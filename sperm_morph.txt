@@ -16,6 +16,24 @@ to zero axis coordinates. X and Y coordinates are swapped to make the curve hori
 This allows for simple plotting and drawing best fit lines in excel. Coordinates for
 the curve are given in the log window.
 
+LOGGED FIELDS:
+CL Curve length
+NA Nuclear area
+NP Nuclear perimeter
+FD Feret diameter
+MY Max Y
+IN Image name
+ID Image directory
+Curve y = a+bx+cx^2
+XA = a
+XB = b
+XC = c
+XR = r^2
+
+BUGS:
+Still consistently failing on some images
+Does not properly detect tip out of roi
+
 TODO:
 Detect lectin stain and analyse acrosome morphology
 
@@ -34,6 +52,9 @@ var nucleusMax = 3000;
 var logFields = newArray();
 var logValues = newArray();
 
+// var logDir = "";
+// var logFileName = 'log.txt';
+
 var showDebug = false; // show debugging info
 
 function main() {
@@ -41,6 +62,16 @@ function main() {
 	 emptyLog()
 	// click a pixel inside the nucleus
 	location_on_image = selectNucleus();
+	
+	logDir = getInfo("image.directory");
+	logFileName = getInfo("image.filename");
+	
+	addToLog("IN", logFileName);
+	addToLog("ID", logDir);
+	
+	logFile = checkLogFilePath(logDir, logFileName, 1);
+	addToLog("LF", logFile);
+	f = File.open(logFile);
 		
 	copyAndSplit();
 	close("working (red)");
@@ -87,23 +118,54 @@ function main() {
 	drawSmoothROI(complete_roi, "freeline");
 	drawSpermTip(complete_roi);
 	
-	if(showDebug) { print("------------------");}
-	if(showDebug) { print("END DEBUG LOG"); }
-	if(showDebug) { print("------------------"); }
-	print("------------------");
-	print("Final curve in "+getInfo("image.filename")+":");
-	print("------------------");
-	writeROI(complete_roi);
+	doCurveFit(complete_roi);
+	
+	if(showDebug) { print("# ------------------");}
+	if(showDebug) { print("# END DEBUG LOG"); }
+	if(showDebug) { print("# ------------------"); }
+	
+	printLog(f);
+	
+	// print(f, "# ------------------");
+	// print(f, "! "+logFile);
+	print(f, "# ------------------");
+	writeROI(complete_roi, f);
 	
 	// blueOutline = makeROI(location, "blue");
 	// greenOutline = makeROI(location, "green");
 	
 	// compareROIs(blueOutline, greenOutline);
-	printLog();
+	
+	print(f, "# END OF FILE");
 	
 	close("working*");
 	close("spare*");
-	close("draw");
+	close("Calibrating*");
+	if(!showDebug){
+		close("draw");
+	}
+}
+
+function doCurveFit(roi){
+
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	Fit.doFit(1, x, y); // 2 is 2nd Degree Polynomial
+	// Fit.plot();
+	// rename("Calibrating curve");
+
+	// And then the can be extracted easily as thus:
+
+	a = Fit.p(0);
+	b = Fit.p(1);
+	c = Fit.p(2);
+	r2 = Fit.rSquared;
+	
+	addToLog("XA", a);
+	addToLog("XB", b);
+	addToLog("XC", c);
+	addToLog("XR", r2);
 }
 
 function offsetToZeroROI(roi){
@@ -205,18 +267,13 @@ function findTipToHump(location) {
 		
 	drawROI(nucleus_roi, "freeline");
 	
-	
-	// waitForUser("moo");
-	// nucleus_roi = roi;
-	if(showDebug) { print("------------------");}
-	if(showDebug) { print("BEGIN DEBUG LOG");}
-	if(showDebug) { print("------------------");}
+	if(showDebug) { print("# ------------------");}
+	if(showDebug) { print("# BEGIN DEBUG LOG");}
+	if(showDebug) { print("# ------------------");}
 	if(showDebug) { print("Found nucleus ROI");}
 	nucleus_centre = findNucleusCentreOfMass(nucleus_roi);
 	if(showDebug) { print("Found nucleus COM");}
-	
-	// roiManager("reset");
-		
+			
 	// find the feret line of the nucleus
 	feret_line = findFeretsDiameter(nucleus_roi); // gets the positions on the border of the ferret line
 	
@@ -227,26 +284,42 @@ function findTipToHump(location) {
 	head_point = findSpermHeadPoint(orth_line, feret_line);
 	if(showDebug) { print("Got head");}
 	
-	nucleus_roi = shuffleROI(nucleus_roi, head_point);
+	if(showDebug){
+		print("Before shuffling:");
+		printROI(nucleus_roi);
+	}
+	
+	// reorder the roi array to put the tip at the front
+	// nucleus_roi = shuffleROI(nucleus_roi, head_point);
+	// if(showDebug){
+		// print("After shuffling:");
+		// printROI(nucleus_roi);
+		// print("Splitting ROI:");
+	// }
+	
 	hump_roi = splitROIs(feret_line, nucleus_roi); // splits the nucleus roi in two along the feret line and returns hump roi coordinates
+	if(showDebug){
+		printROI(hump_roi);
+		print("Completed split");
+	}
 	// writeROI(hump_roi);
-	if(showDebug) { print("Completed split");}
 	selectWindow("draw");
 	
 	drawROI(hump_roi, "freeline");
-	if(showDebug) { print("Drew roi");}
 	
 	// order the roi to make sure we start the array on the tip of the sperm
-	
-	// MAKE THIS WORK
-	// ordered_roi = shuffleROI(hump_roi, head_point);
-	// drawROI(ordered_roi, "freeline");
+	ordered_roi = shuffleROI(hump_roi, head_point);
+	drawROI(ordered_roi, "freeline");
+	if(showDebug){
+		print("Shuffled hump ROI:");
+		printROI(hump_roi);
+	}
 	
 	
 	// trim the roi
 	// need to determine which end is the tip
 	// ordered_roi = checkOrientation(ordered_roi, head_point);
-	ordered_roi = checkOrientation(hump_roi, head_point);
+	ordered_roi = checkOrientation(ordered_roi, head_point);
 	if(showDebug) { print("ROI ordered");}
 	
 	// fetch first 70% of signals
@@ -258,7 +331,7 @@ function findTipToHump(location) {
 	run("Measure");
 	if(nResults > 0){
 		length = getResult('Length');
-		addToLog("Curve length", length);
+		addToLog("CL", length);
 	}
 	if(showDebug) { print("ROI trimmed");}
 	
@@ -335,7 +408,7 @@ function findNucleusCentreOfMass(roi) {
 		result = newArray();
 		print("Could not get measurements of nucleus");
 	}
-	addToLog("Nuclear Area", area);
+	addToLog("NA", area);
 
 	close("temp");
 	return result;
@@ -363,7 +436,7 @@ function findFeretsDiameter(roi) {
     }
 
 	result = newArray(xCoordinates[i1], yCoordinates[i1],xCoordinates[i2],yCoordinates[i2]);
-	addToLog("Feret Diameter", diameter);
+	addToLog("FD", diameter);
 	return result;
 }
 
@@ -573,7 +646,7 @@ function makeROIFromPoint(point, imageID){
 	
 	if(nResults > 0){
 		perimeter = getResult('Perim.');
-		addToLog("Nuclear Perimeter", perimeter);
+		addToLog("NP", perimeter);
 	}
 	return newROI;
 }
@@ -639,6 +712,9 @@ function shuffleROI(roi, head_point){
 	max_distance = 0;
 	max_i = 0;
 	
+	if(showDebug){
+		print("Shuffling ROI:");
+	}
 	// find the two most divergent points
 	for(i=0;i<x_points.length;i++){
 	
@@ -656,20 +732,46 @@ function shuffleROI(roi, head_point){
 			max_distance = distance;
 			max_i = i;
 		}
+		if(showDebug){
+			print(pointA[0]+"  "+pointA[1]+" to "+pointB[0]+"  "+pointB[1]+": "+distance);
+		}
+	}
+	if(showDebug){
+		print("Max distance: "+max_distance+" at "+max_i);
 	}
 	// we now have the position just before the discontinuity
 	// chop the array in two and reassemble in the correct order
-	x1 = Array.slice(x_points,max_i);
-	y1 = Array.slice(y_points,max_i);
+	x1 = Array.slice(x_points,max_i+1); // max_i to end
+	y1 = Array.slice(y_points,max_i+1);
+		
+	x2 = Array.slice(x_points,0,max_i+1);
+	y2 = Array.slice(y_points,0,max_i+1);
 	
-	x2 = Array.slice(x_points,0,max_i);
-	y2 = Array.slice(y_points,0,max_i);
+	if(showDebug){
+		
+		x1roi = createROI(x1, y1);
+		print("Array x1:");
+		drawROI(x1roi, "freeline");
+		printROI(x1roi);
+
+		x2roi = createROI(x2, y2);
+		print("Array x2:");
+		drawROI(x2roi, "freeline");
+		printROI(x2roi);
+		
+	}
 	
 	x_final = Array.concat(x1,x2);
 	y_final = Array.concat(y1,y2);
 
 	// transfer to ROI format
 	full_array = createROI(x_final, y_final);
+	
+	if(showDebug){
+		print("Combined array:");
+		drawROI(full_array, "freeline");
+		printROI(full_array);
+	}
 	return full_array;
 }
 
@@ -746,11 +848,21 @@ function drawSmoothROI(roi, type){
 	roiManager("Add");
 }
 
-function writeROI(roi){
+function writeROI(roi, file){
 	x = ROI_to_x(roi);
 	y = ROI_to_y(roi);
+	
 	for(i=0;i<x.length;i++){
-		print(x[i]+"  "+y[i]);
+		print(file, x[i]+"\t"+y[i]);
+	}
+}
+
+function printROI(roi){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	for(i=0;i<x.length;i++){
+		print(x[i]+"   "+y[i]);
 	}
 }
 
@@ -779,7 +891,7 @@ function normaliseROI(roi, newLength){
 		}
 	}
 	
-	addToLog("Max Y",max_y);
+	addToLog("MY",max_y);
 	
 	for(i=0;i<x.length;i++){
 		x[i] = (x[i] / old_x_max) * newLength;
@@ -870,19 +982,29 @@ function addToLog(field, value){
 	logValues = Array.concat(logValues, value);
 }
 
-function printLog(){
+function printLog(file){
 	
-	print("------------------");
-	print("LOGGED PARAMETERS");
-	print("------------------");
+	print(file, "~ ------------------");
+	// print(file, "# LOGGED PARAMETERS");
+	// print(file, "# ------------------");
 	for(i=0;i<logFields.length;i++){
-		print(logFields[i]+": "+logValues[i]);
+		print(file, logFields[i]+"\t"+logValues[i]);
 	}
 }
 
 function emptyLog(){
 	logFields = newArray();
 	logValues = newArray();
+}
+
+function checkLogFilePath(logDir, logFileName, n){
+	
+	logFile = logDir + "//" + logFileName + "." + n +".txt";
+	if(File.exists(logFile)){
+		n++;
+		logFile = checkLogFilePath(logDir, logFileName, n);
+	}
+	return logFile;
 }
 // -------------------------------------------------
 // MACROS
