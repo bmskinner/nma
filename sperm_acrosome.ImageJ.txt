@@ -1,0 +1,435 @@
+/*
+Copyright (C) Ben Skinner 2014
+-------------------------------------------------
+MOUSE ACROSOME MORPOLOGY ANALYSIS
+-------------------------------------------------
+This script uses lectin green signal.
+
+Things to measure:
+	Direct:
+	Area of acrosome
+	Length of outer and inner borders
+	
+	Needs roi orientation:
+	Outer curvature
+	Inner curvature
+	
+	?
+	Signal intensity distribution
+
+LOGGED FIELDS:
+	BI	inner border length
+	BO	outer border length
+	AA	acrosome area
+BUGS:
+
+TODO:
+
+*/
+// signalThresholdLevel determines the segmentation level for separating the acrosome from
+// the background
+var signalThresholdLevel = 30;
+
+// the array of information to log
+var logFields = newArray();
+var logValues = newArray();
+
+var showDebug = true; // show debugging info
+
+function main() {
+	emptyLog();
+	// click a pixel inside the nucleus
+	location_on_image = selectNucleus();
+	
+	logDir = getInfo("image.directory");
+	imageName = getInfo("image.filename");
+	
+	addToLog("IN", imageName);
+	addToLog("ID", logDir);
+	
+	logFile = checkLogFilePath(logDir, imageName, 1);
+	addToLog("LF", logFile);
+	f = File.open(logFile);
+	
+	copyAndSplit();
+	close("working (red)");
+	close("working (blue)");
+	selectWindow("working (green)");
+	greenID = getImageID();
+	run("Smooth");
+	run("Smooth");
+	acrosome_roi = makeROIFromPoint(location_on_image, greenID);
+	acrosome_area = getROIArea(acrosome_roi);
+	addToLog("AA", acrosome_area);
+	signal_CoM = findCentreOfMass("green", acrosome_roi);
+	selectWindow("draw");
+	drawRectangleAtPoint(signal_CoM, "white");
+	
+	ends_of_roi = findEndPointsOfROI(signal_CoM, acrosome_roi);
+	
+	if(showDebug) { drawEndpoints(ends_of_roi);}
+	
+	outer_roi = findBorderROI(ends_of_roi, acrosome_roi, "outer");
+	inner_roi = findBorderROI(ends_of_roi, acrosome_roi, "inner");
+	
+	selectWindow("draw");
+	drawROI(outer_roi, "freeline");
+	drawROI(inner_roi, "freeline");
+	
+	// this is something we can use for orientation and curve fitting 
+	// determine head from tail? Does it matter?
+	// Try without determination. Alter if there are bimodal distributions
+	outer_roi = alignFirstAndLastElementOnAxisY(outer_roi);
+	if(showDebug) { drawROI(outer_roi, "freeline"); }
+	
+	inner_roi = alignFirstAndLastElementOnAxisY(inner_roi);
+	if(showDebug) { drawROI(inner_roi, "freeline"); }
+	
+	// ROI is now horizontal. Determine if curve is to the top or bottom
+	// // check if the bottom of the midpoint is within roi
+	// // if not, flip on x axis
+	outer_roi = putHumpOnBottom(outer_roi);
+	drawSmoothROI(outer_roi, "freeline");
+	
+	inner_roi = putHumpOnBottom(inner_roi);
+	drawSmoothROI(inner_roi, "freeline");
+	 
+	// offset the ROI to start at 0,0
+	outer_roi = offsetToZeroROI(outer_roi);
+	inner_roi = offsetToZeroROI(inner_roi);
+	// // print("Offset:");
+	
+	// normalise curve length to 100 pixels
+	outer_roi = normaliseROI(outer_roi, 100);
+	drawSmoothROI(outer_roi, "freeline");
+	
+	inner_roi = normaliseROI(inner_roi, 100);
+	drawSmoothROI(inner_roi, "freeline");
+	
+	doCurveFit(outer_roi, "O");
+	doCurveFit(inner_roi, "I");
+	
+	if(showDebug) { print("# ------------------");}
+	if(showDebug) { print("# END DEBUG LOG"); }
+	if(showDebug) { print("# ------------------"); }
+	
+	// information to use to figure out where to cut the ROI arrays
+	outer_length = outer_roi[0];
+	addToLog("OL", outer_length);
+	inner_length = inner_roi[0];
+	addToLog("IL", inner_length);
+	
+	printLog(f);
+	
+	
+	
+	print(f, "# x\ty"); // the column headers
+	writeROI(outer_roi, f);
+	writeROI(inner_roi, f);
+			
+	print(f, "# END OF FILE");
+	File.close(f);
+	
+	close("working*");
+	close("spare*");
+	close("Calibrating*");
+	if(!showDebug){
+		close("draw");
+	}
+}
+
+function doCurveFit(roi, type){
+
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	Fit.doFit(1, x, y); // 2 is 2nd Degree Polynomial
+	// Fit.plot();
+	// rename("Calibrating curve");
+
+	// And then the can be extracted easily as thus:
+
+	a = Fit.p(0);
+	b = Fit.p(1);
+	c = Fit.p(2);
+	r2 = Fit.rSquared;
+	
+	addToLog(type+"XA", a);
+	addToLog(type+"XB", b);
+	addToLog(type+"XC", c);
+	addToLog(type+"XR", r2);
+}
+
+function putHumpOnBottom(roi){
+	y = ROI_to_y(roi);
+	x = ROI_to_x(roi);
+	midpoint = (x[0] + x[x.length-1]) / 2;
+	
+	if(selectionContains(midpoint,y[0]-2)){
+		// hump is on bottom
+		// continue
+		flipped = roi;
+	} else {
+		// hump is on right
+		// flip on x axis
+		flipped = flipROI(roi, "y");
+	}
+	return flipped;	
+}
+
+function findBorderROI(ends, roi, type){
+	// split the roi into two based on the two points provided
+	// return the longer of the two
+	
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	end1 = newArray(ends[1], ends[2]);
+	end2 = newArray(ends[3], ends[4]);
+		
+	for(i=0;i<x.length;i++){
+		
+		if(showDebug) { print(i+": "+x[i]+"  "+y[i]);}
+		if(x[i] == end1[0] && y[i] == end1[1]){
+			cuta = i;
+		}
+		if(x[i] == end2[0] && y[i] == end2[1]){
+			cutb = i;
+		}
+	}
+	
+	if(cuta<cutb){
+		cut1 = cuta;
+		cut2 = cutb;
+	} else {
+		cut1 = cutb;
+		cut2 = cuta;
+	}
+		
+	x1 = Array.slice(x, cut1, cut2);
+	y1 = Array.slice(y, cut1, cut2);
+	
+	x2 = Array.slice(x, 0, cut1);
+	y2 = Array.slice(y, 0, cut1);
+	
+	x3 = Array.slice(x, cut2);
+	y3 = Array.slice(y, cut2);
+	
+	x4 = Array.concat(x3, x2);
+	y4 = Array.concat(y3, y2);
+	
+	boundary1 = createROI(x1, y1);
+	boundary4 = createROI(x4, y4);
+	
+	if(showDebug){
+		print("Cut 1: "+cut1);
+		print("Cut 2: "+cut2);	
+	}
+	
+	selectImage("draw");
+	makeSelection("freeline", x1, y1);
+	// drawROI(boundary1, "freeline");
+	run("Set Measurements...", "Length");
+	run("Measure");
+	
+	if(nResults > 0){
+		perim1 = getResult("Length"); 
+	}
+	print("Perim 1: "+perim1);
+	
+	// drawROI(boundary4, "freeline");
+	makeSelection("freeline", x4, y4);
+	run("Measure");
+	if(nResults > 0){
+		perim4 = getResult("Length"); 
+	}
+	print("Perim 4: "+perim4);
+	
+	if (perim1 > perim4){
+		outer = boundary1;
+		inner = boundary4;
+		addToLog("BO",perim1);
+		addToLog("BI",perim4);
+	} else {
+		outer = boundary4;
+		inner = boundary1;
+		addToLog("BO",perim4);
+		addToLog("BI",perim1);
+	}
+	
+	if (type == "outer"){
+		return outer;
+	} else {
+		return inner;
+	}
+}
+
+function drawEndpoints(ends){
+
+	print("End point 1: "+ ends[1] + " " + ends[2]);
+	print("End point 1: "+ ends[3] + " " + ends[4]);
+	print("Distance: "+ ends[0]);
+	
+	end1 = newArray(ends[1], ends[2]);
+	end2 = newArray(ends[3], ends[4]);
+	
+	drawRectangleAtPoint(end1, "yellow");
+	drawRectangleAtPoint(end2, "yellow");
+}
+
+function findEndPointsOfROI(point, roi){
+	
+	// we cannot be sure that the greatest distance between two points will be the endpoints
+	// because the hook may begin to curve back on itself. We supplement this basic distance with
+	// the distances of each point from the centre of mass. The points with the combined greatest
+	// distance are both far from each other and far from the centre, and are a more robust estimate
+	// of the true ends of the signal
+	
+	max_distance = 0;
+	distances_from_CoM = findDistancesFromPoint(point, roi);
+	
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	for(i=0;i<x.length;i++){
+		
+		border_point1 = newArray(x[i],y[i]);
+		border1_to_CoM = distances_from_CoM[i];
+		
+		for(j=0;j<x.length;j++){
+			border_point2 = newArray(x[j],y[j]);
+			
+			distance_between_borders = getLength(border_point1, border_point2);
+			border2_to_CoM = distances_from_CoM[j];
+			
+			total_distance = distance_between_borders + border1_to_CoM + border2_to_CoM;
+			if(total_distance > max_distance){
+				max_distance = total_distance;
+				end1 = border_point1;
+				end2 = border_point2;
+			}
+		}
+	}
+	
+	result = Array.concat(max_distance, end1);
+	result = Array.concat(result,end2);
+	return result;
+}
+
+function findDistancesFromPoint(point, roi){
+	
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	result = newArray(x.length);
+	for(i=0;i<x.length;i++){
+		border_point = newArray(x[i],y[i]);
+		result[i] = getLength(point, border_point);
+	}
+	return result;
+}
+
+function findCentreOfMass(channel, roi){
+	selectWindow("working ("+channel+")");
+	drawROI(roi, "polygon");
+
+	run("Set Measurements...", "center");
+	run("Measure");
+	
+	if(nResults > 0){
+		x = getResult("XM"); // centre of mass
+		y = getResult("YM");
+	}
+	result = newArray(x,y);
+	return result;
+}
+
+function selectNucleus() {
+
+	roiManager("reset");
+	leftButton=16;
+	x2=-1; y2=-1; z2=-1; flags2=-1; clickCount=0;
+
+	point=newArray(0, 0); // x,y
+
+	logOpened = false;
+	if (getVersion>="1.37r")
+		setOption("DisablePopupMenu", true);
+
+	name=getTitle;
+	
+	if(!isOpen("Log")){
+		print("Click a nucleus to measure");
+	}
+	
+	while (!logOpened || isOpen("Log")) {
+		getCursorLoc(x, y, z, flags);
+		if (x!=x2 || y!=y2 || z!=z2 || flags!=flags2) {
+
+			if (flags&leftButton!=0){
+
+				clickCount++;
+				if(clickCount==1){
+					point[0]=x;
+					point[1]=y;		
+					break;
+				}
+			}
+			logOpened = true;
+			startTime = getTime();
+		}
+		x2=x; y2=y; z2=z; flags2=flags;
+		wait(10);
+	}
+	if (getVersion>="1.37r")
+		setOption("DisablePopupMenu", false);
+		
+	// print("Terminus 1 - x: " + point[0] + " y: " + point[1]);
+	return point;
+}
+
+function copyAndSplit() {
+	//duplicate image for channel splitting
+	run("Duplicate...", "title=draw");
+	run("Duplicate...", "title=working");
+	selectWindow("working");
+	run("RGB Split");
+}
+
+function makeROIFromPoint(point, imageID){
+
+	// roiManager("reset");
+	selectImage(imageID);
+	run("Duplicate...", "title=temp"); //a copy of the primary image
+	selectImage("temp");
+	setThreshold(signalThresholdLevel, 255);  // Set the threshold
+	
+	doWand(point[0], point[1]);
+	roiManager("Add"); // add line to ROI
+	resetThreshold();
+	
+	// find the coordinates of the ROI
+	// run("Interpolate", "interval=1 smooth"); // Edit>Selection>Interpolate
+	getSelectionCoordinates(xpoints, ypoints); 
+	
+	close("temp");
+	newROI = createROI(xpoints, ypoints); 
+	run("Set Measurements...", "perimeter");
+	run("Measure");
+	
+	if(nResults > 0){
+		perimeter = getResult('Perim.');
+		addToLog("NP", perimeter);
+	}
+	return newROI;
+}
+
+// -------------------------------------------------
+// MACROS
+// -------------------------------------------------
+macro "Sperm Acrosome Tool - C0a0L18f8L818f"
+{
+	requires("1.47");
+	saveSettings();
+	main();
+	restoreSettings();
+}

@@ -1,0 +1,987 @@
+/*
+-------------------------------------------------
+SPERM CARTOGRAPHY IMAGEJ MACRO SET
+-------------------------------------------------
+Copyright (C) Ben Skinner 2014
+
+These macros allow for automated detection of FISH
+signals in a mouse sperm nucleus, and measurement of
+the signal position relative to the nuclear centre of
+mass and sperm tip
+
+-------------------------------------------------
+SPERM CARTOGRAPHY: DISTANCE
+-------------------------------------------------
+Find centre of mass of the nucleus
+Find centre of mass of the signal
+
+Draw a line through these points to the image edges
+Find the nucleus borders
+Calculate the distance from the signal CoM to the closest border
+
+-------------------------------------------------
+SPERM CARTOGRAPHY: BEARING
+-------------------------------------------------
+Find the Feret border points; thereby determine the axes of the sperm head.
+
+Orientation in each axis:
+	Hook / hump:
+		Dividing the nucleus on the Feret diameter leaves a larger area on the hump side
+	
+	Head / tail:
+		Draw a line through the centre of mass and orthogonal to the Feret diameter
+		Take the distance from the intersection with the Feret line to the Feret border points
+		The longer distance is the head, the shorter the tail (the CoM is closer to the tail as little DNA is in the hook)
+		
+Using these points to orient, draw a two segement line through the hook Feret, nuclear CoM, signal CoM.
+Calculate the angle between the two.
+Subtract from 360 if needed to account for hook side or hump side (enantiomers)
+
+Plot signal coordinates as heading and distance from centre of mass of nucleus
+
+Export annotated tiff, log and signal profile
+
+TODO: Rotate and flip sperm heads for output: x.rot.png
+Provide an estimate of DAPI area to left and right of signal CoM in profile for 'eyeball' plotting
+
+*/
+
+// kNucleusThresholdLevel determines the segmentation level for separating the cell from
+// the background
+var kNucleusThresholdLevel = 30;
+// kSignalThresholdLevel detrmines the segmentation level for separating true signal from
+// the background noise
+var kSignalThresholdLevel = 70;
+
+var signalMin = 30;
+var signalMax = 1000;
+
+// nucleusMin is the minimum number of pixels that a nucleus contains 
+// (based on mouse sperm)
+var nucleusMin = 400; 
+var nucleusMax = 3000;
+var logFile = "";
+
+// the array of information to log in the log file header
+var logFields = newArray();
+var logValues = newArray();
+
+var showDebug = false; // show debugging info
+
+function findNucleiInImage(){
+	/*
+	For the input image, identify the nuclei
+	and add them to the ROI manager
+	*/
+	setBatchMode(false);
+	name=getTitle; 
+	name = replace(name, ".tiff","");
+	name = replace(name, ".tif","");
+	name = replace(name, ".jpg","");
+	dir = getDirectory("image");
+	var path = dir + name; // global to allow for tiff saving within analysis function
+	roipath = path + ".zip";
+	if(!File.exists(path)){
+		File.makeDirectory(path);
+	}
+	
+	run("Clear Results");
+	run("Duplicate...", "title=initial"); //a copy of the primary image with all nuclei
+	run("Duplicate...", "title=main"); //a copy of the primary image with all nuclei
+	selectWindow("main");
+	run("RGB Split");
+	
+	// reset the ROI manager for each new image
+	run("ROI Manager...");
+	roiManager("reset");
+	
+//remove un-needed windows (green and red signals can be detected later)
+	close("main (red)");
+	close("main (green)");
+	close(name);
+
+// make the binary mask from the blue channel
+	selectWindow("main (blue)");
+	setThreshold(kNucleusThresholdLevel, 255);
+	run("Convert to Mask"); //keeps title the same
+	run("Select All");
+	run("Set Measurements...", "area center centroid redirect=None");
+	run("Analyze Particles...", "size="+nucleusMin+"-"+nucleusMax+" circularity=0.3-1 show=Nothing display exclude add "); // need to check size of nuclei in real images
+	// wait(5000);
+	nucleus_count = roiManager("count"); //total number of nuclei found
+	
+	if(nucleus_count > 0){ // ignore images with no usable nuclei
+	
+		//save the nucleus ROIs for clarity
+		roiManager("deselect");
+		roiManager("save", roipath);
+
+		for (var nucleus_number = 0; nucleus_number<nucleus_count; nucleus_number++) { // go through each nucleus, so we avoid counting background on the slide as a signal
+		
+			// clear out any ROIs left over from the previous nucleus
+			// replace with the saved ROIs for all nuclei
+			roiManager("reset");
+			roiManager("open", roipath);
+			
+			print_number = nucleus_number +1;
+
+			// use the ROIs to select the nuclei from the original RGB image
+			selectWindow("initial"); //select rgb image of nuclei
+			roiManager("select", nucleus_number); //select the current nucleus
+			run("Copy"); 
+			run("Internal Clipboard"); // copy and paste as new image
+			run("Rename...", "title=nucleus"); // consistently name the new image
+			selectWindow("nucleus");
+			nucleus_id = getImageID();
+			
+			print("Nucleus "+print_number+" of "+nucleus_count+" in "+path);
+			
+			// call the main analysis script
+			analyseSignalInNucleus(nucleus_id); //run the analysis on the window 'nucleus'
+			
+			if (isOpen("nucleus")) { // handle cases where no signal was found
+				selectWindow("nucleus");	
+				saveAs("tiff", path+"\\"+nucleus_number+".tiff");
+				close("nucleus");
+			}
+			
+		}
+		if(File.exists(roipath)){
+			File.delete(roipath);
+		}
+	}
+	
+	if (isOpen("main (blue)")) {
+		close("main (blue)");
+	}
+	
+	close("initial");
+	close("*.tiff");
+}
+
+function analyseSignalInNucleus(id) {
+
+	run("Clear Results");
+	selectImage(id);
+	run("Duplicate...", "title=working"); //a copy of the primary image
+	selectWindow("working");
+	run("RGB Split");
+
+	roiManager("reset");
+	
+	selectWindow("working (red)");
+	redID = getImageID();
+
+	selectWindow("working (blue)");
+	blueID = getImageID();
+	run("Duplicate...", "title=spare_blue");
+
+	//remove un-needed windows
+	close("working (green)");
+	
+	// find the centre of the nucleus
+	nucleus_centre = findNucleusCentreOfMass(blueID);
+	if(nucleus_centre.length < 1 ){ // this should never occur as nuclei detected previously
+		close("working*");
+		close("spare*");
+		write("No nuclei found");
+		return;
+	}
+	nucleus_roi = nucleus_centre[3];
+	roiManager("reset");
+	 
+
+	signal_centre = findSignalCentreOfMass(redID, nucleus_roi);
+	if(signal_centre.length < 2){
+		close("working*");
+		close("spare*");
+		write("No signals found");
+		return;
+	}
+
+	signal_roi = signal_centre[3];
+	roiManager("reset");
+	
+	line_equation = calculateLineEquation(nucleus_centre, signal_centre);
+	
+	selectImage(blueID);
+	image_width = getWidth();
+	image_height = getHeight();
+	
+	// calculate the start and end points of the line extended to image edges
+	line = getLineCoordinates(line_equation, image_width, image_height);
+	setThreshold(kNucleusThresholdLevel, 255);
+	makeLine(line[0], line[1], line[2], line[3]);
+	
+	// Using the line through the centres of mass, find the nuclear boundaries
+	// by looking for dropoff in signal intensity on the binary mask
+	borders = findBordersFromProfile(blueID);
+	
+	updateResults;
+	
+	// find the coordinates of borders
+	border1_coords = getCoordinatesFromDistance(line, borders[0], line_equation);
+	border2_coords = getCoordinatesFromDistance(line, borders[1], line_equation);
+	
+	// draw a line between the borders
+	makeLine(border1_coords[0], border1_coords[1], border2_coords[0], border2_coords[1]);
+	
+	// choose the nearest border
+	signal_1 = getLength(border1_coords, signal_centre);
+	signal_2 = getLength(border2_coords, signal_centre);
+	
+	if(signal_1 >= signal_2){
+		signal_to_border = signal_2;
+		CoM_to_border = getLength(border2_coords, nucleus_centre);
+		border_coords = border2_coords;
+	} else {
+		signal_to_border = signal_1;
+		CoM_to_border = getLength(border1_coords, nucleus_centre);
+		border_coords = border1_coords;
+	}
+	
+	// find the feret line of the nucleus
+	feret_line = findFeretsDiameter(nucleus_roi); 
+	// get the positions on the border of the feret line
+	feret1 = newArray(feret_line[0], feret_line[1]);
+	feret2 = newArray(feret_line[2], feret_line[3]);
+	
+	roi_array = splitROIs(feret_line, nucleus_roi); // splits the nucleus roi in two along the feret line and returns area and centroid of each (area, x, y, area, x, y)
+
+	// get the orthogonal-to-feret line
+	roiManager("open", nucleus_roi);	
+	orth_line = findOrthogonalToFeretLine(nucleus_centre, feret_line);
+	
+	// measure from the crossing point of orth and feret lines to the ends of the feret line;
+	// decide which is smaller - assume that is the tail side
+	orth_crossing = newArray(orth_line[4], orth_line[5]);
+	
+	feret1_dist = getLength(orth_crossing, feret1);
+	feret2_dist = getLength(orth_crossing, feret2);
+	// write("Found feret1: "+feret1_dist);
+	// write("Found feret2: "+feret2_dist);
+	if(feret1_dist >= feret2_dist){
+		head_point = feret1;
+		tail_point = feret2;
+	} else {
+		head_point = feret2;
+		tail_point = feret1;
+	}
+	// write("Decided head is at : "+head_point[0]+","+head_point[1]);
+	// write("Decided tail is at : "+tail_point[0]+","+tail_point[1]);
+	
+	// look at area each side of feret line
+	// decide which side is hump and which side is hook
+	// smaller is hook side
+	area1 = roi_array[0];
+	area2 = roi_array[3];
+	
+	roiManager("open", roi_array[6]);
+	if(area1 >= area2){
+		orth_point = newArray(orth_line[2],orth_line[3]);
+		hook_roi = 1;
+	} else {
+		orth_point = newArray(orth_line[0],orth_line[1]);
+		hook_roi = 0;
+	}
+
+	// decide if the signal CoM is in the hook side or hump side
+	signal_angle = getSignalAngle(head_point, nucleus_centre, signal_centre, hook_roi);
+		
+	// get profile on red unthresholded signal
+	// along line from nucleus CoM to the border through the signal CoM
+	signalProfile = generateSignalProfile(redID, border_coords, nucleus_centre);
+	
+	// get profile for unthresholded DAPI
+	dapiProfile = generateSignalProfile("spare_blue", border_coords, nucleus_centre);
+	
+	// draw out what has been plotted
+	roiManager("reset");
+	
+	// select the original rgb image to annotate
+	selectImage(id);
+	drawLineBetweenPoints(head_point, orth_crossing, "#7D26CD"); // draw feret line
+	drawLineBetweenPoints(orth_point, orth_crossing, "#7D26CD"); // draw orth line
+	drawRectangleAtPoint(head_point, "#7D26CD"); // draw sperm head
+	drawLineBetweenPoints(border_coords, nucleus_centre, "yellow"); // line across nucleus
+	drawRectangleAtPoint(border_coords, "yellow"); // point at border near signal
+	drawRectangleAtPoint(signal_centre, "white"); // signal centre of mass
+	drawRectangleAtPoint(nucleus_centre, "white"); // nucleus centre of mass
+	saveAs("tiff", path+"\\"+nucleus_number+".line.tiff"); // export
+	
+	// express the distance as a proportion from the nuclear centre of mass
+	signal_to_com = signal_to_border / CoM_to_border;
+	write("Proportion of distance: "+signal_to_com);
+		
+	totalSignal = getTotalSignal(signalProfile);
+	totalDAPI   = getTotalSignal( dapiProfile );
+	
+	cumulativeSignalArray = getCumulativeSignal(signalProfile);
+	cumulativeDAPIArray   = getCumulativeSignal(dapiProfile  );
+	
+	// find the position with half the signal either side
+	medianSignalPoint = findMedianSignalPoint(signalProfile, cumulativeSignalArray);
+	
+	// determine the proportion of DAPI peripheral to the median signal point
+	outerDAPI = cumulativeDAPIArray[medianSignalPoint];
+	proportionDAPI = outerDAPI / totalDAPI;
+	
+	// find the positions along the array
+	positionArray = getProportionalArray(signalProfile, CoM_to_border);
+
+	positionDAPI = positionArray[medianSignalPoint];
+	
+	// assemble and print the header fields
+	addToLog("ID", path);
+	addToLog("NN", nucleus_number);
+	addToLog("SP", signal_to_com);
+	addToLog("SR", signal_centre[2]);
+	addToLog("NA", nucleus_centre[2]);
+	addToLog("SA", signal_angle);
+	addToLog("DR", proportionDAPI);
+	addToLog("DS", positionDAPI);
+	printLog(f);
+	
+	// print out the profiles
+	print(f, "# signal_position\tsignal_intensity\tdapi\tcumulative_signal\tcumulative_dapi");
+	for (i=0; i<signalProfile.length; i++){		
+		print(f, positionArray[i]+"\t"+signalProfile[i]+"\t"+dapiProfile[i]+"\t"+cumulativeSignalArray[i]+"\t"+cumulativeDAPIArray[i]);
+	}
+	print(f, "# END OF FILE");
+	emptyLog();
+	close("working*");
+	close("spare*");
+	run("Clear Results");
+}
+
+function getSignalAngle(pointA, pointB, pointC, roi){
+	selectImage(blueID);
+	roiManager("select", roi);
+	run("Create Mask");
+	selectImage("Mask");
+	pixel = getPixel(pointC[0], pointC[1]);
+
+	if(pixel != 0){
+		hump = 1;
+		// write("Signal is hump side");
+	} else {
+		hump = 0;
+		// write("Signal is hook side");
+	}
+	close("Mask");
+	
+	// measure the angle from head-CoM-signal
+	// angles go from 0 at head through hook to hump at 180, and back to hook at 360
+	// hence if signal is hump side, angle is 360-angle
+	xcoords = newArray(pointA[0], pointB[0], pointC[0]);
+	ycoords = newArray(pointA[1],  pointB[1], pointC[1]);
+	makeSelection("angle", xcoords, ycoords);
+	run("Measure");		
+	angle = getResult("Angle");
+	if(hump == 1){
+		angle = 360 - angle;
+	}
+	write("Signal angle is :"+angle);
+	return angle;
+}
+
+function getProportionalArray(profile, total_length){
+	
+	result = newArray(profile.length);
+	for (i=0; i<profile.length; i++){
+		result[i] = i / total_length; // express pixel of line as proportion of total line length
+	}
+	return result;
+}
+
+function findMedianSignalPoint(profile, signalArray){
+
+	totalSignal = getTotalSignal(profile);
+	halfSignal = totalSignal / 2;
+	point = 0;
+	for (i=0; i<profile.length; i++){
+		if ( abs(halfSignal - signalArray[i]) < abs(halfSignal - signalArray[point]) ){
+			point = i;
+		}
+	}
+	// write("Half signal: "+point+"   "+cumulativeSignalArray[point]);
+	return point;
+}
+
+function getTotalSignal(array){
+	total = 0;
+	for (i=0; i<array.length; i++){
+		total += array[i];
+	}
+	return total;
+}
+
+function getCumulativeSignal(profile){
+	total = 0;
+	result = newArray(profile.length);
+	for (i=0; i<profile.length; i++){
+		total += profile[i];
+		result[i] = total;
+	}
+	return result;
+}
+
+function findOrthogonalToFeretLine(centroid, feret_line){
+	// centroid is the position the line must pass through at 90 degrees to feret (x,y)
+	// feret_line is the coordinates of the start and end of the line (x,y,x,y)
+	// returns the start and end points of the orth line, plus the feret crossing (x1,y1,x2,y2, xc, yc)
+	x = newArray(feret_line[0], feret_line[2]); // arrays of the feret line bounds
+	y = newArray(feret_line[1], feret_line[3]);
+
+	makeSelection("line", x, y);
+	// makeLine(feret_line[0], feret_line[1], feret_line[2], feret_line[3]); // 
+	run("Fit Spline", "straighten"); 
+	getSelectionCoordinates(xCoordinates, yCoordinates); // list of points on the line
+	
+	best_angle = 90;
+	best_diff = 90;
+	for(i=0; i<xCoordinates.length; i++){
+		
+		// draw a new line from centroid to feret start
+		makeLine(centroid[0], centroid[1], xCoordinates[i], yCoordinates[i], feret_line[0], feret_line[1]);
+		xcoord1 = newArray(centroid[0],  xCoordinates[i], feret_line[0]);
+		ycoord1 = newArray(centroid[1],  yCoordinates[i], feret_line[1]);
+		makeSelection("angle", xcoord1, ycoord1);
+		run("Measure");		
+		angle1 = getResult("Angle");
+		
+		// draw a new line from centroid to feret end
+		xcoord2 = newArray(centroid[0],  xCoordinates[i], feret_line[2]);
+		ycoord2 = newArray(centroid[1],  yCoordinates[i], feret_line[3]);
+		makeSelection("angle", xcoord2, ycoord2);
+		run("Measure");		
+		angle2 = getResult("Angle");
+		
+		diff = abs(angle1 - angle2);
+		if(  diff < best_diff ){ // try to find the point at which they are equal
+			best_angle = angle1;
+			best_diff = diff;
+			orth = newArray(xCoordinates[i], yCoordinates[i]);
+		}
+		// write(angle1+"  "+angle2+"  "+diff+"  "+best_angle+"  "+xCoordinates[i]+"  "+yCoordinates[i]);
+	}
+	// write("Set on: "+best_angle+" at "+orth[0]+","+orth[1]);
+	eq = calculateLineEquation(orth, centroid);
+	line = getLineCoordinates(eq, getWidth(), getHeight());
+	line = Array.concat(line, orth[0]); // add in the crossing point to the orth line results
+	line = Array.concat(line, orth[1]);
+	return line;	
+}
+
+function splitROIs(line, roi) {
+
+	// splits the nucleus roi in two along the line 
+	// returns area and centroid of each (area, x, y, area, x, y)
+
+	// line is array of xy, xy
+	roiManager("reset");
+	roiManager("open", roi);
+	roiManager("select", 0);
+    getSelectionCoordinates(xCoordinates, yCoordinates);
+	
+	// new arrays for the split roi coordinates
+	roi1X = newArray();
+	roi1Y = newArray();
+	roi2X = newArray();
+	roi2Y = newArray();
+	
+	roi1 = 1;
+	roi2 = 0;
+	for (i=0; i<xCoordinates.length; i++) { // go through the selection border coords
+				
+		// add to current roi
+		if(roi1 == 1){
+			roi1X = Array.concat(roi1X, xCoordinates[i]);
+			roi1Y = Array.concat(roi1Y, yCoordinates[i]);
+		}
+		
+		if(roi2 == 1){
+			roi2X = Array.concat(roi2X, xCoordinates[i]);
+			roi2Y = Array.concat(roi2Y, yCoordinates[i]);
+		}
+		
+		// if we hit the line, switch from roi1 to roi2 and or back	
+		if( (xCoordinates[i] == line[0] && yCoordinates[i] ==  line[1]) || (xCoordinates[i] == line[2] && yCoordinates[i] ==  line[3]) ) {
+			
+			if(!roi1){ // ensure the feret coordinates are included in the new roi even if the roi bit is not true
+				roi1X = Array.concat(roi1X, xCoordinates[i]);
+				roi1Y = Array.concat(roi1Y, yCoordinates[i]);
+			}
+			if(!roi2){
+				roi2X = Array.concat(roi2X, xCoordinates[i]);
+				roi2Y = Array.concat(roi2Y, yCoordinates[i]);
+			}
+			
+			// flip roi1 and roi2
+			roi1 = !roi1;
+			roi2 = !roi2;
+		}
+		
+	}
+	roiManager("reset");
+	// create new roi out of roi1 and roi2
+	makeSelection("polygon", roi1X, roi1Y);
+	roiManager("add");
+	// roi1_index = roiManager("index");
+	makeSelection("polygon", roi2X, roi2Y);
+	roiManager("add");
+	// roi2_index = roiManager("index");
+	split_roi = path+"\\"+nucleus_number+".roi.zip";
+	
+	// save out
+	roiManager("save", split_roi);
+	run("Set Measurements...", "area centroid");
+	
+	roiManager("reset");
+	roiManager("open", split_roi);
+	
+	// measure the areas of each roi
+	roiManager("select", 0);
+	run("Measure");
+	area1 = getResult("Area");
+	cent1x = getResult("X");
+	cent1y = getResult("Y");
+	
+	roiManager("select", 1);
+	run("Measure");
+	area2 = getResult("Area");
+	cent2x = getResult("X");
+	cent2y = getResult("Y");
+	
+	// write("ROI1: Area "+area1);
+	// write("ROI2: Area "+area2);
+	result = newArray(area1, cent1x, cent1y, area2, cent2x, cent2y, split_roi);
+	roiManager("reset");
+	return result;
+}
+
+function findFeretsDiameter(roi) {
+    requires("1.29n");
+    diameter = 0.0;
+	
+	roiManager("open", roi);
+	roiManager("select", 0);
+	
+    getSelectionCoordinates(xCoordinates, yCoordinates);
+
+     n = xCoordinates.length;
+     for (i=0; i<n; i++) {
+        for (j=i; j<n; j++) {
+            dx = xCoordinates[i] - xCoordinates[j];
+            dy = yCoordinates[i] - yCoordinates[j];
+            d = sqrt(dx*dx + dy*dy);
+			
+            if (d>diameter) {
+                diameter = d;
+                i1 = i;
+                i2 = j;
+            }
+        }
+    }
+	roiManager("reset");
+	result = newArray(xCoordinates[i1], yCoordinates[i1],xCoordinates[i2],yCoordinates[i2]);
+	return result;
+}
+
+function findBordersFromProfile(id) {
+	selectImage(id);
+	prev = 0;
+	border1 = 0;
+	border2 = 0;
+	profile = getProfile();
+	for (i=0; i<profile.length; i++){
+		// setResult("Value", i, profile[i]);
+		if(profile[i] > 0 && prev == 0){
+			border1 = i;
+		}
+		if(profile[i] == 0 && prev > 0){
+			border2 = i;
+		}
+		prev = profile[i];
+	}
+	
+	// the line through the nucleus may stretch to the boundaries of the image
+	// in this case, there is no discontinuity in mask intensity and
+	// border2 is empty. In this case, use max i from profile
+	if(border2 == 0){
+		border2 = profile.length;
+	}
+	result=newArray(border1, border2);
+	return result;
+}
+
+function generateSignalProfile(id, pointA, pointB){
+	selectImage(id);
+	makeLine(pointA[0], pointA[1], pointB[0], pointB[1]);
+	profile = getProfile();
+	return profile;
+}
+
+function findNucleusCentreOfMass(id) {
+	// returns x,y, area, roi_index
+	selectImage(id);
+	imageName = getTitle(); 
+	run("Duplicate...", "title=temp"); //a copy of the primary image
+	
+	selectImage("temp");
+	setThreshold(kNucleusThresholdLevel, 255); // masks
+
+	run("Select All");
+	run("Set Measurements...", "area center centroid feret redirect=["+imageName+"]"); // output redirected to non-thresholded image
+	run("Analyze Particles...", "size="+nucleusMin+"-"+nucleusMax+" circularity=0.3-1 show=Nothing display include add");
+	
+	if(nResults > 0){
+		nucleus_x = getResult("XM"); // centre of mass
+		nucleus_y = getResult("YM");
+		area = getResult("Area");
+
+		nucleus_roi = path+"\\"+nucleus_number+".nucleus.zip";
+		roiManager("select",0);
+		roiManager("rename", "nucleus");
+		roiManager("save", nucleus_roi);
+		  		
+		result=newArray(nucleus_x, nucleus_y, area, nucleus_roi);
+		run("Clear Results");
+	} else {
+		result = newArray();
+	}
+	close("temp");
+	roiManager("reset");
+	return result;
+}
+
+function findSignalCentreOfMass(id, roi) {
+	// find the signal centre of mass
+	selectImage(id);
+	imageName = getTitle(); 
+
+	run("Duplicate...", "title=temp"); //a copy of the primary image
+	selectImage("temp");
+	setThreshold(kSignalThresholdLevel, 255);
+	roiManager("open", roi);
+	// selectImage("temp");
+	// roiManager("select", 0);
+	// roiManager("select", roi); // select the nucleus outline
+	// waitForUser("selecting nucleus");
+	run("Convert to Mask"); //for accurate outline detection
+	roiManager("open", roi);
+	run("Set Measurements...", "area center centroid redirect=["+imageName+"]");
+	run("Analyze Particles...", "size="+signalMin+"-"+signalMax+" show=Nothing display exclude add"); // add all particles to ROI
+	// waitForUser("wait");
+	if(nResults > 0 && nResults < 2){ // one signal only	
+		signal_x = getResult("XM"); // centre of mass
+		signal_y = getResult("YM");
+		area = getResult("Area");
+		signal_roi = path+"\\"+nucleus_number+".signal.zip";
+		roiManager("save", signal_roi);
+		result=newArray(signal_x, signal_y, area, signal_roi );
+		run("Clear Results");
+	} else {
+		result = newArray();
+	}
+	close("temp");
+	roiManager("reset");
+	return result;
+}
+
+function analyseFromDirectory(dir) {
+	resetLog();
+	
+	logFile = dir + "//" + "log.txt";
+	if(File.exists(logFile)){
+		File.delete(logFile);
+	}
+	var f = File.open(logFile);
+	
+	list = getFileList(dir);
+	count = 1;
+	for (i=0; i<list.length; i++) {
+		if (
+		  endsWith(list[i], ".jpg") ||
+		  endsWith(list[i], ".tif") ||
+		  endsWith(list[i], ".tiff")
+		) {
+			print("image " + (count++) + ": " + dir + list[i]);
+			open(dir + list[i]);
+			imageID = getImageID();
+			
+			findNucleiInImage();
+			
+			if (isOpen(imageID)) {
+				close(imageID);
+			}
+		} 
+	}
+}
+
+// -------------------------------------------------
+// ROI HANDLING FUNCTIONS
+// -------------------------------------------------
+
+function ROI_to_x(array){
+	// convert an ROI selection to array of x coordinates
+	length = array[0];
+	
+	x_selection = newArray();		
+	for (i=1; i<=length; i++){
+		x_selection = Array.concat(x_selection, array[i]);
+	}
+	return x_selection;
+}
+
+function ROI_to_y(array){
+	// convert an ROI selection to array of y coordinates
+	length = array[0];
+	y_selection = newArray();		
+	for (i=1; i<=length; i++){
+		y_selection = Array.concat(y_selection, array[i+length]);
+	}
+	return y_selection;
+}
+
+function createROI(x, y){
+	// transfer x and y arrays to ROI format
+	// 0 - length of array
+	// 1 - first x
+	// [0]+1 - first y
+	length = x.length;
+	full_array =  Array.concat(x,y);
+	full_array =  Array.concat(length,full_array);
+	return full_array;
+}
+
+function writeROItoFile(roi, file){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	for(i=0;i<x.length;i++){
+		print(file, x[i]+"\t"+y[i]);
+	}
+}
+
+function printROI(roi){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	for(i=0;i<x.length;i++){
+		print(x[i]+"   "+y[i]);
+	}
+}
+
+function drawROI(roi, type){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	makeSelection(type, x, y);
+	roiManager("Add");
+}
+
+function drawSmoothROI(roi, type){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	makeSelection(type, x, y);
+	run("Interpolate", "interval=1 smooth");
+	roiManager("Add");
+}
+
+// -------------------------------------------------
+// DRAWING FUNCTIONS
+// -------------------------------------------------
+function drawRectangleAtPoint(point, colour){
+	// a rectangle at x-1, y-1, 3x3 square so centred on x,y
+	setColor(colour);
+	drawRect(point[0]-1, point[1]-1, 3, 3); 
+}
+
+function drawLineBetweenPoints(pointA, pointB, colour){
+	
+	setColor(colour);
+	drawLine(pointA[0], pointA[1], pointB[0], pointB[1]);
+}
+// -------------------------------------------------
+// GENERAL FUNCTIONS
+// -------------------------------------------------
+function getX(eq, y){
+	// x = (y-c)/m
+	x = (y - eq[1]) / eq[0];
+	return x;
+}
+
+function getY(eq, x){
+	// y = mx +c
+	y = (eq[0] * x) + eq[1];
+	return y;
+}
+
+function getLineCoordinates(eq, w, h){
+	
+	// the start and end points of the line may be offscreen for given x coordinates
+	// find the best start and end points
+	x_start = 0;
+	x_end = w - 1;
+	
+	y_start = getY(eq, x_start); // (eq[0] * 1) + eq[1];
+	y_end =  getY(eq, x_end); //(eq[0] * (w - 1)) + eq[1];
+	
+	// write("Ideal line: "+x_start+","+y_start+" to "+x_end+","+y_end);
+		
+	if(y_start > h - 1){ // too high
+		x_start = getX(eq, h - 1);
+		y_start = h - 1;
+		
+	}
+	if(y_start < 0){ 
+		x_start = getX(eq, 0);
+		y_start = 0;
+	}
+	
+	if(y_end > h - 1){
+		x_end = getX(eq, h - 1);
+		y_end = h - 1;
+	}
+
+	if(y_end < 0){ 
+		x_end = getX(eq, 0);
+		y_end = 0;
+	}
+	// write("Final line: "+x_start+","+y_start+" to "+x_end+","+y_end);
+	result=newArray(x_start, y_start, x_end, y_end);
+	return result;
+}
+
+function resetLog() {
+	if (isOpen("Log")) {
+		selectWindow("Log");
+		run("Close");
+	}
+}
+
+function getLength(pointA, pointB) {
+	dx = pointB[0]-pointA[0]; 
+	dy = pointB[1]-pointA[1];
+	length = sqrt(dx*dx+dy*dy);
+	return length;
+}
+
+function calculateLineEquation(position_1, position_2){
+	
+	delta_x = position_1[0] - position_2[0];
+	delta_y = position_1[1] - position_2[1];
+	
+	m = delta_y / delta_x;
+	
+	// y - y1 = m(x - x1)
+	c = position_1[1] -  ( m * position_1[0] );
+	
+	testy = (m * position_2[0]) + c;
+	
+	// write("y = "+m+"x + "+c);
+	result=newArray(m, c);
+	return result;
+	
+}
+
+function getCoordinatesFromDistance(line, dist, eq){
+	// given a line, and a distance from 0,0, return the x,y
+	// coordinates of the point
+	x1 = line[0];
+	y1 = line[1];
+	
+	x2 = line[2];
+	y2 = line[3];
+	
+	// right angled triangle of sides: 
+	// a:  x2 - x1; b: y2-y1; c: dist
+
+	a = abs(x2 - x1);
+	b = abs(y2 - y1);
+		
+	theta = atan(a/b);
+	c = a / sin(theta);
+	
+	// write("Length of a: "+a);	
+	// write("Length of b: "+b);	
+	// write("Length of c: "+c);
+	
+	proportion = dist / c;
+	// write(dist+" proportion of hypotenuse: "+proportion);
+	
+	// if(x1 < x2){
+		x = (a * proportion) + x1;
+		// y = (b * proportion) + y1;
+	// } else {
+		// x = (a * proportion) + x2;
+		// y = (b * proportion) + y2;
+	// }
+	y = getY(eq, x);
+	
+	// write("Expecting coordinates of "+dist+" are "+x+","+y);
+	
+	result=newArray(x, y);
+	return result;
+}
+
+function printLog(file){
+	
+	print(file, "~ ------------------");
+	// print(file, "# LOGGED PARAMETERS");
+	// print(file, "# ------------------");
+	for(i=0;i<logFields.length;i++){
+		print(file, logFields[i]+"~"+logValues[i]);
+	}
+}
+
+function emptyLog(){
+	logFields = newArray();
+	logValues = newArray();
+}
+
+function addToLog(field, value){
+	
+	logFields = Array.concat(logFields, field);
+	logValues = Array.concat(logValues, value);
+}
+
+// -------------------------------------------------
+// MACROS
+// -------------------------------------------------
+macro "findCentreOfMass"
+{
+	requires("1.47");
+	saveSettings();
+	run("Colors...", "background=black"); //set background colour to black
+	analyseSignalInNucleus();
+	restoreSettings();
+}
+macro "analyseAllNucleiInImage"
+{
+	requires("1.47");
+	saveSettings();
+	run("Colors...", "background=black"); //set background colour to black
+	resetLog();
+	imageID = getImageID();
+	name=getTitle;
+	dir = getInfo("image.directory");
+	logFile = dir + "//" + name + ".txt";
+	if(File.exists(logFile)){
+		File.delete(logFile);
+	}
+	var f = File.open(logFile);
+	
+	findNucleiInImage();
+	restoreSettings();
+}
+macro "analyseFromDirectory"
+{
+	requires("1.47");
+	saveSettings();
+	run("Colors...", "background=black"); //set background colour to black
+	dir = getDirectory("Choose a Directory ");
+	analyseFromDirectory(dir);
+	restoreSettings();
+}
+	
