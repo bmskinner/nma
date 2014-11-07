@@ -1,0 +1,1095 @@
+/*
+Copyright (C) Ben Skinner 2014
+-------------------------------------------------
+MOUSE SPERM MORPOLOGY ANALYSIS
+-------------------------------------------------
+This script uses DAPI signal.
+Nuclear organisation script technique is used to find the 
+axes head-tail and hook-hump.
+
+The head-hump border is extracted from the hump-side ROI
+(70% of ROI boundary beginning at head)
+
+The resulting ROI is rotated and flipped to put the head directly
+above the tail end of the curve, with the hump on the left. This curve is translated
+to zero axis coordinates. X and Y coordinates are swapped to make the curve horizontal.
+This allows for simple plotting and drawing best fit lines in excel. Coordinates for
+the curve are given in the log window.
+
+LOGGED FIELDS:
+CL Curve length
+NA Nuclear area
+NP Nuclear perimeter
+FD Feret diameter
+MY Max Y
+IN Image name
+ID Image directory
+Curve y = a+bx+cx^2
+XA = a
+XB = b
+XC = c
+XR = r^2
+
+BUGS:
+Still consistently failing on some images
+Does not properly detect tip out of roi
+
+TODO:
+Detect lectin stain and analyse acrosome morphology
+
+*/
+
+// nucleusThresholdLevel determines the segmentation level for separating the cell from
+// the background
+var nucleusThresholdLevel = 30;
+
+// nucleusMin is the minimum number of pixels that a nucleus contains 
+// (based on mouse sperm)
+var nucleusMin = 400; 
+var nucleusMax = 3000;
+
+// the array of information to log
+var logFields = newArray();
+var logValues = newArray();
+
+// var logDir = "";
+// var logFileName = 'log.txt';
+
+var showDebug = false; // show debugging info
+
+function main() {
+
+	 emptyLog()
+	// click a pixel inside the nucleus
+	location_on_image = selectNucleus();
+	
+	logDir = getInfo("image.directory");
+	logFileName = getInfo("image.filename");
+	
+	addToLog("IN", logFileName);
+	addToLog("ID", logDir);
+	
+	logFile = checkLogFilePath(logDir, logFileName, 1);
+	addToLog("LF", logFile);
+	f = File.open(logFile);
+		
+	copyAndSplit();
+	close("working (red)");
+
+	// figure out where the hook tip is located
+	// create an ROI for the curve
+	initial_roi = findTipToHump(location_on_image);
+	
+	// rotate the ROI until head and tail are vertically aligned
+	rotated_roi = alignHeadandTailOnX(initial_roi);
+	
+	// ensure the head is at the top - flip y if needed
+	oriented_roi = putHeadOnTop(rotated_roi);
+	drawROI(oriented_roi, "polygon");
+	
+	// draw head point
+	// remember y axis is reversed for images
+	// drawSpermTip(oriented_roi);
+	
+	// check if the left of the midpoint is within roi
+	// if not, flip on x axis
+	oriented_roi = putHumpOnLeft(oriented_roi);
+	drawSmoothROI(oriented_roi, "freeline");
+	// writeROI(final_roi);
+	// drawSpermTip(final_roi);
+		
+	// swap x and y coordinates to make a horizontal roi
+	complete_roi = swapXandYinROI(oriented_roi);
+	
+	// put the sperm head at x=0
+	complete_roi = flipROI(complete_roi, "x");
+	
+	if(showDebug){ print("Flipped:");}
+	// writeROI(complete_roi);
+	 
+	// offset the ROI to start at 0,0
+	complete_roi = offsetToZeroROI(complete_roi);
+	// print("Offset:");
+	// writeROI(complete_roi);
+	
+	// normalise curve length to 100 pixels
+	complete_roi = normaliseROI(complete_roi, 100);
+	
+	drawSmoothROI(complete_roi, "freeline");
+	drawSpermTip(complete_roi);
+	
+	doCurveFit(complete_roi);
+	
+	if(showDebug) { print("# ------------------");}
+	if(showDebug) { print("# END DEBUG LOG"); }
+	if(showDebug) { print("# ------------------"); }
+	
+	printLog(f);
+	
+	// print(f, "# ------------------");
+	// print(f, "! "+logFile);
+	print(f, "# ------------------");
+	writeROI(complete_roi, f);
+	
+	// blueOutline = makeROI(location, "blue");
+	// greenOutline = makeROI(location, "green");
+	
+	// compareROIs(blueOutline, greenOutline);
+	
+	print(f, "# END OF FILE");
+	
+	close("working*");
+	close("spare*");
+	close("Calibrating*");
+	if(!showDebug){
+		close("draw");
+	}
+}
+
+function doCurveFit(roi){
+
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	Fit.doFit(1, x, y); // 2 is 2nd Degree Polynomial
+	// Fit.plot();
+	// rename("Calibrating curve");
+
+	// And then the can be extracted easily as thus:
+
+	a = Fit.p(0);
+	b = Fit.p(1);
+	c = Fit.p(2);
+	r2 = Fit.rSquared;
+	
+	addToLog("XA", a);
+	addToLog("XB", b);
+	addToLog("XC", c);
+	addToLog("XR", r2);
+}
+
+function offsetToZeroROI(roi){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	min_x = 1000;
+	min_y = 1000;
+	
+	for(i=0;i<x.length;i++){
+		
+		if(x[i] < min_x){
+			min_x = x[i];
+		}
+		if(y[i] < min_y){
+			min_y = y[i];
+		}
+	}
+	for(i=0;i<x.length;i++){
+		x[i] = x[i] - min_x;
+		y[i] = y[i] - min_y;
+	}
+	new_roi = createROI(x, y);
+	return new_roi;
+}
+
+function putHumpOnLeft(roi){
+	y = ROI_to_y(roi);
+	x = ROI_to_x(roi);
+	midpoint = (y[0] + y[y.length-1]) / 2;
+	
+	if(selectionContains(x[0]-2,midpoint)){
+		// hump is on left
+		// continue
+		flipped = roi;
+	} else {
+		// hump is on right
+		// flip on x axis
+		flipped = flipROI(roi, "x");
+	}
+	return flipped;	
+}
+
+function alignHeadandTailOnX(selection){
+	x_points = ROI_to_x(selection);
+	y_points = ROI_to_y(selection);
+	min_x = 100;
+	theta = 0;
+	
+	for(i=1;i<180;i++){
+		// always do the rotation fresh on original coordinates
+		// avoids distortion from integer positions building up
+		makeSelection("freeline", x_points, y_points);
+		// run("Interpolate", "interval=1 smooth");
+		run("Rotate...", "angle="+i);
+		getSelectionCoordinates(rot_x, rot_y);
+		head_to_tail_x = abs(rot_x[0] - rot_x[rot_x.length-1]);
+		// print(i+" degrees: "+head_to_tail_x);
+		if(head_to_tail_x < min_x){
+			min_x_roi = createROI(rot_x, rot_y);
+			theta = i;
+			min_x = head_to_tail_x;
+		}
+	}
+	if(showDebug) { print("Minimum distance: "+min_x);}
+	if(showDebug) { print("Rotated by "+theta+" degrees");}
+	return min_x_roi;
+}
+
+function putHeadOnTop(roi){
+	
+	y_points = ROI_to_y(roi);
+	if(showDebug) { print("Head: "+y_points[0]+" Tail"+y_points[y_points.length-1]);}
+	if(y_points[0] < y_points[y_points.length-1]){
+		// flip it
+		if(showDebug) { print("Flipping");}
+		flipped_roi = flipROI(roi, "y");
+	} else {
+		flipped_roi = roi;
+	}
+	return flipped_roi;
+}
+
+function findTipToHump(location) {
+	// identifies the outline of the sperm nucleus
+	// finds the axes head-tail and hook-hump
+	// returns an roi from tip across the hump
+	
+	selectWindow("working (blue)");
+	blueID = getImageID();
+	
+	run("Duplicate...", "title=spare_blue");
+
+	// find the centre of the nucleus
+	nucleus_roi = makeROIFromPoint(location, blueID);
+	// nucleus_roi = shuffleROI(nucleus_roi, location);
+	// print("By wand:");
+	// writeROI(nucleus_roi);
+		
+	drawROI(nucleus_roi, "freeline");
+	
+	if(showDebug) { print("# ------------------");}
+	if(showDebug) { print("# BEGIN DEBUG LOG");}
+	if(showDebug) { print("# ------------------");}
+	if(showDebug) { print("Found nucleus ROI");}
+	nucleus_centre = findNucleusCentreOfMass(nucleus_roi);
+	if(showDebug) { print("Found nucleus COM");}
+			
+	// find the feret line of the nucleus
+	feret_line = findFeretsDiameter(nucleus_roi); // gets the positions on the border of the ferret line
+	
+	// get the orthogonal-to-feret line through centre of mass
+	orth_line = findOrthogonalToFeretLine(nucleus_centre, feret_line);
+	
+	// decide which end of the line is at the tip of the sperm
+	head_point = findSpermHeadPoint(orth_line, feret_line);
+	if(showDebug) { print("Got head");}
+	
+	if(showDebug){
+		print("Before shuffling:");
+		printROI(nucleus_roi);
+	}
+	
+	// reorder the roi array to put the tip at the front
+	// nucleus_roi = shuffleROI(nucleus_roi, head_point);
+	// if(showDebug){
+		// print("After shuffling:");
+		// printROI(nucleus_roi);
+		// print("Splitting ROI:");
+	// }
+	
+	hump_roi = splitROIs(feret_line, nucleus_roi); // splits the nucleus roi in two along the feret line and returns hump roi coordinates
+	if(showDebug){
+		printROI(hump_roi);
+		print("Completed split");
+	}
+	// writeROI(hump_roi);
+	selectWindow("draw");
+	
+	drawROI(hump_roi, "freeline");
+	
+	// order the roi to make sure we start the array on the tip of the sperm
+	ordered_roi = shuffleROI(hump_roi, head_point);
+	drawROI(ordered_roi, "freeline");
+	if(showDebug){
+		print("Shuffled hump ROI:");
+		printROI(hump_roi);
+	}
+	
+	
+	// trim the roi
+	// need to determine which end is the tip
+	// ordered_roi = checkOrientation(ordered_roi, head_point);
+	ordered_roi = checkOrientation(ordered_roi, head_point);
+	if(showDebug) { print("ROI ordered");}
+	
+	// fetch first 70% of signals
+	trimmed_roi = trimROI(ordered_roi, 0.7);
+	
+	// roiManager("reset");
+	drawROI(trimmed_roi, "freeline");
+	run("Set Measurements...", "length");
+	run("Measure");
+	if(nResults > 0){
+		length = getResult('Length');
+		addToLog("CL", length);
+	}
+	if(showDebug) { print("ROI trimmed");}
+	
+	run("Clear Results");
+	return trimmed_roi;
+}
+
+function findSpermHeadPoint(orth_line, feret_line){
+	// measure from the crossing point of orth and feret lines to the ends of the feret line;
+	// decide which is smaller - assume that is the tail side
+	orth_crossing = newArray(orth_line[4], orth_line[5]);
+	feret1 = newArray(feret_line[0], feret_line[1]);
+	feret2 = newArray(feret_line[2], feret_line[3]);
+	
+	feret1_dist = getLength(orth_crossing, feret1);
+	feret2_dist = getLength(orth_crossing, feret2);
+	
+	if(feret1_dist >= feret2_dist){
+		head_point = feret1;
+		tail_point = feret2;
+	} else {
+		head_point = feret2;
+		tail_point = feret1;
+	}
+	if(showDebug) { write("Decided head is at : "+head_point[0]+","+head_point[1]);}
+	if(showDebug) { write("Decided tail is at : "+tail_point[0]+","+tail_point[1]);}
+	return head_point;
+}
+
+function checkOrientation(roi, head_point){
+
+	x_points = ROI_to_x(roi);
+	y_points = ROI_to_y(roi);
+	end_x = x_points[x_points.length-1];
+	end_y = y_points[y_points.length-1];
+	
+	if(x_points[0] == head_point[0] && y_points[0] == head_point[1]){
+		// flip = 0;
+		if(showDebug) { print("Tip is at top of array; leaving");}
+	} else if(end_x == head_point[0] && end_y == head_point[1]){
+		// flip = 1;
+		if(showDebug) { print("Tip is at bottom of array; reversing");}
+		// reverse the arrays if needed to put tip at beginning
+		x_points = Array.reverse(x_points);
+		y_points = Array.reverse(y_points);
+	} else {
+		if(showDebug) { print("Cannot determine orientation");}
+	}
+	new_roi = createROI(x_points, y_points);
+	
+	return new_roi;
+}
+
+function findNucleusCentreOfMass(roi) {
+	// returns x,y, area
+	selectImage("working (blue)");
+	run("Duplicate...", "title=temp"); //a copy of the primary image
+	selectImage("temp");
+	// setThreshold(nucleusThresholdLevel, 255); // masks
+
+	drawROI(roi, "polygon");
+
+	run("Set Measurements...", "area center centroid feret");
+	run("Measure");
+	
+	if(nResults > 0){
+		nucleus_x = getResult("XM"); // centre of mass
+		nucleus_y = getResult("YM");
+		area = getResult("Area");
+		  		
+		result=newArray(nucleus_x, nucleus_y, area);
+		run("Clear Results");
+	} else {
+		result = newArray();
+		print("Could not get measurements of nucleus");
+	}
+	addToLog("NA", area);
+
+	close("temp");
+	return result;
+}
+
+function findFeretsDiameter(roi) {
+    
+    diameter = 0.0;
+	xCoordinates = ROI_to_x(roi);
+	yCoordinates = ROI_to_y(roi);
+
+     n = xCoordinates.length;
+     for (i=0; i<n; i++) {
+        for (j=i; j<n; j++) {
+            dx = xCoordinates[i] - xCoordinates[j];
+            dy = yCoordinates[i] - yCoordinates[j];
+            d = sqrt(dx*dx + dy*dy);
+			
+            if (d>diameter) {
+                diameter = d;
+                i1 = i;
+                i2 = j;
+            }
+        }
+    }
+
+	result = newArray(xCoordinates[i1], yCoordinates[i1],xCoordinates[i2],yCoordinates[i2]);
+	addToLog("FD", diameter);
+	return result;
+}
+
+function splitROIs(line, roi) {
+
+	// splits the nucleus roi in two along a given line 
+	// return the outline of the hump side roi
+
+	// line is array: xy, xy
+
+	xCoordinates = ROI_to_x(roi);
+	yCoordinates = ROI_to_y(roi);
+	// print("Got x and y");
+	
+	// new arrays for the split roi coordinates
+	roi1X = newArray();	roi1Y = newArray();
+	roi2X = newArray();	roi2Y = newArray();
+	
+	roi1 = 1;
+	roi2 = 0;
+	for (i=0; i<xCoordinates.length; i++) { // go through the selection border coords
+				
+		// add to current roi
+		if(roi1 == 1){
+			roi1X = Array.concat(roi1X, xCoordinates[i]);
+			roi1Y = Array.concat(roi1Y, yCoordinates[i]);
+		}
+		
+		if(roi2 == 1){
+			roi2X = Array.concat(roi2X, xCoordinates[i]);
+			roi2Y = Array.concat(roi2Y, yCoordinates[i]);
+		}
+		
+		// if we hit the line, switch from roi1 to roi2 and or back	
+		if( (xCoordinates[i] == line[0] && yCoordinates[i] ==  line[1]) || (xCoordinates[i] == line[2] && yCoordinates[i] ==  line[3]) ) {
+			
+			// if(!roi1){ // ensure the feret coordinates are included in the new roi even if the roi bit is not true
+				// roi1X = Array.concat(roi1X, xCoordinates[i]);
+				// roi1Y = Array.concat(roi1Y, yCoordinates[i]);
+			// }
+			// if(!roi2){
+				// roi2X = Array.concat(roi2X, xCoordinates[i]);
+				// roi2Y = Array.concat(roi2Y, yCoordinates[i]);
+			// }
+			
+			// flip roi1 and roi2
+			roi1 = !roi1;
+			roi2 = !roi2;
+		}
+		
+	}
+	// print("Made the split");
+	
+	// roiManager("reset");
+	selectImage("spare_blue");
+	// create new roi out of roi1 and roi2
+	
+	// roi1_array = createROI(roi1X, roi1Y);
+	// print("Made roi1");
+	makeSelection("polygon", roi1X, roi1Y);
+	// print("Selected polygon");
+	run("Measure");
+	// print("Measured");
+	area1 = getResult("Area");
+	cent1x = getResult("X");
+	cent1y = getResult("Y");
+	
+	// roi2_array = createROI(roi2X, roi2Y);
+	makeSelection("polygon", roi2X, roi2Y);
+	run("Measure");
+	area2 = getResult("Area");
+	cent2x = getResult("X");
+	cent2y = getResult("Y");	
+
+	// roiManager("reset");
+	if(area1 >= area2){
+		// roi1X = Array.slice(roi1X,1,roi1X.length-2);
+		// roi1Y = Array.slice(roi1Y,1,roi1Y.length-2);
+		list = createROI(roi1X, roi1Y);
+	} else {
+		// roi2X = Array.slice(roi2X,1,roi2X.length-2);
+		// roi2Y = Array.slice(roi2Y,1,roi2Y.length-2);
+		list = createROI(roi2X, roi2Y);
+	}
+	return list;
+}
+
+function findOrthogonalToFeretLine(centroid, feret_line){
+	// centroid is the position the line must pass through at 90 degrees to feret (x,y)
+	// feret_line is the coordinates of the start and end of the line (x,y,x,y)
+	// returns the start and end points of the orth line, plus the feret crossing (x1,y1,x2,y2, xc, yc)
+	x = newArray(feret_line[0], feret_line[2]); // arrays of the feret line bounds
+	y = newArray(feret_line[1], feret_line[3]);
+
+	makeSelection("line", x, y);
+	// makeLine(feret_line[0], feret_line[1], feret_line[2], feret_line[3]); // 
+	run("Fit Spline", "straighten"); 
+	getSelectionCoordinates(xCoordinates, yCoordinates); // list of points on the line
+	
+	best_angle = 90;
+	best_diff = 90;
+	for(i=0; i<xCoordinates.length; i++){
+		
+		// draw a new line from centroid to feret start
+		makeLine(centroid[0], centroid[1], xCoordinates[i], yCoordinates[i], feret_line[0], feret_line[1]);
+		xcoord1 = newArray(centroid[0],  xCoordinates[i], feret_line[0]);
+		ycoord1 = newArray(centroid[1],  yCoordinates[i], feret_line[1]);
+		makeSelection("angle", xcoord1, ycoord1);
+		run("Measure");		
+		angle1 = getResult("Angle");
+		
+		// draw a new line from centroid to feret end
+		xcoord2 = newArray(centroid[0],  xCoordinates[i], feret_line[2]);
+		ycoord2 = newArray(centroid[1],  yCoordinates[i], feret_line[3]);
+		makeSelection("angle", xcoord2, ycoord2);
+		run("Measure");		
+		angle2 = getResult("Angle");
+		
+		diff = abs(angle1 - angle2);
+		if(  diff < best_diff ){ // try to find the point at which they are equal
+			best_angle = angle1;
+			best_diff = diff;
+			orth = newArray(xCoordinates[i], yCoordinates[i]);
+		}
+		// write(angle1+"  "+angle2+"  "+diff+"  "+best_angle+"  "+xCoordinates[i]+"  "+yCoordinates[i]);
+	}
+	// write("Set on: "+best_angle+" at "+orth[0]+","+orth[1]);
+	eq = calculateLineEquation(orth, centroid);
+	line = getLineCoordinates(eq, getWidth(), getHeight());
+	line = Array.concat(line, orth[0]); // add in the crossing point to the orth line results
+	line = Array.concat(line, orth[1]);
+	return line;	
+}
+
+function selectNucleus() {
+
+	roiManager("reset");
+	leftButton=16;
+	x2=-1; y2=-1; z2=-1; flags2=-1; clickCount=0;
+
+	point=newArray(0, 0); // x,y
+
+	logOpened = false;
+	if (getVersion>="1.37r")
+		setOption("DisablePopupMenu", true);
+
+	name=getTitle;
+	
+	if(!isOpen("Log")){
+		print("Click a nucleus to measure");
+	}
+	
+	while (!logOpened || isOpen("Log")) {
+		getCursorLoc(x, y, z, flags);
+		if (x!=x2 || y!=y2 || z!=z2 || flags!=flags2) {
+
+			if (flags&leftButton!=0){
+
+				clickCount++;
+				if(clickCount==1){
+					point[0]=x;
+					point[1]=y;		
+					break;
+				}
+			}
+			logOpened = true;
+			startTime = getTime();
+		}
+		x2=x; y2=y; z2=z; flags2=flags;
+		wait(10);
+	}
+	if (getVersion>="1.37r")
+		setOption("DisablePopupMenu", false);
+		
+	// print("Terminus 1 - x: " + point[0] + " y: " + point[1]);
+	return point;
+}
+
+function copyAndSplit() {
+	//duplicate image for channel splitting
+	run("Duplicate...", "title=draw");
+	run("Duplicate...", "title=working");
+	selectWindow("working");
+	run("RGB Split");
+}
+
+function makeROIFromPoint(point, imageID){
+
+	// roiManager("reset");
+	selectImage(imageID);
+	run("Duplicate...", "title=temp"); //a copy of the primary image
+	selectImage("temp");
+	setThreshold(nucleusThresholdLevel, 255);  // Set the threshold
+	
+	doWand(point[0], point[1]);
+	roiManager("Add"); // add line to ROI
+	resetThreshold();
+	
+	// find the coordinates of the ROI
+	// run("Interpolate", "interval=1 smooth"); // Edit>Selection>Interpolate
+	getSelectionCoordinates(xpoints, ypoints); 
+	
+	close("temp");
+	newROI = createROI(xpoints, ypoints); 
+	run("Set Measurements...", "perimeter");
+	run("Measure");
+	
+	if(nResults > 0){
+		perimeter = getResult('Perim.');
+		addToLog("NP", perimeter);
+	}
+	return newROI;
+}
+
+function drawSpermTip(roi){
+
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	selectWindow("draw");
+	setColor("#7D26CD");
+	drawRect(x[0]-1, y[0]-1, 3, 3);
+}
+
+// -------------------------------------------------
+// ROI HANDLING FUNCTIONS
+// -------------------------------------------------
+
+function ROI_to_x(array){
+	// convert an ROI selection to array of x coordinates
+	length = array[0];
+	
+	x_selection = newArray();		
+	for (i=1; i<=length; i++){
+		x_selection = Array.concat(x_selection, array[i]);
+	}
+	return x_selection;
+}
+
+function ROI_to_y(array){
+	// convert an ROI selection to array of y coordinates
+	length = array[0];
+	y_selection = newArray();		
+	for (i=1; i<=length; i++){
+		y_selection = Array.concat(y_selection, array[i+length]);
+	}
+	return y_selection;
+}
+
+function createROI(x, y){
+	// transfer x and y arrays to ROI format
+	// 0 - length of array
+	// 1 - first x
+	// [0]+1 - first y
+	length = x.length;
+	full_array =  Array.concat(x,y);
+	full_array =  Array.concat(length,full_array);
+	return full_array;
+}
+
+function shuffleROI(roi, head_point){
+	
+	// given an ROI, find where a selected point lies within it
+	// and make this the first element
+	// REPLACED WITH DISTANCE-BASED MEASURE
+	
+	// look for largest discontinuity between points
+	x_points = ROI_to_x(roi);
+	y_points = ROI_to_y(roi);
+	
+	last_x = x_points[x_points.length-1];
+	last_y = y_points[y_points.length-1];
+	
+	max_distance = 0;
+	max_i = 0;
+	
+	if(showDebug){
+		print("Shuffling ROI:");
+	}
+	// find the two most divergent points
+	for(i=0;i<x_points.length;i++){
+	
+		pointA = newArray(x_points[i],y_points[i]);
+		
+		if(i==x_points.length-1){ // check last against first
+			pointB = newArray(x_points[0],y_points[0]);
+			distance = getLength( pointA, pointB);
+		} else { // otherwise check to the next in array
+			pointB = newArray(x_points[i+1],y_points[i+1]);
+			distance = getLength( pointA, pointB);
+		}
+		
+		if(distance > max_distance){
+			max_distance = distance;
+			max_i = i;
+		}
+		if(showDebug){
+			print(pointA[0]+"  "+pointA[1]+" to "+pointB[0]+"  "+pointB[1]+": "+distance);
+		}
+	}
+	if(showDebug){
+		print("Max distance: "+max_distance+" at "+max_i);
+	}
+	// we now have the position just before the discontinuity
+	// chop the array in two and reassemble in the correct order
+	x1 = Array.slice(x_points,max_i+1); // max_i to end
+	y1 = Array.slice(y_points,max_i+1);
+		
+	x2 = Array.slice(x_points,0,max_i+1);
+	y2 = Array.slice(y_points,0,max_i+1);
+	
+	if(showDebug){
+		
+		x1roi = createROI(x1, y1);
+		print("Array x1:");
+		drawROI(x1roi, "freeline");
+		printROI(x1roi);
+
+		x2roi = createROI(x2, y2);
+		print("Array x2:");
+		drawROI(x2roi, "freeline");
+		printROI(x2roi);
+		
+	}
+	
+	x_final = Array.concat(x1,x2);
+	y_final = Array.concat(y1,y2);
+
+	// transfer to ROI format
+	full_array = createROI(x_final, y_final);
+	
+	if(showDebug){
+		print("Combined array:");
+		drawROI(full_array, "freeline");
+		printROI(full_array);
+	}
+	return full_array;
+}
+
+function trimROI(roi, amount_to_keep){
+	x_points = ROI_to_x(roi);
+	y_points = ROI_to_y(roi);
+	roi_length = roi[0];
+	
+	end = floor(roi_length*amount_to_keep); // fetch first x% of signals
+	trimmed_x = Array.slice(x_points, 0, end);
+	trimmed_y = Array.slice(y_points, 0, end);
+	
+	trimmed_roi = createROI(trimmed_x, trimmed_y);
+	return trimmed_roi;
+	
+}
+
+function flipROI(roi, axis){
+
+	// flip the ROI on one or other axis
+	// return an ROI
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	if(axis == "x"){
+		// horizontal flip
+		midpoint = (x[0] + x[x.length-1]) / 2;
+		flipped_x = newArray(x.length);
+		
+		for(i=0;i<x.length;i++){
+		
+			if(x[i] > midpoint){
+				new_x = midpoint - (x[i]-midpoint);
+			} else {
+				new_x = midpoint + (midpoint - x[i]);
+			}
+			
+			flipped_x[i] = new_x;
+		}
+		flipped_array = createROI(flipped_x, y);
+	}
+	if(axis == "y"){
+		//vertical flip
+		midpoint = (y[0] + y[y.length-1]) / 2;
+		flipped_y = newArray(y.length);
+		
+		for(i=0;i<y.length;i++){
+		
+			if(y[i] > midpoint){
+				new_y = midpoint - (y[i]-midpoint);
+			} else {
+				new_y = midpoint + (midpoint - y[i]);
+			}
+			
+			flipped_y[i] = new_y;
+		}
+		flipped_array = createROI(x, flipped_y);
+	}
+	return flipped_array;
+}
+
+function drawROI(roi, type){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	makeSelection(type, x, y);
+	roiManager("Add");
+}
+
+function drawSmoothROI(roi, type){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	makeSelection(type, x, y);
+	run("Interpolate", "interval=1 smooth");
+	roiManager("Add");
+}
+
+function writeROI(roi, file){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	for(i=0;i<x.length;i++){
+		print(file, x[i]+"\t"+y[i]);
+	}
+}
+
+function printROI(roi){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	
+	for(i=0;i<x.length;i++){
+		print(x[i]+"   "+y[i]);
+	}
+}
+
+function swapXandYinROI(roi){
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	newROI = createROI(y, x);
+	return newROI;
+}
+
+function normaliseROI(roi, newLength){
+	// stretch the x coordinates of the given roi to fit from 
+	// 0 - length allowing comparison between different curves
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+	old_x_max = 0;
+	
+	max_y = 0; // for logging
+	
+	for(i=0;i<x.length;i++){
+		if(x[i] > old_x_max){
+			old_x_max = x[i];
+		}
+		if(y[i] > max_y){ // for logging
+			max_y = y[i];
+		}
+	}
+	
+	addToLog("MY",max_y);
+	
+	for(i=0;i<x.length;i++){
+		x[i] = (x[i] / old_x_max) * newLength;
+	}
+	newROI = createROI(x,y);
+	return newROI;	
+}
+
+// -------------------------------------------------
+// GENERAL FUNCTIONS
+// -------------------------------------------------
+function getLength(pointA, pointB) {
+	dx = pointB[0]-pointA[0]; 
+	dy = pointB[1]-pointA[1];
+	length = sqrt(dx*dx+dy*dy);
+	return length;
+}
+
+function getX(eq, y){
+	// x = (y-c)/m
+	x = (y - eq[1]) / eq[0];
+	return x;
+}
+
+function getY(eq, x){
+	// y = mx +c
+	y = (eq[0] * x) + eq[1];
+	return y;
+}
+
+function getLineCoordinates(eq, w, h){
+	
+	// the start and end points of the line may be offscreen for given x coordinates
+	// find the best start and end points
+	x_start = 0;
+	x_end = w - 1;
+	
+	y_start = getY(eq, x_start); // (eq[0] * 1) + eq[1];
+	y_end =  getY(eq, x_end); //(eq[0] * (w - 1)) + eq[1];
+	
+	// write("Ideal line: "+x_start+","+y_start+" to "+x_end+","+y_end);
+		
+	if(y_start > h - 1){ // too high
+		x_start = getX(eq, h - 1);
+		y_start = h - 1;
+		
+	}
+	if(y_start < 0){ 
+		x_start = getX(eq, 0);
+		y_start = 0;
+	}
+	
+	if(y_end > h - 1){
+		x_end = getX(eq, h - 1);
+		y_end = h - 1;
+	}
+
+	if(y_end < 0){ 
+		x_end = getX(eq, 0);
+		y_end = 0;
+	}
+	// write("Final line: "+x_start+","+y_start+" to "+x_end+","+y_end);
+	result=newArray(x_start, y_start, x_end, y_end);
+	return result;
+}
+
+function calculateLineEquation(position_1, position_2){
+	
+	delta_x = position_1[0] - position_2[0];
+	delta_y = position_1[1] - position_2[1];
+	
+	m = delta_y / delta_x;
+	
+	// y - y1 = m(x - x1)
+	c = position_1[1] -  ( m * position_1[0] );
+	
+	testy = (m * position_2[0]) + c;
+	
+	// write("y = "+m+"x + "+c);
+	result=newArray(m, c);
+	return result;
+	
+}
+
+function addToLog(field, value){
+	
+	logFields = Array.concat(logFields, field);
+	logValues = Array.concat(logValues, value);
+}
+
+function printLog(file){
+	
+	print(file, "~ ------------------");
+	// print(file, "# LOGGED PARAMETERS");
+	// print(file, "# ------------------");
+	for(i=0;i<logFields.length;i++){
+		print(file, logFields[i]+"\t"+logValues[i]);
+	}
+}
+
+function emptyLog(){
+	logFields = newArray();
+	logValues = newArray();
+}
+
+function checkLogFilePath(logDir, logFileName, n){
+	
+	logFile = logDir + "//" + logFileName + "." + n +".txt";
+	if(File.exists(logFile)){
+		n++;
+		logFile = checkLogFilePath(logDir, logFileName, n);
+	}
+	return logFile;
+}
+// -------------------------------------------------
+// MACROS
+// -------------------------------------------------
+macro "Sperm Morph Tool - C0a0L18f8L818f"
+{
+	requires("1.47");
+	saveSettings();
+	main();
+	restoreSettings();
+}
+
+/*
+// function compareROIs(blue, green){
+
+	// // find the blue borders closest to the green border - this is outside
+	// // of the nucleus. Use blue coordinates for next step.
+	// greenLength = green[0];
+	// blueLength = blue[0];
+	
+	// // profile = newArray(greenLength+1);
+	// x_selection = newArray();
+	// y_selection = newArray();
+		
+	// for (i=1; i<=greenLength; i++){
+		
+		// g_x = green[i];
+		// g_y = green[i+greenLength];
+		// // print(g_x+" "+g_y);
+		// g = newArray(g_x, g_y);
+		// min_l = 100;
+		// min_b = newArray(0,0);
+		// max_l = 0; // largest distance between lines
+		
+		// for (j=1; j<=blueLength; j++){
+			// b_x = blue[j];
+			// b_y = blue[j+blueLength];
+			
+			// // find distance between points;
+			// // get the minimum
+			// b = newArray(b_x, b_y);
+			// l = getLength(g, b);
+			// if(l<min_l){
+				// min_l = l;
+				// min_b[0] = b_x;
+				// min_b[1] = b_y;
+			// }
+			// if(l>max_l){
+				// max_l = l;
+			// }
+		// }
+		// // profile[i] = min_l;
+		// // print(i+": "+profile[i]);
+		
+		// max_distance_difference = max_l / 10; // 10% of greatest difference between blue and green lines
+		
+		// if(min_l < max_distance_difference){ // find the lines that mostly overlap
+		
+			// x_selection = Array.concat(x_selection, min_b[0]);
+			// y_selection = Array.concat(y_selection, min_b[1]);
+		// }
+	// }
+	
+	// // trim off the first and last 10% of points to focus on the hump
+	// // some of the overlap is in the descending hook
+	// begin = floor(greenLength*0.1);
+	// end = floor(greenLength*0.8); // fetch 80% of signals past first 10% = 90%
+	// trimmed_x = Array.slice(x_selection, begin, end);
+	// trimmed_y = Array.slice(y_selection, begin, end);
+	
+	// for (i=0; i<trimmed_x.length; i++){
+		// print(trimmed_x[i]+" "+trimmed_y[i]);
+	// }
+	
+	// // add the first pixel to the end of the array to close the ROI
+	// first_x = trimmed_x[0];
+	// first_y = trimmed_y[0];
+	// trimmed_x = Array.concat(trimmed_x, first_x);
+	// trimmed_y = Array.concat(trimmed_y, first_y);
+	
+	// // makeSelection("freeline", x_selection, y_selection);
+	// // roiManager("Add"); // add line to ROI
+	// makeSelection("freeline", trimmed_x, trimmed_y);
+	// roiManager("Add"); // add line to ROI
+	
+	
+// }
+*/
