@@ -336,13 +336,82 @@ function processAngleArrayFurther(array){
 		print("Sperm tip is at: "+values[0]+"    "+values[1]+" with angle: "+values[2]);
 
 		new_array = shuffleAngleROI(array, min_index);
-		printMultiDimensionalArray(new_array, getLogValue("LFS"));
+		// printMultiDimensionalArray(new_array, getLogValue("LFS"));
 
 		caclulateDerivativeAngles(new_array);
+
+		// find local minima for range of window sizes and export
+		minima_array = detectLocalMinima(new_array);
+		printMultiDimensionalArray(minima_array, getLogValue("LFS"));
 	}
 
-	// now we can plot the angle charts together
 
+}
+
+function detectLocalMinima(array){
+
+	// go through angle array (with tip at start)
+	// look at 1-2-3-4-5 points ahead and behind.
+	// if all greater, local minimum
+	x = AngleROI_to_x(array);
+	y = AngleROI_to_y(array);
+	a = AngleROI_to_angle(array);
+
+	newarray = createMultiDimensionalArray(x.length, 7); // 1-2-3-4-5 points ahead and behind.
+	newarray = populateMultiDimensionalArray(newarray, x, 1);
+	newarray = populateMultiDimensionalArray(newarray, y, 2);
+	newarray = populateMultiDimensionalArray(newarray, a, 3);
+
+	// 4-5-6-7 points ahead and behind
+	for(lookup=4;lookup<=7;lookup++){
+
+		prev_a = newArray(lookup); // slots for previous angles
+		next_a = newArray(lookup); // slots for next angles
+
+		ok_array = newArray(x.length); // array to hold an ok for each position in sperm
+
+		for (i=0; i<x.length; i++) { // for each position in sperm
+
+			// go through each lookup position and get the appropriate angles
+			for(j=0;j<prev_a.length;j++){
+
+
+				prev_i = i-(j+1);
+				next_i = i+(j+1);
+
+				// handle beginning and end of array - wrap around
+				if(prev_i < 0){
+					prev_i = x.length + prev_i;
+				}
+				if(next_i >= x.length){
+					next_i = next_i - x.length;
+				}
+
+				// fill the lookup array
+				prev_a[j] = a[prev_i];
+				next_a[j] = a[next_i];
+			}
+			
+			// with the lookup positions, see if minimum at i
+			// return a 1 if all higher than last, 0 if not
+			// prev_l = 0;
+			ok = 1;
+			for(l=1;l<prev_a.length;l++){
+
+				// not ok if the outer entries are not higher than inner entries
+				if(prev_a[l] < prev_a[l-1] || next_a[l] < next_a[l-1]){
+					ok = 0;
+				}
+			}
+
+			// put oks into array to put into multiarray
+			ok_array[i] = ok;
+
+		}
+		// add ok to correct point in multi array - gives determination of local minimum
+		newarray = populateMultiDimensionalArray(newarray, ok_array, lookup);
+	}
+	return newarray;
 }
 
 function caclulateDerivativeAngles(array){
