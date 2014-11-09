@@ -126,15 +126,17 @@ function initialiseLogging(){
 	logFile = checkLogFilePath(logDir, logFileName, 1);
 	addToLog("LF", logFile);
 
-	angleFileName = logFileName+".angles";
-		
+	angleFileName = logFileName+".angles";	
 	angleFile = checkLogFilePath(logDir, angleFileName, 1);
 	addToLog("LFA", angleFile);
 
 	shuffAngleFileName = logFileName+".shuff.angles";
-
 	shuffAngleFile = checkLogFilePath(logDir, shuffAngleFileName, 1);
 	addToLog("LFS", shuffAngleFile);
+
+	diffAngleFileName = logFileName+".diff.angles";
+	diffAngleFile = checkLogFilePath(logDir, diffAngleFileName, 1);
+	addToLog("LDA", diffAngleFile);
 
 	f = File.open(logFile);
 	return f;
@@ -308,33 +310,90 @@ function findSpermTip(array){
 function processAngleArrayFurther(array){
 
 	// shuffle the ROI to put the sperm tip first
+	x = AngleROI_to_x(array);
+	y = AngleROI_to_y(array);
 
-	// copied from findSpermTip
-	min_angle = 180;
-	min_index = 0;
+	roi = createROI(x, y);
 
-	checkangles = AngleROI_to_angle(array);
-	for (i=0; i<checkangles.length; i++) {
-		
-		if(checkangles[i] < min_angle){
-			min_angle = checkangles[i];
-			min_index = i;
+	for(space=5;space<32;space+=2){
+		array = makeAngles(roi, 1, space); // with smoothing
+	
+
+		// copied from findSpermTip
+		min_angle = 180;
+		min_index = 0;
+
+		checkangles = AngleROI_to_angle(array);
+		for (i=0; i<checkangles.length; i++) {
+			
+			if(checkangles[i] < min_angle){
+				min_angle = checkangles[i];
+				min_index = i;
+			}
 		}
-	}
-	print("Found min index is "+min_index+" at angle "+min_angle);
+		// print("Found min index is "+min_index+" at angle "+min_angle);
+		values = getValuesAtMultiDimensionalArrayIndex(array, min_index);
+		print("Sperm tip is at: "+values[0]+"    "+values[1]+" with angle: "+values[2]);
 
-	new_array = shuffleAngleROI(array, min_index);
-	printMultiDimensionalArray(new_array, getLogValue("LFS"));
+		new_array = shuffleAngleROI(array, min_index);
+		printMultiDimensionalArray(new_array, getLogValue("LFS"));
+
+		caclulateDerivativeAngles(new_array);
+	}
 
 	// now we can plot the angle charts together
+
 }
 
-function makeAngles(roi){
+function caclulateDerivativeAngles(array){
+
+	x = AngleROI_to_x(array);
+	y = AngleROI_to_y(array);
+	a = AngleROI_to_angle(array);
+	diffs = newArray();
+
+	newarray = createMultiDimensionalArray(x.length, 4);
+	
+	prev_a = 0;
+	for (i=0; i<x.length; i++) {
+		if(i==0){
+			a_diff = a[i] - a[x.length-1];
+
+		} else {
+			a_diff = a[i] - prev_a;
+		}
+
+		prev_a = a[i];
+
+		diffs = Array.concat(diffs, a_diff);
+	}
+
+	newarray = populateMultiDimensionalArray(newarray, x, 1);
+	newarray = populateMultiDimensionalArray(newarray, y, 2);
+	newarray = populateMultiDimensionalArray(newarray, a, 3);
+	newarray = populateMultiDimensionalArray(newarray, diffs, 4);
+	printMultiDimensionalArray(newarray, getLogValue("LDA"));
+
+
+}
+
+function makeAngles(roi, smooth, spacing){
 
 	x = ROI_to_x(roi); // should be core function
 	y = ROI_to_y(roi);
 
-	spacing = 25; // magic number. Make function to detect it.
+	if(smooth == 1){
+		// smoothig allows for easier min/max detection
+		makeSelection("freeline", x, y);
+		run("Interpolate", "interval=1 smooth");
+		getSelectionCoordinates(x, y);
+	}
+
+	// consider using distance to CoM to determine curve orientation
+	// increaseing distance = outer curve
+	// decreasing = inner curve
+
+	// spacing = 25; // magic number. Make function to detect it.
 	addToLog("ASP", spacing);
 	midpoint = (spacing+1) /2;
 
@@ -525,7 +584,7 @@ function getAcrosomalCurve(nucleus_roi) {
 
 	// make and export the angles at 25 pixel spacing
 	// around the nucleus
-	angle_array = makeAngles(nucleus_roi);
+	angle_array = makeAngles(nucleus_roi, 0, 25);
 
 	// based on the array of angles, find the sperm tip.
 	// It will have the lowest angle
