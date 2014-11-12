@@ -357,16 +357,17 @@ function detectLocalMinima(array){
 	y = AngleROI_to_y(array);
 	a = AngleROI_to_angle(array);
 
-	newarray = createMultiDimensionalArray(x.length, 7); // 1-2-3-4-5 points ahead and behind.
+	lookups = newArray(4,5,6,7); // 4-5-6-7 points ahead and behind
+
+	newarray = createMultiDimensionalArray(x.length, lookups.length + 3); // x, y, a plus the number of window sizes
 	newarray = populateMultiDimensionalArray(newarray, x, 1);
 	newarray = populateMultiDimensionalArray(newarray, y, 2);
 	newarray = populateMultiDimensionalArray(newarray, a, 3);
+	
+	for(lookup=0;lookup<lookups.length;lookup++){
 
-	// 4-5-6-7 points ahead and behind
-	for(lookup=4;lookup<=7;lookup++){
-
-		prev_a = newArray(lookup); // slots for previous angles
-		next_a = newArray(lookup); // slots for next angles
+		prev_a = newArray(lookups[lookup]); // slots for previous angles
+		next_a = newArray(lookups[lookup]); // slots for next angles
 
 		ok_array = newArray(x.length); // array to hold an ok for each position in sperm
 
@@ -409,7 +410,7 @@ function detectLocalMinima(array){
 
 		}
 		// add ok to correct point in multi array - gives determination of local minimum
-		newarray = populateMultiDimensionalArray(newarray, ok_array, lookup);
+		newarray = populateMultiDimensionalArray(newarray, ok_array, lookup+4);
 	}
 	return newarray;
 }
