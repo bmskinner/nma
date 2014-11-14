@@ -342,11 +342,63 @@ function processAngleArrayFurther(array){
 
 		// find local minima for range of window sizes and export
 		minima_array = detectLocalMinima(new_array);
+
+		// get the minima from the array
+		minima_array = extractMinima(minima_array);
+		// Array.print(minima_array);
+		// rank minimas them by angle
+		minima_array = sortMultiDimensionalArray(minima_array, 3, "asc");
+		Array.print(minima_array);
+
+		// exclude points overlapping head
+		// find closest xy point to the next lowest (remember we have smoothed)
+		data = getValuesAtMultiDimensionalArrayIndex(minima_array, 1);
+		print("Decide low point at "+data[0]+", "+data[1]+" with angle "+data[2]);
+		selectWindow("draw");
+		drawRectangleAtPoint(data, "white");
+		
+
 		printMultiDimensionalArray(minima_array, getLogValue("LFS"));
 	}
 	// TODO: How do we decide which is the best of the window sizes?
 
 }
+
+// takes a minima multi dimensional array
+// return an AngleROI_array
+function extractMinima(array){
+
+	max_dimension = array[1];
+
+	x = readMultiDimensionalArray(array, 1);
+	y = readMultiDimensionalArray(array, 2);
+	a = readMultiDimensionalArray(array, 3);
+	m = readMultiDimensionalArray(array, max_dimension);
+
+	new_x = newArray();	new_y = newArray();	new_a = newArray();
+
+
+	for (i=0; i<x.length; i++) {
+
+		if(m[i] == 1){ // this is a minimm
+			new_x = Array.concat(new_x, x[i]);
+			new_y = Array.concat(new_y, y[i]);
+			new_a = Array.concat(new_a, a[i]);
+
+			if(showDebug){ 
+				selectWindow("draw");
+				point = newArray(x[i], y[i]);
+				drawRectangleAtPoint(point, "yellow");
+			}
+		}
+	}
+
+	result = createAngleROI(new_x, new_y, new_a);
+	return result;
+
+}
+
+
 
 function detectLocalMinima(array){
 
