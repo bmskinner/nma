@@ -307,15 +307,16 @@ function findSpermTip(array){
 	return values;
 }
 
-function processAngleArrayFurther(array){
+function processAngleArrayFurther(roi){
 
 	// shuffle the ROI to put the sperm tip first
-	x = AngleROI_to_x(array);
-	y = AngleROI_to_y(array);
+	// x = ROI_to_x(roi);
+	// y = ROI_to_y(roi);
 
-	roi = createROI(x, y);
+	// roi = createROI(x, y);
 
-	for(space=25;space<26;space+=2){
+	// for(space=23;space<24;space+=2){
+		space = 23;
 		array = makeAngles(roi, 1, space); // with smoothing
 	
 
@@ -333,12 +334,15 @@ function processAngleArrayFurther(array){
 		}
 		// print("Found min index is "+min_index+" at angle "+min_angle);
 		values = getValuesAtMultiDimensionalArrayIndex(array, min_index);
-		print("Sperm tip is at: "+values[0]+"    "+values[1]+" with angle: "+values[2]);
+		print("Low point is at: "+values[0]+", "+values[1]+" with angle: "+values[2]);
+
+		tip_point = findClosestPointOnROI(values, roi);
+		print("Sperm tip is at: "+tip_point[0]+", "+tip_point[1]);
 
 		new_array = shuffleAngleROI(array, min_index);
 		// printMultiDimensionalArray(new_array, getLogValue("LFS"));
 
-		caclulateDerivativeAngles(new_array);
+		// caclulateDerivativeAngles(new_array);
 
 		// find local minima for range of window sizes and export
 		minima_array = detectLocalMinima(new_array);
@@ -353,15 +357,44 @@ function processAngleArrayFurther(array){
 		// exclude points overlapping head
 		// find closest xy point to the next lowest (remember we have smoothed)
 		data = getValuesAtMultiDimensionalArrayIndex(minima_array, 1);
-		print("Decide low point at "+data[0]+", "+data[1]+" with angle "+data[2]);
-		selectWindow("draw");
-		drawRectangleAtPoint(data, "white");
+		print("Low point at "+data[0]+", "+data[1]+" with angle "+data[2]);
+
+		tail_point = findClosestPointOnROI(data, roi);
+		print("Sperm tail is at "+tail_point[0]+", "+tail_point[1]);
+		
+		if(showDebug){
+			selectWindow("draw");
+			drawRectangleAtPoint(tail_point, "white");
+		}
 		
 
-		printMultiDimensionalArray(minima_array, getLogValue("LFS"));
-	}
+		//printMultiDimensionalArray(minima_array, getLogValue("LFS"));
+	// }
 	// TODO: How do we decide which is the best of the window sizes?
+	return tail_point;
+}
 
+function findClosestPointOnROI(point, roi){
+
+	x = ROI_to_x(roi);
+	y = ROI_to_y(roi);
+
+	min_index = 0;
+	min_dist = 100;
+
+	for (i=0; i<x.length; i++) { 
+
+		test_point = newArray(x[i], y[i]);
+		distance = getLength(point, test_point);
+
+		if(distance<min_dist){
+			min_dist = distance;
+			min_index = i;
+		}
+	}
+
+	result = newArray(x[min_index],y[min_index]);
+	return result;
 }
 
 // takes a minima multi dimensional array
@@ -409,7 +442,7 @@ function detectLocalMinima(array){
 	y = AngleROI_to_y(array);
 	a = AngleROI_to_angle(array);
 
-	lookups = newArray(6,7); // 4-5-6-7 points ahead and behind
+	lookups = newArray(5,6); // 4-5-6-7 points ahead and behind
 
 	newarray = createMultiDimensionalArray(x.length, lookups.length + 3); // x, y, a plus the number of window sizes
 	newarray = populateMultiDimensionalArray(newarray, x, 1);
@@ -718,8 +751,9 @@ function getAcrosomalCurve(nucleus_roi) {
 	// based on the array of angles, find the sperm tip.
 	// It will have the lowest angle
 	sperm_tip = findSpermTip(angle_array);
+	sperm_tail = processAngleArrayFurther(nucleus_roi);
 
-	processAngleArrayFurther(angle_array);
+	// processAngleArrayFurther(angle_array);
 
 	// find the feret line of the nucleus
 	feret_line = findFeretsDiameter(nucleus_roi); // gets the positions on the border of the feret line
@@ -753,6 +787,8 @@ function getAcrosomalCurve(nucleus_roi) {
 	// decide which end of the line is at the tip of the sperm
 	// based on distance from CoM to points
 	tail_point = findSpermTailPoint(orth_line, feret_line);
+	// replace old methods here
+	tail_point = sperm_tail;
 
 	// combine the tip point detected by angle with the tail point detected by orth line
 	head_point = newArray(sperm_tip[0],sperm_tip[1]);
