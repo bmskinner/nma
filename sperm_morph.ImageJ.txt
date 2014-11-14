@@ -315,7 +315,7 @@ function processAngleArrayFurther(array){
 
 	roi = createROI(x, y);
 
-	for(space=5;space<32;space+=2){
+	for(space=25;space<26;space+=2){
 		array = makeAngles(roi, 1, space); // with smoothing
 	
 
@@ -344,7 +344,7 @@ function processAngleArrayFurther(array){
 		minima_array = detectLocalMinima(new_array);
 		printMultiDimensionalArray(minima_array, getLogValue("LFS"));
 	}
-
+	// TODO: How do we decide which is the best of the window sizes?
 
 }
 
@@ -357,7 +357,7 @@ function detectLocalMinima(array){
 	y = AngleROI_to_y(array);
 	a = AngleROI_to_angle(array);
 
-	lookups = newArray(4,5,6,7); // 4-5-6-7 points ahead and behind
+	lookups = newArray(6,7); // 4-5-6-7 points ahead and behind
 
 	newarray = createMultiDimensionalArray(x.length, lookups.length + 3); // x, y, a plus the number of window sizes
 	newarray = populateMultiDimensionalArray(newarray, x, 1);
@@ -397,11 +397,18 @@ function detectLocalMinima(array){
 			// return a 1 if all higher than last, 0 if not
 			// prev_l = 0;
 			ok = 1;
-			for(l=1;l<prev_a.length;l++){
+			for(l=0;l<prev_a.length;l++){
 
 				// not ok if the outer entries are not higher than inner entries
-				if(prev_a[l] < prev_a[l-1] || next_a[l] < next_a[l-1]){
-					ok = 0;
+				if(l==0){
+					if(prev_a[l] < a[i] || next_a[l] < a[i]){
+						ok = 0;
+					}
+				} else {
+					
+					if(prev_a[l] < prev_a[l-1] || next_a[l] < next_a[l-1]){
+						ok = 0;
+					}
 				}
 			}
 
