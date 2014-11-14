@@ -227,35 +227,6 @@ function main() {
 	File.close(f);
 }
 
-// function analyseAngles(roi){
-
-	// make and export the angles at 25 pixel spacing
-	// around the nucleus
-	// angle_array = makeAngles(roi);
-
-
-	// based on the array of angles, find the sperm tip.
-	// It will have the lowest angle
-	// sperm_tip = findSpermTip(angle_array);
-
-	// With the sperm tip defined, find the longest diameter
-	// in the nucleus. This leads towards the tail.
-	// TODO Use the original feret line to compare against
-	// sperm_tail = findLongestDiameter(sperm_tip, roi);
-
-
-	// reorder the angle array so that the tip is at the beginning
-	// we can then plot it consitently
-	// need to know the orientation of the sperm head
-
-
-
-	// selectWindow("draw");
-	// drawRectangleAtPoint(sperm_tip,"white");
-	// drawRectangleAtPoint(sperm_tail,"yellow");
-	// drawLineBetweenPoints(sperm_tip, sperm_tail, "yellow");
-
-}
 
 // Given a point and an ROI, find the place on the ROI
 // that is furthest from the point of interest
@@ -307,6 +278,9 @@ function findSpermTip(array){
 	return values;
 }
 
+// Given an ROI, find the tail of the sperm head (second lowest local minimum)
+// Input: roi - ROI array
+// Returns: point  [array (x,y)]
 function processAngleArrayFurther(roi){
 
 	// shuffle the ROI to put the sperm tip first
@@ -346,11 +320,12 @@ function processAngleArrayFurther(roi){
 
 		// find local minima for range of window sizes and export
 		minima_array = detectLocalMinima(new_array);
+		// printMultiDimensionalArray(minima_array, getLogValue("LFS"));
 
 		// get the minima from the array
 		minima_array = extractMinima(minima_array);
 		// Array.print(minima_array);
-		// rank minimas them by angle
+		// rank minimas by angle
 		minima_array = sortMultiDimensionalArray(minima_array, 3, "asc");
 		Array.print(minima_array);
 
@@ -367,13 +342,17 @@ function processAngleArrayFurther(roi){
 			drawRectangleAtPoint(tail_point, "white");
 		}
 		
-
-		//printMultiDimensionalArray(minima_array, getLogValue("LFS"));
 	// }
 	// TODO: How do we decide which is the best of the window sizes?
 	return tail_point;
 }
 
+// Given an ROI array with integers, and a floating point single point,
+// find the position in the ROI that is closest. Use to convert points found in smoothed
+// ROIs back to unsmoothed ROI coordinates
+// Input: point  - array (x,y)
+// 		  roi 	 - ROI array
+// Returns: point [array (x,y)]
 function findClosestPointOnROI(point, roi){
 
 	x = ROI_to_x(roi);
@@ -397,8 +376,10 @@ function findClosestPointOnROI(point, roi){
 	return result;
 }
 
-// takes a minima multi dimensional array
-// return an AngleROI_array
+// Extract points declared as local minima from a multicolumn array
+// and return the points as an AngleROI
+// Input: multi dimensional array with minima in final column
+// Returns: AngleROI_array
 function extractMinima(array){
 
 	max_dimension = array[1];
@@ -428,11 +409,11 @@ function extractMinima(array){
 
 	result = createAngleROI(new_x, new_y, new_a);
 	return result;
-
 }
 
-
-
+// Given an AngleROI array, find points with local minima
+// Input: AngleROI_array
+// Returns:  Multi dimensional array (AngleROI plus minima boolean in final column)
 function detectLocalMinima(array){
 
 	// go through angle array (with tip at start)
@@ -507,37 +488,37 @@ function detectLocalMinima(array){
 	return newarray;
 }
 
-function caclulateDerivativeAngles(array){
+// function caclulateDerivativeAngles(array){
 
-	x = AngleROI_to_x(array);
-	y = AngleROI_to_y(array);
-	a = AngleROI_to_angle(array);
-	diffs = newArray();
+// 	x = AngleROI_to_x(array);
+// 	y = AngleROI_to_y(array);
+// 	a = AngleROI_to_angle(array);
+// 	diffs = newArray();
 
-	newarray = createMultiDimensionalArray(x.length, 4);
+// 	newarray = createMultiDimensionalArray(x.length, 4);
 	
-	prev_a = 0;
-	for (i=0; i<x.length; i++) {
-		if(i==0){
-			a_diff = a[i] - a[x.length-1];
+// 	prev_a = 0;
+// 	for (i=0; i<x.length; i++) {
+// 		if(i==0){
+// 			a_diff = a[i] - a[x.length-1];
 
-		} else {
-			a_diff = a[i] - prev_a;
-		}
+// 		} else {
+// 			a_diff = a[i] - prev_a;
+// 		}
 
-		prev_a = a[i];
+// 		prev_a = a[i];
 
-		diffs = Array.concat(diffs, a_diff);
-	}
+// 		diffs = Array.concat(diffs, a_diff);
+// 	}
 
-	newarray = populateMultiDimensionalArray(newarray, x, 1);
-	newarray = populateMultiDimensionalArray(newarray, y, 2);
-	newarray = populateMultiDimensionalArray(newarray, a, 3);
-	newarray = populateMultiDimensionalArray(newarray, diffs, 4);
-	printMultiDimensionalArray(newarray, getLogValue("LDA"));
+// 	newarray = populateMultiDimensionalArray(newarray, x, 1);
+// 	newarray = populateMultiDimensionalArray(newarray, y, 2);
+// 	newarray = populateMultiDimensionalArray(newarray, a, 3);
+// 	newarray = populateMultiDimensionalArray(newarray, diffs, 4);
+// 	printMultiDimensionalArray(newarray, getLogValue("LDA"));
 
+// }
 
-}
 
 function makeAngles(roi, smooth, spacing){
 
@@ -756,37 +737,37 @@ function getAcrosomalCurve(nucleus_roi) {
 	// processAngleArrayFurther(angle_array);
 
 	// find the feret line of the nucleus
-	feret_line = findFeretsDiameter(nucleus_roi); // gets the positions on the border of the feret line
-	if(showDebug) {
-		// selectWindow("draw");
-		// point1 = newArray(feret_line[0], feret_line[1]);
-		// point2 = newArray(feret_line[2], feret_line[3]);
-		// drawLineBetweenPoints(point1, point2, "yellow");
-		print("Drew Feret line");
-		// waitForUser("Feret drawn");
-	}
+	// feret_line = findFeretsDiameter(nucleus_roi); // gets the positions on the border of the feret line
+	// if(showDebug) {
+	// 	// selectWindow("draw");
+	// 	// point1 = newArray(feret_line[0], feret_line[1]);
+	// 	// point2 = newArray(feret_line[2], feret_line[3]);
+	// 	// drawLineBetweenPoints(point1, point2, "yellow");
+	// 	print("Drew Feret line");
+	// 	// waitForUser("Feret drawn");
+	// }
 
-	// find the max diameter line from the sperm tip (not always feret line)
-	max_point = findLongestDiameter(sperm_tip, nucleus_roi);
-	max_line = Array.concat(sperm_tip, max_point);
+	// // find the max diameter line from the sperm tip (not always feret line)
+	// max_point = findLongestDiameter(sperm_tip, nucleus_roi);
+	// max_line = Array.concat(sperm_tip, max_point);
 
-	if(showDebug) {
-		print("Max point: "+max_point[0]+"   "+max_point[1]);
-		// selectWindow("draw");
-		// drawLineBetweenPoints(sperm_tip, max_point, "white");
-	}
+	// if(showDebug) {
+	// 	print("Max point: "+max_point[0]+"   "+max_point[1]);
+	// 	// selectWindow("draw");
+	// 	// drawLineBetweenPoints(sperm_tip, max_point, "white");
+	// }
 		
-	// get the orthogonal-to-feret line through centre of mass
-	orth_line = findOrthogonalToFeretLine(nucleus_centre, feret_line);
-	// orth_line = findOrthogonalToFeretLine(nucleus_centre, max_line);
-	if(showDebug) {
-		print("Orth line: "+orth_line[0]+"   "+orth_line[1]+" to "+orth_line[2]+"   "+orth_line[3]);
-	}
+	// // get the orthogonal-to-feret line through centre of mass
+	// orth_line = findOrthogonalToFeretLine(nucleus_centre, feret_line);
+	// // orth_line = findOrthogonalToFeretLine(nucleus_centre, max_line);
+	// if(showDebug) {
+	// 	print("Orth line: "+orth_line[0]+"   "+orth_line[1]+" to "+orth_line[2]+"   "+orth_line[3]);
+	// }
 
 	
-	// decide which end of the line is at the tip of the sperm
-	// based on distance from CoM to points
-	tail_point = findSpermTailPoint(orth_line, feret_line);
+	// // decide which end of the line is at the tip of the sperm
+	// // based on distance from CoM to points
+	// tail_point = findSpermTailPoint(orth_line, feret_line);
 	// replace old methods here
 	tail_point = sperm_tail;
 
