@@ -538,3 +538,44 @@ function getValuesAtMultiDimensionalArrayIndex(multiarray, index){
 	}
 	return result;
 }
+
+// sort on a given column
+// type = asc or desc
+function sortMultiDimensionalArray(multiarray, dimension, type){
+
+	length = multiarray[0];
+	dimensions = multiarray[1];
+
+	result = createMultiDimensionalArray(length, dimensions);
+	if(showDebug){ print("Reading sort column:"+dimension); }
+
+	sort_column = readMultiDimensionalArray(multiarray, dimension);
+	if(showDebug){ print("Read sort column"); }
+	sort_order = Array.rankPositions(sort_column);
+
+	if(type == "desc"){
+		sort_order = Array.reverse(sort_order);
+	}
+	
+	if(showDebug){ Array.print(sort_order); }
+
+	for(j=1;j<=dimensions;j++){
+
+		old_array = readMultiDimensionalArray(multiarray, j);
+		new_array = newArray(length);
+
+		for(i=0;i<length;i++){
+
+			index = sort_order[i];
+			new_array[i] = old_array[index];
+	
+		}
+		if(showDebug){ 
+			print("Column "+j); Array.print(new_array);
+		}
+		result = populateMultiDimensionalArray(result, new_array, j);
+	}
+
+	return result;
+
+}
