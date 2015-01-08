@@ -156,6 +156,13 @@ function main() {
 	// find the nuclear ROI at the given location
 	nucleus_roi = findNuclearROI(location_on_image);
 	
+	if(showDebug) { 
+		print("# ------------------");
+		print("# BEGIN DEBUG LOG");
+		print("# ------------------");
+		print("Found nucleus ROI");
+	}
+	
 	// carry out angle based analysis as alternative to feret line approach
 	// for finding the features of interest in the sperm
 	// analyseAngles(nucleus_roi);
@@ -207,9 +214,11 @@ function main() {
 	doCurveFit(complete_roi);
 	doRawCurveFit(raw_roi);
 	
-	if(showDebug) { print("# ------------------");}
-	if(showDebug) { print("# END DEBUG LOG"); }
-	if(showDebug) { print("# ------------------"); }
+	if(showDebug) { 
+		print("# ------------------");
+		print("# END DEBUG LOG");
+		print("# ------------------"); 
+	}
 	
 	printLog(f);
 	
@@ -708,14 +717,16 @@ function findNuclearROI(location) {
 		
 	drawROI(nucleus_roi, "freeline");
 	
-	if(showDebug) { print("# ------------------");}
-	if(showDebug) { print("# BEGIN DEBUG LOG");}
-	if(showDebug) { print("# ------------------");}
-	if(showDebug) { print("Found nucleus ROI");}
-
 	return nucleus_roi;
 }
 
+// Given a nucleus ROI, find the centre of mass
+// Create an angle array for minima detection
+// Run the tip and tail detection, draw lines
+// Split the ROI and get the hump side
+// Return 70% of the hump side beginning at the tip
+// Input: ROI
+// Returns: ROI
 function getAcrosomalCurve(nucleus_roi) {
 
 	// finds the axes head-tail and hook-hump
@@ -726,7 +737,8 @@ function getAcrosomalCurve(nucleus_roi) {
 	if(showDebug) { print("Nucleus CoM: "+nucleus_centre[0]+"    "+nucleus_centre[1]);}
 
 	// make and export the angles at 25 pixel spacing
-	// around the nucleus
+	// around the nucleus. Do not smooth the line; we 
+	// need to keep the original xy coordinates
 	angle_array = makeAngles(nucleus_roi, 0, 25);
 
 	// based on the array of angles, find the sperm tip.
@@ -734,42 +746,7 @@ function getAcrosomalCurve(nucleus_roi) {
 	sperm_tip = findSpermTip(angle_array);
 	sperm_tail = processAngleArrayFurther(nucleus_roi);
 
-	// processAngleArrayFurther(angle_array);
-
-	// find the feret line of the nucleus
-	// feret_line = findFeretsDiameter(nucleus_roi); // gets the positions on the border of the feret line
-	// if(showDebug) {
-	// 	// selectWindow("draw");
-	// 	// point1 = newArray(feret_line[0], feret_line[1]);
-	// 	// point2 = newArray(feret_line[2], feret_line[3]);
-	// 	// drawLineBetweenPoints(point1, point2, "yellow");
-	// 	print("Drew Feret line");
-	// 	// waitForUser("Feret drawn");
-	// }
-
-	// // find the max diameter line from the sperm tip (not always feret line)
-	// max_point = findLongestDiameter(sperm_tip, nucleus_roi);
-	// max_line = Array.concat(sperm_tip, max_point);
-
-	// if(showDebug) {
-	// 	print("Max point: "+max_point[0]+"   "+max_point[1]);
-	// 	// selectWindow("draw");
-	// 	// drawLineBetweenPoints(sperm_tip, max_point, "white");
-	// }
-		
-	// // get the orthogonal-to-feret line through centre of mass
-	// orth_line = findOrthogonalToFeretLine(nucleus_centre, feret_line);
-	// // orth_line = findOrthogonalToFeretLine(nucleus_centre, max_line);
-	// if(showDebug) {
-	// 	print("Orth line: "+orth_line[0]+"   "+orth_line[1]+" to "+orth_line[2]+"   "+orth_line[3]);
-	// }
-
-	
-	// // decide which end of the line is at the tip of the sperm
-	// // based on distance from CoM to points
-	// tail_point = findSpermTailPoint(orth_line, feret_line);
-	// replace old methods here
-	tail_point = sperm_tail;
+	tail_point = sperm_tail; // because the variable was transitioned from feret approach to angle approach
 
 	// combine the tip point detected by angle with the tail point detected by orth line
 	head_point = newArray(sperm_tip[0],sperm_tip[1]);
@@ -782,12 +759,7 @@ function getAcrosomalCurve(nucleus_roi) {
 	
 	// splits the nucleus roi in two along the feret line and returns hump roi coordinates
 	hump_roi = splitROIs(improved_feret_line, nucleus_roi); 
-	// hump_roi = splitROIs(feret_line, nucleus_roi); // splits the nucleus roi in two along the feret line and returns hump roi coordinates
-	// if(showDebug){
-	// 	printROI(hump_roi);
-	// 	print("Completed split");
-	// }
-	// writeROI(hump_roi);
+	
 	selectWindow("draw");
 	
 	drawROI(hump_roi, "freeline");
@@ -801,11 +773,7 @@ function getAcrosomalCurve(nucleus_roi) {
 		// printROI(hump_roi);
 	}
 	
-	
-	// trim the roi
-	// need to determine which end is the tip
-	// ordered_roi = checkOrientation(ordered_roi, head_point);
-	// ordered_roi = checkOrientation(ordered_roi, head_point);
+	// determine which end is the tip
 	ordered_roi = checkOrientation(ordered_roi, sperm_tip);
 	if(showDebug) { print("ROI ordered");}
 	
@@ -826,9 +794,10 @@ function getAcrosomalCurve(nucleus_roi) {
 	return trimmed_roi;
 }
 
+// Measure from the crossing point of orth and feret lines to the ends of the feret line.
+// Decide which is smaller - assume that is the tail side
 function findSpermTailPoint(orth_line, feret_line){
-	// measure from the crossing point of orth and feret lines to the ends of the feret line;
-	// decide which is smaller - assume that is the tail side
+
 	orth_crossing = newArray(orth_line[4], orth_line[5]);
 	feret1 = newArray(feret_line[0], feret_line[1]);
 	feret2 = newArray(feret_line[2], feret_line[3]);
@@ -848,6 +817,10 @@ function findSpermTailPoint(orth_line, feret_line){
 	return tail_point;
 }
 
+// Determine which end of a curve roi is at the sperm tip.
+// Reorder the ROI array as needed to begin with the given point
+// Input: ROI, point
+// Returns: ROI
 function checkOrientation(roi, head_point){
 
 	x_points = ROI_to_x(roi);
@@ -872,6 +845,9 @@ function checkOrientation(roi, head_point){
 	return new_roi;
 }
 
+// Find the centre of mass and area of an ROI in the blue channel
+// Input: ROI
+// Returns: array (x,y, area)
 function findNucleusCentreOfMass(roi) {
 	// returns x,y, area
 	selectImage("working (blue)");
@@ -941,6 +917,10 @@ function findFeretsDiameter(roi) {
 	return result;
 }
 
+// split an roi in two along a given intersecting line 
+// return the roi with the larger area
+// Inputs: line, roi
+// Returns: roi
 function splitROIs(line, roi) {
 
 	// splits the nucleus roi in two along a given line 
@@ -1192,7 +1172,7 @@ function writeDualROI(roi1, roi2, file){
 	}
 }
 
-*/
+// */
 // -------------------------------------------------
 // MACROS
 // -------------------------------------------------
