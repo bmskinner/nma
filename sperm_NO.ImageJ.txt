@@ -7,7 +7,7 @@ Copyright (C) Ben Skinner 2014
 These macros allow for automated detection of FISH
 signals in a mouse sperm nucleus, and measurement of
 the signal position relative to the nuclear centre of
-mass and sperm tip
+mass and sperm tip. Works with both red and green channels
 
 -------------------------------------------------
 SPERM CARTOGRAPHY: DISTANCE
@@ -205,10 +205,9 @@ function analyseSignalInNucleus(id) {
 			channelID = greenID;
 			logFile = logFileGreen;
 		}
-		// logToUse = File.open(logFile);	
+
 		write("Analysing channel "+channel);
 
-		// signal_centre = findSignalCentreOfMass(redID, nucleus_roi);
 		signal_centre = findSignalCentreOfMass(channelID, nucleus_roi);
 		if(signal_centre.length < 2){
 			close("working ("+channel+")");
@@ -308,7 +307,6 @@ function analyseSignalInNucleus(id) {
 			
 		// get profile on red unthresholded signal
 		// along line from nucleus CoM to the border through the signal CoM
-		// signalProfile = generateSignalProfile(redID, border_coords, nucleus_centre);
 		signalProfile = generateSignalProfile(channelID, border_coords, nucleus_centre);
 		
 		// get profile for unthresholded DAPI
@@ -359,27 +357,19 @@ function analyseSignalInNucleus(id) {
 		addToLog("SA", signal_angle);
 		addToLog("DR", proportionDAPI);
 		addToLog("DS", positionDAPI);
-		// printLog(f);
-		// printLog(logToUse);
-		// printLog(logFile);
+
 		File.append("~ ------------------\r", logFile);
 		for(j=0;j<logFields.length;j++){
 			File.append(logFields[j]+"~"+logValues[j]+"\r", logFile);
 		}
 		
 		// print out the profiles
-		// print(f, "# signal_position\tsignal_intensity\tdapi\tcumulative_signal\tcumulative_dapi");
-		// print(logToUse, "# signal_position\tsignal_intensity\tdapi\tcumulative_signal\tcumulative_dapi");
 		File.append("# signal_position\tsignal_intensity\tdapi\tcumulative_signal\tcumulative_dapi\r",logFile);
 		for (i=0; i<signalProfile.length; i++){		
-			// print(f, positionArray[i]+"\t"+signalProfile[i]+"\t"+dapiProfile[i]+"\t"+cumulativeSignalArray[i]+"\t"+cumulativeDAPIArray[i]);
-			// print(logToUse, positionArray[i]+"\t"+signalProfile[i]+"\t"+dapiProfile[i]+"\t"+cumulativeSignalArray[i]+"\t"+cumulativeDAPIArray[i]);
 			File.append(positionArray[i]+"\t"+signalProfile[i]+"\t"+dapiProfile[i]+"\t"+cumulativeSignalArray[i]+"\t"+cumulativeDAPIArray[i]+"\r", logFile)
 		}
-		// print(f, "# END OF FILE");
-		// print(logToUse, "# END OF FILE");
+
 		File.append("# END OF FILE\r", logFile);
-		// File.close(logToUse);
 		emptyLog();
 		close("working ("+channel+")");
 		run("Clear Results");
@@ -698,10 +688,7 @@ function findSignalCentreOfMass(id, roi) {
 	selectImage("temp");
 	setThreshold(kSignalThresholdLevel, 255);
 	roiManager("open", roi);
-	// selectImage("temp");
-	// roiManager("select", 0);
-	// roiManager("select", roi); // select the nucleus outline
-	// waitForUser("selecting nucleus");
+
 	run("Convert to Mask"); //for accurate outline detection
 	roiManager("open", roi);
 	run("Set Measurements...", "area center centroid redirect=["+imageName+"]");
@@ -726,20 +713,15 @@ function findSignalCentreOfMass(id, roi) {
 function analyseFromDirectory(dir) {
 	resetLog();
 	
-	// logFile = dir + "//" + "log.txt";
 	logFileRed = dir + "log.red.txt";
 	logFileGreen = dir + "log.green.txt";
-	// if(File.exists(logFile)){
-	// 	File.delete(logFile);
-	// }
+
 	if(File.exists(logFileRed)){
 		File.delete(logFileRed);
 	}
 	if(File.exists(logFileGreen)){
 		File.delete(logFileGreen);
 	}
-	// var f = File.open(logFile);
-	
 	
 	list = getFileList(dir);
 	count = 1;
@@ -860,6 +842,12 @@ function getY(eq, x){
 	return y;
 }
 
+// Find the start and stop positions of a line
+// with a given equation that fit within the canvas
+// Inputs: eq - line equation as array(m,c)
+//			w - width of canvas
+//			h - height of canvas
+// Returns: array of points (x1, y1, x2, y2)
 function getLineCoordinates(eq, w, h){
 	
 	// the start and end points of the line may be offscreen for given x coordinates
@@ -945,40 +933,16 @@ function getCoordinatesFromDistance(line, dist, eq){
 		
 	theta = atan(a/b);
 	c = a / sin(theta);
-	
-	// write("Length of a: "+a);	
-	// write("Length of b: "+b);	
-	// write("Length of c: "+c);
-	
+		
 	proportion = dist / c;
 	// write(dist+" proportion of hypotenuse: "+proportion);
 	
-	// if(x1 < x2){
-		x = (a * proportion) + x1;
-		// y = (b * proportion) + y1;
-	// } else {
-		// x = (a * proportion) + x2;
-		// y = (b * proportion) + y2;
-	// }
+
+	x = (a * proportion) + x1;
 	y = getY(eq, x);
-	
-	// write("Expecting coordinates of "+dist+" are "+x+","+y);
-	
+		
 	result=newArray(x, y);
 	return result;
-}
-
-function printLog(file){
-	
-	// print(file, "~ ------------------");
-	File.append("~ ------------------", logFile);
-		
-	// print(file, "# LOGGED PARAMETERS");
-	// print(file, "# ------------------");
-	for(i=0;i<logFields.length;i++){
-		// print(file, logFields[i]+"~"+logValues[i]);
-		File.append(logFields[i]+"~"+logValues[i]+"\r", logFile);
-	}
 }
 
 function emptyLog(){
@@ -1003,24 +967,30 @@ macro "findCentreOfMass"
 	analyseSignalInNucleus();
 	restoreSettings();
 }
-// macro "analyseAllNucleiInImage"
-// {
-// 	requires("1.47");
-// 	saveSettings();
-// 	run("Colors...", "background=black"); //set background colour to black
-// 	resetLog();
-// 	imageID = getImageID();
-// 	name=getTitle;
-// 	dir = getInfo("image.directory");
-// 	logFile = dir + "//" + name + ".txt";
-// 	if(File.exists(logFile)){
-// 		File.delete(logFile);
-// 	}
-// 	var f = File.open(logFile);
+
+macro "analyseAllNucleiInImage"
+{
+	requires("1.47");
+	saveSettings();
+	run("Colors...", "background=black"); //set background colour to black
+	resetLog();
+	imageID = getImageID();
+	name=getTitle;
+	dir = getInfo("image.directory");
 	
-// 	findNucleiInImage();
-// 	restoreSettings();
-// }
+	logFileRed = dir+"//"+name+".log.red.txt";
+	logFileGreen = dir+"//"+name+".log.green.txt";
+
+	if(File.exists(logFileRed)){
+		File.delete(logFileRed);
+	}
+	if(File.exists(logFileGreen)){
+		File.delete(logFileGreen);
+	}
+	
+	findNucleiInImage();
+	restoreSettings();
+}
 macro "analyseFromDirectory"
 {
 	requires("1.47");
