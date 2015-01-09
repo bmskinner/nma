@@ -60,19 +60,20 @@ var signalMax = 1000;
 // (based on mouse sperm)
 var nucleusMin = 400; 
 var nucleusMax = 3000;
-var logFile = "";
+// var logFile = "";
 
 // the array of information to log in the log file header
 var logFields = newArray();
 var logValues = newArray();
 
 var showDebug = false; // show debugging info
+var channels = newArray("green", "red");
 
 function findNucleiInImage(){
-	/*
-	For the input image, identify the nuclei
-	and add them to the ROI manager
-	*/
+	
+	//For the input image, identify the nuclei
+	//and add them to the ROI manager
+	
 	setBatchMode(false);
 	name=getTitle; 
 	name = replace(name, ".tiff","");
@@ -95,12 +96,12 @@ function findNucleiInImage(){
 	run("ROI Manager...");
 	roiManager("reset");
 	
-//remove un-needed windows (green and red signals can be detected later)
+	//remove un-needed windows (green and red signals can be detected later)
 	close("main (red)");
 	close("main (green)");
 	close(name);
 
-// make the binary mask from the blue channel
+	// make the binary mask from the blue channel
 	selectWindow("main (blue)");
 	setThreshold(kNucleusThresholdLevel, 255);
 	run("Convert to Mask"); //keeps title the same
@@ -172,12 +173,15 @@ function analyseSignalInNucleus(id) {
 	selectWindow("working (red)");
 	redID = getImageID();
 
+	selectWindow("working (green)");
+	greenID = getImageID();
+
 	selectWindow("working (blue)");
 	blueID = getImageID();
 	run("Duplicate...", "title=spare_blue");
 
 	//remove un-needed windows
-	close("working (green)");
+	// close("working (green)");
 	
 	// find the centre of the nucleus
 	nucleus_centre = findNucleusCentreOfMass(blueID);
@@ -190,168 +194,198 @@ function analyseSignalInNucleus(id) {
 	nucleus_roi = nucleus_centre[3];
 	roiManager("reset");
 	 
+	// insert loop for signals
+	for (i = 0; i < channels.length; i++) {
+		channel = channels[i];
 
-	signal_centre = findSignalCentreOfMass(redID, nucleus_roi);
-	if(signal_centre.length < 2){
-		close("working*");
-		close("spare*");
-		write("No signals found");
-		return;
-	}
+		if(channel == "red"){
+			channelID = redID;
+			logFile = logFileRed;
+		} else {
+			channelID = greenID;
+			logFile = logFileGreen;
+		}
+		// logToUse = File.open(logFile);	
+		write("Analysing channel "+channel);
 
-	signal_roi = signal_centre[3];
-	roiManager("reset");
-	
-	line_equation = calculateLineEquation(nucleus_centre, signal_centre);
-	
-	selectImage(blueID);
-	image_width = getWidth();
-	image_height = getHeight();
-	
-	// calculate the start and end points of the line extended to image edges
-	line = getLineCoordinates(line_equation, image_width, image_height);
-	setThreshold(kNucleusThresholdLevel, 255);
-	makeLine(line[0], line[1], line[2], line[3]);
-	
-	// Using the line through the centres of mass, find the nuclear boundaries
-	// by looking for dropoff in signal intensity on the binary mask
-	borders = findBordersFromProfile(blueID);
-	
-	updateResults;
-	
-	// find the coordinates of borders
-	border1_coords = getCoordinatesFromDistance(line, borders[0], line_equation);
-	border2_coords = getCoordinatesFromDistance(line, borders[1], line_equation);
-	
-	// draw a line between the borders
-	makeLine(border1_coords[0], border1_coords[1], border2_coords[0], border2_coords[1]);
-	
-	// choose the nearest border
-	signal_1 = getLength(border1_coords, signal_centre);
-	signal_2 = getLength(border2_coords, signal_centre);
-	
-	if(signal_1 >= signal_2){
-		signal_to_border = signal_2;
-		CoM_to_border = getLength(border2_coords, nucleus_centre);
-		border_coords = border2_coords;
-	} else {
-		signal_to_border = signal_1;
-		CoM_to_border = getLength(border1_coords, nucleus_centre);
-		border_coords = border1_coords;
-	}
-	
-	// find the feret line of the nucleus
-	feret_line = findFeretsDiameter(nucleus_roi); 
-	// get the positions on the border of the feret line
-	feret1 = newArray(feret_line[0], feret_line[1]);
-	feret2 = newArray(feret_line[2], feret_line[3]);
-	
-	roi_array = splitROIs(feret_line, nucleus_roi); // splits the nucleus roi in two along the feret line and returns area and centroid of each (area, x, y, area, x, y)
+		// signal_centre = findSignalCentreOfMass(redID, nucleus_roi);
+		signal_centre = findSignalCentreOfMass(channelID, nucleus_roi);
+		if(signal_centre.length < 2){
+			close("working ("+channel+")");
+			write("No signals found in channel "+channel);
+			// File.close(logToUse);	
+			continue;
+		}
 
-	// get the orthogonal-to-feret line
-	roiManager("open", nucleus_roi);	
-	orth_line = findOrthogonalToFeretLine(nucleus_centre, feret_line);
-	
-	// measure from the crossing point of orth and feret lines to the ends of the feret line;
-	// decide which is smaller - assume that is the tail side
-	orth_crossing = newArray(orth_line[4], orth_line[5]);
-	
-	feret1_dist = getLength(orth_crossing, feret1);
-	feret2_dist = getLength(orth_crossing, feret2);
-	// write("Found feret1: "+feret1_dist);
-	// write("Found feret2: "+feret2_dist);
-	if(feret1_dist >= feret2_dist){
-		head_point = feret1;
-		tail_point = feret2;
-	} else {
-		head_point = feret2;
-		tail_point = feret1;
-	}
-	// write("Decided head is at : "+head_point[0]+","+head_point[1]);
-	// write("Decided tail is at : "+tail_point[0]+","+tail_point[1]);
-	
-	// look at area each side of feret line
-	// decide which side is hump and which side is hook
-	// smaller is hook side
-	area1 = roi_array[0];
-	area2 = roi_array[3];
-	
-	roiManager("open", roi_array[6]);
-	if(area1 >= area2){
-		orth_point = newArray(orth_line[2],orth_line[3]);
-		hook_roi = 1;
-	} else {
-		orth_point = newArray(orth_line[0],orth_line[1]);
-		hook_roi = 0;
-	}
-
-	// decide if the signal CoM is in the hook side or hump side
-	signal_angle = getSignalAngle(head_point, nucleus_centre, signal_centre, hook_roi);
+		signal_roi = signal_centre[3];
+		roiManager("reset");
 		
-	// get profile on red unthresholded signal
-	// along line from nucleus CoM to the border through the signal CoM
-	signalProfile = generateSignalProfile(redID, border_coords, nucleus_centre);
-	
-	// get profile for unthresholded DAPI
-	dapiProfile = generateSignalProfile("spare_blue", border_coords, nucleus_centre);
-	
-	// draw out what has been plotted
-	roiManager("reset");
-	
-	// select the original rgb image to annotate
-	selectImage(id);
-	drawLineBetweenPoints(head_point, orth_crossing, "#7D26CD"); // draw feret line
-	drawLineBetweenPoints(orth_point, orth_crossing, "#7D26CD"); // draw orth line
-	drawRectangleAtPoint(head_point, "#7D26CD"); // draw sperm head
-	drawLineBetweenPoints(border_coords, nucleus_centre, "yellow"); // line across nucleus
-	drawRectangleAtPoint(border_coords, "yellow"); // point at border near signal
-	drawRectangleAtPoint(signal_centre, "white"); // signal centre of mass
-	drawRectangleAtPoint(nucleus_centre, "white"); // nucleus centre of mass
-	saveAs("tiff", path+"\\"+nucleus_number+".line.tiff"); // export
-	
-	// express the distance as a proportion from the nuclear centre of mass
-	signal_to_com = signal_to_border / CoM_to_border;
-	write("Proportion of distance: "+signal_to_com);
+		line_equation = calculateLineEquation(nucleus_centre, signal_centre);
 		
-	totalSignal = getTotalSignal(signalProfile);
-	totalDAPI   = getTotalSignal( dapiProfile );
-	
-	cumulativeSignalArray = getCumulativeSignal(signalProfile);
-	cumulativeDAPIArray   = getCumulativeSignal(dapiProfile  );
-	
-	// find the position with half the signal either side
-	medianSignalPoint = findMedianSignalPoint(signalProfile, cumulativeSignalArray);
-	
-	// determine the proportion of DAPI peripheral to the median signal point
-	outerDAPI = cumulativeDAPIArray[medianSignalPoint];
-	proportionDAPI = outerDAPI / totalDAPI;
-	
-	// find the positions along the array
-	positionArray = getProportionalArray(signalProfile, CoM_to_border);
+		selectImage(blueID);
+		image_width = getWidth();
+		image_height = getHeight();
+		
+		// calculate the start and end points of the line extended to image edges
+		line = getLineCoordinates(line_equation, image_width, image_height);
+		setThreshold(kNucleusThresholdLevel, 255);
+		makeLine(line[0], line[1], line[2], line[3]);
+		
+		// Using the line through the centres of mass, find the nuclear boundaries
+		// by looking for dropoff in signal intensity on the binary mask
+		borders = findBordersFromProfile(blueID);
+		
+		updateResults;
+		
+		// find the coordinates of borders
+		border1_coords = getCoordinatesFromDistance(line, borders[0], line_equation);
+		border2_coords = getCoordinatesFromDistance(line, borders[1], line_equation);
+		
+		// draw a line between the borders
+		makeLine(border1_coords[0], border1_coords[1], border2_coords[0], border2_coords[1]);
+		
+		// choose the nearest border
+		signal_1 = getLength(border1_coords, signal_centre);
+		signal_2 = getLength(border2_coords, signal_centre);
+		
+		if(signal_1 >= signal_2){
+			signal_to_border = signal_2;
+			CoM_to_border = getLength(border2_coords, nucleus_centre);
+			border_coords = border2_coords;
+		} else {
+			signal_to_border = signal_1;
+			CoM_to_border = getLength(border1_coords, nucleus_centre);
+			border_coords = border1_coords;
+		}
+		
+		// find the feret line of the nucleus
+		feret_line = findFeretsDiameter(nucleus_roi); 
+		// get the positions on the border of the feret line
+		feret1 = newArray(feret_line[0], feret_line[1]);
+		feret2 = newArray(feret_line[2], feret_line[3]);
+		
+		roi_array = splitROIs(feret_line, nucleus_roi); // splits the nucleus roi in two along the feret line and returns area and centroid of each (area, x, y, area, x, y)
 
-	positionDAPI = positionArray[medianSignalPoint];
-	
-	// assemble and print the header fields
-	addToLog("ID", path);
-	addToLog("NN", nucleus_number);
-	addToLog("SP", signal_to_com);
-	addToLog("SR", signal_centre[2]);
-	addToLog("NA", nucleus_centre[2]);
-	addToLog("SA", signal_angle);
-	addToLog("DR", proportionDAPI);
-	addToLog("DS", positionDAPI);
-	printLog(f);
-	
-	// print out the profiles
-	print(f, "# signal_position\tsignal_intensity\tdapi\tcumulative_signal\tcumulative_dapi");
-	for (i=0; i<signalProfile.length; i++){		
-		print(f, positionArray[i]+"\t"+signalProfile[i]+"\t"+dapiProfile[i]+"\t"+cumulativeSignalArray[i]+"\t"+cumulativeDAPIArray[i]);
+		// get the orthogonal-to-feret line
+		roiManager("open", nucleus_roi);	
+		orth_line = findOrthogonalToFeretLine(nucleus_centre, feret_line);
+		
+		// measure from the crossing point of orth and feret lines to the ends of the feret line;
+		// decide which is smaller - assume that is the tail side
+		orth_crossing = newArray(orth_line[4], orth_line[5]);
+		
+		feret1_dist = getLength(orth_crossing, feret1);
+		feret2_dist = getLength(orth_crossing, feret2);
+		// write("Found feret1: "+feret1_dist);
+		// write("Found feret2: "+feret2_dist);
+		if(feret1_dist >= feret2_dist){
+			head_point = feret1;
+			tail_point = feret2;
+		} else {
+			head_point = feret2;
+			tail_point = feret1;
+		}
+		// write("Decided head is at : "+head_point[0]+","+head_point[1]);
+		// write("Decided tail is at : "+tail_point[0]+","+tail_point[1]);
+		
+		// look at area each side of feret line
+		// decide which side is hump and which side is hook
+		// smaller is hook side
+		area1 = roi_array[0];
+		area2 = roi_array[3];
+		
+		roiManager("open", roi_array[6]);
+		if(area1 >= area2){
+			orth_point = newArray(orth_line[2],orth_line[3]);
+			hook_roi = 1;
+		} else {
+			orth_point = newArray(orth_line[0],orth_line[1]);
+			hook_roi = 0;
+		}
+
+		// decide if the signal CoM is in the hook side or hump side
+		signal_angle = getSignalAngle(head_point, nucleus_centre, signal_centre, hook_roi);
+			
+		// get profile on red unthresholded signal
+		// along line from nucleus CoM to the border through the signal CoM
+		// signalProfile = generateSignalProfile(redID, border_coords, nucleus_centre);
+		signalProfile = generateSignalProfile(channelID, border_coords, nucleus_centre);
+		
+		// get profile for unthresholded DAPI
+		dapiProfile = generateSignalProfile("spare_blue", border_coords, nucleus_centre);
+		
+		// draw out what has been plotted
+		roiManager("reset");
+		
+		// select the original rgb image to annotate
+		selectImage(id);
+		drawLineBetweenPoints(head_point, orth_crossing, "#7D26CD"); // draw feret line
+		drawLineBetweenPoints(orth_point, orth_crossing, "#7D26CD"); // draw orth line
+		drawRectangleAtPoint(head_point, "#7D26CD"); // draw sperm head
+		drawLineBetweenPoints(border_coords, nucleus_centre, "yellow"); // line across nucleus
+		drawRectangleAtPoint(border_coords, "yellow"); // point at border near signal
+		drawRectangleAtPoint(signal_centre, "white"); // signal centre of mass
+		drawRectangleAtPoint(nucleus_centre, "white"); // nucleus centre of mass
+		saveAs("tiff", path+"\\"+nucleus_number+"."+channel+".line.tiff"); // export
+		
+		// express the distance as a proportion from the nuclear centre of mass
+		signal_to_com = signal_to_border / CoM_to_border;
+		write("Proportion of distance: "+signal_to_com);
+			
+		totalSignal = getTotalSignal(signalProfile);
+		totalDAPI   = getTotalSignal( dapiProfile );
+		
+		cumulativeSignalArray = getCumulativeSignal(signalProfile);
+		cumulativeDAPIArray   = getCumulativeSignal(dapiProfile  );
+		
+		// find the position with half the signal either side
+		medianSignalPoint = findMedianSignalPoint(signalProfile, cumulativeSignalArray);
+		
+		// determine the proportion of DAPI peripheral to the median signal point
+		outerDAPI = cumulativeDAPIArray[medianSignalPoint];
+		proportionDAPI = outerDAPI / totalDAPI;
+		
+		// find the positions along the array
+		positionArray = getProportionalArray(signalProfile, CoM_to_border);
+
+		positionDAPI = positionArray[medianSignalPoint];
+		
+		// assemble and print the header fields
+		addToLog("ID", path);
+		addToLog("NN", nucleus_number);
+		addToLog("SP", signal_to_com);
+		addToLog("SR", signal_centre[2]);
+		addToLog("NA", nucleus_centre[2]);
+		addToLog("SA", signal_angle);
+		addToLog("DR", proportionDAPI);
+		addToLog("DS", positionDAPI);
+		// printLog(f);
+		// printLog(logToUse);
+		// printLog(logFile);
+		File.append("~ ------------------\r", logFile);
+		for(j=0;j<logFields.length;j++){
+			File.append(logFields[j]+"~"+logValues[j]+"\r", logFile);
+		}
+		
+		// print out the profiles
+		// print(f, "# signal_position\tsignal_intensity\tdapi\tcumulative_signal\tcumulative_dapi");
+		// print(logToUse, "# signal_position\tsignal_intensity\tdapi\tcumulative_signal\tcumulative_dapi");
+		File.append("# signal_position\tsignal_intensity\tdapi\tcumulative_signal\tcumulative_dapi\r",logFile);
+		for (i=0; i<signalProfile.length; i++){		
+			// print(f, positionArray[i]+"\t"+signalProfile[i]+"\t"+dapiProfile[i]+"\t"+cumulativeSignalArray[i]+"\t"+cumulativeDAPIArray[i]);
+			// print(logToUse, positionArray[i]+"\t"+signalProfile[i]+"\t"+dapiProfile[i]+"\t"+cumulativeSignalArray[i]+"\t"+cumulativeDAPIArray[i]);
+			File.append(positionArray[i]+"\t"+signalProfile[i]+"\t"+dapiProfile[i]+"\t"+cumulativeSignalArray[i]+"\t"+cumulativeDAPIArray[i]+"\r", logFile)
+		}
+		// print(f, "# END OF FILE");
+		// print(logToUse, "# END OF FILE");
+		File.append("# END OF FILE\r", logFile);
+		// File.close(logToUse);
+		emptyLog();
+		close("working ("+channel+")");
+		run("Clear Results");
 	}
-	print(f, "# END OF FILE");
-	emptyLog();
 	close("working*");
 	close("spare*");
-	run("Clear Results");
 }
 
 function getSignalAngle(pointA, pointB, pointC, roi){
@@ -692,11 +726,20 @@ function findSignalCentreOfMass(id, roi) {
 function analyseFromDirectory(dir) {
 	resetLog();
 	
-	logFile = dir + "//" + "log.txt";
-	if(File.exists(logFile)){
-		File.delete(logFile);
+	// logFile = dir + "//" + "log.txt";
+	logFileRed = dir + "log.red.txt";
+	logFileGreen = dir + "log.green.txt";
+	// if(File.exists(logFile)){
+	// 	File.delete(logFile);
+	// }
+	if(File.exists(logFileRed)){
+		File.delete(logFileRed);
 	}
-	var f = File.open(logFile);
+	if(File.exists(logFileGreen)){
+		File.delete(logFileGreen);
+	}
+	// var f = File.open(logFile);
+	
 	
 	list = getFileList(dir);
 	count = 1;
@@ -927,11 +970,14 @@ function getCoordinatesFromDistance(line, dist, eq){
 
 function printLog(file){
 	
-	print(file, "~ ------------------");
+	// print(file, "~ ------------------");
+	File.append("~ ------------------", logFile);
+		
 	// print(file, "# LOGGED PARAMETERS");
 	// print(file, "# ------------------");
 	for(i=0;i<logFields.length;i++){
-		print(file, logFields[i]+"~"+logValues[i]);
+		// print(file, logFields[i]+"~"+logValues[i]);
+		File.append(logFields[i]+"~"+logValues[i]+"\r", logFile);
 	}
 }
 
@@ -957,24 +1003,24 @@ macro "findCentreOfMass"
 	analyseSignalInNucleus();
 	restoreSettings();
 }
-macro "analyseAllNucleiInImage"
-{
-	requires("1.47");
-	saveSettings();
-	run("Colors...", "background=black"); //set background colour to black
-	resetLog();
-	imageID = getImageID();
-	name=getTitle;
-	dir = getInfo("image.directory");
-	logFile = dir + "//" + name + ".txt";
-	if(File.exists(logFile)){
-		File.delete(logFile);
-	}
-	var f = File.open(logFile);
+// macro "analyseAllNucleiInImage"
+// {
+// 	requires("1.47");
+// 	saveSettings();
+// 	run("Colors...", "background=black"); //set background colour to black
+// 	resetLog();
+// 	imageID = getImageID();
+// 	name=getTitle;
+// 	dir = getInfo("image.directory");
+// 	logFile = dir + "//" + name + ".txt";
+// 	if(File.exists(logFile)){
+// 		File.delete(logFile);
+// 	}
+// 	var f = File.open(logFile);
 	
-	findNucleiInImage();
-	restoreSettings();
-}
+// 	findNucleiInImage();
+// 	restoreSettings();
+// }
 macro "analyseFromDirectory"
 {
 	requires("1.47");
