@@ -305,16 +305,38 @@ public class Sperm_Analysis
     }
   }
 
+  class AnglePoint {
+
+  	private int index;
+  	private double  angle;
+
+  	public AnglePoint (int i, double d){
+  		this.index = i;
+  		this.angle = d;
+  	}
+
+  	public int getIndex(){
+  		return this.index;
+  	}
+
+  	public double getAngle(){
+  		return this.angle;
+  	}
+  }
+
   class RoiArray {
   
     private int points;
     private XYPoint[] array;
     private String imagePath;
     private int nucleusNumber;
+    private AnglePoint[] angleArray; // this will hold the index and angle
+    private int windowSize = 23; // default size, can be overridden if needed
     
     public RoiArray (int points) { // construct an empty array of given size
       this.array = new XYPoint[points]; // x and y for each point 
       this.points = points;
+      this.angleArray = new AnglePoint[points];
     }
 
     public RoiArray (Polygon polygon) { // construct from a polygon object
@@ -333,6 +355,13 @@ public class Sperm_Analysis
     // public int getY(int index){
     //   return array[index].getY();
     // }
+    public void setWindowSize(int i){
+    	this.windowSize = i;
+    }
+
+    public int getWindowSize(){
+    	return this.windowSize;
+    }
 
     public void setX(int index, int x){
       this.array[index].setX(x);
@@ -488,6 +517,22 @@ public class Sperm_Analysis
       return angle;
     }
 
+    // Make an angle array for the current coordinates in the XYPoint array
+    // Will need to be rerun on each index order change
+    public void makeAngleArray(){
+    	// go through points
+    	// find angle
+    	// assign to angle array
+
+	    for(int i=0; i<this.points;i++){
+
+	      // use a window size of 25 for now
+	      double angle = findAngleBetweenPoints(i, this.getWindowSize());
+	      angleArray[i] = new AnglePoint(i, angle);
+
+	    }
+    }
+
     public XYPoint findMinimumAngle(){
 
       double minAngle = 180.0;
@@ -495,7 +540,7 @@ public class Sperm_Analysis
       for(int i=0; i<this.points;i++){
 
           // use a window size of 25 for now
-          double angle = findAngleBetweenPoints(i, 23);
+          double angle = this.angleArray[i].getAngle();
           if(angle<minAngle){
             minAngle = angle;
             minIndex = i;
