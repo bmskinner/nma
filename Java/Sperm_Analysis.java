@@ -15,6 +15,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.frame.RoiManager;
+import ij.process.FloatPolygon;
 import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
 import ij.process.StackConverter;
@@ -34,7 +35,7 @@ public class Sperm_Analysis
 
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
   private static final int SIGNAL_THRESHOLD = 70;
-  private static final int NUCLEUS_THRESHOLD = 36;
+  private static final int NUCLEUS_THRESHOLD = 40;
   
   public void run(String paramString)  {
 
@@ -105,7 +106,7 @@ public class Sperm_Analysis
       }
 
     } catch(NullPointerException e){
-         IJ.log("No nuclei found");
+         IJ.log("Error:"+e);
     }
   }
 
@@ -162,7 +163,7 @@ public class Sperm_Analysis
     smallRegion.setRoi(nucleus);
 
     // turn roi into RoiArray for later manipulation
-    RoiArray roiArray = new RoiArray(nucleus.getPolygon());
+    RoiArray roiArray = new RoiArray(nucleus);
     roiArray.setPath(path);
     roiArray.setNucleusNumber(nucleusNumber);
 
@@ -178,7 +179,15 @@ public class Sperm_Analysis
     ImageProcessor ip = smallRegion.getProcessor();
     ip.setLineWidth(5);
     ip.setColor(Color.YELLOW);
-    ip.drawDot(spermTip.getX(), spermTip.getY());
+    ip.drawDot(spermTip.getXAsInt(), spermTip.getYAsInt());
+
+    ip.setColor(Color.GREEN);
+    p.setLineWidth(3);
+    IJ.log("Found "+roiArray.minimaCount+" local minima");
+    XYPoint[] minima = roiArray.getLocalMinima();
+    for (XYPoint example : minima){
+         ip.drawDot(example.getXAsInt(), example.getYAsInt());
+    }
 
     File dir = new File(roiArray.getPathWithoutExtension());
     
@@ -194,10 +203,12 @@ public class Sperm_Analysis
     IJ.saveAsTiff(smallRegion, roiArray.getPathWithoutExtension()+"\\"+roiArray.getNucleusNumber()+".tiff");
     ip.reset();
 
+
+    roiArray.printAngleInfo();
     // find CoM in colour
     // within nuclear roi, analyze particles in colour channels
-    RoiManager   redSignalsInImage = findSignalInNucleus(smallRegion, 0);
-    RoiManager greenSignalsInImage = findSignalInNucleus(smallRegion, 1);
+    // RoiManager   redSignalsInImage = findSignalInNucleus(smallRegion, 0);
+    // RoiManager greenSignalsInImage = findSignalInNucleus(smallRegion, 1);
     // get signal roi
 
   }
@@ -266,36 +277,84 @@ public class Sperm_Analysis
   }
 
   class XYPoint {
-    private int x;
-    private int y;
-
-    public XYPoint (int x, int y){
+    private double x;
+    private double y;
+    private double minAngle;
+    private double interiorAngle; // depends on whether the min angle is inside or outside the shape
+    private int index; // keep the original index position in case we need to change
+    private boolean localMin; // is this angle a local minimum
+  
+    public XYPoint (double x, double y){
       this.x = x;
       this.y = y;
     }
 
-    public int getX(){
+    public double getX(){
       return this.x;
     }
-    public int getY(){
+    public double getY(){
       return this.y;
     }
 
-    public void setX(int x){
+    public int getXAsInt(){
+      Double obj = new Double(this.x);
+      int i = obj.intValue();
+      return i;
+    }
+
+    public int getYAsInt(){
+      Double obj = new Double(this.y);
+      int i = obj.intValue();
+      return i;
+    }
+
+    public void setX(double x){
       this.x = x;
     }
 
-    public void setY(int y){
+    public void setY(double y){
       this.y = y;
+    }
+
+    public int getIndex(){
+      return this.index;
+    }
+
+    public double getMinAngle(){
+      return this.minAngle;
+    }
+
+    public void setIndex(int i){
+      this.index = i;
+    }
+
+    public void setMinAngle(double d){
+      this.minAngle = d;
+    }
+
+    public double getInteriorAngle(){
+      return this.interiorAngle;
+    }
+
+    public void setInteriorAngle(double d){
+      this.interiorAngle = d;
+    }
+
+    public void setLocalMin(boolean b){
+      this.localMin = b;
+    }
+
+    public boolean isLocalMin(){
+      return this.localMin;
     }
 
     public double getLengthTo(XYPoint a){
 
       // a2 = b2 + c2
-      int dx = Math.abs(this.getX() - a.getX());
-      int dy = Math.abs(this.getY() - a.getY());
-      int dx2 = dx * dx;
-      int dy2 = dy * dy;
+      double dx = Math.abs(this.getX() - a.getX());
+      double dy = Math.abs(this.getY() - a.getY());
+      double dx2 = dx * dx;
+      double dy2 = dy * dy;
       double length = Math.sqrt(dx2+dy2);
       return length;
     }
@@ -305,70 +364,62 @@ public class Sperm_Analysis
     }
   }
 
-  class AnglePoint {
-
-  	private int index;
-  	private double  angle;
-
-  	public AnglePoint (int i, double d){
-  		this.index = i;
-  		this.angle = d;
-  	}
-
-  	public int getIndex(){
-  		return this.index;
-  	}
-
-  	public double getAngle(){
-  		return this.angle;
-  	}
-  }
 
   class RoiArray {
   
-    private int points;
-    private XYPoint[] array;
-    private String imagePath;
     private int nucleusNumber;
-    private AnglePoint[] angleArray; // this will hold the index and angle
     private int windowSize = 23; // default size, can be overridden if needed
+    private int minimaCount; // the number of local minima detected in the array
+    private int length;
+    private int smoothLength;
+    private int minimaLookupDistance = 6;
+
+    private XYPoint[] array; // this will hold the index and angle as well
+    private XYPoint[] smoothedArray; // this allows the same calculations on interpolated array
     
-    public RoiArray (int points) { // construct an empty array of given size
-      this.array = new XYPoint[points]; // x and y for each point 
-      this.points = points;
-      this.angleArray = new AnglePoint[points];
-    }
+    private String imagePath;
 
-    public RoiArray (Polygon polygon) { // construct from a polygon object
+    private boolean minimaCalculated = false; // has detectLocalMinima been run
+    private boolean anglesCalculated = false; // has makeAngleArray been run
+    
+    private Roi roi; // the original ROI
+    private Polygon polygon; // the source of the array
 
-      this.array = new XYPoint[polygon.npoints];
-      for(int i=0; i<polygon.npoints; i++){
-        array[i] = new XYPoint(polygon.xpoints[i],polygon.ypoints[i]);
+    private FloatPolygon smoothedPolygon; // hold the smoothed polygon data
+    
+    // DEPRECATED - WE NEED THE POLYGON FOR ANGLE CONSTRUCTION
+    // public RoiArray (int points) { // construct an empty array of given size
+    //   this.array = new XYPoint[points]; // x and y for each point 
+    //   this.points = points;
+    //   this.minimaCalculated = false;
+    // }
+
+    public RoiArray (Roi roi) { // construct from an roi
+
+      // get the polygon from the roi
+      this.polygon = roi.getPolygon();
+      this.array = new XYPoint[this.polygon.npoints];
+      this.length = this.array.length;
+      for(int i=0; i<this.polygon.npoints; i++){
+        array[i] = new XYPoint(this.polygon.xpoints[i],this.polygon.ypoints[i]);
       }
-      this.points = polygon.npoints;
+
+      // interpolate and smooth the roi
+      this.smoothedPolygon = roi.getInterpolatedPolygon(1,true); // pixels 1 apart, smoothed
+      this.smoothedArray = new XYPoint[this.smoothedPolygon.npoints];
+      this.smoothLength = this.smoothedArray.length;
+      for(int i=0; i<this.smoothedPolygon.npoints; i++){
+        smoothedArray[i] = new XYPoint(this.smoothedPolygon.xpoints[i],this.smoothedPolygon.ypoints[i]);
+      }
+      
     }
 
-    // public int getX(int index){
-    //   return array[index].getX();
-    // }
-
-    // public int getY(int index){
-    //   return array[index].getY();
-    // }
     public void setWindowSize(int i){
     	this.windowSize = i;
     }
 
     public int getWindowSize(){
     	return this.windowSize;
-    }
-
-    public void setX(int index, int x){
-      this.array[index].setX(x);
-    }
-
-    public void setY(int index, int y){
-      this.array[index].setY(y);
     }
 
     public void setPath(String path){
@@ -379,16 +430,22 @@ public class Sperm_Analysis
       this.nucleusNumber = n;
     }
 
-    public int getPoints(){
-      return this.points;
+    public XYPoint getPoint(int i){
+      return this.array[i];
     }
 
-    public XYPoint getPoint(int index){
-      return this.array[index];
+    public XYPoint getSmoothedPoint(int i){
+      // XYPoint p = new XYPoint(this.smoothedPolygon.xpoints[i], this.smoothedPolygon.ypoints[i]);
+      return this.smoothedArray[i];
     }
 
     public String getPath(){
       return this.imagePath;
+    }
+
+    public String getDirectory(){
+      File f = new File(this.imagePath);
+      return f.getParent();
     }
 
     public String getPathWithoutExtension(){
@@ -412,109 +469,123 @@ public class Sperm_Analysis
       return this.imagePath+"\\"+this.nucleusNumber;
     }
 
-    public RoiArray flipROI(){
+    // public RoiArray flipROI(){
 
-      // reverse the array and create a new roi
+    //   // reverse the array and create a new roi
 
-      RoiArray newArray = new RoiArray(this.points);
-      int j=0;
-      for(int i=this.getPoints()-1;i>=0;i--){
+    //   RoiArray newArray = new RoiArray(this.points);
+    //   int j=0;
+    //   for(int i=this.getPoints()-1;i>=0;i--){
 
-        XYPoint point = this.array[i];
-        int x = point.getX();
-        int y = point.getY();
-        newArray.setX(j, x);
-        newArray.setY(j, y);
-        j++;
-      }
-      return newArray;
-    }
+    //     XYPoint point = this.array[i];
+    //     int x = point.getX();
+    //     int y = point.getY();
+    //     newArray.setX(j, x);
+    //     newArray.setY(j, y);
+    //     j++;
+    //   }
+    //   return newArray;
+    // }
 
-    public RoiArray trimROI(int percent){
+    // public RoiArray trimROI(int percent){
 
-      // find the number of points to include for a given percentage
-      // create a new RoiArray and copy the current RoiArray values to it up to the endpoint
-      int end = this.points*(percent/100);
+    //   // find the number of points to include for a given percentage
+    //   // create a new RoiArray and copy the current RoiArray values to it up to the endpoint
+    //   int end = this.points*(percent/100);
 
-      // int end = Math.floor(this.points*(percent/100)); // fetch first x% of signals
-      // int end = d.intValue();
+    //   // int end = Math.floor(this.points*(percent/100)); // fetch first x% of signals
+    //   // int end = d.intValue();
 
-      RoiArray newArray = new RoiArray(end);
+    //   RoiArray newArray = new RoiArray(end);
 
-      System.arraycopy(this.array, 0, newArray, 0, end); // copy over the 0 to end values
+    //   System.arraycopy(this.array, 0, newArray, 0, end); // copy over the 0 to end values
 
-      // for(int i=0;i<end;i++){
-      //  newArray.setX(i, this.getX(i));
-      //  newArray.setY(i, this.getY(i));
-      // }
-      return newArray;
-    }
+    //   // for(int i=0;i<end;i++){
+    //   //  newArray.setX(i, this.getX(i));
+    //   //  newArray.setY(i, this.getY(i));
+    //   // }
+    //   return newArray;
+    // }
 
-    public RoiArray shuffleROI(){
+    // public RoiArray shuffleROI(){
 
-      // Look for largest discontinuity between points
-      // Set these coordinates to the ROI end
+    //   // Look for largest discontinuity between points
+    //   // Set these coordinates to the ROI end
           
-      double max_distance = 0;
-      int max_i = 0;
+    //   double max_distance = 0;
+    //   int max_i = 0;
       
-      // find the two most divergent points
-      for(int i=0;i<this.getPoints();i++){
+    //   // find the two most divergent points
+    //   for(int i=0;i<this.getPoints();i++){
       
-        XYPoint pointA = this.array[i];
-        XYPoint pointB  = i == this.getPoints()-1 
-                ? this.array[0] 
-                : this.array[i+1]; // check last array element against first
+    //     XYPoint pointA = this.array[i];
+    //     XYPoint pointB  = i == this.getPoints()-1 
+    //             ? this.array[0] 
+    //             : this.array[i+1]; // check last array element against first
 
-        // if(i==this.points-1){ // check last against first
-        //  XYPoint pointB = this.array[0];
+    //     // if(i==this.points-1){ // check last against first
+    //     //  XYPoint pointB = this.array[0];
           
-        // } else { // otherwise check to the next in array
-        //  XYPoint pointB = this.array[i+1];
-        // }
-        double distance = pointA.getLengthTo(pointB);
+    //     // } else { // otherwise check to the next in array
+    //     //  XYPoint pointB = this.array[i+1];
+    //     // }
+    //     double distance = pointA.getLengthTo(pointB);
         
-        if(distance > max_distance){
-          max_distance = distance;
-          max_i = i;
-        }
-      }
+    //     if(distance > max_distance){
+    //       max_distance = distance;
+    //       max_i = i;
+    //     }
+    //   }
 
-      // we now have the position just before the discontinuity
-      // chop the array in two and reassemble in the correct order
-      RoiArray newArray = new RoiArray(this.getPoints()); // new array, empty
-      System.arraycopy(this.array, max_i+1, newArray, 0, this.getPoints()-max_i); // copy over the max_i to end values
-      System.arraycopy(this.array, 0, newArray, max_i+1, max_i); // copy over index 0 to max_i
+    //   // we now have the position just before the discontinuity
+    //   // chop the array in two and reassemble in the correct order
+    //   RoiArray newArray = new RoiArray(this.getPoints()); // new array, empty
+    //   System.arraycopy(this.array, max_i+1, newArray, 0, this.getPoints()-max_i); // copy over the max_i to end values
+    //   System.arraycopy(this.array, 0, newArray, max_i+1, max_i); // copy over index 0 to max_i
 
-      return newArray;
-    }
+    //   return newArray;
+    // }
 
-    public double findAngleBetweenPoints(int index, int window){
+    public void findAngleBetweenPoints(int index, int window){
 
       // from the given index, draw a line between this point, and the points window before and window after
       // measure the angle between these points
 
       // wrap the array
       int indexBefore = index < window
-                      ? this.getPoints() - (window-index)
+                      ? this.smoothLength - (window-index)
                       : index - window;
 
-      int indexAfter = index + window > this.getPoints()-1
-                     ? Math.abs(this.getPoints() - (index+window))
+      int indexAfter = index + window > this.smoothLength-1
+                     ? Math.abs(this.smoothLength - (index+window))
                      : index + window;
 
-      XYPoint pointBefore = this.getPoint(indexBefore);
-      XYPoint pointAfter = this.getPoint(indexAfter);
-      XYPoint point = this.getPoint(index);
+      XYPoint pointBefore = this.getSmoothedPoint(indexBefore);
+      XYPoint pointAfter = this.getSmoothedPoint(indexAfter);
+      XYPoint point = this.getSmoothedPoint(index);
 
       // make a segmented line
-      int[] xpoints = {pointBefore.getX(), point.getX(),pointAfter.getX()};
-      int[] ypoints = {pointBefore.getY(), point.getY(),pointAfter.getY()};
+      float[] xpoints = { (float) pointBefore.getX(), (float) point.getX(), (float) pointAfter.getX()};
+      float[] ypoints = { (float) pointBefore.getY(), (float) point.getY(), (float) pointAfter.getY()};
       PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+
 
       // measure the angle of the line
       double angle = roi.getAngle();
-      return angle;
+
+      // find the halfway point between the first and last points.
+      // is this within the roi?
+      // if yes, keep min angle as interior angle
+      // if no, 360-min is interior
+      double midX = (pointBefore.getX()+pointAfter.getX())/2;
+      double midY = (pointBefore.getY()+pointAfter.getY())/2;
+
+      this.smoothedArray[index].setMinAngle(angle);
+      if(this.smoothedPolygon.contains( (float) midX, (float) midY)){
+        this.smoothedArray[index].setInteriorAngle(angle);
+      } else {
+        this.smoothedArray[index].setInteriorAngle(360-angle);
+      }
     }
 
     // Make an angle array for the current coordinates in the XYPoint array
@@ -524,23 +595,29 @@ public class Sperm_Analysis
     	// find angle
     	// assign to angle array
 
-	    for(int i=0; i<this.points;i++){
+	    for(int i=0; i<this.smoothLength;i++){
 
 	      // use a window size of 25 for now
-	      double angle = findAngleBetweenPoints(i, this.getWindowSize());
-	      angleArray[i] = new AnglePoint(i, angle);
-
+	      findAngleBetweenPoints(i, this.getWindowSize());
+        this.smoothedArray[i].setIndex(i);
 	    }
+      IJ.log("Measured angles with window size "+this.windowSize);
     }
 
     public XYPoint findMinimumAngle(){
 
+      if(!this.anglesCalculated){
+        this.makeAngleArray();
+      }
+      if(!this.minimaCalculated){
+        this.detectLocalMinima();
+      }
       double minAngle = 180.0;
       int minIndex = 0;
-      for(int i=0; i<this.points;i++){
+      for(int i=0; i<this.length;i++){
 
           // use a window size of 25 for now
-          double angle = this.angleArray[i].getAngle();
+          double angle = this.smoothedArray[i].getMinAngle();
           if(angle<minAngle){
             minAngle = angle;
             minIndex = i;
@@ -548,8 +625,107 @@ public class Sperm_Analysis
 
           // IJ.log(i+" \t "+angle+" \t "+minAngle+"  "+minIndex);
       }
-      return this.array[minIndex];
+      return this.smoothedArray[minIndex];
+    }
 
+    // retrieve an array of the points designated as local minima
+    public XYPoint[] getLocalMinima(){
+
+      XYPoint[] newArray = new XYPoint[this.minimaCount];
+      if(!this.minimaCalculated){
+        this.detectLocalMinima();
+      }
+
+      int j = 0;
+      for (int i=0; i<this.smoothLength; i++) {
+        if(this.smoothedArray[i].isLocalMin()){
+          newArray[j] = this.smoothedArray[i];
+          j++;
+        }
+      }
+
+      IJ.log("Detected "+j+" local minima with lookup size "+this.minimaLookupDistance);
+      return newArray;
+    }
+
+    public void detectLocalMinima(){
+      // go through angle array (with tip at start)
+      // look at 1-2-3-4-5 points ahead and behind.
+      // if all greater, local minimum
+      
+      double[] prevAngles = new double[this.minimaLookupDistance]; // slots for previous angles
+      double[] nextAngles = new double[this.minimaLookupDistance]; // slots for next angles
+
+      int count = 0;
+
+      for (int i=0; i<this.smoothLength; i++) { // for each position in sperm
+
+        // go through each lookup position and get the appropriate angles
+        for(int j=0;j<prevAngles.length;j++){
+
+          int prev_i = i-(j+1);
+          int next_i = i+(j+1);
+
+          // handle beginning and end of array - wrap around
+          if(prev_i < 0){
+            prev_i = this.smoothLength + prev_i;
+          }
+          if(next_i >= this.smoothLength){
+            next_i = next_i - this.smoothLength;
+          }
+
+          // fill the lookup array
+          prevAngles[j] = this.smoothedArray[prev_i].getMinAngle();
+          nextAngles[j] = this.smoothedArray[next_i].getMinAngle();
+        }
+        
+        // with the lookup positions, see if minimum at i
+        // return a 1 if all higher than last, 0 if not
+        // prev_l = 0;
+        boolean ok = true;
+        for(int l=0;l<prevAngles.length;l++){
+
+          // not ok if the outer entries are not higher than inner entries
+          if(l==0){
+            if(prevAngles[l] < this.smoothedArray[i].getMinAngle() || nextAngles[l] < this.smoothedArray[i].getMinAngle()){
+              ok = false;
+            }
+          } else {
+            
+            if(prevAngles[l] < prevAngles[l-1] || nextAngles[l] < nextAngles[l-1]){
+              ok = false;
+            }
+          }
+        }
+        if(ok){
+          count++;
+        }
+
+        // put oks into array to put into multiarray
+        smoothedArray[i].setLocalMin(ok);
+      }
+      this.minimaCalculated = true;
+      this.minimaCount =  count;
+    }
+
+    public void printAngleInfo(){
+
+      String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
+      
+       IJ.append("X\tY", path);
+      for(int i=0;i<this.length;i++){
+        // IJ.log(array[i].getXAsInt()+"  "+array[i].getYAsInt()+"  "+this.getSmoothedPoint(i).getX()+"  "+this.getSmoothedPoint(i).getY()+"  "+array[i].getInteriorAngle()+"  "+array[i].getMinAngle()+"  "+array[i].isLocalMin());
+        IJ.append(array[i].getXAsInt()+"\t"+array[i].getYAsInt(), path);
+      
+      }
+
+
+      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tLM", path);
+      
+      for(int i=0;i<this.smoothLength;i++){
+        // IJ.log(smoothedPolygon.xpoints[i]+"  "+smoothedPolygon.ypoints[i]);
+        IJ.append(smoothedArray[i].getXAsInt()+"\t"+smoothedArray[i].getYAsInt()+"\t"+smoothedArray[i].getX()+"\t"+smoothedArray[i].getY()+"\t"+smoothedArray[i].getInteriorAngle()+"  "+smoothedArray[i].getMinAngle()+"  "+smoothedArray[i].isLocalMin(), path);
+      }
     }
   }
 }
