@@ -66,11 +66,10 @@ public class Sperm_Analysis
               ImagePlus localImagePlus = localOpener.openImage(path);             
               // handle the image
               processImage(localImagePlus, path);
-              Thread.sleep(100);
               localImagePlus.close();
 
-            } catch (InterruptedException ex) { 
-                IJ.log("Error in sleeping");
+            } catch (Exception e) { 
+                IJ.log("Error:"+e);
             }
           }
         }
@@ -80,12 +79,6 @@ public class Sperm_Analysis
 
   public void processImage(ImagePlus image, String path){
 
-    // int[] xpoints = {10,100,100,10};
-    // int[] ypoints = {10,100,10,100};
-    // PolygonRoi testRoi = new PolygonRoi(xpoints,ypoints,4,Roi.POLYGON);
-    // testRoi.setStroke(new java.awt.BasicStroke());
-    // testRoi.setStrokeColor(new java.awt.Color(255,255,0));
-    // image.setRoi(testRoi);
     RoiManager nucleiInImage;
 
     try {
@@ -98,12 +91,6 @@ public class Sperm_Analysis
 
         analyseNucleus(roi, image, i, path);
         i++;
-
-        try{
-          Thread.sleep(100);
-        } catch (InterruptedException ex) {
-
-        }
       }
 
     } catch(NullPointerException e){
@@ -152,46 +139,8 @@ public class Sperm_Analysis
    return manager;
   }
 
-  public void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
-    
-    // IJ.log("Processing nucleus");
-
-    // make a copy of the nucleus only for saving out and processing
-    image.setRoi(nucleus);
-    image.copy();
-    ImagePlus smallRegion = ImagePlus.getClipboard();
-    nucleus.setLocation(0,0);
-    smallRegion.setRoi(nucleus);
-
-    // turn roi into RoiArray for later manipulation
-    RoiArray roiArray = new RoiArray(nucleus);
-    roiArray.setPath(path);
-    roiArray.setNucleusNumber(nucleusNumber);
-
-    // measure CoM, area, perimeter and feret in blue
-    ResultsTable blueResults = findNuclearMeasurements(smallRegion, nucleus);
-    // IJ.log("Found nuclear CoM at "+blueResults.getValue("XM", 0)+","+blueResults.getValue("YM", 0));
-
-    // find tip - use the least angle method
-    XYPoint spermTip = roiArray.findMinimumAngle();
-    roiArray.moveIndexToArrayStart(spermTip.getIndex());
-    // IJ.log("Found sperm tip at "+spermTip.toString());
-    
-    //draw the sperm tip
-    ImageProcessor ip = smallRegion.getProcessor();
-    ip.setLineWidth(5);
-    ip.setColor(Color.YELLOW);
-    ip.drawDot(spermTip.getXAsInt(), spermTip.getYAsInt());
-
-    ip.setColor(Color.GREEN);
-    ip.setLineWidth(3);
-    IJ.log("Found "+roiArray.minimaCount+" local minima");
-    XYPoint[] minima = roiArray.getLocalMinima();
-    for (XYPoint example : minima){
-         ip.drawDot(example.getXAsInt(), example.getYAsInt());
-    }
-
-    File dir = new File(roiArray.getPathWithoutExtension());
+  public String createImageDirectory(String path){
+    File dir = new File(path);
     
     if (!dir.exists()) {
       try{
@@ -202,11 +151,65 @@ public class Sperm_Analysis
         IJ.log("Saving to: "+dir.toString());
       }
     }
-    IJ.saveAsTiff(smallRegion, roiArray.getPathWithoutExtension()+"\\"+roiArray.getNucleusNumber()+".tiff");
-    ip.reset();
+    return dir.toString();
+  }
+
+  public void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
+    
+    // IJ.log("Processing nucleus");
+
+    // make a copy of the nucleus only for saving out and processing
+    image.setRoi(nucleus);
+    image.copy();
+    ImagePlus smallRegion = ImagePlus.getClipboard();
+    nucleus.setLocation(0,0); // translate the roi to the new image coordinates
+    smallRegion.setRoi(nucleus);
+
+
+    // turn roi into RoiArray for later manipulation
+    RoiArray roiArray = new RoiArray(nucleus);
+    roiArray.setPath(path);
+    roiArray.setNucleusNumber(nucleusNumber);
+
+    // measure CoM, area, perimeter and feret in blue
+    ResultsTable blueResults = findNuclearMeasurements(smallRegion, nucleus);
+
+
+    // find tip - use the least angle method
+    XYPoint spermTip = roiArray.findMinimumAngle();
+    roiArray.moveIndexToArrayStart(spermTip.getIndex());
+
+    
+    //draw the sperm tip and local minima
+    ImageProcessor ip = smallRegion.getProcessor();
+    ip.setLineWidth(5);
+    ip.setColor(Color.YELLOW);
+    ip.drawDot(spermTip.getXAsInt(), spermTip.getYAsInt());
+    ip.setColor(Color.GREEN);
+    ip.setLineWidth(3);
+   
+    XYPoint[] minima = roiArray.getLocalMinima();
+    for (XYPoint example : minima){
+         ip.drawDot(example.getXAsInt(), example.getYAsInt());
+    }
+    String saveFolder = createImageDirectory(roiArray.getPathWithoutExtension());
+    
+    IJ.saveAsTiff(smallRegion, saveFolder+"\\"+roiArray.getNucleusNumber()+".tiff");
 
 
     roiArray.printAngleInfo();
+
+    // find the tail point
+
+    // determine hook from hump
+
+    // get the acrosomal curve
+
+    // find the signal positions
+
+    // find lectin stains
+
+
     // find CoM in colour
     // within nuclear roi, analyze particles in colour channels
     // RoiManager   redSignalsInImage = findSignalInNucleus(smallRegion, 0);
