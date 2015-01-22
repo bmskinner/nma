@@ -35,7 +35,8 @@ public class Sperm_Analysis
 
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
   private static final int SIGNAL_THRESHOLD = 70;
-  private static final int NUCLEUS_THRESHOLD = 40;
+  private static final int NUCLEUS_THRESHOLD = 36;
+  private static final double ANGLE_THRESHOLD = 40.0; // when calculating local minima, ignore angles above this
   
   public void run(String paramString)  {
 
@@ -173,6 +174,7 @@ public class Sperm_Analysis
 
     // find tip - use the least angle method
     XYPoint spermTip = roiArray.findMinimumAngle();
+    roiArray.moveIndexToArrayStart(spermTip.getIndex());
     // IJ.log("Found sperm tip at "+spermTip.toString());
     
     //draw the sperm tip
@@ -182,7 +184,7 @@ public class Sperm_Analysis
     ip.drawDot(spermTip.getXAsInt(), spermTip.getYAsInt());
 
     ip.setColor(Color.GREEN);
-    p.setLineWidth(3);
+    ip.setLineWidth(3);
     IJ.log("Found "+roiArray.minimaCount+" local minima");
     XYPoint[] minima = roiArray.getLocalMinima();
     for (XYPoint example : minima){
@@ -387,13 +389,6 @@ public class Sperm_Analysis
 
     private FloatPolygon smoothedPolygon; // hold the smoothed polygon data
     
-    // DEPRECATED - WE NEED THE POLYGON FOR ANGLE CONSTRUCTION
-    // public RoiArray (int points) { // construct an empty array of given size
-    //   this.array = new XYPoint[points]; // x and y for each point 
-    //   this.points = points;
-    //   this.minimaCalculated = false;
-    // }
-
     public RoiArray (Roi roi) { // construct from an roi
 
       // get the polygon from the roi
@@ -435,7 +430,6 @@ public class Sperm_Analysis
     }
 
     public XYPoint getSmoothedPoint(int i){
-      // XYPoint p = new XYPoint(this.smoothedPolygon.xpoints[i], this.smoothedPolygon.ypoints[i]);
       return this.smoothedArray[i];
     }
 
@@ -507,12 +501,27 @@ public class Sperm_Analysis
     //   return newArray;
     // }
 
+    // only works for smoothed array - indexes are different for normal array
+    public void moveIndexToArrayStart(int i){
+
+      // copy the array to refer to
+      // XYPoint[] tempArray = new XYPoint[this.length];
+      XYPoint[] tempSmooth = new XYPoint[this.smoothLength];
+      System.arraycopy(this.smoothedArray, 0, tempSmooth, 0 , this.smoothLength);
+     
+      System.arraycopy(tempSmooth, i, this.smoothedArray, 0 , this.smoothLength-i); // copy over the i to end values
+      System.arraycopy(tempSmooth, 0, this.smoothedArray, this.smoothLength-i, i); // copy over index 0 to i
+     
+      if(tempSmooth.length != this.smoothedArray.length){
+        IJ.log("Unequal array size");
+      }     
+
+    }
     // public RoiArray shuffleROI(){
 
     //   // Look for largest discontinuity between points
     //   // Set these coordinates to the ROI end
-          
-    //   double max_distance = 0;
+    //   double maxDistance = 0;
     //   int max_i = 0;
       
     //   // find the two most divergent points
@@ -523,16 +532,10 @@ public class Sperm_Analysis
     //             ? this.array[0] 
     //             : this.array[i+1]; // check last array element against first
 
-    //     // if(i==this.points-1){ // check last against first
-    //     //  XYPoint pointB = this.array[0];
-          
-    //     // } else { // otherwise check to the next in array
-    //     //  XYPoint pointB = this.array[i+1];
-    //     // }
     //     double distance = pointA.getLengthTo(pointB);
         
-    //     if(distance > max_distance){
-    //       max_distance = distance;
+    //     if(distance > maxDistance){
+    //       maxDistance = distance;
     //       max_i = i;
     //     }
     //   }
@@ -629,6 +632,7 @@ public class Sperm_Analysis
     }
 
     // retrieve an array of the points designated as local minima
+    // include a check for magnitude
     public XYPoint[] getLocalMinima(){
 
       XYPoint[] newArray = new XYPoint[this.minimaCount];
@@ -696,7 +700,12 @@ public class Sperm_Analysis
               ok = false;
             }
           }
+
+          if( Math.abs(this.smoothedArray[i].getInteriorAngle()-180) < 20){
+            ok = false;
+          }
         }
+
         if(ok){
           count++;
         }
@@ -711,20 +720,25 @@ public class Sperm_Analysis
     public void printAngleInfo(){
 
       String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
-      
-       IJ.append("X\tY", path);
-      for(int i=0;i<this.length;i++){
-        // IJ.log(array[i].getXAsInt()+"  "+array[i].getYAsInt()+"  "+this.getSmoothedPoint(i).getX()+"  "+this.getSmoothedPoint(i).getY()+"  "+array[i].getInteriorAngle()+"  "+array[i].getMinAngle()+"  "+array[i].isLocalMin());
-        IJ.append(array[i].getXAsInt()+"\t"+array[i].getYAsInt(), path);
-      
+      File f = new File(path);
+      if(f.exists()){
+        f.delete();
       }
 
-
-      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tLM", path);
+      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tLM", path);
       
       for(int i=0;i<this.smoothLength;i++){
-        // IJ.log(smoothedPolygon.xpoints[i]+"  "+smoothedPolygon.ypoints[i]);
-        IJ.append(smoothedArray[i].getXAsInt()+"\t"+smoothedArray[i].getYAsInt()+"\t"+smoothedArray[i].getX()+"\t"+smoothedArray[i].getY()+"\t"+smoothedArray[i].getInteriorAngle()+"  "+smoothedArray[i].getMinAngle()+"  "+smoothedArray[i].isLocalMin(), path);
+
+        double normalisedIAngle = smoothedArray[i].getInteriorAngle()-180;
+
+        IJ.append(smoothedArray[i].getXAsInt()+"\t"+
+                  smoothedArray[i].getYAsInt()+"\t"+
+                  smoothedArray[i].getX()+"\t"+
+                  smoothedArray[i].getY()+"\t"+
+                  smoothedArray[i].getInteriorAngle()+"\t"+
+                  smoothedArray[i].getMinAngle()+"\t"+
+                  normalisedIAngle+"\t"+
+                  smoothedArray[i].isLocalMin(), path);
       }
     }
   }
