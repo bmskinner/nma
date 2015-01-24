@@ -171,7 +171,7 @@ public class Sperm_Analysis
     ImageProcessor ip = smallRegion.getProcessor();
 
 
-    // turn roi into RoiArray for later manipulation
+    // turn roi into RoiArray for manipulation
     RoiArray roiArray = new RoiArray(nucleus);
     roiArray.setPath(path);
     roiArray.setNucleusNumber(nucleusNumber);
@@ -182,7 +182,7 @@ public class Sperm_Analysis
     XYPoint nucleusCoM = new XYPoint(blueResults.getValue("XM", 0),  blueResults.getValue("YM", 0) );
 
 
-    // draw teh roi
+    // draw the roi
     ip.setColor(Color.BLUE);
     ip.setLineWidth(1);
     ip.draw(nucleus);
@@ -232,10 +232,11 @@ public class Sperm_Analysis
 
     
     // rotate the ROI to put the tail at the top/bottom
-    double rotationAngle = findRotationAngle(spermTail, nucleusCoM);
-    IJ.log("    Rotate by "+rotationAngle);
+    // double rotationAngle = findRotationAngle(spermTail, nucleusCoM);
+    // IJ.log("    Rotate by "+rotationAngle);
 
 
+    // alert if tail is not found
     if(spermTail.getLengthTo(spermTip) < nucleus.getFeretsDiameter() * 0.7){
       IJ.log("    Tip to tail: "+spermTail.getLengthTo(spermTip));
       IJ.log("    Feret: "+nucleus.getFeretsDiameter());
@@ -252,11 +253,16 @@ public class Sperm_Analysis
     ip.drawDot(spermTail2.getXAsInt(), spermTail.getYAsInt());
     
 
+    // look at the 2nd derivative - rate of change of angles
+
+
     // determine hook from hump
+
 
     // get the acrosomal curve
 
     // find the signal positions
+
 
     // find lectin stains
 
@@ -419,6 +425,7 @@ public class Sperm_Analysis
     private double y;
     private double minAngle;
     private double interiorAngle; // depends on whether the min angle is inside or outside the shape
+    private double interiorAngleDelta; // this will hold the difference between a previous interiorAngle and a next interiorAngle
     private int index; // keep the original index position in case we need to change
     private boolean localMin; // is this angle a local minimum based on the minAngle
     private boolean localMax; // is this angle a local maximum based on the interior angle
@@ -477,6 +484,14 @@ public class Sperm_Analysis
 
     public void setInteriorAngle(double d){
       this.interiorAngle = d;
+    }
+
+     public double getInteriorAngleDelta(){
+      return this.interiorAngleDelta;
+    }
+
+    public void setInteriorAngleDelta(double d){
+      this.interiorAngleDelta = d;
     }
 
     public void setLocalMin(boolean b){
@@ -757,15 +772,31 @@ public class Sperm_Analysis
     	// find angle
     	// assign to angle array
 
-	    for(int i=0; i<this.smoothLength;i++){
+        for(int i=0; i<this.smoothLength;i++){
 
-	      // use a window size of 25 for now
-	      findAngleBetweenPoints(i, this.getWindowSize());
-        this.smoothedArray[i].setIndex(i);
-	    }
-      this.calculateMedianAngle();
-      IJ.log("    Measured angles with window size "+this.windowSize);
-      IJ.log("    Median angle "+this.medianAngle);
+          // use a window size of 25 for now
+          findAngleBetweenPoints(i, this.getWindowSize());
+          this.smoothedArray[i].setIndex(i);
+        }
+        this.calculateMedianAngle();
+
+        // calculate the angle deltas and store
+        double angleDelta = 0;
+        for(int i=0; i<this.smoothLength;i++){
+
+        	// handle array wrapping
+	      if(i==0){
+	      	angleDelta = this.smoothedArray[i+1].getInteriorAngle() - this.smoothedArray[this.smoothLength-1].getInteriorAngle();
+	      } else if(i==this.smoothLength-1){
+	      	angleDelta = this.smoothedArray[0].getInteriorAngle() - this.smoothedArray[i-1].getInteriorAngle();
+	      } else{
+	        angleDelta = this.smoothedArray[i+1].getInteriorAngle() - this.smoothedArray[i-1].getInteriorAngle();
+	      }
+	      this.smoothedArray[i].setInteriorAngleDelta(angleDelta);
+        }
+
+        IJ.log("    Measured angles with window size "+this.windowSize);
+        IJ.log("    Median angle "+this.medianAngle);
     }
 
     public XYPoint findMinimumAngle(){
@@ -1013,7 +1044,7 @@ public class Sperm_Analysis
         f.delete();
       }
 
-      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tL_MIN\tL_MAX", path);
+      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tL_MIN\tL_MAX", path);
       
       for(int i=0;i<this.smoothLength;i++){
 
@@ -1026,6 +1057,7 @@ public class Sperm_Analysis
                   smoothedArray[i].getInteriorAngle()+"\t"+
                   smoothedArray[i].getMinAngle()+"\t"+
                   normalisedIAngle+"\t"+
+                  smoothedArray[i].getInteriorAngleDelta()+"\t"+
                   smoothedArray[i].isLocalMin()+"\t"+
                   smoothedArray[i].isLocalMax(), path);
       }
