@@ -27,7 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
+import java.util.*;
 
 public class Sperm_Analysis
   extends ImagePlus
@@ -198,6 +198,13 @@ public class Sperm_Analysis
     XYPoint spermTip = roiArray.findMinimumAngle();
     roiArray.moveIndexToArrayStart(spermTip.getIndex());
 
+
+    // decide if the profile is right or left handed; flip if needed
+    if(!roiArray.isProfileOrientationOK()){
+      IJ.log("    Reversing array");
+      roiArray.reverseArray();
+    }
+
     
     //draw the sperm tip 
     ip.setLineWidth(5);
@@ -229,7 +236,17 @@ public class Sperm_Analysis
     // this will be the local minimum furthest from the tip
     XYPoint spermTail = findPointFurthestFrom(spermTip, minima);
     XYPoint spermTail2 = findTailPointFromMinima(spermTip, nucleusCoM, minima);
-    XYPoint spermTail3 = findTailFromDeltas(spermTip, roiArray);
+    XYPoint spermTail3 = roiArray.findTailFromDeltas(spermTip);
+
+
+    // given distinct methods for finding a tail,
+    // take a position between them on roi
+    XYPoint consensusTail = getPositionBetween(spermTail2, spermTail3, roiArray);
+
+    if(spermTail2.getLengthTo(spermTail3) > nucleus.getFeretsDiameter() * 0.3){
+      IJ.log("    Cannot reliably assign tail position");
+    }
+
 
     
     // rotate the ROI to put the tail at the top/bottom
@@ -238,22 +255,23 @@ public class Sperm_Analysis
 
 
     // alert if tail is not found
-    if(spermTail.getLengthTo(spermTip) < nucleus.getFeretsDiameter() * 0.7){
-      IJ.log("    Tip to tail: "+spermTail.getLengthTo(spermTip));
-      IJ.log("    Feret: "+nucleus.getFeretsDiameter());
-      IJ.log("    Cannot reliably assign tail position");
-    }
+    // if(spermTail.getLengthTo(spermTip) < nucleus.getFeretsDiameter() * 0.7){
+    //   IJ.log("    Tip to tail: "+spermTail.getLengthTo(spermTip));
+    //   IJ.log("    Feret: "+nucleus.getFeretsDiameter());
+    //   IJ.log("    Cannot reliably assign tail position");
+    // }
 
 
     // draw the points considered as sperm tails
     ip.setLineWidth(5);
     ip.setColor(Color.CYAN);
-    ip.drawDot(spermTail.getXAsInt(), spermTail.getYAsInt());
+    ip.drawDot(consensusTail.getXAsInt(), consensusTail.getYAsInt());
+
     ip.setLineWidth(3);
     ip.setColor(Color.GRAY);
-    ip.drawDot(spermTail2.getXAsInt(), spermTail.getYAsInt());
+    ip.drawDot(spermTail2.getXAsInt(), spermTail2.getYAsInt());
     ip.setColor(Color.ORANGE);
-    ip.drawDot(spermTail3.getXAsInt(), spermTail.getYAsInt());
+    ip.drawDot(spermTail3.getXAsInt(), spermTail3.getYAsInt());
     
 
     // look at the 2nd derivative - rate of change of angles
@@ -300,43 +318,24 @@ public class Sperm_Analysis
     roiArray.printAngleInfo();
   }
 
+  public XYPoint getPositionBetween(XYPoint pointA, XYPoint pointB, RoiArray array){
 
-  // Go through the deltas marked as consecutive blocks
-  // find the midpoints of each block
-  // get the point furthest from the tip
-  public XYPoint findTailFromDeltas(XYPoint tip, RoiArray array){
-
-  	XYPoint[] points = new XYPoint[array.getBlockCount()];
-
-  	for(int i=0; i<array.smoothLength;i++){
-
-  		for(int j=0;j<array.getBlockCount();j++){
-  			if(array.smoothedArray[i].getBlockNumber()==j-1 && points[j] != null){
-  				points[j] = array.smoothedArray[i];
-  			}
-  		}
-  	}
-  	// we have all the blocks; get the midpoints
-  	XYPoint[] finalPoints = new XYPoint[points.length];
-  	for(int i = 0; i<points.length;i++){
-  		int endIndex = points[i].getConsecutiveBlocks()+i;
-  		double midIndexD = Math.floor( (endIndex + i) / 2);
-
-  		Double obj = new Double(midIndexD);
-      	int midIndex = obj.intValue();
-  		finalPoints[i] = points[midIndex];
-
-  	}
-  	// go through the midpoints, get the max distance from tip
-  	double maxLength = 0;
-  	int maxIndex = 0;
-  	for(int i = 0; i<finalPoints.length;i++){
-  		if(finalPoints[i].getLengthTo(tip) > maxLength){
-  			maxLength = finalPoints[i].getLengthTo(tip);
-  			maxIndex = i;
-  		}
-  	}
-  	return finalPoints[maxIndex];
+    int a = 0;
+    int b = 0;
+    // find the indices that correspond on the array
+    for(int i = 0; i<array.smoothLength; i++){
+        if(array.smoothedArray[i].overlaps(pointA)){
+          a = i;
+        }
+        if(array.smoothedArray[i].overlaps(pointB)){
+          b = i;
+        }
+    }
+    // IJ.log(    "Found a="+a+", b="+b);
+    // get the midpoint
+    int mid = (int)Math.floor( (a+b) /2);
+    // IJ.log(    "Consensus tail at "+mid+": "+array.smoothedArray[mid].toString());
+    return array.smoothedArray[mid];
   }
 
   public double findRotationAngle(XYPoint tail, XYPoint centre){
@@ -473,11 +472,16 @@ public class Sperm_Analysis
     private double interiorAngle; // depends on whether the min angle is inside or outside the shape
     private double interiorAngleDelta; // this will hold the difference between a previous interiorAngle and a next interiorAngle
     private double interiorAngleDeltaSmoothed; // holds delta from a 5-window average centred on this point
+
     private int index; // keep the original index position in case we need to change
     private int numberOfConsecutiveBlocks; // holds the number of interiorAngleDeltaSmootheds > 1 degree after this point
     private int blockNumber; // identifies the group of consecutive blocks this point is part of
+    private int blockSize; // the total number of points within the block
+    private int positionWithinBlock; // stores the place within the block starting at 0
+
     private boolean localMin; // is this angle a local minimum based on the minAngle
     private boolean localMax; // is this angle a local maximum based on the interior angle
+    private boolean isMidpoint; // is this point the midpoint of a block
   
     public XYPoint (double x, double y){
       this.x = x;
@@ -567,6 +571,22 @@ public class Sperm_Analysis
       this.blockNumber = i;
     }
 
+    public int getBlockSize(){
+      return this.blockSize;
+    }
+
+    public void setBlockSize(int i){
+      this.blockSize = i;
+    }
+
+    public int getPositionWithinBlock(){
+      return this.positionWithinBlock;
+    }
+
+    public void setPositionWithinBlock(int i){
+      this.positionWithinBlock = i;
+    }
+
     public void setLocalMin(boolean b){
       this.localMin = b;
     }
@@ -583,6 +603,33 @@ public class Sperm_Analysis
       return this.localMax;
     }
 
+    public boolean isBlock(){
+      if(this.blockNumber>0){
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    // public boolean isMidpoint(){
+    //   return this.isMidpoint;
+    // }
+
+    public void setMidpoint(boolean b){
+      this.isMidpoint = b;
+    }
+
+    public boolean isMidpoint(){
+     
+      int midpoint  = (int)Math.floor(this.getBlockSize()/2);
+      if(this.getPositionWithinBlock() == midpoint){
+        this.setMidpoint(true);
+      } else {
+        this.setMidpoint(false);
+      }
+      return this.isMidpoint;
+    }
+
     public double getLengthTo(XYPoint a){
 
       // a2 = b2 + c2
@@ -594,8 +641,17 @@ public class Sperm_Analysis
       return length;
     }
 
+    public boolean overlaps(XYPoint a){
+      if( this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()){
+        return true;
+      } else {
+        return false;
+      }
+
+    }
+
     public String toString(){
-      return x+","+y;
+      return this.getXAsInt()+","+this.getYAsInt();
     }
   }
 
@@ -719,6 +775,17 @@ public class Sperm_Analysis
       return this.imagePath+"\\"+this.nucleusNumber;
     }
 
+    public void reverseArray(){
+
+      XYPoint tmp;
+
+      for (int i = 0; i < this.smoothLength / 2; i++) {
+          tmp = this.smoothedArray[i];
+          this.smoothedArray[i] = this.smoothedArray[this.smoothedArray.length - 1 - i];
+          this.smoothedArray[this.smoothedArray.length - 1 - i] = tmp;
+      }
+
+    }
     // public RoiArray flipROI(){
 
     //   // reverse the array and create a new roi
@@ -803,6 +870,63 @@ public class Sperm_Analysis
     //   System.arraycopy(this.array, 0, newArray, max_i+1, max_i); // copy over index 0 to max_i
 
     //   return newArray;
+    // }
+
+    public XYPoint[] fetchPointsWithBlockNumber(int b){
+
+      // find how many points within this block
+      int count = countPointsWithBlockNumber(b);
+      XYPoint[] array = new XYPoint[count];
+      
+      int j=0;
+      for(int i=0; i<this.smoothLength;i++){
+
+        if(this.smoothedArray[i].getBlockNumber() == b){
+          array[j] = this.smoothedArray[i];
+          j++;
+        }
+
+      }
+      return array;
+    }
+
+    public int countPointsWithBlockNumber(int b){
+
+      // find how many points within this block
+      int count = 0;
+      for(int i=0; i<this.smoothLength;i++){
+
+        if(this.smoothedArray[i].getBlockNumber() == b){
+          count++;
+        }
+
+      }
+
+      return count;
+
+    }   
+
+    public void updatePointsWithBlockCount(){
+
+      // find how many points within this block
+      for(int i=0; i<this.smoothLength;i++){
+
+        int p = countPointsWithBlockNumber(this.smoothedArray[i].getBlockNumber());
+        this.smoothedArray[i].setBlockSize(p);
+
+      }
+    }   
+
+    // public int findMaximumBlockNumber(){
+    //   int max = 0;
+    //   for(int i=0; i<this.smoothLength;i++){
+
+    //     if(this.smoothedArray[i].getBlockNumber() > max){
+    //       max == this.smoothedArray[i].getBlockNumber();
+    //     }
+
+    //   }
+    //   return max;
     // }
 
     public void findAngleBetweenPoints(int index, int window){
@@ -924,30 +1048,38 @@ public class Sperm_Analysis
 
         this.countConsecutiveDeltas();
 
-        IJ.log("    Measured angles with window size "+this.windowSize);
-        IJ.log("    Median angle "+this.medianAngle);
+        // IJ.log("    Measured angles with window size "+this.windowSize);
+        // IJ.log("    Median angle "+this.medianAngle);
     }
 
     public void countConsecutiveDeltas(){
     	
-    	int blockNumber = 1;
-    	for(int i=0;i<this.smoothLength;i++){
+    	int blockNumber = 0;
+    	for(int i=0;i<this.smoothLength;i++){ // iterate over every point in the array
+
     		int count = 0;
-    		if(this.smoothedArray[i].getInteriorAngleDeltaSmoothed() < 1){
+    		if(this.smoothedArray[i].getInteriorAngleDeltaSmoothed() < 1){ // if the current XYPoint has an angle < 1, move on
     			this.smoothedArray[i].setConsecutiveBlocks(0);
     			this.smoothedArray[i].setBlockNumber(0);
+          this.smoothedArray[i].setPositionWithinBlock(0);
     			continue;
     		}
 
-    		for(int j=1;j<this.smoothLength-i;j++){ // next point on until up to end of array
+        int positionInBlock = i==0
+                            ? 0
+                            : this.smoothedArray[i-1].getPositionWithinBlock() + 1; // unless first element of array, use prev value++
+    		
+        for(int j=1;j<this.smoothLength-i;j++){ // next point on until up to end of array
     			if(this.smoothedArray[i+j].getInteriorAngleDeltaSmoothed() >= 1){
     				count++;
+
     			} else {
     				break; // stop counting on first point below 1 degree delta
     			}
     		}
     		
     		this.smoothedArray[i].setConsecutiveBlocks(count);
+        this.smoothedArray[i].setPositionWithinBlock(positionInBlock);
     		if(i>0){
 	    		if(this.smoothedArray[i-1].getBlockNumber()==0){
 	    			blockNumber++;
@@ -956,7 +1088,8 @@ public class Sperm_Analysis
     		this.smoothedArray[i].setBlockNumber(blockNumber);
     		
     	}
-    	this.blockCount = blockNumber;
+
+    	this.setBlockCount(blockNumber);
     }
 
     public XYPoint findMinimumAngle(){
@@ -983,6 +1116,36 @@ public class Sperm_Analysis
       return this.smoothedArray[minIndex];
     }
 
+    public boolean isProfileOrientationOK(){
+
+      if(!this.anglesCalculated){
+        this.makeAngleArray();
+      }
+      if(!this.minimaCalculated){
+        this.detectLocalMinima();
+      }
+
+      double maxAngle = 0.0;
+      int maxIndex = 0;
+      for(int i=0; i<this.smoothLength;i++){
+
+          double angle = this.smoothedArray[i].getInteriorAngle();
+          if(angle>maxAngle){
+            maxAngle = angle;
+            maxIndex = i;
+          }
+
+          // IJ.log(i+" \t "+angle+" \t "+minAngle+"  "+minIndex);
+      }
+      // IJ.log("    Maximum angle "+maxAngle+" at "+maxIndex);
+
+      if(this.smoothLength - maxIndex < maxIndex){ // if the maxIndex is closer to the end than the beginning
+        return false;
+      } else{ 
+        return true;
+      }
+    }
+
     // retrieve an array of the points designated as local minima
     public XYPoint[] getLocalMinima(){
 
@@ -1004,7 +1167,7 @@ public class Sperm_Analysis
         IJ.log("    Error in minima detection: "+e);
       }
 
-      IJ.log("    Detected "+j+" local minima with lookup size "+this.minimaLookupDistance);
+      // IJ.log("    Detected "+j+" local minima with lookup size "+this.minimaLookupDistance);
       return newArray;
     }
 
@@ -1027,7 +1190,7 @@ public class Sperm_Analysis
         IJ.log("    Error in maxima detection: "+e);
       }
 
-      IJ.log("    Detected "+j+" local maxima with lookup size "+this.minimaLookupDistance);
+      // IJ.log("    Detected "+j+" local maxima with lookup size "+this.minimaLookupDistance);
       return newArray;
     }
 
@@ -1177,6 +1340,57 @@ public class Sperm_Analysis
       this.maximaCount =  count;
     }
 
+      // Go through the deltas marked as consecutive blocks
+      // find the midpoints of each block
+      // get the point furthest from the tip
+    public XYPoint findTailFromDeltas(XYPoint tip){
+
+
+      // get the midpoint of each block
+      ArrayList results = new ArrayList<XYPoint>(0);
+      int maxIndex = 0;
+    
+      // remember that block 0 is not assigned; start from 1
+      try{
+
+        this.updatePointsWithBlockCount();
+        for(int i=1; i<this.getBlockCount();i++){
+
+          // number of points in each block
+
+          XYPoint[] points = this.fetchPointsWithBlockNumber(i);
+          for(XYPoint p : points){
+            if(p.isMidpoint()){ // will ignore any blocks without a midpoint established - <2 members
+              results.add(p);
+              // IJ.log("    Midpoint found for block "+i);
+            }
+          }
+        }
+        // IJ.log("    "+results.size()+" blocks");
+      } catch(Exception e){
+        IJ.log("    Error in finding midpoints: findTailFromDeltas(): "+e);
+      }
+      
+      XYPoint tail = new XYPoint(0,0);
+      try{
+        // go through the midpoints, get the max distance from tip
+        double maxLength = 0;
+        
+        for(Object o : results){
+          XYPoint p = (XYPoint)o;
+          if(p.getLengthTo(tip) > maxLength){
+            maxLength = p.getLengthTo(tip);
+            tail = p;
+          }
+        }
+      } catch(Exception e){
+        IJ.log("    Error in finding lengths: findTailFromDeltas(): "+e);
+      }
+       // IJ.log("    Midpoint decided at "+tail.toString());
+      return tail;
+    }
+
+
     // the array double[] m MUST BE SORTED
     public void calculateMedianAngle() {
 
@@ -1204,7 +1418,7 @@ public class Sperm_Analysis
         f.delete();
       }
 
-      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tCONSECUTIVE_BLOCKS\tBLOCK_NUMBER\tL_MIN\tL_MAX", path);
+      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK", path);
       
       for(int i=0;i<this.smoothLength;i++){
 
@@ -1219,10 +1433,12 @@ public class Sperm_Analysis
                   normalisedIAngle+"\t"+
                   smoothedArray[i].getInteriorAngleDelta()+"\t"+
                   smoothedArray[i].getInteriorAngleDeltaSmoothed()+"\t"+
-                  smoothedArray[i].getConsecutiveBlocks()+"\t"+
+                  smoothedArray[i].getPositionWithinBlock()+"\t"+
                   smoothedArray[i].getBlockNumber()+"\t"+
                   smoothedArray[i].isLocalMin()+"\t"+
-                  smoothedArray[i].isLocalMax(), path);
+                  smoothedArray[i].isLocalMax()+"\t"+
+                  smoothedArray[i].isMidpoint()+"\t"+
+                  smoothedArray[i].isBlock(), path);
       }
     }
   }
