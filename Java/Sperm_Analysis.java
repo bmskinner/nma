@@ -4,6 +4,7 @@ import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.DirectoryChooser;
@@ -40,14 +41,17 @@ public class Sperm_Analysis
 
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
   private static final int SIGNAL_THRESHOLD = 70;
-  private static final int NUCLEUS_THRESHOLD = 36;
-
+  
   private static final double ANGLE_THRESHOLD = 40.0; // when calculating local minima, ignore angles above this
+
+  /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
+  private static final int NUCLEUS_THRESHOLD = 40;
   private static final double MIN_NUCLEAR_SIZE = 500;
   private static final double MAX_NUCLEAR_SIZE = 7000;
   private static final double MIN_NUCLEAR_CIRC = 0.3;
-  private static final double MAX_NUCLEAR_CIRC = 0.9;
+  private static final double MAX_NUCLEAR_CIRC = 0.8;
   private static final double PROFILE_INCREMENT = 0.2;
+
   private Plot linePlot;
 
   private String logFile;
@@ -77,8 +81,8 @@ public class Sperm_Analysis
             "Angle");
     linePlot.setLimits(0,100,-180,360);
     linePlot.setSize(800,600);
-    linePlot.setColor(Color.BLUE);
-    linePlot.show();
+    linePlot.setYTicks(true);
+    PlotWindow plotWindow = linePlot.show();
 
     for (File file : listOfFiles) {
       if (file.isFile()) {
@@ -107,10 +111,15 @@ public class Sperm_Analysis
       }
     }
 
-    // output the final results
+
+    // output the final results: calculate median positions
     IJ.append("", this.logFile);
     IJ.append("# MEDIANS", this.logFile);
-    for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
+    // double[] xmedians = new double[500];
+    // double[] ymedians = new double[500];
+    for(int m = 0; m<1000;m+=2){
+    // for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
+      double k = m/10;
 
       try{
           Collection<Double> values = finalResults.get(k);
@@ -125,11 +134,16 @@ public class Sperm_Analysis
                 median = (double) d[d.length/2];
             
             IJ.append(k+"\t"+median, this.logFile);
+            xmedians[m] = k;
+            ymedians[m] = median;
           }
         } catch(Exception e){
              IJ.log("Cannot calculate median for "+k);
         }
     }
+    // linePlot.setColor(Color.BLACK);
+    // linePlot.addPoints(xmedians, ymedians, Plot.LINE);
+    // linePlot.draw();
   }
 
   public void processImage(ImagePlus image, String path){
@@ -151,8 +165,9 @@ public class Sperm_Analysis
         // carry out the group processing - eg find median lines
         if(rt.size()>0){
           // add values to pool
-          for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
-
+          for(int m=0;m<1000;m+=2){
+          // for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
+            double k = m/10;
             for(int j=0;j<rt.size();j++){
 
                 double[] d = (double[])rt.get(j);
@@ -178,6 +193,7 @@ public class Sperm_Analysis
               ypoints[j] = d[1];
 
           }
+          linePlot.setColor(Color.BLUE);
           linePlot.addPoints(xpoints, ypoints, Plot.LINE);
           linePlot.draw();
 
@@ -249,6 +265,10 @@ public class Sperm_Analysis
 
   public ArrayList analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
     
+    // results table
+    ArrayList rt = new ArrayList(0);
+
+
     // make a copy of the nucleus only for saving out and processing
     image.setRoi(nucleus);
     image.copy();
@@ -286,6 +306,10 @@ public class Sperm_Analysis
 
     // find tip - use the least angle method
     XYPoint spermTip = roiArray.findMinimumAngle();
+    if(spermTip.getInteriorAngle() > 110){ // this is not a deep enough curve to declare the tip
+        IJ.log("    Cannot reliably assign tip position");
+        return rt;
+    }
     roiArray.moveIndexToArrayStart(spermTip.getIndex());
 
 
@@ -340,8 +364,6 @@ public class Sperm_Analysis
     XYPoint consensusTail = getPositionBetween(spermTail2, spermTail3, roiArray);
 
 
-    ArrayList rt = new ArrayList(0);
-
     if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.3){
 
        for (int i=0; i<roiArray.smoothLength;i++ ) {
@@ -356,6 +378,7 @@ public class Sperm_Analysis
 
     } else {
       IJ.log("    Cannot reliably assign tail position");
+      return rt;
     }
 
 
