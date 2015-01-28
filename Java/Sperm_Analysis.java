@@ -3,6 +3,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.gui.Plot;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.DirectoryChooser;
@@ -21,7 +22,10 @@ import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
 import ij.process.StackConverter;
 import java.awt.BasicStroke;
+import java.awt.Shape;
 import java.awt.Color;
+import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
 import java.awt.Polygon;
 import java.io.File;
 import java.io.IOException;
@@ -36,19 +40,45 @@ public class Sperm_Analysis
 
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
   private static final int SIGNAL_THRESHOLD = 70;
-  private static final int NUCLEUS_THRESHOLD = 45;
+  private static final int NUCLEUS_THRESHOLD = 36;
+
   private static final double ANGLE_THRESHOLD = 40.0; // when calculating local minima, ignore angles above this
+  private static final double MIN_NUCLEAR_SIZE = 500;
+  private static final double MAX_NUCLEAR_SIZE = 7000;
+  private static final double MIN_NUCLEAR_CIRC = 0.3;
+  private static final double MAX_NUCLEAR_CIRC = 0.9;
+  private static final double PROFILE_INCREMENT = 0.2;
+  private Plot linePlot;
+
+  private String logFile;
+
+  private Map<Double, Collection<Double>> finalResults = new HashMap<Double, Collection<Double>>();
   
   public void run(String paramString)  {
 
     DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
     String folderName = localOpenDialog.getDirectory();
 
+    this.logFile = folderName+"log.txt";
+    File f = new File(logFile);
+    if(f.exists()){
+      f.delete();
+    }
+
     IJ.showStatus("Opening directory: " + folderName);
     IJ.log("Directory: "+folderName);
 
     File folder = new File(folderName);
     File[] listOfFiles = folder.listFiles();
+
+
+    this.linePlot = new Plot("Profiles in "+folderName,
+            "Position",
+            "Angle");
+    linePlot.setLimits(0,100,-180,360);
+    linePlot.setSize(800,600);
+    linePlot.setColor(Color.BLUE);
+    linePlot.show();
 
     for (File file : listOfFiles) {
       if (file.isFile()) {
@@ -76,6 +106,30 @@ public class Sperm_Analysis
         }
       }
     }
+
+    // output the final results
+    IJ.append("", this.logFile);
+    IJ.append("# MEDIANS", this.logFile);
+    for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
+
+      try{
+          Collection<Double> values = finalResults.get(k);
+
+          if(values.size()> 0){
+            Double[] d = values.toArray(new Double[0]);
+            Arrays.sort(d);
+            double median;
+            if (d.length % 2 == 0)
+                median = ((double)d[d.length/2] + (double)d[d.length/2 - 1])/2;
+            else
+                median = (double) d[d.length/2];
+            
+            IJ.append(k+"\t"+median, this.logFile);
+          }
+        } catch(Exception e){
+             IJ.log("Cannot calculate median for "+k);
+        }
+    }
   }
 
   public void processImage(ImagePlus image, String path){
@@ -90,8 +144,46 @@ public class Sperm_Analysis
 
       for(Roi roi : roiArray){
 
+        // get the profile (and other) data back for the nucleus
         IJ.log("  Analysing nucleus "+i);
-        analyseNucleus(roi, image, i, path);
+        ArrayList rt = analyseNucleus(roi, image, i, path);
+
+        // carry out the group processing - eg find median lines
+        if(rt.size()>0){
+          // add values to pool
+          for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
+
+            for(int j=0;j<rt.size();j++){
+
+                double[] d = (double[])rt.get(j);
+               
+                if( d[0] > k && d[0] < k+PROFILE_INCREMENT){
+
+                    Collection<Double> values = finalResults.get(k);
+                    if (values==null) {
+                        values = new ArrayList<Double>();
+                        finalResults.put(k, values);
+                    }
+                    values.add(d[1]);
+
+                }
+            }
+          }
+
+          double[] xpoints = new double[rt.size()];
+          double[] ypoints = new double[rt.size()];
+          for(int j=0;j<rt.size();j++){
+              double[] d = (double[])rt.get(j);
+              xpoints[j] = d[0];
+              ypoints[j] = d[1];
+
+          }
+          linePlot.addPoints(xpoints, ypoints, Plot.LINE);
+          linePlot.draw();
+
+        }
+
+
         i++;
       }
 
@@ -103,10 +195,6 @@ public class Sperm_Analysis
   // within image, look for nuclei. Return as what? Array of Roi arrays?
   public RoiManager findNucleiInImage(ImagePlus image){
 
-    double minSize = 500;
-    double maxSize = 7000;
-    double minCirc = 0.3;
-    double maxCirc = 1;
     RoiManager manager = new RoiManager(true);
 
     // split out blue channel
@@ -123,7 +211,9 @@ public class Sperm_Analysis
 
     // run the particle analyser
     ResultsTable rt = new ResultsTable();
-    ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA , rt, minSize, maxSize, minCirc, maxCirc);
+    ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
+                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA ,
+                 rt, MIN_NUCLEAR_SIZE, MAX_NUCLEAR_SIZE, MIN_NUCLEAR_CIRC, MAX_NUCLEAR_CIRC);
     try {
       pa.setRoiManager(manager);
       boolean success = pa.analyze(blue);
@@ -157,7 +247,7 @@ public class Sperm_Analysis
     return dir.toString();
   }
 
-  public void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
+  public ArrayList analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
     
     // make a copy of the nucleus only for saving out and processing
     image.setRoi(nucleus);
@@ -234,54 +324,99 @@ public class Sperm_Analysis
 
     // find the tail point - two methods. Do they agree?
     // this will be the local minimum furthest from the tip
-    XYPoint spermTail = findPointFurthestFrom(spermTip, minima);
+    XYPoint spermTail1 = findPointFurthestFrom(spermTip, minima);
     XYPoint spermTail2 = findTailPointFromMinima(spermTip, nucleusCoM, minima);
+        // look at the 2nd derivative - rate of change of angles
+    // can we use the width of the regions above 0 to predict a tail corner?
+    // perform a 5win average smoothing of the deltas
+    // count the number of consecutive >1 degree blocks
+    // wide block far from tip = tail
     XYPoint spermTail3 = roiArray.findTailFromDeltas(spermTip);
 
 
     // given distinct methods for finding a tail,
     // take a position between them on roi
+    // Ignoring spermTail1 because almost always overlaps spermTail2
     XYPoint consensusTail = getPositionBetween(spermTail2, spermTail3, roiArray);
 
-    if(spermTail2.getLengthTo(spermTail3) > nucleus.getFeretsDiameter() * 0.3){
+
+    ArrayList rt = new ArrayList(0);
+
+    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.3){
+
+       for (int i=0; i<roiArray.smoothLength;i++ ) {
+          double profileX = ((double)i/(double)roiArray.smoothLength)*100; // normalise to 100 length
+          double[] d = new double[] { profileX, roiArray.smoothedArray[i].getInteriorAngle() };
+          IJ.append(profileX+"\t"+roiArray.smoothedArray[i].getInteriorAngle(), this.logFile);
+          // rt.addValue("PROFILE_POSITION", profileX);
+          // rt.addValue("INTERIOR_ANGLE", roiArray.smoothedArray[i].getInteriorAngle());
+          rt.add(d);
+        }
+        IJ.append("", this.logFile);
+
+    } else {
       IJ.log("    Cannot reliably assign tail position");
     }
 
 
+    // Export the .profiles and create gunplot .plots to show
+    // Scale the profile to 100 for export
+   
     
+
+    // Include tip, CoM, tail
+    roiArray.printLogFile();
+
+
     // rotate the ROI to put the tail at the top/bottom
-    // double rotationAngle = findRotationAngle(spermTail, nucleusCoM);
-    // IJ.log("    Rotate by "+rotationAngle);
+    // save/export the rotated coordinates for schematic plot
 
+    double rotationAngleD = findRotationAngle(consensusTail, nucleusCoM);
+    double rotationAngleR = Math.toRadians(rotationAngleD); 
+    // IJ.log("    Rotate by "+rotationAngleD);
+    final AffineTransform at = AffineTransform.getRotateInstance(rotationAngleR,
+                                                                  nucleusCoM.getX(), 
+                                                                  nucleusCoM.getY() 
+    );
+    PathIterator p = roiArray.getPolygon().getPathIterator(at);
+    // go through path iterator and export points
+    String file = roiArray.getPathWithoutExtension()+"\\"+roiArray.getNucleusNumber()+".schematic";
+    File f = new File(file);
+    if(f.exists()){
+      f.delete();
+    }
 
-    // alert if tail is not found
-    // if(spermTail.getLengthTo(spermTip) < nucleus.getFeretsDiameter() * 0.7){
-    //   IJ.log("    Tip to tail: "+spermTail.getLengthTo(spermTip));
-    //   IJ.log("    Feret: "+nucleus.getFeretsDiameter());
-    //   IJ.log("    Cannot reliably assign tail position");
-    // }
+    FloatPolygon rotatedPolygon = new FloatPolygon();
+    IJ.append("ROT_X\tROT_Y", file);
+    while(!p.isDone()){
+      double[] coords = new double[2];
+      int i = p.currentSegment(coords);
+      if(i==p.SEG_LINETO){
+        IJ.append(coords[0]+"\t"+coords[1], file);
+        rotatedPolygon.addPoint(coords[0], coords[1]);
+      }
+      p.next();
+    }
 
-
-    // draw the points considered as sperm tails
-    ip.setLineWidth(5);
-    ip.setColor(Color.CYAN);
-    ip.drawDot(consensusTail.getXAsInt(), consensusTail.getYAsInt());
-
-    ip.setLineWidth(3);
-    ip.setColor(Color.GRAY);
-    ip.drawDot(spermTail2.getXAsInt(), spermTail2.getYAsInt());
-    ip.setColor(Color.ORANGE);
-    ip.drawDot(spermTail3.getXAsInt(), spermTail3.getYAsInt());
-    
-
-    // look at the 2nd derivative - rate of change of angles
-    // can we use the width of the regions above 0 to predict a tail corner?
-    // perform a 5win average smoothing of the deltas
-    // count the number of consecutive >1 degree blocks
-    // wide block far from tip = tail?
+    // LOOKS LIKE WE NEED TO MAKE A NEW ROIARRAY BASED ON THE ROTATED POLYGON
+    // create a float polygon from the rotated coordinates. Use this to make an roiarray.
+    // redo the interpolation and smoothing.
+    // get the tip
+    PolygonRoi rotatedRoi = new PolygonRoi(rotatedPolygon, Roi.POLYGON);
+    RoiArray rotatedRoiArray = new RoiArray(rotatedRoi);
+    rotatedRoiArray.setPath(path);
+    rotatedRoiArray.setNucleusNumber(nucleusNumber);
     
 
     // determine hook from hump
+    // the CoM should not have changed, as this was the rotation point
+    // the sperm tip will always be the hook side; which way does it point?
+    XYPoint rotatedSpermTip = rotatedRoiArray.findMinimumAngle();
+    rotatedRoiArray.moveIndexToArrayStart(rotatedSpermTip.getIndex());
+    if(rotatedSpermTip.getX() < nucleusCoM.getX()){
+      rotatedRoiArray.flipXAroundPoint(nucleusCoM);
+    }
+    // rotatedRoiArray.printLogFile();
 
 
     // get the acrosomal curve
@@ -299,6 +434,19 @@ public class Sperm_Analysis
     // get signal roi
 
 
+
+    // draw the points considered as sperm tails
+    ip.setLineWidth(5);
+    ip.setColor(Color.CYAN);
+    ip.drawDot(consensusTail.getXAsInt(), consensusTail.getYAsInt());
+
+    ip.setLineWidth(3);
+    ip.setColor(Color.GRAY);
+    ip.drawDot(spermTail2.getXAsInt(), spermTail2.getYAsInt());
+    ip.setColor(Color.ORANGE);
+    ip.drawDot(spermTail3.getXAsInt(), spermTail3.getYAsInt());
+
+
     String saveFolder = createImageDirectory(roiArray.getPathWithoutExtension());
     IJ.saveAsTiff(smallRegion, saveFolder+"\\"+roiArray.getNucleusNumber()+".tiff");
 
@@ -313,9 +461,8 @@ public class Sperm_Analysis
     // ip.rotate(rotationAngle);
     // ImagePlus finalImage = new ImagePlus("Image", ip);
     // IJ.saveAsTiff(finalImage, saveFolder+"\\"+roiArray.getNucleusNumber()+".final.tiff");
+    return rt;
 
-
-    roiArray.printAngleInfo();
   }
 
   public XYPoint getPositionBetween(XYPoint pointA, XYPoint pointB, RoiArray array){
@@ -666,6 +813,7 @@ public class Sperm_Analysis
     private int smoothLength;
     private int minimaLookupDistance = 5;
     private int blockCount = 0;
+    private int DELTA_WINDOW_MIN = 5;
 
     private double medianAngle;
 
@@ -711,6 +859,10 @@ public class Sperm_Analysis
       }
 
       
+    }
+
+    public Polygon getPolygon(){
+      return this.polygon;
     }
 
     public void setWindowSize(int i){
@@ -786,7 +938,19 @@ public class Sperm_Analysis
       }
 
     }
-    // public RoiArray flipROI(){
+    public void flipXAroundPoint(XYPoint p){
+
+      double xCentre = p.getX();
+
+      for(int i = 0; i<this.smoothLength;i++){
+
+        double dx = xCentre - this.smoothedArray[i].getX();
+        double xNew = xCentre + dx;
+        this.smoothedArray[i].setX(xNew);
+      }
+
+    }
+
 
     //   // reverse the array and create a new roi
 
@@ -1410,7 +1574,7 @@ public class Sperm_Analysis
 
 
 
-    public void printAngleInfo(){
+    public void printLogFile(){
 
       String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
       File f = new File(path);
@@ -1418,11 +1582,14 @@ public class Sperm_Analysis
         f.delete();
       }
 
-      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK", path);
+      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X", path);
       
       for(int i=0;i<this.smoothLength;i++){
 
         double normalisedIAngle = smoothedArray[i].getInteriorAngle()-180;
+        // double length = this.smoothLength;
+        double profileX = ((double)i/(double)this.smoothLength)*100; // normalise to 100 length
+        // IJ.log("i: "+i+" length: "+this.smoothLength+" profile: "+profileX);
 
         IJ.append(smoothedArray[i].getXAsInt()+"\t"+
                   smoothedArray[i].getYAsInt()+"\t"+
@@ -1438,7 +1605,9 @@ public class Sperm_Analysis
                   smoothedArray[i].isLocalMin()+"\t"+
                   smoothedArray[i].isLocalMax()+"\t"+
                   smoothedArray[i].isMidpoint()+"\t"+
-                  smoothedArray[i].isBlock(), path);
+                  smoothedArray[i].isBlock()+"\t"+
+                  profileX, 
+                  path);
       }
     }
   }
