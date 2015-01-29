@@ -12,6 +12,7 @@ import ij.io.Opener;
 import ij.io.OpenDialog;
 import ij.io.RandomAccessStream;
 import ij.measure.ResultsTable;
+import ij.measure.SplineFitter;
 import ij.plugin.ChannelSplitter;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
@@ -82,6 +83,7 @@ public class Sperm_Analysis
     linePlot.setLimits(0,100,-180,360);
     linePlot.setSize(800,600);
     linePlot.setYTicks(true);
+    linePlot.setColor(Color.BLUE);
     PlotWindow plotWindow = linePlot.show();
 
     for (File file : listOfFiles) {
@@ -115,11 +117,12 @@ public class Sperm_Analysis
     // output the final results: calculate median positions
     IJ.append("", this.logFile);
     IJ.append("# MEDIANS", this.logFile);
-    // double[] xmedians = new double[500];
-    // double[] ymedians = new double[500];
-    for(int m = 0; m<1000;m+=2){
-    // for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
-      double k = m/10;
+
+    double[] xmedians = new double[500];
+    double[] ymedians = new double[500];
+
+    int m = 0;
+    for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
 
       try{
           Collection<Double> values = finalResults.get(k);
@@ -128,29 +131,36 @@ public class Sperm_Analysis
             Double[] d = values.toArray(new Double[0]);
             Arrays.sort(d);
             double median;
-            if (d.length % 2 == 0)
+            if (d.length % 2 == 0){
                 median = ((double)d[d.length/2] + (double)d[d.length/2 - 1])/2;
-            else
+            }
+            else{
                 median = (double) d[d.length/2];
-            
-            IJ.append(k+"\t"+median, this.logFile);
+            }
+           
             xmedians[m] = k;
             ymedians[m] = median;
+            IJ.append(xmedians[m]+"\t"+ymedians[m], this.logFile);
           }
         } catch(Exception e){
              IJ.log("Cannot calculate median for "+k);
-        }
+             xmedians[m] = k;
+             ymedians[m] = 0;
+        } finally {
+        	m++;
+    	}
     }
-    // linePlot.setColor(Color.BLACK);
-    // linePlot.addPoints(xmedians, ymedians, Plot.LINE);
-    // linePlot.draw();
+
+    linePlot.setColor(Color.BLACK);
+    linePlot.setLineWidth(3);
+    linePlot.addPoints(xmedians, ymedians, Plot.LINE);
+    linePlot.draw();
   }
 
   public void processImage(ImagePlus image, String path){
 
     RoiManager nucleiInImage;
 
-    try {
       nucleiInImage = findNucleiInImage(image);
 
       Roi[] roiArray = nucleiInImage.getSelectedRoisAsArray();
@@ -158,16 +168,22 @@ public class Sperm_Analysis
 
       for(Roi roi : roiArray){
 
+      	ArrayList rt = new ArrayList(0);
         // get the profile (and other) data back for the nucleus
         IJ.log("  Analysing nucleus "+i);
-        ArrayList rt = analyseNucleus(roi, image, i, path);
+        try{
+        	rt = analyseNucleus(roi, image, i, path);
+        } catch(Exception e){
+        	IJ.log("  Error analysing nucleus: "+e);
+        }
 
         // carry out the group processing - eg find median lines
+        try{
         if(rt.size()>0){
           // add values to pool
-          for(int m=0;m<1000;m+=2){
-          // for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
-            double k = m/10;
+
+          for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
+
             for(int j=0;j<rt.size();j++){
 
                 double[] d = (double[])rt.get(j);
@@ -201,11 +217,11 @@ public class Sperm_Analysis
 
 
         i++;
+      } catch(NullPointerException e){
+         IJ.log("  Error processing nucleus data: "+e);
       }
 
-    } catch(NullPointerException e){
-         IJ.log("  Error: "+e);
-    }
+    } 
   }
 
   // within image, look for nuclei. Return as what? Array of Roi arrays?
@@ -385,6 +401,19 @@ public class Sperm_Analysis
     // Export the .profiles and create gunplot .plots to show
     // Scale the profile to 100 for export
    
+
+   	// EXPERIMENT WITH SPLINE FITTING
+   	// roiArray.updateSplineArray();
+   	// XYPoint[] splines = new XYPoint[roiArray.smoothLength];
+   	// SplineFitter spf = new SplineFitter(roiArray.getXasArray(), roiArray.getYasArray(), roiArray.getLength()+1, true); // true  = closed curve
+   	// for(int i=0; i<roiArray.smoothLength;i++) {
+   	// 	double profileX = ((double)i/(double)this.smoothLength)*100;
+   	// 	double splineY = spf.evalSpline(roiArray.smoothedArray[i].getX());
+   	// 	XYPoint p = new XYPoint(roiArray.smoothedArray[i].getX(), splineY);
+   	// 	// IJ.log("    Spline: "+splineY);
+   	// 	splines[i] = p;
+   	// }
+   	// roiArray.setSplineArray(splines);
     
 
     // Include tip, CoM, tail
@@ -833,7 +862,7 @@ public class Sperm_Analysis
     private int minimaCount; // the number of local minima detected in the array
     private int maximaCount; // the number of local minima detected in the array
     private int length;
-    private int smoothLength;
+    private int smoothLength = 0;
     private int minimaLookupDistance = 5;
     private int blockCount = 0;
     private int DELTA_WINDOW_MIN = 5;
@@ -842,6 +871,7 @@ public class Sperm_Analysis
 
     private XYPoint[] array; // this will hold the index and angle as well
     private XYPoint[] smoothedArray; // this allows the same calculations on interpolated array
+    private XYPoint[] splineArray; // holds spline values.
     
     private String imagePath;
 
@@ -894,6 +924,12 @@ public class Sperm_Analysis
 
     public int getWindowSize(){
     	return this.windowSize;
+    }
+    /* 
+    Find the smoothed length of the array
+    */
+    public int getLength(){
+    	return this.smoothLength;
     }
 
     public void setPath(String path){
@@ -974,7 +1010,87 @@ public class Sperm_Analysis
 
     }
 
+    /*
+	Get the X values from the smoothed array as a float array
+	To be used for spline fitting experiment, hence needs to have the first element duplicated
+    */
+    public float[] getXasArray(){
 
+    	float[] newArray = new float[this.smoothLength+1]; // allow the first and last element to be duplicated
+    	for(int i=0;i<this.smoothLength;i++){
+    		newArray[i] = (float)this.smoothedArray[i].getX();
+    	}
+
+    	newArray[this.smoothLength] = newArray[0];
+
+    	return newArray;
+    }
+
+    /*
+	Get the Y values from the smoothed array as a float array
+	To be used for spline fitting experiment, hence needs to have the first element duplicated
+    */
+    public float[] getYasArray(){
+
+    	float[] newArray = new float[this.smoothLength+1]; // allow the first and last element to be duplicated
+    	for(int i=0;i<this.smoothLength;i++){
+    		newArray[i] = (float)this.smoothedArray[i].getY();
+    	}
+
+    	newArray[this.smoothLength] = newArray[0];
+
+    	return newArray;
+    }
+    /*
+	The spline array
+    */
+    public void setSplineArray(XYPoint[] p){
+    	this.splineArray = p;
+    }
+
+    public XYPoint[] getSplineArray(){
+    	return this.splineArray;
+    }
+
+    public void updateSplineArray(){
+
+    	XYPoint[] splines = new XYPoint[this.smoothLength];
+    	float[] profileArray = this.getProfileArray();
+    	float[] angleArray = this.getAnglesAsArray();
+
+	   	SplineFitter spf = new SplineFitter(profileArray, angleArray, this.getLength()+1, false); // true  = closed curve
+	   	
+	   	for(int i=0; i<this.smoothLength;i++) {
+	   		double splineY = spf.evalSpline(profileArray[i]);
+	   		XYPoint p = new XYPoint(profileArray[i], splineY);
+	   		// IJ.log("    Spline: "+splineY);
+	   		splines[i] = p;
+	   	}
+	   	this.setSplineArray(splines);
+	}
+
+	public float[] getProfileArray(){
+
+		float[] newArray = new float[this.smoothLength+1];
+		for(int i=0; i<this.smoothLength;i++) {
+			float profileX = ((float)i/(float)this.smoothLength)*100; // normalise to 100 length
+			newArray[i] = profileX;
+		}
+		newArray[this.smoothLength] = newArray[0];
+		return newArray;
+	}
+
+	public float[] getAnglesAsArray(){
+
+    	float[] newArray = new float[this.smoothLength+1]; // allow the first and last element to be duplicated
+    	for(int i=0;i<this.smoothLength;i++){
+    		newArray[i] = (float)this.smoothedArray[i].getInteriorAngle();
+    	}
+
+    	newArray[this.smoothLength] = newArray[0];
+
+    	return newArray;
+    }
     //   // reverse the array and create a new roi
 
     //   RoiArray newArray = new RoiArray(this.points);
@@ -1629,7 +1745,7 @@ public class Sperm_Analysis
                   smoothedArray[i].isLocalMax()+"\t"+
                   smoothedArray[i].isMidpoint()+"\t"+
                   smoothedArray[i].isBlock()+"\t"+
-                  profileX, 
+                  profileX,
                   path);
       }
     }
