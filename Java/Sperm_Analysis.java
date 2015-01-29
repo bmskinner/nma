@@ -51,7 +51,7 @@ public class Sperm_Analysis
   private static final double MAX_NUCLEAR_SIZE = 7000;
   private static final double MIN_NUCLEAR_CIRC = 0.3;
   private static final double MAX_NUCLEAR_CIRC = 0.8;
-  private static final double PROFILE_INCREMENT = 0.2;
+  private static final double PROFILE_INCREMENT = 0.5;
 
   private Plot linePlot;
 
@@ -83,7 +83,7 @@ public class Sperm_Analysis
     linePlot.setLimits(0,100,-180,360);
     linePlot.setSize(800,600);
     linePlot.setYTicks(true);
-    linePlot.setColor(Color.BLUE);
+    linePlot.setColor(Color.  LIGHT_GRAY);
     PlotWindow plotWindow = linePlot.show();
 
     for (File file : listOfFiles) {
@@ -116,10 +116,15 @@ public class Sperm_Analysis
 
     // output the final results: calculate median positions
     IJ.append("", this.logFile);
-    IJ.append("# MEDIANS", this.logFile);
+    IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.logFile);
 
-    double[] xmedians = new double[500];
-    double[] ymedians = new double[500];
+    int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
+    double[] xmedians = new double[arraySize];
+    double[] ymedians = new double[arraySize];
+    double[] lowQuartiles = new double[arraySize];
+    double[] uppQuartiles = new double[arraySize];
+    double[] tenQuartiles = new double[arraySize];
+    double[] ninetyQuartiles = new double[arraySize];
 
     int m = 0;
     for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
@@ -129,23 +134,36 @@ public class Sperm_Analysis
 
           if(values.size()> 0){
             Double[] d = values.toArray(new Double[0]);
-            Arrays.sort(d);
-            double median;
-            if (d.length % 2 == 0){
-                median = ((double)d[d.length/2] + (double)d[d.length/2 - 1])/2;
-            }
-            else{
-                median = (double) d[d.length/2];
-            }
+            int n = d.length;
+
+            // Arrays.sort(d);
+            double median = quartile(d, 50.0);
+            double q1 = quartile(d, 25.0);
+            double q3 = quartile(d, 75.0);
+            double q10 = quartile(d, 10.0);
+            double q90 = quartile(d, 90.0);
            
             xmedians[m] = k;
             ymedians[m] = median;
-            IJ.append(xmedians[m]+"\t"+ymedians[m], this.logFile);
+            lowQuartiles[m] = q1;
+            uppQuartiles[m] = q3;
+            tenQuartiles[m] = q10;
+            ninetyQuartiles[m] = q90;
+
+            IJ.append(xmedians[m]+"\t"+
+                      ymedians[m]+"\t"+
+                      lowQuartiles[m]+"\t"+
+                      uppQuartiles[m]+"\t"+
+                      tenQuartiles[m]+"\t"+
+                      ninetyQuartiles[m]+"\t"+
+                      n, this.logFile);
           }
         } catch(Exception e){
              IJ.log("Cannot calculate median for "+k);
              xmedians[m] = k;
              ymedians[m] = 0;
+             lowQuartiles[m] = 0;
+             uppQuartiles[m] = 0;
         } finally {
         	m++;
     	}
@@ -154,8 +172,35 @@ public class Sperm_Analysis
     linePlot.setColor(Color.BLACK);
     linePlot.setLineWidth(3);
     linePlot.addPoints(xmedians, ymedians, Plot.LINE);
+    linePlot.setColor(Color.DARK_GRAY);
+    linePlot.setLineWidth(2);
+    linePlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+    linePlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
+    linePlot.addPoints(xmedians, tenQuartiles, Plot.LINE);
+    linePlot.addPoints(xmedians, ninetyQuartiles, Plot.LINE);
     linePlot.draw();
+    ImagePlus finalPlot = linePlot.getImagePlus();
+    IJ.saveAsTiff(finalPlot, folderName+"plot.tiff");
+     IJ.log("Completed folder: "+folderName);
   }
+
+  public static double quartile(Double[] values, double lowerPercent) {
+
+      if (values == null || values.length == 0) {
+          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+      }
+
+      // Rank order the values
+      Double[] v = new Double[values.length];
+      System.arraycopy(values, 0, v, 0, values.length);
+      Arrays.sort(v);
+
+      int n = (int) Math.round(v.length * lowerPercent / 100);
+      
+      return (double)v[n];
+
+  }
+
 
   public void processImage(ImagePlus image, String path){
 
@@ -209,7 +254,7 @@ public class Sperm_Analysis
               ypoints[j] = d[1];
 
           }
-          linePlot.setColor(Color.BLUE);
+          linePlot.setColor(Color.LIGHT_GRAY);
           linePlot.addPoints(xpoints, ypoints, Plot.LINE);
           linePlot.draw();
 
