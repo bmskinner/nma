@@ -136,6 +136,9 @@ public class Sperm_Analysis
 
   }
 
+  /*
+    Write the median angles at each bin to the global log file
+  */
   public void exportMedians(){
   	// output the final results: calculate median positions
     IJ.append("", this.logFile);
@@ -204,6 +207,9 @@ public class Sperm_Analysis
     linePlot.addPoints(xmedians, ninetyQuartiles, Plot.LINE);
   }
 
+  /*
+    Write the nuclear area, perimeter, feret and path to the global log file
+  */
   public void exportNuclearStats(){
   	
   	// int[] areas = this.areaArray.toArray(new int[0]);
@@ -220,6 +226,9 @@ public class Sperm_Analysis
 
   }
 
+  /*
+    Calculate the <lowerPercent> quartile from a Double[] array
+  */
   public static double quartile(Double[] values, double lowerPercent) {
 
       if (values == null || values.length == 0) {
@@ -234,33 +243,41 @@ public class Sperm_Analysis
       int n = (int) Math.round(v.length * lowerPercent / 100);
       
       return (double)v[n];
-
   }
 
 
+  /*
+    Input: ImagePlus image, String path to the image
+    Detects nuclei within the image
+    For each nuclcus, performs the full analysis
+    Adds stats for each nucleus analysed to the global stats arrays
+    Calculates the normalised profile plots and stores in <finalResults>
+    Draws the profile on the global chart
+  */
   public void processImage(ImagePlus image, String path){
 
     RoiManager nucleiInImage;
 
-      nucleiInImage = findNucleiInImage(image);
+    nucleiInImage = findNucleiInImage(image);
 
-      Roi[] roiArray = nucleiInImage.getSelectedRoisAsArray();
-      int i = 0;
+    Roi[] roiArray = nucleiInImage.getSelectedRoisAsArray();
+    int i = 0;
 
-      for(Roi roi : roiArray){
+    for(Roi roi : roiArray){
 
-      	ArrayList rt = new ArrayList(0);
-        // get the profile (and other) data back for the nucleus
-        IJ.log("  Analysing nucleus "+i);
-        try{
-        	rt = analyseNucleus(roi, image, i, path);
-        	this.totalNuclei++;
-        } catch(Exception e){
-        	IJ.log("  Error analysing nucleus: "+e);
-        }
+    	ArrayList rt = new ArrayList(0);
+      // get the profile (and other) data back for the nucleus
+      IJ.log("  Analysing nucleus "+i);
+      try{
+      	rt = analyseNucleus(roi, image, i, path);
+      	this.totalNuclei++;
+      } catch(Exception e){
+      	IJ.log("  Error analysing nucleus: "+e);
+      }
 
-        // carry out the group processing - eg find median lines
-        try{
+      // carry out the group processing - eg find median lines
+      try{
+
         if(rt.size()>0){
           // add values to pool
 
@@ -291,22 +308,23 @@ public class Sperm_Analysis
               ypoints[j] = d[1];
 
           }
+
           linePlot.setColor(Color.LIGHT_GRAY);
           linePlot.addPoints(xpoints, ypoints, Plot.LINE);
           linePlot.draw();
-
         }
-
 
         i++;
       } catch(NullPointerException e){
          IJ.log("  Error processing nucleus data: "+e);
       }
-
     } 
   }
 
-  // within image, look for nuclei. Return as what? Array of Roi arrays?
+  /*
+    Within a given image, look for nuclei using the particle analyser.
+    Return an RoiManager containing the outlines of all potential nuclei
+  */
   public RoiManager findNucleiInImage(ImagePlus image){
 
     RoiManager manager = new RoiManager(true);
@@ -346,6 +364,9 @@ public class Sperm_Analysis
    return manager;
   }
 
+  /*
+    Make a directory with the same name as the image being analysed
+  */
   public String createImageDirectory(String path){
     File dir = new File(path);
     
@@ -361,6 +382,14 @@ public class Sperm_Analysis
     return dir.toString();
   }
 
+  /*
+    Carry out the full analysis of a given nucleus.
+    Detect the nuclear centre of mass.
+    Detect the sperm tip.
+    Detect the sperm tail by multiple methods, and find a consensus point.
+    Detect signals in the red and green channels, and calculate their positions relative to the CoM
+    Draw regions of interest on a new image, and save this out to the relevant directory.
+  */
   public ArrayList analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
     
     // results table
@@ -604,7 +633,10 @@ public class Sperm_Analysis
     return rt;
 
   }
-
+  /*
+    For two XYPoints in an RoiArray, find the point that lies halfway between them
+    Used for obtaining a consensus between potential tail positions
+  */
   public XYPoint getPositionBetween(XYPoint pointA, XYPoint pointB, RoiArray array){
 
     int a = 0;
@@ -625,17 +657,16 @@ public class Sperm_Analysis
     return array.smoothedArray[mid];
   }
 
+  /*
+    Find the angle that the nucleus must be rotated to make the CoM-tail vertical
+    Returns an angle
+  */
   public double findRotationAngle(XYPoint tail, XYPoint centre){
-    // tail point to CoM, tail point to y=0, x = tail
-    // make polygon roi and measure angle
-    // if CoMx < tailX:  rotate image by angle (clockwise)
-    // if CoMx > tailX: rotate image by -angle (anticlockwise)
     XYPoint end = new XYPoint(tail.getXAsInt(),0);
 
     float[] xpoints = { (float) end.getX(), (float) tail.getX(), (float) centre.getX()};
     float[] ypoints = { (float) end.getY(), (float) tail.getY(), (float) centre.getY()};
     PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-
 
    // measure the angle of the line
    double angle = roi.getAngle();
@@ -647,6 +678,10 @@ public class Sperm_Analysis
     }
   }
 
+  /*
+    Detect the tail based on a list of local minima in an XYPoint array.
+    The putative tail is the point furthest from the sum of the distances from the CoM and the tip
+  */
   public XYPoint findTailPointFromMinima(XYPoint tip, XYPoint centre, XYPoint[] array){
   
     // we cannot be sure that the greatest distance between two points will be the endpoints
@@ -675,6 +710,9 @@ public class Sperm_Analysis
     return tail;
   }
 
+  /*
+    Detect a poiint in an XYPoint array furthest from a given point.
+  */
   public XYPoint findPointFurthestFrom(XYPoint p, XYPoint[] list){
 
     double maxL = 0;
@@ -688,6 +726,7 @@ public class Sperm_Analysis
     }
     return result;
   }
+
 
   public RoiManager findSignalInNucleus(ImagePlus image, int channel){
 
@@ -727,6 +766,10 @@ public class Sperm_Analysis
     return manager;
   }
 
+  /*
+    Use the particle analyser to detect the nucleus in an image.
+    Calculate parameters of interest and return a ResultsTable.
+  */
   public ResultsTable findNuclearMeasurements(ImagePlus imp, Roi roi){
 
     ChannelSplitter cs = new ChannelSplitter();
@@ -740,21 +783,14 @@ public class Sperm_Analysis
 
     Analyzer an = new Analyzer(blueChannel, Analyzer.CENTER_OF_MASS | Analyzer.PERIMETER | Analyzer.AREA | Analyzer.FERET, rt);
     an.measure();
-
-    // IJ.log(rt.getColumnHeadings());
-    // try {
-    //   double nuclearArea = rt.getValue("Area", 0);
-    //   double nuclearCoMX = rt.getValue("XM", 0);
-    //   double nuclearCoMY = rt.getValue("YM", 0);
-    //   double nuclearPerimeter = rt.getValue("Perim.", 0);
-
-    //   IJ.log("Area: "+nuclearArea+"; CoM: "+nuclearCoMX+","+nuclearCoMY+"; Perimeter: "+nuclearPerimeter);
-    // } catch(Exception e){
-    //   IJ.log("Results error: "+e);
-    // }
     return rt;
   }
 
+  /*
+    This class contains the X and Y coordinates of a point as doubles,
+    plus any angles calculated for that point. 
+    Also contains methods for determining distance and overlap with other points
+  */
   class XYPoint {
     private double x;
     private double y;
@@ -948,32 +984,32 @@ public class Sperm_Analysis
 
   class RoiArray {
   
-    private int nucleusNumber;
+    private int nucleusNumber; // the number of the nucleus in the current image
     private int windowSize = 23; // default size, can be overridden if needed
     private int minimaCount; // the number of local minima detected in the array
     private int maximaCount; // the number of local minima detected in the array
-    private int length;
-    private int smoothLength = 0;
-    private int minimaLookupDistance = 5;
-    private int blockCount = 0;
-    private int DELTA_WINDOW_MIN = 5;
+    private int length;  // the length of the array; shortcut to this.array.length
+    private int smoothLength = 0; // the length of the smoothed array; shortcut to this.smoothedArray.length
+    private int minimaLookupDistance = 5; // the points ahead and behind to check when finding local minima and maxima
+    private int blockCount = 0; // the number of delta blocks detected
+    private int DELTA_WINDOW_MIN = 5; // the minimum number of points required in a delta block
 
-    private double medianAngle;
+    private double medianAngle; // the median angle from XYPoint[] smoothedArray
 
-    private XYPoint[] array; // this will hold the index and angle as well
-    private XYPoint[] smoothedArray; // this allows the same calculations on interpolated array
-    private XYPoint[] splineArray; // holds spline values.
+    private XYPoint[] array; // the points from the polygon made from the input roi
+    private XYPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
+    private XYPoint[] splineArray; // spline values. Currently not used.
     
-    private String imagePath;
+    private String imagePath; // the path to the image being analysed
 
     private boolean minimaCalculated = false; // has detectLocalMinima been run
     private boolean maximaCalculated = false; // has detectLocalMaxima been run
     private boolean anglesCalculated = false; // has makeAngleArray been run
     
     private Roi roi; // the original ROI
-    private Polygon polygon; // the source of the array
+    private Polygon polygon; // the ROI converted to a polygon; source of XYPoint[] array
 
-    private FloatPolygon smoothedPolygon; // hold the smoothed polygon data
+    private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray
     
     public RoiArray (Roi roi) { // construct from an roi
 
@@ -984,25 +1020,19 @@ public class Sperm_Analysis
       for(int i=0; i<this.polygon.npoints; i++){
         array[i] = new XYPoint(this.polygon.xpoints[i],this.polygon.ypoints[i]);
       }
-
-      // interpolate and smooth the roi
-      // FloatPolygon firstSmoothing = roi.getInterpolatedPolygon(2,true); // pixels 1 apart, smoothed
-      // PolygonRoi smoothROI = new PolygonRoi(firstSmoothing, Roi.POLYGON);
-      // this.smoothedPolygon = smoothROI.getInterpolatedPolygon(1,true);
      
      try{
-        this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
+        this.smoothedPolygon = roi.getInterpolatedPolygon(1,true); // interpolate and smooth the roi, 1 pixel spacing
 
         this.smoothedArray = new XYPoint[this.smoothedPolygon.npoints];
-        this.smoothLength = this.smoothedArray.length;
+        this.smoothLength = this.smoothedArray.length; // shortcult for functions
+
         for(int i=0; i<this.smoothedPolygon.npoints; i++){
           smoothedArray[i] = new XYPoint(this.smoothedPolygon.xpoints[i],this.smoothedPolygon.ypoints[i]);
         }
       } catch(Exception e){
         IJ.log("Cannot create ROI array: "+e);
-      }
-
-      
+      } 
     }
 
     public Polygon getPolygon(){
@@ -1088,6 +1118,7 @@ public class Sperm_Analysis
       }
 
     }
+
     public void flipXAroundPoint(XYPoint p){
 
       double xCentre = p.getX();
@@ -1102,8 +1133,8 @@ public class Sperm_Analysis
     }
 
     /*
-	Get the X values from the smoothed array as a float array
-	To be used for spline fitting experiment, hence needs to have the first element duplicated
+    	Get the X values from the smoothed array as a float array
+    	To be used for spline fitting experiment, hence needs to have the first element duplicated
     */
     public float[] getXasArray(){
 
@@ -1118,8 +1149,8 @@ public class Sperm_Analysis
     }
 
     /*
-	Get the Y values from the smoothed array as a float array
-	To be used for spline fitting experiment, hence needs to have the first element duplicated
+    	Get the Y values from the smoothed array as a float array
+    	To be used for spline fitting experiment, hence has the first element duplicated
     */
     public float[] getYasArray(){
 
@@ -1132,17 +1163,26 @@ public class Sperm_Analysis
 
     	return newArray;
     }
+
     /*
-	The spline array
+	   The spline array
     */
     public void setSplineArray(XYPoint[] p){
     	this.splineArray = p;
     }
 
+    /*
+    Spline fitting
+    CURRENTLY UNUSED
+    */
     public XYPoint[] getSplineArray(){
     	return this.splineArray;
     }
 
+    /*
+    Spline fitting
+    CURRENTLY UNUSED
+    */
     public void updateSplineArray(){
 
     	XYPoint[] splines = new XYPoint[this.smoothLength];
@@ -1158,20 +1198,20 @@ public class Sperm_Analysis
 	   		splines[i] = p;
 	   	}
 	   	this.setSplineArray(splines);
-	}
+	  }
 
-	public float[] getProfileArray(){
+  	public float[] getProfileArray(){
 
-		float[] newArray = new float[this.smoothLength+1];
-		for(int i=0; i<this.smoothLength;i++) {
-			float profileX = ((float)i/(float)this.smoothLength)*100; // normalise to 100 length
-			newArray[i] = profileX;
-		}
-		newArray[this.smoothLength] = newArray[0];
-		return newArray;
-	}
+  		float[] newArray = new float[this.smoothLength+1];
+  		for(int i=0; i<this.smoothLength;i++) {
+  			float profileX = ((float)i/(float)this.smoothLength)*100; // normalise to 100 length
+  			newArray[i] = profileX;
+  		}
+  		newArray[this.smoothLength] = newArray[0];
+  		return newArray;
+  	}
 
-	public float[] getAnglesAsArray(){
+	  public float[] getAnglesAsArray(){
 
     	float[] newArray = new float[this.smoothLength+1]; // allow the first and last element to be duplicated
     	for(int i=0;i<this.smoothLength;i++){
@@ -1182,47 +1222,15 @@ public class Sperm_Analysis
 
     	return newArray;
     }
-    //   // reverse the array and create a new roi
 
-    //   RoiArray newArray = new RoiArray(this.points);
-    //   int j=0;
-    //   for(int i=this.getPoints()-1;i>=0;i--){
-
-    //     XYPoint point = this.array[i];
-    //     int x = point.getX();
-    //     int y = point.getY();
-    //     newArray.setX(j, x);
-    //     newArray.setY(j, y);
-    //     j++;
-    //   }
-    //   return newArray;
-    // }
-
-    // public RoiArray trimROI(int percent){
-
-    //   // find the number of points to include for a given percentage
-    //   // create a new RoiArray and copy the current RoiArray values to it up to the endpoint
-    //   int end = this.points*(percent/100);
-
-    //   // int end = Math.floor(this.points*(percent/100)); // fetch first x% of signals
-    //   // int end = d.intValue();
-
-    //   RoiArray newArray = new RoiArray(end);
-
-    //   System.arraycopy(this.array, 0, newArray, 0, end); // copy over the 0 to end values
-
-    //   // for(int i=0;i<end;i++){
-    //   //  newArray.setX(i, this.getX(i));
-    //   //  newArray.setY(i, this.getY(i));
-    //   // }
-    //   return newArray;
-    // }
-
-    // only works for smoothed array - indexes are different for normal array
+    /*
+      Change the smoothed array order to put the selected index at the beginning
+      only works for smoothed array - indexes are different for normal array
+      Input: int the index to move to the start
+    */
     public void moveIndexToArrayStart(int i){
 
       // copy the array to refer to
-      // XYPoint[] tempArray = new XYPoint[this.length];
       XYPoint[] tempSmooth = new XYPoint[this.smoothLength];
       System.arraycopy(this.smoothedArray, 0, tempSmooth, 0 , this.smoothLength);
      
@@ -1232,43 +1240,16 @@ public class Sperm_Analysis
       if(tempSmooth.length != this.smoothedArray.length){
         IJ.log("    Unequal array size");
       }     
-
     }
-    // public RoiArray shuffleROI(){
 
-    //   // Look for largest discontinuity between points
-    //   // Set these coordinates to the ROI end
-    //   double maxDistance = 0;
-    //   int max_i = 0;
-      
-    //   // find the two most divergent points
-    //   for(int i=0;i<this.getPoints();i++){
-      
-    //     XYPoint pointA = this.array[i];
-    //     XYPoint pointB  = i == this.getPoints()-1 
-    //             ? this.array[0] 
-    //             : this.array[i+1]; // check last array element against first
-
-    //     double distance = pointA.getLengthTo(pointB);
-        
-    //     if(distance > maxDistance){
-    //       maxDistance = distance;
-    //       max_i = i;
-    //     }
-    //   }
-
-    //   // we now have the position just before the discontinuity
-    //   // chop the array in two and reassemble in the correct order
-    //   RoiArray newArray = new RoiArray(this.getPoints()); // new array, empty
-    //   System.arraycopy(this.array, max_i+1, newArray, 0, this.getPoints()-max_i); // copy over the max_i to end values
-    //   System.arraycopy(this.array, 0, newArray, max_i+1, max_i); // copy over index 0 to max_i
-
-    //   return newArray;
-    // }
-
+    /* 
+    For a given delta block number in the smoothed XYPoint array:
+    Get all the points in the array that have the same block number
+    Input: int block number
+    Return: XYPoint[] all the points in the block
+    */
     public XYPoint[] fetchPointsWithBlockNumber(int b){
 
-      // find how many points within this block
       int count = countPointsWithBlockNumber(b);
       XYPoint[] array = new XYPoint[count];
       
@@ -1284,6 +1265,12 @@ public class Sperm_Analysis
       return array;
     }
 
+    /* 
+    For a given delta block number in the smoothed XYPoint array:
+    Count the number of points in the array that have the same block number
+    Input: int block number
+    Return: int total number of points in block
+    */
     public int countPointsWithBlockNumber(int b){
 
       // find how many points within this block
@@ -1293,16 +1280,17 @@ public class Sperm_Analysis
         if(this.smoothedArray[i].getBlockNumber() == b){
           count++;
         }
-
       }
-
       return count;
-
     }   
 
+    /* 
+    For each point in the smoothed XYPoint array:
+      Find how many points lie within the angle delta block
+      Add this number to the blockSize variable of the point
+    */
     public void updatePointsWithBlockCount(){
 
-      // find how many points within this block
       for(int i=0; i<this.smoothLength;i++){
 
         int p = countPointsWithBlockNumber(this.smoothedArray[i].getBlockNumber());
@@ -1311,22 +1299,16 @@ public class Sperm_Analysis
       }
     }   
 
-    // public int findMaximumBlockNumber(){
-    //   int max = 0;
-    //   for(int i=0; i<this.smoothLength;i++){
-
-    //     if(this.smoothedArray[i].getBlockNumber() > max){
-    //       max == this.smoothedArray[i].getBlockNumber();
-    //     }
-
-    //   }
-    //   return max;
-    // }
-
+    /*
+      For a given index in the smoothed angle array: 
+        Draw a line between this point, and the points <window> ahead and <window> behind.
+        Measure the angle between these points and store as minAngle
+        Determine if the angle lies inside or outside the shape. Adjust the angle to always report the interior angle.
+        Store interior angle as interiorAngle.
+      Automatically wraps the array.
+      Input: int index in the array, int window the points ahead and behind to look
+    */
     public void findAngleBetweenPoints(int index, int window){
-
-      // from the given index, draw a line between this point, and the points window before and window after
-      // measure the angle between these points
 
       // wrap the array
       int indexBefore = index < window
@@ -1441,6 +1423,7 @@ public class Sperm_Analysis
         }
 
         this.countConsecutiveDeltas();
+        this.anglesCalculated = true;
 
         // IJ.log("    Measured angles with window size "+this.windowSize);
         // IJ.log("    Median angle "+this.medianAngle);
@@ -1510,6 +1493,12 @@ public class Sperm_Analysis
       return this.smoothedArray[minIndex];
     }
 
+    /*
+      Checks if the smoothed array nuclear shape profile has the acrosome to the rear of the array
+      If acrosome is at the beginning:
+        returns true
+      else returns false
+    */
     public boolean isProfileOrientationOK(){
 
       if(!this.anglesCalculated){
@@ -1540,7 +1529,10 @@ public class Sperm_Analysis
       }
     }
 
-    // retrieve an array of the points designated as local minima
+    /*
+      Retrieves an XYPoint array of the points designated as local minima.
+      If the local minimum detection has not yet been run, calculates local minima
+    */
     public XYPoint[] getLocalMinima(){
 
       if(!this.minimaCalculated){
@@ -1565,6 +1557,10 @@ public class Sperm_Analysis
       return newArray;
     }
 
+    /*
+      Retrieves an XYPoint array of the points designated as local maxima.
+      If the local maximum detection has not yet been run, calculates local maxima
+    */
     public XYPoint[] getLocalMaxima(){
  
       if(!this.maximaCalculated){
@@ -1588,6 +1584,12 @@ public class Sperm_Analysis
       return newArray;
     }
 
+    /*
+      For each point in the smoothed angle array, test for a local minimum.
+      The angles of the points <minimaLookupDistance> ahead and behind are checked.
+      Each should be greater than the angle before.
+      One exception is allowed, to account for noisy data.
+    */
     private void detectLocalMinima(){
       // go through angle array (with tip at start)
       // look at 1-2-3-4-5 points ahead and behind.
@@ -1655,6 +1657,13 @@ public class Sperm_Analysis
       this.minimaCount =  count;
     }
 
+    /*
+      For each point in the smoothed angle array, test for a local maximum.
+      The angles of the points <minimaLookupDistance> ahead and behind are checked.
+        *Note that this uses the same variable as detectLocalMinima()*
+      Each should be lower than the angle before.
+      One exception is allowed, to account for noisy data.
+    */
     private void detectLocalMaxima(){
       // go through interior angle array (with tip at start)
       // look at 1-2-3-4-5 points ahead and behind.
@@ -1734,9 +1743,11 @@ public class Sperm_Analysis
       this.maximaCount =  count;
     }
 
-      // Go through the deltas marked as consecutive blocks
-      // find the midpoints of each block
-      // get the point furthest from the tip
+    /*
+      Go through the deltas marked as consecutive blocks
+      Find the midpoints of each block
+      Return the point furthest from the tip
+    */
     public XYPoint findTailFromDeltas(XYPoint tip){
 
 
@@ -1784,8 +1795,11 @@ public class Sperm_Analysis
       return tail;
     }
 
-
-    // the array double[] m MUST BE SORTED
+    /*
+      For the interior angles in the smoothed angle array:
+        Calculate the median angle in the array.
+      Stores in medianAngle
+    */    
     public void calculateMedianAngle() {
 
         double[] m = new double[this.smoothLength];
@@ -1802,8 +1816,10 @@ public class Sperm_Analysis
         }
     }
 
-
-
+    /*
+      Print key data to the image log file
+      Overwrites any existing log
+    */   
     public void printLogFile(){
 
       String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
