@@ -53,11 +53,20 @@ public class Sperm_Analysis
   private static final double MAX_NUCLEAR_CIRC = 0.8;
   private static final double PROFILE_INCREMENT = 0.5;
 
+  private int totalNuclei = 0;
+  private int nucleiFailedOnTip = 0;
+  private int nucleiFailedOnTail = 0;
+
   private Plot linePlot;
 
   private String logFile;
 
   private Map<Double, Collection<Double>> finalResults = new HashMap<Double, Collection<Double>>();
+
+  private ArrayList perimeterArray = new ArrayList(0);
+  private ArrayList areaArray = new ArrayList(0);
+  private ArrayList feretArray = new ArrayList(0);
+  private ArrayList nucleusArray = new ArrayList(0); // hold the name and paths for reference
   
   public void run(String paramString)  {
 
@@ -113,8 +122,22 @@ public class Sperm_Analysis
       }
     }
 
+    exportMedians();
+    exportNuclearStats();
+    linePlot.draw();
+    ImagePlus finalPlot = linePlot.getImagePlus();
+    IJ.saveAsTiff(finalPlot, folderName+"plot.tiff");
+    IJ.log("Completed folder");
+    IJ.log("Total nuclei  : "+this.totalNuclei);
+    IJ.log("Failed on tip : "+this.nucleiFailedOnTip);
+    IJ.log("Failed on tail: "+this.nucleiFailedOnTail);
+    int analysed = this.totalNuclei - this.nucleiFailedOnTail - this.nucleiFailedOnTip;
+    IJ.log("Analysed      : "+analysed);
 
-    // output the final results: calculate median positions
+  }
+
+  public void exportMedians(){
+  	// output the final results: calculate median positions
     IJ.append("", this.logFile);
     IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.logFile);
 
@@ -168,6 +191,7 @@ public class Sperm_Analysis
         	m++;
     	}
     }
+    IJ.append("", this.logFile);
 
     linePlot.setColor(Color.BLACK);
     linePlot.setLineWidth(3);
@@ -178,10 +202,22 @@ public class Sperm_Analysis
     linePlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
     linePlot.addPoints(xmedians, tenQuartiles, Plot.LINE);
     linePlot.addPoints(xmedians, ninetyQuartiles, Plot.LINE);
-    linePlot.draw();
-    ImagePlus finalPlot = linePlot.getImagePlus();
-    IJ.saveAsTiff(finalPlot, folderName+"plot.tiff");
-     IJ.log("Completed folder: "+folderName);
+  }
+
+  public void exportNuclearStats(){
+  	
+  	// int[] areas = this.areaArray.toArray(new int[0]);
+  	// int[] perims = this.perimeterArray.toArray(new int[0]);
+  	
+  	IJ.append("", this.logFile);
+    IJ.append("# AREA\tPERIMETER\tFERET\tPATH", this.logFile);
+  	for(int i=0; i<areaArray.size();i++){
+  		IJ.append(areaArray.get(i)+"\t"+
+                  perimeterArray.get(i)+"\t"+
+                  feretArray.get(i)+"\t"+
+                  nucleusArray.get(i), this.logFile);
+  	}
+
   }
 
   public static double quartile(Double[] values, double lowerPercent) {
@@ -218,6 +254,7 @@ public class Sperm_Analysis
         IJ.log("  Analysing nucleus "+i);
         try{
         	rt = analyseNucleus(roi, image, i, path);
+        	this.totalNuclei++;
         } catch(Exception e){
         	IJ.log("  Error analysing nucleus: "+e);
         }
@@ -301,7 +338,7 @@ public class Sperm_Analysis
         IJ.log("  Unable to perform particle analysis");
       }
     } catch(Exception e){
-       IJ.log("  Error: "+e);
+       IJ.log("  Error in particle analyser: "+e);
     } finally {
       blue.close();
     }
@@ -351,6 +388,10 @@ public class Sperm_Analysis
     // measure CoM, area, perimeter and feret in blue
     ResultsTable blueResults = findNuclearMeasurements(smallRegion, nucleus);
     XYPoint nucleusCoM = new XYPoint(blueResults.getValue("XM", 0),  blueResults.getValue("YM", 0) );
+    this.perimeterArray.add(blueResults.getValue("Perim.",0) );
+    this.areaArray.add(blueResults.getValue("Area",0) );
+    this.feretArray.add(blueResults.getValue("Feret",0) );
+    this.nucleusArray.add(path+"-"+nucleusNumber);
 
 
     // draw the roi
@@ -369,6 +410,7 @@ public class Sperm_Analysis
     XYPoint spermTip = roiArray.findMinimumAngle();
     if(spermTip.getInteriorAngle() > 110){ // this is not a deep enough curve to declare the tip
         IJ.log("    Cannot reliably assign tip position");
+        this.nucleiFailedOnTip++;
         return rt;
     }
     roiArray.moveIndexToArrayStart(spermTip.getIndex());
@@ -439,6 +481,7 @@ public class Sperm_Analysis
 
     } else {
       IJ.log("    Cannot reliably assign tail position");
+      this.nucleiFailedOnTail++;
       return rt;
     }
 
@@ -511,7 +554,7 @@ public class Sperm_Analysis
     XYPoint rotatedSpermTip = rotatedRoiArray.findMinimumAngle();
     rotatedRoiArray.moveIndexToArrayStart(rotatedSpermTip.getIndex());
     if(rotatedSpermTip.getX() < nucleusCoM.getX()){
-      rotatedRoiArray.flipXAroundPoint(nucleusCoM);
+      // rotatedRoiArray.flipXAroundPoint(nucleusCoM);
     }
     // rotatedRoiArray.printLogFile();
 
@@ -519,16 +562,16 @@ public class Sperm_Analysis
     // get the acrosomal curve
 
     // find the signal positions
+    // within nuclear roi, analyze particles in colour channels
+    // RoiManager   redSignalsInImage = findSignalInNucleus(smallRegion, 0);
+    // RoiManager greenSignalsInImage = findSignalInNucleus(smallRegion, 1);
+    // get signal roi
 
 
     // find lectin stains
 
 
-    // find CoM in colour
-    // within nuclear roi, analyze particles in colour channels
-    // RoiManager   redSignalsInImage = findSignalInNucleus(smallRegion, 0);
-    // RoiManager greenSignalsInImage = findSignalInNucleus(smallRegion, 1);
-    // get signal roi
+    
 
 
 
@@ -663,7 +706,10 @@ public class Sperm_Analysis
     // run the particle analyser
     ResultsTable rt = new ResultsTable();
     ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER, 
-                                               0, rt, minSize, maxSize);
+    										   ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA,
+                                               rt, 
+                                               minSize, 
+                                               maxSize);
     try {
       pa.setRoiManager(manager);
       boolean success = pa.analyze(imp);
