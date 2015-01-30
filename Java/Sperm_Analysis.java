@@ -53,13 +53,17 @@ public class Sperm_Analysis
   private static final double MAX_NUCLEAR_CIRC = 0.8;
   private static final double PROFILE_INCREMENT = 0.5;
 
+  private static final double MAXIMUM_PATH_LENGTH = 1000; // reject nuclei with an angle path length greater than this; wibbly
+
   private int totalNuclei = 0;
   private int nucleiFailedOnTip = 0;
   private int nucleiFailedOnTail = 0;
+  private int nucleiFailedOther = 0; // generic reasons for failure
 
   private Plot linePlot;
 
   private String logFile;
+  private String failedFile;
 
   private Map<Double, Collection<Double>> finalResults = new HashMap<Double, Collection<Double>>();
 
@@ -67,6 +71,8 @@ public class Sperm_Analysis
   private ArrayList areaArray = new ArrayList(0);
   private ArrayList feretArray = new ArrayList(0);
   private ArrayList nucleusArray = new ArrayList(0); // hold the name and paths for reference
+  private ArrayList pathLengthArray = new ArrayList(0); // hold the length from point to point of the angle profile.
+  private ArrayList<Double> tailIndexArray = new ArrayList<Double>(0); // hold the length from point to point of the angle profile.
   
   public void run(String paramString)  {
 
@@ -78,6 +84,13 @@ public class Sperm_Analysis
     if(f.exists()){
       f.delete();
     }
+
+    this.failedFile = folderName+"failed.txt";
+    File g = new File(failedFile);
+    if(g.exists()){
+      g.delete();
+    }
+    IJ.append("CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tPATH", this.failedFile);
 
     IJ.showStatus("Opening directory: " + folderName);
     IJ.log("Directory: "+folderName);
@@ -131,7 +144,8 @@ public class Sperm_Analysis
     IJ.log("Total nuclei  : "+this.totalNuclei);
     IJ.log("Failed on tip : "+this.nucleiFailedOnTip);
     IJ.log("Failed on tail: "+this.nucleiFailedOnTail);
-    int analysed = this.totalNuclei - this.nucleiFailedOnTail - this.nucleiFailedOnTip;
+    IJ.log("Failed (other): "+this.nucleiFailedOther);
+    int analysed = this.totalNuclei - this.nucleiFailedOnTail - this.nucleiFailedOnTip - this.nucleiFailedOther;
     IJ.log("Analysed      : "+analysed);
 
   }
@@ -203,8 +217,35 @@ public class Sperm_Analysis
     linePlot.setLineWidth(2);
     linePlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
     linePlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
-    linePlot.addPoints(xmedians, tenQuartiles, Plot.LINE);
-    linePlot.addPoints(xmedians, ninetyQuartiles, Plot.LINE);
+    // linePlot.addPoints(xmedians, tenQuartiles, Plot.LINE);
+    // linePlot.addPoints(xmedians, ninetyQuartiles, Plot.LINE);
+
+
+    // handle the tail position mapping
+    double[] xTails = new double[tailIndexArray.size()];
+    for(int i=0; i<tailIndexArray.size(); i++){
+      xTails[i] = (double)tailIndexArray.get(i);
+    }
+
+    double[] yTails = new double[tailIndexArray.size()];
+    Arrays.fill(yTails, 300);
+    linePlot.setColor(Color.LIGHT_GRAY);
+    linePlot.addPoints(xTails, yTails, Plot.DOT);
+
+    // median tail positions
+    Double[] tails = tailIndexArray.toArray(new Double[0]);
+    double tailQ50 = quartile(tails, 50);
+    double tailQ25 = quartile(tails, 25);
+    double tailQ75 = quartile(tails, 75);
+
+    linePlot.setColor(Color.DARK_GRAY);
+    linePlot.setLineWidth(1);
+    linePlot.drawLine(tailQ25, 320, tailQ75, 320);
+    linePlot.drawLine(tailQ25, 280, tailQ75, 280);
+    linePlot.drawLine(tailQ25, 280, tailQ25, 320);
+    linePlot.drawLine(tailQ75, 280, tailQ75, 320);
+    linePlot.drawLine(tailQ50, 280, tailQ50, 320);
+
   }
 
   /*
@@ -216,11 +257,12 @@ public class Sperm_Analysis
   	// int[] perims = this.perimeterArray.toArray(new int[0]);
   	
   	IJ.append("", this.logFile);
-    IJ.append("# AREA\tPERIMETER\tFERET\tPATH", this.logFile);
+    IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tPATH", this.logFile);
   	for(int i=0; i<areaArray.size();i++){
   		IJ.append(areaArray.get(i)+"\t"+
                   perimeterArray.get(i)+"\t"+
                   feretArray.get(i)+"\t"+
+                  pathLengthArray.get(i)+"\t"+
                   nucleusArray.get(i), this.logFile);
   	}
 
@@ -302,12 +344,18 @@ public class Sperm_Analysis
 
           double[] xpoints = new double[rt.size()];
           double[] ypoints = new double[rt.size()];
+          // double pathLength = 0;
+          // XYPoint prevPoint = new XYPoint(0,0);
           for(int j=0;j<rt.size();j++){
               double[] d = (double[])rt.get(j);
               xpoints[j] = d[0];
               ypoints[j] = d[1];
 
+              // XYPoint thisPoint = new XYPoint(d[0],d[1]);
+              // pathLength += thisPoint.getLengthTo(prevPoint);
+              // prevPoint = thisPoint;
           }
+          // pathLengthArray.add(pathLength); // put the total length along the normalised array into the global array
 
           linePlot.setColor(Color.LIGHT_GRAY);
           linePlot.addPoints(xpoints, ypoints, Plot.LINE);
@@ -394,6 +442,8 @@ public class Sperm_Analysis
     
     // results table
     ArrayList rt = new ArrayList(0);
+    boolean nucleusPassedChecks = true; // any check can disable this
+    String failureReason = "";
 
 
     // make a copy of the nucleus only for saving out and processing
@@ -417,10 +467,6 @@ public class Sperm_Analysis
     // measure CoM, area, perimeter and feret in blue
     ResultsTable blueResults = findNuclearMeasurements(smallRegion, nucleus);
     XYPoint nucleusCoM = new XYPoint(blueResults.getValue("XM", 0),  blueResults.getValue("YM", 0) );
-    this.perimeterArray.add(blueResults.getValue("Perim.",0) );
-    this.areaArray.add(blueResults.getValue("Area",0) );
-    this.feretArray.add(blueResults.getValue("Feret",0) );
-    this.nucleusArray.add(path+"-"+nucleusNumber);
 
 
     // draw the roi
@@ -440,7 +486,10 @@ public class Sperm_Analysis
     if(spermTip.getInteriorAngle() > 110){ // this is not a deep enough curve to declare the tip
         IJ.log("    Cannot reliably assign tip position");
         this.nucleiFailedOnTip++;
-        return rt;
+        // IJ.append("Tip\t"+path+"-"+nucleusNumber, this.failedFile);
+        nucleusPassedChecks = false;
+        failureReason += "Tip ";
+        // return new ArrayList(0);
     }
     roiArray.moveIndexToArrayStart(spermTip.getIndex());
 
@@ -493,15 +542,25 @@ public class Sperm_Analysis
     // given distinct methods for finding a tail,
     // take a position between them on roi
     // Ignoring spermTail1 because almost always overlaps spermTail2
-    XYPoint consensusTail = getPositionBetween(spermTail2, spermTail3, roiArray);
+    int consensusTailIndex = getPositionBetween(spermTail2, spermTail3, roiArray);
+    XYPoint consensusTail = roiArray.smoothedArray[consensusTailIndex];
+    // XYPoint consensusTail = getPositionBetween(spermTail2, spermTail3, roiArray);
 
+    double pathLength = 0;
+    double normalisedTailIndex = ((double)consensusTailIndex/(double)roiArray.smoothLength)*100;
 
     if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.3){
 
+       XYPoint prevPoint = new XYPoint(0,0);
+       
        for (int i=0; i<roiArray.smoothLength;i++ ) {
           double profileX = ((double)i/(double)roiArray.smoothLength)*100; // normalise to 100 length
           double[] d = new double[] { profileX, roiArray.smoothedArray[i].getInteriorAngle() };
           IJ.append(profileX+"\t"+roiArray.smoothedArray[i].getInteriorAngle(), this.logFile);
+
+              XYPoint thisPoint = new XYPoint(d[0],d[1]);
+              pathLength += thisPoint.getLengthTo(prevPoint);
+              prevPoint = thisPoint;
           // rt.addValue("PROFILE_POSITION", profileX);
           // rt.addValue("INTERIOR_ANGLE", roiArray.smoothedArray[i].getInteriorAngle());
           rt.add(d);
@@ -511,7 +570,10 @@ public class Sperm_Analysis
     } else {
       IJ.log("    Cannot reliably assign tail position");
       this.nucleiFailedOnTail++;
-      return rt;
+      failureReason += "Tail ";
+      // IJ.append("Tail\t"+path+"-"+nucleusNumber, this.failedFile);
+      nucleusPassedChecks = false;
+      // return new ArrayList(0);
     }
 
 
@@ -630,14 +692,41 @@ public class Sperm_Analysis
     // ip.rotate(rotationAngle);
     // ImagePlus finalImage = new ImagePlus("Image", ip);
     // IJ.saveAsTiff(finalImage, saveFolder+"\\"+roiArray.getNucleusNumber()+".final.tiff");
-    return rt;
+
+    if(pathLength > MAXIMUM_PATH_LENGTH){ // skip nuclei with poor thresholding
+      IJ.log("    Nucleus failed on thresholding");
+      this.nucleiFailedOther++;
+      failureReason += "Threshold ";
+      nucleusPassedChecks = false;
+      // return new ArrayList(0);
+    }
+
+
+    // if everything checks out, add the measured parameters to the global pool
+    if(nucleusPassedChecks){
+      this.perimeterArray.add(blueResults.getValue("Perim.",0) );
+      this.areaArray.add(blueResults.getValue("Area",0) );
+      this.feretArray.add(blueResults.getValue("Feret",0) );
+      this.nucleusArray.add(path+"-"+nucleusNumber);
+      this.pathLengthArray.add(pathLength);
+      this.tailIndexArray.add(normalisedTailIndex);
+      return rt;
+    } else {
+      IJ.append(  failureReason+"\t"+
+                  blueResults.getValue("Perim.",0)+"\t"+
+                  blueResults.getValue("Area",0)+"\t"+
+                  blueResults.getValue("Feret",0)+"\t"+
+                  pathLength+"\t"+
+                  path+"-"+nucleusNumber, this.failedFile);
+      return new ArrayList(0);
+    }
 
   }
   /*
     For two XYPoints in an RoiArray, find the point that lies halfway between them
     Used for obtaining a consensus between potential tail positions
   */
-  public XYPoint getPositionBetween(XYPoint pointA, XYPoint pointB, RoiArray array){
+  public int getPositionBetween(XYPoint pointA, XYPoint pointB, RoiArray array){
 
     int a = 0;
     int b = 0;
@@ -654,7 +743,8 @@ public class Sperm_Analysis
     // get the midpoint
     int mid = (int)Math.floor( (a+b) /2);
     // IJ.log(    "Consensus tail at "+mid+": "+array.smoothedArray[mid].toString());
-    return array.smoothedArray[mid];
+    // return array.smoothedArray[mid];
+    return mid;
   }
 
   /*
