@@ -64,6 +64,8 @@ public class Sperm_Analysis
 
   private String logFile;
   private String failedFile;
+  private String medianFile;
+  private String statsFile;
 
   private Map<Double, Collection<Double>> finalResults = new HashMap<Double, Collection<Double>>();
 
@@ -79,18 +81,7 @@ public class Sperm_Analysis
     DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
     String folderName = localOpenDialog.getDirectory();
 
-    this.logFile = folderName+"log.txt";
-    File f = new File(logFile);
-    if(f.exists()){
-      f.delete();
-    }
-
-    this.failedFile = folderName+"failed.txt";
-    File g = new File(failedFile);
-    if(g.exists()){
-      g.delete();
-    }
-    IJ.append("CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tPATH", this.failedFile);
+    prepareLogFiles(folderName);
 
     IJ.showStatus("Opening directory: " + folderName);
     IJ.log("Directory: "+folderName);
@@ -150,13 +141,51 @@ public class Sperm_Analysis
 
   }
 
+
+  /*
+    If previous log files exist, delete them
+    Add the header row to each file
+  */
+  public void prepareLogFiles(String folderName){
+
+    this.logFile = folderName+"logProfiles.txt";
+    File f = new File(logFile);
+    if(f.exists()){
+      f.delete();
+    }
+    IJ.append("# NORM_X\tANGLE", this.logFile);
+
+    this.failedFile = folderName+"logFailed.txt";
+    File g = new File(failedFile);
+    if(g.exists()){
+      g.delete();
+    }
+
+    IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tPATH", this.failedFile);
+
+    this.medianFile = folderName+"logMedians.txt";
+    File h = new File(medianFile);
+    if(h.exists()){
+      h.delete();
+    }
+
+    IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.medianFile);
+
+    this.statsFile = folderName+"logStats.txt";
+    File i = new File(statsFile);
+    if(i.exists()){
+      i.delete();
+    }
+
+    IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tPATH", this.statsFile);
+  }
+
   /*
     Write the median angles at each bin to the global log file
   */
   public void exportMedians(){
   	// output the final results: calculate median positions
-    IJ.append("", this.logFile);
-    IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.logFile);
+    // IJ.append("", this.medianFile);
 
     int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
     double[] xmedians = new double[arraySize];
@@ -196,7 +225,7 @@ public class Sperm_Analysis
                       uppQuartiles[m]+"\t"+
                       tenQuartiles[m]+"\t"+
                       ninetyQuartiles[m]+"\t"+
-                      n, this.logFile);
+                      n, this.medianFile);
           }
         } catch(Exception e){
              IJ.log("Cannot calculate median for "+k);
@@ -208,7 +237,7 @@ public class Sperm_Analysis
         	m++;
     	}
     }
-    IJ.append("", this.logFile);
+    // IJ.append("", this.logFile);
 
     linePlot.setColor(Color.BLACK);
     linePlot.setLineWidth(3);
@@ -253,17 +282,13 @@ public class Sperm_Analysis
   */
   public void exportNuclearStats(){
   	
-  	// int[] areas = this.areaArray.toArray(new int[0]);
-  	// int[] perims = this.perimeterArray.toArray(new int[0]);
-  	
-  	IJ.append("", this.logFile);
-    IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tPATH", this.logFile);
   	for(int i=0; i<areaArray.size();i++){
   		IJ.append(areaArray.get(i)+"\t"+
                   perimeterArray.get(i)+"\t"+
                   feretArray.get(i)+"\t"+
                   pathLengthArray.get(i)+"\t"+
-                  nucleusArray.get(i), this.logFile);
+                  tailIndexArray.get(i)+"\t"+
+                  nucleusArray.get(i), this.statsFile);
   	}
 
   }
@@ -717,6 +742,7 @@ public class Sperm_Analysis
                   blueResults.getValue("Area",0)+"\t"+
                   blueResults.getValue("Feret",0)+"\t"+
                   pathLength+"\t"+
+                  normalisedTailIndex+"\t"+
                   path+"-"+nucleusNumber, this.failedFile);
       return new ArrayList(0);
     }
