@@ -62,9 +62,16 @@ public class Sperm_Analysis
 
   private Plot linePlot;
   private Plot rawProfilePlot;
+  private Plot tailCentredPlot;
+  private Plot tailCentredRawPlot;
 
   private PlotWindow plotWindow;
   private PlotWindow rawPlotWindow;
+  private PlotWindow tailCentredPlotWindow;
+  private PlotWindow tailCentredRawPlotWindow;
+
+  private static final int CHART_WINDOW_HEIGHT = 300;
+  private static final int CHART_WINDOW_WIDTH = 400;
 
   private String logFile;
   private String failedFile;
@@ -78,9 +85,11 @@ public class Sperm_Analysis
   private ArrayList feretArray = new ArrayList(0);
   private ArrayList nucleusArray = new ArrayList(0); // hold the name and paths for reference
   private ArrayList pathLengthArray = new ArrayList(0); // hold the length from point to point of the angle profile.
-  private ArrayList<Double> tailIndexArray = new ArrayList<Double>(0); // hold the length from point to point of the angle profile.
+  private ArrayList<Double> tailIndexArray = new ArrayList<Double>(0);
+  private ArrayList<Double> rawTailIndexArray = new ArrayList<Double>(0);
+  
 
-  private static final int RAW_PROFILE_CHART_WIDTH = 400;
+  private static final int RAW_PROFILE_CHART_X_MAX = 400;
 
   private static final int FAILURE_TIP = 1;
   private static final int FAILURE_TAIL = 2;
@@ -101,23 +110,41 @@ public class Sperm_Analysis
     File[] listOfFiles = folder.listFiles();
 
 
-    this.linePlot = new Plot("Profiles in "+folderName,
+    this.linePlot = new Plot("Normalised tip-centred plot",
             "Position",
             "Angle");
     linePlot.setLimits(0,100,-50,360);
-    linePlot.setSize(800,600);
+    linePlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
     linePlot.setYTicks(true);
     linePlot.setColor(Color.  LIGHT_GRAY);
     plotWindow = linePlot.show();
 
-    this.rawProfilePlot = new Plot("Non-normalised profiles in "+folderName,
+    this.rawProfilePlot = new Plot("Raw tip-centred plot",
             "Position",
             "Angle");
-    rawProfilePlot.setLimits(0,this.RAW_PROFILE_CHART_WIDTH,-50,360);
-    rawProfilePlot.setSize(800,600);
+    rawProfilePlot.setLimits(0,this.RAW_PROFILE_CHART_X_MAX,-50,360);
+    rawProfilePlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
     rawProfilePlot.setYTicks(true);
     rawProfilePlot.setColor(Color.  LIGHT_GRAY);
     rawPlotWindow = rawProfilePlot.show();
+
+    this.tailCentredPlot = new Plot("Normalised tail-centred plot",
+            "Position",
+            "Angle");
+    tailCentredPlot.setLimits(-70,70,-50,360);
+    tailCentredPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+    tailCentredPlot.setYTicks(true);
+    tailCentredPlot.setColor(Color.LIGHT_GRAY);
+    tailCentredPlotWindow = tailCentredPlot.show();
+
+    this.tailCentredRawPlot = new Plot("Raw tail-centred plot",
+            "Position",
+            "Angle");
+    tailCentredRawPlot.setLimits(-200,200,-50,360);
+    tailCentredRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+    tailCentredRawPlot.setYTicks(true);
+    tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
+    tailCentredRawPlotWindow = tailCentredRawPlot.show();
 
     for (File file : listOfFiles) {
       if (file.isFile()) {
@@ -149,7 +176,13 @@ public class Sperm_Analysis
     exportMedians();
     exportNuclearStats();
     linePlot.draw();
+    plotWindow.drawPlot(linePlot);
     rawProfilePlot.draw();
+    rawPlotWindow.drawPlot(rawProfilePlot);
+    tailCentredPlot.draw();
+    tailCentredPlotWindow.drawPlot(tailCentredPlot);
+    tailCentredRawPlot.draw();
+    tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
 
     ImagePlus finalPlot = linePlot.getImagePlus();
     IJ.saveAsTiff(finalPlot, folderName+"plotNorm.tiff");
@@ -177,7 +210,7 @@ public class Sperm_Analysis
     if(f.exists()){
       f.delete();
     }
-    IJ.append("# NORM_X\tANGLE", this.logFile);
+    IJ.append("# NORM_X\tANGLE\tNORM_X_FROM_TAIL\tRAW_X_FROM_TAIL", this.logFile);
 
     this.failedFile = folderName+"logFailed.txt";
     File g = new File(failedFile);
@@ -185,7 +218,7 @@ public class Sperm_Analysis
       g.delete();
     }
 
-    IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tPATH", this.failedFile);
+    IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.failedFile);
 
     this.medianFile = folderName+"logMedians.txt";
     File h = new File(medianFile);
@@ -271,18 +304,15 @@ public class Sperm_Analysis
     linePlot.setLineWidth(2);
     linePlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
     linePlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
-    // linePlot.addPoints(xmedians, tenQuartiles, Plot.LINE);
-    // linePlot.addPoints(xmedians, ninetyQuartiles, Plot.LINE);
 
-
-    // handle the tail position mapping
+    // handle the normalised tail position mapping
     double[] xTails = new double[tailIndexArray.size()];
     for(int i=0; i<tailIndexArray.size(); i++){
       xTails[i] = (double)tailIndexArray.get(i);
     }
 
     double[] yTails = new double[tailIndexArray.size()];
-    Arrays.fill(yTails, 300);
+    Arrays.fill(yTails, 300); // all dots at y=300
     linePlot.setColor(Color.LIGHT_GRAY);
     linePlot.addPoints(xTails, yTails, Plot.DOT);
 
@@ -300,6 +330,30 @@ public class Sperm_Analysis
     linePlot.drawLine(tailQ75, 280, tailQ75, 320);
     linePlot.drawLine(tailQ50, 280, tailQ50, 320);
 
+
+    // handle raw tail position mapping
+
+    double[] rawXTails = new double[rawTailIndexArray.size()];
+    for(int i=0; i<rawTailIndexArray.size(); i++){
+      rawXTails[i] = (double)rawTailIndexArray.get(i);
+    }
+    rawProfilePlot.setColor(Color.LIGHT_GRAY);
+    rawProfilePlot.addPoints(rawXTails, yTails, Plot.DOT);
+
+    Double[] rawTails = rawTailIndexArray.toArray(new Double[0]);
+    double rawTailQ50 = quartile(rawTails, 50);
+    double rawTailQ25 = quartile(rawTails, 25);
+    double rawTailQ75 = quartile(rawTails, 75);
+
+    rawProfilePlot.setColor(Color.DARK_GRAY);
+    rawProfilePlot.setLineWidth(1);
+    rawProfilePlot.drawLine(rawTailQ25, 320, rawTailQ75, 320);
+    rawProfilePlot.drawLine(rawTailQ25, 280, rawTailQ75, 280);
+    rawProfilePlot.drawLine(rawTailQ25, 280, rawTailQ25, 320);
+    rawProfilePlot.drawLine(rawTailQ75, 280, rawTailQ75, 320);
+    rawProfilePlot.drawLine(rawTailQ50, 280, rawTailQ50, 320);
+
+
   }
 
   /*
@@ -313,6 +367,7 @@ public class Sperm_Analysis
                   feretArray.get(i)+"\t"+
                   pathLengthArray.get(i)+"\t"+
                   tailIndexArray.get(i)+"\t"+
+                  rawTailIndexArray.get(i)+"\t"+
                   nucleusArray.get(i), this.statsFile);
   	}
 
@@ -395,23 +450,37 @@ public class Sperm_Analysis
           double[] xpoints = new double[rt.size()];
           double[] ypoints = new double[rt.size()];
           double[] xprofile = new double[rt.size()];
-          // double pathLength = 0;
-          // XYPoint prevPoint = new XYPoint(0,0);
+          double[] xCentredOnTail = new double[rt.size()];
+          double[] xRawCentredOnTail = new double[rt.size()];
+
           for(int j=0;j<rt.size();j++){
               double[] d = (double[])rt.get(j);
               xpoints[j] = d[0];
               ypoints[j] = d[1];
               xprofile[j] = j;
+              xCentredOnTail[j] = d[2];
+              xRawCentredOnTail[j] = d[3];
           }
 
           linePlot.setColor(Color.LIGHT_GRAY);
           linePlot.addPoints(xpoints, ypoints, Plot.LINE);
           linePlot.draw();
           plotWindow.drawPlot(linePlot);
+
           rawProfilePlot.setColor(Color.LIGHT_GRAY);
           rawProfilePlot.addPoints(xprofile, ypoints, Plot.LINE);
           rawProfilePlot.draw();
           rawPlotWindow.drawPlot(rawProfilePlot);
+
+          tailCentredPlot.setColor(Color.LIGHT_GRAY);
+          tailCentredPlot.addPoints(xCentredOnTail, ypoints, Plot.LINE);
+          tailCentredPlot.draw();
+          tailCentredPlotWindow.drawPlot(tailCentredPlot);
+
+          tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
+          tailCentredRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
+          tailCentredRawPlot.draw();
+          tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
         }
 
         i++;
@@ -612,22 +681,34 @@ public class Sperm_Analysis
     XYPoint consensusTail = roiArray.smoothedArray[consensusTailIndex];
     // XYPoint consensusTail = getPositionBetween(spermTail2, spermTail3, roiArray);
 
+    /*
+    	Produce the normalised profile positions from the angle array.
+    	Also recentre the profile on the tail position.
+			No need to alter the array index; we want the same profile shape
+			as in the tip-aligned plots.
+			Take the consensusTailIndex and profileX, and offset the profile positions
+			in the raw and normalised profiles appropriately
+    */
     double pathLength = 0;
     double normalisedTailIndex = ((double)consensusTailIndex/(double)roiArray.smoothLength)*100;
 
-    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.3){
+    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.3){ // only proceed if the tail points are together
 
        XYPoint prevPoint = new XYPoint(0,0);
        
        for (int i=0; i<roiArray.smoothLength;i++ ) {
           double profileX = ((double)i/(double)roiArray.smoothLength)*100; // normalise to 100 length
-          double[] d = new double[] { profileX, roiArray.smoothedArray[i].getInteriorAngle() };
-          IJ.append(profileX+"\t"+roiArray.smoothedArray[i].getInteriorAngle(), this.logFile);
+          double profileXOffsetToTail = profileX - normalisedTailIndex; // set tail to 0
+          double rawXOffsetToTail = (double)i - (double)consensusTailIndex;
 
+          double[] d = new double[] { profileX, roiArray.smoothedArray[i].getInteriorAngle(), profileXOffsetToTail, rawXOffsetToTail };
+          IJ.append(profileX+"\t"+roiArray.smoothedArray[i].getInteriorAngle()+"\t"+profileXOffsetToTail+"\t"+rawXOffsetToTail, this.logFile);
+          rt.add(d);          
+
+          // calculate the path length
           XYPoint thisPoint = new XYPoint(d[0],d[1]);
           pathLength += thisPoint.getLengthTo(prevPoint);
           prevPoint = thisPoint;
-          rt.add(d);
         }
         IJ.append("", this.logFile);
 
@@ -638,6 +719,8 @@ public class Sperm_Analysis
       failureReason = failureReason | this.FAILURE_TAIL;
       nucleusPassedChecks = false;
     }
+
+
    
 
    	// EXPERIMENT WITH SPLINE FITTING
@@ -763,6 +846,7 @@ public class Sperm_Analysis
       this.nucleusArray.add(path+"-"+nucleusNumber);
       this.pathLengthArray.add(pathLength);
       this.tailIndexArray.add(normalisedTailIndex);
+      this.rawTailIndexArray.add((double)consensusTailIndex);
       return rt;
     } else {
       IJ.append(  failureReason+"\t"+
@@ -771,6 +855,7 @@ public class Sperm_Analysis
                   blueResults.getValue("Feret",0)+"\t"+
                   pathLength+"\t"+
                   normalisedTailIndex+"\t"+
+                  consensusTailIndex+"\t"+
                   path+"-"+nucleusNumber, this.failedFile);
       return new ArrayList(0);
     }
