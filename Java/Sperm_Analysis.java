@@ -87,6 +87,8 @@ public class Sperm_Analysis
   private ArrayList pathLengthArray = new ArrayList(0); // hold the length from point to point of the angle profile.
   private ArrayList<Double> tailIndexArray = new ArrayList<Double>(0);
   private ArrayList<Double> rawTailIndexArray = new ArrayList<Double>(0);
+
+  private RoiCollection completeCollection;
   
 
   private static final int RAW_PROFILE_CHART_X_MAX = 400;
@@ -108,7 +110,88 @@ public class Sperm_Analysis
 
     File folder = new File(folderName);
     File[] listOfFiles = folder.listFiles();
+ 
+    this.completeCollection = new RoiCollection(folderName);
+    setupPlots();
 
+    for (File file : listOfFiles) {
+      if (file.isFile()) {
+
+        String fileName = file.getName();
+
+        for( String fileType : fileTypes){
+          if( fileName.endsWith(fileType) ){
+            IJ.showStatus("Opening file: " + fileName);
+            IJ.log("File:    "+fileName);
+            try {
+
+              // open and process each image here
+              String path = folderName+fileName;
+              Opener localOpener = new Opener();
+              ImagePlus localImagePlus = localOpener.openImage(path);             
+              // handle the image
+              processImage(localImagePlus, path);
+              localImagePlus.close();
+
+            } catch (Exception e) { 
+                IJ.log("Error:"+e);
+            }
+          }
+        }
+      }
+    }
+
+    exportMedians();
+    exportNuclearStats();
+    drawFinalPlots(folderName);
+
+    IJ.log("Completed folder");
+    IJ.log("Total nuclei  : "+this.totalNuclei);
+    IJ.log("Failed on tip : "+this.nucleiFailedOnTip);
+    IJ.log("Failed on tail: "+this.nucleiFailedOnTail);
+    IJ.log("Failed (other): "+this.nucleiFailedOther);
+    int analysed = this.totalNuclei - this.nucleiFailedOnTail - this.nucleiFailedOnTip - this.nucleiFailedOther;
+    IJ.log("Analysed      : "+analysed);
+
+
+    Plot offsetRawPlot = new Plot("Raw Offset", "Position", "Angle");
+  	PlotWindow offsetRawPlotWindow;
+
+  	Plot offsetNormPlot = new Plot("Norm Offset", "Position", "Angle");
+  	PlotWindow offsetNormPlotWindow;
+
+    offsetRawPlot.setLimits(-200,200,-50,360);
+    offsetRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+    offsetRawPlot.setYTicks(true);
+    offsetRawPlot.setColor(Color.LIGHT_GRAY);
+
+    offsetNormPlot.setLimits(-10,110,-50,360);
+    offsetNormPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+    offsetNormPlot.setYTicks(true);
+    offsetNormPlot.setColor(Color.LIGHT_GRAY);
+
+    this.completeCollection.calculateSquareDifferences();
+    for(int i=0;i<this.completeCollection.nucleiCollection.size();i++){
+    	double[] xRawCentredOnTail = this.completeCollection.createOffsetRawProfile(i);
+    	double[] xNormCentredOnTail = this.completeCollection.createOffsetRawProfile(i);
+    	double[] ypoints = this.completeCollection.fetchAnglesFromResultsTable(i);
+    	offsetRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
+    	offsetNormPlot.addPoints(xNormCentredOnTail, ypoints, Plot.LINE);
+    }
+    offsetRawPlot.draw();
+    offsetRawPlotWindow = offsetRawPlot.show();
+    offsetRawPlotWindow.drawPlot(offsetRawPlot);	
+
+    offsetNormPlot.draw();
+    offsetNormPlotWindow = offsetNormPlot.show();
+    offsetNormPlotWindow.drawPlot(offsetNormPlot);	
+
+  }
+
+  /*
+  	Create the necessary plot windows and plots
+	*/
+  public void setupPlots(){
 
     this.linePlot = new Plot("Normalised tip-centred plot",
             "Position",
@@ -145,37 +228,14 @@ public class Sperm_Analysis
     tailCentredRawPlot.setYTicks(true);
     tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
     tailCentredRawPlotWindow = tailCentredRawPlot.show();
+  }
 
-    for (File file : listOfFiles) {
-      if (file.isFile()) {
+  /*
+  	Write the plot images to the folder being analysed
+  */
+  public void drawFinalPlots(String folderName){
 
-        String fileName = file.getName();
-
-        for( String fileType : fileTypes){
-          if( fileName.endsWith(fileType) ){
-            IJ.showStatus("Opening file: " + fileName);
-            IJ.log("File:    "+fileName);
-            try {
-
-              // open and process each image here
-              String path = folderName+fileName;
-              Opener localOpener = new Opener();
-              ImagePlus localImagePlus = localOpener.openImage(path);             
-              // handle the image
-              processImage(localImagePlus, path);
-              localImagePlus.close();
-
-            } catch (Exception e) { 
-                IJ.log("Error:"+e);
-            }
-          }
-        }
-      }
-    }
-
-    exportMedians();
-    exportNuclearStats();
-    linePlot.draw();
+  	linePlot.draw();
     plotWindow.drawPlot(linePlot);
     rawProfilePlot.draw();
     rawPlotWindow.drawPlot(rawProfilePlot);
@@ -183,21 +243,34 @@ public class Sperm_Analysis
     tailCentredPlotWindow.drawPlot(tailCentredPlot);
     tailCentredRawPlot.draw();
     tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
-
     ImagePlus finalPlot = linePlot.getImagePlus();
     IJ.saveAsTiff(finalPlot, folderName+"plotNorm.tiff");
     ImagePlus finalRawPlot = rawProfilePlot.getImagePlus();
     IJ.saveAsTiff(finalRawPlot, folderName+"plotRaw.tiff");
-    IJ.log("Completed folder");
-    IJ.log("Total nuclei  : "+this.totalNuclei);
-    IJ.log("Failed on tip : "+this.nucleiFailedOnTip);
-    IJ.log("Failed on tail: "+this.nucleiFailedOnTail);
-    IJ.log("Failed (other): "+this.nucleiFailedOther);
-    int analysed = this.totalNuclei - this.nucleiFailedOnTail - this.nucleiFailedOnTip - this.nucleiFailedOther;
-    IJ.log("Analysed      : "+analysed);
-
   }
 
+
+  public void plotOffsetValues(){
+
+  	// Plot offsetPlot = new Plot("Offset tail plot",
+   //          "Position",
+   //          "Angle");
+   //  offsetPlot.setLimits(-200,200,-50,360);
+   //  offsetPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+   //  offsetPlot.setYTicks(true);
+   //  offsetPlot.setColor(Color.  LIGHT_GRAY);
+
+  	
+   //  for(int i=0; i<rawTailIndexArray.size(); i++){
+   //  	double offset = (double)this.completeCollection.offsets.get(i);
+   //    rawXTails[i] = (double)rawTailIndexArray.get(i)+offset;
+   //  }
+
+    // for each plot in completeCollection
+    // add offset, draw
+
+    // PlotWindow offsetPlotWindow = offsetPlot.show();
+  }
 
   /*
     If previous log files exist, delete them
@@ -353,6 +426,7 @@ public class Sperm_Analysis
     rawProfilePlot.drawLine(rawTailQ75, 280, rawTailQ75, 320);
     rawProfilePlot.drawLine(rawTailQ50, 280, rawTailQ50, 320);
 
+    this.completeCollection.setNormalisedMedianLine(ymedians);
 
   }
 
@@ -413,10 +487,10 @@ public class Sperm_Analysis
     for(Roi roi : roiArray){
 
     	ArrayList rt = new ArrayList(0);
-      // get the profile (and other) data back for the nucleus
+      
       IJ.log("  Analysing nucleus "+i);
       try{
-      	rt = analyseNucleus(roi, image, i, path);
+      	rt = analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
       	this.totalNuclei++;
       } catch(Exception e){
       	IJ.log("  Error analysing nucleus: "+e);
@@ -446,41 +520,7 @@ public class Sperm_Analysis
                 }
             }
           }
-
-          double[] xpoints = new double[rt.size()];
-          double[] ypoints = new double[rt.size()];
-          double[] xprofile = new double[rt.size()];
-          double[] xCentredOnTail = new double[rt.size()];
-          double[] xRawCentredOnTail = new double[rt.size()];
-
-          for(int j=0;j<rt.size();j++){
-              double[] d = (double[])rt.get(j);
-              xpoints[j] = d[0];
-              ypoints[j] = d[1];
-              xprofile[j] = j;
-              xCentredOnTail[j] = d[2];
-              xRawCentredOnTail[j] = d[3];
-          }
-
-          linePlot.setColor(Color.LIGHT_GRAY);
-          linePlot.addPoints(xpoints, ypoints, Plot.LINE);
-          linePlot.draw();
-          plotWindow.drawPlot(linePlot);
-
-          rawProfilePlot.setColor(Color.LIGHT_GRAY);
-          rawProfilePlot.addPoints(xprofile, ypoints, Plot.LINE);
-          rawProfilePlot.draw();
-          rawPlotWindow.drawPlot(rawProfilePlot);
-
-          tailCentredPlot.setColor(Color.LIGHT_GRAY);
-          tailCentredPlot.addPoints(xCentredOnTail, ypoints, Plot.LINE);
-          tailCentredPlot.draw();
-          tailCentredPlotWindow.drawPlot(tailCentredPlot);
-
-          tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
-          tailCentredRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
-          tailCentredRawPlot.draw();
-          tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
+          drawProfilePlots(rt);
         }
 
         i++;
@@ -488,6 +528,44 @@ public class Sperm_Analysis
          IJ.log("  Error processing nucleus data: "+e);
       }
     } 
+  }
+
+  public void drawProfilePlots(ArrayList rt){
+
+  	double[] xpoints = new double[rt.size()];
+    double[] ypoints = new double[rt.size()];
+    double[] xprofile = new double[rt.size()];
+    double[] xCentredOnTail = new double[rt.size()];
+    double[] xRawCentredOnTail = new double[rt.size()];
+
+    for(int j=0;j<rt.size();j++){
+        double[] d = (double[])rt.get(j);
+        xpoints[j] = d[0];
+        ypoints[j] = d[1];
+        xprofile[j] = j;
+        xCentredOnTail[j] = d[2];
+        xRawCentredOnTail[j] = d[3];
+    }
+
+    linePlot.setColor(Color.LIGHT_GRAY);
+    linePlot.addPoints(xpoints, ypoints, Plot.LINE);
+    linePlot.draw();
+    plotWindow.drawPlot(linePlot);
+
+    rawProfilePlot.setColor(Color.LIGHT_GRAY);
+    rawProfilePlot.addPoints(xprofile, ypoints, Plot.LINE);
+    rawProfilePlot.draw();
+    rawPlotWindow.drawPlot(rawProfilePlot);
+
+    tailCentredPlot.setColor(Color.LIGHT_GRAY);
+    tailCentredPlot.addPoints(xCentredOnTail, ypoints, Plot.LINE);
+    tailCentredPlot.draw();
+    tailCentredPlotWindow.drawPlot(tailCentredPlot);
+
+    tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
+    tailCentredRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
+    tailCentredRawPlot.draw();
+    tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
   }
 
   /*
@@ -692,7 +770,7 @@ public class Sperm_Analysis
     double pathLength = 0;
     double normalisedTailIndex = ((double)consensusTailIndex/(double)roiArray.smoothLength)*100;
 
-    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.3){ // only proceed if the tail points are together
+    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // only proceed if the tail points are together
 
        XYPoint prevPoint = new XYPoint(0,0);
        
@@ -701,8 +779,15 @@ public class Sperm_Analysis
           double profileXOffsetToTail = profileX - normalisedTailIndex; // set tail to 0
           double rawXOffsetToTail = (double)i - (double)consensusTailIndex;
 
-          double[] d = new double[] { profileX, roiArray.smoothedArray[i].getInteriorAngle(), profileXOffsetToTail, rawXOffsetToTail };
-          IJ.append(profileX+"\t"+roiArray.smoothedArray[i].getInteriorAngle()+"\t"+profileXOffsetToTail+"\t"+rawXOffsetToTail, this.logFile);
+          double[] d = new double[] { profileX, 
+          														roiArray.smoothedArray[i].getInteriorAngle(), 
+          														profileXOffsetToTail, 
+          														rawXOffsetToTail };
+          
+          IJ.append(profileX+"\t"+
+          					roiArray.smoothedArray[i].getInteriorAngle()+"\t"+
+          					profileXOffsetToTail+"\t"+
+          					rawXOffsetToTail, this.logFile);
           rt.add(d);          
 
           // calculate the path length
@@ -847,6 +932,9 @@ public class Sperm_Analysis
       this.pathLengthArray.add(pathLength);
       this.tailIndexArray.add(normalisedTailIndex);
       this.rawTailIndexArray.add((double)consensusTailIndex);
+
+      roiArray.measurementResults = rt;
+      this.completeCollection.addRoiArray(roiArray);
       return rt;
     } else {
       IJ.append(  failureReason+"\t"+
@@ -1166,10 +1254,6 @@ public class Sperm_Analysis
       }
     }
 
-    // public boolean isMidpoint(){
-    //   return this.isMidpoint;
-    // }
-
     public void setMidpoint(boolean b){
       this.isMidpoint = b;
     }
@@ -1239,6 +1323,8 @@ public class Sperm_Analysis
     private Polygon polygon; // the ROI converted to a polygon; source of XYPoint[] array
 
     private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray
+
+    private ArrayList measurementResults = new ArrayList(0);
     
     public RoiArray (Roi roi) { // construct from an roi
 
@@ -2085,5 +2171,190 @@ public class Sperm_Analysis
                   path);
       }
     }
+  }
+
+  /* 
+  	This class contains the nuclei that pass detection criteria
+  	It enables offsets to be calculated based on the median normalised curves
+  */
+  class RoiCollection {
+
+  	private String folder; // the source of the nuclei
+
+  	private ArrayList<RoiArray> nucleiCollection = new ArrayList<RoiArray>(0); // store all the nuclei analysed
+
+  	private ArrayList<Double> offsets = new ArrayList<Double>(0); // the offset to apply to the angle profile
+  
+  	private double[] normalisedMedian; // this is an array of 200 angles
+
+  	private boolean squareDifferencesCalculated = false;
+
+  	private int offsetCount = 50;
+
+  	public RoiCollection(String folder){
+  		this.folder = folder;
+  	}
+
+  	public void addRoiArray(RoiArray r){
+  		this.nucleiCollection.add(r);
+  	}
+
+  	public void setNormalisedMedianLine(double[] d){
+  		this.normalisedMedian = d;
+  	}
+
+  	public double[] fetchAnglesFromResultsTable(int index){
+
+			ArrayList rt = this.nucleiCollection.get(index).measurementResults;
+
+	    double[] ypoints = new double[rt.size()];
+
+	    for(int j=0;j<rt.size();j++){
+	        double[] d = (double[])rt.get(j);
+	        ypoints[j] = d[1];
+	    }
+
+	    return ypoints;
+  	}
+
+  	public double[] createOffsetRawProfile(int index){
+
+			if(!this.squareDifferencesCalculated){
+				this.calculateSquareDifferences();
+			}
+
+			double offset = this.offsets.get(index);
+
+			ArrayList rt = this.nucleiCollection.get(index).measurementResults;
+
+	    double[] xRawCentredOnTail = new double[rt.size()];
+
+	    for(int j=0;j<rt.size();j++){
+	        double[] d = (double[])rt.get(j);
+	        xRawCentredOnTail[j] = d[3]+offset;
+	    }
+	    return xRawCentredOnTail;
+  	}
+
+  	public double[] createOffsetNormalisedProfile(int index){
+
+			if(!this.squareDifferencesCalculated){
+				this.calculateSquareDifferences();
+			}
+
+			double offset = this.offsets.get(index);
+
+			ArrayList rt = this.nucleiCollection.get(index).measurementResults;
+
+	    double[] xpoints = new double[rt.size()];
+
+	    for(int j=0;j<rt.size();j++){
+	        double[] d = (double[])rt.get(j);
+	        xpoints[j] = d[0]+offset;
+	    }
+	    return xpoints;
+  	}
+
+  	public void calculateSquareDifferences(){
+
+  		
+  		for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
+
+  			double offset = calculateSquareDifferencesInRoi(this.nucleiCollection.get(i));
+  			this.offsets.add(offset);
+  			IJ.log("ROI "+i+"  Offset: "+offset);
+  		}
+  		this.squareDifferencesCalculated = true;
+  	}
+
+  	public int calculateSquareDifferencesInRoi(RoiArray r){
+
+			double minSqDifference = 1000000000; // stupidly big until we see actual values
+			int minSqOffset = 0; // default to no change
+			
+			for(int offset = (0-this.offsetCount); offset<=this.offsetCount; offset++){ // for each offset
+
+				double sqDifference = 0;
+
+				for(int j=0; j<r.smoothLength; j++){ // for each point
+
+					XYPoint p = r.smoothedArray[j];
+					sqDifference += calculateSquareDifferencesBetweenPoints(p, j, offset, r.smoothLength);
+				}
+				// IJ.log("Offset: "+offset+" Sq: "+sqDifference);
+
+				if(sqDifference < minSqDifference){
+					minSqDifference = sqDifference;
+					minSqOffset = offset;
+				}
+
+			}
+  		return minSqOffset;
+  	}
+
+  	public double calculateSquareDifferencesBetweenPoints(XYPoint p, int i, int offset, int arrayLength){
+
+  		// get the interpolated median
+  		double pointAngle = p.getInteriorAngle();
+  		double medianAngle = interpolateNormalisedMedian(i+offset, arrayLength);
+
+  		// calculate the square diffence to the median
+  		double difference = pointAngle - medianAngle;
+  		return difference * difference;
+  	}
+
+  	/*
+			Take an index position from a non-normalised profile
+			Normalise it
+			Find the corresponding angle in the median curve
+			Interpolate as needed
+  	*/
+  	public double interpolateNormalisedMedian(int index, int length){
+
+  		// wrap the array
+  		if(index<0)
+  			index = length-1 + index;
+  		if(index>length-1)
+  			index = index - length-1;
+
+
+  		// normalise the index
+  		double normIndex = ( (double)index / (double)length)*this.normalisedMedian.length;
+
+  		// convert index to 1 window boundaries
+  		int medianIndex1 = (int)Math.round(normIndex);
+  		int medianIndex2 = medianIndex1 > normIndex
+  												? medianIndex1 - 1
+  												: medianIndex1 + 1;
+
+  		int medianIndexLower = medianIndex1 < medianIndex2
+  														? medianIndex1
+  														: medianIndex2;
+
+  		int medianIndexHigher = medianIndex2 < medianIndex1
+  														 ? medianIndex2
+  														 : medianIndex1;
+
+  		// wrap the arrays
+  		if(medianIndexLower<0)
+  			medianIndexLower = (this.normalisedMedian.length-1) + index;
+  		if(medianIndexLower>this.normalisedMedian.length-1)
+  			medianIndexLower = medianIndexLower - (this.normalisedMedian.length-1);
+
+  		if(medianIndexHigher<0)
+  			medianIndexHigher = (this.normalisedMedian.length-1) + index;
+  		if(medianIndexHigher>this.normalisedMedian.length-1)
+  			medianIndexHigher = medianIndexHigher - (this.normalisedMedian.length-1);
+
+  		// get the angle values in the median profile at the given indices
+  		double medianAngleLower = this.normalisedMedian[medianIndexLower];
+  		double medianAngleHigher = this.normalisedMedian[medianIndexHigher];
+
+  		// interpolate on a stright line between the points
+  		double medianAngleDifference = medianAngleHigher - medianAngleLower;
+  		double positionToFind = medianIndexHigher - normIndex;
+  		double interpolatedMedianAngle = (medianAngleDifference * positionToFind) + medianAngleLower;
+  		return interpolatedMedianAngle;
+  	}
   }
 }
