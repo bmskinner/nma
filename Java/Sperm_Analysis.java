@@ -171,6 +171,7 @@ public class Sperm_Analysis
     offsetNormPlot.setColor(Color.LIGHT_GRAY);
 
     this.completeCollection.calculateSquareDifferences();
+    this.completeCollection.findTailIndexInMedianCurve();
     for(int i=0;i<this.completeCollection.nucleiCollection.size();i++){
     	double[] xRawCentredOnTail = this.completeCollection.createOffsetRawProfile(i);
     	double[] xNormCentredOnTail = this.completeCollection.createOffsetRawProfile(i);
@@ -2190,6 +2191,7 @@ public class Sperm_Analysis
   	private boolean squareDifferencesCalculated = false;
 
   	private int offsetCount = 50;
+  	private int medianLineTailIndex;
 
   	public RoiCollection(String folder){
   		this.folder = folder;
@@ -2356,5 +2358,107 @@ public class Sperm_Analysis
   		double interpolatedMedianAngle = (medianAngleDifference * positionToFind) + medianAngleLower;
   		return interpolatedMedianAngle;
   	}
+
+  	public int findTailIndexInMedianCurve(){
+  			// can't use regular tail detector, because it's based on XYPoints
+  			// get minima in curve, then find the minima furthest from both ends
+
+  		ArrayList minima = detectLocalMinimaInMedian();
+
+  		double minDiff = normalisedMedian.length;
+  		double minAngle = 180;
+  		int tailIndex = 0;
+
+  		for(int i = 0; i<minima.size();i++){
+  			Integer index = (Integer)minima.get(i);
+  			// int index = (int);
+  			int toEnd = normalisedMedian.length - index;
+  			int diff = Math.abs(index - toEnd);
+
+  /*			double angle = normalisedMedian[index];
+  			if(angle < minAngle){
+  				minAngle = angle;
+  				tailIndex = index;
+  			}*/
+
+  			if(diff < minDiff){
+  				minDiff = diff;
+  				tailIndex = index;
+  			}
+  		}
+  		IJ.log("Median tail index: "+tailIndex);
+  		this.medianLineTailIndex = tailIndex;
+  		return tailIndex;
+  	}
+
+  	private ArrayList detectLocalMinimaInMedian(){
+      // go through angle array (with tip at start)
+      // look at 1-2-3-4-5 points ahead and behind.
+      // if all greater, local minimum
+      int lookupDistance = 5;
+      
+      double[] prevAngles = new double[lookupDistance]; // slots for previous angles
+      double[] nextAngles = new double[lookupDistance]; // slots for next angles
+
+      // int count = 0;
+
+      ArrayList medianIndexMinima = new ArrayList(0);
+
+      for (int i=0; i<normalisedMedian.length; i++) { // for each position in sperm
+
+        // go through each lookup position and get the appropriate angles
+        for(int j=0;j<prevAngles.length;j++){
+
+          int prev_i = i-(j+1); // the index j+1 before i
+          int next_i = i+(j+1); // the index j+1 after i
+
+          // handle beginning of array - wrap around
+          if(prev_i < 0){
+            prev_i = normalisedMedian.length + prev_i; // length of array - appropriate value
+          }
+
+          // handle end of array - wrap
+          if(next_i >= normalisedMedian.length){
+            next_i = next_i - normalisedMedian.length;
+          }
+
+          // fill the lookup array
+          prevAngles[j] = this.normalisedMedian[prev_i];
+          nextAngles[j] = this.normalisedMedian[next_i];
+        }
+        
+        // with the lookup positions, see if minimum at i
+        // return a 1 if all higher than last, 0 if not
+        // prev_l = 0;
+        boolean ok = true;
+        for(int l=0;l<prevAngles.length;l++){
+
+          // for the first position in prevAngles, compare to the current index
+          if(l==0){
+            if(prevAngles[l] < this.normalisedMedian[i] || nextAngles[l] < this.normalisedMedian[i]){
+              ok = false;
+            }
+          } else { // for the remainder of the positions in prevAngles, compare to the prior prevAngle
+            
+            if(prevAngles[l] < prevAngles[l-1] || nextAngles[l] < nextAngles[l-1]){
+              ok = false;
+            }
+          }
+
+          // if( this.normalisedMedian[i] > -20){ // ignore any values close to 180 degrees
+          //   ok = false;
+          // }
+        }
+
+        if(ok){
+          // count++;
+          medianIndexMinima.add(i);
+          // IJ.log("Minima at: "+i);
+        }
+
+      }
+      
+      return medianIndexMinima;
+    }
   }
 }
