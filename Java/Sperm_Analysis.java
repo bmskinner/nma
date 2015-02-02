@@ -187,6 +187,15 @@ public class Sperm_Analysis
 
   }
 
+  public int wrapIndex(int i, int length){
+    if(i<0)
+      i = length-1 + i;
+    if(Math.floor(i / length)>0)
+      i = i - ( ((int)Math.floor(i / length) )*length);
+    
+    return i;
+  }
+
   /*
   	Create the necessary plot windows and plots
 	*/
@@ -2329,44 +2338,87 @@ public class Sperm_Analysis
       }
     }
 
-    public void splitNucleusToHeadAndHump(){
-
-      // get an array of points from tip to tail
-      float[] roi1X = new float[tailIndex+2]; // will run from 0-tailindex-0
-      float[] roi2X = new float[smoothLength - tailIndex+2];  // will run from tailindex - end - tailIndex
-      float[] roi1Y = new float[tailIndex+2];
-      float[] roi2Y = new float[smoothLength - tailIndex+2];
-
-      // test if each point from the tail intersects the splitting line
+    /*
+			In order to split the nuclear roi into hook and hump sides,
+			we need to get an intersection point of the line through the 
+			tail and centre of mass with the opposite border of the nucleus.
+    */
+    private int findIntersectionPointForNuclearSplit(){
+    	// test if each point from the tail intersects the splitting line
       // determine the coordinates of the point intersected as int
       // for each xvalue of each point in array, get the line y value
       // at the point the yvalues are closest and not the tail point is the intersesction
+    	double[] lineEquation = findLineEquation(this.getCentreOfMass(), this.getSpermTail());
+      double minDeltaY = 100;
+      int minDeltaYIndex = 0;
 
       for(int i = 0; i<smoothLength;i++){
-        XYPoint p = smoothedArray[i];
-        if(i<tailIndex){   // starting at the tip, assign points to roi1
-          roi1X[i] = (float) p.getX();
-          roi1Y[i] = (float) p.getY();
-        }
-        if(i==tailIndex){ // until we hit the tail. Then, close the polygon of roi1 back to the tip. Switch to roi2
-          roi1X[i] = (float) p.getX();
-          roi1Y[i] = (float) p.getY();
-          roi1X[i+1] = (float) spermTip.getX();
-          roi1Y[i+1] = (float) spermTip.getY();
+      		double x = smoothedArray[i].getX();
+      		double y = smoothedArray[i].getY();
+      		double yOnLine = getYFromEquation(lineEquation, x);
 
-          roi2X[0] = (float) spermTail.getX();
-          roi2Y[0] = (float) spermTail.getY();
+      		double distanceToTail = smoothedArray[i].getLengthTo(spermTail);
+
+      		double deltaY = Math.abs(y - yOnLine);
+      		if(deltaY < minDeltaY && distanceToTail > this.getFeret()/2){ // exclude points too close to the tail
+      			minDeltaY = deltaY;
+      			minDeltaYIndex = i;
+      		}
+      }
+      return minDeltaYIndex;
+    }
+
+    public void splitNucleusToHeadAndHump(){
+
+      int intersectionPointIndex = findIntersectionPointForNuclearSplit();
+      XYPoint intersectionPoint = smoothedArray[intersectionPointIndex];
+
+      // get an array of points from tip to tail
+      ArrayList<XYPoint> roi1 = new ArrayList(0);
+      ArrayList<XYPoint> roi2 = new ArrayList(0);
+      boolean changeRoi = false;
+
+      for(int i = 0; i<smoothLength;i++){
+
+      	
+      	int currentIndex = wrapIndex(tailIndex+i, smoothLength); // start at the tail, and go around the array
+        
+        XYPoint p = smoothedArray[currentIndex];
+
+        if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
+        	roi1.add(p);
         }
-        if(i>tailIndex && i<smoothLength-1){ // continue with roi2, adjusting the index numbering as needed
-          roi2X[i-tailIndex] = (float) p.getX();
-          roi2Y[i-tailIndex] = (float) p.getY();
+        if(currentIndex==intersectionPointIndex && !changeRoi){ // until we hit the intersection point. Then, close the polygon of roi1 back to the tip. Switch to roi2
+          roi1.add(p);
+          roi1.add(spermTail);
+          roi2.add(intersectionPoint);
+          changeRoi = true;
         }
-        if(i==smoothLength-1){ // after reaching the tip again, close the polygon back to the tail
-          roi2X[i-tailIndex] = (float) spermTail.getX();
-          roi2Y[i-tailIndex] = (float) spermTail.getY();
+        if(currentIndex != intersectionPointIndex && currentIndex != tailIndex && changeRoi){   // continue with roi2, adjusting the index numbering as needed
+          roi2.add(p);
+        }
+
+        if(currentIndex==tailIndex && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
+        	roi2.add(intersectionPoint);
         }
 
       }
+
+      float[] roi1X = new float[ roi1.size()];
+      float[] roi2X = new float[ roi2.size()];
+      float[] roi1Y = new float[ roi1.size()];
+      float[] roi2Y = new float[ roi2.size()];
+
+      for(int i=0;i<roi1.size();i++){
+      	roi1X[i] = (float) roi1.get(i).getX();
+      	roi1Y[i] = (float) roi1.get(i).getY();
+      }
+
+      for(int i=0;i<roi2.size();i++){
+      	roi2X[i] = (float) roi2.get(i).getX();
+      	roi2Y[i] = (float) roi2.get(i).getY();
+      }
+
 
       double roi1Area = Math.abs(getPolygonArea(roi1X, roi1Y, roi1X.length));
       double roi2Area = Math.abs(getPolygonArea(roi2X, roi2Y, roi2X.length));
@@ -2411,12 +2463,53 @@ public class Sperm_Analysis
 
           // hook or hump?
           if(hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  ){
-            angle += 180;
+            angle = 360 - angle;
           }
 
           // set the final angle
           n.setAngle(angle);
+        }
+      }
 
+    	if(greenSignals.size()>0){
+
+        for(int i=0;i<greenSignals.size();i++){
+          NuclearSignal n = greenSignals.get(i);
+
+          float[] xpoints = { (float) this.spermTail.getX(), (float) this.centreOfMass.getX(), (float) n.centreOfMass.getX()};
+          float[] ypoints = { (float) this.spermTail.getY(), (float) this.centreOfMass.getY(), (float) n.centreOfMass.getY()};
+          PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+          double angle = roi.getAngle();
+
+          // hook or hump?
+          if(hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  ){
+            angle = 360 - angle;
+          }
+
+          // set the final angle
+          n.setAngle(angle);
+        }
+      }
+    }
+
+    public void calculateSignalDistances(){
+
+    	if(redSignals.size()>0){
+        for(int i=0;i<redSignals.size();i++){
+        	NuclearSignal n = redSignals.get(i);
+
+        	// NEED TO MAKE A FRACTION OF DISTANCE TO EDGE
+        	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+        	n.setDistance(distance);
+        }
+      }
+
+
+      if(greenSignals.size()>0){
+        for(int i=0;i<greenSignals.size();i++){
+        	NuclearSignal n = greenSignals.get(i);
+        	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+        	n.setDistance(distance);
         }
       }
     }
@@ -2701,14 +2794,14 @@ public class Sperm_Analysis
 
     }
 
-    public int wrapIndex(int i, int length){
-      if(i<0)
-        i = length-1 + i;
-      if(Math.floor(i / length)>0)
-        i = i - ( ((int)Math.floor(i / length) )*length);
+    // public int wrapIndex(int i, int length){
+    //   if(i<0)
+    //     i = length-1 + i;
+    //   if(Math.floor(i / length)>0)
+    //     i = i - ( ((int)Math.floor(i / length) )*length);
       
-      return i;
-    }
+    //   return i;
+    // }
 
   	/*
 			Take an index position from a non-normalised profile
@@ -2887,7 +2980,6 @@ public class Sperm_Analysis
 
          this.nucleiCollection.get(i).splitNucleusToHeadAndHump();
          this.nucleiCollection.get(i).calculateSignalAnglesFromTail();
-
       }
     }
 
