@@ -170,8 +170,9 @@ public class Sperm_Analysis
     offsetNormPlot.setYTicks(true);
     offsetNormPlot.setColor(Color.LIGHT_GRAY);
 
-    this.completeCollection.calculateSquareDifferences();
     this.completeCollection.findTailIndexInMedianCurve();
+    this.completeCollection.calculateSquareDifferences();
+    
     for(int i=0;i<this.completeCollection.nucleiCollection.size();i++){
     	double[] xRawCentredOnTail = this.completeCollection.createOffsetRawProfile(i);
     	double[] xNormCentredOnTail = this.completeCollection.createOffsetRawProfile(i);
@@ -692,6 +693,7 @@ public class Sperm_Analysis
         failureReason = failureReason | this.FAILURE_TIP;
     }
     roiArray.moveIndexToArrayStart(spermTip.getIndex());
+    roiArray.tipIndex = 0;
 
 
     // decide if the profile is right or left handed; flip if needed
@@ -757,6 +759,7 @@ public class Sperm_Analysis
     	take a position between them on roi
     */
     int consensusTailIndex = getPositionBetween(spermTail2, spermTail3, roiArray);
+    roiArray.tailIndex = consensusTailIndex;
     XYPoint consensusTail = roiArray.smoothedArray[consensusTailIndex];
     // XYPoint consensusTail = getPositionBetween(spermTail2, spermTail3, roiArray);
 
@@ -1308,6 +1311,11 @@ public class Sperm_Analysis
     private int blockCount = 0; // the number of delta blocks detected
     private int DELTA_WINDOW_MIN = 5; // the minimum number of points required in a delta block
 
+    private int offsetForTail = 0;
+
+    private int tailIndex; // the index in the smoothedArray that has been designated the tail
+    private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
+
     private double medianAngle; // the median angle from XYPoint[] smoothedArray
 
     private XYPoint[] array; // the points from the polygon made from the input roi
@@ -1319,9 +1327,13 @@ public class Sperm_Analysis
     private boolean minimaCalculated = false; // has detectLocalMinima been run
     private boolean maximaCalculated = false; // has detectLocalMaxima been run
     private boolean anglesCalculated = false; // has makeAngleArray been run
+    private boolean offsetCalculated = false; // has makeAngleArray been run
     
     private Roi roi; // the original ROI
     private Polygon polygon; // the ROI converted to a polygon; source of XYPoint[] array
+
+    private Roi[] redSignals; // an array to hold any signals detected
+    private Roi[] greenSignals; // an array to hold any signals detected
 
     private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray
 
@@ -2183,14 +2195,12 @@ public class Sperm_Analysis
   	private String folder; // the source of the nuclei
 
   	private ArrayList<RoiArray> nucleiCollection = new ArrayList<RoiArray>(0); // store all the nuclei analysed
-
-  	private ArrayList<Double> offsets = new ArrayList<Double>(0); // the offset to apply to the angle profile
   
   	private double[] normalisedMedian; // this is an array of 200 angles
 
   	private boolean squareDifferencesCalculated = false;
 
-  	private int offsetCount = 50;
+  	private int offsetCount = 20;
   	private int medianLineTailIndex;
 
   	public RoiCollection(String folder){
@@ -2225,7 +2235,7 @@ public class Sperm_Analysis
 				this.calculateSquareDifferences();
 			}
 
-			double offset = this.offsets.get(index);
+			double offset = this.nucleiCollection.get(index).offsetForTail;
 
 			ArrayList rt = this.nucleiCollection.get(index).measurementResults;
 
@@ -2244,7 +2254,7 @@ public class Sperm_Analysis
 				this.calculateSquareDifferences();
 			}
 
-			double offset = this.offsets.get(index);
+			double offset = this.nucleiCollection.get(index).offsetForTail;
 
 			ArrayList rt = this.nucleiCollection.get(index).measurementResults;
 
@@ -2262,8 +2272,7 @@ public class Sperm_Analysis
   		
   		for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
 
-  			double offset = calculateSquareDifferencesInRoi(this.nucleiCollection.get(i));
-  			this.offsets.add(offset);
+  			int offset = calculateSquareDifferencesInRoi(this.nucleiCollection.get(i));
   			IJ.log("ROI "+i+"  Offset: "+offset);
   		}
   		this.squareDifferencesCalculated = true;
@@ -2273,37 +2282,107 @@ public class Sperm_Analysis
 
 			double minSqDifference = 1000000000; // stupidly big until we see actual values
 			int minSqOffset = 0; // default to no change
+
+      int curveTailIndex = r.tailIndex;
+
+      // the curve needs to be matched to the median 
+      // hence the median array needs to be the same curve length
+      double[] medianInterpolatedArray = interpolateMedianToLength(r.smoothLength);
+      drawInterpolatedMedians(medianInterpolatedArray);
+
+      IJ.log("Median interpolated to length: "+medianInterpolatedArray.length);
+      IJ.log("Original median tail index: "+this.medianLineTailIndex+" : "+this.normalisedMedian[medianLineTailIndex]);
+      // int medianTailIndex = this.medianLineTailIndex;
+
+      // alter the median tail index to the interpolated curve equivalent
+      int medianTailIndex = (int)Math.round(( (double)this.medianLineTailIndex / (double)normalisedMedian.length )* r.smoothLength);
+      IJ.log("Interpolated median tail index: "+medianTailIndex+" : "+medianInterpolatedArray[medianTailIndex]);
+      IJ.log("Curve tail index: "+curveTailIndex+" : "+r.smoothedArray[curveTailIndex].getInteriorAngle());
 			
-			for(int offset = (0-this.offsetCount); offset<=this.offsetCount; offset++){ // for each offset
+      if(medianInterpolatedArray.length != r.smoothLength){
+        IJ.log("Error: interpolated median array is not the right length");
+      }
 
-				double sqDifference = 0;
+      int offset = curveTailIndex - medianTailIndex;
 
-				for(int j=0; j<r.smoothLength; j++){ // for each point
+   //    double[] offsetLog = new double[r.smoothLength];
+   //    // go through each offset position
+   //    int offsetCount = r.smoothLength; // allow every possible position to be checked
+			// for(int offset = 0; offset<offsetCount; offset++){ // for each offset
 
-					XYPoint p = r.smoothedArray[j];
-					sqDifference += calculateSquareDifferencesBetweenPoints(p, j, offset, r.smoothLength);
-				}
-				// IJ.log("Offset: "+offset+" Sq: "+sqDifference);
+			// 	double sqDifference = 0;
 
-				if(sqDifference < minSqDifference){
-					minSqDifference = sqDifference;
-					minSqOffset = offset;
-				}
+			// 	for(int j=0; j<r.smoothLength; j++){ // for each point round the array
 
-			}
-  		return minSqOffset;
+   //        // IJ.log("j="+j);
+   //        // find the next point in the array, given the tail point is our 0
+   //        int curveIndex = wrapIndex(curveTailIndex+j+offset, r.smoothLength);
+   //        // IJ.log("Curve index: "+curveIndex);
+
+   //        // get the angle at this point
+   //        double curveAngle = r.smoothedArray[curveIndex].getInteriorAngle();
+
+   //        // get the next median index position, given the tail point is 0
+   //        int medianIndex = wrapIndex(medianTailIndex+j, normalisedMedian.length);
+   //        // IJ.log("Median index: "+medianIndex);
+   //        double medianAngle = medianInterpolatedArray[medianIndex];
+   //        // IJ.log("j="+j+" Curve index: "+curveIndex+" Median index: "+medianIndex+" Median: "+medianAngle);
+   //        double difference = curveAngle - medianAngle;
+   //        sqDifference += difference * difference;
+			// 	}
+			// 	// IJ.log("Offset: "+offset+" Sq: "+sqDifference+" MinSq: "+minSqDifference);
+
+			// 	if(sqDifference < minSqDifference){
+			// 		minSqDifference = sqDifference;
+			// 		minSqOffset = offset;
+			// 	}
+   //      offsetLog[offset] = sqDifference; // recording the square difference at each offset position
+			// }
+   //    int offsetIndex = curveTailIndex+minSqOffset;
+   //    IJ.log("Offset: "+minSqOffset+" Index: "+offsetIndex+" : "+r.smoothedArray[offsetIndex].getInteriorAngle());
+      r.offsetForTail = offset;
+      r.offsetCalculated = true;
+   //    drawOffsets(offsetLog);
+  	// 	return minSqOffset;
+      return offset;
   	}
 
-  	public double calculateSquareDifferencesBetweenPoints(XYPoint p, int i, int offset, int arrayLength){
+    public double[] interpolateMedianToLength(int newLength){
 
-  		// get the interpolated median
-  		double pointAngle = p.getInteriorAngle();
-  		double medianAngle = interpolateNormalisedMedian(i+offset, arrayLength);
+      int oldLength = normalisedMedian.length;
+      
+      double[] newMedianCurve = new double[newLength];
 
-  		// calculate the square diffence to the median
-  		double difference = pointAngle - medianAngle;
-  		return difference * difference;
-  	}
+      // where in the old curve index is the new curve index?
+
+      for (int i=0; i<newLength; i++) {
+
+        // we have a point in the new curve.
+        // we want to know which points it lay between in the old curve
+        double oldIndex = ( (double)i / (double)newLength)*oldLength; // get the frational index position needed
+        double interpolatedMedian = interpolateNormalisedMedian(oldIndex, oldLength);
+        newMedianCurve[i] = interpolatedMedian;
+      }
+      return newMedianCurve;
+
+    }
+
+    public int wrapIndex(int i, int length){
+      if(i<0)
+        i = length-1 + i;
+      if(Math.floor(i / length)>0)
+        i = i - ( ((int)Math.floor(i / length) )*length);
+      
+      return i;
+    }
+
+  	// public double calculateSquareDifferencesBetweenPoints(double a, double b){
+
+  	// 	  		// calculate the square diffence to the median
+  	// 	double difference = a - b;
+  	// 	return difference * difference;
+  	// }
+
 
   	/*
 			Take an index position from a non-normalised profile
@@ -2311,17 +2390,10 @@ public class Sperm_Analysis
 			Find the corresponding angle in the median curve
 			Interpolate as needed
   	*/
-  	public double interpolateNormalisedMedian(int index, int length){
-
-  		// wrap the array
-  		if(index<0)
-  			index = length-1 + index;
-  		if(index>length-1)
-  			index = index - length-1;
-
+  	public double interpolateNormalisedMedian(double normIndex, int length){
 
   		// normalise the index
-  		double normIndex = ( (double)index / (double)length)*this.normalisedMedian.length;
+  		// double normIndex = ( (double)index / (double)length)*this.normalisedMedian.length;
 
   		// convert index to 1 window boundaries
   		int medianIndex1 = (int)Math.round(normIndex);
@@ -2338,15 +2410,19 @@ public class Sperm_Analysis
   														 : medianIndex1;
 
   		// wrap the arrays
-  		if(medianIndexLower<0)
-  			medianIndexLower = (this.normalisedMedian.length-1) + index;
-  		if(medianIndexLower>this.normalisedMedian.length-1)
-  			medianIndexLower = medianIndexLower - (this.normalisedMedian.length-1);
+      medianIndexLower  = wrapIndex(medianIndexLower, length);
+      medianIndexHigher = wrapIndex(medianIndexHigher, length);
 
-  		if(medianIndexHigher<0)
-  			medianIndexHigher = (this.normalisedMedian.length-1) + index;
-  		if(medianIndexHigher>this.normalisedMedian.length-1)
-  			medianIndexHigher = medianIndexHigher - (this.normalisedMedian.length-1);
+
+  		// if(medianIndexLower<0)
+  		// 	medianIndexLower = (this.normalisedMedian.length-1) + index;
+  		// if(medianIndexLower>this.normalisedMedian.length-1)
+  		// 	medianIndexLower = medianIndexLower - (this.normalisedMedian.length-1);
+
+  		// if(medianIndexHigher<0)
+  		// 	medianIndexHigher = (this.normalisedMedian.length-1) + index;
+  		// if(medianIndexHigher>this.normalisedMedian.length-1)
+  		// 	medianIndexHigher = medianIndexHigher - (this.normalisedMedian.length-1);
 
   		// get the angle values in the median profile at the given indices
   		double medianAngleLower = this.normalisedMedian[medianIndexLower];
@@ -2460,5 +2536,30 @@ public class Sperm_Analysis
       
       return medianIndexMinima;
     }
+
+    public void drawInterpolatedMedians(double[] d){
+
+      logFile = folder+"logInterpolatedMedians.txt";
+
+      IJ.append("INDEX\tANGLE", logFile);
+      for(int i=0;i<d.length;i++){
+        IJ.append(i+"\t"+d[i], logFile);
+      }
+      IJ.append("", logFile);
+
+    }
+
+    public void drawOffsets(double[] d){
+
+      logFile = folder+"logOffsets.txt";
+      IJ.append("OFFSET\tDIFFERENCE", logFile);
+
+      for(int i=0;i<d.length;i++){
+        IJ.append(i+"\t"+d[i], logFile);
+      }
+      IJ.append("", logFile);
+
+    }
   }
+
 }
