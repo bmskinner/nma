@@ -147,8 +147,6 @@ public class Sperm_Analysis
     IJ.log("Before filtering: "+analysed);
 
     this.completeCollection.refilterNuclei();
-    this.completeCollection.exportNuclearStats();
-    // this.completeCollection.refilterNuclei();
     this.completeCollection.createProfileAggregate();
     this.completeCollection.drawProfilePlots();
 
@@ -157,6 +155,8 @@ public class Sperm_Analysis
     this.completeCollection.calculateOffsets();
     this.completeCollection.drawOffsetChart();
     this.completeCollection.measureNuclearOrganisation();
+    this.completeCollection.exportNuclearStats();
+    this.completeCollection.annotateImagesOfNuclei();
     
   }
 
@@ -208,22 +208,6 @@ public class Sperm_Analysis
     }
 
     IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.failedFile);
-
-    // this.medianFile = folderName+"logMedians.txt";
-    // File h = new File(medianFile);
-    // if(h.exists()){
-    //   h.delete();
-    // }
-
-    // IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.medianFile);
-
-    // this.statsFile = folderName+"logStats.txt";
-    // File i = new File(statsFile);
-    // if(i.exists()){
-    //   i.delete();
-    // }
-
-    // IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.statsFile);
   }
 
   /*
@@ -295,31 +279,6 @@ public class Sperm_Analysis
   }
 
   /*
-    Write the nuclear area, perimeter, feret and path to the global log file
-  */
-  // public void exportNuclearStats(){
-  	
-  //   IJ.log("Exporting stats for "+completeCollection.getNucleusCount()+" nuclei");
-  //   double[] areas  = completeCollection.getAreas();
-  //   double[] perims = completeCollection.getPerimeters();
-  //   double[] ferets = completeCollection.getFerets();
-  //   double[] pathLengths  = completeCollection.getPathLengths();
-  //   int[] tails = completeCollection.getTailIndexes();
-  //   String[] paths = completeCollection.getNucleusPaths();
-
-  // 	for(int i=0; i<completeCollection.getNucleusCount();i++){
-  //     IJ.append(  areas[i]+"\t"+
-  //                 perims[i]+"\t"+
-  //                 ferets[i]+"\t"+
-  //                 pathLengths[i]+"\t"+
-  //                 tails[i]+"\t"+
-  //                 rawTailIndexArray.get(i)+"\t"+
-  //                 paths[i], this.statsFile);
-  // 	}
-
-  // }
-
-  /*
     Calculate the <lowerPercent> quartile from a Double[] array
   */
   public static double quartile(double[] values, double lowerPercent) {
@@ -385,39 +344,7 @@ public class Sperm_Analysis
       } catch(Exception e){
       	IJ.log("  Error analysing nucleus: "+e);
       }
-
-      // carry out the group processing - eg find median lines
-      // GROUP PROCESSING SHOULD BE CARRIED OUT ON THE COLLECTION AFTER FILTERING; NOT HERE
-      // try{
-
-      //   if(rt.size()>0){
-      //     // add values to pool
-
-      //     for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
-
-      //       for(int j=0;j<rt.size();j++){
-
-      //           double[] d = (double[])rt.get(j);
-               
-      //           if( d[0] > k && d[0] < k+PROFILE_INCREMENT){
-
-      //               Collection<Double> values = finalResults.get(k);
-      //               if (values==null) {
-      //                   values = new ArrayList<Double>();
-      //                   finalResults.put(k, values);
-      //               }
-      //               values.add(d[1]);
-
-      //           }
-      //       }
-      //     }
-      //     drawProfilePlots(rt);
-      //   }
-
-        i++;
-      // } catch(NullPointerException e){
-      //    IJ.log("  Error processing nucleus data: "+e);
-      // }
+      i++;
     } 
   }
 
@@ -447,11 +374,6 @@ public class Sperm_Analysis
     rawProfilePlot.addPoints(xprofile, ypoints, Plot.LINE);
     rawProfilePlot.draw();
     rawPlotWindow.drawPlot(rawProfilePlot);
-
-    // tailCentredPlot.setColor(Color.LIGHT_GRAY);
-    // tailCentredPlot.addPoints(xCentredOnTail, ypoints, Plot.LINE);
-    // tailCentredPlot.draw();
-    // tailCentredPlotWindow.drawPlot(tailCentredPlot);
 
     tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
     tailCentredRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
@@ -533,7 +455,6 @@ public class Sperm_Analysis
     // results table
     ArrayList rt = new ArrayList(0);
     boolean nucleusPassedChecks = true; // any check can disable this
-    // String failureReason = "";
     int failureReason = 0;
 
 
@@ -541,6 +462,7 @@ public class Sperm_Analysis
     image.setRoi(nucleus);
     image.copy();
     ImagePlus smallRegion = ImagePlus.getClipboard();
+
     nucleus.setLocation(0,0); // translate the roi to the new image coordinates
     smallRegion.setRoi(nucleus);
 
@@ -553,6 +475,10 @@ public class Sperm_Analysis
     Nucleus roiArray = new Nucleus(nucleus);
     roiArray.setPath(path);
     roiArray.setNucleusNumber(nucleusNumber);
+
+    // immediately save out a picture of the nucleus for later annotation
+    String saveFolder = createImageDirectory(roiArray.getPathWithoutExtension());
+    IJ.saveAsTiff(smallRegion, saveFolder+"\\"+roiArray.getNucleusNumber()+".tiff");
 
 
     // measure CoM, area, perimeter and feret in blue
@@ -568,9 +494,9 @@ public class Sperm_Analysis
 
 
     // draw the CoM
-    ip.setColor(Color.MAGENTA);
-    ip.setLineWidth(5);
-    ip.drawDot(nucleusCoM.getXAsInt(), nucleusCoM.getYAsInt());
+    // ip.setColor(Color.MAGENTA);
+    // ip.setLineWidth(5);
+    // ip.drawDot(nucleusCoM.getXAsInt(), nucleusCoM.getYAsInt());
 
 
     // find tip - use the least angle method
@@ -594,9 +520,9 @@ public class Sperm_Analysis
 
     
     //draw the sperm tip 
-    ip.setLineWidth(5);
-    ip.setColor(Color.YELLOW);
-    ip.drawDot(spermTip.getXAsInt(), spermTip.getYAsInt());
+    // ip.setLineWidth(5);
+    // ip.setColor(Color.YELLOW);
+    // ip.drawDot(spermTip.getXAsInt(), spermTip.getYAsInt());
     
 
     // find local minima and maxima
@@ -742,7 +668,7 @@ public class Sperm_Analysis
     ip.setColor(Color.ORANGE);
     ip.drawDot(spermTail3.getXAsInt(), spermTail3.getYAsInt());
 
-    String saveFolder = createImageDirectory(roiArray.getPathWithoutExtension());
+    // String saveFolder = createImageDirectory(roiArray.getPathWithoutExtension());
     IJ.saveAsTiff(smallRegion, saveFolder+"\\"+roiArray.getNucleusNumber()+".tiff");
 
 
@@ -1188,6 +1114,8 @@ public class Sperm_Analysis
     private int tailIndex; // the index in the smoothedArray that has been designated the tail
     private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
 
+    private double differenceToMedianCurve; // store the difference between curves as the sum of squares
+
     private double medianAngle; // the median angle from XYPoint[] smoothedArray
     private double perimeter; // the nuclear perimeter
     private double pathLength; // the angle path length
@@ -1201,6 +1129,7 @@ public class Sperm_Analysis
     private XYPoint centreOfMass;
     private XYPoint spermTip;
     private XYPoint spermTail;
+    private XYPoint intersectionPoint;
     
     private String imagePath; // the path to the image being analysed
 
@@ -2131,7 +2060,7 @@ public class Sperm_Analysis
 
 
       // get the midpoint of each block
-      ArrayList results = new ArrayList<XYPoint>(0);
+      ArrayList<XYPoint> results = new ArrayList<XYPoint>(0);
       int maxIndex = 0;
     
       // remember that block 0 is not assigned; start from 1
@@ -2270,6 +2199,7 @@ public class Sperm_Analysis
 
       int intersectionPointIndex = findIntersectionPointForNuclearSplit();
       XYPoint intersectionPoint = smoothedArray[intersectionPointIndex];
+      this.intersectionPoint = intersectionPoint;
 
       // get an array of points from tip to tail
       ArrayList<XYPoint> roi1 = new ArrayList<XYPoint>(0);
@@ -2476,7 +2406,7 @@ public class Sperm_Analysis
     private PlotWindow rawXFromTailWindow;
 
     private double maxDifferenceFromMedian = 1.25; // used to filter the nuclei, and remove those too small, large or irregular to be real
-    private double maxWibblinessFromMedian = 1.1; // filter for the irregular borders more stringently
+    private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
 
   	public NucleusCollection(String folder){
   		this.folder = folder;
@@ -2542,6 +2472,15 @@ public class Sperm_Analysis
 
       for(int i=0;i<nucleiCollection.size();i++){
         d[i] = nucleiCollection.get(i).getTailIndex();
+      }
+      return d;
+    }
+
+    public double[] getSquareDifferences(){
+      double[] d = new double[nucleiCollection.size()];
+
+      for(int i=0;i<nucleiCollection.size();i++){
+        d[i] = nucleiCollection.get(i).differenceToMedianCurve;
       }
       return d;
     }
@@ -2668,37 +2607,46 @@ public class Sperm_Analysis
       int pathlength = 0;
       int arraylength = 0;
 
+      int totalIterations = nucleiCollection.size();
+
       IJ.log("Prefiltered: Area: "+medianArea+" ; Perimeter: "+medianPerimeter+" ; Path length: "+medianPathLength+" ; Array length: "+medianArrayLength);
 
       for(int i=0;i<nucleiCollection.size();i++){
         Nucleus n = nucleiCollection.get(i);
         boolean dropNucleus = false;
+        // IJ.log("Filtering: "+i);
 
-        IJ.log("Nucleus "+n.getPath()+"-"+n.getNucleusNumber()+" Path length "+n.getPathLength());
+        // IJ.log("Nucleus "+n.getPath()+"-"+n.getNucleusNumber()+" Path length "+n.getPathLength());
 
         if(n.getArea() > maxArea || n.getArea() < minArea ){
           dropNucleus = true;
           // nucleiCollection.remove(n);
+          // IJ.log("Drop because area");
           area++;
         }
         if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
            // nucleiCollection.remove(n);
            dropNucleus = true;
+           // IJ.log("Drop because perimeter");
            perim++;
         }
         if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
            // nucleiCollection.remove(n);
+        	// IJ.log("Drop because path length");
            dropNucleus = true;
            pathlength++;
         }
         if(n.smoothLength > medianArrayLength * maxDifferenceFromMedian || n.smoothLength < medianArrayLength / maxDifferenceFromMedian ){
            // nucleiCollection.remove(n);
+        	// IJ.log("Drop because array length");
            dropNucleus = true;
            arraylength++;
         }
-        if(dropNucleus)
-          IJ.log("Dropping nucleus: "+n.getPath()+"-"+n.getNucleusNumber());
+        if(dropNucleus){
+          // IJ.log("Dropping nucleus: "+n.getPath()+"-"+n.getNucleusNumber());
           this.nucleiCollection.remove(n);
+          i--; // the array index automatically shifts to account for the removed nucleus. Compensate to avoid skipping nuclei
+        }
       }
 
       medianArea = this.getMedianNuclearArea();
@@ -2714,7 +2662,7 @@ public class Sperm_Analysis
       IJ.log("  Due to wibbliness >"+maxPathLength+" : "+pathlength+" nuclei");
       IJ.log("  Due to array length: "+arraylength+" nuclei");
       IJ.log("Remaining: "+this.nucleiCollection.size()+" nuclei");
-      nucleiCollection.trimToSize();
+      // nucleiCollection.trimToSize();
     }
 
     /*
@@ -2946,83 +2894,63 @@ public class Sperm_Analysis
       Calculate the offsets needed to corectly assign the tail positions
       compared to ideal median curves
     */
-  	public void calculateOffsets(){
+  	private void calculateOffsets(){
 
   		for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
-  			int offset = calculateOffsetInNucleus(this.nucleiCollection.get(i));
-  			// IJ.log("ROI "+i+"  Offset: "+offset);
-        this.nucleiCollection.get(i).offsetForTail = offset;
-        this.nucleiCollection.get(i).offsetCalculated = true;
-        this.nucleiCollection.get(i).tailIndex = this.nucleiCollection.get(i).tailIndex+offset; // update the tail position
+  			Nucleus r = this.nucleiCollection.get(i);
+  			// int offset = calculateOffsetInNucleus(this.nucleiCollection.get(i));
+
+				double minSqDifference = 1000000000; // stupidly big until we see actual values
+				int minSqOffset = 0; // default to no change
+
+	      int curveTailIndex = r.tailIndex;
+
+	      // the curve needs to be matched to the median 
+	      // hence the median array needs to be the same curve length
+	      double[] medianInterpolatedArray = interpolateMedianToLength(r.smoothLength);
+
+	      // alter the median tail index to the interpolated curve equivalent
+	      int medianTailIndex = (int)Math.round(( (double)this.medianLineTailIndex / (double)normalisedMedian.length )* r.smoothLength);
+				
+	      if(medianInterpolatedArray.length != r.smoothLength){
+	        IJ.log("    Error: interpolated median array is not the right length");
+	      }
+
+	      int offset = curveTailIndex - medianTailIndex;
+
+	      // for comparisons between sperm, get the square difference between teh offset curve and the median
+
+				double sqDifference = 0;
+
+				for(int j=0; j<r.smoothLength; j++){ // for each point round the array
+
+		      // IJ.log("j="+j);
+		      // find the next point in the array, given the tail point is our 0
+		      int curveIndex = wrapIndex(curveTailIndex+j+offset, r.smoothLength);
+		      // IJ.log("Curve index: "+curveIndex);
+
+		      // get the angle at this point
+		      double curveAngle = r.smoothedArray[curveIndex].getInteriorAngle();
+
+		      // get the next median index position, given the tail point is 0
+		      int medianIndex = wrapIndex(medianTailIndex+j, normalisedMedian.length);
+		      // IJ.log("Median index: "+medianIndex);
+		      double medianAngle = medianInterpolatedArray[medianIndex];
+		      // IJ.log("j="+j+" Curve index: "+curveIndex+" Median index: "+medianIndex+" Median: "+medianAngle);
+		      double difference = curveAngle - medianAngle;
+		      sqDifference += difference * difference;
+				}
+				// IJ.log("Nucleus: "+r.getPath()+"-"+r.getNucleusNumber()+"   : "+sqDifference);
+
+				this.nucleiCollection.get(i).offsetForTail = offset;
+
+        r.offsetCalculated = true;
+        r.tailIndex = r.tailIndex-offset; // update the tail position
+        r.setSpermTail(r.smoothedArray[r.tailIndex]); // ensure the spermTail is updated
+        r.differenceToMedianCurve = sqDifference;
   		}
+
   		this.squareDifferencesCalculated = true;
-  	}
-
-  	private int calculateOffsetInNucleus(Nucleus r){
-
-			double minSqDifference = 1000000000; // stupidly big until we see actual values
-			int minSqOffset = 0; // default to no change
-
-      int curveTailIndex = r.tailIndex;
-
-      // the curve needs to be matched to the median 
-      // hence the median array needs to be the same curve length
-      double[] medianInterpolatedArray = interpolateMedianToLength(r.smoothLength);
-      // drawInterpolatedMedians(medianInterpolatedArray);
-
-      // IJ.log("Median interpolated to length: "+medianInterpolatedArray.length);
-      // IJ.log("Original median tail index: "+this.medianLineTailIndex+" : "+this.normalisedMedian[medianLineTailIndex]);
-      // int medianTailIndex = this.medianLineTailIndex;
-
-      // alter the median tail index to the interpolated curve equivalent
-      int medianTailIndex = (int)Math.round(( (double)this.medianLineTailIndex / (double)normalisedMedian.length )* r.smoothLength);
-      // IJ.log("Interpolated median tail index: "+medianTailIndex+" : "+medianInterpolatedArray[medianTailIndex]);
-      // IJ.log("Curve tail index: "+curveTailIndex+" : "+r.smoothedArray[curveTailIndex].getInteriorAngle());
-			
-      if(medianInterpolatedArray.length != r.smoothLength){
-        IJ.log("    Error: interpolated median array is not the right length");
-      }
-
-      int offset = curveTailIndex - medianTailIndex;
-
-     //    double[] offsetLog = new double[r.smoothLength];
-     //    // go through each offset position
-     //    int offsetCount = r.smoothLength; // allow every possible position to be checked
-  			// for(int offset = 0; offset<offsetCount; offset++){ // for each offset
-
-  			// 	double sqDifference = 0;
-
-  			// 	for(int j=0; j<r.smoothLength; j++){ // for each point round the array
-
-     //        // IJ.log("j="+j);
-     //        // find the next point in the array, given the tail point is our 0
-     //        int curveIndex = wrapIndex(curveTailIndex+j+offset, r.smoothLength);
-     //        // IJ.log("Curve index: "+curveIndex);
-
-     //        // get the angle at this point
-     //        double curveAngle = r.smoothedArray[curveIndex].getInteriorAngle();
-
-     //        // get the next median index position, given the tail point is 0
-     //        int medianIndex = wrapIndex(medianTailIndex+j, normalisedMedian.length);
-     //        // IJ.log("Median index: "+medianIndex);
-     //        double medianAngle = medianInterpolatedArray[medianIndex];
-     //        // IJ.log("j="+j+" Curve index: "+curveIndex+" Median index: "+medianIndex+" Median: "+medianAngle);
-     //        double difference = curveAngle - medianAngle;
-     //        sqDifference += difference * difference;
-			// 	}
-			// 	// IJ.log("Offset: "+offset+" Sq: "+sqDifference+" MinSq: "+minSqDifference);
-
-			// 	if(sqDifference < minSqDifference){
-			// 		minSqDifference = sqDifference;
-			// 		minSqOffset = offset;
-			// 	}
-     //      offsetLog[offset] = sqDifference; // recording the square difference at each offset position
-  			// }
-     //    int offsetIndex = curveTailIndex+minSqOffset;
-     //    IJ.log("Offset: "+minSqOffset+" Index: "+offsetIndex+" : "+r.smoothedArray[offsetIndex].getInteriorAngle());
-      //    drawOffsets(offsetLog);
-    	// 	return minSqOffset;
-      return offset;
   	}
 
     public double[] interpolateMedianToLength(int newLength){
@@ -3165,7 +3093,7 @@ public class Sperm_Analysis
 
   	public int findTailIndexInMedianCurve(){
 			// can't use regular tail detector, because it's based on XYPoints
-			// get minima in curve, then find the minima furthest from both ends
+			// get minima in curve, then find the lowest minima / minima furthest from both ends
 
   		ArrayList minima = detectLocalMinimaInMedian();
 
@@ -3186,8 +3114,14 @@ public class Sperm_Analysis
     			int toEnd = normalisedMedian.length - index;
     			int diff = Math.abs(index - toEnd);
 
-    			if(diff < minDiff){
-    				minDiff = diff;
+    			// if(diff < minDiff){
+    			// 	minDiff = diff;
+    			// 	tailIndex = index;
+    			// }
+
+    			double angle = normalisedMedian[index];
+    			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not the tip
+    				minAngle = angle;
     				tailIndex = index;
     			}
     		}
@@ -3388,7 +3322,7 @@ public class Sperm_Analysis
       if(f.exists()){
         f.delete();
       }
-      IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tPATH", statsFile);
+      IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tSQUARE_DIFFERENCE\tPATH", statsFile);
 
       IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei");
       double[] areas  = this.getAreas();
@@ -3396,6 +3330,7 @@ public class Sperm_Analysis
       double[] ferets = this.getFerets();
       double[] pathLengths  = this.getPathLengths();
       int[] tails = this.getTailIndexes();
+      double[] differences= this.getSquareDifferences();
       String[] paths = this.getNucleusPaths();
 
       for(int i=0; i<this.getNucleusCount();i++){
@@ -3404,9 +3339,63 @@ public class Sperm_Analysis
                     ferets[i]+"\t"+
                     pathLengths[i]+"\t"+
                     tails[i]+"\t"+
+                    differences[i]+"\t"+
                     paths[i], statsFile);
       }
 
+    }
+
+    public void annotateImagesOfNuclei(){
+    	for(int i=0; i<this.getNucleusCount();i++){
+    		Nucleus n = this.nucleiCollection.get(i);
+
+    		// open the image we saved earlier
+    		String path = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+".tiff";
+    		Opener localOpener = new Opener();
+        ImagePlus image = localOpener.openImage(path);
+        ImageProcessor ip = image.getProcessor();
+
+        // draw the features of interest
+        // draw the roi
+		    // ip.setColor(Color.BLUE);
+		    // ip.setLineWidth(1);
+		    // ip.draw(nucleus);
+
+
+		    // draw the CoM
+		    ip.setColor(Color.MAGENTA);
+		    ip.setLineWidth(5);
+		    ip.drawDot(n.getCentreOfMass().getXAsInt(),  n.getCentreOfMass().getYAsInt());
+
+		    //draw the sperm tip 
+		    ip.setLineWidth(5);
+		    ip.setColor(Color.YELLOW);
+		    ip.drawDot(n.getSpermTip().getXAsInt(), n.getSpermTip().getYAsInt());
+
+				// line from tail to intsersection point; should pass through CoM   
+				ip.setLineWidth(1);
+		    ip.drawLine(n.getSpermTail().getXAsInt(), n.getSpermTail().getYAsInt(), n.intersectionPoint.getXAsInt(), n.intersectionPoint.getYAsInt());
+ 
+		    //   SIGNALS
+		    //   ip.setLineWidth(3);
+		    //   ip.setColor(Color.GREEN);
+		    //   ip.drawDot(signalCoM.getXAsInt(), signalCoM.getYAsInt());
+		    // }    
+
+
+		    // // draw the points considered as sperm tails
+		    // ip.setLineWidth(5);
+		    // ip.setColor(Color.CYAN);
+		    // ip.drawDot(consensusTail.getXAsInt(), consensusTail.getYAsInt());
+
+		    // ip.setLineWidth(3);
+		    // ip.setColor(Color.GRAY);
+		    // ip.drawDot(spermTail2.getXAsInt(), spermTail2.getYAsInt());
+		    // ip.setColor(Color.ORANGE);
+		    // ip.drawDot(spermTail3.getXAsInt(), spermTail3.getYAsInt());
+		    IJ.saveAsTiff(image, path);
+
+    	}
     }
 
   }
