@@ -165,6 +165,10 @@ public class Sperm_Analysis
       i = length-1 + i;
     if(Math.floor(i / length)>0)
       i = i - ( ((int)Math.floor(i / length) )*length);
+
+    if(i<0 || i>length){
+    	IJ.log("Warning: array out of bounds: "+i);
+    }
     
     return i;
   }
@@ -2777,6 +2781,21 @@ public class Sperm_Analysis
             m++;
         }
       }
+
+      // repair medians with no points by interpolation
+      for(int i=0;i<xmedians.length;i++){
+      	if(ymedians[i] == 0 && lowQuartiles[i] == 0 && uppQuartiles[i] == 0){
+      		int replacementLowerIndex = wrapIndex(i-1, xmedians.length);
+      		int replacementUpperIndex = wrapIndex(i+1, xmedians.length);
+
+      		ymedians[i]        = ymedians[replacementLowerIndex]        + ymedians[replacementUpperIndex]        / 2;
+      		lowQuartiles[i]    = lowQuartiles[replacementLowerIndex]    + lowQuartiles[replacementUpperIndex]    / 2;
+      		uppQuartiles[i]    = uppQuartiles[replacementLowerIndex]    + uppQuartiles[replacementUpperIndex]    / 2;
+          tenQuartiles[i]    = tenQuartiles[replacementLowerIndex]    + tenQuartiles[replacementUpperIndex]    / 2;
+      		ninetyQuartiles[i] = ninetyQuartiles[replacementLowerIndex] + ninetyQuartiles[replacementUpperIndex] / 2;
+      	}
+      }
+
       setNormalisedMedianLine(ymedians);
 
 
@@ -2926,14 +2945,14 @@ public class Sperm_Analysis
 
 		      // IJ.log("j="+j);
 		      // find the next point in the array, given the tail point is our 0
-		      int curveIndex = wrapIndex(curveTailIndex+j+offset, r.smoothLength);
+		      int curveIndex = wrapIndex(curveTailIndex+j-offset, r.smoothLength);
 		      // IJ.log("Curve index: "+curveIndex);
 
 		      // get the angle at this point
 		      double curveAngle = r.smoothedArray[curveIndex].getInteriorAngle();
 
 		      // get the next median index position, given the tail point is 0
-		      int medianIndex = wrapIndex(medianTailIndex+j, normalisedMedian.length);
+		      int medianIndex = wrapIndex(medianTailIndex+j, medianInterpolatedArray.length); // DOUBLE CHECK THE LOGIC HERE - CAUSING NPE WHEN USING  normalisedMedian.length
 		      // IJ.log("Median index: "+medianIndex);
 		      double medianAngle = medianInterpolatedArray[medianIndex];
 		      // IJ.log("j="+j+" Curve index: "+curveIndex+" Median index: "+medianIndex+" Median: "+medianAngle);
