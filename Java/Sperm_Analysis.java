@@ -41,17 +41,30 @@ public class Sperm_Analysis
 {
 
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
-  private static final int SIGNAL_THRESHOLD = 70;
+  private static final int SIGNAL_THRESHOLD = 40;
+  private static final double MIN_SIGNAL_SIZE = 50; // how small can a signal be
+  private static final double MAX_SIGNAL_SIZE = 2000; // how large can a signal be
   
   private static final double ANGLE_THRESHOLD = 40.0; // when calculating local minima, ignore angles above this
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
-  private static final int NUCLEUS_THRESHOLD = 40;
+  private static final int NUCLEUS_THRESHOLD = 36;
   private static final double MIN_NUCLEAR_SIZE = 500;
   private static final double MAX_NUCLEAR_SIZE = 7000;
   private static final double MIN_NUCLEAR_CIRC = 0.3;
   private static final double MAX_NUCLEAR_CIRC = 0.8;
   private static final double PROFILE_INCREMENT = 0.5;
+  private static final double MAX_NUCLEAR_PERIMETER = 300; // help remove overlapping nuclei  
+
+  // failure codes
+  private static final int FAILURE_TIP = 1;
+  private static final int FAILURE_TAIL = 2;
+  private static final int FAILURE_THRESHOLD = 4;
+  private static final int FAILURE_OTHER = 8;
+
+  private static final int CHART_WINDOW_HEIGHT = 300;
+  private static final int CHART_WINDOW_WIDTH = 400;
+  private static final int RAW_PROFILE_CHART_X_MAX = 400;
 
   private static final double MAXIMUM_PATH_LENGTH = 1000; // reject nuclei with an angle path length greater than this; wibbly
 
@@ -70,9 +83,6 @@ public class Sperm_Analysis
   private PlotWindow tailCentredPlotWindow;
   private PlotWindow tailCentredRawPlotWindow;
 
-  private static final int CHART_WINDOW_HEIGHT = 300;
-  private static final int CHART_WINDOW_WIDTH = 400;
-
   private String logFile;
   private String failedFile;
   private String medianFile;
@@ -83,15 +93,7 @@ public class Sperm_Analysis
   private ArrayList<Double> rawTailIndexArray = new ArrayList<Double>(0);
 
   private NucleusCollection completeCollection;
-  
-
-  private static final int RAW_PROFILE_CHART_X_MAX = 400;
-
-  private static final int FAILURE_TIP = 1;
-  private static final int FAILURE_TAIL = 2;
-  private static final int FAILURE_THRESHOLD = 4;
-  private static final int FAILURE_OTHER = 8;
-  
+    
   public void run(String paramString)  {
 
     DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
@@ -482,8 +484,10 @@ public class Sperm_Analysis
       
       return (double)v[n];
   }
-
-    public static double quartile(Double[] values, double lowerPercent) {
+  /*
+    Calculate the <lowerPercent> quartile from a double[] array
+  */
+  public static double quartile(Double[] values, double lowerPercent) {
 
       if (values == null || values.length == 0) {
           throw new IllegalArgumentException("The data array either is null or does not contain any data.");
@@ -805,8 +809,8 @@ public class Sperm_Analysis
     double pathLength = 0;
     double normalisedTailIndex = ((double)consensusTailIndex/(double)roiArray.smoothLength)*100;
 
-    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // only proceed if the tail points are together
-
+    
+    // if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // only proceed if the tail points are together  
        XYPoint prevPoint = new XYPoint(0,0);
        
        for (int i=0; i<roiArray.smoothLength;i++ ) {
@@ -832,12 +836,13 @@ public class Sperm_Analysis
         }
         IJ.append("", this.logFile);
 
-    } else {
-      IJ.log("    Cannot assign tail position");
-      this.nucleiFailedOnTail++;
+    // } else {
+    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // only proceed if the tail points are together  
+      IJ.log("    Difficulty assigning tail position");
+      // this.nucleiFailedOnTail++;
       // failureReason += "Tail ";
-      failureReason = failureReason | this.FAILURE_TAIL;
-      nucleusPassedChecks = false;
+      // failureReason = failureReason | this.FAILURE_TAIL;
+      // nucleusPassedChecks = false;
     }  
 
     // Include tip, CoM, tail
@@ -1102,8 +1107,6 @@ public class Sperm_Analysis
 
   public RoiManager findSignalInNucleus(ImagePlus image, int channel){
 
-    double minSize = 400;
-    double maxSize = 3000;
     RoiManager manager = new RoiManager(true);
     ChannelSplitter cs = new ChannelSplitter();
     ImagePlus[] channels = cs.split(image);
@@ -1116,11 +1119,11 @@ public class Sperm_Analysis
 
     // run the particle analyser
     ResultsTable rt = new ResultsTable();
-    ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER, 
-    										   ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA,
-                                               rt, 
-                                               minSize, 
-                                               maxSize);
+    ParticleAnalyzer pa = new ParticleAnalyzer( ParticleAnalyzer.ADD_TO_MANAGER, 
+    										                        ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA,
+                                                 rt, 
+                                                 MIN_SIGNAL_SIZE, 
+                                                 MAX_SIGNAL_SIZE);
     try {
       pa.setRoiManager(manager);
       boolean success = pa.analyze(imp);
@@ -1586,6 +1589,14 @@ public class Sperm_Analysis
 
     public void setTailIndex(int i){
       this.tailIndex = i;
+    }
+
+    public ArrayList<NuclearSignal> getRedSignals(){
+      return this.redSignals;
+    }
+
+    public ArrayList<NuclearSignal> getGreenSignals(){
+      return this.greenSignals;
     }
 
     public void reverseArray(){
@@ -2419,21 +2430,22 @@ public class Sperm_Analysis
       	roi2Y[i] = (float) roi2.get(i).getY();
       }
 
+      for(int i=0;i<roi1.size();i++){
+        if(roi1.get(i).overlaps(spermTip)){
+          this.hookRoi = new FloatPolygon( roi1X, roi1Y);
+          this.humpRoi = new FloatPolygon( roi2X, roi2Y);
+          // IJ.log("Roi2 is hump");
+          break;
+        }
+      }
 
-      double roi1Area = Math.abs(getPolygonArea(roi1X, roi1Y, roi1X.length));
-      double roi2Area = Math.abs(getPolygonArea(roi2X, roi2Y, roi2X.length));
-
-      IJ.log("Roi1: "+roi1Area);
-      IJ.log("Roi2: "+roi2Area);
-
-      if(roi1Area > roi2Area){
-        this.hookRoi = new FloatPolygon( roi2X, roi2Y);
-        this.humpRoi = new FloatPolygon( roi1X, roi1Y);
-        IJ.log("Roi1 is hump");
-      } else {
-        this.hookRoi = new FloatPolygon( roi1X, roi1Y);
-        this.humpRoi = new FloatPolygon( roi2X, roi2Y);
-        IJ.log("Roi2 is hump");
+      for(int i=0;i<roi2.size();i++){
+        if(roi2.get(i).overlaps(spermTip)){
+          this.hookRoi = new FloatPolygon( roi2X, roi2Y);
+          this.humpRoi = new FloatPolygon( roi1X, roi1Y);
+           // IJ.log("Roi1 is hump");
+           break;
+        }
       }
     }
 
@@ -2864,19 +2876,27 @@ public class Sperm_Analysis
   		double minAngle = 180;
   		int tailIndex = 0;
 
-  		for(int i = 0; i<minima.size();i++){
-  			Integer index = (Integer)minima.get(i);
-  			// int index = (int);
-  			int toEnd = normalisedMedian.length - index;
-  			int diff = Math.abs(index - toEnd);
+      if(minima.size()==0){
+        IJ.log("  Error: no minima found in median line");
+        tailIndex = 100; // set to roughly the middle of the array for the moment
 
-  			if(diff < minDiff){
-  				minDiff = diff;
-  				tailIndex = index;
-  			}
-  		}
-  		IJ.log("Median tail index: "+tailIndex);
-  		this.medianLineTailIndex = tailIndex;
+      } else{
+
+    		for(int i = 0; i<minima.size();i++){
+    			Integer index = (Integer)minima.get(i);
+          IJ.log("  Minima at: "+index);
+    			// int index = (int);
+    			int toEnd = normalisedMedian.length - index;
+    			int diff = Math.abs(index - toEnd);
+
+    			if(diff < minDiff){
+    				minDiff = diff;
+    				tailIndex = index;
+    			}
+    		}
+    		// IJ.log("Median tail index: "+tailIndex);
+    		this.medianLineTailIndex = tailIndex;
+    }
   		return tailIndex;
   	}
 
@@ -2919,21 +2939,26 @@ public class Sperm_Analysis
         // with the lookup positions, see if minimum at i
         // return a 1 if all higher than last, 0 if not
         // prev_l = 0;
+        int errors = 2; // allow two positions to be out of place; better handling of noisy data
         boolean ok = true;
         for(int l=0;l<prevAngles.length;l++){
 
           // for the first position in prevAngles, compare to the current index
           if(l==0){
             if(prevAngles[l] < this.normalisedMedian[i] || nextAngles[l] < this.normalisedMedian[i]){
-              ok = false;
+              // ok = false;
+              errors--;
             }
           } else { // for the remainder of the positions in prevAngles, compare to the prior prevAngle
             
             if(prevAngles[l] < prevAngles[l-1] || nextAngles[l] < nextAngles[l-1]){
-              ok = false;
+              // ok = false;
+              errors--;
             }
           }
-
+          if(errors<0){
+            ok = false;
+          }
           // if( this.normalisedMedian[i] > -20){ // ignore any values close to 180 degrees
           //   ok = false;
           // }
@@ -2980,6 +3005,59 @@ public class Sperm_Analysis
 
          this.nucleiCollection.get(i).splitNucleusToHeadAndHump();
          this.nucleiCollection.get(i).calculateSignalAnglesFromTail();
+
+      }
+      this.exportSignalStats();
+    }
+
+    public void exportSignalStats(){
+
+      String redLogFile = this.folder+"logRedSignals.txt";
+      File r = new File(redLogFile);
+      if(r.exists()){
+        r.delete();
+      }
+
+      String greenLogFile = this.folder+"logGreenSignals.txt";
+      File g = new File(greenLogFile);
+      if(g.exists()){
+        g.delete();
+      }
+
+      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tSIGNAL_PERIMETER\tPATH", redLogFile);
+      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tSIGNAL_PERIMETER\tPATH", greenLogFile);
+      for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
+
+        int nucleusNumber = this.nucleiCollection.get(i).getNucleusNumber();
+        String path = this.nucleiCollection.get(i).getPath();
+
+        ArrayList<NuclearSignal> redSignals = this.nucleiCollection.get(i).getRedSignals();
+        if(redSignals.size()>0){
+          for(int j=0; j<redSignals.size();j++){
+             NuclearSignal n = redSignals.get(j);
+             IJ.append(nucleusNumber+"\t"+
+                       n.getArea()+"\t"+
+                       n.getAngle()+"\t"+
+                       n.getFeret()+"\t"+
+                       n.getDistance()+"\t"+
+                       n.getPerimeter()+"\t"+
+                       path, redLogFile);
+          }
+        }
+
+        ArrayList<NuclearSignal> greenSignals = this.nucleiCollection.get(i).getGreenSignals();
+        if(greenSignals.size()>0){
+          for(int j=0; j<greenSignals.size();j++){
+             NuclearSignal n = greenSignals.get(j);
+             IJ.append(nucleusNumber+"\t"+
+                       n.getArea()+"\t"+
+                       n.getAngle()+"\t"+
+                       n.getFeret()+"\t"+
+                       n.getDistance()+"\t"+
+                       n.getPerimeter()+"\t"+
+                       path, greenLogFile);
+          }
+        }
       }
     }
 
@@ -2991,7 +3069,8 @@ public class Sperm_Analysis
     private double perimeter;
     private double feret;
     private double angleFromTail;
-    private double distanceFromCentreOfMass;
+    private double distanceFromCentreOfMass; // the absolute measured distance from the signal CoM to the nuclear CoM
+    private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
 
     private XYPoint centreOfMass;
 
@@ -3013,7 +3092,7 @@ public class Sperm_Analysis
       return this.perimeter;
     }
 
-    public double getferet(){
+    public double getFeret(){
       return this.feret;
     }
 
@@ -3023,6 +3102,10 @@ public class Sperm_Analysis
 
     public double getDistance(){
       return this.distanceFromCentreOfMass;
+    }
+
+    public double getFractionalDistance(){
+      return this.fractionalDistanceFromCoM;
     }
 
     public XYPoint getCentreOfMass(){
@@ -3037,7 +3120,7 @@ public class Sperm_Analysis
       this.perimeter = d;
     }
 
-    public void setferet(double d){
+    public void setFeret(double d){
       this.feret = d;
     }
 
@@ -3047,6 +3130,10 @@ public class Sperm_Analysis
 
     public void setDistance(double d){
       this.distanceFromCentreOfMass = d;
+    }
+
+    public void setFractionalDistance(double d){
+      this.fractionalDistanceFromCoM = d;
     }
 
     public void setCentreOfMass(XYPoint p){
