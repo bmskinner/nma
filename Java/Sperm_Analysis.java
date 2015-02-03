@@ -139,46 +139,25 @@ public class Sperm_Analysis
       }
     }
 
-    exportNuclearStats();
-    // drawFinalPlots(folderName);
-
     IJ.log("Within folder:");
     IJ.log("Total nuclei  : "+this.totalNuclei);
     IJ.log("Failed on tip : "+this.nucleiFailedOnTip);
-    // IJ.log("Failed on tail: "+this.nucleiFailedOnTail);
     IJ.log("Failed (other): "+this.nucleiFailedOther);
     int analysed = completeCollection.getNucleusCount();
     IJ.log("Before filtering: "+analysed);
 
-   //  Plot offsetRawPlot = new Plot("Raw Offset", "Position", "Angle");
-  	// PlotWindow offsetRawPlotWindow;
-
-   //  offsetRawPlot.setLimits(-200,200,-50,360);
-   //  offsetRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-   //  offsetRawPlot.setYTicks(true);
-   //  offsetRawPlot.setColor(Color.LIGHT_GRAY);
-
     this.completeCollection.refilterNuclei();
-    this.completeCollection.refilterNuclei();
+    this.completeCollection.exportNuclearStats();
+    // this.completeCollection.refilterNuclei();
     this.completeCollection.createProfileAggregate();
-    this.completeCollection.calculateNormalisedMedianLine();
     this.completeCollection.drawProfilePlots();
+
+    this.completeCollection.calculateNormalisedMedianLine();
     this.completeCollection.findTailIndexInMedianCurve();
     this.completeCollection.calculateOffsets();
     this.completeCollection.drawOffsetChart();
     this.completeCollection.measureNuclearOrganisation();
     
-    // for(int i=0;i<this.completeCollection.nucleiCollection.size();i++){
-    // 	double[] xRawCentredOnTail = this.completeCollection.createOffsetRawProfile(i);
-    // 	double[] ypoints = this.completeCollection.fetchAnglesFromResultsTable(i);
-    // 	offsetRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
-    // }
-    // offsetRawPlot.draw();
-    // offsetRawPlotWindow = offsetRawPlot.show();
-    // offsetRawPlotWindow.drawPlot(offsetRawPlot);	
-
-    // proceed to nuclear organisation location corrections and analysis
-
   }
 
   public int wrapIndex(int i, int length){
@@ -191,48 +170,7 @@ public class Sperm_Analysis
   }
 
   /*
-  	Create the necessary plot windows and plots
-	*/
-  // public void setupPlots(){
-
-  //   this.linePlot = new Plot("Normalised tip-centred plot",
-  //           "Position",
-  //           "Angle");
-  //   linePlot.setLimits(0,100,-50,360);
-  //   linePlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-  //   linePlot.setYTicks(true);
-  //   linePlot.setColor(Color.  LIGHT_GRAY);
-  //   plotWindow = linePlot.show();
-
-  //   this.rawProfilePlot = new Plot("Raw tip-centred plot",
-  //           "Position",
-  //           "Angle");
-  //   rawProfilePlot.setLimits(0,this.RAW_PROFILE_CHART_X_MAX,-50,360);
-  //   rawProfilePlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-  //   rawProfilePlot.setYTicks(true);
-  //   rawProfilePlot.setColor(Color.  LIGHT_GRAY);
-  //   rawPlotWindow = rawProfilePlot.show();
-
-  //   // this.tailCentredPlot = new Plot("Normalised tail-centred plot",
-  //   //         "Position",
-  //   //         "Angle");
-  //   // tailCentredPlot.setLimits(-70,70,-50,360);
-  //   // tailCentredPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-  //   // tailCentredPlot.setYTicks(true);
-  //   // tailCentredPlot.setColor(Color.LIGHT_GRAY);
-  //   // tailCentredPlotWindow = tailCentredPlot.show();
-
-  //   this.tailCentredRawPlot = new Plot("Raw tail-centred plot",
-  //           "Position",
-  //           "Angle");
-  //   tailCentredRawPlot.setLimits(-200,200,-50,360);
-  //   tailCentredRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-  //   tailCentredRawPlot.setYTicks(true);
-  //   tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
-  //   tailCentredRawPlotWindow = tailCentredRawPlot.show();
-  // }
-
-  /*
+    TO BE ADDED TO CLASS
   	Write the plot images to the folder being analysed
   */
   // public void drawFinalPlots(String folderName){
@@ -271,29 +209,28 @@ public class Sperm_Analysis
 
     IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.failedFile);
 
-    this.medianFile = folderName+"logMedians.txt";
-    File h = new File(medianFile);
-    if(h.exists()){
-      h.delete();
-    }
+    // this.medianFile = folderName+"logMedians.txt";
+    // File h = new File(medianFile);
+    // if(h.exists()){
+    //   h.delete();
+    // }
 
-    IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.medianFile);
+    // IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.medianFile);
 
-    this.statsFile = folderName+"logStats.txt";
-    File i = new File(statsFile);
-    if(i.exists()){
-      i.delete();
-    }
+    // this.statsFile = folderName+"logStats.txt";
+    // File i = new File(statsFile);
+    // if(i.exists()){
+    //   i.delete();
+    // }
 
-    IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tPATH", this.statsFile);
+    // IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.statsFile);
   }
 
   /*
     Write the median angles at each bin to the global log file
   */
   public void exportMedians(){
-  	// output the final results: calculate median positions
-    // IJ.append("", this.medianFile);
+
 
     // linePlot.setColor(Color.BLACK);
     // linePlot.setLineWidth(3);
@@ -360,26 +297,27 @@ public class Sperm_Analysis
   /*
     Write the nuclear area, perimeter, feret and path to the global log file
   */
-  public void exportNuclearStats(){
+  // public void exportNuclearStats(){
   	
-    double[] areas  = completeCollection.getAreas();
-    double[] perims = completeCollection.getPerimeters();
-    double[] ferets = completeCollection.getFerets();
-    double[] pathLengths  = completeCollection.getPathLengths();
-    int[] tails = completeCollection.getTailIndexes();
-    String[] paths = completeCollection.getNucleusPaths();
+  //   IJ.log("Exporting stats for "+completeCollection.getNucleusCount()+" nuclei");
+  //   double[] areas  = completeCollection.getAreas();
+  //   double[] perims = completeCollection.getPerimeters();
+  //   double[] ferets = completeCollection.getFerets();
+  //   double[] pathLengths  = completeCollection.getPathLengths();
+  //   int[] tails = completeCollection.getTailIndexes();
+  //   String[] paths = completeCollection.getNucleusPaths();
 
-  	for(int i=0; i<completeCollection.getNucleusCount();i++){
-      IJ.append(  areas[i]+"\t"+
-                  perims[i]+"\t"+
-                  ferets[i]+"\t"+
-                  pathLengths[i]+"\t"+
-                  tails[i]+"\t"+
-                  rawTailIndexArray.get(i)+"\t"+
-                  paths[i], this.statsFile);
-  	}
+  // 	for(int i=0; i<completeCollection.getNucleusCount();i++){
+  //     IJ.append(  areas[i]+"\t"+
+  //                 perims[i]+"\t"+
+  //                 ferets[i]+"\t"+
+  //                 pathLengths[i]+"\t"+
+  //                 tails[i]+"\t"+
+  //                 rawTailIndexArray.get(i)+"\t"+
+  //                 paths[i], this.statsFile);
+  // 	}
 
-  }
+  // }
 
   /*
     Calculate the <lowerPercent> quartile from a Double[] array
@@ -819,12 +757,12 @@ public class Sperm_Analysis
     // ImagePlus finalImage = new ImagePlus("Image", ip);
     // IJ.saveAsTiff(finalImage, saveFolder+"\\"+roiArray.getNucleusNumber()+".final.tiff");
 
-    if(pathLength > MAXIMUM_PATH_LENGTH){ // skip nuclei with poor thresholding
-      IJ.log("    Nucleus failed on thresholding");
-      this.nucleiFailedOther++;
-      failureReason = failureReason | this.FAILURE_THRESHOLD;
-      nucleusPassedChecks = false;
-    }
+    // if(pathLength > MAXIMUM_PATH_LENGTH){ // skip nuclei with poor thresholding
+    //   IJ.log("    Nucleus failed on thresholding");
+    //   this.nucleiFailedOther++;
+    //   failureReason = failureReason | this.FAILURE_THRESHOLD;
+    //   nucleusPassedChecks = false;
+    // }
 
     // if(blueResults.getValue("Perim.",0)>MAX_NUCLEAR_PERIMETER){
     //   IJ.log("    Nucleus failed on perimeter: too long");
@@ -1947,6 +1885,8 @@ public class Sperm_Analysis
         this.detectLocalMinima();
       }
 
+      boolean ok = false;
+
       double maxAngle = 0.0;
       int maxIndex = 0;
       for(int i=0; i<this.smoothLength;i++){
@@ -2535,7 +2475,8 @@ public class Sperm_Analysis
     private PlotWindow normXFromTipWindow;
     private PlotWindow rawXFromTailWindow;
 
-    private double maxDifferenceFromMedian = 1.1; // used to filter the nuclei, and remove those too small, large or irregular to be real
+    private double maxDifferenceFromMedian = 1.25; // used to filter the nuclei, and remove those too small, large or irregular to be real
+    private double maxWibblinessFromMedian = 1.1; // filter for the irregular borders more stringently
 
   	public NucleusCollection(String folder){
   		this.folder = folder;
@@ -2701,6 +2642,12 @@ public class Sperm_Analysis
       return d;
     }
 
+    /*
+      The filters needed to separate out the objects from nuclei
+      Filter on: nuclear area, perimeter and array length to find
+      conjoined nuclei and blobs too small to be nuclei
+      Use path length to remove poorly thresholded nuclei
+    */
     public void refilterNuclei(){
 
       double medianArea = this.getMedianNuclearArea();
@@ -2708,6 +2655,13 @@ public class Sperm_Analysis
       double medianPathLength = this.getMedianPathLength();
       double medianArrayLength = this.getMedianArrayLength();
       int beforeSize = nucleiCollection.size();
+
+      double maxPathLength = medianPathLength * maxWibblinessFromMedian;
+      double minArea = medianArea / maxDifferenceFromMedian;
+      double maxArea = medianArea * maxDifferenceFromMedian;
+      double maxPerim = medianPerimeter *maxDifferenceFromMedian;
+      double minPerim = medianPerimeter / maxDifferenceFromMedian;
+
 
       int area = 0;
       int perim = 0;
@@ -2718,22 +2672,33 @@ public class Sperm_Analysis
 
       for(int i=0;i<nucleiCollection.size();i++){
         Nucleus n = nucleiCollection.get(i);
-        if(n.getArea() > medianArea * maxDifferenceFromMedian || n.getArea() < medianArea / maxDifferenceFromMedian ){
-          nucleiCollection.remove(n);
+        boolean dropNucleus = false;
+
+        IJ.log("Nucleus "+n.getPath()+"-"+n.getNucleusNumber()+" Path length "+n.getPathLength());
+
+        if(n.getArea() > maxArea || n.getArea() < minArea ){
+          dropNucleus = true;
+          // nucleiCollection.remove(n);
           area++;
         }
-        if(n.getPerimeter() > medianPerimeter * maxDifferenceFromMedian || n.getPerimeter() < medianPerimeter / maxDifferenceFromMedian ){
-           nucleiCollection.remove(n);
+        if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
+           // nucleiCollection.remove(n);
+           dropNucleus = true;
            perim++;
         }
-        if(n.getPathLength() > medianPathLength * maxDifferenceFromMedian || n.getPathLength() < medianPathLength / maxDifferenceFromMedian ){
-           nucleiCollection.remove(n);
+        if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
+           // nucleiCollection.remove(n);
+           dropNucleus = true;
            pathlength++;
         }
         if(n.smoothLength > medianArrayLength * maxDifferenceFromMedian || n.smoothLength < medianArrayLength / maxDifferenceFromMedian ){
-           nucleiCollection.remove(n);
+           // nucleiCollection.remove(n);
+           dropNucleus = true;
            arraylength++;
         }
+        if(dropNucleus)
+          IJ.log("Dropping nucleus: "+n.getPath()+"-"+n.getNucleusNumber());
+          this.nucleiCollection.remove(n);
       }
 
       medianArea = this.getMedianNuclearArea();
@@ -2744,11 +2709,12 @@ public class Sperm_Analysis
       int removed = beforeSize - afterSize;
       IJ.log("Postfiltered: Area: "+medianArea+" ; Perimeter: "+medianPerimeter+" ; Path length: "+medianPathLength+" ; Array length: "+medianArrayLength);
       IJ.log("Removed due to size or length issues: "+removed+" nuclei");
-      IJ.log("  Due to area: "+area+" nuclei");
-      IJ.log("  Due to perimeter: "+perim+" nuclei");
-      IJ.log("  Due to wibbliness: "+pathlength+" nuclei");
+      IJ.log("  Due to area outside bounds "+minArea+"-"+maxArea+": "+area+" nuclei");
+      IJ.log("  Due to perimeteroutside bounds "+minPerim+"-"+maxPerim+": "+perim+" nuclei");
+      IJ.log("  Due to wibbliness >"+maxPathLength+" : "+pathlength+" nuclei");
       IJ.log("  Due to array length: "+arraylength+" nuclei");
       IJ.log("Remaining: "+this.nucleiCollection.size()+" nuclei");
+      nucleiCollection.trimToSize();
     }
 
     /*
@@ -2864,6 +2830,64 @@ public class Sperm_Analysis
         }
       }
       setNormalisedMedianLine(ymedians);
+
+
+      // add the median lines to the chart
+      normXFromTipPlot.setColor(Color.BLACK);
+      normXFromTipPlot.setLineWidth(3);
+      normXFromTipPlot.addPoints(xmedians, ymedians, Plot.LINE);
+      normXFromTipPlot.setColor(Color.DARK_GRAY);
+      normXFromTipPlot.setLineWidth(2);
+      normXFromTipPlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+      normXFromTipPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
+
+      // handle the normalised tail position mapping
+      int[] tails = this.getTailIndexes();
+      double[] xTails = new double[tails.length];
+      for(int i=0; i<tails.length; i++){
+        xTails[i] = (double)tails[i];
+      }
+
+      double[] yTails = new double[tails.length];
+      Arrays.fill(yTails, 300); // all dots at y=300
+      normXFromTipPlot.setColor(Color.LIGHT_GRAY);
+      normXFromTipPlot.addPoints(xTails, yTails, Plot.DOT);
+
+      // median tail positions
+      double tailQ50 = quartile(xTails, 50);
+      double tailQ25 = quartile(xTails, 25);
+      double tailQ75 = quartile(xTails, 75);
+
+      normXFromTipPlot.setColor(Color.DARK_GRAY);
+      normXFromTipPlot.setLineWidth(1);
+      normXFromTipPlot.drawLine(tailQ25, 320, tailQ75, 320);
+      normXFromTipPlot.drawLine(tailQ25, 280, tailQ75, 280);
+      normXFromTipPlot.drawLine(tailQ25, 280, tailQ25, 320);
+      normXFromTipPlot.drawLine(tailQ75, 280, tailQ75, 320);
+      normXFromTipPlot.drawLine(tailQ50, 280, tailQ50, 320);
+      normXFromTipWindow.drawPlot(normXFromTipPlot);
+
+      // handle raw tail position mapping
+
+      // double[] rawXTails = new double[rawTailIndexArray.size()];
+      // for(int i=0; i<rawTailIndexArray.size(); i++){
+      //   rawXTails[i] = (double)rawTailIndexArray.get(i);
+      // }
+      // rawProfilePlot.setColor(Color.LIGHT_GRAY);
+      // rawProfilePlot.addPoints(rawXTails, yTails, Plot.DOT);
+
+      // Double[] rawTails = rawTailIndexArray.toArray(new Double[0]);
+      // double rawTailQ50 = quartile(rawTails, 50);
+      // double rawTailQ25 = quartile(rawTails, 25);
+      // double rawTailQ75 = quartile(rawTails, 75);
+
+      // rawProfilePlot.setColor(Color.DARK_GRAY);
+      // rawProfilePlot.setLineWidth(1);
+      // rawProfilePlot.drawLine(rawTailQ25, 320, rawTailQ75, 320);
+      // rawProfilePlot.drawLine(rawTailQ25, 280, rawTailQ75, 280);
+      // rawProfilePlot.drawLine(rawTailQ25, 280, rawTailQ25, 320);
+      // rawProfilePlot.drawLine(rawTailQ75, 280, rawTailQ75, 320);
+      // rawProfilePlot.drawLine(rawTailQ50, 280, rawTailQ50, 320);
     }
 
   	public double[] fetchAnglesFromResultsTable(int index){
@@ -3355,6 +3379,34 @@ public class Sperm_Analysis
       offsetRawPlot.draw();
       offsetRawPlotWindow = offsetRawPlot.show();
       offsetRawPlotWindow.drawPlot(offsetRawPlot);  
+    }
+
+    public void exportNuclearStats(){
+    
+      String statsFile = this.folder+"logStats.txt";
+      File f = new File(statsFile);
+      if(f.exists()){
+        f.delete();
+      }
+      IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tPATH", statsFile);
+
+      IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei");
+      double[] areas  = this.getAreas();
+      double[] perims = this.getPerimeters();
+      double[] ferets = this.getFerets();
+      double[] pathLengths  = this.getPathLengths();
+      int[] tails = this.getTailIndexes();
+      String[] paths = this.getNucleusPaths();
+
+      for(int i=0; i<this.getNucleusCount();i++){
+        IJ.append(  areas[i]+"\t"+
+                    perims[i]+"\t"+
+                    ferets[i]+"\t"+
+                    pathLengths[i]+"\t"+
+                    tails[i]+"\t"+
+                    paths[i], statsFile);
+      }
+
     }
 
   }
