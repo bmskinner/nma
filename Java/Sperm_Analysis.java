@@ -1,3 +1,23 @@
+/*
+-------------------------------------------------
+SPERM CARTOGRAPHY IMAGEJ PLUGIN
+-------------------------------------------------
+Copyright (C) Ben Skinner 2015
+
+This plugin allows for automated detection of FISH
+signals in a mouse sperm nucleus, and measurement of
+the signal position relative to the nuclear centre of
+mass and sperm tip. Works with both red and green channels.
+It also generates a profile of the nuclear shape, allowing
+morphology comparisons
+
+  ---------------
+  FEATURES TO ADD
+  ---------------
+    Mega image & rotations
+    Median curve refolding
+    Consensus image
+*/
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -90,10 +110,9 @@ public class Sperm_Analysis
   private String failedFile;
   private String medianFile;
   private String statsFile;
+  private String debugFile;
 
   private Map<Double, Collection<Double>> finalResults = new HashMap<Double, Collection<Double>>();
-
-  private ArrayList<Double> rawTailIndexArray = new ArrayList<Double>(0);
 
   private NucleusCollection completeCollection;
     
@@ -162,7 +181,7 @@ public class Sperm_Analysis
 
   public int wrapIndex(int i, int length){
     if(i<0)
-      i = length-1 + i;
+      i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
     if(Math.floor(i / length)>0)
       i = i - ( ((int)Math.floor(i / length) )*length);
 
@@ -212,6 +231,12 @@ public class Sperm_Analysis
     }
 
     IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.failedFile);
+
+    this.debugFile = folderName+"logDebug.txt";
+    File h = new File(logFile);
+    if(h.exists()){
+      h.delete();
+    }
   }
 
   /*
@@ -338,8 +363,6 @@ public class Sperm_Analysis
     int i = 0;
 
     for(Roi roi : roiArray){
-
-    	// ArrayList rt = new ArrayList(0);
       
       IJ.log("  Analysing nucleus "+i);
       try{
@@ -456,8 +479,6 @@ public class Sperm_Analysis
   */
   public void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
     
-    // results table
-    ArrayList rt = new ArrayList(0);
     boolean nucleusPassedChecks = true; // any check can disable this
     int failureReason = 0;
 
@@ -586,15 +607,15 @@ public class Sperm_Analysis
         IJ.append(normalisedX+"\t"+
         					roiArray.smoothedArray[i].getInteriorAngle()+"\t"+
         					normalisedXFromTail+"\t"+
-        					rawXFromTail, this.logFile);
-        rt.add(d);          
+        					rawXFromTail, this.logFile);        
 
         // calculate the path length
         XYPoint thisPoint = new XYPoint(d[0],d[1]);
         pathLength += thisPoint.getLengthTo(prevPoint);
         prevPoint = thisPoint;
     }
-      IJ.append("", this.logFile);
+
+    IJ.append("", this.logFile);
 
     if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // warn if the tail points are together  
       IJ.log("    Difficulty assigning tail position");
@@ -647,18 +668,14 @@ public class Sperm_Analysis
     // if everything checks out, add the measured parameters to the global pool
     // currently, the only reason to fail at this stage is if the tip cannot be found
     if(nucleusPassedChecks){
-      this.rawTailIndexArray.add((double)consensusTailIndex);
 
-      roiArray.measurementResults = rt;
       roiArray.setPerimeter(blueResults.getValue("Perim.",0));
       roiArray.setArea(blueResults.getValue("Area",0));
       roiArray.setFeret(blueResults.getValue("Feret",0));
       roiArray.setPathLength(pathLength);
 
-
       this.completeCollection.addNucleus(roiArray);
 
-      // return rt;
     } else {
       IJ.append(  failureReason+"\t"+
                   blueResults.getValue("Perim.",0)+"\t"+
@@ -668,12 +685,11 @@ public class Sperm_Analysis
                   normalisedTailIndex+"\t"+
                   consensusTailIndex+"\t"+
                   path+"-"+nucleusNumber, this.failedFile);
-      // return new ArrayList(0);
     }
 
   }
   /*
-    For two XYPoints in an Nucleus, find the point that lies halfway between them
+    For two XYPoints in a Nucleus, find the point that lies halfway between them
     Used for obtaining a consensus between potential tail positions
   */
   public int getPositionBetween(XYPoint pointA, XYPoint pointB, Nucleus array){
@@ -824,6 +840,9 @@ public class Sperm_Analysis
   }
 
   /*
+    -----------------------
+    XY POINT CLASS
+    -----------------------
     This class contains the X and Y coordinates of a point as doubles,
     plus any angles calculated for that point. 
     Also contains methods for determining distance and overlap with other points
@@ -1014,7 +1033,14 @@ public class Sperm_Analysis
     }
   }
 
-
+  /*
+    -----------------------
+    NUCLEUS CLASS
+    -----------------------
+    Contains the variables for storing a nucleus,
+    plus the functions for calculating aggregate stats
+    within a nucleus
+  */  
   class Nucleus {
   
     private int nucleusNumber; // the number of the nucleus in the current image
@@ -1068,10 +1094,10 @@ public class Sperm_Analysis
     private FloatPolygon hookRoi;
     private FloatPolygon humpRoi;
 
-    private ArrayList measurementResults = new ArrayList(0);
+    // private ArrayList<Double[]> measurementResults = new ArrayList<Double[]>(0);
 
     // these will replace measurementResults eventually
-    private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0);
+    private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
     private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
     private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
     private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
@@ -2124,6 +2150,52 @@ public class Sperm_Analysis
       }
     }
 
+    public double[] getInteriorAngles(){
+
+      double[] ypoints = new double[this.smoothLength];
+
+      for(int j=0;j<ypoints.length;j++){
+          ypoints[j] = this.smoothedArray[j].getInteriorAngle();
+      }
+
+      return ypoints;
+    }
+
+    public double[] createOffsetNormalisedProfile(){
+
+      double offset = this.offsetForTail;
+
+      double[] xNormCentredOnTail = this.getNormalisedXPositionsFromTail();
+      double[] offsetX = new double[xNormCentredOnTail.length];
+
+      for(int j=0;j<xNormCentredOnTail.length;j++){
+        offsetX[j] = xNormCentredOnTail[j]+offset;
+      }
+      return offsetX;
+    }
+
+    /*
+      For the given nucleus index:
+      Go through the raw X positions centred on the tail, 
+      and apply the calculated offset.
+    */
+    public double[] createOffsetRawProfile(){
+
+      // if(!this.squareDifferencesCalculated){
+      //   this.calculateOffsets();
+      // }
+
+      double offset = this.offsetForTail;
+
+      double[] xRawCentredOnTail = this.getRawXPositionsFromTail();
+      double[] offsetX = new double[xRawCentredOnTail.length];
+
+      for(int j=0;j<xRawCentredOnTail.length;j++){
+          offsetX[j] = xRawCentredOnTail[j]+offset;
+      }
+      return offsetX;
+    }
+
     /*
 			In order to split the nuclear roi into hook and hump sides,
 			we need to get an intersection point of the line through the 
@@ -2282,24 +2354,29 @@ public class Sperm_Analysis
 
     public void calculateSignalDistances(){
 
-    	if(redSignals.size()>0){
-        for(int i=0;i<redSignals.size();i++){
-        	NuclearSignal n = redSignals.get(i);
+      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+      signals.add(redSignals);
+      signals.add(greenSignals);
 
-        	// NEED TO MAKE A FRACTION OF DISTANCE TO EDGE
-        	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-        	n.setDistance(distance);
+      for( ArrayList<NuclearSignal> signalGroup : signals ){
+
+      	if(signalGroup.size()>0){
+          for(int i=0;i<signalGroup.size();i++){
+          	NuclearSignal n = signalGroup.get(i);
+
+          	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+          	n.setDistance(distance);
+          }
         }
       }
 
-
-      if(greenSignals.size()>0){
-        for(int i=0;i<greenSignals.size();i++){
-        	NuclearSignal n = greenSignals.get(i);
-        	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-        	n.setDistance(distance);
-        }
-      }
+      // if(greenSignals.size()>0){
+      //   for(int i=0;i<greenSignals.size();i++){
+      //   	NuclearSignal n = greenSignals.get(i);
+      //   	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+      //   	n.setDistance(distance);
+      //   }
+      // }
     }
 
 
@@ -2333,9 +2410,100 @@ public class Sperm_Analysis
       return y;
     }
 
+    /*
+      Calculate the distance from the nuclear centre of
+      mass as a fraction of the distance from the nuclear CoM, through the 
+      signal CoM, to the nuclear border
+    */
+    public void calculateFractionalSignalDistances(){
+
+      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+      signals.add(redSignals);
+      signals.add(greenSignals);
+
+      for( ArrayList<NuclearSignal> signalGroup : signals ){
+      
+        if(signalGroup.size()>0){
+          for(int i=0;i<signalGroup.size();i++){
+            NuclearSignal n = signalGroup.get(i);
+
+            // double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+
+            // get the line equation
+            double eq[] = findLineEquation(n.getCentreOfMass(), this.getCentreOfMass());
+
+            // using the equation, get the y postion on the line for each X point around the roi
+            double minDeltaY = 100;
+            int minDeltaYIndex = 0;
+            double minDistanceToSignal = 1000;
+
+            for(int j = 0; j<smoothLength;j++){
+                double x = smoothedArray[j].getX();
+                double y = smoothedArray[j].getY();
+                double yOnLine = getYFromEquation(eq, x);
+                double distanceToSignal = smoothedArray[j].getLengthTo(n.getCentreOfMass()); // fetch
+
+
+                double deltaY = Math.abs(y - yOnLine);
+                // find the point closest to the line; this could find either intersection
+                // hence check it is as close as possible to the signal CoM also
+                if(deltaY < minDeltaY && distanceToSignal < minDistanceToSignal){
+                  minDeltaY = deltaY;
+                  minDeltaYIndex = j;
+                  minDistanceToSignal = distanceToSignal;
+                }
+            }
+            XYPoint borderPoint = smoothedArray[minDeltaYIndex];
+            double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
+            double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+            double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
+            n.setFractionalDistance(fractionalDistance);
+          }
+        }
+      }
+    }
+
+    /*
+      Go through the signals in the nucleus, and find the point on
+      the nuclear ROI that is closest to the signal centre of mass.
+    */
+    public void calculateClosestBorderToSignal(){
+
+      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+      signals.add(redSignals);
+      signals.add(greenSignals);
+
+      for( ArrayList<NuclearSignal> signalGroup : signals ){
+      
+        if(signalGroup.size()>0){
+          for(int i=0;i<signalGroup.size();i++){
+            NuclearSignal n = signalGroup.get(i);
+
+            int minIndex = 0;
+            double minDistanceToSignal = 1000;
+
+            for(int j = 0; j<smoothLength;j++){
+                XYPoint p = smoothedArray[j];
+                double distanceToSignal = p.getLengthTo(n.getCentreOfMass());
+
+                // find the point closest to the CoM
+                if(distanceToSignal < minDistanceToSignal){
+                  minIndex = j;
+                  minDistanceToSignal = distanceToSignal;
+                }
+            }
+            // XYPoint borderPoint = smoothedArray[minIndex];
+            n.setClosestBorderPoint(smoothedArray[minIndex]);
+          }
+        }
+      }
+    }
   }
 
   /* 
+    -----------------------
+    NUCLEUS COLLECTION CLASS
+    -----------------------
   	This class contains the nuclei that pass detection criteria
     Provides aggregate stats
   	It enables offsets to be calculated based on the median normalised curves
@@ -2671,8 +2839,8 @@ public class Sperm_Analysis
   	}
 
     /*
-    Write the median angles at each bin to the global log file
-  */
+      Write the median angles at each bin to the global log file
+    */
     public void calculateNormalisedMedianLine(){
       // output the final results: calculate median positions
       // IJ.append("", this.medianFile);
@@ -2742,12 +2910,20 @@ public class Sperm_Analysis
       	if(ymedians[i] == 0 && lowQuartiles[i] == 0 && uppQuartiles[i] == 0){
       		int replacementLowerIndex = wrapIndex(i-1, xmedians.length);
       		int replacementUpperIndex = wrapIndex(i+1, xmedians.length);
+          if(ymedians[replacementLowerIndex] == 0 && lowQuartiles[replacementLowerIndex] == 0 && uppQuartiles[replacementLowerIndex] == 0){
+            replacementLowerIndex = wrapIndex(i-2, xmedians.length);
+          }
+          if(ymedians[replacementUpperIndex] == 0 && lowQuartiles[replacementUpperIndex] == 0 && uppQuartiles[replacementUpperIndex] == 0){
+            replacementUpperIndex = wrapIndex(i+2, xmedians.length);
+          }
 
       		ymedians[i]        = ymedians[replacementLowerIndex]        + ymedians[replacementUpperIndex]        / 2;
       		lowQuartiles[i]    = lowQuartiles[replacementLowerIndex]    + lowQuartiles[replacementUpperIndex]    / 2;
       		uppQuartiles[i]    = uppQuartiles[replacementLowerIndex]    + uppQuartiles[replacementUpperIndex]    / 2;
           tenQuartiles[i]    = tenQuartiles[replacementLowerIndex]    + tenQuartiles[replacementUpperIndex]    / 2;
       		ninetyQuartiles[i] = ninetyQuartiles[replacementLowerIndex] + ninetyQuartiles[replacementUpperIndex] / 2;
+
+          IJ.log("Repaired medians at "+i+" with values between "+replacementLowerIndex+" and "+replacementUpperIndex);
       	}
       }
 
@@ -2812,57 +2988,6 @@ public class Sperm_Analysis
       // rawProfilePlot.drawLine(rawTailQ50, 280, rawTailQ50, 320);
     }
 
-  	public double[] fetchAnglesFromResultsTable(int index){
-
-			ArrayList rt = this.nucleiCollection.get(index).measurementResults;
-
-	    double[] ypoints = new double[rt.size()];
-
-	    for(int j=0;j<rt.size();j++){
-	        double[] d = (double[])rt.get(j);
-	        ypoints[j] = d[1];
-	    }
-
-	    return ypoints;
-  	}
-
-  	public double[] createOffsetRawProfile(int index){
-
-			if(!this.squareDifferencesCalculated){
-				this.calculateOffsets();
-			}
-
-			double offset = this.nucleiCollection.get(index).offsetForTail;
-
-			ArrayList rt = this.nucleiCollection.get(index).measurementResults;
-
-	    double[] xRawCentredOnTail = new double[rt.size()];
-
-	    for(int j=0;j<rt.size();j++){
-	        double[] d = (double[])rt.get(j);
-	        xRawCentredOnTail[j] = d[3]+offset;
-	    }
-	    return xRawCentredOnTail;
-  	}
-
-  	public double[] createOffsetNormalisedProfile(int index){
-
-			if(!this.squareDifferencesCalculated){
-				this.calculateOffsets();
-			}
-
-			double offset = this.nucleiCollection.get(index).offsetForTail;
-
-			ArrayList rt = this.nucleiCollection.get(index).measurementResults;
-
-	    double[] xpoints = new double[rt.size()];
-
-	    for(int j=0;j<rt.size();j++){
-	        double[] d = (double[])rt.get(j);
-	        xpoints[j] = d[0]+offset;
-	    }
-	    return xpoints;
-  	}
 
     /*
       Calculate the offsets needed to corectly assign the tail positions
@@ -3105,7 +3230,7 @@ public class Sperm_Analysis
   		return tailIndex;
   	}
 
-  	private ArrayList detectLocalMinimaInMedian(){
+  	private ArrayList<Integer> detectLocalMinimaInMedian(){
       // go through angle array (with tip at start)
       // look at 1-2-3-4-5 points ahead and behind.
       // if all greater, local minimum
@@ -3116,7 +3241,7 @@ public class Sperm_Analysis
 
       // int count = 0;
 
-      ArrayList medianIndexMinima = new ArrayList(0);
+      ArrayList<Integer> medianIndexMinima = new ArrayList<Integer>(0);
 
       for (int i=0; i<normalisedMedian.length; i++) { // for each position in sperm
 
@@ -3210,14 +3335,57 @@ public class Sperm_Analysis
 
          this.nucleiCollection.get(i).splitNucleusToHeadAndHump();
          this.nucleiCollection.get(i).calculateSignalAnglesFromTail();
-
+         this.nucleiCollection.get(i).calculateSignalDistances();
+         this.nucleiCollection.get(i).calculateFractionalSignalDistances();
+         this.nucleiCollection.get(i).calculateClosestBorderToSignal();
       }
       this.exportSignalStats();
+      addSignalsToProfileChart();
 
       // find nearest border
 
       IJ.log("Red signals: "+ this.getRedSignalCount());
       IJ.log("Green signals: "+ this.getGreenSignalCount());
+    }
+
+    private void addSignalsToProfileChart(){
+      // PlotWindow normXFromTipWindow; normXFromTipPlot
+      // for each signal in each nucleus, find index of point. Draw dot at index at y=-30 (for now)
+      normXFromTipPlot.setColor(Color.LIGHT_GRAY);
+      normXFromTipPlot.setLineWidth(1);
+      normXFromTipPlot.drawLine(0,220,100,220);
+      normXFromTipPlot.drawLine(0,260,100,260);
+
+      for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
+
+        Nucleus n = this.nucleiCollection.get(i);
+
+
+        ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+        if(redSignals.size()>0){
+
+          ArrayList redPoints = new ArrayList(0);
+          ArrayList yPoints = new ArrayList(0);
+
+          for(int j=0; j<redSignals.size();j++){
+
+            XYPoint border = redSignals.get(j).getClosestBorderPoint();
+            for(int k=0; k<n.smoothLength;k++){
+
+              if(n.smoothedArray[k].overlaps(border)){
+                // IJ.log("Found closest border: "+i+" : "+j);
+                redPoints.add( n.normalisedXPositionsFromTip.get(k) );
+                double yPosition = 220 + ( redSignals.get(j).getFractionalDistance() * 40 ); // make between 220 and 260
+                yPoints.add(yPosition);
+              }
+            }
+          }
+          normXFromTipPlot.setColor(Color.RED);
+          normXFromTipPlot.setLineWidth(2);
+          normXFromTipPlot.addPoints(redPoints, yPoints, Plot.DOT);
+        }
+      }
+      normXFromTipWindow.drawPlot(normXFromTipPlot);
     }
 
     public void exportSignalStats(){
@@ -3234,8 +3402,8 @@ public class Sperm_Analysis
         g.delete();
       }
 
-      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tSIGNAL_PERIMETER\tPATH", redLogFile);
-      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tSIGNAL_PERIMETER\tPATH", greenLogFile);
+      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tPATH", redLogFile);
+      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tPATH", greenLogFile);
       for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
 
         int nucleusNumber = this.nucleiCollection.get(i).getNucleusNumber();
@@ -3250,6 +3418,7 @@ public class Sperm_Analysis
                        n.getAngle()+"\t"+
                        n.getFeret()+"\t"+
                        n.getDistance()+"\t"+
+                       n.getFractionalDistance()+"\t"+
                        n.getPerimeter()+"\t"+
                        path, redLogFile);
           }
@@ -3264,6 +3433,7 @@ public class Sperm_Analysis
                        n.getAngle()+"\t"+
                        n.getFeret()+"\t"+
                        n.getDistance()+"\t"+
+                       n.getFractionalDistance()+"\t"+
                        n.getPerimeter()+"\t"+
                        path, greenLogFile);
           }
@@ -3273,7 +3443,7 @@ public class Sperm_Analysis
 
     public void drawOffsetChart(){
 
-      Plot offsetRawPlot = new Plot("Offset tail-centred plot", "Position", "Angle");
+      Plot offsetRawPlot = new Plot("Offset tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
       PlotWindow offsetRawPlotWindow;
 
       offsetRawPlot.setLimits(-200,200,-50,360);
@@ -3282,12 +3452,13 @@ public class Sperm_Analysis
       offsetRawPlot.setColor(Color.LIGHT_GRAY);
      
       for(int i=0;i<this.nucleiCollection.size();i++){
-        double[] xRawCentredOnTail = this.createOffsetRawProfile(i);
-        double[] ypoints = this.fetchAnglesFromResultsTable(i);
+        double[] xRawCentredOnTail = this.nucleiCollection.get(i).createOffsetRawProfile();
+        double[] ypoints = this.nucleiCollection.get(i).getInteriorAngles();
         offsetRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
       }
       offsetRawPlot.draw();
       offsetRawPlotWindow = offsetRawPlot.show();
+      offsetRawPlotWindow.noGridLines = true; // I have no idea why this makes the grid lines appear on work PC, when they appear by default at home
       offsetRawPlotWindow.drawPlot(offsetRawPlot);  
     }
 
@@ -3402,7 +3573,12 @@ public class Sperm_Analysis
     	 IJ.log("Annotation complete");
     }
   }
-
+  /*
+    -----------------------
+    NUCLEUS SIGNAL CLASS
+    -----------------------
+    Contains the variables for storing a signal within the nucleus
+  */  
   class NuclearSignal {
 
     private double area;
@@ -3413,6 +3589,7 @@ public class Sperm_Analysis
     private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
 
     private XYPoint centreOfMass;
+    private XYPoint closestNuclearBorderPoint;
 
     private Roi roi;
 
@@ -3452,6 +3629,10 @@ public class Sperm_Analysis
       return this.centreOfMass;
     }
 
+    public XYPoint getClosestBorderPoint(){
+      return this.closestNuclearBorderPoint;
+    }
+
     public void setArea(double d){
       this.area = d;
     }
@@ -3478,6 +3659,10 @@ public class Sperm_Analysis
 
     public void setCentreOfMass(XYPoint p){
       this.centreOfMass = p;
+    }
+
+    public void setClosestBorderPoint(XYPoint p){
+      this.closestNuclearBorderPoint = p;
     }
   }
 
