@@ -112,7 +112,7 @@ public class Curve_Refolder
     	// iterate over the circle;
     	XYPoint centreOfMass = new XYPoint(0,0);
 
-    	int cycles = 40;
+    	int cycles = 500;
     	for(int j = 0; j<cycles; j++){
 
     		double[] newXpoints = new double[circleArray.size()];
@@ -127,23 +127,41 @@ public class Curve_Refolder
 
 	    		double currentDistance = p.getLengthTo(centreOfMass);
 	    		double newDistance = currentDistance; // default no change
+	    		double rand = Math.random();
 
 	    		if(p.getAngle() > p.getTargetAngle()){
 
 	    			// increase distance from centre (0,0)
-	    			double rand = Math.random();
+	    			if(currentDistance < 200){
+	    				if(rand < 0.2)
+	    					newDistance = currentDistance + 0.1; // 1% change
+	    				else
+	    					newDistance = currentDistance + 0.5; // 1% change
 
-	    			if(rand<0.33){ // randomly either increase or decrase the angles
-	    				newDistance = currentDistance + 1; // 1% change
-	    			} else if(rand>0.8){
-	    				p.setCreatedAngle( p.getCreatedAngle()-1);
+
+	    				// newDistance = currentDistance + 0.1; // 1% change
 	    			} else {
-	    				p.setCreatedAngle( p.getCreatedAngle()+1);
+	    				// if(rand < 0.2)
+	    				// 	p.setCreatedAngle( p.getCreatedAngle()+1);
+	    				// else
+	    				// 	p.setCreatedAngle( p.getCreatedAngle()-1);
 	    			}
+	    			
 	    		}
 	    		if(p.getAngle() < p.getTargetAngle()){
 
-	    			newDistance = currentDistance - 1; // 1% change
+	    			if(currentDistance > 100){
+	    				if(rand < 0.2)
+	    					newDistance = currentDistance - 0.1; // 1% change
+	    				else
+	    					newDistance = currentDistance - 0.5; // 1% change
+	    				// newDistance = currentDistance - 0.1; // 1% change
+	    			} else {
+	    				// if(rand > 0.2)
+	    				// 	p.setCreatedAngle( p.getCreatedAngle()+1);
+	    				// else
+	    				// 	p.setCreatedAngle( p.getCreatedAngle()-1);
+	    			}
 
 	    		}
 
@@ -159,7 +177,14 @@ public class Curve_Refolder
 				newYpoints[i] = p.getY();
 				newAngle[i] = p.getAngle();
 
+
+
 			}
+			double difference = getDifferenceBetweenCurves(newAngle, targetpoints);
+			IJ.log("Iteration "+j+": "+difference);
+
+			// iterate until differences no longer changing much;
+			// then swap to angle changes to pull the tip out
 
 			if(j == cycles-1){
 		    	circlePlot.addPoints(newXpoints, newYpoints, Plot.LINE);
@@ -245,9 +270,14 @@ public class Curve_Refolder
 	    return roi.getAngle();
     }
 
-    public double getDifferenceBetweenCurves(double[] a, double b){
+    public double getDifferenceBetweenCurves(double[] a, double[] b){
     	// compare the angles of the target curves
-    	
+    	double difference = 0;
+
+    	for(int i=0; i<a.length; i++){
+    		difference += Math.abs(a[i] - b[i]);
+    	}
+    	return difference;
     }
 
     public int wrapIndex(int i, int length){
