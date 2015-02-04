@@ -2603,6 +2603,15 @@ public class Sperm_Analysis
       return d;
     }
 
+    public double[] getNormalisedTailIndexes(){
+      double[] d = new double[nucleiCollection.size()];
+
+      for(int i=0;i<nucleiCollection.size();i++){
+        d[i] = ( (double) nucleiCollection.get(i).getTailIndex() / (double) nucleiCollection.get(i).smoothLength ) * 100;
+      }
+      return d;
+    }
+
     public double[] getSquareDifferences(){
       double[] d = new double[nucleiCollection.size()];
 
@@ -2940,13 +2949,13 @@ public class Sperm_Analysis
       normXFromTipPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
 
       // handle the normalised tail position mapping
-      int[] tails = this.getTailIndexes();
-      double[] xTails = new double[tails.length];
-      for(int i=0; i<tails.length; i++){
-        xTails[i] = (double)tails[i];
-      }
+      double[] xTails = this.getNormalisedTailIndexes();
+      // double[] xTails = new double[tails.length];
+      // for(int i=0; i<tails.length; i++){
+      //   xTails[i] = (double)tails[i];
+      // }
 
-      double[] yTails = new double[tails.length];
+      double[] yTails = new double[xTails.length];
       Arrays.fill(yTails, 300); // all dots at y=300
       normXFromTipPlot.setColor(Color.LIGHT_GRAY);
       normXFromTipPlot.addPoints(xTails, yTails, Plot.DOT);
