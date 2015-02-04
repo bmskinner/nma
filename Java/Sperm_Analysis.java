@@ -339,11 +339,11 @@ public class Sperm_Analysis
 
     for(Roi roi : roiArray){
 
-    	ArrayList rt = new ArrayList(0);
+    	// ArrayList rt = new ArrayList(0);
       
       IJ.log("  Analysing nucleus "+i);
       try{
-      	rt = analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
+      	analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
       	this.totalNuclei++;
       } catch(Exception e){
       	IJ.log("  Error analysing nucleus: "+e);
@@ -454,7 +454,7 @@ public class Sperm_Analysis
     Detect signals in the red and green channels, and calculate their positions relative to the CoM
     Draw regions of interest on a new image, and save this out to the relevant directory.
   */
-  public ArrayList analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
+  public void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, String path){
     
     // results table
     ArrayList rt = new ArrayList(0);
@@ -491,18 +491,6 @@ public class Sperm_Analysis
     roiArray.setCentreOfMass(nucleusCoM);
     
 
-    // draw the roi
-    ip.setColor(Color.BLUE);
-    ip.setLineWidth(1);
-    ip.draw(nucleus);
-
-
-    // draw the CoM
-    // ip.setColor(Color.MAGENTA);
-    // ip.setLineWidth(5);
-    // ip.drawDot(nucleusCoM.getXAsInt(), nucleusCoM.getYAsInt());
-
-
     // find tip - use the least angle method
     XYPoint spermTip = roiArray.findMinimumAngle();
     if(spermTip.getInteriorAngle() > 110){ // this is not a deep enough curve to declare the tip
@@ -521,12 +509,6 @@ public class Sperm_Analysis
       IJ.log("    Reversing array");
       roiArray.reverseArray();
     }
-
-    
-    //draw the sperm tip 
-    // ip.setLineWidth(5);
-    // ip.setColor(Color.YELLOW);
-    // ip.drawDot(spermTip.getXAsInt(), spermTip.getYAsInt());
     
 
     // find local minima and maxima
@@ -542,6 +524,7 @@ public class Sperm_Analysis
     						The border furthest from the tip is the tail
     */	
     XYPoint spermTail1 = findPointFurthestFrom(spermTip, minima); // TO BE REPLACED WITH DESCRIPTION ABOVE
+    roiArray.addTailEstimatePosition(spermTail1);
 
     /*
     	Method 2: Use the list of local minima to detect the tail corner
@@ -549,6 +532,7 @@ public class Sperm_Analysis
     						Can be confused as to which side of the sperm head is chosen
     */	
     XYPoint spermTail2 = findTailPointFromMinima(spermTip, nucleusCoM, minima);
+    roiArray.addTailEstimatePosition(spermTail2);
 
     /*
     	Method 3: Look at the 2nd derivative - rate of change of angles
@@ -557,6 +541,7 @@ public class Sperm_Analysis
     						Wide block far from tip = tail
     */	
     XYPoint spermTail3 = roiArray.findTailFromDeltas(spermTip);
+    roiArray.addTailEstimatePosition(spermTail3);
 
     /*
     	Given distinct methods for finding a tail,
@@ -565,6 +550,7 @@ public class Sperm_Analysis
     int consensusTailIndex = getPositionBetween(spermTail2, spermTail3, roiArray);
     roiArray.tailIndex = consensusTailIndex;
     XYPoint consensusTail = roiArray.smoothedArray[consensusTailIndex];
+    roiArray.setInitialConsensusTail(consensusTail);
     roiArray.setSpermTail(consensusTail);
 
     /*
@@ -610,15 +596,9 @@ public class Sperm_Analysis
     }
       IJ.append("", this.logFile);
 
-    // } else {
-    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // only proceed if the tail points are together  
+    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // warn if the tail points are together  
       IJ.log("    Difficulty assigning tail position");
     }  
-
-
-    // Include tip, CoM, tail
-    roiArray.printLogFile();
-
 
     // find the signals
     // within nuclear roi, analyze particles in colour channels
@@ -637,10 +617,6 @@ public class Sperm_Analysis
                                                 redResults.getValue("Feret",0), 
                                                 redResults.getValue("Perim.",0), 
                                                 signalCoM));
-
-      ip.setLineWidth(3);
-      ip.setColor(Color.RED);
-      ip.drawDot(signalCoM.getXAsInt(), signalCoM.getYAsInt());
     }
 
     // Add green signals to the nucleus
@@ -653,28 +629,7 @@ public class Sperm_Analysis
                                                   greenResults.getValue("Feret",0), 
                                                   greenResults.getValue("Perim.",0), 
                                                   signalCoM));
-
-      ip.setLineWidth(3);
-      ip.setColor(Color.GREEN);
-      ip.drawDot(signalCoM.getXAsInt(), signalCoM.getYAsInt());
     }    
-
-    // find lectin stains
-
-    // draw the points considered as sperm tails
-    ip.setLineWidth(5);
-    ip.setColor(Color.CYAN);
-    ip.drawDot(consensusTail.getXAsInt(), consensusTail.getYAsInt());
-
-    ip.setLineWidth(3);
-    ip.setColor(Color.GRAY);
-    ip.drawDot(spermTail2.getXAsInt(), spermTail2.getYAsInt());
-    ip.setColor(Color.ORANGE);
-    ip.drawDot(spermTail3.getXAsInt(), spermTail3.getYAsInt());
-
-    // String saveFolder = createImageDirectory(roiArray.getPathWithoutExtension());
-    IJ.saveAsTiff(smallRegion, saveFolder+"\\"+roiArray.getNucleusNumber()+".tiff");
-
 
     // rotate the image to provide a consistent view
     // ip.setInterpolationMethod(ImageProcessor.BILINEAR);
@@ -687,26 +642,6 @@ public class Sperm_Analysis
     // ImagePlus finalImage = new ImagePlus("Image", ip);
     // IJ.saveAsTiff(finalImage, saveFolder+"\\"+roiArray.getNucleusNumber()+".final.tiff");
 
-    // if(pathLength > MAXIMUM_PATH_LENGTH){ // skip nuclei with poor thresholding
-    //   IJ.log("    Nucleus failed on thresholding");
-    //   this.nucleiFailedOther++;
-    //   failureReason = failureReason | this.FAILURE_THRESHOLD;
-    //   nucleusPassedChecks = false;
-    // }
-
-    // if(blueResults.getValue("Perim.",0)>MAX_NUCLEAR_PERIMETER){
-    //   IJ.log("    Nucleus failed on perimeter: too long");
-    //   this.nucleiFailedOther++;
-    //   failureReason = failureReason | this.FAILURE_OTHER;
-    //   nucleusPassedChecks = false;
-    // }
-
-    // if(blueResults.getValue("Perim.",0)<MIN_NUCLEAR_PERIMETER){
-    //   IJ.log("    Nucleus failed on perimeter: too short");
-    //   this.nucleiFailedOther++;
-    //   failureReason = failureReason | this.FAILURE_OTHER;
-    //   nucleusPassedChecks = false;
-    // }
 
 
     // if everything checks out, add the measured parameters to the global pool
@@ -723,7 +658,7 @@ public class Sperm_Analysis
 
       this.completeCollection.addNucleus(roiArray);
 
-      return rt;
+      // return rt;
     } else {
       IJ.append(  failureReason+"\t"+
                   blueResults.getValue("Perim.",0)+"\t"+
@@ -733,7 +668,7 @@ public class Sperm_Analysis
                   normalisedTailIndex+"\t"+
                   consensusTailIndex+"\t"+
                   path+"-"+nucleusNumber, this.failedFile);
-      return new ArrayList(0);
+      // return new ArrayList(0);
     }
 
   }
@@ -758,30 +693,9 @@ public class Sperm_Analysis
     // get the midpoint
     int mid = (int)Math.floor( (a+b) /2);
     // IJ.log(    "Consensus tail at "+mid+": "+array.smoothedArray[mid].toString());
-    // return array.smoothedArray[mid];
     return mid;
   }
 
-  /*
-    Find the angle that the nucleus must be rotated to make the CoM-tail vertical
-    Returns an angle
-  */
-  public double findRotationAngle(XYPoint tail, XYPoint centre){
-    XYPoint end = new XYPoint(tail.getXAsInt(),0);
-
-    float[] xpoints = { (float) end.getX(), (float) tail.getX(), (float) centre.getX()};
-    float[] ypoints = { (float) end.getY(), (float) tail.getY(), (float) centre.getY()};
-    PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-
-   // measure the angle of the line
-   double angle = roi.getAngle();
-
-     if(centre.getX() < tail.getX()){
-      return angle;
-     } else {
-      return 0-angle;
-    }
-  }
 
   /*
     Detect the tail based on a list of local minima in an XYPoint array.
@@ -1129,11 +1043,13 @@ public class Sperm_Analysis
     private XYPoint[] array; // the points from the polygon made from the input roi
     private XYPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
     private XYPoint[] splineArray; // spline values. Currently not used.
+    private ArrayList<XYPoint> intialSpermTails = new ArrayList<XYPoint>(0); // holds the points considered to be sperm tails before filtering
 
     private XYPoint centreOfMass;
     private XYPoint spermTip;
     private XYPoint spermTail;
     private XYPoint intersectionPoint;
+    private XYPoint initialConsensusTail;
     
     private String imagePath; // the path to the image being analysed
 
@@ -1163,6 +1079,7 @@ public class Sperm_Analysis
     public Nucleus (Roi roi) { // construct from an roi
 
       // get the polygon from the roi
+      this.roi = roi;
       this.polygon = roi.getPolygon();
       this.array = new XYPoint[this.polygon.npoints];
       this.length = this.array.length;
@@ -1182,6 +1099,10 @@ public class Sperm_Analysis
       } catch(Exception e){
         IJ.log("Cannot create ROI array: "+e);
       } 
+    }
+
+    public Roi getRoi(){
+    	return this.roi;
     }
 
     public double[] getNormalisedXPositionsFromTip(){
@@ -1352,6 +1273,15 @@ public class Sperm_Analysis
       this.spermTip = p;
     }
 
+    public void setInitialConsensusTail(XYPoint p){
+      this.initialConsensusTail = p;
+    }
+
+    public XYPoint getInitialConsensusTail(){
+      return this.initialConsensusTail;
+    }
+
+
     public XYPoint getSpermTail(){
       return this.spermTail;
     }
@@ -1406,6 +1336,10 @@ public class Sperm_Analysis
 
     public ArrayList<NuclearSignal> getGreenSignals(){
       return this.greenSignals;
+    }
+
+    public void addTailEstimatePosition(XYPoint p){
+    	this.intialSpermTails.add(p);
     }
 
     public void reverseArray(){
@@ -1532,6 +1466,27 @@ public class Sperm_Analysis
 
     	return newArray;
     }
+
+    /*
+	    Find the angle that the nucleus must be rotated to make the CoM-tail vertical
+	    Returns an angle
+	  */
+	  public double findRotationAngle(){
+	    XYPoint end = new XYPoint(this.getSpermTail().getXAsInt(),0);
+
+	    float[] xpoints = { (float) end.getX(), (float) this.getSpermTail().getX(), (float) this.getCentreOfMass().getX()};
+	    float[] ypoints = { (float) end.getY(), (float) this.getSpermTail().getY(), (float) this.getCentreOfMass().getY()};
+	    PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+
+	   // measure the angle of the line
+	   double angle = roi.getAngle();
+
+	     if(this.getCentreOfMass().getX() < this.getSpermTail().getX()){
+	      return angle;
+	     } else {
+	      return 0-angle;
+	    }
+	  }
 
     /*
       Change the smoothed array order to put the selected index at the beginning
@@ -3259,6 +3214,8 @@ public class Sperm_Analysis
       }
       this.exportSignalStats();
 
+      // find nearest border
+
       IJ.log("Red signals: "+ this.getRedSignalCount());
       IJ.log("Green signals: "+ this.getGreenSignalCount());
     }
@@ -3353,6 +3310,7 @@ public class Sperm_Analysis
       String[] paths = this.getNucleusPaths();
 
       for(int i=0; i<this.getNucleusCount();i++){
+      	IJ.log("  "+i+" of "+this.getNucleusCount());
         IJ.append(  areas[i]+"\t"+
                     perims[i]+"\t"+
                     ferets[i]+"\t"+
@@ -3360,12 +3318,17 @@ public class Sperm_Analysis
                     tails[i]+"\t"+
                     differences[i]+"\t"+
                     paths[i], statsFile);
-      }
 
+        // Include tip, CoM, tail
+    		this.nucleiCollection.get(i).printLogFile();
+      }
+      IJ.log("Export complete");
     }
 
     public void annotateImagesOfNuclei(){
+    	IJ.log("Annotating images...");
     	for(int i=0; i<this.getNucleusCount();i++){
+    		IJ.log("  "+i+" of "+this.getNucleusCount());
     		Nucleus n = this.nucleiCollection.get(i);
 
     		// open the image we saved earlier
@@ -3375,10 +3338,11 @@ public class Sperm_Analysis
         ImageProcessor ip = image.getProcessor();
 
         // draw the features of interest
-        // draw the roi
-		    // ip.setColor(Color.BLUE);
-		    // ip.setLineWidth(1);
-		    // ip.draw(nucleus);
+        
+        // draw the outline of the nucleus
+		    ip.setColor(Color.BLUE);
+		    ip.setLineWidth(1);
+		    ip.draw(n.getRoi());
 
 
 		    // draw the CoM
@@ -3391,32 +3355,52 @@ public class Sperm_Analysis
 		    ip.setColor(Color.YELLOW);
 		    ip.drawDot(n.getSpermTip().getXAsInt(), n.getSpermTip().getYAsInt());
 
+		    // draw the points considered as sperm tails on a per-nucleus basis
+		    ip.setLineWidth(3);
+		    ip.setColor(Color.GRAY);
+		    for(int j=0; j<n.intialSpermTails.size();j++){
+		    	XYPoint p = n.intialSpermTails.get(j);
+		    	ip.drawDot(p.getXAsInt(), p.getYAsInt());
+		    }
+
+		    // Draw the original consensus tail
+		    ip.setLineWidth(5);
+		    ip.setColor(Color.CYAN);
+		    ip.drawDot(n.getInitialConsensusTail().getXAsInt(), n.getInitialConsensusTail().getYAsInt());
+
 				// line from tail to intsersection point; should pass through CoM   
 				ip.setLineWidth(1);
+				ip.setColor(Color.YELLOW);
 		    ip.drawLine(n.getSpermTail().getXAsInt(), n.getSpermTail().getYAsInt(), n.intersectionPoint.getXAsInt(), n.intersectionPoint.getYAsInt());
  
 		    //   SIGNALS
-		    //   ip.setLineWidth(3);
-		    //   ip.setColor(Color.GREEN);
-		    //   ip.drawDot(signalCoM.getXAsInt(), signalCoM.getYAsInt());
-		    // }    
+		    ip.setLineWidth(3);
+		    ip.setColor(Color.RED);
+		    ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+        if(redSignals.size()>0){
+          for(int j=0; j<redSignals.size();j++){
+            NuclearSignal s = redSignals.get(j);
+            ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+          }
 
+        }
+        ip.setColor(Color.GREEN);
+        ArrayList<NuclearSignal> greenSignals = n.getGreenSignals();
+        if(redSignals.size()>0){
+          for(int j=0; j<greenSignals.size();j++){
+            NuclearSignal s = greenSignals.get(j);
+            ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+          }
+        }
 
-		    // // draw the points considered as sperm tails
-		    // ip.setLineWidth(5);
-		    // ip.setColor(Color.CYAN);
-		    // ip.drawDot(consensusTail.getXAsInt(), consensusTail.getYAsInt());
+		    // make mega image for rotated nuclei
 
-		    // ip.setLineWidth(3);
-		    // ip.setColor(Color.GRAY);
-		    // ip.drawDot(spermTail2.getXAsInt(), spermTail2.getYAsInt());
-		    // ip.setColor(Color.ORANGE);
-		    // ip.drawDot(spermTail3.getXAsInt(), spermTail3.getYAsInt());
 		    IJ.saveAsTiff(image, path);
+		    image.close();
 
     	}
+    	 IJ.log("Annotation complete");
     }
-
   }
 
   class NuclearSignal {
