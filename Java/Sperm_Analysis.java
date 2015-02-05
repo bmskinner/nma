@@ -17,6 +17,9 @@ morphology comparisons
     Mega image & rotations
     Median curve refolding
     Consensus image
+    Add failed nuclei to logFailed
+    Add 180 degree line to plots
+    Find nucleus closest to the median curve as template as alternative to refolding
 */
 import ij.IJ;
 import ij.ImagePlus;
@@ -77,11 +80,8 @@ public class Sperm_Analysis
   private static final double MIN_NUCLEAR_CIRC = 0.3;
   private static final double MAX_NUCLEAR_CIRC = 0.8;
   private static final double PROFILE_INCREMENT = 0.5;
-  // private static final double MAX_NUCLEAR_PERIMETER = 700; // help remove overlapping nuclei  
-  // private static final double MIN_NUCLEAR_PERIMETER = 100; // help remove fragmented / folded nuclei
-  // private static final double MAXIMUM_PATH_LENGTH = 2000; // reject nuclei with an angle path length greater than this; wibbly  
 
-  // failure codes
+  // failure codes - not in use, keep to add back to logFailed in refilter
   private static final int FAILURE_TIP = 1;
   private static final int FAILURE_TAIL = 2;
   private static final int FAILURE_THRESHOLD = 4;
@@ -90,22 +90,11 @@ public class Sperm_Analysis
   // Chart drawing parameters
   private static final int CHART_WINDOW_HEIGHT = 300;
   private static final int CHART_WINDOW_WIDTH = 400;
-  private static final int RAW_PROFILE_CHART_X_MAX = 400;
 
   private int totalNuclei = 0;
   private int nucleiFailedOnTip = 0;
   private int nucleiFailedOnTail = 0;
   private int nucleiFailedOther = 0; // generic reasons for failure
-
-  private Plot linePlot;
-  private Plot rawProfilePlot;
-  // private Plot tailCentredPlot;
-  private Plot tailCentredRawPlot;
-
-  private PlotWindow plotWindow;
-  private PlotWindow rawPlotWindow;
-  private PlotWindow tailCentredPlotWindow;
-  private PlotWindow tailCentredRawPlotWindow;
 
   private String logFile;
   private String failedFile;
@@ -113,11 +102,7 @@ public class Sperm_Analysis
   private String statsFile;
   private String debugFile;
 
-  private Map<Double, Collection<Double>> finalResults = new HashMap<Double, Collection<Double>>();
-
   private NucleusCollection completeCollection;
-
-  private ProgressBar progressBar = new ProgressBar(300,100);
     
   public void run(String paramString)  {
 
@@ -168,21 +153,22 @@ public class Sperm_Analysis
     int analysed = completeCollection.getNucleusCount();
     IJ.log("Before filtering: "+analysed);
 
-    this.completeCollection.refilterNuclei();
-    this.completeCollection.createProfileAggregate();
-    this.completeCollection.drawProfilePlots();
+    completeCollection.refilterNuclei();
+    completeCollection.createProfileAggregate();
+    completeCollection.drawProfilePlots();
 
-    this.completeCollection.calculateNormalisedMedianLine();
-    this.completeCollection.findTailIndexInMedianCurve();
-    this.completeCollection.calculateOffsets();
-    this.completeCollection.drawRawPositionsFromTailChart();
-    this.completeCollection.createNormalisedTailPositions();
-    this.completeCollection.drawNormalisedPositionsFromTailChart();
-    this.completeCollection.createTailCentredProfileAggregate();
-    this.completeCollection.calculateTailCentredNormalisedMedianLine();
-    this.completeCollection.measureNuclearOrganisation();
-    this.completeCollection.exportNuclearStats();
-    this.completeCollection.annotateImagesOfNuclei();
+    completeCollection.calculateNormalisedMedianLine();
+    completeCollection.findTailIndexInMedianCurve();
+    completeCollection.calculateOffsets();
+    completeCollection.drawRawPositionsFromTailChart();
+    completeCollection.createNormalisedTailPositions();
+    completeCollection.drawNormalisedPositionsFromTailChart();
+    completeCollection.createTailCentredProfileAggregate();
+    completeCollection.calculateTailCentredNormalisedMedianLine();
+    completeCollection.measureNuclearOrganisation();
+    completeCollection.exportNuclearStats();
+    completeCollection.annotateImagesOfNuclei();
+    completeCollection.rotateAndAssembleNucleiForExport();
     
   }
 
@@ -198,25 +184,6 @@ public class Sperm_Analysis
     
     return i;
   }
-
-  /*
-    TO BE ADDED TO CLASS
-  	Write the plot images to the folder being analysed
-  */
-  // public void drawFinalPlots(String folderName){
-
-  // 	linePlot.draw();
-  //   plotWindow.drawPlot(linePlot);
-  //   rawProfilePlot.draw();
-  //   rawPlotWindow.drawPlot(rawProfilePlot);
-
-  //   tailCentredRawPlot.draw();
-  //   tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
-  //   ImagePlus finalPlot = linePlot.getImagePlus();
-  //   IJ.saveAsTiff(finalPlot, folderName+"plotNorm.tiff");
-  //   ImagePlus finalRawPlot = rawProfilePlot.getImagePlus();
-  //   IJ.saveAsTiff(finalRawPlot, folderName+"plotRaw.tiff");
-  // }
 
   /*
     If previous log files exist, delete them
@@ -534,9 +501,9 @@ public class Sperm_Analysis
 
     IJ.append("", this.logFile);
 
-    if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // warn if the tail points are together  
-      IJ.log("    Difficulty assigning tail position");
-    }  
+    // if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // warn if the tail points are together  
+    //   // IJ.log("    Difficulty assigning tail position");
+    // }  
 
     // find the signals
     // within nuclear roi, analyze particles in colour channels
@@ -606,6 +573,7 @@ public class Sperm_Analysis
 
   }
   /*
+    SHOULD BE MOVED TO NUCLEUS CLASS
     For two XYPoints in a Nucleus, find the point that lies halfway between them
     Used for obtaining a consensus between potential tail positions
   */
@@ -719,7 +687,7 @@ public class Sperm_Analysis
     return manager;
   }
 
-    /*
+  /*
     Use the particle analyser to detect the nucleus in an image.
     Calculate parameters of interest and return a ResultsTable.
   */
@@ -1434,7 +1402,8 @@ public class Sperm_Analysis
     }
 
     /*
-	    Find the angle that the nucleus must be rotated to make the CoM-tail vertical
+	    Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
+      Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
 	    Returns an angle
 	  */
 	  public double findRotationAngle(){
@@ -2846,7 +2815,7 @@ public class Sperm_Analysis
         f.delete();
       }
 
-      IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", logFile); 
+      IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS", logFile); 
 
       ArrayList<Double[]>  medianResults = new ArrayList<Double[]>(0);
       int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
@@ -3453,6 +3422,11 @@ public class Sperm_Analysis
         }
       }
       normXFromTailWindow.drawPlot(normXFromTailPlot);
+
+      ImagePlus tipPlot = normXFromTipPlot.getImagePlus();
+      IJ.saveAsTiff(tipPlot, this.folder+"plotTipNorm.tiff");
+      ImagePlus tailPlot = normXFromTailPlot.getImagePlus();
+      IJ.saveAsTiff(tailPlot, this.folder+"plotTailNorm.tiff");
     }
 
     public void exportSignalStats(){
@@ -3592,6 +3566,39 @@ public class Sperm_Analysis
       }
       // progressBar.hide();
       IJ.log("Export complete");
+    }
+
+    public void rotateAndAssembleNucleiForExport(){
+
+      // foreach nucleus
+      // createProcessor (500, 500)
+      // sertBackgroundValue(0)
+      // paste in old image at centre
+      // insert(ImageProcessor ip, int xloc, int yloc)
+      // rotate about CoM (new position)
+      // display.
+      // ImagePlus finalImage = new ImagePlus();
+      // "Final", finalProcessor);
+      // finalProcessor = ImageProcessor.createProcessor(1000, 1000);
+
+      for(int i=0; i<this.getNucleusCount();i++){
+        
+        Nucleus n = this.nucleiCollection.get(i);
+        String path = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+".tiff";
+        Opener localOpener = new Opener();
+        ImagePlus image = localOpener.openImage(path);
+        ImageProcessor ip = image.getProcessor();
+
+        ImageProcessor newProcessor = ip.createProcessor(500, 500);
+        newProcessor.insert(ip, 100, 100);
+        newProcessor.rotate( n.findRotationAngle() );
+        // finalProcessor.insert(newProcessor, i+20, 0);
+        ImagePlus newImage = new ImagePlus("Rotated", newProcessor);
+        newImage.show();
+        
+      }
+    // ImagePlus finalImage = new ImagePlus("Final", finalProcessor);
+    // finalImage.show();
     }
 
     /*
