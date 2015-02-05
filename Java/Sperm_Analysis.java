@@ -17,7 +17,6 @@ morphology comparisons
     Mega image & rotations
     Median curve refolding
     Consensus image
-    Correct median repair code
 */
 import ij.IJ;
 import ij.ImagePlus;
@@ -26,6 +25,7 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
+import ij.gui.ProgressBar;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.DirectoryChooser;
@@ -64,7 +64,7 @@ public class Sperm_Analysis
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
 
   // Values for deciding whether an object is a signal
-  private static final int SIGNAL_THRESHOLD = 50;
+  private static final int SIGNAL_THRESHOLD = 70;
   private static final double MIN_SIGNAL_SIZE = 50; // how small can a signal be
   private static final double MAX_SIGNAL_SIZE = 2000; // how large can a signal be
   
@@ -77,9 +77,9 @@ public class Sperm_Analysis
   private static final double MIN_NUCLEAR_CIRC = 0.3;
   private static final double MAX_NUCLEAR_CIRC = 0.8;
   private static final double PROFILE_INCREMENT = 0.5;
-  private static final double MAX_NUCLEAR_PERIMETER = 700; // help remove overlapping nuclei  
-  private static final double MIN_NUCLEAR_PERIMETER = 100; // help remove fragmented / folded nuclei
-  private static final double MAXIMUM_PATH_LENGTH = 2000; // reject nuclei with an angle path length greater than this; wibbly  
+  // private static final double MAX_NUCLEAR_PERIMETER = 700; // help remove overlapping nuclei  
+  // private static final double MIN_NUCLEAR_PERIMETER = 100; // help remove fragmented / folded nuclei
+  // private static final double MAXIMUM_PATH_LENGTH = 2000; // reject nuclei with an angle path length greater than this; wibbly  
 
   // failure codes
   private static final int FAILURE_TIP = 1;
@@ -116,6 +116,8 @@ public class Sperm_Analysis
   private Map<Double, Collection<Double>> finalResults = new HashMap<Double, Collection<Double>>();
 
   private NucleusCollection completeCollection;
+
+  private ProgressBar progressBar = new ProgressBar(300,100);
     
   public void run(String paramString)  {
 
@@ -312,39 +314,6 @@ public class Sperm_Analysis
     } 
   }
 
-  // public void drawProfilePlots(ArrayList rt){
-
-  // 	double[] xpoints = new double[rt.size()];
-  //   double[] ypoints = new double[rt.size()];
-  //   double[] xprofile = new double[rt.size()];
-  //   double[] xCentredOnTail = new double[rt.size()];
-  //   double[] xRawCentredOnTail = new double[rt.size()];
-
-  //   for(int j=0;j<rt.size();j++){
-  //       double[] d = (double[])rt.get(j);
-  //       xpoints[j] = d[0];
-  //       ypoints[j] = d[1];
-  //       xprofile[j] = j;
-  //       xCentredOnTail[j] = d[2];
-  //       xRawCentredOnTail[j] = d[3];
-  //   }
-
-  //   linePlot.setColor(Color.LIGHT_GRAY);
-  //   linePlot.addPoints(xpoints, ypoints, Plot.LINE);
-  //   linePlot.draw();
-  //   plotWindow.drawPlot(linePlot);
-
-  //   rawProfilePlot.setColor(Color.LIGHT_GRAY);
-  //   rawProfilePlot.addPoints(xprofile, ypoints, Plot.LINE);
-  //   rawProfilePlot.draw();
-  //   rawPlotWindow.drawPlot(rawProfilePlot);
-
-  //   tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
-  //   tailCentredRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
-  //   tailCentredRawPlot.draw();
-  //   tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
-  // }
-
   /*
     Within a given image, look for nuclei using the particle analyser.
     Return an RoiManager containing the outlines of all potential nuclei
@@ -374,8 +343,8 @@ public class Sperm_Analysis
       pa.setRoiManager(manager);
       boolean success = pa.analyze(blue);
       if(success){
-        IJ.log("  Found "+manager.getCount()+ " nuclei");
-        // rt.show("Title");
+        String plural = manager.getCount() == 1 ? "nucleus" : "nuclei";
+        IJ.log("  Found "+manager.getCount()+ " "+plural);
       } else {
         IJ.log("  Unable to perform particle analysis");
       }
@@ -404,6 +373,24 @@ public class Sperm_Analysis
       }
     }
     return dir.toString();
+  }
+
+  public double getMin(double[] d){
+    double min = getMax(d);
+    for(int i=0;i<d.length;i++){
+      if( d[i]<min)
+        min = d[i];
+    }
+    return min;
+  }
+
+  public double getMax(double[] d){
+    double max = 0;
+    for(int i=0;i<d.length;i++){
+      if( d[i]>max)
+        max = d[i];
+    }
+    return max;
   }
 
   /*
@@ -532,14 +519,8 @@ public class Sperm_Analysis
         double rawXFromTail = (double)i - (double)consensusTailIndex; // offset the raw array based on the calculated tail position
 
         roiArray.normalisedXPositionsFromTip.add(normalisedX);
-        // roiArray.normalisedXPositionsFromTail.add(normalisedXFromTail);
         roiArray.rawXPositionsFromTail.add(rawXFromTail);
         roiArray.rawXPositionsFromTip.add( (double)i);
-
-        // double[] d = new double[] { normalisedX, 
-        // 														roiArray.smoothedArray[i].getInteriorAngle(), 
-        // 														normalisedXFromTail, 
-        // 														rawXFromTail };
         
         IJ.append(normalisedX+"\t"+
         					roiArray.smoothedArray[i].getInteriorAngle()+"\t"+
@@ -705,6 +686,8 @@ public class Sperm_Analysis
     ChannelSplitter cs = new ChannelSplitter();
     ImagePlus[] channels = cs.split(image);
     ImagePlus imp = channels[channel];
+    String colour = channel == 0 ? "red" : "green";
+
     
     // threshold
     ImageProcessor ip = imp.getChannelProcessor();
@@ -722,8 +705,9 @@ public class Sperm_Analysis
       pa.setRoiManager(manager);
       boolean success = pa.analyze(imp);
       if(success){
-        IJ.log("    Found "+manager.getCount()+ " signals in channel "+channel);
-        // rt.show("Title");
+        String signalPlural = manager.getCount() == 1 ? "signal" : "signals"; // I am pedantic
+        IJ.log("    Found "+manager.getCount()+ " "+signalPlural+" in "+colour+" channel");
+
       } else {
         IJ.log("    Unable to perform signal analysis");
       }
@@ -1035,6 +1019,7 @@ public class Sperm_Analysis
     // these will replace measurementResults eventually
     private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
     private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
+    private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
     private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
     private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
     
@@ -1079,6 +1064,14 @@ public class Sperm_Analysis
       double[] d = new double[normalisedYPositionsFromTail.size()];
       for(int i=0;i<normalisedYPositionsFromTail.size();i++){
         d[i] = normalisedYPositionsFromTail.get(i);
+      }
+      return d;
+    }
+
+    public double[] getNormalisedXPositionsFromTail(){
+      double[] d = new double[normalisedXPositionsFromTail.size()];
+      for(int i=0;i<normalisedXPositionsFromTail.size();i++){
+        d[i] = normalisedXPositionsFromTail.get(i);
       }
       return d;
     }
@@ -1488,6 +1481,7 @@ public class Sperm_Analysis
     public void createNormalisedYPositionsFromTail(){
 
       double[] tipCentredAngles = this.getAngles();
+      double[] tipCentredXPositions = this.getNormalisedXPositionsFromTip();
       int tailIndex = this.getTailIndex();
 
       double[] tempArray = new double[tipCentredAngles.length];
@@ -1495,8 +1489,14 @@ public class Sperm_Analysis
       System.arraycopy(tipCentredAngles, tailIndex, tempArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
       System.arraycopy(tipCentredAngles, 0, tempArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
 
+      double[] tempXArray = new double[tipCentredAngles.length];
+      System.arraycopy(tipCentredXPositions, tailIndex, tempXArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
+      System.arraycopy(tipCentredXPositions, 0, tempXArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
+
+
       for(int i=0; i<this.smoothLength;i++){
           this.normalisedYPositionsFromTail.add(tempArray[i]);
+          this.normalisedXPositionsFromTail.add(tempXArray[i]);
       }
     }
 
@@ -2124,22 +2124,8 @@ public class Sperm_Analysis
       for(int j=0;j<ypoints.length;j++){
           ypoints[j] = this.smoothedArray[j].getInteriorAngle();
       }
-
       return ypoints;
     }
-
-    // public double[] createOffsetNormalisedProfile(){
-
-    //   double offset = this.offsetForTail;
-
-    //   double[] xNormCentredOnTail = this.getNormalisedXPositionsFromTail();
-    //   double[] offsetX = new double[xNormCentredOnTail.length];
-
-    //   for(int j=0;j<xNormCentredOnTail.length;j++){
-    //     offsetX[j] = xNormCentredOnTail[j]+offset;
-    //   }
-    //   return offsetX;
-    // }
 
     /*
       For the given nucleus index:
@@ -2479,6 +2465,7 @@ public class Sperm_Analysis
 
   	private String folder; // the source of the nuclei
     private String medianFile; // output medians
+    private String tailNormalisedMedianFile; // output medians
 
   	private ArrayList<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
   
@@ -2503,12 +2490,13 @@ public class Sperm_Analysis
     private PlotWindow rawXFromTailWindow;
     private PlotWindow normXFromTailWindow;
 
-    private double maxDifferenceFromMedian = 1.25; // used to filter the nuclei, and remove those too small, large or irregular to be real
+    private double maxDifferenceFromMedian = 1.5; // used to filter the nuclei, and remove those too small, large or irregular to be real
     private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
 
   	public NucleusCollection(String folder){
   		this.folder = folder;
-      this.medianFile = folder+"logMedians.txt";
+      this.medianFile = folder+"logTipMedians.txt";
+      this.tailNormalisedMedianFile = folder+"logTailMedians.txt";
   	}
 
   	public void addNucleus(Nucleus r){
@@ -2722,7 +2710,7 @@ public class Sperm_Analysis
 
       int totalIterations = nucleiCollection.size();
 
-      IJ.log("Prefiltered: Area: "+medianArea+" ; Perimeter: "+medianPerimeter+" ; Path length: "+medianPathLength+" ; Array length: "+medianArrayLength);
+      IJ.log("Prefiltered: Area: "+(int)medianArea+" ; Perimeter: "+(int)medianPerimeter+" ; Path length: "+(int)medianPathLength+" ; Array length: "+(int)medianArrayLength);
 
       for(int i=0;i<nucleiCollection.size();i++){
         Nucleus n = nucleiCollection.get(i);
@@ -2733,30 +2721,21 @@ public class Sperm_Analysis
 
         if(n.getArea() > maxArea || n.getArea() < minArea ){
           dropNucleus = true;
-          // nucleiCollection.remove(n);
-          // IJ.log("Drop because area");
           area++;
         }
         if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
-           // nucleiCollection.remove(n);
            dropNucleus = true;
-           // IJ.log("Drop because perimeter");
            perim++;
         }
         if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
-           // nucleiCollection.remove(n);
-        	// IJ.log("Drop because path length");
            dropNucleus = true;
            pathlength++;
         }
         if(n.smoothLength > medianArrayLength * maxDifferenceFromMedian || n.smoothLength < medianArrayLength / maxDifferenceFromMedian ){
-           // nucleiCollection.remove(n);
-        	// IJ.log("Drop because array length");
            dropNucleus = true;
            arraylength++;
         }
         if(dropNucleus){
-          // IJ.log("Dropping nucleus: "+n.getPath()+"-"+n.getNucleusNumber());
           this.nucleiCollection.remove(n);
           i--; // the array index automatically shifts to account for the removed nucleus. Compensate to avoid skipping nuclei
         }
@@ -2768,14 +2747,13 @@ public class Sperm_Analysis
       medianArrayLength = this.getMedianArrayLength();
       int afterSize = nucleiCollection.size();
       int removed = beforeSize - afterSize;
-      IJ.log("Postfiltered: Area: "+medianArea+" ; Perimeter: "+medianPerimeter+" ; Path length: "+medianPathLength+" ; Array length: "+medianArrayLength);
+      IJ.log("Postfiltered: Area: "+(int)medianArea+" ; Perimeter: "+(int)medianPerimeter+" ; Path length: "+(int)medianPathLength+" ; Array length: "+(int)medianArrayLength);
       IJ.log("Removed due to size or length issues: "+removed+" nuclei");
-      IJ.log("  Due to area outside bounds "+minArea+"-"+maxArea+": "+area+" nuclei");
-      IJ.log("  Due to perimeteroutside bounds "+minPerim+"-"+maxPerim+": "+perim+" nuclei");
-      IJ.log("  Due to wibbliness >"+maxPathLength+" : "+pathlength+" nuclei");
+      IJ.log("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei");
+      IJ.log("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei");
+      IJ.log("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei");
       IJ.log("  Due to array length: "+arraylength+" nuclei");
       IJ.log("Remaining: "+this.nucleiCollection.size()+" nuclei");
-      // nucleiCollection.trimToSize();
     }
 
     /*
@@ -2861,7 +2839,14 @@ public class Sperm_Analysis
       Write the median angles at each bin to the global log file
     */
 
-    public ArrayList<Double[]> calculateMediansAndQuartilesOfProfile(Map<Double, Collection<Double>> profile){
+    public ArrayList<Double[]> calculateMediansAndQuartilesOfProfile(Map<Double, Collection<Double>> profile, String logFile){
+
+      File f = new File(logFile);
+      if(f.exists()){
+        f.delete();
+      }
+
+      IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", logFile); 
 
       ArrayList<Double[]>  medianResults = new ArrayList<Double[]>(0);
       int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
@@ -2902,7 +2887,7 @@ public class Sperm_Analysis
                         uppQuartiles[m]+"\t"+
                         tenQuartiles[m]+"\t"+
                         ninetyQuartiles[m]+"\t"+
-                        n, this.medianFile);
+                        n, logFile);
             }
           } catch(Exception e){
                IJ.log("Cannot calculate median for "+k+": "+e);
@@ -2958,14 +2943,7 @@ public class Sperm_Analysis
     public void calculateNormalisedMedianLine(){
       // output the final results: calculate median positions
 
-      File f = new File(this.medianFile);
-      if(f.exists()){
-        f.delete();
-      }
-
-      IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.medianFile); 
-
-      ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile(this.normalisedProfiles);
+      ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile(this.normalisedProfiles, this.medianFile );
 
       double[] xmedians        =  getDoubleFromDouble( medians.get(0) );
       double[] ymedians        =  getDoubleFromDouble( medians.get(1) );
@@ -3010,7 +2988,7 @@ public class Sperm_Analysis
 
     public void calculateTailCentredNormalisedMedianLine(){
 
-      ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile(this.normalisedTailCentredProfiles);
+      ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile(this.normalisedTailCentredProfiles, this.tailNormalisedMedianFile);
 
       double[] xmedians        =  getDoubleFromDouble( medians.get(0) );
       double[] ymedians        =  getDoubleFromDouble( medians.get(1) );
@@ -3101,11 +3079,8 @@ public class Sperm_Analysis
       int oldLength = normalisedMedian.length;
       
       double[] newMedianCurve = new double[newLength];
-
       // where in the old curve index is the new curve index?
-
       for (int i=0; i<newLength; i++) {
-
         // we have a point in the new curve.
         // we want to know which points it lay between in the old curve
         double oldIndex = ( (double)i / (double)newLength)*oldLength; // get the frational index position needed
@@ -3113,7 +3088,6 @@ public class Sperm_Analysis
         newMedianCurve[i] = interpolatedMedian;
       }
       return newMedianCurve;
-
     }
 
     /*
@@ -3185,13 +3159,13 @@ public class Sperm_Analysis
 
       // this.rawXFromTipPlot.draw();
       
-      rawXFromTipWindow.noGridLines = false; 
+      rawXFromTipWindow.noGridLines = true; 
       rawXFromTipWindow = rawXFromTipPlot.show();
       
-      normXFromTipWindow.noGridLines = false; 
+      normXFromTipWindow.noGridLines = true; 
       normXFromTipWindow = normXFromTipPlot.show();
       
-      rawXFromTailWindow.noGridLines = false; 
+      rawXFromTailWindow.noGridLines = true; 
       rawXFromTailWindow = rawXFromTailPlot.show();
     }
 
@@ -3407,6 +3381,7 @@ public class Sperm_Analysis
     private void addSignalsToProfileChart(){
       // PlotWindow normXFromTipWindow; normXFromTipPlot
       // for each signal in each nucleus, find index of point. Draw dot at index at y=-30 (for now)
+      // Add the signals to the tip centred profile plot
       normXFromTipPlot.setColor(Color.LIGHT_GRAY);
       normXFromTipPlot.setLineWidth(1);
       normXFromTipPlot.drawLine(0,220,100,220);
@@ -3415,7 +3390,6 @@ public class Sperm_Analysis
       for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
 
         Nucleus n = this.nucleiCollection.get(i);
-
 
         ArrayList<NuclearSignal> redSignals = n.getRedSignals();
         if(redSignals.size()>0){
@@ -3442,6 +3416,43 @@ public class Sperm_Analysis
         }
       }
       normXFromTipWindow.drawPlot(normXFromTipPlot);
+
+      // Add the signals to the tail centred profile plot
+      normXFromTailPlot.setColor(Color.LIGHT_GRAY);
+      normXFromTailPlot.setLineWidth(1);
+      normXFromTailPlot.drawLine(0,220,100,220);
+      normXFromTailPlot.drawLine(0,260,100,260);
+
+      for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
+
+        Nucleus n = this.nucleiCollection.get(i);
+
+
+        ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+        if(redSignals.size()>0){
+
+          ArrayList redPoints = new ArrayList(0);
+          ArrayList yPoints = new ArrayList(0);
+
+          for(int j=0; j<redSignals.size();j++){
+
+            XYPoint border = redSignals.get(j).getClosestBorderPoint();
+            for(int k=0; k<n.smoothLength;k++){
+
+              if(n.smoothedArray[k].overlaps(border)){
+                // IJ.log("Found closest border: "+i+" : "+j);
+                redPoints.add( n.normalisedXPositionsFromTail.get(k) );
+                double yPosition = 220 + ( redSignals.get(j).getFractionalDistance() * 40 ); // make between 220 and 260
+                yPoints.add(yPosition);
+              }
+            }
+          }
+          normXFromTailPlot.setColor(Color.RED);
+          normXFromTailPlot.setLineWidth(2);
+          normXFromTailPlot.addPoints(redPoints, yPoints, Plot.DOT);
+        }
+      }
+      normXFromTailWindow.drawPlot(normXFromTailPlot);
     }
 
     public void exportSignalStats(){
@@ -3502,16 +3513,31 @@ public class Sperm_Analysis
       Plot offsetRawPlot = new Plot("Raw corrected tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
       PlotWindow offsetRawPlotWindow;
 
-      offsetRawPlot.setLimits(-200,200,-50,360);
       offsetRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       offsetRawPlot.setYTicks(true);
       offsetRawPlot.setColor(Color.LIGHT_GRAY);
+
+      double minX = 0;
+      double maxX = 0;
+      for(int i=0;i<this.nucleiCollection.size();i++){
+        double[] xRawCentredOnTail = this.nucleiCollection.get(i).createOffsetRawProfile();
+        if(getMin(xRawCentredOnTail)<minX){
+          minX = getMin(xRawCentredOnTail);
+        }
+        if(getMax(xRawCentredOnTail)>maxX){
+          maxX = getMax(xRawCentredOnTail);
+        }
+      }
+      offsetRawPlot.setLimits( (int) minX-1, (int) maxX+1,-50,360);
      
       for(int i=0;i<this.nucleiCollection.size();i++){
         double[] xRawCentredOnTail = this.nucleiCollection.get(i).createOffsetRawProfile();
         double[] ypoints = this.nucleiCollection.get(i).getInteriorAngles();
+
+        offsetRawPlot.setColor(Color.LIGHT_GRAY);
         offsetRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
       }
+      
       offsetRawPlot.draw();
       offsetRawPlotWindow = offsetRawPlot.show();
       offsetRawPlotWindow.noGridLines = true; // I have no idea why this makes the grid lines appear on work PC, when they appear by default at home
@@ -3529,8 +3555,6 @@ public class Sperm_Analysis
       normXFromTailWindow = normXFromTailPlot.show();
       normXFromTailWindow.drawPlot(normXFromTailPlot);  
     }
-
-
 
     public void exportNuclearStats(){
     
@@ -3550,8 +3574,11 @@ public class Sperm_Analysis
       double[] differences= this.getSquareDifferences();
       String[] paths = this.getNucleusPaths();
 
+
       for(int i=0; i<this.getNucleusCount();i++){
-      	IJ.log("  "+i+" of "+this.getNucleusCount());
+      	int j = i+1;
+        IJ.log("  "+j+" of "+this.getNucleusCount());
+        // progressBar.show(i, this.getNucleusCount());
         IJ.append(  areas[i]+"\t"+
                     perims[i]+"\t"+
                     ferets[i]+"\t"+
@@ -3563,13 +3590,18 @@ public class Sperm_Analysis
         // Include tip, CoM, tail
     		this.nucleiCollection.get(i).printLogFile();
       }
+      // progressBar.hide();
       IJ.log("Export complete");
     }
 
+    /*
+      Draw the features of interest on the images of the nuclei created earlier
+    */
     public void annotateImagesOfNuclei(){
     	IJ.log("Annotating images...");
     	for(int i=0; i<this.getNucleusCount();i++){
-    		IJ.log("  "+i+" of "+this.getNucleusCount());
+        int m = i+1;
+    		IJ.log("  "+m+" of "+this.getNucleusCount());
     		Nucleus n = this.nucleiCollection.get(i);
 
     		// open the image we saved earlier
@@ -3621,7 +3653,10 @@ public class Sperm_Analysis
         if(redSignals.size()>0){
           for(int j=0; j<redSignals.size();j++){
             NuclearSignal s = redSignals.get(j);
+            ip.setLineWidth(3);
             ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+            ip.setLineWidth(1);
+            ip.draw(s.getRoi());
           }
 
         }
@@ -3630,7 +3665,10 @@ public class Sperm_Analysis
         if(redSignals.size()>0){
           for(int j=0; j<greenSignals.size();j++){
             NuclearSignal s = greenSignals.get(j);
+            ip.setLineWidth(3);
             ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+            ip.setLineWidth(1);
+            ip.draw(s.getRoi());
           }
         }
 
@@ -3669,6 +3707,10 @@ public class Sperm_Analysis
       this.perimeter = perimeter;
       this.feret = feret;
       this.centreOfMass = centreOfMass;
+    }
+
+    public Roi getRoi(){
+      return this.roi;
     }
 
     public double getArea(){
