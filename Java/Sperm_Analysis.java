@@ -17,6 +17,7 @@ morphology comparisons
     Mega image & rotations
     Median curve refolding
     Consensus image
+    Correct median repair code
 */
 import ij.IJ;
 import ij.ImagePlus;
@@ -172,7 +173,11 @@ public class Sperm_Analysis
     this.completeCollection.calculateNormalisedMedianLine();
     this.completeCollection.findTailIndexInMedianCurve();
     this.completeCollection.calculateOffsets();
-    this.completeCollection.drawOffsetChart();
+    this.completeCollection.drawRawPositionsFromTailChart();
+    this.completeCollection.createNormalisedTailPositions();
+    this.completeCollection.drawNormalisedPositionsFromTailChart();
+    this.completeCollection.createTailCentredProfileAggregate();
+    this.completeCollection.calculateTailCentredNormalisedMedianLine();
     this.completeCollection.measureNuclearOrganisation();
     this.completeCollection.exportNuclearStats();
     this.completeCollection.annotateImagesOfNuclei();
@@ -222,7 +227,7 @@ public class Sperm_Analysis
     if(f.exists()){
       f.delete();
     }
-    IJ.append("# NORM_X\tANGLE\tNORM_X_FROM_TAIL\tRAW_X_FROM_TAIL", this.logFile);
+    IJ.append("# NORM_X\tANGLE\tRAW_X_FROM_TAIL", this.logFile);
 
     this.failedFile = folderName+"logFailed.txt";
     File g = new File(failedFile);
@@ -375,38 +380,38 @@ public class Sperm_Analysis
     } 
   }
 
-  public void drawProfilePlots(ArrayList rt){
+  // public void drawProfilePlots(ArrayList rt){
 
-  	double[] xpoints = new double[rt.size()];
-    double[] ypoints = new double[rt.size()];
-    double[] xprofile = new double[rt.size()];
-    double[] xCentredOnTail = new double[rt.size()];
-    double[] xRawCentredOnTail = new double[rt.size()];
+  // 	double[] xpoints = new double[rt.size()];
+  //   double[] ypoints = new double[rt.size()];
+  //   double[] xprofile = new double[rt.size()];
+  //   double[] xCentredOnTail = new double[rt.size()];
+  //   double[] xRawCentredOnTail = new double[rt.size()];
 
-    for(int j=0;j<rt.size();j++){
-        double[] d = (double[])rt.get(j);
-        xpoints[j] = d[0];
-        ypoints[j] = d[1];
-        xprofile[j] = j;
-        xCentredOnTail[j] = d[2];
-        xRawCentredOnTail[j] = d[3];
-    }
+  //   for(int j=0;j<rt.size();j++){
+  //       double[] d = (double[])rt.get(j);
+  //       xpoints[j] = d[0];
+  //       ypoints[j] = d[1];
+  //       xprofile[j] = j;
+  //       xCentredOnTail[j] = d[2];
+  //       xRawCentredOnTail[j] = d[3];
+  //   }
 
-    linePlot.setColor(Color.LIGHT_GRAY);
-    linePlot.addPoints(xpoints, ypoints, Plot.LINE);
-    linePlot.draw();
-    plotWindow.drawPlot(linePlot);
+  //   linePlot.setColor(Color.LIGHT_GRAY);
+  //   linePlot.addPoints(xpoints, ypoints, Plot.LINE);
+  //   linePlot.draw();
+  //   plotWindow.drawPlot(linePlot);
 
-    rawProfilePlot.setColor(Color.LIGHT_GRAY);
-    rawProfilePlot.addPoints(xprofile, ypoints, Plot.LINE);
-    rawProfilePlot.draw();
-    rawPlotWindow.drawPlot(rawProfilePlot);
+  //   rawProfilePlot.setColor(Color.LIGHT_GRAY);
+  //   rawProfilePlot.addPoints(xprofile, ypoints, Plot.LINE);
+  //   rawProfilePlot.draw();
+  //   rawPlotWindow.drawPlot(rawProfilePlot);
 
-    tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
-    tailCentredRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
-    tailCentredRawPlot.draw();
-    tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
-  }
+  //   tailCentredRawPlot.setColor(Color.LIGHT_GRAY);
+  //   tailCentredRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
+  //   tailCentredRawPlot.draw();
+  //   tailCentredRawPlotWindow.drawPlot(tailCentredRawPlot);
+  // }
 
   /*
     Within a given image, look for nuclei using the particle analyser.
@@ -591,26 +596,25 @@ public class Sperm_Analysis
      
     for (int i=0; i<roiArray.smoothLength;i++ ) {
         double normalisedX = ((double)i/(double)roiArray.smoothLength)*100; // normalise to 100 length
-        double normalisedXFromTail = normalisedX - normalisedTailIndex; // offset the normalised array based on the calculated tail position
+        // double normalisedXFromTail = normalisedX - normalisedTailIndex; // offset the normalised array based on the calculated tail position
         double rawXFromTail = (double)i - (double)consensusTailIndex; // offset the raw array based on the calculated tail position
 
         roiArray.normalisedXPositionsFromTip.add(normalisedX);
-        roiArray.normalisedXPositionsFromTail.add(normalisedXFromTail);
+        // roiArray.normalisedXPositionsFromTail.add(normalisedXFromTail);
         roiArray.rawXPositionsFromTail.add(rawXFromTail);
         roiArray.rawXPositionsFromTip.add( (double)i);
 
-        double[] d = new double[] { normalisedX, 
-        														roiArray.smoothedArray[i].getInteriorAngle(), 
-        														normalisedXFromTail, 
-        														rawXFromTail };
+        // double[] d = new double[] { normalisedX, 
+        // 														roiArray.smoothedArray[i].getInteriorAngle(), 
+        // 														normalisedXFromTail, 
+        // 														rawXFromTail };
         
         IJ.append(normalisedX+"\t"+
         					roiArray.smoothedArray[i].getInteriorAngle()+"\t"+
-        					normalisedXFromTail+"\t"+
         					rawXFromTail, this.logFile);        
 
         // calculate the path length
-        XYPoint thisPoint = new XYPoint(d[0],d[1]);
+        XYPoint thisPoint = new XYPoint(normalisedX,roiArray.smoothedArray[i].getInteriorAngle());
         pathLength += thisPoint.getLengthTo(prevPoint);
         prevPoint = thisPoint;
     }
@@ -1098,7 +1102,7 @@ public class Sperm_Analysis
 
     // these will replace measurementResults eventually
     private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
-    private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
+    private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
     private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
     private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
     
@@ -1139,10 +1143,10 @@ public class Sperm_Analysis
       return d;
     }
 
-    public double[] getNormalisedXPositionsFromTail(){
-      double[] d = new double[normalisedXPositionsFromTail.size()];
-      for(int i=0;i<normalisedXPositionsFromTip.size();i++){
-        d[i] = normalisedXPositionsFromTail.get(i);
+    public double[] getNormalisedYPositionsFromTail(){
+      double[] d = new double[normalisedYPositionsFromTail.size()];
+      for(int i=0;i<normalisedYPositionsFromTail.size();i++){
+        d[i] = normalisedYPositionsFromTail.get(i);
       }
       return d;
     }
@@ -1159,6 +1163,17 @@ public class Sperm_Analysis
       double[] d = new double[rawXPositionsFromTip.size()];
       for(int i=0;i<rawXPositionsFromTip.size();i++){
         d[i] = rawXPositionsFromTip.get(i);
+      }
+      return d;
+    }
+
+    /* 
+      Fetch the angles in the smoothed array; will be ordered from the tip
+    */
+    public double[] getAngles(){
+      double[] d = new double[this.smoothLength];
+      for(int i=0;i<this.smoothLength;i++){
+        d[i] = this.smoothedArray[i].getInteriorAngle();
       }
       return d;
     }
@@ -1531,6 +1546,26 @@ public class Sperm_Analysis
       if(tempSmooth.length != this.smoothedArray.length){
         IJ.log("    Unequal array size");
       }     
+    }
+
+    /*
+      To create the normalised tail-centred index, we want to take the 
+      normalised tip-centred index, and move the tail index position to 
+      the start. 
+    */
+    public void createNormalisedYPositionsFromTail(){
+
+      double[] tipCentredAngles = this.getAngles();
+      int tailIndex = this.getTailIndex();
+
+      double[] tempArray = new double[tipCentredAngles.length];
+
+      System.arraycopy(tipCentredAngles, tailIndex, tempArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
+      System.arraycopy(tipCentredAngles, 0, tempArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
+
+      for(int i=0; i<this.smoothLength;i++){
+          this.normalisedYPositionsFromTail.add(tempArray[i]);
+      }
     }
 
     /* 
@@ -2161,18 +2196,18 @@ public class Sperm_Analysis
       return ypoints;
     }
 
-    public double[] createOffsetNormalisedProfile(){
+    // public double[] createOffsetNormalisedProfile(){
 
-      double offset = this.offsetForTail;
+    //   double offset = this.offsetForTail;
 
-      double[] xNormCentredOnTail = this.getNormalisedXPositionsFromTail();
-      double[] offsetX = new double[xNormCentredOnTail.length];
+    //   double[] xNormCentredOnTail = this.getNormalisedXPositionsFromTail();
+    //   double[] offsetX = new double[xNormCentredOnTail.length];
 
-      for(int j=0;j<xNormCentredOnTail.length;j++){
-        offsetX[j] = xNormCentredOnTail[j]+offset;
-      }
-      return offsetX;
-    }
+    //   for(int j=0;j<xNormCentredOnTail.length;j++){
+    //     offsetX[j] = xNormCentredOnTail[j]+offset;
+    //   }
+    //   return offsetX;
+    // }
 
     /*
       For the given nucleus index:
@@ -2516,10 +2551,12 @@ public class Sperm_Analysis
   	private ArrayList<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
   
   	private double[] normalisedMedian; // this is an array of 200 angles
+    private double[] normalisedTailCentredMedian; // this is an array of 200 angles
 
   	private boolean squareDifferencesCalculated = false;
 
     private Map<Double, Collection<Double>> normalisedProfiles = new HashMap<Double, Collection<Double>>();
+    private Map<Double, Collection<Double>> normalisedTailCentredProfiles = new HashMap<Double, Collection<Double>>();
 
   	private int offsetCount = 20;
   	private int medianLineTailIndex;
@@ -2527,10 +2564,12 @@ public class Sperm_Analysis
     private Plot rawXFromTipPlot;
     private Plot normXFromTipPlot;
     private Plot rawXFromTailPlot;
+    private Plot normXFromTailPlot;
 
     private PlotWindow rawXFromTipWindow;
     private PlotWindow normXFromTipWindow;
     private PlotWindow rawXFromTailWindow;
+    private PlotWindow normXFromTailWindow;
 
     private double maxDifferenceFromMedian = 1.25; // used to filter the nuclei, and remove those too small, large or irregular to be real
     private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
@@ -2610,6 +2649,12 @@ public class Sperm_Analysis
         d[i] = ( (double) nucleiCollection.get(i).getTailIndex() / (double) nucleiCollection.get(i).smoothLength ) * 100;
       }
       return d;
+    }
+
+    public void createNormalisedTailPositions(){
+      for(int i=0;i<nucleiCollection.size();i++){
+        nucleiCollection.get(i).createNormalisedYPositionsFromTail();
+      }
     }
 
     public double[] getSquareDifferences(){
@@ -2843,9 +2888,42 @@ public class Sperm_Analysis
       }
     }
 
+    public void createTailCentredProfileAggregate(){
+
+      for(int i=0;i<nucleiCollection.size();i++){
+
+        ArrayList<Double> normalisedXValues = nucleiCollection.get(i).normalisedXPositionsFromTip;
+        double[] yValues = nucleiCollection.get(i).getNormalisedYPositionsFromTail();
+        // XYPoint[] yValues = nucleiCollection.get(i).smoothedArray;
+
+        for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
+
+          for(int j=0;j<normalisedXValues.size();j++){
+           
+            if( normalisedXValues.get(j) > k && normalisedXValues.get(j) < k+PROFILE_INCREMENT){
+
+              Collection<Double> values = normalisedTailCentredProfiles.get(k);
+              
+              if (values==null) { // this this profile increment has not yet been encountered, create it
+                  values = new ArrayList<Double>();
+                  normalisedTailCentredProfiles.put(k, values);
+              }
+              values.add(yValues[j]);
+            }
+          }
+        }        
+      }
+    }
+
+
+
   	public void setNormalisedMedianLine(double[] d){
   		this.normalisedMedian = d;
   	}
+
+    public void setTailCentredNormalisedMedianLine(double[] d){
+      this.normalisedTailCentredMedian = d;
+    }
 
     /*
       Write the median angles at each bin to the global log file
@@ -2997,6 +3075,98 @@ public class Sperm_Analysis
       // rawProfilePlot.drawLine(rawTailQ50, 280, rawTailQ50, 320);
     }
 
+    public void calculateTailCentredNormalisedMedianLine(){
+
+      int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
+      double[] xmedians = new double[arraySize];
+      double[] ymedians = new double[arraySize];
+      double[] lowQuartiles = new double[arraySize];
+      double[] uppQuartiles = new double[arraySize];
+      double[] tenQuartiles = new double[arraySize];
+      double[] ninetyQuartiles = new double[arraySize];
+
+      int m = 0;
+      for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
+
+        try{
+            Collection<Double> values = this.normalisedTailCentredProfiles.get(k);
+
+            if(values.size()> 0){
+              Double[] d = values.toArray(new Double[0]);
+              int n = d.length;
+
+              Arrays.sort(d);
+              double median = quartile(d, 50.0);
+              double q1     = quartile(d, 25.0);
+              double q3     = quartile(d, 75.0);
+              double q10    = quartile(d, 10.0);
+              double q90    = quartile(d, 90.0);
+             
+              xmedians[m] = k;
+              ymedians[m] = median;
+              lowQuartiles[m] = q1;
+              uppQuartiles[m] = q3;
+              tenQuartiles[m] = q10;
+              ninetyQuartiles[m] = q90;
+
+              IJ.append(xmedians[m]+"\t"+
+                        ymedians[m]+"\t"+
+                        lowQuartiles[m]+"\t"+
+                        uppQuartiles[m]+"\t"+
+                        tenQuartiles[m]+"\t"+
+                        ninetyQuartiles[m]+"\t"+
+                        n, this.medianFile);
+            }
+          } catch(Exception e){
+               IJ.log("Cannot calculate median for "+k+": "+e);
+               xmedians[m] = k;
+               ymedians[m] = 0;
+               lowQuartiles[m] = 0;
+               uppQuartiles[m] = 0;
+               tenQuartiles[m] = 0;
+               ninetyQuartiles[m] = 0;
+          } finally {
+            m++;
+        }
+      }
+
+      // repair medians with no points by interpolation
+      for(int i=0;i<xmedians.length;i++){
+        if(ymedians[i] == 0 && lowQuartiles[i] == 0 && uppQuartiles[i] == 0){
+          int replacementLowerIndex = wrapIndex(i-1, xmedians.length);
+          int replacementUpperIndex = wrapIndex(i+1, xmedians.length);
+          if(ymedians[replacementLowerIndex] == 0 && lowQuartiles[replacementLowerIndex] == 0 && uppQuartiles[replacementLowerIndex] == 0){
+            replacementLowerIndex = wrapIndex(i-2, xmedians.length);
+          }
+          if(ymedians[replacementUpperIndex] == 0 && lowQuartiles[replacementUpperIndex] == 0 && uppQuartiles[replacementUpperIndex] == 0){
+            replacementUpperIndex = wrapIndex(i+2, xmedians.length);
+          }
+
+          ymedians[i]        = ymedians[replacementLowerIndex]        + ymedians[replacementUpperIndex]        / 2;
+          lowQuartiles[i]    = lowQuartiles[replacementLowerIndex]    + lowQuartiles[replacementUpperIndex]    / 2;
+          uppQuartiles[i]    = uppQuartiles[replacementLowerIndex]    + uppQuartiles[replacementUpperIndex]    / 2;
+          tenQuartiles[i]    = tenQuartiles[replacementLowerIndex]    + tenQuartiles[replacementUpperIndex]    / 2;
+          ninetyQuartiles[i] = ninetyQuartiles[replacementLowerIndex] + ninetyQuartiles[replacementUpperIndex] / 2;
+
+          IJ.log("Repaired medians at "+i+" with values between "+replacementLowerIndex+" and "+replacementUpperIndex);
+        }
+      }
+
+      setTailCentredNormalisedMedianLine(ymedians);
+
+
+      // add the median lines to the chart
+      normXFromTailPlot.setColor(Color.BLACK);
+      normXFromTailPlot.setLineWidth(3);
+      normXFromTailPlot.addPoints(xmedians, ymedians, Plot.LINE);
+      normXFromTailPlot.setColor(Color.DARK_GRAY);
+      normXFromTailPlot.setLineWidth(2);
+      normXFromTailPlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+      normXFromTailPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
+
+      normXFromTailWindow.drawPlot(normXFromTailPlot);
+    }
+
 
     /*
       Calculate the offsets needed to corectly assign the tail positions
@@ -3089,14 +3259,14 @@ public class Sperm_Analysis
 
       this.rawXFromTipPlot = new Plot( "Raw tip-centred plot",
                                   "Position",
-                                  "Angle");
+                                  "Angle", Plot.Y_GRID | Plot.X_GRID);
       rawXFromTipPlot.setLimits(0,this.getMaxRawXFromTips(),-50,360);
       rawXFromTipPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       rawXFromTipPlot.setYTicks(true);
 
       normXFromTipPlot = new Plot("Normalised tip-centred plot",
                                   "Position",
-                                  "Angle");
+                                  "Angle", Plot.Y_GRID | Plot.X_GRID);
       normXFromTipPlot.setLimits(0,100,-50,360);
       normXFromTipPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       normXFromTipPlot.setYTicks(true);
@@ -3105,12 +3275,18 @@ public class Sperm_Analysis
 
       this.rawXFromTailPlot = new Plot( "Raw tail-centred plot",
                                   "Position",
-                                  "Angle");
+                                  "Angle", Plot.Y_GRID | Plot.X_GRID);
       rawXFromTailPlot.setLimits( this.getMinRawXFromTails(),
                                   this.getMaxRawXFromTails(),
                                   -50,360);
       rawXFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       rawXFromTailPlot.setYTicks(true);
+
+      this.normXFromTailPlot = new Plot("Normalised tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
+      normXFromTailPlot.setLimits(0,100,-50,360);
+      normXFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+      normXFromTailPlot.setYTicks(true);
+      normXFromTailPlot.setColor(Color.LIGHT_GRAY);
     }
 
     /*
@@ -3143,8 +3319,14 @@ public class Sperm_Analysis
       }
 
       // this.rawXFromTipPlot.draw();
+      
+      rawXFromTipWindow.noGridLines = false; 
       rawXFromTipWindow = rawXFromTipPlot.show();
+      
+      normXFromTipWindow.noGridLines = false; 
       normXFromTipWindow = normXFromTipPlot.show();
+      
+      rawXFromTailWindow.noGridLines = false; 
       rawXFromTailWindow = rawXFromTailPlot.show();
     }
 
@@ -3450,9 +3632,9 @@ public class Sperm_Analysis
       }
     }
 
-    public void drawOffsetChart(){
+    public void drawRawPositionsFromTailChart(){
 
-      Plot offsetRawPlot = new Plot("Offset tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
+      Plot offsetRawPlot = new Plot("Raw corrected tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
       PlotWindow offsetRawPlotWindow;
 
       offsetRawPlot.setLimits(-200,200,-50,360);
@@ -3470,6 +3652,20 @@ public class Sperm_Analysis
       offsetRawPlotWindow.noGridLines = true; // I have no idea why this makes the grid lines appear on work PC, when they appear by default at home
       offsetRawPlotWindow.drawPlot(offsetRawPlot);  
     }
+
+    public void drawNormalisedPositionsFromTailChart(){
+     
+      for(int i=0;i<this.nucleiCollection.size();i++){
+        double[] xpoints = this.nucleiCollection.get(i).getNormalisedXPositionsFromTip();
+        double[] ypoints = this.nucleiCollection.get(i).getNormalisedYPositionsFromTail();
+        normXFromTailPlot.addPoints(xpoints, ypoints, Plot.LINE);
+      }
+      normXFromTailPlot.draw();
+      normXFromTailWindow = normXFromTailPlot.show();
+      normXFromTailWindow.drawPlot(normXFromTailPlot);  
+    }
+
+
 
     public void exportNuclearStats(){
     
