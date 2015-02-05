@@ -245,74 +245,6 @@ public class Sperm_Analysis
   }
 
   /*
-    Write the median angles at each bin to the global log file
-  */
-  public void exportMedians(){
-
-
-    // linePlot.setColor(Color.BLACK);
-    // linePlot.setLineWidth(3);
-    // linePlot.addPoints(xmedians, ymedians, Plot.LINE);
-    // linePlot.setColor(Color.DARK_GRAY);
-    // linePlot.setLineWidth(2);
-    // linePlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-    // linePlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
-
-    // // handle the normalised tail position mapping
-    // int[] tails = completeCollection.getTailIndexes();
-    // double[] xTails = new double[tails.length];
-    // for(int i=0; i<tails.length; i++){
-    //   xTails[i] = (double)tails[i];
-    // }
-
-    // double[] yTails = new double[tails.length];
-    // Arrays.fill(yTails, 300); // all dots at y=300
-    // linePlot.setColor(Color.LIGHT_GRAY);
-    // linePlot.addPoints(xTails, yTails, Plot.DOT);
-
-    // // median tail positions
-    // // int[] tails = completeCollection.getTailIndexes();
-    // // Double[] tails = tailIndexArray.toArray(new Double[0]);
-    // double tailQ50 = quartile(xTails, 50);
-    // double tailQ25 = quartile(xTails, 25);
-    // double tailQ75 = quartile(xTails, 75);
-
-    // linePlot.setColor(Color.DARK_GRAY);
-    // linePlot.setLineWidth(1);
-    // linePlot.drawLine(tailQ25, 320, tailQ75, 320);
-    // linePlot.drawLine(tailQ25, 280, tailQ75, 280);
-    // linePlot.drawLine(tailQ25, 280, tailQ25, 320);
-    // linePlot.drawLine(tailQ75, 280, tailQ75, 320);
-    // linePlot.drawLine(tailQ50, 280, tailQ50, 320);
-
-
-    // // handle raw tail position mapping
-
-    // double[] rawXTails = new double[rawTailIndexArray.size()];
-    // for(int i=0; i<rawTailIndexArray.size(); i++){
-    //   rawXTails[i] = (double)rawTailIndexArray.get(i);
-    // }
-    // rawProfilePlot.setColor(Color.LIGHT_GRAY);
-    // rawProfilePlot.addPoints(rawXTails, yTails, Plot.DOT);
-
-    // Double[] rawTails = rawTailIndexArray.toArray(new Double[0]);
-    // double rawTailQ50 = quartile(rawTails, 50);
-    // double rawTailQ25 = quartile(rawTails, 25);
-    // double rawTailQ75 = quartile(rawTails, 75);
-
-    // rawProfilePlot.setColor(Color.DARK_GRAY);
-    // rawProfilePlot.setLineWidth(1);
-    // rawProfilePlot.drawLine(rawTailQ25, 320, rawTailQ75, 320);
-    // rawProfilePlot.drawLine(rawTailQ25, 280, rawTailQ75, 280);
-    // rawProfilePlot.drawLine(rawTailQ25, 280, rawTailQ25, 320);
-    // rawProfilePlot.drawLine(rawTailQ75, 280, rawTailQ75, 320);
-    // rawProfilePlot.drawLine(rawTailQ50, 280, rawTailQ50, 320);
-
-    // this.completeCollection.setNormalisedMedianLine(ymedians);
-
-  }
-
-  /*
     Calculate the <lowerPercent> quartile from a Double[] array
   */
   public static double quartile(double[] values, double lowerPercent) {
@@ -2928,30 +2860,23 @@ public class Sperm_Analysis
     /*
       Write the median angles at each bin to the global log file
     */
-    public void calculateNormalisedMedianLine(){
-      // output the final results: calculate median positions
-      // IJ.append("", this.medianFile);
 
-      File f = new File(this.medianFile);
-      if(f.exists()){
-        f.delete();
-      }
+    public ArrayList<Double[]> calculateMediansAndQuartilesOfProfile(Map<Double, Collection<Double>> profile){
 
-      IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.medianFile); 
-
+      ArrayList<Double[]>  medianResults = new ArrayList<Double[]>(0);
       int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
-      double[] xmedians = new double[arraySize];
-      double[] ymedians = new double[arraySize];
-      double[] lowQuartiles = new double[arraySize];
-      double[] uppQuartiles = new double[arraySize];
-      double[] tenQuartiles = new double[arraySize];
-      double[] ninetyQuartiles = new double[arraySize];
+      Double[] xmedians = new Double[arraySize];
+      Double[] ymedians = new Double[arraySize];
+      Double[] lowQuartiles = new Double[arraySize];
+      Double[] uppQuartiles = new Double[arraySize];
+      Double[] tenQuartiles = new Double[arraySize];
+      Double[] ninetyQuartiles = new Double[arraySize];
 
       int m = 0;
       for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
 
         try{
-            Collection<Double> values = this.normalisedProfiles.get(k);
+            Collection<Double> values = profile.get(k);
 
             if(values.size()> 0){
               Double[] d = values.toArray(new Double[0]);
@@ -2982,11 +2907,11 @@ public class Sperm_Analysis
           } catch(Exception e){
                IJ.log("Cannot calculate median for "+k+": "+e);
                xmedians[m] = k;
-               ymedians[m] = 0;
-               lowQuartiles[m] = 0;
-               uppQuartiles[m] = 0;
-               tenQuartiles[m] = 0;
-               ninetyQuartiles[m] = 0;
+               ymedians[m] = 0.0;
+               lowQuartiles[m] = 0.0;
+               uppQuartiles[m] = 0.0;
+               tenQuartiles[m] = 0.0;
+               ninetyQuartiles[m] = 0.0;
           } finally {
             m++;
         }
@@ -2994,28 +2919,62 @@ public class Sperm_Analysis
 
       // repair medians with no points by interpolation
       for(int i=0;i<xmedians.length;i++){
-      	if(ymedians[i] == 0 && lowQuartiles[i] == 0 && uppQuartiles[i] == 0){
-      		int replacementLowerIndex = wrapIndex(i-1, xmedians.length);
-      		int replacementUpperIndex = wrapIndex(i+1, xmedians.length);
-          if(ymedians[replacementLowerIndex] == 0 && lowQuartiles[replacementLowerIndex] == 0 && uppQuartiles[replacementLowerIndex] == 0){
-            replacementLowerIndex = wrapIndex(i-2, xmedians.length);
-          }
-          if(ymedians[replacementUpperIndex] == 0 && lowQuartiles[replacementUpperIndex] == 0 && uppQuartiles[replacementUpperIndex] == 0){
-            replacementUpperIndex = wrapIndex(i+2, xmedians.length);
-          }
+        if(ymedians[i] == 0 && lowQuartiles[i] == 0 && uppQuartiles[i] == 0){
 
-      		ymedians[i]        = ymedians[replacementLowerIndex]        + ymedians[replacementUpperIndex]        / 2;
-      		lowQuartiles[i]    = lowQuartiles[replacementLowerIndex]    + lowQuartiles[replacementUpperIndex]    / 2;
-      		uppQuartiles[i]    = uppQuartiles[replacementLowerIndex]    + uppQuartiles[replacementUpperIndex]    / 2;
-          tenQuartiles[i]    = tenQuartiles[replacementLowerIndex]    + tenQuartiles[replacementUpperIndex]    / 2;
-      		ninetyQuartiles[i] = ninetyQuartiles[replacementLowerIndex] + ninetyQuartiles[replacementUpperIndex] / 2;
+          int replacementIndex = 0;
 
-          IJ.log("Repaired medians at "+i+" with values between "+replacementLowerIndex+" and "+replacementUpperIndex);
-      	}
+          if(xmedians[i]<1)
+            replacementIndex = i+1;
+          if(xmedians[i]>99)
+            replacementIndex = i-1;
+
+          ymedians[i]        = ymedians[replacementIndex]    ;
+          lowQuartiles[i]    = lowQuartiles[replacementIndex];
+          uppQuartiles[i]    = uppQuartiles[replacementIndex];
+          tenQuartiles[i]    = tenQuartiles[replacementIndex];
+          ninetyQuartiles[i] = ninetyQuartiles[replacementIndex];
+
+          IJ.log("Repaired medians at "+i+" with values from  "+replacementIndex);
+        }
       }
 
-      setNormalisedMedianLine(ymedians);
+      medianResults.add(xmedians);
+      medianResults.add(ymedians);
+      medianResults.add(lowQuartiles);
+      medianResults.add(uppQuartiles);
+      medianResults.add(tenQuartiles);
+      medianResults.add(ninetyQuartiles);
+      return medianResults;
+    }
 
+    private double[] getDoubleFromDouble(Double[] d){
+      double[] results = new double[d.length];
+      for(int i=0;i<d.length;i++){
+        results[i] = d[i];
+      }
+      return results;
+    }
+
+    public void calculateNormalisedMedianLine(){
+      // output the final results: calculate median positions
+
+      File f = new File(this.medianFile);
+      if(f.exists()){
+        f.delete();
+      }
+
+      IJ.append("# X_POSITION\tANGLE_MEDIAN\tQ25\tQ7\tQ10\tQ90\tNUMBER_OF_POINTS", this.medianFile); 
+
+      ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile(this.normalisedProfiles);
+
+      double[] xmedians        =  getDoubleFromDouble( medians.get(0) );
+      double[] ymedians        =  getDoubleFromDouble( medians.get(1) );
+      double[] lowQuartiles    =  getDoubleFromDouble( medians.get(2) );
+      double[] uppQuartiles    =  getDoubleFromDouble( medians.get(3) );
+      double[] tenQuartiles    =  getDoubleFromDouble( medians.get(4) );
+      double[] ninetyQuartiles =  getDoubleFromDouble( medians.get(5) );
+
+      setNormalisedMedianLine(ymedians);
 
       // add the median lines to the chart
       normXFromTipPlot.setColor(Color.BLACK);
@@ -3028,10 +2987,6 @@ public class Sperm_Analysis
 
       // handle the normalised tail position mapping
       double[] xTails = this.getNormalisedTailIndexes();
-      // double[] xTails = new double[tails.length];
-      // for(int i=0; i<tails.length; i++){
-      //   xTails[i] = (double)tails[i];
-      // }
 
       double[] yTails = new double[xTails.length];
       Arrays.fill(yTails, 300); // all dots at y=300
@@ -3051,109 +3006,20 @@ public class Sperm_Analysis
       normXFromTipPlot.drawLine(tailQ75, 280, tailQ75, 320);
       normXFromTipPlot.drawLine(tailQ50, 280, tailQ50, 320);
       normXFromTipWindow.drawPlot(normXFromTipPlot);
-
-      // handle raw tail position mapping
-
-      // double[] rawXTails = new double[rawTailIndexArray.size()];
-      // for(int i=0; i<rawTailIndexArray.size(); i++){
-      //   rawXTails[i] = (double)rawTailIndexArray.get(i);
-      // }
-      // rawProfilePlot.setColor(Color.LIGHT_GRAY);
-      // rawProfilePlot.addPoints(rawXTails, yTails, Plot.DOT);
-
-      // Double[] rawTails = rawTailIndexArray.toArray(new Double[0]);
-      // double rawTailQ50 = quartile(rawTails, 50);
-      // double rawTailQ25 = quartile(rawTails, 25);
-      // double rawTailQ75 = quartile(rawTails, 75);
-
-      // rawProfilePlot.setColor(Color.DARK_GRAY);
-      // rawProfilePlot.setLineWidth(1);
-      // rawProfilePlot.drawLine(rawTailQ25, 320, rawTailQ75, 320);
-      // rawProfilePlot.drawLine(rawTailQ25, 280, rawTailQ75, 280);
-      // rawProfilePlot.drawLine(rawTailQ25, 280, rawTailQ25, 320);
-      // rawProfilePlot.drawLine(rawTailQ75, 280, rawTailQ75, 320);
-      // rawProfilePlot.drawLine(rawTailQ50, 280, rawTailQ50, 320);
     }
 
     public void calculateTailCentredNormalisedMedianLine(){
 
-      int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
-      double[] xmedians = new double[arraySize];
-      double[] ymedians = new double[arraySize];
-      double[] lowQuartiles = new double[arraySize];
-      double[] uppQuartiles = new double[arraySize];
-      double[] tenQuartiles = new double[arraySize];
-      double[] ninetyQuartiles = new double[arraySize];
+      ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile(this.normalisedTailCentredProfiles);
 
-      int m = 0;
-      for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
-
-        try{
-            Collection<Double> values = this.normalisedTailCentredProfiles.get(k);
-
-            if(values.size()> 0){
-              Double[] d = values.toArray(new Double[0]);
-              int n = d.length;
-
-              Arrays.sort(d);
-              double median = quartile(d, 50.0);
-              double q1     = quartile(d, 25.0);
-              double q3     = quartile(d, 75.0);
-              double q10    = quartile(d, 10.0);
-              double q90    = quartile(d, 90.0);
-             
-              xmedians[m] = k;
-              ymedians[m] = median;
-              lowQuartiles[m] = q1;
-              uppQuartiles[m] = q3;
-              tenQuartiles[m] = q10;
-              ninetyQuartiles[m] = q90;
-
-              IJ.append(xmedians[m]+"\t"+
-                        ymedians[m]+"\t"+
-                        lowQuartiles[m]+"\t"+
-                        uppQuartiles[m]+"\t"+
-                        tenQuartiles[m]+"\t"+
-                        ninetyQuartiles[m]+"\t"+
-                        n, this.medianFile);
-            }
-          } catch(Exception e){
-               IJ.log("Cannot calculate median for "+k+": "+e);
-               xmedians[m] = k;
-               ymedians[m] = 0;
-               lowQuartiles[m] = 0;
-               uppQuartiles[m] = 0;
-               tenQuartiles[m] = 0;
-               ninetyQuartiles[m] = 0;
-          } finally {
-            m++;
-        }
-      }
-
-      // repair medians with no points by interpolation
-      for(int i=0;i<xmedians.length;i++){
-        if(ymedians[i] == 0 && lowQuartiles[i] == 0 && uppQuartiles[i] == 0){
-          int replacementLowerIndex = wrapIndex(i-1, xmedians.length);
-          int replacementUpperIndex = wrapIndex(i+1, xmedians.length);
-          if(ymedians[replacementLowerIndex] == 0 && lowQuartiles[replacementLowerIndex] == 0 && uppQuartiles[replacementLowerIndex] == 0){
-            replacementLowerIndex = wrapIndex(i-2, xmedians.length);
-          }
-          if(ymedians[replacementUpperIndex] == 0 && lowQuartiles[replacementUpperIndex] == 0 && uppQuartiles[replacementUpperIndex] == 0){
-            replacementUpperIndex = wrapIndex(i+2, xmedians.length);
-          }
-
-          ymedians[i]        = ymedians[replacementLowerIndex]        + ymedians[replacementUpperIndex]        / 2;
-          lowQuartiles[i]    = lowQuartiles[replacementLowerIndex]    + lowQuartiles[replacementUpperIndex]    / 2;
-          uppQuartiles[i]    = uppQuartiles[replacementLowerIndex]    + uppQuartiles[replacementUpperIndex]    / 2;
-          tenQuartiles[i]    = tenQuartiles[replacementLowerIndex]    + tenQuartiles[replacementUpperIndex]    / 2;
-          ninetyQuartiles[i] = ninetyQuartiles[replacementLowerIndex] + ninetyQuartiles[replacementUpperIndex] / 2;
-
-          IJ.log("Repaired medians at "+i+" with values between "+replacementLowerIndex+" and "+replacementUpperIndex);
-        }
-      }
+      double[] xmedians        =  getDoubleFromDouble( medians.get(0) );
+      double[] ymedians        =  getDoubleFromDouble( medians.get(1) );
+      double[] lowQuartiles    =  getDoubleFromDouble( medians.get(2) );
+      double[] uppQuartiles    =  getDoubleFromDouble( medians.get(3) );
+      double[] tenQuartiles    =  getDoubleFromDouble( medians.get(4) );
+      double[] ninetyQuartiles =  getDoubleFromDouble( medians.get(5) );
 
       setTailCentredNormalisedMedianLine(ymedians);
-
 
       // add the median lines to the chart
       normXFromTailPlot.setColor(Color.BLACK);
@@ -3166,7 +3032,6 @@ public class Sperm_Analysis
 
       normXFromTailWindow.drawPlot(normXFromTailPlot);
     }
-
 
     /*
       Calculate the offsets needed to corectly assign the tail positions
