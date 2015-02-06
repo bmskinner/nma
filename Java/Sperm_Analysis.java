@@ -19,6 +19,7 @@ morphology comparisons
     Find nucleus closest to the median curve as template as alternative to refolding
     Add tail detection by orthogonal to narrowest point
     Get measure of consistency in tail predictions; add as filter
+    Add distance across CoM profile for comparisons
 */
 import ij.IJ;
 import ij.ImagePlus;
@@ -2330,14 +2331,10 @@ public class Sperm_Analysis
 
         for(int i=0;i<redSignals.size();i++){
           NuclearSignal n = redSignals.get(i);
-
-          float[] xpoints = { (float) this.spermTail.getX(), (float) this.centreOfMass.getX(), (float) n.centreOfMass.getX()};
-          float[] ypoints = { (float) this.spermTail.getY(), (float) this.centreOfMass.getY(), (float) n.centreOfMass.getY()};
-          PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-          double angle = roi.getAngle();
+          double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
 
           // hook or hump?
-          if(hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  ){
+          if( this.isHookSide(n.getCentreOfMass()) ){ // hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  
             angle = 360 - angle;
           }
 
@@ -2350,14 +2347,10 @@ public class Sperm_Analysis
 
         for(int i=0;i<greenSignals.size();i++){
           NuclearSignal n = greenSignals.get(i);
-
-          float[] xpoints = { (float) this.spermTail.getX(), (float) this.centreOfMass.getX(), (float) n.centreOfMass.getX()};
-          float[] ypoints = { (float) this.spermTail.getY(), (float) this.centreOfMass.getY(), (float) n.centreOfMass.getY()};
-          PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-          double angle = roi.getAngle();
+          double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
 
           // hook or hump?
-          if(hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  ){
+          if( this.isHookSide(n.getCentreOfMass()) ){
             angle = 360 - angle;
           }
 
@@ -3207,6 +3200,10 @@ public class Sperm_Analysis
       rawXFromTipPlot.setLimits(0,this.getMaxRawXFromTips(),-50,360);
       rawXFromTipPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       rawXFromTipPlot.setYTicks(true);
+      rawXFromTipPlot.setColor(Color.BLACK);
+      rawXFromTipPlot.drawLine(0, 180, this.getMaxRawXFromTips(), 180); 
+      rawXFromTipPlot.setColor(Color.LIGHT_GRAY);
+      
 
       normXFromTipPlot = new Plot("Normalised tip-centred plot",
                                   "Position",
@@ -3214,7 +3211,9 @@ public class Sperm_Analysis
       normXFromTipPlot.setLimits(0,100,-50,360);
       normXFromTipPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       normXFromTipPlot.setYTicks(true);
-      normXFromTipPlot.setColor(Color.  LIGHT_GRAY);
+      normXFromTipPlot.setColor(Color.BLACK);
+      normXFromTipPlot.drawLine(0, 180, 100, 180); 
+      normXFromTipPlot.setColor(Color.LIGHT_GRAY);
 
 
       this.rawXFromTailPlot = new Plot( "Raw tail-centred plot",
@@ -3225,11 +3224,16 @@ public class Sperm_Analysis
                                   -50,360);
       rawXFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       rawXFromTailPlot.setYTicks(true);
+      rawXFromTailPlot.setColor(Color.BLACK);
+      rawXFromTailPlot.drawLine(this.getMinRawXFromTails(), 180, this.getMaxRawXFromTails(), 180); 
+      rawXFromTailPlot.setColor(Color.LIGHT_GRAY);
 
       this.normXFromTailPlot = new Plot("Normalised tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
       normXFromTailPlot.setLimits(0,100,-50,360);
       normXFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       normXFromTailPlot.setYTicks(true);
+      normXFromTailPlot.setColor(Color.BLACK);
+      normXFromTailPlot.drawLine(0, 180, 100, 180); 
       normXFromTailPlot.setColor(Color.LIGHT_GRAY);
     }
 
@@ -3487,10 +3491,13 @@ public class Sperm_Analysis
       // PlotWindow normXFromTipWindow; normXFromTipPlot
       // for each signal in each nucleus, find index of point. Draw dot at index at y=-30 (for now)
       // Add the signals to the tip centred profile plot
+      int SIGNAL_Y_LINE_MIN = 245;
+      int SIGNAL_Y_LINE_MAX = 275;
+
       normXFromTipPlot.setColor(Color.LIGHT_GRAY);
       normXFromTipPlot.setLineWidth(1);
-      normXFromTipPlot.drawLine(0,220,100,220);
-      normXFromTipPlot.drawLine(0,260,100,260);
+      normXFromTipPlot.drawLine(0,SIGNAL_Y_LINE_MIN,100,SIGNAL_Y_LINE_MIN);
+      normXFromTipPlot.drawLine(0,SIGNAL_Y_LINE_MAX,100,SIGNAL_Y_LINE_MAX);
 
       for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
 
@@ -3525,8 +3532,8 @@ public class Sperm_Analysis
       // Add the signals to the tail centred profile plot
       normXFromTailPlot.setColor(Color.LIGHT_GRAY);
       normXFromTailPlot.setLineWidth(1);
-      normXFromTailPlot.drawLine(0,220,100,220);
-      normXFromTailPlot.drawLine(0,260,100,260);
+      normXFromTailPlot.drawLine(0,SIGNAL_Y_LINE_MIN,100,SIGNAL_Y_LINE_MIN);
+      normXFromTailPlot.drawLine(0,SIGNAL_Y_LINE_MAX,100,SIGNAL_Y_LINE_MAX);
 
       for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
 
@@ -3625,8 +3632,7 @@ public class Sperm_Analysis
 
       offsetRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
       offsetRawPlot.setYTicks(true);
-      offsetRawPlot.setColor(Color.LIGHT_GRAY);
-
+      
       double minX = 0;
       double maxX = 0;
       for(int i=0;i<this.nucleiCollection.size();i++){
@@ -3639,6 +3645,9 @@ public class Sperm_Analysis
         }
       }
       offsetRawPlot.setLimits( (int) minX-1, (int) maxX+1,-50,360);
+      offsetRawPlot.setColor(Color.BLACK);
+      offsetRawPlot.drawLine((int) minX-1, 180, (int) maxX+1, 180); 
+      offsetRawPlot.setColor(Color.LIGHT_GRAY);
      
       for(int i=0;i<this.nucleiCollection.size();i++){
         double[] xRawCentredOnTail = this.nucleiCollection.get(i).createOffsetRawProfile();
@@ -3741,11 +3750,9 @@ public class Sperm_Analysis
         ip.setRoi(n.getRoi());
 
 
-        // ImageProcessor newProcessor = ip.createProcessor(width*2, height*2);
         ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
 
         newProcessor.setBackgroundValue(0);
-        // ImagePlus newImage = new ImagePlus("Rotated", newProcessor);
         newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
         newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
         newProcessor.rotate( n.findRotationAngle() );
