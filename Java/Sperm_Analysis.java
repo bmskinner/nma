@@ -14,12 +14,11 @@ morphology comparisons
   ---------------
   FEATURES TO ADD
   ---------------
-    Median curve refolding
-    Consensus image
-    Add failed nuclei to logFailed
+    Median curve refolding & consensus image
     Add 180 degree line to plots
     Find nucleus closest to the median curve as template as alternative to refolding
-    Difference filter
+    Add tail detection by orthogonal to narrowest point
+    Get measure of consistency in tail predictions; add as filter
 */
 import ij.IJ;
 import ij.ImagePlus;
@@ -403,82 +402,90 @@ public class Sperm_Analysis
 
 
     // turn roi into Nucleus for manipulation
-    Nucleus roiArray = new Nucleus(nucleus);
-    roiArray.setPath(path);
-    roiArray.setNucleusNumber(nucleusNumber);
+    Nucleus currentNucleus = new Nucleus(nucleus);
+    currentNucleus.setPath(path);
+    currentNucleus.setNucleusNumber(nucleusNumber);
 
     // immediately save out a picture of the nucleus for later annotation
-    String saveFolder = createImageDirectory(roiArray.getPathWithoutExtension());
-    IJ.saveAsTiff(smallRegion, saveFolder+"\\"+roiArray.getNucleusNumber()+".tiff");
+    String saveFolder = createImageDirectory(currentNucleus.getPathWithoutExtension());
+    IJ.saveAsTiff(smallRegion, saveFolder+"\\"+currentNucleus.getNucleusNumber()+".tiff");
 
 
     // measure CoM, area, perimeter and feret in blue
     ResultsTable blueResults = findNuclearMeasurements(smallRegion, nucleus);
     XYPoint nucleusCoM = new XYPoint(blueResults.getValue("XM", 0),  blueResults.getValue("YM", 0) );
-    roiArray.setCentreOfMass(nucleusCoM);
+    currentNucleus.setCentreOfMass(nucleusCoM);
+    currentNucleus.setPerimeter(blueResults.getValue("Perim.",0));
+    currentNucleus.setArea(blueResults.getValue("Area",0));
+    currentNucleus.setFeret(blueResults.getValue("Feret",0));
     
 
     // find tip - use the least angle method
-    XYPoint spermTip = roiArray.findMinimumAngle();
+    XYPoint spermTip = currentNucleus.findMinimumAngle();
     if(spermTip.getInteriorAngle() > 110){ // this is not a deep enough curve to declare the tip
         IJ.log("    Cannot reliably assign tip position");
         this.nucleiFailedOnTip++;
         nucleusPassedChecks = false;
         failureReason = failureReason | this.FAILURE_TIP;
     }
-    roiArray.moveIndexToArrayStart(spermTip.getIndex());
-    roiArray.tipIndex = 0;
-    roiArray.setSpermTip(spermTip);
+    currentNucleus.moveIndexToArrayStart(spermTip.getIndex());
+    currentNucleus.tipIndex = 0;
+    currentNucleus.setSpermTip(spermTip);
 
 
     // decide if the profile is right or left handed; flip if needed
-    if(!roiArray.isProfileOrientationOK()){
+    if(!currentNucleus.isProfileOrientationOK()){
       IJ.log("    Reversing array");
-      roiArray.reverseArray();
+      currentNucleus.reverseArray();
     }
     
 
     // find local minima and maxima
-    XYPoint[] minima = roiArray.getLocalMinima();
-    XYPoint[] maxima = roiArray.getLocalMaxima();
+    XYPoint[] minima = currentNucleus.getLocalMinima();
+    XYPoint[] maxima = currentNucleus.getLocalMaxima();
 
-    /*
-    	Find the tail point using multiple independent methods. 
-    	Find a consensus point
     
-    	Method 1: Find the narrowest diameter around the nuclear CoM
-    						Draw a line orthogonal, and pick the intersecting border points
-    						The border furthest from the tip is the tail
-    */	
-    XYPoint spermTail1 = findPointFurthestFrom(spermTip, minima); // TO BE REPLACED WITH DESCRIPTION ABOVE
-    roiArray.addTailEstimatePosition(spermTail1);
 
     /*
-    	Method 2: Use the list of local minima to detect the tail corner
+      Find the tail point using multiple independent methods. 
+      Find a consensus point
+
+    	Method 1: Use the list of local minima to detect the tail corner
     						This is the corner furthest from the tip.
     						Can be confused as to which side of the sperm head is chosen
     */	
     XYPoint spermTail2 = findTailPointFromMinima(spermTip, nucleusCoM, minima);
-    roiArray.addTailEstimatePosition(spermTail2);
+    currentNucleus.addTailEstimatePosition(spermTail2);
 
     /*
-    	Method 3: Look at the 2nd derivative - rate of change of angles
+    	Method 2: Look at the 2nd derivative - rate of change of angles
     						Perform a 5win average smoothing of the deltas
     						Count the number of consecutive >1 degree blocks
     						Wide block far from tip = tail
     */	
-    XYPoint spermTail3 = roiArray.findTailFromDeltas(spermTip);
-    roiArray.addTailEstimatePosition(spermTail3);
+    XYPoint spermTail3 = currentNucleus.findTailFromDeltas(spermTip);
+    currentNucleus.addTailEstimatePosition(spermTail3);
+
+    /*    
+      Method 3: Find the narrowest diameter around the nuclear CoM
+                Draw a line orthogonal, and pick the intersecting border points
+                The border furthest from the tip is the tail
+    */  
+    XYPoint spermTail1 = currentNucleus.findTailByNarrowestWidthMethod();
+    currentNucleus.addTailEstimatePosition(spermTail1);
+
 
     /*
-    	Given distinct methods for finding a tail,
-    	take a position between them on roi
+      Given distinct methods for finding a tail,
+      take a position between them on roi
     */
-    int consensusTailIndex = getPositionBetween(spermTail2, spermTail3, roiArray);
-    roiArray.tailIndex = consensusTailIndex;
-    XYPoint consensusTail = roiArray.smoothedArray[consensusTailIndex];
-    roiArray.setInitialConsensusTail(consensusTail);
-    roiArray.setSpermTail(consensusTail);
+    int consensusTailIndex = currentNucleus.getPositionBetween(spermTail2, spermTail3);
+    XYPoint consensusTail = currentNucleus.smoothedArray[consensusTailIndex];
+    consensusTailIndex = currentNucleus.getPositionBetween(consensusTail, spermTail1);
+    currentNucleus.tailIndex = consensusTailIndex;
+    currentNucleus.setInitialConsensusTail(consensusTail);
+    currentNucleus.setSpermTail(consensusTail);
+    
 
     /*
     	Produce the normalised profile positions from the angle array.
@@ -489,27 +496,27 @@ public class Sperm_Analysis
 			in the raw and normalised profiles appropriately
     */
     double pathLength = 0;
-    double normalisedTailIndex = ((double)consensusTailIndex/(double)roiArray.smoothLength)*100;
+    double normalisedTailIndex = ((double)consensusTailIndex/(double)currentNucleus.smoothLength)*100;
 
     
     // if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // only proceed if the tail points are together  
     XYPoint prevPoint = new XYPoint(0,0);
      
-    for (int i=0; i<roiArray.smoothLength;i++ ) {
-        double normalisedX = ((double)i/(double)roiArray.smoothLength)*100; // normalise to 100 length
+    for (int i=0; i<currentNucleus.smoothLength;i++ ) {
+        double normalisedX = ((double)i/(double)currentNucleus.smoothLength)*100; // normalise to 100 length
         // double normalisedXFromTail = normalisedX - normalisedTailIndex; // offset the normalised array based on the calculated tail position
         double rawXFromTail = (double)i - (double)consensusTailIndex; // offset the raw array based on the calculated tail position
 
-        roiArray.normalisedXPositionsFromTip.add(normalisedX);
-        roiArray.rawXPositionsFromTail.add(rawXFromTail);
-        roiArray.rawXPositionsFromTip.add( (double)i);
+        currentNucleus.normalisedXPositionsFromTip.add(normalisedX);
+        currentNucleus.rawXPositionsFromTail.add(rawXFromTail);
+        currentNucleus.rawXPositionsFromTip.add( (double)i);
         
         IJ.append(normalisedX+"\t"+
-        					roiArray.smoothedArray[i].getInteriorAngle()+"\t"+
+        					currentNucleus.smoothedArray[i].getInteriorAngle()+"\t"+
         					rawXFromTail, this.logFile);        
 
         // calculate the path length
-        XYPoint thisPoint = new XYPoint(normalisedX,roiArray.smoothedArray[i].getInteriorAngle());
+        XYPoint thisPoint = new XYPoint(normalisedX,currentNucleus.smoothedArray[i].getInteriorAngle());
         pathLength += thisPoint.getLengthTo(prevPoint);
         prevPoint = thisPoint;
     }
@@ -532,7 +539,7 @@ public class Sperm_Analysis
 
       ResultsTable redResults = findSignalMeasurements(smallRegion, roi, 1);
       XYPoint signalCoM = new XYPoint(redResults.getValue("XM", 0),  redResults.getValue("YM", 0) );
-      roiArray.addRedSignal( new NuclearSignal( roi, 
+      currentNucleus.addRedSignal( new NuclearSignal( roi, 
                                                 redResults.getValue("Area",0), 
                                                 redResults.getValue("Feret",0), 
                                                 redResults.getValue("Perim.",0), 
@@ -544,36 +551,19 @@ public class Sperm_Analysis
 
       ResultsTable greenResults = findSignalMeasurements(smallRegion, roi, 1);
       XYPoint signalCoM = new XYPoint(greenResults.getValue("XM", 0),  greenResults.getValue("YM", 0) );
-      roiArray.addGreenSignal( new NuclearSignal( roi, 
+      currentNucleus.addGreenSignal( new NuclearSignal( roi, 
                                                   greenResults.getValue("Area",0), 
                                                   greenResults.getValue("Feret",0), 
                                                   greenResults.getValue("Perim.",0), 
                                                   signalCoM));
     }    
 
-    // rotate the image to provide a consistent view
-    // ip.setInterpolationMethod(ImageProcessor.BILINEAR);
-    // ip.setBackgroundValue(0);
-    // double diagonal = Math.sqrt( (ip.getWidth()*ip.getWidth() + ip.getHeight()*ip.getHeight() ) );
-    // Double obj = new Double(diagonal);
-    // int diag = obj.intValue();
-    // ip.setRoi(0,0,diag,diag);
-    // ip.rotate(rotationAngle);
-    // ImagePlus finalImage = new ImagePlus("Image", ip);
-    // IJ.saveAsTiff(finalImage, saveFolder+"\\"+roiArray.getNucleusNumber()+".final.tiff");
-
-
-
     // if everything checks out, add the measured parameters to the global pool
     // currently, the only reason to fail at this stage is if the tip cannot be found
     if(nucleusPassedChecks){
+      currentNucleus.setPathLength(pathLength);
 
-      roiArray.setPerimeter(blueResults.getValue("Perim.",0));
-      roiArray.setArea(blueResults.getValue("Area",0));
-      roiArray.setFeret(blueResults.getValue("Feret",0));
-      roiArray.setPathLength(pathLength);
-
-      this.completeCollection.addNucleus(roiArray);
+      this.completeCollection.addNucleus(currentNucleus);
 
     } else {
       IJ.append(  failureReason+"\t"+
@@ -587,31 +577,6 @@ public class Sperm_Analysis
     }
 
   }
-  /*
-    SHOULD BE MOVED TO NUCLEUS CLASS
-    For two XYPoints in a Nucleus, find the point that lies halfway between them
-    Used for obtaining a consensus between potential tail positions
-  */
-  public int getPositionBetween(XYPoint pointA, XYPoint pointB, Nucleus array){
-
-    int a = 0;
-    int b = 0;
-    // find the indices that correspond on the array
-    for(int i = 0; i<array.smoothLength; i++){
-        if(array.smoothedArray[i].overlaps(pointA)){
-          a = i;
-        }
-        if(array.smoothedArray[i].overlaps(pointB)){
-          b = i;
-        }
-    }
-    // IJ.log(    "Found a="+a+", b="+b);
-    // get the midpoint
-    int mid = (int)Math.floor( (a+b) /2);
-    // IJ.log(    "Consensus tail at "+mid+": "+array.smoothedArray[mid].toString());
-    return mid;
-  }
-
 
   /*
     Detect the tail based on a list of local minima in an XYPoint array.
@@ -979,6 +944,8 @@ public class Sperm_Analysis
     private XYPoint spermTail;
     private XYPoint intersectionPoint;
     private XYPoint initialConsensusTail;
+    private XYPoint minFeretPoint1;
+    private XYPoint minFeretPoint2;
     
     private String imagePath; // the path to the image being analysed
 
@@ -1353,6 +1320,43 @@ public class Sperm_Analysis
     	return newArray;
     }
 
+    public boolean isHookSide(XYPoint p){
+      if(hookRoi.contains( (float)p.getX(), (float)p.getY() ) ){
+        return true;
+      } else { 
+        return false;
+      }
+    }
+
+    public boolean isHumpSide(XYPoint p){
+      if(humpRoi.contains( (float)p.getX(), (float)p.getY() ) ){
+        return true;
+      } else { 
+        return false;
+      }
+    }    
+
+    /*
+      For two XYPoints in a Nucleus, find the point that lies halfway between them
+      Used for obtaining a consensus between potential tail positions
+    */
+    public int getPositionBetween(XYPoint pointA, XYPoint pointB){
+
+      int a = 0;
+      int b = 0;
+      // find the indices that correspond on the array
+      for(int i = 0; i<this.smoothLength; i++){
+          if(this.smoothedArray[i].overlaps(pointA)){
+            a = i;
+          }
+          if(this.smoothedArray[i].overlaps(pointB)){
+            b = i;
+          }
+      }
+      // get the midpoint
+      int mid = (int)Math.floor( (a+b) /2);
+      return mid;
+    }
     /*
 	   The spline array
     */
@@ -1429,19 +1433,94 @@ public class Sperm_Analysis
 	  public double findRotationAngle(){
 	    XYPoint end = new XYPoint(this.getSpermTail().getXAsInt(),this.getSpermTail().getYAsInt()-50);
 
-	    float[] xpoints = { (float) end.getX(), (float) this.getSpermTail().getX(), (float) this.getCentreOfMass().getX()};
-	    float[] ypoints = { (float) end.getY(), (float) this.getSpermTail().getY(), (float) this.getCentreOfMass().getY()};
-	    PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+      double angle = findAngleBetweenXYPoints(end, this.getSpermTail(), this.getCentreOfMass());
 
-	   // measure the angle of the line
-	   double angle = roi.getAngle();
-
-	     if(this.getCentreOfMass().getX() < this.getSpermTail().getX()){
+	    if(this.getCentreOfMass().getX() < this.getSpermTail().getX()){
 	      return angle;
-	     } else {
+	    } else {
 	      return 0-angle;
 	    }
 	  }
+
+    /*
+      Given three XYPoints, measure the angle a-b-c
+        a   c
+         \ /
+          b
+    */
+    public double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
+
+      float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
+      float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
+      PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+     return roi.getAngle();
+    }
+
+    // For a position in the roi, draw a line through the CoM and get the intersection point
+    public XYPoint findOppositeBorder(XYPoint p){
+
+      int minDeltaYIndex = 0;
+      double minAngle = 180;
+
+      for(int i = 0; i<smoothLength;i++){
+
+          double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), smoothedArray[i]);
+
+          if(Math.abs(180 - angle) < minAngle){
+            minDeltaYIndex = i;
+            minAngle = 180 - angle;
+          }
+      }
+      return smoothedArray[minDeltaYIndex];
+    }
+
+    /*
+      This is a method for finding a tail point independent of local minima:
+        Find the narrowest diameter around the nuclear CoM
+        Draw a line orthogonal, and pick the intersecting border points
+        The border furthest from the tip is the tail
+    */
+    public XYPoint findTailByNarrowestWidthMethod(){
+
+      // Find the narrowest point around the CoM
+      // For a position in teh roi, draw a line through the CoM to the intersection point
+      // Measure the length; if < min length..., store equation and border(s)
+
+      double minDistance = this.getFeret();
+      XYPoint reference = this.getSpermTip();
+
+      // this.splitNucleusToHeadAndHump();
+
+      for(int i=0;i<this.smoothLength;i++){
+
+        XYPoint p = this.smoothedArray[i];
+        XYPoint opp = findOppositeBorder(p);
+        double distance = p.getLengthTo(opp);
+
+        if(distance<minDistance){
+          minDistance = distance;
+          reference = p;
+        }
+      }
+      this.minFeretPoint1 = reference;
+      this.minFeretPoint2 = findOppositeBorder(reference);
+      
+      // Using the point, draw a line from teh CoM to the border. Measure the angle to an intersection point
+      // if close to 90, and the distance to the tip > CoM-tip, keep the point
+      // return the best point
+      double difference = 90;
+      XYPoint tail = new XYPoint(0,0);;
+      for(int i=0;i<this.smoothLength;i++){
+
+        XYPoint p = this.smoothedArray[i];
+        double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
+        if(  Math.abs(90-angle)<difference && p.getLengthTo(this.getSpermTip()) > this.getCentreOfMass().getLengthTo( this.getSpermTip() ) ){
+          difference = 90-angle;
+          tail = p;
+        }
+      }
+      return tail;
+    }
 
     /*
       Change the smoothed array order to put the selected index at the beginning
@@ -1570,14 +1649,8 @@ public class Sperm_Analysis
       XYPoint pointAfter = this.getSmoothedPoint(indexAfter);
       XYPoint point = this.getSmoothedPoint(index);
 
-      // make a segmented line
-      float[] xpoints = { (float) pointBefore.getX(), (float) point.getX(), (float) pointAfter.getX()};
-      float[] ypoints = { (float) pointBefore.getY(), (float) point.getY(), (float) pointAfter.getY()};
-      PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
 
-
-      // measure the angle of the line
-      double angle = roi.getAngle();
+      double angle = findAngleBetweenXYPoints(pointBefore, point, pointAfter);
 
       // find the halfway point between the first and last points.
       // is this within the roi?
@@ -3749,6 +3822,14 @@ public class Sperm_Analysis
   				ip.setColor(Color.YELLOW);
   		    ip.drawLine(n.getSpermTail().getXAsInt(), n.getSpermTail().getYAsInt(), n.intersectionPoint.getXAsInt(), n.intersectionPoint.getYAsInt());
         }
+
+        // The narrowest part of the sperm head
+        ip.setLineWidth(1);
+        ip.setColor(Color.MAGENTA);
+        ip.drawLine(n.minFeretPoint1.getXAsInt(), n.minFeretPoint1.getYAsInt(), n.minFeretPoint2.getXAsInt(), n.minFeretPoint2.getYAsInt());
+        ip.setLineWidth(3);
+        ip.drawDot(n.minFeretPoint1.getXAsInt(), n.minFeretPoint1.getYAsInt());
+        
 		    //   SIGNALS
 		    ip.setLineWidth(3);
 		    ip.setColor(Color.RED);
