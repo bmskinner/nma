@@ -3587,6 +3587,7 @@ public class Sperm_Analysis
       // insert(ImageProcessor ip, int xloc, int yloc)
       // rotate about CoM (new position)
       // display.
+      IJ.log("Creating composite image...");
       
 
       int totalWidth = 0;
@@ -3596,7 +3597,7 @@ public class Sperm_Analysis
       int boxHeight = (int)(getMedianNuclearPerimeter()/1.2);
 
       int maxBoxWidth = boxWidth * 5;
-      int maxBoxHeight = boxHeight * (int)(Math.ceil(this.getNucleusCount()/5) );
+      int maxBoxHeight = (boxHeight * (int)(Math.ceil(this.getNucleusCount()/5)) + boxHeight );
 
       ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
       ImageProcessor finalProcessor = finalImage.getProcessor();
@@ -3619,12 +3620,12 @@ public class Sperm_Analysis
 
         newProcessor.setBackgroundValue(0);
         // ImagePlus newImage = new ImagePlus("Rotated", newProcessor);
-        newProcessor.insert(ip, (int)boxWidth/2, (int)boxWidth/2); // put the original halfway in
+        newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
         newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
         newProcessor.rotate( n.findRotationAngle() );
         newProcessor.setBackgroundValue(0);
 
-        if(totalWidth>2000-boxWidth){
+        if(totalWidth>maxBoxWidth-boxWidth){
         	totalWidth=0;
         	totalHeight+=(int)(boxHeight);
         }
@@ -3632,23 +3633,14 @@ public class Sperm_Analysis
         int newY = totalHeight;
         totalWidth+=(int)(boxWidth);
         
-
         finalProcessor.insert(newProcessor, newX, newY);
         TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
         Overlay overlay = new Overlay(label);
-        finalProcessor.drawOverlay(overlay);
-
-        // totalWidth += width;
-        // newImage.close();
-        if(i==0){
-
-        	// newImage.updateAndDraw();
-        	// newImage.show();
-        }
-        
+        finalProcessor.drawOverlay(overlay);        
       }
     	finalImage.show();
     	IJ.saveAsTiff(finalImage, folder+"composite.tiff");
+    	IJ.log("Composite image created");
     }
 
     /*
