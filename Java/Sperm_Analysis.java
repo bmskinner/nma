@@ -15,10 +15,8 @@ morphology comparisons
   FEATURES TO ADD
   ---------------
     Median curve refolding & consensus image
-    Add 180 degree line to plots
-    Find nucleus closest to the median curve as template as alternative to refolding
-    Add tail detection by orthogonal to narrowest point
-    Get measure of consistency in tail predictions; add as filter
+      Find nucleus closest to the median curve as template as alternative to refolding
+    Get measure of consistency in tail predictions
     Add distance across CoM profile for comparisons
 */
 import ij.IJ;
@@ -85,14 +83,23 @@ public class Sperm_Analysis
   private static final double PROFILE_INCREMENT = 0.5;
 
   // failure codes - not in use, keep to add back to logFailed in refilter
-  private static final int FAILURE_TIP = 1;
-  private static final int FAILURE_TAIL = 2;
+  private static final int FAILURE_TIP       = 1;
+  private static final int FAILURE_TAIL      = 2;
   private static final int FAILURE_THRESHOLD = 4;
-  private static final int FAILURE_OTHER = 8;
+  private static final int FAILURE_FERET     = 8;
+  private static final int FAILURE_ARRAY     = 16;
+  private static final int FAILURE_AREA      = 32;
+  private static final int FAILURE_PERIM     = 64;
+  private static final int FAILURE_OTHER     = 128;
 
   // Chart drawing parameters
-  private static final int CHART_WINDOW_HEIGHT = 300;
-  private static final int CHART_WINDOW_WIDTH = 400;
+  private static final int CHART_WINDOW_HEIGHT     = 300;
+  private static final int CHART_WINDOW_WIDTH      = 400;
+  private static final int CHART_TAIL_BOX_Y_MIN    = 325;
+  private static final int CHART_TAIL_BOX_Y_MID    = 340;
+  private static final int CHART_TAIL_BOX_Y_MAX    = 355;
+  private static final int CHART_SIGNAL_Y_LINE_MIN = 275;
+  private static final int CHART_SIGNAL_Y_LINE_MAX = 315;
 
   private int totalNuclei = 0;
   private int nucleiFailedOnTip = 0;
@@ -121,7 +128,8 @@ public class Sperm_Analysis
     File folder = new File(folderName);
     File[] listOfFiles = folder.listFiles();
  
-    this.completeCollection = new NucleusCollection(folderName);
+    completeCollection = new NucleusCollection(folderName);
+    failedNuclei       = new NucleusCollection(folderName);
 
     for (File file : listOfFiles) {
       if (file.isFile()) {
@@ -158,8 +166,6 @@ public class Sperm_Analysis
     IJ.log("Failed (other): "+this.nucleiFailedOther);
     int analysed = completeCollection.getNucleusCount();
     IJ.log("Before filtering: "+analysed);
-
-    failedNuclei = new NucleusCollection(folderName);
 
     completeCollection.refilterNuclei(); // remove double nuclei, blobs, nuclei too wibbly
   
@@ -213,13 +219,13 @@ public class Sperm_Analysis
     }
     IJ.append("# NORM_X\tANGLE\tRAW_X_FROM_TAIL", this.logFile);
 
-    this.failedFile = folderName+"logFailed.txt";
-    File g = new File(failedFile);
-    if(g.exists()){
-      g.delete();
-    }
+    // this.failedFile = folderName+"logFailed.txt";
+    // File g = new File(failedFile);
+    // if(g.exists()){
+    //   g.delete();
+    // }
 
-    IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.failedFile);
+    // IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.failedFile);
 
     this.debugFile = folderName+"logDebug.txt";
     File h = new File(logFile);
@@ -425,9 +431,9 @@ public class Sperm_Analysis
     XYPoint spermTip = currentNucleus.findMinimumAngle();
     if(spermTip.getInteriorAngle() > 110){ // this is not a deep enough curve to declare the tip
         IJ.log("    Cannot reliably assign tip position");
+        currentNucleus.failureCode  = currentNucleus.failureCode | FAILURE_TIP;
         this.nucleiFailedOnTip++;
         nucleusPassedChecks = false;
-        failureReason = failureReason | this.FAILURE_TIP;
     }
     currentNucleus.moveIndexToArrayStart(spermTip.getIndex());
     currentNucleus.tipIndex = 0;
@@ -446,7 +452,6 @@ public class Sperm_Analysis
     XYPoint[] maxima = currentNucleus.getLocalMaxima();
 
     
-
     /*
       Find the tail point using multiple independent methods. 
       Find a consensus point
@@ -563,20 +568,11 @@ public class Sperm_Analysis
     // currently, the only reason to fail at this stage is if the tip cannot be found
     if(nucleusPassedChecks){
       currentNucleus.setPathLength(pathLength);
-
       this.completeCollection.addNucleus(currentNucleus);
 
     } else {
-      IJ.append(  failureReason+"\t"+
-                  blueResults.getValue("Perim.",0)+"\t"+
-                  blueResults.getValue("Area",0)+"\t"+
-                  blueResults.getValue("Feret",0)+"\t"+
-                  pathLength+"\t"+
-                  normalisedTailIndex+"\t"+
-                  consensusTailIndex+"\t"+
-                  path+"-"+nucleusNumber, this.failedFile);
+      this.failedNuclei.addNucleus(currentNucleus);
     }
-
   }
 
   /*
@@ -921,6 +917,8 @@ public class Sperm_Analysis
     private int minimaLookupDistance = 5; // the points ahead and behind to check when finding local minima and maxima
     private int blockCount = 0; // the number of delta blocks detected
     private int DELTA_WINDOW_MIN = 5; // the minimum number of points required in a delta block
+
+    private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
     private int offsetForTail = 0;
 
@@ -2795,24 +2793,24 @@ public class Sperm_Analysis
         // IJ.log("Nucleus "+n.getPath()+"-"+n.getNucleusNumber()+" Path length "+n.getPathLength());
 
         if(n.getArea() > maxArea || n.getArea() < minArea ){
-          dropNucleus = true;
+          n.failureCode = n.failureCode | FAILURE_AREA;
           area++;
         }
         if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
-           dropNucleus = true;
-           perim++;
+          n.failureCode = n.failureCode | FAILURE_PERIM;
+          perim++;
         }
         if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
-           dropNucleus = true;
-           pathlength++;
+          n.failureCode = n.failureCode | FAILURE_THRESHOLD;
+          pathlength++;
         }
         if(n.smoothLength > medianArrayLength * maxDifferenceFromMedian || n.smoothLength < medianArrayLength / maxDifferenceFromMedian ){
-           dropNucleus = true;
+          n.failureCode = n.failureCode | FAILURE_ARRAY;
            arraylength++;
         }
 
         if(n.getFeret() < minFeret){
-          dropNucleus = true;
+          n.failureCode = n.failureCode | FAILURE_FERET;
           feretlength++;
         }
 
@@ -2821,7 +2819,7 @@ public class Sperm_Analysis
         //   curveShape++;
         // }
         
-        if(dropNucleus){
+        if(n.failureCode > 0){
           failedNuclei.addNucleus(n);
           this.nucleiCollection.remove(n);
           i--; // the array index automatically shifts to account for the removed nucleus. Compensate to avoid skipping nuclei
@@ -3066,7 +3064,7 @@ public class Sperm_Analysis
       double[] xTails = this.getNormalisedTailIndexes();
 
       double[] yTails = new double[xTails.length];
-      Arrays.fill(yTails, 300); // all dots at y=300
+      Arrays.fill(yTails, CHART_TAIL_BOX_Y_MID); // all dots at y=300
       normXFromTipPlot.setColor(Color.LIGHT_GRAY);
       normXFromTipPlot.addPoints(xTails, yTails, Plot.DOT);
 
@@ -3077,11 +3075,11 @@ public class Sperm_Analysis
 
       normXFromTipPlot.setColor(Color.DARK_GRAY);
       normXFromTipPlot.setLineWidth(1);
-      normXFromTipPlot.drawLine(tailQ25, 320, tailQ75, 320);
-      normXFromTipPlot.drawLine(tailQ25, 280, tailQ75, 280);
-      normXFromTipPlot.drawLine(tailQ25, 280, tailQ25, 320);
-      normXFromTipPlot.drawLine(tailQ75, 280, tailQ75, 320);
-      normXFromTipPlot.drawLine(tailQ50, 280, tailQ50, 320);
+      normXFromTipPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
+      normXFromTipPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
+      normXFromTipPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
+      normXFromTipPlot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
+      normXFromTipPlot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
       normXFromTipWindow.drawPlot(normXFromTipPlot);
     }
 
@@ -3203,7 +3201,7 @@ public class Sperm_Analysis
       rawXFromTipPlot.setColor(Color.BLACK);
       rawXFromTipPlot.drawLine(0, 180, this.getMaxRawXFromTips(), 180); 
       rawXFromTipPlot.setColor(Color.LIGHT_GRAY);
-      
+
 
       normXFromTipPlot = new Plot("Normalised tip-centred plot",
                                   "Position",
@@ -3491,13 +3489,11 @@ public class Sperm_Analysis
       // PlotWindow normXFromTipWindow; normXFromTipPlot
       // for each signal in each nucleus, find index of point. Draw dot at index at y=-30 (for now)
       // Add the signals to the tip centred profile plot
-      int SIGNAL_Y_LINE_MIN = 245;
-      int SIGNAL_Y_LINE_MAX = 275;
 
       normXFromTipPlot.setColor(Color.LIGHT_GRAY);
       normXFromTipPlot.setLineWidth(1);
-      normXFromTipPlot.drawLine(0,SIGNAL_Y_LINE_MIN,100,SIGNAL_Y_LINE_MIN);
-      normXFromTipPlot.drawLine(0,SIGNAL_Y_LINE_MAX,100,SIGNAL_Y_LINE_MAX);
+      normXFromTipPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
+      normXFromTipPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
 
       for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
 
@@ -3515,9 +3511,8 @@ public class Sperm_Analysis
             for(int k=0; k<n.smoothLength;k++){
 
               if(n.smoothedArray[k].overlaps(border)){
-                // IJ.log("Found closest border: "+i+" : "+j);
                 redPoints.add( n.normalisedXPositionsFromTip.get(k) );
-                double yPosition = 220 + ( redSignals.get(j).getFractionalDistance() * 40 ); // make between 220 and 260
+                double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistance() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
                 yPoints.add(yPosition);
               }
             }
@@ -3532,8 +3527,8 @@ public class Sperm_Analysis
       // Add the signals to the tail centred profile plot
       normXFromTailPlot.setColor(Color.LIGHT_GRAY);
       normXFromTailPlot.setLineWidth(1);
-      normXFromTailPlot.drawLine(0,SIGNAL_Y_LINE_MIN,100,SIGNAL_Y_LINE_MIN);
-      normXFromTailPlot.drawLine(0,SIGNAL_Y_LINE_MAX,100,SIGNAL_Y_LINE_MAX);
+      normXFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
+      normXFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
 
       for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
 
@@ -3554,7 +3549,7 @@ public class Sperm_Analysis
               if(n.smoothedArray[k].overlaps(border)){
                 // IJ.log("Found closest border: "+i+" : "+j);
                 redPoints.add( n.normalisedXPositionsFromTail.get(k) );
-                double yPosition = 220 + ( redSignals.get(j).getFractionalDistance() * 40 ); // make between 220 and 260
+                double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistance() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // make between 220 and 260
                 yPoints.add(yPosition);
               }
             }
@@ -3682,7 +3677,7 @@ public class Sperm_Analysis
       if(f.exists()){
         f.delete();
       }
-      IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tSQUARE_DIFFERENCE\tPATH", statsFile);
+      IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tSQUARE_DIFFERENCE\tFAILURE_CODE\tPATH", statsFile);
 
       IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei");
       double[] areas  = this.getAreas();
@@ -3704,12 +3699,12 @@ public class Sperm_Analysis
                     pathLengths[i]+"\t"+
                     tails[i]+"\t"+
                     differences[i]+"\t"+
+                    this.nucleiCollection.get(i).failureCode+"\t"+
                     paths[i], statsFile);
 
         // Include tip, CoM, tail
     		this.nucleiCollection.get(i).printLogFile();
       }
-      // progressBar.hide();
       IJ.log("Export complete");
     }
 
