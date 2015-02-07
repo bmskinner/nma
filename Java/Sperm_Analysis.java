@@ -17,7 +17,6 @@ morphology comparisons
     Median curve refolding & consensus image
       Find nucleus closest to the median curve as template as alternative to refolding
     Get measure of consistency in tail predictions
-    Add distance across CoM profile for comparisons
 */
 import ij.IJ;
 import ij.ImagePlus;
@@ -413,6 +412,7 @@ public class Sperm_Analysis
     currentNucleus.setPath(path);
     currentNucleus.setNucleusNumber(nucleusNumber);
 
+
     // immediately save out a picture of the nucleus for later annotation
     String saveFolder = createImageDirectory(currentNucleus.getPathWithoutExtension());
     IJ.saveAsTiff(smallRegion, saveFolder+"\\"+currentNucleus.getNucleusNumber()+".tiff");
@@ -445,6 +445,9 @@ public class Sperm_Analysis
       IJ.log("    Reversing array");
       currentNucleus.reverseArray();
     }
+
+    // now the array is in the correct orientation, calculate the distance profile
+    currentNucleus.calculateDistanceProfile();
     
 
     // find local minima and maxima
@@ -963,14 +966,14 @@ public class Sperm_Analysis
     private FloatPolygon hookRoi;
     private FloatPolygon humpRoi;
 
-    // private ArrayList<Double[]> measurementResults = new ArrayList<Double[]>(0);
-
-    // these will replace measurementResults eventually
+    // these replaced measurementResults
     private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
     private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
     private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
     private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
     private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
+
+    private double[] distanceProfile;
     
     public Nucleus (Roi roi) { // construct from an roi
 
@@ -1250,6 +1253,14 @@ public class Sperm_Analysis
       this.tailIndex = i;
     }
 
+    public void setDistanceProfile( double[] d){
+    	this.distanceProfile = d;
+    }
+
+    public double[] getDistanceProfile(){
+    	return this.distanceProfile;
+    }
+
     public ArrayList<NuclearSignal> getRedSignals(){
       return this.redSignals;
     }
@@ -1285,38 +1296,6 @@ public class Sperm_Analysis
         this.smoothedArray[i].setX(xNew);
       }
 
-    }
-
-    /*
-    	Get the X values from the smoothed array as a float array
-    	To be used for spline fitting experiment, hence needs to have the first element duplicated
-    */
-    public float[] getXasArray(){
-
-    	float[] newArray = new float[this.smoothLength+1]; // allow the first and last element to be duplicated
-    	for(int i=0;i<this.smoothLength;i++){
-    		newArray[i] = (float)this.smoothedArray[i].getX();
-    	}
-
-    	newArray[this.smoothLength] = newArray[0];
-
-    	return newArray;
-    }
-
-    /*
-    	Get the Y values from the smoothed array as a float array
-    	To be used for spline fitting experiment, hence has the first element duplicated
-    */
-    public float[] getYasArray(){
-
-    	float[] newArray = new float[this.smoothLength+1]; // allow the first and last element to be duplicated
-    	for(int i=0;i<this.smoothLength;i++){
-    		newArray[i] = (float)this.smoothedArray[i].getY();
-    	}
-
-    	newArray[this.smoothLength] = newArray[0];
-
-    	return newArray;
     }
 
     public boolean isHookSide(XYPoint p){
@@ -1356,41 +1335,6 @@ public class Sperm_Analysis
       int mid = (int)Math.floor( (a+b) /2);
       return mid;
     }
-    /*
-	   The spline array
-    */
-    public void setSplineArray(XYPoint[] p){
-    	this.splineArray = p;
-    }
-
-    /*
-    Spline fitting
-    CURRENTLY UNUSED
-    */
-    public XYPoint[] getSplineArray(){
-    	return this.splineArray;
-    }
-
-    /*
-    Spline fitting
-    CURRENTLY UNUSED
-    */
-    public void updateSplineArray(){
-
-    	XYPoint[] splines = new XYPoint[this.smoothLength];
-    	float[] profileArray = this.getProfileArray();
-    	float[] angleArray = this.getAnglesAsArray();
-
-	   	SplineFitter spf = new SplineFitter(profileArray, angleArray, this.getLength()+1, false); // true  = closed curve
-	   	
-	   	for(int i=0; i<this.smoothLength;i++) {
-	   		double splineY = spf.evalSpline(profileArray[i]);
-	   		XYPoint p = new XYPoint(profileArray[i], splineY);
-	   		// IJ.log("    Spline: "+splineY);
-	   		splines[i] = p;
-	   	}
-	   	this.setSplineArray(splines);
-	  }
 
   	public float[] getProfileArray(){
 
@@ -2149,7 +2093,7 @@ public class Sperm_Analysis
         f.delete();
       }
 
-      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X", path);
+      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
       
       for(int i=0;i<this.smoothLength;i++){
 
@@ -2173,7 +2117,8 @@ public class Sperm_Analysis
                   smoothedArray[i].isLocalMax()+"\t"+
                   smoothedArray[i].isMidpoint()+"\t"+
                   smoothedArray[i].isBlock()+"\t"+
-                  normalisedX,
+                  normalisedX+"\t"+
+                  distanceProfile[i],
                   path);
       }
     }
@@ -2311,17 +2256,17 @@ public class Sperm_Analysis
       }
     }
 
-    private double getPolygonArea(float[] x, float[] y, int points){ 
+    // private double getPolygonArea(float[] x, float[] y, int points){ 
         
-        double area = 0;         // Accumulates area in the loop
-        int j = points-1;  // The last vertex is the 'previous' one to the first
+    //     double area = 0;         // Accumulates area in the loop
+    //     int j = points-1;  // The last vertex is the 'previous' one to the first
 
-        for (int i=0; i<points; i++){ 
-          area = area +  (x[j]+x[i]) * (y[j]-y[i]); 
-          j = i;  //j is previous vertex to i
-        }
-        return area/2;
-    }
+    //     for (int i=0; i<points; i++){ 
+    //       area = area +  (x[j]+x[i]) * (y[j]-y[i]); 
+    //       j = i;  //j is previous vertex to i
+    //     }
+    //     return area/2;
+    // }
 
     public void calculateSignalAnglesFromTail(){
 
@@ -2503,6 +2448,20 @@ public class Sperm_Analysis
           }
         }
       }
+    }
+
+    public void calculateDistanceProfile(){
+
+      double[] profile = new double[smoothLength];
+
+      for(int i = 0; i<smoothLength;i++){
+
+      		XYPoint p = smoothedArray[i];
+      		XYPoint opp = findOppositeBorder(p);
+
+          profile[i] = p.getLengthTo(opp);
+      }
+      this.setDistanceProfile(profile);
     }
   }
 
