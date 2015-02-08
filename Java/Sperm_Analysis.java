@@ -1647,84 +1647,50 @@ public class Sperm_Analysis
 
     // Make an angle array for the current coordinates in the XYPoint array
     // Will need to be rerun on each index order change
-    public void makeAngleArray(){
+    public void makeAngleProfile(){
     	// go through points
     	// find angle
     	// assign to angle array
 
-        for(int i=0; i<this.smoothLength;i++){
+      for(int i=0; i<this.smoothLength;i++){
 
-          // use a window size of 25 for now
-          findAngleBetweenPoints(i, this.getWindowSize());
-          this.smoothedArray[i].setIndex(i);
-        }
-        this.calculateMedianAngle();
+        // use a window size of 25 for now
+        findAngleBetweenPoints(i, this.getWindowSize());
+        this.smoothedArray[i].setIndex(i);
+      }
+      this.calculateMedianAngle();
 
-        // calculate the angle deltas and store
-        double angleDelta = 0;
-        for(int i=0; i<this.smoothLength;i++){
+      // calculate the angle deltas and store
+      double angleDelta = 0;
+      for(int i=0; i<this.smoothLength;i++){
 
-        	// handle array wrapping
-	      if(i==0){
-	      	angleDelta = this.smoothedArray[i+1].getInteriorAngle() - this.smoothedArray[this.smoothLength-1].getInteriorAngle();
-	      } else if(i==this.smoothLength-1){
-	      	angleDelta = this.smoothedArray[0].getInteriorAngle() - this.smoothedArray[i-1].getInteriorAngle();
-	      } else{
-	        angleDelta = this.smoothedArray[i+1].getInteriorAngle() - this.smoothedArray[i-1].getInteriorAngle();
-	      }
+      	// handle array wrapping
+      	XYPoint prevPoint = this.smoothedArray[ wrapIndex(i-1, this.smoothLength) ];
+      	XYPoint nextPoint = this.smoothedArray[ wrapIndex(i+1, this.smoothLength) ];
+
+      	angleDelta = nextPoint.getInteriorAngle() - prevPoint.getInteriorAngle();
 	      this.smoothedArray[i].setInteriorAngleDelta(angleDelta);
-        }
+	    }
 
-        // perform 5-window smoothing of the deltas
-        double smoothedDelta = 0;
-        for(int i=0; i<this.smoothLength;i++){
+      // perform 5-window smoothing of the deltas
+      int smoothingWindow = 5;
+      double smoothedDelta = 0;
+      for(int i=0; i<this.smoothLength;i++){
 
-        	// handle array wrapping - TODO: replace with arbitrary length smoothing
-	      if(i==0){
-	      	smoothedDelta = ( this.smoothedArray[this.smoothLength-2].getInteriorAngleDelta() +
-	      					  this.smoothedArray[this.smoothLength-1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i+1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i+2].getInteriorAngleDelta() ) / 5;
-	      } else if(i==1){
+      	smoothedDelta = this.smoothedArray[i].getInteriorAngleDelta();
 
-	      	smoothedDelta = ( this.smoothedArray[this.smoothLength-1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i-1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i+1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i+2].getInteriorAngleDelta() ) / 5;
+      	// handle array wrapping for arbitrary length smoothing
+      	for(int j=1;j<=(int)(smoothingWindow-1)/2;j++){
 
-	      } else if(i==this.smoothLength-2){
-
-	      	smoothedDelta = ( this.smoothedArray[i-2].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i-1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i+1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[0].getInteriorAngleDelta() ) / 5;
-
-	      } else if(i==this.smoothLength-1){
-
-	      	smoothedDelta = ( this.smoothedArray[i-2].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i-1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i].getInteriorAngleDelta() +
-	      					  this.smoothedArray[0].getInteriorAngleDelta() +
-	      					  this.smoothedArray[1].getInteriorAngleDelta() ) / 5;
-
-	      }else{
-	        smoothedDelta  = ( this.smoothedArray[i-2].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i-1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i+1].getInteriorAngleDelta() +
-	      					  this.smoothedArray[i+2].getInteriorAngleDelta() ) / 5;
-	      }
+      		smoothedDelta += ( this.smoothedArray[ wrapIndex(i-j, this.smoothLength) ].getInteriorAngleDelta() +
+	      					  			   this.smoothedArray[ wrapIndex(i+j, this.smoothLength) ].getInteriorAngleDelta());
+      	}
+      	smoothedDelta = smoothedDelta / smoothingWindow;
 	      this.smoothedArray[i].setInteriorAngleDeltaSmoothed(smoothedDelta);
-        }
+      }
 
-        this.countConsecutiveDeltas();
-        this.anglesCalculated = true;
-
-        // IJ.log("    Measured angles with window size "+this.windowSize);
-        // IJ.log("    Median angle "+this.medianAngle);
+      this.countConsecutiveDeltas();
+      this.anglesCalculated = true;
     }
 
     public void countConsecutiveDeltas(){
@@ -1770,7 +1736,7 @@ public class Sperm_Analysis
     public XYPoint findMinimumAngle(){
 
       if(!this.anglesCalculated){
-        this.makeAngleArray();
+        this.makeAngleProfile();
       }
       if(!this.minimaCalculated){
         this.detectLocalMinima();
@@ -1800,7 +1766,7 @@ public class Sperm_Analysis
     public boolean isProfileOrientationOK(){
 
       if(!this.anglesCalculated){
-        this.makeAngleArray();
+        this.makeAngleProfile();
       }
       if(!this.minimaCalculated){
         this.detectLocalMinima();
@@ -4013,6 +3979,20 @@ public class Sperm_Analysis
 			this.moveCoMtoZero();
 			this.preparePlots();
 			this.plotTargetNucleus();
+
+			double score = compareProfiles(targetCurve, initialCurve);
+			
+			IJ.log("Score: "+score);
+			int iterations = 20;
+
+			double prevScore = score;
+
+			while(score>900 || score < prevScore){
+			// for(int i=0; i<iterations;i++){
+				score = this.iterateOverNucleus();
+				IJ.log("Score: "+score);
+			}
+			this.plotTargetNucleus();
 		}
 
 		/*
@@ -4025,6 +4005,8 @@ public class Sperm_Analysis
 			XYPoint centreOfMass = initialNucleus.getCentreOfMass();
 			double xOffset = centreOfMass.getX();
 			double yOffset = centreOfMass.getY();
+
+			initialNucleus.setCentreOfMass(new XYPoint(0,0));
 
 			for(int i=0; i<initialNucleus.smoothLength; i++){
 				XYPoint p = initialNucleus.smoothedArray[i];
@@ -4095,6 +4077,89 @@ public class Sperm_Analysis
 			nucleusPlotWindow = nucleusPlot.show();
 			anglePlotWindow = anglePlot.show();
 		}
+
+		/*
+			Go over the target nucleus, adjusting each point.
+			Keep the change if it helps get closer to the target profile
+		*/
+		private double iterateOverNucleus(){
+
+			double similarityScore = compareProfiles(targetCurve, targetNucleus.getProfileAngles());
+			
+			for(int i=0; i<targetNucleus.smoothLength; i++){
+
+				XYPoint p = targetNucleus.smoothedArray[i];
+	    		
+    		double currentDistance = p.getLengthTo(new XYPoint(0,0));
+    		double newDistance = currentDistance; // default no change
+
+    		double oldX = p.getX();
+    		double oldY = p.getY();
+
+    		if(p.getInteriorAngle() > targetCurve[i]){
+    					newDistance = currentDistance + 1; // 1% change
+    		}
+    		if(p.getInteriorAngle() < targetCurve[i]){
+    					newDistance = currentDistance - 1; // 1% change
+    		}
+
+    		// find the angle the point makes to the x axis
+    		double angle = findAngleBetweenXYPoints(p, new XYPoint(0,0), new XYPoint(10, 0)); // point, 10,0, p,0
+    		if(oldY<0){
+    			angle = 360-angle;
+    		}
+    		double newX = getXComponentOfAngle(newDistance, angle);
+				double newY = getYComponentOfAngle(newDistance, angle);
+
+				// IJ.log("Old: X:"+(int)oldX+" Y:"+(int)oldY+" Distance: "+(int)currentDistance+" Angle: "+(int)angle);
+				// IJ.log("New: X:"+(int)newX+" Y:"+(int)newY+" Distance: "+(int)newDistance+" Angle: "+(int)angle);
+
+				p.setX(newX); // the new x position
+				p.setY(newY); // the new y position
+
+				// measure the new profile & compare
+				targetNucleus.makeAngleProfile();
+				double[] newProfile = targetNucleus.getProfileAngles();
+				double score = compareProfiles(targetCurve, newProfile);
+
+				// IJ.log("Score: "+score);
+				// reset if worse fit
+				if(score > similarityScore){
+					p.setX(oldX);
+					p.setY(oldY);
+					targetNucleus.makeAngleProfile();
+					// IJ.log("Rejecting change");
+				} else {
+					similarityScore = score;
+					// IJ.log("Keeping change");
+				}
+			}
+			return similarityScore;
+		}
+
+		/*
+			Find the total difference between two angle profiles
+		*/
+		private double compareProfiles(double[] profile1, double[] profile2){
+
+			double d = 0;
+			for(int i=0; i<profile1.length; i++){
+				d += Math.abs(profile1[i] - profile2[i]);
+			}
+			return d;
+		}
+
+		private double getXComponentOfAngle(double length, double angle){
+    	// cos(angle) = x / h
+    	// x = cos(a)*h
+    	double x = length * Math.cos(Math.toRadians(angle));
+    	return x;
+    }
+
+    private double getYComponentOfAngle(double length, double angle){
+    	double y = length * Math.sin(Math.toRadians(angle));
+    	return y;
+    }
 
 	}
 
