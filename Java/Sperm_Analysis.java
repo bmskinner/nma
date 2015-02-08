@@ -1654,9 +1654,12 @@ public class Sperm_Analysis
         this.smoothedArray[i].setIndex(i);
       }
       this.calculateMedianAngle();
+      this.anglesCalculated = true;
+    }
 
-      // calculate the angle deltas and store
-      double angleDelta = 0;
+    public void makeDeltaAngleProfile(){
+
+    	double angleDelta = 0;
       for(int i=0; i<this.smoothLength;i++){
 
       	// handle array wrapping
@@ -1685,7 +1688,6 @@ public class Sperm_Analysis
       }
 
       this.countConsecutiveDeltas();
-      this.anglesCalculated = true;
     }
 
     public void countConsecutiveDeltas(){
@@ -1732,6 +1734,7 @@ public class Sperm_Analysis
 
       if(!this.anglesCalculated){
         this.makeAngleProfile();
+        this.makeDeltaAngleProfile();
       }
       if(!this.minimaCalculated){
         this.detectLocalMinima();
@@ -1762,6 +1765,7 @@ public class Sperm_Analysis
 
       if(!this.anglesCalculated){
         this.makeAngleProfile();
+        this.makeDeltaAngleProfile();
       }
       if(!this.minimaCalculated){
         this.detectLocalMinima();
@@ -3978,14 +3982,19 @@ public class Sperm_Analysis
 			double score = compareProfiles(targetCurve, initialCurve);
 			
 			IJ.log("Score: "+score);
-			int iterations = 20;
+			int iterations = 50;
 
 			double prevScore = score;
-
-			while(score>900 || score < prevScore){
+			int i=0;
+			while(score >200){
 			// for(int i=0; i<iterations;i++){
 				score = this.iterateOverNucleus();
 				IJ.log("Score: "+score);
+				prevScore = score;
+				if(i%100 == 0){
+					this.plotTargetNucleus();
+				}
+				i++;
 			}
 			this.plotTargetNucleus();
 		}
@@ -4003,12 +4012,21 @@ public class Sperm_Analysis
 
 			initialNucleus.setCentreOfMass(new XYPoint(0,0));
 
+			FloatPolygon offsetPolygon = new FloatPolygon();
+
 			for(int i=0; i<initialNucleus.smoothLength; i++){
 				XYPoint p = initialNucleus.smoothedArray[i];
 
-				initialNucleus.smoothedArray[i].setX( p.getX() - xOffset  );
-				initialNucleus.smoothedArray[i].setY( p.getY() - yOffset  );
+				double x = p.getX() - xOffset;
+				double y = p.getY() - yOffset;
+				offsetPolygon.addPoint(x, y);
+
+				initialNucleus.smoothedArray[i].setX( x );
+				initialNucleus.smoothedArray[i].setY( y );
+				
 			}
+			initialNucleus.smoothedPolygon = offsetPolygon;
+
 			this.targetNucleus = initialNucleus;
 		}
 
@@ -4017,6 +4035,19 @@ public class Sperm_Analysis
 			intiial and target nuclear shapes, plus the angle profiles
 		*/
 		private void preparePlots(){
+
+			double[] xPoints = new double[initialNucleus.smoothLength];
+			double[] yPoints = new double[initialNucleus.smoothLength];
+			double[] aPoints = new double[initialNucleus.smoothLength]; // angles
+			double[] pPoints = new double[initialNucleus.smoothLength]; // positions along array
+
+			for(int i=0; i<targetNucleus.smoothLength; i++){
+				XYPoint p = targetNucleus.smoothedArray[i];
+				xPoints[i] = p.getX();
+				yPoints[i] = p.getY();
+				aPoints[i] = targetCurve[i];
+				pPoints[i] = i;
+			}
 			
 			nucleusPlot = new Plot( "Nucleus shape",
                                   "X",
@@ -4048,6 +4079,11 @@ public class Sperm_Analysis
 	    anglePlot.setLimits(0,targetCurve.length,-50,360);
 	    anglePlot.setSize(300,300);
 	    anglePlot.setYTicks(true);
+
+	    nucleusPlot.setColor(Color.LIGHT_GRAY);
+			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
+			anglePlot.setColor(Color.LIGHT_GRAY);
+			anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
 		}
 
 		/*
@@ -4067,7 +4103,9 @@ public class Sperm_Analysis
 				aPoints[i] = p.getInteriorAngle();
 				pPoints[i] = i;
 			}
+			nucleusPlot.setColor(Color.RED);
 			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
+			anglePlot.setColor(Color.RED);
 			anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
 			nucleusPlotWindow = nucleusPlot.show();
 			anglePlotWindow = anglePlot.show();
@@ -4092,10 +4130,10 @@ public class Sperm_Analysis
     		double oldY = p.getY();
 
     		if(p.getInteriorAngle() > targetCurve[i]){
-    					newDistance = currentDistance + 1; // 1% change
+    					newDistance = currentDistance + Math.random(); // some change between 0 and 1
     		}
     		if(p.getInteriorAngle() < targetCurve[i]){
-    					newDistance = currentDistance - 1; // 1% change
+    					newDistance = currentDistance - Math.random(); //  some change between 0 and 1
     		}
 
     		// find the angle the point makes to the x axis
@@ -4112,6 +4150,9 @@ public class Sperm_Analysis
 				p.setX(newX); // the new x position
 				p.setY(newY); // the new y position
 
+				// ensure the interior angle calculation works with the current points
+				targetNucleus.smoothedPolygon = createPolygon(); 
+
 				// measure the new profile & compare
 				targetNucleus.makeAngleProfile();
 				double[] newProfile = targetNucleus.getProfileAngles();
@@ -4123,6 +4164,7 @@ public class Sperm_Analysis
 					p.setX(oldX);
 					p.setY(oldY);
 					targetNucleus.makeAngleProfile();
+					targetNucleus.smoothedPolygon = createPolygon();
 					// IJ.log("Rejecting change");
 				} else {
 					similarityScore = score;
@@ -4130,6 +4172,19 @@ public class Sperm_Analysis
 				}
 			}
 			return similarityScore;
+		}
+
+		private FloatPolygon createPolygon(){
+			FloatPolygon offsetPolygon = new FloatPolygon();
+
+			for(int i=0; i<targetNucleus.smoothLength; i++){
+
+				XYPoint p = targetNucleus.smoothedArray[i];
+				double x = p.getX();
+				double y = p.getY();
+				offsetPolygon.addPoint(x, y);
+	    }
+	    return offsetPolygon;
 		}
 
 		/*
