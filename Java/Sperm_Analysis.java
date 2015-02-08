@@ -3977,25 +3977,23 @@ public class Sperm_Analysis
 
 			this.moveCoMtoZero();
 			this.preparePlots();
-			this.plotTargetNucleus();
+			// this.plotTargetNucleus();
 
 			double score = compareProfiles(targetCurve, initialCurve);
 			
-			IJ.log("Score: "+score);
+			IJ.log("Initial score: "+score);
 			int iterations = 50;
 
-			double prevScore = score;
+			double prevScore = score*2;
 			int i=0;
-			while(score >200){
+			while(prevScore - score >0.0001 || i<100 || score > 385){
 			// for(int i=0; i<iterations;i++){
-				score = this.iterateOverNucleus();
-				IJ.log("Score: "+score);
 				prevScore = score;
-				if(i%100 == 0){
-					this.plotTargetNucleus();
-				}
+				score = this.iterateOverNucleus();
+				IJ.log("Iteration "+i+": "+score);
 				i++;
 			}
+			IJ.log("Final score: "+score);
 			this.plotTargetNucleus();
 		}
 
@@ -4084,6 +4082,8 @@ public class Sperm_Analysis
 			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
 			anglePlot.setColor(Color.LIGHT_GRAY);
 			anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
+			nucleusPlotWindow = nucleusPlot.show();
+			anglePlotWindow = anglePlot.show();
 		}
 
 		/*
@@ -4107,8 +4107,8 @@ public class Sperm_Analysis
 			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
 			anglePlot.setColor(Color.RED);
 			anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
-			nucleusPlotWindow = nucleusPlot.show();
-			anglePlotWindow = anglePlot.show();
+			nucleusPlotWindow.drawPlot(nucleusPlot);
+			anglePlotWindow.drawPlot(anglePlot);
 		}
 
 		/*
@@ -4129,11 +4129,14 @@ public class Sperm_Analysis
     		double oldX = p.getX();
     		double oldY = p.getY();
 
+    		// make change dependent on score
+    		double amountToChange = Math.random() * (similarityScore/1000); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
+
     		if(p.getInteriorAngle() > targetCurve[i]){
-    					newDistance = currentDistance + Math.random(); // some change between 0 and 1
+    					newDistance = currentDistance + amountToChange; 
     		}
     		if(p.getInteriorAngle() < targetCurve[i]){
-    					newDistance = currentDistance - Math.random(); //  some change between 0 and 1
+    					newDistance = currentDistance - amountToChange; //  some change between 0 and 2
     		}
 
     		// find the angle the point makes to the x axis
@@ -4159,8 +4162,12 @@ public class Sperm_Analysis
 				double score = compareProfiles(targetCurve, newProfile);
 
 				// IJ.log("Score: "+score);
-				// reset if worse fit
-				if(score > similarityScore){
+				// do not apply change  if the distance from teh surrounding points changes too much
+				double distanceToPrev = p.getLengthTo( targetNucleus.smoothedArray[ wrapIndex(i-1, targetNucleus.smoothLength) ] );
+				double distanceToNext = p.getLengthTo( targetNucleus.smoothedArray[ wrapIndex(i+1, targetNucleus.smoothLength) ] );
+
+				// reset if worse fit or distances are too high
+				if(score > similarityScore  || distanceToNext > 1.2 || distanceToPrev > 1.2 ){
 					p.setX(oldX);
 					p.setY(oldY);
 					targetNucleus.makeAngleProfile();
