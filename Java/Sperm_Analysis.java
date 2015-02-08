@@ -3930,4 +3930,110 @@ public class Sperm_Analysis
     }
   }
 
+ /*
+	-----------------------
+    CURVE REFOLDER CLASS
+    -----------------------
+    Contains the code for taking a profile, and an ideal profile, and
+		making the profile fit
+ */
+	class CurveRefolder {
+
+		private double[] targetCurve;
+		private double[] initialCurve;
+
+		private Nucleus initialNucleus;
+		private Nucleus targetNucleus;
+
+		private Plot nucleusPlot;
+		private PlotWindow nucleusPlotWindow;
+
+		private Plot anglePlot;
+		private PlotWindow anglePlotWindow;
+
+		public CurveRefolder(double[] target, Nucleus n){
+			this.targetCurve = target;
+			this.initialNucleus = n;
+			this.initialCurve = n.getProfileAngles();
+		}
+
+		/*
+			The main function to be called externally;
+			all other functions will hang off this
+		*/
+		public void refoldCurve(){
+
+			this.moveCoMtoZero();
+			this.preparePlots();
+			this.plotTargetNucleus();
+		}
+
+		/*
+			Translate the XY coordinates of each point so that
+			the nuclear centre of mass is at 0,0.
+			Then set the target nucleus as a copy.
+		*/
+		private void moveCoMtoZero(){
+
+			XYPoint centreOfMass = initialNucleus.getCentreOfMass();
+			double xOffset = centreOfMass.getX();
+			double yOffset = centreOfMass.getY();
+
+			for(int i=0, i<initialNucleus.smoothLength; i++){
+				XYPoint p = initialNucleus.smoothedArray[i];
+
+				initialNucleus.smoothedArray[i].setX( p.getX() - xOffset  );
+				initialNucleus.smoothedArray[i].setY( p.getY() - yOffset  );
+			}
+			this.targetNucleus = initialNucleus;
+		}
+
+		/*
+			Create the plots that will be needed to display the 
+			intiial and target nuclear shapes, plus the angle profiles
+		*/
+		private void preparePlots(){
+			
+			nucleusPlot = new Plot( "Nucleus shape",
+                                  "X",
+                                  "Y");
+    	
+	    nucleusPlot.setLimits(-320,320,-320,320); // swap for actual size
+	    nucleusPlot.setSize(300,300);
+	    nucleusPlot.setYTicks(true);
+
+	    anglePlot = new Plot( "Angles",
+                            "Position",
+                            "Angle");
+
+	    anglePlot.setLimits(0,targetCurve.length,-50,360);
+	    anglePlot.setSize(300,300);
+	    anglePlot.setYTicks(true);
+		}
+
+		/*
+			Draw the current state of the target nucleus
+		*/
+		private void plotTargetNucleus(){
+
+			double[] xPoints = new double[targetNucleus.smoothLength];
+			double[] yPoints = new double[targetNucleus.smoothLength];
+			double[] aPoints = new double[targetNucleus.smoothLength]; // angles
+			double[] pPoints = new double[targetNucleus.smoothLength]; // positions along array
+
+			for(int i=0, i<targetNucleus.smoothLength; i++){
+				XYPoint p = targetNucleus.smoothedArray[i];
+				xPoints[i] = p.getX();
+				yPoints[i] = p.getY();
+				aPoints[i] = p.getInteriorAngle();
+				pPoints[i] = i;
+			}
+			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
+			anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
+			nucleusPlotWindow = nucleusPlot.show();
+			anglePlotWindow = anglePlot.show();
+		}
+
+	}
+
 }
