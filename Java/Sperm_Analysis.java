@@ -1356,18 +1356,6 @@ public class Sperm_Analysis
       return d;
     }
 
-	  public float[] getAnglesAsArray(){
-
-    	float[] newArray = new float[this.smoothLength+1]; // allow the first and last element to be duplicated
-    	for(int i=0;i<this.smoothLength;i++){
-    		newArray[i] = (float)this.smoothedArray[i].getInteriorAngle();
-    	}
-
-    	newArray[this.smoothLength] = newArray[0];
-
-    	return newArray;
-    }
-
     /*
 	    Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
       Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
@@ -2598,6 +2586,18 @@ public class Sperm_Analysis
       return d;
     }
 
+    public Nucleus getProfileMostSimilarToMedian(){
+    	Nucleus n = nucleiCollection.get(0); // default to the first nucleus
+    	double difference = 7000;
+    	for(int i=0;i<nucleiCollection.size();i++){
+        if(nucleiCollection.get(i).differenceToMedianCurve;<difference){
+        	difference = nucleiCollection.get(i).differenceToMedianCurve;
+        	n = nucleiCollection.get(i);
+        }
+      }
+      return n;
+    }
+
     public String[] getNucleusPaths(){
       String[] s = new String[nucleiCollection.size()];
 
@@ -3822,6 +3822,16 @@ public class Sperm_Analysis
     	}
     	 IJ.log("Annotation complete");
     }
+
+    /*
+			Interpolate the median profile to match the length of the most-median nucleus
+			Store the angle profile as a double[] to feed into the curve refolder
+    */
+		public double[] getMedianTargetCurve(Nucleus n){
+			double[] targetMedianCurve = interpolateMedianToLength(n.smoothLength);
+			return targetMedianCurve;
+		}	
+
   }
   /*
     -----------------------
