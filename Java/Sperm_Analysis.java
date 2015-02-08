@@ -4006,7 +4006,7 @@ public class Sperm_Analysis
 			// for(int i=0; i<iterations;i++){
 				prevScore = score;
 				score = this.iterateOverNucleus();
-				IJ.log("Iteration "+i+": "+score);
+				// IJ.log("Iteration "+i+": "+score);
 				i++;
 			}
 			IJ.log("Final score: "+score);
@@ -4086,6 +4086,8 @@ public class Sperm_Analysis
 
 	    nucleusPlot.setSize(300,300);
 	    nucleusPlot.setYTicks(true);
+	    nucleusPlot.drawLine(min, 0, max, 0);
+	    nucleusPlot.drawLine(0, min, 0, max);
 
 	    anglePlot = new Plot( "Angles",
                             "Position",
@@ -4231,26 +4233,42 @@ public class Sperm_Analysis
     private void putTailAtBottom(){
 
     	// find the angle to rotate
-    	double angleToRotate = findAngleBetweenXYPoints( targetNucleus.getSpermTail(), targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
-    	if(targetNucleus.getSpermTail().getX()<0){
-    			angleToRotate = 360-angleToRotate;
+    	double angleToRotate = 0;
+    	double distanceFromZero = 180;
+    	for(int i=0;i<360;i++){
+    		XYPoint p = new XYPoint( targetNucleus.getSpermTail().getX(), targetNucleus.getSpermTail().getY() );
+    		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
+    		double oldAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
+    		if(p.getX()<0){
+    			oldAngle = 360-oldAngle;
     		}
+    		double newAngle = oldAngle + i;
+    		double newX = getXComponentOfAngle(distance, newAngle);
+				double newY = getYComponentOfAngle(distance, newAngle);
+
+				if(Math.abs(newX) < distanceFromZero && newY < 0){
+					angleToRotate = i;
+					distanceFromZero = Math.abs(newX);
+				}
+    	}
+
+    	if(targetNucleus.getSpermTail().getX()<0){
+    		angleToRotate = 360-angleToRotate;
+    	}
+    	IJ.log("Rotating by "+(int)angleToRotate);
 
     	for(int i=0;i<targetNucleus.smoothLength;i++){
 
     		XYPoint p = targetNucleus.smoothedArray[i];
     		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
     		double oldAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
-    		double newAngle = oldAngle + angleToRotate;
-
-    		if(p.getY()<0){
-    			newAngle = 360-newAngle;
+    		if(p.getX()<0){
+    			oldAngle = 360-oldAngle;
     		}
+
+    		double newAngle = oldAngle + angleToRotate;
     		double newX = getXComponentOfAngle(distance, newAngle);
 				double newY = getYComponentOfAngle(distance, newAngle);
-
-				// IJ.log("Old: X:"+(int)oldX+" Y:"+(int)oldY+" Distance: "+(int)currentDistance+" Angle: "+(int)angle);
-				// IJ.log("New: X:"+(int)newX+" Y:"+(int)newY+" Distance: "+(int)newDistance+" Angle: "+(int)angle);
 
 				p.setX(newX); // the new x position
 				p.setY(newY); // the new y position
