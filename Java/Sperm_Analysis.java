@@ -715,6 +715,20 @@ public class Sperm_Analysis
   }
 
   /*
+    Given three XYPoints, measure the angle a-b-c
+      a   c
+       \ /
+        b
+  */
+  public double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
+
+    float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
+    float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
+    PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+   return roi.getAngle();
+  }
+
+  /*
     -----------------------
     XY POINT CLASS
     -----------------------
@@ -960,8 +974,8 @@ public class Sperm_Analysis
 
     private boolean minimaCalculated = false; // has detectLocalMinima been run
     private boolean maximaCalculated = false; // has detectLocalMaxima been run
-    private boolean anglesCalculated = false; // has makeAngleArray been run
-    private boolean offsetCalculated = false; // has makeAngleArray been run
+    private boolean anglesCalculated = false; // has makeAngleProfile been run
+    private boolean offsetCalculated = false; // has makeAngleProfile been run
     
     private Roi roi; // the original ROI
     private Polygon polygon; // the ROI converted to a polygon; source of XYPoint[] array
@@ -1420,20 +1434,6 @@ public class Sperm_Analysis
 	    }
 	  }
 
-    /*
-      Given three XYPoints, measure the angle a-b-c
-        a   c
-         \ /
-          b
-    */
-    public double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
-
-      float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
-      float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
-      PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-     return roi.getAngle();
-    }
-
     // For a position in the roi, draw a line through the CoM and get the intersection point
     public XYPoint findOppositeBorder(XYPoint p){
 
@@ -1615,13 +1615,8 @@ public class Sperm_Analysis
     public void findAngleBetweenPoints(int index, int window){
 
       // wrap the array
-      int indexBefore = index < window
-                      ? this.smoothLength - (window-index)
-                      : index - window;
-
-      int indexAfter = index + window > this.smoothLength-1
-                     ? Math.abs(this.smoothLength - (index+window))
-                     : index + window;
+      int indexBefore = wrapIndex(index - window, this.smoothLength);
+      int indexAfter  = wrapIndex(index + window, this.smoothLength);
 
       XYPoint pointBefore = this.getSmoothedPoint(indexBefore);
       XYPoint pointAfter = this.getSmoothedPoint(indexAfter);
