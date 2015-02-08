@@ -1011,6 +1011,46 @@ public class Sperm_Analysis
     	return this.roi;
     }
 
+    public double getMaxX(){
+    	double d = 0;
+      for(int i=0;i<smoothLength;i++){
+      	if(smoothedArray[i].getX()>d){
+        	d = smoothedArray[i].getX();
+      	}
+      }
+      return d;
+    }
+
+    public double getMinX(){
+    	double d = getMaxX();
+      for(int i=0;i<smoothLength;i++){
+      	if(smoothedArray[i].getX()<d){
+        	d = smoothedArray[i].getX();
+	      }
+	    }
+      return d;
+    }
+
+    public double getMaxY(){
+    	double d = 0;
+      for(int i=0;i<smoothLength;i++){
+      	if(smoothedArray[i].getY()>d){
+        	d = smoothedArray[i].getY();
+      	}
+      }
+      return d;
+    }
+
+    public double getMinY(){
+    	double d = getMaxY();
+      for(int i=0;i<smoothLength;i++){
+      	if(smoothedArray[i].getY()<d){
+        	d = smoothedArray[i].getY();
+	      }
+	    }
+      return d;
+    }
+
     public double[] getNormalisedXPositionsFromTip(){
       double[] d = new double[normalisedXPositionsFromTip.size()];
       for(int i=0;i<normalisedXPositionsFromTip.size();i++){
@@ -4005,7 +4045,22 @@ public class Sperm_Analysis
                                   "X",
                                   "Y");
     	
-	    nucleusPlot.setLimits(-320,320,-320,320); // swap for actual size
+    	// get the limits  for the plot  	
+			double minX = targetNucleus.getMinX();
+	    double maxX = targetNucleus.getMaxX();
+	    double minY = targetNucleus.getMinY();
+	    double maxY = targetNucleus.getMaxY();
+
+	    // ensure that the scales for each axis are the same
+	    double min = Math.min(minX, minY);
+	    double max = Math.max(maxX, maxY);
+
+	    // ensure there is room for expansion of the target nucleus
+	    min = Math.floor(min - Math.abs(min));
+	    max = Math.ceil(max * 2);
+
+	    nucleusPlot.setLimits(min, max, min, max);
+
 	    nucleusPlot.setSize(300,300);
 	    nucleusPlot.setYTicks(true);
 
