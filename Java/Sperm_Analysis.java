@@ -190,6 +190,13 @@ public class Sperm_Analysis
     completeCollection.annotateImagesOfNuclei();
     completeCollection.rotateAndAssembleNucleiForExport("composite.tiff");
     
+    // curve refolding
+    Nucleus refoldCandidate = completeCollection.getNucleusMostSimilarToMedian();
+    double[] targetProfile = completeCollection.getMedianTargetCurve(refoldCandidate);
+
+    CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
+    refolder.refoldCurve();
+    
   }
 
   public int wrapIndex(int i, int length){
@@ -2586,11 +2593,11 @@ public class Sperm_Analysis
       return d;
     }
 
-    public Nucleus getProfileMostSimilarToMedian(){
+    public Nucleus getNucleusMostSimilarToMedian(){
     	Nucleus n = nucleiCollection.get(0); // default to the first nucleus
     	double difference = 7000;
     	for(int i=0;i<nucleiCollection.size();i++){
-        if(nucleiCollection.get(i).differenceToMedianCurve;<difference){
+        if(nucleiCollection.get(i).differenceToMedianCurve<difference){
         	difference = nucleiCollection.get(i).differenceToMedianCurve;
         	n = nucleiCollection.get(i);
         }
@@ -3979,7 +3986,7 @@ public class Sperm_Analysis
 			double xOffset = centreOfMass.getX();
 			double yOffset = centreOfMass.getY();
 
-			for(int i=0, i<initialNucleus.smoothLength; i++){
+			for(int i=0; i<initialNucleus.smoothLength; i++){
 				XYPoint p = initialNucleus.smoothedArray[i];
 
 				initialNucleus.smoothedArray[i].setX( p.getX() - xOffset  );
@@ -4021,7 +4028,7 @@ public class Sperm_Analysis
 			double[] aPoints = new double[targetNucleus.smoothLength]; // angles
 			double[] pPoints = new double[targetNucleus.smoothLength]; // positions along array
 
-			for(int i=0, i<targetNucleus.smoothLength; i++){
+			for(int i=0; i<targetNucleus.smoothLength; i++){
 				XYPoint p = targetNucleus.smoothedArray[i];
 				xPoints[i] = p.getX();
 				yPoints[i] = p.getY();
