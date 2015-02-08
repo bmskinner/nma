@@ -14,8 +14,7 @@ morphology comparisons
   ---------------
   FEATURES TO ADD
   ---------------
-    Median curve refolding & consensus image
-      Find nucleus closest to the median curve as template as alternative to refolding
+    Consensus image based on reflded nucleus
     Get measure of consistency in tail predictions
 */
 import ij.IJ;
@@ -196,6 +195,11 @@ public class Sperm_Analysis
 
     CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
     refolder.refoldCurve();
+
+    // orient refolded nucleus to put tail at the bottom
+    refolder.putTailAtBottom();
+    // Nucleus refoldedNucleus = 
+    // draw signals on the refolded nucleus
     
   }
 
@@ -726,6 +730,18 @@ public class Sperm_Analysis
     float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
     PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
    return roi.getAngle();
+  }
+
+  private double getXComponentOfAngle(double length, double angle){
+  	// cos(angle) = x / h
+  	// x = cos(a)*h
+  	double x = length * Math.cos(Math.toRadians(angle));
+  	return x;
+  }
+
+  private double getYComponentOfAngle(double length, double angle){
+  	double y = length * Math.sin(Math.toRadians(angle));
+  	return y;
   }
 
   /*
@@ -3986,7 +4002,7 @@ public class Sperm_Analysis
 
 			double prevScore = score*2;
 			int i=0;
-			while(prevScore - score >0.0001 || i<100 || score > 385){
+			while(prevScore - score >0.0001 || i<100){
 			// for(int i=0; i<iterations;i++){
 				prevScore = score;
 				score = this.iterateOverNucleus();
@@ -3994,7 +4010,8 @@ public class Sperm_Analysis
 				i++;
 			}
 			IJ.log("Final score: "+score);
-			this.plotTargetNucleus();
+			// this.plotTargetNucleus();
+			// return targetNucleus;
 		}
 
 		/*
@@ -4206,16 +4223,39 @@ public class Sperm_Analysis
 			return d;
 		}
 
-		private double getXComponentOfAngle(double length, double angle){
-    	// cos(angle) = x / h
-    	// x = cos(a)*h
-    	double x = length * Math.cos(Math.toRadians(angle));
-    	return x;
-    }
+		/*
+      This is used only for the consensus image.
+      The consenus nucleus needs to be oriented with
+      the tail at the bottom. Assumes CoM is at 0,0
+    */
+    private void putTailAtBottom(){
 
-    private double getYComponentOfAngle(double length, double angle){
-    	double y = length * Math.sin(Math.toRadians(angle));
-    	return y;
+    	// find the angle to rotate
+    	double angleToRotate = findAngleBetweenXYPoints( targetNucleus.getSpermTail(), targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
+    	if(targetNucleus.getSpermTail().getX()<0){
+    			angleToRotate = 360-angleToRotate;
+    		}
+
+    	for(int i=0;i<targetNucleus.smoothLength;i++){
+
+    		XYPoint p = targetNucleus.smoothedArray[i];
+    		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
+    		double oldAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
+    		double newAngle = oldAngle + angleToRotate;
+
+    		if(p.getY()<0){
+    			newAngle = 360-newAngle;
+    		}
+    		double newX = getXComponentOfAngle(distance, newAngle);
+				double newY = getYComponentOfAngle(distance, newAngle);
+
+				// IJ.log("Old: X:"+(int)oldX+" Y:"+(int)oldY+" Distance: "+(int)currentDistance+" Angle: "+(int)angle);
+				// IJ.log("New: X:"+(int)newX+" Y:"+(int)newY+" Distance: "+(int)newDistance+" Angle: "+(int)angle);
+
+				p.setX(newX); // the new x position
+				p.setY(newY); // the new y position
+    	}
+    	plotTargetNucleus();
     }
 
 	}
