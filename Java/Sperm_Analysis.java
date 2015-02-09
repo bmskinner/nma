@@ -176,8 +176,8 @@ public class Sperm_Analysis
 
     completeCollection.refilterNuclei(); // remove any nuclei that are odd shapes
     failedNuclei.exportNuclearStats("logFailed.txt");
-    // failedNuclei.annotateImagesOfNuclei();
-    // failedNuclei.rotateAndAssembleNucleiForExport("compositeFailed.tiff");
+    failedNuclei.annotateImagesOfNuclei();
+    failedNuclei.rotateAndAssembleNucleiForExport("compositeFailed.tiff");
 
     completeCollection.drawRawPositionsFromTailChart();
     completeCollection.createNormalisedTailPositions();
@@ -186,8 +186,8 @@ public class Sperm_Analysis
     completeCollection.calculateTailCentredNormalisedMedianLine();
     completeCollection.measureNuclearOrganisation();
     completeCollection.exportNuclearStats("logStats.txt");
-    // completeCollection.annotateImagesOfNuclei();
-    // completeCollection.rotateAndAssembleNucleiForExport("composite.tiff");
+    completeCollection.annotateImagesOfNuclei();
+    completeCollection.rotateAndAssembleNucleiForExport("composite.tiff");
     
     // curve refolding
     Nucleus refoldCandidate = completeCollection.getNucleusMostSimilarToMedian();
@@ -4083,12 +4083,12 @@ public class Sperm_Analysis
 	    min = Math.floor(min - Math.abs(min));
 	    max = Math.ceil(max * 2);
 
-	    nucleusPlot.setLimits(min, min, min, min);
+	    nucleusPlot.setLimits(min, Math.abs(min), min, Math.abs(min));
 
 	    nucleusPlot.setSize(300,300);
 	    nucleusPlot.setYTicks(true);
-	    nucleusPlot.drawLine(min, 0, max, 0);
-	    nucleusPlot.drawLine(0, min, 0, max);
+	    nucleusPlot.drawLine(min, 0, Math.abs(min), 0);
+	    nucleusPlot.drawLine(0, min, 0, Math.abs(min));
 
 	    anglePlot = new Plot( "Angles",
                             "Position",
