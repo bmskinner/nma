@@ -7,9 +7,86 @@ Copyright (C) Ben Skinner 2015
 This plugin allows for automated detection of FISH
 signals in a mouse sperm nucleus, and measurement of
 the signal position relative to the nuclear centre of
-mass and sperm tip. Works with both red and green channels.
+mass (CoM) and sperm tip. Works with both red and green channels.
 It also generates a profile of the nuclear shape, allowing
 morphology comparisons
+
+  ---------------
+  PLOT AND IMAGE FILES
+  ---------------
+
+  plotConsensus.tiff: The consensus nucleus with measured signal centres of mass displayed
+  plotTailNorm.tiff: The normalised profiles centred on the tail, with median, IQR and signal positions.
+  plotTipNorm.tiff: The normalised profiles centred on the tip, with median, IQR, signal positions and initial estimated tail positions.
+
+  composite.tiff: All nuclei passing filters aggregated and rotated to put the tail at the bottom. Yellow line is tail-CoM-intersection.
+                  This line divides the hook and hump ROIs (regions of interest).
+                  Grey dots are initial tail estimates by 3 methods. Cyan dot is consensus tail position based on initial estimates.
+                  Yellow dot is sperm tip. Pink line is the narrowest width through the nuclear CoM. Pink dot is the nuclear CoM.
+                  Red and green dots are measured red and green signal CoMs. Red and green lines outline the signal ROIs.
+                  The text annotation above and left of the nucleus corresponds to the image and log files in the directory.
+
+  compositeFailed.tiff: As above, for nuclei that failed to pass filters.
+
+
+  ---------------
+  LOG FILES
+  ---------------
+  
+  logProfiles: The normalised position in the array, interiorAngle and raw X position from the tail. No header row. Designed for R cut.
+
+  logStats: The following fields for each nucleus passing filters:
+      AREA            - nuclear area
+      PERIMETER       - nuclear perimeter
+      FERET           - longest distance across the nucleus
+      PATH_LENGTH     - measure of wibbliness. Affected by thresholding.
+      NORM_TAIL_INDEX - the position in the profile array normalised to 100
+      DIFFERENCE      - the difference between the profile for this nucleus and the median profile of the collection of nuclei
+      FAILURE_CODE    - will be 0 for all nuclei in this file
+      PATH            - the path to the source image
+
+  logFailed: The same fields for each nucleus failing filters. Failure codes are a sum of the following:
+      FAILURE_TIP       = 1
+      FAILURE_TAIL      = 2
+      FAILURE_THRESHOLD = 4
+      FAILURE_FERET     = 8
+      FAILURE_ARRAY     = 16
+      FAILURE_AREA      = 32
+      FAILURE_PERIM     = 64
+      FAILURE_OTHER     = 128
+
+  logGreenSignals:
+  logRedSignals:
+    NUCLEUS_NUMBER      - the nucleus in the image. 
+    SIGNAL_AREA         - area of the signal 
+    SIGNAL_ANGLE        - angle of the signal CoM to nuclear CoM to the tail
+    SIGNAL_FERET        - longest diameter of the signal 
+    SIGNAL_DISTANCE     - distance in pixels of the signal from the nuclear CoM
+    FRACTIONAL_DISTANCE - signal distance as a fraction of the distance to the nuclear border at the given angle. 0 = at CoM, 1 = at border
+    SIGNAL_PERIMETER    - perimeter of the signal 
+    SIGNAL_RADIUS       - radius of a circle with the same area as the signal.
+    PATH                - the path to the source image
+
+  logTailMedians: The medians centred on the tail
+  logTipMedians: The medians centred on the tip
+    X_POSITION       - normalised position along the profile. 0-100. Series of bins created from the normalised nuclei
+    ANGLE_MEDIAN     - median angle in this bin
+    Q25              - lowwer quartile
+    Q75              - upper quartile
+    Q10              - 10%ile
+    Q90              - 90%ile
+    NUMBER_OF_POINTS - the number of angles within the bin, from which the median angle was calculated             
+
+  logConsensusNucleus: As per individual nuclei logs, but created for the consensus nucleus. Only SX, SY, FX, FY, IA are relevant.
+    For each point in the nuclear boundary:
+    SX - int x position
+    SY - int y position
+    FX - double x position
+    FY - double y position
+    IA - interior angle
+
+    Remaining fields are for debugging only
+    SX  SY  FX  FY  IA  MA  I_NORM  I_DELTA I_DELTA_S BLOCK_POSITION  BLOCK_NUMBER  L_MIN L_MAX IS_MIDPOINT IS_BLOCK  PROFILE_X DISTANCE_PROFILE
 
   ---------------
   FEATURES TO ADD
@@ -236,14 +313,6 @@ public class Sperm_Analysis
       f.delete();
     }
     IJ.append("# NORM_X\tANGLE\tRAW_X_FROM_TAIL", this.logFile);
-
-    // this.failedFile = folderName+"logFailed.txt";
-    // File g = new File(failedFile);
-    // if(g.exists()){
-    //   g.delete();
-    // }
-
-    // IJ.append("# CAUSE_OF_FAILURE\tPERIMETER\tAREA\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tRAW_TAIL_INDEX\tPATH", this.failedFile);
 
     this.debugFile = folderName+"logDebug.txt";
     File h = new File(logFile);
@@ -2108,9 +2177,9 @@ public class Sperm_Analysis
       Print key data to the image log file
       Overwrites any existing log
     */   
-    public void printLogFile(){
+    public void printLogFile(String path){
 
-      String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
+      // String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
       File f = new File(path);
       if(f.exists()){
         f.delete();
@@ -2343,14 +2412,6 @@ public class Sperm_Analysis
           }
         }
       }
-
-      // if(greenSignals.size()>0){
-      //   for(int i=0;i<greenSignals.size();i++){
-      //   	NuclearSignal n = greenSignals.get(i);
-      //   	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-      //   	n.setDistance(distance);
-      //   }
-      // }
     }
 
 
@@ -3299,17 +3360,6 @@ public class Sperm_Analysis
       medianIndexLower  = wrapIndex(medianIndexLower, length);
       medianIndexHigher = wrapIndex(medianIndexHigher, length);
 
-
-  		// if(medianIndexLower<0)
-  		// 	medianIndexLower = (this.normalisedMedian.length-1) + index;
-  		// if(medianIndexLower>this.normalisedMedian.length-1)
-  		// 	medianIndexLower = medianIndexLower - (this.normalisedMedian.length-1);
-
-  		// if(medianIndexHigher<0)
-  		// 	medianIndexHigher = (this.normalisedMedian.length-1) + index;
-  		// if(medianIndexHigher>this.normalisedMedian.length-1)
-  		// 	medianIndexHigher = medianIndexHigher - (this.normalisedMedian.length-1);
-
   		// get the angle values in the median profile at the given indices
   		double medianAngleLower = this.normalisedMedian[medianIndexLower];
   		double medianAngleHigher = this.normalisedMedian[medianIndexHigher];
@@ -3343,11 +3393,6 @@ public class Sperm_Analysis
     			// int index = (int);
     			int toEnd = normalisedMedian.length - index;
     			int diff = Math.abs(index - toEnd);
-
-    			// if(diff < minDiff){
-    			// 	minDiff = diff;
-    			// 	tailIndex = index;
-    			// }
 
     			double angle = normalisedMedian[index];
     			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not the tip
@@ -3575,43 +3620,41 @@ public class Sperm_Analysis
         g.delete();
       }
 
-      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tPATH", redLogFile);
-      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tPATH", greenLogFile);
+      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", redLogFile);
+      IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", greenLogFile);
+      
       for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
 
-        int nucleusNumber = this.nucleiCollection.get(i).getNucleusNumber();
-        String path = this.nucleiCollection.get(i).getPath();
+        Nucleus n = this.nucleiCollection.get(i);
 
-        ArrayList<NuclearSignal> redSignals = this.nucleiCollection.get(i).getRedSignals();
-        if(redSignals.size()>0){
-          for(int j=0; j<redSignals.size();j++){
-             NuclearSignal n = redSignals.get(j);
-             IJ.append(nucleusNumber+"\t"+
-                       n.getArea()+"\t"+
-                       n.getAngle()+"\t"+
-                       n.getFeret()+"\t"+
-                       n.getDistance()+"\t"+
-                       n.getFractionalDistance()+"\t"+
-                       n.getPerimeter()+"\t"+
-                       path, redLogFile);
-          }
-        }
+        int nucleusNumber = n.getNucleusNumber();
+        String path = n.getPath();
 
-        ArrayList<NuclearSignal> greenSignals = this.nucleiCollection.get(i).getGreenSignals();
-        if(greenSignals.size()>0){
-          for(int j=0; j<greenSignals.size();j++){
-             NuclearSignal n = greenSignals.get(j);
-             IJ.append(nucleusNumber+"\t"+
-                       n.getArea()+"\t"+
-                       n.getAngle()+"\t"+
-                       n.getFeret()+"\t"+
-                       n.getDistance()+"\t"+
-                       n.getFractionalDistance()+"\t"+
-                       n.getPerimeter()+"\t"+
-                       path, greenLogFile);
-          }
-        }
-      }
+        ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+        signals.add(n.getRedSignals());
+        signals.add(n.getGreenSignals());
+
+        int signalCount = 0;
+        for( ArrayList<NuclearSignal> signalGroup : signals ){
+
+          String log = signalCount == 0 ? redLogFile : greenLogFile;
+          
+          if(signalGroup.size()>0){
+            for(int j=0; j<signalGroup.size();j++){
+               NuclearSignal s = signalGroup.get(j);
+               IJ.append(nucleusNumber+"\t"+
+                         s.getArea()+"\t"+
+                         s.getAngle()+"\t"+
+                         s.getFeret()+"\t"+
+                         s.getDistance()+"\t"+
+                         s.getFractionalDistance()+"\t"+
+                         s.getPerimeter()+"\t"+
+                         path, log);
+            } // end for
+          } // end if
+          signalCount++;
+        } // end for
+      } // end for
     }
 
     public void drawRawPositionsFromTailChart(){
@@ -3671,7 +3714,7 @@ public class Sperm_Analysis
       if(f.exists()){
         f.delete();
       }
-      IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tSQUARE_DIFFERENCE\tFAILURE_CODE\tPATH", statsFile);
+      IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH", statsFile);
 
       IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei");
       double[] areas  = this.getAreas();
@@ -3697,7 +3740,7 @@ public class Sperm_Analysis
                     paths[i], statsFile);
 
         // Include tip, CoM, tail
-    		this.nucleiCollection.get(i).printLogFile();
+    		this.nucleiCollection.get(i).printLogFile(nucleiCollection.get(i).getPathWithoutExtension()+"\\"+nucleiCollection.get(i).getNucleusNumber()+".log");
       }
       IJ.log("Export complete");
     }
@@ -4009,23 +4052,20 @@ public class Sperm_Analysis
 
 			this.moveCoMtoZero();
 			this.preparePlots();
-			// this.plotTargetNucleus();
 
 			double score = compareProfiles(targetCurve, initialCurve);
 			
-			IJ.log("Initial score: "+score);
-			int iterations = 50;
+			IJ.log("Refolding curve: initial score: "+(int)score);
 
 			double prevScore = score*2;
 			int i=0;
 			while(prevScore - score >0.0001 || i<100){
-			// for(int i=0; i<iterations;i++){
 				prevScore = score;
 				score = this.iterateOverNucleus();
 				// IJ.log("Iteration "+i+": "+score);
 				i++;
 			}
-			IJ.log("Final score: "+score);
+			IJ.log("Refolded curve: final score: "+(int)score);
 			// this.plotTargetNucleus();
 			// return targetNucleus;
 		}
@@ -4127,18 +4167,24 @@ public class Sperm_Analysis
 		*/
 		private void plotTargetNucleus(){
 
-			double[] xPoints = new double[targetNucleus.smoothLength];
-			double[] yPoints = new double[targetNucleus.smoothLength];
-			double[] aPoints = new double[targetNucleus.smoothLength]; // angles
-			double[] pPoints = new double[targetNucleus.smoothLength]; // positions along array
+			double[] xPoints = new double[targetNucleus.smoothLength+1];
+			double[] yPoints = new double[targetNucleus.smoothLength+1];
+			// double[] aPoints = new double[targetNucleus.smoothLength+1]; // angles
+			// double[] pPoints = new double[targetNucleus.smoothLength+1]; // positions along array
 
 			for(int i=0; i<targetNucleus.smoothLength; i++){
 				XYPoint p = targetNucleus.smoothedArray[i];
 				xPoints[i] = p.getX();
 				yPoints[i] = p.getY();
-				aPoints[i] = p.getInteriorAngle();
-				pPoints[i] = i;
+				// aPoints[i] = p.getInteriorAngle();
+				// pPoints[i] = i;
 			}
+
+      // ensure nucleus outline joins up at tip
+      XYPoint p = targetNucleus.smoothedArray[0];
+      xPoints[targetNucleus.smoothLength] = p.getX();
+      yPoints[targetNucleus.smoothLength] = p.getY();
+
 			nucleusPlot.setColor(Color.DARK_GRAY);
 			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
 			// anglePlot.setColor(Color.DARK_GRAY);
@@ -4312,7 +4358,11 @@ public class Sperm_Analysis
 
     private void exportImage(){
     	ImagePlus plot = nucleusPlot.getImagePlus();
-      IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"plotConsensus.tiff");
+      IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"\\plotConsensus.tiff");
+
+      targetNucleus.setPath(targetNucleus.getDirectory()+"\\logConsensusNucleus.txt");
+      IJ.log("Exporting to: "+targetNucleus.getPath());
+      targetNucleus.printLogFile(targetNucleus.getPath());
     }
 
     /*
@@ -4332,7 +4382,6 @@ public class Sperm_Analysis
         int signalCount = 0;
         for( ArrayList<NuclearSignal> signalGroup : signals ){
 
-        // ArrayList<NuclearSignal> redSignals = n.getRedSignals();
           if(signalGroup.size()>0){
 
             ArrayList<Double> xPoints = new ArrayList<Double>(0);
