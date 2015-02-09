@@ -14,7 +14,13 @@ morphology comparisons
   ---------------
   FEATURES TO ADD
   ---------------
-    Consensus image based on reflded nucleus
+    Adaptive thresholding
+    Measure DAPI propotions in each x-degree segment around CoM for normalisation.
+      Relevant measurement code:  getResult("IntDen", 0);
+    Alter filters to be more permissive of extreme Yqdel
+    Add smoothing to consensus nucleus outline
+    Rescale consensus image plot to rotated nucleus dimensions
+    Add signal areas to consensus image
     Get measure of consistency in tail predictions
 */
 import ij.IJ;
@@ -201,6 +207,7 @@ public class Sperm_Analysis
 
     // draw signals on the refolded nucleus
     refolder.addSignalsToConsensus(completeCollection);
+    refolder.exportImage();
     
   }
 
@@ -974,17 +981,16 @@ public class Sperm_Analysis
     private double feret; // the maximum diameter
     private double area; // the nuclear area
 
-    private XYPoint[] array; // the points from the polygon made from the input roi
+    private XYPoint[] array; // the points from the polygon made from the input roi. Not currently used.
     private XYPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
-    private XYPoint[] splineArray; // spline values. Currently not used.
     private ArrayList<XYPoint> intialSpermTails = new ArrayList<XYPoint>(0); // holds the points considered to be sperm tails before filtering
 
     private XYPoint centreOfMass;
     private XYPoint spermTip;
     private XYPoint spermTail;
-    private XYPoint intersectionPoint;
-    private XYPoint initialConsensusTail;
-    private XYPoint minFeretPoint1;
+    private XYPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
+    private XYPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
+    private XYPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
     private XYPoint minFeretPoint2;
     
     private String imagePath; // the path to the image being analysed
@@ -992,12 +998,12 @@ public class Sperm_Analysis
     private boolean minimaCalculated = false; // has detectLocalMinima been run
     private boolean maximaCalculated = false; // has detectLocalMaxima been run
     private boolean anglesCalculated = false; // has makeAngleProfile been run
-    private boolean offsetCalculated = false; // has makeAngleProfile been run
+    private boolean offsetCalculated = false; // has calculateOffsets been run
     
     private Roi roi; // the original ROI
     private Polygon polygon; // the ROI converted to a polygon; source of XYPoint[] array
 
-    private ArrayList<NuclearSignal> redSignals = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
+    private ArrayList<NuclearSignal> redSignals    = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
     private ArrayList<NuclearSignal> greenSignals  = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
 
     private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
@@ -3490,8 +3496,8 @@ public class Sperm_Analysis
         ArrayList<NuclearSignal> redSignals = n.getRedSignals();
         if(redSignals.size()>0){
 
-          ArrayList redPoints = new ArrayList(0);
-          ArrayList yPoints = new ArrayList(0);
+          ArrayList<Double> redPoints = new ArrayList<Double>(0);
+          ArrayList<Double> yPoints   = new ArrayList<Double>(0);
 
           for(int j=0; j<redSignals.size();j++){
 
@@ -3526,8 +3532,8 @@ public class Sperm_Analysis
         ArrayList<NuclearSignal> redSignals = n.getRedSignals();
         if(redSignals.size()>0){
 
-          ArrayList redPoints = new ArrayList(0);
-          ArrayList yPoints = new ArrayList(0);
+          ArrayList<Double> redPoints = new ArrayList<Double>(0);
+          ArrayList<Double> yPoints   = new ArrayList<Double>(0);
 
           for(int j=0; j<redSignals.size();j++){
 
@@ -3957,6 +3963,15 @@ public class Sperm_Analysis
     public void setClosestBorderPoint(XYPoint p){
       this.closestNuclearBorderPoint = p;
     }
+
+    /*
+      Assuming the signal were a perfect circle of area equal
+      to the measured area, get the radius for that circle
+    */
+    public double getRadius(){
+      // r = sqrt(a/pi)
+      return Math.sqrt(this.area/Math.PI);
+    }
   }
 
  /*
@@ -4066,8 +4081,8 @@ public class Sperm_Analysis
 			}
 			
 			nucleusPlot = new Plot( "Nucleus shape",
-                                  "X",
-                                  "Y");
+                                  "",
+                                  "");
     	
     	// get the limits  for the plot  	
 			double minX = targetNucleus.getMinX();
@@ -4085,8 +4100,9 @@ public class Sperm_Analysis
 
 	    nucleusPlot.setLimits(min, Math.abs(min), min, Math.abs(min));
 
-	    nucleusPlot.setSize(300,300);
+	    nucleusPlot.setSize(400,400);
 	    nucleusPlot.setYTicks(true);
+      nucleusPlot.setColor(Color.LIGHT_GRAY);
 	    nucleusPlot.drawLine(min, 0, Math.abs(min), 0);
 	    nucleusPlot.drawLine(0, min, 0, Math.abs(min));
 
@@ -4123,10 +4139,10 @@ public class Sperm_Analysis
 				aPoints[i] = p.getInteriorAngle();
 				pPoints[i] = i;
 			}
-			nucleusPlot.setColor(Color.LIGHT_GRAY);
+			nucleusPlot.setColor(Color.DARK_GRAY);
 			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
-			anglePlot.setColor(Color.LIGHT_GRAY);
-			anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
+			// anglePlot.setColor(Color.DARK_GRAY);
+			// anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
 			nucleusPlotWindow.drawPlot(nucleusPlot);
 			// anglePlotWindow.drawPlot(anglePlot);
 		}
@@ -4301,7 +4317,7 @@ public class Sperm_Analysis
 
     /*
       Using a list of signal locations, draw on
-      the consensus plot. Only red so far.
+      the consensus plot.
     */
     public void addSignalsToConsensus(NucleusCollection collection){
 
@@ -4309,44 +4325,51 @@ public class Sperm_Analysis
 
         Nucleus n = collection.nucleiCollection.get(i);
 
-        ArrayList<NuclearSignal> redSignals = n.getRedSignals();
-        if(redSignals.size()>0){
+        ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+        signals.add(n.getRedSignals());
+        signals.add(n.getGreenSignals());
 
-          ArrayList redXPoints = new ArrayList(0);
-          ArrayList redYPoints = new ArrayList(0);
-  
-          for(int j=0; j<redSignals.size();j++){
+        int signalCount = 0;
+        for( ArrayList<NuclearSignal> signalGroup : signals ){
 
-          	double angle = redSignals.get(j).getAngle();
-          	double fractionalDistance = redSignals.get(j).getFractionalDistance();
+        // ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+          if(signalGroup.size()>0){
 
-          	// determine the total distance to the border at this angle
-          	double distanceToBorder = getDistanceFromAngle(angle);
+            ArrayList<Double> xPoints = new ArrayList<Double>(0);
+            ArrayList<Double> yPoints = new ArrayList<Double>(0);
+    
+            for(int j=0; j<signalGroup.size();j++){
 
-          	// convert to fractional distance to signal
-          	double signalDistance = distanceToBorder * fractionalDistance;
-            
-            // adjust X and Y because we are now counting angles from the vertical axis
-          	double signalX = getXComponentOfAngle(signalDistance, angle-90);
-          	double signalY = getYComponentOfAngle(signalDistance, angle-90);
+            	double angle = signalGroup.get(j).getAngle();
+            	double fractionalDistance = signalGroup.get(j).getFractionalDistance();
 
-            // add to array
-            redXPoints.add( signalX );
-            redYPoints.add( signalY );
-           // IJ.log("Signal "+j+": Fdist: "+fractionalDistance+" Dist: "+signalDistance+" X: "+signalX+" Y: "+signalY);
-            
+            	// determine the total distance to the border at this angle
+            	double distanceToBorder = getDistanceFromAngle(angle);
+
+            	// convert to fractional distance to signal
+            	double signalDistance = distanceToBorder * fractionalDistance;
+              
+              // adjust X and Y because we are now counting angles from the vertical axis
+            	double signalX = getXComponentOfAngle(signalDistance, angle-90);
+            	double signalY = getYComponentOfAngle(signalDistance, angle-90);
+
+              // add to array
+              xPoints.add( signalX );
+              yPoints.add( signalY );
+             // IJ.log("Signal "+j+": Fdist: "+fractionalDistance+" Dist: "+signalDistance+" X: "+signalX+" Y: "+signalY);
+              
+            }
+            if(signalCount==0)
+              nucleusPlot.setColor(Color.RED);
+            else
+              nucleusPlot.setColor(Color.GREEN);
+
+            nucleusPlot.setLineWidth(2);
+            nucleusPlot.addPoints(xPoints, yPoints, Plot.DOT);
           }
-          nucleusPlot.setColor(Color.RED);
-          nucleusPlot.setLineWidth(2);
-          nucleusPlot.addPoints(redXPoints, redYPoints, Plot.DOT);
+          signalCount++;
         }
       }
-
-      nucleusPlot.setColor(Color.BLUE);
-      nucleusPlot.setLineWidth(2);
-      double[] tailX = { targetNucleus.getSpermTail().getX() };
-      double[] tailY = { targetNucleus.getSpermTail().getY() };
-      nucleusPlot.addPoints( tailX, tailY, Plot.DOT);
       nucleusPlotWindow.drawPlot(nucleusPlot);
 
     }
