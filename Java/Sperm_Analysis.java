@@ -99,6 +99,8 @@ morphology comparisons
     Rescale consensus image plot to rotated nucleus dimensions
     Add signal areas to consensus image
     Get measure of consistency in tail predictions
+    Better profile orientation detector based on area above 180
+    Confirm area of consenus nucleus matches median area, to allow overlay of different genotypes
 */
 import ij.IJ;
 import ij.ImagePlus;
