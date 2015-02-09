@@ -176,8 +176,8 @@ public class Sperm_Analysis
 
     completeCollection.refilterNuclei(); // remove any nuclei that are odd shapes
     failedNuclei.exportNuclearStats("logFailed.txt");
-    failedNuclei.annotateImagesOfNuclei();
-    failedNuclei.rotateAndAssembleNucleiForExport("compositeFailed.tiff");
+    // failedNuclei.annotateImagesOfNuclei();
+    // failedNuclei.rotateAndAssembleNucleiForExport("compositeFailed.tiff");
 
     completeCollection.drawRawPositionsFromTailChart();
     completeCollection.createNormalisedTailPositions();
@@ -186,8 +186,8 @@ public class Sperm_Analysis
     completeCollection.calculateTailCentredNormalisedMedianLine();
     completeCollection.measureNuclearOrganisation();
     completeCollection.exportNuclearStats("logStats.txt");
-    completeCollection.annotateImagesOfNuclei();
-    completeCollection.rotateAndAssembleNucleiForExport("composite.tiff");
+    // completeCollection.annotateImagesOfNuclei();
+    // completeCollection.rotateAndAssembleNucleiForExport("composite.tiff");
     
     // curve refolding
     Nucleus refoldCandidate = completeCollection.getNucleusMostSimilarToMedian();
@@ -198,8 +198,9 @@ public class Sperm_Analysis
 
     // orient refolded nucleus to put tail at the bottom
     refolder.putTailAtBottom();
-    // Nucleus refoldedNucleus = 
+
     // draw signals on the refolded nucleus
+    refolder.addSignalsToConsensus(completeCollection);
     
   }
 
@@ -4082,7 +4083,7 @@ public class Sperm_Analysis
 	    min = Math.floor(min - Math.abs(min));
 	    max = Math.ceil(max * 2);
 
-	    nucleusPlot.setLimits(min, max, min, max);
+	    nucleusPlot.setLimits(min, min, min, min);
 
 	    nucleusPlot.setSize(300,300);
 	    nucleusPlot.setYTicks(true);
@@ -4097,12 +4098,12 @@ public class Sperm_Analysis
 	    anglePlot.setSize(300,300);
 	    anglePlot.setYTicks(true);
 
-	    nucleusPlot.setColor(Color.LIGHT_GRAY);
-			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
-			anglePlot.setColor(Color.LIGHT_GRAY);
-			anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
+	  	//   nucleusPlot.setColor(Color.LIGHT_GRAY);
+			// nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
+			// anglePlot.setColor(Color.LIGHT_GRAY);
+			// anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
 			nucleusPlotWindow = nucleusPlot.show();
-			anglePlotWindow = anglePlot.show();
+			// anglePlotWindow = anglePlot.show();
 		}
 
 		/*
@@ -4122,12 +4123,12 @@ public class Sperm_Analysis
 				aPoints[i] = p.getInteriorAngle();
 				pPoints[i] = i;
 			}
-			nucleusPlot.setColor(Color.RED);
+			nucleusPlot.setColor(Color.LIGHT_GRAY);
 			nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
-			anglePlot.setColor(Color.RED);
+			anglePlot.setColor(Color.LIGHT_GRAY);
 			anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
 			nucleusPlotWindow.drawPlot(nucleusPlot);
-			anglePlotWindow.drawPlot(anglePlot);
+			// anglePlotWindow.drawPlot(anglePlot);
 		}
 
 		/*
@@ -4235,14 +4236,24 @@ public class Sperm_Analysis
     	// find the angle to rotate
     	double angleToRotate = 0;
     	double distanceFromZero = 180;
+
+    	// get the angle from the tail to the vertical axis line
+    	double tailAngle = findAngleBetweenXYPoints( targetNucleus.getSpermTail(), targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
+  		if(targetNucleus.getSpermTail().getX()<0){
+  			tailAngle = 360-tailAngle; // correct for measuring the smallest angle
+  		}
+
     	for(int i=0;i<360;i++){
+
+    		// get a copy of the sperm tail
     		XYPoint p = new XYPoint( targetNucleus.getSpermTail().getX(), targetNucleus.getSpermTail().getY() );
+    		
+    		// get the distance from tail to CoM
     		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
-    		double oldAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
-    		if(p.getX()<0){
-    			oldAngle = 360-oldAngle;
-    		}
-    		double newAngle = oldAngle + i;
+
+    		// add the rotation amount
+    		double newAngle = tailAngle + i;
+
     		double newX = getXComponentOfAngle(distance, newAngle);
 				double newY = getYComponentOfAngle(distance, newAngle);
 
@@ -4252,9 +4263,9 @@ public class Sperm_Analysis
 				}
     	}
 
-    	if(targetNucleus.getSpermTail().getX()<0){
-    		angleToRotate = 360-angleToRotate;
-    	}
+    	// if(targetNucleus.getSpermTail().getX()<0){
+    	// 	angleToRotate = 360-angleToRotate;
+    	// }
     	IJ.log("Rotating by "+(int)angleToRotate);
 
     	for(int i=0;i<targetNucleus.smoothLength;i++){
@@ -4273,7 +4284,98 @@ public class Sperm_Analysis
 				p.setX(newX); // the new x position
 				p.setY(newY); // the new y position
     	}
+
+    	// also flip if tip X is >0
+    	if(targetNucleus.getSpermTip().getX() > 0){
+    		IJ.log("  Flipping");
+    		targetNucleus.flipXAroundPoint(targetNucleus.getCentreOfMass());
+    	}
+
     	plotTargetNucleus();
+    }
+
+    private void exportImage(){
+    	ImagePlus plot = nucleusPlot.getImagePlus();
+      IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"plotConsensus.tiff");
+    }
+
+    /*
+      Using a list of signal locations, draw on
+      the consensus plot. Only red so far.
+    */
+    public void addSignalsToConsensus(NucleusCollection collection){
+
+    	for(int i= 0; i<collection.nucleiCollection.size();i++){ // for each roi
+
+        Nucleus n = collection.nucleiCollection.get(i);
+
+        ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+        if(redSignals.size()>0){
+
+          ArrayList redXPoints = new ArrayList(0);
+          ArrayList redYPoints = new ArrayList(0);
+  
+          for(int j=0; j<redSignals.size();j++){
+
+          	double angle = redSignals.get(j).getAngle();
+          	double fractionalDistance = redSignals.get(j).getFractionalDistance();
+
+          	// determine the total distance to the border at this angle
+          	double distanceToBorder = getDistanceFromAngle(angle);
+
+          	// convert to fractional distance to signal
+          	double signalDistance = distanceToBorder * fractionalDistance;
+            
+            // adjust X and Y because we are now counting angles from the vertical axis
+          	double signalX = getXComponentOfAngle(signalDistance, angle-90);
+          	double signalY = getYComponentOfAngle(signalDistance, angle-90);
+
+            // add to array
+            redXPoints.add( signalX );
+            redYPoints.add( signalY );
+           // IJ.log("Signal "+j+": Fdist: "+fractionalDistance+" Dist: "+signalDistance+" X: "+signalX+" Y: "+signalY);
+            
+          }
+          nucleusPlot.setColor(Color.RED);
+          nucleusPlot.setLineWidth(2);
+          nucleusPlot.addPoints(redXPoints, redYPoints, Plot.DOT);
+        }
+      }
+
+      nucleusPlot.setColor(Color.BLUE);
+      nucleusPlot.setLineWidth(2);
+      double[] tailX = { targetNucleus.getSpermTail().getX() };
+      double[] tailY = { targetNucleus.getSpermTail().getY() };
+      nucleusPlot.addPoints( tailX, tailY, Plot.DOT);
+      nucleusPlotWindow.drawPlot(nucleusPlot);
+
+    }
+
+    private double getDistanceFromAngle(double angle){
+
+    	// go through the nucleus outline
+    	// measure the angle to the tail and the distance to the CoM
+    	// if closest to target angle, return distance
+    	double bestAngle = 180;
+    	double bestDiff = 180;
+    	double bestDistance = 180;
+
+    	for(int i=0;i<targetNucleus.smoothLength;i++){
+    		XYPoint p = targetNucleus.smoothedArray[i];
+    		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
+    		double pAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
+    		if(p.getX()<0){
+    			pAngle = 360-pAngle;
+    		}
+
+    		if(Math.abs(angle-pAngle) < bestDiff){
+    			bestAngle = pAngle;
+    			bestDiff = Math.abs(angle-pAngle);
+    			bestDistance = distance;
+    		}
+    	}
+    	// IJ.log("Target angle: "+angle+": Best angel: "+bestAngle+" Distance: "+bestDistance);
+    	return bestDistance;
     }
 
 	}
