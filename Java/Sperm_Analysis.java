@@ -91,6 +91,8 @@ morphology comparisons
   ---------------
   FEATURES TO ADD
   ---------------
+    Fix bug in signal drawing on tail profile
+    Signal size thresholds adapted
     Adaptive thresholding
     Measure DAPI propotions in each x-degree segment around CoM for normalisation.
       Relevant measurement code:  getResult("IntDen", 0);
@@ -160,7 +162,7 @@ public class Sperm_Analysis
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private static final int NUCLEUS_THRESHOLD = 36;
   private static final double MIN_NUCLEAR_SIZE = 500;
-  private static final double MAX_NUCLEAR_SIZE = 7000;
+  private static final double MAX_NUCLEAR_SIZE = 10000;
   private static final double MIN_NUCLEAR_CIRC = 0.3;
   private static final double MAX_NUCLEAR_CIRC = 0.8;
   private static final double PROFILE_INCREMENT = 0.5;
@@ -174,6 +176,7 @@ public class Sperm_Analysis
   private static final int FAILURE_AREA      = 32;
   private static final int FAILURE_PERIM     = 64;
   private static final int FAILURE_OTHER     = 128;
+  private static final int FAILURE_SIGNALS   = 256;
 
   // Chart drawing parameters
   private static final int CHART_WINDOW_HEIGHT     = 300;
@@ -197,6 +200,12 @@ public class Sperm_Analysis
 
   private NucleusCollection completeCollection;
   private NucleusCollection failedNuclei;
+  private NucleusCollection redNuclei;
+  private NucleusCollection greenNuclei;
+  private NucleusCollection notRedNuclei;
+  private NucleusCollection notGreenNuclei;
+  private ArrayList<NucleusCollection> nuclearPopulations = new ArrayList<NucleusCollection>(0);
+
     
   public void run(String paramString)  {
 
@@ -211,8 +220,12 @@ public class Sperm_Analysis
     File folder = new File(folderName);
     File[] listOfFiles = folder.listFiles();
  
-    completeCollection = new NucleusCollection(folderName);
-    failedNuclei       = new NucleusCollection(folderName);
+    completeCollection = new NucleusCollection(folderName, "complete"); // all nuclei except failed
+    failedNuclei       = new NucleusCollection(folderName, "failed"); // failed nuclei; any reason
+    redNuclei          = new NucleusCollection(folderName, "red"); // nuclei with one red signal
+    greenNuclei        = new NucleusCollection(folderName, "green"); // nuclei with one green signal
+    notRedNuclei       = new NucleusCollection(folderName, "not_red"); // nuclei without a red signal
+    notGreenNuclei     = new NucleusCollection(folderName, "not_green"); // nuclei without a green signal
 
     for (File file : listOfFiles) {
       if (file.isFile()) {
@@ -250,43 +263,106 @@ public class Sperm_Analysis
     int analysed = completeCollection.getNucleusCount();
     IJ.log("Before filtering: "+analysed);
 
-    completeCollection.refilterNuclei(); // remove double nuclei, blobs, nuclei too wibbly
-  
-    completeCollection.createProfileAggregate();
-    completeCollection.drawProfilePlots();
 
-    completeCollection.calculateNormalisedMedianLine();
-    completeCollection.findTailIndexInMedianCurve();
-    completeCollection.calculateOffsets();
+    IJ.log("Adding red nuclei");
+    nuclearPopulations.add(redNuclei);
+    nuclearPopulations.add(notRedNuclei);
+    // IJ.log("Adding green nuclei");
+    // nuclearPopulations.add(greenNuclei);
+    // nuclearPopulations.add(notGreenNuclei);
+    IJ.log("Adding complete collection");
+    nuclearPopulations.add(completeCollection);
 
-    completeCollection.refilterNuclei(); // remove any nuclei that are odd shapes
-    failedNuclei.exportNuclearStats("logFailed.txt");
-    failedNuclei.annotateImagesOfNuclei();
-    failedNuclei.rotateAndAssembleNucleiForExport("compositeFailed.tiff");
+    for(int i = 0;i<nuclearPopulations.size();i++){
 
-    completeCollection.drawRawPositionsFromTailChart();
-    completeCollection.createNormalisedTailPositions();
-    completeCollection.drawNormalisedPositionsFromTailChart();
-    completeCollection.createTailCentredProfileAggregate();
-    completeCollection.calculateTailCentredNormalisedMedianLine();
-    completeCollection.measureNuclearOrganisation();
-    completeCollection.exportNuclearStats("logStats.txt");
-    completeCollection.annotateImagesOfNuclei();
-    completeCollection.rotateAndAssembleNucleiForExport("composite.tiff");
+      NucleusCollection currentPopulation = nuclearPopulations.get(i);
+      if(currentPopulation.getNucleusCount()==0){
+        continue;
+      }
+
+      IJ.log("Analysing population: "+currentPopulation.collectionType);
+      IJ.log("  Total nuclei: "+currentPopulation.getNucleusCount());
+      IJ.log("  Red signals: "+currentPopulation.getRedSignalCount());
+      IJ.log("  Green signals: "+currentPopulation.getGreenSignalCount());
+
+      currentPopulation.refilterNuclei(); // remove double nuclei, blobs, nuclei too wibbly
     
-    // curve refolding
-    Nucleus refoldCandidate = completeCollection.getNucleusMostSimilarToMedian();
-    double[] targetProfile = completeCollection.getMedianTargetCurve(refoldCandidate);
+      currentPopulation.createProfileAggregate();
+      currentPopulation.drawProfilePlots();
 
-    CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
-    refolder.refoldCurve();
+      currentPopulation.calculateNormalisedMedianLine();
+      currentPopulation.findTailIndexInMedianCurve();
+      currentPopulation.calculateOffsets();
 
-    // orient refolded nucleus to put tail at the bottom
-    refolder.putTailAtBottom();
+      currentPopulation.refilterNuclei(); // remove any nuclei that are odd shapes
+      
+      // failedNuclei.exportNuclearStats("logFailed_Pop"+i+".txt");
+      // failedNuclei.annotateImagesOfNuclei();
+      // failedNuclei.rotateAndAssembleNucleiForExport("compositeFailed_Pop"+i+".tiff");
 
-    // draw signals on the refolded nucleus
-    refolder.addSignalsToConsensus(completeCollection);
-    refolder.exportImage();
+      currentPopulation.drawRawPositionsFromTailChart();
+      currentPopulation.createNormalisedTailPositions();
+      currentPopulation.drawNormalisedPositionsFromTailChart();
+      currentPopulation.createTailCentredProfileAggregate();
+      currentPopulation.calculateTailCentredNormalisedMedianLine();
+      currentPopulation.measureNuclearOrganisation();
+      currentPopulation.exportNuclearStats("logStats");
+      currentPopulation.annotateImagesOfNuclei();
+      currentPopulation.rotateAndAssembleNucleiForExport("composite");
+      
+      // curve refolding
+      Nucleus refoldCandidate = currentPopulation.getNucleusMostSimilarToMedian();
+      double[] targetProfile = currentPopulation.getMedianTargetCurve(refoldCandidate);
+
+      CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
+      refolder.refoldCurve();
+
+      // orient refolded nucleus to put tail at the bottom
+      refolder.putTailAtBottom();
+
+      // draw signals on the refolded nucleus
+      refolder.addSignalsToConsensus(currentPopulation);
+      refolder.exportImage("plotConsensus."+currentPopulation.collectionType+".tiff", "logConsensusNucleus."+currentPopulation.collectionType+".txt");
+
+    }
+
+      // completeCollection.refilterNuclei(); // remove double nuclei, blobs, nuclei too wibbly
+    
+      // completeCollection.createProfileAggregate();
+      // completeCollection.drawProfilePlots();
+
+      // completeCollection.calculateNormalisedMedianLine();
+      // completeCollection.findTailIndexInMedianCurve();
+      // completeCollection.calculateOffsets();
+
+      // completeCollection.refilterNuclei(); // remove any nuclei that are odd shapes
+      failedNuclei.exportNuclearStats("logStats");
+      failedNuclei.annotateImagesOfNuclei();
+      failedNuclei.rotateAndAssembleNucleiForExport("composite");
+
+      // completeCollection.drawRawPositionsFromTailChart();
+      // completeCollection.createNormalisedTailPositions();
+      // completeCollection.drawNormalisedPositionsFromTailChart();
+      // completeCollection.createTailCentredProfileAggregate();
+      // completeCollection.calculateTailCentredNormalisedMedianLine();
+      // completeCollection.measureNuclearOrganisation();
+      // completeCollection.exportNuclearStats("logStats.txt");
+      // completeCollection.annotateImagesOfNuclei();
+      // completeCollection.rotateAndAssembleNucleiForExport("compositeAll.tiff");
+      
+      // // curve refolding
+      // Nucleus refoldCandidate = completeCollection.getNucleusMostSimilarToMedian();
+      // double[] targetProfile = completeCollection.getMedianTargetCurve(refoldCandidate);
+
+      // CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
+      // refolder.refoldCurve();
+
+      // // orient refolded nucleus to put tail at the bottom
+      // refolder.putTailAtBottom();
+
+      // // draw signals on the refolded nucleus
+      // refolder.addSignalsToConsensus(completeCollection);
+      // refolder.exportImage();
     
   }
 
@@ -294,7 +370,9 @@ public class Sperm_Analysis
     if(i<0)
       i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
     if(Math.floor(i / length)>0)
-      i = i - ( ((int)Math.floor(i / length) )*length);
+      i = i - ( ((int)Math.floor(i / length) )*length); // if i is 250 in a 200 length array, will return 250-(200*1) = 50
+    // if i is 201 in a 200 length array, will return 201 - floor(201/200)=1 * 200 = 1
+    // if 200 in 200 length array: 200/200 = 1; 200-200 = 0
 
     if(i<0 || i>length){
     	IJ.log("Warning: array out of bounds: "+i);
@@ -317,7 +395,7 @@ public class Sperm_Analysis
     IJ.append("# NORM_X\tANGLE\tRAW_X_FROM_TAIL", this.logFile);
 
     this.debugFile = folderName+"logDebug.txt";
-    File h = new File(logFile);
+    File h = new File(debugFile);
     if(h.exists()){
       h.delete();
     }
@@ -660,8 +738,23 @@ public class Sperm_Analysis
     // if everything checks out, add the measured parameters to the global pool
     // currently, the only reason to fail at this stage is if the tip cannot be found
     if(nucleusPassedChecks){
+
       currentNucleus.setPathLength(pathLength);
       this.completeCollection.addNucleus(currentNucleus);
+
+      if(currentNucleus.getRedSignalCount()==1){
+        this.redNuclei.addNucleus(currentNucleus);
+        
+      } else if(currentNucleus.getRedSignalCount()<1){
+        this.notRedNuclei.addNucleus(currentNucleus);
+      }
+
+      if(currentNucleus.getGreenSignalCount()==1){
+        this.greenNuclei.addNucleus(currentNucleus);
+        
+      } else if(currentNucleus.getGreenSignalCount()<1){
+        this.notGreenNuclei.addNucleus(currentNucleus);
+      }
 
     } else {
       this.failedNuclei.addNucleus(currentNucleus);
@@ -1422,6 +1515,14 @@ public class Sperm_Analysis
 
     public ArrayList<NuclearSignal> getGreenSignals(){
       return this.greenSignals;
+    }
+
+    public int getRedSignalCount(){
+      return redSignals.size();
+    }
+
+    public int getGreenSignalCount(){
+      return greenSignals.size();
     }
 
     public void addTailEstimatePosition(XYPoint p){
@@ -2562,6 +2663,7 @@ public class Sperm_Analysis
   class NucleusCollection {
 
   	private String folder; // the source of the nuclei
+    private String collectionType; // for annotating image names
     private String medianFile; // output medians
     private String tailNormalisedMedianFile; // output medians
 
@@ -2591,10 +2693,12 @@ public class Sperm_Analysis
     private double maxDifferenceFromMedian = 1.5; // used to filter the nuclei, and remove those too small, large or irregular to be real
     private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
 
-  	public NucleusCollection(String folder){
+  	public NucleusCollection(String folder, String type){
   		this.folder = folder;
-      this.medianFile = folder+"logTipMedians.txt";
-      this.tailNormalisedMedianFile = folder+"logTailMedians.txt";
+      this.collectionType = type;
+      this.medianFile = folder+"logTipMedians."+collectionType+".txt";
+      this.tailNormalisedMedianFile = folder+"logTailMedians."+collectionType+".txt";
+
   	}
 
   	public void addNucleus(Nucleus r){
@@ -2713,7 +2817,7 @@ public class Sperm_Analysis
       int count = 0;
 
       for(int i=0;i<nucleiCollection.size();i++){
-        count += nucleiCollection.get(i).getRedSignals().size();
+        count += nucleiCollection.get(i).getRedSignalCount();
       }
       return count;
     }
@@ -2722,7 +2826,7 @@ public class Sperm_Analysis
       int count = 0;
 
       for(int i=0;i<nucleiCollection.size();i++){
-        count += nucleiCollection.get(i).getGreenSignals().size();
+        count += nucleiCollection.get(i).getGreenSignalCount();
       }
       return count;
     }
@@ -2834,20 +2938,17 @@ public class Sperm_Analysis
 
       int totalIterations = nucleiCollection.size();
 
-      IJ.log("Prefiltered:");
-      IJ.log("    Area: "+(int)medianArea);
-      IJ.log("    Perimeter: "+(int)medianPerimeter);
-      IJ.log("    Path length: "+(int)medianPathLength);
-      IJ.log("    Array length: "+(int)medianArrayLength);
-      IJ.log("    Feret length: "+(int)medianFeretLength);
-      IJ.log("    Curve: "+(int)medianDifferenceToMedianCurve);
+      IJ.append("Prefiltered:", debugFile);
+      IJ.append("    Area: "+(int)medianArea, debugFile);
+      IJ.append("    Perimeter: "+(int)medianPerimeter, debugFile);
+      IJ.append("    Path length: "+(int)medianPathLength, debugFile);
+      IJ.append("    Array length: "+(int)medianArrayLength, debugFile);
+      IJ.append("    Feret length: "+(int)medianFeretLength, debugFile);
+      IJ.append("    Curve: "+(int)medianDifferenceToMedianCurve, debugFile);
 
       for(int i=0;i<nucleiCollection.size();i++){
         Nucleus n = nucleiCollection.get(i);
         boolean dropNucleus = false;
-        // IJ.log("Filtering: "+i);
-
-        // IJ.log("Nucleus "+n.getPath()+"-"+n.getNucleusNumber()+" Path length "+n.getPathLength());
 
         if(n.getArea() > maxArea || n.getArea() < minArea ){
           n.failureCode = n.failureCode | FAILURE_AREA;
@@ -2893,20 +2994,20 @@ public class Sperm_Analysis
       int afterSize = nucleiCollection.size();
       int removed = beforeSize - afterSize;
 
-      IJ.log("Postfiltered:");
-      IJ.log("    Area: "+(int)medianArea);
-      IJ.log("    Perimeter: "+(int)medianPerimeter);
-      IJ.log("    Path length: "+(int)medianPathLength);
-      IJ.log("    Array length: "+(int)medianArrayLength);
-      IJ.log("    Feret length: "+(int)medianFeretLength);
-      IJ.log("    Curve: "+(int)medianDifferenceToMedianCurve);
+      IJ.append("Postfiltered:", debugFile);
+      IJ.append("    Area: "+(int)medianArea, debugFile);
+      IJ.append("    Perimeter: "+(int)medianPerimeter, debugFile);
+      IJ.append("    Path length: "+(int)medianPathLength, debugFile);
+      IJ.append("    Array length: "+(int)medianArrayLength, debugFile);
+      IJ.append("    Feret length: "+(int)medianFeretLength, debugFile);
+      IJ.append("    Curve: "+(int)medianDifferenceToMedianCurve, debugFile);
       IJ.log("Removed due to size or length issues: "+removed+" nuclei");
-      IJ.log("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei");
-      IJ.log("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei");
-      IJ.log("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei");
-      IJ.log("  Due to array length: "+arraylength+" nuclei");
-      IJ.log("  Due to feret length: "+feretlength+" nuclei");
-      IJ.log("  Due to curve shape: "+curveShape+" nuclei");
+      IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei", debugFile);
+      IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei", debugFile);
+      IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei", debugFile);
+      IJ.append("  Due to array length: "+arraylength+" nuclei", debugFile);
+      IJ.append("  Due to feret length: "+feretlength+" nuclei", debugFile);
+      IJ.append("  Due to curve shape: "+curveShape+" nuclei", debugFile);
       IJ.log("Remaining: "+this.nucleiCollection.size()+" nuclei");
     }
 
@@ -3603,20 +3704,20 @@ public class Sperm_Analysis
       normXFromTailWindow.drawPlot(normXFromTailPlot);
 
       ImagePlus tipPlot = normXFromTipPlot.getImagePlus();
-      IJ.saveAsTiff(tipPlot, this.folder+"plotTipNorm.tiff");
+      IJ.saveAsTiff(tipPlot, this.folder+"plotTipNorm."+collectionType+".tiff");
       ImagePlus tailPlot = normXFromTailPlot.getImagePlus();
-      IJ.saveAsTiff(tailPlot, this.folder+"plotTailNorm.tiff");
+      IJ.saveAsTiff(tailPlot, this.folder+"plotTailNorm."+collectionType+".tiff");
     }
 
     public void exportSignalStats(){
 
-      String redLogFile = this.folder+"logRedSignals.txt";
+      String redLogFile = this.folder+"logRedSignals."+collectionType+".txt";
       File r = new File(redLogFile);
       if(r.exists()){
         r.delete();
       }
 
-      String greenLogFile = this.folder+"logGreenSignals.txt";
+      String greenLogFile = this.folder+"logGreenSignals."+collectionType+".txt";
       File g = new File(greenLogFile);
       if(g.exists()){
         g.delete();
@@ -3711,7 +3812,7 @@ public class Sperm_Analysis
 
     public void exportNuclearStats(String filename){
     
-      String statsFile = this.folder+filename;
+      String statsFile = this.folder+filename+"."+collectionType+".txt";
       File f = new File(statsFile);
       if(f.exists()){
         f.delete();
@@ -3806,7 +3907,7 @@ public class Sperm_Analysis
         finalProcessor.drawOverlay(overlay);        
       }
     	finalImage.show();
-    	IJ.saveAsTiff(finalImage, folder+filename);
+    	IJ.saveAsTiff(finalImage, folder+filename+"."+collectionType+".tiff");
     	IJ.log("Composite image created");
     }
 
@@ -3822,6 +3923,7 @@ public class Sperm_Analysis
 
     		// open the image we saved earlier
     		String path = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+".tiff";
+        String outPath = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+"."+collectionType+".tiff";
     		Opener localOpener = new Opener();
         ImagePlus image = localOpener.openImage(path);
         ImageProcessor ip = image.getProcessor();
@@ -3896,7 +3998,7 @@ public class Sperm_Analysis
             ip.draw(s.getRoi());
           }
         }
-		    IJ.saveAsTiff(image, path);
+		    IJ.saveAsTiff(image, outPath);
 		    image.close();
 
     	}
@@ -4358,11 +4460,11 @@ public class Sperm_Analysis
     	plotTargetNucleus();
     }
 
-    private void exportImage(){
+    private void exportImage(String plotName, String logName){
     	ImagePlus plot = nucleusPlot.getImagePlus();
-      IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"\\plotConsensus.tiff");
+      IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"\\"+plotName);
 
-      targetNucleus.setPath(targetNucleus.getDirectory()+"\\logConsensusNucleus.txt");
+      targetNucleus.setPath(targetNucleus.getDirectory()+"\\"+logName);
       IJ.log("Exporting to: "+targetNucleus.getPath());
       targetNucleus.printLogFile(targetNucleus.getPath());
     }
