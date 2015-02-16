@@ -322,7 +322,7 @@ public class Sperm_Analysis
 
       // draw signals on the refolded nucleus
       refolder.addSignalsToConsensus(currentPopulation);
-      refolder.exportImage("plotConsensus."+currentPopulation.collectionType+".tiff", "logConsensusNucleus."+currentPopulation.collectionType+".txt");
+      refolder.exportImage(currentPopulation);
 
     }
 
@@ -3877,34 +3877,42 @@ public class Sperm_Analysis
         
         Nucleus n = this.nucleiCollection.get(i);
         String path = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+".tiff";
-        Opener localOpener = new Opener();
-        ImagePlus image = localOpener.openImage(path);
-        ImageProcessor ip = image.getProcessor();
-        int width = ip.getWidth();
-        int height = ip.getHeight();
-        ip.setRoi(n.getRoi());
+
+        try {
+          Opener localOpener = new Opener();
+          ImagePlus image = localOpener.openImage(path);
+          ImageProcessor ip = image.getProcessor();
+          int width = ip.getWidth();
+          int height = ip.getHeight();
+          ip.setRoi(n.getRoi());
 
 
-        ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
+          ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
 
-        newProcessor.setBackgroundValue(0);
-        newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
-        newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
-        newProcessor.rotate( n.findRotationAngle() );
-        newProcessor.setBackgroundValue(0);
+          newProcessor.setBackgroundValue(0);
+          newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
+          newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
+          newProcessor.rotate( n.findRotationAngle() );
+          newProcessor.setBackgroundValue(0);
 
-        if(totalWidth>maxBoxWidth-boxWidth){
-        	totalWidth=0;
-        	totalHeight+=(int)(boxHeight);
-        }
-        int newX = totalWidth;
-        int newY = totalHeight;
-        totalWidth+=(int)(boxWidth);
-        
-        finalProcessor.insert(newProcessor, newX, newY);
-        TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
-        Overlay overlay = new Overlay(label);
-        finalProcessor.drawOverlay(overlay);        
+          if(totalWidth>maxBoxWidth-boxWidth){
+          	totalWidth=0;
+          	totalHeight+=(int)(boxHeight);
+          }
+          int newX = totalWidth;
+          int newY = totalHeight;
+          totalWidth+=(int)(boxWidth);
+          
+          finalProcessor.insert(newProcessor, newX, newY);
+          TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
+          Overlay overlay = new Overlay(label);
+          finalProcessor.drawOverlay(overlay);  
+        } catch(Exception e){
+          IJ.log("Error adding image to composite");
+          IJ.append("Error adding image to composite: "+e, debugFile);
+          IJ.append("  "+collectionType, debugFile);
+          IJ.append("  "+path, debugFile);
+        }     
       }
     	finalImage.show();
     	IJ.saveAsTiff(finalImage, folder+filename+"."+collectionType+".tiff");
@@ -3921,85 +3929,96 @@ public class Sperm_Analysis
     		IJ.log("  "+m+" of "+this.getNucleusCount());
     		Nucleus n = this.nucleiCollection.get(i);
 
-    		// open the image we saved earlier
-    		String path = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+".tiff";
+        String path = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+".tiff";
         String outPath = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+"."+collectionType+".tiff";
-    		Opener localOpener = new Opener();
-        ImagePlus image = localOpener.openImage(path);
-        ImageProcessor ip = image.getProcessor();
 
-        // draw the features of interest
-        
-        // draw the outline of the nucleus
-		    ip.setColor(Color.BLUE);
-		    ip.setLineWidth(1);
-		    ip.draw(n.getRoi());
+        try{
+
+      		// open the image we saved earlier
+      		Opener localOpener = new Opener();
+          ImagePlus image = localOpener.openImage(path);
+          ImageProcessor ip = image.getProcessor();
+
+          // draw the features of interest
+          
+          // draw the outline of the nucleus
+  		    ip.setColor(Color.BLUE);
+  		    ip.setLineWidth(1);
+  		    ip.draw(n.getRoi());
 
 
-		    // draw the CoM
-		    ip.setColor(Color.MAGENTA);
-		    ip.setLineWidth(5);
-		    ip.drawDot(n.getCentreOfMass().getXAsInt(),  n.getCentreOfMass().getYAsInt());
+  		    // draw the CoM
+  		    ip.setColor(Color.MAGENTA);
+  		    ip.setLineWidth(5);
+  		    ip.drawDot(n.getCentreOfMass().getXAsInt(),  n.getCentreOfMass().getYAsInt());
 
-		    //draw the sperm tip 
-		    ip.setLineWidth(5);
-		    ip.setColor(Color.YELLOW);
-		    ip.drawDot(n.getSpermTip().getXAsInt(), n.getSpermTip().getYAsInt());
+  		    //draw the sperm tip 
+  		    ip.setLineWidth(5);
+  		    ip.setColor(Color.YELLOW);
+  		    ip.drawDot(n.getSpermTip().getXAsInt(), n.getSpermTip().getYAsInt());
 
-		    // draw the points considered as sperm tails on a per-nucleus basis
-		    ip.setLineWidth(3);
-		    ip.setColor(Color.GRAY);
-		    for(int j=0; j<n.intialSpermTails.size();j++){
-		    	XYPoint p = n.intialSpermTails.get(j);
-		    	ip.drawDot(p.getXAsInt(), p.getYAsInt());
-		    }
+  		    // draw the points considered as sperm tails on a per-nucleus basis
+  		    ip.setLineWidth(3);
+  		    ip.setColor(Color.GRAY);
+  		    for(int j=0; j<n.intialSpermTails.size();j++){
+  		    	XYPoint p = n.intialSpermTails.get(j);
+  		    	ip.drawDot(p.getXAsInt(), p.getYAsInt());
+  		    }
 
-		    // Draw the original consensus tail
-		    ip.setLineWidth(5);
-		    ip.setColor(Color.CYAN);
-		    ip.drawDot(n.getInitialConsensusTail().getXAsInt(), n.getInitialConsensusTail().getYAsInt());
+  		    // Draw the original consensus tail
+  		    ip.setLineWidth(5);
+  		    ip.setColor(Color.CYAN);
+  		    ip.drawDot(n.getInitialConsensusTail().getXAsInt(), n.getInitialConsensusTail().getYAsInt());
 
-				// line from tail to intsersection point; should pass through CoM   
-        if(n.intersectionPoint!=null){ // handle failed nuclei in which this analysis was not performed
-  				ip.setLineWidth(1);
-  				ip.setColor(Color.YELLOW);
-  		    ip.drawLine(n.getSpermTail().getXAsInt(), n.getSpermTail().getYAsInt(), n.intersectionPoint.getXAsInt(), n.intersectionPoint.getYAsInt());
-        }
-
-        // The narrowest part of the sperm head
-        ip.setLineWidth(1);
-        ip.setColor(Color.MAGENTA);
-        ip.drawLine(n.minFeretPoint1.getXAsInt(), n.minFeretPoint1.getYAsInt(), n.minFeretPoint2.getXAsInt(), n.minFeretPoint2.getYAsInt());
-        ip.setLineWidth(3);
-        ip.drawDot(n.minFeretPoint1.getXAsInt(), n.minFeretPoint1.getYAsInt());
-        
-		    //   SIGNALS
-		    ip.setLineWidth(3);
-		    ip.setColor(Color.RED);
-		    ArrayList<NuclearSignal> redSignals = n.getRedSignals();
-        if(redSignals.size()>0){
-          for(int j=0; j<redSignals.size();j++){
-            NuclearSignal s = redSignals.get(j);
-            ip.setLineWidth(3);
-            ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
-            ip.setLineWidth(1);
-            ip.draw(s.getRoi());
+  				// line from tail to intsersection point; should pass through CoM   
+          if(n.intersectionPoint!=null){ // handle failed nuclei in which this analysis was not performed
+    				ip.setLineWidth(1);
+    				ip.setColor(Color.YELLOW);
+    		    ip.drawLine(n.getSpermTail().getXAsInt(), n.getSpermTail().getYAsInt(), n.intersectionPoint.getXAsInt(), n.intersectionPoint.getYAsInt());
           }
 
-        }
-        ip.setColor(Color.GREEN);
-        ArrayList<NuclearSignal> greenSignals = n.getGreenSignals();
-        if(redSignals.size()>0){
-          for(int j=0; j<greenSignals.size();j++){
-            NuclearSignal s = greenSignals.get(j);
-            ip.setLineWidth(3);
-            ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
-            ip.setLineWidth(1);
-            ip.draw(s.getRoi());
+          // The narrowest part of the sperm head
+          ip.setLineWidth(1);
+          ip.setColor(Color.MAGENTA);
+          ip.drawLine(n.minFeretPoint1.getXAsInt(), n.minFeretPoint1.getYAsInt(), n.minFeretPoint2.getXAsInt(), n.minFeretPoint2.getYAsInt());
+          ip.setLineWidth(3);
+          ip.drawDot(n.minFeretPoint1.getXAsInt(), n.minFeretPoint1.getYAsInt());
+          
+  		    //   SIGNALS
+  		    ip.setLineWidth(3);
+  		    ip.setColor(Color.RED);
+  		    ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+          if(redSignals.size()>0){
+            for(int j=0; j<redSignals.size();j++){
+              NuclearSignal s = redSignals.get(j);
+              ip.setLineWidth(3);
+              ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+              ip.setLineWidth(1);
+              ip.draw(s.getRoi());
+            }
+
           }
+          ip.setColor(Color.GREEN);
+          ArrayList<NuclearSignal> greenSignals = n.getGreenSignals();
+          if(redSignals.size()>0){
+            for(int j=0; j<greenSignals.size();j++){
+              NuclearSignal s = greenSignals.get(j);
+              ip.setLineWidth(3);
+              ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+              ip.setLineWidth(1);
+              ip.draw(s.getRoi());
+            }
+          }
+  		    IJ.saveAsTiff(image, outPath);
+  		    image.close();
+
+        } catch(Exception e){
+          IJ.log("Error annotating nucleus: "+e);
+          IJ.append("Error annotating nucleus: "+e, debugFile);
+          IJ.append("  "+collectionType, debugFile);
+          IJ.append("  "+path, debugFile);
+          IJ.append("  "+outPath, debugFile);
         }
-		    IJ.saveAsTiff(image, outPath);
-		    image.close();
 
     	}
     	 IJ.log("Annotation complete");
@@ -4460,11 +4479,11 @@ public class Sperm_Analysis
     	plotTargetNucleus();
     }
 
-    private void exportImage(String plotName, String logName){
+    private void exportImage(NucleusCollection collection){
     	ImagePlus plot = nucleusPlot.getImagePlus();
-      IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"\\"+plotName);
+      IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"\\plotConsensus."+collection.collectionType+".tiff");
 
-      targetNucleus.setPath(targetNucleus.getDirectory()+"\\"+logName);
+      targetNucleus.setPath(targetNucleus.getDirectory()+"\\logConsensusNucleus."+collection.collectionType+".txt");
       IJ.log("Exporting to: "+targetNucleus.getPath());
       targetNucleus.printLogFile(targetNucleus.getPath());
     }
