@@ -123,8 +123,6 @@ public class Curve_Refolder
 
 	    		XYPoint p = circleArray.get(i);
 	    		
-
-
 	    		double currentDistance = p.getLengthTo(centreOfMass);
 	    		double newDistance = currentDistance; // default no change
 	    		double rand = Math.random();
@@ -137,8 +135,6 @@ public class Curve_Refolder
 	    					newDistance = currentDistance + 0.1; // 1% change
 	    				else
 	    					newDistance = currentDistance + 0.5; // 1% change
-
-
 	    				// newDistance = currentDistance + 0.1; // 1% change
 	    			} else {
 	    				// if(rand < 0.2)
@@ -146,7 +142,6 @@ public class Curve_Refolder
 	    				// else
 	    				// 	p.setCreatedAngle( p.getCreatedAngle()-1);
 	    			}
-	    			
 	    		}
 	    		if(p.getAngle() < p.getTargetAngle()){
 
@@ -162,7 +157,6 @@ public class Curve_Refolder
 	    				// else
 	    				// 	p.setCreatedAngle( p.getCreatedAngle()-1);
 	    			}
-
 	    		}
 
 	    		double x = getXComponentOfAngle(newDistance, p.getCreatedAngle());
@@ -176,10 +170,8 @@ public class Curve_Refolder
 				newXpoints[i] = p.getX();
 				newYpoints[i] = p.getY();
 				newAngle[i] = p.getAngle();
-
-
-
 			}
+			
 			double difference = getDifferenceBetweenCurves(newAngle, targetpoints);
 			IJ.log("Iteration "+j+": "+difference);
 

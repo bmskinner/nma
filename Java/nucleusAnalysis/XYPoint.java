@@ -14,14 +14,7 @@ import java.util.*;
 public class XYPoint {
   private double x;
   private double y;
-  private double minAngle;
-  private double interiorAngle; // depends on whether the min angle is inside or outside the shape
-  private double interiorAngleDelta; // this will hold the difference between a previous interiorAngle and a next interiorAngle
-  private double interiorAngleDeltaSmoothed; // holds delta from a 5-window average centred on this point
-
-  private boolean localMin; // is this angle a local minimum based on the minAngle
-  private boolean localMax; // is this angle a local maximum based on the interior angle
-
+  
   public XYPoint (double x, double y){
     this.x = x;
     this.y = y;
@@ -48,54 +41,6 @@ public class XYPoint {
 
   public void setY(double y){
     this.y = y;
-  }
-
-  public double getMinAngle(){
-    return this.minAngle;
-  }
-
-  public void setMinAngle(double d){
-    this.minAngle = d;
-  }
-
-  public double getInteriorAngle(){
-    return this.interiorAngle;
-  }
-
-  public void setInteriorAngle(double d){
-    this.interiorAngle = d;
-  }
-
-   public double getInteriorAngleDelta(){
-    return this.interiorAngleDelta;
-  }
-
-  public void setInteriorAngleDelta(double d){
-    this.interiorAngleDelta = d;
-  }
-
-  public double getInteriorAngleDeltaSmoothed(){
-    return this.interiorAngleDeltaSmoothed;
-  }
-
-  public void setInteriorAngleDeltaSmoothed(double d){
-    this.interiorAngleDeltaSmoothed = d;
-  }
-
-  public void setLocalMin(boolean b){
-    this.localMin = b;
-  }
-
-  public void setLocalMax(boolean b){
-    this.localMax = b;
-  }
-
-  public boolean isLocalMin(){
-    return this.localMin;
-  }
-
-  public boolean isLocalMax(){
-    return this.localMax;
   }
 
   public double getLengthTo(XYPoint a){

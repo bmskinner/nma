@@ -147,7 +147,6 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 import nucleusAnalysis.*;
-import nucleusAnalysis.sperm.RodentXYPoint;
 
 public class Sperm_Analysis
   extends ImagePlus
@@ -553,7 +552,7 @@ public class Sperm_Analysis
 
     // measure CoM, area, perimeter and feret in blue
     ResultsTable blueResults = findNuclearMeasurements(smallRegion, nucleus);
-    RodentXYPoint nucleusCoM = new RodentXYPoint(blueResults.getValue("XM", 0),  blueResults.getValue("YM", 0) );
+    XYPoint nucleusCoM = new XYPoint(blueResults.getValue("XM", 0),  blueResults.getValue("YM", 0) );
     currentNucleus.setCentreOfMass(nucleusCoM);
     currentNucleus.setPerimeter(blueResults.getValue("Perim.",0));
     currentNucleus.setArea(blueResults.getValue("Area",0));
@@ -561,7 +560,7 @@ public class Sperm_Analysis
     
 
     // find tip - use the least angle method
-    RodentXYPoint spermTip = currentNucleus.findMinimumAngle();
+    NucleusBorderPoint spermTip = currentNucleus.findMinimumAngle();
     if(spermTip.getInteriorAngle() > 110){ // this is not a deep enough curve to declare the tip
         IJ.log("    Cannot reliably assign tip position");
         currentNucleus.failureCode  = currentNucleus.failureCode | FAILURE_TIP;
@@ -584,8 +583,8 @@ public class Sperm_Analysis
     
 
     // find local minima and maxima
-    RodentXYPoint[] minima = currentNucleus.getLocalMinima();
-    RodentXYPoint[] maxima = currentNucleus.getLocalMaxima();
+    NucleusBorderPoint[] minima = currentNucleus.getLocalMinima();
+    NucleusBorderPoint[] maxima = currentNucleus.getLocalMaxima();
 
     
     /*
@@ -596,7 +595,7 @@ public class Sperm_Analysis
     						This is the corner furthest from the tip.
     						Can be confused as to which side of the sperm head is chosen
     */	
-    RodentXYPoint spermTail2 = findTailPointFromMinima(spermTip, nucleusCoM, minima);
+    NucleusBorderPoint spermTail2 = findTailPointFromMinima(spermTip, nucleusCoM, minima);
     currentNucleus.addTailEstimatePosition(spermTail2);
 
     /*
@@ -605,7 +604,7 @@ public class Sperm_Analysis
     						Count the number of consecutive >1 degree blocks
     						Wide block far from tip = tail
     */	
-    RodentXYPoint spermTail3 = currentNucleus.findTailFromDeltas(spermTip);
+    NucleusBorderPoint spermTail3 = currentNucleus.findTailFromDeltas(spermTip);
     currentNucleus.addTailEstimatePosition(spermTail3);
 
     /*    
@@ -613,7 +612,7 @@ public class Sperm_Analysis
                 Draw a line orthogonal, and pick the intersecting border points
                 The border furthest from the tip is the tail
     */  
-    RodentXYPoint spermTail1 = currentNucleus.findTailByNarrowestWidthMethod();
+    NucleusBorderPoint spermTail1 = currentNucleus.findTailByNarrowestWidthMethod();
     currentNucleus.addTailEstimatePosition(spermTail1);
 
 
@@ -622,7 +621,7 @@ public class Sperm_Analysis
       take a position between them on roi
     */
     int consensusTailIndex = currentNucleus.getPositionBetween(spermTail2, spermTail3);
-    RodentXYPoint consensusTail = currentNucleus.smoothedArray[consensusTailIndex];
+    NucleusBorderPoint consensusTail = currentNucleus.smoothedArray[consensusTailIndex];
     consensusTailIndex = currentNucleus.getPositionBetween(consensusTail, spermTail1);
     currentNucleus.tailIndex = consensusTailIndex;
     currentNucleus.setInitialConsensusTail(consensusTail);
@@ -642,7 +641,7 @@ public class Sperm_Analysis
 
     
     // if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // only proceed if the tail points are together  
-    RodentXYPoint prevPoint = new RodentXYPoint(0,0);
+    NucleusBorderPoint prevPoint = new NucleusBorderPoint(0,0);
      
     for (int i=0; i<currentNucleus.smoothLength;i++ ) {
         double normalisedX = ((double)i/(double)currentNucleus.smoothLength)*100; // normalise to 100 length
@@ -658,7 +657,7 @@ public class Sperm_Analysis
         					rawXFromTail, this.logFile);        
 
         // calculate the path length
-        RodentXYPoint thisPoint = new RodentXYPoint(normalisedX,currentNucleus.smoothedArray[i].getInteriorAngle());
+        NucleusBorderPoint thisPoint = new NucleusBorderPoint(normalisedX,currentNucleus.smoothedArray[i].getInteriorAngle());
         pathLength += thisPoint.getLengthTo(prevPoint);
         prevPoint = thisPoint;
     }
@@ -680,7 +679,7 @@ public class Sperm_Analysis
     for(Roi roi : redSignals){
 
       ResultsTable redResults = findSignalMeasurements(smallRegion, roi, 1);
-      RodentXYPoint signalCoM = new RodentXYPoint(redResults.getValue("XM", 0),  redResults.getValue("YM", 0) );
+      XYPoint signalCoM = new XYPoint(redResults.getValue("XM", 0),  redResults.getValue("YM", 0) );
       currentNucleus.addRedSignal( new NuclearSignal( roi, 
                                                 redResults.getValue("Area",0), 
                                                 redResults.getValue("Feret",0), 
@@ -692,7 +691,7 @@ public class Sperm_Analysis
     for(Roi roi : greenSignals){
 
       ResultsTable greenResults = findSignalMeasurements(smallRegion, roi, 1);
-      RodentXYPoint signalCoM = new RodentXYPoint(greenResults.getValue("XM", 0),  greenResults.getValue("YM", 0) );
+      XYPoint signalCoM = new XYPoint(greenResults.getValue("XM", 0),  greenResults.getValue("YM", 0) );
       currentNucleus.addGreenSignal( new NuclearSignal( roi, 
                                                   greenResults.getValue("Area",0), 
                                                   greenResults.getValue("Feret",0), 
@@ -727,10 +726,10 @@ public class Sperm_Analysis
   }
 
   /*
-    Detect the tail based on a list of local minima in an RodentXYPoint array.
+    Detect the tail based on a list of local minima in an NucleusBorderPoint array.
     The putative tail is the point furthest from the sum of the distances from the CoM and the tip
   */
-  public RodentXYPoint findTailPointFromMinima(RodentXYPoint tip, RodentXYPoint centre, RodentXYPoint[] array){
+  public NucleusBorderPoint findTailPointFromMinima(NucleusBorderPoint tip, XYPoint centre, NucleusBorderPoint[] array){
   
     // we cannot be sure that the greatest distance between two points will be the endpoints
     // because the hook may begin to curve back on itself. We supplement this basic distance with
@@ -741,9 +740,9 @@ public class Sperm_Analysis
     double tipToCoMDistance = tip.getLengthTo(centre);
 
     double maxDistance = 0;
-    RodentXYPoint tail = tip;
+    NucleusBorderPoint tail = tip;
 
-    for(RodentXYPoint a : array){
+    for(NucleusBorderPoint a : array){
             
       double distanceAcrossCoM = tipToCoMDistance + centre.getLengthTo(a);
       double distanceBetweenEnds = tip.getLengthTo(a);
@@ -759,13 +758,13 @@ public class Sperm_Analysis
   }
 
   /*
-    Detect a poiint in an RodentXYPoint array furthest from a given point.
+    Detect a poiint in an NucleusBorderPoint array furthest from a given point.
   */
-  public RodentXYPoint findPointFurthestFrom(RodentXYPoint p, RodentXYPoint[] list){
+  public NucleusBorderPoint findPointFurthestFrom(NucleusBorderPoint p, NucleusBorderPoint[] list){
 
     double maxL = 0;
-    RodentXYPoint result = p;
-    for (RodentXYPoint a : list){
+    NucleusBorderPoint result = p;
+    for (NucleusBorderPoint a : list){
       double l = p.getLengthTo(a);
       if(l>maxL){
         maxL = l;
@@ -856,12 +855,12 @@ public class Sperm_Analysis
   }
 
   /*
-    Given three RodentXYPoints, measure the angle a-b-c
+    Given three XYPoints, measure the angle a-b-c
       a   c
        \ /
         b
   */
-  public double findAngleBetweenRodentXYPoints(RodentXYPoint a, RodentXYPoint b, RodentXYPoint c){
+  public double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
 
     float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
     float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
@@ -910,23 +909,23 @@ public class Sperm_Analysis
 
     private double differenceToMedianCurve; // store the difference between curves as the sum of squares
 
-    private double medianAngle; // the median angle from RodentXYPoint[] smoothedArray
+    private double medianAngle; // the median angle from NucleusBorderPoint[] smoothedArray
     private double perimeter; // the nuclear perimeter
     private double pathLength; // the angle path length
     private double feret; // the maximum diameter
     private double area; // the nuclear area
 
-    private RodentXYPoint[] array; // the points from the polygon made from the input roi. Not currently used.
-    private RodentXYPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
-    private ArrayList<RodentXYPoint> intialSpermTails = new ArrayList<RodentXYPoint>(0); // holds the points considered to be sperm tails before filtering
+    private NucleusBorderPoint[] array; // the points from the polygon made from the input roi. Not currently used.
+    private NucleusBorderPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
+    private ArrayList<NucleusBorderPoint> intialSpermTails = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
 
-    private RodentXYPoint centreOfMass;
-    private RodentXYPoint spermTip;
-    private RodentXYPoint spermTail;
-    private RodentXYPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
-    private RodentXYPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
-    private RodentXYPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
-    private RodentXYPoint minFeretPoint2;
+    private XYPoint centreOfMass;
+    private NucleusBorderPoint spermTip;
+    private NucleusBorderPoint spermTail;
+    private NucleusBorderPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
+    private NucleusBorderPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
+    private NucleusBorderPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
+    private NucleusBorderPoint minFeretPoint2;
     
     private String imagePath; // the path to the image being analysed
 
@@ -936,12 +935,12 @@ public class Sperm_Analysis
     private boolean offsetCalculated = false; // has calculateOffsets been run
     
     private Roi roi; // the original ROI
-    private Polygon polygon; // the ROI converted to a polygon; source of RodentXYPoint[] array
+    private Polygon polygon; // the ROI converted to a polygon; source of NucleusBorderPoint[] array
 
     private ArrayList<NuclearSignal> redSignals    = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
     private ArrayList<NuclearSignal> greenSignals  = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
 
-    private FloatPolygon smoothedPolygon; // the interpolated polygon; source of RodentXYPoint[] smoothedArray // can probably be removed
+    private FloatPolygon smoothedPolygon; // the interpolated polygon; source of NucleusBorderPoint[] smoothedArray // can probably be removed
     private FloatPolygon hookRoi;
     private FloatPolygon humpRoi;
 
@@ -959,20 +958,20 @@ public class Sperm_Analysis
       // get the polygon from the roi
       this.roi = roi;
       this.polygon = roi.getPolygon();
-      this.array = new RodentXYPoint[this.polygon.npoints];
+      this.array = new NucleusBorderPoint[this.polygon.npoints];
       this.length = this.array.length;
       for(int i=0; i<this.polygon.npoints; i++){
-        array[i] = new RodentXYPoint(this.polygon.xpoints[i],this.polygon.ypoints[i]);
+        array[i] = new NucleusBorderPoint(this.polygon.xpoints[i],this.polygon.ypoints[i]);
       }
      
      try{
         this.smoothedPolygon = roi.getInterpolatedPolygon(1,true); // interpolate and smooth the roi, 1 pixel spacing
 
-        this.smoothedArray = new RodentXYPoint[this.smoothedPolygon.npoints];
+        this.smoothedArray = new NucleusBorderPoint[this.smoothedPolygon.npoints];
         this.smoothLength = this.smoothedArray.length; // shortcult for functions
 
         for(int i=0; i<this.smoothedPolygon.npoints; i++){
-          smoothedArray[i] = new RodentXYPoint(this.smoothedPolygon.xpoints[i],this.smoothedPolygon.ypoints[i]);
+          smoothedArray[i] = new NucleusBorderPoint(this.smoothedPolygon.xpoints[i],this.smoothedPolygon.ypoints[i]);
         }
       } catch(Exception e){
         IJ.log("Cannot create ROI array: "+e);
@@ -1148,11 +1147,11 @@ public class Sperm_Analysis
       this.nucleusNumber = n;
     }
 
-    public RodentXYPoint getPoint(int i){
+    public NucleusBorderPoint getPoint(int i){
       return this.array[i];
     }
 
-    public RodentXYPoint getSmoothedPoint(int i){
+    public NucleusBorderPoint getSmoothedPoint(int i){
       return this.smoothedArray[i];
     }
 
@@ -1199,36 +1198,36 @@ public class Sperm_Analysis
       return this.imagePath+"\\"+this.nucleusNumber;
     }
 
-    public RodentXYPoint getCentreOfMass(){
+    public XYPoint getCentreOfMass(){
       return this.centreOfMass;
     }
 
-    public void setCentreOfMass(RodentXYPoint p){
+    public void setCentreOfMass(XYPoint p){
       this.centreOfMass = p;
     }
 
-    public RodentXYPoint getSpermTip(){
+    public NucleusBorderPoint getSpermTip(){
       return this.spermTip;
     }
 
-    public void setSpermTip(RodentXYPoint p){
+    public void setSpermTip(NucleusBorderPoint p){
       this.spermTip = p;
     }
 
-    public void setInitialConsensusTail(RodentXYPoint p){
+    public void setInitialConsensusTail(NucleusBorderPoint p){
       this.initialConsensusTail = p;
     }
 
-    public RodentXYPoint getInitialConsensusTail(){
+    public NucleusBorderPoint getInitialConsensusTail(){
       return this.initialConsensusTail;
     }
 
 
-    public RodentXYPoint getSpermTail(){
+    public NucleusBorderPoint getSpermTail(){
       return this.spermTail;
     }
 
-    public void setSpermTail(RodentXYPoint p){
+    public void setSpermTail(NucleusBorderPoint p){
       this.spermTail = p;
     }
 
@@ -1296,13 +1295,13 @@ public class Sperm_Analysis
       return greenSignals.size();
     }
 
-    public void addTailEstimatePosition(RodentXYPoint p){
+    public void addTailEstimatePosition(NucleusBorderPoint p){
     	this.intialSpermTails.add(p);
     }
 
     public void reverseArray(){
 
-      RodentXYPoint tmp;
+      NucleusBorderPoint tmp;
 
       for (int i = 0; i < this.smoothLength / 2; i++) {
           tmp = this.smoothedArray[i];
@@ -1312,7 +1311,7 @@ public class Sperm_Analysis
 
     }
 
-    public void flipXAroundPoint(RodentXYPoint p){
+    public void flipXAroundPoint(XYPoint p){
 
       double xCentre = p.getX();
 
@@ -1325,7 +1324,7 @@ public class Sperm_Analysis
 
     }
 
-    public boolean isHookSide(RodentXYPoint p){
+    public boolean isHookSide(XYPoint p){
       if(hookRoi.contains( (float)p.getX(), (float)p.getY() ) ){
         return true;
       } else { 
@@ -1333,7 +1332,7 @@ public class Sperm_Analysis
       }
     }
 
-    public boolean isHumpSide(RodentXYPoint p){
+    public boolean isHumpSide(XYPoint p){
       if(humpRoi.contains( (float)p.getX(), (float)p.getY() ) ){
         return true;
       } else { 
@@ -1342,10 +1341,10 @@ public class Sperm_Analysis
     }    
 
     /*
-      For two RodentXYPoints in a Nucleus, find the point that lies halfway between them
+      For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
       Used for obtaining a consensus between potential tail positions
     */
-    public int getPositionBetween(RodentXYPoint pointA, RodentXYPoint pointB){
+    public int getPositionBetween(NucleusBorderPoint pointA, NucleusBorderPoint pointB){
 
       int a = 0;
       int b = 0;
@@ -1389,9 +1388,9 @@ public class Sperm_Analysis
 	    Returns an angle
 	  */
 	  public double findRotationAngle(){
-	    RodentXYPoint end = new RodentXYPoint(this.getSpermTail().getXAsInt(),this.getSpermTail().getYAsInt()-50);
+	    XYPoint end = new XYPoint(this.getSpermTail().getXAsInt(),this.getSpermTail().getYAsInt()-50);
 
-      double angle = findAngleBetweenRodentXYPoints(end, this.getSpermTail(), this.getCentreOfMass());
+      double angle = findAngleBetweenXYPoints(end, this.getSpermTail(), this.getCentreOfMass());
 
 	    if(this.getCentreOfMass().getX() < this.getSpermTail().getX()){
 	      return angle;
@@ -1401,14 +1400,14 @@ public class Sperm_Analysis
 	  }
 
     // For a position in the roi, draw a line through the CoM and get the intersection point
-    public RodentXYPoint findOppositeBorder(RodentXYPoint p){
+    public NucleusBorderPoint findOppositeBorder(NucleusBorderPoint p){
 
       int minDeltaYIndex = 0;
       double minAngle = 180;
 
       for(int i = 0; i<smoothLength;i++){
 
-          double angle = findAngleBetweenRodentXYPoints(p, this.getCentreOfMass(), smoothedArray[i]);
+          double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), smoothedArray[i]);
 
           if(Math.abs(180 - angle) < minAngle){
             minDeltaYIndex = i;
@@ -1424,21 +1423,21 @@ public class Sperm_Analysis
         Draw a line orthogonal, and pick the intersecting border points
         The border furthest from the tip is the tail
     */
-    public RodentXYPoint findTailByNarrowestWidthMethod(){
+    public NucleusBorderPoint findTailByNarrowestWidthMethod(){
 
       // Find the narrowest point around the CoM
       // For a position in teh roi, draw a line through the CoM to the intersection point
       // Measure the length; if < min length..., store equation and border(s)
 
       double minDistance = this.getFeret();
-      RodentXYPoint reference = this.getSpermTip();
+      NucleusBorderPoint reference = this.getSpermTip();
 
       // this.splitNucleusToHeadAndHump();
 
       for(int i=0;i<this.smoothLength;i++){
 
-        RodentXYPoint p = this.smoothedArray[i];
-        RodentXYPoint opp = findOppositeBorder(p);
+        NucleusBorderPoint p = this.smoothedArray[i];
+        NucleusBorderPoint opp = findOppositeBorder(p);
         double distance = p.getLengthTo(opp);
 
         if(distance<minDistance){
@@ -1453,11 +1452,11 @@ public class Sperm_Analysis
       // if close to 90, and the distance to the tip > CoM-tip, keep the point
       // return the best point
       double difference = 90;
-      RodentXYPoint tail = new RodentXYPoint(0,0);;
+      NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
       for(int i=0;i<this.smoothLength;i++){
 
-        RodentXYPoint p = this.smoothedArray[i];
-        double angle = findAngleBetweenRodentXYPoints(reference, this.getCentreOfMass(), p);
+        NucleusBorderPoint p = this.smoothedArray[i];
+        double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
         if(  Math.abs(90-angle)<difference && p.getLengthTo(this.getSpermTip()) > this.getCentreOfMass().getLengthTo( this.getSpermTip() ) ){
           difference = 90-angle;
           tail = p;
@@ -1474,7 +1473,7 @@ public class Sperm_Analysis
     public void moveIndexToArrayStart(int i){
 
       // copy the array to refer to
-      RodentXYPoint[] tempSmooth = new RodentXYPoint[this.smoothLength];
+      NucleusBorderPoint[] tempSmooth = new NucleusBorderPoint[this.smoothLength];
       System.arraycopy(this.smoothedArray, 0, tempSmooth, 0 , this.smoothLength);
      
       System.arraycopy(tempSmooth, i, this.smoothedArray, 0 , this.smoothLength-i); // copy over the i to end values
@@ -1513,15 +1512,15 @@ public class Sperm_Analysis
     }
 
     /* 
-    For a given delta block number in the smoothed RodentXYPoint array:
+    For a given delta block number in the smoothed NucleusBorderPoint array:
     Get all the points in the array that have the same block number
     Input: int block number
-    Return: RodentXYPoint[] all the points in the block
+    Return: NucleusBorderPoint[] all the points in the block
     */
-    public RodentXYPoint[] fetchPointsWithBlockNumber(int b){
+    public NucleusBorderPoint[] fetchPointsWithBlockNumber(int b){
 
       int count = countPointsWithBlockNumber(b);
-      RodentXYPoint[] array = new RodentXYPoint[count];
+      NucleusBorderPoint[] array = new NucleusBorderPoint[count];
       
       int j=0;
       for(int i=0; i<this.smoothLength;i++){
@@ -1536,7 +1535,7 @@ public class Sperm_Analysis
     }
 
     /* 
-    For a given delta block number in the smoothed RodentXYPoint array:
+    For a given delta block number in the smoothed NucleusBorderPoint array:
     Count the number of points in the array that have the same block number
     Input: int block number
     Return: int total number of points in block
@@ -1555,7 +1554,7 @@ public class Sperm_Analysis
     }   
 
     /* 
-    For each point in the smoothed RodentXYPoint array:
+    For each point in the smoothed NucleusBorderPoint array:
       Find how many points lie within the angle delta block
       Add this number to the blockSize variable of the point
     */
@@ -1584,12 +1583,12 @@ public class Sperm_Analysis
       int indexBefore = wrapIndex(index - window, this.smoothLength);
       int indexAfter  = wrapIndex(index + window, this.smoothLength);
 
-      RodentXYPoint pointBefore = this.getSmoothedPoint(indexBefore);
-      RodentXYPoint pointAfter = this.getSmoothedPoint(indexAfter);
-      RodentXYPoint point = this.getSmoothedPoint(index);
+      NucleusBorderPoint pointBefore = this.getSmoothedPoint(indexBefore);
+      NucleusBorderPoint pointAfter = this.getSmoothedPoint(indexAfter);
+      NucleusBorderPoint point = this.getSmoothedPoint(index);
 
 
-      double angle = findAngleBetweenRodentXYPoints(pointBefore, point, pointAfter);
+      double angle = findAngleBetweenXYPoints(pointBefore, point, pointAfter);
 
       // find the halfway point between the first and last points.
       // is this within the roi?
@@ -1606,7 +1605,7 @@ public class Sperm_Analysis
       }
     }
 
-    // Make an angle array for the current coordinates in the RodentXYPoint array
+    // Make an angle array for the current coordinates in the NucleusBorderPoint array
     // Will need to be rerun on each index order change
     public void makeAngleProfile(){
     	// go through points
@@ -1629,8 +1628,8 @@ public class Sperm_Analysis
       for(int i=0; i<this.smoothLength;i++){
 
       	// handle array wrapping
-      	RodentXYPoint prevPoint = this.smoothedArray[ wrapIndex(i-1, this.smoothLength) ];
-      	RodentXYPoint nextPoint = this.smoothedArray[ wrapIndex(i+1, this.smoothLength) ];
+      	NucleusBorderPoint prevPoint = this.smoothedArray[ wrapIndex(i-1, this.smoothLength) ];
+      	NucleusBorderPoint nextPoint = this.smoothedArray[ wrapIndex(i+1, this.smoothLength) ];
 
       	angleDelta = nextPoint.getInteriorAngle() - prevPoint.getInteriorAngle();
 	      this.smoothedArray[i].setInteriorAngleDelta(angleDelta);
@@ -1662,7 +1661,7 @@ public class Sperm_Analysis
     	for(int i=0;i<this.smoothLength;i++){ // iterate over every point in the array
 
     		int count = 0;
-    		if(this.smoothedArray[i].getInteriorAngleDeltaSmoothed() < 1){ // if the current RodentXYPoint has an angle < 1, move on
+    		if(this.smoothedArray[i].getInteriorAngleDeltaSmoothed() < 1){ // if the current NucleusBorderPoint has an angle < 1, move on
     			this.smoothedArray[i].setConsecutiveBlocks(0);
     			this.smoothedArray[i].setBlockNumber(0);
           this.smoothedArray[i].setPositionWithinBlock(0);
@@ -1696,7 +1695,7 @@ public class Sperm_Analysis
     	this.setBlockCount(blockNumber);
     }
 
-    public RodentXYPoint findMinimumAngle(){
+    public NucleusBorderPoint findMinimumAngle(){
 
       if(!this.anglesCalculated){
         this.makeAngleProfile();
@@ -1761,16 +1760,16 @@ public class Sperm_Analysis
     }
 
     /*
-      Retrieves an RodentXYPoint array of the points designated as local minima.
+      Retrieves an NucleusBorderPoint array of the points designated as local minima.
       If the local minimum detection has not yet been run, calculates local minima
     */
-    public RodentXYPoint[] getLocalMinima(){
+    public NucleusBorderPoint[] getLocalMinima(){
 
       if(!this.minimaCalculated){
         this.detectLocalMinima();
       }
 
-      RodentXYPoint[] newArray = new RodentXYPoint[this.minimaCount];
+      NucleusBorderPoint[] newArray = new NucleusBorderPoint[this.minimaCount];
       int j = 0;
 
       try{
@@ -1789,16 +1788,16 @@ public class Sperm_Analysis
     }
 
     /*
-      Retrieves an RodentXYPoint array of the points designated as local maxima.
+      Retrieves an NucleusBorderPoint array of the points designated as local maxima.
       If the local maximum detection has not yet been run, calculates local maxima
     */
-    public RodentXYPoint[] getLocalMaxima(){
+    public NucleusBorderPoint[] getLocalMaxima(){
  
       if(!this.maximaCalculated){
         this.detectLocalMaxima();
       }
 
-      RodentXYPoint[] newArray = new RodentXYPoint[this.maximaCount];
+      NucleusBorderPoint[] newArray = new NucleusBorderPoint[this.maximaCount];
       int j = 0;
       try{  
         for (int i=0; i<this.smoothLength; i++) {
@@ -1979,11 +1978,11 @@ public class Sperm_Analysis
       Find the midpoints of each block
       Return the point furthest from the tip
     */
-    public RodentXYPoint findTailFromDeltas(RodentXYPoint tip){
+    public NucleusBorderPoint findTailFromDeltas(NucleusBorderPoint tip){
 
 
       // get the midpoint of each block
-      ArrayList<RodentXYPoint> results = new ArrayList<RodentXYPoint>(0);
+      ArrayList<NucleusBorderPoint> results = new ArrayList<NucleusBorderPoint>(0);
       int maxIndex = 0;
     
       // remember that block 0 is not assigned; start from 1
@@ -1994,8 +1993,8 @@ public class Sperm_Analysis
 
           // number of points in each block
 
-          RodentXYPoint[] points = this.fetchPointsWithBlockNumber(i);
-          for(RodentXYPoint p : points){
+          NucleusBorderPoint[] points = this.fetchPointsWithBlockNumber(i);
+          for(NucleusBorderPoint p : points){
             if(p.isMidpoint()){ // will ignore any blocks without a midpoint established - <2 members
               results.add(p);
               // IJ.log("    Midpoint found for block "+i);
@@ -2007,13 +2006,13 @@ public class Sperm_Analysis
         IJ.log("    Error in finding midpoints: findTailFromDeltas(): "+e);
       }
       
-      RodentXYPoint tail = new RodentXYPoint(0,0);
+      NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
       try{
         // go through the midpoints, get the max distance from tip
         double maxLength = 0;
         
         for(Object o : results){
-          RodentXYPoint p = (RodentXYPoint)o;
+          NucleusBorderPoint p = (NucleusBorderPoint)o;
           if(p.getLengthTo(tip) > maxLength){
             maxLength = p.getLengthTo(tip);
             tail = p;
@@ -2174,12 +2173,12 @@ public class Sperm_Analysis
     public void splitNucleusToHeadAndHump(){
 
       int intersectionPointIndex = findIntersectionPointForNuclearSplit();
-      RodentXYPoint intersectionPoint = smoothedArray[intersectionPointIndex];
+      NucleusBorderPoint intersectionPoint = smoothedArray[intersectionPointIndex];
       this.intersectionPoint = intersectionPoint;
 
       // get an array of points from tip to tail
-      ArrayList<RodentXYPoint> roi1 = new ArrayList<RodentXYPoint>(0);
-      ArrayList<RodentXYPoint> roi2 = new ArrayList<RodentXYPoint>(0);
+      ArrayList<NucleusBorderPoint> roi1 = new ArrayList<NucleusBorderPoint>(0);
+      ArrayList<NucleusBorderPoint> roi2 = new ArrayList<NucleusBorderPoint>(0);
       boolean changeRoi = false;
 
       for(int i = 0; i<smoothLength;i++){
@@ -2187,7 +2186,7 @@ public class Sperm_Analysis
       	
       	int currentIndex = wrapIndex(tailIndex+i, smoothLength); // start at the tail, and go around the array
         
-        RodentXYPoint p = smoothedArray[currentIndex];
+        NucleusBorderPoint p = smoothedArray[currentIndex];
 
         if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
         	roi1.add(p);
@@ -2260,7 +2259,7 @@ public class Sperm_Analysis
 
         for(int i=0;i<redSignals.size();i++){
           NuclearSignal n = redSignals.get(i);
-          double angle = findAngleBetweenRodentXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
+          double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
 
           // hook or hump?
           if( this.isHookSide(n.getCentreOfMass()) ){ // hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  
@@ -2276,7 +2275,7 @@ public class Sperm_Analysis
 
         for(int i=0;i<greenSignals.size();i++){
           NuclearSignal n = greenSignals.get(i);
-          double angle = findAngleBetweenRodentXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
+          double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
 
           // hook or hump?
           if( this.isHookSide(n.getCentreOfMass()) ){
@@ -2309,7 +2308,7 @@ public class Sperm_Analysis
     }
 
 
-    public double[] findLineEquation(RodentXYPoint a, RodentXYPoint b){
+    public double[] findLineEquation(XYPoint a, XYPoint b){
 
       // y=mx+c
       double deltaX = a.getX() - b.getX();
@@ -2382,7 +2381,7 @@ public class Sperm_Analysis
                   minDistanceToSignal = distanceToSignal;
                 }
             }
-            RodentXYPoint borderPoint = smoothedArray[minDeltaYIndex];
+            NucleusBorderPoint borderPoint = smoothedArray[minDeltaYIndex];
             double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
             double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
             double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
@@ -2412,7 +2411,7 @@ public class Sperm_Analysis
             double minDistanceToSignal = 1000;
 
             for(int j = 0; j<smoothLength;j++){
-                RodentXYPoint p = smoothedArray[j];
+                NucleusBorderPoint p = smoothedArray[j];
                 double distanceToSignal = p.getLengthTo(n.getCentreOfMass());
 
                 // find the point closest to the CoM
@@ -2421,7 +2420,7 @@ public class Sperm_Analysis
                   minDistanceToSignal = distanceToSignal;
                 }
             }
-            // RodentXYPoint borderPoint = smoothedArray[minIndex];
+            // NucleusBorderPoint borderPoint = smoothedArray[minIndex];
             n.setClosestBorderPoint(smoothedArray[minIndex]);
           }
         }
@@ -2434,8 +2433,8 @@ public class Sperm_Analysis
 
       for(int i = 0; i<smoothLength;i++){
 
-      		RodentXYPoint p = smoothedArray[i];
-      		RodentXYPoint opp = findOppositeBorder(p);
+      		NucleusBorderPoint p = smoothedArray[i];
+      		NucleusBorderPoint opp = findOppositeBorder(p);
 
           profile[i] = p.getLengthTo(opp);
       }
@@ -2821,7 +2820,7 @@ public class Sperm_Analysis
       for(int i=0;i<nucleiCollection.size();i++){
 
         ArrayList<Double> normalisedXValues = nucleiCollection.get(i).normalisedXPositionsFromTip;
-        RodentXYPoint[] yValues = nucleiCollection.get(i).smoothedArray;
+        NucleusBorderPoint[] yValues = nucleiCollection.get(i).smoothedArray;
 
         for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
 
@@ -2850,7 +2849,7 @@ public class Sperm_Analysis
 
         ArrayList<Double> normalisedXValues = nucleiCollection.get(i).normalisedXPositionsFromTip;
         double[] yValues = nucleiCollection.get(i).getNormalisedYPositionsFromTail();
-        // RodentXYPoint[] yValues = nucleiCollection.get(i).smoothedArray;
+        // NucleusBorderPoint[] yValues = nucleiCollection.get(i).smoothedArray;
 
         for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
 
@@ -3266,7 +3265,7 @@ public class Sperm_Analysis
   	}
 
   	public int findTailIndexInMedianCurve(){
-			// can't use regular tail detector, because it's based on RodentXYPoints
+			// can't use regular tail detector, because it's based on NucleusBorderPoints
 			// get minima in curve, then find the lowest minima / minima furthest from both ends
 
   		ArrayList minima = detectLocalMinimaInMedian();
@@ -3440,7 +3439,7 @@ public class Sperm_Analysis
 
           for(int j=0; j<redSignals.size();j++){
 
-            RodentXYPoint border = redSignals.get(j).getClosestBorderPoint();
+            NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
             for(int k=0; k<n.smoothLength;k++){
 
               if(n.smoothedArray[k].overlaps(border)){
@@ -3476,7 +3475,7 @@ public class Sperm_Analysis
 
           for(int j=0; j<redSignals.size();j++){
 
-            RodentXYPoint border = redSignals.get(j).getClosestBorderPoint();
+            NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
             for(int k=0; k<n.smoothLength;k++){
 
               if(n.smoothedArray[k].overlaps(border)){
@@ -3765,7 +3764,7 @@ public class Sperm_Analysis
   		    ip.setLineWidth(3);
   		    ip.setColor(Color.GRAY);
   		    for(int j=0; j<n.intialSpermTails.size();j++){
-  		    	RodentXYPoint p = n.intialSpermTails.get(j);
+  		    	NucleusBorderPoint p = n.intialSpermTails.get(j);
   		    	ip.drawDot(p.getXAsInt(), p.getYAsInt());
   		    }
 
@@ -3838,111 +3837,6 @@ public class Sperm_Analysis
 		}	
 
   }
-  /*
-    -----------------------
-    NUCLEUS SIGNAL CLASS
-    -----------------------
-    Contains the variables for storing a signal within the nucleus
-  */  
-  class NuclearSignal {
-
-    private double area;
-    private double perimeter;
-    private double feret;
-    private double angleFromTail;
-    private double distanceFromCentreOfMass; // the absolute measured distance from the signal CoM to the nuclear CoM
-    private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
-
-    private RodentXYPoint centreOfMass;
-    private RodentXYPoint closestNuclearBorderPoint;
-
-    private Roi roi;
-
-    public NuclearSignal(Roi roi, double area, double feret, double perimeter, RodentXYPoint centreOfMass){
-      this.roi = roi;
-      this.area = area;
-      this.perimeter = perimeter;
-      this.feret = feret;
-      this.centreOfMass = centreOfMass;
-    }
-
-    public Roi getRoi(){
-      return this.roi;
-    }
-
-    public double getArea(){
-      return this.area;
-    }
-
-    public double getPerimeter(){
-      return this.perimeter;
-    }
-
-    public double getFeret(){
-      return this.feret;
-    }
-
-    public double getAngle(){
-      return this.angleFromTail;
-    }
-
-    public double getDistance(){
-      return this.distanceFromCentreOfMass;
-    }
-
-    public double getFractionalDistance(){
-      return this.fractionalDistanceFromCoM;
-    }
-
-    public RodentXYPoint getCentreOfMass(){
-      return this.centreOfMass;
-    }
-
-    public RodentXYPoint getClosestBorderPoint(){
-      return this.closestNuclearBorderPoint;
-    }
-
-    public void setArea(double d){
-      this.area = d;
-    }
-
-    public void setPerimeter(double d){
-      this.perimeter = d;
-    }
-
-    public void setFeret(double d){
-      this.feret = d;
-    }
-
-    public void setAngle(double d){
-      this.angleFromTail = d;
-    }
-
-    public void setDistance(double d){
-      this.distanceFromCentreOfMass = d;
-    }
-
-    public void setFractionalDistance(double d){
-      this.fractionalDistanceFromCoM = d;
-    }
-
-    public void setCentreOfMass(RodentXYPoint p){
-      this.centreOfMass = p;
-    }
-
-    public void setClosestBorderPoint(RodentXYPoint p){
-      this.closestNuclearBorderPoint = p;
-    }
-
-    /*
-      Assuming the signal were a perfect circle of area equal
-      to the measured area, get the radius for that circle
-    */
-    public double getRadius(){
-      // r = sqrt(a/pi)
-      return Math.sqrt(this.area/Math.PI);
-    }
-  }
 
  /*
 	-----------------------
@@ -4004,16 +3898,16 @@ public class Sperm_Analysis
 		*/
 		private void moveCoMtoZero(){
 
-			RodentXYPoint centreOfMass = initialNucleus.getCentreOfMass();
+			XYPoint centreOfMass = initialNucleus.getCentreOfMass();
 			double xOffset = centreOfMass.getX();
 			double yOffset = centreOfMass.getY();
 
-			initialNucleus.setCentreOfMass(new RodentXYPoint(0,0));
+			initialNucleus.setCentreOfMass(new XYPoint(0,0));
 
 			FloatPolygon offsetPolygon = new FloatPolygon();
 
 			for(int i=0; i<initialNucleus.smoothLength; i++){
-				RodentXYPoint p = initialNucleus.smoothedArray[i];
+				NucleusBorderPoint p = initialNucleus.smoothedArray[i];
 
 				double x = p.getX() - xOffset;
 				double y = p.getY() - yOffset;
@@ -4040,7 +3934,7 @@ public class Sperm_Analysis
 			double[] pPoints = new double[initialNucleus.smoothLength]; // positions along array
 
 			for(int i=0; i<targetNucleus.smoothLength; i++){
-				RodentXYPoint p = targetNucleus.smoothedArray[i];
+				NucleusBorderPoint p = targetNucleus.smoothedArray[i];
 				xPoints[i] = p.getX();
 				yPoints[i] = p.getY();
 				aPoints[i] = targetCurve[i];
@@ -4100,7 +3994,7 @@ public class Sperm_Analysis
 			// double[] pPoints = new double[targetNucleus.smoothLength+1]; // positions along array
 
 			for(int i=0; i<targetNucleus.smoothLength; i++){
-				RodentXYPoint p = targetNucleus.smoothedArray[i];
+				NucleusBorderPoint p = targetNucleus.smoothedArray[i];
 				xPoints[i] = p.getX();
 				yPoints[i] = p.getY();
 				// aPoints[i] = p.getInteriorAngle();
@@ -4108,7 +4002,7 @@ public class Sperm_Analysis
 			}
 
       // ensure nucleus outline joins up at tip
-      RodentXYPoint p = targetNucleus.smoothedArray[0];
+      NucleusBorderPoint p = targetNucleus.smoothedArray[0];
       xPoints[targetNucleus.smoothLength] = p.getX();
       yPoints[targetNucleus.smoothLength] = p.getY();
 
@@ -4130,9 +4024,9 @@ public class Sperm_Analysis
 			
 			for(int i=0; i<targetNucleus.smoothLength; i++){
 
-				RodentXYPoint p = targetNucleus.smoothedArray[i];
+				NucleusBorderPoint p = targetNucleus.smoothedArray[i];
 	    		
-    		double currentDistance = p.getLengthTo(new RodentXYPoint(0,0));
+    		double currentDistance = p.getLengthTo(new XYPoint(0,0));
     		double newDistance = currentDistance; // default no change
 
     		double oldX = p.getX();
@@ -4149,7 +4043,7 @@ public class Sperm_Analysis
     		}
 
     		// find the angle the point makes to the x axis
-    		double angle = findAngleBetweenRodentXYPoints(p, new RodentXYPoint(0,0), new RodentXYPoint(10, 0)); // point, 10,0, p,0
+    		double angle = findAngleBetweenXYPoints(p, new XYPoint(0,0), new XYPoint(10, 0)); // point, 10,0, p,0
     		if(oldY<0){
     			angle = 360-angle;
     		}
@@ -4195,7 +4089,7 @@ public class Sperm_Analysis
 
 			for(int i=0; i<targetNucleus.smoothLength; i++){
 
-				RodentXYPoint p = targetNucleus.smoothedArray[i];
+				NucleusBorderPoint p = targetNucleus.smoothedArray[i];
 				double x = p.getX();
 				double y = p.getY();
 				offsetPolygon.addPoint(x, y);
@@ -4227,7 +4121,7 @@ public class Sperm_Analysis
     	double distanceFromZero = 180;
 
     	// get the angle from the tail to the vertical axis line
-    	double tailAngle = findAngleBetweenRodentXYPoints( targetNucleus.getSpermTail(), targetNucleus.getCentreOfMass(), new RodentXYPoint(0,-10));
+    	double tailAngle = findAngleBetweenXYPoints( targetNucleus.getSpermTail(), targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
   		if(targetNucleus.getSpermTail().getX()<0){
   			tailAngle = 360-tailAngle; // correct for measuring the smallest angle
   		}
@@ -4235,7 +4129,7 @@ public class Sperm_Analysis
     	for(int i=0;i<360;i++){
 
     		// get a copy of the sperm tail
-    		RodentXYPoint p = new RodentXYPoint( targetNucleus.getSpermTail().getX(), targetNucleus.getSpermTail().getY() );
+    		NucleusBorderPoint p = new NucleusBorderPoint( targetNucleus.getSpermTail().getX(), targetNucleus.getSpermTail().getY() );
     		
     		// get the distance from tail to CoM
     		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
@@ -4259,9 +4153,9 @@ public class Sperm_Analysis
 
     	for(int i=0;i<targetNucleus.smoothLength;i++){
 
-    		RodentXYPoint p = targetNucleus.smoothedArray[i];
+    		NucleusBorderPoint p = targetNucleus.smoothedArray[i];
     		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
-    		double oldAngle = findAngleBetweenRodentXYPoints( p, targetNucleus.getCentreOfMass(), new RodentXYPoint(0,-10));
+    		double oldAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
     		if(p.getX()<0){
     			oldAngle = 360-oldAngle;
     		}
@@ -4360,9 +4254,9 @@ public class Sperm_Analysis
     	double bestDistance = 180;
 
     	for(int i=0;i<targetNucleus.smoothLength;i++){
-    		RodentXYPoint p = targetNucleus.smoothedArray[i];
+    		NucleusBorderPoint p = targetNucleus.smoothedArray[i];
     		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
-    		double pAngle = findAngleBetweenRodentXYPoints( p, targetNucleus.getCentreOfMass(), new RodentXYPoint(0,-10));
+    		double pAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
     		if(p.getX()<0){
     			pAngle = 360-pAngle;
     		}

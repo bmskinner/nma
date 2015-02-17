@@ -20,7 +20,7 @@ public class NuclearSignal {
   private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
 
   private XYPoint centreOfMass;
-  private XYPoint closestNuclearBorderPoint;
+  private NucleusBorderPoint closestNuclearBorderPoint;
 
   private Roi roi;
 
@@ -64,7 +64,7 @@ public class NuclearSignal {
     return this.centreOfMass;
   }
 
-  public XYPoint getClosestBorderPoint(){
+  public NucleusBorderPoint getClosestBorderPoint(){
     return this.closestNuclearBorderPoint;
   }
 
@@ -96,7 +96,7 @@ public class NuclearSignal {
     this.centreOfMass = p;
   }
 
-  public void setClosestBorderPoint(XYPoint p){
+  public void setClosestBorderPoint(NucleusBorderPoint p){
     this.closestNuclearBorderPoint = p;
   }
 
