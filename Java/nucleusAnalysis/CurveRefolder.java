@@ -100,18 +100,18 @@ public class CurveRefolder {
 
 		FloatPolygon offsetPolygon = new FloatPolygon();
 
-		for(int i=0; i<initialNucleus.smoothLength; i++){
-			XYPoint p = initialNucleus.smoothedArray[i];
+		for(int i=0; i<initialNucleus.getLength(); i++){
+			XYPoint p = initialNucleus.getSmoothedPoint(i);
 
 			double x = p.getX() - xOffset;
 			double y = p.getY() - yOffset;
 			offsetPolygon.addPoint(x, y);
 
-			initialNucleus.smoothedArray[i].setX( x );
-			initialNucleus.smoothedArray[i].setY( y );
+			initialNucleus.getSmoothedPoint(i).setX( x );
+			initialNucleus.getSmoothedPoint(i).setY( y );
 			
 		}
-		initialNucleus.smoothedPolygon = offsetPolygon;
+		initialNucleus.getSmoothedPolygon() = offsetPolygon;
 
 		this.targetNucleus = initialNucleus;
 	}
@@ -122,13 +122,13 @@ public class CurveRefolder {
 	*/
 	private void preparePlots(){
 
-		double[] xPoints = new double[initialNucleus.smoothLength];
-		double[] yPoints = new double[initialNucleus.smoothLength];
-		double[] aPoints = new double[initialNucleus.smoothLength]; // angles
-		double[] pPoints = new double[initialNucleus.smoothLength]; // positions along array
+		double[] xPoints = new double[initialNucleus.getLength()];
+		double[] yPoints = new double[initialNucleus.getLength()];
+		double[] aPoints = new double[initialNucleus.getLength()]; // angles
+		double[] pPoints = new double[initialNucleus.getLength()]; // positions along array
 
-		for(int i=0; i<targetNucleus.smoothLength; i++){
-			XYPoint p = targetNucleus.smoothedArray[i];
+		for(int i=0; i<targetNucleus.getLength(); i++){
+			XYPoint p = targetNucleus.getSmoothedPoint(i);
 			xPoints[i] = p.getX();
 			yPoints[i] = p.getY();
 			aPoints[i] = targetCurve[i];
@@ -136,11 +136,11 @@ public class CurveRefolder {
 		}
 		
 		nucleusPlot = new Plot( "Nucleus shape",
-                              "",
-                              "");
-	
+	                          "",
+	                          "");
+
 		// get the limits  for the plot  	
-			double minX = targetNucleus.getMinX();
+		double minX = targetNucleus.getMinX();
 	  double maxX = targetNucleus.getMaxX();
 	  double minY = targetNucleus.getMinY();
 	  double maxY = targetNucleus.getMaxY();
@@ -182,13 +182,13 @@ public class CurveRefolder {
 	*/
 	private void plotTargetNucleus(){
 
-		double[] xPoints = new double[targetNucleus.smoothLength+1];
-		double[] yPoints = new double[targetNucleus.smoothLength+1];
-		// double[] aPoints = new double[targetNucleus.smoothLength+1]; // angles
-		// double[] pPoints = new double[targetNucleus.smoothLength+1]; // positions along array
+		double[] xPoints = new double[targetNucleus.getLength()+1];
+		double[] yPoints = new double[targetNucleus.getLength()+1];
+		// double[] aPoints = new double[targetNucleus.getLength()+1]; // angles
+		// double[] pPoints = new double[targetNucleus.getLength()+1]; // positions along array
 
-		for(int i=0; i<targetNucleus.smoothLength; i++){
-			XYPoint p = targetNucleus.smoothedArray[i];
+		for(int i=0; i<targetNucleus.getLength(); i++){
+			XYPoint p = targetNucleus.getSmoothedPoint(i);
 			xPoints[i] = p.getX();
 			yPoints[i] = p.getY();
 			// aPoints[i] = p.getInteriorAngle();
@@ -196,9 +196,9 @@ public class CurveRefolder {
 		}
 
 	  // ensure nucleus outline joins up at tip
-	  XYPoint p = targetNucleus.smoothedArray[0];
-	  xPoints[targetNucleus.smoothLength] = p.getX();
-	  yPoints[targetNucleus.smoothLength] = p.getY();
+	  XYPoint p = targetNucleus.getSmoothedPoint(0);
+	  xPoints[targetNucleus.getLength()] = p.getX();
+	  yPoints[targetNucleus.getLength()] = p.getY();
 
 		nucleusPlot.setColor(Color.DARK_GRAY);
 		nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
@@ -216,9 +216,9 @@ public class CurveRefolder {
 
 		double similarityScore = compareProfiles(targetCurve, targetNucleus.getProfileAngles());
 		
-		for(int i=0; i<targetNucleus.smoothLength; i++){
+		for(int i=0; i<targetNucleus.getLength(); i++){
 
-			XYPoint p = targetNucleus.smoothedArray[i];
+			XYPoint p = targetNucleus.getSmoothedPoint(i);
     		
 		double currentDistance = p.getLengthTo(new XYPoint(0,0));
 		double newDistance = currentDistance; // default no change
@@ -251,7 +251,7 @@ public class CurveRefolder {
 			p.setY(newY); // the new y position
 
 			// ensure the interior angle calculation works with the current points
-			targetNucleus.smoothedPolygon = createPolygon(); 
+			targetNucleus.getSmoothedPolygon() = createPolygon(); 
 
 			// measure the new profile & compare
 			targetNucleus.makeAngleProfile();
@@ -260,15 +260,15 @@ public class CurveRefolder {
 
 			// IJ.log("Score: "+score);
 			// do not apply change  if the distance from teh surrounding points changes too much
-			double distanceToPrev = p.getLengthTo( targetNucleus.smoothedArray[ wrapIndex(i-1, targetNucleus.smoothLength) ] );
-			double distanceToNext = p.getLengthTo( targetNucleus.smoothedArray[ wrapIndex(i+1, targetNucleus.smoothLength) ] );
+			double distanceToPrev = p.getLengthTo( targetNucleus.smoothedArray[ wrapIndex(i-1, targetNucleus.getLength()) ] );
+			double distanceToNext = p.getLengthTo( targetNucleus.smoothedArray[ wrapIndex(i+1, targetNucleus.getLength()) ] );
 
 			// reset if worse fit or distances are too high
 			if(score > similarityScore  || distanceToNext > 1.2 || distanceToPrev > 1.2 ){
 				p.setX(oldX);
 				p.setY(oldY);
 				targetNucleus.makeAngleProfile();
-				targetNucleus.smoothedPolygon = createPolygon();
+				targetNucleus.getSmoothedPolygon() = createPolygon();
 				// IJ.log("Rejecting change");
 			} else {
 				similarityScore = score;
@@ -281,9 +281,9 @@ public class CurveRefolder {
 	private FloatPolygon createPolygon(){
 		FloatPolygon offsetPolygon = new FloatPolygon();
 
-		for(int i=0; i<targetNucleus.smoothLength; i++){
+		for(int i=0; i<targetNucleus.getLength(); i++){
 
-			XYPoint p = targetNucleus.smoothedArray[i];
+			XYPoint p = targetNucleus.getSmoothedPoint(i);
 			double x = p.getX();
 			double y = p.getY();
 			offsetPolygon.addPoint(x, y);
@@ -345,9 +345,9 @@ public class CurveRefolder {
 		// }
 		IJ.log("Rotating by "+(int)angleToRotate);
 
-		for(int i=0;i<targetNucleus.smoothLength;i++){
+		for(int i=0;i<targetNucleus.getLength();i++){
 
-			XYPoint p = targetNucleus.smoothedArray[i];
+			XYPoint p = targetNucleus.getSmoothedPoint(i);
 			double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
 			double oldAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
@@ -373,9 +373,9 @@ public class CurveRefolder {
 
 	private void exportImage(NucleusCollection collection){
 		ImagePlus plot = nucleusPlot.getImagePlus();
-	  IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"\\plotConsensus."+collection.collectionType+".tiff");
+	  IJ.saveAsTiff(plot, targetNucleus.getDirectory()+"\\plotConsensus."+collection.getType()+".tiff");
 
-	  targetNucleus.setPath(targetNucleus.getDirectory()+"\\logConsensusNucleus."+collection.collectionType+".txt");
+	  targetNucleus.setPath(targetNucleus.getDirectory()+"\\logConsensusNucleus."+collection.getType()+".txt");
 	  IJ.log("Exporting to: "+targetNucleus.getPath());
 	  targetNucleus.printLogFile(targetNucleus.getPath());
 	}
@@ -447,8 +447,8 @@ public class CurveRefolder {
 		double bestDiff = 180;
 		double bestDistance = 180;
 
-		for(int i=0;i<targetNucleus.smoothLength;i++){
-			XYPoint p = targetNucleus.smoothedArray[i];
+		for(int i=0;i<targetNucleus.getLength();i++){
+			XYPoint p = targetNucleus.getSmoothedPoint(i);
 			double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
 			double pAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
