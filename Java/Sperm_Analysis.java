@@ -92,11 +92,13 @@ morphology comparisons
   FEATURES TO ADD
   ---------------
     Fix bug in signal drawing on tail profile
+    Fix NPE bug in exporting refolded nucleus profile and images
     Signal size thresholds adapted
     Adaptive thresholding
     Measure DAPI propotions in each x-degree segment around CoM for normalisation.
       Relevant measurement code:  getResult("IntDen", 0);
     Alter filters to be more permissive of extreme Yqdel
+    Clustering of profiles before median tail fitting and exclusion?
     Add smoothing to consensus nucleus outline
     Rescale consensus image plot to rotated nucleus dimensions
     Add signal areas to consensus image
@@ -296,10 +298,6 @@ public class Sperm_Analysis
 
       currentPopulation.refilterNuclei(); // remove any nuclei that are odd shapes
       
-      // failedNuclei.exportNuclearStats("logFailed_Pop"+i+".txt");
-      // failedNuclei.annotateImagesOfNuclei();
-      // failedNuclei.rotateAndAssembleNucleiForExport("compositeFailed_Pop"+i+".tiff");
-
       currentPopulation.drawRawPositionsFromTailChart();
       currentPopulation.createNormalisedTailPositions();
       currentPopulation.drawNormalisedPositionsFromTailChart();
@@ -326,44 +324,9 @@ public class Sperm_Analysis
 
     }
 
-      // completeCollection.refilterNuclei(); // remove double nuclei, blobs, nuclei too wibbly
-    
-      // completeCollection.createProfileAggregate();
-      // completeCollection.drawProfilePlots();
-
-      // completeCollection.calculateNormalisedMedianLine();
-      // completeCollection.findTailIndexInMedianCurve();
-      // completeCollection.calculateOffsets();
-
-      // completeCollection.refilterNuclei(); // remove any nuclei that are odd shapes
-      failedNuclei.exportNuclearStats("logStats");
-      failedNuclei.annotateImagesOfNuclei();
-      failedNuclei.rotateAndAssembleNucleiForExport("composite");
-
-      // completeCollection.drawRawPositionsFromTailChart();
-      // completeCollection.createNormalisedTailPositions();
-      // completeCollection.drawNormalisedPositionsFromTailChart();
-      // completeCollection.createTailCentredProfileAggregate();
-      // completeCollection.calculateTailCentredNormalisedMedianLine();
-      // completeCollection.measureNuclearOrganisation();
-      // completeCollection.exportNuclearStats("logStats.txt");
-      // completeCollection.annotateImagesOfNuclei();
-      // completeCollection.rotateAndAssembleNucleiForExport("compositeAll.tiff");
-      
-      // // curve refolding
-      // Nucleus refoldCandidate = completeCollection.getNucleusMostSimilarToMedian();
-      // double[] targetProfile = completeCollection.getMedianTargetCurve(refoldCandidate);
-
-      // CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
-      // refolder.refoldCurve();
-
-      // // orient refolded nucleus to put tail at the bottom
-      // refolder.putTailAtBottom();
-
-      // // draw signals on the refolded nucleus
-      // refolder.addSignalsToConsensus(completeCollection);
-      // refolder.exportImage();
-    
+    failedNuclei.exportNuclearStats("logStats");
+    failedNuclei.annotateImagesOfNuclei();
+    failedNuclei.rotateAndAssembleNucleiForExport("composite");    
   }
 
   public int wrapIndex(int i, int length){
@@ -2288,34 +2251,54 @@ public class Sperm_Analysis
         f.delete();
       }
 
-      IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
+      String outLine = "SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE\n";
+
+      // IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
       
       for(int i=0;i<this.smoothLength;i++){
 
         double normalisedIAngle = smoothedArray[i].getInteriorAngle()-180;
         // double length = this.smoothLength;
         double normalisedX = ((double)i/(double)this.smoothLength)*100; // normalise to 100 length
-        // IJ.log("i: "+i+" length: "+this.smoothLength+" profile: "+normalisedX);
+        
+        outLine = outLine + smoothedArray[i].getXAsInt()+"\t"+
+                            smoothedArray[i].getYAsInt()+"\t"+
+                            smoothedArray[i].getX()+"\t"+
+                            smoothedArray[i].getY()+"\t"+
+                            smoothedArray[i].getInteriorAngle()+"\t"+
+                            smoothedArray[i].getMinAngle()+"\t"+
+                            normalisedIAngle+"\t"+
+                            smoothedArray[i].getInteriorAngleDelta()+"\t"+
+                            smoothedArray[i].getInteriorAngleDeltaSmoothed()+"\t"+
+                            smoothedArray[i].getPositionWithinBlock()+"\t"+
+                            smoothedArray[i].getBlockNumber()+"\t"+
+                            smoothedArray[i].isLocalMin()+"\t"+
+                            smoothedArray[i].isLocalMax()+"\t"+
+                            smoothedArray[i].isMidpoint()+"\t"+
+                            smoothedArray[i].isBlock()+"\t"+
+                            normalisedX+"\t"+
+                            distanceProfile[i]+"\n";
 
-        IJ.append(smoothedArray[i].getXAsInt()+"\t"+
-                  smoothedArray[i].getYAsInt()+"\t"+
-                  smoothedArray[i].getX()+"\t"+
-                  smoothedArray[i].getY()+"\t"+
-                  smoothedArray[i].getInteriorAngle()+"\t"+
-                  smoothedArray[i].getMinAngle()+"\t"+
-                  normalisedIAngle+"\t"+
-                  smoothedArray[i].getInteriorAngleDelta()+"\t"+
-                  smoothedArray[i].getInteriorAngleDeltaSmoothed()+"\t"+
-                  smoothedArray[i].getPositionWithinBlock()+"\t"+
-                  smoothedArray[i].getBlockNumber()+"\t"+
-                  smoothedArray[i].isLocalMin()+"\t"+
-                  smoothedArray[i].isLocalMax()+"\t"+
-                  smoothedArray[i].isMidpoint()+"\t"+
-                  smoothedArray[i].isBlock()+"\t"+
-                  normalisedX+"\t"+
-                  distanceProfile[i],
-                  path);
+        // IJ.append(smoothedArray[i].getXAsInt()+"\t"+
+        //           smoothedArray[i].getYAsInt()+"\t"+
+        //           smoothedArray[i].getX()+"\t"+
+        //           smoothedArray[i].getY()+"\t"+
+        //           smoothedArray[i].getInteriorAngle()+"\t"+
+        //           smoothedArray[i].getMinAngle()+"\t"+
+        //           normalisedIAngle+"\t"+
+        //           smoothedArray[i].getInteriorAngleDelta()+"\t"+
+        //           smoothedArray[i].getInteriorAngleDeltaSmoothed()+"\t"+
+        //           smoothedArray[i].getPositionWithinBlock()+"\t"+
+        //           smoothedArray[i].getBlockNumber()+"\t"+
+        //           smoothedArray[i].isLocalMin()+"\t"+
+        //           smoothedArray[i].isLocalMax()+"\t"+
+        //           smoothedArray[i].isMidpoint()+"\t"+
+        //           smoothedArray[i].isBlock()+"\t"+
+        //           normalisedX+"\t"+
+        //           distanceProfile[i],
+        //           path);
       }
+      IJ.append( outLine, path);
     }
 
     public double[] getInteriorAngles(){
@@ -3817,7 +3800,10 @@ public class Sperm_Analysis
       if(f.exists()){
         f.delete();
       }
-      IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH", statsFile);
+
+      String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
+
+      // IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH", statsFile);
 
       IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei");
       double[] areas  = this.getAreas();
@@ -3832,19 +3818,29 @@ public class Sperm_Analysis
       for(int i=0; i<this.getNucleusCount();i++){
       	int j = i+1;
         IJ.log("  "+j+" of "+this.getNucleusCount());
-        // progressBar.show(i, this.getNucleusCount());
-        IJ.append(  areas[i]+"\t"+
-                    perims[i]+"\t"+
-                    ferets[i]+"\t"+
-                    pathLengths[i]+"\t"+
-                    tails[i]+"\t"+
-                    differences[i]+"\t"+
-                    this.nucleiCollection.get(i).failureCode+"\t"+
-                    paths[i], statsFile);
+
+        outLine = outLine + areas[i]+"\t"+
+                            perims[i]+"\t"+
+                            ferets[i]+"\t"+
+                            pathLengths[i]+"\t"+
+                            tails[i]+"\t"+
+                            differences[i]+"\t"+
+                            this.nucleiCollection.get(i).failureCode+"\t"+
+                            paths[i]+"\n";
+
+        // IJ.append(  areas[i]+"\t"+
+        //             perims[i]+"\t"+
+        //             ferets[i]+"\t"+
+        //             pathLengths[i]+"\t"+
+        //             tails[i]+"\t"+
+        //             differences[i]+"\t"+
+        //             this.nucleiCollection.get(i).failureCode+"\t"+
+        //             paths[i], statsFile);
 
         // Include tip, CoM, tail
     		this.nucleiCollection.get(i).printLogFile(nucleiCollection.get(i).getPathWithoutExtension()+"\\"+nucleiCollection.get(i).getNucleusNumber()+".log");
       }
+      IJ.append(  outLine, statsFile);
       IJ.log("Export complete");
     }
 
