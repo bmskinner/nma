@@ -285,6 +285,14 @@ public class Sperm_Analysis
         continue;
       }
 
+      if(currentPopulation.collectionType.equals("not_red") && redNuclei.getNucleusCount()==0){
+        continue;
+      }
+
+      if(currentPopulation.collectionType.equals("not_green") && greenNuclei.getNucleusCount()==0){
+        continue;
+      }
+
       IJ.log("Analysing population: "+currentPopulation.collectionType);
       IJ.log("  Total nuclei: "+currentPopulation.getNucleusCount());
       IJ.log("  Red signals: "+currentPopulation.getRedSignalCount());
@@ -542,8 +550,8 @@ public class Sperm_Analysis
 
 
     // turn roi into Nucleus for manipulation
-    Nucleus currentNucleus = new Nucleus(nucleus);
-    currentNucleus.setPath(path);
+    Nucleus currentNucleus = new Nucleus(nucleus, path);
+    // currentNucleus.setPath(path);
     currentNucleus.setNucleusNumber(nucleusNumber);
 
 
@@ -625,7 +633,6 @@ public class Sperm_Analysis
       Given distinct methods for finding a tail,
       take a position between them on roi
     */
-    IJ.log("Finding consensus tail...");
     int consensusTailIndex = currentNucleus.getPositionBetween(spermTail2, spermTail3);
     NucleusBorderPoint consensusTail = currentNucleus.getBorderPoint(consensusTailIndex);
     consensusTailIndex = currentNucleus.getPositionBetween(consensusTail, spermTail1);
@@ -642,7 +649,6 @@ public class Sperm_Analysis
 			Take the consensusTailIndex and normalisedX, and offset the profile positions
 			in the raw and normalised profiles appropriately
     */
-		IJ.log("Normalising...");
     double pathLength = 0;
     double normalisedTailIndex = ((double)consensusTailIndex/(double)currentNucleus.smoothLength)*100;
 
@@ -677,7 +683,6 @@ public class Sperm_Analysis
 
     // find the signals
     // within nuclear roi, analyze particles in colour channels
-    IJ.log("Looking for signals...");
     RoiManager   redSignalManager = findSignalInNucleus(smallRegion, 0);
     RoiManager greenSignalManager = findSignalInNucleus(smallRegion, 1);
 
@@ -744,7 +749,6 @@ public class Sperm_Analysis
     // the distances of each point from the centre of mass. The points with the combined greatest
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
-    IJ.log("Finding sperm tail from minima...");
     double tipToCoMDistance = tip.getLengthTo(centre);
 
     double maxDistance = 0;
@@ -900,11 +904,11 @@ public class Sperm_Analysis
   
     private int nucleusNumber; // the number of the nucleus in the current image
     // private int windowSize = 23; // default size, can be overridden if needed
-    private int minimaCount; // the number of local minima detected in the array
-    private int maximaCount; // the number of local minima detected in the array
+    // private int minimaCount; // the number of local minima detected in the array
+    // private int maximaCount; // the number of local minima detected in the array
     private int length;  // the length of the array; shortcut to this.array.length
     private int smoothLength = 0; // the length of the smoothed array; shortcut to this.getBorderPointArray().length
-    private int minimaLookupDistance = 5; // the points ahead and behind to check when finding local minima and maxima
+    // private int minimaLookupDistance = 5; // the points ahead and behind to check when finding local minima and maxima
     // private int blockCount = 0; // the number of delta blocks detected
     // private int DELTA_WINDOW_MIN = 5; // the minimum number of points required in a delta block
 
@@ -938,10 +942,14 @@ public class Sperm_Analysis
     
     private String imagePath; // the path to the image being analysed
 
-    private boolean minimaCalculated = false; // has detectLocalMinima been run
-    private boolean maximaCalculated = false; // has detectLocalMaxima been run
-    private boolean anglesCalculated = false; // has makeAngleProfile been run
-    private boolean offsetCalculated = false; // has calculateOffsets been run
+    private File sourceImage; // the image from which the nucleus came
+    private File nucleusImage; // the image of just this nucleus, for annotation
+    private File profileLog; // unused. Store output if needed
+
+    // private boolean minimaCalculated = false; // has detectLocalMinima been run
+    // private boolean maximaCalculated = false; // has detectLocalMaxima been run
+    // private boolean anglesCalculated = false; // has makeAngleProfile been run
+    // private boolean offsetCalculated = false; // has calculateOffsets been run
     
     private Roi roi; // the original ROI
     private Polygon polygon; // the ROI converted to a polygon; source of NucleusBorderPoint[] array
@@ -962,10 +970,13 @@ public class Sperm_Analysis
 
     private double[] distanceProfile;
     
-    public Nucleus (Roi roi) { // construct from an roi
+    public Nucleus (Roi roi, String path) { // construct from an roi
 
       // get the polygon from the roi
       this.roi = roi;
+      this.sourceImage = new File(path);
+      this.imagePath = sourceImage.getPath(); // eventually remove
+
       this.polygon = roi.getPolygon();
       this.array = new NucleusBorderPoint[this.polygon.npoints];
       this.length = this.array.length;
@@ -979,7 +990,7 @@ public class Sperm_Analysis
         this.smoothLength = angleProfile.size(); // shortcult for functions
 
       } catch(Exception e){
-        IJ.log("Cannot create ROI array: "+e);
+        IJ.log("Cannot create AngleProfile: "+e);
       } 
     }
 
@@ -1645,7 +1656,7 @@ public class Sperm_Analysis
       double[] ypoints = new double[this.smoothLength];
 
       for(int j=0;j<ypoints.length;j++){
-          ypoints[j] = this.getBorderPointArray()[j].getInteriorAngle();
+          ypoints[j] = this.getBorderPoint(j).getInteriorAngle();
       }
       return ypoints;
     }
@@ -1772,18 +1783,6 @@ public class Sperm_Analysis
         }
       }
     }
-
-    // private double getPolygonArea(float[] x, float[] y, int points){ 
-        
-    //     double area = 0;         // Accumulates area in the loop
-    //     int j = points-1;  // The last vertex is the 'previous' one to the first
-
-    //     for (int i=0; i<points; i++){ 
-    //       area = area +  (x[j]+x[i]) * (y[j]-y[i]); 
-    //       j = i;  //j is previous vertex to i
-    //     }
-    //     return area/2;
-    // }
 
     public void calculateSignalAnglesFromTail(){
 
@@ -2642,7 +2641,7 @@ public class Sperm_Analysis
 
 				this.nucleiCollection.get(i).offsetForTail = offset;
 
-        r.offsetCalculated = true;
+        // r.offsetCalculated = true;
         r.tailIndex = r.tailIndex-offset; // update the tail position
         r.setSpermTail(r.getBorderPointArray()[r.tailIndex]); // ensure the spermTail is updated
         r.differenceToMedianCurve = totalDifference;
