@@ -620,8 +620,9 @@ public class Sperm_Analysis
       Given distinct methods for finding a tail,
       take a position between them on roi
     */
+    IJ.log("Finding consensus tail...");
     int consensusTailIndex = currentNucleus.getPositionBetween(spermTail2, spermTail3);
-    NucleusBorderPoint consensusTail = currentNucleus.smoothedArray[consensusTailIndex];
+    NucleusBorderPoint consensusTail = currentNucleus.getBorderPoint(consensusTailIndex);
     consensusTailIndex = currentNucleus.getPositionBetween(consensusTail, spermTail1);
     currentNucleus.tailIndex = consensusTailIndex;
     currentNucleus.setInitialConsensusTail(consensusTail);
@@ -636,12 +637,13 @@ public class Sperm_Analysis
 			Take the consensusTailIndex and normalisedX, and offset the profile positions
 			in the raw and normalised profiles appropriately
     */
+		IJ.log("Normalising...");
     double pathLength = 0;
     double normalisedTailIndex = ((double)consensusTailIndex/(double)currentNucleus.smoothLength)*100;
 
     
     // if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // only proceed if the tail points are together  
-    NucleusBorderPoint prevPoint = new NucleusBorderPoint(0,0);
+    XYPoint prevPoint = new XYPoint(0,0);
      
     for (int i=0; i<currentNucleus.smoothLength;i++ ) {
         double normalisedX = ((double)i/(double)currentNucleus.smoothLength)*100; // normalise to 100 length
@@ -652,17 +654,17 @@ public class Sperm_Analysis
         currentNucleus.rawXPositionsFromTail.add(rawXFromTail);
         currentNucleus.rawXPositionsFromTip.add( (double)i);
         
-        IJ.append(normalisedX+"\t"+
-        					currentNucleus.smoothedArray[i].getInteriorAngle()+"\t"+
-        					rawXFromTail, this.logFile);        
+        // IJ.append(normalisedX+"\t"+
+        // 					currentNucleus.getBorderPoint(i).getInteriorAngle()+"\t"+
+        // 					rawXFromTail, this.logFile);        
 
         // calculate the path length
-        NucleusBorderPoint thisPoint = new NucleusBorderPoint(normalisedX,currentNucleus.smoothedArray[i].getInteriorAngle());
+        XYPoint thisPoint = new XYPoint(normalisedX,currentNucleus.getBorderPoint(i).getInteriorAngle());
         pathLength += thisPoint.getLengthTo(prevPoint);
         prevPoint = thisPoint;
     }
 
-    IJ.append("", this.logFile);
+    // IJ.append("", this.logFile);
 
     // if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // warn if the tail points are together  
     //   // IJ.log("    Difficulty assigning tail position");
@@ -670,6 +672,7 @@ public class Sperm_Analysis
 
     // find the signals
     // within nuclear roi, analyze particles in colour channels
+    IJ.log("Looking for signals...");
     RoiManager   redSignalManager = findSignalInNucleus(smallRegion, 0);
     RoiManager greenSignalManager = findSignalInNucleus(smallRegion, 1);
 
@@ -736,7 +739,7 @@ public class Sperm_Analysis
     // the distances of each point from the centre of mass. The points with the combined greatest
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
-    
+    IJ.log("Finding sperm tail from minima...");
     double tipToCoMDistance = tip.getLengthTo(centre);
 
     double maxDistance = 0;
@@ -891,14 +894,14 @@ public class Sperm_Analysis
   class Nucleus {
   
     private int nucleusNumber; // the number of the nucleus in the current image
-    private int windowSize = 23; // default size, can be overridden if needed
+    // private int windowSize = 23; // default size, can be overridden if needed
     private int minimaCount; // the number of local minima detected in the array
     private int maximaCount; // the number of local minima detected in the array
     private int length;  // the length of the array; shortcut to this.array.length
-    private int smoothLength = 0; // the length of the smoothed array; shortcut to this.smoothedArray.length
+    private int smoothLength = 0; // the length of the smoothed array; shortcut to this.getBorderPointArray().length
     private int minimaLookupDistance = 5; // the points ahead and behind to check when finding local minima and maxima
-    private int blockCount = 0; // the number of delta blocks detected
-    private int DELTA_WINDOW_MIN = 5; // the minimum number of points required in a delta block
+    // private int blockCount = 0; // the number of delta blocks detected
+    // private int DELTA_WINDOW_MIN = 5; // the minimum number of points required in a delta block
 
     private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
@@ -918,6 +921,7 @@ public class Sperm_Analysis
     private NucleusBorderPoint[] array; // the points from the polygon made from the input roi. Not currently used.
     private NucleusBorderPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
     private ArrayList<NucleusBorderPoint> intialSpermTails = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
+    private AngleProfile angleProfile; // new class to replace smoothedArray
 
     private XYPoint centreOfMass;
     private NucleusBorderPoint spermTip;
@@ -967,12 +971,14 @@ public class Sperm_Analysis
      try{
         this.smoothedPolygon = roi.getInterpolatedPolygon(1,true); // interpolate and smooth the roi, 1 pixel spacing
 
-        this.smoothedArray = new NucleusBorderPoint[this.smoothedPolygon.npoints];
-        this.smoothLength = this.smoothedArray.length; // shortcult for functions
+        angleProfile = new AngleProfile(this.smoothedPolygon);
 
-        for(int i=0; i<this.smoothedPolygon.npoints; i++){
-          smoothedArray[i] = new NucleusBorderPoint(this.smoothedPolygon.xpoints[i],this.smoothedPolygon.ypoints[i]);
-        }
+        // this.getBorderPointArray() = new NucleusBorderPoint[this.smoothedPolygon.npoints];
+        this.smoothLength = angleProfile.size(); // shortcult for functions
+
+        // for(int i=0; i<this.smoothedPolygon.npoints; i++){
+        //   getBorderPointArray()[i] = new NucleusBorderPoint(this.smoothedPolygon.xpoints[i],this.smoothedPolygon.ypoints[i]);
+        // }
       } catch(Exception e){
         IJ.log("Cannot create ROI array: "+e);
       } 
@@ -982,11 +988,19 @@ public class Sperm_Analysis
     	return this.roi;
     }
 
+    public NucleusBorderPoint[] getBorderPointArray(){
+    	return this.angleProfile.getBorderPointArray();
+    }
+
+    public NucleusBorderPoint getBorderPoint(int i){
+    	return angleProfile.getBorderPoint(i);
+    }
+
     public double getMaxX(){
     	double d = 0;
       for(int i=0;i<smoothLength;i++){
-      	if(smoothedArray[i].getX()>d){
-        	d = smoothedArray[i].getX();
+      	if(angleProfile.getBorderPoint(i).getX()>d){
+        	d = angleProfile.getBorderPoint(i).getX();
       	}
       }
       return d;
@@ -995,8 +1009,8 @@ public class Sperm_Analysis
     public double getMinX(){
     	double d = getMaxX();
       for(int i=0;i<smoothLength;i++){
-      	if(smoothedArray[i].getX()<d){
-        	d = smoothedArray[i].getX();
+      	if(angleProfile.getBorderPoint(i).getX()<d){
+        	d = angleProfile.getBorderPoint(i).getX();
 	      }
 	    }
       return d;
@@ -1005,8 +1019,8 @@ public class Sperm_Analysis
     public double getMaxY(){
     	double d = 0;
       for(int i=0;i<smoothLength;i++){
-      	if(smoothedArray[i].getY()>d){
-        	d = smoothedArray[i].getY();
+      	if(angleProfile.getBorderPoint(i).getY()>d){
+        	d = angleProfile.getBorderPoint(i).getY();
       	}
       }
       return d;
@@ -1015,8 +1029,8 @@ public class Sperm_Analysis
     public double getMinY(){
     	double d = getMaxY();
       for(int i=0;i<smoothLength;i++){
-      	if(smoothedArray[i].getY()<d){
-        	d = smoothedArray[i].getY();
+      	if(angleProfile.getBorderPoint(i).getY()<d){
+        	d = angleProfile.getBorderPoint(i).getY();
 	      }
 	    }
       return d;
@@ -1068,7 +1082,7 @@ public class Sperm_Analysis
     public double[] getAngles(){
       double[] d = new double[this.smoothLength];
       for(int i=0;i<this.smoothLength;i++){
-        d[i] = this.smoothedArray[i].getInteriorAngle();
+        d[i] = angleProfile.getBorderPoint(i).getInteriorAngle();
       }
       return d;
     }
@@ -1125,13 +1139,13 @@ public class Sperm_Analysis
       return this.polygon;
     }
 
-    public void setWindowSize(int i){
-    	this.windowSize = i;
-    }
+    // public void setWindowSize(int i){
+    // 	this.windowSize = i;
+    // }
 
-    public int getWindowSize(){
-    	return this.windowSize;
-    }
+    // public int getWindowSize(){
+    // 	return this.windowSize;
+    // }
     /* 
     Find the smoothed length of the array
     */
@@ -1152,7 +1166,7 @@ public class Sperm_Analysis
     }
 
     public NucleusBorderPoint getSmoothedPoint(int i){
-      return this.smoothedArray[i];
+      return this.angleProfile.getBorderPoint(i);
     }
 
     public String getPath(){
@@ -1182,13 +1196,13 @@ public class Sperm_Analysis
       return f.getName();
     }
 
-    public void setBlockCount(int i){
-    	this.blockCount = i;
-    }  
+    // public void setBlockCount(int i){
+    // 	this.blockCount = i;
+    // }  
 
-    public int getBlockCount(){
-    	return this.blockCount;
-    }
+    // public int getBlockCount(){
+    // 	return this.blockCount;
+    // }
 
     public int getNucleusNumber(){
       return this.nucleusNumber;
@@ -1300,27 +1314,20 @@ public class Sperm_Analysis
     }
 
     public void reverseArray(){
-
-      NucleusBorderPoint tmp;
-
-      for (int i = 0; i < this.smoothLength / 2; i++) {
-          tmp = this.smoothedArray[i];
-          this.smoothedArray[i] = this.smoothedArray[this.smoothedArray.length - 1 - i];
-          this.smoothedArray[this.smoothedArray.length - 1 - i] = tmp;
-      }
-
+    	this.angleProfile.reverseAngleProfile();
     }
 
     public void flipXAroundPoint(XYPoint p){
 
-      double xCentre = p.getX();
+    	this.angleProfile.flipXAroundPoint(p);
+      // double xCentre = p.getX();
 
-      for(int i = 0; i<this.smoothLength;i++){
+      // for(int i = 0; i<this.smoothLength;i++){
 
-        double dx = xCentre - this.smoothedArray[i].getX();
-        double xNew = xCentre + dx;
-        this.smoothedArray[i].setX(xNew);
-      }
+      //   double dx = xCentre - this.getBorderPointArray()[i].getX();
+      //   double xNew = xCentre + dx;
+      //   this.getBorderPointArray()[i].setX(xNew);
+      // }
 
     }
 
@@ -1349,11 +1356,13 @@ public class Sperm_Analysis
       int a = 0;
       int b = 0;
       // find the indices that correspond on the array
-      for(int i = 0; i<this.smoothLength; i++){
-          if(this.smoothedArray[i].overlaps(pointA)){
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
+
+      for(int i = 0; i<points.length; i++){
+          if(points[i].overlaps(pointA)){
             a = i;
           }
-          if(this.smoothedArray[i].overlaps(pointB)){
+          if(points[i].overlaps(pointB)){
             b = i;
           }
       }
@@ -1362,24 +1371,28 @@ public class Sperm_Analysis
       return mid;
     }
 
-  	public float[] getProfileArray(){
+  	// public float[] getProfileArray(){
 
-  		float[] newArray = new float[this.smoothLength+1];
-  		for(int i=0; i<this.smoothLength;i++) {
-  			float normalisedX = ((float)i/(float)this.smoothLength)*100; // normalise to 100 length
-  			newArray[i] = normalisedX;
-  		}
-  		newArray[this.smoothLength] = newArray[0];
-  		return newArray;
-  	}
+  	// 	float[] newArray = new float[this.smoothLength+1];
+  	// 	for(int i=0; i<this.smoothLength;i++) {
+  	// 		float normalisedX = ((float)i/(float)this.smoothLength)*100; // normalise to 100 length
+  	// 		newArray[i] = normalisedX;
+  	// 	}
+  	// 	newArray[this.smoothLength] = newArray[0];
+  	// 	return newArray;
+  	// }
 
-    public double[] getProfileAngles(){
+    // public double[] getProfileAngles(){
 
-      double[] d = new double[this.smoothLength]; // allow the first and last element to be duplicated
-      for(int i=0;i<this.smoothLength;i++){
-        d[i] = this.smoothedArray[i].getInteriorAngle();
-      }
-      return d;
+    //   double[] d = new double[this.smoothLength]; // allow the first and last element to be duplicated
+    //   for(int i=0;i<this.smoothLength;i++){
+    //     d[i] = this.getBorderPointArray()[i].getInteriorAngle();
+    //   }
+    //   return d;
+    // }
+
+    public double[] getAngleProfile(){
+    	return this.angleProfile.getAngleProfile();
     }
 
     /*
@@ -1404,17 +1417,18 @@ public class Sperm_Analysis
 
       int minDeltaYIndex = 0;
       double minAngle = 180;
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
 
-      for(int i = 0; i<smoothLength;i++){
+      for(int i = 0; i<points.length;i++){
 
-          double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), smoothedArray[i]);
+          double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), points[i]);
 
           if(Math.abs(180 - angle) < minAngle){
             minDeltaYIndex = i;
             minAngle = 180 - angle;
           }
       }
-      return smoothedArray[minDeltaYIndex];
+      return points[minDeltaYIndex];
     }
 
     /*
@@ -1425,18 +1439,20 @@ public class Sperm_Analysis
     */
     public NucleusBorderPoint findTailByNarrowestWidthMethod(){
 
+    	IJ.log("Finding sperm tail from width...");
       // Find the narrowest point around the CoM
       // For a position in teh roi, draw a line through the CoM to the intersection point
       // Measure the length; if < min length..., store equation and border(s)
 
       double minDistance = this.getFeret();
       NucleusBorderPoint reference = this.getSpermTip();
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
 
       // this.splitNucleusToHeadAndHump();
 
       for(int i=0;i<this.smoothLength;i++){
 
-        NucleusBorderPoint p = this.smoothedArray[i];
+        NucleusBorderPoint p = this.getBorderPoint(i);
         NucleusBorderPoint opp = findOppositeBorder(p);
         double distance = p.getLengthTo(opp);
 
@@ -1455,7 +1471,7 @@ public class Sperm_Analysis
       NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
       for(int i=0;i<this.smoothLength;i++){
 
-        NucleusBorderPoint p = this.smoothedArray[i];
+        NucleusBorderPoint p = points[i];
         double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
         if(  Math.abs(90-angle)<difference && p.getLengthTo(this.getSpermTip()) > this.getCentreOfMass().getLengthTo( this.getSpermTip() ) ){
           difference = 90-angle;
@@ -1472,16 +1488,17 @@ public class Sperm_Analysis
     */
     public void moveIndexToArrayStart(int i){
 
-      // copy the array to refer to
-      NucleusBorderPoint[] tempSmooth = new NucleusBorderPoint[this.smoothLength];
-      System.arraycopy(this.smoothedArray, 0, tempSmooth, 0 , this.smoothLength);
+      // // copy the array to refer to
+      // NucleusBorderPoint[] tempSmooth = new NucleusBorderPoint[this.smoothLength];
+      // System.arraycopy(this.getBorderPointArray(), 0, tempSmooth, 0 , this.smoothLength);
      
-      System.arraycopy(tempSmooth, i, this.smoothedArray, 0 , this.smoothLength-i); // copy over the i to end values
-      System.arraycopy(tempSmooth, 0, this.smoothedArray, this.smoothLength-i, i); // copy over index 0 to i
+      // System.arraycopy(tempSmooth, i, this.getBorderPointArray(), 0 , this.smoothLength-i); // copy over the i to end values
+      // System.arraycopy(tempSmooth, 0, this.getBorderPointArray(), this.smoothLength-i, i); // copy over index 0 to i
      
-      if(tempSmooth.length != this.smoothedArray.length){
-        IJ.log("    Unequal array size");
-      }     
+      // if(tempSmooth.length != this.getBorderPointArray().length){
+      //   IJ.log("    Unequal array size");
+      // }   
+      this.angleProfile.moveIndexToArrayStart(i);  
     }
 
     /*
@@ -1511,196 +1528,196 @@ public class Sperm_Analysis
       }
     }
 
-    /* 
-    For a given delta block number in the smoothed NucleusBorderPoint array:
-    Get all the points in the array that have the same block number
-    Input: int block number
-    Return: NucleusBorderPoint[] all the points in the block
-    */
-    public NucleusBorderPoint[] fetchPointsWithBlockNumber(int b){
+    // /* 
+    // For a given delta block number in the smoothed NucleusBorderPoint array:
+    // Get all the points in the array that have the same block number
+    // Input: int block number
+    // Return: NucleusBorderPoint[] all the points in the block
+    // */
+    // public NucleusBorderPoint[] fetchPointsWithBlockNumber(int b){
 
-      int count = countPointsWithBlockNumber(b);
-      NucleusBorderPoint[] array = new NucleusBorderPoint[count];
+    //   int count = countPointsWithBlockNumber(b);
+    //   NucleusBorderPoint[] array = new NucleusBorderPoint[count];
       
-      int j=0;
-      for(int i=0; i<this.smoothLength;i++){
+    //   int j=0;
+    //   for(int i=0; i<this.smoothLength;i++){
 
-        if(this.smoothedArray[i].getBlockNumber() == b){
-          array[j] = this.smoothedArray[i];
-          j++;
-        }
+    //     if(this.getBorderPointArray()[i].getBlockNumber() == b){
+    //       array[j] = this.getBorderPointArray()[i];
+    //       j++;
+    //     }
 
-      }
-      return array;
-    }
+    //   }
+    //   return array;
+    // }
 
-    /* 
-    For a given delta block number in the smoothed NucleusBorderPoint array:
-    Count the number of points in the array that have the same block number
-    Input: int block number
-    Return: int total number of points in block
-    */
-    public int countPointsWithBlockNumber(int b){
+    // /* 
+    // For a given delta block number in the smoothed NucleusBorderPoint array:
+    // Count the number of points in the array that have the same block number
+    // Input: int block number
+    // Return: int total number of points in block
+    // */
+    // public int countPointsWithBlockNumber(int b){
 
-      // find how many points within this block
-      int count = 0;
-      for(int i=0; i<this.smoothLength;i++){
+    //   // find how many points within this block
+    //   int count = 0;
+    //   for(int i=0; i<this.smoothLength;i++){
 
-        if(this.smoothedArray[i].getBlockNumber() == b){
-          count++;
-        }
-      }
-      return count;
-    }   
+    //     if(this.getBorderPointArray()[i].getBlockNumber() == b){
+    //       count++;
+    //     }
+    //   }
+    //   return count;
+    // }   
 
-    /* 
-    For each point in the smoothed NucleusBorderPoint array:
-      Find how many points lie within the angle delta block
-      Add this number to the blockSize variable of the point
-    */
-    public void updatePointsWithBlockCount(){
+    // /* 
+    // For each point in the smoothed NucleusBorderPoint array:
+    //   Find how many points lie within the angle delta block
+    //   Add this number to the blockSize variable of the point
+    // */
+    // public void updatePointsWithBlockCount(){
 
-      for(int i=0; i<this.smoothLength;i++){
+    //   for(int i=0; i<this.smoothLength;i++){
 
-        int p = countPointsWithBlockNumber(this.smoothedArray[i].getBlockNumber());
-        this.smoothedArray[i].setBlockSize(p);
+    //     int p = countPointsWithBlockNumber(this.getBorderPointArray()[i].getBlockNumber());
+    //     this.getBorderPointArray()[i].setBlockSize(p);
 
-      }
-    }   
+    //   }
+    // }   
 
-    /*
-      For a given index in the smoothed angle array: 
-        Draw a line between this point, and the points <window> ahead and <window> behind.
-        Measure the angle between these points and store as minAngle
-        Determine if the angle lies inside or outside the shape. Adjust the angle to always report the interior angle.
-        Store interior angle as interiorAngle.
-      Automatically wraps the array.
-      Input: int index in the array, int window the points ahead and behind to look
-    */
-    public void findAngleBetweenPoints(int index, int window){
+    
+    //   For a given index in the smoothed angle array: 
+    //     Draw a line between this point, and the points <window> ahead and <window> behind.
+    //     Measure the angle between these points and store as minAngle
+    //     Determine if the angle lies inside or outside the shape. Adjust the angle to always report the interior angle.
+    //     Store interior angle as interiorAngle.
+    //   Automatically wraps the array.
+    //   Input: int index in the array, int window the points ahead and behind to look
+    
+    // public void findAngleBetweenPoints(int index, int window){
 
-      // wrap the array
-      int indexBefore = wrapIndex(index - window, this.smoothLength);
-      int indexAfter  = wrapIndex(index + window, this.smoothLength);
+    //   // wrap the array
+    //   int indexBefore = wrapIndex(index - window, this.smoothLength);
+    //   int indexAfter  = wrapIndex(index + window, this.smoothLength);
 
-      NucleusBorderPoint pointBefore = this.getSmoothedPoint(indexBefore);
-      NucleusBorderPoint pointAfter = this.getSmoothedPoint(indexAfter);
-      NucleusBorderPoint point = this.getSmoothedPoint(index);
+    //   NucleusBorderPoint pointBefore = this.getSmoothedPoint(indexBefore);
+    //   NucleusBorderPoint pointAfter = this.getSmoothedPoint(indexAfter);
+    //   NucleusBorderPoint point = this.getSmoothedPoint(index);
 
 
-      double angle = findAngleBetweenXYPoints(pointBefore, point, pointAfter);
+    //   double angle = findAngleBetweenXYPoints(pointBefore, point, pointAfter);
 
-      // find the halfway point between the first and last points.
-      // is this within the roi?
-      // if yes, keep min angle as interior angle
-      // if no, 360-min is interior
-      double midX = (pointBefore.getX()+pointAfter.getX())/2;
-      double midY = (pointBefore.getY()+pointAfter.getY())/2;
+    //   // find the halfway point between the first and last points.
+    //   // is this within the roi?
+    //   // if yes, keep min angle as interior angle
+    //   // if no, 360-min is interior
+    //   double midX = (pointBefore.getX()+pointAfter.getX())/2;
+    //   double midY = (pointBefore.getY()+pointAfter.getY())/2;
 
-      this.smoothedArray[index].setMinAngle(angle);
-      if(this.smoothedPolygon.contains( (float) midX, (float) midY)){
-        this.smoothedArray[index].setInteriorAngle(angle);
-      } else {
-        this.smoothedArray[index].setInteriorAngle(360-angle);
-      }
-    }
+    //   this.getBorderPointArray()[index].setMinAngle(angle);
+    //   if(this.smoothedPolygon.contains( (float) midX, (float) midY)){
+    //     this.getBorderPointArray()[index].setInteriorAngle(angle);
+    //   } else {
+    //     this.getBorderPointArray()[index].setInteriorAngle(360-angle);
+    //   }
+    // }
 
-    // Make an angle array for the current coordinates in the NucleusBorderPoint array
-    // Will need to be rerun on each index order change
-    public void makeAngleProfile(){
-    	// go through points
-    	// find angle
-    	// assign to angle array
+    // // Make an angle array for the current coordinates in the NucleusBorderPoint array
+    // // Will need to be rerun on each index order change
+    // public void makeAngleProfile(){
+    // 	// go through points
+    // 	// find angle
+    // 	// assign to angle array
 
-      for(int i=0; i<this.smoothLength;i++){
+    //   for(int i=0; i<this.smoothLength;i++){
 
-        // use a window size of 25 for now
-        findAngleBetweenPoints(i, this.getWindowSize());
-        this.smoothedArray[i].setIndex(i);
-      }
-      this.calculateMedianAngle();
-      this.anglesCalculated = true;
-    }
+    //     // use a window size of 25 for now
+    //     findAngleBetweenPoints(i, this.getWindowSize());
+    //     this.getBorderPointArray()[i].setIndex(i);
+    //   }
+    //   this.calculateMedianAngle();
+    //   this.anglesCalculated = true;
+    // }
 
-    public void makeDeltaAngleProfile(){
+    // public void makeDeltaAngleProfile(){
 
-    	double angleDelta = 0;
-      for(int i=0; i<this.smoothLength;i++){
+    // 	double angleDelta = 0;
+    //   for(int i=0; i<this.smoothLength;i++){
 
-      	// handle array wrapping
-      	NucleusBorderPoint prevPoint = this.smoothedArray[ wrapIndex(i-1, this.smoothLength) ];
-      	NucleusBorderPoint nextPoint = this.smoothedArray[ wrapIndex(i+1, this.smoothLength) ];
+    //   	// handle array wrapping
+    //   	NucleusBorderPoint prevPoint = this.getBorderPointArray()[ wrapIndex(i-1, this.smoothLength) ];
+    //   	NucleusBorderPoint nextPoint = this.getBorderPointArray()[ wrapIndex(i+1, this.smoothLength) ];
 
-      	angleDelta = nextPoint.getInteriorAngle() - prevPoint.getInteriorAngle();
-	      this.smoothedArray[i].setInteriorAngleDelta(angleDelta);
-	    }
+    //   	angleDelta = nextPoint.getInteriorAngle() - prevPoint.getInteriorAngle();
+	   //    this.getBorderPointArray()[i].setInteriorAngleDelta(angleDelta);
+	   //  }
 
-      // perform 5-window smoothing of the deltas
-      int smoothingWindow = 5;
-      double smoothedDelta = 0;
-      for(int i=0; i<this.smoothLength;i++){
+    //   // perform 5-window smoothing of the deltas
+    //   int smoothingWindow = 5;
+    //   double smoothedDelta = 0;
+    //   for(int i=0; i<this.smoothLength;i++){
 
-      	smoothedDelta = this.smoothedArray[i].getInteriorAngleDelta();
+    //   	smoothedDelta = this.getBorderPointArray()[i].getInteriorAngleDelta();
 
-      	// handle array wrapping for arbitrary length smoothing
-      	for(int j=1;j<=(int)(smoothingWindow-1)/2;j++){
+    //   	// handle array wrapping for arbitrary length smoothing
+    //   	for(int j=1;j<=(int)(smoothingWindow-1)/2;j++){
 
-      		smoothedDelta += ( this.smoothedArray[ wrapIndex(i-j, this.smoothLength) ].getInteriorAngleDelta() +
-	      					  			   this.smoothedArray[ wrapIndex(i+j, this.smoothLength) ].getInteriorAngleDelta());
-      	}
-      	smoothedDelta = smoothedDelta / smoothingWindow;
-	      this.smoothedArray[i].setInteriorAngleDeltaSmoothed(smoothedDelta);
-      }
+    //   		smoothedDelta += ( this.getBorderPointArray()[ wrapIndex(i-j, this.smoothLength) ].getInteriorAngleDelta() +
+	   //    					  			   this.getBorderPointArray()[ wrapIndex(i+j, this.smoothLength) ].getInteriorAngleDelta());
+    //   	}
+    //   	smoothedDelta = smoothedDelta / smoothingWindow;
+	   //    this.getBorderPointArray()[i].setInteriorAngleDeltaSmoothed(smoothedDelta);
+    //   }
 
-      this.countConsecutiveDeltas();
-    }
+    //   this.countConsecutiveDeltas();
+    // }
 
-    public void countConsecutiveDeltas(){
+    // public void countConsecutiveDeltas(){
     	
-    	int blockNumber = 0;
-    	for(int i=0;i<this.smoothLength;i++){ // iterate over every point in the array
+    // 	int blockNumber = 0;
+    // 	for(int i=0;i<this.smoothLength;i++){ // iterate over every point in the array
 
-    		int count = 0;
-    		if(this.smoothedArray[i].getInteriorAngleDeltaSmoothed() < 1){ // if the current NucleusBorderPoint has an angle < 1, move on
-    			this.smoothedArray[i].setConsecutiveBlocks(0);
-    			this.smoothedArray[i].setBlockNumber(0);
-          this.smoothedArray[i].setPositionWithinBlock(0);
-    			continue;
-    		}
+    // 		int count = 0;
+    // 		if(this.getBorderPointArray()[i].getInteriorAngleDeltaSmoothed() < 1){ // if the current NucleusBorderPoint has an angle < 1, move on
+    // 			this.getBorderPointArray()[i].setConsecutiveBlocks(0);
+    // 			this.getBorderPointArray()[i].setBlockNumber(0);
+    //       this.getBorderPointArray()[i].setPositionWithinBlock(0);
+    // 			continue;
+    // 		}
 
-        int positionInBlock = i==0
-                            ? 0
-                            : this.smoothedArray[i-1].getPositionWithinBlock() + 1; // unless first element of array, use prev value++
+    //     int positionInBlock = i==0
+    //                         ? 0
+    //                         : this.getBorderPointArray()[i-1].getPositionWithinBlock() + 1; // unless first element of array, use prev value++
     		
-        for(int j=1;j<this.smoothLength-i;j++){ // next point on until up to end of array
-    			if(this.smoothedArray[i+j].getInteriorAngleDeltaSmoothed() >= 1){
-    				count++;
+    //     for(int j=1;j<this.smoothLength-i;j++){ // next point on until up to end of array
+    // 			if(this.getBorderPointArray()[i+j].getInteriorAngleDeltaSmoothed() >= 1){
+    // 				count++;
 
-    			} else {
-    				break; // stop counting on first point below 1 degree delta
-    			}
-    		}
+    // 			} else {
+    // 				break; // stop counting on first point below 1 degree delta
+    // 			}
+    // 		}
     		
-    		this.smoothedArray[i].setConsecutiveBlocks(count);
-        this.smoothedArray[i].setPositionWithinBlock(positionInBlock);
-    		if(i>0){
-	    		if(this.smoothedArray[i-1].getBlockNumber()==0){
-	    			blockNumber++;
-	    		}
-	    	}
-    		this.smoothedArray[i].setBlockNumber(blockNumber);
+    // 		this.getBorderPointArray()[i].setConsecutiveBlocks(count);
+    //     this.getBorderPointArray()[i].setPositionWithinBlock(positionInBlock);
+    // 		if(i>0){
+	   //  		if(this.getBorderPointArray()[i-1].getBlockNumber()==0){
+	   //  			blockNumber++;
+	   //  		}
+	   //  	}
+    // 		this.getBorderPointArray()[i].setBlockNumber(blockNumber);
     		
-    	}
+    // 	}
 
-    	this.setBlockCount(blockNumber);
-    }
+    // 	this.setBlockCount(blockNumber);
+    // }
 
     public NucleusBorderPoint findMinimumAngle(){
 
-      if(!this.anglesCalculated){
-        this.makeAngleProfile();
-        this.makeDeltaAngleProfile();
-      }
+      // if(!this.anglesCalculated){
+      //   this.makeAngleProfile();
+      //   this.makeDeltaAngleProfile();
+      // }
       if(!this.minimaCalculated){
         this.detectLocalMinima();
       }
@@ -1709,7 +1726,7 @@ public class Sperm_Analysis
       for(int i=0; i<this.smoothLength;i++){
 
           // use a window size of 25 for now
-          double angle = this.smoothedArray[i].getMinAngle();
+          double angle = this.getBorderPoint(i).getMinAngle();
           if(angle<minAngle){
             minAngle = angle;
             minIndex = i;
@@ -1717,7 +1734,7 @@ public class Sperm_Analysis
 
           // IJ.log(i+" \t "+angle+" \t "+minAngle+"  "+minIndex);
       }
-      return this.smoothedArray[minIndex];
+      return this.getBorderPoint(minIndex);
     }
 
     /*
@@ -1728,21 +1745,22 @@ public class Sperm_Analysis
     */
     public boolean isProfileOrientationOK(){
 
-      if(!this.anglesCalculated){
-        this.makeAngleProfile();
-        this.makeDeltaAngleProfile();
-      }
+      // if(!this.anglesCalculated){
+      //   this.makeAngleProfile();
+      //   this.makeDeltaAngleProfile();
+      // }
       if(!this.minimaCalculated){
         this.detectLocalMinima();
       }
 
       boolean ok = false;
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
 
       double maxAngle = 0.0;
       int maxIndex = 0;
       for(int i=0; i<this.smoothLength;i++){
 
-          double angle = this.smoothedArray[i].getInteriorAngle();
+          double angle = points[i].getInteriorAngle();
           if(angle>maxAngle){
             maxAngle = angle;
             maxIndex = i;
@@ -1765,17 +1783,19 @@ public class Sperm_Analysis
     */
     public NucleusBorderPoint[] getLocalMinima(){
 
+    	IJ.log("Getting local minima...");
       if(!this.minimaCalculated){
         this.detectLocalMinima();
       }
 
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
       NucleusBorderPoint[] newArray = new NucleusBorderPoint[this.minimaCount];
       int j = 0;
 
       try{
-        for (int i=0; i<this.smoothLength; i++) {
-          if(this.smoothedArray[i].isLocalMin()){
-            newArray[j] = this.smoothedArray[i];
+        for (int i=0; i<points.length; i++) {
+          if(points[i].isLocalMin()){
+            newArray[j] = points[i];
             j++;
           }
         }
@@ -1793,16 +1813,18 @@ public class Sperm_Analysis
     */
     public NucleusBorderPoint[] getLocalMaxima(){
  
+ 			IJ.log("Getting local maxima...");
       if(!this.maximaCalculated){
         this.detectLocalMaxima();
       }
 
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
       NucleusBorderPoint[] newArray = new NucleusBorderPoint[this.maximaCount];
       int j = 0;
       try{  
-        for (int i=0; i<this.smoothLength; i++) {
-          if(this.smoothedArray[i].isLocalMax()){
-            newArray[j] = this.smoothedArray[i];
+        for (int i=0; i<points.length; i++) {
+          if(this.getBorderPoint(i).isLocalMax()){
+            newArray[j] = this.getBorderPoint(i);
             j++;
           }
         }
@@ -1824,13 +1846,15 @@ public class Sperm_Analysis
       // go through angle array (with tip at start)
       // look at 1-2-3-4-5 points ahead and behind.
       // if all greater, local minimum
-      
+      IJ.log("Detecting local minima...");
       double[] prevAngles = new double[this.minimaLookupDistance]; // slots for previous angles
       double[] nextAngles = new double[this.minimaLookupDistance]; // slots for next angles
 
       int count = 0;
 
-      for (int i=0; i<this.smoothLength; i++) { // for each position in sperm
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
+
+      for (int i=0; i<points.length; i++) { // for each position in sperm
 
         // go through each lookup position and get the appropriate angles
         for(int j=0;j<prevAngles.length;j++){
@@ -1840,17 +1864,17 @@ public class Sperm_Analysis
 
           // handle beginning of array - wrap around
           if(prev_i < 0){
-            prev_i = this.smoothLength + prev_i; // length of array - appropriate value
+            prev_i = points.length + prev_i; // length of array - appropriate value
           }
 
           // handle end of array - wrap
-          if(next_i >= this.smoothLength){
-            next_i = next_i - this.smoothLength;
+          if(next_i >= points.length){
+            next_i = next_i - points.length;
           }
 
           // fill the lookup array
-          prevAngles[j] = this.smoothedArray[prev_i].getInteriorAngle();
-          nextAngles[j] = this.smoothedArray[next_i].getInteriorAngle();
+          prevAngles[j] = points[prev_i].getInteriorAngle();
+          nextAngles[j] = points[next_i].getInteriorAngle();
         }
         
         // with the lookup positions, see if minimum at i
@@ -1861,7 +1885,7 @@ public class Sperm_Analysis
 
           // for the first position in prevAngles, compare to the current index
           if(l==0){
-            if(prevAngles[l] < this.smoothedArray[i].getInteriorAngle() || nextAngles[l] < this.smoothedArray[i].getInteriorAngle()){
+            if(prevAngles[l] < points[i].getInteriorAngle() || nextAngles[l] < points[i].getInteriorAngle()){
               ok = false;
             }
           } else { // for the remainder of the positions in prevAngles, compare to the prior prevAngle
@@ -1871,7 +1895,7 @@ public class Sperm_Analysis
             }
           }
 
-          if( this.smoothedArray[i].getInteriorAngle()-180 > -20){ // ignore any values close to 180 degrees
+          if( points[i].getInteriorAngle()-180 > -20){ // ignore any values close to 180 degrees
             ok = false;
           }
         }
@@ -1881,7 +1905,7 @@ public class Sperm_Analysis
         }
 
         // put oks into array to put into multiarray
-        smoothedArray[i].setLocalMin(ok);
+        points[i].setLocalMin(ok);
       }
       this.minimaCalculated = true;
       this.minimaCount =  count;
@@ -1898,7 +1922,8 @@ public class Sperm_Analysis
       // go through interior angle array (with tip at start)
       // look at 1-2-3-4-5 points ahead and behind.
       // if all lower, local maximum
-      
+      IJ.log("Detecting local maxima...");
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
       double[] prevAngles = new double[this.minimaLookupDistance]; // slots for previous angles
       double[] nextAngles = new double[this.minimaLookupDistance]; // slots for next angles
 
@@ -1921,8 +1946,8 @@ public class Sperm_Analysis
           }
 
           // fill the lookup array
-          prevAngles[j] = this.smoothedArray[prev_i].getInteriorAngle();
-          nextAngles[j] = this.smoothedArray[next_i].getInteriorAngle();
+          prevAngles[j] = points[prev_i].getInteriorAngle();
+          nextAngles[j] = points[next_i].getInteriorAngle();
         }
         
         // with the lookup positions, see if maximum at i
@@ -1934,8 +1959,8 @@ public class Sperm_Analysis
 
           // not ok if the outer entries are not higher than inner entries
           if(l==0){
-            if( prevAngles[l] > this.smoothedArray[i].getInteriorAngle() ||
-                   nextAngles[l] > this.smoothedArray[i].getInteriorAngle() ){
+            if( prevAngles[l] > points[i].getInteriorAngle() ||
+                   nextAngles[l] > points[i].getInteriorAngle() ){
 
               if( !ignoreOne){
                 ok = false;
@@ -1956,8 +1981,8 @@ public class Sperm_Analysis
           }
 
           // we want the angle of a maximum to be higher than the median angle of the array set
-          // if( this.smoothedArray[i].getInteriorAngle()-180 < -10){
-          if( this.smoothedArray[i].getInteriorAngle() < this.medianAngle){
+          // if( this.getBorderPointArray()[i].getInteriorAngle()-180 < -10){
+          if( points[i].getInteriorAngle() < this.medianAngle){
             ok = false;
           }
         }
@@ -1967,7 +1992,7 @@ public class Sperm_Analysis
         }
 
         // put oks into array to put into multiarray
-        smoothedArray[i].setLocalMax(ok);
+        points[i].setLocalMax(ok);
       }
       this.maximaCalculated = true;
       this.maximaCount =  count;
@@ -1980,7 +2005,7 @@ public class Sperm_Analysis
     */
     public NucleusBorderPoint findTailFromDeltas(NucleusBorderPoint tip){
 
-
+    	IJ.log("Finding sperm tail from deltas...");
       // get the midpoint of each block
       ArrayList<NucleusBorderPoint> results = new ArrayList<NucleusBorderPoint>(0);
       int maxIndex = 0;
@@ -1988,12 +2013,12 @@ public class Sperm_Analysis
       // remember that block 0 is not assigned; start from 1
       try{
 
-        this.updatePointsWithBlockCount();
-        for(int i=1; i<this.getBlockCount();i++){
+        this.angleProfile.updatePointsWithBlockCount();
+        for(int i=1; i<this.angleProfile.getBlockCount();i++){
 
           // number of points in each block
 
-          NucleusBorderPoint[] points = this.fetchPointsWithBlockNumber(i);
+          NucleusBorderPoint[] points = this.angleProfile.getBlockOfBorderPoints(i);
           for(NucleusBorderPoint p : points){
             if(p.isMidpoint()){ // will ignore any blocks without a midpoint established - <2 members
               results.add(p);
@@ -2034,7 +2059,7 @@ public class Sperm_Analysis
 
         double[] m = new double[this.smoothLength];
         for(int i = 0; i<this.smoothLength; i++){
-          m[i] = this.smoothedArray[i].getInteriorAngle();
+          m[i] = this.getBorderPointArray()[i].getInteriorAngle();
         }
         Arrays.sort(m);
 
@@ -2058,52 +2083,34 @@ public class Sperm_Analysis
         f.delete();
       }
 
+      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
       String outLine = "SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE\n";
 
       // IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
       
       for(int i=0;i<this.smoothLength;i++){
 
-        double normalisedIAngle = smoothedArray[i].getInteriorAngle()-180;
+        double normalisedIAngle = getBorderPointArray()[i].getInteriorAngle()-180;
         // double length = this.smoothLength;
         double normalisedX = ((double)i/(double)this.smoothLength)*100; // normalise to 100 length
         
-        outLine = outLine + smoothedArray[i].getXAsInt()+"\t"+
-                            smoothedArray[i].getYAsInt()+"\t"+
-                            smoothedArray[i].getX()+"\t"+
-                            smoothedArray[i].getY()+"\t"+
-                            smoothedArray[i].getInteriorAngle()+"\t"+
-                            smoothedArray[i].getMinAngle()+"\t"+
+        outLine = outLine + points[i].getXAsInt()+"\t"+
+                            points[i].getYAsInt()+"\t"+
+                            points[i].getX()+"\t"+
+                            points[i].getY()+"\t"+
+                            points[i].getInteriorAngle()+"\t"+
+                            points[i].getMinAngle()+"\t"+
                             normalisedIAngle+"\t"+
-                            smoothedArray[i].getInteriorAngleDelta()+"\t"+
-                            smoothedArray[i].getInteriorAngleDeltaSmoothed()+"\t"+
-                            smoothedArray[i].getPositionWithinBlock()+"\t"+
-                            smoothedArray[i].getBlockNumber()+"\t"+
-                            smoothedArray[i].isLocalMin()+"\t"+
-                            smoothedArray[i].isLocalMax()+"\t"+
-                            smoothedArray[i].isMidpoint()+"\t"+
-                            smoothedArray[i].isBlock()+"\t"+
+                            points[i].getInteriorAngleDelta()+"\t"+
+                            points[i].getInteriorAngleDeltaSmoothed()+"\t"+
+                            points[i].getPositionWithinBlock()+"\t"+
+                            points[i].getBlockNumber()+"\t"+
+                            points[i].isLocalMin()+"\t"+
+                            points[i].isLocalMax()+"\t"+
+                            points[i].isMidpoint()+"\t"+
+                            points[i].isBlock()+"\t"+
                             normalisedX+"\t"+
                             distanceProfile[i]+"\n";
-
-        // IJ.append(smoothedArray[i].getXAsInt()+"\t"+
-        //           smoothedArray[i].getYAsInt()+"\t"+
-        //           smoothedArray[i].getX()+"\t"+
-        //           smoothedArray[i].getY()+"\t"+
-        //           smoothedArray[i].getInteriorAngle()+"\t"+
-        //           smoothedArray[i].getMinAngle()+"\t"+
-        //           normalisedIAngle+"\t"+
-        //           smoothedArray[i].getInteriorAngleDelta()+"\t"+
-        //           smoothedArray[i].getInteriorAngleDeltaSmoothed()+"\t"+
-        //           smoothedArray[i].getPositionWithinBlock()+"\t"+
-        //           smoothedArray[i].getBlockNumber()+"\t"+
-        //           smoothedArray[i].isLocalMin()+"\t"+
-        //           smoothedArray[i].isLocalMax()+"\t"+
-        //           smoothedArray[i].isMidpoint()+"\t"+
-        //           smoothedArray[i].isBlock()+"\t"+
-        //           normalisedX+"\t"+
-        //           distanceProfile[i],
-        //           path);
       }
       IJ.append( outLine, path);
     }
@@ -2113,7 +2120,7 @@ public class Sperm_Analysis
       double[] ypoints = new double[this.smoothLength];
 
       for(int j=0;j<ypoints.length;j++){
-          ypoints[j] = this.smoothedArray[j].getInteriorAngle();
+          ypoints[j] = this.getBorderPointArray()[j].getInteriorAngle();
       }
       return ypoints;
     }
@@ -2155,11 +2162,11 @@ public class Sperm_Analysis
       int minDeltaYIndex = 0;
 
       for(int i = 0; i<smoothLength;i++){
-      		double x = smoothedArray[i].getX();
-      		double y = smoothedArray[i].getY();
+      		double x = getBorderPointArray()[i].getX();
+      		double y = getBorderPointArray()[i].getY();
       		double yOnLine = getYFromEquation(lineEquation, x);
 
-      		double distanceToTail = smoothedArray[i].getLengthTo(spermTail);
+      		double distanceToTail = getBorderPointArray()[i].getLengthTo(spermTail);
 
       		double deltaY = Math.abs(y - yOnLine);
       		if(deltaY < minDeltaY && distanceToTail > this.getFeret()/2){ // exclude points too close to the tail
@@ -2173,7 +2180,7 @@ public class Sperm_Analysis
     public void splitNucleusToHeadAndHump(){
 
       int intersectionPointIndex = findIntersectionPointForNuclearSplit();
-      NucleusBorderPoint intersectionPoint = smoothedArray[intersectionPointIndex];
+      NucleusBorderPoint intersectionPoint = getBorderPointArray()[intersectionPointIndex];
       this.intersectionPoint = intersectionPoint;
 
       // get an array of points from tip to tail
@@ -2186,7 +2193,7 @@ public class Sperm_Analysis
       	
       	int currentIndex = wrapIndex(tailIndex+i, smoothLength); // start at the tail, and go around the array
         
-        NucleusBorderPoint p = smoothedArray[currentIndex];
+        NucleusBorderPoint p = getBorderPointArray()[currentIndex];
 
         if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
         	roi1.add(p);
@@ -2366,10 +2373,10 @@ public class Sperm_Analysis
             double minDistanceToSignal = 1000;
 
             for(int j = 0; j<smoothLength;j++){
-                double x = smoothedArray[j].getX();
-                double y = smoothedArray[j].getY();
+                double x = getBorderPointArray()[j].getX();
+                double y = getBorderPointArray()[j].getY();
                 double yOnLine = getYFromEquation(eq, x);
-                double distanceToSignal = smoothedArray[j].getLengthTo(n.getCentreOfMass()); // fetch
+                double distanceToSignal = getBorderPointArray()[j].getLengthTo(n.getCentreOfMass()); // fetch
 
 
                 double deltaY = Math.abs(y - yOnLine);
@@ -2381,7 +2388,7 @@ public class Sperm_Analysis
                   minDistanceToSignal = distanceToSignal;
                 }
             }
-            NucleusBorderPoint borderPoint = smoothedArray[minDeltaYIndex];
+            NucleusBorderPoint borderPoint = getBorderPointArray()[minDeltaYIndex];
             double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
             double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
             double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
@@ -2411,7 +2418,7 @@ public class Sperm_Analysis
             double minDistanceToSignal = 1000;
 
             for(int j = 0; j<smoothLength;j++){
-                NucleusBorderPoint p = smoothedArray[j];
+                NucleusBorderPoint p = getBorderPointArray()[j];
                 double distanceToSignal = p.getLengthTo(n.getCentreOfMass());
 
                 // find the point closest to the CoM
@@ -2420,8 +2427,8 @@ public class Sperm_Analysis
                   minDistanceToSignal = distanceToSignal;
                 }
             }
-            // NucleusBorderPoint borderPoint = smoothedArray[minIndex];
-            n.setClosestBorderPoint(smoothedArray[minIndex]);
+            // NucleusBorderPoint borderPoint = getBorderPointArray()[minIndex];
+            n.setClosestBorderPoint(getBorderPointArray()[minIndex]);
           }
         }
       }
@@ -2429,11 +2436,12 @@ public class Sperm_Analysis
 
     public void calculateDistanceProfile(){
 
+    	IJ.log("Calculating distance profile...");
       double[] profile = new double[smoothLength];
 
       for(int i = 0; i<smoothLength;i++){
 
-      		NucleusBorderPoint p = smoothedArray[i];
+      		NucleusBorderPoint p = this.getBorderPoint(i);
       		NucleusBorderPoint opp = findOppositeBorder(p);
 
           profile[i] = p.getLengthTo(opp);
@@ -2820,7 +2828,7 @@ public class Sperm_Analysis
       for(int i=0;i<nucleiCollection.size();i++){
 
         ArrayList<Double> normalisedXValues = nucleiCollection.get(i).normalisedXPositionsFromTip;
-        NucleusBorderPoint[] yValues = nucleiCollection.get(i).smoothedArray;
+        NucleusBorderPoint[] yValues = nucleiCollection.get(i).getBorderPointArray();
 
         for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
 
@@ -2849,7 +2857,7 @@ public class Sperm_Analysis
 
         ArrayList<Double> normalisedXValues = nucleiCollection.get(i).normalisedXPositionsFromTip;
         double[] yValues = nucleiCollection.get(i).getNormalisedYPositionsFromTail();
-        // NucleusBorderPoint[] yValues = nucleiCollection.get(i).smoothedArray;
+        // NucleusBorderPoint[] yValues = nucleiCollection.get(i).getBorderPointArray();
 
         for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
 
@@ -3096,7 +3104,7 @@ public class Sperm_Analysis
 		      // IJ.log("Curve index: "+curveIndex);
 
 		      // get the angle at this point
-		      double curveAngle = r.smoothedArray[curveIndex].getInteriorAngle();
+		      double curveAngle = r.getBorderPointArray()[curveIndex].getInteriorAngle();
 
 		      // get the next median index position, given the tail point is 0
 		      int medianIndex = wrapIndex(medianTailIndex+j, medianInterpolatedArray.length); // DOUBLE CHECK THE LOGIC HERE - CAUSING NPE WHEN USING  normalisedMedian.length
@@ -3111,7 +3119,7 @@ public class Sperm_Analysis
 
         r.offsetCalculated = true;
         r.tailIndex = r.tailIndex-offset; // update the tail position
-        r.setSpermTail(r.smoothedArray[r.tailIndex]); // ensure the spermTail is updated
+        r.setSpermTail(r.getBorderPointArray()[r.tailIndex]); // ensure the spermTail is updated
         r.differenceToMedianCurve = totalDifference;
   		}
 
@@ -3197,7 +3205,7 @@ public class Sperm_Analysis
       for(int i=0;i<nucleiCollection.size();i++){
         
         double[] rawXpoints         = nucleiCollection.get(i).getRawXPositionsFromTip();
-        double[] yPoints            = nucleiCollection.get(i).getProfileAngles();
+        double[] yPoints            = nucleiCollection.get(i).getAngleProfile();
         double[] normalisedXFromTip = nucleiCollection.get(i).getNormalisedXPositionsFromTip();
         double[] rawXFromTail       = nucleiCollection.get(i).getRawXPositionsFromTail();
 
@@ -3442,7 +3450,7 @@ public class Sperm_Analysis
             NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
             for(int k=0; k<n.smoothLength;k++){
 
-              if(n.smoothedArray[k].overlaps(border)){
+              if(n.getBorderPointArray()[k].overlaps(border)){
                 redPoints.add( n.normalisedXPositionsFromTip.get(k) );
                 double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistance() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
                 yPoints.add(yPosition);
@@ -3478,7 +3486,7 @@ public class Sperm_Analysis
             NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
             for(int k=0; k<n.smoothLength;k++){
 
-              if(n.smoothedArray[k].overlaps(border)){
+              if(n.getBorderPointArray()[k].overlaps(border)){
                 // IJ.log("Found closest border: "+i+" : "+j);
                 redPoints.add( n.normalisedXPositionsFromTail.get(k) );
                 double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistance() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // make between 220 and 260
@@ -3862,7 +3870,7 @@ public class Sperm_Analysis
 		public CurveRefolder(double[] target, Nucleus n){
 			this.targetCurve = target;
 			this.initialNucleus = n;
-			this.initialCurve = n.getProfileAngles();
+			this.initialCurve = n.getAngleProfile();
 		}
 
 		/*
@@ -3907,14 +3915,14 @@ public class Sperm_Analysis
 			FloatPolygon offsetPolygon = new FloatPolygon();
 
 			for(int i=0; i<initialNucleus.smoothLength; i++){
-				NucleusBorderPoint p = initialNucleus.smoothedArray[i];
+				NucleusBorderPoint p = initialNucleus.getBorderPointArray()[i];
 
 				double x = p.getX() - xOffset;
 				double y = p.getY() - yOffset;
 				offsetPolygon.addPoint(x, y);
 
-				initialNucleus.smoothedArray[i].setX( x );
-				initialNucleus.smoothedArray[i].setY( y );
+				initialNucleus.getBorderPointArray()[i].setX( x );
+				initialNucleus.getBorderPointArray()[i].setY( y );
 				
 			}
 			initialNucleus.smoothedPolygon = offsetPolygon;
@@ -3934,7 +3942,7 @@ public class Sperm_Analysis
 			double[] pPoints = new double[initialNucleus.smoothLength]; // positions along array
 
 			for(int i=0; i<targetNucleus.smoothLength; i++){
-				NucleusBorderPoint p = targetNucleus.smoothedArray[i];
+				NucleusBorderPoint p = targetNucleus.getBorderPointArray()[i];
 				xPoints[i] = p.getX();
 				yPoints[i] = p.getY();
 				aPoints[i] = targetCurve[i];
@@ -3994,7 +4002,7 @@ public class Sperm_Analysis
 			// double[] pPoints = new double[targetNucleus.smoothLength+1]; // positions along array
 
 			for(int i=0; i<targetNucleus.smoothLength; i++){
-				NucleusBorderPoint p = targetNucleus.smoothedArray[i];
+				NucleusBorderPoint p = targetNucleus.getBorderPointArray()[i];
 				xPoints[i] = p.getX();
 				yPoints[i] = p.getY();
 				// aPoints[i] = p.getInteriorAngle();
@@ -4002,7 +4010,7 @@ public class Sperm_Analysis
 			}
 
       // ensure nucleus outline joins up at tip
-      NucleusBorderPoint p = targetNucleus.smoothedArray[0];
+      NucleusBorderPoint p = targetNucleus.getBorderPointArray()[0];
       xPoints[targetNucleus.smoothLength] = p.getX();
       yPoints[targetNucleus.smoothLength] = p.getY();
 
@@ -4020,11 +4028,11 @@ public class Sperm_Analysis
 		*/
 		private double iterateOverNucleus(){
 
-			double similarityScore = compareProfiles(targetCurve, targetNucleus.getProfileAngles());
+			double similarityScore = compareProfiles(targetCurve, targetNucleus.getAngleProfile());
 			
 			for(int i=0; i<targetNucleus.smoothLength; i++){
 
-				NucleusBorderPoint p = targetNucleus.smoothedArray[i];
+				NucleusBorderPoint p = targetNucleus.getBorderPointArray()[i];
 	    		
     		double currentDistance = p.getLengthTo(new XYPoint(0,0));
     		double newDistance = currentDistance; // default no change
@@ -4060,20 +4068,20 @@ public class Sperm_Analysis
 				targetNucleus.smoothedPolygon = createPolygon(); 
 
 				// measure the new profile & compare
-				targetNucleus.makeAngleProfile();
-				double[] newProfile = targetNucleus.getProfileAngles();
+				targetNucleus.angleProfile.updateAngleCalculations();
+				double[] newProfile = targetNucleus.getAngleProfile();
 				double score = compareProfiles(targetCurve, newProfile);
 
 				// IJ.log("Score: "+score);
 				// do not apply change  if the distance from teh surrounding points changes too much
-				double distanceToPrev = p.getLengthTo( targetNucleus.smoothedArray[ wrapIndex(i-1, targetNucleus.smoothLength) ] );
-				double distanceToNext = p.getLengthTo( targetNucleus.smoothedArray[ wrapIndex(i+1, targetNucleus.smoothLength) ] );
+				double distanceToPrev = p.getLengthTo( targetNucleus.getBorderPointArray()[ wrapIndex(i-1, targetNucleus.smoothLength) ] );
+				double distanceToNext = p.getLengthTo( targetNucleus.getBorderPointArray()[ wrapIndex(i+1, targetNucleus.smoothLength) ] );
 
 				// reset if worse fit or distances are too high
 				if(score > similarityScore  || distanceToNext > 1.2 || distanceToPrev > 1.2 ){
 					p.setX(oldX);
 					p.setY(oldY);
-					targetNucleus.makeAngleProfile();
+					targetNucleus.angleProfile.updateAngleCalculations();
 					targetNucleus.smoothedPolygon = createPolygon();
 					// IJ.log("Rejecting change");
 				} else {
@@ -4089,7 +4097,7 @@ public class Sperm_Analysis
 
 			for(int i=0; i<targetNucleus.smoothLength; i++){
 
-				NucleusBorderPoint p = targetNucleus.smoothedArray[i];
+				NucleusBorderPoint p = targetNucleus.getBorderPointArray()[i];
 				double x = p.getX();
 				double y = p.getY();
 				offsetPolygon.addPoint(x, y);
@@ -4153,7 +4161,7 @@ public class Sperm_Analysis
 
     	for(int i=0;i<targetNucleus.smoothLength;i++){
 
-    		NucleusBorderPoint p = targetNucleus.smoothedArray[i];
+    		NucleusBorderPoint p = targetNucleus.getBorderPointArray()[i];
     		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
     		double oldAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
     		if(p.getX()<0){
@@ -4254,7 +4262,7 @@ public class Sperm_Analysis
     	double bestDistance = 180;
 
     	for(int i=0;i<targetNucleus.smoothLength;i++){
-    		NucleusBorderPoint p = targetNucleus.smoothedArray[i];
+    		NucleusBorderPoint p = targetNucleus.getBorderPointArray()[i];
     		double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
     		double pAngle = findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
     		if(p.getX()<0){
