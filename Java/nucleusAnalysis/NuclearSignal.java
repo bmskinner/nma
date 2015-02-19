@@ -15,7 +15,7 @@ public class NuclearSignal {
   private double area;
   private double perimeter;
   private double feret;
-  private double angleFromTail;
+  private double angleFromReferencePoint;
   private double distanceFromCentreOfMass; // the absolute measured distance from the signal CoM to the nuclear CoM
   private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
 
@@ -32,6 +32,11 @@ public class NuclearSignal {
     this.centreOfMass = centreOfMass;
   }
 
+  /*
+    -----------------------
+    Getters for basic values within nucleus
+    -----------------------
+  */
   public Roi getRoi(){
     return this.roi;
   }
@@ -49,14 +54,14 @@ public class NuclearSignal {
   }
 
   public double getAngle(){
-    return this.angleFromTail;
+    return this.angleFromReferencePoint;
   }
 
-  public double getDistance(){
+  public double getDistanceFromCoM(){
     return this.distanceFromCentreOfMass;
   }
 
-  public double getFractionalDistance(){
+  public double getFractionalDistanceFromCoM(){
     return this.fractionalDistanceFromCoM;
   }
 
@@ -68,38 +73,6 @@ public class NuclearSignal {
     return this.closestNuclearBorderPoint;
   }
 
-  public void setArea(double d){
-    this.area = d;
-  }
-
-  public void setPerimeter(double d){
-    this.perimeter = d;
-  }
-
-  public void setFeret(double d){
-    this.feret = d;
-  }
-
-  public void setAngle(double d){
-    this.angleFromTail = d;
-  }
-
-  public void setDistance(double d){
-    this.distanceFromCentreOfMass = d;
-  }
-
-  public void setFractionalDistance(double d){
-    this.fractionalDistanceFromCoM = d;
-  }
-
-  public void setCentreOfMass(XYPoint p){
-    this.centreOfMass = p;
-  }
-
-  public void setClosestBorderPoint(NucleusBorderPoint p){
-    this.closestNuclearBorderPoint = p;
-  }
-
   /*
     Assuming the signal were a perfect circle of area equal
     to the measured area, get the radius for that circle
@@ -107,5 +80,26 @@ public class NuclearSignal {
   public double getRadius(){
     // r = sqrt(a/pi)
     return Math.sqrt(this.area/Math.PI);
+  }
+
+  /*
+    -----------------------
+    Setters for externally calculated values
+    -----------------------
+  */
+  public void setAngle(double d){
+    this.angleFromReferencePoint = d;
+  }
+
+  public void setDistanceFromCoM(double d){
+    this.distanceFromCentreOfMass = d;
+  }
+
+  public void setFractionalDistanceFromCoM(double d){
+    this.fractionalDistanceFromCoM = d;
+  }
+
+  public void setClosestBorderPoint(NucleusBorderPoint p){
+    this.closestNuclearBorderPoint = p;
   }
 }

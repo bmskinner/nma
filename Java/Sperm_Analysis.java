@@ -155,6 +155,11 @@ public class Sperm_Analysis
 
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
 
+  // colour channels
+  private static final int RED_CHANNEL   = 0;
+  private static final int GREEN_CHANNEL = 1;
+  private static final int BLUE_CHANNEL  = 2;
+
   // Values for deciding whether an object is a signal
   private static final int SIGNAL_THRESHOLD = 70;
   private static final double MIN_SIGNAL_SIZE = 50; // how small can a signal be
@@ -486,23 +491,23 @@ public class Sperm_Analysis
    return manager;
   }
 
-  /*
-    Make a directory with the same name as the image being analysed
-  */
-  public String createImageDirectory(String path){
-    File dir = new File(path);
+  // /*
+  //   Make a directory with the same name as the image being analysed
+  // */
+  // public String createImageDirectory(String path){
+  //   File dir = new File(path);
     
-    if (!dir.exists()) {
-      try{
-        dir.mkdir();
-        IJ.log("    Dir created");
-      } catch(Exception e) {
-        IJ.log("Failed to create dir: "+e);
-        IJ.log("Saving to: "+dir.toString());
-      }
-    }
-    return dir.toString();
-  }
+  //   if (!dir.exists()) {
+  //     try{
+  //       dir.mkdir();
+  //       IJ.log("    Dir created");
+  //     } catch(Exception e) {
+  //       IJ.log("Failed to create dir: "+e);
+  //       IJ.log("Saving to: "+dir.toString());
+  //     }
+  //   }
+  //   return dir.toString();
+  // }
 
   public double getMin(double[] d){
     double min = getMax(d);
@@ -550,24 +555,16 @@ public class Sperm_Analysis
 
 
     // turn roi into Nucleus for manipulation
-    Nucleus currentNucleus = new Nucleus(nucleus, path);
-    // currentNucleus.setPath(path);
+
+    File file = new File(path);
+    Nucleus currentNucleus = new Nucleus(nucleus, file, smallRegion);
     currentNucleus.setNucleusNumber(nucleusNumber);
 
 
     // immediately save out a picture of the nucleus for later annotation
-    String saveFolder = createImageDirectory(currentNucleus.getPathWithoutExtension());
-    IJ.saveAsTiff(smallRegion, saveFolder+"\\"+currentNucleus.getNucleusNumber()+".tiff");
+    // String saveFolder = createImageDirectory(currentNucleus.getPathWithoutExtension());
+    // IJ.saveAsTiff(smallRegion, saveFolder+"\\"+currentNucleus.getNucleusNumber()+".tiff");
 
-
-    // measure CoM, area, perimeter and feret in blue
-    ResultsTable blueResults = findNuclearMeasurements(smallRegion, nucleus);
-    XYPoint nucleusCoM = new XYPoint(blueResults.getValue("XM", 0),  blueResults.getValue("YM", 0) );
-    currentNucleus.setCentreOfMass(nucleusCoM);
-    currentNucleus.setPerimeter(blueResults.getValue("Perim.",0));
-    currentNucleus.setArea(blueResults.getValue("Area",0));
-    currentNucleus.setFeret(blueResults.getValue("Feret",0));
-    
 
     // find tip - use the least angle method
     NucleusBorderPoint spermTip = currentNucleus.getAngleProfile().getPointWithMinimumAngle();
@@ -675,23 +672,17 @@ public class Sperm_Analysis
         prevPoint = thisPoint;
     }
 
-    // IJ.append("", this.logFile);
-
-    // if(spermTail2.getLengthTo(spermTail3) < nucleus.getFeretsDiameter() * 0.2){ // warn if the tail points are together  
-    //   // IJ.log("    Difficulty assigning tail position");
-    // }  
-
     // find the signals
     // within nuclear roi, analyze particles in colour channels
-    RoiManager   redSignalManager = findSignalInNucleus(smallRegion, 0);
-    RoiManager greenSignalManager = findSignalInNucleus(smallRegion, 1);
+    RoiManager   redSignalManager = findSignalInNucleus(smallRegion, RED_CHANNEL);
+    RoiManager greenSignalManager = findSignalInNucleus(smallRegion, GREEN_CHANNEL);
 
     Roi[] redSignals =     redSignalManager.getSelectedRoisAsArray();
     Roi[] greenSignals = greenSignalManager.getSelectedRoisAsArray();
 
     for(Roi roi : redSignals){
 
-      ResultsTable redResults = findSignalMeasurements(smallRegion, roi, 1);
+      ResultsTable redResults = findSignalMeasurements(smallRegion, roi, RED_CHANNEL);
       XYPoint signalCoM = new XYPoint(redResults.getValue("XM", 0),  redResults.getValue("YM", 0) );
       currentNucleus.addRedSignal( new NuclearSignal( roi, 
                                                 redResults.getValue("Area",0), 
@@ -703,7 +694,7 @@ public class Sperm_Analysis
     // Add green signals to the nucleus
     for(Roi roi : greenSignals){
 
-      ResultsTable greenResults = findSignalMeasurements(smallRegion, roi, 1);
+      ResultsTable greenResults = findSignalMeasurements(smallRegion, roi, GREEN_CHANNEL);
       XYPoint signalCoM = new XYPoint(greenResults.getValue("XM", 0),  greenResults.getValue("YM", 0) );
       currentNucleus.addGreenSignal( new NuclearSignal( roi, 
                                                   greenResults.getValue("Area",0), 

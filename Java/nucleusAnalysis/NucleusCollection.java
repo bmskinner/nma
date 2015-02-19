@@ -52,7 +52,7 @@ import java.util.*;
 
 public class NucleusCollection {
 
-	private String folder; // the source of the nuclei
+	private File folder; // the source of the nuclei
   private String collectionType; // for annotating image names
 
 	private ArrayList<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
@@ -60,7 +60,7 @@ public class NucleusCollection {
   // private double maxDifferenceFromMedian = 1.5; // used to filter the nuclei, and remove those too small, large or irregular to be real
   // private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
 
-	public NucleusCollection(String folder, String type){
+	public NucleusCollection(File folder, String type){
 		this.folder = folder;
     this.collectionType = type;
 	}
@@ -69,7 +69,7 @@ public class NucleusCollection {
 		this.nucleiCollection.add(r);
 	}
 
-  public String getFolder(){
+  public File getFolder(){
     return this.folder;
   }
 
@@ -142,6 +142,10 @@ public class NucleusCollection {
 
   public ArrayList<Nucleus> getNuclei(){
     return this.nucleiCollection;
+  }
+
+  public Nucleus getNucleus(int i){
+    return this.nucleiCollection.get(i);
   }
 
   public int getRedSignalCount(){
@@ -245,8 +249,8 @@ public class NucleusCollection {
                        s.getArea()+"\t"+
                        s.getAngle()+"\t"+
                        s.getFeret()+"\t"+
-                       s.getDistance()+"\t"+
-                       s.getFractionalDistance()+"\t"+
+                       s.getDistanceFromCoM()+"\t"+
+                       s.getFractionalDistanceFromCoM()+"\t"+
                        s.getPerimeter()+"\t"+
                        path, log);
           } // end for
@@ -254,6 +258,49 @@ public class NucleusCollection {
         signalCount++;
       } // end for
     } // end for
+  }
+
+  public void exportDistancesBetweenSingleSignals(){
+
+    File logFile = new File(this.folder.getAbsolutePath()+File.separator+"logDistances."+collectionType+".txt");
+
+    if(logFile.exists()){
+      logFile.delete();
+    }
+    IJ.append("DISTANCE_BETWEEN_SIGNALS\tRED_DISTANCE_TO_COM\tGREEN_DISTANCE_TO_COM\tNUCLEAR_FERET\tRED_FRACTION_OF_FERET\tGREEN_FRACTION_OF_FERET\tDISTANCE_BETWEEN_SIGNALS_FRACTION_OF_FERET\tNORMALISED_DISTANCE\tPATH", logFile.getAbsolutePath());
+
+    for(int i=0; i<this.getNucleusCount();i++){
+
+      Nucleus n = this.nucleiCollection.get(i);
+      if(n.getRedSignalCount()==1 && n.getGreenSignalCount()==1){
+
+        NuclearSignal r = n.getRedSignals().get(0);
+        NuclearSignal g = n.getGreenSignals().get(0);
+
+        XYPoint rCoM = r.getCentreOfMass();
+        XYPoint gCoM = g.getCentreOfMass();
+
+        double distanceBetween = rCoM.getLengthTo(gCoM);    
+        double rDistanceToCoM = rCoM.getLengthTo(n.getCentreOfMass());
+        double gDistanceToCoM = gCoM.getLengthTo(n.getCentreOfMass());
+        double nFeret = n.getFeret();
+
+        double rFractionOfFeret = rDistanceToCoM / nFeret;
+        double gFractionOfFeret = gDistanceToCoM / nFeret;
+        double distanceFractionOfFeret = distanceBetween / nFeret;
+        double normalisedPosition = distanceFractionOfFeret / rFractionOfFeret / gFractionOfFeret;
+
+        IJ.append(  distanceBetween+"\t"+
+                    rDistanceToCoM+"\t"+
+                    gDistanceToCoM+"\t"+
+                    nFeret+"\t"+
+                    rFractionOfFeret+"\t"+
+                    gFractionOfFeret+"\t"+
+                    distanceFractionOfFeret+"\t"+
+                    normalisedPosition+"\t"+
+                    n.getPath(), logFile.getAbsolutePath());
+      }
+    }
   }
 
   /*
@@ -275,7 +322,7 @@ public class NucleusCollection {
       return (double)v[n];
   }
 
-  public int wrapIndex(int i, int length){
+  private int wrapIndex(int i, int length){
     if(i<0)
       i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
     if(Math.floor(i / length)>0)
@@ -286,5 +333,23 @@ public class NucleusCollection {
     }
     
     return i;
+  }
+
+  private double getMin(double[] d){
+    double min = getMax(d);
+    for(int i=0;i<d.length;i++){
+      if( d[i]<min)
+        min = d[i];
+    }
+    return min;
+  }
+
+  private double getMax(double[] d){
+    double max = 0;
+    for(int i=0;i<d.length;i++){
+      if( d[i]>max)
+        max = d[i];
+    }
+    return max;
   }
 }

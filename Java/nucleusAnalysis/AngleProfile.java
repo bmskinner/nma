@@ -12,6 +12,7 @@ import ij.IJ;
 import ij.process.FloatPolygon;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import java.util.*;
 
 public class AngleProfile {
 
@@ -24,6 +25,8 @@ public class AngleProfile {
   private int minimaCount = 0;
   private int maximaCount = 0;
 	private FloatPolygon polygon;
+
+  private double medianAngle = 0;
 	
 
 	public AngleProfile(FloatPolygon p){
@@ -46,6 +49,7 @@ public class AngleProfile {
 		countConsecutiveDeltas();
     detectLocalMinima();
     detectLocalMaxima();
+    calculateMedianAngle();
 	}
 
 	public int getAngleProfileWindowSize(){
@@ -77,6 +81,10 @@ public class AngleProfile {
         }
     }
     return index;
+  }
+
+  public double getMedianInteriorAngle(){
+    return this.medianAngle;
   }
 
 	public NucleusBorderPoint getBorderPoint(int i){
@@ -574,6 +582,37 @@ public class AngleProfile {
       array[i].setLocalMax(ok);
     }
     this.maximaCount =  count;
+  }
+
+  public double[] getInteriorAngles(){
+
+    double[] points = new double[array.length];
+
+    for(int j=0;j<array.length;j++){
+        points[j] = array[j].getInteriorAngle();
+    }
+    return points;
+  }
+
+  /*
+    For the interior angles in the smoothed angle array:
+      Calculate the median angle in the array.
+    Stores in medianAngle
+  */    
+  private void calculateMedianAngle() {
+
+      double[] m = new double[array.length];
+      for(int i = 0; i<array.length; i++){
+        m[i] = this.array[i].getInteriorAngle();
+      }
+      Arrays.sort(m);
+
+      int middle = m.length/2;
+      if (m.length%2 == 1) {
+          this.medianAngle = m[middle];
+      } else {
+          this.medianAngle = (m[middle-1] + m[middle]) / 2.0;
+      }
   }
 
 }
