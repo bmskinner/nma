@@ -83,19 +83,22 @@ public class NucleusBorderPoint
       }
     }
 
-  public void setMidpoint(boolean b){
-    this.isMidpoint = b;
+  public void setMidpoint(){
+    int midpoint  = (int)Math.floor(this.getBlockSize()/2);
+    if(this.getPositionWithinBlock() == midpoint){
+      this.isMidpoint = true;
+    } else {
+      this.isMidpoint =false;
+    }
   }
 
   public boolean isMidpoint(){
-   
     int midpoint  = (int)Math.floor(this.getBlockSize()/2);
-    if(this.getPositionWithinBlock() == midpoint){
-      this.setMidpoint(true);
+    if(this.getPositionWithinBlock() == midpoint && this.getPositionWithinBlock() !=0){
+      return true;
     } else {
-      this.setMidpoint(false);
+      return false;
     }
-    return this.isMidpoint;
   }
 
   public double getMinAngle(){

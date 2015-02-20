@@ -47,6 +47,7 @@ public class AngleProfile {
 		calculateDeltaAngles();
 		calculateSmoothedDeltaAngles();
 		countConsecutiveDeltas();
+    updatePointsWithBlockCount();
     detectLocalMinima();
     detectLocalMaxima();
     calculateMedianAngle();
@@ -435,7 +436,6 @@ public class AngleProfile {
     return newArray;
   }
 
-
   /*
     For each point in the smoothed angle array, test for a local minimum.
     The angles of the points <minimaLookupDistance> ahead and behind are checked.
@@ -614,5 +614,4 @@ public class AngleProfile {
           this.medianAngle = (m[middle-1] + m[middle]) / 2.0;
       }
   }
-
 }

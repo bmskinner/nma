@@ -55,6 +55,11 @@ public class Nucleus {
   private static final int GREEN_CHANNEL = 1;
   private static final int BLUE_CHANNEL  = 2;
 
+  // Values for deciding whether an object is a signal
+  private static final int    SIGNAL_THRESHOLD = 70;
+  private static final double MIN_SIGNAL_SIZE  = 5; // how small can a signal be
+  private static final double MAX_SIGNAL_SIZE  = 50; // how large can a signal be
+
   private int nucleusNumber; // the number of the nucleus in the current image
   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
@@ -63,9 +68,6 @@ public class Nucleus {
   private double pathLength; // the angle path length
   private double feret; // the maximum diameter
   private double area; // the nuclear area
-
-  // private XYPoint[] array; // the points from the polygon made from the input roi. Not currently used.
-  // private XYPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
 
   private AngleProfile angleProfile; // new class to replace smoothedArray
 
@@ -89,12 +91,13 @@ public class Nucleus {
 
   private double[][] distancesBetweenSignals;
   
-  public Nucleus (Roi roi, File file, ImagePlus image) { // construct from an roi
+  public Nucleus (Roi roi, File file, ImagePlus image, int number) { // construct from an roi
 
     // assign main features
     this.roi             = roi;
     this.sourceImage     = image;
     this.sourceFile      = file;
+    this.nucleusNumber   = number;
     this.nucleusFolder   = new File(this.getDirectory()+File.separator+this.getImageNameWithoutExtension());
     
     if (!this.nucleusFolder.exists()) {
@@ -125,12 +128,14 @@ public class Nucleus {
      // calc distances around nucleus through CoM
      this.calculateDistanceProfile();
 
+     // find and measure signals
+     this.measureSignalsInNucleus();
+
      try{
       IJ.saveAsTiff(image, this.nucleusFolder+File.separator+getImageName());
      } catch(Exception e){
         IJ.log("Error saving image: "+e);
      }
-
   }
 
   /*
@@ -144,6 +149,14 @@ public class Nucleus {
 
   public String getPath(){
     return this.sourceFile.getAbsolutePath();
+  }
+
+  public File getSourceFile(){
+    return this.sourceFile;
+  }
+
+  public ImagePlus getSourceImage(){
+    return this.sourceImage;
   }
 
   public String getImageName(){
@@ -299,10 +312,6 @@ public class Nucleus {
     -----------------------
   */
 
-  public void setNucleusNumber(int n){
-    this.nucleusNumber = n;
-  }
-
   public void setPathLength(double d){
     this.pathLength = d;
   }
@@ -312,6 +321,96 @@ public class Nucleus {
     Process signals
     -----------------------
   */
+
+  private RoiManager findSignalInNucleus(ImagePlus image, int channel){
+
+    RoiManager manager = new RoiManager(true);
+    ChannelSplitter cs = new ChannelSplitter();
+    ImagePlus[] channels = cs.split(image);
+    ImagePlus imp = channels[channel];
+    String colour = channel == 0 ? "red" : "green";
+
+    
+    // threshold
+    ImageProcessor ip = imp.getChannelProcessor();
+    ip.threshold(SIGNAL_THRESHOLD);
+    ip.invert();
+
+    // run the particle analyser
+    ResultsTable rt = new ResultsTable();
+    ParticleAnalyzer pa = new ParticleAnalyzer( ParticleAnalyzer.ADD_TO_MANAGER, 
+                                                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA,
+                                                 rt, 
+                                                 MIN_SIGNAL_SIZE, 
+                                                 MAX_SIGNAL_SIZE);
+    try {
+      pa.setRoiManager(manager);
+      boolean success = pa.analyze(imp);
+      if(success){
+        String signalPlural = manager.getCount() == 1 ? "signal" : "signals"; // I am pedantic
+        IJ.log("    Found "+manager.getCount()+ " "+signalPlural+" in "+colour+" channel");
+
+      } else {
+        IJ.log("    Unable to perform signal analysis");
+      }
+    } catch(Exception e){
+       IJ.log("    Error: "+e);
+    } finally {
+      imp.close();
+    }
+    return manager;
+  }
+
+  private ResultsTable findSignalMeasurements(ImagePlus imp, Roi roi, int channel){
+
+    ChannelSplitter cs = new ChannelSplitter();
+    ImagePlus[] channels = cs.split(imp);
+    ImagePlus signalChannel = channels[channel];
+
+    signalChannel.setRoi(roi);
+    double feretDiameter = roi.getFeretsDiameter();
+
+    ResultsTable rt = new ResultsTable();
+
+    Analyzer an = new Analyzer(signalChannel, Analyzer.CENTER_OF_MASS | Analyzer.PERIMETER | Analyzer.AREA | Analyzer.FERET, rt);
+    an.measure();
+    return rt;
+  }
+
+
+  private void measureSignalsInNucleus(){
+
+    // find the signals
+    // within nuclear roi, analyze particles in colour channels
+    RoiManager   redSignalManager = findSignalInNucleus(this.sourceImage, RED_CHANNEL  );
+    RoiManager greenSignalManager = findSignalInNucleus(this.sourceImage, GREEN_CHANNEL);
+
+    Roi[] redSignals =     redSignalManager.getSelectedRoisAsArray();
+    Roi[] greenSignals = greenSignalManager.getSelectedRoisAsArray();
+
+    for(Roi roi : redSignals){
+
+      ResultsTable redResults = findSignalMeasurements(this.sourceImage, roi, RED_CHANNEL);
+      XYPoint signalCoM = new XYPoint(redResults.getValue("XM", 0),  redResults.getValue("YM", 0) );
+      this.addRedSignal( new NuclearSignal( roi, 
+                                   redResults.getValue("Area",0), 
+                                   redResults.getValue("Feret",0), 
+                                   redResults.getValue("Perim.",0), 
+                                   signalCoM));
+    }
+
+    // Add green signals to the nucleus
+    for(Roi roi : greenSignals){
+
+      ResultsTable greenResults = findSignalMeasurements(this.sourceImage, roi, GREEN_CHANNEL);
+      XYPoint signalCoM = new XYPoint(greenResults.getValue("XM", 0),  greenResults.getValue("YM", 0) );
+      this.addGreenSignal( new NuclearSignal( roi, 
+                                                  greenResults.getValue("Area",0), 
+                                                  greenResults.getValue("Feret",0), 
+                                                  greenResults.getValue("Perim.",0), 
+                                                  signalCoM));
+    }    
+  }
 
   public ArrayList<NuclearSignal> getRedSignals(){
     return this.redSignals;
@@ -440,77 +539,6 @@ public class Nucleus {
         }
       }
     }
-  }
-
-  public void exportSignalDistanceMatrix(){
-
-    this.calculateDistancesBetweenSignals();
-
-    File f = new File(this.nucleusFolder+File.separator+"signalDistanceMatrix.txt");
-    if(f.exists()){
-      f.delete();
-    }
-
-    int matrixSize = this.getRedSignalCount()+this.getGreenSignalCount();
-
-    // Prepare the header line and append to file
-    String outLine = "RED\t";
-    for(int i=0;i<this.getRedSignalCount();i++){
-      outLine = outLine + i + "\t";
-    }
-    outLine += "GREEN\t"; // distinguish red from green signals in headers
-    
-    for(int i=0;i<this.getGreenSignalCount();i++){
-      outLine = outLine + i + "\t";
-    }
-    
-    // IJ.append(outLine+"\n", f.getAbsolutePath());
-    outLine += "\r\n";
-
-    // for each row
-    for(int i=0;i<this.getRedSignalCount();i++){
-      // for each column of red
-      outLine += i+"\t";
-      for(int j=0; j<getRedSignalCount();j++){
-        outLine += this.distancesBetweenSignals[i][j]+"\t";
-      }
-      outLine += "|\t";
-      // for each column of green
-      for(int j=0; j<getGreenSignalCount();j++){
-        int k = j+this.getRedSignalCount();
-        outLine += this.distancesBetweenSignals[i][k]+"\t";
-      }
-      // next line
-      outLine += "\r\n";
-    }
-    // add separator line
-    outLine += "GREEN\t";
-    for(int i=0; i<matrixSize;i++){
-      outLine += "--\t";
-    }
-     outLine += "\r\n";
-
-    // add green signals
-    // for each row
-    for(int i=0;i<this.getGreenSignalCount();i++){
-
-      outLine += i+"\t";
-      int m = i+this.getRedSignalCount(); // offset for matrix
-
-      // for each column of red
-      for(int j=0; j<getRedSignalCount();j++){
-        outLine += this.distancesBetweenSignals[m][j]+"\t";
-      }
-      outLine += "|\t";
-      // for each column of green
-      for(int j=0; j<getGreenSignalCount();j++){
-        int k = j+this.getRedSignalCount();
-        outLine += this.distancesBetweenSignals[m][k]+"\t";
-      }
-      // next line
-      outLine += "\r\n";
-    }
-    IJ.append(outLine, f.getAbsolutePath());
   }
 
   public double[][] getSignalDistanceMatrix(){
@@ -686,6 +714,135 @@ public class Nucleus {
     return rt;
   }
 
+  // find the point with the narrowest diameter through the CoM
+  // Uses the distance profile
+  public NucleusBorderPoint getNarrowestDiameterPoint(){
+
+    double distance = getMax(this.distanceProfile);
+    int index = 0;
+    for(int i = 0; i<this.getLength();i++){
+      if(this.distanceProfile[i] < distance){
+        distance = this.distanceProfile[i];
+        index = i;
+      }
+    }
+    return this.getBorderPoint(index);
+  }
+
+  /*
+    -----------------------
+    Exporting data
+    -----------------------
+  */
+  public void exportSignalDistanceMatrix(){
+
+    this.calculateDistancesBetweenSignals();
+
+    File f = new File(this.nucleusFolder+File.separator+"signalDistanceMatrix.txt");
+    if(f.exists()){
+      f.delete();
+    }
+
+    int matrixSize = this.getRedSignalCount()+this.getGreenSignalCount();
+
+    // Prepare the header line and append to file
+    String outLine = "RED\t";
+    for(int i=0;i<this.getRedSignalCount();i++){
+      outLine = outLine + i + "\t";
+    }
+    outLine += "GREEN\t"; // distinguish red from green signals in headers
+    
+    for(int i=0;i<this.getGreenSignalCount();i++){
+      outLine = outLine + i + "\t";
+    }
+    
+    // IJ.append(outLine+"\n", f.getAbsolutePath());
+    outLine += "\r\n";
+
+    // for each row
+    for(int i=0;i<this.getRedSignalCount();i++){
+      // for each column of red
+      outLine += i+"\t";
+      for(int j=0; j<getRedSignalCount();j++){
+        outLine += this.distancesBetweenSignals[i][j]+"\t";
+      }
+      outLine += "|\t";
+      // for each column of green
+      for(int j=0; j<getGreenSignalCount();j++){
+        int k = j+this.getRedSignalCount();
+        outLine += this.distancesBetweenSignals[i][k]+"\t";
+      }
+      // next line
+      outLine += "\r\n";
+    }
+    // add separator line
+    outLine += "GREEN\t";
+    for(int i=0; i<matrixSize;i++){
+      outLine += "--\t";
+    }
+     outLine += "\r\n";
+
+    // add green signals
+    // for each row
+    for(int i=0;i<this.getGreenSignalCount();i++){
+
+      outLine += i+"\t";
+      int m = i+this.getRedSignalCount(); // offset for matrix
+
+      // for each column of red
+      for(int j=0; j<getRedSignalCount();j++){
+        outLine += this.distancesBetweenSignals[m][j]+"\t";
+      }
+      outLine += "|\t";
+      // for each column of green
+      for(int j=0; j<getGreenSignalCount();j++){
+        int k = j+this.getRedSignalCount();
+        outLine += this.distancesBetweenSignals[m][k]+"\t";
+      }
+      // next line
+      outLine += "\r\n";
+    }
+    IJ.append(outLine, f.getAbsolutePath());
+  }
+
+  /*
+    Print key data to the image log file
+    Overwrites any existing log
+  */   
+  public void exportAngleProfile(){
+
+    File f = new File(this.nucleusFolder+File.separator+this.nucleusNumber+".log");
+    if(f.exists()){
+      f.delete();
+    }
+
+    String outLine = "X\tY\tINETRIOR_ANGLE\tMIN_ANGLE\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tBLOCK_SIZE\tDISTANCE_PROFILE\n";
+
+    // IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
+    
+    for(int i=0;i<this.getLength();i++){
+
+      double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
+      
+      outLine +=  this.getPoint(i).getX()                         +"\t"+
+                  this.getPoint(i).getY()                         +"\t"+
+                  this.getPoint(i).getInteriorAngle()             +"\t"+
+                  this.getPoint(i).getMinAngle()                  +"\t"+
+                  this.getPoint(i).getInteriorAngleDelta()        +"\t"+
+                  this.getPoint(i).getInteriorAngleDeltaSmoothed()+"\t"+
+                  this.getPoint(i).getPositionWithinBlock()       +"\t"+
+                  this.getPoint(i).getBlockNumber()               +"\t"+
+                  this.getPoint(i).isLocalMin()                   +"\t"+
+                  this.getPoint(i).isLocalMax()                   +"\t"+
+                  this.getPoint(i).isMidpoint()                   +"\t"+
+                  this.getPoint(i).isBlock()                      +"\t"+
+                  normalisedX                                     +"\t"+
+                  this.getPoint(i).getBlockSize()                 +"\t"+
+                  distanceProfile[i]                              +"\n";
+    }
+    IJ.append( outLine, f.getAbsolutePath());
+  }
+
   /*
     -----------------------
     Basic internal functions
@@ -764,50 +921,4 @@ public class Nucleus {
     }
     return max;
   }
-
-
-
-
-  /*
-    Print key data to the image log file
-    Overwrites any existing log
-  */   
-  // public void printLogFile(String path){
-
-  //   // String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
-  //   File f = new File(path);
-  //   if(f.exists()){
-  //     f.delete();
-  //   }
-
-  //   String outLine = "SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE\n";
-
-  //   // IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
-    
-  //   for(int i=0;i<this.getLength();i++){
-
-  //     double normalisedIAngle = smoothedArray[i].getInteriorAngle()-180;
-  //     // double length = this.getLength();
-  //     double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
-      
-  //     outLine = outLine + smoothedArray[i].getXAsInt()+"\t"+
-  //                         smoothedArray[i].getYAsInt()+"\t"+
-  //                         smoothedArray[i].getX()+"\t"+
-  //                         smoothedArray[i].getY()+"\t"+
-  //                         smoothedArray[i].getInteriorAngle()+"\t"+
-  //                         smoothedArray[i].getMinAngle()+"\t"+
-  //                         normalisedIAngle+"\t"+
-  //                         smoothedArray[i].getInteriorAngleDelta()+"\t"+
-  //                         smoothedArray[i].getInteriorAngleDeltaSmoothed()+"\t"+
-  //                         smoothedArray[i].getPositionWithinBlock()+"\t"+
-  //                         smoothedArray[i].getBlockNumber()+"\t"+
-  //                         smoothedArray[i].isLocalMin()+"\t"+
-  //                         smoothedArray[i].isLocalMax()+"\t"+
-  //                         smoothedArray[i].isMidpoint()+"\t"+
-  //                         smoothedArray[i].isBlock()+"\t"+
-  //                         normalisedX+"\t"+
-  //                         distanceProfile[i]+"\n";
-  //   }
-  //   IJ.append( outLine, path);
-  // }
 }
