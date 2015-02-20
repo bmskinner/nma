@@ -82,23 +82,27 @@ public class Pig_Sperm_Analysis
     String folderName = localOpenDialog.getDirectory();
 
     if(folderName==null){
-      IJ.log("No folder selected; exiting");
-      System.exit(0);
+      return;
     }
 
-
-    IJ.showStatus("Opening directory: " + folderName);
     IJ.log("Directory: "+folderName);
 
     File folder = new File(folderName);
     NucleusDetector detector = new NucleusDetector(folder);
-    completeCollection = detector.getNucleiInFolder();
-  
 
-    // Export profiles
-    for(int i=0;i<completeCollection.getNucleusCount();i++){
-      Nucleus n = completeCollection.getNucleus(i);
-      n.exportAngleProfile();
+    HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
+
+    Set<File> keys = folderCollection.keySet();
+
+    for (File key : keys) {
+      NucleusCollection collection = folderCollection.get(key);
+      IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
+      // Export profiles
+      for(int i=0;i<collection.getNucleusCount();i++){
+        Nucleus n = collection.getNucleus(i);
+        n.exportAngleProfile();
+        n.exportAnnotatedImage();
+      }
     }
 
 

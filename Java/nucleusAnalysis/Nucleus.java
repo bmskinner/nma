@@ -60,6 +60,8 @@ public class Nucleus {
   private static final double MIN_SIGNAL_SIZE  = 5; // how small can a signal be
   private static final double MAX_SIGNAL_SIZE  = 50; // how large can a signal be
 
+  private static final String IMAGE_PREFIX = "export.";
+
   private int nucleusNumber; // the number of the nucleus in the current image
   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
@@ -109,6 +111,17 @@ public class Nucleus {
       }
     }
 
+    try{
+      String outPath = this.nucleusFolder.getAbsolutePath()+
+                      File.separator+
+                      this.IMAGE_PREFIX+
+                      this.getNucleusNumber()+
+                      ".original.tiff";
+      IJ.saveAsTiff(this.sourceImage, outPath);
+     } catch(Exception e){
+        IJ.log("Error saving original image: "+e);
+     }
+
     this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
 
     // calculate angle profile
@@ -130,12 +143,9 @@ public class Nucleus {
 
      // find and measure signals
      this.measureSignalsInNucleus();
-
-     try{
-      IJ.saveAsTiff(image, this.nucleusFolder+File.separator+getImageName());
-     } catch(Exception e){
-        IJ.log("Error saving image: "+e);
-     }
+     this.calculateSignalDistancesFromCoM();
+     this.calculateFractionalSignalDistancesFromCoM();
+     this.annotateNucleusImage();
   }
 
   /*
@@ -432,7 +442,7 @@ public class Nucleus {
     For each signal within the nucleus, calculate the distance to the nCoM
     and update the signal
   */
-  public void calculateSignalDistances(){
+  private void calculateSignalDistancesFromCoM(){
 
     ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
     signals.add(redSignals);
@@ -456,7 +466,7 @@ public class Nucleus {
     mass as a fraction of the distance from the nuclear CoM, through the 
     signal CoM, to the nuclear border
   */
-  public void calculateFractionalSignalDistances(){
+  private void calculateFractionalSignalDistancesFromCoM(){
 
     this.calculateClosestBorderToSignals();
     ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
@@ -841,6 +851,73 @@ public class Nucleus {
                   distanceProfile[i]                              +"\n";
     }
     IJ.append( outLine, f.getAbsolutePath());
+  }
+
+  /*
+    Export the current image state, with
+    any annotations to export.nn.annotated.tiff
+  */
+  public void exportAnnotatedImage(){
+    String outPath = this.nucleusFolder.getAbsolutePath()+
+                      File.separator+
+                      this.IMAGE_PREFIX+
+                      this.getNucleusNumber()+
+                      ".annotated.tiff";
+    IJ.saveAsTiff(sourceImage, outPath);
+  }
+
+  /*
+    Annotate image with ROIs
+    and CoMs of nucleus and signals
+  */
+  public void annotateNucleusImage(){ 
+
+    try{
+
+      ImageProcessor ip = this.sourceImage.getProcessor();
+
+      // draw the features of interest
+      
+      // draw the outline of the nucleus
+      ip.setColor(Color.BLUE);
+      ip.setLineWidth(1);
+      ip.draw(this.getRoi());
+
+
+      // draw the CoM
+      ip.setColor(Color.MAGENTA);
+      ip.setLineWidth(5);
+      ip.drawDot(this.getCentreOfMass().getXAsInt(),  this.getCentreOfMass().getYAsInt());
+
+      
+      //   SIGNALS
+      ip.setLineWidth(3);
+      ip.setColor(Color.RED);
+      ArrayList<NuclearSignal> redSignals = this.getRedSignals();
+      if(redSignals.size()>0){
+        for(int j=0; j<redSignals.size();j++){
+          NuclearSignal s = redSignals.get(j);
+          ip.setLineWidth(3);
+          ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+          ip.setLineWidth(1);
+          ip.draw(s.getRoi());
+        }
+      }
+
+      ip.setColor(Color.GREEN);
+      ArrayList<NuclearSignal> greenSignals = this.getGreenSignals();
+      if(redSignals.size()>0){
+        for(int j=0; j<greenSignals.size();j++){
+          NuclearSignal s = greenSignals.get(j);
+          ip.setLineWidth(3);
+          ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+          ip.setLineWidth(1);
+          ip.draw(s.getRoi());
+        }
+      }
+    } catch(Exception e){
+      IJ.log("Error annotating nucleus: "+e);
+    }
   }
 
   /*
