@@ -51,7 +51,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
-import nucleusAnalysis.*;
+import no.nuclei.*;
+import no.nuclei.sperm.*;
+import no.analysis.*;
 
 public class Pig_Sperm_Analysis
   extends ImagePlus
@@ -99,7 +101,8 @@ public class Pig_Sperm_Analysis
       // Export profiles
       for(int i=0;i<collection.getNucleusCount();i++){
         Nucleus n = collection.getNucleus(i);
-        PigSpermNucleus p = new PigSpermNucleus(n);
+        SpermNucleus s = new SpermNucleus(n);
+        PigSpermNucleus p = new PigSpermNucleus(s);
         p.exportAngleProfile();
         p.findTailByMaxima();
         p.annotateTail();
@@ -192,31 +195,20 @@ public class Pig_Sperm_Analysis
   }
 
   class PigSpermNucleus 
-    extends Nucleus 
+    extends SpermNucleus 
   {
 
-    private NucleusBorderPoint tailPoint;
-    private NucleusBorderPoint headPoint;
-
-    public PigSpermNucleus(Nucleus n){
-      this.setRoi(n.getRoi());
-      this.setSourceImage(n.getSourceImage());
-      this.setSourceFile(n.getSourceFile());
-      this.setAnnotatedImage(n.getAnnotatedImage());
-      this.setNucleusNumber(n.getNucleusNumber());
-      this.setNucleusFolder(n.getNucleusFolder());
-      this.setPerimeter(n.getPerimeter());
-      this.setPathLength(n.getPathLength());
-      this.setFeret(n.getFeret());
-      this.setArea(n.getArea());
-      this.setAngleProfile(n.getAngleProfile());
-      this.setCentreOfMass(n.getCentreOfMass());
-      this.setRedSignals(n.getRedSignals());
-      this.setGreenSignals(n.getGreenSignals());
-      this.setPolygon(n.getSmoothedPolygon());
-      this.setDistanceProfile(n.getDistanceProfile());
-      this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
+    public PigSpermNucleus(SpermNucleus n){
+      super(n);
+      setTailPoint(n.getTailPoint());
+      setHeadPoint(n.getHeadPoint());
     }
+
+    /*
+      -----------------------
+      Methods for detecting the head and tail
+      -----------------------
+    */
 
     public void findTailByMinima(){
 
@@ -238,7 +230,7 @@ public class Pig_Sperm_Analysis
           secondLowestMinima = n;
         }
       }
-      this.tailPoint = this.getBorderPoint(this.getPositionBetween(lowestMinima, secondLowestMinima));
+      this.setTailPoint(this.getBorderPoint(this.getPositionBetween(lowestMinima, secondLowestMinima)));
     }
 
     public void findTailByMaxima(){
@@ -251,48 +243,10 @@ public class Pig_Sperm_Analysis
 
       for( NucleusBorderPoint n : maxima){
         if (n.getDistanceAcrossCoM()>medianProfileDistance){
-          this.tailPoint = n;
+          this.setTailPoint(n);
         }
       }
     }
-
-    public void annotateTail(){
-      ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-      ip.setColor(Color.LIGHT_GRAY);
-      ip.setLineWidth(3);
-      ip.drawDot( this.tailPoint.getXAsInt(), 
-                  this.tailPoint.getYAsInt());
-    }
-
-    /*
-      Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
-      Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
-      Returns an angle
-    */
-    public double findRotationAngle(){
-      XYPoint end = new XYPoint(this.tailPoint.getXAsInt(),this.tailPoint.getYAsInt()-50);
-
-      double angle = findAngleBetweenXYPoints(end, this.tailPoint, this.getCentreOfMass());
-
-      if(this.getCentreOfMass().getX() < this.tailPoint.getX()){
-        return angle;
-      } else {
-        return 0-angle;
-      }
-    }
-
-    /*
-      Given three XYPoints, measure the angle a-b-c
-    */
-    private double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
-
-      float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
-      float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
-      PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-     return roi.getAngle();
-    }
-
-
   }
 
   public class PigSpermNucleusCollection

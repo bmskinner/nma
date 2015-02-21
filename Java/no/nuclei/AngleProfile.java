@@ -6,7 +6,7 @@
 	orient a nucleus
 */
 
-package nucleusAnalysis;	
+package no.nuclei;
 
 import ij.IJ;
 import ij.process.FloatPolygon;
