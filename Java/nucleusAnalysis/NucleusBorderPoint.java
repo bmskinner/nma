@@ -19,6 +19,7 @@ public class NucleusBorderPoint
   private double interiorAngle; // depends on whether the min angle is inside or outside the shape
   private double interiorAngleDelta; // this will hold the difference between a previous interiorAngle and a next interiorAngle
   private double interiorAngleDeltaSmoothed; // holds delta from a 5-window average centred on this point
+  private double distanceAcrossCoM;
 
   private boolean localMin; // is this angle a local minimum based on the minAngle
   private boolean localMax; // is this angle a local maximum based on the interior angle
@@ -131,6 +132,14 @@ public class NucleusBorderPoint
 
   public void setInteriorAngleDeltaSmoothed(double d){
     this.interiorAngleDeltaSmoothed = d;
+  }
+
+  public double getDistanceAcrossCoM(){
+    return this.distanceAcrossCoM;
+  }
+
+  public void setDistanceAcrossCoM(double d){
+    this.distanceAcrossCoM = d;
   }
 
   public void setLocalMin(boolean b){

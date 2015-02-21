@@ -18,7 +18,6 @@ Copyright (C) Ben Skinner 2015
 */
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Overlay;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -44,11 +43,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
 import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
 import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.Polygon;
 import java.io.File;
@@ -73,6 +68,9 @@ public class Pig_Sperm_Analysis
   private static final int FAILURE_PERIM     = 64;
   private static final int FAILURE_OTHER     = 128;
 
+  private static final String IMAGE_PREFIX = "export.";
+
+
   private NucleusCollection completeCollection;
   private NucleusCollection failedNuclei;
     
@@ -96,13 +94,19 @@ public class Pig_Sperm_Analysis
 
     for (File key : keys) {
       NucleusCollection collection = folderCollection.get(key);
+      PigSpermNucleusCollection processed = new PigSpermNucleusCollection(key, "complete");
       IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
       // Export profiles
       for(int i=0;i<collection.getNucleusCount();i++){
         Nucleus n = collection.getNucleus(i);
-        n.exportAngleProfile();
-        n.exportAnnotatedImage();
+        PigSpermNucleus p = new PigSpermNucleus(n);
+        p.exportAngleProfile();
+        p.findTailByMaxima();
+        p.annotateTail();
+        p.exportAnnotatedImage();
+        processed.addNucleus(p);
       }
+      rotateAndAssembleNucleiForExport(processed);
     }
 
 
@@ -113,22 +117,198 @@ public class Pig_Sperm_Analysis
     IJ.log("Analysis complete");
   }
 
+  public void rotateAndAssembleNucleiForExport(PigSpermNucleusCollection collection){
+
+    // foreach nucleus
+    // createProcessor (500, 500)
+    // sertBackgroundValue(0)
+    // paste in old image at centre
+    // insert(ImageProcessor ip, int xloc, int yloc)
+    // rotate about CoM (new position)
+    // display.
+    IJ.log("Creating composite image...");
+    
+    int totalWidth = 0;
+    int totalHeight = 0;
+
+    int boxWidth = (int)(collection.getMedianNuclearPerimeter()/1.4);
+    int boxHeight = (int)(collection.getMedianNuclearPerimeter()/1.2);
+
+    int maxBoxWidth = boxWidth * 5;
+    int maxBoxHeight = (boxHeight * (int)(Math.ceil(collection.getNucleusCount()/5)) + boxHeight );
+
+    ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
+    ImageProcessor finalProcessor = finalImage.getProcessor();
+    finalProcessor.setBackgroundValue(0);
+
+    for(int i=0; i<collection.getNucleusCount();i++){
+      
+      PigSpermNucleus n = collection.getNucleus(i);
+      String path = n.getNucleusFolder().getAbsolutePath()+
+                      File.separator+
+                      this.IMAGE_PREFIX+
+                      n.getNucleusNumber()+
+                      ".annotated.tiff";
+
+      try {
+        Opener localOpener = new Opener();
+        ImagePlus image = localOpener.openImage(path);
+        ImageProcessor ip = image.getProcessor();
+        int width = ip.getWidth();
+        int height = ip.getHeight();
+        ip.setRoi(n.getRoi());
+
+
+        ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
+
+        newProcessor.setBackgroundValue(0);
+        newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
+        newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
+        newProcessor.rotate( n.findRotationAngle() );
+        newProcessor.setBackgroundValue(0);
+
+        if(totalWidth>maxBoxWidth-boxWidth){
+          totalWidth=0;
+          totalHeight+=(int)(boxHeight);
+        }
+        int newX = totalWidth;
+        int newY = totalHeight;
+        totalWidth+=(int)(boxWidth);
+        
+        finalProcessor.insert(newProcessor, newX, newY);
+        TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
+        Overlay overlay = new Overlay(label);
+        finalProcessor.drawOverlay(overlay);  
+      } catch(Exception e){
+        IJ.log("Error adding image to composite");
+        // IJ.append("Error adding image to composite: "+e, debugFile);
+        // IJ.append("  "+collectionType, debugFile);
+        // IJ.append("  "+path, debugFile);
+      }     
+    }
+    finalImage.show();
+    IJ.saveAsTiff(finalImage, collection.getFolder().getAbsolutePath()+"composite.tiff");
+    IJ.log("Composite image created");
+  }
+
   class PigSpermNucleus 
     extends Nucleus 
   {
 
-      private NucleusBorderPoint tailPoint;
-      private NucleusBorderPoint headPoint;
+    private NucleusBorderPoint tailPoint;
+    private NucleusBorderPoint headPoint;
 
-      public PigSpermNucleus(Nucleus n){
-        super(n.getRoi(), n.getSourceFile(), n.getSourceImage(), n.getNucleusNumber());
+    public PigSpermNucleus(Nucleus n){
+      this.setRoi(n.getRoi());
+      this.setSourceImage(n.getSourceImage());
+      this.setSourceFile(n.getSourceFile());
+      this.setAnnotatedImage(n.getAnnotatedImage());
+      this.setNucleusNumber(n.getNucleusNumber());
+      this.setNucleusFolder(n.getNucleusFolder());
+      this.setPerimeter(n.getPerimeter());
+      this.setPathLength(n.getPathLength());
+      this.setFeret(n.getFeret());
+      this.setArea(n.getArea());
+      this.setAngleProfile(n.getAngleProfile());
+      this.setCentreOfMass(n.getCentreOfMass());
+      this.setRedSignals(n.getRedSignals());
+      this.setGreenSignals(n.getGreenSignals());
+      this.setPolygon(n.getSmoothedPolygon());
+      this.setDistanceProfile(n.getDistanceProfile());
+      this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
+    }
+
+    public void findTailByMinima(){
+
+      NucleusBorderPoint[] minima = this.getAngleProfile().getLocalMinima();
+
+      // sort minima by interior angle
+      NucleusBorderPoint lowestMinima = minima[0];
+      NucleusBorderPoint secondLowestMinima = minima[0];
+
+      for( NucleusBorderPoint n : minima){
+        if (n.getInteriorAngle()<lowestMinima.getInteriorAngle()){
+          secondLowestMinima = lowestMinima;
+          lowestMinima = n;
+        }
       }
-
-      public void findTailByMinima(){
-
-        NucleusBorderPoint[] minima = this.getAngleProfile().getLocalMinima();
+      for( NucleusBorderPoint n : minima){
+        if (n.getInteriorAngle()<secondLowestMinima.getInteriorAngle() && 
+            n.getInteriorAngle()>lowestMinima.getInteriorAngle()){
+          secondLowestMinima = n;
+        }
       }
-      // get the narrowest point, and extend out.
-      // get the two local minima and choose a maximum between them
+      this.tailPoint = this.getBorderPoint(this.getPositionBetween(lowestMinima, secondLowestMinima));
+    }
+
+    public void findTailByMaxima(){
+      // the tail is the ?only local maximum with an interior angle above the median
+      // distance on the distance profile
+
+      // the CoM is also more towards the tail. Use this.
+      NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
+      double medianProfileDistance= this.getMedianDistanceFromProfile();
+
+      for( NucleusBorderPoint n : maxima){
+        if (n.getDistanceAcrossCoM()>medianProfileDistance){
+          this.tailPoint = n;
+        }
+      }
+    }
+
+    public void annotateTail(){
+      ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+      ip.setColor(Color.LIGHT_GRAY);
+      ip.setLineWidth(3);
+      ip.drawDot( this.tailPoint.getXAsInt(), 
+                  this.tailPoint.getYAsInt());
+    }
+
+    /*
+      Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
+      Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
+      Returns an angle
+    */
+    public double findRotationAngle(){
+      XYPoint end = new XYPoint(this.tailPoint.getXAsInt(),this.tailPoint.getYAsInt()-50);
+
+      double angle = findAngleBetweenXYPoints(end, this.tailPoint, this.getCentreOfMass());
+
+      if(this.getCentreOfMass().getX() < this.tailPoint.getX()){
+        return angle;
+      } else {
+        return 0-angle;
+      }
+    }
+
+    /*
+      Given three XYPoints, measure the angle a-b-c
+    */
+    private double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
+
+      float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
+      float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
+      PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+     return roi.getAngle();
+    }
+
+
+  }
+
+  public class PigSpermNucleusCollection
+    extends NucleusCollection
+  {
+
+    public PigSpermNucleusCollection(File folder, String type){
+      super(folder, type);
+    }
+
+    public PigSpermNucleus getNucleus(int i){
+      return (PigSpermNucleus)this.getNuclei().get(i);
+    }
+
+    public void addNucleus(PigSpermNucleus n){
+      this.getNuclei().add(n);
+    }
   }
 }

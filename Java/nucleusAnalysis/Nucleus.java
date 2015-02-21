@@ -83,6 +83,7 @@ public class Nucleus {
   // private Polygon polygon; // the ROI converted to a polygon; source of XYPoint[] array
 
   private ImagePlus sourceImage;
+  private ImagePlus annotatedImage;
 
   private ArrayList<NuclearSignal> redSignals    = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
   private ArrayList<NuclearSignal> greenSignals  = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
@@ -98,6 +99,7 @@ public class Nucleus {
     // assign main features
     this.roi             = roi;
     this.sourceImage     = image;
+    this.annotatedImage  = image; // NEEDS TO BE A COPY
     this.sourceFile      = file;
     this.nucleusNumber   = number;
     this.nucleusFolder   = new File(this.getDirectory()+File.separator+this.getImageNameWithoutExtension());
@@ -148,6 +150,11 @@ public class Nucleus {
      this.annotateNucleusImage();
   }
 
+  // constructor for subclasses
+  protected Nucleus(){
+
+  }
+
   /*
     -----------------------
     Getters for basic values within nucleus
@@ -165,8 +172,16 @@ public class Nucleus {
     return this.sourceFile;
   }
 
+  public File getNucleusFolder(){
+    return this.nucleusFolder;
+  }
+
   public ImagePlus getSourceImage(){
     return this.sourceImage;
+  }
+
+  public ImagePlus getAnnotatedImage(){
+    return this.annotatedImage;
   }
 
   public String getImageName(){
@@ -265,6 +280,80 @@ public class Nucleus {
 
   /*
     -----------------------
+    Protected setters for subclasses
+    -----------------------
+  */
+
+  protected void setMedianAngle(double d){
+    this.medianAngle = d;
+  }
+
+  protected void setPerimeter(double d){
+    this.perimeter = d;
+  }
+
+  protected void setFeret(double d){
+    this.feret = d;
+  }
+
+  protected void setArea(double d){
+    this.area = d;
+  }
+
+  protected void setAngleProfile(AngleProfile p){
+    this.angleProfile = p;
+  }
+
+  protected void setCentreOfMass(XYPoint d){
+    this.centreOfMass = d;
+  }
+
+  protected void setRedSignals(ArrayList<NuclearSignal> d){
+    this.redSignals = d;
+  }
+
+  protected void setGreenSignals(ArrayList<NuclearSignal> d){
+    this.greenSignals = d;
+  }
+
+  protected void setPolygon(FloatPolygon p){
+    this.smoothedPolygon = p;
+  }
+
+  protected void setDistanceProfile(double[] d){
+    this.distanceProfile = d;
+  }
+
+  protected void setSignalDistanceMatrix(double[][] d){
+    this.distancesBetweenSignals = d;
+  }
+
+  protected void setRoi(Roi d){
+    this.roi = d;
+  }
+
+  protected void setSourceImage(ImagePlus d){
+    this.sourceImage = d;
+  }
+
+  protected void setSourceFile(File d){
+    this.sourceFile = d;
+  }
+
+  protected void setAnnotatedImage(ImagePlus d){
+    this.annotatedImage = d;
+  }
+
+  protected void setNucleusNumber(int d){
+    this.nucleusNumber = d;
+  }
+
+  protected void setNucleusFolder(File d){
+    this.nucleusFolder = d;
+  }
+
+  /*
+    -----------------------
     Get aggregate values
     -----------------------
   */
@@ -316,6 +405,10 @@ public class Nucleus {
     return greenSignals.size();
   }
 
+  public double getMedianDistanceFromProfile(){
+    return quartile(distanceProfile, 50);
+  }
+
   /*
     -----------------------
     Set miscellaneous features
@@ -358,7 +451,7 @@ public class Nucleus {
       boolean success = pa.analyze(imp);
       if(success){
         String signalPlural = manager.getCount() == 1 ? "signal" : "signals"; // I am pedantic
-        IJ.log("    Found "+manager.getCount()+ " "+signalPlural+" in "+colour+" channel");
+        // IJ.log("    Found "+manager.getCount()+ " "+signalPlural+" in "+colour+" channel");
 
       } else {
         IJ.log("    Unable to perform signal analysis");
@@ -685,7 +778,8 @@ public class Nucleus {
     		NucleusBorderPoint p   = this.getPoint(i);
     		NucleusBorderPoint opp = findOppositeBorder(p);
 
-        profile[i] = p.getLengthTo(opp);
+        profile[i] = p.getLengthTo(opp); // REMOVE
+        p.setDistanceAcrossCoM(p.getLengthTo(opp));
     }
     this.distanceProfile = profile;
   }
@@ -863,7 +957,7 @@ public class Nucleus {
                       this.IMAGE_PREFIX+
                       this.getNucleusNumber()+
                       ".annotated.tiff";
-    IJ.saveAsTiff(sourceImage, outPath);
+    IJ.saveAsTiff(annotatedImage, outPath);
   }
 
   /*
@@ -874,7 +968,7 @@ public class Nucleus {
 
     try{
 
-      ImageProcessor ip = this.sourceImage.getProcessor();
+      ImageProcessor ip = this.annotatedImage.getProcessor();
 
       // draw the features of interest
       
@@ -910,7 +1004,6 @@ public class Nucleus {
         for(int j=0; j<greenSignals.size();j++){
           NuclearSignal s = greenSignals.get(j);
           ip.setLineWidth(3);
-          ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
           ip.setLineWidth(1);
           ip.draw(s.getRoi());
         }
@@ -997,5 +1090,24 @@ public class Nucleus {
         max = d[i];
     }
     return max;
+  }
+
+  /*
+    Calculate the <lowerPercent> quartile from a Double[] array
+  */
+  private double quartile(double[] values, double lowerPercent) {
+
+      if (values == null || values.length == 0) {
+          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+      }
+
+      // Rank order the values
+      double[] v = new double[values.length];
+      System.arraycopy(values, 0, v, 0, values.length);
+      Arrays.sort(v);
+
+      int n = (int) Math.round(v.length * lowerPercent / 100);
+      
+      return (double)v[n];
   }
 }
