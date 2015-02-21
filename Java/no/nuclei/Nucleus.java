@@ -66,21 +66,20 @@ public class Nucleus {
   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
   private double medianAngle; // the median angle from XYPoint[] smoothedArray
-  private double perimeter; // the nuclear perimeter
-  private double pathLength; // the angle path length
-  private double feret; // the maximum diameter
-  private double area; // the nuclear area
+  private double perimeter;   // the nuclear perimeter
+  private double pathLength;  // the angle path length - measures wibbliness in border
+  private double feret;       // the maximum diameter
+  private double area;        // the nuclear area
 
   private AngleProfile angleProfile; // new class to replace smoothedArray
 
   private XYPoint centreOfMass;
 
-  private File sourceFile; // the image from which the nucleus came
+  private File sourceFile;    // the image from which the nucleus came
   private File nucleusFolder; // the folder to store nucleus information
-  private File profileLog; // unused. Store output if needed
+  private File profileLog;    // unused. Store output if needed
   
   private Roi roi; // the original ROI
-  // private Polygon polygon; // the ROI converted to a polygon; source of XYPoint[] array
 
   private ImagePlus sourceImage;
   private ImagePlus annotatedImage;
@@ -90,7 +89,7 @@ public class Nucleus {
 
   private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
 
-  private double[] distanceProfile;
+  private double[] distanceProfile; // diameter through the CoM for each point
 
   private double[][] distancesBetweenSignals;
   

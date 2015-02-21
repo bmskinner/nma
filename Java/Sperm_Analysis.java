@@ -891,1079 +891,1079 @@ public class Sperm_Analysis
     plus the functions for calculating aggregate stats
     within a nucleus
   */  
-  class Nucleus {
+  // class Nucleus {
   
-    private int nucleusNumber; // the number of the nucleus in the current image
-    // private int windowSize = 23; // default size, can be overridden if needed
-    // private int minimaCount; // the number of local minima detected in the array
-    // private int maximaCount; // the number of local minima detected in the array
-    private int length;  // the length of the array; shortcut to this.array.length
-    private int smoothLength = 0; // the length of the smoothed array; shortcut to this.getBorderPointArray().length
-    // private int minimaLookupDistance = 5; // the points ahead and behind to check when finding local minima and maxima
-    // private int blockCount = 0; // the number of delta blocks detected
-    // private int DELTA_WINDOW_MIN = 5; // the minimum number of points required in a delta block
+  //   private int nucleusNumber; // the number of the nucleus in the current image
+  //   // private int windowSize = 23; // default size, can be overridden if needed
+  //   // private int minimaCount; // the number of local minima detected in the array
+  //   // private int maximaCount; // the number of local minima detected in the array
+  //   private int length;  // the length of the array; shortcut to this.array.length
+  //   private int smoothLength = 0; // the length of the smoothed array; shortcut to this.getBorderPointArray().length
+  //   // private int minimaLookupDistance = 5; // the points ahead and behind to check when finding local minima and maxima
+  //   // private int blockCount = 0; // the number of delta blocks detected
+  //   // private int DELTA_WINDOW_MIN = 5; // the minimum number of points required in a delta block
 
-    private int failureCode = 0; // stores a code to explain why the nucleus failed filters
+  //   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
-    private int offsetForTail = 0;
+  //   private int offsetForTail = 0;
 
-    private int tailIndex; // the index in the smoothedArray that has been designated the tail
-    private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
+  //   private int tailIndex; // the index in the smoothedArray that has been designated the tail
+  //   private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
 
-    private double differenceToMedianCurve; // store the difference between curves as the sum of squares
+  //   private double differenceToMedianCurve; // store the difference between curves as the sum of squares
 
-    private double medianAngle; // the median angle from NucleusBorderPoint[] smoothedArray
-    private double perimeter; // the nuclear perimeter
-    private double pathLength; // the angle path length
-    private double feret; // the maximum diameter
-    private double area; // the nuclear area
+  //   private double medianAngle; // the median angle from NucleusBorderPoint[] smoothedArray
+  //   private double perimeter; // the nuclear perimeter
+  //   private double pathLength; // the angle path length
+  //   private double feret; // the maximum diameter
+  //   private double area; // the nuclear area
 
-    private NucleusBorderPoint[] array; // the points from the polygon made from the input roi. Not currently used.
-    // private NucleusBorderPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
-    private ArrayList<NucleusBorderPoint> intialSpermTails = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
-    private AngleProfile angleProfile; // new class to replace smoothedArray
+  //   private NucleusBorderPoint[] array; // the points from the polygon made from the input roi. Not currently used.
+  //   // private NucleusBorderPoint[] smoothedArray; // the interpolated points from the input polygon. Most calculations use this.
+  //   private ArrayList<NucleusBorderPoint> intialSpermTails = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
+  //   private AngleProfile angleProfile; // new class to replace smoothedArray
 
-    private XYPoint centreOfMass;
-    private NucleusBorderPoint spermTip;
-    private NucleusBorderPoint spermTail;
-    private NucleusBorderPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
-    private NucleusBorderPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
-    private NucleusBorderPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
-    private NucleusBorderPoint minFeretPoint2;
+  //   private XYPoint centreOfMass;
+  //   private NucleusBorderPoint spermTip;
+  //   private NucleusBorderPoint spermTail;
+  //   private NucleusBorderPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
+  //   private NucleusBorderPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
+  //   private NucleusBorderPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
+  //   private NucleusBorderPoint minFeretPoint2;
     
-    private String imagePath; // the path to the image being analysed
+  //   private String imagePath; // the path to the image being analysed
 
-    private File sourceImage; // the image from which the nucleus came
-    private File nucleusImage; // the image of just this nucleus, for annotation
-    private File profileLog; // unused. Store output if needed
+  //   private File sourceImage; // the image from which the nucleus came
+  //   private File nucleusImage; // the image of just this nucleus, for annotation
+  //   private File profileLog; // unused. Store output if needed
 
-    // private boolean minimaCalculated = false; // has detectLocalMinima been run
-    // private boolean maximaCalculated = false; // has detectLocalMaxima been run
-    // private boolean anglesCalculated = false; // has makeAngleProfile been run
-    // private boolean offsetCalculated = false; // has calculateOffsets been run
+  //   // private boolean minimaCalculated = false; // has detectLocalMinima been run
+  //   // private boolean maximaCalculated = false; // has detectLocalMaxima been run
+  //   // private boolean anglesCalculated = false; // has makeAngleProfile been run
+  //   // private boolean offsetCalculated = false; // has calculateOffsets been run
     
-    private Roi roi; // the original ROI
-    private Polygon polygon; // the ROI converted to a polygon; source of NucleusBorderPoint[] array
+  //   private Roi roi; // the original ROI
+  //   private Polygon polygon; // the ROI converted to a polygon; source of NucleusBorderPoint[] array
 
-    private ArrayList<NuclearSignal> redSignals    = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
-    private ArrayList<NuclearSignal> greenSignals  = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
+  //   private ArrayList<NuclearSignal> redSignals    = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
+  //   private ArrayList<NuclearSignal> greenSignals  = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
 
-    private FloatPolygon smoothedPolygon; // the interpolated polygon; source of NucleusBorderPoint[] smoothedArray // can probably be removed
-    private FloatPolygon hookRoi;
-    private FloatPolygon humpRoi;
+  //   private FloatPolygon smoothedPolygon; // the interpolated polygon; source of NucleusBorderPoint[] smoothedArray // can probably be removed
+  //   private FloatPolygon hookRoi;
+  //   private FloatPolygon humpRoi;
 
-    // these replaced measurementResults
-    private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
-    private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
-    private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
-    private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
-    private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
+  //   // these replaced measurementResults
+  //   private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
+  //   private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
+  //   private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
+  //   private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
+  //   private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
 
-    private double[] distanceProfile;
+  //   private double[] distanceProfile;
     
-    public Nucleus (Roi roi, String path) { // construct from an roi
+  //   public Nucleus (Roi roi, String path) { // construct from an roi
 
-      // get the polygon from the roi
-      this.roi = roi;
-      this.sourceImage = new File(path);
-      this.imagePath = sourceImage.getPath(); // eventually remove
+  //     // get the polygon from the roi
+  //     this.roi = roi;
+  //     this.sourceImage = new File(path);
+  //     this.imagePath = sourceImage.getPath(); // eventually remove
 
-      this.polygon = roi.getPolygon();
-      this.array = new NucleusBorderPoint[this.polygon.npoints];
-      this.length = this.array.length;
-      for(int i=0; i<this.polygon.npoints; i++){
-        array[i] = new NucleusBorderPoint(this.polygon.xpoints[i],this.polygon.ypoints[i]);
-      }
+  //     this.polygon = roi.getPolygon();
+  //     this.array = new NucleusBorderPoint[this.polygon.npoints];
+  //     this.length = this.array.length;
+  //     for(int i=0; i<this.polygon.npoints; i++){
+  //       array[i] = new NucleusBorderPoint(this.polygon.xpoints[i],this.polygon.ypoints[i]);
+  //     }
      
-     try{
-        this.smoothedPolygon = roi.getInterpolatedPolygon(1,true); // interpolate and smooth the roi, 1 pixel spacing
-        angleProfile = new AngleProfile(this.smoothedPolygon);
-        this.smoothLength = angleProfile.size(); // shortcult for functions
+  //    try{
+  //       this.smoothedPolygon = roi.getInterpolatedPolygon(1,true); // interpolate and smooth the roi, 1 pixel spacing
+  //       angleProfile = new AngleProfile(this.smoothedPolygon);
+  //       this.smoothLength = angleProfile.size(); // shortcult for functions
 
-      } catch(Exception e){
-        IJ.log("Cannot create AngleProfile: "+e);
-      } 
-    }
+  //     } catch(Exception e){
+  //       IJ.log("Cannot create AngleProfile: "+e);
+  //     } 
+  //   }
 
-    public Roi getRoi(){
-    	return this.roi;
-    }
+  //   public Roi getRoi(){
+  //   	return this.roi;
+  //   }
 
-    public NucleusBorderPoint[] getBorderPointArray(){
-    	return this.angleProfile.getBorderPointArray();
-    }
+  //   public NucleusBorderPoint[] getBorderPointArray(){
+  //   	return this.angleProfile.getBorderPointArray();
+  //   }
 
-    public NucleusBorderPoint getBorderPoint(int i){
-    	return angleProfile.getBorderPoint(i);
-    }
+  //   public NucleusBorderPoint getBorderPoint(int i){
+  //   	return angleProfile.getBorderPoint(i);
+  //   }
 
-    public AngleProfile getAngleProfile(){
-      return this.angleProfile;
-    }
+  //   public AngleProfile getAngleProfile(){
+  //     return this.angleProfile;
+  //   }
 
-    public double getMaxX(){
-    	double d = 0;
-      for(int i=0;i<smoothLength;i++){
-      	if(angleProfile.getBorderPoint(i).getX()>d){
-        	d = angleProfile.getBorderPoint(i).getX();
-      	}
-      }
-      return d;
-    }
+  //   public double getMaxX(){
+  //   	double d = 0;
+  //     for(int i=0;i<smoothLength;i++){
+  //     	if(angleProfile.getBorderPoint(i).getX()>d){
+  //       	d = angleProfile.getBorderPoint(i).getX();
+  //     	}
+  //     }
+  //     return d;
+  //   }
 
-    public double getMinX(){
-    	double d = getMaxX();
-      for(int i=0;i<smoothLength;i++){
-      	if(angleProfile.getBorderPoint(i).getX()<d){
-        	d = angleProfile.getBorderPoint(i).getX();
-	      }
-	    }
-      return d;
-    }
+  //   public double getMinX(){
+  //   	double d = getMaxX();
+  //     for(int i=0;i<smoothLength;i++){
+  //     	if(angleProfile.getBorderPoint(i).getX()<d){
+  //       	d = angleProfile.getBorderPoint(i).getX();
+	 //      }
+	 //    }
+  //     return d;
+  //   }
 
-    public double getMaxY(){
-    	double d = 0;
-      for(int i=0;i<smoothLength;i++){
-      	if(angleProfile.getBorderPoint(i).getY()>d){
-        	d = angleProfile.getBorderPoint(i).getY();
-      	}
-      }
-      return d;
-    }
+  //   public double getMaxY(){
+  //   	double d = 0;
+  //     for(int i=0;i<smoothLength;i++){
+  //     	if(angleProfile.getBorderPoint(i).getY()>d){
+  //       	d = angleProfile.getBorderPoint(i).getY();
+  //     	}
+  //     }
+  //     return d;
+  //   }
 
-    public double getMinY(){
-    	double d = getMaxY();
-      for(int i=0;i<smoothLength;i++){
-      	if(angleProfile.getBorderPoint(i).getY()<d){
-        	d = angleProfile.getBorderPoint(i).getY();
-	      }
-	    }
-      return d;
-    }
+  //   public double getMinY(){
+  //   	double d = getMaxY();
+  //     for(int i=0;i<smoothLength;i++){
+  //     	if(angleProfile.getBorderPoint(i).getY()<d){
+  //       	d = angleProfile.getBorderPoint(i).getY();
+	 //      }
+	 //    }
+  //     return d;
+  //   }
 
-    public double[] getNormalisedXPositionsFromTip(){
-      double[] d = new double[normalisedXPositionsFromTip.size()];
-      for(int i=0;i<normalisedXPositionsFromTip.size();i++){
-        d[i] = normalisedXPositionsFromTip.get(i);
-      }
-      return d;
-    }
+  //   public double[] getNormalisedXPositionsFromTip(){
+  //     double[] d = new double[normalisedXPositionsFromTip.size()];
+  //     for(int i=0;i<normalisedXPositionsFromTip.size();i++){
+  //       d[i] = normalisedXPositionsFromTip.get(i);
+  //     }
+  //     return d;
+  //   }
 
-    public double[] getNormalisedYPositionsFromTail(){
-      double[] d = new double[normalisedYPositionsFromTail.size()];
-      for(int i=0;i<normalisedYPositionsFromTail.size();i++){
-        d[i] = normalisedYPositionsFromTail.get(i);
-      }
-      return d;
-    }
+  //   public double[] getNormalisedYPositionsFromTail(){
+  //     double[] d = new double[normalisedYPositionsFromTail.size()];
+  //     for(int i=0;i<normalisedYPositionsFromTail.size();i++){
+  //       d[i] = normalisedYPositionsFromTail.get(i);
+  //     }
+  //     return d;
+  //   }
 
-    public double[] getNormalisedXPositionsFromTail(){
-      double[] d = new double[normalisedXPositionsFromTail.size()];
-      for(int i=0;i<normalisedXPositionsFromTail.size();i++){
-        d[i] = normalisedXPositionsFromTail.get(i);
-      }
-      return d;
-    }
+  //   public double[] getNormalisedXPositionsFromTail(){
+  //     double[] d = new double[normalisedXPositionsFromTail.size()];
+  //     for(int i=0;i<normalisedXPositionsFromTail.size();i++){
+  //       d[i] = normalisedXPositionsFromTail.get(i);
+  //     }
+  //     return d;
+  //   }
 
-    public double[] getRawXPositionsFromTail(){
-      double[] d = new double[rawXPositionsFromTail.size()];
-      for(int i=0;i<rawXPositionsFromTail.size();i++){
-        d[i] = rawXPositionsFromTail.get(i);
-      }
-      return d;
-    }
+  //   public double[] getRawXPositionsFromTail(){
+  //     double[] d = new double[rawXPositionsFromTail.size()];
+  //     for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //       d[i] = rawXPositionsFromTail.get(i);
+  //     }
+  //     return d;
+  //   }
 
-    public double[] getRawXPositionsFromTip(){
-      double[] d = new double[rawXPositionsFromTip.size()];
-      for(int i=0;i<rawXPositionsFromTip.size();i++){
-        d[i] = rawXPositionsFromTip.get(i);
-      }
-      return d;
-    }
+  //   public double[] getRawXPositionsFromTip(){
+  //     double[] d = new double[rawXPositionsFromTip.size()];
+  //     for(int i=0;i<rawXPositionsFromTip.size();i++){
+  //       d[i] = rawXPositionsFromTip.get(i);
+  //     }
+  //     return d;
+  //   }
 
-    /* 
-      Fetch the angles in the smoothed array; will be ordered from the tip
-    */
-    public double[] getAngles(){
-      double[] d = new double[this.smoothLength];
-      for(int i=0;i<this.smoothLength;i++){
-        d[i] = angleProfile.getBorderPoint(i).getInteriorAngle();
-      }
-      return d;
-    }
+  //   /* 
+  //     Fetch the angles in the smoothed array; will be ordered from the tip
+  //   */
+  //   public double[] getAngles(){
+  //     double[] d = new double[this.smoothLength];
+  //     for(int i=0;i<this.smoothLength;i++){
+  //       d[i] = angleProfile.getBorderPoint(i).getInteriorAngle();
+  //     }
+  //     return d;
+  //   }
 
-    public double getMaxRawXFromTail(){
-      double d = 0;
-      for(int i=0;i<rawXPositionsFromTail.size();i++){
-        if(rawXPositionsFromTail.get(i) > d){
-          d = rawXPositionsFromTail.get(i);
-        }
-      }
-      return d;
-    }
+  //   public double getMaxRawXFromTail(){
+  //     double d = 0;
+  //     for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //       if(rawXPositionsFromTail.get(i) > d){
+  //         d = rawXPositionsFromTail.get(i);
+  //       }
+  //     }
+  //     return d;
+  //   }
 
-    public double getMinRawXFromTail(){
-      double d = 0;
-      for(int i=0;i<rawXPositionsFromTail.size();i++){
-        if(rawXPositionsFromTail.get(i) < d){
-          d = rawXPositionsFromTail.get(i);
-        }
-      }
-      return d;
-    }
+  //   public double getMinRawXFromTail(){
+  //     double d = 0;
+  //     for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //       if(rawXPositionsFromTail.get(i) < d){
+  //         d = rawXPositionsFromTail.get(i);
+  //       }
+  //     }
+  //     return d;
+  //   }
 
-    public double getMaxRawXFromTip(){
-      double d = 0;
-      for(int i=0;i<rawXPositionsFromTip.size();i++){
-        if(rawXPositionsFromTip.get(i) > d){
-          d = rawXPositionsFromTip.get(i);
-        }
-      }
-      return d;
-    }
+  //   public double getMaxRawXFromTip(){
+  //     double d = 0;
+  //     for(int i=0;i<rawXPositionsFromTip.size();i++){
+  //       if(rawXPositionsFromTip.get(i) > d){
+  //         d = rawXPositionsFromTip.get(i);
+  //       }
+  //     }
+  //     return d;
+  //   }
 
-    public double getMinRawXFromTip(){
-      double d = 0;
-      for(int i=0;i<rawXPositionsFromTip.size();i++){
-        if(rawXPositionsFromTip.get(i) < d){
-          d = rawXPositionsFromTip.get(i);
-        }
-      }
-      return d;
-    }
+  //   public double getMinRawXFromTip(){
+  //     double d = 0;
+  //     for(int i=0;i<rawXPositionsFromTip.size();i++){
+  //       if(rawXPositionsFromTip.get(i) < d){
+  //         d = rawXPositionsFromTip.get(i);
+  //       }
+  //     }
+  //     return d;
+  //   }
 
-    public void addRedSignal(NuclearSignal n){
-      this.redSignals.add(n);
-    }
+  //   public void addRedSignal(NuclearSignal n){
+  //     this.redSignals.add(n);
+  //   }
 
-    public void addGreenSignal(NuclearSignal n){
-      this.greenSignals.add(n);
-    }
+  //   public void addGreenSignal(NuclearSignal n){
+  //     this.greenSignals.add(n);
+  //   }
 
-    public Polygon getPolygon(){
-      return this.polygon;
-    }
+  //   public Polygon getPolygon(){
+  //     return this.polygon;
+  //   }
 
-    // public void setWindowSize(int i){
-    // 	this.windowSize = i;
-    // }
+  //   // public void setWindowSize(int i){
+  //   // 	this.windowSize = i;
+  //   // }
 
-    // public int getWindowSize(){
-    // 	return this.windowSize;
-    // }
-    /* 
-    Find the smoothed length of the array
-    */
-    public int getLength(){
-    	return this.smoothLength;
-    }
+  //   // public int getWindowSize(){
+  //   // 	return this.windowSize;
+  //   // }
+  //   /* 
+  //   Find the smoothed length of the array
+  //   */
+  //   public int getLength(){
+  //   	return this.smoothLength;
+  //   }
 
-    public void setPath(String path){
-      this.imagePath = path;
-    }
+  //   public void setPath(String path){
+  //     this.imagePath = path;
+  //   }
 
-    public void setNucleusNumber(int n){
-      this.nucleusNumber = n;
-    }
+  //   public void setNucleusNumber(int n){
+  //     this.nucleusNumber = n;
+  //   }
 
-    public NucleusBorderPoint getPoint(int i){
-      return this.array[i];
-    }
+  //   public NucleusBorderPoint getPoint(int i){
+  //     return this.array[i];
+  //   }
 
-    public NucleusBorderPoint getSmoothedPoint(int i){
-      return this.angleProfile.getBorderPoint(i);
-    }
+  //   public NucleusBorderPoint getSmoothedPoint(int i){
+  //     return this.angleProfile.getBorderPoint(i);
+  //   }
 
-    public String getPath(){
-      return this.imagePath;
-    }
+  //   public String getPath(){
+  //     return this.imagePath;
+  //   }
 
-    public String getDirectory(){
-      File f = new File(this.imagePath);
-      return f.getParent();
-    }
+  //   public String getDirectory(){
+  //     File f = new File(this.imagePath);
+  //     return f.getParent();
+  //   }
 
-    public String getPathWithoutExtension(){
+  //   public String getPathWithoutExtension(){
       
-      String extension = "";
-      String trimmed = "";
+  //     String extension = "";
+  //     String trimmed = "";
 
-      int i = this.imagePath.lastIndexOf('.');
-      if (i > 0) {
-          extension = this.imagePath.substring(i+1);
-          trimmed = this.imagePath.substring(0,i);
-      }
-      return trimmed;
-    }  
+  //     int i = this.imagePath.lastIndexOf('.');
+  //     if (i > 0) {
+  //         extension = this.imagePath.substring(i+1);
+  //         trimmed = this.imagePath.substring(0,i);
+  //     }
+  //     return trimmed;
+  //   }  
 
-    public String getImageName(){
-    	File f = new File(this.imagePath);
-      return f.getName();
-    }
+  //   public String getImageName(){
+  //   	File f = new File(this.imagePath);
+  //     return f.getName();
+  //   }
 
-    public int getNucleusNumber(){
-      return this.nucleusNumber;
-    }
+  //   public int getNucleusNumber(){
+  //     return this.nucleusNumber;
+  //   }
 
-    public String getPathAndNumber(){
-      return this.imagePath+"\\"+this.nucleusNumber;
-    }
+  //   public String getPathAndNumber(){
+  //     return this.imagePath+"\\"+this.nucleusNumber;
+  //   }
 
-    public XYPoint getCentreOfMass(){
-      return this.centreOfMass;
-    }
+  //   public XYPoint getCentreOfMass(){
+  //     return this.centreOfMass;
+  //   }
 
-    public void setCentreOfMass(XYPoint p){
-      this.centreOfMass = p;
-    }
+  //   public void setCentreOfMass(XYPoint p){
+  //     this.centreOfMass = p;
+  //   }
 
-    public NucleusBorderPoint getSpermTip(){
-      return this.spermTip;
-    }
+  //   public NucleusBorderPoint getSpermTip(){
+  //     return this.spermTip;
+  //   }
 
-    public void setSpermTip(NucleusBorderPoint p){
-      this.spermTip = p;
-    }
+  //   public void setSpermTip(NucleusBorderPoint p){
+  //     this.spermTip = p;
+  //   }
 
-    public void setInitialConsensusTail(NucleusBorderPoint p){
-      this.initialConsensusTail = p;
-    }
+  //   public void setInitialConsensusTail(NucleusBorderPoint p){
+  //     this.initialConsensusTail = p;
+  //   }
 
-    public NucleusBorderPoint getInitialConsensusTail(){
-      return this.initialConsensusTail;
-    }
+  //   public NucleusBorderPoint getInitialConsensusTail(){
+  //     return this.initialConsensusTail;
+  //   }
 
 
-    public NucleusBorderPoint getSpermTail(){
-      return this.spermTail;
-    }
+  //   public NucleusBorderPoint getSpermTail(){
+  //     return this.spermTail;
+  //   }
 
-    public void setSpermTail(NucleusBorderPoint p){
-      this.spermTail = p;
-    }
+  //   public void setSpermTail(NucleusBorderPoint p){
+  //     this.spermTail = p;
+  //   }
 
-    public double getPerimeter(){
-      return this.perimeter;
-    }
+  //   public double getPerimeter(){
+  //     return this.perimeter;
+  //   }
 
-    public void setPerimeter(double d){
-      this.perimeter = d;
-    }
+  //   public void setPerimeter(double d){
+  //     this.perimeter = d;
+  //   }
 
-    public double getArea(){
-      return this.area;
-    }
+  //   public double getArea(){
+  //     return this.area;
+  //   }
 
-    public void setArea(double d){
-      this.area = d;
-    }
+  //   public void setArea(double d){
+  //     this.area = d;
+  //   }
 
-    public double getFeret(){
-      return this.feret;
-    }
+  //   public double getFeret(){
+  //     return this.feret;
+  //   }
 
-    public void setFeret(double d){
-      this.feret = d;
-    }
+  //   public void setFeret(double d){
+  //     this.feret = d;
+  //   }
 
-    public double getPathLength(){
-      return this.pathLength;
-    }
+  //   public double getPathLength(){
+  //     return this.pathLength;
+  //   }
 
-    public void setPathLength(double d){
-      this.pathLength = d;
-    }
+  //   public void setPathLength(double d){
+  //     this.pathLength = d;
+  //   }
 
-    public int getTailIndex(){
-      return this.tailIndex;
-    }
+  //   public int getTailIndex(){
+  //     return this.tailIndex;
+  //   }
 
-    public void setTailIndex(int i){
-      this.tailIndex = i;
-    }
+  //   public void setTailIndex(int i){
+  //     this.tailIndex = i;
+  //   }
 
-    public void setDistanceProfile( double[] d){
-    	this.distanceProfile = d;
-    }
+  //   public void setDistanceProfile( double[] d){
+  //   	this.distanceProfile = d;
+  //   }
 
-    public double[] getDistanceProfile(){
-    	return this.distanceProfile;
-    }
+  //   public double[] getDistanceProfile(){
+  //   	return this.distanceProfile;
+  //   }
 
-    public ArrayList<NuclearSignal> getRedSignals(){
-      return this.redSignals;
-    }
+  //   public ArrayList<NuclearSignal> getRedSignals(){
+  //     return this.redSignals;
+  //   }
 
-    public ArrayList<NuclearSignal> getGreenSignals(){
-      return this.greenSignals;
-    }
+  //   public ArrayList<NuclearSignal> getGreenSignals(){
+  //     return this.greenSignals;
+  //   }
 
-    public int getRedSignalCount(){
-      return redSignals.size();
-    }
+  //   public int getRedSignalCount(){
+  //     return redSignals.size();
+  //   }
 
-    public int getGreenSignalCount(){
-      return greenSignals.size();
-    }
+  //   public int getGreenSignalCount(){
+  //     return greenSignals.size();
+  //   }
 
-    public void addTailEstimatePosition(NucleusBorderPoint p){
-    	this.intialSpermTails.add(p);
-    }
+  //   public void addTailEstimatePosition(NucleusBorderPoint p){
+  //   	this.intialSpermTails.add(p);
+  //   }
 
-    public void reverseArray(){
-    	this.angleProfile.reverseAngleProfile();
-    }
+  //   public void reverseArray(){
+  //   	this.angleProfile.reverseAngleProfile();
+  //   }
 
-    public void flipXAroundPoint(XYPoint p){
-    	this.angleProfile.flipXAroundPoint(p);
-    }
+  //   public void flipXAroundPoint(XYPoint p){
+  //   	this.angleProfile.flipXAroundPoint(p);
+  //   }
 
-    public boolean isHookSide(XYPoint p){
-      if(hookRoi.contains( (float)p.getX(), (float)p.getY() ) ){
-        return true;
-      } else { 
-        return false;
-      }
-    }
+  //   public boolean isHookSide(XYPoint p){
+  //     if(hookRoi.contains( (float)p.getX(), (float)p.getY() ) ){
+  //       return true;
+  //     } else { 
+  //       return false;
+  //     }
+  //   }
 
-    public boolean isHumpSide(XYPoint p){
-      if(humpRoi.contains( (float)p.getX(), (float)p.getY() ) ){
-        return true;
-      } else { 
-        return false;
-      }
-    }    
+  //   public boolean isHumpSide(XYPoint p){
+  //     if(humpRoi.contains( (float)p.getX(), (float)p.getY() ) ){
+  //       return true;
+  //     } else { 
+  //       return false;
+  //     }
+  //   }    
 
-    /*
-      For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
-      Used for obtaining a consensus between potential tail positions
-    */
-    public int getPositionBetween(NucleusBorderPoint pointA, NucleusBorderPoint pointB){
+  //   /*
+  //     For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
+  //     Used for obtaining a consensus between potential tail positions
+  //   */
+  //   public int getPositionBetween(NucleusBorderPoint pointA, NucleusBorderPoint pointB){
 
-      int a = 0;
-      int b = 0;
-      // find the indices that correspond on the array
-      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
+  //     int a = 0;
+  //     int b = 0;
+  //     // find the indices that correspond on the array
+  //     NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
 
-      for(int i = 0; i<points.length; i++){
-          if(points[i].overlaps(pointA)){
-            a = i;
-          }
-          if(points[i].overlaps(pointB)){
-            b = i;
-          }
-      }
-      // get the midpoint
-      int mid = (int)Math.floor( (a+b) /2);
-      return mid;
-    }
+  //     for(int i = 0; i<points.length; i++){
+  //         if(points[i].overlaps(pointA)){
+  //           a = i;
+  //         }
+  //         if(points[i].overlaps(pointB)){
+  //           b = i;
+  //         }
+  //     }
+  //     // get the midpoint
+  //     int mid = (int)Math.floor( (a+b) /2);
+  //     return mid;
+  //   }
 
-    public double[] getAngleProfileArray(){
-    	return this.angleProfile.getAngleArray();
-    }
+  //   public double[] getAngleProfileArray(){
+  //   	return this.angleProfile.getAngleArray();
+  //   }
 
-    /*
-	    Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
-      Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
-	    Returns an angle
-	  */
-	  public double findRotationAngle(){
-	    XYPoint end = new XYPoint(this.getSpermTail().getXAsInt(),this.getSpermTail().getYAsInt()-50);
+  //   /*
+	 //    Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
+  //     Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
+	 //    Returns an angle
+	 //  */
+	 //  public double findRotationAngle(){
+	 //    XYPoint end = new XYPoint(this.getSpermTail().getXAsInt(),this.getSpermTail().getYAsInt()-50);
 
-      double angle = findAngleBetweenXYPoints(end, this.getSpermTail(), this.getCentreOfMass());
+  //     double angle = findAngleBetweenXYPoints(end, this.getSpermTail(), this.getCentreOfMass());
 
-	    if(this.getCentreOfMass().getX() < this.getSpermTail().getX()){
-	      return angle;
-	    } else {
-	      return 0-angle;
-	    }
-	  }
+	 //    if(this.getCentreOfMass().getX() < this.getSpermTail().getX()){
+	 //      return angle;
+	 //    } else {
+	 //      return 0-angle;
+	 //    }
+	 //  }
 
-    // For a position in the roi, draw a line through the CoM and get the intersection point
-    public NucleusBorderPoint findOppositeBorder(NucleusBorderPoint p){
+  //   // For a position in the roi, draw a line through the CoM and get the intersection point
+  //   public NucleusBorderPoint findOppositeBorder(NucleusBorderPoint p){
 
-      int minDeltaYIndex = 0;
-      double minAngle = 180;
-      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
+  //     int minDeltaYIndex = 0;
+  //     double minAngle = 180;
+  //     NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
 
-      for(int i = 0; i<points.length;i++){
+  //     for(int i = 0; i<points.length;i++){
 
-          double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), points[i]);
+  //         double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), points[i]);
 
-          if(Math.abs(180 - angle) < minAngle){
-            minDeltaYIndex = i;
-            minAngle = 180 - angle;
-          }
-      }
-      return points[minDeltaYIndex];
-    }
+  //         if(Math.abs(180 - angle) < minAngle){
+  //           minDeltaYIndex = i;
+  //           minAngle = 180 - angle;
+  //         }
+  //     }
+  //     return points[minDeltaYIndex];
+  //   }
 
-    /*
-      This is a method for finding a tail point independent of local minima:
-        Find the narrowest diameter around the nuclear CoM
-        Draw a line orthogonal, and pick the intersecting border points
-        The border furthest from the tip is the tail
-    */
-    public NucleusBorderPoint findTailByNarrowestWidthMethod(){
+  //   /*
+  //     This is a method for finding a tail point independent of local minima:
+  //       Find the narrowest diameter around the nuclear CoM
+  //       Draw a line orthogonal, and pick the intersecting border points
+  //       The border furthest from the tip is the tail
+  //   */
+  //   public NucleusBorderPoint findTailByNarrowestWidthMethod(){
 
-    	IJ.log("Finding sperm tail from width...");
-      // Find the narrowest point around the CoM
-      // For a position in teh roi, draw a line through the CoM to the intersection point
-      // Measure the length; if < min length..., store equation and border(s)
+  //   	IJ.log("Finding sperm tail from width...");
+  //     // Find the narrowest point around the CoM
+  //     // For a position in teh roi, draw a line through the CoM to the intersection point
+  //     // Measure the length; if < min length..., store equation and border(s)
 
-      double minDistance = this.getFeret();
-      NucleusBorderPoint reference = this.getSpermTip();
-      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
+  //     double minDistance = this.getFeret();
+  //     NucleusBorderPoint reference = this.getSpermTip();
+  //     NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
 
-      // this.splitNucleusToHeadAndHump();
+  //     // this.splitNucleusToHeadAndHump();
 
-      for(int i=0;i<this.smoothLength;i++){
+  //     for(int i=0;i<this.smoothLength;i++){
 
-        NucleusBorderPoint p = this.getBorderPoint(i);
-        NucleusBorderPoint opp = findOppositeBorder(p);
-        double distance = p.getLengthTo(opp);
+  //       NucleusBorderPoint p = this.getBorderPoint(i);
+  //       NucleusBorderPoint opp = findOppositeBorder(p);
+  //       double distance = p.getLengthTo(opp);
 
-        if(distance<minDistance){
-          minDistance = distance;
-          reference = p;
-        }
-      }
-      this.minFeretPoint1 = reference;
-      this.minFeretPoint2 = findOppositeBorder(reference);
+  //       if(distance<minDistance){
+  //         minDistance = distance;
+  //         reference = p;
+  //       }
+  //     }
+  //     this.minFeretPoint1 = reference;
+  //     this.minFeretPoint2 = findOppositeBorder(reference);
       
-      // Using the point, draw a line from teh CoM to the border. Measure the angle to an intersection point
-      // if close to 90, and the distance to the tip > CoM-tip, keep the point
-      // return the best point
-      double difference = 90;
-      NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
-      for(int i=0;i<this.smoothLength;i++){
+  //     // Using the point, draw a line from teh CoM to the border. Measure the angle to an intersection point
+  //     // if close to 90, and the distance to the tip > CoM-tip, keep the point
+  //     // return the best point
+  //     double difference = 90;
+  //     NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
+  //     for(int i=0;i<this.smoothLength;i++){
 
-        NucleusBorderPoint p = points[i];
-        double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
-        if(  Math.abs(90-angle)<difference && p.getLengthTo(this.getSpermTip()) > this.getCentreOfMass().getLengthTo( this.getSpermTip() ) ){
-          difference = 90-angle;
-          tail = p;
-        }
-      }
-      return tail;
-    }
+  //       NucleusBorderPoint p = points[i];
+  //       double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
+  //       if(  Math.abs(90-angle)<difference && p.getLengthTo(this.getSpermTip()) > this.getCentreOfMass().getLengthTo( this.getSpermTip() ) ){
+  //         difference = 90-angle;
+  //         tail = p;
+  //       }
+  //     }
+  //     return tail;
+  //   }
 
-    /*
-      Change the smoothed array order to put the selected index at the beginning
-      only works for smoothed array - indexes are different for normal array
-      Input: int the index to move to the start
-    */
-    public void moveIndexToArrayStart(int i){
-      this.angleProfile.moveIndexToArrayStart(i);  
-    }
+  //   /*
+  //     Change the smoothed array order to put the selected index at the beginning
+  //     only works for smoothed array - indexes are different for normal array
+  //     Input: int the index to move to the start
+  //   */
+  //   public void moveIndexToArrayStart(int i){
+  //     this.angleProfile.moveIndexToArrayStart(i);  
+  //   }
 
-    /*
-      To create the normalised tail-centred index, we want to take the 
-      normalised tip-centred index, and move the tail index position to 
-      the start. 
-    */
-    public void createNormalisedYPositionsFromTail(){
-
-      double[] tipCentredAngles = this.getAngles();
-      double[] tipCentredXPositions = this.getNormalisedXPositionsFromTip();
-      int tailIndex = this.getTailIndex();
-
-      double[] tempArray = new double[tipCentredAngles.length];
-
-      System.arraycopy(tipCentredAngles, tailIndex, tempArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
-      System.arraycopy(tipCentredAngles, 0, tempArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
-
-      double[] tempXArray = new double[tipCentredAngles.length];
-      System.arraycopy(tipCentredXPositions, tailIndex, tempXArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
-      System.arraycopy(tipCentredXPositions, 0, tempXArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
-
-
-      for(int i=0; i<this.smoothLength;i++){
-          this.normalisedYPositionsFromTail.add(tempArray[i]);
-          this.normalisedXPositionsFromTail.add(tempXArray[i]);
-      }
-    }
-
-
-    /*
-      Checks if the smoothed array nuclear shape profile has the acrosome to the rear of the array
-      If acrosome is at the beginning:
-        returns true
-      else returns false
-    */
-    public boolean isProfileOrientationOK(){
-
-      // if(!this.anglesCalculated){
-      //   this.makeAngleProfile();
-      //   this.makeDeltaAngleProfile();
-      // }
-      // if(!this.minimaCalculated){
-      //   this.detectLocalMinima();
-      // }
-
-      boolean ok = false;
-      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
-
-      double maxAngle = 0.0;
-      int maxIndex = 0;
-      for(int i=0; i<this.smoothLength;i++){
-
-          double angle = points[i].getInteriorAngle();
-          if(angle>maxAngle){
-            maxAngle = angle;
-            maxIndex = i;
-          }
-
-          // IJ.log(i+" \t "+angle+" \t "+minAngle+"  "+minIndex);
-      }
-      // IJ.log("    Maximum angle "+maxAngle+" at "+maxIndex);
-
-      if(this.smoothLength - maxIndex < maxIndex){ // if the maxIndex is closer to the end than the beginning
-        return false;
-      } else{ 
-        return true;
-      }
-    }
-
-    /*
-      Go through the deltas marked as consecutive blocks
-      Find the midpoints of each block
-      Return the point furthest from the tip
-    */
-    public NucleusBorderPoint findTailFromDeltas(NucleusBorderPoint tip){
-
-    	IJ.log("Finding sperm tail from deltas...");
-      // get the midpoint of each block
-      ArrayList<NucleusBorderPoint> results = new ArrayList<NucleusBorderPoint>(0);
-      int maxIndex = 0;
     
-      // remember that block 0 is not assigned; start from 1
-      try{
+  //     To create the normalised tail-centred index, we want to take the 
+  //     normalised tip-centred index, and move the tail index position to 
+  //     the start. 
+    
+  //   public void createNormalisedYPositionsFromTail(){
 
-        this.angleProfile.updatePointsWithBlockCount();
-        for(int i=1; i<this.angleProfile.getBlockCount();i++){
+  //     double[] tipCentredAngles = this.getAngles();
+  //     double[] tipCentredXPositions = this.getNormalisedXPositionsFromTip();
+  //     int tailIndex = this.getTailIndex();
 
-          // number of points in each block
+  //     double[] tempArray = new double[tipCentredAngles.length];
 
-          NucleusBorderPoint[] points = this.angleProfile.getBlockOfBorderPoints(i);
-          for(NucleusBorderPoint p : points){
-            if(p.isMidpoint()){ // will ignore any blocks without a midpoint established - <2 members
-              results.add(p);
-              // IJ.log("    Midpoint found for block "+i);
-            }
-          }
-        }
-        // IJ.log("    "+results.size()+" blocks");
-      } catch(Exception e){
-        IJ.log("    Error in finding midpoints: findTailFromDeltas(): "+e);
-      }
+  //     System.arraycopy(tipCentredAngles, tailIndex, tempArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
+  //     System.arraycopy(tipCentredAngles, 0, tempArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
+
+  //     double[] tempXArray = new double[tipCentredAngles.length];
+  //     System.arraycopy(tipCentredXPositions, tailIndex, tempXArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
+  //     System.arraycopy(tipCentredXPositions, 0, tempXArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
+
+
+  //     for(int i=0; i<this.smoothLength;i++){
+  //         this.normalisedYPositionsFromTail.add(tempArray[i]);
+  //         this.normalisedXPositionsFromTail.add(tempXArray[i]);
+  //     }
+  //   }
+
+
+  //   /*
+  //     Checks if the smoothed array nuclear shape profile has the acrosome to the rear of the array
+  //     If acrosome is at the beginning:
+  //       returns true
+  //     else returns false
+  //   */
+  //   public boolean isProfileOrientationOK(){
+
+  //     // if(!this.anglesCalculated){
+  //     //   this.makeAngleProfile();
+  //     //   this.makeDeltaAngleProfile();
+  //     // }
+  //     // if(!this.minimaCalculated){
+  //     //   this.detectLocalMinima();
+  //     // }
+
+  //     boolean ok = false;
+  //     NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
+
+  //     double maxAngle = 0.0;
+  //     int maxIndex = 0;
+  //     for(int i=0; i<this.smoothLength;i++){
+
+  //         double angle = points[i].getInteriorAngle();
+  //         if(angle>maxAngle){
+  //           maxAngle = angle;
+  //           maxIndex = i;
+  //         }
+
+  //         // IJ.log(i+" \t "+angle+" \t "+minAngle+"  "+minIndex);
+  //     }
+  //     // IJ.log("    Maximum angle "+maxAngle+" at "+maxIndex);
+
+  //     if(this.smoothLength - maxIndex < maxIndex){ // if the maxIndex is closer to the end than the beginning
+  //       return false;
+  //     } else{ 
+  //       return true;
+  //     }
+  //   }
+
+  //   /*
+  //     Go through the deltas marked as consecutive blocks
+  //     Find the midpoints of each block
+  //     Return the point furthest from the tip
+  //   */
+  //   public NucleusBorderPoint findTailFromDeltas(NucleusBorderPoint tip){
+
+  //   	IJ.log("Finding sperm tail from deltas...");
+  //     // get the midpoint of each block
+  //     ArrayList<NucleusBorderPoint> results = new ArrayList<NucleusBorderPoint>(0);
+  //     int maxIndex = 0;
+    
+  //     // remember that block 0 is not assigned; start from 1
+  //     try{
+
+  //       this.angleProfile.updatePointsWithBlockCount();
+  //       for(int i=1; i<this.angleProfile.getBlockCount();i++){
+
+  //         // number of points in each block
+
+  //         NucleusBorderPoint[] points = this.angleProfile.getBlockOfBorderPoints(i);
+  //         for(NucleusBorderPoint p : points){
+  //           if(p.isMidpoint()){ // will ignore any blocks without a midpoint established - <2 members
+  //             results.add(p);
+  //             // IJ.log("    Midpoint found for block "+i);
+  //           }
+  //         }
+  //       }
+  //       // IJ.log("    "+results.size()+" blocks");
+  //     } catch(Exception e){
+  //       IJ.log("    Error in finding midpoints: findTailFromDeltas(): "+e);
+  //     }
       
-      NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
-      try{
-        // go through the midpoints, get the max distance from tip
-        double maxLength = 0;
+  //     NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
+  //     try{
+  //       // go through the midpoints, get the max distance from tip
+  //       double maxLength = 0;
         
-        for(Object o : results){
-          NucleusBorderPoint p = (NucleusBorderPoint)o;
-          if(p.getLengthTo(tip) > maxLength){
-            maxLength = p.getLengthTo(tip);
-            tail = p;
-          }
-        }
-      } catch(Exception e){
-        IJ.log("    Error in finding lengths: findTailFromDeltas(): "+e);
-      }
-       // IJ.log("    Midpoint decided at "+tail.toString());
-      return tail;
-    }
+  //       for(Object o : results){
+  //         NucleusBorderPoint p = (NucleusBorderPoint)o;
+  //         if(p.getLengthTo(tip) > maxLength){
+  //           maxLength = p.getLengthTo(tip);
+  //           tail = p;
+  //         }
+  //       }
+  //     } catch(Exception e){
+  //       IJ.log("    Error in finding lengths: findTailFromDeltas(): "+e);
+  //     }
+  //      // IJ.log("    Midpoint decided at "+tail.toString());
+  //     return tail;
+  //   }
 
-    /*
-      For the interior angles in the smoothed angle array:
-        Calculate the median angle in the array.
-      Stores in medianAngle
-    */    
-    public void calculateMedianAngle() {
+  //   /*
+  //     For the interior angles in the smoothed angle array:
+  //       Calculate the median angle in the array.
+  //     Stores in medianAngle
+  //   */    
+  //   public void calculateMedianAngle() {
 
-        double[] m = new double[this.smoothLength];
-        for(int i = 0; i<this.smoothLength; i++){
-          m[i] = this.getBorderPointArray()[i].getInteriorAngle();
-        }
-        Arrays.sort(m);
+  //       double[] m = new double[this.smoothLength];
+  //       for(int i = 0; i<this.smoothLength; i++){
+  //         m[i] = this.getBorderPointArray()[i].getInteriorAngle();
+  //       }
+  //       Arrays.sort(m);
 
-        int middle = m.length/2;
-        if (m.length%2 == 1) {
-            this.medianAngle = m[middle];
-        } else {
-            this.medianAngle = (m[middle-1] + m[middle]) / 2.0;
-        }
-    }
+  //       int middle = m.length/2;
+  //       if (m.length%2 == 1) {
+  //           this.medianAngle = m[middle];
+  //       } else {
+  //           this.medianAngle = (m[middle-1] + m[middle]) / 2.0;
+  //       }
+  //   }
 
-    /*
-      Print key data to the image log file
-      Overwrites any existing log
-    */   
-    public void printLogFile(String path){
+  //   /*
+  //     Print key data to the image log file
+  //     Overwrites any existing log
+  //   */   
+  //   public void printLogFile(String path){
 
-      // String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
-      File f = new File(path);
-      if(f.exists()){
-        f.delete();
-      }
+  //     // String path = this.getPathWithoutExtension()+"\\"+this.getNucleusNumber()+".log";
+  //     File f = new File(path);
+  //     if(f.exists()){
+  //       f.delete();
+  //     }
 
-      NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
-      String outLine = "SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE\n";
+  //     NucleusBorderPoint[] points = this.angleProfile.getBorderPointArray();
+  //     String outLine = "SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE\n";
 
-      // IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
+  //     // IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
       
-      for(int i=0;i<this.smoothLength;i++){
+  //     for(int i=0;i<this.smoothLength;i++){
 
-        double normalisedIAngle = getBorderPointArray()[i].getInteriorAngle()-180;
-        // double length = this.smoothLength;
-        double normalisedX = ((double)i/(double)this.smoothLength)*100; // normalise to 100 length
+  //       double normalisedIAngle = getBorderPointArray()[i].getInteriorAngle()-180;
+  //       // double length = this.smoothLength;
+  //       double normalisedX = ((double)i/(double)this.smoothLength)*100; // normalise to 100 length
         
-        outLine = outLine + points[i].getXAsInt()+"\t"+
-                            points[i].getYAsInt()+"\t"+
-                            points[i].getX()+"\t"+
-                            points[i].getY()+"\t"+
-                            points[i].getInteriorAngle()+"\t"+
-                            points[i].getMinAngle()+"\t"+
-                            normalisedIAngle+"\t"+
-                            points[i].getInteriorAngleDelta()+"\t"+
-                            points[i].getInteriorAngleDeltaSmoothed()+"\t"+
-                            points[i].getPositionWithinBlock()+"\t"+
-                            points[i].getBlockNumber()+"\t"+
-                            points[i].isLocalMin()+"\t"+
-                            points[i].isLocalMax()+"\t"+
-                            points[i].isMidpoint()+"\t"+
-                            points[i].isBlock()+"\t"+
-                            normalisedX+"\t"+
-                            distanceProfile[i]+"\n";
-      }
-      IJ.append( outLine, path);
-    }
+  //       outLine = outLine + points[i].getXAsInt()+"\t"+
+  //                           points[i].getYAsInt()+"\t"+
+  //                           points[i].getX()+"\t"+
+  //                           points[i].getY()+"\t"+
+  //                           points[i].getInteriorAngle()+"\t"+
+  //                           points[i].getMinAngle()+"\t"+
+  //                           normalisedIAngle+"\t"+
+  //                           points[i].getInteriorAngleDelta()+"\t"+
+  //                           points[i].getInteriorAngleDeltaSmoothed()+"\t"+
+  //                           points[i].getPositionWithinBlock()+"\t"+
+  //                           points[i].getBlockNumber()+"\t"+
+  //                           points[i].isLocalMin()+"\t"+
+  //                           points[i].isLocalMax()+"\t"+
+  //                           points[i].isMidpoint()+"\t"+
+  //                           points[i].isBlock()+"\t"+
+  //                           normalisedX+"\t"+
+  //                           distanceProfile[i]+"\n";
+  //     }
+  //     IJ.append( outLine, path);
+  //   }
 
-    public double[] getInteriorAngles(){
+  //   public double[] getInteriorAngles(){
 
-      double[] ypoints = new double[this.smoothLength];
+  //     double[] ypoints = new double[this.smoothLength];
 
-      for(int j=0;j<ypoints.length;j++){
-          ypoints[j] = this.getBorderPoint(j).getInteriorAngle();
-      }
-      return ypoints;
-    }
+  //     for(int j=0;j<ypoints.length;j++){
+  //         ypoints[j] = this.getBorderPoint(j).getInteriorAngle();
+  //     }
+  //     return ypoints;
+  //   }
 
-    /*
-      For the given nucleus index:
-      Go through the raw X positions centred on the tail, 
-      and apply the calculated offset.
-    */
-    public double[] createOffsetRawProfile(){
+  //   /*
+  //     For the given nucleus index:
+  //     Go through the raw X positions centred on the tail, 
+  //     and apply the calculated offset.
+  //   */
+  //   public double[] createOffsetRawProfile(){
 
-      // if(!this.differencesCalculated){
-      //   this.calculateOffsets();
-      // }
+  //     // if(!this.differencesCalculated){
+  //     //   this.calculateOffsets();
+  //     // }
 
-      double offset = this.offsetForTail;
+  //     double offset = this.offsetForTail;
 
-      double[] xRawCentredOnTail = this.getRawXPositionsFromTail();
-      double[] offsetX = new double[xRawCentredOnTail.length];
+  //     double[] xRawCentredOnTail = this.getRawXPositionsFromTail();
+  //     double[] offsetX = new double[xRawCentredOnTail.length];
 
-      for(int j=0;j<xRawCentredOnTail.length;j++){
-          offsetX[j] = xRawCentredOnTail[j]+offset;
-      }
-      return offsetX;
-    }
+  //     for(int j=0;j<xRawCentredOnTail.length;j++){
+  //         offsetX[j] = xRawCentredOnTail[j]+offset;
+  //     }
+  //     return offsetX;
+  //   }
 
-    /*
-			In order to split the nuclear roi into hook and hump sides,
-			we need to get an intersection point of the line through the 
-			tail and centre of mass with the opposite border of the nucleus.
-    */
-    private int findIntersectionPointForNuclearSplit(){
-    	// test if each point from the tail intersects the splitting line
-      // determine the coordinates of the point intersected as int
-      // for each xvalue of each point in array, get the line y value
-      // at the point the yvalues are closest and not the tail point is the intersesction
-    	double[] lineEquation = findLineEquation(this.getCentreOfMass(), this.getSpermTail());
-      double minDeltaY = 100;
-      int minDeltaYIndex = 0;
+  //   /*
+		// 	In order to split the nuclear roi into hook and hump sides,
+		// 	we need to get an intersection point of the line through the 
+		// 	tail and centre of mass with the opposite border of the nucleus.
+  //   */
+  //   private int findIntersectionPointForNuclearSplit(){
+  //   	// test if each point from the tail intersects the splitting line
+  //     // determine the coordinates of the point intersected as int
+  //     // for each xvalue of each point in array, get the line y value
+  //     // at the point the yvalues are closest and not the tail point is the intersesction
+  //   	double[] lineEquation = findLineEquation(this.getCentreOfMass(), this.getSpermTail());
+  //     double minDeltaY = 100;
+  //     int minDeltaYIndex = 0;
 
-      for(int i = 0; i<smoothLength;i++){
-      		double x = getBorderPointArray()[i].getX();
-      		double y = getBorderPointArray()[i].getY();
-      		double yOnLine = getYFromEquation(lineEquation, x);
+  //     for(int i = 0; i<smoothLength;i++){
+  //     		double x = getBorderPointArray()[i].getX();
+  //     		double y = getBorderPointArray()[i].getY();
+  //     		double yOnLine = getYFromEquation(lineEquation, x);
 
-      		double distanceToTail = getBorderPointArray()[i].getLengthTo(spermTail);
+  //     		double distanceToTail = getBorderPointArray()[i].getLengthTo(spermTail);
 
-      		double deltaY = Math.abs(y - yOnLine);
-      		if(deltaY < minDeltaY && distanceToTail > this.getFeret()/2){ // exclude points too close to the tail
-      			minDeltaY = deltaY;
-      			minDeltaYIndex = i;
-      		}
-      }
-      return minDeltaYIndex;
-    }
+  //     		double deltaY = Math.abs(y - yOnLine);
+  //     		if(deltaY < minDeltaY && distanceToTail > this.getFeret()/2){ // exclude points too close to the tail
+  //     			minDeltaY = deltaY;
+  //     			minDeltaYIndex = i;
+  //     		}
+  //     }
+  //     return minDeltaYIndex;
+  //   }
 
-    public void splitNucleusToHeadAndHump(){
+  //   public void splitNucleusToHeadAndHump(){
 
-      int intersectionPointIndex = findIntersectionPointForNuclearSplit();
-      NucleusBorderPoint intersectionPoint = getBorderPointArray()[intersectionPointIndex];
-      this.intersectionPoint = intersectionPoint;
+  //     int intersectionPointIndex = findIntersectionPointForNuclearSplit();
+  //     NucleusBorderPoint intersectionPoint = getBorderPointArray()[intersectionPointIndex];
+  //     this.intersectionPoint = intersectionPoint;
 
-      // get an array of points from tip to tail
-      ArrayList<NucleusBorderPoint> roi1 = new ArrayList<NucleusBorderPoint>(0);
-      ArrayList<NucleusBorderPoint> roi2 = new ArrayList<NucleusBorderPoint>(0);
-      boolean changeRoi = false;
+  //     // get an array of points from tip to tail
+  //     ArrayList<NucleusBorderPoint> roi1 = new ArrayList<NucleusBorderPoint>(0);
+  //     ArrayList<NucleusBorderPoint> roi2 = new ArrayList<NucleusBorderPoint>(0);
+  //     boolean changeRoi = false;
 
-      for(int i = 0; i<smoothLength;i++){
+  //     for(int i = 0; i<smoothLength;i++){
 
       	
-      	int currentIndex = wrapIndex(tailIndex+i, smoothLength); // start at the tail, and go around the array
+  //     	int currentIndex = wrapIndex(tailIndex+i, smoothLength); // start at the tail, and go around the array
         
-        NucleusBorderPoint p = getBorderPointArray()[currentIndex];
+  //       NucleusBorderPoint p = getBorderPointArray()[currentIndex];
 
-        if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
-        	roi1.add(p);
-        }
-        if(currentIndex==intersectionPointIndex && !changeRoi){ // until we hit the intersection point. Then, close the polygon of roi1 back to the tip. Switch to roi2
-          roi1.add(p);
-          roi1.add(spermTail);
-          roi2.add(intersectionPoint);
-          changeRoi = true;
-        }
-        if(currentIndex != intersectionPointIndex && currentIndex != tailIndex && changeRoi){   // continue with roi2, adjusting the index numbering as needed
-          roi2.add(p);
-        }
+  //       if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
+  //       	roi1.add(p);
+  //       }
+  //       if(currentIndex==intersectionPointIndex && !changeRoi){ // until we hit the intersection point. Then, close the polygon of roi1 back to the tip. Switch to roi2
+  //         roi1.add(p);
+  //         roi1.add(spermTail);
+  //         roi2.add(intersectionPoint);
+  //         changeRoi = true;
+  //       }
+  //       if(currentIndex != intersectionPointIndex && currentIndex != tailIndex && changeRoi){   // continue with roi2, adjusting the index numbering as needed
+  //         roi2.add(p);
+  //       }
 
-        if(currentIndex==tailIndex && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
-        	roi2.add(intersectionPoint);
-        }
+  //       if(currentIndex==tailIndex && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
+  //       	roi2.add(intersectionPoint);
+  //       }
 
-      }
+  //     }
 
-      float[] roi1X = new float[ roi1.size()];
-      float[] roi2X = new float[ roi2.size()];
-      float[] roi1Y = new float[ roi1.size()];
-      float[] roi2Y = new float[ roi2.size()];
+  //     float[] roi1X = new float[ roi1.size()];
+  //     float[] roi2X = new float[ roi2.size()];
+  //     float[] roi1Y = new float[ roi1.size()];
+  //     float[] roi2Y = new float[ roi2.size()];
 
-      for(int i=0;i<roi1.size();i++){
-      	roi1X[i] = (float) roi1.get(i).getX();
-      	roi1Y[i] = (float) roi1.get(i).getY();
-      }
+  //     for(int i=0;i<roi1.size();i++){
+  //     	roi1X[i] = (float) roi1.get(i).getX();
+  //     	roi1Y[i] = (float) roi1.get(i).getY();
+  //     }
 
-      for(int i=0;i<roi2.size();i++){
-      	roi2X[i] = (float) roi2.get(i).getX();
-      	roi2Y[i] = (float) roi2.get(i).getY();
-      }
+  //     for(int i=0;i<roi2.size();i++){
+  //     	roi2X[i] = (float) roi2.get(i).getX();
+  //     	roi2Y[i] = (float) roi2.get(i).getY();
+  //     }
 
-      for(int i=0;i<roi1.size();i++){
-        if(roi1.get(i).overlaps(spermTip)){
-          this.hookRoi = new FloatPolygon( roi1X, roi1Y);
-          this.humpRoi = new FloatPolygon( roi2X, roi2Y);
-          // IJ.log("Roi2 is hump");
-          break;
-        }
-      }
+  //     for(int i=0;i<roi1.size();i++){
+  //       if(roi1.get(i).overlaps(spermTip)){
+  //         this.hookRoi = new FloatPolygon( roi1X, roi1Y);
+  //         this.humpRoi = new FloatPolygon( roi2X, roi2Y);
+  //         // IJ.log("Roi2 is hump");
+  //         break;
+  //       }
+  //     }
 
-      for(int i=0;i<roi2.size();i++){
-        if(roi2.get(i).overlaps(spermTip)){
-          this.hookRoi = new FloatPolygon( roi2X, roi2Y);
-          this.humpRoi = new FloatPolygon( roi1X, roi1Y);
-           // IJ.log("Roi1 is hump");
-           break;
-        }
-      }
-    }
+  //     for(int i=0;i<roi2.size();i++){
+  //       if(roi2.get(i).overlaps(spermTip)){
+  //         this.hookRoi = new FloatPolygon( roi2X, roi2Y);
+  //         this.humpRoi = new FloatPolygon( roi1X, roi1Y);
+  //          // IJ.log("Roi1 is hump");
+  //          break;
+  //       }
+  //     }
+  //   }
 
-    public void calculateSignalAnglesFromTail(){
+  //   public void calculateSignalAnglesFromTail(){
 
-      if(redSignals.size()>0){
+  //     if(redSignals.size()>0){
 
-        for(int i=0;i<redSignals.size();i++){
-          NuclearSignal n = redSignals.get(i);
-          double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
+  //       for(int i=0;i<redSignals.size();i++){
+  //         NuclearSignal n = redSignals.get(i);
+  //         double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
 
-          // hook or hump?
-          if( this.isHookSide(n.getCentreOfMass()) ){ // hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  
-            angle = 360 - angle;
-          }
+  //         // hook or hump?
+  //         if( this.isHookSide(n.getCentreOfMass()) ){ // hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  
+  //           angle = 360 - angle;
+  //         }
 
-          // set the final angle
-          n.setAngle(angle);
-        }
-      }
+  //         // set the final angle
+  //         n.setAngle(angle);
+  //       }
+  //     }
 
-    	if(greenSignals.size()>0){
+  //   	if(greenSignals.size()>0){
 
-        for(int i=0;i<greenSignals.size();i++){
-          NuclearSignal n = greenSignals.get(i);
-          double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
+  //       for(int i=0;i<greenSignals.size();i++){
+  //         NuclearSignal n = greenSignals.get(i);
+  //         double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
 
-          // hook or hump?
-          if( this.isHookSide(n.getCentreOfMass()) ){
-            angle = 360 - angle;
-          }
+  //         // hook or hump?
+  //         if( this.isHookSide(n.getCentreOfMass()) ){
+  //           angle = 360 - angle;
+  //         }
 
-          // set the final angle
-          n.setAngle(angle);
-        }
-      }
-    }
+  //         // set the final angle
+  //         n.setAngle(angle);
+  //       }
+  //     }
+  //   }
 
-    public void calculateSignalDistances(){
+  //   public void calculateSignalDistances(){
 
-      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
-      signals.add(redSignals);
-      signals.add(greenSignals);
+  //     ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+  //     signals.add(redSignals);
+  //     signals.add(greenSignals);
 
-      for( ArrayList<NuclearSignal> signalGroup : signals ){
+  //     for( ArrayList<NuclearSignal> signalGroup : signals ){
 
-      	if(signalGroup.size()>0){
-          for(int i=0;i<signalGroup.size();i++){
-          	NuclearSignal n = signalGroup.get(i);
+  //     	if(signalGroup.size()>0){
+  //         for(int i=0;i<signalGroup.size();i++){
+  //         	NuclearSignal n = signalGroup.get(i);
 
-          	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-          	n.setDistance(distance);
-          }
-        }
-      }
-    }
+  //         	double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+  //         	n.setDistance(distance);
+  //         }
+  //       }
+  //     }
+  //   }
 
 
-    public double[] findLineEquation(XYPoint a, XYPoint b){
+  //   public double[] findLineEquation(XYPoint a, XYPoint b){
 
-      // y=mx+c
-      double deltaX = a.getX() - b.getX();
-      double deltaY = a.getY() - b.getY();
+  //     // y=mx+c
+  //     double deltaX = a.getX() - b.getX();
+  //     double deltaY = a.getY() - b.getY();
         
-      double m = deltaY / deltaX;
+  //     double m = deltaY / deltaX;
         
-      // y - y1 = m(x - x1)
-      double c = a.getY() -  ( m * a.getX() );
+  //     // y - y1 = m(x - x1)
+  //     double c = a.getY() -  ( m * a.getX() );
         
-      // double testY = (m * position_2[0]) + c;
+  //     // double testY = (m * position_2[0]) + c;
         
-      // write("y = "+m+"x + "+c);
-      // result=newArray(m, c);
-      return new double[] { m, c };
-    }
+  //     // write("y = "+m+"x + "+c);
+  //     // result=newArray(m, c);
+  //     return new double[] { m, c };
+  //   }
 
-    public double getXFromEquation(double[] eq, double y){
-      // x = (y-c)/m
-      double x = (y - eq[1]) / eq[0];
-      return x;
-    }
+  //   public double getXFromEquation(double[] eq, double y){
+  //     // x = (y-c)/m
+  //     double x = (y - eq[1]) / eq[0];
+  //     return x;
+  //   }
 
-    public double getYFromEquation(double[] eq, double x){
-      // x = (y-c)/m
-      double y = (eq[0] * x) + eq[1];
-      return y;
-    }
+  //   public double getYFromEquation(double[] eq, double x){
+  //     // x = (y-c)/m
+  //     double y = (eq[0] * x) + eq[1];
+  //     return y;
+  //   }
 
-    /*
-      Calculate the distance from the nuclear centre of
-      mass as a fraction of the distance from the nuclear CoM, through the 
-      signal CoM, to the nuclear border
-    */
-    public void calculateFractionalSignalDistances(){
+  //   /*
+  //     Calculate the distance from the nuclear centre of
+  //     mass as a fraction of the distance from the nuclear CoM, through the 
+  //     signal CoM, to the nuclear border
+  //   */
+  //   public void calculateFractionalSignalDistances(){
 
-      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
-      signals.add(redSignals);
-      signals.add(greenSignals);
+  //     ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+  //     signals.add(redSignals);
+  //     signals.add(greenSignals);
 
-      for( ArrayList<NuclearSignal> signalGroup : signals ){
+  //     for( ArrayList<NuclearSignal> signalGroup : signals ){
       
-        if(signalGroup.size()>0){
-          for(int i=0;i<signalGroup.size();i++){
-            NuclearSignal n = signalGroup.get(i);
+  //       if(signalGroup.size()>0){
+  //         for(int i=0;i<signalGroup.size();i++){
+  //           NuclearSignal n = signalGroup.get(i);
 
-            // double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+  //           // double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
 
-            // get the line equation
-            double eq[] = findLineEquation(n.getCentreOfMass(), this.getCentreOfMass());
+  //           // get the line equation
+  //           double eq[] = findLineEquation(n.getCentreOfMass(), this.getCentreOfMass());
 
-            // using the equation, get the y postion on the line for each X point around the roi
-            double minDeltaY = 100;
-            int minDeltaYIndex = 0;
-            double minDistanceToSignal = 1000;
+  //           // using the equation, get the y postion on the line for each X point around the roi
+  //           double minDeltaY = 100;
+  //           int minDeltaYIndex = 0;
+  //           double minDistanceToSignal = 1000;
 
-            for(int j = 0; j<smoothLength;j++){
-                double x = getBorderPointArray()[j].getX();
-                double y = getBorderPointArray()[j].getY();
-                double yOnLine = getYFromEquation(eq, x);
-                double distanceToSignal = getBorderPointArray()[j].getLengthTo(n.getCentreOfMass()); // fetch
+  //           for(int j = 0; j<smoothLength;j++){
+  //               double x = getBorderPointArray()[j].getX();
+  //               double y = getBorderPointArray()[j].getY();
+  //               double yOnLine = getYFromEquation(eq, x);
+  //               double distanceToSignal = getBorderPointArray()[j].getLengthTo(n.getCentreOfMass()); // fetch
 
 
-                double deltaY = Math.abs(y - yOnLine);
-                // find the point closest to the line; this could find either intersection
-                // hence check it is as close as possible to the signal CoM also
-                if(deltaY < minDeltaY && distanceToSignal < minDistanceToSignal){
-                  minDeltaY = deltaY;
-                  minDeltaYIndex = j;
-                  minDistanceToSignal = distanceToSignal;
-                }
-            }
-            NucleusBorderPoint borderPoint = getBorderPointArray()[minDeltaYIndex];
-            double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
-            double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-            double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
-            n.setFractionalDistance(fractionalDistance);
-          }
-        }
-      }
-    }
+  //               double deltaY = Math.abs(y - yOnLine);
+  //               // find the point closest to the line; this could find either intersection
+  //               // hence check it is as close as possible to the signal CoM also
+  //               if(deltaY < minDeltaY && distanceToSignal < minDistanceToSignal){
+  //                 minDeltaY = deltaY;
+  //                 minDeltaYIndex = j;
+  //                 minDistanceToSignal = distanceToSignal;
+  //               }
+  //           }
+  //           NucleusBorderPoint borderPoint = getBorderPointArray()[minDeltaYIndex];
+  //           double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
+  //           double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
+  //           double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
+  //           n.setFractionalDistance(fractionalDistance);
+  //         }
+  //       }
+  //     }
+  //   }
 
-    /*
-      Go through the signals in the nucleus, and find the point on
-      the nuclear ROI that is closest to the signal centre of mass.
-    */
-    public void calculateClosestBorderToSignal(){
+  //   /*
+  //     Go through the signals in the nucleus, and find the point on
+  //     the nuclear ROI that is closest to the signal centre of mass.
+  //   */
+  //   public void calculateClosestBorderToSignal(){
 
-      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
-      signals.add(redSignals);
-      signals.add(greenSignals);
+  //     ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+  //     signals.add(redSignals);
+  //     signals.add(greenSignals);
 
-      for( ArrayList<NuclearSignal> signalGroup : signals ){
+  //     for( ArrayList<NuclearSignal> signalGroup : signals ){
       
-        if(signalGroup.size()>0){
-          for(int i=0;i<signalGroup.size();i++){
-            NuclearSignal n = signalGroup.get(i);
+  //       if(signalGroup.size()>0){
+  //         for(int i=0;i<signalGroup.size();i++){
+  //           NuclearSignal n = signalGroup.get(i);
 
-            int minIndex = 0;
-            double minDistanceToSignal = 1000;
+  //           int minIndex = 0;
+  //           double minDistanceToSignal = 1000;
 
-            for(int j = 0; j<smoothLength;j++){
-                NucleusBorderPoint p = getBorderPointArray()[j];
-                double distanceToSignal = p.getLengthTo(n.getCentreOfMass());
+  //           for(int j = 0; j<smoothLength;j++){
+  //               NucleusBorderPoint p = getBorderPointArray()[j];
+  //               double distanceToSignal = p.getLengthTo(n.getCentreOfMass());
 
-                // find the point closest to the CoM
-                if(distanceToSignal < minDistanceToSignal){
-                  minIndex = j;
-                  minDistanceToSignal = distanceToSignal;
-                }
-            }
-            // NucleusBorderPoint borderPoint = getBorderPointArray()[minIndex];
-            n.setClosestBorderPoint(getBorderPointArray()[minIndex]);
-          }
-        }
-      }
-    }
+  //               // find the point closest to the CoM
+  //               if(distanceToSignal < minDistanceToSignal){
+  //                 minIndex = j;
+  //                 minDistanceToSignal = distanceToSignal;
+  //               }
+  //           }
+  //           // NucleusBorderPoint borderPoint = getBorderPointArray()[minIndex];
+  //           n.setClosestBorderPoint(getBorderPointArray()[minIndex]);
+  //         }
+  //       }
+  //     }
+  //   }
 
-    public void calculateDistanceProfile(){
+  //   public void calculateDistanceProfile(){
 
-    	IJ.log("Calculating distance profile...");
-      double[] profile = new double[smoothLength];
+  //   	IJ.log("Calculating distance profile...");
+  //     double[] profile = new double[smoothLength];
 
-      for(int i = 0; i<smoothLength;i++){
+  //     for(int i = 0; i<smoothLength;i++){
 
-      		NucleusBorderPoint p = this.getBorderPoint(i);
-      		NucleusBorderPoint opp = findOppositeBorder(p);
+  //     		NucleusBorderPoint p = this.getBorderPoint(i);
+  //     		NucleusBorderPoint opp = findOppositeBorder(p);
 
-          profile[i] = p.getLengthTo(opp);
-      }
-      this.setDistanceProfile(profile);
-    }
-  }
+  //         profile[i] = p.getLengthTo(opp);
+  //     }
+  //     this.setDistanceProfile(profile);
+  //   }
+  // }
 
   /* 
     -----------------------

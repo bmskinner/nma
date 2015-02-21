@@ -52,6 +52,7 @@ import java.util.*;
 public class NucleusCollection {
 
 	private File folder; // the source of the nuclei
+  private File debugFile;
   private String collectionType; // for annotating image names
 
 	private ArrayList<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
@@ -61,15 +62,45 @@ public class NucleusCollection {
 
 	public NucleusCollection(File folder, String type){
 		this.folder = folder;
+    this.debugFile = new File(folder.getAbsolutePath()+File.separator+"logDebug.txt");
     this.collectionType = type;
 	}
+
+  /*
+    -----------------------
+    Define adders for all
+    types of nucleus eligable
+    -----------------------
+  */
 
 	public void addNucleus(Nucleus r){
 		this.nucleiCollection.add(r);
 	}
 
+  public void addNucleus(SpermNucleus r){
+    this.nucleiCollection.add(r);
+  }
+
+  public void addNucleus(RodentSpermNucleus r){
+    this.nucleiCollection.add(r);
+  }
+
+  public void addNucleus(PigSpermNucleus r){
+    this.nucleiCollection.add(r);
+  }
+
+  /*
+    -----------------------
+    Getters for aggregate stats
+    -----------------------
+  */
+
   public File getFolder(){
     return this.folder;
+  }
+
+  public File getDebugFile(){
+    return this.debugFile;
   }
 
   public String getType(){
