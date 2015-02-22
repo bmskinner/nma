@@ -55,6 +55,8 @@ public class Nucleus {
   public static final int RED_CHANNEL   = 0;
   public static final int GREEN_CHANNEL = 1;
   public static final int BLUE_CHANNEL  = 2;
+  public static final int NOT_RED_CHANNEL  = 3;
+  public static final int NOT_GREEN_CHANNEL  = 4;
 
   // Values for deciding whether an object is a signal
   public static final int    SIGNAL_THRESHOLD = 70;
@@ -295,6 +297,21 @@ public class Nucleus {
     return this.failureCode;
   }
 
+  public boolean hasRedSignal(){
+    if(this.getRedSignalCount()>0){
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public boolean hasGreenSignal(){
+    if(this.getGreenSignalCount()>0){
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   /*
     -----------------------

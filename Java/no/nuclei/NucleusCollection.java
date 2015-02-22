@@ -233,6 +233,43 @@ public class NucleusCollection {
     return median;
   }
 
+  public ArrayList<Nucleus> getNucleiWithSignals(int channel){
+    ArrayList<Nucleus> result = new ArrayList<Nucleus>(0);
+
+    for(Nucleus n : this.nucleiCollection){
+
+      switch (channel) {
+        case Nucleus.RED_CHANNEL:
+          if(n.hasRedSignal()){
+            result.add(n);
+          }
+          break;
+        case Nucleus.GREEN_CHANNEL:
+          if(n.hasGreenSignal()){
+            result.add(n);
+          }
+          break;
+        case Nucleus.NOT_RED_CHANNEL:  
+          if(!n.hasRedSignal()){
+              result.add(n);
+          }
+          break;
+        case Nucleus.NOT_GREEN_CHANNEL:  
+          if(!n.hasGreenSignal()){
+              result.add(n);
+          }
+          break;
+      }
+    }
+    return result;
+  }
+
+  /*
+    -----------------
+    General functions
+    -----------------
+  */
+
   /*
     Turn a Double[] into a double[]
   */

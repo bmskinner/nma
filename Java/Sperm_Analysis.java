@@ -206,7 +206,6 @@ public class Sperm_Analysis
 
       for(int i=0;i<collection.getNucleusCount();i++){
         Nucleus n = collection.getNucleus(i);
-        // SpermNucleus s = new SpermNucleus(n);
         RodentSpermNucleus p = new RodentSpermNucleus(n);
         spermNuclei.addNucleus(p);
       }
@@ -238,33 +237,40 @@ public class Sperm_Analysis
 
       r.recalculateTailPositions();
       r.refilterNuclei(failedNuclei);
-
       r.measureNuclearOrganisation();
+      r.measureAndExportNuclei();
 
-      r.exportNuclearStats("logStats");
-      
-      r.annotateImagesOfNuclei();
-      r.exportAnnotatedNuclei();
+      failedNuclei.measureAndExportNuclei();
 
-      r.exportCompositeImage("composite");
+      attemptRefoldingConsensusNucleus(r);
 
-      failedNuclei.exportNuclearStats("logStats");
-      failedNuclei.annotateImagesOfNuclei();
-      failedNuclei.exportAnnotatedNuclei();
-      failedNuclei.exportCompositeImage("composite");
+      // split complete set by signals and analyse
+      RodentSpermNucleusCollection redNuclei = new RodentSpermNucleusCollection(folder, "red");
+      ArrayList<Nucleus> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
+      for(Nucleus n : redList){
+        redNuclei.addNucleus( (RodentSpermNucleus)n );
+      }
+      redNuclei.measureAndExportNuclei();
+      // attemptRefoldingConsensusNucleus(redNuclei);
 
-      RodentSpermNucleus refoldCandidate = (RodentSpermNucleus)r.getNucleusMostSimilarToMedian();
-      double[] targetProfile = r.getMedianTargetCurve(refoldCandidate);
 
-      CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
-      refolder.refoldCurve();
-
-      // orient refolded nucleus to put tail at the bottom
-      refolder.putPointAtBottom(refoldCandidate.getSpermTail());
-
-      // draw signals on the refolded nucleus
-      refolder.addSignalsToConsensus(r);
-      refolder.exportImage(r);
     }
+  }
+
+  public void attemptRefoldingConsensusNucleus(RodentSpermNucleusCollection collection){
+
+    RodentSpermNucleus refoldCandidate = (RodentSpermNucleus)collection.getNucleusMostSimilarToMedian();
+    double[] targetProfile = collection.getMedianTargetCurve(refoldCandidate);
+
+    CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
+    refolder.refoldCurve();
+
+    // orient refolded nucleus to put tail at the bottom
+    refolder.putPointAtBottom(refoldCandidate.getSpermTail());
+
+    // draw signals on the refolded nucleus
+    refolder.addSignalsToConsensus(collection);
+    refolder.exportImage(collection);
+
   }
 }

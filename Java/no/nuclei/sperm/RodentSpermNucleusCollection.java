@@ -350,6 +350,13 @@ public class RodentSpermNucleusCollection
     this.drawNormalisedMedianLineFromTail();
   }
 
+  public void measureAndExportNuclei(){
+    this.exportNuclearStats("logStats");
+    this.annotateImagesOfNuclei();
+    this.exportAnnotatedNuclei();
+    this.exportCompositeImage("composite");
+  }
+
   /*
     We need to calculate the median angle profile. This requires binning the normalised profiles
     into bins of size PROFILE_INCREMENT to generate a table such as this:
