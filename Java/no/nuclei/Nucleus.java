@@ -49,18 +49,19 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 
+
 public class Nucleus {
 
-  private static final int RED_CHANNEL   = 0;
-  private static final int GREEN_CHANNEL = 1;
-  private static final int BLUE_CHANNEL  = 2;
+  public static final int RED_CHANNEL   = 0;
+  public static final int GREEN_CHANNEL = 1;
+  public static final int BLUE_CHANNEL  = 2;
 
   // Values for deciding whether an object is a signal
-  private static final int    SIGNAL_THRESHOLD = 70;
-  private static final double MIN_SIGNAL_SIZE  = 5; // how small can a signal be
-  private static final double MAX_SIGNAL_SIZE  = 50; // how large can a signal be
+  public static final int    SIGNAL_THRESHOLD = 70;
+  public static final double MIN_SIGNAL_SIZE  = 5; // how small can a signal be
+  public static final double MAX_SIGNAL_FRACTION = 0.5; // allow up to 50% of nucleus to be signal
 
-  private static final String IMAGE_PREFIX = "export.";
+  public static final String IMAGE_PREFIX = "export.";
 
   private int nucleusNumber; // the number of the nucleus in the current image
   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
@@ -113,11 +114,7 @@ public class Nucleus {
     }
 
     try{
-      String outPath = this.nucleusFolder.getAbsolutePath()+
-                      File.separator+
-                      this.IMAGE_PREFIX+
-                      this.getNucleusNumber()+
-                      ".original.tiff";
+      String outPath = this.getOriginalImagePath();
       IJ.saveAsTiff(this.sourceImage, outPath);
      } catch(Exception e){
         IJ.log("Error saving original image: "+e);
@@ -185,6 +182,24 @@ public class Nucleus {
 
   public String getImageName(){
     return this.sourceFile.getName();
+  }
+
+  public String getAnnotatedImagePath(){
+    String outPath = this.nucleusFolder.getAbsolutePath()+
+                      File.separator+
+                      this.IMAGE_PREFIX+
+                      this.getNucleusNumber()+
+                      ".annotated.tiff";
+    return outPath;
+  }
+
+  public String getOriginalImagePath(){
+    String outPath = this.nucleusFolder.getAbsolutePath()+
+                      File.separator+
+                      this.IMAGE_PREFIX+
+                      this.getNucleusNumber()+
+                      ".original.tiff";
+    return outPath;
   }
 
   public String getImageNameWithoutExtension(){
@@ -276,6 +291,10 @@ public class Nucleus {
     return this.angleProfile.getBorderPoint(i);
   }
 
+  public int getFailureCode(){
+    return this.failureCode;
+  }
+
 
   /*
     -----------------------
@@ -303,7 +322,7 @@ public class Nucleus {
     this.angleProfile = p;
   }
 
-  protected void setCentreOfMass(XYPoint d){
+  public void setCentreOfMass(XYPoint d){
     this.centreOfMass = d;
   }
 
@@ -315,7 +334,7 @@ public class Nucleus {
     this.greenSignals = d;
   }
 
-  protected void setPolygon(FloatPolygon p){
+  public void setPolygon(FloatPolygon p){
     this.smoothedPolygon = p;
   }
 
@@ -349,6 +368,10 @@ public class Nucleus {
 
   protected void setNucleusFolder(File d){
     this.nucleusFolder = d;
+  }
+
+  public void updateFailureCode(int i){
+    this.failureCode = this.failureCode | i;
   }
 
   /*
@@ -440,16 +463,17 @@ public class Nucleus {
 
     // run the particle analyser
     ResultsTable rt = new ResultsTable();
+    double maxSignalSize = this.getArea() * MAX_SIGNAL_FRACTION;
     ParticleAnalyzer pa = new ParticleAnalyzer( ParticleAnalyzer.ADD_TO_MANAGER, 
                                                 ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA,
                                                  rt, 
                                                  MIN_SIGNAL_SIZE, 
-                                                 MAX_SIGNAL_SIZE);
+                                                 maxSignalSize);
     try {
       pa.setRoiManager(manager);
       boolean success = pa.analyze(imp);
       if(success){
-        String signalPlural = manager.getCount() == 1 ? "signal" : "signals"; // I am pedantic
+        // String signalPlural = manager.getCount() == 1 ? "signal" : "signals"; // I am pedantic
         // IJ.log("    Found "+manager.getCount()+ " "+signalPlural+" in "+colour+" channel");
 
       } else {
@@ -758,7 +782,7 @@ public class Nucleus {
        \ /
         b
   */
-  public double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
+  public static double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
 
     float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
     float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
@@ -951,11 +975,7 @@ public class Nucleus {
     any annotations to export.nn.annotated.tiff
   */
   public void exportAnnotatedImage(){
-    String outPath = this.nucleusFolder.getAbsolutePath()+
-                      File.separator+
-                      this.IMAGE_PREFIX+
-                      this.getNucleusNumber()+
-                      ".annotated.tiff";
+    String outPath = this.getAnnotatedImagePath();
     IJ.saveAsTiff(annotatedImage, outPath);
   }
 
@@ -1018,7 +1038,7 @@ public class Nucleus {
     -----------------------
   */
 
-  protected double[] findLineEquation(XYPoint a, XYPoint b){
+  public static double[] findLineEquation(XYPoint a, XYPoint b){
 
     // y=mx+c
     double deltaX = a.getX() - b.getX();
@@ -1036,19 +1056,19 @@ public class Nucleus {
     return new double[] { m, c };
   }
 
-  protected double getXFromEquation(double[] eq, double y){
+  public static double getXFromEquation(double[] eq, double y){
     // x = (y-c)/m
     double x = (y - eq[1]) / eq[0];
     return x;
   }
 
-  protected double getYFromEquation(double[] eq, double x){
+  public static double getYFromEquation(double[] eq, double x){
     // x = (y-c)/m
     double y = (eq[0] * x) + eq[1];
     return y;
   }
 
-  protected int wrapIndex(int i, int length){
+  public static int wrapIndex(int i, int length){
     if(i<0)
       i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
     if(Math.floor(i / length)>0)
@@ -1061,14 +1081,14 @@ public class Nucleus {
     return i;
   }
 
-  protected double getXComponentOfAngle(double length, double angle){
+  public static double getXComponentOfAngle(double length, double angle){
     // cos(angle) = x / h
     // x = cos(a)*h
     double x = length * Math.cos(Math.toRadians(angle));
     return x;
   }
 
-  protected double getYComponentOfAngle(double length, double angle){
+  public static double getYComponentOfAngle(double length, double angle){
     double y = length * Math.sin(Math.toRadians(angle));
     return y;
   }

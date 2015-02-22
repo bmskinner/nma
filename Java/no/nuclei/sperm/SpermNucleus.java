@@ -87,7 +87,7 @@ public class SpermNucleus
   	return this.headPoint;
   }
 
-  public NucleusBorderPoint getTailPoint(){
+  public NucleusBorderPoint getSpermTail(){
   	return this.tailPoint;
   }
 
@@ -95,7 +95,7 @@ public class SpermNucleus
   	this.headPoint = p;
   }
 
-  protected void setTailPoint(NucleusBorderPoint p){
+  protected void setSpermTail(NucleusBorderPoint p){
   	this.tailPoint = p;
   }
 

@@ -48,6 +48,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
+import no.nuclei.*;
+import no.nuclei.sperm.*;
+
 
 public class NucleusCollection {
 
@@ -55,10 +58,15 @@ public class NucleusCollection {
   private File debugFile;
   private String collectionType; // for annotating image names
 
-	private ArrayList<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
+  public static final int FAILURE_THRESHOLD = 4;
+  public static final int FAILURE_FERET     = 8;
+  public static final int FAILURE_ARRAY     = 16;
+  public static final int FAILURE_AREA      = 32;
+  public static final int FAILURE_PERIM     = 64;
+  public static final int FAILURE_OTHER     = 128;
+  public static final int FAILURE_SIGNALS   = 256;
 
-  // private double maxDifferenceFromMedian = 1.5; // used to filter the nuclei, and remove those too small, large or irregular to be real
-  // private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
+	private ArrayList<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
 
 	public NucleusCollection(File folder, String type){
 		this.folder = folder;
@@ -333,10 +341,17 @@ public class NucleusCollection {
     }
   }
 
+  public void exportAnnotatedNuclei(){
+    for(int i=0; i<this.getNucleusCount();i++){
+      Nucleus n = this.getNucleus(i);
+      n.exportAnnotatedImage();
+    }
+  }
+
   /*
     Calculate the <lowerPercent> quartile from a Double[] array
   */
-  public static double quartile(double[] values, double lowerPercent) {
+  protected static double quartile(double[] values, double lowerPercent) {
 
       if (values == null || values.length == 0) {
           throw new IllegalArgumentException("The data array either is null or does not contain any data.");
@@ -352,7 +367,23 @@ public class NucleusCollection {
       return (double)v[n];
   }
 
-  private int wrapIndex(int i, int length){
+  protected static double quartile(Double[] values, double lowerPercent) {
+
+    if (values == null || values.length == 0) {
+        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+    }
+
+    // Rank order the values
+    Double[] v = new Double[values.length];
+    System.arraycopy(values, 0, v, 0, values.length);
+    Arrays.sort(v);
+
+    int n = (int) Math.round(v.length * lowerPercent / 100);
+    
+    return (double)v[n];
+  }
+
+  protected static int wrapIndex(int i, int length){
     if(i<0)
       i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
     if(Math.floor(i / length)>0)
@@ -365,7 +396,7 @@ public class NucleusCollection {
     return i;
   }
 
-  private double getMin(double[] d){
+  protected double getMin(double[] d){
     double min = getMax(d);
     for(int i=0;i<d.length;i++){
       if( d[i]<min)
@@ -374,7 +405,7 @@ public class NucleusCollection {
     return min;
   }
 
-  private double getMax(double[] d){
+  protected double getMax(double[] d){
     double max = 0;
     for(int i=0;i<d.length;i++){
       if( d[i]>max)

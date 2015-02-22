@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
+import no.nuclei.*;
+import no.nuclei.sperm.*;
 
 public class RodentSpermNucleusCollection 
 	extends no.nuclei.NucleusCollection
@@ -62,10 +64,14 @@ public class RodentSpermNucleusCollection
   private static final int CHART_SIGNAL_Y_LINE_MIN = 275;
   private static final int CHART_SIGNAL_Y_LINE_MAX = 315;
 
+  // failure  codes
+  public static final int FAILURE_TIP       = 1;
+  public static final int FAILURE_TAIL      = 2;
+
   private static final double PROFILE_INCREMENT = 0.5;
 
-	private String logMedianFromTipFile  = "logMediansFromTip.txt"; // output medians
-  private String logMedianFromTailFile = "logMediansFromTail.txt"; // output medians
+	private String logMedianFromTipFile  = "logMediansFromTip"; // output medians
+  private String logMedianFromTailFile = "logMediansFromTail"; // output medians
 
 	// private ArrayList<RodentSpermNucleus> nucleiCollection = new ArrayList<RodentSpermNucleus>(0); // store all the nuclei analysed
 
@@ -95,8 +101,6 @@ public class RodentSpermNucleusCollection
 
   public RodentSpermNucleusCollection(File folder, String type){
   		super(folder, type);
-      this.medianFile               = folder.getAbsolutePath()+"logTipMedians." +collectionType+".txt";
-      this.tailNormalisedMedianFile = folder.getAbsolutePath()+"logTailMedians."+collectionType+".txt";
   }
 
   /*
@@ -105,6 +109,19 @@ public class RodentSpermNucleusCollection
     profiles
     -----------------------
   */
+
+  public ArrayList<RodentSpermNucleus> getNucleiAsSperm(){
+  	ArrayList<RodentSpermNucleus> result = new ArrayList<RodentSpermNucleus>(0);
+  	ArrayList<Nucleus> simple = this.getNuclei();
+  	for( Nucleus n : simple){
+  		result.add( (RodentSpermNucleus)n);
+  	}
+    return result;
+  }
+
+  public RodentSpermNucleus getNucleus(int i){
+    return (RodentSpermNucleus)this.getNuclei().get(i);
+  }
 
   public int[] getTailIndexes(){
     int[] d = new int[this.getNucleusCount()];
@@ -119,7 +136,7 @@ public class RodentSpermNucleusCollection
     double[] d = new double[this.getNucleusCount()];
 
     for(int i=0;i<this.getNucleusCount();i++){
-      d[i] = ( (double) this.getNucleus(i).getTailIndex() / (double) this.getNucleus(i).smoothLength ) * 100;
+      d[i] = ( (double) this.getNucleus(i).getTailIndex() / (double) this.getNucleus(i).getLength() ) * 100;
     }
     return d;
   }
@@ -134,13 +151,13 @@ public class RodentSpermNucleusCollection
     double[] d = new double[this.getNucleusCount()];
 
     for(int i=0;i<this.getNucleusCount();i++){
-      d[i] = this.getNucleus(i).differenceToMedianCurve;
+      d[i] = this.getNucleus(i).getDifferenceToMedianCurve();
     }
     return d;
   }
 
   public RodentSpermNucleus getNucleusMostSimilarToMedian(){
-  	RodentSpermNucleus n = nucleiCollection.get(0); // default to the first nucleus
+  	RodentSpermNucleus n = (RodentSpermNucleus) this.getNuclei().get(0); // default to the first nucleus
   	double difference = 7000;
   	for(int i=0;i<this.getNucleusCount();i++){
       if(this.getNucleus(i).getDifferenceToMedianCurve()<difference){
@@ -196,7 +213,7 @@ public class RodentSpermNucleusCollection
 		Store the angle profile as a double[] to feed into the curve refolder
   */
 	public double[] getMedianTargetCurve(Nucleus n){
-		double[] targetMedianCurve = interpolateMedianToLength(n.smoothLength);
+		double[] targetMedianCurve = interpolateMedianToLength(n.getLength());
 		return targetMedianCurve;
 	}	
 
@@ -206,12 +223,12 @@ public class RodentSpermNucleusCollection
     -----------------------
   */
 
-  public void setNormalisedMedianLine(double[] d){
-		this.normalisedMedian = d;
+  public void setNormalisedMedianLineFromTip(double[] d){
+		this.normalisedMedianLineFromTip = d;
 	}
 
-  public void setTailCentredNormalisedMedianLine(double[] d){
-    this.normalisedTailCentredMedian = d;
+  public void setNormalisedMedianLineFromTail(double[] d){
+    this.normalisedMedianLineFromTail = d;
   }
 
   /*
@@ -226,26 +243,23 @@ public class RodentSpermNucleusCollection
     conjoined nuclei and blobs too small to be nuclei
     Use path length to remove poorly thresholded nuclei
   */
-  public void refilterNuclei(){
+  public void refilterNuclei(RodentSpermNucleusCollection failedCollection){
 
+  	IJ.log("  Filtering nuclei...");
     double medianArea = this.getMedianNuclearArea();
     double medianPerimeter = this.getMedianNuclearPerimeter();
     double medianPathLength = this.getMedianPathLength();
     double medianArrayLength = this.getMedianArrayLength();
     double medianFeretLength = this.getMedianFeretLength();
-    double medianDifferenceToMedianCurve = quartile(this.getDifferencesToMedian(),50);
-    
+
     int beforeSize = this.getNucleusCount();
 
-    double maxPathLength = medianPathLength * maxWibblinessFromMedian;
-    double minArea = medianArea / maxDifferenceFromMedian;
-    double maxArea = medianArea * maxDifferenceFromMedian;
-    double maxPerim = medianPerimeter *maxDifferenceFromMedian;
-    double minPerim = medianPerimeter / maxDifferenceFromMedian;
-    double minFeret = medianFeretLength / maxDifferenceFromMedian;
-
-    double maxCurveDifference = medianDifferenceToMedianCurve * 2;
-
+    double maxPathLength = medianPathLength * this.maxWibblinessFromMedian;
+    double minArea = medianArea / this.maxDifferenceFromMedian;
+    double maxArea = medianArea * this.maxDifferenceFromMedian;
+    double maxPerim = medianPerimeter * this.maxDifferenceFromMedian;
+    double minPerim = medianPerimeter / this.maxDifferenceFromMedian;
+    double minFeret = medianFeretLength / this.maxDifferenceFromMedian;
 
     int area = 0;
     int perim = 0;
@@ -254,50 +268,38 @@ public class RodentSpermNucleusCollection
     int curveShape = 0;
     int feretlength = 0;
 
-    int totalIterations = this.getNucleusCount();
-
-    IJ.append("Prefiltered:", debugFile);
-    IJ.append("    Area: "+(int)medianArea, debugFile);
-    IJ.append("    Perimeter: "+(int)medianPerimeter, debugFile);
-    IJ.append("    Path length: "+(int)medianPathLength, debugFile);
-    IJ.append("    Array length: "+(int)medianArrayLength, debugFile);
-    IJ.append("    Feret length: "+(int)medianFeretLength, debugFile);
-    IJ.append("    Curve: "+(int)medianDifferenceToMedianCurve, debugFile);
+    IJ.append("Prefiltered:", this.getDebugFile().getAbsolutePath());
+    this.exportFilterStats();
 
     for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getNucleus(i);
+      RodentSpermNucleus n = (RodentSpermNucleus) this.getNucleus(i);
       boolean dropNucleus = false;
 
       if(n.getArea() > maxArea || n.getArea() < minArea ){
-        n.failureCode = n.failureCode | FAILURE_AREA;
+        n.updateFailureCode(FAILURE_AREA);
         area++;
       }
       if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
-        n.failureCode = n.failureCode | FAILURE_PERIM;
+        n.updateFailureCode(FAILURE_PERIM);
         perim++;
       }
       if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
-        n.failureCode = n.failureCode | FAILURE_THRESHOLD;
+        n.updateFailureCode(FAILURE_THRESHOLD);
         pathlength++;
       }
-      if(n.smoothLength > medianArrayLength * maxDifferenceFromMedian || n.smoothLength < medianArrayLength / maxDifferenceFromMedian ){
-        n.failureCode = n.failureCode | FAILURE_ARRAY;
+      if(n.getLength() > medianArrayLength * maxDifferenceFromMedian || n.getLength() < medianArrayLength / maxDifferenceFromMedian ){
+        n.updateFailureCode(FAILURE_ARRAY);
          arraylength++;
       }
 
       if(n.getFeret() < minFeret){
-        n.failureCode = n.failureCode | FAILURE_FERET;
+        n.updateFailureCode(FAILURE_FERET);
         feretlength++;
       }
-
-      // if(n.differenceToMedianCurve > maxCurveDifference){
-      //   dropNucleus = true;
-      //   curveShape++;
-      // }
       
-      if(n.failureCode > 0){
-        failedNuclei.addNucleus(n);
-        this.nucleiCollection.remove(n);
+      if(n.getFailureCode() > 0){
+        failedCollection.addNucleus(n);
+        this.getNuclei().remove(this.getNucleus(i));
         i--; // the array index automatically shifts to account for the removed nucleus. Compensate to avoid skipping nuclei
       }
     }
@@ -307,26 +309,21 @@ public class RodentSpermNucleusCollection
     medianPathLength = this.getMedianPathLength();
     medianArrayLength = this.getMedianArrayLength();
     medianFeretLength = this.getMedianFeretLength();
-    medianDifferenceToMedianCurve = quartile(this.getDifferencesToMedian(),50);
+    // medianDifferenceToMedianCurve = quartile(this.getDifferencesToMedian(),50);
 
     int afterSize = this.getNucleusCount();
     int removed = beforeSize - afterSize;
 
-    IJ.append("Postfiltered:", debugFile);
-    IJ.append("    Area: "+(int)medianArea, debugFile);
-    IJ.append("    Perimeter: "+(int)medianPerimeter, debugFile);
-    IJ.append("    Path length: "+(int)medianPathLength, debugFile);
-    IJ.append("    Array length: "+(int)medianArrayLength, debugFile);
-    IJ.append("    Feret length: "+(int)medianFeretLength, debugFile);
-    IJ.append("    Curve: "+(int)medianDifferenceToMedianCurve, debugFile);
-    IJ.log("Removed due to size or length issues: "+removed+" nuclei");
-    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei", debugFile);
-    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei", debugFile);
-    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei", debugFile);
-    IJ.append("  Due to array length: "+arraylength+" nuclei", debugFile);
-    IJ.append("  Due to feret length: "+feretlength+" nuclei", debugFile);
-    IJ.append("  Due to curve shape: "+curveShape+" nuclei", debugFile);
-    IJ.log("Remaining: "+this.this.getNucleusCount()+" nuclei");
+    IJ.append("Postfiltered:", this.getDebugFile().getAbsolutePath());
+    this.exportFilterStats();
+    IJ.log("  Removed due to size or length issues: "+removed+" nuclei");
+    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to array length: "+arraylength+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to feret length: "+feretlength+" nuclei", this.getDebugFile().getAbsolutePath());
+    // IJ.append("  Due to curve shape: "+curveShape+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.log("  Remaining: "+this.getNucleusCount()+" nuclei");
   }
 
   /*
@@ -336,6 +333,22 @@ public class RodentSpermNucleusCollection
     can be centred on tip  or tail
     -----------------------
   */
+
+  public void recalculateTailPositions(){
+
+  	this.createProfileAggregateFromTip();
+  	this.drawProfilePlots();
+  	this.drawNormalisedMedianLineFromTip();
+    this.findTailIndexInMedianCurve();
+    this.calculateOffsets();
+    this.createNormalisedTailPositions();
+    this.createProfileAggregateFromTail();
+
+    this.drawRawPositionsFromTailChart();
+    this.drawNormalisedPositionsFromTailChart();
+
+    this.drawNormalisedMedianLineFromTail();
+  }
 
   /*
     We need to calculate the median angle profile. This requires binning the normalised profiles
@@ -353,13 +366,13 @@ public class RodentSpermNucleusCollection
     The data are stored as a Map<Double, Collection<Double>>
   */
 
-  private void updateProfileAggregate(ArrayList<Double> xvalues, double[] yvalues, Map<Double, Collection<Double>> profileAggregate){
+  private void updateProfileAggregate(double[] xvalues, double[] yvalues, Map<Double, Collection<Double>> profileAggregate){
 
     for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
 
-      for(int j=0;j<xvalues.size();j++){
+      for(int j=0;j<xvalues.length;j++){
        
-        if( xvalues.get(j) > k && xvalues.get(j) < k+PROFILE_INCREMENT){
+        if( xvalues[j] > k && xvalues[j] < k+PROFILE_INCREMENT){
 
           Collection<Double> values = profileAggregate.get(k);
           
@@ -367,7 +380,7 @@ public class RodentSpermNucleusCollection
               values = new ArrayList<Double>();
               profileAggregate.put(k, values);
           }
-          values.add(yValues[j].getInteriorAngle());
+          values.add(yvalues[j]);
         }
       }
     }        
@@ -377,8 +390,8 @@ public class RodentSpermNucleusCollection
 
   	for(int i=0;i<this.getNucleusCount();i++){
 
-	  	ArrayList<Double> xvalues = this.getNucleus(i).normalisedXPositionsFromTip;
-	  	double[]          yValues = this.getNucleus(i).getAngleProfile().getAngleArray();
+	  	double[] xvalues = this.getNucleus(i).getNormalisedXPositionsFromTip();
+	  	double[] yvalues = this.getNucleus(i).getAngleProfile().getAngleArray();
 	  	updateProfileAggregate(xvalues, yvalues, this.normalisedProfilesFromTip); 
 	  }
   }
@@ -387,37 +400,11 @@ public class RodentSpermNucleusCollection
 
   	for(int i=0;i<this.getNucleusCount();i++){
 
-	  	ArrayList<Double> xvalues = this.getNucleus(i).normalisedXPositionsFromTip;
-	  	double[]          yValues = this.getNucleus(i).getNormalisedYPositionsFromTail();
+	  	double[] xvalues = this.getNucleus(i).getNormalisedXPositionsFromTip();
+	  	double[] yvalues = this.getNucleus(i).getNormalisedYPositionsFromTail();
 	  	updateProfileAggregate(xvalues, yvalues, this.normalisedProfilesFromTail); 
 	  }
   }
-
-  // public void createTailCentredProfileAggregate(){
-
-  //   for(int i=0;i<this.getNucleusCount();i++){
-
-  //     ArrayList<Double> normalisedXValues = this.getNucleus(i).normalisedXPositionsFromTip;
-  //     double[] yValues = this.getNucleus(i).getNormalisedYPositionsFromTail();
-
-  //     for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
-
-  //       for(int j=0;j<normalisedXValues.size();j++){
-         
-  //         if( normalisedXValues.get(j) > k && normalisedXValues.get(j) < k+PROFILE_INCREMENT){
-
-  //           Collection<Double> values = normalisedProfilesFromTail.get(k);
-            
-  //           if (values==null) { // this this profile increment has not yet been encountered, create it
-  //               values = new ArrayList<Double>();
-  //               normalisedProfilesFromTail.put(k, values);
-  //           }
-  //           values.add(yValues[j]);
-  //         }
-  //       }
-  //     }        
-  //   }
-  // }
 
   /*
     Calculate median angles at each bin
@@ -458,11 +445,11 @@ public class RodentSpermNucleusCollection
             uppQuartiles[m] = q3;
             tenQuartiles[m] = q10;
             ninetyQuartiles[m] = q90;
-            numberOfPoints[m] = n;
+            numberOfPoints[m] = (double)n;
           }
         } catch(Exception e){
-             IJ.log("Cannot calculate median for "+k+": "+e);
-             IJ.append("Cannot calculate median for "+k+": "+e, this.getDebugFile());
+             IJ.log("Cannot calculate median for "+k);
+             IJ.append("Cannot calculate median for "+k+": "+e, this.getDebugFile().getAbsolutePath());
              xmedians[m] = k;
              ymedians[m] = 0.0;
              lowQuartiles[m] = 0.0;
@@ -492,7 +479,7 @@ public class RodentSpermNucleusCollection
         ninetyQuartiles[i] = ninetyQuartiles[replacementIndex];
 
         IJ.log("Repaired medians at "+i+" with values from  "+replacementIndex);
-        IJ.append("Repaired medians at "+i+" with values from  "+replacementIndex, this.getDebugFile());
+        IJ.append("Repaired medians at "+i+" with values from  "+replacementIndex, this.getDebugFile().getAbsolutePath());
       }
     }
 
@@ -511,20 +498,20 @@ public class RodentSpermNucleusCollection
     Calculate the offsets needed to corectly assign the tail positions
     compared to ideal median curves
   */
-	private void calculateOffsets(){
+	public void calculateOffsets(){
 
-		for(int i= 0; i<this.this.getNucleusCount();i++){ // for each roi
+		for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 			RodentSpermNucleus r = this.getNucleus(i);
-      int curveTailIndex = r.tailIndex;
+      int curveTailIndex = r.getTailIndex();
 
       // the curve needs to be matched to the median 
       // hence the median array needs to be the same curve length
-      double[] medianInterpolatedArray = interpolateMedianToLength(r.smoothLength);
+      double[] medianInterpolatedArray = interpolateMedianToLength(r.getLength());
 
       // alter the median tail index to the interpolated curve equivalent
-      int medianTailIndex = (int)Math.round(( (double)this.medianLineTailIndex / (double)normalisedMedian.length )* r.smoothLength);
+      int medianTailIndex = (int)Math.round(( (double)this.medianLineTailIndex / (double)this.normalisedMedianLineFromTip.length )* r.getLength());
 			
-      if(medianInterpolatedArray.length != r.smoothLength){
+      if(medianInterpolatedArray.length != r.getLength()){
         IJ.log("    Error: interpolated median array is not the right length");
       }
 
@@ -533,18 +520,18 @@ public class RodentSpermNucleusCollection
       // for comparisons between sperm, get the difference between the offset curve and the median
 			double totalDifference = 0;
 
-			for(int j=0; j<r.smoothLength; j++){ // for each point round the array
+			for(int j=0; j<r.getLength(); j++){ // for each point round the array
 
 	      // IJ.log("j="+j);
 	      // find the next point in the array, given the tail point is our 0
-	      int curveIndex = wrapIndex(curveTailIndex+j-offset, r.smoothLength);
+	      int curveIndex = wrapIndex(curveTailIndex+j-offset, r.getLength());
 	      // IJ.log("Curve index: "+curveIndex);
 
 	      // get the angle at this point
-	      double curveAngle = r.getBorderPointArray()[curveIndex].getInteriorAngle();
+	      double curveAngle = r.getBorderPoint(curveIndex).getInteriorAngle();
 
 	      // get the next median index position, given the tail point is 0
-	      int medianIndex = wrapIndex(medianTailIndex+j, medianInterpolatedArray.length); // DOUBLE CHECK THE LOGIC HERE - CAUSING NPE WHEN USING  normalisedMedian.length
+	      int medianIndex = wrapIndex(medianTailIndex+j, medianInterpolatedArray.length); // DOUBLE CHECK THE LOGIC HERE - CAUSING NPE WHEN USING  this.normalisedMedianLineFromTip.length
 	      // IJ.log("Median index: "+medianIndex);
 	      double medianAngle = medianInterpolatedArray[medianIndex];
 	      // IJ.log("j="+j+" Curve index: "+curveIndex+" Median index: "+medianIndex+" Median: "+medianAngle);
@@ -552,12 +539,12 @@ public class RodentSpermNucleusCollection
 	      totalDifference += Math.abs(curveAngle - medianAngle);
 			}
 
-			this.this.getNucleus(i).offsetForTail = offset;
+			this.getNucleus(i).setOffsetForTail(offset);
 
       // r.offsetCalculated = true;
-      r.tailIndex = r.tailIndex-offset; // update the tail position
-      r.setSpermTail(r.getBorderPointArray()[r.tailIndex]); // ensure the spermTail is updated
-      r.differenceToMedianCurve = totalDifference;
+      r.setTailIndex(r.getTailIndex()-offset); // update the tail position
+      r.setSpermTail(r.getBorderPoint(r.getTailIndex())); // ensure the spermTail is updated
+      r.setDifferenceToMedianCurve(totalDifference);
 		}
 
 		this.differencesCalculated = true;
@@ -565,7 +552,7 @@ public class RodentSpermNucleusCollection
 
   public double[] interpolateMedianToLength(int newLength){
 
-    int oldLength = normalisedMedian.length;
+    int oldLength = normalisedMedianLineFromTip.length;
     
     double[] newMedianCurve = new double[newLength];
     // where in the old curve index is the new curve index?
@@ -587,9 +574,6 @@ public class RodentSpermNucleusCollection
 	*/
 	public double interpolateNormalisedMedian(double normIndex, int length){
 
-		// normalise the index
-		// double normIndex = ( (double)index / (double)length)*this.normalisedMedian.length;
-
 		// convert index to 1 window boundaries
 		int medianIndex1 = (int)Math.round(normIndex);
 		int medianIndex2 = medianIndex1 > normIndex
@@ -597,20 +581,20 @@ public class RodentSpermNucleusCollection
 												: medianIndex1 + 1;
 
 		int medianIndexLower = medianIndex1 < medianIndex2
-														? medianIndex1
-														: medianIndex2;
+											 	? medianIndex1
+											 	: medianIndex2;
 
 		int medianIndexHigher = medianIndex2 < medianIndex1
 														 ? medianIndex2
 														 : medianIndex1;
 
 		// wrap the arrays
-    medianIndexLower  = wrapIndex(medianIndexLower, length);
+    medianIndexLower  = wrapIndex(medianIndexLower , length);
     medianIndexHigher = wrapIndex(medianIndexHigher, length);
 
 		// get the angle values in the median profile at the given indices
-		double medianAngleLower = this.normalisedMedian[medianIndexLower];
-		double medianAngleHigher = this.normalisedMedian[medianIndexHigher];
+		double medianAngleLower  = this.normalisedMedianLineFromTip[medianIndexLower ];
+		double medianAngleHigher = this.normalisedMedianLineFromTip[medianIndexHigher];
 
 		// interpolate on a stright line between the points
 		double medianAngleDifference = medianAngleHigher - medianAngleLower;
@@ -619,13 +603,13 @@ public class RodentSpermNucleusCollection
 		return interpolatedMedianAngle;
 	}
 
-	public int findTailIndexInMedianCurve(){
+	public void findTailIndexInMedianCurve(){
 		// can't use regular tail detector, because it's based on NucleusBorderPoints
 		// get minima in curve, then find the lowest minima / minima furthest from both ends
 
 		ArrayList<Integer> minima = this.detectLocalMinimaInMedian();
 
-		double minDiff = normalisedMedian.length;
+		double minDiff = this.normalisedMedianLineFromTip.length;
 		double minAngle = 180;
 		int tailIndex = 0;
 
@@ -638,18 +622,17 @@ public class RodentSpermNucleusCollection
   		for(int i = 0; i<minima.size();i++){
   			Integer index = (Integer)minima.get(i);
 
-  			int toEnd = normalisedMedian.length - index;
+  			int toEnd = this.normalisedMedianLineFromTip.length - index;
   			int diff = Math.abs(index - toEnd);
 
-  			double angle = normalisedMedian[index];
-  			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not the tip
+  			double angle = this.normalisedMedianLineFromTip[index];
+  			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
   				minAngle = angle;
   				tailIndex = index;
   			}
   		}
-  		this.medianLineTailIndex = tailIndex;
   	}
-		return tailIndex;
+  	this.medianLineTailIndex = tailIndex;
 	}
 
 	/*
@@ -669,27 +652,17 @@ public class RodentSpermNucleusCollection
 
     ArrayList<Integer> medianIndexMinima = new ArrayList<Integer>(0);
 
-    for (int i=0; i<normalisedMedian.length; i++) { // for each position in sperm
+    for (int i=0; i<this.normalisedMedianLineFromTip.length; i++) { // for each position in sperm
 
       // go through each lookup position and get the appropriate angles
       for(int j=0;j<prevAngles.length;j++){
 
-        int prev_i = i-(j+1); // the index j+1 before i
-        int next_i = i+(j+1); // the index j+1 after i
-
-        // handle beginning of array - wrap around
-        if(prev_i < 0){
-          prev_i = normalisedMedian.length + prev_i; // length of array - appropriate value
-        }
-
-        // handle end of array - wrap
-        if(next_i >= normalisedMedian.length){
-          next_i = next_i - normalisedMedian.length;
-        }
+        int prev_i = wrapIndex( i-(j+1), this.normalisedMedianLineFromTip.length ); // the index j+1 before i
+        int next_i = wrapIndex( i+(j+1), this.normalisedMedianLineFromTip.length ); // the index j+1 after i
 
         // fill the lookup array
-        prevAngles[j] = this.normalisedMedian[prev_i];
-        nextAngles[j] = this.normalisedMedian[next_i];
+        prevAngles[j] = this.normalisedMedianLineFromTip[prev_i];
+        nextAngles[j] = this.normalisedMedianLineFromTip[next_i];
       }
       
       // with the lookup positions, see if minimum at i
@@ -701,14 +674,12 @@ public class RodentSpermNucleusCollection
 
         // for the first position in prevAngles, compare to the current index
         if(l==0){
-          if(prevAngles[l] < this.normalisedMedian[i] || nextAngles[l] < this.normalisedMedian[i]){
-            // ok = false;
+          if(prevAngles[l] < this.normalisedMedianLineFromTip[i] || nextAngles[l] < this.normalisedMedianLineFromTip[i]){
             errors--;
           }
         } else { // for the remainder of the positions in prevAngles, compare to the prior prevAngle
           
           if(prevAngles[l] < prevAngles[l-1] || nextAngles[l] < nextAngles[l-1]){
-            // ok = false;
             errors--;
           }
         }
@@ -727,258 +698,20 @@ public class RodentSpermNucleusCollection
  
   public void measureNuclearOrganisation(){
 
-    for(int i= 0; i<this.this.getNucleusCount();i++){ // for each roi
+    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 
-       this.this.getNucleus(i).splitNucleusToHeadAndHump();
-       this.this.getNucleus(i).calculateSignalAnglesFromTail();
-       this.this.getNucleus(i).calculateSignalDistances();
-       this.this.getNucleus(i).calculateFractionalSignalDistances();
-       this.this.getNucleus(i).calculateClosestBorderToSignal();
+       this.getNucleus(i).splitNucleusToHeadAndHump();
+       this.getNucleus(i).calculateSignalAnglesFromTail();
     }
     this.exportSignalStats();
-    addSignalsToProfileChart();
+    this.addSignalsToProfileChartFromTip();
+    this.addSignalsToProfileChartFromTail();
 
-    // find nearest border
-
-    IJ.log("Red signals: "+ this.getRedSignalCount());
+    IJ.log("Red signals: "  + this.getRedSignalCount());
     IJ.log("Green signals: "+ this.getGreenSignalCount());
   }
 
-  private void addSignalsToProfileChart(){
-    // PlotWindow normXFromTipWindow; normXFromTipPlot
-    // for each signal in each nucleus, find index of point. Draw dot at index at y=-30 (for now)
-    // Add the signals to the tip centred profile plot
-
-    normXFromTipPlot.setColor(Color.LIGHT_GRAY);
-    normXFromTipPlot.setLineWidth(1);
-    normXFromTipPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
-    normXFromTipPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
-
-    for(int i= 0; i<this.this.getNucleusCount();i++){ // for each roi
-
-      Nucleus n = this.this.getNucleus(i);
-
-      ArrayList<NuclearSignal> redSignals = n.getRedSignals();
-      if(redSignals.size()>0){
-
-        ArrayList<Double> redPoints = new ArrayList<Double>(0);
-        ArrayList<Double> yPoints   = new ArrayList<Double>(0);
-
-        for(int j=0; j<redSignals.size();j++){
-
-          NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
-          for(int k=0; k<n.smoothLength;k++){
-
-            if(n.getBorderPointArray()[k].overlaps(border)){
-              redPoints.add( n.normalisedXPositionsFromTip.get(k) );
-              double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistance() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
-              yPoints.add(yPosition);
-            }
-          }
-        }
-        normXFromTipPlot.setColor(Color.RED);
-        normXFromTipPlot.setLineWidth(2);
-        normXFromTipPlot.addPoints(redPoints, yPoints, Plot.DOT);
-      }
-    }
-    normXFromTipWindow.drawPlot(normXFromTipPlot);
-
-    // Add the signals to the tail centred profile plot
-    normXFromTailPlot.setColor(Color.LIGHT_GRAY);
-    normXFromTailPlot.setLineWidth(1);
-    normXFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
-    normXFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
-
-    for(int i= 0; i<this.this.getNucleusCount();i++){ // for each roi
-
-      Nucleus n = this.this.getNucleus(i);
-
-
-      ArrayList<NuclearSignal> redSignals = n.getRedSignals();
-      if(redSignals.size()>0){
-
-        ArrayList<Double> redPoints = new ArrayList<Double>(0);
-        ArrayList<Double> yPoints   = new ArrayList<Double>(0);
-
-        for(int j=0; j<redSignals.size();j++){
-
-          NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
-          for(int k=0; k<n.smoothLength;k++){
-
-            if(n.getBorderPointArray()[k].overlaps(border)){
-              // IJ.log("Found closest border: "+i+" : "+j);
-              redPoints.add( n.normalisedXPositionsFromTail.get(k) );
-              double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistance() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // make between 220 and 260
-              yPoints.add(yPosition);
-            }
-          }
-        }
-        normXFromTailPlot.setColor(Color.RED);
-        normXFromTailPlot.setLineWidth(2);
-        normXFromTailPlot.addPoints(redPoints, yPoints, Plot.DOT);
-      }
-    }
-    normXFromTailWindow.drawPlot(normXFromTailPlot);
-
-    ImagePlus tipPlot = normXFromTipPlot.getImagePlus();
-    IJ.saveAsTiff(tipPlot, this.folder+"plotTipNorm."+collectionType+".tiff");
-    ImagePlus tailPlot = normXFromTailPlot.getImagePlus();
-    IJ.saveAsTiff(tailPlot, this.folder+"plotTailNorm."+collectionType+".tiff");
-  }
-
-  public void exportSignalStats(){
-
-    String redLogFile = this.folder+"logRedSignals."+collectionType+".txt";
-    File r = new File(redLogFile);
-    if(r.exists()){
-      r.delete();
-    }
-
-    String greenLogFile = this.folder+"logGreenSignals."+collectionType+".txt";
-    File g = new File(greenLogFile);
-    if(g.exists()){
-      g.delete();
-    }
-
-    IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", redLogFile);
-    IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", greenLogFile);
-    
-    for(int i= 0; i<this.this.getNucleusCount();i++){ // for each roi
-
-      Nucleus n = this.this.getNucleus(i);
-
-      int nucleusNumber = n.getNucleusNumber();
-      String path = n.getPath();
-
-      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
-      signals.add(n.getRedSignals());
-      signals.add(n.getGreenSignals());
-
-      int signalCount = 0;
-      for( ArrayList<NuclearSignal> signalGroup : signals ){
-
-        String log = signalCount == 0 ? redLogFile : greenLogFile;
-        
-        if(signalGroup.size()>0){
-          for(int j=0; j<signalGroup.size();j++){
-             NuclearSignal s = signalGroup.get(j);
-             IJ.append(nucleusNumber+"\t"+
-                       s.getArea()+"\t"+
-                       s.getAngle()+"\t"+
-                       s.getFeret()+"\t"+
-                       s.getDistance()+"\t"+
-                       s.getFractionalDistance()+"\t"+
-                       s.getPerimeter()+"\t"+
-                       path, log);
-          } // end for
-        } // end if
-        signalCount++;
-      } // end for
-    } // end for
-  }
-
-  public void drawRawPositionsFromTailChart(){
-
-    Plot offsetRawPlot = new Plot("Raw corrected tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-    PlotWindow offsetRawPlotWindow;
-
-    offsetRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-    offsetRawPlot.setYTicks(true);
-    
-    double minX = 0;
-    double maxX = 0;
-    for(int i=0;i<this.this.getNucleusCount();i++){
-      double[] xRawCentredOnTail = this.this.getNucleus(i).createOffsetRawProfile();
-      if(getMin(xRawCentredOnTail)<minX){
-        minX = getMin(xRawCentredOnTail);
-      }
-      if(getMax(xRawCentredOnTail)>maxX){
-        maxX = getMax(xRawCentredOnTail);
-      }
-    }
-    offsetRawPlot.setLimits( (int) minX-1, (int) maxX+1,-50,360);
-    offsetRawPlot.setColor(Color.BLACK);
-    offsetRawPlot.drawLine((int) minX-1, 180, (int) maxX+1, 180); 
-    offsetRawPlot.setColor(Color.LIGHT_GRAY);
-   
-    for(int i=0;i<this.this.getNucleusCount();i++){
-      double[] xRawCentredOnTail = this.this.getNucleus(i).createOffsetRawProfile();
-      double[] ypoints = this.this.getNucleus(i).getInteriorAngles();
-
-      offsetRawPlot.setColor(Color.LIGHT_GRAY);
-      offsetRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
-    }
-    
-    offsetRawPlot.draw();
-    offsetRawPlotWindow = offsetRawPlot.show();
-    offsetRawPlotWindow.noGridLines = true; // I have no idea why this makes the grid lines appear on work PC, when they appear by default at home
-    offsetRawPlotWindow.drawPlot(offsetRawPlot);  
-  }
-
-  public void drawNormalisedPositionsFromTailChart(){
-   
-    for(int i=0;i<this.this.getNucleusCount();i++){
-      double[] xpoints = this.this.getNucleus(i).getNormalisedXPositionsFromTip();
-      double[] ypoints = this.this.getNucleus(i).getNormalisedYPositionsFromTail();
-      normXFromTailPlot.addPoints(xpoints, ypoints, Plot.LINE);
-    }
-    normXFromTailPlot.draw();
-    normXFromTailWindow = normXFromTailPlot.show();
-    normXFromTailWindow.drawPlot(normXFromTailPlot);  
-  }
-
-  public void exportNuclearStats(String filename){
-  
-    String statsFile = this.folder+filename+"."+collectionType+".txt";
-    File f = new File(statsFile);
-    if(f.exists()){
-      f.delete();
-    }
-
-    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
-
-    // IJ.append("# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH", statsFile);
-
-    IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei");
-    double[] areas  = this.getAreas();
-    double[] perims = this.getPerimeters();
-    double[] ferets = this.getFerets();
-    double[] pathLengths  = this.getPathLengths();
-    int[] tails = this.getTailIndexes();
-    double[] differences= this.getDifferencesToMedian();
-    String[] paths = this.getNucleusPaths();
-
-
-    for(int i=0; i<this.getNucleusCount();i++){
-    	int j = i+1;
-      IJ.log("  "+j+" of "+this.getNucleusCount());
-
-      outLine = outLine + areas[i]+"\t"+
-                          perims[i]+"\t"+
-                          ferets[i]+"\t"+
-                          pathLengths[i]+"\t"+
-                          tails[i]+"\t"+
-                          differences[i]+"\t"+
-                          this.this.getNucleus(i).failureCode+"\t"+
-                          paths[i]+"\n";
-
-      // IJ.append(  areas[i]+"\t"+
-      //             perims[i]+"\t"+
-      //             ferets[i]+"\t"+
-      //             pathLengths[i]+"\t"+
-      //             tails[i]+"\t"+
-      //             differences[i]+"\t"+
-      //             this.this.getNucleus(i).failureCode+"\t"+
-      //             paths[i], statsFile);
-
-      // Include tip, CoM, tail
-  		this.this.getNucleus(i).printLogFile(this.getNucleus(i).getPathWithoutExtension()+"\\"+this.getNucleus(i).getNucleusNumber()+".log");
-    }
-    IJ.append(  outLine, statsFile);
-    IJ.log("Export complete");
-  }
-
-  public void rotateAndAssembleNucleiForExport(String filename){
+  public void exportCompositeImage(String filename){
 
     // foreach nucleus
     // createProcessor (500, 500)
@@ -993,8 +726,8 @@ public class RodentSpermNucleusCollection
     int totalWidth = 0;
     int totalHeight = 0;
 
-    int boxWidth = (int)(getMedianNuclearPerimeter()/1.4);
-    int boxHeight = (int)(getMedianNuclearPerimeter()/1.2);
+    int boxWidth  = (int)(this.getMedianNuclearPerimeter()/1.4);
+    int boxHeight = (int)(this.getMedianNuclearPerimeter()/1.2);
 
     int maxBoxWidth = boxWidth * 5;
     int maxBoxHeight = (boxHeight * (int)(Math.ceil(this.getNucleusCount()/5)) + boxHeight );
@@ -1005,14 +738,14 @@ public class RodentSpermNucleusCollection
 
     for(int i=0; i<this.getNucleusCount();i++){
       
-      Nucleus n = this.this.getNucleus(i);
-      String path = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+".tiff";
+      RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+      String path = n.getAnnotatedImagePath();
 
       try {
         Opener localOpener = new Opener();
         ImagePlus image = localOpener.openImage(path);
         ImageProcessor ip = image.getProcessor();
-        int width = ip.getWidth();
+        int width  = ip.getWidth();
         int height = ip.getHeight();
         ip.setRoi(n.getRoi());
 
@@ -1039,121 +772,17 @@ public class RodentSpermNucleusCollection
         finalProcessor.drawOverlay(overlay);  
       } catch(Exception e){
         IJ.log("Error adding image to composite");
-        IJ.append("Error adding image to composite: "+e, this.getDebugFile());
-        IJ.append("  "+collectionType, this.getDebugFile());
-        IJ.append("  "+path, this.getDebugFile());
+        IJ.append("Error adding image to composite: "+e, this.getDebugFile().getAbsolutePath());
+        IJ.append("  "+getType(), this.getDebugFile().getAbsolutePath());
+        IJ.append("  "+path, this.getDebugFile().getAbsolutePath());
       }     
     }
-  	finalImage.show();
-  	IJ.saveAsTiff(finalImage, folder+filename+"."+collectionType+".tiff");
+  	// finalImage.show();
+  	IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+filename+"."+getType()+".tiff");
   	IJ.log("Composite image created");
   }
 
-  /*
-    Draw the features of interest on the images of the nuclei created earlier
-  */
-  public void annotateImagesOfNuclei(){
-  	IJ.log("Annotating images...");
-  	for(int i=0; i<this.getNucleusCount();i++){
-      int m = i+1;
-  		IJ.log("  "+m+" of "+this.getNucleusCount());
-  		Nucleus n = this.this.getNucleus(i);
-
-      String path = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+".tiff";
-      String outPath = n.getPathWithoutExtension()+"\\"+n.getNucleusNumber()+"."+collectionType+".tiff";
-
-      try{
-
-    		// open the image we saved earlier
-    		Opener localOpener = new Opener();
-        ImagePlus image = localOpener.openImage(path);
-        ImageProcessor ip = image.getProcessor();
-
-        // draw the features of interest
-        
-        // draw the outline of the nucleus
-		    ip.setColor(Color.BLUE);
-		    ip.setLineWidth(1);
-		    ip.draw(n.getRoi());
-
-
-		    // draw the CoM
-		    ip.setColor(Color.MAGENTA);
-		    ip.setLineWidth(5);
-		    ip.drawDot(n.getCentreOfMass().getXAsInt(),  n.getCentreOfMass().getYAsInt());
-
-		    //draw the sperm tip 
-		    ip.setLineWidth(5);
-		    ip.setColor(Color.YELLOW);
-		    ip.drawDot(n.getSpermTip().getXAsInt(), n.getSpermTip().getYAsInt());
-
-		    // draw the points considered as sperm tails on a per-nucleus basis
-		    ip.setLineWidth(3);
-		    ip.setColor(Color.GRAY);
-		    for(int j=0; j<n.intialSpermTails.size();j++){
-		    	NucleusBorderPoint p = n.intialSpermTails.get(j);
-		    	ip.drawDot(p.getXAsInt(), p.getYAsInt());
-		    }
-
-		    // Draw the original consensus tail
-		    ip.setLineWidth(5);
-		    ip.setColor(Color.CYAN);
-		    ip.drawDot(n.getInitialConsensusTail().getXAsInt(), n.getInitialConsensusTail().getYAsInt());
-
-				// line from tail to intsersection point; should pass through CoM   
-        if(n.intersectionPoint!=null){ // handle failed nuclei in which this analysis was not performed
-  				ip.setLineWidth(1);
-  				ip.setColor(Color.YELLOW);
-  		    ip.drawLine(n.getSpermTail().getXAsInt(), n.getSpermTail().getYAsInt(), n.intersectionPoint.getXAsInt(), n.intersectionPoint.getYAsInt());
-        }
-
-        // The narrowest part of the sperm head
-        ip.setLineWidth(1);
-        ip.setColor(Color.MAGENTA);
-        ip.drawLine(n.minFeretPoint1.getXAsInt(), n.minFeretPoint1.getYAsInt(), n.minFeretPoint2.getXAsInt(), n.minFeretPoint2.getYAsInt());
-        ip.setLineWidth(3);
-        ip.drawDot(n.minFeretPoint1.getXAsInt(), n.minFeretPoint1.getYAsInt());
-        
-		    //   SIGNALS
-		    ip.setLineWidth(3);
-		    ip.setColor(Color.RED);
-		    ArrayList<NuclearSignal> redSignals = n.getRedSignals();
-        if(redSignals.size()>0){
-          for(int j=0; j<redSignals.size();j++){
-            NuclearSignal s = redSignals.get(j);
-            ip.setLineWidth(3);
-            ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
-            ip.setLineWidth(1);
-            ip.draw(s.getRoi());
-          }
-
-        }
-        ip.setColor(Color.GREEN);
-        ArrayList<NuclearSignal> greenSignals = n.getGreenSignals();
-        if(redSignals.size()>0){
-          for(int j=0; j<greenSignals.size();j++){
-            NuclearSignal s = greenSignals.get(j);
-            ip.setLineWidth(3);
-            ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
-            ip.setLineWidth(1);
-            ip.draw(s.getRoi());
-          }
-        }
-		    IJ.saveAsTiff(image, outPath);
-		    image.close();
-
-      } catch(Exception e){
-        IJ.log("Error annotating nucleus: "+e);
-        IJ.append("Error annotating nucleus: "+e, debugFile);
-        IJ.append("  "+collectionType, debugFile);
-        IJ.append("  "+path, debugFile);
-        IJ.append("  "+outPath, debugFile);
-      }
-
-  	}
-  	 IJ.log("Annotation complete");
-  }
-
+ 
 
 	/*
     -----------------------
@@ -1162,23 +791,23 @@ public class RodentSpermNucleusCollection
   */
   public void exportMediansAndQuartilesOfProfile(ArrayList<Double[]> profile, String filename){
 
-  	String logFile = this.getFolder()+File.separator+filename;
+  	String logFile = this.getFolder()+File.separator+filename+"."+this.getType()+".txt";
     File f = new File(logFile);
     if(f.exists()){
       f.delete();
     }
 
-    outLine = "# X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\n";
+    String outLine = "# X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\n";
     
 
     for(int i =0;i<profile.get(0).length;i++){
-			outLine += 	profile.get(0)[m]+"\t"+
-				          profile.get(1)[m]+"\t"+
-				          profile.get(2)[m]+"\t"+
-				          profile.get(3)[m]+"\t"+
-				          profile.get(4)[m]+"\t"+
-				          profile.get(5)[m]+"\t"+
-				          profile.get(6);
+			outLine += 	profile.get(0)[i]+"\t"+
+				          profile.get(1)[i]+"\t"+
+				          profile.get(2)[i]+"\t"+
+				          profile.get(3)[i]+"\t"+
+				          profile.get(4)[i]+"\t"+
+				          profile.get(5)[i]+"\t"+
+				          profile.get(6)[i]+"\n";
   	}
   	IJ.append(outLine, logFile); 
   }
@@ -1215,6 +844,125 @@ public class RodentSpermNucleusCollection
     IJ.append("", logFile);
   }
 
+  private void exportFilterStats(){
+
+  	double medianArea = this.getMedianNuclearArea();
+    double medianPerimeter = this.getMedianNuclearPerimeter();
+    double medianPathLength = this.getMedianPathLength();
+    double medianArrayLength = this.getMedianArrayLength();
+    double medianFeretLength = this.getMedianFeretLength();
+    // double medianDifferenceToMedianCurve = quartile(this.getDifferencesToMedian(),50);
+
+    IJ.append("    Area: "        +(int)medianArea,                    this.getDebugFile().getAbsolutePath());
+    IJ.append("    Perimeter: "   +(int)medianPerimeter,               this.getDebugFile().getAbsolutePath());
+    IJ.append("    Path length: " +(int)medianPathLength,              this.getDebugFile().getAbsolutePath());
+    IJ.append("    Array length: "+(int)medianArrayLength,             this.getDebugFile().getAbsolutePath());
+    IJ.append("    Feret length: "+(int)medianFeretLength,             this.getDebugFile().getAbsolutePath());
+    // IJ.append("    Curve: "       +(int)medianDifferenceToMedianCurve, this.getDebugFile().getAbsolutePath());
+  }
+
+  public void exportSignalStats(){
+
+    String redLogFile = this.getFolder()+File.separator+"logRedSignals."+getType()+".txt";
+    File r = new File(redLogFile);
+    if(r.exists()){
+      r.delete();
+    }
+
+    String greenLogFile = this.getFolder()+File.separator+"logGreenSignals."+getType()+".txt";
+    File g = new File(greenLogFile);
+    if(g.exists()){
+      g.delete();
+    }
+
+    IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", redLogFile);
+    IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", greenLogFile);
+    
+    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+
+      Nucleus n = this.getNucleus(i);
+
+      int nucleusNumber = n.getNucleusNumber();
+      String path = n.getPath();
+
+      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+      signals.add(n.getRedSignals());
+      signals.add(n.getGreenSignals());
+
+      int signalCount = 0;
+      for( ArrayList<NuclearSignal> signalGroup : signals ){
+
+        String log = signalCount == Nucleus.RED_CHANNEL ? redLogFile : greenLogFile;
+        
+        if(signalGroup.size()>0){
+          for(int j=0; j<signalGroup.size();j++){
+             NuclearSignal s = signalGroup.get(j);
+             IJ.append(nucleusNumber                   +"\t"+
+                       s.getArea()                     +"\t"+
+                       s.getAngle()                    +"\t"+
+                       s.getFeret()                    +"\t"+
+                       s.getDistanceFromCoM()          +"\t"+
+                       s.getFractionalDistanceFromCoM()+"\t"+
+                       s.getPerimeter()                +"\t"+
+                       path, log);
+          } // end for
+        } // end if
+        signalCount++;
+      } // end for
+    } // end for
+  }
+
+  public void exportNuclearStats(String filename){
+  
+    String statsFile = this.getFolder()+File.separator+filename+"."+getType()+".txt";
+    File f = new File(statsFile);
+    if(f.exists()){
+      f.delete();
+    }
+
+    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
+
+    IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
+    double[] areas        = this.getAreas();
+    double[] perims       = this.getPerimeters();
+    double[] ferets       = this.getFerets();
+    double[] pathLengths  = this.getPathLengths();
+    int[] tails           = this.getTailIndexes();
+    double[] differences  = this.getDifferencesToMedian();
+    String[] paths        = this.getNucleusPaths();
+
+
+    for(int i=0; i<this.getNucleusCount();i++){
+    	int j = i+1;
+
+      outLine = outLine + areas[i]+"\t"+
+                          perims[i]+"\t"+
+                          ferets[i]+"\t"+
+                          pathLengths[i]+"\t"+
+                          tails[i]+"\t"+
+                          differences[i]+"\t"+
+                          this.getNucleus(i).getFailureCode()+"\t"+
+                          paths[i]+"\n";
+
+      // Include tip, CoM, tail
+  		// this.getNucleus(i).printLogFile(this.getNucleus(i).getNucleusFolder()+File.separator+this.getNucleus(i).getNucleusNumber()+".log");
+    }
+    IJ.append(  outLine, statsFile);
+    IJ.log("Export complete");
+  }
+
+  /*
+    Draw the features of interest on the images of the nuclei created earlier
+  */
+  public void annotateImagesOfNuclei(){
+  	IJ.log("Annotating images ("+this.getType()+")...");
+  	for(int i=0; i<this.getNucleusCount();i++){
+      int m = i+1;
+  		RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+  		n.annotateSpermFeatures();
+  	}
+  	 IJ.log("Annotation complete");
+  }
 
   /*
     -----------------------
@@ -1285,7 +1033,7 @@ public class RodentSpermNucleusCollection
     for(int i=0;i<this.getNucleusCount();i++){
       
       double[] rawXpoints         = this.getNucleus(i).getRawXPositionsFromTip();
-      double[] yPoints            = this.getNucleus(i).getAngleProfileArray();
+      double[] yPoints            = this.getNucleus(i).getAngleProfile().getAngleArray();
       double[] normalisedXFromTip = this.getNucleus(i).getNormalisedXPositionsFromTip();
       double[] rawXFromTail       = this.getNucleus(i).getRawXPositionsFromTail();
 
@@ -1303,13 +1051,16 @@ public class RodentSpermNucleusCollection
     // this.rawXFromTipPlot.draw();
     
     rawXFromTipWindow.noGridLines = true; 
-    rawXFromTipWindow = rawXFromTipPlot.show();
+    // rawXFromTipWindow = rawXFromTipPlot.show();
     
     normXFromTipWindow.noGridLines = true; 
     normXFromTipWindow = normXFromTipPlot.show();
     
     rawXFromTailWindow.noGridLines = true; 
-    rawXFromTailWindow = rawXFromTailPlot.show();
+    // rawXFromTailWindow = rawXFromTailPlot.show();
+
+    exportProfilePlot(rawXFromTipPlot, "plotTipRaw");
+    exportProfilePlot(rawXFromTailPlot, "plotTailRaw");
   }
 
   /*
@@ -1329,7 +1080,7 @@ public class RodentSpermNucleusCollection
     double[] tenQuartiles    =  getDoubleFromDouble( medians.get(4) );
     double[] ninetyQuartiles =  getDoubleFromDouble( medians.get(5) );
 
-    setNormalisedMedianLine(ymedians);
+    setNormalisedMedianLineFromTip(ymedians);
 
     // add the median lines to the chart
     normXFromTipPlot.setColor(Color.BLACK);
@@ -1379,7 +1130,7 @@ public class RodentSpermNucleusCollection
     double[] tenQuartiles    =  getDoubleFromDouble( medians.get(4) );
     double[] ninetyQuartiles =  getDoubleFromDouble( medians.get(5) );
 
-    setTailCentredNormalisedMedianLine(ymedians);
+    setNormalisedMedianLineFromTail(ymedians);
 
     // add the median lines to the chart
     normXFromTailPlot.setColor(Color.BLACK);
@@ -1391,6 +1142,141 @@ public class RodentSpermNucleusCollection
     normXFromTailPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
 
     normXFromTailWindow.drawPlot(normXFromTailPlot);
+  }
+
+  private void addSignalsToProfileChartFromTip(){
+    // PlotWindow normXFromTipWindow; normXFromTipPlot
+    // for each signal in each nucleus, find index of point. Draw dot at index at y=-30 (for now)
+    // Add the signals to the tip centred profile plot
+
+    normXFromTipPlot.setColor(Color.LIGHT_GRAY);
+    normXFromTipPlot.setLineWidth(1);
+    normXFromTipPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
+    normXFromTipPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
+
+    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+
+      RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+
+      ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+      if(redSignals.size()>0){
+
+        ArrayList<Double> redPoints = new ArrayList<Double>(0);
+        ArrayList<Double> yPoints   = new ArrayList<Double>(0);
+
+        for(int j=0; j<redSignals.size();j++){
+
+          NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
+          for(int k=0; k<n.getLength();k++){
+
+            if(n.getBorderPoint(k).overlaps(border)){
+              redPoints.add( n.getNormalisedXPositionsFromTip()[k] );
+              double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
+              yPoints.add(yPosition);
+            }
+          }
+        }
+        normXFromTipPlot.setColor(Color.RED);
+        normXFromTipPlot.setLineWidth(2);
+        normXFromTipPlot.addPoints(redPoints, yPoints, Plot.DOT);
+      }
+    }
+    normXFromTipWindow.drawPlot(normXFromTipPlot);
+    exportProfilePlot(normXFromTipPlot, "plotTipNorm");
+  }
+
+  public void addSignalsToProfileChartFromTail(){
+  	// Add the signals to the tail centred profile plot
+    normXFromTailPlot.setColor(Color.LIGHT_GRAY);
+    normXFromTailPlot.setLineWidth(1);
+    normXFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
+    normXFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
+
+    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+
+      RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+
+      ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+      if(redSignals.size()>0){
+
+        ArrayList<Double> redPoints = new ArrayList<Double>(0);
+        ArrayList<Double> yPoints   = new ArrayList<Double>(0);
+
+        for(int j=0; j<redSignals.size();j++){
+
+          NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
+          for(int k=0; k<n.getLength();k++){
+
+            if(n.getBorderPoint(k).overlaps(border)){
+              // IJ.log("Found closest border: "+i+" : "+j);
+              redPoints.add( n.getNormalisedXPositionsFromTail()[k] );
+              double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // make between 220 and 260
+              yPoints.add(yPosition);
+            }
+          }
+        }
+        normXFromTailPlot.setColor(Color.RED);
+        normXFromTailPlot.setLineWidth(2);
+        normXFromTailPlot.addPoints(redPoints, yPoints, Plot.DOT);
+      }
+    }
+    normXFromTailWindow.drawPlot(normXFromTailPlot);
+    exportProfilePlot(normXFromTailPlot, "plotTailNorm");
+  }
+
+  private void exportProfilePlot(Plot plot, String name){
+  	ImagePlus image = plot.getImagePlus();
+    IJ.saveAsTiff(image, this.getFolder()+File.separator+name+"."+this.getType()+".tiff");
+  }
+
+  public void drawRawPositionsFromTailChart(){
+
+    Plot offsetRawPlot = new Plot("Raw corrected tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
+    PlotWindow offsetRawPlotWindow;
+
+    offsetRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+    offsetRawPlot.setYTicks(true);
+    
+    double minX = 0;
+    double maxX = 0;
+    for(int i=0;i<this.getNucleusCount();i++){
+      double[] xRawCentredOnTail = this.getNucleus(i).createOffsetRawProfile();
+      if(getMin(xRawCentredOnTail)<minX){
+        minX = getMin(xRawCentredOnTail);
+      }
+      if(getMax(xRawCentredOnTail)>maxX){
+        maxX = getMax(xRawCentredOnTail);
+      }
+    }
+    offsetRawPlot.setLimits( (int) minX-1, (int) maxX+1,-50,360);
+    offsetRawPlot.setColor(Color.BLACK);
+    offsetRawPlot.drawLine((int) minX-1, 180, (int) maxX+1, 180); 
+    offsetRawPlot.setColor(Color.LIGHT_GRAY);
+   
+    for(int i=0;i<this.getNucleusCount();i++){
+      double[] xRawCentredOnTail = this.getNucleus(i).createOffsetRawProfile();
+      double[] ypoints = this.getNucleus(i).getInteriorAngles();
+
+      offsetRawPlot.setColor(Color.LIGHT_GRAY);
+      offsetRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
+    }
+    
+    offsetRawPlot.draw();
+    offsetRawPlotWindow = offsetRawPlot.show();
+    offsetRawPlotWindow.noGridLines = true; // I have no idea why this makes the grid lines appear on work PC, when they appear by default at home
+    offsetRawPlotWindow.drawPlot(offsetRawPlot);  
+  }
+
+  public void drawNormalisedPositionsFromTailChart(){
+   
+    for(int i=0;i<this.getNucleusCount();i++){
+      double[] xpoints = this.getNucleus(i).getNormalisedXPositionsFromTip();
+      double[] ypoints = this.getNucleus(i).getNormalisedYPositionsFromTail();
+      normXFromTailPlot.addPoints(xpoints, ypoints, Plot.LINE);
+    }
+    normXFromTailPlot.draw();
+    normXFromTailWindow = normXFromTailPlot.show();
+    normXFromTailWindow.drawPlot(normXFromTailPlot);  
   }
 
   /*

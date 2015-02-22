@@ -60,11 +60,11 @@ public class NucleusDetector {
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
-  private static final int    NUCLEUS_THRESHOLD = 36;
-  private static final double MIN_NUCLEAR_SIZE  = 500;
-  private static final double MAX_NUCLEAR_SIZE  = 10000;
-  private static final double MIN_NUCLEAR_CIRC  = 0.3;
-  private static final double MAX_NUCLEAR_CIRC  = 1;
+  private static final int  NUCLEUS_THRESHOLD = 36;
+  private double minNuclearSize  = 500;
+  private double maxNuclearSize  = 10000;
+  private double minNuclearCirc  = 0.4;
+  private double maxNuclearCirc  = 1;
 
   // counts of nuclei processed
   private int totalNuclei        = 0;
@@ -76,20 +76,47 @@ public class NucleusDetector {
 	// private NucleusCollection collection;
   private HashMap<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
 
+
+  /*
+    Constructors
+  */
 	public NucleusDetector(File folder){
 		this.folder = folder;
-
-		try{
-			processFolder(this.folder);
-		} catch(Exception e){
-			IJ.log("Error in processing folder: "+e);
-		}
-
 	}
 
-	// public NucleusCollection getNucleiInFolder(){
-	// 	return this.collection;
-	// }
+  public NucleusDetector(File folder, double minSize, double maxSize){
+    this.folder = folder;
+    this.setMinNuclearSize(minSize);
+    this.setMaxNuclearSize(maxSize);
+  }
+
+  public void runDetector(){
+    try{
+      processFolder(this.folder);
+    } catch(Exception e){
+      IJ.log("Error in processing folder: "+e);
+    }
+  }
+
+	/*
+    Settings for nucleus detection
+  */
+
+  public void setMinNuclearSize(double d){
+    this.minNuclearSize = d;
+  } 
+
+  public void setMaxNuclearSize(double d){
+    this.maxNuclearSize = d;
+  }   
+
+  public void setMinNuclearCirc(double d){
+    this.minNuclearCirc = d;
+  }
+
+  public void setMaxNuclearCirc(double d){
+    this.maxNuclearCirc = d;
+  }   
 
   public HashMap<File, NucleusCollection> getNucleiCollections(){
     // remove any empty collections before returning
@@ -180,12 +207,12 @@ public class NucleusDetector {
 
     for(Roi roi : roiArray){
       
-      IJ.log("  Analysing nucleus "+i);
+      IJ.log("  Acquiring nucleus "+i);
       try{
       	analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
       	this.totalNuclei++;
       } catch(Exception e){
-      	IJ.log("  Error analysing nucleus: "+e);
+      	IJ.log("  Error acquiring nucleus: "+e);
       }
       i++;
     } 
@@ -215,7 +242,7 @@ public class NucleusDetector {
     ResultsTable rt = new ResultsTable();
     ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
                 ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA ,
-                 rt, MIN_NUCLEAR_SIZE, MAX_NUCLEAR_SIZE, MIN_NUCLEAR_CIRC, MAX_NUCLEAR_CIRC);
+                 rt, this.minNuclearSize, this.maxNuclearSize, this.minNuclearCirc, this.maxNuclearCirc);
     try {
       pa.setRoiManager(manager);
       boolean success = pa.analyze(blue);
