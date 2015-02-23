@@ -60,11 +60,12 @@ public class NucleusDetector {
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
-  private static final int  NUCLEUS_THRESHOLD = 36;
   private double minNuclearSize  = 500;
   private double maxNuclearSize  = 10000;
   private double minNuclearCirc  = 0.4;
   private double maxNuclearCirc  = 1;
+
+  private int nucleusThreshold = 36;
 
   // counts of nuclei processed
   private int totalNuclei        = 0;
@@ -88,6 +89,13 @@ public class NucleusDetector {
     this.folder = folder;
     this.setMinNuclearSize(minSize);
     this.setMaxNuclearSize(maxSize);
+  }
+
+    public NucleusDetector(File folder, double minSize, double maxSize, int threshold){
+    this.folder = folder;
+    this.setMinNuclearSize(minSize);
+    this.setMaxNuclearSize(maxSize);
+    this.setThreshold(threshold);
   }
 
   public void runDetector(){
@@ -116,6 +124,10 @@ public class NucleusDetector {
 
   public void setMaxNuclearCirc(double d){
     this.maxNuclearCirc = d;
+  }
+
+  public void setThreshold(int i){
+    this.nucleusThreshold = i;
   }   
 
   public HashMap<File, NucleusCollection> getNucleiCollections(){
@@ -173,9 +185,12 @@ public class NucleusDetector {
             Opener localOpener = new Opener();
             ImagePlus localImagePlus = localOpener.openImage(file.getAbsolutePath());             
             // handle the image
-            processImage(localImagePlus, file);
-            localImagePlus.close();
-
+            if(localImagePlus.getType()==ImagePlus.COLOR_RGB){ // convert to RGB
+              processImage(localImagePlus, file);
+              localImagePlus.close();
+            } else {
+              IJ.log("Cannot analyse - RGB image required");
+            }
           } catch (Exception e) { 
               IJ.log("Error in image processing: "+e);
           }
@@ -186,9 +201,6 @@ public class NucleusDetector {
         }
       }
     }
-    // this.collectionGroup.add(folderCollection);
-    // IJ.log("Within folder:");
-    // IJ.log("Total nuclei  : "+this.totalNuclei);
   }
 
   /*
@@ -198,9 +210,7 @@ public class NucleusDetector {
   private void processImage(ImagePlus image, File path){
 
     IJ.log("File:  "+path.getName());
-    RoiManager nucleiInImage;
-
-    nucleiInImage = findNucleiInImage(image);
+    RoiManager nucleiInImage = findNucleiInImage(image);
 
     Roi[] roiArray = nucleiInImage.getSelectedRoisAsArray();
     int i = 0;
@@ -234,7 +244,7 @@ public class NucleusDetector {
     // threshold
     ImageProcessor ip = blue.getChannelProcessor();
     ip.smooth();
-    ip.threshold(NUCLEUS_THRESHOLD);
+    ip.threshold(this.nucleusThreshold);
     ip.invert();
     // blue.show();
 

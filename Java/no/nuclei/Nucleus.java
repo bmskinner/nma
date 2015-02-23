@@ -68,6 +68,8 @@ public class Nucleus {
   private int nucleusNumber; // the number of the nucleus in the current image
   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
+  private double differenceToMedianCurve; // store the difference between curves
+
   private double medianAngle; // the median angle from XYPoint[] smoothedArray
   private double perimeter;   // the nuclear perimeter
   private double pathLength;  // the angle path length - measures wibbliness in border
@@ -140,6 +142,7 @@ public class Nucleus {
 
      // calc distances around nucleus through CoM
      this.calculateDistanceProfile();
+     this.calculatePathLength();
 
      // find and measure signals
      this.measureSignalsInNucleus();
@@ -313,6 +316,10 @@ public class Nucleus {
     }
   }
 
+  public double getDifferenceToMedianCurve(){
+    return this.differenceToMedianCurve;
+  }
+
   /*
     -----------------------
     Protected setters for subclasses
@@ -391,6 +398,10 @@ public class Nucleus {
     this.failureCode = this.failureCode | i;
   }
 
+  public void setDifferenceToMedianCurve(double d){
+    this.differenceToMedianCurve = d;
+  }
+
   /*
     -----------------------
     Get aggregate values
@@ -456,6 +467,22 @@ public class Nucleus {
 
   public void setPathLength(double d){
     this.pathLength = d;
+  }
+
+  public void calculatePathLength(){
+    double pathLength = 0;
+
+    XYPoint prevPoint = new XYPoint(0,0);
+     
+    for (int i=0; i<this.getLength();i++ ) {
+        double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
+
+        // calculate the path length as if it were a border
+        XYPoint thisPoint = new XYPoint(normalisedX,this.getBorderPoint(i).getInteriorAngle());
+        pathLength += thisPoint.getLengthTo(prevPoint);
+        prevPoint = thisPoint;
+    }
+    this.setPathLength(pathLength);
   }
 
   /*
@@ -796,24 +823,67 @@ public class Nucleus {
   /*
     From the point given, create a line to the CoM. Measure angles from all 
     other points. Pick the point closest to 90 degrees. Can then get opposite
-    point
+    point. Defaults to input point if unable to find point.
   */
   public NucleusBorderPoint findOrthogonalBorderPoint(NucleusBorderPoint a){
 
-    NucleusBorderPoint orthgonalPoint;
-    double bestAngle = 90;
+    NucleusBorderPoint orthgonalPoint = a;
+    double bestAngle = 0;
 
-    for(i=0;i<this.getLength();i++){
+    for(int i=0;i<this.getLength();i++){
 
       NucleusBorderPoint p = this.getBorderPoint(i);
       double angle = Nucleus.findAngleBetweenXYPoints(a, this.getCentreOfMass(), p); 
-      if(Math.abs(90-bestAngle)<bestAngle){
-        bestAngle = 90-bestAngle;
+      if(Math.abs(90-angle)< Math.abs(90-bestAngle)){
+        bestAngle = angle;
         orthgonalPoint = p;
       }
     }
     return orthgonalPoint;
   }
+
+  /*
+    This will find the point in a list that is closest to any local maximum
+    in the border profile, wherever that maximum may be
+  */
+  public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list){
+
+    NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
+    NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
+    double closestDistance = this.getPerimeter();
+
+    for(NucleusBorderPoint p : list){
+      for(NucleusBorderPoint m : maxima){
+        double distance = p.getLengthTo(m);
+        if(distance<closestDistance){
+          closestPoint = p;
+        }
+      }
+    }
+    return closestPoint;
+  }
+
+    /*
+    This will find the point in a list that is closest to any local minimum
+    in the border profile, wherever that minimum may be
+  */
+  public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list){
+
+    NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMinima();
+    NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
+    double closestDistance = this.getPerimeter();
+
+    for(NucleusBorderPoint p : list){
+      for(NucleusBorderPoint m : maxima){
+        double distance = p.getLengthTo(m);
+        if(distance<closestDistance){
+          closestPoint = p;
+        }
+      }
+    }
+    return closestPoint;
+  }
+
 
   /*
     Given three XYPoints, measure the angle a-b-c
@@ -893,6 +963,22 @@ public class Nucleus {
       }
     }
     return this.getBorderPoint(index);
+  }
+
+  public double[] getNormalisedProfilePositions(){
+    double[] d = new double[this.getLength()];
+    for(int i=0;i<this.getLength();i++){
+      d[i] = ( (double)i / (double)this.getLength() ) * 100;
+    }
+    return d;
+  }
+
+  public double[] getRawProfilePositions(){
+    double[] d = new double[this.getLength()];
+    for(int i=0;i<this.getLength();i++){
+      d[i] = i;
+    }
+    return d;
   }
 
   /*
@@ -983,7 +1069,6 @@ public class Nucleus {
       f.delete();
     }
 
-    // NucleusBorderPoint[] points = this.getAngleProfile().getBorderPointArray();
     String outLine =  "X_INT\t"+
                       "Y_INT\t"+
                       "X_DOUBLE\t"+
@@ -1036,7 +1121,8 @@ public class Nucleus {
 
   /*
     Annotate image with ROIs
-    and CoMs of nucleus and signals
+    CoMs of nucleus and signals
+    Narrowest diameter across nucleus
   */
   public void annotateNucleusImage(){ 
 
@@ -1082,6 +1168,14 @@ public class Nucleus {
           ip.draw(s.getRoi());
         }
       }
+
+      // The narrowest part of the nucleus
+      ip.setLineWidth(1);
+      ip.setColor(Color.MAGENTA);
+      NucleusBorderPoint narrow1 = this.getNarrowestDiameterPoint();
+      NucleusBorderPoint narrow2 = this.findOppositeBorder(narrow1);
+      ip.drawLine(narrow1.getXAsInt(), narrow1.getYAsInt(), narrow2.getXAsInt(), narrow2.getYAsInt());
+
     } catch(Exception e){
       IJ.log("Error annotating nucleus: "+e);
     }

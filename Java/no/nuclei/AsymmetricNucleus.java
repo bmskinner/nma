@@ -1,0 +1,389 @@
+/*
+  -----------------------
+  ASYMMETRIC NUCLEUS CLASS
+  -----------------------
+  Contains the variables for storing a non-circular nucleus.
+  They have a head and a tail, hence can be oriented
+  in one axis.
+*/  
+package no.nuclei;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.Overlay;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.gui.ProgressBar;
+import ij.gui.TextRoi;
+import ij.io.FileInfo;
+import ij.io.FileOpener;
+import ij.io.DirectoryChooser;
+import ij.io.Opener;
+import ij.io.OpenDialog;
+import ij.io.RandomAccessStream;
+import ij.measure.ResultsTable;
+import ij.measure.SplineFitter;
+import ij.plugin.ChannelSplitter;
+import ij.plugin.PlugIn;
+import ij.plugin.filter.Analyzer;
+import ij.plugin.filter.ParticleAnalyzer;
+import ij.plugin.frame.RoiManager;
+import ij.process.FloatPolygon;
+import ij.process.FloatProcessor;
+import ij.process.ImageConverter;
+import ij.process.ImageProcessor;
+import ij.process.StackConverter;
+import java.awt.BasicStroke;
+import java.awt.Shape;
+import java.awt.Color;
+import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.awt.Polygon;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.*;
+import no.nuclei.*;
+
+public class AsymmetricNucleus
+	extends Nucleus
+{
+	private NucleusBorderPoint tailPoint;
+  private NucleusBorderPoint headPoint;
+
+  private ArrayList<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
+
+  private int tailIndex; // the index in the angleProfile that has been designated the tail
+  private int headIndex; // the index in the angleProfile that has been designated the head
+
+  private int offsetForTail = 0; // the offset to apply to the angleProfile to start it from the tail
+  private int offsetForHead = 0; // the offset to apply to the angleProfile to start it from the head
+
+  private ArrayList<Double> normalisedXPositionsFromHead = new ArrayList<Double>(0); // holds the x values only after normalisation
+  private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
+
+  private ArrayList<Double> normalisedYPositionsFromHead = new ArrayList<Double>(0);
+  private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
+  
+  private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
+  private ArrayList<Double> rawXPositionsFromHead        = new ArrayList<Double>(0);
+
+  // Requires a nucleus object to construct from
+  public AsymmetricNucleus(Nucleus n){
+  	this.setRoi(n.getRoi());
+    this.setSourceImage(n.getSourceImage());
+    this.setSourceFile(n.getSourceFile());
+    this.setAnnotatedImage(n.getAnnotatedImage());
+    this.setNucleusNumber(n.getNucleusNumber());
+    this.setNucleusFolder(n.getNucleusFolder());
+    this.setPerimeter(n.getPerimeter());
+    this.setPathLength(n.getPathLength());
+    this.setFeret(n.getFeret());
+    this.setArea(n.getArea());
+    this.setAngleProfile(n.getAngleProfile());
+    this.setCentreOfMass(n.getCentreOfMass());
+    this.setRedSignals(n.getRedSignals());
+    this.setGreenSignals(n.getGreenSignals());
+    this.setPolygon(n.getSmoothedPolygon());
+    this.setDistanceProfile(n.getDistanceProfile());
+    this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
+  }
+
+  /*
+    -----------------------
+    Get nucleus features
+    -----------------------
+  */
+
+  public NucleusBorderPoint getHead(){
+  	return this.headPoint;
+  }
+
+  public NucleusBorderPoint getTail(){
+  	return this.tailPoint;
+  }
+
+  public int getTailIndex(){
+    return this.tailIndex;
+  }
+
+  public int getHeadIndex(){
+    return this.headIndex;
+  }
+
+  public int getOffsetForTail(){
+    return this.offsetForTail;
+  }
+
+  public int getOffsetForHead(){
+    return this.offsetForHead;
+  }
+
+  public ArrayList<NucleusBorderPoint> getEstimatedTailPoints(){
+    return this.tailEstimatePoints;
+  }
+
+  /*
+    -----------------------
+    Set sperm nucleus features
+    -----------------------
+  */
+
+  protected void setHead(NucleusBorderPoint p){
+    this.headPoint = p;
+  }
+
+  protected void setTail(NucleusBorderPoint p){
+    this.tailPoint = p;
+  }
+
+  protected void setTailIndex(int i){
+    this.tailIndex = i;
+  }
+
+  protected void setHeadIndex(int i){
+    this.headIndex = i;
+  }
+
+  protected void setOffsetForTail(int i){
+    this.offsetForTail = i;
+  }
+
+  protected void setOffsetForHead(int i){
+    this.offsetForHead = i;
+  }
+
+  protected void addRawXPositionFromTail(double d){
+    this.rawXPositionsFromTail.add(d);
+  }
+
+  protected void addNormalisedXPositionFromTail(double d){
+    this.normalisedXPositionsFromTail.add(d);
+  }
+
+  protected void addNormalisedYPositionFromTail(double d){
+    this.normalisedYPositionsFromTail.add(d);
+  }
+
+  protected void addRawXPositionFromHead(double d){
+    this.rawXPositionsFromHead.add(d);
+  }
+
+  protected void addNormalisedXPositionFromHead(double d){
+    this.normalisedXPositionsFromHead.add(d);
+  }
+
+  protected void addTailEstimatePosition(NucleusBorderPoint p){
+    this.tailEstimatePoints.add(p);
+  }
+
+  /*
+    -----------------------
+    Get raw and normalised profile and values
+    -----------------------
+  */
+
+  public double[] getNormalisedYPositionsFromTail(){
+    double[] d = new double[normalisedYPositionsFromTail.size()];
+    for(int i=0;i<normalisedYPositionsFromTail.size();i++){
+      d[i] = normalisedYPositionsFromTail.get(i);
+    }
+    return d;
+  }
+
+  public double[] getNormalisedXPositionsFromTail(){
+    double[] d = new double[normalisedXPositionsFromTail.size()];
+    for(int i=0;i<normalisedXPositionsFromTail.size();i++){
+      d[i] = normalisedXPositionsFromTail.get(i);
+    }
+    return d;
+  }
+
+  public double[] getRawXPositionsFromTail(){
+    double[] d = new double[rawXPositionsFromTail.size()];
+    for(int i=0;i<rawXPositionsFromTail.size();i++){
+      d[i] = rawXPositionsFromTail.get(i);
+    }
+    return d;
+  }
+
+
+  public double[] getNormalisedYPositionsFromHead(){
+    double[] d = new double[normalisedYPositionsFromHead.size()];
+    for(int i=0;i<normalisedYPositionsFromHead.size();i++){
+      d[i] = normalisedYPositionsFromHead.get(i);
+    }
+    return d;
+  }
+
+  public double[] getNormalisedXPositionsFromHead(){
+    double[] d = new double[normalisedXPositionsFromHead.size()];
+    for(int i=0;i<normalisedXPositionsFromHead.size();i++){
+      d[i] = normalisedXPositionsFromHead.get(i);
+    }
+    return d;
+  }
+
+  public double[] getRawXPositionsFromHead(){
+    double[] d = new double[rawXPositionsFromHead.size()];
+    for(int i=0;i<rawXPositionsFromHead.size();i++){
+      d[i] = rawXPositionsFromHead.get(i);
+    }
+    return d;
+  }
+
+  public double getMaxRawXFromTail(){
+    double d = 0;
+    for(int i=0;i<rawXPositionsFromTail.size();i++){
+      if(rawXPositionsFromTail.get(i) > d){
+        d = rawXPositionsFromTail.get(i);
+      }
+    }
+    return d;
+  }
+
+  public double getMinRawXFromTail(){
+    double d = 0;
+    for(int i=0;i<rawXPositionsFromTail.size();i++){
+      if(rawXPositionsFromTail.get(i) < d){
+        d = rawXPositionsFromTail.get(i);
+      }
+    }
+    return d;
+  }
+
+  public double getMaxRawXFromHead(){
+    double d = 0;
+    for(int i=0;i<rawXPositionsFromHead.size();i++){
+      if(rawXPositionsFromHead.get(i) > d){
+        d = rawXPositionsFromHead.get(i);
+      }
+    }
+    return d;
+  }
+
+  public double getMinRawXFromHead(){
+    double d = 0;
+    for(int i=0;i<rawXPositionsFromHead.size();i++){
+      if(rawXPositionsFromHead.get(i) < d){
+        d = rawXPositionsFromHead.get(i);
+      }
+    }
+    return d;
+  }
+
+  /*
+    -----------------------
+    Annotate features of the nucleus
+    -----------------------
+  */
+
+  public void annotateTail(){
+    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+    ip.setColor(Color.CYAN);
+    ip.setLineWidth(3);
+    ip.drawDot( this.tailPoint.getXAsInt(), 
+                this.tailPoint.getYAsInt());
+  }
+
+  public void annotateHead(){
+    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+    ip.setColor(Color.YELLOW);
+    ip.setLineWidth(3);
+    ip.drawDot( this.headPoint.getXAsInt(), 
+                this.headPoint.getYAsInt());
+  }
+
+  // draw the points considered as sperm tails
+  public void annotateEstimatedTailPoints(){
+    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+    ip.setLineWidth(3);
+    ip.setColor(Color.GRAY);
+    for(int j=0; j<this.getEstimatedTailPoints().size();j++){
+      NucleusBorderPoint p = this.getEstimatedTailPoints().get(j);
+      ip.drawDot(p.getXAsInt(), p.getYAsInt());
+    }
+  }
+
+  public void annotateFeatures(){
+    this.annotateTail();
+    this.annotateHead();
+    this.annotateEstimatedTailPoints();
+  }
+
+  /*
+    -----------------------
+    Find rotations based on tail point
+    -----------------------
+  */
+
+  /*
+    Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
+    Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
+    Returns an angle
+  */
+  public double findRotationAngle(){
+    XYPoint end = new XYPoint(this.getTail().getXAsInt(),this.getTail().getYAsInt()-50);
+
+    double angle = findAngleBetweenXYPoints(end, this.getTail(), this.getCentreOfMass());
+
+    if(this.getCentreOfMass().getX() < this.getTail().getX()){
+      return angle;
+    } else {
+      return 0-angle;
+    }
+  }
+
+  /*
+    -----------------------
+    Measure signal positions
+    -----------------------
+  */
+
+  public void calculateSignalAnglesFromTail(){
+
+    ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+    signals.add(this.getRedSignals());
+    signals.add(this.getGreenSignals());
+
+    for( ArrayList<NuclearSignal> signalGroup : signals ){
+
+      if(signalGroup.size()>0){
+
+        for(int i=0;i<signalGroup.size();i++){
+          NuclearSignal n = signalGroup.get(i);
+          double angle = findAngleBetweenXYPoints(this.getTail(), this.getCentreOfMass(), n.getCentreOfMass());
+
+          // set the final angle
+          n.setAngle(angle);
+        }
+      }
+    }
+  }
+
+  public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
+
+    ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+    signals.add(this.getRedSignals());
+    signals.add(this.getGreenSignals());
+
+    for( ArrayList<NuclearSignal> signalGroup : signals ){
+
+      if(signalGroup.size()>0){
+
+        for(int i=0;i<signalGroup.size();i++){
+          NuclearSignal n = signalGroup.get(i);
+          double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), n.getCentreOfMass());
+
+          // set the final angle
+          n.setAngle(angle);
+        }
+      }
+    }
+  }
+}

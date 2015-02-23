@@ -73,17 +73,14 @@ public class CurveRefolder {
 		
 		IJ.log("Refolding curve: initial score: "+(int)score);
 
-		double prevScore = score*2;
-		int i=0;
-		while(prevScore - score >0.0001 || i<100){
-			prevScore = score;
-			score = this.iterateOverNucleus();
-			// IJ.log("Iteration "+i+": "+score);
-			i++;
-		}
+		// double prevScore = score*2;
+		// int i=0;
+		// while(prevScore - score >0.0001 || i<100){
+		// 	prevScore = score;
+		// 	score = this.iterateOverNucleus();
+		// 	i++;
+		// }
 		IJ.log("Refolded curve: final score: "+(int)score);
-		// this.plotTargetNucleus();
-		// return targetNucleus;
 	}
 
 	/*

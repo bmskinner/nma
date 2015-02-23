@@ -63,11 +63,11 @@ public class Pig_Sperm_Analysis
   // failure codes - not in use, keep to add back to logFailed in refilter
   private static final String IMAGE_PREFIX = "export.";
 
-  private static final int NUCLEUS_THRESHOLD = 36;
-  private static final double MIN_NUCLEAR_SIZE = 2000;
-  private static final double MAX_NUCLEAR_SIZE = 8000;
-  private static final double MIN_NUCLEAR_CIRC = 0.4;
-  private static final double MAX_NUCLEAR_CIRC = 0.9;
+  private static final int NUCLEUS_THRESHOLD = 40;
+  private static final double MIN_NUCLEAR_SIZE = 1000;
+  private static final double MAX_NUCLEAR_SIZE = 10000;
+  private static final double MIN_NUCLEAR_CIRC = 0.2;
+  private static final double MAX_NUCLEAR_CIRC = 1.0;
 
   private NucleusCollection completeCollection;
   private NucleusCollection failedNuclei;
@@ -87,7 +87,7 @@ public class Pig_Sperm_Analysis
     IJ.log("Directory: "+folderName);
 
     File folder = new File(folderName);
-    NucleusDetector detector = new NucleusDetector(folder, MIN_NUCLEAR_SIZE, MAX_NUCLEAR_SIZE);
+    NucleusDetector detector = new NucleusDetector(folder, MIN_NUCLEAR_SIZE, MAX_NUCLEAR_SIZE, NUCLEUS_THRESHOLD);
     detector.runDetector();
 
     HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
@@ -104,7 +104,7 @@ public class Pig_Sperm_Analysis
 
     for (File key : keys) {
       NucleusCollection collection = folderCollection.get(key);
-      PigSpermNucleusCollection processed = new PigSpermNucleusCollection(key, "complete");
+      PigSpermNucleusCollection spermNuclei = new PigSpermNucleusCollection(key, "complete");
       IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
 
       for(int i=0;i<collection.getNucleusCount();i++){
@@ -138,13 +138,13 @@ public class Pig_Sperm_Analysis
       IJ.log("  Green signals: "+r.getGreenSignalCount());
 
       r.recalculateTailPositions();
-      r.refilterNuclei(failedNuclei);
+
       r.measureNuclearOrganisation();
       r.measureAndExportNuclei();
 
       failedNuclei.measureAndExportNuclei();
 
-      // attemptRefoldingConsensusNucleus(r);
+      attemptRefoldingConsensusNucleus(r);
 
       // split complete set by signals and analyse
       PigSpermNucleusCollection redNuclei = new PigSpermNucleusCollection(folder, "red");
@@ -159,77 +159,20 @@ public class Pig_Sperm_Analysis
     }
   }
 
-  // public void rotateAndAssembleNucleiForExport(PigSpermNucleusCollection collection){
+  public void attemptRefoldingConsensusNucleus(PigSpermNucleusCollection collection){
 
-  //   // foreach nucleus
-  //   // createProcessor (500, 500)
-  //   // sertBackgroundValue(0)
-  //   // paste in old image at centre
-  //   // insert(ImageProcessor ip, int xloc, int yloc)
-  //   // rotate about CoM (new position)
-  //   // display.
-  //   IJ.log("Creating composite image...");
-    
-  //   int totalWidth = 0;
-  //   int totalHeight = 0;
+    PigSpermNucleus refoldCandidate = (PigSpermNucleus)collection.getNucleusMostSimilarToMedian();
+    double[] targetProfile = collection.getMedianTargetCurve(refoldCandidate);
 
-  //   int boxWidth = (int)(collection.getMedianNuclearPerimeter()/1.4);
-  //   int boxHeight = (int)(collection.getMedianNuclearPerimeter()/1.2);
+    CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
+    refolder.refoldCurve();
 
-  //   int maxBoxWidth = boxWidth * 5;
-  //   int maxBoxHeight = (boxHeight * (int)(Math.ceil(collection.getNucleusCount()/5)) + boxHeight );
+    // orient refolded nucleus to put tail at the bottom
+    refolder.putPointAtBottom(refoldCandidate.getSpermTail());
 
-  //   ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
-  //   ImageProcessor finalProcessor = finalImage.getProcessor();
-  //   finalProcessor.setBackgroundValue(0);
+    // draw signals on the refolded nucleus
+    refolder.addSignalsToConsensus(collection);
+    refolder.exportImage(collection);
 
-  //   for(int i=0; i<collection.getNucleusCount();i++){
-      
-  //     PigSpermNucleus n = collection.getNucleus(i);
-  //     String path = n.getNucleusFolder().getAbsolutePath()+
-  //                     File.separator+
-  //                     this.IMAGE_PREFIX+
-  //                     n.getNucleusNumber()+
-  //                     ".annotated.tiff";
-
-  //     try {
-  //       Opener localOpener = new Opener();
-  //       ImagePlus image = localOpener.openImage(path);
-  //       ImageProcessor ip = image.getProcessor();
-  //       int width = ip.getWidth();
-  //       int height = ip.getHeight();
-  //       ip.setRoi(n.getRoi());
-
-
-  //       ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
-
-  //       newProcessor.setBackgroundValue(0);
-  //       newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
-  //       newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
-  //       newProcessor.rotate( n.findRotationAngle() );
-  //       newProcessor.setBackgroundValue(0);
-
-  //       if(totalWidth>maxBoxWidth-boxWidth){
-  //         totalWidth=0;
-  //         totalHeight+=(int)(boxHeight);
-  //       }
-  //       int newX = totalWidth;
-  //       int newY = totalHeight;
-  //       totalWidth+=(int)(boxWidth);
-        
-  //       finalProcessor.insert(newProcessor, newX, newY);
-  //       TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
-  //       Overlay overlay = new Overlay(label);
-  //       finalProcessor.drawOverlay(overlay);  
-  //     } catch(Exception e){
-  //       IJ.log("Error adding image to composite");
-  //       // IJ.append("Error adding image to composite: "+e, debugFile);
-  //       // IJ.append("  "+collectionType, debugFile);
-  //       // IJ.append("  "+path, debugFile);
-  //     }     
-  //   }
-  //   finalImage.show();
-  //   IJ.saveAsTiff(finalImage, collection.getFolder().getAbsolutePath()+"composite.tiff");
-  //   IJ.log("Composite image created");
-  // }
+  }
 }

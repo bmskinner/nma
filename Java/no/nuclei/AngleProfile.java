@@ -13,6 +13,7 @@ import ij.process.FloatPolygon;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import java.util.*;
+import no.nuclei.Nucleus;
 
 public class AngleProfile {
 
@@ -38,40 +39,22 @@ public class AngleProfile {
 		updateAngleCalculations();
 	}
 
-	public NucleusBorderPoint[] getBorderPointArray(){
-		return this.array;
-	}
 
-	public void updateAngleCalculations(){
-		calculateAngles();
-		calculateDeltaAngles();
-		calculateSmoothedDeltaAngles();
-		countConsecutiveDeltas();
-    updatePointsWithBlockCount();
-    detectLocalMinima();
-    detectLocalMaxima();
-    calculateMedianAngle();
-	}
+  /*
+    Getters
+  */
 
-	public int getAngleProfileWindowSize(){
-		return this.angleProfileWindowSize;
-	}
+  public int getAngleProfileWindowSize(){
+    return this.angleProfileWindowSize;
+  }
 
-	public void setAngleProfileWindowSize(int i){
-		int old = this.angleProfileWindowSize;
-		this.angleProfileWindowSize = i;
-		if(old != i){
-			calculateAngles(); // trigget a recalc on change
-		}
-	}
+  public int getBlockCount(){
+    return this.blockCount;
+  }
 
-	public int getBlockCount(){
-		return this.blockCount;
-	}
-
-	public int size(){
-		return array.length;
-	}
+  public int size(){
+    return array.length;
+  }
 
   public int getIndexOfPoint(NucleusBorderPoint p){
 
@@ -84,29 +67,21 @@ public class AngleProfile {
     return index;
   }
 
+  public int getDeltaSmoothingWindowSize(){
+    return this.deltaSmoothingWindowSize;
+  }
+
+  public int getMinimaAndMaximaLookupWindow(){
+    return this.minimaAndMaximaLookupWindow;
+  }
+
   public double getMedianInteriorAngle(){
     return this.medianAngle;
   }
 
-	public NucleusBorderPoint getBorderPoint(int i){
+  public NucleusBorderPoint getBorderPoint(int i){
       return this.array[i];
     }
-
-	public int getDeltaSmoothingWindowSize(){
-		return this.deltaSmoothingWindowSize;
-	}
-
-	public void setDeltaSmoothingWindowSize(int i){
-		int old = this.deltaSmoothingWindowSize;
-		this.deltaSmoothingWindowSize = i;
-		if(old != i){
-			calculateSmoothedDeltaAngles();
-		}
-	}
-
-  public void setMinimaAndMaximaLookupWindow(int i){
-    this.minimaAndMaximaLookupWindow = i;
-  }
 
   public NucleusBorderPoint getPointWithMinimumAngle(){
 
@@ -138,21 +113,134 @@ public class AngleProfile {
     return array[maxIndex];
   }
 
-  public int getMinimaAndMaximaLookupWindow(){
-    return this.minimaAndMaximaLookupWindow;
+  public FloatPolygon getPolygon(){
+    return this.polygon;
   }
 
-	public FloatPolygon getPolygon(){
-		return this.polygon;
-	}
+  // get the interior angles with no offset
+  public double[] getInteriorAngles(){
 
-	public double[] getAngleArray(){
-      double[] d = new double[this.array.length]; // allow the first and last element to be duplicated
-      for(int i=0;i<this.array.length;i++){
-        d[i] = this.array[i].getInteriorAngle();
-      }
-      return d;
+    double[] points = new double[array.length];
+
+    for(int j=0;j<array.length;j++){
+        points[j] = array[j].getInteriorAngle();
     }
+    return points;
+  }
+
+  // get the interior angles beginning from the specified index
+  public double[] getInteriorAngles(int offset){
+
+    double[] points = new double[array.length];
+    for(int j=0;j<array.length;j++){
+        points[j] = array[  Nucleus.wrapIndex( j+offset, array.length) ].getInteriorAngle();
+    }
+    return points;
+  }
+
+  /*
+    Retrieves an NucleusBorderPoint array of the points designated as local minima.
+    If the local minimum detection has not yet been run, calculates local minima
+  */
+  public NucleusBorderPoint[] getLocalMinima(){
+
+    NucleusBorderPoint[] newArray = new NucleusBorderPoint[this.minimaCount];
+    int j = 0;
+
+    try{
+      for (int i=0; i<array.length; i++) {
+        if(array[i].isLocalMin()){
+          newArray[j] = array[i];
+          j++;
+        }
+      }
+    } catch(Exception e){
+      IJ.log("Error in fetching minima: "+e);
+    }
+    return newArray;
+  }
+
+  /*
+    Retrieves an NucleusBorderPoint array of the points designated as local maxima.
+    If the local maximum detection has not yet been run, calculates local maxima
+  */
+  public NucleusBorderPoint[] getLocalMaxima(){
+
+    NucleusBorderPoint[] newArray = new NucleusBorderPoint[this.maximaCount];
+    int j = 0;
+
+    try{  
+      for (int i=0; i<array.length; i++) {
+        if(array[i].isLocalMax()){
+          newArray[j] = this.getBorderPoint(i);
+          j++;
+        }
+      }
+    } catch(Exception e){
+      IJ.log("Error in fetching maxima: "+e);
+    }
+    return newArray;
+  }
+
+  public NucleusBorderPoint[] getBorderPointArray(){
+    return this.array;
+  }
+
+  public NucleusBorderPoint[] getBlockOfBorderPoints(int b){
+
+    int count = countPointsWithBlockNumber(b);
+    NucleusBorderPoint[] result = new NucleusBorderPoint[count];
+    
+    int j=0;
+    for(int i=0; i<this.array.length;i++){
+
+      if(this.array[i].getBlockNumber() == b){
+        result[j] = this.array[i];
+        j++;
+      }
+
+    }
+    return result;
+  }
+
+  /*
+    Setters
+  */
+
+  public void setAngleProfileWindowSize(int i){
+    int old = this.angleProfileWindowSize;
+    this.angleProfileWindowSize = i;
+    if(old != i){
+      calculateAngles(); // trigget a recalc on change
+    }
+  }
+
+  public void setDeltaSmoothingWindowSize(int i){
+    int old = this.deltaSmoothingWindowSize;
+    this.deltaSmoothingWindowSize = i;
+    if(old != i){
+      calculateSmoothedDeltaAngles();
+    }
+  }
+
+  public void setMinimaAndMaximaLookupWindow(int i){
+    this.minimaAndMaximaLookupWindow = i;
+  }
+
+  /*
+    Angle calculations
+  */
+
+	public void updateAngleCalculations(){
+		calculateAngles();
+		calculateDeltaAngles();
+		calculateSmoothedDeltaAngles();
+		countConsecutiveDeltas();
+    updatePointsWithBlockCount();
+    detectLocalMinima();
+    detectLocalMaxima();
+    calculateMedianAngle();
+	}
 
 	/*
     For a given index in the smoothed angle array: 
@@ -166,15 +254,15 @@ public class AngleProfile {
     // IJ.log("Calculating angles...");
     for(int i=0; i<array.length;i++){
       // use a window size of 25 for now
-    	int indexBefore = wrapIndex(i - this.getAngleProfileWindowSize(), this.array.length);
-    int indexAfter  = wrapIndex(i + this.getAngleProfileWindowSize(), this.array.length);
+    	int indexBefore = Nucleus.wrapIndex(i - this.getAngleProfileWindowSize(), this.array.length);
+    int indexAfter  = Nucleus.wrapIndex(i + this.getAngleProfileWindowSize(), this.array.length);
 
     NucleusBorderPoint pointBefore = this.getBorderPoint(indexBefore);
     NucleusBorderPoint pointAfter = this.getBorderPoint(indexAfter);
     NucleusBorderPoint point = this.getBorderPoint(i);
 
 
-    double angle = findAngleBetweenXYPoints(pointBefore, point, pointAfter);
+    double angle = Nucleus.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
     this.array[i].setMinAngle(angle);
 
     // find the halfway point between the first and last points.
@@ -199,8 +287,8 @@ public class AngleProfile {
   	double angleDelta = 0;
   	for(int i=0; i<this.array.length;i++){
 
-     	NucleusBorderPoint prevPoint = this.array[ wrapIndex(i-1, this.array.length) ];
-     	NucleusBorderPoint nextPoint = this.array[ wrapIndex(i+1, this.array.length) ];
+     	NucleusBorderPoint prevPoint = this.array[ Nucleus.wrapIndex(i-1, this.array.length) ];
+     	NucleusBorderPoint nextPoint = this.array[ Nucleus.wrapIndex(i+1, this.array.length) ];
 
      	angleDelta = nextPoint.getInteriorAngle() - prevPoint.getInteriorAngle();
 	    this.array[i].setInteriorAngleDelta(angleDelta);
@@ -218,8 +306,8 @@ public class AngleProfile {
       // handle array wrapping for arbitrary length smoothing
       for(int j=1;j<=(int)(this.getDeltaSmoothingWindowSize()-1)/2;j++){
 
-      	smoothedDelta += ( this.array[ wrapIndex(i-j, this.array.length) ].getInteriorAngleDelta() +
-	      		this.array[ wrapIndex(i+j, this.array.length) ].getInteriorAngleDelta());
+      	smoothedDelta += ( this.array[ Nucleus.wrapIndex(i-j, this.array.length) ].getInteriorAngleDelta() +
+	      		this.array[ Nucleus.wrapIndex(i+j, this.array.length) ].getInteriorAngleDelta());
       }
       smoothedDelta = smoothedDelta / this.deltaSmoothingWindowSize;
 	  this.array[i].setInteriorAngleDeltaSmoothed(smoothedDelta);
@@ -270,22 +358,7 @@ public class AngleProfile {
   Input: int block number
   Return: NucleusBorderPoint[] all the points in the block
   */
-  public NucleusBorderPoint[] getBlockOfBorderPoints(int b){
-
-    int count = countPointsWithBlockNumber(b);
-    NucleusBorderPoint[] result = new NucleusBorderPoint[count];
-    
-    int j=0;
-    for(int i=0; i<this.array.length;i++){
-
-      if(this.array[i].getBlockNumber() == b){
-        result[j] = this.array[i];
-        j++;
-      }
-
-    }
-    return result;
-  }
+  
 
   /* 
     For a given delta block number in the smoothed NucleusBorderPoint array:
@@ -317,34 +390,11 @@ public class AngleProfile {
     }
   }   
 
-  private int wrapIndex(int i, int length){
-    if(i<0)
-      i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
-    if(Math.floor(i / length)>0)
-      i = i - ( ((int)Math.floor(i / length) )*length); // if i is 250 in a 200 length array, will return 250-(200*1) = 50
-    // if i is 201 in a 200 length array, will return 201 - floor(201/200)=1 * 200 = 1
-    // if 200 in 200 length array: 200/200 = 1; 200-200 = 0
-
-    if(i<0 || i>length){
-    	IJ.log("Warning: array out of bounds: "+i);
-    }
-    
-    return i;
-  }
-
   /*
-    Given three XYPoints, measure the angle a-b-c
-      a   c
-       \ /
-        b
+    --------------------
+    Profile manipulation
+    --------------------
   */
-  private double findAngleBetweenXYPoints(XYPoint a, XYPoint b, XYPoint c){
-
-    float[] xpoints = { (float) a.getX(), (float) b.getX(), (float) c.getX()};
-    float[] ypoints = { (float) a.getY(), (float) b.getY(), (float) c.getY()};
-    PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-   return roi.getAngle();
-  }
 
   /*
     Change the smoothed array order to put the selected index at the beginning
@@ -389,52 +439,10 @@ public class AngleProfile {
   }
 
   /*
-    Functions for detecting minima within the profiles
+    --------------------
+    Detect minima within the profiles
+    --------------------
   */
-
-  /*
-    Retrieves an NucleusBorderPoint array of the points designated as local minima.
-    If the local minimum detection has not yet been run, calculates local minima
-  */
-  public NucleusBorderPoint[] getLocalMinima(){
-
-    NucleusBorderPoint[] newArray = new NucleusBorderPoint[this.minimaCount];
-    int j = 0;
-
-    try{
-      for (int i=0; i<array.length; i++) {
-        if(array[i].isLocalMin()){
-          newArray[j] = array[i];
-          j++;
-        }
-      }
-    } catch(Exception e){
-      IJ.log("Error in fetching minima: "+e);
-    }
-    return newArray;
-  }
-
-  /*
-    Retrieves an NucleusBorderPoint array of the points designated as local maxima.
-    If the local maximum detection has not yet been run, calculates local maxima
-  */
-  public NucleusBorderPoint[] getLocalMaxima(){
-
-    NucleusBorderPoint[] newArray = new NucleusBorderPoint[this.maximaCount];
-    int j = 0;
-
-    try{  
-      for (int i=0; i<array.length; i++) {
-        if(array[i].isLocalMax()){
-          newArray[j] = this.getBorderPoint(i);
-          j++;
-        }
-      }
-    } catch(Exception e){
-      IJ.log("Error in fetching maxima: "+e);
-    }
-    return newArray;
-  }
 
   /*
     For each point in the smoothed angle array, test for a local minimum.
@@ -530,8 +538,8 @@ public class AngleProfile {
       // go through each lookup position and get the appropriate angles
       for(int j=0;j<prevAngles.length;j++){
 
-        int prev_i = wrapIndex( i-(j+1) , array.length );
-        int next_i = wrapIndex( i+(j+1) , array.length );
+        int prev_i = Nucleus.wrapIndex( i-(j+1) , array.length );
+        int next_i = Nucleus.wrapIndex( i+(j+1) , array.length );
 
         // fill the lookup array
         prevAngles[j] = array[prev_i].getInteriorAngle();
@@ -582,16 +590,6 @@ public class AngleProfile {
       array[i].setLocalMax(ok);
     }
     this.maximaCount =  count;
-  }
-
-  public double[] getInteriorAngles(){
-
-    double[] points = new double[array.length];
-
-    for(int j=0;j<array.length;j++){
-        points[j] = array[j].getInteriorAngle();
-    }
-    return points;
   }
 
   /*

@@ -58,13 +58,18 @@ public class NucleusCollection {
   private File debugFile;
   private String collectionType; // for annotating image names
 
-  public static final int FAILURE_THRESHOLD = 4;
-  public static final int FAILURE_FERET     = 8;
-  public static final int FAILURE_ARRAY     = 16;
-  public static final int FAILURE_AREA      = 32;
-  public static final int FAILURE_PERIM     = 64;
-  public static final int FAILURE_OTHER     = 128;
-  public static final int FAILURE_SIGNALS   = 256;
+  public static final int FAILURE_THRESHOLD = 1;
+  public static final int FAILURE_FERET     = 2;
+  public static final int FAILURE_ARRAY     = 4;
+  public static final int FAILURE_AREA      = 8;
+  public static final int FAILURE_PERIM     = 16;
+  public static final int FAILURE_OTHER     = 32;
+  public static final int FAILURE_SIGNALS   = 64;
+
+  public static final double PROFILE_INCREMENT = 0.5;
+
+  private double maxDifferenceFromMedian = 1.5; // used to filter the nuclei, and remove those too small, large or irregular to be real
+  private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
 
 	private ArrayList<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
 
@@ -84,18 +89,6 @@ public class NucleusCollection {
 	public void addNucleus(Nucleus r){
 		this.nucleiCollection.add(r);
 	}
-
-  public void addNucleus(SpermNucleus r){
-    this.nucleiCollection.add(r);
-  }
-
-  public void addNucleus(RodentSpermNucleus r){
-    this.nucleiCollection.add(r);
-  }
-
-  public void addNucleus(PigSpermNucleus r){
-    this.nucleiCollection.add(r);
-  }
 
   /*
     -----------------------
@@ -264,9 +257,115 @@ public class NucleusCollection {
     return result;
   }
 
+  public double[] getDifferencesToMedian(){
+    double[] d = new double[this.getNucleusCount()];
+
+    for(int i=0;i<this.getNucleusCount();i++){
+      d[i] = this.getNucleus(i).getDifferenceToMedianCurve();
+    }
+    return d;
+  }
+
+
+
   /*
     -----------------
-    General functions
+    Basic filtering of population
+    -----------------
+  */
+
+  /*
+    The filters needed to separate out objects from nuclei
+    Filter on: nuclear area, perimeter and array length to find
+    conjoined nuclei and blobs too small to be nuclei
+    Use path length to remove poorly thresholded nuclei
+  */
+  public void refilterNuclei(NucleusCollection failedCollection){
+
+    IJ.log("  Filtering nuclei...");
+    double medianArea = this.getMedianNuclearArea();
+    double medianPerimeter = this.getMedianNuclearPerimeter();
+    double medianPathLength = this.getMedianPathLength();
+    double medianArrayLength = this.getMedianArrayLength();
+    double medianFeretLength = this.getMedianFeretLength();
+
+    int beforeSize = this.getNucleusCount();
+
+    double maxPathLength = medianPathLength * this.maxWibblinessFromMedian;
+    double minArea = medianArea / this.maxDifferenceFromMedian;
+    double maxArea = medianArea * this.maxDifferenceFromMedian;
+    double maxPerim = medianPerimeter * this.maxDifferenceFromMedian;
+    double minPerim = medianPerimeter / this.maxDifferenceFromMedian;
+    double minFeret = medianFeretLength / this.maxDifferenceFromMedian;
+
+    int area = 0;
+    int perim = 0;
+    int pathlength = 0;
+    int arraylength = 0;
+    int curveShape = 0;
+    int feretlength = 0;
+
+    IJ.append("Prefiltered:", this.getDebugFile().getAbsolutePath());
+    this.exportFilterStats();
+
+    for(int i=0;i<this.getNucleusCount();i++){
+      Nucleus n = this.getNucleus(i);
+      boolean dropNucleus = false;
+
+      if(n.getArea() > maxArea || n.getArea() < minArea ){
+        n.updateFailureCode(FAILURE_AREA);
+        area++;
+      }
+      if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
+        n.updateFailureCode(FAILURE_PERIM);
+        perim++;
+      }
+      if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
+        n.updateFailureCode(FAILURE_THRESHOLD);
+        pathlength++;
+      }
+      if(n.getLength() > medianArrayLength * maxDifferenceFromMedian || n.getLength() < medianArrayLength / maxDifferenceFromMedian ){
+        n.updateFailureCode(FAILURE_ARRAY);
+         arraylength++;
+      }
+
+      if(n.getFeret() < minFeret){
+        n.updateFailureCode(FAILURE_FERET);
+        feretlength++;
+      }
+      
+      if(n.getFailureCode() > 0){
+        failedCollection.addNucleus(n);
+        this.getNuclei().remove(this.getNucleus(i));
+        i--; // the array index automatically shifts to account for the removed nucleus. Compensate to avoid skipping nuclei
+      }
+    }
+
+    medianArea = this.getMedianNuclearArea();
+    medianPerimeter = this.getMedianNuclearPerimeter();
+    medianPathLength = this.getMedianPathLength();
+    medianArrayLength = this.getMedianArrayLength();
+    medianFeretLength = this.getMedianFeretLength();
+    // medianDifferenceToMedianCurve = quartile(this.getDifferencesToMedian(),50);
+
+    int afterSize = this.getNucleusCount();
+    int removed = beforeSize - afterSize;
+
+    IJ.append("Postfiltered:", this.getDebugFile().getAbsolutePath());
+    this.exportFilterStats();
+    IJ.log("  Removed due to size or length issues: "+removed+" nuclei");
+    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to array length: "+arraylength+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to feret length: "+feretlength+" nuclei", this.getDebugFile().getAbsolutePath());
+    // IJ.append("  Due to curve shape: "+curveShape+" nuclei", this.getDebugFile().getAbsolutePath());
+    IJ.log("  Remaining: "+this.getNucleusCount()+" nuclei");
+  }
+
+  /*
+    -----------------
+    Profile functions
     -----------------
   */
 
@@ -392,16 +491,126 @@ public class NucleusCollection {
     }        
   }
 
+
   /*
-    Turn a Double[] into a double[]
+    Finds, as a list of index integers, the points
+    of local minimum in the median profile line
   */
-  private double[] getDoubleFromDouble(Double[] d){
-    double[] results = new double[d.length];
-    for(int i=0;i<d.length;i++){
-      results[i] = d[i];
+  private ArrayList<Integer> detectLocalMinimaInMedian(double[] medianProfile){
+    // go through angle array (with tip at start)
+    // look at 1-2-3-4-5 points ahead and behind.
+    // if all greater, local minimum
+    int lookupDistance = 5;
+    
+    double[] prevAngles = new double[lookupDistance]; // slots for previous angles
+    double[] nextAngles = new double[lookupDistance]; // slots for next angles
+
+    // int count = 0;
+
+    ArrayList<Integer> medianIndexMinima = new ArrayList<Integer>(0);
+
+    for (int i=0; i<medianProfile.length; i++) { // for each position in sperm
+
+      // go through each lookup position and get the appropriate angles
+      for(int j=0;j<prevAngles.length;j++){
+
+        int prev_i = wrapIndex( i-(j+1), medianProfile.length ); // the index j+1 before i
+        int next_i = wrapIndex( i+(j+1), medianProfile.length ); // the index j+1 after i
+
+        // fill the lookup array
+        prevAngles[j] = medianProfile[prev_i];
+        nextAngles[j] = medianProfile[next_i];
+      }
+      
+      // with the lookup positions, see if minimum at i
+      // return a 1 if all higher than last, 0 if not
+      // prev_l = 0;
+      int errors = 2; // allow two positions to be out of place; better handling of noisy data
+      boolean ok = true;
+      for(int l=0;l<prevAngles.length;l++){
+
+        // for the first position in prevAngles, compare to the current index
+        if(l==0){
+          if(prevAngles[l] < medianProfile[i] || nextAngles[l] < medianProfile[i]){
+            errors--;
+          }
+        } else { // for the remainder of the positions in prevAngles, compare to the prior prevAngle
+          
+          if(prevAngles[l] < prevAngles[l-1] || nextAngles[l] < nextAngles[l-1]){
+            errors--;
+          }
+        }
+        if(errors<0){
+          ok = false;
+        }
+      }
+
+      if(ok){
+        medianIndexMinima.add(i);
+      }
     }
-    return results;
+    return medianIndexMinima;
   }
+
+  public static double[] interpolateMedianToLength(int newLength, double[] medianProfile){
+
+    int oldLength = medianProfile.length;
+    
+    double[] newMedianCurve = new double[newLength];
+    // where in the old curve index is the new curve index?
+    for (int i=0; i<newLength; i++) {
+      // we have a point in the new curve.
+      // we want to know which points it lay between in the old curve
+      double oldIndex = ( (double)i / (double)newLength)*oldLength; // get the frational index position needed
+      double interpolatedMedian = interpolateNormalisedMedian(oldIndex, medianProfile);
+      newMedianCurve[i] = interpolatedMedian;
+    }
+    return newMedianCurve;
+  }
+
+  /*
+    Take an index position from a non-normalised profile
+    Normalise it
+    Find the corresponding angle in the median curve
+    Interpolate as needed
+  */
+  public static double interpolateNormalisedMedian(double normIndex, double[] medianProfile){
+
+    // convert index to 1 window boundaries
+    int medianIndex1 = (int)Math.round(normIndex);
+    int medianIndex2 = medianIndex1 > normIndex
+                        ? medianIndex1 - 1
+                        : medianIndex1 + 1;
+
+    int medianIndexLower = medianIndex1 < medianIndex2
+                        ? medianIndex1
+                        : medianIndex2;
+
+    int medianIndexHigher = medianIndex2 < medianIndex1
+                             ? medianIndex2
+                             : medianIndex1;
+
+    // wrap the arrays
+    medianIndexLower  = wrapIndex(medianIndexLower , medianProfile.length);
+    medianIndexHigher = wrapIndex(medianIndexHigher, medianProfile.length);
+
+    // get the angle values in the median profile at the given indices
+    double medianAngleLower  = medianProfile[medianIndexLower ];
+    double medianAngleHigher = medianProfile[medianIndexHigher];
+
+    // interpolate on a stright line between the points
+    double medianAngleDifference = medianAngleHigher - medianAngleLower;
+    double positionToFind = medianIndexHigher - normIndex;
+    double interpolatedMedianAngle = (medianAngleDifference * positionToFind) + medianAngleLower;
+    return interpolatedMedianAngle;
+  }
+
+
+  /*
+    -----------------
+    Export functions
+    -----------------
+  */
 
   /*
     Export the signal parameters of the nucleus to the designated log file
@@ -538,14 +747,13 @@ public class NucleusCollection {
       f.delete();
     }
 
-    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
+    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
 
     IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
     double[] pathLengths  = this.getPathLengths();
-    int[] tails           = this.getTailIndexes();
     double[] differences  = this.getDifferencesToMedian();
     String[] paths        = this.getNucleusPaths();
 
@@ -557,7 +765,6 @@ public class NucleusCollection {
                           perims[i]+"\t"+
                           ferets[i]+"\t"+
                           pathLengths[i]+"\t"+
-                          tails[i]+"\t"+
                           differences[i]+"\t"+
                           this.getNucleus(i).getFailureCode()+"\t"+
                           paths[i]+"\n";
@@ -568,6 +775,108 @@ public class NucleusCollection {
     IJ.append(  outLine, statsFile);
     IJ.log("Export complete");
   }
+
+  public void exportFilterStats(){
+
+    double medianArea = this.getMedianNuclearArea();
+    double medianPerimeter = this.getMedianNuclearPerimeter();
+    double medianPathLength = this.getMedianPathLength();
+    double medianArrayLength = this.getMedianArrayLength();
+    double medianFeretLength = this.getMedianFeretLength();
+    // double medianDifferenceToMedianCurve = quartile(this.getDifferencesToMedian(),50);
+
+    IJ.append("    Area: "        +(int)medianArea,                    this.getDebugFile().getAbsolutePath());
+    IJ.append("    Perimeter: "   +(int)medianPerimeter,               this.getDebugFile().getAbsolutePath());
+    IJ.append("    Path length: " +(int)medianPathLength,              this.getDebugFile().getAbsolutePath());
+    IJ.append("    Array length: "+(int)medianArrayLength,             this.getDebugFile().getAbsolutePath());
+    IJ.append("    Feret length: "+(int)medianFeretLength,             this.getDebugFile().getAbsolutePath());
+    // IJ.append("    Curve: "       +(int)medianDifferenceToMedianCurve, this.getDebugFile().getAbsolutePath());
+  }
+
+  public void exportCompositeImage(String filename){
+
+    // foreach nucleus
+    // createProcessor (500, 500)
+    // sertBackgroundValue(0)
+    // paste in old image at centre
+    // insert(ImageProcessor ip, int xloc, int yloc)
+    // rotate about CoM (new position)
+    // display.
+    if(this.getNucleusCount()==0){
+      return;
+    }
+    IJ.log("Creating composite image...");
+    
+
+    int totalWidth = 0;
+    int totalHeight = 0;
+
+    int boxWidth  = (int)(this.getMedianNuclearPerimeter()/1.4);
+    int boxHeight = (int)(this.getMedianNuclearPerimeter()/1.2);
+
+    int maxBoxWidth = boxWidth * 5;
+    int maxBoxHeight = (boxHeight * (int)(Math.ceil(this.getNucleusCount()/5)) + boxHeight );
+
+    ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
+    ImageProcessor finalProcessor = finalImage.getProcessor();
+    finalProcessor.setBackgroundValue(0);
+
+    for(int i=0; i<this.getNucleusCount();i++){
+      
+      Nucleus n = this.getNucleus(i);
+      String path = n.getAnnotatedImagePath();
+
+      try {
+        Opener localOpener = new Opener();
+        ImagePlus image = localOpener.openImage(path);
+        ImageProcessor ip = image.getProcessor();
+        int width  = ip.getWidth();
+        int height = ip.getHeight();
+        ip.setRoi(n.getRoi());
+
+
+        ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
+
+        newProcessor.setBackgroundValue(0);
+        newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
+        newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
+        // newProcessor.rotate( n.findRotationAngle() );
+        newProcessor.setBackgroundValue(0);
+
+        if(totalWidth>maxBoxWidth-boxWidth){
+          totalWidth=0;
+          totalHeight+=(int)(boxHeight);
+        }
+        int newX = totalWidth;
+        int newY = totalHeight;
+        totalWidth+=(int)(boxWidth);
+        
+        finalProcessor.insert(newProcessor, newX, newY);
+        TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
+        Overlay overlay = new Overlay(label);
+        finalProcessor.drawOverlay(overlay);  
+      } catch(Exception e){
+        IJ.log("Error adding image to composite");
+        IJ.append("Error adding image to composite: "+e, this.getDebugFile().getAbsolutePath());
+        IJ.append("  "+getType(), this.getDebugFile().getAbsolutePath());
+        IJ.append("  "+path, this.getDebugFile().getAbsolutePath());
+      }     
+    }
+    // finalImage.show();
+    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+filename+"."+getType()+".tiff");
+    IJ.log("Composite image created");
+  }
+
+  public void exportProfilePlot(Plot plot, String name){
+    ImagePlus image = plot.getImagePlus();
+    IJ.saveAsTiff(image, this.getFolder()+File.separator+name+"."+this.getType()+".tiff");
+  }
+
+  /*
+    -----------------
+    General functions
+    -----------------
+  */
 
   /*
     Calculate the <lowerPercent> quartile from a Double[] array
@@ -602,6 +911,17 @@ public class NucleusCollection {
     int n = (int) Math.round(v.length * lowerPercent / 100);
     
     return (double)v[n];
+  }
+
+  /*
+    Turn a Double[] into a double[]
+  */
+  protected static double[] getDoubleFromDouble(Double[] d){
+    double[] results = new double[d.length];
+    for(int i=0;i<d.length;i++){
+      results[i] = d[i];
+    }
+    return results;
   }
 
   protected static int wrapIndex(int i, int length){
