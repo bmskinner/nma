@@ -54,11 +54,42 @@ public class PigSpermNucleus
     extends SpermNucleus 
   {
 
-    public PigSpermNucleus(SpermNucleus n){
+    public PigSpermNucleus(Nucleus n){
       super(n);
-      setSpermTail(n.getSpermTail());
-      setHeadPoint(n.getHeadPoint());
+      this.findPointsAroundBorder();
+      this.performNormalisation();
     }
+
+    private void findPointsAroundBorder(){
+      
+      this.findTailByNarrowestPoint();
+
+      int tailIndex = this.getAngleProfile().getIndexOfPoint(this.getSpermTail());
+      this.getAngleProfile().moveIndexToArrayStart(tailIndex);
+
+    }
+
+    public void performNormalisation(){
+      double pathLength = 0;
+      double normalisedTailIndex = ((double)this.getTailIndex()/(double)this.getLength())*100;
+
+      XYPoint prevPoint = new XYPoint(0,0);
+       
+      for (int i=0; i<this.getLength();i++ ) {
+          double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
+          double rawXFromTail = (double)i - (double)this.getTailIndex(); // offset the raw array based on the calculated tail position
+
+          this.addNormalisedXPositionFromTail(normalisedX);
+          this.addRawXPositionFromTail.add(rawXFromTail);
+
+          // calculate the path length
+          XYPoint thisPoint = new XYPoint(normalisedX,this.getBorderPoint(i).getInteriorAngle());
+          pathLength += thisPoint.getLengthTo(prevPoint);
+          prevPoint = thisPoint;
+      }
+      this.setPathLength(pathLength);
+    }
+
 
     /*
       -----------------------
@@ -102,5 +133,27 @@ public class PigSpermNucleus
           this.setSpermTail(n);
         }
       }
+    }
+
+    /*
+      The narrowest diameter through the CoM
+      is orthogonal to the tail. Of the two
+      orthogonal border points, the closest to the
+      CoM is the tail
+    */
+    public void findTailByNarrowestPoint(){
+
+      NucleusBorderPoint narrowPoint = this.getNarrowestDiameterPoint();
+      NucleusBorderPoint orthPoint1  = this.findOrthogonalBorderPoint(narrowPoint);
+      NucleusBorderPoint orthPoint2  = this.findOppositeBorder(orthPoint1);
+
+      // choose the closest to CoM
+      NucleusBorderPoint tailPoint  = orthPoint1.getLengthTo(this.getCentreOfMass() <
+                                      orthPoint2.getLengthTo(this.getCentreOfMass()
+                                    ? orthPoint1
+                                    : orthPoint2);
+
+      this.setSpermTail(tailPoint);
+      this.setHeadPoint(this.findOppositeBorder(tailPoint));
     }
   }

@@ -271,6 +271,128 @@ public class NucleusCollection {
   */
 
   /*
+    Calculate median angles at each bin within an angle profile
+  */
+  protected ArrayList<Double[]> calculateMediansAndQuartilesOfProfile(Map<Double, Collection<Double>> profile){
+
+    ArrayList<Double[]>  medianResults = new ArrayList<Double[]>(0);
+    int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
+    Double[] xmedians = new Double[arraySize];
+    Double[] ymedians = new Double[arraySize];
+    Double[] lowQuartiles = new Double[arraySize];
+    Double[] uppQuartiles = new Double[arraySize];
+    Double[] tenQuartiles = new Double[arraySize];
+    Double[] ninetyQuartiles = new Double[arraySize];
+    Double[] numberOfPoints = new Double[arraySize];
+
+    int m = 0;
+    for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
+
+      try{
+          Collection<Double> values = profile.get(k);
+
+          if(values.size()> 0){
+            Double[] d = values.toArray(new Double[0]);
+            int n = d.length;
+
+            Arrays.sort(d);
+            double median = quartile(d, 50.0);
+            double q1     = quartile(d, 25.0);
+            double q3     = quartile(d, 75.0);
+            double q10    = quartile(d, 10.0);
+            double q90    = quartile(d, 90.0);
+           
+            xmedians[m] = k;
+            ymedians[m] = median;
+            lowQuartiles[m] = q1;
+            uppQuartiles[m] = q3;
+            tenQuartiles[m] = q10;
+            ninetyQuartiles[m] = q90;
+            numberOfPoints[m] = (double)n;
+          }
+        } catch(Exception e){
+             IJ.log("Cannot calculate median for "+k);
+             IJ.append("Cannot calculate median for "+k+": "+e, this.getDebugFile().getAbsolutePath());
+             xmedians[m] = k;
+             ymedians[m] = 0.0;
+             lowQuartiles[m] = 0.0;
+             uppQuartiles[m] = 0.0;
+             tenQuartiles[m] = 0.0;
+             ninetyQuartiles[m] = 0.0;
+        } finally {
+          m++;
+      }
+    }
+
+    // repair medians with no points by interpolation
+    for(int i=0;i<xmedians.length;i++){
+      if(ymedians[i] == 0 && lowQuartiles[i] == 0 && uppQuartiles[i] == 0){
+
+        int replacementIndex = 0;
+
+        if(xmedians[i]<1)
+          replacementIndex = i+1;
+        if(xmedians[i]>99)
+          replacementIndex = i-1;
+
+        ymedians[i]        = ymedians[replacementIndex]    ;
+        lowQuartiles[i]    = lowQuartiles[replacementIndex];
+        uppQuartiles[i]    = uppQuartiles[replacementIndex];
+        tenQuartiles[i]    = tenQuartiles[replacementIndex];
+        ninetyQuartiles[i] = ninetyQuartiles[replacementIndex];
+
+        IJ.log("Repaired medians at "+i+" with values from  "+replacementIndex);
+        IJ.append("Repaired medians at "+i+" with values from  "+replacementIndex, this.getDebugFile().getAbsolutePath());
+      }
+    }
+
+    medianResults.add(xmedians);
+    medianResults.add(ymedians);
+    medianResults.add(lowQuartiles);
+    medianResults.add(uppQuartiles);
+    medianResults.add(tenQuartiles);
+    medianResults.add(ninetyQuartiles);
+    medianResults.add(numberOfPoints);
+    return medianResults;
+  }
+
+  /*
+    We need to calculate the median angle profile. This requires binning the normalised profiles
+    into bins of size PROFILE_INCREMENT to generate a table such as this:
+          k   0.0   0.5   1.0   1.5   2.0 ... 99.5   <- normalised profile bins
+    NUCLEUS1  180   185  170    130   120 ... 50     <- angle within those bins
+    NUCLEUS2  180   185  170    130   120 ... 50
+
+    The median of each bin can then be calculated. 
+    Depending on the length of the profile arrays and the chosen increment, there may
+    be >1 or <1 angle within each bin for any given nucleus. We rely on large numbers of 
+    nuclei to average this problem away; further methods interpolate values from surrounding
+    bins to plug any holes left over
+
+    The data are stored as a Map<Double, Collection<Double>>
+  */
+
+  protected void updateProfileAggregate(double[] xvalues, double[] yvalues, Map<Double, Collection<Double>> profileAggregate){
+
+    for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
+
+      for(int j=0;j<xvalues.length;j++){
+       
+        if( xvalues[j] > k && xvalues[j] < k+PROFILE_INCREMENT){
+
+          Collection<Double> values = profileAggregate.get(k);
+          
+          if (values==null) { // this this profile increment has not yet been encountered, create it
+              values = new ArrayList<Double>();
+              profileAggregate.put(k, values);
+          }
+          values.add(yvalues[j]);
+        }
+      }
+    }        
+  }
+
+  /*
     Turn a Double[] into a double[]
   */
   private double[] getDoubleFromDouble(Double[] d){
@@ -286,13 +408,13 @@ public class NucleusCollection {
   */
   public void exportSignalStats(){
 
-    String redLogFile = this.folder+"logRedSignals."+collectionType+".txt";
+    String redLogFile = this.getFolder()+File.separator+"logRedSignals."+getType()+".txt";
     File r = new File(redLogFile);
     if(r.exists()){
       r.delete();
     }
 
-    String greenLogFile = this.folder+"logGreenSignals."+collectionType+".txt";
+    String greenLogFile = this.getFolder()+File.separator+"logGreenSignals."+getType()+".txt";
     File g = new File(greenLogFile);
     if(g.exists()){
       g.delete();
@@ -301,9 +423,9 @@ public class NucleusCollection {
     IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", redLogFile);
     IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", greenLogFile);
     
-    for(int i= 0; i<this.nucleiCollection.size();i++){ // for each roi
+    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 
-      Nucleus n = this.nucleiCollection.get(i);
+      Nucleus n = this.getNucleus(i);
 
       int nucleusNumber = n.getNucleusNumber();
       String path = n.getPath();
@@ -315,18 +437,18 @@ public class NucleusCollection {
       int signalCount = 0;
       for( ArrayList<NuclearSignal> signalGroup : signals ){
 
-        String log = signalCount == 0 ? redLogFile : greenLogFile; // the red signals are first to be analysed
+        String log = signalCount == Nucleus.RED_CHANNEL ? redLogFile : greenLogFile;
         
         if(signalGroup.size()>0){
           for(int j=0; j<signalGroup.size();j++){
              NuclearSignal s = signalGroup.get(j);
-             IJ.append(nucleusNumber+"\t"+
-                       s.getArea()+"\t"+
-                       s.getAngle()+"\t"+
-                       s.getFeret()+"\t"+
-                       s.getDistanceFromCoM()+"\t"+
+             IJ.append(nucleusNumber                   +"\t"+
+                       s.getArea()                     +"\t"+
+                       s.getAngle()                    +"\t"+
+                       s.getFeret()                    +"\t"+
+                       s.getDistanceFromCoM()          +"\t"+
                        s.getFractionalDistanceFromCoM()+"\t"+
-                       s.getPerimeter()+"\t"+
+                       s.getPerimeter()                +"\t"+
                        path, log);
           } // end for
         } // end if
@@ -383,6 +505,68 @@ public class NucleusCollection {
       Nucleus n = this.getNucleus(i);
       n.exportAnnotatedImage();
     }
+  }
+
+  public void exportMediansAndQuartilesOfProfile(ArrayList<Double[]> profile, String filename){
+
+    String logFile = this.getFolder()+File.separator+filename+"."+this.getType()+".txt";
+    File f = new File(logFile);
+    if(f.exists()){
+      f.delete();
+    }
+
+    String outLine = "# X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\n";
+    
+
+    for(int i =0;i<profile.get(0).length;i++){
+      outLine +=  profile.get(0)[i]+"\t"+
+                  profile.get(1)[i]+"\t"+
+                  profile.get(2)[i]+"\t"+
+                  profile.get(3)[i]+"\t"+
+                  profile.get(4)[i]+"\t"+
+                  profile.get(5)[i]+"\t"+
+                  profile.get(6)[i]+"\n";
+    }
+    IJ.append(outLine, logFile); 
+  }
+
+  public void exportNuclearStats(String filename){
+  
+    String statsFile = this.getFolder()+File.separator+filename+"."+getType()+".txt";
+    File f = new File(statsFile);
+    if(f.exists()){
+      f.delete();
+    }
+
+    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
+
+    IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
+    double[] areas        = this.getAreas();
+    double[] perims       = this.getPerimeters();
+    double[] ferets       = this.getFerets();
+    double[] pathLengths  = this.getPathLengths();
+    int[] tails           = this.getTailIndexes();
+    double[] differences  = this.getDifferencesToMedian();
+    String[] paths        = this.getNucleusPaths();
+
+
+    for(int i=0; i<this.getNucleusCount();i++){
+      int j = i+1;
+
+      outLine = outLine + areas[i]+"\t"+
+                          perims[i]+"\t"+
+                          ferets[i]+"\t"+
+                          pathLengths[i]+"\t"+
+                          tails[i]+"\t"+
+                          differences[i]+"\t"+
+                          this.getNucleus(i).getFailureCode()+"\t"+
+                          paths[i]+"\n";
+
+      // Include tip, CoM, tail
+      // this.getNucleus(i).printLogFile(this.getNucleus(i).getNucleusFolder()+File.separator+this.getNucleus(i).getNucleusNumber()+".log");
+    }
+    IJ.append(  outLine, statsFile);
+    IJ.log("Export complete");
   }
 
   /*

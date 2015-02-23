@@ -163,12 +163,6 @@ public class Sperm_Analysis
 
   private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
 
-  // private NucleusCollection completeCollection;
-  // private NucleusCollection failedNuclei;
-  // private NucleusCollection redNuclei;
-  // private NucleusCollection greenNuclei;
-  // private NucleusCollection notRedNuclei;
-  // private NucleusCollection notGreenNuclei;
   private ArrayList<RodentSpermNucleusCollection> nuclearPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
   private ArrayList<RodentSpermNucleusCollection> failedPopulations  = new ArrayList<RodentSpermNucleusCollection>(0);
   

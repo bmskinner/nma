@@ -794,6 +794,28 @@ public class Nucleus {
   }
 
   /*
+    From the point given, create a line to the CoM. Measure angles from all 
+    other points. Pick the point closest to 90 degrees. Can then get opposite
+    point
+  */
+  public NucleusBorderPoint findOrthogonalBorderPoint(NucleusBorderPoint a){
+
+    NucleusBorderPoint orthgonalPoint;
+    double bestAngle = 90;
+
+    for(i=0;i<this.getLength();i++){
+
+      NucleusBorderPoint p = this.getBorderPoint(i);
+      double angle = Nucleus.findAngleBetweenXYPoints(a, this.getCentreOfMass(), p); 
+      if(Math.abs(90-bestAngle)<bestAngle){
+        bestAngle = 90-bestAngle;
+        orthgonalPoint = p;
+      }
+    }
+    return orthgonalPoint;
+  }
+
+  /*
     Given three XYPoints, measure the angle a-b-c
       a   c
        \ /
@@ -878,6 +900,7 @@ public class Nucleus {
     Exporting data
     -----------------------
   */
+
   public void exportSignalDistanceMatrix(){
 
     this.calculateDistancesBetweenSignals();
@@ -955,34 +978,49 @@ public class Nucleus {
   */   
   public void exportAngleProfile(){
 
-    File f = new File(this.nucleusFolder+File.separator+this.nucleusNumber+".log");
+    File f = new File(this.getNucleusFolder()+File.separator+this.getNucleusNumber()+".log");
     if(f.exists()){
       f.delete();
     }
 
-    String outLine = "X\tY\tINETRIOR_ANGLE\tMIN_ANGLE\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tBLOCK_SIZE\tDISTANCE_PROFILE\n";
+    // NucleusBorderPoint[] points = this.getAngleProfile().getBorderPointArray();
+    String outLine =  "X_INT\t"+
+                      "Y_INT\t"+
+                      "X_DOUBLE\t"+
+                      "Y_DOUBLE\t"+
+                      "INTERIOR_ANGLE\t"+
+                      "MIN_ANGLE\t"+
+                      "INTERIOR_ANGLE_DELTA\t"+
+                      "INTERIOR_ANGLE_DELTA_SMOOTHED\t"+
+                      "BLOCK_POSITION\t"+
+                      "BLOCK_NUMBER\t"+
+                      "IS_LOCAL_MIN\t"+
+                      "IS_LOCAL_MAX\t"+
+                      "IS_MIDPOINT\t"+
+                      "IS_BLOCK\t"+
+                      "NORMALISED_PROFILE_X\t"+
+                      "DISTANCE_PROFILE\n";
 
-    // IJ.append("SX\tSY\tFX\tFY\tIA\tMA\tI_NORM\tI_DELTA\tI_DELTA_S\tBLOCK_POSITION\tBLOCK_NUMBER\tL_MIN\tL_MAX\tIS_MIDPOINT\tIS_BLOCK\tPROFILE_X\tDISTANCE_PROFILE", path);
-    
     for(int i=0;i<this.getLength();i++){
 
       double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
       
-      outLine +=  this.getPoint(i).getX()                         +"\t"+
-                  this.getPoint(i).getY()                         +"\t"+
-                  this.getPoint(i).getInteriorAngle()             +"\t"+
-                  this.getPoint(i).getMinAngle()                  +"\t"+
-                  this.getPoint(i).getInteriorAngleDelta()        +"\t"+
-                  this.getPoint(i).getInteriorAngleDeltaSmoothed()+"\t"+
-                  this.getPoint(i).getPositionWithinBlock()       +"\t"+
-                  this.getPoint(i).getBlockNumber()               +"\t"+
-                  this.getPoint(i).isLocalMin()                   +"\t"+
-                  this.getPoint(i).isLocalMax()                   +"\t"+
-                  this.getPoint(i).isMidpoint()                   +"\t"+
-                  this.getPoint(i).isBlock()                      +"\t"+
-                  normalisedX                                     +"\t"+
-                  this.getPoint(i).getBlockSize()                 +"\t"+
-                  distanceProfile[i]                              +"\n";
+      outLine +=  this.getBorderPoint(i).getXAsInt()                      +"\t"+
+                  this.getBorderPoint(i).getYAsInt()                      +"\t"+
+                  this.getBorderPoint(i).getX()                           +"\t"+
+                  this.getBorderPoint(i).getY()                           +"\t"+
+                  this.getBorderPoint(i).getInteriorAngle()               +"\t"+
+                  this.getBorderPoint(i).getMinAngle()                    +"\t"+
+                  this.getBorderPoint(i).getInteriorAngleDelta()          +"\t"+
+                  this.getBorderPoint(i).getInteriorAngleDeltaSmoothed()  +"\t"+
+                  this.getBorderPoint(i).getPositionWithinBlock()         +"\t"+
+                  this.getBorderPoint(i).getBlockNumber()                 +"\t"+
+                  this.getBorderPoint(i).isLocalMin()                     +"\t"+
+                  this.getBorderPoint(i).isLocalMax()                     +"\t"+
+                  this.getBorderPoint(i).isMidpoint()                     +"\t"+
+                  this.getBorderPoint(i).isBlock()                        +"\t"+
+                  normalisedX                                             +"\t"+
+                  this.getBorderPoint(i).getDistanceAcrossCoM()           +"\n";
     }
     IJ.append( outLine, f.getAbsolutePath());
   }

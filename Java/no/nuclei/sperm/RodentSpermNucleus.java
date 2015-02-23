@@ -55,9 +55,6 @@ public class RodentSpermNucleus
 {
   private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
 
-  private int offsetForTail = 0;
-
-  private int tailIndex; // the index in the smoothedArray that has been designated the tail
   private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
 
   private double differenceToMedianCurve; // store the difference between curves
@@ -74,9 +71,9 @@ public class RodentSpermNucleus
   private FloatPolygon humpRoi;
 
   private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
-  private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
-  private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
-  private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
+  // private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
+  // private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
+  // private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
   private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
 
   // Requires a sperm nucleus object to construct from
@@ -156,7 +153,7 @@ public class RodentSpermNucleus
         double rawXFromTail = (double)i - (double)this.getTailIndex(); // offset the raw array based on the calculated tail position
 
         this.normalisedXPositionsFromTip.add(normalisedX);
-        this.rawXPositionsFromTail.add(rawXFromTail);
+        this.addRawXPositionFromTail(rawXFromTail);
         this.rawXPositionsFromTip.add( (double)i); 
 
         // calculate the path length
@@ -181,29 +178,29 @@ public class RodentSpermNucleus
     return d;
   }
 
-  public double[] getNormalisedYPositionsFromTail(){
-    double[] d = new double[normalisedYPositionsFromTail.size()];
-    for(int i=0;i<normalisedYPositionsFromTail.size();i++){
-      d[i] = normalisedYPositionsFromTail.get(i);
-    }
-    return d;
-  }
+  // public double[] getNormalisedYPositionsFromTail(){
+  //   double[] d = new double[normalisedYPositionsFromTail.size()];
+  //   for(int i=0;i<normalisedYPositionsFromTail.size();i++){
+  //     d[i] = normalisedYPositionsFromTail.get(i);
+  //   }
+  //   return d;
+  // }
 
-  public double[] getNormalisedXPositionsFromTail(){
-    double[] d = new double[normalisedXPositionsFromTail.size()];
-    for(int i=0;i<normalisedXPositionsFromTail.size();i++){
-      d[i] = normalisedXPositionsFromTail.get(i);
-    }
-    return d;
-  }
+  // public double[] getNormalisedXPositionsFromTail(){
+  //   double[] d = new double[normalisedXPositionsFromTail.size()];
+  //   for(int i=0;i<normalisedXPositionsFromTail.size();i++){
+  //     d[i] = normalisedXPositionsFromTail.get(i);
+  //   }
+  //   return d;
+  // }
 
-  public double[] getRawXPositionsFromTail(){
-    double[] d = new double[rawXPositionsFromTail.size()];
-    for(int i=0;i<rawXPositionsFromTail.size();i++){
-      d[i] = rawXPositionsFromTail.get(i);
-    }
-    return d;
-  }
+  // public double[] getRawXPositionsFromTail(){
+  //   double[] d = new double[rawXPositionsFromTail.size()];
+  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //     d[i] = rawXPositionsFromTail.get(i);
+  //   }
+  //   return d;
+  // }
 
   public double[] getRawXPositionsFromTip(){
     double[] d = new double[rawXPositionsFromTip.size()];
@@ -213,25 +210,25 @@ public class RodentSpermNucleus
     return d;
   }
 
-  public double getMaxRawXFromTail(){
-    double d = 0;
-    for(int i=0;i<rawXPositionsFromTail.size();i++){
-      if(rawXPositionsFromTail.get(i) > d){
-        d = rawXPositionsFromTail.get(i);
-      }
-    }
-    return d;
-  }
+  // public double getMaxRawXFromTail(){
+  //   double d = 0;
+  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //     if(rawXPositionsFromTail.get(i) > d){
+  //       d = rawXPositionsFromTail.get(i);
+  //     }
+  //   }
+  //   return d;
+  // }
 
-  public double getMinRawXFromTail(){
-    double d = 0;
-    for(int i=0;i<rawXPositionsFromTail.size();i++){
-      if(rawXPositionsFromTail.get(i) < d){
-        d = rawXPositionsFromTail.get(i);
-      }
-    }
-    return d;
-  }
+  // public double getMinRawXFromTail(){
+  //   double d = 0;
+  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //     if(rawXPositionsFromTail.get(i) < d){
+  //       d = rawXPositionsFromTail.get(i);
+  //     }
+  //   }
+  //   return d;
+  // }
 
   public double getMaxRawXFromTip(){
     double d = 0;
@@ -278,21 +275,7 @@ public class RodentSpermNucleus
   }
 
 
-  public int getTailIndex(){
-    return this.tailIndex;
-  }
-
-  public void setTailIndex(int i){
-    this.tailIndex = i;
-  }
-
-  public int getOffsetForTail(){
-    return this.offsetForTail;
-  }
-
-  public void setOffsetForTail(int i){
-    this.offsetForTail = i;
-  }
+  
 
 
   public void addTailEstimatePosition(NucleusBorderPoint p){
@@ -634,6 +617,7 @@ public class RodentSpermNucleus
     -----------------------
   */
 
+  // needs to override SpermNucleus version because hook/hump
   public void calculateSignalAnglesFromTail(){
 
     ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
@@ -658,21 +642,6 @@ public class RodentSpermNucleus
         }
       }
     }
-    // if(greenSignals.size()>0){
-
-    //   for(int i=0;i<greenSignals.size();i++){
-    //     NuclearSignal n = greenSignals.get(i);
-    //     double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
-
-    //     // hook or hump?
-    //     if( this.isHookSide(n.getCentreOfMass()) ){
-    //       angle = 360 - angle;
-    //     }
-
-    //     // set the final angle
-    //     n.setAngle(angle);
-    //   }
-    // }
   }
 
 
@@ -687,54 +656,54 @@ public class RodentSpermNucleus
     Overwrites any existing log
     Replaces exportAngleProfile in Nucleus
   */   
-  public void exportAngleProfile(){
+  // public void exportAngleProfile(){
 
-    File f = new File(this.getNucleusFolder()+File.separator+this.getNucleusNumber()+".log");
-    if(f.exists()){
-      f.delete();
-    }
+  //   File f = new File(this.getNucleusFolder()+File.separator+this.getNucleusNumber()+".log");
+  //   if(f.exists()){
+  //     f.delete();
+  //   }
 
-    // NucleusBorderPoint[] points = this.getAngleProfile().getBorderPointArray();
-    String outLine =  "X_INT\t"+
-                      "Y_INT\t"+
-                      "X_DOUBLE\t"+
-                      "Y_DOUBLE\t"+
-                      "INTERIOR_ANGLE\t"+
-                      "MIN_ANGLE\t"+
-                      "INTERIOR_ANGLE_DELTA\t"+
-                      "INTERIOR_ANGLE_DELTA_SMOOTHED\t"+
-                      "BLOCK_POSITION\t"+
-                      "BLOCK_NUMBER\t"+
-                      "IS_LOCAL_MIN\t"+
-                      "IS_LOCAL_MAX\t"+
-                      "IS_MIDPOINT\t"+
-                      "IS_BLOCK\t"+
-                      "NORMALISED_PROFILE_X\t"+
-                      "DISTANCE_PROFILE\n";
+  //   // NucleusBorderPoint[] points = this.getAngleProfile().getBorderPointArray();
+  //   String outLine =  "X_INT\t"+
+  //                     "Y_INT\t"+
+  //                     "X_DOUBLE\t"+
+  //                     "Y_DOUBLE\t"+
+  //                     "INTERIOR_ANGLE\t"+
+  //                     "MIN_ANGLE\t"+
+  //                     "INTERIOR_ANGLE_DELTA\t"+
+  //                     "INTERIOR_ANGLE_DELTA_SMOOTHED\t"+
+  //                     "BLOCK_POSITION\t"+
+  //                     "BLOCK_NUMBER\t"+
+  //                     "IS_LOCAL_MIN\t"+
+  //                     "IS_LOCAL_MAX\t"+
+  //                     "IS_MIDPOINT\t"+
+  //                     "IS_BLOCK\t"+
+  //                     "NORMALISED_PROFILE_X\t"+
+  //                     "DISTANCE_PROFILE\n";
 
-    for(int i=0;i<this.getLength();i++){
+  //   for(int i=0;i<this.getLength();i++){
 
-      double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
+  //     double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
       
-      outLine +=  this.getBorderPoint(i).getXAsInt()                      +"\t"+
-                  this.getBorderPoint(i).getYAsInt()                      +"\t"+
-                  this.getBorderPoint(i).getX()                           +"\t"+
-                  this.getBorderPoint(i).getY()                           +"\t"+
-                  this.getBorderPoint(i).getInteriorAngle()               +"\t"+
-                  this.getBorderPoint(i).getMinAngle()                    +"\t"+
-                  this.getBorderPoint(i).getInteriorAngleDelta()          +"\t"+
-                  this.getBorderPoint(i).getInteriorAngleDeltaSmoothed()  +"\t"+
-                  this.getBorderPoint(i).getPositionWithinBlock()         +"\t"+
-                  this.getBorderPoint(i).getBlockNumber()                 +"\t"+
-                  this.getBorderPoint(i).isLocalMin()                     +"\t"+
-                  this.getBorderPoint(i).isLocalMax()                     +"\t"+
-                  this.getBorderPoint(i).isMidpoint()                     +"\t"+
-                  this.getBorderPoint(i).isBlock()                        +"\t"+
-                  normalisedX                                             +"\t"+
-                  this.getBorderPoint(i).getDistanceAcrossCoM()           +"\n";
-    }
-    IJ.append( outLine, f.getAbsolutePath());
-  }
+  //     outLine +=  this.getBorderPoint(i).getXAsInt()                      +"\t"+
+  //                 this.getBorderPoint(i).getYAsInt()                      +"\t"+
+  //                 this.getBorderPoint(i).getX()                           +"\t"+
+  //                 this.getBorderPoint(i).getY()                           +"\t"+
+  //                 this.getBorderPoint(i).getInteriorAngle()               +"\t"+
+  //                 this.getBorderPoint(i).getMinAngle()                    +"\t"+
+  //                 this.getBorderPoint(i).getInteriorAngleDelta()          +"\t"+
+  //                 this.getBorderPoint(i).getInteriorAngleDeltaSmoothed()  +"\t"+
+  //                 this.getBorderPoint(i).getPositionWithinBlock()         +"\t"+
+  //                 this.getBorderPoint(i).getBlockNumber()                 +"\t"+
+  //                 this.getBorderPoint(i).isLocalMin()                     +"\t"+
+  //                 this.getBorderPoint(i).isLocalMax()                     +"\t"+
+  //                 this.getBorderPoint(i).isMidpoint()                     +"\t"+
+  //                 this.getBorderPoint(i).isBlock()                        +"\t"+
+  //                 normalisedX                                             +"\t"+
+  //                 this.getBorderPoint(i).getDistanceAcrossCoM()           +"\n";
+  //   }
+  //   IJ.append( outLine, f.getAbsolutePath());
+  // }
 
   public void annotateSpermFeatures(){
 

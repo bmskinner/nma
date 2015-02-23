@@ -56,6 +56,15 @@ public class SpermNucleus
 	private NucleusBorderPoint tailPoint;
   private NucleusBorderPoint headPoint;
 
+  private int tailIndex; // the index in the smoothedArray that has been designated the tail
+  private int offsetForTail = 0;
+
+  private ArrayList<Double> normalisedXPositionsFromHead = new ArrayList<Double>(0); // holds the x values only after normalisation
+  private ArrayList<Double> rawXPositionsFromHead        = new ArrayList<Double>(0);
+  private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
+  private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
+  private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
+
   // Requires a nucleus object to construct from
   public SpermNucleus(Nucleus n){
   	this.setRoi(n.getRoi());
@@ -83,7 +92,7 @@ public class SpermNucleus
     -----------------------
   */
 
-  public NucleusBorderPoint getHeadPoint(){
+  public NucleusBorderPoint getSpermHead(){
   	return this.headPoint;
   }
 
@@ -91,12 +100,87 @@ public class SpermNucleus
   	return this.tailPoint;
   }
 
-  protected void setHeadPoint(NucleusBorderPoint p){
+  protected void setSpermHead(NucleusBorderPoint p){
   	this.headPoint = p;
   }
 
   protected void setSpermTail(NucleusBorderPoint p){
   	this.tailPoint = p;
+  }
+
+  public int getTailIndex(){
+    return this.tailIndex;
+  }
+
+  public void setTailIndex(int i){
+    this.tailIndex = i;
+  }
+
+  public int getOffsetForTail(){
+    return this.offsetForTail;
+  }
+
+  public void setOffsetForTail(int i){
+    this.offsetForTail = i;
+  }
+
+
+  public addRawXPositionFromTail(double d){
+    this.rawXPositionsFromTail.add(d);
+  }
+
+  public addNormalisedXPositionFromTail(double d){
+    this.normalisedXPositionsFromTail.add(d);
+  }
+
+  /*
+    -----------------------
+    Get raw and normalised profiles
+    -----------------------
+  */
+
+  public double[] getNormalisedYPositionsFromTail(){
+    double[] d = new double[normalisedYPositionsFromTail.size()];
+    for(int i=0;i<normalisedYPositionsFromTail.size();i++){
+      d[i] = normalisedYPositionsFromTail.get(i);
+    }
+    return d;
+  }
+
+  public double[] getNormalisedXPositionsFromTail(){
+    double[] d = new double[normalisedXPositionsFromTail.size()];
+    for(int i=0;i<normalisedXPositionsFromTail.size();i++){
+      d[i] = normalisedXPositionsFromTail.get(i);
+    }
+    return d;
+  }
+
+  public double[] getRawXPositionsFromTail(){
+    double[] d = new double[rawXPositionsFromTail.size()];
+    for(int i=0;i<rawXPositionsFromTail.size();i++){
+      d[i] = rawXPositionsFromTail.get(i);
+    }
+    return d;
+  }
+
+  public double getMaxRawXFromTail(){
+    double d = 0;
+    for(int i=0;i<rawXPositionsFromTail.size();i++){
+      if(rawXPositionsFromTail.get(i) > d){
+        d = rawXPositionsFromTail.get(i);
+      }
+    }
+    return d;
+  }
+
+  public double getMinRawXFromTail(){
+    double d = 0;
+    for(int i=0;i<rawXPositionsFromTail.size();i++){
+      if(rawXPositionsFromTail.get(i) < d){
+        d = rawXPositionsFromTail.get(i);
+      }
+    }
+    return d;
   }
 
   /*
@@ -142,6 +226,33 @@ public class SpermNucleus
       return angle;
     } else {
       return 0-angle;
+    }
+  }
+
+  /*
+    -----------------------
+    Measure signal positions
+    -----------------------
+  */
+
+  public void calculateSignalAnglesFromTail(){
+
+    ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+    signals.add(this.getRedSignals());
+    signals.add(this.getGreenSignals());
+
+    for( ArrayList<NuclearSignal> signalGroup : signals ){
+
+      if(signalGroup.size()>0){
+
+        for(int i=0;i<signalGroup.size();i++){
+          NuclearSignal n = signalGroup.get(i);
+          double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
+
+          // set the final angle
+          n.setAngle(angle);
+        }
+      }
     }
   }
 }
