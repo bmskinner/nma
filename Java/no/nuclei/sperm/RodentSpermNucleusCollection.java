@@ -517,15 +517,15 @@ public class RodentSpermNucleusCollection
     // export the profiles for each nucleus
     for(int i=0; i<this.getNucleusCount();i++){
 
-      outLine = outLine + paths[i]      +"\t"+
-                          areas[i]      +"\t"+
-                          perims[i]     +"\t"+
-                          ferets[i]     +"\t"+
-                          pathLengths[i]+"\t"+
-                          differences[i]+"\t"+
-                          headToTail[i] +"\t"+
-                          tipToTail[i]  +"\t"+
-                          headToTip[i]  +"\t";
+      outLine +=  paths[i]      +"\t"+
+                  areas[i]      +"\t"+
+                  perims[i]     +"\t"+
+                  ferets[i]     +"\t"+
+                  pathLengths[i]+"\t"+
+                  differences[i]+"\t"+
+                  headToTail[i] +"\t"+
+                  tipToTail[i]  +"\t"+
+                  headToTip[i]  +"\t";
 
       AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
       double[] profile = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
