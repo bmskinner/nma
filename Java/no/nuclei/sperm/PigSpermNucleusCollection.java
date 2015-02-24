@@ -51,55 +51,9 @@ import java.util.*;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 
-public class RodentSpermNucleusCollection 
-	extends no.nuclei.NucleusCollection
+public class PigSpermNucleusCollection
+    extends no.nuclei.AsymmetricNucleusCollection
 {
-
-	// Chart drawing parameters
-  private static final int CHART_WINDOW_HEIGHT     = 300;
-  private static final int CHART_WINDOW_WIDTH      = 400;
-  private static final int CHART_TAIL_BOX_Y_MIN    = 325;
-  private static final int CHART_TAIL_BOX_Y_MID    = 340;
-  private static final int CHART_TAIL_BOX_Y_MAX    = 355;
-  private static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-  private static final int CHART_SIGNAL_Y_LINE_MAX = 315;
-
-  // failure  codes
-  public static final int FAILURE_TIP       = 1;
-  public static final int FAILURE_TAIL      = 2;
-
-  private static final double PROFILE_INCREMENT = 0.5;
-
-	private String logMedianFromTipFile  = "logMediansFromTip"; // output medians
-  private String logMedianFromTailFile = "logMediansFromTail"; // output medians
-
-	// private ArrayList<RodentSpermNucleus> nucleiCollection = new ArrayList<RodentSpermNucleus>(0); // store all the nuclei analysed
-
-  private double[] normalisedMedianLineFromTail; // this is an array of 200 angles
-
-	private boolean differencesCalculated = false;
-
-private Map<Double, Collection<Double>> normalisedProfilesFromTail = new HashMap<Double, Collection<Double>>();
-
-	private int offsetCount = 20;
-	private int medianLineTailIndex;
-
-  private Plot  rawXFromTipPlot;
-  private Plot normXFromTipPlot;
-  private Plot  rawXFromTailPlot;
-  private Plot normXFromTailPlot;
-
-  private PlotWindow rawXFromTipWindow;
-  private PlotWindow normXFromTipWindow;
-  private PlotWindow rawXFromTailWindow;
-  private PlotWindow normXFromTailWindow;
-
-  private double maxDifferenceFromMedian = 1.5; // used to filter the nuclei, and remove those too small, large or irregular to be real
-  private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
-
-  public class PigSpermNucleusCollection
-    extends NucleusCollection
-  {
 
     public PigSpermNucleusCollection(File folder, String type){
       super(folder, type);
@@ -117,26 +71,67 @@ private Map<Double, Collection<Double>> normalisedProfilesFromTail = new HashMap
     -----------------------
   */
 
-  public void recalculateTailPositions(){
+  // public void measureProfilePositions(){
 
-    // this.createProfileAggregateFromTail();
-    // this.drawProfilePlots();
-    // this.drawNormalisedMedianLineFromTail();
-    // this.findTailIndexInMedianCurve();
-    // this.calculateOffsets();
-    // this.createNormalisedTailPositions();
-    // this.createProfileAggregateFromTail();
+  //   this.createProfileAggregateFromTail();
+  //   this.createProfileAggregateFromHead();
+  //   this.drawProfilePlots();
+  //   this.drawNormalisedMedianLineFromTail();
+  //   this.drawNormalisedMedianLineFromHead();
+  //   this.calculateDifferencesToMedianProfiles();
+  //   this.exportProfilePlots();
 
-    // this.drawRawPositionsFromTailChart();
-    // this.drawNormalisedPositionsFromTailChart();
+  //   // Use the median profile to refine head / tail point
+  //   // this.findTailIndexInMedianCurve();
+  //   // this.calculateOffsets();
 
-    // this.drawNormalisedMedianLineFromTail();
+  // }
+
+  // public void annotateAndExportNuclei(){
+  //   this.exportNuclearStats("logStats");
+  //   this.exportClusteringProfiles("logClusters");
+  //   this.annotateImagesOfNuclei();
+  //   this.exportAnnotatedNuclei();
+  //   this.exportCompositeImage("composite");
+  // }
+
+  /*
+    -----------------------
+    Get aggregate values
+    -----------------------
+  */
+
+  public int[] getTailIndexes(){
+    int[] d = new int[this.getNucleusCount()];
+
+    for(int i=0;i<this.getNucleusCount();i++){
+      d[i] = this.getNucleus(i).getTailIndex();
+    }
+    return d;
   }
 
-  public void measureAndExportNuclei(){
-    this.exportNuclearStats("logStats");
-    this.annotateImagesOfNuclei();
-    this.exportAnnotatedNuclei();
-    this.exportCompositeImage("composite");
+  /*
+    -----------------------
+    Identify tail in median profile
+    and offset nuclei profiles
+    -----------------------
+  */
+
+  /*
+    -----------------------
+    Annotate sperm
+    -----------------------
+  */
+
+  /*
+    Draw the features of interest on the images of the nuclei created earlier
+  */
+  public void annotateImagesOfNuclei(){
+    IJ.log("Annotating images ("+this.getType()+")...");
+    for(int i=0; i<this.getNucleusCount();i++){
+      PigSpermNucleus n = (PigSpermNucleus)this.getNucleus(i);
+      n.annotateFeatures();
+    }
   }
-  }
+
+}

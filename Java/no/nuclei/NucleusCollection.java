@@ -226,6 +226,10 @@ public class NucleusCollection {
     return median;
   }
 
+  public double getMaxProfileLength(){
+    return getMax(this.getArrayLengths());
+  }
+
   public ArrayList<Nucleus> getNucleiWithSignals(int channel){
     ArrayList<Nucleus> result = new ArrayList<Nucleus>(0);
 
@@ -257,14 +261,14 @@ public class NucleusCollection {
     return result;
   }
 
-  public double[] getDifferencesToMedian(){
-    double[] d = new double[this.getNucleusCount()];
+  // public double[] getDifferencesToMedian(){
+  //   double[] d = new double[this.getNucleusCount()];
 
-    for(int i=0;i<this.getNucleusCount();i++){
-      d[i] = this.getNucleus(i).getDifferenceToMedianCurve();
-    }
-    return d;
-  }
+  //   for(int i=0;i<this.getNucleusCount();i++){
+  //     d[i] = this.getNucleus(i).getDifferenceToMedianCurve();
+  //   }
+  //   return d;
+  // }
 
 
 
@@ -410,8 +414,10 @@ public class NucleusCollection {
             numberOfPoints[m] = (double)n;
           }
         } catch(Exception e){
-             IJ.log("Cannot calculate median for "+k);
+             IJ.log("    Cannot calculate median for "+k);
              IJ.append("Cannot calculate median for "+k+": "+e, this.getDebugFile().getAbsolutePath());
+             IJ.append("\tFolder: "+this.getFolder().getAbsolutePath(), this.getDebugFile().getAbsolutePath());
+             IJ.append("\tCollection: "+this.getType(), this.getDebugFile().getAbsolutePath());
              xmedians[m] = k;
              ymedians[m] = 0.0;
              lowQuartiles[m] = 0.0;
@@ -440,8 +446,8 @@ public class NucleusCollection {
         tenQuartiles[i]    = tenQuartiles[replacementIndex];
         ninetyQuartiles[i] = ninetyQuartiles[replacementIndex];
 
-        IJ.log("Repaired medians at "+i+" with values from  "+replacementIndex);
-        IJ.append("Repaired medians at "+i+" with values from  "+replacementIndex, this.getDebugFile().getAbsolutePath());
+        IJ.log("    Repaired medians at "+i+" with values from  "+replacementIndex);
+        IJ.append("\tRepaired medians at "+i+" with values from  "+replacementIndex, this.getDebugFile().getAbsolutePath());
       }
     }
 
@@ -496,7 +502,7 @@ public class NucleusCollection {
     Finds, as a list of index integers, the points
     of local minimum in the median profile line
   */
-  private ArrayList<Integer> detectLocalMinimaInMedian(double[] medianProfile){
+  protected ArrayList<Integer> detectLocalMinimaInMedian(double[] medianProfile){
     // go through angle array (with tip at start)
     // look at 1-2-3-4-5 points ahead and behind.
     // if all greater, local minimum
@@ -604,7 +610,6 @@ public class NucleusCollection {
     double interpolatedMedianAngle = (medianAngleDifference * positionToFind) + medianAngleLower;
     return interpolatedMedianAngle;
   }
-
 
   /*
     -----------------
@@ -747,14 +752,13 @@ public class NucleusCollection {
       f.delete();
     }
 
-    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
+    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tFAILURE_CODE\tPATH\n";
 
     IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
     double[] pathLengths  = this.getPathLengths();
-    double[] differences  = this.getDifferencesToMedian();
     String[] paths        = this.getNucleusPaths();
 
 
@@ -765,12 +769,8 @@ public class NucleusCollection {
                           perims[i]+"\t"+
                           ferets[i]+"\t"+
                           pathLengths[i]+"\t"+
-                          differences[i]+"\t"+
                           this.getNucleus(i).getFailureCode()+"\t"+
                           paths[i]+"\n";
-
-      // Include tip, CoM, tail
-      // this.getNucleus(i).printLogFile(this.getNucleus(i).getNucleusFolder()+File.separator+this.getNucleus(i).getNucleusNumber()+".log");
     }
     IJ.append(  outLine, statsFile);
     IJ.log("Export complete");

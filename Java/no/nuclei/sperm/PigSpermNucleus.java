@@ -54,42 +54,43 @@ public class PigSpermNucleus
     extends SpermNucleus 
   {
 
+    private NucleusBorderPoint orthPoint1;
+
     public PigSpermNucleus(Nucleus n){
       super(n);
       this.findPointsAroundBorder();
-      this.performNormalisation();
+      this.exportAngleProfile();
     }
 
     private void findPointsAroundBorder(){
-      
-      this.findTailByNarrowestPoint();
 
+      NucleusBorderPoint tailPoint1 = this.findTailByMinima();
+      NucleusBorderPoint tailPoint2 = this.findTailByMaxima();
+      NucleusBorderPoint tailPoint3 = this.findTailByNarrowestPoint();
+
+      this.addTailEstimatePosition(tailPoint1);
+      this.addTailEstimatePosition(tailPoint2);
+      this.addTailEstimatePosition(tailPoint3);
+
+      // int consensusTailIndex = this.getPositionBetween(tailPoint1, tailPoint2);
+      // NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
+      // consensusTailIndex = this.getPositionBetween(consensusTail, tailPoint3);
+      // consensusTail = this.getBorderPoint(consensusTailIndex);
+      // NucleusBorderPoint consensusTail = tailPoint3;
+
+      // this.setTailIndex(consensusTailIndex);
+      // this.setInitialConsensusTail(consensusTail);
+
+      this.setSpermTail(tailPoint3);
       int tailIndex = this.getAngleProfile().getIndexOfPoint(this.getSpermTail());
       this.getAngleProfile().moveIndexToArrayStart(tailIndex);
+      tailIndex = this.getAngleProfile().getIndexOfPoint(this.getSpermTail());
+       this.setTailIndex(tailIndex);
 
+      this.setSpermHead(this.findOppositeBorder(this.getSpermTail()));
+      int headIndex = this.getAngleProfile().getIndexOfPoint(this.getHead());
+      this.setHeadIndex(headIndex);
     }
-
-    public void performNormalisation(){
-      double pathLength = 0;
-      double normalisedTailIndex = ((double)this.getTailIndex()/(double)this.getLength())*100;
-
-      XYPoint prevPoint = new XYPoint(0,0);
-       
-      for (int i=0; i<this.getLength();i++ ) {
-          double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
-          double rawXFromTail = (double)i - (double)this.getTailIndex(); // offset the raw array based on the calculated tail position
-
-          this.addNormalisedXPositionFromTail(normalisedX);
-          this.addRawXPositionFromTail.add(rawXFromTail);
-
-          // calculate the path length
-          XYPoint thisPoint = new XYPoint(normalisedX,this.getBorderPoint(i).getInteriorAngle());
-          pathLength += thisPoint.getLengthTo(prevPoint);
-          prevPoint = thisPoint;
-      }
-      this.setPathLength(pathLength);
-    }
-
 
     /*
       -----------------------
@@ -97,7 +98,7 @@ public class PigSpermNucleus
       -----------------------
     */
 
-    public void findTailByMinima(){
+    public NucleusBorderPoint findTailByMinima(){
 
       NucleusBorderPoint[] minima = this.getAngleProfile().getLocalMinima();
 
@@ -117,22 +118,26 @@ public class PigSpermNucleus
           secondLowestMinima = n;
         }
       }
-      this.setSpermTail(this.getBorderPoint(this.getPositionBetween(lowestMinima, secondLowestMinima)));
+
+      NucleusBorderPoint tailPoint = this.getBorderPoint(this.getPositionBetween(lowestMinima, secondLowestMinima));
+      return tailPoint;
     }
 
-    public void findTailByMaxima(){
+    public NucleusBorderPoint findTailByMaxima(){
       // the tail is the ?only local maximum with an interior angle above the median
       // distance on the distance profile
 
       // the CoM is also more towards the tail. Use this.
       NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
       double medianProfileDistance= this.getMedianDistanceFromProfile();
+      NucleusBorderPoint tailPoint = maxima[0];
 
       for( NucleusBorderPoint n : maxima){
         if (n.getDistanceAcrossCoM()>medianProfileDistance){
-          this.setSpermTail(n);
+          tailPoint = n;
         }
       }
+      return tailPoint;
     }
 
     /*
@@ -141,19 +146,42 @@ public class PigSpermNucleus
       orthogonal border points, the closest to the
       CoM is the tail
     */
-    public void findTailByNarrowestPoint(){
+    public NucleusBorderPoint findTailByNarrowestPoint(){
 
       NucleusBorderPoint narrowPoint = this.getNarrowestDiameterPoint();
-      NucleusBorderPoint orthPoint1  = this.findOrthogonalBorderPoint(narrowPoint);
+      this.orthPoint1  = this.findOrthogonalBorderPoint(narrowPoint);
       NucleusBorderPoint orthPoint2  = this.findOppositeBorder(orthPoint1);
 
-      // choose the closest to CoM
-      NucleusBorderPoint tailPoint  = orthPoint1.getLengthTo(this.getCentreOfMass() <
-                                      orthPoint2.getLengthTo(this.getCentreOfMass()
-                                    ? orthPoint1
-                                    : orthPoint2);
+      NucleusBorderPoint[] array = { orthPoint1, orthPoint2 };
 
-      this.setSpermTail(tailPoint);
-      this.setHeadPoint(this.findOppositeBorder(tailPoint));
+      // the tail should be a maximum, hence have a high angle
+      NucleusBorderPoint tailPoint  = orthPoint1.getInteriorAngle() >
+                                      orthPoint2.getInteriorAngle()
+                                    ? orthPoint1
+                                    : orthPoint2;
+
+      // the tail is near a set of local maxima; hopefully the head is not
+      // NucleusBorderPoint tailPoint = findPointClosestToLocalMaximum(array);
+
+
+      // choose the closest to CoM
+      // NucleusBorderPoint tailPoint  = orthPoint1.getLengthTo(this.getCentreOfMass()) <
+      //                                 orthPoint2.getLengthTo(this.getCentreOfMass())
+      //                               ? orthPoint1
+      //                               : orthPoint2;
+
+      return tailPoint;
     }
+
+    public void annotateFeatures(){
+
+      super.annotateFeatures();
+      // ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+      // ip.setColor(Color.GREEN);
+      // ip.setLineWidth(3);
+      // ip.drawDot( this.orthPoint1.getXAsInt(), 
+      //             this.orthPoint1.getYAsInt());
+
+      // scope for other points of interest to be added   
   }
+}

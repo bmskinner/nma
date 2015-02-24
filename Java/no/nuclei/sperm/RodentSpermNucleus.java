@@ -57,10 +57,6 @@ public class RodentSpermNucleus
 
   private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
 
-  private double differenceToMedianCurve; // store the difference between curves
-
-  private ArrayList<NucleusBorderPoint> intialSpermTails = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
-
   private NucleusBorderPoint spermTip; // differs from the headpoint, which in other sperm is opposite the tail
   private NucleusBorderPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
   private NucleusBorderPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
@@ -71,16 +67,12 @@ public class RodentSpermNucleus
   private FloatPolygon humpRoi;
 
   private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
-  // private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
-  // private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
-  // private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
   private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
 
   // Requires a sperm nucleus object to construct from
   public RodentSpermNucleus(Nucleus n){
   	super(n);
     this.findPointsAroundBorder();
-    this.performNormalisation();
   }
 
   /*
@@ -94,6 +86,7 @@ public class RodentSpermNucleus
     int tipIndex = this.getAngleProfile().getIndexOfPoint(spermTip);
     this.getAngleProfile().moveIndexToArrayStart(tipIndex);
     this.setSpermTip(spermTip);
+    this.setTipIndex(0);
 
     // decide if the profile is right or left handed; flip if needed
     if(!this.isProfileOrientationOK()){
@@ -136,32 +129,12 @@ public class RodentSpermNucleus
     int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail3);
     NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
     consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
-    this.tailIndex = consensusTailIndex;
+    this.setTailIndex(consensusTailIndex);
     this.setInitialConsensusTail(consensusTail);
     this.setSpermTail(consensusTail);
-    
-  }
 
-  public void performNormalisation(){
-    double pathLength = 0;
-    double normalisedTailIndex = ((double)this.getTailIndex()/(double)this.getLength())*100;
-
-    XYPoint prevPoint = new XYPoint(0,0);
-     
-    for (int i=0; i<this.getLength();i++ ) {
-        double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
-        double rawXFromTail = (double)i - (double)this.getTailIndex(); // offset the raw array based on the calculated tail position
-
-        this.normalisedXPositionsFromTip.add(normalisedX);
-        this.addRawXPositionFromTail(rawXFromTail);
-        this.rawXPositionsFromTip.add( (double)i); 
-
-        // calculate the path length
-        XYPoint thisPoint = new XYPoint(normalisedX,this.getBorderPoint(i).getInteriorAngle());
-        pathLength += thisPoint.getLengthTo(prevPoint);
-        prevPoint = thisPoint;
-    }
-    this.setPathLength(pathLength);
+    this.setHead( this.findOppositeBorder(this.getTail()));
+    this.setHeadIndex(this.getAngleProfile().getIndexOfPoint(this.getHead()));
   }
 
   /*
@@ -178,30 +151,6 @@ public class RodentSpermNucleus
     return d;
   }
 
-  // public double[] getNormalisedYPositionsFromTail(){
-  //   double[] d = new double[normalisedYPositionsFromTail.size()];
-  //   for(int i=0;i<normalisedYPositionsFromTail.size();i++){
-  //     d[i] = normalisedYPositionsFromTail.get(i);
-  //   }
-  //   return d;
-  // }
-
-  // public double[] getNormalisedXPositionsFromTail(){
-  //   double[] d = new double[normalisedXPositionsFromTail.size()];
-  //   for(int i=0;i<normalisedXPositionsFromTail.size();i++){
-  //     d[i] = normalisedXPositionsFromTail.get(i);
-  //   }
-  //   return d;
-  // }
-
-  // public double[] getRawXPositionsFromTail(){
-  //   double[] d = new double[rawXPositionsFromTail.size()];
-  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
-  //     d[i] = rawXPositionsFromTail.get(i);
-  //   }
-  //   return d;
-  // }
-
   public double[] getRawXPositionsFromTip(){
     double[] d = new double[rawXPositionsFromTip.size()];
     for(int i=0;i<rawXPositionsFromTip.size();i++){
@@ -209,26 +158,6 @@ public class RodentSpermNucleus
     }
     return d;
   }
-
-  // public double getMaxRawXFromTail(){
-  //   double d = 0;
-  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
-  //     if(rawXPositionsFromTail.get(i) > d){
-  //       d = rawXPositionsFromTail.get(i);
-  //     }
-  //   }
-  //   return d;
-  // }
-
-  // public double getMinRawXFromTail(){
-  //   double d = 0;
-  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
-  //     if(rawXPositionsFromTail.get(i) < d){
-  //       d = rawXPositionsFromTail.get(i);
-  //     }
-  //   }
-  //   return d;
-  // }
 
   public double getMaxRawXFromTip(){
     double d = 0;
@@ -250,14 +179,6 @@ public class RodentSpermNucleus
     return d;
   }
 
-  public double getDifferenceToMedianCurve(){
-    return this.differenceToMedianCurve;
-  }
-
-  public void setDifferenceToMedianCurve(double d){
-    this.differenceToMedianCurve = d;
-  }
-
   public NucleusBorderPoint getSpermTip(){
     return this.spermTip;
   }
@@ -274,12 +195,12 @@ public class RodentSpermNucleus
     return this.initialConsensusTail;
   }
 
+  public int getTipIndex(){
+    return this.tipIndex;
+  }
 
-  
-
-
-  public void addTailEstimatePosition(NucleusBorderPoint p){
-    this.intialSpermTails.add(p);
+  public void setTipIndex(int i){
+    this.tipIndex = i;
   }
 
   /*
@@ -461,52 +382,6 @@ public class RodentSpermNucleus
   }
 
   /*
-    To create the normalised tail-centred index, we want to take the 
-    normalised tip-centred index, and move the tail index position to 
-    the start. 
-  */
-  public void createNormalisedYPositionsFromTail(){
-
-    double[] tipCentredAngles = this.getAngleProfile().getAngleArray();
-    double[] tipCentredXPositions = this.getNormalisedXPositionsFromTip();
-    int tailIndex = this.getTailIndex();
-
-    double[] tempArray = new double[tipCentredAngles.length];
-
-    System.arraycopy(tipCentredAngles, tailIndex, tempArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
-    System.arraycopy(tipCentredAngles, 0, tempArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
-
-    double[] tempXArray = new double[tipCentredAngles.length];
-    System.arraycopy(tipCentredXPositions, tailIndex, tempXArray, 0 , tipCentredAngles.length-tailIndex); // copy over the tailIndex to end values
-    System.arraycopy(tipCentredXPositions, 0, tempXArray, tipCentredAngles.length-tailIndex, tailIndex); // copy over index 0 to tailIndex
-
-
-    for(int i=0; i<this.getLength();i++){
-        this.normalisedYPositionsFromTail.add(tempArray[i]);
-        this.normalisedXPositionsFromTail.add(tempXArray[i]);
-    }
-  }
-
-
-  /*
-    For the given nucleus index:
-    Go through the raw X positions centred on the tail, 
-    and apply the calculated offset.
-  */
-  public double[] createOffsetRawProfile(){
-
-    double offset = this.offsetForTail;
-
-    double[] xRawCentredOnTail = this.getRawXPositionsFromTail();
-    double[] offsetX = new double[xRawCentredOnTail.length];
-
-    for(int j=0;j<xRawCentredOnTail.length;j++){
-        offsetX[j] = xRawCentredOnTail[j]+offset;
-    }
-    return offsetX;
-  }
-
-  /*
     -----------------------
     Methods for dividing the nucleus to hook
     and hump sides
@@ -555,7 +430,7 @@ public class RodentSpermNucleus
 
     for(int i = 0; i<this.getLength();i++){
 
-      int currentIndex = wrapIndex(tailIndex+i, this.getLength()); // start at the tail, and go around the array
+      int currentIndex = wrapIndex(this.getTailIndex()+i, this.getLength()); // start at the tail, and go around the array
       
       NucleusBorderPoint p = getBorderPoint(currentIndex);
 
@@ -568,11 +443,11 @@ public class RodentSpermNucleus
         roi2.add(this.intersectionPoint);
         changeRoi = true;
       }
-      if(currentIndex != intersectionPointIndex && currentIndex != tailIndex && changeRoi){   // continue with roi2, adjusting the index numbering as needed
+      if(currentIndex != intersectionPointIndex && currentIndex != this.getTailIndex() && changeRoi){   // continue with roi2, adjusting the index numbering as needed
         roi2.add(p);
       }
 
-      if(currentIndex==tailIndex && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
+      if(currentIndex==this.getTailIndex() && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
         roi2.add(this.intersectionPoint);
       }
 
@@ -617,8 +492,12 @@ public class RodentSpermNucleus
     -----------------------
   */
 
-  // needs to override SpermNucleus version because hook/hump
+  // needs to override AsymmetricNucleus version because hook/hump
   public void calculateSignalAnglesFromTail(){
+
+    this.calculateSignalAnglesFromPoint(this.getTail());
+
+    // update signal angles with hook or hump side
 
     ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
     signals.add(this.getRedSignals());
@@ -630,10 +509,10 @@ public class RodentSpermNucleus
 
         for(int i=0;i<signalGroup.size();i++){
           NuclearSignal n = signalGroup.get(i);
-          double angle = findAngleBetweenXYPoints(this.getSpermTail(), this.getCentreOfMass(), n.getCentreOfMass());
 
           // hook or hump?
-          if( this.isHookSide(n.getCentreOfMass()) ){ // hookRoi.contains((float) n.centreOfMass.getX() , (float) n.centreOfMass.getY())  
+          double angle = n.getAngle();
+          if( this.isHookSide(n.getCentreOfMass()) ){ 
             angle = 360 - angle;
           }
 
@@ -642,6 +521,8 @@ public class RodentSpermNucleus
         }
       }
     }
+
+
   }
 
 
@@ -651,100 +532,35 @@ public class RodentSpermNucleus
     -----------------------
   */
 
-   /*
-    Print key data to the image log file
-    Overwrites any existing log
-    Replaces exportAngleProfile in Nucleus
-  */   
-  // public void exportAngleProfile(){
 
-  //   File f = new File(this.getNucleusFolder()+File.separator+this.getNucleusNumber()+".log");
-  //   if(f.exists()){
-  //     f.delete();
-  //   }
+  /*
+    -----------------------
+    Annotate nucleus
+    -----------------------
+  */
 
-  //   // NucleusBorderPoint[] points = this.getAngleProfile().getBorderPointArray();
-  //   String outLine =  "X_INT\t"+
-  //                     "Y_INT\t"+
-  //                     "X_DOUBLE\t"+
-  //                     "Y_DOUBLE\t"+
-  //                     "INTERIOR_ANGLE\t"+
-  //                     "MIN_ANGLE\t"+
-  //                     "INTERIOR_ANGLE_DELTA\t"+
-  //                     "INTERIOR_ANGLE_DELTA_SMOOTHED\t"+
-  //                     "BLOCK_POSITION\t"+
-  //                     "BLOCK_NUMBER\t"+
-  //                     "IS_LOCAL_MIN\t"+
-  //                     "IS_LOCAL_MAX\t"+
-  //                     "IS_MIDPOINT\t"+
-  //                     "IS_BLOCK\t"+
-  //                     "NORMALISED_PROFILE_X\t"+
-  //                     "DISTANCE_PROFILE\n";
+  public void annotateFeatures(){
 
-  //   for(int i=0;i<this.getLength();i++){
+    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
 
-  //     double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
-      
-  //     outLine +=  this.getBorderPoint(i).getXAsInt()                      +"\t"+
-  //                 this.getBorderPoint(i).getYAsInt()                      +"\t"+
-  //                 this.getBorderPoint(i).getX()                           +"\t"+
-  //                 this.getBorderPoint(i).getY()                           +"\t"+
-  //                 this.getBorderPoint(i).getInteriorAngle()               +"\t"+
-  //                 this.getBorderPoint(i).getMinAngle()                    +"\t"+
-  //                 this.getBorderPoint(i).getInteriorAngleDelta()          +"\t"+
-  //                 this.getBorderPoint(i).getInteriorAngleDeltaSmoothed()  +"\t"+
-  //                 this.getBorderPoint(i).getPositionWithinBlock()         +"\t"+
-  //                 this.getBorderPoint(i).getBlockNumber()                 +"\t"+
-  //                 this.getBorderPoint(i).isLocalMin()                     +"\t"+
-  //                 this.getBorderPoint(i).isLocalMax()                     +"\t"+
-  //                 this.getBorderPoint(i).isMidpoint()                     +"\t"+
-  //                 this.getBorderPoint(i).isBlock()                        +"\t"+
-  //                 normalisedX                                             +"\t"+
-  //                 this.getBorderPoint(i).getDistanceAcrossCoM()           +"\n";
-  //   }
-  //   IJ.append( outLine, f.getAbsolutePath());
-  // }
+    //draw the sperm tip 
+    ip.setLineWidth(5);
+    ip.setColor(Color.YELLOW);
+    ip.drawDot(this.getSpermTip().getXAsInt(), this.getSpermTip().getYAsInt());
 
-  public void annotateSpermFeatures(){
+    this.annotateEstimatedTailPoints();
+    this.annotateTail();
 
-    try{
+    // Draw the original consensus tail
+    // ip.setLineWidth(5);
+    // ip.setColor(Color.CYAN);
+    // ip.drawDot(this.getInitialConsensusTail().getXAsInt(), this.getInitialConsensusTail().getYAsInt());
 
-      ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-
-      //draw the sperm tip 
-      ip.setLineWidth(5);
-      ip.setColor(Color.YELLOW);
-      ip.drawDot(this.getSpermTip().getXAsInt(), this.getSpermTip().getYAsInt());
-
-      // draw the points considered as sperm tails on a per-nucleus basis
-      ip.setLineWidth(3);
-      ip.setColor(Color.GRAY);
-      for(int j=0; j<this.intialSpermTails.size();j++){
-        NucleusBorderPoint p = this.intialSpermTails.get(j);
-        ip.drawDot(p.getXAsInt(), p.getYAsInt());
-      }
-
-      // Draw the original consensus tail
-      ip.setLineWidth(5);
-      ip.setColor(Color.CYAN);
-      ip.drawDot(this.getInitialConsensusTail().getXAsInt(), this.getInitialConsensusTail().getYAsInt());
-
-      // line from tail to intsersection point; should pass through CoM   
-      if(this.intersectionPoint!=null){ // handle failed nuclei in which this analysis was not performed
-        ip.setLineWidth(1);
-        ip.setColor(Color.YELLOW);
-        ip.drawLine(this.getSpermTail().getXAsInt(), this.getSpermTail().getYAsInt(), this.intersectionPoint.getXAsInt(), this.intersectionPoint.getYAsInt());
-      }
-
-      // The narrowest part of the sperm head
+    // line from tail to intsersection point; should pass through CoM   
+    if(this.intersectionPoint!=null){ // handle failed nuclei in which this analysis was not performed
       ip.setLineWidth(1);
-      ip.setColor(Color.MAGENTA);
-      ip.drawLine(this.minFeretPoint1.getXAsInt(), this.minFeretPoint1.getYAsInt(), this.minFeretPoint2.getXAsInt(), this.minFeretPoint2.getYAsInt());
-      ip.setLineWidth(3);
-      ip.drawDot(this.minFeretPoint1.getXAsInt(), this.minFeretPoint1.getYAsInt());
-      
-    } catch(Exception e){
-      IJ.log("Error annotating nucleus: "+e);
+      ip.setColor(Color.YELLOW);
+      ip.drawLine(this.getSpermTail().getXAsInt(), this.getSpermTail().getYAsInt(), this.intersectionPoint.getXAsInt(), this.intersectionPoint.getYAsInt());
     }
   }
 }

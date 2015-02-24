@@ -5,6 +5,9 @@
   Contains the variables for storing a non-circular nucleus.
   They have a head and a tail, hence can be oriented
   in one axis.
+
+  A tail is the point determined via profile analysis. The
+  head is assigned as the point opposite through the CoM.
 */  
 package no.nuclei;
 
@@ -64,14 +67,17 @@ public class AsymmetricNucleus
   private int offsetForTail = 0; // the offset to apply to the angleProfile to start it from the tail
   private int offsetForHead = 0; // the offset to apply to the angleProfile to start it from the head
 
-  private ArrayList<Double> normalisedXPositionsFromHead = new ArrayList<Double>(0); // holds the x values only after normalisation
-  private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
+  private double differenceToMedianProfileFromHead; // store the difference between curves
+  private double differenceToMedianProfileFromTail; // store the difference between curves
 
-  private ArrayList<Double> normalisedYPositionsFromHead = new ArrayList<Double>(0);
-  private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
+  // private ArrayList<Double> normalisedXPositionsFromHead = new ArrayList<Double>(0); // holds the x values only after normalisation
+  // private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
+
+  // private ArrayList<Double> normalisedYPositionsFromHead = new ArrayList<Double>(0);
+  // private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
   
-  private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
-  private ArrayList<Double> rawXPositionsFromHead        = new ArrayList<Double>(0);
+  // private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
+  // private ArrayList<Double> rawXPositionsFromHead        = new ArrayList<Double>(0);
 
   // Requires a nucleus object to construct from
   public AsymmetricNucleus(Nucleus n){
@@ -128,58 +134,74 @@ public class AsymmetricNucleus
     return this.tailEstimatePoints;
   }
 
+  public double getDifferenceToMedianProfileFromHead(){
+    return this.differenceToMedianProfileFromHead;
+  }
+
+  public double getDifferenceToMedianProfileFromTail(){
+    return this.differenceToMedianProfileFromTail;
+  }
+
   /*
     -----------------------
     Set sperm nucleus features
     -----------------------
   */
 
-  protected void setHead(NucleusBorderPoint p){
+  public void setHead(NucleusBorderPoint p){
     this.headPoint = p;
   }
 
-  protected void setTail(NucleusBorderPoint p){
+  public void setTail(NucleusBorderPoint p){
     this.tailPoint = p;
   }
 
-  protected void setTailIndex(int i){
+  public void setTailIndex(int i){
     this.tailIndex = i;
   }
 
-  protected void setHeadIndex(int i){
+  public void setHeadIndex(int i){
     this.headIndex = i;
   }
 
-  protected void setOffsetForTail(int i){
+  public void setOffsetForTail(int i){
     this.offsetForTail = i;
   }
 
-  protected void setOffsetForHead(int i){
+  public void setOffsetForHead(int i){
     this.offsetForHead = i;
   }
 
-  protected void addRawXPositionFromTail(double d){
-    this.rawXPositionsFromTail.add(d);
-  }
+  // protected void addRawXPositionFromTail(double d){
+  //   this.rawXPositionsFromTail.add(d);
+  // }
 
-  protected void addNormalisedXPositionFromTail(double d){
-    this.normalisedXPositionsFromTail.add(d);
-  }
+  // protected void addNormalisedXPositionFromTail(double d){
+  //   this.normalisedXPositionsFromTail.add(d);
+  // }
 
-  protected void addNormalisedYPositionFromTail(double d){
-    this.normalisedYPositionsFromTail.add(d);
-  }
+  // protected void addNormalisedYPositionFromTail(double d){
+  //   this.normalisedYPositionsFromTail.add(d);
+  // }
 
-  protected void addRawXPositionFromHead(double d){
-    this.rawXPositionsFromHead.add(d);
-  }
+  // protected void addRawXPositionFromHead(double d){
+  //   this.rawXPositionsFromHead.add(d);
+  // }
 
-  protected void addNormalisedXPositionFromHead(double d){
-    this.normalisedXPositionsFromHead.add(d);
-  }
+  // protected void addNormalisedXPositionFromHead(double d){
+  //   this.normalisedXPositionsFromHead.add(d);
+  // }
 
   protected void addTailEstimatePosition(NucleusBorderPoint p){
     this.tailEstimatePoints.add(p);
+  }
+
+  public void setDifferenceToMedianProfileFromHead(double d){
+    this.differenceToMedianProfileFromHead = d;
+  }
+
+  public void setDifferenceToMedianProfileFromTail(double d){
+    this.differenceToMedianProfileFromTail = d;
   }
 
   /*
@@ -188,93 +210,116 @@ public class AsymmetricNucleus
     -----------------------
   */
 
-  public double[] getNormalisedYPositionsFromTail(){
-    double[] d = new double[normalisedYPositionsFromTail.size()];
-    for(int i=0;i<normalisedYPositionsFromTail.size();i++){
-      d[i] = normalisedYPositionsFromTail.get(i);
-    }
-    return d;
-  }
+  // public double[] getNormalisedYPositionsFromTail(){
+  //   double[] d = new double[normalisedYPositionsFromTail.size()];
+  //   for(int i=0;i<normalisedYPositionsFromTail.size();i++){
+  //     d[i] = normalisedYPositionsFromTail.get(i);
+  //   }
+  //   return d;
+  // }
 
-  public double[] getNormalisedXPositionsFromTail(){
-    double[] d = new double[normalisedXPositionsFromTail.size()];
-    for(int i=0;i<normalisedXPositionsFromTail.size();i++){
-      d[i] = normalisedXPositionsFromTail.get(i);
-    }
-    return d;
-  }
+  // public double[] getNormalisedXPositionsFromTail(){
+  //   double[] d = new double[normalisedXPositionsFromTail.size()];
+  //   for(int i=0;i<normalisedXPositionsFromTail.size();i++){
+  //     d[i] = normalisedXPositionsFromTail.get(i);
+  //   }
+  //   return d;
+  // }
 
-  public double[] getRawXPositionsFromTail(){
-    double[] d = new double[rawXPositionsFromTail.size()];
-    for(int i=0;i<rawXPositionsFromTail.size();i++){
-      d[i] = rawXPositionsFromTail.get(i);
-    }
-    return d;
-  }
+  // public double[] getRawXPositionsFromTail(){
+  //   double[] d = new double[rawXPositionsFromTail.size()];
+  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //     d[i] = rawXPositionsFromTail.get(i);
+  //   }
+  //   return d;
+  // }
 
 
-  public double[] getNormalisedYPositionsFromHead(){
-    double[] d = new double[normalisedYPositionsFromHead.size()];
-    for(int i=0;i<normalisedYPositionsFromHead.size();i++){
-      d[i] = normalisedYPositionsFromHead.get(i);
-    }
-    return d;
-  }
+  // public double[] getNormalisedYPositionsFromHead(){
+  //   double[] d = new double[normalisedYPositionsFromHead.size()];
+  //   for(int i=0;i<normalisedYPositionsFromHead.size();i++){
+  //     d[i] = normalisedYPositionsFromHead.get(i);
+  //   }
+  //   return d;
+  // }
 
-  public double[] getNormalisedXPositionsFromHead(){
-    double[] d = new double[normalisedXPositionsFromHead.size()];
-    for(int i=0;i<normalisedXPositionsFromHead.size();i++){
-      d[i] = normalisedXPositionsFromHead.get(i);
-    }
-    return d;
-  }
+  // public double[] getNormalisedXPositionsFromHead(){
+  //   double[] d = new double[normalisedXPositionsFromHead.size()];
+  //   for(int i=0;i<normalisedXPositionsFromHead.size();i++){
+  //     d[i] = normalisedXPositionsFromHead.get(i);
+  //   }
+  //   return d;
+  // }
 
-  public double[] getRawXPositionsFromHead(){
-    double[] d = new double[rawXPositionsFromHead.size()];
-    for(int i=0;i<rawXPositionsFromHead.size();i++){
-      d[i] = rawXPositionsFromHead.get(i);
-    }
-    return d;
-  }
+  // public double[] getRawXPositionsFromHead(){
+  //   double[] d = new double[rawXPositionsFromHead.size()];
+  //   for(int i=0;i<rawXPositionsFromHead.size();i++){
+  //     d[i] = rawXPositionsFromHead.get(i);
+  //   }
+  //   return d;
+  // }
 
-  public double getMaxRawXFromTail(){
-    double d = 0;
-    for(int i=0;i<rawXPositionsFromTail.size();i++){
-      if(rawXPositionsFromTail.get(i) > d){
-        d = rawXPositionsFromTail.get(i);
-      }
-    }
-    return d;
-  }
+  // public double getMaxRawXFromTail(){
+  //   double d = 0;
+  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //     if(rawXPositionsFromTail.get(i) > d){
+  //       d = rawXPositionsFromTail.get(i);
+  //     }
+  //   }
+  //   return d;
+  // }
 
-  public double getMinRawXFromTail(){
-    double d = 0;
-    for(int i=0;i<rawXPositionsFromTail.size();i++){
-      if(rawXPositionsFromTail.get(i) < d){
-        d = rawXPositionsFromTail.get(i);
-      }
-    }
-    return d;
-  }
+  // public double getMinRawXFromTail(){
+  //   double d = 0;
+  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
+  //     if(rawXPositionsFromTail.get(i) < d){
+  //       d = rawXPositionsFromTail.get(i);
+  //     }
+  //   }
+  //   return d;
+  // }
 
-  public double getMaxRawXFromHead(){
-    double d = 0;
-    for(int i=0;i<rawXPositionsFromHead.size();i++){
-      if(rawXPositionsFromHead.get(i) > d){
-        d = rawXPositionsFromHead.get(i);
-      }
-    }
-    return d;
-  }
+  // public double getMaxRawXFromHead(){
+  //   double d = 0;
+  //   for(int i=0;i<rawXPositionsFromHead.size();i++){
+  //     if(rawXPositionsFromHead.get(i) > d){
+  //       d = rawXPositionsFromHead.get(i);
+  //     }
+  //   }
+  //   return d;
+  // }
 
-  public double getMinRawXFromHead(){
-    double d = 0;
-    for(int i=0;i<rawXPositionsFromHead.size();i++){
-      if(rawXPositionsFromHead.get(i) < d){
-        d = rawXPositionsFromHead.get(i);
-      }
+  // public double getMinRawXFromHead(){
+  //   double d = 0;
+  //   for(int i=0;i<rawXPositionsFromHead.size();i++){
+  //     if(rawXPositionsFromHead.get(i) < d){
+  //       d = rawXPositionsFromHead.get(i);
+  //     }
+  //   }
+  //   return d;
+  // }
+
+
+  /*
+    See if there is a differences to the given median
+  */
+  public double calculateDifferenceToMedianProfile(double[] medianProfile){
+
+    // the curve needs to be matched to the median 
+    // hence the median array needs to be the same curve length
+    double[] interpolatedMedian = NucleusCollection.interpolateMedianToLength(this.getLength(), medianProfile);
+
+    // for comparisons between sperm, get the difference between the offset curve and the median
+    double totalDifference = 0;
+
+    for(int j=0; j<this.getLength(); j++){ // for each point round the array
+
+      double curveAngle  = this.getBorderPoint(j).getInteriorAngle();
+      double medianAngle = interpolatedMedian[j];
+
+      totalDifference += Math.abs(curveAngle - medianAngle);
     }
-    return d;
+    return totalDifference;
   }
 
   /*
@@ -346,24 +391,7 @@ public class AsymmetricNucleus
   */
 
   public void calculateSignalAnglesFromTail(){
-
-    ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
-    signals.add(this.getRedSignals());
-    signals.add(this.getGreenSignals());
-
-    for( ArrayList<NuclearSignal> signalGroup : signals ){
-
-      if(signalGroup.size()>0){
-
-        for(int i=0;i<signalGroup.size();i++){
-          NuclearSignal n = signalGroup.get(i);
-          double angle = findAngleBetweenXYPoints(this.getTail(), this.getCentreOfMass(), n.getCentreOfMass());
-
-          // set the final angle
-          n.setAngle(angle);
-        }
-      }
-    }
+    this.calculateSignalAnglesFromPoint(this.getTail());
   }
 
   public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
@@ -386,4 +414,12 @@ public class AsymmetricNucleus
       }
     }
   }
+
+  /*
+    -----------------------
+    Export data
+    -----------------------
+  */
+
+  
 }

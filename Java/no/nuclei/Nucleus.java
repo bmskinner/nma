@@ -68,7 +68,7 @@ public class Nucleus {
   private int nucleusNumber; // the number of the nucleus in the current image
   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
-  private double differenceToMedianCurve; // store the difference between curves
+  
 
   private double medianAngle; // the median angle from XYPoint[] smoothedArray
   private double perimeter;   // the nuclear perimeter
@@ -86,8 +86,8 @@ public class Nucleus {
   
   private Roi roi; // the original ROI
 
-  private ImagePlus sourceImage;
-  private ImagePlus annotatedImage;
+  private ImagePlus sourceImage;    // a copy of the input nucleus. Not to be altered
+  private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
 
   private ArrayList<NuclearSignal> redSignals    = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
   private ArrayList<NuclearSignal> greenSignals  = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
@@ -96,7 +96,7 @@ public class Nucleus {
 
   private double[] distanceProfile; // diameter through the CoM for each point
 
-  private double[][] distancesBetweenSignals;
+  private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
   
   public Nucleus (Roi roi, File file, ImagePlus image, int number) { // construct from an roi
 
@@ -316,10 +316,6 @@ public class Nucleus {
     }
   }
 
-  public double getDifferenceToMedianCurve(){
-    return this.differenceToMedianCurve;
-  }
-
   /*
     -----------------------
     Protected setters for subclasses
@@ -396,10 +392,6 @@ public class Nucleus {
 
   public void updateFailureCode(int i){
     this.failureCode = this.failureCode | i;
-  }
-
-  public void setDifferenceToMedianCurve(double d){
-    this.differenceToMedianCurve = d;
   }
 
   /*

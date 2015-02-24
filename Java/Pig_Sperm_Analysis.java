@@ -137,22 +137,22 @@ public class Pig_Sperm_Analysis
       IJ.log("  Red signals: "+r.getRedSignalCount());
       IJ.log("  Green signals: "+r.getGreenSignalCount());
 
-      r.recalculateTailPositions();
+      r.measureProfilePositions();
 
       r.measureNuclearOrganisation();
-      r.measureAndExportNuclei();
+      r.annotateAndExportNuclei();
 
-      failedNuclei.measureAndExportNuclei();
+      failedNuclei.annotateAndExportNuclei();
 
       attemptRefoldingConsensusNucleus(r);
 
       // split complete set by signals and analyse
-      PigSpermNucleusCollection redNuclei = new PigSpermNucleusCollection(folder, "red");
-      ArrayList<Nucleus> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
-      for(Nucleus n : redList){
-        redNuclei.addNucleus( (PigSpermNucleus)n );
-      }
-      redNuclei.measureAndExportNuclei();
+      // PigSpermNucleusCollection redNuclei = new PigSpermNucleusCollection(folder, "red");
+      // ArrayList<Nucleus> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
+      // for(Nucleus n : redList){
+      //   redNuclei.addNucleus( (PigSpermNucleus)n );
+      // }
+      // redNuclei.annotateAndExportNuclei();
       // attemptRefoldingConsensusNucleus(redNuclei);
 
 

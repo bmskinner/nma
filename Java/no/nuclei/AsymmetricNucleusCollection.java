@@ -59,13 +59,13 @@ public class AsymmetricNucleusCollection
 {
 
 	// Chart drawing parameters
-  private static final int CHART_WINDOW_HEIGHT     = 400;
-  private static final int CHART_WINDOW_WIDTH      = 500;
-  private static final int CHART_TAIL_BOX_Y_MIN    = 325;
-  private static final int CHART_TAIL_BOX_Y_MID    = 340;
-  private static final int CHART_TAIL_BOX_Y_MAX    = 355;
-  private static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-  private static final int CHART_SIGNAL_Y_LINE_MAX = 315;
+  public static final int CHART_WINDOW_HEIGHT     = 400;
+  public static final int CHART_WINDOW_WIDTH      = 500;
+  public static final int CHART_TAIL_BOX_Y_MIN    = 325;
+  public static final int CHART_TAIL_BOX_Y_MID    = 340;
+  public static final int CHART_TAIL_BOX_Y_MAX    = 355;
+  public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
+  public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
 
   // failure  codes
   public static final int FAILURE_HEAD = 128;
@@ -100,6 +100,25 @@ public class AsymmetricNucleusCollection
 
   public AsymmetricNucleusCollection(File folder, String type){
   		super(folder, type);
+  }
+
+  public void measureProfilePositions(){
+
+    this.createProfileAggregateFromTail();
+    this.createProfileAggregateFromHead();
+    this.drawProfilePlots();
+    this.drawNormalisedMedianLineFromTail();
+    this.drawNormalisedMedianLineFromHead();
+    this.calculateDifferencesToMedianProfiles();
+    this.exportProfilePlots();
+  }
+
+  public void annotateAndExportNuclei(){
+    this.exportNuclearStats("logStats");
+    this.exportClusteringProfiles("logClusters");
+    this.annotateImagesOfNuclei();
+    this.exportAnnotatedNuclei();
+    this.exportCompositeImage("composite");
   }
 
 
@@ -227,54 +246,32 @@ public class AsymmetricNucleusCollection
   	double difference = 7000;
   	for(int i=0;i<this.getNucleusCount();i++){
       AsymmetricNucleus p = (AsymmetricNucleus)this.getNucleus(i);
-      if(p.getDifferenceToMedianCurve()<difference){
-      	difference = p.getDifferenceToMedianCurve();
+      if(p.getDifferenceToMedianProfileFromTail()<difference){
+      	difference = p.getDifferenceToMedianProfileFromTail();
       	n = p;
       }
     }
     return n;
   }
 
-  public double getMaxRawXFromTails(){
-    double d = 0;
+  public double[] getDifferencesToMedianFromTail(){
+    double[] d = new double[this.getNucleusCount()];
+
     for(int i=0;i<this.getNucleusCount();i++){
+
       AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
-      if(n.getMaxRawXFromTail() > d){
-        d = n.getMaxRawXFromTail();
-      }
+      d[i] = n.getDifferenceToMedianProfileFromTail();
     }
     return d;
   }
 
-  public double getMinRawXFromTails(){
-    double d = 0;
-    for(int i=0;i<this.getNucleusCount();i++){
-      AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
-      if(n.getMinRawXFromTail() < d){
-        d = n.getMinRawXFromTail();
-      }
-    }
-    return d;
-  }
+  public double[] getDifferencesToMedianFromHead(){
+    double[] d = new double[this.getNucleusCount()];
 
-  public double getMaxRawXFromHeads(){
-    double d = 0;
     for(int i=0;i<this.getNucleusCount();i++){
-      AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
-      if(n.getMaxRawXFromHead() > d){
-        d = n.getMaxRawXFromHead();
-      }
-    }
-    return d;
-  }
 
-  public double getMinRawXFromHeads(){
-    double d = 0;
-    for(int i=0;i<this.getNucleusCount();i++){
       AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
-      if(n.getMaxRawXFromHead() < d){
-        d = n.getMaxRawXFromHead();
-      }
+      d[i] = n.getDifferenceToMedianProfileFromHead();
     }
     return d;
   }
@@ -288,6 +285,15 @@ public class AsymmetricNucleusCollection
 		return targetMedianCurve;
 	}	
 
+  public double[] getHeadToTailDistances(){
+    double[] d = new double[this.getNucleusCount()];
+    for(int i=0;i<this.getNucleusCount();i++){
+      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+      d[i] = n.getHead().getLengthTo(n.getTail());
+    }
+    return d;
+  }
+
   /*
     -----------------------
     Setters
@@ -300,6 +306,14 @@ public class AsymmetricNucleusCollection
 
   public void setNormalisedMedianProfileFromTail(double[] d){
     this.normalisedMedianProfileFromTail = d;
+  }
+
+  public void setMedianProfileTailIndex(int i){
+    this.medianProfileTailIndex = i;
+  }
+
+  public void setMedianProfileHeadIndex(int i){
+    this.medianProfileHeadIndex = i;
   }
 
   /*
@@ -318,13 +332,6 @@ public class AsymmetricNucleusCollection
     can be centred on head or tail
     -----------------------
   */
-
-  public void measureAndExportNuclei(){
-    this.exportNuclearStats("logStats");
-    this.annotateImagesOfNuclei();
-    this.exportAnnotatedNuclei();
-    this.exportCompositeImage("composite");
-  }
 
   public void createProfileAggregateFromHead(){
 
@@ -352,6 +359,22 @@ public class AsymmetricNucleusCollection
 	  	// double[] yvalues = n.getNormalisedYPositionsFromTail();
 	  	updateProfileAggregate(xvalues, yvalues, this.getNormalisedProfilesFromTail()); 
 	  }
+  }
+
+  // /*
+  //   For each nucleus in the collection see if there is a differences to the given median
+  // */
+  public void calculateDifferencesToMedianProfiles(){
+
+    for(int i= 0; i<this.getNucleusCount();i++){ // for each nucleus
+      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+      
+      double differenceFromHead = n.calculateDifferenceToMedianProfile(this.getMedianProfileFromHead());
+      n.setDifferenceToMedianProfileFromHead(differenceFromHead);
+
+      double differenceFromTail = n.calculateDifferenceToMedianProfile(this.getMedianProfileFromTail());
+      n.setDifferenceToMedianProfileFromTail(differenceFromTail);
+    }
   }
 	 
   public void measureNuclearOrganisation(){
@@ -396,7 +419,7 @@ public class AsymmetricNucleusCollection
     -----------------------
   */
 
-  public void exportInterpolatedMedians(double[] d){
+  public void exportInterpolatedMedians(double[] medianProfile){
 
     String logFile = this.getFolder()+File.separator+"logInterpolatedMedians.txt";
     File f = new File(logFile);
@@ -404,8 +427,8 @@ public class AsymmetricNucleusCollection
       f.delete();
     }
     IJ.append("INDEX\tANGLE", logFile);
-    for(int i=0;i<d.length;i++){
-      IJ.append(i+"\t"+d[i], logFile);
+    for(int i=0;i<medianProfile.length;i++){
+      IJ.append(i+"\t"+medianProfile[i], logFile);
     }
     IJ.append("", logFile);
   }
@@ -442,7 +465,7 @@ public class AsymmetricNucleusCollection
     double[] ferets       = this.getFerets();
     double[] pathLengths  = this.getPathLengths();
     int[] tails           = this.getTailIndexes();
-    double[] differences  = this.getDifferencesToMedian();
+    double[] differences  = this.getDifferencesToMedianFromTail();
     String[] paths        = this.getNucleusPaths();
 
 
@@ -538,6 +561,52 @@ public class AsymmetricNucleusCollection
     IJ.log("Composite image created");
   }
 
+  public void exportClusteringProfiles(String filename){
+    String statsFile = this.getFolder()+File.separator+filename+"."+getType()+".txt";
+    File f = new File(statsFile);
+    if(f.exists()){
+      f.delete();
+    }
+
+    String outLine = "PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\t";
+
+    IJ.log("Exporting clustering profiles for "+this.getNucleusCount()+" nuclei ("+this.getType()+")...");
+    double[] areas        = this.getAreas();
+    double[] perims       = this.getPerimeters();
+    double[] ferets       = this.getFerets();
+    double[] pathLengths  = this.getPathLengths();
+    double[] differences  = this.getDifferencesToMedianFromTail();
+    double[] headToTail   = this.getHeadToTailDistances();
+    String[] paths        = this.getNucleusPaths();
+
+    double maxPerim = getMax(perims); // add column headers
+    for(int i=0;i<maxPerim;i++){
+      outLine += i+"\t";
+    }
+    outLine += "\n";
+
+    // export the profiles for each nucleus
+    for(int i=0; i<this.getNucleusCount();i++){
+
+      outLine = outLine + paths[i]      +"\t"+
+                          areas[i]      +"\t"+
+                          perims[i]     +"\t"+
+                          ferets[i]     +"\t"+
+                          pathLengths[i]+"\t"+
+                          differences[i]+"\t"+
+                          headToTail[i] +"\t";
+
+      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+      double[] profile = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
+      for(int j=0;j<profile.length;j++){
+        outLine += profile[j]+"\t";
+      }
+      outLine += "\n";
+    }
+    IJ.append(  outLine, statsFile);
+    IJ.log("Cluster export complete");
+  }
+
   /*
     -----------------------
     Draw plots
@@ -548,16 +617,16 @@ public class AsymmetricNucleusCollection
     Create the plots that we will be using
     Get the x max and min as needed from aggregate stats
   */
-  private void preparePlots(){
+  public void preparePlots(){
 
     this.rawProfileFromHeadPlot = new Plot( "Raw head-indexed plot",
                                 "Position",
                                 "Angle", Plot.Y_GRID | Plot.X_GRID);
-    rawProfileFromHeadPlot.setLimits(0,this.getMaxRawXFromHeads(),-50,360);
+    rawProfileFromHeadPlot.setLimits(0,this.getMaxProfileLength(),-50,360);
     rawProfileFromHeadPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
     rawProfileFromHeadPlot.setYTicks(true);
     rawProfileFromHeadPlot.setColor(Color.BLACK);
-    rawProfileFromHeadPlot.drawLine(0, 180, this.getMaxRawXFromHeads(), 180); 
+    rawProfileFromHeadPlot.drawLine(0, 180, this.getMaxProfileLength(), 180); 
     rawProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
 
 
@@ -575,13 +644,12 @@ public class AsymmetricNucleusCollection
     this.rawProfileFromTailPlot = new Plot( "Raw tail-indexed plot",
                                 "Position",
                                 "Angle", Plot.Y_GRID | Plot.X_GRID);
-    rawProfileFromTailPlot.setLimits( this.getMinRawXFromTails(),
-                                this.getMaxRawXFromTails(),
+    rawProfileFromTailPlot.setLimits( 0, this.getMaxProfileLength(),
                                 -50,360);
     rawProfileFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
     rawProfileFromTailPlot.setYTicks(true);
     rawProfileFromTailPlot.setColor(Color.BLACK);
-    rawProfileFromTailPlot.drawLine(this.getMinRawXFromTails(), 180, this.getMaxRawXFromTails(), 180); 
+    rawProfileFromTailPlot.drawLine(0, 180, this.getMaxProfileLength(), 180); 
     rawProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
 
     this.normProfileFromTailPlot = new Plot("Normalised tail-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
@@ -729,7 +797,7 @@ public class AsymmetricNucleusCollection
     normProfileFromTailPlot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
   }
 
-  private void addSignalsToProfileChartFromHead(){
+  public void addSignalsToProfileChartFromHead(){
     // PlotWindow normProfileFromTipWindow; normProfileFromHeadPlot
     // for each signal in each nucleus, find index of point. Draw dot
     // Add the signals to the tip centred profile plot
@@ -825,56 +893,6 @@ public class AsymmetricNucleusCollection
     this.normProfileFromTailPlotWindow.draw();
     this.normProfileFromHeadPlotWindow.draw();
   }
-
-  // public void drawRawPositionsFromTailChart(){
-
-  //   Plot offsetRawPlot = new Plot("Raw corrected tail-centred plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-  //   PlotWindow offsetRawPlotWindow;
-
-  //   offsetRawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-  //   offsetRawPlot.setYTicks(true);
-    
-  //   double minX = 0;
-  //   double maxX = 0;
-  //   for(int i=0;i<this.getNucleusCount();i++){
-  //     double[] xRawCentredOnTail = this.getNucleus(i).createOffsetRawProfile();
-  //     if(getMin(xRawCentredOnTail)<minX){
-  //       minX = getMin(xRawCentredOnTail);
-  //     }
-  //     if(getMax(xRawCentredOnTail)>maxX){
-  //       maxX = getMax(xRawCentredOnTail);
-  //     }
-  //   }
-  //   offsetRawPlot.setLimits( (int) minX-1, (int) maxX+1,-50,360);
-  //   offsetRawPlot.setColor(Color.BLACK);
-  //   offsetRawPlot.drawLine((int) minX-1, 180, (int) maxX+1, 180); 
-  //   offsetRawPlot.setColor(Color.LIGHT_GRAY);
-   
-  //   for(int i=0;i<this.getNucleusCount();i++){
-  //     double[] xRawCentredOnTail = this.getNucleus(i).createOffsetRawProfile();
-  //     double[] ypoints = this.getNucleus(i).getInteriorAngles();
-
-  //     offsetRawPlot.setColor(Color.LIGHT_GRAY);
-  //     offsetRawPlot.addPoints(xRawCentredOnTail, ypoints, Plot.LINE);
-  //   }
-    
-  //   offsetRawPlot.draw();
-  //   offsetRawPlotWindow = offsetRawPlot.show();
-  //   offsetRawPlotWindow.noGridLines = true; // I have no idea why this makes the grid lines appear on work PC, when they appear by default at home
-  //   offsetRawPlotWindow.drawPlot(offsetRawPlot);  
-  // }
-
-  // public void drawNormalisedPositionsFromTailChart(){
-   
-  //   for(int i=0;i<this.getNucleusCount();i++){
-  //     double[] xpoints = this.getNucleus(i).getNormalisedXPositionsFromTip();
-  //     double[] ypoints = this.getNucleus(i).getNormalisedYPositionsFromTail();
-  //     normProfileFromTailPlot.addPoints(xpoints, ypoints, Plot.LINE);
-  //   }
-  //   normProfileFromTailPlot.draw();
-  //   normProfileFromTailWindow = normProfileFromTailPlot.show();
-  //   normProfileFromTailWindow.drawPlot(normProfileFromTailPlot);  
-  // }
 
   /*
     -----------------------
