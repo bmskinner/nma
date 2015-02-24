@@ -142,7 +142,9 @@ public class Pig_Sperm_Analysis
       r.measureNuclearOrganisation();
       r.annotateAndExportNuclei();
 
-      failedNuclei.annotateAndExportNuclei();
+      if(failedNuclei.getNucleusCount()>0){
+        failedNuclei.annotateAndExportNuclei();
+      }
 
       attemptRefoldingConsensusNucleus(r);
 
@@ -173,6 +175,7 @@ public class Pig_Sperm_Analysis
     // draw signals on the refolded nucleus
     refolder.addSignalsToConsensus(collection);
     refolder.exportImage(collection);
+    refolder.exportProfileOfRefoldedImage(collection);
 
   }
 }
