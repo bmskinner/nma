@@ -67,7 +67,7 @@ public class CurveRefolder {
 	public void refoldCurve(){
 
 		this.moveCoMtoZero();
-		this.preparePlots();
+		// this.preparePlots();
 
 		double score = compareProfiles(targetCurve, initialCurve);
 		
@@ -202,7 +202,7 @@ public class CurveRefolder {
 		nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
 		// anglePlot.setColor(Color.DARK_GRAY);
 		// anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
-		nucleusPlotWindow.drawPlot(nucleusPlot);
+		// nucleusPlotWindow.drawPlot(nucleusPlot);
 		// anglePlotWindow.drawPlot(anglePlot);
 	}
 
@@ -367,13 +367,7 @@ public class CurveRefolder {
 		plotTargetNucleus();
 	}
 
-	public void exportImage(NucleusCollection collection){
-		ImagePlus plot = nucleusPlot.getImagePlus();
-	  IJ.saveAsTiff(plot, targetNucleus.getDirectory()+File.separator+"plotConsensus."+collection.getType()+".tiff");
-	  // targetNucleus.setPath(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
-	  // IJ.log("Exporting to: "+targetNucleus.getPath());
-	  // targetNucleus.printLogFile(targetNucleus.getPath());
-	}
+	
 
 	/*
 	  Using a list of signal locations, draw on
@@ -458,6 +452,50 @@ public class CurveRefolder {
 		}
 		// IJ.log("Target angle: "+angle+": Best angel: "+bestAngle+" Distance: "+bestDistance);
 		return bestDistance;
+	}
+
+	/*
+		-----------------------
+		Export data
+		-----------------------
+	*/
+
+	public void exportProfileOfRefoldedImage(NucleusCollection collection){
+		// targetNucleus.setPath(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
+	  // IJ.log("Exporting to: "+targetNucleus.getPath());
+	  // targetNucleus.printLogFile(targetNucleus.getPath());
+	 
+	  File f = new File(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
+    if(f.exists()){
+      f.delete();
+    }
+
+    String outLine =  "X_INT\t"+
+                      "Y_INT\t"+
+                      "X_DOUBLE\t"+
+                      "Y_DOUBLE\t"+
+                      "INTERIOR_ANGLE\t"+
+                      "NORMALISED_PROFILE_X\t"+
+                      "DISTANCE_PROFILE\n";
+
+    for(int i=0;i<targetNucleus.getLength();i++){
+
+      double normalisedX = ((double)i/(double)targetNucleus.getLength())*100; // normalise to 100 length
+      
+      outLine +=  targetNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
+                  targetNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
+                  targetNucleus.getBorderPoint(i).getX()                  +"\t"+
+                  targetNucleus.getBorderPoint(i).getY()                  +"\t"+
+                  targetNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
+                  normalisedX                                             +"\t"+
+                  targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
+    }
+    IJ.append( outLine, f.getAbsolutePath());
+	}
+
+	public void exportImage(NucleusCollection collection){
+		ImagePlus plot = nucleusPlot.getImagePlus();
+	  IJ.saveAsTiff(plot, targetNucleus.getDirectory()+File.separator+"plotConsensus."+collection.getType()+".tiff");
 	}
 
 }

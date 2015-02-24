@@ -493,6 +493,7 @@ public class RodentSpermNucleus
   */
 
   // needs to override AsymmetricNucleus version because hook/hump
+  @Override
   public void calculateSignalAnglesFromTail(){
 
     this.calculateSignalAnglesFromPoint(this.getTail());

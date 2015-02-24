@@ -176,12 +176,6 @@ public class PigSpermNucleus
     public void annotateFeatures(){
 
       super.annotateFeatures();
-      // ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-      // ip.setColor(Color.GREEN);
-      // ip.setLineWidth(3);
-      // ip.drawDot( this.orthPoint1.getXAsInt(), 
-      //             this.orthPoint1.getYAsInt());
-
       // scope for other points of interest to be added   
   }
 }
