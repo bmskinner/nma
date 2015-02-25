@@ -81,11 +81,11 @@ public class SpermNucleus
     -----------------------
   */
 
-  protected void setSpermHead(NucleusBorderPoint p){
+  public void setSpermHead(NucleusBorderPoint p){
     this.setHead(p);
   }
 
-  protected void setSpermTail(NucleusBorderPoint p){
+  public void setSpermTail(NucleusBorderPoint p){
     this.setTail(p);
   }
 

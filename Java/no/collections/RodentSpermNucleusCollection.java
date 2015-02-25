@@ -263,7 +263,7 @@ public class RodentSpermNucleusCollection
 
       n.setOffsetForTail(offset);
 
-      int newTailIndex = wrapIndex(n.getTailIndex()-offset, n.getLength());
+      int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getTailIndex()-offset, n.getLength());
 
       n.setTailIndex(newTailIndex); // update the tail position
       n.setSpermTail(n.getBorderPoint(n.getTailIndex())); // ensure the spermTail is updated
@@ -383,7 +383,7 @@ public class RodentSpermNucleusCollection
   public void calculateNormalisedMedianLineFromTip(){
     ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile( this.normalisedProfilesFromTip );
     this.exportMediansAndQuartilesOfProfile(medians, this.logMedianFromTipFile);
-    setNormalisedMedianProfileFromTip(getDoubleFromDouble( medians.get(1) ));
+    setNormalisedMedianProfileFromTip(NuclearOrganisationUtility.getDoubleFromDouble( medians.get(1) ));
   }
 
   /*
@@ -395,12 +395,12 @@ public class RodentSpermNucleusCollection
 
     ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile( this.normalisedProfilesFromTip );
 
-    double[] xmedians        =  getDoubleFromDouble( medians.get(0) );
-    double[] ymedians        =  getDoubleFromDouble( medians.get(1) );
-    double[] lowQuartiles    =  getDoubleFromDouble( medians.get(2) );
-    double[] uppQuartiles    =  getDoubleFromDouble( medians.get(3) );
-    double[] tenQuartiles    =  getDoubleFromDouble( medians.get(4) );
-    double[] ninetyQuartiles =  getDoubleFromDouble( medians.get(5) );
+    double[] xmedians        =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(0) );
+    double[] ymedians        =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(1) );
+    double[] lowQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(2) );
+    double[] uppQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(3) );
+    double[] tenQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(4) );
+    double[] ninetyQuartiles =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(5) );
 
     // add the median lines to the chart
     normProfileFromTipPlot.setColor(Color.BLACK);
@@ -510,7 +510,7 @@ public class RodentSpermNucleusCollection
     double[] tipToTail    = this.getTailToTipDistances();
     String[] paths        = this.getNucleusPaths();
 
-    double maxPerim = getMax(perims); // add column headers
+    double maxPerim = NuclearOrganisationUtility.getMax(perims); // add column headers
     for(int i=0;i<maxPerim;i++){
       outLine += i+"\t";
     }

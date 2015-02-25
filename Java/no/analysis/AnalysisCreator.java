@@ -39,7 +39,7 @@ public class AnalysisCreator {
   private  double maxNucleusCirc   = 1.0;
 
   private  double minSignalSize = 5;
-  private  double maxSignalSize = 500;
+  private  double maxSignalFraction = 0.5;
 
   private File folder;
 
@@ -60,12 +60,17 @@ public class AnalysisCreator {
   */
 
   public HashMap<File, NucleusCollection> runAnalysis(){
-    NucleusDetector detector = new NucleusDetector(this.folder, 
-                                                  this.getMinNucleusSize(), 
-                                                  this.getMaxNucleusSize(), 
-                                                  this.getNucleusThreshold(),
-                                                  this.getMinNucleusCirc(),
-                                                  this.getMaxNucleusCirc());
+    NucleusDetector detector = new NucleusDetector(this.folder);
+
+    detector.setMinNucleusSize(this.getMinNucleusSize()); 
+    detector.setMaxNucleusSize(this.getMaxNucleusSize());
+    detector.setThreshold(this.getNucleusThreshold());
+    detector.setMinNucleusCirc(this.getMinNucleusCirc());
+    detector.setMaxNucleusCirc(this.getMaxNucleusCirc());
+
+    detector.setSignalThreshold(this.getSignalThreshold());
+    detector.setMinSignalSize(this.getMinSignalSize());
+    detector.setMaxSignalFraction(this.getMaxSignalFraction());
     detector.runDetector();
 
     HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
@@ -104,34 +109,50 @@ public class AnalysisCreator {
     return this.maxNucleusCirc;
   }
 
+  public double getMinSignalSize(){
+    return this.minSignalSize;
+  }
+
+  public double getMaxSignalFraction(){
+    return this.maxSignalFraction;
+  }
+
   /*
     -----------------------
     Setters
     -----------------------
   */
 
-  public int setNucleusThreshold(int i){
+  public void setNucleusThreshold(int i){
     this.nucleusThreshold = i;
   }
 
-  public int setSignalThreshold(int i){
+  public void setSignalThreshold(int i){
     this.signalThreshold = i;
   }
 
-  public double setMinNucleusSize(double d){
+  public void setMinNucleusSize(double d){
     this.minNucleusSize = d;
   }
 
-  public double setMaxNucleusSize(double d){
+  public void setMaxNucleusSize(double d){
     this.maxNucleusSize = d;
   }
 
-  public double setMinNucleusCirc(double d){
+  public void setMinNucleusCirc(double d){
     this.minNucleusCirc = d;
   }
 
-  public double setMaxNucleusCirc(double d){
+  public void setMaxNucleusCirc(double d){
     this.maxNucleusCirc = d;
+  }
+
+  public void setMinSignalSize(double d){
+    this.minSignalSize = d;
+  }
+
+  public void setMaxSignalFraction(double d){
+    this.maxSignalFraction = d;
   }
 
 }

@@ -50,6 +50,7 @@ import java.io.RandomAccessFile;
 import java.util.*;
 import no.nuclei.*;
 import no.components.*;
+import no.utility.*;
 
 public class RodentSpermNucleus
 	extends SpermNucleus
@@ -399,14 +400,14 @@ public class RodentSpermNucleus
     // determine the coordinates of the point intersected as int
     // for each xvalue of each point in array, get the line y value
     // at the point the yvalues are closest and not the tail point is the intersesction
-    double[] lineEquation = findLineEquation(this.getCentreOfMass(), this.getSpermTail());
+    double[] lineEquation = NuclearOrganisationUtility.findLineEquation(this.getCentreOfMass(), this.getSpermTail());
     double minDeltaY = 100;
     int minDeltaYIndex = 0;
 
     for(int i = 0; i<this.getLength();i++){
         double x = this.getBorderPoint(i).getX();
         double y = this.getBorderPoint(i).getY();
-        double yOnLine = getYFromEquation(lineEquation, x);
+        double yOnLine = NuclearOrganisationUtility.getYFromEquation(lineEquation, x);
 
         double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getSpermTail());
 
@@ -431,7 +432,7 @@ public class RodentSpermNucleus
 
     for(int i = 0; i<this.getLength();i++){
 
-      int currentIndex = wrapIndex(this.getTailIndex()+i, this.getLength()); // start at the tail, and go around the array
+      int currentIndex = NuclearOrganisationUtility.wrapIndex(this.getTailIndex()+i, this.getLength()); // start at the tail, and go around the array
       
       NucleusBorderPoint p = getBorderPoint(currentIndex);
 

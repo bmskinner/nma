@@ -162,6 +162,10 @@ public class Mouse_Sperm_Analysis
   private static final double MIN_NUCLEAR_CIRC = 0.3;
   private static final double MAX_NUCLEAR_CIRC = 0.8;
 
+  private static final double MIN_SIGNAL_SIZE = 50;
+
+
+
   private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
 
   private ArrayList<RodentSpermNucleusCollection> nuclearPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
@@ -175,16 +179,21 @@ public class Mouse_Sperm_Analysis
     if(folderName==null){
       return;
     }
-
     IJ.log("Directory: "+folderName);
-
     File folder = new File(folderName);
-    NucleusDetector detector = new NucleusDetector(folder, MIN_NUCLEAR_SIZE, MAX_NUCLEAR_SIZE);
-    detector.runDetector();
 
-    HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
+    AnalysisCreator analysisCreator = new AnalysisCreator(folder);
 
-    IJ.log("Imported folder(s)");
+    analysisCreator.setMinNucleusSize(  MIN_NUCLEAR_SIZE );
+    analysisCreator.setMaxNucleusSize(  MAX_NUCLEAR_SIZE );
+    analysisCreator.setMaxNucleusSize(  MAX_NUCLEAR_SIZE );
+    analysisCreator.setNucleusThreshold(NUCLEUS_THRESHOLD);
+    analysisCreator.setMinNucleusCirc(  MIN_NUCLEAR_CIRC );
+    analysisCreator.setMaxNucleusCirc(  MAX_NUCLEAR_CIRC );
+    analysisCreator.setMinSignalSize(   MIN_SIGNAL_SIZE  );
+
+    HashMap<File, NucleusCollection> folderCollection = analysisCreator.runAnalysis();
+
     getPopulations(folderCollection);
     analysePopulations();
 

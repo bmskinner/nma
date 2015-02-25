@@ -163,7 +163,7 @@ public class CurveRefolder {
 		nucleusPlot.setColor(Color.LIGHT_GRAY);
 	  nucleusPlot.drawLine(min, 0, Math.abs(min), 0);
 	  nucleusPlot.drawLine(0, min, 0, Math.abs(min));
-		nucleusPlotWindow = nucleusPlot.show();
+		// nucleusPlotWindow = nucleusPlot.show();
 	}
 
 

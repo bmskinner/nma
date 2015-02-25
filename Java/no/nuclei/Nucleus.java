@@ -61,9 +61,9 @@ public class Nucleus {
   public static final int NOT_GREEN_CHANNEL  = 4;
 
   // Values for deciding whether an object is a signal
-  public static final int    SIGNAL_THRESHOLD = 70;
-  public static final double MIN_SIGNAL_SIZE  = 5; // how small can a signal be
-  public static final double MAX_SIGNAL_FRACTION = 0.5; // allow up to 50% of nucleus to be signal
+  private int    signalThreshold = 70;
+  private double minSignalSize  = 5; // how small can a signal be
+  private double maxSignalFraction = 0.5; // allow up to 50% of nucleus to be signal
 
   public static final String IMAGE_PREFIX = "export.";
 
@@ -145,17 +145,20 @@ public class Nucleus {
      // calc distances around nucleus through CoM
      this.calculateDistanceProfile();
      this.calculatePathLength();
-
-     // find and measure signals
-     this.measureSignalsInNucleus();
-     this.calculateSignalDistancesFromCoM();
-     this.calculateFractionalSignalDistancesFromCoM();
-     this.annotateNucleusImage();
+     
+     // this.annotateNucleusImage();
   }
 
-  // constructor for subclasses
   protected Nucleus(){
+    // for subclasses to access
+  }
 
+  // find and measure signals. Call after constructor to allow alteration of 
+  // thresholding and size parameters
+  public void detectSignalsInNucleus(){
+    this.measureSignalsInNucleus();
+    this.calculateSignalDistancesFromCoM();
+    this.calculateFractionalSignalDistancesFromCoM();
   }
 
   /*
@@ -396,6 +399,18 @@ public class Nucleus {
     this.failureCode = this.failureCode | i;
   }
 
+  public void setMinSignalSize(double d){
+    this.minSignalSize = d;
+  }
+
+  public void setMaxSignalFraction(double d){
+    this.maxSignalFraction = d;
+  }
+
+  public void setSignalThreshold(int i){
+    this.signalThreshold = i;
+  }
+
   /*
     -----------------------
     Get aggregate values
@@ -496,16 +511,16 @@ public class Nucleus {
     
     // threshold
     ImageProcessor ip = imp.getChannelProcessor();
-    ip.threshold(SIGNAL_THRESHOLD);
+    ip.threshold(this.signalThreshold);
     ip.invert();
 
     // run the particle analyser
     ResultsTable rt = new ResultsTable();
-    double maxSignalSize = this.getArea() * MAX_SIGNAL_FRACTION;
+    double maxSignalSize = this.getArea() * this.maxSignalFraction;
     ParticleAnalyzer pa = new ParticleAnalyzer( ParticleAnalyzer.ADD_TO_MANAGER, 
                                                 ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA,
                                                  rt, 
-                                                 MIN_SIGNAL_SIZE, 
+                                                 this.minSignalSize, 
                                                  maxSignalSize);
     try {
       pa.setRoiManager(manager);

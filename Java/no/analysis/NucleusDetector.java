@@ -63,10 +63,10 @@ public class NucleusDetector {
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
-  private double minNuclearSize  = 500;
-  private double maxNuclearSize  = 10000;
-  private double minNuclearCirc  = 0.4;
-  private double maxNuclearCirc  = 1;
+  private double minNucleusSize  = 500;
+  private double maxNucleusSize  = 10000;
+  private double minNucleusCirc  = 0.4;
+  private double maxNucleusCirc  = 1;
 
   private int nucleusThreshold = 36;
 
@@ -75,6 +75,10 @@ public class NucleusDetector {
   private int nucleiFailedOnTip  = 0;
   private int nucleiFailedOnTail = 0;
   private int nucleiFailedOther  = 0; // generic reasons for failure
+
+  private  int    signalThreshold = 70;
+  private  double   minSignalSize = 5;
+  private  double   maxSignalFraction = 0.5;
 
 	private File folder;
 	// private NucleusCollection collection;
@@ -90,24 +94,15 @@ public class NucleusDetector {
 
   public NucleusDetector(File folder, double minSize, double maxSize){
     this.folder = folder;
-    this.setMinNuclearSize(minSize);
-    this.setMaxNuclearSize(maxSize);
+    this.setMinNucleusSize(minSize);
+    this.setMaxNucleusSize(maxSize);
   }
 
   public NucleusDetector(File folder, double minSize, double maxSize, int threshold){
     this.folder = folder;
-    this.setMinNuclearSize(minSize);
-    this.setMaxNuclearSize(maxSize);
+    this.setMinNucleusSize(minSize);
+    this.setMaxNucleusSize(maxSize);
     this.setThreshold(threshold);
-  }
-
-  public NucleusDetector(File folder, double minSize, double maxSize, int threshold, double minCirc, double maxCirc){
-    this.folder = folder;
-    this.setMinNuclearSize(minSize);
-    this.setMaxNuclearSize(maxSize);
-    this.setThreshold(threshold);
-    this.setMinNuclearCirc(minCirc);
-    this.setMaxNuclearCirc(maxCirc);
   }
 
   public void runDetector(){
@@ -122,25 +117,44 @@ public class NucleusDetector {
     Settings for nucleus detection
   */
 
-  public void setMinNuclearSize(double d){
-    this.minNuclearSize = d;
+  public void setMinNucleusSize(double d){
+    this.minNucleusSize = d;
   } 
 
-  public void setMaxNuclearSize(double d){
-    this.maxNuclearSize = d;
+  public void setMaxNucleusSize(double d){
+    this.maxNucleusSize = d;
   }   
 
-  public void setMinNuclearCirc(double d){
-    this.minNuclearCirc = d;
+  public void setMinNucleusCirc(double d){
+    this.minNucleusCirc = d;
   }
 
-  public void setMaxNuclearCirc(double d){
-    this.maxNuclearCirc = d;
+  public void setMaxNucleusCirc(double d){
+    this.maxNucleusCirc = d;
   }
 
   public void setThreshold(int i){
     this.nucleusThreshold = i;
-  }   
+  } 
+
+  /*
+    Settings for signal detection
+  */
+
+  public void setSignalThreshold(int i){
+    this.signalThreshold = i;
+  }
+
+  public void setMinSignalSize(double d){
+    this.minSignalSize = d;
+  }
+
+  // this is a fraction of the nuclear area
+  public void setMaxSignalFraction(double d){
+    this.maxSignalFraction = d;
+  }
+
+
 
   public HashMap<File, NucleusCollection> getNucleiCollections(){
     // remove any empty collections before returning
@@ -264,7 +278,7 @@ public class NucleusDetector {
     ResultsTable rt = new ResultsTable();
     ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
                 ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA ,
-                 rt, this.minNuclearSize, this.maxNuclearSize, this.minNuclearCirc, this.maxNuclearCirc);
+                 rt, this.minNucleusSize, this.maxNucleusSize, this.minNucleusCirc, this.maxNucleusCirc);
     try {
       pa.setRoiManager(manager);
       boolean success = pa.analyze(blue);
@@ -299,6 +313,11 @@ public class NucleusDetector {
 
     // turn roi into Nucleus for manipulation
     Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, nucleusNumber);
+    currentNucleus.setSignalThreshold(this.signalThreshold);
+    currentNucleus.setMinSignalSize(this.minSignalSize);
+    currentNucleus.setMaxSignalFraction(this.maxSignalFraction);
+    currentNucleus.detectSignalsInNucleus();
+    currentNucleus.annotateNucleusImage();
 
     // if everything checks out, add the measured parameters to the global pool
     NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
