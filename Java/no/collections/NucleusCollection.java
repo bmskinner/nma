@@ -765,6 +765,33 @@ public class NucleusCollection {
     IJ.append(outLine, logFile); 
   }
 
+  // public void addStatsColumn()
+  /*
+    To hold the nuclear stats (and any stats), we want a structure that can 
+    hold: a column of data. Any arbitrary other numbers of columns of data.
+    A list of associated column headings
+    HashMap<String, ArrayList<Double>>
+    Heading is the key; the arraylist of values is called by it.
+    How do we ensure order? And include ints and strings? Make it type generic
+    
+    private Map<String, ArrayList<?>> stats = new HashMap<>();
+
+    public <String> void put(String key, ArrayList<String> value) {
+      stats.put(key, value);
+    }
+
+    public <Double> void put(String key, ArrayList<Double> value) {
+      stats.put(key, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    // as long as all entries are put in via put, the cast is safe
+    public <String> String get(String key) {
+      return (String) stats.get(key);
+    }
+
+  */
+
   public void exportNuclearStats(String filename){
   
     String statsFile = makeGlobalLogFile(filename);
