@@ -51,7 +51,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
-import no.nuclei.*;
+
+import no.components.*;
+import no.collections.NucleusCollection;
 
 public class AsymmetricNucleus
 	extends Nucleus

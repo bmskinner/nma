@@ -54,6 +54,7 @@ import java.util.*;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.analysis.*;
+import no.collections.*;
 
 public class Pig_Sperm_Analysis
   extends ImagePlus

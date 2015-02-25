@@ -7,7 +7,6 @@
  */
 package no.analysis;
 
-import no.nuclei.*;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -40,6 +39,12 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 
+import no.nuclei.Nucleus;
+import no.collections.NucleusCollection;
+import no.utility.*;
+import no.components.*;
+
+
 public class CurveRefolder {
 
 	private double[] targetCurve;
@@ -67,7 +72,7 @@ public class CurveRefolder {
 	public void refoldCurve(){
 
 		this.moveCoMtoZero();
-		// this.preparePlots();
+		this.preparePlots();
 
 		double score = compareProfiles(targetCurve, initialCurve);
 		
@@ -158,22 +163,9 @@ public class CurveRefolder {
 		nucleusPlot.setColor(Color.LIGHT_GRAY);
 	  nucleusPlot.drawLine(min, 0, Math.abs(min), 0);
 	  nucleusPlot.drawLine(0, min, 0, Math.abs(min));
-
-	  anglePlot = new Plot( "Angles",
-						  "Position",
-						  "Angle");
-
-	  anglePlot.setLimits(0,targetCurve.length,-50,360);
-	  anglePlot.setSize(300,300);
-	  anglePlot.setYTicks(true);
-
-	//   nucleusPlot.setColor(Color.LIGHT_GRAY);
-		// nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
-		// anglePlot.setColor(Color.LIGHT_GRAY);
-		// anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
 		nucleusPlotWindow = nucleusPlot.show();
-		// anglePlotWindow = anglePlot.show();
 	}
+
 
 	/*
 		Draw the current state of the target nucleus
@@ -182,15 +174,11 @@ public class CurveRefolder {
 
 		double[] xPoints = new double[targetNucleus.getLength()+1];
 		double[] yPoints = new double[targetNucleus.getLength()+1];
-		// double[] aPoints = new double[targetNucleus.getLength()+1]; // angles
-		// double[] pPoints = new double[targetNucleus.getLength()+1]; // positions along array
 
 		for(int i=0; i<targetNucleus.getLength(); i++){
 			XYPoint p = targetNucleus.getBorderPoint(i);
 			xPoints[i] = p.getX();
 			yPoints[i] = p.getY();
-			// aPoints[i] = p.getInteriorAngle();
-			// pPoints[i] = i;
 		}
 
 	  // ensure nucleus outline joins up at tip
@@ -200,10 +188,7 @@ public class CurveRefolder {
 
 		nucleusPlot.setColor(Color.DARK_GRAY);
 		nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
-		// anglePlot.setColor(Color.DARK_GRAY);
-		// anglePlot.addPoints(pPoints, aPoints, Plot.LINE);
 		// nucleusPlotWindow.drawPlot(nucleusPlot);
-		// anglePlotWindow.drawPlot(anglePlot);
 	}
 
 	/*
@@ -239,11 +224,8 @@ public class CurveRefolder {
 			if(oldY<0){
 				angle = 360-angle;
 			}
-			double newX = Nucleus.getXComponentOfAngle(newDistance, angle);
-			double newY = Nucleus.getYComponentOfAngle(newDistance, angle);
-
-			// IJ.log("Old: X:"+(int)oldX+" Y:"+(int)oldY+" Distance: "+(int)currentDistance+" Angle: "+(int)angle);
-			// IJ.log("New: X:"+(int)newX+" Y:"+(int)newY+" Distance: "+(int)newDistance+" Angle: "+(int)angle);
+			double newX = NuclearOrganisationUtility.getXComponentOfAngle(newDistance, angle);
+			double newY = NuclearOrganisationUtility.getYComponentOfAngle(newDistance, angle);
 
 			p.setX(newX); // the new x position
 			p.setY(newY); // the new y position
@@ -256,10 +238,9 @@ public class CurveRefolder {
 			double[] newProfile = targetNucleus.getInteriorAngles();
 			double score = compareProfiles(targetCurve, newProfile);
 
-			// IJ.log("Score: "+score);
 			// do not apply change  if the distance from teh surrounding points changes too much
-			double distanceToPrev = p.getLengthTo( targetNucleus.getBorderPoint( Nucleus.wrapIndex(i-1, targetNucleus.getLength()) ) );
-			double distanceToNext = p.getLengthTo( targetNucleus.getBorderPoint( Nucleus.wrapIndex(i+1, targetNucleus.getLength()) ) );
+			double distanceToPrev = p.getLengthTo( targetNucleus.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i-1, targetNucleus.getLength()) ) );
+			double distanceToNext = p.getLengthTo( targetNucleus.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i+1, targetNucleus.getLength()) ) );
 
 			// reset if worse fit or distances are too high
 			if(score > similarityScore  || distanceToNext > 1.2 || distanceToPrev > 1.2 ){
@@ -327,8 +308,8 @@ public class CurveRefolder {
 			// add the rotation amount
 			double newAngle = tailAngle + i;
 
-			double newX = Nucleus.getXComponentOfAngle(distance, newAngle);
-			double newY = Nucleus.getYComponentOfAngle(distance, newAngle);
+			double newX = NuclearOrganisationUtility.getXComponentOfAngle(distance, newAngle);
+			double newY = NuclearOrganisationUtility.getYComponentOfAngle(distance, newAngle);
 
 			if(Math.abs(newX) < distanceFromZero && newY < 0){
 				angleToRotate = i;
@@ -358,8 +339,8 @@ public class CurveRefolder {
 			}
 
 			double newAngle = oldAngle + angleToRotate;
-			double newX = Nucleus.getXComponentOfAngle(distance, newAngle);
-			double newY = Nucleus.getYComponentOfAngle(distance, newAngle);
+			double newX = NuclearOrganisationUtility.getXComponentOfAngle(distance, newAngle);
+			double newY = NuclearOrganisationUtility.getYComponentOfAngle(distance, newAngle);
 
 				p.setX(newX); // the new x position
 				p.setY(newY); // the new y position
@@ -403,8 +384,8 @@ public class CurveRefolder {
 				double signalDistance = distanceToBorder * fractionalDistance;
 			  
 			  // adjust X and Y because we are now counting angles from the vertical axis
-				double signalX = Nucleus.getXComponentOfAngle(signalDistance, angle-90);
-				double signalY = Nucleus.getYComponentOfAngle(signalDistance, angle-90);
+				double signalX = NuclearOrganisationUtility.getXComponentOfAngle(signalDistance, angle-90);
+				double signalY = NuclearOrganisationUtility.getYComponentOfAngle(signalDistance, angle-90);
 
 			  // add to array
 			  xPoints.add( signalX );
@@ -466,31 +447,31 @@ public class CurveRefolder {
 	  // targetNucleus.printLogFile(targetNucleus.getPath());
 	 
 	  File f = new File(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
-    if(f.exists()){
-      f.delete();
-    }
+	if(f.exists()){
+	  f.delete();
+	}
 
-    String outLine =  "X_INT\t"+
-                      "Y_INT\t"+
-                      "X_DOUBLE\t"+
-                      "Y_DOUBLE\t"+
-                      "INTERIOR_ANGLE\t"+
-                      "NORMALISED_PROFILE_X\t"+
-                      "DISTANCE_PROFILE\n";
+	String outLine =  "X_INT\t"+
+					  "Y_INT\t"+
+					  "X_DOUBLE\t"+
+					  "Y_DOUBLE\t"+
+					  "INTERIOR_ANGLE\t"+
+					  "NORMALISED_PROFILE_X\t"+
+					  "DISTANCE_PROFILE\n";
 
-    for(int i=0;i<targetNucleus.getLength();i++){
+	for(int i=0;i<targetNucleus.getLength();i++){
 
-      double normalisedX = ((double)i/(double)targetNucleus.getLength())*100; // normalise to 100 length
-      
-      outLine +=  targetNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
-                  targetNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
-                  targetNucleus.getBorderPoint(i).getX()                  +"\t"+
-                  targetNucleus.getBorderPoint(i).getY()                  +"\t"+
-                  targetNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
-                  normalisedX                                             +"\t"+
-                  targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
-    }
-    IJ.append( outLine, f.getAbsolutePath());
+	  double normalisedX = ((double)i/(double)targetNucleus.getLength())*100; // normalise to 100 length
+	  
+	  outLine +=  targetNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
+				  targetNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
+				  targetNucleus.getBorderPoint(i).getX()                  +"\t"+
+				  targetNucleus.getBorderPoint(i).getY()                  +"\t"+
+				  targetNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
+				  normalisedX                                             +"\t"+
+				  targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
+	}
+	IJ.append( outLine, f.getAbsolutePath());
 	}
 
 	public void exportImage(NucleusCollection collection){

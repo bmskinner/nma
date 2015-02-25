@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
+import no.utility.*;
+import no.components.*;
 
 
 public class Nucleus {
@@ -448,7 +450,7 @@ public class Nucleus {
   }
 
   public double getMedianDistanceFromProfile(){
-    return quartile(distanceProfile, 50);
+    return NuclearOrganisationUtility.quartile(distanceProfile, 50);
   }
 
   /*
@@ -634,7 +636,7 @@ public class Nucleus {
           // double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
 
           // get the line equation
-          double eq[] = findLineEquation(n.getCentreOfMass(), this.getCentreOfMass());
+          double eq[] = NuclearOrganisationUtility.findLineEquation(n.getCentreOfMass(), this.getCentreOfMass());
 
           // using the equation, get the y postion on the line for each X point around the roi
           double minDeltaY = 100;
@@ -644,7 +646,7 @@ public class Nucleus {
           for(int j = 0; j<getLength();j++){
               double x = this.getBorderPoint(j).getX();
               double y = this.getBorderPoint(j).getY();
-              double yOnLine = getYFromEquation(eq, x);
+              double yOnLine = NuclearOrganisationUtility.getYFromEquation(eq, x);
               double distanceToSignal = this.getBorderPoint(j).getLengthTo(n.getCentreOfMass()); // fetch
 
 
@@ -946,7 +948,7 @@ public class Nucleus {
   // Uses the distance profile
   public NucleusBorderPoint getNarrowestDiameterPoint(){
 
-    double distance = getMax(this.distanceProfile);
+    double distance = NuclearOrganisationUtility.getMax(this.distanceProfile);
     int index = 0;
     for(int i = 0; i<this.getLength();i++){
       if(this.distanceProfile[i] < distance){
@@ -1171,103 +1173,5 @@ public class Nucleus {
     } catch(Exception e){
       IJ.log("Error annotating nucleus: "+e);
     }
-  }
-
-  /*
-    -----------------------
-    Basic internal functions
-    -----------------------
-  */
-
-  public static double[] findLineEquation(XYPoint a, XYPoint b){
-
-    // y=mx+c
-    double deltaX = a.getX() - b.getX();
-    double deltaY = a.getY() - b.getY();
-      
-    double m = deltaY / deltaX;
-      
-    // y - y1 = m(x - x1)
-    double c = a.getY() -  ( m * a.getX() );
-      
-    // double testY = (m * position_2[0]) + c;
-      
-    // write("y = "+m+"x + "+c);
-    // result=newArray(m, c);
-    return new double[] { m, c };
-  }
-
-  public static double getXFromEquation(double[] eq, double y){
-    // x = (y-c)/m
-    double x = (y - eq[1]) / eq[0];
-    return x;
-  }
-
-  public static double getYFromEquation(double[] eq, double x){
-    // x = (y-c)/m
-    double y = (eq[0] * x) + eq[1];
-    return y;
-  }
-
-  public static int wrapIndex(int i, int length){
-    if(i<0)
-      i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
-    if(Math.floor(i / length)>0)
-      i = i - ( ((int)Math.floor(i / length) )*length);
-
-    if(i<0 || i>length){
-      IJ.log("Warning: array out of bounds: "+i);
-    }
-    
-    return i;
-  }
-
-  public static double getXComponentOfAngle(double length, double angle){
-    // cos(angle) = x / h
-    // x = cos(a)*h
-    double x = length * Math.cos(Math.toRadians(angle));
-    return x;
-  }
-
-  public static double getYComponentOfAngle(double length, double angle){
-    double y = length * Math.sin(Math.toRadians(angle));
-    return y;
-  }
-
-  protected double getMin(double[] d){
-    double min = getMax(d);
-    for(int i=0;i<d.length;i++){
-      if( d[i]<min)
-        min = d[i];
-    }
-    return min;
-  }
-
-  protected double getMax(double[] d){
-    double max = 0;
-    for(int i=0;i<d.length;i++){
-      if( d[i]>max)
-        max = d[i];
-    }
-    return max;
-  }
-
-  /*
-    Calculate the <lowerPercent> quartile from a Double[] array
-  */
-  protected double quartile(double[] values, double lowerPercent) {
-
-      if (values == null || values.length == 0) {
-          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
-      }
-
-      // Rank order the values
-      double[] v = new double[values.length];
-      System.arraycopy(values, 0, v, 0, values.length);
-      Arrays.sort(v);
-
-      int n = (int) Math.round(v.length * lowerPercent / 100);
-      
-      return (double)v[n];
   }
 }

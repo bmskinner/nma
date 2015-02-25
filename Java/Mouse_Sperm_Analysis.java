@@ -149,6 +149,7 @@ import java.util.*;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.analysis.*;
+import no.collections.*;
 
 public class Mouse_Sperm_Analysis
   extends ImagePlus

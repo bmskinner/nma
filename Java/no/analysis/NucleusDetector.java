@@ -45,6 +45,9 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 import no.nuclei.*;
+import no.utility.*;
+import no.collections.*;
+import no.components.*;
 
 public class NucleusDetector {
 

@@ -49,6 +49,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 import no.nuclei.*;
+import no.components.*;
+import no.utility.*;
 
 public class SpermNucleus
 	extends AsymmetricNucleus

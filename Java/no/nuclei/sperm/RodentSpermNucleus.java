@@ -49,6 +49,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 import no.nuclei.*;
+import no.components.*;
 
 public class RodentSpermNucleus
 	extends SpermNucleus
