@@ -165,7 +165,7 @@ public class Mouse_Sperm_Analysis
     analysePopulations();
 
     IJ.log("----------------------------- ");
-    IJ.log("All done!");
+    IJ.log("All done!"                     );
     IJ.log("----------------------------- ");
   }  
 
@@ -206,11 +206,11 @@ public class Mouse_Sperm_Analysis
       r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
 
       IJ.log("    ----------------------------- ");
-      IJ.log("    Analysing population: "+r.getType());
+      IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
       IJ.log("    ----------------------------- ");
-      IJ.log("    Total nuclei: "+r.getNucleusCount());
-      IJ.log("    Red signals: "+r.getRedSignalCount());
-      IJ.log("    Green signals: "+r.getGreenSignalCount());
+      // IJ.log("    Total nuclei: "+r.getNucleusCount());
+      // IJ.log("    Red signals: "+r.getRedSignalCount());
+      // IJ.log("    Green signals: "+r.getGreenSignalCount());
 
 
       r.measureProfilePositions();
@@ -219,12 +219,12 @@ public class Mouse_Sperm_Analysis
 
       // r.refilterNuclei(failedNuclei);
       IJ.log("    ----------------------------- ");
-      IJ.log("    Exporting failed nuclei");
+      IJ.log("    Exporting failed nuclei"       );
       IJ.log("    ----------------------------- ");
       failedNuclei.annotateAndExportNuclei();
 
       IJ.log("    ----------------------------- ");
-      IJ.log("    Refolding nucleus");
+      IJ.log("    Refolding nucleus"             );
       IJ.log("    ----------------------------- ");
 
       attemptRefoldingConsensusNucleus(r);
@@ -234,7 +234,7 @@ public class Mouse_Sperm_Analysis
       for(RodentSpermNucleusCollection p : signalPopulations){
 
         IJ.log("    ----------------------------- ");
-        IJ.log("    Analysing population: "+p.getType());
+        IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
         IJ.log("    ----------------------------- ");
         p.measureProfilePositions();
         p.annotateAndExportNuclei();
