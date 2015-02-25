@@ -797,7 +797,6 @@ public class NucleusCollection {
 
     Set<String> headings = stats.keySet();
     for(String heading : headings){
-      IJ.log("    Field: "+heading);
       outLine.append(heading+"\t");
     }
     outLine.append("\n");
