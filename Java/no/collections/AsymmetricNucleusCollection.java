@@ -392,9 +392,6 @@ public class AsymmetricNucleusCollection
       this.addSignalsToProfileChartFromTail();
 
       this.exportProfilePlots();
-
-      IJ.log("Red signals: "  + this.getRedSignalCount());
-      IJ.log("Green signals: "+ this.getGreenSignalCount());
     }
   }
 
@@ -406,12 +403,12 @@ public class AsymmetricNucleusCollection
   */
   
   public void annotateImagesOfNuclei(){
-    IJ.log("Annotating images ("+this.getType()+")...");
+    IJ.log("    Annotating images ("+this.getType()+")...");
     for(int i=0; i<this.getNucleusCount();i++){
       AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
       n.annotateFeatures();
     }
-     IJ.log("Annotation complete");
+     IJ.log("    Annotation complete");
   }
 
 
@@ -423,11 +420,8 @@ public class AsymmetricNucleusCollection
 
   public void exportInterpolatedMedians(double[] medianProfile){
 
-    String logFile = this.getFolder()+File.separator+"logInterpolatedMedians.txt";
-    File f = new File(logFile);
-    if(f.exists()){
-      f.delete();
-    }
+    String logFile = makeGlobalLogFile("logOffsets");
+    
     IJ.append("INDEX\tANGLE", logFile);
     for(int i=0;i<medianProfile.length;i++){
       IJ.append(i+"\t"+medianProfile[i], logFile);
@@ -437,11 +431,7 @@ public class AsymmetricNucleusCollection
 
   public void exportOffsets(double[] d){
 
-  	String logFile = this.getFolder()+File.separator+"logOffsets.txt";
-    File f = new File(logFile);
-    if(f.exists()){
-      f.delete();
-    }
+  	String logFile = makeGlobalLogFile("logOffsets");
 
     IJ.append("OFFSET\tDIFFERENCE", logFile);
 
@@ -453,15 +443,11 @@ public class AsymmetricNucleusCollection
 
   public void exportNuclearStats(String filename){
   
-    String statsFile = this.getFolder()+File.separator+filename+"."+getType()+".txt";
-    File f = new File(statsFile);
-    if(f.exists()){
-      f.delete();
-    }
+    String statsFile = makeGlobalLogFile(filename);
 
     String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
 
-    IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
+    IJ.log("    Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
@@ -486,7 +472,7 @@ public class AsymmetricNucleusCollection
   		// this.getNucleus(i).printLogFile(this.getNucleus(i).getNucleusFolder()+File.separator+this.getNucleus(i).getNucleusNumber()+".log");
     }
     IJ.append(  outLine, statsFile);
-    IJ.log("Export complete");
+    IJ.log("    Export complete");
   }
 
   public void exportCompositeImage(String filename){
@@ -501,7 +487,7 @@ public class AsymmetricNucleusCollection
     if(this.getNucleusCount()==0){
       return;
     }
-    IJ.log("Creating composite image...");
+    IJ.log("    Creating composite image ("+this.getType()+")...");
     
 
     int totalWidth = 0;
@@ -560,19 +546,17 @@ public class AsymmetricNucleusCollection
     }
     // finalImage.show();
     IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+filename+"."+getType()+".tiff");
-    IJ.log("Composite image created");
+    IJ.log("    Composite image created");
   }
 
   public void exportClusteringProfiles(String filename){
-    String statsFile = this.getFolder()+File.separator+filename+"."+getType()+".txt";
-    File f = new File(statsFile);
-    if(f.exists()){
-      f.delete();
-    }
 
-    String outLine = "PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\t";
+    String statsFile = makeGlobalLogFile(filename);
 
-    IJ.log("Exporting clustering profiles for "+this.getNucleusCount()+" nuclei ("+this.getType()+")...");
+    StringBuilder outLine = new StringBuilder();
+    outLine.append("PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\t");
+
+    IJ.log("Exporting clustering profiles ("+this.getType()+")...");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
@@ -583,30 +567,31 @@ public class AsymmetricNucleusCollection
 
     double maxPerim = NuclearOrganisationUtility.getMax(perims); // add column headers
     for(int i=0;i<maxPerim;i++){
-      outLine += i+"\t";
+      outLine.append(i+"\t");
     }
-    outLine += "\n";
+    outLine.append("\n");
+
 
     // export the profiles for each nucleus
     for(int i=0; i<this.getNucleusCount();i++){
 
-      outLine = outLine + paths[i]      +"\t"+
-                          areas[i]      +"\t"+
-                          perims[i]     +"\t"+
-                          ferets[i]     +"\t"+
-                          pathLengths[i]+"\t"+
-                          differences[i]+"\t"+
-                          headToTail[i] +"\t";
+      outLine.append(paths[i]      +"\t"+
+                    areas[i]      +"\t"+
+                    perims[i]     +"\t"+
+                    ferets[i]     +"\t"+
+                    pathLengths[i]+"\t"+
+                    differences[i]+"\t"+
+                    headToTail[i] +"\t");
 
       AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
       double[] profile = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
       for(int j=0;j<profile.length;j++){
-        outLine += profile[j]+"\t";
+        outLine.append(profile[j]+"\t");
       }
-      outLine += "\n";
+      outLine.append("\n");
     }
-    IJ.append(  outLine, statsFile);
-    IJ.log("Cluster export complete");
+    IJ.append(  outLine.toString(), statsFile);
+    IJ.log("    Cluster export complete");
   }
 
   /*

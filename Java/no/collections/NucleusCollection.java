@@ -24,6 +24,7 @@ import ij.io.DirectoryChooser;
 import ij.io.Opener;
 import ij.io.OpenDialog;
 import ij.io.RandomAccessStream;
+import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.measure.SplineFitter;
 import ij.plugin.ChannelSplitter;
@@ -278,7 +279,7 @@ public class NucleusCollection {
   */
   public void refilterNuclei(NucleusCollection failedCollection){
 
-    IJ.log("  Filtering nuclei...");
+    IJ.log("    Filtering nuclei...");
     double medianArea = this.getMedianNuclearArea();
     double medianPerimeter = this.getMedianNuclearPerimeter();
     double medianPathLength = this.getMedianPathLength();
@@ -348,14 +349,14 @@ public class NucleusCollection {
 
     IJ.append("Postfiltered:", this.getDebugFile().getAbsolutePath());
     this.exportFilterStats();
-    IJ.log("  Removed due to size or length issues: "+removed+" nuclei");
+    IJ.log("    Removed due to size or length issues: "+removed+" nuclei");
     IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei", this.getDebugFile().getAbsolutePath());
     IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei", this.getDebugFile().getAbsolutePath());
     IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei", this.getDebugFile().getAbsolutePath());
     IJ.append("  Due to array length: "+arraylength+" nuclei", this.getDebugFile().getAbsolutePath());
     IJ.append("  Due to feret length: "+feretlength+" nuclei", this.getDebugFile().getAbsolutePath());
     // IJ.append("  Due to curve shape: "+curveShape+" nuclei", this.getDebugFile().getAbsolutePath());
-    IJ.log("  Remaining: "+this.getNucleusCount()+" nuclei");
+    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei");
   }
 
   /*
@@ -405,7 +406,7 @@ public class NucleusCollection {
             numberOfPoints[m] = (double)n;
           }
         } catch(Exception e){
-             IJ.log("    Cannot calculate median for "+k);
+             // IJ.log("    Cannot calculate median for "+k);
              IJ.append("Cannot calculate median for "+k+": "+e, this.getDebugFile().getAbsolutePath());
              IJ.append("\tFolder: "+this.getFolder().getAbsolutePath(), this.getDebugFile().getAbsolutePath());
              IJ.append("\tCollection: "+this.getType(), this.getDebugFile().getAbsolutePath());
@@ -437,7 +438,7 @@ public class NucleusCollection {
         tenQuartiles[i]    = tenQuartiles[replacementIndex];
         ninetyQuartiles[i] = ninetyQuartiles[replacementIndex];
 
-        IJ.log("    Repaired medians at "+i+" with values from  "+replacementIndex);
+        // IJ.log("    Repaired medians at "+i+" with values from  "+replacementIndex);
         IJ.append("\tRepaired medians at "+i+" with values from  "+replacementIndex, this.getDebugFile().getAbsolutePath());
       }
     }
@@ -608,22 +609,22 @@ public class NucleusCollection {
     -----------------
   */
 
+  public String makeGlobalLogFile(String filename){
+    String file = this.getFolder()+File.separator+filename+"."+getType()+".txt";
+    File f = new File(file);
+    if(f.exists()){
+      f.delete();
+    }
+    return file;
+  }
+
   /*
     Export the signal parameters of the nucleus to the designated log file
   */
   public void exportSignalStats(){
 
-    String redLogFile = this.getFolder()+File.separator+"logRedSignals."+getType()+".txt";
-    File r = new File(redLogFile);
-    if(r.exists()){
-      r.delete();
-    }
-
-    String greenLogFile = this.getFolder()+File.separator+"logGreenSignals."+getType()+".txt";
-    File g = new File(greenLogFile);
-    if(g.exists()){
-      g.delete();
-    }
+    String redLogFile   = makeGlobalLogFile( "logRedSignals"  );
+    String greenLogFile = makeGlobalLogFile( "logGreenSignals");
 
     IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", redLogFile);
     IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", greenLogFile);
@@ -860,6 +861,10 @@ public class NucleusCollection {
 
   public void exportProfilePlot(Plot plot, String name){
     ImagePlus image = plot.getImagePlus();
+    Calibration cal = image.getCalibration();
+    cal.setUnit("pixels");
+    cal.pixelWidth = 1;
+    cal.pixelHeight = 1;
     IJ.saveAsTiff(image, this.getFolder()+File.separator+name+"."+this.getType()+".tiff");
   }
 

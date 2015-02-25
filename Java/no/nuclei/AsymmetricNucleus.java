@@ -72,15 +72,6 @@ public class AsymmetricNucleus
   private double differenceToMedianProfileFromHead; // store the difference between curves
   private double differenceToMedianProfileFromTail; // store the difference between curves
 
-  // private ArrayList<Double> normalisedXPositionsFromHead = new ArrayList<Double>(0); // holds the x values only after normalisation
-  // private ArrayList<Double> normalisedXPositionsFromTail = new ArrayList<Double>(0);
-
-  // private ArrayList<Double> normalisedYPositionsFromHead = new ArrayList<Double>(0);
-  // private ArrayList<Double> normalisedYPositionsFromTail = new ArrayList<Double>(0);
-  
-  // private ArrayList<Double> rawXPositionsFromTail        = new ArrayList<Double>(0);
-  // private ArrayList<Double> rawXPositionsFromHead        = new ArrayList<Double>(0);
-
   // Requires a nucleus object to construct from
   public AsymmetricNucleus(Nucleus n){
   	this.setRoi(n.getRoi());
@@ -174,26 +165,6 @@ public class AsymmetricNucleus
     this.offsetForHead = i;
   }
 
-  // protected void addRawXPositionFromTail(double d){
-  //   this.rawXPositionsFromTail.add(d);
-  // }
-
-  // protected void addNormalisedXPositionFromTail(double d){
-  //   this.normalisedXPositionsFromTail.add(d);
-  // }
-
-  // protected void addNormalisedYPositionFromTail(double d){
-  //   this.normalisedYPositionsFromTail.add(d);
-  // }
-
-  // protected void addRawXPositionFromHead(double d){
-  //   this.rawXPositionsFromHead.add(d);
-  // }
-
-  // protected void addNormalisedXPositionFromHead(double d){
-  //   this.normalisedXPositionsFromHead.add(d);
-  // }
-
   protected void addTailEstimatePosition(NucleusBorderPoint p){
     this.tailEstimatePoints.add(p);
   }
@@ -205,102 +176,6 @@ public class AsymmetricNucleus
   public void setDifferenceToMedianProfileFromTail(double d){
     this.differenceToMedianProfileFromTail = d;
   }
-
-  /*
-    -----------------------
-    Get raw and normalised profile and values
-    -----------------------
-  */
-
-  // public double[] getNormalisedYPositionsFromTail(){
-  //   double[] d = new double[normalisedYPositionsFromTail.size()];
-  //   for(int i=0;i<normalisedYPositionsFromTail.size();i++){
-  //     d[i] = normalisedYPositionsFromTail.get(i);
-  //   }
-  //   return d;
-  // }
-
-  // public double[] getNormalisedXPositionsFromTail(){
-  //   double[] d = new double[normalisedXPositionsFromTail.size()];
-  //   for(int i=0;i<normalisedXPositionsFromTail.size();i++){
-  //     d[i] = normalisedXPositionsFromTail.get(i);
-  //   }
-  //   return d;
-  // }
-
-  // public double[] getRawXPositionsFromTail(){
-  //   double[] d = new double[rawXPositionsFromTail.size()];
-  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
-  //     d[i] = rawXPositionsFromTail.get(i);
-  //   }
-  //   return d;
-  // }
-
-
-  // public double[] getNormalisedYPositionsFromHead(){
-  //   double[] d = new double[normalisedYPositionsFromHead.size()];
-  //   for(int i=0;i<normalisedYPositionsFromHead.size();i++){
-  //     d[i] = normalisedYPositionsFromHead.get(i);
-  //   }
-  //   return d;
-  // }
-
-  // public double[] getNormalisedXPositionsFromHead(){
-  //   double[] d = new double[normalisedXPositionsFromHead.size()];
-  //   for(int i=0;i<normalisedXPositionsFromHead.size();i++){
-  //     d[i] = normalisedXPositionsFromHead.get(i);
-  //   }
-  //   return d;
-  // }
-
-  // public double[] getRawXPositionsFromHead(){
-  //   double[] d = new double[rawXPositionsFromHead.size()];
-  //   for(int i=0;i<rawXPositionsFromHead.size();i++){
-  //     d[i] = rawXPositionsFromHead.get(i);
-  //   }
-  //   return d;
-  // }
-
-  // public double getMaxRawXFromTail(){
-  //   double d = 0;
-  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
-  //     if(rawXPositionsFromTail.get(i) > d){
-  //       d = rawXPositionsFromTail.get(i);
-  //     }
-  //   }
-  //   return d;
-  // }
-
-  // public double getMinRawXFromTail(){
-  //   double d = 0;
-  //   for(int i=0;i<rawXPositionsFromTail.size();i++){
-  //     if(rawXPositionsFromTail.get(i) < d){
-  //       d = rawXPositionsFromTail.get(i);
-  //     }
-  //   }
-  //   return d;
-  // }
-
-  // public double getMaxRawXFromHead(){
-  //   double d = 0;
-  //   for(int i=0;i<rawXPositionsFromHead.size();i++){
-  //     if(rawXPositionsFromHead.get(i) > d){
-  //       d = rawXPositionsFromHead.get(i);
-  //     }
-  //   }
-  //   return d;
-  // }
-
-  // public double getMinRawXFromHead(){
-  //   double d = 0;
-  //   for(int i=0;i<rawXPositionsFromHead.size();i++){
-  //     if(rawXPositionsFromHead.get(i) < d){
-  //       d = rawXPositionsFromHead.get(i);
-  //     }
-  //   }
-  //   return d;
-  // }
-
 
   /*
     See if there is a differences to the given median

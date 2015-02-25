@@ -201,7 +201,7 @@ public class RodentSpermNucleusCollection
 		int tailIndex = 0;
 
     if(minima.size()==0){
-      IJ.log("  Error: no minima found in median line");
+      IJ.log("    Error: no minima found in median line");
       tailIndex = 100; // set to roughly the middle of the array for the moment
 
     } else{
@@ -234,9 +234,6 @@ public class RodentSpermNucleusCollection
     this.exportSignalStats();
     this.addSignalsToProfileChartFromTip();
     this.addSignalsToProfileChartFromTail();
-
-    IJ.log("Red signals: "  + this.getRedSignalCount());
-    IJ.log("Green signals: "+ this.getGreenSignalCount());
   }
 
   /*
@@ -280,32 +277,32 @@ public class RodentSpermNucleusCollection
     -----------------------
   */
 
-  public void exportOffsets(double[] d){
+  // public void exportOffsets(double[] d){
 
-  	String logFile = this.getFolder()+File.separator+"logOffsets.txt";
-    File f = new File(logFile);
-    if(f.exists()){
-      f.delete();
-    }
+  // 	String logFile = this.getFolder()+File.separator+"logOffsets.txt";
+  //   File f = new File(logFile);
+  //   if(f.exists()){
+  //     f.delete();
+  //   }
 
-    IJ.append("OFFSET\tDIFFERENCE", logFile);
+  //   IJ.append("OFFSET\tDIFFERENCE", logFile);
 
-    for(int i=0;i<d.length;i++){
-      IJ.append(i+"\t"+d[i], logFile);
-    }
-    IJ.append("", logFile);
-  }
+  //   for(int i=0;i<d.length;i++){
+  //     IJ.append(i+"\t"+d[i], logFile);
+  //   }
+  //   IJ.append("", logFile);
+  // }
 
   /*
     Draw the features of interest on the images of the nuclei created earlier
   */
   public void annotateImagesOfNuclei(){
-  	IJ.log("Annotating images ("+this.getType()+")...");
+  	IJ.log("    Annotating images ("+this.getType()+")...");
   	for(int i=0; i<this.getNucleusCount();i++){
   		RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
   		n.annotateFeatures();
   	}
-  	 IJ.log("Annotation complete");
+  	 IJ.log("    Annotation complete");
   }
 
   /*
@@ -491,15 +488,12 @@ public class RodentSpermNucleusCollection
 
   @Override
   public void exportClusteringProfiles(String filename){
-    String statsFile = this.getFolder()+File.separator+filename+"."+getType()+".txt";
-    File f = new File(statsFile);
-    if(f.exists()){
-      f.delete();
-    }
+    String statsFile = makeGlobalLogFile(filename);
 
-    String outLine = "PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\tTIP_TO_TAIL\tHEAD_TO_TIP\t";
+    StringBuilder outLine = new StringBuilder();
+    outLine.append("PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\tTIP_TO_TAIL\tHEAD_TO_TIP\t");
 
-    IJ.log("Exporting clustering profiles for "+this.getNucleusCount()+" nuclei ("+this.getType()+")...");
+    IJ.log("    Exporting clustering profiles ("+this.getType()+")...");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
@@ -512,14 +506,14 @@ public class RodentSpermNucleusCollection
 
     double maxPerim = NuclearOrganisationUtility.getMax(perims); // add column headers
     for(int i=0;i<maxPerim;i++){
-      outLine += i+"\t";
+      outLine.append(i+"\t");
     }
-    outLine += "\n";
+    outLine.append("\n");
 
     // export the profiles for each nucleus
     for(int i=0; i<this.getNucleusCount();i++){
 
-      outLine +=  paths[i]      +"\t"+
+      outLine.append(paths[i]      +"\t"+
                   areas[i]      +"\t"+
                   perims[i]     +"\t"+
                   ferets[i]     +"\t"+
@@ -527,17 +521,17 @@ public class RodentSpermNucleusCollection
                   differences[i]+"\t"+
                   headToTail[i] +"\t"+
                   tipToTail[i]  +"\t"+
-                  headToTip[i]  +"\t";
+                  headToTip[i]  +"\t");
 
       AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
       double[] profile = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
       for(int j=0;j<profile.length;j++){
-        outLine += profile[j]+"\t";
+        outLine.append(profile[j]+"\t");
       }
-      outLine += "\n";
+      outLine.append("\n");
     }
-    IJ.append(  outLine, statsFile);
-    IJ.log("Cluster export complete");
+    IJ.append(  outLine.toString(), statsFile);
+    IJ.log("    Cluster export complete");
   }
 
   /*

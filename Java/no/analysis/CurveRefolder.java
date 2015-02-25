@@ -76,7 +76,7 @@ public class CurveRefolder {
 
 		double score = compareProfiles(targetCurve, initialCurve);
 		
-		IJ.log("Refolding curve: initial score: "+(int)score);
+		IJ.log("    Refolding curve: initial score: "+(int)score);
 
 		// double prevScore = score*2;
 		// int i=0;
@@ -85,7 +85,7 @@ public class CurveRefolder {
 		// 	score = this.iterateOverNucleus();
 		// 	i++;
 		// }
-		IJ.log("Refolded curve: final score: "+(int)score);
+		IJ.log("    Refolded curve: final score: "+(int)score);
 	}
 
 	/*
@@ -317,7 +317,7 @@ public class CurveRefolder {
 			}
 		}
 
-		IJ.log("Rotating by "+(int)angleToRotate);
+		IJ.log("    Rotating by "+(int)angleToRotate);
 		return angleToRotate;
 	}
 
@@ -358,54 +358,50 @@ public class CurveRefolder {
 
 		for(int i= 0; i<collection.getNuclei().size();i++){ // for each roi
 
-		Nucleus n = collection.getNuclei().get(i);
+			Nucleus n = collection.getNuclei().get(i);
 
-		ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
-		signals.add(n.getRedSignals());
-		signals.add(n.getGreenSignals());
+			ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+			signals.add(n.getRedSignals());
+			signals.add(n.getGreenSignals());
 
-		int signalCount = 0;
-		for( ArrayList<NuclearSignal> signalGroup : signals ){
+			int signalCount = 0;
+			for( ArrayList<NuclearSignal> signalGroup : signals ){
 
-		  if(signalGroup.size()>0){
+			  if(signalGroup.size()>0){
 
-			ArrayList<Double> xPoints = new ArrayList<Double>(0);
-			ArrayList<Double> yPoints = new ArrayList<Double>(0);
+				ArrayList<Double> xPoints = new ArrayList<Double>(0);
+				ArrayList<Double> yPoints = new ArrayList<Double>(0);
 
-			for(int j=0; j<signalGroup.size();j++){
+				for(int j=0; j<signalGroup.size();j++){
 
-				double angle = signalGroup.get(j).getAngle();
-				double fractionalDistance = signalGroup.get(j).getFractionalDistanceFromCoM();
+					double angle = signalGroup.get(j).getAngle();
+					double fractionalDistance = signalGroup.get(j).getFractionalDistanceFromCoM();
 
-				// determine the total distance to the border at this angle
-				double distanceToBorder = getDistanceFromAngle(angle);
+					// determine the total distance to the border at this angle
+					double distanceToBorder = getDistanceFromAngle(angle);
 
-				// convert to fractional distance to signal
-				double signalDistance = distanceToBorder * fractionalDistance;
-			  
-			  // adjust X and Y because we are now counting angles from the vertical axis
-				double signalX = NuclearOrganisationUtility.getXComponentOfAngle(signalDistance, angle-90);
-				double signalY = NuclearOrganisationUtility.getYComponentOfAngle(signalDistance, angle-90);
+					// convert to fractional distance to signal
+					double signalDistance = distanceToBorder * fractionalDistance;
+				  
+				  // adjust X and Y because we are now counting angles from the vertical axis
+					double signalX = NuclearOrganisationUtility.getXComponentOfAngle(signalDistance, angle-90);
+					double signalY = NuclearOrganisationUtility.getYComponentOfAngle(signalDistance, angle-90);
 
-			  // add to array
-			  xPoints.add( signalX );
-			  yPoints.add( signalY );
-			 // IJ.log("Signal "+j+": Fdist: "+fractionalDistance+" Dist: "+signalDistance+" X: "+signalX+" Y: "+signalY);
-			  
+				  // add to array
+				  xPoints.add( signalX );
+				  yPoints.add( signalY ); 
+				}
+				if(signalCount==0)
+				  nucleusPlot.setColor(Color.RED);
+				else
+				  nucleusPlot.setColor(Color.GREEN);
+
+				nucleusPlot.setLineWidth(2);
+				nucleusPlot.addPoints(xPoints, yPoints, Plot.DOT);
+			  }
+			  signalCount++;
 			}
-			if(signalCount==0)
-			  nucleusPlot.setColor(Color.RED);
-			else
-			  nucleusPlot.setColor(Color.GREEN);
-
-			nucleusPlot.setLineWidth(2);
-			nucleusPlot.addPoints(xPoints, yPoints, Plot.DOT);
-		  }
-		  signalCount++;
-		}
 	  }
-	  nucleusPlotWindow.drawPlot(nucleusPlot);
-
 	}
 
 	private double getDistanceFromAngle(double angle){

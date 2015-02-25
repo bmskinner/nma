@@ -108,43 +108,14 @@ morphology comparisons
 */
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.Overlay;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.gui.ProgressBar;
-import ij.gui.TextRoi;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.DirectoryChooser;
 import ij.io.Opener;
 import ij.io.OpenDialog;
-import ij.io.RandomAccessStream;
-import ij.measure.ResultsTable;
-import ij.measure.SplineFitter;
-import ij.plugin.ChannelSplitter;
 import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.frame.RoiManager;
-import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
-import ij.process.ImageConverter;
-import ij.process.ImageProcessor;
-import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
-import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.Polygon;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.*;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
@@ -157,16 +128,14 @@ public class Mouse_Sperm_Analysis
 {
    // /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private static final int NUCLEUS_THRESHOLD = 36;
-  private static final double MIN_NUCLEAR_SIZE = 1000;
+  private static final double MIN_NUCLEAR_SIZE = 2000;
   private static final double MAX_NUCLEAR_SIZE = 10000;
   private static final double MIN_NUCLEAR_CIRC = 0.3;
   private static final double MAX_NUCLEAR_CIRC = 0.8;
 
   private static final double MIN_SIGNAL_SIZE = 50;
 
-
-
-  private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
+  // private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
 
   private ArrayList<RodentSpermNucleusCollection> nuclearPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
   private ArrayList<RodentSpermNucleusCollection> failedPopulations  = new ArrayList<RodentSpermNucleusCollection>(0);
@@ -197,7 +166,9 @@ public class Mouse_Sperm_Analysis
     getPopulations(folderCollection);
     analysePopulations();
 
-    IJ.log("Done");
+    IJ.log("----------------------------- ");
+    IJ.log("All done!");
+    IJ.log("----------------------------- ");
   }  
 
   public void getPopulations(HashMap<File, NucleusCollection> folderCollection){
@@ -228,55 +199,90 @@ public class Mouse_Sperm_Analysis
       }
 
       File folder = r.getFolder();
+      IJ.log("  ----------------------------- ");
       IJ.log("  Analysing: "+folder.getName());
+      IJ.log("  ----------------------------- ");
 
       RodentSpermNucleusCollection failedNuclei = new RodentSpermNucleusCollection(folder, "failed");
 
       r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
 
-      IJ.log("Analysing population: "+r.getType());
-      IJ.log("  Total nuclei: "+r.getNucleusCount());
-      IJ.log("  Red signals: "+r.getRedSignalCount());
-      IJ.log("  Green signals: "+r.getGreenSignalCount());
+      IJ.log("    ----------------------------- ");
+      IJ.log("    Analysing population: "+r.getType());
+      IJ.log("    ----------------------------- ");
+      IJ.log("    Total nuclei: "+r.getNucleusCount());
+      IJ.log("    Red signals: "+r.getRedSignalCount());
+      IJ.log("    Green signals: "+r.getGreenSignalCount());
 
 
       r.measureProfilePositions();
       r.measureNuclearOrganisation();
       r.annotateAndExportNuclei();
 
-      r.refilterNuclei(failedNuclei);
-
+      // r.refilterNuclei(failedNuclei);
+      IJ.log("    ----------------------------- ");
+      IJ.log("    Exporting failed nuclei");
+      IJ.log("    ----------------------------- ");
       failedNuclei.annotateAndExportNuclei();
+
+      IJ.log("    ----------------------------- ");
+      IJ.log("    Refolding nucleus");
+      IJ.log("    ----------------------------- ");
 
       attemptRefoldingConsensusNucleus(r);
 
+      ArrayList<RodentSpermNucleusCollection> signalPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
+
       // split complete set by signals and analyse
-      RodentSpermNucleusCollection redNuclei = new RodentSpermNucleusCollection(folder, "red");
       ArrayList<Nucleus> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
-      for(Nucleus n : redList){
-        redNuclei.addNucleus( (RodentSpermNucleus)n );
+      if(redList.size()>0){
+        RodentSpermNucleusCollection redNuclei = new RodentSpermNucleusCollection(folder, "red");
+        for(Nucleus n : redList){
+          redNuclei.addNucleus( (RodentSpermNucleus)n );
+        }
+        signalPopulations.add(redNuclei);
+        ArrayList<Nucleus> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
+        if(notRedList.size()>0){
+          RodentSpermNucleusCollection notRedNuclei = new RodentSpermNucleusCollection(folder, "not_red");
+          for(Nucleus n : notRedList){
+            notRedNuclei.addNucleus( (RodentSpermNucleus)n );
+          }
+          signalPopulations.add(notRedNuclei);
+        }
+
       }
-      redNuclei.annotateAndExportNuclei();
-      // attemptRefoldingConsensusNucleus(redNuclei);
+      
+      for(RodentSpermNucleusCollection p : signalPopulations){
 
-
+        IJ.log("    ----------------------------- ");
+        IJ.log("    Analysing population: "+p.getType());
+        IJ.log("    ----------------------------- ");
+        p.measureProfilePositions();
+        p.annotateAndExportNuclei();
+        attemptRefoldingConsensusNucleus(p);
+      }
     }
   }
 
   public void attemptRefoldingConsensusNucleus(RodentSpermNucleusCollection collection){
 
-    RodentSpermNucleus refoldCandidate = (RodentSpermNucleus)collection.getNucleusMostSimilarToMedian();
-    double[] targetProfile = collection.getMedianTargetCurve(refoldCandidate);
+    try{ 
+      RodentSpermNucleus refoldCandidate = (RodentSpermNucleus)collection.getNucleusMostSimilarToMedian();
+      double[] targetProfile = collection.getMedianTargetCurve(refoldCandidate);
 
-    CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
-    refolder.refoldCurve();
+      CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
+      refolder.refoldCurve();
 
-    // orient refolded nucleus to put tail at the bottom
-    refolder.putPointAtBottom(refoldCandidate.getSpermTail());
+      // orient refolded nucleus to put tail at the bottom
+      refolder.putPointAtBottom(refoldCandidate.getSpermTail());
 
-    // draw signals on the refolded nucleus
-    refolder.addSignalsToConsensus(collection);
-    refolder.exportImage(collection);
+      // draw signals on the refolded nucleus
+      refolder.addSignalsToConsensus(collection);
+      refolder.exportImage(collection);
+
+    } catch(Exception e){
+      IJ.log("    Unable to refold nucleus: "+e);
+    }
 
   }
 }
