@@ -67,38 +67,6 @@ public class PigSpermNucleusCollection
 
   /*
     -----------------------
-    Create and manipulate
-    aggregate profiles. These
-    can be centred on head or tail
-    -----------------------
-  */
-
-  // public void measureProfilePositions(){
-
-  //   this.createProfileAggregateFromTail();
-  //   this.createProfileAggregateFromHead();
-  //   this.drawProfilePlots();
-  //   this.drawNormalisedMedianLineFromTail();
-  //   this.drawNormalisedMedianLineFromHead();
-  //   this.calculateDifferencesToMedianProfiles();
-  //   this.exportProfilePlots();
-
-  //   // Use the median profile to refine head / tail point
-  //   // this.findTailIndexInMedianCurve();
-  //   // this.calculateOffsets();
-
-  // }
-
-  // public void annotateAndExportNuclei(){
-  //   this.exportNuclearStats("logStats");
-  //   this.exportClusteringProfiles("logClusters");
-  //   this.annotateImagesOfNuclei();
-  //   this.exportAnnotatedNuclei();
-  //   this.exportCompositeImage("composite");
-  // }
-
-  /*
-    -----------------------
     Get aggregate values
     -----------------------
   */

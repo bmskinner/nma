@@ -135,8 +135,6 @@ public class Mouse_Sperm_Analysis
 
   private static final double MIN_SIGNAL_SIZE = 50;
 
-  // private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
-
   private ArrayList<RodentSpermNucleusCollection> nuclearPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
   private ArrayList<RodentSpermNucleusCollection> failedPopulations  = new ArrayList<RodentSpermNucleusCollection>(0);
   
@@ -231,26 +229,7 @@ public class Mouse_Sperm_Analysis
 
       attemptRefoldingConsensusNucleus(r);
 
-      ArrayList<RodentSpermNucleusCollection> signalPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
-
-      // split complete set by signals and analyse
-      ArrayList<Nucleus> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
-      if(redList.size()>0){
-        RodentSpermNucleusCollection redNuclei = new RodentSpermNucleusCollection(folder, "red");
-        for(Nucleus n : redList){
-          redNuclei.addNucleus( (RodentSpermNucleus)n );
-        }
-        signalPopulations.add(redNuclei);
-        ArrayList<Nucleus> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
-        if(notRedList.size()>0){
-          RodentSpermNucleusCollection notRedNuclei = new RodentSpermNucleusCollection(folder, "not_red");
-          for(Nucleus n : notRedList){
-            notRedNuclei.addNucleus( (RodentSpermNucleus)n );
-          }
-          signalPopulations.add(notRedNuclei);
-        }
-
-      }
+      ArrayList<RodentSpermNucleusCollection> signalPopulations = dividePopulationBySignals(r);
       
       for(RodentSpermNucleusCollection p : signalPopulations){
 
@@ -284,5 +263,50 @@ public class Mouse_Sperm_Analysis
       IJ.log("    Unable to refold nucleus: "+e);
     }
 
+  }
+
+  /*
+    Given a complete collection of nuclei, split it into up to 4 populations;
+      nuclei with red signals, with green signals, without red signals and without green signals
+    Only include the 'without' populations if there is a 'with' population.
+  */
+  public ArrayList<RodentSpermNucleusCollection> dividePopulationBySignals(RodentSpermNucleusCollection r){
+
+    ArrayList<RodentSpermNucleusCollection> signalPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
+
+    ArrayList<Nucleus> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
+    if(redList.size()>0){
+      RodentSpermNucleusCollection redNuclei = new RodentSpermNucleusCollection(r.getFolder(), "red");
+      for(Nucleus n : redList){
+        redNuclei.addNucleus( (RodentSpermNucleus)n );
+      }
+      signalPopulations.add(redNuclei);
+      ArrayList<Nucleus> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
+      if(notRedList.size()>0){
+        RodentSpermNucleusCollection notRedNuclei = new RodentSpermNucleusCollection(r.getFolder(), "not_red");
+        for(Nucleus n : notRedList){
+          notRedNuclei.addNucleus( (RodentSpermNucleus)n );
+        }
+        signalPopulations.add(notRedNuclei);
+      }
+    }
+
+    ArrayList<Nucleus> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
+    if(greenList.size()>0){
+      RodentSpermNucleusCollection greenNuclei = new RodentSpermNucleusCollection(r.getFolder(), "green");
+      for(Nucleus n : greenList){
+        greenNuclei.addNucleus( (RodentSpermNucleus)n );
+      }
+      signalPopulations.add(greenNuclei);
+      ArrayList<Nucleus> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
+      if(notGreenList.size()>0){
+        RodentSpermNucleusCollection notGreenNuclei = new RodentSpermNucleusCollection(r.getFolder(), "not_green");
+        for(Nucleus n : notGreenList){
+          notGreenNuclei.addNucleus( (RodentSpermNucleus)n );
+        }
+        signalPopulations.add(notGreenNuclei);
+      }
+    }
+    return signalPopulations;
   }
 }

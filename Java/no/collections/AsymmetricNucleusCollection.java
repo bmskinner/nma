@@ -421,7 +421,7 @@ public class AsymmetricNucleusCollection
   public void exportInterpolatedMedians(double[] medianProfile){
 
     String logFile = makeGlobalLogFile("logOffsets");
-    
+
     IJ.append("INDEX\tANGLE", logFile);
     for(int i=0;i<medianProfile.length;i++){
       IJ.append(i+"\t"+medianProfile[i], logFile);
@@ -556,7 +556,7 @@ public class AsymmetricNucleusCollection
     StringBuilder outLine = new StringBuilder();
     outLine.append("PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\t");
 
-    IJ.log("Exporting clustering profiles ("+this.getType()+")...");
+    IJ.log("    Exporting clustering profiles ("+this.getType()+")...");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
