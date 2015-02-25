@@ -32,6 +32,7 @@ public class AnalysisCreator {
 
 	 // /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private  int    nucleusThreshold = 36;
+  private  int    signalThreshold  = 70;
   private  double minNucleusSize   = 500;
   private  double maxNucleusSize   = 10000;
   private  double minNucleusCirc   = 0.0;
@@ -40,12 +41,97 @@ public class AnalysisCreator {
   private  double minSignalSize = 5;
   private  double maxSignalSize = 500;
 
-  private ArrayList<PigSpermNucleusCollection> nuclearPopulations = new ArrayList<PigSpermNucleusCollection>(0);
-  private ArrayList<PigSpermNucleusCollection> failedPopulations  = new ArrayList<PigSpermNucleusCollection>(0);
-  
-  public AnalysisCreator(){
+  private File folder;
+
+  /*
+    -----------------------
+    Constructors
+    -----------------------
+  */
+  public AnalysisCreator(File folder){
   	// create with default permissive parameters
+    this.folder = folder;
   }
 
+  /*
+    -----------------------
+    Run the analysis
+    -----------------------
+  */
+
+  public HashMap<File, NucleusCollection> runAnalysis(){
+    NucleusDetector detector = new NucleusDetector(this.folder, 
+                                                  this.getMinNucleusSize(), 
+                                                  this.getMaxNucleusSize(), 
+                                                  this.getNucleusThreshold(),
+                                                  this.getMinNucleusCirc(),
+                                                  this.getMaxNucleusCirc());
+    detector.runDetector();
+
+    HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
+
+    IJ.log("Imported folder(s)");
+    return folderCollection;
+  }
+
+  /*
+    -----------------------
+    Getters
+    -----------------------
+  */
+
+  public int getNucleusThreshold(){
+    return this.nucleusThreshold;
+  }
+
+  public int getSignalThreshold(){
+    return this.signalThreshold;
+  }
+
+  public double getMinNucleusSize(){
+    return this.minNucleusSize;
+  }
+
+  public double getMaxNucleusSize(){
+    return this.maxNucleusSize;
+  }
+
+  public double getMinNucleusCirc(){
+    return this.minNucleusCirc;
+  }
+
+  public double getMaxNucleusCirc(){
+    return this.maxNucleusCirc;
+  }
+
+  /*
+    -----------------------
+    Setters
+    -----------------------
+  */
+
+  public int setNucleusThreshold(int i){
+    this.nucleusThreshold = i;
+  }
+
+  public int setSignalThreshold(int i){
+    this.signalThreshold = i;
+  }
+
+  public double setMinNucleusSize(double d){
+    this.minNucleusSize = d;
+  }
+
+  public double setMaxNucleusSize(double d){
+    this.maxNucleusSize = d;
+  }
+
+  public double setMinNucleusCirc(double d){
+    this.minNucleusCirc = d;
+  }
+
+  public double setMaxNucleusCirc(double d){
+    this.maxNucleusCirc = d;
+  }
 
 }

@@ -94,11 +94,20 @@ public class NucleusDetector {
     this.setMaxNuclearSize(maxSize);
   }
 
-    public NucleusDetector(File folder, double minSize, double maxSize, int threshold){
+  public NucleusDetector(File folder, double minSize, double maxSize, int threshold){
     this.folder = folder;
     this.setMinNuclearSize(minSize);
     this.setMaxNuclearSize(maxSize);
     this.setThreshold(threshold);
+  }
+
+  public NucleusDetector(File folder, double minSize, double maxSize, int threshold, double minCirc, double maxCirc){
+    this.folder = folder;
+    this.setMinNuclearSize(minSize);
+    this.setMaxNuclearSize(maxSize);
+    this.setThreshold(threshold);
+    this.setMinNuclearCirc(minCirc);
+    this.setMaxNuclearCirc(maxCirc);
   }
 
   public void runDetector(){
