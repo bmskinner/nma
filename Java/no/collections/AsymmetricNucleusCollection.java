@@ -445,36 +445,18 @@ public class AsymmetricNucleusCollection
 
   @Override
   public void exportNuclearStats(String filename){
-  
-    String statsFile = makeGlobalLogFile(filename);
 
-    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tMEDIAN_DISTANCE_BETWEEN_POINTS\tNORM_TAIL_INDEX\tDIFFERENCE_TO_MEDIAN_PROFILE\tFAILURE_CODE\tPATH\n";
+    Map<String, List<String>> stats = super.calculateNuclearStats();
 
-    IJ.log("    Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
-    double[] areas        = this.getAreas();
-    double[] perims       = this.getPerimeters();
-    double[] ferets       = this.getFerets();
-    double[] pathLengths  = this.getPathLengths();
-    int[] tails           = this.getTailIndexes();
-    double[] differences  = this.getDifferencesToMedianFromTail();
-    String[] paths        = this.getNucleusPaths();
-    double[] distances    = this.getMedianDistanceBetweenPoints();
+    String[] index  = NuclearOrganisationUtility.getStringFromInt(this.getTailIndexes());
+    String[] diff   = NuclearOrganisationUtility.getStringFromDouble(this.getDifferencesToMedianFromTail());
+    String[] points = NuclearOrganisationUtility.getStringFromDouble(this.getMedianDistanceBetweenPoints());
 
+    stats.put("NORM_TAIL_INDEX",                Arrays.asList(index ));
+    stats.put("DIFFERENCE_TO_MEDIAN_PROFILE",   Arrays.asList(diff  ));
+    stats.put("MEDIAN_DISTANCE_BETWEEN_POINTS", Arrays.asList(points));
 
-    for(int i=0; i<this.getNucleusCount();i++){
-
-      outLine = outLine + areas[i]+"\t"+
-                          perims[i]+"\t"+
-                          ferets[i]+"\t"+
-                          pathLengths[i]+"\t"+
-                          distances[i]+"\t"+
-                          tails[i]+"\t"+
-                          differences[i]+"\t"+
-                          this.getNucleus(i).getFailureCode()+"\t"+
-                          paths[i]+"\n";
-    }
-    IJ.append(  outLine, statsFile);
-    IJ.log("    Export complete");
+    exportStats(stats, filename);
   }
 
   public void exportCompositeImage(String filename){

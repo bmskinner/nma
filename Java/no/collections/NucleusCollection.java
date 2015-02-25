@@ -765,61 +765,59 @@ public class NucleusCollection {
     IJ.append(outLine, logFile); 
   }
 
-  // public void addStatsColumn()
   /*
     To hold the nuclear stats (and any stats), we want a structure that can 
     hold: a column of data. Any arbitrary other numbers of columns of data.
-    A list of associated column headings
-    HashMap<String, ArrayList<Double>>
-    Heading is the key; the arraylist of values is called by it.
-    How do we ensure order? And include ints and strings? Make it type generic
-    
-    private Map<String, ArrayList<?>> stats = new HashMap<>();
-
-    public <String> void put(String key, ArrayList<String> value) {
-      stats.put(key, value);
-    }
-
-    public <Double> void put(String key, ArrayList<Double> value) {
-      stats.put(key, value);
-    }
-
-    @SuppressWarnings("unchecked")
-    // as long as all entries are put in via put, the cast is safe
-    public <String> String get(String key) {
-      return (String) stats.get(key);
-    }
-
   */
+  public Map<String, List<String>> calculateNuclearStats(){
+
+    Map<String, List<String>> stats = new LinkedHashMap<String, List<String>>();
+
+    String[] sAreas        = NuclearOrganisationUtility.getStringFromDouble(this.getAreas());
+    String[] sPerims       = NuclearOrganisationUtility.getStringFromDouble(this.getPerimeters());
+    String[] sFerets       = NuclearOrganisationUtility.getStringFromDouble(this.getFerets());
+    String[] sPathlengths  = NuclearOrganisationUtility.getStringFromDouble(this.getPathLengths());
+    String[] sDistances    = NuclearOrganisationUtility.getStringFromDouble(this.getMedianDistanceBetweenPoints());
+    String[] sPaths        = this.getNucleusPaths();
+
+    stats.put("AREA",        Arrays.asList(  sAreas));
+    stats.put("PERIMETER",   Arrays.asList(  sPerims));
+    stats.put("FERET",       Arrays.asList(  sFerets));
+    stats.put("PATH_LENGTH", Arrays.asList(  sPathlengths));
+    stats.put("MEDIAN_DISTANCE_BETWEEN_POINTS", Arrays.asList(sDistances ) );
+    stats.put("PATH",        Arrays.asList(  sPaths));
+
+    return stats;
+  }
+
+  public void exportStats(Map<String, List<String>> stats, String filename){
+    String statsFile = makeGlobalLogFile(filename);
+
+    StringBuilder outLine = new StringBuilder();
+
+    Set<String> headings = stats.keySet();
+    for(String heading : headings){
+      IJ.log("    Field: "+heading);
+      outLine.append(heading+"\t");
+    }
+    outLine.append("\n");
+
+
+    for(int i=0;i<this.getNucleusCount();i++){
+      for(String heading : headings){
+        List<String> column = stats.get(heading);
+        outLine.append(column.get(i)+"\t");
+      }
+      outLine.append("\n");
+    }
+    IJ.append(  outLine.toString(), statsFile);
+  }
+  
 
   public void exportNuclearStats(String filename){
   
-    String statsFile = makeGlobalLogFile(filename);
-
-    String outLine = "AREA\tPERIMETER\tFERET\tPATH_LENGTH\tMEDIAN_DISTANCE_BETWEEN_POINTS\tFAILURE_CODE\tPATH\n";
-
-    IJ.log("    Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
-    double[] areas        = this.getAreas();
-    double[] perims       = this.getPerimeters();
-    double[] ferets       = this.getFerets();
-    double[] pathLengths  = this.getPathLengths();
-    String[] paths        = this.getNucleusPaths();
-    double[] distances    = this.getMedianDistanceBetweenPoints();
-
-
-    for(int i=0; i<this.getNucleusCount();i++){
-      int j = i+1;
-
-      outLine = outLine + areas[i]+"\t"+
-                          perims[i]+"\t"+
-                          ferets[i]+"\t"+
-                          pathLengths[i]+"\t"+
-                          distances[i]+"\t"+
-                          this.getNucleus(i).getFailureCode()+"\t"+
-                          paths[i]+"\n";
-    }
-    IJ.append(  outLine, statsFile);
-    IJ.log("    Export complete");
+    Map<String, List<String>> stats = this.calculateNuclearStats();
+    exportStats(stats, filename);
   }
 
   public void exportFilterStats(){

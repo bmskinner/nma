@@ -61,6 +61,28 @@
     return results;
   }
 
+  /*
+    Turn a double[] into a String[]
+  */
+  public static String[] getStringFromDouble(double[] d){
+    String[] s = new String[d.length];
+    for (int i = 0; i < s.length; i++){
+        s[i] = String.valueOf(d[i]);
+    }
+    return s;
+  }
+
+  /*
+    Turn an int[] into a String[]
+  */
+  public static String[] getStringFromInt(int[] d){
+    String[] s = new String[d.length];
+    for (int i = 0; i < s.length; i++){
+        s[i] = String.valueOf(d[i]);
+    }
+    return s;
+  }
+
   public static int wrapIndex(int i, int length){
     if(i<0)
       i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199
