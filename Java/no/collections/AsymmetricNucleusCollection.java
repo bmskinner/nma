@@ -443,11 +443,12 @@ public class AsymmetricNucleusCollection
     IJ.append("", logFile);
   }
 
+  @Override
   public void exportNuclearStats(String filename){
   
     String statsFile = makeGlobalLogFile(filename);
 
-    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tNORM_TAIL_INDEX\tDIFFERENCE\tFAILURE_CODE\tPATH\n";
+    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tMEDIAN_DISTANCE_BETWEEN_POINTS\tNORM_TAIL_INDEX\tDIFFERENCE_TO_MEDIAN_PROFILE\tFAILURE_CODE\tPATH\n";
 
     IJ.log("    Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
     double[] areas        = this.getAreas();
@@ -457,6 +458,7 @@ public class AsymmetricNucleusCollection
     int[] tails           = this.getTailIndexes();
     double[] differences  = this.getDifferencesToMedianFromTail();
     String[] paths        = this.getNucleusPaths();
+    double[] distances    = this.getMedianDistanceBetweenPoints();
 
 
     for(int i=0; i<this.getNucleusCount();i++){
@@ -465,13 +467,11 @@ public class AsymmetricNucleusCollection
                           perims[i]+"\t"+
                           ferets[i]+"\t"+
                           pathLengths[i]+"\t"+
+                          distances[i]+"\t"+
                           tails[i]+"\t"+
                           differences[i]+"\t"+
                           this.getNucleus(i).getFailureCode()+"\t"+
                           paths[i]+"\n";
-
-      // Include tip, CoM, tail
-  		// this.getNucleus(i).printLogFile(this.getNucleus(i).getNucleusFolder()+File.separator+this.getNucleus(i).getNucleusNumber()+".log");
     }
     IJ.append(  outLine, statsFile);
     IJ.log("    Export complete");

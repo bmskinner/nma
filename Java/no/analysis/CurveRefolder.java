@@ -78,13 +78,17 @@ public class CurveRefolder {
 		
 		IJ.log("    Refolding curve: initial score: "+(int)score);
 
+		double originalScore = score;
 		double prevScore = score*2;
 		int i=0;
-		while(prevScore - score >0.0001){ // iterate until converging
-			prevScore = score;
-			score = this.iterateOverNucleus();
-			i++;
-		}
+		// while( (prevScore - score)/prevScore > 0.01 || i<50 ){ // iterate until converging on a better curve  score >= originalScore
+		// 	prevScore = score;
+		// 	score = this.iterateOverNucleus();
+		// 	i++;
+		// 	if(i%50==0){
+		// 		IJ.log("    Iteration "+i+": "+(int)score);
+		// 	}
+		// }
 		IJ.log("    Refolded curve: final score: "+(int)score);
 	}
 
@@ -193,10 +197,17 @@ public class CurveRefolder {
 	/*
 		Go over the target nucleus, adjusting each point.
 		Keep the change if it helps get closer to the target profile
+
+		Changes to make:
+			Random mutation to the distance of a point from the CoM
+			Random mutation to the angle of a point from the CoM 
+			Together these affect the XY position of the point
 	*/
 	private double iterateOverNucleus(){
 
 		double similarityScore = compareProfiles(targetCurve, targetNucleus.getInteriorAngles());
+
+		double medianDistanceBetweenPoints = this.initialNucleus.getAngleProfile().getMedianDistanceBetweenPoints();
 		
 		for(int i=0; i<targetNucleus.getLength(); i++){
 
@@ -204,18 +215,21 @@ public class CurveRefolder {
 			
 			double currentDistance = p.getLengthTo(new XYPoint(0,0));
 			double newDistance = currentDistance; // default no change
+			double newAngle = p.getInteriorAngle();
 
 			double oldX = p.getX();
 			double oldY = p.getY();
 
 			// make change dependent on score
-			double amountToChange = Math.random() * (similarityScore/1000); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
+			double amountToChange = Math.min( Math.random() * (similarityScore/1000), medianDistanceBetweenPoints); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
 
 			if(p.getInteriorAngle() > targetCurve[i]){
-						newDistance = currentDistance + amountToChange; 
+						newDistance = currentDistance + amountToChange;
+						// newAngle = p.getInteriorAngle() + (1-Math.random()); 
 			}
 			if(p.getInteriorAngle() < targetCurve[i]){
 						newDistance = currentDistance - amountToChange; //  some change between 0 and 2
+						// newAngle = p.getInteriorAngle() + (1-Math.random()); 
 			}
 
 			// find the angle the point makes to the x axis
@@ -242,7 +256,7 @@ public class CurveRefolder {
 			double distanceToNext = p.getLengthTo( targetNucleus.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i+1, targetNucleus.getLength()) ) );
 
 			// reset if worse fit or distances are too high
-			if(score > similarityScore  || distanceToNext > 1.2 || distanceToPrev > 1.2 ){
+			if(score > similarityScore  || distanceToNext > medianDistanceBetweenPoints*1.2 || distanceToPrev > medianDistanceBetweenPoints*1.2 ){
 				p.setX(oldX);
 				p.setY(oldY);
 				targetNucleus.getAngleProfile().updateAngleCalculations();

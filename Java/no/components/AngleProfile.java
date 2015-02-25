@@ -80,6 +80,16 @@ public class AngleProfile {
     return this.medianAngle;
   }
 
+  public double getMedianDistanceBetweenPoints(){
+    double[] distances = new double[this.array.length];
+    for(int i=0;i<this.array.length;i++){
+      NucleusBorderPoint p = this.getBorderPoint(i);
+      NucleusBorderPoint next = this.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i+1, this.array.length));
+      distances[i] = p.getLengthTo(next);
+    }
+    return NuclearOrganisationUtility.quartile(distances, 50);
+  }
+
   public NucleusBorderPoint getBorderPoint(int i){
       return this.array[i];
     }

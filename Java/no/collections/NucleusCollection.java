@@ -162,6 +162,16 @@ public class NucleusCollection {
     return d;
   }
 
+  public double[] getMedianDistanceBetweenPoints(){
+
+    double[] d = new double[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      d[i] = nucleiCollection.get(i).getAngleProfile().getMedianDistanceBetweenPoints();
+    }
+    return d;
+  }
+
   public String[] getNucleusPaths(){
     String[] s = new String[nucleiCollection.size()];
 
@@ -652,8 +662,8 @@ public class NucleusCollection {
     String redLogFile   = makeGlobalLogFile( "logRedSignals"  );
     String greenLogFile = makeGlobalLogFile( "logGreenSignals");
 
-    IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", redLogFile);
-    IJ.append("# NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", greenLogFile);
+    IJ.append("NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", redLogFile);
+    IJ.append("NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", greenLogFile);
     
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 
@@ -738,13 +748,9 @@ public class NucleusCollection {
 
   public void exportMediansAndQuartilesOfProfile(ArrayList<Double[]> profile, String filename){
 
-    String logFile = this.getFolder()+File.separator+filename+"."+this.getType()+".txt";
-    File f = new File(logFile);
-    if(f.exists()){
-      f.delete();
-    }
+    String logFile = makeGlobalLogFile(filename);
 
-    String outLine = "# X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\n";
+    String outLine = "X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\n";
     
 
     for(int i =0;i<profile.get(0).length;i++){
@@ -761,13 +767,9 @@ public class NucleusCollection {
 
   public void exportNuclearStats(String filename){
   
-    String statsFile = this.getFolder()+File.separator+filename+"."+getType()+".txt";
-    File f = new File(statsFile);
-    if(f.exists()){
-      f.delete();
-    }
+    String statsFile = makeGlobalLogFile(filename);
 
-    String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tFAILURE_CODE\tPATH\n";
+    String outLine = "AREA\tPERIMETER\tFERET\tPATH_LENGTH\tMEDIAN_DISTANCE_BETWEEN_POINTS\tFAILURE_CODE\tPATH\n";
 
     IJ.log("    Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
     double[] areas        = this.getAreas();
@@ -775,6 +777,7 @@ public class NucleusCollection {
     double[] ferets       = this.getFerets();
     double[] pathLengths  = this.getPathLengths();
     String[] paths        = this.getNucleusPaths();
+    double[] distances    = this.getMedianDistanceBetweenPoints();
 
 
     for(int i=0; i<this.getNucleusCount();i++){
@@ -784,6 +787,7 @@ public class NucleusCollection {
                           perims[i]+"\t"+
                           ferets[i]+"\t"+
                           pathLengths[i]+"\t"+
+                          distances[i]+"\t"+
                           this.getNucleus(i).getFailureCode()+"\t"+
                           paths[i]+"\n";
     }
