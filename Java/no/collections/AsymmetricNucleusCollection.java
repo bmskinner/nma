@@ -115,6 +115,7 @@ public class AsymmetricNucleusCollection
     this.exportProfilePlots();
   }
 
+  @Override
   public void annotateAndExportNuclei(){
     this.exportNuclearStats("logStats");
     this.exportClusteringProfiles("logClusters");
@@ -379,6 +380,7 @@ public class AsymmetricNucleusCollection
     }
   }
 	 
+  @Override 
   public void measureNuclearOrganisation(){
 
     if(this.getRedSignalCount()>0 || this.getGreenSignalCount()>0){

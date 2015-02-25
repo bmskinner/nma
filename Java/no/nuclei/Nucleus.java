@@ -167,7 +167,7 @@ public class Nucleus {
     -----------------------
   */
   public Roi getRoi(){
-  	return this.roi;
+    return this.roi;
   }
 
   public String getPath(){
@@ -417,40 +417,40 @@ public class Nucleus {
     -----------------------
   */
   public double getMaxX(){
-  	double d = 0;
+    double d = 0;
     for(int i=0;i<getLength();i++){
-    	if(this.getBorderPoint(i).getX()>d){
-      	d = this.getBorderPoint(i).getX();
-    	}
+      if(this.getBorderPoint(i).getX()>d){
+        d = this.getBorderPoint(i).getX();
+      }
     }
     return d;
   }
 
   public double getMinX(){
-  	double d = getMaxX();
+    double d = getMaxX();
     for(int i=0;i<getLength();i++){
-    	if(this.getBorderPoint(i).getX()<d){
-      	d = this.getBorderPoint(i).getX();
+      if(this.getBorderPoint(i).getX()<d){
+        d = this.getBorderPoint(i).getX();
       }
     }
     return d;
   }
 
   public double getMaxY(){
-  	double d = 0;
+    double d = 0;
     for(int i=0;i<getLength();i++){
-    	if(this.getBorderPoint(i).getY()>d){
-      	d = this.getBorderPoint(i).getY();
-    	}
+      if(this.getBorderPoint(i).getY()>d){
+        d = this.getBorderPoint(i).getY();
+      }
     }
     return d;
   }
 
   public double getMinY(){
-  	double d = getMaxY();
+    double d = getMaxY();
     for(int i=0;i<getLength();i++){
-    	if(this.getBorderPoint(i).getY()<d){
-      	d = this.getBorderPoint(i).getY();
+      if(this.getBorderPoint(i).getY()<d){
+        d = this.getBorderPoint(i).getY();
       }
     }
     return d;
@@ -916,8 +916,8 @@ public class Nucleus {
 
     for(int i = 0; i<this.getLength();i++){
 
-    		NucleusBorderPoint p   = this.getPoint(i);
-    		NucleusBorderPoint opp = findOppositeBorder(p);
+        NucleusBorderPoint p   = this.getPoint(i);
+        NucleusBorderPoint opp = findOppositeBorder(p);
 
         profile[i] = p.getLengthTo(opp); // REMOVE
         p.setDistanceAcrossCoM(p.getLengthTo(opp));

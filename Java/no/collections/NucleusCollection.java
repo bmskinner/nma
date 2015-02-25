@@ -605,6 +605,32 @@ public class NucleusCollection {
 
   /*
     -----------------
+    Annotate images
+    -----------------
+  */
+
+  public void annotateAndExportNuclei(){
+    this.exportNuclearStats("logStats");
+    this.exportAnnotatedNuclei();
+    this.exportCompositeImage("composite");
+  }
+
+  public void measureNuclearOrganisation(){
+
+    if(this.getRedSignalCount()>0 || this.getGreenSignalCount()>0){
+
+      for(int i= 0; i<this.getNucleusCount();i++){
+        Nucleus n = this.getNucleus(i);
+        n.exportSignalDistanceMatrix();
+
+      }
+      this.exportSignalStats();
+      this.exportDistancesBetweenSingleSignals();
+    }
+  }
+
+  /*
+    -----------------
     Export functions
     -----------------
   */
@@ -794,7 +820,7 @@ public class NucleusCollection {
     if(this.getNucleusCount()==0){
       return;
     }
-    IJ.log("Creating composite image...");
+    IJ.log("    Creating composite image...");
     
 
     int totalWidth = 0;
@@ -845,7 +871,7 @@ public class NucleusCollection {
         Overlay overlay = new Overlay(label);
         finalProcessor.drawOverlay(overlay);  
       } catch(Exception e){
-        IJ.log("Error adding image to composite");
+        IJ.log("    Error adding image to composite");
         IJ.append("Error adding image to composite: "+e, this.getDebugFile().getAbsolutePath());
         IJ.append("  "+getType(), this.getDebugFile().getAbsolutePath());
         IJ.append("  "+path, this.getDebugFile().getAbsolutePath());
@@ -853,7 +879,7 @@ public class NucleusCollection {
     }
     // finalImage.show();
     IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+filename+"."+getType()+".tiff");
-    IJ.log("Composite image created");
+    IJ.log("    Composite image created");
   }
 
   public void exportProfilePlot(Plot plot, String name){

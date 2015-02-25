@@ -56,9 +56,9 @@ import no.components.*;
 import no.collections.NucleusCollection;
 
 public class AsymmetricNucleus
-	extends Nucleus
+  extends Nucleus
 {
-	private NucleusBorderPoint tailPoint;
+  private NucleusBorderPoint tailPoint;
   private NucleusBorderPoint headPoint;
 
   private ArrayList<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
@@ -74,7 +74,7 @@ public class AsymmetricNucleus
 
   // Requires a nucleus object to construct from
   public AsymmetricNucleus(Nucleus n){
-  	this.setRoi(n.getRoi());
+    this.setRoi(n.getRoi());
     this.setSourceImage(n.getSourceImage());
     this.setSourceFile(n.getSourceFile());
     this.setAnnotatedImage(n.getAnnotatedImage());
@@ -100,11 +100,11 @@ public class AsymmetricNucleus
   */
 
   public NucleusBorderPoint getHead(){
-  	return this.headPoint;
+    return this.headPoint;
   }
 
   public NucleusBorderPoint getTail(){
-  	return this.tailPoint;
+    return this.tailPoint;
   }
 
   public int getTailIndex(){
