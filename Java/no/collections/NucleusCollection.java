@@ -665,12 +665,9 @@ public class NucleusCollection {
 
   public void exportDistancesBetweenSingleSignals(){
 
-    File logFile = new File(this.folder.getAbsolutePath()+File.separator+"logDistances."+collectionType+".txt");
+    String logFile = makeGlobalLogFile("logDistances");
 
-    if(logFile.exists()){
-      logFile.delete();
-    }
-    IJ.append("DISTANCE_BETWEEN_SIGNALS\tRED_DISTANCE_TO_COM\tGREEN_DISTANCE_TO_COM\tNUCLEAR_FERET\tRED_FRACTION_OF_FERET\tGREEN_FRACTION_OF_FERET\tDISTANCE_BETWEEN_SIGNALS_FRACTION_OF_FERET\tNORMALISED_DISTANCE\tPATH", logFile.getAbsolutePath());
+    IJ.append("DISTANCE_BETWEEN_SIGNALS\tRED_DISTANCE_TO_COM\tGREEN_DISTANCE_TO_COM\tNUCLEAR_FERET\tRED_FRACTION_OF_FERET\tGREEN_FRACTION_OF_FERET\tDISTANCE_BETWEEN_SIGNALS_FRACTION_OF_FERET\tNORMALISED_DISTANCE\tPATH", logFile);
 
     for(int i=0; i<this.getNucleusCount();i++){
 
@@ -701,7 +698,7 @@ public class NucleusCollection {
                     gFractionOfFeret+"\t"+
                     distanceFractionOfFeret+"\t"+
                     normalisedPosition+"\t"+
-                    n.getPath(), logFile.getAbsolutePath());
+                    n.getPath(), logFile);
       }
     }
   }
@@ -746,7 +743,7 @@ public class NucleusCollection {
 
     String outLine = "# AREA\tPERIMETER\tFERET\tPATH_LENGTH\tFAILURE_CODE\tPATH\n";
 
-    IJ.log("Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
+    IJ.log("    Exporting stats for "+this.getNucleusCount()+" nuclei ("+this.getType()+")");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
@@ -765,7 +762,7 @@ public class NucleusCollection {
                           paths[i]+"\n";
     }
     IJ.append(  outLine, statsFile);
-    IJ.log("Export complete");
+    IJ.log("    Export complete");
   }
 
   public void exportFilterStats(){

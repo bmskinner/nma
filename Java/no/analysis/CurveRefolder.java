@@ -78,13 +78,13 @@ public class CurveRefolder {
 		
 		IJ.log("    Refolding curve: initial score: "+(int)score);
 
-		// double prevScore = score*2;
-		// int i=0;
-		// while(prevScore - score >0.0001 || i<100){
-		// 	prevScore = score;
-		// 	score = this.iterateOverNucleus();
-		// 	i++;
-		// }
+		double prevScore = score*2;
+		int i=0;
+		while(prevScore - score >0.0001){ // iterate until converging
+			prevScore = score;
+			score = this.iterateOverNucleus();
+			i++;
+		}
 		IJ.log("    Refolded curve: final score: "+(int)score);
 	}
 
@@ -163,7 +163,6 @@ public class CurveRefolder {
 		nucleusPlot.setColor(Color.LIGHT_GRAY);
 	  nucleusPlot.drawLine(min, 0, Math.abs(min), 0);
 	  nucleusPlot.drawLine(0, min, 0, Math.abs(min));
-		// nucleusPlotWindow = nucleusPlot.show();
 	}
 
 
