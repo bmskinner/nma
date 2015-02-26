@@ -214,16 +214,10 @@ public class RodentSpermNucleusCollection
       medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.length )* n.getLength());
       
       int offset = n.getBorderIndexOfInterest("tail") - medianTailIndex;
-      IJ.log("Offset: "+offset);
 
-      // n.setOffsetForTail(offset);
+      int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getBorderIndexOfInterest("tail")-offset, n.getLength());
 
-      int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getTailIndex()-offset, n.getLength());
-
-      // n.setTailIndex(newTailIndex); // update the tail position
-      // addMedianProfileFeatureIndex("tip", "tail", tailIndex);
       n.addBorderPointOfInterest("tail", n.getBorderPoint(newTailIndex));
-      // n.setSpermTail(n.getBorderPoint(n.getTailIndex())); // ensure the spermTail is updated
 
       // also update the head position
       n.addBorderPointOfInterest("head", n.findOppositeBorder( n.getBorderPoint(newTailIndex) ));
@@ -293,7 +287,7 @@ public class RodentSpermNucleusCollection
                   headToTip[i]  +"\t");
 
       AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
-      double[] profile = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
+      double[] profile = n.getAngleProfile().getInteriorAngles(n.getBorderIndexOfInterest("tail"));
       for(int j=0;j<profile.length;j++){
         outLine.append(profile[j]+"\t");
       }

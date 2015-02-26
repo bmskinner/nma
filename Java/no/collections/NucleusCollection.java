@@ -118,6 +118,11 @@ public class NucleusCollection {
     this.exportNuclearStats("logStats");
   }
 
+  public void annotateAndExportNuclei(){
+    this.exportAnnotatedNuclei();
+    this.exportCompositeImage("composite");
+  }
+
   /*
     -----------------------
     Getters for aggregate stats
@@ -766,10 +771,7 @@ public class NucleusCollection {
     -----------------
   */
 
-  public void annotateAndExportNuclei(){
-    this.exportAnnotatedNuclei();
-    this.exportCompositeImage("composite");
-  }
+  
 
   public void measureNuclearOrganisation(){
 

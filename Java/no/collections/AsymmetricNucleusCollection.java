@@ -414,7 +414,7 @@ public class AsymmetricNucleusCollection
                     headToTail[i] +"\t");
 
       AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
-      double[] profile = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
+      double[] profile = n.getAngleProfile().getInteriorAngles(n.getBorderIndexOfInterest("tail"));
       for(int j=0;j<profile.length;j++){
         outLine.append(profile[j]+"\t");
       }

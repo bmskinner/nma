@@ -133,7 +133,7 @@ public class RodentSpermNucleus
     NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
     consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
 
-    this.setTailIndex(consensusTailIndex);
+    // this.setTailIndex(consensusTailIndex);
     this.setInitialConsensusTail(consensusTail);
 
     addBorderPointOfInterest("tail", consensusTail);
@@ -141,7 +141,7 @@ public class RodentSpermNucleus
 
     // this.setHead( this.findOppositeBorder(this.getTail()));
     addBorderPointOfInterest("head", this.findOppositeBorder(this.getBorderPointOfInterest("tail")));
-    this.setHeadIndex(this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("head")));
+    // this.setHeadIndex(this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("head")));
   }
 
   /*
@@ -405,7 +405,7 @@ public class RodentSpermNucleus
     // determine the coordinates of the point intersected as int
     // for each xvalue of each point in array, get the line y value
     // at the point the yvalues are closest and not the tail point is the intersesction
-    double[] lineEquation = NuclearOrganisationUtility.findLineEquation(this.getCentreOfMass(), this.getSpermTail());
+    double[] lineEquation = NuclearOrganisationUtility.findLineEquation(this.getCentreOfMass(), this.getBorderPointOfInterest("tail"));
     double minDeltaY = 100;
     int minDeltaYIndex = 0;
 
@@ -414,7 +414,7 @@ public class RodentSpermNucleus
         double y = this.getBorderPoint(i).getY();
         double yOnLine = NuclearOrganisationUtility.getYFromEquation(lineEquation, x);
 
-        double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getSpermTail());
+        double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderPointOfInterest("tail"));
 
         double deltaY = Math.abs(y - yOnLine);
         if(deltaY < minDeltaY && distanceToTail > this.getFeret()/2){ // exclude points too close to the tail
@@ -438,7 +438,7 @@ public class RodentSpermNucleus
 
     for(int i = 0; i<this.getLength();i++){
 
-      int currentIndex = NuclearOrganisationUtility.wrapIndex(this.getTailIndex()+i, this.getLength()); // start at the tail, and go around the array
+      int currentIndex = NuclearOrganisationUtility.wrapIndex(this.getBorderIndexOfInterest("tail")+i, this.getLength()); // start at the tail, and go around the array
       
       NucleusBorderPoint p = getBorderPoint(currentIndex);
 
@@ -447,15 +447,15 @@ public class RodentSpermNucleus
       }
       if(currentIndex==intersectionPointIndex && !changeRoi){ // until we hit the intersection point. Then, close the polygon of roi1 back to the tip. Switch to roi2
         roi1.add(p);
-        roi1.add(this.getSpermTail());
+        roi1.add(this.getBorderPointOfInterest("tail"));
         roi2.add(this.getBorderPointOfInterest("intersectionPoint"));
         changeRoi = true;
       }
-      if(currentIndex != intersectionPointIndex && currentIndex != this.getTailIndex() && changeRoi){   // continue with roi2, adjusting the index numbering as needed
+      if(currentIndex != intersectionPointIndex && currentIndex != this.getBorderIndexOfInterest("tail") && changeRoi){   // continue with roi2, adjusting the index numbering as needed
         roi2.add(p);
       }
 
-      if(currentIndex==this.getTailIndex() && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
+      if(currentIndex==this.getBorderIndexOfInterest("tail") && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
         roi2.add(this.getBorderPointOfInterest("intersectionPoint"));
       }
 
@@ -504,7 +504,7 @@ public class RodentSpermNucleus
   @Override
   public void calculateSignalAnglesFromTail(){
 
-    this.calculateSignalAnglesFromPoint(this.getTail());
+    this.calculateSignalAnglesFromPoint(this.getBorderPointOfInterest("tail"));
 
     // update signal angles with hook or hump side
 
