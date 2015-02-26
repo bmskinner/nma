@@ -72,7 +72,7 @@ public class Nucleus {
   private int nucleusNumber; // the number of the nucleus in the current image
   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
-  private double medianAngle; // the median angle from XYPoint[] smoothedArray
+  private double medianAngle; // the median interior angle
   private double perimeter;   // the nuclear perimeter
   private double pathLength;  // the angle path length - measures wibbliness in border
   private double feret;       // the maximum diameter
@@ -84,7 +84,6 @@ public class Nucleus {
 
   // store points of interest around the border e.g. heads, tails, any other features of note
   private HashMap<String, NucleusBorderPoint> borderPointsOfInterest = new HashMap<String, NucleusBorderPoint>();
-  // private HashMap<String, Integer> borderIndexesOfInterest = new HashMap<String, NucleusBorderPoint>();
 
   private File sourceFile;    // the image from which the nucleus came
   private File nucleusFolder; // the folder to store nucleus information

@@ -58,19 +58,8 @@ import no.collections.NucleusCollection;
 public class AsymmetricNucleus
   extends Nucleus
 {
-  // private NucleusBorderPoint tailPoint;
-  // private NucleusBorderPoint headPoint;
 
   private ArrayList<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
-
-  // private int tailIndex; // the index in the angleProfile that has been designated the tail
-  // private int headIndex; // the index in the angleProfile that has been designated the head
-
-  // private int offsetForTail = 0; // the offset to apply to the angleProfile to start it from the tail
-  // private int offsetForHead = 0; // the offset to apply to the angleProfile to start it from the head
-
-  // private double differenceToMedianProfileFromHead; // store the difference between curves
-  // private double differenceToMedianProfileFromTail; // store the difference between curves
 
   // Requires a nucleus object to construct from
   public AsymmetricNucleus(Nucleus n){
@@ -100,83 +89,19 @@ public class AsymmetricNucleus
     -----------------------
   */
 
-  // public NucleusBorderPoint getHead(){
-  //   return this.headPoint;
-  // }
-
-  // public NucleusBorderPoint getTail(){
-  //   return this.tailPoint;
-  // }
-
-  // public int getTailIndex(){
-  //   return this.tailIndex;
-  // }
-
-  // public int getHeadIndex(){
-  //   return this.headIndex;
-  // }
-
-  // public int getOffsetForTail(){
-  //   return this.offsetForTail;
-  // }
-
-  // public int getOffsetForHead(){
-  //   return this.offsetForHead;
-  // }
-
   public ArrayList<NucleusBorderPoint> getEstimatedTailPoints(){
     return this.tailEstimatePoints;
   }
 
-  // public double getDifferenceToMedianProfileFromHead(){
-  //   return this.differenceToMedianProfileFromHead;
-  // }
-
-  // public double getDifferenceToMedianProfileFromTail(){
-  //   return this.differenceToMedianProfileFromTail;
-  // }
-
   /*
     -----------------------
-    Set sperm nucleus features
+    Set nucleus features
     -----------------------
   */
-
-  // public void setHead(NucleusBorderPoint p){
-  //   this.headPoint = p;
-  // }
-
-  // public void setTail(NucleusBorderPoint p){
-  //   this.tailPoint = p;
-  // }
-
-  // public void setTailIndex(int i){
-  //   this.tailIndex = i;
-  // }
-
-  // public void setHeadIndex(int i){
-  //   this.headIndex = i;
-  // }
-
-  // public void setOffsetForTail(int i){
-  //   this.offsetForTail = i;
-  // }
-
-  // public void setOffsetForHead(int i){
-  //   this.offsetForHead = i;
-  // }
 
   protected void addTailEstimatePosition(NucleusBorderPoint p){
     this.tailEstimatePoints.add(p);
   }
-
-  // public void setDifferenceToMedianProfileFromHead(double d){
-  //   this.differenceToMedianProfileFromHead = d;
-  // }
-
-  // public void setDifferenceToMedianProfileFromTail(double d){
-  //   this.differenceToMedianProfileFromTail = d;
-  // }
 
   /*
     -----------------------

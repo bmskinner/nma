@@ -208,27 +208,23 @@ public class Mouse_Sperm_Analysis
       IJ.log("    ----------------------------- ");
       IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
       IJ.log("    ----------------------------- ");
-      // IJ.log("    Total nuclei: "+r.getNucleusCount());
-      // IJ.log("    Red signals: "+r.getRedSignalCount());
-      // IJ.log("    Green signals: "+r.getGreenSignalCount());
-
 
       r.measureProfilePositions();
       r.measureNuclearOrganisation();
       r.exportStatsFiles();
       r.annotateAndExportNuclei();
 
-      // r.refilterNuclei(failedNuclei);
-      IJ.log("    ----------------------------- ");
-      IJ.log("    Exporting failed nuclei"       );
-      IJ.log("    ----------------------------- ");
-      failedNuclei.annotateAndExportNuclei();
-
       IJ.log("    ----------------------------- ");
       IJ.log("    Refolding nucleus"             );
       IJ.log("    ----------------------------- ");
 
       attemptRefoldingConsensusNucleus(r);
+
+      IJ.log("    ----------------------------- ");
+      IJ.log("    Exporting failed nuclei"       );
+      IJ.log("    ----------------------------- ");
+      failedNuclei.annotateAndExportNuclei();
+
 
       ArrayList<RodentSpermNucleusCollection> signalPopulations = dividePopulationBySignals(r);
       

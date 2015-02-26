@@ -63,12 +63,6 @@ public class RodentSpermNucleusCollection
   // failure  codes
   public static final int FAILURE_TIP = 512;
 
-	// private String logMedianFromTipFile  = "logMediansFromTip"; // output medians
-
-	// private double[] normalisedMedianProfileFromTip; // this is an array of 200 angles
-
-  // private Map<Double, Collection<Double>> normalisedProfilesFromTip  = new HashMap<Double, Collection<Double>>();
-
   public RodentSpermNucleusCollection(File folder, String type){
   		super(folder, type);
   }
@@ -91,65 +85,6 @@ public class RodentSpermNucleusCollection
     this.calculateDifferencesToMedianProfiles();
     this.exportProfilePlots();
   }
-
-  /*
-    -----------------------
-    Get values relating to sperm
-    profiles
-    -----------------------
-  */
-
-  // public double getMaxRawXFromTips(){
-  //   double d = 0;
-  //   for(int i=0;i<this.getNucleusCount();i++){
-  //     RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
-  //     if(n.getMaxRawXFromTip() > d){
-  //       d = n.getMaxRawXFromTip();
-  //     }
-  //   }
-  //   return d;
-  // }
-
-  // public double getMinRawXFromTips(){
-  //   double d = 0;
-  //   for(int i=0;i<this.getNucleusCount();i++){
-  //     RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
-  //     if(n.getMaxRawXFromTip() < d){
-  //       d = n.getMaxRawXFromTip();
-  //     }
-  //   }
-  //   return d;
-  // }
-
-  // public double[] getHeadToTipDistances(){
-  //   double[] d = new double[this.getNucleusCount()];
-  //   for(int i=0;i<this.getNucleusCount();i++){
-  //     RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
-  //     d[i] = n.getBorderPointOfInterest("tip").getLengthTo(n.getBorderPointOfInterest("head"));
-  //   }
-  //   return d;
-  // }
-
-  // public double[] getTailToTipDistances(){
-  //   double[] d = new double[this.getNucleusCount()];
-  //   for(int i=0;i<this.getNucleusCount();i++){
-  //     RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
-  //     d[i] = n.getBorderPointOfInterest("tip").getLengthTo(n.getBorderPointOfInterest("tail"));
-  //   }
-  //   return d;
-  // }
-
-  /*
-    -----------------------
-    Setters
-    -----------------------
-  */
-
-  /*
-    -----------------------
-    Filters for nuclei
-    -----------------------
-  */
 
 
   /*

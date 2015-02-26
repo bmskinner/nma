@@ -345,8 +345,7 @@ public class NucleusCollection {
 
   // get the plot from the collection corresponding to the given pointType of interest
   public Plot getPlot(String pointType, String plotType){
-    HashMap<String, Plot> plots = this.plotCollection.get(pointType);
-    return plots.get(plotType);
+    return this.plotCollection.get(pointType).get(plotType);
   }
 
   public void addMedianProfileFeatureIndex(String profile, String indexType, int index){
@@ -1121,7 +1120,6 @@ public class NucleusCollection {
         double[] xPointsRaw  = n.getRawProfilePositions();
         double[] xPointsNorm = n.getNormalisedProfilePositions();
 
-
         NucleusBorderPoint indexPoint = n.getBorderPointOfInterest(pointType);
         int index = n.getAngleProfile().getIndexOfPoint(indexPoint);
         double[] anglesFromPoint = n.getAngleProfile().getInteriorAngles(index);
@@ -1216,7 +1214,6 @@ public class NucleusCollection {
 
   public void addSignalsToProfileChartFromPoint(String pointType, Plot plot){
     // for each signal in each nucleus, find index of point. Draw dot
-    // Add the signals to the tip centred profile plot
 
     plot.setColor(Color.LIGHT_GRAY);
     plot.setLineWidth(1);
@@ -1226,29 +1223,38 @@ public class NucleusCollection {
     for(int i= 0; i<this.getNucleusCount();i++){
 
       Nucleus n = this.getNucleus(i);
+      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+      signals.add(n.getRedSignals());
+      signals.add(n.getGreenSignals());
 
-      ArrayList<NuclearSignal> redSignals = n.getRedSignals();
-      if(redSignals.size()>0){
+      int signalCount = 0;
+      for( ArrayList<NuclearSignal> signalGroup : signals ){
+        
+        if(signalGroup.size()>0){
 
-        ArrayList<Double> redPoints = new ArrayList<Double>(0);
-        ArrayList<Double> yPoints   = new ArrayList<Double>(0);
+          Color colour = signalCount == Nucleus.RED_CHANNEL ? Color.RED : Color.GREEN;
 
-        for(int j=0; j<redSignals.size();j++){
+          ArrayList<Double> xPoints = new ArrayList<Double>(0);
+          ArrayList<Double> yPoints = new ArrayList<Double>(0);
 
-          NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
-          for(int k=0; k<n.getLength();k++){
+          for(int j=0; j<signalGroup.size();j++){
 
-            // THIS IS NOT SETUP FOR ARBITRARY POINT OFFSETS
-            if(n.getBorderPoint(k).overlaps(border)){
-              redPoints.add( n.getNormalisedProfilePositions()[k] );
-              double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
-              yPoints.add(yPosition);
+            NucleusBorderPoint border = signalGroup.get(j).getClosestBorderPoint();
+            for(int k=0; k<n.getLength();k++){
+
+              // THIS IS NOT SETUP FOR ARBITRARY POINT OFFSETS
+              if(n.getBorderPoint(k).overlaps(border)){
+                xPoints.add( n.getNormalisedProfilePositions()[k] );
+                double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( signalGroup.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
+                yPoints.add(yPosition);
+              }
             }
           }
+          plot.setColor(colour);
+          plot.setLineWidth(2);
+          plot.addPoints(xPoints, yPoints, Plot.DOT);
         }
-        plot.setColor(Color.RED);
-        plot.setLineWidth(2);
-        plot.addPoints(redPoints, yPoints, Plot.DOT);
+        signalCount++;
       }
     }
   }
@@ -1262,7 +1268,7 @@ public class NucleusCollection {
       Plot  rawPlot = getPlot(pointType, "raw" );
 
       exportProfilePlot(normPlot, "plot"+pointType+"Norm");
-      exportProfilePlot(normPlot, "plot"+pointType+"Raw");
+      exportProfilePlot(rawPlot , "plot"+pointType+"Raw");
     }  
   }
 }

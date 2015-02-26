@@ -60,15 +60,6 @@ public class AsymmetricNucleusCollection
 	extends no.collections.NucleusCollection
 {
 
-	// Chart drawing parameters
-  // public static final int CHART_WINDOW_HEIGHT     = 400;
-  // public static final int CHART_WINDOW_WIDTH      = 500;
-  // public static final int CHART_TAIL_BOX_Y_MIN    = 325;
-  // public static final int CHART_TAIL_BOX_Y_MID    = 340;
-  // public static final int CHART_TAIL_BOX_Y_MAX    = 355;
-  // public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-  // public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
-
   // failure  codes
   public static final int FAILURE_HEAD = 128;
   public static final int FAILURE_TAIL = 256;
@@ -83,16 +74,6 @@ public class AsymmetricNucleusCollection
 
   private Map<Double, Collection<Double>> normalisedProfilesFromHead = new HashMap<Double, Collection<Double>>();
   private Map<Double, Collection<Double>> normalisedProfilesFromTail = new HashMap<Double, Collection<Double>>();
-
-  // store indexes of the head and tail in the median profile
-	// private int medianProfileTailIndex;
- //  private int medianProfileHeadIndex;
-
-  // plots to draw the profiles
-  // private Plot  rawProfileFromHeadPlot;
-  // private Plot normProfileFromHeadPlot;
-  // private Plot  rawProfileFromTailPlot;
-  // private Plot normProfileFromTailPlot;
 
   public AsymmetricNucleusCollection(File folder, String type){
   		super(folder, type);
@@ -126,29 +107,6 @@ public class AsymmetricNucleusCollection
     General getters
     -----------------------
   */
-  // public String getLogMedianFromHeadFile(){
-  //   return this.logMedianFromTailFile;
-  // }
-
-  // public String getLogMedianFromTailFile(){
-  //   return this.logMedianFromTailFile;
-  // }
-
-  // public Plot getRawProfilesFromHeadPlot(){
-  //   return this.rawProfileFromHeadPlot;
-  // }
-
-  // public Plot getRawProfilesFromTailPlot(){
-  //   return this.rawProfileFromTailPlot;
-  // }
-
-  // public Plot getNormProfilesFromHeadPlot(){
-  //   return this.normProfileFromHeadPlot;
-  // }
-
-  // public Plot getNormProfilesFromTailPlot(){
-  //   return this.normProfileFromTailPlot;
-  // }
 
   public boolean isDifferencesCalculated(){
     return this.differencesCalculated;
@@ -158,21 +116,6 @@ public class AsymmetricNucleusCollection
     this.differencesCalculated = b;
   }
 
-  // public double[] getMedianProfileFromHead(){
-  //   return this.normalisedMedianProfileFromHead;
-  // }
-
-  // public double[] getMedianProfileFromTail(){
-  //   return this.normalisedMedianProfileFromTail;
-  // }
-
-  // private Map<Double, Collection<Double>> getNormalisedProfilesFromTail(){
-  //   return this.normalisedProfilesFromTail;
-  // }
-
-  // private Map<Double, Collection<Double>> getNormalisedProfilesFromHead(){
-  //   return this.normalisedProfilesFromHead;
-  // }
 
   /*
     -----------------------
