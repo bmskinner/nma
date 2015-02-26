@@ -64,6 +64,7 @@ public class AsymmetricNucleus
   // Requires a nucleus object to construct from
   public AsymmetricNucleus(Nucleus n){
     this.setRoi(n.getRoi());
+    this.setPosition(n.getPosition());
     this.setSourceImage(n.getSourceImage());
     this.setSourceFile(n.getSourceFile());
     this.setAnnotatedImage(n.getAnnotatedImage());

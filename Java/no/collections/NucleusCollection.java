@@ -116,6 +116,7 @@ public class NucleusCollection {
 
   public void exportStatsFiles(){
     this.exportNuclearStats("logStats");
+    this.exportImagePaths("logImagePaths");
   }
 
   public void annotateAndExportNuclei(){
@@ -206,6 +207,25 @@ public class NucleusCollection {
 
     for(int i=0;i<nucleiCollection.size();i++){
       s[i] = nucleiCollection.get(i).getPath()+"-"+nucleiCollection.get(i).getNucleusNumber();
+    }
+    return s;
+  }
+
+  public String[] getCleanNucleusPaths(){
+    String[] s = new String[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      Nucleus n = nucleiCollection.get(i);
+      s[i] = n.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+n.getNucleusNumber()+".clean.tiff";
+    }
+    return s;
+  }
+
+  public String[] getPositions(){
+    String[] s = new String[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      s[i] = nucleiCollection.get(i).getPosition();
     }
     return s;
   }
@@ -960,6 +980,16 @@ public class NucleusCollection {
     IJ.append(  outLine.toString(), statsFile);
   }
   
+  // this is for the mapping of image to path for 
+  // identifying FISHed nuclei in prefish images
+  public void exportImagePaths(String filename){
+    Map<String, List<String>> stats = new LinkedHashMap<String, List<String>>();
+    String[] sPaths     = this.getCleanNucleusPaths();
+    String[] sPositions = this.getPositions();
+    stats.put("PATH",    Arrays.asList(  sPaths    ));
+    stats.put("POSITION",Arrays.asList(  sPositions));
+    exportStats(stats, filename);
+  }
 
   public void exportNuclearStats(String filename){
   

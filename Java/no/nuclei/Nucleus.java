@@ -78,6 +78,8 @@ public class Nucleus {
   private double feret;       // the maximum diameter
   private double area;        // the nuclear area
 
+  private String position; // the position of the centre of the ROI bounding rectangle in the original image as "x.y"
+
   private AngleProfile angleProfile; // the border points of the nucleus, and associated angles
 
   private XYPoint centreOfMass;
@@ -105,7 +107,7 @@ public class Nucleus {
 
   private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
   
-  public Nucleus (Roi roi, File file, ImagePlus image, int number) { // construct from an roi
+  public Nucleus (Roi roi, File file, ImagePlus image, int number, String position) { // construct from an roi
 
     // assign main features
     this.roi             = roi;
@@ -114,6 +116,7 @@ public class Nucleus {
     this.sourceFile      = file;
     this.nucleusNumber   = number;
     this.nucleusFolder   = new File(this.getDirectory()+File.separator+this.getImageNameWithoutExtension());
+    this.position        = position;
     
     if (!this.nucleusFolder.exists()) {
       try{
@@ -177,6 +180,10 @@ public class Nucleus {
 
   public String getPath(){
     return this.sourceFile.getAbsolutePath();
+  }
+
+  public String getPosition(){
+    return this.position;
   }
 
   public File getSourceFile(){
@@ -344,6 +351,10 @@ public class Nucleus {
     Protected setters for subclasses
     -----------------------
   */
+
+  protected void setPosition(String p){
+    this.position = p;
+  }
 
   protected void setMedianAngle(double d){
     this.medianAngle = d;

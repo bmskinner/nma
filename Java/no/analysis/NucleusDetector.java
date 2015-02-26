@@ -39,6 +39,7 @@ import java.awt.Color;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -303,6 +304,17 @@ public class NucleusDetector {
   */
   private void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, File path){
     
+    // save the position of the roi, for later use
+    double xbase = nucleus.getXBase();
+    double ybase = nucleus.getYBase();
+
+    Rectangle bounds = nucleus.getBounds();
+    double xCentre = xbase+(bounds.getWidth()/2);
+    double yCentre = ybase+(bounds.getHeight()/2);
+    String position = xCentre+"."+yCentre;
+
+    // IJ.log(" X:"+xbase+"  Y:"+ybase);
+
     // make a copy of the nucleus only for saving out and processing
     image.setRoi(nucleus);
     image.copy();
@@ -312,7 +324,7 @@ public class NucleusDetector {
     smallRegion.setRoi(nucleus);
 
     // turn roi into Nucleus for manipulation
-    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, nucleusNumber);
+    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, nucleusNumber, position);
     currentNucleus.setSignalThreshold(this.signalThreshold);
     currentNucleus.setMinSignalSize(this.minSignalSize);
     currentNucleus.setMaxSignalFraction(this.maxSignalFraction);
