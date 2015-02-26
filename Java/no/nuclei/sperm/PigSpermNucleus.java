@@ -175,10 +175,4 @@ public class PigSpermNucleus
 
       return tailPoint;
     }
-
-    public void annotateFeatures(){
-
-      super.annotateFeatures();
-      // scope for other points of interest to be added   
-  }
 }

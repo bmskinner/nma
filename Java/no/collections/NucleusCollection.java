@@ -114,6 +114,10 @@ public class NucleusCollection {
 		this.nucleiCollection.add(r);
 	}
 
+  public void exportStatsFiles(){
+    this.exportNuclearStats("logStats");
+  }
+
   /*
     -----------------------
     Getters for aggregate stats
@@ -352,6 +356,25 @@ public class NucleusCollection {
 
   public int getMedianProfileFeatureIndex(String profile, String indexType){
     return this.medianProfileFeatureIndexes.get(profile).get(indexType);
+  }
+
+  public int[] getPointIndexes(String pointType){
+    int[] d = new int[this.getNucleusCount()];
+
+    for(int i=0;i<this.getNucleusCount();i++){
+      Nucleus n = this.getNucleus(i);
+      d[i] = n.getBorderIndexOfInterest(pointType);
+    }
+    return d;
+  }
+
+  public double[] getPointToPointDistances(String pointTypeA, String pointTypeB){
+    double[] d = new double[this.getNucleusCount()];
+    for(int i=0;i<this.getNucleusCount();i++){
+      Nucleus n = this.getNucleus(i);
+      d[i] = n.getBorderPointOfInterest(pointTypeA).getLengthTo(n.getBorderPointOfInterest(pointTypeB));
+    }
+    return d;
   }
 
   /*
@@ -744,7 +767,6 @@ public class NucleusCollection {
   */
 
   public void annotateAndExportNuclei(){
-    this.exportNuclearStats("logStats");
     this.exportAnnotatedNuclei();
     this.exportCompositeImage("composite");
   }

@@ -215,6 +215,7 @@ public class Mouse_Sperm_Analysis
 
       r.measureProfilePositions();
       r.measureNuclearOrganisation();
+      r.exportStatsFiles();
       r.annotateAndExportNuclei();
 
       // r.refilterNuclei(failedNuclei);
@@ -237,6 +238,7 @@ public class Mouse_Sperm_Analysis
         IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
         IJ.log("    ----------------------------- ");
         p.measureProfilePositions();
+        p.exportStatsFiles();
         p.annotateAndExportNuclei();
         attemptRefoldingConsensusNucleus(p);
       }
@@ -247,20 +249,23 @@ public class Mouse_Sperm_Analysis
 
     try{ 
       RodentSpermNucleus refoldCandidate = (RodentSpermNucleus)collection.getNucleusMostSimilarToMedian();
+      if(refoldCandidate==null){
+        throw new Exception();
+      }
       double[] targetProfile = collection.getMedianTargetCurve(refoldCandidate);
 
       CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
       refolder.refoldCurve();
 
       // orient refolded nucleus to put tail at the bottom
-      refolder.putPointAtBottom(refoldCandidate.getSpermTail());
+      refolder.putPointAtBottom(refoldCandidate.getBorderPointOfInterest("tail"));
 
       // draw signals on the refolded nucleus
       refolder.addSignalsToConsensus(collection);
       refolder.exportImage(collection);
 
     } catch(Exception e){
-      IJ.log("    Unable to refold nucleus: "+e);
+      IJ.log("    Unable to refold nucleus: "+e.getMessage());
     }
 
   }

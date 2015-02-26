@@ -84,6 +84,7 @@ public class Nucleus {
 
   // store points of interest around the border e.g. heads, tails, any other features of note
   private HashMap<String, NucleusBorderPoint> borderPointsOfInterest = new HashMap<String, NucleusBorderPoint>();
+  // private HashMap<String, Integer> borderIndexesOfInterest = new HashMap<String, NucleusBorderPoint>();
 
   private File sourceFile;    // the image from which the nucleus came
   private File nucleusFolder; // the folder to store nucleus information

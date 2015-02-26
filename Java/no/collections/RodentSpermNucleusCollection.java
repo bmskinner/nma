@@ -63,17 +63,11 @@ public class RodentSpermNucleusCollection
   // failure  codes
   public static final int FAILURE_TIP = 512;
 
-	private String logMedianFromTipFile  = "logMediansFromTip"; // output medians
+	// private String logMedianFromTipFile  = "logMediansFromTip"; // output medians
 
-	private double[] normalisedMedianProfileFromTip; // this is an array of 200 angles
+	// private double[] normalisedMedianProfileFromTip; // this is an array of 200 angles
 
-  private Map<Double, Collection<Double>> normalisedProfilesFromTip  = new HashMap<Double, Collection<Double>>();
-
-  private Plot  rawProfileFromTipPlot;
-  private Plot normProfileFromTipPlot;
-
-  private PlotWindow  rawProfileFromTipPlotWindow;
-  private PlotWindow normProfileFromTipPlotWindow;
+  // private Map<Double, Collection<Double>> normalisedProfilesFromTip  = new HashMap<Double, Collection<Double>>();
 
   public RodentSpermNucleusCollection(File folder, String type){
   		super(folder, type);
@@ -105,45 +99,45 @@ public class RodentSpermNucleusCollection
     -----------------------
   */
 
-  public double getMaxRawXFromTips(){
-    double d = 0;
-    for(int i=0;i<this.getNucleusCount();i++){
-      RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
-      if(n.getMaxRawXFromTip() > d){
-        d = n.getMaxRawXFromTip();
-      }
-    }
-    return d;
-  }
+  // public double getMaxRawXFromTips(){
+  //   double d = 0;
+  //   for(int i=0;i<this.getNucleusCount();i++){
+  //     RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+  //     if(n.getMaxRawXFromTip() > d){
+  //       d = n.getMaxRawXFromTip();
+  //     }
+  //   }
+  //   return d;
+  // }
 
-  public double getMinRawXFromTips(){
-    double d = 0;
-    for(int i=0;i<this.getNucleusCount();i++){
-      RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
-      if(n.getMaxRawXFromTip() < d){
-        d = n.getMaxRawXFromTip();
-      }
-    }
-    return d;
-  }
+  // public double getMinRawXFromTips(){
+  //   double d = 0;
+  //   for(int i=0;i<this.getNucleusCount();i++){
+  //     RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+  //     if(n.getMaxRawXFromTip() < d){
+  //       d = n.getMaxRawXFromTip();
+  //     }
+  //   }
+  //   return d;
+  // }
 
-  public double[] getHeadToTipDistances(){
-    double[] d = new double[this.getNucleusCount()];
-    for(int i=0;i<this.getNucleusCount();i++){
-      RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
-      d[i] = n.getBorderPointOfInterest("tip").getLengthTo(n.getBorderPointOfInterest("head"));
-    }
-    return d;
-  }
+  // public double[] getHeadToTipDistances(){
+  //   double[] d = new double[this.getNucleusCount()];
+  //   for(int i=0;i<this.getNucleusCount();i++){
+  //     RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+  //     d[i] = n.getBorderPointOfInterest("tip").getLengthTo(n.getBorderPointOfInterest("head"));
+  //   }
+  //   return d;
+  // }
 
-  public double[] getTailToTipDistances(){
-    double[] d = new double[this.getNucleusCount()];
-    for(int i=0;i<this.getNucleusCount();i++){
-      RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
-      d[i] = n.getBorderPointOfInterest("tip").getLengthTo(n.getBorderPointOfInterest("tail"));
-    }
-    return d;
-  }
+  // public double[] getTailToTipDistances(){
+  //   double[] d = new double[this.getNucleusCount()];
+  //   for(int i=0;i<this.getNucleusCount();i++){
+  //     RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+  //     d[i] = n.getBorderPointOfInterest("tip").getLengthTo(n.getBorderPointOfInterest("tail"));
+  //   }
+  //   return d;
+  // }
 
   /*
     -----------------------
@@ -170,9 +164,11 @@ public class RodentSpermNucleusCollection
 		// can't use regular tail detector, because it's based on NucleusBorderPoints
 		// get minima in curve, then find the lowest minima / minima furthest from both ends
 
-		ArrayList<Integer> minima = this.detectLocalMinimaInMedian(this.getNormalisedMedianProfileFromPoint("tip"));
+    double[] medianProfile = this.getNormalisedMedianProfileFromPoint("tip");
 
-		double minDiff = this.getNormalisedMedianProfileFromPoint("tip").length;
+		ArrayList<Integer> minima = this.detectLocalMinimaInMedian(medianProfile);
+
+		double minDiff = medianProfile.length;
 		double minAngle = 180;
 		int tailIndex = 0;
 
@@ -185,10 +181,10 @@ public class RodentSpermNucleusCollection
   		for(int i = 0; i<minima.size();i++){
   			Integer index = (Integer)minima.get(i);
 
-  			int toEnd = this.getNormalisedMedianProfileFromPoint("tip").length - index;
+  			int toEnd = medianProfile.length - index;
   			int diff = Math.abs(index - toEnd);
 
-  			double angle = this.getNormalisedMedianProfileFromPoint("tip")[index];
+  			double angle = medianProfile[index];
   			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
   				minAngle = angle;
   				tailIndex = index;
@@ -218,6 +214,7 @@ public class RodentSpermNucleusCollection
       medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.length )* n.getLength());
       
       int offset = n.getBorderIndexOfInterest("tail") - medianTailIndex;
+      IJ.log("Offset: "+offset);
 
       // n.setOffsetForTail(offset);
 
@@ -271,9 +268,9 @@ public class RodentSpermNucleusCollection
     double[] ferets       = this.getFerets();
     double[] pathLengths  = this.getPathLengths();
     double[] differences  = this.getDifferencesToMedianFromPoint("tail");
-    double[] headToTail   = this.getHeadToTailDistances();
-    double[] headToTip    = this.getHeadToTipDistances();
-    double[] tipToTail    = this.getTailToTipDistances();
+    double[] headToTail   = this.getPointToPointDistances("head", "tail");
+    double[] headToTip    = this.getPointToPointDistances("head", "tip");
+    double[] tipToTail    = this.getPointToPointDistances("tail", "tip");
     String[] paths        = this.getNucleusPaths();
 
     double maxPerim = NuclearOrganisationUtility.getMax(perims); // add column headers

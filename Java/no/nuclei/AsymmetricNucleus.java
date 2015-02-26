@@ -178,28 +178,6 @@ public class AsymmetricNucleus
     this.differenceToMedianProfileFromTail = d;
   }
 
-  // /*
-  //   See if there is a differences to the given median
-  // */
-  // public double calculateDifferenceToMedianProfile(double[] medianProfile){
-
-  //   // the curve needs to be matched to the median 
-  //   // hence the median array needs to be the same curve length
-  //   double[] interpolatedMedian = NucleusCollection.interpolateMedianToLength(this.getLength(), medianProfile);
-
-  //   // for comparisons between sperm, get the difference between the offset curve and the median
-  //   double totalDifference = 0;
-
-  //   for(int j=0; j<this.getLength(); j++){ // for each point round the array
-
-  //     double curveAngle  = this.getBorderPoint(j).getInteriorAngle();
-  //     double medianAngle = interpolatedMedian[j];
-
-  //     totalDifference += Math.abs(curveAngle - medianAngle);
-  //   }
-  //   return totalDifference;
-  // }
-
   /*
     -----------------------
     Annotate features of the nucleus
@@ -292,13 +270,5 @@ public class AsymmetricNucleus
         }
       }
     }
-  }
-
-  /*
-    -----------------------
-    Export data
-    -----------------------
-  */
-
-  
+  }  
 }
