@@ -93,6 +93,10 @@ public class AsymmetricNucleusCollection
   public void exportStatsFiles(){
     super.exportStatsFiles();
     this.exportClusteringProfiles("logClusters");
+
+    double[] normalisedMedian = this.getNormalisedMedianProfileFromPoint("tail");
+    double[] interpolatedMedian = this.interpolateMedianToLength((int)this.getMedianNuclearPerimeter(), normalisedMedian);
+    this.exportMediansOfProfile(interpolatedMedian, "logMediansPerimeterLength");
   }
 
   @Override
@@ -348,7 +352,7 @@ public class AsymmetricNucleusCollection
     // export the profiles for each nucleus
     for(int i=0; i<this.getNucleusCount();i++){
 
-      outLine.append(paths[i]      +"\t"+
+      outLine.append(paths[i]     +"\t"+
                     areas[i]      +"\t"+
                     perims[i]     +"\t"+
                     ferets[i]     +"\t"+

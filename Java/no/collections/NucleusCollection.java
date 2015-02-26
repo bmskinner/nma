@@ -914,6 +914,18 @@ public class NucleusCollection {
     }
   }
 
+  public void exportMediansOfProfile(double[] profile, String filename){
+
+    String logFile = makeGlobalLogFile(filename);
+
+    String outLine = "X_POSITION\tANGLE_MEDIAN\n";
+    
+    for(int i =0;i<profile.length;i++){
+      outLine +=  i+"\t"+profile[i]+"\n";
+    }
+    IJ.append(outLine, logFile); 
+  }
+
   public void exportMediansAndQuartilesOfProfile(ArrayList<Double[]> profile, String filename){
 
     String logFile = makeGlobalLogFile(filename);
