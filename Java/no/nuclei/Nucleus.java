@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
+import java.util.HashMap;
+import no.collections.NucleusCollection;
 import no.utility.*;
 import no.components.*;
 
@@ -70,17 +72,18 @@ public class Nucleus {
   private int nucleusNumber; // the number of the nucleus in the current image
   private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
-  
-
   private double medianAngle; // the median angle from XYPoint[] smoothedArray
   private double perimeter;   // the nuclear perimeter
   private double pathLength;  // the angle path length - measures wibbliness in border
   private double feret;       // the maximum diameter
   private double area;        // the nuclear area
 
-  private AngleProfile angleProfile; // new class to replace smoothedArray
+  private AngleProfile angleProfile; // the border points of the nucleus, and associated angles
 
   private XYPoint centreOfMass;
+
+  // store points of interest around the border e.g. heads, tails, any other features of note
+  private HashMap<String, NucleusBorderPoint> borderPointsOfInterest = new HashMap<String, NucleusBorderPoint>();
 
   private File sourceFile;    // the image from which the nucleus came
   private File nucleusFolder; // the folder to store nucleus information
@@ -97,6 +100,8 @@ public class Nucleus {
   private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
 
   private double[] distanceProfile; // diameter through the CoM for each point
+
+  private Map<String, Double> differencesToMedianProfile = new HashMap<String, Double>(); // store the difference between curves
 
   private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
   
@@ -321,6 +326,19 @@ public class Nucleus {
     }
   }
 
+  public HashMap<String, NucleusBorderPoint> getBorderPointsOfInterest(){
+    return this.borderPointsOfInterest;
+  }
+
+  public NucleusBorderPoint getBorderPointOfInterest(String name){
+    return this.borderPointsOfInterest.get(name);
+  }
+
+  public int getBorderIndexOfInterest(String name){
+    NucleusBorderPoint p = getBorderPointOfInterest(name);
+    return this.getAngleProfile().getIndexOfPoint(p);
+  }
+
   /*
     -----------------------
     Protected setters for subclasses
@@ -411,6 +429,10 @@ public class Nucleus {
     this.signalThreshold = i;
   }
 
+  public void setBorderPointsOfInterest( HashMap<String, NucleusBorderPoint> b){
+    this.borderPointsOfInterest = b;
+  }
+
   /*
     -----------------------
     Get aggregate values
@@ -468,6 +490,10 @@ public class Nucleus {
     return NuclearOrganisationUtility.quartile(distanceProfile, 50);
   }
 
+  public double getDifferenceToMedianProfile(String pointType){
+    return this.differencesToMedianProfile.get(pointType);
+  }
+
   /*
     -----------------------
     Set miscellaneous features
@@ -492,6 +518,15 @@ public class Nucleus {
         prevPoint = thisPoint;
     }
     this.setPathLength(pathLength);
+  }
+
+
+  public void addBorderPointOfInterest(String name, NucleusBorderPoint p){
+    this.borderPointsOfInterest.put(name, p);
+  }
+
+  public void addDifferenceToMedianProfile(String pointType, double value){
+    this.differencesToMedianProfile.put(pointType, value);
   }
 
   /*
@@ -723,6 +758,28 @@ public class Nucleus {
   public double[][] getSignalDistanceMatrix(){
     this.calculateDistancesBetweenSignals();
     return this.distancesBetweenSignals;
+  }
+
+  /*
+    Find the difference to the given median
+  */
+  public double calculateDifferenceToMedianProfile(double[] medianProfile){
+
+    // the curve needs to be matched to the median 
+    // hence the median array needs to be the same curve length
+    double[] interpolatedMedian = NucleusCollection.interpolateMedianToLength(this.getLength(), medianProfile);
+
+    // for comparisons between sperm, get the difference between the offset curve and the median
+    double totalDifference = 0;
+
+    for(int j=0; j<this.getLength(); j++){ // for each point round the array
+
+      double curveAngle  = this.getBorderPoint(j).getInteriorAngle();
+      double medianAngle = interpolatedMedian[j];
+
+      totalDifference += Math.abs(curveAngle - medianAngle);
+    }
+    return totalDifference;
   }
 
   private void calculateDistancesBetweenSignals(){

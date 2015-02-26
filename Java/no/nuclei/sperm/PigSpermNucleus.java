@@ -82,14 +82,16 @@ public class PigSpermNucleus
       // this.setTailIndex(consensusTailIndex);
       // this.setInitialConsensusTail(consensusTail);
 
-      this.setSpermTail(tailPoint3);
-      int tailIndex = this.getAngleProfile().getIndexOfPoint(this.getSpermTail());
+      // this.setSpermTail(tailPoint3);
+      addBorderPointOfInterest("tail", tailPoint3);
+
+      int tailIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("tail"));
       this.getAngleProfile().moveIndexToArrayStart(tailIndex);
-      tailIndex = this.getAngleProfile().getIndexOfPoint(this.getSpermTail());
+      tailIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("tail"));
        this.setTailIndex(tailIndex);
 
-      this.setSpermHead(this.findOppositeBorder(this.getSpermTail()));
-      int headIndex = this.getAngleProfile().getIndexOfPoint(this.getHead());
+      addBorderPointOfInterest("head", this.findOppositeBorder(this.getBorderPointOfInterest("tail")));
+      int headIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("head"));
       this.setHeadIndex(headIndex);
     }
 

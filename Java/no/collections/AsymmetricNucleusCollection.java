@@ -61,13 +61,13 @@ public class AsymmetricNucleusCollection
 {
 
 	// Chart drawing parameters
-  public static final int CHART_WINDOW_HEIGHT     = 400;
-  public static final int CHART_WINDOW_WIDTH      = 500;
-  public static final int CHART_TAIL_BOX_Y_MIN    = 325;
-  public static final int CHART_TAIL_BOX_Y_MID    = 340;
-  public static final int CHART_TAIL_BOX_Y_MAX    = 355;
-  public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-  public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
+  // public static final int CHART_WINDOW_HEIGHT     = 400;
+  // public static final int CHART_WINDOW_WIDTH      = 500;
+  // public static final int CHART_TAIL_BOX_Y_MIN    = 325;
+  // public static final int CHART_TAIL_BOX_Y_MID    = 340;
+  // public static final int CHART_TAIL_BOX_Y_MAX    = 355;
+  // public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
+  // public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
 
   // failure  codes
   public static final int FAILURE_HEAD = 128;
@@ -85,8 +85,8 @@ public class AsymmetricNucleusCollection
   private Map<Double, Collection<Double>> normalisedProfilesFromTail = new HashMap<Double, Collection<Double>>();
 
   // store indexes of the head and tail in the median profile
-	private int medianProfileTailIndex;
-  private int medianProfileHeadIndex;
+	// private int medianProfileTailIndex;
+ //  private int medianProfileHeadIndex;
 
   // plots to draw the profiles
   private Plot  rawProfileFromHeadPlot;
@@ -94,23 +94,19 @@ public class AsymmetricNucleusCollection
   private Plot  rawProfileFromTailPlot;
   private Plot normProfileFromTailPlot;
 
-  // plot windows to display the profiles
-  private PlotWindow  rawProfileFromHeadPlotWindow;
-  private PlotWindow normProfileFromHeadPlotWindow;
-  private PlotWindow  rawProfileFromTailPlotWindow;
-  private PlotWindow normProfileFromTailPlotWindow;
-
   public AsymmetricNucleusCollection(File folder, String type){
   		super(folder, type);
   }
 
   public void measureProfilePositions(){
 
-    this.createProfileAggregateFromTail();
-    this.createProfileAggregateFromHead();
+    // this.createProfileAggregateFromTail();
+    // this.createProfileAggregateFromHead();
+    this.createProfileAggregates();
     this.drawProfilePlots();
-    this.drawNormalisedMedianLineFromTail();
-    this.drawNormalisedMedianLineFromHead();
+    // this.drawNormalisedMedianLineFromTail();
+    // this.drawNormalisedMedianLineFromHead();
+    this.drawNormalisedMedianLines();
     this.calculateDifferencesToMedianProfiles();
     this.exportProfilePlots();
   }
@@ -154,29 +150,29 @@ public class AsymmetricNucleusCollection
     return this.normProfileFromTailPlot;
   }
 
-  public PlotWindow getRawProfilesFromHeadPlotWindow(){
-    return this.rawProfileFromHeadPlotWindow;
-  }
+  // public PlotWindow getRawProfilesFromHeadPlotWindow(){
+  //   return this.rawProfileFromHeadPlotWindow;
+  // }
 
-  public PlotWindow getRawProfilesFromTailPlotWindow(){
-    return this.rawProfileFromTailPlotWindow;
-  }
+  // public PlotWindow getRawProfilesFromTailPlotWindow(){
+  //   return this.rawProfileFromTailPlotWindow;
+  // }
 
-  public PlotWindow getNormProfilesFromHeadPlotWindow(){
-    return this.normProfileFromHeadPlotWindow;
-  }
+  // public PlotWindow getNormProfilesFromHeadPlotWindow(){
+  //   return this.normProfileFromHeadPlotWindow;
+  // }
 
-  public PlotWindow getNormProfilesFromTailPlotWindow(){
-    return this.normProfileFromTailPlotWindow;
-  }
+  // public PlotWindow getNormProfilesFromTailPlotWindow(){
+  //   return this.normProfileFromTailPlotWindow;
+  // }
 
-  public int getMedianProfileTailIndex(){
-    return this.medianProfileTailIndex;
-  }
+  // public int getMedianProfileTailIndex(){
+  //   return this.medianProfileTailIndex;
+  // }
 
-  public int getMedianProfileHeadIndex(){
-    return this.medianProfileHeadIndex;
-  }
+  // public int getMedianProfileHeadIndex(){
+  //   return this.medianProfileHeadIndex;
+  // }
 
   public boolean isDifferencesCalculated(){
     return this.differencesCalculated;
@@ -257,34 +253,34 @@ public class AsymmetricNucleusCollection
     return n;
   }
 
-  public double[] getDifferencesToMedianFromTail(){
-    double[] d = new double[this.getNucleusCount()];
+  // public double[] getDifferencesToMedianFromTail(){
+  //   double[] d = new double[this.getNucleusCount()];
 
-    for(int i=0;i<this.getNucleusCount();i++){
+  //   for(int i=0;i<this.getNucleusCount();i++){
 
-      AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
-      d[i] = n.getDifferenceToMedianProfileFromTail();
-    }
-    return d;
-  }
+  //     AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
+  //     d[i] = n.getDifferenceToMedianProfileFromTail();
+  //   }
+  //   return d;
+  // }
 
-  public double[] getDifferencesToMedianFromHead(){
-    double[] d = new double[this.getNucleusCount()];
+  // public double[] getDifferencesToMedianFromHead(){
+  //   double[] d = new double[this.getNucleusCount()];
 
-    for(int i=0;i<this.getNucleusCount();i++){
+  //   for(int i=0;i<this.getNucleusCount();i++){
 
-      AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
-      d[i] = n.getDifferenceToMedianProfileFromHead();
-    }
-    return d;
-  }
+  //     AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
+  //     d[i] = n.getDifferenceToMedianProfileFromHead();
+  //   }
+  //   return d;
+  // }
 
   /*
 		Interpolate the median profile to match the length of the most-median nucleus
 		Store the angle profile as a double[] to feed into the curve refolder
   */
 	public double[] getMedianTargetCurve(Nucleus n){
-		double[] targetMedianCurve = interpolateMedianToLength(n.getLength(), this.getMedianProfileFromTail());
+		double[] targetMedianCurve = interpolateMedianToLength(n.getLength(), this.getNormalisedMedianProfileFromPoint("tail"));
 		return targetMedianCurve;
 	}	
 
@@ -292,7 +288,7 @@ public class AsymmetricNucleusCollection
     double[] d = new double[this.getNucleusCount()];
     for(int i=0;i<this.getNucleusCount();i++){
       AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
-      d[i] = n.getHead().getLengthTo(n.getTail());
+      d[i] = n.getBorderPointOfInterest("head").getLengthTo(n.getBorderPointOfInterest("tail"));
     }
     return d;
   }
@@ -303,21 +299,21 @@ public class AsymmetricNucleusCollection
     -----------------------
   */
 
-  public void setNormalisedMedianProfileFromHead(double[] d){
-		this.normalisedMedianProfileFromHead = d;
-	}
+ //  public void setNormalisedMedianProfileFromHead(double[] d){
+	// 	this.normalisedMedianProfileFromHead = d;
+	// }
 
-  public void setNormalisedMedianProfileFromTail(double[] d){
-    this.normalisedMedianProfileFromTail = d;
-  }
+ //  public void setNormalisedMedianProfileFromTail(double[] d){
+ //    this.normalisedMedianProfileFromTail = d;
+ //  }
 
-  public void setMedianProfileTailIndex(int i){
-    this.medianProfileTailIndex = i;
-  }
+  // public void setMedianProfileTailIndex(int i){
+  //   this.medianProfileTailIndex = i;
+  // }
 
-  public void setMedianProfileHeadIndex(int i){
-    this.medianProfileHeadIndex = i;
-  }
+  // public void setMedianProfileHeadIndex(int i){
+  //   this.medianProfileHeadIndex = i;
+  // }
 
   /*
     -----------------------
@@ -336,49 +332,49 @@ public class AsymmetricNucleusCollection
     -----------------------
   */
 
-  public void createProfileAggregateFromHead(){
+  // public void createProfileAggregateFromHead(){
 
-  	for(int i=0;i<this.getNucleusCount();i++){
+  // 	for(int i=0;i<this.getNucleusCount();i++){
 
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+  //     AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
 
-      double[] xvalues = n.getNormalisedProfilePositions();
-      double[] yvalues = n.getAngleProfile().getInteriorAngles(n.getHeadIndex());
+  //     double[] xvalues = n.getNormalisedProfilePositions();
+  //     double[] yvalues = n.getAngleProfile().getInteriorAngles(n.getHeadIndex());
 
-	  	updateProfileAggregate(xvalues, yvalues, this.getNormalisedProfilesFromHead()); 
-	  }
-  }
+	 //  	updateProfileAggregate(xvalues, yvalues, this.getNormalisedProfilesFromHead()); 
+	 //  }
+  // }
 
-  public void createProfileAggregateFromTail(){
+  // public void createProfileAggregateFromTail(){
 
-  	for(int i=0;i<this.getNucleusCount();i++){
+  // 	for(int i=0;i<this.getNucleusCount();i++){
 
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+  //     AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
 
-	  	double[] xvalues = n.getNormalisedProfilePositions();
-      // get the angles starting from the tail index
-      double[] yvalues = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
+	 //  	double[] xvalues = n.getNormalisedProfilePositions();
+  //     // get the angles starting from the tail index
+  //     double[] yvalues = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
 
-	  	// double[] yvalues = n.getNormalisedYPositionsFromTail();
-	  	updateProfileAggregate(xvalues, yvalues, this.getNormalisedProfilesFromTail()); 
-	  }
-  }
+	 //  	// double[] yvalues = n.getNormalisedYPositionsFromTail();
+	 //  	updateProfileAggregate(xvalues, yvalues, this.getNormalisedProfilesFromTail()); 
+	 //  }
+  // }
 
-  // /*
-  //   For each nucleus in the collection see if there is a differences to the given median
-  // */
-  public void calculateDifferencesToMedianProfiles(){
+  // // /*
+  // //   For each nucleus in the collection see if there is a differences to the given median
+  // // */
+  // public void calculateDifferencesToMedianProfiles(){
 
-    for(int i= 0; i<this.getNucleusCount();i++){ // for each nucleus
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+  //   for(int i= 0; i<this.getNucleusCount();i++){ // for each nucleus
+  //     AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
       
-      double differenceFromHead = n.calculateDifferenceToMedianProfile(this.getMedianProfileFromHead());
-      n.setDifferenceToMedianProfileFromHead(differenceFromHead);
+  //     double differenceFromHead = n.calculateDifferenceToMedianProfile(this.getMedianProfileFromHead());
+  //     n.setDifferenceToMedianProfileFromHead(differenceFromHead);
 
-      double differenceFromTail = n.calculateDifferenceToMedianProfile(this.getMedianProfileFromTail());
-      n.setDifferenceToMedianProfileFromTail(differenceFromTail);
-    }
-  }
+  //     double differenceFromTail = n.calculateDifferenceToMedianProfile(this.getMedianProfileFromTail());
+  //     n.setDifferenceToMedianProfileFromTail(differenceFromTail);
+  //   }
+  // }
 	 
   @Override 
   public void measureNuclearOrganisation(){
@@ -387,12 +383,10 @@ public class AsymmetricNucleusCollection
 
       for(int i= 0; i<this.getNucleusCount();i++){
         AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
-         n.calculateSignalAnglesFromPoint(n.getTail());
+         n.calculateSignalAnglesFromPoint(n.getBorderPointOfInterest("tail"));
       }
       this.exportSignalStats();
-      this.addSignalsToProfileChartFromHead();
-      this.addSignalsToProfileChartFromTail();
-
+      this.addSignalsToProfileCharts();
       this.exportProfilePlots();
     }
   }
@@ -449,11 +443,11 @@ public class AsymmetricNucleusCollection
     Map<String, List<String>> stats = super.calculateNuclearStats();
 
     String[] index  = NuclearOrganisationUtility.getStringFromInt(this.getTailIndexes());
-    String[] diff   = NuclearOrganisationUtility.getStringFromDouble(this.getDifferencesToMedianFromTail());
+    // String[] diff   = NuclearOrganisationUtility.getStringFromDouble(this.getDifferencesToMedianFromTail());
     String[] points = NuclearOrganisationUtility.getStringFromDouble(this.getMedianDistanceBetweenPoints());
 
     stats.put("NORM_TAIL_INDEX",                Arrays.asList(index ));
-    stats.put("DIFFERENCE_TO_MEDIAN_PROFILE",   Arrays.asList(diff  ));
+    // stats.put("DIFFERENCE_TO_MEDIAN_PROFILE",   Arrays.asList(diff  ));
     stats.put("MEDIAN_DISTANCE_BETWEEN_POINTS", Arrays.asList(points));
 
     exportStats(stats, filename);
@@ -545,7 +539,7 @@ public class AsymmetricNucleusCollection
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
     double[] pathLengths  = this.getPathLengths();
-    double[] differences  = this.getDifferencesToMedianFromTail();
+    double[] differences  = this.getDifferencesToMedianFromPoint("tail");
     double[] headToTail   = this.getHeadToTailDistances();
     String[] paths        = this.getNucleusPaths();
 
@@ -588,49 +582,49 @@ public class AsymmetricNucleusCollection
     Create the plots that we will be using
     Get the x max and min as needed from aggregate stats
   */
-  public void preparePlots(){
+  // public void preparePlots(){
 
-    this.rawProfileFromHeadPlot = new Plot( "Raw head-indexed plot",
-                                "Position",
-                                "Angle", Plot.Y_GRID | Plot.X_GRID);
-    rawProfileFromHeadPlot.setLimits(0,this.getMaxProfileLength(),-50,360);
-    rawProfileFromHeadPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-    rawProfileFromHeadPlot.setYTicks(true);
-    rawProfileFromHeadPlot.setColor(Color.BLACK);
-    rawProfileFromHeadPlot.drawLine(0, 180, this.getMaxProfileLength(), 180); 
-    rawProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
-
-
-    normProfileFromHeadPlot = new Plot("Normalised head-indexed plot",
-                                "Position",
-                                "Angle", Plot.Y_GRID | Plot.X_GRID);
-    normProfileFromHeadPlot.setLimits(0,100,-50,360);
-    normProfileFromHeadPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-    normProfileFromHeadPlot.setYTicks(true);
-    normProfileFromHeadPlot.setColor(Color.BLACK);
-    normProfileFromHeadPlot.drawLine(0, 180, 100, 180); 
-    normProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
+  //   this.rawProfileFromHeadPlot = new Plot( "Raw head-indexed plot",
+  //                               "Position",
+  //                               "Angle", Plot.Y_GRID | Plot.X_GRID);
+  //   rawProfileFromHeadPlot.setLimits(0,this.getMaxProfileLength(),-50,360);
+  //   rawProfileFromHeadPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+  //   rawProfileFromHeadPlot.setYTicks(true);
+  //   rawProfileFromHeadPlot.setColor(Color.BLACK);
+  //   rawProfileFromHeadPlot.drawLine(0, 180, this.getMaxProfileLength(), 180); 
+  //   rawProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
 
 
-    this.rawProfileFromTailPlot = new Plot( "Raw tail-indexed plot",
-                                "Position",
-                                "Angle", Plot.Y_GRID | Plot.X_GRID);
-    rawProfileFromTailPlot.setLimits( 0, this.getMaxProfileLength(),
-                                -50,360);
-    rawProfileFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-    rawProfileFromTailPlot.setYTicks(true);
-    rawProfileFromTailPlot.setColor(Color.BLACK);
-    rawProfileFromTailPlot.drawLine(0, 180, this.getMaxProfileLength(), 180); 
-    rawProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
+  //   normProfileFromHeadPlot = new Plot("Normalised head-indexed plot",
+  //                               "Position",
+  //                               "Angle", Plot.Y_GRID | Plot.X_GRID);
+  //   normProfileFromHeadPlot.setLimits(0,100,-50,360);
+  //   normProfileFromHeadPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+  //   normProfileFromHeadPlot.setYTicks(true);
+  //   normProfileFromHeadPlot.setColor(Color.BLACK);
+  //   normProfileFromHeadPlot.drawLine(0, 180, 100, 180); 
+  //   normProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
 
-    this.normProfileFromTailPlot = new Plot("Normalised tail-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-    normProfileFromTailPlot.setLimits(0,100,-50,360);
-    normProfileFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-    normProfileFromTailPlot.setYTicks(true);
-    normProfileFromTailPlot.setColor(Color.BLACK);
-    normProfileFromTailPlot.drawLine(0, 180, 100, 180); 
-    normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
-  }
+
+  //   this.rawProfileFromTailPlot = new Plot( "Raw tail-indexed plot",
+  //                               "Position",
+  //                               "Angle", Plot.Y_GRID | Plot.X_GRID);
+  //   rawProfileFromTailPlot.setLimits( 0, this.getMaxProfileLength(),
+  //                               -50,360);
+  //   rawProfileFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+  //   rawProfileFromTailPlot.setYTicks(true);
+  //   rawProfileFromTailPlot.setColor(Color.BLACK);
+  //   rawProfileFromTailPlot.drawLine(0, 180, this.getMaxProfileLength(), 180); 
+  //   rawProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
+
+  //   this.normProfileFromTailPlot = new Plot("Normalised tail-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
+  //   normProfileFromTailPlot.setLimits(0,100,-50,360);
+  //   normProfileFromTailPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+  //   normProfileFromTailPlot.setYTicks(true);
+  //   normProfileFromTailPlot.setColor(Color.BLACK);
+  //   normProfileFromTailPlot.drawLine(0, 180, 100, 180); 
+  //   normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
+  // }
 
   /*
     Create the charts of the profiles of the nuclei within this collecion.
@@ -641,229 +635,232 @@ public class AsymmetricNucleusCollection
       Tail-aligned normalised X
 
   */
-  public void drawProfilePlots(){
+  // public void drawProfilePlots(){
 
-    preparePlots();
+  //   preparePlots();
 
-    for(int i=0;i<this.getNucleusCount();i++){
+  //   for(int i=0;i<this.getNucleusCount();i++){
 
-      AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
+  //     AsymmetricNucleus n = (AsymmetricNucleus) this.getNucleus(i);
       
-      double[] xPointsRaw  = n.getRawProfilePositions();
-      double[] xPointsNorm = n.getNormalisedProfilePositions();
+  //     double[] xPointsRaw  = n.getRawProfilePositions();
+  //     double[] xPointsNorm = n.getNormalisedProfilePositions();
 
-      double[] anglesFromHead = n.getAngleProfile().getInteriorAngles(n.getHeadIndex());
-      double[] anglesFromTail = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
+  //     double[] anglesFromHead = n.getAngleProfile().getInteriorAngles(n.getHeadIndex());
+  //     double[] anglesFromTail = n.getAngleProfile().getInteriorAngles(n.getTailIndex());
 
-      this.rawProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
-      this.rawProfileFromHeadPlot.addPoints(xPointsRaw, anglesFromHead, Plot.LINE);
+  //     this.rawProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
+  //     this.rawProfileFromHeadPlot.addPoints(xPointsRaw, anglesFromHead, Plot.LINE);
 
-      this.normProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
-      this.normProfileFromHeadPlot.addPoints(xPointsNorm, anglesFromHead, Plot.LINE);
+  //     this.normProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
+  //     this.normProfileFromHeadPlot.addPoints(xPointsNorm, anglesFromHead, Plot.LINE);
 
-      this.rawProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
-      this.rawProfileFromTailPlot.addPoints(xPointsRaw, anglesFromTail, Plot.LINE);
+  //     this.rawProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
+  //     this.rawProfileFromTailPlot.addPoints(xPointsRaw, anglesFromTail, Plot.LINE);
 
-      this.normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
-      this.normProfileFromTailPlot.addPoints(xPointsNorm, anglesFromTail, Plot.LINE);
-    }   
-  }
+  //     this.normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
+  //     this.normProfileFromTailPlot.addPoints(xPointsNorm, anglesFromTail, Plot.LINE);
+  //   }   
+  // }
 
 
   /*
 		Draw the median line on the normalised profile
 		chart, aligned to the sperm tip
   */
-  public void drawNormalisedMedianLineFromHead(){
-    // output the final results: calculate median positions
+  // public void drawNormalisedMedianLineFromHead(){
+  //   // output the final results: calculate median positions
+  //   this.drawNormalisedMedianLineFromPoint(this.getHead(), "head", Plot normProfileFromTailPlot);
 
-    ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile( this.getNormalisedProfilesFromHead() );
-    this.exportMediansAndQuartilesOfProfile(medians, this.getLogMedianFromHeadFile());
+    // ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile( this.getNormalisedProfilesFromHead() );
+    // this.exportMediansAndQuartilesOfProfile(medians, this.getLogMedianFromHeadFile());
 
-    double[] xmedians        =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(0) );
-    double[] ymedians        =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(1) );
-    double[] lowQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(2) );
-    double[] uppQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(3) );
-    double[] tenQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(4) );
-    double[] ninetyQuartiles =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(5) );
+    // double[] xmedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(0) );
+    // double[] ymedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) );
+    // double[] lowQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) );
+    // double[] uppQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) );
+    // double[] tenQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(4) );
+    // double[] ninetyQuartiles =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(5) );
 
-    setNormalisedMedianProfileFromHead(ymedians);
+    // setNormalisedMedianProfileFromHead(ymedians);
 
 
-    // get the tail positions with the head offset applied
-    double[] xTails = this.getNormalisedTailIndexesFromHead();
-    double[] yTails = new double[xTails.length];
-    Arrays.fill(yTails, CHART_TAIL_BOX_Y_MID); // all dots at y=300
-    normProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
-    normProfileFromHeadPlot.addPoints(xTails, yTails, Plot.DOT);
+    // // get the tail positions with the head offset applied
+    // double[] xTails = this.getNormalisedTailIndexesFromHead();
+    // double[] yTails = new double[xTails.length];
+    // Arrays.fill(yTails, CHART_TAIL_BOX_Y_MID); // all dots at y=300
+    // normProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
+    // normProfileFromHeadPlot.addPoints(xTails, yTails, Plot.DOT);
 
-    // median tail positions
-    double tailQ50 = NuclearOrganisationUtility.quartile(xTails, 50);
-    double tailQ25 = NuclearOrganisationUtility.quartile(xTails, 25);
-    double tailQ75 = NuclearOrganisationUtility.quartile(xTails, 75);
+    // // median tail positions
+    // double tailQ50 = NuclearOrganisationUtility.quartile(xTails, 50);
+    // double tailQ25 = NuclearOrganisationUtility.quartile(xTails, 25);
+    // double tailQ75 = NuclearOrganisationUtility.quartile(xTails, 75);
 
-    // add the median lines to the chart
-    normProfileFromHeadPlot.setColor(Color.BLACK);
-    normProfileFromHeadPlot.setLineWidth(3);
-    normProfileFromHeadPlot.addPoints(xmedians, ymedians, Plot.LINE);
-    normProfileFromHeadPlot.setColor(Color.DARK_GRAY);
-    normProfileFromHeadPlot.setLineWidth(2);
-    normProfileFromHeadPlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-    normProfileFromHeadPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
+    // // add the median lines to the chart
+    // normProfileFromHeadPlot.setColor(Color.BLACK);
+    // normProfileFromHeadPlot.setLineWidth(3);
+    // normProfileFromHeadPlot.addPoints(xmedians, ymedians, Plot.LINE);
+    // normProfileFromHeadPlot.setColor(Color.DARK_GRAY);
+    // normProfileFromHeadPlot.setLineWidth(2);
+    // normProfileFromHeadPlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+    // normProfileFromHeadPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
 
-    normProfileFromHeadPlot.setColor(Color.DARK_GRAY);
-    normProfileFromHeadPlot.setLineWidth(1);
-    normProfileFromHeadPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
-    normProfileFromHeadPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
-    normProfileFromHeadPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
-    normProfileFromHeadPlot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
-    normProfileFromHeadPlot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
-  }
+    // normProfileFromHeadPlot.setColor(Color.DARK_GRAY);
+    // normProfileFromHeadPlot.setLineWidth(1);
+    // normProfileFromHeadPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
+    // normProfileFromHeadPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
+    // normProfileFromHeadPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
+    // normProfileFromHeadPlot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
+    // normProfileFromHeadPlot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
+  // }
 
   /*
 		Draw the median line on the normalised profile
 		chart, aligned to the sperm tail
   */
-  public void drawNormalisedMedianLineFromTail(){
+  // public void drawNormalisedMedianLineFromTail(){
 
-    ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile( this.getNormalisedProfilesFromTail() );
-    this.exportMediansAndQuartilesOfProfile(medians, this.getLogMedianFromTailFile());
+  //   this.drawNormalisedMedianLineFromPoint(this.getTail(), "tail", Plot normProfileFromTailPlot);
 
-    double[] xmedians        =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(0) );
-    double[] ymedians        =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(1) );
-    double[] lowQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(2) );
-    double[] uppQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(3) );
-    double[] tenQuartiles    =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(4) );
-    double[] ninetyQuartiles =  NuclearOrganisationUtility.getDoubleFromDouble( medians.get(5) );
+  //   // ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile( this.getNormalisedProfilesFromTail() );
+  //   // this.exportMediansAndQuartilesOfProfile(medians, this.getLogMedianFromTailFile());
 
-    setNormalisedMedianProfileFromTail(ymedians);
+  //   // double[] xmedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(0) );
+  //   // double[] ymedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) );
+  //   // double[] lowQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) );
+  //   // double[] uppQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) );
+  //   // double[] tenQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(4) );
+  //   // double[] ninetyQuartiles =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(5) );
 
-    // get the tail positions with the head offset applied
-    double[] xTails = this.getNormalisedHeadIndexesFromTail();
-    double[] yTails = new double[xTails.length];
-    Arrays.fill(yTails, CHART_TAIL_BOX_Y_MID); // all dots at y=300
-    normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
-    normProfileFromTailPlot.addPoints(xTails, yTails, Plot.DOT);
+  //   // setNormalisedMedianProfileFromTail(ymedians);
 
-    // median tail positions
-    double tailQ50 = NuclearOrganisationUtility.quartile(xTails, 50);
-    double tailQ25 = NuclearOrganisationUtility.quartile(xTails, 25);
-    double tailQ75 = NuclearOrganisationUtility.quartile(xTails, 75);
+  //   // // get the tail positions with the head offset applied
+  //   // double[] xTails = this.getNormalisedHeadIndexesFromTail();
+  //   // double[] yTails = new double[xTails.length];
+  //   // Arrays.fill(yTails, CHART_TAIL_BOX_Y_MID); // all dots at y=300
+  //   // normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
+  //   // normProfileFromTailPlot.addPoints(xTails, yTails, Plot.DOT);
 
-    // add the median lines to the chart
-    normProfileFromTailPlot.setColor(Color.BLACK);
-    normProfileFromTailPlot.setLineWidth(3);
-    normProfileFromTailPlot.addPoints(xmedians, ymedians, Plot.LINE);
-    normProfileFromTailPlot.setColor(Color.DARK_GRAY);
-    normProfileFromTailPlot.setLineWidth(2);
-    normProfileFromTailPlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-    normProfileFromTailPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
+  //   // // median tail positions
+  //   // double tailQ50 = NuclearOrganisationUtility.quartile(xTails, 50);
+  //   // double tailQ25 = NuclearOrganisationUtility.quartile(xTails, 25);
+  //   // double tailQ75 = NuclearOrganisationUtility.quartile(xTails, 75);
 
-    normProfileFromTailPlot.setColor(Color.DARK_GRAY);
-    normProfileFromTailPlot.setLineWidth(1);
-    normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
-    normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
-    normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
-    normProfileFromTailPlot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
-    normProfileFromTailPlot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
-  }
+  //   // // add the median lines to the chart
+  //   // normProfileFromTailPlot.setColor(Color.BLACK);
+  //   // normProfileFromTailPlot.setLineWidth(3);
+  //   // normProfileFromTailPlot.addPoints(xmedians, ymedians, Plot.LINE);
+  //   // normProfileFromTailPlot.setColor(Color.DARK_GRAY);
+  //   // normProfileFromTailPlot.setLineWidth(2);
+  //   // normProfileFromTailPlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+  //   // normProfileFromTailPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
 
-  public void addSignalsToProfileChartFromHead(){
-    // PlotWindow normProfileFromTipWindow; normProfileFromHeadPlot
-    // for each signal in each nucleus, find index of point. Draw dot
-    // Add the signals to the tip centred profile plot
+  //   // normProfileFromTailPlot.setColor(Color.DARK_GRAY);
+  //   // normProfileFromTailPlot.setLineWidth(1);
+  //   // normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
+  //   // normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
+  //   // normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
+  //   // normProfileFromTailPlot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
+  //   // normProfileFromTailPlot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
+  // }
 
-    normProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
-    normProfileFromHeadPlot.setLineWidth(1);
-    normProfileFromHeadPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
-    normProfileFromHeadPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
+  // public void addSignalsToProfileChartFromHead(){
+  //   // PlotWindow normProfileFromTipWindow; normProfileFromHeadPlot
+  //   // for each signal in each nucleus, find index of point. Draw dot
+  //   // Add the signals to the tip centred profile plot
 
-    for(int i= 0; i<this.getNucleusCount();i++){
+  //   normProfileFromHeadPlot.setColor(Color.LIGHT_GRAY);
+  //   normProfileFromHeadPlot.setLineWidth(1);
+  //   normProfileFromHeadPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
+  //   normProfileFromHeadPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
 
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+  //   for(int i= 0; i<this.getNucleusCount();i++){
 
-      ArrayList<NuclearSignal> redSignals = n.getRedSignals();
-      if(redSignals.size()>0){
+  //     AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
 
-        ArrayList<Double> redPoints = new ArrayList<Double>(0);
-        ArrayList<Double> yPoints   = new ArrayList<Double>(0);
+  //     ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+  //     if(redSignals.size()>0){
 
-        for(int j=0; j<redSignals.size();j++){
+  //       ArrayList<Double> redPoints = new ArrayList<Double>(0);
+  //       ArrayList<Double> yPoints   = new ArrayList<Double>(0);
 
-          NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
-          for(int k=0; k<n.getLength();k++){
+  //       for(int j=0; j<redSignals.size();j++){
 
-            if(n.getBorderPoint(k).overlaps(border)){
-              redPoints.add( n.getNormalisedProfilePositions()[k] );
-              double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
-              yPoints.add(yPosition);
-            }
-          }
-        }
-        normProfileFromHeadPlot.setColor(Color.RED);
-        normProfileFromHeadPlot.setLineWidth(2);
-        normProfileFromHeadPlot.addPoints(redPoints, yPoints, Plot.DOT);
-      }
-    }
-  }
+  //         NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
+  //         for(int k=0; k<n.getLength();k++){
 
-  public void addSignalsToProfileChartFromTail(){
-  	// Add the signals to the tail centred profile plot
-    normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
-    normProfileFromTailPlot.setLineWidth(1);
-    normProfileFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
-    normProfileFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
+  //           if(n.getBorderPoint(k).overlaps(border)){
+  //             redPoints.add( n.getNormalisedProfilePositions()[k] );
+  //             double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
+  //             yPoints.add(yPosition);
+  //           }
+  //         }
+  //       }
+  //       normProfileFromHeadPlot.setColor(Color.RED);
+  //       normProfileFromHeadPlot.setLineWidth(2);
+  //       normProfileFromHeadPlot.addPoints(redPoints, yPoints, Plot.DOT);
+  //     }
+  //   }
+  // }
 
-    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+  // public void addSignalsToProfileChartFromTail(){
+  // 	// Add the signals to the tail centred profile plot
+  //   normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
+  //   normProfileFromTailPlot.setLineWidth(1);
+  //   normProfileFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
+  //   normProfileFromTailPlot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
 
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+  //   for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 
-      ArrayList<NuclearSignal> redSignals = n.getRedSignals();
-      if(redSignals.size()>0){
+  //     AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
 
-        ArrayList<Double> redPoints = new ArrayList<Double>(0);
-        ArrayList<Double> yPoints   = new ArrayList<Double>(0);
+  //     ArrayList<NuclearSignal> redSignals = n.getRedSignals();
+  //     if(redSignals.size()>0){
 
-        for(int j=0; j<redSignals.size();j++){
+  //       ArrayList<Double> redPoints = new ArrayList<Double>(0);
+  //       ArrayList<Double> yPoints   = new ArrayList<Double>(0);
 
-          NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
-          for(int k=0; k<n.getLength();k++){
+  //       for(int j=0; j<redSignals.size();j++){
 
-            if(n.getBorderPoint(k).overlaps(border)){
-              // IJ.log("Found closest border: "+i+" : "+j);
-              redPoints.add( n.getNormalisedProfilePositions()[k] );
-              double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // make between 220 and 260
-              yPoints.add(yPosition);
-            }
-          }
-        }
-        normProfileFromTailPlot.setColor(Color.RED);
-        normProfileFromTailPlot.setLineWidth(2);
-        normProfileFromTailPlot.addPoints(redPoints, yPoints, Plot.DOT);
-      }
-    }
-  }
+  //         NucleusBorderPoint border = redSignals.get(j).getClosestBorderPoint();
+  //         for(int k=0; k<n.getLength();k++){
 
-  public void exportProfilePlots(){
-    this.exportProfilePlot(rawProfileFromHeadPlot, "plotHeadRaw");
-    this.exportProfilePlot(rawProfileFromTailPlot, "plotTailRaw");
-    this.exportProfilePlot(normProfileFromHeadPlot, "plotHeadNorm");
-    this.exportProfilePlot(normProfileFromTailPlot, "plotTailNorm");
-  }
+  //           if(n.getBorderPoint(k).overlaps(border)){
+  //             // IJ.log("Found closest border: "+i+" : "+j);
+  //             redPoints.add( n.getNormalisedProfilePositions()[k] );
+  //             double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( redSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // make between 220 and 260
+  //             yPoints.add(yPosition);
+  //           }
+  //         }
+  //       }
+  //       normProfileFromTailPlot.setColor(Color.RED);
+  //       normProfileFromTailPlot.setLineWidth(2);
+  //       normProfileFromTailPlot.addPoints(redPoints, yPoints, Plot.DOT);
+  //     }
+  //   }
+  // }
 
-  public void updatePlotWindows(){
-    this.rawProfileFromHeadPlotWindow.drawPlot(rawProfileFromHeadPlot);
-    this.rawProfileFromTailPlotWindow.drawPlot(rawProfileFromTailPlot);
-    this.normProfileFromTailPlotWindow.drawPlot(normProfileFromTailPlot);
-    this.normProfileFromHeadPlotWindow.drawPlot(normProfileFromHeadPlot);
-  }
+  // public void exportProfilePlots(){
+  //   this.exportProfilePlot(rawProfileFromHeadPlot, "plotHeadRaw");
+  //   this.exportProfilePlot(rawProfileFromTailPlot, "plotTailRaw");
+  //   this.exportProfilePlot(normProfileFromHeadPlot, "plotHeadNorm");
+  //   this.exportProfilePlot(normProfileFromTailPlot, "plotTailNorm");
+  // }
 
-  public void showPlotWindows(){
-    this.rawProfileFromHeadPlotWindow.draw();
-    this.rawProfileFromTailPlotWindow.draw();
-    this.normProfileFromTailPlotWindow.draw();
-    this.normProfileFromHeadPlotWindow.draw();
-  }
+  // public void updatePlotWindows(){
+  //   this.rawProfileFromHeadPlotWindow.drawPlot(rawProfileFromHeadPlot);
+  //   this.rawProfileFromTailPlotWindow.drawPlot(rawProfileFromTailPlot);
+  //   this.normProfileFromTailPlotWindow.drawPlot(normProfileFromTailPlot);
+  //   this.normProfileFromHeadPlotWindow.drawPlot(normProfileFromHeadPlot);
+  // }
+
+  // public void showPlotWindows(){
+  //   this.rawProfileFromHeadPlotWindow.draw();
+  //   this.rawProfileFromTailPlotWindow.draw();
+  //   this.normProfileFromTailPlotWindow.draw();
+  //   this.normProfileFromHeadPlotWindow.draw();
+  // }
 
   /*
     -----------------------

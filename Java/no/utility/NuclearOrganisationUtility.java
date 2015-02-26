@@ -53,8 +53,16 @@
   /*
     Turn a Double[] into a double[]
   */
-  public static double[] getDoubleFromDouble(Double[] d){
+  public static double[] getdoubleFromDouble(Double[] d){
     double[] results = new double[d.length];
+    for(int i=0;i<d.length;i++){
+      results[i] = d[i];
+    }
+    return results;
+  }
+
+  public static Double[] getDoubleFromdouble(double[] d){
+    Double[] results = new Double[d.length];
     for(int i=0;i<d.length;i++){
       results[i] = d[i];
     }

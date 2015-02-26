@@ -91,6 +91,7 @@ public class AsymmetricNucleus
     this.setPolygon(n.getSmoothedPolygon());
     this.setDistanceProfile(n.getDistanceProfile());
     this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
+    this.setBorderPointsOfInterest(n.getBorderPointsOfInterest());
   }
 
   /*
@@ -177,27 +178,27 @@ public class AsymmetricNucleus
     this.differenceToMedianProfileFromTail = d;
   }
 
-  /*
-    See if there is a differences to the given median
-  */
-  public double calculateDifferenceToMedianProfile(double[] medianProfile){
+  // /*
+  //   See if there is a differences to the given median
+  // */
+  // public double calculateDifferenceToMedianProfile(double[] medianProfile){
 
-    // the curve needs to be matched to the median 
-    // hence the median array needs to be the same curve length
-    double[] interpolatedMedian = NucleusCollection.interpolateMedianToLength(this.getLength(), medianProfile);
+  //   // the curve needs to be matched to the median 
+  //   // hence the median array needs to be the same curve length
+  //   double[] interpolatedMedian = NucleusCollection.interpolateMedianToLength(this.getLength(), medianProfile);
 
-    // for comparisons between sperm, get the difference between the offset curve and the median
-    double totalDifference = 0;
+  //   // for comparisons between sperm, get the difference between the offset curve and the median
+  //   double totalDifference = 0;
 
-    for(int j=0; j<this.getLength(); j++){ // for each point round the array
+  //   for(int j=0; j<this.getLength(); j++){ // for each point round the array
 
-      double curveAngle  = this.getBorderPoint(j).getInteriorAngle();
-      double medianAngle = interpolatedMedian[j];
+  //     double curveAngle  = this.getBorderPoint(j).getInteriorAngle();
+  //     double medianAngle = interpolatedMedian[j];
 
-      totalDifference += Math.abs(curveAngle - medianAngle);
-    }
-    return totalDifference;
-  }
+  //     totalDifference += Math.abs(curveAngle - medianAngle);
+  //   }
+  //   return totalDifference;
+  // }
 
   /*
     -----------------------
@@ -209,16 +210,16 @@ public class AsymmetricNucleus
     ImageProcessor ip = this.getAnnotatedImage().getProcessor();
     ip.setColor(Color.CYAN);
     ip.setLineWidth(3);
-    ip.drawDot( this.tailPoint.getXAsInt(), 
-                this.tailPoint.getYAsInt());
+    ip.drawDot( this.getBorderPointOfInterest("tail").getXAsInt(), 
+                this.getBorderPointOfInterest("tail").getYAsInt());
   }
 
   public void annotateHead(){
     ImageProcessor ip = this.getAnnotatedImage().getProcessor();
     ip.setColor(Color.YELLOW);
     ip.setLineWidth(3);
-    ip.drawDot( this.headPoint.getXAsInt(), 
-                this.headPoint.getYAsInt());
+    ip.drawDot( this.getBorderPointOfInterest("head").getXAsInt(), 
+                this.getBorderPointOfInterest("head").getYAsInt());
   }
 
   // draw the points considered as sperm tails
@@ -233,6 +234,7 @@ public class AsymmetricNucleus
   }
 
   public void annotateFeatures(){
+
     this.annotateTail();
     this.annotateHead();
     this.annotateEstimatedTailPoints();
@@ -250,11 +252,11 @@ public class AsymmetricNucleus
     Returns an angle
   */
   public double findRotationAngle(){
-    XYPoint end = new XYPoint(this.getTail().getXAsInt(),this.getTail().getYAsInt()-50);
+    XYPoint end = new XYPoint(this.getBorderPointOfInterest("tail").getXAsInt(),this.getBorderPointOfInterest("tail").getYAsInt()-50);
 
-    double angle = findAngleBetweenXYPoints(end, this.getTail(), this.getCentreOfMass());
+    double angle = findAngleBetweenXYPoints(end, this.getBorderPointOfInterest("tail"), this.getCentreOfMass());
 
-    if(this.getCentreOfMass().getX() < this.getTail().getX()){
+    if(this.getCentreOfMass().getX() < this.getBorderPointOfInterest("tail").getX()){
       return angle;
     } else {
       return 0-angle;
@@ -268,7 +270,7 @@ public class AsymmetricNucleus
   */
 
   public void calculateSignalAnglesFromTail(){
-    this.calculateSignalAnglesFromPoint(this.getTail());
+    this.calculateSignalAnglesFromPoint(this.getBorderPointOfInterest("tail"));
   }
 
   public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){

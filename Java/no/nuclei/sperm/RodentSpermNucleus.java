@@ -87,6 +87,7 @@ public class RodentSpermNucleus
     NucleusBorderPoint spermTip = this.getAngleProfile().getPointWithMinimumAngle();
     int tipIndex = this.getAngleProfile().getIndexOfPoint(spermTip);
     this.getAngleProfile().moveIndexToArrayStart(tipIndex);
+    addBorderPointOfInterest("tip", spermTip);
     this.setSpermTip(spermTip);
     this.setTipIndex(0);
 
@@ -131,12 +132,16 @@ public class RodentSpermNucleus
     int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail3);
     NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
     consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
+
     this.setTailIndex(consensusTailIndex);
     this.setInitialConsensusTail(consensusTail);
-    this.setSpermTail(consensusTail);
 
-    this.setHead( this.findOppositeBorder(this.getTail()));
-    this.setHeadIndex(this.getAngleProfile().getIndexOfPoint(this.getHead()));
+    addBorderPointOfInterest("tail", consensusTail);
+    // this.setSpermTail(consensusTail);
+
+    // this.setHead( this.findOppositeBorder(this.getTail()));
+    addBorderPointOfInterest("head", this.findOppositeBorder(this.getBorderPointOfInterest("tail")));
+    this.setHeadIndex(this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("head")));
   }
 
   /*
@@ -423,7 +428,8 @@ public class RodentSpermNucleus
   public void splitNucleusToHeadAndHump(){
 
     int intersectionPointIndex = findIntersectionPointForNuclearSplit();
-    this.intersectionPoint = this.getBorderPoint( intersectionPointIndex );
+    // this.intersectionPoint = this.getBorderPoint( intersectionPointIndex );
+    this.addBorderPointOfInterest("intersectionPoint", this.getBorderPoint( intersectionPointIndex ));
 
     // get an array of points from tip to tail
     ArrayList<NucleusBorderPoint> roi1 = new ArrayList<NucleusBorderPoint>(0);
@@ -442,7 +448,7 @@ public class RodentSpermNucleus
       if(currentIndex==intersectionPointIndex && !changeRoi){ // until we hit the intersection point. Then, close the polygon of roi1 back to the tip. Switch to roi2
         roi1.add(p);
         roi1.add(this.getSpermTail());
-        roi2.add(this.intersectionPoint);
+        roi2.add(this.getBorderPointOfInterest("intersectionPoint"));
         changeRoi = true;
       }
       if(currentIndex != intersectionPointIndex && currentIndex != this.getTailIndex() && changeRoi){   // continue with roi2, adjusting the index numbering as needed
@@ -450,7 +456,7 @@ public class RodentSpermNucleus
       }
 
       if(currentIndex==this.getTailIndex() && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
-        roi2.add(this.intersectionPoint);
+        roi2.add(this.getBorderPointOfInterest("intersectionPoint"));
       }
 
     }
@@ -549,21 +555,21 @@ public class RodentSpermNucleus
     //draw the sperm tip 
     ip.setLineWidth(5);
     ip.setColor(Color.YELLOW);
-    ip.drawDot(this.getSpermTip().getXAsInt(), this.getSpermTip().getYAsInt());
+    ip.drawDot( this.getBorderPointOfInterest("tip").getXAsInt(), 
+                this.getBorderPointOfInterest("tip").getYAsInt());
+
 
     this.annotateEstimatedTailPoints();
     this.annotateTail();
 
-    // Draw the original consensus tail
-    // ip.setLineWidth(5);
-    // ip.setColor(Color.CYAN);
-    // ip.drawDot(this.getInitialConsensusTail().getXAsInt(), this.getInitialConsensusTail().getYAsInt());
-
     // line from tail to intsersection point; should pass through CoM   
-    if(this.intersectionPoint!=null){ // handle failed nuclei in which this analysis was not performed
+    if(this.getBorderPointOfInterest("intersectionPoint")!=null){ // handle failed nuclei in which this analysis was not performed
       ip.setLineWidth(1);
       ip.setColor(Color.YELLOW);
-      ip.drawLine(this.getSpermTail().getXAsInt(), this.getSpermTail().getYAsInt(), this.intersectionPoint.getXAsInt(), this.intersectionPoint.getYAsInt());
+      ip.drawLine(this.getBorderPointOfInterest("tail").getXAsInt(),
+                  this.getBorderPointOfInterest("tail").getYAsInt(), 
+                  this.getBorderPointOfInterest("intersectionPoint").getXAsInt(), 
+                  this.getBorderPointOfInterest("intersectionPoint").getYAsInt());
     }
   }
 }
