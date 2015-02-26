@@ -216,7 +216,7 @@ public class NucleusCollection {
 
     for(int i=0;i<nucleiCollection.size();i++){
       Nucleus n = nucleiCollection.get(i);
-      s[i] = n.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+n.getNucleusNumber()+".clean.tiff";
+      s[i] = n.getPath();
     }
     return s;
   }

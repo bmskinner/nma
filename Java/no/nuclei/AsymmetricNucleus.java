@@ -68,6 +68,7 @@ public class AsymmetricNucleus
     this.setSourceImage(n.getSourceImage());
     this.setSourceFile(n.getSourceFile());
     this.setAnnotatedImage(n.getAnnotatedImage());
+    this.setEnlargedImage(n.getEnlargedImage());
     this.setNucleusNumber(n.getNucleusNumber());
     this.setNucleusFolder(n.getNucleusFolder());
     this.setPerimeter(n.getPerimeter());

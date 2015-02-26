@@ -27,6 +27,7 @@ import ij.plugin.ChannelSplitter;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
+import ij.plugin.RoiEnlarger;
 import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
 import ij.process.FloatProcessor;
@@ -311,11 +312,16 @@ public class NucleusDetector {
     Rectangle bounds = nucleus.getBounds();
     double xCentre = xbase+(bounds.getWidth()/2);
     double yCentre = ybase+(bounds.getHeight()/2);
-    String position = xCentre+"."+yCentre;
+    String position = xCentre+"-"+yCentre;
 
-    // IJ.log(" X:"+xbase+"  Y:"+ybase);
+    // Enlarge the ROI, so we can do nucleus detection on the resulting original images
+    RoiEnlarger enlarger = new RoiEnlarger();
+    Roi enlargedRoi = enlarger.enlarge(nucleus, 20);
 
     // make a copy of the nucleus only for saving out and processing
+    image.setRoi(enlargedRoi);
+    image.copy();
+    ImagePlus largeRegion = ImagePlus.getClipboard();
     image.setRoi(nucleus);
     image.copy();
     ImagePlus smallRegion = ImagePlus.getClipboard();
@@ -324,7 +330,7 @@ public class NucleusDetector {
     smallRegion.setRoi(nucleus);
 
     // turn roi into Nucleus for manipulation
-    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, nucleusNumber, position);
+    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
     currentNucleus.setSignalThreshold(this.signalThreshold);
     currentNucleus.setMinSignalSize(this.minSignalSize);
     currentNucleus.setMaxSignalFraction(this.maxSignalFraction);

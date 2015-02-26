@@ -95,6 +95,7 @@ public class Nucleus {
 
   private ImagePlus sourceImage;    // a copy of the input nucleus. Not to be altered
   private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
+  private ImagePlus enlargedImage; // a copy of the input nucleus for use in later reanalyses that need a particle detector
 
   private ArrayList<NuclearSignal> redSignals    = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
   private ArrayList<NuclearSignal> greenSignals  = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
@@ -107,12 +108,13 @@ public class Nucleus {
 
   private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
   
-  public Nucleus (Roi roi, File file, ImagePlus image, int number, String position) { // construct from an roi
+  public Nucleus (Roi roi, File file, ImagePlus image, ImagePlus enlarged, int number, String position) { // construct from an roi
 
     // assign main features
     this.roi             = roi;
     this.sourceImage     = image;
     this.annotatedImage  = image; // NEEDS TO BE A COPY
+    this.enlargedImage   = enlarged;
     this.sourceFile      = file;
     this.nucleusNumber   = number;
     this.nucleusFolder   = new File(this.getDirectory()+File.separator+this.getImageNameWithoutExtension());
@@ -130,8 +132,11 @@ public class Nucleus {
     try{
       String outPath = this.getOriginalImagePath();
       IJ.saveAsTiff(this.sourceImage, outPath);
+
+      outPath = this.getEnlargedImagePath();
+      IJ.saveAsTiff(this.enlargedImage, outPath);
      } catch(Exception e){
-        IJ.log("Error saving original image: "+e);
+        IJ.log("Error saving original images: "+e);
      }
 
     this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
@@ -202,6 +207,10 @@ public class Nucleus {
     return this.annotatedImage;
   }
 
+  public ImagePlus getEnlargedImage(){
+    return this.enlargedImage;
+  }
+
   public String getImageName(){
     return this.sourceFile.getName();
   }
@@ -221,6 +230,15 @@ public class Nucleus {
                       this.IMAGE_PREFIX+
                       this.getNucleusNumber()+
                       ".original.tiff";
+    return outPath;
+  }
+
+  public String getEnlargedImagePath(){
+    String outPath = this.nucleusFolder.getAbsolutePath()+
+                      File.separator+
+                      this.IMAGE_PREFIX+
+                      this.getNucleusNumber()+
+                      ".enlarged.tiff";
     return outPath;
   }
 
@@ -414,6 +432,10 @@ public class Nucleus {
 
   protected void setAnnotatedImage(ImagePlus d){
     this.annotatedImage = d;
+  }
+
+  protected void setEnlargedImage(ImagePlus d){
+    this.enlargedImage = d;
   }
 
   protected void setNucleusNumber(int d){
