@@ -67,13 +67,6 @@ public class SpermNucleus
     -----------------------
   */
 
-  // public NucleusBorderPoint getSpermHead(){
-  // 	return this.getHead();
-  // }
-
-  // public NucleusBorderPoint getSpermTail(){
-  // 	return this.getTail();
-  // }
 
   /*
     -----------------------
@@ -81,13 +74,6 @@ public class SpermNucleus
     -----------------------
   */
 
-  // public void setSpermHead(NucleusBorderPoint p){
-  //   this.setHead(p);
-  // }
-
-  // public void setSpermTail(NucleusBorderPoint p){
-  //   this.setTail(p);
-  // }
 
   /*
     -----------------------
