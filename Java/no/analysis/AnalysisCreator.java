@@ -42,6 +42,7 @@ public class AnalysisCreator {
   private  double maxSignalFraction = 0.5;
 
   private File folder;
+  private File nucleiToFind;
 
   /*
     -----------------------
@@ -59,9 +60,49 @@ public class AnalysisCreator {
     -----------------------
   */
 
+  /**
+   * Returns a HashMap<File, NucleusCollection> object. This 
+   * contains the nuclei found, keyed to the folder in which
+   * they were found. 
+   *
+   * @return      the nuclei in each folder analysed
+   * @see         NucleusCollection
+   */
+
   public HashMap<File, NucleusCollection> runAnalysis(){
     NucleusDetector detector = new NucleusDetector(this.folder);
 
+    setDetectionParameters(detector);
+    detector.runDetector();
+
+    HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
+
+    IJ.log("Imported folder(s)");
+    return folderCollection;
+  }
+
+  /**
+   * Returns a HashMap<File, NucleusCollection> object. This 
+   * contains the nuclei found, keyed to the folder in which
+   * they were found. It filters the nuclei based on whether they
+   * are present in a list of previously captured images.
+   *
+   * @param  nucleiToFind  a File containing the image names and nuclear coordinates
+   * @return      the nuclei in each folder analysed
+   * @see         NucleusCollection
+   */
+  public HashMap<File, NucleusCollection> runReAnalysis(File nucleiToFind){
+    NucleusRefinder detector = new NucleusRefinder(this.folder, nucleiToFind);
+    setDetectionParameters(detector);
+    detector.runDetector();
+
+    HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
+
+    IJ.log("Imported folder(s)");
+    return folderCollection;
+  }
+
+  private void  setDetectionParameters(NucleusDetector detector){
     detector.setMinNucleusSize(this.getMinNucleusSize()); 
     detector.setMaxNucleusSize(this.getMaxNucleusSize());
     detector.setThreshold(this.getNucleusThreshold());
@@ -71,12 +112,6 @@ public class AnalysisCreator {
     detector.setSignalThreshold(this.getSignalThreshold());
     detector.setMinSignalSize(this.getMinSignalSize());
     detector.setMaxSignalFraction(this.getMaxSignalFraction());
-    detector.runDetector();
-
-    HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
-
-    IJ.log("Imported folder(s)");
-    return folderCollection;
   }
 
   /*
