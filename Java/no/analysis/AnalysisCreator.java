@@ -189,5 +189,4 @@ public class AnalysisCreator {
   public void setMaxSignalFraction(double d){
     this.maxSignalFraction = d;
   }
-
 }

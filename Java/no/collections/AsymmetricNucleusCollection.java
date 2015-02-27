@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
+import no.analysis.Analysable;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.components.*;
@@ -58,6 +59,7 @@ import no.utility.*;
 
 public class AsymmetricNucleusCollection 
 	extends no.collections.NucleusCollection
+  implements no.analysis.Analysable
 {
 
   // failure  codes
