@@ -48,20 +48,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Scanner;
+import no.analysis.*;
 import no.nuclei.*;
 import no.utility.*;
 import no.collections.*;
 import no.components.*;
 
 public class NucleusRefinder
-  extends NucleusDectector{
+  extends no.analysis.NucleusDetector
+{
 
-  // private final static Charset ENCODING = StandardCharsets.UTF_8;  
-
-	// private File folder;
   private File pathList; // the file of paths and coordinates
 
   // a structure to hold the image names, and the extracted nucleus coordinates
@@ -76,15 +74,18 @@ public class NucleusRefinder
     this.pathList = pathList;
 
     // get the image names and coordinates from the pathList
-    parsePathList(this.pathList);
+    try{
+      parsePathList(this.pathList);
+    } catch(IOException e){
+      IJ.log("IOException in NucleusRefinder.parsePathList(): "+e.getMessage());
+    }
 	}
 
 
   public void parsePathList(File file) throws IOException {
-    try (Scanner scanner =  new Scanner(file)){
-      while (scanner.hasNextLine()){
-        processLine(scanner.nextLine());
-      }      
+    Scanner scanner =  new Scanner(file);
+    while (scanner.hasNextLine()){
+      processLine(scanner.nextLine());
     }
   }
 
@@ -92,18 +93,22 @@ public class NucleusRefinder
     //use a second Scanner to parse the content of each line 
     Scanner scanner = new Scanner(line);
     scanner.useDelimiter("\t");
+    String path = "";
+    String position = "";
     if (scanner.hasNext()){
-      String path     = scanner.next();
-      String position = scanner.next();
+      path     = scanner.next();
+      position = scanner.next();
     }
     File imagePath = new File(path);
     String name = imagePath.getName();
 
     Scanner positionScanner = new Scanner(position);
+    double x = 0;
+    double y = 0;
     positionScanner.useDelimiter("-");
     if (positionScanner.hasNext()){
-      double x = double.parseDouble(positionScanner.next());
-      double y = double.parseDouble(positionScanner.next());
+      x = Double.parseDouble(positionScanner.next());
+      y = Double.parseDouble(positionScanner.next());
     }
 
     IJ.log("Found image: "+name+" x:"+x+" y:"+y);
@@ -122,11 +127,11 @@ public class NucleusRefinder
 		from previous runs being analysed.
 	*/
   @Override
-	private void processFolder(File folder){
+	protected void processFolder(File folder){
 
     File[] listOfFiles = folder.listFiles();
     NucleusCollection folderCollection = new NucleusCollection(folder, folder.getName());
-    this.collectionGroup.put(folder, folderCollection);
+    addNucleusCollection(folder, folderCollection);
  
     for (File file : listOfFiles) {
 
@@ -135,13 +140,13 @@ public class NucleusRefinder
 
         String fileName = file.getName();
 
-        for( String fileType : fileTypes){
+        for( String fileType : this.getFileTypes()){
           if( fileName.endsWith(fileType) ){
             ok = true;
           }
         }
 
-        for( String prefix : prefixesToIgnore){
+        for( String prefix : this.getPrefixesToIgnore()){
           if(fileName.startsWith(prefix)){
             ok = false;
           }
@@ -152,7 +157,7 @@ public class NucleusRefinder
           ok = false;
           //check that the image is in the list to be analysed
           for( HashMap<String, XYPoint> hash : nucleiToFind ){
-            if(hash.keySet().get(0).equals(filename)){
+            if(hash.containsKey(fileName)){
               ok = true;
             }
           }
@@ -187,7 +192,7 @@ public class NucleusRefinder
     For each nucleus, perform the analysis step
   */
   @Override
-  private void processImage(ImagePlus image, File path){
+  protected void processImage(ImagePlus image, File path){
 
     IJ.log("File:  "+path.getName());
     RoiManager nucleiInImage = findNucleiInImage(image);
@@ -203,7 +208,7 @@ public class NucleusRefinder
         // if the point is within the roi
         boolean ok = false;
         for( HashMap<String, XYPoint> hash : nucleiToFind ){
-          if(hash.keySet().get(0).equals(filename)){
+          if(hash.containsKey(path.getName())){
             XYPoint p = hash.get(path.getName());
             if(roi.contains(p.getXAsInt(), p.getYAsInt())){
               ok = true;

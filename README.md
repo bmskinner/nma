@@ -91,14 +91,6 @@ morphology comparisons
   FEATURES TO ADD
   ---------------
     Fix bug in signal drawing on tail profile
-    Adaptive thresholding
-    Measure DAPI propotions in each x-degree segment around CoM for normalisation.
-      Relevant measurement code:  getResult("IntDen", 0);
     Alter filters to be more permissive of extreme Yqdel
     Clustering of profiles before median tail fitting and exclusion
-    Add smoothing to consensus nucleus outline
-    Rescale consensus image plot to rotated nucleus dimensions
-    Add signal areas to consensus image
-    Get measure of consistency in tail predictions
-    Better profile orientation detector based on area above 180
     Confirm area of consenus nucleus matches median area, to allow overlay of different genotypes

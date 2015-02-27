@@ -58,7 +58,7 @@ public class NucleusDetector {
   private static final int GREEN_CHANNEL = 1;
   private static final int BLUE_CHANNEL  = 2;
 
-  private static final String IMAGE_PREFIX = "export.";
+  protected static final String IMAGE_PREFIX = "export.";
 
   private static final String[] prefixesToIgnore = { IMAGE_PREFIX, "composite", "plot"};
 
@@ -73,10 +73,10 @@ public class NucleusDetector {
   private int nucleusThreshold = 36;
 
   // counts of nuclei processed
-  private int totalNuclei        = 0;
-  private int nucleiFailedOnTip  = 0;
-  private int nucleiFailedOnTail = 0;
-  private int nucleiFailedOther  = 0; // generic reasons for failure
+  protected int totalNuclei        = 0;
+  protected int nucleiFailedOnTip  = 0;
+  protected int nucleiFailedOnTail = 0;
+  protected int nucleiFailedOther  = 0; // generic reasons for failure
 
   private  int    signalThreshold = 70;
   private  double   minSignalSize = 5;
@@ -113,6 +113,17 @@ public class NucleusDetector {
     } catch(Exception e){
       IJ.log("Error in processing folder: "+e);
     }
+  }
+
+  /*
+    Getters
+  */
+  public String[] getFileTypes(){
+    return this.fileTypes;
+  }
+
+  public String[] getPrefixesToIgnore(){
+    return this.prefixesToIgnore;
   }
 
 	/*
@@ -157,6 +168,11 @@ public class NucleusDetector {
   }
 
 
+  public void addNucleusCollection(File file, NucleusCollection collection){
+    this.collectionGroup.put(file, collection);
+  }
+
+
 
   public HashMap<File, NucleusCollection> getNucleiCollections(){
     // remove any empty collections before returning
@@ -183,7 +199,7 @@ public class NucleusDetector {
 		at later stages of analysis. This prevents exported images
 		from previous runs being analysed.
 	*/
-	private void processFolder(File folder){
+	protected void processFolder(File folder){
 
     File[] listOfFiles = folder.listFiles();
     NucleusCollection folderCollection = new NucleusCollection(folder, folder.getName());
@@ -235,7 +251,7 @@ public class NucleusDetector {
     Detects nuclei within the image.
     For each nucleus, perform the analysis step
   */
-  private void processImage(ImagePlus image, File path){
+  protected void processImage(ImagePlus image, File path){
 
     IJ.log("File:  "+path.getName());
     RoiManager nucleiInImage = findNucleiInImage(image);
@@ -260,7 +276,7 @@ public class NucleusDetector {
     Within a given image, look for nuclei using the particle analyser.
     Return an RoiManager containing the outlines of all potential nuclei
   */
-  private RoiManager findNucleiInImage(ImagePlus image){
+  protected RoiManager findNucleiInImage(ImagePlus image){
 
     RoiManager manager = new RoiManager(true);
 
@@ -303,7 +319,7 @@ public class NucleusDetector {
   	Save the region of the input image containing the nucleus
     Add to collection
   */
-  private void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, File path){
+  protected void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, File path){
     
     // save the position of the roi, for later use
     double xbase = nucleus.getXBase();
