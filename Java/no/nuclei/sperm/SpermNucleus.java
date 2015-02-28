@@ -61,6 +61,10 @@ public class SpermNucleus
   	super(n);
   }
 
+  public SpermNucleus(){
+    
+  }
+
   /*
     -----------------------
     Get sperm nucleus features

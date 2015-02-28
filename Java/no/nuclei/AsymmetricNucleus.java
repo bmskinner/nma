@@ -85,6 +85,10 @@ public class AsymmetricNucleus
     this.setBorderPointsOfInterest(n.getBorderPointsOfInterest());
   }
 
+  public AsymmetricNucleus(){
+    
+  }
+
   /*
     -----------------------
     Get nucleus features

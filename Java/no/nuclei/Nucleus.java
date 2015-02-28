@@ -54,7 +54,9 @@ import no.utility.*;
 import no.components.*;
 
 
-public class Nucleus {
+public class Nucleus 
+  implements no.nuclei.INuclearFunctions
+{
 
   public static final int RED_CHANNEL   = 0;
   public static final int GREEN_CHANNEL = 1;

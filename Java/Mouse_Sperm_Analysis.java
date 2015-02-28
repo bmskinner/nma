@@ -66,6 +66,10 @@ public class Mouse_Sperm_Analysis
 
     HashMap<File, NucleusCollection> folderCollection = analysisCreator.runAnalysis();
 
+    analysisCreator.setNucleusClass(new RodentSpermNucleus());
+    analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(folder, "test"));
+    analysisCreator.assignNucleusTypes();
+
     getPopulations(folderCollection);
     analysePopulations();
 
@@ -76,19 +80,21 @@ public class Mouse_Sperm_Analysis
 
   public void getPopulations(HashMap<File, NucleusCollection> folderCollection){
     Set<File> keys = folderCollection.keySet();
-
+    
     for (File key : keys) {
       NucleusCollection collection = folderCollection.get(key);
+
       RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
       IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
 
       for(int i=0;i<collection.getNucleusCount();i++){
         Nucleus n = collection.getNucleus(i);
+
         RodentSpermNucleus p = new RodentSpermNucleus(n);
         spermNuclei.addNucleus(p);
       }
       this.nuclearPopulations.add(spermNuclei);
-      IJ.log("  Population converted to Rodent Sperm Nuclei");
+      IJ.log("  Population converted to RodentSpermNucleus");
     }
   }
 

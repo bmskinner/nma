@@ -77,6 +77,10 @@ public class RodentSpermNucleus
     this.findPointsAroundBorder();
   }
 
+  // empty object
+  public RodentSpermNucleus(){
+  }
+
   /*
     Identify key points: tip, estimated tail position
   */

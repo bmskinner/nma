@@ -21,6 +21,8 @@ import ij.io.RandomAccessStream;
 import ij.plugin.PlugIn;
 import java.awt.Color;
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import no.nuclei.*;
 import no.analysis.*;
@@ -43,6 +45,16 @@ public class AnalysisCreator {
 
   private File folder;
   private File nucleiToFind;
+
+  private Class nucleusClass;
+  private Class collectionClass;
+
+  // the raw input from nucleus detector
+  private HashMap<File, NucleusCollection> folderCollection;
+
+  private ArrayList<Analysable> nuclearPopulations = new ArrayList<Analysable>(0);
+  private ArrayList<Analysable> failedPopulations  = new ArrayList<Analysable>(0);
+  
 
   /*
     -----------------------
@@ -75,10 +87,13 @@ public class AnalysisCreator {
     setDetectionParameters(detector);
     detector.runDetector();
 
-    HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
+    // HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
+    this.folderCollection = detector.getNucleiCollections();
+
+
 
     IJ.log("Imported folder(s)");
-    return folderCollection;
+    return this.folderCollection;
   }
 
   /**
@@ -189,4 +204,111 @@ public class AnalysisCreator {
   public void setMaxSignalFraction(double d){
     this.maxSignalFraction = d;
   }
+
+  public void setNucleusClass(Nucleus n){
+    this.nucleusClass = n.getClass();
+  }
+
+  public void setNucleusCollectionClass(NucleusCollection n){
+    this.collectionClass = n.getClass();
+  }
+
+  /*
+    Use reflection to assign the correct class to the nuclei and populations
+  */
+  public void assignNucleusTypes(){
+    
+    Set<File> keys = this.folderCollection.keySet();
+
+    try{
+      Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class});
+      Constructor nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
+    
+      for (File key : keys) {
+        NucleusCollection collection = folderCollection.get(key);
+
+        try{
+          Analysable spermNuclei = (Analysable) collectionConstructor.newInstance(key, "complete");
+          
+          // RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
+          IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
+
+          for(int i=0;i<collection.getNucleusCount();i++){
+            Nucleus p = collection.getNucleus(i);
+
+            INuclearFunctions subNucleus  = (INuclearFunctions) nucleusConstructor.newInstance(p);
+
+            // RodentSpermNucleus p = new RodentSpermNucleus(n);
+            spermNuclei.addNucleus(p);
+          }
+          this.nuclearPopulations.add(spermNuclei);
+          IJ.log("  Population converted to "+nucleusClass.getName()+" in "+spermNuclei.getClass().getName());
+        } catch(InstantiationException e){
+          IJ.log("Cannot create collection: "+e.getMessage());
+        } catch(IllegalAccessException e){
+          IJ.log("Cannot access constructor: "+e.getMessage());
+        } catch(InvocationTargetException e){
+          IJ.log("Cannot invoke constructor: "+e.getMessage());
+        }
+      }
+    } catch(NoSuchMethodException e){
+      IJ.log("Cannot find constructor: "+e.getMessage());
+    }
+
+  }
+
+  // public void analysePopulations(){
+  //   IJ.log("Beginning analysis");
+
+  //   for(Analysable r : this.nuclearPopulations){
+
+  //     if(r.getDebugFile().exists()){
+  //       r.getDebugFile().delete();
+  //     }
+
+  //     File folder = r.getFolder();
+  //     IJ.log("  ----------------------------- ");
+  //     IJ.log("  Analysing: "+folder.getName());
+  //     IJ.log("  ----------------------------- ");
+
+  //     Analysable failedNuclei = new RodentSpermNucleusCollection(folder, "failed");
+
+  //     r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
+
+  //     IJ.log("    ----------------------------- ");
+  //     IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
+  //     IJ.log("    ----------------------------- ");
+
+  //     r.measureProfilePositions();
+  //     r.measureNuclearOrganisation();
+  //     r.exportStatsFiles();
+  //     r.annotateAndExportNuclei();
+
+  //     IJ.log("    ----------------------------- ");
+  //     IJ.log("    Refolding nucleus"             );
+  //     IJ.log("    ----------------------------- ");
+
+  //     attemptRefoldingConsensusNucleus(r);
+
+  //     IJ.log("    ----------------------------- ");
+  //     IJ.log("    Exporting failed nuclei"       );
+  //     IJ.log("    ----------------------------- ");
+  //     failedNuclei.annotateAndExportNuclei();
+
+
+  //     ArrayList<Analysable> signalPopulations = dividePopulationBySignals(r);
+      
+  //     for(Analysable p : signalPopulations){
+
+  //       IJ.log("    ----------------------------- ");
+  //       IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
+  //       IJ.log("    ----------------------------- ");
+  //       p.measureProfilePositions();
+  //       p.exportStatsFiles();
+  //       p.annotateAndExportNuclei();
+  //       attemptRefoldingConsensusNucleus(p);
+  //     }
+  //   }
+  // }
+
 }
