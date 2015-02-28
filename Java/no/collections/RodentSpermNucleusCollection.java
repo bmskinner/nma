@@ -136,7 +136,7 @@ public class RodentSpermNucleusCollection
   public void calculateOffsets(){
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-      RodentSpermNucleus n = (RodentSpermNucleus) this.getNucleus(i);
+      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
 
       // the curve needs to be matched to the median 
       // hence the median array needs to be the same curve length
@@ -170,9 +170,9 @@ public class RodentSpermNucleusCollection
     Draw the features of interest on the images of the nuclei created earlier
   */
   public void annotateImagesOfNuclei(){
-  	IJ.log("    Annotating images ("+this.getType()+")...");
+  	IJ.log("    Annotating images...");
   	for(int i=0; i<this.getNucleusCount();i++){
-  		RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
+  		INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
   		n.annotateFeatures();
   	}
   	 IJ.log("    Annotation complete");
@@ -191,7 +191,7 @@ public class RodentSpermNucleusCollection
     StringBuilder outLine = new StringBuilder();
     outLine.append("PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\tTIP_TO_TAIL\tHEAD_TO_TIP\t");
 
-    IJ.log("    Exporting clustering profiles ("+this.getType()+")...");
+    IJ.log("    Exporting clustering profiles...");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
@@ -221,7 +221,7 @@ public class RodentSpermNucleusCollection
                   tipToTail[i]  +"\t"+
                   headToTip[i]  +"\t");
 
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
       double[] profile = n.getAngleProfile().getInteriorAngles(n.getBorderIndexOfInterest("tail"));
       for(int j=0;j<profile.length;j++){
         outLine.append(profile[j]+"\t");

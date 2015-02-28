@@ -257,58 +257,71 @@ public class AnalysisCreator {
 
   }
 
-  // public void analysePopulations(){
-  //   IJ.log("Beginning analysis");
+  public void analysePopulations(){
+    IJ.log("Beginning analysis");
 
-  //   for(Analysable r : this.nuclearPopulations){
+    for(Analysable r : this.nuclearPopulations){
 
-  //     if(r.getDebugFile().exists()){
-  //       r.getDebugFile().delete();
-  //     }
+      if(r.getDebugFile().exists()){
+        r.getDebugFile().delete();
+      }
 
-  //     File folder = r.getFolder();
-  //     IJ.log("  ----------------------------- ");
-  //     IJ.log("  Analysing: "+folder.getName());
-  //     IJ.log("  ----------------------------- ");
+      File folder = r.getFolder();
+      IJ.log("  ----------------------------- ");
+      IJ.log("  Analysing: "+folder.getName());
+      IJ.log("  ----------------------------- ");
 
-  //     Analysable failedNuclei = new RodentSpermNucleusCollection(folder, "failed");
+      try{
 
-  //     r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
+        Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class});
+        Analysable failedNuclei = (Analysable) collectionConstructor.newInstance(folder, "failed");
 
-  //     IJ.log("    ----------------------------- ");
-  //     IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
-  //     IJ.log("    ----------------------------- ");
+        r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
+        IJ.log("    ----------------------------- ");
+        IJ.log("    Exporting failed nuclei"       );
+        IJ.log("    ----------------------------- ");
+        failedNuclei.annotateAndExportNuclei();
 
-  //     r.measureProfilePositions();
-  //     r.measureNuclearOrganisation();
-  //     r.exportStatsFiles();
-  //     r.annotateAndExportNuclei();
+      } catch(InstantiationException e){
+        IJ.log("Cannot create collection: "+e.getMessage());
+      } catch(IllegalAccessException e){
+        IJ.log("Cannot access constructor: "+e.getMessage());
+      } catch(InvocationTargetException e){
+        IJ.log("Cannot invoke constructor: "+e.getMessage());
+      } catch(NoSuchMethodException e){
+        IJ.log("Cannot find constructor: "+e.getMessage());
+      }
 
-  //     IJ.log("    ----------------------------- ");
-  //     IJ.log("    Refolding nucleus"             );
-  //     IJ.log("    ----------------------------- ");
+      IJ.log("    ----------------------------- ");
+      IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
+      IJ.log("    ----------------------------- ");
 
-  //     attemptRefoldingConsensusNucleus(r);
+      r.measureProfilePositions();
+      r.measureNuclearOrganisation();
+      r.exportStatsFiles();
+      r.annotateAndExportNuclei();
 
-  //     IJ.log("    ----------------------------- ");
-  //     IJ.log("    Exporting failed nuclei"       );
-  //     IJ.log("    ----------------------------- ");
-  //     failedNuclei.annotateAndExportNuclei();
+      IJ.log("    ----------------------------- ");
+      IJ.log("    Refolding nucleus"             );
+      IJ.log("    ----------------------------- ");
 
+      // attemptRefoldingConsensusNucleus(r);
 
-  //     ArrayList<Analysable> signalPopulations = dividePopulationBySignals(r);
+    
+
+      // ArrayList<Analysable> signalPopulations = dividePopulationBySignals(r);
       
-  //     for(Analysable p : signalPopulations){
+      // for(Analysable p : signalPopulations){
 
-  //       IJ.log("    ----------------------------- ");
-  //       IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
-  //       IJ.log("    ----------------------------- ");
-  //       p.measureProfilePositions();
-  //       p.exportStatsFiles();
-  //       p.annotateAndExportNuclei();
-  //       attemptRefoldingConsensusNucleus(p);
-  //     }
-  //   }
-  // }
+      //   IJ.log("    ----------------------------- ");
+      //   IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
+      //   IJ.log("    ----------------------------- ");
+      //   p.measureProfilePositions();
+      //   p.exportStatsFiles();
+      //   p.annotateAndExportNuclei();
+      //   attemptRefoldingConsensusNucleus(p);
+      // }
+    }
+  }
 
 }

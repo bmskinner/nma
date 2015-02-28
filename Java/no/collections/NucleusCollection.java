@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 
+import no.analysis.Analysable;
 import no.nuclei.*;
 import no.components.*;
 import no.utility.NuclearOrganisationUtility;
@@ -413,7 +414,7 @@ public class NucleusCollection {
     conjoined nuclei and blobs too small to be nuclei
     Use path length to remove poorly thresholded nuclei
   */
-  public void refilterNuclei(NucleusCollection failedCollection){
+  public void refilterNuclei(Analysable failedCollection){
 
     IJ.log("    Filtering nuclei...");
     double medianArea = this.getMedianNuclearArea();

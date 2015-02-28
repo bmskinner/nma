@@ -69,6 +69,7 @@ public class Mouse_Sperm_Analysis
     analysisCreator.setNucleusClass(new RodentSpermNucleus());
     analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(folder, "test"));
     analysisCreator.assignNucleusTypes();
+    analysisCreator.analysePopulations();
 
     getPopulations(folderCollection);
     analysePopulations();

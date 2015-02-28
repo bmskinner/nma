@@ -131,11 +131,11 @@ public class AsymmetricNucleusCollection
   */
 
   public AsymmetricNucleus getNucleusMostSimilarToMedian(){
-  	AsymmetricNucleus n = (AsymmetricNucleus) this.getNuclei().get(0); // default to the first nucleus
+  	INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
 
   	double difference = 7000;
   	for(int i=0;i<this.getNucleusCount();i++){
-      AsymmetricNucleus p = (AsymmetricNucleus)this.getNucleus(i);
+      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
       if(p.getDifferenceToMedianProfile("tail")<difference){
       	difference = p.getDifferenceToMedianProfile("tail");
       	n = p;
@@ -166,6 +166,9 @@ public class AsymmetricNucleusCollection
     -----------------------
   */
 
+    public void refilterNuclei(Analysable failedCollection){
+      super.refilterNuclei(failedCollection);
+    }
 
 
   /*
@@ -182,8 +185,8 @@ public class AsymmetricNucleusCollection
     if(this.getRedSignalCount()>0 || this.getGreenSignalCount()>0){
 
       for(int i= 0; i<this.getNucleusCount();i++){
-        AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
-         n.calculateSignalAnglesFromPoint(n.getBorderPointOfInterest("tail"));
+        INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+        n.calculateSignalAnglesFromPoint(n.getBorderPointOfInterest("tail"));
       }
       this.exportSignalStats();
       this.addSignalsToProfileCharts();
@@ -201,7 +204,7 @@ public class AsymmetricNucleusCollection
   public void annotateImagesOfNuclei(){
     IJ.log("    Annotating images ("+this.getType()+")...");
     for(int i=0; i<this.getNucleusCount();i++){
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
       n.annotateFeatures();
     }
      IJ.log("    Annotation complete");
@@ -266,7 +269,7 @@ public class AsymmetricNucleusCollection
     if(this.getNucleusCount()==0){
       return;
     }
-    IJ.log("    Creating composite image ("+this.getType()+")...");
+    IJ.log("    Creating composite image...");
     
 
     int totalWidth = 0;
@@ -284,7 +287,7 @@ public class AsymmetricNucleusCollection
 
     for(int i=0; i<this.getNucleusCount();i++){
       
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
       String path = n.getAnnotatedImagePath();
 
       try {
@@ -335,7 +338,7 @@ public class AsymmetricNucleusCollection
     StringBuilder outLine = new StringBuilder();
     outLine.append("PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\t");
 
-    IJ.log("    Exporting clustering profiles ("+this.getType()+")...");
+    IJ.log("    Exporting clustering profiles...");
     double[] areas        = this.getAreas();
     double[] perims       = this.getPerimeters();
     double[] ferets       = this.getFerets();
@@ -362,7 +365,7 @@ public class AsymmetricNucleusCollection
                     differences[i]+"\t"+
                     headToTail[i] +"\t");
 
-      AsymmetricNucleus n = (AsymmetricNucleus)this.getNucleus(i);
+      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
       double[] profile = n.getAngleProfile().getInteriorAngles(n.getBorderIndexOfInterest("tail"));
       for(int j=0;j<profile.length;j++){
         outLine.append(profile[j]+"\t");
