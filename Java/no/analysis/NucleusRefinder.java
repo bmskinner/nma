@@ -5,8 +5,6 @@
   This takes a list of image paths, and nucleus
   coordinates. Trim the path to just the source image name
   Check if there is the point is within a nucleus.
-  Eventually modify the NucleusDectector so we can use it
-  for the detection step
 */  
 package no.analysis;
 
@@ -62,6 +60,9 @@ public class NucleusRefinder
 
   private File pathList; // the file of paths and coordinates
 
+  private int xOffset;
+  private int yOffset;
+
   // a structure to hold the image names, and the extracted nucleus coordinates
   private ArrayList< HashMap<String, XYPoint> > nucleiToFind = new ArrayList< HashMap<String, XYPoint> >();
 
@@ -84,12 +85,25 @@ public class NucleusRefinder
 
   public void parsePathList(File file) throws IOException {
     Scanner scanner =  new Scanner(file);
+    int i=0;
     while (scanner.hasNextLine()){
-      processLine(scanner.nextLine());
+      if(i>0){
+        processLine(scanner.nextLine());
+      }
+      i++;
     }
   }
 
+  public void setXOffset(int i){
+    this.xOffset = i;
+  }
+
+  public void setYOffset(int i){
+    this.yOffset = i;
+  }
+
   protected void processLine(String line){
+    // IJ.log("Processing line: "+line);
     //use a second Scanner to parse the content of each line 
     Scanner scanner = new Scanner(line);
     scanner.useDelimiter("\t");
@@ -98,6 +112,9 @@ public class NucleusRefinder
     if (scanner.hasNext()){
       path     = scanner.next();
       position = scanner.next();
+    }
+    if(position.equals("POSITION")){
+      return;
     }
     File imagePath = new File(path);
     String name = imagePath.getName();
