@@ -13,19 +13,17 @@
 */
 import ij.IJ;
 import ij.ImagePlus;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
 import ij.io.DirectoryChooser;
 import ij.io.Opener;
 import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import no.nuclei.*;
-import no.nuclei.sperm.*;
-import no.analysis.*;
-import no.collections.*;
+
+import no.analysis.AnalysisCreator;
+import no.nuclei.sperm.RodentSpermNucleus;
+import no.collections.RodentSpermNucleusCollection;
 
 public class Mouse_Sperm_Analysis
   extends ImagePlus
@@ -40,9 +38,6 @@ public class Mouse_Sperm_Analysis
 
   private static final double MIN_SIGNAL_SIZE = 50;
 
-  private ArrayList<RodentSpermNucleusCollection> nuclearPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
-  private ArrayList<RodentSpermNucleusCollection> failedPopulations  = new ArrayList<RodentSpermNucleusCollection>(0);
-  
   public void run(String paramString)  {
 
     DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
@@ -56,6 +51,9 @@ public class Mouse_Sperm_Analysis
 
     AnalysisCreator analysisCreator = new AnalysisCreator(folder);
 
+    analysisCreator.setNucleusClass(new RodentSpermNucleus());
+    analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(folder, ""));
+
     analysisCreator.setMinNucleusSize(  MIN_NUCLEAR_SIZE );
     analysisCreator.setMaxNucleusSize(  MAX_NUCLEAR_SIZE );
     analysisCreator.setMaxNucleusSize(  MAX_NUCLEAR_SIZE );
@@ -64,162 +62,12 @@ public class Mouse_Sperm_Analysis
     analysisCreator.setMaxNucleusCirc(  MAX_NUCLEAR_CIRC );
     analysisCreator.setMinSignalSize(   MIN_SIGNAL_SIZE  );
 
-    HashMap<File, NucleusCollection> folderCollection = analysisCreator.runAnalysis();
-
-    analysisCreator.setNucleusClass(new RodentSpermNucleus());
-    analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(folder, "test"));
+    analysisCreator.runAnalysis();
     analysisCreator.assignNucleusTypes();
     analysisCreator.analysePopulations();
-
-    getPopulations(folderCollection);
-    analysePopulations();
 
     IJ.log("----------------------------- ");
     IJ.log("All done!"                     );
     IJ.log("----------------------------- ");
   }  
-
-  public void getPopulations(HashMap<File, NucleusCollection> folderCollection){
-    Set<File> keys = folderCollection.keySet();
-    
-    for (File key : keys) {
-      NucleusCollection collection = folderCollection.get(key);
-
-      RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
-      IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
-
-      for(int i=0;i<collection.getNucleusCount();i++){
-        Nucleus n = collection.getNucleus(i);
-
-        RodentSpermNucleus p = new RodentSpermNucleus(n);
-        spermNuclei.addNucleus(p);
-      }
-      this.nuclearPopulations.add(spermNuclei);
-      IJ.log("  Population converted to RodentSpermNucleus");
-    }
-  }
-
-  public void analysePopulations(){
-    IJ.log("Beginning analysis");
-
-    for(RodentSpermNucleusCollection r : this.nuclearPopulations){
-
-      if(r.getDebugFile().exists()){
-        r.getDebugFile().delete();
-      }
-
-      File folder = r.getFolder();
-      IJ.log("  ----------------------------- ");
-      IJ.log("  Analysing: "+folder.getName());
-      IJ.log("  ----------------------------- ");
-
-      RodentSpermNucleusCollection failedNuclei = new RodentSpermNucleusCollection(folder, "failed");
-
-      r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
-
-      IJ.log("    ----------------------------- ");
-      IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
-      IJ.log("    ----------------------------- ");
-
-      r.measureProfilePositions();
-      r.measureNuclearOrganisation();
-      r.exportStatsFiles();
-      r.annotateAndExportNuclei();
-
-      IJ.log("    ----------------------------- ");
-      IJ.log("    Refolding nucleus"             );
-      IJ.log("    ----------------------------- ");
-
-      attemptRefoldingConsensusNucleus(r);
-
-      IJ.log("    ----------------------------- ");
-      IJ.log("    Exporting failed nuclei"       );
-      IJ.log("    ----------------------------- ");
-      failedNuclei.annotateAndExportNuclei();
-
-
-      ArrayList<RodentSpermNucleusCollection> signalPopulations = dividePopulationBySignals(r);
-      
-      for(RodentSpermNucleusCollection p : signalPopulations){
-
-        IJ.log("    ----------------------------- ");
-        IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
-        IJ.log("    ----------------------------- ");
-        p.measureProfilePositions();
-        p.exportStatsFiles();
-        p.annotateAndExportNuclei();
-        attemptRefoldingConsensusNucleus(p);
-      }
-    }
-  }
-
-  public void attemptRefoldingConsensusNucleus(RodentSpermNucleusCollection collection){
-
-    try{ 
-      RodentSpermNucleus refoldCandidate = (RodentSpermNucleus)collection.getNucleusMostSimilarToMedian();
-      if(refoldCandidate==null){
-        throw new Exception();
-      }
-      double[] targetProfile = collection.getMedianTargetCurve(refoldCandidate);
-
-      CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
-      refolder.refoldCurve();
-
-      // orient refolded nucleus to put tail at the bottom
-      refolder.putPointAtBottom(refoldCandidate.getBorderPointOfInterest("tail"));
-
-      // draw signals on the refolded nucleus
-      refolder.addSignalsToConsensus(collection);
-      refolder.exportImage(collection);
-
-    } catch(Exception e){
-      IJ.log("    Unable to refold nucleus: "+e.getMessage());
-    }
-
-  }
-
-  /*
-    Given a complete collection of nuclei, split it into up to 4 populations;
-      nuclei with red signals, with green signals, without red signals and without green signals
-    Only include the 'without' populations if there is a 'with' population.
-  */
-  public ArrayList<RodentSpermNucleusCollection> dividePopulationBySignals(RodentSpermNucleusCollection r){
-
-    ArrayList<RodentSpermNucleusCollection> signalPopulations = new ArrayList<RodentSpermNucleusCollection>(0);
-
-    ArrayList<Nucleus> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
-    if(redList.size()>0){
-      RodentSpermNucleusCollection redNuclei = new RodentSpermNucleusCollection(r.getFolder(), "red");
-      for(Nucleus n : redList){
-        redNuclei.addNucleus( (RodentSpermNucleus)n );
-      }
-      signalPopulations.add(redNuclei);
-      ArrayList<Nucleus> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
-      if(notRedList.size()>0){
-        RodentSpermNucleusCollection notRedNuclei = new RodentSpermNucleusCollection(r.getFolder(), "not_red");
-        for(Nucleus n : notRedList){
-          notRedNuclei.addNucleus( (RodentSpermNucleus)n );
-        }
-        signalPopulations.add(notRedNuclei);
-      }
-    }
-
-    ArrayList<Nucleus> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
-    if(greenList.size()>0){
-      RodentSpermNucleusCollection greenNuclei = new RodentSpermNucleusCollection(r.getFolder(), "green");
-      for(Nucleus n : greenList){
-        greenNuclei.addNucleus( (RodentSpermNucleus)n );
-      }
-      signalPopulations.add(greenNuclei);
-      ArrayList<Nucleus> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
-      if(notGreenList.size()>0){
-        RodentSpermNucleusCollection notGreenNuclei = new RodentSpermNucleusCollection(r.getFolder(), "not_green");
-        for(Nucleus n : notGreenList){
-          notGreenNuclei.addNucleus( (RodentSpermNucleus)n );
-        }
-        signalPopulations.add(notGreenNuclei);
-      }
-    }
-    return signalPopulations;
-  }
 }

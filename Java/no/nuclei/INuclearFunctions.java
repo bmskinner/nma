@@ -220,6 +220,7 @@ public interface INuclearFunctions
 
   public double findRotationAngle();
 
+	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p);
   public void exportSignalDistanceMatrix();
 
   /*

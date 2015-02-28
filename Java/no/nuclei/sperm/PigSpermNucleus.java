@@ -63,6 +63,10 @@ public class PigSpermNucleus
       this.exportAngleProfile();
     }
 
+    public PigSpermNucleus(){
+
+    }
+
     private void findPointsAroundBorder(){
 
       NucleusBorderPoint tailPoint1 = this.findTailByMinima();
@@ -87,12 +91,12 @@ public class PigSpermNucleus
 
       int tailIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("tail"));
       this.getAngleProfile().moveIndexToArrayStart(tailIndex);
-      tailIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("tail"));
-       this.setTailIndex(tailIndex);
+      // tailIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("tail"));
+       // this.setTailIndex(tailIndex);
 
       addBorderPointOfInterest("head", this.findOppositeBorder(this.getBorderPointOfInterest("tail")));
-      int headIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("head"));
-      this.setHeadIndex(headIndex);
+      // int headIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("head"));
+      // this.setHeadIndex(headIndex);s
     }
 
     /*

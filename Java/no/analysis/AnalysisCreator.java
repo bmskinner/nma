@@ -28,6 +28,7 @@ import no.nuclei.*;
 import no.analysis.*;
 import no.utility.*;
 import no.collections.*;
+import no.nuclei.INuclearFunctions;
 
 
 public class AnalysisCreator {
@@ -81,19 +82,14 @@ public class AnalysisCreator {
    * @see         NucleusCollection
    */
 
-  public HashMap<File, NucleusCollection> runAnalysis(){
+  public void runAnalysis(){
     NucleusDetector detector = new NucleusDetector(this.folder);
 
     setDetectionParameters(detector);
     detector.runDetector();
 
-    // HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
     this.folderCollection = detector.getNucleiCollections();
-
-
-
     IJ.log("Imported folder(s)");
-    return this.folderCollection;
   }
 
   /**
@@ -106,15 +102,12 @@ public class AnalysisCreator {
    * @return      the nuclei in each folder analysed
    * @see         NucleusCollection
    */
-  public HashMap<File, NucleusCollection> runReAnalysis(File nucleiToFind){
+  public void runReAnalysis(File nucleiToFind){
     NucleusRefinder detector = new NucleusRefinder(this.folder, nucleiToFind);
     setDetectionParameters(detector);
     detector.runDetector();
-
-    HashMap<File, NucleusCollection> folderCollection = detector.getNucleiCollections();
-
+    this.folderCollection = detector.getNucleiCollections();
     IJ.log("Imported folder(s)");
-    return folderCollection;
   }
 
   private void  setDetectionParameters(NucleusDetector detector){
@@ -234,15 +227,15 @@ public class AnalysisCreator {
           IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
 
           for(int i=0;i<collection.getNucleusCount();i++){
-            Nucleus p = collection.getNucleus(i);
+            INuclearFunctions p = collection.getNucleus(i);
 
             INuclearFunctions subNucleus  = (INuclearFunctions) nucleusConstructor.newInstance(p);
 
             // RodentSpermNucleus p = new RodentSpermNucleus(n);
-            spermNuclei.addNucleus(p);
+            spermNuclei.addNucleus(subNucleus);
           }
           this.nuclearPopulations.add(spermNuclei);
-          IJ.log("  Population converted to "+nucleusClass.getName()+" in "+spermNuclei.getClass().getName());
+          IJ.log("  Population converted to "+nucleusClass.getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
         } catch(InstantiationException e){
           IJ.log("Cannot create collection: "+e.getMessage());
         } catch(IllegalAccessException e){
@@ -305,23 +298,111 @@ public class AnalysisCreator {
       IJ.log("    Refolding nucleus"             );
       IJ.log("    ----------------------------- ");
 
-      // attemptRefoldingConsensusNucleus(r);
+      this.attemptRefoldingConsensusNucleus(r);
 
     
-
-      // ArrayList<Analysable> signalPopulations = dividePopulationBySignals(r);
+      ArrayList<Analysable> signalPopulations = dividePopulationBySignals(r);
       
-      // for(Analysable p : signalPopulations){
+      for(Analysable p : signalPopulations){
 
-      //   IJ.log("    ----------------------------- ");
-      //   IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
-      //   IJ.log("    ----------------------------- ");
-      //   p.measureProfilePositions();
-      //   p.exportStatsFiles();
-      //   p.annotateAndExportNuclei();
-      //   attemptRefoldingConsensusNucleus(p);
-      // }
+        IJ.log("    ----------------------------- ");
+        IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
+        IJ.log("    ----------------------------- ");
+        p.measureProfilePositions();
+        p.exportStatsFiles();
+        p.annotateAndExportNuclei();
+        attemptRefoldingConsensusNucleus(p);
+      }
     }
   }
 
+  public void attemptRefoldingConsensusNucleus(Analysable collection){
+
+    try{ 
+      INuclearFunctions refoldCandidate = (INuclearFunctions)collection.getNucleusMostSimilarToMedian();
+      IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
+      if(refoldCandidate==null){
+        throw new Exception();
+      }
+      double[] targetProfile = collection.getMedianTargetCurve(refoldCandidate);
+
+      CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
+      refolder.refoldCurve();
+
+      // orient refolded nucleus to put tail at the bottom
+      refolder.putPointAtBottom(refoldCandidate.getBorderPointOfInterest("tail"));
+
+      // draw signals on the refolded nucleus
+      refolder.addSignalsToConsensus(collection);
+      refolder.exportImage(collection);
+
+    } catch(Exception e){
+      IJ.log("    Unable to refold nucleus: "+e.getMessage());
+    }
+  }
+
+  /*
+    Given a complete collection of nuclei, split it into up to 4 populations;
+      nuclei with red signals, with green signals, without red signals and without green signals
+    Only include the 'without' populations if there is a 'with' population.
+  */
+  public ArrayList<Analysable> dividePopulationBySignals(Analysable r){
+
+    ArrayList<Analysable> signalPopulations = new ArrayList<Analysable>(0);
+
+    try{
+
+      Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class});
+      
+      ArrayList<INuclearFunctions> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
+      if(redList.size()>0){
+        // Analysable redNuclei = new Analysable(r.getFolder(), "red");
+        Analysable redNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), "red");
+        for(INuclearFunctions n : redList){
+          redNuclei.addNucleus( (INuclearFunctions)n );
+        }
+        signalPopulations.add(redNuclei);
+        ArrayList<INuclearFunctions> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
+        if(notRedList.size()>0){
+          Analysable notRedNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), "not_red");
+          // Analysable notRedNuclei = new Analysable(r.getFolder(), "not_red");
+          for(INuclearFunctions n : notRedList){
+            notRedNuclei.addNucleus( (INuclearFunctions)n );
+          }
+          signalPopulations.add(notRedNuclei);
+        }
+      }
+
+      ArrayList<INuclearFunctions> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
+      if(greenList.size()>0){
+        Analysable greenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), "green");
+        // Analysable greenNuclei = new Analysable(r.getFolder(), "green");
+        for(INuclearFunctions n : greenList){
+          greenNuclei.addNucleus( (INuclearFunctions)n );
+        }
+        signalPopulations.add(greenNuclei);
+        ArrayList<INuclearFunctions> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
+        if(notGreenList.size()>0){
+          Analysable notGreenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), "not_green");
+          // Analysable notGreenNuclei = new Analysable(r.getFolder(), "not_green");
+          for(INuclearFunctions n : notGreenList){
+            notGreenNuclei.addNucleus( (INuclearFunctions)n );
+          }
+          signalPopulations.add(notGreenNuclei);
+        }
+      }
+
+    } catch(InstantiationException e){
+      IJ.log("Cannot create collection: "+e.getMessage());
+    } catch(IllegalAccessException e){
+      IJ.log("Cannot access constructor: "+e.getMessage());
+    } catch(InvocationTargetException e){
+      IJ.log("Cannot invoke constructor: "+e.getMessage());
+    } catch(NoSuchMethodException e){
+      IJ.log("Cannot find constructor: "+e.getMessage());
+    }
+
+    return signalPopulations;
+  }
 }
+

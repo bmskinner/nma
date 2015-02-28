@@ -130,12 +130,12 @@ public class AsymmetricNucleusCollection
     -----------------------
   */
 
-  public AsymmetricNucleus getNucleusMostSimilarToMedian(){
+  public INuclearFunctions getNucleusMostSimilarToMedian(){
   	INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
 
   	double difference = 7000;
   	for(int i=0;i<this.getNucleusCount();i++){
-      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+      INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
       if(p.getDifferenceToMedianProfile("tail")<difference){
       	difference = p.getDifferenceToMedianProfile("tail");
       	n = p;
@@ -148,7 +148,7 @@ public class AsymmetricNucleusCollection
 		Interpolate the median profile to match the length of the most-median nucleus
 		Store the angle profile as a double[] to feed into the curve refolder
   */
-	public double[] getMedianTargetCurve(Nucleus n){
+	public double[] getMedianTargetCurve(INuclearFunctions n){
 		double[] targetMedianCurve = interpolateMedianToLength(n.getLength(), this.getNormalisedMedianProfileFromPoint("tail"));
 		return targetMedianCurve;
 	}	

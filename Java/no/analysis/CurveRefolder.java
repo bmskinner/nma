@@ -39,8 +39,9 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 
+import no.nuclei.INuclearFunctions;
 import no.nuclei.Nucleus;
-import no.collections.NucleusCollection;
+import no.analysis.Analysable;
 import no.utility.*;
 import no.components.*;
 
@@ -50,8 +51,8 @@ public class CurveRefolder {
 	private double[] targetCurve;
 	private double[] initialCurve;
 
-	private Nucleus initialNucleus;
-	private Nucleus targetNucleus;
+	private INuclearFunctions initialNucleus;
+	private INuclearFunctions targetNucleus;
 
 	private Plot nucleusPlot;
 	private PlotWindow nucleusPlotWindow;
@@ -59,7 +60,7 @@ public class CurveRefolder {
 	private Plot anglePlot;
 	private PlotWindow anglePlotWindow;
 
-	public CurveRefolder(double[] target, Nucleus n){
+	public CurveRefolder(double[] target, INuclearFunctions n){
 		this.targetCurve = target;
 		this.initialNucleus = n;
 		this.initialCurve = n.getInteriorAngles();
@@ -367,11 +368,11 @@ public class CurveRefolder {
 	  Using a list of signal locations, draw on
 	  the consensus plot.
 	*/
-	public void addSignalsToConsensus(NucleusCollection collection){
+	public void addSignalsToConsensus(Analysable collection){
 
 		for(int i= 0; i<collection.getNuclei().size();i++){ // for each roi
 
-			Nucleus n = collection.getNuclei().get(i);
+			INuclearFunctions n = collection.getNuclei().get(i);
 
 			ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
 			signals.add(n.getRedSignals());
@@ -450,42 +451,39 @@ public class CurveRefolder {
 		-----------------------
 	*/
 
-	public void exportProfileOfRefoldedImage(NucleusCollection collection){
-		// targetNucleus.setPath(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
-	  // IJ.log("Exporting to: "+targetNucleus.getPath());
-	  // targetNucleus.printLogFile(targetNucleus.getPath());
+	public void exportProfileOfRefoldedImage(Analysable collection){
 	 
-	  File f = new File(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
-	if(f.exists()){
-	  f.delete();
-	}
+		File f = new File(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
+		if(f.exists()){
+		  f.delete();
+		}
 
-	String outLine =  "X_INT\t"+
-					  "Y_INT\t"+
-					  "X_DOUBLE\t"+
-					  "Y_DOUBLE\t"+
-					  "INTERIOR_ANGLE\t"+
-					  "NORMALISED_PROFILE_X\t"+
-					  "DISTANCE_PROFILE\n";
+		String outLine =  "X_INT\t"+
+						  "Y_INT\t"+
+						  "X_DOUBLE\t"+
+						  "Y_DOUBLE\t"+
+						  "INTERIOR_ANGLE\t"+
+						  "NORMALISED_PROFILE_X\t"+
+						  "DISTANCE_PROFILE\n";
 
-	for(int i=0;i<targetNucleus.getLength();i++){
+		for(int i=0;i<targetNucleus.getLength();i++){
 
-	  double normalisedX = ((double)i/(double)targetNucleus.getLength())*100; // normalise to 100 length
-	  
-	  outLine +=  targetNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
-				  targetNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
-				  targetNucleus.getBorderPoint(i).getX()                  +"\t"+
-				  targetNucleus.getBorderPoint(i).getY()                  +"\t"+
-				  targetNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
-				  normalisedX                                             +"\t"+
-				  targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
-	}
-	IJ.append( outLine, f.getAbsolutePath());
-	}
+		  double normalisedX = ((double)i/(double)targetNucleus.getLength())*100; // normalise to 100 length
+		  
+		  outLine +=  targetNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
+					  targetNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
+					  targetNucleus.getBorderPoint(i).getX()                  +"\t"+
+					  targetNucleus.getBorderPoint(i).getY()                  +"\t"+
+					  targetNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
+					  normalisedX                                             +"\t"+
+					  targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
+		}
+		IJ.append( outLine, f.getAbsolutePath());
+		}
 
-	public void exportImage(NucleusCollection collection){
-		ImagePlus plot = nucleusPlot.getImagePlus();
-	  IJ.saveAsTiff(plot, targetNucleus.getDirectory()+File.separator+"plotConsensus."+collection.getType()+".tiff");
+		public void exportImage(Analysable collection){
+			ImagePlus plot = nucleusPlot.getImagePlus();
+		  IJ.saveAsTiff(plot, targetNucleus.getDirectory()+File.separator+"plotConsensus."+collection.getType()+".tiff");
 	}
 
 }

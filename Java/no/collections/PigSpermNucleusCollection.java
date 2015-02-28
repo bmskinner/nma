@@ -61,25 +61,6 @@ public class PigSpermNucleusCollection
       super(folder, type);
     }
 
-    public PigSpermNucleus getNucleus(int i){
-      return (PigSpermNucleus)this.getNuclei().get(i);
-    }
-
-  /*
-    -----------------------
-    Get aggregate values
-    -----------------------
-  */
-
-  public int[] getTailIndexes(){
-    int[] d = new int[this.getNucleusCount()];
-
-    for(int i=0;i<this.getNucleusCount();i++){
-      d[i] = this.getNucleus(i).getTailIndex();
-    }
-    return d;
-  }
-
   /*
     -----------------------
     Identify tail in median profile
@@ -96,12 +77,12 @@ public class PigSpermNucleusCollection
   /*
     Draw the features of interest on the images of the nuclei created earlier
   */
-  public void annotateImagesOfNuclei(){
-    IJ.log("Annotating images ("+this.getType()+")...");
-    for(int i=0; i<this.getNucleusCount();i++){
-      PigSpermNucleus n = (PigSpermNucleus)this.getNucleus(i);
-      n.annotateFeatures();
-    }
-  }
+  // public void annotateImagesOfNuclei(){
+  //   IJ.log("Annotating images ("+this.getType()+")...");
+  //   for(int i=0; i<this.getNucleusCount();i++){
+  //     INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+  //     n.annotateFeatures();
+  //   }
+  // }
 
 }

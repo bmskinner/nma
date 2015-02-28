@@ -1090,8 +1090,13 @@ public class Nucleus
 
   public void annotateFeatures(){
   }
+  
   public double findRotationAngle(){
     return 0;
+  }
+
+  public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
+
   }
 
   public void exportSignalDistanceMatrix(){

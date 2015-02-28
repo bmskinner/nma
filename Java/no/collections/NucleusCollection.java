@@ -52,6 +52,7 @@ import java.util.*;
 
 import no.analysis.Analysable;
 import no.nuclei.*;
+import no.nuclei.INuclearFunctions;
 import no.components.*;
 import no.utility.NuclearOrganisationUtility;
 
@@ -90,7 +91,7 @@ public class NucleusCollection {
   // the tail index point in the head normalised array would be head, <tail, int>
   private HashMap<String, HashMap<String, Integer>> medianProfileFeatureIndexes = new HashMap<String, HashMap<String, Integer>>();
 
-	private ArrayList<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
+	private ArrayList<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
   private HashMap<String, Double[]> normalisedMedianProfileFromPoint = new HashMap<String, Double[]>();// the type of point and the array
 
@@ -111,7 +112,7 @@ public class NucleusCollection {
     -----------------------
   */
 
-	public void addNucleus(Nucleus r){
+	public void addNucleus(INuclearFunctions r){
 		this.nucleiCollection.add(r);
 	}
 
@@ -216,7 +217,7 @@ public class NucleusCollection {
     String[] s = new String[nucleiCollection.size()];
 
     for(int i=0;i<nucleiCollection.size();i++){
-      Nucleus n = nucleiCollection.get(i);
+      INuclearFunctions n = nucleiCollection.get(i);
       s[i] = n.getPath();
     }
     return s;
@@ -235,11 +236,11 @@ public class NucleusCollection {
     return this.nucleiCollection.size();
   }
 
-  public ArrayList<Nucleus> getNuclei(){
+  public ArrayList<INuclearFunctions> getNuclei(){
     return this.nucleiCollection;
   }
 
-  public Nucleus getNucleus(int i){
+  public INuclearFunctions getNucleus(int i){
     return this.nucleiCollection.get(i);
   }
 
@@ -296,15 +297,15 @@ public class NucleusCollection {
 
   public Set<String> getNamesOfPointsOfInterest(){
 
-    Nucleus n = this.nucleiCollection.get(0);
+    INuclearFunctions n = this.nucleiCollection.get(0);
     Set<String> headings = n.getBorderPointsOfInterest().keySet();
     return headings;
   }
 
-  public ArrayList<Nucleus> getNucleiWithSignals(int channel){
-    ArrayList<Nucleus> result = new ArrayList<Nucleus>(0);
+  public ArrayList<INuclearFunctions> getNucleiWithSignals(int channel){
+    ArrayList<INuclearFunctions> result = new ArrayList<INuclearFunctions>(0);
 
-    for(Nucleus n : this.nucleiCollection){
+    for(INuclearFunctions n : this.nucleiCollection){
 
       switch (channel) {
         case Nucleus.RED_CHANNEL:
@@ -353,7 +354,7 @@ public class NucleusCollection {
   public double[] getDifferencesToMedianFromPoint(String pointType){
     double[] d = new double[this.getNucleusCount()];
     for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
       try{
         d[i] = n.getDifferenceToMedianProfile(pointType);
       } catch(Exception e){
@@ -387,7 +388,7 @@ public class NucleusCollection {
     int[] d = new int[this.getNucleusCount()];
 
     for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
       d[i] = n.getBorderIndexOfInterest(pointType);
     }
     return d;
@@ -396,7 +397,7 @@ public class NucleusCollection {
   public double[] getPointToPointDistances(String pointTypeA, String pointTypeB){
     double[] d = new double[this.getNucleusCount()];
     for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
       d[i] = n.getBorderPointOfInterest(pointTypeA).getLengthTo(n.getBorderPointOfInterest(pointTypeB));
     }
     return d;
@@ -443,7 +444,7 @@ public class NucleusCollection {
     this.exportFilterStats();
 
     for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
       boolean dropNucleus = false;
 
       if(n.getArea() > maxArea || n.getArea() < minArea ){
@@ -633,7 +634,7 @@ public class NucleusCollection {
 
     for(int i=0;i<this.getNucleusCount();i++){
 
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
 
       double[] xvalues = n.getNormalisedProfilePositions();
 
@@ -778,7 +779,7 @@ public class NucleusCollection {
       double[] medianProfile = getNormalisedMedianProfileFromPoint(pointType);
 
       for(int i= 0; i<this.getNucleusCount();i++){ // for each nucleus
-        Nucleus n = this.getNucleus(i);
+        INuclearFunctions n = this.getNucleus(i);
         double difference = n.calculateDifferenceToMedianProfile(medianProfile);
         n.addDifferenceToMedianProfile(pointType, difference);
       } 
@@ -798,7 +799,7 @@ public class NucleusCollection {
     if(this.getRedSignalCount()>0 || this.getGreenSignalCount()>0){
 
       for(int i= 0; i<this.getNucleusCount();i++){
-        Nucleus n = this.getNucleus(i);
+        INuclearFunctions n = this.getNucleus(i);
         n.exportSignalDistanceMatrix();
 
       }
@@ -836,7 +837,7 @@ public class NucleusCollection {
     
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
 
       int nucleusNumber = n.getNucleusNumber();
       String path = n.getPath();
@@ -876,7 +877,7 @@ public class NucleusCollection {
 
     for(int i=0; i<this.getNucleusCount();i++){
 
-      Nucleus n = this.nucleiCollection.get(i);
+      INuclearFunctions n = this.nucleiCollection.get(i);
       if(n.getRedSignalCount()==1 && n.getGreenSignalCount()==1){
 
         NuclearSignal r = n.getRedSignals().get(0);
@@ -910,7 +911,7 @@ public class NucleusCollection {
 
   public void exportAnnotatedNuclei(){
     for(int i=0; i<this.getNucleusCount();i++){
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
       n.exportAnnotatedImage();
     }
   }
@@ -1057,7 +1058,7 @@ public class NucleusCollection {
 
     for(int i=0; i<this.getNucleusCount();i++){
       
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
       String path = n.getAnnotatedImagePath();
 
       try {
@@ -1158,7 +1159,7 @@ public class NucleusCollection {
 
       for(int i=0;i<this.getNucleusCount();i++){
 
-        Nucleus n = this.getNucleus(i);
+        INuclearFunctions n = this.getNucleus(i);
 
         double[] xPointsRaw  = n.getRawProfilePositions();
         double[] xPointsNorm = n.getNormalisedProfilePositions();
@@ -1265,7 +1266,7 @@ public class NucleusCollection {
 
     for(int i= 0; i<this.getNucleusCount();i++){
 
-      Nucleus n = this.getNucleus(i);
+      INuclearFunctions n = this.getNucleus(i);
       ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
       signals.add(n.getRedSignals());
       signals.add(n.getGreenSignals());

@@ -86,7 +86,7 @@ public class AsymmetricNucleus
   }
 
   public AsymmetricNucleus(){
-    
+
   }
 
   /*
@@ -160,6 +160,7 @@ public class AsymmetricNucleus
     Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
     Returns an angle
   */
+  @Override
   public double findRotationAngle(){
     XYPoint end = new XYPoint(this.getBorderPointOfInterest("tail").getXAsInt(),this.getBorderPointOfInterest("tail").getYAsInt()-50);
 
