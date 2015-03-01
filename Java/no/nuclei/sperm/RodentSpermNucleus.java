@@ -86,14 +86,11 @@ public class RodentSpermNucleus
   */
   private void findPointsAroundBorder(){
     
-
     // find tip - use the least angle method
     NucleusBorderPoint spermTip = this.getAngleProfile().getPointWithMinimumAngle();
     int tipIndex = this.getAngleProfile().getIndexOfPoint(spermTip);
     this.getAngleProfile().moveIndexToArrayStart(tipIndex);
     addBorderPointOfInterest("tip", spermTip);
-    this.setSpermTip(spermTip);
-    this.setTipIndex(0);
 
     // decide if the profile is right or left handed; flip if needed
     if(!this.isProfileOrientationOK()){
@@ -137,15 +134,11 @@ public class RodentSpermNucleus
     NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
     consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
 
-    // this.setTailIndex(consensusTailIndex);
     this.setInitialConsensusTail(consensusTail);
 
     addBorderPointOfInterest("tail", consensusTail);
-    // this.setSpermTail(consensusTail);
 
-    // this.setHead( this.findOppositeBorder(this.getTail()));
     addBorderPointOfInterest("head", this.findOppositeBorder(this.getBorderPointOfInterest("tail")));
-    // this.setHeadIndex(this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("head")));
   }
 
   /*
@@ -153,65 +146,12 @@ public class RodentSpermNucleus
     Get and set sperm nucleus features
     -----------------------
   */
-
-  public double[] getNormalisedXPositionsFromTip(){
-    double[] d = new double[normalisedXPositionsFromTip.size()];
-    for(int i=0;i<normalisedXPositionsFromTip.size();i++){
-      d[i] = normalisedXPositionsFromTip.get(i);
-    }
-    return d;
-  }
-
-  public double[] getRawXPositionsFromTip(){
-    double[] d = new double[rawXPositionsFromTip.size()];
-    for(int i=0;i<rawXPositionsFromTip.size();i++){
-      d[i] = rawXPositionsFromTip.get(i);
-    }
-    return d;
-  }
-
-  public double getMaxRawXFromTip(){
-    double d = 0;
-    for(int i=0;i<rawXPositionsFromTip.size();i++){
-      if(rawXPositionsFromTip.get(i) > d){
-        d = rawXPositionsFromTip.get(i);
-      }
-    }
-    return d;
-  }
-
-  public double getMinRawXFromTip(){
-    double d = 0;
-    for(int i=0;i<rawXPositionsFromTip.size();i++){
-      if(rawXPositionsFromTip.get(i) < d){
-        d = rawXPositionsFromTip.get(i);
-      }
-    }
-    return d;
-  }
-
-  public NucleusBorderPoint getSpermTip(){
-    return this.spermTip;
-  }
-
-  public void setSpermTip(NucleusBorderPoint p){
-    this.spermTip = p;
-  }
-
   public void setInitialConsensusTail(NucleusBorderPoint p){
     this.initialConsensusTail = p;
   }
 
   public NucleusBorderPoint getInitialConsensusTail(){
     return this.initialConsensusTail;
-  }
-
-  public int getTipIndex(){
-    return this.tipIndex;
-  }
-
-  public void setTipIndex(int i){
-    this.tipIndex = i;
   }
 
   /*
@@ -279,16 +219,16 @@ public class RodentSpermNucleus
     // the distances of each point from the centre of mass. The points with the combined greatest
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
-    double tipToCoMDistance = this.getSpermTip().getLengthTo(this.getCentreOfMass());
+    double tipToCoMDistance = this.getBorderPointOfInterest("tip").getLengthTo(this.getCentreOfMass());
     NucleusBorderPoint[] array = this.getAngleProfile().getLocalMinima();
 
     double maxDistance = 0;
-    NucleusBorderPoint tail = this.getSpermTip();
+    NucleusBorderPoint tail = this.getBorderPointOfInterest("tip");
 
     for(NucleusBorderPoint a : array){
             
       double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(a);
-      double distanceBetweenEnds = this.getSpermTip().getLengthTo(a);
+      double distanceBetweenEnds = this.getBorderPointOfInterest("tip").getLengthTo(a);
       
       double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
 
@@ -314,7 +254,7 @@ public class RodentSpermNucleus
     // Measure the length; if < min length..., store equation and border(s)
 
     double minDistance = this.getFeret();
-    NucleusBorderPoint reference = this.getSpermTip();
+    NucleusBorderPoint reference = this.getBorderPointOfInterest("tip");
 
     for(int i=0;i<this.getLength();i++){
 
@@ -339,7 +279,7 @@ public class RodentSpermNucleus
 
       NucleusBorderPoint p = this.getBorderPoint(i);
       double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
-      if(  Math.abs(90-angle)<difference && p.getLengthTo(this.getSpermTip()) > this.getCentreOfMass().getLengthTo( this.getSpermTip() ) ){
+      if(  Math.abs(90-angle)<difference && p.getLengthTo(this.getBorderPointOfInterest("tip")) > this.getCentreOfMass().getLengthTo( this.getBorderPointOfInterest("tip") ) ){
         difference = 90-angle;
         tail = p;
       }
@@ -381,8 +321,8 @@ public class RodentSpermNucleus
       
       for( NucleusBorderPoint p : results){
         // NucleusBorderPoint p = (NucleusBorderPoint)o;
-        if(p.getLengthTo(this.getSpermTip()) > maxLength){
-          maxLength = p.getLengthTo(this.getSpermTip());
+        if(p.getLengthTo(this.getBorderPointOfInterest("tip")) > maxLength){
+          maxLength = p.getLengthTo(this.getBorderPointOfInterest("tip"));
           tail = p;
         }
       }
@@ -482,7 +422,7 @@ public class RodentSpermNucleus
     }
 
     for(int i=0;i<roi1.size();i++){
-      if(roi1.get(i).overlaps(spermTip)){
+      if(roi1.get(i).overlaps(this.getBorderPointOfInterest("tip"))){
         this.hookRoi = new FloatPolygon( roi1X, roi1Y);
         this.humpRoi = new FloatPolygon( roi2X, roi2Y);
         break;
@@ -490,7 +430,7 @@ public class RodentSpermNucleus
     }
 
     for(int i=0;i<roi2.size();i++){
-      if(roi2.get(i).overlaps(spermTip)){
+      if(roi2.get(i).overlaps(this.getBorderPointOfInterest("tip"))){
         this.hookRoi = new FloatPolygon( roi2X, roi2Y);
         this.humpRoi = new FloatPolygon( roi1X, roi1Y);
          break;
@@ -534,8 +474,6 @@ public class RodentSpermNucleus
         }
       }
     }
-
-
   }
 
 
