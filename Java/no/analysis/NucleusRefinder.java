@@ -70,8 +70,8 @@ public class NucleusRefinder
   /*
     Constructors
   */
-	public NucleusRefinder(File folder, File pathList){
-		super(folder);
+	public NucleusRefinder(File inputFolder, String outputFolder, File pathList){
+		super(inputFolder, outputFolder);
     this.pathList = pathList;
 
     // get the image names and coordinates from the pathList
@@ -147,7 +147,7 @@ public class NucleusRefinder
 	protected void processFolder(File folder){
 
     File[] listOfFiles = folder.listFiles();
-    NucleusCollection folderCollection = new NucleusCollection(folder, folder.getName());
+    NucleusCollection folderCollection = new NucleusCollection(folder, this.outputFolder, folder.getName());
     addNucleusCollection(folder, folderCollection);
  
     for (File file : listOfFiles) {

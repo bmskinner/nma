@@ -84,7 +84,8 @@ public class NucleusDetector {
   private  double   minSignalSize = 5;
   private  double   maxSignalFraction = 0.5;
 
-	private File folder;
+	private File inputFolder;
+  protected String outputFolder;
 	// private NucleusCollection collection;
   private HashMap<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
 
@@ -92,26 +93,15 @@ public class NucleusDetector {
   /*
     Constructors
   */
-	public NucleusDetector(File folder){
-		this.folder = folder;
+	public NucleusDetector(File inputFolder, String outputFolder){
+		this.inputFolder = inputFolder;
+    this.outputFolder = outputFolder;
 	}
 
-  public NucleusDetector(File folder, double minSize, double maxSize){
-    this.folder = folder;
-    this.setMinNucleusSize(minSize);
-    this.setMaxNucleusSize(maxSize);
-  }
-
-  public NucleusDetector(File folder, double minSize, double maxSize, int threshold){
-    this.folder = folder;
-    this.setMinNucleusSize(minSize);
-    this.setMaxNucleusSize(maxSize);
-    this.setThreshold(threshold);
-  }
 
   public void runDetector(){
     try{
-      processFolder(this.folder);
+      processFolder(this.inputFolder);
     } catch(Exception e){
       IJ.log("Error in processing folder: "+e);
     }
@@ -207,7 +197,7 @@ public class NucleusDetector {
 	protected void processFolder(File folder){
 
     File[] listOfFiles = folder.listFiles();
-    NucleusCollection folderCollection = new NucleusCollection(folder, folder.getName());
+    NucleusCollection folderCollection = new NucleusCollection(folder, this.outputFolder, folder.getName());
     this.collectionGroup.put(folder, folderCollection);
  
     for (File file : listOfFiles) {
@@ -295,7 +285,6 @@ public class NucleusDetector {
     ip.smooth();
     ip.threshold(this.nucleusThreshold);
     ip.invert();
-    // blue.show();
 
     // run the particle analyser
     ResultsTable rt = new ResultsTable();
@@ -351,7 +340,9 @@ public class NucleusDetector {
     smallRegion.setRoi(nucleus);
 
     // turn roi into Nucleus for manipulation
-    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position, this.angleProfileWindowSize);
+    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
+    currentNucleus.setOutputFolder(this.outputFolder);
+    currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
     currentNucleus.setSignalThreshold(this.signalThreshold);
     currentNucleus.setMinSignalSize(this.minSignalSize);
     currentNucleus.setMaxSignalFraction(this.maxSignalFraction);

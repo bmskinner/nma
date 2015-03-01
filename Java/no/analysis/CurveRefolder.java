@@ -453,10 +453,11 @@ public class CurveRefolder {
 
 	public void exportProfileOfRefoldedImage(Analysable collection){
 	 
-		File f = new File(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
-		if(f.exists()){
-		  f.delete();
-		}
+	 	String logFile = collection.makeGlobalLogFile("logConsensusNucleus");
+		// File f = new File(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
+		// if(f.exists()){
+		//   f.delete();
+		// }
 
 		String outLine =  "X_INT\t"+
 						  "Y_INT\t"+
@@ -478,12 +479,12 @@ public class CurveRefolder {
 					  normalisedX                                             +"\t"+
 					  targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
 		}
-		IJ.append( outLine, f.getAbsolutePath());
+		IJ.append( outLine, logFile);
 		}
 
 		public void exportImage(Analysable collection){
 			ImagePlus plot = nucleusPlot.getImagePlus();
-		  IJ.saveAsTiff(plot, targetNucleus.getDirectory()+File.separator+"plotConsensus."+collection.getType()+".tiff");
+		  IJ.saveAsTiff(plot, targetNucleus.getOutputFolder()+File.separator+"plotConsensus."+collection.getType()+".tiff");
 	}
 
 }

@@ -63,8 +63,8 @@ public class RodentSpermNucleusCollection
   // failure  codes
   public static final int FAILURE_TIP = 512;
 
-  public RodentSpermNucleusCollection(File folder, String type){
-  		super(folder, type);
+  public RodentSpermNucleusCollection(File folder, String outputFolder, String type){
+      super(folder, outputFolder, type);
   }
 
   @Override

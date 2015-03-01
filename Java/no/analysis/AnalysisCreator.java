@@ -45,10 +45,14 @@ public class AnalysisCreator {
 
   private int angleProfileWindowSize = 23;
 
+  private Date startTime;
+
   private  double minSignalSize = 5;
   private  double maxSignalFraction = 0.5;
 
   private File folder;
+  private File outputFolder;
+  private String outputFolderName;
   private File logAnalysis;
   private File nucleiToFind;
 
@@ -73,7 +77,19 @@ public class AnalysisCreator {
   	// create with default permissive parameters
     this.folder = folder;
 
-    this.logAnalysis = new File(this.folder.getAbsolutePath()+File.separator+"logAnalysis.txt");
+    this.startTime = Calendar.getInstance().getTime();
+    this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+
+    this.outputFolder = new File(this.folder.getAbsolutePath()+File.separator+outputFolderName);
+    if(!this.outputFolder.exists()){
+      try{
+        this.outputFolder.mkdir();
+      } catch(Exception e) {
+        IJ.log("Failed to create directory: "+e);
+      }
+    }
+
+    this.logAnalysis = new File(this.outputFolder.getAbsolutePath()+File.separator+"logAnalysis.txt");
     if(this.logAnalysis.exists()){
       this.logAnalysis.delete();
     }
@@ -95,7 +111,7 @@ public class AnalysisCreator {
    */
 
   public void runAnalysis(){
-    NucleusDetector detector = new NucleusDetector(this.folder);
+    NucleusDetector detector = new NucleusDetector(this.folder, this.outputFolderName);
 
     setDetectionParameters(detector);
     detector.runDetector();
@@ -115,7 +131,7 @@ public class AnalysisCreator {
    * @see         NucleusCollection
    */
   public void runReAnalysis(File nucleiToFind){
-    NucleusRefinder detector = new NucleusRefinder(this.folder, nucleiToFind);
+    NucleusRefinder detector = new NucleusRefinder(this.folder, this.outputFolderName, nucleiToFind);
     setDetectionParameters(detector);
     detector.runDetector();
     this.folderCollection = detector.getNucleiCollections();
@@ -236,14 +252,14 @@ public class AnalysisCreator {
     Set<File> keys = this.folderCollection.keySet();
 
     try{
-      Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class});
+      Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
       Constructor nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
     
       for (File key : keys) {
         NucleusCollection collection = folderCollection.get(key);
 
         try{
-          Analysable spermNuclei = (Analysable) collectionConstructor.newInstance(key, "analysable");
+          Analysable spermNuclei = (Analysable) collectionConstructor.newInstance(key, this.outputFolderName, "analysable");
           
           // RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
           IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
@@ -292,13 +308,14 @@ public class AnalysisCreator {
 
         
         nucleusCounts.put("input", r.getNucleusCount());
-        Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class});
-        Analysable failedNuclei = (Analysable) collectionConstructor.newInstance(folder, "failed");
+        Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
+        Analysable failedNuclei = (Analysable) collectionConstructor.newInstance(folder, this.outputFolderName, "failed");
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
         IJ.log("    ----------------------------- ");
         IJ.log("    Exporting failed nuclei"       );
         IJ.log("    ----------------------------- ");
+        // failedNuclei.exportStatsFiles(); // NPE on clustering profile export
         failedNuclei.annotateAndExportNuclei();
         nucleusCounts.put("failed", failedNuclei.getNucleusCount());
 
@@ -382,19 +399,19 @@ public class AnalysisCreator {
 
     try{
 
-      Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class});
+      Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
       
       ArrayList<INuclearFunctions> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
       if(redList.size()>0){
         // Analysable redNuclei = new Analysable(r.getFolder(), "red");
-        Analysable redNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), "red");
+        Analysable redNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "red");
         for(INuclearFunctions n : redList){
           redNuclei.addNucleus( (INuclearFunctions)n );
         }
         signalPopulations.add(redNuclei);
         ArrayList<INuclearFunctions> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
         if(notRedList.size()>0){
-          Analysable notRedNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), "not_red");
+          Analysable notRedNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_red");
           // Analysable notRedNuclei = new Analysable(r.getFolder(), "not_red");
           for(INuclearFunctions n : notRedList){
             notRedNuclei.addNucleus( (INuclearFunctions)n );
@@ -405,7 +422,7 @@ public class AnalysisCreator {
 
       ArrayList<INuclearFunctions> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
       if(greenList.size()>0){
-        Analysable greenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), "green");
+        Analysable greenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "green");
         // Analysable greenNuclei = new Analysable(r.getFolder(), "green");
         for(INuclearFunctions n : greenList){
           greenNuclei.addNucleus( (INuclearFunctions)n );
@@ -413,7 +430,7 @@ public class AnalysisCreator {
         signalPopulations.add(greenNuclei);
         ArrayList<INuclearFunctions> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
         if(notGreenList.size()>0){
-          Analysable notGreenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), "not_green");
+          Analysable notGreenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_green");
           // Analysable notGreenNuclei = new Analysable(r.getFolder(), "not_green");
           for(INuclearFunctions n : notGreenList){
             notGreenNuclei.addNucleus( (INuclearFunctions)n );
@@ -437,11 +454,13 @@ public class AnalysisCreator {
 
   public void exportAnalysisLog(){
     StringBuilder outLine = new StringBuilder();
-    String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+    String timeStamp = formatter.format(Calendar.getInstance().getTime());
     outLine.append("-------------------------\n");
     outLine.append("Nuclear morphology analysis log\n");
     outLine.append("-------------------------\n");
-    outLine.append("Analysis run at "+timeStamp+"\n");
+    outLine.append("Analysis began    :"+formatter.format(this.startTime)+"\n");
+    outLine.append("Analysis complete :"+timeStamp+"\n");
     outLine.append("-------------------------\n");
     outLine.append("Parameters:\n");
     outLine.append("-------------------------\n");

@@ -77,8 +77,8 @@ public class AsymmetricNucleusCollection
   private Map<Double, Collection<Double>> normalisedProfilesFromHead = new HashMap<Double, Collection<Double>>();
   private Map<Double, Collection<Double>> normalisedProfilesFromTail = new HashMap<Double, Collection<Double>>();
 
-  public AsymmetricNucleusCollection(File folder, String type){
-  		super(folder, type);
+  public AsymmetricNucleusCollection(File folder, String outputFolder, String type){
+  		super(folder, outputFolder, type);
   }
 
   public void measureProfilePositions(){
@@ -133,7 +133,7 @@ public class AsymmetricNucleusCollection
   public INuclearFunctions getNucleusMostSimilarToMedian(){
   	INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
 
-  	double difference = 7000;
+  	double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint("tail"));
   	for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
       if(p.getDifferenceToMedianProfile("tail")<difference){
@@ -327,7 +327,7 @@ public class AsymmetricNucleusCollection
       }     
     }
     // finalImage.show();
-    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+filename+"."+getType()+".tiff");
+    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".tiff");
     IJ.log("    Composite image created");
   }
 

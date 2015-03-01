@@ -61,6 +61,7 @@ import no.utility.NuclearOrganisationUtility;
 public class NucleusCollection {
 
 	private File folder; // the source of the nuclei
+  private String outputFolder;
   private File debugFile;
   private String collectionType; // for annotating image names
 
@@ -99,9 +100,10 @@ public class NucleusCollection {
 
   private HashMap<String, HashMap<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
 
-	public NucleusCollection(File folder, String type){
+	public NucleusCollection(File folder, String outputFolder, String type){
 		this.folder = folder;
-    this.debugFile = new File(folder.getAbsolutePath()+File.separator+"logDebug.txt");
+    this.outputFolder = outputFolder;
+    this.debugFile = new File(folder.getAbsolutePath()+File.separator+outputFolder+File.separator+"logDebug.txt");
     this.collectionType = type;
 	}
 
@@ -117,8 +119,10 @@ public class NucleusCollection {
 	}
 
   public void exportStatsFiles(){
+    IJ.log("Exporting to: "+this.getFolder().getAbsolutePath()+File.separator+this.getOutputFolder()+File.separator);
     this.exportNuclearStats("logStats");
     this.exportImagePaths("logImagePaths");
+    this.exportAngleProfiles();
   }
 
   public void annotateAndExportNuclei(){
@@ -134,6 +138,10 @@ public class NucleusCollection {
 
   public File getFolder(){
     return this.folder;
+  }
+
+  public String getOutputFolder(){
+    return this.outputFolder;
   }
 
   public File getDebugFile(){
@@ -816,7 +824,7 @@ public class NucleusCollection {
   */
 
   public String makeGlobalLogFile(String filename){
-    String file = this.getFolder()+File.separator+filename+"."+getType()+".txt";
+    String file = this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".txt";
     File f = new File(file);
     if(f.exists()){
       f.delete();
@@ -913,6 +921,14 @@ public class NucleusCollection {
     for(int i=0; i<this.getNucleusCount();i++){
       INuclearFunctions n = this.getNucleus(i);
       n.exportAnnotatedImage();
+    }
+  }
+
+  public void exportAngleProfiles(){
+    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+
+      INuclearFunctions n = this.getNucleus(i);
+      n.exportAngleProfile();
     }
   }
 
@@ -1098,7 +1114,7 @@ public class NucleusCollection {
       }     
     }
     // finalImage.show();
-    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+filename+"."+getType()+".tiff");
+    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".tiff");
     IJ.log("    Composite image created");
   }
 
@@ -1108,7 +1124,7 @@ public class NucleusCollection {
     cal.setUnit("pixels");
     cal.pixelWidth = 1;
     cal.pixelHeight = 1;
-    IJ.saveAsTiff(image, this.getFolder()+File.separator+name+"."+this.getType()+".tiff");
+    IJ.saveAsTiff(image, this.getFolder()+File.separator+this.getOutputFolder()+File.separator+name+"."+this.getType()+".tiff");
   }
 
   /*

@@ -83,6 +83,7 @@ public class AsymmetricNucleus
     this.setDistanceProfile(n.getDistanceProfile());
     this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
     this.setBorderPointsOfInterest(n.getBorderPointsOfInterest());
+    this.setOutputFolder(n.getOutputFolderName());
   }
 
   public AsymmetricNucleus(){

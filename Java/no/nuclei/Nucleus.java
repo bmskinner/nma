@@ -92,6 +92,7 @@ public class Nucleus
   private File sourceFile;    // the image from which the nucleus came
   private File nucleusFolder; // the folder to store nucleus information
   private File profileLog;    // unused. Store output if needed
+  private String outputFolder;  // the top-level path in which to store outputs; has analysis date
   
   private Roi roi; // the original ROI
 
@@ -110,7 +111,7 @@ public class Nucleus
 
   private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
   
-  public Nucleus (Roi roi, File file, ImagePlus image, ImagePlus enlarged, int number, String position, int angleProfileWindowSize) { // construct from an roi
+  public Nucleus (Roi roi, File file, ImagePlus image, ImagePlus enlarged, int number, String position) { // construct from an roi
 
     // assign main features
     this.roi             = roi;
@@ -119,9 +120,17 @@ public class Nucleus
     this.enlargedImage   = enlarged;
     this.sourceFile      = file;
     this.nucleusNumber   = number;
-    this.nucleusFolder   = new File(this.getDirectory()+File.separator+this.getImageNameWithoutExtension());
     this.position        = position;
-    
+  }
+
+  protected Nucleus(){
+    // for subclasses to access
+  }
+
+  public void intitialiseNucleus(int angleProfileWindowSize){
+
+    this.nucleusFolder = new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension());
+
     if (!this.nucleusFolder.exists()) {
       try{
         this.nucleusFolder.mkdir();
@@ -160,12 +169,6 @@ public class Nucleus
      // calc distances around nucleus through CoM
      this.calculateDistanceProfile();
      this.calculatePathLength();
-     
-     // this.annotateNucleusImage();
-  }
-
-  protected Nucleus(){
-    // for subclasses to access
   }
 
   // find and measure signals. Call after constructor to allow alteration of 
@@ -254,6 +257,14 @@ public class Nucleus
         trimmed   = this.getImageName().substring(0,i);
     }
     return trimmed;
+  }
+
+  public String getOutputFolderName(){
+    return this.outputFolder;
+  }
+
+  public File getOutputFolder(){
+    return new File(this.getDirectory()+File.separator+this.outputFolder);
   }
 
   public String getDirectory(){
@@ -371,6 +382,10 @@ public class Nucleus
     Protected setters for subclasses
     -----------------------
   */
+
+  public void setOutputFolder(String f){
+    this.outputFolder = f;
+  }
 
   protected void setPosition(String p){
     this.position = p;
@@ -1176,7 +1191,10 @@ public class Nucleus
   */   
   public void exportAngleProfile(){
 
-    File f = new File(this.getNucleusFolder()+File.separator+this.getNucleusNumber()+".log");
+    File f = new File(this.getNucleusFolder().getAbsolutePath()+
+                      File.separator+
+                      this.getNucleusNumber()+
+                      ".txt");
     if(f.exists()){
       f.delete();
     }

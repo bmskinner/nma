@@ -165,6 +165,8 @@ public interface Analysable
 	*/
 	public void exportSignalStats();
 
+	public void exportAngleProfiles();
+
 	public void exportDistancesBetweenSingleSignals();
 
 	public void exportAnnotatedNuclei();

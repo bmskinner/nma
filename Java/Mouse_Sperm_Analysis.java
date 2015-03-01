@@ -52,7 +52,7 @@ public class Mouse_Sperm_Analysis
     AnalysisCreator analysisCreator = new AnalysisCreator(folder);
 
     analysisCreator.setNucleusClass(new RodentSpermNucleus());
-    analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(folder, ""));
+    analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(folder, "", ""));
 
     analysisCreator.setMinNucleusSize(  MIN_NUCLEAR_SIZE );
     analysisCreator.setMaxNucleusSize(  MAX_NUCLEAR_SIZE );

@@ -41,6 +41,8 @@ public interface INuclearFunctions
 
 	public String getImageNameWithoutExtension();
 
+  public File getOutputFolder();
+
 	public String getDirectory();
 
 	public String getPathWithoutExtension();
