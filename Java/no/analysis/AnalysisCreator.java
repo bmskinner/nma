@@ -23,6 +23,8 @@ import java.awt.Color;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.*;
 import no.nuclei.*;
 import no.analysis.*;
@@ -41,14 +43,19 @@ public class AnalysisCreator {
   private  double minNucleusCirc   = 0.0;
   private  double maxNucleusCirc   = 1.0;
 
+  private int angleProfileWindowSize = 23;
+
   private  double minSignalSize = 5;
   private  double maxSignalFraction = 0.5;
 
   private File folder;
+  private File logAnalysis;
   private File nucleiToFind;
 
   private Class nucleusClass;
   private Class collectionClass;
+
+  private HashMap<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
   // the raw input from nucleus detector
   private HashMap<File, NucleusCollection> folderCollection;
@@ -65,6 +72,11 @@ public class AnalysisCreator {
   public AnalysisCreator(File folder){
   	// create with default permissive parameters
     this.folder = folder;
+
+    this.logAnalysis = new File(this.folder.getAbsolutePath()+File.separator+"logAnalysis.txt");
+    if(this.logAnalysis.exists()){
+      this.logAnalysis.delete();
+    }
   }
 
   /*
@@ -117,6 +129,8 @@ public class AnalysisCreator {
     detector.setMinNucleusCirc(this.getMinNucleusCirc());
     detector.setMaxNucleusCirc(this.getMaxNucleusCirc());
 
+    detector.setAngleProfileWindowSize(this.getAngleProfileWindowSize());
+
     detector.setSignalThreshold(this.getSignalThreshold());
     detector.setMinSignalSize(this.getMinSignalSize());
     detector.setMaxSignalFraction(this.getMaxSignalFraction());
@@ -158,6 +172,10 @@ public class AnalysisCreator {
 
   public double getMaxSignalFraction(){
     return this.maxSignalFraction;
+  }
+
+  public int getAngleProfileWindowSize(){
+    return this.angleProfileWindowSize;
   }
 
   /*
@@ -206,6 +224,10 @@ public class AnalysisCreator {
     this.collectionClass = n.getClass();
   }
 
+  public void setAngleProfileWindowSize(int i){
+    this.angleProfileWindowSize = i;
+  }
+
   /*
     Use reflection to assign the correct class to the nuclei and populations
   */
@@ -221,7 +243,7 @@ public class AnalysisCreator {
         NucleusCollection collection = folderCollection.get(key);
 
         try{
-          Analysable spermNuclei = (Analysable) collectionConstructor.newInstance(key, "complete");
+          Analysable spermNuclei = (Analysable) collectionConstructor.newInstance(key, "analysable");
           
           // RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
           IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
@@ -264,8 +286,12 @@ public class AnalysisCreator {
       IJ.log("  Analysing: "+folder.getName());
       IJ.log("  ----------------------------- ");
 
+      LinkedHashMap<String, Integer> nucleusCounts = new LinkedHashMap<String, Integer>();
+
       try{
 
+        
+        nucleusCounts.put("input", r.getNucleusCount());
         Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class});
         Analysable failedNuclei = (Analysable) collectionConstructor.newInstance(folder, "failed");
 
@@ -274,6 +300,7 @@ public class AnalysisCreator {
         IJ.log("    Exporting failed nuclei"       );
         IJ.log("    ----------------------------- ");
         failedNuclei.annotateAndExportNuclei();
+        nucleusCounts.put("failed", failedNuclei.getNucleusCount());
 
       } catch(InstantiationException e){
         IJ.log("Cannot create collection: "+e.getMessage());
@@ -304,6 +331,8 @@ public class AnalysisCreator {
       ArrayList<Analysable> signalPopulations = dividePopulationBySignals(r);
       
       for(Analysable p : signalPopulations){
+       
+        nucleusCounts.put(p.getType(), p.getNucleusCount());
 
         IJ.log("    ----------------------------- ");
         IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
@@ -313,6 +342,7 @@ public class AnalysisCreator {
         p.annotateAndExportNuclei();
         attemptRefoldingConsensusNucleus(p);
       }
+      collectionNucleusCounts.put(folder, nucleusCounts);
     }
   }
 
@@ -403,6 +433,54 @@ public class AnalysisCreator {
     }
 
     return signalPopulations;
+  }
+
+  public void exportAnalysisLog(){
+    StringBuilder outLine = new StringBuilder();
+    String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
+    outLine.append("-------------------------\n");
+    outLine.append("Nuclear morphology analysis log\n");
+    outLine.append("-------------------------\n");
+    outLine.append("Analysis run at "+timeStamp+"\n");
+    outLine.append("-------------------------\n");
+    outLine.append("Parameters:\n");
+    outLine.append("-------------------------\n");
+    outLine.append("\tNucleus thresholding: "+this.getNucleusThreshold()+"\n");
+    outLine.append("\tNucleus minimum size: "+this.getMinNucleusSize()+"\n");
+    outLine.append("\tNucleus maximum size: "+this.getMaxNucleusSize()+"\n");
+    outLine.append("\tNucleus minimum circ: "+this.getMinNucleusCirc()+"\n");
+    outLine.append("\tNucleus maximum circ: "+this.getMaxNucleusCirc()+"\n");
+    outLine.append("\tSignal thresholding : "+this.getSignalThreshold()+"\n");
+    outLine.append("\tSignal minimum size : "+this.getMinSignalSize()+"\n");
+    outLine.append("\tSignal max. fraction: "+this.getMaxSignalFraction()+"\n");
+    outLine.append("\tAngle profile window: "+this.getAngleProfileWindowSize()+"\n");
+    outLine.append("\tNucleus class       : "+this.nucleusClass.getSimpleName()+"\n");
+    outLine.append("\tCollection class    : "+this.collectionClass.getSimpleName()+"\n");
+    outLine.append("-------------------------\n");
+    outLine.append("Populations:\n");
+    outLine.append("-------------------------\n");
+
+    for(Analysable r : this.nuclearPopulations){
+      outLine.append("\t"+r.getFolder().getAbsolutePath()+"\n");
+      // outLine.append("\t\t"+r.getType()+" : "+r.getNucleusCount()+" nuclei\n");
+
+      LinkedHashMap<String, Integer> nucleusCounts = collectionNucleusCounts.get(r.getFolder());
+      Set<String> keys = nucleusCounts.keySet();
+      for(String s : keys){
+        double percent = ( (double) nucleusCounts.get(s) / (double)r.getNucleusCount() )* 100;
+        if(s.equals("input")){
+          outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei\n");
+        } else {
+            if(s.equals("failed")){
+              outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei\n");
+              outLine.append("\t\t"+r.getType()+" : "+r.getNucleusCount()+" nuclei\n");
+            } else {
+              outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei ("+(int)percent+"% of analysable)\n");
+            }
+        }
+      }
+    }
+    IJ.append( outLine.toString(), this.logAnalysis.getAbsolutePath());
   }
 }
 

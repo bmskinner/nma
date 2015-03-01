@@ -70,6 +70,8 @@ public class NucleusDetector {
   private double minNucleusCirc  = 0.4;
   private double maxNucleusCirc  = 1;
 
+  private int angleProfileWindowSize  = 23;
+
   private int nucleusThreshold = 36;
 
   // counts of nuclei processed
@@ -167,6 +169,9 @@ public class NucleusDetector {
     this.maxSignalFraction = d;
   }
 
+  public void setAngleProfileWindowSize(int i){
+    this.angleProfileWindowSize = i;
+  }
 
   public void addNucleusCollection(File file, NucleusCollection collection){
     this.collectionGroup.put(file, collection);
@@ -346,7 +351,7 @@ public class NucleusDetector {
     smallRegion.setRoi(nucleus);
 
     // turn roi into Nucleus for manipulation
-    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
+    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position, this.angleProfileWindowSize);
     currentNucleus.setSignalThreshold(this.signalThreshold);
     currentNucleus.setMinSignalSize(this.minSignalSize);
     currentNucleus.setMaxSignalFraction(this.maxSignalFraction);

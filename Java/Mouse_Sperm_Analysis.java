@@ -65,6 +65,7 @@ public class Mouse_Sperm_Analysis
     analysisCreator.runAnalysis();
     analysisCreator.assignNucleusTypes();
     analysisCreator.analysePopulations();
+    analysisCreator.exportAnalysisLog();
 
     IJ.log("----------------------------- ");
     IJ.log("All done!"                     );

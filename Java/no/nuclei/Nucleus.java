@@ -110,7 +110,7 @@ public class Nucleus
 
   private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
   
-  public Nucleus (Roi roi, File file, ImagePlus image, ImagePlus enlarged, int number, String position) { // construct from an roi
+  public Nucleus (Roi roi, File file, ImagePlus image, ImagePlus enlarged, int number, String position, int angleProfileWindowSize) { // construct from an roi
 
     // assign main features
     this.roi             = roi;
@@ -145,7 +145,7 @@ public class Nucleus
 
     // calculate angle profile
     try{
-      angleProfile = new AngleProfile(this.smoothedPolygon);
+      angleProfile = new AngleProfile(this.smoothedPolygon, angleProfileWindowSize);
      } catch(Exception e){
        IJ.log("Cannot create angle profile: "+e);
      } 

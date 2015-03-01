@@ -31,12 +31,13 @@ public class AngleProfile {
   private double medianAngle = 0;
 	
 
-	public AngleProfile(FloatPolygon p){
+	public AngleProfile(FloatPolygon p, int angleProfileWindowSize){
 		this.polygon = p;
 		this.array = new NucleusBorderPoint[p.npoints];
 		for(int i=0; i<this.polygon.npoints; i++){
           array[i] = new NucleusBorderPoint( p.xpoints[i], p.ypoints[i]);
         }
+    this.angleProfileWindowSize = angleProfileWindowSize;
 		updateAngleCalculations();
 	}
 
@@ -222,7 +223,7 @@ public class AngleProfile {
     int old = this.angleProfileWindowSize;
     this.angleProfileWindowSize = i;
     if(old != i){
-      calculateAngles(); // trigget a recalc on change
+      updateAngleCalculations(); // trigget a recalc on change
     }
   }
 
