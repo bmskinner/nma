@@ -225,6 +225,16 @@ public class NucleusDetector {
             ImagePlus localImagePlus = localOpener.openImage(file.getAbsolutePath());             
             // handle the image
             if(localImagePlus.getType()==ImagePlus.COLOR_RGB){ // convert to RGB
+
+              // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
+              File output = new File(folder.getAbsolutePath()+File.separator+outputFolder);
+              if(!output.exists()){
+                try{
+                  output.mkdir();
+                } catch(Exception e) {
+                  IJ.log("Failed to create directory: "+e);
+                }
+              }
               processImage(localImagePlus, file);
               localImagePlus.close();
             } else {

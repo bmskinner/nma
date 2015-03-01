@@ -81,18 +81,18 @@ public class AnalysisCreator {
     this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
     this.outputFolder = new File(this.folder.getAbsolutePath()+File.separator+outputFolderName);
-    if(!this.outputFolder.exists()){
-      try{
-        this.outputFolder.mkdir();
-      } catch(Exception e) {
-        IJ.log("Failed to create directory: "+e);
-      }
-    }
+    // if(!this.outputFolder.exists()){
+    //   try{
+    //     this.outputFolder.mkdir();
+    //   } catch(Exception e) {
+    //     IJ.log("Failed to create directory: "+e);
+    //   }
+    // }
 
-    this.logAnalysis = new File(this.outputFolder.getAbsolutePath()+File.separator+"logAnalysis.txt");
-    if(this.logAnalysis.exists()){
-      this.logAnalysis.delete();
-    }
+    // this.logAnalysis = new File(this.outputFolder.getAbsolutePath()+File.separator+"logAnalysis.txt");
+    // if(this.logAnalysis.exists()){
+    //   this.logAnalysis.delete();
+    // }
   }
 
   /*
@@ -453,53 +453,56 @@ public class AnalysisCreator {
   }
 
   public void exportAnalysisLog(){
-    StringBuilder outLine = new StringBuilder();
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-    String timeStamp = formatter.format(Calendar.getInstance().getTime());
-    outLine.append("-------------------------\n");
-    outLine.append("Nuclear morphology analysis log\n");
-    outLine.append("-------------------------\n");
-    outLine.append("Analysis began    :"+formatter.format(this.startTime)+"\n");
-    outLine.append("Analysis complete :"+timeStamp+"\n");
-    outLine.append("-------------------------\n");
-    outLine.append("Parameters:\n");
-    outLine.append("-------------------------\n");
-    outLine.append("\tNucleus thresholding: "+this.getNucleusThreshold()+"\n");
-    outLine.append("\tNucleus minimum size: "+this.getMinNucleusSize()+"\n");
-    outLine.append("\tNucleus maximum size: "+this.getMaxNucleusSize()+"\n");
-    outLine.append("\tNucleus minimum circ: "+this.getMinNucleusCirc()+"\n");
-    outLine.append("\tNucleus maximum circ: "+this.getMaxNucleusCirc()+"\n");
-    outLine.append("\tSignal thresholding : "+this.getSignalThreshold()+"\n");
-    outLine.append("\tSignal minimum size : "+this.getMinSignalSize()+"\n");
-    outLine.append("\tSignal max. fraction: "+this.getMaxSignalFraction()+"\n");
-    outLine.append("\tAngle profile window: "+this.getAngleProfileWindowSize()+"\n");
-    outLine.append("\tNucleus class       : "+this.nucleusClass.getSimpleName()+"\n");
-    outLine.append("\tCollection class    : "+this.collectionClass.getSimpleName()+"\n");
-    outLine.append("-------------------------\n");
-    outLine.append("Populations:\n");
-    outLine.append("-------------------------\n");
 
     for(Analysable r : this.nuclearPopulations){
-      outLine.append("\t"+r.getFolder().getAbsolutePath()+"\n");
-      // outLine.append("\t\t"+r.getType()+" : "+r.getNucleusCount()+" nuclei\n");
+      
+      // outLine.append("\t\t"+r.getType()+" : "+r.getNucleusCount()+" nuclei\r\n");
+      StringBuilder outLine = new StringBuilder();
+      SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+      String timeStamp = formatter.format(Calendar.getInstance().getTime());
+      outLine.append("-------------------------\r\n");
+      outLine.append("Nuclear morphology analysis log\r\n");
+      outLine.append("-------------------------\r\n");
+      outLine.append("Analysis began    :"+formatter.format(this.startTime)+"\r\n");
+      outLine.append("Analysis complete :"+timeStamp+"\r\n");
+      outLine.append("-------------------------\r\n");
+      outLine.append("Parameters:\r\n");
+      outLine.append("-------------------------\r\n");
+      outLine.append("\tNucleus thresholding: "+this.getNucleusThreshold()+"\r\n");
+      outLine.append("\tNucleus minimum size: "+this.getMinNucleusSize()+"\r\n");
+      outLine.append("\tNucleus maximum size: "+this.getMaxNucleusSize()+"\r\n");
+      outLine.append("\tNucleus minimum circ: "+this.getMinNucleusCirc()+"\r\n");
+      outLine.append("\tNucleus maximum circ: "+this.getMaxNucleusCirc()+"\r\n");
+      outLine.append("\tSignal thresholding : "+this.getSignalThreshold()+"\r\n");
+      outLine.append("\tSignal minimum size : "+this.getMinSignalSize()+"\r\n");
+      outLine.append("\tSignal max. fraction: "+this.getMaxSignalFraction()+"\r\n");
+      outLine.append("\tAngle profile window: "+this.getAngleProfileWindowSize()+"\r\n");
+      outLine.append("\tNucleus class       : "+this.nucleusClass.getSimpleName()+"\r\n");
+      outLine.append("\tCollection class    : "+this.collectionClass.getSimpleName()+"\r\n");
+      outLine.append("-------------------------\r\n");
+      outLine.append("Populations:\r\n");
+      outLine.append("-------------------------\r\n");
+
+      outLine.append("\t"+r.getFolder().getAbsolutePath()+"\r\n");
 
       LinkedHashMap<String, Integer> nucleusCounts = collectionNucleusCounts.get(r.getFolder());
       Set<String> keys = nucleusCounts.keySet();
       for(String s : keys){
         double percent = ( (double) nucleusCounts.get(s) / (double)r.getNucleusCount() )* 100;
         if(s.equals("input")){
-          outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei\n");
+          outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei\r\n");
         } else {
             if(s.equals("failed")){
-              outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei\n");
-              outLine.append("\t\t"+r.getType()+" : "+r.getNucleusCount()+" nuclei\n");
+              outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei\r\n");
+              outLine.append("\t\t"+r.getType()+" : "+r.getNucleusCount()+" nuclei\r\n");
             } else {
-              outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei ("+(int)percent+"% of analysable)\n");
-            }
-        }
-      }
+              outLine.append("\t\t"+s+" : "+nucleusCounts.get(s)+" nuclei ("+(int)percent+"% of analysable)\r\n");
+            } //else
+        } //else
+      } //for(String s : keys)
+      String outPath = r.getFolder().getAbsolutePath()+File.separator+this.outputFolderName+File.separator+"logAnalysis.txt";
+      IJ.append( outLine.toString(), outPath);
     }
-    IJ.append( outLine.toString(), this.logAnalysis.getAbsolutePath());
   }
 }
 
