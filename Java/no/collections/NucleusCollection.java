@@ -867,6 +867,7 @@ public class NucleusCollection {
                        s.getFeret()                    +"\t"+
                        s.getDistanceFromCoM()          +"\t"+
                        s.getFractionalDistanceFromCoM()+"\t"+
+                       s.getRadius()                   +"\t"+
                        s.getPerimeter()                +"\t"+
                        path, log);
           } // end for
