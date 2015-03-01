@@ -136,7 +136,7 @@ public class RodentSpermNucleusCollection
   public void calculateOffsets(){
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+      RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
 
       // the curve needs to be matched to the median 
       // hence the median array needs to be the same curve length
@@ -156,6 +156,7 @@ public class RodentSpermNucleusCollection
 
       // also update the head position
       n.addBorderPointOfInterest("head", n.findOppositeBorder( n.getBorderPoint(newTailIndex) ));
+      n.splitNucleusToHeadAndHump();
     }
   }
 

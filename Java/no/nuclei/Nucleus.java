@@ -602,7 +602,7 @@ public class Nucleus
     // run the particle analyser
     ResultsTable rt = new ResultsTable();
     double maxSignalSize = this.getArea() * this.maxSignalFraction;
-    ParticleAnalyzer pa = new ParticleAnalyzer( ParticleAnalyzer.ADD_TO_MANAGER, 
+    ParticleAnalyzer pa = new ParticleAnalyzer( ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
                                                 ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA,
                                                  rt, 
                                                  this.minSignalSize, 
@@ -656,11 +656,15 @@ public class Nucleus
 
       ResultsTable redResults = findSignalMeasurements(this.sourceImage, roi, RED_CHANNEL);
       XYPoint signalCoM = new XYPoint(redResults.getValue("XM", 0),  redResults.getValue("YM", 0) );
-      this.addRedSignal( new NuclearSignal( roi, 
-                                   redResults.getValue("Area",0), 
-                                   redResults.getValue("Feret",0), 
-                                   redResults.getValue("Perim.",0), 
-                                   signalCoM));
+
+      // don't add anything outside the nuclear border
+      if(this.getRoi().contains(signalCoM.getXAsInt(), signalCoM.getYAsInt())){
+        this.addRedSignal( new NuclearSignal( roi, 
+                                     redResults.getValue("Area",0), 
+                                     redResults.getValue("Feret",0), 
+                                     redResults.getValue("Perim.",0), 
+                                     signalCoM));
+      }
     }
 
     // Add green signals to the nucleus
@@ -668,11 +672,13 @@ public class Nucleus
 
       ResultsTable greenResults = findSignalMeasurements(this.sourceImage, roi, GREEN_CHANNEL);
       XYPoint signalCoM = new XYPoint(greenResults.getValue("XM", 0),  greenResults.getValue("YM", 0) );
-      this.addGreenSignal( new NuclearSignal( roi, 
-                                                  greenResults.getValue("Area",0), 
-                                                  greenResults.getValue("Feret",0), 
-                                                  greenResults.getValue("Perim.",0), 
-                                                  signalCoM));
+      if(this.getRoi().contains(signalCoM.getXAsInt(), signalCoM.getYAsInt())){
+        this.addGreenSignal( new NuclearSignal( roi, 
+                                                    greenResults.getValue("Area",0), 
+                                                    greenResults.getValue("Feret",0), 
+                                                    greenResults.getValue("Perim.",0), 
+                                                    signalCoM));
+      }
     }    
   }
 
@@ -1111,7 +1117,23 @@ public class Nucleus
   }
 
   public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
+    ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+    signals.add(this.getRedSignals());
+    signals.add(this.getGreenSignals());
 
+    for( ArrayList<NuclearSignal> signalGroup : signals ){
+
+      if(signalGroup.size()>0){
+
+        for(int i=0;i<signalGroup.size();i++){
+          NuclearSignal n = signalGroup.get(i);
+          double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), n.getCentreOfMass());
+
+          // set the final angle
+          n.setAngle(angle);
+        }
+      }
+    }
   }
 
   public void exportSignalDistanceMatrix(){
@@ -1214,7 +1236,7 @@ public class Nucleus
                       "IS_MIDPOINT\t"+
                       "IS_BLOCK\t"+
                       "NORMALISED_PROFILE_X\t"+
-                      "DISTANCE_PROFILE\n";
+                      "DISTANCE_PROFILE\r\n";
 
     for(int i=0;i<this.getLength();i++){
 
@@ -1235,7 +1257,7 @@ public class Nucleus
                   this.getBorderPoint(i).isMidpoint()                     +"\t"+
                   this.getBorderPoint(i).isBlock()                        +"\t"+
                   normalisedX                                             +"\t"+
-                  this.getBorderPoint(i).getDistanceAcrossCoM()           +"\n";
+                  this.getBorderPoint(i).getDistanceAcrossCoM()           +"\r\n";
     }
     IJ.append( outLine, f.getAbsolutePath());
   }

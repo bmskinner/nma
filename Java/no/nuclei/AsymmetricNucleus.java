@@ -179,29 +179,4 @@ public class AsymmetricNucleus
     Measure signal positions
     -----------------------
   */
-
-  public void calculateSignalAnglesFromTail(){
-    this.calculateSignalAnglesFromPoint(this.getBorderPointOfInterest("tail"));
-  }
-
-  public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
-
-    ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
-    signals.add(this.getRedSignals());
-    signals.add(this.getGreenSignals());
-
-    for( ArrayList<NuclearSignal> signalGroup : signals ){
-
-      if(signalGroup.size()>0){
-
-        for(int i=0;i<signalGroup.size();i++){
-          NuclearSignal n = signalGroup.get(i);
-          double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), n.getCentreOfMass());
-
-          // set the final angle
-          n.setAngle(angle);
-        }
-      }
-    }
-  }  
 }

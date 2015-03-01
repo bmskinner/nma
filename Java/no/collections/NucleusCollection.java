@@ -119,7 +119,6 @@ public class NucleusCollection {
 	}
 
   public void exportStatsFiles(){
-    IJ.log("Exporting to: "+this.getFolder().getAbsolutePath()+File.separator+this.getOutputFolder()+File.separator);
     this.exportNuclearStats("logStats");
     this.exportImagePaths("logImagePaths");
     this.exportAngleProfiles();
@@ -936,10 +935,10 @@ public class NucleusCollection {
 
     String logFile = makeGlobalLogFile(filename);
 
-    String outLine = "X_POSITION\tANGLE_MEDIAN\n";
+    String outLine = "X_POSITION\tANGLE_MEDIAN\r\n";
     
     for(int i =0;i<profile.length;i++){
-      outLine +=  i+"\t"+profile[i]+"\n";
+      outLine +=  i+"\t"+profile[i]+"\r\n";
     }
     IJ.append(outLine, logFile); 
   }
@@ -948,7 +947,7 @@ public class NucleusCollection {
 
     String logFile = makeGlobalLogFile(filename);
 
-    String outLine = "X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\n";
+    String outLine = "X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\r\n";
     
 
     for(int i =0;i<profile.get(0).length;i++){
@@ -958,7 +957,7 @@ public class NucleusCollection {
                   profile.get(3)[i]+"\t"+
                   profile.get(4)[i]+"\t"+
                   profile.get(5)[i]+"\t"+
-                  profile.get(6)[i]+"\n";
+                  profile.get(6)[i]+"\r\n";
     }
     IJ.append(outLine, logFile); 
   }
@@ -997,7 +996,7 @@ public class NucleusCollection {
     for(String heading : headings){
       outLine.append(heading+"\t");
     }
-    outLine.append("\n");
+    outLine.append("\r\n");
 
 
     for(int i=0;i<this.getNucleusCount();i++){
@@ -1005,7 +1004,7 @@ public class NucleusCollection {
         List<String> column = stats.get(heading);
         outLine.append(column.get(i)+"\t");
       }
-      outLine.append("\n");
+      outLine.append("\r\n");
     }
     IJ.append(  outLine.toString(), statsFile);
   }
