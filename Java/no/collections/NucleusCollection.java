@@ -1213,8 +1213,8 @@ public class NucleusCollection {
 
     double[] xmedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(0) );
     double[] ymedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) );
-    // double[] lowQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) );
-    // double[] uppQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) );
+    double[] lowQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) );
+    double[] uppQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) );
     // double[] tenQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(4) );
     // double[] ninetyQuartiles =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(5) );
 
@@ -1223,32 +1223,43 @@ public class NucleusCollection {
     plot.setLineWidth(3);
     plot.addPoints(xmedians, ymedians, Plot.LINE);
 
+    plot.setColor(Color.DARK_GRAY);
+    plot.setLineWidth(2);
+    plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+    plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
+
     this.addNormalisedMedianProfileFromPoint(pointType, ymedians);
+  }
 
-    // adding boxplots should be a separate function
+  /*
+    Draw a boxplot on the normalised plots. Specify which BorderPointOfInterest is to be plotted.
+  */
+  public void drawBoxplotOnNormalisedMedianLineFromPoint(String profilePointType, Plot plot, String boxPointType){
+
     // get the tail positions with the head offset applied
-    // double[] xTails = this.getNormalisedTailIndexesFromHead();
-    // double[] yTails = new double[xTails.length];
-    // Arrays.fill(yTails, CHART_TAIL_BOX_Y_MID); // all dots at y=300
-    // plot.setColor(Color.LIGHT_GRAY);
-    // plot.addPoints(xTails, yTails, Plot.DOT);
+    double[] xPoints = new double[this.getNucleusCount()];
+    for(int i= 0; i<this.getNucleusCount();i++){
 
-    // // median tail positions
-    // double tailQ50 = NuclearOrganisationUtility.quartile(xTails, 50);
-    // double tailQ25 = NuclearOrganisationUtility.quartile(xTails, 25);
-    // double tailQ75 = NuclearOrganisationUtility.quartile(xTails, 75);
-    // plot.setColor(Color.DARK_GRAY);
-    // plot.setLineWidth(2);
-    // plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-    // plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
+      INuclearFunctions n = this.getNucleus(i);
+      xPoints[i] =  ((double) n.getOffsetIndex(boxPointType, profilePointType) / (double)n.getLength()) *100;
+    }
+    double[] yPoints = new double[xPoints.length];
+    Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=300
+    plot.setColor(Color.LIGHT_GRAY);
+    plot.addPoints(xPoints, yPoints, Plot.DOT);
 
-    // plot.setColor(Color.DARK_GRAY);
-    // plot.setLineWidth(1);
-    // plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
-    // plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
-    // plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
-    // plot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
-    // plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
+    // median tail positions
+    double tailQ50 = NuclearOrganisationUtility.quartile(xPoints, 50);
+    double tailQ25 = NuclearOrganisationUtility.quartile(xPoints, 25);
+    double tailQ75 = NuclearOrganisationUtility.quartile(xPoints, 75);
+
+    plot.setColor(Color.DARK_GRAY);
+    plot.setLineWidth(1);
+    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
+    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
+    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
+    plot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
+    plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
   }
 
   public void drawNormalisedMedianLines(){
@@ -1258,6 +1269,7 @@ public class NucleusCollection {
 
         Plot normPlot = getPlot(pointType, "norm");
         drawNormalisedMedianLineFromPoint(pointType, normPlot);
+        drawBoxplotOnNormalisedMedianLineFromPoint(pointType, normPlot, "tail");
     }
   }
 

@@ -91,6 +91,17 @@
     return s;
   }
 
+  /*
+    Turn an int[] into a double[]
+  */
+  public static double[] getdoubleFromInt(int[] d){
+    double[] s = new double[d.length];
+    for (int i = 0; i < s.length; i++){
+        s[i] = (double) d[i];
+    }
+    return s;
+  }
+
   public static int wrapIndex(int i, int length){
     if(i<0)
       i = length + i; // if i = -1, in a 200 length array,  will return 200-1 = 199

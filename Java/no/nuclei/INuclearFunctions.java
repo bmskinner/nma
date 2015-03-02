@@ -90,6 +90,8 @@ public interface INuclearFunctions
 
   public int getBorderIndexOfInterest(String name);
 
+  public int getOffsetIndex(String indexPoint, String referencePoint);
+
 	
 	/*
     -----------------------
