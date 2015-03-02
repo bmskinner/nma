@@ -952,13 +952,14 @@ public class NucleusCollection {
     
 
     for(int i =0;i<profile.get(0).length;i++){
+      int numberOfPoints = (int) profile.get(6)[i];
       outLine +=  profile.get(0)[i]+"\t"+
                   profile.get(1)[i]+"\t"+
                   profile.get(2)[i]+"\t"+
                   profile.get(3)[i]+"\t"+
                   profile.get(4)[i]+"\t"+
                   profile.get(5)[i]+"\t"+
-                  profile.get(6)[i]+"\r\n";
+                  numberOfPoints   +"\r\n";
     }
     IJ.append(outLine, logFile); 
   }

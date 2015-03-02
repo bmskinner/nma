@@ -351,7 +351,7 @@ public class AsymmetricNucleusCollection
     for(int i=0;i<maxPerim;i++){
       outLine.append(i+"\t");
     }
-    outLine.append("\n");
+    outLine.append("\r\n");
 
 
     // export the profiles for each nucleus
@@ -370,66 +370,9 @@ public class AsymmetricNucleusCollection
       for(int j=0;j<profile.length;j++){
         outLine.append(profile[j]+"\t");
       }
-      outLine.append("\n");
+      outLine.append("\r\n");
     }
     IJ.append(  outLine.toString(), statsFile);
     IJ.log("    Cluster export complete");
   }
-
-  /*
-    -----------------------
-    Draw plots
-    -----------------------
-  */
-    // KEEP THIS FOR THE BOXPLOT CODE - NEED TO MAKE GENERIC
-  /*
-		Draw the median line on the normalised profile
-		chart, aligned to the sperm tail
-  */
-  // public void drawNormalisedMedianLineFromTail(){
-
-  //   this.drawNormalisedMedianLineFromPoint(this.getTail(), "tail", Plot normProfileFromTailPlot);
-
-  //   // ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile( this.getNormalisedProfilesFromTail() );
-  //   // this.exportMediansAndQuartilesOfProfile(medians, this.getLogMedianFromTailFile());
-
-  //   // double[] xmedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(0) );
-  //   // double[] ymedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) );
-  //   // double[] lowQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) );
-  //   // double[] uppQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) );
-  //   // double[] tenQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(4) );
-  //   // double[] ninetyQuartiles =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(5) );
-
-  //   // setNormalisedMedianProfileFromTail(ymedians);
-
-  //   // // get the tail positions with the head offset applied
-  //   // double[] xTails = this.getNormalisedHeadIndexesFromTail();
-  //   // double[] yTails = new double[xTails.length];
-  //   // Arrays.fill(yTails, CHART_TAIL_BOX_Y_MID); // all dots at y=300
-  //   // normProfileFromTailPlot.setColor(Color.LIGHT_GRAY);
-  //   // normProfileFromTailPlot.addPoints(xTails, yTails, Plot.DOT);
-
-  //   // // median tail positions
-  //   // double tailQ50 = NuclearOrganisationUtility.quartile(xTails, 50);
-  //   // double tailQ25 = NuclearOrganisationUtility.quartile(xTails, 25);
-  //   // double tailQ75 = NuclearOrganisationUtility.quartile(xTails, 75);
-
-  //   // // add the median lines to the chart
-  //   // normProfileFromTailPlot.setColor(Color.BLACK);
-  //   // normProfileFromTailPlot.setLineWidth(3);
-  //   // normProfileFromTailPlot.addPoints(xmedians, ymedians, Plot.LINE);
-  //   // normProfileFromTailPlot.setColor(Color.DARK_GRAY);
-  //   // normProfileFromTailPlot.setLineWidth(2);
-  //   // normProfileFromTailPlot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-  //   // normProfileFromTailPlot.addPoints(xmedians, uppQuartiles, Plot.LINE);
-
-  //   // normProfileFromTailPlot.setColor(Color.DARK_GRAY);
-  //   // normProfileFromTailPlot.setLineWidth(1);
-  //   // normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
-  //   // normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
-  //   // normProfileFromTailPlot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
-  //   // normProfileFromTailPlot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
-  //   // normProfileFromTailPlot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
-  // }
-
 }

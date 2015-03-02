@@ -448,7 +448,6 @@ public class AnalysisCreator {
 
     for(Analysable r : this.nuclearPopulations){
       
-      // outLine.append("\t\t"+r.getType()+" : "+r.getNucleusCount()+" nuclei\r\n");
       StringBuilder outLine = new StringBuilder();
       SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
       String timeStamp = formatter.format(Calendar.getInstance().getTime());
