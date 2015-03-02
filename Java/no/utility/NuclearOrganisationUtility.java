@@ -24,6 +24,10 @@
           throw new IllegalArgumentException("The data array either is null or does not contain any data.");
       }
 
+      if(values.length==1){
+        return values[0];
+      }
+
       // Rank order the values
       double[] v = new double[values.length];
       System.arraycopy(values, 0, v, 0, values.length);
