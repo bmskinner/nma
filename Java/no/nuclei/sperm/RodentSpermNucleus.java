@@ -181,24 +181,28 @@ public class RodentSpermNucleus
     If acrosome is at the beginning:
       returns true
     else returns false
+    counts the number of points above 180 degrees in each half of the array
   */
   public boolean isProfileOrientationOK(){
 
-    double maxAngle = 0.0;
-    int maxIndex = 0;
+    int frontPoints = 0;
+    int rearPoints = 0;
+
+    int midPoint = (int) (this.getLength()/2) ;
     for(int i=0; i<this.getLength();i++){
 
-        double angle = this.getBorderPoint(i).getInteriorAngle();
-        if(angle>maxAngle){
-          maxAngle = angle;
-          maxIndex = i;
+        if(this.getBorderPoint(i).getInteriorAngle()>180 && i<midPoint){
+          frontPoints++;
+        }
+        if(this.getBorderPoint(i).getInteriorAngle()>180 && i>midPoint){
+          rearPoints++;
         }
     }
 
-    if(this.getLength() - maxIndex < maxIndex){ // if the maxIndex is closer to the end than the beginning
-      return false;
-    } else{ 
+    if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
       return true;
+    } else{ 
+      return false;
     }
   }
 
