@@ -56,6 +56,8 @@ public class AnalysisCreator {
   private File logAnalysis;
   private File nucleiToFind;
 
+  private boolean analysisRun = false;
+  private boolean reAnalysisRun = false;
   private Class nucleusClass;
   private Class collectionClass;
 
@@ -81,18 +83,6 @@ public class AnalysisCreator {
     this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
     this.outputFolder = new File(this.folder.getAbsolutePath()+File.separator+outputFolderName);
-    // if(!this.outputFolder.exists()){
-    //   try{
-    //     this.outputFolder.mkdir();
-    //   } catch(Exception e) {
-    //     IJ.log("Failed to create directory: "+e);
-    //   }
-    // }
-
-    // this.logAnalysis = new File(this.outputFolder.getAbsolutePath()+File.separator+"logAnalysis.txt");
-    // if(this.logAnalysis.exists()){
-    //   this.logAnalysis.delete();
-    // }
   }
 
   /*
@@ -118,6 +108,7 @@ public class AnalysisCreator {
 
     this.folderCollection = detector.getNucleiCollections();
     IJ.log("Imported folder(s)");
+    this.analysisRun = true;
   }
 
   /**
@@ -136,6 +127,7 @@ public class AnalysisCreator {
     detector.runDetector();
     this.folderCollection = detector.getNucleiCollections();
     IJ.log("Imported folder(s)");
+    this.reAnalysisRun = true;
   }
 
   private void  setDetectionParameters(NucleusDetector detector){
@@ -463,8 +455,13 @@ public class AnalysisCreator {
       outLine.append("-------------------------\r\n");
       outLine.append("Nuclear morphology analysis log\r\n");
       outLine.append("-------------------------\r\n");
-      outLine.append("Analysis began    :"+formatter.format(this.startTime)+"\r\n");
-      outLine.append("Analysis complete :"+timeStamp+"\r\n");
+      outLine.append("Analysis began    : "+formatter.format(this.startTime)+"\r\n");
+      outLine.append("Analysis complete : "+timeStamp+"\r\n");
+      if(this.analysisRun)
+        outLine.append("Analysis type     : Primary analysis\r\n");
+       if(this.reAnalysisRun)
+        outLine.append("Analysis type     : Nucleus refinding analysis\r\n");
+      
       outLine.append("-------------------------\r\n");
       outLine.append("Parameters:\r\n");
       outLine.append("-------------------------\r\n");
