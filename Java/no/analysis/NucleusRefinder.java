@@ -128,7 +128,7 @@ public class NucleusRefinder
       y = Double.parseDouble(positionScanner.next());
     }
 
-    IJ.log("Found image: "+name+" x:"+x+" y:"+y);
+    // IJ.log("Found image: "+name+" x:"+x+" y:"+y);
     XYPoint point = new XYPoint(x, y);
 
     HashMap<String, XYPoint> map = new HashMap<String, XYPoint>();
@@ -186,6 +186,16 @@ public class NucleusRefinder
               ImagePlus localImagePlus = localOpener.openImage(file.getAbsolutePath());             
               // handle the image
               if(localImagePlus.getType()==ImagePlus.COLOR_RGB){ // convert to RGB
+
+                // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
+                File output = new File(folder.getAbsolutePath()+File.separator+outputFolder);
+                if(!output.exists()){
+                  try{
+                    output.mkdir();
+                  } catch(Exception e) {
+                    IJ.log("Failed to create directory: "+e);
+                  }
+                }
                 processImage(localImagePlus, file);
                 localImagePlus.close();
               } else {
@@ -219,7 +229,6 @@ public class NucleusRefinder
 
     for(Roi roi : roiArray){
       
-      IJ.log("  Acquiring nucleus "+i);
       try{
 
         // if the point is within the roi
@@ -227,9 +236,10 @@ public class NucleusRefinder
         for( HashMap<String, XYPoint> hash : nucleiToFind ){
           if(hash.containsKey(path.getName())){
             XYPoint p = hash.get(path.getName());
-            if(roi.contains(p.getXAsInt(), p.getYAsInt())){
+            if(roi.getBounds().contains(p.getXAsInt(), p.getYAsInt())){
               ok = true;
-              IJ.log("Found a nucleus at "+p.getXAsInt()+","+p.getYAsInt());
+              // IJ.log("  Acquiring nucleus "+i);
+              IJ.log("  Acquiring nucleus at "+p.getXAsInt()+","+p.getYAsInt());
             }
           }
         }

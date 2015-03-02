@@ -125,6 +125,7 @@ public class AnalysisCreator {
     NucleusRefinder detector = new NucleusRefinder(this.folder, this.outputFolderName, nucleiToFind);
     setDetectionParameters(detector);
     detector.runDetector();
+    this.nucleiToFind = nucleiToFind;
     this.folderCollection = detector.getNucleiCollections();
     IJ.log("Imported folder(s)");
     this.reAnalysisRun = true;
@@ -458,8 +459,10 @@ public class AnalysisCreator {
       outLine.append("Analysis complete : "+timeStamp+"\r\n");
       if(this.analysisRun)
         outLine.append("Analysis type     : Primary analysis\r\n");
-       if(this.reAnalysisRun)
+      if(this.reAnalysisRun){
         outLine.append("Analysis type     : Nucleus refinding analysis\r\n");
+        outLine.append("Mapping file      : "+this.nucleiToFind.getAbsolutePath()+"\r\n");
+      }
       
       outLine.append("-------------------------\r\n");
       outLine.append("Parameters:\r\n");
