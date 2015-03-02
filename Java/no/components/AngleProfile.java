@@ -43,7 +43,9 @@ public class AngleProfile {
 
 
   /*
+    ---------------------
     Getters
+    ---------------------
   */
 
   public int getAngleProfileWindowSize(){
@@ -216,7 +218,9 @@ public class AngleProfile {
   }
 
   /*
+    ---------------------
     Setters
+    ---------------------
   */
 
   public void setAngleProfileWindowSize(int i){
@@ -240,9 +244,14 @@ public class AngleProfile {
   }
 
   /*
+    ---------------------
     Angle calculations
+    ---------------------
   */
 
+  /*
+    Update all the profile angles and deltas
+  */
 	public void updateAngleCalculations(){
 		calculateAngles();
 		calculateDeltaAngles();
@@ -410,8 +419,8 @@ public class AngleProfile {
 
   /*
     Change the smoothed array order to put the selected index at the beginning
-    only works for smoothed array - indexes are different for normal array
-    Input: int the index to move to the start
+    Input: int the index to move to the start. 
+    DEPRECATE IN FAVOUR OF DYNAMIC OFFSETTING
   */
   public void moveIndexToArrayStart(int i){
 
@@ -438,7 +447,7 @@ public class AngleProfile {
   }  
 
   /*
-  	Flip the array around an X position
+  	Flip the X positions of the profile around an X position
   */
   public void flipXAroundPoint(XYPoint p){
 

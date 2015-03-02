@@ -382,10 +382,10 @@ public class Nucleus
     be numbered relative to a NucleusBorderPoint referencePoint. 
     Example: if tail is index 10 and head is index 15, this(head, tail) will return 5
   */
-  public int getOffsetIndex(String indexPoint, String referencePoint){
+  public int getOffsetIndex(NucleusBorderPoint indexPoint, String referencePoint){
 
     int referenceIndex = getBorderIndexOfInterest(referencePoint);
-    int rawIndex = getBorderIndexOfInterest(indexPoint);
+    int rawIndex = this.getAngleProfile().getIndexOfPoint(indexPoint);
     int newIndex = NuclearOrganisationUtility.wrapIndex(rawIndex - referenceIndex, this.getLength());
     return newIndex;
   }

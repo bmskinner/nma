@@ -1241,7 +1241,7 @@ public class NucleusCollection {
     for(int i= 0; i<this.getNucleusCount();i++){
 
       INuclearFunctions n = this.getNucleus(i);
-      xPoints[i] =  ((double) n.getOffsetIndex(boxPointType, profilePointType) / (double)n.getLength()) *100;
+      xPoints[i] =  ((double) n.getOffsetIndex(n.getBorderPointOfInterest(boxPointType), profilePointType) / (double)n.getLength()) *100;
     }
     double[] yPoints = new double[xPoints.length];
     Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=300
@@ -1314,9 +1314,11 @@ public class NucleusCollection {
             NucleusBorderPoint border = signalGroup.get(j).getClosestBorderPoint();
             for(int k=0; k<n.getLength();k++){
 
-              // THIS IS NOT SETUP FOR ARBITRARY POINT OFFSETS
+              // We want to get the profile position, offset to the pointType 
               if(n.getBorderPoint(k).overlaps(border)){
-                xPoints.add( n.getNormalisedProfilePositions()[k] );
+                int rawIndex = n.getOffsetIndex(n.getBorderPoint(k), pointType);
+                double normIndex = ((double) rawIndex / (double) n.getLength()) *100;
+                xPoints.add( normIndex );
                 double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( signalGroup.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
                 yPoints.add(yPosition);
               }
