@@ -126,13 +126,24 @@ public class Mouse_Sperm_Analysis
     gd.addNumericField("Signal threshold: ", signalThreshold, 0);
     gd.addNumericField("Min nuclear size: ", minNucleusSize, 0);
     gd.addNumericField("Max nuclear size: ", maxNucleusSize, 0);
+    gd.addNumericField("Min nuclear circ: ", minNucleusCirc, 2);
+    gd.addNumericField("Max nuclear circ: ", maxNucleusCirc, 2);
+    gd.addNumericField("Min signal size: ", minSignalSize, 0);
+    gd.addNumericField("Max signal fraction: ", maxSignalFraction, 2);
+    gd.addNumericField("Profile window size: ", angleProfileWindowSize, 0);
     gd.addCheckbox("Re-analysis?", false);
     gd.showDialog();
     if (gd.wasCanceled()) return false;
+
     nucleusThreshold = (int) gd.getNextNumber();
     signalThreshold = (int) gd.getNextNumber();
     minNucleusSize = gd.getNextNumber();
     maxNucleusSize = gd.getNextNumber();
+    minNucleusCirc = gd.getNextNumber();
+    maxNucleusCirc = gd.getNextNumber();
+    minSignalSize = gd.getNextNumber();
+    maxSignalFraction = gd.getNextNumber();
+    angleProfileWindowSize = (int) gd.getNextNumber();
     performReanalysis = gd.getNextBoolean();
     return true;
   }
