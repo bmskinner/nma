@@ -114,6 +114,12 @@ public class AnalysisCreator {
     } else {
       this.runReAnalysis();
     }
+    this.assignNucleusTypes();
+    this.analysePopulations();
+    this.exportAnalysisLog();
+    IJ.log("----------------------------- ");
+    IJ.log("All done!"                     );
+    IJ.log("----------------------------- ");
   }
 
   /*
@@ -534,7 +540,7 @@ public class AnalysisCreator {
   }
 
   public boolean displayOptionsDialog(){
-    GenericDialog gd = new GenericDialog("New mophology analysis");
+    GenericDialog gd = new GenericDialog("New analysis");
     gd.addNumericField("Nucleus threshold: ", nucleusThreshold, 0);
     gd.addNumericField("Signal threshold: ", signalThreshold, 0);
     gd.addNumericField("Min nuclear size: ", minNucleusSize, 0);

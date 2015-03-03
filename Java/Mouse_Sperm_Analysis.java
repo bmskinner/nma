@@ -12,7 +12,6 @@
   morphology comparisons
 */
 import ij.IJ;
-// import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.io.DirectoryChooser;
 import ij.io.Opener;
@@ -30,41 +29,6 @@ public class Mouse_Sperm_Analysis
   implements PlugIn
 {
    
-  /* 
-    Command line parameters to expect
-  */
-  private static final String NUCLEUS_THRESHOLD_OPTION = "nt";
-  private static final String SIGNAL_THRESHOLD_OPTION  = "st";
-  private static final String MIN_NUCLEAR_SIZE_OPTION  = "minN";
-  private static final String MAX_NUCLEAR_SIZE_OPTION  = "maxN";
-  private static final String MIN_NUCLEAR_CIRC_OPTION  = "minC";
-  private static final String MAX_NUCLEAR_CIRC_OPTION  = "maxC";
-  private static final String MIN_SIGNAL_SIZE_OPTION   = "minS" ;
-  private static final String MAX_SIGNAL_FRACT_OPTION  = "maxSf" ;
-  private static final String ANGLE_PROFILE_OPTION     = "aw" ;
-  private static final String INPUT_FOLDER_OPTION      = "folder" ;
-  private static final String MAPPING_FILE_OPTION      = "mf" ;
-
-  /* 
-    Analysis parameters, with defaults
-    if no command line parameters are given
-  */
-  private double minNucleusSize  = 2000;
-  private double maxNucleusSize  = 10000;
-  private double minNucleusCirc  = 0.3;
-  private double maxNucleusCirc  = 0.8;
-
-  private int     nucleusThreshold = 36;
-  private int      signalThreshold = 70;
-  private double     minSignalSize = 50;
-  private double maxSignalFraction = 0.5;
-
-  private int angleProfileWindowSize  = 23;
-
-  private File mappingFile;
-
-  private boolean performReanalysis = false;
-
    /* 
     The first method to be run when the plugin starts.
   */
@@ -76,13 +40,5 @@ public class Mouse_Sperm_Analysis
     analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(new File("test"), "", ""));
 
     analysisCreator.run();
-
-    analysisCreator.assignNucleusTypes();
-    analysisCreator.analysePopulations();
-    analysisCreator.exportAnalysisLog();
-
-    IJ.log("----------------------------- ");
-    IJ.log("All done!"                     );
-    IJ.log("----------------------------- ");
   }  
 }
