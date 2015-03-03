@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.*;
 import no.nuclei.*;
+import no.nuclei.sperm.*;
 import no.analysis.*;
 import no.utility.*;
 import no.collections.*;
@@ -66,12 +67,40 @@ public class AnalysisCreator {
 
   private HashMap<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
+  // allow us to map an id to a class to construct
+  private static HashMap<Integer, Class>  collectionClassTypes;
+  private static HashMap<Integer, Class>  nucleusClassTypes;
+  private static HashMap<String, Integer> nucleusTypes;
+
   // the raw input from nucleus detector
   private HashMap<File, NucleusCollection> folderCollection;
 
   private ArrayList<Analysable> nuclearPopulations = new ArrayList<Analysable>(0);
   private ArrayList<Analysable> failedPopulations  = new ArrayList<Analysable>(0);
   
+
+   /*
+    -----------------------
+    Populate the class map with available options
+    -----------------------
+  */
+  static
+  {
+      nucleusTypes = new HashMap<String, Integer>();
+      nucleusTypes.put("Rodent sperm" , 0);
+      nucleusTypes.put("Pig sperm"    , 1);
+      nucleusTypes.put("Round nucleus", 2);
+
+      collectionClassTypes = new HashMap<Integer, Class>();
+      collectionClassTypes.put(0, new RodentSpermNucleusCollection().getClass());
+      collectionClassTypes.put(1, new PigSpermNucleusCollection().getClass());
+      collectionClassTypes.put(2, new NucleusCollection().getClass());
+
+      nucleusClassTypes = new HashMap<Integer, Class>();
+      nucleusClassTypes.put(0, new RodentSpermNucleus().getClass());
+      nucleusClassTypes.put(1, new PigSpermNucleus().getClass());
+      nucleusClassTypes.put(2, new Nucleus().getClass());
+  }
 
   /*
     -----------------------
@@ -539,6 +568,10 @@ public class AnalysisCreator {
     }
   }
 
+  private String[] getNucleusTypeStrings(){
+    return this.nucleusTypes.keySet().toArray(new String[0]);
+  }
+
   public boolean displayOptionsDialog(){
     GenericDialog gd = new GenericDialog("New analysis");
     gd.addNumericField("Nucleus threshold: ", nucleusThreshold, 0);
@@ -550,6 +583,10 @@ public class AnalysisCreator {
     gd.addNumericField("Min signal size: ", minSignalSize, 0);
     gd.addNumericField("Max signal fraction: ", maxSignalFraction, 2);
     gd.addNumericField("Profile window size: ", angleProfileWindowSize, 0);
+
+    String[] items = this.getNucleusTypeStrings();
+    gd.addChoice("Nucleus type", items, items[2]); // default to rodent for now
+
     gd.addCheckbox("Re-analysis?", false);
     gd.showDialog();
     if (gd.wasCanceled()) return false;
@@ -564,6 +601,11 @@ public class AnalysisCreator {
     maxSignalFraction = gd.getNextNumber();
     angleProfileWindowSize = (int) gd.getNextNumber();
     performReanalysis = gd.getNextBoolean();
+
+    String nucleusType = gd.getNextChoice();
+    int nucleusCode = this.nucleusTypes.get(nucleusType);
+    this.collectionClass = this.collectionClassTypes.get(nucleusCode);
+    this.nucleusClass = this.nucleusClassTypes.get(nucleusCode);
     return true;
   }
 }

@@ -81,6 +81,11 @@ public class AsymmetricNucleusCollection
   		super(folder, outputFolder, type);
   }
 
+  
+  public AsymmetricNucleusCollection(){
+
+  }
+
   public void measureProfilePositions(){
 
     this.createProfileAggregates();

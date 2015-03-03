@@ -107,6 +107,11 @@ public class NucleusCollection {
     this.collectionType = type;
 	}
 
+  // used only for getting classes in setup of analysis
+  public NucleusCollection(){
+
+  }
+
   /*
     -----------------------
     Define adders for all

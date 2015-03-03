@@ -67,6 +67,10 @@ public class RodentSpermNucleusCollection
       super(folder, outputFolder, type);
   }
 
+  public RodentSpermNucleusCollection(){
+    
+  }
+
   @Override
   public void measureProfilePositions(){
 

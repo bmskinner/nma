@@ -1,6 +1,6 @@
 /*
   -------------------------------------------------
-  MOUSE SPERM CARTOGRAPHY IMAGEJ PLUGIN
+  NUCLEAR MORPHOLOGY IMAGEJ PLUGIN
   -------------------------------------------------
   Copyright (C) Ben Skinner 2015
 
@@ -12,20 +12,18 @@
   morphology comparisons
 */
 import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.io.DirectoryChooser;
-import ij.io.Opener;
-import ij.io.OpenDialog;
+// import ij.gui.GenericDialog;
+// import ij.io.DirectoryChooser;
+// import ij.io.Opener;
+// import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
 
-import java.io.File;
-import java.io.IOException;
+// import java.io.File;
+// import java.io.IOException;
 
 import no.analysis.AnalysisCreator;
-import no.nuclei.sperm.RodentSpermNucleus;
-import no.collections.RodentSpermNucleusCollection;
 
-public class Mouse_Sperm_Analysis
+public class Nuclear_Morphology_Analysis
   implements PlugIn
 {
    
@@ -35,10 +33,6 @@ public class Mouse_Sperm_Analysis
   public void run(String paramString)  {
     
     AnalysisCreator analysisCreator = new AnalysisCreator();
-
-    analysisCreator.setNucleusClass(new RodentSpermNucleus());
-    analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(new File("test"), "", ""));
-
     analysisCreator.run();
   }  
 }

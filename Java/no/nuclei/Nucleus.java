@@ -123,7 +123,7 @@ public class Nucleus
     this.position        = position;
   }
 
-  protected Nucleus(){
+  public Nucleus(){
     // for subclasses to access
   }
 
