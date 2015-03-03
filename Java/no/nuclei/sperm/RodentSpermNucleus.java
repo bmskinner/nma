@@ -96,7 +96,7 @@ public class RodentSpermNucleus
     if(!this.isProfileOrientationOK()){
       this.getAngleProfile().reverseAngleProfile();
     }
-    
+
     /*
       Find the tail point using multiple independent methods. 
       Find a consensus point

@@ -147,33 +147,33 @@ public class CurveRefolder {
 		}
 		
 		nucleusPlot = new Plot( "Nucleus shape",
-							  "",
-							  "");
+								"",
+								"");
 
 		// get the limits  for the plot  	
 		double minX = targetNucleus.getMinX();
-	  double maxX = targetNucleus.getMaxX();
-	  double minY = targetNucleus.getMinY();
-	  double maxY = targetNucleus.getMaxY();
+		double maxX = targetNucleus.getMaxX();
+		double minY = targetNucleus.getMinY();
+		double maxY = targetNucleus.getMaxY();
 
-	  // ensure that the scales for each axis are the same
-	  double min = Math.min(minX, minY);
-	  double max = Math.max(maxX, maxY);
+		// ensure that the scales for each axis are the same
+		double min = Math.min(minX, minY);
+		double max = Math.max(maxX, maxY);
 
-	  // ensure there is room for expansion of the target nucleus
-	  min = Math.floor(min - Math.abs(min));
-	  max = Math.ceil(max * 2);
+		// ensure there is room for expansion of the target nucleus
+		min = Math.floor(min - Math.abs(min));
+		max = Math.ceil(max * 2);
 
-	  this.plotLimit = Math.abs(min);
+		this.plotLimit = Math.abs(min);
 
-	  nucleusPlot.setLimits(min, Math.abs(min), min, Math.abs(min));
+		nucleusPlot.setLimits(min, Math.abs(min), min, Math.abs(min));
 
-	  nucleusPlot.setSize(400,400);
-	  nucleusPlot.setYTicks(false);
-	  nucleusPlot.setXTicks(false);
+		nucleusPlot.setSize(400,400);
+		nucleusPlot.setYTicks(false);
+		nucleusPlot.setXTicks(false);
 		nucleusPlot.setColor(Color.LIGHT_GRAY);
-	  nucleusPlot.drawLine(min, 0, Math.abs(min), 0);
-	  nucleusPlot.drawLine(0, min, 0, Math.abs(min));
+		nucleusPlot.drawLine(min, 0, Math.abs(min), 0);
+		nucleusPlot.drawLine(0, min, 0, Math.abs(min));
 	}
 
 
@@ -191,10 +191,10 @@ public class CurveRefolder {
 			yPoints[i] = p.getY();
 		}
 
-	  // ensure nucleus outline joins up at tip
-	  XYPoint p = targetNucleus.getBorderPoint(0);
-	  xPoints[targetNucleus.getLength()] = p.getX();
-	  yPoints[targetNucleus.getLength()] = p.getY();
+		// ensure nucleus outline joins up at tip
+		XYPoint p = targetNucleus.getBorderPoint(0);
+		xPoints[targetNucleus.getLength()] = p.getX();
+		yPoints[targetNucleus.getLength()] = p.getY();
 
 		nucleusPlot.setColor(Color.DARK_GRAY);
 		nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
@@ -301,10 +301,10 @@ public class CurveRefolder {
 	}
 
 	/*
-	  This is used only for the consensus image.
-	  The consenus nucleus needs to be oriented with
-	  a given point at the bottom. Assumes CoM is at 0,0.
-	  Find the angle of rotation needed to put the point atthe bottom
+		This is used only for the consensus image.
+		The consenus nucleus needs to be oriented with
+		a given point at the bottom. Assumes CoM is at 0,0.
+		Find the angle of rotation needed to put the point atthe bottom
 	*/
 	private double findRotationAngle(NucleusBorderPoint bottomPoint){
 		// find the angle to rotate
@@ -342,8 +342,8 @@ public class CurveRefolder {
 	}
 
 	/*
-	  Given a point, rotate the roi around the CoM so that  the point
-	  is at the bottom
+		Given a point, rotate the roi around the CoM so that  the point
+		is at the bottom
 	*/
 	public void putPointAtBottom(NucleusBorderPoint bottomPoint){
 
@@ -368,11 +368,9 @@ public class CurveRefolder {
 		plotTargetNucleus();
 	}
 
-	
-
 	/*
-	  Using a list of signal locations, draw on
-	  the consensus plot.
+		Using a list of signal locations, draw on
+		the consensus plot.
 	*/
 	public void addSignalsToConsensus(Analysable collection){
 
@@ -386,75 +384,75 @@ public class CurveRefolder {
 
 			ImageProcessor plotIP = nucleusPlot.getImagePlus().getProcessor();
 			Calibration cal = nucleusPlot.getImagePlus().getCalibration();
-	    cal.setUnit("pixels");
-	    cal.pixelWidth = 1;
-	    cal.pixelHeight = 1;
+			cal.setUnit("pixels");
+			cal.pixelWidth = 1;
+			cal.pixelHeight = 1;
 
 
 			int signalCount = 0;
 			for( ArrayList<NuclearSignal> signalGroup : signals ){
 
-				Color colour = signalCount==0 ? Color.RED : Color.GREEN;
+				Color colour = signalCount==0 ? new Color(255,0,0,50) : new Color(0,255,0,50);
 
-			  if(signalGroup.size()>0){
+				if(signalGroup.size()>0){
 
-				ArrayList<Double> xPoints = new ArrayList<Double>(0);
-				ArrayList<Double> yPoints = new ArrayList<Double>(0);
+					ArrayList<Double> xPoints = new ArrayList<Double>(0);
+					ArrayList<Double> yPoints = new ArrayList<Double>(0);
 
-				for(int j=0; j<signalGroup.size();j++){
+					for(int j=0; j<signalGroup.size();j++){
 
-					double angle = signalGroup.get(j).getAngle();
-					double fractionalDistance = signalGroup.get(j).getFractionalDistanceFromCoM();
-					double diameter = signalGroup.get(j).getRadius() * 2;
+						double angle = signalGroup.get(j).getAngle();
+						double fractionalDistance = signalGroup.get(j).getFractionalDistanceFromCoM();
+						double diameter = signalGroup.get(j).getRadius() * 2;
 
-					// determine the total distance to the border at this angle
-					double distanceToBorder = getDistanceFromAngle(angle);
+						// determine the total distance to the border at this angle
+						double distanceToBorder = getDistanceFromAngle(angle);
 
-					// convert to fractional distance to signal
-					double signalDistance = distanceToBorder * fractionalDistance;
-				  
-				  // adjust X and Y because we are now counting angles from the vertical axis
-					double signalX = NuclearOrganisationUtility.getXComponentOfAngle(signalDistance, angle-90);
-					double signalY = NuclearOrganisationUtility.getYComponentOfAngle(signalDistance, angle-90);
+						// convert to fractional distance to signal
+						double signalDistance = distanceToBorder * fractionalDistance;
+						
+						// adjust X and Y because we are now counting angles from the vertical axis
+						double signalX = NuclearOrganisationUtility.getXComponentOfAngle(signalDistance, angle-90);
+						double signalY = NuclearOrganisationUtility.getYComponentOfAngle(signalDistance, angle-90);
 
-					/* draw the circles on the plot
-						 An ImageJ Plot cannot draw circles by itself. We therefore need to get the
-						 underlying ImageProcessor, and draw the circles on this. To do this correctly,
-						 the signal positions within the plot must be translated into pixel positions
-						 on the ImageProcessor. 
-						 The image is 400*400 pixels. 
-						 60 pixels used for the left border, 18 pixels for the right, leaving 322 horizontal pixels
-						 17 used for the top border, 40 for the bottom border, leaving 343 vertical pixels.
-						 The plot 0,0 is therefore at x:161+60 = 221 y:172+17= 189  :  221,189
-						 Positive Y values must be subtracted from this at a ratio : (plotLimit / 189) * Y
-						 Negative X values must be subtracted from this at a ratio : (plotLimit / 221) * X
-					*/
-					double xRatio = signalX / this.plotLimit; // the ratio of the signal from the centre to the border
-					double yRatio = signalY / this.plotLimit;
+						/* draw the circles on the plot
+							 An ImageJ Plot cannot draw circles by itself. We therefore need to get the
+							 underlying ImageProcessor, and draw the circles on this. To do this correctly,
+							 the signal positions within the plot must be translated into pixel positions
+							 on the ImageProcessor. 
+							 The image is 400*400 pixels. 
+							 60 pixels used for the left border, 18 pixels for the right, leaving 322 horizontal pixels
+							 17 used for the top border, 40 for the bottom border, leaving 343 vertical pixels.
+							 The plot 0,0 is therefore at x:161+60 = 221 y:172+17= 189  :  221,189
+							 Positive Y values must be subtracted from this
+							 Negative X values must be subtracted from this
+						*/
+						double xRatio = signalX / this.plotLimit; // the ratio of the signal from the centre to the plot edge
+						double yRatio = signalY / this.plotLimit;
 
-					double xCorrected = 221 + (  161 * xRatio );
-					double yCorrected = 189 - (  172 * yRatio );
+						double xCorrected = 222 + (  161 * xRatio ) -7; // 9 is arbirtrary offset for now
+						double yCorrected = 188 - (  172 * yRatio ) -7;
 
-					// double xCorrected = 221 + ( xRatio + signalX );
-					// double yCorrected = 189 - ( yRatio + signalY );
+						// double xCorrected = 221 + ( xRatio + signalX );
+						// double yCorrected = 189 - ( yRatio + signalY );
 
-					// IJ.log("X: "+signalX+"  Y: "+signalY+" Xc: "+xCorrected+"  Yc: "+yCorrected);
+						// IJ.log("X: "+signalX+"  Y: "+signalY+" Xc: "+xCorrected+"  Yc: "+yCorrected);
 
-					plotIP.setColor(colour);
-					plotIP.drawOval((int) xCorrected, (int)yCorrected, (int)diameter, (int)diameter);
+						plotIP.setColor(colour);
+						plotIP.drawOval((int) xCorrected, (int)yCorrected, (int)diameter, (int)diameter);
 
-				  // add to array
-				  xPoints.add( signalX );
-				  yPoints.add( signalY ); 
+						// add to array
+						xPoints.add( signalX );
+						yPoints.add( signalY ); 
+					}
+									
+					nucleusPlot.setColor(colour);
+					nucleusPlot.setLineWidth(2);
+					nucleusPlot.addPoints(xPoints, yPoints, Plot.DOT);
 				}
-							  
-				nucleusPlot.setColor(colour);
-				nucleusPlot.setLineWidth(2);
-				nucleusPlot.addPoints(xPoints, yPoints, Plot.DOT);
-			  }
-			  signalCount++;
+				signalCount++;
 			}
-	  }
+		}
 	}
 
 	private double getDistanceFromAngle(double angle){
@@ -480,7 +478,6 @@ public class CurveRefolder {
 				bestDistance = distance;
 			}
 		}
-		// IJ.log("Target angle: "+angle+": Best angel: "+bestAngle+" Distance: "+bestDistance);
 		return bestDistance;
 	}
 
@@ -492,31 +489,31 @@ public class CurveRefolder {
 
 	public void exportProfileOfRefoldedImage(Analysable collection){
 	 
-	 	String logFile = collection.makeGlobalLogFile("logConsensusNucleus");
+		String logFile = collection.makeGlobalLogFile("logConsensusNucleus");
 		// File f = new File(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
 		// if(f.exists()){
 		//   f.delete();
 		// }
 
 		String outLine =  "X_INT\t"+
-						  "Y_INT\t"+
-						  "X_DOUBLE\t"+
-						  "Y_DOUBLE\t"+
-						  "INTERIOR_ANGLE\t"+
-						  "NORMALISED_PROFILE_X\t"+
-						  "DISTANCE_PROFILE\n";
+							"Y_INT\t"+
+							"X_DOUBLE\t"+
+							"Y_DOUBLE\t"+
+							"INTERIOR_ANGLE\t"+
+							"NORMALISED_PROFILE_X\t"+
+							"DISTANCE_PROFILE\n";
 
 		for(int i=0;i<targetNucleus.getLength();i++){
 
-		  double normalisedX = ((double)i/(double)targetNucleus.getLength())*100; // normalise to 100 length
-		  
-		  outLine +=  targetNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
-					  targetNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
-					  targetNucleus.getBorderPoint(i).getX()                  +"\t"+
-					  targetNucleus.getBorderPoint(i).getY()                  +"\t"+
-					  targetNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
-					  normalisedX                                             +"\t"+
-					  targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
+			double normalisedX = ((double)i/(double)targetNucleus.getLength())*100; // normalise to 100 length
+			
+			outLine +=  targetNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
+						targetNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
+						targetNucleus.getBorderPoint(i).getX()                  +"\t"+
+						targetNucleus.getBorderPoint(i).getY()                  +"\t"+
+						targetNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
+						normalisedX                                             +"\t"+
+						targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
 		}
 		IJ.append( outLine, logFile);
 	}
@@ -524,9 +521,9 @@ public class CurveRefolder {
 	public void exportImage(Analysable collection){
 		ImagePlus plot = nucleusPlot.getImagePlus();
 		Calibration cal = plot.getCalibration();
-    cal.setUnit("pixels");
-    cal.pixelWidth = 1;
-    cal.pixelHeight = 1;
+		cal.setUnit("pixels");
+		cal.pixelWidth = 1;
+		cal.pixelHeight = 1;
 		IJ.saveAsTiff(plot, targetNucleus.getOutputFolder()+File.separator+"plotConsensus."+collection.getType()+".tiff");
 	}
 
