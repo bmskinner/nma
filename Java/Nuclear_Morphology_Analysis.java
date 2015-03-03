@@ -12,15 +12,7 @@
   morphology comparisons
 */
 import ij.IJ;
-// import ij.gui.GenericDialog;
-// import ij.io.DirectoryChooser;
-// import ij.io.Opener;
-// import ij.io.OpenDialog;
 import ij.plugin.PlugIn;
-
-// import java.io.File;
-// import java.io.IOException;
-
 import no.analysis.AnalysisCreator;
 
 public class Nuclear_Morphology_Analysis

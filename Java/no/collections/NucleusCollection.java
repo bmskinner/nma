@@ -992,7 +992,7 @@ public class NucleusCollection
     
 
     for(int i =0;i<profile.get(0).length;i++){
-      int numberOfPoints = profile.get(6)[i].intValue();
+      int numberOfPoints = profile.get(6)[i]==null ? 0 : profile.get(6)[i].intValue();
       outLine +=  profile.get(0)[i]+"\t"+
                   profile.get(1)[i]+"\t"+
                   profile.get(2)[i]+"\t"+

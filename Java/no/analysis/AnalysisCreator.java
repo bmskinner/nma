@@ -60,6 +60,7 @@ public class AnalysisCreator {
 
   private boolean analysisRun = false;
   private boolean reAnalysisRun = false;
+  private boolean readyToRun = false;
   private Class nucleusClass;
   private Class collectionClass;
 
@@ -135,9 +136,13 @@ public class AnalysisCreator {
     this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
     this.outputFolder = new File(this.folder.getAbsolutePath()+File.separator+outputFolderName);
+    this.readyToRun = true;
   }
 
   public void run(){
+    
+    if(!readyToRun) return;
+
      if(!performReanalysis){
       this.runAnalysis();
     } else {
@@ -585,7 +590,7 @@ public class AnalysisCreator {
     gd.addNumericField("Profile window size: ", angleProfileWindowSize, 0);
 
     String[] items = this.getNucleusTypeStrings();
-    gd.addChoice("Nucleus type", items, items[2]); // default to rodent for now
+    gd.addChoice("Nucleus type", items, items[1]); // default to rodent for now
 
     gd.addCheckbox("Re-analysis?", false);
     gd.showDialog();

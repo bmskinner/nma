@@ -77,26 +77,14 @@ public class PigSpermNucleus
       this.addTailEstimatePosition(tailPoint2);
       this.addTailEstimatePosition(tailPoint3);
 
-      // int consensusTailIndex = this.getPositionBetween(tailPoint1, tailPoint2);
-      // NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
-      // consensusTailIndex = this.getPositionBetween(consensusTail, tailPoint3);
-      // consensusTail = this.getBorderPoint(consensusTailIndex);
-      // NucleusBorderPoint consensusTail = tailPoint3;
 
-      // this.setTailIndex(consensusTailIndex);
-      // this.setInitialConsensusTail(consensusTail);
-
-      // this.setSpermTail(tailPoint3);
+      // of the three methods, method 3 seems most accurate
       addBorderPointOfInterest("tail", tailPoint3);
 
       int tailIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("tail"));
       this.getAngleProfile().moveIndexToArrayStart(tailIndex);
-      // tailIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("tail"));
-       // this.setTailIndex(tailIndex);
 
       addBorderPointOfInterest("head", this.findOppositeBorder(this.getBorderPointOfInterest("tail")));
-      // int headIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("head"));
-      // this.setHeadIndex(headIndex);s
     }
 
     /*
@@ -166,17 +154,6 @@ public class PigSpermNucleus
                                       orthPoint2.getInteriorAngle()
                                     ? orthPoint1
                                     : orthPoint2;
-
-      // the tail is near a set of local maxima; hopefully the head is not
-      // NucleusBorderPoint tailPoint = findPointClosestToLocalMaximum(array);
-
-
-      // choose the closest to CoM
-      // NucleusBorderPoint tailPoint  = orthPoint1.getLengthTo(this.getCentreOfMass()) <
-      //                                 orthPoint2.getLengthTo(this.getCentreOfMass())
-      //                               ? orthPoint1
-      //                               : orthPoint2;
-
       return tailPoint;
     }
 }
