@@ -1,10 +1,10 @@
 /* 
   -----------------------
-  UTILITY FUNCTIONS
+  COMMAND LINE PARSER FOR NO
   -----------------------
-  This class contains basic functions for 
-  nuclear organisation analysis used across
-  other classes
+  This class contains the parsing system
+  to allow the NO analysis to be invoked
+  from CLI with different parameters
 */
 
  package no.utility;
