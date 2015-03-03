@@ -127,6 +127,30 @@ public class Nucleus
     // for subclasses to access
   }
 
+  public Nucleus(Nucleus n){
+    this.setRoi(n.getRoi());
+    this.setPosition(n.getPosition());
+    this.setSourceImage(n.getSourceImage());
+    this.setSourceFile(n.getSourceFile());
+    this.setAnnotatedImage(n.getAnnotatedImage());
+    this.setEnlargedImage(n.getEnlargedImage());
+    this.setNucleusNumber(n.getNucleusNumber());
+    this.setNucleusFolder(n.getNucleusFolder());
+    this.setPerimeter(n.getPerimeter());
+    this.setPathLength(n.getPathLength());
+    this.setFeret(n.getFeret());
+    this.setArea(n.getArea());
+    this.setAngleProfile(n.getAngleProfile());
+    this.setCentreOfMass(n.getCentreOfMass());
+    this.setRedSignals(n.getRedSignals());
+    this.setGreenSignals(n.getGreenSignals());
+    this.setPolygon(n.getSmoothedPolygon());
+    this.setDistanceProfile(n.getDistanceProfile());
+    this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
+    this.setBorderPointsOfInterest(n.getBorderPointsOfInterest());
+    this.setOutputFolder(n.getOutputFolderName());
+  }
+
   public void intitialiseNucleus(int angleProfileWindowSize){
 
     this.nucleusFolder = new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension());

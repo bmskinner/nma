@@ -86,15 +86,15 @@ public class AsymmetricNucleusCollection
 
   }
 
-  public void measureProfilePositions(){
+  // public void measureProfilePositions(){
 
-    this.createProfileAggregates();
-    this.drawProfilePlots();
+  //   this.createProfileAggregates();
+  //   this.drawProfilePlots();
 
-    this.drawNormalisedMedianLines();
-    this.calculateDifferencesToMedianProfiles();
-    this.exportProfilePlots();
-  }
+  //   this.drawNormalisedMedianLines();
+  //   this.calculateDifferencesToMedianProfiles();
+  //   this.exportProfilePlots();
+  // }
 
   @Override
   public void exportStatsFiles(){
@@ -135,28 +135,28 @@ public class AsymmetricNucleusCollection
     -----------------------
   */
 
-  public INuclearFunctions getNucleusMostSimilarToMedian(){
-  	INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
+ //  public INuclearFunctions getNucleusMostSimilarToMedian(){
+ //  	INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
 
-  	double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint("tail"));
-  	for(int i=0;i<this.getNucleusCount();i++){
-      INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
-      if(p.getDifferenceToMedianProfile("tail")<difference){
-      	difference = p.getDifferenceToMedianProfile("tail");
-      	n = p;
-      }
-    }
-    return n;
-  }
+ //  	double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint("tail"));
+ //  	for(int i=0;i<this.getNucleusCount();i++){
+ //      INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
+ //      if(p.getDifferenceToMedianProfile("tail")<difference){
+ //      	difference = p.getDifferenceToMedianProfile("tail");
+ //      	n = p;
+ //      }
+ //    }
+ //    return n;
+ //  }
 
-  /*
-		Interpolate the median profile to match the length of the most-median nucleus
-		Store the angle profile as a double[] to feed into the curve refolder
-  */
-	public double[] getMedianTargetCurve(INuclearFunctions n){
-		double[] targetMedianCurve = interpolateMedianToLength(n.getLength(), this.getNormalisedMedianProfileFromPoint("tail"));
-		return targetMedianCurve;
-	}	
+ //  /*
+	// 	Interpolate the median profile to match the length of the most-median nucleus
+	// 	Store the angle profile as a double[] to feed into the curve refolder
+ //  */
+	// public double[] getMedianTargetCurve(INuclearFunctions n){
+	// 	double[] targetMedianCurve = interpolateMedianToLength(n.getLength(), this.getNormalisedMedianProfileFromPoint("tail"));
+	// 	return targetMedianCurve;
+	// }	
 
   /*
     -----------------------
