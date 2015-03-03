@@ -11,7 +11,8 @@ can be varied in the nucleus and signal detection
 package no.analysis;
 
 import ij.IJ;
-import ij.ImagePlus;
+// import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.DirectoryChooser;
@@ -61,6 +62,8 @@ public class AnalysisCreator {
   private Class nucleusClass;
   private Class collectionClass;
 
+  private boolean performReanalysis = false;
+
   private HashMap<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
   // the raw input from nucleus detector
@@ -75,14 +78,42 @@ public class AnalysisCreator {
     Constructors
     -----------------------
   */
-  public AnalysisCreator(File folder){
-  	// create with default permissive parameters
-    this.folder = folder;
+  public AnalysisCreator(){
+    this.initialise();
+  }
+
+  public void initialise(){
+
+    boolean ok = this.displayOptionsDialog();
+    if(!ok) return;
+
+    DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
+    String folderName = localOpenDialog.getDirectory();
+
+    if(folderName==null) return;
+    this.folder = new File(folderName);
+
+    if(performReanalysis){
+      OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
+      String fileName = fileDialog.getPath();
+      if(fileName==null) return;
+      nucleiToFind = new File(fileName);
+    }
+
+    IJ.log("Directory: "+folderName);
 
     this.startTime = Calendar.getInstance().getTime();
     this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
     this.outputFolder = new File(this.folder.getAbsolutePath()+File.separator+outputFolderName);
+  }
+
+  public void run(){
+     if(!performReanalysis){
+      this.runAnalysis();
+    } else {
+      this.runReAnalysis();
+    }
   }
 
   /*
@@ -117,15 +148,13 @@ public class AnalysisCreator {
    * they were found. It filters the nuclei based on whether they
    * are present in a list of previously captured images.
    *
-   * @param  nucleiToFind  a File containing the image names and nuclear coordinates
    * @return      the nuclei in each folder analysed
    * @see         NucleusCollection
    */
-  public void runReAnalysis(File nucleiToFind){
+  public void runReAnalysis(){
     NucleusRefinder detector = new NucleusRefinder(this.folder, this.outputFolderName, nucleiToFind);
     setDetectionParameters(detector);
     detector.runDetector();
-    this.nucleiToFind = nucleiToFind;
     this.folderCollection = detector.getNucleiCollections();
     IJ.log("Imported folder(s)");
     this.reAnalysisRun = true;
@@ -502,6 +531,34 @@ public class AnalysisCreator {
       String outPath = r.getFolder().getAbsolutePath()+File.separator+this.outputFolderName+File.separator+"logAnalysis.txt";
       IJ.append( outLine.toString(), outPath);
     }
+  }
+
+  public boolean displayOptionsDialog(){
+    GenericDialog gd = new GenericDialog("New mophology analysis");
+    gd.addNumericField("Nucleus threshold: ", nucleusThreshold, 0);
+    gd.addNumericField("Signal threshold: ", signalThreshold, 0);
+    gd.addNumericField("Min nuclear size: ", minNucleusSize, 0);
+    gd.addNumericField("Max nuclear size: ", maxNucleusSize, 0);
+    gd.addNumericField("Min nuclear circ: ", minNucleusCirc, 2);
+    gd.addNumericField("Max nuclear circ: ", maxNucleusCirc, 2);
+    gd.addNumericField("Min signal size: ", minSignalSize, 0);
+    gd.addNumericField("Max signal fraction: ", maxSignalFraction, 2);
+    gd.addNumericField("Profile window size: ", angleProfileWindowSize, 0);
+    gd.addCheckbox("Re-analysis?", false);
+    gd.showDialog();
+    if (gd.wasCanceled()) return false;
+
+    nucleusThreshold = (int) gd.getNextNumber();
+    signalThreshold = (int) gd.getNextNumber();
+    minNucleusSize = gd.getNextNumber();
+    maxNucleusSize = gd.getNextNumber();
+    minNucleusCirc = gd.getNextNumber();
+    maxNucleusCirc = gd.getNextNumber();
+    minSignalSize = gd.getNextNumber();
+    maxSignalFraction = gd.getNextNumber();
+    angleProfileWindowSize = (int) gd.getNextNumber();
+    performReanalysis = gd.getNextBoolean();
+    return true;
   }
 }
 

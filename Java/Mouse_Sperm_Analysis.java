@@ -69,47 +69,13 @@ public class Mouse_Sperm_Analysis
     The first method to be run when the plugin starts.
   */
   public void run(String paramString)  {
-
-    boolean ok = displayOptionsDialog();
-
-    if(!ok) return;
-
-    DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
-    String folderName = localOpenDialog.getDirectory();
-
-    if(folderName==null) return;
-    File folder = new File(folderName);
-
-    if(performReanalysis){
-      OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
-      String fileName = fileDialog.getPath();
-      if(mappingFile==null) return;
-      mappingFile = new File(fileName);
-    }
-
-    IJ.log("Directory: "+folderName);
     
-    AnalysisCreator analysisCreator = new AnalysisCreator(folder);
+    AnalysisCreator analysisCreator = new AnalysisCreator();
 
     analysisCreator.setNucleusClass(new RodentSpermNucleus());
-    analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(folder, "", ""));
+    analysisCreator.setNucleusCollectionClass(new RodentSpermNucleusCollection(new File("test"), "", ""));
 
-    analysisCreator.setMinNucleusSize(  minNucleusSize );
-    analysisCreator.setMaxNucleusSize(  maxNucleusSize );
-    analysisCreator.setNucleusThreshold(nucleusThreshold);
-    analysisCreator.setMinNucleusCirc(  minNucleusCirc );
-    analysisCreator.setMaxNucleusCirc(  maxNucleusCirc );
-    analysisCreator.setMinSignalSize(   minSignalSize  );
-    analysisCreator.setSignalThreshold( signalThreshold);
-    analysisCreator.setAngleProfileWindowSize( angleProfileWindowSize);
-    analysisCreator.setMaxSignalFraction( maxSignalFraction);
-
-
-    if(!performReanalysis){
-      analysisCreator.runAnalysis();
-    } else {
-      analysisCreator.runReAnalysis(mappingFile);
-    }
+    analysisCreator.run();
 
     analysisCreator.assignNucleusTypes();
     analysisCreator.analysePopulations();
@@ -119,32 +85,4 @@ public class Mouse_Sperm_Analysis
     IJ.log("All done!"                     );
     IJ.log("----------------------------- ");
   }  
-
-  public boolean displayOptionsDialog(){
-    GenericDialog gd = new GenericDialog("New mophology analysis");
-    gd.addNumericField("Nucleus threshold: ", nucleusThreshold, 0);
-    gd.addNumericField("Signal threshold: ", signalThreshold, 0);
-    gd.addNumericField("Min nuclear size: ", minNucleusSize, 0);
-    gd.addNumericField("Max nuclear size: ", maxNucleusSize, 0);
-    gd.addNumericField("Min nuclear circ: ", minNucleusCirc, 2);
-    gd.addNumericField("Max nuclear circ: ", maxNucleusCirc, 2);
-    gd.addNumericField("Min signal size: ", minSignalSize, 0);
-    gd.addNumericField("Max signal fraction: ", maxSignalFraction, 2);
-    gd.addNumericField("Profile window size: ", angleProfileWindowSize, 0);
-    gd.addCheckbox("Re-analysis?", false);
-    gd.showDialog();
-    if (gd.wasCanceled()) return false;
-
-    nucleusThreshold = (int) gd.getNextNumber();
-    signalThreshold = (int) gd.getNextNumber();
-    minNucleusSize = gd.getNextNumber();
-    maxNucleusSize = gd.getNextNumber();
-    minNucleusCirc = gd.getNextNumber();
-    maxNucleusCirc = gd.getNextNumber();
-    minSignalSize = gd.getNextNumber();
-    maxSignalFraction = gd.getNextNumber();
-    angleProfileWindowSize = (int) gd.getNextNumber();
-    performReanalysis = gd.getNextBoolean();
-    return true;
-  }
 }
