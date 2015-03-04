@@ -93,44 +93,47 @@ public class Profile {
     return this.array;
   }
 
-  public double[] getNormalisedIndexes(){
-    double[] d = new double[this.size()];
-    for(int i=0;i<this.size();i++){
-      d[i] = ( (double)i / (double)this.size() ) * 100;
-    }
-    return d;
-  }
-
-  // NEEDS WORK
-  // public double calculateDifferenceToProfile(double[] testProfile){
-
-  //   // the curve needs to be matched to the median 
-  //   // hence the median array needs to be the same curve length
-  //   double[] interpolatedProfile = NucleusCollection.interpolateMedianToLength(this.getLength(), testProfile);
-
-  //   // for comparisons between sperm, get the difference between the offset curve and the median
-  //   double totalDifference = 0;
-
-  //   int offset = getBorderIndexOfInterest(pointType);
-
-  //   for(int j=0; j<this.size(); j++){ // for each point round the array
-
-  //     // ensure we match array offsets to correct pointType
-  //     int index = NuclearOrganisationUtility.wrapIndex(offset + j, this.this.size());
-
-  //     double curveAngle  = this.get(index);
-  //     double testAngle = interpolatedProfile[j];
-
-  //     totalDifference += Math.abs(curveAngle - testAngle);
+  // public double[] getNormalisedIndexes(){
+  //   double[] d = new double[this.size()];
+  //   for(int i=0;i<this.size();i++){
+  //     d[i] = ( (double)i / (double)this.size() ) * 100;
   //   }
-  //   return totalDifference;
+  //   return d;
   // }
+
+  // The testProfile must have been offset appropriately
+  public double differenceToProfile(Profile testProfile){
+
+    // the test profile needs to be matched to this profile
+    // whichever is smaller must be interpolated 
+    Profile profile1 = this.copy();
+    Profile profile2 = testProfile;
+    if(testProfile.size()<this.size()){
+      profile2 = profile2.interpolate(this.size());
+    } else {
+      profile1 = profile1.interpolate(testProfile.size());
+    }
+
+    double difference = 0;
+
+    for(int j=0; j<this.size(); j++){ // for each point round the array
+
+      double thisValue = profile1.get(j);
+      double testValue = profile2.get(j);
+      difference += Math.abs(curveAngle - testAngle);
+    }
+    return difference;
+  }
 
   /*
     --------------------
     Profile manipulation
     --------------------
   */
+
+  public Profile copy(){
+    return new Profile(this.array);
+  }
 
   public void reverse(){
 
@@ -144,43 +147,23 @@ public class Profile {
 
   // newLength must be larger than current
   // Make this profile the length specified
-  public double[] interpolate(int newLength){
+  public Profile interpolate(int newLength){
 
     if(newLength < this.size()){
       // throw new Exception("Cannot interpolate to a smaller array!");
     }
     
-    double[] newProfile = new double[newLength];
+    double[] newArray = new double[newLength];
     // where in the old curve index is the new curve index?
     for (int i=0; i<newLength; i++) {
       // we have a point in the new curve.
       // we want to know which points it lay between in the old curve
       double oldIndex = ( (double)i / (double)newLength)*array.length; // get the frational index position needed
       double interpolatedValue = interpolateValue(oldIndex);
-      newProfile[i] = interpolatedValue;
+      newArray[i] = interpolatedValue;
     }
-    return newProfile;
+    return new Profile(newArray);
   }
-
-  // reverse of interpolate above; given a new profile, make
-  // it the same length as this profile. NEEDS WORK
-  // public double[] interpolate(Profile profile){
-
-  //   if(profile.size() > this.size()){
-  //     throw new Exception("Cannot interpolate to a smaller array!");
-  //   }
-    
-  //   double[] newProfile = new double[this.size()];
-  //   // where in the old curve index is the new curve index?
-  //   for (int i=0; i<newLength; i++) {
-  //     // we have a point in the new curve.
-  //     // we want to know which points it lay between in the old curve
-  //     double oldIndex = ( (double)i / (double)profile.size())*array.length; // get the frational index position needed
-  //     double interpolatedValue = interpolateValue(oldIndex);
-  //     newProfile[i] = interpolatedValue;
-  //   }
-  //   return newProfile;
-  // }
 
   /*
     Take an index position from a non-normalised profile

@@ -95,7 +95,8 @@ public class Nucleus
   private Profile distanceProfileTest; // eventually to replace distanceProfile
   private List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
   private List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
-  private Map<String, Integer> borderTags = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+  private Map<String, Integer> borderTags  = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+  private Map<String, Integer> segmentTags = new HashMap<String, Integer>(0);
 
   private XYPoint centreOfMass;
 
@@ -1086,23 +1087,6 @@ public class Nucleus
    return roi.getAngle();
   }
 
- 
-
-  private void calculateDistanceProfile(){
-
-    double[] profile = new double[this.getLength()];
-
-    for(int i = 0; i<this.getLength();i++){
-
-        NucleusBorderPoint p   = this.getPoint(i);
-        NucleusBorderPoint opp = findOppositeBorder(p);
-
-        profile[i] = p.getLengthTo(opp); // REMOVE
-        p.setDistanceAcrossCoM(p.getLengthTo(opp));
-    }
-    this.distanceProfile = profile;
-  }
-
   /*
     Get measurements of the blue channel, using the nuclear roi
     Store the values.
@@ -1418,4 +1402,75 @@ public class Nucleus
      IJ.log("    "+s+": "+p.getX()+"    "+p.getY());
     }
   }
+
+  /*
+    -----------------------
+    Methods for the new architecture only
+    -----------------------
+  */
+
+  public NucleusBorderPoint getBorderTag(String s){
+    return this.borderList.get(this.borderTags.get(s));
+  }
+
+  public NucleusBorderSegment getSegmentTag(String s){
+    return this.segmentList.get(this.segmentTags.get(s));
+  }
+
+  public void addBorderTag(String name, int i){
+    this.borderTags.put(name, i);
+  }
+
+  public void addSegmentTag(String name, int i){
+    this.segmentTags.put(name, i);
+  }
+
+  private void calculateDistanceProfile(){
+
+    double[] profile = new double[this.getLength()];
+
+    for(int i = 0; i<this.getLength();i++){
+
+        NucleusBorderPoint p   = this.getPoint(i);
+        NucleusBorderPoint opp = findOppositeBorder(p);
+
+        profile[i] = p.getLengthTo(opp); 
+        p.setDistanceAcrossCoM(p.getLengthTo(opp)); // LEGACY
+    }
+    this.distanceProfile = profile; // LEGACY
+    this.distanceProfileTest = new Profile(profile);
+  }
+
+  private void calculateAngleProfile(){
+
+    double[] angles = new double[this.getLength()];
+
+    for(int i=0; i<this.getLength();i++){
+    // while(borderList.hasNext()){
+
+      int indexBefore = NuclearOrganisationUtility.wrapIndex(i - this.getAngleProfileWindowSize(), this.getLength());
+      int indexAfter  = NuclearOrganisationUtility.wrapIndex(i + this.getAngleProfileWindowSize(), this.getLength());
+
+      NucleusBorderPoint pointBefore = this.borderList.get(indexBefore);
+      NucleusBorderPoint pointAfter  = this.borderList.get(indexAfter);
+      NucleusBorderPoint point       = this.borderList.get(i);
+
+      double angle = Nucleus.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
+
+      // find the halfway point between the first and last points.
+        // is this within the roi?
+        // if yes, keep min angle as interior angle
+        // if no, 360-min is interior
+      double midX = (pointBefore.getX()+pointAfter.getX())/2;
+      double midY = (pointBefore.getY()+pointAfter.getY())/2;
+
+      if(this.getPolygon().contains( (float) midX, (float) midY)){
+        angles[i] = angle;
+      } else {
+        angles[i] = 360-angle;
+      }
+    }
+    this.angleProfileTest = new Profile(angles);
+  }
+
 }

@@ -102,6 +102,9 @@ public class NucleusCollection
 
   private HashMap<String, HashMap<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
 
+  // in preparation for new architecture:
+  private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); // REPLACE profileCollection WITH  THIS
+
 	public NucleusCollection(File folder, String outputFolder, String type){
 		this.folder = folder;
     this.outputFolder = outputFolder;
