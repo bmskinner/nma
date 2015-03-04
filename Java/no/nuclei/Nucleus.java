@@ -239,11 +239,11 @@ public class Nucleus
   }
 
   public File getSourceFile(){
-    return new File(this.sourceFile);
+    return new File(this.sourceFile.getAbsolutePath());
   }
 
   public File getNucleusFolder(){
-    return new File(this.nucleusFolder);
+    return new File(this.nucleusFolder.getAbsolutePath());
   }
 
   public ImagePlus getSourceImage(){

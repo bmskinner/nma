@@ -27,7 +27,7 @@ public class Profile {
 
     this.array = new double[p.size()];
     for(int i=0; i<this.array.length; i++){
-      array[i] = p.getValue(i);
+      array[i] = p.get(i);
     }
   }
 
@@ -57,7 +57,7 @@ public class Profile {
 
   public int getIndexOfMax(){
     double max = 0;
-    int maxIndex = 0
+    int maxIndex = 0;
     for(int i=0; i<array.length;i++){
       if(array[i]>max){
         max = array[i];
@@ -79,7 +79,7 @@ public class Profile {
 
   public int getIndexOfMin(){
     double min = this.getMax();
-    int minIndex = 0
+    int minIndex = 0;
     for(int i=0; i<array.length;i++){
       if(array[i]<min){
         min = array[i];
@@ -101,30 +101,30 @@ public class Profile {
     return d;
   }
 
+  // NEEDS WORK
+  // public double calculateDifferenceToProfile(double[] testProfile){
 
-  public double calculateDifferenceToProfile(double[] testProfile){
+  //   // the curve needs to be matched to the median 
+  //   // hence the median array needs to be the same curve length
+  //   double[] interpolatedProfile = NucleusCollection.interpolateMedianToLength(this.getLength(), testProfile);
 
-    // the curve needs to be matched to the median 
-    // hence the median array needs to be the same curve length
-    double[] interpolatedProfile = NucleusCollection.interpolateMedianToLength(this.getLength(), testProfile);
+  //   // for comparisons between sperm, get the difference between the offset curve and the median
+  //   double totalDifference = 0;
 
-    // for comparisons between sperm, get the difference between the offset curve and the median
-    double totalDifference = 0;
+  //   int offset = getBorderIndexOfInterest(pointType);
 
-    int offset = getBorderIndexOfInterest(pointType);
+  //   for(int j=0; j<this.size(); j++){ // for each point round the array
 
-    for(int j=0; j<this.getLength(); j++){ // for each point round the array
+  //     // ensure we match array offsets to correct pointType
+  //     int index = NuclearOrganisationUtility.wrapIndex(offset + j, this.this.size());
 
-      // ensure we match array offsets to correct pointType
-      int index = NuclearOrganisationUtility.wrapIndex(offset + j, this.getLength());
+  //     double curveAngle  = this.get(index);
+  //     double testAngle = interpolatedProfile[j];
 
-      double curveAngle  = this.getBorderPoint(index).getInteriorAngle();
-      double testAngle = interpolatedProfile[j];
-
-      totalDifference += Math.abs(curveAngle - testAngle);
-    }
-    return totalDifference;
-  }
+  //     totalDifference += Math.abs(curveAngle - testAngle);
+  //   }
+  //   return totalDifference;
+  // }
 
   /*
     --------------------
@@ -143,10 +143,11 @@ public class Profile {
   }  
 
   // newLength must be larger than current
+  // Make this profile the length specified
   public double[] interpolate(int newLength){
 
     if(newLength < this.size()){
-      throw new Exception("Cannot interpolate to a smaller array!");
+      // throw new Exception("Cannot interpolate to a smaller array!");
     }
     
     double[] newProfile = new double[newLength];
@@ -160,6 +161,26 @@ public class Profile {
     }
     return newProfile;
   }
+
+  // reverse of interpolate above; given a new profile, make
+  // it the same length as this profile. NEEDS WORK
+  // public double[] interpolate(Profile profile){
+
+  //   if(profile.size() > this.size()){
+  //     throw new Exception("Cannot interpolate to a smaller array!");
+  //   }
+    
+  //   double[] newProfile = new double[this.size()];
+  //   // where in the old curve index is the new curve index?
+  //   for (int i=0; i<newLength; i++) {
+  //     // we have a point in the new curve.
+  //     // we want to know which points it lay between in the old curve
+  //     double oldIndex = ( (double)i / (double)profile.size())*array.length; // get the frational index position needed
+  //     double interpolatedValue = interpolateValue(oldIndex);
+  //     newProfile[i] = interpolatedValue;
+  //   }
+  //   return newProfile;
+  // }
 
   /*
     Take an index position from a non-normalised profile
