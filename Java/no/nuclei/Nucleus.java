@@ -1409,12 +1409,13 @@ public class Nucleus
     -----------------------
   */
 
+  // Ensure only copies of border points get returned
   public NucleusBorderPoint getBorderTag(String s){
-    return this.borderList.get(this.borderTags.get(s));
+    return new NucleusBorderPoint(this.borderList.get(this.borderTags.get(s)));
   }
 
   public NucleusBorderSegment getSegmentTag(String s){
-    return this.segmentList.get(this.segmentTags.get(s));
+    return new NucleusBorderSegment(this.segmentList.get(this.segmentTags.get(s)));
   }
 
   public void addBorderTag(String name, int i){

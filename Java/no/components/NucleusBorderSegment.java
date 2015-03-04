@@ -27,6 +27,12 @@ public class NucleusBorderSegment{
 		this.endIndex = endIndex;
 	}
 
+	public NucleusBorderSegment(NucleusBorderSegment n){
+		this.startIndex = n.getStartIndex();
+		this.endIndex = n.getEndIndex();
+		this.segmentType = n.getSegmentType();
+	}
+
 	/*
 		----------------
 		Getters
