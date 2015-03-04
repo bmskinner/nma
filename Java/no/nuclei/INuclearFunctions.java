@@ -74,6 +74,8 @@ public interface INuclearFunctions
 
 	public double[] getInteriorAngles();
 
+  public double[] getInteriorAngles(String pointType);
+
 	public double getMedianInteriorAngle();
 
 	public NucleusBorderPoint getBorderPoint(int i);

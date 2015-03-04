@@ -50,7 +50,7 @@ import no.components.*;
 public class CurveRefolder {
 
 	private double[] targetCurve;
-	private double[] initialCurve;
+	// private double[] initialCurve;
 
 	// private INuclearFunctions refoldNucleus;
 	// private INuclearFunctions refoldNucleus;
@@ -67,7 +67,7 @@ public class CurveRefolder {
 	public CurveRefolder(double[] target, INuclearFunctions n){
 		this.targetCurve = target;
 		this.refoldNucleus = n;
-		this.initialCurve = n.getInteriorAngles();
+		// this.initialCurve = n.getInteriorAngles("tail");
 	}
 
 	/*
@@ -79,21 +79,22 @@ public class CurveRefolder {
 		this.moveCoMtoZero();
 		this.preparePlots();
 
-		double score = compareProfiles(targetCurve, initialCurve);
+		double score = refoldNucleus.calculateDifferenceToProfile(targetCurve, "tail");
+		// double score = compareProfiles(targetCurve, initialCurve);
 		
 		IJ.log("    Refolding curve: initial score: "+(int)score);
 
 		double originalScore = score;
 		double prevScore = score*2;
 		int i=0;
-		// while( (prevScore - score)/prevScore > 0.01 || i<50 ){ // iterate until converging on a better curve  score >= originalScore
-		// 	prevScore = score;
-		// 	score = this.iterateOverNucleus();
-		// 	i++;
-		// 	if(i%50==0){
-		// 		IJ.log("    Iteration "+i+": "+(int)score);
-		// 	}
-		// }
+		while( (prevScore - score)/prevScore > 0.01 || i<2 ){ // iterate until converging on a better curve  score >= originalScore
+			prevScore = score;
+			score = this.iterateOverNucleus();
+			i++;
+			// if(i%50==0){
+				IJ.log("    Iteration "+i+": "+(int)score);
+			// }
+		}
 		IJ.log("    Refolded curve: final score: "+(int)score);
 	}
 
@@ -236,7 +237,9 @@ public class CurveRefolder {
 	*/
 	private double iterateOverNucleus(){
 
-		double similarityScore = compareProfiles(targetCurve, refoldNucleus.getInteriorAngles());
+		// double similarityScore = compareProfiles(targetCurve, refoldNucleus.getInteriorAngles("tail"));
+		double similarityScore = refoldNucleus.calculateDifferenceToProfile(targetCurve, "tail");
+		IJ.log("    Internal score: "+(int)similarityScore);
 
 		double medianDistanceBetweenPoints = this.refoldNucleus.getAngleProfile().getMedianDistanceBetweenPoints();
 		
@@ -279,8 +282,10 @@ public class CurveRefolder {
 
 			// measure the new profile & compare
 			refoldNucleus.getAngleProfile().updateAngleCalculations();
-			double[] newProfile = refoldNucleus.getInteriorAngles();
-			double score = compareProfiles(targetCurve, newProfile);
+			// double[] newProfile = refoldNucleus.getInteriorAngles("tail");
+			double score = refoldNucleus.calculateDifferenceToProfile(targetCurve, "tail");
+			IJ.log("    Internal score: "+(int)score);
+			// double score = compareProfiles(targetCurve, newProfile);
 
 			// do not apply change  if the distance from teh surrounding points changes too much
 			double distanceToPrev = p.getLengthTo( refoldNucleus.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i-1, refoldNucleus.getLength()) ) );

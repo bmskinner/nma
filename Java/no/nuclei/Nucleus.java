@@ -219,16 +219,17 @@ public class Nucleus
     return this.sourceFile.getAbsolutePath();
   }
 
+  // defensive copy
   public String getPosition(){
-    return this.position;
+    return new String(this.position);
   }
 
   public File getSourceFile(){
-    return this.sourceFile;
+    return new File(this.sourceFile);
   }
 
   public File getNucleusFolder(){
-    return this.nucleusFolder;
+    return new File(this.nucleusFolder);
   }
 
   public ImagePlus getSourceImage(){
@@ -244,7 +245,7 @@ public class Nucleus
   }
 
   public String getImageName(){
-    return this.sourceFile.getName();
+    return new String(this.sourceFile.getName());
   }
 
   public String getAnnotatedImagePath(){
@@ -253,7 +254,7 @@ public class Nucleus
                       this.IMAGE_PREFIX+
                       this.getNucleusNumber()+
                       ".annotated.tiff";
-    return outPath;
+    return new String(outPath);
   }
 
   public String getOriginalImagePath(){
@@ -262,7 +263,7 @@ public class Nucleus
                       this.IMAGE_PREFIX+
                       this.getNucleusNumber()+
                       ".original.tiff";
-    return outPath;
+    return new String(outPath);
   }
 
   public String getEnlargedImagePath(){
@@ -320,7 +321,7 @@ public class Nucleus
   }
 
   public XYPoint getCentreOfMass(){
-    return this.centreOfMass;
+    return new XYPoint(this.centreOfMass.getX(), this.centreOfMass.getY());
   }
 
   public NucleusBorderPoint getPoint(int i){
@@ -361,6 +362,11 @@ public class Nucleus
 
   public double[] getInteriorAngles(){
     return this.angleProfile.getInteriorAngles();
+  }
+
+  public double[] getInteriorAngles(String pointType){
+    int offset = this.getBorderIndexOfInterest(pointType);
+    return this.angleProfile.getInteriorAngles(offset);
   }
 
   public double getMedianInteriorAngle(){
