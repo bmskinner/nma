@@ -41,6 +41,16 @@ public class AngleProfile {
 		updateAngleCalculations();
 	}
 
+  public AngleProfile(AngleProfile p){
+    this.polygon = p.getPolygon().duplicate();
+    this.array = new NucleusBorderPoint[p.getBorderPointArray().length];
+    for(int i=0; i<this.array.length; i++){
+      array[i] = new NucleusBorderPoint( p.getBorderPoint(i));
+    }
+    this.angleProfileWindowSize = p.getAngleProfileWindowSize();
+    updateAngleCalculations();
+  }
+
 
   /*
     ---------------------
@@ -276,7 +286,7 @@ public class AngleProfile {
     for(int i=0; i<array.length;i++){
       // use a window size of 25 for now
     	int indexBefore = NuclearOrganisationUtility.wrapIndex(i - this.getAngleProfileWindowSize(), this.array.length);
-    int indexAfter  = NuclearOrganisationUtility.wrapIndex(i + this.getAngleProfileWindowSize(), this.array.length);
+      int indexAfter  = NuclearOrganisationUtility.wrapIndex(i + this.getAngleProfileWindowSize(), this.array.length);
 
     NucleusBorderPoint pointBefore = this.getBorderPoint(indexBefore);
     NucleusBorderPoint pointAfter = this.getBorderPoint(indexAfter);

@@ -84,9 +84,23 @@ public class Nucleus
 
   private AngleProfile angleProfile; // the border points of the nucleus, and associated angles
 
+  /*
+    The following fields are part of the redesign of the whole system. Instead of storing border points within
+    an AngleProfile, they will be part of the Nucleus. The Profiles can take any double[] of values, and
+    manipulate them. BorderPoints can be combined into BorderSegments, which may overlap. No copies of the 
+    BorderPoints are made; everything references the copy in the Nucleus. Given this, the points of interest 
+    (now borderTags) need only to be indexes.
+  */
+  private Profile angleProfileTest; // eventually to replace angleProfile
+  private Profile distanceProfileTest; // eventually to replace distanceProfile
+  private List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
+  private List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
+  private Map<String, Integer> borderTags = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+
   private XYPoint centreOfMass;
 
   // store points of interest around the border e.g. heads, tails, any other features of note
+  // these are mutable
   private HashMap<String, NucleusBorderPoint> borderPointsOfInterest = new HashMap<String, NucleusBorderPoint>();
 
   private File sourceFile;    // the image from which the nucleus came
@@ -107,7 +121,7 @@ public class Nucleus
 
   private double[] distanceProfile; // diameter through the CoM for each point
 
-  private Map<String, Double> differencesToMedianProfile = new HashMap<String, Double>(); // store the difference between curves
+  private Map<String, Double> differencesToMedianProfile = new HashMap<String, Double>(); // store the difference between curves; move to collection
 
   private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
   
@@ -325,7 +339,7 @@ public class Nucleus
   }
 
   public NucleusBorderPoint getPoint(int i){
-    return this.angleProfile.getBorderPoint(i);
+    return new NucleusBorderPoint(this.angleProfile.getBorderPoint(i));
   }
 
   public FloatPolygon getSmoothedPolygon(){
@@ -349,7 +363,7 @@ public class Nucleus
   }
 
   public AngleProfile getAngleProfile(){
-    return this.angleProfile;
+    return new AngleProfile(this.angleProfile);
   }
 
   public double[] getDistanceProfile(){
@@ -374,7 +388,7 @@ public class Nucleus
   }
 
   public NucleusBorderPoint getBorderPoint(int i){
-    return this.angleProfile.getBorderPoint(i);
+    return new NucleusBorderPoint(this.angleProfile.getBorderPoint(i));
   }
 
   public int getFailureCode(){
@@ -402,7 +416,7 @@ public class Nucleus
   }
 
   public NucleusBorderPoint getBorderPointOfInterest(String name){
-    return this.borderPointsOfInterest.get(name);
+    return new NucleusBorderPoint(this.borderPointsOfInterest.get(name));
   }
 
   public int getBorderIndexOfInterest(String name){
