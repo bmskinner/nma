@@ -37,6 +37,22 @@ public class NucleusBorderPoint
   	super(x, y);
   }
 
+  public NucleusBorderPoint( NucleusBorderPoint p){
+    super(p.getX(), p.getY());
+    this.setMinAngle(p.getMinAngle());
+    this.setInteriorAngle(p.getInteriorAngle());
+    this.setInteriorAngleDelta(p.getInteriorAngleDelta());
+    this.setInteriorAngleDeltaSmoothed(p.getInteriorAngleDeltaSmoothed());
+    this.setDistanceAcrossCoM(p.getDistanceAcrossCoM());
+    this.setLocalMin(p.isLocalMin());
+    this.setLocalMax(p.isLocalMax());
+    this.setIndex(p.getIndex());
+    this.setConsecutiveBlocks(p.getConsecutiveBlocks());
+    this.setBlockNumber(p.getBlockNumber());
+    this.setBlockSize(p.getBlockSize());
+    this.setPositionWithinBlock(p.getPositionWithinBlock());
+  }
+
   public int getIndex(){
     return this.index;
   }

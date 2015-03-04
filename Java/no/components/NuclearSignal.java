@@ -32,6 +32,14 @@ public class NuclearSignal {
     this.centreOfMass = centreOfMass;
   }
 
+  public NuclearSignal(NuclearSignal n){
+    this.roi = n.getRoi();
+    this.area = n.getArea();
+    this.perimeter = n.getPerimeter();
+    this.feret = n.getFeret();
+    this.centreOfMass = n.getCentreOfMass();
+  }
+
   /*
     -----------------------
     Getters for basic values within nucleus
@@ -66,11 +74,11 @@ public class NuclearSignal {
   }
 
   public XYPoint getCentreOfMass(){
-    return this.centreOfMass;
+    return new XYPoint(this.centreOfMass);
   }
 
   public NucleusBorderPoint getClosestBorderPoint(){
-    return this.closestNuclearBorderPoint;
+    return new NucleusBorderPoint(this.closestNuclearBorderPoint);
   }
 
   /*

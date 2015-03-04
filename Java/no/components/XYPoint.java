@@ -20,6 +20,11 @@ public class XYPoint {
     this.y = y;
   }
 
+  public XYPoint(XYPoint p){
+    this.x = p.getX();
+    this.y = p.getY();
+  }
+
   public double getX(){
     return this.x;
   }
