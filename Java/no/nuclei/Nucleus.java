@@ -196,7 +196,8 @@ public class Nucleus
 
     // calculate angle profile
     try{
-      angleProfile = new AngleProfile(this.smoothedPolygon, angleProfileWindowSize);
+      angleProfile = new AngleProfile(this.smoothedPolygon, angleProfileWindowSize); // LEGACY
+      this.calculateAngleProfile();
      } catch(Exception e){
        IJ.log("Cannot create angle profile: "+e);
      } 
@@ -1408,6 +1409,14 @@ public class Nucleus
     Methods for the new architecture only
     -----------------------
   */
+
+  public Profile getAngleProfileTest(){
+    return new Profile(this.angleProfileTest);
+  }
+
+  public Profile getDistanceProfileTest(){
+    return new Profile(this.distanceProfileTest);
+  }
 
   // Ensure only copies of border points get returned
   public NucleusBorderPoint getBorderTag(String s){

@@ -103,7 +103,7 @@ public class NucleusCollection
   private HashMap<String, HashMap<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
 
   // in preparation for new architecture:
-  private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); // REPLACE profileCollection WITH  THIS
+  private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); // REPLACE normalisedMedianProfileFromPoint WITH  THIS
 
 	public NucleusCollection(File folder, String outputFolder, String type){
 		this.folder = folder;
@@ -329,8 +329,8 @@ public class NucleusCollection
     return headings;
   }
 
-  public ArrayList<INuclearFunctions> getNucleiWithSignals(int channel){
-    ArrayList<INuclearFunctions> result = new ArrayList<INuclearFunctions>(0);
+  public List<INuclearFunctions> getNucleiWithSignals(int channel){
+    List<INuclearFunctions> result = new ArrayList<INuclearFunctions>(0);
 
     for(INuclearFunctions n : this.nucleiCollection){
 
@@ -368,11 +368,21 @@ public class NucleusCollection
     this.profileCollection.put(pointType, profile);
   }
 
+  public Profile getMedianProfile(String pointType){
+    return this.medianProfiles.get(pointType);
+  }
+
+  //LEGACY
   public double[] getNormalisedMedianProfileFromPoint(String pointType ){
     Double[] profile = this.normalisedMedianProfileFromPoint.get(pointType);
     return NuclearOrganisationUtility.getdoubleFromDouble(profile);
   }
 
+  public void addMedianProfile(String pointType, Profile p){
+    this.medianProfiles.put(pointType, p);
+  }
+
+  //LEGACY
   public void addNormalisedMedianProfileFromPoint(String pointType , double[] profile){
     Double[] result = NuclearOrganisationUtility.getDoubleFromdouble(profile);
     this.normalisedMedianProfileFromPoint.put(pointType, result);
@@ -803,11 +813,15 @@ public class NucleusCollection
     Set<String> headings = this.getNamesOfPointsOfInterest();
     for( String pointType : headings ){
 
-      double[] medianProfile = getNormalisedMedianProfileFromPoint(pointType);
+      // double[] medianProfile = getNormalisedMedianProfileFromPoint(pointType); //LEGACY
+      Profile medianProfile = getMedianProfile(pointType);
 
       for(int i= 0; i<this.getNucleusCount();i++){ // for each nucleus
         INuclearFunctions n = this.getNucleus(i);
-        double difference = n.calculateDifferenceToProfile(medianProfile, pointType);
+        int index = n.getBorderTag(pointType);
+        Profile nProfile = n.getAngleProfileTest().offset(index);
+        double difference = nProfile.differenceToProfile(medianProfile);
+        // double difference = n.calculateDifferenceToProfile(medianProfile, pointType); //LEGACY
         n.addDifferenceToMedianProfile(pointType, difference);
       } 
     }
@@ -1242,7 +1256,8 @@ public class NucleusCollection
 
     ArrayList<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
     double[] ymedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) );
-    this.addNormalisedMedianProfileFromPoint(pointType, ymedians);
+    this.addNormalisedMedianProfileFromPoint(pointType, ymedians); // LEGACY
+    this.addMedianProfile(pointType, ymedians);
   }
 
   /*

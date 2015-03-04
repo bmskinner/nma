@@ -135,6 +135,14 @@ public class Profile {
     return new Profile(this.array);
   }
 
+  public Profile offset(int j){
+    double[] newArray = new double[this.size()];
+    for(int i=0;i<this.size();i++){
+      newArray[i] = this.array[ NuclearOrganisationUtility.wrapIndex( i+j , this.size() ) ];
+    }
+    return new Profile(newArray);
+  }
+
   public void reverse(){
 
     double tmp;
