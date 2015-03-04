@@ -74,7 +74,7 @@ public class RodentSpermNucleus
   // Requires a sperm nucleus object to construct from
   public RodentSpermNucleus(Nucleus n){
   	super(n);
-    this.findPointsAroundBorder();
+    // this.findPointsAroundBorder();
   }
 
   // empty object
@@ -84,7 +84,8 @@ public class RodentSpermNucleus
   /*
     Identify key points: tip, estimated tail position
   */
-  private void findPointsAroundBorder(){
+  @Override
+  public void findPointsAroundBorder(){
     
     // find tip - use the least angle method
     NucleusBorderPoint spermTip = this.getAngleProfile().getPointWithMinimumAngle();

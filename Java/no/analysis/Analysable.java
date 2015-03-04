@@ -33,7 +33,7 @@ public interface Analysable
 
 	public void measureProfilePositions();
 
-	public INuclearFunctions getNucleusMostSimilarToMedian();
+	public INuclearFunctions getNucleusMostSimilarToMedian(String pointType);
 
 	public double[] getMedianTargetCurve(INuclearFunctions n);
 

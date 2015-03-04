@@ -52,8 +52,9 @@ public class CurveRefolder {
 	private double[] targetCurve;
 	private double[] initialCurve;
 
-	private INuclearFunctions initialNucleus;
-	private INuclearFunctions targetNucleus;
+	// private INuclearFunctions refoldNucleus;
+	// private INuclearFunctions refoldNucleus;
+	private INuclearFunctions refoldNucleus;
 
 	private Plot nucleusPlot;
 	private PlotWindow nucleusPlotWindow;
@@ -65,7 +66,7 @@ public class CurveRefolder {
 
 	public CurveRefolder(double[] target, INuclearFunctions n){
 		this.targetCurve = target;
-		this.initialNucleus = n;
+		this.refoldNucleus = n;
 		this.initialCurve = n.getInteriorAngles();
 	}
 
@@ -103,28 +104,26 @@ public class CurveRefolder {
 	*/
 	private void moveCoMtoZero(){
 
-		XYPoint centreOfMass = initialNucleus.getCentreOfMass();
+		XYPoint centreOfMass = refoldNucleus.getCentreOfMass();
 		double xOffset = centreOfMass.getX();
 		double yOffset = centreOfMass.getY();
 
-		initialNucleus.setCentreOfMass(new XYPoint(0,0));
+		refoldNucleus.setCentreOfMass(new XYPoint(0,0));
 
 		FloatPolygon offsetPolygon = new FloatPolygon();
 
-		for(int i=0; i<initialNucleus.getLength(); i++){
-			XYPoint p = initialNucleus.getBorderPoint(i);
+		for(int i=0; i<refoldNucleus.getLength(); i++){
+			XYPoint p = refoldNucleus.getBorderPoint(i);
 
 			double x = p.getX() - xOffset;
 			double y = p.getY() - yOffset;
 			offsetPolygon.addPoint(x, y);
 
-			initialNucleus.getBorderPoint(i).setX( x );
-			initialNucleus.getBorderPoint(i).setY( y );
+			refoldNucleus.getBorderPoint(i).setX( x );
+			refoldNucleus.getBorderPoint(i).setY( y );
 			
 		}
-		initialNucleus.setPolygon(offsetPolygon);
-
-		this.targetNucleus = initialNucleus;
+		refoldNucleus.setPolygon(offsetPolygon);
 	}
 
 	/*
@@ -133,13 +132,13 @@ public class CurveRefolder {
 	*/
 	private void preparePlots(){
 
-		double[] xPoints = new double[initialNucleus.getLength()];
-		double[] yPoints = new double[initialNucleus.getLength()];
-		double[] aPoints = new double[initialNucleus.getLength()]; // angles
-		double[] pPoints = new double[initialNucleus.getLength()]; // positions along array
+		double[] xPoints = new double[refoldNucleus.getLength()];
+		double[] yPoints = new double[refoldNucleus.getLength()];
+		double[] aPoints = new double[refoldNucleus.getLength()]; // angles
+		double[] pPoints = new double[refoldNucleus.getLength()]; // positions along array
 
-		for(int i=0; i<targetNucleus.getLength(); i++){
-			XYPoint p = targetNucleus.getBorderPoint(i);
+		for(int i=0; i<refoldNucleus.getLength(); i++){
+			XYPoint p = refoldNucleus.getBorderPoint(i);
 			xPoints[i] = p.getX();
 			yPoints[i] = p.getY();
 			aPoints[i] = targetCurve[i];
@@ -151,10 +150,10 @@ public class CurveRefolder {
 								"");
 
 		// get the limits  for the plot  	
-		double minX = targetNucleus.getMinX();
-		double maxX = targetNucleus.getMaxX();
-		double minY = targetNucleus.getMinY();
-		double maxY = targetNucleus.getMaxY();
+		double minX = refoldNucleus.getMinX();
+		double maxX = refoldNucleus.getMaxX();
+		double minY = refoldNucleus.getMinY();
+		double maxY = refoldNucleus.getMaxY();
 
 		// ensure that the scales for each axis are the same
 		double min = Math.min(minX, minY);
@@ -180,25 +179,50 @@ public class CurveRefolder {
 	/*
 		Draw the current state of the target nucleus
 	*/
-	private void plotTargetNucleus(){
+	public void plotNucleus(){
 
-		double[] xPoints = new double[targetNucleus.getLength()+1];
-		double[] yPoints = new double[targetNucleus.getLength()+1];
+		double[] xPoints = new double[refoldNucleus.getLength()+1];
+		double[] yPoints = new double[refoldNucleus.getLength()+1];
 
-		for(int i=0; i<targetNucleus.getLength(); i++){
-			XYPoint p = targetNucleus.getBorderPoint(i);
+		for(int i=0; i<refoldNucleus.getLength(); i++){
+			XYPoint p = refoldNucleus.getBorderPoint(i);
 			xPoints[i] = p.getX();
 			yPoints[i] = p.getY();
 		}
 
 		// ensure nucleus outline joins up at tip
-		XYPoint p = targetNucleus.getBorderPoint(0);
-		xPoints[targetNucleus.getLength()] = p.getX();
-		yPoints[targetNucleus.getLength()] = p.getY();
+		XYPoint p = refoldNucleus.getBorderPoint(0);
+		xPoints[refoldNucleus.getLength()] = p.getX();
+		yPoints[refoldNucleus.getLength()] = p.getY();
 
 		nucleusPlot.setColor(Color.DARK_GRAY);
 		nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
-		// nucleusPlotWindow.drawPlot(nucleusPlot);
+
+		// // also add the positions of selected border points
+		// HashMap<String, NucleusBorderPoint> pointHash = refoldNucleus.getBorderPointsOfInterest();
+		// Set<String> keys = pointHash.keySet();
+		// double[] xFeatures = new double[keys.size()];
+		// double[] yFeatures = new double[keys.size()];
+		// int i=0;
+		// for(String s : keys){
+		// 	NucleusBorderPoint n = pointHash.get(s);
+		// 	xFeatures[i] = n.getX();
+		// 	yFeatures[i] = n.getY();
+		// 	i++;
+		// }
+		// nucleusPlot.setColor(Color.BLUE);
+		// nucleusPlot.setLineWidth(3);
+		// nucleusPlot.addPoints(xFeatures, yFeatures, Plot.DOT);
+
+		// double[] xTail = new double[1];
+		// double[] yTail = new double[1];
+		// NucleusBorderPoint tail = refoldNucleus.getBorderPointOfInterest("tail");
+		// xTail[0] = tail.getX();
+		// yTail[0] = tail.getY();
+		// nucleusPlot.setColor(Color.CYAN);
+		// nucleusPlot.setLineWidth(3);
+		// nucleusPlot.addPoints(xTail, yTail, Plot.DOT);
+
 	}
 
 	/*
@@ -212,13 +236,13 @@ public class CurveRefolder {
 	*/
 	private double iterateOverNucleus(){
 
-		double similarityScore = compareProfiles(targetCurve, targetNucleus.getInteriorAngles());
+		double similarityScore = compareProfiles(targetCurve, refoldNucleus.getInteriorAngles());
 
-		double medianDistanceBetweenPoints = this.initialNucleus.getAngleProfile().getMedianDistanceBetweenPoints();
+		double medianDistanceBetweenPoints = this.refoldNucleus.getAngleProfile().getMedianDistanceBetweenPoints();
 		
-		for(int i=0; i<targetNucleus.getLength(); i++){
+		for(int i=0; i<refoldNucleus.getLength(); i++){
 
-			NucleusBorderPoint p = targetNucleus.getBorderPoint(i);
+			NucleusBorderPoint p = refoldNucleus.getBorderPoint(i);
 			
 			double currentDistance = p.getLengthTo(new XYPoint(0,0));
 			double newDistance = currentDistance; // default no change
@@ -251,23 +275,23 @@ public class CurveRefolder {
 			p.setY(newY); // the new y position
 
 			// ensure the interior angle calculation works with the current points
-			targetNucleus.setPolygon(createPolygon()); 
+			refoldNucleus.setPolygon(createPolygon()); 
 
 			// measure the new profile & compare
-			targetNucleus.getAngleProfile().updateAngleCalculations();
-			double[] newProfile = targetNucleus.getInteriorAngles();
+			refoldNucleus.getAngleProfile().updateAngleCalculations();
+			double[] newProfile = refoldNucleus.getInteriorAngles();
 			double score = compareProfiles(targetCurve, newProfile);
 
 			// do not apply change  if the distance from teh surrounding points changes too much
-			double distanceToPrev = p.getLengthTo( targetNucleus.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i-1, targetNucleus.getLength()) ) );
-			double distanceToNext = p.getLengthTo( targetNucleus.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i+1, targetNucleus.getLength()) ) );
+			double distanceToPrev = p.getLengthTo( refoldNucleus.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i-1, refoldNucleus.getLength()) ) );
+			double distanceToNext = p.getLengthTo( refoldNucleus.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i+1, refoldNucleus.getLength()) ) );
 
 			// reset if worse fit or distances are too high
 			if(score > similarityScore  || distanceToNext > medianDistanceBetweenPoints*1.2 || distanceToPrev > medianDistanceBetweenPoints*1.2 ){
 				p.setX(oldX);
 				p.setY(oldY);
-				targetNucleus.getAngleProfile().updateAngleCalculations();
-				targetNucleus.setPolygon(createPolygon());
+				refoldNucleus.getAngleProfile().updateAngleCalculations();
+				refoldNucleus.setPolygon(createPolygon());
 			} else {
 				similarityScore = score;
 			}
@@ -278,9 +302,9 @@ public class CurveRefolder {
 	private FloatPolygon createPolygon(){
 		FloatPolygon offsetPolygon = new FloatPolygon();
 
-		for(int i=0; i<targetNucleus.getLength(); i++){
+		for(int i=0; i<refoldNucleus.getLength(); i++){
 
-			NucleusBorderPoint p = targetNucleus.getBorderPoint(i);
+			NucleusBorderPoint p = refoldNucleus.getBorderPoint(i);
 			double x = p.getX();
 			double y = p.getY();
 			offsetPolygon.addPoint(x, y);
@@ -312,7 +336,7 @@ public class CurveRefolder {
 		double distanceFromZero = 180;
 
 		// get the angle from the tail to the vertical axis line
-		double tailAngle = Nucleus.findAngleBetweenXYPoints( bottomPoint, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
+		double tailAngle = Nucleus.findAngleBetweenXYPoints( bottomPoint, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
 			if(bottomPoint.getX()<0){
 				tailAngle = 360-tailAngle; // correct for measuring the smallest angle
 			}
@@ -323,7 +347,7 @@ public class CurveRefolder {
 			XYPoint p = new XYPoint( bottomPoint.getX(), bottomPoint.getY() );
 			
 			// get the distance from tail to CoM
-			double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
+			double distance = p.getLengthTo(refoldNucleus.getCentreOfMass());
 
 			// add the rotation amount
 			double newAngle = tailAngle + i;
@@ -349,11 +373,11 @@ public class CurveRefolder {
 
 		double angleToRotate = findRotationAngle(bottomPoint);
 
-		for(int i=0;i<targetNucleus.getLength();i++){
+		for(int i=0;i<refoldNucleus.getLength();i++){
 
-			XYPoint p = targetNucleus.getBorderPoint(i);
-			double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
-			double oldAngle = Nucleus.findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
+			XYPoint p = refoldNucleus.getBorderPoint(i);
+			double distance = p.getLengthTo(refoldNucleus.getCentreOfMass());
+			double oldAngle = Nucleus.findAngleBetweenXYPoints( p, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
 				oldAngle = 360-oldAngle;
 			}
@@ -362,10 +386,9 @@ public class CurveRefolder {
 			double newX = NuclearOrganisationUtility.getXComponentOfAngle(distance, newAngle);
 			double newY = NuclearOrganisationUtility.getYComponentOfAngle(distance, newAngle);
 
-				p.setX(newX); // the new x position
-				p.setY(newY); // the new y position
+			p.setX(newX); // the new x position
+			p.setY(newY); // the new y position
 		}
-		plotTargetNucleus();
 	}
 
 	/*
@@ -464,10 +487,10 @@ public class CurveRefolder {
 		double bestDiff = 180;
 		double bestDistance = 180;
 
-		for(int i=0;i<targetNucleus.getLength();i++){
-			XYPoint p = targetNucleus.getBorderPoint(i);
-			double distance = p.getLengthTo(targetNucleus.getCentreOfMass());
-			double pAngle = Nucleus.findAngleBetweenXYPoints( p, targetNucleus.getCentreOfMass(), new XYPoint(0,-10));
+		for(int i=0;i<refoldNucleus.getLength();i++){
+			XYPoint p = refoldNucleus.getBorderPoint(i);
+			double distance = p.getLengthTo(refoldNucleus.getCentreOfMass());
+			double pAngle = Nucleus.findAngleBetweenXYPoints( p, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
 				pAngle = 360-pAngle;
 			}
@@ -490,7 +513,7 @@ public class CurveRefolder {
 	public void exportProfileOfRefoldedImage(Analysable collection){
 	 
 		String logFile = collection.makeGlobalLogFile("logConsensusNucleus");
-		// File f = new File(targetNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
+		// File f = new File(refoldNucleus.getDirectory()+File.separator+"logConsensusNucleus."+collection.getType()+".txt");
 		// if(f.exists()){
 		//   f.delete();
 		// }
@@ -503,17 +526,17 @@ public class CurveRefolder {
 							"NORMALISED_PROFILE_X\t"+
 							"DISTANCE_PROFILE\n";
 
-		for(int i=0;i<targetNucleus.getLength();i++){
+		for(int i=0;i<refoldNucleus.getLength();i++){
 
-			double normalisedX = ((double)i/(double)targetNucleus.getLength())*100; // normalise to 100 length
+			double normalisedX = ((double)i/(double)refoldNucleus.getLength())*100; // normalise to 100 length
 			
-			outLine +=  targetNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
-						targetNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
-						targetNucleus.getBorderPoint(i).getX()                  +"\t"+
-						targetNucleus.getBorderPoint(i).getY()                  +"\t"+
-						targetNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
+			outLine +=  refoldNucleus.getBorderPoint(i).getXAsInt()             +"\t"+
+						refoldNucleus.getBorderPoint(i).getYAsInt()             +"\t"+
+						refoldNucleus.getBorderPoint(i).getX()                  +"\t"+
+						refoldNucleus.getBorderPoint(i).getY()                  +"\t"+
+						refoldNucleus.getBorderPoint(i).getInteriorAngle()      +"\t"+
 						normalisedX                                             +"\t"+
-						targetNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
+						refoldNucleus.getBorderPoint(i).getDistanceAcrossCoM()  +"\n";
 		}
 		IJ.append( outLine, logFile);
 	}
@@ -524,7 +547,7 @@ public class CurveRefolder {
 		cal.setUnit("pixels");
 		cal.pixelWidth = 1;
 		cal.pixelHeight = 1;
-		IJ.saveAsTiff(plot, targetNucleus.getOutputFolder()+File.separator+"plotConsensus."+collection.getType()+".tiff");
+		IJ.saveAsTiff(plot, refoldNucleus.getOutputFolder()+File.separator+"plotConsensus."+collection.getType()+".tiff");
 	}
 
 }

@@ -59,15 +59,16 @@ public class PigSpermNucleus
 
     public PigSpermNucleus(Nucleus n){
       super(n);
-      this.findPointsAroundBorder();
-      this.exportAngleProfile();
+      // this.findPointsAroundBorder();
+      // this.exportAngleProfile();
     }
 
     public PigSpermNucleus(){
 
     }
 
-    private void findPointsAroundBorder(){
+    @Override
+    public void findPointsAroundBorder(){
 
       NucleusBorderPoint tailPoint1 = this.findTailByMinima();
       NucleusBorderPoint tailPoint2 = this.findTailByMaxima();

@@ -804,16 +804,16 @@ public class NucleusCollection
 
       for(int i= 0; i<this.getNucleusCount();i++){ // for each nucleus
         INuclearFunctions n = this.getNucleus(i);
-        double difference = n.calculateDifferenceToMedianProfile(medianProfile);
+        double difference = n.calculateDifferenceToProfile(medianProfile, pointType);
         n.addDifferenceToMedianProfile(pointType, difference);
       } 
     }
   }
 
-  public INuclearFunctions getNucleusMostSimilarToMedian(){
+  public INuclearFunctions getNucleusMostSimilarToMedian(String pointType){
     INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
 
-    double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint("tail"));
+    double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint(pointType));
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
       if(p.getDifferenceToMedianProfile("tail")<difference){

@@ -16,7 +16,8 @@ import no.components.NuclearSignal;
 
 public interface INuclearFunctions
 {
-	 
+  
+	public void findPointsAroundBorder();
 	public Roi getRoi();
 	public String getPath();
 
@@ -168,7 +169,7 @@ public interface INuclearFunctions
   /*
     Find the difference to the given median
   */
-  public double calculateDifferenceToMedianProfile(double[] medianProfile);
+  public double calculateDifferenceToProfile(double[] testProfile, String pointType);
 
   
   /*
@@ -240,4 +241,6 @@ public interface INuclearFunctions
   public void exportAnnotatedImage();
 
   public void annotateNucleusImage();
+
+   public void dumpInfo();
 }

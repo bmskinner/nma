@@ -330,6 +330,7 @@ public class AnalysisCreator {
             INuclearFunctions p = collection.getNucleus(i);
 
             INuclearFunctions subNucleus  = (INuclearFunctions) nucleusConstructor.newInstance(p);
+            subNucleus.findPointsAroundBorder();
 
             // RodentSpermNucleus p = new RodentSpermNucleus(n);
             spermNuclei.addNucleus(subNucleus);
@@ -428,8 +429,15 @@ public class AnalysisCreator {
   public void attemptRefoldingConsensusNucleus(Analysable collection){
 
     try{ 
-      INuclearFunctions refoldCandidate = (INuclearFunctions)collection.getNucleusMostSimilarToMedian();
+
+      // make an entirely new nucleus to play with
+      INuclearFunctions n = (INuclearFunctions)collection.getNucleusMostSimilarToMedian("tail");
+
+      Constructor nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
+      INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
+    
       IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
+      IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
       if(refoldCandidate==null){
         throw new Exception();
       }
@@ -441,13 +449,24 @@ public class AnalysisCreator {
       // orient refolded nucleus to put tail at the bottom
       refolder.putPointAtBottom(refoldCandidate.getBorderPointOfInterest("tail"));
 
+      // if rodent sperm, put tip on left if needed
+      if(refoldCandidate.getClass().equals(nucleusClassTypes.get(0))){
+        IJ.log("    Rodent nucleus found");
+        if(refoldCandidate.getBorderPointOfInterest("tip").getX()>0){
+          IJ.log("    Flipping nucleus");
+          refoldCandidate.getAngleProfile().flipXAroundPoint(refoldCandidate.getCentreOfMass());
+        }
+      }
+
+      refolder.plotNucleus();
+
       // draw signals on the refolded nucleus
       refolder.addSignalsToConsensus(collection);
       refolder.exportImage(collection);
 
     } catch(Exception e){
       IJ.log("    Unable to refold nucleus: "+e.getMessage());
-    }
+    } 
   }
 
   /*

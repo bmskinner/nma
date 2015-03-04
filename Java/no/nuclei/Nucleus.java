@@ -151,6 +151,9 @@ public class Nucleus
     this.setOutputFolder(n.getOutputFolderName());
   }
 
+  public void findPointsAroundBorder(){
+  }
+
   public void intitialiseNucleus(int angleProfileWindowSize){
 
     this.nucleusFolder = new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension());
@@ -854,23 +857,28 @@ public class Nucleus
   }
 
   /*
-    Find the difference to the given median
+    Find the difference to the given median. Use pointType to align the profiles
   */
-  public double calculateDifferenceToMedianProfile(double[] medianProfile){
+  public double calculateDifferenceToProfile(double[] testProfile, String pointType){
 
     // the curve needs to be matched to the median 
     // hence the median array needs to be the same curve length
-    double[] interpolatedMedian = NucleusCollection.interpolateMedianToLength(this.getLength(), medianProfile);
+    double[] interpolatedProfile = NucleusCollection.interpolateMedianToLength(this.getLength(), testProfile);
 
     // for comparisons between sperm, get the difference between the offset curve and the median
     double totalDifference = 0;
 
+    int offset = getBorderIndexOfInterest(pointType);
+
     for(int j=0; j<this.getLength(); j++){ // for each point round the array
 
-      double curveAngle  = this.getBorderPoint(j).getInteriorAngle();
-      double medianAngle = interpolatedMedian[j];
+      // ensure we match array offsets to correct pointType
+      int index = NuclearOrganisationUtility.wrapIndex(offset + j, this.getLength());
 
-      totalDifference += Math.abs(curveAngle - medianAngle);
+      double curveAngle  = this.getBorderPoint(index).getInteriorAngle();
+      double testAngle = interpolatedProfile[j];
+
+      totalDifference += Math.abs(curveAngle - testAngle);
     }
     return totalDifference;
   }
@@ -1367,6 +1375,27 @@ public class Nucleus
 
     } catch(Exception e){
       IJ.log("Error annotating nucleus: "+e);
+    }
+  }
+
+   /*
+    Get a readout of the state of the nucleus
+    Used only for debugging
+  */
+  public void dumpInfo(){
+    IJ.log("Dumping nucleus info:");
+    IJ.log("CoM: "+this.getCentreOfMass().getX()+", "+this.getCentreOfMass().getY());
+    IJ.log("Border:");
+    for(int i=0; i<this.getLength(); i++){
+      NucleusBorderPoint p = this.getBorderPoint(i);
+      IJ.log("    "+p.getX()+"    "+p.getY());
+    }
+    IJ.log("Points of interest:");
+    HashMap<String, NucleusBorderPoint> pointHash = this.getBorderPointsOfInterest();
+    Set<String> keys = pointHash.keySet();
+    for(String s : keys){
+     NucleusBorderPoint p = pointHash.get(s);
+     IJ.log("    "+s+": "+p.getX()+"    "+p.getY());
     }
   }
 }
