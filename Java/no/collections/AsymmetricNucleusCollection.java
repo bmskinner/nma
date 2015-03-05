@@ -101,8 +101,8 @@ public class AsymmetricNucleusCollection
     super.exportStatsFiles();
     this.exportClusteringProfiles("logClusters");
 
-    double[] normalisedMedian = this.getNormalisedMedianProfileFromPoint("tail");
-    double[] interpolatedMedian = this.interpolateMedianToLength((int)this.getMedianNuclearPerimeter(), normalisedMedian);
+    Profile normalisedMedian = this.getMedianProfile("tail");
+    Profile interpolatedMedian = normalisedMedian.interpolate((int)this.getMedianNuclearPerimeter());
     this.exportMediansOfProfile(interpolatedMedian, "logMediansPerimeterLength");
   }
 
@@ -130,50 +130,14 @@ public class AsymmetricNucleusCollection
 
   /*
     -----------------------
-    Get values relating to
-    nucleus profiles
-    -----------------------
-  */
-
- //  public INuclearFunctions getNucleusMostSimilarToMedian(){
- //  	INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
-
- //  	double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint("tail"));
- //  	for(int i=0;i<this.getNucleusCount();i++){
- //      INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
- //      if(p.getDifferenceToMedianProfile("tail")<difference){
- //      	difference = p.getDifferenceToMedianProfile("tail");
- //      	n = p;
- //      }
- //    }
- //    return n;
- //  }
-
- //  /*
-	// 	Interpolate the median profile to match the length of the most-median nucleus
-	// 	Store the angle profile as a double[] to feed into the curve refolder
- //  */
-	// public double[] getMedianTargetCurve(INuclearFunctions n){
-	// 	double[] targetMedianCurve = interpolateMedianToLength(n.getLength(), this.getNormalisedMedianProfileFromPoint("tail"));
-	// 	return targetMedianCurve;
-	// }	
-
-  /*
-    -----------------------
-    Setters
-    -----------------------
-  */
-
-  /*
-    -----------------------
     Filter nuclei on
     assymetric specific features
     -----------------------
   */
 
-    public void refilterNuclei(Analysable failedCollection){
-      super.refilterNuclei(failedCollection);
-    }
+    // public void refilterNuclei(Analysable failedCollection){
+    //   super.refilterNuclei(failedCollection);
+    // }
 
 
   /*
@@ -191,7 +155,7 @@ public class AsymmetricNucleusCollection
 
       for(int i= 0; i<this.getNucleusCount();i++){
         INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-        n.calculateSignalAnglesFromPoint(n.getBorderPointOfInterest("tail"));
+        n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
       }
       this.exportSignalStats();
       this.addSignalsToProfileCharts();
@@ -222,13 +186,13 @@ public class AsymmetricNucleusCollection
     -----------------------
   */
 
-  public void exportInterpolatedMedians(double[] medianProfile){
+  public void exportInterpolatedMedians(Profile medianProfile){
 
     String logFile = makeGlobalLogFile("logOffsets");
 
     IJ.append("INDEX\tANGLE", logFile);
-    for(int i=0;i<medianProfile.length;i++){
-      IJ.append(i+"\t"+medianProfile[i], logFile);
+    for(int i=0;i<medianProfile.size();i++){
+      IJ.append(i+"\t"+medianProfile.get(i), logFile);
     }
     IJ.append("", logFile);
   }
@@ -371,9 +335,9 @@ public class AsymmetricNucleusCollection
                     headToTail[i] +"\t");
 
       INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-      double[] profile = n.getAngleProfile().getInteriorAngles(n.getBorderIndexOfInterest("tail"));
-      for(int j=0;j<profile.length;j++){
-        outLine.append(profile[j]+"\t");
+      Profile = n.getAngleProfile("tail");
+      for(int j=0;j<profile.size();j++){
+        outLine.append(profile.get(j)+"\t");
       }
       outLine.append("\r\n");
     }

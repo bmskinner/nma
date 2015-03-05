@@ -103,11 +103,11 @@ public class RodentSpermNucleusCollection
 		// can't use regular tail detector, because it's based on NucleusBorderPoints
 		// get minima in curve, then find the lowest minima / minima furthest from both ends
 
-    double[] medianProfile = this.getNormalisedMedianProfileFromPoint("tip");
+    Profile medianProfile = this.getMedianProfile("tip");
 
-		ArrayList<Integer> minima = this.detectLocalMinimaInMedian(medianProfile);
+		List<Integer> minima = medianProfile.getLocalMinima(5); // window size 5
 
-		double minDiff = medianProfile.length;
+		double minDiff = medianProfile.size();
 		double minAngle = 180;
 		int tailIndex = 0;
 
@@ -144,22 +144,22 @@ public class RodentSpermNucleusCollection
 
       // the curve needs to be matched to the median 
       // hence the median array needs to be the same curve length
-      double[] medianToCompare = this.getNormalisedMedianProfileFromPoint("tip");
+      Profile medianToCompare = this.getMedianProfile("tip");
 
-      double[] interpolatedMedian = NucleusCollection.interpolateMedianToLength(n.getLength(), medianToCompare);
+      Profile interpolatedMedian medianToCompare.interpolate(n.getLength());
 
       // find the median tail index position in the interplolated median profile
       int medianTailIndex = getMedianProfileFeatureIndex("tip", "tail");
       medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.length )* n.getLength());
       
-      int offset = n.getBorderIndexOfInterest("tail") - medianTailIndex;
+      int offset = n.getBorderIndex("tail") - medianTailIndex;
 
-      int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getBorderIndexOfInterest("tail")-offset, n.getLength());
+      int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getBorderIndex("tail")-offset, n.getLength());
 
-      n.addBorderPointOfInterest("tail", n.getBorderPoint(newTailIndex));
+      n.addBorderTag("tail", newTailIndex);
 
-      // also update the head position
-      n.addBorderPointOfInterest("head", n.findOppositeBorder( n.getBorderPoint(newTailIndex) ));
+      // also update the head position TO BE FINISHED
+      n.addBorderTag("head", n.findOppositeBorder( n.getBorderPoint(newTailIndex) ));
       n.splitNucleusToHeadAndHump();
     }
   }
