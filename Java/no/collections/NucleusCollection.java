@@ -88,19 +88,19 @@ public class NucleusCollection
   private double maxDifferenceFromMedian = 1.5; // used to filter the nuclei, and remove those too small, large or irregular to be real
   private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
 
-  private HashMap<String, HashMap<String, Plot>> plotCollection = new HashMap<String, HashMap<String, Plot>>();
+  private Map<String, Map<String, Plot>> plotCollection = new HashMap<String, HashMap<String, Plot>>();
 
   // this holds the mapping of tail indexes etc in the median profile arrays
   // the tail index point in the head normalised array would be head, <tail, int>
-  private HashMap<String, HashMap<String, Integer>> medianProfileFeatureIndexes = new HashMap<String, HashMap<String, Integer>>();
+  private Map<String, Map<String, Integer>> medianProfileFeatureIndexes = new HashMap<String, HashMap<String, Integer>>();
 
-	private ArrayList<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
+	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
-  private HashMap<String, Double[]> normalisedMedianProfileFromPoint = new HashMap<String, Double[]>();// the type of point and the array
+  private Map<String, Double[]> normalisedMedianProfileFromPoint = new HashMap<String, Double[]>();// the type of point and the array
 
   // store the calculated median profiles centred on the given border point
 
-  private HashMap<String, HashMap<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
+  private Map<String, Map<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
 
   // in preparation for new architecture:
   private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); // REPLACE normalisedMedianProfileFromPoint WITH  THIS
@@ -263,7 +263,7 @@ public class NucleusCollection
     return this.nucleiCollection.size();
   }
 
-  public ArrayList<INuclearFunctions> getNuclei(){
+  public List<INuclearFunctions> getNuclei(){
     return this.nucleiCollection;
   }
 
@@ -322,10 +322,10 @@ public class NucleusCollection
     return NuclearOrganisationUtility.getMax(this.getArrayLengths());
   }
 
-  public Set<String> getNamesOfPointsOfInterest(){
+  public Set<String> getTags(){
 
     INuclearFunctions n = this.nucleiCollection.get(0);
-    Set<String> headings = n.getBorderPointsOfInterest().keySet();
+    Set<String> headings = n.getTags();
     return headings;
   }
 
@@ -360,40 +360,47 @@ public class NucleusCollection
     return result;
   }
 
-  public HashMap<Double, Collection<Double>> getProfileAggregate(String pointType){
+  /*
+    --------------------
+    Profile methds
+    --------------------
+  */
+
+  public Map<Double, Collection<Double>> getProfileAggregate(String pointType){
     return this.profileCollection.get(pointType);
   }
 
-  public void addProfileAggregate(String pointType , HashMap<Double, Collection<Double>> profile){
+  public void addProfileAggregate(String pointType , Map<Double, Collection<Double>> profile){
     this.profileCollection.put(pointType, profile);
   }
 
-  public Profile getMedianProfile(String pointType){
+  public Profile getMedianProfile(String pointType){ // replaces getNormalisedMedianProfileFromPoint
     return this.medianProfiles.get(pointType);
   }
 
-  //LEGACY
-  public double[] getNormalisedMedianProfileFromPoint(String pointType ){
-    Double[] profile = this.normalisedMedianProfileFromPoint.get(pointType);
-    return NuclearOrganisationUtility.getdoubleFromDouble(profile);
-  }
+  // //LEGACY
+  // public double[] getNormalisedMedianProfileFromPoint(String pointType ){
+  //   Double[] profile = this.normalisedMedianProfileFromPoint.get(pointType);
+  //   return NuclearOrganisationUtility.getdoubleFromDouble(profile);
+  // }
 
-  public void addMedianProfile(String pointType, Profile p){
+  public void addMedianProfile(String pointType, Profile p){ // replaces addNormalisedMedianProfileFromPoint
     this.medianProfiles.put(pointType, p);
   }
 
-  //LEGACY
-  public void addNormalisedMedianProfileFromPoint(String pointType , double[] profile){
-    Double[] result = NuclearOrganisationUtility.getDoubleFromdouble(profile);
-    this.normalisedMedianProfileFromPoint.put(pointType, result);
-  }
+  // //LEGACY
+  // public void addNormalisedMedianProfileFromPoint(String pointType , double[] profile){
+  //   Double[] result = NuclearOrganisationUtility.getDoubleFromdouble(profile);
+  //   this.normalisedMedianProfileFromPoint.put(pointType, result);
+  // }
 
   public double[] getDifferencesToMedianFromPoint(String pointType){
     double[] d = new double[this.getNucleusCount()];
+    Profile medianProfile = getMedianProfile(pointType);
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions n = this.getNucleus(i);
       try{
-        d[i] = n.getDifferenceToMedianProfile(pointType);
+        d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
       } catch(Exception e){
         IJ.log("    Unable to get difference to median profile: "+i+": "+pointType);
         IJ.append("    Unable to get difference to median profile: "+i+": "+pointType, this.debugFile.getAbsolutePath());
@@ -426,7 +433,7 @@ public class NucleusCollection
 
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions n = this.getNucleus(i);
-      d[i] = n.getBorderIndexOfInterest(pointType);
+      d[i] = n.getBorderIndex(pointType);
     }
     return d;
   }
@@ -435,7 +442,7 @@ public class NucleusCollection
     double[] d = new double[this.getNucleusCount()];
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions n = this.getNucleus(i);
-      d[i] = n.getBorderPointOfInterest(pointTypeA).getLengthTo(n.getBorderPointOfInterest(pointTypeB));
+      d[i] = n.getBorderTag(pointTypeA).getLengthTo(n.getBorderTag(pointTypeB));
     }
     return d;
   }
@@ -508,10 +515,15 @@ public class NucleusCollection
       
       if(n.getFailureCode() > 0){
         failedCollection.addNucleus(n);
-        this.getNuclei().remove(this.getNucleus(i));
-        i--; // the array index automatically shifts to account for the removed nucleus. Compensate to avoid skipping nuclei
+        // this.getNuclei().remove(this.getNucleus(i));
+        // i--; // the array index automatically shifts to account for the removed nucleus. Compensate to avoid skipping nuclei
       }
     }
+
+    for( INuclearFunctions f : failedCollection){ // should be safer than the i-- above
+      this.getNuclei().remove(f);
+    }
+      
 
     medianArea = this.getMedianNuclearArea();
     medianPerimeter = this.getMedianNuclearPerimeter();
@@ -532,6 +544,7 @@ public class NucleusCollection
     IJ.append("  Due to feret length: "+feretlength+" nuclei", this.getDebugFile().getAbsolutePath());
     // IJ.append("  Due to curve shape: "+curveShape+" nuclei", this.getDebugFile().getAbsolutePath());
     IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei");
+    
   }
 
   /*
@@ -675,9 +688,10 @@ public class NucleusCollection
 
       double[] xvalues = n.getNormalisedProfilePositions();
 
-      NucleusBorderPoint indexPoint = n.getBorderPointOfInterest(pointType);
-      int index = n.getAngleProfile().getIndexOfPoint(indexPoint);
-      double[] yvalues = n.getAngleProfile().getInteriorAngles(index);
+      // NucleusBorderPoint indexPoint = n.getBorderTag(pointType);
+      // int index = n.getAngleProfile().getIndexOfPoint(indexPoint);
+      // double[] yvalues = n.getAngleProfile().getInteriorAngles(index);
+      double[] yvalues = n.getAngleProfile(pointType).asArray();
 
       updateProfileAggregate(xvalues, yvalues, profileAggregate); 
     }
@@ -685,7 +699,7 @@ public class NucleusCollection
 
   public void createProfileAggregates(){
 
-    Set<String> headings = this.getNamesOfPointsOfInterest();
+    Set<String> headings = this.getTags();
     for( String pointType : headings ){
       createProfileAggregateFromPoint(pointType);
     }
@@ -696,77 +710,77 @@ public class NucleusCollection
     Finds, as a list of index integers, the points
     of local minimum in the median profile line
   */
-  protected ArrayList<Integer> detectLocalMinimaInMedian(double[] medianProfile){
-    // go through angle array (with tip at start)
-    // look at 1-2-3-4-5 points ahead and behind.
-    // if all greater, local minimum
-    int lookupDistance = 5;
+  // protected ArrayList<Integer> detectLocalMinimaInMedian(double[] medianProfile){
+  //   // go through angle array (with tip at start)
+  //   // look at 1-2-3-4-5 points ahead and behind.
+  //   // if all greater, local minimum
+  //   int lookupDistance = 5;
     
-    double[] prevAngles = new double[lookupDistance]; // slots for previous angles
-    double[] nextAngles = new double[lookupDistance]; // slots for next angles
+  //   double[] prevAngles = new double[lookupDistance]; // slots for previous angles
+  //   double[] nextAngles = new double[lookupDistance]; // slots for next angles
 
-    // int count = 0;
+  //   // int count = 0;
 
-    ArrayList<Integer> medianIndexMinima = new ArrayList<Integer>(0);
+  //   ArrayList<Integer> medianIndexMinima = new ArrayList<Integer>(0);
 
-    for (int i=0; i<medianProfile.length; i++) { // for each position in sperm
+  //   for (int i=0; i<medianProfile.length; i++) { // for each position in sperm
 
-      // go through each lookup position and get the appropriate angles
-      for(int j=0;j<prevAngles.length;j++){
+  //     // go through each lookup position and get the appropriate angles
+  //     for(int j=0;j<prevAngles.length;j++){
 
-        int prev_i = NuclearOrganisationUtility.wrapIndex( i-(j+1), medianProfile.length ); // the index j+1 before i
-        int next_i = NuclearOrganisationUtility.wrapIndex( i+(j+1), medianProfile.length ); // the index j+1 after i
+  //       int prev_i = NuclearOrganisationUtility.wrapIndex( i-(j+1), medianProfile.length ); // the index j+1 before i
+  //       int next_i = NuclearOrganisationUtility.wrapIndex( i+(j+1), medianProfile.length ); // the index j+1 after i
 
-        // fill the lookup array
-        prevAngles[j] = medianProfile[prev_i];
-        nextAngles[j] = medianProfile[next_i];
-      }
+  //       // fill the lookup array
+  //       prevAngles[j] = medianProfile[prev_i];
+  //       nextAngles[j] = medianProfile[next_i];
+  //     }
       
-      // with the lookup positions, see if minimum at i
-      // return a 1 if all higher than last, 0 if not
-      // prev_l = 0;
-      int errors = 2; // allow two positions to be out of place; better handling of noisy data
-      boolean ok = true;
-      for(int l=0;l<prevAngles.length;l++){
+  //     // with the lookup positions, see if minimum at i
+  //     // return a 1 if all higher than last, 0 if not
+  //     // prev_l = 0;
+  //     int errors = 2; // allow two positions to be out of place; better handling of noisy data
+  //     boolean ok = true;
+  //     for(int l=0;l<prevAngles.length;l++){
 
-        // for the first position in prevAngles, compare to the current index
-        if(l==0){
-          if(prevAngles[l] < medianProfile[i] || nextAngles[l] < medianProfile[i]){
-            errors--;
-          }
-        } else { // for the remainder of the positions in prevAngles, compare to the prior prevAngle
+  //       // for the first position in prevAngles, compare to the current index
+  //       if(l==0){
+  //         if(prevAngles[l] < medianProfile[i] || nextAngles[l] < medianProfile[i]){
+  //           errors--;
+  //         }
+  //       } else { // for the remainder of the positions in prevAngles, compare to the prior prevAngle
           
-          if(prevAngles[l] < prevAngles[l-1] || nextAngles[l] < nextAngles[l-1]){
-            errors--;
-          }
-        }
-        if(errors<0){
-          ok = false;
-        }
-      }
+  //         if(prevAngles[l] < prevAngles[l-1] || nextAngles[l] < nextAngles[l-1]){
+  //           errors--;
+  //         }
+  //       }
+  //       if(errors<0){
+  //         ok = false;
+  //       }
+  //     }
 
-      if(ok){
-        medianIndexMinima.add(i);
-      }
-    }
-    return medianIndexMinima;
-  }
+  //     if(ok){
+  //       medianIndexMinima.add(i);
+  //     }
+  //   }
+  //   return medianIndexMinima;
+  // }
 
-  public static double[] interpolateMedianToLength(int newLength, double[] medianProfile){
+  // public static double[] interpolateMedianToLength(int newLength, double[] medianProfile){
 
-    int oldLength = medianProfile.length;
+  //   int oldLength = medianProfile.length;
     
-    double[] newMedianCurve = new double[newLength];
-    // where in the old curve index is the new curve index?
-    for (int i=0; i<newLength; i++) {
-      // we have a point in the new curve.
-      // we want to know which points it lay between in the old curve
-      double oldIndex = ( (double)i / (double)newLength)*oldLength; // get the frational index position needed
-      double interpolatedMedian = interpolateNormalisedMedian(oldIndex, medianProfile);
-      newMedianCurve[i] = interpolatedMedian;
-    }
-    return newMedianCurve;
-  }
+  //   double[] newMedianCurve = new double[newLength];
+  //   // where in the old curve index is the new curve index?
+  //   for (int i=0; i<newLength; i++) {
+  //     // we have a point in the new curve.
+  //     // we want to know which points it lay between in the old curve
+  //     double oldIndex = ( (double)i / (double)newLength)*oldLength; // get the frational index position needed
+  //     double interpolatedMedian = interpolateNormalisedMedian(oldIndex, medianProfile);
+  //     newMedianCurve[i] = interpolatedMedian;
+  //   }
+  //   return newMedianCurve;
+  // }
 
   /*
     Take an index position from a non-normalised profile
@@ -774,36 +788,36 @@ public class NucleusCollection
     Find the corresponding angle in the median curve
     Interpolate as needed
   */
-  public static double interpolateNormalisedMedian(double normIndex, double[] medianProfile){
+  // public static double interpolateNormalisedMedian(double normIndex, double[] medianProfile){
 
-    // convert index to 1 window boundaries
-    int medianIndex1 = (int)Math.round(normIndex);
-    int medianIndex2 = medianIndex1 > normIndex
-                        ? medianIndex1 - 1
-                        : medianIndex1 + 1;
+  //   // convert index to 1 window boundaries
+  //   int medianIndex1 = (int)Math.round(normIndex);
+  //   int medianIndex2 = medianIndex1 > normIndex
+  //                       ? medianIndex1 - 1
+  //                       : medianIndex1 + 1;
 
-    int medianIndexLower = medianIndex1 < medianIndex2
-                        ? medianIndex1
-                        : medianIndex2;
+  //   int medianIndexLower = medianIndex1 < medianIndex2
+  //                       ? medianIndex1
+  //                       : medianIndex2;
 
-    int medianIndexHigher = medianIndex2 < medianIndex1
-                             ? medianIndex2
-                             : medianIndex1;
+  //   int medianIndexHigher = medianIndex2 < medianIndex1
+  //                            ? medianIndex2
+  //                            : medianIndex1;
 
-    // wrap the arrays
-    medianIndexLower  = NuclearOrganisationUtility.wrapIndex(medianIndexLower , medianProfile.length);
-    medianIndexHigher = NuclearOrganisationUtility.wrapIndex(medianIndexHigher, medianProfile.length);
+  //   // wrap the arrays
+  //   medianIndexLower  = NuclearOrganisationUtility.wrapIndex(medianIndexLower , medianProfile.length);
+  //   medianIndexHigher = NuclearOrganisationUtility.wrapIndex(medianIndexHigher, medianProfile.length);
 
-    // get the angle values in the median profile at the given indices
-    double medianAngleLower  = medianProfile[medianIndexLower ];
-    double medianAngleHigher = medianProfile[medianIndexHigher];
+  //   // get the angle values in the median profile at the given indices
+  //   double medianAngleLower  = medianProfile[medianIndexLower ];
+  //   double medianAngleHigher = medianProfile[medianIndexHigher];
 
-    // interpolate on a stright line between the points
-    double medianAngleDifference = medianAngleHigher - medianAngleLower;
-    double positionToFind = medianIndexHigher - normIndex;
-    double interpolatedMedianAngle = (medianAngleDifference * positionToFind) + medianAngleLower;
-    return interpolatedMedianAngle;
-  }
+  //   // interpolate on a stright line between the points
+  //   double medianAngleDifference = medianAngleHigher - medianAngleLower;
+  //   double positionToFind = medianIndexHigher - normIndex;
+  //   double interpolatedMedianAngle = (medianAngleDifference * positionToFind) + medianAngleLower;
+  //   return interpolatedMedianAngle;
+  // }
 
   // /*
   //   For each nucleus in the collection see if there is a differences to the given median
@@ -813,7 +827,6 @@ public class NucleusCollection
     Set<String> headings = this.getNamesOfPointsOfInterest();
     for( String pointType : headings ){
 
-      // double[] medianProfile = getNormalisedMedianProfileFromPoint(pointType); //LEGACY
       Profile medianProfile = getMedianProfile(pointType);
 
       for(int i= 0; i<this.getNucleusCount();i++){ // for each nucleus
@@ -821,7 +834,6 @@ public class NucleusCollection
         int index = n.getBorderTag(pointType);
         Profile nProfile = n.getAngleProfileTest().offset(index);
         double difference = nProfile.differenceToProfile(medianProfile);
-        // double difference = n.calculateDifferenceToProfile(medianProfile, pointType); //LEGACY
         n.addDifferenceToMedianProfile(pointType, difference);
       } 
     }
@@ -829,12 +841,15 @@ public class NucleusCollection
 
   public INuclearFunctions getNucleusMostSimilarToMedian(String pointType){
     INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
+    Profile medianProfile = getMedianProfile(pointType);
 
     double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint(pointType));
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
-      if(p.getDifferenceToMedianProfile("tail")<difference){
-        difference = p.getDifferenceToMedianProfile("tail");
+      int index = n.getBorderTag(pointType);
+      double nDifference = p.getAngleProfile().offset(index).differenceToProfile(medianProfile);
+      if(nDifference<difference){
+        difference = nDifference;
         n = p;
       }
     }
@@ -845,10 +860,10 @@ public class NucleusCollection
     Interpolate the median profile to match the length of the most-median nucleus
     Store the angle profile as a double[] to feed into the curve refolder
   */
-  public double[] getMedianTargetCurve(INuclearFunctions n){
-    double[] targetMedianCurve = interpolateMedianToLength(n.getLength(), this.getNormalisedMedianProfileFromPoint("tail"));
-    return targetMedianCurve;
-  } 
+  // public double[] getMedianTargetCurve(INuclearFunctions n){
+  //   double[] targetMedianCurve = interpolateMedianToLength(n.getLength(), this.getNormalisedMedianProfileFromPoint("tail"));
+  //   return targetMedianCurve;
+  // } 
 
   /*
     -----------------
@@ -1263,7 +1278,7 @@ public class NucleusCollection
   /*
     Draw a median profile on the normalised plots.
   */
-  public void drawNormalisedMedianLineFromPoint(String pointType, Plot plot){
+  public void drawMedianLine(String pointType, Plot plot){
 
     HashMap<Double, Collection<Double>> profileAggregate = this.getProfileAggregate(pointType);
 
@@ -1293,17 +1308,27 @@ public class NucleusCollection
   /*
     Draw a boxplot on the normalised plots. Specify which BorderPointOfInterest is to be plotted.
   */
-  public void drawBoxplotOnNormalisedMedianLineFromPoint(String profilePointType, Plot plot, String boxPointType){
+  public void drawBoxplot(String profilePointType, Plot plot, String boxPointType){
 
     // get the tail positions with the head offset applied
     double[] xPoints = new double[this.getNucleusCount()];
     for(int i= 0; i<this.getNucleusCount();i++){
 
       INuclearFunctions n = this.getNucleus(i);
-      xPoints[i] =  ((double) n.getOffsetIndex(n.getBorderPointOfInterest(boxPointType), profilePointType) / (double)n.getLength()) *100;
+
+      // get the index of the NBP with the boxPointType
+      int boxIndex = n.getBorderIndex(boxPointType);
+      // get the index of the NBP with the profilePointType; the new zero
+      int profileIndex = n.getBorderIndex(profilePointType);
+
+      // find the offset position of boxPoint, using profilePoint as a zero. 
+      int offsetIndex = NuclearOrganisationUtility.wrapIndex( boxIndex - profileIndex , n.getLength() );
+
+      // normalise to 100
+      xPoints[i] =  (   (double) offsetIndex / (double) n.getLength()  ) * 100;
     }
     double[] yPoints = new double[xPoints.length];
-    Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=300
+    Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=CHART_TAIL_BOX_Y_MID
     plot.setColor(Color.LIGHT_GRAY);
     plot.addPoints(xPoints, yPoints, Plot.DOT);
 
@@ -1327,8 +1352,8 @@ public class NucleusCollection
     for( String pointType : headings ){
 
         Plot normPlot = getPlot(pointType, "norm");
-        drawNormalisedMedianLineFromPoint(pointType, normPlot);
-        drawBoxplotOnNormalisedMedianLineFromPoint(pointType, normPlot, "tail");
+        drawMedianLine(pointType, normPlot);
+        drawBoxplot(pointType, normPlot, "tail");
     }
   }
 
@@ -1354,29 +1379,36 @@ public class NucleusCollection
     for(int i= 0; i<this.getNucleusCount();i++){
 
       INuclearFunctions n = this.getNucleus(i);
-      ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+      List<List<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
       signals.add(n.getRedSignals());
       signals.add(n.getGreenSignals());
 
       int signalCount = 0;
-      for( ArrayList<NuclearSignal> signalGroup : signals ){
+      for( List<NuclearSignal> signalGroup : signals ){
         
         if(signalGroup.size()>0){
 
           Color colour = signalCount == Nucleus.RED_CHANNEL ? Color.RED : Color.GREEN;
 
-          ArrayList<Double> xPoints = new ArrayList<Double>(0);
-          ArrayList<Double> yPoints = new ArrayList<Double>(0);
+          List<Double> xPoints = new ArrayList<Double>(0);
+          List<Double> yPoints = new ArrayList<Double>(0);
 
           for(int j=0; j<signalGroup.size();j++){
 
-            NucleusBorderPoint border = signalGroup.get(j).getClosestBorderPoint();
+            int borderIndex = signalGroup.get(j).getClosestBorderPoint();
             for(int k=0; k<n.getLength();k++){
 
-              // We want to get the profile position, offset to the pointType 
-              if(n.getBorderPoint(k).overlaps(border)){
-                int rawIndex = n.getOffsetIndex(n.getBorderPoint(k), pointType);
-                double normIndex = ((double) rawIndex / (double) n.getLength()) *100;
+              // Check if the current NBP is the correct closest border
+              if(  n.getPoint(k).overlaps(  n.getPoint(borderIndex) )){
+
+                // We want to get the profile position, offset to the pointType 
+                // get the index of the NBP with the profilePointType; the new zero
+                int profileIndex = n.getBorderIndex(profilePointType);
+
+                // find the offset position of boxPoint, using profilePoint as a zero. 
+                int offsetIndex = NuclearOrganisationUtility.wrapIndex( borderIndex - profileIndex , n.getLength() );
+                double normIndex = (  (double) offsetIndex / (double) n.getLength()  ) * 100;
+
                 xPoints.add( normIndex );
                 double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( signalGroup.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
                 yPoints.add(yPosition);

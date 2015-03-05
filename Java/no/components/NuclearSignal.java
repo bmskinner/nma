@@ -20,7 +20,7 @@ public class NuclearSignal {
   private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
 
   private XYPoint centreOfMass;
-  private NucleusBorderPoint closestNuclearBorderPoint;
+  private int closestNuclearBorderPoint;
 
   private Roi roi;
 
@@ -37,7 +37,7 @@ public class NuclearSignal {
     this.area = n.getArea();
     this.perimeter = n.getPerimeter();
     this.feret = n.getFeret();
-    this.centreOfMass = n.getCentreOfMass();
+    this.centreOfMass = new XYPoint(n.getCentreOfMass());
   }
 
   /*
@@ -77,8 +77,8 @@ public class NuclearSignal {
     return new XYPoint(this.centreOfMass);
   }
 
-  public NucleusBorderPoint getClosestBorderPoint(){
-    return new NucleusBorderPoint(this.closestNuclearBorderPoint);
+  public int getClosestBorderPoint(){
+    return this.closestNuclearBorderPoint;
   }
 
   /*

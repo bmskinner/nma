@@ -89,7 +89,7 @@ public class Profile {
     return minIndex;
   }
 
-  public double[] getProfile(){
+  public double[] asArray(){
     return this.array;
   }
 

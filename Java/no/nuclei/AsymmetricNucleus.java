@@ -59,32 +59,7 @@ public class AsymmetricNucleus
   extends Nucleus
 {
 
-  private ArrayList<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
-
-  // Requires a nucleus object to construct from
-  public AsymmetricNucleus(Nucleus n){
-    this.setRoi(n.getRoi());
-    this.setPosition(n.getPosition());
-    this.setSourceImage(n.getSourceImage());
-    this.setSourceFile(n.getSourceFile());
-    this.setAnnotatedImage(n.getAnnotatedImage());
-    this.setEnlargedImage(n.getEnlargedImage());
-    this.setNucleusNumber(n.getNucleusNumber());
-    this.setNucleusFolder(n.getNucleusFolder());
-    this.setPerimeter(n.getPerimeter());
-    this.setPathLength(n.getPathLength());
-    this.setFeret(n.getFeret());
-    this.setArea(n.getArea());
-    this.setAngleProfile(n.getAngleProfile());
-    this.setCentreOfMass(n.getCentreOfMass());
-    this.setRedSignals(n.getRedSignals());
-    this.setGreenSignals(n.getGreenSignals());
-    this.setPolygon(n.getSmoothedPolygon());
-    this.setDistanceProfile(n.getDistanceProfile());
-    this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
-    this.setBorderPointsOfInterest(n.getBorderPointsOfInterest());
-    this.setOutputFolder(n.getOutputFolderName());
-  }
+  private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
 
   public AsymmetricNucleus(){
 
@@ -96,7 +71,7 @@ public class AsymmetricNucleus
     -----------------------
   */
 
-  public ArrayList<NucleusBorderPoint> getEstimatedTailPoints(){
+  public List<NucleusBorderPoint> getEstimatedTailPoints(){
     return this.tailEstimatePoints;
   }
 
@@ -163,11 +138,11 @@ public class AsymmetricNucleus
   */
   @Override
   public double findRotationAngle(){
-    XYPoint end = new XYPoint(this.getBorderPointOfInterest("tail").getXAsInt(),this.getBorderPointOfInterest("tail").getYAsInt()-50);
+    XYPoint end = new XYPoint(this.getBorderTag("tail").getXAsInt(),this.getBorderTag("tail").getYAsInt()-50);
 
-    double angle = findAngleBetweenXYPoints(end, this.getBorderPointOfInterest("tail"), this.getCentreOfMass());
+    double angle = findAngleBetweenXYPoints(end, this.getBorderTag("tail"), this.getCentreOfMass());
 
-    if(this.getCentreOfMass().getX() < this.getBorderPointOfInterest("tail").getX()){
+    if(this.getCentreOfMass().getX() < this.getBorderTag("tail").getX()){
       return angle;
     } else {
       return 0-angle;

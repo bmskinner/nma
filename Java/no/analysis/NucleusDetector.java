@@ -76,9 +76,9 @@ public class NucleusDetector {
 
   // counts of nuclei processed
   protected int totalNuclei        = 0;
-  protected int nucleiFailedOnTip  = 0;
-  protected int nucleiFailedOnTail = 0;
-  protected int nucleiFailedOther  = 0; // generic reasons for failure
+  // protected int nucleiFailedOnTip  = 0;
+  // protected int nucleiFailedOnTail = 0;
+  // protected int nucleiFailedOther  = 0; // generic reasons for failure
 
   private  int    signalThreshold = 70;
   private  double   minSignalSize = 5;
@@ -87,7 +87,7 @@ public class NucleusDetector {
 	private File inputFolder;
   protected String outputFolder;
 	// private NucleusCollection collection;
-  private HashMap<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
+  private Map<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
 
 
   /*
@@ -169,9 +169,9 @@ public class NucleusDetector {
 
 
 
-  public HashMap<File, NucleusCollection> getNucleiCollections(){
+  public Map<File, NucleusCollection> getNucleiCollections(){
     // remove any empty collections before returning
-    ArrayList<File> toRemove = new ArrayList<File>(0);
+    List<File> toRemove = new ArrayList<File>(0);
     Set<File> keys = collectionGroup.keySet();
     for (File key : keys) {
       NucleusCollection collection = collectionGroup.get(key);
@@ -259,16 +259,26 @@ public class NucleusDetector {
   protected void processImage(ImagePlus image, File path){
 
     IJ.log("File:  "+path.getName());
-    RoiManager nucleiInImage = findNucleiInImage(image);
 
-    Roi[] roiArray = nucleiInImage.getSelectedRoisAsArray();
+    Detector detector = new Dectector();
+    detector.setMaxSize(this.maxNucleusSize);
+    detector.setMinSize(this.minNucleusSize);
+    detector.setMinCirc(this.minNucleusCirc);
+    detector.setMaxCirc(this.maxNucleusCirc);
+    detector.setThreshold(this.nucleusThreshold);
+    detector.setChannel(BLUE_CHANNEL);
+    detector.run(image);
+    Map<Roi, Map<String, Double>> map = detector.getRoiMap();
+
     int i = 0;
 
-    for(Roi roi : roiArray){
+    Set<Roi> keys = map.keySet();
+
+    for(Roi roi : keys){
       
       IJ.log("  Acquiring nucleus "+i);
       try{
-      	analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
+      	analyseNucleus(roi, image, i, path, map.get(roi)); // get the profile data back for the nucleus
       	this.totalNuclei++;
       } catch(Exception e){
       	IJ.log("  Error acquiring nucleus: "+e);
@@ -278,52 +288,10 @@ public class NucleusDetector {
   }
 
   /*
-    Within a given image, look for nuclei using the particle analyser.
-    Return an RoiManager containing the outlines of all potential nuclei
-  */
-  protected RoiManager findNucleiInImage(ImagePlus image){
-
-    RoiManager manager = new RoiManager(true);
-
-    // split out blue channel
-    ChannelSplitter cs = new ChannelSplitter();
-    ImagePlus[] channels = cs.split(image);
-    ImagePlus blue = channels[BLUE_CHANNEL];
-    
-    // threshold
-    ImageProcessor ip = blue.getChannelProcessor();
-    ip.smooth();
-    ip.threshold(this.nucleusThreshold);
-    ip.invert();
-
-    // run the particle analyser
-    ResultsTable rt = new ResultsTable();
-    ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
-                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA ,
-                 rt, this.minNucleusSize, this.maxNucleusSize, this.minNucleusCirc, this.maxNucleusCirc);
-    try {
-      pa.setRoiManager(manager);
-      boolean success = pa.analyze(blue);
-      if(success){
-        String plural = manager.getCount() == 1 ? "nucleus" : "nuclei";
-        IJ.log("  Found "+manager.getCount()+ " "+plural);
-      } else {
-        IJ.log("  Unable to perform particle analysis");
-      }
-    } catch(Exception e){
-       IJ.log("  Error in particle analyser: "+e);
-    } finally {
-      blue.close();
-    }
-   
-   return manager;
-  }
-
-  /*
   	Save the region of the input image containing the nucleus
     Add to collection
   */
-  protected void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, File path){
+  protected void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, File path, Map<String, Double> values){
     
     // save the position of the roi, for later use
     double xbase = nucleus.getXBase();
@@ -351,11 +319,19 @@ public class NucleusDetector {
 
     // turn roi into Nucleus for manipulation
     Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
+
+    currentNucleus.setCentreOfMass(new XYPoint(values.get("XM"), values.get("YM")));
+    currentNucleus.setArea(values.get("Area")); 
+    currentNucleus.setFeret(values.getValue("Feret"));
+    currentNucleus.setPerimeter(values.getValue("Perim"));
+
     currentNucleus.setOutputFolder(this.outputFolder);
     currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
+
     currentNucleus.setSignalThreshold(this.signalThreshold);
     currentNucleus.setMinSignalSize(this.minSignalSize);
     currentNucleus.setMaxSignalFraction(this.maxSignalFraction);
+
     currentNucleus.detectSignalsInNucleus();
     currentNucleus.annotateNucleusImage();
 

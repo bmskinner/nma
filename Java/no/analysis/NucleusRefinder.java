@@ -221,15 +221,24 @@ public class NucleusRefinder
   @Override
   protected void processImage(ImagePlus image, File path){
 
-    IJ.log("File:  "+path.getName());
-    RoiManager nucleiInImage = findNucleiInImage(image);
+     IJ.log("File:  "+path.getName());
 
-    Roi[] roiArray = nucleiInImage.getSelectedRoisAsArray();
+    Detector detector = new Dectector();
+    detector.setMaxSize(this.maxNucleusSize);
+    detector.setMinSize(this.minNucleusSize);
+    detector.setMinCirc(this.minNucleusCirc);
+    detector.setMaxCirc(this.maxNucleusCirc);
+    detector.setThreshold(this.nucleusThreshold);
+    detector.setChannel(BLUE_CHANNEL);
+    detector.run(image);
+    Map<Roi, Map<String, Double>> map = detector.getRoiMap();
+
     int i = 0;
 
-    for(Roi roi : roiArray){
-      
-      try{
+    Set<Roi> keys = map.keySet();
+
+    for(Roi roi : keys){
+       try{
 
         // if the point is within the roi
         boolean ok = false;
@@ -238,18 +247,17 @@ public class NucleusRefinder
             XYPoint p = hash.get(path.getName());
             if(roi.getBounds().contains(p.getXAsInt(), p.getYAsInt())){
               ok = true;
-              // IJ.log("  Acquiring nucleus "+i);
               IJ.log("  Acquiring nucleus at "+p.getXAsInt()+","+p.getYAsInt());
             }
           }
         }
 
         if(ok){
-        	analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
-        	this.totalNuclei++;
+          analyseNucleus(roi, image, i, path, map.get(roi)); // get the profile data back for the nucleus
+          this.totalNuclei++;
         }
       } catch(Exception e){
-      	IJ.log("  Error acquiring nucleus: "+e);
+        IJ.log("  Error acquiring nucleus: "+e);
       }
       i++;
     } 
