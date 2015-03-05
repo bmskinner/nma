@@ -431,30 +431,31 @@ public class AnalysisCreator {
     try{ 
 
       // make an entirely new nucleus to play with
-      INuclearFunctions n = (INuclearFunctions)collection.getNucleusMostSimilarToMedian("tail");
+      INuclearFunctions refoldCandidate = (INuclearFunctions)collection.getNucleusMostSimilarToMedian("tail").copy();
 
-      Constructor nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
-      INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
+      // Constructor nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
+      // INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
     
       IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
       IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
       if(refoldCandidate==null){
         throw new Exception();
       }
-      double[] targetProfile = collection.getMedianTargetCurve(refoldCandidate);
+
+      Profile targetProfile = collection.getMedianProfile("tail");
 
       CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
       refolder.refoldCurve();
 
       // orient refolded nucleus to put tail at the bottom
-      refolder.putPointAtBottom(refoldCandidate.getBorderPointOfInterest("tail"));
+      refolder.putPointAtBottom(refoldCandidate.getBorderTag("tail"));
 
       // if rodent sperm, put tip on left if needed
       if(refoldCandidate.getClass().equals(nucleusClassTypes.get(0))){
         IJ.log("    Rodent nucleus found");
         if(refoldCandidate.getBorderPointOfInterest("tip").getX()>0){
           IJ.log("    Flipping nucleus");
-          refoldCandidate.getAngleProfile().flipXAroundPoint(refoldCandidate.getCentreOfMass());
+          refoldCandidate.flipXAroundPoint(refoldCandidate.getCentreOfMass());
         }
       }
 

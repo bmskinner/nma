@@ -268,7 +268,7 @@ public class NucleusCollection
   }
 
   public INuclearFunctions getNucleus(int i){
-    return this.nucleiCollection.get(i);
+    return this.nucleiCollection.get(i).copy();
   }
 
   public int getRedSignalCount(){
@@ -840,8 +840,9 @@ public class NucleusCollection
   }
 
   public INuclearFunctions getNucleusMostSimilarToMedian(String pointType){
-    INuclearFunctions n = (INuclearFunctions) this.getNuclei().get(0); // default to the first nucleus
-    Profile medianProfile = getMedianProfile(pointType);
+    
+    Profile medianProfile = getMedianProfile(pointType); // the profile we compare the nucleus to
+    INuclearFunctions n = (INuclearFunctions) this.getNucleus(0); // default to the first nucleus
 
     double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint(pointType));
     for(int i=0;i<this.getNucleusCount();i++){

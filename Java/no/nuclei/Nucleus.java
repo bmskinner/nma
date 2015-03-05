@@ -222,6 +222,10 @@ public class Nucleus
 		Getters for basic values within nucleus
 		-----------------------
 	*/
+
+	public Nucleus copy(){
+		return new Nucleus(this);
+	}
 	public Roi getRoi(){
 		return this.roi;
 	}
@@ -360,7 +364,7 @@ public class Nucleus
 	}
 
 	public int getLength(){
-		return this.angleProfile.size();
+		return this.borderList.size();
 	}
 
 	public NucleusBorderPoint getBorderPoint(int i){
@@ -963,6 +967,20 @@ public class Nucleus
 	}
 
 	/*
+  	Flip the X positions of the border points around an X position
+  */
+  public void flipXAroundPoint(XYPoint p){
+
+    double xCentre = p.getX();
+    // for(int i = 0; i<this.borderList.size();i++){
+    for(NucleusBorderPoint n : borderList){
+      double dx = xCentre - n.getX();
+      double xNew = xCentre + dx;
+      n.setX(xNew);
+    }
+  }
+
+	/*
 		-----------------------
 		Exporting data
 		-----------------------
@@ -1239,6 +1257,11 @@ public class Nucleus
 
 	public double getDistance(int index){
 		return this.distanceProfileTest.get(index);
+	}
+
+	public void updatePoint(int i, double x, double y){
+		this.borderList.get(i).setX(x);
+		this.borderList.get(i).setY(y);
 	}
 
 	// Ensure only copies of border points get returned
