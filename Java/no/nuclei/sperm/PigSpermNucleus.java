@@ -70,22 +70,21 @@ public class PigSpermNucleus
     @Override
     public void findPointsAroundBorder(){
 
-      NucleusBorderPoint tailPoint1 = this.findTailByMinima();
-      NucleusBorderPoint tailPoint2 = this.findTailByMaxima();
+      // NucleusBorderPoint tailPoint1 = this.findTailByMinima();
+      // NucleusBorderPoint tailPoint2 = this.findTailByMaxima();
       NucleusBorderPoint tailPoint3 = this.findTailByNarrowestPoint();
 
-      this.addTailEstimatePosition(tailPoint1);
-      this.addTailEstimatePosition(tailPoint2);
+      // this.addTailEstimatePosition(tailPoint1);
+      // this.addTailEstimatePosition(tailPoint2);
       this.addTailEstimatePosition(tailPoint3);
 
 
       // of the three methods, method 3 seems most accurate
-      addBorderPointOfInterest("tail", tailPoint3);
+      int tailIndex = this.getIndex(tailPoint3);
+      addBorderTag("tail", tailIndex);
 
-      int tailIndex = this.getAngleProfile().getIndexOfPoint(this.getBorderPointOfInterest("tail"));
-      this.getAngleProfile().moveIndexToArrayStart(tailIndex);
-
-      addBorderPointOfInterest("head", this.findOppositeBorder(this.getBorderPointOfInterest("tail")));
+      int headIndex = getIndex(this.findOppositeBorder(tailPoint3));
+      addBorderTag("head", headIndex);
     }
 
     /*
@@ -94,47 +93,48 @@ public class PigSpermNucleus
       -----------------------
     */
 
-    public NucleusBorderPoint findTailByMinima(){
+    // public NucleusBorderPoint findTailByMinima(){
 
-      NucleusBorderPoint[] minima = this.getAngleProfile().getLocalMinima();
+    //   NucleusBorderPoint[] minima = this.getAngleProfile().getLocalMinima();
 
-      // sort minima by interior angle
-      NucleusBorderPoint lowestMinima = minima[0];
-      NucleusBorderPoint secondLowestMinima = minima[0];
+    //   // sort minima by interior angle
+    //   NucleusBorderPoint lowestMinima = minima[0];
+    //   NucleusBorderPoint secondLowestMinima = minima[0];
 
-      for( NucleusBorderPoint n : minima){
-        if (n.getInteriorAngle()<lowestMinima.getInteriorAngle()){
-          secondLowestMinima = lowestMinima;
-          lowestMinima = n;
-        }
-      }
-      for( NucleusBorderPoint n : minima){
-        if (n.getInteriorAngle()<secondLowestMinima.getInteriorAngle() && 
-            n.getInteriorAngle()>lowestMinima.getInteriorAngle()){
-          secondLowestMinima = n;
-        }
-      }
+    //   for( NucleusBorderPoint n : minima){
+    //     if (n.getInteriorAngle()<lowestMinima.getInteriorAngle()){
+    //       secondLowestMinima = lowestMinima;
+    //       lowestMinima = n;
+    //     }
+    //   }
+    //   for( NucleusBorderPoint n : minima){
+    //     if (n.getInteriorAngle()<secondLowestMinima.getInteriorAngle() && 
+    //         n.getInteriorAngle()>lowestMinima.getInteriorAngle()){
+    //       secondLowestMinima = n;
+    //     }
+    //   }
 
-      NucleusBorderPoint tailPoint = this.getBorderPoint(this.getPositionBetween(lowestMinima, secondLowestMinima));
-      return tailPoint;
-    }
+    //   NucleusBorderPoint tailPoint = this.getBorderPoint(this.getPositionBetween(lowestMinima, secondLowestMinima));
+    //   return tailPoint;
+    // }
 
-    public NucleusBorderPoint findTailByMaxima(){
-      // the tail is the ?only local maximum with an interior angle above the median
-      // distance on the distance profile
+    // public NucleusBorderPoint findTailByMaxima(){
+    //   // the tail is the ?only local maximum with an interior angle above the median
+    //   // distance on the distance profile
 
-      // the CoM is also more towards the tail. Use this.
-      NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
-      double medianProfileDistance= this.getMedianDistanceFromProfile();
-      NucleusBorderPoint tailPoint = maxima[0];
+    //   // the CoM is also more towards the tail. Use this.
+    //   Integer[] maxima = this.getAngleProfile().getLocalMaxima();
+    //   // NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
+    //   double medianProfileDistance= this.getMedianDistanceFromProfile();
+    //   NucleusBorderPoint tailPoint = maxima[0];
 
-      for( NucleusBorderPoint n : maxima){
-        if (n.getDistanceAcrossCoM()>medianProfileDistance){
-          tailPoint = n;
-        }
-      }
-      return tailPoint;
-    }
+    //   for( NucleusBorderPoint n : maxima){
+    //     if (n.getDistanceAcrossCoM()>medianProfileDistance){
+    //       tailPoint = n;
+    //     }
+    //   }
+    //   return tailPoint;
+    // }
 
     /*
       The narrowest diameter through the CoM
@@ -148,11 +148,11 @@ public class PigSpermNucleus
       this.orthPoint1  = this.findOrthogonalBorderPoint(narrowPoint);
       NucleusBorderPoint orthPoint2  = this.findOppositeBorder(orthPoint1);
 
-      NucleusBorderPoint[] array = { orthPoint1, orthPoint2 };
+      // NucleusBorderPoint[] array = { orthPoint1, orthPoint2 };
 
       // the tail should be a maximum, hence have a high angle
-      NucleusBorderPoint tailPoint  = orthPoint1.getInteriorAngle() >
-                                      orthPoint2.getInteriorAngle()
+      NucleusBorderPoint tailPoint  = getAngle(this.getIndex(orthPoint1)) >
+                                      getAngle(this.getIndex(orthPoint2))
                                     ? orthPoint1
                                     : orthPoint2;
       return tailPoint;

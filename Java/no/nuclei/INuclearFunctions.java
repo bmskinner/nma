@@ -18,6 +18,9 @@ public interface INuclearFunctions
 {
   
 	public void findPointsAroundBorder();
+  public void intitialiseNucleus(int angleProfileWindowSize);
+  public Nucleus copy();
+
 	public Roi getRoi();
 	public String getPath();
 
@@ -74,10 +77,6 @@ public interface INuclearFunctions
 
 	public double[] getInteriorAngles();
 
-  public double[] getInteriorAngles(String pointType);
-
-	public double getMedianInteriorAngle();
-
 	public NucleusBorderPoint getBorderPoint(int i);
 
 	public int getFailureCode();
@@ -87,20 +86,13 @@ public interface INuclearFunctions
 	public boolean hasGreenSignal();
 
 
-	public HashMap<String, NucleusBorderPoint> getBorderPointsOfInterest();
-
-  public NucleusBorderPoint getBorderPointOfInterest(String name);
-
-  public int getBorderIndexOfInterest(String name);
-
-  public int getOffsetIndex(NucleusBorderPoint indexPoint, String referencePoint);
-
 	
 	/*
     -----------------------
     Protected setters for subclasses
     -----------------------
   */
+  public void setOutputFolder(String f);
 
   public void setCentreOfMass(XYPoint d);
 
@@ -113,8 +105,6 @@ public interface INuclearFunctions
   public void setMaxSignalFraction(double d);
 
   public void setSignalThreshold(int i);
-
-  public void setBorderPointsOfInterest( HashMap<String, NucleusBorderPoint> b);
 
   /*
     -----------------------
@@ -133,10 +123,6 @@ public interface INuclearFunctions
 
   public int getGreenSignalCount();
 
-  public double getMedianDistanceFromProfile();
-
-  public double getDifferenceToMedianProfile(String pointType);
-
   /*
     -----------------------
     Set miscellaneous features
@@ -148,19 +134,15 @@ public interface INuclearFunctions
   public void calculatePathLength();
 
 
-  public void addBorderPointOfInterest(String name, NucleusBorderPoint p);
-
-  public void addDifferenceToMedianProfile(String pointType, double value);
-
   /*
     -----------------------
     Process signals
     -----------------------
   */
 
-  public ArrayList<NuclearSignal> getRedSignals();
+  public List<NuclearSignal> getRedSignals();
 
-  public ArrayList<NuclearSignal> getGreenSignals();
+  public List<NuclearSignal> getGreenSignals();
 
   public void addRedSignal(NuclearSignal n);
 
@@ -168,12 +150,6 @@ public interface INuclearFunctions
 
   public double[][] getSignalDistanceMatrix();
 
-  /*
-    Find the difference to the given median
-  */
-  public double calculateDifferenceToProfile(double[] testProfile, String pointType);
-
-  
   /*
     -----------------------
     Determine positions of points
@@ -217,6 +193,8 @@ public interface INuclearFunctions
 
   public double[] getRawProfilePositions();
 
+  public void flipXAroundPoint(XYPoint p);
+
   /*
     -----------------------
     Exporting data
@@ -245,4 +223,37 @@ public interface INuclearFunctions
   public void annotateNucleusImage();
 
    public void dumpInfo();
+
+  public void dumpInfo();
+
+  public Profile getAngleProfile();
+
+  public Profile getAngleProfile(String pointType);
+
+  public double getAngle(int index);
+
+  public int getIndex(NucleusBorderPoint p);
+
+  public Profile getDistanceProfile();
+
+  public double getDistance(int index);
+
+  public void updatePoint(int i, double x, double y);
+
+  public NucleusBorderPoint getBorderTag(String s);
+
+  public int getBorderIndex(String s);
+
+  public Set<String> getTags();
+
+  public NucleusBorderSegment getSegmentTag(String s);
+
+  public void addBorderTag(String name, int i);
+
+  public void addSegmentTag(String name, int i);
+
+  private void calculateDistanceProfile();
+
+  private void calculateAngleProfile(int angleProfileWindowSize);
+
 }

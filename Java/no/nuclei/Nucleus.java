@@ -1251,6 +1251,17 @@ public class Nucleus
 		return this.angleProfileTest.get(index);
 	}
 
+	public int getIndex(NucleusBorderPoint p){
+		int i = 0;
+		for(NucleusBorderPoint n : borderList){
+			if( n.equals(p)){
+				return i;
+			}
+			i++;
+		}
+		return -1; // default if no match found
+	}
+
 	public Profile getDistanceProfile(){
 		return new Profile(this.distanceProfileTest);
 	}
@@ -1335,6 +1346,16 @@ public class Nucleus
 			}
 		}
 		this.angleProfileTest = new Profile(angles);
+	}
+
+	public void reverse(){
+		this.getAngleProfile().reverse();
+    this.getDistanceProfile().reverse();
+    List<NucleusBorderPoint> reversed = new ArrayList<NucleusBorderPoint>(0);
+    for(int i=borderList.size()-1; i>=0;i--){
+    	reversed.add(borderList.get(i));
+    }
+    this.borderList = reversed;
 	}
 
 }

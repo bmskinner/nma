@@ -158,8 +158,9 @@ public class RodentSpermNucleusCollection
 
       n.addBorderTag("tail", newTailIndex);
 
-      // also update the head position TO BE FINISHED
-      n.addBorderTag("head", n.findOppositeBorder( n.getBorderPoint(newTailIndex) ));
+      // also update the head position
+      int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
+      n.addBorderTag("head", headIndex);
       n.splitNucleusToHeadAndHump();
     }
   }

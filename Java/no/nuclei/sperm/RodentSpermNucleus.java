@@ -88,14 +88,14 @@ public class RodentSpermNucleus
   public void findPointsAroundBorder(){
     
     // find tip - use the least angle method
-    NucleusBorderPoint spermTip = this.getAngleProfile().getPointWithMinimumAngle();
-    int tipIndex = this.getAngleProfile().getIndexOfPoint(spermTip);
-    this.getAngleProfile().moveIndexToArrayStart(tipIndex);
-    addBorderPointOfInterest("tip", spermTip);
+    // NucleusBorderPoint spermTip = 
+    int tipIndex = this.getAngleProfile().getIndexOfMin();
+    // this.getAngleProfile().moveIndexToArrayStart(tipIndex);
+    addBorderTag("tip", tipIndex);
 
     // decide if the profile is right or left handed; flip if needed
     if(!this.isProfileOrientationOK()){
-      this.getAngleProfile().reverseAngleProfile();
+      this.reverse();
     }
 
     /*
@@ -115,8 +115,8 @@ public class RodentSpermNucleus
                 Count the number of consecutive >1 degree blocks
                 Wide block far from tip = tail
     */  
-    NucleusBorderPoint spermTail3 = this.findTailFromDeltas();
-    this.addTailEstimatePosition(spermTail3);
+    // NucleusBorderPoint spermTail3 = this.findTailFromDeltas();
+    // this.addTailEstimatePosition(spermTail3);
 
     /*    
       Method 3: Find the narrowest diameter around the nuclear CoM
@@ -131,15 +131,15 @@ public class RodentSpermNucleus
       Given distinct methods for finding a tail,
       take a position between them on roi
     */
-    int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail3);
+    int consensusTailIndex = this.getPositionBetween(spermTail2, spermTail1);
     NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
-    consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
+    // consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
 
     this.setInitialConsensusTail(consensusTail);
 
-    addBorderPointOfInterest("tail", consensusTail);
+    addBorderTag("tail", consensusTailIndex);
 
-    addBorderPointOfInterest("head", this.findOppositeBorder(this.getBorderPointOfInterest("tail")));
+    addBorderTag("head", this.getIndex(this.findOppositeBorder(consensusTail)));
   }
 
   /*
@@ -192,10 +192,10 @@ public class RodentSpermNucleus
     int midPoint = (int) (this.getLength()/2) ;
     for(int i=0; i<this.getLength();i++){
 
-        if(this.getBorderPoint(i).getInteriorAngle()>180 && i<midPoint){
+        if(this.getAngle(i)>180 && i<midPoint){
           frontPoints++;
         }
-        if(this.getBorderPoint(i).getInteriorAngle()>180 && i>midPoint){
+        if(this.getAngle(i)>180 && i>midPoint){
           rearPoints++;
         }
     }
@@ -224,16 +224,16 @@ public class RodentSpermNucleus
     // the distances of each point from the centre of mass. The points with the combined greatest
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
-    double tipToCoMDistance = this.getBorderPointOfInterest("tip").getLengthTo(this.getCentreOfMass());
-    NucleusBorderPoint[] array = this.getAngleProfile().getLocalMinima();
+    double tipToCoMDistance = this.getBorderTag("tip").getLengthTo(this.getCentreOfMass());
+    Integer[] array = this.getAngleProfile().getLocalMinima();
 
     double maxDistance = 0;
-    NucleusBorderPoint tail = this.getBorderPointOfInterest("tip");
+    NucleusBorderPoint tail = this.getBorderTag("tip"); // start at tip, move round
 
-    for(NucleusBorderPoint a : array){
+    for(int a : array){
             
-      double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(a);
-      double distanceBetweenEnds = this.getBorderPointOfInterest("tip").getLengthTo(a);
+      double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getPoint(a));
+      double distanceBetweenEnds = this.getBorderTag("tip").getLengthTo(getPoint(a));
       
       double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
 
@@ -242,7 +242,7 @@ public class RodentSpermNucleus
         tail = a;
       }
     }
-    return tail;
+    return getPoint(a);
   }
 
 
@@ -259,11 +259,11 @@ public class RodentSpermNucleus
     // Measure the length; if < min length..., store equation and border(s)
 
     double minDistance = this.getFeret();
-    NucleusBorderPoint reference = this.getBorderPointOfInterest("tip");
+    NucleusBorderPoint reference = this.getBorderTag("tip");
 
     for(int i=0;i<this.getLength();i++){
 
-      NucleusBorderPoint p = this.getBorderPoint(i);
+      NucleusBorderPoint p = this.getPoint(i);
       NucleusBorderPoint opp = this.findOppositeBorder(p);
       double distance = p.getLengthTo(opp);
 
@@ -284,7 +284,8 @@ public class RodentSpermNucleus
 
       NucleusBorderPoint p = this.getBorderPoint(i);
       double angle = findAngleBetweenXYPoints(reference, this.getCentreOfMass(), p);
-      if(  Math.abs(90-angle)<difference && p.getLengthTo(this.getBorderPointOfInterest("tip")) > this.getCentreOfMass().getLengthTo( this.getBorderPointOfInterest("tip") ) ){
+      if(  Math.abs(90-angle)<difference && 
+          p.getLengthTo(this.getBorderTag("tip")) > this.getCentreOfMass().getLengthTo( this.getBorderTag("tip") ) ){
         difference = 90-angle;
         tail = p;
       }
@@ -297,45 +298,45 @@ public class RodentSpermNucleus
     Find the midpoints of each block
     Return the point furthest from the tip
   */
-  public NucleusBorderPoint findTailFromDeltas(){
+  // public NucleusBorderPoint findTailFromDeltas(){
 
-    // get the midpoint of each block
-    ArrayList<NucleusBorderPoint> results = new ArrayList<NucleusBorderPoint>(0);
-    int maxIndex = 0;
+  //   // get the midpoint of each block
+  //   ArrayList<NucleusBorderPoint> results = new ArrayList<NucleusBorderPoint>(0);
+  //   int maxIndex = 0;
   
-    // remember that block 0 is not assigned; start from 1
-    try{
-      for(int i=1; i<this.getAngleProfile().getBlockCount();i++){
+  //   // remember that block 0 is not assigned; start from 1
+  //   try{
+  //     for(int i=1; i<this.getAngleProfile().getBlockCount();i++){
 
-        // number of points in each block
-        NucleusBorderPoint[] points = this.getAngleProfile().getBlockOfBorderPoints(i);
-        for(NucleusBorderPoint p : points){
-          if(p.isMidpoint()){ // will ignore any blocks without a midpoint established - <2 members
-            results.add(p);
-          }
-        }
-      }
-    } catch(Exception e){
-      IJ.log("    Error in finding midpoints: findTailFromDeltas(): "+e);
-    }
+  //       // number of points in each block
+  //       NucleusBorderPoint[] points = this.getAngleProfile().getBlockOfBorderPoints(i);
+  //       for(NucleusBorderPoint p : points){
+  //         if(p.isMidpoint()){ // will ignore any blocks without a midpoint established - <2 members
+  //           results.add(p);
+  //         }
+  //       }
+  //     }
+  //   } catch(Exception e){
+  //     IJ.log("    Error in finding midpoints: findTailFromDeltas(): "+e);
+  //   }
     
-    NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
-    try{
-      // go through the midpoints, get the max distance from tip
-      double maxLength = 0;
+  //   NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
+  //   try{
+  //     // go through the midpoints, get the max distance from tip
+  //     double maxLength = 0;
       
-      for( NucleusBorderPoint p : results){
-        // NucleusBorderPoint p = (NucleusBorderPoint)o;
-        if(p.getLengthTo(this.getBorderPointOfInterest("tip")) > maxLength){
-          maxLength = p.getLengthTo(this.getBorderPointOfInterest("tip"));
-          tail = p;
-        }
-      }
-    } catch(Exception e){
-      IJ.log("    Error in finding lengths: findTailFromDeltas(): "+e);
-    }
-    return tail;
-  }
+  //     for( NucleusBorderPoint p : results){
+  //       // NucleusBorderPoint p = (NucleusBorderPoint)o;
+  //       if(p.getLengthTo(this.getBorderPointOfInterest("tip")) > maxLength){
+  //         maxLength = p.getLengthTo(this.getBorderPointOfInterest("tip"));
+  //         tail = p;
+  //       }
+  //     }
+  //   } catch(Exception e){
+  //     IJ.log("    Error in finding lengths: findTailFromDeltas(): "+e);
+  //   }
+  //   return tail;
+  // }
 
   /*
     -----------------------
@@ -354,16 +355,16 @@ public class RodentSpermNucleus
     // determine the coordinates of the point intersected as int
     // for each xvalue of each point in array, get the line y value
     // at the point the yvalues are closest and not the tail point is the intersesction
-    double[] lineEquation = NuclearOrganisationUtility.findLineEquation(this.getCentreOfMass(), this.getBorderPointOfInterest("tail"));
+    Equation lineEquation = new Equation(this.getCentreOfMass(), this.getBorderTag("tail"));
     double minDeltaY = 100;
     int minDeltaYIndex = 0;
 
     for(int i = 0; i<this.getLength();i++){
         double x = this.getBorderPoint(i).getX();
         double y = this.getBorderPoint(i).getY();
-        double yOnLine = NuclearOrganisationUtility.getYFromEquation(lineEquation, x);
+        double yOnLine = lineEquation.getY(x);
 
-        double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderPointOfInterest("tail"));
+        double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag("tail"));
 
         double deltaY = Math.abs(y - yOnLine);
         if(deltaY < minDeltaY && distanceToTail > this.getFeret()/2){ // exclude points too close to the tail
@@ -378,34 +379,34 @@ public class RodentSpermNucleus
 
     int intersectionPointIndex = findIntersectionPointForNuclearSplit();
     // this.intersectionPoint = this.getBorderPoint( intersectionPointIndex );
-    this.addBorderPointOfInterest("intersectionPoint", this.getBorderPoint( intersectionPointIndex ));
+    this.addBorderTag("intersectionPoint", intersectionPointIndex );
 
     // get an array of points from tip to tail
-    ArrayList<NucleusBorderPoint> roi1 = new ArrayList<NucleusBorderPoint>(0);
-    ArrayList<NucleusBorderPoint> roi2 = new ArrayList<NucleusBorderPoint>(0);
+    List<NucleusBorderPoint> roi1 = new ArrayList<NucleusBorderPoint>(0);
+    List<NucleusBorderPoint> roi2 = new ArrayList<NucleusBorderPoint>(0);
     boolean changeRoi = false;
 
     for(int i = 0; i<this.getLength();i++){
 
-      int currentIndex = NuclearOrganisationUtility.wrapIndex(this.getBorderIndexOfInterest("tail")+i, this.getLength()); // start at the tail, and go around the array
+      int currentIndex = NuclearOrganisationUtility.wrapIndex(this.getBorderIndex("tail")+i, this.getLength()); // start at the tail, and go around the array
       
-      NucleusBorderPoint p = getBorderPoint(currentIndex);
+      NucleusBorderPoint p = getPoint(currentIndex);
 
       if(currentIndex != intersectionPointIndex && !changeRoi){   // starting at the tip, assign points to roi1
         roi1.add(p);
       }
       if(currentIndex==intersectionPointIndex && !changeRoi){ // until we hit the intersection point. Then, close the polygon of roi1 back to the tip. Switch to roi2
         roi1.add(p);
-        roi1.add(this.getBorderPointOfInterest("tail"));
-        roi2.add(this.getBorderPointOfInterest("intersectionPoint"));
+        roi1.add(this.getBorderTag("tail"));
+        roi2.add(this.getBorderTag("intersectionPoint"));
         changeRoi = true;
       }
-      if(currentIndex != intersectionPointIndex && currentIndex != this.getBorderIndexOfInterest("tail") && changeRoi){   // continue with roi2, adjusting the index numbering as needed
+      if(currentIndex != intersectionPointIndex && currentIndex != this.getBorderTag("tail") && changeRoi){   // continue with roi2, adjusting the index numbering as needed
         roi2.add(p);
       }
 
-      if(currentIndex==this.getBorderIndexOfInterest("tail") && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
-        roi2.add(this.getBorderPointOfInterest("intersectionPoint"));
+      if(currentIndex==this.getBorderTag("tail") && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
+        roi2.add(this.getBorderTag("intersectionPoint"));
       }
 
     }
@@ -427,7 +428,7 @@ public class RodentSpermNucleus
     }
 
     for(int i=0;i<roi1.size();i++){
-      if(roi1.get(i).overlaps(this.getBorderPointOfInterest("tip"))){
+      if(roi1.get(i).overlaps(this.getBorderTag("tip"))){
         this.hookRoi = new FloatPolygon( roi1X, roi1Y);
         this.humpRoi = new FloatPolygon( roi2X, roi2Y);
         break;
@@ -435,7 +436,7 @@ public class RodentSpermNucleus
     }
 
     for(int i=0;i<roi2.size();i++){
-      if(roi2.get(i).overlaps(this.getBorderPointOfInterest("tip"))){
+      if(roi2.get(i).overlaps(this.getBorderTag("tip"))){
         this.hookRoi = new FloatPolygon( roi2X, roi2Y);
         this.humpRoi = new FloatPolygon( roi1X, roi1Y);
          break;
@@ -457,11 +458,11 @@ public class RodentSpermNucleus
 
     // update signal angles with hook or hump side
 
-    ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+    List<List<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
     signals.add(this.getRedSignals());
     signals.add(this.getGreenSignals());
 
-    for( ArrayList<NuclearSignal> signalGroup : signals ){
+    for( List<NuclearSignal> signalGroup : signals ){
 
       if(signalGroup.size()>0){
 
@@ -502,21 +503,21 @@ public class RodentSpermNucleus
     //draw the sperm tip 
     ip.setLineWidth(5);
     ip.setColor(Color.YELLOW);
-    ip.drawDot( this.getBorderPointOfInterest("tip").getXAsInt(), 
-                this.getBorderPointOfInterest("tip").getYAsInt());
+    ip.drawDot( this.getBorderTag("tip").getXAsInt(), 
+                this.getBorderTag("tip").getYAsInt());
 
 
     this.annotateEstimatedTailPoints();
     this.annotateTail();
 
     // line from tail to intsersection point; should pass through CoM   
-    if(this.getBorderPointOfInterest("intersectionPoint")!=null){ // handle failed nuclei in which this analysis was not performed
+    if(this.getBorderTag("intersectionPoint")!=null){ // handle failed nuclei in which this analysis was not performed
       ip.setLineWidth(1);
       ip.setColor(Color.YELLOW);
-      ip.drawLine(this.getBorderPointOfInterest("tail").getXAsInt(),
-                  this.getBorderPointOfInterest("tail").getYAsInt(), 
-                  this.getBorderPointOfInterest("intersectionPoint").getXAsInt(), 
-                  this.getBorderPointOfInterest("intersectionPoint").getYAsInt());
+      ip.drawLine(this.getBorderTag("tail").getXAsInt(),
+                  this.getBorderTag("tail").getYAsInt(), 
+                  this.getBorderTag("intersectionPoint").getXAsInt(), 
+                  this.getBorderTag("intersectionPoint").getYAsInt());
     }
   }
 }
