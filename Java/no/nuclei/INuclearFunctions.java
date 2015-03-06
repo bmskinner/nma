@@ -21,9 +21,11 @@ public interface INuclearFunctions
   
 	public void findPointsAroundBorder();
   public void intitialiseNucleus(int angleProfileWindowSize);
-  public Nucleus copy();
+
+  // public Nucleus copy();
 
 	public Roi getRoi();
+  
 	public String getPath();
 
 	public String getPosition();
@@ -61,7 +63,7 @@ public interface INuclearFunctions
 
 	public NucleusBorderPoint getPoint(int i);
 
-	public FloatPolygon getSmoothedPolygon();
+	public FloatPolygon getPolygon();
 	
 	public double getArea();
 
@@ -72,6 +74,8 @@ public interface INuclearFunctions
 	public double getPerimeter();
 
 	public Profile getAngleProfile();
+
+  public int getAngleProfileWindowSize();
 
 	public Profile getDistanceProfile();
 
@@ -84,6 +88,8 @@ public interface INuclearFunctions
 	public boolean hasRedSignal();
 
 	public boolean hasGreenSignal();
+
+  public List<NucleusBorderPoint> getBorderList();
 
 
 	
@@ -105,6 +111,8 @@ public interface INuclearFunctions
   public void setMaxSignalFraction(double d);
 
   public void setSignalThreshold(int i);
+
+  public void setBorderList(List<NucleusBorderPoint> list);
 
   /*
     -----------------------
@@ -247,4 +255,6 @@ public interface INuclearFunctions
   public void addBorderTag(String name, int i);
 
   public void addSegmentTag(String name, int i);
+
+  public void calculateAngleProfile(int angleProfileWindowSize);
 }

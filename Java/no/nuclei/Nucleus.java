@@ -75,6 +75,8 @@ public class Nucleus
 	private int nucleusNumber; // the number of the nucleus in the current image
 	private int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
+	private int angleProfileWindowSize;
+
 	// private double medianAngle; // the median interior angle
 	private double perimeter;   // the nuclear perimeter
 	private double pathLength;  // the angle path length - measures wibbliness in border
@@ -92,8 +94,8 @@ public class Nucleus
 		BorderPoints are made; everything references the copy in the Nucleus. Given this, the points of interest 
 		(now borderTags) need only to be indexes.
 	*/
-	private Profile angleProfile; // eventually to replace angleProfile
-	private Profile distanceProfile; // eventually to replace distanceProfile
+	private Profile angleProfile; // 
+	private Profile distanceProfile; // 
 	private List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
 	private List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
 	private Map<String, Integer> borderTags  = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
@@ -160,11 +162,12 @@ public class Nucleus
 		this.setCentreOfMass(n.getCentreOfMass());
 		this.setRedSignals(n.getRedSignals());
 		this.setGreenSignals(n.getGreenSignals());
-		this.setPolygon(n.getSmoothedPolygon());
+		this.setPolygon(n.getPolygon());
 		this.setDistanceProfile(n.getDistanceProfile());
 		this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
 		this.setBorderTags(n.getBorderTags());
 		this.setOutputFolder(n.getOutputFolderName());
+		this.setBorderList(n.getBorderList());
 	}
 
 	public void findPointsAroundBorder(){
@@ -224,9 +227,10 @@ public class Nucleus
 		-----------------------
 	*/
 
-	public Nucleus copy(){
-		return new Nucleus(this);
-	}
+	// public INuclearFunctions copy(){
+	// 	return new Nucleus(this);
+	// }
+
 	public Roi getRoi(){
 		return this.roi;
 	}
@@ -344,7 +348,7 @@ public class Nucleus
 		return new NucleusBorderPoint(this.borderList.get(i));
 	}
 
-	public FloatPolygon getSmoothedPolygon(){
+	public FloatPolygon getPolygon(){
 		return this.smoothedPolygon;
 	}
 	
@@ -370,6 +374,18 @@ public class Nucleus
 
 	public NucleusBorderPoint getBorderPoint(int i){
 		return new NucleusBorderPoint(this.getPoint(i));
+	}
+
+	public List<NucleusBorderPoint> getBorderList(){
+		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
+		for(NucleusBorderPoint n : borderList){
+			result.add(new NucleusBorderPoint(n));
+		}
+		return result;
+	}
+
+	public int getAngleProfileWindowSize(){
+		return this.angleProfileWindowSize;
 	}
 
 	public int getFailureCode(){
@@ -422,9 +438,6 @@ public class Nucleus
 		this.area = d;
 	}
 
-	// protected void setAngleProfile(AngleProfile p){
-	//   this.angleProfile = p;
-	// }
 
 	public void setCentreOfMass(XYPoint d){
 		this.centreOfMass = new XYPoint(d);
@@ -442,9 +455,6 @@ public class Nucleus
 		this.smoothedPolygon = p;
 	}
 
-	// protected void setDistanceProfile(double[] d){
-	//   this.distanceProfile = d;
-	// }
 
 	protected void setSignalDistanceMatrix(double[][] d){
 		this.distancesBetweenSignals = d;
@@ -492,6 +502,14 @@ public class Nucleus
 
 	public void setSignalThreshold(int i){
 		this.signalThreshold = i;
+	}
+
+	public void setAngleProfileWindowSize(int i){
+		this.angleProfileWindowSize = i;
+	}
+
+	public void setBorderList(List<NucleusBorderPoint> list){
+		this.borderList = list;
 	}
 
 	/*
@@ -596,7 +614,7 @@ public class Nucleus
 			detector.setThreshold(this.signalThreshold);
 			detector.setChannel(channel);
 			detector.run(this.sourceImage);
-			Map<Roi, Map<String, Double>> map = detector.getRoiMap();
+			Map<Roi, HashMap<String, Double>> map = detector.getRoiMap();
 
 			Set<Roi> keys = map.keySet();
 			for( Roi r : keys){
@@ -885,13 +903,13 @@ public class Nucleus
 	*/
 	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list){
 
-		NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima(5);
+		List<Integer> maxima = this.getAngleProfile().getLocalMaxima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
 		double closestDistance = this.getPerimeter();
 
 		for(NucleusBorderPoint p : list){
-			for(NucleusBorderPoint m : maxima){
-				double distance = p.getLengthTo(m);
+			for(int m : maxima){
+				double distance = p.getLengthTo(getPoint(m));
 				if(distance<closestDistance){
 					closestPoint = p;
 				}
@@ -906,13 +924,13 @@ public class Nucleus
 	*/
 	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list){
 
-		NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMinima(5);
+		List<Integer> minima = this.getAngleProfile().getLocalMinima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
 		double closestDistance = this.getPerimeter();
 
 		for(NucleusBorderPoint p : list){
-			for(NucleusBorderPoint m : maxima){
-				double distance = p.getLengthTo(m);
+			for(int m : minima){
+				double distance = p.getLengthTo(getPoint(m));
 				if(distance<closestDistance){
 					closestPoint = p;
 				}
@@ -1006,11 +1024,11 @@ public class Nucleus
 	}
 
 	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
-		ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 		signals.add(this.getRedSignals());
 		signals.add(this.getGreenSignals());
 
-		for( ArrayList<NuclearSignal> signalGroup : signals ){
+		for( List<NuclearSignal> signalGroup : signals ){
 
 			if(signalGroup.size()>0){
 
@@ -1188,7 +1206,7 @@ public class Nucleus
 			//   SIGNALS
 			ip.setLineWidth(3);
 			ip.setColor(Color.RED);
-			ArrayList<NuclearSignal> redSignals = this.getRedSignals();
+			List<NuclearSignal> redSignals = this.getRedSignals();
 			if(redSignals.size()>0){
 				for(int j=0; j<redSignals.size();j++){
 					NuclearSignal s = redSignals.get(j);
@@ -1200,7 +1218,7 @@ public class Nucleus
 			}
 
 			ip.setColor(Color.GREEN);
-			ArrayList<NuclearSignal> greenSignals = this.getGreenSignals();
+			List<NuclearSignal> greenSignals = this.getGreenSignals();
 			if(redSignals.size()>0){
 				for(int j=0; j<greenSignals.size();j++){
 					NuclearSignal s = greenSignals.get(j);
@@ -1235,10 +1253,10 @@ public class Nucleus
 			IJ.log("    "+p.getX()+"    "+p.getY());
 		}
 		IJ.log("Points of interest:");
-		HashMap<String, NucleusBorderPoint> pointHash = this.getBorderPointsOfInterest();
+		Map<String, Integer> pointHash = this.getBorderTags();
 		Set<String> keys = pointHash.keySet();
 		for(String s : keys){
-		 NucleusBorderPoint p = pointHash.get(s);
+		 NucleusBorderPoint p = getPoint(pointHash.get(s));
 		 IJ.log("    "+s+": "+p.getX()+"    "+p.getY());
 		}
 	}
@@ -1250,7 +1268,7 @@ public class Nucleus
 	*/
 
 	public Profile getAngleProfile(){
-		return new Profile(this.angleProfileTest);
+		return new Profile(this.angleProfile);
 	}
 
 	// returns a copy
@@ -1264,22 +1282,23 @@ public class Nucleus
 	}
 
 	public double getAngle(int index){
-		return this.angleProfileTest.get(index);
+		return this.angleProfile.get(index);
 	}
 
 	public int getIndex(NucleusBorderPoint p){
 		int i = 0;
 		for(NucleusBorderPoint n : borderList){
-			if( n.equals(p)){
+			if( n.getX()==p.getX() && n.getY()==p.getY()){
 				return i;
 			}
 			i++;
 		}
+		IJ.log("Error: cannot find border point in Nucleus.getIndex()");
 		return -1; // default if no match found
 	}
 
 	public Profile getDistanceProfile(){
-		return new Profile(this.distanceProfileTest);
+		return new Profile(this.distanceProfile);
 	}
 
 	public void setDistanceProfile(Profile p){
@@ -1287,7 +1306,7 @@ public class Nucleus
 	}
 
 	public double getDistance(int index){
-		return this.distanceProfileTest.get(index);
+		return this.distanceProfile.get(index);
 	}
 
 	public void updatePoint(int i, double x, double y){
@@ -1297,7 +1316,13 @@ public class Nucleus
 
 	// Ensure only copies of border points get returned
 	public NucleusBorderPoint getBorderTag(String s){
-		return new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
+		NucleusBorderPoint result = new NucleusBorderPoint(0,0);
+		if(this.getBorderIndex(s)>-1){
+			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
+		} else {
+			IJ.log("    Error: cannot find border tag  in Nucleus.getBorderTag()"+s);
+		}
+		return result;
 	}
 
 	public Map<String, Integer> getBorderTags(){
@@ -1309,7 +1334,13 @@ public class Nucleus
 	}
 
 	public int getBorderIndex(String s){
-		return this.borderTags.get(s);
+		int result = -1;
+		if(this.borderTags.containsKey(s)){
+			result = this.borderTags.get(s);
+		}
+		// IJ.log("Searching for "+s);
+		// IJ.log("Found index "+this.borderTags.get(s)+" of "+borderList.size());
+		return result;
 	}
 
 	public Set<String> getTags(){
@@ -1340,11 +1371,10 @@ public class Nucleus
 				profile[i] = p.getLengthTo(opp); 
 				p.setDistanceAcrossCoM(p.getLengthTo(opp)); // LEGACY
 		}
-		this.distanceProfile = profile; // LEGACY
-		this.distanceProfileTest = new Profile(profile);
+		this.distanceProfile = new Profile(profile);
 	}
 
-	private void calculateAngleProfile(int angleProfileWindowSize){
+	public void calculateAngleProfile(int angleProfileWindowSize){
 
 		double[] angles = new double[this.getLength()];
 
@@ -1373,7 +1403,8 @@ public class Nucleus
 				angles[i] = 360-angle;
 			}
 		}
-		this.angleProfileTest = new Profile(angles);
+		this.angleProfile = new Profile(angles);
+		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}
 
 	public void reverse(){

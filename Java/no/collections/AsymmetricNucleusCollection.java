@@ -55,6 +55,7 @@ import no.analysis.Analysable;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.components.*;
+import no.components.Profile;
 import no.utility.*;
 
 public class AsymmetricNucleusCollection 
@@ -335,7 +336,7 @@ public class AsymmetricNucleusCollection
                     headToTail[i] +"\t");
 
       INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-      Profile = n.getAngleProfile("tail");
+      Profile profile = n.getAngleProfile("tail");
       for(int j=0;j<profile.size();j++){
         outLine.append(profile.get(j)+"\t");
       }

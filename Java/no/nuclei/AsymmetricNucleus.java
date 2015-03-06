@@ -61,6 +61,10 @@ public class AsymmetricNucleus
 
   private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
 
+  public AsymmetricNucleus(Nucleus n){
+    super(n);
+  }
+
   public AsymmetricNucleus(){
 
   }
@@ -95,16 +99,16 @@ public class AsymmetricNucleus
     ImageProcessor ip = this.getAnnotatedImage().getProcessor();
     ip.setColor(Color.CYAN);
     ip.setLineWidth(3);
-    ip.drawDot( this.getBorderPointOfInterest("tail").getXAsInt(), 
-                this.getBorderPointOfInterest("tail").getYAsInt());
+    ip.drawDot( this.getBorderTag("tail").getXAsInt(), 
+                this.getBorderTag("tail").getYAsInt());
   }
 
   public void annotateHead(){
     ImageProcessor ip = this.getAnnotatedImage().getProcessor();
     ip.setColor(Color.YELLOW);
     ip.setLineWidth(3);
-    ip.drawDot( this.getBorderPointOfInterest("head").getXAsInt(), 
-                this.getBorderPointOfInterest("head").getYAsInt());
+    ip.drawDot( this.getBorderTag("head").getXAsInt(), 
+                this.getBorderTag("head").getYAsInt());
   }
 
   // draw the points considered as sperm tails

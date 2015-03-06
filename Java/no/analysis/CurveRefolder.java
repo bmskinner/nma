@@ -135,10 +135,10 @@ public class CurveRefolder {
 		double[] pPoints = new double[refoldNucleus.getLength()]; // positions along array
 
 		for(int i=0; i<refoldNucleus.getLength(); i++){
-			XYPoint p = refoldNucleus.getBorderPoint(i);
+			XYPoint p = refoldNucleus.getPoint(i);
 			xPoints[i] = p.getX();
 			yPoints[i] = p.getY();
-			aPoints[i] = targetCurve[i];
+			aPoints[i] = targetCurve.asArray()[i];
 			pPoints[i] = i;
 		}
 		
@@ -237,7 +237,7 @@ public class CurveRefolder {
 		double similarityScore = refoldProfile.differenceToProfile(targetCurve);
 		IJ.log("    Internal score: "+(int)similarityScore);
 
-		// double medianDistanceBetweenPoints = this.refoldNucleus.getAngleProfile().getMedianDistanceBetweenPoints();
+		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
 		
 		for(int i=0; i<refoldNucleus.getLength(); i++){
 
@@ -277,7 +277,7 @@ public class CurveRefolder {
 			refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
 
 			Profile newRefoldProfile = refoldNucleus.getAngleProfile("tail");
-			double similarityScore = newRefoldProfile.differenceToProfile(targetCurve);
+			double score = newRefoldProfile.differenceToProfile(targetCurve);
 			IJ.log("    Internal score: "+(int)score);
 
 			// do not apply change  if the distance from teh surrounding points changes too much
@@ -287,7 +287,7 @@ public class CurveRefolder {
 			// reset if worse fit or distances are too high
 			if(score > similarityScore  || distanceToNext > medianDistanceBetweenPoints*1.2 || distanceToPrev > medianDistanceBetweenPoints*1.2 ){
 				refoldNucleus.updatePoint(i, oldX, oldY);
-				refoldNucleus.refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
+				refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
 				refoldNucleus.setPolygon(createPolygon());
 			} else {
 				similarityScore = score;
@@ -385,7 +385,7 @@ public class CurveRefolder {
 
 			INuclearFunctions n = collection.getNuclei().get(i);
 
-			ArrayList<ArrayList<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+			List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 			signals.add(n.getRedSignals());
 			signals.add(n.getGreenSignals());
 
@@ -397,7 +397,7 @@ public class CurveRefolder {
 
 
 			int signalCount = 0;
-			for( ArrayList<NuclearSignal> signalGroup : signals ){
+			for( List<NuclearSignal> signalGroup : signals ){
 
 				Color colour = signalCount==0 ? new Color(255,0,0,50) : new Color(0,255,0,50);
 

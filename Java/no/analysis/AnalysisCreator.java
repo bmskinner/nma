@@ -432,10 +432,9 @@ public class AnalysisCreator {
     try{ 
 
       // make an entirely new nucleus to play with
-      INuclearFunctions refoldCandidate = (INuclearFunctions)collection.getNucleusMostSimilarToMedian("tail").copy();
-
-      // Constructor nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
-      // INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
+      INuclearFunctions n = (INuclearFunctions)collection.getNucleusMostSimilarToMedian("tail");
+      Constructor<?> nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
+      INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
     
       IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
       IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());

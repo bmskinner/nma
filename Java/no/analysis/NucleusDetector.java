@@ -54,9 +54,9 @@ import no.components.*;
 public class NucleusDetector {
 
 	// colour channels
-  private static final int RED_CHANNEL   = 0;
-  private static final int GREEN_CHANNEL = 1;
-  private static final int BLUE_CHANNEL  = 2;
+  public static final int RED_CHANNEL   = 0;
+  public static final int GREEN_CHANNEL = 1;
+  public static final int BLUE_CHANNEL  = 2;
 
   protected static final String IMAGE_PREFIX = "export.";
 
@@ -65,14 +65,14 @@ public class NucleusDetector {
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
-  private double minNucleusSize  = 500;
-  private double maxNucleusSize  = 10000;
-  private double minNucleusCirc  = 0.4;
-  private double maxNucleusCirc  = 1;
+  protected double minNucleusSize  = 500;
+  protected double maxNucleusSize  = 10000;
+  protected double minNucleusCirc  = 0.4;
+  protected double maxNucleusCirc  = 1;
 
   private int angleProfileWindowSize  = 23;
 
-  private int nucleusThreshold = 36;
+  protected int nucleusThreshold = 36;
 
   // counts of nuclei processed
   protected int totalNuclei        = 0;
@@ -268,7 +268,7 @@ public class NucleusDetector {
     detector.setThreshold(this.nucleusThreshold);
     detector.setChannel(BLUE_CHANNEL);
     detector.run(image);
-    Map<Roi, Map<String, Double>> map = detector.getRoiMap();
+    Map<Roi, HashMap<String, Double>> map = detector.getRoiMap();
 
     int i = 0;
 
@@ -320,7 +320,7 @@ public class NucleusDetector {
     // turn roi into Nucleus for manipulation
     Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
 
-    currentNucleus.setCentreOfMass(new XYPoint(values.get("XM"), values.get("YM")));
+    currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
     currentNucleus.setArea(values.get("Area")); 
     currentNucleus.setFeret(values.get("Feret"));
     currentNucleus.setPerimeter(values.get("Perim"));

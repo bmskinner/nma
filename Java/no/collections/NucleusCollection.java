@@ -268,7 +268,7 @@ public class NucleusCollection
   }
 
   public INuclearFunctions getNucleus(int i){
-    return this.nucleiCollection.get(i).copy();
+    return this.nucleiCollection.get(i);
   }
 
   public int getRedSignalCount(){
@@ -1005,14 +1005,16 @@ public class NucleusCollection
     }
   }
 
-  public void exportMediansOfProfile(double[] profile, String filename){
+  public void exportMediansOfProfile(Profile profile, String filename){
 
     String logFile = makeGlobalLogFile(filename);
 
+    double[] profileArray = profile.asArray();
+
     String outLine = "X_POSITION\tANGLE_MEDIAN\r\n";
     
-    for(int i =0;i<profile.length;i++){
-      outLine +=  i+"\t"+profile[i]+"\r\n";
+    for(int i =0;i<profileArray.length;i++){
+      outLine +=  i+"\t"+profileArray[i]+"\r\n";
     }
     IJ.append(outLine, logFile); 
   }

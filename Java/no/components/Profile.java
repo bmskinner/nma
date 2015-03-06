@@ -120,7 +120,7 @@ public class Profile {
 
       double thisValue = profile1.get(j);
       double testValue = profile2.get(j);
-      difference += Math.abs(curveAngle - testAngle);
+      difference += Math.abs(thisValue - testValue);
     }
     return difference;
   }

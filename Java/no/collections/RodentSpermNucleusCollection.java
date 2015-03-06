@@ -86,7 +86,7 @@ public class RodentSpermNucleusCollection
     this.drawProfilePlots();
     this.drawNormalisedMedianLines();
 
-    this.calculateDifferencesToMedianProfiles();
+    // this.calculateDifferencesToMedianProfiles();
     this.exportProfilePlots();
   }
 
@@ -120,10 +120,10 @@ public class RodentSpermNucleusCollection
   		for(int i = 0; i<minima.size();i++){
   			Integer index = (Integer)minima.get(i);
 
-  			int toEnd = medianProfile.length - index;
+  			int toEnd = medianProfile.size() - index;
   			int diff = Math.abs(index - toEnd);
 
-  			double angle = medianProfile[index];
+  			double angle = medianProfile.asArray()[index];
   			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
   				minAngle = angle;
   				tailIndex = index;
@@ -142,6 +142,9 @@ public class RodentSpermNucleusCollection
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
 
+      IJ.log("Before offsets:");
+      n.dumpInfo();
+
       // the curve needs to be matched to the median 
       // hence the median array needs to be the same curve length
       Profile medianToCompare = this.getMedianProfile("tip");
@@ -150,7 +153,7 @@ public class RodentSpermNucleusCollection
 
       // find the median tail index position in the interplolated median profile
       int medianTailIndex = getMedianProfileFeatureIndex("tip", "tail");
-      medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.length )* n.getLength());
+      medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.size() )* n.getLength());
       
       int offset = n.getBorderIndex("tail") - medianTailIndex;
 
@@ -162,6 +165,8 @@ public class RodentSpermNucleusCollection
       int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
       n.addBorderTag("head", headIndex);
       n.splitNucleusToHeadAndHump();
+      IJ.log("After offsets:");
+      n.dumpInfo();
     }
   }
 
@@ -228,7 +233,7 @@ public class RodentSpermNucleusCollection
                   headToTip[i]  +"\t");
 
       INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-      double[] profile = n.getAngleProfile().getInteriorAngles(n.getBorderIndexOfInterest("tail"));
+      double[] profile = n.getAngleProfile("tail").asArray();
       for(int j=0;j<profile.length;j++){
         outLine.append(profile[j]+"\t");
       }

@@ -225,7 +225,7 @@ public class RodentSpermNucleus
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
     double tipToCoMDistance = this.getBorderTag("tip").getLengthTo(this.getCentreOfMass());
-    Integer[] array = this.getAngleProfile().getLocalMinima();
+    List<Integer> array = this.getAngleProfile().getLocalMinima(5);
 
     double maxDistance = 0;
     NucleusBorderPoint tail = this.getBorderTag("tip"); // start at tip, move round
@@ -239,10 +239,10 @@ public class RodentSpermNucleus
 
       if(totalDistance > maxDistance){
         maxDistance = totalDistance;
-        tail = a;
+        tail = getPoint(a);
       }
     }
-    return getPoint(a);
+    return tail;
   }
 
 
@@ -401,11 +401,11 @@ public class RodentSpermNucleus
         roi2.add(this.getBorderTag("intersectionPoint"));
         changeRoi = true;
       }
-      if(currentIndex != intersectionPointIndex && currentIndex != this.getBorderTag("tail") && changeRoi){   // continue with roi2, adjusting the index numbering as needed
+      if(currentIndex != intersectionPointIndex && currentIndex != this.getBorderIndex("tail") && changeRoi){   // continue with roi2, adjusting the index numbering as needed
         roi2.add(p);
       }
 
-      if(currentIndex==this.getBorderTag("tail") && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
+      if(currentIndex==this.getBorderIndex("tail") && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
         roi2.add(this.getBorderTag("intersectionPoint"));
       }
 
@@ -458,7 +458,7 @@ public class RodentSpermNucleus
 
     // update signal angles with hook or hump side
 
-    List<List<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+    List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
     signals.add(this.getRedSignals());
     signals.add(this.getGreenSignals());
 

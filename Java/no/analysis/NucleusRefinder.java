@@ -223,7 +223,7 @@ public class NucleusRefinder
 
      IJ.log("File:  "+path.getName());
 
-    Detector detector = new Dectector();
+    Detector detector = new Detector();
     detector.setMaxSize(this.maxNucleusSize);
     detector.setMinSize(this.minNucleusSize);
     detector.setMinCirc(this.minNucleusCirc);
@@ -231,7 +231,7 @@ public class NucleusRefinder
     detector.setThreshold(this.nucleusThreshold);
     detector.setChannel(BLUE_CHANNEL);
     detector.run(image);
-    Map<Roi, Map<String, Double>> map = detector.getRoiMap();
+    Map<Roi, HashMap<String, Double>> map = detector.getRoiMap();
 
     int i = 0;
 

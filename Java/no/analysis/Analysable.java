@@ -169,7 +169,7 @@ public interface Analysable
 
 	public void exportAnnotatedNuclei();
 
-	public void exportMediansOfProfile(double[] profile, String filename);
+	public void exportMediansOfProfile(Profile profile, String filename);
 
 	public void exportMediansAndQuartilesOfProfile(List<Double[]> profile, String filename);
 	/*

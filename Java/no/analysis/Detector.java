@@ -14,7 +14,11 @@ import no.components.*;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
+import ij.plugin.frame.RoiManager;
+import ij.plugin.ChannelSplitter;
 import ij.plugin.filter.Analyzer;
+import ij.process.ImageProcessor;
+import ij.measure.ResultsTable;
 import ij.plugin.filter.ParticleAnalyzer;
 
 
@@ -36,7 +40,7 @@ public class Detector{
 
   private Roi[] roiArray;
 
-  private Map<Roi, Map<String, Double>> roiMap = new HashMap<Roi, HashMap<String, Double>>(0);
+  private Map<Roi, HashMap<String, Double>> roiMap = new HashMap<Roi, HashMap<String, Double>>(0);
 
   public Detector(){
 
@@ -67,15 +71,11 @@ public class Detector{
   }
 
   public void run(ImagePlus image){
-  	if(this.minSize==null || this.maxSize==null){
+  	if( Double.isNaN(this.minSize) || 
+        Double.isNaN(this.maxSize) ||
+        Double.isNaN(this.minCirc) ||
+        Double.isNaN(this.maxCirc))
   		return;
-  	}
-  	if(this.minCirc==null || this.maxCirc==null){
-  		return;
-  	}
-  	if(this.threshold==null){
-  		return;
-  	}
 
   	if(	this.channel!=RED_CHANNEL 	&& 
 	  		this.channel!=GREEN_CHANNEL && 
@@ -95,13 +95,13 @@ public class Detector{
   }
 
   // ensure defensive
-  public Map<Roi, Map<String, Double>> getRoiMap(){
-  	Map<Roi, Map<String, Double>> resultMap = new HashMap<Roi, HashMap<String, Double>>(0);
+  public Map<Roi, HashMap<String, Double>> getRoiMap(){
+  	Map<Roi, HashMap<String, Double>> resultMap = new HashMap<Roi, HashMap<String, Double>>(0);
   	Set<Roi> keys = this.roiMap.keySet();
 
   	for(Roi r : keys){
-  		Map<String, Double> values = roiMap.get(r);
-  		Map<String, Double> resultValues = new HashMap<String, Double>(0);
+  		HashMap<String, Double> values = roiMap.get(r);
+  		HashMap<String, Double> resultValues = new HashMap<String, Double>(0);
   		Set<String> valueKeys = values.keySet();
   		for( String s : valueKeys){
   			resultValues.put(s, values.get(s));
@@ -129,7 +129,7 @@ public class Detector{
     // run the particle analyser
     ResultsTable rt = new ResultsTable();
     ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
-                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA, ParticleAnalyzer.PERIMETER, ParticleAnalyzer.FERET ,
+                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA | ParticleAnalyzer.PERIMETER | ParticleAnalyzer.FERET ,
                  rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
     try {
       pa.setRoiManager(manager);
@@ -145,7 +145,7 @@ public class Detector{
 
     this.roiArray = manager.getSelectedRoisAsArray();
     for(int i=0;i<roiArray.length;i++){
-    	Map<String, Double> values = new HashMap<String, Double>(0);
+    	HashMap<String, Double> values = new HashMap<String, Double>(0);
     	values.put("Area", rt.getValue("Area",i)); 
     	values.put("Feret", rt.getValue("Feret",i)); 
     	values.put("Perim", rt.getValue("Perim.",i)); 
