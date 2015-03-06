@@ -18,7 +18,7 @@ import ij.process.FloatPolygon;
 import ij.gui.Plot;
 
 import no.components.XYPoint;
-import no.components.AngleProfile;
+import no.components.Profile;
 import no.components.NucleusBorderPoint;
 import no.components.NuclearSignal;
 
@@ -34,8 +34,6 @@ public interface Analysable
 	public void measureProfilePositions();
 
 	public INuclearFunctions getNucleusMostSimilarToMedian(String pointType);
-
-	public double[] getMedianTargetCurve(INuclearFunctions n);
 
 	/*
 		-----------------------
@@ -69,7 +67,7 @@ public interface Analysable
 
 	public int getNucleusCount();
 
-	public ArrayList<INuclearFunctions> getNuclei();
+	public List<INuclearFunctions> getNuclei();
 
 	public INuclearFunctions getNucleus(int i);
 
@@ -90,17 +88,17 @@ public interface Analysable
 
 	public double getMaxProfileLength();
 
-	public Set<String> getNamesOfPointsOfInterest();
+	public Set<String> getTags();
 
-	public ArrayList<INuclearFunctions> getNucleiWithSignals(int channel);
+	public List<INuclearFunctions> getNucleiWithSignals(int channel);
 
-	public HashMap<Double, Collection<Double>> getProfileAggregate(String pointType);
+	public Map<Double, Collection<Double>> getProfileAggregate(String pointType);
 
 	public void addProfileAggregate(String pointType , HashMap<Double, Collection<Double>> profile);
 
-	public double[] getNormalisedMedianProfileFromPoint(String pointType );
+	public Profile getMedianProfile(String pointType );
 
-	public void addNormalisedMedianProfileFromPoint(String pointType , double[] profile);
+	public void addMedianProfile(String pointType , Profile profile);
 
 	public double[] getDifferencesToMedianFromPoint(String pointType);
 
@@ -142,7 +140,7 @@ public interface Analysable
 	// /*
 	//   For each nucleus in the collection see if there is a differences to the given median
 	// */
-	public void calculateDifferencesToMedianProfiles();
+	// public void calculateDifferencesToMedianProfiles();
 
 	/*
 		-----------------
@@ -173,7 +171,7 @@ public interface Analysable
 
 	public void exportMediansOfProfile(double[] profile, String filename);
 
-	public void exportMediansAndQuartilesOfProfile(ArrayList<Double[]> profile, String filename);
+	public void exportMediansAndQuartilesOfProfile(List<Double[]> profile, String filename);
 	/*
 		To hold the nuclear stats (and any stats), we want a structure that can 
 		hold: a column of data. Any arbitrary other numbers of columns of data.
@@ -209,7 +207,7 @@ public interface Analysable
 	/*
 		Draw a median profile on the normalised plots.
 	*/
-	public void drawNormalisedMedianLineFromPoint(String pointType, Plot plot);
+	public void drawMedianLine(String pointType, Plot plot);
 
 	public void drawNormalisedMedianLines();
 

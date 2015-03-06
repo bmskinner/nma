@@ -146,7 +146,7 @@ public class RodentSpermNucleusCollection
       // hence the median array needs to be the same curve length
       Profile medianToCompare = this.getMedianProfile("tip");
 
-      Profile interpolatedMedian medianToCompare.interpolate(n.getLength());
+      Profile interpolatedMedian = medianToCompare.interpolate(n.getLength());
 
       // find the median tail index position in the interplolated median profile
       int medianTailIndex = getMedianProfileFeatureIndex("tip", "tail");

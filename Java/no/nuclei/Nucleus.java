@@ -49,6 +49,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.HashMap;
+import no.analysis.Detector;
 import no.collections.NucleusCollection;
 import no.utility.*;
 import no.components.*;
@@ -162,7 +163,7 @@ public class Nucleus
 		this.setPolygon(n.getSmoothedPolygon());
 		this.setDistanceProfile(n.getDistanceProfile());
 		this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
-		this.setBorderPointsOfInterest(n.getBorderPointsOfInterest());
+		this.setBorderTags(n.getBorderTags());
 		this.setOutputFolder(n.getOutputFolderName());
 	}
 
@@ -194,7 +195,7 @@ public class Nucleus
 
 		this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
 		for(int i=0; i<this.smoothedPolygon.npoints; i++){
-			borderList.add(new NucleusBorderPoint( p.xpoints[i], p.ypoints[i]));
+			borderList.add(new NucleusBorderPoint( this.smoothedPolygon.xpoints[i], this.smoothedPolygon.ypoints[i]));
 		}
 
 		// calculate angle profile
@@ -401,7 +402,7 @@ public class Nucleus
 		this.outputFolder = f;
 	}
 
-	protected void setPosition(String p){
+	public void setPosition(String p){
 		this.position = p;
 	}
 
@@ -409,15 +410,15 @@ public class Nucleus
 	//   this.medianAngle = d;
 	// }
 
-	protected void setPerimeter(double d){
+	public void setPerimeter(double d){
 		this.perimeter = d;
 	}
 
-	protected void setFeret(double d){
+	public void setFeret(double d){
 		this.feret = d;
 	}
 
-	protected void setArea(double d){
+	public void setArea(double d){
 		this.area = d;
 	}
 
@@ -429,11 +430,11 @@ public class Nucleus
 		this.centreOfMass = new XYPoint(d);
 	}
 
-	protected void setRedSignals(ArrayList<NuclearSignal> d){
+	protected void setRedSignals(List<NuclearSignal> d){
 		this.redSignals = d;
 	}
 
-	protected void setGreenSignals(ArrayList<NuclearSignal> d){
+	protected void setGreenSignals(List<NuclearSignal> d){
 		this.greenSignals = d;
 	}
 
@@ -587,7 +588,7 @@ public class Nucleus
 
 			int channel = i;
 
-			Detector detector = new Dectector();
+			Detector detector = new Detector();
 			detector.setMaxSize(this.getArea() * this.maxSignalFraction);
 			detector.setMinSize(this.minSignalSize);
 			detector.setMinCirc(0);
@@ -599,11 +600,11 @@ public class Nucleus
 
 			Set<Roi> keys = map.keySet();
 			for( Roi r : keys){
-				Map<String, Double> values = redMap.get(r);
+				Map<String, Double> values = map.get(r);
 				NuclearSignal n = new NuclearSignal( r, 
 													 values.get("Area"), 
-													 values.getValue("Feret"), 
-													 values.getValue("Perim"), 
+													 values.get("Feret"), 
+													 values.get("Perim"), 
 													 new XYPoint(values.get("XM"), values.get("YM")));
 
 				if(i==RED_CHANNEL)
@@ -645,7 +646,7 @@ public class Nucleus
 	*/
 	private void calculateSignalDistancesFromCoM(){
 
-		List<List<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 		signals.add(redSignals);
 		signals.add(greenSignals);
 
@@ -670,11 +671,11 @@ public class Nucleus
 	private void calculateFractionalSignalDistancesFromCoM(){
 
 		this.calculateClosestBorderToSignals();
-		List<List<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 		signals.add(redSignals);
 		signals.add(greenSignals);
 
-		for( ArrayList<NuclearSignal> signalGroup : signals ){
+		for( List<NuclearSignal> signalGroup : signals ){
 		
 			if(signalGroup.size()>0){
 				for(int i=0;i<signalGroup.size();i++){
@@ -719,7 +720,7 @@ public class Nucleus
 	*/
 	private void calculateClosestBorderToSignals(){
 
-		List<List<NuclearSignal>> signals = new ArrayList<ArrayList<NuclearSignal>>(0);
+		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 		signals.add(redSignals);
 		signals.add(greenSignals);
 
@@ -884,7 +885,7 @@ public class Nucleus
 	*/
 	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list){
 
-		NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
+		NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
 		double closestDistance = this.getPerimeter();
 
@@ -905,7 +906,7 @@ public class Nucleus
 	*/
 	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list){
 
-		NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMinima();
+		NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMinima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
 		double closestDistance = this.getPerimeter();
 
@@ -939,15 +940,16 @@ public class Nucleus
 	// Uses the distance profile
 	public NucleusBorderPoint getNarrowestDiameterPoint(){
 
-		double distance = NuclearOrganisationUtility.getMax(this.distanceProfile);
+		double[] distanceArray = this.distanceProfile.asArray();
+		double distance = NuclearOrganisationUtility.getMax(distanceArray);
 		int index = 0;
 		for(int i = 0; i<this.getLength();i++){
-			if(this.distanceProfile[i] < distance){
-				distance = this.distanceProfile[i];
+			if(distanceArray[i] < distance){
+				distance = distanceArray[i];
 				index = i;
 			}
 		}
-		return new NucleusBorderPoint(this.getBorderPoint(index));
+		return new NucleusBorderPoint(this.getPoint(index));
 	}
 
 	public double[] getNormalisedProfilePositions(){
@@ -967,18 +969,28 @@ public class Nucleus
 	}
 
 	/*
-  	Flip the X positions of the border points around an X position
-  */
-  public void flipXAroundPoint(XYPoint p){
+		Flip the X positions of the border points around an X position
+	*/
+	public void flipXAroundPoint(XYPoint p){
 
-    double xCentre = p.getX();
-    // for(int i = 0; i<this.borderList.size();i++){
-    for(NucleusBorderPoint n : borderList){
-      double dx = xCentre - n.getX();
-      double xNew = xCentre + dx;
-      n.setX(xNew);
-    }
-  }
+		double xCentre = p.getX();
+		// for(int i = 0; i<this.borderList.size();i++){
+		for(NucleusBorderPoint n : borderList){
+			double dx = xCentre - n.getX();
+			double xNew = xCentre + dx;
+			n.setX(xNew);
+		}
+	}
+
+	public double getMedianDistanceBetweenPoints(){
+		double[] distances = new double[this.borderList.size()];
+		for(int i=0;i<this.borderList.size();i++){
+			NucleusBorderPoint p = this.getPoint(i);
+			NucleusBorderPoint next = this.getPoint( NuclearOrganisationUtility.wrapIndex(i+1, this.borderList.size()));
+			distances[i] = p.getLengthTo(next);
+		}
+		return NuclearOrganisationUtility.quartile(distances, 50);
+	}
 
 	/*
 		-----------------------
@@ -1247,6 +1259,10 @@ public class Nucleus
 		return this.angleProfile.offset(offset);
 	}
 
+	public void setAngleProfile(Profile p){
+		this.angleProfile = new Profile(p);
+	}
+
 	public double getAngle(int index){
 		return this.angleProfileTest.get(index);
 	}
@@ -1266,6 +1282,10 @@ public class Nucleus
 		return new Profile(this.distanceProfileTest);
 	}
 
+	public void setDistanceProfile(Profile p){
+		this.distanceProfile = new Profile(p);
+	}
+
 	public double getDistance(int index){
 		return this.distanceProfileTest.get(index);
 	}
@@ -1278,6 +1298,14 @@ public class Nucleus
 	// Ensure only copies of border points get returned
 	public NucleusBorderPoint getBorderTag(String s){
 		return new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
+	}
+
+	public Map<String, Integer> getBorderTags(){
+		return this.borderTags;
+	}
+
+	public void setBorderTags(Map<String, Integer> m){
+		this.borderTags = m;
 	}
 
 	public int getBorderIndex(String s){
@@ -1350,12 +1378,12 @@ public class Nucleus
 
 	public void reverse(){
 		this.getAngleProfile().reverse();
-    this.getDistanceProfile().reverse();
-    List<NucleusBorderPoint> reversed = new ArrayList<NucleusBorderPoint>(0);
-    for(int i=borderList.size()-1; i>=0;i--){
-    	reversed.add(borderList.get(i));
-    }
-    this.borderList = reversed;
+		this.getDistanceProfile().reverse();
+		List<NucleusBorderPoint> reversed = new ArrayList<NucleusBorderPoint>(0);
+		for(int i=borderList.size()-1; i>=0;i--){
+			reversed.add(borderList.get(i));
+		}
+		this.borderList = reversed;
 	}
 
 }

@@ -2,16 +2,18 @@ package no.nuclei;
 
 import java.lang.*;
 import java.io.File;
-import java.util.HashMap;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
 import no.components.XYPoint;
-import no.components.AngleProfile;
+import no.components.Profile;
 import no.components.NucleusBorderPoint;
+import no.components.NucleusBorderSegment;
 import no.components.NuclearSignal;
 
 public interface INuclearFunctions
@@ -69,13 +71,11 @@ public interface INuclearFunctions
 
 	public double getPerimeter();
 
-	public AngleProfile getAngleProfile();
+	public Profile getAngleProfile();
 
-	public double[] getDistanceProfile();
+	public Profile getDistanceProfile();
 
 	public int getLength();
-
-	public double[] getInteriorAngles();
 
 	public NucleusBorderPoint getBorderPoint(int i);
 
@@ -195,6 +195,8 @@ public interface INuclearFunctions
 
   public void flipXAroundPoint(XYPoint p);
 
+  public double getMedianDistanceBetweenPoints();
+
   /*
     -----------------------
     Exporting data
@@ -222,19 +224,13 @@ public interface INuclearFunctions
 
   public void annotateNucleusImage();
 
-   public void dumpInfo();
-
   public void dumpInfo();
-
-  public Profile getAngleProfile();
 
   public Profile getAngleProfile(String pointType);
 
   public double getAngle(int index);
 
   public int getIndex(NucleusBorderPoint p);
-
-  public Profile getDistanceProfile();
 
   public double getDistance(int index);
 
@@ -251,9 +247,4 @@ public interface INuclearFunctions
   public void addBorderTag(String name, int i);
 
   public void addSegmentTag(String name, int i);
-
-  private void calculateDistanceProfile();
-
-  private void calculateAngleProfile(int angleProfileWindowSize);
-
 }

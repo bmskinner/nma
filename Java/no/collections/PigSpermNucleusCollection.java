@@ -10,6 +10,7 @@ package no.collections;
 
 import ij.IJ;
 import java.util.*;
+import java.io.File;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.components.*;

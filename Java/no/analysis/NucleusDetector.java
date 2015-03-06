@@ -260,7 +260,7 @@ public class NucleusDetector {
 
     IJ.log("File:  "+path.getName());
 
-    Detector detector = new Dectector();
+    Detector detector = new Detector();
     detector.setMaxSize(this.maxNucleusSize);
     detector.setMinSize(this.minNucleusSize);
     detector.setMinCirc(this.minNucleusCirc);
@@ -322,8 +322,8 @@ public class NucleusDetector {
 
     currentNucleus.setCentreOfMass(new XYPoint(values.get("XM"), values.get("YM")));
     currentNucleus.setArea(values.get("Area")); 
-    currentNucleus.setFeret(values.getValue("Feret"));
-    currentNucleus.setPerimeter(values.getValue("Perim"));
+    currentNucleus.setFeret(values.get("Feret"));
+    currentNucleus.setPerimeter(values.get("Perim"));
 
     currentNucleus.setOutputFolder(this.outputFolder);
     currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);

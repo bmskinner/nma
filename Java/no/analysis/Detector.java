@@ -13,6 +13,7 @@ import no.collections.*;
 import no.components.*;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 
@@ -57,11 +58,11 @@ public class Detector{
   	this.maxCirc = d;
   }
 
-  public setThreshold(int i){
+  public void setThreshold(int i){
   	this.threshold = i;
   }
 
-  public setChannel(int i){
+  public void setChannel(int i){
   	this.channel = i;
   }
 

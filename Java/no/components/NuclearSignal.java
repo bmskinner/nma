@@ -107,7 +107,7 @@ public class NuclearSignal {
     this.fractionalDistanceFromCoM = d;
   }
 
-  public void setClosestBorderPoint(NucleusBorderPoint p){
+  public void setClosestBorderPoint(int p){
     this.closestNuclearBorderPoint = p;
   }
 }

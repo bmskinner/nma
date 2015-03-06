@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.*;
+import no.components.Profile;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.analysis.*;
@@ -61,23 +62,23 @@ public class AnalysisCreator {
   private boolean analysisRun = false;
   private boolean reAnalysisRun = false;
   private boolean readyToRun = false;
-  private Class nucleusClass;
-  private Class collectionClass;
+  private Class<?> nucleusClass;
+  private Class<?> collectionClass;
 
   private boolean performReanalysis = false;
 
-  private HashMap<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
+  private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
   // allow us to map an id to a class to construct
-  private static HashMap<Integer, Class>  collectionClassTypes;
-  private static HashMap<Integer, Class>  nucleusClassTypes;
-  private static HashMap<String, Integer> nucleusTypes;
+  private static Map<Integer, Class>  collectionClassTypes;
+  private static Map<Integer, Class>  nucleusClassTypes;
+  private static Map<String, Integer> nucleusTypes;
 
   // the raw input from nucleus detector
-  private HashMap<File, NucleusCollection> folderCollection;
+  private Map<File, NucleusCollection> folderCollection;
 
-  private ArrayList<Analysable> nuclearPopulations = new ArrayList<Analysable>(0);
-  private ArrayList<Analysable> failedPopulations  = new ArrayList<Analysable>(0);
+  private List<Analysable> nuclearPopulations = new ArrayList<Analysable>(0);
+  private List<Analysable> failedPopulations  = new ArrayList<Analysable>(0);
   
 
    /*
@@ -314,8 +315,8 @@ public class AnalysisCreator {
     Set<File> keys = this.folderCollection.keySet();
 
     try{
-      Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
-      Constructor nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
+      Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
+      Constructor<?> nucleusConstructor = this.nucleusClass.getConstructor(new Class<?>[]{Nucleus.class});
     
       for (File key : keys) {
         NucleusCollection collection = folderCollection.get(key);
@@ -453,7 +454,7 @@ public class AnalysisCreator {
       // if rodent sperm, put tip on left if needed
       if(refoldCandidate.getClass().equals(nucleusClassTypes.get(0))){
         IJ.log("    Rodent nucleus found");
-        if(refoldCandidate.getBorderPointOfInterest("tip").getX()>0){
+        if(refoldCandidate.getBorderTag("tip").getX()>0){
           IJ.log("    Flipping nucleus");
           refoldCandidate.flipXAroundPoint(refoldCandidate.getCentreOfMass());
         }
@@ -481,9 +482,9 @@ public class AnalysisCreator {
 
     try{
 
-      Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
+      Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
       
-      ArrayList<INuclearFunctions> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
+      List<INuclearFunctions> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
       if(redList.size()>0){
         // Analysable redNuclei = new Analysable(r.getFolder(), "red");
         Analysable redNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "red");
@@ -491,7 +492,7 @@ public class AnalysisCreator {
           redNuclei.addNucleus( (INuclearFunctions)n );
         }
         signalPopulations.add(redNuclei);
-        ArrayList<INuclearFunctions> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
+        List<INuclearFunctions> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
         if(notRedList.size()>0){
           Analysable notRedNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_red");
           // Analysable notRedNuclei = new Analysable(r.getFolder(), "not_red");
@@ -502,7 +503,7 @@ public class AnalysisCreator {
         }
       }
 
-      ArrayList<INuclearFunctions> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
+      List<INuclearFunctions> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
       if(greenList.size()>0){
         Analysable greenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "green");
         // Analysable greenNuclei = new Analysable(r.getFolder(), "green");
@@ -510,7 +511,7 @@ public class AnalysisCreator {
           greenNuclei.addNucleus( (INuclearFunctions)n );
         }
         signalPopulations.add(greenNuclei);
-        ArrayList<INuclearFunctions> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
+        List<INuclearFunctions> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
         if(notGreenList.size()>0){
           Analysable notGreenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_green");
           // Analysable notGreenNuclei = new Analysable(r.getFolder(), "not_green");
@@ -573,7 +574,7 @@ public class AnalysisCreator {
 
       outLine.append("\t"+r.getFolder().getAbsolutePath()+"\r\n");
 
-      LinkedHashMap<String, Integer> nucleusCounts = collectionNucleusCounts.get(r.getFolder());
+      Map<String, Integer> nucleusCounts = collectionNucleusCounts.get(r.getFolder());
       Set<String> keys = nucleusCounts.keySet();
       for(String s : keys){
         double percent = ( (double) nucleusCounts.get(s) / (double)r.getNucleusCount() )* 100;
