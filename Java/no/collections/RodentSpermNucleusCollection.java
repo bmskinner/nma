@@ -123,7 +123,7 @@ public class RodentSpermNucleusCollection
   			int toEnd = medianProfile.size() - index;
   			int diff = Math.abs(index - toEnd);
 
-  			double angle = medianProfile.asArray()[index];
+  			double angle = medianProfile.get(index);
   			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
   				minAngle = angle;
   				tailIndex = index;

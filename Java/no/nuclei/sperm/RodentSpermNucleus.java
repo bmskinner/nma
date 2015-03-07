@@ -135,7 +135,9 @@ public class RodentSpermNucleus
     NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
     // consensusTailIndex = this.getPositionBetween(consensusTail, spermTail1);
 
-    this.setInitialConsensusTail(consensusTail);
+    // this.setInitialConsensusTail(consensusTail);
+
+    addBorderTag("initialConsensusTail", consensusTailIndex);
 
     addBorderTag("tail", consensusTailIndex);
 
@@ -147,13 +149,13 @@ public class RodentSpermNucleus
     Get and set sperm nucleus features
     -----------------------
   */
-  public void setInitialConsensusTail(NucleusBorderPoint p){
-    this.initialConsensusTail = p;
-  }
+  // public void setInitialConsensusTail(NucleusBorderPoint p){
+  //   this.initialConsensusTail = p;
+  // }
 
-  public NucleusBorderPoint getInitialConsensusTail(){
-    return this.initialConsensusTail;
-  }
+  // public NucleusBorderPoint getInitialConsensusTail(){
+  //   return this.initialConsensusTail;
+  // }
 
   /*
     -----------------------

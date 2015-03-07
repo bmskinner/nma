@@ -839,7 +839,8 @@ public class Nucleus
 
 	/*
 		For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
-		Used for obtaining a consensus between potential tail positions
+		Used for obtaining a consensus between potential tail positions. Ensure we choose the
+		smaller distance
 	*/
 	public int getPositionBetween(NucleusBorderPoint pointA, NucleusBorderPoint pointB){
 
@@ -855,8 +856,13 @@ public class Nucleus
 				}
 		}
 		// get the midpoint
-		int mid = (int)Math.floor( (a+b) /2);
-		return mid;
+		// option one: b-a
+		int mid1 = NuclearOrganisationUtility.wrapIndex( (int)Math.floor( ((b-a)/2)+a  ), this.getLength() );
+
+		// option two: a-b
+		int mid2 = NuclearOrganisationUtility.wrapIndex( (int)Math.floor( ((a-b)/2)+b  ), this.getLength() );
+
+		return Math.abs(b-a)>Math.abs(a-b) ? mid1 : mid2;
 	}
 
 	// For a position in the roi, draw a line through the CoM and get the intersection point
@@ -1320,7 +1326,7 @@ public class Nucleus
 		if(this.getBorderIndex(s)>-1){
 			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
 		} else {
-			IJ.log("    Error: cannot find border tag  in Nucleus.getBorderTag()"+s);
+			IJ.log("    Error: cannot find border tag in Nucleus.getBorderTag(\""+s+"\")");
 		}
 		return result;
 	}
@@ -1338,8 +1344,6 @@ public class Nucleus
 		if(this.borderTags.containsKey(s)){
 			result = this.borderTags.get(s);
 		}
-		// IJ.log("Searching for "+s);
-		// IJ.log("Found index "+this.borderTags.get(s)+" of "+borderList.size());
 		return result;
 	}
 
