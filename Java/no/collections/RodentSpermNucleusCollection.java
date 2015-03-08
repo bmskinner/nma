@@ -130,6 +130,7 @@ public class RodentSpermNucleusCollection
   			}
   		}
   	}
+    IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
     addMedianProfileFeatureIndex("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
 	}
 
@@ -153,11 +154,22 @@ public class RodentSpermNucleusCollection
 
       // find the median tail index position in the interplolated median profile
       int medianTailIndex = getMedianProfileFeatureIndex("tip", "tail");
+      IJ.log("    Tail in median profile is at index "+medianTailIndex+" of "+medianToCompare.size()+" ("+medianToCompare.get(medianTailIndex)+")");
       medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.size() )* n.getLength());
+      IJ.log("    Tail in interpolated median profile is at index "+
+                  medianTailIndex+
+                  " of "+
+                  interpolatedMedian.size()+
+                  " ("+
+                  interpolatedMedian.get(medianTailIndex)+
+                  ")");
       
       int offset = n.getBorderIndex("tail") - medianTailIndex;
+      IJ.log("    Tail in nucleus is at index "+n.getBorderIndex("tail"));
+      IJ.log("    Offset to apply is "+offset);
 
       int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getBorderIndex("tail")-offset, n.getLength());
+      IJ.log("    New tail index at "+newTailIndex);
 
       n.addBorderTag("tail", newTailIndex);
 

@@ -1419,6 +1419,14 @@ public class Nucleus
 			reversed.add(borderList.get(i));
 		}
 		this.borderList = reversed;
+
+		// replace the tag posiitons also
+		Set<String> keys = borderTags.keySet();
+		for( String s : keys){
+			int index = borderTags.get(s);
+			int newIndex = this.getLength() - index - 1; // if was 0, will now be <length-1>; if was length-1, will be 0
+			addBorderTag(s, newIndex);
+		}
 	}
 
 }

@@ -88,15 +88,14 @@ public class RodentSpermNucleus
   public void findPointsAroundBorder(){
     
     // find tip - use the least angle method
-    // NucleusBorderPoint spermTip = 
     int tipIndex = this.getAngleProfile().getIndexOfMin();
-    // this.getAngleProfile().moveIndexToArrayStart(tipIndex);
     addBorderTag("tip", tipIndex);
 
-    // decide if the profile is right or left handed; flip if needed
+    // decide if the profile is right or left handed; flip if needed NEEDS TO BE AFTER TIP ASSIGNED
     if(!this.isProfileOrientationOK()){
-      this.reverse();
-    }
+      this.reverse(); // reverses all profiles, border array and tagged points
+    }  
+    
 
     /*
       Find the tail point using multiple independent methods. 
@@ -108,6 +107,7 @@ public class RodentSpermNucleus
     */  
     NucleusBorderPoint spermTail2 = findTailPointFromMinima();
     this.addTailEstimatePosition(spermTail2);
+    addBorderTag("spermTail2", this.getIndex(spermTail2));
 
     /*
       Method 2: Look at the 2nd derivative - rate of change of angles
@@ -125,6 +125,7 @@ public class RodentSpermNucleus
     */  
     NucleusBorderPoint spermTail1 = this.findTailByNarrowestWidthMethod();
     this.addTailEstimatePosition(spermTail1);
+    addBorderTag("spermTail1", this.getIndex(spermTail1));
 
 
     /*
@@ -191,13 +192,15 @@ public class RodentSpermNucleus
     int frontPoints = 0;
     int rearPoints = 0;
 
+    Profile profile = this.getAngleProfile("tip");
+
     int midPoint = (int) (this.getLength()/2) ;
     for(int i=0; i<this.getLength();i++){
 
-        if(this.getAngle(i)>180 && i<midPoint){
+        if(profile.get(i)>180 && i<midPoint){
           frontPoints++;
         }
-        if(this.getAngle(i)>180 && i>midPoint){
+        if(profile.get(i)>180 && i>midPoint){
           rearPoints++;
         }
     }
