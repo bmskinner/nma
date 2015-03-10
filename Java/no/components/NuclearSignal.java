@@ -38,6 +38,9 @@ public class NuclearSignal {
     this.perimeter = n.getPerimeter();
     this.feret = n.getFeret();
     this.centreOfMass = new XYPoint(n.getCentreOfMass());
+    this.distanceFromCentreOfMass = n.getDistanceFromCoM();
+    this.fractionalDistanceFromCoM = n.getFractionalDistanceFromCoM();
+    this.angleFromReferencePoint = n.getAngle();
   }
 
   /*

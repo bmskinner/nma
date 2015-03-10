@@ -666,6 +666,7 @@ public class Nucleus
 		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 		signals.add(redSignals);
 		signals.add(greenSignals);
+		int j=0;
 
 		for( List<NuclearSignal> signalGroup : signals ){
 
@@ -674,9 +675,14 @@ public class Nucleus
 					NuclearSignal n = signalGroup.get(i);
 
 					double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-					n.setDistanceFromCoM(distance);
+
+					if(j==RED_CHANNEL)
+						this.redSignals.get(i).setDistanceFromCoM(distance);
+					if(j==GREEN_CHANNEL)
+						this.greenSignals.get(i).setDistanceFromCoM(distance);
 				}
 			}
+			j++;
 		}
 	}
 
@@ -691,6 +697,7 @@ public class Nucleus
 		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 		signals.add(redSignals);
 		signals.add(greenSignals);
+		int k=0;
 
 		for( List<NuclearSignal> signalGroup : signals ){
 		
@@ -725,9 +732,13 @@ public class Nucleus
 					double nucleusCoMToBorder = borderPoint.getLengthTo(this.getCentreOfMass());
 					double signalCoMToNucleusCoM = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
 					double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
-					n.setFractionalDistanceFromCoM(fractionalDistance);
+					if(k==RED_CHANNEL)
+						this.redSignals.get(i).setFractionalDistanceFromCoM(fractionalDistance);
+					if(k==GREEN_CHANNEL)
+						this.greenSignals.get(i).setFractionalDistanceFromCoM(fractionalDistance);
 				}
 			}
+			k++;
 		}
 	}
 
@@ -827,6 +838,13 @@ public class Nucleus
 				this.distancesBetweenSignals[m][k] = aCoM.getLengthTo(bCoM);
 			}
 		}
+	}
+
+	public void updateSignalAngle(int channel, int signal, double angle){
+		if(channel==RED_CHANNEL)
+			this.redSignals.get(signal).setAngle(angle);
+		if(channel==GREEN_CHANNEL)
+			this.greenSignals.get(signal).setAngle(angle);
 	}
 
 	
@@ -1043,19 +1061,24 @@ public class Nucleus
 		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 		signals.add(this.getRedSignals());
 		signals.add(this.getGreenSignals());
+		int j=0;
 
 		for( List<NuclearSignal> signalGroup : signals ){
 
 			if(signalGroup.size()>0){
 
 				for(int i=0;i<signalGroup.size();i++){
-					NuclearSignal n = signalGroup.get(i);
-					double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), n.getCentreOfMass());
+					NuclearSignal s = signalGroup.get(i);
+					double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), s.getCentreOfMass());
 
 					// set the final angle
-					n.setAngle(angle);
+					if(j==RED_CHANNEL)
+						this.redSignals.get(i).setAngle(angle);
+					if(j==GREEN_CHANNEL)
+						this.greenSignals.get(i).setAngle(angle);
 				}
 			}
+			j++;
 		}
 	}
 

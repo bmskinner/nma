@@ -195,10 +195,10 @@ public class RodentSpermNucleus
     int midPoint = (int) (this.getLength()/2) ;
     for(int i=0; i<this.getLength();i++){ // integrate points over 180
 
-        if(profile.get(i)>180 && i<midPoint){
+        if(i<midPoint){
           frontPoints += profile.get(i);
         }
-        if(profile.get(i)>180 && i>midPoint){
+        if(i>midPoint){
           rearPoints  += profile.get(i);
         }
     }
@@ -464,6 +464,7 @@ public class RodentSpermNucleus
     List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
     signals.add(this.getRedSignals());
     signals.add(this.getGreenSignals());
+    int channel = 0;
 
     for( List<NuclearSignal> signalGroup : signals ){
 
@@ -479,9 +480,10 @@ public class RodentSpermNucleus
           }
 
           // set the final angle
-          n.setAngle(angle);
+          this.updateSignalAngle(channel, i, angle);
         }
       }
+      channel++;
     }
   }
 
