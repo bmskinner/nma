@@ -68,8 +68,8 @@ public class RodentSpermNucleus
   private FloatPolygon hookRoi;
   private FloatPolygon humpRoi;
 
-  private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
-  private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
+  // private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
+  // private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
 
   // Requires a sperm nucleus object to construct from
   public RodentSpermNucleus(Nucleus n){
@@ -91,7 +91,8 @@ public class RodentSpermNucleus
     int tipIndex = this.getAngleProfile().getIndexOfMin();
     addBorderTag("tip", tipIndex);
 
-    // decide if the profile is right or left handed; flip if needed NEEDS TO BE AFTER TIP ASSIGNED
+    // decide if the profile is right or left handed; flip if needed
+    IJ.log("    Nucleus "+this.getNucleusNumber());
     if(!this.isProfileOrientationOK()){
       this.reverse(); // reverses all profiles, border array and tagged points
     }  
@@ -195,13 +196,13 @@ public class RodentSpermNucleus
     Profile profile = this.getAngleProfile("tip");
 
     int midPoint = (int) (this.getLength()/2) ;
-    for(int i=0; i<this.getLength();i++){
+    for(int i=0; i<this.getLength();i++){ // integrate points over 180
 
         if(profile.get(i)>180 && i<midPoint){
-          frontPoints++;
+          frontPoints += profile.get(i);
         }
         if(profile.get(i)>180 && i>midPoint){
-          rearPoints++;
+          rearPoints  += profile.get(i);
         }
     }
 

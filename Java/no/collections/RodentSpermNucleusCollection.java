@@ -130,7 +130,7 @@ public class RodentSpermNucleusCollection
   			}
   		}
   	}
-    IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
+    // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
     addMedianProfileFeatureIndex("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
 	}
 
@@ -182,7 +182,7 @@ public class RodentSpermNucleusCollection
       int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
       n.addBorderTag("head", headIndex);
       n.splitNucleusToHeadAndHump();
-      IJ.log("After offsets:");
+      // IJ.log("After offsets:");
       // n.dumpInfo(Nucleus.BORDER_TAGS);
     }
   }

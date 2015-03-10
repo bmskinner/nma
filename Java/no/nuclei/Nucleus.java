@@ -1269,21 +1269,21 @@ public class Nucleus
 	*/
 	public void dumpInfo(int type){
 		IJ.log("Dumping nucleus info:");
-		IJ.log("CoM: "+this.getCentreOfMass().getX()+", "+this.getCentreOfMass().getY());
+		IJ.log("    CoM: "+this.getCentreOfMass().getX()+", "+this.getCentreOfMass().getY());
 		if(type==ALL_POINTS || type==BORDER_POINTS){
-			IJ.log("Border:");
+			IJ.log("    Border:");
 			for(int i=0; i<this.getLength(); i++){
 				NucleusBorderPoint p = this.getBorderPoint(i);
-				IJ.log("    "+p.getX()+"    "+p.getY());
+				IJ.log("      Index "+i+": "+p.getX()+"    "+p.getY());
 			}
 		}
 		if(type==ALL_POINTS || type==BORDER_TAGS){
-			IJ.log("Points of interest:");
+			IJ.log("    Points of interest:");
 			Map<String, Integer> pointHash = this.getBorderTags();
 			Set<String> keys = pointHash.keySet();
 			for(String s : keys){
 			 NucleusBorderPoint p = getPoint(pointHash.get(s));
-			 IJ.log("    "+s+": "+p.getX()+"    "+p.getY());
+			 IJ.log("    "+s+": "+p.getX()+"    "+p.getY()+" at index "+pointHash.get(s));
 			}
 		}
 	}
@@ -1301,7 +1301,7 @@ public class Nucleus
 	// returns a copy
 	public Profile getAngleProfile(String pointType){ // USE getAngleProfile
 		int offset = this.borderTags.get(pointType);
-		return this.angleProfile.offset(offset);
+		return new Profile(this.angleProfile.offset(offset));
 	}
 
 	public void setAngleProfile(Profile p){
@@ -1433,8 +1433,14 @@ public class Nucleus
 	}
 
 	public void reverse(){
-		this.getAngleProfile().reverse();
-		this.getDistanceProfile().reverse();
+		Profile aProfile = this.getAngleProfile();
+		aProfile.reverse();
+		this.setAngleProfile(aProfile);
+
+		Profile dProfile = this.getDistanceProfile();
+		dProfile.reverse();
+		this.setDistanceProfile(dProfile);
+
 		List<NucleusBorderPoint> reversed = new ArrayList<NucleusBorderPoint>(0);
 		for(int i=borderList.size()-1; i>=0;i--){
 			reversed.add(borderList.get(i));
