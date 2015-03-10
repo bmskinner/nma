@@ -232,7 +232,7 @@ public interface INuclearFunctions
 
   public void annotateNucleusImage();
 
-  public void dumpInfo();
+  public void dumpInfo(int type);
 
   public Profile getAngleProfile(String pointType);
 

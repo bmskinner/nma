@@ -6,6 +6,7 @@
 
 package no.components;
 
+import ij.IJ;
 import java.util.*;
 import no.utility.*;
 
@@ -334,5 +335,12 @@ public class Profile {
     // this.minimaCalculated = true;
     this.minimaCount =  count;
     return result;
+  }
+
+  // use for debugging
+  public void print(){
+    for (int i=0; i<array.length; i++) {
+      IJ.log("Point "+i+": "+array[i]);
+    }
   }
 }

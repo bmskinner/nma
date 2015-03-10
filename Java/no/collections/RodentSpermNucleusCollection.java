@@ -143,33 +143,38 @@ public class RodentSpermNucleusCollection
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
 
-      IJ.log("Before offsets:");
-      n.dumpInfo();
+      // IJ.log("Before offsets:");
+      // n.dumpInfo(Nucleus.BORDER_TAGS); // dump just points of interest
 
       // the curve needs to be matched to the median 
       // hence the median array needs to be the same curve length
-      Profile medianToCompare = this.getMedianProfile("tip");
+      Profile medianToCompare = this.getMedianProfile("tip"); // returns a median profile with tip at 0
+      // medianToCompare.print();
 
       Profile interpolatedMedian = medianToCompare.interpolate(n.getLength());
+      // interpolatedMedian.print();
 
       // find the median tail index position in the interplolated median profile
       int medianTailIndex = getMedianProfileFeatureIndex("tip", "tail");
-      IJ.log("    Tail in median profile is at index "+medianTailIndex+" of "+medianToCompare.size()+" ("+medianToCompare.get(medianTailIndex)+")");
+      // IJ.log("    Tail in median profile is at index "+medianTailIndex+" of "+medianToCompare.size()+" ("+medianToCompare.get(medianTailIndex)+")");
       medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.size() )* n.getLength());
-      IJ.log("    Tail in interpolated median profile is at index "+
-                  medianTailIndex+
-                  " of "+
-                  interpolatedMedian.size()+
-                  " ("+
-                  interpolatedMedian.get(medianTailIndex)+
-                  ")");
-      
-      int offset = n.getBorderIndex("tail") - medianTailIndex;
-      IJ.log("    Tail in nucleus is at index "+n.getBorderIndex("tail"));
-      IJ.log("    Offset to apply is "+offset);
+      // IJ.log("    Tail in interpolated median profile is at index "+
+      //             medianTailIndex+
+      //             " of "+
+      //             interpolatedMedian.size()+
+      //             " ("+
+      //             interpolatedMedian.get(medianTailIndex)+
+      //             ")");
+
+      int differenceTipToTailInMedianProfile = medianTailIndex;
+      int differenceTipToTailInNucleus = n.getBorderIndex("tail") - n.getBorderIndex("tip"); // tail index should be larger than tip index because we oriented the array
+      int offset = differenceTipToTailInNucleus - differenceTipToTailInMedianProfile;
+
+      // IJ.log("    Tail in nucleus is at index "+n.getBorderIndex("tail"));
+      // IJ.log("    Offset to apply is "+offset);
 
       int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getBorderIndex("tail")-offset, n.getLength());
-      IJ.log("    New tail index at "+newTailIndex);
+      // IJ.log("    New tail index at "+newTailIndex);
 
       n.addBorderTag("tail", newTailIndex);
 
@@ -178,7 +183,7 @@ public class RodentSpermNucleusCollection
       n.addBorderTag("head", headIndex);
       n.splitNucleusToHeadAndHump();
       IJ.log("After offsets:");
-      n.dumpInfo();
+      // n.dumpInfo(Nucleus.BORDER_TAGS);
     }
   }
 

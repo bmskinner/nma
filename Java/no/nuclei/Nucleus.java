@@ -65,6 +65,12 @@ public class Nucleus
 	public static final int NOT_RED_CHANNEL  = 3;
 	public static final int NOT_GREEN_CHANNEL  = 4;
 
+	// for debugging - use in calling dumpInfo()
+	public static final int ALL_POINTS = 0;
+	public static final int BORDER_POINTS = 1;
+	public static final int BORDER_TAGS = 2;
+
+
 	// Values for deciding whether an object is a signal
 	private int    signalThreshold = 70;
 	private double minSignalSize  = 5; // how small can a signal be
@@ -855,14 +861,25 @@ public class Nucleus
 					b = i;
 				}
 		}
+
+		// find the higher and lower index of a and b
+		int maxIndex = a > b ? a : b;
+		int minIndex = a > b ? b : a;
+
+		// there are two midpoints between any points on a ring; we want to take the 
+		// midpoint that is in the smaller segment.
+
+		int difference1 = maxIndex - minIndex;
+		int difference2 = this.getLength() - difference1;
+
 		// get the midpoint
-		// option one: b-a
-		int mid1 = NuclearOrganisationUtility.wrapIndex( (int)Math.floor( ((b-a)/2)+a  ), this.getLength() );
+		int mid1 = NuclearOrganisationUtility.wrapIndex( (int)Math.floor( (difference1/2)+minIndex ),
+															this.getLength() );
 
-		// option two: a-b
-		int mid2 = NuclearOrganisationUtility.wrapIndex( (int)Math.floor( ((a-b)/2)+b  ), this.getLength() );
+		int mid2 = NuclearOrganisationUtility.wrapIndex( (int)Math.floor( (difference2/2)+maxIndex ), 
+															this.getLength() );
 
-		return Math.abs(b-a)>Math.abs(a-b) ? mid1 : mid2;
+		return difference1 < difference2 ? mid1 : mid2;
 	}
 
 	// For a position in the roi, draw a line through the CoM and get the intersection point
@@ -1250,20 +1267,24 @@ public class Nucleus
 		Get a readout of the state of the nucleus
 		Used only for debugging
 	*/
-	public void dumpInfo(){
+	public void dumpInfo(int type){
 		IJ.log("Dumping nucleus info:");
 		IJ.log("CoM: "+this.getCentreOfMass().getX()+", "+this.getCentreOfMass().getY());
-		IJ.log("Border:");
-		for(int i=0; i<this.getLength(); i++){
-			NucleusBorderPoint p = this.getBorderPoint(i);
-			IJ.log("    "+p.getX()+"    "+p.getY());
+		if(type==ALL_POINTS || type==BORDER_POINTS){
+			IJ.log("Border:");
+			for(int i=0; i<this.getLength(); i++){
+				NucleusBorderPoint p = this.getBorderPoint(i);
+				IJ.log("    "+p.getX()+"    "+p.getY());
+			}
 		}
-		IJ.log("Points of interest:");
-		Map<String, Integer> pointHash = this.getBorderTags();
-		Set<String> keys = pointHash.keySet();
-		for(String s : keys){
-		 NucleusBorderPoint p = getPoint(pointHash.get(s));
-		 IJ.log("    "+s+": "+p.getX()+"    "+p.getY());
+		if(type==ALL_POINTS || type==BORDER_TAGS){
+			IJ.log("Points of interest:");
+			Map<String, Integer> pointHash = this.getBorderTags();
+			Set<String> keys = pointHash.keySet();
+			for(String s : keys){
+			 NucleusBorderPoint p = getPoint(pointHash.get(s));
+			 IJ.log("    "+s+": "+p.getX()+"    "+p.getY());
+			}
 		}
 	}
 
