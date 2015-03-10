@@ -751,11 +751,15 @@ public class Nucleus
 		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
 		signals.add(redSignals);
 		signals.add(greenSignals);
+		int k = 0;
 
 		for( List<NuclearSignal> signalGroup : signals ){
 		
 			if(signalGroup.size()>0){
-				for(NuclearSignal s : signalGroup){
+
+				for(int i=0;i<signalGroup.size();i++){
+
+					NuclearSignal s = signalGroup.get(i);
 
 					int minIndex = 0;
 					double minDistance = this.getFeret();
@@ -770,9 +774,14 @@ public class Nucleus
 							minDistance = distance;
 						}
 					}
-					s.setClosestBorderPoint(minIndex);
+
+					if(k==RED_CHANNEL)
+							this.redSignals.get(i).setClosestBorderPoint(minIndex);
+					if(k==GREEN_CHANNEL)
+							this.greenSignals.get(i).setClosestBorderPoint(minIndex);
 				}
 			}
+			k++;
 		}
 	}
 

@@ -41,6 +41,7 @@ public class NuclearSignal {
     this.distanceFromCentreOfMass = n.getDistanceFromCoM();
     this.fractionalDistanceFromCoM = n.getFractionalDistanceFromCoM();
     this.angleFromReferencePoint = n.getAngle();
+    this.closestNuclearBorderPoint = n.getClosestBorderPoint();
   }
 
   /*

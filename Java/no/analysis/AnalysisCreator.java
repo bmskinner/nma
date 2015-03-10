@@ -419,6 +419,7 @@ public class AnalysisCreator {
         IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
         IJ.log("    ----------------------------- ");
         p.measureProfilePositions();
+        p.measureNuclearOrganisation();
         p.exportStatsFiles();
         p.annotateAndExportNuclei();
         attemptRefoldingConsensusNucleus(p);

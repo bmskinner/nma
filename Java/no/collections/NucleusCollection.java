@@ -767,9 +767,23 @@ public class NucleusCollection
     String redLogFile   = makeGlobalLogFile( "logRedSignals"  );
     String greenLogFile = makeGlobalLogFile( "logGreenSignals");
 
-    IJ.append("NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", redLogFile);
-    IJ.append("NUCLEUS_NUMBER\tSIGNAL_AREA\tSIGNAL_ANGLE\tSIGNAL_FERET\tSIGNAL_DISTANCE\tFRACTIONAL_DISTANCE\tSIGNAL_PERIMETER\tSIGNAL_RADIUS\tPATH", greenLogFile);
-    
+    StringBuilder redLog = new StringBuilder();
+    StringBuilder greenLog = new StringBuilder();
+
+    String header = "NUCLEUS_NUMBER\t"+
+                    "SIGNAL_AREA\t"+
+                    "SIGNAL_ANGLE\t"+
+                    "SIGNAL_FERET\t"+
+                    "SIGNAL_DISTANCE\t"+
+                    "FRACTIONAL_DISTANCE\t"+
+                    "SIGNAL_PERIMETER\t"+
+                    "SIGNAL_RADIUS\t"+
+                    "CLOSEST_BORDER_INDEX\t"+
+                    "PATH\r\n";
+
+    redLog.append( header );
+    greenLog.append(header);
+
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 
       INuclearFunctions n = this.getNucleus(i);
@@ -784,25 +798,29 @@ public class NucleusCollection
       int signalCount = 0;
       for( List<NuclearSignal> signalGroup : signals ){
 
-        String log = signalCount == Nucleus.RED_CHANNEL ? redLogFile : greenLogFile;
+        StringBuilder log = signalCount == Nucleus.RED_CHANNEL ? redLog : greenLog;
         
         if(signalGroup.size()>0){
           for(int j=0; j<signalGroup.size();j++){
              NuclearSignal s = signalGroup.get(j);
-             IJ.append(nucleusNumber                   +"\t"+
+             log.append(nucleusNumber                  +"\t"+
                        s.getArea()                     +"\t"+
                        s.getAngle()                    +"\t"+
                        s.getFeret()                    +"\t"+
                        s.getDistanceFromCoM()          +"\t"+
                        s.getFractionalDistanceFromCoM()+"\t"+
-                       s.getRadius()                   +"\t"+
                        s.getPerimeter()                +"\t"+
-                       path, log);
+                       s.getRadius()                   +"\t"+
+                       s.getClosestBorderPoint()       +"\t"+
+                       path                            +"\r\n");
           } // end for
         } // end if
         signalCount++;
       } // end for
     } // end for
+
+    IJ.append(redLog.toString(), redLogFile);
+    IJ.append(greenLog.toString(), greenLogFile);
   }
 
   public void exportDistancesBetweenSingleSignals(){
@@ -1234,6 +1252,7 @@ public class NucleusCollection
     for(int i= 0; i<this.getNucleusCount();i++){
 
       INuclearFunctions n = this.getNucleus(i);
+      int profileIndex = n.getBorderIndex(pointType); 
       List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
       signals.add(n.getRedSignals());
       signals.add(n.getGreenSignals());
@@ -1250,26 +1269,21 @@ public class NucleusCollection
 
           for(int j=0; j<signalGroup.size();j++){
 
+            // get the index of the point closest to the signal
             int borderIndex = signalGroup.get(j).getClosestBorderPoint();
-            for(int k=0; k<n.getLength();k++){
 
-              // Check if the current NBP is the correct closest border
-              if(  n.getPoint(k).overlaps(  n.getPoint(borderIndex) )){
+            // offset the index relative to the current profile type, and normalise
+            int offsetIndex = NuclearOrganisationUtility.wrapIndex( borderIndex - profileIndex , n.getLength() );
+            double normIndex = (  (double) offsetIndex / (double) n.getLength()  ) * 100;
 
-                // We want to get the profile position, offset to the pointType 
-                // get the index of the NBP with the profilePointType; the new zero
-                int profileIndex = n.getBorderIndex(pointType);
+            xPoints[j] = normIndex;
+            double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( signalGroup.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
+            yPoints[j] = yPosition;
 
-                // find the offset position of boxPoint, using profilePoint as a zero. 
-                int offsetIndex = NuclearOrganisationUtility.wrapIndex( borderIndex - profileIndex , n.getLength() );
-                double normIndex = (  (double) offsetIndex / (double) n.getLength()  ) * 100;
+            IJ.log("Nucleus "+i+": Signal: "+j+": "+normIndex+"  "+yPosition);
 
-                xPoints[j] = normIndex;
-                double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( signalGroup.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
-                xPoints[j] = yPosition;
-              }
-            }
           }
+
           plot.setColor(colour);
           plot.setLineWidth(2);
           plot.addPoints( xPoints, yPoints, Plot.DOT);
