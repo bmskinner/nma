@@ -109,10 +109,6 @@ public class Nucleus
 
 	private XYPoint centreOfMass;
 
-	// store points of interest around the border e.g. heads, tails, any other features of note
-	// these are mutable
-	// private HashMap<String, NucleusBorderPoint> borderPointsOfInterest = new HashMap<String, NucleusBorderPoint>();
-
 	private File sourceFile;    // the image from which the nucleus came
 	private File nucleusFolder; // the folder to store nucleus information
 	// private File profileLog;    // unused. Store output if needed
@@ -128,10 +124,6 @@ public class Nucleus
 	private List<NuclearSignal> greenSignals = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
 
 	private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
-
-	// private double[] distanceProfile; // diameter through the CoM for each point
-
-	// private Map<String, Double> differencesToMedianProfile = new HashMap<String, Double>(); // store the difference between curves; move to collection
 
 	private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
 	
@@ -174,6 +166,7 @@ public class Nucleus
 		this.setBorderTags(n.getBorderTags());
 		this.setOutputFolder(n.getOutputFolderName());
 		this.setBorderList(n.getBorderList());
+		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 	}
 
 	public void findPointsAroundBorder(){
@@ -1405,7 +1398,6 @@ public class Nucleus
 		double[] angles = new double[this.getLength()];
 
 		for(int i=0; i<this.getLength();i++){
-		// while(borderList.hasNext()){
 
 			int indexBefore = NuclearOrganisationUtility.wrapIndex(i - angleProfileWindowSize, this.getLength());
 			int indexAfter  = NuclearOrganisationUtility.wrapIndex(i + angleProfileWindowSize, this.getLength());
@@ -1415,6 +1407,12 @@ public class Nucleus
 			NucleusBorderPoint point       = this.borderList.get(i);
 
 			double angle = Nucleus.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
+
+			// IJ.log("Comparing points: "+angle);
+			// IJ.log("    Before: ("+indexBefore+") "+pointBefore.getX()+"  "+pointBefore.getY());
+			// IJ.log("    i     : ("+i          +") "+      point.getX()+"  "+      point.getY());
+			// IJ.log("    After : ("+indexAfter +") "+ pointAfter.getX()+"  "+ pointAfter.getY());
+			// IJ.log("");
 
 			// find the halfway point between the first and last points.
 				// is this within the roi?
@@ -1429,7 +1427,7 @@ public class Nucleus
 				angles[i] = 360-angle;
 			}
 		}
-		this.angleProfile = new Profile(angles);
+		this.setAngleProfile( new Profile(angles)  );
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}
 

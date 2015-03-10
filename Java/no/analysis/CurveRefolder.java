@@ -101,7 +101,7 @@ public class CurveRefolder{
 				score = this.iterateOverNucleus();
 				i++;
 				// if(i%50==0){
-					IJ.log("    Iteration "+i+": "+(int)score);
+					// IJ.log("    Iteration "+i+": "+(int)score);
 				// }
 			}
 			IJ.log("    Refolded curve: final score: "+(int)score);
@@ -235,18 +235,26 @@ public class CurveRefolder{
 	private double iterateOverNucleus() throws Exception{
 
 		Profile refoldProfile = refoldNucleus.getAngleProfile("tail");
-		double similarityScore = refoldProfile.differenceToProfile(targetCurve);
-		IJ.log("    Internal score: "+(int)similarityScore);
-
 		Profile interpolatedTargetCurve = targetCurve.interpolate(refoldProfile.size());
 
-		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
+		double similarityScore = refoldProfile.differenceToProfile(targetCurve);
+		// IJ.log("    Iteration score: "+(int)similarityScore);
 
-		// testNucleus = new Nucleus(refoldNucleus);
+		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
+		// refoldNucleus.getAngleProfile("tail").print();
+
+		testNucleus = new Nucleus( (Nucleus)refoldNucleus);
+		// IJ.log("Before calculating new profile:");
+		// testNucleus.dumpInfo(Nucleus.BORDER_POINTS);
+		// testNucleus.getAngleProfile().print();
+		// IJ.log("");
 		
 		for(int i=0; i<refoldNucleus.getLength(); i++){
 
 			Nucleus testNucleus = new Nucleus( (Nucleus)refoldNucleus);
+
+			double score = testNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
+			// IJ.log("    Internal score: "+(int)score);
 
 			NucleusBorderPoint p = testNucleus.getPoint(i);
 			
@@ -290,13 +298,18 @@ public class CurveRefolder{
 
 			// measure the new profile & compare
 			try{
-				testNucleus.calculateAngleProfile(testNucleus.getAngleProfileWindowSize());
+				testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
+				// if(i==0){
+				// 	IJ.log("After calculating new profile:");
+				// 	testNucleus.getAngleProfile().print();
+				// 	testNucleus.dumpInfo(Nucleus.BORDER_POINTS);
+				// }
 			} catch(Exception e){
 				throw new Exception("Cannot calculate angle profile: "+e);
 			}
 
-			double score = testNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
-			IJ.log("    Internal score: "+(int)score);
+			score = testNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
+			// IJ.log("    Internal score: "+(int)score);
 
 			// do not apply change  if the distance from teh surrounding points changes too much
 			double distanceToPrev = p.getLengthTo( testNucleus.getPoint( NuclearOrganisationUtility.wrapIndex(i-1, testNucleus.getLength()) ) );
@@ -307,18 +320,8 @@ public class CurveRefolder{
 				refoldNucleus.updatePoint(i, newX, newY);
 				refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
 				refoldNucleus.setPolygon(createPolygon());
-			} else {
 				similarityScore = score;
 			}
-
-			// reset if worse fit or distances are too high
-			// if(score > similarityScore  || distanceToNext > medianDistanceBetweenPoints*1.2 || distanceToPrev > medianDistanceBetweenPoints*1.2 ){
-			// 	refoldNucleus.updatePoint(i, oldX, oldY);
-			// 	refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
-			// 	refoldNucleus.setPolygon(createPolygon());
-			// } else {
-			// 	similarityScore = score;
-			// }
 		}
 		return similarityScore;
 	}
