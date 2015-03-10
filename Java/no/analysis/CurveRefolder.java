@@ -96,7 +96,7 @@ public class CurveRefolder{
 			double originalScore = score;
 			double prevScore = score*2;
 			int i=0;
-			while( (prevScore - score)/prevScore > 0.01 || i<2 ){ // iterate until converging on a better curve  score >= originalScore
+			while( (prevScore - score)/prevScore > 0.01 || i<50){ // iterate until converging on a better curve  score >= originalScore
 				prevScore = score;
 				score = this.iterateOverNucleus();
 				i++;
