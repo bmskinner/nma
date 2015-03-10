@@ -1346,9 +1346,10 @@ public class Nucleus
 		NucleusBorderPoint result = new NucleusBorderPoint(0,0);
 		if(this.getBorderIndex(s)>-1){
 			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
-		} else {
-			IJ.log("    Error: cannot find border tag in Nucleus.getBorderTag(\""+s+"\")");
 		}
+		// } else {
+		// 	IJ.log("    Error: cannot find border tag in Nucleus.getBorderTag(\""+s+"\")");
+		// }
 		return result;
 	}
 

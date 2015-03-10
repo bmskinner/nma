@@ -68,9 +68,6 @@ public class RodentSpermNucleus
   private FloatPolygon hookRoi;
   private FloatPolygon humpRoi;
 
-  // private ArrayList<Double> normalisedXPositionsFromTip  = new ArrayList<Double>(0); // holds the x values only after normalisation
-  // private ArrayList<Double> rawXPositionsFromTip         = new ArrayList<Double>(0);
-
   // Requires a sperm nucleus object to construct from
   public RodentSpermNucleus(Nucleus n){
   	super(n);
@@ -92,7 +89,7 @@ public class RodentSpermNucleus
     addBorderTag("tip", tipIndex);
 
     // decide if the profile is right or left handed; flip if needed
-    IJ.log("    Nucleus "+this.getNucleusNumber());
+    // IJ.log("    Nucleus "+this.getNucleusNumber());
     if(!this.isProfileOrientationOK()){
       this.reverse(); // reverses all profiles, border array and tagged points
     }  
@@ -108,7 +105,7 @@ public class RodentSpermNucleus
     */  
     NucleusBorderPoint spermTail2 = findTailPointFromMinima();
     this.addTailEstimatePosition(spermTail2);
-    addBorderTag("spermTail2", this.getIndex(spermTail2));
+    // addBorderTag("spermTail2", this.getIndex(spermTail2));
 
     /*
       Method 2: Look at the 2nd derivative - rate of change of angles
@@ -126,7 +123,7 @@ public class RodentSpermNucleus
     */  
     NucleusBorderPoint spermTail1 = this.findTailByNarrowestWidthMethod();
     this.addTailEstimatePosition(spermTail1);
-    addBorderTag("spermTail1", this.getIndex(spermTail1));
+    // addBorderTag("spermTail1", this.getIndex(spermTail1));
 
 
     /*
@@ -139,7 +136,7 @@ public class RodentSpermNucleus
 
     // this.setInitialConsensusTail(consensusTail);
 
-    addBorderTag("initialConsensusTail", consensusTailIndex);
+    // addBorderTag("initialConsensusTail", consensusTailIndex);
 
     addBorderTag("tail", consensusTailIndex);
 
@@ -517,7 +514,7 @@ public class RodentSpermNucleus
     this.annotateTail();
 
     // line from tail to intsersection point; should pass through CoM   
-    if(this.getBorderTag("intersectionPoint")!=null){ // handle failed nuclei in which this analysis was not performed
+    if(this.getBorderTag("intersectionPoint").getX()!=0 && this.getBorderTag("intersectionPoint").getY()!=0){ // handle failed nuclei in which this analysis was not performed
       ip.setLineWidth(1);
       ip.setColor(Color.YELLOW);
       ip.drawLine(this.getBorderTag("tail").getXAsInt(),
