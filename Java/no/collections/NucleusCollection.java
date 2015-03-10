@@ -1280,7 +1280,7 @@ public class NucleusCollection
             double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( signalGroup.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
             yPoints[j] = yPosition;
 
-            IJ.log("Nucleus "+i+": Signal: "+j+": "+normIndex+"  "+yPosition);
+            // IJ.log("Nucleus "+i+": Signal: "+j+": "+normIndex+"  "+yPosition);
 
           }
 

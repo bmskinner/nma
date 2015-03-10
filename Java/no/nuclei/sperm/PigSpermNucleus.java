@@ -71,19 +71,23 @@ public class PigSpermNucleus
     public void findPointsAroundBorder(){
 
       // NucleusBorderPoint tailPoint1 = this.findTailByMinima();
-      // NucleusBorderPoint tailPoint2 = this.findTailByMaxima();
+      int tailPointIndex2 = this.findTailByMaxima();
+      NucleusBorderPoint tailPoint2 = this.getBorderPoint(tailPointIndex2);
+      
+
       NucleusBorderPoint tailPoint3 = this.findTailByNarrowestPoint();
 
       // this.addTailEstimatePosition(tailPoint1);
-      // this.addTailEstimatePosition(tailPoint2);
+      this.addTailEstimatePosition(tailPoint2);
       this.addTailEstimatePosition(tailPoint3);
 
+      int consensusTailIndex = this.getPositionBetween(tailPoint2, tailPoint3);
+      NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
 
-      // of the three methods, method 3 seems most accurate
-      int tailIndex = this.getIndex(tailPoint3);
-      addBorderTag("tail", tailIndex);
 
-      int headIndex = getIndex(this.findOppositeBorder(tailPoint3));
+      addBorderTag("tail", consensusTailIndex);
+
+      int headIndex = getIndex(this.findOppositeBorder(consensusTail));
       addBorderTag("head", headIndex);
     }
 
@@ -118,23 +122,24 @@ public class PigSpermNucleus
     //   return tailPoint;
     // }
 
-    // public NucleusBorderPoint findTailByMaxima(){
-    //   // the tail is the ?only local maximum with an interior angle above the median
-    //   // distance on the distance profile
+    public int findTailByMaxima(){
+      // the tail is the ?only local maximum with an interior angle above the 180 line
 
-    //   // the CoM is also more towards the tail. Use this.
-    //   Integer[] maxima = this.getAngleProfile().getLocalMaxima();
-    //   // NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
-    //   double medianProfileDistance= this.getMedianDistanceFromProfile();
-    //   NucleusBorderPoint tailPoint = maxima[0];
+      // the CoM is also more towards the tail. Use this.
+      List<Integer> maxima = this.getAngleProfile().getLocalMaxima(5);
+      // NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
+      // double medianProfileDistance= this.getMedianDistanceFromProfile();
+      int tailPoint = maxima.get(0);
 
-    //   for( NucleusBorderPoint n : maxima){
-    //     if (n.getDistanceAcrossCoM()>medianProfileDistance){
-    //       tailPoint = n;
-    //     }
-    //   }
-    //   return tailPoint;
-    // }
+      double maxAngle = 180;
+
+      for( int i : maxima){
+        if (this.getAngleProfile().get(i)>maxAngle){
+          tailPoint = i;
+        }
+      }
+      return tailPoint;
+    }
 
     /*
       The narrowest diameter through the CoM
@@ -157,4 +162,5 @@ public class PigSpermNucleus
                                     : orthPoint2;
       return tailPoint;
     }
+
 }
