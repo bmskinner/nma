@@ -137,36 +137,6 @@
     return max;
   }
 
-  // public static double[] findLineEquation(XYPoint a, XYPoint b){
-
-  //   // y=mx+c
-  //   double deltaX = a.getX() - b.getX();
-  //   double deltaY = a.getY() - b.getY();
-      
-  //   double m = deltaY / deltaX;
-      
-  //   // y - y1 = m(x - x1)
-  //   double c = a.getY() -  ( m * a.getX() );
-      
-  //   // double testY = (m * position_2[0]) + c;
-      
-  //   // write("y = "+m+"x + "+c);
-  //   // result=newArray(m, c);
-  //   return new double[] { m, c };
-  // }
-
-  // public static double getXFromEquation(double[] eq, double y){
-  //   // x = (y-c)/m
-  //   double x = (y - eq[1]) / eq[0];
-  //   return x;
-  // }
-
-  // public static double getYFromEquation(double[] eq, double x){
-  //   // x = (y-c)/m
-  //   double y = (eq[0] * x) + eq[1];
-  //   return y;
-  // }
-
   public static double getXComponentOfAngle(double length, double angle){
     // cos(angle) = x / h
     // x = cos(a)*h

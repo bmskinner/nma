@@ -47,7 +47,7 @@ import no.utility.*;
 import no.components.*;
 
 
-public class CurveRefolder {
+public class CurveRefolder{
 
 	private Profile targetCurve;
 	// private double[] initialCurve;
@@ -55,6 +55,7 @@ public class CurveRefolder {
 	// private INuclearFunctions refoldNucleus;
 	// private INuclearFunctions refoldNucleus;
 	private INuclearFunctions refoldNucleus;
+	private Nucleus testNucleus;
 
 	private Plot nucleusPlot;
 	private PlotWindow nucleusPlotWindow;
@@ -73,27 +74,40 @@ public class CurveRefolder {
 		The main function to be called externally;
 		all other functions will hang off this
 	*/
-	public void refoldCurve(){
+	public void refoldCurve() throws Exception {
 
-		this.moveCoMtoZero();
-		this.preparePlots();
-
-		double score = refoldNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
-		
-		IJ.log("    Refolding curve: initial score: "+(int)score);
-
-		double originalScore = score;
-		double prevScore = score*2;
-		int i=0;
-		while( (prevScore - score)/prevScore > 0.01 || i<2 ){ // iterate until converging on a better curve  score >= originalScore
-			prevScore = score;
-			score = this.iterateOverNucleus();
-			i++;
-			// if(i%50==0){
-				IJ.log("    Iteration "+i+": "+(int)score);
-			// }
+		try{
+			this.moveCoMtoZero();
+		} catch(Exception e){
+			throw new Exception("Unable to move centre of mass");
 		}
-		IJ.log("    Refolded curve: final score: "+(int)score);
+
+		try{
+			this.preparePlots();
+		} catch(Exception e){
+			throw new Exception("Unable to prepare plots");
+		}
+
+		try{
+			double score = refoldNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
+			
+			IJ.log("    Refolding curve: initial score: "+(int)score);
+
+			double originalScore = score;
+			double prevScore = score*2;
+			int i=0;
+			while( (prevScore - score)/prevScore > 0.01 || i<2 ){ // iterate until converging on a better curve  score >= originalScore
+				prevScore = score;
+				score = this.iterateOverNucleus();
+				i++;
+				// if(i%50==0){
+					IJ.log("    Iteration "+i+": "+(int)score);
+				// }
+			}
+			IJ.log("    Refolded curve: final score: "+(int)score);
+		} catch(Exception e){
+			throw new Exception("Cannot calculate scores: "+e);
+		}
 	}
 
 	/*
@@ -128,19 +142,6 @@ public class CurveRefolder {
 		intiial and target nuclear shapes, plus the angle profiles
 	*/
 	private void preparePlots(){
-
-		double[] xPoints = new double[refoldNucleus.getLength()];
-		double[] yPoints = new double[refoldNucleus.getLength()];
-		double[] aPoints = new double[refoldNucleus.getLength()]; // angles
-		double[] pPoints = new double[refoldNucleus.getLength()]; // positions along array
-
-		for(int i=0; i<refoldNucleus.getLength(); i++){
-			XYPoint p = refoldNucleus.getPoint(i);
-			xPoints[i] = p.getX();
-			yPoints[i] = p.getY();
-			aPoints[i] = targetCurve.asArray()[i];
-			pPoints[i] = i;
-		}
 		
 		nucleusPlot = new Plot( "Nucleus shape",
 								"",
@@ -231,17 +232,23 @@ public class CurveRefolder {
 			Random mutation to the angle of a point from the CoM 
 			Together these affect the XY position of the point
 	*/
-	private double iterateOverNucleus(){
+	private double iterateOverNucleus() throws Exception{
 
 		Profile refoldProfile = refoldNucleus.getAngleProfile("tail");
 		double similarityScore = refoldProfile.differenceToProfile(targetCurve);
 		IJ.log("    Internal score: "+(int)similarityScore);
 
+		Profile interpolatedTargetCurve = targetCurve.interpolate(refoldProfile.size());
+
 		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
+
+		// testNucleus = new Nucleus(refoldNucleus);
 		
 		for(int i=0; i<refoldNucleus.getLength(); i++){
 
-			NucleusBorderPoint p = refoldNucleus.getPoint(i);
+			Nucleus testNucleus = new Nucleus( (Nucleus)refoldNucleus);
+
+			NucleusBorderPoint p = testNucleus.getPoint(i);
 			
 			double currentDistance = p.getLengthTo(new XYPoint(0,0));
 			double newDistance = currentDistance; // default no change
@@ -251,12 +258,12 @@ public class CurveRefolder {
 			double oldY = p.getY();
 
 			// make change dependent on score
-			double amountToChange =  Math.random() * (similarityScore/1000); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
+			double amountToChange =  Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
 
-			if(refoldProfile.get(i) > targetCurve.get(i))
+			if(refoldProfile.get(i) > interpolatedTargetCurve.get(i))
 				newDistance = currentDistance + amountToChange;
 			
-			if(refoldProfile.get(i) < targetCurve.get(i))
+			if(refoldProfile.get(i) < interpolatedTargetCurve.get(i))
 				newDistance = currentDistance - amountToChange; //  some change between 0 and 2
 			
 
@@ -268,30 +275,50 @@ public class CurveRefolder {
 			double newX = NuclearOrganisationUtility.getXComponentOfAngle(newDistance, angle);
 			double newY = NuclearOrganisationUtility.getYComponentOfAngle(newDistance, angle);
 
-			refoldNucleus.updatePoint(i, newX, newY);
+			try{
+				testNucleus.updatePoint(i, newX, newY);
+			} catch(Exception e){
+				throw new Exception("Cannot update point "+i+" to "+newX+", "+newY+": "+e);
+			}
 
 			// ensure the interior angle calculation works with the current points
-			refoldNucleus.setPolygon(createPolygon()); 
+			try{
+				testNucleus.setPolygon(createPolygon()); 
+			} catch(Exception e){
+				throw new Exception("Cannot set new polygon position "+e);
+			}
 
 			// measure the new profile & compare
-			refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
+			try{
+				testNucleus.calculateAngleProfile(testNucleus.getAngleProfileWindowSize());
+			} catch(Exception e){
+				throw new Exception("Cannot calculate angle profile: "+e);
+			}
 
-			Profile newRefoldProfile = refoldNucleus.getAngleProfile("tail");
-			double score = newRefoldProfile.differenceToProfile(targetCurve);
+			double score = testNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
 			IJ.log("    Internal score: "+(int)score);
 
 			// do not apply change  if the distance from teh surrounding points changes too much
-			double distanceToPrev = p.getLengthTo( refoldNucleus.getPoint( NuclearOrganisationUtility.wrapIndex(i-1, refoldNucleus.getLength()) ) );
-			double distanceToNext = p.getLengthTo( refoldNucleus.getPoint( NuclearOrganisationUtility.wrapIndex(i+1, refoldNucleus.getLength()) ) );
+			double distanceToPrev = p.getLengthTo( testNucleus.getPoint( NuclearOrganisationUtility.wrapIndex(i-1, testNucleus.getLength()) ) );
+			double distanceToNext = p.getLengthTo( testNucleus.getPoint( NuclearOrganisationUtility.wrapIndex(i+1, testNucleus.getLength()) ) );
 
-			// reset if worse fit or distances are too high
-			if(score > similarityScore  || distanceToNext > medianDistanceBetweenPoints*1.2 || distanceToPrev > medianDistanceBetweenPoints*1.2 ){
-				refoldNucleus.updatePoint(i, oldX, oldY);
+			// apply the change if better fit
+			if(score < similarityScore && distanceToNext < medianDistanceBetweenPoints*1.2 && distanceToPrev < medianDistanceBetweenPoints*1.2){
+				refoldNucleus.updatePoint(i, newX, newY);
 				refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
 				refoldNucleus.setPolygon(createPolygon());
 			} else {
 				similarityScore = score;
 			}
+
+			// reset if worse fit or distances are too high
+			// if(score > similarityScore  || distanceToNext > medianDistanceBetweenPoints*1.2 || distanceToPrev > medianDistanceBetweenPoints*1.2 ){
+			// 	refoldNucleus.updatePoint(i, oldX, oldY);
+			// 	refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
+			// 	refoldNucleus.setPolygon(createPolygon());
+			// } else {
+			// 	similarityScore = score;
+			// }
 		}
 		return similarityScore;
 	}

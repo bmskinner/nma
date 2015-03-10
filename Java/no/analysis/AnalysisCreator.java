@@ -436,13 +436,18 @@ public class AnalysisCreator {
       Constructor<?> nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
       INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
     
-      IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
-      IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
       if(refoldCandidate==null){
-        throw new Exception();
+        throw new Exception("Null reference to nucleus refold candidate");
       }
 
+      IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
+      IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
+
       Profile targetProfile = collection.getMedianProfile("tail");
+
+      if(targetProfile==null){
+        throw new Exception("Null reference to target profile");
+      }
 
       CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
       refolder.refoldCurve();
@@ -452,9 +457,9 @@ public class AnalysisCreator {
 
       // if rodent sperm, put tip on left if needed
       if(refoldCandidate.getClass().equals(nucleusClassTypes.get(0))){
-        IJ.log("    Rodent nucleus found");
+        // IJ.log("    Rodent nucleus found");
         if(refoldCandidate.getBorderTag("tip").getX()>0){
-          IJ.log("    Flipping nucleus");
+          // IJ.log("    Flipping nucleus");
           refoldCandidate.flipXAroundPoint(refoldCandidate.getCentreOfMass());
         }
       }
