@@ -129,7 +129,7 @@ public class NucleusRefinder
     }
 
     // IJ.log("Found image: "+name+" x:"+x+" y:"+y);
-    XYPoint point = new XYPoint(x, y);
+    XYPoint point = new XYPoint(x+xOffset, y+yOffset);
 
     HashMap<String, XYPoint> map = new HashMap<String, XYPoint>();
     map.put(name, point);

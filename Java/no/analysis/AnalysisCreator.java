@@ -48,6 +48,9 @@ public class AnalysisCreator {
 
   private int angleProfileWindowSize = 23;
 
+  private int xoffset = 0;
+  private int yoffset = 0;
+
   private Date startTime;
 
   private  double minSignalSize = 5;
@@ -195,6 +198,8 @@ public class AnalysisCreator {
   public void runReAnalysis(){
     NucleusRefinder detector = new NucleusRefinder(this.folder, this.outputFolderName, nucleiToFind);
     setDetectionParameters(detector);
+    detector.setXOffset(this.xoffset);
+    detector.setYOffset(this.yoffset);
     detector.runDetector();
     this.folderCollection = detector.getNucleiCollections();
     IJ.log("Imported folder(s)");
@@ -619,6 +624,8 @@ public class AnalysisCreator {
     gd.addChoice("Nucleus type", items, items[1]); // default to rodent for now
 
     gd.addCheckbox("Re-analysis?", false);
+    gd.addNumericField("X offset:      ", xoffset, 0);
+    gd.addNumericField("Y offset:      ", yoffset, 0);
     gd.showDialog();
     if (gd.wasCanceled()) return false;
 
@@ -632,6 +639,8 @@ public class AnalysisCreator {
     maxSignalFraction = gd.getNextNumber();
     angleProfileWindowSize = (int) gd.getNextNumber();
     performReanalysis = gd.getNextBoolean();
+    xoffset = (int)gd.getNextNumber();
+    yoffset = (int)gd.getNextNumber();
 
     String nucleusType = gd.getNextChoice();
     int nucleusCode = this.nucleusTypes.get(nucleusType);
