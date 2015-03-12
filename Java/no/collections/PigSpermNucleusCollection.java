@@ -58,7 +58,7 @@ public class PigSpermNucleusCollection
 
     Profile medianProfile = this.getMedianProfile("head");
 
-    List<Integer> minima = medianProfile.getLocalMaxima(5); // window size 5
+    Profile minima = medianProfile.getLocalMaxima(5); // window size 5
 
     double minDiff = medianProfile.size();
     double minAngle = 180;
@@ -71,15 +71,17 @@ public class PigSpermNucleusCollection
     } else{
 
       for(int i = 0; i<minima.size();i++){
-        Integer index = (Integer)minima.get(i);
+        if(minima.get(i)==1){
+          int index = (int)minima.get(i);
 
-        int toEnd = medianProfile.size() - index;
-        int diff = Math.abs(index - toEnd);
+          int toEnd = medianProfile.size() - index;
+          int diff = Math.abs(index - toEnd);
 
-        double angle = medianProfile.get(index);
-        if(angle>minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
-          minAngle = angle;
-          tailIndex = index;
+          double angle = medianProfile.get(index);
+          if(angle>minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
+            minAngle = angle;
+            tailIndex = index;
+          }
         }
       }
     }
@@ -96,30 +98,15 @@ public class PigSpermNucleusCollection
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       PigSpermNucleus n = (PigSpermNucleus)this.getNucleus(i);
 
-      // the curve needs to be matched to the median 
-      // hence the median array needs to be the same curve length
-      Profile medianToCompare = this.getMedianProfile("head"); // returns a median profile with tip at 0
-      // medianToCompare.print();
+      Profile medianToCompare = this.getMedianProfile("head"); // returns a median profile
 
-      Profile interpolatedMedian = medianToCompare.interpolate(n.getLength());
-      // interpolatedMedian.print();
+      int newTailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
 
-      // find the median tail index position in the interplolated median profile
-      int medianTailIndex = getMedianProfileFeatureIndex("head", "tail");
-      medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.size() )* n.getLength());
-
-
-      int differenceTipToTailInMedianProfile = medianTailIndex;
-      int differenceTipToTailInNucleus = n.getBorderIndex("tail") - n.getBorderIndex("head"); // tail index should be larger than tip index because we oriented the array
-      int offset = differenceTipToTailInNucleus - differenceTipToTailInMedianProfile;
-
-      int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getBorderIndex("tail")-offset, n.getLength());
-
-      n.addBorderTag("tail", newTailIndex);
+      n.addBorderTag("head", newTailIndex);
 
       // also update the head position
       int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
-      n.addBorderTag("head", headIndex);
+      n.addBorderTag("tail", headIndex);
     }
   }
 

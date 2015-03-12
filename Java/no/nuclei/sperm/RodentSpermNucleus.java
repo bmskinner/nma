@@ -228,21 +228,23 @@ public class RodentSpermNucleus
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
     double tipToCoMDistance = this.getBorderTag("tip").getLengthTo(this.getCentreOfMass());
-    List<Integer> array = this.getAngleProfile().getLocalMinima(5);
+    Profile array = this.getAngleProfile().getLocalMinima(5);
 
     double maxDistance = 0;
     NucleusBorderPoint tail = this.getBorderTag("tip"); // start at tip, move round
 
-    for(int a : array){
+    for(int i=0; i<array.size();i++){
+      if(array.get(i)==1){
             
-      double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getPoint(a));
-      double distanceBetweenEnds = this.getBorderTag("tip").getLengthTo(getPoint(a));
-      
-      double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
+        double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getPoint(i));
+        double distanceBetweenEnds = this.getBorderTag("tip").getLengthTo(getPoint(i));
+        
+        double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
 
-      if(totalDistance > maxDistance){
-        maxDistance = totalDistance;
-        tail = getPoint(a);
+        if(totalDistance > maxDistance){
+          maxDistance = totalDistance;
+          tail = getPoint(i);
+        }
       }
     }
     return tail;

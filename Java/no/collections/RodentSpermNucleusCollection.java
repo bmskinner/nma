@@ -105,20 +105,15 @@ public class RodentSpermNucleusCollection
 
     Profile medianProfile = this.getMedianProfile("tip");
 
-		List<Integer> minima = medianProfile.getLocalMinima(5); // window size 5
+		Profile minima = medianProfile.getLocalMinima(5); // window size 5
 
 		double minDiff = medianProfile.size();
 		double minAngle = 180;
 		int tailIndex = 0;
 
-    if(minima.size()==0){
-      IJ.log("    Error: no minima found in median line");
-      tailIndex = 100; // set to roughly the middle of the array for the moment
-
-    } else{
-
-  		for(int i = 0; i<minima.size();i++){
-  			Integer index = (Integer)minima.get(i);
+  	for(int i = 0; i<minima.size();i++){
+      if(minima.get(i)==1){
+  			int index = (int)minima.get(i);
 
   			int toEnd = medianProfile.size() - index;
   			int diff = Math.abs(index - toEnd);
@@ -128,8 +123,8 @@ public class RodentSpermNucleusCollection
   				minAngle = angle;
   				tailIndex = index;
   			}
-  		}
-  	}
+      }
+		}
     // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
     addMedianProfileFeatureIndex("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
 	}

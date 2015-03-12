@@ -70,20 +70,23 @@ public class PigSpermNucleus
     @Override
     public void findPointsAroundBorder(){
 
-      // NucleusBorderPoint tailPoint1 = this.findTailByMinima();
+      NucleusBorderPoint tailPoint1 = this.findTailByMinima();
       int tailPointIndex2 = this.findTailByMaxima();
       NucleusBorderPoint tailPoint2 = this.getBorderPoint(tailPointIndex2);
       
-
       NucleusBorderPoint tailPoint3 = this.findTailByNarrowestPoint();
 
-      // this.addTailEstimatePosition(tailPoint1);
+      this.addTailEstimatePosition(tailPoint1);
       this.addTailEstimatePosition(tailPoint2);
       this.addTailEstimatePosition(tailPoint3);
 
-      int consensusTailIndex = this.getPositionBetween(tailPoint2, tailPoint3);
-      NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
+      // int consensusTailIndex = this.getPositionBetween(tailPoint2, tailPoint3);
+      // NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
+      // consensusTailIndex = this.getPositionBetween(consensusTail, tailPoint1);
+      // consensusTail = this.getBorderPoint(consensusTailIndex);
 
+      int consensusTailIndex = this.getIndex(tailPoint2);
+      NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
 
       addBorderTag("tail", consensusTailIndex);
 
@@ -97,47 +100,59 @@ public class PigSpermNucleus
       -----------------------
     */
 
-    // public NucleusBorderPoint findTailByMinima(){
+    public NucleusBorderPoint findTailByMinima(){
 
-    //   NucleusBorderPoint[] minima = this.getAngleProfile().getLocalMinima();
+      // the two lowest minima are at the tail-end corners. 
+      // between them lies the tail. Find the two lowest minima,
+      // and get the point between them
 
-    //   // sort minima by interior angle
-    //   NucleusBorderPoint lowestMinima = minima[0];
-    //   NucleusBorderPoint secondLowestMinima = minima[0];
+      Profile minima = this.getAngleProfile().getLocalMinima(5);
 
-    //   for( NucleusBorderPoint n : minima){
-    //     if (n.getInteriorAngle()<lowestMinima.getInteriorAngle()){
-    //       secondLowestMinima = lowestMinima;
-    //       lowestMinima = n;
-    //     }
-    //   }
-    //   for( NucleusBorderPoint n : minima){
-    //     if (n.getInteriorAngle()<secondLowestMinima.getInteriorAngle() && 
-    //         n.getInteriorAngle()>lowestMinima.getInteriorAngle()){
-    //       secondLowestMinima = n;
-    //     }
-    //   }
+      // sort minima by interior angle
+      int lowestMinima = 0;
+      int secondLowestMinima = 0;
 
-    //   NucleusBorderPoint tailPoint = this.getBorderPoint(this.getPositionBetween(lowestMinima, secondLowestMinima));
-    //   return tailPoint;
-    // }
+      for(int i=0; i<minima.size();i++){
+        if(minima.get(i)==1){
+          if (this.getAngle(i)<this.getAngle(lowestMinima)){
+            secondLowestMinima = lowestMinima;
+            lowestMinima = i;
+          }
+        }
+      }
+      for(int i=0; i<minima.size();i++){
+        if(minima.get(i)==1){
+          if (this.getAngle(i)<this.getAngle(secondLowestMinima) && 
+              this.getAngle(i)>this.getAngle(lowestMinima)){
+            secondLowestMinima = i;
+          }
+        }
+      }
+
+      NucleusBorderPoint a = this.getBorderPoint(lowestMinima);
+      NucleusBorderPoint b = this.getBorderPoint(secondLowestMinima);
+
+      NucleusBorderPoint tailPoint = this.getBorderPoint(this.getPositionBetween(a, b));
+      return tailPoint;
+    }
 
     public int findTailByMaxima(){
       // the tail is the ?only local maximum with an interior angle above the 180 line
 
-      // the CoM is also more towards the tail. Use this.
-      List<Integer> maxima = this.getAngleProfile().getLocalMaxima(5);
-      // NucleusBorderPoint[] maxima = this.getAngleProfile().getLocalMaxima();
-      // double medianProfileDistance= this.getMedianDistanceFromProfile();
-      int tailPoint = maxima.get(0);
+     int tailPoint = this.getAngleProfile().getIndexOfMax();
 
-      double maxAngle = 180;
+     //  Profile maxima = this.getAngleProfile().getLocalMaxima(5);
+     //  int tailPoint = (int)maxima.get(0);
 
-      for( int i : maxima){
-        if (this.getAngleProfile().get(i)>maxAngle){
-          tailPoint = i;
-        }
-      }
+     //  double maxAngle = 170;
+
+     // for(int i=0; i<maxima.size();i++){
+     //    if(maxima.get(i)==1){
+     //      if (this.getAngle(i)>maxAngle){
+     //        tailPoint = i;
+     //      }
+     //    }
+     //  }
       return tailPoint;
     }
 

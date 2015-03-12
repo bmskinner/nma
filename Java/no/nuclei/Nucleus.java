@@ -101,7 +101,8 @@ public class Nucleus
 		(now borderTags) need only to be indexes.
 	*/
 	private Profile angleProfile; // 
-	private Profile distanceProfile; // 
+	private Profile distanceProfile; // holds distances through CoM to opposite border
+	private Profile singleDistanceProfile; // holds distances from CoM, not through CoM
 	private List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
 	private List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
 	private Map<String, Integer> borderTags  = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
@@ -167,6 +168,7 @@ public class Nucleus
 		this.setOutputFolder(n.getOutputFolderName());
 		this.setBorderList(n.getBorderList());
 		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
+		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
 	}
 
 	public void findPointsAroundBorder(){
@@ -209,6 +211,7 @@ public class Nucleus
 
 		 // calc distances around nucleus through CoM
 		 this.calculateDistanceProfile();
+		 this.calculateSingleDistanceProfile();
 		 this.calculatePathLength();
 	}
 
@@ -946,15 +949,17 @@ public class Nucleus
 	*/
 	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list){
 
-		List<Integer> maxima = this.getAngleProfile().getLocalMaxima(5);
+		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
 		double closestDistance = this.getPerimeter();
 
 		for(NucleusBorderPoint p : list){
-			for(int m : maxima){
-				double distance = p.getLengthTo(getPoint(m));
-				if(distance<closestDistance){
-					closestPoint = p;
+			for(int i=0; i<maxima.size();i++){
+				if(maxima.get(i)==1){
+					double distance = p.getLengthTo(getPoint(i));
+					if(distance<closestDistance){
+						closestPoint = p;
+					}
 				}
 			}
 		}
@@ -967,15 +972,17 @@ public class Nucleus
 	*/
 	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list){
 
-		List<Integer> minima = this.getAngleProfile().getLocalMinima(5);
+		Profile minima = this.getAngleProfile().getLocalMinima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
 		double closestDistance = this.getPerimeter();
 
 		for(NucleusBorderPoint p : list){
-			for(int m : minima){
-				double distance = p.getLengthTo(getPoint(m));
-				if(distance<closestDistance){
-					closestPoint = p;
+			for(int i=0; i<minima.size();i++){
+				if(minima.get(i)==1){
+					double distance = p.getLengthTo(getPoint(i));
+					if(distance<closestDistance){
+						closestPoint = p;
+					}
 				}
 			}
 		}
@@ -1176,45 +1183,44 @@ public class Nucleus
 			f.delete();
 		}
 
-		String outLine =  "X_INT\t"+
-											"Y_INT\t"+
-											"X_DOUBLE\t"+
-											"Y_DOUBLE\t"+
-											"INTERIOR_ANGLE\t"+
-											"MIN_ANGLE\t"+
-											"INTERIOR_ANGLE_DELTA\t"+
-											"INTERIOR_ANGLE_DELTA_SMOOTHED\t"+
-											"BLOCK_POSITION\t"+
-											"BLOCK_NUMBER\t"+
-											"IS_LOCAL_MIN\t"+
-											"IS_LOCAL_MAX\t"+
-											"IS_MIDPOINT\t"+
-											"IS_BLOCK\t"+
-											"NORMALISED_PROFILE_X\t"+
-											"DISTANCE_PROFILE\r\n";
+		StringBuilder outLine = new StringBuilder();
+
+		outLine.append(	"X_INT\t"+
+						"Y_INT\t"+
+						"X_DOUBLE\t"+
+						"Y_DOUBLE\t"+
+						"INTERIOR_ANGLE\t"+
+						"IS_LOCAL_MIN\t"+
+						"IS_LOCAL_MAX\t"+
+						"ANGLE_DELTA\t"+
+						"NORMALISED_PROFILE_X\t"+
+						"SD_PROFILE\t"+
+						"IS_SD_MIN\t"+
+						"DISTANCE_PROFILE\r\n");
+
+		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
+		Profile minima = this.getAngleProfile().getLocalMinima(5);
+		Profile angleDeltas = this.getAngleProfile().calculateDeltas(2);
+		Profile sdMinima = this.getSingleDistanceProfile().getLocalMinima(5);
 
 		for(int i=0;i<this.getLength();i++){
 
 			double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
 			
-			outLine +=  this.getBorderPoint(i).getXAsInt()                      +"\t"+
-									this.getBorderPoint(i).getYAsInt()                      +"\t"+
-									this.getBorderPoint(i).getX()                           +"\t"+
-									this.getBorderPoint(i).getY()                           +"\t"+
-									this.getBorderPoint(i).getInteriorAngle()               +"\t"+
-									this.getBorderPoint(i).getMinAngle()                    +"\t"+
-									this.getBorderPoint(i).getInteriorAngleDelta()          +"\t"+
-									this.getBorderPoint(i).getInteriorAngleDeltaSmoothed()  +"\t"+
-									this.getBorderPoint(i).getPositionWithinBlock()         +"\t"+
-									this.getBorderPoint(i).getBlockNumber()                 +"\t"+
-									this.getBorderPoint(i).isLocalMin()                     +"\t"+
-									this.getBorderPoint(i).isLocalMax()                     +"\t"+
-									this.getBorderPoint(i).isMidpoint()                     +"\t"+
-									this.getBorderPoint(i).isBlock()                        +"\t"+
-									normalisedX                                             +"\t"+
-									this.getBorderPoint(i).getDistanceAcrossCoM()           +"\r\n";
+			outLine.append( this.getBorderPoint(i).getXAsInt()	+"\t"+
+							this.getPoint(i).getYAsInt()		+"\t"+
+							this.getPoint(i).getX()				+"\t"+
+							this.getPoint(i).getY()				+"\t"+
+							this.getAngle(i) 					+"\t"+
+							minima.get(i)						+"\t"+
+							maxima.get(i)						+"\t"+
+							angleDeltas.get(i)					+"\t"+
+							normalisedX							+"\t"+
+							this.singleDistanceProfile.get(i)	+"\t"+
+							sdMinima.get(i)						+"\t"+
+							this.getDistance(i)					+"\r\n");
 		}
-		IJ.append( outLine, f.getAbsolutePath());
+		IJ.append( outLine.toString(), f.getAbsolutePath());
 	}
 
 	/*
@@ -1361,6 +1367,14 @@ public class Nucleus
 		return this.distanceProfile.get(index);
 	}
 
+	public void setSingleDistanceProfile(Profile p){
+		this.singleDistanceProfile = new Profile(p);
+	}
+
+	public Profile getSingleDistanceProfile(){
+		return new Profile(this.singleDistanceProfile);
+	}
+
 	public void updatePoint(int i, double x, double y){
 		this.borderList.get(i).setX(x);
 		this.borderList.get(i).setY(y);
@@ -1423,6 +1437,18 @@ public class Nucleus
 				p.setDistanceAcrossCoM(p.getLengthTo(opp)); // LEGACY
 		}
 		this.distanceProfile = new Profile(profile);
+	}
+
+	private void calculateSingleDistanceProfile(){
+
+		double[] profile = new double[this.getLength()];
+
+		for(int i = 0; i<this.getLength();i++){
+
+				NucleusBorderPoint p   = this.getPoint(i);
+				profile[i] = p.getLengthTo(this.getCentreOfMass()); 
+		}
+		this.singleDistanceProfile = new Profile(profile);
 	}
 
 	public void calculateAngleProfile(int angleProfileWindowSize){

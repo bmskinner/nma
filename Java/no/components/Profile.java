@@ -94,14 +94,6 @@ public class Profile {
     return this.array;
   }
 
-  // public double[] getNormalisedIndexes(){
-  //   double[] d = new double[this.size()];
-  //   for(int i=0;i<this.size();i++){
-  //     d[i] = ( (double)i / (double)this.size() ) * 100;
-  //   }
-  //   return d;
-  // }
-
   // The testProfile must have been offset appropriately
   public double differenceToProfile(Profile testProfile){
 
@@ -109,10 +101,19 @@ public class Profile {
     // whichever is smaller must be interpolated 
     Profile profile1 = this.copy();
     Profile profile2 = testProfile;
-    if(testProfile.size()<this.size()){
-      profile2 = profile2.interpolate(this.size());
-    } else {
-      profile1 = profile1.interpolate(testProfile.size());
+
+    try{
+      if(profile2.size()<profile1.size()){
+        profile2 = profile2.interpolate(this.size());
+      } else {
+        profile1 = profile1.interpolate(testProfile.size());
+      }
+    } catch(Exception e){
+      IJ.log("Error interpolating profiles: "+e.getMessage());
+      IJ.log("Profile 1: ");
+      profile1.print();
+      IJ.log("Profile 2: ");
+      profile2.print();
     }
 
     double difference = 0;
@@ -211,6 +212,29 @@ public class Profile {
     return interpolatedValue;
   }
 
+  /*
+    Interpolate another profile to match this, and move it along
+    one index at a time. Find the point of least difference, and
+    return the offset
+  */
+  public int getSlidingWindowOffset(Profile testProfile){
+
+    double lowestScore = this.differenceToProfile(testProfile);
+    int index = 0;
+    for(int i=0;i<this.size();i++){
+
+      Profile offsetProfile = this.offset(i);
+
+      double score = offsetProfile.differenceToProfile(testProfile);
+      if(score<lowestScore){
+        lowestScore=score;
+        index=i;
+      }
+
+    }
+    return index;
+  }
+
 
 
   /*
@@ -225,15 +249,17 @@ public class Profile {
     Each should be greater than the value before.
     One exception is allowed, to account for noisy data. Returns the indexes of minima
   */
-  public List<Integer> getLocalMinima(int windowSize){
+  public Profile getLocalMinima(int windowSize){
     // go through angle array (with tip at start)
     // look at 1-2-3-4-5 points ahead and behind.
     // if all greater, local minimum
     double[] prevValues = new double[windowSize]; // slots for previous angles
     double[] nextValues = new double[windowSize]; // slots for next angles
 
-    int count = 0;
-    List<Integer> result = new ArrayList<Integer>(0);
+    // int count = 0;
+    // List<Integer> result = new ArrayList<Integer>(0);
+
+    double[] minima = new double[this.size()];
 
     for (int i=0; i<array.length; i++) { // for each position in sperm
 
@@ -270,26 +296,31 @@ public class Profile {
       }
 
       if(ok){
-        count++;
+        // count++;
+        minima[i] = 1;
+      } else {
+        minima[i] = 0;
       }
 
-      result.add(i);
+      // result.add(i);
 
     }
+    Profile minimaProfile = new Profile(minima);
     // this.minimaCalculated = true;
-    this.minimaCount =  count;
-    return result;
+    // this.minimaCount =  count;
+    return minimaProfile;
   }
 
-  public List<Integer> getLocalMaxima(int windowSize){
+  public Profile getLocalMaxima(int windowSize){
     // go through angle array (with tip at start)
     // look at 1-2-3-4-5 points ahead and behind.
     // if all greater, local minimum
     double[] prevValues = new double[windowSize]; // slots for previous angles
     double[] nextValues = new double[windowSize]; // slots for next angles
+    double[] minima = new double[this.size()];
 
-    int count = 0;
-    List<Integer> result = new ArrayList<Integer>(0);
+    // int count = 0;
+    // List<Integer> result = new ArrayList<Integer>(0);
 
     for (int i=0; i<array.length; i++) { // for each position in sperm
 
@@ -326,14 +357,56 @@ public class Profile {
       }
 
       if(ok){
-        count++;
+        // count++;
+        minima[i] = 1;
+      } else {
+        minima[i] = 0;
       }
 
-      result.add(i);
+      // result.add(i);
 
     }
+    Profile minimaProfile = new Profile(minima);
     // this.minimaCalculated = true;
-    this.minimaCount =  count;
+    // this.minimaCount =  count;
+    return minimaProfile;
+  }
+
+  public Profile calculateDeltas(int windowSize){
+
+    double[] deltas = new double[this.size()];
+
+    double[] prevValues = new double[windowSize]; // slots for previous angles
+    double[] nextValues = new double[windowSize]; // slots for next angles
+
+    for (int i=0; i<array.length; i++) { // for each position in sperm
+
+      for(int j=0;j<prevValues.length;j++){
+
+        int prev_i = NuclearOrganisationUtility.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+        int next_i = NuclearOrganisationUtility.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+
+        // fill the lookup array
+        prevValues[j] = array[prev_i];
+        nextValues[j] = array[next_i];
+      }
+
+      double delta = 0;
+      for(int k=0;k<prevValues.length;k++){
+
+        if(k==0){
+          delta += (array[i] - prevValues[k]) + (nextValues[k] - array[i]);
+          
+        } else {
+          delta += (prevValues[k-1] - prevValues[k] ) + (nextValues[k-1] - nextValues[k]);
+          
+        }
+        
+      }
+
+      deltas[i] = delta;
+    }
+    Profile result = new Profile(deltas);
     return result;
   }
 
