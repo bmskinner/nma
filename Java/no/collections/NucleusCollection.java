@@ -279,7 +279,7 @@ public class NucleusCollection
     String[] s = new String[nucleiCollection.size()];
 
     for(int i=0;i<nucleiCollection.size();i++){
-      s[i] = nucleiCollection.get(i).getPath()+"-"+nucleiCollection.get(i).getNucleusNumber();
+      s[i] = nucleiCollection.get(i).getPath(); //+"-"+nucleiCollection.get(i).getNucleusNumber();
     }
     return s;
   }

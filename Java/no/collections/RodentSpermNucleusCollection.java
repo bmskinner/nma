@@ -173,7 +173,7 @@ public class RodentSpermNucleusCollection
     String statsFile = makeGlobalLogFile(filename);
 
     StringBuilder outLine = new StringBuilder();
-    outLine.append("PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\tTIP_TO_TAIL\tHEAD_TO_TIP\t");
+    outLine.append("PATH\tPOSITION\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\tTIP_TO_TAIL\tHEAD_TO_TIP\t");
 
     IJ.log("    Exporting clustering profiles...");
     double[] areas        = this.getAreas();
@@ -190,12 +190,15 @@ public class RodentSpermNucleusCollection
     for(int i=0;i<maxPerim;i++){
       outLine.append(i+"\t");
     }
-    outLine.append("\n");
+    outLine.append("\r\n");
 
     // export the profiles for each nucleus
     for(int i=0; i<this.getNucleusCount();i++){
 
+      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+
       outLine.append(paths[i]      +"\t"+
+                      n.getPosition() +"\t"+
                   areas[i]      +"\t"+
                   perims[i]     +"\t"+
                   ferets[i]     +"\t"+
@@ -205,12 +208,12 @@ public class RodentSpermNucleusCollection
                   tipToTail[i]  +"\t"+
                   headToTip[i]  +"\t");
 
-      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+      
       double[] profile = n.getAngleProfile("tail").asArray();
       for(int j=0;j<profile.length;j++){
         outLine.append(profile[j]+"\t");
       }
-      outLine.append("\n");
+      outLine.append("\r\n");
     }
     IJ.append(  outLine.toString(), statsFile);
     IJ.log("    Cluster export complete");

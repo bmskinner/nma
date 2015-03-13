@@ -306,7 +306,15 @@ public class AsymmetricNucleusCollection
     String statsFile = makeGlobalLogFile(filename);
 
     StringBuilder outLine = new StringBuilder();
-    outLine.append("PATH\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\t");
+    outLine.append( "PATH\t"+
+                    "POSITION\t"+
+                    "AREA\t"+
+                    "PERIMETER\t"+
+                    "FERET\t"+
+                    "PATH_LENGTH\t"+
+                    "DIFFERENCE\t"+
+                    "FAILURE_CODE\t"+
+                    "HEAD_TO_TAIL\t");
 
     IJ.log("    Exporting clustering profiles...");
     double[] areas        = this.getAreas();
@@ -327,15 +335,18 @@ public class AsymmetricNucleusCollection
     // export the profiles for each nucleus
     for(int i=0; i<this.getNucleusCount();i++){
 
-      outLine.append(paths[i]     +"\t"+
-                    areas[i]      +"\t"+
-                    perims[i]     +"\t"+
-                    ferets[i]     +"\t"+
-                    pathLengths[i]+"\t"+
-                    differences[i]+"\t"+
-                    headToTail[i] +"\t");
-
       INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+
+      outLine.append( paths[i]        +"\t"+
+                      n.getPosition() +"\t"+
+                      areas[i]        +"\t"+
+                      perims[i]       +"\t"+
+                      ferets[i]       +"\t"+
+                      pathLengths[i]  +"\t"+
+                      differences[i]  +"\t"+
+                      headToTail[i]   +"\t");
+
+      
       Profile profile = n.getAngleProfile("tail");
       for(int j=0;j<profile.size();j++){
         outLine.append(profile.get(j)+"\t");
