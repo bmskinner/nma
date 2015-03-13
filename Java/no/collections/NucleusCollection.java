@@ -752,13 +752,20 @@ public class NucleusCollection
 
       updateProfileAggregate(xvalues, yvalues, profileAggregate); 
     }
+    List<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
+    Profile ymedians        = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) ) );
+    Profile q25             = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) ) );
+    Profile q75             = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) ) );
+    this.addMedianProfile(pointType, ymedians);
+    this.addMedianProfile(pointType+"25", q25);
+    this.addMedianProfile(pointType+"75", q75);
   }
 
   public void createProfileAggregates(){
 
     Set<String> headings = this.getTags();
     for( String pointType : headings ){
-      createProfileAggregateFromPoint(pointType);
+      createProfileAggregateFromPoint(pointType);   
     }
   }
 
@@ -1212,7 +1219,11 @@ public class NucleusCollection
 
     List<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
     Profile ymedians        = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) ) );
+    Profile q25             = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) ) );
+    Profile q75             = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) ) );
     this.addMedianProfile(pointType, ymedians);
+    this.addMedianProfile(pointType+"25", q25);
+    this.addMedianProfile(pointType+"75", q75);
   }
 
   /*
@@ -1371,5 +1382,12 @@ public class NucleusCollection
       exportProfilePlot(normPlot, "plot"+pointType+"Norm");
       exportProfilePlot(rawPlot , "plot"+pointType+"Raw");
     }  
+  }
+
+  public void printProfiles(){
+    Set<String> keys = medianProfiles.keySet();
+    for(String s : keys){
+      IJ.log("   "+s);
+    }
   }
 }

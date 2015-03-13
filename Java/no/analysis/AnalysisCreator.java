@@ -452,12 +452,17 @@ public class AnalysisCreator {
       IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
 
       Profile targetProfile = collection.getMedianProfile("tail");
+      Profile q25 = collection.getMedianProfile("tail25");
+      Profile q75 = collection.getMedianProfile("tail75");
 
       if(targetProfile==null){
         throw new Exception("Null reference to target profile");
       }
+      if(q25==null || q75==null){
+        throw new Exception("Null reference to q25 or q75 profile");
+      }
 
-      CurveRefolder refolder = new CurveRefolder(targetProfile, refoldCandidate);
+      CurveRefolder refolder = new CurveRefolder(targetProfile, q25, q75, refoldCandidate);
       refolder.refoldCurve();
 
       // orient refolded nucleus to put tail at the bottom

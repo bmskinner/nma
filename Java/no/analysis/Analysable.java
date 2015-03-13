@@ -217,4 +217,6 @@ public interface Analysable
 
 	public void exportProfilePlots();
 
+	public void printProfiles();
+
 }

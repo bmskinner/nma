@@ -43,7 +43,13 @@ public class Profile {
   }
 
   public double get(int i){
-    return this.array[i];
+    double result = 0;
+    try {
+      result = this.array[i];
+    } catch(Exception e){
+      IJ.log("Cannot get value from profile: "+e.getMessage());
+    }
+    return result;
   }
 
   public double getMax(){

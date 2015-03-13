@@ -50,6 +50,8 @@ import no.components.*;
 public class CurveRefolder{
 
 	private Profile targetCurve;
+	private Profile q25;
+	private Profile q75;
 	// private double[] initialCurve;
 
 	// private INuclearFunctions refoldNucleus;
@@ -65,8 +67,10 @@ public class CurveRefolder{
 
 	private double plotLimit;
 
-	public CurveRefolder(Profile target, INuclearFunctions n){
+	public CurveRefolder(Profile target, Profile q25, Profile q75, INuclearFunctions n){
 		this.targetCurve = target;
+		this.q25 = q25.interpolate(n.getLength());
+		this.q75 = q75.interpolate(n.getLength());
 		this.refoldNucleus = n;
 	}
 
@@ -196,31 +200,37 @@ public class CurveRefolder{
 		nucleusPlot.setColor(Color.DARK_GRAY);
 		nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
 
-		// // also add the positions of selected border points
-		// HashMap<String, NucleusBorderPoint> pointHash = refoldNucleus.getBorderPointsOfInterest();
-		// Set<String> keys = pointHash.keySet();
-		// double[] xFeatures = new double[keys.size()];
-		// double[] yFeatures = new double[keys.size()];
-		// int i=0;
-		// for(String s : keys){
-		// 	NucleusBorderPoint n = pointHash.get(s);
-		// 	xFeatures[i] = n.getX();
-		// 	yFeatures[i] = n.getY();
-		// 	i++;
+		// Add lines to show the IQR of the angle profile at each point
+		// We need (1) The length of the line
+		// (2) The equation of the line from the CoM
+		// (3) The calculated end points of the line
+
+		// // iterate from tail point
+		// int tailIndex = refoldNucleus.getBorderIndex("tail");
+		// // IJ.log("Tail index: "+tailIndex);
+		// for(int i=0; i<refoldNucleus.getLength(); i++){
+
+		// 	int index = NuclearOrganisationUtility.wrapIndex(i + tailIndex, refoldNucleus.getLength());
+
+		// 	// IJ.log("Getting point: "+index);
+		// 	XYPoint n = refoldNucleus.getPoint( index  );
+		// 	double x = n.getX();
+		// 	double y = n.getY();
+		// 	// IJ.log("Getting IQRs");
+		// 	double distance = this.q75.get(index) - this.q25.get(index);
+		// 	// IJ.log("Distance between IQRs: "+distance);
+		// 	// normalise distances to the plot?
+
+		// 	Equation eq = new Equation(refoldNucleus.getCentreOfMass(), n);
+
+		// 	XYPoint innerPoint = eq.getPointOnLine(p, (0-distance)/2);
+		// 	XYPoint outerPoint = eq.getPointOnLine(p, distance/2);
+
+		// 	double[] xVar = { innerPoint.getX() , outerPoint.getX()};
+		// 	double[] yVar = { innerPoint.getY() , outerPoint.getY()};
+		// 	nucleusPlot.setColor(Color.DARK_GRAY);
+		// 	nucleusPlot.addPoints(xVar, yVar, Plot.LINE);
 		// }
-		// nucleusPlot.setColor(Color.BLUE);
-		// nucleusPlot.setLineWidth(3);
-		// nucleusPlot.addPoints(xFeatures, yFeatures, Plot.DOT);
-
-		// double[] xTail = new double[1];
-		// double[] yTail = new double[1];
-		// NucleusBorderPoint tail = refoldNucleus.getBorderPointOfInterest("tail");
-		// xTail[0] = tail.getX();
-		// yTail[0] = tail.getY();
-		// nucleusPlot.setColor(Color.CYAN);
-		// nucleusPlot.setLineWidth(3);
-		// nucleusPlot.addPoints(xTail, yTail, Plot.DOT);
-
 	}
 
 	/*
