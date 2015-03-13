@@ -381,12 +381,14 @@ public class AnalysisCreator {
         Analysable failedNuclei = (Analysable) collectionConstructor.newInstance(folder, this.outputFolderName, "failed");
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
-        IJ.log("    ----------------------------- ");
-        IJ.log("    Exporting failed nuclei"       );
-        IJ.log("    ----------------------------- ");
-        // failedNuclei.exportStatsFiles(); // NPE on clustering profile export
-        failedNuclei.annotateAndExportNuclei();
-        nucleusCounts.put("failed", failedNuclei.getNucleusCount());
+        if(failedNuclei.getNucleusCount()>0){
+          IJ.log("    ----------------------------- ");
+          IJ.log("    Exporting failed nuclei"       );
+          IJ.log("    ----------------------------- ");
+          // failedNuclei.exportStatsFiles(); // NPE on clustering profile export
+          failedNuclei.annotateAndExportNuclei();
+          nucleusCounts.put("failed", failedNuclei.getNucleusCount());
+        }
 
       } catch(InstantiationException e){
         IJ.log("Cannot create collection: "+e.getMessage());
