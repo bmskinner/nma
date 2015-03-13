@@ -30,20 +30,7 @@ public class PigSpermNucleusCollection
 
   @Override
   public void measureProfilePositions(){
-
-    this.createProfileAggregateFromPoint("head");
-
-    calculateNormalisedMedianLineFromPoint("head");
-
-    this.findTailIndexInMedianCurve();
-    this.calculateOffsets();
-
-    this.createProfileAggregates();
-
-    this.drawProfilePlots();
-    this.drawNormalisedMedianLines();
-
-    this.exportProfilePlots();
+    this.measureProfilePositions("head");
   }
 
   /*
@@ -52,7 +39,7 @@ public class PigSpermNucleusCollection
     and offset nuclei profiles
     -----------------------
   */
-
+  @Override
   public void findTailIndexInMedianCurve(){
     // can't use regular tail detector, because it's based on NucleusBorderPoints
 
@@ -93,22 +80,23 @@ public class PigSpermNucleusCollection
     Calculate the offsets needed to corectly assign the tail positions
     compared to ideal median curves
   */
+  @Override
   public void calculateOffsets(){
+
+    Profile medianToCompare = this.getMedianProfile("head"); // returns a median profile with head at 0
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       PigSpermNucleus n = (PigSpermNucleus)this.getNucleus(i);
 
-      Profile medianToCompare = this.getMedianProfile("head"); // returns a median profile
+      // returns the positive offset index of this profile which best matches the median profile
+      int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
 
-      int newTailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-
-      n.addBorderTag("head", newTailIndex);
+      n.addBorderTag("head", newHeadIndex);
 
       // also update the head position
-      int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
-      n.addBorderTag("tail", headIndex);
+      int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+      n.addBorderTag("tail", tailIndex);
     }
   }
-
 
 }

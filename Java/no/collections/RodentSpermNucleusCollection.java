@@ -73,21 +73,7 @@ public class RodentSpermNucleusCollection
 
   @Override
   public void measureProfilePositions(){
-
-    this.createProfileAggregateFromPoint("tip");
-
-    calculateNormalisedMedianLineFromPoint("tip");
-
-    this.findTailIndexInMedianCurve();
-    this.calculateOffsets();
-
-    this.createProfileAggregates();
-
-    this.drawProfilePlots();
-    this.drawNormalisedMedianLines();
-
-    // this.calculateDifferencesToMedianProfiles();
-    this.exportProfilePlots();
+    this.measureProfilePositions("tip");
   }
 
 
@@ -98,7 +84,7 @@ public class RodentSpermNucleusCollection
     can be centred on tip  or tail
     -----------------------
   */
-
+  @Override
 	public void findTailIndexInMedianCurve(){
 		// can't use regular tail detector, because it's based on NucleusBorderPoints
 		// get minima in curve, then find the lowest minima / minima furthest from both ends
@@ -112,8 +98,8 @@ public class RodentSpermNucleusCollection
 		int tailIndex = 0;
 
   	for(int i = 0; i<minima.size();i++){
-      if(minima.get(i)==1){
-  			int index = (int)minima.get(i);
+      if( (int)minima.get(i)==1){
+  			int index = i;
 
   			int toEnd = medianProfile.size() - index;
   			int diff = Math.abs(index - toEnd);
@@ -125,6 +111,9 @@ public class RodentSpermNucleusCollection
   			}
       }
 		}
+    Profile tailProfile = medianProfile.offset(tailIndex);
+    addMedianProfile("tail", tailProfile);
+
     // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
     addMedianProfileFeatureIndex("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
 	}
@@ -133,43 +122,17 @@ public class RodentSpermNucleusCollection
     Calculate the offsets needed to corectly assign the tail positions
     compared to ideal median curves
   */
+  @Override
   public void calculateOffsets(){
+
+    Profile medianToCompare = this.getMedianProfile("tail"); // returns a median profile
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);
 
-      // IJ.log("Before offsets:");
-      // n.dumpInfo(Nucleus.BORDER_TAGS); // dump just points of interest
 
-      // the curve needs to be matched to the median 
-      // hence the median array needs to be the same curve length
-      Profile medianToCompare = this.getMedianProfile("tip"); // returns a median profile with tip at 0
-      // medianToCompare.print();
-
-      Profile interpolatedMedian = medianToCompare.interpolate(n.getLength());
-      // interpolatedMedian.print();
-
-      // find the median tail index position in the interplolated median profile
-      int medianTailIndex = getMedianProfileFeatureIndex("tip", "tail");
-      // IJ.log("    Tail in median profile is at index "+medianTailIndex+" of "+medianToCompare.size()+" ("+medianToCompare.get(medianTailIndex)+")");
-      medianTailIndex = (int)Math.round(( (double)medianTailIndex / (double)medianToCompare.size() )* n.getLength());
-      // IJ.log("    Tail in interpolated median profile is at index "+
-      //             medianTailIndex+
-      //             " of "+
-      //             interpolatedMedian.size()+
-      //             " ("+
-      //             interpolatedMedian.get(medianTailIndex)+
-      //             ")");
-
-      int differenceTipToTailInMedianProfile = medianTailIndex;
-      int differenceTipToTailInNucleus = n.getBorderIndex("tail") - n.getBorderIndex("tip"); // tail index should be larger than tip index because we oriented the array
-      int offset = differenceTipToTailInNucleus - differenceTipToTailInMedianProfile;
-
-      // IJ.log("    Tail in nucleus is at index "+n.getBorderIndex("tail"));
-      // IJ.log("    Offset to apply is "+offset);
-
-      int newTailIndex = NuclearOrganisationUtility.wrapIndex(n.getBorderIndex("tail")-offset, n.getLength());
-      // IJ.log("    New tail index at "+newTailIndex);
+      // THE NEW WAY
+      int newTailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
 
       n.addBorderTag("tail", newTailIndex);
 
@@ -177,8 +140,6 @@ public class RodentSpermNucleusCollection
       int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
       n.addBorderTag("head", headIndex);
       n.splitNucleusToHeadAndHump();
-      // IJ.log("After offsets:");
-      // n.dumpInfo(Nucleus.BORDER_TAGS);
     }
   }
 

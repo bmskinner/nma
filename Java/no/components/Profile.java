@@ -213,9 +213,9 @@ public class Profile {
   }
 
   /*
-    Interpolate another profile to match this, and move it along
-    one index at a time. Find the point of least difference, and
-    return the offset
+    Interpolate another profile to match this, and move this profile
+    along it one index at a time. Find the point of least difference, 
+    and return this offset
   */
   public int getSlidingWindowOffset(Profile testProfile){
 

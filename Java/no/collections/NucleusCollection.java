@@ -140,13 +140,57 @@ public class NucleusCollection
   }
 
   public void measureProfilePositions(){
+    this.measureProfilePositions("head");
+  }
+
+  public void measureProfilePositions(String pointType){
+
+    this.createProfileAggregateFromPoint(pointType);
+
+    calculateNormalisedMedianLineFromPoint(pointType);
+
+    this.findTailIndexInMedianCurve();
+
+    double score = this.compareProfilesToMedian(pointType);
+    double prevScore = score+1;
+
+    while(score < prevScore){
+
+      this.createProfileAggregateFromPoint(pointType);
+      calculateNormalisedMedianLineFromPoint(pointType);
+      this.findTailIndexInMedianCurve();
+      this.calculateOffsets();
+
+      prevScore = score;
+      score = this.compareProfilesToMedian(pointType);
+
+      IJ.log("    Reticulating splines: score: "+(int)score);
+    }
 
     this.createProfileAggregates();
-    this.drawProfilePlots();
 
+    this.drawProfilePlots();
     this.drawNormalisedMedianLines();
-    // this.calculateDifferencesToMedianProfiles();
+
     this.exportProfilePlots();
+  }
+
+  public void calculateOffsets(){
+
+    Profile medianToCompare = this.getMedianProfile("head"); // returns a median profile with head at 0
+
+    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+      Nucleus n = (Nucleus)this.getNucleus(i);
+
+      // returns the positive offset index of this profile which best matches the median profile
+      int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+
+      n.addBorderTag("head", newHeadIndex);
+
+      // also update the head position
+      int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+      n.addBorderTag("tail", tailIndex);
+    }
   }
 
   /*
@@ -378,21 +422,9 @@ public class NucleusCollection
     return this.medianProfiles.get(pointType);
   }
 
-  // //LEGACY
-  // public double[] getNormalisedMedianProfileFromPoint(String pointType ){
-  //   Double[] profile = this.normalisedMedianProfileFromPoint.get(pointType);
-  //   return NuclearOrganisationUtility.getdoubleFromDouble(profile);
-  // }
-
   public void addMedianProfile(String pointType, Profile p){ // replaces addNormalisedMedianProfileFromPoint
     this.medianProfiles.put(pointType, p);
   }
-
-  // //LEGACY
-  // public void addNormalisedMedianProfileFromPoint(String pointType , double[] profile){
-  //   Double[] result = NuclearOrganisationUtility.getDoubleFromdouble(profile);
-  //   this.normalisedMedianProfileFromPoint.put(pointType, result);
-  // }
 
   public double[] getDifferencesToMedianFromPoint(String pointType){
     double[] d = new double[this.getNucleusCount()];
@@ -407,6 +439,15 @@ public class NucleusCollection
       }
     }
     return d;
+  }
+
+  public double compareProfilesToMedian(String pointType){
+    double[] scores = this.getDifferencesToMedianFromPoint(pointType);
+    double result = 0;
+    for(double s : scores){
+      result += s;
+    }
+    return result;
   }
 
   // get the plot from the collection corresponding to the given pointType of interest
@@ -445,6 +486,22 @@ public class NucleusCollection
       d[i] = n.getBorderTag(pointTypeA).getLengthTo(n.getBorderTag(pointTypeB));
     }
     return d;
+  }
+
+  /*
+    Identify tail in median profile
+    and offset nuclei profiles. For a 
+    regular round nucleus, the tail is one
+    of the points of longest diameter, and 
+    lowest angle
+  */
+
+  public void findTailIndexInMedianCurve(){
+
+    Profile medianProfile = this.getMedianProfile("head");
+    int headIndex = medianProfile.getIndexOfMin();
+    addMedianProfileFeatureIndex("tail", "head", headIndex); 
+    addMedianProfileFeatureIndex("head", "tail", headIndex);// set the tail-index in the head normalised profile
   }
 
   /*
@@ -825,9 +882,18 @@ public class NucleusCollection
 
   public void exportDistancesBetweenSingleSignals(){
 
-    String logFile = makeGlobalLogFile("logDistances");
+    String logFile = makeGlobalLogFile("logSignalDistances");
+    StringBuilder outLine = new StringBuilder();
 
-    IJ.append("DISTANCE_BETWEEN_SIGNALS\tRED_DISTANCE_TO_COM\tGREEN_DISTANCE_TO_COM\tNUCLEAR_FERET\tRED_FRACTION_OF_FERET\tGREEN_FRACTION_OF_FERET\tDISTANCE_BETWEEN_SIGNALS_FRACTION_OF_FERET\tNORMALISED_DISTANCE\tPATH", logFile);
+    outLine.append( "DISTANCE_BETWEEN_SIGNALS\t"+
+                    "RED_DISTANCE_TO_COM\t"+
+                    "GREEN_DISTANCE_TO_COM\t"+
+                    "NUCLEAR_FERET\t"+
+                    "RED_FRACTION_OF_FERET\t"+
+                    "GREEN_FRACTION_OF_FERET\t"+
+                    "DISTANCE_BETWEEN_SIGNALS_FRACTION_OF_FERET\t"+
+                    "NORMALISED_DISTANCE\t"+
+                    "PATH\r\n");
 
     for(int i=0; i<this.getNucleusCount();i++){
 
@@ -850,7 +916,7 @@ public class NucleusCollection
         double distanceFractionOfFeret = distanceBetween / nFeret;
         double normalisedPosition = distanceFractionOfFeret / rFractionOfFeret / gFractionOfFeret;
 
-        IJ.append(  distanceBetween+"\t"+
+        outLine.append(  distanceBetween+"\t"+
                     rDistanceToCoM+"\t"+
                     gDistanceToCoM+"\t"+
                     nFeret+"\t"+
@@ -858,9 +924,10 @@ public class NucleusCollection
                     gFractionOfFeret+"\t"+
                     distanceFractionOfFeret+"\t"+
                     normalisedPosition+"\t"+
-                    n.getPath(), logFile);
+                    n.getPath()+"\r\n");
       }
     }
+    IJ.append(outLine.toString(), logFile);
   }
 
   public void exportAnnotatedNuclei(){

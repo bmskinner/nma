@@ -46,7 +46,7 @@ public class AnalysisCreator {
   private  double minNucleusCirc   = 0.0;
   private  double maxNucleusCirc   = 1.0;
 
-  private int angleProfileWindowSize = 23;
+  private int angleProfileWindowSize = 15;
 
   private int xoffset = 0;
   private int yoffset = 0;

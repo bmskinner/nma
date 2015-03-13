@@ -171,7 +171,16 @@ public class Nucleus
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
 	}
 
+	/*
+		The default in a round nucleus is to get the longest diameter
+		and set this at the head/tail axis
+	*/
 	public void findPointsAroundBorder(){
+
+		int tailIndex = this.getDistanceProfile().getIndexOfMax();
+		NucleusBorderPoint tailPoint = this.getPoint(tailIndex);
+		addBorderTag("tail", tailIndex);
+    	addBorderTag("head", this.getIndex(this.findOppositeBorder(tailPoint)));
 	}
 
 	public void intitialiseNucleus(int angleProfileWindowSize){
