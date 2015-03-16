@@ -94,16 +94,17 @@ public class Equation{
 	}
 
 	/**
-	*	Finds the line equation perpendicular to this line,
+	* Finds the line equation perpendicular to this line,
 	* at the given point. The point p must lie on the line;
-	* if it does not, an empty Equation will be returned
+	* if the y-value for XYPoint p's x does not lie on the line
+	* to int precision, an empty Equation will be returned.
 	*
 	* @param p	the XYPoint to measure from
 	* @return The Equation of the perpendicular line
 	*/
 	public Equation getPerpendicular(XYPoint p){
 
-		if(p.getY()!=this.getY(p.getX())){
+		if((int)p.getY()!=(int)this.getY(p.getX())){
 			return new Equation(0,0);
 		}
 		double pM = 0-(1/m); // invert and flip sign
@@ -116,7 +117,7 @@ public class Equation{
 	}
 
 	/**
-	*	Translates the line to run through the given point,
+	* Translates the line to run through the given point,
 	* keeping the gradient but moving the y intercept.
 	*
 	* @param p	the XYPoint to intercept
@@ -131,6 +132,15 @@ public class Equation{
 		double newC = this.c - dy;
 		return new Equation(this.m, newC);
 
+	}
+
+	/**
+	* Returns the equation as a string as y=mx+c
+	*
+	* @return The Equation of the line
+	*/ 
+	public String print(){
+		return "y="+m+".x+"+c;
 	}
 
 }

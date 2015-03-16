@@ -208,6 +208,15 @@ public class CurveRefolder{
 			}
 		}
 
+		// this.q25.print();
+		// this.q75.print();
+
+		// get the maximum values from nuclear diameters
+		// get the limits  for the plot  	
+		double min = Math.min(refoldNucleus.getMinX(), refoldNucleus.getMinY());
+		double max = Math.max(refoldNucleus.getMaxX(), refoldNucleus.getMaxY());
+		double scale = Math.min(Math.abs(min), Math.abs(max));
+
 		// iterate from tail point
 		int tailIndex = refoldNucleus.getBorderIndex("tail");
 
@@ -221,8 +230,9 @@ public class CurveRefolder{
 			// IJ.log("Getting point: "+index);
 			XYPoint n = refoldNucleus.getPoint( index  );
 
-			double distance = ((this.q75.get(index) - this.q25.get(index))/maxIQR)*5; // scale to maximum of 10 pixels total width 
+			double distance = ((this.q75.get(index) - this.q25.get(index))/maxIQR)*(scale/10); // scale to maximum of 10% the minimum diameter 
 			// use scaling factor
+			// IJ.log("    Distance: "+distance);
 			// normalise distances to the plot
 
 			Equation eq = new Equation(refoldNucleus.getPoint( prevIndex  ), refoldNucleus.getPoint( nextIndex  ));
@@ -231,6 +241,9 @@ public class CurveRefolder{
 
 			XYPoint aPoint = perp.getPointOnLine(n, (0-distance));
 			XYPoint bPoint = perp.getPointOnLine(n, distance);
+			// IJ.log("    Eq: "+eq.print());
+			// IJ.log("    Perp: "+perp.print());
+			// IJ.log("    Position: n: "+n.toString()+"   A: "+aPoint.toString()+"   B: "+bPoint.toString());
 
 			XYPoint innerPoint = refoldNucleus.getPolygon().contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
 			XYPoint outerPoint = refoldNucleus.getPolygon().contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
@@ -462,6 +475,7 @@ public class CurveRefolder{
 					for(int j=0; j<signalGroup.size();j++){
 
 						double angle = signalGroup.get(j).getAngle();
+
 						double fractionalDistance = signalGroup.get(j).getFractionalDistanceFromCoM();
 						double diameter = signalGroup.get(j).getRadius() * 2;
 
@@ -470,6 +484,10 @@ public class CurveRefolder{
 
 						// convert to fractional distance to signal
 						double signalDistance = distanceToBorder * fractionalDistance;
+
+						if(angle==0){ // no angle was calculated, so spread the points based on distance from CoM
+							angle = 360 * fractionalDistance;
+						}
 						
 						// adjust X and Y because we are now counting angles from the vertical axis
 						double signalX = NuclearOrganisationUtility.getXComponentOfAngle(signalDistance, angle-90);

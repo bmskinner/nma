@@ -11,7 +11,6 @@ can be varied in the nucleus and signal detection
 package no.analysis;
 
 import ij.IJ;
-// import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
@@ -38,9 +37,13 @@ import no.nuclei.INuclearFunctions;
 
 public class AnalysisCreator {
 
-  private int RODENT_SPERM_NUCLEUS = 0;
-  private int PIG_SPERM_NUCLEUS = 1;
-  private int ROUND_NUCLEUS = 2;
+  /**
+  * These values are keys to the different types of nucleus we 
+  * can analyse. They act like a primary key in a database
+  */
+  private static final int RODENT_SPERM_NUCLEUS = 0;
+  private static final int PIG_SPERM_NUCLEUS = 1;
+  private static final int ROUND_NUCLEUS = 2;
 
 	 // /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private  int    nucleusThreshold = 36;
@@ -55,7 +58,7 @@ public class AnalysisCreator {
   private int xoffset = 0;
   private int yoffset = 0;
 
-  private Date startTime;
+  private Date startTime; // the time the analysis began
 
   private  double minSignalSize = 5;
   private  double maxSignalFraction = 0.5;
@@ -66,12 +69,35 @@ public class AnalysisCreator {
   private File logAnalysis;
   private File nucleiToFind;
 
+  /**
+   * Will be set true if a primary analysis was run
+   */
   private boolean analysisRun = false;
+  
+  /**
+   * Will be set true if a reanalysis was run
+   */
   private boolean reAnalysisRun = false;
+  
+  /**
+   * Will be set true if all parameters have been set,
+   * and an analysis can be run
+   */
   private boolean readyToRun = false;
+
+  /**
+   * The class of Nucleus to use in the analysis
+   */
   private Class<?> nucleusClass;
+
+  /**
+   * The class of NucleusCollection to use in the analysis
+   */
   private Class<?> collectionClass;
 
+  /**
+   * Should a reanalysis be performed?
+   */
   private boolean performReanalysis = false;
 
   private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
@@ -88,7 +114,7 @@ public class AnalysisCreator {
   private List<Analysable> failedPopulations  = new ArrayList<Analysable>(0);
   
 
-   /*
+  /*
     -----------------------
     Populate the class map with available options
     -----------------------
@@ -101,14 +127,14 @@ public class AnalysisCreator {
       nucleusTypes.put("Round nucleus", ROUND_NUCLEUS);
 
       collectionClassTypes = new HashMap<Integer, Class>();
-      collectionClassTypes.put(0, new RodentSpermNucleusCollection().getClass());
-      collectionClassTypes.put(1, new PigSpermNucleusCollection().getClass());
-      collectionClassTypes.put(2, new NucleusCollection().getClass());
+      collectionClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleusCollection().getClass());
+      collectionClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleusCollection().getClass());
+      collectionClassTypes.put(ROUND_NUCLEUS, new NucleusCollection().getClass());
 
       nucleusClassTypes = new HashMap<Integer, Class>();
-      nucleusClassTypes.put(0, new RodentSpermNucleus().getClass());
-      nucleusClassTypes.put(1, new PigSpermNucleus().getClass());
-      nucleusClassTypes.put(2, new Nucleus().getClass());
+      nucleusClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleus().getClass());
+      nucleusClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleus().getClass());
+      nucleusClassTypes.put(ROUND_NUCLEUS, new Nucleus().getClass());
   }
 
   /*
@@ -123,7 +149,7 @@ public class AnalysisCreator {
   public void initialise(){
 
     boolean ok = this.displayOptionsDialog();
-    if(!ok) return;
+    if(!ok) return; // should be true if we got all needed data
 
     DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
     String folderName = localOpenDialog.getDirectory();
