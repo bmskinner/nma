@@ -65,6 +65,17 @@ public class CurveRefolder{
 	private Plot anglePlot;
 	private PlotWindow anglePlotWindow;
 
+	public static final int FAST_MODE = 0; // default; iterate until convergence
+	public static final int INTENSIVE_MODE = 1; // iterate until value
+	private int mode = FAST_MODE;
+
+	public static Map<String, Integer> MODES = new HashMap<String, Integer>();
+
+	static {
+		MODES.put("Fast", FAST_MODE);
+		MODES.put("Intensive", INTENSIVE_MODE);
+	}
+
 	private double plotLimit;
 
 	public CurveRefolder(Profile target, Profile q25, Profile q75, INuclearFunctions n){
@@ -100,18 +111,37 @@ public class CurveRefolder{
 			double originalScore = score;
 			double prevScore = score*2;
 			int i=0;
-			while( (prevScore - score)/prevScore > 0.01 || i<50){ // iterate until converging on a better curve  score >= originalScore
-				prevScore = score;
-				score = this.iterateOverNucleus();
-				i++;
-				// if(i%50==0){
-					// IJ.log("    Iteration "+i+": "+(int)score);
-				// }
+
+			if(this.mode==FAST_MODE){
+				while( (prevScore - score)/prevScore > 0.001 || i<50){ // iterate until converging
+					prevScore = score;
+					score = this.iterateOverNucleus();
+					i++;
+					if(i%50==0){
+						IJ.log("    Iteration "+i+": "+(int)score);
+					}
+				}
+			}
+
+			if(this.mode==INTENSIVE_MODE){
+
+				while(score > (originalScore*0.6) && i<1000){ // iterate until 0.6 original score, or 1000 iterations
+					prevScore = score;
+					score = this.iterateOverNucleus();
+					i++;
+					if(i%50==0){
+						IJ.log("    Iteration "+i+": "+(int)score);
+					}
+				}
 			}
 			IJ.log("    Refolded curve: final score: "+(int)score);
 		} catch(Exception e){
 			throw new Exception("Cannot calculate scores: "+e);
 		}
+	}
+
+	public void setMode(String s){
+		this.mode = CurveRefolder.MODES.get(s);
 	}
 
 	/*
@@ -276,9 +306,8 @@ public class CurveRefolder{
 		Keep the change if it helps get closer to the target profile
 
 		Changes to make:
-			Random mutation to the distance of a point from the CoM
-			Random mutation to the angle of a point from the CoM 
-			Together these affect the XY position of the point
+			Random mutation to the X and Y position. Must remain
+			within a certain range of neighbours
 	*/
 	private double iterateOverNucleus() throws Exception{
 
@@ -286,16 +315,14 @@ public class CurveRefolder{
 		Profile interpolatedTargetCurve = targetCurve.interpolate(refoldProfile.size());
 
 		double similarityScore = refoldProfile.differenceToProfile(targetCurve);
-		// IJ.log("    Iteration score: "+(int)similarityScore);
 
 		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
-		// refoldNucleus.getAngleProfile("tail").print();
+		double minDistance = medianDistanceBetweenPoints * 0.5;
+		double maxDistance = medianDistanceBetweenPoints * 1.2;
 
+		// make all changes to a fresh nucleus before buggering up the real one
 		testNucleus = new Nucleus( (Nucleus)refoldNucleus);
-		// IJ.log("Before calculating new profile:");
-		// testNucleus.dumpInfo(Nucleus.BORDER_POINTS);
-		// testNucleus.getAngleProfile().print();
-		// IJ.log("");
+
 		
 		for(int i=0; i<refoldNucleus.getLength(); i++){
 
@@ -313,23 +340,12 @@ public class CurveRefolder{
 			double oldX = p.getX();
 			double oldY = p.getY();
 
-			// make change dependent on score
-			double amountToChange =  Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
+			double xDelta =  0.5 - Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
+			double yDelta =  0.5 - Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
 
-			if(refoldProfile.get(i) > interpolatedTargetCurve.get(i))
-				newDistance = currentDistance + amountToChange;
-			
-			if(refoldProfile.get(i) < interpolatedTargetCurve.get(i))
-				newDistance = currentDistance - amountToChange; //  some change between 0 and 2
-			
 
-			// find the angle the point makes to the x axis
-			double angle = Nucleus.findAngleBetweenXYPoints(p, new XYPoint(0,0), new XYPoint(10, 0)); // point, 10,0, p,0
-			if(oldY<0){
-				angle = 360-angle;
-			}
-			double newX = NuclearOrganisationUtility.getXComponentOfAngle(newDistance, angle);
-			double newY = NuclearOrganisationUtility.getYComponentOfAngle(newDistance, angle);
+			double newX = oldX + xDelta;
+			double newY = oldY + yDelta;
 
 			try{
 				testNucleus.updatePoint(i, newX, newY);
@@ -364,7 +380,9 @@ public class CurveRefolder{
 			double distanceToNext = p.getLengthTo( testNucleus.getPoint( NuclearOrganisationUtility.wrapIndex(i+1, testNucleus.getLength()) ) );
 
 			// apply the change if better fit
-			if(score < similarityScore && distanceToNext < medianDistanceBetweenPoints*1.2 && distanceToPrev < medianDistanceBetweenPoints*1.2){
+			if(score < 	similarityScore && 
+									distanceToNext < maxDistance && distanceToNext > minDistance &&
+									distanceToPrev < maxDistance && distanceToPrev > minDistance) {
 				refoldNucleus.updatePoint(i, newX, newY);
 				refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
 				refoldNucleus.updatePolygon();

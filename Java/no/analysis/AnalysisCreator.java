@@ -55,6 +55,8 @@ public class AnalysisCreator {
 
   private int angleProfileWindowSize = 15;
 
+  private String refoldMode = "Fast";
+
   private int xoffset = 0;
   private int yoffset = 0;
 
@@ -493,6 +495,7 @@ public class AnalysisCreator {
       }
 
       CurveRefolder refolder = new CurveRefolder(targetProfile, q25, q75, refoldCandidate);
+      refolder.setMode(refoldMode);
       refolder.refoldCurve();
 
       // orient refolded nucleus to put tail at the bottom
@@ -615,6 +618,7 @@ public class AnalysisCreator {
       outLine.append("\tAngle profile window: "+this.getAngleProfileWindowSize()+"\r\n");
       outLine.append("\tNucleus class       : "+this.nucleusClass.getSimpleName()+"\r\n");
       outLine.append("\tCollection class    : "+this.collectionClass.getSimpleName()+"\r\n");
+      outLine.append("\tRefolding mode      : "+this.refoldMode+"\r\n");
       outLine.append("-------------------------\r\n");
       outLine.append("Populations:\r\n");
       outLine.append("-------------------------\r\n");
@@ -660,6 +664,10 @@ public class AnalysisCreator {
     String[] items = this.getNucleusTypeStrings();
     gd.addChoice("Nucleus type", items, items[1]); // default to rodent for now
 
+    Set<String> modeSet = CurveRefolder.MODES.keySet();
+    String[] modeArray = modeSet.toArray(new String[modeSet.size()]);
+    gd.addRadioButtonGroup("Consensus refolding mode:", modeArray, 1, 2, "Fast");
+
     gd.addCheckbox("Re-analysis?", false);
     gd.addNumericField("X offset:      ", xoffset, 0);
     gd.addNumericField("Y offset:      ", yoffset, 0);
@@ -683,6 +691,7 @@ public class AnalysisCreator {
     int nucleusCode = this.nucleusTypes.get(nucleusType);
     this.collectionClass = this.collectionClassTypes.get(nucleusCode);
     this.nucleusClass = this.nucleusClassTypes.get(nucleusCode);
+    this.refoldMode = gd.getNextRadioButton();
     return true;
   }
 }
