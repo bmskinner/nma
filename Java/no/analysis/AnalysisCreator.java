@@ -666,7 +666,7 @@ public class AnalysisCreator {
 
     Set<String> modeSet = CurveRefolder.MODES.keySet();
     String[] modeArray = modeSet.toArray(new String[modeSet.size()]);
-    gd.addRadioButtonGroup("Consensus refolding mode:", modeArray, 1, 2, "Fast");
+    gd.addRadioButtonGroup("Consensus refolding mode:", modeArray, 1, 3, "Fast");
 
     gd.addCheckbox("Re-analysis?", false);
     gd.addNumericField("X offset:      ", xoffset, 0);

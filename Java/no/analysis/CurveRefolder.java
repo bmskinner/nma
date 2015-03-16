@@ -52,10 +52,7 @@ public class CurveRefolder{
 	private Profile targetCurve;
 	private Profile q25;
 	private Profile q75;
-	// private double[] initialCurve;
 
-	// private INuclearFunctions refoldNucleus;
-	// private INuclearFunctions refoldNucleus;
 	private INuclearFunctions refoldNucleus;
 	private Nucleus testNucleus;
 
@@ -67,13 +64,15 @@ public class CurveRefolder{
 
 	public static final int FAST_MODE = 0; // default; iterate until convergence
 	public static final int INTENSIVE_MODE = 1; // iterate until value
+	public static final int BRUTAL_MODE = 2; // iterate until value
 	private int mode = FAST_MODE;
 
-	public static Map<String, Integer> MODES = new HashMap<String, Integer>();
+	public static Map<String, Integer> MODES = new LinkedHashMap<String, Integer>();
 
 	static {
 		MODES.put("Fast", FAST_MODE);
 		MODES.put("Intensive", INTENSIVE_MODE);
+		MODES.put("Brutal", BRUTAL_MODE);
 	}
 
 	private double plotLimit;
@@ -126,6 +125,18 @@ public class CurveRefolder{
 			if(this.mode==INTENSIVE_MODE){
 
 				while(score > (originalScore*0.6) && i<1000){ // iterate until 0.6 original score, or 1000 iterations
+					prevScore = score;
+					score = this.iterateOverNucleus();
+					i++;
+					if(i%50==0){
+						IJ.log("    Iteration "+i+": "+(int)score);
+					}
+				}
+			}
+
+			if(this.mode==BRUTAL_MODE){
+
+				while(score > (originalScore*0.5) && i<10000){ // iterate until 0.5 original score, or 10000 iterations
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					i++;
@@ -363,11 +374,6 @@ public class CurveRefolder{
 			// measure the new profile & compare
 			try{
 				testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
-				// if(i==0){
-				// 	IJ.log("After calculating new profile:");
-				// 	testNucleus.getAngleProfile().print();
-				// 	testNucleus.dumpInfo(Nucleus.BORDER_POINTS);
-				// }
 			} catch(Exception e){
 				throw new Exception("Cannot calculate angle profile: "+e);
 			}
