@@ -1522,4 +1522,20 @@ public class Nucleus
 		}
 	}
 
+	public void updatePolygon(){
+		
+		float[] xpoints = new float[this.getLength()];
+		float[] ypoints = new float[this.getLength()];
+
+		for(int i=0; i<this.getLength(); i++){
+
+			NucleusBorderPoint p = this.getPoint(i);
+			xpoints[i] = (float) p.getX();
+			ypoints[i] = (float) p.getY();
+
+		}
+		FloatPolygon newPolygon = new FloatPolygon(xpoints, ypoints);
+		this.setPolygon(newPolygon);
+	}
+
 }

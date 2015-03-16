@@ -50,43 +50,42 @@ public class Equation{
 		double xA = p.getX();
 
 		/*
-			the equation is (xA - xB)^2 + (yA - yB)^2 = distance^2
-			y=mx+c
-			(xA - xB)^2 + ((m*xA+c) - (m*xB+c))^2 = distance^2
-			xA^2 - 2*xA*xB + xb^2  + ((m*xA+c) - (m*xB+c))^2 = distance^2
-			xA^2 - 2*xA*xB + xb^2  + ((m*xA) - (m*xB))^2 = distance^2
-			xA^2 - 2*xA*xB + xb^2  + ( (m*xA)^2 - 2*(m*xA)*(m*xB) + (m*xB)^2   ) = distance^2
-			xA^2 - 2*xA*xB + xb^2  + ( (m^2*xA^2) - 2*(m*xA)*(m*xB) + (m^2*xB^2)   ) = distance^2
-			( (m^2+1*xA^2) - (2m^2+2)*(xA)*(xB) + (m^2+1*xB^2)   ) = distance^2
-			( (m^2+1*xA^2) - (2m^2+2)*(xA)*(xB) + (m^2+1*xB^2)   ) - distance^2 = 0
-
-			Quadratic: ax^2 + bx + c
-			a = (m^2+1*xB^2)  
-			b = -(2m^2+2)*(xA)*(xB)
-			c = ( (m^2+1*xA^2) - distance^2
-
+			d^2 = dx^2 + m.dx^2 // dy is a function of dx
+			d^2 = (m^2+1)*dx^2
+			d^2 / (m^2+1) = dx^2
+			root( d^2 / (m^2+1)) = dx
 		*/
-	
-		// get the parameters of the quadratic equation
-		double eqa = (Math.pow(m,2)+1);
-		double eqb = -(Math.pow(2*m,2)+2)*xA;
-		double eqc = ((Math.pow(m,2)+1) *Math.pow(xA,2)) - Math.pow(distance,2)  ;
 
-		// solve the quadratic
-		double xB1 = (0-eqb)+(Math.sqrt( ((Math.pow(eqb,2)) - (4*eqa*eqc))/2*eqa ));
-		double xB2 = (0-eqb)-(Math.sqrt( ((Math.pow(eqb,2)) - (4*eqa*eqc))/2*eqa ));
+		double dx = Math.sqrt( Math.pow(distance,2) / (Math.pow(m,2)+1)  );
 
-		double xB = 0;
-		if(distance>0){
-		 	xB = Math.max(xB1, xB2);
-		 } else {
-		 	xB = Math.min(xB1, xB2);
-		 }
+		double newX  = distance>0 ? xA + dx : xA - dx;
+		double newY = this.getY(newX);
+		return new XYPoint(newX, newY);	
+	}
 
-		double yB = this.getY(xB);
-		XYPoint result = new XYPoint(xB, yB);
-		return result;
-	
-  	}
+	public Equation getPerpendicular(XYPoint p){
+		double pM = 0-(1/m); // invert and flip sign
+
+		// find new c
+
+		// y = pM.x + c
+		// y -(pM.x) = c
+		double pC = p.getY() - (pM * p.getX());
+
+		return new Equation(pM, pC);
+	}
+
+	// translate the line to run through the given point,
+	// keeping the gradient but moving the y intercept
+	public Equation translate(XYPoint p ){
+
+		double oldY = this.getY(p.getX());
+		double desiredY = p.getY();
+
+		double dy = oldY - desiredY;
+		double newC = this.c - dy;
+		return new Equation(this.m, newC);
+
+	}
 
 }

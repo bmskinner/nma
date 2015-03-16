@@ -257,4 +257,6 @@ public interface INuclearFunctions
   public void addSegmentTag(String name, int i);
 
   public void calculateAngleProfile(int angleProfileWindowSize);
+
+  public void updatePolygon();
 }
