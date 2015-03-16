@@ -486,7 +486,7 @@ public class CurveRefolder{
 						double signalDistance = distanceToBorder * fractionalDistance;
 
 						if(angle==0){ // no angle was calculated, so spread the points based on distance from CoM
-							angle = 360 * fractionalDistance;
+							angle = signalCount == Nucleus.RED_CHANNEL ? 360 * fractionalDistance : 360 * fractionalDistance + 180;
 						}
 						
 						// adjust X and Y because we are now counting angles from the vertical axis
@@ -508,8 +508,8 @@ public class CurveRefolder{
 						double xRatio = signalX / this.plotLimit; // the ratio of the signal from the centre to the plot edge
 						double yRatio = signalY / this.plotLimit;
 
-						double xCorrected = 222 + (  161 * xRatio ) -7; // 9 is arbirtrary offset for now
-						double yCorrected = 188 - (  172 * yRatio ) -7;
+						double xCorrected = 222 + (  161 * xRatio ) -2; // 9 is arbirtrary offset for now
+						double yCorrected = 188 - (  172 * yRatio ) -2;
 
 						// double xCorrected = 221 + ( xRatio + signalX );
 						// double yCorrected = 189 - ( yRatio + signalY );
