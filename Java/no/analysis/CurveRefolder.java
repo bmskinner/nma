@@ -195,18 +195,22 @@ public class CurveRefolder{
 		yPoints[refoldNucleus.getLength()] = p.getY();
 
 		// Add lines to show the IQR of the angle profile at each point
-		// We need (1) The length of the line
-		// (2) The equation of the line from the CoM
-		// (3) The calculated end points of the line
+		double[] innerIQRX = new double[refoldNucleus.getLength()+1];
+		double[] innerIQRY = new double[refoldNucleus.getLength()+1];
+		double[] outerIQRX = new double[refoldNucleus.getLength()+1];
+		double[] outerIQRY = new double[refoldNucleus.getLength()+1];
 
-		double[] innerIQRX = new double[refoldNucleus.getLength()];
-		double[] innerIQRY = new double[refoldNucleus.getLength()];
-		double[] outerIQRX = new double[refoldNucleus.getLength()];
-		double[] outerIQRY = new double[refoldNucleus.getLength()];
+		// find the maximum difference between IQRs
+		double maxIQR = 0;
+		for(int i=0; i<refoldNucleus.getLength(); i++){
+			if(this.q75.get(i) - this.q25.get(i)>maxIQR){
+				maxIQR = this.q75.get(i) - this.q25.get(i);
+			}
+		}
 
 		// iterate from tail point
 		int tailIndex = refoldNucleus.getBorderIndex("tail");
-		// IJ.log("Tail index: "+tailIndex);
+
 		for(int i=0; i<refoldNucleus.getLength(); i++){
 
 			int index = NuclearOrganisationUtility.wrapIndex(i + tailIndex, refoldNucleus.getLength());
@@ -216,24 +220,17 @@ public class CurveRefolder{
 
 			// IJ.log("Getting point: "+index);
 			XYPoint n = refoldNucleus.getPoint( index  );
-			// double x = n.getX();
-			// double y = n.getY();
-			// IJ.log("Getting IQRs");
-			double distance = (this.q75.get(index) - this.q25.get(index))/4; // use 0.25 of the distance for scale
-			// IJ.log("Distance between IQRs: "+distance);
-			// normalise distances to the plot?
+
+			double distance = ((this.q75.get(index) - this.q25.get(index))/maxIQR)*5; // scale to maximum of 10 pixels total width 
+			// use scaling factor
+			// normalise distances to the plot
 
 			Equation eq = new Equation(refoldNucleus.getPoint( prevIndex  ), refoldNucleus.getPoint( nextIndex  ));
-			// move the line to the index point
+			// move the line to the index point, and find the orthogonal line
 			Equation perp = eq.translate(n).getPerpendicular(n);
 
 			XYPoint aPoint = perp.getPointOnLine(n, (0-distance));
 			XYPoint bPoint = perp.getPointOnLine(n, distance);
-
-			// the points may not be in the correct order for inner/outer, since we have +ves and -ves flying about
-			// check which is closer to the CoM
-			// double distanceToCoMA = aPoint.getLengthTo(refoldNucleus.getCentreOfMass());
-			// double distanceToCoMB = bPoint.getLengthTo(refoldNucleus.getCentreOfMass());
 
 			XYPoint innerPoint = refoldNucleus.getPolygon().contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
 			XYPoint outerPoint = refoldNucleus.getPolygon().contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
@@ -244,13 +241,21 @@ public class CurveRefolder{
 			outerIQRY[i] = outerPoint.getY();
 			
 		}
+		innerIQRX[refoldNucleus.getLength()] = innerIQRX[0];
+		innerIQRY[refoldNucleus.getLength()] = innerIQRY[0];
+		outerIQRX[refoldNucleus.getLength()] = outerIQRX[0];
+		outerIQRY[refoldNucleus.getLength()] = outerIQRY[0];
+
 		nucleusPlot.setColor(Color.LIGHT_GRAY);
 		nucleusPlot.addPoints(innerIQRX, innerIQRY, Plot.LINE);
 		nucleusPlot.setColor(Color.LIGHT_GRAY);
 		nucleusPlot.addPoints(outerIQRX, outerIQRY, Plot.LINE);
 
+		// nucleusPlot.setColor(Color.DARK_GRAY);
+		// nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
 		nucleusPlot.setColor(Color.DARK_GRAY);
-		nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
+		nucleusPlot.addPoints(refoldNucleus.getPolygon().xpoints, refoldNucleus.getPolygon().ypoints, Plot.LINE);
+
 	}
 
 	/*

@@ -1057,6 +1057,7 @@ public class Nucleus
 			double xNew = xCentre + dx;
 			n.setX(xNew);
 		}
+		this.updatePolygon();
 	}
 
 	public double getMedianDistanceBetweenPoints(){
