@@ -172,8 +172,11 @@ public class Nucleus
 	}
 
 	/*
-		The default in a round nucleus is to get the longest diameter
-		and set this at the head/tail axis
+	* Finds the key points of interest around the border
+	* of the Nucleus. Can use several different methods, and 
+	* take a best-fit, or just use one. The default in a round 
+	* nucleus is to get the longest diameter and set this as
+	*  the head/tail axis.
 	*/
 	public void findPointsAroundBorder(){
 

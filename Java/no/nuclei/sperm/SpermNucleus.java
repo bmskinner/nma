@@ -2,9 +2,10 @@
   -----------------------
   SPERM NUCLEUS CLASS
   -----------------------
-  Contains the variables for storing a sperm nucleus.
   Sperm have a head and a tail, hence can be oriented
-  in one axis.
+  in one axis. This is inherited from the AsymmetricNucleus.
+  Mostly empty for now, but analyses involving
+  segments such as acrosomes may need common methods.
 */  
 package no.nuclei.sperm;
 
@@ -56,11 +57,23 @@ public class SpermNucleus
 	extends AsymmetricNucleus
 {
 	
-  // Requires a nucleus object to construct from
+  /**
+  * Constructor using a Nucleus; passes up
+  * to the Nucleus constructor
+  *
+  * @param n the Nucleus to construct from
+  * @return a SpermNucleus
+  */
   public SpermNucleus(Nucleus n){
   	super(n);
   }
 
+  /**
+  * Empty constructor. Can be used for class
+  * identification (as in AnalysisCreator) 
+  *
+  * @return an empty SpermNucleus
+  */
   public SpermNucleus(){
     
   }

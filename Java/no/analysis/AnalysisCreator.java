@@ -38,6 +38,10 @@ import no.nuclei.INuclearFunctions;
 
 public class AnalysisCreator {
 
+  private int RODENT_SPERM_NUCLEUS = 0;
+  private int PIG_SPERM_NUCLEUS = 1;
+  private int ROUND_NUCLEUS = 2;
+
 	 // /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private  int    nucleusThreshold = 36;
   private  int    signalThreshold  = 70;
@@ -92,9 +96,9 @@ public class AnalysisCreator {
   static
   {
       nucleusTypes = new HashMap<String, Integer>();
-      nucleusTypes.put("Rodent sperm" , 0);
-      nucleusTypes.put("Pig sperm"    , 1);
-      nucleusTypes.put("Round nucleus", 2);
+      nucleusTypes.put("Rodent sperm" , RODENT_SPERM_NUCLEUS);
+      nucleusTypes.put("Pig sperm"    , PIG_SPERM_NUCLEUS);
+      nucleusTypes.put("Round nucleus", ROUND_NUCLEUS);
 
       collectionClassTypes = new HashMap<Integer, Class>();
       collectionClassTypes.put(0, new RodentSpermNucleusCollection().getClass());
@@ -469,7 +473,7 @@ public class AnalysisCreator {
       refolder.putPointAtBottom(refoldCandidate.getBorderTag("tail"));
 
       // if rodent sperm, put tip on left if needed
-      if(refoldCandidate.getClass().equals(nucleusClassTypes.get(0))){
+      if(refoldCandidate.getClass().equals(nucleusClassTypes.get(RODENT_SPERM_NUCLEUS))){
         // IJ.log("    Rodent nucleus found");
         if(refoldCandidate.getBorderTag("tip").getX()>0){
           // IJ.log("    Flipping nucleus");

@@ -2,9 +2,6 @@
   -----------------------
   PIG SPERM NUCLEUS CLASS
   -----------------------
-  Contains the variables for storing a rodentsperm nucleus.
-  Sperm have a hook, hump and tip, hence can be oriented
-  in two axes.
 */  
 package no.nuclei.sperm;
 
@@ -54,19 +51,38 @@ import no.components.*;
 public class PigSpermNucleus 
     extends SpermNucleus 
   {
-
+    /**
+    * The point of the nucleus orthogonal to the narrowest
+    * diameter, through the centre of mass.
+    * Used in tail identification functions only.
+    */
     private NucleusBorderPoint orthPoint1;
 
+  /**
+  * Constructor using a Nucleus; passes up
+  * to the SpermNucleus constructor
+  *
+  * @param n the Nucleus to construct from
+  */
     public PigSpermNucleus(Nucleus n){
       super(n);
-      // this.findPointsAroundBorder();
-      // this.exportAngleProfile();
     }
 
+    /**
+    * Empty constructor. Can be used for class
+    * identification (as in AnalysisCreator) 
+    */
     public PigSpermNucleus(){
 
     }
 
+  /**
+  * {@inheritDoc}
+  * <p>
+  * This method overrides the Nucleus method, and uses a single measure
+  * to find the pig sperm tail. This is using the maximum angle in the 
+  * Profile.
+  */
     @Override
     public void findPointsAroundBorder(){
 
@@ -100,6 +116,13 @@ public class PigSpermNucleus
       -----------------------
     */
 
+    /**
+    * This method attempts to find the pig sperm tail point
+    * using the lowest angles in the Profile. The two lowest
+    * minima should be either side of the tail. Not currently
+    * used.
+    * @see Profile
+    */
     public NucleusBorderPoint findTailByMinima(){
 
       // the two lowest minima are at the tail-end corners. 
@@ -136,6 +159,12 @@ public class PigSpermNucleus
       return tailPoint;
     }
 
+    /**
+    * This method attempts to find the pig sperm tail point
+    * using the highest angle in the Profile. The highest point 
+    * should be at the tail, since the nucleus has an inward 'dent'
+    * @see Profile
+    */
     public int findTailByMaxima(){
       // the tail is the ?only local maximum with an interior angle above the 180 line
 
@@ -156,11 +185,14 @@ public class PigSpermNucleus
       return tailPoint;
     }
 
-    /*
-      The narrowest diameter through the CoM
-      is orthogonal to the tail. Of the two
-      orthogonal border points, the closest to the
-      CoM is the tail
+
+    /**
+    * This method attempts to find the pig sperm tail point
+    * using the narrowest point across the centre of mass.
+    * The narrowest diameter through the CoM is orthogonal to 
+    * the tail. Of the two orthogonal border points, the point with
+    * the highest angle is the tail.
+    * @see Profile
     */
     public NucleusBorderPoint findTailByNarrowestPoint(){
 

@@ -2,8 +2,7 @@
   -----------------------
   XY POINT CLASS
   -----------------------
-  This class contains the X and Y coordinates of a point as doubles,
-  plus any angles calculated for that point. 
+  This class contains the X and Y coordinates of a point as doubles.
   Also contains methods for determining distance and overlap with other points
 */
 
@@ -16,39 +15,92 @@ public class XYPoint {
   private double x;
   private double y;
   
+  /**
+  * Constructor using doubles. 
+  *
+  * @param x the x-coordinate
+  * @param y the y-coordinate
+  * @return An XYPoint at these coordinates
+  */
   public XYPoint (double x, double y){
     this.x = x;
     this.y = y;
   }
 
+  /**
+  * Constructor using XYPoint. Copies
+  * the x and y coordinates from the given
+  * point
+  *
+  * @param p the XYPoint
+  * @return An XYPoint at these coordinates
+  */
   public XYPoint(XYPoint p){
     this.x = p.getX();
     this.y = p.getY();
   }
 
+  /**
+  * Get the x-value 
+  *
+  * @return the x-value of the point
+  */
   public double getX(){
     return this.x;
   }
+
+  /**
+  * Get the y-value 
+  *
+  * @return the y-value of the point
+  */
   public double getY(){
     return this.y;
   }
 
+  /**
+  * Get the x-value as an integer
+  *
+  * @return the x-value of the point
+  */
   public int getXAsInt(){
     return (int)this.x;
   }
 
+  /**
+  * Get the y-value as an integer
+  *
+  * @return the y-value of the point
+  */
   public int getYAsInt(){
     return (int)this.y;
   }
 
+  /**
+  * Set the x-value
+  *
+  * @param x the new x-value
+  */
   public void setX(double x){
     this.x = x;
   }
 
+  /**
+  * Set the y-value
+  *
+  * @param y the new x-value
+  */
   public void setY(double y){
     this.y = y;
   }
 
+  /**
+  * Find the distance between this point and
+  * a given point
+  *
+  * @param a the point to measure to
+  * @return the distance between the points
+  */
   public double getLengthTo(XYPoint a){
 
     // a2 = b2 + c2
@@ -60,6 +112,13 @@ public class XYPoint {
     return length;
   }
 
+  /**
+  * Tests if the two points overlap with
+  * integer precision
+  *
+  * @param a the point to test against
+  * @return boolean whether they overlap as integers
+  */
   public boolean overlaps(XYPoint a){
     if( this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()){
       return true;
@@ -68,6 +127,12 @@ public class XYPoint {
     }
   }
 
+  /**
+  * Writes the integer x and y values together in the format
+  * "x,y"
+  *
+  * @return the string with the integer coordinates
+  */
   public String toString(){
     return this.getXAsInt()+","+this.getYAsInt();
   }
