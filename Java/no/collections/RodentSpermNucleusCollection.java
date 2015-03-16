@@ -209,7 +209,7 @@ public class RodentSpermNucleusCollection
                   headToTip[i]  +"\t");
 
       
-      double[] profile = n.getAngleProfile("tail").asArray();
+      double[] profile = n.getAngleProfile("tail").interpolate((int)maxPerim).asArray();
       for(int j=0;j<profile.length;j++){
         outLine.append(profile[j]+"\t");
       }

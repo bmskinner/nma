@@ -515,6 +515,7 @@ public class AnalysisCreator {
       // draw signals on the refolded nucleus
       refolder.addSignalsToConsensus(collection);
       refolder.exportImage(collection);
+      refolder.exportProfileOfRefoldedImage(collection);
 
     } catch(Exception e){
       IJ.log("    Unable to refold nucleus: "+e.getMessage());
