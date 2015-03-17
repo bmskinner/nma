@@ -64,7 +64,7 @@ public class NucleusRefinder
   private int yOffset;
 
   // a structure to hold the image names, and the extracted nucleus coordinates
-  private ArrayList< HashMap<String, XYPoint> > nucleiToFind = new ArrayList< HashMap<String, XYPoint> >();
+  private ArrayList< HashMap<String, XYPoint> > nucleiToFind = new ArrayList< HashMap<String, XYPoint> >(0);
 
 
   /*
@@ -92,6 +92,10 @@ public class NucleusRefinder
       }
       i++;
     }
+  }
+
+  public int getMappingCount(){
+    return this.nucleiToFind.size()-1; // for some reason it gives one more than expected
   }
 
   public void setXOffset(int i){

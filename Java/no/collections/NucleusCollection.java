@@ -85,8 +85,8 @@ public class NucleusCollection
 
   public static final double PROFILE_INCREMENT = 0.5;
 
-  private double maxDifferenceFromMedian = 1.5; // used to filter the nuclei, and remove those too small, large or irregular to be real
-  private double maxWibblinessFromMedian = 1.2; // filter for the irregular borders more stringently
+  private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
+  private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
   private Map<String, HashMap<String, Plot>> plotCollection = new HashMap<String, HashMap<String, Plot>>();
 
@@ -594,13 +594,12 @@ public class NucleusCollection
     IJ.append("Postfiltered:", this.getDebugFile().getAbsolutePath());
     this.exportFilterStats();
     IJ.log("    Removed due to size or length issues: "+removed+" nuclei");
-    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to array length: "+arraylength+" nuclei", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to feret length: "+feretlength+" nuclei", this.getDebugFile().getAbsolutePath());
-    // IJ.append("  Due to curve shape: "+curveShape+" nuclei", this.getDebugFile().getAbsolutePath());
-    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei");
+    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei\r", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei\r", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei\r", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to array length: "+arraylength+" nuclei\r", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to feret length: "+feretlength+" nuclei\r", this.getDebugFile().getAbsolutePath());
+    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei\r");
     
   }
 

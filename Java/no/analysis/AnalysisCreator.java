@@ -59,6 +59,7 @@ public class AnalysisCreator {
 
   private int xoffset = 0;
   private int yoffset = 0;
+  private int mappingCount = 0;
 
   private Date startTime; // the time the analysis began
 
@@ -234,6 +235,7 @@ public class AnalysisCreator {
     detector.setYOffset(this.yoffset);
     detector.runDetector();
     this.folderCollection = detector.getNucleiCollections();
+    this.mappingCount = detector.getMappingCount();
     IJ.log("Imported folder(s)");
     this.reAnalysisRun = true;
   }
@@ -603,6 +605,9 @@ public class AnalysisCreator {
       if(this.reAnalysisRun){
         outLine.append("Analysis type     : Nucleus refinding analysis\r\n");
         outLine.append("Mapping file      : "+this.nucleiToFind.getAbsolutePath()+"\r\n");
+        outLine.append("X offset          : "+this.xoffset+"\r\n");
+        outLine.append("Y offset          : "+this.yoffset+"\r\n");
+        outLine.append("Mapping count     : "+this.mappingCount+" nuclei\r\n");
       }
       
       outLine.append("-------------------------\r\n");
