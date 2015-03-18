@@ -34,10 +34,10 @@ public class ImageAligner{
   * The max number of pixels to move in any direction. A value of 50
   * would mean a range of -50 to 50 x and -50 to 50 y
   */
-  private int range = 50; 
+  private int range = 20; 
 
   /**
-  * Constructor. Takes two ImagePlus images. These should be geryscale, i.e.
+  * Constructor. Takes two ImagePlus images. These should be greyscale, i.e.
   * have only one channel. 
   *
   * @param staticImage the image that will be used as a reference
@@ -66,6 +66,38 @@ public class ImageAligner{
     this.yOffset = i;
   }
 
+  public int getXOffset(){
+    return this.xOffset;
+  }
+
+  public int getYOffset(){
+    return this.yOffset;
+  }
+
+  public void run(){
+
+    int bestScore = compareImages();
+    int bestX = 0;
+    int bestY = 0;
+
+    ImagePlus offsetImage = new ImagePlus(testImage.getProcessor().duplicate());
+
+    for(int x= xOffset-this.range; x<this.range;x++){
+      for(int y= yOffset-this.range; y<this.range;y++){
+        offsetImage(offsetImage, x, y); // need to use a copy of the image
+        int score = compareImages();
+        if(score>bestScore){
+          bestScore = score;
+          bestX = x;
+          bestY = y;
+        }
+      }
+    }
+
+    this.xOffset = bestX;
+    this.yOffset = bestY;
+  }
+
   private void maskImage(ImagePlus image, int threshold){
     ImageProcessor ip = image.getProcessor();
     ip.threshold(threshold);
@@ -78,40 +110,21 @@ public class ImageAligner{
     ip.translate(x, y);
   }
 
-  private int compareImages(){
-    int height = staticImage.getHeight();
-    int width = staticImage.getWidth();
+  private int compareImages(ImagePlus image1, ImagePlus image2){
+    int height = image1.getHeight();
+    int width = image1.getWidth();
     int score = 0;
 
     for(int i=0; i<height; i++){
       for(int j=0; j<width; j++){
-        int a = staticImage.getPixel(i, j)[0]; // greyscale values are in the first index
-        int b = testImage.getPixel(i, j)[0];
-        if(a&b ==1){
+        int a = image1.getPixel(i, j)[0]; // greyscale values are in the first index
+        int b = image2.getPixel(i, j)[0];
+        if(a&b==1){
           score++;
         }
       }
     }
     return score;
-  }
-
-  private void findBestOffset(){
-
-    int bestScore = compareImages();
-    int bestX = 0;
-    int bestY = 0;
-
-    for(int x= xOffset-this.range; x<this.range;x++){
-      for(int y= yOffset-this.range; y<this.range;y++){
-        offsetImage(this.testImage, x, y); // need to make a copy of the image
-        int score = compareImages();
-        if(score>bestScore){
-          bestScore = score;
-          bestX = x;
-          bestY = y;
-        }
-      }
-    }
   }
 
 }
