@@ -29,6 +29,7 @@ import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.RoiEnlarger;
 import ij.plugin.frame.RoiManager;
+import ij.plugin.RGBStackMerge;
 import ij.process.FloatPolygon;
 import ij.process.FloatProcessor;
 import ij.process.ImageConverter;
@@ -188,12 +189,37 @@ public class NucleusDetector {
   }
 
 	/*
-		Go through the input folder. Check if each file
-		is an image. Also check if it is in the 'banned list'.
-		These are prefixes that are attached to exported images
-		at later stages of analysis. This prevents exported images
-		from previous runs being analysed.
-	*/
+    Check the the file in in question is suitable
+    for analysis.
+  */
+  protected boolean checkFile(File file){
+    boolean ok = false;
+    if (file.isFile()) {
+
+      String fileName = file.getName();
+
+      for( String fileType : fileTypes){
+        if( fileName.endsWith(fileType) ){
+          ok = true;
+        }
+      }
+
+      for( String prefix : prefixesToIgnore){
+        if(fileName.startsWith(prefix)){
+          ok = false;
+        }
+      }
+    }
+    return ok;
+  }
+
+  /*
+    Go through the input folder. Check if each file
+    is an image. Also check if it is in the 'banned list'.
+    These are prefixes that are attached to exported images
+    at later stages of analysis. This prevents exported images
+    from previous runs being analysed.
+  */
 	protected void processFolder(File folder){
 
     File[] listOfFiles = folder.listFiles();
@@ -202,55 +228,39 @@ public class NucleusDetector {
  
     for (File file : listOfFiles) {
 
-      boolean ok = false;
-      if (file.isFile()) {
-
-        String fileName = file.getName();
-
-        for( String fileType : fileTypes){
-          if( fileName.endsWith(fileType) ){
-            ok = true;
-          }
-        }
-
-        for( String prefix : prefixesToIgnore){
-          if(fileName.startsWith(prefix)){
-            ok = false;
-          }
-        }
+      boolean ok = this.checkFile(file);
             
-        if(ok){
-          try {
-            Opener localOpener = new Opener();
-            ImagePlus localImagePlus = localOpener.openImage(file.getAbsolutePath());             
-            // handle the image
-            if(localImagePlus.getType()==ImagePlus.COLOR_RGB){ // convert to RGB
+      if(ok){
+        try {
+          Opener localOpener = new Opener();
+          ImagePlus localImagePlus = localOpener.openImage(file.getAbsolutePath());             
+          // handle the image
+          if(localImagePlus.getType()==ImagePlus.COLOR_RGB){ // convert to RGB
 
-              // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
-              File output = new File(folder.getAbsolutePath()+File.separator+outputFolder);
-              if(!output.exists()){
-                try{
-                  output.mkdir();
-                } catch(Exception e) {
-                  IJ.log("Failed to create directory: "+e);
-                }
+            // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
+            File output = new File(folder.getAbsolutePath()+File.separator+outputFolder);
+            if(!output.exists()){
+              try{
+                output.mkdir();
+              } catch(Exception e) {
+                IJ.log("Failed to create directory: "+e);
               }
-              processImage(localImagePlus, file);
-              localImagePlus.close();
-            } else {
-              IJ.log("Cannot analyse - RGB image required");
-            }
-          } catch (Exception e) { 
-              IJ.log("Error in image processing: "+e);
-          }
-        }
-      } else {
+            } // end !output.exists
+            processImage(localImagePlus, file);
+            localImagePlus.close();
+          } else { // end if RGB image
+            IJ.log("Cannot analyse - RGB image required");
+          } // end else
+        } catch (Exception e) { // end try
+            IJ.log("Error in image processing: "+e);
+        } // end catch
+      } else { // if !ok
         if(file.isDirectory()){ // recurse over any sub folders
           processFolder(file);
         }
-      }
-    }
-  }
+      } // end else if !ok
+    } // end for (File)
+  } // end function
 
   /*
     Detects nuclei within the image.
