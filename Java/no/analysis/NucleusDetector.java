@@ -213,6 +213,41 @@ public class NucleusDetector {
     return ok;
   }
 
+  private ImagePlus makeRGB(ImagePlus image) throws Exception{
+    
+    ImagePlus mergedImage = new ImagePlus();
+    if(image.getType()==ImagePlus.GRAY8){
+
+      ImagePlus[] images = new ImagePlus[3];
+      images[0] = new ImagePlus();
+      images[1] = new ImagePlus();
+      images[2] = image;
+
+      IJ.log("Attempting to merge");
+
+      RGBStackMerge merger = new RGBStackMerge();
+      IJ.log("Merger created");
+      mergedImage = merger.mergeChannels(images, false); 
+      IJ.log("Merged");
+    } else{
+      IJ.log("Cannot convert at present; please convert to RGB manually");
+      throw new Exception("Error converting image to RGB: wrong type");
+    }
+    return mergedImage;
+  }
+
+  private File makeFolder(File folder){
+    File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
+    if(!output.exists()){
+      try{
+        output.mkdir();
+      } catch(Exception e) {
+        IJ.log("Failed to create directory: "+e);
+      }
+    }
+    return output;
+  }
+
   /*
     Go through the input folder. Check if each file
     is an image. Also check if it is in the 'banned list'.
@@ -233,24 +268,17 @@ public class NucleusDetector {
       if(ok){
         try {
           Opener localOpener = new Opener();
-          ImagePlus localImagePlus = localOpener.openImage(file.getAbsolutePath());             
+          ImagePlus image = localOpener.openImage(file.getAbsolutePath());             
           // handle the image
-          if(localImagePlus.getType()==ImagePlus.COLOR_RGB){ // convert to RGB
+          if(image.getType()!=ImagePlus.COLOR_RGB){ // convert to RGB
+            IJ.log("Found image type "+image.getType()+"; converting to RGB");
+            image = this.makeRGB(image);
+          } 
+          // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
+          File output = makeFolder(folder);
+          processImage(image, file);
+          image.close();
 
-            // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
-            File output = new File(folder.getAbsolutePath()+File.separator+outputFolder);
-            if(!output.exists()){
-              try{
-                output.mkdir();
-              } catch(Exception e) {
-                IJ.log("Failed to create directory: "+e);
-              }
-            } // end !output.exists
-            processImage(localImagePlus, file);
-            localImagePlus.close();
-          } else { // end if RGB image
-            IJ.log("Cannot analyse - RGB image required");
-          } // end else
         } catch (Exception e) { // end try
             IJ.log("Error in image processing: "+e);
         } // end catch
