@@ -144,7 +144,7 @@ public class ImageAligner{
     int roiYmin = y > 0 ? 0 : ip.getHeight()+y;
     int roiYmax = y > 0 ? y : ip.getHeight();
     
-    ip.snapshot();
+    // ip.snapshot();
     ip.setRoi(roiXmin, 0, roiXmax, ip.getHeight());
     ip.setColor(255);
     ip.fill();
