@@ -144,7 +144,7 @@ public class NucleusRefinder
 
   private ImagePlus makeGreyscaleFromBlue(ImagePlus image){
 
-    ColorProcessor icp = (ColorProcessor) image.getChannelProcessor();
+    ColorProcessor icp = (ColorProcessor) image.getChannelProcessor().convertToRGB();
     ImagePlus newImage = new ImagePlus("image",new ByteProcessor( image.getWidth(), 
                                                                   image.getHeight(), 
                                                                   icp.getChannel(3)));
