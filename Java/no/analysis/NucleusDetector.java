@@ -30,6 +30,7 @@ import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.RoiEnlarger;
 import ij.plugin.frame.RoiManager;
 import ij.plugin.RGBStackMerge;
+import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.FloatProcessor;
 import ij.process.ImageConverter;
@@ -188,9 +189,15 @@ public class NucleusDetector {
     return this.collectionGroup;
   }
 
-	/*
-    Check the the file in in question is suitable
-    for analysis.
+  /**
+  *  Checks that the given file is suitable for analysis.
+  *  Is the file an image. Also check if it is in the 'banned list'.
+  *  These are prefixes that are attached to exported images
+  *  at later stages of analysis. This prevents exported images
+  *  from previous runs being analysed.
+  *
+  *  @param file the File to check
+  *  @return a true or false of whether the file passed checks
   */
   protected boolean checkFile(File file){
     boolean ok = false;
@@ -213,29 +220,45 @@ public class NucleusDetector {
     return ok;
   }
 
+  /**
+  * Given a greyscale image, convert it to RGB, and set the greyscale to 
+  * the blue channel. 
+  *
+  * @param image the ImagePlus to convert
+  * @return a COLOR_RGB ImagePlus
+  */
   private ImagePlus makeRGB(ImagePlus image) throws Exception{
     
     ImagePlus mergedImage = new ImagePlus();
     if(image.getType()==ImagePlus.GRAY8){
 
-      ImagePlus[] images = new ImagePlus[3];
-      images[0] = new ImagePlus();
-      images[1] = new ImagePlus();
-      images[2] = image;
+      byte[] blank = new byte[image.getWidth() * image.getHeight()];
+      for( byte b : blank){
+        b = -128;
+      }
 
-      IJ.log("Attempting to merge");
+      ImagePlus[] images = new ImagePlus[3];
+      images[0] = new ImagePlus("red",   new ByteProcessor(image.getWidth(), image.getHeight(), blank));
+      images[1] = new ImagePlus("green", new ByteProcessor(image.getWidth(), image.getHeight(), blank));
+      images[2] = image;      
 
       RGBStackMerge merger = new RGBStackMerge();
-      IJ.log("Merger created");
+      // IJ.log("  Merger created");
       mergedImage = merger.mergeChannels(images, false); 
-      IJ.log("Merged");
+      // IJ.log("  Merged");
     } else{
-      IJ.log("Cannot convert at present; please convert to RGB manually");
+      IJ.log("  Cannot convert at present; please convert to RGB manually");
       throw new Exception("Error converting image to RGB: wrong type");
     }
-    return mergedImage;
+    return mergedImage.flatten();
   }
 
+  /**
+  * Create the output folder for the analysis if required
+  *
+  * @param folder the folder in which to create the analysis folder
+  * @return a File containing the created folder
+  */
   private File makeFolder(File folder){
     File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
     if(!output.exists()){
@@ -248,12 +271,12 @@ public class NucleusDetector {
     return output;
   }
 
-  /*
-    Go through the input folder. Check if each file
-    is an image. Also check if it is in the 'banned list'.
-    These are prefixes that are attached to exported images
-    at later stages of analysis. This prevents exported images
-    from previous runs being analysed.
+
+  /**
+  * Go through the input folder. Check if each file is
+  * suitable for analysis, and if so, call the analyser.
+  *
+  * @param folder the folder of images to be analysed
   */
 	protected void processFolder(File folder){
 
@@ -271,7 +294,7 @@ public class NucleusDetector {
           ImagePlus image = localOpener.openImage(file.getAbsolutePath());             
           // handle the image
           if(image.getType()!=ImagePlus.COLOR_RGB){ // convert to RGB
-            IJ.log("Found image type "+image.getType()+"; converting to RGB");
+            IJ.log("  Found image type "+image.getType()+"; converting to RGB");
             image = this.makeRGB(image);
           } 
           // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
@@ -290,9 +313,13 @@ public class NucleusDetector {
     } // end for (File)
   } // end function
 
-  /*
-    Detects nuclei within the image.
-    For each nucleus, perform the analysis step
+
+  /**
+  * Detects nuclei within the given image.
+  * For each nucleus, perform the analysis step
+  *
+  * @param image the ImagePlus to be analysed
+  * @param path the full path of the image
   */
   protected void processImage(ImagePlus image, File path){
 
@@ -325,9 +352,16 @@ public class NucleusDetector {
     } 
   }
 
-  /*
-  	Save the region of the input image containing the nucleus
-    Add to collection
+
+  /**
+  * Save the region of the input image containing the nucleus
+  * Create a Nucleus and add it to the collection
+  *
+  * @param nucleus the ROI within the image
+  * @param image the ImagePlus containing the nucleus
+  * @param nucleusNumber the count of the nuclei in the image
+  * @param path the full path to the image
+  * @param values the Map holding stats for this nucleus
   */
   protected void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, File path, Map<String, Double> values){
     
