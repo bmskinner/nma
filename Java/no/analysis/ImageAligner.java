@@ -82,8 +82,27 @@ public class ImageAligner{
     int bestX = 0;
     int bestY = 0;
 
-    for(int x= xOffset-this.range; x<xOffset+this.range;x++){
-      for(int y= yOffset-this.range; y<yOffset+this.range; y++){
+    int interval = this.range / 4;
+
+    // perform the offsets at a rough resolution, then go finer
+     for(int x= xOffset-this.range; x<xOffset+this.range;x+=5){
+      for(int y= yOffset-this.range; y<yOffset+this.range; y+=5){
+        
+        ImagePlus offsetImage = new ImagePlus("offset", testImage.getProcessor().duplicate());
+        offsetImage(offsetImage, x, y); // need to use a copy of the image
+        int score = compareImages(this.staticImage, offsetImage);
+        offsetImage.close();
+        if(score>bestScore){
+          bestScore = score;
+          bestX = x;
+          bestY = y;
+        }
+      }
+    }
+
+
+    for(int x=bestX-5; x<bestX+5;x++){
+      for(int y=bestY-5; y<bestY+5; y++){
         
         ImagePlus offsetImage = new ImagePlus("offset", testImage.getProcessor().duplicate());
         offsetImage(offsetImage, x, y); // need to use a copy of the image

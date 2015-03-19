@@ -103,6 +103,12 @@ public class AnalysisCreator {
    */
   private boolean performReanalysis = false;
 
+  /**
+   * Should images for a reanalysis be aligned
+   * beyond the offsets provided?
+   */
+  private boolean realignMode = true;
+
   private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
   // allow us to map an id to a class to construct
@@ -233,6 +239,7 @@ public class AnalysisCreator {
     setDetectionParameters(detector);
     detector.setXOffset(this.xoffset);
     detector.setYOffset(this.yoffset);
+    detector.setRealignMode(this.realignMode);
     detector.runDetector();
     this.folderCollection = detector.getNucleiCollections();
     this.mappingCount = detector.getMappingCount();
@@ -605,8 +612,9 @@ public class AnalysisCreator {
       if(this.reAnalysisRun){
         outLine.append("Analysis type     : Nucleus refinding analysis\r\n");
         outLine.append("Mapping file      : "+this.nucleiToFind.getAbsolutePath()+"\r\n");
-        outLine.append("X offset          : "+this.xoffset+"\r\n");
-        outLine.append("Y offset          : "+this.yoffset+"\r\n");
+        outLine.append("Initial X offset  : "+this.xoffset+"\r\n");
+        outLine.append("Initial Y offset  : "+this.yoffset+"\r\n");
+        outLine.append("Aligning images   : "+this.realignMode+"\r\n");
         outLine.append("Mapping count     : "+this.mappingCount+" nuclei\r\n");
       }
       
@@ -674,9 +682,10 @@ public class AnalysisCreator {
     String[] modeArray = modeSet.toArray(new String[modeSet.size()]);
     gd.addRadioButtonGroup("Consensus refolding mode:", modeArray, 1, 3, "Fast");
 
-    gd.addCheckbox("Re-analysis?", false);
+    gd.addCheckbox("Perform re-analysis", false);
     gd.addNumericField("X offset:      ", xoffset, 0);
     gd.addNumericField("Y offset:      ", yoffset, 0);
+    gd.addCheckbox("Realign each image", true);
     gd.showDialog();
     if (gd.wasCanceled()) return false;
 
@@ -698,6 +707,7 @@ public class AnalysisCreator {
     this.collectionClass = this.collectionClassTypes.get(nucleusCode);
     this.nucleusClass = this.nucleusClassTypes.get(nucleusCode);
     this.refoldMode = gd.getNextRadioButton();
+    this.realignMode = gd.getNextBoolean();
     return true;
   }
 }

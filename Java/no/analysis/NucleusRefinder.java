@@ -30,6 +30,8 @@ public class NucleusRefinder
   private int xOffset;
   private int yOffset;
 
+  private boolean realignMode;
+
   private Map<File, File> fileMap =  new HashMap<File, File>(); // map from old file to new file
 
   private Map<File, XYPoint> offsets = new HashMap<File, XYPoint>(); // hold the calculated offsets for each image
@@ -75,6 +77,10 @@ public class NucleusRefinder
 
   public void setYOffset(int i){
     this.yOffset = i;
+  }
+
+  public void setRealignMode(boolean b){
+    this.realignMode = b;
   }
 
   protected void processLine(String line){
@@ -159,21 +165,24 @@ public class NucleusRefinder
 
   private void alignImages(File newPath, File oldPath){
     
+    if(this.realignMode==true){    
+      // this is the template file that matches the file we are checking
+      ImagePlus template = new ImagePlus(oldPath.getAbsolutePath());
+      ImagePlus source   = new ImagePlus(newPath.getAbsolutePath());
 
-    // this is the template file that matches the file we are checking
-    ImagePlus template = new ImagePlus(oldPath.getAbsolutePath());
-    ImagePlus source   = new ImagePlus(newPath.getAbsolutePath());
+      // CONVERT BOTH BLUE CHANNELS TO 8-bit GREYSCALE
+      ImagePlus imageToOffset = makeGreyscaleFromBlue(source);
+      ImagePlus templateImage = makeGreyscaleFromBlue(template);
 
-    // CONVERT BOTH BLUE CHANNELS TO 8-bit GREYSCALE
-    ImagePlus imageToOffset = makeGreyscaleFromBlue(source);
-    ImagePlus templateImage = makeGreyscaleFromBlue(template);
-
-    // INSERT IMAGE ALIGNMENT HERE
-    ImageAligner aligner = new ImageAligner(templateImage, imageToOffset, this.getThreshold());
-    aligner.setXOffset(this.xOffset);
-    aligner.setYOffset(this.yOffset);
-    aligner.run();
-    offsets.put(newPath, new XYPoint(aligner.getXOffset(), aligner.getYOffset()));
+      // INSERT IMAGE ALIGNMENT HERE
+      ImageAligner aligner = new ImageAligner(templateImage, imageToOffset, this.getThreshold());
+      aligner.setXOffset(this.xOffset);
+      aligner.setYOffset(this.yOffset);
+      aligner.run();
+      offsets.put(newPath, new XYPoint(aligner.getXOffset(), aligner.getYOffset()));
+    } else {
+      offsets.put(newPath, new XYPoint(this.xOffset, this.yOffset));
+    }
   }
 
   /*
@@ -210,11 +219,13 @@ public class NucleusRefinder
 
               // APPLY THE CALCULATED OFFSET HERE
               XYPoint imageOffset = offsets.get(path);
+
+              int xToFind = p.getXAsInt()-imageOffset.getXAsInt();
+              int yToFind = p.getYAsInt()-imageOffset.getYAsInt();
               
-              if(roi.getBounds().contains( p.getXAsInt()+imageOffset.getX(),
-                                           p.getYAsInt()+imageOffset.getY())){
+              if(roi.getBounds().contains( xToFind, yToFind )){
                 ok = true;
-                IJ.log("  Acquiring nucleus at "+p.getXAsInt()+","+p.getYAsInt());
+                IJ.log("  Acquiring nucleus at: "+xToFind+","+yToFind);
               }
             }
 
