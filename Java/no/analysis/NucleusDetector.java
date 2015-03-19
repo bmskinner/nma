@@ -11,42 +11,15 @@ package no.analysis;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.Overlay;
-import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.gui.ProgressBar;
-import ij.gui.TextRoi;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
-import ij.io.DirectoryChooser;
 import ij.io.Opener;
-import ij.io.OpenDialog;
-import ij.io.RandomAccessStream;
-import ij.measure.ResultsTable;
-import ij.plugin.ChannelSplitter;
-import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.RoiEnlarger;
-import ij.plugin.frame.RoiManager;
 import ij.plugin.RGBStackMerge;
 import ij.process.ByteProcessor;
-import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
 import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
-import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
-import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.*;
 import no.nuclei.*;
 import no.utility.*;
@@ -66,7 +39,7 @@ public class NucleusDetector {
 
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
 
-  /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
+  /* DEFAULT VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   protected double minNucleusSize  = 500;
   protected double maxNucleusSize  = 10000;
   protected double minNucleusCirc  = 0.4;
@@ -78,9 +51,6 @@ public class NucleusDetector {
 
   // counts of nuclei processed
   protected int totalNuclei        = 0;
-  // protected int nucleiFailedOnTip  = 0;
-  // protected int nucleiFailedOnTail = 0;
-  // protected int nucleiFailedOther  = 0; // generic reasons for failure
 
   private  int    signalThreshold = 70;
   private  double   minSignalSize = 5;
@@ -88,12 +58,15 @@ public class NucleusDetector {
 
 	private File inputFolder;
   protected String outputFolder;
-	// private NucleusCollection collection;
   private Map<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
 
 
-  /*
-    Constructors
+  /**
+  * Construct a detector on the given folder, and output the results to 
+  * the given output folder
+  *
+  * @param inputFolder the folder to analyse
+  * @param outputFolder the name of the folder for results
   */
 	public NucleusDetector(File inputFolder, String outputFolder){
 		this.inputFolder = inputFolder;
@@ -101,6 +74,9 @@ public class NucleusDetector {
 	}
 
 
+  /**
+  * Run the detector on the input folder
+  */
   public void runDetector(){
     try{
       processFolder(this.inputFolder);
@@ -110,67 +86,144 @@ public class NucleusDetector {
   }
 
   /*
+    -------------------
     Getters
+    -------------------
+  */
+
+  /**
+  * Get the image filetypes to analyse.
+  *
+  *  @return the array of filetypes
   */
   public String[] getFileTypes(){
     return this.fileTypes;
   }
 
+  /**
+  * Get the filename prefixes to ignore.
+  * These prevent exports of previously analyses
+  * being included in an analysis
+  *
+  *  @return the array of prefixes
+  */
   public String[] getPrefixesToIgnore(){
     return this.prefixesToIgnore;
   }
 
 	/*
+    -------------------
     Settings for nucleus detection
+    -------------------
   */
 
+  /**
+  * Set minimum size of a nucleus in pixels
+  *
+  *  @param d the minimum size
+  */
   public void setMinNucleusSize(double d){
     this.minNucleusSize = d;
   } 
 
+  /**
+  * Set maximum size of a nucleus in pixels
+  *
+  *  @param d the maximum size
+  */
   public void setMaxNucleusSize(double d){
     this.maxNucleusSize = d;
   }   
 
+  /**
+  * Set minimum circularity of a nucleus
+  *
+  *  @param d the minimum circularity
+  */
   public void setMinNucleusCirc(double d){
     this.minNucleusCirc = d;
   }
 
+  /**
+  * Set maximum circularity of a nucleus
+  *
+  *  @param d the maximum circularity
+  */
   public void setMaxNucleusCirc(double d){
     this.maxNucleusCirc = d;
   }
 
+  /**
+  * Set the image thresholding for detecting nuclei
+  *
+  *  @param i the threshold
+  */
   public void setThreshold(int i){
     this.nucleusThreshold = i;
   } 
 
   /*
+    -------------------
     Settings for signal detection
+    -------------------
   */
 
+
+  /**
+  * Set the image thresholding for detecting signals
+  *
+  *  @param i the threshold
+  */
   public void setSignalThreshold(int i){
     this.signalThreshold = i;
   }
 
+  /**
+  * Set minimum size of a signal in pixels
+  *
+  *  @param d the signal size
+  */
   public void setMinSignalSize(double d){
     this.minSignalSize = d;
   }
 
-  // this is a fraction of the nuclear area
+  /**
+  * Set maximum fraction of nuclear area a signal can take up
+  *
+  *  @param d the signal size
+  */
   public void setMaxSignalFraction(double d){
     this.maxSignalFraction = d;
   }
 
+  /**
+  * Set the window size for angle profiling in the nuclei
+  *
+  *  @param i the window size
+  */
   public void setAngleProfileWindowSize(int i){
     this.angleProfileWindowSize = i;
   }
 
+  /**
+  * Add a NucleusCollection to the group, using the source folder
+  * name as a key.
+  *
+  *  @param file a folder to be analysed
+  *  @param collection the collection of nuclei found
+  */
   public void addNucleusCollection(File file, NucleusCollection collection){
     this.collectionGroup.put(file, collection);
   }
 
 
-
+  /**
+  * Get the Map of NucleusCollections to the folder from
+  * which they came. Any folders with no nuclei are removed
+  * before returning.
+  *
+  *  @return a Map of a folder to its nuclei
+  */
   public Map<File, NucleusCollection> getNucleiCollections(){
     // remove any empty collections before returning
     List<File> toRemove = new ArrayList<File>(0);
@@ -294,7 +347,7 @@ public class NucleusDetector {
           ImagePlus image = localOpener.openImage(file.getAbsolutePath());             
           // handle the image
           if(image.getType()!=ImagePlus.COLOR_RGB){ // convert to RGB
-            IJ.log("  Found image type "+image.getType()+"; converting to RGB");
+            IJ.log("Converting image to RGB");
             image = this.makeRGB(image);
           } 
           // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
@@ -313,18 +366,13 @@ public class NucleusDetector {
     } // end for (File)
   } // end function
 
-
   /**
   * Detects nuclei within the given image.
-  * For each nucleus, perform the analysis step
   *
   * @param image the ImagePlus to be analysed
-  * @param path the full path of the image
+  * @return the Map linking an roi to its stats
   */
-  protected void processImage(ImagePlus image, File path){
-
-    IJ.log("File:  "+path.getName());
-
+  protected Map<Roi, HashMap<String, Double>> getROIs(ImagePlus image){
     Detector detector = new Detector();
     detector.setMaxSize(this.maxNucleusSize);
     detector.setMinSize(this.minNucleusSize);
@@ -333,7 +381,20 @@ public class NucleusDetector {
     detector.setThreshold(this.nucleusThreshold);
     detector.setChannel(BLUE_CHANNEL);
     detector.run(image);
-    Map<Roi, HashMap<String, Double>> map = detector.getRoiMap();
+    return detector.getRoiMap();
+  }
+
+  /**
+  * Call the nucleus detector on the given image.
+  * For each nucleus, perform the analysis step
+  *
+  * @param image the ImagePlus to be analysed
+  * @param path the full path of the image
+  */
+  protected void processImage(ImagePlus image, File path){
+
+    IJ.log("File:  "+path.getName());
+    Map<Roi, HashMap<String, Double>> map = getROIs(image);
 
     int i = 0;
 

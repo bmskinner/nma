@@ -10,49 +10,12 @@ package no.analysis;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.Overlay;
-import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.gui.ProgressBar;
-import ij.gui.TextRoi;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
-import ij.io.DirectoryChooser;
-import ij.io.Opener;
-import ij.io.OpenDialog;
-import ij.io.RandomAccessStream;
-import ij.measure.ResultsTable;
-import ij.plugin.ChannelSplitter;
-import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.RoiEnlarger;
-import ij.plugin.frame.RoiManager;
-import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
-import ij.process.ImageConverter;
-import ij.process.ImageProcessor;
-import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
-import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.awt.Polygon;
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.nio.charset.Charset;
 import java.util.*;
 import java.util.Scanner;
-import no.analysis.*;
-import no.nuclei.*;
-import no.utility.*;
-import no.collections.*;
-import no.components.*;
+import no.components.XYPoint;
 
 public class NucleusRefinder
   extends no.analysis.NucleusDetector
@@ -169,18 +132,9 @@ public class NucleusRefinder
   @Override
   protected void processImage(ImagePlus image, File path){
 
-     IJ.log("File:  "+path.getName());
+    IJ.log("File:  "+path.getName());
 
-    Detector detector = new Detector();
-    detector.setMaxSize(this.maxNucleusSize);
-    detector.setMinSize(this.minNucleusSize);
-    detector.setMinCirc(this.minNucleusCirc);
-    detector.setMaxCirc(this.maxNucleusCirc);
-    detector.setThreshold(this.nucleusThreshold);
-    detector.setChannel(BLUE_CHANNEL);
-    detector.run(image);
-    Map<Roi, HashMap<String, Double>> map = detector.getRoiMap();
-
+    Map<Roi, HashMap<String, Double>> map = getROIs(image);
     int i = 0;
 
     Set<Roi> keys = map.keySet();
