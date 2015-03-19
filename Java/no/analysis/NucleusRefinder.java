@@ -11,11 +11,15 @@ package no.analysis;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ColorProcessor;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.Scanner;
 import no.components.XYPoint;
+import no.analysis.ImageAligner;
 
 public class NucleusRefinder
   extends no.analysis.NucleusDetector
@@ -26,8 +30,12 @@ public class NucleusRefinder
   private int xOffset;
   private int yOffset;
 
+  private Map<File, File> fileMap =  new HashMap<File, File>(); // map from old file to new file
+
+  private Map<File, XYPoint> offsets = new HashMap<File, XYPoint>(); // hold the calculated offsets for each image
+
   // a structure to hold the image names, and the extracted nucleus coordinates
-  private ArrayList< HashMap<String, XYPoint> > nucleiToFind = new ArrayList< HashMap<String, XYPoint> >(0);
+  private ArrayList< HashMap<File, XYPoint> > nucleiToFind = new ArrayList< HashMap<File, XYPoint> >(0);
 
 
   /*
@@ -96,10 +104,10 @@ public class NucleusRefinder
     }
 
     // IJ.log("Found image: "+name+" x:"+x+" y:"+y);
-    XYPoint point = new XYPoint(x+xOffset, y+yOffset);
+    XYPoint point = new XYPoint(x, y);
 
-    HashMap<String, XYPoint> map = new HashMap<String, XYPoint>();
-    map.put(name, point);
+    HashMap<File, XYPoint> map = new HashMap<File, XYPoint>();
+    map.put(imagePath, point);
     nucleiToFind.add(map);
   }
 
@@ -116,13 +124,56 @@ public class NucleusRefinder
 
       ok = false;
       //check that the image is in the list to be analysed
-      for( HashMap<String, XYPoint> hash : nucleiToFind ){
-        if(hash.containsKey(file.getName())){
-          ok = true;
+      for( HashMap<File, XYPoint> hash : nucleiToFind ){
+        Set<File> fileSet = hash.keySet();
+        for(File oldFile : fileSet){ // will only be one entry in this hash
+          if(oldFile.getName().equals(file.getName() ) ){
+            ok = true;
+          }
         }
       }
     }
     return ok;
+  }
+
+  private ImagePlus makeGreyscaleFromBlue(ImagePlus image){
+
+    ColorProcessor icp = (ColorProcessor) image.getChannelProcessor();
+    ImagePlus newImage = new ImagePlus("image",new ByteProcessor( image.getWidth(), 
+                                                                  image.getHeight(), 
+                                                                  icp.getChannel(3)));
+    return newImage;
+
+  } 
+
+  private void updateFileMap(File file){
+    for( HashMap<File, XYPoint> hash : nucleiToFind ){ // the hash holds the tmeplate image path and position
+      Set<File> fileSet = hash.keySet();
+      for(File oldFile : fileSet){ // will only be one entry in this hash
+        if(oldFile.getName().equals(file.getName() ) ){
+          fileMap.put(file, oldFile);
+        }
+      }
+    }
+  }
+
+  private void alignImages(File newPath, File oldPath){
+    
+
+    // this is the template file that matches the file we are checking
+    ImagePlus template = new ImagePlus(oldPath.getAbsolutePath());
+    ImagePlus source   = new ImagePlus(newPath.getAbsolutePath());
+
+    // CONVERT BOTH BLUE CHANNELS TO 8-bit GREYSCALE
+    ImagePlus imageToOffset = makeGreyscaleFromBlue(source);
+    ImagePlus templateImage = makeGreyscaleFromBlue(template);
+
+    // INSERT IMAGE ALIGNMENT HERE
+    ImageAligner aligner = new ImageAligner(templateImage, imageToOffset, this.getThreshold());
+    aligner.setXOffset(this.xOffset);
+    aligner.setYOffset(this.yOffset);
+    aligner.run();
+    offsets.put(newPath, new XYPoint(aligner.getXOffset(), aligner.getYOffset()));
   }
 
   /*
@@ -133,24 +184,40 @@ public class NucleusRefinder
   protected void processImage(ImagePlus image, File path){
 
     IJ.log("File:  "+path.getName());
+    updateFileMap(path); // map from new to old
+    if(!fileMap.containsKey(path)){ return; } // skip images with no nuclei to catch
 
     Map<Roi, HashMap<String, Double>> map = getROIs(image);
     int i = 0;
 
     Set<Roi> keys = map.keySet();
 
+    if(!offsets.containsKey(path)){
+      alignImages(path, fileMap.get(path));
+    }   
+
     for(Roi roi : keys){
        try{
 
-        // if the point is within the roi
-        boolean ok = false;
-        for( HashMap<String, XYPoint> hash : nucleiToFind ){
-          if(hash.containsKey(path.getName())){
-            XYPoint p = hash.get(path.getName());
-            if(roi.getBounds().contains(p.getXAsInt(), p.getYAsInt())){
-              ok = true;
-              IJ.log("  Acquiring nucleus at "+p.getXAsInt()+","+p.getYAsInt());
+        boolean ok = false; // don't capture by default
+        for( HashMap<File, XYPoint> hash : nucleiToFind ){ // the hash holds the tmeplate image path and position
+          Set<File> fileSet = hash.keySet();
+          for(File oldFile : fileSet){ // will only be one entry in this hash
+
+
+            if(oldFile.getName().equals(path.getName() ) ){
+              XYPoint p = hash.get(oldFile);
+
+              // APPLY THE CALCULATED OFFSET HERE
+              XYPoint imageOffset = offsets.get(path);
+              
+              if(roi.getBounds().contains( p.getXAsInt()+imageOffset.getX(),
+                                           p.getYAsInt()+imageOffset.getY())){
+                ok = true;
+                IJ.log("  Acquiring nucleus at "+p.getXAsInt()+","+p.getYAsInt());
+              }
             }
+
           }
         }
 

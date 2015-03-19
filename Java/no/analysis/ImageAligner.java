@@ -43,9 +43,11 @@ public class ImageAligner{
   * @param staticImage the image that will be used as a reference
   * @param testImage the image that will be moved to best fit
   */
-  public ImageAligner(ImagePlus staticImage, ImagePlus testImage){
+  public ImageAligner(ImagePlus staticImage, ImagePlus testImage, int threshold){
     this.staticImage = staticImage;
     this.testImage = testImage;
+    maskImage(this.staticImage, threshold);
+    maskImage(this.testImage, threshold);
   }
 
   /**
@@ -76,16 +78,17 @@ public class ImageAligner{
 
   public void run(){
 
-    int bestScore = compareImages();
+    int bestScore = compareImages(this.staticImage, this.testImage);
     int bestX = 0;
     int bestY = 0;
 
-    ImagePlus offsetImage = new ImagePlus(testImage.getProcessor().duplicate());
-
-    for(int x= xOffset-this.range; x<this.range;x++){
-      for(int y= yOffset-this.range; y<this.range;y++){
+    for(int x= xOffset-this.range; x<xOffset+this.range;x++){
+      for(int y= yOffset-this.range; y<yOffset+this.range; y++){
+        
+        ImagePlus offsetImage = new ImagePlus("offset", testImage.getProcessor().duplicate());
         offsetImage(offsetImage, x, y); // need to use a copy of the image
-        int score = compareImages();
+        int score = compareImages(this.staticImage, offsetImage);
+        offsetImage.close();
         if(score>bestScore){
           bestScore = score;
           bestX = x;
@@ -93,6 +96,8 @@ public class ImageAligner{
         }
       }
     }
+
+    IJ.log("  Images aligned at: x: "+bestX+" y:"+bestY);
 
     this.xOffset = bestX;
     this.yOffset = bestY;
@@ -119,7 +124,7 @@ public class ImageAligner{
       for(int j=0; j<width; j++){
         int a = image1.getPixel(i, j)[0]; // greyscale values are in the first index
         int b = image2.getPixel(i, j)[0];
-        if(a&b==1){
+        if(a==255 && b==255){
           score++;
         }
       }

@@ -111,6 +111,10 @@ public class NucleusDetector {
     return this.prefixesToIgnore;
   }
 
+  public int getThreshold(){
+    return this.nucleusThreshold;
+  }
+
 	/*
     -------------------
     Settings for nucleus detection
