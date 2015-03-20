@@ -384,7 +384,11 @@ public class NucleusDetector {
     detector.setMaxCirc(this.maxNucleusCirc);
     detector.setThreshold(this.nucleusThreshold);
     detector.setChannel(BLUE_CHANNEL);
-    detector.run(image);
+    try{
+      detector.run(image);
+    } catch(Exception e){
+      IJ.log("Error in nucleus detection: "+e.getMessage());
+    }
     return detector.getRoiMap();
   }
 

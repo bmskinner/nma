@@ -70,18 +70,22 @@ public class Detector{
   	this.channel = i;
   }
 
-  public void run(ImagePlus image){
+  public void run(ImagePlus image) throws Exception{
   	if( Double.isNaN(this.minSize) || 
         Double.isNaN(this.maxSize) ||
         Double.isNaN(this.minCirc) ||
         Double.isNaN(this.maxCirc))
-  		return;
+  		throw new Exception("Detection parameters not set");
 
   	if(	this.channel!=RED_CHANNEL 	&& 
 	  		this.channel!=GREEN_CHANNEL && 
 	  		this.channel!=BLUE_CHANNEL){
-  		return;
+  		throw new Exception("RGB channel not set");
   	}
+
+    if(image==null){
+      throw new Exception("No image to analyse");
+    }
 
   	this.findInImage(image);
   }
@@ -111,11 +115,9 @@ public class Detector{
   	return resultMap;
   }
 
-  private void findInImage(ImagePlus image){
+  private ImagePlus getChannelImage(ImagePlus image){
 
-    RoiManager manager = new RoiManager(true);
-
-    // split out blue channel
+    // split out colour channel
     ChannelSplitter cs = new ChannelSplitter();
     ImagePlus[] channels = cs.split(image);
     ImagePlus searchImage = channels[this.channel];
@@ -124,7 +126,15 @@ public class Detector{
     ImageProcessor ip = searchImage.getChannelProcessor();
     ip.smooth();
     ip.threshold(this.threshold);
-    ip.invert();
+    // ip.invert(); // WHY IS THIS NEEDED? MAKES BLACK NUCLEUS ON WHITE. NEEDED BY PARTICLE DETECTOR UNTIL IT SUDDENLY BROKE THE PARTICLE DETECTOR.
+    return searchImage;
+  }
+
+  private void findInImage(ImagePlus image){
+
+    RoiManager manager = new RoiManager(true);
+
+    ImagePlus searchImage = this.getChannelImage(image);
 
     // run the particle analyser
     ResultsTable rt = new ResultsTable();

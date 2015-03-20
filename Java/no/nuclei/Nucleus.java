@@ -627,7 +627,12 @@ public class Nucleus
 			detector.setMaxCirc(1);
 			detector.setThreshold(this.signalThreshold);
 			detector.setChannel(channel);
-			detector.run(this.sourceImage);
+			try{
+				detector.run(this.sourceImage);
+			} catch(Exception e){
+				IJ.log("Error in signal detection: "+e.getMessage());
+			}
+			
 			Map<Roi, HashMap<String, Double>> map = detector.getRoiMap();
 
 			Set<Roi> keys = map.keySet();
