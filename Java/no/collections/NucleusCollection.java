@@ -51,6 +51,7 @@ import java.io.RandomAccessFile;
 import java.util.*;
 
 import no.analysis.Analysable;
+import no.analysis.ShellAnalyser;
 import no.nuclei.*;
 import no.nuclei.INuclearFunctions;
 import no.components.*;
@@ -591,15 +592,15 @@ public class NucleusCollection
     int afterSize = this.getNucleusCount();
     int removed = beforeSize - afterSize;
 
-    IJ.append("Postfiltered:", this.getDebugFile().getAbsolutePath());
+    IJ.append("Postfiltered:\r\n", this.getDebugFile().getAbsolutePath());
     this.exportFilterStats();
     IJ.log("    Removed due to size or length issues: "+removed+" nuclei");
-    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei\r", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei\r", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei\r", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to array length: "+arraylength+" nuclei\r", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to feret length: "+feretlength+" nuclei\r", this.getDebugFile().getAbsolutePath());
-    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei\r");
+    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to array length: "+arraylength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+    IJ.append("  Due to feret length: "+feretlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei");
     
   }
 
@@ -804,8 +805,68 @@ public class NucleusCollection
       this.exportSignalStats();
       this.exportDistancesBetweenSingleSignals();
       this.addSignalsToProfileCharts();
+      this.doShellAnalysis();
     }
   }
+
+  public void doShellAnalysis(){
+
+    IJ.log("Shell analysis:");
+
+    String redLogFile   = makeGlobalLogFile( "logShellsRed"  );
+    String greenLogFile = makeGlobalLogFile( "logShellsGreen");
+
+    StringBuilder redLog = new StringBuilder();
+    StringBuilder greenLog = new StringBuilder();
+    StringBuilder header = new StringBuilder();
+
+    // create the log file header
+
+    header.append("NUCLEUS_NUMBER\tSIGNAL_NUMBER\t");
+
+    for(int i=0; i<5; i++){
+      header.append("SHELL_"+i+"\t");
+    }
+    header.append("PATH\r\n");
+
+    redLog.append(  header.toString() );
+    greenLog.append(header.toString() );
+
+    // do the analysis
+
+    for(int i= 0; i<this.getNucleusCount();i++){
+      INuclearFunctions n = this.getNucleus(i);
+      ShellAnalyser shellAnalyser = new ShellAnalyser(n);
+      shellAnalyser.createShells();
+
+      List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
+      signals.add(n.getRedSignals());
+      signals.add(n.getGreenSignals());
+
+      int signalCount = 0;
+      for( List<NuclearSignal> signalGroup : signals ){
+
+        StringBuilder log = signalCount == Nucleus.RED_CHANNEL ? redLog : greenLog;
+        
+        if(signalGroup.size()>0){
+          for(int j=0; j<signalGroup.size();j++){
+            NuclearSignal s = signalGroup.get(j);
+            double[] signalPerShell = shellAnalyser.findShell(s, signalCount);
+
+            log.append(n.getNucleusNumber()+"\t"+j+"\t");
+            for(int k=0; k<shellAnalyser.getNumberOfShells(); k++){
+              log.append(signalPerShell[k]+"\t");
+            } // end for shells
+            log.append(n.getPath()+"\r\n");
+          } // end for signals
+        } // end if signals
+      } // end for signal group
+      signalCount++;
+    } // end nucleus iterations
+    IJ.append(  redLog.toString(), redLogFile);
+    IJ.append(greenLog.toString(), greenLogFile);
+  }
+  
 
   /*
     -----------------

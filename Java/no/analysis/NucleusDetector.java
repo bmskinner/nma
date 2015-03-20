@@ -399,6 +399,9 @@ public class NucleusDetector {
 
     IJ.log("File:  "+path.getName());
     Map<Roi, HashMap<String, Double>> map = getROIs(image);
+    if(map.size()==0){
+      IJ.log("  No nuclei in image");
+    }
 
     int i = 0;
 
