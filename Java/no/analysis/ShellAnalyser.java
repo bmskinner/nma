@@ -103,7 +103,7 @@ public class ShellAnalyser {
 
 	/**
 	*	Divide the nucleus into shells of equal area. Number of
-	* shells is 5 by default
+	* shells is 5 by default. Use setNumberOfShells to change.
 	*/
 	public void createShells(){
 
@@ -117,10 +117,6 @@ public class ShellAnalyser {
 		double area = initialArea;
 
 		for(int i=shellCount; i>0; i--){
-
-			// IJ.log("   Shell "+i);
-			// IJ.log("   Initiial area: "+initialArea);
-			// IJ.log("   Area: "+area);
 
 			RoiEnlarger enlarger = new RoiEnlarger();
 			Roi shrinkingRoi = (Roi) originalRoi.clone();
