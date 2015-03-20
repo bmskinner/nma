@@ -65,16 +65,41 @@ public class ShellAnalyser {
 		this.shellCount = i;
 	}
 
+	/**
+	*	Get the number of shells
+	*
+	* @return the number of shells
+	*/
 	public int getNumberOfShells(){
 		return this.shellCount;
 	}
 
+	/**
+	*	Get the DAPI densities in each shell
+	*
+	* @return DAPI density per shell, outer to inner
+	*/
 	public double[] getDapiDensities(){
 		return this.dapiDensities;
 	}
 
+	/**
+	*	Get the proportion of total signal per shell
+	*	before DAPI normalisation
+	*
+	* @return signal density per shell, outer to inner
+	*/
 	public double[] getSignalProportions(){
 		return this.signalProportions;
+	}
+
+	/**
+	*	Get the ROIs for the shells
+	*
+	* @return list of ROIs
+	*/
+	public List<Roi> getShells(){
+		return this.shells;
 	}
 
 	/**
@@ -83,7 +108,7 @@ public class ShellAnalyser {
 	*/
 	public void createShells(){
 
-			// IJ.log(" Creating shells");
+		// IJ.log(" Creating shells");
 
 		ImagePlus searchImage = channels[Nucleus.BLUE_CHANNEL];
 		ImageProcessor ip = searchImage.getProcessor();
@@ -142,7 +167,7 @@ public class ShellAnalyser {
 		Roi signalRoi = signal.getRoi();
 		
 		// Get a list of all the points within the ROI
-		List<XYPoint> signalPoints = getSignalPoints(signalRoi);
+		List<XYPoint> signalPoints = getXYPoints(signalRoi);
 
 		// now test each point for which shell it is in
 		double[] signalDensities = getSignalDensities(signalPoints, channel);
@@ -157,25 +182,25 @@ public class ShellAnalyser {
 	}
 
 	/**
-	*	Find the XYPoints within a signal ROI
+	*	Find the XYPoints within an ROI
 	*
 	* @param signaRoi the ROI to convert
 	* @return a list of XYPoints within the roi
 	*/
-	private List<XYPoint> getSignalPoints(Roi signalRoi){
+	private List<XYPoint> getXYPoints(Roi roi){
 	
-		Rectangle signalBounds = signalRoi.getBounds();
+		Rectangle roiBounds = roi.getBounds();
 
 		// Get a list of all the points within the ROI
-		List<XYPoint> signalPoints = new ArrayList<XYPoint>(0);
-		for(int x=(int)signalBounds.getX(); x<signalBounds.getWidth()+signalBounds.getX(); x++){
-			for(int y=(int)signalBounds.getY(); y<signalBounds.getHeight()+signalBounds.getY(); y++){
-				if(signalRoi.contains(x, y)){
-					signalPoints.add(new XYPoint(x, y));
+		List<XYPoint> roiPoints = new ArrayList<XYPoint>(0);
+		for(int x=(int)roiBounds.getX(); x<roiBounds.getWidth()+roiBounds.getX(); x++){
+			for(int y=(int)roiBounds.getY(); y<roiBounds.getHeight()+roiBounds.getY(); y++){
+				if(roi.contains(x, y)){
+					roiPoints.add(new XYPoint(x, y));
 				}
 			}
 		}
-		return signalPoints;
+		return roiPoints;
 	}
 
 	/**
@@ -238,21 +263,22 @@ public class ShellAnalyser {
 	private double[] findDapiDensities(){
 
 		double[] densities = new double[shellCount];
-		ImagePlus nucleusImage = channels[Nucleus.BLUE_CHANNEL];
-		ImageProcessor ip = nucleusImage.getProcessor();
 
 		int i=0;
 		for(Roi r : shells){
-			
-			ip.resetRoi();
-			ip.setRoi(r);	 
-			ResultsTable rt = new ResultsTable();
-			Analyzer analyser = new Analyzer( nucleusImage, Analyzer.INTEGRATED_DENSITY, rt);
-			analyser.measure();
-			densities[i] = rt.getValue("IntDen",0);
+
+			List<XYPoint> points = getXYPoints(r);
+			double density = 0;
+
+			for(XYPoint p : points){
+				// find the value of the signal
+				density += (double)channels[Nucleus.BLUE_CHANNEL].getPixel(p.getXAsInt(), p.getYAsInt())[0];	 
+			}
+			densities[i] = density;
 			i++;
 		}
 
+		// correct for the shells stacking
 		double[] result = new double[shellCount];
 
 		for(int j=0; j<shellCount; j++){
