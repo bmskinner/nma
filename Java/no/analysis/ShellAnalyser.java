@@ -38,6 +38,7 @@ public class ShellAnalyser {
 	Roi originalRoi;
 
 	double[] dapiDensities;
+	double[] signalProportions;
 
 	List<Roi> shells = new ArrayList<Roi>(0);
 
@@ -52,7 +53,7 @@ public class ShellAnalyser {
 		this.image = n.getSourceImage();
 		ChannelSplitter cs = new ChannelSplitter();
 	  this.channels = cs.split(this.image);
-	  IJ.log(" Prepping image: "+n.getNucleusNumber());
+	  // IJ.log(" Prepping image: "+n.getNucleusNumber());
 	}
 
 	/**
@@ -68,44 +69,63 @@ public class ShellAnalyser {
 		return this.shellCount;
 	}
 
+	public double[] getDapiDensities(){
+		return this.dapiDensities;
+	}
+
+	public double[] getSignalProportions(){
+		return this.signalProportions;
+	}
+
 	/**
 	*	Divide the nucleus into shells of equal area. Number of
 	* shells is 5 by default
 	*/
 	public void createShells(){
 
-			IJ.log(" Creating shells");
+			// IJ.log(" Creating shells");
 
-	    ImagePlus searchImage = channels[Nucleus.BLUE_CHANNEL];
-	    ImageProcessor ip = searchImage.getProcessor();
+		ImagePlus searchImage = channels[Nucleus.BLUE_CHANNEL];
+		ImageProcessor ip = searchImage.getProcessor();
 
-	    ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
-     	double initialArea = stats.area;
+		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
+		double initialArea = stats.area;
+		
 
-     	Roi shrinkingRoi = (Roi) originalRoi.clone();
-     	RoiEnlarger enlarger = new RoiEnlarger();
+		double area = initialArea;
 
-     	double area = initialArea;
+		for(int i=shellCount; i>0; i--){
 
-	    for(int i=shellCount; i>0; i--){
+			// IJ.log("   Shell "+i);
+			// IJ.log("   Initiial area: "+initialArea);
+			// IJ.log("   Area: "+area);
 
-	    	IJ.log("   Shell "+i);
-	    	IJ.log("   Initiial area: "+initialArea);
-	    	IJ.log("   Area: "+area);
+			RoiEnlarger enlarger = new RoiEnlarger();
+			Roi shrinkingRoi = (Roi) originalRoi.clone();
 
-	    	while(area>initialArea* (i/shellCount)){
-	    		shrinkingRoi = enlarger.enlarge(shrinkingRoi, -1);
-	    		
-	     		ip.setRoi(shrinkingRoi); 
-	     		stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
-	     		area = stats.area;
-	     	}
-	     	shells.add((Roi)shrinkingRoi.clone());
-	    }
+			double maxArea = initialArea * ((double)i/(double)shellCount);
 
-	    // find the dapi density in each shell
-			this.dapiDensities = getDapiDensities();
-			IJ.log(" Shells created");
+			while(area>maxArea){
+
+				shrinkingRoi = enlarger.enlarge(shrinkingRoi, -1);
+				ip.resetRoi();
+				ip.setRoi(shrinkingRoi); 
+				stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
+				area = stats.area;
+				// IJ.log("      "+area +" of "+maxArea);
+
+				// try{
+				// 	Thread.sleep(500);
+				// } catch(Exception e){
+
+				// }
+			}
+			shells.add((Roi)shrinkingRoi.clone());
+		}
+
+		// find the dapi density in each shell
+			this.dapiDensities = findDapiDensities();
+			// IJ.log(" Shells created");
 	}
 
 	/**
@@ -117,23 +137,23 @@ public class ShellAnalyser {
 	*/
 	public double[] findShell(NuclearSignal signal, int channel){
 
-		IJ.log(" Finding shells");
+		// IJ.log(" Finding shells");
 
-    Roi signalRoi = signal.getRoi();
-    
-    // Get a list of all the points within the ROI
-    List<XYPoint> signalPoints = getSignalPoints(signalRoi);
+		Roi signalRoi = signal.getRoi();
+		
+		// Get a list of all the points within the ROI
+		List<XYPoint> signalPoints = getSignalPoints(signalRoi);
 
-	  // now test each point for which shell it is in
+		// now test each point for which shell it is in
 		double[] signalDensities = getSignalDensities(signalPoints, channel);
 
 		// find the proportion of signal within each shell
-		double[] proportions = getProportions(signalDensities);
+		this.signalProportions = getProportions(signalDensities);
 
 		// normalise the signals to the dapi intensity
-		double[] normalisedSignal = normalise(proportions, this.dapiDensities);
+		double[] normalisedSignal = normalise(this.signalProportions, this.dapiDensities);
 
-		return proportions;
+		return normalisedSignal;
 	}
 
 	/**
@@ -143,18 +163,19 @@ public class ShellAnalyser {
 	* @return a list of XYPoints within the roi
 	*/
 	private List<XYPoint> getSignalPoints(Roi signalRoi){
+	
 		Rectangle signalBounds = signalRoi.getBounds();
 
-    // Get a list of all the points within the ROI
-    List<XYPoint> signalPoints = new ArrayList<XYPoint>(0);
-    for(int x=(int)signalBounds.getX(); x<signalBounds.getWidth()+signalBounds.getX(); x++){
-    	for(int y=(int)signalBounds.getY(); y<signalBounds.getHeight()+signalBounds.getY(); y++){
-    		if(signalRoi.contains(x, y)){
-    			signalPoints.add(new XYPoint(x, y));
-    		}
-    	}
-    }
-    return signalPoints;
+		// Get a list of all the points within the ROI
+		List<XYPoint> signalPoints = new ArrayList<XYPoint>(0);
+		for(int x=(int)signalBounds.getX(); x<signalBounds.getWidth()+signalBounds.getX(); x++){
+			for(int y=(int)signalBounds.getY(); y<signalBounds.getHeight()+signalBounds.getY(); y++){
+				if(signalRoi.contains(x, y)){
+					signalPoints.add(new XYPoint(x, y));
+				}
+			}
+		}
+		return signalPoints;
 	}
 
 	/**
@@ -214,15 +235,19 @@ public class ShellAnalyser {
 	*
 	* @return a double[] with the DAPI density per shell, outer to inner
 	*/
-	private double[] getDapiDensities(){
+	private double[] findDapiDensities(){
 
 		double[] densities = new double[shellCount];
+		ImagePlus nucleusImage = channels[Nucleus.BLUE_CHANNEL];
+		ImageProcessor ip = nucleusImage.getProcessor();
 
 		int i=0;
 		for(Roi r : shells){
-			channels[Nucleus.BLUE_CHANNEL].getProcessor().setRoi(r);	 
+			
+			ip.resetRoi();
+			ip.setRoi(r);	 
 			ResultsTable rt = new ResultsTable();
-			Analyzer analyser = new Analyzer( channels[Nucleus.BLUE_CHANNEL], Analyzer.INTEGRATED_DENSITY, rt);
+			Analyzer analyser = new Analyzer( nucleusImage, Analyzer.INTEGRATED_DENSITY, rt);
 			analyser.measure();
 			densities[i] = rt.getValue("IntDen",0);
 			i++;
@@ -242,9 +267,19 @@ public class ShellAnalyser {
 	* @return a double[] with the normalised signal density per shell, outer to inner
 	*/
 	private double[] normalise(double[] signals, double[] dapi){
+		
+		double[] norm = new double[shellCount];
+		double total = 0;
+		// perform the dapi normalisation, and get the signal total
+		for(int i=0; i<shellCount; i++){
+			norm[i] = signals[i] / dapi[i];
+			total += norm[i];
+		}
+
+		// express the normalised signal as a fraction of the total
 		double[] result = new double[shellCount];
 		for(int i=0; i<shellCount; i++){
-			result[i] = signals[i] / dapi[i];
+			result[i] = norm[i] / total;
 		}
 		return result;
 	}

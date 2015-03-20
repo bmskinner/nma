@@ -811,7 +811,7 @@ public class NucleusCollection
 
   public void doShellAnalysis(){
 
-    IJ.log("Shell analysis:");
+    // IJ.log("Shell analysis:");
 
     String redLogFile   = makeGlobalLogFile( "logShellsRed"  );
     String greenLogFile = makeGlobalLogFile( "logShellsGreen");
@@ -825,7 +825,10 @@ public class NucleusCollection
     header.append("NUCLEUS_NUMBER\tSIGNAL_NUMBER\t");
 
     for(int i=0; i<5; i++){
-      header.append("SHELL_"+i+"\t");
+      header.append("SIGNAL_SHELL_"+i+"\t");
+    }
+    for(int i=0; i<5; i++){
+      header.append("DAPI_SHELL_"+i+"\t");
     }
     header.append("PATH\r\n");
 
@@ -852,12 +855,19 @@ public class NucleusCollection
           for(int j=0; j<signalGroup.size();j++){
             NuclearSignal s = signalGroup.get(j);
             double[] signalPerShell = shellAnalyser.findShell(s, signalCount);
+            double[] dapi = shellAnalyser.getDapiDensities();
+            Double firstShell = new Double(signalPerShell[0]);
+            // if(!firstShell.isNaN() ){ // only include signals with proper numbers
 
-            log.append(n.getNucleusNumber()+"\t"+j+"\t");
-            for(int k=0; k<shellAnalyser.getNumberOfShells(); k++){
-              log.append(signalPerShell[k]+"\t");
-            } // end for shells
-            log.append(n.getPath()+"\r\n");
+              log.append(n.getNucleusNumber()+"\t"+j+"\t");
+              for(int k=0; k<shellAnalyser.getNumberOfShells(); k++){
+                log.append(signalPerShell[k]+"\t");
+              } // end for shells
+              for(int k=0; k<shellAnalyser.getNumberOfShells(); k++){
+                log.append(dapi[k]+"\t");
+              } // end for shells
+              log.append(n.getPath()+"\r\n");
+            // } // end isNaN
           } // end for signals
         } // end if signals
       } // end for signal group
