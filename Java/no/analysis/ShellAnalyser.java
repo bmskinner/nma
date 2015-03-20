@@ -52,8 +52,7 @@ public class ShellAnalyser {
 		this.originalRoi = n.getRoi();
 		this.image = n.getSourceImage();
 		ChannelSplitter cs = new ChannelSplitter();
-	  this.channels = cs.split(this.image);
-	  // IJ.log(" Prepping image: "+n.getNucleusNumber());
+		this.channels = cs.split(this.image);
 	}
 
 	/**
@@ -108,8 +107,6 @@ public class ShellAnalyser {
 	*/
 	public void createShells(){
 
-		// IJ.log(" Creating shells");
-
 		ImagePlus searchImage = channels[Nucleus.BLUE_CHANNEL];
 		ImageProcessor ip = searchImage.getProcessor();
 
@@ -137,20 +134,12 @@ public class ShellAnalyser {
 				ip.setRoi(shrinkingRoi); 
 				stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
 				area = stats.area;
-				// IJ.log("      "+area +" of "+maxArea);
-
-				// try{
-				// 	Thread.sleep(500);
-				// } catch(Exception e){
-
-				// }
 			}
 			shells.add((Roi)shrinkingRoi.clone());
 		}
 
 		// find the dapi density in each shell
-			this.dapiDensities = findDapiDensities();
-			// IJ.log(" Shells created");
+		this.dapiDensities = findDapiDensities();
 	}
 
 	/**

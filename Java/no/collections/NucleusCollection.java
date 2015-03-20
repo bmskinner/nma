@@ -842,6 +842,24 @@ public class NucleusCollection
       ShellAnalyser shellAnalyser = new ShellAnalyser(n);
       shellAnalyser.createShells();
 
+      ImagePlus shellImage = n.getSourceImage();
+      ImageProcessor ip = shellImage.getProcessor();
+      List<Roi> shells = shellAnalyser.getShells();
+      if(shells.size()>0){ // check we actually got shells out
+        for(Roi r : shells){
+          ip.setColor(Color.YELLOW);
+          ip.setLineWidth(1);
+          r.drawPixels(ip);
+        }
+
+        String outPath = n.getNucleusFolder().getAbsolutePath()+
+                        File.separator+
+                        Nucleus.IMAGE_PREFIX+
+                        n.getNucleusNumber()+
+                        ".shells.tiff";
+        IJ.saveAsTiff(shellImage, outPath);
+      }
+
       List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
       signals.add(n.getRedSignals());
       signals.add(n.getGreenSignals());
