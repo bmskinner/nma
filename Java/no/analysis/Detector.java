@@ -126,7 +126,7 @@ public class Detector{
     ImageProcessor ip = searchImage.getChannelProcessor();
     ip.smooth();
     ip.threshold(this.threshold);
-    // ip.invert(); // WHY IS THIS NEEDED? MAKES BLACK NUCLEUS ON WHITE. NEEDED BY PARTICLE DETECTOR UNTIL IT SUDDENLY BROKE THE PARTICLE DETECTOR.
+    ip.invert(); // WHY IS THIS NEEDED? MAKES BLACK NUCLEUS ON WHITE. NEEDED BY PARTICLE DETECTOR ON MANETHEREN, BUT BREAKS ON WORK PC UNTIL IT SUDDENLY BROKE THE PARTICLE DETECTOR.
     return searchImage;
   }
 
