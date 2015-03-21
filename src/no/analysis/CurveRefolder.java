@@ -9,40 +9,17 @@ package no.analysis;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
-import ij.gui.TextRoi;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
 import ij.measure.Calibration;
-import ij.measure.ResultsTable;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.frame.RoiManager;
-import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
-import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
-import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
 import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.Polygon;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.*;
 
 import no.nuclei.INuclearFunctions;
 import no.nuclei.Nucleus;
-import no.analysis.Analysable;
+import no.collections.INuclearCollection;
 import no.utility.*;
 import no.components.*;
 
@@ -469,7 +446,7 @@ public class CurveRefolder{
 		Using a list of signal locations, draw on
 		the consensus plot.
 	*/
-	public void addSignalsToConsensus(Analysable collection){
+	public void addSignalsToConsensus(INuclearCollection collection){
 
 		for(int i= 0; i<collection.getNuclei().size();i++){ // for each roi
 
@@ -589,7 +566,7 @@ public class CurveRefolder{
 		-----------------------
 	*/
 
-	public void exportProfileOfRefoldedImage(Analysable collection){
+	public void exportProfileOfRefoldedImage(INuclearCollection collection){
 	 
 		String logFile = collection.makeGlobalLogFile("logConsensusNucleus");
 
@@ -618,7 +595,7 @@ public class CurveRefolder{
 		IJ.append( outLine.toString(), logFile);
 	}
 
-	public void exportImage(Analysable collection){
+	public void exportImage(INuclearCollection collection){
 		ImagePlus plot = nucleusPlot.getImagePlus();
 		Calibration cal = plot.getCalibration();
 		cal.setUnit("pixels");

@@ -119,8 +119,8 @@ public class AnalysisCreator {
   // the raw input from nucleus detector
   private Map<File, NucleusCollection> folderCollection;
 
-  private List<Analysable> nuclearPopulations = new ArrayList<Analysable>(0);
-  private List<Analysable> failedPopulations  = new ArrayList<Analysable>(0);
+  private List<INuclearCollection> nuclearPopulations = new ArrayList<INuclearCollection>(0);
+  private List<INuclearCollection> failedPopulations  = new ArrayList<INuclearCollection>(0);
   
 
   /*
@@ -368,7 +368,7 @@ public class AnalysisCreator {
         NucleusCollection collection = folderCollection.get(key);
 
         try{
-          Analysable spermNuclei = (Analysable) collectionConstructor.newInstance(key, this.outputFolderName, "analysable");
+          INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, this.outputFolderName, "analysable");
           
           // RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
           IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
@@ -401,7 +401,7 @@ public class AnalysisCreator {
   public void analysePopulations(){
     IJ.log("Beginning analysis");
 
-    for(Analysable r : this.nuclearPopulations){
+    for(INuclearCollection r : this.nuclearPopulations){
 
       if(r.getDebugFile().exists()){
         r.getDebugFile().delete();
@@ -419,7 +419,7 @@ public class AnalysisCreator {
         
         nucleusCounts.put("input", r.getNucleusCount());
         Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
-        Analysable failedNuclei = (Analysable) collectionConstructor.newInstance(folder, this.outputFolderName, "failed");
+        INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, this.outputFolderName, "failed");
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
         if(failedNuclei.getNucleusCount()>0){
@@ -457,9 +457,9 @@ public class AnalysisCreator {
       this.attemptRefoldingConsensusNucleus(r);
 
     
-      ArrayList<Analysable> signalPopulations = dividePopulationBySignals(r);
+      ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
       
-      for(Analysable p : signalPopulations){
+      for(INuclearCollection p : signalPopulations){
        
         nucleusCounts.put(p.getType(), p.getNucleusCount());
 
@@ -476,7 +476,7 @@ public class AnalysisCreator {
     }
   }
 
-  public void attemptRefoldingConsensusNucleus(Analysable collection){
+  public void attemptRefoldingConsensusNucleus(INuclearCollection collection){
 
     try{ 
 
@@ -536,9 +536,9 @@ public class AnalysisCreator {
       nuclei with red signals, with green signals, without red signals and without green signals
     Only include the 'without' populations if there is a 'with' population.
   */
-  public ArrayList<Analysable> dividePopulationBySignals(Analysable r){
+  public ArrayList<INuclearCollection> dividePopulationBySignals(INuclearCollection r){
 
-    ArrayList<Analysable> signalPopulations = new ArrayList<Analysable>(0);
+    ArrayList<INuclearCollection> signalPopulations = new ArrayList<INuclearCollection>(0);
 
     try{
 
@@ -546,16 +546,16 @@ public class AnalysisCreator {
       
       List<INuclearFunctions> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
       if(redList.size()>0){
-        // Analysable redNuclei = new Analysable(r.getFolder(), "red");
-        Analysable redNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "red");
+        // INuclearCollection redNuclei = new INuclearCollection(r.getFolder(), "red");
+        INuclearCollection redNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "red");
         for(INuclearFunctions n : redList){
           redNuclei.addNucleus( (INuclearFunctions)n );
         }
         signalPopulations.add(redNuclei);
         List<INuclearFunctions> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
         if(notRedList.size()>0){
-          Analysable notRedNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_red");
-          // Analysable notRedNuclei = new Analysable(r.getFolder(), "not_red");
+          INuclearCollection notRedNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_red");
+          // INuclearCollection notRedNuclei = new INuclearCollection(r.getFolder(), "not_red");
           for(INuclearFunctions n : notRedList){
             notRedNuclei.addNucleus( (INuclearFunctions)n );
           }
@@ -565,16 +565,16 @@ public class AnalysisCreator {
 
       List<INuclearFunctions> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
       if(greenList.size()>0){
-        Analysable greenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "green");
-        // Analysable greenNuclei = new Analysable(r.getFolder(), "green");
+        INuclearCollection greenNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "green");
+        // INuclearCollection greenNuclei = new INuclearCollection(r.getFolder(), "green");
         for(INuclearFunctions n : greenList){
           greenNuclei.addNucleus( (INuclearFunctions)n );
         }
         signalPopulations.add(greenNuclei);
         List<INuclearFunctions> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
         if(notGreenList.size()>0){
-          Analysable notGreenNuclei = (Analysable) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_green");
-          // Analysable notGreenNuclei = new Analysable(r.getFolder(), "not_green");
+          INuclearCollection notGreenNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_green");
+          // INuclearCollection notGreenNuclei = new INuclearCollection(r.getFolder(), "not_green");
           for(INuclearFunctions n : notGreenList){
             notGreenNuclei.addNucleus( (INuclearFunctions)n );
           }
@@ -597,7 +597,7 @@ public class AnalysisCreator {
 
   public void exportAnalysisLog(){
 
-    for(Analysable r : this.nuclearPopulations){
+    for(INuclearCollection r : this.nuclearPopulations){
       
       StringBuilder outLine = new StringBuilder();
       SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
