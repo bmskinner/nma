@@ -6,27 +6,16 @@
 */  
 package no.analysis;
 
-import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.measure.Measurements;
-import ij.measure.ResultsTable;
 import ij.gui.Roi;
-import ij.io.Opener;
-import ij.plugin.filter.Analyzer;
 import ij.plugin.ChannelSplitter;
 import ij.plugin.RoiEnlarger;
-import ij.plugin.RGBStackMerge;
 import ij.process.ImageStatistics;
-import ij.process.ByteProcessor;
-import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
 import java.awt.Rectangle;
-import java.io.File;
 import java.util.*;
 import no.nuclei.*;
-import no.utility.*;
-import no.collections.*;
 import no.components.*;
 
 public class ShellAnalyser {
@@ -51,8 +40,8 @@ public class ShellAnalyser {
 	public ShellAnalyser(INuclearFunctions n){
 		this.originalRoi = n.getRoi();
 		this.image = n.getSourceImage();
-		ChannelSplitter cs = new ChannelSplitter();
-		this.channels = cs.split(this.image);
+//		ChannelSplitter cs = new ChannelSplitter();
+		this.channels = ChannelSplitter.split(this.image);
 	}
 
 	/**
@@ -118,14 +107,14 @@ public class ShellAnalyser {
 
 		for(int i=shellCount; i>0; i--){
 
-			RoiEnlarger enlarger = new RoiEnlarger();
+//			RoiEnlarger enlarger = new RoiEnlarger();
 			Roi shrinkingRoi = (Roi) originalRoi.clone();
 
 			double maxArea = initialArea * ((double)i/(double)shellCount);
 
 			while(area>maxArea){
 
-				shrinkingRoi = enlarger.enlarge(shrinkingRoi, -1);
+				shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, -1);
 				ip.resetRoi();
 				ip.setRoi(shrinkingRoi); 
 				stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
