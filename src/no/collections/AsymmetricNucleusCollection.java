@@ -230,8 +230,8 @@ public class AsymmetricNucleusCollection
         Opener localOpener = new Opener();
         ImagePlus image = localOpener.openImage(path);
         ImageProcessor ip = image.getProcessor();
-        int width  = ip.getWidth();
-        int height = ip.getHeight();
+//        int width  = ip.getWidth();
+//        int height = ip.getHeight();
         ip.setRoi(n.getRoi());
 
 

@@ -9,12 +9,9 @@
 package no.collections;
 
 import ij.IJ;
-import java.util.*;
 import java.io.File;
-import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.components.*;
-import no.utility.*;
 
 public class PigSpermNucleusCollection
     extends no.collections.AsymmetricNucleusCollection
@@ -47,7 +44,7 @@ public class PigSpermNucleusCollection
 
     Profile minima = medianProfile.getLocalMaxima(5); // window size 5
 
-    double minDiff = medianProfile.size();
+//    double minDiff = medianProfile.size();
     double minAngle = 180;
     int tailIndex = 0;
 
@@ -61,8 +58,8 @@ public class PigSpermNucleusCollection
         if(minima.get(i)==1){
           int index = (int)minima.get(i);
 
-          int toEnd = medianProfile.size() - index;
-          int diff = Math.abs(index - toEnd);
+//          int toEnd = medianProfile.size() - index;
+//          int diff = Math.abs(index - toEnd);
 
           double angle = medianProfile.get(index);
           if(angle>minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip

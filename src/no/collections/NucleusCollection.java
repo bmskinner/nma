@@ -10,44 +10,16 @@
 package no.collections;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Overlay;
-import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.gui.ProgressBar;
 import ij.gui.TextRoi;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
-import ij.io.DirectoryChooser;
 import ij.io.Opener;
-import ij.io.OpenDialog;
-import ij.io.RandomAccessStream;
 import ij.measure.Calibration;
-import ij.measure.ResultsTable;
-import ij.measure.SplineFitter;
-import ij.plugin.ChannelSplitter;
-import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.frame.RoiManager;
-import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
-import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
-import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
 import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.Polygon;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.*;
 
 import no.collections.INuclearCollection;
@@ -97,14 +69,12 @@ public class NucleusCollection
 
 	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
-  private Map<String, Double[]> normalisedMedianProfileFromPoint = new HashMap<String, Double[]>();// the type of point and the array
 
   // store the calculated median profiles centred on the given border point
 
   private Map<String, HashMap<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
 
-  // in preparation for new architecture:
-  private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); // REPLACE normalisedMedianProfileFromPoint WITH  THIS
+  private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); 
 
 	public NucleusCollection(File folder, String outputFolder, String type){
 		this.folder = folder;
@@ -539,7 +509,6 @@ public class NucleusCollection
     int perim = 0;
     int pathlength = 0;
     int arraylength = 0;
-    int curveShape = 0;
     int feretlength = 0;
 
     IJ.append("Prefiltered:", this.getDebugFile().getAbsolutePath());
@@ -547,8 +516,7 @@ public class NucleusCollection
 
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions n = this.getNucleus(i);
-      boolean dropNucleus = false;
-
+      
       if(n.getArea() > maxArea || n.getArea() < minArea ){
         n.updateFailureCode(FAILURE_AREA);
         area++;
@@ -573,8 +541,6 @@ public class NucleusCollection
       
       if(n.getFailureCode() > 0){
         failedCollection.addNucleus(n);
-        // this.getNuclei().remove(this.getNucleus(i));
-        // i--; // the array index automatically shifts to account for the removed nucleus. Compensate to avoid skipping nuclei
       }
     }
 
@@ -1192,8 +1158,8 @@ public class NucleusCollection
         Opener localOpener = new Opener();
         ImagePlus image = localOpener.openImage(path);
         ImageProcessor ip = image.getProcessor();
-        int width  = ip.getWidth();
-        int height = ip.getHeight();
+//        int width  = ip.getWidth();
+//        int height = ip.getHeight();
         ip.setRoi(n.getRoi());
 
 

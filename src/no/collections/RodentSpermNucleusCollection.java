@@ -11,45 +11,7 @@
 package no.collections;
 
 import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.Overlay;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.gui.ProgressBar;
-import ij.gui.TextRoi;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
-import ij.io.DirectoryChooser;
-import ij.io.Opener;
-import ij.io.OpenDialog;
-import ij.io.RandomAccessStream;
-import ij.measure.ResultsTable;
-import ij.measure.SplineFitter;
-import ij.plugin.ChannelSplitter;
-import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.frame.RoiManager;
-import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
-import ij.process.ImageConverter;
-import ij.process.ImageProcessor;
-import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
-import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.Polygon;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.util.*;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.components.*;
@@ -93,7 +55,7 @@ public class RodentSpermNucleusCollection
 
 		Profile minima = medianProfile.getLocalMinima(5); // window size 5
 
-		double minDiff = medianProfile.size();
+//		double minDiff = medianProfile.size();
 		double minAngle = 180;
 		int tailIndex = 0;
 
@@ -101,8 +63,8 @@ public class RodentSpermNucleusCollection
       if( (int)minima.get(i)==1){
   			int index = i;
 
-  			int toEnd = medianProfile.size() - index;
-  			int diff = Math.abs(index - toEnd);
+//  			int toEnd = medianProfile.size() - index;
+//  			int diff = Math.abs(index - toEnd);
 
   			double angle = medianProfile.get(index);
   			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
