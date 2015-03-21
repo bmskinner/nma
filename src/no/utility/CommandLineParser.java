@@ -11,7 +11,7 @@ package no.utility;
 
 import java.util.*;
 import java.util.Scanner;
-import java.util.StringJoiner;
+import java.lang.StringBuilder;
 
 public class CommandLineParser {
 
@@ -23,13 +23,13 @@ public class CommandLineParser {
 	// arguments - e.g in file paths.
 	public CommandLineParser(String[] input){
 
-		StringJoiner sj = new StringJoiner("\t");
+		StringBuilder sj = new StringBuilder();
 		for(String arg : input){
-			sj.add(arg);
+			sj.append(arg+"\t");
 		}
 		// expecting input to be:
 		// -min 12 -max 15 ...
-		parseInput(sj.toString);
+		parseInput(sj.toString());
 	}
 
 	public HashMap<String, String> getParameters(){
@@ -41,12 +41,12 @@ public class CommandLineParser {
 	}
 
 	public boolean contains(String arg){
-		return this.parameterList.containKey(arg);
+		return this.parameterList.containsKey(arg);
 	}
 
 	public void parseInput(String input){
-		Scanner lineScanner = new Scanner(inputString);
-	  lineScanner.useDelimiter("\t-"); // split on space followed by dash
+		Scanner lineScanner = new Scanner(input);
+		lineScanner.useDelimiter("\t-"); // split on space followed by dash
 
 	  while (lineScanner.hasNext()){
 
@@ -58,6 +58,8 @@ public class CommandLineParser {
 				String value = parameterScanner.next();
 				parameterList.put(arg, value);
 			}
+			parameterScanner.close();
 	  }
+	  lineScanner.close();
 	}
 }
