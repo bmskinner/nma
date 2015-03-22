@@ -6,6 +6,7 @@
 */  
 package no.analysis;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.measure.Measurements;
 import ij.gui.Roi;
@@ -13,8 +14,12 @@ import ij.plugin.ChannelSplitter;
 import ij.plugin.RoiEnlarger;
 import ij.process.ImageStatistics;
 import ij.process.ImageProcessor;
+
+import java.awt.Color;
 import java.awt.Rectangle;
+import java.io.File;
 import java.util.*;
+
 import no.nuclei.*;
 import no.components.*;
 
@@ -25,6 +30,7 @@ public class ShellAnalyser {
 	ImagePlus image;
 	ImagePlus[] channels;
 	Roi originalRoi;
+	INuclearFunctions nucleus;
 
 	double[] dapiDensities;
 	double[] signalProportions;
@@ -42,6 +48,7 @@ public class ShellAnalyser {
 		this.image = n.getSourceImage();
 //		ChannelSplitter cs = new ChannelSplitter();
 		this.channels = ChannelSplitter.split(this.image);
+		this.nucleus = n;
 	}
 
 	/**
@@ -155,6 +162,30 @@ public class ShellAnalyser {
 		return normalisedSignal;
 	}
 
+	
+	/**
+	 * Draw the shells on the nucleus, and export the image to the Nucleus folder.
+	 */
+	public void exportImage(){
+	  ImagePlus shellImage = nucleus.getSourceImage();
+      ImageProcessor ip = shellImage.getProcessor();
+      List<Roi> shells = this.getShells();
+      if(shells.size()>0){ // check we actually got shells out
+        for(Roi r : shells){
+          ip.setColor(Color.YELLOW);
+          ip.setLineWidth(1);
+          r.drawPixels(ip);
+        }
+
+        String outPath = nucleus.getNucleusFolder().getAbsolutePath()+
+                        File.separator+
+                        Nucleus.IMAGE_PREFIX+
+                        nucleus.getNucleusNumber()+
+                        ".shells.tiff";
+        IJ.saveAsTiff(shellImage, outPath);
+      }
+	}
+	
 	/**
 	*	Find the XYPoints within an ROI
 	*

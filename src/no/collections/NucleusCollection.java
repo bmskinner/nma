@@ -17,6 +17,7 @@ import ij.gui.TextRoi;
 import ij.io.Opener;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -24,8 +25,8 @@ import java.util.*;
 
 import no.collections.INuclearCollection;
 import no.analysis.ShellAnalyser;
+import no.analysis.ShellCounter;
 import no.nuclei.*;
-import no.nuclei.INuclearFunctions;
 import no.components.*;
 import no.utility.Utils;
 
@@ -781,84 +782,50 @@ public class NucleusCollection
 
     String redLogFile   = makeGlobalLogFile( "logShellsRed"  );
     String greenLogFile = makeGlobalLogFile( "logShellsGreen");
+    
+    ShellCounter   redCounter = new ShellCounter(5);
+    ShellCounter greenCounter = new ShellCounter(5);
 
-    StringBuilder redLog = new StringBuilder();
-    StringBuilder greenLog = new StringBuilder();
-    StringBuilder header = new StringBuilder();
-
-    // create the log file header
-
-    header.append("NUCLEUS_NUMBER\tSIGNAL_NUMBER\t");
-
-    for(int i=0; i<5; i++){
-      header.append("SIGNAL_SHELL_"+i+"\t");
-    }
-    // for(int i=0; i<5; i++){
-    //   header.append("DAPI_SHELL_"+i+"\t");
-    // }
-    header.append("PATH\r\n");
-
-    redLog.append(  header.toString() );
-    greenLog.append(header.toString() );
-
-    // do the analysis
-
+    // make the shells and measure the values
     for(int i= 0; i<this.getNucleusCount();i++){
       INuclearFunctions n = this.getNucleus(i);
       ShellAnalyser shellAnalyser = new ShellAnalyser(n);
       shellAnalyser.createShells();
-
-      ImagePlus shellImage = n.getSourceImage();
-      ImageProcessor ip = shellImage.getProcessor();
-      List<Roi> shells = shellAnalyser.getShells();
-      if(shells.size()>0){ // check we actually got shells out
-        for(Roi r : shells){
-          ip.setColor(Color.YELLOW);
-          ip.setLineWidth(1);
-          r.drawPixels(ip);
-        }
-
-        String outPath = n.getNucleusFolder().getAbsolutePath()+
-                        File.separator+
-                        Nucleus.IMAGE_PREFIX+
-                        n.getNucleusNumber()+
-                        ".shells.tiff";
-        IJ.saveAsTiff(shellImage, outPath);
-      }
+      shellAnalyser.exportImage();
 
       List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
       signals.add(n.getRedSignals());
       signals.add(n.getGreenSignals());
 
       int signalCount = 0;
+      
+      // put each signal in the correct counter
       for( List<NuclearSignal> signalGroup : signals ){
 
-        StringBuilder log = signalCount == Nucleus.RED_CHANNEL ? redLog : greenLog;
+    	  ShellCounter counter = signalCount == Nucleus.RED_CHANNEL ? redCounter : greenCounter;
         
-        if(signalGroup.size()>0){
-          for(int j=0; j<signalGroup.size();j++){
-            NuclearSignal s = signalGroup.get(j);
-            double[] signalPerShell = shellAnalyser.findShell(s, signalCount);
-            // double[] dapi = shellAnalyser.getDapiDensities();
-            Double firstShell = new Double(signalPerShell[0]);
-            if(!firstShell.isNaN() ){ // only include signals with proper numbers
-
-              log.append(n.getNucleusNumber()+"\t"+j+"\t");
-              for(int k=0; k<shellAnalyser.getNumberOfShells(); k++){
-                log.append(signalPerShell[k]+"\t");
-              } // end for shells
-              // for(int k=0; k<shellAnalyser.getNumberOfShells(); k++){
-              //   log.append(dapi[k]+"\t");
-              // } // end for shells
-              log.append(n.getPath()+"\r\n");
-            } // end isNaN
-          } // end for signals
-        } // end if signals
-      } // end for signal group
-      signalCount++;
+	        if(signalGroup.size()>0){
+	          for(int j=0; j<signalGroup.size();j++){
+	            NuclearSignal s = signalGroup.get(j);
+	            double[] signalPerShell = shellAnalyser.findShell(s, signalCount);
+	            try {
+					counter.addValues(signalPerShell);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	          } // end for signals
+	        } // end if signals
+	      } // end for signal group
+	      signalCount++;
     } // end nucleus iterations
-    IJ.append(  redLog.toString(), redLogFile);
-    IJ.append(greenLog.toString(), greenLogFile);
+    
+    // get stats and export
+    redCounter.print();
+    redCounter.export(new File(redLogFile));
+    greenCounter.print();
+    greenCounter.export(new File(greenLogFile));
+
   }
   
 
