@@ -913,10 +913,10 @@ public class Nucleus
 		int difference2 = this.getLength() - difference1;
 
 		// get the midpoint
-		int mid1 = NuclearOrganisationUtility.wrapIndex( (int)Math.floor( (difference1/2)+minIndex ),
+		int mid1 = Utils.wrapIndex( (int)Math.floor( (difference1/2)+minIndex ),
 															this.getLength() );
 
-		int mid2 = NuclearOrganisationUtility.wrapIndex( (int)Math.floor( (difference2/2)+maxIndex ), 
+		int mid2 = Utils.wrapIndex( (int)Math.floor( (difference2/2)+maxIndex ), 
 															this.getLength() );
 
 		return difference1 < difference2 ? mid1 : mid2;
@@ -1026,7 +1026,7 @@ public class Nucleus
 	public NucleusBorderPoint getNarrowestDiameterPoint(){
 
 		double[] distanceArray = this.distanceProfile.asArray();
-		double distance = NuclearOrganisationUtility.getMax(distanceArray);
+		double distance = Utils.getMax(distanceArray);
 		int index = 0;
 		for(int i = 0; i<this.getLength();i++){
 			if(distanceArray[i] < distance){
@@ -1072,10 +1072,10 @@ public class Nucleus
 		double[] distances = new double[this.borderList.size()];
 		for(int i=0;i<this.borderList.size();i++){
 			NucleusBorderPoint p = this.getPoint(i);
-			NucleusBorderPoint next = this.getPoint( NuclearOrganisationUtility.wrapIndex(i+1, this.borderList.size()));
+			NucleusBorderPoint next = this.getPoint( Utils.wrapIndex(i+1, this.borderList.size()));
 			distances[i] = p.getLengthTo(next);
 		}
-		return NuclearOrganisationUtility.quartile(distances, 50);
+		return Utils.quartile(distances, 50);
 	}
 
 	/*
@@ -1475,8 +1475,8 @@ public class Nucleus
 
 		for(int i=0; i<this.getLength();i++){
 
-			int indexBefore = NuclearOrganisationUtility.wrapIndex(i - angleProfileWindowSize, this.getLength());
-			int indexAfter  = NuclearOrganisationUtility.wrapIndex(i + angleProfileWindowSize, this.getLength());
+			int indexBefore = Utils.wrapIndex(i - angleProfileWindowSize, this.getLength());
+			int indexAfter  = Utils.wrapIndex(i + angleProfileWindowSize, this.getLength());
 
 			NucleusBorderPoint pointBefore = this.borderList.get(indexBefore);
 			NucleusBorderPoint pointAfter  = this.borderList.get(indexAfter);

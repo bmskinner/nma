@@ -240,10 +240,10 @@ public class CurveRefolder{
 
 		for(int i=0; i<refoldNucleus.getLength(); i++){
 
-			int index = NuclearOrganisationUtility.wrapIndex(i + tailIndex, refoldNucleus.getLength());
+			int index = Utils.wrapIndex(i + tailIndex, refoldNucleus.getLength());
 
-			int prevIndex = NuclearOrganisationUtility.wrapIndex(i-3 + tailIndex, refoldNucleus.getLength());
-			int nextIndex = NuclearOrganisationUtility.wrapIndex(i+3 + tailIndex, refoldNucleus.getLength());
+			int prevIndex = Utils.wrapIndex(i-3 + tailIndex, refoldNucleus.getLength());
+			int nextIndex = Utils.wrapIndex(i+3 + tailIndex, refoldNucleus.getLength());
 
 			// IJ.log("Getting point: "+index);
 			XYPoint n = refoldNucleus.getPoint( index  );
@@ -359,8 +359,8 @@ public class CurveRefolder{
 			// IJ.log("    Internal score: "+(int)score);
 
 			// do not apply change  if the distance from teh surrounding points changes too much
-			double distanceToPrev = p.getLengthTo( testNucleus.getPoint( NuclearOrganisationUtility.wrapIndex(i-1, testNucleus.getLength()) ) );
-			double distanceToNext = p.getLengthTo( testNucleus.getPoint( NuclearOrganisationUtility.wrapIndex(i+1, testNucleus.getLength()) ) );
+			double distanceToPrev = p.getLengthTo( testNucleus.getPoint( Utils.wrapIndex(i-1, testNucleus.getLength()) ) );
+			double distanceToNext = p.getLengthTo( testNucleus.getPoint( Utils.wrapIndex(i+1, testNucleus.getLength()) ) );
 
 			// apply the change if better fit
 			if(score < 	similarityScore && 
@@ -403,8 +403,8 @@ public class CurveRefolder{
 			// add the rotation amount
 			double newAngle = tailAngle + i;
 
-			double newX = NuclearOrganisationUtility.getXComponentOfAngle(distance, newAngle);
-			double newY = NuclearOrganisationUtility.getYComponentOfAngle(distance, newAngle);
+			double newX = Utils.getXComponentOfAngle(distance, newAngle);
+			double newY = Utils.getYComponentOfAngle(distance, newAngle);
 
 			if(Math.abs(newX) < distanceFromZero && newY < 0){
 				angleToRotate = i;
@@ -434,8 +434,8 @@ public class CurveRefolder{
 			}
 
 			double newAngle = oldAngle + angleToRotate;
-			double newX = NuclearOrganisationUtility.getXComponentOfAngle(distance, newAngle);
-			double newY = NuclearOrganisationUtility.getYComponentOfAngle(distance, newAngle);
+			double newX = Utils.getXComponentOfAngle(distance, newAngle);
+			double newY = Utils.getYComponentOfAngle(distance, newAngle);
 
 			refoldNucleus.updatePoint(i, newX, newY);
 		}
@@ -491,8 +491,8 @@ public class CurveRefolder{
 						}
 						
 						// adjust X and Y because we are now counting angles from the vertical axis
-						double signalX = NuclearOrganisationUtility.getXComponentOfAngle(signalDistance, angle-90);
-						double signalY = NuclearOrganisationUtility.getYComponentOfAngle(signalDistance, angle-90);
+						double signalX = Utils.getXComponentOfAngle(signalDistance, angle-90);
+						double signalY = Utils.getYComponentOfAngle(signalDistance, angle-90);
 
 						/* draw the circles on the plot
 							 An ImageJ Plot cannot draw circles by itself. We therefore need to get the

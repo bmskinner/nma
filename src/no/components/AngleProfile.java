@@ -97,10 +97,10 @@ public class AngleProfile {
     double[] distances = new double[this.array.length];
     for(int i=0;i<this.array.length;i++){
       NucleusBorderPoint p = this.getBorderPoint(i);
-      NucleusBorderPoint next = this.getBorderPoint( NuclearOrganisationUtility.wrapIndex(i+1, this.array.length));
+      NucleusBorderPoint next = this.getBorderPoint( Utils.wrapIndex(i+1, this.array.length));
       distances[i] = p.getLengthTo(next);
     }
-    return NuclearOrganisationUtility.quartile(distances, 50);
+    return Utils.quartile(distances, 50);
   }
 
   public NucleusBorderPoint getBorderPoint(int i){
@@ -157,7 +157,7 @@ public class AngleProfile {
 
     double[] points = new double[array.length];
     for(int j=0;j<array.length;j++){
-        points[j] = array[  NuclearOrganisationUtility.wrapIndex( j+offset, array.length) ].getInteriorAngle();
+        points[j] = array[  Utils.wrapIndex( j+offset, array.length) ].getInteriorAngle();
     }
     return points;
   }
@@ -285,8 +285,8 @@ public class AngleProfile {
     // IJ.log("Calculating angles...");
     for(int i=0; i<array.length;i++){
       // use a window size of 25 for now
-    	int indexBefore = NuclearOrganisationUtility.wrapIndex(i - this.getAngleProfileWindowSize(), this.array.length);
-      int indexAfter  = NuclearOrganisationUtility.wrapIndex(i + this.getAngleProfileWindowSize(), this.array.length);
+    	int indexBefore = Utils.wrapIndex(i - this.getAngleProfileWindowSize(), this.array.length);
+      int indexAfter  = Utils.wrapIndex(i + this.getAngleProfileWindowSize(), this.array.length);
 
     NucleusBorderPoint pointBefore = this.getBorderPoint(indexBefore);
     NucleusBorderPoint pointAfter = this.getBorderPoint(indexAfter);
@@ -318,8 +318,8 @@ public class AngleProfile {
   	double angleDelta = 0;
   	for(int i=0; i<this.array.length;i++){
 
-     	NucleusBorderPoint prevPoint = this.array[ NuclearOrganisationUtility.wrapIndex(i-1, this.array.length) ];
-     	NucleusBorderPoint nextPoint = this.array[ NuclearOrganisationUtility.wrapIndex(i+1, this.array.length) ];
+     	NucleusBorderPoint prevPoint = this.array[ Utils.wrapIndex(i-1, this.array.length) ];
+     	NucleusBorderPoint nextPoint = this.array[ Utils.wrapIndex(i+1, this.array.length) ];
 
      	angleDelta = nextPoint.getInteriorAngle() - prevPoint.getInteriorAngle();
 	    this.array[i].setInteriorAngleDelta(angleDelta);
@@ -337,8 +337,8 @@ public class AngleProfile {
       // handle array wrapping for arbitrary length smoothing
       for(int j=1;j<=(int)(this.getDeltaSmoothingWindowSize()-1)/2;j++){
 
-      	smoothedDelta += ( this.array[ NuclearOrganisationUtility.wrapIndex(i-j, this.array.length) ].getInteriorAngleDelta() +
-	      		this.array[ NuclearOrganisationUtility.wrapIndex(i+j, this.array.length) ].getInteriorAngleDelta());
+      	smoothedDelta += ( this.array[ Utils.wrapIndex(i-j, this.array.length) ].getInteriorAngleDelta() +
+	      		this.array[ Utils.wrapIndex(i+j, this.array.length) ].getInteriorAngleDelta());
       }
       smoothedDelta = smoothedDelta / this.deltaSmoothingWindowSize;
 	  this.array[i].setInteriorAngleDeltaSmoothed(smoothedDelta);
@@ -569,8 +569,8 @@ public class AngleProfile {
       // go through each lookup position and get the appropriate angles
       for(int j=0;j<prevAngles.length;j++){
 
-        int prev_i = NuclearOrganisationUtility.wrapIndex( i-(j+1) , array.length );
-        int next_i = NuclearOrganisationUtility.wrapIndex( i+(j+1) , array.length );
+        int prev_i = Utils.wrapIndex( i-(j+1) , array.length );
+        int next_i = Utils.wrapIndex( i+(j+1) , array.length );
 
         // fill the lookup array
         prevAngles[j] = array[prev_i].getInteriorAngle();

@@ -27,7 +27,7 @@ import no.analysis.ShellAnalyser;
 import no.nuclei.*;
 import no.nuclei.INuclearFunctions;
 import no.components.*;
-import no.utility.NuclearOrganisationUtility;
+import no.utility.Utils;
 
 
 
@@ -305,36 +305,36 @@ public class NucleusCollection
   // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
   public double getMedianNuclearArea(){
     double[] areas = this.getAreas();
-    double median = NuclearOrganisationUtility.quartile(areas, 50);
+    double median = Utils.quartile(areas, 50);
     return median;
   }
 
   public double getMedianNuclearPerimeter(){
     double[] p = this.getPerimeters();
-    double median = NuclearOrganisationUtility.quartile(p, 50);
+    double median = Utils.quartile(p, 50);
     return median;
   }
 
   public double getMedianPathLength(){
     double[] p = this.getPathLengths();
-    double median = NuclearOrganisationUtility.quartile(p, 50);
+    double median = Utils.quartile(p, 50);
     return median;
   }
 
   public double getMedianArrayLength(){
     double[] p = this.getArrayLengths();
-    double median = NuclearOrganisationUtility.quartile(p, 50);
+    double median = Utils.quartile(p, 50);
     return median;
   }
 
   public double getMedianFeretLength(){
     double[] p = this.getFerets();
-    double median = NuclearOrganisationUtility.quartile(p, 50);
+    double median = Utils.quartile(p, 50);
     return median;
   }
 
   public double getMaxProfileLength(){
-    return NuclearOrganisationUtility.getMax(this.getArrayLengths());
+    return Utils.getMax(this.getArrayLengths());
   }
 
   public Set<String> getTags(){
@@ -602,11 +602,11 @@ public class NucleusCollection
             int n = d.length;
 
             Arrays.sort(d);
-            double median = NuclearOrganisationUtility.quartile(d, 50.0);
-            double q1     = NuclearOrganisationUtility.quartile(d, 25.0);
-            double q3     = NuclearOrganisationUtility.quartile(d, 75.0);
-            double q10    = NuclearOrganisationUtility.quartile(d, 10.0);
-            double q90    = NuclearOrganisationUtility.quartile(d, 90.0);
+            double median = Utils.quartile(d, 50.0);
+            double q1     = Utils.quartile(d, 25.0);
+            double q3     = Utils.quartile(d, 75.0);
+            double q10    = Utils.quartile(d, 10.0);
+            double q90    = Utils.quartile(d, 90.0);
            
             xmedians[m] = k;
             ymedians[m] = median;
@@ -719,9 +719,9 @@ public class NucleusCollection
       updateProfileAggregate(xvalues, yvalues, profileAggregate); 
     }
     List<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
-    Profile ymedians        = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) ) );
-    Profile q25             = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) ) );
-    Profile q75             = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) ) );
+    Profile ymedians        = new Profile( Utils.getdoubleFromDouble( medians.get(1) ) );
+    Profile q25             = new Profile( Utils.getdoubleFromDouble( medians.get(2) ) );
+    Profile q75             = new Profile( Utils.getdoubleFromDouble( medians.get(3) ) );
     this.addMedianProfile(pointType, ymedians);
     this.addMedianProfile(pointType+"25", q25);
     this.addMedianProfile(pointType+"75", q75);
@@ -740,7 +740,7 @@ public class NucleusCollection
     Profile medianProfile = getMedianProfile(pointType); // the profile we compare the nucleus to
     INuclearFunctions n = (INuclearFunctions) this.getNucleus(0); // default to the first nucleus
 
-    double difference = NuclearOrganisationUtility.getMax(getDifferencesToMedianFromPoint(pointType));
+    double difference = Utils.getMax(getDifferencesToMedianFromPoint(pointType));
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
       int index = n.getBorderIndex(pointType);
@@ -1048,11 +1048,11 @@ public class NucleusCollection
 
     Map<String, List<String>> stats = new LinkedHashMap<String, List<String>>();
 
-    String[] sAreas        = NuclearOrganisationUtility.getStringFromDouble(this.getAreas());
-    String[] sPerims       = NuclearOrganisationUtility.getStringFromDouble(this.getPerimeters());
-    String[] sFerets       = NuclearOrganisationUtility.getStringFromDouble(this.getFerets());
-    String[] sPathlengths  = NuclearOrganisationUtility.getStringFromDouble(this.getPathLengths());
-    String[] sDistances    = NuclearOrganisationUtility.getStringFromDouble(this.getMedianDistanceBetweenPoints());
+    String[] sAreas        = Utils.getStringFromDouble(this.getAreas());
+    String[] sPerims       = Utils.getStringFromDouble(this.getPerimeters());
+    String[] sFerets       = Utils.getStringFromDouble(this.getFerets());
+    String[] sPathlengths  = Utils.getStringFromDouble(this.getPathLengths());
+    String[] sDistances    = Utils.getStringFromDouble(this.getMedianDistanceBetweenPoints());
     String[] sPaths        = this.getNucleusPaths();
 
     stats.put("AREA",        Arrays.asList(  sAreas));
@@ -1272,9 +1272,9 @@ public class NucleusCollection
     Map<Double, Collection<Double>> profileAggregate = this.getProfileAggregate(pointType);
 
     List<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
-    Profile ymedians        = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) ) );
-    Profile q25             = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) ) );
-    Profile q75             = new Profile( NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) ) );
+    Profile ymedians        = new Profile( Utils.getdoubleFromDouble( medians.get(1) ) );
+    Profile q25             = new Profile( Utils.getdoubleFromDouble( medians.get(2) ) );
+    Profile q75             = new Profile( Utils.getdoubleFromDouble( medians.get(3) ) );
     this.addMedianProfile(pointType, ymedians);
     this.addMedianProfile(pointType+"25", q25);
     this.addMedianProfile(pointType+"75", q75);
@@ -1290,10 +1290,10 @@ public class NucleusCollection
     List<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
     this.exportMediansAndQuartilesOfProfile(medians, "logMediansFrom"+pointType); // needs to be "logMediansFrom<pointname>"
 
-    double[] xmedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(0) );
-    double[] ymedians        =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(1) );
-    double[] lowQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(2) );
-    double[] uppQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(3) );
+    double[] xmedians        =  Utils.getdoubleFromDouble( medians.get(0) );
+    double[] ymedians        =  Utils.getdoubleFromDouble( medians.get(1) );
+    double[] lowQuartiles    =  Utils.getdoubleFromDouble( medians.get(2) );
+    double[] uppQuartiles    =  Utils.getdoubleFromDouble( medians.get(3) );
     // double[] tenQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(4) );
     // double[] ninetyQuartiles =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(5) );
 
@@ -1327,7 +1327,7 @@ public class NucleusCollection
       int profileIndex = n.getBorderIndex(profilePointType);
 
       // find the offset position of boxPoint, using profilePoint as a zero. 
-      int offsetIndex = NuclearOrganisationUtility.wrapIndex( boxIndex - profileIndex , n.getLength() );
+      int offsetIndex = Utils.wrapIndex( boxIndex - profileIndex , n.getLength() );
 
       // normalise to 100
       xPoints[i] =  (   (double) offsetIndex / (double) n.getLength()  ) * 100;
@@ -1338,9 +1338,9 @@ public class NucleusCollection
     plot.addPoints(xPoints, yPoints, Plot.DOT);
 
     // median tail positions
-    double tailQ50 = NuclearOrganisationUtility.quartile(xPoints, 50);
-    double tailQ25 = NuclearOrganisationUtility.quartile(xPoints, 25);
-    double tailQ75 = NuclearOrganisationUtility.quartile(xPoints, 75);
+    double tailQ50 = Utils.quartile(xPoints, 50);
+    double tailQ25 = Utils.quartile(xPoints, 25);
+    double tailQ75 = Utils.quartile(xPoints, 75);
 
     plot.setColor(Color.DARK_GRAY);
     plot.setLineWidth(1);
@@ -1405,7 +1405,7 @@ public class NucleusCollection
             int borderIndex = signalGroup.get(j).getClosestBorderPoint();
 
             // offset the index relative to the current profile type, and normalise
-            int offsetIndex = NuclearOrganisationUtility.wrapIndex( borderIndex - profileIndex , n.getLength() );
+            int offsetIndex = Utils.wrapIndex( borderIndex - profileIndex , n.getLength() );
             double normIndex = (  (double) offsetIndex / (double) n.getLength()  ) * 100;
 
             xPoints[j] = normIndex;

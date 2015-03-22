@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
-import no.utility.NuclearOrganisationUtility;
+import no.utility.Utils;
 
 /**
  *
@@ -92,7 +92,7 @@ public class ShellCounter {
 	private double calculateQuartileOfShell(int shell, double quartile){
 		List<Double> values = shellValues.get(shell);
 		Double[] array = values.toArray(new Double[values.size()]);
-		return NuclearOrganisationUtility.quartile(array, quartile);
+		return Utils.quartile(array, quartile);
 	}
 	
 }

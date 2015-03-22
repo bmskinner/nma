@@ -181,9 +181,9 @@ public class AsymmetricNucleusCollection
 
     Map<String, List<String>> stats = super.calculateNuclearStats();
 
-    String[] index  = NuclearOrganisationUtility.getStringFromInt(this.getPointIndexes("tail"));
+    String[] index  = Utils.getStringFromInt(this.getPointIndexes("tail"));
     // String[] diff   = NuclearOrganisationUtility.getStringFromDouble(this.getDifferencesToMedianFromTail());
-    String[] points = NuclearOrganisationUtility.getStringFromDouble(this.getMedianDistanceBetweenPoints());
+    String[] points = Utils.getStringFromDouble(this.getMedianDistanceBetweenPoints());
 
     stats.put("NORM_TAIL_INDEX",                Arrays.asList(index ));
     // stats.put("DIFFERENCE_TO_MEDIAN_PROFILE",   Arrays.asList(diff  ));
@@ -291,7 +291,7 @@ public class AsymmetricNucleusCollection
     double[] headToTail   = this.getPointToPointDistances("head", "tail");
     String[] paths        = this.getNucleusPaths();
 
-    double maxPerim = NuclearOrganisationUtility.getMax(perims); // add column headers
+    double maxPerim = Utils.getMax(perims); // add column headers
     for(int i=0;i<maxPerim;i++){
       outLine.append(i+"\t");
     }

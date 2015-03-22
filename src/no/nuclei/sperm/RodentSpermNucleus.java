@@ -393,7 +393,7 @@ public class RodentSpermNucleus
 
     for(int i = 0; i<this.getLength();i++){
 
-      int currentIndex = NuclearOrganisationUtility.wrapIndex(this.getBorderIndex("tail")+i, this.getLength()); // start at the tail, and go around the array
+      int currentIndex = Utils.wrapIndex(this.getBorderIndex("tail")+i, this.getLength()); // start at the tail, and go around the array
       
       NucleusBorderPoint p = getPoint(currentIndex);
 

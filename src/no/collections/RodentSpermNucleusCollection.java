@@ -148,7 +148,7 @@ public class RodentSpermNucleusCollection
     double[] tipToTail    = this.getPointToPointDistances("tail", "tip");
     String[] paths        = this.getNucleusPaths();
 
-    double maxPerim = NuclearOrganisationUtility.getMax(perims); // add column headers
+    double maxPerim = Utils.getMax(perims); // add column headers
     for(int i=0;i<maxPerim;i++){
       outLine.append(i+"\t");
     }

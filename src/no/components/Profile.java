@@ -146,7 +146,7 @@ public class Profile {
   public Profile offset(int j){
     double[] newArray = new double[this.size()];
     for(int i=0;i<this.size();i++){
-      newArray[i] = this.array[ NuclearOrganisationUtility.wrapIndex( i+j , this.size() ) ];
+      newArray[i] = this.array[ Utils.wrapIndex( i+j , this.size() ) ];
     }
     return new Profile(newArray);
   }
@@ -204,8 +204,8 @@ public class Profile {
                              : index1;
 
     // wrap the arrays
-    indexLower  = NuclearOrganisationUtility.wrapIndex(indexLower , this.size());
-    indexHigher = NuclearOrganisationUtility.wrapIndex(indexHigher, this.size());
+    indexLower  = Utils.wrapIndex(indexLower , this.size());
+    indexHigher = Utils.wrapIndex(indexHigher, this.size());
 
     // get the angle values in the profile at the given indices
     double valueHigher = array[indexLower ];
@@ -272,8 +272,8 @@ public class Profile {
       // go through each lookup position and get the appropriate angles
       for(int j=0;j<prevValues.length;j++){
 
-        int prev_i = NuclearOrganisationUtility.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-        int next_i = NuclearOrganisationUtility.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
 
         // fill the lookup array
         prevValues[j] = array[prev_i];
@@ -333,8 +333,8 @@ public class Profile {
       // go through each lookup position and get the appropriate angles
       for(int j=0;j<prevValues.length;j++){
 
-        int prev_i = NuclearOrganisationUtility.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-        int next_i = NuclearOrganisationUtility.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
 
         // fill the lookup array
         prevValues[j] = array[prev_i];
@@ -389,8 +389,8 @@ public class Profile {
 
       for(int j=0;j<prevValues.length;j++){
 
-        int prev_i = NuclearOrganisationUtility.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-        int next_i = NuclearOrganisationUtility.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
 
         // fill the lookup array
         prevValues[j] = array[prev_i];
