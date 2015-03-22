@@ -3,10 +3,13 @@
  */
 package no.analysis;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
 import no.utility.NuclearOrganisationUtility;
 
@@ -35,18 +38,61 @@ public class ShellCounter {
 		}
 	}
 	
-	public List<Double> getMedians(){
+	private List<Double> getQuartiles(double quartile){
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
-			result.add(calculateMedianOfShell(i));
+			result.add(calculateQuartileOfShell(i, quartile));
 		}
 		return result;
 	}
 	
-	private double calculateMedianOfShell(int shell){
+	public void export(File f){
+		if(f.exists()){
+			f.delete();
+		}
+		
+		// export the median and IQR for each shell, plus any stats, plus charts
+	}
+	
+	public double getPValue(){
+		long[]   observed = getObserved();
+		double[] expected = getExpected();
+		
+		ChiSquareTest test = new ChiSquareTest();
+		double pvalue = test.chiSquareTest(expected, observed);
+		return pvalue;
+	}
+	
+	public double getChiSquare(){
+		long[]   observed = getObserved();
+		double[] expected = getExpected();
+		
+		ChiSquareTest test = new ChiSquareTest();
+		double chi = test.chiSquare(expected, observed);
+		return chi;
+	}
+	
+	private long[] getObserved(){
+		long[] observed = new long[numberOfShells];
+		List<Double> medians = getQuartiles(50);
+		for(int i=0;i<numberOfShells; i++){
+			observed[i] = medians.get(i).longValue();
+		}
+		return observed;
+	}
+	
+ 	private double[] getExpected(){
+		double[] expected = new double[numberOfShells];
+		for(int i=0;i<numberOfShells; i++){
+			expected[i] = (double)1/(double)numberOfShells;
+		}
+		return expected;
+	}
+	
+	private double calculateQuartileOfShell(int shell, double quartile){
 		List<Double> values = shellValues.get(shell);
 		Double[] array = values.toArray(new Double[values.size()]);
-		return NuclearOrganisationUtility.quartile(array, 50);
+		return NuclearOrganisationUtility.quartile(array, quartile);
 	}
-
+	
 }
