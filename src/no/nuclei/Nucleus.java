@@ -10,47 +10,15 @@ package no.nuclei;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.Overlay;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.gui.ProgressBar;
-import ij.gui.TextRoi;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
-import ij.io.DirectoryChooser;
-import ij.io.Opener;
-import ij.io.OpenDialog;
-import ij.io.RandomAccessStream;
-import ij.measure.ResultsTable;
-import ij.measure.SplineFitter;
-import ij.plugin.ChannelSplitter;
-import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
-import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
-import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
 import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.Polygon;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.HashMap;
 import no.analysis.Detector;
-import no.collections.NucleusCollection;
 import no.utility.*;
 import no.components.*;
 
@@ -285,7 +253,7 @@ public class Nucleus
 	public String getAnnotatedImagePath(){
 		String outPath = this.nucleusFolder.getAbsolutePath()+
 											File.separator+
-											this.IMAGE_PREFIX+
+											Nucleus.IMAGE_PREFIX+
 											this.getNucleusNumber()+
 											".annotated.tiff";
 		return new String(outPath);
@@ -294,7 +262,7 @@ public class Nucleus
 	public String getOriginalImagePath(){
 		String outPath = this.nucleusFolder.getAbsolutePath()+
 											File.separator+
-											this.IMAGE_PREFIX+
+											Nucleus.IMAGE_PREFIX+
 											this.getNucleusNumber()+
 											".original.tiff";
 		return new String(outPath);
@@ -303,19 +271,19 @@ public class Nucleus
 	public String getEnlargedImagePath(){
 		String outPath = this.nucleusFolder.getAbsolutePath()+
 											File.separator+
-											this.IMAGE_PREFIX+
+											Nucleus.IMAGE_PREFIX+
 											this.getNucleusNumber()+
 											".enlarged.tiff";
 		return outPath;
 	}
 
 	public String getImageNameWithoutExtension(){
-		String extension = "";
+//		String extension = "";
 		String trimmed = "";
 
 		int i = this.getImageName().lastIndexOf('.');
 		if (i > 0) {
-				extension = this.getImageName().substring(i+1);
+//				extension = this.getImageName().substring(i+1);
 				trimmed   = this.getImageName().substring(0,i);
 		}
 		return trimmed;
@@ -335,12 +303,12 @@ public class Nucleus
 
 	public String getPathWithoutExtension(){
 		
-		String extension = "";
+//		String extension = "";
 		String trimmed = "";
 
 		int i = this.getPath().lastIndexOf('.');
 		if (i > 0) {
-				extension = this.getPath().substring(i+1);
+//				extension = this.getPath().substring(i+1);
 				trimmed = this.getPath().substring(0,i);
 		}
 		return trimmed;
@@ -837,7 +805,7 @@ public class Nucleus
 
 				XYPoint bCoM = this.greenSignals.get(j).getCentreOfMass();
 
-				double distance = 
+//				double distance = 
 				this.distancesBetweenSignals[i][k] = aCoM.getLengthTo(bCoM);
 			}
 		}
@@ -863,7 +831,7 @@ public class Nucleus
 
 				XYPoint bCoM = this.greenSignals.get(j).getCentreOfMass();
 
-				double distance = 
+//				double distance = 
 				this.distancesBetweenSignals[m][k] = aCoM.getLengthTo(bCoM);
 			}
 		}
