@@ -110,6 +110,7 @@ public class ShellCounter {
 	    
 		// , plus any stats, plus charts
 	    log.append("--------\r\nCHI SQUARE\r\n--------\r\n");
+	    log.append("Number of signals: "+this.size());
 	    log.append("Chi square: "+getChiSquare()+"\r\n");
 	    log.append("p-value   : "+getPValue()+"\r\n");
 	    IJ.append(log.toString(), f.getAbsolutePath());

@@ -156,10 +156,22 @@ public class NucleusCollection
 
       // returns the positive offset index of this profile which best matches the median profile
       int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-
       n.addBorderTag("head", newHeadIndex);
+      
+      // check if flipping the profile will help
+      
+      double differenceToMedian1 = n.getAngleProfile("head").differenceToProfile(medianToCompare);
+      n.reverse();
+      double differenceToMedian2 = n.getAngleProfile("head").differenceToProfile(medianToCompare);
+      
+      if(differenceToMedian1<differenceToMedian2){
+    	  n.reverse(); // put it back if no better
+      }
+      
+//      int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+//      n.addBorderTag("head", newHeadIndex);
 
-      // also update the head position
+      // also update the tail position
       int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
       n.addBorderTag("tail", tailIndex);
     }
