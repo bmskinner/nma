@@ -14,6 +14,7 @@ import java.util.Map;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
 import no.utility.Utils;
+import no.utility.Stats;
 
 /**
  *
@@ -50,6 +51,15 @@ public class ShellCounter {
 		}
 		return result;
 	}
+
+	private List<Double> getMeans(){
+		List<Double> result = new ArrayList<Double>(0);
+		for(int i=0;i<numberOfShells;i++){
+			result.add(calculateMeanOfShell(i));
+		}
+		return result;
+	}
+	
 	
 	public void export(File f){
 		if(f.exists()){
@@ -115,9 +125,13 @@ public class ShellCounter {
 	private long[] getObserved(){
 		long[] observed = new long[numberOfShells];
 		double count = shellValues.get(0).size();
-		List<Double> medians = getQuartiles(50);
+		// List<Double> medians = getQuartiles(50);
+		// for(int i=0;i<numberOfShells; i++){
+		// 	observed[i] = (long) (medians.get(i).longValue()*count);
+		// }
+		List<Double> means = getMeans();
 		for(int i=0;i<numberOfShells; i++){
-			observed[i] = (long) (medians.get(i).longValue()*count);
+			observed[i] = (long) (means.get(i).longValue()*count);
 		}
 		return observed;
 	}
@@ -139,7 +153,20 @@ public class ShellCounter {
 		}
 //		Double[] array = values.toArray(new Double[values.size()]);
 		if(array.length>0){
-			return Utils.quartile(array, quartile);
+			return Stats.quartile(array, quartile);
+		} else {
+			return 0;
+		}
+	}
+
+	private double calculateMeanOfShell(int shell){
+		List<Double> values = shellValues.get(shell);
+		double[] array = new double[values.size()];
+		for(int i=0;i<array.length;i++){
+			array[i] = values.get(i);
+		}
+		if(array.length>0){
+			return Stats.mean(array);
 		} else {
 			return 0;
 		}

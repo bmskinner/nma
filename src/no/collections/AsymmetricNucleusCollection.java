@@ -291,7 +291,7 @@ public class AsymmetricNucleusCollection
     double[] headToTail   = this.getPointToPointDistances("head", "tail");
     String[] paths        = this.getNucleusPaths();
 
-    double maxPerim = Utils.getMax(perims); // add column headers
+    double maxPerim = Stats.max(perims); // add column headers
     for(int i=0;i<maxPerim;i++){
       outLine.append(i+"\t");
     }

@@ -1026,7 +1026,7 @@ public class Nucleus
 	public NucleusBorderPoint getNarrowestDiameterPoint(){
 
 		double[] distanceArray = this.distanceProfile.asArray();
-		double distance = Utils.getMax(distanceArray);
+		double distance = Stats.max(distanceArray);
 		int index = 0;
 		for(int i = 0; i<this.getLength();i++){
 			if(distanceArray[i] < distance){
@@ -1075,7 +1075,7 @@ public class Nucleus
 			NucleusBorderPoint next = this.getPoint( Utils.wrapIndex(i+1, this.borderList.size()));
 			distances[i] = p.getLengthTo(next);
 		}
-		return Utils.quartile(distances, 50);
+		return Stats.quartile(distances, 50);
 	}
 
 	/*

@@ -28,6 +28,7 @@ import no.analysis.ShellAnalyser;
 import no.analysis.ShellCounter;
 import no.nuclei.*;
 import no.components.*;
+import no.utility.Stats;
 import no.utility.Utils;
 
 
@@ -306,36 +307,36 @@ public class NucleusCollection
   // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
   public double getMedianNuclearArea(){
     double[] areas = this.getAreas();
-    double median = Utils.quartile(areas, 50);
+    double median = Stats.quartile(areas, 50);
     return median;
   }
 
   public double getMedianNuclearPerimeter(){
     double[] p = this.getPerimeters();
-    double median = Utils.quartile(p, 50);
+    double median = Stats.quartile(p, 50);
     return median;
   }
 
   public double getMedianPathLength(){
     double[] p = this.getPathLengths();
-    double median = Utils.quartile(p, 50);
+    double median = Stats.quartile(p, 50);
     return median;
   }
 
   public double getMedianArrayLength(){
     double[] p = this.getArrayLengths();
-    double median = Utils.quartile(p, 50);
+    double median = Stats.quartile(p, 50);
     return median;
   }
 
   public double getMedianFeretLength(){
     double[] p = this.getFerets();
-    double median = Utils.quartile(p, 50);
+    double median = Stats.quartile(p, 50);
     return median;
   }
 
   public double getMaxProfileLength(){
-    return Utils.getMax(this.getArrayLengths());
+    return Stats.max(this.getArrayLengths());
   }
 
   public Set<String> getTags(){
@@ -603,11 +604,11 @@ public class NucleusCollection
             int n = d.length;
 
             Arrays.sort(d);
-            double median = Utils.quartile(d, 50.0);
-            double q1     = Utils.quartile(d, 25.0);
-            double q3     = Utils.quartile(d, 75.0);
-            double q10    = Utils.quartile(d, 10.0);
-            double q90    = Utils.quartile(d, 90.0);
+            double median = Stats.quartile(d, 50.0);
+            double q1     = Stats.quartile(d, 25.0);
+            double q3     = Stats.quartile(d, 75.0);
+            double q10    = Stats.quartile(d, 10.0);
+            double q90    = Stats.quartile(d, 90.0);
            
             xmedians[m] = k;
             ymedians[m] = median;
@@ -741,7 +742,7 @@ public class NucleusCollection
     Profile medianProfile = getMedianProfile(pointType); // the profile we compare the nucleus to
     INuclearFunctions n = (INuclearFunctions) this.getNucleus(0); // default to the first nucleus
 
-    double difference = Utils.getMax(getDifferencesToMedianFromPoint(pointType));
+    double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
       int index = n.getBorderIndex(pointType);
@@ -1305,9 +1306,9 @@ public class NucleusCollection
     plot.addPoints(xPoints, yPoints, Plot.DOT);
 
     // median tail positions
-    double tailQ50 = Utils.quartile(xPoints, 50);
-    double tailQ25 = Utils.quartile(xPoints, 25);
-    double tailQ75 = Utils.quartile(xPoints, 75);
+    double tailQ50 = Stats.quartile(xPoints, 50);
+    double tailQ25 = Stats.quartile(xPoints, 25);
+    double tailQ75 = Stats.quartile(xPoints, 75);
 
     plot.setColor(Color.DARK_GRAY);
     plot.setLineWidth(1);

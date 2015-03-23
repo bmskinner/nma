@@ -10,8 +10,6 @@ package no.components;
 
 import ij.IJ;
 import ij.process.FloatPolygon;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 import java.util.*;
 import no.utility.*;
 import no.nuclei.Nucleus;
@@ -100,7 +98,7 @@ public class AngleProfile {
       NucleusBorderPoint next = this.getBorderPoint( Utils.wrapIndex(i+1, this.array.length));
       distances[i] = p.getLengthTo(next);
     }
-    return Utils.quartile(distances, 50);
+    return Stats.quartile(distances, 50);
   }
 
   public NucleusBorderPoint getBorderPoint(int i){

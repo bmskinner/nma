@@ -15,45 +15,6 @@
 
  public class Utils {
 
- 	/*
-    Calculate the <lowerPercent> quartile from a Double[] array
-  */
-  public static double quartile(double[] values, double lowerPercent) {
-
-      if (values == null || values.length == 0) {
-          throw new IllegalArgumentException("The data array either is null or does not contain any data.");
-      }
-
-      if(values.length==1){
-        return values[0];
-      }
-
-      // Rank order the values
-      double[] v = new double[values.length];
-      System.arraycopy(values, 0, v, 0, values.length);
-      Arrays.sort(v);
-
-      int n = (int) Math.round(v.length * lowerPercent / 100);
-      
-      return (double)v[n];
-  }
-
-  public static double quartile(Double[] values, double lowerPercent) {
-
-    if (values == null || values.length == 0) {
-        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
-    }
-
-    // Rank order the values
-    Double[] v = new Double[values.length];
-    System.arraycopy(values, 0, v, 0, values.length);
-    Arrays.sort(v);
-
-    int n = (int) Math.round(v.length * lowerPercent / 100);
-    
-    return (double)v[n];
-  }
-
   /*
     Turn a Double[] into a double[]
   */
@@ -117,24 +78,6 @@
     }
     
     return i;
-  }
-
-  public static double getMin(double[] d){
-    double min = getMax(d);
-    for(int i=0;i<d.length;i++){
-      if( d[i]<min)
-        min = d[i];
-    }
-    return min;
-  }
-
-  public static double getMax(double[] d){
-    double max = 0;
-    for(int i=0;i<d.length;i++){
-      if( d[i]>max)
-        max = d[i];
-    }
-    return max;
   }
 
   public static double getXComponentOfAngle(double length, double angle){
