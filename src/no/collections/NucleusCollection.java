@@ -57,7 +57,7 @@ public class NucleusCollection
   public static final int FAILURE_OTHER     = 32;
   public static final int FAILURE_SIGNALS   = 64;
 
-  public static final double PROFILE_INCREMENT = 0.5;
+//  public double PROFILE_INCREMENT = 0.5;
 
   private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
   private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
@@ -343,6 +343,7 @@ public class NucleusCollection
 	 } // end nucleus iterations
 	 return result;
   }
+  
   // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
   public double getMedianNuclearArea(){
     double[] areas = this.getAreas();
@@ -418,7 +419,7 @@ public class NucleusCollection
 
   /*
     --------------------
-    Profile methds
+    Profile methods
     --------------------
   */
 
@@ -622,8 +623,11 @@ public class NucleusCollection
   */
   protected List<Double[]> calculateMediansAndQuartilesOfProfile(Map<Double, Collection<Double>> profile){
 
+	double profileIncrement = (double) 100 / (double) this.getMedianArrayLength();
+	IJ.log("Profile increment: "+profileIncrement);
     List<Double[]>  medianResults = new ArrayList<Double[]>(0);
-    int arraySize = (int)Math.round(100/PROFILE_INCREMENT);
+    int arraySize = (int) this.getMedianArrayLength();
+    IJ.log("Median length: "+arraySize);
     Double[] xmedians = new Double[arraySize];
     Double[] ymedians = new Double[arraySize];
     Double[] lowQuartiles = new Double[arraySize];
@@ -633,7 +637,7 @@ public class NucleusCollection
     Double[] numberOfPoints = new Double[arraySize];
 
     int m = 0;
-    for(double k=0.0;k<100;k+=PROFILE_INCREMENT){
+    for(double k=0.0;k<100;k+=profileIncrement){
 
       try{
           Collection<Double> values = profile.get(k);
@@ -719,15 +723,18 @@ public class NucleusCollection
     bins to plug any holes left over
 
     The data are stored as a Map<Double, Collection<Double>>
+    PROFILE_INCREMENT is 100 / the median array length. This ensures > 1 entry for each bin, while not
+    pooling too many entries.
   */
 
   protected void updateProfileAggregate(double[] xvalues, double[] yvalues, HashMap<Double, Collection<Double>> profileAggregate){
 
-    for(double k=0.0;k<100;k+=PROFILE_INCREMENT){ // cover all the bin positions across the profile
+	double profileIncrement = (double) 100 / (double) this.getMedianArrayLength();
+    for(double k=0.0;k<100;k+=profileIncrement){ // cover all the bin positions across the profile
 
       for(int j=0;j<xvalues.length;j++){
        
-        if( xvalues[j] > k && xvalues[j] < k+PROFILE_INCREMENT){
+        if( xvalues[j] > k && xvalues[j] < k+profileIncrement){
 
           Collection<Double> values = profileAggregate.get(k);
           
@@ -743,6 +750,7 @@ public class NucleusCollection
 
   public void createProfileAggregateFromPoint(String pointType){
 
+//	this.PROFILE_INCREMENT = (double) 100 / (double) this.getMedianArrayLength();
     HashMap<Double, Collection<Double>> profileAggregate = new HashMap<Double, Collection<Double>>();
     this.addProfileAggregate(pointType, profileAggregate);
 
