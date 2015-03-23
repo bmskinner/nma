@@ -101,7 +101,7 @@ public class Nucleus
 		// assign main features
 		this.roi             = roi;
 		this.sourceImage     = image;
-		this.annotatedImage  = image; // NEEDS TO BE A COPY
+		this.annotatedImage  = new ImagePlus("annotated", image.getProcessor().duplicate()); // NEEDS TO BE A COPY
 		this.enlargedImage   = enlarged;
 		this.sourceFile      = file;
 		this.nucleusNumber   = number;
@@ -235,11 +235,11 @@ public class Nucleus
 	}
 
 	public ImagePlus getSourceImage(){
-		return this.sourceImage;
+		return new ImagePlus("source", this.sourceImage.getProcessor().duplicate());
 	}
 
 	public ImagePlus getAnnotatedImage(){
-		return this.annotatedImage;
+		return new ImagePlus("annotated", this.annotatedImage.getProcessor().duplicate());
 	}
 
 	public ImagePlus getEnlargedImage(){

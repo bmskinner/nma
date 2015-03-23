@@ -829,7 +829,7 @@ public class NucleusCollection
     			  } catch (Exception e) {
     				  IJ.log("    Error in shell analysis: "+e.getMessage());;
     			  }
-    			  IJ.log("    "+color+" counter has "+counter.size()+" entries");
+//    			  IJ.log("    "+color+" counter has "+counter.size()+" entries");
     		  } // end for signals
     	  } // end if signals
     	  channel++;

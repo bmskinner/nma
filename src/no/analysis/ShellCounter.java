@@ -123,6 +123,7 @@ public class ShellCounter {
 			
 			ChiSquareTest test = new ChiSquareTest();
 			pvalue = test.chiSquareTest(expected, observed);
+			IJ.log("    Chi test: p="+pvalue);
 		
 		} catch(Exception e){
 			IJ.log("    Error getting p-values: "+e.getMessage());

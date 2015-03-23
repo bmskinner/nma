@@ -309,21 +309,31 @@ public class ShellAnalyser {
 	*/
 	private double[] normalise(double[] signals, double[] dapi){
 		if(new Double(signals[0]).isNaN()){
-			throw new IllegalArgumentException("Not a number within ShellAnalyser.normalise");
+			throw new IllegalArgumentException("Signal not a number within ShellAnalyser.normalise");
 		}
+		if(new Double(dapi[0]).isNaN()){
+			throw new IllegalArgumentException("DAPI not a number within ShellAnalyser.normalise");
+		}
+		
 		double[] norm = new double[shellCount];
 		double total = 0;
+//		String line = "";
 		// perform the dapi normalisation, and get the signal total
 		for(int i=0; i<shellCount; i++){
 			norm[i] = signals[i] / dapi[i];
 			total += norm[i];
+//			line += norm[i]+"  ";
 		}
+//		IJ.log(line+"  "+total);
 
 		// express the normalised signal as a fraction of the total
+//		line = "";
 		double[] result = new double[shellCount];
 		for(int i=0; i<shellCount; i++){
 			result[i] = norm[i] / total;
+//			line += result[i]+"  ";
 		}
+//		IJ.log(line);
 		return result;
 	}
 
