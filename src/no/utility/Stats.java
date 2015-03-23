@@ -9,12 +9,11 @@
 
  package no.utility;
 
- import ij.IJ;
  import java.util.*;
 
  public class Stats {
 
- 	/*
+ /*
     Calculate the <lowerPercent> quartile from a Double[] array
   */
   public static double quartile(double[] values, double lowerPercent) {
@@ -62,6 +61,31 @@
         sum += m[i];
     }
     return sum / m.length;
+  }
+  
+  public static double stderr(double[] m){
+	  if (m == null || m.length == 0) {
+	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+	  }
+	  return stdev(m)/Math.sqrt(m.length);
+  }
+  
+  public static double stdev(double[] m){
+	  if (m == null || m.length == 0) {
+	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+	  }
+	  return Math.sqrt(variance(m));
+  }
+  
+  public static double variance(double[] m){
+	  if (m == null || m.length == 0) {
+	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+	  }
+      double mean = mean(m);
+      double temp = 0;
+      for(double d : m)
+          temp += Math.pow(mean-d, 2);
+      return temp/m.length;
   }
 
   public static double min(double[] d){
