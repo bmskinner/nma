@@ -11,7 +11,6 @@ package no.collections;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Overlay;
-import ij.gui.Roi;
 import ij.gui.Plot;
 import ij.gui.TextRoi;
 import ij.io.Opener;
@@ -304,6 +303,24 @@ public class NucleusCollection
     return count;
   }
 
+  
+  public List<NuclearSignal> getSignals(int channel){
+	  
+	  List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
+	  
+	  for(int i= 0; i<this.getNucleusCount();i++){
+	      INuclearFunctions n = this.getNucleus(i);
+	      
+	      List<NuclearSignal> signals = channel == Nucleus.RED_CHANNEL 
+	    		  						? n.getRedSignals()
+	    		  						: n.getGreenSignals();
+
+	      for( NuclearSignal s : signals ){ 
+	    	  result.add(s);
+		  } 
+	 } // end nucleus iterations
+	 return result;
+  }
   // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
   public double getMedianNuclearArea(){
     double[] areas = this.getAreas();
@@ -817,14 +834,14 @@ public class NucleusCollection
 				}
 	          } // end for signals
 	        } // end if signals
+	        signalCount++;
 	      } // end for signal group
-	      signalCount++;
     } // end nucleus iterations
     
     // get stats and export
-    redCounter.print();
+//    redCounter.print();
     redCounter.export(new File(redLogFile));
-    greenCounter.print();
+//    greenCounter.print();
     greenCounter.export(new File(greenLogFile));
 
   }

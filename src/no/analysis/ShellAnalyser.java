@@ -46,7 +46,6 @@ public class ShellAnalyser {
 	public ShellAnalyser(INuclearFunctions n){
 		this.originalRoi = n.getRoi();
 		this.image = n.getSourceImage();
-//		ChannelSplitter cs = new ChannelSplitter();
 		this.channels = ChannelSplitter.split(this.image);
 		this.nucleus = n;
 	}
