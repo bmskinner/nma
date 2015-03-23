@@ -10,19 +10,15 @@ package no.analysis;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Roi;
 import ij.io.Opener;
 import ij.plugin.RoiEnlarger;
 import ij.plugin.RGBStackMerge;
 import ij.process.ByteProcessor;
-import ij.process.ImageConverter;
-import ij.process.ImageProcessor;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.*;
 import no.nuclei.*;
-import no.utility.*;
 import no.collections.*;
 import no.components.*;
 
@@ -97,7 +93,7 @@ public class NucleusDetector {
   *  @return the array of filetypes
   */
   public String[] getFileTypes(){
-    return this.fileTypes;
+    return NucleusDetector.fileTypes;
   }
 
   /**
@@ -108,7 +104,7 @@ public class NucleusDetector {
   *  @return the array of prefixes
   */
   public String[] getPrefixesToIgnore(){
-    return this.prefixesToIgnore;
+    return NucleusDetector.prefixesToIgnore;
   }
 
   public int getThreshold(){
@@ -299,9 +295,9 @@ public class NucleusDetector {
       images[1] = new ImagePlus("green", new ByteProcessor(image.getWidth(), image.getHeight(), blank));
       images[2] = image;      
 
-      RGBStackMerge merger = new RGBStackMerge();
+//      RGBStackMerge merger = new RGBStackMerge();
       // IJ.log("  Merger created");
-      mergedImage = merger.mergeChannels(images, false); 
+      mergedImage = RGBStackMerge.mergeChannels(images, false); 
       // IJ.log("  Merged");
     } else{
       IJ.log("  Cannot convert at present; please convert to RGB manually");
@@ -447,8 +443,8 @@ public class NucleusDetector {
     String position = xCentre+"-"+yCentre;
 
     // Enlarge the ROI, so we can do nucleus detection on the resulting original images
-    RoiEnlarger enlarger = new RoiEnlarger();
-    Roi enlargedRoi = enlarger.enlarge(nucleus, 20);
+//    RoiEnlarger enlarger = new RoiEnlarger();
+    Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
 
     // make a copy of the nucleus only for saving out and processing
     image.setRoi(enlargedRoi);

@@ -322,7 +322,7 @@ public class CurveRefolder{
 			NucleusBorderPoint p = testNucleus.getPoint(i);
 			
 			double currentDistance = p.getLengthTo(new XYPoint(0,0));
-			double newDistance = currentDistance; // default no change
+//			double newDistance = currentDistance; // default no change
 			// double newAngle = p.getAngle();
 
 			double oldX = p.getX();

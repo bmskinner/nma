@@ -12,7 +12,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
 import ij.process.ColorProcessor;
 import java.io.File;
 import java.io.IOException;
@@ -65,6 +64,7 @@ public class NucleusRefinder
       }
       i++;
     }
+    scanner.close();
   }
 
   public int getMappingCount(){
@@ -95,10 +95,11 @@ public class NucleusRefinder
       position = scanner.next();
     }
     if(position.equals("POSITION")){
-      return;
+    	scanner.close();
+    	return;
     }
     File imagePath = new File(path);
-    String name = imagePath.getName();
+//    String name = imagePath.getName();
 
     Scanner positionScanner = new Scanner(position);
     double x = 0;
@@ -108,6 +109,7 @@ public class NucleusRefinder
       x = Double.parseDouble(positionScanner.next());
       y = Double.parseDouble(positionScanner.next());
     }
+    positionScanner.close();
 
     // IJ.log("Found image: "+name+" x:"+x+" y:"+y);
     XYPoint point = new XYPoint(x, y);
@@ -115,6 +117,7 @@ public class NucleusRefinder
     HashMap<File, XYPoint> map = new HashMap<File, XYPoint>();
     map.put(imagePath, point);
     nucleiToFind.add(map);
+    scanner.close();
   }
 
 

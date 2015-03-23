@@ -6,22 +6,10 @@
   aligns them
 */  
 package no.analysis;
-import java.util.*;
-import java.awt.Color;
-import no.nuclei.*;
-import no.utility.*;
-import no.collections.*;
-import no.components.*;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.Roi;
-import ij.plugin.frame.RoiManager;
-import ij.plugin.ChannelSplitter;
-import ij.plugin.filter.Analyzer;
 import ij.process.ImageProcessor;
 import ij.plugin.ImageCalculator;
-import ij.measure.ResultsTable;
-import ij.plugin.filter.ParticleAnalyzer;
 
 
 public class ImageAligner{
