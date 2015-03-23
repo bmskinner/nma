@@ -10,7 +10,6 @@ package no.analysis;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Plot;
-import ij.gui.PlotWindow;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 import java.awt.Color;
@@ -31,13 +30,13 @@ public class CurveRefolder{
 	private Profile q75;
 
 	private INuclearFunctions refoldNucleus;
-	private Nucleus testNucleus;
+//	private Nucleus testNucleus;
 
 	private Plot nucleusPlot;
-	private PlotWindow nucleusPlotWindow;
+//	private PlotWindow nucleusPlotWindow;
 
-	private Plot anglePlot;
-	private PlotWindow anglePlotWindow;
+//	private Plot anglePlot;
+//	private PlotWindow anglePlotWindow;
 
 	public static final int FAST_MODE = 0; // default; iterate until convergence
 	public static final int INTENSIVE_MODE = 1; // iterate until value
@@ -300,7 +299,7 @@ public class CurveRefolder{
 	private double iterateOverNucleus() throws Exception{
 
 		Profile refoldProfile = refoldNucleus.getAngleProfile("tail");
-		Profile interpolatedTargetCurve = targetCurve.interpolate(refoldProfile.size());
+//		Profile interpolatedTargetCurve = targetCurve.interpolate(refoldProfile.size());
 
 		double similarityScore = refoldProfile.differenceToProfile(targetCurve);
 
@@ -309,7 +308,7 @@ public class CurveRefolder{
 		double maxDistance = medianDistanceBetweenPoints * 1.2;
 
 		// make all changes to a fresh nucleus before buggering up the real one
-		testNucleus = new Nucleus( (Nucleus)refoldNucleus);
+//		testNucleus = new Nucleus( (Nucleus)refoldNucleus);
 
 		
 		for(int i=0; i<refoldNucleus.getLength(); i++){
@@ -321,7 +320,7 @@ public class CurveRefolder{
 
 			NucleusBorderPoint p = testNucleus.getPoint(i);
 			
-			double currentDistance = p.getLengthTo(new XYPoint(0,0));
+//			double currentDistance = p.getLengthTo(new XYPoint(0,0));
 //			double newDistance = currentDistance; // default no change
 			// double newAngle = p.getAngle();
 
@@ -539,7 +538,7 @@ public class CurveRefolder{
 		// go through the nucleus outline
 		// measure the angle to the tail and the distance to the CoM
 		// if closest to target angle, return distance
-		double bestAngle = 180;
+//		double bestAngle = 180;
 		double bestDiff = 180;
 		double bestDistance = 180;
 
@@ -552,7 +551,7 @@ public class CurveRefolder{
 			}
 
 			if(Math.abs(angle-pAngle) < bestDiff){
-				bestAngle = pAngle;
+//				bestAngle = pAngle;
 				bestDiff = Math.abs(angle-pAngle);
 				bestDistance = distance;
 			}

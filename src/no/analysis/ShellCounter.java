@@ -69,30 +69,16 @@ public class ShellCounter {
 			return;
 		}
 		
-		IJ.log("    Counter Size: "+this.size());
+//		IJ.log("    Counter Size: "+this.size());
 		if(f.exists()){
 			f.delete();
 		}
 		NumberFormat formatter = new DecimalFormat("#0.000");     
 		StringBuilder log = new StringBuilder();
-
-	    // create the log file header
-	    for(int i=0; i<5; i++){
-	      log.append("SHELL_"+i+"\t");
-	    }
-
-	    log.append("\r\n");
-	    for(int i = 0; i< shellValues.get(0).size();i++){ // go through each signal
-	    	for(int j = 0; j<numberOfShells; j++){ // each shell for signal
-	    		List<Double> list = shellValues.get(j);
-	    		log.append(formatter.format(list.get(i))+"\t");
-	    	}
-	    	log.append("\r\n");
-	    }
-	    log.append("--------\r\nMEAN\r\n--------\r\n");
-	    
-	 // export the median and IQR for each shell
+		
+		// export the mean and SE for each shell
 	    try{
+	    	log.append("--------\r\nMEAN\r\n--------\r\n");
 		    List<Double> means = getMeans();
 		    for(Double d : means){
 		    	log.append(formatter.format(d)+"\t");
@@ -108,11 +94,28 @@ public class ShellCounter {
 	    	IJ.log("Error exporting stats: "+e.getMessage());
 	    }
 	    
-		// , plus any stats, plus charts
+	    // export chi square stats
 	    log.append("--------\r\nCHI SQUARE\r\n--------\r\n");
-	    log.append("Number of signals: "+this.size());
-	    log.append("Chi square: "+getChiSquare()+"\r\n");
-	    log.append("p-value   : "+getPValue()+"\r\n");
+	    log.append("Signals   :\t"+this.size()+"\r\n");
+	    log.append("Chi square:\t"+getChiSquare()+"\r\n");
+	    log.append("p-value   :\t"+getPValue()+"\r\n");
+	    
+	    
+	    log.append("--------\r\nOUTER <- SHELLS -> INNER\r\n--------\r\n");
+	    // Export the individual values
+	    for(int i=0; i<5; i++){
+	      log.append("SHELL_"+i+"\t");
+	    }
+
+	    log.append("\r\n");
+	    for(int i = 0; i< shellValues.get(0).size();i++){ // go through each signal
+	    	for(int j = 0; j<numberOfShells; j++){ // each shell for signal
+	    		List<Double> list = shellValues.get(j);
+	    		log.append(formatter.format(list.get(i))+"\t");
+	    	}
+	    	log.append("\r\n");
+	    }
+
 	    IJ.append(log.toString(), f.getAbsolutePath());
 	}
 		
@@ -121,10 +124,10 @@ public class ShellCounter {
 		try{
 			long[]   observed = getObserved();
 			double[] expected = getExpected();
-			
+						
 			ChiSquareTest test = new ChiSquareTest();
 			pvalue = test.chiSquareTest(expected, observed);
-			IJ.log("    Chi test: p="+pvalue);
+//			IJ.log("    Chi test: p="+pvalue);
 		
 		} catch(Exception e){
 			IJ.log("    Error getting p-values: "+e.getMessage());
@@ -156,10 +159,11 @@ public class ShellCounter {
 
 	private long[] getObserved() throws Exception{
 		long[] observed = new long[numberOfShells];
-		double count = shellValues.get(0).size();
+		int count = shellValues.get(0).size();
 		List<Double> means = getMeans();
 		for(int i=0;i<numberOfShells; i++){
-			observed[i] = (long) (means.get(i).longValue()*count);
+			double mean = means.get(i);
+			observed[i] = (long) (mean*count);
 		}
 		return observed;
 	}
@@ -169,6 +173,7 @@ public class ShellCounter {
 		double count = shellValues.get(0).size();
 		for(int i=0;i<numberOfShells; i++){
 			expected[i] = ((double)1/(double)numberOfShells) * count;
+//			IJ.log("E: "+expected[i]);
 		}
 		return expected;
 	}

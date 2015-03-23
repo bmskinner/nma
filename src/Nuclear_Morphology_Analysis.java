@@ -11,7 +11,6 @@
   It also generates a profile of the nuclear shape, allowing
   morphology comparisons
 */
-import ij.IJ;
 import ij.plugin.PlugIn;
 import no.analysis.AnalysisCreator;
 
