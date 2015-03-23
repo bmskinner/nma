@@ -69,7 +69,7 @@ public class ShellCounter {
 			return;
 		}
 		
-		IJ.log("   Counter Size: "+this.size());
+		IJ.log("    Counter Size: "+this.size());
 		if(f.exists()){
 			f.delete();
 		}
@@ -171,7 +171,7 @@ public class ShellCounter {
 		return expected;
 	}
 		
- 	private int size(){
+ 	public int size(){
  		return shellValues.get(0).size();
  	}
 	public void print(){

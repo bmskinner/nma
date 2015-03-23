@@ -796,8 +796,6 @@ public class NucleusCollection
 
   public void doShellAnalysis(){
 
-    // IJ.log("Shell analysis:");
-
     String redLogFile   = makeGlobalLogFile( "logShellsRed"  );
     String greenLogFile = makeGlobalLogFile( "logShellsGreen");
     
@@ -815,33 +813,31 @@ public class NucleusCollection
       signals.add(n.getRedSignals());
       signals.add(n.getGreenSignals());
 
-      int signalCount = 0;
+      int channel = 0;
       
       // put each signal in the correct counter
       for( List<NuclearSignal> signalGroup : signals ){
 
-    	  ShellCounter counter = signalCount == Nucleus.RED_CHANNEL ? redCounter : greenCounter;
-        
-	        if(signalGroup.size()>0){
-	          for(int j=0; j<signalGroup.size();j++){
-	            NuclearSignal s = signalGroup.get(j);
-	            double[] signalPerShell = shellAnalyser.findShell(s, signalCount);
-	            try {
-					counter.addValues(signalPerShell);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	          } // end for signals
-	        } // end if signals
-	        signalCount++;
-	      } // end for signal group
+    	  if(signalGroup.size()>0){
+    		  ShellCounter counter = channel == Nucleus.RED_CHANNEL ? redCounter : greenCounter;
+    		  String color = channel == Nucleus.RED_CHANNEL ? "Red" : "Green";
+    		  
+    		  for(NuclearSignal s : signalGroup){
+    			  try {
+    				  double[] signalPerShell = shellAnalyser.findShell(s, channel);
+    				  counter.addValues(signalPerShell);
+    			  } catch (Exception e) {
+    				  IJ.log("    Error in shell analysis: "+e.getMessage());;
+    			  }
+    			  IJ.log("    "+color+" counter has "+counter.size()+" entries");
+    		  } // end for signals
+    	  } // end if signals
+    	  channel++;
+      } // end for signal group
     } // end nucleus iterations
     
     // get stats and export
-//    redCounter.print();
-    redCounter.export(new File(redLogFile));
-//    greenCounter.print();
+      redCounter.export(new File(redLogFile  ));
     greenCounter.export(new File(greenLogFile));
 
   }
@@ -867,8 +863,8 @@ public class NucleusCollection
   */
   public void exportSignalStats(){
 
-    String redLogFile   = makeGlobalLogFile( "logRedSignals"  );
-    String greenLogFile = makeGlobalLogFile( "logGreenSignals");
+    String redLogFile   = makeGlobalLogFile( "logSignalsRed"  );
+    String greenLogFile = makeGlobalLogFile( "logSignalsGreen");
 
     StringBuilder redLog = new StringBuilder();
     StringBuilder greenLog = new StringBuilder();

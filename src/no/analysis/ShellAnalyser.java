@@ -139,12 +139,14 @@ public class ShellAnalyser {
 	*
 	* @param signal the signal to analyse
 	* @return an array of signal proportions in each shell
+	 * @throws Exception 
 	*/
-	public double[] findShell(NuclearSignal signal, int channel){
+	public double[] findShell(NuclearSignal signal, int channel) throws Exception{
 
 		// IJ.log(" Finding shells");
 
 		Roi signalRoi = signal.getRoi();
+//		IJ.log("    Signal ROI: "+signalRoi.getBounds().x+","+signalRoi.getBounds().y);
 		
 		// Get a list of all the points within the ROI
 		List<XYPoint> signalPoints = getXYPoints(signalRoi);
@@ -158,6 +160,9 @@ public class ShellAnalyser {
 		// normalise the signals to the dapi intensity
 		double[] normalisedSignal = normalise(this.signalProportions, this.dapiDensities);
 
+		if(new Double(normalisedSignal[0]).isNaN()){
+			throw new Exception("Result is not a number");
+		}
 		return normalisedSignal;
 	}
 
@@ -214,6 +219,9 @@ public class ShellAnalyser {
 	* @return an array of signal densities per shell, outer to centre
 	*/
 	private double[] getSignalDensities(List<XYPoint> signalPoints, int channel){
+		if(signalPoints.size()==0){
+			throw new IllegalArgumentException("No points found in ROI");
+		}
 		double[] result = new double[shellCount];
 
 		int i=0;
@@ -243,6 +251,9 @@ public class ShellAnalyser {
 	* @return a double[] with the fractions of signal per shell, outer to inner
 	*/
 	private double[] getProportions(double[] counts){
+		if(new Double(counts[0]).isNaN()){
+			throw new IllegalArgumentException("Not a number within ShellAnalyser.getProportions");
+		}
 		double[] proportions = new double[shellCount];
 
 		double total = 0;
@@ -297,7 +308,9 @@ public class ShellAnalyser {
 	* @return a double[] with the normalised signal density per shell, outer to inner
 	*/
 	private double[] normalise(double[] signals, double[] dapi){
-		
+		if(new Double(signals[0]).isNaN()){
+			throw new IllegalArgumentException("Not a number within ShellAnalyser.normalise");
+		}
 		double[] norm = new double[shellCount];
 		double total = 0;
 		// perform the dapi normalisation, and get the signal total
