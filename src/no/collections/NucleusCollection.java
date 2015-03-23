@@ -820,7 +820,6 @@ public class NucleusCollection
 
     	  if(signalGroup.size()>0){
     		  ShellCounter counter = channel == Nucleus.RED_CHANNEL ? redCounter : greenCounter;
-    		  String color = channel == Nucleus.RED_CHANNEL ? "Red" : "Green";
     		  
     		  for(NuclearSignal s : signalGroup){
     			  try {
@@ -829,7 +828,6 @@ public class NucleusCollection
     			  } catch (Exception e) {
     				  IJ.log("    Error in shell analysis: "+e.getMessage());;
     			  }
-//    			  IJ.log("    "+color+" counter has "+counter.size()+" entries");
     		  } // end for signals
     	  } // end if signals
     	  channel++;

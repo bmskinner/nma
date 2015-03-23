@@ -26,8 +26,8 @@ public class RodentSpermNucleus
 //  private NucleusBorderPoint spermTip; // differs from the headpoint, which in other sperm is opposite the tail
 //  private NucleusBorderPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
 //  private NucleusBorderPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
-  private NucleusBorderPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
-  private NucleusBorderPoint minFeretPoint2;
+//  private NucleusBorderPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
+//  private NucleusBorderPoint minFeretPoint2;
   
   private FloatPolygon hookRoi;
   private FloatPolygon humpRoi;
@@ -242,8 +242,8 @@ public class RodentSpermNucleus
         reference = p;
       }
     }
-    this.minFeretPoint1 = reference;
-    this.minFeretPoint2 = this.findOppositeBorder(reference);
+//    this.minFeretPoint1 = reference;
+//    this.minFeretPoint2 = this.findOppositeBorder(reference);
     
     // Using the point, draw a line from teh CoM to the border. Measure the angle to an intersection point
     // if close to 90, and the distance to the tip > CoM-tip, keep the point
