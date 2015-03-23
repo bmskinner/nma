@@ -7,16 +7,11 @@
 */  
 package no.analysis;
 import java.util.*;
-import no.nuclei.*;
-import no.utility.*;
-import no.collections.*;
-import no.components.*;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.plugin.ChannelSplitter;
-import ij.plugin.filter.Analyzer;
 import ij.process.ImageProcessor;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.ParticleAnalyzer;
@@ -115,55 +110,69 @@ public class Detector{
   	return resultMap;
   }
 
-  private ImagePlus getChannelImage(ImagePlus image){
+  private ImagePlus getChannelImage(ImagePlus image, boolean invert){
 
     // split out colour channel
-    ChannelSplitter cs = new ChannelSplitter();
-    ImagePlus[] channels = cs.split(image);
+    ImagePlus[] channels = ChannelSplitter.split(image);
     ImagePlus searchImage = channels[this.channel];
     
     // threshold
     ImageProcessor ip = searchImage.getChannelProcessor();
     ip.smooth();
     ip.threshold(this.threshold);
-    ip.invert(); // WHY IS THIS NEEDED? MAKES BLACK NUCLEUS ON WHITE. NEEDED BY PARTICLE DETECTOR ON MANETHEREN, BUT BREAKS ON WORK PC UNTIL IT SUDDENLY BROKE THE PARTICLE DETECTOR.
+    if(invert){
+    	ip.invert(); // WHY IS THIS NEEDED? MAKES BLACK NUCLEUS ON WHITE. NEEDED BY PARTICLE DETECTOR ON MANETHEREN, BUT BREAKS ON WORK PC UNTIL IT SUDDENLY BROKE THE PARTICLE DETECTOR.
+    }
     return searchImage;
   }
 
   private void findInImage(ImagePlus image){
 
-    RoiManager manager = new RoiManager(true);
-
-    ImagePlus searchImage = this.getChannelImage(image);
-
-    // run the particle analyser
-    ResultsTable rt = new ResultsTable();
-    ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
-                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA | ParticleAnalyzer.PERIMETER | ParticleAnalyzer.FERET ,
-                 rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
-    try {
-      pa.setRoiManager(manager);
-      boolean success = pa.analyze(searchImage);
-      if(!success){
-        IJ.log("  Unable to perform particle analysis");
-      }
-    } catch(Exception e){
-       IJ.log("  Error in particle analyser: "+e);
-    } finally {
-      searchImage.close();
+    
+    ImagePlus searchImage = this.getChannelImage(image, false);
+    this.runAnalyser(searchImage);
+    if(this.getRoiCount()==0){
+    	searchImage = this.getChannelImage(image, true);
+    	this.runAnalyser(searchImage);
     }
 
-    this.roiArray = manager.getSelectedRoisAsArray();
-    for(int i=0;i<roiArray.length;i++){
-    	HashMap<String, Double> values = new HashMap<String, Double>(0);
-    	values.put("Area", rt.getValue("Area",i)); 
-    	values.put("Feret", rt.getValue("Feret",i)); 
-    	values.put("Perim", rt.getValue("Perim.",i)); 
-    	values.put("XM", rt.getValue("XM",i)); 
-    	values.put("YM", rt.getValue("YM",i)); 
+   
+  }
+  
+  private int getRoiCount() {
+	return this.roiArray.length;
+}
 
-    	this.roiMap.put(roiArray[i], values);
-    }
+  private void runAnalyser(ImagePlus image){
+	  RoiManager manager = new RoiManager(true);
+	  // run the particle analyser
+	    ResultsTable rt = new ResultsTable();
+	    ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
+	                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA | ParticleAnalyzer.PERIMETER | ParticleAnalyzer.FERET ,
+	                 rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
+	    try {
+	      ParticleAnalyzer.setRoiManager(manager);
+	      boolean success = pa.analyze(image);
+	      if(!success){
+	        IJ.log("  Unable to perform particle analysis");
+	      }
+	    } catch(Exception e){
+	       IJ.log("  Error in particle analyser: "+e);
+	    } finally {
+	      image.close();
+	    }
+
+	    this.roiArray = manager.getSelectedRoisAsArray();
+	    for(int i=0;i<roiArray.length;i++){
+	    	HashMap<String, Double> values = new HashMap<String, Double>(0);
+	    	values.put("Area", rt.getValue("Area",i)); 
+	    	values.put("Feret", rt.getValue("Feret",i)); 
+	    	values.put("Perim", rt.getValue("Perim.",i)); 
+	    	values.put("XM", rt.getValue("XM",i)); 
+	    	values.put("YM", rt.getValue("YM",i)); 
+
+	    	this.roiMap.put(roiArray[i], values);
+	    }
   }
 
 
