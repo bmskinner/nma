@@ -10,8 +10,6 @@
  package no.utility;
 
  import ij.IJ;
- import java.util.*;
- import no.components.*;
 
  public class Utils {
 

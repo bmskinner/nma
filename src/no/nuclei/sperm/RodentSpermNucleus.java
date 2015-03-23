@@ -8,45 +8,9 @@
 */  
 package no.nuclei.sperm;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.Overlay;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.gui.Plot;
-import ij.gui.PlotWindow;
-import ij.gui.ProgressBar;
-import ij.gui.TextRoi;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
-import ij.io.DirectoryChooser;
-import ij.io.Opener;
-import ij.io.OpenDialog;
-import ij.io.RandomAccessStream;
-import ij.measure.ResultsTable;
-import ij.measure.SplineFitter;
-import ij.plugin.ChannelSplitter;
-import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
-import ij.process.FloatProcessor;
-import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
-import ij.process.StackConverter;
-import java.awt.BasicStroke;
-import java.awt.Shape;
 import java.awt.Color;
-import java.awt.geom.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.Polygon;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.util.*;
 import no.nuclei.*;
 import no.components.*;
@@ -55,13 +19,13 @@ import no.utility.*;
 public class RodentSpermNucleus
 	extends SpermNucleus
 {
-  private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
+//  private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
 
-  private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
+//  private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
 
-  private NucleusBorderPoint spermTip; // differs from the headpoint, which in other sperm is opposite the tail
-  private NucleusBorderPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
-  private NucleusBorderPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
+//  private NucleusBorderPoint spermTip; // differs from the headpoint, which in other sperm is opposite the tail
+//  private NucleusBorderPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
+//  private NucleusBorderPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
   private NucleusBorderPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
   private NucleusBorderPoint minFeretPoint2;
   
@@ -170,6 +134,7 @@ public class RodentSpermNucleus
     }
   }
 
+
   public boolean isHumpSide(XYPoint p){
     if(humpRoi.contains( (float)p.getX(), (float)p.getY() ) ){
       return true;
@@ -177,7 +142,7 @@ public class RodentSpermNucleus
       return false;
     }
   }    
-
+  
   /*
     Checks if the smoothed array nuclear shape profile has the acrosome to the rear of the array
     If acrosome is at the beginning:

@@ -10,12 +10,6 @@
 */  
 package no.components;
 
-import ij.IJ;
-import java.util.*;
-import no.nuclei.*;
-import no.components.*;
-import no.utility.*;
-
 public class NucleusBorderSegment{
 
 	private int startIndex;

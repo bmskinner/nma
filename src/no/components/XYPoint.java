@@ -8,9 +8,6 @@
 
 package no.components;
 
-import java.util.*;
-import no.utility.Equation;
-
 public class XYPoint {
   private double x;
   private double y;

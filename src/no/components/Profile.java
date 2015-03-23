@@ -7,14 +7,13 @@
 package no.components;
 
 import ij.IJ;
-import java.util.*;
 import no.utility.*;
 
 public class Profile {
 
 	private double[] array;
-  private int minimaCount = 0;
-  private int maximaCount = 0;
+//  private int minimaCount = 0;
+//  private int maximaCount = 0;
 
 	public Profile(double[] values){
 

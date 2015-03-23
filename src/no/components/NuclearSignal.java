@@ -1,8 +1,6 @@
 package no.components;
 
-import ij.IJ;
 import ij.gui.Roi;
-import java.util.*;
 
 /*
   -----------------------

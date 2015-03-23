@@ -9,9 +9,6 @@
 
 package no.components;
 
-import java.util.*;
-import no.nuclei.*;
-
 public class NucleusBorderPoint
 	extends no.components.XYPoint 
 {
@@ -29,9 +26,9 @@ public class NucleusBorderPoint
   private int numberOfConsecutiveBlocks; // holds the number of interiorAngleDeltaSmootheds > 1 degree after this point
   private int blockNumber; // identifies the group of consecutive blocks this point is part of
   private int blockSize; // the total number of points within the block
-  private int positionWithinBlock; // stores the place within the block starting at 0
+//  private int positionWithinBlock; // stores the place within the block starting at 0
 
-  private boolean isMidpoint; // is this point the midpoint of a block
+//  private boolean isMidpoint; // is this point the midpoint of a block
 
   public NucleusBorderPoint( double x, double y){
   	super(x, y);
@@ -50,7 +47,7 @@ public class NucleusBorderPoint
     this.setConsecutiveBlocks(p.getConsecutiveBlocks());
     this.setBlockNumber(p.getBlockNumber());
     this.setBlockSize(p.getBlockSize());
-    this.setPositionWithinBlock(p.getPositionWithinBlock());
+//    this.setPositionWithinBlock(p.getPositionWithinBlock());
   }
 
   public int getIndex(){
@@ -85,13 +82,13 @@ public class NucleusBorderPoint
     this.blockSize = i;
   }
 
-  public int getPositionWithinBlock(){
-    return this.positionWithinBlock;
-  }
-
-  public void setPositionWithinBlock(int i){
-    this.positionWithinBlock = i;
-  }
+//  public int getPositionWithinBlock(){
+//    return this.positionWithinBlock;
+//  }
+//
+//  public void setPositionWithinBlock(int i){
+//    this.positionWithinBlock = i;
+//  }
 
   public boolean isBlock(){
       if(this.blockNumber>0){
@@ -101,23 +98,23 @@ public class NucleusBorderPoint
       }
     }
 
-  public void setMidpoint(){
-    int midpoint  = (int)Math.floor(this.getBlockSize()/2);
-    if(this.getPositionWithinBlock() == midpoint){
-      this.isMidpoint = true;
-    } else {
-      this.isMidpoint =false;
-    }
-  }
+//  public void setMidpoint(){
+//    int midpoint  = (int)Math.floor(this.getBlockSize()/2);
+//    if(this.getPositionWithinBlock() == midpoint){
+//      this.isMidpoint = true;
+//    } else {
+//      this.isMidpoint =false;
+//    }
+//  }
 
-  public boolean isMidpoint(){
-    int midpoint  = (int)Math.floor(this.getBlockSize()/2);
-    if(this.getPositionWithinBlock() == midpoint && this.getPositionWithinBlock() !=0){
-      return true;
-    } else {
-      return false;
-    }
-  }
+//  public boolean isMidpoint(){
+//    int midpoint  = (int)Math.floor(this.getBlockSize()/2);
+//    if(this.getPositionWithinBlock() == midpoint && this.getPositionWithinBlock() !=0){
+//      return true;
+//    } else {
+//      return false;
+//    }
+//  }
 
   public double getMinAngle(){
     return this.minAngle;

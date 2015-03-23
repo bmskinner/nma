@@ -1,8 +1,6 @@
 package no.nuclei;
 
-import java.lang.*;
 import java.io.File;
-import java.util.Map;
 import java.util.List;
 import java.util.Set;
 

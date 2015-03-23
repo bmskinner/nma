@@ -6,7 +6,6 @@
 */  
 package no.utility;
 
-import java.util.*;
 import no.components.XYPoint;
 
 
