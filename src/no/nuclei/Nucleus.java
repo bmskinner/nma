@@ -1004,6 +1004,10 @@ public class Nucleus
 		}
 		return new NucleusBorderPoint(this.getPoint(index));
 	}
+	
+	public double getNarrowestDiameter(){
+		return Stats.min(this.distanceProfile.asArray());
+	}
 
 	public double[] getNormalisedProfilePositions(){
 		double[] d = new double[this.getLength()];

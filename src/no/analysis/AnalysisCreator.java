@@ -12,14 +12,8 @@ package no.analysis;
 
 import ij.IJ;
 import ij.gui.GenericDialog;
-import ij.io.FileInfo;
-import ij.io.FileOpener;
 import ij.io.DirectoryChooser;
-import ij.io.Opener;
 import ij.io.OpenDialog;
-import ij.io.RandomAccessStream;
-import ij.plugin.PlugIn;
-import java.awt.Color;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -29,8 +23,6 @@ import java.util.*;
 import no.components.Profile;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
-import no.analysis.*;
-import no.utility.*;
 import no.collections.*;
 import no.nuclei.INuclearFunctions;
 
@@ -418,7 +410,7 @@ public class AnalysisCreator {
 
         
         nucleusCounts.put("input", r.getNucleusCount());
-        Constructor collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
+        Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
         INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, this.outputFolderName, "failed");
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
@@ -660,7 +652,7 @@ public class AnalysisCreator {
   }
 
   private String[] getNucleusTypeStrings(){
-    return this.nucleusTypes.keySet().toArray(new String[0]);
+    return AnalysisCreator.nucleusTypes.keySet().toArray(new String[0]);
   }
 
   public boolean displayOptionsDialog(){
@@ -703,9 +695,9 @@ public class AnalysisCreator {
     yoffset = (int)gd.getNextNumber();
 
     String nucleusType = gd.getNextChoice();
-    int nucleusCode = this.nucleusTypes.get(nucleusType);
-    this.collectionClass = this.collectionClassTypes.get(nucleusCode);
-    this.nucleusClass = this.nucleusClassTypes.get(nucleusCode);
+    int nucleusCode = AnalysisCreator.nucleusTypes.get(nucleusType);
+    this.collectionClass = AnalysisCreator.collectionClassTypes.get(nucleusCode);
+    this.nucleusClass = AnalysisCreator.nucleusClassTypes.get(nucleusCode);
     this.refoldMode = gd.getNextRadioButton();
     this.realignMode = gd.getNextBoolean();
     return true;

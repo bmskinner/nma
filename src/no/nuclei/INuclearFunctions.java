@@ -66,6 +66,8 @@ public interface INuclearFunctions
 	public double getArea();
 
 	public double getFeret();
+	
+	public double getNarrowestDiameter();
 
 	public double getPathLength();
 

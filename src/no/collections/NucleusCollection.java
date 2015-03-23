@@ -228,6 +228,16 @@ public class NucleusCollection
     }
     return d;
   }
+  
+  public double[] getMinFerets(){
+
+	    double[] d = new double[nucleiCollection.size()];
+
+	    for(int i=0;i<nucleiCollection.size();i++){
+	      d[i] = nucleiCollection.get(i).getNarrowestDiameter();
+	    }
+	    return d;
+	  }
 
   public double[] getPathLengths(){
 
@@ -1044,6 +1054,7 @@ public class NucleusCollection
     String[] sFerets       = Utils.getStringFromDouble(this.getFerets());
     String[] sPathlengths  = Utils.getStringFromDouble(this.getPathLengths());
     String[] sDistances    = Utils.getStringFromDouble(this.getMedianDistanceBetweenPoints());
+    String[] sMinFerets    = Utils.getStringFromDouble(this.getMinFerets());
     String[] sPaths        = this.getNucleusPaths();
 
     stats.put("AREA",        Arrays.asList(  sAreas));
@@ -1051,6 +1062,7 @@ public class NucleusCollection
     stats.put("FERET",       Arrays.asList(  sFerets));
     stats.put("PATH_LENGTH", Arrays.asList(  sPathlengths));
     stats.put("MEDIAN_DISTANCE_BETWEEN_POINTS", Arrays.asList(sDistances ) );
+    stats.put("MIN_FERET",   Arrays.asList(  sMinFerets));
     stats.put("PATH",        Arrays.asList(  sPaths));
 
     return stats;
