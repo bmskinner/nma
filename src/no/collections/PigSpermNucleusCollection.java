@@ -38,39 +38,42 @@ public class PigSpermNucleusCollection
   */
   @Override
   public void findTailIndexInMedianCurve(){
-    // can't use regular tail detector, because it's based on NucleusBorderPoints
+	  // can't use regular tail detector, because it's based on NucleusBorderPoints
 
-    Profile medianProfile = this.getMedianProfile("head");
+	  Profile medianProfile = this.getMedianProfile("head");
 
-    Profile minima = medianProfile.getLocalMaxima(5); // window size 5
+	  Profile minima = medianProfile.getLocalMaxima(5); // window size 5
 
-//    double minDiff = medianProfile.size();
-    double minAngle = 180;
-    int tailIndex = 0;
+	  //    double minDiff = medianProfile.size();
+	  double minAngle = 180;
+	  int tailIndex = 0;
 
-    if(minima.size()==0){
-      IJ.log("    Error: no minima found in median line");
-      tailIndex = 100; // set to roughly the middle of the array for the moment
+	  int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
+	  int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
 
-    } else{
+	  if(minima.size()==0){
+		  IJ.log("    Error: no minima found in median line");
+		  tailIndex = 100; // set to roughly the middle of the array for the moment
 
-      for(int i = 0; i<minima.size();i++){
-        if(minima.get(i)==1){
-          int index = (int)minima.get(i);
+	  } else{
 
-//          int toEnd = medianProfile.size() - index;
-//          int diff = Math.abs(index - toEnd);
+		  for(int i = 0; i<minima.size();i++){
+			  if(minima.get(i)==1){
+				  int index = (int)minima.get(i);
 
-          double angle = medianProfile.get(index);
-          if(angle>minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
-            minAngle = angle;
-            tailIndex = index;
-          }
-        }
-      }
-    }
-    // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-    addMedianProfileFeatureIndex("head", "tail", tailIndex); // set the tail-index in the head normalised profile
+				  //          int toEnd = medianProfile.size() - index;
+				  //          int diff = Math.abs(index - toEnd);
+
+				  double angle = medianProfile.get(index);
+				  if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
+					  minAngle = angle;
+					  tailIndex = index;
+				  }
+			  }
+		  }
+	  }
+	  // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
+	  addMedianProfileFeatureIndex("head", "tail", tailIndex); // set the tail-index in the head normalised profile
   }
 
   /*

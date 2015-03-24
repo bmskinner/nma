@@ -47,38 +47,38 @@ public class RodentSpermNucleusCollection
     -----------------------
   */
   @Override
-	public void findTailIndexInMedianCurve(){
-		// can't use regular tail detector, because it's based on NucleusBorderPoints
-		// get minima in curve, then find the lowest minima / minima furthest from both ends
+  public void findTailIndexInMedianCurve(){
+	  // can't use regular tail detector, because it's based on NucleusBorderPoints
+	  // get minima in curve, then find the lowest minima / minima furthest from both ends
 
-    Profile medianProfile = this.getMedianProfile("tip");
+	  Profile medianProfile = this.getMedianProfile("tip");
 
-		Profile minima = medianProfile.getLocalMinima(5); // window size 5
+	  Profile minima = medianProfile.getLocalMinima(5); // window size 5
 
-//		double minDiff = medianProfile.size();
-		double minAngle = 180;
-		int tailIndex = 0;
+	  //		double minDiff = medianProfile.size();
+	  double minAngle = 180;
+	  int tailIndex = 0;
+	  
+	  int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
+	  int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
 
-  	for(int i = 0; i<minima.size();i++){
-      if( (int)minima.get(i)==1){
-  			int index = i;
+	  for(int i = 0; i<minima.size();i++){
+		  if( (int)minima.get(i)==1){
+			  int index = i;
 
-//  			int toEnd = medianProfile.size() - index;
-//  			int diff = Math.abs(index - toEnd);
+			  double angle = medianProfile.get(index);
+			  if(angle<minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
+				  minAngle = angle;
+				  tailIndex = index;
+			  }
+		  }
+	  }
+	  Profile tailProfile = medianProfile.offset(tailIndex);
+	  addMedianProfile("tail", tailProfile);
 
-  			double angle = medianProfile.get(index);
-  			if(angle<minAngle && index > 40 && index < 120){ // get the lowest point that is not near the tip
-  				minAngle = angle;
-  				tailIndex = index;
-  			}
-      }
-		}
-    Profile tailProfile = medianProfile.offset(tailIndex);
-    addMedianProfile("tail", tailProfile);
-
-    // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-    addMedianProfileFeatureIndex("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
-	}
+	  // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
+	  addMedianProfileFeatureIndex("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
+  }
 
   /*
     Calculate the offsets needed to corectly assign the tail positions
