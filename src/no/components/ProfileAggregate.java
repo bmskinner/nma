@@ -3,7 +3,6 @@ package no.components;
 import ij.IJ;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,21 +30,7 @@ public class ProfileAggregate {
 			x += profileIncrement;
 		}
 	}
-	
-//	private ProfileAggregate(Map<Double, Collection<Double>> aggregate, int length){
-//		this.aggregate = aggregate;
-//		this.length = length;
-//		
-//		this.profileIncrement = (double) 100 / (double) length;;
-//		
-//		xPositions = new double[length];
-//		double x = 0;
-//		for(int i=0;i<length;i++){
-//			xPositions[i] = x;
-//			x += profileIncrement;
-//		}
-//	}
-	
+		
 	/*
     We need to calculate the median angle profile. This requires binning the normalised profiles
     into bins of size PROFILE_INCREMENT to generate a table such as this:
@@ -66,18 +51,22 @@ public class ProfileAggregate {
 
 	public void addValues(Profile yvalues){
 		
-		// find the appropriate x positions for each y
+		// normalise the profile to the correct x positions
 		double[] xvalues = new double[yvalues.size()];
 		for(int i=0;i<xvalues.length;i++){
-			xvalues[i] = ( (double)i / (double)xvalues.length ) * this.length;
+			xvalues[i] = ( (double)i / (double)xvalues.length ) * 100;
 		}
+				 
+		for(int i=0;i<xvalues.length;i++){  // the positions in the input profile
+			
+			double testX = xvalues[i];
 
-		for(int i=0;i<length;i++){ // cover all the bin positions across the profile
-
-			double x = xPositions[i];
-			for(int j=0;j<xvalues.length;j++){
-
-				if( xvalues[j] >= x && xvalues[j] < x+profileIncrement){
+			for(int j=0;j<this.length;j++){ // cover all the bin positions across the profile
+				
+				double x = xPositions[j]; // the bin to fill
+				double maxX = x+profileIncrement;
+				
+				if( testX >= x && testX < maxX){ // profile xvalue is in bin
 
 					Collection<Double> values = aggregate.get(x);
 
@@ -85,7 +74,9 @@ public class ProfileAggregate {
 						values = new ArrayList<Double>();
 						aggregate.put(x, values);
 					}
-					values.add(yvalues.get(j));
+//					IJ.log("Found:"+x+" <= "+testX+" < "+maxX+" : Adding: "+yvalues.get(i));
+					values.add(yvalues.get(i));
+					break;
 				}
 			}
 		}        
@@ -110,14 +101,11 @@ public class ProfileAggregate {
 		try{
 			result = calculateQuartile(50);
 		} catch(ProfileException e){
-			if(this.length!=200){
-				int newLength = this.length < 200 ? this.length-5 : 200;
-				IJ.log("    "+e.getMessage()+": rescaling to "+newLength);
-				this.rescaleProfile(newLength);
-				result = this.getQuartile(50);
-			} else {
-				IJ.log("    Unable to get median");
-			}
+			// if the profile >200, scale down to 200. Otherwise, reduce stepwise until we get a profile
+			int newLength = this.length <= 200 ? this.length-5 : 200;
+			IJ.log("    "+e.getMessage()+": rescaling to "+newLength);
+			this.rescaleProfile(newLength);
+			result = this.getMedian();
 		}
 		return result;
 	}
@@ -127,17 +115,17 @@ public class ProfileAggregate {
 		try{
 			result = calculateQuartile(quartile);
 		} catch(ProfileException e){
-			result = this.getMedian();
+			result = this.getMedian(); // median is the only method that rescales, so should have been called before this
 			IJ.log("    Cannot find quartile; falling back on median");
 		}
 		return result;
 	}
 	
 	private Profile calculateQuartile(double quartile) throws ProfileException{
-		Double[] medians = new Double[length];
+		Double[] medians = new Double[this.length];
 		int missing = 0;
 
-		for(int i=0;i<length;i++){
+		for(int i=0;i<this.length;i++){
 			double x = xPositions[i];
 
 			try{
@@ -181,8 +169,6 @@ public class ProfileAggregate {
 						throw new ProfileException("Unable to repair median profile");
 					}
 				}	
-
-//				IJ.log("    Repaired medians at "+i+" with values from  "+replacementIndex);
 			}
 		}
 		return new Profile(Utils.getdoubleFromDouble(array));
@@ -227,7 +213,7 @@ public class ProfileAggregate {
 		this.xPositions = new double[newLength];
 		double x = 0;
 		for(int i=0;i<length;i++){
-			xPositions[i] = x;
+			this.xPositions[i] = x;
 			x += profileIncrement;
 		}
 	}
