@@ -201,44 +201,46 @@ public class Profile {
     int indexHigher = index2 < index1
                              ? index2
                              : index1;
+    
+//    int absIndex = (int) Math.abs((normIndex - indexLower));
 
     // wrap the arrays
     indexLower  = Utils.wrapIndex(indexLower , this.size());
     indexHigher = Utils.wrapIndex(indexHigher, this.size());
     
-    int indexTwoLower = Utils.wrapIndex(indexLower-1 , this.size());
-    int indexTwoHigher = Utils.wrapIndex(indexHigher+1 , this.size());
+//    int indexTwoLower = Utils.wrapIndex(indexLower-1 , this.size());
+//    int indexTwoHigher = Utils.wrapIndex(indexHigher+1 , this.size());
 
     // get the angle values in the profile at the given indices
-    double valueTwoHigher = array[indexTwoHigher ];
-    double valueTwoLower = array[indexTwoLower ];
+//    double valueTwoHigher = array[indexTwoHigher ];
+//    double valueTwoLower = array[indexTwoLower ];
     double valueHigher = array[indexLower ];
     double valueLower  = array[indexHigher];
     
-    double[] xvalues = { normIndex-2, normIndex-1, normIndex+1, normIndex+2 };
-    double[] yvalues = { valueTwoLower, valueLower, valueHigher, valueTwoHigher };
-
-    double interpolatedValue = 0;
-    try{
-    	Interpolator interpolator = new Interpolator(xvalues, yvalues);
-    	interpolatedValue = interpolator.find(normIndex);
-    } catch(Exception e){
-    	// interpolate on a straight line between the points if the Interpolator fails
-    	double valueDifference = valueHigher - valueLower;
-    	double positionToFind = indexHigher - normIndex;
-    	interpolatedValue = (valueDifference * positionToFind) + valueLower;
-    	IJ.log("    Error in cubic interpolator: falling back to linear");
-    }
+//    double[] xvalues = { -1, 0, 1, 2 };
+//    double[] yvalues = { valueTwoLower, valueLower, valueHigher, valueTwoHigher };
+//
+//    double interpolatedValue = 0;
+//    try{
+//    	Interpolator interpolator = new Interpolator(xvalues, yvalues);
+//    	interpolatedValue = interpolator.find(absIndex);
+//    } catch(Exception e){
+//    	// interpolate on a straight line between the points if the Interpolator fails
+//    	double valueDifference = valueHigher - valueLower;
+//    	double positionToFind = indexHigher - normIndex;
+//    	interpolatedValue = (valueDifference * positionToFind) + valueLower;
+//    	IJ.log("    Error in cubic interpolator: falling back to linear");
+//    }
     
     double valueDifference = valueHigher - valueLower;
 	double positionToFind = indexHigher - normIndex;
 	double linearInterpolatedValue = (valueDifference * positionToFind) + valueLower;
-//	IJ.log("    L: "+linearInterpolatedValue+" C: "+interpolatedValue);
-	if(Math.abs(interpolatedValue)>Math.abs(linearInterpolatedValue*2)){
-		interpolatedValue = linearInterpolatedValue;
-//		IJ.log("    Ambiguous curve; falling back to linear interpolation"); 
-	}
-    return interpolatedValue;
+////	IJ.log("    L: "+linearInterpolatedValue+" C: "+interpolatedValue);
+//	if(Math.abs(interpolatedValue)>Math.abs(linearInterpolatedValue*2) || Math.abs(interpolatedValue)< Math.abs(linearInterpolatedValue/2)){
+//		interpolatedValue = linearInterpolatedValue;
+////		IJ.log("    Ambiguous curve; falling back to linear interpolation"); 
+//	}
+    return linearInterpolatedValue;
   }
 
   /*
