@@ -215,7 +215,7 @@ public class Profile {
     double valueHigher = array[indexLower ];
     double valueLower  = array[indexHigher];
     
-    double[] xvalues = { indexTwoLower, indexLower, indexHigher, indexTwoHigher };
+    double[] xvalues = { normIndex-2, normIndex-1, normIndex+1, normIndex+2 };
     double[] yvalues = { valueTwoLower, valueLower, valueHigher, valueTwoHigher };
 
     double interpolatedValue = 0;
@@ -227,8 +227,17 @@ public class Profile {
     	double valueDifference = valueHigher - valueLower;
     	double positionToFind = indexHigher - normIndex;
     	interpolatedValue = (valueDifference * positionToFind) + valueLower;
-    	IJ.log("Error in cubic interpolator: falling back to linear");
+    	IJ.log("    Error in cubic interpolator: falling back to linear");
     }
+    
+    double valueDifference = valueHigher - valueLower;
+	double positionToFind = indexHigher - normIndex;
+	double linearInterpolatedValue = (valueDifference * positionToFind) + valueLower;
+//	IJ.log("    L: "+linearInterpolatedValue+" C: "+interpolatedValue);
+	if(Math.abs(interpolatedValue)>Math.abs(linearInterpolatedValue*2)){
+		interpolatedValue = linearInterpolatedValue;
+//		IJ.log("    Ambiguous curve; falling back to linear interpolation"); 
+	}
     return interpolatedValue;
   }
 
