@@ -1,15 +1,15 @@
 package no.collections;
 
 import no.nuclei.INuclearFunctions;
-import java.io.File;
 
-import java.util.HashMap;
+import java.io.File;
 import java.util.Set;
-import java.util.Collection;
 import java.util.Map;
 import java.util.List;
+
 import ij.gui.Plot;
 import no.components.Profile;
+import no.components.ProfileAggregate;
 
 public interface INuclearCollection
 {
@@ -88,9 +88,9 @@ public interface INuclearCollection
 
 	public List<INuclearFunctions> getNucleiWithSignals(int channel);
 
-	public Map<Double, Collection<Double>> getProfileAggregate(String pointType);
+	public ProfileAggregate getProfileAggregate(String pointType);
 
-	public void addProfileAggregate(String pointType , HashMap<Double, Collection<Double>> profile);
+	public void addProfileAggregate(String pointType , ProfileAggregate profile);
 
 	public Profile getMedianProfile(String pointType );
 
@@ -129,7 +129,7 @@ public interface INuclearCollection
 		-----------------
 	*/
 
-	public void createProfileAggregateFromPoint(String pointType);
+//	protected void createProfileAggregateFromPoint(String pointType);
 
 	public void createProfileAggregates();
 
@@ -167,7 +167,7 @@ public interface INuclearCollection
 
 	public void exportMediansOfProfile(Profile profile, String filename);
 
-	public void exportMediansAndQuartilesOfProfile(List<Double[]> profile, String filename);
+	public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename);
 	/*
 		To hold the nuclear stats (and any stats), we want a structure that can 
 		hold: a column of data. Any arbitrary other numbers of columns of data.
@@ -197,8 +197,6 @@ public interface INuclearCollection
 		Draw the charts of the profiles of the nuclei within this collecion.
 	*/
 	public void drawProfilePlots();
-
-	public void calculateNormalisedMedianLineFromPoint(String pointType);
 
 	/*
 		Draw a median profile on the normalised plots.

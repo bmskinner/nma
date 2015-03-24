@@ -73,8 +73,10 @@ public class NucleusCollection
 
   // store the calculated median profiles centred on the given border point
 
-  private Map<String, HashMap<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
+//  private Map<String, HashMap<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
+  private Map<String, ProfileAggregate> profileCollection = new HashMap<String, ProfileAggregate>();
 
+  
   private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); 
 
 	public NucleusCollection(File folder, String outputFolder, String type){
@@ -119,8 +121,6 @@ public class NucleusCollection
 
     this.createProfileAggregateFromPoint(pointType);
 
-    calculateNormalisedMedianLineFromPoint(pointType);
-
     this.findTailIndexInMedianCurve();
 
     double score = this.compareProfilesToMedian(pointType);
@@ -129,7 +129,6 @@ public class NucleusCollection
     while(score < prevScore){
 
       this.createProfileAggregateFromPoint(pointType);
-      calculateNormalisedMedianLineFromPoint(pointType);
       this.findTailIndexInMedianCurve();
       this.calculateOffsets();
 
@@ -423,11 +422,11 @@ public class NucleusCollection
     --------------------
   */
 
-  public Map<Double, Collection<Double>> getProfileAggregate(String pointType){
+  public ProfileAggregate getProfileAggregate(String pointType){
     return this.profileCollection.get(pointType);
   }
 
-  public void addProfileAggregate(String pointType , HashMap<Double, Collection<Double>> profile){
+  public void addProfileAggregate(String pointType , ProfileAggregate profile){
     this.profileCollection.put(pointType, profile);
   }
 
@@ -618,162 +617,23 @@ public class NucleusCollection
     -----------------
   */
 
-  /*
-    Calculate median angles at each bin within an angle profile
-  */
-  protected List<Double[]> calculateMediansAndQuartilesOfProfile(Map<Double, Collection<Double>> profile){
+  protected void createProfileAggregateFromPoint(String pointType){
 
-	double profileIncrement = (double) 100 / (double) this.getMedianArrayLength();
-	IJ.log("Profile increment: "+profileIncrement);
-    List<Double[]>  medianResults = new ArrayList<Double[]>(0);
-    int arraySize = (int) this.getMedianArrayLength();
-    IJ.log("Median length: "+arraySize);
-    Double[] xmedians = new Double[arraySize];
-    Double[] ymedians = new Double[arraySize];
-    Double[] lowQuartiles = new Double[arraySize];
-    Double[] uppQuartiles = new Double[arraySize];
-    Double[] tenQuartiles = new Double[arraySize];
-    Double[] ninetyQuartiles = new Double[arraySize];
-    Double[] numberOfPoints = new Double[arraySize];
+	  ProfileAggregate profileAggregate = new ProfileAggregate((int)this.getMedianArrayLength());
+	  this.addProfileAggregate(pointType, profileAggregate);
 
-    int m = 0;
-    for(double k=0.0;k<100;k+=profileIncrement){
+	  for(int i=0;i<this.getNucleusCount();i++){
+		  INuclearFunctions n = this.getNucleus(i);
+		  profileAggregate.addValues(n.getAngleProfile(pointType));
+	  }
 
-      try{
-          Collection<Double> values = profile.get(k);
+	  Profile medians = profileAggregate.getMedian();
+	  Profile q25     = profileAggregate.getQuartile(25);
+	  Profile q75     = profileAggregate.getQuartile(75);
+	  this.addMedianProfile(pointType, medians);
+	  this.addMedianProfile(pointType+"25", q25);
+	  this.addMedianProfile(pointType+"75", q75);
 
-          if(values.size()> 0){
-            Double[] d = values.toArray(new Double[0]);
-            int n = d.length;
-
-            Arrays.sort(d);
-            double median = Stats.quartile(d, 50.0);
-            double q1     = Stats.quartile(d, 25.0);
-            double q3     = Stats.quartile(d, 75.0);
-            double q10    = Stats.quartile(d, 10.0);
-            double q90    = Stats.quartile(d, 90.0);
-           
-            xmedians[m] = k;
-            ymedians[m] = median;
-            lowQuartiles[m] = q1;
-            uppQuartiles[m] = q3;
-            tenQuartiles[m] = q10;
-            ninetyQuartiles[m] = q90;
-            numberOfPoints[m] = (double)n;
-          }
-        } catch(Exception e){
-             // IJ.log("    Cannot calculate median for "+k);
-             IJ.append("Cannot calculate median for "+k+": "+e, this.getDebugFile().getAbsolutePath());
-             IJ.append("\tFolder: "+this.getFolder().getAbsolutePath(), this.getDebugFile().getAbsolutePath());
-             IJ.append("\tCollection: "+this.getType(), this.getDebugFile().getAbsolutePath());
-             xmedians[m] = k;
-             ymedians[m] = 0.0;
-             lowQuartiles[m] = 0.0;
-             uppQuartiles[m] = 0.0;
-             tenQuartiles[m] = 0.0;
-             ninetyQuartiles[m] = 0.0;
-        } finally {
-          m++;
-      }
-    }
-
-    // repair medians with no points by interpolation
-    for(int i=0;i<xmedians.length;i++){
-      if(ymedians[i] == 0 && lowQuartiles[i] == 0 && uppQuartiles[i] == 0){
-
-        int replacementIndex = 0;
-
-        if(xmedians[i]<1)
-          replacementIndex = i+1;
-        if(xmedians[i]>99)
-          replacementIndex = i-1;
-
-        ymedians[i]        = ymedians[replacementIndex]    ;
-        lowQuartiles[i]    = lowQuartiles[replacementIndex];
-        uppQuartiles[i]    = uppQuartiles[replacementIndex];
-        tenQuartiles[i]    = tenQuartiles[replacementIndex];
-        ninetyQuartiles[i] = ninetyQuartiles[replacementIndex];
-
-        // IJ.log("    Repaired medians at "+i+" with values from  "+replacementIndex);
-        IJ.append("\tRepaired medians at "+i+" with values from  "+replacementIndex, this.getDebugFile().getAbsolutePath());
-      }
-    }
-
-    medianResults.add(xmedians);
-    medianResults.add(ymedians);
-    medianResults.add(lowQuartiles);
-    medianResults.add(uppQuartiles);
-    medianResults.add(tenQuartiles);
-    medianResults.add(ninetyQuartiles);
-    medianResults.add(numberOfPoints);
-    return medianResults;
-  }
-
-  /*
-    We need to calculate the median angle profile. This requires binning the normalised profiles
-    into bins of size PROFILE_INCREMENT to generate a table such as this:
-          k   0.0   0.5   1.0   1.5   2.0 ... 99.5   <- normalised profile bins
-    NUCLEUS1  180   185  170    130   120 ... 50     <- angle within those bins
-    NUCLEUS2  180   185  170    130   120 ... 50
-
-    The median of each bin can then be calculated. 
-    Depending on the length of the profile arrays and the chosen increment, there may
-    be >1 or <1 angle within each bin for any given nucleus. We rely on large numbers of 
-    nuclei to average this problem away; further methods interpolate values from surrounding
-    bins to plug any holes left over
-
-    The data are stored as a Map<Double, Collection<Double>>
-    PROFILE_INCREMENT is 100 / the median array length. This ensures > 1 entry for each bin, while not
-    pooling too many entries.
-  */
-
-  protected void updateProfileAggregate(double[] xvalues, double[] yvalues, HashMap<Double, Collection<Double>> profileAggregate){
-
-	double profileIncrement = (double) 100 / (double) this.getMedianArrayLength();
-    for(double k=0.0;k<100;k+=profileIncrement){ // cover all the bin positions across the profile
-
-      for(int j=0;j<xvalues.length;j++){
-       
-        if( xvalues[j] > k && xvalues[j] < k+profileIncrement){
-
-          Collection<Double> values = profileAggregate.get(k);
-          
-          if (values==null) { // this this profile increment has not yet been encountered, create it
-              values = new ArrayList<Double>();
-              profileAggregate.put(k, values);
-          }
-          values.add(yvalues[j]);
-        }
-      }
-    }        
-  }
-
-  public void createProfileAggregateFromPoint(String pointType){
-
-//	this.PROFILE_INCREMENT = (double) 100 / (double) this.getMedianArrayLength();
-    HashMap<Double, Collection<Double>> profileAggregate = new HashMap<Double, Collection<Double>>();
-    this.addProfileAggregate(pointType, profileAggregate);
-
-    for(int i=0;i<this.getNucleusCount();i++){
-
-      INuclearFunctions n = this.getNucleus(i);
-
-      double[] xvalues = n.getNormalisedProfilePositions();
-
-      // NucleusBorderPoint indexPoint = n.getBorderTag(pointType);
-      // int index = n.getAngleProfile().getIndexOfPoint(indexPoint);
-      // double[] yvalues = n.getAngleProfile().getInteriorAngles(index);
-      double[] yvalues = n.getAngleProfile(pointType).asArray();
-
-      updateProfileAggregate(xvalues, yvalues, profileAggregate); 
-    }
-    List<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
-    Profile ymedians        = new Profile( Utils.getdoubleFromDouble( medians.get(1) ) );
-    Profile q25             = new Profile( Utils.getdoubleFromDouble( medians.get(2) ) );
-    Profile q75             = new Profile( Utils.getdoubleFromDouble( medians.get(3) ) );
-    this.addMedianProfile(pointType, ymedians);
-    this.addMedianProfile(pointType+"25", q25);
-    this.addMedianProfile(pointType+"75", q75);
   }
 
   public void createProfileAggregates(){
@@ -804,7 +664,7 @@ public class NucleusCollection
 
   /*
     -----------------
-    Annotate images
+    Perform nuclear organisation analyses
     -----------------
   */
 
@@ -1029,24 +889,30 @@ public class NucleusCollection
     IJ.append(outLine, logFile); 
   }
 
-  public void exportMediansAndQuartilesOfProfile(List<Double[]> profile, String filename){
+  public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename){
 
-    String logFile = makeGlobalLogFile(filename);
+	  String logFile = makeGlobalLogFile(filename);
 
-    String outLine = "X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\r\n";
-    
+	  StringBuilder outLine = new StringBuilder("X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\r\n");
 
-    for(int i =0;i<profile.get(0).length;i++){
-      int numberOfPoints = profile.get(6)[i]==null ? 0 : profile.get(6)[i].intValue();
-      outLine +=  profile.get(0)[i]+"\t"+
-                  profile.get(1)[i]+"\t"+
-                  profile.get(2)[i]+"\t"+
-                  profile.get(3)[i]+"\t"+
-                  profile.get(4)[i]+"\t"+
-                  profile.get(5)[i]+"\t"+
-                  numberOfPoints   +"\r\n";
-    }
-    IJ.append(outLine, logFile); 
+	  double[] xmedians       =  profileAggregate.getXPositions().asArray();
+	  double[] ymedians       =  profileAggregate.getMedian().asArray();
+	  double[] lowQuartiles   =  profileAggregate.getQuartile(25).asArray();
+	  double[] uppQuartiles   =  profileAggregate.getQuartile(75).asArray();
+	  double[] quartiles10    =  profileAggregate.getQuartile(10).asArray();
+	  double[] quartiles90    =  profileAggregate.getQuartile(90).asArray();
+	  double[] numberOfPoints =  profileAggregate.getNumberOfPoints().asArray();
+
+	  for(int i =0;i<xmedians.length;i++){
+		  outLine.append( xmedians[i]      +"\t"+
+				  ymedians[i]      +"\t"+
+				  lowQuartiles[i]  +"\t"+
+				  uppQuartiles[i]  +"\t"+
+				  quartiles10[i]   +"\t"+
+				  quartiles90[i]   +"\t"+
+				  numberOfPoints[i]+"\r\n");
+	  }
+	  IJ.append(outLine.toString(), logFile); 
   }
 
   /*
@@ -1279,46 +1145,29 @@ public class NucleusCollection
     }   
   }
 
-  public void calculateNormalisedMedianLineFromPoint(String pointType){
-    Map<Double, Collection<Double>> profileAggregate = this.getProfileAggregate(pointType);
-
-    List<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
-    Profile ymedians        = new Profile( Utils.getdoubleFromDouble( medians.get(1) ) );
-    Profile q25             = new Profile( Utils.getdoubleFromDouble( medians.get(2) ) );
-    Profile q75             = new Profile( Utils.getdoubleFromDouble( medians.get(3) ) );
-    this.addMedianProfile(pointType, ymedians);
-    this.addMedianProfile(pointType+"25", q25);
-    this.addMedianProfile(pointType+"75", q75);
-  }
-
   /*
     Draw a median profile on the normalised plots.
   */
   public void drawMedianLine(String pointType, Plot plot){
 
-    Map<Double, Collection<Double>> profileAggregate = this.getProfileAggregate(pointType);
+	  ProfileAggregate profileAggregate = this.getProfileAggregate(pointType);
 
-    List<Double[]> medians = calculateMediansAndQuartilesOfProfile( profileAggregate );
-    this.exportMediansAndQuartilesOfProfile(medians, "logMediansFrom"+pointType); // needs to be "logMediansFrom<pointname>"
+	  this.exportMediansAndQuartilesOfProfile(profileAggregate, "logMediansFrom"+pointType); // needs to be "logMediansFrom<pointname>"
 
-    double[] xmedians        =  Utils.getdoubleFromDouble( medians.get(0) );
-    double[] ymedians        =  Utils.getdoubleFromDouble( medians.get(1) );
-    double[] lowQuartiles    =  Utils.getdoubleFromDouble( medians.get(2) );
-    double[] uppQuartiles    =  Utils.getdoubleFromDouble( medians.get(3) );
-    // double[] tenQuartiles    =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(4) );
-    // double[] ninetyQuartiles =  NuclearOrganisationUtility.getdoubleFromDouble( medians.get(5) );
+	  double[] xmedians        =  profileAggregate.getXPositions().asArray();
+	  double[] ymedians        =  profileAggregate.getMedian().asArray();
+	  double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
+	  double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
 
-    // add the median lines to the chart
-    plot.setColor(Color.BLACK);
-    plot.setLineWidth(3);
-    plot.addPoints(xmedians, ymedians, Plot.LINE);
+	  // add the median lines to the chart
+	  plot.setColor(Color.BLACK);
+	  plot.setLineWidth(3);
+	  plot.addPoints(xmedians, ymedians, Plot.LINE);
 
-    plot.setColor(Color.DARK_GRAY);
-    plot.setLineWidth(2);
-    plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-    plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
-
-    this.addMedianProfile(pointType, new Profile(ymedians));
+	  plot.setColor(Color.DARK_GRAY);
+	  plot.setLineWidth(2);
+	  plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+	  plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
   }
 
   /*
