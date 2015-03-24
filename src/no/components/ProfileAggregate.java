@@ -74,7 +74,6 @@ public class ProfileAggregate {
 						values = new ArrayList<Double>();
 						aggregate.put(x, values);
 					}
-//					IJ.log("Found:"+x+" <= "+testX+" < "+maxX+" : Adding: "+yvalues.get(i));
 					values.add(yvalues.get(i));
 					break;
 				}
@@ -82,8 +81,18 @@ public class ProfileAggregate {
 		}        
 	}
 
+	/**
+	 * Get the x-axis positions of the centre of each bin.
+	 * @return the Profile of positions
+	 */
 	public Profile getXPositions(){
-		return new Profile(xPositions);
+		double[] result = new double[length];
+		double x = -this.profileIncrement/2;
+		for(int i=0;i<length;i++){
+			x += profileIncrement;
+			result[i] = x;
+		}
+		return new Profile(result);
 	}
 
 	public Profile getNumberOfPoints(){
