@@ -928,6 +928,19 @@ public class Nucleus
 		}
 		return orthgonalPoint;
 	}
+	
+	// given a point ,find the String tag of the segment it belongs to 
+	public String getSegmentOfPoint(int i){
+		String segment = "";
+		for(String s : this.getSegmentTags()){
+			
+			NucleusBorderSegment b = this.getSegmentTag(s);
+			if(b.contains(i)){
+				segment = s;
+			}
+		}
+		return segment;
+	}
 
 	/*
 		This will find the point in a list that is closest to any local maximum
@@ -1187,7 +1200,8 @@ public class Nucleus
 						"NORMALISED_PROFILE_X\t"+
 						"SD_PROFILE\t"+
 						"IS_SD_MIN\t"+
-						"DISTANCE_PROFILE\r\n");
+						"DISTANCE_PROFILE"+
+						"SEGMENT\r\n");
 
 		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
 		Profile minima = this.getAngleProfile().getLocalMinima(5);
@@ -1209,7 +1223,8 @@ public class Nucleus
 							normalisedX							+"\t"+
 							this.singleDistanceProfile.get(i)	+"\t"+
 							sdMinima.get(i)						+"\t"+
-							this.getDistance(i)					+"\r\n");
+							this.getDistance(i)					+"\t"+
+							this.getSegmentOfPoint(i)			+"\r\n");
 		}
 		IJ.append( outLine.toString(), f.getAbsolutePath());
 	}
@@ -1243,13 +1258,15 @@ public class Nucleus
 			
 			// segments
 			if(this.segmentList.size()>0){ // only draw if there are segments
+				IJ.log(" Nucleus "+this.getImageName()+"-"+this.getNucleusNumber());
 				for(int i=0;i<segmentList.size();i++){
 //					NucleusBorderSegment seg = this.getSegment(i);
 					NucleusBorderSegment seg = this.getSegmentTag("Seg_"+i);
+					IJ.log("  Segment "+i);
 					seg.print();
-					float[] xpoints = new float[seg.length()+1];
-					float[] ypoints = new float[seg.length()+1];
-					for(int j=0; j<=seg.length();j++){
+					float[] xpoints = new float[seg.length(this.getLength())+1];
+					float[] ypoints = new float[seg.length(this.getLength())+1];
+					for(int j=0; j<=seg.length(this.getLength());j++){
 						int k = Utils.wrapIndex(seg.getStartIndex()+j, this.getLength());
 						NucleusBorderPoint p = this.getBorderPoint(k); // get the border points in the segment
 						xpoints[j] = (float) p.getX();
@@ -1259,10 +1276,10 @@ public class Nucleus
 					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 					Color color = 	i==0 ? Color.RED : 
 									i==1 ? Color.ORANGE :
-									i==2 ? Color.YELLOW :
-									i==3 ? Color.GREEN :
-									i==4 ? Color.BLUE :
-									i==5 ? Color.MAGENTA : 
+									i==2 ? Color.GREEN :
+									i==3 ? Color.MAGENTA :
+									i==4 ? Color.CYAN :
+									i==5 ? Color.YELLOW : 
 									i==6 ? Color.PINK :
 									i==7 ? Color.WHITE :
 									i==8 ? Color.RED :
@@ -1455,6 +1472,10 @@ public class Nucleus
 	
 	public void addSegment(NucleusBorderSegment n){
 		this.segmentList.add(n);
+	}
+	
+	public Set<String> getSegmentTags(){
+		return this.segmentTags.keySet();
 	}
 	
 	public NucleusBorderSegment getSegment(int i){

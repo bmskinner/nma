@@ -53,8 +53,26 @@ public class NucleusBorderSegment{
 		return midpoint;
 	}
 	
-	public int length(){
-		return Math.abs(this.endIndex - this.startIndex);
+	public int length(int totalLength){
+		if(endIndex<startIndex){
+			return startIndex + (totalLength-endIndex);
+		} else{
+			return this.endIndex - this.startIndex;
+		}
+	}
+	
+	public boolean contains(int index){
+		boolean result = false;
+		if(endIndex<startIndex){ // wrapped
+			if(index<endIndex || index>startIndex){
+				result=true;
+			}
+		} else{ // regular
+			if(index>startIndex && index<endIndex){
+				result=true;
+			}
+		}
+		return result;
 	}
 	
 	public void update(int start, int end){

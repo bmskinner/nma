@@ -9,7 +9,9 @@
 package no.collections;
 
 import ij.IJ;
+
 import java.io.File;
+
 import no.nuclei.sperm.*;
 import no.components.*;
 
@@ -73,8 +75,10 @@ public class PigSpermNucleusCollection
 		  }
 	  }
 	  // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
+	  Profile tailProfile = medianProfile.offset(tailIndex);
+	  this.profileCollection.addProfile("tail", tailProfile);
 	  this.profileCollection.addFeature("head", new ProfileFeature("tail", tailIndex));
-//	  medianProfileFeatureIndexes.add("head", "tail", tailIndex); // set the tail-index in the head normalised profile
+
   }
 
   /*
