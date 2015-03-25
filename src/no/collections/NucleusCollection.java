@@ -473,8 +473,6 @@ implements INuclearCollection
     ProfileFeature tailFeature = new ProfileFeature();
     tailFeature.add("head", headIndex);
     this.profileCollection.addFeature("head", tailFeature);
-//    medianProfileFeatureIndexes.add("tail", "head", headIndex); 
-//    medianProfileFeatureIndexes.add("head", "tail", headIndex);// set the tail-index in the head normalised profile
   }
 
   /*
