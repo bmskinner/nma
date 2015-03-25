@@ -484,9 +484,9 @@ public class AnalysisCreator {
       IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
       IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
 
-      Profile targetProfile = collection.getMedianProfile("tail");
-      Profile q25 = collection.getMedianProfile("tail25");
-      Profile q75 = collection.getMedianProfile("tail75");
+      Profile targetProfile = collection.getProfileCollection().getProfile("tail");
+      Profile q25 = collection.getProfileCollection().getProfile("tail25");
+      Profile q75 = collection.getProfileCollection().getProfile("tail75");
 
       if(targetProfile==null){
         throw new Exception("Null reference to target profile");

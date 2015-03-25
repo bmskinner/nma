@@ -68,7 +68,7 @@ public class AsymmetricNucleusCollection
     super.exportStatsFiles();
     this.exportClusteringProfiles("logClusters");
 
-    Profile normalisedMedian = this.getMedianProfile("tail");
+    Profile normalisedMedian = this.profileCollection.getProfile("tail");
     Profile interpolatedMedian = normalisedMedian.interpolate((int)this.getMedianNuclearPerimeter());
     this.exportMediansOfProfile(interpolatedMedian, "logMediansPerimeterLength");
   }

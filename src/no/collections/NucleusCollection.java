@@ -63,23 +63,16 @@ public class NucleusCollection
   private Map<String, HashMap<String, Plot>> plotCollection = new HashMap<String, HashMap<String, Plot>>();
 
   //this holds the mapping of tail indexes etc in the median profile arrays
-  protected ProfileFeature medianProfileFeatureIndexes = new ProfileFeature();
+  protected ProfileCollection profileCollection = new ProfileCollection();
 
   private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
-
-  // store the calculated median profiles centred on the given border point
-  private Map<String, ProfileAggregate> profileCollection = new HashMap<String, ProfileAggregate>();
-
-
-  private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); 
-
-	public NucleusCollection(File folder, String outputFolder, String type){
-		this.folder = folder;
-	    this.outputFolder = outputFolder;
-	    this.debugFile = new File(folder.getAbsolutePath()+File.separator+outputFolder+File.separator+"logDebug.txt");
-	    this.collectionType = type;
-	}
+  public NucleusCollection(File folder, String outputFolder, String type){
+	  this.folder = folder;
+	  this.outputFolder = outputFolder;
+	  this.debugFile = new File(folder.getAbsolutePath()+File.separator+outputFolder+File.separator+"logDebug.txt");
+	  this.collectionType = type;
+  }
 
   // used only for getting classes in setup of analysis
   public NucleusCollection(){
@@ -143,7 +136,7 @@ public class NucleusCollection
 
   public void calculateOffsets(){
 
-    Profile medianToCompare = this.getMedianProfile("head"); // returns a median profile with head at 0
+    Profile medianToCompare = this.profileCollection.getProfile("head"); // returns a median profile with head at 0
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       Nucleus n = (Nucleus)this.getNucleus(i);
@@ -176,6 +169,10 @@ public class NucleusCollection
     Getters for aggregate stats
     -----------------------
   */
+  
+  public ProfileCollection getProfileCollection(){
+	  return this.profileCollection;
+  }
 
   public File getFolder(){
     return this.folder;
@@ -417,25 +414,9 @@ public class NucleusCollection
     --------------------
   */
 
-  public ProfileAggregate getProfileAggregate(String pointType){
-    return this.profileCollection.get(pointType);
-  }
-
-  public void addProfileAggregate(String pointType , ProfileAggregate profile){
-    this.profileCollection.put(pointType, profile);
-  }
-
-  public Profile getMedianProfile(String pointType){ // replaces getNormalisedMedianProfileFromPoint
-    return this.medianProfiles.get(pointType);
-  }
-
-  public void addMedianProfile(String pointType, Profile p){ // replaces addNormalisedMedianProfileFromPoint
-    this.medianProfiles.put(pointType, p);
-  }
-
   public double[] getDifferencesToMedianFromPoint(String pointType){
     double[] d = new double[this.getNucleusCount()];
-    Profile medianProfile = getMedianProfile(pointType);
+    Profile medianProfile = this.profileCollection.getProfile(pointType);
     for(int i=0;i<this.getNucleusCount();i++){
       INuclearFunctions n = this.getNucleus(i);
       try{
@@ -461,20 +442,6 @@ public class NucleusCollection
   public Plot getPlot(String pointType, String plotType){
     return this.plotCollection.get(pointType).get(plotType);
   }
-
-//  public void addMedianProfileFeatureIndex(String profile, String indexType, int index){
-//
-//    ProfileFeature indexHash = this.medianProfileFeatureIndexes.get(profile);
-//    if(indexHash==null){
-//      indexHash = new ProfileFeature();
-//    }
-//    indexHash.add(indexType, index);
-//    this.medianProfileFeatureIndexes.put(profile, indexHash);
-//  }
-
-//  public int getMedianProfileFeatureIndex(String profile, String indexType){
-//    return this.medianProfileFeatureIndexes.get(profile).get(indexType);
-//  }
 
   public int[] getPointIndexes(String pointType){
     int[] d = new int[this.getNucleusCount()];
@@ -505,10 +472,17 @@ public class NucleusCollection
 
   public void findTailIndexInMedianCurve(){
 
-    Profile medianProfile = this.getMedianProfile("head");
+    Profile medianProfile = this.profileCollection.getProfile("head");
     int headIndex = medianProfile.getIndexOfMin();
-    medianProfileFeatureIndexes.add("tail", "head", headIndex); 
-    medianProfileFeatureIndexes.add("head", "tail", headIndex);// set the tail-index in the head normalised profile
+    ProfileFeature headFeature = new ProfileFeature();
+    headFeature.add("head", headIndex);
+    this.profileCollection.addFeature("tail", headFeature);
+    
+    ProfileFeature tailFeature = new ProfileFeature();
+    tailFeature.add("head", headIndex);
+    this.profileCollection.addFeature("head", tailFeature);
+//    medianProfileFeatureIndexes.add("tail", "head", headIndex); 
+//    medianProfileFeatureIndexes.add("head", "tail", headIndex);// set the tail-index in the head normalised profile
   }
 
   /*
@@ -615,7 +589,7 @@ public class NucleusCollection
   protected void createProfileAggregateFromPoint(String pointType){
 
 	  ProfileAggregate profileAggregate = new ProfileAggregate((int)this.getMedianArrayLength());
-	  this.addProfileAggregate(pointType, profileAggregate);
+	  this.profileCollection.addAggregate(pointType, profileAggregate);
 
 	  for(int i=0;i<this.getNucleusCount();i++){
 		  INuclearFunctions n = this.getNucleus(i);
@@ -625,9 +599,9 @@ public class NucleusCollection
 	  Profile medians = profileAggregate.getMedian();
 	  Profile q25     = profileAggregate.getQuartile(25);
 	  Profile q75     = profileAggregate.getQuartile(75);
-	  this.addMedianProfile(pointType, medians);
-	  this.addMedianProfile(pointType+"25", q25);
-	  this.addMedianProfile(pointType+"75", q75);
+	  this.profileCollection.addProfile(pointType, medians);
+	  this.profileCollection.addProfile(pointType+"25", q25);
+	  this.profileCollection.addProfile(pointType+"75", q75);
 
   }
 
@@ -641,7 +615,7 @@ public class NucleusCollection
 
   public INuclearFunctions getNucleusMostSimilarToMedian(String pointType){
     
-    Profile medianProfile = getMedianProfile(pointType); // the profile we compare the nucleus to
+    Profile medianProfile = this.profileCollection.getProfile(pointType); // the profile we compare the nucleus to
     INuclearFunctions n = (INuclearFunctions) this.getNucleus(0); // default to the first nucleus
 
     double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
@@ -1143,7 +1117,7 @@ public class NucleusCollection
   */
   public void drawMedianLine(String pointType, Plot plot){
 
-	  ProfileAggregate profileAggregate = this.getProfileAggregate(pointType);
+	  ProfileAggregate profileAggregate = profileCollection.getAggregate(pointType);
 
 	  this.exportMediansAndQuartilesOfProfile(profileAggregate, "logMediansFrom"+pointType); // needs to be "logMediansFrom<pointname>"
 
@@ -1289,12 +1263,5 @@ public class NucleusCollection
       exportProfilePlot(normPlot, "plot"+pointType+"Norm");
       exportProfilePlot(rawPlot , "plot"+pointType+"Raw");
     }  
-  }
-
-  public void printProfiles(){
-    Set<String> keys = medianProfiles.keySet();
-    for(String s : keys){
-      IJ.log("   "+s);
-    }
   }
 }

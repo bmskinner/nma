@@ -40,7 +40,7 @@ public class PigSpermNucleusCollection
   public void findTailIndexInMedianCurve(){
 	  // can't use regular tail detector, because it's based on NucleusBorderPoints
 
-	  Profile medianProfile = this.getMedianProfile("head");
+	  Profile medianProfile = this.profileCollection.getProfile("head");
 
 	  Profile minima = medianProfile.getLocalMaxima(5); // window size 5
 
@@ -73,7 +73,8 @@ public class PigSpermNucleusCollection
 		  }
 	  }
 	  // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-	  medianProfileFeatureIndexes.add("head", "tail", tailIndex); // set the tail-index in the head normalised profile
+	  this.profileCollection.addFeature("head", new ProfileFeature("tail", tailIndex));
+//	  medianProfileFeatureIndexes.add("head", "tail", tailIndex); // set the tail-index in the head normalised profile
   }
 
   /*
@@ -83,7 +84,7 @@ public class PigSpermNucleusCollection
   @Override
   public void calculateOffsets(){
 
-    Profile medianToCompare = this.getMedianProfile("head"); // returns a median profile with head at 0
+    Profile medianToCompare = this.profileCollection.getProfile("head"); // returns a median profile with head at 0
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       PigSpermNucleus n = (PigSpermNucleus)this.getNucleus(i);

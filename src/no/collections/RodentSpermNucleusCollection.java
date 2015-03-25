@@ -51,7 +51,7 @@ public class RodentSpermNucleusCollection
 	  // can't use regular tail detector, because it's based on NucleusBorderPoints
 	  // get minima in curve, then find the lowest minima / minima furthest from both ends
 
-	  Profile medianProfile = this.getMedianProfile("tip");
+	  Profile medianProfile = this.profileCollection.getProfile("tip");
 
 	  Profile minima = medianProfile.getLocalMinima(5); // window size 5
 
@@ -74,10 +74,8 @@ public class RodentSpermNucleusCollection
 		  }
 	  }
 	  Profile tailProfile = medianProfile.offset(tailIndex);
-	  addMedianProfile("tail", tailProfile);
-
-	  // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-	  medianProfileFeatureIndexes.add("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
+	  this.profileCollection.addProfile("tail", tailProfile);
+	  this.profileCollection.addFeature("tip", new ProfileFeature("tail", tailIndex)); // set the tail-index in the tip normalised profile
   }
 
   /*
@@ -87,7 +85,7 @@ public class RodentSpermNucleusCollection
   @Override
   public void calculateOffsets(){
 
-    Profile medianToCompare = this.getMedianProfile("tail"); // returns a median profile
+    Profile medianToCompare = this.profileCollection.getProfile("tail"); // returns a median profile
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       RodentSpermNucleus n = (RodentSpermNucleus)this.getNucleus(i);

@@ -10,6 +10,7 @@ import java.util.List;
 import ij.gui.Plot;
 import no.components.Profile;
 import no.components.ProfileAggregate;
+import no.components.ProfileCollection;
 
 public interface INuclearCollection
 {
@@ -88,14 +89,6 @@ public interface INuclearCollection
 
 	public List<INuclearFunctions> getNucleiWithSignals(int channel);
 
-	public ProfileAggregate getProfileAggregate(String pointType);
-
-	public void addProfileAggregate(String pointType , ProfileAggregate profile);
-
-	public Profile getMedianProfile(String pointType );
-
-	public void addMedianProfile(String pointType , Profile profile);
-
 	public double[] getDifferencesToMedianFromPoint(String pointType);
 
 	// get the plot from the collection corresponding to the given pointType of interest
@@ -129,18 +122,12 @@ public interface INuclearCollection
 
 	public void createProfileAggregates();
 
-	// /*
-	//   For each nucleus in the collection see if there is a differences to the given median
-	// */
-	// public void calculateDifferencesToMedianProfiles();
-
 	/*
 		-----------------
 		Annotate images
 		-----------------
 	*/
 
- 
 	public void measureNuclearOrganisation();
 
 	/*
@@ -207,6 +194,6 @@ public interface INuclearCollection
 
 	public void exportProfilePlots();
 
-	public void printProfiles();
+	public ProfileCollection getProfileCollection();
 
 }
