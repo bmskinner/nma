@@ -3,7 +3,6 @@ package no.collections;
 import no.nuclei.INuclearFunctions;
 
 import java.io.File;
-import java.util.Set;
 import java.util.Map;
 import java.util.List;
 
@@ -84,8 +83,6 @@ public interface INuclearCollection
 	public double getMedianFeretLength();
 
 	public double getMaxProfileLength();
-
-	public Set<String> getTags();
 
 	public List<INuclearFunctions> getNucleiWithSignals(int channel);
 
@@ -172,11 +169,6 @@ public interface INuclearCollection
 	public void exportProfilePlot(Plot plot, String name);
 
 	/*
-		Create the charts of the profiles of the nuclei within this collecion.
-	*/
-	public void preparePlots();
-
-	/*
 		Draw the charts of the profiles of the nuclei within this collecion.
 	*/
 	public void drawProfilePlots();
@@ -184,9 +176,9 @@ public interface INuclearCollection
 	/*
 		Draw a median profile on the normalised plots.
 	*/
-	public void drawMedianLine(String pointType, Plot plot);
-
-	public void drawNormalisedMedianLines();
+//	public void drawMedianLine(String pointType, Plot plot);
+//
+//	public void drawNormalisedMedianLines();
 
 	public void addSignalsToProfileCharts();
 

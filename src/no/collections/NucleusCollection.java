@@ -33,39 +33,37 @@ import no.utility.Utils;
 
 
 public class NucleusCollection
-  implements INuclearCollection 
+implements INuclearCollection 
 {
 
 	private File folder; // the source of the nuclei
-  private String outputFolder;
-  private File debugFile;
-  private String collectionType; // for annotating image names
+	private String outputFolder;
+	private File debugFile;
+	private String collectionType; // for annotating image names
 
-  public static final int CHART_WINDOW_HEIGHT     = 400;
-  public static final int CHART_WINDOW_WIDTH      = 500;
-  public static final int CHART_TAIL_BOX_Y_MIN    = 325;
-  public static final int CHART_TAIL_BOX_Y_MID    = 340;
-  public static final int CHART_TAIL_BOX_Y_MAX    = 355;
-  public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-  public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
+	public static final int CHART_WINDOW_HEIGHT     = 400;
+	public static final int CHART_WINDOW_WIDTH      = 500;
+	public static final int CHART_TAIL_BOX_Y_MIN    = 325;
+	public static final int CHART_TAIL_BOX_Y_MID    = 340;
+	public static final int CHART_TAIL_BOX_Y_MAX    = 355;
+	public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
+	public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
 
-  public static final int FAILURE_THRESHOLD = 1;
-  public static final int FAILURE_FERET     = 2;
-  public static final int FAILURE_ARRAY     = 4;
-  public static final int FAILURE_AREA      = 8;
-  public static final int FAILURE_PERIM     = 16;
-  public static final int FAILURE_OTHER     = 32;
-  public static final int FAILURE_SIGNALS   = 64;
+	public static final int FAILURE_THRESHOLD = 1;
+	public static final int FAILURE_FERET     = 2;
+	public static final int FAILURE_ARRAY     = 4;
+	public static final int FAILURE_AREA      = 8;
+	public static final int FAILURE_PERIM     = 16;
+	public static final int FAILURE_OTHER     = 32;
+	public static final int FAILURE_SIGNALS   = 64;
 
-  private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
-  private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
+	private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
+	private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
-//  private Map<String, HashMap<String, Plot>> plotCollection = new HashMap<String, HashMap<String, Plot>>();
+	//this holds the mapping of tail indexes etc in the median profile arrays
+	protected ProfileCollection profileCollection = new ProfileCollection();
 
-  //this holds the mapping of tail indexes etc in the median profile arrays
-  protected ProfileCollection profileCollection = new ProfileCollection();
-
-  private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
+	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
   public NucleusCollection(File folder, String outputFolder, String type){
 	  this.folder = folder;
@@ -129,7 +127,8 @@ public class NucleusCollection
     this.createProfileAggregates();
 
     this.drawProfilePlots();
-    this.drawNormalisedMedianLines();
+    this.profileCollection.addMedianLinesToPlots();
+//    this.drawNormalisedMedianLines();
 
     this.exportProfilePlots();
   }
@@ -370,13 +369,6 @@ public class NucleusCollection
     return Stats.max(this.getArrayLengths());
   }
 
-  public Set<String> getTags(){
-
-    INuclearFunctions n = this.nucleiCollection.get(0);
-    Set<String> headings = n.getTags();
-    return headings;
-  }
-
   public List<INuclearFunctions> getNucleiWithSignals(int channel){
     List<INuclearFunctions> result = new ArrayList<INuclearFunctions>(0);
 
@@ -607,7 +599,7 @@ public class NucleusCollection
 
   public void createProfileAggregates(){
 
-    Set<String> headings = this.getTags();
+    Set<String> headings = this.profileCollection.getProfileKeys();
     for( String pointType : headings ){
       createProfileAggregateFromPoint(pointType);   
     }
@@ -1045,50 +1037,20 @@ public class NucleusCollection
     cal.setUnit("pixels");
     cal.pixelWidth = 1;
     cal.pixelHeight = 1;
-    IJ.saveAsTiff(image, this.getFolder()+File.separator+this.getOutputFolder()+File.separator+name+"."+this.getType()+".tiff");
+    IJ.saveAsTiff(image, this.getFolder()+
+    					File.separator+
+    					this.getOutputFolder()+
+    					File.separator+name+
+    					"."+
+    					this.getType()+".tiff");
   }
-
-  /*
-    Create the charts of the profiles of the nuclei within this collecion.
-  */
-  public void preparePlots(){
-
-    Set<String> headings = this.getTags();
-    for( String pointType : headings ){
-
-      Plot  rawPlot = new Plot( "Raw "       +pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-      Plot normPlot = new Plot( "Normalised "+pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-
-      rawPlot.setLimits(0,this.getMaxProfileLength(),-50,360);
-      rawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-      rawPlot.setYTicks(true);
-      rawPlot.setColor(Color.BLACK);
-      rawPlot.drawLine(0, 180, this.getMaxProfileLength(), 180); 
-      rawPlot.setColor(Color.LIGHT_GRAY);
-
-      normPlot.setLimits(0,100,-50,360);
-      normPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-      normPlot.setYTicks(true);
-      normPlot.setColor(Color.BLACK);
-      normPlot.drawLine(0, 180, 100, 180); 
-      normPlot.setColor(Color.LIGHT_GRAY);
-      
-      ProfilePlot plotHash = new ProfilePlot();
-//      HashMap<String, Plot> plotHash = new HashMap<String, Plot>();
-      plotHash.add("raw" , rawPlot );
-      plotHash.add("norm", normPlot);
-      this.profileCollection.addPlots(pointType, plotHash);
-      
-//      this.plotCollection.put(pointType, plotHash);
-    }
-  }    
 
   /*
     Draw the charts of the profiles of the nuclei within this collecion.
   */
   public void drawProfilePlots(){
 
-    this.preparePlots();
+    this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
 
     Set<String> headings = this.profileCollection.getPlotKeys();
 
@@ -1112,31 +1074,6 @@ public class NucleusCollection
         normPlot.addPoints(xPointsNorm, anglesFromPoint.asArray(), Plot.LINE);
       }
     }   
-  }
-
-  /*
-    Draw a median profile on the normalised plots.
-  */
-  public void drawMedianLine(String pointType, Plot plot){
-
-	  ProfileAggregate profileAggregate = profileCollection.getAggregate(pointType);
-
-	  this.exportMediansAndQuartilesOfProfile(profileAggregate, "logMediansFrom"+pointType); // needs to be "logMediansFrom<pointname>"
-
-	  double[] xmedians        =  profileAggregate.getXPositions().asArray();
-	  double[] ymedians        =  profileAggregate.getMedian().asArray();
-	  double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
-	  double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
-
-	  // add the median lines to the chart
-	  plot.setColor(Color.BLACK);
-	  plot.setLineWidth(3);
-	  plot.addPoints(xmedians, ymedians, Plot.LINE);
-
-	  plot.setColor(Color.DARK_GRAY);
-	  plot.setLineWidth(2);
-	  plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-	  plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
   }
 
   /*
@@ -1180,13 +1117,13 @@ public class NucleusCollection
     plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
   }
 
-  public void drawNormalisedMedianLines(){
+  public void drawBoxplots(){
 
     Set<String> headings = this.profileCollection.getPlotKeys();
     for( String pointType : headings ){
 
         Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
-        drawMedianLine(pointType, normPlot);
+//        drawMedianLine(pointType, normPlot);
         drawBoxplot(pointType, normPlot, "tail");
     }
   }
