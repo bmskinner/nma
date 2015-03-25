@@ -57,33 +57,28 @@ public class NucleusCollection
   public static final int FAILURE_OTHER     = 32;
   public static final int FAILURE_SIGNALS   = 64;
 
-//  public double PROFILE_INCREMENT = 0.5;
-
   private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
   private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
   private Map<String, HashMap<String, Plot>> plotCollection = new HashMap<String, HashMap<String, Plot>>();
 
-  // this holds the mapping of tail indexes etc in the median profile arrays
-  // the tail index point in the head normalised array would be head, <tail, int>
-  private Map<String, HashMap<String, Integer>> medianProfileFeatureIndexes = new HashMap<String, HashMap<String, Integer>>();
+  //this holds the mapping of tail indexes etc in the median profile arrays
+  protected ProfileFeature medianProfileFeatureIndexes = new ProfileFeature();
 
-	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
+  private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
 
   // store the calculated median profiles centred on the given border point
-
-//  private Map<String, HashMap<Double, Collection<Double>>> profileCollection = new HashMap<String, HashMap<Double, Collection<Double>>>();
   private Map<String, ProfileAggregate> profileCollection = new HashMap<String, ProfileAggregate>();
 
-  
+
   private Map<String, Profile> medianProfiles = new HashMap<String, Profile>(0); 
 
 	public NucleusCollection(File folder, String outputFolder, String type){
 		this.folder = folder;
-    this.outputFolder = outputFolder;
-    this.debugFile = new File(folder.getAbsolutePath()+File.separator+outputFolder+File.separator+"logDebug.txt");
-    this.collectionType = type;
+	    this.outputFolder = outputFolder;
+	    this.debugFile = new File(folder.getAbsolutePath()+File.separator+outputFolder+File.separator+"logDebug.txt");
+	    this.collectionType = type;
 	}
 
   // used only for getting classes in setup of analysis
@@ -467,19 +462,19 @@ public class NucleusCollection
     return this.plotCollection.get(pointType).get(plotType);
   }
 
-  public void addMedianProfileFeatureIndex(String profile, String indexType, int index){
+//  public void addMedianProfileFeatureIndex(String profile, String indexType, int index){
+//
+//    ProfileFeature indexHash = this.medianProfileFeatureIndexes.get(profile);
+//    if(indexHash==null){
+//      indexHash = new ProfileFeature();
+//    }
+//    indexHash.add(indexType, index);
+//    this.medianProfileFeatureIndexes.put(profile, indexHash);
+//  }
 
-    HashMap<String, Integer> indexHash = this.medianProfileFeatureIndexes.get(profile);
-    if(indexHash==null){
-      indexHash = new HashMap<String, Integer>();
-    }
-    indexHash.put(indexType, index);
-    this.medianProfileFeatureIndexes.put(profile, indexHash);
-  }
-
-  public int getMedianProfileFeatureIndex(String profile, String indexType){
-    return this.medianProfileFeatureIndexes.get(profile).get(indexType);
-  }
+//  public int getMedianProfileFeatureIndex(String profile, String indexType){
+//    return this.medianProfileFeatureIndexes.get(profile).get(indexType);
+//  }
 
   public int[] getPointIndexes(String pointType){
     int[] d = new int[this.getNucleusCount()];
@@ -512,8 +507,8 @@ public class NucleusCollection
 
     Profile medianProfile = this.getMedianProfile("head");
     int headIndex = medianProfile.getIndexOfMin();
-    addMedianProfileFeatureIndex("tail", "head", headIndex); 
-    addMedianProfileFeatureIndex("head", "tail", headIndex);// set the tail-index in the head normalised profile
+    medianProfileFeatureIndexes.add("tail", "head", headIndex); 
+    medianProfileFeatureIndexes.add("head", "tail", headIndex);// set the tail-index in the head normalised profile
   }
 
   /*
@@ -552,7 +547,7 @@ public class NucleusCollection
     int arraylength = 0;
     int feretlength = 0;
 
-    IJ.append("Prefiltered:", this.getDebugFile().getAbsolutePath());
+    IJ.append("Prefiltered:\r\n", this.getDebugFile().getAbsolutePath());
     this.exportFilterStats();
 
     for(int i=0;i<this.getNucleusCount();i++){
@@ -988,14 +983,12 @@ public class NucleusCollection
     double medianPathLength = this.getMedianPathLength();
     double medianArrayLength = this.getMedianArrayLength();
     double medianFeretLength = this.getMedianFeretLength();
-    // double medianDifferenceToMedianCurve = NuclearOrganisationUtility.quartile(this.getDifferencesToMedian(),50);
 
-    IJ.append("    Area: "        +(int)medianArea,                    this.getDebugFile().getAbsolutePath());
-    IJ.append("    Perimeter: "   +(int)medianPerimeter,               this.getDebugFile().getAbsolutePath());
-    IJ.append("    Path length: " +(int)medianPathLength,              this.getDebugFile().getAbsolutePath());
-    IJ.append("    Array length: "+(int)medianArrayLength,             this.getDebugFile().getAbsolutePath());
-    IJ.append("    Feret length: "+(int)medianFeretLength,             this.getDebugFile().getAbsolutePath());
-    // IJ.append("    Curve: "       +(int)medianDifferenceToMedianCurve, this.getDebugFile().getAbsolutePath());
+    IJ.append("    Area: "        +(int)medianArea       +"\r\n",  this.getDebugFile().getAbsolutePath());
+    IJ.append("    Perimeter: "   +(int)medianPerimeter  +"\r\n",  this.getDebugFile().getAbsolutePath());
+    IJ.append("    Path length: " +(int)medianPathLength +"\r\n",  this.getDebugFile().getAbsolutePath());
+    IJ.append("    Array length: "+(int)medianArrayLength+"\r\n",  this.getDebugFile().getAbsolutePath());
+    IJ.append("    Feret length: "+(int)medianFeretLength+"\r\n",  this.getDebugFile().getAbsolutePath());
   }
 
   public void exportCompositeImage(String filename){

@@ -101,10 +101,6 @@ public interface INuclearCollection
 	// get the plot from the collection corresponding to the given pointType of interest
 	public Plot getPlot(String pointType, String plotType);
 
-	public void addMedianProfileFeatureIndex(String profile, String indexType, int index);
-
-	public int getMedianProfileFeatureIndex(String profile, String indexType);
-
 	public int[] getPointIndexes(String pointType);
 
 	public double[] getPointToPointDistances(String pointTypeA, String pointTypeB);

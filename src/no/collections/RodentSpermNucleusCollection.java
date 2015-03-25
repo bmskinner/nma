@@ -77,7 +77,7 @@ public class RodentSpermNucleusCollection
 	  addMedianProfile("tail", tailProfile);
 
 	  // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-	  addMedianProfileFeatureIndex("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
+	  medianProfileFeatureIndexes.add("tip", "tail", tailIndex); // set the tail-index in the tip normalised profile
   }
 
   /*

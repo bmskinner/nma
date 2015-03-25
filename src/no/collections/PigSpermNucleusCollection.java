@@ -73,7 +73,7 @@ public class PigSpermNucleusCollection
 		  }
 	  }
 	  // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-	  addMedianProfileFeatureIndex("head", "tail", tailIndex); // set the tail-index in the head normalised profile
+	  medianProfileFeatureIndexes.add("head", "tail", tailIndex); // set the tail-index in the head normalised profile
   }
 
   /*
