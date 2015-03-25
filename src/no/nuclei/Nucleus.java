@@ -1276,7 +1276,9 @@ public class Nucleus
 					}
 					
 					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
-					Color color = ProfileSegmenter.getColor(i);
+					
+					// avoid colour wrapping when segment number is 1 more than the colour list
+					Color color = i==0 && segmentList.size()==9 ? Color.MAGENTA : ProfileSegmenter.getColor(i);
 
 					ip.setColor(color);
 					ip.setLineWidth(2);

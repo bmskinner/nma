@@ -100,7 +100,11 @@ public class ProfileSegmenter {
 		for(NucleusBorderSegment b : segments){
 						
 			segPlot.setLineWidth(4);
-			segPlot.setColor(getColor(i));
+			if(i==0 && segments.size()==9){ // avoid colour wrapping when segment number is 1 more than the colour list
+				segPlot.setColor(Color.MAGENTA);
+			} else{
+				segPlot.setColor(getColor(i));
+			}
 			if(b.getStartIndex()<b.getEndIndex()){
 				segPlot.drawLine(b.getStartIndex(), -30, b.getEndIndex(), -30);
 				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), b.getEndIndex());
