@@ -53,7 +53,7 @@ public class RodentSpermNucleusCollection
 
 	  Profile medianProfile = this.profileCollection.getProfile("tip");
 
-	  Profile minima = medianProfile.getLocalMinima(5); // window size 5
+	  Profile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
 
 	  //		double minDiff = medianProfile.size();
 	  double minAngle = 180;
