@@ -6,19 +6,16 @@ import ij.gui.Plot;
 import ij.measure.Calibration;
 
 import java.awt.Color;
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
-import no.utility.Utils;
-//import no.components.ProfileFeature;
 
 // this is used to divide a median profile into segments of interest
 public class ProfileSegmenter {
 	
-//	private ProfileFeature features = new ProfileFeature(); // hold the found features
 	private Profile profile; // the profile to segment
 	List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
 	
@@ -34,8 +31,8 @@ public class ProfileSegmenter {
 		Profile maxima = this.profile.smooth(2).getLocalMaxima(5);
 		Profile minima = this.profile.smooth(2).getLocalMinima(5);
 		Profile deltas = this.profile.smooth(2).calculateDeltas(4);
-		Profile dMax = deltas.getLocalMaxima(3);
-		Profile dMin = deltas.getLocalMinima(3);
+//		Profile dMax = deltas.getLocalMaxima(3);
+//		Profile dMin = deltas.getLocalMinima(3);
 		
 		int segmentStart = 0;
 		int segmentEnd = 0;
@@ -77,29 +74,63 @@ public class ProfileSegmenter {
 	
 	public void draw(String filename){
 		
+		int narrowLine = 3;
+		int wideLine = 10;
+		int verticalLine = 3;
+		
 		Plot segPlot = new Plot("Segments", "Position", "Angle");
 		segPlot.setSize(600,400);
-		segPlot.setLineWidth(1);
+		segPlot.setLineWidth(narrowLine);
 		segPlot.setLimits(0,profile.size(),-50,360);
-		segPlot.addPoints(profile.getPositions(profile.size()).asArray(), profile.smooth(2).asArray(), Plot.LINE);
+		
+		// draw 180 degree line
+		segPlot.setLineWidth(narrowLine);
+		segPlot.setColor(Color.DARK_GRAY);
+		segPlot.drawLine(0, 180, profile.size(),180);			
+		
+		// draw the background black median line for contrast
+		double[] xpoints = profile.getPositions(profile.size()).asArray();
+		double[] ypoints = profile.smooth(2).asArray();
+		segPlot.setLineWidth(wideLine);
+		segPlot.addPoints(xpoints, ypoints, Plot.LINE);
+		segPlot.setLineWidth(narrowLine);
+		
+		// draw the coloured segments
 		int i=0;
 		for(NucleusBorderSegment b : segments){
-			segPlot.setColor(Color.LIGHT_GRAY);
-			segPlot.setLineWidth(1);
-			segPlot.drawLine(b.getStartIndex(), -50, b.getStartIndex(),360);
-			
+						
 			segPlot.setLineWidth(4);
 			segPlot.setColor(getColor(i));
 			if(b.getStartIndex()<b.getEndIndex()){
 				segPlot.drawLine(b.getStartIndex(), -30, b.getEndIndex(), -30);
-			} else { // hand wrap arounds
+				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), b.getEndIndex());
+				double[] yPart = Arrays.copyOfRange(ypoints, b.getStartIndex(), b.getEndIndex());
+				segPlot.setLineWidth(narrowLine);
+				segPlot.addPoints(xPart, yPart, Plot.LINE);
+				segPlot.setLineWidth(4);
+				
+			} else { // handle wrap arounds
 				segPlot.drawLine(0, -30, b.getEndIndex(), -30);
 				segPlot.drawLine(b.getStartIndex(), -30, profile.size(), -30);
+				
+				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), profile.size()-1);
+				double[] yPart = Arrays.copyOfRange(ypoints, b.getStartIndex(), profile.size()-1);
+				segPlot.setLineWidth(narrowLine);
+				segPlot.addPoints(xPart, yPart, Plot.LINE);
+				xPart = Arrays.copyOfRange(xpoints, 0, b.getEndIndex());
+				yPart = Arrays.copyOfRange(ypoints, 0, b.getEndIndex());
+				segPlot.addPoints(xPart, yPart, Plot.LINE);
+				segPlot.setLineWidth(4);
+				
 			}
+			// draw the vertical lines
+			segPlot.setColor(Color.LIGHT_GRAY);
+			segPlot.setLineWidth(verticalLine);
+			segPlot.drawLine(b.getStartIndex(), -50, b.getStartIndex(),360);			
 			segPlot.setLineWidth(1);
 			i++;
 		}
-		
+				
 		ImagePlus image = segPlot.getImagePlus();
 	    Calibration cal = image.getCalibration();
 	    cal.setUnit("pixels");
