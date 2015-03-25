@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.*;
 
 import no.analysis.Detector;
+import no.analysis.ProfileSegmenter;
 import no.utility.*;
 import no.components.*;
 
@@ -1258,12 +1259,13 @@ public class Nucleus
 			
 			// segments
 			if(this.segmentList.size()>0){ // only draw if there are segments
-				IJ.log(" Nucleus "+this.getImageName()+"-"+this.getNucleusNumber());
+//				IJ.log(" Nucleus "+this.getImageName()+"-"+this.getNucleusNumber());
 				for(int i=0;i<segmentList.size();i++){
 //					NucleusBorderSegment seg = this.getSegment(i);
 					NucleusBorderSegment seg = this.getSegmentTag("Seg_"+i);
-					IJ.log("  Segment "+i);
-					seg.print();
+//					IJ.log("  Segment "+i);
+//					seg.print();
+//					IJ.log("    Segment length"+seg.length(this.getLength()));
 					float[] xpoints = new float[seg.length(this.getLength())+1];
 					float[] ypoints = new float[seg.length(this.getLength())+1];
 					for(int j=0; j<=seg.length(this.getLength());j++){
@@ -1274,19 +1276,8 @@ public class Nucleus
 					}
 					
 					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
-					Color color = 	i==0 ? Color.RED : 
-									i==1 ? Color.ORANGE :
-									i==2 ? Color.GREEN :
-									i==3 ? Color.MAGENTA :
-									i==4 ? Color.CYAN :
-									i==5 ? Color.YELLOW : 
-									i==6 ? Color.PINK :
-									i==7 ? Color.WHITE :
-									i==8 ? Color.RED :
-									i==9 ? Color.ORANGE :
-									Color.YELLOW;
+					Color color = ProfileSegmenter.getColor(i);
 
-//					Color color = i%2==0 ? Color.ORANGE : Color.CYAN; // alternate colours between segments
 					ip.setColor(color);
 					ip.setLineWidth(2);
 					ip.draw(segRoi);

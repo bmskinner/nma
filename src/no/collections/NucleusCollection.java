@@ -177,7 +177,13 @@ implements INuclearCollection
 
 		  ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
 		  List<NucleusBorderSegment> segments = segmenter.segment();
-		  segmenter.draw();
+		  String segmentedProfileName = this.getFolder()+
+										File.separator+
+										this.getOutputFolder()+
+										File.separator+"plotSegments"+
+										"."+
+										this.getType()+".tiff";
+		  segmenter.draw(segmentedProfileName);
 		  
 		  IJ.log("    Found "+segments.size()+" segments in profile");
 		  

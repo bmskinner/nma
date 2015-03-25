@@ -55,7 +55,7 @@ public class NucleusBorderSegment{
 	
 	public int length(int totalLength){
 		if(endIndex<startIndex){
-			return startIndex + (totalLength-endIndex);
+			return endIndex + (totalLength-startIndex);
 		} else{
 			return this.endIndex - this.startIndex;
 		}
@@ -64,11 +64,11 @@ public class NucleusBorderSegment{
 	public boolean contains(int index){
 		boolean result = false;
 		if(endIndex<startIndex){ // wrapped
-			if(index<endIndex || index>startIndex){
+			if(index<=endIndex || index>startIndex){
 				result=true;
 			}
 		} else{ // regular
-			if(index>startIndex && index<endIndex){
+			if(index>=startIndex && index<endIndex){
 				result=true;
 			}
 		}
