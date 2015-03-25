@@ -4,7 +4,9 @@ import ij.IJ;
 import ij.gui.Plot;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,15 +28,27 @@ public class ProfileCollection {
 	}
 	
 	public Profile getProfile(String s){
-		return profiles.get(s);
+		if(profiles.containsKey(s)){	
+			return profiles.get(s);
+		} else {
+			throw new IllegalArgumentException("The requested key does not exist");
+		}
 	}
 	
 	public ProfileAggregate getAggregate(String s){
-		return aggregates.get(s);
+		if(aggregates.containsKey(s)){	
+			return aggregates.get(s);
+		} else {
+			throw new IllegalArgumentException("The requested key does not exist");
+		}
 	}
 	
 	public ProfilePlot getPlots(String s){
-		return plots.get(s);
+		if(plots.containsKey(s)){	
+			return plots.get(s);
+		} else {
+			throw new IllegalArgumentException("The requested key does not exist");
+		}		
 	}
 	
 	// Add or update features
@@ -55,10 +69,22 @@ public class ProfileCollection {
 		plots.put(s, p);
 	}
 	
-	public void printProfiles(){
-		Set<String> keys = profiles.keySet();
-		for(String s : keys){
-			IJ.log("   "+s);
+	public void printKeys(){
+		IJ.log("    Plots:");
+		for(String s : this.getPlotKeys()){
+			IJ.log("     "+s);
+		}
+		IJ.log("    Profiles:");
+		for(String s : this.getProfileKeys()){
+			IJ.log("     "+s);
+		}
+		IJ.log("    Aggregates:");
+		for(String s : this.getAggregateKeys()){
+			IJ.log("     "+s);
+		}
+		IJ.log("    Features:");
+		for(String s : this.getFeatureKeys()){
+			IJ.log("     "+s);
 		}
 	}
 	
@@ -68,7 +94,18 @@ public class ProfileCollection {
 		return plots.keySet();
 	}
 	
-	public Set<String> getProfileKeys(){
+	// get the profile keys without IQR headings
+	public List<String> getProfileKeys(){
+		List<String> result = new ArrayList<String>();
+		for(String s : profiles.keySet()){
+			if(!s.endsWith("5")){
+				result.add(s);
+			}
+		}
+		return result;
+	}
+	
+	public Set<String> getProfileKeysPlusIQRs(){
 		return profiles.keySet();
 	}
 	
@@ -84,8 +121,7 @@ public class ProfileCollection {
 
 	public void preparePlots(int width, int height, double maxLength){
 
-		Set<String> headings = this.getProfileKeys();
-		for( String pointType : headings ){
+		for( String pointType : this.getProfileKeys() ){
 
 			Plot  rawPlot = new Plot( "Raw "       +pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
 			Plot normPlot = new Plot( "Normalised "+pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);

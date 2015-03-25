@@ -10,6 +10,8 @@
 */  
 package no.components;
 
+import ij.IJ;
+
 public class NucleusBorderSegment{
 
 	private int startIndex;
@@ -50,6 +52,15 @@ public class NucleusBorderSegment{
 		int midpoint = ((endIndex- startIndex)/2) + startIndex;
 		return midpoint;
 	}
+	
+	public int length(){
+		return Math.abs(this.endIndex - this.startIndex);
+	}
+	
+	public void update(int start, int end){
+		this.startIndex = start;
+		this.endIndex = end;
+	}
 
 	/*
 		----------------
@@ -59,6 +70,10 @@ public class NucleusBorderSegment{
 
 	public void setSegmentType(String s){
 		this.segmentType = s;
+	}
+	
+	public void print(){
+		IJ.log("    Segment from "+this.startIndex+" to "+this.endIndex);
 	}
 
 }

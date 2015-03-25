@@ -14,10 +14,11 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
+
 import java.awt.Color;
 import java.io.File;
 import java.util.*;
-import java.util.HashMap;
+
 import no.analysis.Detector;
 import no.utility.*;
 import no.components.*;
@@ -1239,6 +1240,41 @@ public class Nucleus
 			ip.setColor(Color.BLUE);
 			ip.setLineWidth(1);
 			ip.draw(this.getRoi());
+			
+			// segments
+			if(this.segmentList.size()>0){ // only draw if there are segments
+				for(int i=0;i<segmentList.size();i++){
+//					NucleusBorderSegment seg = this.getSegment(i);
+					NucleusBorderSegment seg = this.getSegmentTag("Seg_"+i);
+					seg.print();
+					float[] xpoints = new float[seg.length()+1];
+					float[] ypoints = new float[seg.length()+1];
+					for(int j=0; j<=seg.length();j++){
+						int k = Utils.wrapIndex(seg.getStartIndex()+j, this.getLength());
+						NucleusBorderPoint p = this.getBorderPoint(k); // get the border points in the segment
+						xpoints[j] = (float) p.getX();
+						ypoints[j] = (float) p.getY();
+					}
+					
+					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+					Color color = 	i==0 ? Color.RED : 
+									i==1 ? Color.ORANGE :
+									i==2 ? Color.YELLOW :
+									i==3 ? Color.GREEN :
+									i==4 ? Color.BLUE :
+									i==5 ? Color.MAGENTA : 
+									i==6 ? Color.PINK :
+									i==7 ? Color.WHITE :
+									i==8 ? Color.RED :
+									i==9 ? Color.ORANGE :
+									Color.YELLOW;
+
+//					Color color = i%2==0 ? Color.ORANGE : Color.CYAN; // alternate colours between segments
+					ip.setColor(color);
+					ip.setLineWidth(2);
+					ip.draw(segRoi);
+				}
+			}
 
 
 			// draw the CoM
@@ -1281,6 +1317,9 @@ public class Nucleus
 
 		} catch(Exception e){
 			IJ.log("Error annotating nucleus: "+e);
+			for( NucleusBorderSegment s : segmentList){
+				s.print();
+			}
 		}
 	}
 
@@ -1412,6 +1451,14 @@ public class Nucleus
 
 	public void addSegmentTag(String name, int i){
 		this.segmentTags.put(name, i);
+	}
+	
+	public void addSegment(NucleusBorderSegment n){
+		this.segmentList.add(n);
+	}
+	
+	public NucleusBorderSegment getSegment(int i){
+		return this.segmentList.get(i);
 	}
 
 	private void calculateDistanceProfile(){

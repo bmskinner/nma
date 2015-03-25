@@ -12,6 +12,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Overlay;
 import ij.gui.Plot;
+import ij.gui.PlotWindow;
 import ij.gui.TextRoi;
 import ij.io.Opener;
 import ij.measure.Calibration;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.util.*;
 
 import no.collections.INuclearCollection;
+import no.analysis.ProfileSegmenter;
 import no.analysis.ShellAnalyser;
 import no.analysis.ShellCounter;
 import no.nuclei.*;
@@ -95,6 +97,9 @@ implements INuclearCollection
   }
 
   public void annotateAndExportNuclei(){
+	for(INuclearFunctions n : this.nucleiCollection){
+		n.annotateNucleusImage();
+	}
     this.exportAnnotatedNuclei();
     this.exportCompositeImage("composite");
   }
@@ -123,6 +128,8 @@ implements INuclearCollection
 
       IJ.log("    Reticulating splines: score: "+(int)score);
     }
+    IJ.log("    Segmenting profile...");
+    this.assignSegments(pointType);
 
     this.createProfileAggregates();
 
@@ -161,6 +168,45 @@ implements INuclearCollection
       int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
       n.addBorderTag("tail", tailIndex);
     }
+  }
+  
+  public void assignSegments(String pointType){
+	  // get the segments within the median curve
+	  try{
+		  Profile medianToCompare = this.profileCollection.getProfile(pointType);
+
+		  ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
+		  List<NucleusBorderSegment> segments = segmenter.segment();
+		  segmenter.draw();
+		  
+		  IJ.log("    Found "+segments.size()+" segments in profile");
+		  
+		  // find the corresponding point in each Nucleus
+		  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+			  Nucleus n = (Nucleus)this.getNucleus(i);
+
+			  int j=0;
+			  for(NucleusBorderSegment b : segments){
+				  int startIndexInMedian = b.getStartIndex();
+				  int endIndexInMedian = b.getEndIndex();
+				  
+				  Profile startOffsetMedian = medianToCompare.offset(startIndexInMedian);
+				  Profile endOffsetMedian = medianToCompare.offset(endIndexInMedian);
+
+				  int startIndex = n.getAngleProfile().getSlidingWindowOffset(startOffsetMedian);
+				  int endIndex = n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
+
+				  NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex);
+				  n.addSegment(seg);
+				  n.addSegmentTag("Seg_"+j, j);
+				  j++;
+			  }
+		  }
+
+	  } catch(Exception e){
+		  IJ.log("    Error segmenting: "+e.getMessage());
+		  this.profileCollection.printKeys();
+	  }
   }
 
   /*
@@ -407,18 +453,24 @@ implements INuclearCollection
   */
 
   public double[] getDifferencesToMedianFromPoint(String pointType){
-    double[] d = new double[this.getNucleusCount()];
-    Profile medianProfile = this.profileCollection.getProfile(pointType);
-    for(int i=0;i<this.getNucleusCount();i++){
-      INuclearFunctions n = this.getNucleus(i);
-      try{
-        d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
-      } catch(Exception e){
-        IJ.log("    Unable to get difference to median profile: "+i+": "+pointType);
-        IJ.append("    Unable to get difference to median profile: "+i+": "+pointType, this.debugFile.getAbsolutePath());
-      }
-    }
-    return d;
+	  double[] d = new double[this.getNucleusCount()];
+	  try{
+
+		  Profile medianProfile = this.profileCollection.getProfile(pointType);
+		  for(int i=0;i<this.getNucleusCount();i++){
+			  INuclearFunctions n = this.getNucleus(i);
+			  try{
+				  d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
+			  } catch(Exception e){
+				  IJ.log("    Unable to get difference to median profile: "+i+": "+pointType);
+				  IJ.append("    Unable to get difference to median profile: "+i+": "+pointType, this.debugFile.getAbsolutePath());
+			  }
+		  }
+	  } catch(Exception e){
+		  IJ.log("    Error getting differences from point "+pointType+": "+e.getMessage());
+		  this.profileCollection.printKeys();
+	  }
+	  return d;
   }
 
   public double compareProfilesToMedian(String pointType){
@@ -596,11 +648,17 @@ implements INuclearCollection
   }
 
   public void createProfileAggregates(){
-
-    Set<String> headings = this.profileCollection.getProfileKeys();
-    for( String pointType : headings ){
-      createProfileAggregateFromPoint(pointType);   
-    }
+	  try{
+		  for( String pointType : this.profileCollection.getProfileKeys() ){
+			  if(pointType.endsWith("5")){ // ignore 25 and 75s
+				  continue;
+			  }
+			  createProfileAggregateFromPoint(pointType);   
+		  }
+	  } catch(Exception e){
+		  IJ.log("Error creating profile aggregates: "+e.getMessage());
+		  this.profileCollection.printKeys();
+	  }
   }
 
   public INuclearFunctions getNucleusMostSimilarToMedian(String pointType){

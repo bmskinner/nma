@@ -98,6 +98,14 @@ public class Profile {
   public double[] asArray(){
     return this.array;
   }
+  
+  public Profile getPositions(int length){
+	  double [] result = new double[array.length];
+	  for(int i=0;i<array.length;i++){
+		  result[i] = (double) i / (double) array.length * (double) length;
+	  }
+	  return new Profile(result);
+  }
 
   // The testProfile must have been offset appropriately
   public double differenceToProfile(Profile testProfile){
@@ -149,6 +157,36 @@ public class Profile {
     }
     return new Profile(newArray);
   }
+  
+  public Profile smooth(int windowSize){
+
+	    double[] smoothed = new double[this.size()];
+
+	    double[] prevValues = new double[windowSize]; // slots for previous angles
+	    double[] nextValues = new double[windowSize]; // slots for next angles
+
+	    for (int i=0; i<array.length; i++) { // for each position in sperm
+
+	      for(int j=0;j<prevValues.length;j++){
+
+	        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+	        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+
+	        // fill the lookup array
+	        prevValues[j] = array[prev_i];
+	        nextValues[j] = array[next_i];
+	      }
+
+	      double average = array[i];
+	      for(int k=0;k<prevValues.length;k++){ 
+	    	  average += prevValues[k] + nextValues[k];	        
+	      }
+
+	      smoothed[i] = average / (windowSize*2 + 1);
+	    }
+	    Profile result = new Profile(smoothed);
+	    return result;
+	  }
 
   public void reverse(){
 
@@ -246,7 +284,7 @@ public class Profile {
   /*
     Interpolate another profile to match this, and move this profile
     along it one index at a time. Find the point of least difference, 
-    and return this offset
+    and return this offset. Returns the positive offset to this profile
   */
   public int getSlidingWindowOffset(Profile testProfile){
 

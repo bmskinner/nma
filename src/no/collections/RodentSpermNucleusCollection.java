@@ -79,7 +79,7 @@ public class RodentSpermNucleusCollection
   }
 
   /*
-    Calculate the offsets needed to corectly assign the tail positions
+    Calculate the offsets needed to correctly assign the tail positions
     compared to ideal median curves
   */
   @Override
