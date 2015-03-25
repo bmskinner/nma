@@ -60,7 +60,7 @@ public class NucleusCollection
   private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
   private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
-  private Map<String, HashMap<String, Plot>> plotCollection = new HashMap<String, HashMap<String, Plot>>();
+//  private Map<String, HashMap<String, Plot>> plotCollection = new HashMap<String, HashMap<String, Plot>>();
 
   //this holds the mapping of tail indexes etc in the median profile arrays
   protected ProfileCollection profileCollection = new ProfileCollection();
@@ -439,9 +439,9 @@ public class NucleusCollection
   }
 
   // get the plot from the collection corresponding to the given pointType of interest
-  public Plot getPlot(String pointType, String plotType){
-    return this.plotCollection.get(pointType).get(plotType);
-  }
+//  public Plot getPlot(String pointType, String plotType){
+//    return this.plotCollection.get(pointType).get(plotType);
+//  }
 
   public int[] getPointIndexes(String pointType){
     int[] d = new int[this.getNucleusCount()];
@@ -1072,12 +1072,14 @@ public class NucleusCollection
       normPlot.setColor(Color.BLACK);
       normPlot.drawLine(0, 180, 100, 180); 
       normPlot.setColor(Color.LIGHT_GRAY);
-
-      HashMap<String, Plot> plotHash = new HashMap<String, Plot>();
-      plotHash.put("raw" , rawPlot );
-      plotHash.put("norm", normPlot);
       
-      this.plotCollection.put(pointType, plotHash);
+      ProfilePlot plotHash = new ProfilePlot();
+//      HashMap<String, Plot> plotHash = new HashMap<String, Plot>();
+      plotHash.add("raw" , rawPlot );
+      plotHash.add("norm", normPlot);
+      this.profileCollection.addPlots(pointType, plotHash);
+      
+//      this.plotCollection.put(pointType, plotHash);
     }
   }    
 
@@ -1088,11 +1090,11 @@ public class NucleusCollection
 
     this.preparePlots();
 
-    Set<String> headings = this.plotCollection.keySet();
+    Set<String> headings = this.profileCollection.getPlotKeys();
 
     for( String pointType : headings ){
-      Plot  rawPlot = getPlot(pointType, "raw" );
-      Plot normPlot = getPlot(pointType, "norm");
+      Plot  rawPlot = this.profileCollection.getPlots(pointType).get("raw");
+      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
 
       for(int i=0;i<this.getNucleusCount();i++){
 
@@ -1180,10 +1182,10 @@ public class NucleusCollection
 
   public void drawNormalisedMedianLines(){
 
-    Set<String> headings = this.plotCollection.keySet();
+    Set<String> headings = this.profileCollection.getPlotKeys();
     for( String pointType : headings ){
 
-        Plot normPlot = getPlot(pointType, "norm");
+        Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
         drawMedianLine(pointType, normPlot);
         drawBoxplot(pointType, normPlot, "tail");
     }
@@ -1191,10 +1193,10 @@ public class NucleusCollection
 
   public void addSignalsToProfileCharts(){
 
-    Set<String> headings = this.plotCollection.keySet();
+    Set<String> headings = this.profileCollection.getPlotKeys();
 
     for( String pointType : headings ){
-      Plot normPlot = getPlot(pointType, "norm");
+      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
       this.addSignalsToProfileChartFromPoint(pointType, normPlot);
 
     }    
@@ -1254,11 +1256,11 @@ public class NucleusCollection
 
   public void exportProfilePlots(){
 
-    Set<String> headings = this.plotCollection.keySet();
+    Set<String> headings = this.profileCollection.getPlotKeys();
     for( String pointType : headings ){
 
-      Plot normPlot = getPlot(pointType, "norm");
-      Plot  rawPlot = getPlot(pointType, "raw" );
+      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
+      Plot  rawPlot = this.profileCollection.getPlots(pointType).get("raw" );
 
       exportProfilePlot(normPlot, "plot"+pointType+"Norm");
       exportProfilePlot(rawPlot , "plot"+pointType+"Raw");

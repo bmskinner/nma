@@ -92,7 +92,7 @@ public interface INuclearCollection
 	public double[] getDifferencesToMedianFromPoint(String pointType);
 
 	// get the plot from the collection corresponding to the given pointType of interest
-	public Plot getPlot(String pointType, String plotType);
+//	public Plot getPlot(String pointType, String plotType);
 
 	public int[] getPointIndexes(String pointType);
 
