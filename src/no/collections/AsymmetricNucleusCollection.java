@@ -177,22 +177,6 @@ public class AsymmetricNucleusCollection
   }
 
   @Override
-  public void exportNuclearStats(String filename){
-
-    Map<String, List<String>> stats = super.calculateNuclearStats();
-
-    String[] index  = Utils.getStringFromInt(this.getPointIndexes("tail"));
-    // String[] diff   = NuclearOrganisationUtility.getStringFromDouble(this.getDifferencesToMedianFromTail());
-    String[] points = Utils.getStringFromDouble(this.getMedianDistanceBetweenPoints());
-
-    stats.put("NORM_TAIL_INDEX",                Arrays.asList(index ));
-    // stats.put("DIFFERENCE_TO_MEDIAN_PROFILE",   Arrays.asList(diff  ));
-    stats.put("MEDIAN_DISTANCE_BETWEEN_POINTS", Arrays.asList(points));
-
-    exportStats(stats, filename);
-  }
-
-  @Override
   public void exportCompositeImage(String filename){
 
     // foreach nucleus

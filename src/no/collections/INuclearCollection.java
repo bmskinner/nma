@@ -152,9 +152,9 @@ public interface INuclearCollection
 		To hold the nuclear stats (and any stats), we want a structure that can 
 		hold: a column of data. Any arbitrary other numbers of columns of data.
 	*/
-	public Map<String, List<String>> calculateNuclearStats();
+//	public Map<String, List<String>> calculateNuclearStats();
 
-	public void exportStats(Map<String, List<String>> stats, String filename);
+//	public void exportStats(Map<String, List<String>> stats, String filename);
 	
 	// this is for the mapping of image to path for 
 	// identifying FISHed nuclei in prefish images
