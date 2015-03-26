@@ -1474,6 +1474,11 @@ public class Nucleus
 	public NucleusBorderSegment getSegment(int i){
 		return this.segmentList.get(i);
 	}
+	
+	public void clearSegments(){
+		this.segmentList = new ArrayList<NucleusBorderSegment>(0);
+		this.segmentTags = new HashMap<String, Integer>(0);
+	}
 
 	private void calculateDistanceProfile(){
 

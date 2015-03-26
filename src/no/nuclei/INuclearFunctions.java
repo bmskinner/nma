@@ -255,6 +255,8 @@ public interface INuclearFunctions
   public void addBorderTag(String name, int i);
 
   public void addSegmentTag(String name, int i);
+  
+  public void clearSegments();
 
   public void calculateAngleProfile(int angleProfileWindowSize);
 
