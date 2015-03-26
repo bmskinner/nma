@@ -189,6 +189,7 @@ implements INuclearCollection
 		  segmenter.draw(segmentedProfileName);
 		  
 		  IJ.log("    Found "+segments.size()+" segments in profile");
+		  IJ.log("    Assigning segments to nuclei...");
 		  
 		  // find the corresponding point in each Nucleus
 		  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi

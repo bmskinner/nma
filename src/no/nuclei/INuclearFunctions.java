@@ -261,4 +261,6 @@ public interface INuclearFunctions
   public void calculateAngleProfile(int angleProfileWindowSize);
 
   public void updatePolygon();
+  
+  public void setSegments(List<NucleusBorderSegment> newList);
 }

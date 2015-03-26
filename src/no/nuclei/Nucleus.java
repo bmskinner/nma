@@ -1516,6 +1516,10 @@ public class Nucleus
 		return this.segmentList;
 	}
 	
+	public void setSegments(List<NucleusBorderSegment> segments){
+		this.segmentList = segments;
+	}
+	
 	public void clearSegments(){
 		this.segmentList = new ArrayList<NucleusBorderSegment>(0);
 		this.segmentTags = new HashMap<String, Integer>(0);

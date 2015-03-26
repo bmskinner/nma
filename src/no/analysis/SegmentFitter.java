@@ -28,7 +28,7 @@ public class SegmentFitter {
 	List<NucleusBorderSegment> medianSegments;
 	List<NucleusBorderSegment>   testSegments;
 	
-	private static int POINTS_TO_TEST = 5;
+	private static int POINTS_TO_TEST = 8;
 	
 	/**
 	 * Construct with a median profile and list of segments. The originals will not be modified
@@ -67,8 +67,10 @@ public class SegmentFitter {
 		
 		List<NucleusBorderSegment> newList = this.runFitter();
 		
-		ProfileSegmenter segmenter = new ProfileSegmenter(this.testProfile, newList);
-		segmenter.draw(n.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+n.getNucleusNumber()+".revised_segments.tiff");
+		n.setSegments(newList);
+		
+//		ProfileSegmenter segmenter = new ProfileSegmenter(this.testProfile, newList);
+//		segmenter.draw(n.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+n.getNucleusNumber()+".revised_segments.tiff");
 	}
 	
 	/**
@@ -82,15 +84,21 @@ public class SegmentFitter {
 			// update the nucleus
 	 */
 	private List<NucleusBorderSegment> runFitter(){
-		IJ.log("Running fitter:");
+//		IJ.log("Running fitter:");
 		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>(0);
+		
+//		Profile testMinima = this.testProfile.smooth(2).getLocalMinima(5);
+//		Profile testMaxima = this.testProfile.smooth(2).getLocalMaxima(5);
+		
 		for(int i=0; i<this.testSegments.size();i++){
-			IJ.log("    Segment "+i);			
+//			IJ.log("    Segment "+i);			
 			NucleusBorderSegment seg = this.testSegments.get(i);
 			if(i>0){ // carry over the offset from the previous segment
 				seg = new NucleusBorderSegment(newList.get(i-1).getEndIndex(), seg.getEndIndex());
 			}
-			seg.print();
+//			seg.print();
+			
+				
 			double score =  compareSegments(this.medianSegments.get(i), seg);
 			double minScore = score;
 			NucleusBorderSegment bestSeg = seg;
@@ -102,10 +110,17 @@ public class SegmentFitter {
 					minScore=score;
 					bestSeg = newSeg;
 				}
-				IJ.log("      Endpoint offset "+j+": "+score);	
+				// this is a tempting system, but it falls apart as soon as we get irregular nuclei
+//				if((testMinima.get(newSeg.getEndIndex())==1 || testMaxima.get(newSeg.getEndIndex())==1) && j>-SegmentFitter.POINTS_TO_TEST){ // we found something interesting
+//					bestSeg = newSeg;
+//					IJ.log("      Endpoint offset "+j+": Mimum or maximum");	
+//					break; // stop looking, we have our point of interest
+//				}
+//				IJ.log("      Endpoint offset "+j+": "+score);	
 			}
 			newList.add(bestSeg);
-			bestSeg.print();	
+//			bestSeg.print();	
+
 		}
 		return newList;
 	}
