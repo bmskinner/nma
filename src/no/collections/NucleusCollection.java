@@ -904,6 +904,7 @@ implements INuclearCollection
 
       INuclearFunctions n = this.getNucleus(i);
       n.exportAngleProfile();
+      n.exportProfilePlotImage();
     }
   }
 
@@ -1073,8 +1074,8 @@ implements INuclearCollection
 
         INuclearFunctions n = this.getNucleus(i);
 
-        double[] xPointsRaw  = n.getRawProfilePositions();
-        double[] xPointsNorm = n.getNormalisedProfilePositions();
+        double[] xPointsRaw  = n.getAngleProfile().getPositions(n.getLength()).asArray();//getRawProfilePositions();
+        double[] xPointsNorm = n.getAngleProfile().getPositions(100).asArray();//n.getNormalisedProfilePositions();
 
         Profile anglesFromPoint = n.getAngleProfile(pointType);
 

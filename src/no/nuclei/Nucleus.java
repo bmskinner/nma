@@ -10,6 +10,7 @@ package no.nuclei;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Plot;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -23,8 +24,13 @@ import no.analysis.Detector;
 import no.analysis.ProfileSegmenter;
 import no.utility.*;
 import no.components.*;
+import no.export.Logger;
 
 
+/**
+ * @author bms41
+ *
+ */
 public class Nucleus 
 	implements no.nuclei.INuclearFunctions
 {
@@ -1024,22 +1030,6 @@ public class Nucleus
 		return Stats.min(this.distanceProfile.asArray());
 	}
 
-	public double[] getNormalisedProfilePositions(){
-		double[] d = new double[this.getLength()];
-		for(int i=0;i<this.getLength();i++){
-			d[i] = ( (double)i / (double)this.getLength() ) * 100;
-		}
-		return d;
-	}
-
-	public double[] getRawProfilePositions(){
-		double[] d = new double[this.getLength()];
-		for(int i=0;i<this.getLength();i++){
-			d[i] = i;
-		}
-		return d;
-	}
-
 	/*
 		Flip the X positions of the border points around an X position
 	*/
@@ -1075,7 +1065,15 @@ public class Nucleus
 	}
 	
 	public double findRotationAngle(){
-		return 0;
+		XYPoint end = new XYPoint(this.getBorderTag("tail").getXAsInt(),this.getBorderTag("tail").getYAsInt()-50);
+
+	    double angle = findAngleBetweenXYPoints(end, this.getBorderTag("tail"), this.getCentreOfMass());
+
+	    if(this.getCentreOfMass().getX() < this.getBorderTag("tail").getX()){
+	      return angle;
+	    } else {
+	      return 0-angle;
+	    }
 	}
 
 	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
@@ -1179,30 +1177,46 @@ public class Nucleus
 		Overwrites any existing log
 	*/   
 	public void exportAngleProfile(){
-
-		File f = new File(this.getNucleusFolder().getAbsolutePath()+
-											File.separator+
-											this.getNucleusNumber()+
-											".txt");
-		if(f.exists()){
-			f.delete();
-		}
-
-		StringBuilder outLine = new StringBuilder();
-
-		outLine.append(	"X_INT\t"+
-						"Y_INT\t"+
-						"X_DOUBLE\t"+
-						"Y_DOUBLE\t"+
-						"INTERIOR_ANGLE\t"+
-						"IS_LOCAL_MIN\t"+
-						"IS_LOCAL_MAX\t"+
-						"ANGLE_DELTA\t"+
-						"NORMALISED_PROFILE_X\t"+
-						"SD_PROFILE\t"+
-						"IS_SD_MIN\t"+
-						"DISTANCE_PROFILE"+
-						"SEGMENT\r\n");
+		
+		Logger logger = new Logger(this.getNucleusFolder());
+		logger.addColumnHeading("X_INT");
+		logger.addColumnHeading("Y_INT");
+		logger.addColumnHeading("X_DOUBLE");
+		logger.addColumnHeading("Y_DOUBLE");
+		logger.addColumnHeading("INTERIOR_ANGLE");
+		logger.addColumnHeading("IS_LOCAL_MIN");
+		logger.addColumnHeading("IS_LOCAL_MAX");
+		logger.addColumnHeading("ANGLE_DELTA");
+		logger.addColumnHeading("NORMALISED_PROFILE_X");
+		logger.addColumnHeading("SD_PROFILE");
+		logger.addColumnHeading("IS_SD_MIN");
+		logger.addColumnHeading("DISTANCE_PROFILE");
+		logger.addColumnHeading("SEGMENT");
+		
+		
+//		File f = new File(this.getNucleusFolder().getAbsolutePath()+
+//											File.separator+
+//											this.getNucleusNumber()+
+//											".txt");
+//		if(f.exists()){
+//			f.delete();
+//		}
+//
+//		StringBuilder outLine = new StringBuilder();
+//
+//		outLine.append(	"X_INT\t"+
+//						"Y_INT\t"+
+//						"X_DOUBLE\t"+
+//						"Y_DOUBLE\t"+
+//						"INTERIOR_ANGLE\t"+
+//						"IS_LOCAL_MIN\t"+
+//						"IS_LOCAL_MAX\t"+
+//						"ANGLE_DELTA\t"+
+//						"NORMALISED_PROFILE_X\t"+
+//						"SD_PROFILE\t"+
+//						"IS_SD_MIN\t"+
+//						"DISTANCE_PROFILE"+
+//						"SEGMENT\r\n");
 
 		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
 		Profile minima = this.getAngleProfile().getLocalMinima(5);
@@ -1213,21 +1227,36 @@ public class Nucleus
 
 			double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
 			
-			outLine.append( this.getBorderPoint(i).getXAsInt()	+"\t"+
-							this.getPoint(i).getYAsInt()		+"\t"+
-							this.getPoint(i).getX()				+"\t"+
-							this.getPoint(i).getY()				+"\t"+
-							this.getAngle(i) 					+"\t"+
-							minima.get(i)						+"\t"+
-							maxima.get(i)						+"\t"+
-							angleDeltas.get(i)					+"\t"+
-							normalisedX							+"\t"+
-							this.singleDistanceProfile.get(i)	+"\t"+
-							sdMinima.get(i)						+"\t"+
-							this.getDistance(i)					+"\t"+
-							this.getSegmentOfPoint(i)			+"\r\n");
+			logger.addRow("X_INT"               , this.getBorderPoint(i).getXAsInt());
+			logger.addRow("Y_INT"               , this.getPoint(i).getYAsInt());
+			logger.addRow("X_DOUBLE"            , this.getPoint(i).getX());
+			logger.addRow("Y_DOUBLE"            , this.getPoint(i).getY());
+			logger.addRow("INTERIOR_ANGLE"      , this.getAngle(i) );
+			logger.addRow("IS_LOCAL_MIN"        , minima.get(i));
+			logger.addRow("IS_LOCAL_MAX"        , maxima.get(i));
+			logger.addRow("ANGLE_DELTA"         , angleDeltas.get(i));
+			logger.addRow("NORMALISED_PROFILE_X", normalisedX);
+			logger.addRow("SD_PROFILE"          , this.singleDistanceProfile.get(i));
+			logger.addRow("IS_SD_MIN"           , sdMinima.get(i));
+			logger.addRow("DISTANCE_PROFILE"    , this.getDistance(i)	);
+			logger.addRow("SEGMENT"             , this.getSegmentOfPoint(i));
+			
+//			outLine.append( this.getBorderPoint(i).getXAsInt()	+"\t"+
+//							this.getPoint(i).getYAsInt()		+"\t"+
+//							this.getPoint(i).getX()				+"\t"+
+//							this.getPoint(i).getY()				+"\t"+
+//							this.getAngle(i) 					+"\t"+
+//							minima.get(i)						+"\t"+
+//							maxima.get(i)						+"\t"+
+//							angleDeltas.get(i)					+"\t"+
+//							normalisedX							+"\t"+
+//							this.singleDistanceProfile.get(i)	+"\t"+
+//							sdMinima.get(i)						+"\t"+
+//							this.getDistance(i)					+"\t"+
+//							this.getSegmentOfPoint(i)			+"\r\n");
 		}
-		IJ.append( outLine.toString(), f.getAbsolutePath());
+//		IJ.append( outLine.toString(), f.getAbsolutePath());
+		logger.export(""+this.getNucleusNumber());
 	}
 
 	/*
@@ -1239,11 +1268,19 @@ public class Nucleus
 		IJ.saveAsTiff(annotatedImage, outPath);
 	}
 
-	/*
-		Annotate image with ROIs
-		CoMs of nucleus and signals
-		Narrowest diameter across nucleus
-	*/
+	/**
+	 * Export an image of the raw profile for this nucleus to
+	 * the nucleus folder 
+	 */
+	public void exportProfilePlotImage(){
+		ProfileSegmenter segmenter = new ProfileSegmenter(this.getAngleProfile(), this.segmentList);
+		segmenter.draw(this.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+this.nucleusNumber+".segments.tiff");
+	}
+
+	/** Annotate image with ROIs
+	 *	CoMs of nucleus and signals
+	 *	Narrowest diameter across nucleus
+	 */
 	public void annotateNucleusImage(){ 
 
 		try{
@@ -1473,6 +1510,10 @@ public class Nucleus
 	
 	public NucleusBorderSegment getSegment(int i){
 		return this.segmentList.get(i);
+	}
+	
+	public List<NucleusBorderSegment> getSegments(){
+		return this.segmentList;
 	}
 	
 	public void clearSegments(){

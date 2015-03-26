@@ -197,10 +197,6 @@ public interface INuclearFunctions
   // Uses the distance profile
   public NucleusBorderPoint getNarrowestDiameterPoint();
 
-  public double[] getNormalisedProfilePositions();
-
-  public double[] getRawProfilePositions();
-
   public void flipXAroundPoint(XYPoint p);
 
   public double getMedianDistanceBetweenPoints();
@@ -231,6 +227,8 @@ public interface INuclearFunctions
   public void exportAnnotatedImage();
 
   public void annotateNucleusImage();
+  
+  public void exportProfilePlotImage();
 
   public void dumpInfo(int type);
 
@@ -249,6 +247,8 @@ public interface INuclearFunctions
   public int getBorderIndex(String s);
 
   public Set<String> getTags();
+  
+  public List<NucleusBorderSegment> getSegments();
 
   public NucleusBorderSegment getSegmentTag(String s);
 

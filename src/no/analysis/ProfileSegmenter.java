@@ -14,6 +14,7 @@ import no.components.NucleusBorderSegment;
 import no.components.Profile;
 
 // this is used to divide a median profile into segments of interest
+// it can also take a list of segments, and apply them
 public class ProfileSegmenter {
 	
 	private Profile profile; // the profile to segment
@@ -24,6 +25,17 @@ public class ProfileSegmenter {
 			throw new IllegalArgumentException("Profile is null");
 		}
 		this.profile = p;
+	}
+	
+	/**
+	 * Create using existing segments. Can then be used to draw plots
+	 * without calling the segmenting method
+	 * @param p the profile
+	 * @param n a list of segments
+	 */
+	public ProfileSegmenter(Profile p, List<NucleusBorderSegment> n){
+		this.profile = p;
+		this.segments = n;
 	}
 	
 	// get the deltas and find minima and maxima. These switch between segments
