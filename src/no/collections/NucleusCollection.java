@@ -143,32 +143,32 @@ implements INuclearCollection
 
   public void calculateOffsets(){
 
-    Profile medianToCompare = this.profileCollection.getProfile("head"); // returns a median profile with head at 0
+	  Profile medianToCompare = this.profileCollection.getProfile("head"); // returns a median profile with head at 0
 
-    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-      Nucleus n = (Nucleus)this.getNucleus(i);
+	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+		  Nucleus n = (Nucleus)this.getNucleus(i);
 
-      // returns the positive offset index of this profile which best matches the median profile
-      int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-      n.addBorderTag("head", newHeadIndex);
-      
-      // check if flipping the profile will help
-      
-      double differenceToMedian1 = n.getAngleProfile("head").differenceToProfile(medianToCompare);
-      n.reverse();
-      double differenceToMedian2 = n.getAngleProfile("head").differenceToProfile(medianToCompare);
-      
-      if(differenceToMedian1<differenceToMedian2){
-    	  n.reverse(); // put it back if no better
-      }
-      
-//      int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-//      n.addBorderTag("head", newHeadIndex);
+		  // returns the positive offset index of this profile which best matches the median profile
+		  int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+		  n.addBorderTag("head", newHeadIndex);
 
-      // also update the tail position
-      int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
-      n.addBorderTag("tail", tailIndex);
-    }
+		  // check if flipping the profile will help
+
+		  double differenceToMedian1 = n.getAngleProfile("head").differenceToProfile(medianToCompare);
+		  n.reverse();
+		  double differenceToMedian2 = n.getAngleProfile("head").differenceToProfile(medianToCompare);
+
+		  if(differenceToMedian1<differenceToMedian2){
+			  n.reverse(); // put it back if no better
+		  }
+
+		  //      int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+		  //      n.addBorderTag("head", newHeadIndex);
+
+		  // also update the tail position
+		  int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+		  n.addBorderTag("tail", tailIndex);
+	  }
   }
   
   public void assignSegments(String pointType){
@@ -191,6 +191,7 @@ implements INuclearCollection
 		  // find the corresponding point in each Nucleus
 		  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 			  Nucleus n = (Nucleus)this.getNucleus(i);
+			  n.clearSegments();
 
 			  int j=0;
 			  for(NucleusBorderSegment b : segments){
@@ -524,14 +525,24 @@ implements INuclearCollection
   public void findTailIndexInMedianCurve(){
 
     Profile medianProfile = this.profileCollection.getProfile("head");
-    int headIndex = medianProfile.getIndexOfMin();
-    ProfileFeature headFeature = new ProfileFeature();
-    headFeature.add("head", headIndex);
-    this.profileCollection.addFeature("tail", headFeature);
     
-    ProfileFeature tailFeature = new ProfileFeature();
-    tailFeature.add("head", headIndex);
-    this.profileCollection.addFeature("head", tailFeature);
+	int tailIndex = (int) Math.floor(medianProfile.size()/2);
+	  
+	  Profile tailProfile = medianProfile.offset(tailIndex);
+	  this.profileCollection.addProfile("tail", tailProfile);
+	  this.profileCollection.addFeature("head", new ProfileFeature("tail", tailIndex));
+	  
+    
+//    int headIndex = medianProfile.getIndexOfMin();
+//    ProfileFeature headFeature = new ProfileFeature();
+//    headFeature.add("head", headIndex);
+//    this.profileCollection.addFeature("tail", headFeature);
+//    
+//    ProfileFeature tailFeature = new ProfileFeature();
+//    tailFeature.add("head", headIndex);
+//    this.profileCollection.addFeature("head", tailFeature);
+    
+//    int tailIndex = 
   }
 
   /*
