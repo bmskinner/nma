@@ -130,7 +130,7 @@ public class RodentSpermNucleusCollection
 
   @Override
   public void exportClusteringProfiles(String filename){
-    String statsFile = makeGlobalLogFile(filename);
+    String statsFile = getLogFileName(filename);
 
     StringBuilder outLine = new StringBuilder();
     outLine.append("PATH\tPOSITION\tAREA\tPERIMETER\tFERET\tPATH_LENGTH\tDIFFERENCE\tFAILURE_CODE\tHEAD_TO_TAIL\tTIP_TO_TAIL\tHEAD_TO_TIP\t");

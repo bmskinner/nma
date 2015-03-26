@@ -59,7 +59,7 @@ public class AnalysisCreator {
   private  double maxSignalFraction = 0.5;
 
   private File folder;
-  private File outputFolder;
+//  private File outputFolder;
   private String outputFolderName;
   private File logAnalysis;
   private File nucleiToFind;
@@ -104,8 +104,8 @@ public class AnalysisCreator {
   private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
   // allow us to map an id to a class to construct
-  private static Map<Integer, Class>  collectionClassTypes;
-  private static Map<Integer, Class>  nucleusClassTypes;
+  private static Map<Integer, Class<?>>  collectionClassTypes;
+  private static Map<Integer, Class<?>>  nucleusClassTypes;
   private static Map<String, Integer> nucleusTypes;
 
   // the raw input from nucleus detector
@@ -127,12 +127,12 @@ public class AnalysisCreator {
       nucleusTypes.put("Pig sperm"    , PIG_SPERM_NUCLEUS);
       nucleusTypes.put("Round nucleus", ROUND_NUCLEUS);
 
-      collectionClassTypes = new HashMap<Integer, Class>();
+      collectionClassTypes = new HashMap<Integer, Class<?>>();
       collectionClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleusCollection().getClass());
       collectionClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleusCollection().getClass());
       collectionClassTypes.put(ROUND_NUCLEUS, new NucleusCollection().getClass());
 
-      nucleusClassTypes = new HashMap<Integer, Class>();
+      nucleusClassTypes = new HashMap<Integer, Class<?>>();
       nucleusClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleus().getClass());
       nucleusClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleus().getClass());
       nucleusClassTypes.put(ROUND_NUCLEUS, new Nucleus().getClass());
@@ -155,7 +155,7 @@ public class AnalysisCreator {
     DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
     String folderName = localOpenDialog.getDirectory();
 
-    if(folderName==null) return;
+    if(folderName==null) return; // user cancelled
     this.folder = new File(folderName);
 
     if(performReanalysis){
@@ -170,7 +170,7 @@ public class AnalysisCreator {
     this.startTime = Calendar.getInstance().getTime();
     this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
-    this.outputFolder = new File(this.folder.getAbsolutePath()+File.separator+outputFolderName);
+//    this.outputFolder = new File(this.folder.getAbsolutePath()+File.separator+outputFolderName);
     this.readyToRun = true;
   }
 
@@ -360,7 +360,7 @@ public class AnalysisCreator {
         NucleusCollection collection = folderCollection.get(key);
 
         try{
-          INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, this.outputFolderName, "analysable");
+          INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, collection.getOutputFolder(), "analysable");
           
           // RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
           IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
@@ -411,7 +411,7 @@ public class AnalysisCreator {
         
         nucleusCounts.put("input", r.getNucleusCount());
         Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
-        INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, this.outputFolderName, "failed");
+        INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolder(), "failed");
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
         if(failedNuclei.getNucleusCount()>0){
@@ -539,14 +539,14 @@ public class AnalysisCreator {
       List<INuclearFunctions> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
       if(redList.size()>0){
         // INuclearCollection redNuclei = new INuclearCollection(r.getFolder(), "red");
-        INuclearCollection redNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "red");
+        INuclearCollection redNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "red");
         for(INuclearFunctions n : redList){
           redNuclei.addNucleus( (INuclearFunctions)n );
         }
         signalPopulations.add(redNuclei);
         List<INuclearFunctions> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
         if(notRedList.size()>0){
-          INuclearCollection notRedNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_red");
+          INuclearCollection notRedNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "not_red");
           // INuclearCollection notRedNuclei = new INuclearCollection(r.getFolder(), "not_red");
           for(INuclearFunctions n : notRedList){
             notRedNuclei.addNucleus( (INuclearFunctions)n );
@@ -557,7 +557,7 @@ public class AnalysisCreator {
 
       List<INuclearFunctions> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
       if(greenList.size()>0){
-        INuclearCollection greenNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "green");
+        INuclearCollection greenNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "green");
         // INuclearCollection greenNuclei = new INuclearCollection(r.getFolder(), "green");
         for(INuclearFunctions n : greenList){
           greenNuclei.addNucleus( (INuclearFunctions)n );
@@ -565,7 +565,7 @@ public class AnalysisCreator {
         signalPopulations.add(greenNuclei);
         List<INuclearFunctions> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
         if(notGreenList.size()>0){
-          INuclearCollection notGreenNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), this.outputFolderName, "not_green");
+          INuclearCollection notGreenNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "not_green");
           // INuclearCollection notGreenNuclei = new INuclearCollection(r.getFolder(), "not_green");
           for(INuclearFunctions n : notGreenList){
             notGreenNuclei.addNucleus( (INuclearFunctions)n );

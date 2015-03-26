@@ -155,7 +155,7 @@ public class AsymmetricNucleusCollection
 
   public void exportInterpolatedMedians(Profile medianProfile){
 
-    String logFile = makeGlobalLogFile("logOffsets");
+    String logFile = getLogFileName("logOffsets");
 
     IJ.append("INDEX\tANGLE", logFile);
     for(int i=0;i<medianProfile.size();i++){
@@ -166,7 +166,7 @@ public class AsymmetricNucleusCollection
 
   public void exportOffsets(double[] d){
 
-  	String logFile = makeGlobalLogFile("logOffsets");
+  	String logFile = getLogFileName("logOffsets");
 
     IJ.append("OFFSET\tDIFFERENCE", logFile);
 
@@ -253,7 +253,7 @@ public class AsymmetricNucleusCollection
 
   public void exportClusteringProfiles(String filename){
 
-    String statsFile = makeGlobalLogFile(filename);
+    String statsFile = getLogFileName(filename);
 
     StringBuilder outLine = new StringBuilder();
     outLine.append( "PATH\t"+

@@ -38,6 +38,8 @@ public interface INuclearCollection
 	*/
 
 	public File getFolder();
+	
+	public String getOutputFolder();
 
 	public File getDebugFile();
 
@@ -133,7 +135,7 @@ public interface INuclearCollection
 		-----------------
 	*/
 
-	public String makeGlobalLogFile(String filename);
+	public String getLogFileName(String filename);
 	/*
 		Export the signal parameters of the nucleus to the designated log file
 	*/

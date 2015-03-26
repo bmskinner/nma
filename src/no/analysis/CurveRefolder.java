@@ -567,7 +567,7 @@ public class CurveRefolder{
 
 	public void exportProfileOfRefoldedImage(INuclearCollection collection){
 	 
-		String logFile = collection.makeGlobalLogFile("logConsensusNucleus");
+		String logFile = collection.getLogFileName("logConsensusNucleus");
 
 		StringBuilder outLine = new StringBuilder();
 

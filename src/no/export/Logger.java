@@ -16,7 +16,7 @@ import no.utility.Utils;
 public class Logger {
 	
 	private File exportFolder;
-	private Map<String, ArrayList<String>> columns = new LinkedHashMap<String, ArrayList<String>>();
+	private Map<String, List<String>> columns = new LinkedHashMap<String, List<String>>();
 	
 	public Logger(File f){
 		if(f.exists()){
@@ -36,7 +36,7 @@ public class Logger {
 	}
 	
 	public void addColumn(String s, String[] values){
-		columns.put(s, (ArrayList<String>)Arrays.asList( values));
+		columns.put(s, Arrays.asList( values));
 	}
 	
 	public void addColumn(String s, double[] array){
@@ -51,7 +51,7 @@ public class Logger {
 	
 	public void addColumnHeading(String s){
 		if(!columns.containsKey(s)){
-			ArrayList<String> values = new ArrayList<String>();
+			List<String> values = new ArrayList<String>();
 			columns.put(s,  values);
 		}else{
 			throw new IllegalArgumentException("Specified column ("+s+") already exists");
@@ -60,7 +60,7 @@ public class Logger {
 	
 	public void addRow(String column, String value){
 		if(columns.containsKey(column)){
-			ArrayList<String> values = columns.get(column);
+			List<String> values = columns.get(column);
 			values.add(value);
 		} else {
 			throw new IllegalArgumentException("Specified column ("+column+") does not exist");
@@ -83,11 +83,19 @@ public class Logger {
 	}
 	
 	public String makeFile(String fileName){
-		File f = new File(this.exportFolder.getAbsolutePath()+File.separator+fileName);
+		File f = new File(this.exportFolder.getAbsolutePath()+File.separator+fileName+".txt");
 		if(f.exists()){
 			f.delete();
 		}
 		return f.getAbsolutePath();
+	}
+	
+	public int length(){
+		int size = 0;
+		for(String heading : columns.keySet()){
+			size = columns.get(heading).size();
+		}
+		return size;
 	}
 
 	public void export(String fileName){
@@ -101,7 +109,7 @@ public class Logger {
 		outLine.append("\r\n");
 
 
-		for(int i=0;i<columns.get(0).size();i++){
+		for(int i=0;i<this.length();i++){
 			
 			for(String heading : columns.keySet()){
 				List<String> column = columns.get(heading);

@@ -710,8 +710,8 @@ implements INuclearCollection
 
   public void doShellAnalysis(){
 
-    String redLogFile   = makeGlobalLogFile( "logShellsRed"  );
-    String greenLogFile = makeGlobalLogFile( "logShellsGreen");
+    String redLogFile   = getLogFileName( "logShellsRed"  );
+    String greenLogFile = getLogFileName( "logShellsGreen");
     
     ShellCounter   redCounter = new ShellCounter(5);
     ShellCounter greenCounter = new ShellCounter(5);
@@ -761,7 +761,7 @@ implements INuclearCollection
     -----------------
   */
 
-  public String makeGlobalLogFile(String filename){
+  public String getLogFileName(String filename){
     String file = this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".txt";
     File f = new File(file);
     if(f.exists()){
@@ -774,15 +774,9 @@ implements INuclearCollection
     Export the signal parameters of the nucleus to the designated log file
   */
   public void exportSignalStats(){
-
-//    String redLogFile   = makeGlobalLogFile( "logSignalsRed"  );
-//    String greenLogFile = makeGlobalLogFile( "logSignalsGreen");
     
-    Logger redLogger   = new Logger(this.outputFolder);
-    Logger greenLogger = new Logger(this.outputFolder);
-
-//    StringBuilder redLog = new StringBuilder();
-//    StringBuilder greenLog = new StringBuilder();
+    Logger redLogger   = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+    Logger greenLogger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
     
     for(int i=0;i<2;i++){
     	Logger logger = i == Nucleus.RED_CHANNEL ? redLogger : greenLogger;
@@ -791,28 +785,13 @@ implements INuclearCollection
     	logger.addColumnHeading("SIGNAL_ANGLE");
     	logger.addColumnHeading("SIGNAL_FERET");
     	logger.addColumnHeading("SIGNAL_DISTANCE");
-    	logger.addColumnHeading("FRACT._DISTANCE");
+    	logger.addColumnHeading("FRACT_DISTANCE");
     	logger.addColumnHeading("SIGNAL_PERIM.");
     	logger.addColumnHeading("SIGNAL_RADIUS");
     	logger.addColumnHeading("CLOSEST_BORDER_INDEX");
     	logger.addColumnHeading("PATH");
     }
     
-
-//    String header = "NUCLEUS_NUMBER\t"+
-//                    "SIGNAL_AREA\t"+
-//                    "SIGNAL_ANGLE\t"+
-//                    "SIGNAL_FERET\t"+
-//                    "SIGNAL_DISTANCE\t"+
-//                    "FRACTIONAL_DISTANCE\t"+
-//                    "SIGNAL_PERIMETER\t"+
-//                    "SIGNAL_RADIUS\t"+
-//                    "CLOSEST_BORDER_INDEX\t"+
-//                    "PATH\r\n";
-//
-//    redLog.append( header );
-//    greenLog.append(header);
-
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 
       INuclearFunctions n = this.getNucleus(i);
@@ -827,7 +806,6 @@ implements INuclearCollection
       int signalCount = 0;
       for( List<NuclearSignal> signalGroup : signals ){
 
-//        StringBuilder log = signalCount == Nucleus.RED_CHANNEL ? redLog : greenLog;
         Logger logger = signalCount == Nucleus.RED_CHANNEL ? redLogger : greenLogger;
         
         if(signalGroup.size()>0){
@@ -839,49 +817,33 @@ implements INuclearCollection
              logger.addRow("SIGNAL_ANGLE"        , s.getAngle());
              logger.addRow("SIGNAL_FERET"        , s.getFeret());
              logger.addRow("SIGNAL_DISTANCE"     , s.getDistanceFromCoM());
-             logger.addRow("FRACT._DISTANCE"     , s.getFractionalDistanceFromCoM());
+             logger.addRow("FRACT_DISTANCE"     , s.getFractionalDistanceFromCoM());
              logger.addRow("SIGNAL_PERIM."       , s.getPerimeter());
              logger.addRow("SIGNAL_RADIUS"       , s.getRadius());
              logger.addRow("CLOSEST_BORDER_INDEX", s.getClosestBorderPoint());
              logger.addRow("PATH"                , path);
-             
-//             log.append(nucleusNumber                  +"\t"+
-//                       s.getArea()                     +"\t"+
-//                       s.getAngle()                    +"\t"+
-//                       s.getFeret()                    +"\t"+
-//                       s.getDistanceFromCoM()          +"\t"+
-//                       s.getFractionalDistanceFromCoM()+"\t"+
-//                       s.getPerimeter()                +"\t"+
-//                       s.getRadius()                   +"\t"+
-//                       s.getClosestBorderPoint()       +"\t"+
-//                       path                            +"\r\n");
-          } // end for
+                       } // end for
         } // end if
         signalCount++;
       } // end for
     } // end for
     
-    redLogger.export("logSignalsRed");
-    greenLogger.export("logSignalsGreen");
-
-//    IJ.append(redLog.toString(), redLogFile);
-//    IJ.append(greenLog.toString(), greenLogFile);
+    redLogger.export("logSignalsRed."+getType());
+    greenLogger.export("logSignalsGreen."+getType());
   }
 
   public void exportDistancesBetweenSingleSignals(){
-
-    String logFile = makeGlobalLogFile("logSignalDistances");
-    StringBuilder outLine = new StringBuilder();
-
-    outLine.append( "DISTANCE_BETWEEN_SIGNALS\t"+
-                    "RED_DISTANCE_TO_COM\t"+
-                    "GREEN_DISTANCE_TO_COM\t"+
-                    "NUCLEAR_FERET\t"+
-                    "RED_FRACTION_OF_FERET\t"+
-                    "GREEN_FRACTION_OF_FERET\t"+
-                    "DISTANCE_BETWEEN_SIGNALS_FRACTION_OF_FERET\t"+
-                    "NORMALISED_DISTANCE\t"+
-                    "PATH\r\n");
+	  
+	Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+	logger.addColumnHeading("DISTANCE_BETWEEN_SIGNALS");
+	logger.addColumnHeading("RED_DISTANCE_TO_COM");
+	logger.addColumnHeading("GREEN_DISTANCE_TO_COM");
+	logger.addColumnHeading("NUCLEAR_FERET");
+	logger.addColumnHeading("RED_FRACTION_OF_FERET");
+	logger.addColumnHeading("GREEN_FRACTION_OF_FERET");
+	logger.addColumnHeading("DIST_BETWEEN_SIGNALS_FRACT_FERET");
+	logger.addColumnHeading("NORMALISED_DISTANCE");
+	logger.addColumnHeading("PATH");
 
     for(int i=0; i<this.getNucleusCount();i++){
 
@@ -903,19 +865,20 @@ implements INuclearCollection
         double gFractionOfFeret = gDistanceToCoM / nFeret;
         double distanceFractionOfFeret = distanceBetween / nFeret;
         double normalisedPosition = distanceFractionOfFeret / rFractionOfFeret / gFractionOfFeret;
-
-        outLine.append(  distanceBetween+"\t"+
-                    rDistanceToCoM+"\t"+
-                    gDistanceToCoM+"\t"+
-                    nFeret+"\t"+
-                    rFractionOfFeret+"\t"+
-                    gFractionOfFeret+"\t"+
-                    distanceFractionOfFeret+"\t"+
-                    normalisedPosition+"\t"+
-                    n.getPath()+"\r\n");
+        
+        logger.addRow("DISTANCE_BETWEEN_SIGNALS"		, distanceBetween);
+    	logger.addRow("RED_DISTANCE_TO_COM"				, rDistanceToCoM);
+    	logger.addRow("GREEN_DISTANCE_TO_COM"			, gDistanceToCoM);
+    	logger.addRow("NUCLEAR_FERET"					, nFeret);
+    	logger.addRow("RED_FRACTION_OF_FERET"			, rFractionOfFeret);
+    	logger.addRow("GREEN_FRACTION_OF_FERET"			, gFractionOfFeret);
+    	logger.addRow("DIST_BETWEEN_SIGNALS_FRACT_FERET", distanceFractionOfFeret);
+    	logger.addRow("NORMALISED_DISTANCE"    			, normalisedPosition);
+    	logger.addRow("PATH"                			, n.getPath());
       }
     }
-    IJ.append(outLine.toString(), logFile);
+    logger.export("logSingleSignalDistances");
+//    IJ.append(outLine.toString(), logFile);
   }
 
   public void exportAnnotatedNuclei(){
@@ -935,21 +898,16 @@ implements INuclearCollection
 
   public void exportMediansOfProfile(Profile profile, String filename){
 
-    String logFile = makeGlobalLogFile(filename);
-
-    double[] profileArray = profile.asArray();
-
-    String outLine = "X_POSITION\tANGLE_MEDIAN\r\n";
-    
-    for(int i =0;i<profileArray.length;i++){
-      outLine +=  i+"\t"+profileArray[i]+"\r\n";
-    }
-    IJ.append(outLine, logFile); 
+//    String logFile = makeGlobalLogFile(filename);
+    Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+    logger.addColumn("X_POSITION",   profile.getPositions(profile.size()).asArray());
+    logger.addColumn("ANGLE_MEDIAN", profile.asArray());
+    logger.export(filename+"."+getType());
   }
 
   public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename){
 
-	  Logger logger = new Logger(new File(this.outputFolder));
+	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
 	  logger.addColumn("X_POSITION",       profileAggregate.getXPositions().asArray());
 	  logger.addColumn("ANGLE_MEDIAN",     profileAggregate.getMedian().asArray());
 	  logger.addColumn("Q25", 	 		   profileAggregate.getQuartile(25).asArray());
@@ -963,7 +921,7 @@ implements INuclearCollection
   // this is for the mapping of image to path for 
   // identifying FISHed nuclei in prefish images
   public void exportImagePaths(String filename){
-	Logger logger = new Logger(new File(this.outputFolder));
+	Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
 	logger.addColumn("PATH",     this.getCleanNucleusPaths());
 	logger.addColumn("POSITION", this.getPositions());
 	logger.export(filename);
@@ -971,7 +929,7 @@ implements INuclearCollection
 
   public void exportNuclearStats(String filename){
 	  
-	Logger nuclearStats = new Logger(new File(this.outputFolder));
+	Logger nuclearStats = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
 	nuclearStats.addColumn("AREA",                       this.getAreas());
 	nuclearStats.addColumn("PERIMETER",                  this.getPerimeters());
 	nuclearStats.addColumn("FERET",                      this.getFerets());
@@ -981,7 +939,7 @@ implements INuclearCollection
 	nuclearStats.addColumn("NORM_TAIL_INDEX",            this.getPointIndexes("tail"));
 	nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       this.getDifferencesToMedianFromPoint("tail"));
 	nuclearStats.addColumn("PATH",                       this.getNucleusPaths());
-	nuclearStats.export(filename);
+	nuclearStats.export(filename+"."+getType());
   }
 
   public void exportFilterStats(){
