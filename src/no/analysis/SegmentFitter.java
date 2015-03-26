@@ -1,5 +1,8 @@
 package no.analysis;
 
+import ij.IJ;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +10,7 @@ import java.util.List;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Utils;
 
 /**
@@ -23,6 +27,8 @@ public class SegmentFitter {
 	
 	List<NucleusBorderSegment> medianSegments;
 	List<NucleusBorderSegment>   testSegments;
+	
+	private static int POINTS_TO_TEST = 5;
 	
 	/**
 	 * Construct with a median profile and list of segments. The originals will not be modified
@@ -59,20 +65,49 @@ public class SegmentFitter {
 			this.testSegments.add(new NucleusBorderSegment(seg));
 		}
 		
-		this.runFitter();
+		List<NucleusBorderSegment> newList = this.runFitter();
+		
+		ProfileSegmenter segmenter = new ProfileSegmenter(this.testProfile, newList);
+		segmenter.draw(n.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+n.getNucleusNumber()+".revised_segments.tiff");
 	}
 	
-	private void runFitter(){
-		
-		// for each test segment
-			// compare with median segment
-			// move the increase or decrease the test endpoint
-			// score again
-			// get the lowest score within ?10 border points either side
-			// next segment
-		
-		// update the nucleus
-		
+	/**
+	 * for each test segment
+				// compare with median segment
+				// move the increase or decrease the test endpoint
+				// score again
+				// get the lowest score within ?10 border points either side
+				// next segment
+			
+			// update the nucleus
+	 */
+	private List<NucleusBorderSegment> runFitter(){
+		IJ.log("Running fitter:");
+		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>(0);
+		for(int i=0; i<this.testSegments.size();i++){
+			IJ.log("    Segment "+i);			
+			NucleusBorderSegment seg = this.testSegments.get(i);
+			if(i>0){ // carry over the offset from the previous segment
+				seg = new NucleusBorderSegment(newList.get(i-1).getEndIndex(), seg.getEndIndex());
+			}
+			seg.print();
+			double score =  compareSegments(this.medianSegments.get(i), seg);
+			double minScore = score;
+			NucleusBorderSegment bestSeg = seg;
+			for(int j=-SegmentFitter.POINTS_TO_TEST;j<=SegmentFitter.POINTS_TO_TEST;j++){
+				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, this.testProfile.size());
+				NucleusBorderSegment newSeg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex);
+				score = compareSegments(this.medianSegments.get(i), newSeg);
+				if(score<minScore){
+					minScore=score;
+					bestSeg = newSeg;
+				}
+				IJ.log("      Endpoint offset "+j+": "+score);	
+			}
+			newList.add(bestSeg);
+			bestSeg.print();	
+		}
+		return newList;
 	}
 	
 	/**

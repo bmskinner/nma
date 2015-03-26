@@ -12,7 +12,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Overlay;
 import ij.gui.Plot;
-import ij.gui.PlotWindow;
 import ij.gui.TextRoi;
 import ij.io.Opener;
 import ij.measure.Calibration;
@@ -25,6 +24,7 @@ import java.util.*;
 
 import no.collections.INuclearCollection;
 import no.analysis.ProfileSegmenter;
+import no.analysis.SegmentFitter;
 import no.analysis.ShellAnalyser;
 import no.analysis.ShellCounter;
 import no.nuclei.*;
@@ -129,9 +129,11 @@ implements INuclearCollection
 
       IJ.log("    Reticulating splines: score: "+(int)score);
     }
+    
+    // assign and revise segments
     IJ.log("    Segmenting profile...");
     this.assignSegments(pointType);
-
+           
     this.createProfileAggregates();
 
     this.drawProfilePlots();
@@ -210,10 +212,21 @@ implements INuclearCollection
 				  j++;
 			  }
 		  }
+		  
+		  this.reviseSegments(pointType, segments);
 
 	  } catch(Exception e){
 		  IJ.log("    Error segmenting: "+e.getMessage());
 		  this.profileCollection.printKeys();
+	  }
+  }
+  
+  public void reviseSegments(String pointType, List<NucleusBorderSegment> segments){
+	  IJ.log("    Refining segment assignments...");
+	  SegmentFitter fitter = new SegmentFitter(this.profileCollection.getProfile(pointType), segments);
+	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+		  Nucleus n = (Nucleus)this.getNucleus(i);
+		  fitter.fit(n);
 	  }
   }
 
