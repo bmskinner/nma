@@ -924,80 +924,8 @@ implements INuclearCollection
 	  logger.addColumn("Q90", 	 		   profileAggregate.getQuartile(90).asArray());
 	  logger.addColumn("NUMBER_OF_POINTS", profileAggregate.getNumberOfPoints().asArray());
 	  logger.export(filename);
-	  
-//	  String logFile = makeGlobalLogFile(filename);
-//
-//	  StringBuilder outLine = new StringBuilder("X_POSITION\tANGLE_MEDIAN\tQ25\tQ75\tQ10\tQ90\tNUMBER_OF_POINTS\r\n");
-//
-//	  double[] xmedians       =  profileAggregate.getXPositions().asArray();
-//	  double[] ymedians       =  profileAggregate.getMedian().asArray();
-//	  double[] lowQuartiles   =  profileAggregate.getQuartile(25).asArray();
-//	  double[] uppQuartiles   =  profileAggregate.getQuartile(75).asArray();
-//	  double[] quartiles10    =  profileAggregate.getQuartile(10).asArray();
-//	  double[] quartiles90    =  profileAggregate.getQuartile(90).asArray();
-//	  double[] numberOfPoints =  profileAggregate.getNumberOfPoints().asArray();
-//
-//	  for(int i =0;i<xmedians.length;i++){
-//		  outLine.append( xmedians[i]      +"\t"+
-//				  ymedians[i]      +"\t"+
-//				  lowQuartiles[i]  +"\t"+
-//				  uppQuartiles[i]  +"\t"+
-//				  quartiles10[i]   +"\t"+
-//				  quartiles90[i]   +"\t"+
-//				  numberOfPoints[i]+"\r\n");
-//	  }
-//	  IJ.append(outLine.toString(), logFile); 
   }
 
-  /*
-    To hold the nuclear stats (and any stats), we want a structure that can 
-    hold: a column of data. Any arbitrary other numbers of columns of data.
-  */
-//  public Map<String, List<String>> calculateNuclearStats(){
-//
-//    Map<String, List<String>> stats = new LinkedHashMap<String, List<String>>();
-//
-//    String[] sAreas        = Utils.getStringFromDouble(this.getAreas());
-//    String[] sPerims       = Utils.getStringFromDouble(this.getPerimeters());
-//    String[] sFerets       = Utils.getStringFromDouble(this.getFerets());
-//    String[] sPathlengths  = Utils.getStringFromDouble(this.getPathLengths());
-//    String[] sDistances    = Utils.getStringFromDouble(this.getMedianDistanceBetweenPoints());
-//    String[] sMinFerets    = Utils.getStringFromDouble(this.getMinFerets());
-//    String[] sPaths        = this.getNucleusPaths();
-//
-//    stats.put("AREA",        Arrays.asList(  sAreas));
-//    stats.put("PERIMETER",   Arrays.asList(  sPerims));
-//    stats.put("FERET",       Arrays.asList(  sFerets));
-//    stats.put("PATH_LENGTH", Arrays.asList(  sPathlengths));
-//    stats.put("MEDIAN_DISTANCE_BETWEEN_POINTS", Arrays.asList(sDistances ) );
-//    stats.put("MIN_FERET",   Arrays.asList(  sMinFerets));
-//    stats.put("PATH",        Arrays.asList(  sPaths));
-//
-//    return stats;
-//  }
-
-//  public void exportStats(Map<String, List<String>> stats, String filename){
-//    String statsFile = makeGlobalLogFile(filename);
-//
-//    StringBuilder outLine = new StringBuilder();
-//
-//    Set<String> headings = stats.keySet();
-//    for(String heading : headings){
-//      outLine.append(heading+"\t");
-//    }
-//    outLine.append("\r\n");
-//
-//
-//    for(int i=0;i<this.getNucleusCount();i++){
-//      for(String heading : headings){
-//        List<String> column = stats.get(heading);
-//        outLine.append(column.get(i)+"\t");
-//      }
-//      outLine.append("\r\n");
-//    }
-//    IJ.append(  outLine.toString(), statsFile);
-//  }
-  
   // this is for the mapping of image to path for 
   // identifying FISHed nuclei in prefish images
   public void exportImagePaths(String filename){
@@ -1005,13 +933,6 @@ implements INuclearCollection
 	logger.addColumn("PATH",     this.getCleanNucleusPaths());
 	logger.addColumn("POSITION", this.getPositions());
 	logger.export(filename);
-	
-//    Map<String, List<String>> stats = new LinkedHashMap<String, List<String>>();
-//    String[] sPaths     = this.getCleanNucleusPaths();
-//    String[] sPositions = this.getPositions();
-//    stats.put("PATH",    Arrays.asList(  sPaths    ));
-//    stats.put("POSITION",Arrays.asList(  sPositions));
-//    exportStats(stats, filename);
   }
 
   public void exportNuclearStats(String filename){
@@ -1027,10 +948,6 @@ implements INuclearCollection
 	nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       this.getDifferencesToMedianFromPoint("tail"));
 	nuclearStats.addColumn("PATH",                       this.getNucleusPaths());
 	nuclearStats.export(filename);
-  
-	
-//    Map<String, List<String>> stats = this.calculateNuclearStats();
-//    exportStats(stats, filename);
   }
 
   public void exportFilterStats(){
