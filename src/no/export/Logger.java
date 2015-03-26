@@ -3,6 +3,7 @@ package no.export;
 import ij.IJ;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,17 +12,31 @@ import java.util.Map;
 import no.utility.Utils;
 
 // this will take columns of data, and write them out to a specified folder
+// Since the data is arbitrary and only for export, convert everything to strings. 
 public class Logger {
 	
 	private File exportFolder;
-	private Map<String, List<String>> columns = new LinkedHashMap<String, List<String>>();
+	private Map<String, ArrayList<String>> columns = new LinkedHashMap<String, ArrayList<String>>();
 	
 	public Logger(File f){
-		this.exportFolder = f;
+		if(f.exists()){
+			this.exportFolder = f;
+		} else{
+			throw new IllegalArgumentException("Specified folder ("+f.getAbsolutePath()+") does not exist");
+		}
+	}
+	
+	public Logger(String s){
+		File f = new File(s);
+		if(f.exists()){
+			this.exportFolder = f;
+		} else{
+			throw new IllegalArgumentException("Specified folder ("+f.getAbsolutePath()+") does not exist");
+		}
 	}
 	
 	public void addColumn(String s, String[] values){
-		columns.put(s, Arrays.asList( values));
+		columns.put(s, (ArrayList<String>)Arrays.asList( values));
 	}
 	
 	public void addColumn(String s, double[] array){
@@ -32,6 +47,39 @@ public class Logger {
 	public void addColumn(String s, int[] array){
 		String[] values = Utils.getStringFromInt(array);
 		this.addColumn(s, values);
+	}
+	
+	public void addColumnHeading(String s){
+		if(!columns.containsKey(s)){
+			ArrayList<String> values = new ArrayList<String>();
+			columns.put(s,  values);
+		}else{
+			throw new IllegalArgumentException("Specified column ("+s+") already exists");
+		}
+	}
+	
+	public void addRow(String column, String value){
+		if(columns.containsKey(column)){
+			ArrayList<String> values = columns.get(column);
+			values.add(value);
+		} else {
+			throw new IllegalArgumentException("Specified column ("+column+") does not exist");
+		}
+	}
+	public void addRow(String column, Double value){
+		if(columns.containsKey(column)){
+			addRow(column, value.toString());
+		} else {
+			throw new IllegalArgumentException("Specified column ("+column+") does not exist");
+		}
+	}
+	
+	public void addRow(String column, Integer value){
+		if(columns.containsKey(column)){
+			addRow(column, value.toString());
+		} else {
+			throw new IllegalArgumentException("Specified column ("+column+") does not exist");
+		}
 	}
 	
 	public String makeFile(String fileName){

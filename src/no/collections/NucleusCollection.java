@@ -775,25 +775,43 @@ implements INuclearCollection
   */
   public void exportSignalStats(){
 
-    String redLogFile   = makeGlobalLogFile( "logSignalsRed"  );
-    String greenLogFile = makeGlobalLogFile( "logSignalsGreen");
+//    String redLogFile   = makeGlobalLogFile( "logSignalsRed"  );
+//    String greenLogFile = makeGlobalLogFile( "logSignalsGreen");
+    
+    Logger redLogger   = new Logger(this.outputFolder);
+    Logger greenLogger = new Logger(this.outputFolder);
 
-    StringBuilder redLog = new StringBuilder();
-    StringBuilder greenLog = new StringBuilder();
+//    StringBuilder redLog = new StringBuilder();
+//    StringBuilder greenLog = new StringBuilder();
+    
+    for(int i=0;i<2;i++){
+    	Logger logger = i == Nucleus.RED_CHANNEL ? redLogger : greenLogger;
+    	logger.addColumnHeading("NUCLEUS_NUMBER");
+    	logger.addColumnHeading("SIGNAL_AREA");
+    	logger.addColumnHeading("SIGNAL_ANGLE");
+    	logger.addColumnHeading("SIGNAL_FERET");
+    	logger.addColumnHeading("SIGNAL_DISTANCE");
+    	logger.addColumnHeading("FRACT._DISTANCE");
+    	logger.addColumnHeading("SIGNAL_PERIM.");
+    	logger.addColumnHeading("SIGNAL_RADIUS");
+    	logger.addColumnHeading("CLOSEST_BORDER_INDEX");
+    	logger.addColumnHeading("PATH");
+    }
+    
 
-    String header = "NUCLEUS_NUMBER\t"+
-                    "SIGNAL_AREA\t"+
-                    "SIGNAL_ANGLE\t"+
-                    "SIGNAL_FERET\t"+
-                    "SIGNAL_DISTANCE\t"+
-                    "FRACTIONAL_DISTANCE\t"+
-                    "SIGNAL_PERIMETER\t"+
-                    "SIGNAL_RADIUS\t"+
-                    "CLOSEST_BORDER_INDEX\t"+
-                    "PATH\r\n";
-
-    redLog.append( header );
-    greenLog.append(header);
+//    String header = "NUCLEUS_NUMBER\t"+
+//                    "SIGNAL_AREA\t"+
+//                    "SIGNAL_ANGLE\t"+
+//                    "SIGNAL_FERET\t"+
+//                    "SIGNAL_DISTANCE\t"+
+//                    "FRACTIONAL_DISTANCE\t"+
+//                    "SIGNAL_PERIMETER\t"+
+//                    "SIGNAL_RADIUS\t"+
+//                    "CLOSEST_BORDER_INDEX\t"+
+//                    "PATH\r\n";
+//
+//    redLog.append( header );
+//    greenLog.append(header);
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 
@@ -809,29 +827,45 @@ implements INuclearCollection
       int signalCount = 0;
       for( List<NuclearSignal> signalGroup : signals ){
 
-        StringBuilder log = signalCount == Nucleus.RED_CHANNEL ? redLog : greenLog;
+//        StringBuilder log = signalCount == Nucleus.RED_CHANNEL ? redLog : greenLog;
+        Logger logger = signalCount == Nucleus.RED_CHANNEL ? redLogger : greenLogger;
         
         if(signalGroup.size()>0){
           for(int j=0; j<signalGroup.size();j++){
              NuclearSignal s = signalGroup.get(j);
-             log.append(nucleusNumber                  +"\t"+
-                       s.getArea()                     +"\t"+
-                       s.getAngle()                    +"\t"+
-                       s.getFeret()                    +"\t"+
-                       s.getDistanceFromCoM()          +"\t"+
-                       s.getFractionalDistanceFromCoM()+"\t"+
-                       s.getPerimeter()                +"\t"+
-                       s.getRadius()                   +"\t"+
-                       s.getClosestBorderPoint()       +"\t"+
-                       path                            +"\r\n");
+             
+             logger.addRow("NUCLEUS_NUMBER"      , nucleusNumber);
+             logger.addRow("SIGNAL_AREA"         , s.getArea());
+             logger.addRow("SIGNAL_ANGLE"        , s.getAngle());
+             logger.addRow("SIGNAL_FERET"        , s.getFeret());
+             logger.addRow("SIGNAL_DISTANCE"     , s.getDistanceFromCoM());
+             logger.addRow("FRACT._DISTANCE"     , s.getFractionalDistanceFromCoM());
+             logger.addRow("SIGNAL_PERIM."       , s.getPerimeter());
+             logger.addRow("SIGNAL_RADIUS"       , s.getRadius());
+             logger.addRow("CLOSEST_BORDER_INDEX", s.getClosestBorderPoint());
+             logger.addRow("PATH"                , path);
+             
+//             log.append(nucleusNumber                  +"\t"+
+//                       s.getArea()                     +"\t"+
+//                       s.getAngle()                    +"\t"+
+//                       s.getFeret()                    +"\t"+
+//                       s.getDistanceFromCoM()          +"\t"+
+//                       s.getFractionalDistanceFromCoM()+"\t"+
+//                       s.getPerimeter()                +"\t"+
+//                       s.getRadius()                   +"\t"+
+//                       s.getClosestBorderPoint()       +"\t"+
+//                       path                            +"\r\n");
           } // end for
         } // end if
         signalCount++;
       } // end for
     } // end for
+    
+    redLogger.export("logSignalsRed");
+    greenLogger.export("logSignalsGreen");
 
-    IJ.append(redLog.toString(), redLogFile);
-    IJ.append(greenLog.toString(), greenLogFile);
+//    IJ.append(redLog.toString(), redLogFile);
+//    IJ.append(greenLog.toString(), greenLogFile);
   }
 
   public void exportDistancesBetweenSingleSignals(){
