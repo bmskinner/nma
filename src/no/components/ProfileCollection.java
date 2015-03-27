@@ -150,8 +150,7 @@ public class ProfileCollection {
 
 	public void addMedianLinesToPlots(){
 
-		Set<String> headings = this.getPlotKeys();
-		for( String pointType : headings ){
+		for( String pointType : this.getPlotKeys() ){
 
 			Plot plot = this.getPlots(pointType).get("norm");
 

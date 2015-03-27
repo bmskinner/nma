@@ -82,6 +82,52 @@ public class SegmentFitter {
 //		segmenter.draw(n.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+n.getNucleusNumber()+".revised_segments.tiff");
 	}
 	
+	public Profile recombine(INuclearFunctions n){
+		if(n==null){
+			throw new IllegalArgumentException("Test nucleus is null");
+		}
+		if(n.getSegments()==null){
+			throw new IllegalArgumentException("Nucleus has no segments");
+		}
+		Profile testMedian = new Profile(n.getAngleProfile());
+		List<NucleusBorderSegment> testSegments = n.getSegments();
+		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
+		
+		// go through each segment
+		for(int i=0; i<this.testSegments.size();i++){
+			NucleusBorderSegment targetSeg = this.medianSegments.get(i);
+			NucleusBorderSegment testSeg = this.testSegments.get(i);
+			
+			// interpolate the test segments to the length of the median segments
+			Profile testSegProfile = this.getSegmentProfile(testSeg, testMedian);
+			Profile revisedProfile = testSegProfile.interpolate(targetSeg.length(this.medianProfile.size()));
+			finalSegmentProfiles.add(revisedProfile);
+		}
+		return this.merge(finalSegmentProfiles);
+	}
+	
+	/**
+	 * Given a list of ordered profiles, merge them into one 
+	 * contiguous profile
+	 * @param list the list of profiles to merge
+	 * @return the merged profile
+	 */
+	private Profile merge(List<Profile> list){
+		Profile result = new Profile(new double[0]);
+		List<Double> combinedList = new ArrayList<Double>(0);
+		
+		for(Profile p : list){
+			// we may need to trim out the last element, because the segments share endpoints
+			double[] values = p.asArray();
+			List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
+			combinedList.addAll(valueList);
+		}
+		
+		Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
+		result = new Profile(Utils.getdoubleFromDouble(combinedArray));
+		return result;
+	}
+	
 	/**
 	 * for each test segment
 				// compare with median segment
