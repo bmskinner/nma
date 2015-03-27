@@ -25,7 +25,7 @@ public class ProfilePlot {
 		return this.collection.get(s);
 	}
 	
-	public Set<String> getTypes(){
+	public Set<String> getKeys(){
 		return this.collection.keySet();
 	}
 	
