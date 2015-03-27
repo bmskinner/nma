@@ -4,11 +4,14 @@ import ij.IJ;
 import ij.gui.Plot;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import no.nuclei.INuclearFunctions;
 
 public class ProfileCollection {
 	
@@ -69,6 +72,19 @@ public class ProfileCollection {
 		plots.put(s, p);
 	}
 	
+	
+	public void createProfileAggregateFromPoint(String pointType, int length){
+
+		ProfileAggregate profileAggregate = new ProfileAggregate(length);
+		this.addAggregate(pointType, profileAggregate);
+		Profile medians = profileAggregate.getMedian();
+		Profile q25     = profileAggregate.getQuartile(25);
+		Profile q75     = profileAggregate.getQuartile(75);
+		this.addProfile(pointType, medians);
+		this.addProfile(pointType+"25", q25);
+		this.addProfile(pointType+"75", q75);
+	}
+	
 	public void printKeys(){
 		IJ.log("    Plots:");
 		for(String s : this.getPlotKeys()){
@@ -89,7 +105,6 @@ public class ProfileCollection {
 	}
 	
 	// Get keys
-	
 	public Set<String> getPlotKeys(){
 		return plots.keySet();
 	}
@@ -172,5 +187,30 @@ public class ProfileCollection {
 			plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
 	    }
 	}
+	
+//	public void exportProfilePlots(){
+//
+//	    for( String pointType : this.getPlotKeys() ){
+//	    	
+//	    	for(String s: this.getPlots(pointType).getTypes()){
+//	    		this.getPlots(pointType).export(s, "plot"+pointType);
+//	    		
+//	    		 this.getFolder()+
+//					File.separator+
+//					this.getOutputFolder()+
+//					File.separator+name+
+//					"."+
+//					this.getType()+".tiff"
+//					
+//					"plot"+pointType+"Norm"
+//	    	}
+//
+//	      Plot normPlot = this.getPlots(pointType).get("norm");
+//	      Plot  rawPlot = this.getPlots(pointType).get("raw" );
+//
+//	      normPlot.export(normPlot, "plot"+pointType+"Norm");
+//	      exportProfilePlot(rawPlot , "plot"+pointType+"Raw");
+//	    }  
+//	  }
 	
 }
