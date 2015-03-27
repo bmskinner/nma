@@ -27,14 +27,18 @@ public class ProfileCollection {
 	// Get features
 	
 	public ProfileFeature getFeature(String s){
-		return features.get(s);
+		if(features.containsKey(s)){	
+			return features.get(s);
+		} else {
+			throw new IllegalArgumentException("The requested feature key does not exist: "+s);
+		}
 	}
 	
 	public Profile getProfile(String s){
 		if(profiles.containsKey(s)){	
 			return profiles.get(s);
 		} else {
-			throw new IllegalArgumentException("The requested key does not exist");
+			throw new IllegalArgumentException("The requested profile key does not exist: "+s);
 		}
 	}
 	
@@ -42,7 +46,7 @@ public class ProfileCollection {
 		if(aggregates.containsKey(s)){	
 			return aggregates.get(s);
 		} else {
-			throw new IllegalArgumentException("The requested key does not exist");
+			throw new IllegalArgumentException("The requested aggregate key does not exist: "+s);
 		}
 	}
 	
@@ -50,17 +54,23 @@ public class ProfileCollection {
 		if(plots.containsKey(s)){	
 			return plots.get(s);
 		} else {
-			throw new IllegalArgumentException("The requested key does not exist");
+			throw new IllegalArgumentException("The requested plot key does not exist: "+s);
 		}		
 	}
 	
 	// Add or update features
 	
 	public void addFeature(String s, ProfileFeature p){
+		if(s==null || p==null){
+			throw new IllegalArgumentException("String or Profile is null");
+		}
 		features.put(s, p);
 	}
 	
 	public void addProfile(String s, Profile p){
+		if(s==null || p==null){
+			throw new IllegalArgumentException("String or Profile is null");
+		}
 		profiles.put(s, p);
 	}
 	
@@ -69,14 +79,23 @@ public class ProfileCollection {
 	}
 	
 	public void addPlots(String s, ProfilePlot p){
+		if(s==null || p==null){
+			throw new IllegalArgumentException("String or Profile is null");
+		}
 		plots.put(s, p);
 	}
 	
 	
 	public void createProfileAggregateFromPoint(String pointType, int length){
+		if(pointType==null){
+			throw new IllegalArgumentException("Point type is null");
+		}
+		if(length<0){
+			throw new IllegalArgumentException("Requested length is negative");
+		}
 
-		ProfileAggregate profileAggregate = new ProfileAggregate(length);
-		this.addAggregate(pointType, profileAggregate);
+		ProfileAggregate profileAggregate = this.getAggregate(pointType);
+//		this.addAggregate(pointType, profileAggregate);
 		Profile medians = profileAggregate.getMedian();
 		Profile q25     = profileAggregate.getQuartile(25);
 		Profile q75     = profileAggregate.getQuartile(75);
@@ -135,8 +154,11 @@ public class ProfileCollection {
 	// Set up the plots within the collection
 
 	public void preparePlots(int width, int height, double maxLength){
-
-		for( String pointType : this.getProfileKeys() ){
+		List<String> keys = this.getProfileKeys();
+		if(keys==null || keys.size()==0){
+			keys.addAll(getAggregateKeys()); //backup
+		}
+		for( String pointType : keys ){
 
 			Plot  rawPlot = new Plot( "Raw "       +pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
 			Plot normPlot = new Plot( "Normalised "+pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
@@ -188,29 +210,24 @@ public class ProfileCollection {
 	    }
 	}
 	
-//	public void exportProfilePlots(){
-//
-//	    for( String pointType : this.getPlotKeys() ){
-//	    	
-//	    	for(String s: this.getPlots(pointType).getTypes()){
-//	    		this.getPlots(pointType).export(s, "plot"+pointType);
-//	    		
-//	    		 this.getFolder()+
-//					File.separator+
-//					this.getOutputFolder()+
-//					File.separator+name+
-//					"."+
-//					this.getType()+".tiff"
-//					
-//					"plot"+pointType+"Norm"
-//	    	}
-//
-//	      Plot normPlot = this.getPlots(pointType).get("norm");
-//	      Plot  rawPlot = this.getPlots(pointType).get("raw" );
-//
-//	      normPlot.export(normPlot, "plot"+pointType+"Norm");
-//	      exportProfilePlot(rawPlot , "plot"+pointType+"Raw");
-//	    }  
-//	  }
+	public void exportProfilePlots(String folder, String nucleusCollectionType){
+
+		for( String pointType : this.getPlotKeys() ){
+
+			for(String key: this.getPlots(pointType).getKeys()){
+				String filename = folder+
+						File.separator+
+						"plot."+
+						pointType+
+						"."+
+						key+
+						"."+
+						nucleusCollectionType+
+						".tiff";
+				this.getPlots(pointType).export(key, filename);
+
+			}
+		}  
+	}
 	
 }

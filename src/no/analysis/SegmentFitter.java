@@ -32,12 +32,12 @@ public class SegmentFitter {
 	 * The number of points ahead and behind to test
 	 * when creating new segment profiles
 	 */
-	private static int POINTS_TO_TEST = 8;
+	private static int POINTS_TO_TEST = 50;
 	
 	/**
 	 * The smallest number of points a segment can contain. 
 	 */
-	private static int MIN_SEGMENT_SIZE = 50;
+	private static int MIN_SEGMENT_SIZE = 20;
 	
 	/**
 	 * Construct with a median profile and list of segments. The originals will not be modified
@@ -115,6 +115,9 @@ public class SegmentFitter {
 	 * @return the merged profile
 	 */
 	private Profile merge(List<Profile> list){
+		if(list==null || list.size()==0){
+			throw new IllegalArgumentException("Profile list is null or empty");
+		}
 		Profile result = new Profile(new double[0]);
 		List<Double> combinedList = new ArrayList<Double>(0);
 		
@@ -218,6 +221,10 @@ public class SegmentFitter {
 	 * @return a profile containing the profile values covered by the segment 
 	 */
 	private Profile getSegmentProfile(NucleusBorderSegment seg, Profile p){
+		if(seg==null || p==null){
+			throw new IllegalArgumentException("Profile or segment is null");
+		}
+		
 		double[] ref = p.asArray();
 		Profile result = new Profile(new double[0]);
 		if(seg.getStartIndex() < seg.getEndIndex()){ // most segments

@@ -65,6 +65,7 @@ implements INuclearCollection
 
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	protected ProfileCollection profileCollection = new ProfileCollection();
+	protected ProfileCollection frankensteinProfiles = new ProfileCollection();
 
 	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
@@ -111,7 +112,7 @@ implements INuclearCollection
 
   public void measureProfilePositions(String pointType){
 
-	  this.profileCollection.createProfileAggregateFromPoint(pointType, (int)this.getMedianArrayLength());
+	  this.createProfileAggregateFromPoint(pointType);
 
 	  this.findTailIndexInMedianCurve();
 
@@ -119,8 +120,7 @@ implements INuclearCollection
 	  double prevScore = score+1;
 
 	  while(score < prevScore){
-
-		  this.profileCollection.createProfileAggregateFromPoint(pointType, (int)this.getMedianArrayLength());
+		  this.createProfileAggregateFromPoint(pointType);
 		  this.findTailIndexInMedianCurve();
 		  this.calculateOffsets();
 
@@ -224,15 +224,37 @@ implements INuclearCollection
   
   public void reviseSegments(String pointType, List<NucleusBorderSegment> segments){
 	  IJ.log("    Refining segment assignments...");
+	  
+	 
+	  this.frankensteinProfiles.addAggregate( pointType, new ProfileAggregate((int)this.getMedianArrayLength()));//pointType, recombinedProfile);
+	  this.frankensteinProfiles.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, getMaxProfileLength());
 	  SegmentFitter fitter = new SegmentFitter(this.profileCollection.getProfile(pointType), segments);
 	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-		  Nucleus n = (Nucleus)this.getNucleus(i);
+		  INuclearFunctions n = this.getNucleus(i);
 		  fitter.fit(n);
 		  
 		  // recombine the segments at the lengths of the median profile segments
 		  // what does it look like?
 		  Profile recombinedProfile = fitter.recombine(n);
+		  this.frankensteinProfiles.getAggregate(pointType).addValues(recombinedProfile);
+		  
+		  	double[] xPointsRaw  = recombinedProfile.getPositions(n.getLength()).asArray();
+	        double[] xPointsNorm = recombinedProfile.getPositions(100).asArray();
+	        Plot rawPlot = this.frankensteinProfiles.getPlots(pointType).get("raw");
+	        Plot normPlot = this.frankensteinProfiles.getPlots(pointType).get("norm");
+	        
+	        rawPlot.setColor(Color.LIGHT_GRAY);
+	        rawPlot.addPoints(xPointsRaw, recombinedProfile.asArray(), Plot.LINE);
+	
+	        normPlot.setColor(Color.LIGHT_GRAY);
+	        normPlot.addPoints(xPointsNorm, recombinedProfile.asArray(), Plot.LINE);
 	  }
+	  this.frankensteinProfiles.createProfileAggregateFromPoint(    pointType, (int) this.getMedianArrayLength()    );
+	  	  
+	  this.frankensteinProfiles.addMedianLinesToPlots();
+	  this.frankensteinProfiles.exportProfilePlots(this.getFolder()+
+    	                      			        	File.separator+
+    					                            this.getOutputFolder(), this.getType());
   }
 
   /*
@@ -664,34 +686,34 @@ implements INuclearCollection
     -----------------
   */
 
-//  protected void createProfileAggregateFromPoint(String pointType){
-//
-//	  ProfileAggregate profileAggregate = new ProfileAggregate((int)this.getMedianArrayLength());
-//	  this.profileCollection.addAggregate(pointType, profileAggregate);
-//
-//	  for(int i=0;i<this.getNucleusCount();i++){
-//		  INuclearFunctions n = this.getNucleus(i);
-//		  profileAggregate.addValues(n.getAngleProfile(pointType));
-//	  }
-//
-//	  Profile medians = profileAggregate.getMedian();
-//	  Profile q25     = profileAggregate.getQuartile(25);
-//	  Profile q75     = profileAggregate.getQuartile(75);
-//	  this.profileCollection.addProfile(pointType, medians);
-//	  this.profileCollection.addProfile(pointType+"25", q25);
-//	  this.profileCollection.addProfile(pointType+"75", q75);
-//
-//  }
+  protected void createProfileAggregateFromPoint(String pointType){
+
+	  ProfileAggregate profileAggregate = new ProfileAggregate((int)this.getMedianArrayLength());
+	  this.profileCollection.addAggregate(pointType, profileAggregate);
+
+	  for(int i=0;i<this.getNucleusCount();i++){
+		  INuclearFunctions n = this.getNucleus(i);
+		  profileAggregate.addValues(n.getAngleProfile(pointType));
+	  }
+
+	  Profile medians = profileAggregate.getMedian();
+	  Profile q25     = profileAggregate.getQuartile(25);
+	  Profile q75     = profileAggregate.getQuartile(75);
+	  this.profileCollection.addProfile(pointType, medians);
+	  this.profileCollection.addProfile(pointType+"25", q25);
+	  this.profileCollection.addProfile(pointType+"75", q75);
+
+  }
 
   public void createProfileAggregates(){
 	  try{
 		  for( String pointType : this.profileCollection.getProfileKeys() ){
-			  for(int i=0;i<this.getNucleusCount();i++){
-				  INuclearFunctions n = this.getNucleus(i);
-				  ProfileAggregate profileAggregate = this.profileCollection.getAggregate(pointType);
-				  profileAggregate.addValues(n.getAngleProfile(pointType));
-			  }
-			  this.profileCollection.createProfileAggregateFromPoint(pointType, (int)this.getMedianArrayLength());   
+//			  for(int i=0;i<this.getNucleusCount();i++){
+//				  INuclearFunctions n = this.getNucleus(i);
+//				  ProfileAggregate profileAggregate = this.profileCollection.getAggregate(pointType);
+//				  profileAggregate.addValues(n.getAngleProfile(pointType));
+//			  }
+			  this.createProfileAggregateFromPoint(pointType);   
 		  }
 	  } catch(Exception e){
 		  IJ.log("Error creating profile aggregates: "+e.getMessage());
