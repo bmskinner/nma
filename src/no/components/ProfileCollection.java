@@ -12,10 +12,10 @@ import java.util.Set;
 
 public class ProfileCollection {
 	
-	private Map<String, ProfileFeature> features = new HashMap<String, ProfileFeature>();
-	private Map<String, Profile> profiles = new HashMap<String, Profile>(0); 
-	private Map<String, ProfileAggregate> aggregates = new HashMap<String, ProfileAggregate>();
-	private Map<String, ProfilePlot> plots = new HashMap<String, ProfilePlot>();
+	private Map<String, ProfileFeature> 	features 	= new HashMap<String, ProfileFeature>();
+	private Map<String, Profile> 			profiles 	= new HashMap<String, Profile>(0); 
+	private Map<String, ProfileAggregate> 	aggregates 	= new HashMap<String, ProfileAggregate>();
+	private Map<String, ProfilePlot> 		plots 		= new HashMap<String, ProfilePlot>();
 	
 	public ProfileCollection(){
 		

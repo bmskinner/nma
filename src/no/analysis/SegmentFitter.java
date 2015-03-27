@@ -28,7 +28,16 @@ public class SegmentFitter {
 	List<NucleusBorderSegment> medianSegments;
 	List<NucleusBorderSegment>   testSegments;
 	
+	/**
+	 * The number of points ahead and behind to test
+	 * when creating new segment profiles
+	 */
 	private static int POINTS_TO_TEST = 8;
+	
+	/**
+	 * The smallest number of points a segment can contain. 
+	 */
+	private static int MIN_SEGMENT_SIZE = 50;
 	
 	/**
 	 * Construct with a median profile and list of segments. The originals will not be modified
@@ -103,8 +112,17 @@ public class SegmentFitter {
 			double minScore = score;
 			NucleusBorderSegment bestSeg = seg;
 			for(int j=-SegmentFitter.POINTS_TO_TEST;j<=SegmentFitter.POINTS_TO_TEST;j++){
+				
+				// make the new segment
 				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, this.testProfile.size());
 				NucleusBorderSegment newSeg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex);
+				
+				// check that the proposed new segment is longer that the minimum reqired length
+				if(newSeg.length(this.testProfile.size())<SegmentFitter.MIN_SEGMENT_SIZE){
+					continue;
+				}
+				
+				// get the score for the new segment
 				score = compareSegments(this.medianSegments.get(i), newSeg);
 				if(score<minScore){
 					minScore=score;
@@ -119,6 +137,13 @@ public class SegmentFitter {
 //				IJ.log("      Endpoint offset "+j+": "+score);	
 			}
 			newList.add(bestSeg);
+			if(i==this.testSegments.size()-1){ 
+				// this is the last segment; 
+				// set the start index of the first segment to be
+				// the end index for this segment
+				newList.set(0, new NucleusBorderSegment(bestSeg.getEndIndex(), newList.get(0).getEndIndex()));
+				
+			}
 //			bestSeg.print();	
 
 		}

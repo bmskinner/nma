@@ -17,6 +17,20 @@ import no.components.Profile;
 // it can also take a list of segments, and apply them
 public class ProfileSegmenter {
 	
+	private static List<Color> colourList = new ArrayList<Color>(0);
+	
+	// these are the colours for segments in the order they will loop
+	static {
+		colourList.add(Color.RED);
+		colourList.add(Color.ORANGE);
+		colourList.add(Color.GREEN);
+		colourList.add(Color.MAGENTA);
+		colourList.add(Color.LIGHT_GRAY);
+		colourList.add(Color.CYAN);
+		colourList.add(Color.YELLOW);
+		colourList.add(Color.PINK);
+	}
+	
 	private Profile profile; // the profile to segment
 	List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
 	
@@ -72,18 +86,21 @@ public class ProfileSegmenter {
 		}
 	}
 	
-	public static Color getColor(int i){
-		Color color = 	i%8==0 ? Color.RED : 
-			i%8==1 ? Color.ORANGE :
-			i%8==2 ? Color.GREEN :
-			i%8==3 ? Color.MAGENTA :
-			i%8==4 ? Color.CYAN :
-			i%8==5 ? Color.YELLOW : 
-			i%8==6 ? Color.PINK :
-					 Color.LIGHT_GRAY;
+	/**
+	 * Get an appropriate segment colour for the given number.
+	 * Loops through 8 colours.
+	 * @param i the number of the colour to return
+	 * @return a colour
+	 */
+	public static Color getColor(int i){		
+		Color color = ProfileSegmenter.colourList.get(i % ProfileSegmenter.colourList.size());
 		return color;
 	}
 	
+	/**
+	 * Draw the current segmented profile to a tiff file
+	 * @param filename the absolute path of the file to save as
+	 */
 	public void draw(String filename){
 		
 		int narrowLine = 3;
