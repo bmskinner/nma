@@ -32,7 +32,7 @@ public class SegmentFitter {
 	 * The number of points ahead and behind to test
 	 * when creating new segment profiles
 	 */
-	private static int POINTS_TO_TEST = 50;
+	private static int POINTS_TO_TEST = 20;
 	
 	/**
 	 * The smallest number of points a segment can contain. 
