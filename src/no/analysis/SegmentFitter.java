@@ -96,7 +96,9 @@ public class SegmentFitter {
 		// go through each segment
 		for(int i=0; i<this.testSegments.size();i++){
 			NucleusBorderSegment targetSeg = this.medianSegments.get(i);
-			NucleusBorderSegment testSeg = this.testSegments.get(i);
+			
+			// we may need to trim out the last element, because the segments share endpoints
+			NucleusBorderSegment   testSeg = testSegments.get(i);
 			
 			// interpolate the test segments to the length of the median segments
 			Profile testSegProfile = this.getSegmentProfile(testSeg, testMedian);
@@ -117,7 +119,6 @@ public class SegmentFitter {
 		List<Double> combinedList = new ArrayList<Double>(0);
 		
 		for(Profile p : list){
-			// we may need to trim out the last element, because the segments share endpoints
 			double[] values = p.asArray();
 			List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
 			combinedList.addAll(valueList);
