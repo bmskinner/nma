@@ -229,6 +229,8 @@ implements INuclearCollection
 	  this.frankensteinProfiles.addAggregate( pointType, new ProfileAggregate((int)this.getMedianArrayLength()));//pointType, recombinedProfile);
 	  this.frankensteinProfiles.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, getMaxProfileLength());
 	  SegmentFitter fitter = new SegmentFitter(this.profileCollection.getProfile(pointType), segments);
+	  List<Profile> frankenProfiles = new ArrayList<Profile>(0);
+	  
 	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 		  INuclearFunctions n = this.getNucleus(i);
 		  fitter.fit(n);
@@ -237,20 +239,10 @@ implements INuclearCollection
 		  // what does it look like?
 		  Profile recombinedProfile = fitter.recombine(n);
 		  this.frankensteinProfiles.getAggregate(pointType).addValues(recombinedProfile);
-		  
-		  	double[] xPointsRaw  = recombinedProfile.getPositions(n.getLength()).asArray();
-	        double[] xPointsNorm = recombinedProfile.getPositions(100).asArray();
-	        Plot rawPlot = this.frankensteinProfiles.getPlots(pointType).get("raw");
-	        Plot normPlot = this.frankensteinProfiles.getPlots(pointType).get("norm");
-	        
-	        rawPlot.setColor(Color.LIGHT_GRAY);
-	        rawPlot.addPoints(xPointsRaw, recombinedProfile.asArray(), Plot.LINE);
-	
-	        normPlot.setColor(Color.LIGHT_GRAY);
-	        normPlot.addPoints(xPointsNorm, recombinedProfile.asArray(), Plot.LINE);
+		  frankenProfiles.add(recombinedProfile);
 	  }
 	  this.frankensteinProfiles.createProfileAggregateFromPoint(    pointType, (int) this.getMedianArrayLength()    );
-	  	  
+	  this.frankensteinProfiles.drawProfilePlots(pointType, frankenProfiles);
 	  this.frankensteinProfiles.addMedianLinesToPlots();
 	  this.frankensteinProfiles.exportProfilePlots(this.getFolder()+
     	                      			        	File.separator+

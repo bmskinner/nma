@@ -210,9 +210,11 @@ public class ProfileCollection {
 	    }
 	}
 
-	public void drawProfilePlots(List<Profile> profiles){
+	
+	// TODO: make this work with pointTypes
+	public void drawProfilePlots(String pointType, List<Profile> profiles){
 
-		for( String pointType : this.getPlotKeys() ){
+//		for( String pointType : this.getPlotKeys() ){
 
 			Plot  rawPlot = this.getPlots(pointType).get("raw");
 			Plot normPlot = this.getPlots(pointType).get("norm");
@@ -230,7 +232,7 @@ public class ProfileCollection {
 				normPlot.setColor(Color.LIGHT_GRAY);
 				normPlot.addPoints(xPointsNorm, p.asArray(), Plot.LINE);
 			}
-		}   
+//		}   
 	}
 
 	public void exportProfilePlots(String folder, String nucleusCollectionType){
@@ -245,10 +247,7 @@ public class ProfileCollection {
 						"."+
 						this.collectionName+
 						"."+
-						key+
-						"."+
-						nucleusCollectionType+
-						".tiff";
+						nucleusCollectionType;
 				this.getPlots(pointType).export(key, filename);
 
 			}
