@@ -140,7 +140,10 @@ implements INuclearCollection
 	  this.profileCollection.addMedianLinesToPlots();
 	  //    this.drawNormalisedMedianLines();
 
-	  this.exportProfilePlots();
+//	  this.exportProfilePlots();
+	  this.profileCollection.exportProfilePlots(this.getFolder()+
+	        	File.separator+
+              this.getOutputFolder(), this.getType());
   }
 
   public void calculateOffsets(){
@@ -1096,31 +1099,33 @@ implements INuclearCollection
   */
   public void drawProfilePlots(){
 
-    this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
+	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
 
-//    Set<String> headings = this.profileCollection.getPlotKeys();
+	  for( String pointType : this.profileCollection.getPlotKeys() ){
 
-    for( String pointType : this.profileCollection.getPlotKeys() ){
-    	
-      Plot  rawPlot = this.profileCollection.getPlots(pointType).get("raw");
-      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
+		  List<Profile> profiles = new ArrayList<Profile>(0);
+		  //    	
+		  //      Plot  rawPlot = this.profileCollection.getPlots(pointType).get("raw");
+		  //      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
 
-      for(int i=0;i<this.getNucleusCount();i++){
+		  for(int i=0;i<this.getNucleusCount();i++){
 
-        INuclearFunctions n = this.getNucleus(i);
+			  INuclearFunctions n = this.getNucleus(i);
+			  //
+			  //        double[] xPointsRaw  = n.getAngleProfile().getPositions(n.getLength()).asArray();
+			  //        double[] xPointsNorm = n.getAngleProfile().getPositions(100).asArray();
 
-        double[] xPointsRaw  = n.getAngleProfile().getPositions(n.getLength()).asArray();
-        double[] xPointsNorm = n.getAngleProfile().getPositions(100).asArray();
+			  profiles.add(n.getAngleProfile(pointType));
+			  //        Profile anglesFromPoint = n.getAngleProfile(pointType);
 
-        Profile anglesFromPoint = n.getAngleProfile(pointType);
-
-        rawPlot.setColor(Color.LIGHT_GRAY);
-        rawPlot.addPoints(xPointsRaw, anglesFromPoint.asArray(), Plot.LINE);
-
-        normPlot.setColor(Color.LIGHT_GRAY);
-        normPlot.addPoints(xPointsNorm, anglesFromPoint.asArray(), Plot.LINE);
-      }
-    }   
+			  //        rawPlot.setColor(Color.LIGHT_GRAY);
+			  //        rawPlot.addPoints(xPointsRaw, anglesFromPoint.asArray(), Plot.LINE);
+			  //
+			  //        normPlot.setColor(Color.LIGHT_GRAY);
+			  //        normPlot.addPoints(xPointsNorm, anglesFromPoint.asArray(), Plot.LINE);
+		  }
+		  this.profileCollection.drawProfilePlots(pointType, profiles);
+	  }   
   }
 
   /*
