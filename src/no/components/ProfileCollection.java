@@ -19,9 +19,10 @@ public class ProfileCollection {
 	private Map<String, Profile> 			profiles 	= new HashMap<String, Profile>(0); 
 	private Map<String, ProfileAggregate> 	aggregates 	= new HashMap<String, ProfileAggregate>();
 	private Map<String, ProfilePlot> 		plots 		= new HashMap<String, ProfilePlot>();
+	private String collectionName;
 	
-	public ProfileCollection(){
-		
+	public ProfileCollection(String name){
+		this.collectionName = name;
 	}
 	
 	// Get features
@@ -95,7 +96,6 @@ public class ProfileCollection {
 		}
 
 		ProfileAggregate profileAggregate = this.getAggregate(pointType);
-//		this.addAggregate(pointType, profileAggregate);
 		Profile medians = profileAggregate.getMedian();
 		Profile q25     = profileAggregate.getQuartile(25);
 		Profile q75     = profileAggregate.getQuartile(75);
@@ -209,7 +209,30 @@ public class ProfileCollection {
 			plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
 	    }
 	}
-	
+
+	public void drawProfilePlots(List<Profile> profiles){
+
+		for( String pointType : this.getPlotKeys() ){
+
+			Plot  rawPlot = this.getPlots(pointType).get("raw");
+			Plot normPlot = this.getPlots(pointType).get("norm");
+
+			for(int i=0;i<profiles.size();i++){
+
+				Profile p = profiles.get(i);
+
+				double[] xPointsRaw  = p.getPositions(p.size()).asArray();
+				double[] xPointsNorm = p.getPositions(100).asArray();
+
+				rawPlot.setColor(Color.LIGHT_GRAY);
+				rawPlot.addPoints(xPointsRaw, p.asArray(), Plot.LINE);
+
+				normPlot.setColor(Color.LIGHT_GRAY);
+				normPlot.addPoints(xPointsNorm, p.asArray(), Plot.LINE);
+			}
+		}   
+	}
+
 	public void exportProfilePlots(String folder, String nucleusCollectionType){
 
 		for( String pointType : this.getPlotKeys() ){
@@ -219,6 +242,8 @@ public class ProfileCollection {
 						File.separator+
 						"plot."+
 						pointType+
+						"."+
+						this.collectionName+
 						"."+
 						key+
 						"."+

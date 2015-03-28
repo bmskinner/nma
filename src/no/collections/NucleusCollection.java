@@ -64,8 +64,8 @@ implements INuclearCollection
 	private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
 	//this holds the mapping of tail indexes etc in the median profile arrays
-	protected ProfileCollection profileCollection = new ProfileCollection();
-	protected ProfileCollection frankensteinProfiles = new ProfileCollection();
+	protected ProfileCollection profileCollection = new ProfileCollection("regular");
+	protected ProfileCollection frankensteinProfiles = new ProfileCollection("frankenstein");
 
 	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
