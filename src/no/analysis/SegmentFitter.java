@@ -35,7 +35,7 @@ public class SegmentFitter {
 	/**
 	 * The smallest number of points a segment can contain. 
 	 */
-	private static int MIN_SEGMENT_SIZE = 5;
+//	private static int MIN_SEGMENT_SIZE = 5;
 	
 	/**
 	 * Construct with a median profile and list of segments. The originals will not be modified
@@ -178,14 +178,14 @@ public class SegmentFitter {
 			if(seg.getEndIndex()<seg.getStartIndex() && !oldSeg.contains(0)){
 
 				// the new end point is the start point, plus the minimum segment size
-				int newEndIndex = Utils.wrapIndex(seg.getStartIndex()+SegmentFitter.MIN_SEGMENT_SIZE, this.testProfile.size());
+				int newEndIndex = Utils.wrapIndex(seg.getStartIndex()+ProfileSegmenter.MIN_SEGMENT_SIZE, this.testProfile.size());
 				seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex);
 			}
 			
 			// if the segment is otherwise too short, update the end position
-			if( seg.length(this.testProfile.size())<SegmentFitter.MIN_SEGMENT_SIZE){
+			if( seg.length(this.testProfile.size())<ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// find the number of points needed to make the segment long enough
-				int extension = SegmentFitter.MIN_SEGMENT_SIZE - seg.length(this.testProfile.size());
+				int extension = ProfileSegmenter.MIN_SEGMENT_SIZE - seg.length(this.testProfile.size());
 				// get the index of the new end point
 				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+extension, this.testProfile.size());
 				// add the new end index position to the segment
@@ -213,7 +213,7 @@ public class SegmentFitter {
 				}
 				
 				// add a penalty if the proposed new segment is shorter that the minimum segment length
-				if(newSeg.length(this.testProfile.size())<SegmentFitter.MIN_SEGMENT_SIZE){
+				if(newSeg.length(this.testProfile.size())<ProfileSegmenter.MIN_SEGMENT_SIZE){
 					score += newSeg.length(  oldLength - this.testProfile.size() );
 				}
 				

@@ -31,6 +31,13 @@ public class ProfileSegmenter {
 		colourList.add(Color.PINK);
 	}
 	
+	/**
+	 * The smallest number of points a segment can contain. 
+	 * Increasing this value will make the segment fitting more robust, 
+	 * but reduces resolution
+	 */
+	static final int MIN_SEGMENT_SIZE = 15;
+	
 	private Profile profile; // the profile to segment
 	List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
 	
@@ -62,16 +69,19 @@ public class ProfileSegmenter {
 		
 		int segmentStart = 0;
 		int segmentEnd = 0;
+		int segLength = 0;
 		for(int i=0;i<profile.size();i++){
 			segmentEnd = i;
+			segLength++;
 			// we want a minima or maxima, and the rate of change must be enough to warrent a segemnt
 			if( ( maxima.get(i)==1 || minima.get(i)==1 ) 
-				 && Math.abs(deltas.get(i))> Math.max( deltas.getMax()*0.05, deltas.getMin()*0.05)){
-//			if((dMax.get(i)==1 || dMin.get(i)==1) && Math.abs(deltas.get(i))>5){
+				 && Math.abs(deltas.get(i))> Math.max( deltas.getMax()*0.05, deltas.getMin()*0.05)
+				 && segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// we've hit a new segment
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd);
 				segments.add(seg);
 				segmentStart = i;
+				segLength=0;
 			}
 		}
 		// join up segments at start and end of profile 
