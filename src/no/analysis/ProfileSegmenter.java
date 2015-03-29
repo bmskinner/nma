@@ -74,8 +74,9 @@ public class ProfileSegmenter {
 			segmentEnd = i;
 			segLength++;
 			// we want a minima or maxima, and the rate of change must be enough to warrent a segemnt
+//			&& Math.abs(deltas.get(i))> Math.max( deltas.getMax()*0.05, deltas.getMin()*0.05)
 			if( ( maxima.get(i)==1 || minima.get(i)==1 ) 
-				 && Math.abs(deltas.get(i))> Math.max( deltas.getMax()*0.05, deltas.getMin()*0.05)
+				 
 				 && segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// we've hit a new segment
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd);
