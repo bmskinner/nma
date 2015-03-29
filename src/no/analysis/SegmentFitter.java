@@ -194,6 +194,7 @@ public class SegmentFitter {
 				// make the new segment
 				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, profileLength);
 				NucleusBorderSegment newSeg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex);
+				newSeg.setSegmentType("Seg_"+i);
 				
 				int newLength = newSeg.length(profileLength);
 								
@@ -224,6 +225,7 @@ public class SegmentFitter {
 				// set the start index of the first segment to be
 				// the end index for this segment
 				newList.set(0, new NucleusBorderSegment(bestSeg.getEndIndex(), newList.get(0).getEndIndex()));
+				newList.get(0).setSegmentType("Seg_"+0);
 				
 			}
 //			bestSeg.print();	
@@ -269,6 +271,7 @@ public class SegmentFitter {
 			// add the new end index position to the segment
 			seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex);
 		}
+		seg.setSegmentType(unalteredSeg.getSegmentType());
 		return seg;
 	}
 	

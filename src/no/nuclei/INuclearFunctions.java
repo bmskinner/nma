@@ -219,6 +219,8 @@ public interface INuclearFunctions
     Overwrites any existing log
   */   
   public void exportAngleProfile();
+  
+  public void exportSegments();
 
   /*
     Export the current image state, with

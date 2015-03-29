@@ -185,6 +185,7 @@ implements INuclearCollection
 
 		  ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
 		  List<NucleusBorderSegment> segments = segmenter.segment();
+		  
 		  String segmentedProfileName = this.getFolder()+
 										File.separator+
 										this.getOutputFolder()+
@@ -194,6 +195,7 @@ implements INuclearCollection
 		  segmenter.draw(segmentedProfileName);
 		  
 		  IJ.log("    Found "+segments.size()+" segments in profile");
+		  this.profileCollection.addSegments(pointType, segments);
 		  IJ.log("    Assigning segments to nuclei...");
 		  
 		  // find the corresponding point in each Nucleus
@@ -213,6 +215,7 @@ implements INuclearCollection
 				  int endIndex = n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
 
 				  NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex);
+				  seg.setSegmentType("Seg_"+j);
 				  n.addSegment(seg);
 				  n.addSegmentTag("Seg_"+j, j);
 				  j++;
@@ -252,6 +255,35 @@ implements INuclearCollection
 	  this.frankensteinProfiles.exportProfilePlots(this.getFolder()+
     	                      			        	File.separator+
     					                            this.getOutputFolder(), this.getType());
+	  
+	  this.exportSegments(pointType);
+  }
+  
+  public void exportSegments(String pointType){
+	  // export the individual segment files for each nucleus
+	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+		  INuclearFunctions n = this.getNucleus(i);
+		  n.exportSegments();
+	  }
+
+	  // also export the group stats for each segment
+	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+	  
+	  List<NucleusBorderSegment> segments = this.profileCollection.getSegments(pointType);
+	  IJ.log("    Exporting segments...");
+	  for(NucleusBorderSegment seg : segments){
+		  logger.addColumnHeading(seg.getSegmentType());
+	  }
+	  
+	  for(int i= 0; i<this.getNucleusCount();i++){
+		  INuclearFunctions n = this.getNucleus(i);
+
+		  for(NucleusBorderSegment seg : segments){
+			  NucleusBorderSegment nucSeg = n.getSegmentTag(seg.getSegmentType());
+			  logger.addRow(seg.getSegmentType(), nucSeg.length(n.getLength()));
+		  }
+	  }
+	  logger.export("logSegments");
   }
 
   /*

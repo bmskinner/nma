@@ -82,6 +82,7 @@ public class ProfileSegmenter {
 					&& segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// we've hit a new segment
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd);
+				seg.setSegmentType("Seg_"+i);
 				segments.add(seg);
 				segmentStart = i;
 				segLength=0;

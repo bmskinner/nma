@@ -28,6 +28,8 @@ public class ProfileCollection {
 	private Map<String, ProfilePlot> 		plots 		= new HashMap<String, ProfilePlot>();
 	private String collectionName; // the name of the NucleusCollection - e.g analysable, red, not_red
 	
+	private Map<String, List<NucleusBorderSegment>> segments 	= new HashMap<String, List<NucleusBorderSegment>>();
+		
 	public ProfileCollection(String name){
 		this.collectionName = name;
 	}
@@ -66,6 +68,14 @@ public class ProfileCollection {
 		}		
 	}
 	
+	public List<NucleusBorderSegment> getSegments(String s){
+		if(segments.containsKey(s)){	
+			return segments.get(s);
+		} else {
+			throw new IllegalArgumentException("The requested segment key does not exist: "+s);
+		}
+	}
+	
 	// Add or update features
 	
 	public void addFeature(String s, ProfileFeature p){
@@ -91,6 +101,13 @@ public class ProfileCollection {
 			throw new IllegalArgumentException("String or Profile is null");
 		}
 		plots.put(s, p);
+	}
+	
+	public void addSegments(String s, List<NucleusBorderSegment> n){
+		if(s==null || n==null || n.isEmpty()){
+			throw new IllegalArgumentException("String or segment list is null or empty");
+		}
+		segments.put(s, n);
 	}
 	
 	

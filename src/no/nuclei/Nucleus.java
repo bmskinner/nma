@@ -1193,31 +1193,6 @@ public class Nucleus
 		logger.addColumnHeading("DISTANCE_PROFILE");
 		logger.addColumnHeading("SEGMENT");
 		
-		
-//		File f = new File(this.getNucleusFolder().getAbsolutePath()+
-//											File.separator+
-//											this.getNucleusNumber()+
-//											".txt");
-//		if(f.exists()){
-//			f.delete();
-//		}
-//
-//		StringBuilder outLine = new StringBuilder();
-//
-//		outLine.append(	"X_INT\t"+
-//						"Y_INT\t"+
-//						"X_DOUBLE\t"+
-//						"Y_DOUBLE\t"+
-//						"INTERIOR_ANGLE\t"+
-//						"IS_LOCAL_MIN\t"+
-//						"IS_LOCAL_MAX\t"+
-//						"ANGLE_DELTA\t"+
-//						"NORMALISED_PROFILE_X\t"+
-//						"SD_PROFILE\t"+
-//						"IS_SD_MIN\t"+
-//						"DISTANCE_PROFILE"+
-//						"SEGMENT\r\n");
-
 		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
 		Profile minima = this.getAngleProfile().getLocalMinima(5);
 		Profile angleDeltas = this.getAngleProfile().calculateDeltas(2);
@@ -1241,24 +1216,36 @@ public class Nucleus
 			logger.addRow("DISTANCE_PROFILE"    , this.getDistance(i)	);
 			logger.addRow("SEGMENT"             , this.getSegmentOfPoint(i));
 			
-//			outLine.append( this.getBorderPoint(i).getXAsInt()	+"\t"+
-//							this.getPoint(i).getYAsInt()		+"\t"+
-//							this.getPoint(i).getX()				+"\t"+
-//							this.getPoint(i).getY()				+"\t"+
-//							this.getAngle(i) 					+"\t"+
-//							minima.get(i)						+"\t"+
-//							maxima.get(i)						+"\t"+
-//							angleDeltas.get(i)					+"\t"+
-//							normalisedX							+"\t"+
-//							this.singleDistanceProfile.get(i)	+"\t"+
-//							sdMinima.get(i)						+"\t"+
-//							this.getDistance(i)					+"\t"+
-//							this.getSegmentOfPoint(i)			+"\r\n");
 		}
-//		IJ.append( outLine.toString(), f.getAbsolutePath());
 		logger.export(""+this.getNucleusNumber());
 	}
 
+	
+	/**
+	 * Export the individual segments in this nucleus
+	 */
+	public void exportSegments(){
+
+		Logger logger = new Logger(this.getNucleusFolder());
+		logger.addColumnHeading("SEGMENT");
+		logger.addColumnHeading("START_INDEX");
+		logger.addColumnHeading("END_INDEX");
+		logger.addColumnHeading("PERIMETER_LENGTH");
+		logger.addColumnHeading("DISTANCE_END_TO_END");
+
+		for(NucleusBorderSegment seg :this.getSegments() ){
+			logger.addRow("SEGMENT" , seg.getSegmentType());
+			logger.addRow("PERIMETER_LENGTH" , seg.length(this.getLength()));
+			logger.addRow("START_INDEX" , seg.getStartIndex());
+			logger.addRow("END_INDEX" , seg.getEndIndex());
+
+			double distance = this.getBorderPoint(seg.getEndIndex()).getLengthTo(this.getBorderPoint(seg.getStartIndex()));
+			logger.addRow("DISTANCE_END_TO_END" , distance);
+		}
+
+		logger.export(this.getNucleusNumber()+".segments");
+	}
+	
 	/*
 		Export the current image state, with
 		any annotations to export.nn.annotated.tiff
