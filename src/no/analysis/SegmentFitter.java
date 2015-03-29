@@ -196,7 +196,8 @@ public class SegmentFitter {
 			double minScore = score;
 			NucleusBorderSegment bestSeg = seg;
 			
-			// this causes problems when the best fit places the startindex before the end index
+			// TODO: allow rotation through the entire profile
+//			for(int j=0;j<this.testProfile.size();j++){
 			for(int j=0;j<=SegmentFitter.POINTS_TO_TEST;j++){
 				
 				// make the new segment
