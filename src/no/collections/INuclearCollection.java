@@ -184,7 +184,7 @@ public interface INuclearCollection
 
 	public void addSignalsToProfileCharts();
 
-	public void addSignalsToProfileChartFromPoint(String pointType, Plot plot);
+	public void addSignalsToProfileChartFromPoint(String pointType);
 
 //	public void exportProfilePlots();
 

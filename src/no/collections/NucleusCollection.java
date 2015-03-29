@@ -950,7 +950,6 @@ implements INuclearCollection
 
   public void exportMediansOfProfile(Profile profile, String filename){
 
-//    String logFile = makeGlobalLogFile(filename);
     Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
     logger.addColumn("X_POSITION",   profile.getPositions(profile.size()).asArray());
     logger.addColumn("ANGLE_MEDIAN", profile.asArray());
@@ -1083,23 +1082,9 @@ implements INuclearCollection
     IJ.log("    Composite image created");
   }
 
-//  public void exportProfilePlot(Plot plot, String name){
-//	  ImagePlus image = plot.getImagePlus();
-//	  Calibration cal = image.getCalibration();
-//	  cal.setUnit("pixels");
-//	  cal.pixelWidth = 1;
-//	  cal.pixelHeight = 1;
-//	  IJ.saveAsTiff(image, this.getFolder()+
-//			  File.separator+
-//			  this.getOutputFolder()+
-//			  File.separator+name+
-//			  "."+
-//			  this.getType()+".tiff");
-//  }
-
   /*
     Draw the charts of the profiles of the nuclei within this collecion.
-  */
+   */
   public void drawProfilePlots(){
 
 	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
@@ -1117,60 +1102,38 @@ implements INuclearCollection
 		  this.profileCollection.drawProfilePlots(pointType, profiles);
 	  }   
   }
+  
+  public void drawBoxplots(){
+	  for( String pointType : this.profileCollection.getPlotKeys() ){
+		  drawBoxplotFromPoint(pointType, "tail");
+	  }
+  }
 
   /*
     Draw a boxplot on the normalised plots. Specify which BorderPointOfInterest is to be plotted.
-  */
-  public void drawBoxplot(String profilePointType, String boxPointType){
+   */
+  public void drawBoxplotFromPoint(String profilePointType, String boxPointType){
 
-    // get the tail positions with the head offset applied
+	  // get the tail positions with the head offset applied
 	  List<Double> pointIndexes = new ArrayList<Double>(0);
-    double[] xPoints = new double[this.getNucleusCount()];
-    for(int i= 0; i<this.getNucleusCount();i++){
+	  //	  double[] xPoints = new double[this.getNucleusCount()];
+	  for(int i= 0; i<this.getNucleusCount();i++){
 
-      INuclearFunctions n = this.getNucleus(i);
+		  INuclearFunctions n = this.getNucleus(i);
 
-      // get the index of the NBP with the boxPointType
-      int boxIndex = n.getBorderIndex(boxPointType);
-      // get the index of the NBP with the profilePointType; the new zero
-      int profileIndex = n.getBorderIndex(profilePointType);
+		  // get the index of the NBP with the boxPointType
+		  int boxIndex = n.getBorderIndex(boxPointType);
+		  // get the index of the NBP with the profilePointType; the new zero
+		  int profileIndex = n.getBorderIndex(profilePointType);
 
-      // find the offset position of boxPoint, using profilePoint as a zero. 
-      int offsetIndex = Utils.wrapIndex( boxIndex - profileIndex , n.getLength() );
+		  // find the offset position of boxPoint, using profilePoint as a zero. 
+		  int offsetIndex = Utils.wrapIndex( boxIndex - profileIndex , n.getLength() );
 
-      // normalise to 100
-      xPoints[i] =  (   (double) offsetIndex / (double) n.getLength()  ) * 100;
-      pointIndexes.add((   (double) offsetIndex / (double) n.getLength()  ) * 100);
-    }
-    this.profileCollection.addBoxplot(profilePointType, pointIndexes);
-//    double[] yPoints = new double[xPoints.length];
-//    Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=CHART_TAIL_BOX_Y_MID
-//    plot.setColor(Color.LIGHT_GRAY);
-//    plot.addPoints(xPoints, yPoints, Plot.DOT);
-//
-//    // median tail positions
-//    double tailQ50 = Stats.quartile(xPoints, 50);
-//    double tailQ25 = Stats.quartile(xPoints, 25);
-//    double tailQ75 = Stats.quartile(xPoints, 75);
-//
-//    plot.setColor(Color.DARK_GRAY);
-//    plot.setLineWidth(1);
-//    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
-//    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
-//    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
-//    plot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
-//    plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
-  }
-
-  public void drawBoxplots(){
-
-    Set<String> headings = this.profileCollection.getPlotKeys();
-    for( String pointType : headings ){
-
-//        Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
-//        drawMedianLine(pointType, normPlot);
-        drawBoxplot(pointType, "tail");
-    }
+		  // normalise to 100
+		  //		  xPoints[i] =  (   (double) offsetIndex / (double) n.getLength()  ) * 100;
+		  pointIndexes.add((   (double) offsetIndex / (double) n.getLength()  ) * 100);
+	  }
+	  this.profileCollection.addBoxplot(profilePointType, pointIndexes);
   }
 
   public void addSignalsToProfileCharts(){
@@ -1178,74 +1141,60 @@ implements INuclearCollection
     Set<String> headings = this.profileCollection.getPlotKeys();
 
     for( String pointType : headings ){
-      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
-      this.addSignalsToProfileChartFromPoint(pointType, normPlot);
+//      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
+      this.addSignalsToProfileChartFromPoint(pointType);
 
     }    
   }
 
-  public void addSignalsToProfileChartFromPoint(String pointType, Plot plot){
-    // for each signal in each nucleus, find index of point. Draw dot
+  public void addSignalsToProfileChartFromPoint(String pointType){
+	  // for each signal in each nucleus, find index of point. Draw dot
 
-    plot.setColor(Color.LIGHT_GRAY);
-    plot.setLineWidth(1);
-    plot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
-    plot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
+	  List<List<XYPoint>> points = new ArrayList<List<XYPoint>>(0);
+	  points.add( new ArrayList<XYPoint>(0)); // red signals
+	  points.add( new ArrayList<XYPoint>(0)); // green signals
 
-    for(int i= 0; i<this.getNucleusCount();i++){
+	  for(int i= 0; i<this.getNucleusCount();i++){
 
-      INuclearFunctions n = this.getNucleus(i);
-      int profileIndex = n.getBorderIndex(pointType); 
-      List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
-      signals.add(n.getRedSignals());
-      signals.add(n.getGreenSignals());
+		  INuclearFunctions n = this.getNucleus(i);
+		  int profileIndex = n.getBorderIndex(pointType); 
+		  List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
+		  signals.add(n.getRedSignals());
+		  signals.add(n.getGreenSignals());
 
-      int signalCount = 0;
-      for( List<NuclearSignal> signalGroup : signals ){
-        
-        if(signalGroup.size()>0){
+		  int channel = 0;
+		  for( List<NuclearSignal> channelSignals : signals ){
 
-          Color colour = signalCount == Nucleus.RED_CHANNEL ? Color.RED : Color.GREEN;
+			  if(!channelSignals.isEmpty()){
 
-          double[] xPoints = new double[signalGroup.size()];
-          double[] yPoints = new double[signalGroup.size()];
+				  List<XYPoint> channelPoints = points.get(channel);
 
-          for(int j=0; j<signalGroup.size();j++){
+				  for(int j=0; j<channelSignals.size();j++){
 
-            // get the index of the point closest to the signal
-            int borderIndex = signalGroup.get(j).getClosestBorderPoint();
+					  // get the index of the point closest to the signal
+					  int borderIndex = channelSignals.get(j).getClosestBorderPoint();
 
-            // offset the index relative to the current profile type, and normalise
-            int offsetIndex = Utils.wrapIndex( borderIndex - profileIndex , n.getLength() );
-            double normIndex = (  (double) offsetIndex / (double) n.getLength()  ) * 100;
+					  // offset the index relative to the current profile type, and normalise
+					  int offsetIndex = Utils.wrapIndex( borderIndex - profileIndex , n.getLength() );
+					  double normIndex = (  (double) offsetIndex / (double) n.getLength()  ) * 100;
 
-            xPoints[j] = normIndex;
-            double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( signalGroup.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
-            yPoints[j] = yPosition;
+					  double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( channelSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
 
-            // IJ.log("Nucleus "+i+": Signal: "+j+": "+normIndex+"  "+yPosition);
+					  // make a point, and add to the appropriate list
+					  channelPoints.add(new XYPoint(normIndex, yPosition));
+				  }
+			  }
+			  channel++;
+		  }
+	  }
 
-          }
-
-          plot.setColor(colour);
-          plot.setLineWidth(2);
-          plot.addPoints( xPoints, yPoints, Plot.DOT);
-        }
-        signalCount++;
-      }
-    }
+	  // all points are assigned to lists
+	  // draw the lists
+	  int channel = 0;
+	  for( List<XYPoint> channelPoints : points ){
+		  Color colour = channel == Nucleus.RED_CHANNEL ? Color.RED : Color.GREEN;
+		  this.profileCollection.addSignalsToProfileChart(pointType, channelPoints, colour);
+		  channel++;
+	  }
   }
-
-//  public void exportProfilePlots(){
-//
-//    Set<String> headings = this.profileCollection.getPlotKeys();
-//    for( String pointType : headings ){
-//
-//      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
-//      Plot  rawPlot = this.profileCollection.getPlots(pointType).get("raw" );
-//
-//      exportProfilePlot(normPlot, "plot"+pointType+"Norm");
-//      exportProfilePlot(rawPlot , "plot"+pointType+"Raw");
-//    }  
-//  }
 }

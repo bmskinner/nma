@@ -29,24 +29,18 @@ public class AsymmetricNucleusCollection
   implements no.collections.INuclearCollection
 {
 
-  // failure  codes
-  public static final int FAILURE_HEAD = 128;
-  public static final int FAILURE_TAIL = 256;
+	// failure  codes
+	public static final int FAILURE_HEAD = 128;
+	public static final int FAILURE_TAIL = 256;
 
-	// private String logMedianFromHeadFile = "logMediansFromHead"; // output medians
- //  private String logMedianFromTailFile = "logMediansFromTail"; // output medians
-
-	// private double[] normalisedMedianProfileFromHead; // this is an array of 200 angles
- //  private double[] normalisedMedianProfileFromTail; // this is an array of 200 angles
 
 	private boolean differencesCalculated = false;
 
-  // private Map<Double, Collection<Double>> normalisedProfilesFromHead = new HashMap<Double, Collection<Double>>();
-  // private Map<Double, Collection<Double>> normalisedProfilesFromTail = new HashMap<Double, Collection<Double>>();
 
-  public AsymmetricNucleusCollection(File folder, String outputFolder, String type){
-  		super(folder, outputFolder, type);
-  }
+
+	public AsymmetricNucleusCollection(File folder, String outputFolder, String type){
+		super(folder, outputFolder, type);
+	}
 
   
   public AsymmetricNucleusCollection(){

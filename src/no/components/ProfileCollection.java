@@ -13,14 +13,17 @@ import java.util.Map;
 import java.util.Set;
 
 import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Stats;
 import no.utility.Utils;
 
 public class ProfileCollection {
 	
-	private static final double CHART_TAIL_BOX_Y_MID = 340;
-	private static final double CHART_TAIL_BOX_Y_MAX = 355;
-	private static final double CHART_TAIL_BOX_Y_MIN = 325;
+	private static final int CHART_TAIL_BOX_Y_MID = 340;
+	private static final int CHART_TAIL_BOX_Y_MAX = 355;
+	private static final int CHART_TAIL_BOX_Y_MIN = 325;
+	private static final int CHART_SIGNAL_Y_LINE_MIN = 275;
+	private static final int CHART_SIGNAL_Y_LINE_MAX = 315;
 	
 	private Map<String, ProfileFeature> 	features 	= new HashMap<String, ProfileFeature>();
 	private Map<String, Profile> 			profiles 	= new HashMap<String, Profile>(0); 
@@ -246,28 +249,47 @@ public class ProfileCollection {
 		plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
 	}
 	
-	// TODO: make this work with pointTypes
+
+	public void addSignalsToProfileChart(String pointType, List<XYPoint> signals, Color colour){
+		// setup the plot for getting signals
+		Plot plot = this.getPlots(pointType).get("norm");
+		plot.setColor(Color.LIGHT_GRAY);
+		plot.setLineWidth(1);
+		plot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
+		plot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
+
+		double[] xPoints = new double[signals.size()];
+		double[] yPoints = new double[signals.size()];
+
+		// turn the XYPoints into an array
+		for(int i= 0; i<signals.size();i++){
+			xPoints[i] = signals.get(i).getX();
+			yPoints[i] = signals.get(i).getY();
+		}
+		plot.setColor(colour);
+		plot.setLineWidth(2);
+		plot.addPoints( xPoints, yPoints, Plot.DOT);
+	}
+	
 	public void drawProfilePlots(String pointType, List<Profile> profiles){
 
-//		for( String pointType : this.getPlotKeys() ){
+		Plot  rawPlot = this.getPlots(pointType).get("raw");
+		Plot normPlot = this.getPlots(pointType).get("norm");
 
-			Plot  rawPlot = this.getPlots(pointType).get("raw");
-			Plot normPlot = this.getPlots(pointType).get("norm");
+		for(int i=0;i<profiles.size();i++){
 
-			for(int i=0;i<profiles.size();i++){
+			Profile p = profiles.get(i);
 
-				Profile p = profiles.get(i);
+			double[] xPointsRaw  = p.getPositions(p.size()).asArray();
+			double[] xPointsNorm = p.getPositions(100).asArray();
 
-				double[] xPointsRaw  = p.getPositions(p.size()).asArray();
-				double[] xPointsNorm = p.getPositions(100).asArray();
+			rawPlot.setColor(Color.LIGHT_GRAY);
+			rawPlot.addPoints(xPointsRaw, p.asArray(), Plot.LINE);
 
-				rawPlot.setColor(Color.LIGHT_GRAY);
-				rawPlot.addPoints(xPointsRaw, p.asArray(), Plot.LINE);
+			normPlot.setColor(Color.LIGHT_GRAY);
+			normPlot.addPoints(xPointsNorm, p.asArray(), Plot.LINE);
+		}
 
-				normPlot.setColor(Color.LIGHT_GRAY);
-				normPlot.addPoints(xPointsNorm, p.asArray(), Plot.LINE);
-			}
-//		}   
 	}
 
 	public void exportProfilePlots(String folder, String nucleusCollectionType){
