@@ -72,22 +72,27 @@ public class SegmentFitter {
 			this.testSegments.add(new NucleusBorderSegment(seg));
 		}
 		
-		List<NucleusBorderSegment> newList = this.runFitter();
-		
-//		Profile revisedProfile = this.recombineSegments(newList, testProfile);
-//		IJ.log(n.getImageName()+"-"+n.getNucleusNumber());
-		double score = testProfile.differenceToProfile(medianProfile);
-		IJ.log("Start score: "+score);
-		double prevScore = score+1;
-		while(score<prevScore){
-			newList = runFitter();
-			Profile revisedProfile = this.recombineSegments(newList, testProfile);
-			prevScore = score;
-			score = revisedProfile.differenceToProfile(medianProfile);
-			IJ.log("Score: "+score);
+		try{
+			List<NucleusBorderSegment> newList = this.runFitter(this.testSegments);
+			
+	//		Profile revisedProfile = this.recombineSegments(newList, testProfile);
+			IJ.log(n.getImageName()+"-"+n.getNucleusNumber());
+			double score = testProfile.differenceToProfile(medianProfile);
+			IJ.log("Start score: "+score);
+			double prevScore = score+1;
+			while(score<prevScore){
+				newList = runFitter(newList);
+				Profile revisedProfile = this.recombineSegments(newList, testProfile);
+				prevScore = score;
+				score = revisedProfile.differenceToProfile(medianProfile);
+				IJ.log("Score: "+score);
+			}
+			IJ.log("Final score: "+score);
+			n.setSegments(newList);
+		} catch(Exception e){
+			IJ.log("    Error refitting segments: "+e.getMessage());
+			e.printStackTrace();
 		}
-//		IJ.log("Final score: "+score);
-		n.setSegments(newList);
 	}
 	
 	public Profile recombine(INuclearFunctions n){
@@ -103,15 +108,21 @@ public class SegmentFitter {
 		return new Profile(recombineSegments(testSegments, testMedian));
 	}
 	
-	private Profile recombineSegments(List<NucleusBorderSegment> testSegments, Profile testMedian){
+	private Profile recombineSegments(List<NucleusBorderSegment> testSegs, Profile testMedian){
+		if(testSegs==null || testSegs.isEmpty()){
+			throw new IllegalArgumentException("Segment list is null or empty");
+		}
+		if(testMedian==null){
+			throw new IllegalArgumentException("Test profile is null in recombiner");
+		}
 		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
 
 		// go through each segment
-		for(int i=0; i<this.testSegments.size();i++){
+		for(int i=0; i<testSegs.size();i++){
 			NucleusBorderSegment targetSeg = this.medianSegments.get(i);
 
 			// we may need to trim out the last element, because the segments share endpoints
-			NucleusBorderSegment   testSeg = testSegments.get(i);
+			NucleusBorderSegment   testSeg = testSegs.get(i);
 
 			// interpolate the test segments to the length of the median segments
 			Profile testSegProfile = this.getSegmentProfile(testSeg, testMedian);
@@ -153,19 +164,20 @@ public class SegmentFitter {
 	 *  next segment
 	 *  update the nucleus
 	 */
-	private List<NucleusBorderSegment> runFitter(){
+	private List<NucleusBorderSegment> runFitter(List<NucleusBorderSegment> testList){
 
 		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>(0);
 		int profileLength = this.testProfile.size();
-		int segmentCount  = this.testSegments.size();
+		int segmentCount  = testList.size();
 		
 //		IJ.log("");
 		for(int i=0; i<segmentCount;i++){
 //			IJ.log("    Segment "+i);			
-			NucleusBorderSegment seg = this.testSegments.get(i);
+			NucleusBorderSegment seg = testList.get(i);
 			int oldLength = seg.length(profileLength);
 			
-			NucleusBorderSegment prevSeg = new NucleusBorderSegment(newList.get(  Utils.wrapIndex(i-1, segmentCount)  ));
+//			NucleusBorderSegment prevSeg = new NucleusBorderSegment(newList.get(  Utils.wrapIndex(i-1, segmentCount)  ));
+			NucleusBorderSegment prevSeg = i==0 ? new NucleusBorderSegment(testList.get(segmentCount-1)) : new NucleusBorderSegment(newList.get( i-1 ));
 			
 //			seg.print();
 			// basic checks - is the segment long enough, does it wrap, offset from the previous fitting
@@ -177,7 +189,7 @@ public class SegmentFitter {
 			
 			// TODO: allow rotation through the entire profile
 //			for(int j=0;j<this.testProfile.size();j++){
-			for(int j=0;j<=SegmentFitter.POINTS_TO_TEST;j++){
+			for(int j=0;j<SegmentFitter.POINTS_TO_TEST;j++){
 				
 				// make the new segment
 				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, profileLength);
@@ -220,7 +232,16 @@ public class SegmentFitter {
 		return newList;
 	}
 	
+	/**
+	 * Basic preprocessing of a segment to be fitted
+	 * @param seg the segment to process
+	 * @param prev the previous segment in the list
+	 * @return the process segment for fitting
+	 */
 	private NucleusBorderSegment preprocessSegment(NucleusBorderSegment seg, NucleusBorderSegment prev){
+		if(seg==null || prev==null){
+			throw new IllegalArgumentException("Current of previous segment is null");
+		}
 		
 		NucleusBorderSegment unalteredSeg = new NucleusBorderSegment(seg);
 		int segLength = seg.length(this.testProfile.size());

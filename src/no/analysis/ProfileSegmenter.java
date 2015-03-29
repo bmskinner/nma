@@ -65,8 +65,9 @@ public class ProfileSegmenter {
 		Profile minima = this.profile.smooth(2).getLocalMinima(5);
 		Profile deltas = this.profile.smooth(2).calculateDeltas(2); // minima and maxima should be near 0 
 		Profile dDeltas = deltas.calculateDeltas(2); // second differential
-		//		Profile dMax = deltas.getLocalMaxima(3);
-		//		Profile dMin = deltas.getLocalMinima(3);
+		double dMax = dDeltas.getMax();
+		double dMin = dDeltas.getMin();
+		double variationRange = Math.abs(dMax - dMin);
 
 		int segmentStart = 0;
 		int segmentEnd = 0;
@@ -74,10 +75,10 @@ public class ProfileSegmenter {
 		for(int i=0;i<profile.size();i++){
 			segmentEnd = i;
 			segLength++;
-			// We want a minima or maxima, and the value must be distinct from its surroundings
-			//			
+			
+			// We want a minima or maxima, and the value must be distinct from its surroundings			
 			if( ( maxima.get(i)==1 || minima.get(i)==1 ) 
-					&& dDeltas.get(i)  > Math.max( dDeltas.getMax()*0.05, dDeltas.getMin()*0.05)
+					&& Math.abs(dDeltas.get(i)) > variationRange*0.02
 					&& segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// we've hit a new segment
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd);
@@ -156,7 +157,7 @@ public class ProfileSegmenter {
 				
 				// draw the coloured line at the base of the plot
 				segPlot.drawLine(b.getStartIndex(), -30, b.getEndIndex(), -30);
-				IJ.log("    Line from "+b.getStartIndex()+" to "+b.getEndIndex());
+//				IJ.log("    Line from "+b.getStartIndex()+" to "+b.getEndIndex());
 				
 				// draw the section of the profile
 				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), b.getEndIndex());
