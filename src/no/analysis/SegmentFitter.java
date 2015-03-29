@@ -35,7 +35,7 @@ public class SegmentFitter {
 	/**
 	 * The smallest number of points a segment can contain. 
 	 */
-	private static int MIN_SEGMENT_SIZE = 10;
+	private static int MIN_SEGMENT_SIZE = 5;
 	
 	/**
 	 * Construct with a median profile and list of segments. The originals will not be modified
@@ -75,6 +75,7 @@ public class SegmentFitter {
 		List<NucleusBorderSegment> newList = this.runFitter();
 		
 //		Profile revisedProfile = this.recombineSegments(newList, testProfile);
+		IJ.log(n.getImageName()+"-"+n.getNucleusNumber());
 		double score = testProfile.differenceToProfile(medianProfile);
 		IJ.log("Start score: "+score);
 		double prevScore = score+1;
@@ -165,6 +166,7 @@ public class SegmentFitter {
 			int oldStart = seg.getStartIndex();
 			int oldEnd = seg.getEndIndex();
 			NucleusBorderSegment oldSeg = new NucleusBorderSegment(oldStart, oldEnd);
+			int oldLength = oldSeg.length(this.testProfile.size());
 			seg.print();
 			
 			if(i>0){ // carry over the offset from the previous segment
@@ -200,25 +202,27 @@ public class SegmentFitter {
 				// make the new segment
 				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, this.testProfile.size());
 				NucleusBorderSegment newSeg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex);
-				
-				// check that the proposed new segment is longer that the minimum reqired length
-				if(newSeg.length(this.testProfile.size())<SegmentFitter.MIN_SEGMENT_SIZE){
-					continue;
-				}
-				
+								
 				// get the score for the new segment
 				score = compareSegments(this.medianSegments.get(i), newSeg);
+				
+				// add a penalty for each point that makes the segment longer
+				if(newSeg.length(this.testProfile.size())>oldLength){
+					score += newSeg.length(  this.testProfile.size()-  oldLength  );
+				}
+				
+				// add a penalty if the proposed new segment is shorter that the minimum segment length
+				if(newSeg.length(this.testProfile.size())<SegmentFitter.MIN_SEGMENT_SIZE){
+					score += newSeg.length(  oldLength - this.testProfile.size() );
+				}
+				
+				
 				if(score<minScore){
 					minScore=score;
 					bestSeg = newSeg;
 				}
-				// this is a tempting system, but it falls apart as soon as we get very wibbly nuclei
-//				if((testMinima.get(newSeg.getEndIndex())==1 || testMaxima.get(newSeg.getEndIndex())==1) && j>-SegmentFitter.POINTS_TO_TEST){ // we found something interesting
-//					bestSeg = newSeg;
-//					IJ.log("      Endpoint offset "+j+": Mimum or maximum");	
-//					break; // stop looking, we have our point of interest
-//				}
-				IJ.log("      Endpoint offset "+j+": "+score);	
+				
+//				IJ.log("      Endpoint offset "+j+": "+score);	
 			}
 			newList.add(bestSeg);
 			if(i==this.testSegments.size()-1){ 
