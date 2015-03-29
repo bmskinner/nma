@@ -63,21 +63,22 @@ public class ProfileSegmenter {
 	public List<NucleusBorderSegment> segment(){
 		Profile maxima = this.profile.smooth(2).getLocalMaxima(5);
 		Profile minima = this.profile.smooth(2).getLocalMinima(5);
-		Profile deltas = this.profile.smooth(2).calculateDeltas(4);
-//		Profile dMax = deltas.getLocalMaxima(3);
-//		Profile dMin = deltas.getLocalMinima(3);
-		
+		Profile deltas = this.profile.smooth(2).calculateDeltas(2); // minima and maxima should be near 0 
+		Profile dDeltas = deltas.calculateDeltas(2); // second differential
+		//		Profile dMax = deltas.getLocalMaxima(3);
+		//		Profile dMin = deltas.getLocalMinima(3);
+
 		int segmentStart = 0;
 		int segmentEnd = 0;
 		int segLength = 0;
 		for(int i=0;i<profile.size();i++){
 			segmentEnd = i;
 			segLength++;
-			// we want a minima or maxima, and the rate of change must be enough to warrent a segemnt
-//			&& Math.abs(deltas.get(i))> Math.max( deltas.getMax()*0.05, deltas.getMin()*0.05)
+			// We want a minima or maxima, and the value must be distinct from its surroundings
+			//			
 			if( ( maxima.get(i)==1 || minima.get(i)==1 ) 
-				 
-				 && segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
+					&& dDeltas.get(i)  > Math.max( dDeltas.getMax()*0.05, dDeltas.getMin()*0.05)
+					&& segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// we've hit a new segment
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd);
 				segments.add(seg);
@@ -167,7 +168,7 @@ public class ProfileSegmenter {
 			} else { // handle wrap arounds
 				segPlot.drawLine(0, -30, b.getEndIndex(), -30);
 				segPlot.drawLine(b.getStartIndex(), -30, profile.size(), -30);
-				IJ.log("    Line from 0 to "+b.getEndIndex()+" and "+b.getStartIndex()+" to "+profile.size());
+//				IJ.log("    Line from 0 to "+b.getEndIndex()+" and "+b.getStartIndex()+" to "+profile.size());
 				
 				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), profile.size()-1);
 				double[] yPart = Arrays.copyOfRange(ypoints, b.getStartIndex(), profile.size()-1);

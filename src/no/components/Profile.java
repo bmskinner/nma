@@ -467,8 +467,7 @@ public class Profile {
           delta += (array[i] - prevValues[k]) + (nextValues[k] - array[i]);
           
         } else {
-          delta += (prevValues[k-1] - prevValues[k] ) + (nextValues[k-1] - nextValues[k]);
-          
+          delta += ( prevValues[k] - prevValues[k-1]) + (nextValues[k] - nextValues[k-1]);
         }
         
       }
@@ -477,6 +476,26 @@ public class Profile {
     }
     Profile result = new Profile(deltas);
     return result;
+  }
+  
+  public Profile differentiate(){
+
+	  double[] deltas = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { // for each position in sperm
+
+		  int prev_i = Utils.wrapIndex( i-1  , this.size() ); // the index before
+		  int next_i = Utils.wrapIndex( i+1  , this.size() ); // the index after
+
+
+		  double delta = 	array[i]	-  array[prev_i] +
+				  			array[next_i]- array[i];
+
+
+		  deltas[i] = delta;
+	  }
+	  Profile result = new Profile(deltas);
+	  return result;
   }
 
   // use for debugging
