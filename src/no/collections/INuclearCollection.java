@@ -168,7 +168,7 @@ public interface INuclearCollection
 
 	public void exportCompositeImage(String filename);
 
-	public void exportProfilePlot(Plot plot, String name);
+//	public void exportProfilePlot(Plot plot, String name);
 	
 	/*
 		Draw the charts of the profiles of the nuclei within this collecion.
@@ -186,7 +186,7 @@ public interface INuclearCollection
 
 	public void addSignalsToProfileChartFromPoint(String pointType, Plot plot);
 
-	public void exportProfilePlots();
+//	public void exportProfilePlots();
 
 	public ProfileCollection getProfileCollection();
 

@@ -118,16 +118,18 @@ public class AsymmetricNucleusCollection
   @Override 
   public void measureNuclearOrganisation(){
 
-    if(this.getRedSignalCount()>0 || this.getGreenSignalCount()>0){
+	  if(this.getRedSignalCount()>0 || this.getGreenSignalCount()>0){
 
-      for(int i= 0; i<this.getNucleusCount();i++){
-        INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-        n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
-      }
-      this.exportSignalStats();
-      this.addSignalsToProfileCharts();
-      this.exportProfilePlots();
-    }
+		  for(int i= 0; i<this.getNucleusCount();i++){
+			  INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+			  n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
+		  }
+		  this.exportSignalStats();
+		  this.addSignalsToProfileCharts();
+		  this.profileCollection.exportProfilePlots(this.getFolder()+
+				  File.separator+
+				  this.getOutputFolder(), this.getType());
+	  }
   }
 
 

@@ -140,10 +140,10 @@ implements INuclearCollection
 	  this.profileCollection.addMedianLinesToPlots();
 	  //    this.drawNormalisedMedianLines();
 
-//	  this.exportProfilePlots();
+	  //	  this.exportProfilePlots();
 	  this.profileCollection.exportProfilePlots(this.getFolder()+
-	        	File.separator+
-              this.getOutputFolder(), this.getType());
+			  File.separator+
+			  this.getOutputFolder(), this.getType());
   }
 
   public void calculateOffsets(){
@@ -186,7 +186,7 @@ implements INuclearCollection
 		  String segmentedProfileName = this.getFolder()+
 										File.separator+
 										this.getOutputFolder()+
-										File.separator+"plotSegments"+
+										File.separator+"plot.Segments"+
 										"."+
 										this.getType()+".tiff";
 		  segmenter.draw(segmentedProfileName);
@@ -753,53 +753,56 @@ implements INuclearCollection
       this.exportDistancesBetweenSingleSignals();
       this.addSignalsToProfileCharts();
       this.doShellAnalysis();
+      this.profileCollection.exportProfilePlots(this.getFolder()+
+			  File.separator+
+			  this.getOutputFolder(), this.getType());
     }
   }
 
   public void doShellAnalysis(){
+	  IJ.log("    Performing shell analysis...");
+	  String redLogFile   = getLogFileName( "logShellsRed"  );
+	  String greenLogFile = getLogFileName( "logShellsGreen");
 
-    String redLogFile   = getLogFileName( "logShellsRed"  );
-    String greenLogFile = getLogFileName( "logShellsGreen");
-    
-    ShellCounter   redCounter = new ShellCounter(5);
-    ShellCounter greenCounter = new ShellCounter(5);
+	  ShellCounter   redCounter = new ShellCounter(5);
+	  ShellCounter greenCounter = new ShellCounter(5);
 
-    // make the shells and measure the values
-    for(int i= 0; i<this.getNucleusCount();i++){
-      INuclearFunctions n = this.getNucleus(i);
-      ShellAnalyser shellAnalyser = new ShellAnalyser(n);
-      shellAnalyser.createShells();
-      shellAnalyser.exportImage();
+	  // make the shells and measure the values
+	  for(int i= 0; i<this.getNucleusCount();i++){
+		  INuclearFunctions n = this.getNucleus(i);
+		  ShellAnalyser shellAnalyser = new ShellAnalyser(n);
+		  shellAnalyser.createShells();
+		  shellAnalyser.exportImage();
 
-      List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
-      signals.add(n.getRedSignals());
-      signals.add(n.getGreenSignals());
+		  List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
+		  signals.add(n.getRedSignals());
+		  signals.add(n.getGreenSignals());
 
-      int channel = 0;
-      
-      // put each signal in the correct counter
-      for( List<NuclearSignal> signalGroup : signals ){
+		  int channel = 0;
 
-    	  if(signalGroup.size()>0){
-    		  ShellCounter counter = channel == Nucleus.RED_CHANNEL ? redCounter : greenCounter;
-    		  
-    		  for(NuclearSignal s : signalGroup){
-    			  try {
-    				  double[] signalPerShell = shellAnalyser.findShell(s, channel);
-    				  counter.addValues(signalPerShell);
-    			  } catch (Exception e) {
-    				  IJ.log("    Error in shell analysis: "+e.getMessage());;
-    			  }
-    		  } // end for signals
-    	  } // end if signals
-    	  channel++;
-      } // end for signal group
-    } // end nucleus iterations
-    
-    // get stats and export
-      redCounter.export(new File(redLogFile  ));
-    greenCounter.export(new File(greenLogFile));
+		  // put each signal in the correct counter
+		  for( List<NuclearSignal> signalGroup : signals ){
 
+			  if(signalGroup.size()>0){
+				  ShellCounter counter = channel == Nucleus.RED_CHANNEL ? redCounter : greenCounter;
+
+				  for(NuclearSignal s : signalGroup){
+					  try {
+						  double[] signalPerShell = shellAnalyser.findShell(s, channel);
+						  counter.addValues(signalPerShell);
+					  } catch (Exception e) {
+						  IJ.log("    Error in shell analysis: "+e.getMessage());;
+					  }
+				  } // end for signals
+			  } // end if signals
+			  channel++;
+		  } // end for signal group
+	  } // end nucleus iterations
+
+	  // get stats and export
+	  redCounter.export(new File(redLogFile  ));
+	  greenCounter.export(new File(greenLogFile));
+	  IJ.log("    Shell analysis complete");
   }
   
 
@@ -1080,19 +1083,19 @@ implements INuclearCollection
     IJ.log("    Composite image created");
   }
 
-  public void exportProfilePlot(Plot plot, String name){
-    ImagePlus image = plot.getImagePlus();
-    Calibration cal = image.getCalibration();
-    cal.setUnit("pixels");
-    cal.pixelWidth = 1;
-    cal.pixelHeight = 1;
-    IJ.saveAsTiff(image, this.getFolder()+
-    					File.separator+
-    					this.getOutputFolder()+
-    					File.separator+name+
-    					"."+
-    					this.getType()+".tiff");
-  }
+//  public void exportProfilePlot(Plot plot, String name){
+//	  ImagePlus image = plot.getImagePlus();
+//	  Calibration cal = image.getCalibration();
+//	  cal.setUnit("pixels");
+//	  cal.pixelWidth = 1;
+//	  cal.pixelHeight = 1;
+//	  IJ.saveAsTiff(image, this.getFolder()+
+//			  File.separator+
+//			  this.getOutputFolder()+
+//			  File.separator+name+
+//			  "."+
+//			  this.getType()+".tiff");
+//  }
 
   /*
     Draw the charts of the profiles of the nuclei within this collecion.
@@ -1104,25 +1107,12 @@ implements INuclearCollection
 	  for( String pointType : this.profileCollection.getPlotKeys() ){
 
 		  List<Profile> profiles = new ArrayList<Profile>(0);
-		  //    	
-		  //      Plot  rawPlot = this.profileCollection.getPlots(pointType).get("raw");
-		  //      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
 
 		  for(int i=0;i<this.getNucleusCount();i++){
 
 			  INuclearFunctions n = this.getNucleus(i);
-			  //
-			  //        double[] xPointsRaw  = n.getAngleProfile().getPositions(n.getLength()).asArray();
-			  //        double[] xPointsNorm = n.getAngleProfile().getPositions(100).asArray();
 
 			  profiles.add(n.getAngleProfile(pointType));
-			  //        Profile anglesFromPoint = n.getAngleProfile(pointType);
-
-			  //        rawPlot.setColor(Color.LIGHT_GRAY);
-			  //        rawPlot.addPoints(xPointsRaw, anglesFromPoint.asArray(), Plot.LINE);
-			  //
-			  //        normPlot.setColor(Color.LIGHT_GRAY);
-			  //        normPlot.addPoints(xPointsNorm, anglesFromPoint.asArray(), Plot.LINE);
 		  }
 		  this.profileCollection.drawProfilePlots(pointType, profiles);
 	  }   
@@ -1131,9 +1121,10 @@ implements INuclearCollection
   /*
     Draw a boxplot on the normalised plots. Specify which BorderPointOfInterest is to be plotted.
   */
-  public void drawBoxplot(String profilePointType, Plot plot, String boxPointType){
+  public void drawBoxplot(String profilePointType, String boxPointType){
 
     // get the tail positions with the head offset applied
+	  List<Double> pointIndexes = new ArrayList<Double>(0);
     double[] xPoints = new double[this.getNucleusCount()];
     for(int i= 0; i<this.getNucleusCount();i++){
 
@@ -1149,24 +1140,26 @@ implements INuclearCollection
 
       // normalise to 100
       xPoints[i] =  (   (double) offsetIndex / (double) n.getLength()  ) * 100;
+      pointIndexes.add((   (double) offsetIndex / (double) n.getLength()  ) * 100);
     }
-    double[] yPoints = new double[xPoints.length];
-    Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=CHART_TAIL_BOX_Y_MID
-    plot.setColor(Color.LIGHT_GRAY);
-    plot.addPoints(xPoints, yPoints, Plot.DOT);
-
-    // median tail positions
-    double tailQ50 = Stats.quartile(xPoints, 50);
-    double tailQ25 = Stats.quartile(xPoints, 25);
-    double tailQ75 = Stats.quartile(xPoints, 75);
-
-    plot.setColor(Color.DARK_GRAY);
-    plot.setLineWidth(1);
-    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
-    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
-    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
-    plot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
-    plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
+    this.profileCollection.addBoxplot(profilePointType, pointIndexes);
+//    double[] yPoints = new double[xPoints.length];
+//    Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=CHART_TAIL_BOX_Y_MID
+//    plot.setColor(Color.LIGHT_GRAY);
+//    plot.addPoints(xPoints, yPoints, Plot.DOT);
+//
+//    // median tail positions
+//    double tailQ50 = Stats.quartile(xPoints, 50);
+//    double tailQ25 = Stats.quartile(xPoints, 25);
+//    double tailQ75 = Stats.quartile(xPoints, 75);
+//
+//    plot.setColor(Color.DARK_GRAY);
+//    plot.setLineWidth(1);
+//    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
+//    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
+//    plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
+//    plot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
+//    plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
   }
 
   public void drawBoxplots(){
@@ -1174,9 +1167,9 @@ implements INuclearCollection
     Set<String> headings = this.profileCollection.getPlotKeys();
     for( String pointType : headings ){
 
-        Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
+//        Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
 //        drawMedianLine(pointType, normPlot);
-        drawBoxplot(pointType, normPlot, "tail");
+        drawBoxplot(pointType, "tail");
     }
   }
 
@@ -1243,16 +1236,16 @@ implements INuclearCollection
     }
   }
 
-  public void exportProfilePlots(){
-
-    Set<String> headings = this.profileCollection.getPlotKeys();
-    for( String pointType : headings ){
-
-      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
-      Plot  rawPlot = this.profileCollection.getPlots(pointType).get("raw" );
-
-      exportProfilePlot(normPlot, "plot"+pointType+"Norm");
-      exportProfilePlot(rawPlot , "plot"+pointType+"Raw");
-    }  
-  }
+//  public void exportProfilePlots(){
+//
+//    Set<String> headings = this.profileCollection.getPlotKeys();
+//    for( String pointType : headings ){
+//
+//      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
+//      Plot  rawPlot = this.profileCollection.getPlots(pointType).get("raw" );
+//
+//      exportProfilePlot(normPlot, "plot"+pointType+"Norm");
+//      exportProfilePlot(rawPlot , "plot"+pointType+"Raw");
+//    }  
+//  }
 }

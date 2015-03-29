@@ -95,10 +95,10 @@ public class ShellCounter {
 	    }
 	    
 	    // export chi square stats
-	    log.append("--------\r\nCHI SQUARE\r\n--------\r\n");
-	    log.append("Signals   :\t"+this.size()+"\r\n");
-	    log.append("Chi square:\t"+getChiSquare()+"\r\n");
-	    log.append("p-value   :\t"+getPValue()+"\r\n");
+//	    log.append("--------\r\nCHI SQUARE\r\n--------\r\n");
+//	    log.append("Signals   :\t"+this.size()+"\r\n");
+//	    log.append("Chi square:\t"+getChiSquare()+"\r\n");
+//	    log.append("p-value   :\t"+getPValue()+"\r\n");
 	    
 	    
 	    log.append("--------\r\nOUTER <- SHELLS -> INNER\r\n--------\r\n");

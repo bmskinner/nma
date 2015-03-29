@@ -6,20 +6,27 @@ import ij.gui.Plot;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import no.nuclei.INuclearFunctions;
+import no.utility.Stats;
+import no.utility.Utils;
 
 public class ProfileCollection {
+	
+	private static final double CHART_TAIL_BOX_Y_MID = 340;
+	private static final double CHART_TAIL_BOX_Y_MAX = 355;
+	private static final double CHART_TAIL_BOX_Y_MIN = 325;
 	
 	private Map<String, ProfileFeature> 	features 	= new HashMap<String, ProfileFeature>();
 	private Map<String, Profile> 			profiles 	= new HashMap<String, Profile>(0); 
 	private Map<String, ProfileAggregate> 	aggregates 	= new HashMap<String, ProfileAggregate>();
 	private Map<String, ProfilePlot> 		plots 		= new HashMap<String, ProfilePlot>();
-	private String collectionName;
+	private String collectionName; // the name of the NucleusCollection - e.g analysable, red, not_red
 	
 	public ProfileCollection(String name){
 		this.collectionName = name;
@@ -210,6 +217,34 @@ public class ProfileCollection {
 	    }
 	}
 
+	
+	public void addBoxplot(String pointType, List<Double> indexes){
+
+		double[] xPoints = new double[indexes.size()];
+		for(int i= 0; i<indexes.size();i++){
+			xPoints[i] = indexes.get(i);
+		}
+		// get the tail positions with the head offset applied
+		double[] yPoints = new double[xPoints.length];
+		Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=CHART_TAIL_BOX_Y_MID
+
+		Plot plot = this.getPlots(pointType).get("norm");
+		plot.setColor(Color.LIGHT_GRAY);
+		plot.addPoints(xPoints, yPoints, Plot.DOT);
+
+		// median tail positions
+		double tailQ50 = Stats.quartile(xPoints, 50);
+		double tailQ25 = Stats.quartile(xPoints, 25);
+		double tailQ75 = Stats.quartile(xPoints, 75);
+
+		plot.setColor(Color.DARK_GRAY);
+		plot.setLineWidth(1);
+		plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
+		plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
+		plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
+		plot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
+		plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
+	}
 	
 	// TODO: make this work with pointTypes
 	public void drawProfilePlots(String pointType, List<Profile> profiles){
