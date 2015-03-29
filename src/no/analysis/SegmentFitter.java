@@ -2,7 +2,6 @@ package no.analysis;
 
 import ij.IJ;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.List;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.nuclei.INuclearFunctions;
-import no.nuclei.Nucleus;
 import no.utility.Utils;
 
 /**
@@ -32,12 +30,12 @@ public class SegmentFitter {
 	 * The number of points ahead and behind to test
 	 * when creating new segment profiles
 	 */
-	private static int POINTS_TO_TEST = 20;
+	private static int POINTS_TO_TEST = 50;
 	
 	/**
 	 * The smallest number of points a segment can contain. 
 	 */
-	private static int MIN_SEGMENT_SIZE = 20;
+	private static int MIN_SEGMENT_SIZE = 10;
 	
 	/**
 	 * Construct with a median profile and list of segments. The originals will not be modified
@@ -76,10 +74,19 @@ public class SegmentFitter {
 		
 		List<NucleusBorderSegment> newList = this.runFitter();
 		
+//		Profile revisedProfile = this.recombineSegments(newList, testProfile);
+		double score = testProfile.differenceToProfile(medianProfile);
+		IJ.log("Start score: "+score);
+		double prevScore = score+1;
+		while(score<prevScore){
+			newList = runFitter();
+			Profile revisedProfile = this.recombineSegments(newList, testProfile);
+			prevScore = score;
+			score = revisedProfile.differenceToProfile(medianProfile);
+			IJ.log("Score: "+score);
+		}
+		IJ.log("Final score: "+score);
 		n.setSegments(newList);
-		
-//		ProfileSegmenter segmenter = new ProfileSegmenter(this.testProfile, newList);
-//		segmenter.draw(n.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+n.getNucleusNumber()+".revised_segments.tiff");
 	}
 	
 	public Profile recombine(INuclearFunctions n){
@@ -91,15 +98,20 @@ public class SegmentFitter {
 		}
 		Profile testMedian = new Profile(n.getAngleProfile());
 		List<NucleusBorderSegment> testSegments = n.getSegments();
-		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
 		
+		return new Profile(recombineSegments(testSegments, testMedian));
+	}
+	
+	private Profile recombineSegments(List<NucleusBorderSegment> testSegments, Profile testMedian){
+		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
+
 		// go through each segment
 		for(int i=0; i<this.testSegments.size();i++){
 			NucleusBorderSegment targetSeg = this.medianSegments.get(i);
-			
+
 			// we may need to trim out the last element, because the segments share endpoints
 			NucleusBorderSegment   testSeg = testSegments.get(i);
-			
+
 			// interpolate the test segments to the length of the median segments
 			Profile testSegProfile = this.getSegmentProfile(testSeg, testMedian);
 			Profile revisedProfile = testSegProfile.interpolate(targetSeg.length(this.medianProfile.size()));
@@ -133,14 +145,12 @@ public class SegmentFitter {
 	}
 	
 	/**
-	 * for each test segment
-				// compare with median segment
-				// move the increase or decrease the test endpoint
-				// score again
-				// get the lowest score within ?10 border points either side
-				// next segment
-			
-			// update the nucleus
+	 * for each test segment: compare with median segment
+	 *	increase or decrease the test endpoint
+	 *  score again
+	 *  get the lowest score within ?10 border points either side
+	 *  next segment
+	 *  update the nucleus
 	 */
 	private List<NucleusBorderSegment> runFitter(){
 //		IJ.log("Running fitter:");
@@ -148,20 +158,44 @@ public class SegmentFitter {
 		
 //		Profile testMinima = this.testProfile.smooth(2).getLocalMinima(5);
 //		Profile testMaxima = this.testProfile.smooth(2).getLocalMaxima(5);
-		
+		IJ.log("");
 		for(int i=0; i<this.testSegments.size();i++){
-//			IJ.log("    Segment "+i);			
+			IJ.log("    Segment "+i);			
 			NucleusBorderSegment seg = this.testSegments.get(i);
+			int oldStart = seg.getStartIndex();
+			int oldEnd = seg.getEndIndex();
+			NucleusBorderSegment oldSeg = new NucleusBorderSegment(oldStart, oldEnd);
+			seg.print();
+			
 			if(i>0){ // carry over the offset from the previous segment
 				seg = new NucleusBorderSegment(newList.get(i-1).getEndIndex(), seg.getEndIndex());
 			}
-//			seg.print();
 			
-				
+			// if the endpoint has ended up before the start point, the segment was not originally wrapping,
+			// correct the posiiton
+			if(seg.getEndIndex()<seg.getStartIndex() && !oldSeg.contains(0)){
+
+				// the new end point is the start point, plus the minimum segment size
+				int newEndIndex = Utils.wrapIndex(seg.getStartIndex()+SegmentFitter.MIN_SEGMENT_SIZE, this.testProfile.size());
+				seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex);
+			}
+			
+			// if the segment is otherwise too short, update the end position
+			if( seg.length(this.testProfile.size())<SegmentFitter.MIN_SEGMENT_SIZE){
+				// find the number of points needed to make the segment long enough
+				int extension = SegmentFitter.MIN_SEGMENT_SIZE - seg.length(this.testProfile.size());
+				// get the index of the new end point
+				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+extension, this.testProfile.size());
+				// add the new end index position to the segment
+				seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex);
+			}
+			
 			double score =  compareSegments(this.medianSegments.get(i), seg);
 			double minScore = score;
 			NucleusBorderSegment bestSeg = seg;
-			for(int j=-SegmentFitter.POINTS_TO_TEST;j<=SegmentFitter.POINTS_TO_TEST;j++){
+			
+			// this causes problems when the best fit places the startindex before the end index
+			for(int j=0;j<=SegmentFitter.POINTS_TO_TEST;j++){
 				
 				// make the new segment
 				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, this.testProfile.size());
@@ -178,13 +212,13 @@ public class SegmentFitter {
 					minScore=score;
 					bestSeg = newSeg;
 				}
-				// this is a tempting system, but it falls apart as soon as we get irregular nuclei
+				// this is a tempting system, but it falls apart as soon as we get very wibbly nuclei
 //				if((testMinima.get(newSeg.getEndIndex())==1 || testMaxima.get(newSeg.getEndIndex())==1) && j>-SegmentFitter.POINTS_TO_TEST){ // we found something interesting
 //					bestSeg = newSeg;
 //					IJ.log("      Endpoint offset "+j+": Mimum or maximum");	
 //					break; // stop looking, we have our point of interest
 //				}
-//				IJ.log("      Endpoint offset "+j+": "+score);	
+				IJ.log("      Endpoint offset "+j+": "+score);	
 			}
 			newList.add(bestSeg);
 			if(i==this.testSegments.size()-1){ 
@@ -194,7 +228,7 @@ public class SegmentFitter {
 				newList.set(0, new NucleusBorderSegment(bestSeg.getEndIndex(), newList.get(0).getEndIndex()));
 				
 			}
-//			bestSeg.print();	
+			bestSeg.print();	
 
 		}
 		return newList;

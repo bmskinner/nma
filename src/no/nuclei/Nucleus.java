@@ -1296,6 +1296,7 @@ public class Nucleus
 			
 			// segments
 			if(this.segmentList.size()>0){ // only draw if there are segments
+//				IJ.log("");
 //				IJ.log(" Nucleus "+this.getImageName()+"-"+this.getNucleusNumber());
 				for(int i=0;i<segmentList.size();i++){
 //					NucleusBorderSegment seg = this.getSegment(i);

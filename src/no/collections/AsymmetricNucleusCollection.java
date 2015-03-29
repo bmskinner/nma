@@ -19,7 +19,6 @@ import ij.io.Opener;
 import ij.process.ImageProcessor;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
 import no.nuclei.*;
 import no.components.Profile;
 import no.utility.*;

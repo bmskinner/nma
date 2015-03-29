@@ -11,10 +11,8 @@ package no.collections;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Overlay;
-import ij.gui.Plot;
 import ij.gui.TextRoi;
 import ij.io.Opener;
-import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
@@ -88,9 +86,9 @@ implements INuclearCollection
     -----------------------
   */
 
-	public void addNucleus(INuclearFunctions r){
-		this.nucleiCollection.add(r);
-	}
+  public void addNucleus(INuclearFunctions r){
+	  this.nucleiCollection.add(r);
+  }
 
   public void exportStatsFiles(){
     this.exportNuclearStats("logStats");
@@ -112,14 +110,18 @@ implements INuclearCollection
 
   public void measureProfilePositions(String pointType){
 
+	  	// create an initial profile aggregate from the estimated points
 	  this.createProfileAggregateFromPoint(pointType);
 
+	  // use the median profile of this aggregate to find the tail point
 	  this.findTailIndexInMedianCurve();
 
+	  // carry out iterative offsetting to refine the tail point estimate
 	  double score = this.compareProfilesToMedian(pointType);
 	  double prevScore = score+1;
-
-	  while(score < prevScore){
+	  IJ.log("    Profile alignment score: "+(int)score);
+	  int cycles = 10; // see what happens when we force it
+	  while(score < prevScore || cycles >0){
 		  this.createProfileAggregateFromPoint(pointType);
 		  this.findTailIndexInMedianCurve();
 		  this.calculateOffsets();
@@ -128,6 +130,7 @@ implements INuclearCollection
 		  score = this.compareProfilesToMedian(pointType);
 
 		  IJ.log("    Reticulating splines: score: "+(int)score);
+		  cycles--;
 	  }
 
 	  // assign and revise segments
@@ -136,11 +139,10 @@ implements INuclearCollection
 
 	  this.createProfileAggregates();
 
+	  // export the profiles
 	  this.drawProfilePlots();
 	  this.profileCollection.addMedianLinesToPlots();
-	  //    this.drawNormalisedMedianLines();
 
-	  //	  this.exportProfilePlots();
 	  this.profileCollection.exportProfilePlots(this.getFolder()+
 			  File.separator+
 			  this.getOutputFolder(), this.getType());
@@ -1103,6 +1105,10 @@ implements INuclearCollection
 	  }   
   }
   
+  /** 
+   * For each of the point types in the profile collection, add boxplot showing
+   * the tail position
+   */
   public void drawBoxplots(){
 	  for( String pointType : this.profileCollection.getPlotKeys() ){
 		  drawBoxplotFromPoint(pointType, "tail");
@@ -1112,7 +1118,7 @@ implements INuclearCollection
   /*
     Draw a boxplot on the normalised plots. Specify which BorderPointOfInterest is to be plotted.
    */
-  public void drawBoxplotFromPoint(String profilePointType, String boxPointType){
+  private void drawBoxplotFromPoint(String profilePointType, String boxPointType){
 
 	  // get the tail positions with the head offset applied
 	  List<Double> pointIndexes = new ArrayList<Double>(0);
@@ -1136,18 +1142,21 @@ implements INuclearCollection
 	  this.profileCollection.addBoxplot(profilePointType, pointIndexes);
   }
 
+  /** 
+   * For each of the point types in the profile collection, add nuclear signals
+   */
   public void addSignalsToProfileCharts(){
 
-    Set<String> headings = this.profileCollection.getPlotKeys();
+	  Set<String> headings = this.profileCollection.getPlotKeys();
 
-    for( String pointType : headings ){
-//      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
-      this.addSignalsToProfileChartFromPoint(pointType);
+	  for( String pointType : headings ){
+		  //      Plot normPlot = this.profileCollection.getPlots(pointType).get("norm");
+		  this.addSignalsToProfileChartFromPoint(pointType);
 
-    }    
+	  }    
   }
 
-  public void addSignalsToProfileChartFromPoint(String pointType){
+  private void addSignalsToProfileChartFromPoint(String pointType){
 	  // for each signal in each nucleus, find index of point. Draw dot
 
 	  List<List<XYPoint>> points = new ArrayList<List<XYPoint>>(0);

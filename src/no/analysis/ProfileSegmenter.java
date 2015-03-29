@@ -125,17 +125,28 @@ public class ProfileSegmenter {
 		segPlot.setLineWidth(narrowLine);
 		
 		// draw the coloured segments
+//		IJ.log("");
 		int i=0;
 		for(NucleusBorderSegment b : segments){
+			
+//			IJ.log("Segment "+i);
+//			b.print();
 						
 			segPlot.setLineWidth(4);
-			if(i==0 && segments.size()==9){ // avoid colour wrapping when segment number is 1 more than the colour list
+			if(i==0 && segments.size()==colourList.size()+1){ // avoid colour wrapping when segment number is 1 more than the colour list
 				segPlot.setColor(Color.MAGENTA);
 			} else{
 				segPlot.setColor(getColor(i));
 			}
+			
+//			IJ.log("    Colour: "+getColor(i));
 			if(b.getStartIndex()<b.getEndIndex()){
+				
+				// draw the coloured line at the base of the plot
 				segPlot.drawLine(b.getStartIndex(), -30, b.getEndIndex(), -30);
+				IJ.log("    Line from "+b.getStartIndex()+" to "+b.getEndIndex());
+				
+				// draw the section of the profile
 				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), b.getEndIndex());
 				double[] yPart = Arrays.copyOfRange(ypoints, b.getStartIndex(), b.getEndIndex());
 				segPlot.setLineWidth(narrowLine);
@@ -145,6 +156,7 @@ public class ProfileSegmenter {
 			} else { // handle wrap arounds
 				segPlot.drawLine(0, -30, b.getEndIndex(), -30);
 				segPlot.drawLine(b.getStartIndex(), -30, profile.size(), -30);
+				IJ.log("    Line from 0 to "+b.getEndIndex()+" and "+b.getStartIndex()+" to "+profile.size());
 				
 				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), profile.size()-1);
 				double[] yPart = Arrays.copyOfRange(ypoints, b.getStartIndex(), profile.size()-1);

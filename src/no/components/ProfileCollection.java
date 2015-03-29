@@ -12,10 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import no.nuclei.INuclearFunctions;
-import no.nuclei.Nucleus;
 import no.utility.Stats;
-import no.utility.Utils;
 
 public class ProfileCollection {
 	

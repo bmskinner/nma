@@ -3,10 +3,8 @@ package no.collections;
 import no.nuclei.INuclearFunctions;
 
 import java.io.File;
-import java.util.Map;
 import java.util.List;
 
-import ij.gui.Plot;
 import no.components.Profile;
 import no.components.ProfileAggregate;
 import no.components.ProfileCollection;
@@ -150,13 +148,6 @@ public interface INuclearCollection
 	public void exportMediansOfProfile(Profile profile, String filename);
 
 	public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename);
-	/*
-		To hold the nuclear stats (and any stats), we want a structure that can 
-		hold: a column of data. Any arbitrary other numbers of columns of data.
-	*/
-//	public Map<String, List<String>> calculateNuclearStats();
-
-//	public void exportStats(Map<String, List<String>> stats, String filename);
 	
 	// this is for the mapping of image to path for 
 	// identifying FISHed nuclei in prefish images
@@ -167,26 +158,15 @@ public interface INuclearCollection
 	public void exportFilterStats();
 
 	public void exportCompositeImage(String filename);
-
-//	public void exportProfilePlot(Plot plot, String name);
 	
 	/*
 		Draw the charts of the profiles of the nuclei within this collecion.
 	*/
 	public void drawProfilePlots();
 
-	/*
-		Draw a median profile on the normalised plots.
-	*/
-//	public void drawMedianLine(String pointType, Plot plot);
-//
-//	public void drawNormalisedMedianLines();
+	public void drawBoxplots();
 
 	public void addSignalsToProfileCharts();
-
-	public void addSignalsToProfileChartFromPoint(String pointType);
-
-//	public void exportProfilePlots();
 
 	public ProfileCollection getProfileCollection();
 
