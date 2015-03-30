@@ -10,15 +10,19 @@ package no.analysis;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Roi;
 import ij.io.Opener;
 import ij.plugin.RoiEnlarger;
 import ij.plugin.RGBStackMerge;
 import ij.process.ByteProcessor;
+
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.*;
+
 import no.nuclei.*;
+import no.utility.ImageImporter;
 import no.collections.*;
 import no.components.*;
 
@@ -280,31 +284,31 @@ public class NucleusDetector {
   * @param image the ImagePlus to convert
   * @return a COLOR_RGB ImagePlus
   */
-  private ImagePlus makeRGB(ImagePlus image) throws Exception{
-    
-    ImagePlus mergedImage = new ImagePlus();
-    if(image.getType()==ImagePlus.GRAY8){
-
-      byte[] blank = new byte[image.getWidth() * image.getHeight()];
-      for( byte b : blank){
-        b = -128;
-      }
-
-      ImagePlus[] images = new ImagePlus[3];
-      images[0] = new ImagePlus("red",   new ByteProcessor(image.getWidth(), image.getHeight(), blank));
-      images[1] = new ImagePlus("green", new ByteProcessor(image.getWidth(), image.getHeight(), blank));
-      images[2] = image;      
-
-//      RGBStackMerge merger = new RGBStackMerge();
-      // IJ.log("  Merger created");
-      mergedImage = RGBStackMerge.mergeChannels(images, false); 
-      // IJ.log("  Merged");
-    } else{
-      IJ.log("  Cannot convert at present; please convert to RGB manually");
-      throw new Exception("Error converting image to RGB: wrong type");
-    }
-    return mergedImage.flatten();
-  }
+//  private ImagePlus makeRGB(ImagePlus image) throws Exception{
+//    
+//    ImagePlus mergedImage = new ImagePlus();
+//    if(image.getType()==ImagePlus.GRAY8){
+//
+//      byte[] blank = new byte[image.getWidth() * image.getHeight()];
+//      for( byte b : blank){
+//        b = -128;
+//      }
+//
+//      ImagePlus[] images = new ImagePlus[3];
+//      images[0] = new ImagePlus("red",   new ByteProcessor(image.getWidth(), image.getHeight(), blank));
+//      images[1] = new ImagePlus("green", new ByteProcessor(image.getWidth(), image.getHeight(), blank));
+//      images[2] = image;      
+//
+////      RGBStackMerge merger = new RGBStackMerge();
+//      // IJ.log("  Merger created");
+//      mergedImage = RGBStackMerge.mergeChannels(images, false); 
+//      // IJ.log("  Merged");
+//    } else{
+//      IJ.log("  Cannot convert at present; please convert to RGB manually");
+//      throw new Exception("Error converting image to RGB: wrong type");
+//    }
+//    return mergedImage.flatten();
+//  }
 
   /**
   * Create the output folder for the analysis if required
@@ -344,15 +348,19 @@ public class NucleusDetector {
       if(ok){
         try {
           Opener localOpener = new Opener();
-          ImagePlus image = localOpener.openImage(file.getAbsolutePath());             
-          // handle the image
-          if(image.getType()!=ImagePlus.COLOR_RGB){ // convert to RGB
-            IJ.log("Converting image to RGB");
-            image = this.makeRGB(image);
-          } 
+          ImagePlus image = localOpener.openImage(file.getAbsolutePath());   
+          
+//          // handle the image
+//          if(image.getType()!=ImagePlus.COLOR_RGB){ // convert to RGB
+//            IJ.log("Converting image to RGB");
+//            image = this.makeRGB(image);
+//          } 
+          // Add in the ImageStack code
+          ImageStack imageStack = ImageImporter.convert(image);
+          
           // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
-          File output = makeFolder(folder);
-          processImage(image, file);
+          makeFolder(folder);
+          processImage(imageStack, file);
           image.close();
 
         } catch (Exception e) { // end try
@@ -387,6 +395,22 @@ public class NucleusDetector {
     }
     return detector.getRoiMap();
   }
+  
+  protected Map<Roi, HashMap<String, Double>> getROIs(ImageStack image){
+	    Detector detector = new Detector();
+	    detector.setMaxSize(this.maxNucleusSize);
+	    detector.setMinSize(this.minNucleusSize);
+	    detector.setMinCirc(this.minNucleusCirc);
+	    detector.setMaxCirc(this.maxNucleusCirc);
+	    detector.setThreshold(this.nucleusThreshold);
+	    detector.setChannel(0);
+	    try{
+	      detector.run(image);
+	    } catch(Exception e){
+	      IJ.log("Error in nucleus detection: "+e.getMessage());
+	    }
+	    return detector.getRoiMap();
+	  }
 
   /**
   * Call the nucleus detector on the given image.
@@ -395,19 +419,17 @@ public class NucleusDetector {
   * @param image the ImagePlus to be analysed
   * @param path the full path of the image
   */
-  protected void processImage(ImagePlus image, File path){
+  protected void processImage(ImageStack image, File path){
 
     IJ.log("File:  "+path.getName());
     Map<Roi, HashMap<String, Double>> map = getROIs(image);
-    if(map.size()==0){
+    if(map.isEmpty()){
       IJ.log("  No nuclei in image");
     }
 
     int i = 0;
 
-    Set<Roi> keys = map.keySet();
-
-    for(Roi roi : keys){
+    for(Roi roi : map.keySet()){
       
       IJ.log("  Acquiring nucleus "+i);
       try{
@@ -431,7 +453,7 @@ public class NucleusDetector {
   * @param path the full path to the image
   * @param values the Map holding stats for this nucleus
   */
-  protected void analyseNucleus(Roi nucleus, ImagePlus image, int nucleusNumber, File path, Map<String, Double> values){
+  protected void analyseNucleus(Roi nucleus, ImageStack image, int nucleusNumber, File path, Map<String, Double> values){
     
     // save the position of the roi, for later use
     double xbase = nucleus.getXBase();
@@ -444,18 +466,20 @@ public class NucleusDetector {
 
     // Enlarge the ROI, so we can do nucleus detection on the resulting original images
 //    RoiEnlarger enlarger = new RoiEnlarger();
+    ImageStack smallRegion = getRoiAsStack(nucleus, image);
     Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
-
+    ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
+    
     // make a copy of the nucleus only for saving out and processing
-    image.setRoi(enlargedRoi);
-    image.copy();
-    ImagePlus largeRegion = ImagePlus.getClipboard();
-    image.setRoi(nucleus);
-    image.copy();
-    ImagePlus smallRegion = ImagePlus.getClipboard();
+//    image.setRoi(enlargedRoi);
+//    image.copy();
+//    ImagePlus largeRegion = ImagePlus.getClipboard();
+//    image.setRoi(nucleus);
+//    image.copy();
+//    ImagePlus smallRegion = ImagePlus.getClipboard();
 
     nucleus.setLocation(0,0); // translate the roi to the new image coordinates
-    smallRegion.setRoi(nucleus);
+//    smallRegion.setRoi(nucleus);
 
     // turn roi into Nucleus for manipulation
     Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
@@ -478,5 +502,23 @@ public class NucleusDetector {
     // if everything checks out, add the measured parameters to the global pool
     NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
     collectionToAddTo.addNucleus(currentNucleus);
+  }
+  
+  
+  /**
+   * Given an roi and a stack, get a stack containing just the roi
+   * @param roi
+   * @param stack
+   */
+  private ImageStack getRoiAsStack(Roi roi, ImageStack stack){
+	  ImageStack result = new ImageStack();
+	  for(int i=0; i<stack.getSize();i++){
+		  ImagePlus image = new ImagePlus(null, stack.getProcessor(i));
+		  image.setRoi(roi);
+		  image.copy();
+		  ImagePlus region = ImagePlus.getClipboard();
+		  result.addSlice(region.getProcessor());
+	  }
+	  return result;
   }
 }

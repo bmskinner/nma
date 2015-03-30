@@ -10,13 +10,15 @@ package no.analysis;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.Scanner;
+
 import no.components.XYPoint;
 import no.analysis.ImageAligner;
 
@@ -193,7 +195,7 @@ public class NucleusRefinder
     For each nucleus, perform the analysis step
   */
   @Override
-  protected void processImage(ImagePlus image, File path){
+  protected void processImage(ImageStack image, File path){
 
     IJ.log("File:  "+path.getName());
     updateFileMap(path); // map from new to old
@@ -211,29 +213,7 @@ public class NucleusRefinder
     for(Roi roi : keys){
        try{
 
-        boolean ok = false; // don't capture by default
-        for( HashMap<File, XYPoint> hash : nucleiToFind ){ // the hash holds the tmeplate image path and position
-          Set<File> fileSet = hash.keySet();
-          for(File oldFile : fileSet){ // will only be one entry in this hash
-
-
-            if(oldFile.getName().equals(path.getName() ) ){
-              XYPoint p = hash.get(oldFile);
-
-              // APPLY THE CALCULATED OFFSET HERE
-              XYPoint imageOffset = offsets.get(path);
-
-              int xToFind = p.getXAsInt()-imageOffset.getXAsInt();
-              int yToFind = p.getYAsInt()-imageOffset.getYAsInt();
-              
-              if(roi.getBounds().contains( xToFind, yToFind )){
-                ok = true;
-                IJ.log("  Acquiring nucleus at: "+xToFind+","+yToFind);
-              }
-            }
-
-          }
-        }
+        boolean ok = checkRoi(roi, path);
 
         if(ok){
           analyseNucleus(roi, image, i, path, map.get(roi)); // get the profile data back for the nucleus
@@ -244,5 +224,31 @@ public class NucleusRefinder
       }
       i++;
     } 
+  }
+  
+  private boolean checkRoi(Roi roi, File path){
+	  boolean result = false;
+	  for( HashMap<File, XYPoint> hash : nucleiToFind ){ // the hash holds the tmeplate image path and position
+
+		  for(File oldFile : hash.keySet()){ // will only be one entry in this hash
+
+			  if(oldFile.getName().equals(path.getName() ) ){
+				  XYPoint p = hash.get(oldFile);
+
+				  // APPLY THE CALCULATED OFFSET HERE
+				  XYPoint imageOffset = offsets.get(path);
+
+				  int xToFind = p.getXAsInt()-imageOffset.getXAsInt();
+				  int yToFind = p.getYAsInt()-imageOffset.getYAsInt();
+
+				  if(roi.getBounds().contains( xToFind, yToFind )){
+					  result = true;
+					  IJ.log("  Acquiring nucleus at: "+xToFind+","+yToFind);
+				  }
+			  }
+
+		  }
+	  }
+	  return result;
   }
 }

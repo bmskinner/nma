@@ -11,7 +11,6 @@ package no.nuclei;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.Plot;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -95,12 +94,15 @@ public class Nucleus
 	private Roi roi; // the original ROI
 
 	private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
+	private ImageStack enlargedPlanes;
 	private ImagePlus sourceImage;    // a copy of the input nucleus. Not to be altered
 	private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
 	private ImagePlus enlargedImage; // a copy of the input nucleus for use in later reanalyses that need a particle detector
 
 	private List<NuclearSignal> redSignals   = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
 	private List<NuclearSignal> greenSignals = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
+	
+	private Map<Integer, ArrayList<NuclearSignal>> signalCollection = new HashMap<Integer, ArrayList<NuclearSignal>>();
 
 	private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
 
@@ -117,6 +119,18 @@ public class Nucleus
 		this.nucleusNumber   = number;
 		this.position        = position;
 	}
+	
+	public Nucleus (Roi roi, File file, ImageStack image, ImageStack enlarged, int number, String position) { // construct from an roi
+
+		// assign main features
+		this.roi             = roi;
+		this.imagePlanes     = image;
+		this.annotatedImage = new ImagePlus("annotated", image.duplicate()); // NEEDS TO BE A COPY
+		this.enlargedPlanes  = enlarged;
+		this.sourceFile      = file;
+		this.nucleusNumber   = number;
+		this.position        = position;
+	}
 
 	public Nucleus(){
 		// for subclasses to access
@@ -129,6 +143,8 @@ public class Nucleus
 		this.setSourceFile(n.getSourceFile());
 		this.setAnnotatedImage(n.getAnnotatedImage());
 		this.setEnlargedImage(n.getEnlargedImage());
+		this.setImagePlanes(n.getImagePlanes());
+		this.setEnlargedPlanes(n.getEnlargedPlanes());
 		this.setNucleusNumber(n.getNucleusNumber());
 		this.setNucleusFolder(n.getNucleusFolder());
 		this.setPerimeter(n.getPerimeter());
@@ -137,8 +153,9 @@ public class Nucleus
 		this.setArea(n.getArea());
 		this.setAngleProfile(n.getAngleProfile());
 		this.setCentreOfMass(n.getCentreOfMass());
-		this.setRedSignals(n.getRedSignals());
-		this.setGreenSignals(n.getGreenSignals());
+		this.setSignals(n.getSignalCollection());
+//		this.setRedSignals(n.getRedSignals());
+//		this.setGreenSignals(n.getGreenSignals());
 		this.setPolygon(n.getPolygon());
 		this.setDistanceProfile(n.getDistanceProfile());
 		this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
@@ -254,6 +271,14 @@ public class Nucleus
 
 	public ImagePlus getEnlargedImage(){
 		return this.enlargedImage;
+	}
+	
+	public ImageStack getImagePlanes(){
+		return this.imagePlanes;
+	}
+		
+	public ImageStack getEnlargedPlanes(){
+		return this.enlargedPlanes;
 	}
 
 	public String getImageName(){
@@ -434,6 +459,10 @@ public class Nucleus
 	public void setCentreOfMass(XYPoint d){
 		this.centreOfMass = new XYPoint(d);
 	}
+	
+	protected void setSignals(Map<Integer, ArrayList<NuclearSignal>> map){
+		this.signalCollection = map;
+	}
 
 	protected void setRedSignals(List<NuclearSignal> d){
 		this.redSignals = d;
@@ -463,6 +492,10 @@ public class Nucleus
 	protected void setSourceFile(File d){
 		this.sourceFile = d;
 	}
+	
+	protected void setImagePlanes(ImageStack s){
+		this.imagePlanes = s;
+	}
 
 	protected void setAnnotatedImage(ImagePlus d){
 		this.annotatedImage = d.duplicate();
@@ -470,6 +503,10 @@ public class Nucleus
 
 	protected void setEnlargedImage(ImagePlus d){
 		this.enlargedImage = d.duplicate();
+	}
+	
+	protected void setEnlargedPlanes(ImageStack s){
+		this.enlargedPlanes = s;
 	}
 
 	protected void setNucleusNumber(int d){
@@ -594,10 +631,9 @@ public class Nucleus
 
 		// find the signals
 		// within nuclear roi, analyze particles in colour channels
-		for(int i=0;i<2;i++){
-
-			int channel = i;
-
+		// the nucleus is in index 0, so from 1 to end
+		for(int channel=1;channel<this.imagePlanes.getSize();channel++){
+			
 			Detector detector = new Detector();
 			detector.setMaxSize(this.getArea() * this.maxSignalFraction);
 			detector.setMinSize(this.minSignalSize);
@@ -612,47 +648,64 @@ public class Nucleus
 			}
 			
 			Map<Roi, HashMap<String, Double>> map = detector.getRoiMap();
+			
+			if(!map.isEmpty()){
+				
+				ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
 
-			Set<Roi> keys = map.keySet();
-			for( Roi r : keys){
-				Map<String, Double> values = map.get(r);
-				NuclearSignal n = new NuclearSignal( r, 
-													 values.get("Area"), 
-													 values.get("Feret"), 
-													 values.get("Perim"), 
-													 new XYPoint(values.get("XM"), values.get("YM")));
+				for( Roi r : map.keySet()){
+					Map<String, Double> values = map.get(r);
+					NuclearSignal n = new NuclearSignal( r, 
+							values.get("Area"), 
+							values.get("Feret"), 
+							values.get("Perim"), 
+							new XYPoint(values.get("XM"), values.get("YM")));
 
-				if(i==RED_CHANNEL)
-					this.addRedSignal(n);
-
-				if(i==GREEN_CHANNEL)
-					this.addGreenSignal(n);
+					signals.add(n);
+				}
+				this.signalCollection.put(channel, signals);
 			}
+			
 		} 
+	}
+	
+	public List<NuclearSignal> getSignals(int channel){
+		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
+		List<NuclearSignal> signals = this.signalCollection.get(channel);
+		for( NuclearSignal n : signals){
+			result.add(new NuclearSignal(n));
+		}
+		return result;
+	}
+	
+	public Map<Integer, ArrayList<NuclearSignal>> getSignalCollection(){
+		return this.signalCollection;
 	}
 
 	public List<NuclearSignal> getRedSignals(){
-		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
-		for( NuclearSignal n : this.redSignals){
-			result.add(new NuclearSignal(n));
-		}
-		return result;
+		return this.getSignals(1);
 	}
 
 	public List<NuclearSignal> getGreenSignals(){
-		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
-		for( NuclearSignal n : this.greenSignals){
-			result.add(new NuclearSignal(n));
-		}
-		return result;
+		return this.getSignals(2);
+	}
+	
+	/**
+	 * @param n the signal
+	 * @param channel Channel 0 is for the nucleus; count from 1
+	 */
+	public void addSignal(NuclearSignal n, int channel){
+		List<NuclearSignal> signals = this.signalCollection.get(channel);
+		signals.add(n);
 	}
 
+
 	public void addRedSignal(NuclearSignal n){
-		this.redSignals.add(n);
+		this.addSignal(n, 1);
 	}
 
 	public void addGreenSignal(NuclearSignal n){
-		this.greenSignals.add(n);
+		this.addSignal(n, 2);
 	}
 
 	 /*
@@ -661,23 +714,15 @@ public class Nucleus
 	*/
 	private void calculateSignalDistancesFromCoM(){
 
-		List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
-		signals.add(redSignals);
-		signals.add(greenSignals);
-		int j=0;
+		for( int j=1; j<=signalCollection.size();j++ ){
 
-		for( List<NuclearSignal> signalGroup : signals ){
-
-			if(signalGroup.size()>0){
-				for(int i=0;i<signalGroup.size();i++){
-					NuclearSignal n = signalGroup.get(i);
+			List<NuclearSignal> signals = signalCollection.get(j);
+			if(signals.size()>0){
+				for(int i=0;i<signals.size();i++){
+					NuclearSignal n = signals.get(i);
 
 					double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
-
-					if(j==RED_CHANNEL)
-						this.redSignals.get(i).setDistanceFromCoM(distance);
-					if(j==GREEN_CHANNEL)
-						this.greenSignals.get(i).setDistanceFromCoM(distance);
+					n.setDistanceFromCoM(distance);
 				}
 			}
 			j++;

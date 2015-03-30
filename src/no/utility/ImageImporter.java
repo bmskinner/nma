@@ -1,5 +1,7 @@
 package no.utility;
 
+import java.util.Arrays;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
@@ -11,14 +13,25 @@ import ij.plugin.ChannelSplitter;
  *
  */
 public class ImageImporter {
-		
-	public ImageImporter(){
-	}
 	
+	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB };
+			
+	/**
+	 * Create an ImageStack from the input image
+	 * @param image the image to be converted to a stack
+	 * @return the stack with countertain in index 0
+	 */
 	public static ImageStack convert(ImagePlus image){
 		if(image==null){
 			throw new IllegalArgumentException("Input image is null");
 		}
+		
+		// check that we are able to handle this image type
+		if(!Arrays.asList(imageTypesProcessed).contains(image.getType()) ){
+			throw new IllegalArgumentException("Cannot handle image type");
+		}
+		
+		// do the conversions
 		ImageStack result = new ImageStack();
 		if(image.getType()==ImagePlus.GRAY8){
 			result = convertGreyscale(image);
