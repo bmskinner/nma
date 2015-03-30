@@ -15,9 +15,9 @@ public class ImageImporter {
 	public static final int COUNTERSTAIN = 1; // ImageStack slices are numbered from 1; first slice is blue
 	public static final int FIRST_SIGNAL_CHANNEL = 2; // ImageStack slices are numbered from 1; first slice is blue
 	
-	private static final int RGB_RED = 0;
-	private static final int RGB_GREEN = 1;
-	private static final int RGB_BLUE = 2;
+	public static final int RGB_RED = 0;
+	public static final int RGB_GREEN = 1;
+	public static final int RGB_BLUE = 2;
 	
 	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB };
 			

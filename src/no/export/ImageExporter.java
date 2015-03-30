@@ -18,25 +18,31 @@ public class ImageExporter {
 		if(stack==null){
 			throw new IllegalArgumentException("Stack is null");
 		}
+		ImagePlus result = null;
+		if(stack.getSize()==1){
+			result = makeGreyScaleIamge(stack);
+		}
+		if(stack.getSize()>1){
+			result = mergeStack(stack);
+		}
 		
-		ImagePlus image = mergeStack(stack);
-		return image;
+		return result;
+	}
+	
+	private static ImagePlus makeGreyScaleIamge(ImageStack stack){
+		return  new ImagePlus(null, stack.getProcessor(1));
 	}
 	
 	private static ImagePlus mergeStack(ImageStack stack){
-		ImagePlus result = null;
-		if(stack.getSize()==1){
-			result = new ImagePlus(null, stack.getProcessor(1));
-		}
-		if(stack.getSize()>1){ // ignore signals above 3 for now
-			ImagePlus[] images = new ImagePlus[3];
-			images[0] = new ImagePlus(null, stack.getProcessor(2));  
-			images[1] = new ImagePlus(null, stack.getProcessor(3));  
-			images[2] = new ImagePlus(null, stack.getProcessor(ImageImporter.COUNTERSTAIN));      
 
-			result = RGBStackMerge.mergeChannels(images, false); 
-			result.flatten();
-		}
+		ImagePlus[] images = new ImagePlus[3];
+		images[ImageImporter.RGB_RED]   = new ImagePlus("red", stack.getProcessor(ImageImporter.FIRST_SIGNAL_CHANNEL));  
+		images[ImageImporter.RGB_GREEN] = new ImagePlus("green", stack.getProcessor(3));  
+		images[ImageImporter.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(ImageImporter.COUNTERSTAIN));      
+
+		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
+		
+		result = result.flatten();
 		return result;
 	}
-}
+}     
