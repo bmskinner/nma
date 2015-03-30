@@ -74,7 +74,7 @@ public class Detector{
 			  Double.isNaN(this.maxCirc))
 		  throw new IllegalArgumentException("Detection parameters not set");
 
-	  if(image.getSize()<this.channel){
+	  if(this.channel==0 || this.channel > image.getSize()){
 		  throw new IllegalArgumentException("Not a valid channel for this image");
 	  }
 	  findInImage(image);
@@ -91,14 +91,17 @@ public class Detector{
   private void findInImage(ImageStack image){
 
 	  // Note - the channels in an ImageStack are numbered from 1
-	  ImageProcessor searchProcessor = image.getProcessor(this.channel+1).duplicate();
-	  IJ.log("Processor: "+this.channel);
+	  if(this.channel==0 || this.channel > image.getSize()){
+		  throw new IllegalArgumentException("Not a valid channel for this image in Detector.findInImage():"+this.channel);
+	  }
+	  ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
 	  searchProcessor.smooth();
 	  searchProcessor.threshold(this.threshold);
 
 	  this.runAnalyser(searchProcessor);
-
+	  IJ.log("Ran first pass on stack channel "+this.channel);
 	  if(this.getRoiCount()==0){
+		  IJ.log("Running second pass on stack channel ");
 		  searchProcessor.invert();
 		  this.runAnalyser(searchProcessor);
 	  }
@@ -143,6 +146,9 @@ public class Detector{
 	  }
 	  if(image.getProcessor(this.channel)==null){
 		  throw new IllegalArgumentException("Not a valid channel for this image");
+	  }
+	  if(this.channel==0 || this.channel>image.getSize()){
+		  throw new IllegalArgumentException("Channel out of range for this image");
 	  }
 	  ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
 	  ImagePlus imp = new ImagePlus(null, searchProcessor);

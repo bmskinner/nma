@@ -92,9 +92,8 @@ public class Nucleus
 	private Roi roi; // the original nucleus ROI
 
 	private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
-	private ImageStack enlargedPlanes;
+	private ImageStack enlargedPlanes; // a copy of the input nucleus for use in later reanalyses that need a particle detector
 	private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
-	private ImagePlus enlargedImage; // a copy of the input nucleus for use in later reanalyses that need a particle detector
 
 	protected SignalCollection signalCollection = new SignalCollection();
 
@@ -102,6 +101,9 @@ public class Nucleus
 	
 	public Nucleus (Roi roi, File file, ImageStack image, ImageStack enlarged, int number, String position) { // construct from an roi
 
+		if(roi==null || file==null || image==null || enlarged==null || Integer.valueOf(number)==null || position==null){
+			throw new IllegalArgumentException("Nucleus constructor argument is null");
+		}
 		// assign main features
 		this.roi             = roi;
 		this.imagePlanes     = image;
@@ -124,7 +126,6 @@ public class Nucleus
 		this.setOutputFolder(n.getOutputFolderName());
 		
 		this.setAnnotatedImage(n.getAnnotatedImage());
-		this.setEnlargedImage(n.getEnlargedImage());
 		this.setImagePlanes(n.getImagePlanes());
 		this.setEnlargedPlanes(n.getEnlargedPlanes());
 		
@@ -173,19 +174,19 @@ public class Nucleus
 			try{
 				this.nucleusFolder.mkdir();
 			} catch(Exception e) {
-				IJ.log("Failed to create directory: "+e);
-				IJ.log("Attempt: "+this.nucleusFolder.toString());
+				IJ.log("Failed to create directory"+this.nucleusFolder.toString()+": "+e.getMessage());
 			}
 		}
 
 		try{
 			String outPath = this.getOriginalImagePath();
 			IJ.saveAsTiff(ImageExporter.convert(this.imagePlanes), outPath);
-
+			IJ.log("Exported original");
 			outPath = this.getEnlargedImagePath();
-			IJ.saveAsTiff(this.enlargedImage, outPath);
+			IJ.saveAsTiff(ImageExporter.convert(this.enlargedPlanes), outPath);
+			IJ.log("Exported enlarged");
 		 } catch(Exception e){
-				IJ.log("Error saving original images: "+e);
+				IJ.log("Error saving original image or enlarged image: "+e.getMessage());
 		 }
 
 		this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
@@ -253,9 +254,9 @@ public class Nucleus
 		return new ImagePlus("annotated", this.annotatedImage.getProcessor().duplicate());
 	}
 
-	public ImagePlus getEnlargedImage(){
-		return this.enlargedImage;
-	}
+//	public ImagePlus getEnlargedImage(){
+//		return this.enlargedImage;
+//	}
 	
 	public ImageStack getImagePlanes(){
 		return this.imagePlanes;
@@ -482,9 +483,9 @@ public class Nucleus
 		this.annotatedImage = d.duplicate();
 	}
 
-	protected void setEnlargedImage(ImagePlus d){
-		this.enlargedImage = d.duplicate();
-	}
+//	protected void setEnlargedImage(ImagePlus d){
+//		this.enlargedImage = d.duplicate();
+//	}
 	
 	protected void setEnlargedPlanes(ImageStack s){
 		this.enlargedPlanes = s;

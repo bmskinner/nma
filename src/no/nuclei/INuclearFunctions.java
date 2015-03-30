@@ -38,7 +38,7 @@ public interface INuclearFunctions
 
 	public ImagePlus getAnnotatedImage();
 
-	public ImagePlus getEnlargedImage();
+	public ImageStack getEnlargedPlanes();
 
 	public String getImageName();
 

@@ -201,6 +201,12 @@ public class SignalCollection {
 	 * @return the count
 	 */
 	public int numberOfSignals(int channel){
+		if(Integer.valueOf(channel)==null){
+			throw new IllegalArgumentException("Channel is null");
+		}
+		if(!collection.containsKey(channel)){
+			throw new IllegalArgumentException("Channel not present in collection: "+channel);
+		}
 		return collection.get(channel).size();
 	}
 	
@@ -210,6 +216,12 @@ public class SignalCollection {
 	 * @return the count
 	 */
 	public int numberOfSignals(String channel){
+		if(channel==null){
+			throw new IllegalArgumentException("Channel is null");
+		}
+		if(!names.containsKey(channel)){
+			throw new IllegalArgumentException("Channel name not present: "+channel);
+		}
 		return numberOfSignals(names.get(channel));
 	}
 	

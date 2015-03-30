@@ -66,6 +66,7 @@ public class ImageImporter {
 	private static ImageStack convertGreyscale(ImagePlus image){
 		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
 	    result.addSlice("counterstain", image.getProcessor());
+	    result.deleteSlice(1); // remove the blank first slice
 	    return result;
 	}
 	
@@ -85,6 +86,10 @@ public class ImageImporter {
 	    result.addSlice("counterstain", channels[ImageImporter.RGB_BLUE].getProcessor());
 	    result.addSlice(channels[ImageImporter.RGB_RED].getProcessor());
 	    result.addSlice(channels[ImageImporter.RGB_GREEN].getProcessor());
+	    result.deleteSlice(1); // remove the blank first slice
+//	    ImagePlus demo = new ImagePlus(null, result);
+//	    
+//	    demo.show();
 	    return result;
 	}
 }
