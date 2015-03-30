@@ -99,9 +99,9 @@ public class Nucleus
 	private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
 	private ImagePlus enlargedImage; // a copy of the input nucleus for use in later reanalyses that need a particle detector
 
-	private List<NuclearSignal> redSignals   = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
-	private List<NuclearSignal> greenSignals = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
-	
+//	private List<NuclearSignal> redSignals   = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
+//	private List<NuclearSignal> greenSignals = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
+//	
 	private SignalCollection signalCollection = new SignalCollection();
 
 	private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
@@ -460,17 +460,18 @@ public class Nucleus
 		this.centreOfMass = new XYPoint(d);
 	}
 	
-	protected void setSignals(Map<Integer, ArrayList<NuclearSignal>> map){
-		this.signalCollection = map;
+	protected void setSignals(SignalCollection collection){
+		this.signalCollection = collection;
 	}
+	
 
-	protected void setRedSignals(List<NuclearSignal> d){
-		this.redSignals = d;
-	}
-
-	protected void setGreenSignals(List<NuclearSignal> d){
-		this.greenSignals = d;
-	}
+//	protected void setRedSignals(List<NuclearSignal> d){
+//		this.redSignals = d;
+//	}
+//
+//	protected void setGreenSignals(List<NuclearSignal> d){
+//		this.greenSignals = d;
+//	}
 
 	public void setPolygon(FloatPolygon p){
 		this.smoothedPolygon = p;
@@ -586,13 +587,16 @@ public class Nucleus
 		return d;
 	}
 
-	public int getRedSignalCount(){
-		return redSignals.size();
+	public int getSignalCount(){
+		return this.signalCollection.numberOfSignals();
 	}
-
-	public int getGreenSignalCount(){
-		return greenSignals.size();
-	}
+//	public int getRedSignalCount(){
+//		return redSignals.size();
+//	}
+//
+//	public int getGreenSignalCount(){
+//		return greenSignals.size();
+//	}
 
 	/*
 		-----------------------
@@ -663,7 +667,7 @@ public class Nucleus
 
 					signals.add(n);
 				}
-				this.signalCollection.put(channel, signals);
+				this.signalCollection.addSignals(signals, channel);
 			}
 			
 		} 
@@ -671,14 +675,14 @@ public class Nucleus
 	
 	public List<NuclearSignal> getSignals(int channel){
 		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
-		List<NuclearSignal> signals = this.signalCollection.get(channel);
+		List<NuclearSignal> signals = this.signalCollection.getSignals(channel);
 		for( NuclearSignal n : signals){
 			result.add(new NuclearSignal(n));
 		}
 		return result;
 	}
 	
-	public Map<Integer, ArrayList<NuclearSignal>> getSignalCollection(){
+	public SignalCollection getSignalCollection(){
 		return this.signalCollection;
 	}
 
@@ -695,7 +699,7 @@ public class Nucleus
 	 * @param channel Channel 0 is for the nucleus; count from 1
 	 */
 	public void addSignal(NuclearSignal n, int channel){
-		List<NuclearSignal> signals = this.signalCollection.get(channel);
+		List<NuclearSignal> signals = this.signalCollection.getSignals(channel);
 		signals.add(n);
 	}
 
@@ -714,9 +718,9 @@ public class Nucleus
 	*/
 	private void calculateSignalDistancesFromCoM(){
 
-		for( int j=1; j<=signalCollection.size();j++ ){
+		for( int j=1; j<=signalCollection.numberOfChannels();j++ ){
 
-			List<NuclearSignal> signals = signalCollection.get(j);
+			List<NuclearSignal> signals = signalCollection.getSignals(j);
 			if(signals.size()>0){
 				for(int i=0;i<signals.size();i++){
 					NuclearSignal n = signals.get(i);

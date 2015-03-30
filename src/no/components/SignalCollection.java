@@ -28,6 +28,10 @@ public class SignalCollection {
 		
 	}
 	
+	public SignalCollection(SignalCollection s){
+		
+	}
+	
 	/**
 	 * Add a single signal to the given channel
 	 * @param n the signal
@@ -128,6 +132,44 @@ public class SignalCollection {
 	 */
 	public Set<String> getChannelNames(){
 		return names.keySet();
+	}
+	
+	/**
+	 * Get the number of signal channels
+	 * @return the number of signal channels
+	 */
+	public int numberOfChannels(){
+		return collection.size();
+	}
+	
+	/**
+	 * Get the total number of signals in all channels
+	 * @return the count
+	 */
+	public int numberOfSignals(){
+		int count=0;
+		for(int i=1; i<=collection.size(); i++){
+			count += numberOfSignals(i);
+		}
+		return count;
+	}
+	
+	/**
+	 * Get the total number of signals in a given channel
+	 * @param channel the channel
+	 * @return the count
+	 */
+	public int numberOfSignals(int channel){
+		return collection.get(channel).size();
+	}
+	
+	/**
+	 * Get the total number of signals in a given channel
+	 * @param channel the channel name
+	 * @return the count
+	 */
+	public int numberOfSignals(String channel){
+		return numberOfSignals(names.get(channel));
 	}
 
 }
