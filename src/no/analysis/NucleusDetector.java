@@ -14,9 +14,6 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.io.Opener;
 import ij.plugin.RoiEnlarger;
-import ij.plugin.RGBStackMerge;
-import ij.process.ByteProcessor;
-
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.*;

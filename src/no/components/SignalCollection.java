@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import no.utility.ImageImporter;
+
 /**
  * This holds all the signals within a nucleus, within a hash.
  * The hash key is the channel number from which they were found,
@@ -96,8 +98,8 @@ public class SignalCollection {
 		if(channel>collection.size()){
 			throw new IllegalArgumentException("Channel is out of range");
 		}
-		if(channel==0){
-			throw new IllegalArgumentException("Channel 0 is reserved for nucleus");
+		if(channel==ImageImporter.COUNTERSTAIN){
+			throw new IllegalArgumentException("Channel is reserved for nucleus");
 		}
 		return collection.get(channel);
 	}

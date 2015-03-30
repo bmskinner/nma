@@ -61,7 +61,7 @@ public class AnalysisCreator {
   private File folder;
 //  private File outputFolder;
   private String outputFolderName;
-  private File logAnalysis;
+//  private File logAnalysis;
   private File nucleiToFind;
 
   /**
@@ -112,7 +112,7 @@ public class AnalysisCreator {
   private Map<File, NucleusCollection> folderCollection;
 
   private List<INuclearCollection> nuclearPopulations = new ArrayList<INuclearCollection>(0);
-  private List<INuclearCollection> failedPopulations  = new ArrayList<INuclearCollection>(0);
+//  private List<INuclearCollection> failedPopulations  = new ArrayList<INuclearCollection>(0);
   
 
   /*
