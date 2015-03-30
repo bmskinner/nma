@@ -10,6 +10,7 @@ package no.nuclei;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Plot;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -93,6 +94,7 @@ public class Nucleus
 	
 	private Roi roi; // the original ROI
 
+	private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
 	private ImagePlus sourceImage;    // a copy of the input nucleus. Not to be altered
 	private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
 	private ImagePlus enlargedImage; // a copy of the input nucleus for use in later reanalyses that need a particle detector
