@@ -181,10 +181,10 @@ public class Nucleus
 		try{
 			String outPath = this.getOriginalImagePath();
 			IJ.saveAsTiff(ImageExporter.convert(this.imagePlanes), outPath);
-			IJ.log("Exported original");
+//			IJ.log("Exported original");
 			outPath = this.getEnlargedImagePath();
 			IJ.saveAsTiff(ImageExporter.convert(this.enlargedPlanes), outPath);
-			IJ.log("Exported enlarged");
+//			IJ.log("Exported enlarged");
 		 } catch(Exception e){
 				IJ.log("Error saving original image or enlarged image: "+e.getMessage());
 		 }
@@ -614,7 +614,7 @@ public class Nucleus
 		// find the signals
 		// within nuclear roi, analyze particles in colour channels
 		// the nucleus is in index 0, so from 1 to end
-		for(int channel=1;channel<this.imagePlanes.getSize();channel++){
+		for(int channel=ImageImporter.FIRST_SIGNAL_CHANNEL;channel<this.imagePlanes.getSize();channel++){
 			
 			Detector detector = new Detector();
 			detector.setMaxSize(this.getArea() * this.maxSignalFraction);

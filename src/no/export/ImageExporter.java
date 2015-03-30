@@ -26,11 +26,9 @@ public class ImageExporter {
 	private static ImagePlus mergeStack(ImageStack stack){
 		ImagePlus result = null;
 		if(stack.getSize()==1){
-			IJ.log("Single channel");
 			result = new ImagePlus(null, stack.getProcessor(1));
 		}
 		if(stack.getSize()>1){ // ignore signals above 3 for now
-			IJ.log("Multi channel");
 			ImagePlus[] images = new ImagePlus[3];
 			images[0] = new ImagePlus(null, stack.getProcessor(2));  
 			images[1] = new ImagePlus(null, stack.getProcessor(3));  

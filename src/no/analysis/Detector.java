@@ -99,10 +99,8 @@ public class Detector{
 	  searchProcessor.threshold(this.threshold);
 
 	  this.runAnalyser(searchProcessor);
-	  IJ.log("Ran first pass on stack channel "+this.channel);
 	  if(this.getRoiCount()==0){
-		  IJ.log("Running second pass on stack channel ");
-		  searchProcessor.invert();
+		  searchProcessor.invert(); // Work PC needs the inversion; MANETHEREN does not. Don't yet know why.
 		  this.runAnalyser(searchProcessor);
 	  }
   }

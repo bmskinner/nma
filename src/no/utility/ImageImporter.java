@@ -1,10 +1,5 @@
 package no.utility;
 
-import java.awt.color.ColorSpace;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
@@ -18,6 +13,7 @@ import ij.plugin.ChannelSplitter;
 public class ImageImporter {
 	
 	public static final int COUNTERSTAIN = 1; // ImageStack slices are numbered from 1; first slice is blue
+	public static final int FIRST_SIGNAL_CHANNEL = 2; // ImageStack slices are numbered from 1; first slice is blue
 	
 	private static final int RGB_RED = 0;
 	private static final int RGB_GREEN = 1;

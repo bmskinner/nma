@@ -111,8 +111,15 @@ public class AsymmetricNucleusCollection
   @Override 
   public void measureNuclearOrganisation(){
 
-	  if(this.getRedSignalCount()>0 || this.getGreenSignalCount()>0){
-
+	  // check if there are any signals
+	  boolean ok = false;
+	  for(int channel : this.getSignalChannels() ){
+		  if( this.getSignalCount(channel) > 0){
+			  ok=true;
+		  }
+	  }
+	  
+	  if(ok){ // if yes, export them
 		  for(int i= 0; i<this.getNucleusCount();i++){
 			  INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
 			  n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
@@ -123,6 +130,7 @@ public class AsymmetricNucleusCollection
 				  File.separator+
 				  this.getOutputFolder(), this.getType());
 	  }
+
   }
 
 
