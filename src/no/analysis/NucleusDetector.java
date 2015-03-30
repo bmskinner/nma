@@ -23,6 +23,7 @@ import java.util.*;
 
 import no.nuclei.*;
 import no.utility.ImageImporter;
+import no.utility.StatsMap;
 import no.collections.*;
 import no.components.*;
 
@@ -341,7 +342,7 @@ public class NucleusDetector {
 	 * @param image the ImagePlus to be analysed
 	 * @return the Map linking an roi to its stats
 	 */
-	protected Map<Roi, HashMap<String, Double>> getROIs(ImageStack image){
+	protected List<Roi> getROIs(ImageStack image){
 		Detector detector = new Detector();
 		detector.setMaxSize(this.maxNucleusSize);
 		detector.setMinSize(this.minNucleusSize);
@@ -354,7 +355,7 @@ public class NucleusDetector {
 		} catch(Exception e){
 			IJ.log("Error in nucleus detection: "+e.getMessage());
 		}
-		return detector.getRoiMap();
+		return detector.getRoiList();
 	}
 
   /**
@@ -367,23 +368,23 @@ public class NucleusDetector {
   protected void processImage(ImageStack image, File path){
 
     IJ.log("File:  "+path.getName());
-    Map<Roi, HashMap<String, Double>> map = getROIs(image);
-    if(map.isEmpty()){
+    List<Roi> roiList = getROIs(image);
+    if(roiList.isEmpty()){
       IJ.log("  No nuclei in image");
     }
 
-    int i = 0;
+    int nucleusNumber = 0;
 
-    for(Roi roi : map.keySet()){
+    for(Roi roi : roiList){
       
-      IJ.log("  Acquiring nucleus "+i);
+      IJ.log("  Acquiring nucleus "+nucleusNumber);
       try{
-      	analyseNucleus(roi, image, i, path, map.get(roi)); // get the profile data back for the nucleus
+      	analyseNucleus(roi, image, nucleusNumber, path); // get the profile data back for the nucleus
       	this.totalNuclei++;
       } catch(Exception e){
       	IJ.log("  Error acquiring nucleus: "+e.getMessage());
       }
-      i++;
+      nucleusNumber++;
     } 
   }
 
@@ -396,48 +397,52 @@ public class NucleusDetector {
   * @param image the ImagePlus containing the nucleus
   * @param nucleusNumber the count of the nuclei in the image
   * @param path the full path to the image
-  * @param values the Map holding stats for this nucleus
   */
-  protected void analyseNucleus(Roi nucleus, ImageStack image, int nucleusNumber, File path, Map<String, Double> values){
-    
-    // save the position of the roi, for later use
-    double xbase = nucleus.getXBase();
-    double ybase = nucleus.getYBase();
+  protected void analyseNucleus(Roi nucleus, ImageStack image, int nucleusNumber, File path){
 
-    Rectangle bounds = nucleus.getBounds();
-    double xCentre = xbase+(bounds.getWidth()/2);
-    double yCentre = ybase+(bounds.getHeight()/2);
-    String position = xCentre+"-"+yCentre;
+	  // measure the area, density etc within the nucleus
+	  Detector detector = new Detector();
+	  detector.setChannel(ImageImporter.COUNTERSTAIN);
+	  StatsMap values = detector.measure(nucleus, image);
 
-    // Enlarge the ROI, so we can do nucleus detection on the resulting original images
-    ImageStack smallRegion = getRoiAsStack(nucleus, image);
-    Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
-    ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
-    
-    nucleus.setLocation(0,0); // translate the roi to the new image coordinates
+	  // save the position of the roi, for later use
+	  double xbase = nucleus.getXBase();
+	  double ybase = nucleus.getYBase();
+
+	  Rectangle bounds = nucleus.getBounds();
+	  double xCentre = xbase+(bounds.getWidth()/2);
+	  double yCentre = ybase+(bounds.getHeight()/2);
+	  String position = xCentre+"-"+yCentre;
+
+	  // Enlarge the ROI, so we can do nucleus detection on the resulting original images
+	  ImageStack smallRegion = getRoiAsStack(nucleus, image);
+	  Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
+	  ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
+
+	  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
 
 
-    // turn roi into Nucleus for manipulation
-    Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
+	  // turn roi into Nucleus for manipulation
+	  Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
 
-    currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
-    currentNucleus.setArea(values.get("Area")); 
-    currentNucleus.setFeret(values.get("Feret"));
-    currentNucleus.setPerimeter(values.get("Perim"));
+	  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
+	  currentNucleus.setArea(values.get("Area")); 
+	  currentNucleus.setFeret(values.get("Feret"));
+	  currentNucleus.setPerimeter(values.get("Perim"));
 
-    currentNucleus.setOutputFolder(this.outputFolder);
-    currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
+	  currentNucleus.setOutputFolder(this.outputFolder);
+	  currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
 
-    currentNucleus.setSignalThreshold(this.signalThreshold);
-    currentNucleus.setMinSignalSize(this.minSignalSize);
-    currentNucleus.setMaxSignalFraction(this.maxSignalFraction);
+	  currentNucleus.setSignalThreshold(this.signalThreshold);
+	  currentNucleus.setMinSignalSize(this.minSignalSize);
+	  currentNucleus.setMaxSignalFraction(this.maxSignalFraction);
 
-    currentNucleus.detectSignalsInNucleus();
-    currentNucleus.annotateNucleusImage();
+	  currentNucleus.detectSignalsInNucleus();
+	  currentNucleus.annotateNucleusImage();
 
-    // if everything checks out, add the measured parameters to the global pool
-    NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
-    collectionToAddTo.addNucleus(currentNucleus);
+	  // if everything checks out, add the measured parameters to the global pool
+	  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
+	  collectionToAddTo.addNucleus(currentNucleus);
   }
   
   
@@ -451,7 +456,7 @@ public class NucleusDetector {
 		  throw new IllegalArgumentException("ROI or stack is null");
 	  }
 	  ImageStack result = new ImageStack((int)roi.getBounds().getWidth(), (int)roi.getBounds().getHeight());
-	  for(int i=0; i<stack.getSize();i++){
+	  for(int i=1; i<=stack.getSize();i++){ // ImageStack starts at 1
 		  ImagePlus image = new ImagePlus(null, stack.getProcessor(i));
 		  image.setRoi(roi);
 		  image.copy();

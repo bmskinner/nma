@@ -201,22 +201,20 @@ public class NucleusRefinder
     updateFileMap(path); // map from new to old
     if(!fileMap.containsKey(path)){ return; } // skip images with no nuclei to catch
 
-    Map<Roi, HashMap<String, Double>> map = getROIs(image);
+    List<Roi> roiList = getROIs(image);
     int i = 0;
-
-    Set<Roi> keys = map.keySet();
 
     if(!offsets.containsKey(path)){
       alignImages(path, fileMap.get(path));
     }   
 
-    for(Roi roi : keys){
+    for(Roi roi : roiList){
        try{
 
         boolean ok = checkRoi(roi, path);
 
         if(ok){
-          analyseNucleus(roi, image, i, path, map.get(roi)); // get the profile data back for the nucleus
+          analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
           this.totalNuclei++;
         }
       } catch(Exception e){

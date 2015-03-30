@@ -628,14 +628,15 @@ public class Nucleus
 				IJ.log("Error in signal detection: "+e.getMessage());
 			}
 			
-			Map<Roi, HashMap<String, Double>> map = detector.getRoiMap();
+			List<Roi> roiList = detector.getRoiList();
 			
-			if(!map.isEmpty()){
+			if(!roiList.isEmpty()){
 				
 				ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
 
-				for( Roi r : map.keySet()){
-					Map<String, Double> values = map.get(r);
+				for( Roi r : roiList){
+					
+					StatsMap values = detector.measure(r, imagePlanes);
 					NuclearSignal n = new NuclearSignal( r, 
 							values.get("Area"), 
 							values.get("Feret"), 

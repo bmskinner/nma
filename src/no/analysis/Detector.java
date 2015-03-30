@@ -14,18 +14,14 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
-import ij.plugin.ChannelSplitter;
 import ij.process.ImageProcessor;
+import ij.measure.Measurements;
 import ij.measure.ResultsTable;
+import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 
 
 public class Detector{
-
-	// colour channels
-//  private static final int RED_CHANNEL   = 0;
-//  private static final int GREEN_CHANNEL = 1;
-//  private static final int BLUE_CHANNEL  = 2;
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private double minSize;
@@ -38,7 +34,7 @@ public class Detector{
 
   private Roi[] roiArray;
 
-  private Map<Roi, StatsMap> roiMap = new HashMap<Roi, StatsMap>(0);
+//  private Map<Roi, StatsMap> roiMap = new HashMap<Roi, StatsMap>(0);
 
   public Detector(){
 
@@ -78,7 +74,7 @@ public class Detector{
 			  Double.isNaN(this.maxCirc))
 		  throw new IllegalArgumentException("Detection parameters not set");
 
-	  if(image.getProcessor(this.channel)==null){
+	  if(image.getSize()<this.channel){
 		  throw new IllegalArgumentException("Not a valid channel for this image");
 	  }
 	  findInImage(image);
@@ -91,22 +87,12 @@ public class Detector{
   	}
   	return result;
   }
-
-  // ensure defensive
-  public Map<Roi, StatsMap> getRoiMap(){
-  	Map<Roi, StatsMap> resultMap = new HashMap<Roi, StatsMap>(0);
-
-  	for(Roi r : this.roiMap.keySet()){
-  		StatsMap values = roiMap.get(r);
-  		StatsMap resultValues = new StatsMap(values);
-  		resultMap.put(r, resultValues);
-  	}
-  	return resultMap;
-  }
   
   private void findInImage(ImageStack image){
 
-	  ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
+	  // Note - the channels in an ImageStack are numbered from 1
+	  ImageProcessor searchProcessor = image.getProcessor(this.channel+1).duplicate();
+	  IJ.log("Processor: "+this.channel);
 	  searchProcessor.smooth();
 	  searchProcessor.threshold(this.threshold);
 
@@ -128,7 +114,7 @@ public class Detector{
 	  // run the particle analyser
 	  ResultsTable rt = new ResultsTable();
 	  ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
-			  ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA | ParticleAnalyzer.PERIMETER | ParticleAnalyzer.FERET ,
+			  ParticleAnalyzer.FERET ,
 			  rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
 	  try {
 		  ParticleAnalyzer.setRoiManager(manager);
@@ -143,25 +129,38 @@ public class Detector{
 	  }
 
 	  this.roiArray = manager.getSelectedRoisAsArray();
-	  for(int i=0;i<roiArray.length;i++){
-		  StatsMap values = new StatsMap();
-		  values.add("Area", rt.getValue("Area",i)); 
-		  values.add("Feret", rt.getValue("Feret",i)); 
-		  values.add("Perim", rt.getValue("Perim.",i)); 
-		  values.add("XM", rt.getValue("XM",i)); 
-		  values.add("YM", rt.getValue("YM",i)); 
-
-		  this.roiMap.put(roiArray[i], values);
-	  }
   }
   
   /**
-   * Get the stats for the region covered by the given roi
+   * Get the stats for the region covered by the given roi. Uses the channel
+   * previously set.
    * @param roi the region to measure
    * @return
    */
-//  public Map<String, Double> measure(Roi roi, ){
-//
-//  }
+  public StatsMap measure(Roi roi, ImageStack image ){
+	  if(image==null || roi==null){
+		  throw new IllegalArgumentException("Image or roi is null");
+	  }
+	  if(image.getProcessor(this.channel)==null){
+		  throw new IllegalArgumentException("Not a valid channel for this image");
+	  }
+	  ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
+	  ImagePlus imp = new ImagePlus(null, searchProcessor);
+	  imp.setRoi(roi);
+	  ResultsTable rt = new ResultsTable();
+	  Analyzer analyser = new Analyzer(imp, Measurements.CENTER_OF_MASS | 
+			  								Measurements.AREA | 
+			  								Measurements.PERIMETER | 
+			  								Measurements.FERET, 
+			  							rt);
+	  analyser.measure();
+	  StatsMap values = new StatsMap();
+	  values.add("Area", rt.getValue("Area",0)); 
+	  values.add("Feret", rt.getValue("Feret",0)); 
+	  values.add("Perim", rt.getValue("Perim.",0)); 
+	  values.add("XM", rt.getValue("XM",0)); 
+	  values.add("YM", rt.getValue("YM",0)); 
+	  return values;
+  }
 
 }

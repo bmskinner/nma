@@ -1,5 +1,10 @@
 package no.utility;
 
+import java.awt.color.ColorSpace;
+import java.awt.image.ColorModel;
+import java.awt.image.ComponentColorModel;
+import java.awt.image.DataBuffer;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
@@ -12,7 +17,7 @@ import ij.plugin.ChannelSplitter;
  */
 public class ImageImporter {
 	
-	public static final int COUNTERSTAIN = 0; 
+	public static final int COUNTERSTAIN = 1; // ImageStack slices are numbered from 1; first slice is blue
 	
 	private static final int RGB_RED = 0;
 	private static final int RGB_GREEN = 1;
@@ -42,7 +47,7 @@ public class ImageImporter {
 		}
 				
 		// do the conversions
-		ImageStack result = new ImageStack();
+		ImageStack result = null;
 		if(image.getType()==ImagePlus.GRAY8){
 			result = convertGreyscale(image);
 		}
@@ -59,7 +64,7 @@ public class ImageImporter {
 	 * @return a stack with the input image as position 0
 	 */
 	private static ImageStack convertGreyscale(ImagePlus image){
-		ImageStack result = new ImageStack(image.getWidth(), image.getHeight());
+		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
 	    result.addSlice("counterstain", image.getProcessor());
 	    return result;
 	}
@@ -71,7 +76,8 @@ public class ImageImporter {
 	 * @return the stack
 	 */
 	private static ImageStack convertRGB(ImagePlus image){
-		ImageStack result = new ImageStack(image.getWidth(), image.getHeight());
+		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
+//		ImageStack result = new ImageStack(image.getWidth(), image.getHeight());
 		
 		// split out colour channel
 	    ImagePlus[] channels = ChannelSplitter.split(image);
