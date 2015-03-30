@@ -24,6 +24,7 @@ import no.analysis.Detector;
 import no.analysis.ProfileSegmenter;
 import no.utility.*;
 import no.components.*;
+import no.export.ImageExporter;
 import no.export.Logger;
 
 
@@ -112,7 +113,7 @@ public class Nucleus
 
 		// assign main features
 		this.roi             = roi;
-		this.sourceImage     = image;
+//		this.sourceImage     = image;
 		this.annotatedImage  = new ImagePlus("annotated", image.getProcessor().duplicate()); // NEEDS TO BE A COPY
 		this.enlargedImage   = enlarged;
 		this.sourceFile      = file;
@@ -139,7 +140,7 @@ public class Nucleus
 	public Nucleus(Nucleus n){
 		this.setRoi(n.getRoi());
 		this.setPosition(n.getPosition());
-		this.setSourceImage(n.getSourceImage());
+//		this.setSourceImage(n.getSourceImage());
 		this.setSourceFile(n.getSourceFile());
 		this.setAnnotatedImage(n.getAnnotatedImage());
 		this.setEnlargedImage(n.getEnlargedImage());
@@ -196,7 +197,7 @@ public class Nucleus
 
 		try{
 			String outPath = this.getOriginalImagePath();
-			IJ.saveAsTiff(this.sourceImage, outPath);
+			IJ.saveAsTiff(ImageExporter.convert(this.imagePlanes), outPath);
 
 			outPath = this.getEnlargedImagePath();
 			IJ.saveAsTiff(this.enlargedImage, outPath);
@@ -261,9 +262,9 @@ public class Nucleus
 		return new File(this.nucleusFolder.getAbsolutePath());
 	}
 
-	public ImagePlus getSourceImage(){
-		return new ImagePlus("source", this.sourceImage.getProcessor().duplicate());
-	}
+//	public ImagePlus getSourceImage(){
+//		return new ImagePlus("source", this.sourceImage.getProcessor().duplicate());
+//	}
 
 	public ImagePlus getAnnotatedImage(){
 		return new ImagePlus("annotated", this.annotatedImage.getProcessor().duplicate());
@@ -482,9 +483,9 @@ public class Nucleus
 		this.roi = d;
 	}
 
-	protected void setSourceImage(ImagePlus d){
-		this.sourceImage = d.duplicate();
-	}
+//	protected void setSourceImage(ImagePlus d){
+//		this.sourceImage = d.duplicate();
+//	}
 
 	protected void setSourceFile(File d){
 		this.sourceFile = d;
@@ -639,7 +640,8 @@ public class Nucleus
 			detector.setThreshold(this.signalThreshold);
 			detector.setChannel(channel);
 			try{
-				detector.run(this.sourceImage);
+				ImagePlus image = new ImagePlus(null, this.imagePlanes.getProcessor(channel));
+				detector.run(image);
 			} catch(Exception e){
 				IJ.log("Error in signal detection: "+e.getMessage());
 			}

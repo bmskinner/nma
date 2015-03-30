@@ -17,6 +17,6 @@ public class ImageExporter {
 		}
 		
 		ImagePlus image = new ImagePlus(null, stack);
-		return image;
+		return image.flatten();
 	}
 }

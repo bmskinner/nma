@@ -8,9 +8,9 @@ package no.analysis;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.measure.Measurements;
 import ij.gui.Roi;
-import ij.plugin.ChannelSplitter;
 import ij.plugin.RoiEnlarger;
 import ij.process.ImageStatistics;
 import ij.process.ImageProcessor;
@@ -22,13 +22,14 @@ import java.util.*;
 
 import no.nuclei.*;
 import no.components.*;
+import no.export.ImageExporter;
 
 public class ShellAnalyser {
 
 	int shellCount = 5;
 
-	ImagePlus image;
-	ImagePlus[] channels;
+	ImageStack image;
+//	ImagePlus[] channels;
 	Roi originalRoi;
 	INuclearFunctions nucleus;
 
@@ -45,8 +46,7 @@ public class ShellAnalyser {
 	*/
 	public ShellAnalyser(INuclearFunctions n){
 		this.originalRoi = n.getRoi();
-		this.image = n.getSourceImage();
-		this.channels = ChannelSplitter.split(this.image);
+		this.image = n.getImagePlanes();
 		this.nucleus = n;
 	}
 
@@ -102,7 +102,7 @@ public class ShellAnalyser {
 	*/
 	public void createShells(){
 
-		ImagePlus searchImage = channels[Nucleus.BLUE_CHANNEL];
+		ImagePlus searchImage = new ImagePlus(null, image.getProcessor(0).duplicate()); // blue channel
 		ImageProcessor ip = searchImage.getProcessor();
 
 		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
@@ -131,6 +131,7 @@ public class ShellAnalyser {
 
 		// find the dapi density in each shell
 		this.dapiDensities = findDapiDensities();
+		searchImage.close();
 	}
 
 	/**
@@ -171,7 +172,7 @@ public class ShellAnalyser {
 	 * Draw the shells on the nucleus, and export the image to the Nucleus folder.
 	 */
 	public void exportImage(){
-	  ImagePlus shellImage = nucleus.getSourceImage();
+	  ImagePlus shellImage = ImageExporter.convert(image);
       ImageProcessor ip = shellImage.getProcessor();
       List<Roi> shells = this.getShells();
       if(shells.size()>0){ // check we actually got shells out
@@ -233,7 +234,8 @@ public class ShellAnalyser {
 
 				if(r.contains(p.getXAsInt(), p.getYAsInt())){
 					// find the value of the signal
-					density += (double)channels[channel].getPixel(p.getXAsInt(), p.getYAsInt())[0];	 
+					ImageProcessor ip = image.getProcessor(channel);
+					density += (double) ip.getPixel(p.getXAsInt(), p.getYAsInt());	 
 				}
 			}
 			result[i] = density;
@@ -287,7 +289,8 @@ public class ShellAnalyser {
 
 			for(XYPoint p : points){
 				// find the value of the signal
-				density += (double)channels[Nucleus.BLUE_CHANNEL].getPixel(p.getXAsInt(), p.getYAsInt())[0];	 
+				ImageProcessor ip = image.getProcessor(0);
+				density += (double)ip.getPixel(p.getXAsInt(), p.getYAsInt());	 
 			}
 			densities[i] = density;
 			i++;

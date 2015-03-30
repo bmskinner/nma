@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import no.components.SignalCollection;
@@ -31,7 +32,9 @@ public interface INuclearFunctions
 	public File getSourceFile();
 
 	public File getNucleusFolder();
-	public ImagePlus getSourceImage();
+//	public ImagePlus getSourceImage();
+	
+	public ImageStack getImagePlanes();
 
 	public ImagePlus getAnnotatedImage();
 
