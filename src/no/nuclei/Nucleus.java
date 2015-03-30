@@ -68,8 +68,6 @@ public class Nucleus
 
 	private String position; // the position of the centre of the ROI bounding rectangle in the original image as "x.y"
 
-	// private AngleProfile angleProfile; // the border points of the nucleus, and associated angles
-
 	/*
 		The following fields are part of the redesign of the whole system. Instead of storing border points within
 		an AngleProfile, they will be part of the Nucleus. The Profiles can take any double[] of values, and
@@ -89,44 +87,25 @@ public class Nucleus
 
 	private File sourceFile;    // the image from which the nucleus came
 	private File nucleusFolder; // the folder to store nucleus information
-	// private File profileLog;    // unused. Store output if needed
 	private String outputFolder;  // the top-level path in which to store outputs; has analysis date
 	
-	private Roi roi; // the original ROI
+	private Roi roi; // the original nucleus ROI
 
 	private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
 	private ImageStack enlargedPlanes;
-//	private ImagePlus sourceImage;    // a copy of the input nucleus. Not to be altered
 	private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
 	private ImagePlus enlargedImage; // a copy of the input nucleus for use in later reanalyses that need a particle detector
 
-//	private List<NuclearSignal> redSignals   = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
-//	private List<NuclearSignal> greenSignals = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
-//	
 	protected SignalCollection signalCollection = new SignalCollection();
 
 	private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
-
-//	private double[][] distancesBetweenSignals; // the distance between all signals as a matrix
-	
-	public Nucleus (Roi roi, File file, ImagePlus image, ImagePlus enlarged, int number, String position) { // construct from an roi
-
-		// assign main features
-		this.roi             = roi;
-//		this.sourceImage     = image;
-		this.annotatedImage  = new ImagePlus("annotated", image.getProcessor().duplicate()); // NEEDS TO BE A COPY
-		this.enlargedImage   = enlarged;
-		this.sourceFile      = file;
-		this.nucleusNumber   = number;
-		this.position        = position;
-	}
 	
 	public Nucleus (Roi roi, File file, ImageStack image, ImageStack enlarged, int number, String position) { // construct from an roi
 
 		// assign main features
 		this.roi             = roi;
 		this.imagePlanes     = image;
-		this.annotatedImage = new ImagePlus("annotated", image.duplicate()); // NEEDS TO BE A COPY
+		this.annotatedImage  = ImageExporter.convert(image.duplicate()); // NEEDS TO BE A COPY
 		this.enlargedPlanes  = enlarged;
 		this.sourceFile      = file;
 		this.nucleusNumber   = number;
@@ -140,29 +119,33 @@ public class Nucleus
 	public Nucleus(Nucleus n){
 		this.setRoi(n.getRoi());
 		this.setPosition(n.getPosition());
-//		this.setSourceImage(n.getSourceImage());
+
 		this.setSourceFile(n.getSourceFile());
+		this.setOutputFolder(n.getOutputFolderName());
+		
 		this.setAnnotatedImage(n.getAnnotatedImage());
 		this.setEnlargedImage(n.getEnlargedImage());
 		this.setImagePlanes(n.getImagePlanes());
 		this.setEnlargedPlanes(n.getEnlargedPlanes());
+		
 		this.setNucleusNumber(n.getNucleusNumber());
 		this.setNucleusFolder(n.getNucleusFolder());
+		
 		this.setPerimeter(n.getPerimeter());
 		this.setPathLength(n.getPathLength());
 		this.setFeret(n.getFeret());
 		this.setArea(n.getArea());
 		this.setAngleProfile(n.getAngleProfile());
 		this.setCentreOfMass(n.getCentreOfMass());
+		
 		this.setSignals(n.getSignalCollection());
-//		this.setRedSignals(n.getRedSignals());
-//		this.setGreenSignals(n.getGreenSignals());
+
 		this.setPolygon(n.getPolygon());
 		this.setDistanceProfile(n.getDistanceProfile());
-//		this.setSignalDistanceMatrix(n.getSignalDistanceMatrix());
+
 		this.setBorderTags(n.getBorderTags());
-		this.setOutputFolder(n.getOutputFolderName());
 		this.setBorderList(n.getBorderList());
+		
 		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
 	}
