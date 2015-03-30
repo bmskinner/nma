@@ -31,8 +31,6 @@ import no.export.Logger;
 import no.utility.Stats;
 import no.utility.Utils;
 
-
-
 public class NucleusCollection
 implements INuclearCollection 
 {
@@ -437,8 +435,39 @@ implements INuclearCollection
     }
     return count;
   }
-
   
+  /**
+   * Find the signal channels present within the nuclei of the collection
+   * @return the list of channels. Order is not guaranteed
+   */
+  public List<Integer> getSignalChannels(){
+	  List<Integer> result = new ArrayList<Integer>(0);
+	  for(int i= 0; i<this.getNucleusCount();i++){
+		  INuclearFunctions n = this.getNucleus(i);
+		  for( int channel : n.getSignalCollection().getChannels()){
+			  if(!result.contains(channel)){
+				  result.add(channel);
+			  }
+		  }
+	  } // end nucleus iterations
+	  return result;
+  }
+  
+  /**
+   * Get the number of signals in the given channel
+   * @param channel the channel to search
+   * @return the count
+   */
+  public int getSignalCount(int channel){
+	  int count = 0;
+	  for(int i= 0; i<this.getNucleusCount();i++){
+		  INuclearFunctions n = this.getNucleus(i);
+		  count += n.getSignalCount(channel);
+
+	  } // end nucleus iterations
+	  return count;
+  }
+
   /**
    * Get all the signals from all nuclei in the given channel
    * @param channel the channel to search
@@ -859,24 +888,7 @@ implements INuclearCollection
   */
   public void exportSignalStats(){
 	  
-
-//	  Logger redLogger   = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-//	  Logger greenLogger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-
-//	  for(int i=1;i<3;i++){
-//		  Logger logger = i == Nucleus.RED_CHANNEL ? redLogger : greenLogger;
-//		  logger.addColumnHeading("SIGNAL_AREA");
-//		  logger.addColumnHeading("SIGNAL_ANGLE");
-//		  logger.addColumnHeading("SIGNAL_FERET");
-//		  logger.addColumnHeading("SIGNAL_DISTANCE");
-//		  logger.addColumnHeading("FRACT_DISTANCE");
-//		  logger.addColumnHeading("SIGNAL_PERIM.");
-//		  logger.addColumnHeading("SIGNAL_RADIUS");
-//		  logger.addColumnHeading("CLOSEST_BORDER_INDEX");
-//		  logger.addColumnHeading("SOURCE");
-//	  }
-	  
-	  for(int i=1;i<3;i++){
+	  for(int i : this.getSignalChannels()){
 		  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
 		  logger.addColumnHeading("SIGNAL_AREA");
 		  logger.addColumnHeading("SIGNAL_ANGLE");
@@ -887,6 +899,7 @@ implements INuclearCollection
 		  logger.addColumnHeading("SIGNAL_RADIUS");
 		  logger.addColumnHeading("CLOSEST_BORDER_INDEX");
 		  logger.addColumnHeading("SOURCE");
+		  
 		  for(NuclearSignal s : this.getSignals(i)){
 			  logger.addRow("SIGNAL_AREA"         , s.getArea());
 			  logger.addRow("SIGNAL_ANGLE"        , s.getAngle());
@@ -898,40 +911,8 @@ implements INuclearCollection
 			  logger.addRow("CLOSEST_BORDER_INDEX", s.getClosestBorderPoint());
 			  logger.addRow("SOURCE"              , s.getOrigin());
 		  }
-		  logger.export("log.signals."+i+"."+getType());
+		  logger.export("log.signals."+i+"."+getType()); // TODO: get channel names
 	  }
-
-//	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-//
-//		  INuclearFunctions n = this.getNucleus(i);
-//
-//		  int nucleusNumber = n.getNucleusNumber();
-//		  String path = n.getPath();
-//
-//		  for( int j : n.getSignalCollection().getChannels()){
-//			  List<NuclearSignal> signals = n.getSignalCollection().getSignals(j);
-//
-//			  Logger logger = signalCount == Nucleus.RED_CHANNEL ? redLogger : greenLogger;
-//			  if(!signals.isEmpty()){
-//
-//				  for(NuclearSignal s : signals){
-//
-//					  logger.addRow("SIGNAL_AREA"         , s.getArea());
-//					  logger.addRow("SIGNAL_ANGLE"        , s.getAngle());
-//					  logger.addRow("SIGNAL_FERET"        , s.getFeret());
-//					  logger.addRow("SIGNAL_DISTANCE"     , s.getDistanceFromCoM());
-//					  logger.addRow("FRACT_DISTANCE"     , s.getFractionalDistanceFromCoM());
-//					  logger.addRow("SIGNAL_PERIM."       , s.getPerimeter());
-//					  logger.addRow("SIGNAL_RADIUS"       , s.getRadius());
-//					  logger.addRow("CLOSEST_BORDER_INDEX", s.getClosestBorderPoint());
-//					  logger.addRow("SOURCE"              , s.getOrigin());
-//				  } // end for
-//			  } // end if
-//		  } // end for
-//	  } // end for
-//
-//	  redLogger.export("logSignalsRed."+getType());
-//	  greenLogger.export("logSignalsGreen."+getType());
   }
 
   public void exportDistancesBetweenSingleSignals(){
@@ -950,10 +931,10 @@ implements INuclearCollection
     for(int i=0; i<this.getNucleusCount();i++){
 
       INuclearFunctions n = this.nucleiCollection.get(i);
-      if(n.getRedSignalCount()==1 && n.getGreenSignalCount()==1){
+      if(n.getSignalCount(1)==1 && n.getSignalCount(2)==1){
 
-        NuclearSignal r = n.getRedSignals().get(0);
-        NuclearSignal g = n.getGreenSignals().get(0);
+        NuclearSignal r = n.getSignals(1).get(0);
+        NuclearSignal g = n.getSignals(2).get(0);
 
         XYPoint rCoM = r.getCentreOfMass();
         XYPoint gCoM = g.getCentreOfMass();
@@ -1217,8 +1198,8 @@ implements INuclearCollection
 		  INuclearFunctions n = this.getNucleus(i);
 		  int profileIndex = n.getBorderIndex(pointType); 
 		  List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
-		  signals.add(n.getRedSignals());
-		  signals.add(n.getGreenSignals());
+		  signals.add(n.getSignals(1));
+		  signals.add(n.getSignals(2));
 
 		  int channel = 0;
 		  for( List<NuclearSignal> channelSignals : signals ){

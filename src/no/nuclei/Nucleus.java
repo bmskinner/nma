@@ -95,7 +95,7 @@ public class Nucleus
 
 	private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
 	private ImageStack enlargedPlanes;
-	private ImagePlus sourceImage;    // a copy of the input nucleus. Not to be altered
+//	private ImagePlus sourceImage;    // a copy of the input nucleus. Not to be altered
 	private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
 	private ImagePlus enlargedImage; // a copy of the input nucleus for use in later reanalyses that need a particle detector
 
@@ -712,18 +712,15 @@ public class Nucleus
 	*/
 	private void calculateSignalDistancesFromCoM(){
 
-		for( int j=1; j<=signalCollection.numberOfChannels();j++ ){
+		for( int j : signalCollection.getChannels() ){
 
 			List<NuclearSignal> signals = signalCollection.getSignals(j);
-			if(signals.size()>0){
-				for(int i=0;i<signals.size();i++){
-					NuclearSignal n = signals.get(i);
-
+			if(!signals.isEmpty()){
+				for(NuclearSignal n : signals){
 					double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
 					n.setDistanceFromCoM(distance);
 				}
 			}
-			j++;
 		}
 	}
 
