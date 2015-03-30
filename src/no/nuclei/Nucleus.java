@@ -102,7 +102,7 @@ public class Nucleus
 	private List<NuclearSignal> redSignals   = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
 	private List<NuclearSignal> greenSignals = new ArrayList<NuclearSignal>(0); // an array to hold any signals detected
 	
-	private Map<Integer, ArrayList<NuclearSignal>> signalCollection = new HashMap<Integer, ArrayList<NuclearSignal>>();
+	private SignalCollection signalCollection = new SignalCollection();
 
 	private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
 
