@@ -8,6 +8,7 @@
 package no.analysis;
 import java.util.*;
 
+import no.utility.StatsMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -22,9 +23,9 @@ import ij.plugin.filter.ParticleAnalyzer;
 public class Detector{
 
 	// colour channels
-  private static final int RED_CHANNEL   = 0;
-  private static final int GREEN_CHANNEL = 1;
-  private static final int BLUE_CHANNEL  = 2;
+//  private static final int RED_CHANNEL   = 0;
+//  private static final int GREEN_CHANNEL = 1;
+//  private static final int BLUE_CHANNEL  = 2;
 
   /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
   private double minSize;
@@ -37,7 +38,7 @@ public class Detector{
 
   private Roi[] roiArray;
 
-  private Map<Roi, HashMap<String, Double>> roiMap = new HashMap<Roi, HashMap<String, Double>>(0);
+  private Map<Roi, StatsMap> roiMap = new HashMap<Roi, StatsMap>(0);
 
   public Detector(){
 
@@ -83,30 +84,7 @@ public class Detector{
 	  findInImage(image);
   }
 
-  public void run(ImagePlus image) throws Exception{
-
-	  if(image==null){
-		  throw new IllegalArgumentException("No image to analyse");
-	  }
-
-	  if( Double.isNaN(this.minSize) || 
-			  Double.isNaN(this.maxSize) ||
-			  Double.isNaN(this.minCirc) ||
-			  Double.isNaN(this.maxCirc))
-		  throw new Exception("Detection parameters not set");
-
-	  if(	this.channel!=RED_CHANNEL 	&& 
-			  this.channel!=GREEN_CHANNEL && 
-			  this.channel!=BLUE_CHANNEL){
-		  throw new Exception("RGB channel not set");
-	  }
-
-
-
-	  this.findInImage(image);
-  }
-
-  public List<Roi> getRois(){
+  public List<Roi> getRoiList(){
   	List<Roi> result = new ArrayList<Roi>(0);
   	for(Roi r : this.roiArray){
   		result.add(r);
@@ -115,133 +93,75 @@ public class Detector{
   }
 
   // ensure defensive
-  public Map<Roi, HashMap<String, Double>> getRoiMap(){
-  	Map<Roi, HashMap<String, Double>> resultMap = new HashMap<Roi, HashMap<String, Double>>(0);
-  	Set<Roi> keys = this.roiMap.keySet();
+  public Map<Roi, StatsMap> getRoiMap(){
+  	Map<Roi, StatsMap> resultMap = new HashMap<Roi, StatsMap>(0);
 
-  	for(Roi r : keys){
-  		HashMap<String, Double> values = roiMap.get(r);
-  		HashMap<String, Double> resultValues = new HashMap<String, Double>(0);
-  		Set<String> valueKeys = values.keySet();
-  		for( String s : valueKeys){
-  			resultValues.put(s, values.get(s));
-  		}
+  	for(Roi r : this.roiMap.keySet()){
+  		StatsMap values = roiMap.get(r);
+  		StatsMap resultValues = new StatsMap(values);
   		resultMap.put(r, resultValues);
   	}
   	return resultMap;
   }
-
-  private ImagePlus getChannelImage(ImagePlus image, boolean invert){
-
-    // split out colour channel
-    ImagePlus[] channels = ChannelSplitter.split(image);
-    ImagePlus searchImage = channels[this.channel];
-    
-    // threshold
-    ImageProcessor ip = searchImage.getChannelProcessor();
-    ip.smooth();
-    ip.threshold(this.threshold);
-    if(invert){
-    	ip.invert(); // WHY IS THIS NEEDED? MAKES BLACK NUCLEUS ON WHITE. NEEDED BY PARTICLE DETECTOR ON MANETHEREN, BUT BREAKS ON WORK PC UNTIL IT SUDDENLY BROKE THE PARTICLE DETECTOR.
-    }
-    return searchImage;
-  }
-
   
   private void findInImage(ImageStack image){
 
-	  	ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
-	  	searchProcessor.smooth();
-	  	searchProcessor.threshold(this.threshold);
-	  	
-	    this.runAnalyser(searchProcessor);
-	    
-	    if(this.getRoiCount()==0){
-	    	searchProcessor.invert();
-	    	this.runAnalyser(searchProcessor);
-	    }
+	  ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
+	  searchProcessor.smooth();
+	  searchProcessor.threshold(this.threshold);
+
+	  this.runAnalyser(searchProcessor);
+
+	  if(this.getRoiCount()==0){
+		  searchProcessor.invert();
+		  this.runAnalyser(searchProcessor);
 	  }
-  
-  private void findInImage(ImagePlus image){
-
-    
-    ImagePlus searchImage = this.getChannelImage(image, false);
-    this.runAnalyser(searchImage);
-    if(this.getRoiCount()==0){
-    	searchImage = this.getChannelImage(image, true);
-    	this.runAnalyser(searchImage);
-    }
-
-   
   }
-  
+
   private int getRoiCount() {
-	return this.roiArray.length;
-}
-
-  private void runAnalyser(ImagePlus image){
-	  RoiManager manager = new RoiManager(true);
-	  // run the particle analyser
-	    ResultsTable rt = new ResultsTable();
-	    ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
-	                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA | ParticleAnalyzer.PERIMETER | ParticleAnalyzer.FERET ,
-	                 rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
-	    try {
-	      ParticleAnalyzer.setRoiManager(manager);
-	      boolean success = pa.analyze(image);
-	      if(!success){
-	        IJ.log("  Unable to perform particle analysis");
-	      }
-	    } catch(Exception e){
-	       IJ.log("  Error in particle analyser: "+e);
-	    } finally {
-	      image.close();
-	    }
-
-	    this.roiArray = manager.getSelectedRoisAsArray();
-	    for(int i=0;i<roiArray.length;i++){
-	    	HashMap<String, Double> values = new HashMap<String, Double>(0);
-	    	values.put("Area", rt.getValue("Area",i)); 
-	    	values.put("Feret", rt.getValue("Feret",i)); 
-	    	values.put("Perim", rt.getValue("Perim.",i)); 
-	    	values.put("XM", rt.getValue("XM",i)); 
-	    	values.put("YM", rt.getValue("YM",i)); 
-
-	    	this.roiMap.put(roiArray[i], values);
-	    }
+	  return this.roiArray.length;
   }
 
   private void runAnalyser(ImageProcessor processor){
 	  ImagePlus image = new ImagePlus(null, processor);
 	  RoiManager manager = new RoiManager(true);
 	  // run the particle analyser
-	    ResultsTable rt = new ResultsTable();
-	    ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
-	                ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA | ParticleAnalyzer.PERIMETER | ParticleAnalyzer.FERET ,
-	                 rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
-	    try {
-	      ParticleAnalyzer.setRoiManager(manager);
-	      boolean success = pa.analyze(image);
-	      if(!success){
-	        IJ.log("  Unable to perform particle analysis");
-	      }
-	    } catch(Exception e){
-	       IJ.log("  Error in particle analyser: "+e);
-	    } finally {
-	      image.close();
-	    }
+	  ResultsTable rt = new ResultsTable();
+	  ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
+			  ParticleAnalyzer.CENTER_OF_MASS | ParticleAnalyzer.AREA | ParticleAnalyzer.PERIMETER | ParticleAnalyzer.FERET ,
+			  rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
+	  try {
+		  ParticleAnalyzer.setRoiManager(manager);
+		  boolean success = pa.analyze(image);
+		  if(!success){
+			  IJ.log("  Unable to perform particle analysis");
+		  }
+	  } catch(Exception e){
+		  IJ.log("  Error in particle analyser: "+e);
+	  } finally {
+		  image.close();
+	  }
 
-	    this.roiArray = manager.getSelectedRoisAsArray();
-	    for(int i=0;i<roiArray.length;i++){
-	    	HashMap<String, Double> values = new HashMap<String, Double>(0);
-	    	values.put("Area", rt.getValue("Area",i)); 
-	    	values.put("Feret", rt.getValue("Feret",i)); 
-	    	values.put("Perim", rt.getValue("Perim.",i)); 
-	    	values.put("XM", rt.getValue("XM",i)); 
-	    	values.put("YM", rt.getValue("YM",i)); 
+	  this.roiArray = manager.getSelectedRoisAsArray();
+	  for(int i=0;i<roiArray.length;i++){
+		  StatsMap values = new StatsMap();
+		  values.add("Area", rt.getValue("Area",i)); 
+		  values.add("Feret", rt.getValue("Feret",i)); 
+		  values.add("Perim", rt.getValue("Perim.",i)); 
+		  values.add("XM", rt.getValue("XM",i)); 
+		  values.add("YM", rt.getValue("YM",i)); 
 
-	    	this.roiMap.put(roiArray[i], values);
-	    }
+		  this.roiMap.put(roiArray[i], values);
+	  }
   }
+  
+  /**
+   * Get the stats for the region covered by the given roi
+   * @param roi the region to measure
+   * @return
+   */
+//  public Map<String, Double> measure(Roi roi, ){
+//
+//  }
 
 }

@@ -1,7 +1,5 @@
 package no.utility;
 
-import java.util.Arrays;
-
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
@@ -13,6 +11,12 @@ import ij.plugin.ChannelSplitter;
  *
  */
 public class ImageImporter {
+	
+	public static final int COUNTERSTAIN = 0; 
+	
+	private static final int RGB_RED = 0;
+	private static final int RGB_GREEN = 1;
+	private static final int RGB_BLUE = 2;
 	
 	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB };
 			
@@ -27,10 +31,16 @@ public class ImageImporter {
 		}
 		
 		// check that we are able to handle this image type
-		if(!Arrays.asList(imageTypesProcessed).contains(image.getType()) ){
-			throw new IllegalArgumentException("Cannot handle image type");
+		boolean ok = false;
+		for(int i : imageTypesProcessed){
+			if(i==image.getType()){
+				ok = true;
+			}
 		}
-		
+		if(!ok ){
+			throw new IllegalArgumentException("Cannot handle image type: "+image.getType());
+		}
+				
 		// do the conversions
 		ImageStack result = new ImageStack();
 		if(image.getType()==ImagePlus.GRAY8){
@@ -49,7 +59,7 @@ public class ImageImporter {
 	 * @return a stack with the input image as position 0
 	 */
 	private static ImageStack convertGreyscale(ImagePlus image){
-		ImageStack result = new ImageStack();
+		ImageStack result = new ImageStack(image.getWidth(), image.getHeight());
 	    result.addSlice("counterstain", image.getProcessor());
 	    return result;
 	}
@@ -61,14 +71,14 @@ public class ImageImporter {
 	 * @return the stack
 	 */
 	private static ImageStack convertRGB(ImagePlus image){
-		ImageStack result = new ImageStack();
+		ImageStack result = new ImageStack(image.getWidth(), image.getHeight());
 		
 		// split out colour channel
 	    ImagePlus[] channels = ChannelSplitter.split(image);
 	    
-	    result.addSlice("counterstain", channels[2].getProcessor());
-	    result.addSlice(channels[0].getProcessor());
-	    result.addSlice(channels[1].getProcessor());
+	    result.addSlice("counterstain", channels[ImageImporter.RGB_BLUE].getProcessor());
+	    result.addSlice(channels[ImageImporter.RGB_RED].getProcessor());
+	    result.addSlice(channels[ImageImporter.RGB_GREEN].getProcessor());
 	    return result;
 	}
 }

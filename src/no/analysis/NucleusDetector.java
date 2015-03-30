@@ -278,39 +278,6 @@ public class NucleusDetector {
   }
 
   /**
-  * Given a greyscale image, convert it to RGB, and set the greyscale to 
-  * the blue channel. 
-  *
-  * @param image the ImagePlus to convert
-  * @return a COLOR_RGB ImagePlus
-  */
-//  private ImagePlus makeRGB(ImagePlus image) throws Exception{
-//    
-//    ImagePlus mergedImage = new ImagePlus();
-//    if(image.getType()==ImagePlus.GRAY8){
-//
-//      byte[] blank = new byte[image.getWidth() * image.getHeight()];
-//      for( byte b : blank){
-//        b = -128;
-//      }
-//
-//      ImagePlus[] images = new ImagePlus[3];
-//      images[0] = new ImagePlus("red",   new ByteProcessor(image.getWidth(), image.getHeight(), blank));
-//      images[1] = new ImagePlus("green", new ByteProcessor(image.getWidth(), image.getHeight(), blank));
-//      images[2] = image;      
-//
-////      RGBStackMerge merger = new RGBStackMerge();
-//      // IJ.log("  Merger created");
-//      mergedImage = RGBStackMerge.mergeChannels(images, false); 
-//      // IJ.log("  Merged");
-//    } else{
-//      IJ.log("  Cannot convert at present; please convert to RGB manually");
-//      throw new Exception("Error converting image to RGB: wrong type");
-//    }
-//    return mergedImage.flatten();
-//  }
-
-  /**
   * Create the output folder for the analysis if required
   *
   * @param folder the folder in which to create the analysis folder
@@ -350,12 +317,6 @@ public class NucleusDetector {
           Opener localOpener = new Opener();
           ImagePlus image = localOpener.openImage(file.getAbsolutePath());   
           
-//          // handle the image
-//          if(image.getType()!=ImagePlus.COLOR_RGB){ // convert to RGB
-//            IJ.log("Converting image to RGB");
-//            image = this.makeRGB(image);
-//          } 
-          // Add in the ImageStack code
           ImageStack imageStack = ImageImporter.convert(image);
           
           // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
@@ -364,7 +325,7 @@ public class NucleusDetector {
           image.close();
 
         } catch (Exception e) { // end try
-            IJ.log("Error in image processing: "+e);
+            IJ.log("Error in image processing: "+e.getMessage());
         } // end catch
       } else { // if !ok
         if(file.isDirectory()){ // recurse over any sub folders
@@ -374,43 +335,27 @@ public class NucleusDetector {
     } // end for (File)
   } // end function
 
-  /**
-  * Detects nuclei within the given image.
-  *
-  * @param image the ImagePlus to be analysed
-  * @return the Map linking an roi to its stats
-  */
-  protected Map<Roi, HashMap<String, Double>> getROIs(ImagePlus image){
-    Detector detector = new Detector();
-    detector.setMaxSize(this.maxNucleusSize);
-    detector.setMinSize(this.minNucleusSize);
-    detector.setMinCirc(this.minNucleusCirc);
-    detector.setMaxCirc(this.maxNucleusCirc);
-    detector.setThreshold(this.nucleusThreshold);
-    detector.setChannel(BLUE_CHANNEL);
-    try{
-      detector.run(image);
-    } catch(Exception e){
-      IJ.log("Error in nucleus detection: "+e.getMessage());
-    }
-    return detector.getRoiMap();
-  }
-  
-  protected Map<Roi, HashMap<String, Double>> getROIs(ImageStack image){
-	    Detector detector = new Detector();
-	    detector.setMaxSize(this.maxNucleusSize);
-	    detector.setMinSize(this.minNucleusSize);
-	    detector.setMinCirc(this.minNucleusCirc);
-	    detector.setMaxCirc(this.maxNucleusCirc);
-	    detector.setThreshold(this.nucleusThreshold);
-	    detector.setChannel(0);
-	    try{
-	      detector.run(image);
-	    } catch(Exception e){
-	      IJ.log("Error in nucleus detection: "+e.getMessage());
-	    }
-	    return detector.getRoiMap();
-	  }
+	/**
+	 * Detects nuclei within the given image.
+	 *
+	 * @param image the ImagePlus to be analysed
+	 * @return the Map linking an roi to its stats
+	 */
+	protected Map<Roi, HashMap<String, Double>> getROIs(ImageStack image){
+		Detector detector = new Detector();
+		detector.setMaxSize(this.maxNucleusSize);
+		detector.setMinSize(this.minNucleusSize);
+		detector.setMinCirc(this.minNucleusCirc);
+		detector.setMaxCirc(this.maxNucleusCirc);
+		detector.setThreshold(this.nucleusThreshold);
+		detector.setChannel(ImageImporter.COUNTERSTAIN);
+		try{
+			detector.run(image);
+		} catch(Exception e){
+			IJ.log("Error in nucleus detection: "+e.getMessage());
+		}
+		return detector.getRoiMap();
+	}
 
   /**
   * Call the nucleus detector on the given image.
@@ -436,7 +381,7 @@ public class NucleusDetector {
       	analyseNucleus(roi, image, i, path, map.get(roi)); // get the profile data back for the nucleus
       	this.totalNuclei++;
       } catch(Exception e){
-      	IJ.log("  Error acquiring nucleus: "+e);
+      	IJ.log("  Error acquiring nucleus: "+e.getMessage());
       }
       i++;
     } 
@@ -465,21 +410,12 @@ public class NucleusDetector {
     String position = xCentre+"-"+yCentre;
 
     // Enlarge the ROI, so we can do nucleus detection on the resulting original images
-//    RoiEnlarger enlarger = new RoiEnlarger();
     ImageStack smallRegion = getRoiAsStack(nucleus, image);
     Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
     ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
     
-    // make a copy of the nucleus only for saving out and processing
-//    image.setRoi(enlargedRoi);
-//    image.copy();
-//    ImagePlus largeRegion = ImagePlus.getClipboard();
-//    image.setRoi(nucleus);
-//    image.copy();
-//    ImagePlus smallRegion = ImagePlus.getClipboard();
-
     nucleus.setLocation(0,0); // translate the roi to the new image coordinates
-//    smallRegion.setRoi(nucleus);
+
 
     // turn roi into Nucleus for manipulation
     Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
@@ -511,7 +447,10 @@ public class NucleusDetector {
    * @param stack
    */
   private ImageStack getRoiAsStack(Roi roi, ImageStack stack){
-	  ImageStack result = new ImageStack();
+	  if(roi==null || stack == null){
+		  throw new IllegalArgumentException("ROI or stack is null");
+	  }
+	  ImageStack result = new ImageStack((int)roi.getBounds().getWidth(), (int)roi.getBounds().getHeight());
 	  for(int i=0; i<stack.getSize();i++){
 		  ImagePlus image = new ImagePlus(null, stack.getProcessor(i));
 		  image.setRoi(roi);

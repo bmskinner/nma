@@ -623,8 +623,7 @@ public class Nucleus
 			detector.setThreshold(this.signalThreshold);
 			detector.setChannel(channel);
 			try{
-				ImagePlus image = new ImagePlus(null, this.imagePlanes.getProcessor(channel));
-				detector.run(image);
+				detector.run(imagePlanes);
 			} catch(Exception e){
 				IJ.log("Error in signal detection: "+e.getMessage());
 			}
