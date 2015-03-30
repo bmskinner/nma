@@ -1,5 +1,8 @@
 package no.components;
 
+import ij.IJ;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -126,12 +129,36 @@ public class SignalCollection {
 		names.put(name, channel);
 	}
 	
+	public String getChannelName(int channel){
+		if(Integer.valueOf(channel)==null){
+			throw new IllegalArgumentException("Channel is null");
+		}
+		if(!names.containsValue(channel)){
+			throw new IllegalArgumentException("Channel name is not present");
+		}
+		String result = null;
+		for(String name : getChannelNames()){
+			if(names.get(name)==channel){
+				result=name;
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * Get the names of channels which have been named; ignores unnamed channels
 	 * @return the set of names
 	 */
 	public Set<String> getChannelNames(){
 		return names.keySet();
+	}
+	
+	/**
+	 * Get the channel codes
+	 * @return the set of names
+	 */
+	public Set<Integer> getChannels(){
+		return collection.keySet();
 	}
 	
 	/**
@@ -154,6 +181,20 @@ public class SignalCollection {
 		return count;
 	}
 	
+	public boolean hasSignal(int channel){
+		if(Integer.valueOf(channel)==null){
+			throw new IllegalArgumentException("Channel is null");
+		}
+		if(!collection.containsKey(channel)){
+			return false;
+		}
+		if(collection.get(channel).isEmpty()){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 	/**
 	 * Get the total number of signals in a given channel
 	 * @param channel the channel
@@ -171,5 +212,120 @@ public class SignalCollection {
 	public int numberOfSignals(String channel){
 		return numberOfSignals(names.get(channel));
 	}
+	
+	/**
+	 * Find the pairwise distances between all signals in the nucleus 
+	 */
+	private double[][] calculateDistanceMatrix(){
 
+		// create a matrix to hold the data
+		// needs to be between every signal and every other signal, irrespective of colour
+		int matrixSize = this.numberOfSignals();
+
+		double [][] matrix = new double[matrixSize][matrixSize];
+		
+		int matrixRow = 0;
+		int matrixCol = 0;
+		
+		for( int i : getChannels()){
+			List<NuclearSignal> signalsRow = getSignals(i);
+
+			if(!signalsRow.isEmpty()){
+
+				for(NuclearSignal row : signalsRow){
+					
+					matrixCol=0;
+
+					XYPoint aCoM = row.getCentreOfMass();
+
+					for( int j : getChannels()){
+						List<NuclearSignal> signalsCol = getSignals(j);
+
+						if(!signalsCol.isEmpty()){
+
+							for(NuclearSignal col : signalsCol){
+								XYPoint bCoM = col.getCentreOfMass();
+								matrix[matrixRow][matrixCol] = aCoM.getLengthTo(bCoM);
+								matrixCol++;
+							}
+
+						}
+
+					}
+					matrixRow++;
+				}
+			}
+		}
+		return matrix;
+	}
+	
+	/**
+	 * Export the pairwise distances between all signals to the given folder
+	 * @param outputFolder the folder to export to
+	 */
+	public void exportDistanceMatrix(File outputFolder){
+
+		double[][] matrix = calculateDistanceMatrix();
+		int matrixRow = 0;
+		int matrixCol = 0;
+
+		File f = new File(outputFolder.getAbsolutePath()+File.separator+"signalDistanceMatrix.txt");
+		if(f.exists()){
+			f.delete();
+		}
+
+		int matrixSize = matrix.length;
+		StringBuilder outLine = new StringBuilder("Signal\t");
+		
+		// prepare the column headings
+		for( int i : getChannels()){
+			List<NuclearSignal> signalsRow = getSignals(i);
+			
+			if(!signalsRow.isEmpty()){
+
+				for(NuclearSignal row : signalsRow){
+					if(names.containsValue(i)){ // if a name has been set for the channel, use it
+						outLine.append("SIGNAL_"+i+"_"+getChannelName(i).toUpperCase()+"\t");
+							
+					} else { // otherwise just the signal number
+					outLine.append("SIGNAL_"+i+"\t");
+					}
+				}
+				outLine.append("|\t"); // separator between signal channels
+			}
+		}
+		outLine.append("\r\n");
+
+		// add the rows of values
+		for( int i : getChannels()){
+			List<NuclearSignal> signalsRow = getSignals(i);
+			
+
+			if(!signalsRow.isEmpty()){
+				
+				outLine.append("SIGNAL_"+matrixRow);
+
+				for(NuclearSignal row : signalsRow){
+					
+					matrixCol=0;
+
+					for( int j : getChannels()){
+						List<NuclearSignal> signalsCol = getSignals(j);
+
+						if(!signalsCol.isEmpty()){
+
+							for(NuclearSignal col : signalsCol){
+								outLine.append(matrix[matrixRow][matrixCol]+"\t");
+								matrixCol++;
+							}
+						}
+						outLine.append("|\t");
+					}
+					matrixRow++;
+					outLine.append("\r\n");
+				}
+			}
+		}
+		IJ.append(outLine.toString(), f.getAbsolutePath());
+	}
 }

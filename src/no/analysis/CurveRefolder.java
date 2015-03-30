@@ -12,6 +12,7 @@ import ij.ImagePlus;
 import ij.gui.Plot;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
+
 import java.awt.Color;
 import java.io.File;
 import java.util.*;
@@ -451,33 +452,30 @@ public class CurveRefolder{
 
 			INuclearFunctions n = collection.getNuclei().get(i);
 
-			List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
-			signals.add(n.getRedSignals());
-			signals.add(n.getGreenSignals());
-
 			ImageProcessor plotIP = nucleusPlot.getImagePlus().getProcessor();
 			Calibration cal = nucleusPlot.getImagePlus().getCalibration();
 			cal.setUnit("pixels");
 			cal.pixelWidth = 1;
 			cal.pixelHeight = 1;
 
-
-			int signalCount = 0;
-			for( List<NuclearSignal> signalGroup : signals ){
-
+			for( int j : n.getSignalCollection().getChannels()){
+				List<NuclearSignal> signals = n.getSignalCollection().getSignals(j);
+				int signalCount = 0;
 				Color colour = signalCount==0 ? new Color(255,0,0,50) : new Color(0,255,0,50);
 
-				if(signalGroup.size()>0){
+				if(!signals.isEmpty()){
 
 					ArrayList<Double> xPoints = new ArrayList<Double>(0);
 					ArrayList<Double> yPoints = new ArrayList<Double>(0);
 
-					for(int j=0; j<signalGroup.size();j++){
 
-						double angle = signalGroup.get(j).getAngle();
+					for(NuclearSignal s : signals){
 
-						double fractionalDistance = signalGroup.get(j).getFractionalDistanceFromCoM();
-						double diameter = signalGroup.get(j).getRadius() * 2;
+
+						double angle = s.getAngle();
+
+						double fractionalDistance = s.getFractionalDistanceFromCoM();
+						double diameter = s.getRadius() * 2;
 
 						// determine the total distance to the border at this angle
 						double distanceToBorder = getDistanceFromAngle(angle);
@@ -488,7 +486,7 @@ public class CurveRefolder{
 						if(angle==0){ // no angle was calculated, so spread the points based on distance from CoM
 							angle = signalCount == Nucleus.RED_CHANNEL ? 360 * fractionalDistance : 360 * fractionalDistance + 180;
 						}
-						
+
 						// adjust X and Y because we are now counting angles from the vertical axis
 						double signalX = Utils.getXComponentOfAngle(signalDistance, angle-90);
 						double signalY = Utils.getYComponentOfAngle(signalDistance, angle-90);
@@ -504,7 +502,7 @@ public class CurveRefolder{
 							 The plot 0,0 is therefore at x:161+60 = 221 y:172+17= 189  :  221,189
 							 Positive Y values must be subtracted from this
 							 Negative X values must be subtracted from this
-						*/
+						 */
 						double xRatio = signalX / this.plotLimit; // the ratio of the signal from the centre to the plot edge
 						double yRatio = signalY / this.plotLimit;
 
@@ -523,7 +521,7 @@ public class CurveRefolder{
 						xPoints.add( signalX );
 						yPoints.add( signalY ); 
 					}
-									
+
 					nucleusPlot.setColor(colour);
 					nucleusPlot.setLineWidth(2);
 					nucleusPlot.addPoints(xPoints, yPoints, Plot.DOT);

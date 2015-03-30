@@ -7,7 +7,7 @@ import java.util.Set;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
-
+import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.components.Profile;
 import no.components.NucleusBorderPoint;
@@ -127,9 +127,9 @@ public interface INuclearFunctions
 
   public double getMinY();
 
-  public int getRedSignalCount();
-
-  public int getGreenSignalCount();
+//  public int getRedSignalCount();
+//
+//  public int getGreenSignalCount();
 
   /*
     -----------------------
@@ -148,15 +148,15 @@ public interface INuclearFunctions
     -----------------------
   */
 
-  public List<NuclearSignal> getRedSignals();
-
-  public List<NuclearSignal> getGreenSignals();
+//  public List<NuclearSignal> getRedSignals();
+//
+//  public List<NuclearSignal> getGreenSignals();
 
   public void addRedSignal(NuclearSignal n);
 
   public void addGreenSignal(NuclearSignal n);
 
-  public double[][] getSignalDistanceMatrix();
+//  public double[][] getSignalDistanceMatrix();
 
   /*
     -----------------------
@@ -257,12 +257,16 @@ public interface INuclearFunctions
   public void addBorderTag(String name, int i);
 
   public void addSegmentTag(String name, int i);
-  
+
   public void clearSegments();
 
   public void calculateAngleProfile(int angleProfileWindowSize);
 
   public void updatePolygon();
-  
+
   public void setSegments(List<NucleusBorderSegment> newList);
+  public SignalCollection getSignalCollection();
+  public int getSignalCount();
+  public int getSignalCount(int channel);
+  public List<NuclearSignal> getSignals(int channel);
 }

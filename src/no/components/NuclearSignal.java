@@ -19,15 +19,17 @@ public class NuclearSignal {
 
   private XYPoint centreOfMass;
   private int closestNuclearBorderPoint;
+  private String origin;
 
   private Roi roi;
 
-  public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass){
+  public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass, String origin){
     this.roi = roi;
     this.area = area;
     this.perimeter = perimeter;
     this.feret = feret;
     this.centreOfMass = centreOfMass;
+    this.origin = origin;
   }
 
   public NuclearSignal(NuclearSignal n){
@@ -40,6 +42,7 @@ public class NuclearSignal {
     this.fractionalDistanceFromCoM = n.getFractionalDistanceFromCoM();
     this.angleFromReferencePoint = n.getAngle();
     this.closestNuclearBorderPoint = n.getClosestBorderPoint();
+    this.origin = n.getOrigin();
   }
 
   /*
@@ -81,6 +84,10 @@ public class NuclearSignal {
 
   public int getClosestBorderPoint(){
     return this.closestNuclearBorderPoint;
+  }
+  
+  public String getOrigin(){
+	  return this.origin;
   }
 
   /*

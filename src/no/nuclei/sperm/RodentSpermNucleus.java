@@ -10,8 +10,10 @@ package no.nuclei.sperm;
 
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
+
 import java.awt.Color;
 import java.util.*;
+
 import no.nuclei.*;
 import no.components.*;
 import no.utility.*;
@@ -428,29 +430,25 @@ public class RodentSpermNucleus
 
     // update signal angles with hook or hump side
 
-    List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
-    signals.add(this.getRedSignals());
-    signals.add(this.getGreenSignals());
-    int channel = 0;
+    for( int i : signalCollection.getChannels()){
+    	List<NuclearSignal> signals = signalCollection.getSignals(i);
 
-    for( List<NuclearSignal> signalGroup : signals ){
+    	if(!signals.isEmpty()){
 
-      if(signalGroup.size()>0){
+    		for(NuclearSignal n : signals){
 
-        for(int i=0;i<signalGroup.size();i++){
-          NuclearSignal n = signalGroup.get(i);
+    			// hook or hump?
+    			double angle = n.getAngle();
+    			if( this.isHookSide(n.getCentreOfMass()) ){ 
+    				angle = 360 - angle;
+    			}
+    			n.setAngle(angle);
 
-          // hook or hump?
-          double angle = n.getAngle();
-          if( this.isHookSide(n.getCentreOfMass()) ){ 
-            angle = 360 - angle;
-          }
-
-          // set the final angle
-          this.updateSignalAngle(channel, i, angle);
-        }
-      }
-      channel++;
+    			// set the final angle
+//    			this.updateSignalAngle(channel, i, angle);
+    		}
+    	}
+//    	channel++;
     }
   }
 
