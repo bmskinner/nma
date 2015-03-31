@@ -273,7 +273,7 @@ implements INuclearCollection
 	
 			  for(NucleusBorderSegment seg : segments){
 				  logger.addColumnHeading(seg.getSegmentType());
-				  IJ.log("    Heading made: "+seg.getSegmentType());
+//				  IJ.log("    Heading made: "+seg.getSegmentType());
 			  }
 			  
 			  for(INuclearFunctions n : this.getNuclei()){
@@ -283,7 +283,7 @@ implements INuclearCollection
 					  logger.addRow(seg.getSegmentType(), nucSeg.length(n.getLength()));
 				  }
 			  }
-			  IJ.log("    Values added");
+//			  IJ.log("    Values added");
 			  logger.export("log.segments."+getType());
 			  IJ.log("    Segments exported");
 		  }
@@ -636,18 +636,6 @@ implements INuclearCollection
 	  Profile tailProfile = medianProfile.offset(tailIndex);
 	  this.profileCollection.addProfile("tail", tailProfile);
 	  this.profileCollection.addFeature("head", new ProfileFeature("tail", tailIndex));
-	  
-    
-//    int headIndex = medianProfile.getIndexOfMin();
-//    ProfileFeature headFeature = new ProfileFeature();
-//    headFeature.add("head", headIndex);
-//    this.profileCollection.addFeature("tail", headFeature);
-//    
-//    ProfileFeature tailFeature = new ProfileFeature();
-//    tailFeature.add("head", headIndex);
-//    this.profileCollection.addFeature("head", tailFeature);
-    
-//    int tailIndex = 
   }
 
   /*

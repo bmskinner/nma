@@ -71,8 +71,16 @@ public class Detector{
 	  if( Double.isNaN(this.minSize) || 
 			  Double.isNaN(this.maxSize) ||
 			  Double.isNaN(this.minCirc) ||
-			  Double.isNaN(this.maxCirc))
+			  Double.isNaN(this.maxCirc)){
 		  throw new IllegalArgumentException("Detection parameters not set");
+	  }
+	  
+	  if(this.minSize >= this.maxSize){
+		  throw new IllegalArgumentException("Minimum size >= maximum size");
+	  }
+	  if(this.minCirc >= this.maxCirc){
+		  throw new IllegalArgumentException("Minimum circularity >= maximum circularity");
+	  }
 
 	  if(this.channel==0 || this.channel > image.getSize()){
 		  throw new IllegalArgumentException("Not a valid channel for this image");

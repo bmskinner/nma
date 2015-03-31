@@ -76,18 +76,18 @@ public class SegmentFitter {
 			List<NucleusBorderSegment> newList = this.runFitter(this.testSegments);
 			
 	//		Profile revisedProfile = this.recombineSegments(newList, testProfile);
-			IJ.log(n.getImageName()+"-"+n.getNucleusNumber());
+//			IJ.log(n.getImageName()+"-"+n.getNucleusNumber());
 			double score = testProfile.differenceToProfile(medianProfile);
-			IJ.log("Start score: "+score);
+//			IJ.log("Start score: "+score);
 			double prevScore = score+1;
 			while(score<prevScore){
 				newList = runFitter(newList);
 				Profile revisedProfile = this.recombineSegments(newList, testProfile);
 				prevScore = score;
 				score = revisedProfile.differenceToProfile(medianProfile);
-				IJ.log("Score: "+score);
+//				IJ.log("Score: "+score);
 			}
-			IJ.log("Final score: "+score);
+//			IJ.log("Final score: "+score);
 			n.setSegments(newList);
 		} catch(Exception e){
 			IJ.log("    Error refitting segments: "+e.getMessage());

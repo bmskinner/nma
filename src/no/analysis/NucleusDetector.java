@@ -14,6 +14,7 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.io.Opener;
 import ij.plugin.RoiEnlarger;
+
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.*;
@@ -27,9 +28,9 @@ import no.components.*;
 public class NucleusDetector {
 
 	// colour channels
-  public static final int RED_CHANNEL   = 0;
-  public static final int GREEN_CHANNEL = 1;
-  public static final int BLUE_CHANNEL  = 2;
+//  public static final int RED_CHANNEL   = 0;
+//  public static final int GREEN_CHANNEL = 1;
+//  public static final int BLUE_CHANNEL  = 2;
 
   protected static final String IMAGE_PREFIX = "export.";
 
@@ -125,7 +126,13 @@ public class NucleusDetector {
   *  @param d the minimum size
   */
   public void setMinNucleusSize(double d){
-    this.minNucleusSize = d;
+	  if(Double.valueOf(d)==null){
+		  throw new IllegalArgumentException("Value is null");
+	  }
+	  if(d<=0){
+		  throw new IllegalArgumentException("Min nucleus size is 0 or less");
+	  }
+	  this.minNucleusSize = d;
   } 
 
   /**
@@ -134,7 +141,13 @@ public class NucleusDetector {
   *  @param d the maximum size
   */
   public void setMaxNucleusSize(double d){
-    this.maxNucleusSize = d;
+	  if(Double.valueOf(d)==null){
+		  throw new IllegalArgumentException("Value is null");
+	  }
+	  if(d<=0){
+		  throw new IllegalArgumentException("Max nucleus size is 0 or less");
+	  }
+	  this.maxNucleusSize = d;
   }   
 
   /**
@@ -143,7 +156,13 @@ public class NucleusDetector {
   *  @param d the minimum circularity
   */
   public void setMinNucleusCirc(double d){
-    this.minNucleusCirc = d;
+	  if(Double.valueOf(d)==null){
+		  throw new IllegalArgumentException("Value is null");
+	  }
+	  if(d<0 || d>1){
+		  throw new IllegalArgumentException("Value is outside range 0-1");
+	  }
+	  this.minNucleusCirc = d;
   }
 
   /**
@@ -152,7 +171,13 @@ public class NucleusDetector {
   *  @param d the maximum circularity
   */
   public void setMaxNucleusCirc(double d){
-    this.maxNucleusCirc = d;
+	  if(Double.valueOf(d)==null){
+		  throw new IllegalArgumentException("Value is null");
+	  }
+	  if(d<0 || d>1){
+		  throw new IllegalArgumentException("Value is outside range 0-1");
+	  }
+	  this.maxNucleusCirc = d;
   }
 
   /**
@@ -161,7 +186,13 @@ public class NucleusDetector {
   *  @param i the threshold
   */
   public void setThreshold(int i){
-    this.nucleusThreshold = i;
+	  if(Integer.valueOf(i)==null){
+		  throw new IllegalArgumentException("Value is null");
+	  }
+	  if(i<0 || i>255){
+		  throw new IllegalArgumentException("Value is outside range 0-255");
+	  }
+	  this.nucleusThreshold = i;
   } 
 
   /*
@@ -409,37 +440,41 @@ public class NucleusDetector {
 	  Rectangle bounds = nucleus.getBounds();
 	  double xCentre = xbase+(bounds.getWidth()/2);
 	  double yCentre = ybase+(bounds.getHeight()/2);
-	  String position = xCentre+"-"+yCentre;
+	  String position = xCentre+"-"+yCentre; // store the centre of the rectangle for remapping
 
-	  // Enlarge the ROI, so we can do nucleus detection on the resulting original images
-	  ImageStack smallRegion = getRoiAsStack(nucleus, image);
-	  Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
-	  ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
-
-	  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
-
-
-	  // turn roi into Nucleus for manipulation
-	  Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
-
-	  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
-	  currentNucleus.setArea(values.get("Area")); 
-	  currentNucleus.setFeret(values.get("Feret"));
-	  currentNucleus.setPerimeter(values.get("Perim"));
-
-	  currentNucleus.setOutputFolder(this.outputFolder);
-	  currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
-
-	  currentNucleus.setSignalThreshold(this.signalThreshold);
-	  currentNucleus.setMinSignalSize(this.minSignalSize);
-	  currentNucleus.setMaxSignalFraction(this.maxSignalFraction);
-
-	  currentNucleus.detectSignalsInNucleus();
-	  currentNucleus.annotateNucleusImage();
-
-	  // if everything checks out, add the measured parameters to the global pool
-	  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
-	  collectionToAddTo.addNucleus(currentNucleus);
+	  try{
+	  	// Enlarge the ROI, so we can do nucleus detection on the resulting original images
+		  ImageStack smallRegion = getRoiAsStack(nucleus, image);
+		  Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
+		  ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
+	
+		  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
+	
+	
+		  // turn roi into Nucleus for manipulation
+		  Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
+	
+		  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
+		  currentNucleus.setArea(values.get("Area")); 
+		  currentNucleus.setFeret(values.get("Feret"));
+		  currentNucleus.setPerimeter(values.get("Perim"));
+	
+		  currentNucleus.setOutputFolder(this.outputFolder);
+		  currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
+	
+		  currentNucleus.setSignalThreshold(this.signalThreshold);
+		  currentNucleus.setMinSignalSize(this.minSignalSize);
+		  currentNucleus.setMaxSignalFraction(this.maxSignalFraction);
+	
+		  currentNucleus.detectSignalsInNucleus();
+		  currentNucleus.annotateNucleusImage();
+	
+		  // if everything checks out, add the measured parameters to the global pool
+		  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
+		  collectionToAddTo.addNucleus(currentNucleus);
+	  }catch(Exception e){
+		  IJ.log("    Error in nucleus assignment: "+e.getMessage());
+	  }
   }
   
   
@@ -447,17 +482,44 @@ public class NucleusDetector {
    * Given an roi and a stack, get a stack containing just the roi
    * @param roi
    * @param stack
+ * @throws Exception 
    */
-  private ImageStack getRoiAsStack(Roi roi, ImageStack stack){
+  private ImageStack getRoiAsStack(Roi roi, ImageStack stack) throws Exception{
 	  if(roi==null || stack == null){
 		  throw new IllegalArgumentException("ROI or stack is null");
 	  }
-	  ImageStack result = new ImageStack((int)roi.getBounds().getWidth(), (int)roi.getBounds().getHeight());
-	  for(int i=1; i<=stack.getSize();i++){ // ImageStack starts at 1
+	  int x = (int) roi.getXBase();
+	  int y = (int) roi.getYBase();
+	  int w = (int) roi.getBounds().getWidth();
+	  int h = (int) roi.getBounds().getHeight();
+	  
+	// correct for enlarged ROIs that go offscreen
+	  if(y<0){
+		  h=h+y;
+		  y=0;
+	  }
+	  if(y+h>=stack.getHeight()){
+		  h=stack.getHeight()-y;
+	  }	  
+	  if(x<0){
+		 w=w+y;
+		 x=0;
+	  }
+	  if(x+w>=stack.getWidth()){
+		  w=stack.getWidth()-x;
+	  }	  
+	  Roi rectangle = new Roi(x, y, w, h);
+	  
+	  ImageStack result = new ImageStack(w, h);
+	  for(int i=ImageImporter.COUNTERSTAIN; i<=stack.getSize();i++){ // ImageStack starts at 1
 		  ImagePlus image = new ImagePlus(null, stack.getProcessor(i));
-		  image.setRoi(roi);
+		  
+		  image.setRoi(rectangle);
 		  image.copy();
 		  ImagePlus region = ImagePlus.getClipboard();
+		  if(region.getWidth()!=w || region.getHeight()!=h){
+			  throw new Exception("Size mismatch from ROI ("+region.getWidth()+","+region.getHeight()+") to stack ("+w+","+h+"). ROI at "+x+","+y);
+		  }
 		  result.addSlice(region.getProcessor());
 	  }
 	  return result;
