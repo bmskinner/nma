@@ -573,7 +573,11 @@ public class Nucleus
 	}
 	
 	public int getSignalCount(int channel){
-		return this.signalCollection.numberOfSignals(channel);
+		if(signalCollection.hasSignal(channel)){
+			return this.signalCollection.numberOfSignals(channel);
+		} else {
+			return 0;
+		}
 	}
 
 	/*
@@ -613,8 +617,8 @@ public class Nucleus
 
 		// find the signals
 		// within nuclear roi, analyze particles in colour channels
-		// the nucleus is in index 0, so from 1 to end
-		for(int channel=ImageImporter.FIRST_SIGNAL_CHANNEL;channel<this.imagePlanes.getSize();channel++){
+		// the nucleus is in index 1, so from 2 to end
+		for(int channel=ImageImporter.FIRST_SIGNAL_CHANNEL;channel<=this.imagePlanes.getSize();channel++){
 			
 			Detector detector = new Detector();
 			detector.setMaxSize(this.getArea() * this.maxSignalFraction);
@@ -628,13 +632,12 @@ public class Nucleus
 			} catch(Exception e){
 				IJ.log("Error in signal detection: "+e.getMessage());
 			}
-			
 			List<Roi> roiList = detector.getRoiList();
+			
+			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
 			
 			if(!roiList.isEmpty()){
 				
-				ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
-
 				for( Roi r : roiList){
 					
 					StatsMap values = detector.measure(r, imagePlanes);
@@ -647,12 +650,15 @@ public class Nucleus
 
 					signals.add(n);
 				}
-				this.signalCollection.addSignals(signals, channel);
-			}
-			
+			} 
+			this.signalCollection.addChannel(signals, channel);
 		} 
 	}
 	
+	public Set<Integer> getSignalChannels(){
+		return signalCollection.getChannels();
+	}
+		
 	public List<NuclearSignal> getSignals(int channel){
 		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
 		List<NuclearSignal> signals = this.signalCollection.getSignals(channel);
@@ -665,14 +671,6 @@ public class Nucleus
 	public SignalCollection getSignalCollection(){
 		return this.signalCollection;
 	}
-
-//	public List<NuclearSignal> getRedSignals(){
-//		return this.getSignals(1);
-//	}
-//
-//	public List<NuclearSignal> getGreenSignals(){
-//		return this.getSignals(2);
-//	}
 	
 	/**
 	 * @param n the signal
@@ -685,11 +683,11 @@ public class Nucleus
 
 
 	public void addRedSignal(NuclearSignal n){
-		this.addSignal(n, 1);
+		this.addSignal(n, ImageImporter.FIRST_SIGNAL_CHANNEL);
 	}
 
 	public void addGreenSignal(NuclearSignal n){
-		this.addSignal(n, 2);
+		this.addSignal(n, ImageImporter.FIRST_SIGNAL_CHANNEL+1);
 	}
 
 	 /*
@@ -697,10 +695,11 @@ public class Nucleus
 		and update the signal
 	*/
 	private void calculateSignalDistancesFromCoM(){
-
-		for( int j : signalCollection.getChannels() ){
-
-			List<NuclearSignal> signals = signalCollection.getSignals(j);
+		
+//		IJ.log("Getting signal distances");
+//		this.signalCollection.print();
+		for(List<NuclearSignal> signals : signalCollection.getSignals()){
+//			IJ.log("    Found "+signals.size()+" signals in channel");
 			if(!signals.isEmpty()){
 				for(NuclearSignal n : signals){
 					double distance = this.getCentreOfMass().getLengthTo(n.getCentreOfMass());
@@ -719,8 +718,7 @@ public class Nucleus
 
 		this.calculateClosestBorderToSignals();
 
-		for( int i : signalCollection.getChannels()){
-			List<NuclearSignal> signals = signalCollection.getSignals(i);
+		for(List<NuclearSignal> signals : signalCollection.getSignals()){
 
 			if(!signals.isEmpty()){
 
@@ -765,13 +763,11 @@ public class Nucleus
 	 */
 	private void calculateClosestBorderToSignals(){
 
-		for( int i : signalCollection.getChannels()){
-			List<NuclearSignal> signals = signalCollection.getSignals(i);
+		for(List<NuclearSignal> signals : signalCollection.getSignals()){
 
 			if(!signals.isEmpty()){
 
 				for(NuclearSignal s : signals){
-
 
 					int minIndex = 0;
 					double minDistance = this.getFeret();
@@ -793,77 +789,8 @@ public class Nucleus
 		}
 	}
 
-//	public double[][] getSignalDistanceMatrix(){
-//		this.calculateDistancesBetweenSignals();
-//		return this.distancesBetweenSignals;
-//	}
-
-	// this needs to be moved to SignalCollection, and rewritten
-//	private void calculateDistancesBetweenSignals(){
-//
-//		// create a matrix to hold the data
-//		// needs to be between every signal and every other signal, irrespective of colour
-//		int matrixSize = this.getRedSignalCount()+this.getGreenSignalCount();
-//
-//		this.distancesBetweenSignals = new double[matrixSize][matrixSize];
-//
-//		// go through the red signals
-//		for(int i=0;i<this.getRedSignalCount();i++){
-//
-//			XYPoint aCoM = this.redSignals.get(i).getCentreOfMass();
-//
-//			// compare to all red
-//			for(int j=0; j<getRedSignalCount();j++){
-//
-//				XYPoint bCoM = this.redSignals.get(j).getCentreOfMass();
-//				this.distancesBetweenSignals[i][j] = aCoM.getLengthTo(bCoM);
-//			}
-//
-//			// compare to all green
-//			for(int j=0; j<getGreenSignalCount();j++){
-//
-//				int k = j+this.getRedSignalCount(); // offset for matrix
-//
-//				XYPoint bCoM = this.greenSignals.get(j).getCentreOfMass();
-//
-////				double distance = 
-//				this.distancesBetweenSignals[i][k] = aCoM.getLengthTo(bCoM);
-//			}
-//		}
-//
-//		// go through the green signals
-//		for(int i=0;i<this.getGreenSignalCount();i++){
-//
-//			int m = i+this.getRedSignalCount(); // offset for matrix
-//
-//			XYPoint aCoM = this.greenSignals.get(i).getCentreOfMass();
-//
-//			// and compare to all red
-//			for(int j=0; j<getRedSignalCount();j++){
-//
-//				XYPoint bCoM = this.redSignals.get(j).getCentreOfMass();
-//				this.distancesBetweenSignals[m][j] = aCoM.getLengthTo(bCoM);
-//			}
-//
-//			// compare to all green
-//			for(int j=0; j<getGreenSignalCount();j++){
-//
-//				int k = j+this.getRedSignalCount(); // offset for matrix
-//
-//				XYPoint bCoM = this.greenSignals.get(j).getCentreOfMass();
-//
-////				double distance = 
-//				this.distancesBetweenSignals[m][k] = aCoM.getLengthTo(bCoM);
-//			}
-//		}
-//	}
-
 	public void updateSignalAngle(int channel, int signal, double angle){
 		signalCollection.getSignals(channel).get(signal).setAngle(angle);
-//		if(channel==RED_CHANNEL)
-//			this.redSignals.get(signal).setAngle(angle);
-//		if(channel==GREEN_CHANNEL)
-//			this.greenSignals.get(signal).setAngle(angle);
 	}
 
 	
@@ -1109,75 +1036,6 @@ public class Nucleus
 	public void exportSignalDistanceMatrix(){
 		signalCollection.exportDistanceMatrix(this.nucleusFolder);
 	}
-//
-//		this.calculateDistancesBetweenSignals();
-//
-//		File f = new File(this.nucleusFolder+File.separator+"signalDistanceMatrix.txt");
-//		if(f.exists()){
-//			f.delete();
-//		}
-//
-//		int matrixSize = this.getRedSignalCount()+this.getGreenSignalCount();
-//
-//		// Prepare the header line and append to file
-//		String outLine = "RED\t";
-//		for(int i=0;i<this.getRedSignalCount();i++){
-//			outLine = outLine + i + "\t";
-//		}
-//		outLine += "GREEN\t"; // distinguish red from green signals in headers
-//		
-//		for(int i=0;i<this.getGreenSignalCount();i++){
-//			outLine = outLine + i + "\t";
-//		}
-//		
-//		// IJ.append(outLine+"\n", f.getAbsolutePath());
-//		outLine += "\r\n";
-//
-//		// for each row
-//		for(int i=0;i<this.getRedSignalCount();i++){
-//			// for each column of red
-//			outLine += i+"\t";
-//			for(int j=0; j<getRedSignalCount();j++){
-//				outLine += this.distancesBetweenSignals[i][j]+"\t";
-//			}
-//			outLine += "|\t";
-//			// for each column of green
-//			for(int j=0; j<getGreenSignalCount();j++){
-//				int k = j+this.getRedSignalCount();
-//				outLine += this.distancesBetweenSignals[i][k]+"\t";
-//			}
-//			// next line
-//			outLine += "\r\n";
-//		}
-//		// add separator line
-//		outLine += "GREEN\t";
-//		for(int i=0; i<matrixSize;i++){
-//			outLine += "--\t";
-//		}
-//		 outLine += "\r\n";
-//
-//		// add green signals
-//		// for each row
-//		for(int i=0;i<this.getGreenSignalCount();i++){
-//
-//			outLine += i+"\t";
-//			int m = i+this.getRedSignalCount(); // offset for matrix
-//
-//			// for each column of red
-//			for(int j=0; j<getRedSignalCount();j++){
-//				outLine += this.distancesBetweenSignals[m][j]+"\t";
-//			}
-//			outLine += "|\t";
-//			// for each column of green
-//			for(int j=0; j<getGreenSignalCount();j++){
-//				int k = j+this.getRedSignalCount();
-//				outLine += this.distancesBetweenSignals[m][k]+"\t";
-//			}
-//			// next line
-//			outLine += "\r\n";
-//		}
-//		IJ.append(outLine, f.getAbsolutePath());
-//	}
 
 	/*
 		Print key data to the image log file
@@ -1329,7 +1187,12 @@ public class Nucleus
 			ip.setLineWidth(3);
 			for( int i : signalCollection.getChannels()){
 				List<NuclearSignal> signals = signalCollection.getSignals(i);
-				Color colour = i==1 ? Color.RED : i==2 ? Color.GREEN : Color.WHITE;
+				Color colour = i==ImageImporter.FIRST_SIGNAL_CHANNEL 
+							 ? Color.RED 
+							 : i==ImageImporter.FIRST_SIGNAL_CHANNEL+1 
+							 	? Color.GREEN 
+							 	: Color.WHITE;
+				
 				ip.setColor(colour);
 
 				if(!signals.isEmpty()){
@@ -1343,29 +1206,6 @@ public class Nucleus
 				}
 			}
 			
-//			ip.setColor(Color.RED);
-//			List<NuclearSignal> redSignals = this.getRedSignals();
-//			if(redSignals.size()>0){
-//				for(int j=0; j<redSignals.size();j++){
-//					NuclearSignal s = redSignals.get(j);
-//					ip.setLineWidth(3);
-//					ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
-//					ip.setLineWidth(1);
-//					ip.draw(s.getRoi());
-//				}
-//			}
-//
-//			ip.setColor(Color.GREEN);
-//			List<NuclearSignal> greenSignals = this.getGreenSignals();
-//			if(redSignals.size()>0){
-//				for(int j=0; j<greenSignals.size();j++){
-//					NuclearSignal s = greenSignals.get(j);
-//					ip.setLineWidth(3);
-//					ip.setLineWidth(1);
-//					ip.draw(s.getRoi());
-//				}
-//			}
-
 			// The narrowest part of the nucleus
 			ip.setLineWidth(1);
 			ip.setColor(Color.MAGENTA);

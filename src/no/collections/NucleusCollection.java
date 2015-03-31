@@ -117,8 +117,6 @@ implements INuclearCollection
 	  // carry out iterative offsetting to refine the tail point estimate
 	  double score = this.compareProfilesToMedian(pointType);
 	  double prevScore = score+1;
-	  IJ.log("    Profile alignment score: "+(int)score);
-//	  int cycles = 10; // see what happens when we force it
 	  while(score < prevScore){
 		  this.createProfileAggregateFromPoint(pointType);
 		  this.findTailIndexInMedianCurve();
@@ -128,7 +126,6 @@ implements INuclearCollection
 		  score = this.compareProfilesToMedian(pointType);
 
 		  IJ.log("    Reticulating splines: score: "+(int)score);
-//		  cycles--;
 	  }
 
 	  // assign and revise segments

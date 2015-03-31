@@ -398,7 +398,7 @@ public class NucleusDetector {
     IJ.log("File:  "+path.getName());
     List<Roi> roiList = getROIs(image);
     if(roiList.isEmpty()){
-      IJ.log("  No nuclei in image");
+      IJ.log("  No usable nuclei in image");
     }
 
     int nucleusNumber = 0;
@@ -474,6 +474,9 @@ public class NucleusDetector {
 		  collectionToAddTo.addNucleus(currentNucleus);
 	  }catch(Exception e){
 		  IJ.log("    Error in nucleus assignment: "+e.getMessage());
+		  for(StackTraceElement element : e.getStackTrace()){
+			  IJ.log("    "+element.toString());
+		  }
 	  }
   }
   

@@ -14,7 +14,7 @@ import no.utility.ImageImporter;
 /**
  * This holds all the signals within a nucleus, within a hash.
  * The hash key is the channel number from which they were found,
- * and links to the channel number in the ImageStack for the nucleus
+ * and links to the channel number in the ImageStack for the nucleus.
  *
  */
 public class SignalCollection {
@@ -37,21 +37,23 @@ public class SignalCollection {
 		
 	}
 	
+	public void addChannel(ArrayList<NuclearSignal> list, int channel){
+		if(list==null || Integer.valueOf(channel)==null){
+			throw new IllegalArgumentException("Signal list or channel is null");
+		}
+		if(channel==ImageImporter.COUNTERSTAIN){
+			throw new IllegalArgumentException("Channel is reserved for nucleus");
+		}
+		collection.put(channel, list);
+	}
+	
 	/**
 	 * Add a single signal to the given channel
 	 * @param n the signal
 	 * @param channel the channel
 	 */
 	public void addSignal(NuclearSignal n, int channel){
-		if(n==null || Integer.valueOf(channel)==null){
-			throw new IllegalArgumentException("Signal or channel is null");
-		}
-		if(channel>collection.size()){
-			throw new IllegalArgumentException("Channel is out of range");
-		}
-		if(channel==0){
-			throw new IllegalArgumentException("Channel 0 is reserved for nucleus");
-		}
+		checkChannel(channel);
 		collection.get(channel).add(n);
 	}
 	
@@ -61,15 +63,10 @@ public class SignalCollection {
 	 * @param channel the channel
 	 */
 	public void addSignals(List<NuclearSignal> list, int channel){
-		if(list==null || Integer.valueOf(channel)==null){
-			throw new IllegalArgumentException("Signal or channel is null");
+		if(list==null){
+			throw new IllegalArgumentException("Signal is null");
 		}
-		if(channel>collection.size()){
-			throw new IllegalArgumentException("Channel is out of range");
-		}
-		if(channel==0){
-			throw new IllegalArgumentException("Channel 0 is reserved for nucleus");
-		}
+		checkChannel(channel);
 		collection.get(channel).addAll(list);
 	}
 
@@ -80,10 +77,24 @@ public class SignalCollection {
 	 * @param channel the channel name
 	 */
 	public void addSignals(List<NuclearSignal> list, String channel){
-		if(list==null || channel==null){
+		if(list==null){
 			throw new IllegalArgumentException("Signal or channel is null");
 		}
+		checkChannel(channel);
 		this.addSignals(list, names.get(channel));
+	}
+	
+	
+	/**
+	 * Get all the signals in all planes, as a list of lists
+	 * @return the list of signal lists
+	 */
+	public ArrayList<List<NuclearSignal>> getSignals(){
+		ArrayList<List<NuclearSignal>> result = new ArrayList<List<NuclearSignal>>(0);
+		for(int channel : this.getChannels()){
+			result.add(getSignals(channel));
+		}
+		return result;
 	}
 	
 	/**
@@ -92,16 +103,12 @@ public class SignalCollection {
 	 * @return a list of signals
 	 */
 	public List<NuclearSignal> getSignals(int channel){
-		if(Integer.valueOf(channel)==null){
-			throw new IllegalArgumentException("Channel is null");
+		checkChannel(channel);
+		if(this.hasSignal(channel)){
+			return this.collection.get(channel);
+		} else {
+			return new ArrayList<NuclearSignal>(0);
 		}
-		if(channel>collection.size()){
-			throw new IllegalArgumentException("Channel is out of range");
-		}
-		if(channel==ImageImporter.COUNTERSTAIN){
-			throw new IllegalArgumentException("Channel is reserved for nucleus");
-		}
-		return collection.get(channel);
 	}
 	
 	/**
@@ -110,13 +117,12 @@ public class SignalCollection {
 	 * @return a list of signals
 	 */
 	public List<NuclearSignal> getSignals(String channel){
-		if(channel==null){
-			throw new IllegalArgumentException("Channel is null");
+		checkChannel(channel);
+		if(this.hasSignal(channel)){
+			return this.collection.get(names.get(channel));
+		} else {
+			return new ArrayList<NuclearSignal>(0);
 		}
-		if(!names.containsKey(channel)){
-			throw new IllegalArgumentException("Channel name is not present");
-		}	
-		return this.getSignals(names.get(channel));
 	}
 	
 	/**
@@ -177,8 +183,8 @@ public class SignalCollection {
 	 */
 	public int numberOfSignals(){
 		int count=0;
-		for(int i=1; i<=collection.size(); i++){
-			count += numberOfSignals(i);
+		for(int channel : collection.keySet()){
+			count += numberOfSignals(channel);
 		}
 		return count;
 	}
@@ -197,18 +203,27 @@ public class SignalCollection {
 		}
 	}
 	
+	public boolean hasSignal(String channel){
+		if(channel==null){
+			throw new IllegalArgumentException("Channel is null");
+		}
+		if(!collection.containsValue(channel)){
+			return false;
+		}
+		if(collection.get(channel).isEmpty()){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 	/**
 	 * Get the total number of signals in a given channel
 	 * @param channel the channel
 	 * @return the count
 	 */
 	public int numberOfSignals(int channel){
-		if(Integer.valueOf(channel)==null){
-			throw new IllegalArgumentException("Channel is null");
-		}
-		if(!collection.containsKey(channel)){
-			throw new IllegalArgumentException("Channel not present in collection: "+channel);
-		}
+		checkChannel(channel);
 		return collection.get(channel).size();
 	}
 	
@@ -218,12 +233,7 @@ public class SignalCollection {
 	 * @return the count
 	 */
 	public int numberOfSignals(String channel){
-		if(channel==null){
-			throw new IllegalArgumentException("Channel is null");
-		}
-		if(!names.containsKey(channel)){
-			throw new IllegalArgumentException("Channel name not present: "+channel);
-		}
+		checkChannel(channel);
 		return numberOfSignals(names.get(channel));
 	}
 	
@@ -235,14 +245,14 @@ public class SignalCollection {
 		// create a matrix to hold the data
 		// needs to be between every signal and every other signal, irrespective of colour
 		int matrixSize = this.numberOfSignals();
+		IJ.log("Calculating distance matrix...");
 
 		double [][] matrix = new double[matrixSize][matrixSize];
 		
 		int matrixRow = 0;
 		int matrixCol = 0;
 		
-		for( int i : getChannels()){
-			List<NuclearSignal> signalsRow = getSignals(i);
+		for( List<NuclearSignal> signalsRow : getSignals()){
 
 			if(!signalsRow.isEmpty()){
 
@@ -252,8 +262,7 @@ public class SignalCollection {
 
 					XYPoint aCoM = row.getCentreOfMass();
 
-					for( int j : getChannels()){
-						List<NuclearSignal> signalsCol = getSignals(j);
+					for( List<NuclearSignal> signalsCol : getSignals()){
 
 						if(!signalsCol.isEmpty()){
 
@@ -278,8 +287,11 @@ public class SignalCollection {
 	 * @param outputFolder the folder to export to
 	 */
 	public void exportDistanceMatrix(File outputFolder){
+		
+		IJ.log("Exporting distance matrix...");
 
 		double[][] matrix = calculateDistanceMatrix();
+		IJ.log("Calculated distance matrix...");
 		int matrixRow = 0;
 		int matrixCol = 0;
 
@@ -292,56 +304,80 @@ public class SignalCollection {
 		StringBuilder outLine = new StringBuilder("Signal\t");
 		
 		// prepare the column headings
-		for( int i : getChannels()){
-			List<NuclearSignal> signalsRow = getSignals(i);
+		int col = 0;
+		for(List<NuclearSignal> signalsRow : getSignals()){
 			
 			if(!signalsRow.isEmpty()){
+				IJ.log("Checking signals...");
 
-				while(signalsRow.iterator().hasNext()){
-					if(names.containsValue(i)){ // if a name has been set for the channel, use it
-						outLine.append("SIGNAL_"+i+"_"+getChannelName(i).toUpperCase()+"\t");
-							
-					} else { // otherwise just the signal number
-					outLine.append("SIGNAL_"+i+"\t");
-					}
-				}
-				outLine.append("|\t"); // separator between signal channels
+				for(NuclearSignal s : signalsRow){
+					outLine.append("SIGNAL_"+col+"\t");
+					col++;
+				}	
 			}
+			outLine.append("|\t"); // separator between signal channels
 		}
 		outLine.append("\r\n");
+		IJ.log("Made headings");
 
 		// add the rows of values
-		for( int i : getChannels()){
-			List<NuclearSignal> signalsRow = getSignals(i);
+		for(List<NuclearSignal> signalsRow : getSignals()){
 			
-
 			if(!signalsRow.isEmpty()){
 				
 				outLine.append("SIGNAL_"+matrixRow);
+				matrixCol=0;
 
-				while(signalsRow.iterator().hasNext()){
-//				for(NuclearSignal row : signalsRow){
+				for(NuclearSignal s : signalsRow){ // go through all the signals, row by row
 					
-					matrixCol=0;
+					// within the row, get all signals as a column
+					for(List<NuclearSignal> signalsCol : getSignals()){
 
-					for( int j : getChannels()){
-						List<NuclearSignal> signalsCol = getSignals(j);
-
-						if(!signalsCol.isEmpty()){
-
-							while(signalsCol.iterator().hasNext()){
-//							for(NuclearSignal col : signalsCol){
+						if(!signalsCol.isEmpty()){							
+							for(NuclearSignal c : signalsCol){
+								IJ.log("Attempting export of ["+matrixRow+"]["+matrixCol+"]");
 								outLine.append(matrix[matrixRow][matrixCol]+"\t");
 								matrixCol++;
 							}
 						}
 						outLine.append("|\t");
+						matrixRow++;
 					}
-					matrixRow++;
+					
 					outLine.append("\r\n");
 				}
 			}
+			outLine.append("--\r\n"); // separate between channels
 		}
 		IJ.append(outLine.toString(), f.getAbsolutePath());
+	}
+	
+	/**
+	 * Given the id of a channel, make sure it is suitable to use
+	 * @param channel the channel to check
+	 */
+	private void checkChannel(int channel){
+		if(Integer.valueOf(channel)==null){
+			throw new IllegalArgumentException("Channel is null");
+		}
+		if(channel==ImageImporter.COUNTERSTAIN){
+			throw new IllegalArgumentException("Channel is reserved for nucleus");
+		}
+	}
+	
+	private void checkChannel(String channel){
+		if(channel==null){
+			throw new IllegalArgumentException("Channel is null");
+		}
+		if(!names.containsKey(channel)){
+			throw new IllegalArgumentException("Channel name not present: "+channel);
+		}
+	}
+	
+	// the print function bypasses all input checks to show everything present
+	public void print(){
+		for(int channel : this.collection.keySet()){
+			IJ.log("    Channel "+channel+": "+this.collection.get(channel).size());
+		}
 	}
 }
