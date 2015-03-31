@@ -21,6 +21,7 @@ import java.io.File;
 import java.util.*;
 
 import no.nuclei.*;
+import no.utility.ImageImporter;
 import no.components.*;
 import no.export.ImageExporter;
 
@@ -102,7 +103,7 @@ public class ShellAnalyser {
 	*/
 	public void createShells(){
 
-		ImagePlus searchImage = new ImagePlus(null, image.getProcessor(0).duplicate()); // blue channel
+		ImagePlus searchImage = new ImagePlus(null, image.getProcessor(ImageImporter.COUNTERSTAIN).duplicate()); // blue channel
 		ImageProcessor ip = searchImage.getProcessor();
 
 		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
@@ -289,7 +290,7 @@ public class ShellAnalyser {
 
 			for(XYPoint p : points){
 				// find the value of the signal
-				ImageProcessor ip = image.getProcessor(0);
+				ImageProcessor ip = image.getProcessor(ImageImporter.COUNTERSTAIN);
 				density += (double)ip.getPixel(p.getXAsInt(), p.getYAsInt());	 
 			}
 			densities[i] = density;

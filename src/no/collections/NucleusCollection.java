@@ -817,11 +817,11 @@ implements INuclearCollection
 
   public void doShellAnalysis(){
 	  IJ.log("    Performing shell analysis...");
-	  String redLogFile   = getLogFileName( "logShellsRed"  );
-	  String greenLogFile = getLogFileName( "logShellsGreen");
 
-	  ShellCounter   redCounter = new ShellCounter(5);
-	  ShellCounter greenCounter = new ShellCounter(5);
+	  Map<Integer, ShellCounter> counters = new HashMap<Integer, ShellCounter>(0);
+	  for(int channel : this.getSignalChannels()){
+		  counters.put(channel, new ShellCounter(5));
+	  }
 
 	  // make the shells and measure the values
 	  for(int i= 0; i<this.getNucleusCount();i++){
@@ -830,17 +830,11 @@ implements INuclearCollection
 		  shellAnalyser.createShells();
 		  shellAnalyser.exportImage();
 
-		  List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
-		  signals.add(n.getSignals(1));
-		  signals.add(n.getSignals(2));
-
-		  int channel = 0;
-
-		  // put each signal in the correct counter
-		  for( List<NuclearSignal> signalGroup : signals ){
-
-			  if(signalGroup.size()>0){
-				  ShellCounter counter = channel == Nucleus.RED_CHANNEL ? redCounter : greenCounter;
+		  Set<Integer> channels = n.getSignalChannels();
+		  for(int channel : channels){
+			  List<NuclearSignal> signalGroup = n.getSignals(channel); 
+			  if(!signalGroup.isEmpty()){
+				  ShellCounter counter = counters.get(channel);
 
 				  for(NuclearSignal s : signalGroup){
 					  try {
@@ -851,13 +845,13 @@ implements INuclearCollection
 					  }
 				  } // end for signals
 			  } // end if signals
-			  channel++;
-		  } // end for signal group
-	  } // end nucleus iterations
+		  }
+	  }
 
 	  // get stats and export
-	  redCounter.export(new File(redLogFile  ));
-	  greenCounter.export(new File(greenLogFile));
+	  for(int channel : counters.keySet()){
+		  counters.get(channel).export(new File(getLogFileName( "log.shells."+channel  )));
+	  }
 	  IJ.log("    Shell analysis complete");
   }
   

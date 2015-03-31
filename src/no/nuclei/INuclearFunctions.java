@@ -273,4 +273,5 @@ public interface INuclearFunctions
   public int getSignalCount(int channel);
   public List<NuclearSignal> getSignals(int channel);
   public List<List<NuclearSignal>> getSignals();
+  public Set<Integer> getSignalChannels();
 }
