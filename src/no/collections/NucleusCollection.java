@@ -306,7 +306,7 @@ implements INuclearCollection
 	  
 	  outLine.append("nuclei = read.csv(paste(path,\"log.segments.analysable.txt\", sep=\"\"),header=T, sep=\"\\t\")\r\n");
 	  outLine.append("d <- dist(as.matrix(nuclei))\r\n");
-	  outLine.append("hc <- hclust(d)\r\n");
+	  outLine.append("hc <- hclust(d, method=\"ward.D2\")\r\n");
 	  outLine.append("ct <- cutree(hc, k=5)\r\n");
 	  outLine.append("nuclei <- cbind(ct, nuclei , deparse.level=1)\r\n");
 	  outLine.append("tt <- table(nuclei $ct)\r\n");
