@@ -245,7 +245,6 @@ public class SignalCollection {
 		// create a matrix to hold the data
 		// needs to be between every signal and every other signal, irrespective of colour
 		int matrixSize = this.numberOfSignals();
-		IJ.log("Calculating distance matrix...");
 
 		double [][] matrix = new double[matrixSize][matrixSize];
 		
@@ -288,13 +287,8 @@ public class SignalCollection {
 	 */
 	public void exportDistanceMatrix(File outputFolder){
 		
-		IJ.log("Exporting distance matrix...");
-
 		double[][] matrix = calculateDistanceMatrix();
-		IJ.log("Calculated distance matrix...");
-		int matrixRow = 0;
-		int matrixCol = 0;
-
+		
 		File f = new File(outputFolder.getAbsolutePath()+File.separator+"signalDistanceMatrix.txt");
 		if(f.exists()){
 			f.delete();
@@ -308,7 +302,6 @@ public class SignalCollection {
 		for(List<NuclearSignal> signalsRow : getSignals()){
 			
 			if(!signalsRow.isEmpty()){
-				IJ.log("Checking signals...");
 
 				for(NuclearSignal s : signalsRow){
 					outLine.append("SIGNAL_"+col+"\t");
@@ -318,36 +311,40 @@ public class SignalCollection {
 			outLine.append("|\t"); // separator between signal channels
 		}
 		outLine.append("\r\n");
-		IJ.log("Made headings");
 
 		// add the rows of values
-		for(List<NuclearSignal> signalsRow : getSignals()){
+		int matrixRow = 0;
+		int matrixCol = 0;
+		for(List<NuclearSignal> imagePlane : getSignals()){
 			
-			if(!signalsRow.isEmpty()){
+			
+			if(!imagePlane.isEmpty()){
 				
-				outLine.append("SIGNAL_"+matrixRow);
-				matrixCol=0;
-
-				for(NuclearSignal s : signalsRow){ // go through all the signals, row by row
-					
+				
+				for(NuclearSignal s : imagePlane){ // go through all the signals, row by row
+					matrixCol=0; // begin a new column
+					outLine.append("SIGNAL_"+matrixRow+"\t");
 					// within the row, get all signals as a column
 					for(List<NuclearSignal> signalsCol : getSignals()){
 
 						if(!signalsCol.isEmpty()){							
 							for(NuclearSignal c : signalsCol){
-								IJ.log("Attempting export of ["+matrixRow+"]["+matrixCol+"]");
 								outLine.append(matrix[matrixRow][matrixCol]+"\t");
 								matrixCol++;
 							}
 						}
-						outLine.append("|\t");
-						matrixRow++;
+						outLine.append("|\t"); // separate between channels within row
 					}
 					
-					outLine.append("\r\n");
+					outLine.append("\r\n"); // end of a row
+					matrixRow++; // increase the row number if we are onto another row
 				}
+				
 			}
-			outLine.append("--\r\n"); // separate between channels
+			for(int i=0; i<=matrix.length;i++){
+				outLine.append("--\t"); // make separator across entire line
+			}
+			outLine.append("\r\n"); // separate between channels between rows
 		}
 		IJ.append(outLine.toString(), f.getAbsolutePath());
 	}
