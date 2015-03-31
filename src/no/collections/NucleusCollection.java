@@ -28,6 +28,7 @@ import no.analysis.ShellCounter;
 import no.nuclei.*;
 import no.components.*;
 import no.export.Logger;
+import no.utility.ImageImporter;
 import no.utility.Stats;
 import no.utility.Utils;
 
@@ -924,10 +925,12 @@ implements INuclearCollection
     for(int i=0; i<this.getNucleusCount();i++){
 
       INuclearFunctions n = this.nucleiCollection.get(i);
-      if(n.getSignalCount(1)==1 && n.getSignalCount(2)==1){
+      
+      if(	n.getSignalCount(ImageImporter.FIRST_SIGNAL_CHANNEL)  ==1 && 
+    		n.getSignalCount(ImageImporter.FIRST_SIGNAL_CHANNEL+1)==1){
 
-        NuclearSignal r = n.getSignals(1).get(0);
-        NuclearSignal g = n.getSignals(2).get(0);
+        NuclearSignal r = n.getSignals(ImageImporter.FIRST_SIGNAL_CHANNEL).get(0);
+        NuclearSignal g = n.getSignals(ImageImporter.FIRST_SIGNAL_CHANNEL+1).get(0);
 
         XYPoint rCoM = r.getCentreOfMass();
         XYPoint gCoM = g.getCentreOfMass();
@@ -1183,16 +1186,14 @@ implements INuclearCollection
 	  // for each signal in each nucleus, find index of point. Draw dot
 
 	  List<List<XYPoint>> points = new ArrayList<List<XYPoint>>(0);
-	  points.add( new ArrayList<XYPoint>(0)); // red signals
-	  points.add( new ArrayList<XYPoint>(0)); // green signals
+	  for(int channel : this.getSignalChannels()){
+		  points.add(new ArrayList<XYPoint>(0)); // hold signal positions in chart
+	  }
+	  
+	  for(INuclearFunctions n : this.getNuclei()){
 
-	  for(int i= 0; i<this.getNucleusCount();i++){
-
-		  INuclearFunctions n = this.getNucleus(i);
 		  int profileIndex = n.getBorderIndex(pointType); 
-		  List<List<NuclearSignal>> signals = new ArrayList<List<NuclearSignal>>(0);
-		  signals.add(n.getSignals(1));
-		  signals.add(n.getSignals(2));
+		  List<List<NuclearSignal>> signals = n.getSignals();
 
 		  int channel = 0;
 		  for( List<NuclearSignal> channelSignals : signals ){
@@ -1201,16 +1202,16 @@ implements INuclearCollection
 
 				  List<XYPoint> channelPoints = points.get(channel);
 
-				  for(int j=0; j<channelSignals.size();j++){
+				  for(NuclearSignal s : channelSignals){
 
 					  // get the index of the point closest to the signal
-					  int borderIndex = channelSignals.get(j).getClosestBorderPoint();
+					  int borderIndex = s.getClosestBorderPoint();
 
 					  // offset the index relative to the current profile type, and normalise
 					  int offsetIndex = Utils.wrapIndex( borderIndex - profileIndex , n.getLength() );
 					  double normIndex = (  (double) offsetIndex / (double) n.getLength()  ) * 100;
 
-					  double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( channelSignals.get(j).getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
+					  double yPosition = CHART_SIGNAL_Y_LINE_MIN + ( s.getFractionalDistanceFromCoM() * ( CHART_SIGNAL_Y_LINE_MAX - CHART_SIGNAL_Y_LINE_MIN) ); // 
 
 					  // make a point, and add to the appropriate list
 					  channelPoints.add(new XYPoint(normIndex, yPosition));
@@ -1224,7 +1225,11 @@ implements INuclearCollection
 	  // draw the lists
 	  int channel = 0;
 	  for( List<XYPoint> channelPoints : points ){
-		  Color colour = channel == Nucleus.RED_CHANNEL ? Color.RED : Color.GREEN;
+		  Color colour 	= channel == 0 
+				  		? Color.RED 
+				  		: channel == 1 
+				  			? Color.GREEN
+				  			: Color.LIGHT_GRAY;
 		  this.profileCollection.addSignalsToProfileChart(pointType, channelPoints, colour);
 		  channel++;
 	  }

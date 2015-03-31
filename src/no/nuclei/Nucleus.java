@@ -401,7 +401,7 @@ public class Nucleus
 	public boolean hasGreenSignal(){
 		return hasSignal(2);
 	}
-	
+		
 	public boolean hasSignal(int channel){
 		return signalCollection.hasSignal(channel);
 	}
@@ -657,6 +657,10 @@ public class Nucleus
 	
 	public Set<Integer> getSignalChannels(){
 		return signalCollection.getChannels();
+	}
+	
+	public List<List<NuclearSignal>> getSignals(){
+		return this.signalCollection.getSignals();
 	}
 		
 	public List<NuclearSignal> getSignals(int channel){
