@@ -263,6 +263,8 @@ implements INuclearCollection
 
 	  // also export the group stats for each segment
 	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+	  logger.addColumnHeading("PATH"    );
+	  logger.addColumnHeading("POSITION");
 	  
 	  IJ.log("    Exporting segments...");
 	  try{
@@ -275,19 +277,45 @@ implements INuclearCollection
 			  }
 			  
 			  for(INuclearFunctions n : this.getNuclei()){
+				  
+				  logger.addRow("PATH", n.getPath());
+				  logger.addRow("POSITION", n.getPosition());
 	
 				  for(NucleusBorderSegment seg : segments){
 					  NucleusBorderSegment nucSeg = n.getSegmentTag(seg.getSegmentType());
-					  logger.addRow(seg.getSegmentType(), nucSeg.length(n.getLength()));
+					  // export the segment length as a fraction of the total array length
+					  logger.addRow(seg.getSegmentType(),   (double)nucSeg.length(n.getLength())/(double)n.getLength()      );
 				  }
 			  }
-//			  IJ.log("    Values added");
 			  logger.export("log.segments."+getType());
 			  IJ.log("    Segments exported");
+			  makeClusteringScript();
 		  }
 	  }catch(Exception e){
 		  IJ.log("    Error exporting segments: "+e.getMessage());
 	  }
+  }
+  
+  private void makeClusteringScript(){
+	  
+	  StringBuilder outLine = new StringBuilder();
+	  
+	  String path = this.getFolder().getAbsolutePath()+File.separator+this.getOutputFolder()+File.separator;
+	  path = path.replace("\\", "\\\\");// escape folder separator for R
+	  outLine.append("path = \""+path+"\"\r\n"); 
+	  
+	  outLine.append("nuclei = read.csv(paste(path,\"log.segments.analysable.txt\", sep=\"\"),header=T, sep=\"\\t\")\r\n");
+	  outLine.append("d <- dist(as.matrix(nuclei))\r\n");
+	  outLine.append("hc <- hclust(d)\r\n");
+	  outLine.append("ct <- cutree(hc, k=5)\r\n");
+	  outLine.append("nuclei <- cbind(ct, nuclei , deparse.level=1)\r\n");
+	  outLine.append("tt <- table(nuclei $ct)\r\n");
+	  outLine.append("for (i in 1:dim(tt)) {\r\n");
+	  outLine.append("\tsub <- subset(nuclei , ct==i)\r\n");
+	  outLine.append("\twrite.table(subset(sub, select=c(PATH, POSITION)), file=paste(path,\"mapping_cluster\",i,\".analysable.txt\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\r\n");
+	  outLine.append("}\r\n");
+	  
+	  IJ.append(outLine.toString(), path+"clusteringScript.r");
   }
 
   /*
