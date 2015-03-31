@@ -20,6 +20,18 @@ import no.utility.Utils;
  */
 public class SegmentFitter {
 
+	/**
+	 * The multiplier to add to best-fit scores when shrinking a segment below the 
+	 * minimum segment size specified in ProfileSegmenter
+	 */
+	static final double PENALTY_SHRINK = 1.5;
+	
+	/**
+	 * The multiplier to add to best-fit scores when shrinking a segment above the 
+	 * median segment size
+	 */
+	static final double PENALTY_GROW   = 1;
+	
 	private Profile medianProfile; // the profile to align against
 	private Profile   testProfile; // the profile to adjust
 	
@@ -203,13 +215,13 @@ public class SegmentFitter {
 				
 				// add a penalty for each point that makes the segment longer
 				if(newLength>oldLength){
-					score += newLength-oldLength ;
+					score += (newLength-oldLength) * SegmentFitter.PENALTY_GROW ;
 				}
 				
 				// add a penalty if the proposed new segment is shorter that the minimum segment length
 				if(newLength<ProfileSegmenter.MIN_SEGMENT_SIZE){
 					// penalty increases the smaller we go below the minimum
-					score += (ProfileSegmenter.MIN_SEGMENT_SIZE - newLength) * 2;
+					score += (ProfileSegmenter.MIN_SEGMENT_SIZE - newLength) * SegmentFitter.PENALTY_SHRINK;
 				}
 				
 				if(score<minScore){

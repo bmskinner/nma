@@ -36,7 +36,7 @@ public class ProfileSegmenter {
 	 * Increasing this value will make the segment fitting more robust, 
 	 * but reduces resolution
 	 */
-	static final int MIN_SEGMENT_SIZE = 15;
+	static final int MIN_SEGMENT_SIZE = 10;
 	
 	private Profile profile; // the profile to segment
 	List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
