@@ -118,8 +118,8 @@ implements INuclearCollection
 	  double score = this.compareProfilesToMedian(pointType);
 	  double prevScore = score+1;
 	  IJ.log("    Profile alignment score: "+(int)score);
-	  int cycles = 10; // see what happens when we force it
-	  while(score < prevScore || cycles >0){
+//	  int cycles = 10; // see what happens when we force it
+	  while(score < prevScore){
 		  this.createProfileAggregateFromPoint(pointType);
 		  this.findTailIndexInMedianCurve();
 		  this.calculateOffsets();
@@ -128,7 +128,7 @@ implements INuclearCollection
 		  score = this.compareProfilesToMedian(pointType);
 
 		  IJ.log("    Reticulating splines: score: "+(int)score);
-		  cycles--;
+//		  cycles--;
 	  }
 
 	  // assign and revise segments
@@ -259,29 +259,37 @@ implements INuclearCollection
   
   public void exportSegments(String pointType){
 	  // export the individual segment files for each nucleus
-	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-		  INuclearFunctions n = this.getNucleus(i);
+	  for(INuclearFunctions n : this.getNuclei()){
 		  n.exportSegments();
 	  }
 
 	  // also export the group stats for each segment
 	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
 	  
-	  List<NucleusBorderSegment> segments = this.profileCollection.getSegments(pointType);
 	  IJ.log("    Exporting segments...");
-	  for(NucleusBorderSegment seg : segments){
-		  logger.addColumnHeading(seg.getSegmentType());
-	  }
-	  
-	  for(int i= 0; i<this.getNucleusCount();i++){
-		  INuclearFunctions n = this.getNucleus(i);
-
-		  for(NucleusBorderSegment seg : segments){
-			  NucleusBorderSegment nucSeg = n.getSegmentTag(seg.getSegmentType());
-			  logger.addRow(seg.getSegmentType(), nucSeg.length(n.getLength()));
+	  try{
+		  List<NucleusBorderSegment> segments = this.profileCollection.getSegments(pointType);
+		  if(!segments.isEmpty()){
+	
+			  for(NucleusBorderSegment seg : segments){
+				  logger.addColumnHeading(seg.getSegmentType());
+				  IJ.log("    Heading made: "+seg.getSegmentType());
+			  }
+			  
+			  for(INuclearFunctions n : this.getNuclei()){
+	
+				  for(NucleusBorderSegment seg : segments){
+					  NucleusBorderSegment nucSeg = n.getSegmentTag(seg.getSegmentType());
+					  logger.addRow(seg.getSegmentType(), nucSeg.length(n.getLength()));
+				  }
+			  }
+			  IJ.log("    Values added");
+			  logger.export("log.segments."+getType());
+			  IJ.log("    Segments exported");
 		  }
+	  }catch(Exception e){
+		  IJ.log("    Error exporting segments: "+e.getMessage());
 	  }
-	  logger.export("logSegments");
   }
 
   /*

@@ -37,6 +37,9 @@ public class ProfileCollection {
 	// Get features
 	
 	public ProfileFeature getFeature(String s){
+		if(s==null){
+			throw new IllegalArgumentException("The requested feature key is null: "+s);
+		}
 		if(features.containsKey(s)){	
 			return features.get(s);
 		} else {
@@ -45,6 +48,9 @@ public class ProfileCollection {
 	}
 	
 	public Profile getProfile(String s){
+		if(s==null){
+			throw new IllegalArgumentException("The requested profile key is null: "+s);
+		}
 		if(profiles.containsKey(s)){	
 			return profiles.get(s);
 		} else {
@@ -53,6 +59,9 @@ public class ProfileCollection {
 	}
 	
 	public ProfileAggregate getAggregate(String s){
+		if(s==null){
+			throw new IllegalArgumentException("The requested aggregate key is null: "+s);
+		}
 		if(aggregates.containsKey(s)){	
 			return aggregates.get(s);
 		} else {
@@ -61,6 +70,9 @@ public class ProfileCollection {
 	}
 	
 	public ProfilePlot getPlots(String s){
+		if(s==null){
+			throw new IllegalArgumentException("The requested plot key is null: "+s);
+		}
 		if(plots.containsKey(s)){	
 			return plots.get(s);
 		} else {
@@ -69,6 +81,9 @@ public class ProfileCollection {
 	}
 	
 	public List<NucleusBorderSegment> getSegments(String s){
+		if(s==null){
+			throw new IllegalArgumentException("The requested segment key is null: "+s);
+		}
 		if(segments.containsKey(s)){	
 			return segments.get(s);
 		} else {

@@ -36,20 +36,32 @@ public class Logger {
 	}
 	
 	public void addColumn(String s, String[] values){
+		if(s==null || values==null){
+			throw new IllegalArgumentException("Column or array is null");
+		}
 		columns.put(s, Arrays.asList( values));
 	}
 	
 	public void addColumn(String s, double[] array){
+		if(s==null || array==null){
+			throw new IllegalArgumentException("Column or array is null");
+		}
 		String[] values = Utils.getStringFromDouble(array);
 		this.addColumn(s, values);
 	}
 	
 	public void addColumn(String s, int[] array){
+		if(s==null || array==null){
+			throw new IllegalArgumentException("Column or array is null");
+		}
 		String[] values = Utils.getStringFromInt(array);
 		this.addColumn(s, values);
 	}
 	
 	public void addColumnHeading(String s){
+		if(s==null){
+			throw new IllegalArgumentException("Column heading is null");
+		}
 		if(!columns.containsKey(s)){
 			List<String> values = new ArrayList<String>();
 			columns.put(s,  values);
@@ -59,6 +71,9 @@ public class Logger {
 	}
 	
 	public void addRow(String column, String value){
+		if(column==null || value==null){
+			throw new IllegalArgumentException("Column or value is null");
+		}
 		if(columns.containsKey(column)){
 			List<String> values = columns.get(column);
 			values.add(value);
@@ -67,6 +82,9 @@ public class Logger {
 		}
 	}
 	public void addRow(String column, Double value){
+		if(column==null || value==null){
+			throw new IllegalArgumentException("Column or value is null");
+		}
 		if(columns.containsKey(column)){
 			addRow(column, value.toString());
 		} else {
@@ -75,6 +93,9 @@ public class Logger {
 	}
 	
 	public void addRow(String column, Integer value){
+		if(column==null || value==null){
+			throw new IllegalArgumentException("Column or value is null");
+		}
 		if(columns.containsKey(column)){
 			addRow(column, value.toString());
 		} else {
@@ -83,6 +104,9 @@ public class Logger {
 	}
 	
 	public String makeFile(String fileName){
+		if(fileName==null){
+			throw new IllegalArgumentException("Filename is null");
+		}
 		File f = new File(this.exportFolder.getAbsolutePath()+File.separator+fileName+".txt");
 		if(f.exists()){
 			f.delete();
@@ -99,6 +123,7 @@ public class Logger {
 	}
 
 	public void export(String fileName){
+
 		String exportFile = makeFile(fileName);
 
 		StringBuilder outLine = new StringBuilder();

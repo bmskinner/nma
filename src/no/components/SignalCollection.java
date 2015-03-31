@@ -288,7 +288,7 @@ public class SignalCollection {
 			f.delete();
 		}
 
-		int matrixSize = matrix.length;
+//		int matrixSize = matrix.length;
 		StringBuilder outLine = new StringBuilder("Signal\t");
 		
 		// prepare the column headings
@@ -297,7 +297,7 @@ public class SignalCollection {
 			
 			if(!signalsRow.isEmpty()){
 
-				for(NuclearSignal row : signalsRow){
+				while(signalsRow.iterator().hasNext()){
 					if(names.containsValue(i)){ // if a name has been set for the channel, use it
 						outLine.append("SIGNAL_"+i+"_"+getChannelName(i).toUpperCase()+"\t");
 							
@@ -319,7 +319,8 @@ public class SignalCollection {
 				
 				outLine.append("SIGNAL_"+matrixRow);
 
-				for(NuclearSignal row : signalsRow){
+				while(signalsRow.iterator().hasNext()){
+//				for(NuclearSignal row : signalsRow){
 					
 					matrixCol=0;
 
@@ -328,7 +329,8 @@ public class SignalCollection {
 
 						if(!signalsCol.isEmpty()){
 
-							for(NuclearSignal col : signalsCol){
+							while(signalsCol.iterator().hasNext()){
+//							for(NuclearSignal col : signalsCol){
 								outLine.append(matrix[matrixRow][matrixCol]+"\t");
 								matrixCol++;
 							}

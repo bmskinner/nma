@@ -72,6 +72,7 @@ public class ProfileSegmenter {
 		int segmentStart = 0;
 		int segmentEnd = 0;
 		int segLength = 0;
+		int segCount = 0;
 		for(int i=0;i<profile.size();i++){
 			segmentEnd = i;
 			segLength++;
@@ -82,10 +83,11 @@ public class ProfileSegmenter {
 					&& segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// we've hit a new segment
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd);
-				seg.setSegmentType("Seg_"+i);
+				seg.setSegmentType("Seg_"+segCount);
 				segments.add(seg);
 				segmentStart = i;
 				segLength=0;
+				segCount++;
 			}
 		}
 		// join up segments at start and end of profile 

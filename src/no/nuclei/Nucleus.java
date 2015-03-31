@@ -1500,6 +1500,12 @@ public class Nucleus
 	}
 
 	public NucleusBorderSegment getSegmentTag(String s){
+		if(s==null){
+			throw new IllegalArgumentException("Requested tag is null");
+		}
+		if(!this.segmentTags.containsKey(s)){
+			throw new IllegalArgumentException("Requested tag is not present: "+s);
+		}
 		return new NucleusBorderSegment(this.segmentList.get(this.segmentTags.get(s)));
 	}
 
