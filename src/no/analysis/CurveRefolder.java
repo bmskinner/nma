@@ -268,7 +268,7 @@ public class CurveRefolder{
 		nucleusPlot.addPoints(outerIQRX, outerIQRY, Plot.LINE);
 
 
-		// draw the segments - should be on top of the IQR lines
+		// draw the segments on top of the IQR lines
 		List<NucleusBorderSegment> segmentList = refoldNucleus.getSegments();
 		if(!segmentList.isEmpty()){ // only draw if there are segments
 			for(int i=0;i<segmentList.size();i++){
@@ -284,13 +284,11 @@ public class CurveRefolder{
 					ypoints[j] = (float) p.getY();
 				}
 
-//				PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
-
 				// avoid colour wrapping when segment number is 1 more than the colour list
 				Color color = i==0 && segmentList.size()==9 ? Color.MAGENTA : ProfileSegmenter.getColor(i);
 
 				nucleusPlot.setColor(color);
-				nucleusPlot.setLineWidth(2);
+				nucleusPlot.setLineWidth(3);
 				nucleusPlot.addPoints(xpoints, ypoints, Plot.LINE);
 			}
 		} else { // segment list was empty, fall back on black and white

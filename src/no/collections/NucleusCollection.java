@@ -179,23 +179,7 @@ implements INuclearCollection
   
   public void assignSegments(String pointType){
 	  // get the segments within the median curve
-	  try{
-//		  Profile medianToCompare = this.profileCollection.getProfile(pointType);
-//
-//		  ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
-//		  List<NucleusBorderSegment> segments = segmenter.segment();
-//		  
-//		  String segmentedProfileName = this.getFolder()+
-//										File.separator+
-//										this.getOutputFolder()+
-//										File.separator+"plot.Segments"+
-//										"."+
-//										this.getType()+".tiff";
-//		  segmenter.draw(segmentedProfileName);
-//		  
-//		  IJ.log("    Found "+segments.size()+" segments in profile");
-//		  this.profileCollection.addSegments(pointType, segments);
-		  
+	  try{		  
 		  this.profileCollection.segmentProfiles();
 		  
 		  IJ.log("    Assigning segments to nuclei...");
@@ -1002,7 +986,7 @@ implements INuclearCollection
 
       INuclearFunctions n = this.getNucleus(i);
       n.exportAngleProfile();
-      n.exportProfilePlotImage();
+//      n.exportProfilePlotImage();
     }
   }
 

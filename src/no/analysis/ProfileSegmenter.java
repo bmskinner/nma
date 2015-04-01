@@ -64,7 +64,7 @@ public class ProfileSegmenter {
 		Profile maxima = this.profile.smooth(2).getLocalMaxima(5);
 		Profile minima = this.profile.smooth(2).getLocalMinima(5);
 		Profile deltas = this.profile.smooth(2).calculateDeltas(2); // minima and maxima should be near 0 
-		Profile dDeltas = deltas.calculateDeltas(2); // second differential
+		Profile dDeltas = deltas.smooth(2).calculateDeltas(2); // second differential
 		double dMax = dDeltas.getMax();
 		double dMin = dDeltas.getMin();
 		double variationRange = Math.abs(dMax - dMin);
@@ -114,7 +114,7 @@ public class ProfileSegmenter {
 	}
 	
 	/**
-	 * Draw the current segmented profile to a tiff file
+	 * Draw the current segmented profile to screen
 	 * @param filename the absolute path of the file to save as
 	 */
 	public void draw(String filename){
@@ -191,24 +191,30 @@ public class ProfileSegmenter {
 			segPlot.setLineWidth(1);
 			i++;
 		}
+		segPlot.show();
 				
-		ImagePlus image = segPlot.getImagePlus();
-	    Calibration cal = image.getCalibration();
-	    cal.setUnit("pixels");
-	    cal.pixelWidth = 1;
-	    cal.pixelHeight = 1;
-	    IJ.saveAsTiff(image, filename);
 		
-//		Profile deltas = this.profile.smooth(2).calculateDeltas(4);
-//		Plot deltaPlot = new Plot("deltas", "position", "deltas");
-//		deltaPlot.setLimits(0,deltas.size(),-100,100);
-//		deltaPlot.setSize(400,300);
-//		deltaPlot.addPoints(deltas.getPositions(deltas.size()).asArray(), deltas.asArray(), Plot.LINE);
-//		for(NucleusBorderSegment b : segments){
-//			deltaPlot.setColor(Color.BLUE);
-//			deltaPlot.drawLine(b.getStartIndex(), -100, b.getStartIndex(),100);
-//		}
-//		deltaPlot.show();
+		Profile deltas = this.profile.smooth(2).calculateDeltas(2);
+		Plot deltaPlot = new Plot("deltas", "position", "deltas");
+		deltaPlot.setLimits(0,deltas.size(),-100,100);
+		deltaPlot.setSize(400,300);
+		deltaPlot.addPoints(deltas.getPositions(deltas.size()).asArray(), deltas.asArray(), Plot.LINE);
+		for(NucleusBorderSegment b : segments){
+			deltaPlot.setColor(Color.BLUE);
+			deltaPlot.drawLine(b.getStartIndex(), -100, b.getStartIndex(),100);
+		}
+		deltaPlot.show();
+		
+		Profile dDeltas = deltas.smooth(2).calculateDeltas(2);
+		Plot dDeltaPlot = new Plot("Second differential", "position", "deltas");
+		dDeltaPlot.setLimits(0,dDeltas.size(),-100,100);
+		dDeltaPlot.setSize(400,300);
+		dDeltaPlot.addPoints(dDeltas.getPositions(dDeltas.size()).asArray(), dDeltas.asArray(), Plot.LINE);
+		for(NucleusBorderSegment b : segments){
+			dDeltaPlot.setColor(Color.BLUE);
+			dDeltaPlot.drawLine(b.getStartIndex(), -100, b.getStartIndex(),100);
+		}
+		dDeltaPlot.show();
 		
 	}
 	

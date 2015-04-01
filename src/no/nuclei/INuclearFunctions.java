@@ -2,6 +2,7 @@ package no.nuclei;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import ij.ImagePlus;
@@ -274,4 +275,5 @@ public interface INuclearFunctions
   public List<NuclearSignal> getSignals(int channel);
   public List<List<NuclearSignal>> getSignals();
   public Set<Integer> getSignalChannels();
+  public Map<String, Integer> getBorderTags();
 }

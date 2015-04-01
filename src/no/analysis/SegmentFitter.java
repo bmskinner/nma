@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.nuclei.INuclearFunctions;
@@ -101,12 +102,21 @@ public class SegmentFitter {
 			}
 //			IJ.log("Final score: "+score);
 			n.setSegments(newList);
+			
+			// modify tail point to nearest segment end
+//			this.remapBorderPoints(n, newList);
+			
 		} catch(Exception e){
 			IJ.log("    Error refitting segments: "+e.getMessage());
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Join the segmnets within the given nucleus into Frankenstein's Profile 
+	 * @param n the nucleus to recombine
+	 * @return a profile
+	 */
 	public Profile recombine(INuclearFunctions n){
 		if(n==null){
 			throw new IllegalArgumentException("Test nucleus is null");
@@ -119,6 +129,37 @@ public class SegmentFitter {
 		
 		return new Profile(recombineSegments(testSegments, testMedian));
 	}
+	
+	/**
+	 * Move any border points to their closest segment end
+	 * @param n the nucleus to fit
+	 * @param list the segments in the nucleus
+	 */
+//	private void remapBorderPoints(INuclearFunctions n, List<NucleusBorderSegment> list){
+//		
+//		for(String pointTag : this.getFeatureKeys()){
+//			
+//		}
+//				
+//		for(String pointTag: n.getBorderTags().keySet()){
+//			int index = n.getBorderTags().get(pointTag); 
+//			
+//			int nearestIndex = index;
+//			int smallestDiff = n.getLength();
+//			
+//			for(NucleusBorderSegment seg : n.getSegments()){
+//				int difference = Math.abs(index - seg.getStartIndex());
+//				// find the best fitting segment start, so long as it is not too far
+//				// needed to stop head being moved in rodent or pig sperm
+//				if(difference < smallestDiff && difference <  (double)n.getLength()/4){
+//					nearestIndex = seg.getStartIndex();
+//					smallestDiff = difference;
+//				}
+//			}
+//			n.addBorderTag(pointTag, nearestIndex);
+//		}
+//		
+//	}
 	
 	private Profile recombineSegments(List<NucleusBorderSegment> testSegs, Profile testMedian){
 		if(testSegs==null || testSegs.isEmpty()){
