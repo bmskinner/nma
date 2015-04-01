@@ -147,6 +147,9 @@ public class Nucleus
 		this.setBorderTags(n.getBorderTags());
 		this.setBorderList(n.getBorderList());
 		
+		this.setSegmentMap(n.getSegmentMap());
+		this.setSegments(n.getSegments());
+		
 		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
 	}
@@ -521,6 +524,10 @@ public class Nucleus
 
 	public void setBorderList(List<NucleusBorderPoint> list){
 		this.borderList = list;
+	}
+	
+	public void setSegmentMap(Map<String, Integer> map){
+		this.segmentTags = map;
 	}
 
 	/*
@@ -1363,6 +1370,10 @@ public class Nucleus
 	
 	public void addSegment(NucleusBorderSegment n){
 		this.segmentList.add(n);
+	}
+
+	protected Map<String, Integer> getSegmentMap( ){
+		return this.segmentTags;
 	}
 	
 	public Set<String> getSegmentTags(){

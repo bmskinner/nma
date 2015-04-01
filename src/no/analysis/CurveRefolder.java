@@ -10,6 +10,8 @@ package no.analysis;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Plot;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 
@@ -192,26 +194,11 @@ public class CurveRefolder{
 		nucleusPlot.drawLine(0, min, 0, Math.abs(min));
 	}
 
-
 	/*
 		Draw the current state of the target nucleus
 	*/
 	public void plotNucleus(){
-
-		double[] xPoints = new double[refoldNucleus.getLength()+1];
-		double[] yPoints = new double[refoldNucleus.getLength()+1];
-
-		for(int i=0; i<refoldNucleus.getLength(); i++){
-			XYPoint p = refoldNucleus.getPoint(i);
-			xPoints[i] = p.getX();
-			yPoints[i] = p.getY();
-		}
-
-		// ensure nucleus outline joins up at tip
-		XYPoint p = refoldNucleus.getPoint(0);
-		xPoints[refoldNucleus.getLength()] = p.getX();
-		yPoints[refoldNucleus.getLength()] = p.getY();
-
+		
 		// Add lines to show the IQR of the angle profile at each point
 		double[] innerIQRX = new double[refoldNucleus.getLength()+1];
 		double[] innerIQRY = new double[refoldNucleus.getLength()+1];
@@ -226,8 +213,6 @@ public class CurveRefolder{
 			}
 		}
 
-		// this.q25.print();
-		// this.q75.print();
 
 		// get the maximum values from nuclear diameters
 		// get the limits  for the plot  	
@@ -270,22 +255,65 @@ public class CurveRefolder{
 			innerIQRY[i] = innerPoint.getY();
 			outerIQRX[i] = outerPoint.getX();
 			outerIQRY[i] = outerPoint.getY();
-			
+
 		}
 		innerIQRX[refoldNucleus.getLength()] = innerIQRX[0];
 		innerIQRY[refoldNucleus.getLength()] = innerIQRY[0];
 		outerIQRX[refoldNucleus.getLength()] = outerIQRX[0];
 		outerIQRY[refoldNucleus.getLength()] = outerIQRY[0];
 
-		nucleusPlot.setColor(Color.LIGHT_GRAY);
+		nucleusPlot.setColor(Color.DARK_GRAY);
 		nucleusPlot.addPoints(innerIQRX, innerIQRY, Plot.LINE);
-		nucleusPlot.setColor(Color.LIGHT_GRAY);
+		nucleusPlot.setColor(Color.DARK_GRAY);
 		nucleusPlot.addPoints(outerIQRX, outerIQRY, Plot.LINE);
 
-		// nucleusPlot.setColor(Color.DARK_GRAY);
-		// nucleusPlot.addPoints(xPoints, yPoints, Plot.LINE);
-		nucleusPlot.setColor(Color.DARK_GRAY);
-		nucleusPlot.addPoints(refoldNucleus.getPolygon().xpoints, refoldNucleus.getPolygon().ypoints, Plot.LINE);
+
+		// draw the segments - should be on top of the IQR lines
+		List<NucleusBorderSegment> segmentList = refoldNucleus.getSegments();
+		if(!segmentList.isEmpty()){ // only draw if there are segments
+			for(int i=0;i<segmentList.size();i++){
+
+				NucleusBorderSegment seg = refoldNucleus.getSegmentTag("Seg_"+i);
+
+				float[] xpoints = new float[seg.length(refoldNucleus.getLength())+1];
+				float[] ypoints = new float[seg.length(refoldNucleus.getLength())+1];
+				for(int j=0; j<=seg.length(refoldNucleus.getLength());j++){
+					int k = Utils.wrapIndex(seg.getStartIndex()+j, refoldNucleus.getLength());
+					NucleusBorderPoint p = refoldNucleus.getBorderPoint(k); // get the border points in the segment
+					xpoints[j] = (float) p.getX();
+					ypoints[j] = (float) p.getY();
+				}
+
+//				PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+
+				// avoid colour wrapping when segment number is 1 more than the colour list
+				Color color = i==0 && segmentList.size()==9 ? Color.MAGENTA : ProfileSegmenter.getColor(i);
+
+				nucleusPlot.setColor(color);
+				nucleusPlot.setLineWidth(2);
+				nucleusPlot.addPoints(xpoints, ypoints, Plot.LINE);
+			}
+		} else { // segment list was empty, fall back on black and white
+			IJ.log("    Cannot add segments to consensus");
+			
+			double[] xPoints = new double[refoldNucleus.getLength()+1];
+			double[] yPoints = new double[refoldNucleus.getLength()+1];
+
+			for(int i=0; i<refoldNucleus.getLength(); i++){
+				XYPoint p = refoldNucleus.getPoint(i);
+				xPoints[i] = p.getX();
+				yPoints[i] = p.getY();
+			}
+
+			// ensure nucleus outline joins up at tip
+			XYPoint p = refoldNucleus.getPoint(0);
+			xPoints[refoldNucleus.getLength()] = p.getX();
+			yPoints[refoldNucleus.getLength()] = p.getY();
+			
+			nucleusPlot.setColor(Color.DARK_GRAY);
+			nucleusPlot.addPoints(refoldNucleus.getPolygon().xpoints, refoldNucleus.getPolygon().ypoints, Plot.LINE);
+
+		}
 
 	}
 
