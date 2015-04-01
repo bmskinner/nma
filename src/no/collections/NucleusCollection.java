@@ -129,6 +129,9 @@ implements INuclearCollection
 		  IJ.log("    Reticulating splines: score: "+(int)score);
 	  }
 
+	  // get the profile plots created
+	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
+	  
 	  // assign and revise segments
 	  IJ.log("    Segmenting profile...");
 	  this.assignSegments(pointType);
@@ -177,30 +180,34 @@ implements INuclearCollection
   public void assignSegments(String pointType){
 	  // get the segments within the median curve
 	  try{
-		  Profile medianToCompare = this.profileCollection.getProfile(pointType);
-
-		  ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
-		  List<NucleusBorderSegment> segments = segmenter.segment();
+//		  Profile medianToCompare = this.profileCollection.getProfile(pointType);
+//
+//		  ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
+//		  List<NucleusBorderSegment> segments = segmenter.segment();
+//		  
+//		  String segmentedProfileName = this.getFolder()+
+//										File.separator+
+//										this.getOutputFolder()+
+//										File.separator+"plot.Segments"+
+//										"."+
+//										this.getType()+".tiff";
+//		  segmenter.draw(segmentedProfileName);
+//		  
+//		  IJ.log("    Found "+segments.size()+" segments in profile");
+//		  this.profileCollection.addSegments(pointType, segments);
 		  
-		  String segmentedProfileName = this.getFolder()+
-										File.separator+
-										this.getOutputFolder()+
-										File.separator+"plot.Segments"+
-										"."+
-										this.getType()+".tiff";
-		  segmenter.draw(segmentedProfileName);
+		  this.profileCollection.segmentProfiles();
 		  
-		  IJ.log("    Found "+segments.size()+" segments in profile");
-		  this.profileCollection.addSegments(pointType, segments);
 		  IJ.log("    Assigning segments to nuclei...");
 		  
 		  // find the corresponding point in each Nucleus
+		  Profile medianToCompare = this.profileCollection.getProfile(pointType);
 		  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 			  Nucleus n = (Nucleus)this.getNucleus(i);
 			  n.clearSegments();
 
 			  int j=0;
-			  for(NucleusBorderSegment b : segments){
+			  for(NucleusBorderSegment b : this.profileCollection.getSegments(pointType)){
 				  int startIndexInMedian = b.getStartIndex();
 				  int endIndexInMedian = b.getEndIndex();
 				  
@@ -218,7 +225,8 @@ implements INuclearCollection
 			  }
 		  }
 		  
-		  this.reviseSegments(pointType, segments);
+		  this.reviseSegments(pointType);
+		  this.exportSegments(pointType);
 
 	  } catch(Exception e){
 		  IJ.log("    Error segmenting: "+e.getMessage());
@@ -226,11 +234,13 @@ implements INuclearCollection
 	  }
   }
   
-  public void reviseSegments(String pointType, List<NucleusBorderSegment> segments){
+  public void reviseSegments(String pointType){
 	  IJ.log("    Refining segment assignments...");
 	  
+	  List<NucleusBorderSegment> segments = this.profileCollection.getSegments(pointType);
 	 
-	  this.frankensteinProfiles.addAggregate( pointType, new ProfileAggregate((int)this.getMedianArrayLength()));//pointType, recombinedProfile);
+	  this.frankensteinProfiles.addAggregate( pointType, new ProfileAggregate((int)this.getMedianArrayLength()));
+	  this.frankensteinProfiles.addSegments(pointType, segments);
 	  this.frankensteinProfiles.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, getMaxProfileLength());
 	  SegmentFitter fitter = new SegmentFitter(this.profileCollection.getProfile(pointType), segments);
 	  List<Profile> frankenProfiles = new ArrayList<Profile>(0);
@@ -251,8 +261,6 @@ implements INuclearCollection
 	  this.frankensteinProfiles.exportProfilePlots(this.getFolder()+
     	                      			        	File.separator+
     					                            this.getOutputFolder(), this.getType());
-	  
-	  this.exportSegments(pointType);
   }
   
   public void exportSegments(String pointType){
@@ -1137,7 +1145,7 @@ implements INuclearCollection
    */
   public void drawProfilePlots(){
 
-	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
+//	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
 
 	  for( String pointType : this.profileCollection.getPlotKeys() ){
 

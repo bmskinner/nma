@@ -17,7 +17,7 @@ import no.components.Profile;
 // it can also take a list of segments, and apply them
 public class ProfileSegmenter {
 	
-	private static List<Color> colourList = new ArrayList<Color>(0);
+	public static List<Color> colourList = new ArrayList<Color>(0);
 	
 	// these are the colours for segments in the order they will loop
 	static {
@@ -211,5 +211,5 @@ public class ProfileSegmenter {
 //		deltaPlot.show();
 		
 	}
-
+	
 }
