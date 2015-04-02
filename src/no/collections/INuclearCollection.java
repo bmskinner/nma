@@ -11,7 +11,14 @@ import no.components.ProfileCollection;
 
 public interface INuclearCollection
 {
-	 
+	public static final int CHART_WINDOW_HEIGHT     = 400;
+	public static final int CHART_WINDOW_WIDTH      = 500;
+	public static final int CHART_TAIL_BOX_Y_MIN    = 325;
+	public static final int CHART_TAIL_BOX_Y_MID    = 340;
+	public static final int CHART_TAIL_BOX_Y_MAX    = 355;
+	public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
+	public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
+
 	public void addNucleus(INuclearFunctions r);
 
 	public void exportStatsFiles();
