@@ -231,16 +231,20 @@ public class ProfileCollection {
 		
 		// get the IQR and maxima
 		Profile iqrProfile = getIQRProfile(pointType);
+//		iqrProfile.print();
+//		iqrProfile.smooth(3).print();
 		Profile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
+//		maxima.print();
 		Profile displayMaxima = maxima.multiply(50);
 		
 		// given the list of maxima, find the highest 3 regions
 		// store the rank (1-3) and the index of the position at this rank
 		// To future me: I am sorry about this.
 		Map<Integer, Integer> values = new HashMap<Integer, Integer>(0);
-		values.put(1, 0);
-		values.put(2, 0);
-		values.put(3, 0);
+		int minIndex = iqrProfile.getIndexOfMin(); // ensure that our has begins with lowest data
+		values.put(1, minIndex);
+		values.put(2, minIndex);
+		values.put(3, minIndex);
 		for(int i=0; i<maxima.size();i++ ){
 			if(maxima.get(i)==1){
 				if(iqrProfile.get(i)>iqrProfile.get(values.get(1))){
@@ -263,6 +267,7 @@ public class ProfileCollection {
 		List<Integer> result = new ArrayList<Integer>(0);
 		for(int i : values.keySet()){
 			result.add(values.get(i));
+			IJ.log("    Variable index "+values.get(i));
 		}
 		
 		// draw the IQR - only needed during debugging. Can be removed later.

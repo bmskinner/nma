@@ -229,6 +229,7 @@ implements INuclearCollection
 	  SegmentFitter fitter = new SegmentFitter(this.profileCollection.getProfile(pointType), segments);
 	  List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 	  
+	  IJ.log("    Fitting profile segments...");
 	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 		  INuclearFunctions n = this.getNucleus(i);
 		  fitter.fit(n);
@@ -239,9 +240,11 @@ implements INuclearCollection
 		  this.frankensteinProfiles.getAggregate(pointType).addValues(recombinedProfile);
 		  frankenProfiles.add(recombinedProfile);
 	  }
+	  IJ.log("    Created "+frankenProfiles.size()+" frankenprofiles");
 	  this.frankensteinProfiles.createProfileAggregateFromPoint(    pointType, (int) this.getMedianArrayLength()    );
 	  this.frankensteinProfiles.drawProfilePlots(pointType, frankenProfiles);
 	  this.frankensteinProfiles.addMedianLinesToPlots();
+	  IJ.log("    Created frankenmedian");
 	  
 	  // get the regions with the highest variability within the population
 	  List<Integer> variableIndexes = this.frankensteinProfiles.findMostVariableRegions(pointType);
@@ -249,15 +252,16 @@ implements INuclearCollection
 	  // compare to 
 	  // interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
 	  // export clustering info
-	  
+	  IJ.log("    Top variable indexes:");
 	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
 	  logger.addColumnHeading("ID");
 	  logger.addColumnHeading("AREA");
 	  logger.addColumnHeading("PERIMETER");
 	  for(int index : variableIndexes){
+		  IJ.log("      Index "+index);
 		  // get the points in a window centred on the index
 		  for(int i=0; i<21;i++){ // index plus 10 positions to either side
-			  logger.addColumnHeading("IOR_INDEX_"+index+"_"+i);
+			  logger.addColumnHeading("IQR_INDEX_"+index+"_"+i);
 		  }
 	  }
 	  
@@ -275,7 +279,7 @@ implements INuclearCollection
 			  Profile window = interpolatedProfile.getWindow(index, 10);
 			  for(int j=0; j<21;j++){ // index plus 10 positions to either side
 //				  IJ.log("  Poisiton "+j);
-				  logger.addRow("IOR_INDEX_"+index+"_"+j, window.get(j));
+				  logger.addRow("IQR_INDEX_"+index+"_"+j, window.get(j));
 			  }
 			  
 		  }
