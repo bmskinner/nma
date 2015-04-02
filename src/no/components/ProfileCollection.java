@@ -227,16 +227,47 @@ public class ProfileCollection {
 	/**
 	 * Find the points in the profile that are most variable
 	 */
-	public void findMostVariableRegions(String pointType){
+	public List<Integer> findMostVariableRegions(String pointType){
 		
+		// get the IQR and maxima
 		Profile iqrProfile = getIQRProfile(pointType);
+		Profile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
+		Profile displayMaxima = maxima.multiply(50);
 		
-		Profile maxima = iqrProfile.smooth(3).getLocalMaxima(3).multiply(50);
-		
-		Plot  plot = this.getPlots(pointType).get("iqr");
+		// given the list of maxima, find the highest 3 regions
+		// store the rank (1-3) and the index of the position at this rank
+		// To future me: I am sorry about this.
+		Map<Integer, Integer> values = new HashMap<Integer, Integer>(0);
+		values.put(1, 0);
+		values.put(2, 0);
+		values.put(3, 0);
+		for(int i=0; i<maxima.size();i++ ){
+			if(maxima.get(i)==1){
+				if(iqrProfile.get(i)>iqrProfile.get(values.get(1))){
+					values.put(3,  values.get(2));
+					values.put(2,  values.get(1));
+					values.put(1, i);
+				} else {
+					if(iqrProfile.get(i)>iqrProfile.get(values.get(2))){
+						values.put(3,  values.get(2));
+						values.put(2, i);
+					} else {
+						if(iqrProfile.get(i)>iqrProfile.get(values.get(3))){
+							values.put(3, i);
+						}
+					}
 
-		double[] xPoints  = iqrProfile.getPositions(100).asArray();
+				}
+			}
+		}
+		List<Integer> result = new ArrayList<Integer>(0);
+		for(int i : values.keySet()){
+			result.add(values.get(i));
+		}
 		
+		// draw the IQR - only needed during debugging. Can be removed later.
+		Plot  plot = this.getPlots(pointType).get("iqr");
+		double[] xPoints  = iqrProfile.getPositions(100).asArray();
 		plot.setColor(Color.DARK_GRAY);
 		plot.addPoints(xPoints, iqrProfile.asArray(), Plot.LINE);
 		plot.setColor(Color.LIGHT_GRAY);
@@ -244,9 +275,20 @@ public class ProfileCollection {
 		plot.setColor(Color.DARK_GRAY);
 		for(int i=0;i<maxima.size();i++){
 			double x = xPoints[i];
-			plot.drawLine(x, 0, x, maxima.get(i) );
+			if(maxima.get(i)==1){
+				plot.drawLine(x, 0, x, iqrProfile.get(i) );
+			}
 		}
-//		plot.addPoints(xPoints, maxima.multiply(50).asArray(), Plot.DOT);
+		plot.setColor(Color.RED);
+		for(int i : values.keySet()){
+			int index = values.get(i);
+			double x = xPoints[index];
+			plot.drawLine(x, iqrProfile.get(index), x, displayMaxima.get(index));
+		}
+		// end of stuff that can be removed
+		
+		
+		return result;
 	}
 	
 	// Set up the plots within the collection

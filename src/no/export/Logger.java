@@ -144,5 +144,18 @@ public class Logger {
 		}
 		IJ.append(  outLine.toString(), exportFile);
 	}
+	
+	/**
+	 * For debugging. Show everything in the logger
+	 */
+	public void print(){
+		for(String s : columns.keySet()){
+			IJ.log("    "+s);
+			List<String> rows = columns.get(s);
+			for(String row : rows){
+				IJ.log("      "+row);
+			}
+		}
+	}
 
 }

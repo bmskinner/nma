@@ -242,7 +242,49 @@ implements INuclearCollection
 	  this.frankensteinProfiles.createProfileAggregateFromPoint(    pointType, (int) this.getMedianArrayLength()    );
 	  this.frankensteinProfiles.drawProfilePlots(pointType, frankenProfiles);
 	  this.frankensteinProfiles.addMedianLinesToPlots();
-	  this.frankensteinProfiles.findMostVariableRegions(pointType);
+	  
+	  // get the regions with the highest variability within the population
+	  List<Integer> variableIndexes = this.frankensteinProfiles.findMostVariableRegions(pointType);
+	  // these points are indexes in the frankenstein profile. Find the points in each nucleus profile that they
+	  // compare to 
+	  // interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
+	  // export clustering info
+	  
+	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+	  logger.addColumnHeading("ID");
+	  logger.addColumnHeading("AREA");
+	  logger.addColumnHeading("PERIMETER");
+	  for(int index : variableIndexes){
+		  // get the points in a window centred on the index
+		  for(int i=0; i<21;i++){ // index plus 10 positions to either side
+			  logger.addColumnHeading("IOR_INDEX_"+index+"_"+i);
+		  }
+	  }
+	  
+	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+//		  IJ.log("Nucleus "+i+" of "+this.getNucleusCount());
+		  INuclearFunctions n = this.getNucleus(i);
+		  logger.addRow("ID",		n.getPath()+"-"+n.getNucleusNumber());
+		  logger.addRow("AREA",		n.getArea());
+		  logger.addRow("PERIMETER",n.getPerimeter());
+		  Profile frankenProfile = frankenProfiles.get(i);
+		  Profile interpolatedProfile = frankenProfile.interpolate(this.frankensteinProfiles.getProfile(pointType).size());
+		  for(int index : variableIndexes){
+			  // get the points in a window centred on the index
+//			  IJ.log("Index "+index);
+			  Profile window = interpolatedProfile.getWindow(index, 10);
+			  for(int j=0; j<21;j++){ // index plus 10 positions to either side
+//				  IJ.log("  Poisiton "+j);
+				  logger.addRow("IOR_INDEX_"+index+"_"+j, window.get(j));
+			  }
+			  
+		  }
+		  
+	  }
+//	  IJ.log("    Added all rows");
+//	  logger.print();
+	  logger.export("log.variability_regions."+getType());
+//	  IJ.log("    Exported rows");
 	  this.frankensteinProfiles.exportProfilePlots(this.getFolder()+
     	                      			        	File.separator+
     					                            this.getOutputFolder(), this.getType());

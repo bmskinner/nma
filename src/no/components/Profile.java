@@ -6,6 +6,8 @@
 
 package no.components;
 
+import java.util.Arrays;
+
 import ij.IJ;
 import no.utility.*;
 
@@ -428,6 +430,42 @@ public class Profile {
 
 		  result[i] = isMaximum ? 1 : 0;
 	  }
+	  return new Profile(result);
+  }
+  
+  /**
+   * Get the windowSize points around a point of interest
+   * @param index the index position to centre on
+   * @param windowSize the number of points either side
+   * @return a profile with the window
+   */
+  public Profile getWindow(int index, int windowSize){
+
+	  double[] result = new double[windowSize*2 + 1];
+
+	  double[] prevValues = getValues(index, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+	  double[] nextValues = getValues(index, windowSize, Profile.ARRAY_AFTER);
+
+	  // need to reverse the previous array
+	  for(int k=prevValues.length, i=0;k>0;k--, i++){ 
+		  result[i] = prevValues[k-1];        
+	  }
+	  result[windowSize] = array[index];
+	  for(int i=0; i<nextValues.length;i++){ 
+		  result[windowSize+i+1] = nextValues[i];        
+	  }
+
+	  return new Profile(result);
+  }
+
+  /**
+   * Fetch a sub-region of the profile
+   * @param indexStart the index to begin
+   * @param indexEnd the index to end
+   * @return a Profile
+   */
+  public Profile getSubregion(int indexStart, int indexEnd){
+	  double[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
 	  return new Profile(result);
   }
 
