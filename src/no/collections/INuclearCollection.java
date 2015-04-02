@@ -66,6 +66,8 @@ public interface INuclearCollection
 	public List<INuclearFunctions> getNuclei();
 
 	public INuclearFunctions getNucleus(int i);
+	
+	public List<Integer> getSignalChannels();
 
 	public int getRedSignalCount();
 

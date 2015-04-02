@@ -25,7 +25,7 @@ import no.utility.ImageImporter;
 import no.components.*;
 import no.export.ImageExporter;
 
-public class ShellAnalyser {
+public class ShellCreator {
 
 	int shellCount = 5;
 
@@ -45,7 +45,7 @@ public class ShellAnalyser {
 	*
 	* @param nucleus the nucleus to analyse
 	*/
-	public ShellAnalyser(INuclearFunctions n){
+	public ShellCreator(INuclearFunctions n){
 		this.originalRoi = n.getRoi();
 		this.image = n.getImagePlanes();
 		this.nucleus = n;

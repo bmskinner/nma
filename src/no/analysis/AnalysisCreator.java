@@ -439,6 +439,11 @@ public class AnalysisCreator {
 
       r.measureProfilePositions();
       r.measureNuclearOrganisation();
+      
+      // Perform shell analysis
+      ShellAnalysis shell = new ShellAnalysis();
+      shell.run(r);
+      
       r.exportStatsFiles();
       r.annotateAndExportNuclei();
 

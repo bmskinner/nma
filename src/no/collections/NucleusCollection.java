@@ -23,7 +23,7 @@ import java.util.*;
 import no.collections.INuclearCollection;
 import no.analysis.ProfileSegmenter;
 import no.analysis.SegmentFitter;
-import no.analysis.ShellAnalyser;
+import no.analysis.ShellCreator;
 import no.analysis.ShellCounter;
 import no.nuclei.*;
 import no.components.*;
@@ -877,53 +877,12 @@ implements INuclearCollection
       this.exportSignalStats();
       this.exportDistancesBetweenSingleSignals();
       this.addSignalsToProfileCharts();
-      this.doShellAnalysis();
+      
       this.profileCollection.exportProfilePlots(this.getFolder()+
 			  File.separator+
 			  this.getOutputFolder(), this.getType());
     }
-  }
-
-  public void doShellAnalysis(){
-	  IJ.log("    Performing shell analysis...");
-
-	  Map<Integer, ShellCounter> counters = new HashMap<Integer, ShellCounter>(0);
-	  for(int channel : this.getSignalChannels()){
-		  counters.put(channel, new ShellCounter(5));
-	  }
-
-	  // make the shells and measure the values
-	  for(int i= 0; i<this.getNucleusCount();i++){
-		  INuclearFunctions n = this.getNucleus(i);
-		  ShellAnalyser shellAnalyser = new ShellAnalyser(n);
-		  shellAnalyser.createShells();
-		  shellAnalyser.exportImage();
-
-		  Set<Integer> channels = n.getSignalChannels();
-		  for(int channel : channels){
-			  List<NuclearSignal> signalGroup = n.getSignals(channel); 
-			  if(!signalGroup.isEmpty()){
-				  ShellCounter counter = counters.get(channel);
-
-				  for(NuclearSignal s : signalGroup){
-					  try {
-						  double[] signalPerShell = shellAnalyser.findShell(s, channel);
-						  counter.addValues(signalPerShell);
-					  } catch (Exception e) {
-						  IJ.log("    Error in shell analysis: "+e.getMessage());;
-					  }
-				  } // end for signals
-			  } // end if signals
-		  }
-	  }
-
-	  // get stats and export
-	  for(int channel : counters.keySet()){
-		  counters.get(channel).export(new File(getLogFileName( "log.shells."+channel  )));
-	  }
-	  IJ.log("    Shell analysis complete");
-  }
-  
+  } 
 
   /*
     -----------------
