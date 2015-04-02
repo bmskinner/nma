@@ -242,9 +242,12 @@ implements INuclearCollection
 	  this.frankensteinProfiles.createProfileAggregateFromPoint(    pointType, (int) this.getMedianArrayLength()    );
 	  this.frankensteinProfiles.drawProfilePlots(pointType, frankenProfiles);
 	  this.frankensteinProfiles.addMedianLinesToPlots();
+	  this.frankensteinProfiles.findMostVariableRegions(pointType);
 	  this.frankensteinProfiles.exportProfilePlots(this.getFolder()+
     	                      			        	File.separator+
     					                            this.getOutputFolder(), this.getType());
+	  
+	  
   }
   
   public void exportSegments(String pointType){

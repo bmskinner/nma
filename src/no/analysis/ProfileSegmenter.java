@@ -25,7 +25,7 @@ public class ProfileSegmenter {
 		colourList.add(Color.ORANGE);
 		colourList.add(Color.GREEN);
 		colourList.add(Color.MAGENTA);
-		colourList.add(Color.LIGHT_GRAY);
+		colourList.add(Color.DARK_GRAY);
 		colourList.add(Color.CYAN);
 		colourList.add(Color.YELLOW);
 		colourList.add(Color.PINK);

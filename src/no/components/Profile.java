@@ -12,8 +12,9 @@ import no.utility.*;
 public class Profile {
 
 	private double[] array;
-//  private int minimaCount = 0;
-//  private int maximaCount = 0;
+	private static final int ARRAY_BEFORE = -1;
+	private static final int ARRAY_AFTER = 1;
+
 
 	public Profile(double[] values){
 
@@ -158,35 +159,48 @@ public class Profile {
     return new Profile(newArray);
   }
   
+  /**
+   * Perform a window-averaging smooth of the profile with the given window size
+   * @param windowSize the size of the window
+   * @return
+   */
   public Profile smooth(int windowSize){
 
-	    double[] smoothed = new double[this.size()];
+	  double[] result = new double[this.size()];
 
-	    double[] prevValues = new double[windowSize]; // slots for previous angles
-	    double[] nextValues = new double[windowSize]; // slots for next angles
+	  for (int i=0; i<array.length; i++) { // for each position
 
-	    for (int i=0; i<array.length; i++) { // for each position in sperm
+		  double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+		  double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
 
-	      for(int j=0;j<prevValues.length;j++){
+		  double average = array[i];
+		  for(int k=0;k<prevValues.length;k++){ 
+			  average += prevValues[k] + nextValues[k];	        
+		  }
 
-	        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-	        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
-
-	        // fill the lookup array
-	        prevValues[j] = array[prev_i];
-	        nextValues[j] = array[next_i];
-	      }
-
-	      double average = array[i];
-	      for(int k=0;k<prevValues.length;k++){ 
-	    	  average += prevValues[k] + nextValues[k];	        
-	      }
-
-	      smoothed[i] = average / (windowSize*2 + 1);
-	    }
-	    Profile result = new Profile(smoothed);
-	    return result;
+		  result[i] = average / (windowSize*2 + 1);
 	  }
+	  return new Profile(result);
+  }
+  
+  /**
+   * Get an array of the values <windowSize> before or after the current point
+   * @param position the position in the array
+   * @param windowSize the number of points to find
+   * @param type find points before or after
+   * @return
+   */
+  private double[] getValues(int position, int windowSize, int type){
+
+	  double[] values = new double[windowSize]; // slots for previous angles
+	  for(int j=0;j<values.length;j++){
+
+		  // If type was before, multiply by -1; if after, multiply by 1
+		  int index = Utils.wrapIndex( position + ((j+1)*type)  , this.size() );
+		  values[j] = array[index];
+	  }
+	  return values;
+  }
 
   public void reverse(){
 
@@ -381,64 +395,40 @@ public class Profile {
   }
 
   public Profile getLocalMaxima(int windowSize){
-    // go through angle array (with tip at start)
-    // look at 1-2-3-4-5 points ahead and behind.
-    // if all greater, local minimum
-    double[] prevValues = new double[windowSize]; // slots for previous angles
-    double[] nextValues = new double[windowSize]; // slots for next angles
-    double[] minima = new double[this.size()];
+	  // go through array
+	  // look at points ahead and behind.
+	  // if all lower, local maximum
 
-    // int count = 0;
-    // List<Integer> result = new ArrayList<Integer>(0);
+	  double[] result = new double[this.size()];
 
-    for (int i=0; i<array.length; i++) { // for each position in sperm
+	  for (int i=0; i<array.length; i++) { // for each position
 
-      // go through each lookup position and get the appropriate angles
-      for(int j=0;j<prevValues.length;j++){
+		  double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+		  double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
 
-        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+		  // with the lookup positions, see if maximum at i
+		  // return a 1 if all lower than last, 0 if not
+		  boolean isMaximum = true;
+		  for(int k=0;k<prevValues.length;k++){
 
-        // fill the lookup array
-        prevValues[j] = array[prev_i];
-        nextValues[j] = array[next_i];
-      }
-      
-      // with the lookup positions, see if minimum at i
-      // return a 1 if all higher than last, 0 if not
-      // prev_l = 0;
-      boolean ok = true;
-      for(int k=0;k<prevValues.length;k++){
+			  // for the first position in prevValues, compare to the current index
+			  if(k==0){
+				  if( prevValues[k] > array[i] || 
+						  nextValues[k] > array[i] ){
+					  isMaximum = false;
+				  }
+			  } else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
 
-        // for the first position in prevValues, compare to the current index
-        if(k==0){
-          if( prevValues[k] > array[i] || 
-              nextValues[k] > array[i] ){
-            ok = false;
-          }
-        } else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
-          
-          if( prevValues[k] > prevValues[k-1] || 
-              nextValues[k] > nextValues[k-1]){
-            ok = false;
-          }
-        }
-      }
+				  if( prevValues[k] > prevValues[k-1] || 
+						  nextValues[k] > nextValues[k-1]){
+					  isMaximum = false;
+				  }
+			  }
+		  }
 
-      if(ok){
-        // count++;
-        minima[i] = 1;
-      } else {
-        minima[i] = 0;
-      }
-
-      // result.add(i);
-
-    }
-    Profile minimaProfile = new Profile(minima);
-    // this.minimaCalculated = true;
-    // this.minimaCount =  count;
-    return minimaProfile;
+		  result[i] = isMaximum ? 1 : 0;
+	  }
+	  return new Profile(result);
   }
 
   public Profile calculateDeltas(int windowSize){
@@ -496,6 +486,20 @@ public class Profile {
 	  }
 	  Profile result = new Profile(deltas);
 	  return result;
+  }
+  
+  /**
+   * Multiply all values within the profile by a given value
+   * @param multiplier the value to multiply by
+   * @return the new profile
+   */
+  public Profile multiply(double multiplier){
+	  double[] result = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { // for each position in sperm
+		  result[i] = array[i] * multiplier;
+	  }
+	  return new Profile(result);
   }
 
   // use for debugging

@@ -205,6 +205,50 @@ public class ProfileCollection {
 		return segments.keySet();
 	}
 	
+	/**
+	 * Turn the IQR (difference between Q25, Q75) of the median into a profile.
+	 * @param pointType the profile type to use
+	 * @return the profile
+	 */
+	private Profile getIQRProfile(String pointType){
+		
+		ProfileAggregate profileAggregate = this.getAggregate(pointType);
+
+		double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
+		double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
+		
+		double[] iqr = new double[lowQuartiles.length];
+		for(int i=0;i<iqr.length;i++){
+			iqr[i] = uppQuartiles[i] - lowQuartiles[i]; 
+		}
+		return new Profile(iqr);
+	}
+	
+	/**
+	 * Find the points in the profile that are most variable
+	 */
+	public void findMostVariableRegions(String pointType){
+		
+		Profile iqrProfile = getIQRProfile(pointType);
+		
+		Profile maxima = iqrProfile.smooth(3).getLocalMaxima(3).multiply(50);
+		
+		Plot  plot = this.getPlots(pointType).get("iqr");
+
+		double[] xPoints  = iqrProfile.getPositions(100).asArray();
+		
+		plot.setColor(Color.DARK_GRAY);
+		plot.addPoints(xPoints, iqrProfile.asArray(), Plot.LINE);
+		plot.setColor(Color.LIGHT_GRAY);
+		plot.addPoints(xPoints, iqrProfile.smooth(3).asArray(), Plot.LINE);
+		plot.setColor(Color.DARK_GRAY);
+		for(int i=0;i<maxima.size();i++){
+			double x = xPoints[i];
+			plot.drawLine(x, 0, x, maxima.get(i) );
+		}
+//		plot.addPoints(xPoints, maxima.multiply(50).asArray(), Plot.DOT);
+	}
+	
 	// Set up the plots within the collection
 
 	public void preparePlots(int width, int height, double maxLength){
@@ -216,6 +260,7 @@ public class ProfileCollection {
 
 			Plot  rawPlot = new Plot( "Raw "       +pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
 			Plot normPlot = new Plot( "Normalised "+pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
+			Plot  iqrPlot = new Plot( "IQR "       +pointType+"-indexed plot", "Position", "IQR", Plot.Y_GRID | Plot.X_GRID);
 
 			rawPlot.setLimits(0,maxLength,CHART_SCALE_Y_MIN,CHART_SCALE_Y_MAX);
 			rawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
@@ -230,10 +275,17 @@ public class ProfileCollection {
 			normPlot.setColor(Color.BLACK);
 			normPlot.drawLine(0, 180, 100, 180); 
 			normPlot.setColor(Color.LIGHT_GRAY);
+			
+			iqrPlot.setLimits(0,100,0,50);
+			iqrPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+			iqrPlot.setYTicks(true);
+			iqrPlot.setColor(Color.BLACK);
+			iqrPlot.setColor(Color.LIGHT_GRAY);
 
 			ProfilePlot plotHash = new ProfilePlot();
 			plotHash.add("raw" , rawPlot );
 			plotHash.add("norm", normPlot);
+			plotHash.add("iqr" , iqrPlot);
 			this.addPlots(pointType, plotHash);
 		}
 	}   
@@ -261,10 +313,10 @@ public class ProfileCollection {
 					this.getSegments(pointType));
 
 			// add the IQR
-//			plot.setColor(Color.DARK_GRAY);
-//			plot.setLineWidth(2);
-//			plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-//			plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
+			plot.setColor(Color.DARK_GRAY);
+			plot.setLineWidth(2);
+			plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+			plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
 	    }
 	}
 
@@ -376,26 +428,26 @@ public class ProfileCollection {
 	
 	public void appendSegmentsToPlot(Plot segPlot, Profile profile, List<NucleusBorderSegment> segments){
 
-		int narrowLine = 3;
+		int narrowLine = 2;
 		int wideLine = 10;
 		int verticalLine = 2;
 
 		int baseLineY = 5;
 
 		// draw 180 degree line
-		segPlot.setLineWidth(narrowLine);
-		segPlot.setColor(Color.DARK_GRAY);
-		segPlot.drawLine(0, 180, profile.size(),180);			
+//		segPlot.setLineWidth(narrowLine);
+//		segPlot.setColor(Color.DARK_GRAY);
+////		segPlot.drawLine(0, 180, profile.size(),180);			
 
-		// draw the background black median line for contrast
+		
 		double[] xpoints = profile.getPositions(100).asArray();
 		double[] ypoints = profile.asArray();
-		segPlot.setLineWidth(wideLine);
-		segPlot.addPoints(xpoints, ypoints, Plot.LINE);
-		segPlot.setLineWidth(narrowLine);
+		// draw the background black median line for contrast
+//		segPlot.setLineWidth(wideLine);
+//		segPlot.addPoints(xpoints, ypoints, Plot.LINE);
+//		segPlot.setLineWidth(narrowLine);
 
 		// draw the coloured segments
-		//		IJ.log("");
 		int i=0;
 		for(NucleusBorderSegment b : segments){
 
