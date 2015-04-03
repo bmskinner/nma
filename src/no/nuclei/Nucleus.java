@@ -1014,6 +1014,24 @@ public class Nucleus
 	*/
 
 	public void annotateFeatures(){
+		this.annotateTail();
+		this.annotateHead();
+	}
+
+	public void annotateTail(){
+		ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+		ip.setColor(Color.CYAN);
+		ip.setLineWidth(3);
+		ip.drawDot( this.getBorderTag("tail").getXAsInt(), 
+				this.getBorderTag("tail").getYAsInt());
+	}
+
+	public void annotateHead(){
+		ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+		ip.setColor(Color.YELLOW);
+		ip.setLineWidth(3);
+		ip.drawDot( this.getBorderTag("head").getXAsInt(), 
+				this.getBorderTag("head").getYAsInt());
 	}
 	
 	public double findRotationAngle(){

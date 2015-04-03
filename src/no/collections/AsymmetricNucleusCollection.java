@@ -75,8 +75,7 @@ public class AsymmetricNucleusCollection
   
   public void annotateImagesOfNuclei(){
     IJ.log("    Annotating images ("+this.getType()+")...");
-    for(int i=0; i<this.getNucleusCount();i++){
-      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+    for(INuclearFunctions n : this.getNuclei()){
       n.annotateFeatures();
     }
      IJ.log("    Annotation complete");
@@ -111,81 +110,6 @@ public class AsymmetricNucleusCollection
     }
     IJ.append("", logFile);
   }
-
-//  @Override
-//  public void exportCompositeImage(String filename){
-//
-//    // foreach nucleus
-//    // createProcessor (500, 500)
-//    // sertBackgroundValue(0)
-//    // paste in old image at centre
-//    // insert(ImageProcessor ip, int xloc, int yloc)
-//    // rotate about CoM (new position)
-//    // display.
-//    if(this.getNucleusCount()==0){
-//      return;
-//    }
-//    IJ.log("    Creating composite image...");
-//    
-//
-//    int totalWidth = 0;
-//    int totalHeight = 0;
-//
-//    int boxWidth  = (int)(this.getMedianNuclearPerimeter()/1.4);
-//    int boxHeight = (int)(this.getMedianNuclearPerimeter()/1.2);
-//
-//    int maxBoxWidth = boxWidth * 5;
-//    int maxBoxHeight = (boxHeight * (int)(Math.ceil(this.getNucleusCount()/5)) + boxHeight );
-//
-//    ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
-//    ImageProcessor finalProcessor = finalImage.getProcessor();
-//    finalProcessor.setBackgroundValue(0);
-//
-//    for(int i=0; i<this.getNucleusCount();i++){
-//      
-//      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-//      String path = n.getAnnotatedImagePath();
-//
-//      try {
-//        Opener localOpener = new Opener();
-//        ImagePlus image = localOpener.openImage(path);
-//        ImageProcessor ip = image.getProcessor();
-////        int width  = ip.getWidth();
-////        int height = ip.getHeight();
-//        ip.setRoi(n.getRoi());
-//
-//
-//        ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
-//
-//        newProcessor.setBackgroundValue(0);
-//        newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
-//        newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
-//        newProcessor.rotate( n.findRotationAngle() );
-//        newProcessor.setBackgroundValue(0);
-//
-//        if(totalWidth>maxBoxWidth-boxWidth){
-//          totalWidth=0;
-//          totalHeight+=(int)(boxHeight);
-//        }
-//        int newX = totalWidth;
-//        int newY = totalHeight;
-//        totalWidth+=(int)(boxWidth);
-//        
-//        finalProcessor.insert(newProcessor, newX, newY);
-//        TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
-//        Overlay overlay = new Overlay(label);
-//        finalProcessor.drawOverlay(overlay);  
-//      } catch(Exception e){
-//        IJ.log("Error adding image to composite");
-//        IJ.append("Error adding image to composite: "+e, this.getDebugFile().getAbsolutePath());
-//        IJ.append("  "+getType(), this.getDebugFile().getAbsolutePath());
-//        IJ.append("  "+path, this.getDebugFile().getAbsolutePath());
-//      }     
-//    }
-//    // finalImage.show();
-//    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".tiff");
-//    IJ.log("    Composite image created");
-//  }
 
   public void exportClusteringProfiles(String filename){
 

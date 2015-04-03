@@ -23,11 +23,7 @@ public interface INuclearCollection
 
 	public void addNucleus(INuclearFunctions r);
 
-//	public void exportStatsFiles();
-
 	public void annotateAndExportNuclei();
-
-//	public void measureProfilePositions();
 
 	/**
 	 * Find the Nucleus with a profile most closely matching the median 
@@ -110,69 +106,12 @@ public interface INuclearCollection
 
 	public double[] getPointToPointDistances(String pointTypeA, String pointTypeB);
 
-	/*
-		-----------------
-		Basic filtering of population
-		-----------------
-	*/
-
-	/*
-		The filters needed to separate out objects from nuclei
-		Filter on: nuclear area, perimeter and array length to find
-		conjoined nuclei and blobs too small to be nuclei
-		Use path length to remove poorly thresholded nuclei
-	*/
 	public void refilterNuclei(INuclearCollection failedCollection);
 
-	/*
-		-----------------
-		Profile functions
-		-----------------
-	*/
-
-//	protected void createProfileAggregateFromPoint(String pointType);
-
-//	public void createProfileAggregates();
-
-	/*
-		-----------------
-		Annotate images
-		-----------------
-	*/
-
-//	public void measureNuclearOrganisation();
-
-	/*
-		-----------------
-		Export functions
-		-----------------
-	*/
-
 	public String getLogFileName(String filename);
-	/*
-		Export the signal parameters of the nucleus to the designated log file
-	*/
-//	public void exportSignalStats();
-
-//	public void exportAngleProfiles();
-
-//	public void exportDistancesBetweenSingleSignals();
-
-//	public void exportAnnotatedNuclei();
-
-//	public void exportMediansOfProfile(Profile profile, String filename);
-
-//	public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename);
-	
-	// this is for the mapping of image to path for 
-	// identifying FISHed nuclei in prefish images
-//	public void exportImagePaths(String filename);
-
-//	public void exportNuclearStats(String filename);
 
 	public void exportFilterStats();
 
-//	public void exportCompositeImage(String filename);
 	
 	/*
 		Draw the charts of the profiles of the nuclei within this collecion.

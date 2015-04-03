@@ -45,7 +45,7 @@ public class SignalAnalysis {
 
 	private static void exportSignalStats(INuclearCollection collection){
 
-		for(int i : collection.getSignalChannels()){
+		for(int channel : collection.getSignalChannels()){
 			Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolder());
 			logger.addColumnHeading("SIGNAL_AREA");
 			logger.addColumnHeading("SIGNAL_ANGLE");
@@ -57,7 +57,7 @@ public class SignalAnalysis {
 			logger.addColumnHeading("CLOSEST_BORDER_INDEX");
 			logger.addColumnHeading("SOURCE");
 
-			for(NuclearSignal s : collection.getSignals(i)){
+			for(NuclearSignal s : collection.getSignals(channel)){
 				logger.addRow("SIGNAL_AREA"         , s.getArea());
 				logger.addRow("SIGNAL_ANGLE"        , s.getAngle());
 				logger.addRow("SIGNAL_FERET"        , s.getFeret());
@@ -68,7 +68,7 @@ public class SignalAnalysis {
 				logger.addRow("CLOSEST_BORDER_INDEX", s.getClosestBorderPoint());
 				logger.addRow("SOURCE"              , s.getOrigin());
 			}
-			logger.export("log.signals."+i+"."+collection.getType()); // TODO: get channel names
+			logger.export("log.signals.Channel_"+channel+"."+collection.getType()); // TODO: get channel names
 		}
 	}
 
@@ -117,7 +117,9 @@ public class SignalAnalysis {
 				logger.addRow("PATH"                			, n.getPath());
 			}
 		}
-		logger.export("log.SingleSignalDistances");
+		if(logger.length()>0){
+			logger.export("log.SingleSignalDistances");
+		}
 	}
 
 	private static void addSignalsToProfileCharts(INuclearCollection collection){

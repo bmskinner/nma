@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import no.components.Profile;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.collections.*;
@@ -452,15 +451,12 @@ public class AnalysisCreator {
       
       // export the stats files
       StatsExporter.run(r);
-      r.annotateAndExportNuclei();
+      r.annotateAndExportNuclei(); // method overridden in subclasses.
       
       // make a composite image of all nuclei in the collection
       CompositeExporter.run(r);
 
-      IJ.log("    ----------------------------- ");
-      IJ.log("    Refolding nucleus"             );
-      IJ.log("    ----------------------------- ");
-
+      // refold the median consensus nucleus
       CurveRefolder.run(r, nucleusClass, refoldMode);
 
       ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
@@ -504,7 +500,7 @@ public class AnalysisCreator {
       for(int channel : channels){
     	  List<INuclearFunctions> list = r.getNucleiWithSignals(channel);
     	  if(!list.isEmpty()){
-    		  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "Channel_"+channel);
+    		  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "Signals_in_channel_"+channel);
     		  for(INuclearFunctions n : list){
     			  listCollection.addNucleus( n );
     		  }
@@ -512,7 +508,7 @@ public class AnalysisCreator {
 
     		  List<INuclearFunctions> notList = r.getNucleiWithSignals(-channel);
     		  if(!notList.isEmpty()){
-    			  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "Not_channel_"+channel);
+    			  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "No_signals_in_channel_"+channel);
     			  for(INuclearFunctions n : notList){
     				  notListCollection.addNucleus( n );
     			  }

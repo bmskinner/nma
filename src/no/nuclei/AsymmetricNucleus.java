@@ -56,22 +56,6 @@ public class AsymmetricNucleus
     -----------------------
   */
 
-  public void annotateTail(){
-    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-    ip.setColor(Color.CYAN);
-    ip.setLineWidth(3);
-    ip.drawDot( this.getBorderTag("tail").getXAsInt(), 
-                this.getBorderTag("tail").getYAsInt());
-  }
-
-  public void annotateHead(){
-    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-    ip.setColor(Color.YELLOW);
-    ip.setLineWidth(3);
-    ip.drawDot( this.getBorderTag("head").getXAsInt(), 
-                this.getBorderTag("head").getYAsInt());
-  }
-
   // draw the points considered as sperm tails
   public void annotateEstimatedTailPoints(){
     ImageProcessor ip = this.getAnnotatedImage().getProcessor();
@@ -85,8 +69,6 @@ public class AsymmetricNucleus
 
   public void annotateFeatures(){
 
-    this.annotateTail();
-    this.annotateHead();
     this.annotateEstimatedTailPoints();
   }
 

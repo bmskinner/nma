@@ -73,6 +73,7 @@ implements INuclearCollection
   public void annotateAndExportNuclei(){
 	for(INuclearFunctions n : this.nucleiCollection){
 		n.annotateNucleusImage();
+		n.annotateFeatures();
 		n.exportAnnotatedImage();
 	}
   }
@@ -372,6 +373,7 @@ implements INuclearCollection
  * Return the nuclei that have signals in the given channel. If negative, this will give the nuclei
  * that do NOT have signals in the given channel.
  * @param channel the channel 
+ * @return a list of nuclei
  */
 public List<INuclearFunctions> getNucleiWithSignals(int channel){
     List<INuclearFunctions> result = new ArrayList<INuclearFunctions>(0);
@@ -578,8 +580,7 @@ public List<INuclearFunctions> getNucleiWithSignals(int channel){
     INuclearFunctions n = (INuclearFunctions) this.getNucleus(0); // default to the first nucleus
 
     double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
-    for(int i=0;i<this.getNucleusCount();i++){
-      INuclearFunctions p = (INuclearFunctions)this.getNucleus(i);
+    for(INuclearFunctions p : this.getNuclei()){
       int index = n.getBorderIndex(pointType);
       double nDifference = p.getAngleProfile().offset(index).differenceToProfile(medianProfile);
       if(nDifference<difference){
@@ -619,80 +620,6 @@ public List<INuclearFunctions> getNucleiWithSignals(int channel){
     IJ.append("    Array length: "+(int)medianArrayLength+"\r\n",  this.getDebugFile().getAbsolutePath());
     IJ.append("    Feret length: "+(int)medianFeretLength+"\r\n",  this.getDebugFile().getAbsolutePath());
   }
-
-//  public void exportCompositeImage(String filename){
-//
-//    // foreach nucleus
-//    // createProcessor (500, 500)
-//    // sertBackgroundValue(0)
-//    // paste in old image at centre
-//    // insert(ImageProcessor ip, int xloc, int yloc)
-//    // rotate about CoM (new position)
-//    // display.
-//    if(this.getNucleusCount()==0){
-//      return;
-//    }
-//    IJ.log("    Creating composite image...");
-//    
-//
-//    int totalWidth = 0;
-//    int totalHeight = 0;
-//
-//    int boxWidth  = (int)(this.getMedianNuclearPerimeter()/1.4);
-//    int boxHeight = (int)(this.getMedianNuclearPerimeter()/1.2);
-//
-//    int maxBoxWidth = boxWidth * 5;
-//    int maxBoxHeight = (boxHeight * (int)(Math.ceil(this.getNucleusCount()/5)) + boxHeight );
-//
-//    ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
-//    ImageProcessor finalProcessor = finalImage.getProcessor();
-//    finalProcessor.setBackgroundValue(0);
-//
-//    for(int i=0; i<this.getNucleusCount();i++){
-//      
-//      INuclearFunctions n = this.getNucleus(i);
-//      String path = n.getAnnotatedImagePath();
-//
-//      try {
-//        Opener localOpener = new Opener();
-//        ImagePlus image = localOpener.openImage(path);
-//        ImageProcessor ip = image.getProcessor();
-////        int width  = ip.getWidth();
-////        int height = ip.getHeight();
-//        ip.setRoi(n.getRoi());
-//
-//
-//        ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
-//
-//        newProcessor.setBackgroundValue(0);
-//        newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
-//        newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
-//        // newProcessor.rotate( n.findRotationAngle() );
-//        newProcessor.setBackgroundValue(0);
-//
-//        if(totalWidth>maxBoxWidth-boxWidth){
-//          totalWidth=0;
-//          totalHeight+=(int)(boxHeight);
-//        }
-//        int newX = totalWidth;
-//        int newY = totalHeight;
-//        totalWidth+=(int)(boxWidth);
-//        
-//        finalProcessor.insert(newProcessor, newX, newY);
-//        TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
-//        Overlay overlay = new Overlay(label);
-//        finalProcessor.drawOverlay(overlay);  
-//      } catch(Exception e){
-//        IJ.log("    Error adding image to composite");
-//        IJ.append("Error adding image to composite: "+e, this.getDebugFile().getAbsolutePath());
-//        IJ.append("  "+getType(), this.getDebugFile().getAbsolutePath());
-//        IJ.append("  "+path, this.getDebugFile().getAbsolutePath());
-//      }     
-//    }
-//    // finalImage.show();
-//    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".tiff");
-//    IJ.log("    Composite image created");
-//  }
 
   /*
     Draw the charts of the profiles of the nuclei within this collecion.
