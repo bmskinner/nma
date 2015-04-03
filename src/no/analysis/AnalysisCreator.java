@@ -25,6 +25,7 @@ import no.components.Profile;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.collections.*;
+import no.export.CompositeExporter;
 import no.export.StatsExporter;
 import no.nuclei.INuclearFunctions;
 
@@ -456,6 +457,9 @@ public class AnalysisCreator {
       // export the stats files
       StatsExporter.run(r);
       r.annotateAndExportNuclei();
+      
+      // make a composite image of all nuclei in the collection
+      CompositeExporter.run(r);
 
       IJ.log("    ----------------------------- ");
       IJ.log("    Refolding nucleus"             );
@@ -480,6 +484,7 @@ public class AnalysisCreator {
         ShellAnalysis.run(p, 5);
         StatsExporter.run(p);
         p.annotateAndExportNuclei();
+        CompositeExporter.run(p);
         CurveRefolder.run(p, nucleusClass, refoldMode);
       }
       collectionNucleusCounts.put(folder, nucleusCounts);

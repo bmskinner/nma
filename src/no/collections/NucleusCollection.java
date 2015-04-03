@@ -9,13 +9,6 @@
 
 package no.collections;
 import ij.IJ;
-import ij.ImagePlus;
-import ij.gui.Overlay;
-import ij.gui.TextRoi;
-import ij.io.Opener;
-import ij.process.ImageProcessor;
-
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
 
@@ -77,18 +70,11 @@ implements INuclearCollection
 	  this.nucleiCollection.add(r);
   }
 
-//  public void exportStatsFiles(){
-//    this.exportNuclearStats("logStats");
-//    this.exportImagePaths("logImagePaths");
-//    this.exportAngleProfiles();
-//  }
-
   public void annotateAndExportNuclei(){
 	for(INuclearFunctions n : this.nucleiCollection){
 		n.annotateNucleusImage();
+		n.exportAnnotatedImage();
 	}
-    this.exportAnnotatedNuclei();
-    this.exportCompositeImage("composite");
   }
   
   public void exportProfiles(){
@@ -626,67 +612,6 @@ implements INuclearCollection
     return file;
   }
 
-  public void exportAnnotatedNuclei(){
-    for(int i=0; i<this.getNucleusCount();i++){
-      INuclearFunctions n = this.getNucleus(i);
-      n.exportAnnotatedImage();
-    }
-  }
-
-//  public void exportAngleProfiles(){
-//    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-//
-//      INuclearFunctions n = this.getNucleus(i);
-//      n.exportAngleProfile();
-////      n.exportProfilePlotImage();
-//    }
-//  }
-
-//  public void exportMediansOfProfile(Profile profile, String filename){
-//
-//    Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-//    logger.addColumn("X_POSITION",   profile.getPositions(profile.size()).asArray());
-//    logger.addColumn("ANGLE_MEDIAN", profile.asArray());
-//    logger.export(filename+"."+getType());
-//  }
-
-//  public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename){
-//
-//	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-//	  logger.addColumn("X_POSITION",       profileAggregate.getXPositions().asArray());
-//	  logger.addColumn("ANGLE_MEDIAN",     profileAggregate.getMedian().asArray());
-//	  logger.addColumn("Q25", 	 		   profileAggregate.getQuartile(25).asArray());
-//	  logger.addColumn("Q75", 	 		   profileAggregate.getQuartile(75).asArray());
-//	  logger.addColumn("Q10", 	 		   profileAggregate.getQuartile(10).asArray());
-//	  logger.addColumn("Q90", 	 		   profileAggregate.getQuartile(90).asArray());
-//	  logger.addColumn("NUMBER_OF_POINTS", profileAggregate.getNumberOfPoints().asArray());
-//	  logger.export(filename);
-//  }
-
-  // this is for the mapping of image to path for 
-  // identifying FISHed nuclei in prefish images
-//  public void exportImagePaths(String filename){
-//	Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-//	logger.addColumn("PATH",     this.getCleanNucleusPaths());
-//	logger.addColumn("POSITION", this.getPositions());
-//	logger.export(filename);
-//  }
-
-//  public void exportNuclearStats(String filename){
-//	  
-//	Logger nuclearStats = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-//	nuclearStats.addColumn("AREA",                       this.getAreas());
-//	nuclearStats.addColumn("PERIMETER",                  this.getPerimeters());
-//	nuclearStats.addColumn("FERET",                      this.getFerets());
-//	nuclearStats.addColumn("PATH_LENGTH",                this.getPathLengths());
-//	nuclearStats.addColumn("MEDIAN_DIST_BETWEEN_POINTS", this.getMedianDistanceBetweenPoints());
-//	nuclearStats.addColumn("MIN_FERET",                  this.getMinFerets());
-//	nuclearStats.addColumn("NORM_TAIL_INDEX",            this.getPointIndexes("tail"));
-//	nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       this.getDifferencesToMedianFromPoint("tail"));
-//	nuclearStats.addColumn("PATH",                       this.getNucleusPaths());
-//	nuclearStats.export(filename+"."+getType());
-//  }
-
   public void exportFilterStats(){
 
     double medianArea = this.getMedianNuclearArea();
@@ -702,79 +627,79 @@ implements INuclearCollection
     IJ.append("    Feret length: "+(int)medianFeretLength+"\r\n",  this.getDebugFile().getAbsolutePath());
   }
 
-  public void exportCompositeImage(String filename){
-
-    // foreach nucleus
-    // createProcessor (500, 500)
-    // sertBackgroundValue(0)
-    // paste in old image at centre
-    // insert(ImageProcessor ip, int xloc, int yloc)
-    // rotate about CoM (new position)
-    // display.
-    if(this.getNucleusCount()==0){
-      return;
-    }
-    IJ.log("    Creating composite image...");
-    
-
-    int totalWidth = 0;
-    int totalHeight = 0;
-
-    int boxWidth  = (int)(this.getMedianNuclearPerimeter()/1.4);
-    int boxHeight = (int)(this.getMedianNuclearPerimeter()/1.2);
-
-    int maxBoxWidth = boxWidth * 5;
-    int maxBoxHeight = (boxHeight * (int)(Math.ceil(this.getNucleusCount()/5)) + boxHeight );
-
-    ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
-    ImageProcessor finalProcessor = finalImage.getProcessor();
-    finalProcessor.setBackgroundValue(0);
-
-    for(int i=0; i<this.getNucleusCount();i++){
-      
-      INuclearFunctions n = this.getNucleus(i);
-      String path = n.getAnnotatedImagePath();
-
-      try {
-        Opener localOpener = new Opener();
-        ImagePlus image = localOpener.openImage(path);
-        ImageProcessor ip = image.getProcessor();
-//        int width  = ip.getWidth();
-//        int height = ip.getHeight();
-        ip.setRoi(n.getRoi());
-
-
-        ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
-
-        newProcessor.setBackgroundValue(0);
-        newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
-        newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
-        // newProcessor.rotate( n.findRotationAngle() );
-        newProcessor.setBackgroundValue(0);
-
-        if(totalWidth>maxBoxWidth-boxWidth){
-          totalWidth=0;
-          totalHeight+=(int)(boxHeight);
-        }
-        int newX = totalWidth;
-        int newY = totalHeight;
-        totalWidth+=(int)(boxWidth);
-        
-        finalProcessor.insert(newProcessor, newX, newY);
-        TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
-        Overlay overlay = new Overlay(label);
-        finalProcessor.drawOverlay(overlay);  
-      } catch(Exception e){
-        IJ.log("    Error adding image to composite");
-        IJ.append("Error adding image to composite: "+e, this.getDebugFile().getAbsolutePath());
-        IJ.append("  "+getType(), this.getDebugFile().getAbsolutePath());
-        IJ.append("  "+path, this.getDebugFile().getAbsolutePath());
-      }     
-    }
-    // finalImage.show();
-    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".tiff");
-    IJ.log("    Composite image created");
-  }
+//  public void exportCompositeImage(String filename){
+//
+//    // foreach nucleus
+//    // createProcessor (500, 500)
+//    // sertBackgroundValue(0)
+//    // paste in old image at centre
+//    // insert(ImageProcessor ip, int xloc, int yloc)
+//    // rotate about CoM (new position)
+//    // display.
+//    if(this.getNucleusCount()==0){
+//      return;
+//    }
+//    IJ.log("    Creating composite image...");
+//    
+//
+//    int totalWidth = 0;
+//    int totalHeight = 0;
+//
+//    int boxWidth  = (int)(this.getMedianNuclearPerimeter()/1.4);
+//    int boxHeight = (int)(this.getMedianNuclearPerimeter()/1.2);
+//
+//    int maxBoxWidth = boxWidth * 5;
+//    int maxBoxHeight = (boxHeight * (int)(Math.ceil(this.getNucleusCount()/5)) + boxHeight );
+//
+//    ImagePlus finalImage = new ImagePlus("Final image", new BufferedImage(maxBoxWidth, maxBoxHeight, BufferedImage.TYPE_INT_RGB));
+//    ImageProcessor finalProcessor = finalImage.getProcessor();
+//    finalProcessor.setBackgroundValue(0);
+//
+//    for(int i=0; i<this.getNucleusCount();i++){
+//      
+//      INuclearFunctions n = this.getNucleus(i);
+//      String path = n.getAnnotatedImagePath();
+//
+//      try {
+//        Opener localOpener = new Opener();
+//        ImagePlus image = localOpener.openImage(path);
+//        ImageProcessor ip = image.getProcessor();
+////        int width  = ip.getWidth();
+////        int height = ip.getHeight();
+//        ip.setRoi(n.getRoi());
+//
+//
+//        ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);
+//
+//        newProcessor.setBackgroundValue(0);
+//        newProcessor.insert(ip, (int)boxWidth/4, (int)boxWidth/4); // put the original halfway in
+//        newProcessor.setInterpolationMethod(ImageProcessor.BICUBIC);
+//        // newProcessor.rotate( n.findRotationAngle() );
+//        newProcessor.setBackgroundValue(0);
+//
+//        if(totalWidth>maxBoxWidth-boxWidth){
+//          totalWidth=0;
+//          totalHeight+=(int)(boxHeight);
+//        }
+//        int newX = totalWidth;
+//        int newY = totalHeight;
+//        totalWidth+=(int)(boxWidth);
+//        
+//        finalProcessor.insert(newProcessor, newX, newY);
+//        TextRoi label = new TextRoi(newX, newY, n.getImageName()+"-"+n.getNucleusNumber());
+//        Overlay overlay = new Overlay(label);
+//        finalProcessor.drawOverlay(overlay);  
+//      } catch(Exception e){
+//        IJ.log("    Error adding image to composite");
+//        IJ.append("Error adding image to composite: "+e, this.getDebugFile().getAbsolutePath());
+//        IJ.append("  "+getType(), this.getDebugFile().getAbsolutePath());
+//        IJ.append("  "+path, this.getDebugFile().getAbsolutePath());
+//      }     
+//    }
+//    // finalImage.show();
+//    IJ.saveAsTiff(finalImage, this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".tiff");
+//    IJ.log("    Composite image created");
+//  }
 
   /*
     Draw the charts of the profiles of the nuclei within this collecion.

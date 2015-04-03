@@ -158,7 +158,7 @@ public interface INuclearCollection
 
 //	public void exportDistancesBetweenSingleSignals();
 
-	public void exportAnnotatedNuclei();
+//	public void exportAnnotatedNuclei();
 
 //	public void exportMediansOfProfile(Profile profile, String filename);
 
@@ -172,7 +172,7 @@ public interface INuclearCollection
 
 	public void exportFilterStats();
 
-	public void exportCompositeImage(String filename);
+//	public void exportCompositeImage(String filename);
 	
 	/*
 		Draw the charts of the profiles of the nuclei within this collecion.
