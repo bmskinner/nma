@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.*;
 
+import no.analysis.PopulationProfiler;
 import no.collections.INuclearCollection;
 import no.nuclei.*;
 import no.components.*;
@@ -92,40 +93,9 @@ implements INuclearCollection
     this.exportAnnotatedNuclei();
     this.exportCompositeImage("composite");
   }
-
-  public void measureProfilePositions(){
-    this.measureProfilePositions(DEFAULT_REFERENCE_POINT);
-  }
-
-  public void measureProfilePositions(String pointType){
-
-	  	// create an initial profile aggregate from the estimated points
-	  this.createProfileAggregateFromPoint(pointType);
-
-	  // use the median profile of this aggregate to find the tail point
-	  this.findTailIndexInMedianCurve();
-
-	  // carry out iterative offsetting to refine the tail point estimate
-	  double score = this.compareProfilesToMedian(pointType);
-	  double prevScore = score+1;
-	  while(score < prevScore){
-		  this.createProfileAggregateFromPoint(pointType);
-		  this.findTailIndexInMedianCurve();
-		  this.calculateOffsets();
-
-		  prevScore = score;
-		  score = this.compareProfilesToMedian(pointType);
-
-		  IJ.log("    Reticulating splines: score: "+(int)score);
-	  }
-
-	  // get the profile plots created
-	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
-
-  }
   
   public void exportProfiles(){
-	  this.createProfileAggregates();
+	  PopulationProfiler.createProfileAggregates(this);
 
 	  // export the profiles
 	  this.drawProfilePlots();
@@ -625,40 +595,6 @@ implements INuclearCollection
     Profile functions
     -----------------
   */
-
-  protected void createProfileAggregateFromPoint(String pointType){
-
-	  ProfileAggregate profileAggregate = new ProfileAggregate((int)this.getMedianArrayLength());
-	  this.profileCollection.addAggregate(pointType, profileAggregate);
-
-	  for(INuclearFunctions n : this.getNuclei()){
-		  profileAggregate.addValues(n.getAngleProfile(pointType));
-	  }
-
-	  Profile medians = profileAggregate.getMedian();
-	  Profile q25     = profileAggregate.getQuartile(25);
-	  Profile q75     = profileAggregate.getQuartile(75);
-	  this.profileCollection.addProfile(pointType, medians);
-	  this.profileCollection.addProfile(pointType+"25", q25);
-	  this.profileCollection.addProfile(pointType+"75", q75);
-
-  }
-
-  public void createProfileAggregates(){
-	  try{
-		  for( String pointType : this.profileCollection.getProfileKeys() ){
-//			  for(int i=0;i<this.getNucleusCount();i++){
-//				  INuclearFunctions n = this.getNucleus(i);
-//				  ProfileAggregate profileAggregate = this.profileCollection.getAggregate(pointType);
-//				  profileAggregate.addValues(n.getAngleProfile(pointType));
-//			  }
-			  this.createProfileAggregateFromPoint(pointType);   
-		  }
-	  } catch(Exception e){
-		  IJ.log("Error creating profile aggregates: "+e.getMessage());
-		  this.profileCollection.printKeys();
-	  }
-  }
 
   public INuclearFunctions getNucleusMostSimilarToMedian(String pointType){
     

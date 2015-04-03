@@ -57,7 +57,7 @@ public class PopulationProfiler {
 
 	}
 
-	private static void createProfileAggregates(INuclearCollection collection){
+	public static void createProfileAggregates(INuclearCollection collection){
 		try{
 			for( String pointType : collection.getProfileCollection().getProfileKeys() ){
 				createProfileAggregateFromPoint(collection, pointType);   

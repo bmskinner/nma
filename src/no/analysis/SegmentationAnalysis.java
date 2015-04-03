@@ -24,7 +24,7 @@ public class SegmentationAnalysis {
 			exportSegments(collection, pointType);
 			makeClusteringScript(collection);
 
-			collection.createProfileAggregates();
+			PopulationProfiler.createProfileAggregates(collection);
 		} catch(Exception e){
 			IJ.log("    Error segmenting: "+e.getMessage());
 			collection.getProfileCollection().printKeys();

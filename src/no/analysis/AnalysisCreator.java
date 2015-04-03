@@ -470,69 +470,18 @@ public class AnalysisCreator {
         IJ.log("    ----------------------------- ");
         IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
         IJ.log("    ----------------------------- ");
-        p.measureProfilePositions();
+        
+        PopulationProfiler.run(p);
+//        p.measureProfilePositions();
+        p.exportProfiles();
         p.measureNuclearOrganisation();
+        ShellAnalysis.run(p, 5);
         p.exportStatsFiles();
         p.annotateAndExportNuclei();
-        attemptRefoldingConsensusNucleus(p);
+        CurveRefolder.run(p, nucleusClass, refoldMode);
       }
       collectionNucleusCounts.put(folder, nucleusCounts);
     }
-  }
-
-  public void attemptRefoldingConsensusNucleus(INuclearCollection collection){
-
-    try{ 
-
-      // make an entirely new nucleus to play with
-      INuclearFunctions n = (INuclearFunctions)collection.getNucleusMostSimilarToMedian("tail");
-      Constructor<?> nucleusConstructor = this.nucleusClass.getConstructor(new Class[]{Nucleus.class});
-      INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
-    
-      if(refoldCandidate==null){
-        throw new Exception("Null reference to nucleus refold candidate");
-      }
-
-      IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
-      IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
-
-      Profile targetProfile = collection.getProfileCollection().getProfile("tail");
-      Profile q25 = collection.getProfileCollection().getProfile("tail25");
-      Profile q75 = collection.getProfileCollection().getProfile("tail75");
-
-      if(targetProfile==null){
-        throw new Exception("Null reference to target profile");
-      }
-      if(q25==null || q75==null){
-        throw new Exception("Null reference to q25 or q75 profile");
-      }
-
-      CurveRefolder refolder = new CurveRefolder(targetProfile, q25, q75, refoldCandidate);
-      refolder.setMode(refoldMode);
-      refolder.refoldCurve();
-
-      // orient refolded nucleus to put tail at the bottom
-      refolder.putPointAtBottom(refoldCandidate.getBorderTag("tail"));
-
-      // if rodent sperm, put tip on left if needed
-      if(refoldCandidate.getClass().equals(nucleusClassTypes.get(RODENT_SPERM_NUCLEUS))){
-        // IJ.log("    Rodent nucleus found");
-        if(refoldCandidate.getBorderTag("tip").getX()>0){
-          // IJ.log("    Flipping nucleus");
-          refoldCandidate.flipXAroundPoint(refoldCandidate.getCentreOfMass());
-        }
-      }
-
-      refolder.plotNucleus();
-
-      // draw signals on the refolded nucleus
-      refolder.addSignalsToConsensus(collection);
-      refolder.exportImage(collection);
-      refolder.exportProfileOfRefoldedImage(collection);
-
-    } catch(Exception e){
-      IJ.log("    Unable to refold nucleus: "+e.getMessage());
-    } 
   }
 
   /*

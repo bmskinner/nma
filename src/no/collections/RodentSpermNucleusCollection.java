@@ -37,10 +37,10 @@ public class RodentSpermNucleusCollection
     
   }
 
-  @Override
-  public void measureProfilePositions(){
-    this.measureProfilePositions("tip");
-  }
+//  @Override
+//  public void measureProfilePositions(){
+//    this.measureProfilePositions("tip");
+//  }
   
   @Override
   public String getReferencePoint(){

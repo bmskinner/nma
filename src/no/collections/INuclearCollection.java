@@ -26,7 +26,7 @@ public interface INuclearCollection
 
 	public void annotateAndExportNuclei();
 
-	public void measureProfilePositions();
+//	public void measureProfilePositions();
 
 	/**
 	 * Find the Nucleus with a profile most closely matching the median 
@@ -129,7 +129,7 @@ public interface INuclearCollection
 
 //	protected void createProfileAggregateFromPoint(String pointType);
 
-	public void createProfileAggregates();
+//	public void createProfileAggregates();
 
 	/*
 		-----------------

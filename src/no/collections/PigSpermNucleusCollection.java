@@ -27,10 +27,10 @@ public class PigSpermNucleusCollection
     
   }
 
-  @Override
-  public void measureProfilePositions(){
-    this.measureProfilePositions("head");
-  }
+//  @Override
+//  public void measureProfilePositions(){
+//    this.measureProfilePositions("head");
+//  }
 
   /*
     -----------------------
