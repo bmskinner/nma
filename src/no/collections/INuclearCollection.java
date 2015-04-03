@@ -5,6 +5,7 @@ import no.nuclei.INuclearFunctions;
 import java.io.File;
 import java.util.List;
 
+import no.components.NuclearSignal;
 import no.components.Profile;
 import no.components.ProfileAggregate;
 import no.components.ProfileCollection;
@@ -137,7 +138,7 @@ public interface INuclearCollection
 		-----------------
 	*/
 
-	public void measureNuclearOrganisation();
+//	public void measureNuclearOrganisation();
 
 	/*
 		-----------------
@@ -149,11 +150,11 @@ public interface INuclearCollection
 	/*
 		Export the signal parameters of the nucleus to the designated log file
 	*/
-	public void exportSignalStats();
+//	public void exportSignalStats();
 
 	public void exportAngleProfiles();
 
-	public void exportDistancesBetweenSingleSignals();
+//	public void exportDistancesBetweenSingleSignals();
 
 	public void exportAnnotatedNuclei();
 
@@ -178,7 +179,7 @@ public interface INuclearCollection
 
 	public void drawBoxplots();
 
-	public void addSignalsToProfileCharts();
+//	public void addSignalsToProfileCharts();
 
 	public ProfileCollection getProfileCollection();
 	
@@ -189,5 +190,7 @@ public interface INuclearCollection
 	public void calculateOffsets();
 	
 	public int getSignalCount();
+	
+	public List<NuclearSignal> getSignals(int channel);
 
 }

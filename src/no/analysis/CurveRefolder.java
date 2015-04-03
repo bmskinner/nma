@@ -541,10 +541,11 @@ public class CurveRefolder{
 			cal.pixelWidth = 1;
 			cal.pixelHeight = 1;
 
+			int signalCount = 0;
 			for( int j : n.getSignalCollection().getChannels()){
 				List<NuclearSignal> signals = n.getSignalCollection().getSignals(j);
-				int signalCount = 0;
-				Color colour = signalCount==0 ? new Color(255,0,0,50) : new Color(0,255,0,50);
+				
+				Color colour = signalCount== 0 ? new Color(255,0,0,50) : new Color(0,255,0,50);
 
 				if(!signals.isEmpty()){
 

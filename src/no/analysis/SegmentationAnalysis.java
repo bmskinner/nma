@@ -29,7 +29,7 @@ public class SegmentationAnalysis {
 			IJ.log("    Error segmenting: "+e.getMessage());
 			collection.getProfileCollection().printKeys();
 		}
-		IJ.log("   Segmentation complete...");
+		IJ.log("    Segmentation complete...");
 	}
 
 	private static void assignSegments(INuclearCollection collection, String pointType){

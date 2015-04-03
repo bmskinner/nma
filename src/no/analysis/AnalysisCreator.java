@@ -436,8 +436,6 @@ public class AnalysisCreator {
       IJ.log("    ----------------------------- ");
       IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
       IJ.log("    ----------------------------- ");
-
-//      r.measureProfilePositions();
       
       // align profiles
       PopulationProfiler.run(r);
@@ -446,7 +444,8 @@ public class AnalysisCreator {
       SegmentationAnalysis.run(r, "tail");
       
       r.exportProfiles();
-      r.measureNuclearOrganisation();
+      SignalAnalysis.run(r);
+//      r.measureNuclearOrganisation();
       
       // Perform shell analysis
       ShellAnalysis.run(r, 5);
@@ -472,9 +471,10 @@ public class AnalysisCreator {
         IJ.log("    ----------------------------- ");
         
         PopulationProfiler.run(p);
+        SegmentationAnalysis.run(p, "tail");
 //        p.measureProfilePositions();
         p.exportProfiles();
-        p.measureNuclearOrganisation();
+        SignalAnalysis.run(p);
         ShellAnalysis.run(p, 5);
         p.exportStatsFiles();
         p.annotateAndExportNuclei();
