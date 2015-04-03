@@ -17,10 +17,12 @@ import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 import no.nuclei.INuclearFunctions;
 import no.nuclei.Nucleus;
+import no.nuclei.sperm.RodentSpermNucleus;
 import no.collections.INuclearCollection;
 import no.utility.*;
 import no.components.*;
@@ -55,6 +57,61 @@ public class CurveRefolder{
 	}
 
 	private double plotLimit;
+	
+	public static void run(INuclearCollection collection, Class<?> nucleusClass, String refoldMode){
+
+	    try{ 
+
+	      // make an entirely new nucleus to play with
+	      INuclearFunctions n = (INuclearFunctions)collection.getNucleusMostSimilarToMedian("tail");
+	      Constructor<?> nucleusConstructor = nucleusClass.getConstructor(new Class[]{Nucleus.class});
+	      INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
+	    
+	      if(refoldCandidate==null){
+	        throw new Exception("Null reference to nucleus refold candidate");
+	      }
+
+	      IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
+	      IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
+
+	      Profile targetProfile = collection.getProfileCollection().getProfile("tail");
+	      Profile q25 = collection.getProfileCollection().getProfile("tail25");
+	      Profile q75 = collection.getProfileCollection().getProfile("tail75");
+
+	      if(targetProfile==null){
+	        throw new Exception("Null reference to target profile");
+	      }
+	      if(q25==null || q75==null){
+	        throw new Exception("Null reference to q25 or q75 profile");
+	      }
+
+	      CurveRefolder refolder = new CurveRefolder(targetProfile, q25, q75, refoldCandidate);
+	      refolder.setMode(refoldMode);
+	      refolder.refoldCurve();
+
+	      // orient refolded nucleus to put tail at the bottom
+	      refolder.putPointAtBottom(refoldCandidate.getBorderTag("tail"));
+
+	      // if rodent sperm, put tip on left if needed
+	      if(refoldCandidate.getClass().equals(RodentSpermNucleus.class)){
+	        // IJ.log("    Rodent nucleus found");
+	        if(refoldCandidate.getBorderTag("tip").getX()>0){
+	          // IJ.log("    Flipping nucleus");
+	          refoldCandidate.flipXAroundPoint(refoldCandidate.getCentreOfMass());
+	        }
+	      }
+
+	      refolder.plotNucleus();
+
+	      // draw signals on the refolded nucleus
+	      refolder.addSignalsToConsensus(collection);
+	      refolder.exportImage(collection);
+	      refolder.exportProfileOfRefoldedImage(collection);
+
+	    } catch(Exception e){
+	      IJ.log("    Unable to refold nucleus: "+e.getMessage());
+	    } 
+	  }
 
 	public CurveRefolder(Profile target, Profile q25, Profile q75, INuclearFunctions n){
 		this.targetCurve = target;

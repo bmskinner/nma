@@ -458,7 +458,7 @@ public class AnalysisCreator {
       IJ.log("    Refolding nucleus"             );
       IJ.log("    ----------------------------- ");
 
-      this.attemptRefoldingConsensusNucleus(r);
+      CurveRefolder.run(r, nucleusClass, refoldMode);
 
     
       ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
