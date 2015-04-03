@@ -15,9 +15,8 @@ import no.export.Logger;
 import no.nuclei.INuclearFunctions;
 
 public class SegmentationAnalysis {
-
-	public SegmentationAnalysis(INuclearCollection collection, String pointType){
-
+	
+	public static void run(INuclearCollection collection, String pointType){
 		IJ.log("    Beginning segmentation...");
 		try{	
 			assignSegments(collection, pointType);
@@ -33,7 +32,7 @@ public class SegmentationAnalysis {
 		IJ.log("   Segmentation complete...");
 	}
 
-	private void assignSegments(INuclearCollection collection, String pointType){
+	private static void assignSegments(INuclearCollection collection, String pointType){
 		// get the segments within the median curve
 
 		collection.getProfileCollection().segmentProfiles();
@@ -66,7 +65,7 @@ public class SegmentationAnalysis {
 		}
 	}
 
-	private void reviseSegments(INuclearCollection collection, String pointType){
+	private static void reviseSegments(INuclearCollection collection, String pointType){
 		IJ.log("    Refining segment assignments...");
 
 		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(pointType);
@@ -78,7 +77,7 @@ public class SegmentationAnalysis {
 		SegmentFitter fitter = new SegmentFitter(collection.getProfileCollection().getProfile(pointType), segments);
 		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
-		IJ.log("    Fitting profile segments...");
+//		IJ.log("    Fitting profile segments...");
 		for(INuclearFunctions n : collection.getNuclei()){ 
 			fitter.fit(n);
 
@@ -88,11 +87,11 @@ public class SegmentationAnalysis {
 			frankensteinProfiles.getAggregate(pointType).addValues(recombinedProfile);
 			frankenProfiles.add(recombinedProfile);
 		}
-		IJ.log("    Created "+frankenProfiles.size()+" frankenprofiles");
+//		IJ.log("    Created "+frankenProfiles.size()+" frankenprofiles");
 		frankensteinProfiles.createProfileAggregateFromPoint(    pointType, (int) collection.getMedianArrayLength()    );
 		frankensteinProfiles.drawProfilePlots(pointType, frankenProfiles);
 		frankensteinProfiles.addMedianLinesToPlots();
-		IJ.log("    Created frankenmedian");
+//		IJ.log("    Created frankenmedian");
 
 		// get the regions with the highest variability within the population
 		List<Integer> variableIndexes = frankensteinProfiles.findMostVariableRegions(pointType);
@@ -101,13 +100,13 @@ public class SegmentationAnalysis {
 		// compare to 
 		// interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
 		// export clustering info
-		IJ.log("    Top variable indexes:");
+//		IJ.log("    Top variable indexes:");
 		Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolder());
 		logger.addColumnHeading("ID");
 		logger.addColumnHeading("AREA");
 		logger.addColumnHeading("PERIMETER");
 		for(int index : variableIndexes){
-			IJ.log("      Index "+index);
+//			IJ.log("      Index "+index);
 			// get the points in a window centred on the index
 			for(int i=0; i<21;i++){ // index plus 10 positions to either side
 				logger.addColumnHeading("IQR_INDEX_"+index+"_"+i);
@@ -145,7 +144,9 @@ public class SegmentationAnalysis {
 
 	}
 
-	private void exportSegments(INuclearCollection collection, String pointType){
+	private static void exportSegments(INuclearCollection collection, String pointType){
+		
+		IJ.log("    Exporting segments...");
 		// export the individual segment files for each nucleus
 		for(INuclearFunctions n : collection.getNuclei()){
 			n.exportSegments();
@@ -156,7 +157,7 @@ public class SegmentationAnalysis {
 		logger.addColumnHeading("PATH"    );
 		logger.addColumnHeading("POSITION");
 
-		IJ.log("    Exporting segments...");
+		
 		try{
 			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(pointType);
 			if(!segments.isEmpty()){
@@ -185,7 +186,7 @@ public class SegmentationAnalysis {
 		}
 	}
 
-	private void makeClusteringScript(INuclearCollection collection){
+	private static void makeClusteringScript(INuclearCollection collection){
 
 		StringBuilder outLine = new StringBuilder();
 

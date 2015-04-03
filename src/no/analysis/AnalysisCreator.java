@@ -437,12 +437,19 @@ public class AnalysisCreator {
       IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
       IJ.log("    ----------------------------- ");
 
-      r.measureProfilePositions();
+//      r.measureProfilePositions();
+      
+      // align profiles
+      PopulationProfiler.run(r);
+      
+      // segment profiles
+      SegmentationAnalysis.run(r, "tail");
+      
+      r.exportProfiles();
       r.measureNuclearOrganisation();
       
       // Perform shell analysis
-      ShellAnalysis shell = new ShellAnalysis();
-      shell.run(r);
+      ShellAnalysis.run(r, 5);
       
       r.exportStatsFiles();
       r.annotateAndExportNuclei();

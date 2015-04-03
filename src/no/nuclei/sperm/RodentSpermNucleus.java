@@ -266,51 +266,6 @@ public class RodentSpermNucleus
   }
 
   /*
-    Go through the deltas marked as consecutive blocks
-    Find the midpoints of each block
-    Return the point furthest from the tip
-  */
-  // public NucleusBorderPoint findTailFromDeltas(){
-
-  //   // get the midpoint of each block
-  //   ArrayList<NucleusBorderPoint> results = new ArrayList<NucleusBorderPoint>(0);
-  //   int maxIndex = 0;
-  
-  //   // remember that block 0 is not assigned; start from 1
-  //   try{
-  //     for(int i=1; i<this.getAngleProfile().getBlockCount();i++){
-
-  //       // number of points in each block
-  //       NucleusBorderPoint[] points = this.getAngleProfile().getBlockOfBorderPoints(i);
-  //       for(NucleusBorderPoint p : points){
-  //         if(p.isMidpoint()){ // will ignore any blocks without a midpoint established - <2 members
-  //           results.add(p);
-  //         }
-  //       }
-  //     }
-  //   } catch(Exception e){
-  //     IJ.log("    Error in finding midpoints: findTailFromDeltas(): "+e);
-  //   }
-    
-  //   NucleusBorderPoint tail = new NucleusBorderPoint(0,0);
-  //   try{
-  //     // go through the midpoints, get the max distance from tip
-  //     double maxLength = 0;
-      
-  //     for( NucleusBorderPoint p : results){
-  //       // NucleusBorderPoint p = (NucleusBorderPoint)o;
-  //       if(p.getLengthTo(this.getBorderPointOfInterest("tip")) > maxLength){
-  //         maxLength = p.getLengthTo(this.getBorderPointOfInterest("tip"));
-  //         tail = p;
-  //       }
-  //     }
-  //   } catch(Exception e){
-  //     IJ.log("    Error in finding lengths: findTailFromDeltas(): "+e);
-  //   }
-  //   return tail;
-  // }
-
-  /*
     -----------------------
     Methods for dividing the nucleus to hook
     and hump sides

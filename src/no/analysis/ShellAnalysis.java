@@ -13,31 +13,20 @@ import no.nuclei.INuclearFunctions;
 
 public class ShellAnalysis {
 	
-	private Map<Integer, ShellCounter> counters = new HashMap<Integer, ShellCounter>(0);
-	private int numberOfShells= 5;
-
-	public ShellAnalysis(){
-
-	}
-	
-	/**
-	 * Set the number of shells to divide a nucleus into.
-	 * The default is 5
-	 * @param shells the number of shells
-	 */
-	public void setNumberOfShell(int shells){
-		this.numberOfShells = shells;
-	}
-	
+	private static Map<Integer, ShellCounter> counters = new HashMap<Integer, ShellCounter>(0);
+		
 	/**
 	 * Perform shell analysis on the given collection
 	 * @param collection the collection of nuclei to analyse
+	 * @param shells the number of shells per nucleus
 	 */
-	public void run(INuclearCollection collection){
+	public static void run(INuclearCollection collection, int shells){
 		IJ.log("    Performing shell analysis...");
+		
+		counters = new HashMap<Integer, ShellCounter>(0);
 
 		for(int channel : collection.getSignalChannels()){
-			counters.put(channel, new ShellCounter(this.numberOfShells));
+			counters.put(channel, new ShellCounter(shells));
 		}
 
 		// make the shells and measure the values

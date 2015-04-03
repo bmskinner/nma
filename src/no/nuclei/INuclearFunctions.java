@@ -277,4 +277,5 @@ public interface INuclearFunctions
   public Set<Integer> getSignalChannels();
   public Map<String, Integer> getBorderTags();
   public void addSegment(NucleusBorderSegment n);
+  public void reverse();
 }

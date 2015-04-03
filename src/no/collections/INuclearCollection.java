@@ -18,6 +18,7 @@ public interface INuclearCollection
 	public static final int CHART_TAIL_BOX_Y_MAX    = 355;
 	public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
 	public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
+	public String DEFAULT_REFERENCE_POINT = null;
 
 	public void addNucleus(INuclearFunctions r);
 
@@ -41,6 +42,8 @@ public interface INuclearCollection
 		Getters for aggregate stats
 		-----------------------
 	*/
+	
+	public String getReferencePoint();
 
 	public File getFolder();
 	
@@ -178,5 +181,11 @@ public interface INuclearCollection
 	public void addSignalsToProfileCharts();
 
 	public ProfileCollection getProfileCollection();
+	
+	public void exportProfiles();
+	
+	public void findTailIndexInMedianCurve();
+	
+	public void calculateOffsets();
 
 }

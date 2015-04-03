@@ -267,7 +267,7 @@ public class ProfileCollection {
 		List<Integer> result = new ArrayList<Integer>(0);
 		for(int i : values.keySet()){
 			result.add(values.get(i));
-			IJ.log("    Variable index "+values.get(i));
+//			IJ.log("    Variable index "+values.get(i));
 		}
 		
 		// draw the IQR - only needed during debugging. Can be removed later.

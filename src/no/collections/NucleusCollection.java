@@ -21,10 +21,6 @@ import java.io.File;
 import java.util.*;
 
 import no.collections.INuclearCollection;
-import no.analysis.ProfileSegmenter;
-import no.analysis.SegmentFitter;
-import no.analysis.ShellCreator;
-import no.analysis.ShellCounter;
 import no.nuclei.*;
 import no.components.*;
 import no.export.Logger;
@@ -41,14 +37,6 @@ implements INuclearCollection
 	private File debugFile;
 	private String collectionType; // for annotating image names
 
-//	public static final int CHART_WINDOW_HEIGHT     = 400;
-//	public static final int CHART_WINDOW_WIDTH      = 500;
-//	public static final int CHART_TAIL_BOX_Y_MIN    = 325;
-//	public static final int CHART_TAIL_BOX_Y_MID    = 340;
-//	public static final int CHART_TAIL_BOX_Y_MAX    = 355;
-//	public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-//	public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
-
 	public static final int FAILURE_THRESHOLD = 1;
 	public static final int FAILURE_FERET     = 2;
 	public static final int FAILURE_ARRAY     = 4;
@@ -56,6 +44,8 @@ implements INuclearCollection
 	public static final int FAILURE_PERIM     = 16;
 	public static final int FAILURE_OTHER     = 32;
 	public static final int FAILURE_SIGNALS   = 64;
+	
+	private final  String DEFAULT_REFERENCE_POINT = "head";
 
 	private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
 	private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
@@ -104,7 +94,7 @@ implements INuclearCollection
   }
 
   public void measureProfilePositions(){
-    this.measureProfilePositions("head");
+    this.measureProfilePositions(DEFAULT_REFERENCE_POINT);
   }
 
   public void measureProfilePositions(String pointType){
@@ -131,11 +121,10 @@ implements INuclearCollection
 
 	  // get the profile plots created
 	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
-	  
-	  // assign and revise segments
-	  IJ.log("    Segmenting profile...");
-	  this.assignSegments(pointType);
 
+  }
+  
+  public void exportProfiles(){
 	  this.createProfileAggregates();
 
 	  // export the profiles
@@ -149,214 +138,29 @@ implements INuclearCollection
 
   public void calculateOffsets(){
 
-	  Profile medianToCompare = this.profileCollection.getProfile("head"); // returns a median profile with head at 0
+	  Profile medianToCompare = this.profileCollection.getProfile(DEFAULT_REFERENCE_POINT); // returns a median profile with head at 0
 
 	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 		  Nucleus n = (Nucleus)this.getNucleus(i);
 
 		  // returns the positive offset index of this profile which best matches the median profile
 		  int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-		  n.addBorderTag("head", newHeadIndex);
+		  n.addBorderTag(DEFAULT_REFERENCE_POINT, newHeadIndex);
 
 		  // check if flipping the profile will help
 
-		  double differenceToMedian1 = n.getAngleProfile("head").differenceToProfile(medianToCompare);
+		  double differenceToMedian1 = n.getAngleProfile(DEFAULT_REFERENCE_POINT).differenceToProfile(medianToCompare);
 		  n.reverse();
-		  double differenceToMedian2 = n.getAngleProfile("head").differenceToProfile(medianToCompare);
+		  double differenceToMedian2 = n.getAngleProfile(DEFAULT_REFERENCE_POINT).differenceToProfile(medianToCompare);
 
 		  if(differenceToMedian1<differenceToMedian2){
 			  n.reverse(); // put it back if no better
 		  }
 
-		  //      int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-		  //      n.addBorderTag("head", newHeadIndex);
-
 		  // also update the tail position
 		  int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
 		  n.addBorderTag("tail", tailIndex);
 	  }
-  }
-  
-  public void assignSegments(String pointType){
-	  // get the segments within the median curve
-	  try{		  
-		  this.profileCollection.segmentProfiles();
-		  
-		  IJ.log("    Assigning segments to nuclei...");
-		  
-		  // find the corresponding point in each Nucleus
-		  Profile medianToCompare = this.profileCollection.getProfile(pointType);
-		  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-			  Nucleus n = (Nucleus)this.getNucleus(i);
-			  n.clearSegments();
-
-			  int j=0;
-			  for(NucleusBorderSegment b : this.profileCollection.getSegments(pointType)){
-				  int startIndexInMedian = b.getStartIndex();
-				  int endIndexInMedian = b.getEndIndex();
-				  
-				  Profile startOffsetMedian = medianToCompare.offset(startIndexInMedian);
-				  Profile endOffsetMedian = medianToCompare.offset(endIndexInMedian);
-
-				  int startIndex = n.getAngleProfile().getSlidingWindowOffset(startOffsetMedian);
-				  int endIndex = n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
-
-				  NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex);
-				  seg.setSegmentType("Seg_"+j);
-				  n.addSegment(seg);
-				  n.addSegmentTag("Seg_"+j, j);
-				  j++;
-			  }
-		  }
-		  
-		  this.reviseSegments(pointType);
-		  this.exportSegments(pointType);
-
-	  } catch(Exception e){
-		  IJ.log("    Error segmenting: "+e.getMessage());
-		  this.profileCollection.printKeys();
-	  }
-  }
-  
-  public void reviseSegments(String pointType){
-	  IJ.log("    Refining segment assignments...");
-	  
-	  List<NucleusBorderSegment> segments = this.profileCollection.getSegments(pointType);
-	 
-	  this.frankensteinProfiles.addAggregate( pointType, new ProfileAggregate((int)this.getMedianArrayLength()));
-	  this.frankensteinProfiles.addSegments(pointType, segments);
-	  this.frankensteinProfiles.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, getMaxProfileLength());
-	  SegmentFitter fitter = new SegmentFitter(this.profileCollection.getProfile(pointType), segments);
-	  List<Profile> frankenProfiles = new ArrayList<Profile>(0);
-	  
-	  IJ.log("    Fitting profile segments...");
-	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-		  INuclearFunctions n = this.getNucleus(i);
-		  fitter.fit(n);
-		  
-		  // recombine the segments at the lengths of the median profile segments
-		  // what does it look like?
-		  Profile recombinedProfile = fitter.recombine(n);
-		  this.frankensteinProfiles.getAggregate(pointType).addValues(recombinedProfile);
-		  frankenProfiles.add(recombinedProfile);
-	  }
-	  IJ.log("    Created "+frankenProfiles.size()+" frankenprofiles");
-	  this.frankensteinProfiles.createProfileAggregateFromPoint(    pointType, (int) this.getMedianArrayLength()    );
-	  this.frankensteinProfiles.drawProfilePlots(pointType, frankenProfiles);
-	  this.frankensteinProfiles.addMedianLinesToPlots();
-	  IJ.log("    Created frankenmedian");
-	  
-	  // get the regions with the highest variability within the population
-	  List<Integer> variableIndexes = this.frankensteinProfiles.findMostVariableRegions(pointType);
-	  // these points are indexes in the frankenstein profile. Find the points in each nucleus profile that they
-	  // compare to 
-	  // interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
-	  // export clustering info
-	  IJ.log("    Top variable indexes:");
-	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-	  logger.addColumnHeading("ID");
-	  logger.addColumnHeading("AREA");
-	  logger.addColumnHeading("PERIMETER");
-	  for(int index : variableIndexes){
-		  IJ.log("      Index "+index);
-		  // get the points in a window centred on the index
-		  for(int i=0; i<21;i++){ // index plus 10 positions to either side
-			  logger.addColumnHeading("IQR_INDEX_"+index+"_"+i);
-		  }
-	  }
-	  
-	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
-//		  IJ.log("Nucleus "+i+" of "+this.getNucleusCount());
-		  INuclearFunctions n = this.getNucleus(i);
-		  logger.addRow("ID",		n.getPath()+"-"+n.getNucleusNumber());
-		  logger.addRow("AREA",		n.getArea());
-		  logger.addRow("PERIMETER",n.getPerimeter());
-		  Profile frankenProfile = frankenProfiles.get(i);
-		  Profile interpolatedProfile = frankenProfile.interpolate(this.frankensteinProfiles.getProfile(pointType).size());
-		  for(int index : variableIndexes){
-			  // get the points in a window centred on the index
-//			  IJ.log("Index "+index);
-			  Profile window = interpolatedProfile.getWindow(index, 10);
-			  for(int j=0; j<21;j++){ // index plus 10 positions to either side
-//				  IJ.log("  Poisiton "+j);
-				  logger.addRow("IQR_INDEX_"+index+"_"+j, window.get(j));
-			  }
-			  
-		  }
-		  
-	  }
-//	  IJ.log("    Added all rows");
-//	  logger.print();
-	  logger.export("log.variability_regions."+getType());
-//	  IJ.log("    Exported rows");
-	  this.frankensteinProfiles.exportProfilePlots(this.getFolder()+
-    	                      			        	File.separator+
-    					                            this.getOutputFolder(), this.getType());
-	  
-	  
-  }
-  
-  public void exportSegments(String pointType){
-	  // export the individual segment files for each nucleus
-	  for(INuclearFunctions n : this.getNuclei()){
-		  n.exportSegments();
-	  }
-
-	  // also export the group stats for each segment
-	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-	  logger.addColumnHeading("PATH"    );
-	  logger.addColumnHeading("POSITION");
-	  
-	  IJ.log("    Exporting segments...");
-	  try{
-		  List<NucleusBorderSegment> segments = this.profileCollection.getSegments(pointType);
-		  if(!segments.isEmpty()){
-	
-			  for(NucleusBorderSegment seg : segments){
-				  logger.addColumnHeading(seg.getSegmentType());
-//				  IJ.log("    Heading made: "+seg.getSegmentType());
-			  }
-			  
-			  for(INuclearFunctions n : this.getNuclei()){
-				  
-				  logger.addRow("PATH", n.getPath());
-				  logger.addRow("POSITION", n.getPosition());
-	
-				  for(NucleusBorderSegment seg : segments){
-					  NucleusBorderSegment nucSeg = n.getSegmentTag(seg.getSegmentType());
-					  // export the segment length as a fraction of the total array length
-					  logger.addRow(seg.getSegmentType(),   (double)nucSeg.length(n.getLength())/(double)n.getLength()      );
-				  }
-			  }
-			  logger.export("log.segments."+getType());
-			  IJ.log("    Segments exported");
-			  makeClusteringScript();
-		  }
-	  }catch(Exception e){
-		  IJ.log("    Error exporting segments: "+e.getMessage());
-	  }
-  }
-  
-  private void makeClusteringScript(){
-	  
-	  StringBuilder outLine = new StringBuilder();
-	  
-	  String path = this.getFolder().getAbsolutePath()+File.separator+this.getOutputFolder()+File.separator;
-	  path = path.replace("\\", "\\\\");// escape folder separator for R
-	  outLine.append("path = \""+path+"\"\r\n"); 
-	  
-	  outLine.append("nuclei = read.csv(paste(path,\"log.segments.analysable.txt\", sep=\"\"),header=T, sep=\"\\t\")\r\n");
-	  outLine.append("d <- dist(as.matrix(nuclei))\r\n");
-	  outLine.append("hc <- hclust(d, method=\"ward.D2\")\r\n");
-	  outLine.append("ct <- cutree(hc, k=5)\r\n");
-	  outLine.append("nuclei <- cbind(ct, nuclei , deparse.level=1)\r\n");
-	  outLine.append("tt <- table(nuclei $ct)\r\n");
-	  outLine.append("for (i in 1:dim(tt)) {\r\n");
-	  outLine.append("\tsub <- subset(nuclei , ct==i)\r\n");
-	  outLine.append("\twrite.table(subset(sub, select=c(PATH, POSITION)), file=paste(path,\"mapping_cluster\",i,\".analysable.txt\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\r\n");
-	  outLine.append("}\r\n");
-	  
-	  IJ.append(outLine.toString(), path+"clusteringScript.r");
   }
 
   /*
@@ -364,6 +168,10 @@ implements INuclearCollection
     Getters for aggregate stats
     -----------------------
   */
+  
+  public String getReferencePoint(){
+	  return this.DEFAULT_REFERENCE_POINT;
+  }
   
   public ProfileCollection getProfileCollection(){
 	  return this.profileCollection;
@@ -811,8 +619,7 @@ implements INuclearCollection
 	  ProfileAggregate profileAggregate = new ProfileAggregate((int)this.getMedianArrayLength());
 	  this.profileCollection.addAggregate(pointType, profileAggregate);
 
-	  for(int i=0;i<this.getNucleusCount();i++){
-		  INuclearFunctions n = this.getNucleus(i);
+	  for(INuclearFunctions n : this.getNuclei()){
 		  profileAggregate.addValues(n.getAngleProfile(pointType));
 	  }
 

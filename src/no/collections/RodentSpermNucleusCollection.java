@@ -11,7 +11,9 @@
 package no.collections;
 
 import ij.IJ;
+
 import java.io.File;
+
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.components.*;
@@ -24,6 +26,8 @@ public class RodentSpermNucleusCollection
 
   // failure  codes
   public static final int FAILURE_TIP = 512;
+  
+  private final String DEFAULT_REFERENCE_POINT = "tip";
 
   public RodentSpermNucleusCollection(File folder, String outputFolder, String type){
       super(folder, outputFolder, type);
@@ -36,6 +40,11 @@ public class RodentSpermNucleusCollection
   @Override
   public void measureProfilePositions(){
     this.measureProfilePositions("tip");
+  }
+  
+  @Override
+  public String getReferencePoint(){
+	  return this.DEFAULT_REFERENCE_POINT;
   }
 
 
@@ -51,7 +60,7 @@ public class RodentSpermNucleusCollection
 	  // can't use regular tail detector, because it's based on NucleusBorderPoints
 	  // get minima in curve, then find the lowest minima / minima furthest from both ends
 
-	  Profile medianProfile = this.profileCollection.getProfile("tip");
+	  Profile medianProfile = this.profileCollection.getProfile(DEFAULT_REFERENCE_POINT);
 
 	  Profile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
 
@@ -75,7 +84,7 @@ public class RodentSpermNucleusCollection
 	  }
 	  Profile tailProfile = medianProfile.offset(tailIndex);
 	  this.profileCollection.addProfile("tail", tailProfile);
-	  this.profileCollection.addFeature("tip", new ProfileFeature("tail", tailIndex)); // set the tail-index in the tip normalised profile
+	  this.profileCollection.addFeature(DEFAULT_REFERENCE_POINT, new ProfileFeature("tail", tailIndex)); // set the tail-index in the tip normalised profile
   }
 
   /*
