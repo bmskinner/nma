@@ -56,15 +56,15 @@ public class AsymmetricNucleusCollection
   //   this.exportProfilePlots();
   // }
 
-  @Override
-  public void exportStatsFiles(){
-    super.exportStatsFiles();
-    this.exportClusteringProfiles("logClusters");
-
-    Profile normalisedMedian = this.profileCollection.getProfile("tail");
-    Profile interpolatedMedian = normalisedMedian.interpolate((int)this.getMedianNuclearPerimeter());
-    this.exportMediansOfProfile(interpolatedMedian, "logMediansPerimeterLength");
-  }
+//  @Override
+//  public void exportStatsFiles(){
+//    super.exportStatsFiles();
+//    this.exportClusteringProfiles("logClusters");
+//
+//    Profile normalisedMedian = this.profileCollection.getProfile("tail");
+//    Profile interpolatedMedian = normalisedMedian.interpolate((int)this.getMedianNuclearPerimeter());
+//    this.exportMediansOfProfile(interpolatedMedian, "logMediansPerimeterLength");
+//  }
 
   @Override
   public void annotateAndExportNuclei(){

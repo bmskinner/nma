@@ -14,16 +14,18 @@ import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.*;
+
 import no.components.Profile;
 import no.nuclei.*;
 import no.nuclei.sperm.*;
 import no.collections.*;
+import no.export.StatsExporter;
 import no.nuclei.INuclearFunctions;
 
 
@@ -444,13 +446,15 @@ public class AnalysisCreator {
       SegmentationAnalysis.run(r, "tail");
       
       r.exportProfiles();
+      
+      // measure general nuclear organisation
       SignalAnalysis.run(r);
-//      r.measureNuclearOrganisation();
       
       // Perform shell analysis
       ShellAnalysis.run(r, 5);
       
-      r.exportStatsFiles();
+      // export the stats files
+      StatsExporter.run(r);
       r.annotateAndExportNuclei();
 
       IJ.log("    ----------------------------- ");
@@ -459,7 +463,6 @@ public class AnalysisCreator {
 
       CurveRefolder.run(r, nucleusClass, refoldMode);
 
-    
       ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
       
       for(INuclearCollection p : signalPopulations){
@@ -472,11 +475,10 @@ public class AnalysisCreator {
         
         PopulationProfiler.run(p);
         SegmentationAnalysis.run(p, "tail");
-//        p.measureProfilePositions();
         p.exportProfiles();
         SignalAnalysis.run(p);
         ShellAnalysis.run(p, 5);
-        p.exportStatsFiles();
+        StatsExporter.run(p);
         p.annotateAndExportNuclei();
         CurveRefolder.run(p, nucleusClass, refoldMode);
       }

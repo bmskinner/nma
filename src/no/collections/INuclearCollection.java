@@ -23,7 +23,7 @@ public interface INuclearCollection
 
 	public void addNucleus(INuclearFunctions r);
 
-	public void exportStatsFiles();
+//	public void exportStatsFiles();
 
 	public void annotateAndExportNuclei();
 
@@ -59,6 +59,8 @@ public interface INuclearCollection
 	public double[] getAreas();
 
 	public double[] getFerets();
+	
+	public double[] getMinFerets();
 
 	public double[] getPathLengths();
 
@@ -152,21 +154,21 @@ public interface INuclearCollection
 	*/
 //	public void exportSignalStats();
 
-	public void exportAngleProfiles();
+//	public void exportAngleProfiles();
 
 //	public void exportDistancesBetweenSingleSignals();
 
 	public void exportAnnotatedNuclei();
 
-	public void exportMediansOfProfile(Profile profile, String filename);
+//	public void exportMediansOfProfile(Profile profile, String filename);
 
-	public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename);
+//	public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename);
 	
 	// this is for the mapping of image to path for 
 	// identifying FISHed nuclei in prefish images
-	public void exportImagePaths(String filename);
+//	public void exportImagePaths(String filename);
 
-	public void exportNuclearStats(String filename);
+//	public void exportNuclearStats(String filename);
 
 	public void exportFilterStats();
 

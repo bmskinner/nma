@@ -23,7 +23,6 @@ import no.analysis.PopulationProfiler;
 import no.collections.INuclearCollection;
 import no.nuclei.*;
 import no.components.*;
-import no.export.Logger;
 import no.utility.Stats;
 import no.utility.Utils;
 
@@ -78,11 +77,11 @@ implements INuclearCollection
 	  this.nucleiCollection.add(r);
   }
 
-  public void exportStatsFiles(){
-    this.exportNuclearStats("logStats");
-    this.exportImagePaths("logImagePaths");
-    this.exportAngleProfiles();
-  }
+//  public void exportStatsFiles(){
+//    this.exportNuclearStats("logStats");
+//    this.exportImagePaths("logImagePaths");
+//    this.exportAngleProfiles();
+//  }
 
   public void annotateAndExportNuclei(){
 	for(INuclearFunctions n : this.nucleiCollection){
@@ -634,59 +633,59 @@ implements INuclearCollection
     }
   }
 
-  public void exportAngleProfiles(){
-    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+//  public void exportAngleProfiles(){
+//    for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
+//
+//      INuclearFunctions n = this.getNucleus(i);
+//      n.exportAngleProfile();
+////      n.exportProfilePlotImage();
+//    }
+//  }
 
-      INuclearFunctions n = this.getNucleus(i);
-      n.exportAngleProfile();
-//      n.exportProfilePlotImage();
-    }
-  }
+//  public void exportMediansOfProfile(Profile profile, String filename){
+//
+//    Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+//    logger.addColumn("X_POSITION",   profile.getPositions(profile.size()).asArray());
+//    logger.addColumn("ANGLE_MEDIAN", profile.asArray());
+//    logger.export(filename+"."+getType());
+//  }
 
-  public void exportMediansOfProfile(Profile profile, String filename){
-
-    Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-    logger.addColumn("X_POSITION",   profile.getPositions(profile.size()).asArray());
-    logger.addColumn("ANGLE_MEDIAN", profile.asArray());
-    logger.export(filename+"."+getType());
-  }
-
-  public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename){
-
-	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-	  logger.addColumn("X_POSITION",       profileAggregate.getXPositions().asArray());
-	  logger.addColumn("ANGLE_MEDIAN",     profileAggregate.getMedian().asArray());
-	  logger.addColumn("Q25", 	 		   profileAggregate.getQuartile(25).asArray());
-	  logger.addColumn("Q75", 	 		   profileAggregate.getQuartile(75).asArray());
-	  logger.addColumn("Q10", 	 		   profileAggregate.getQuartile(10).asArray());
-	  logger.addColumn("Q90", 	 		   profileAggregate.getQuartile(90).asArray());
-	  logger.addColumn("NUMBER_OF_POINTS", profileAggregate.getNumberOfPoints().asArray());
-	  logger.export(filename);
-  }
+//  public void exportMediansAndQuartilesOfProfile(ProfileAggregate profileAggregate, String filename){
+//
+//	  Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+//	  logger.addColumn("X_POSITION",       profileAggregate.getXPositions().asArray());
+//	  logger.addColumn("ANGLE_MEDIAN",     profileAggregate.getMedian().asArray());
+//	  logger.addColumn("Q25", 	 		   profileAggregate.getQuartile(25).asArray());
+//	  logger.addColumn("Q75", 	 		   profileAggregate.getQuartile(75).asArray());
+//	  logger.addColumn("Q10", 	 		   profileAggregate.getQuartile(10).asArray());
+//	  logger.addColumn("Q90", 	 		   profileAggregate.getQuartile(90).asArray());
+//	  logger.addColumn("NUMBER_OF_POINTS", profileAggregate.getNumberOfPoints().asArray());
+//	  logger.export(filename);
+//  }
 
   // this is for the mapping of image to path for 
   // identifying FISHed nuclei in prefish images
-  public void exportImagePaths(String filename){
-	Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-	logger.addColumn("PATH",     this.getCleanNucleusPaths());
-	logger.addColumn("POSITION", this.getPositions());
-	logger.export(filename);
-  }
+//  public void exportImagePaths(String filename){
+//	Logger logger = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+//	logger.addColumn("PATH",     this.getCleanNucleusPaths());
+//	logger.addColumn("POSITION", this.getPositions());
+//	logger.export(filename);
+//  }
 
-  public void exportNuclearStats(String filename){
-	  
-	Logger nuclearStats = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
-	nuclearStats.addColumn("AREA",                       this.getAreas());
-	nuclearStats.addColumn("PERIMETER",                  this.getPerimeters());
-	nuclearStats.addColumn("FERET",                      this.getFerets());
-	nuclearStats.addColumn("PATH_LENGTH",                this.getPathLengths());
-	nuclearStats.addColumn("MEDIAN_DIST_BETWEEN_POINTS", this.getMedianDistanceBetweenPoints());
-	nuclearStats.addColumn("MIN_FERET",                  this.getMinFerets());
-	nuclearStats.addColumn("NORM_TAIL_INDEX",            this.getPointIndexes("tail"));
-	nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       this.getDifferencesToMedianFromPoint("tail"));
-	nuclearStats.addColumn("PATH",                       this.getNucleusPaths());
-	nuclearStats.export(filename+"."+getType());
-  }
+//  public void exportNuclearStats(String filename){
+//	  
+//	Logger nuclearStats = new Logger(this.getFolder()+File.separator+this.getOutputFolder());
+//	nuclearStats.addColumn("AREA",                       this.getAreas());
+//	nuclearStats.addColumn("PERIMETER",                  this.getPerimeters());
+//	nuclearStats.addColumn("FERET",                      this.getFerets());
+//	nuclearStats.addColumn("PATH_LENGTH",                this.getPathLengths());
+//	nuclearStats.addColumn("MEDIAN_DIST_BETWEEN_POINTS", this.getMedianDistanceBetweenPoints());
+//	nuclearStats.addColumn("MIN_FERET",                  this.getMinFerets());
+//	nuclearStats.addColumn("NORM_TAIL_INDEX",            this.getPointIndexes("tail"));
+//	nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       this.getDifferencesToMedianFromPoint("tail"));
+//	nuclearStats.addColumn("PATH",                       this.getNucleusPaths());
+//	nuclearStats.export(filename+"."+getType());
+//  }
 
   public void exportFilterStats(){
 
