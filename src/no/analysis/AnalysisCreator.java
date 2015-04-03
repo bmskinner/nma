@@ -26,7 +26,9 @@ import no.nuclei.sperm.*;
 import no.collections.*;
 import no.export.CompositeExporter;
 import no.export.StatsExporter;
+import no.gui.PopulationSplitWindow;
 import no.nuclei.INuclearFunctions;
+import no.utility.MappingFileParser;
 
 
 public class AnalysisCreator {
@@ -188,6 +190,18 @@ public class AnalysisCreator {
     this.assignNucleusTypes();
     this.analysePopulations();
     this.exportAnalysisLog();
+    
+    PopulationSplitWindow splitter = new PopulationSplitWindow();
+    if(splitter.getResult()){
+    	File f = splitter.addMappingFile();
+    	
+    	// import and parse the mapping file
+    	List<String> pathList = MappingFileParser.parse(f);
+    	
+    	// divide the population based on the mapping info
+    	
+    	// reanalyse / generate medians and consensus
+    }
     IJ.log("----------------------------- ");
     IJ.log("All done!"                     );
     IJ.log("----------------------------- ");
