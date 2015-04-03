@@ -368,33 +368,26 @@ implements INuclearCollection
     return Stats.max(this.getArrayLengths());
   }
 
-  public List<INuclearFunctions> getNucleiWithSignals(int channel){
+  /** 
+ * Return the nuclei that have signals in the given channel. If negative, this will give the nuclei
+ * that do NOT have signals in the given channel.
+ * @param channel the channel 
+ */
+public List<INuclearFunctions> getNucleiWithSignals(int channel){
     List<INuclearFunctions> result = new ArrayList<INuclearFunctions>(0);
 
     for(INuclearFunctions n : this.nucleiCollection){
 
-      switch (channel) {
-        case Nucleus.RED_CHANNEL:
-          if(n.hasRedSignal()){
-            result.add(n);
-          }
-          break;
-        case Nucleus.GREEN_CHANNEL:
-          if(n.hasGreenSignal()){
-            result.add(n);
-          }
-          break;
-        case Nucleus.NOT_RED_CHANNEL:  
-          if(!n.hasRedSignal()){
-              result.add(n);
-          }
-          break;
-        case Nucleus.NOT_GREEN_CHANNEL:  
-          if(!n.hasGreenSignal()){
-              result.add(n);
-          }
-          break;
-      }
+    	if(channel>0){
+    		if(n.hasSignal(channel)){
+    			result.add(n);
+    		}
+    	}
+    	if(channel<0){
+    		if(!n.hasSignal(Math.abs(channel))){
+    			result.add(n);
+    		}
+    	}
     }
     return result;
   }

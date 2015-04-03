@@ -221,13 +221,9 @@ public class AnalysisCreator {
   }
 
   /**
-   * Returns a HashMap<File, NucleusCollection> object. This 
-   * contains the nuclei found, keyed to the folder in which
-   * they were found. It filters the nuclei based on whether they
-   * are present in a list of previously captured images.
+   * Run an analysis of selected nuclei based on a mapping file
    *
    * @return      the nuclei in each folder analysed
-   * @see         NucleusCollection
    */
   public void runReAnalysis(){
     NucleusRefinder detector = new NucleusRefinder(this.folder, this.outputFolderName, nucleiToFind);
@@ -504,44 +500,28 @@ public class AnalysisCreator {
 
       Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
       
-      List<INuclearFunctions> redList = r.getNucleiWithSignals(Nucleus.RED_CHANNEL);
-      if(redList.size()>0){
-        // INuclearCollection redNuclei = new INuclearCollection(r.getFolder(), "red");
-        INuclearCollection redNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "red");
-        for(INuclearFunctions n : redList){
-          redNuclei.addNucleus( (INuclearFunctions)n );
-        }
-        signalPopulations.add(redNuclei);
-        List<INuclearFunctions> notRedList = r.getNucleiWithSignals(Nucleus.NOT_RED_CHANNEL);
-        if(notRedList.size()>0){
-          INuclearCollection notRedNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "not_red");
-          // INuclearCollection notRedNuclei = new INuclearCollection(r.getFolder(), "not_red");
-          for(INuclearFunctions n : notRedList){
-            notRedNuclei.addNucleus( (INuclearFunctions)n );
-          }
-          signalPopulations.add(notRedNuclei);
-        }
-      }
+      List<Integer> channels = r.getSignalChannels();
+      for(int channel : channels){
+    	  List<INuclearFunctions> list = r.getNucleiWithSignals(channel);
+    	  if(!list.isEmpty()){
+    		  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "Channel_"+channel);
+    		  for(INuclearFunctions n : list){
+    			  listCollection.addNucleus( n );
+    		  }
+    		  signalPopulations.add(listCollection);
 
-      List<INuclearFunctions> greenList = r.getNucleiWithSignals(Nucleus.GREEN_CHANNEL);
-      if(greenList.size()>0){
-        INuclearCollection greenNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "green");
-        // INuclearCollection greenNuclei = new INuclearCollection(r.getFolder(), "green");
-        for(INuclearFunctions n : greenList){
-          greenNuclei.addNucleus( (INuclearFunctions)n );
-        }
-        signalPopulations.add(greenNuclei);
-        List<INuclearFunctions> notGreenList = r.getNucleiWithSignals(Nucleus.NOT_GREEN_CHANNEL);
-        if(notGreenList.size()>0){
-          INuclearCollection notGreenNuclei = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "not_green");
-          // INuclearCollection notGreenNuclei = new INuclearCollection(r.getFolder(), "not_green");
-          for(INuclearFunctions n : notGreenList){
-            notGreenNuclei.addNucleus( (INuclearFunctions)n );
-          }
-          signalPopulations.add(notGreenNuclei);
-        }
-      }
+    		  List<INuclearFunctions> notList = r.getNucleiWithSignals(-channel);
+    		  if(!notList.isEmpty()){
+    			  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "Not_channel_"+channel);
+    			  for(INuclearFunctions n : notList){
+    				  notListCollection.addNucleus( n );
+    			  }
+    			  signalPopulations.add(notListCollection);
+    		  }
 
+    	  }
+      }
+      
     } catch(InstantiationException e){
       IJ.log("Cannot create collection: "+e.getMessage());
     } catch(IllegalAccessException e){

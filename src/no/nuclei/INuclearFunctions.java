@@ -88,6 +88,8 @@ public interface INuclearFunctions
 	public NucleusBorderPoint getBorderPoint(int i);
 
 	public int getFailureCode();
+	
+	public boolean hasSignal(int channel);
 
 	public boolean hasRedSignal();
 
