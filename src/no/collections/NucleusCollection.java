@@ -337,6 +337,18 @@ implements INuclearCollection
   }
   
   /**
+   * Find the total number of signals within all nuclei of the collection.
+   * @return the total
+   */
+  public int getSignalCount(){
+	  int count = 0;
+	  for(int i : this.getSignalChannels()){
+		  count+= this.getSignalCount(i);
+	  }
+	  return count;
+  }
+  
+  /**
    * Get the number of signals in the given channel
    * @param channel the channel to search
    * @return the count

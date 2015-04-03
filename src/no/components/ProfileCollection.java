@@ -467,9 +467,6 @@ public class ProfileCollection {
 
 			IJ.log("    Found "+segments.size()+" segments in "+pointType+" profile");
 			this.addSegments(pointType, segments);
-//			this.appendSegmentsToPlot(	this.getPlots(pointType).get("norm"), 
-//										this.getProfile(pointType),
-//										segments);
 		}
 	}
 	

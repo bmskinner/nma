@@ -63,6 +63,7 @@ public class ProfileSegmenter {
 	public List<NucleusBorderSegment> segment(){
 		Profile maxima = this.profile.smooth(2).getLocalMaxima(5);
 		Profile minima = this.profile.smooth(2).getLocalMinima(5);
+		Profile either = minima.add(maxima);
 		Profile deltas = this.profile.smooth(2).calculateDeltas(2); // minima and maxima should be near 0 
 		Profile dDeltas = deltas.smooth(2).calculateDeltas(2); // second differential
 		double dMax = dDeltas.getMax();
@@ -77,8 +78,14 @@ public class ProfileSegmenter {
 			segmentEnd = i;
 			segLength++;
 			
+			// when we get to the end of the profile, seglength must  be discounted, so we can wrap
+			// ditto for the beginning of the profile
+			if(i>profile.size()-ProfileSegmenter.MIN_SEGMENT_SIZE || i<ProfileSegmenter.MIN_SEGMENT_SIZE){
+				segLength = ProfileSegmenter.MIN_SEGMENT_SIZE;
+			}
+
 			// We want a minima or maxima, and the value must be distinct from its surroundings			
-			if( ( maxima.get(i)==1 || minima.get(i)==1 ) 
+			if( either.get(i)==1 
 					&& Math.abs(dDeltas.get(i)) > variationRange*0.02
 					&& segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// we've hit a new segment
@@ -90,9 +97,10 @@ public class ProfileSegmenter {
 				segCount++;
 			}
 		}
-		// join up segments at start and end of profile 
+		// join up segments at start and end of profile if needed
 		NucleusBorderSegment seg = segments.get(0);
-		seg.update(segmentStart, seg.getEndIndex()); // runs through 0
+		seg.update(segmentStart, seg.getEndIndex()); // merge the segments around 0	
+
 		return segments;
 	}
 	

@@ -539,6 +539,40 @@ public class Profile {
 	  }
 	  return new Profile(result);
   }
+  
+  /**
+   * Multiply all values within the profile by the value within the given Profile
+   * @param multiplier the profile to multiply by. Must be the same length as this profile
+   * @return the new profile
+   */
+  public Profile multiply(Profile multiplier){
+	  if(this.size()!=multiplier.size()){
+		  throw new IllegalArgumentException("Profile sizes do not match");
+	  }
+	  double[] result = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { // for each position in sperm
+		  result[i] = array[i] * multiplier.get(i);
+	  }
+	  return new Profile(result);
+  }
+  
+  /**
+   * Multiply all values within the profile by the value within the given Profile
+   * @param multiplier the profile to multiply by. Must be the same length as this profile
+   * @return the new profile
+   */
+  public Profile add(Profile adder){
+	  if(this.size()!=adder.size()){
+		  throw new IllegalArgumentException("Profile sizes do not match");
+	  }
+	  double[] result = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { // for each position in sperm
+		  result[i] = array[i] + adder.get(i);
+	  }
+	  return new Profile(result);
+  }
 
   // use for debugging
   public void print(){

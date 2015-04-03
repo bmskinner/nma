@@ -187,5 +187,7 @@ public interface INuclearCollection
 	public void findTailIndexInMedianCurve();
 	
 	public void calculateOffsets();
+	
+	public int getSignalCount();
 
 }

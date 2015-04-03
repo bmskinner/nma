@@ -21,6 +21,11 @@ public class ShellAnalysis {
 	 * @param shells the number of shells per nucleus
 	 */
 	public static void run(INuclearCollection collection, int shells){
+		
+		if(collection.getSignalCount()==0){
+			return; // only bother if there are signals
+		}
+		
 		IJ.log("    Performing shell analysis...");
 		
 		counters = new HashMap<Integer, ShellCounter>(0);
