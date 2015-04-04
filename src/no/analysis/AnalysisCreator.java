@@ -191,20 +191,67 @@ public class AnalysisCreator {
     this.analysePopulations();
     this.exportAnalysisLog();
     
-    PopulationSplitWindow splitter = new PopulationSplitWindow();
-    if(splitter.getResult()){
-    	File f = splitter.addMappingFile();
-    	
-    	// import and parse the mapping file
-    	List<String> pathList = MappingFileParser.parse(f);
-    	
-    	// divide the population based on the mapping info
-    	
-    	// reanalyse / generate medians and consensus
+    boolean ok = true;
+    // do as many post mappings as needed
+    while(ok){
+    	ok = this.postAnalysis();
     }
+    
+    
     IJ.log("----------------------------- ");
     IJ.log("All done!"                     );
     IJ.log("----------------------------- ");
+  }
+  
+  /**
+   * Following the main analysis, allow a mapping file to be applied
+   * to investigate a seubset of nuclei.
+   * @return true if another analysis is to be performed
+   */
+  private boolean postAnalysis(){
+	  PopulationSplitWindow splitter = new PopulationSplitWindow(this.nuclearPopulations);
+	  if(splitter.getResult()){
+
+		  try{
+			  File f = splitter.addMappingFile();
+			  INuclearCollection subjectCollection = splitter.getCollection();
+
+			  // import and parse the mapping file
+			  List<String> pathList = MappingFileParser.parse(f);
+
+			  // create a new collection to hold the nuclei
+			  Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
+			  INuclearCollection remapCollection = (INuclearCollection) collectionConstructor.newInstance(f, subjectCollection.getOutputFolder(), f.getName());
+
+			  // add nuclei to the new population based on the mapping info
+			  for(INuclearFunctions n : subjectCollection.getNuclei()){
+				  if(pathList.contains(n.getPath()+"\t"+n.getNucleusNumber())){  
+					  remapCollection.addNucleus(n);
+				  }
+			  }
+		  } catch(InstantiationException e){
+			  IJ.log("Cannot create collection: "+e.getMessage());
+		  } catch(IllegalAccessException e){
+			  IJ.log("Cannot access constructor: "+e.getMessage());
+		  } catch(InvocationTargetException e){
+			  IJ.log("Cannot invoke constructor: "+e.getMessage());
+		  } catch (NoSuchMethodException e) {
+			  // TODO Auto-generated catch block
+			  e.printStackTrace();
+		  } catch (SecurityException e) {
+			  // TODO Auto-generated catch block
+			  e.printStackTrace();
+		  }
+
+		  // reanalyse / generate medians and consensus
+		  // create median of the same length as the main population median
+		  // this allows the segments from the main population to be drawn directly
+		  // draw the main population segment pattern on the new median profile
+		  // make a consensus nucleus from the new median
+		  return true;
+	  }	else {
+		  return false;
+	  }
   }
 
   /*

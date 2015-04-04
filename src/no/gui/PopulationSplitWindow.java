@@ -1,7 +1,12 @@
 package no.gui;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
+import no.analysis.AnalysisCreator;
+import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
@@ -14,8 +19,10 @@ import ij.io.OpenDialog;
 public class PopulationSplitWindow {
 
 	private GenericDialog gd;
+	private List<INuclearCollection> collections = new ArrayList<INuclearCollection>(0);
 
-	public PopulationSplitWindow(){
+	public PopulationSplitWindow(List<INuclearCollection> collections){
+		this.collections = collections;
 		gd = new GenericDialog("Finish analysis?");
 		gd.enableYesNoCancel("Add mapping", "End analysis");
 		gd.hideCancelButton();
@@ -34,6 +41,28 @@ public class PopulationSplitWindow {
 			return false;
 		}
 		
+	}
+	
+	public INuclearCollection getCollection(){
+		gd = new GenericDialog("Select nuclear population");
+		
+		List<String> items = new ArrayList<String>(0);
+		for(INuclearCollection collection : this.collections){
+			items.add(collection.getType());
+		}
+		
+		String[] list = items.toArray(new String[0]);
+	    gd.addChoice("Population", list, list[0]);
+	    gd.showDialog();
+
+	    
+	    String collectionType = gd.getNextChoice();
+	    for(INuclearCollection collection : this.collections){
+			if(collection.getType().equals(collectionType)){
+				return collection;
+			}
+		}
+	    return new NucleusCollection();
 	}
 	
 	public File addMappingFile(){
