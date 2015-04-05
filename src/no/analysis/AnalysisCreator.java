@@ -221,14 +221,26 @@ public class AnalysisCreator {
 
 			  // create a new collection to hold the nuclei
 			  Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
-			  INuclearCollection remapCollection = (INuclearCollection) collectionConstructor.newInstance(f, subjectCollection.getOutputFolder(), f.getName());
+			  INuclearCollection remapCollection = (INuclearCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), subjectCollection.getOutputFolder(), f.getName());
 
 			  // add nuclei to the new population based on the mapping info
 			  for(INuclearFunctions n : subjectCollection.getNuclei()){
-				  if(pathList.contains(n.getPath()+"\t"+n.getNucleusNumber())){  
+				  if(pathList.contains(n.getPath()+"\t"+n.getNucleusNumber())){
+//					  IJ.log("    Adding nucleus: "+n.getImageName()+"-"+n.getNucleusNumber());
 					  remapCollection.addNucleus(n);
 				  }
 			  }
+
+
+			  // reanalyse / generate medians and consensus
+			  // create median of the same length as the main population median
+			  // ensure that no remapping of points or segmentation occurs.
+			  // this allows the segments from the main population to be drawn directly
+			  PopulationProfiler.reapplyProfiles(remapCollection, subjectCollection);
+			  // draw the main population segment pattern on the new median profile
+			  // make a consensus nucleus from the new median
+			  CurveRefolder.run(remapCollection, nucleusClass, refoldMode);
+
 		  } catch(InstantiationException e){
 			  IJ.log("Cannot create collection: "+e.getMessage());
 		  } catch(IllegalAccessException e){
@@ -242,12 +254,6 @@ public class AnalysisCreator {
 			  // TODO Auto-generated catch block
 			  e.printStackTrace();
 		  }
-
-		  // reanalyse / generate medians and consensus
-		  // create median of the same length as the main population median
-		  // this allows the segments from the main population to be drawn directly
-		  // draw the main population segment pattern on the new median profile
-		  // make a consensus nucleus from the new median
 		  return true;
 	  }	else {
 		  return false;

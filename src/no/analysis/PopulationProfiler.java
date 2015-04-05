@@ -1,6 +1,10 @@
 package no.analysis;
 
+import java.io.File;
+import java.util.List;
+
 import no.collections.INuclearCollection;
+import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileAggregate;
 import no.nuclei.INuclearFunctions;
@@ -36,6 +40,23 @@ public class PopulationProfiler {
 		// get the profile plots created
 		collection.getProfileCollection().preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
 
+	}
+	
+	/**
+	 * When a population needs to be reanalysed do not offset nuclei or recalculate best fits;
+	 * just get the new median profile 
+	 * @param collection the collection of nuclei
+	 */
+	public static void reapplyProfiles(INuclearCollection collection, INuclearCollection sourceCollection){
+		String pointType = collection.getReferencePoint();
+		createProfileAggregateFromPoint(collection, pointType);
+		createProfileAggregateFromPoint(collection, "tail");
+		
+		collection.getProfileCollection().addSegments(pointType, sourceCollection.getProfileCollection().getSegments(pointType));
+		collection.getProfileCollection().addSegments("tail", sourceCollection.getProfileCollection().getSegments("tail"));
+		collection.getProfileCollection().preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+		collection.getProfileCollection().addMedianLinesToPlots();
+		collection.getProfileCollection().exportProfilePlots(collection.getFolder()+File.separator+collection.getOutputFolder(), collection.getType());
 	}
 
 	private static void createProfileAggregateFromPoint(INuclearCollection collection, String pointType){
