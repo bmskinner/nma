@@ -49,14 +49,40 @@ public class PopulationProfiler {
 	 */
 	public static void reapplyProfiles(INuclearCollection collection, INuclearCollection sourceCollection){
 		String pointType = collection.getReferencePoint();
-		createProfileAggregateFromPoint(collection, pointType);
-		createProfileAggregateFromPoint(collection, "tail");
+		createProfileAggregateFromPoint(collection, pointType, (int)sourceCollection.getMedianArrayLength());
+		createProfileAggregateFromPoint(collection, "tail", (int)sourceCollection.getMedianArrayLength());
 		
 		collection.getProfileCollection().addSegments(pointType, sourceCollection.getProfileCollection().getSegments(pointType));
 		collection.getProfileCollection().addSegments("tail", sourceCollection.getProfileCollection().getSegments("tail"));
 		collection.getProfileCollection().preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
 		collection.getProfileCollection().addMedianLinesToPlots();
 		collection.getProfileCollection().exportProfilePlots(collection.getFolder()+File.separator+collection.getOutputFolder(), collection.getType());
+	}
+	
+	/**
+	 * A temp addition to allow a remapping median to be the same length as the original population median.
+	 * Otherwise the segment remapping will fail
+	 * @param collection
+	 * @param pointType
+	 * @param length
+	 */
+	private static void createProfileAggregateFromPoint(INuclearCollection collection, String pointType, int length){
+
+		ProfileAggregate profileAggregate = new ProfileAggregate(length);
+		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
+		
+		for(INuclearFunctions n : collection.getNuclei()){
+			profileAggregate.addValues(n.getAngleProfile(pointType));
+		}
+
+		Profile medians = profileAggregate.getMedian();
+		Profile q25     = profileAggregate.getQuartile(25);
+		Profile q75     = profileAggregate.getQuartile(75);
+		collection.getProfileCollection().addProfile(pointType, medians);
+		collection.getProfileCollection().addProfile(pointType+"25", q25);
+		collection.getProfileCollection().addProfile(pointType+"75", q75);
+//		collection.getProfileCollection().printKeys();
+
 	}
 
 	private static void createProfileAggregateFromPoint(INuclearCollection collection, String pointType){
