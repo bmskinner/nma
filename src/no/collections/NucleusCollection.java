@@ -36,7 +36,8 @@ implements INuclearCollection
 	public static final int FAILURE_OTHER     = 32;
 	public static final int FAILURE_SIGNALS   = 64;
 	
-	private final  String DEFAULT_REFERENCE_POINT = "head";
+	private final String DEFAULT_REFERENCE_POINT = "head";
+	private final String DEFAULT_ORIENTAITION_POINT = "tail";
 
 	private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
 	private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
@@ -125,6 +126,10 @@ implements INuclearCollection
   
   public String getReferencePoint(){
 	  return this.DEFAULT_REFERENCE_POINT;
+  }
+  
+  public String getOrientationPoint(){
+	  return this.DEFAULT_ORIENTAITION_POINT;
   }
   
   public ProfileCollection getProfileCollection(){

@@ -50,10 +50,10 @@ public class PopulationProfiler {
 	public static void reapplyProfiles(INuclearCollection collection, INuclearCollection sourceCollection){
 		String pointType = collection.getReferencePoint();
 		createProfileAggregateFromPoint(collection, pointType, (int)sourceCollection.getMedianArrayLength());
-		createProfileAggregateFromPoint(collection, "tail", (int)sourceCollection.getMedianArrayLength());
+		createProfileAggregateFromPoint(collection, collection.getOrientationPoint(), (int)sourceCollection.getMedianArrayLength());
 		
 		collection.getProfileCollection().addSegments(pointType, sourceCollection.getProfileCollection().getSegments(pointType));
-		collection.getProfileCollection().addSegments("tail", sourceCollection.getProfileCollection().getSegments("tail"));
+		collection.getProfileCollection().addSegments("tail", sourceCollection.getProfileCollection().getSegments(collection.getOrientationPoint()));
 		collection.getProfileCollection().preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
 		collection.getProfileCollection().addMedianLinesToPlots();
 		collection.getProfileCollection().exportProfilePlots(collection.getFolder()+File.separator+collection.getOutputFolder(), collection.getType());

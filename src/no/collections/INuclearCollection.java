@@ -41,6 +41,7 @@ public interface INuclearCollection
 	*/
 	
 	public String getReferencePoint();
+	public String getOrientationPoint();
 
 	public File getFolder();
 	
