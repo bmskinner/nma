@@ -214,7 +214,13 @@ public class AnalysisCreator {
 
 		  try{
 			  File f = splitter.addMappingFile();
+			  
+			  if(f==null) return false;
+			  
+			  if(!f.exists()) return false;
+			  
 			  INuclearCollection subjectCollection = splitter.getCollection();
+			  if(subjectCollection==null) return false;
 
 			  // import and parse the mapping file
 			  List<String> pathList = MappingFileParser.parse(f);
