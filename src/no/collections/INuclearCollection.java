@@ -45,7 +45,9 @@ public interface INuclearCollection
 
 	public File getFolder();
 	
-	public String getOutputFolder();
+	public File getOutputFolder();
+	
+	public String getOutputFolderName();
 
 	public File getDebugFile();
 
@@ -125,7 +127,7 @@ public interface INuclearCollection
 
 	public ProfileCollection getProfileCollection();
 	
-	public void exportProfiles();
+//	public void exportProfiles();
 	
 	public void findTailIndexInMedianCurve();
 	

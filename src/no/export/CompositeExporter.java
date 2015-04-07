@@ -74,7 +74,7 @@ public class CompositeExporter {
 	      }     
 	    }
 	    // finalImage.show();
-	    IJ.saveAsTiff(finalImage, collection.getFolder()+File.separator+collection.getOutputFolder()+File.separator+"composite"+"."+collection.getType()+".tiff");
+	    IJ.saveAsTiff(finalImage, collection.getFolder()+File.separator+collection.getOutputFolderName()+File.separator+"composite"+"."+collection.getType()+".tiff");
 	    IJ.log("    Composite image created");
 	  }
 }

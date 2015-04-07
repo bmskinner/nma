@@ -9,10 +9,11 @@
 
 package no.collections;
 import ij.IJ;
+
 import java.io.File;
 import java.util.*;
 
-import no.analysis.PopulationProfiler;
+import no.analysis.MorphologyAnalysis;
 import no.collections.INuclearCollection;
 import no.nuclei.*;
 import no.components.*;
@@ -79,17 +80,17 @@ implements INuclearCollection
 	}
   }
   
-  public void exportProfiles(){
-	  PopulationProfiler.createProfileAggregates(this);
-
-	  // export the profiles
-	  this.drawProfilePlots();
-	  this.profileCollection.addMedianLinesToPlots();
-
-	  this.profileCollection.exportProfilePlots(this.getFolder()+
-			  File.separator+
-			  this.getOutputFolder(), this.getType());
-  }
+//  public void exportProfiles(){
+////	  MorphologyAnalysis.createProfileAggregates(this);
+//
+//	  // export the profiles
+//	  this.drawProfilePlots();
+//	  this.profileCollection.addMedianLinesToPlots();
+//
+//	  this.profileCollection.exportProfilePlots(this.getFolder()+
+//			  File.separator+
+//			  this.getOutputFolder(), this.getType());
+//  }
 
   public void calculateOffsets(){
 
@@ -140,9 +141,15 @@ implements INuclearCollection
     return this.folder;
   }
 
-  public String getOutputFolder(){
+  public String getOutputFolderName(){
     return this.outputFolder;
   }
+  
+  public File getOutputFolder(){
+	    return new File(this.getFolder()+File.separator+this.getOutputFolderName());
+	  }
+  
+  
 
   public File getDebugFile(){
     return this.debugFile;
@@ -603,7 +610,7 @@ public List<INuclearFunctions> getNucleiWithSignals(int channel){
   */
 
   public String getLogFileName(String filename){
-    String file = this.getFolder()+File.separator+this.getOutputFolder()+File.separator+filename+"."+getType()+".txt";
+    String file = this.getFolder()+File.separator+this.getOutputFolderName()+File.separator+filename+"."+getType()+".txt";
     File f = new File(file);
     if(f.exists()){
       f.delete();

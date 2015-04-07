@@ -221,7 +221,7 @@ public class AnalysisCreator {
 
 			  // create a new collection to hold the nuclei
 			  Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
-			  INuclearCollection remapCollection = (INuclearCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), subjectCollection.getOutputFolder(), f.getName());
+			  INuclearCollection remapCollection = (INuclearCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), subjectCollection.getOutputFolderName(), f.getName());
 
 			  // add nuclei to the new population based on the mapping info
 			  for(INuclearFunctions n : subjectCollection.getNuclei()){
@@ -236,7 +236,7 @@ public class AnalysisCreator {
 			  // create median of the same length as the main population median
 			  // ensure that no remapping of points or segmentation occurs.
 			  // this allows the segments from the main population to be drawn directly
-			  PopulationProfiler.reapplyProfiles(remapCollection, subjectCollection);
+			  MorphologyAnalysis.reapplyProfiles(remapCollection, subjectCollection);
 			  // draw the main population segment pattern on the new median profile
 			  // make a consensus nucleus from the new median
 			  CurveRefolder.run(remapCollection, nucleusClass, refoldMode);
@@ -425,7 +425,7 @@ public class AnalysisCreator {
         NucleusCollection collection = folderCollection.get(key);
 
         try{
-          INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, collection.getOutputFolder(), "analysable");
+          INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, collection.getOutputFolderName(), "analysable");
           
           // RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
           IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
@@ -476,7 +476,7 @@ public class AnalysisCreator {
         
         nucleusCounts.put("input", r.getNucleusCount());
         Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
-        INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolder(), "failed");
+        INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed");
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
         if(failedNuclei.getNucleusCount()>0){
@@ -502,14 +502,9 @@ public class AnalysisCreator {
       IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
       IJ.log("    ----------------------------- ");
       
-      // align profiles
-      PopulationProfiler.run(r);
-      
-      // segment profiles
-      SegmentationAnalysis.run(r, "tail");
-      
-      r.exportProfiles();
-      
+      // core analysis - align profiles and segment
+      MorphologyAnalysis.run(r);
+                  
       // measure general nuclear organisation
       SignalAnalysis.run(r);
       
@@ -536,9 +531,7 @@ public class AnalysisCreator {
         IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
         IJ.log("    ----------------------------- ");
         
-        PopulationProfiler.run(p);
-        SegmentationAnalysis.run(p, "tail");
-        p.exportProfiles();
+        MorphologyAnalysis.run(p);
         SignalAnalysis.run(p);
         ShellAnalysis.run(p, 5);
         StatsExporter.run(p);
@@ -567,7 +560,7 @@ public class AnalysisCreator {
       for(int channel : channels){
     	  List<INuclearFunctions> list = r.getNucleiWithSignals(channel);
     	  if(!list.isEmpty()){
-    		  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "Signals_in_channel_"+channel);
+    		  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "Signals_in_channel_"+channel);
     		  for(INuclearFunctions n : list){
     			  listCollection.addNucleus( n );
     		  }
@@ -575,7 +568,7 @@ public class AnalysisCreator {
 
     		  List<INuclearFunctions> notList = r.getNucleiWithSignals(-channel);
     		  if(!notList.isEmpty()){
-    			  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolder(), "No_signals_in_channel_"+channel);
+    			  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "No_signals_in_channel_"+channel);
     			  for(INuclearFunctions n : notList){
     				  notListCollection.addNucleus( n );
     			  }

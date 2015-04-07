@@ -40,13 +40,13 @@ public class SignalAnalysis {
 
 		collection.getProfileCollection().exportProfilePlots(collection.getFolder()+
 				File.separator+
-				collection.getOutputFolder(), collection.getType());
+				collection.getOutputFolderName(), collection.getType());
 	}
 
 	private static void exportSignalStats(INuclearCollection collection){
 
 		for(int channel : collection.getSignalChannels()){
-			Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolder());
+			Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
 			logger.addColumnHeading("SIGNAL_AREA");
 			logger.addColumnHeading("SIGNAL_ANGLE");
 			logger.addColumnHeading("SIGNAL_FERET");
@@ -74,7 +74,7 @@ public class SignalAnalysis {
 
 	public static void exportDistancesBetweenSingleSignals(INuclearCollection collection){
 
-		Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolder());
+		Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		logger.addColumnHeading("DISTANCE_BETWEEN_SIGNALS");
 		logger.addColumnHeading("RED_DISTANCE_TO_COM");
 		logger.addColumnHeading("GREEN_DISTANCE_TO_COM");

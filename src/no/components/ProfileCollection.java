@@ -457,19 +457,7 @@ public class ProfileCollection {
 			}
 		}  
 	}
-	
-	public void segmentProfiles(){
-		for( String pointType : this.getProfileKeys() ){
-			Profile medianToCompare = this.getProfile(pointType);
-
-			ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
-			List<NucleusBorderSegment> segments = segmenter.segment();
-
-			IJ.log("    Found "+segments.size()+" segments in "+pointType+" profile");
-			this.addSegments(pointType, segments);
-		}
-	}
-	
+		
 	public void appendSegmentsToPlot(Plot segPlot, Profile profile, List<NucleusBorderSegment> segments){
 
 		int narrowLine = 2;
