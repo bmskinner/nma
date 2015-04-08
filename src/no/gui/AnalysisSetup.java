@@ -6,6 +6,7 @@ ANALYSIS SETUP OPTIONS
 */
 package no.gui;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -18,6 +19,8 @@ import no.nuclei.Nucleus;
 import no.nuclei.sperm.PigSpermNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
 import ij.gui.GenericDialog;
+import ij.io.DirectoryChooser;
+import ij.io.OpenDialog;
 
 public class AnalysisSetup{
 
@@ -53,6 +56,9 @@ public class AnalysisSetup{
 	 * beyond the offsets provided?
 	 */
 	private boolean realignMode = true;
+	
+	private File folder;
+	private File mappingFile;
 
 	private String refoldMode = "Fast";
 
@@ -88,13 +94,38 @@ public class AnalysisSetup{
 
 		createOptionsPanel();
 
+	}
+	
+	public boolean run(){
 		boolean ok = showPanel();
 
 		if(ok){
 			fetchOptions();
+			if(getFiles()){
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
 		}
+	}
+	
+	private boolean getFiles(){
 
+	    DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
+	    String folderName = localOpenDialog.getDirectory();
 
+	    if(folderName==null) return false; // user cancelled
+	    this.folder = new File(folderName);
+
+	    if(performReanalysis){
+	      OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
+	      String fileName = fileDialog.getPath();
+	      if(fileName==null) return false;
+	      this.mappingFile = new File(fileName);
+	    }
+	    return true;
 
 	}
 
@@ -104,6 +135,14 @@ public class AnalysisSetup{
     Getters
     -----------------------
 	 */
+	
+	public File getFolder(){
+		return this.folder;
+	}
+	
+	public File getMappingFile(){
+		return this.mappingFile;
+	}
 
 	public int getNucleusThreshold(){
 		return this.nucleusThreshold;
@@ -159,6 +198,14 @@ public class AnalysisSetup{
 	
 	public boolean realignImages(){
 		return this.realignMode;
+	}
+	
+	public int getXOffset(){
+		return  this.xoffset;
+	}
+	
+	public int getYOffset(){
+		return  this.yoffset;
 	}
 
 	private String[] getNucleusTypeStrings(){

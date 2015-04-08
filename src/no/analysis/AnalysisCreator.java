@@ -11,9 +11,6 @@ can be varied in the nucleus and signal detection
 package no.analysis;
 
 import ij.IJ;
-import ij.gui.GenericDialog;
-import ij.io.DirectoryChooser;
-import ij.io.OpenDialog;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -22,10 +19,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import no.nuclei.*;
-import no.nuclei.sperm.*;
 import no.collections.*;
 import no.export.CompositeExporter;
 import no.export.StatsExporter;
+import no.gui.AnalysisSetup;
 import no.gui.PopulationSplitWindow;
 import no.nuclei.INuclearFunctions;
 import no.utility.MappingFileParser;
@@ -33,116 +30,37 @@ import no.utility.MappingFileParser;
 
 public class AnalysisCreator {
 
-  /**
-  * These values are keys to the different types of nucleus we 
-  * can analyse. They act like a primary key in a database
-  */
-  private static final int RODENT_SPERM_NUCLEUS = 0;
-  private static final int PIG_SPERM_NUCLEUS = 1;
-  private static final int ROUND_NUCLEUS = 2;
+	private AnalysisSetup analysisOptions;
+	private int mappingCount = 0;
 
-	 // /* VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
-  private  int    nucleusThreshold = 36;
-  private  int    signalThreshold  = 70;
-  private  double minNucleusSize   = 500;
-  private  double maxNucleusSize   = 10000;
-  private  double minNucleusCirc   = 0.0;
-  private  double maxNucleusCirc   = 1.0;
+	private Date startTime; // the time the analysis began
 
-  private int angleProfileWindowSize = 15;
+	private String outputFolderName;
 
-  private String refoldMode = "Fast";
+	/**
+	 * Will be set true if a primary analysis was run
+	 */
+	private boolean analysisRun = false;
 
-  private int xoffset = 0;
-  private int yoffset = 0;
-  private int mappingCount = 0;
+	/**
+	 * Will be set true if a reanalysis was run
+	 */
+	private boolean reAnalysisRun = false;
 
-  private Date startTime; // the time the analysis began
+	/**
+	 * Will be set true if all parameters have been set,
+	 * and an analysis can be run
+	 */
+	private boolean readyToRun = false;
 
-  private  double minSignalSize = 5;
-  private  double maxSignalFraction = 0.5;
+	private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
-  private File folder;
-//  private File outputFolder;
-  private String outputFolderName;
-//  private File logAnalysis;
-  private File nucleiToFind;
+	// the raw input from nucleus detector
+	private Map<File, NucleusCollection> folderCollection;
 
-  /**
-   * Will be set true if a primary analysis was run
-   */
-  private boolean analysisRun = false;
-  
-  /**
-   * Will be set true if a reanalysis was run
-   */
-  private boolean reAnalysisRun = false;
-  
-  /**
-   * Will be set true if all parameters have been set,
-   * and an analysis can be run
-   */
-  private boolean readyToRun = false;
+	private List<INuclearCollection> nuclearPopulations = new ArrayList<INuclearCollection>(0);
 
-  /**
-   * The class of Nucleus to use in the analysis
-   */
-  private Class<?> nucleusClass;
-
-  /**
-   * The class of NucleusCollection to use in the analysis
-   */
-  private Class<?> collectionClass;
-
-  /**
-   * Should a reanalysis be performed?
-   */
-  private boolean performReanalysis = false;
-
-  /**
-   * Should images for a reanalysis be aligned
-   * beyond the offsets provided?
-   */
-  private boolean realignMode = true;
-
-  private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
-
-  // allow us to map an id to a class to construct
-  private static Map<Integer, Class<?>>  collectionClassTypes;
-  private static Map<Integer, Class<?>>  nucleusClassTypes;
-  private static Map<String, Integer> nucleusTypes;
-
-  // the raw input from nucleus detector
-  private Map<File, NucleusCollection> folderCollection;
-
-  private List<INuclearCollection> nuclearPopulations = new ArrayList<INuclearCollection>(0);
-//  private List<INuclearCollection> failedPopulations  = new ArrayList<INuclearCollection>(0);
-  
-
-  /*
-    -----------------------
-    Populate the class map with available options
-    -----------------------
-  */
-  static
-  {
-      nucleusTypes = new HashMap<String, Integer>();
-      nucleusTypes.put("Rodent sperm" , RODENT_SPERM_NUCLEUS);
-      nucleusTypes.put("Pig sperm"    , PIG_SPERM_NUCLEUS);
-      nucleusTypes.put("Round nucleus", ROUND_NUCLEUS);
-
-      collectionClassTypes = new HashMap<Integer, Class<?>>();
-      collectionClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleusCollection().getClass());
-      collectionClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleusCollection().getClass());
-      collectionClassTypes.put(ROUND_NUCLEUS, new NucleusCollection().getClass());
-
-      nucleusClassTypes = new HashMap<Integer, Class<?>>();
-      nucleusClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleus().getClass());
-      nucleusClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleus().getClass());
-      nucleusClassTypes.put(ROUND_NUCLEUS, new Nucleus().getClass());
-  }
-
-  /*
+	/*
     -----------------------
     Constructors
     -----------------------
@@ -152,37 +70,23 @@ public class AnalysisCreator {
   }
 
   public void initialise(){
+	  
+	  analysisOptions = new AnalysisSetup();
+	  if(analysisOptions.run()){
 
-    boolean ok = this.displayOptionsDialog();
-    if(!ok) return; // should be true if we got all needed data
+		  IJ.log("Directory: "+analysisOptions.getFolder().getName());
 
-    DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
-    String folderName = localOpenDialog.getDirectory();
-
-    if(folderName==null) return; // user cancelled
-    this.folder = new File(folderName);
-
-    if(performReanalysis){
-      OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
-      String fileName = fileDialog.getPath();
-      if(fileName==null) return;
-      nucleiToFind = new File(fileName);
-    }
-
-    IJ.log("Directory: "+folderName);
-
-    this.startTime = Calendar.getInstance().getTime();
-    this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
-
-//    this.outputFolder = new File(this.folder.getAbsolutePath()+File.separator+outputFolderName);
-    this.readyToRun = true;
+		  this.startTime = Calendar.getInstance().getTime();
+		  this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+		  this.readyToRun = true;
+	  }
   }
 
   public void run(){
     
     if(!readyToRun) return;
 
-     if(!performReanalysis){
+     if(!analysisOptions.isReanalysis()){
       this.runAnalysis();
     } else {
       this.runReAnalysis();
@@ -226,7 +130,7 @@ public class AnalysisCreator {
 			  List<String> pathList = MappingFileParser.parse(f);
 
 			  // create a new collection to hold the nuclei
-			  Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
+			  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
 			  INuclearCollection remapCollection = (INuclearCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), subjectCollection.getOutputFolderName(), f.getName());
 
 			  // add nuclei to the new population based on the mapping info
@@ -245,7 +149,7 @@ public class AnalysisCreator {
 			  MorphologyAnalysis.reapplyProfiles(remapCollection, subjectCollection);
 			  // draw the main population segment pattern on the new median profile
 			  // make a consensus nucleus from the new median
-			  CurveRefolder.run(remapCollection, nucleusClass, refoldMode);
+			  CurveRefolder.run(remapCollection, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
 
 		  } catch(InstantiationException e){
 			  IJ.log("Cannot create collection: "+e.getMessage());
@@ -282,7 +186,7 @@ public class AnalysisCreator {
    */
 
   public void runAnalysis(){
-    NucleusDetector detector = new NucleusDetector(this.folder, this.outputFolderName);
+    NucleusDetector detector = new NucleusDetector(analysisOptions.getFolder(), this.outputFolderName);
 
     setDetectionParameters(detector);
     detector.runDetector();
@@ -298,11 +202,11 @@ public class AnalysisCreator {
    * @return      the nuclei in each folder analysed
    */
   public void runReAnalysis(){
-    NucleusRefinder detector = new NucleusRefinder(this.folder, this.outputFolderName, nucleiToFind);
+    NucleusRefinder detector = new NucleusRefinder(analysisOptions.getFolder(), this.outputFolderName, analysisOptions.getMappingFile());
     setDetectionParameters(detector);
-    detector.setXOffset(this.xoffset);
-    detector.setYOffset(this.yoffset);
-    detector.setRealignMode(this.realignMode);
+    detector.setXOffset(analysisOptions.getXOffset());
+    detector.setYOffset(analysisOptions.getYOffset());
+    detector.setRealignMode(analysisOptions.realignImages());
     detector.runDetector();
     this.folderCollection = detector.getNucleiCollections();
     this.mappingCount = detector.getMappingCount();
@@ -311,109 +215,17 @@ public class AnalysisCreator {
   }
 
   private void  setDetectionParameters(NucleusDetector detector){
-    detector.setMinNucleusSize(this.getMinNucleusSize()); 
-    detector.setMaxNucleusSize(this.getMaxNucleusSize());
-    detector.setThreshold(this.getNucleusThreshold());
-    detector.setMinNucleusCirc(this.getMinNucleusCirc());
-    detector.setMaxNucleusCirc(this.getMaxNucleusCirc());
+    detector.setMinNucleusSize(analysisOptions.getMinNucleusSize()); 
+    detector.setMaxNucleusSize(analysisOptions.getMaxNucleusSize());
+    detector.setThreshold(analysisOptions.getNucleusThreshold());
+    detector.setMinNucleusCirc(analysisOptions.getMinNucleusCirc());
+    detector.setMaxNucleusCirc(analysisOptions.getMaxNucleusCirc());
 
-    detector.setAngleProfileWindowSize(this.getAngleProfileWindowSize());
+    detector.setAngleProfileWindowSize(analysisOptions.getAngleProfileWindowSize());
 
-    detector.setSignalThreshold(this.getSignalThreshold());
-    detector.setMinSignalSize(this.getMinSignalSize());
-    detector.setMaxSignalFraction(this.getMaxSignalFraction());
-  }
-
-  /*
-    -----------------------
-    Getters
-    -----------------------
-  */
-
-  public int getNucleusThreshold(){
-    return this.nucleusThreshold;
-  }
-
-  public int getSignalThreshold(){
-    return this.signalThreshold;
-  }
-
-  public double getMinNucleusSize(){
-    return this.minNucleusSize;
-  }
-
-  public double getMaxNucleusSize(){
-    return this.maxNucleusSize;
-  }
-
-  public double getMinNucleusCirc(){
-    return this.minNucleusCirc;
-  }
-
-  public double getMaxNucleusCirc(){
-    return this.maxNucleusCirc;
-  }
-
-  public double getMinSignalSize(){
-    return this.minSignalSize;
-  }
-
-  public double getMaxSignalFraction(){
-    return this.maxSignalFraction;
-  }
-
-  public int getAngleProfileWindowSize(){
-    return this.angleProfileWindowSize;
-  }
-
-  /*
-    -----------------------
-    Setters
-    -----------------------
-  */
-
-  public void setNucleusThreshold(int i){
-    this.nucleusThreshold = i;
-  }
-
-  public void setSignalThreshold(int i){
-    this.signalThreshold = i;
-  }
-
-  public void setMinNucleusSize(double d){
-    this.minNucleusSize = d;
-  }
-
-  public void setMaxNucleusSize(double d){
-    this.maxNucleusSize = d;
-  }
-
-  public void setMinNucleusCirc(double d){
-    this.minNucleusCirc = d;
-  }
-
-  public void setMaxNucleusCirc(double d){
-    this.maxNucleusCirc = d;
-  }
-
-  public void setMinSignalSize(double d){
-    this.minSignalSize = d;
-  }
-
-  public void setMaxSignalFraction(double d){
-    this.maxSignalFraction = d;
-  }
-
-  public void setNucleusClass(Nucleus n){
-    this.nucleusClass = n.getClass();
-  }
-
-  public void setNucleusCollectionClass(NucleusCollection n){
-    this.collectionClass = n.getClass();
-  }
-
-  public void setAngleProfileWindowSize(int i){
-    this.angleProfileWindowSize = i;
+    detector.setSignalThreshold(analysisOptions.getSignalThreshold());
+    detector.setMinSignalSize(analysisOptions.getMinSignalSize());
+    detector.setMaxSignalFraction(analysisOptions.getMaxSignalFraction());
   }
 
   /*
@@ -424,8 +236,8 @@ public class AnalysisCreator {
     Set<File> keys = this.folderCollection.keySet();
 
     try{
-      Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
-      Constructor<?> nucleusConstructor = this.nucleusClass.getConstructor(new Class<?>[]{Nucleus.class});
+      Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
+      Constructor<?> nucleusConstructor = analysisOptions.getNucleusClass().getConstructor(new Class<?>[]{Nucleus.class});
     
       for (File key : keys) {
         NucleusCollection collection = folderCollection.get(key);
@@ -446,7 +258,7 @@ public class AnalysisCreator {
             spermNuclei.addNucleus(subNucleus);
           }
           this.nuclearPopulations.add(spermNuclei);
-          IJ.log("  Population converted to "+nucleusClass.getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
+          IJ.log("  Population converted to "+analysisOptions.getNucleusClass().getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
         } catch(InstantiationException e){
           IJ.log("Cannot create collection: "+e.getMessage());
         } catch(IllegalAccessException e){
@@ -481,7 +293,7 @@ public class AnalysisCreator {
 
         
         nucleusCounts.put("input", r.getNucleusCount());
-        Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class[]{File.class, String.class, String.class});
+        Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class});
         INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed");
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
@@ -525,7 +337,7 @@ public class AnalysisCreator {
       CompositeExporter.run(r);
 
       // refold the median consensus nucleus
-      CurveRefolder.run(r, nucleusClass, refoldMode);
+      CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
 
       ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
       
@@ -543,7 +355,7 @@ public class AnalysisCreator {
         StatsExporter.run(p);
         p.annotateAndExportNuclei();
         CompositeExporter.run(p);
-        CurveRefolder.run(p, nucleusClass, refoldMode);
+        CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
       }
       collectionNucleusCounts.put(folder, nucleusCounts);
     }
@@ -560,7 +372,7 @@ public class AnalysisCreator {
 
     try{
 
-      Constructor<?> collectionConstructor = this.collectionClass.getConstructor(new Class<?>[]{File.class, String.class, String.class});
+      Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
       
       List<Integer> channels = r.getSignalChannels();
       for(int channel : channels){
@@ -613,28 +425,28 @@ public class AnalysisCreator {
         outLine.append("Analysis type     : Primary analysis\r\n");
       if(this.reAnalysisRun){
         outLine.append("Analysis type     : Nucleus refinding analysis\r\n");
-        outLine.append("Mapping file      : "+this.nucleiToFind.getAbsolutePath()+"\r\n");
-        outLine.append("Initial X offset  : "+this.xoffset+"\r\n");
-        outLine.append("Initial Y offset  : "+this.yoffset+"\r\n");
-        outLine.append("Aligning images   : "+this.realignMode+"\r\n");
+        outLine.append("Mapping file      : "+analysisOptions.getMappingFile().getAbsolutePath()+"\r\n");
+        outLine.append("Initial X offset  : "+analysisOptions.getXOffset()+"\r\n");
+        outLine.append("Initial Y offset  : "+analysisOptions.getYOffset()+"\r\n");
+        outLine.append("Aligning images   : "+analysisOptions.realignImages()+"\r\n");
         outLine.append("Mapping count     : "+this.mappingCount+" nuclei\r\n");
       }
       
       outLine.append("-------------------------\r\n");
       outLine.append("Parameters:\r\n");
       outLine.append("-------------------------\r\n");
-      outLine.append("\tNucleus thresholding: "+this.getNucleusThreshold()+"\r\n");
-      outLine.append("\tNucleus minimum size: "+this.getMinNucleusSize()+"\r\n");
-      outLine.append("\tNucleus maximum size: "+this.getMaxNucleusSize()+"\r\n");
-      outLine.append("\tNucleus minimum circ: "+this.getMinNucleusCirc()+"\r\n");
-      outLine.append("\tNucleus maximum circ: "+this.getMaxNucleusCirc()+"\r\n");
-      outLine.append("\tSignal thresholding : "+this.getSignalThreshold()+"\r\n");
-      outLine.append("\tSignal minimum size : "+this.getMinSignalSize()+"\r\n");
-      outLine.append("\tSignal max. fraction: "+this.getMaxSignalFraction()+"\r\n");
-      outLine.append("\tAngle profile window: "+this.getAngleProfileWindowSize()+"\r\n");
-      outLine.append("\tNucleus class       : "+this.nucleusClass.getSimpleName()+"\r\n");
-      outLine.append("\tCollection class    : "+this.collectionClass.getSimpleName()+"\r\n");
-      outLine.append("\tRefolding mode      : "+this.refoldMode+"\r\n");
+      outLine.append("\tNucleus thresholding: "+analysisOptions.getNucleusThreshold()+"\r\n");
+      outLine.append("\tNucleus minimum size: "+analysisOptions.getMinNucleusSize()+"\r\n");
+      outLine.append("\tNucleus maximum size: "+analysisOptions.getMaxNucleusSize()+"\r\n");
+      outLine.append("\tNucleus minimum circ: "+analysisOptions.getMinNucleusCirc()+"\r\n");
+      outLine.append("\tNucleus maximum circ: "+analysisOptions.getMaxNucleusCirc()+"\r\n");
+      outLine.append("\tSignal thresholding : "+analysisOptions.getSignalThreshold()+"\r\n");
+      outLine.append("\tSignal minimum size : "+analysisOptions.getMinSignalSize()+"\r\n");
+      outLine.append("\tSignal max. fraction: "+analysisOptions.getMaxSignalFraction()+"\r\n");
+      outLine.append("\tAngle profile window: "+analysisOptions.getAngleProfileWindowSize()+"\r\n");
+      outLine.append("\tNucleus class       : "+analysisOptions.getNucleusClass().getSimpleName()+"\r\n");
+      outLine.append("\tCollection class    : "+analysisOptions.getCollectionClass().getSimpleName()+"\r\n");
+      outLine.append("\tRefolding mode      : "+analysisOptions.getRefoldMode()+"\r\n");
       outLine.append("-------------------------\r\n");
       outLine.append("Populations:\r\n");
       outLine.append("-------------------------\r\n");
@@ -659,58 +471,6 @@ public class AnalysisCreator {
       String outPath = r.getFolder().getAbsolutePath()+File.separator+this.outputFolderName+File.separator+"logAnalysis.txt";
       IJ.append( outLine.toString(), outPath);
     }
-  }
-
-  private String[] getNucleusTypeStrings(){
-    return AnalysisCreator.nucleusTypes.keySet().toArray(new String[0]);
-  }
-
-  public boolean displayOptionsDialog(){
-    GenericDialog gd = new GenericDialog("New analysis");
-    gd.addNumericField("Nucleus threshold: ", nucleusThreshold, 0);
-    gd.addNumericField("Signal threshold: ", signalThreshold, 0);
-    gd.addNumericField("Min nuclear size: ", minNucleusSize, 0);
-    gd.addNumericField("Max nuclear size: ", maxNucleusSize, 0);
-    gd.addNumericField("Min nuclear circ: ", minNucleusCirc, 2);
-    gd.addNumericField("Max nuclear circ: ", maxNucleusCirc, 2);
-    gd.addNumericField("Min signal size: ", minSignalSize, 0);
-    gd.addNumericField("Max signal fraction: ", maxSignalFraction, 2);
-    gd.addNumericField("Profile window size: ", angleProfileWindowSize, 0);
-
-    String[] items = this.getNucleusTypeStrings();
-    gd.addChoice("Nucleus type", items, items[1]); // default to rodent for now
-
-    Set<String> modeSet = CurveRefolder.MODES.keySet();
-    String[] modeArray = modeSet.toArray(new String[modeSet.size()]);
-    gd.addRadioButtonGroup("Consensus refolding mode:", modeArray, 1, 3, "Fast");
-
-    gd.addCheckbox("Perform re-analysis", false);
-    gd.addNumericField("X offset:      ", xoffset, 0);
-    gd.addNumericField("Y offset:      ", yoffset, 0);
-    gd.addCheckbox("Realign each image", true);
-    gd.showDialog();
-    if (gd.wasCanceled()) return false;
-
-    nucleusThreshold = (int) gd.getNextNumber();
-    signalThreshold = (int) gd.getNextNumber();
-    minNucleusSize = gd.getNextNumber();
-    maxNucleusSize = gd.getNextNumber();
-    minNucleusCirc = gd.getNextNumber();
-    maxNucleusCirc = gd.getNextNumber();
-    minSignalSize = gd.getNextNumber();
-    maxSignalFraction = gd.getNextNumber();
-    angleProfileWindowSize = (int) gd.getNextNumber();
-    performReanalysis = gd.getNextBoolean();
-    xoffset = (int)gd.getNextNumber();
-    yoffset = (int)gd.getNextNumber();
-
-    String nucleusType = gd.getNextChoice();
-    int nucleusCode = AnalysisCreator.nucleusTypes.get(nucleusType);
-    this.collectionClass = AnalysisCreator.collectionClassTypes.get(nucleusCode);
-    this.nucleusClass = AnalysisCreator.nucleusClassTypes.get(nucleusCode);
-    this.refoldMode = gd.getNextRadioButton();
-    this.realignMode = gd.getNextBoolean();
-    return true;
   }
 }
 
