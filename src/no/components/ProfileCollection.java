@@ -336,35 +336,66 @@ public class ProfileCollection {
 			this.addPlots(pointType, plotHash);
 		}
 	}   
+	
+	public void preparePlot(String pointType, int width, int height, double maxLength){
+
+		Plot  rawPlot = new Plot( "Raw "       +pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
+		Plot normPlot = new Plot( "Normalised "+pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
+		Plot  iqrPlot = new Plot( "IQR "       +pointType+"-indexed plot", "Position", "IQR", Plot.Y_GRID | Plot.X_GRID);
+
+		rawPlot.setLimits(0,maxLength,CHART_SCALE_Y_MIN,CHART_SCALE_Y_MAX);
+		rawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+		rawPlot.setYTicks(true);
+		rawPlot.setColor(Color.BLACK);
+		rawPlot.drawLine(0, 180, maxLength, 180); 
+		rawPlot.setColor(Color.LIGHT_GRAY);
+
+		normPlot.setLimits(0,100,CHART_SCALE_Y_MIN,CHART_SCALE_Y_MAX);
+		normPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+		normPlot.setYTicks(true);
+		normPlot.setColor(Color.BLACK);
+		normPlot.drawLine(0, 180, 100, 180); 
+		normPlot.setColor(Color.LIGHT_GRAY);
+
+		iqrPlot.setLimits(0,100,0,50);
+		iqrPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
+		iqrPlot.setYTicks(true);
+		iqrPlot.setColor(Color.BLACK);
+		iqrPlot.setColor(Color.LIGHT_GRAY);
+
+		ProfilePlot plotHash = new ProfilePlot();
+		plotHash.add("raw" , rawPlot );
+		plotHash.add("norm", normPlot);
+		plotHash.add("iqr" , iqrPlot);
+		this.addPlots(pointType, plotHash);
+	}   
 
 
-	public void addMedianLinesToPlots(){
+	public void addMedianLineToPlots(String pointType){
 
-		for( String pointType : this.getPlotKeys() ){
+		Plot plot = this.getPlots(pointType).get("norm");
 
-			Plot plot = this.getPlots(pointType).get("norm");
+		ProfileAggregate profileAggregate = this.getAggregate(pointType);
 
-			ProfileAggregate profileAggregate = this.getAggregate(pointType);
+		double[] xmedians        =  profileAggregate.getXPositions().asArray();
+		//			double[] ymedians        =  profileAggregate.getMedian().asArray();
+		double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
+		double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
 
-			double[] xmedians        =  profileAggregate.getXPositions().asArray();
-//			double[] ymedians        =  profileAggregate.getMedian().asArray();
-			double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
-			double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
+		// add the median lines to the chart
+		//			plot.setColor(Color.BLACK);
+		//			plot.setLineWidth(3);
+		//			plot.addPoints(xmedians, ymedians, Plot.LINE);
+		this.appendSegmentsToPlot(	this.getPlots(pointType).get("norm"), 
+				this.getProfile(pointType),
+				this.getSegments(pointType));
 
-			// add the median lines to the chart
-//			plot.setColor(Color.BLACK);
-//			plot.setLineWidth(3);
-//			plot.addPoints(xmedians, ymedians, Plot.LINE);
-			this.appendSegmentsToPlot(	this.getPlots(pointType).get("norm"), 
-					this.getProfile(pointType),
-					this.getSegments(pointType));
+		// add the IQR
+		plot.setColor(Color.DARK_GRAY);
+		plot.setLineWidth(2);
+		plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
+		plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
 
-			// add the IQR
-			plot.setColor(Color.DARK_GRAY);
-			plot.setLineWidth(2);
-			plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-			plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
-	    }
 	}
 
 	
