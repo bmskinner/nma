@@ -13,7 +13,6 @@ import ij.IJ;
 import java.io.File;
 import java.util.*;
 
-import no.analysis.MorphologyAnalysis;
 import no.collections.INuclearCollection;
 import no.nuclei.*;
 import no.components.*;
@@ -37,15 +36,15 @@ implements INuclearCollection
 	public static final int FAILURE_OTHER     = 32;
 	public static final int FAILURE_SIGNALS   = 64;
 	
-	private final String DEFAULT_REFERENCE_POINT = "head";
-	private final String DEFAULT_ORIENTAITION_POINT = "tail";
+	private String DEFAULT_REFERENCE_POINT = "head";
+	private String DEFAULT_ORIENTAITION_POINT = "tail";
 
 	private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
 	private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	protected ProfileCollection profileCollection = new ProfileCollection("regular");
-	protected ProfileCollection frankensteinProfiles = new ProfileCollection("frankenstein");
+	protected ProfileCollection frankenCollection = new ProfileCollection("franken");
 
 	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
@@ -80,18 +79,6 @@ implements INuclearCollection
 	}
   }
   
-//  public void exportProfiles(){
-////	  MorphologyAnalysis.createProfileAggregates(this);
-//
-//	  // export the profiles
-//	  this.drawProfilePlots();
-//	  this.profileCollection.addMedianLinesToPlots();
-//
-//	  this.profileCollection.exportProfilePlots(this.getFolder()+
-//			  File.separator+
-//			  this.getOutputFolder(), this.getType());
-//  }
-
   public void calculateOffsets(){
 
 	  Profile medianToCompare = this.profileCollection.getProfile(DEFAULT_REFERENCE_POINT); // returns a median profile with head at 0
@@ -135,6 +122,10 @@ implements INuclearCollection
   
   public ProfileCollection getProfileCollection(){
 	  return this.profileCollection;
+  }
+  
+  public ProfileCollection getFrankenCollection(){
+	  return this.frankenCollection;
   }
 
   public File getFolder(){
@@ -378,35 +369,39 @@ implements INuclearCollection
   }
 
   public double getMaxProfileLength(){
-    return Stats.max(this.getArrayLengths());
+	  return Stats.max(this.getArrayLengths());
   }
 
   /** 
- * Return the nuclei that have signals in the given channel. If negative, this will give the nuclei
- * that do NOT have signals in the given channel.
- * @param channel the channel 
- * @return a list of nuclei
- */
-public List<INuclearFunctions> getNucleiWithSignals(int channel){
-    List<INuclearFunctions> result = new ArrayList<INuclearFunctions>(0);
+   * Return the nuclei that have signals in the given channel. If negative, this will give the nuclei
+   * that do NOT have signals in the given channel.
+   * @param channel the channel 
+   * @return a list of nuclei
+   */
+  public List<INuclearFunctions> getNucleiWithSignals(int channel){
+	  List<INuclearFunctions> result = new ArrayList<INuclearFunctions>(0);
 
-    for(INuclearFunctions n : this.nucleiCollection){
+	  for(INuclearFunctions n : this.nucleiCollection){
 
-    	if(channel>0){
-    		if(n.hasSignal(channel)){
-    			result.add(n);
-    		}
-    	}
-    	if(channel<0){
-    		if(!n.hasSignal(Math.abs(channel))){
-    			result.add(n);
-    		}
-    	}
-    }
-    return result;
+		  if(channel>0){
+			  if(n.hasSignal(channel)){
+				  result.add(n);
+			  }
+		  }
+		  if(channel<0){
+			  if(!n.hasSignal(Math.abs(channel))){
+				  result.add(n);
+			  }
+		  }
+	  }
+	  return result;
   }
 
-  /*
+  public void setFrankenCollection (ProfileCollection frankenCollection){
+	  this.frankenCollection = frankenCollection;
+  }
+
+/*
     --------------------
     Profile methods
     --------------------

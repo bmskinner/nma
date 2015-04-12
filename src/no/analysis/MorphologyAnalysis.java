@@ -23,49 +23,46 @@ import no.nuclei.INuclearFunctions;
 public class MorphologyAnalysis {
 	
 	public static void run(INuclearCollection collection){
-		
-		IJ.log("    Beginning core morphology analysis...");
-		
-		String pointType = collection.getReferencePoint();
-		
-		// profile the collection
-		runProfiler(collection, pointType);
-		
-		// segment the profiles from head
-		runSegmentation(collection, pointType);
-		
-		// segment from tail
-		// should not do this - instead, save the offset for segments
-		runSegmentation(collection, collection.getOrientationPoint());
-		
-		// export the core data
-		
-		// prepare the plots
-		// create plots to hold the profile data
-		ProfileCollection pc = collection.getProfileCollection();
-		for( String type : pc.getProfileKeys() ){
-			pc.preparePlot(type, INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+
+		try{
+
+			IJ.log("    Beginning core morphology analysis...");
+
+			String pointType = collection.getReferencePoint();
+
+			// setup the plots and profile agregates
+			initialiseProfileCollection(collection);
+
+			// profile the collection
+			runProfiler(collection, pointType);
+
+			// segment the profiles from head
+			runSegmentation(collection, pointType);
+
+			// export the core data
+
+			// run the exports
+			exportProfiles(collection);
+			exportSegments(collection, pointType);
+			exportClusteringScript(collection);
+
+			// begin migrating these export functions up
+			exportVariabilityRegions(collection, pointType);
+			drawProfileCollection(   collection, pointType);
+
+			IJ.log("    Core morphology analysis complete");
+		} catch(Exception e){
+			IJ.log("    Error in morphology analysis: "+e.getMessage());
+			IJ.log("      Collection:");
+			collection.getProfileCollection().printKeys();
+			IJ.log("      FrankenCollection:");
+			collection.getFrankenCollection().printKeys();
 		}
-		
-		// run the exports
-		exportProfiles(collection);
-		exportSegments(collection, pointType);
-		exportClusteringScript(collection);
-		
-		// begin migrating these export functions up
-//		exportVariabilityRegions(frankenCollection, collection, pointType, frankenProfiles);
-//		drawProfileCollection(   frankenCollection, collection, pointType, frankenProfiles);
-		
-		IJ.log("    Core morphology analysis complete");
-		
+
 	}
 
 	private static void runProfiler(INuclearCollection collection, String pointType){
-		
-
-		// create an initial profile aggregate from the estimated points
-		createProfileAggregateFromPoint(collection, pointType);
-		
+				
 		// use the median profile of this aggregate to find the tail point
 		collection.findTailIndexInMedianCurve();
 
@@ -84,8 +81,23 @@ public class MorphologyAnalysis {
 
 			IJ.log("    Reticulating splines: score: "+(int)score);
 		}
+		
+		// update the median profile with the final offset locations
 		createProfileAggregateFromPoint(collection, collection.getOrientationPoint());
 
+	}
+	
+	private static void initialiseProfileCollection(INuclearCollection collection){
+		ProfileCollection pc = collection.getProfileCollection();
+		
+		// aggregates
+		createProfileAggregateFromPoint(collection, collection.getReferencePoint());
+		// plots
+		pc.preparePlot(collection.getReferencePoint()  , INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+		pc.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+		
+		// features
+		
 	}
 	
 	/**
@@ -132,8 +144,6 @@ public class MorphologyAnalysis {
 		collection.getProfileCollection().addProfile(pointType, medians);
 		collection.getProfileCollection().addProfile(pointType+"25", q25);
 		collection.getProfileCollection().addProfile(pointType+"75", q75);
-//		collection.getProfileCollection().printKeys();
-
 	}
 
 	private static void createProfileAggregateFromPoint(INuclearCollection collection, String pointType){
@@ -171,16 +181,13 @@ public class MorphologyAnalysis {
 
 		ProfileCollection pc = collection.getProfileCollection();
 		// get the profile plots created
-		pc.preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-
+//		pc.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
 		// export the profiles
 		collection.drawProfilePlots();
 
 		pc.addMedianLineToPlots(collection.getOrientationPoint());
 
-		pc.exportProfilePlots(collection.getFolder()+
-				File.separator+
-				collection.getOutputFolderName(), collection.getType());
+		pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
 	}
 
 	private static double compareProfilesToMedian(INuclearCollection collection, String pointType){
@@ -198,10 +205,11 @@ public class MorphologyAnalysis {
 			createSegments(collection, pointType);
 			assignSegments(collection, pointType);
 			
-			ProfileCollection frankenProfiles = reviseSegments(collection, pointType);
-			
+			reviseSegments(collection, pointType);			
 
 			createProfileAggregates(collection);
+			
+			applySegmentsToOtherPointTypes(collection, pointType);
 		} catch(Exception e){
 			IJ.log("    Error segmenting: "+e.getMessage());
 			collection.getProfileCollection().printKeys();
@@ -281,7 +289,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static ProfileCollection reviseSegments(INuclearCollection collection, String pointType){
+	private static void reviseSegments(INuclearCollection collection, String pointType){
 		IJ.log("    Refining segment assignments...");
 		
 		ProfileCollection pc = collection.getProfileCollection();
@@ -306,25 +314,49 @@ public class MorphologyAnalysis {
 			frankenCollection.getAggregate(pointType).addValues(recombinedProfile);
 			frankenProfiles.add(recombinedProfile);
 		}
-		
+		frankenCollection.addNucleusProfiles(pointType, frankenProfiles);
 		// update the profile aggregate
 		frankenCollection.createProfileAggregateFromPoint(    pointType, (int) collection.getMedianArrayLength()    );
-		return frankenCollection;
+		frankenCollection.preparePlot(collection.getReferencePoint()  , INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+		frankenCollection.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+		
+		collection.setFrankenCollection(frankenCollection);
 	}
 	
-	private static void drawProfileCollection(ProfileCollection pc, INuclearCollection collection, String pointType, List<Profile> profiles){
-//		pc.preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+	private static void applySegmentsToOtherPointTypes(INuclearCollection collection, String pointType){
+
+		ProfileCollection pc = collection.getProfileCollection();
 		
+		Profile referenceProfile = pc.getProfile(pointType);
+		Profile orientProfile = pc.getProfile(collection.getOrientationPoint());
+		int offset = orientProfile.getSlidingWindowOffset(referenceProfile);
+		
+		pc.addSegments(collection.getOrientationPoint(), pointType, offset);
+	}
+
+	private static void drawProfileCollection(INuclearCollection collection, String pointType){
+
+		ProfileCollection pc = collection.getFrankenCollection();
+
+		// get the nucleus profiles
+		List<Profile> profiles = pc.getNucleusProfiles(pointType);
+
 		pc.drawProfilePlots(pointType, profiles);
 		pc.addMedianLineToPlots(pointType);
-		
+
 		pc.exportProfilePlots(collection.getFolder()+
 				File.separator+
 				collection.getOutputFolderName(), collection.getType());
 
 	}
 	
-	private static void exportVariabilityRegions(ProfileCollection pc, INuclearCollection collection, String pointType, List<Profile> profiles){
+	private static void exportVariabilityRegions(INuclearCollection collection, String pointType){
+		
+		ProfileCollection pc = collection.getFrankenCollection();
+		
+		// get the nucleus profiles
+		List<Profile> profiles = pc.getNucleusProfiles(pointType);
+		
 		// get the regions with the highest variability within the population
 		List<Integer> variableIndexes = pc.findMostVariableRegions(pointType);
 
@@ -332,7 +364,7 @@ public class MorphologyAnalysis {
 		// compare to 
 		// interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
 		// export clustering info
-		Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
+		Logger logger = new Logger(collection.getOutputFolder());
 		logger.addColumnHeading("ID");
 		logger.addColumnHeading("AREA");
 		logger.addColumnHeading("PERIMETER");

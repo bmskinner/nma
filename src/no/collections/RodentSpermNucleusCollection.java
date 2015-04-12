@@ -27,7 +27,7 @@ public class RodentSpermNucleusCollection
   // failure  codes
   public static final int FAILURE_TIP = 512;
   
-  private final String DEFAULT_REFERENCE_POINT = "tip";
+  private String DEFAULT_REFERENCE_POINT = "tip";
 
   public RodentSpermNucleusCollection(File folder, String outputFolder, String type){
       super(folder, outputFolder, type);

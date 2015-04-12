@@ -14,6 +14,7 @@ import java.util.Set;
 
 import no.analysis.ProfileSegmenter;
 import no.utility.Stats;
+import no.utility.Utils;
 
 public class ProfileCollection {
 	
@@ -35,7 +36,9 @@ public class ProfileCollection {
 	private Map<String, ProfilePlot> 		plots 		= new HashMap<String, ProfilePlot>();
 	private String collectionName; // the name of the NucleusCollection - e.g analysable, red, not_red
 	
-	private Map<String, List<NucleusBorderSegment>> segments 	= new HashMap<String, List<NucleusBorderSegment>>();
+	private Map<String, List<NucleusBorderSegment>> segments = new HashMap<String, List<NucleusBorderSegment>>();
+	private Map<String, List<Profile>> nucleusProfileList    = new HashMap<String, List<Profile>>();
+	
 		
 	public ProfileCollection(String name){
 		this.collectionName = name;
@@ -98,6 +101,17 @@ public class ProfileCollection {
 		}
 	}
 	
+	public List<Profile> getNucleusProfiles(String s){
+		if(s==null){
+			throw new IllegalArgumentException("The requested profile list key is null: "+s);
+		}
+		if(nucleusProfileList.containsKey(s)){	
+			return nucleusProfileList.get(s);
+		} else {
+			throw new IllegalArgumentException("The requested profile list key does not exist: "+s);
+		}
+	}
+	
 	// Add or update features
 	
 	public void addFeature(String s, ProfileFeature p){
@@ -130,6 +144,40 @@ public class ProfileCollection {
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
 		segments.put(s, n);
+	}
+	
+	/**
+	 * Create a list of segments based on an offset of existing segments
+	 * This is an alternative to re-segmenting while transition to indexing is in progress
+	 * @param pointToAdd the name of the pointType to add
+	 * @param referencePoint the name of the pointType to take segments from
+	 * @param offset the offset to apply to each segment
+	 */
+	public void addSegments(String pointToAdd, String referencePoint, int offset){
+		if(pointToAdd==null || referencePoint==null || Integer.valueOf(offset)==null){
+			throw new IllegalArgumentException("String or offset is null or empty");
+		}
+		List<NucleusBorderSegment> referenceList =  getSegments(referencePoint);
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
+		for(NucleusBorderSegment s : referenceList){
+			
+			int newStart = Utils.wrapIndex( s.getStartIndex()+ offset , getProfile(referencePoint).size());
+			int newEnd = Utils.wrapIndex( s.getEndIndex()+ offset , getProfile(referencePoint).size());
+			
+			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd);
+			c.setSegmentType(s.getSegmentType());
+			
+			result.add(c);
+		}
+		
+		segments.put(pointToAdd, result);
+	}
+	
+	public void addNucleusProfiles(String s, List<Profile> n){
+		if(s==null || n==null || n.isEmpty()){
+			throw new IllegalArgumentException("String or segment list is null or empty");
+		}
+		nucleusProfileList.put(s, n);
 	}
 	
 	
@@ -270,27 +318,27 @@ public class ProfileCollection {
 //			IJ.log("    Variable index "+values.get(i));
 		}
 		
-		// draw the IQR - only needed during debugging. Can be removed later.
-		Plot  plot = this.getPlots(pointType).get("iqr");
-		double[] xPoints  = iqrProfile.getPositions(100).asArray();
-		plot.setColor(Color.DARK_GRAY);
-		plot.addPoints(xPoints, iqrProfile.asArray(), Plot.LINE);
-		plot.setColor(Color.LIGHT_GRAY);
-		plot.addPoints(xPoints, iqrProfile.smooth(3).asArray(), Plot.LINE);
-		plot.setColor(Color.DARK_GRAY);
-		for(int i=0;i<maxima.size();i++){
-			double x = xPoints[i];
-			if(maxima.get(i)==1){
-				plot.drawLine(x, 0, x, iqrProfile.get(i) );
-			}
-		}
-		plot.setColor(Color.RED);
-		for(int i : values.keySet()){
-			int index = values.get(i);
-			double x = xPoints[index];
-			plot.drawLine(x, iqrProfile.get(index), x, displayMaxima.get(index));
-		}
-		// end of stuff that can be removed
+//		// draw the IQR - only needed during debugging. Can be removed later.
+//		Plot  plot = this.getPlots(pointType).get("iqr");
+//		double[] xPoints  = iqrProfile.getPositions(100).asArray();
+//		plot.setColor(Color.DARK_GRAY);
+//		plot.addPoints(xPoints, iqrProfile.asArray(), Plot.LINE);
+//		plot.setColor(Color.LIGHT_GRAY);
+//		plot.addPoints(xPoints, iqrProfile.smooth(3).asArray(), Plot.LINE);
+//		plot.setColor(Color.DARK_GRAY);
+//		for(int i=0;i<maxima.size();i++){
+//			double x = xPoints[i];
+//			if(maxima.get(i)==1){
+//				plot.drawLine(x, 0, x, iqrProfile.get(i) );
+//			}
+//		}
+//		plot.setColor(Color.RED);
+//		for(int i : values.keySet()){
+//			int index = values.get(i);
+//			double x = xPoints[index];
+//			plot.drawLine(x, iqrProfile.get(index), x, displayMaxima.get(index));
+//		}
+//		// end of stuff that can be removed
 		
 		
 		return result;

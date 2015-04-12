@@ -1,9 +1,7 @@
 package no.analysis;
 
-import ij.IJ;
-import ij.ImagePlus;
+
 import ij.gui.Plot;
-import ij.measure.Calibration;
 
 import java.awt.Color;
 import java.util.ArrayList;

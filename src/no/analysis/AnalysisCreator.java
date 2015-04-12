@@ -70,7 +70,7 @@ public class AnalysisCreator {
   }
 
   public void initialise(){
-	  
+
 	  analysisOptions = new AnalysisSetup();
 	  if(analysisOptions.run()){
 
@@ -254,7 +254,6 @@ public class AnalysisCreator {
             INuclearFunctions subNucleus  = (INuclearFunctions) nucleusConstructor.newInstance(p);
             subNucleus.findPointsAroundBorder();
 
-            // RodentSpermNucleus p = new RodentSpermNucleus(n);
             spermNuclei.addNucleus(subNucleus);
           }
           this.nuclearPopulations.add(spermNuclei);
@@ -326,7 +325,7 @@ public class AnalysisCreator {
       // measure general nuclear organisation
       SignalAnalysis.run(r);
       
-      // Perform shell analysis
+      // Perform shell analysis with 5 shells by default
       ShellAnalysis.run(r, 5);
       
       // export the stats files

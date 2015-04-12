@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.nuclei.INuclearFunctions;

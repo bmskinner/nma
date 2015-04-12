@@ -126,6 +126,8 @@ public interface INuclearCollection
 //	public void addSignalsToProfileCharts();
 
 	public ProfileCollection getProfileCollection();
+	public ProfileCollection getFrankenCollection();
+	public void setFrankenCollection (ProfileCollection frankenCollection);
 	
 //	public void exportProfiles();
 	
