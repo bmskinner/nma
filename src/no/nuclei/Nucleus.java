@@ -295,6 +295,7 @@ public class Nucleus
 		String outPath = this.nucleusFolder.getAbsolutePath()+
 											File.separator+
 											Nucleus.IMAGE_PREFIX+
+											this.getImageName()+"-"+
 											this.getNucleusNumber()+
 											".enlarged.tiff";
 		return outPath;

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
 import no.nuclei.INuclearFunctions;
 
@@ -24,6 +25,10 @@ public class ShellAnalysis {
 		
 		if(collection.getSignalCount()==0){
 			return; // only bother if there are signals
+		}
+		
+		if(collection.getClass() != NucleusCollection.class){
+			return; // only analyse round nuclei
 		}
 		
 		IJ.log("    Performing shell analysis...");

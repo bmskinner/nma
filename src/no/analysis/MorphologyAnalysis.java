@@ -54,6 +54,8 @@ public class MorphologyAnalysis {
 		} catch(Exception e){
 			IJ.log("    Error in morphology analysis: "+e.getMessage());
 			IJ.log("      Collection:");
+			IJ.append("Error in morphology analysis: "+e.getMessage(), collection.getDebugFile().getAbsolutePath());
+			IJ.append(e.getStackTrace().toString(), collection.getDebugFile().getAbsolutePath());
 			collection.getProfileCollection().printKeys();
 			IJ.log("      FrankenCollection:");
 			collection.getFrankenCollection().printKeys();
@@ -104,22 +106,28 @@ public class MorphologyAnalysis {
 	 * When a population needs to be reanalysed do not offset nuclei or recalculate best fits;
 	 * just get the new median profile 
 	 * @param collection the collection of nuclei
+	 * @param sourceCollection the collection with segments to copy
 	 */
 	public static void reapplyProfiles(INuclearCollection collection, INuclearCollection sourceCollection){
 		
-		String pointType = collection.getReferencePoint();
+		IJ.log("    Applying existing seegmentation profile to population...");
 		
-		createProfileAggregateFromPoint(collection, pointType, (int)sourceCollection.getMedianArrayLength());
-		createProfileAggregateFromPoint(collection, collection.getOrientationPoint(), (int)sourceCollection.getMedianArrayLength());
+		String referencePoint = collection.getReferencePoint();
+		String orientationPoint = collection.getOrientationPoint();
+		
+		createProfileAggregateFromPoint(collection, referencePoint, (int)sourceCollection.getMedianArrayLength());
+		createProfileAggregateFromPoint(collection, orientationPoint, (int)sourceCollection.getMedianArrayLength());
 		
 		ProfileCollection pc = collection.getProfileCollection();
 		ProfileCollection sc = sourceCollection.getProfileCollection();
 		
-		pc.addSegments(pointType, sc.getSegments(pointType));
-		pc.addSegments(sourceCollection.getOrientationPoint(), sc.getSegments(collection.getOrientationPoint()));
+		pc.addSegments(referencePoint, sc.getSegments(referencePoint));
+		pc.addSegments(sourceCollection.getOrientationPoint(), sc.getSegments(orientationPoint));
 		pc.preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-		pc.addMedianLineToPlots(collection.getOrientationPoint());
+		pc.addMedianLineToPlots(orientationPoint);
 		pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
+		
+		IJ.log("    Re-profiling complete");
 	}
 	
 	/**
@@ -214,7 +222,7 @@ public class MorphologyAnalysis {
 			IJ.log("    Error segmenting: "+e.getMessage());
 			collection.getProfileCollection().printKeys();
 		}
-		IJ.log("    Segmentation complete...");
+		IJ.log("    Segmentation complete");
 	}
 	
 	/**

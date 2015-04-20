@@ -348,7 +348,10 @@ public class AnalysisCreator {
         IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
         IJ.log("    ----------------------------- ");
         
-        MorphologyAnalysis.run(p);
+//        MorphologyAnalysis.run(p);
+        // use the same segmentation from the initial analysis
+        MorphologyAnalysis.reapplyProfiles(p, r);
+        
         SignalAnalysis.run(p);
         ShellAnalysis.run(p, 5);
         StatsExporter.run(p);
