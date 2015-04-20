@@ -33,7 +33,7 @@ public class StatsExporter {
 		Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		logger.addColumn("PATH",     collection.getCleanNucleusPaths());
 		logger.addColumn("POSITION", collection.getPositions());
-		logger.export(filename);
+		logger.export(filename+"."+collection.getType());
 	}
 	
 	public static void exportAngleProfiles(INuclearCollection collection){
