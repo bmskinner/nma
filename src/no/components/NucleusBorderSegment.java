@@ -10,10 +10,16 @@
 */  
 package no.components;
 
+import java.io.Serializable;
+
 import ij.IJ;
 
-public class NucleusBorderSegment{
+public class NucleusBorderSegment  implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int startIndex;
 	private int endIndex;
 	private String segmentType;

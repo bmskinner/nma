@@ -1,5 +1,7 @@
 package no.components;
 
+import java.io.Serializable;
+
 import ij.gui.Roi;
 
 /*
@@ -8,20 +10,21 @@ import ij.gui.Roi;
   -----------------------
   Contains the variables for storing a signal within the nucleus
 */  
-public class NuclearSignal {
+public class NuclearSignal implements Serializable {
 
-  private double area;
-  private double perimeter;
-  private double feret;
-  private double angleFromReferencePoint;
-  private double distanceFromCentreOfMass; // the absolute measured distance from the signal CoM to the nuclear CoM
-  private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
+	private static final long serialVersionUID = 1L;
+	private double area;
+	private double perimeter;
+	private double feret;
+	private double angleFromReferencePoint;
+	private double distanceFromCentreOfMass; // the absolute measured distance from the signal CoM to the nuclear CoM
+	private double fractionalDistanceFromCoM; // the distance to the centre of mass as a fraction of the distance from the CoM to the closest border
 
-  private XYPoint centreOfMass;
-  private int closestNuclearBorderPoint;
-  private String origin;
+	private XYPoint centreOfMass;
+	private int closestNuclearBorderPoint;
+	private String origin;
 
-  private Roi roi;
+	private Roi roi;
 
   public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass, String origin){
     this.roi = roi;

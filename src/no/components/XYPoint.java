@@ -8,8 +8,14 @@
 
 package no.components;
 
-public class XYPoint {
-  private double x;
+import java.io.Serializable;
+
+public class XYPoint  implements Serializable{
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private double x;
   private double y;
   
   /**

@@ -13,7 +13,11 @@ public class NucleusBorderPoint
 	extends no.components.XYPoint 
 {
 
-  private double minAngle;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private double minAngle;
   private double interiorAngle; // depends on whether the min angle is inside or outside the shape
   private double interiorAngleDelta; // this will hold the difference between a previous interiorAngle and a next interiorAngle
   private double interiorAngleDeltaSmoothed; // holds delta from a 5-window average centred on this point

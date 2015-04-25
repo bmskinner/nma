@@ -21,6 +21,7 @@ import java.util.*;
 import no.nuclei.*;
 import no.collections.*;
 import no.export.CompositeExporter;
+import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.gui.AnalysisSetup;
 import no.gui.PopulationSplitWindow;
@@ -337,6 +338,9 @@ public class AnalysisCreator {
 
       // refold the median consensus nucleus
       CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+      
+      // export the population to a save file for later
+      PopulationExporter.savePopulation(r);
 
       ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
       
@@ -358,6 +362,9 @@ public class AnalysisCreator {
         p.annotateAndExportNuclei();
         CompositeExporter.run(p);
         CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+        
+        // export the population to a save file for later
+        PopulationExporter.savePopulation(p);
       }
       collectionNucleusCounts.put(folder, nucleusCounts);
     }
@@ -470,7 +477,7 @@ public class AnalysisCreator {
             } //else
         } //else
       } //for(String s : keys)
-      String outPath = r.getFolder().getAbsolutePath()+File.separator+this.outputFolderName+File.separator+"logAnalysis.txt";
+      String outPath = r.getFolder().getAbsolutePath()+File.separator+this.outputFolderName+File.separator+"log.analysis.txt";
       IJ.append( outLine.toString(), outPath);
     }
   }

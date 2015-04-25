@@ -18,9 +18,9 @@ import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.Serializable;
 import java.util.*;
 
-import no.analysis.Detector;
 import no.analysis.ProfileSegmenter;
 import no.utility.*;
 import no.components.*;
@@ -33,9 +33,13 @@ import no.export.Logger;
  *
  */
 public class Nucleus 
-	implements no.nuclei.INuclearFunctions
+	implements no.nuclei.INuclearFunctions, Serializable
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static final int RED_CHANNEL   = 0;
 	public static final int GREEN_CHANNEL = 1;
 	public static final int BLUE_CHANNEL  = 2;
@@ -46,12 +50,6 @@ public class Nucleus
 	public static final int ALL_POINTS = 0;
 	public static final int BORDER_POINTS = 1;
 	public static final int BORDER_TAGS = 2;
-
-
-	// Values for deciding whether an object is a signal
-	private int    signalThreshold = 70;
-	private double minSignalSize  = 5; // how small can a signal be
-	private double maxSignalFraction = 0.5; // allow up to 50% of nucleus to be signal
 
 	public static final String IMAGE_PREFIX = "export.";
 
@@ -91,9 +89,9 @@ public class Nucleus
 	
 	private Roi roi; // the original nucleus ROI
 
-	private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
-	private ImageStack enlargedPlanes; // a copy of the input nucleus for use in later reanalyses that need a particle detector
-	private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
+	transient private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
+	transient private ImageStack enlargedPlanes; // a copy of the input nucleus for use in later reanalyses that need a particle detector
+	transient private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
 
 	protected SignalCollection signalCollection = new SignalCollection();
 
@@ -200,23 +198,26 @@ public class Nucleus
 		// calculate angle profile
 		try{
 			this.calculateAngleProfile(angleProfileWindowSize);
-		 } catch(Exception e){
-			 IJ.log("Cannot create angle profile: "+e);
-		 } 
+		} catch(Exception e){
+			IJ.log("Cannot create angle profile: "+e);
+		} 
 
-		 // calc distances around nucleus through CoM
-		 this.calculateDistanceProfile();
-		 this.calculateSingleDistanceProfile();
-		 this.calculatePathLength();
+		// calc distances around nucleus through CoM
+		this.calculateDistanceProfile();
+		this.calculateSingleDistanceProfile();
+		this.calculatePathLength();
+
+		this.calculateSignalDistancesFromCoM();
+		this.calculateFractionalSignalDistancesFromCoM();
 	}
 
 	// find and measure signals. Call after constructor to allow alteration of 
 	// thresholding and size parameters
-	public void detectSignalsInNucleus(){
-		this.measureSignalsInNucleus();
-		this.calculateSignalDistancesFromCoM();
-		this.calculateFractionalSignalDistancesFromCoM();
-	}
+//	public void detectSignalsInNucleus(){
+////		this.measureSignalsInNucleus();
+//		this.calculateSignalDistancesFromCoM();
+//		this.calculateFractionalSignalDistancesFromCoM();
+//	}
 
 	/*
 		-----------------------
@@ -507,17 +508,17 @@ public class Nucleus
 		this.failureCode = this.failureCode | i;
 	}
 
-	public void setMinSignalSize(double d){
-		this.minSignalSize = d;
-	}
-
-	public void setMaxSignalFraction(double d){
-		this.maxSignalFraction = d;
-	}
-
-	public void setSignalThreshold(int i){
-		this.signalThreshold = i;
-	}
+//	public void setMinSignalSize(double d){
+//		this.minSignalSize = d;
+//	}
+//
+//	public void setMaxSignalFraction(double d){
+//		this.maxSignalFraction = d;
+//	}
+//
+//	public void setSignalThreshold(int i){
+//		this.signalThreshold = i;
+//	}
 
 	public void setAngleProfileWindowSize(int i){
 		this.angleProfileWindowSize = i;
@@ -621,47 +622,47 @@ public class Nucleus
 		-----------------------
 	*/
 
-	private void measureSignalsInNucleus(){
-
-		// find the signals
-		// within nuclear roi, analyze particles in colour channels
-		// the nucleus is in index 1, so from 2 to end
-		for(int channel=ImageImporter.FIRST_SIGNAL_CHANNEL;channel<=this.imagePlanes.getSize();channel++){
-			
-			Detector detector = new Detector();
-			detector.setMaxSize(this.getArea() * this.maxSignalFraction);
-			detector.setMinSize(this.minSignalSize);
-			detector.setMinCirc(0);
-			detector.setMaxCirc(1);
-			detector.setThreshold(this.signalThreshold);
-			detector.setChannel(channel);
-			try{
-				detector.run(imagePlanes);
-			} catch(Exception e){
-				IJ.log("Error in signal detection: "+e.getMessage());
-			}
-			List<Roi> roiList = detector.getRoiList();
-			
-			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
-			
-			if(!roiList.isEmpty()){
-				
-				for( Roi r : roiList){
-					
-					StatsMap values = detector.measure(r, imagePlanes);
-					NuclearSignal n = new NuclearSignal( r, 
-							values.get("Area"), 
-							values.get("Feret"), 
-							values.get("Perim"), 
-							new XYPoint(values.get("XM"), values.get("YM")),
-							this.getImageName()+"-"+this.getNucleusNumber());
-
-					signals.add(n);
-				}
-			} 
-			this.signalCollection.addChannel(signals, channel);
-		} 
-	}
+//	private void measureSignalsInNucleus(){
+//
+//		// find the signals
+//		// within nuclear roi, analyze particles in colour channels
+//		// the nucleus is in index 1, so from 2 to end
+//		for(int channel=ImageImporter.FIRST_SIGNAL_CHANNEL;channel<=this.imagePlanes.getSize();channel++){
+//			
+//			Detector detector = new Detector();
+//			detector.setMaxSize(this.getArea() * this.maxSignalFraction);
+//			detector.setMinSize(this.minSignalSize);
+//			detector.setMinCirc(0);
+//			detector.setMaxCirc(1);
+//			detector.setThreshold(this.signalThreshold);
+//			detector.setChannel(channel);
+//			try{
+//				detector.run(imagePlanes);
+//			} catch(Exception e){
+//				IJ.log("Error in signal detection: "+e.getMessage());
+//			}
+//			List<Roi> roiList = detector.getRoiList();
+//			
+//			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
+//			
+//			if(!roiList.isEmpty()){
+//				
+//				for( Roi r : roiList){
+//					
+//					StatsMap values = detector.measure(r, imagePlanes);
+//					NuclearSignal n = new NuclearSignal( r, 
+//							values.get("Area"), 
+//							values.get("Feret"), 
+//							values.get("Perim"), 
+//							new XYPoint(values.get("XM"), values.get("YM")),
+//							this.getImageName()+"-"+this.getNucleusNumber());
+//
+//					signals.add(n);
+//				}
+//			} 
+//			this.signalCollection.addChannel(signals, channel);
+//		} 
+//	}
 	
 	public Set<Integer> getSignalChannels(){
 		return signalCollection.getChannels();

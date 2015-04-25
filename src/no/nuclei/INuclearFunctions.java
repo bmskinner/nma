@@ -112,11 +112,11 @@ public interface INuclearFunctions
 
   public void updateFailureCode(int i);
 
-  public void setMinSignalSize(double d);
-
-  public void setMaxSignalFraction(double d);
-
-  public void setSignalThreshold(int i);
+//  public void setMinSignalSize(double d);
+//
+//  public void setMaxSignalFraction(double d);
+//
+//  public void setSignalThreshold(int i);
 
   public void setBorderList(List<NucleusBorderPoint> list);
 

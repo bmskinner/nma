@@ -27,11 +27,6 @@ import no.components.*;
 
 public class NucleusDetector {
 
-	// colour channels
-//  public static final int RED_CHANNEL   = 0;
-//  public static final int GREEN_CHANNEL = 1;
-//  public static final int BLUE_CHANNEL  = 2;
-
   protected static final String IMAGE_PREFIX = "export.";
 
   private static final String[] prefixesToIgnore = { IMAGE_PREFIX, "composite", "plot"};
@@ -460,13 +455,17 @@ public class NucleusDetector {
 		  currentNucleus.setPerimeter(values.get("Perim"));
 	
 		  currentNucleus.setOutputFolder(this.outputFolder);
+		  
+		  SignalDetector signalDetector = new SignalDetector();
+	
+		  signalDetector.setSignalThreshold(this.signalThreshold);
+		  signalDetector.setMinSignalSize(this.minSignalSize);
+		  signalDetector.setMaxSignalFraction(this.maxSignalFraction);
+		  signalDetector.run(currentNucleus);
+		  
 		  currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
-	
-		  currentNucleus.setSignalThreshold(this.signalThreshold);
-		  currentNucleus.setMinSignalSize(this.minSignalSize);
-		  currentNucleus.setMaxSignalFraction(this.maxSignalFraction);
-	
-		  currentNucleus.detectSignalsInNucleus();
+		  
+//		  currentNucleus.detectSignalsInNucleus();
 		  currentNucleus.annotateNucleusImage();
 	
 		  // if everything checks out, add the measured parameters to the global pool

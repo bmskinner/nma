@@ -3,6 +3,7 @@ package no.components;
 import ij.IJ;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,12 @@ import no.utility.ImageImporter;
  * and links to the channel number in the ImageStack for the nucleus.
  *
  */
-public class SignalCollection {
+public class SignalCollection implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Holds the signals

@@ -6,13 +6,18 @@
 
 package no.components;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import ij.IJ;
 import no.utility.*;
 
-public class Profile {
+public class Profile implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private double[] array;
 	private static final int ARRAY_BEFORE = -1;
 	private static final int ARRAY_AFTER = 1;
