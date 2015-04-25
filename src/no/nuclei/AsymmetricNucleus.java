@@ -11,9 +11,13 @@
 */  
 package no.nuclei;
 
+import ij.IJ;
+import ij.ImagePlus;
 import ij.process.ImageProcessor;
+
 import java.awt.Color;
 import java.util.*;
+
 import no.components.*;
 
 public class AsymmetricNucleus
@@ -58,13 +62,16 @@ public class AsymmetricNucleus
 
   // draw the points considered as sperm tails
   public void annotateEstimatedTailPoints(){
-    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+	  ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
+		ImageProcessor ip = annotatedImage.getProcessor();
+//    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
     ip.setLineWidth(3);
     ip.setColor(Color.GRAY);
     for(int j=0; j<this.getEstimatedTailPoints().size();j++){
       NucleusBorderPoint p = this.getEstimatedTailPoints().get(j);
       ip.drawDot(p.getXAsInt(), p.getYAsInt());
     }
+    IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
   }
 
   public void annotateFeatures(){

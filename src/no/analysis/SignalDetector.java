@@ -18,41 +18,41 @@ public class SignalDetector {
 	private  int    signalThreshold = 70;
 	private  double   minSignalSize = 5;
 	private  double   maxSignalFraction = 0.5;
-		
+
 	public SignalDetector(){
-		
+
 	}
-	
+
 	public void setSignalThreshold(int i){
 		if(i<0){
 			throw new IllegalArgumentException("Value must be positive");
 		}
 		this.signalThreshold = i;
 	}
-	
+
 	public void setMinSignalSize(double d){
 		if(d<0){
 			throw new IllegalArgumentException("Value must be positive");
 		}
 		this.minSignalSize = d;
 	}
-	
+
 	public void setMaxSignalFraction(double d){
 		if(d<0 || d>1){
 			throw new IllegalArgumentException("Value must be between 0 and 1");
 		}
 		this.maxSignalFraction = d;
 	}
-	
+
 	public void run(INuclearFunctions n){
-				
+
 		SignalCollection signalCollection = n.getSignalCollection();
 
 		// find the signals
 		// within nuclear roi, analyze particles in colour channels
 		// the nucleus is in index 1, so from 2 to end
 		for(int channel=ImageImporter.FIRST_SIGNAL_CHANNEL;channel<=n.getImagePlanes().getSize();channel++){
-			
+
 			Detector detector = new Detector();
 			detector.setMaxSize(n.getArea() * this.maxSignalFraction);
 			detector.setMinSize(this.minSignalSize);
@@ -66,13 +66,13 @@ public class SignalDetector {
 				IJ.log("Error in signal detection: "+e.getMessage());
 			}
 			List<Roi> roiList = detector.getRoiList();
-			
+
 			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
-			
+
 			if(!roiList.isEmpty()){
-				
+
 				for( Roi r : roiList){
-					
+
 					StatsMap values = detector.measure(r, n.getImagePlanes());
 					NuclearSignal s = new NuclearSignal( r, 
 							values.get("Area"), 
@@ -87,5 +87,4 @@ public class SignalDetector {
 			signalCollection.addChannel(signals, channel);
 		} 
 	}
-
 }

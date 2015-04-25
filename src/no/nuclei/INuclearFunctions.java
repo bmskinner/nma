@@ -37,7 +37,7 @@ public interface INuclearFunctions
 	
 	public ImageStack getImagePlanes();
 
-	public ImagePlus getAnnotatedImage();
+//	public ImagePlus getAnnotatedImage();
 
 	public ImageStack getEnlargedPlanes();
 
@@ -133,10 +133,6 @@ public interface INuclearFunctions
 
   public double getMinY();
 
-//  public int getRedSignalCount();
-//
-//  public int getGreenSignalCount();
-
   /*
     -----------------------
     Set miscellaneous features
@@ -154,15 +150,9 @@ public interface INuclearFunctions
     -----------------------
   */
 
-//  public List<NuclearSignal> getRedSignals();
-//
-//  public List<NuclearSignal> getGreenSignals();
-
   public void addRedSignal(NuclearSignal n);
 
   public void addGreenSignal(NuclearSignal n);
-
-//  public double[][] getSignalDistanceMatrix();
 
   /*
     -----------------------
@@ -232,7 +222,7 @@ public interface INuclearFunctions
     Export the current image state, with
     any annotations to export.nn.annotated.tiff
   */
-  public void exportAnnotatedImage();
+//  public void exportAnnotatedImage();
 
   public void annotateNucleusImage();
   

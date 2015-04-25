@@ -91,7 +91,8 @@ public class Nucleus
 
 	transient private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
 	transient private ImageStack enlargedPlanes; // a copy of the input nucleus for use in later reanalyses that need a particle detector
-	transient private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
+//	transient private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
+//	private File annotatedImageFile; // the name of the annotated image
 
 	protected SignalCollection signalCollection = new SignalCollection();
 
@@ -105,7 +106,9 @@ public class Nucleus
 		// assign main features
 		this.roi             = roi;
 		this.imagePlanes     = image;
-		this.annotatedImage  = ImageExporter.convert(image.duplicate()); // NEEDS TO BE A COPY
+//		this.annotatedImage  = ImageExporter.convert(image.duplicate()); // NEEDS TO BE A COPY
+//		IJ.saveAsTiff(ImageExporter.convert(image.duplicate()), this.getAnnotatedImagePath());
+		
 		this.enlargedPlanes  = enlarged;
 		this.sourceFile      = file;
 		this.nucleusNumber   = number;
@@ -123,7 +126,7 @@ public class Nucleus
 		this.setSourceFile(n.getSourceFile());
 		this.setOutputFolder(n.getOutputFolderName());
 		
-		this.setAnnotatedImage(n.getAnnotatedImage());
+//		this.setAnnotatedImage(n.getAnnotatedImage());
 		this.setImagePlanes(n.getImagePlanes());
 		this.setEnlargedPlanes(n.getEnlargedPlanes());
 		
@@ -186,6 +189,8 @@ public class Nucleus
 			outPath = this.getEnlargedImagePath();
 			IJ.saveAsTiff(ImageExporter.convert(this.enlargedPlanes), outPath);
 //			IJ.log("Exported enlarged");
+			IJ.saveAsTiff(ImageExporter.convert(this.imagePlanes.duplicate()), this.getAnnotatedImagePath());
+			
 		 } catch(Exception e){
 				IJ.log("Error saving original image or enlarged image: "+e.getMessage());
 		 }
@@ -211,23 +216,11 @@ public class Nucleus
 		this.calculateFractionalSignalDistancesFromCoM();
 	}
 
-	// find and measure signals. Call after constructor to allow alteration of 
-	// thresholding and size parameters
-//	public void detectSignalsInNucleus(){
-////		this.measureSignalsInNucleus();
-//		this.calculateSignalDistancesFromCoM();
-//		this.calculateFractionalSignalDistancesFromCoM();
-//	}
-
 	/*
 		-----------------------
 		Getters for basic values within nucleus
 		-----------------------
 	*/
-
-	// public INuclearFunctions copy(){
-	// 	return new Nucleus(this);
-	// }
 
 	public Roi getRoi(){
 		return this.roi;
@@ -250,16 +243,8 @@ public class Nucleus
 		return new File(this.nucleusFolder.getAbsolutePath());
 	}
 
-//	public ImagePlus getSourceImage(){
-//		return new ImagePlus("source", this.sourceImage.getProcessor().duplicate());
-//	}
-
-	public ImagePlus getAnnotatedImage(){
-		return new ImagePlus("annotated", this.annotatedImage.getProcessor().duplicate());
-	}
-
-//	public ImagePlus getEnlargedImage(){
-//		return this.enlargedImage;
+//	public ImagePlus getAnnotatedImage(){
+//		return new ImagePlus("annotated", this.annotatedImage.getProcessor().duplicate());
 //	}
 	
 	public ImageStack getImagePlanes(){
@@ -425,10 +410,6 @@ public class Nucleus
 		this.position = p;
 	}
 
-	// protected void setMedianAngle(double d){
-	//   this.medianAngle = d;
-	// }
-
 	public void setPerimeter(double d){
 		this.perimeter = d;
 	}
@@ -449,32 +430,14 @@ public class Nucleus
 	protected void setSignals(SignalCollection collection){
 		this.signalCollection = collection;
 	}
-	
-
-//	protected void setRedSignals(List<NuclearSignal> d){
-//		this.redSignals = d;
-//	}
-//
-//	protected void setGreenSignals(List<NuclearSignal> d){
-//		this.greenSignals = d;
-//	}
 
 	public void setPolygon(FloatPolygon p){
 		this.smoothedPolygon = p;
 	}
 
-
-//	protected void setSignalDistanceMatrix(double[][] d){
-//		this.distancesBetweenSignals = d;
-//	}
-
 	protected void setRoi(Roi d){
 		this.roi = d;
 	}
-
-//	protected void setSourceImage(ImagePlus d){
-//		this.sourceImage = d.duplicate();
-//	}
 
 	protected void setSourceFile(File d){
 		this.sourceFile = d;
@@ -484,12 +447,8 @@ public class Nucleus
 		this.imagePlanes = s;
 	}
 
-	protected void setAnnotatedImage(ImagePlus d){
-		this.annotatedImage = d.duplicate();
-	}
-
-//	protected void setEnlargedImage(ImagePlus d){
-//		this.enlargedImage = d.duplicate();
+//	protected void setAnnotatedImage(ImagePlus d){
+//		this.annotatedImage = d.duplicate();
 //	}
 	
 	protected void setEnlargedPlanes(ImageStack s){
@@ -507,18 +466,6 @@ public class Nucleus
 	public void updateFailureCode(int i){
 		this.failureCode = this.failureCode | i;
 	}
-
-//	public void setMinSignalSize(double d){
-//		this.minSignalSize = d;
-//	}
-//
-//	public void setMaxSignalFraction(double d){
-//		this.maxSignalFraction = d;
-//	}
-//
-//	public void setSignalThreshold(int i){
-//		this.signalThreshold = i;
-//	}
 
 	public void setAngleProfileWindowSize(int i){
 		this.angleProfileWindowSize = i;
@@ -621,48 +568,6 @@ public class Nucleus
 		Process and fetch signals
 		-----------------------
 	*/
-
-//	private void measureSignalsInNucleus(){
-//
-//		// find the signals
-//		// within nuclear roi, analyze particles in colour channels
-//		// the nucleus is in index 1, so from 2 to end
-//		for(int channel=ImageImporter.FIRST_SIGNAL_CHANNEL;channel<=this.imagePlanes.getSize();channel++){
-//			
-//			Detector detector = new Detector();
-//			detector.setMaxSize(this.getArea() * this.maxSignalFraction);
-//			detector.setMinSize(this.minSignalSize);
-//			detector.setMinCirc(0);
-//			detector.setMaxCirc(1);
-//			detector.setThreshold(this.signalThreshold);
-//			detector.setChannel(channel);
-//			try{
-//				detector.run(imagePlanes);
-//			} catch(Exception e){
-//				IJ.log("Error in signal detection: "+e.getMessage());
-//			}
-//			List<Roi> roiList = detector.getRoiList();
-//			
-//			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
-//			
-//			if(!roiList.isEmpty()){
-//				
-//				for( Roi r : roiList){
-//					
-//					StatsMap values = detector.measure(r, imagePlanes);
-//					NuclearSignal n = new NuclearSignal( r, 
-//							values.get("Area"), 
-//							values.get("Feret"), 
-//							values.get("Perim"), 
-//							new XYPoint(values.get("XM"), values.get("YM")),
-//							this.getImageName()+"-"+this.getNucleusNumber());
-//
-//					signals.add(n);
-//				}
-//			} 
-//			this.signalCollection.addChannel(signals, channel);
-//		} 
-//	}
 	
 	public Set<Integer> getSignalChannels(){
 		return signalCollection.getChannels();
@@ -1021,19 +926,25 @@ public class Nucleus
 	}
 
 	public void annotateTail(){
-		ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+//		ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+		ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
+		ImageProcessor ip = annotatedImage.getProcessor();
 		ip.setColor(Color.CYAN);
 		ip.setLineWidth(3);
 		ip.drawDot( this.getBorderTag("tail").getXAsInt(), 
 				this.getBorderTag("tail").getYAsInt());
+		IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
 	}
 
 	public void annotateHead(){
-		ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+//		ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+		ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
+		ImageProcessor ip = annotatedImage.getProcessor();
 		ip.setColor(Color.YELLOW);
 		ip.setLineWidth(3);
 		ip.drawDot( this.getBorderTag("head").getXAsInt(), 
 				this.getBorderTag("head").getYAsInt());
+		IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
 	}
 	
 	public double findRotationAngle(){
@@ -1146,10 +1057,10 @@ public class Nucleus
 		Export the current image state, with
 		any annotations to export.nn.annotated.tiff
 	*/
-	public void exportAnnotatedImage(){
-		String outPath = this.getAnnotatedImagePath();
-		IJ.saveAsTiff(annotatedImage, outPath);
-	}
+//	public void exportAnnotatedImage(){
+////		String outPath = this.getAnnotatedImagePath();
+////		IJ.saveAsTiff(annotatedImage, outPath);
+//	}
 
 	/**
 	 * Export an image of the raw profile for this nucleus to
@@ -1165,10 +1076,14 @@ public class Nucleus
 	 *	Narrowest diameter across nucleus
 	 */
 	public void annotateNucleusImage(){ 
+		
+		ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
 
 		try{
 
-			ImageProcessor ip = this.annotatedImage.getProcessor();
+			
+			ImageProcessor ip = annotatedImage.getProcessor();
+//			ImageProcessor ip = this.annotatedImage.getProcessor();
 
 			// draw the features of interest
 			
@@ -1249,6 +1164,8 @@ public class Nucleus
 			for( NucleusBorderSegment s : segmentList){
 				s.print();
 			}
+		} finally {
+			IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
 		}
 	}
 

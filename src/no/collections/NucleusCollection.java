@@ -75,7 +75,7 @@ implements INuclearCollection
 	for(INuclearFunctions n : this.nucleiCollection){
 		n.annotateNucleusImage();
 		n.annotateFeatures();
-		n.exportAnnotatedImage();
+//		n.exportAnnotatedImage();
 	}
   }
   

@@ -8,6 +8,8 @@
 */  
 package no.nuclei.sperm;
 
+import ij.IJ;
+import ij.ImagePlus;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
@@ -423,8 +425,9 @@ public class RodentSpermNucleus
 
   public void annotateFeatures(){
 
-    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-
+//    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+    ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
+	ImageProcessor ip = annotatedImage.getProcessor();
     //draw the sperm tip 
     ip.setLineWidth(5);
     ip.setColor(Color.YELLOW);
@@ -444,5 +447,6 @@ public class RodentSpermNucleus
                   this.getBorderTag("intersectionPoint").getXAsInt(), 
                   this.getBorderTag("intersectionPoint").getYAsInt());
     }
+    IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
   }
 }
