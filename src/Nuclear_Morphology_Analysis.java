@@ -10,21 +10,37 @@
   mass (CoM) and sperm tip. Works with both red and green channels.
   It also generates a profile of the nuclear shape, allowing
   morphology comparisons
-*/
+ */
+import java.awt.EventQueue;
+import java.awt.event.MouseEvent;
+
 import ij.plugin.PlugIn;
 import no.analysis.AnalysisCreator;
+import no.gui.MainWindow;
 
 public class Nuclear_Morphology_Analysis
-  implements PlugIn
+implements PlugIn
+
 {
-   
-   /* 
+
+	/* 
     The first method to be run when the plugin starts.
-  */
-  public void run(String paramString)  {
-    
-    AnalysisCreator analysisCreator = new AnalysisCreator();
-    analysisCreator.run();
-  }  
+	 */
+	public void run(String paramString)  {
+
+		try {
+			MainWindow frame = new MainWindow();
+			frame.setVisible(true);
+			frame.log("Startup complete\n");
+
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		//		AnalysisCreator analysisCreator = new AnalysisCreator();
+		//		analysisCreator.run();
+	}
 }
 

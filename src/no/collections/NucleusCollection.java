@@ -70,14 +70,6 @@ implements INuclearCollection
   public void addNucleus(INuclearFunctions r){
 	  this.nucleiCollection.add(r);
   }
-
-//  public void annotateAndExportNuclei(){
-//	for(INuclearFunctions n : this.nucleiCollection){
-////		n.annotateNucleusImage();
-////		n.annotateFeatures();
-////		n.exportAnnotatedImage();
-//	}
-//  }
   
   public void calculateOffsets(){
 

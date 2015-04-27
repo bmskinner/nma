@@ -25,6 +25,7 @@ import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.gui.AnalysisSetup;
+import no.gui.MainWindow;
 import no.gui.PopulationSplitWindow;
 import no.imports.PopulationImporter;
 import no.nuclei.INuclearFunctions;
@@ -32,7 +33,7 @@ import no.utility.MappingFileParser;
 
 
 public class AnalysisCreator {
-
+	
 	private AnalysisSetup analysisOptions;
 	private int mappingCount = 0;
 
@@ -68,9 +69,9 @@ public class AnalysisCreator {
     Constructors
     -----------------------
   */
-  public AnalysisCreator(){
-    this.initialise();
-  }
+	public AnalysisCreator(){
+		this.initialise();
+	}
 
   public void initialise(){
 
