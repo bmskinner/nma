@@ -10,8 +10,6 @@ package no.analysis;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Plot;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
 

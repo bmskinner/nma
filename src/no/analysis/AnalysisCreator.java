@@ -26,6 +26,7 @@ import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.gui.AnalysisSetup;
 import no.gui.PopulationSplitWindow;
+import no.imports.PopulationImporter;
 import no.nuclei.INuclearFunctions;
 import no.utility.MappingFileParser;
 
@@ -346,6 +347,8 @@ public class AnalysisCreator {
       
       // export the population to a save file for later
       PopulationExporter.savePopulation(r);
+      // check if the reading works
+      INuclearCollection test = PopulationImporter.readPopulation(new File(r.getOutputFolder()+File.separator+r.getType()+".sav"));
 
       ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
       

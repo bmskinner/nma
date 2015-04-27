@@ -31,8 +31,7 @@ public class PopulationExporter {
 			try{
 				
 				output.writeObject(collection.getFolder());
-				output.writeObject(collection.getOutputFolder());
-				output.writeObject(collection.getDebugFile());
+				output.writeObject(collection.getOutputFolderName());
 				output.writeObject(collection.getType());
 				output.writeObject(collection.getNuclei());
 				

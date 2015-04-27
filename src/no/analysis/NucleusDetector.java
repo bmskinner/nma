@@ -20,12 +20,11 @@ import java.io.File;
 import java.util.*;
 
 import no.nuclei.*;
-import no.utility.ImageImporter;
 import no.utility.StatsMap;
 import no.collections.*;
 import no.components.*;
 import no.export.ImageExporter;
-import no.export.NucleusAnnotator;
+import no.imports.ImageImporter;
 
 public class NucleusDetector {
 
@@ -470,9 +469,6 @@ public class NucleusDetector {
 		  
 		  SignalDetector signalDetector = new SignalDetector(this.signalThreshold, this.minSignalSize, this.maxSignalFraction);
 		  signalDetector.run(currentNucleus, smallRegion);
-
-//		  currentNucleus.annotateNucleusImage();
-//		  NucleusAnnotator.run(currentNucleus);
 	
 		  // if everything checks out, add the measured parameters to the global pool
 		  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));

@@ -12,6 +12,10 @@ public class PigSpermNucleus
     extends SpermNucleus 
   {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
     * The point of the nucleus orthogonal to the narrowest
     * diameter, through the centre of mass.
     * Used in tail identification functions only.

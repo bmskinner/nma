@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.components.Profile;

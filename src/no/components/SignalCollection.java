@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import no.utility.ImageImporter;
+import no.imports.ImageImporter;
 
 /**
  * This holds all the signals within a nucleus, within a hash.

@@ -10,8 +10,8 @@ import java.util.List;
 import no.components.NuclearSignal;
 import no.components.SignalCollection;
 import no.components.XYPoint;
+import no.imports.ImageImporter;
 import no.nuclei.INuclearFunctions;
-import no.utility.ImageImporter;
 import no.utility.StatsMap;
 
 

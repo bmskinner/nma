@@ -1,4 +1,4 @@
-package no.utility;
+package no.imports;
 
 import ij.ImagePlus;
 import ij.ImageStack;

@@ -122,14 +122,14 @@ public class RodentSpermNucleusCollection
   /*
     Draw the features of interest on the images of the nuclei created earlier
   */
-  public void annotateImagesOfNuclei(){
-  	IJ.log("    Annotating images...");
-  	for(int i=0; i<this.getNucleusCount();i++){
-  		INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-//  		n.annotateFeatures();
-  	}
-  	 IJ.log("    Annotation complete");
-  }
+//  public void annotateImagesOfNuclei(){
+//  	IJ.log("    Annotating images...");
+//  	for(int i=0; i<this.getNucleusCount();i++){
+//  		INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+////  		n.annotateFeatures();
+//  	}
+//  	 IJ.log("    Annotation complete");
+//  }
 
   /*
     -----------------------

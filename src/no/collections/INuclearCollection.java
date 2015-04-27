@@ -6,8 +6,6 @@ import java.io.File;
 import java.util.List;
 
 import no.components.NuclearSignal;
-import no.components.Profile;
-import no.components.ProfileAggregate;
 import no.components.ProfileCollection;
 
 public interface INuclearCollection
@@ -23,7 +21,7 @@ public interface INuclearCollection
 
 	public void addNucleus(INuclearFunctions r);
 
-	public void annotateAndExportNuclei();
+//	public void annotateAndExportNuclei();
 
 	/**
 	 * Find the Nucleus with a profile most closely matching the median 

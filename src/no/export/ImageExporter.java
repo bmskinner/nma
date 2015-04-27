@@ -1,6 +1,6 @@
 package no.export;
 
-import no.utility.ImageImporter;
+import no.imports.ImageImporter;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.RGBStackMerge;

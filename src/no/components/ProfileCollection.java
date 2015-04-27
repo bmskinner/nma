@@ -283,7 +283,7 @@ public class ProfileCollection {
 //		iqrProfile.smooth(3).print();
 		Profile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
 //		maxima.print();
-		Profile displayMaxima = maxima.multiply(50);
+//		Profile displayMaxima = maxima.multiply(50);
 		
 		// given the list of maxima, find the highest 3 regions
 		// store the rank (1-3) and the index of the position at this rank
@@ -540,7 +540,7 @@ public class ProfileCollection {
 	public void appendSegmentsToPlot(Plot segPlot, Profile profile, List<NucleusBorderSegment> segments){
 
 		int narrowLine = 2;
-		int wideLine = 10;
+//		int wideLine = 10;
 		int verticalLine = 2;
 
 		int baseLineY = 5;

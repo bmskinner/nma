@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.analysis.AnalysisCreator;
 import no.collections.INuclearCollection;
 import no.collections.NucleusCollection;
 import ij.IJ;

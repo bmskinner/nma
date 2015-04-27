@@ -12,12 +12,6 @@
 package no.collections;
 
 import ij.IJ;
-import ij.ImagePlus;
-import ij.gui.Overlay;
-import ij.gui.TextRoi;
-import ij.io.Opener;
-import ij.process.ImageProcessor;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import no.nuclei.*;
 import no.components.Profile;
@@ -46,11 +40,11 @@ public class AsymmetricNucleusCollection
 
   }
 
-  @Override
-  public void annotateAndExportNuclei(){
-//    this.annotateImagesOfNuclei();
-//    super.annotateAndExportNuclei();
-  }
+//  @Override
+//  public void annotateAndExportNuclei(){
+////    this.annotateImagesOfNuclei();
+////    super.annotateAndExportNuclei();
+//  }
 
 
   /*
@@ -73,13 +67,13 @@ public class AsymmetricNucleusCollection
     -----------------------
   */
   
-  public void annotateImagesOfNuclei(){
-    IJ.log("    Annotating images ("+this.getType()+")...");
-    for(INuclearFunctions n : this.getNuclei()){
-//      n.annotateFeatures();
-    }
-     IJ.log("    Annotation complete");
-  }
+//  public void annotateImagesOfNuclei(){
+//    IJ.log("    Annotating images ("+this.getType()+")...");
+//    for(INuclearFunctions n : this.getNuclei()){
+////      n.annotateFeatures();
+//    }
+//     IJ.log("    Annotation complete");
+//  }
 
 
 	/*

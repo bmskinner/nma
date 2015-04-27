@@ -15,8 +15,8 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.SignalCollection;
+import no.imports.ImageImporter;
 import no.nuclei.INuclearFunctions;
-import no.utility.ImageImporter;
 import no.utility.Utils;
 
 public class NucleusAnnotator {

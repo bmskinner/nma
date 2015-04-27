@@ -23,10 +23,10 @@ import java.io.File;
 import java.util.*;
 
 import no.nuclei.*;
-import no.utility.ImageImporter;
 import no.utility.Utils;
 import no.components.*;
 import no.export.ImageExporter;
+import no.imports.ImageImporter;
 
 public class ShellCreator {
 

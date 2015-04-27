@@ -25,8 +25,8 @@ import no.components.Profile;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.export.Logger;
+import no.imports.ImageImporter;
 import no.utility.Equation;
-import no.utility.ImageImporter;
 import no.utility.Stats;
 import no.utility.Utils;
 

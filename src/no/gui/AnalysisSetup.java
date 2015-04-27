@@ -6,8 +6,6 @@ ANALYSIS SETUP OPTIONS
 */
 package no.gui;
 
-import java.awt.Button;
-import java.awt.Panel;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;

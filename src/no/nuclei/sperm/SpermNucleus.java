@@ -16,6 +16,11 @@ public class SpermNucleus
 {
 	
   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+/**
   * Constructor using a Nucleus; passes up
   * to the Nucleus constructor
   *
