@@ -73,8 +73,8 @@ implements INuclearCollection
 
   public void annotateAndExportNuclei(){
 	for(INuclearFunctions n : this.nucleiCollection){
-		n.annotateNucleusImage();
-		n.annotateFeatures();
+//		n.annotateNucleusImage();
+//		n.annotateFeatures();
 //		n.exportAnnotatedImage();
 	}
   }

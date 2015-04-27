@@ -9,23 +9,26 @@
 package no.nuclei;
 
 import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
 import no.analysis.ProfileSegmenter;
-import no.utility.*;
-import no.components.*;
-import no.export.ImageExporter;
+import no.components.NuclearSignal;
+import no.components.NucleusBorderPoint;
+import no.components.NucleusBorderSegment;
+import no.components.Profile;
+import no.components.SignalCollection;
+import no.components.XYPoint;
 import no.export.Logger;
+import no.utility.Equation;
+import no.utility.ImageImporter;
+import no.utility.Stats;
+import no.utility.Utils;
 
 
 /**
@@ -87,29 +90,20 @@ public class Nucleus
 	private File nucleusFolder; // the folder to store nucleus information
 	private String outputFolder;  // the top-level path in which to store outputs; has analysis date
 	
-	private Roi roi; // the original nucleus ROI
-
-	transient private ImageStack imagePlanes; // hold the colour channels as 8-bit greyscale images. [0] is always counterstain
-	transient private ImageStack enlargedPlanes; // a copy of the input nucleus for use in later reanalyses that need a particle detector
-//	transient private ImagePlus annotatedImage; // a copy of the input nucleus for annotating
-//	private File annotatedImageFile; // the name of the annotated image
-
 	protected SignalCollection signalCollection = new SignalCollection();
 
-	private FloatPolygon smoothedPolygon; // the interpolated polygon; source of XYPoint[] smoothedArray // can probably be removed
-	
-	public Nucleus (Roi roi, File file, ImageStack image, ImageStack enlarged, int number, String position) { // construct from an roi
+	public Nucleus (Roi roi, File file, int number, String position) { // construct from an roi
 
-		if(roi==null || file==null || image==null || enlarged==null || Integer.valueOf(number)==null || position==null){
+		if(roi==null || file==null || Integer.valueOf(number)==null || position==null){
 			throw new IllegalArgumentException("Nucleus constructor argument is null");
 		}
-		// assign main features
-		this.roi             = roi;
-		this.imagePlanes     = image;
-//		this.annotatedImage  = ImageExporter.convert(image.duplicate()); // NEEDS TO BE A COPY
-//		IJ.saveAsTiff(ImageExporter.convert(image.duplicate()), this.getAnnotatedImagePath());
+
+		// convert the roi positions to a list of nucleus border points
+		FloatPolygon polygon = roi.getInterpolatedPolygon(1,true);
+		for(int i=0; i<polygon.npoints; i++){
+			borderList.add(new NucleusBorderPoint( polygon.xpoints[i], polygon.ypoints[i]));
+		}
 		
-		this.enlargedPlanes  = enlarged;
 		this.sourceFile      = file;
 		this.nucleusNumber   = number;
 		this.position        = position;
@@ -120,16 +114,12 @@ public class Nucleus
 	}
 
 	public Nucleus(Nucleus n){
-		this.setRoi(n.getRoi());
+//		this.setRoi(n.getRoi());
 		this.setPosition(n.getPosition());
 
 		this.setSourceFile(n.getSourceFile());
 		this.setOutputFolder(n.getOutputFolderName());
-		
-//		this.setAnnotatedImage(n.getAnnotatedImage());
-		this.setImagePlanes(n.getImagePlanes());
-		this.setEnlargedPlanes(n.getEnlargedPlanes());
-		
+				
 		this.setNucleusNumber(n.getNucleusNumber());
 		this.setNucleusFolder(n.getNucleusFolder());
 		
@@ -142,7 +132,7 @@ public class Nucleus
 		
 		this.setSignals(n.getSignalCollection());
 
-		this.setPolygon(n.getPolygon());
+//		this.setPolygon(n.getPolygon());
 		this.setDistanceProfile(n.getDistanceProfile());
 
 		this.setBorderTags(n.getBorderTags());
@@ -182,23 +172,10 @@ public class Nucleus
 			}
 		}
 
-		try{
-			String outPath = this.getOriginalImagePath();
-			IJ.saveAsTiff(ImageExporter.convert(this.imagePlanes), outPath);
-//			IJ.log("Exported original");
-			outPath = this.getEnlargedImagePath();
-			IJ.saveAsTiff(ImageExporter.convert(this.enlargedPlanes), outPath);
-//			IJ.log("Exported enlarged");
-			IJ.saveAsTiff(ImageExporter.convert(this.imagePlanes.duplicate()), this.getAnnotatedImagePath());
-			
-		 } catch(Exception e){
-				IJ.log("Error saving original image or enlarged image: "+e.getMessage());
-		 }
-
-		this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
-		for(int i=0; i<this.smoothedPolygon.npoints; i++){
-			borderList.add(new NucleusBorderPoint( this.smoothedPolygon.xpoints[i], this.smoothedPolygon.ypoints[i]));
-		}
+//		this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
+//		for(int i=0; i<this.smoothedPolygon.npoints; i++){
+//			borderList.add(new NucleusBorderPoint( this.smoothedPolygon.xpoints[i], this.smoothedPolygon.ypoints[i]));
+//		}
 
 		// calculate angle profile
 		try{
@@ -222,9 +199,9 @@ public class Nucleus
 		-----------------------
 	*/
 
-	public Roi getRoi(){
-		return this.roi;
-	}
+//	public Roi getRoi(){
+//		return this.roi;
+//	}
 
 	public String getPath(){
 		return this.sourceFile.getAbsolutePath();
@@ -241,18 +218,6 @@ public class Nucleus
 
 	public File getNucleusFolder(){
 		return new File(this.nucleusFolder.getAbsolutePath());
-	}
-
-//	public ImagePlus getAnnotatedImage(){
-//		return new ImagePlus("annotated", this.annotatedImage.getProcessor().duplicate());
-//	}
-	
-	public ImageStack getImagePlanes(){
-		return this.imagePlanes;
-	}
-		
-	public ImageStack getEnlargedPlanes(){
-		return this.enlargedPlanes;
 	}
 
 	public String getImageName(){
@@ -340,9 +305,9 @@ public class Nucleus
 		return new NucleusBorderPoint(this.borderList.get(i));
 	}
 
-	public FloatPolygon getPolygon(){
-		return this.smoothedPolygon;
-	}
+//	public FloatPolygon getPolygon(){
+//		return this.smoothedPolygon;
+//	}
 	
 	public double getArea(){
 		return this.area;
@@ -431,30 +396,18 @@ public class Nucleus
 		this.signalCollection = collection;
 	}
 
-	public void setPolygon(FloatPolygon p){
-		this.smoothedPolygon = p;
-	}
+//	public void setPolygon(FloatPolygon p){
+//		this.smoothedPolygon = p;
+//	}
 
-	protected void setRoi(Roi d){
-		this.roi = d;
-	}
+//	protected void setRoi(Roi d){
+//		this.roi = d;
+//	}
 
 	protected void setSourceFile(File d){
 		this.sourceFile = d;
 	}
 	
-	protected void setImagePlanes(ImageStack s){
-		this.imagePlanes = s;
-	}
-
-//	protected void setAnnotatedImage(ImagePlus d){
-//		this.annotatedImage = d.duplicate();
-//	}
-	
-	protected void setEnlargedPlanes(ImageStack s){
-		this.enlargedPlanes = s;
-	}
-
 	protected void setNucleusNumber(int d){
 		this.nucleusNumber = d;
 	}
@@ -901,7 +854,7 @@ public class Nucleus
 			double xNew = xCentre + dx;
 			n.setX(xNew);
 		}
-		this.updatePolygon();
+//		this.updatePolygon();
 	}
 
 	public double getMedianDistanceBetweenPoints(){
@@ -919,33 +872,6 @@ public class Nucleus
 		Exporting data
 		-----------------------
 	*/
-
-	public void annotateFeatures(){
-		this.annotateTail();
-		this.annotateHead();
-	}
-
-	public void annotateTail(){
-//		ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-		ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
-		ImageProcessor ip = annotatedImage.getProcessor();
-		ip.setColor(Color.CYAN);
-		ip.setLineWidth(3);
-		ip.drawDot( this.getBorderTag("tail").getXAsInt(), 
-				this.getBorderTag("tail").getYAsInt());
-		IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
-	}
-
-	public void annotateHead(){
-//		ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-		ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
-		ImageProcessor ip = annotatedImage.getProcessor();
-		ip.setColor(Color.YELLOW);
-		ip.setLineWidth(3);
-		ip.drawDot( this.getBorderTag("head").getXAsInt(), 
-				this.getBorderTag("head").getYAsInt());
-		IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
-	}
 	
 	public double findRotationAngle(){
 		XYPoint end = new XYPoint(this.getBorderTag("tail").getXAsInt(),this.getBorderTag("tail").getYAsInt()-50);
@@ -1053,15 +979,6 @@ public class Nucleus
 		logger.export(this.getNucleusNumber()+".segments");
 	}
 	
-	/*
-		Export the current image state, with
-		any annotations to export.nn.annotated.tiff
-	*/
-//	public void exportAnnotatedImage(){
-////		String outPath = this.getAnnotatedImagePath();
-////		IJ.saveAsTiff(annotatedImage, outPath);
-//	}
-
 	/**
 	 * Export an image of the raw profile for this nucleus to
 	 * the nucleus folder 
@@ -1069,104 +986,6 @@ public class Nucleus
 	public void exportProfilePlotImage(){
 		ProfileSegmenter segmenter = new ProfileSegmenter(this.getAngleProfile(), this.segmentList);
 		segmenter.draw(this.getNucleusFolder()+File.separator+Nucleus.IMAGE_PREFIX+this.nucleusNumber+".segments.tiff");
-	}
-
-	/** Annotate image with ROIs
-	 *	CoMs of nucleus and signals
-	 *	Narrowest diameter across nucleus
-	 */
-	public void annotateNucleusImage(){ 
-		
-		ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
-
-		try{
-
-			
-			ImageProcessor ip = annotatedImage.getProcessor();
-//			ImageProcessor ip = this.annotatedImage.getProcessor();
-
-			// draw the features of interest
-			
-			// draw the outline of the nucleus
-			ip.setColor(Color.BLUE);
-			ip.setLineWidth(1);
-			ip.draw(this.getRoi());
-			
-			// segments
-			if(this.segmentList.size()>0){ // only draw if there are segments
-//				IJ.log("");
-//				IJ.log(" Nucleus "+this.getImageName()+"-"+this.getNucleusNumber());
-				for(int i=0;i<segmentList.size();i++){
-//					NucleusBorderSegment seg = this.getSegment(i);
-					NucleusBorderSegment seg = this.getSegmentTag("Seg_"+i);
-//					IJ.log("  Segment "+i);
-//					seg.print();
-//					IJ.log("    Segment length"+seg.length(this.getLength()));
-					float[] xpoints = new float[seg.length(this.getLength())+1];
-					float[] ypoints = new float[seg.length(this.getLength())+1];
-					for(int j=0; j<=seg.length(this.getLength());j++){
-						int k = Utils.wrapIndex(seg.getStartIndex()+j, this.getLength());
-						NucleusBorderPoint p = this.getBorderPoint(k); // get the border points in the segment
-						xpoints[j] = (float) p.getX();
-						ypoints[j] = (float) p.getY();
-					}
-					
-					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
-					
-					// avoid colour wrapping when segment number is 1 more than the colour list
-					Color color = i==0 && segmentList.size()==9 ? Color.MAGENTA : ProfileSegmenter.getColor(i);
-
-					ip.setColor(color);
-					ip.setLineWidth(2);
-					ip.draw(segRoi);
-				}
-			}
-
-
-			// draw the CoM
-			ip.setColor(Color.MAGENTA);
-			ip.setLineWidth(5);
-			ip.drawDot(this.getCentreOfMass().getXAsInt(),  this.getCentreOfMass().getYAsInt());
-
-			
-			//   SIGNALS
-			ip.setLineWidth(3);
-			for( int i : signalCollection.getChannels()){
-				List<NuclearSignal> signals = signalCollection.getSignals(i);
-				Color colour = i==ImageImporter.FIRST_SIGNAL_CHANNEL 
-							 ? Color.RED 
-							 : i==ImageImporter.FIRST_SIGNAL_CHANNEL+1 
-							 	? Color.GREEN 
-							 	: Color.WHITE;
-				
-				ip.setColor(colour);
-
-				if(!signals.isEmpty()){
-
-					for(NuclearSignal s : signals){
-						ip.setLineWidth(3);
-						ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
-						ip.setLineWidth(1);
-						ip.draw(s.getRoi());
-					}
-				}
-			}
-			
-			// The narrowest part of the nucleus
-			ip.setLineWidth(1);
-			ip.setColor(Color.MAGENTA);
-			NucleusBorderPoint narrow1 = this.getNarrowestDiameterPoint();
-			NucleusBorderPoint narrow2 = this.findOppositeBorder(narrow1);
-			ip.drawLine(narrow1.getXAsInt(), narrow1.getYAsInt(), narrow2.getXAsInt(), narrow2.getYAsInt());
-
-		} catch(Exception e){
-			IJ.log("Error annotating nucleus: "+e);
-			for( NucleusBorderSegment s : segmentList){
-				s.print();
-			}
-		} finally {
-			IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
-		}
 	}
 
 	 /*
@@ -1309,7 +1128,7 @@ public class Nucleus
 		this.segmentList.add(n);
 	}
 
-	protected Map<String, Integer> getSegmentMap( ){
+	public Map<String, Integer> getSegmentMap( ){
 		return this.segmentTags;
 	}
 	
@@ -1388,8 +1207,11 @@ public class Nucleus
 				// if no, 360-min is interior
 			double midX = (pointBefore.getX()+pointAfter.getX())/2;
 			double midY = (pointBefore.getY()+pointAfter.getY())/2;
-
-			if(this.getPolygon().contains( (float) midX, (float) midY)){
+			
+			// create a polygon from the border list - we are not storing the polygon directly
+			FloatPolygon polygon = Utils.createPolygon(this);
+			
+			if(polygon.contains( (float) midX, (float) midY)){
 				angles[i] = angle;
 			} else {
 				angles[i] = 360-angle;
@@ -1422,21 +1244,19 @@ public class Nucleus
 			addBorderTag(s, newIndex);
 		}
 	}
-
-	public void updatePolygon(){
-		
-		float[] xpoints = new float[this.getLength()];
-		float[] ypoints = new float[this.getLength()];
-
-		for(int i=0; i<this.getLength(); i++){
-
-			NucleusBorderPoint p = this.getPoint(i);
-			xpoints[i] = (float) p.getX();
-			ypoints[i] = (float) p.getY();
-
-		}
-		FloatPolygon newPolygon = new FloatPolygon(xpoints, ypoints);
-		this.setPolygon(newPolygon);
-	}
+	
+//	public FloatPolygon createPolygon(){
+//		float[] xpoints = new float[this.getLength()];
+//		float[] ypoints = new float[this.getLength()];
+//		
+//		for(int i=0;i<this.getLength();i++){
+//			NucleusBorderPoint p = this.getBorderPoint(i);
+//			xpoints[i] = (float) p.getX();
+//			ypoints[i] = (float) p.getY();
+//		}
+//		
+//		return new FloatPolygon(xpoints, ypoints, this.getLength());
+//		
+//	}
 
 }

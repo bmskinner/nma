@@ -6,7 +6,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
@@ -18,31 +17,39 @@ public class PopulationExporter {
 	public static void savePopulation(INuclearCollection collection){
 
 		File saveFile = new File(collection.getFolder()+"."+collection.getType()+".sav");
+		if(saveFile.exists()){
+			saveFile.delete();
+		}
 
 		try{
 			//use buffering
 			OutputStream file = new FileOutputStream(saveFile);
 			OutputStream buffer = new BufferedOutputStream(file);
-			ObjectOutput output = new ObjectOutputStream(buffer);
+			ObjectOutputStream output = new ObjectOutputStream(buffer);
 			
 			IJ.log("    Saving data to file...");
 
 			try{
 
+//				output.writeObject(collection.getNuclei());
+				
 				for(INuclearFunctions n : collection.getNuclei()){
-					IJ.log("      Next nucleus...");
+//					writeNucleus(n, output);
 					output.writeObject(n);
+					
 				}
 				IJ.log("    Save complete");
 
 			} catch(IOException e){
-				IJ.log("    Unable to save nucleus: "+e.getMessage());
+				IJ.log("    Unable to save nuclei: "+e.getMessage());
 				for(StackTraceElement el : e.getStackTrace()){
 					IJ.log(el.toString());
 				}
 				
 			} finally{
 				output.close();
+				buffer.close();
+				file.close();
 			}
 
 		} catch(Exception e){
@@ -52,4 +59,61 @@ public class PopulationExporter {
 			}
 		}
 	}
+
+	private static void writeNucleus(INuclearFunctions n, ObjectOutputStream oos) throws IOException {
+
+		
+//		oos.writeObject(n.getRoi().); // not serializable - build from polygon
+//		oos.writeObject(n.getPolygon().); // not serializable - build from border list
+		
+		// Basic info
+		oos.writeObject(n.getPosition());
+		oos.writeObject(n.getNucleusNumber());
+		oos.writeObject(n.getNucleusFolder());
+		oos.writeObject(n.getPerimeter());
+		oos.writeObject(n.getPathLength());
+		oos.writeObject(n.getFeret());
+		oos.writeObject(n.getArea());
+		oos.writeObject(n.getCentreOfMass());
+		oos.writeObject(n.getSourceFile());
+		oos.writeObject(n.getOutputFolderName());
+		oos.writeObject(n.getAngleProfileWindowSize());
+
+		// Profiles
+		oos.writeObject(n.getAngleProfile());
+		oos.writeObject(n.getDistanceProfile());
+		oos.writeObject(n.getSingleDistanceProfile());
+		
+		// Segment and border info
+		oos.writeObject(n.getBorderTags());
+		oos.writeObject(n.getBorderList());
+
+		oos.writeObject(n.getSegmentMap());
+		oos.writeObject(n.getSegments());
+		
+		// Signals
+		oos.writeObject(n.getSignalCollection());
+	}
 }
+
+
+//public class SerializableObject implements Serializable {
+//
+//    private transient UnserializableObject unserializableObject;
+//
+//    private void writeObject(ObjectOutputStream oos) throws IOException {
+//        oos.defaultWriteObject();
+//        oos.writeObject(unserializableObject.getSerializableProperty());
+//        oos.writeObject(unserializableObject.getAnotherSerializableProperty());
+//        // ...
+//    }
+//
+//    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+//        ois.defaultReadObject();
+//        unserializableObject = new UnserializableObject();
+//        unserializableObject.setSerializableProperty((SomeSerializableObject) ois.readObject());
+//        unserializableObject.setAnotherSerializableProperty((AnotherSerializableObject) ois.readObject());
+//        // ...
+//    }
+//
+//}

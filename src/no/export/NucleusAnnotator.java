@@ -1,0 +1,157 @@
+package no.export;
+
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.ImageProcessor;
+
+import java.awt.Color;
+import java.util.List;
+
+import no.analysis.ProfileSegmenter;
+import no.collections.INuclearCollection;
+import no.components.NuclearSignal;
+import no.components.NucleusBorderPoint;
+import no.components.NucleusBorderSegment;
+import no.components.SignalCollection;
+import no.nuclei.INuclearFunctions;
+import no.utility.ImageImporter;
+import no.utility.Utils;
+
+public class NucleusAnnotator {
+	
+	public static void run(INuclearCollection collection){
+
+		IJ.log("    Annoatating images of nuclei...");
+		for(INuclearFunctions n : collection.getNuclei()){
+			NucleusAnnotator.run(n);
+		}
+		IJ.log("    Annoatation complete");
+	}
+
+	public static void run(INuclearFunctions n){
+		
+		// to add in here - division of functions based on class of nucleus
+		annotateFeatures(n);
+		
+	}
+	
+	private static void annotateFeatures(INuclearFunctions n){
+
+		ImagePlus annotatedImage = new ImagePlus(n.getAnnotatedImagePath());
+		try{
+
+			annotateTail(annotatedImage, n);
+			annotateHead(annotatedImage, n);
+			annotateCoM(annotatedImage, n);
+			annotateMinFeret(annotatedImage, n);
+			annotateSegments(annotatedImage, n);
+			annotateSignals(annotatedImage, n);
+
+		}  catch(Exception e){
+			IJ.log("Error annotating nucleus: "+e);
+
+		} finally {
+			IJ.saveAsTiff(annotatedImage, n.getAnnotatedImagePath());
+		}
+
+	}
+
+	private static void annotateTail(ImagePlus image, INuclearFunctions n){
+		ImageProcessor ip = image.getProcessor();
+		
+		ip.setColor(Color.CYAN);
+		ip.setLineWidth(3);
+		ip.drawDot( n.getBorderTag("tail").getXAsInt(), 
+				n.getBorderTag("tail").getYAsInt());
+	}
+
+	private static void annotateHead(ImagePlus image, INuclearFunctions n){
+		ImageProcessor ip = image.getProcessor();
+		
+		ip.setColor(Color.YELLOW);
+		ip.setLineWidth(3);
+		ip.drawDot( n.getBorderTag("head").getXAsInt(), 
+				n.getBorderTag("head").getYAsInt());
+	}
+	
+	private static void annotateCoM(ImagePlus image, INuclearFunctions n){
+		ImageProcessor ip = image.getProcessor();
+
+		ip.setColor(Color.MAGENTA);
+		ip.setLineWidth(5);
+		ip.drawDot(n.getCentreOfMass().getXAsInt(),  n.getCentreOfMass().getYAsInt());
+
+	}
+
+	// The narrowest part of the nucleus
+	private static void annotateMinFeret(ImagePlus image, INuclearFunctions n){
+		ImageProcessor ip = image.getProcessor();
+
+
+		ip.setLineWidth(1);
+		ip.setColor(Color.MAGENTA);
+		NucleusBorderPoint narrow1 = n.getNarrowestDiameterPoint();
+		NucleusBorderPoint narrow2 = n.findOppositeBorder(narrow1);
+		ip.drawLine(narrow1.getXAsInt(), narrow1.getYAsInt(), narrow2.getXAsInt(), narrow2.getYAsInt());
+
+	}
+	
+	private static void annotateSegments(ImagePlus image, INuclearFunctions n){
+		ImageProcessor ip = image.getProcessor();
+
+		if(n.getSegments().size()>0){ // only draw if there are segments
+			for(int i=0;i<n.getSegments().size();i++){
+
+				NucleusBorderSegment seg = n.getSegmentTag("Seg_"+i);
+
+				float[] xpoints = new float[seg.length(n.getLength())+1];
+				float[] ypoints = new float[seg.length(n.getLength())+1];
+				for(int j=0; j<=seg.length(n.getLength());j++){
+					int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getLength());
+					NucleusBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+					xpoints[j] = (float) p.getX();
+					ypoints[j] = (float) p.getY();
+				}
+
+				PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+
+				// avoid colour wrapping when segment number is 1 more than the colour list
+				Color color = i==0 && n.getSegments().size()==9 ? Color.MAGENTA : ProfileSegmenter.getColor(i);
+
+				ip.setColor(color);
+				ip.setLineWidth(2);
+				ip.draw(segRoi);
+			}
+		}
+	}
+	
+	
+	private static void annotateSignals(ImagePlus image, INuclearFunctions n){
+		ImageProcessor ip = image.getProcessor();
+		
+		ip.setLineWidth(3);
+		SignalCollection signalCollection = n.getSignalCollection();
+		for( int i : signalCollection.getChannels()){
+			List<NuclearSignal> signals = signalCollection.getSignals(i);
+			Color colour = i==ImageImporter.FIRST_SIGNAL_CHANNEL 
+						 ? Color.RED 
+						 : i==ImageImporter.FIRST_SIGNAL_CHANNEL+1 
+						 	? Color.GREEN 
+						 	: Color.WHITE;
+			
+			ip.setColor(colour);
+
+			if(!signals.isEmpty()){
+
+				for(NuclearSignal s : signals){
+					ip.setLineWidth(3);
+					ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
+					ip.setLineWidth(1);
+					ip.draw(s.getRoi());
+				}
+			}
+		}
+	}
+}

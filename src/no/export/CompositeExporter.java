@@ -3,8 +3,11 @@ package no.export;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Overlay;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 import ij.gui.TextRoi;
 import ij.io.Opener;
+import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.image.BufferedImage;
@@ -12,6 +15,7 @@ import java.io.File;
 
 import no.collections.INuclearCollection;
 import no.nuclei.INuclearFunctions;
+import no.utility.Utils;
 
 public class CompositeExporter {
 
@@ -43,7 +47,10 @@ public class CompositeExporter {
 	        Opener localOpener = new Opener();
 	        ImagePlus image = localOpener.openImage(path);
 	        ImageProcessor ip = image.getProcessor();
-	        ip.setRoi(n.getRoi());
+	        
+	        FloatPolygon polygon = Utils.createPolygon(n);
+			PolygonRoi roi = new PolygonRoi(polygon, Roi.POLYGON);
+			ip.setRoi(roi);
 
 
 	        ImageProcessor newProcessor = ip.createProcessor(boxWidth, boxHeight);

@@ -48,8 +48,8 @@ public class AsymmetricNucleusCollection
 
   @Override
   public void annotateAndExportNuclei(){
-    this.annotateImagesOfNuclei();
-    super.annotateAndExportNuclei();
+//    this.annotateImagesOfNuclei();
+//    super.annotateAndExportNuclei();
   }
 
 
@@ -76,7 +76,7 @@ public class AsymmetricNucleusCollection
   public void annotateImagesOfNuclei(){
     IJ.log("    Annotating images ("+this.getType()+")...");
     for(INuclearFunctions n : this.getNuclei()){
-      n.annotateFeatures();
+//      n.annotateFeatures();
     }
      IJ.log("    Annotation complete");
   }

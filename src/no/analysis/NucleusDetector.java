@@ -24,6 +24,8 @@ import no.utility.ImageImporter;
 import no.utility.StatsMap;
 import no.collections.*;
 import no.components.*;
+import no.export.ImageExporter;
+import no.export.NucleusAnnotator;
 
 public class NucleusDetector {
 
@@ -444,10 +446,9 @@ public class NucleusDetector {
 		  ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
 	
 		  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
-	
-	
+		  
 		  // turn roi into Nucleus for manipulation
-		  Nucleus currentNucleus = new Nucleus(nucleus, path, smallRegion, largeRegion, nucleusNumber, position);
+		  Nucleus currentNucleus = new Nucleus(nucleus, path, nucleusNumber, position);
 	
 		  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
 		  currentNucleus.setArea(values.get("Area")); 
@@ -455,18 +456,23 @@ public class NucleusDetector {
 		  currentNucleus.setPerimeter(values.get("Perim"));
 	
 		  currentNucleus.setOutputFolder(this.outputFolder);
-		  
-		  SignalDetector signalDetector = new SignalDetector();
-	
-		  signalDetector.setSignalThreshold(this.signalThreshold);
-		  signalDetector.setMinSignalSize(this.minSignalSize);
-		  signalDetector.setMaxSignalFraction(this.maxSignalFraction);
-		  signalDetector.run(currentNucleus);
-		  
 		  currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
 		  
-//		  currentNucleus.detectSignalsInNucleus();
-		  currentNucleus.annotateNucleusImage();
+		  // save out the image stacks rather than hold within the nucleus
+		  try{
+			  IJ.saveAsTiff(new ImagePlus(null, smallRegion), currentNucleus.getOriginalImagePath());
+			  IJ.saveAsTiff(new ImagePlus(null, largeRegion), currentNucleus.getEnlargedImagePath());
+			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
+
+		  } catch(Exception e){
+			  IJ.log("Error saving original, enlarged or annotated image: "+e.getMessage());
+		  }
+		  
+		  SignalDetector signalDetector = new SignalDetector(this.signalThreshold, this.minSignalSize, this.maxSignalFraction);
+		  signalDetector.run(currentNucleus, smallRegion);
+
+//		  currentNucleus.annotateNucleusImage();
+//		  NucleusAnnotator.run(currentNucleus);
 	
 		  // if everything checks out, add the measured parameters to the global pool
 		  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));

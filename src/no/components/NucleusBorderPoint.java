@@ -10,33 +10,30 @@
 package no.components;
 
 public class NucleusBorderPoint
-	extends no.components.XYPoint 
+extends no.components.XYPoint 
 {
 
-  /**
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-private double minAngle;
-  private double interiorAngle; // depends on whether the min angle is inside or outside the shape
-  private double interiorAngleDelta; // this will hold the difference between a previous interiorAngle and a next interiorAngle
-  private double interiorAngleDeltaSmoothed; // holds delta from a 5-window average centred on this point
-  private double distanceAcrossCoM;
+	private double minAngle;
+	private double interiorAngle; // depends on whether the min angle is inside or outside the shape
+	private double interiorAngleDelta; // this will hold the difference between a previous interiorAngle and a next interiorAngle
+	private double interiorAngleDeltaSmoothed; // holds delta from a 5-window average centred on this point
+	private double distanceAcrossCoM;
 
-  private boolean localMin; // is this angle a local minimum based on the minAngle
-  private boolean localMax; // is this angle a local maximum based on the interior angle
+	private boolean localMin; // is this angle a local minimum based on the minAngle
+	private boolean localMax; // is this angle a local maximum based on the interior angle
 
 	private int index; // keep the original index position in case we need to change
-  private int numberOfConsecutiveBlocks; // holds the number of interiorAngleDeltaSmootheds > 1 degree after this point
-  private int blockNumber; // identifies the group of consecutive blocks this point is part of
-  private int blockSize; // the total number of points within the block
-//  private int positionWithinBlock; // stores the place within the block starting at 0
+	private int numberOfConsecutiveBlocks; // holds the number of interiorAngleDeltaSmootheds > 1 degree after this point
+	private int blockNumber; // identifies the group of consecutive blocks this point is part of
+	private int blockSize; // the total number of points within the block
 
-//  private boolean isMidpoint; // is this point the midpoint of a block
-
-  public NucleusBorderPoint( double x, double y){
-  	super(x, y);
-  }
+	public NucleusBorderPoint( double x, double y){
+		super(x, y);
+	}
 
   public NucleusBorderPoint( NucleusBorderPoint p){
     super(p.getX(), p.getY());
@@ -51,7 +48,6 @@ private double minAngle;
     this.setConsecutiveBlocks(p.getConsecutiveBlocks());
     this.setBlockNumber(p.getBlockNumber());
     this.setBlockSize(p.getBlockSize());
-//    this.setPositionWithinBlock(p.getPositionWithinBlock());
   }
 
   public int getIndex(){

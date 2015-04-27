@@ -9,7 +9,12 @@
 
  package no.utility;
 
- import ij.IJ;
+ import java.util.List;
+
+import no.components.NucleusBorderPoint;
+import no.nuclei.INuclearFunctions;
+import ij.IJ;
+import ij.process.FloatPolygon;
 
  /**
  * @author bms41
@@ -127,5 +132,38 @@ public class Utils {
 	 public static double getYComponentOfAngle(double length, double angle){
 		 double y = length * Math.sin(Math.toRadians(angle));
 		 return y;
+	 }
+	 
+
+	 /**
+	  * Turn the border points in a nucleus into a polygon
+	  * @param n the nucleus
+	  * @return
+	  */
+	 public static FloatPolygon createPolygon(INuclearFunctions n){
+		 float[] xpoints = new float[n.getLength()];
+		 float[] ypoints = new float[n.getLength()];
+
+		 for(int i=0;i<n.getLength();i++){
+			 NucleusBorderPoint p = n.getBorderPoint(i);
+			 xpoints[i] = (float) p.getX();
+			 ypoints[i] = (float) p.getY();
+		 }
+
+		 return new FloatPolygon(xpoints, ypoints, n.getLength());
+
+	 }
+
+	 public static FloatPolygon createPolygon(List<NucleusBorderPoint> list){
+		 float[] xpoints = new float[list.size()];
+		 float[] ypoints = new float[list.size()];
+
+		 for(int i=0;i<list.size();i++){
+			 NucleusBorderPoint p = list.get(i);
+			 xpoints[i] = (float) p.getX();
+			 ypoints[i] = (float) p.getY();
+		 }
+
+		 return new FloatPolygon(xpoints, ypoints, list.size());
 	 }
  }

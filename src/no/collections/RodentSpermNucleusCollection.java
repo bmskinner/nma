@@ -126,7 +126,7 @@ public class RodentSpermNucleusCollection
   	IJ.log("    Annotating images...");
   	for(int i=0; i<this.getNucleusCount();i++){
   		INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-  		n.annotateFeatures();
+//  		n.annotateFeatures();
   	}
   	 IJ.log("    Annotation complete");
   }

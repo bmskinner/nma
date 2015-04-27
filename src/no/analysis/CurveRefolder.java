@@ -212,7 +212,7 @@ public class CurveRefolder{
 
 			refoldNucleus.updatePoint(i, x, y );
 		}
-		refoldNucleus.updatePolygon();
+//		refoldNucleus.updatePolygon();
 	}
 
 	/*
@@ -305,8 +305,8 @@ public class CurveRefolder{
 			// IJ.log("    Perp: "+perp.print());
 			// IJ.log("    Position: n: "+n.toString()+"   A: "+aPoint.toString()+"   B: "+bPoint.toString());
 
-			XYPoint innerPoint = refoldNucleus.getPolygon().contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
-			XYPoint outerPoint = refoldNucleus.getPolygon().contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
+			XYPoint innerPoint = Utils.createPolygon(refoldNucleus).contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
+			XYPoint outerPoint = Utils.createPolygon(refoldNucleus).contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
 
 			innerIQRX[i] = innerPoint.getX();
 			innerIQRY[i] = innerPoint.getY();
@@ -366,7 +366,7 @@ public class CurveRefolder{
 			yPoints[refoldNucleus.getLength()] = p.getY();
 			
 			nucleusPlot.setColor(Color.DARK_GRAY);
-			nucleusPlot.addPoints(refoldNucleus.getPolygon().xpoints, refoldNucleus.getPolygon().ypoints, Plot.LINE);
+			nucleusPlot.addPoints(Utils.createPolygon(refoldNucleus).xpoints, Utils.createPolygon(refoldNucleus).ypoints, Plot.LINE);
 
 		}
 
@@ -424,12 +424,6 @@ public class CurveRefolder{
 				throw new Exception("Cannot update point "+i+" to "+newX+", "+newY+": "+e);
 			}
 
-			// ensure the interior angle calculation works with the current points
-			try{
-				testNucleus.updatePolygon();
-			} catch(Exception e){
-				throw new Exception("Cannot set new polygon position "+e);
-			}
 
 			// measure the new profile & compare
 			try{
@@ -451,7 +445,6 @@ public class CurveRefolder{
 									distanceToPrev < maxDistance && distanceToPrev > minDistance) {
 				refoldNucleus.updatePoint(i, newX, newY);
 				refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
-				refoldNucleus.updatePolygon();
 				similarityScore = score;
 			}
 		}
@@ -522,7 +515,6 @@ public class CurveRefolder{
 
 			refoldNucleus.updatePoint(i, newX, newY);
 		}
-		refoldNucleus.updatePolygon();
 	}
 
 	/*

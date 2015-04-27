@@ -21,6 +21,7 @@ import java.util.*;
 import no.nuclei.*;
 import no.collections.*;
 import no.export.CompositeExporter;
+import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.gui.AnalysisSetup;
@@ -291,18 +292,16 @@ public class AnalysisCreator {
 
       try{
 
-        
         nucleusCounts.put("input", r.getNucleusCount());
         Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class});
         INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed");
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
         if(failedNuclei.getNucleusCount()>0){
-          IJ.log("    ----------------------------- ");
           IJ.log("    Exporting failed nuclei"       );
-          IJ.log("    ----------------------------- ");
           // failedNuclei.exportStatsFiles(); // NPE on clustering profile export
-          failedNuclei.annotateAndExportNuclei();
+//          failedNuclei.annotateAndExportNuclei();
+          	CompositeExporter.run(failedNuclei);
           nucleusCounts.put("failed", failedNuclei.getNucleusCount());
         }
 
@@ -331,7 +330,11 @@ public class AnalysisCreator {
       
       // export the stats files
       StatsExporter.run(r);
-      r.annotateAndExportNuclei(); // method overridden in subclasses.
+//      r.annotateAndExportNuclei(); // method overridden in subclasses.
+      
+      // annotate the nuclei in the population
+      NucleusAnnotator.run(r);
+
       
       // make a composite image of all nuclei in the collection
       CompositeExporter.run(r);
@@ -349,7 +352,7 @@ public class AnalysisCreator {
         nucleusCounts.put(p.getType(), p.getNucleusCount());
 
         IJ.log("    ----------------------------- ");
-        IJ.log("    Analysing population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
+        IJ.log("    Analysing sub-population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
         IJ.log("    ----------------------------- ");
         
 //        MorphologyAnalysis.run(p);
@@ -359,7 +362,7 @@ public class AnalysisCreator {
         SignalAnalysis.run(p);
         ShellAnalysis.run(p, 5);
         StatsExporter.run(p);
-        p.annotateAndExportNuclei();
+//        p.annotateAndExportNuclei();
         CompositeExporter.run(p);
         CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
         

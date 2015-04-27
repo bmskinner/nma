@@ -10,8 +10,10 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Measurements;
+import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.plugin.RoiEnlarger;
+import ij.process.FloatPolygon;
 import ij.process.ImageStatistics;
 import ij.process.ImageProcessor;
 
@@ -22,6 +24,7 @@ import java.util.*;
 
 import no.nuclei.*;
 import no.utility.ImageImporter;
+import no.utility.Utils;
 import no.components.*;
 import no.export.ImageExporter;
 
@@ -30,7 +33,6 @@ public class ShellCreator {
 	int shellCount = 5;
 
 	ImageStack image;
-//	ImagePlus[] channels;
 	Roi originalRoi;
 	INuclearFunctions nucleus;
 
@@ -46,8 +48,11 @@ public class ShellCreator {
 	* @param nucleus the nucleus to analyse
 	*/
 	public ShellCreator(INuclearFunctions n){
-		this.originalRoi = n.getRoi();
-		this.image = n.getImagePlanes();
+//		this.originalRoi = n.getRoi();
+		FloatPolygon polygon = Utils.createPolygon(n);
+		PolygonRoi originalRoi = new PolygonRoi(polygon, Roi.POLYGON);
+		this.image = ImageImporter.convert(new ImagePlus(n.getOriginalImagePath()));
+//		this.image = n.getImagePlanes();
 		this.nucleus = n;
 	}
 

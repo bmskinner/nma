@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import no.components.SignalCollection;
@@ -24,7 +22,7 @@ public interface INuclearFunctions
 
   // public Nucleus copy();
 
-	public Roi getRoi();
+//	public Roi getRoi();
   
 	public String getPath();
 
@@ -33,13 +31,6 @@ public interface INuclearFunctions
 	public File getSourceFile();
 
 	public File getNucleusFolder();
-//	public ImagePlus getSourceImage();
-	
-	public ImageStack getImagePlanes();
-
-//	public ImagePlus getAnnotatedImage();
-
-	public ImageStack getEnlargedPlanes();
 
 	public String getImageName();
 
@@ -65,7 +56,7 @@ public interface INuclearFunctions
 
 	public NucleusBorderPoint getPoint(int i);
 
-	public FloatPolygon getPolygon();
+//	public FloatPolygon getPolygon();
 	
 	public double getArea();
 
@@ -108,7 +99,7 @@ public interface INuclearFunctions
 
   public void setCentreOfMass(XYPoint d);
 
-  public void setPolygon(FloatPolygon p);
+//  public void setPolygon(FloatPolygon p);
 
   public void updateFailureCode(int i);
 
@@ -203,7 +194,7 @@ public interface INuclearFunctions
     -----------------------
   */
 
-  public void annotateFeatures();
+//  public void annotateFeatures();
 
   public double findRotationAngle();
 
@@ -224,7 +215,10 @@ public interface INuclearFunctions
   */
 //  public void exportAnnotatedImage();
 
-  public void annotateNucleusImage();
+//  public void annotateNucleusImage();
+  
+  public Map<String, Integer> getSegmentMap( );
+  public Profile getSingleDistanceProfile();
   
   public void exportProfilePlotImage();
 
@@ -258,7 +252,7 @@ public interface INuclearFunctions
 
   public void calculateAngleProfile(int angleProfileWindowSize);
 
-  public void updatePolygon();
+//  public FloatPolygon createPolygon();
 
   public void setSegments(List<NucleusBorderSegment> newList);
   public SignalCollection getSignalCollection();
@@ -270,4 +264,5 @@ public interface INuclearFunctions
   public Map<String, Integer> getBorderTags();
   public void addSegment(NucleusBorderSegment n);
   public void reverse();
+public String getOutputFolderName();
 }

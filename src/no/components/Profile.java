@@ -9,8 +9,8 @@ package no.components;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import no.utility.Utils;
 import ij.IJ;
-import no.utility.*;
 
 public class Profile implements Serializable {
 
