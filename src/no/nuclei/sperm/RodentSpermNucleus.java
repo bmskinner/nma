@@ -15,66 +15,54 @@ import no.components.*;
 import no.utility.*;
 
 public class RodentSpermNucleus
-	extends SpermNucleus
+extends SpermNucleus
 {
-/**
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-//  private static final int MAX_INTERIOR_ANGLE_TO_CALL_TIP = 110;
 
-//  private int tipIndex; // the index in the smoothedArray that has been designated the tip [should be 0]
+	private List<NucleusBorderPoint> hookRoi;
+	private List<NucleusBorderPoint> humpRoi;
 
-//  private NucleusBorderPoint spermTip; // differs from the headpoint, which in other sperm is opposite the tail
-//  private NucleusBorderPoint intersectionPoint; // the point through the centre of mass directly opposite the sperm tail. Used for dividing hook/hump Rois
-//  private NucleusBorderPoint initialConsensusTail; // the point initially chosen as the tail. Used to draw tail position box plots
-//  private NucleusBorderPoint minFeretPoint1; // debugging tool used for identification of narrowest width across CoM. Stores the border point
-//  private NucleusBorderPoint minFeretPoint2;
-  
-//  private FloatPolygon hookRoi;
-//  private FloatPolygon humpRoi;
-  
-  private List<NucleusBorderPoint> hookRoi;
-  private List<NucleusBorderPoint> humpRoi;
+	// Requires a sperm nucleus object to construct from
+	public RodentSpermNucleus(Nucleus n){
+		super(n);
+		// this.findPointsAroundBorder();
+	}
 
-  // Requires a sperm nucleus object to construct from
-  public RodentSpermNucleus(Nucleus n){
-  	super(n);
-    // this.findPointsAroundBorder();
-  }
+	// empty object
+	public RodentSpermNucleus(){
+	}
 
-  // empty object
-  public RodentSpermNucleus(){
-  }
-
-  /*
+	/*
     Identify key points: tip, estimated tail position
-  */
-  @Override
-  public void findPointsAroundBorder(){
-    
-    // find tip - use the least angle method
-    int tipIndex = this.getAngleProfile().getIndexOfMin();
-    addBorderTag("tip", tipIndex);
+	 */
+	@Override
+	public void findPointsAroundBorder(){
 
-    // decide if the profile is right or left handed; flip if needed
-    // IJ.log("    Nucleus "+this.getNucleusNumber());
-    if(!this.isProfileOrientationOK()){
-      this.reverse(); // reverses all profiles, border array and tagged points
-    }  
-    
+		// find tip - use the least angle method
+		int tipIndex = this.getAngleProfile().getIndexOfMin();
+		addBorderTag("tip", tipIndex);
 
-    /*
+		// decide if the profile is right or left handed; flip if needed
+		// IJ.log("    Nucleus "+this.getNucleusNumber());
+		if(!this.isProfileOrientationOK()){
+			this.reverse(); // reverses all profiles, border array and tagged points
+		}  
+
+
+		/*
       Find the tail point using multiple independent methods. 
       Find a consensus point
 
       Method 1: Use the list of local minima to detect the tail corner
                 This is the corner furthest from the tip.
                 Can be confused as to which side of the sperm head is chosen
-    */  
-    NucleusBorderPoint spermTail2 = findTailPointFromMinima();
-    this.addTailEstimatePosition(spermTail2);
-    // addBorderTag("spermTail2", this.getIndex(spermTail2));
+		 */  
+		NucleusBorderPoint spermTail2 = findTailPointFromMinima();
+		this.addTailEstimatePosition(spermTail2);
+		// addBorderTag("spermTail2", this.getIndex(spermTail2));
 
     /*
       Method 2: Look at the 2nd derivative - rate of change of angles

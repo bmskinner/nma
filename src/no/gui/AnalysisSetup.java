@@ -6,6 +6,8 @@ ANALYSIS SETUP OPTIONS
 */
 package no.gui;
 
+import java.awt.Button;
+import java.awt.Panel;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +58,8 @@ public class AnalysisSetup{
 	 * beyond the offsets provided?
 	 */
 	private boolean realignMode = true;
+	
+	private boolean refoldNucleus = true;
 	
 	private File folder;
 	private File mappingFile;
@@ -200,6 +204,10 @@ public class AnalysisSetup{
 		return this.realignMode;
 	}
 	
+	public boolean refoldNucleus(){
+		return this.refoldNucleus;
+	}
+	
 	public int getXOffset(){
 		return  this.xoffset;
 	}
@@ -213,7 +221,11 @@ public class AnalysisSetup{
 	}
 
 	private void createOptionsPanel(){
+		
+//		AnalysisSetupWindow demoWindow = new AnalysisSetupWindow(); // will not work - needs >= java 7
+		
 		gd = new GenericDialog("New analysis");
+	
 		gd.addNumericField("Nucleus threshold: ", nucleusThreshold, 0);
 		gd.addNumericField("Signal threshold: ", signalThreshold, 0);
 		gd.addNumericField("Min nuclear size: ", minNucleusSize, 0);
@@ -226,6 +238,8 @@ public class AnalysisSetup{
 
 		String[] items = this.getNucleusTypeStrings();
 		gd.addChoice("Nucleus type", items, items[1]); // default to rodent for now
+		
+		gd.addCheckbox("Refold consensus nucleus?", true);
 
 		Set<String> modeSet = CurveRefolder.MODES.keySet();
 		String[] modeArray = modeSet.toArray(new String[modeSet.size()]);
@@ -259,6 +273,9 @@ public class AnalysisSetup{
 		minSignalSize = gd.getNextNumber();
 		maxSignalFraction = gd.getNextNumber();
 		angleProfileWindowSize = (int) gd.getNextNumber();
+		this.refoldNucleus = gd.getNextBoolean();
+		
+		
 		performReanalysis = gd.getNextBoolean();
 		xoffset = (int)gd.getNextNumber();
 		yoffset = (int)gd.getNextNumber();
@@ -267,6 +284,8 @@ public class AnalysisSetup{
 		int nucleusCode = AnalysisSetup.nucleusTypes.get(nucleusType);
 		this.collectionClass = AnalysisSetup.collectionClassTypes.get(nucleusCode);
 		this.nucleusClass = AnalysisSetup.nucleusClassTypes.get(nucleusCode);
+		
+		
 		this.refoldMode = gd.getNextRadioButton();
 		this.realignMode = gd.getNextBoolean();
 	}

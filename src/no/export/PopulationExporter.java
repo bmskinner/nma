@@ -10,13 +10,12 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 import no.collections.INuclearCollection;
-import no.nuclei.INuclearFunctions;
 
 public class PopulationExporter {
 
 	public static void savePopulation(INuclearCollection collection){
 
-		File saveFile = new File(collection.getFolder()+"."+collection.getType()+".sav");
+		File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+".sav");
 		if(saveFile.exists()){
 			saveFile.delete();
 		}
@@ -30,14 +29,13 @@ public class PopulationExporter {
 			IJ.log("    Saving data to file...");
 
 			try{
-
-//				output.writeObject(collection.getNuclei());
 				
-				for(INuclearFunctions n : collection.getNuclei()){
-//					writeNucleus(n, output);
-					output.writeObject(n);
-					
-				}
+				output.writeObject(collection.getFolder());
+				output.writeObject(collection.getOutputFolder());
+				output.writeObject(collection.getDebugFile());
+				output.writeObject(collection.getType());
+				output.writeObject(collection.getNuclei());
+				
 				IJ.log("    Save complete");
 
 			} catch(IOException e){
@@ -60,40 +58,40 @@ public class PopulationExporter {
 		}
 	}
 
-	private static void writeNucleus(INuclearFunctions n, ObjectOutputStream oos) throws IOException {
-
-		
-//		oos.writeObject(n.getRoi().); // not serializable - build from polygon
-//		oos.writeObject(n.getPolygon().); // not serializable - build from border list
-		
-		// Basic info
-		oos.writeObject(n.getPosition());
-		oos.writeObject(n.getNucleusNumber());
-		oos.writeObject(n.getNucleusFolder());
-		oos.writeObject(n.getPerimeter());
-		oos.writeObject(n.getPathLength());
-		oos.writeObject(n.getFeret());
-		oos.writeObject(n.getArea());
-		oos.writeObject(n.getCentreOfMass());
-		oos.writeObject(n.getSourceFile());
-		oos.writeObject(n.getOutputFolderName());
-		oos.writeObject(n.getAngleProfileWindowSize());
-
-		// Profiles
-		oos.writeObject(n.getAngleProfile());
-		oos.writeObject(n.getDistanceProfile());
-		oos.writeObject(n.getSingleDistanceProfile());
-		
-		// Segment and border info
-		oos.writeObject(n.getBorderTags());
-		oos.writeObject(n.getBorderList());
-
-		oos.writeObject(n.getSegmentMap());
-		oos.writeObject(n.getSegments());
-		
-		// Signals
-		oos.writeObject(n.getSignalCollection());
-	}
+//	private static void writeNucleus(INuclearFunctions n, ObjectOutputStream oos) throws IOException {
+//
+//		
+////		oos.writeObject(n.getRoi().); // not serializable - build from polygon
+////		oos.writeObject(n.getPolygon().); // not serializable - build from border list
+//		
+//		// Basic info
+//		oos.writeObject(n.getPosition());
+//		oos.writeObject(n.getNucleusNumber());
+//		oos.writeObject(n.getNucleusFolder());
+//		oos.writeObject(n.getPerimeter());
+//		oos.writeObject(n.getPathLength());
+//		oos.writeObject(n.getFeret());
+//		oos.writeObject(n.getArea());
+//		oos.writeObject(n.getCentreOfMass());
+//		oos.writeObject(n.getSourceFile());
+//		oos.writeObject(n.getOutputFolderName());
+//		oos.writeObject(n.getAngleProfileWindowSize());
+//
+//		// Profiles
+//		oos.writeObject(n.getAngleProfile());
+//		oos.writeObject(n.getDistanceProfile());
+//		oos.writeObject(n.getSingleDistanceProfile());
+//		
+//		// Segment and border info
+//		oos.writeObject(n.getBorderTags());
+//		oos.writeObject(n.getBorderList());
+//
+//		oos.writeObject(n.getSegmentMap());
+//		oos.writeObject(n.getSegments());
+//		
+//		// Signals
+//		oos.writeObject(n.getSignalCollection());
+//	}
 }
 
 

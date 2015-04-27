@@ -340,7 +340,9 @@ public class AnalysisCreator {
       CompositeExporter.run(r);
 
       // refold the median consensus nucleus
-      CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+      if(analysisOptions.refoldNucleus()){
+    	  CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+      }
       
       // export the population to a save file for later
       PopulationExporter.savePopulation(r);
@@ -362,9 +364,13 @@ public class AnalysisCreator {
         SignalAnalysis.run(p);
         ShellAnalysis.run(p, 5);
         StatsExporter.run(p);
-//        p.annotateAndExportNuclei();
+
+        NucleusAnnotator.run(p);
         CompositeExporter.run(p);
-        CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+        
+        if(analysisOptions.refoldNucleus()){
+        	CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+        }
         
         // export the population to a save file for later
         PopulationExporter.savePopulation(p);

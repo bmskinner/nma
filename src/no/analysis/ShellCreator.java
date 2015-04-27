@@ -50,7 +50,7 @@ public class ShellCreator {
 	public ShellCreator(INuclearFunctions n){
 //		this.originalRoi = n.getRoi();
 		FloatPolygon polygon = Utils.createPolygon(n);
-		PolygonRoi originalRoi = new PolygonRoi(polygon, Roi.POLYGON);
+		originalRoi = new PolygonRoi(polygon, Roi.POLYGON);
 		this.image = ImageImporter.convert(new ImagePlus(n.getOriginalImagePath()));
 //		this.image = n.getImagePlanes();
 		this.nucleus = n;
