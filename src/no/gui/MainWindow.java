@@ -78,13 +78,21 @@ public class MainWindow extends JFrame {
 	}
 	
 	public void log(String s){
-		textArea.append(s);
+		textArea.append(s+"\n");
 	}
 	
 	public void newAnalysis(){
-		log("New analysis\n");
-		AnalysisCreator analysisCreator = new AnalysisCreator();
-		analysisCreator.run();
+//		log("New analysis\n");
+		
+		Thread thr = new Thread() {
+			public void run() {
+				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
+				analysisCreator.run();
+			}
+		};
+		thr.start();
+//		AnalysisCreator analysisCreator = new AnalysisCreator();
+//		analysisCreator.run();
 		
 	}
 	

@@ -29,10 +29,12 @@ implements PlugIn
 	public void run(String paramString)  {
 
 		try {
-			MainWindow frame = new MainWindow();
-			frame.setVisible(true);
-			frame.log("Startup complete\n");
-
+			java.awt.EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					MainWindow frame = new MainWindow();
+					frame.setVisible(true);
+				}
+			});
 
 		} catch (Exception e) {
 			e.printStackTrace();

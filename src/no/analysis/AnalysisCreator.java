@@ -34,6 +34,8 @@ import no.utility.MappingFileParser;
 
 public class AnalysisCreator {
 	
+	private MainWindow mw;
+	
 	private AnalysisSetup analysisOptions;
 	private int mappingCount = 0;
 
@@ -69,7 +71,8 @@ public class AnalysisCreator {
     Constructors
     -----------------------
   */
-	public AnalysisCreator(){
+	public AnalysisCreator(MainWindow mw){
+		this.mw = mw;
 		this.initialise();
 	}
 
@@ -77,6 +80,8 @@ public class AnalysisCreator {
 
 	  analysisOptions = new AnalysisSetup();
 	  if(analysisOptions.run()){
+		  
+		  mw.log("Directory: "+analysisOptions.getFolder().getName());
 
 		  IJ.log("Directory: "+analysisOptions.getFolder().getName());
 
@@ -104,6 +109,10 @@ public class AnalysisCreator {
     while(ok){
     	ok = this.postAnalysis();
     }
+    
+    mw.log("----------------------------- ");
+    mw.log("All done!"                     );
+    mw.log("----------------------------- ");
     
     
     IJ.log("----------------------------- ");
@@ -250,6 +259,7 @@ public class AnalysisCreator {
           INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, collection.getOutputFolderName(), "analysable");
           
           // RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
+          mw.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
           IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
 
           for(int i=0;i<collection.getNucleusCount();i++){
@@ -261,6 +271,7 @@ public class AnalysisCreator {
             spermNuclei.addNucleus(subNucleus);
           }
           this.nuclearPopulations.add(spermNuclei);
+          mw.log("  Population converted to "+analysisOptions.getNucleusClass().getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
           IJ.log("  Population converted to "+analysisOptions.getNucleusClass().getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
         } catch(InstantiationException e){
           IJ.log("Cannot create collection: "+e.getMessage());
@@ -277,6 +288,7 @@ public class AnalysisCreator {
   }
 
   public void analysePopulations(){
+	  mw.log("Beginning analysis");
     IJ.log("Beginning analysis");
 
     for(INuclearCollection r : this.nuclearPopulations){
@@ -286,6 +298,9 @@ public class AnalysisCreator {
       }
 
       File folder = r.getFolder();
+      mw.log("  ----------------------------- ");
+      mw.log("  Analysing: "+folder.getName());
+      mw.log("  ----------------------------- ");
       IJ.log("  ----------------------------- ");
       IJ.log("  Analysing: "+folder.getName());
       IJ.log("  ----------------------------- ");
@@ -300,6 +315,7 @@ public class AnalysisCreator {
 
         r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
         if(failedNuclei.getNucleusCount()>0){
+        	mw.log("    Exporting failed nuclei"       );
           IJ.log("    Exporting failed nuclei"       );
           // failedNuclei.exportStatsFiles(); // NPE on clustering profile export
 //          failedNuclei.annotateAndExportNuclei();
@@ -316,6 +332,10 @@ public class AnalysisCreator {
       } catch(NoSuchMethodException e){
         IJ.log("Cannot find constructor: "+e.getMessage());
       }
+      
+      mw.log("    ----------------------------- ");
+      mw.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
+      mw.log("    ----------------------------- ");
 
       IJ.log("    ----------------------------- ");
       IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
@@ -356,6 +376,10 @@ public class AnalysisCreator {
       for(INuclearCollection p : signalPopulations){
        
         nucleusCounts.put(p.getType(), p.getNucleusCount());
+        
+        mw.log("    ----------------------------- ");
+        mw.log("    Analysing sub-population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
+        mw.log("    ----------------------------- ");
 
         IJ.log("    ----------------------------- ");
         IJ.log("    Analysing sub-population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
