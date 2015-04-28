@@ -12,14 +12,16 @@ import java.util.List;
 
 import no.collections.INuclearCollection;
 import no.collections.NucleusCollection;
+import no.gui.MainWindow;
 import no.nuclei.INuclearFunctions;
 
 public class PopulationImporter {
 
 
-	public static INuclearCollection readPopulation(File inputFile){
+	public static INuclearCollection readPopulation(File inputFile, MainWindow mw){
 		
 		if(!inputFile.exists()){
+			mw.log("Requested file does not exist");
 			throw new IllegalArgumentException("Requested file does not exist");
 		}
 
@@ -37,7 +39,7 @@ public class PopulationImporter {
 			//		output.writeObject(collection.getType());
 			//		output.writeObject(collection.getNuclei());
 
-			IJ.log("Reading file...");
+			mw.logc("Reading file...");
 			List<Object> inputList = new ArrayList<Object>(0);
 
 			try{
@@ -48,7 +50,8 @@ public class PopulationImporter {
 				}
 			} catch (Exception e) { // exception occurs on reaching EOF
 
-				IJ.log("Read "+inputList.size()+" items");
+				mw.log("OK");
+//				mw.log("Read "+inputList.size()+" items");
 
 				File folder = (File) inputList.get(0);
 				String outputFolder = (String) inputList.get(1);
@@ -63,7 +66,7 @@ public class PopulationImporter {
 //					IJ.log("Found "+n.getClass().getSimpleName());
 				}
 
-				IJ.log("File imported");
+				mw.log("File imported");
 
 			} finally {
 				ois.close();

@@ -27,7 +27,6 @@ import no.export.StatsExporter;
 import no.gui.AnalysisSetup;
 import no.gui.MainWindow;
 import no.gui.PopulationSplitWindow;
-import no.imports.PopulationImporter;
 import no.nuclei.INuclearFunctions;
 import no.utility.MappingFileParser;
 
@@ -199,7 +198,7 @@ public class AnalysisCreator {
    */
 
   public void runAnalysis(){
-    NucleusDetector detector = new NucleusDetector(analysisOptions.getFolder(), this.outputFolderName);
+    NucleusDetector detector = new NucleusDetector(analysisOptions.getFolder(), this.outputFolderName, this.mw);
 
     setDetectionParameters(detector);
     detector.runDetector();
@@ -215,7 +214,7 @@ public class AnalysisCreator {
    * @return      the nuclei in each folder analysed
    */
   public void runReAnalysis(){
-    NucleusRefinder detector = new NucleusRefinder(analysisOptions.getFolder(), this.outputFolderName, analysisOptions.getMappingFile());
+    NucleusRefinder detector = new NucleusRefinder(analysisOptions.getFolder(), this.outputFolderName, analysisOptions.getMappingFile(), this.mw);
     setDetectionParameters(detector);
     detector.setXOffset(analysisOptions.getXOffset());
     detector.setYOffset(analysisOptions.getYOffset());
@@ -368,8 +367,6 @@ public class AnalysisCreator {
       
       // export the population to a save file for later
       PopulationExporter.savePopulation(r);
-      // check if the reading works
-      INuclearCollection test = PopulationImporter.readPopulation(new File(r.getOutputFolder()+File.separator+r.getType()+".sav"));
 
       ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
       

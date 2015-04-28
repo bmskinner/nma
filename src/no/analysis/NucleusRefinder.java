@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.*;
 
 import no.components.XYPoint;
+import no.gui.MainWindow;
 import no.analysis.ImageAligner;
 
 public class NucleusRefinder
@@ -44,8 +45,8 @@ public class NucleusRefinder
   /*
     Constructors
   */
-	public NucleusRefinder(File inputFolder, String outputFolder, File pathList){
-		super(inputFolder, outputFolder);
+	public NucleusRefinder(File inputFolder, String outputFolder, File pathList, MainWindow mw){
+		super(inputFolder, outputFolder, mw);
     this.pathList = pathList;
 
     // get the image names and coordinates from the pathList
@@ -197,7 +198,7 @@ public class NucleusRefinder
   @Override
   protected void processImage(ImageStack image, File path){
 
-    IJ.log("File:  "+path.getName());
+    mw.log("File:  "+path.getName());
     updateFileMap(path); // map from new to old
     if(!fileMap.containsKey(path)){ return; } // skip images with no nuclei to catch
 
@@ -218,7 +219,7 @@ public class NucleusRefinder
           this.totalNuclei++;
         }
       } catch(Exception e){
-        IJ.log("  Error acquiring nucleus: "+e);
+        mw.log("  Error acquiring nucleus: "+e);
       }
       i++;
     } 
@@ -241,7 +242,7 @@ public class NucleusRefinder
 
 				  if(roi.getBounds().contains( xToFind, yToFind )){
 					  result = true;
-					  IJ.log("  Acquiring nucleus at: "+xToFind+","+yToFind);
+					  mw.log("  Acquiring nucleus at: "+xToFind+","+yToFind);
 				  }
 			  }
 

@@ -24,6 +24,7 @@ import no.utility.StatsMap;
 import no.collections.*;
 import no.components.*;
 import no.export.ImageExporter;
+import no.gui.MainWindow;
 import no.imports.ImageImporter;
 
 public class NucleusDetector {
@@ -53,6 +54,8 @@ public class NucleusDetector {
 
 	private File inputFolder;
   protected String outputFolder;
+  
+  protected MainWindow mw;
   private Map<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
 
 
@@ -63,10 +66,11 @@ public class NucleusDetector {
   * @param inputFolder the folder to analyse
   * @param outputFolder the name of the folder for results
   */
-	public NucleusDetector(File inputFolder, String outputFolder){
-		this.inputFolder = inputFolder;
-    this.outputFolder = outputFolder;
-	}
+  public NucleusDetector(File inputFolder, String outputFolder, MainWindow mw){
+	  this.inputFolder = inputFolder;
+	  this.outputFolder = outputFolder;
+	  this.mw = mw;
+  }
 
 
   /**
@@ -314,7 +318,7 @@ public class NucleusDetector {
       try{
         output.mkdir();
       } catch(Exception e) {
-        IJ.log("Failed to create directory: "+e);
+        mw.log("Failed to create directory: "+e);
       }
     }
     return output;
@@ -350,7 +354,7 @@ public class NucleusDetector {
           image.close();
 
         } catch (Exception e) { // end try
-            IJ.log("Error in image processing: "+e.getMessage());
+        	mw.log("Error in image processing: "+e.getMessage());
         } // end catch
       } else { // if !ok
         if(file.isDirectory()){ // recurse over any sub folders
@@ -377,7 +381,7 @@ public class NucleusDetector {
 		try{
 			detector.run(image);
 		} catch(Exception e){
-			IJ.log("Error in nucleus detection: "+e.getMessage());
+			mw.log("Error in nucleus detection: "+e.getMessage());
 		}
 		return detector.getRoiList();
 	}
@@ -391,22 +395,22 @@ public class NucleusDetector {
   */
   protected void processImage(ImageStack image, File path){
 
-    IJ.log("File:  "+path.getName());
+	  mw.log("File:  "+path.getName());
     List<Roi> roiList = getROIs(image);
     if(roiList.isEmpty()){
-      IJ.log("  No usable nuclei in image");
+    	mw.log("  No usable nuclei in image");
     }
 
     int nucleusNumber = 0;
 
     for(Roi roi : roiList){
       
-      IJ.log("  Acquiring nucleus "+nucleusNumber);
+    	mw.log("  Acquiring nucleus "+nucleusNumber);
       try{
       	analyseNucleus(roi, image, nucleusNumber, path); // get the profile data back for the nucleus
       	this.totalNuclei++;
       } catch(Exception e){
-      	IJ.log("  Error acquiring nucleus: "+e.getMessage());
+    	  mw.log("  Error acquiring nucleus: "+e.getMessage());
       }
       nucleusNumber++;
     } 
@@ -464,7 +468,7 @@ public class NucleusDetector {
 			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
 
 		  } catch(Exception e){
-			  IJ.log("Error saving original, enlarged or annotated image: "+e.getMessage());
+			  mw.log("Error saving original, enlarged or annotated image: "+e.getMessage());
 		  }
 		  
 		  SignalDetector signalDetector = new SignalDetector(this.signalThreshold, this.minSignalSize, this.maxSignalFraction);
@@ -474,9 +478,9 @@ public class NucleusDetector {
 		  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
 		  collectionToAddTo.addNucleus(currentNucleus);
 	  }catch(Exception e){
-		  IJ.log("    Error in nucleus assignment: "+e.getMessage());
+		  mw.log("    Error in nucleus assignment: "+e.getMessage());
 		  for(StackTraceElement element : e.getStackTrace()){
-			  IJ.log("    "+element.toString());
+			  mw.log("    "+element.toString());
 		  }
 	  }
   }
