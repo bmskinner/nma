@@ -26,10 +26,8 @@ import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.gui.AnalysisSetup;
 import no.gui.MainWindow;
-import no.gui.PopulationSplitWindow;
 import no.nuclei.INuclearFunctions;
 import no.utility.Logger;
-import no.utility.MappingFileParser;
 
 
 public class AnalysisCreator {
@@ -119,11 +117,11 @@ public class AnalysisCreator {
     this.analysePopulations();
     this.exportAnalysisLog();
     
-    boolean ok = true;
-    // do as many post mappings as needed
-    while(ok){
-    	ok = this.postAnalysis();
-    }
+//    boolean ok = true;
+//    // do as many post mappings as needed
+//    while(ok){
+//    	ok = this.postAnalysis();
+//    }
     
     mw.log(spacerString);
     mw.log("All done!" );
@@ -138,76 +136,6 @@ public class AnalysisCreator {
    */
   public List<INuclearCollection> getPopulations(){
 	  return this.finalPopulations;
-  }
-
-  /**
-   * Following the main analysis, allow a mapping file to be applied
-   * to investigate a seubset of nuclei.
-   * @return true if another analysis is to be performed
-   */
-  private boolean postAnalysis(){
-	  PopulationSplitWindow splitter = new PopulationSplitWindow(this.nuclearPopulations, this.mw);
-	  if(splitter.getResult()){
-
-		  try{
-			  File f = splitter.addMappingFile();
-			  
-			  if(f==null) return false;
-			  
-			  if(!f.exists()) return false;
-			  
-			  INuclearCollection subjectCollection = splitter.getCollection();
-			  if(subjectCollection==null) return false;
-
-			  // import and parse the mapping file
-			  List<String> pathList = MappingFileParser.parse(f);
-
-			  // create a new collection to hold the nuclei
-			  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
-			  INuclearCollection remapCollection = (INuclearCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), subjectCollection.getOutputFolderName(), f.getName());
-
-			  // add nuclei to the new population based on the mapping info
-			  for(INuclearFunctions n : subjectCollection.getNuclei()){
-				  if(pathList.contains(n.getPath()+"\t"+n.getNucleusNumber())){
-//					  IJ.log("    Adding nucleus: "+n.getImageName()+"-"+n.getNucleusNumber());
-					  remapCollection.addNucleus(n);
-				  }
-			  }
-
-
-			  // reanalyse / generate medians and consensus
-			  // create median of the same length as the main population median
-			  // ensure that no remapping of points or segmentation occurs.
-			  // this allows the segments from the main population to be drawn directly
-			  MorphologyAnalysis.reapplyProfiles(remapCollection, subjectCollection);
-			  // draw the main population segment pattern on the new median profile
-			  // make a consensus nucleus from the new median
-			  CurveRefolder.run(remapCollection, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
-
-		  } catch(InstantiationException e){
-			  logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
-//			  IJ.log("Cannot create collection: "+e.getMessage());
-		  } catch(IllegalAccessException e){
-			  logger.log("Cannot access constructor: "+e.getMessage(), Logger.ERROR);
-//			  IJ.log("Cannot access constructor: "+e.getMessage());
-		  } catch(InvocationTargetException e){
-			  logger.log("Cannot invoke constructor: "+e.getMessage(), Logger.ERROR);
-//			  IJ.log("Cannot invoke constructor: "+e.getMessage());
-		  } catch (NoSuchMethodException e) {
-			  logger.log("No such method: "+e.getMessage(), Logger.ERROR);
-			  for(StackTraceElement el : e.getStackTrace()){
-				  logger.log(el.toString(), Logger.ERROR);
-			  }
-		  } catch (SecurityException e) {
-			  logger.log("Security error: "+e.getMessage(), Logger.ERROR);
-			  for(StackTraceElement el : e.getStackTrace()){
-				  logger.log(el.toString(), Logger.ERROR);
-			  }
-		  }
-		  return true;
-	  }	else {
-		  return false;
-	  }
   }
 
   /*
@@ -365,8 +293,9 @@ public class AnalysisCreator {
 		  }
 
 		  //		  mw.log(spacerString);
-		  mw.log("Population: "+r.getType()+":\n\t"+r.getNucleusCount()+" nuclei");
-		  logger.log("Population: "+r.getType()+":\n\t"+r.getNucleusCount()+" nuclei");
+		  mw.log("Population: "+r.getType());
+		  mw.log("Population: "+r.getNucleusCount()+" nuclei");
+		  logger.log("Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
 		  //		  mw.log(spacerString);
 
 		  // core analysis - align profiles and segment
@@ -379,10 +308,22 @@ public class AnalysisCreator {
 		  }
 
 		  // measure general nuclear organisation
-		  SignalAnalysis.run(r);
+		  mw.logc("Running signal analysis...");
+		  ok = SignalAnalysis.run(r);
+		  if(ok){
+			  mw.log("OK");
+		  } else {
+			  mw.log("Error");
+		  }
 
 		  // Perform shell analysis with 5 shells by default
-		  ShellAnalysis.run(r, 5);
+		  mw.logc("Running shell analysis...");
+		  ok = ShellAnalysis.run(r, 5);
+		  if(ok){
+			  mw.log("OK");
+		  } else {
+			  mw.log("Error");
+		  }
 
 		  // export the stats files
 		  mw.logc("Exporting stats...");
@@ -433,31 +374,88 @@ public class AnalysisCreator {
 
 			  nucleusCounts.put(p.getType(), p.getNucleusCount());
 
-			  mw.log(spacerString);
-			  mw.log("Sub-population: "+p.getType()+":\n\t"+p.getNucleusCount()+" nuclei");
-			  mw.log(spacerString);
-
-			  //        IJ.log("    ----------------------------- ");
-			  //        IJ.log("    Analysing sub-population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
-			  //        IJ.log("    ----------------------------- ");
+			  mw.log("Sub-population: "+p.getType());
+			  mw.log("Sub-population: "+p.getNucleusCount()+" nuclei");
+			  logger.log("Sub-population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
 
 			  //        MorphologyAnalysis.run(p);
 			  // use the same segmentation from the initial analysis
-			  MorphologyAnalysis.reapplyProfiles(p, r);
+			  mw.logc("Reapplying morphology...");
+			  ok = MorphologyAnalysis.reapplyProfiles(p, r);
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
+			  
+			  // measure general nuclear organisation
+			  mw.logc("Running signal analysis...");
+			  ok = SignalAnalysis.run(p);
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
 
-			  SignalAnalysis.run(p);
-			  ShellAnalysis.run(p, 5);
-			  StatsExporter.run(p);
+			  // Perform shell analysis with 5 shells by default
+			  mw.logc("Running shell analysis...");
+			  ok = ShellAnalysis.run(p, 5);
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
 
-			  NucleusAnnotator.run(p);
-			  CompositeExporter.run(p);
+			  // export the stats files
+			  mw.logc("Exporting stats...");
+			  ok = StatsExporter.run(p);
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
+
+			  // annotate the nuclei in the population
+			  mw.logc("Annotating nuclei...");
+			  ok = NucleusAnnotator.run(p);
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
+
+
+			  // make a composite image of all nuclei in the collection
+			  mw.logc("Exporting composite...");
+			  ok = CompositeExporter.run(p);
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
+			  
+//
+//			  SignalAnalysis.run(p);
+//			  ShellAnalysis.run(p, 5);
+//			  StatsExporter.run(p);
+//
+//			  NucleusAnnotator.run(p);
+//			  CompositeExporter.run(p);
 
 			  if(analysisOptions.refoldNucleus()){
 				  CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
 			  }
 
 			  // export the population to a save file for later
-			  PopulationExporter.savePopulation(p);
+			// export the population to a save file for later
+			  mw.logc("Saving to file...");
+			  ok = PopulationExporter.savePopulation(p);
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
+//			  PopulationExporter.savePopulation(p);
 			  finalPopulations.add(p);
 		  }
 		  collectionNucleusCounts.put(folder, nucleusCounts);
@@ -472,7 +470,7 @@ public class AnalysisCreator {
   public ArrayList<INuclearCollection> dividePopulationBySignals(INuclearCollection r){
 
 	  ArrayList<INuclearCollection> signalPopulations = new ArrayList<INuclearCollection>(0);
-
+	  logger.log("Dividing population by signals...");
 	  try{
 
 		  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
@@ -481,7 +479,7 @@ public class AnalysisCreator {
 		  for(int channel : channels){
 			  List<INuclearFunctions> list = r.getNucleiWithSignals(channel);
 			  if(!list.isEmpty()){
-				  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "Signals_in_channel_"+channel);
+				  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "Signals_in_channel_"+channel, r.getDebugFile());
 				  for(INuclearFunctions n : list){
 					  listCollection.addNucleus( n );
 				  }
@@ -489,7 +487,7 @@ public class AnalysisCreator {
 
 				  List<INuclearFunctions> notList = r.getNucleiWithSignals(-channel);
 				  if(!notList.isEmpty()){
-					  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "No_signals_in_channel_"+channel);
+					  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "No_signals_in_channel_"+channel, r.getDebugFile());
 					  for(INuclearFunctions n : notList){
 						  notListCollection.addNucleus( n );
 					  }

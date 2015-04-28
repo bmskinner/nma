@@ -4,6 +4,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
@@ -161,7 +162,10 @@ public class NucleusAnnotator {
 					ip.setLineWidth(3);
 					ip.drawDot(s.getCentreOfMass().getXAsInt(), s.getCentreOfMass().getYAsInt());
 					ip.setLineWidth(1);
-					ip.draw(s.getRoi());
+					
+					FloatPolygon p = Utils.createPolygon(s.getBorder());
+					PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+					ip.draw(roi);
 				}
 			}
 		}

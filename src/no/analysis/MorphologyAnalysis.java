@@ -113,26 +113,34 @@ public class MorphologyAnalysis {
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
-	public static void reapplyProfiles(INuclearCollection collection, INuclearCollection sourceCollection){
+	public static boolean reapplyProfiles(INuclearCollection collection, INuclearCollection sourceCollection){
 		
 		logger.log("Applying existing segmentation profile to population...");
 		
-		String referencePoint = collection.getReferencePoint();
-		String orientationPoint = collection.getOrientationPoint();
-		
-		createProfileAggregateFromPoint(collection, referencePoint, (int)sourceCollection.getMedianArrayLength());
-		createProfileAggregateFromPoint(collection, orientationPoint, (int)sourceCollection.getMedianArrayLength());
-		
-		ProfileCollection pc = collection.getProfileCollection();
-		ProfileCollection sc = sourceCollection.getProfileCollection();
-		
-		pc.addSegments(referencePoint, sc.getSegments(referencePoint));
-		pc.addSegments(sourceCollection.getOrientationPoint(), sc.getSegments(orientationPoint));
-		pc.preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-		pc.addMedianLineToPlots(orientationPoint);
-		pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
-		
+		try {
+			String referencePoint = collection.getReferencePoint();
+			String orientationPoint = collection.getOrientationPoint();
+			
+			createProfileAggregateFromPoint(collection, referencePoint, (int)sourceCollection.getMedianArrayLength());
+			createProfileAggregateFromPoint(collection, orientationPoint, (int)sourceCollection.getMedianArrayLength());
+			
+			ProfileCollection pc = collection.getProfileCollection();
+			ProfileCollection sc = sourceCollection.getProfileCollection();
+			
+			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
+			pc.addSegments(sourceCollection.getOrientationPoint(), sc.getSegments(orientationPoint));
+			pc.preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+			pc.addMedianLineToPlots(orientationPoint);
+			pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
+		} catch (Exception e) {
+			logger.log("Error reapplying profiles: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return false;
+		}
 		logger.log("Re-profiling complete");
+		return true;
 	}
 	
 	/**

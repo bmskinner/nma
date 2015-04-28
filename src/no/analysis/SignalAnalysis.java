@@ -20,33 +20,42 @@ public class SignalAnalysis {
 
 	private static Logger logger;
 
-	public static void run(INuclearCollection collection){
+	public static boolean run(INuclearCollection collection){
 		
 		logger = new Logger(collection.getDebugFile(), "SignalAnalysis");
 
 		if(collection.getSignalCount()==0){
 			logger.log("No signals found in collection", Logger.DEBUG);
-			return;
+			return true;
 		}
 
-		logger.log("Exporting distance matrix...");
-		for(INuclearFunctions n : collection.getNuclei()){
-			n.exportSignalDistanceMatrix();
-			
-			// if asymmetric, calculate the angle from the tail
-			if(AsymmetricNucleusCollection.class.isAssignableFrom(collection.getClass())){
-				n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
+		try {
+			logger.log("Exporting distance matrix...");
+			for(INuclearFunctions n : collection.getNuclei()){
+				n.exportSignalDistanceMatrix();
+				
+				// if asymmetric, calculate the angle from the tail
+				if(AsymmetricNucleusCollection.class.isAssignableFrom(collection.getClass())){
+					n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
+				}
 			}
-		}
-		logger.log("Distance matrix exported");
-		
-		exportSignalStats(collection);
-		exportDistancesBetweenSingleSignals(collection);
-		addSignalsToProfileCharts(collection);
+			logger.log("Distance matrix exported");
+			
+			exportSignalStats(collection);
+			exportDistancesBetweenSingleSignals(collection);
+			addSignalsToProfileCharts(collection);
 
-		collection.getProfileCollection().exportProfilePlots(collection.getFolder()+
-				File.separator+
-				collection.getOutputFolderName(), collection.getType());
+			collection.getProfileCollection().exportProfilePlots(collection.getFolder()+
+					File.separator+
+					collection.getOutputFolderName(), collection.getType());
+		} catch (Exception e) {
+			logger.log("Error in signal analysis: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return false;
+		}
+		return true;
 	}
 
 	private static void exportSignalStats(INuclearCollection collection){

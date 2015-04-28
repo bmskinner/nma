@@ -46,6 +46,7 @@ public class PopulationExporter {
 					for(StackTraceElement el : e.getStackTrace()){
 						logger.log(el.toString(), Logger.STACK);
 					}
+					throw new Exception("Individual nucleus error");
 
 				} finally{
 					output.close();
@@ -58,7 +59,9 @@ public class PopulationExporter {
 				for(StackTraceElement el : e.getStackTrace()){
 					logger.log(el.toString(), Logger.STACK);
 				}
+				return false;
 			}
+			
 		} catch(Exception e){
 			logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
 			return false;

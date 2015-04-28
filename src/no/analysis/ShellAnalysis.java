@@ -1,7 +1,5 @@
 package no.analysis;
 
-import ij.IJ;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -11,8 +9,11 @@ import no.collections.INuclearCollection;
 import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
 import no.nuclei.INuclearFunctions;
+import no.utility.Logger;
 
 public class ShellAnalysis {
+	
+	private static Logger logger;
 	
 	private static Map<Integer, ShellCounter> counters = new HashMap<Integer, ShellCounter>(0);
 		
@@ -21,52 +22,64 @@ public class ShellAnalysis {
 	 * @param collection the collection of nuclei to analyse
 	 * @param shells the number of shells per nucleus
 	 */
-	public static void run(INuclearCollection collection, int shells){
+	public static boolean run(INuclearCollection collection, int shells){
+		
+		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
 		
 		if(collection.getSignalCount()==0){
-			return; // only bother if there are signals
+			logger.log("No signals in population",Logger.DEBUG);
+			return true; // only bother if there are signals
 		}
 		
 		if(collection.getClass() != NucleusCollection.class){
-			return; // only analyse round nuclei
+			logger.log("Not a round nucleus; skipping");
+			return true; // only analyse round nuclei
 		}
+		logger.log("Performing shell analysis...");
 		
-		IJ.log("    Performing shell analysis...");
-		
-		counters = new HashMap<Integer, ShellCounter>(0);
+		try {
+			counters = new HashMap<Integer, ShellCounter>(0);
 
-		for(int channel : collection.getSignalChannels()){
-			counters.put(channel, new ShellCounter(shells));
-		}
-
-		// make the shells and measure the values
-		for(INuclearFunctions n : collection.getNuclei()){
-
-			ShellCreator shellAnalyser = new ShellCreator(n);
-			shellAnalyser.createShells();
-			shellAnalyser.exportImage();
-
-			for(int channel : n.getSignalChannels()){
-				List<NuclearSignal> signalGroup = n.getSignals(channel); 
-				if(!signalGroup.isEmpty()){
-					ShellCounter counter = counters.get(channel);
-
-					for(NuclearSignal s : signalGroup){
-						try {
-							double[] signalPerShell = shellAnalyser.findShell(s, channel);
-							counter.addValues(signalPerShell);
-						} catch (Exception e) {
-							IJ.log("    Error in shell analysis: "+e.getMessage());;
-						}
-					} // end for signals
-				} // end if signals
+			for(int channel : collection.getSignalChannels()){
+				counters.put(channel, new ShellCounter(shells));
 			}
-		}
 
-		// get stats and export
-		for(int channel : counters.keySet()){
-			counters.get(channel).export(new File(collection.getLogFileName( "log.shells."+channel  )));
+			// make the shells and measure the values
+			for(INuclearFunctions n : collection.getNuclei()){
+
+				ShellCreator shellAnalyser = new ShellCreator(n);
+				shellAnalyser.createShells();
+				shellAnalyser.exportImage();
+
+				for(int channel : n.getSignalChannels()){
+					List<NuclearSignal> signalGroup = n.getSignals(channel); 
+					if(!signalGroup.isEmpty()){
+						ShellCounter counter = counters.get(channel);
+
+						for(NuclearSignal s : signalGroup){
+							try {
+								double[] signalPerShell = shellAnalyser.findShell(s, channel);
+								counter.addValues(signalPerShell);
+							} catch (Exception e) {
+								logger.log("Error in signal in shell analysis: "+e.getMessage(), Logger.ERROR);
+							}
+						} // end for signals
+					} // end if signals
+				}
+			}
+
+			// get stats and export
+			for(int channel : counters.keySet()){
+				counters.get(channel).export(new File(collection.getLogFileName( "log.shells."+channel  )));
+			}
+			logger.log("Shell analysis complete");
+		} catch (Exception e) {
+			logger.log("Error in shell analysis: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return false;
 		}
-		IJ.log("    Shell analysis complete");
+		return true;
 	}
 }

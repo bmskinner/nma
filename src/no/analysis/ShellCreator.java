@@ -48,7 +48,7 @@ public class ShellCreator {
 	* @param nucleus the nucleus to analyse
 	*/
 	public ShellCreator(INuclearFunctions n){
-//		this.originalRoi = n.getRoi();
+
 		FloatPolygon polygon = Utils.createPolygon(n);
 		originalRoi = new PolygonRoi(polygon, Roi.POLYGON);
 		this.image = ImageImporter.convert(new ImagePlus(n.getOriginalImagePath()));
@@ -152,7 +152,9 @@ public class ShellCreator {
 
 		// IJ.log(" Finding shells");
 
-		Roi signalRoi = signal.getRoi();
+//		Roi signalRoi = signal.getRoi();
+		FloatPolygon polygon = Utils.createPolygon(signal.getBorder());
+		Roi signalRoi = new PolygonRoi(polygon, Roi.POLYGON);
 //		IJ.log("    Signal ROI: "+signalRoi.getBounds().x+","+signalRoi.getBounds().y);
 		
 		// Get a list of all the points within the ROI

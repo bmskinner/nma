@@ -18,30 +18,30 @@ public class PopulationSplitWindow {
 
 	private GenericDialog gd;
 	private List<INuclearCollection> collections = new ArrayList<INuclearCollection>(0);
-	private MainWindow mw;
+//	private MainWindow mw;
 
-	public PopulationSplitWindow(List<INuclearCollection> collections, MainWindow mw){
+	public PopulationSplitWindow(List<INuclearCollection> collections){
 		this.collections = collections;
-		this.mw = mw;
-		gd = new GenericDialog("Finish analysis?");
-		gd.enableYesNoCancel("Add mapping", "End analysis");
-		gd.hideCancelButton();
-
-		gd.showDialog();
+//		this.mw = mw;
+//		gd = new GenericDialog("Finish analysis?");
+//		gd.enableYesNoCancel("Add mapping", "End analysis");
+//		gd.hideCancelButton();
+//
+//		gd.showDialog();
 	}
 	
-	public boolean getResult(){
-		
-		if (gd.wasOKed()){
-			mw.log("Adding a mapping file");
-			return true;
-		}
-		else{
-			mw.log("Ending analysis");
-			return false;
-		}
-		
-	}
+//	public boolean getResult(){
+//		
+//		if (gd.wasOKed()){
+//			mw.log("Adding a mapping file");
+//			return true;
+//		}
+//		else{
+//			mw.log("Ending analysis");
+//			return false;
+//		}
+//		
+//	}
 	
 	public INuclearCollection getCollection(){
 		gd = new GenericDialog("Select nuclear population");

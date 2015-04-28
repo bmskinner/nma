@@ -11,12 +11,9 @@
 */  
 package no.nuclei;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.process.ImageProcessor;
 
-import java.awt.Color;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import no.components.*;
 
@@ -65,23 +62,23 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
   */
 
   // draw the points considered as sperm tails
-  public void annotateEstimatedTailPoints(){
-	  ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
-		ImageProcessor ip = annotatedImage.getProcessor();
-//    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-    ip.setLineWidth(3);
-    ip.setColor(Color.GRAY);
-    for(int j=0; j<this.getEstimatedTailPoints().size();j++){
-      NucleusBorderPoint p = this.getEstimatedTailPoints().get(j);
-      ip.drawDot(p.getXAsInt(), p.getYAsInt());
-    }
-    IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
-  }
+//  public void annotateEstimatedTailPoints(){
+//	  ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
+//		ImageProcessor ip = annotatedImage.getProcessor();
+////    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
+//    ip.setLineWidth(3);
+//    ip.setColor(Color.GRAY);
+//    for(int j=0; j<this.getEstimatedTailPoints().size();j++){
+//      NucleusBorderPoint p = this.getEstimatedTailPoints().get(j);
+//      ip.drawDot(p.getXAsInt(), p.getYAsInt());
+//    }
+//    IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
+//  }
 
-  public void annotateFeatures(){
-
-    this.annotateEstimatedTailPoints();
-  }
+//  public void annotateFeatures(){
+//
+//    this.annotateEstimatedTailPoints();
+//  }
 
   /*
     -----------------------

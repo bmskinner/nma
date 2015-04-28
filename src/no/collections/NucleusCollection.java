@@ -8,7 +8,6 @@
 */
 
 package no.collections;
-import ij.IJ;
 
 import java.io.File;
 import java.util.*;

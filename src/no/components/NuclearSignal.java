@@ -1,8 +1,11 @@
 package no.components;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 /*
   -----------------------
@@ -22,104 +25,109 @@ public class NuclearSignal implements Serializable {
 
 	private XYPoint centreOfMass;
 	private int closestNuclearBorderPoint;
-	private String origin;
+	private String origin; // can store the image and nucleus the signal was found in
 
-	private Roi roi;
+	private List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // replace ROI
 
-  public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass, String origin){
-    this.roi = roi;
-    this.area = area;
-    this.perimeter = perimeter;
-    this.feret = feret;
-    this.centreOfMass = centreOfMass;
-    this.origin = origin;
-  }
+	public NuclearSignal(Roi roi, double area, double feret, double perimeter, XYPoint centreOfMass, String origin){
 
-  public NuclearSignal(NuclearSignal n){
-    this.roi = n.getRoi();
-    this.area = n.getArea();
-    this.perimeter = n.getPerimeter();
-    this.feret = n.getFeret();
-    this.centreOfMass = new XYPoint(n.getCentreOfMass());
-    this.distanceFromCentreOfMass = n.getDistanceFromCoM();
-    this.fractionalDistanceFromCoM = n.getFractionalDistanceFromCoM();
-    this.angleFromReferencePoint = n.getAngle();
-    this.closestNuclearBorderPoint = n.getClosestBorderPoint();
-    this.origin = n.getOrigin();
-  }
+		FloatPolygon polygon = roi.getInterpolatedPolygon(1,true);
+		for(int i=0; i<polygon.npoints; i++){
+			borderList.add(new NucleusBorderPoint( polygon.xpoints[i], polygon.ypoints[i]));
+		}
+		this.area = area;
+		this.perimeter = perimeter;
+		this.feret = feret;
+		this.centreOfMass = centreOfMass;
+		this.origin = origin;
+	}
 
-  /*
+	public NuclearSignal(NuclearSignal n){
+		this.borderList = n.getBorder();
+		this.area = n.getArea();
+		this.perimeter = n.getPerimeter();
+		this.feret = n.getFeret();
+		this.centreOfMass = new XYPoint(n.getCentreOfMass());
+		this.distanceFromCentreOfMass = n.getDistanceFromCoM();
+		this.fractionalDistanceFromCoM = n.getFractionalDistanceFromCoM();
+		this.angleFromReferencePoint = n.getAngle();
+		this.closestNuclearBorderPoint = n.getClosestBorderPoint();
+		this.origin = n.getOrigin();
+	}
+
+	/*
     -----------------------
     Getters for basic values within nucleus
     -----------------------
-  */
-  public Roi getRoi(){
-    return this.roi;
-  }
+	 */
 
-  public double getArea(){
-    return this.area;
-  }
+	public List<NucleusBorderPoint> getBorder(){
+		return this.borderList;
+	}
 
-  public double getPerimeter(){
-    return this.perimeter;
-  }
+	public double getArea(){
+		return this.area;
+	}
 
-  public double getFeret(){
-    return this.feret;
-  }
+	public double getPerimeter(){
+		return this.perimeter;
+	}
 
-  public double getAngle(){
-    return this.angleFromReferencePoint;
-  }
+	public double getFeret(){
+		return this.feret;
+	}
 
-  public double getDistanceFromCoM(){
-    return this.distanceFromCentreOfMass;
-  }
+	public double getAngle(){
+		return this.angleFromReferencePoint;
+	}
 
-  public double getFractionalDistanceFromCoM(){
-    return this.fractionalDistanceFromCoM;
-  }
+	public double getDistanceFromCoM(){
+		return this.distanceFromCentreOfMass;
+	}
 
-  public XYPoint getCentreOfMass(){
-    return new XYPoint(this.centreOfMass);
-  }
+	public double getFractionalDistanceFromCoM(){
+		return this.fractionalDistanceFromCoM;
+	}
 
-  public int getClosestBorderPoint(){
-    return this.closestNuclearBorderPoint;
-  }
-  
-  public String getOrigin(){
-	  return this.origin;
-  }
+	public XYPoint getCentreOfMass(){
+		return new XYPoint(this.centreOfMass);
+	}
 
-  /*
+	public int getClosestBorderPoint(){
+		return this.closestNuclearBorderPoint;
+	}
+
+	public String getOrigin(){
+		return this.origin;
+	}
+
+	/*
     Assuming the signal were a perfect circle of area equal
     to the measured area, get the radius for that circle
-  */
-  public double getRadius(){
-    // r = sqrt(a/pi)
-    return Math.sqrt(this.area/Math.PI);
-  }
+	 */
+	public double getRadius(){
+		// r = sqrt(a/pi)
+		return Math.sqrt(this.area/Math.PI);
+	}
 
-  /*
+	/*
     -----------------------
     Setters for externally calculated values
     -----------------------
-  */
-  public void setAngle(double d){
-    this.angleFromReferencePoint = d;
-  }
+	 */
+	public void setAngle(double d){
+		this.angleFromReferencePoint = d;
+	}
 
-  public void setDistanceFromCoM(double d){
-    this.distanceFromCentreOfMass = d;
-  }
+	public void setDistanceFromCoM(double d){
+		this.distanceFromCentreOfMass = d;
+	}
 
-  public void setFractionalDistanceFromCoM(double d){
-    this.fractionalDistanceFromCoM = d;
-  }
+	public void setFractionalDistanceFromCoM(double d){
+		this.fractionalDistanceFromCoM = d;
+	}
 
-  public void setClosestBorderPoint(int p){
-    this.closestNuclearBorderPoint = p;
-  }
+	public void setClosestBorderPoint(int p){
+		this.closestNuclearBorderPoint = p;
+	}
 }
