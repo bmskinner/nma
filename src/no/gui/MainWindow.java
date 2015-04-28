@@ -1,5 +1,6 @@
 package no.gui;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
 import ij.gui.Plot;
@@ -21,6 +22,8 @@ import javax.swing.JButton;
 
 import no.analysis.AnalysisCreator;
 import no.collections.INuclearCollection;
+import no.components.NucleusBorderSegment;
+import no.components.Profile;
 import no.components.ProfileCollection;
 import no.imports.PopulationImporter;
 import no.nuclei.INuclearFunctions;
@@ -48,11 +51,25 @@ import java.awt.Font;
 
 import javax.swing.JTable;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Paint;
 
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 public class MainWindow extends JFrame {
 
@@ -72,118 +89,137 @@ public class MainWindow extends JFrame {
 	
 	private ImageCanvas ic = new ImageCanvas(new ImagePlus(null, new ByteProcessor(600,400)));
 	
+	private ChartPanel cp;
+	
 	private HashMap<String, INuclearCollection> analysisPopulations = new HashMap<String, INuclearCollection>();;
-//	private List<INuclearCollection> analysisPopulations;
 
 
 	/**
 	 * Create the frame.
 	 */
 	public MainWindow() {
-		setTitle("Nuclear Morphology Analysis");
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 669, 514);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
-		
-		JScrollPane scrollPane = new JScrollPane();
-		contentPane.add(scrollPane, BorderLayout.WEST);
-		textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
-		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		
-		scrollPane.setViewportView(textArea);
-		textArea.setBackground(SystemColor.menu);
-		textArea.setEditable(false);
-		textArea.setRows(9);
-		textArea.setColumns(40);
-		
-		JLabel lblAnalysisLog = new JLabel("Analysis Log");
-		lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
-		scrollPane.setColumnHeaderView(lblAnalysisLog);
-		
-		JPanel panelHeader = new JPanel();
-		contentPane.add(panelHeader, BorderLayout.NORTH);
+		try {
+			setTitle("Nuclear Morphology Analysis");
+			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			setBounds(100, 100, 992, 514);
+			contentPane = new JPanel();
+			contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+			contentPane.setLayout(new BorderLayout(0, 0));
+			setContentPane(contentPane);
+			
+			JScrollPane scrollPane = new JScrollPane();
+			contentPane.add(scrollPane, BorderLayout.WEST);
+			textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+			DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+			caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+			
+			scrollPane.setViewportView(textArea);
+			textArea.setBackground(SystemColor.menu);
+			textArea.setEditable(false);
+			textArea.setRows(9);
+			textArea.setColumns(40);
+			
+			JLabel lblAnalysisLog = new JLabel("Analysis Log");
+			lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
+			scrollPane.setColumnHeaderView(lblAnalysisLog);
+			
+			JPanel panelHeader = new JPanel();
+			contentPane.add(panelHeader, BorderLayout.NORTH);
 //		
-		JButton btnNewAnalysis = new JButton("New analysis");
-		btnNewAnalysis.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				newAnalysis();
-			}
-		});
-		panelHeader.add(btnNewAnalysis);
-		
-		JButton btnLoadSavedNuclei = new JButton("Load saved nuclei");
-		btnLoadSavedNuclei.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				loadNuclei();
-			}
-		});
-		panelHeader.add(btnLoadSavedNuclei);
-		
-		JButton btnPostanalysisMapping = new JButton("Post-analysis mapping");
-		btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				postAnalysis();
-			}
-		});
-		panelHeader.add(btnPostanalysisMapping);
-		
-		JPanel panelFooter = new JPanel();
-		contentPane.add(panelFooter, BorderLayout.SOUTH);
-		
+			JButton btnNewAnalysis = new JButton("New analysis");
+			btnNewAnalysis.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					newAnalysis();
+				}
+			});
+			panelHeader.add(btnNewAnalysis);
+			
+			JButton btnLoadSavedNuclei = new JButton("Load saved nuclei");
+			btnLoadSavedNuclei.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					loadNuclei();
+				}
+			});
+			panelHeader.add(btnLoadSavedNuclei);
+			
+			JButton btnPostanalysisMapping = new JButton("Post-analysis mapping");
+			btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					postAnalysis();
+				}
+			});
+			panelHeader.add(btnPostanalysisMapping);
+			
+			JPanel panelFooter = new JPanel();
+			contentPane.add(panelFooter, BorderLayout.SOUTH);
+			
 //		JLabel lblStatusLine = new JLabel("No analysis open");
-		panelFooter.add(lblStatusLine);
-		contentPane.add(panelGeneralData, BorderLayout.CENTER);
-		panelGeneralData.setLayout(new BoxLayout(panelGeneralData, BoxLayout.Y_AXIS));
-		
-		JPanel panel = new JPanel();
-		panelGeneralData.add(panel);
-		panel.setLayout(new GridLayout(0, 2, 0, 0));
-		panel.add(panelPopulations);
-		panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
-		
-		JLabel lblPopulations = new JLabel("Populations");
-		lblPopulations.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelPopulations.add(lblPopulations);
-		
+			panelFooter.add(lblStatusLine);
+			contentPane.add(panelGeneralData, BorderLayout.CENTER);
+			panelGeneralData.setLayout(new BoxLayout(panelGeneralData, BoxLayout.Y_AXIS));
+			
+			JPanel panel = new JPanel();
+			panelGeneralData.add(panel);
+			panel.setLayout(new GridLayout(0, 2, 0, 0));
+			panel.add(panelPopulations);
+			panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
+			
+			JLabel lblPopulations = new JLabel("Populations");
+			lblPopulations.setAlignmentX(Component.CENTER_ALIGNMENT);
+			panelPopulations.add(lblPopulations);
+			
 
-		DefaultListModel<String> model = new DefaultListModel<String>();
-		model.addElement("No populations");
-		populationList = new JList<String>(model);
-		populationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);;
-		
-		ListSelectionModel listSelectionModel = populationList.getSelectionModel();
-	    listSelectionModel.addListSelectionListener(
-	                            new ListSelectionHandler());
-		
-		panelPopulations.add(populationList);
-		
-		JPanel panelStats = new JPanel();
-		panel.add(panelStats);
-		panelStats.setLayout(new BoxLayout(panelStats, BoxLayout.Y_AXIS));
-		
-		JLabel lblPopulationStatistics = new JLabel("Statistics");
-		lblPopulationStatistics.setAlignmentX(Component.CENTER_ALIGNMENT);
-		lblPopulationStatistics.setHorizontalAlignment(SwingConstants.CENTER);
-		panelStats.add(lblPopulationStatistics);
-		
-		table = new JTable();
-		table.setEnabled(false);
-		panelStats.add(table);
-		
-		JLabel lblAggregates = new JLabel("Segmented Profile");
-		lblAggregates.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelGeneralData.add(panelAggregates);
-		panelAggregates.setLayout(new BoxLayout(panelAggregates, BoxLayout.Y_AXIS));
-		panelAggregates.add(lblAggregates);
-		panelAggregates.add(ic);
-		panelAggregates.setVisible(true);
+			DefaultListModel<String> model = new DefaultListModel<String>();
+			model.addElement("No populations");
+			populationList = new JList<String>(model);
+			populationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);;
+			
+			ListSelectionModel listSelectionModel = populationList.getSelectionModel();
+			listSelectionModel.addListSelectionListener(
+			                        new ListSelectionHandler());
+			
+			panelPopulations.add(populationList);
+			
+			JPanel panelStats = new JPanel();
+			panel.add(panelStats);
+			panelStats.setLayout(new BoxLayout(panelStats, BoxLayout.Y_AXIS));
+			
+			JLabel lblPopulationStatistics = new JLabel("Statistics");
+			lblPopulationStatistics.setAlignmentX(Component.CENTER_ALIGNMENT);
+			lblPopulationStatistics.setHorizontalAlignment(SwingConstants.CENTER);
+			panelStats.add(lblPopulationStatistics);
+			
+			table = new JTable();
+			table.setEnabled(false);
+			panelStats.add(table);
+			
+			JLabel lblAggregates = new JLabel("Segmented Profile");
+			lblAggregates.setAlignmentX(Component.CENTER_ALIGNMENT);
+			panelGeneralData.add(panelAggregates);
+			
+			panelAggregates.setLayout(new BoxLayout(panelAggregates, BoxLayout.Y_AXIS));
+			panelAggregates.add(lblAggregates);
+			
+			
+			JFreeChart chart = ChartFactory.createXYLineChart(null,
+		            "Position", "Angle", null);
+			XYPlot plot = chart.getXYPlot();
+			plot.getDomainAxis().setRange(0,100);
+			plot.getRangeAxis().setRange(0,360);
+			plot.setBackgroundPaint(Color.WHITE);
+
+			cp = new ChartPanel(chart);
+			
+//			panelAggregates.add(ic);
+			panelAggregates.add(cp);
+		} catch (Exception e) {
+			IJ.log("Error in Main");
+			e.printStackTrace();
+		}
+//		panelAggregates.setVisible(true);
 		
 	}
 	
@@ -306,15 +342,37 @@ public class MainWindow extends JFrame {
 	public void updateProfileImage(INuclearCollection collection){
 		
 		try {
-			ProfileCollection p = collection.getProfileCollection();
-			Plot plot = p.getPlots(collection.getOrientationPoint()).get("norm");
-			
-			ImagePlus imp = plot.getImagePlus();
-			panelAggregates.remove(ic);
-			ic = new ImageCanvas(imp);
-			panelAggregates.add(ic);
+//			ProfileCollection p = collection.getProfileCollection();
+//			Plot plot = p.getPlots(collection.getOrientationPoint()).get("norm");
+//			
+//			ImagePlus imp = plot.getImagePlus();
+//			panelAggregates.remove(ic);
+//			ic = new ImageCanvas(imp);
+//			panelAggregates.add(ic);
 //			panelAggregates.repaint();
-			panelAggregates.setVisible(true);
+//			panelAggregates.setVisible(true);
+			
+			XYDataset ds = createSegmentDataset(collection);
+			
+			JFreeChart chart = 
+					ChartFactory.createXYLineChart(null,
+					                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+					                false);
+			
+			
+			XYPlot plot = chart.getXYPlot();
+			plot.getDomainAxis().setRange(0,100);
+			plot.getRangeAxis().setRange(0,360);
+			plot.setBackgroundPaint(Color.WHITE);
+			plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+			int seriesCount = plot.getSeriesCount();
+
+			for (int i = 0; i < seriesCount; i++) {
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+			}
+
+			cp.setChart(chart);
+			
 		} catch (Exception e) {
 			log("Plot not present in save yet");
 		} 
@@ -345,6 +403,31 @@ public class MainWindow extends JFrame {
 				updateProfileImage(c);
 			}
 		}
+	}
+	
+	private XYDataset createSegmentDataset(INuclearCollection collection){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+		Profile xpoints = profile.getPositions(100);
+		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+		
+		for(NucleusBorderSegment seg : segments){
+
+			if(seg.getStartIndex()>seg.getEndIndex()){
+				//				Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
+				//				Profile subPoints = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
+				//				double[][] data = { subPoints.asArray(), subProfile.asArray() };
+				//				ds.addSeries(seg.getSegmentType(), data);
+				continue;
+			} 
+			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
+			Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
+			double[][] data = { subPoints.asArray(), subProfile.asArray() };
+			ds.addSeries(seg.getSegmentType(), data);
+
+		}
+        
+        return ds;
 	}
 
 }
