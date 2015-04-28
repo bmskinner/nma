@@ -13,12 +13,12 @@ import no.utility.Utils;
 
 // this will take columns of data, and write them out to a specified folder
 // Since the data is arbitrary and only for export, convert everything to strings. 
-public class Logger {
+public class TableExporter {
 	
 	private File exportFolder;
 	private Map<String, List<String>> columns = new LinkedHashMap<String, List<String>>();
 	
-	public Logger(File f){
+	public TableExporter(File f){
 		if(f.exists()){
 			this.exportFolder = f;
 		} else{
@@ -26,7 +26,7 @@ public class Logger {
 		}
 	}
 	
-	public Logger(String s){
+	public TableExporter(String s){
 		File f = new File(s);
 		if(f.exists()){
 			this.exportFolder = f;

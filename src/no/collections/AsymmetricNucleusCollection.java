@@ -31,8 +31,8 @@ public class AsymmetricNucleusCollection
 
 
 
-	public AsymmetricNucleusCollection(File folder, String outputFolder, String type){
-		super(folder, outputFolder, type);
+	public AsymmetricNucleusCollection(File folder, String outputFolder, String type, File debugFile){
+		super(folder, outputFolder, type, debugFile);
 	}
 
   

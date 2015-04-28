@@ -28,12 +28,18 @@ import no.gui.AnalysisSetup;
 import no.gui.MainWindow;
 import no.gui.PopulationSplitWindow;
 import no.nuclei.INuclearFunctions;
+import no.utility.Logger;
 import no.utility.MappingFileParser;
 
 
 public class AnalysisCreator {
 	
-	private MainWindow mw;
+	private MainWindow mw; // use to log and update gui
+	
+	private static final String spacerString = "------------";
+	
+	private Logger logger;
+//	debugFile;
 	
 	private AnalysisSetup analysisOptions;
 	private int mappingCount = 0;
@@ -64,6 +70,8 @@ public class AnalysisCreator {
 	private Map<File, NucleusCollection> folderCollection;
 
 	private List<INuclearCollection> nuclearPopulations = new ArrayList<INuclearCollection>(0);
+	
+	private List<INuclearCollection> finalPopulations = new ArrayList<INuclearCollection>(0);
 
 	/*
     -----------------------
@@ -74,7 +82,7 @@ public class AnalysisCreator {
 		this.mw = mw;
 		this.initialise();
 	}
-
+	  
   public void initialise(){
 
 	  analysisOptions = new AnalysisSetup();
@@ -82,10 +90,18 @@ public class AnalysisCreator {
 		  
 		  mw.log("Directory: "+analysisOptions.getFolder().getName());
 
-		  IJ.log("Directory: "+analysisOptions.getFolder().getName());
-
 		  this.startTime = Calendar.getInstance().getTime();
 		  this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+		  
+		  // craete the analysis folder early. Did not before in case folder had no images
+		  File analysisFolder = new File(analysisOptions.getFolder().getAbsolutePath()+File.separator+outputFolderName);
+		  if(!analysisFolder.exists()){
+			  analysisFolder.mkdir();
+		  }
+		  this.logger = new Logger( new File(analysisOptions.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
+//		  mw.log("Debug at: "+logger.getLogfile().getAbsolutePath());
+		  logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
+		  logger.log("Directory: "+analysisOptions.getFolder().getName());
 		  this.readyToRun = true;
 	  }
   }
@@ -109,23 +125,28 @@ public class AnalysisCreator {
     	ok = this.postAnalysis();
     }
     
-    mw.log("----------------------------- ");
-    mw.log("All done!"                     );
-    mw.log("----------------------------- ");
-    
-    
-    IJ.log("----------------------------- ");
-    IJ.log("All done!"                     );
-    IJ.log("----------------------------- ");
+    mw.log(spacerString);
+    mw.log("All done!" );
+    mw.log(spacerString);
+    logger.log("All done!");
   }
-  
+
+  /**
+   * Get the populations from this analysis. Allows re/sub analysis to take place
+   * outside the AnalysisCreator
+   * @return the collections of nuclei
+   */
+  public List<INuclearCollection> getPopulations(){
+	  return this.finalPopulations;
+  }
+
   /**
    * Following the main analysis, allow a mapping file to be applied
    * to investigate a seubset of nuclei.
    * @return true if another analysis is to be performed
    */
   private boolean postAnalysis(){
-	  PopulationSplitWindow splitter = new PopulationSplitWindow(this.nuclearPopulations);
+	  PopulationSplitWindow splitter = new PopulationSplitWindow(this.nuclearPopulations, this.mw);
 	  if(splitter.getResult()){
 
 		  try{
@@ -164,17 +185,24 @@ public class AnalysisCreator {
 			  CurveRefolder.run(remapCollection, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
 
 		  } catch(InstantiationException e){
-			  IJ.log("Cannot create collection: "+e.getMessage());
+			  logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
+//			  IJ.log("Cannot create collection: "+e.getMessage());
 		  } catch(IllegalAccessException e){
-			  IJ.log("Cannot access constructor: "+e.getMessage());
+			  logger.log("Cannot access constructor: "+e.getMessage(), Logger.ERROR);
+//			  IJ.log("Cannot access constructor: "+e.getMessage());
 		  } catch(InvocationTargetException e){
-			  IJ.log("Cannot invoke constructor: "+e.getMessage());
+			  logger.log("Cannot invoke constructor: "+e.getMessage(), Logger.ERROR);
+//			  IJ.log("Cannot invoke constructor: "+e.getMessage());
 		  } catch (NoSuchMethodException e) {
-			  // TODO Auto-generated catch block
-			  e.printStackTrace();
+			  logger.log("No such method: "+e.getMessage(), Logger.ERROR);
+			  for(StackTraceElement el : e.getStackTrace()){
+				  logger.log(el.toString(), Logger.ERROR);
+			  }
 		  } catch (SecurityException e) {
-			  // TODO Auto-generated catch block
-			  e.printStackTrace();
+			  logger.log("Security error: "+e.getMessage(), Logger.ERROR);
+			  for(StackTraceElement el : e.getStackTrace()){
+				  logger.log(el.toString(), Logger.ERROR);
+			  }
 		  }
 		  return true;
 	  }	else {
@@ -198,13 +226,14 @@ public class AnalysisCreator {
    */
 
   public void runAnalysis(){
-    NucleusDetector detector = new NucleusDetector(analysisOptions.getFolder(), this.outputFolderName, this.mw);
+    NucleusDetector detector = new NucleusDetector(analysisOptions.getFolder(), this.outputFolderName, this.mw, logger.getLogfile());
 
     setDetectionParameters(detector);
     detector.runDetector();
 
     this.folderCollection = detector.getNucleiCollections();
-    IJ.log("Imported folder(s)");
+    logger.log("Imported folder(s)");
+    mw.log("Imported folder(s)");
     this.analysisRun = true;
   }
 
@@ -214,194 +243,225 @@ public class AnalysisCreator {
    * @return      the nuclei in each folder analysed
    */
   public void runReAnalysis(){
-    NucleusRefinder detector = new NucleusRefinder(analysisOptions.getFolder(), this.outputFolderName, analysisOptions.getMappingFile(), this.mw);
-    setDetectionParameters(detector);
-    detector.setXOffset(analysisOptions.getXOffset());
-    detector.setYOffset(analysisOptions.getYOffset());
-    detector.setRealignMode(analysisOptions.realignImages());
-    detector.runDetector();
-    this.folderCollection = detector.getNucleiCollections();
-    this.mappingCount = detector.getMappingCount();
-    IJ.log("Imported folder(s)");
-    this.reAnalysisRun = true;
+	  NucleusRefinder detector = new NucleusRefinder(analysisOptions.getFolder(), this.outputFolderName, analysisOptions.getMappingFile(), this.mw, logger.getLogfile());
+	  setDetectionParameters(detector);
+	  detector.setXOffset(analysisOptions.getXOffset());
+	  detector.setYOffset(analysisOptions.getYOffset());
+	  detector.setRealignMode(analysisOptions.realignImages());
+	  detector.runDetector();
+	  this.folderCollection = detector.getNucleiCollections();
+	  this.mappingCount = detector.getMappingCount();
+
+	  logger.log("Imported folder(s)");
+	  mw.log("Imported folder(s)");
+	  this.reAnalysisRun = true;
   }
 
   private void  setDetectionParameters(NucleusDetector detector){
-    detector.setMinNucleusSize(analysisOptions.getMinNucleusSize()); 
-    detector.setMaxNucleusSize(analysisOptions.getMaxNucleusSize());
-    detector.setThreshold(analysisOptions.getNucleusThreshold());
-    detector.setMinNucleusCirc(analysisOptions.getMinNucleusCirc());
-    detector.setMaxNucleusCirc(analysisOptions.getMaxNucleusCirc());
+	  logger.log("Setting detection parameters...", Logger.DEBUG);
+	  detector.setMinNucleusSize(analysisOptions.getMinNucleusSize()); 
+	  detector.setMaxNucleusSize(analysisOptions.getMaxNucleusSize());
+	  detector.setThreshold(analysisOptions.getNucleusThreshold());
+	  detector.setMinNucleusCirc(analysisOptions.getMinNucleusCirc());
+	  detector.setMaxNucleusCirc(analysisOptions.getMaxNucleusCirc());
 
-    detector.setAngleProfileWindowSize(analysisOptions.getAngleProfileWindowSize());
+	  detector.setAngleProfileWindowSize(analysisOptions.getAngleProfileWindowSize());
 
-    detector.setSignalThreshold(analysisOptions.getSignalThreshold());
-    detector.setMinSignalSize(analysisOptions.getMinSignalSize());
-    detector.setMaxSignalFraction(analysisOptions.getMaxSignalFraction());
+	  detector.setSignalThreshold(analysisOptions.getSignalThreshold());
+	  detector.setMinSignalSize(analysisOptions.getMinSignalSize());
+	  detector.setMaxSignalFraction(analysisOptions.getMaxSignalFraction());
+	  logger.log("Detection parameters set", Logger.DEBUG);
   }
 
   /*
     Use reflection to assign the correct class to the nuclei and populations
   */
   public void assignNucleusTypes(){
-    
-    Set<File> keys = this.folderCollection.keySet();
 
-    try{
-      Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
-      Constructor<?> nucleusConstructor = analysisOptions.getNucleusClass().getConstructor(new Class<?>[]{Nucleus.class});
-    
-      for (File key : keys) {
-        NucleusCollection collection = folderCollection.get(key);
+	  Set<File> keys = this.folderCollection.keySet();
+	  logger.log("Assigning nucleus types");
+	  
 
-        try{
-          INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, collection.getOutputFolderName(), "analysable");
-          
-          // RodentSpermNucleusCollection spermNuclei = new RodentSpermNucleusCollection(key, "complete");
-          mw.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
-          IJ.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
+	  try{
+		  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+		  Constructor<?> nucleusConstructor = analysisOptions.getNucleusClass().getConstructor(new Class<?>[]{Nucleus.class});
+		  logger.log("Prepared constructors",Logger.DEBUG);
+		  
+		  for (File key : keys) {
+			  NucleusCollection collection = folderCollection.get(key);
 
-          for(int i=0;i<collection.getNucleusCount();i++){
-            INuclearFunctions p = collection.getNucleus(i);
+			  try{
+				  INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, collection.getOutputFolderName(), "analysable", logger.getLogfile());
+				  logger.log("Created collection instance",Logger.DEBUG);
 
-            INuclearFunctions subNucleus  = (INuclearFunctions) nucleusConstructor.newInstance(p);
-            subNucleus.findPointsAroundBorder();
+				  mw.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
 
-            spermNuclei.addNucleus(subNucleus);
-          }
-          this.nuclearPopulations.add(spermNuclei);
-          mw.log("  Population converted to "+analysisOptions.getNucleusClass().getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
-          IJ.log("  Population converted to "+analysisOptions.getNucleusClass().getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
-        } catch(InstantiationException e){
-          IJ.log("Cannot create collection: "+e.getMessage());
-        } catch(IllegalAccessException e){
-          IJ.log("Cannot access constructor: "+e.getMessage());
-        } catch(InvocationTargetException e){
-          IJ.log("Cannot invoke constructor: "+e.getMessage());
-        }
-      }
-    } catch(NoSuchMethodException e){
-      IJ.log("Cannot find constructor: "+e.getMessage());
-    }
+				  logger.log("Detecting nucleus border points");
+				  for(int i=0;i<collection.getNucleusCount();i++){
+					  INuclearFunctions p = collection.getNucleus(i);
+
+					  INuclearFunctions subNucleus  = (INuclearFunctions) nucleusConstructor.newInstance(p);
+					  subNucleus.findPointsAroundBorder();
+
+					  spermNuclei.addNucleus(subNucleus);
+				  }
+				  this.nuclearPopulations.add(spermNuclei);
+				  logger.log("Nucleus border points found");
+				  logger.log("Population converted to "+analysisOptions.getNucleusClass().getSimpleName()+" in "+spermNuclei.getClass().getSimpleName(),Logger.DEBUG);
+				  //          mw.log("  Population converted to "+analysisOptions.getNucleusClass().getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
+				  //          IJ.log("  Population converted to "+analysisOptions.getNucleusClass().getSimpleName()+" in "+spermNuclei.getClass().getSimpleName());
+			  } catch(InstantiationException e){
+				  logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
+			  } catch(IllegalAccessException e){
+				  logger.log("Cannot access constructor: "+e.getMessage(), Logger.ERROR);
+			  } catch(InvocationTargetException e){
+				  logger.log("Cannot invoke constructor: "+e.getMessage(), Logger.ERROR);
+			  }
+		  }
+	  } catch(NoSuchMethodException e){
+		  IJ.log("Cannot find constructor: "+e.getMessage());
+	  }
 
   }
 
   public void analysePopulations(){
 	  mw.log("Beginning analysis");
-    IJ.log("Beginning analysis");
+	  logger.log("Beginning population analysis");
 
-    for(INuclearCollection r : this.nuclearPopulations){
+	  for(INuclearCollection r : this.nuclearPopulations){
 
-      if(r.getDebugFile().exists()){
-        r.getDebugFile().delete();
-      }
+		  File folder = r.getFolder();
+		  //		  mw.log(spacerString);
+		  mw.log("Analysing: "+folder.getName());
+		  logger.log("Analysing: "+folder.getName());
+		  //		  mw.log(spacerString);
 
-      File folder = r.getFolder();
-      mw.log("  ----------------------------- ");
-      mw.log("  Analysing: "+folder.getName());
-      mw.log("  ----------------------------- ");
-      IJ.log("  ----------------------------- ");
-      IJ.log("  Analysing: "+folder.getName());
-      IJ.log("  ----------------------------- ");
+		  LinkedHashMap<String, Integer> nucleusCounts = new LinkedHashMap<String, Integer>();
 
-      LinkedHashMap<String, Integer> nucleusCounts = new LinkedHashMap<String, Integer>();
+		  try{
 
-      try{
+			  nucleusCounts.put("input", r.getNucleusCount());
+			  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class, File.class});
+			  INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed", logger.getLogfile());
 
-        nucleusCounts.put("input", r.getNucleusCount());
-        Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class});
-        INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed");
+			  r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
+			  if(failedNuclei.getNucleusCount()>0){
+				  mw.log("Exporting failed nuclei");
+				  logger.log("Exporting failed nuclei");
 
-        r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
-        if(failedNuclei.getNucleusCount()>0){
-        	mw.log("    Exporting failed nuclei"       );
-          IJ.log("    Exporting failed nuclei"       );
-          // failedNuclei.exportStatsFiles(); // NPE on clustering profile export
-//          failedNuclei.annotateAndExportNuclei();
-          	CompositeExporter.run(failedNuclei);
-          nucleusCounts.put("failed", failedNuclei.getNucleusCount());
-        }
+				  CompositeExporter.run(failedNuclei);
+				  nucleusCounts.put("failed", failedNuclei.getNucleusCount());
+				  logger.log("Failed nuclei exported");
+			  }
 
-      } catch(InstantiationException e){
-        IJ.log("Cannot create collection: "+e.getMessage());
-      } catch(IllegalAccessException e){
-        IJ.log("Cannot access constructor: "+e.getMessage());
-      } catch(InvocationTargetException e){
-        IJ.log("Cannot invoke constructor: "+e.getMessage());
-      } catch(NoSuchMethodException e){
-        IJ.log("Cannot find constructor: "+e.getMessage());
-      }
-      
-      mw.log("    ----------------------------- ");
-      mw.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
-      mw.log("    ----------------------------- ");
+		  } catch(InstantiationException e){
+			  logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
+		  } catch(IllegalAccessException e){
+			  logger.log("Cannot access constructor: "+e.getMessage(), Logger.ERROR);
+		  } catch(InvocationTargetException e){
+			  logger.log("Cannot invoke constructor: "+e.getMessage(), Logger.ERROR);
+		  } catch(NoSuchMethodException e){
+			  logger.log("Cannot find constructor: "+e.getMessage(), Logger.ERROR);
+		  }
 
-      IJ.log("    ----------------------------- ");
-      IJ.log("    Analysing population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
-      IJ.log("    ----------------------------- ");
-      
-      // core analysis - align profiles and segment
-      MorphologyAnalysis.run(r);
-                  
-      // measure general nuclear organisation
-      SignalAnalysis.run(r);
-      
-      // Perform shell analysis with 5 shells by default
-      ShellAnalysis.run(r, 5);
-      
-      // export the stats files
-      StatsExporter.run(r);
-//      r.annotateAndExportNuclei(); // method overridden in subclasses.
-      
-      // annotate the nuclei in the population
-      NucleusAnnotator.run(r);
+		  //		  mw.log(spacerString);
+		  mw.log("Population: "+r.getType()+":\n\t"+r.getNucleusCount()+" nuclei");
+		  logger.log("Population: "+r.getType()+":\n\t"+r.getNucleusCount()+" nuclei");
+		  //		  mw.log(spacerString);
 
-      
-      // make a composite image of all nuclei in the collection
-      CompositeExporter.run(r);
+		  // core analysis - align profiles and segment
+		  mw.logc("Running morphology analysis...");
+		  boolean ok = MorphologyAnalysis.run(r);
+		  if(ok){
+			  mw.log("OK");
+		  } else {
+			  mw.log("Error");
+		  }
 
-      // refold the median consensus nucleus
-      if(analysisOptions.refoldNucleus()){
-    	  CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
-      }
-      
-      // export the population to a save file for later
-      PopulationExporter.savePopulation(r);
+		  // measure general nuclear organisation
+		  SignalAnalysis.run(r);
 
-      ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
-      
-      for(INuclearCollection p : signalPopulations){
-       
-        nucleusCounts.put(p.getType(), p.getNucleusCount());
-        
-        mw.log("    ----------------------------- ");
-        mw.log("    Analysing sub-population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
-        mw.log("    ----------------------------- ");
+		  // Perform shell analysis with 5 shells by default
+		  ShellAnalysis.run(r, 5);
 
-        IJ.log("    ----------------------------- ");
-        IJ.log("    Analysing sub-population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
-        IJ.log("    ----------------------------- ");
-        
-//        MorphologyAnalysis.run(p);
-        // use the same segmentation from the initial analysis
-        MorphologyAnalysis.reapplyProfiles(p, r);
-        
-        SignalAnalysis.run(p);
-        ShellAnalysis.run(p, 5);
-        StatsExporter.run(p);
+		  // export the stats files
+		  mw.logc("Exporting stats...");
+		  ok = StatsExporter.run(r);
+		  if(ok){
+			  mw.log("OK");
+		  } else {
+			  mw.log("Error");
+		  }
 
-        NucleusAnnotator.run(p);
-        CompositeExporter.run(p);
-        
-        if(analysisOptions.refoldNucleus()){
-        	CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
-        }
-        
-        // export the population to a save file for later
-        PopulationExporter.savePopulation(p);
-      }
-      collectionNucleusCounts.put(folder, nucleusCounts);
-    }
+		  // annotate the nuclei in the population
+		  mw.logc("Annotating nuclei...");
+		  ok = NucleusAnnotator.run(r);
+		  if(ok){
+			  mw.log("OK");
+		  } else {
+			  mw.log("Error");
+		  }
+
+
+		  // make a composite image of all nuclei in the collection
+		  mw.logc("Exporting composite...");
+		  ok = CompositeExporter.run(r);
+		  if(ok){
+			  mw.log("OK");
+		  } else {
+			  mw.log("Error");
+		  }
+
+		  // refold the median consensus nucleus
+		  if(analysisOptions.refoldNucleus()){
+			  CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+		  }
+
+		  // export the population to a save file for later
+		  mw.logc("Saving to file...");
+		  ok = PopulationExporter.savePopulation(r);
+		  if(ok){
+			  mw.log("OK");
+		  } else {
+			  mw.log("Error");
+		  }
+
+		  finalPopulations.add(r);
+		  ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
+		  
+		  for(INuclearCollection p : signalPopulations){
+
+			  nucleusCounts.put(p.getType(), p.getNucleusCount());
+
+			  mw.log(spacerString);
+			  mw.log("Sub-population: "+p.getType()+":\n\t"+p.getNucleusCount()+" nuclei");
+			  mw.log(spacerString);
+
+			  //        IJ.log("    ----------------------------- ");
+			  //        IJ.log("    Analysing sub-population: "+p.getType()+" : "+p.getNucleusCount()+" nuclei");
+			  //        IJ.log("    ----------------------------- ");
+
+			  //        MorphologyAnalysis.run(p);
+			  // use the same segmentation from the initial analysis
+			  MorphologyAnalysis.reapplyProfiles(p, r);
+
+			  SignalAnalysis.run(p);
+			  ShellAnalysis.run(p, 5);
+			  StatsExporter.run(p);
+
+			  NucleusAnnotator.run(p);
+			  CompositeExporter.run(p);
+
+			  if(analysisOptions.refoldNucleus()){
+				  CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+			  }
+
+			  // export the population to a save file for later
+			  PopulationExporter.savePopulation(p);
+			  finalPopulations.add(p);
+		  }
+		  collectionNucleusCounts.put(folder, nucleusCounts);
+	  }
   }
 
   /*
@@ -411,43 +471,43 @@ public class AnalysisCreator {
   */
   public ArrayList<INuclearCollection> dividePopulationBySignals(INuclearCollection r){
 
-    ArrayList<INuclearCollection> signalPopulations = new ArrayList<INuclearCollection>(0);
+	  ArrayList<INuclearCollection> signalPopulations = new ArrayList<INuclearCollection>(0);
 
-    try{
+	  try{
 
-      Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
-      
-      List<Integer> channels = r.getSignalChannels();
-      for(int channel : channels){
-    	  List<INuclearFunctions> list = r.getNucleiWithSignals(channel);
-    	  if(!list.isEmpty()){
-    		  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "Signals_in_channel_"+channel);
-    		  for(INuclearFunctions n : list){
-    			  listCollection.addNucleus( n );
-    		  }
-    		  signalPopulations.add(listCollection);
+		  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
 
-    		  List<INuclearFunctions> notList = r.getNucleiWithSignals(-channel);
-    		  if(!notList.isEmpty()){
-    			  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "No_signals_in_channel_"+channel);
-    			  for(INuclearFunctions n : notList){
-    				  notListCollection.addNucleus( n );
-    			  }
-    			  signalPopulations.add(notListCollection);
-    		  }
+		  List<Integer> channels = r.getSignalChannels();
+		  for(int channel : channels){
+			  List<INuclearFunctions> list = r.getNucleiWithSignals(channel);
+			  if(!list.isEmpty()){
+				  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "Signals_in_channel_"+channel);
+				  for(INuclearFunctions n : list){
+					  listCollection.addNucleus( n );
+				  }
+				  signalPopulations.add(listCollection);
 
-    	  }
-      }
-      
-    } catch(InstantiationException e){
-      IJ.log("Cannot create collection: "+e.getMessage());
-    } catch(IllegalAccessException e){
-      IJ.log("Cannot access constructor: "+e.getMessage());
-    } catch(InvocationTargetException e){
-      IJ.log("Cannot invoke constructor: "+e.getMessage());
-    } catch(NoSuchMethodException e){
-      IJ.log("Cannot find constructor: "+e.getMessage());
-    }
+				  List<INuclearFunctions> notList = r.getNucleiWithSignals(-channel);
+				  if(!notList.isEmpty()){
+					  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "No_signals_in_channel_"+channel);
+					  for(INuclearFunctions n : notList){
+						  notListCollection.addNucleus( n );
+					  }
+					  signalPopulations.add(notListCollection);
+				  }
+
+			  }
+		  }
+
+	  } catch(InstantiationException e){
+		  logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
+	  } catch(IllegalAccessException e){
+		  logger.log("Cannot access constructor: "+e.getMessage(), Logger.ERROR);
+	  } catch(InvocationTargetException e){
+		  logger.log("Cannot invoke constructor: "+e.getMessage(), Logger.ERROR);
+	  } catch(NoSuchMethodException e){
+		  logger.log("Cannot find constructor: "+e.getMessage(), Logger.ERROR);
+	  }
 
     return signalPopulations;
   }

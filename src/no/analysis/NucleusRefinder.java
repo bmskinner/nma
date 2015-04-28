@@ -21,6 +21,7 @@ import java.util.*;
 
 import no.components.XYPoint;
 import no.gui.MainWindow;
+import no.utility.Logger;
 import no.analysis.ImageAligner;
 
 public class NucleusRefinder
@@ -28,6 +29,7 @@ public class NucleusRefinder
 {
 
   private File pathList; // the file of paths and coordinates
+  private Logger logger;
 
   private int xOffset;
   private int yOffset;
@@ -45,9 +47,10 @@ public class NucleusRefinder
   /*
     Constructors
   */
-	public NucleusRefinder(File inputFolder, String outputFolder, File pathList, MainWindow mw){
-		super(inputFolder, outputFolder, mw);
+	public NucleusRefinder(File inputFolder, String outputFolder, File pathList, MainWindow mw, File debugFile){
+		super(inputFolder, outputFolder, mw, debugFile);
     this.pathList = pathList;
+    this.logger = new Logger(debugFile, "NucleusRefinder");
 
     // get the image names and coordinates from the pathList
     try{

@@ -29,8 +29,8 @@ public class RodentSpermNucleusCollection
   
   private String DEFAULT_REFERENCE_POINT = "tip";
 
-  public RodentSpermNucleusCollection(File folder, String outputFolder, String type){
-      super(folder, outputFolder, type);
+  public RodentSpermNucleusCollection(File folder, String outputFolder, String type, File debugFile){
+	  super(folder, outputFolder, type, debugFile);
   }
 
   public RodentSpermNucleusCollection(){

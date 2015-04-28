@@ -16,6 +16,7 @@ import java.util.*;
 import no.collections.INuclearCollection;
 import no.nuclei.*;
 import no.components.*;
+import no.utility.Logger;
 import no.utility.Stats;
 import no.utility.Utils;
 
@@ -27,6 +28,8 @@ implements INuclearCollection
 	private String outputFolder;
 	private File debugFile;
 	private String collectionType; // for annotating image names
+	
+	private Logger logger;
 
 	public static final int FAILURE_THRESHOLD = 1;
 	public static final int FAILURE_FERET     = 2;
@@ -48,10 +51,12 @@ implements INuclearCollection
 
 	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
-  public NucleusCollection(File folder, String outputFolder, String type){
+  public NucleusCollection(File folder, String outputFolder, String type, File debugFile){
 	  this.folder = folder;
 	  this.outputFolder = outputFolder;
-	  this.debugFile = new File(folder.getAbsolutePath()+File.separator+outputFolder+File.separator+"logDebug.txt");
+	  this.debugFile = debugFile;
+//	  this.debugFile = new File(folder.getAbsolutePath()+File.separator+outputFolder+File.separator+"log.debug.txt");
+	  this.logger = new Logger(this.debugFile, "NucleusCollection");
 	  this.collectionType = type;
   }
 
@@ -409,13 +414,12 @@ implements INuclearCollection
 			  try{
 				  d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
 			  } catch(Exception e){
-				  IJ.log("    Unable to get difference to median profile: "+i+": "+pointType);
-				  IJ.append("    Unable to get difference to median profile: "+i+": "+pointType, this.debugFile.getAbsolutePath());
+				  logger.log("Unable to get difference to median profile: "+i+": "+pointType, Logger.ERROR);
 			  }
 		  }
 	  } catch(Exception e){
-		  IJ.log("    Error getting differences from point "+pointType+": "+e.getMessage());
-		  this.profileCollection.printKeys();
+		  logger.log("Error getting differences from point "+pointType+": "+e.getMessage(), Logger.ERROR);
+		  this.profileCollection.printKeys(this.debugFile);
 	  }
 	  return d;
   }
@@ -486,7 +490,7 @@ implements INuclearCollection
   */
   public void refilterNuclei(INuclearCollection failedCollection){
 
-    IJ.log("    Filtering nuclei...");
+    logger.log("Filtering nuclei...");
     double medianArea = this.getMedianNuclearArea();
     double medianPerimeter = this.getMedianNuclearPerimeter();
     double medianPathLength = this.getMedianPathLength();
@@ -508,7 +512,8 @@ implements INuclearCollection
     int arraylength = 0;
     int feretlength = 0;
 
-    IJ.append("Prefiltered:\r\n", this.getDebugFile().getAbsolutePath());
+    logger.log("Prefiltered values found");
+//    IJ.append("Prefiltered:\r\n", this.getDebugFile().getAbsolutePath());
     this.exportFilterStats();
 
     for(int i=0;i<this.getNucleusCount();i++){
@@ -555,15 +560,22 @@ implements INuclearCollection
     int afterSize = this.getNucleusCount();
     int removed = beforeSize - afterSize;
 
-    IJ.append("Postfiltered:\r\n", this.getDebugFile().getAbsolutePath());
+    logger.log("Postfiltered values found");
     this.exportFilterStats();
-    IJ.log("    Removed due to size or length issues: "+removed+" nuclei");
-    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to array length: "+arraylength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-    IJ.append("  Due to feret length: "+feretlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei");
+    logger.log("Removed due to size or length issues: "+removed+" nuclei");
+    logger.log("Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei");
+    logger.log("Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei");
+    logger.log("Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei");
+    logger.log("Due to array length: "+arraylength+" nuclei");
+    logger.log("Due to feret length: "+feretlength+" nuclei");
+    logger.log("Remaining: "+this.getNucleusCount()+" nuclei");
+//    
+//    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+//    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+//    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+//    IJ.append("  Due to array length: "+arraylength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+//    IJ.append("  Due to feret length: "+feretlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+//    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei");
     
   }
 
@@ -613,11 +625,17 @@ implements INuclearCollection
     double medianArrayLength = this.getMedianArrayLength();
     double medianFeretLength = this.getMedianFeretLength();
 
-    IJ.append("    Area: "        +(int)medianArea       +"\r\n",  this.getDebugFile().getAbsolutePath());
-    IJ.append("    Perimeter: "   +(int)medianPerimeter  +"\r\n",  this.getDebugFile().getAbsolutePath());
-    IJ.append("    Path length: " +(int)medianPathLength +"\r\n",  this.getDebugFile().getAbsolutePath());
-    IJ.append("    Array length: "+(int)medianArrayLength+"\r\n",  this.getDebugFile().getAbsolutePath());
-    IJ.append("    Feret length: "+(int)medianFeretLength+"\r\n",  this.getDebugFile().getAbsolutePath());
+    logger.log("Area: "        +(int)medianArea);
+    logger.log("Perimeter: "   +(int)medianPerimeter);
+    logger.log("Path length: " +(int)medianPathLength);
+    logger.log("Array length: "+(int)medianArrayLength);
+    logger.log("Feret length: "+(int)medianFeretLength);
+    
+//    IJ.append("    Area: "        +(int)medianArea       +"\r\n",  this.getDebugFile().getAbsolutePath());
+//    IJ.append("    Perimeter: "   +(int)medianPerimeter  +"\r\n",  this.getDebugFile().getAbsolutePath());
+//    IJ.append("    Path length: " +(int)medianPathLength +"\r\n",  this.getDebugFile().getAbsolutePath());
+//    IJ.append("    Array length: "+(int)medianArrayLength+"\r\n",  this.getDebugFile().getAbsolutePath());
+//    IJ.append("    Feret length: "+(int)medianFeretLength+"\r\n",  this.getDebugFile().getAbsolutePath());
   }
 
   /*

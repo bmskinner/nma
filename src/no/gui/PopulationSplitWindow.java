@@ -6,7 +6,6 @@ import java.util.List;
 
 import no.collections.INuclearCollection;
 import no.collections.NucleusCollection;
-import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 
@@ -19,9 +18,11 @@ public class PopulationSplitWindow {
 
 	private GenericDialog gd;
 	private List<INuclearCollection> collections = new ArrayList<INuclearCollection>(0);
+	private MainWindow mw;
 
-	public PopulationSplitWindow(List<INuclearCollection> collections){
+	public PopulationSplitWindow(List<INuclearCollection> collections, MainWindow mw){
 		this.collections = collections;
+		this.mw = mw;
 		gd = new GenericDialog("Finish analysis?");
 		gd.enableYesNoCancel("Add mapping", "End analysis");
 		gd.hideCancelButton();
@@ -32,11 +33,11 @@ public class PopulationSplitWindow {
 	public boolean getResult(){
 		
 		if (gd.wasOKed()){
-			IJ.log("    Adding a mapping file");
+			mw.log("Adding a mapping file");
 			return true;
 		}
 		else{
-			IJ.log("    Ending analysis");
+			mw.log("Ending analysis");
 			return false;
 		}
 		

@@ -38,6 +38,7 @@ import java.awt.Font;
 
 import javax.swing.JTable;
 import java.awt.Component;
+import java.awt.GridLayout;
 
 public class MainWindow extends JFrame {
 
@@ -50,6 +51,7 @@ public class MainWindow extends JFrame {
 	private JLabel lblStatusLine = new JLabel("No analysis open");
 	private final JPanel panelAggregates = new JPanel();
 	private JTable table;
+	private final JPanel panelGeneralData = new JPanel();
 
 
 	/**
@@ -71,11 +73,10 @@ public class MainWindow extends JFrame {
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
 		scrollPane.setViewportView(textArea);
-		textArea.setLineWrap(true);
 		textArea.setBackground(SystemColor.menu);
 		textArea.setEditable(false);
 		textArea.setRows(9);
-		textArea.setColumns(30);
+		textArea.setColumns(40);
 		
 		JLabel lblAnalysisLog = new JLabel("Analysis Log");
 		lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
@@ -109,8 +110,12 @@ public class MainWindow extends JFrame {
 //		JLabel lblStatusLine = new JLabel("No analysis open");
 		panelFooter.add(lblStatusLine);
 		
+		JLabel lblAggregates = new JLabel("Aggregates");
+		contentPane.add(panelGeneralData, BorderLayout.CENTER);
+		panelGeneralData.setLayout(new GridLayout(2, 1, 0, 0));
+		
 		JPanel panelStats = new JPanel();
-		contentPane.add(panelStats, BorderLayout.CENTER);
+		panelGeneralData.add(panelStats);
 		panelStats.setLayout(new BoxLayout(panelStats, BoxLayout.Y_AXIS));
 		
 		JLabel lblPopulationStatistics = new JLabel("Statistics");
@@ -119,10 +124,9 @@ public class MainWindow extends JFrame {
 		panelStats.add(lblPopulationStatistics);
 		
 		table = new JTable();
+		table.setEnabled(false);
 		panelStats.add(table);
-		contentPane.add(panelAggregates, BorderLayout.EAST);
-		
-		JLabel lblAggregates = new JLabel("Aggregates");
+		panelGeneralData.add(panelAggregates);
 		panelAggregates.add(lblAggregates);
 	}
 	
@@ -146,8 +150,10 @@ public class MainWindow extends JFrame {
 		
 		Thread thr = new Thread() {
 			public void run() {
+				lblStatusLine.setText("New analysis in progress");
 				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
 				analysisCreator.run();
+				lblStatusLine.setText("New analysis complete");
 			}
 		};
 		thr.start();		

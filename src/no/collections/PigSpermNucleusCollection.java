@@ -19,8 +19,8 @@ public class PigSpermNucleusCollection
     extends no.collections.AsymmetricNucleusCollection
 {
 
-  public PigSpermNucleusCollection(File folder, String outputFolder, String type){
-      super(folder, outputFolder, type);
+  public PigSpermNucleusCollection(File folder, String outputFolder, String type, File debugFile){
+	  super(folder, outputFolder, type, debugFile);
   }
 
   public PigSpermNucleusCollection(){

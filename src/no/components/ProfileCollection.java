@@ -221,6 +221,29 @@ public class ProfileCollection {
 		}
 	}
 	
+	public void printKeys(File file){
+		IJ.append("    Plots:", file.getAbsolutePath());
+		for(String s : this.getPlotKeys()){
+			IJ.append("     "+s, file.getAbsolutePath());
+		}
+		IJ.append("    Profiles:", file.getAbsolutePath());
+		for(String s : this.getProfileKeys()){
+			IJ.append("     "+s, file.getAbsolutePath());
+		}
+		IJ.append("    Aggregates:", file.getAbsolutePath());
+		for(String s : this.getAggregateKeys()){
+			IJ.append("     "+s, file.getAbsolutePath());
+		}
+		IJ.append("    Features:", file.getAbsolutePath());
+		for(String s : this.getFeatureKeys()){
+			IJ.append("     "+s, file.getAbsolutePath());
+		}
+		IJ.append("    Segments:", file.getAbsolutePath());
+		for(String s : this.getSegmentKeys()){
+			IJ.append("     "+s, file.getAbsolutePath());
+		}
+	}
+	
 	// Get keys
 	public Set<String> getPlotKeys(){
 		return plots.keySet();

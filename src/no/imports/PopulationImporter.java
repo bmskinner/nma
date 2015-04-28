@@ -14,8 +14,11 @@ import no.collections.INuclearCollection;
 import no.collections.NucleusCollection;
 import no.gui.MainWindow;
 import no.nuclei.INuclearFunctions;
+import no.utility.Logger;
 
 public class PopulationImporter {
+	
+	private static Logger logger;
 
 
 	public static INuclearCollection readPopulation(File inputFile, MainWindow mw){
@@ -24,6 +27,8 @@ public class PopulationImporter {
 			mw.log("Requested file does not exist");
 			throw new IllegalArgumentException("Requested file does not exist");
 		}
+		
+		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
 
 		NucleusCollection collection = null;
 
@@ -56,7 +61,7 @@ public class PopulationImporter {
 				File folder = (File) inputList.get(0);
 				String outputFolder = (String) inputList.get(1);
 				String type = (String)inputList.get(2);
-				collection = new NucleusCollection(folder, outputFolder, type);
+				collection = new NucleusCollection(folder, outputFolder, type, logger.getLogfile());
 
 				@SuppressWarnings("unchecked")
 				List<INuclearFunctions> list = (List<INuclearFunctions>) inputList.get(3);

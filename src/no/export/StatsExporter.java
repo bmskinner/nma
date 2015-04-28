@@ -5,18 +5,30 @@ import java.io.File;
 import no.collections.INuclearCollection;
 import no.components.Profile;
 import no.nuclei.INuclearFunctions;
+import no.utility.Logger;
 
 public class StatsExporter {
+	
+	private static Logger logger;
 
-	public static void run(INuclearCollection collection){
-		exportNuclearStats(collection, "log.stats");
-		exportImagePaths(collection, "log.imagePaths");
-		exportAngleProfiles(collection);
-		exportMediansOfProfile(collection, "log.medians");
+	public static boolean run(INuclearCollection collection){
+
+		logger = new Logger(collection.getDebugFile(), "StatsExporter");
+		try{
+			exportNuclearStats(collection, "log.stats");
+			exportImagePaths(collection, "log.imagePaths");
+			exportAngleProfiles(collection);
+			exportMediansOfProfile(collection, "log.medians");
+		} catch (Exception e){
+			logger.log("Error in stats export: "+e.getMessage(), Logger.ERROR);
+			return false;
+		}
+		return true;
 	}
+	
 	public static void exportNuclearStats(INuclearCollection collection, String filename){
 
-		Logger nuclearStats = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
+		TableExporter nuclearStats = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		nuclearStats.addColumn("AREA",                       collection.getAreas());
 		nuclearStats.addColumn("PERIMETER",                  collection.getPerimeters());
 		nuclearStats.addColumn("FERET",                      collection.getFerets());
@@ -30,7 +42,7 @@ public class StatsExporter {
 	}
 
 	public static void exportImagePaths(INuclearCollection collection, String filename){
-		Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
+		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		logger.addColumn("PATH",     collection.getCleanNucleusPaths());
 		logger.addColumn("POSITION", collection.getPositions());
 		logger.export(filename+"."+collection.getType());
@@ -47,7 +59,7 @@ public class StatsExporter {
 		Profile normalisedMedian = collection.getProfileCollection().getProfile("tail");
 		Profile interpolatedMedian = normalisedMedian.interpolate((int)collection.getMedianNuclearPerimeter());
 
-		Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
+		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		logger.addColumn("X_POSITION",   interpolatedMedian.getPositions(interpolatedMedian.size()).asArray());
 		logger.addColumn("ANGLE_MEDIAN", interpolatedMedian.asArray());
 		logger.export(filename+"."+collection.getType());

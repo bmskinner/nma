@@ -24,7 +24,7 @@ import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.SignalCollection;
 import no.components.XYPoint;
-import no.export.Logger;
+import no.export.TableExporter;
 import no.imports.ImageImporter;
 import no.utility.Equation;
 import no.utility.Stats;
@@ -911,7 +911,7 @@ public class Nucleus
 	*/   
 	public void exportAngleProfile(){
 		
-		Logger logger = new Logger(this.getNucleusFolder());
+		TableExporter logger = new TableExporter(this.getNucleusFolder());
 		logger.addColumnHeading("X_INT");
 		logger.addColumnHeading("Y_INT");
 		logger.addColumnHeading("X_DOUBLE");
@@ -959,7 +959,7 @@ public class Nucleus
 	 */
 	public void exportSegments(){
 
-		Logger logger = new Logger(this.getNucleusFolder());
+		TableExporter logger = new TableExporter(this.getNucleusFolder());
 		logger.addColumnHeading("SEGMENT");
 		logger.addColumnHeading("START_INDEX");
 		logger.addColumnHeading("END_INDEX");

@@ -10,20 +10,26 @@ import no.collections.AsymmetricNucleusCollection;
 import no.collections.INuclearCollection;
 import no.components.NuclearSignal;
 import no.components.XYPoint;
-import no.export.Logger;
+import no.export.TableExporter;
 import no.imports.ImageImporter;
 import no.nuclei.INuclearFunctions;
+import no.utility.Logger;
 import no.utility.Utils;
 
 public class SignalAnalysis {
 
+	private static Logger logger;
 
 	public static void run(INuclearCollection collection){
+		
+		logger = new Logger(collection.getDebugFile(), "SignalAnalysis");
 
 		if(collection.getSignalCount()==0){
+			logger.log("No signals found in collection", Logger.DEBUG);
 			return;
 		}
 
+		logger.log("Exporting distance matrix...");
 		for(INuclearFunctions n : collection.getNuclei()){
 			n.exportSignalDistanceMatrix();
 			
@@ -31,9 +37,9 @@ public class SignalAnalysis {
 			if(AsymmetricNucleusCollection.class.isAssignableFrom(collection.getClass())){
 				n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
 			}
-			
-
 		}
+		logger.log("Distance matrix exported");
+		
 		exportSignalStats(collection);
 		exportDistancesBetweenSingleSignals(collection);
 		addSignalsToProfileCharts(collection);
@@ -45,45 +51,48 @@ public class SignalAnalysis {
 
 	private static void exportSignalStats(INuclearCollection collection){
 
+		logger.log("Exporting signal stats...");
 		for(int channel : collection.getSignalChannels()){
-			Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
-			logger.addColumnHeading("SIGNAL_AREA");
-			logger.addColumnHeading("SIGNAL_ANGLE");
-			logger.addColumnHeading("SIGNAL_FERET");
-			logger.addColumnHeading("SIGNAL_DISTANCE");
-			logger.addColumnHeading("FRACT_DISTANCE");
-			logger.addColumnHeading("SIGNAL_PERIM.");
-			logger.addColumnHeading("SIGNAL_RADIUS");
-			logger.addColumnHeading("CLOSEST_BORDER_INDEX");
-			logger.addColumnHeading("SOURCE");
+			TableExporter tableExporter = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
+			tableExporter.addColumnHeading("SIGNAL_AREA");
+			tableExporter.addColumnHeading("SIGNAL_ANGLE");
+			tableExporter.addColumnHeading("SIGNAL_FERET");
+			tableExporter.addColumnHeading("SIGNAL_DISTANCE");
+			tableExporter.addColumnHeading("FRACT_DISTANCE");
+			tableExporter.addColumnHeading("SIGNAL_PERIM.");
+			tableExporter.addColumnHeading("SIGNAL_RADIUS");
+			tableExporter.addColumnHeading("CLOSEST_BORDER_INDEX");
+			tableExporter.addColumnHeading("SOURCE");
 
 			for(NuclearSignal s : collection.getSignals(channel)){
-				logger.addRow("SIGNAL_AREA"         , s.getArea());
-				logger.addRow("SIGNAL_ANGLE"        , s.getAngle());
-				logger.addRow("SIGNAL_FERET"        , s.getFeret());
-				logger.addRow("SIGNAL_DISTANCE"     , s.getDistanceFromCoM());
-				logger.addRow("FRACT_DISTANCE"     , s.getFractionalDistanceFromCoM());
-				logger.addRow("SIGNAL_PERIM."       , s.getPerimeter());
-				logger.addRow("SIGNAL_RADIUS"       , s.getRadius());
-				logger.addRow("CLOSEST_BORDER_INDEX", s.getClosestBorderPoint());
-				logger.addRow("SOURCE"              , s.getOrigin());
+				tableExporter.addRow("SIGNAL_AREA"         , s.getArea());
+				tableExporter.addRow("SIGNAL_ANGLE"        , s.getAngle());
+				tableExporter.addRow("SIGNAL_FERET"        , s.getFeret());
+				tableExporter.addRow("SIGNAL_DISTANCE"     , s.getDistanceFromCoM());
+				tableExporter.addRow("FRACT_DISTANCE"     , s.getFractionalDistanceFromCoM());
+				tableExporter.addRow("SIGNAL_PERIM."       , s.getPerimeter());
+				tableExporter.addRow("SIGNAL_RADIUS"       , s.getRadius());
+				tableExporter.addRow("CLOSEST_BORDER_INDEX", s.getClosestBorderPoint());
+				tableExporter.addRow("SOURCE"              , s.getOrigin());
 			}
-			logger.export("log.signals.Channel_"+channel+"."+collection.getType()); // TODO: get channel names
+			tableExporter.export("log.signals.Channel_"+channel+"."+collection.getType()); // TODO: get channel names
 		}
+		logger.log("Signal stats exported");
 	}
 
 	public static void exportDistancesBetweenSingleSignals(INuclearCollection collection){
 
-		Logger logger = new Logger(collection.getFolder()+File.separator+collection.getOutputFolderName());
-		logger.addColumnHeading("DISTANCE_BETWEEN_SIGNALS");
-		logger.addColumnHeading("RED_DISTANCE_TO_COM");
-		logger.addColumnHeading("GREEN_DISTANCE_TO_COM");
-		logger.addColumnHeading("NUCLEAR_FERET");
-		logger.addColumnHeading("RED_FRACTION_OF_FERET");
-		logger.addColumnHeading("GREEN_FRACTION_OF_FERET");
-		logger.addColumnHeading("DIST_BETWEEN_SIGNALS_FRACT_FERET");
-		logger.addColumnHeading("NORMALISED_DISTANCE");
-		logger.addColumnHeading("PATH");
+		logger.log("Exporting distance between signals...");
+		TableExporter tableExporter = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
+		tableExporter.addColumnHeading("DISTANCE_BETWEEN_SIGNALS");
+		tableExporter.addColumnHeading("RED_DISTANCE_TO_COM");
+		tableExporter.addColumnHeading("GREEN_DISTANCE_TO_COM");
+		tableExporter.addColumnHeading("NUCLEAR_FERET");
+		tableExporter.addColumnHeading("RED_FRACTION_OF_FERET");
+		tableExporter.addColumnHeading("GREEN_FRACTION_OF_FERET");
+		tableExporter.addColumnHeading("DIST_BETWEEN_SIGNALS_FRACT_FERET");
+		tableExporter.addColumnHeading("NORMALISED_DISTANCE");
+		tableExporter.addColumnHeading("PATH");
 
 		for(INuclearFunctions n : collection.getNuclei()){
 
@@ -106,20 +115,23 @@ public class SignalAnalysis {
 				double distanceFractionOfFeret = distanceBetween / nFeret;
 				double normalisedPosition = distanceFractionOfFeret / rFractionOfFeret / gFractionOfFeret;
 
-				logger.addRow("DISTANCE_BETWEEN_SIGNALS"		, distanceBetween);
-				logger.addRow("RED_DISTANCE_TO_COM"				, rDistanceToCoM);
-				logger.addRow("GREEN_DISTANCE_TO_COM"			, gDistanceToCoM);
-				logger.addRow("NUCLEAR_FERET"					, nFeret);
-				logger.addRow("RED_FRACTION_OF_FERET"			, rFractionOfFeret);
-				logger.addRow("GREEN_FRACTION_OF_FERET"			, gFractionOfFeret);
-				logger.addRow("DIST_BETWEEN_SIGNALS_FRACT_FERET", distanceFractionOfFeret);
-				logger.addRow("NORMALISED_DISTANCE"    			, normalisedPosition);
-				logger.addRow("PATH"                			, n.getPath());
+				tableExporter.addRow("DISTANCE_BETWEEN_SIGNALS"		, distanceBetween);
+				tableExporter.addRow("RED_DISTANCE_TO_COM"				, rDistanceToCoM);
+				tableExporter.addRow("GREEN_DISTANCE_TO_COM"			, gDistanceToCoM);
+				tableExporter.addRow("NUCLEAR_FERET"					, nFeret);
+				tableExporter.addRow("RED_FRACTION_OF_FERET"			, rFractionOfFeret);
+				tableExporter.addRow("GREEN_FRACTION_OF_FERET"			, gFractionOfFeret);
+				tableExporter.addRow("DIST_BETWEEN_SIGNALS_FRACT_FERET", distanceFractionOfFeret);
+				tableExporter.addRow("NORMALISED_DISTANCE"    			, normalisedPosition);
+				tableExporter.addRow("PATH"                			, n.getPath());
 			}
 		}
-		if(logger.length()>0){
-			logger.export("log.SingleSignalDistances");
+		if(tableExporter.length()>0){
+			tableExporter.export("log.SingleSignalDistances");
+		} else {
+			logger.log("No single signal pairs found", Logger.DEBUG);
 		}
+		logger.log("Signal distances exported");
 	}
 
 	private static void addSignalsToProfileCharts(INuclearCollection collection){

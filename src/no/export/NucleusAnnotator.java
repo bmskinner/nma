@@ -17,18 +17,30 @@ import no.components.NucleusBorderSegment;
 import no.components.SignalCollection;
 import no.imports.ImageImporter;
 import no.nuclei.INuclearFunctions;
+import no.utility.Logger;
 import no.utility.Utils;
 
 public class NucleusAnnotator {
 	
-	public static void run(INuclearCollection collection){
+	private static Logger logger;
+	
+	public static boolean run(INuclearCollection collection){
 
-		IJ.log("    Annoatating images of nuclei...");
-		for(INuclearFunctions n : collection.getNuclei()){
-			NucleusAnnotator.run(n);
+		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
+		try{
+			logger.log("Annotating images of nuclei...");
+			for(INuclearFunctions n : collection.getNuclei()){
+				NucleusAnnotator.run(n);
+			}
+			logger.log("Annotation complete");
+
+		}catch(Exception e){
+			logger.log("Error in annotaion: "+e.getMessage(), Logger.ERROR);
+			return false;
 		}
-		IJ.log("    Annoatation complete");
+		return true;
 	}
+
 
 	public static void run(INuclearFunctions n){
 		
@@ -50,7 +62,7 @@ public class NucleusAnnotator {
 			annotateSignals(annotatedImage, n);
 
 		}  catch(Exception e){
-			IJ.log("Error annotating nucleus: "+e);
+			logger.log("Error annotating nucleus: "+e, Logger.ERROR);
 
 		} finally {
 			IJ.saveAsTiff(annotatedImage, n.getAnnotatedImagePath());
