@@ -25,7 +25,7 @@ public class RodentSpermNucleusCollection
 
 
   // failure  codes
-  public static final int FAILURE_TIP = 512;
+//  public static final int FAILURE_TIP = 512;
   
   private String DEFAULT_REFERENCE_POINT = "tip";
 
@@ -118,18 +118,6 @@ public class RodentSpermNucleusCollection
     Export data
     -----------------------
   */
-
-  /*
-    Draw the features of interest on the images of the nuclei created earlier
-  */
-//  public void annotateImagesOfNuclei(){
-//  	IJ.log("    Annotating images...");
-//  	for(int i=0; i<this.getNucleusCount();i++){
-//  		INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
-////  		n.annotateFeatures();
-//  	}
-//  	 IJ.log("    Annotation complete");
-//  }
 
   /*
     -----------------------

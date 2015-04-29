@@ -36,17 +36,7 @@ public class PopulationExporter {
 				try{
 
 					output.writeObject(collection);
-//					output.writeObject(collection.getFolder());
-//					output.writeObject(collection.getOutputFolderName());
-//					output.writeObject(collection.getType());
-//					
-//					output.writeObject(collection.getReferencePoint());
-//					output.writeObject(collection.getOrientationPoint());
-//					
-//					output.writeObject(collection.getNuclei());
-//					
-//					output.writeObject(collection.getProfileCollection());
-					
+			
 
 					logger.log("Save complete");
 
@@ -55,7 +45,7 @@ public class PopulationExporter {
 					for(StackTraceElement el : e.getStackTrace()){
 						logger.log(el.toString(), Logger.STACK);
 					}
-					throw new Exception("Individual nucleus error");
+					throw new Exception("Individual nucleus error: "+e.getMessage());
 
 				} finally{
 					output.close();

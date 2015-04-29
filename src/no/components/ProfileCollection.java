@@ -1,38 +1,18 @@
 package no.components;
 
 import ij.IJ;
-//import ij.gui.Plot;
 
-
-//import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-//import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-
-//import no.analysis.ProfileSegmenter;
-//import no.utility.Stats;
 import no.utility.Utils;
 
 public class ProfileCollection implements Serializable {
-	
-//	private static final int CHART_TAIL_BOX_Y_MID = 340;
-//	private static final int CHART_TAIL_BOX_Y_MAX = 355;
-//	private static final int CHART_TAIL_BOX_Y_MIN = 325;
-//	private static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-//	private static final int CHART_SIGNAL_Y_LINE_MAX = 315;
-//	
-//	private static final int CHART_SCALE_Y_MIN = 0;
-//	private static final int CHART_SCALE_Y_MAX = 360;
-	
-	/**
-	 * 
-	 */
+		
 	private static final long serialVersionUID = 1L;
 	public static final int CHART_WINDOW_HEIGHT     = 400;
 	public static final int CHART_WINDOW_WIDTH      = 600;

@@ -95,6 +95,8 @@ public interface INuclearCollection
 	public double getMedianFeretLength();
 
 	public double getMaxProfileLength();
+	
+	public int getProfileWindowSize();
 
 	public List<INuclearFunctions> getNucleiWithSignals(int channel);
 

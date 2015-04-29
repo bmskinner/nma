@@ -316,6 +316,7 @@ public class MainWindow extends JFrame {
 		log("Opened collection: "+collection.getType());
 		
 		updateStatsPanel(collection);
+		updateProfileImage(collection);
 		updatePopulationList();
 	}
 	
@@ -328,6 +329,7 @@ public class MainWindow extends JFrame {
 				{"Median perimeter", null},
 				{"Median feret", null},
 				{"Signal channels", null},
+				{"Profile window", null},
 				{"Ran", null},
 				{"Type", null}
 		};
@@ -350,6 +352,7 @@ public class MainWindow extends JFrame {
 				{"Median perimeter", df.format(collection.getMedianNuclearPerimeter())},
 				{"Median feret", df.format(collection.getMedianFeretLength())},
 				{"Signal channels", collection.getSignalChannels().size()},
+				{"Profile window", collection.getProfileWindowSize()},
 				{"Ran", collection.getOutputFolderName()},
 				{"Type", collection.getClass().getSimpleName()}
 		};
@@ -388,12 +391,10 @@ public class MainWindow extends JFrame {
 				if(name.startsWith("Nucleus_")){
 					plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
 					plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-//					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
 				} 
 				if(name.startsWith("Q")){
 					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
 					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-//					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
 				} 
 				
 			}			

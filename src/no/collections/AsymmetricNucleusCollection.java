@@ -23,8 +23,8 @@ public class AsymmetricNucleusCollection
 {
 
 	// failure  codes
-	public static final int FAILURE_HEAD = 128;
-	public static final int FAILURE_TAIL = 256;
+//	public static final int FAILURE_HEAD = 128;
+//	public static final int FAILURE_TAIL = 256;
 
 
 	private boolean differencesCalculated = false;
@@ -40,12 +40,6 @@ public class AsymmetricNucleusCollection
 
   }
 
-//  @Override
-//  public void annotateAndExportNuclei(){
-////    this.annotateImagesOfNuclei();
-////    super.annotateAndExportNuclei();
-//  }
-
 
   /*
     -----------------------
@@ -60,21 +54,6 @@ public class AsymmetricNucleusCollection
   public void setDifferencesCalculated(boolean b){
     this.differencesCalculated = b;
   }
-
-  /*
-    -----------------------
-    Annotate images
-    -----------------------
-  */
-  
-//  public void annotateImagesOfNuclei(){
-//    IJ.log("    Annotating images ("+this.getType()+")...");
-//    for(INuclearFunctions n : this.getNuclei()){
-////      n.annotateFeatures();
-//    }
-//     IJ.log("    Annotation complete");
-//  }
-
 
 	/*
     -----------------------

@@ -30,7 +30,7 @@ public class PopulationImporter {
 		
 		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
 
-		NucleusCollection collection = null;
+		INuclearCollection collection = null;
 
 		FileInputStream fis;
 		try {
@@ -56,20 +56,21 @@ public class PopulationImporter {
 			} catch (Exception e) { // exception occurs on reaching EOF
 
 				mw.log("OK");
+				collection = (INuclearCollection) inputList.get(0);
 //				mw.log("Read "+inputList.size()+" items");
 
-				File folder = (File) inputList.get(0);
-				String outputFolder = (String) inputList.get(1);
-				String type = (String)inputList.get(2);
-				collection = new NucleusCollection(folder, outputFolder, type, logger.getLogfile());
+//				File folder = (File) inputList.get(0);
+//				String outputFolder = (String) inputList.get(1);
+//				String type = (String)inputList.get(2);
+//				collection = new NucleusCollection(folder, outputFolder, type, logger.getLogfile());
 
-				@SuppressWarnings("unchecked")
-				List<INuclearFunctions> list = (List<INuclearFunctions>) inputList.get(3);
-
-				for(INuclearFunctions n : list){
-					collection.addNucleus(n);
-//					IJ.log("Found "+n.getClass().getSimpleName());
-				}
+//				@SuppressWarnings("unchecked")
+//				List<INuclearFunctions> list = (List<INuclearFunctions>) inputList.get(3);
+//
+//				for(INuclearFunctions n : list){
+//					collection.addNucleus(n);
+////					IJ.log("Found "+n.getClass().getSimpleName());
+//				}
 
 				mw.log("File imported");
 
