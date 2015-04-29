@@ -20,7 +20,8 @@ public class PopulationExporter {
 
 		try{
 
-			File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+".sav");
+			// Since we're creating a save format, go with nmb: Nuclear Morphology Binary
+			File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+".nmb");
 			if(saveFile.exists()){
 				saveFile.delete();
 			}
@@ -34,10 +35,11 @@ public class PopulationExporter {
 
 				try{
 
-					output.writeObject(collection.getFolder());
-					output.writeObject(collection.getOutputFolderName());
-					output.writeObject(collection.getType());
-					output.writeObject(collection.getNuclei());
+					output.writeObject(collection);
+//					output.writeObject(collection.getFolder());
+//					output.writeObject(collection.getOutputFolderName());
+//					output.writeObject(collection.getType());
+//					output.writeObject(collection.getNuclei());
 
 					logger.log("Save complete");
 

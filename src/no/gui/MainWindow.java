@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 
 import no.analysis.AnalysisCreator;
+import no.analysis.ProfileSegmenter;
 import no.collections.INuclearCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
@@ -194,6 +195,7 @@ public class MainWindow extends JFrame {
 			
 			table = new JTable();
 			table.setEnabled(false);
+			table.setModel(this.createStatsPanel());
 			panelStats.add(table);
 			
 			JLabel lblAggregates = new JLabel("Segmented Profile");
@@ -317,6 +319,23 @@ public class MainWindow extends JFrame {
 		updatePopulationList();
 	}
 	
+	private TableModel createStatsPanel(){
+		String[] columnNames = {"Field", "Value"};
+
+		Object[][] data = {
+				{"Nuclei", null},
+				{"Median area", null},
+				{"Median perimeter", null},
+				{"Median feret", null},
+				{"Signal channels", null},
+				{"Ran", null},
+				{"Type", null}
+		};
+
+		TableModel model = new DefaultTableModel(data, columnNames);
+		return model;
+	}
+	
 	
 	public void updateStatsPanel(INuclearCollection collection){
 		// format the numbers and make into a tablemodel
@@ -342,18 +361,9 @@ public class MainWindow extends JFrame {
 	public void updateProfileImage(INuclearCollection collection){
 		
 		try {
-//			ProfileCollection p = collection.getProfileCollection();
-//			Plot plot = p.getPlots(collection.getOrientationPoint()).get("norm");
-//			
-//			ImagePlus imp = plot.getImagePlus();
-//			panelAggregates.remove(ic);
-//			ic = new ImageCanvas(imp);
-//			panelAggregates.add(ic);
-//			panelAggregates.repaint();
-//			panelAggregates.setVisible(true);
 			
 			XYDataset ds = createSegmentDataset(collection);
-			
+						
 			JFreeChart chart = 
 					ChartFactory.createXYLineChart(null,
 					                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
@@ -365,16 +375,33 @@ public class MainWindow extends JFrame {
 			plot.getRangeAxis().setRange(0,360);
 			plot.setBackgroundPaint(Color.WHITE);
 			plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+
 			int seriesCount = plot.getSeriesCount();
 
 			for (int i = 0; i < seriesCount; i++) {
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-			}
+				plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+				String name = (String) ds.getSeriesKey(i);
+				if(name.startsWith("Seg_")){
+					plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+					plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
+				} 
+				if(name.startsWith("Nucleus_")){
+					plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+					plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+//					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+				} 
+				if(name.startsWith("Q")){
+					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+//					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+				} 
+				
+			}			
 
 			cp.setChart(chart);
 			
 		} catch (Exception e) {
-			log("Plot not present in save yet");
+			log("Error in plotting");
 		} 
 	}
 	
@@ -409,25 +436,52 @@ public class MainWindow extends JFrame {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 		Profile xpoints = profile.getPositions(100);
-		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
 		
+		// rendering order will be first on top
+		
+		// add the segments
+
+		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+
 		for(NucleusBorderSegment seg : segments){
 
-			if(seg.getStartIndex()>seg.getEndIndex()){
-				//				Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
-				//				Profile subPoints = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
-				//				double[][] data = { subPoints.asArray(), subProfile.asArray() };
-				//				ds.addSeries(seg.getSegmentType(), data);
+			if(seg.getStartIndex()>seg.getEndIndex()){ // case when array wraps
+
+				// beginning of array
+				Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
+				Profile subPointsA = xpoints.getSubregion(0, seg.getEndIndex());
+				double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
+				ds.addSeries(seg.getSegmentType(), dataA);
+
+				// end of array
+				Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
+				Profile subPointsB = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
+				double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
+				ds.addSeries(seg.getSegmentType(), dataB);
 				continue;
 			} 
 			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
 			Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
 			double[][] data = { subPoints.asArray(), subProfile.asArray() };
 			ds.addSeries(seg.getSegmentType(), data);
-
 		}
-        
-        return ds;
-	}
 
+		// make the IQR
+		Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
+		Profile profile75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
+		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
+		ds.addSeries("Q25", data25);
+		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
+		ds.addSeries("Q75", data75);
+
+		// add the individual nuclei
+		for(INuclearFunctions n : collection.getNuclei()){
+			Profile angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(profile.size());
+			double[][] ndata = { xpoints.asArray(), angles.asArray() };
+			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
+		}
+
+
+		return ds;
+	}
 }
