@@ -60,7 +60,7 @@ public class NucleusDetector {
   private Logger logger;
   
   protected MainWindow mw;
-  private Map<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
+  private Map<File, RoundNucleusCollection> collectionGroup = new HashMap<File, RoundNucleusCollection>();
 
 
   /**
@@ -253,7 +253,7 @@ public class NucleusDetector {
   *  @param file a folder to be analysed
   *  @param collection the collection of nuclei found
   */
-  public void addNucleusCollection(File file, NucleusCollection collection){
+  public void addNucleusCollection(File file, RoundNucleusCollection collection){
     this.collectionGroup.put(file, collection);
   }
 
@@ -265,12 +265,12 @@ public class NucleusDetector {
   *
   *  @return a Map of a folder to its nuclei
   */
-  public Map<File, NucleusCollection> getNucleiCollections(){
+  public Map<File, RoundNucleusCollection> getNucleiCollections(){
     // remove any empty collections before returning
     List<File> toRemove = new ArrayList<File>(0);
     Set<File> keys = collectionGroup.keySet();
     for (File key : keys) {
-      NucleusCollection collection = collectionGroup.get(key);
+      RoundNucleusCollection collection = collectionGroup.get(key);
       if(collection.getNucleusCount()==0){
         toRemove.add(key);
       }    
@@ -343,7 +343,7 @@ public class NucleusDetector {
 	protected void processFolder(File folder){
 
     File[] listOfFiles = folder.listFiles();
-    NucleusCollection folderCollection = new NucleusCollection(folder, this.outputFolder, folder.getName(), this.debugFile);
+    RoundNucleusCollection folderCollection = new RoundNucleusCollection(folder, this.outputFolder, folder.getName(), this.debugFile);
     this.collectionGroup.put(folder, folderCollection);
  
     for (File file : listOfFiles) {
@@ -465,7 +465,7 @@ public class NucleusDetector {
 		  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
 		  
 		  // turn roi into Nucleus for manipulation
-		  Nucleus currentNucleus = new Nucleus(nucleus, path, nucleusNumber, position);
+		  RoundNucleus currentNucleus = new RoundNucleus(nucleus, path, nucleusNumber, position);
 	
 		  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
 		  currentNucleus.setArea(values.get("Area")); 
@@ -490,7 +490,7 @@ public class NucleusDetector {
 		  signalDetector.run(currentNucleus, smallRegion);
 	
 		  // if everything checks out, add the measured parameters to the global pool
-		  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
+		  RoundNucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
 		  collectionToAddTo.addNucleus(currentNucleus);
 	  }catch(Exception e){
 		  logger.log(" Error in nucleus assignment: "+e.getMessage(), Logger.ERROR);

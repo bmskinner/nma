@@ -7,14 +7,14 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import no.utility.Logger;
 
 public class PopulationExporter {
 	
 	private static Logger logger;
 
-	public static boolean savePopulation(INuclearCollection collection){
+	public static boolean savePopulation(NucleusCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "PopulationExporter");
 

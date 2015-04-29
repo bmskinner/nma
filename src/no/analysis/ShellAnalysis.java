@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import no.collections.INuclearCollection;
 import no.collections.NucleusCollection;
+import no.collections.RoundNucleusCollection;
 import no.components.NuclearSignal;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 
 public class ShellAnalysis {
@@ -22,7 +22,7 @@ public class ShellAnalysis {
 	 * @param collection the collection of nuclei to analyse
 	 * @param shells the number of shells per nucleus
 	 */
-	public static boolean run(INuclearCollection collection, int shells){
+	public static boolean run(NucleusCollection collection, int shells){
 		
 		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
 		
@@ -31,7 +31,7 @@ public class ShellAnalysis {
 			return true; // only bother if there are signals
 		}
 		
-		if(collection.getClass() != NucleusCollection.class){
+		if(collection.getClass() != RoundNucleusCollection.class){
 			logger.log("Not a round nucleus; skipping");
 			return true; // only analyse round nuclei
 		}
@@ -45,7 +45,7 @@ public class ShellAnalysis {
 			}
 
 			// make the shells and measure the values
-			for(INuclearFunctions n : collection.getNuclei()){
+			for(Nucleus n : collection.getNuclei()){
 
 				ShellCreator shellAnalyser = new ShellCreator(n);
 				shellAnalyser.createShells();

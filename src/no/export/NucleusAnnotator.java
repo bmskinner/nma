@@ -11,13 +11,13 @@ import java.awt.Color;
 import java.util.List;
 
 import no.analysis.ProfileSegmenter;
-import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.SignalCollection;
 import no.imports.ImageImporter;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 import no.utility.Utils;
 
@@ -25,12 +25,12 @@ public class NucleusAnnotator {
 	
 	private static Logger logger;
 	
-	public static boolean run(INuclearCollection collection){
+	public static boolean run(NucleusCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
 		try{
 			logger.log("Annotating images of nuclei...");
-			for(INuclearFunctions n : collection.getNuclei()){
+			for(Nucleus n : collection.getNuclei()){
 				NucleusAnnotator.run(n);
 			}
 			logger.log("Annotation complete");
@@ -43,14 +43,14 @@ public class NucleusAnnotator {
 	}
 
 
-	public static void run(INuclearFunctions n){
+	public static void run(Nucleus n){
 		
 		// to add in here - division of functions based on class of nucleus
 		annotateFeatures(n);
 		
 	}
 	
-	private static void annotateFeatures(INuclearFunctions n){
+	private static void annotateFeatures(Nucleus n){
 
 		ImagePlus annotatedImage = new ImagePlus(n.getAnnotatedImagePath());
 		try{
@@ -71,7 +71,7 @@ public class NucleusAnnotator {
 
 	}
 
-	private static void annotateTail(ImagePlus image, INuclearFunctions n){
+	private static void annotateTail(ImagePlus image, Nucleus n){
 		ImageProcessor ip = image.getProcessor();
 		
 		ip.setColor(Color.CYAN);
@@ -80,7 +80,7 @@ public class NucleusAnnotator {
 				n.getBorderTag("tail").getYAsInt());
 	}
 
-	private static void annotateHead(ImagePlus image, INuclearFunctions n){
+	private static void annotateHead(ImagePlus image, Nucleus n){
 		ImageProcessor ip = image.getProcessor();
 		
 		ip.setColor(Color.YELLOW);
@@ -89,7 +89,7 @@ public class NucleusAnnotator {
 				n.getBorderTag("head").getYAsInt());
 	}
 	
-	private static void annotateCoM(ImagePlus image, INuclearFunctions n){
+	private static void annotateCoM(ImagePlus image, Nucleus n){
 		ImageProcessor ip = image.getProcessor();
 
 		ip.setColor(Color.MAGENTA);
@@ -99,7 +99,7 @@ public class NucleusAnnotator {
 	}
 
 	// The narrowest part of the nucleus
-	private static void annotateMinFeret(ImagePlus image, INuclearFunctions n){
+	private static void annotateMinFeret(ImagePlus image, Nucleus n){
 		ImageProcessor ip = image.getProcessor();
 
 
@@ -111,7 +111,7 @@ public class NucleusAnnotator {
 
 	}
 	
-	private static void annotateSegments(ImagePlus image, INuclearFunctions n){
+	private static void annotateSegments(ImagePlus image, Nucleus n){
 		ImageProcessor ip = image.getProcessor();
 
 		if(n.getSegments().size()>0){ // only draw if there are segments
@@ -141,7 +141,7 @@ public class NucleusAnnotator {
 	}
 	
 	
-	private static void annotateSignals(ImagePlus image, INuclearFunctions n){
+	private static void annotateSignals(ImagePlus image, Nucleus n){
 		ImageProcessor ip = image.getProcessor();
 		
 		ip.setLineWidth(3);

@@ -1,7 +1,7 @@
 package no.analysis;
 
-import no.collections.INuclearCollection;
-import no.nuclei.INuclearFunctions;
+import no.collections.NucleusCollection;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 
 public class CollectionFilterer {
@@ -20,7 +20,7 @@ public class CollectionFilterer {
 	private static double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
 
-	public static boolean run(INuclearCollection collection, INuclearCollection failCollection){
+	public static boolean run(NucleusCollection collection, NucleusCollection failCollection){
 
 		logger = new Logger(collection.getDebugFile(), "CollectionFilterer");
 		try{
@@ -39,7 +39,7 @@ public class CollectionFilterer {
 		return true;
 	}
 	
-	private static void refilterNuclei(INuclearCollection collection, INuclearCollection failCollection){
+	private static void refilterNuclei(NucleusCollection collection, NucleusCollection failCollection){
 
 	    double medianArea = collection.getMedianNuclearArea();
 	    double medianPerimeter = collection.getMedianNuclearPerimeter();
@@ -67,7 +67,7 @@ public class CollectionFilterer {
 	    exportFilterStats(collection);
 
 	    for(int i=0;i<collection.getNucleusCount();i++){
-	      INuclearFunctions n = collection.getNucleus(i);
+	      Nucleus n = collection.getNucleus(i);
 	      
 	      if(n.getArea() > maxArea || n.getArea() < minArea ){
 	        n.updateFailureCode(FAILURE_AREA);
@@ -96,7 +96,7 @@ public class CollectionFilterer {
 	      }
 	    }
 
-	    for( INuclearFunctions f : failCollection.getNuclei()){ // should be safer than the i-- above
+	    for( Nucleus f : failCollection.getNuclei()){ // should be safer than the i-- above
 	    	collection.getNuclei().remove(f);
 	    }
 	      
@@ -122,7 +122,7 @@ public class CollectionFilterer {
 	    
 	  }
 	
-	public static void exportFilterStats(INuclearCollection collection){
+	public static void exportFilterStats(NucleusCollection collection){
 
 	    double medianArea = collection.getMedianNuclearArea();
 	    double medianPerimeter = collection.getMedianNuclearPerimeter();

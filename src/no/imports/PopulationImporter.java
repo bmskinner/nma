@@ -10,10 +10,10 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.collections.INuclearCollection;
 import no.collections.NucleusCollection;
+import no.collections.RoundNucleusCollection;
 import no.gui.MainWindow;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 
 public class PopulationImporter {
@@ -21,7 +21,7 @@ public class PopulationImporter {
 	private static Logger logger;
 
 
-	public static INuclearCollection readPopulation(File inputFile, MainWindow mw){
+	public static NucleusCollection readPopulation(File inputFile, MainWindow mw){
 		
 		if(!inputFile.exists()){
 			mw.log("Requested file does not exist");
@@ -30,7 +30,7 @@ public class PopulationImporter {
 		
 		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
 
-		INuclearCollection collection = null;
+		NucleusCollection collection = null;
 
 		FileInputStream fis;
 		try {
@@ -56,7 +56,7 @@ public class PopulationImporter {
 			} catch (Exception e) { // exception occurs on reaching EOF
 
 				mw.log("OK");
-				collection = (INuclearCollection) inputList.get(0);
+				collection = (NucleusCollection) inputList.get(0);
 //				mw.log("Read "+inputList.size()+" items");
 
 //				File folder = (File) inputList.get(0);

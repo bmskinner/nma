@@ -18,7 +18,7 @@ import java.util.List;
 import no.components.*;
 
 public class AsymmetricNucleus
-  extends Nucleus
+  extends RoundNucleus
 {
 
   /**
@@ -27,7 +27,7 @@ public class AsymmetricNucleus
 	private static final long serialVersionUID = 1L;
 private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
 
-  public AsymmetricNucleus(Nucleus n){
+  public AsymmetricNucleus(RoundNucleus n){
     super(n);
   }
 

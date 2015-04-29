@@ -28,7 +28,7 @@ public class PigSpermNucleus
   *
   * @param n the Nucleus to construct from
   */
-    public PigSpermNucleus(Nucleus n){
+    public PigSpermNucleus(RoundNucleus n){
       super(n);
     }
 

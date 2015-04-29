@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Set;
 
 import no.analysis.CurveRefolder;
-import no.collections.NucleusCollection;
+import no.collections.RoundNucleusCollection;
 import no.collections.PigSpermNucleusCollection;
 import no.collections.RodentSpermNucleusCollection;
-import no.nuclei.Nucleus;
+import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.PigSpermNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
 import ij.gui.GenericDialog;
@@ -84,12 +84,12 @@ public class AnalysisSetup{
 		collectionClassTypes = new HashMap<Integer, Class<?>>();
 		collectionClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleusCollection().getClass());
 		collectionClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleusCollection().getClass());
-		collectionClassTypes.put(ROUND_NUCLEUS, new NucleusCollection().getClass());
+		collectionClassTypes.put(ROUND_NUCLEUS, new RoundNucleusCollection().getClass());
 
 		nucleusClassTypes = new HashMap<Integer, Class<?>>();
 		nucleusClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleus().getClass());
 		nucleusClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleus().getClass());
-		nucleusClassTypes.put(ROUND_NUCLEUS, new Nucleus().getClass());
+		nucleusClassTypes.put(ROUND_NUCLEUS, new RoundNucleus().getClass());
 	}
 
 	public AnalysisSetup(){

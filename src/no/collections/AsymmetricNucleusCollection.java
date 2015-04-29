@@ -18,8 +18,8 @@ import no.components.Profile;
 import no.utility.*;
 
 public class AsymmetricNucleusCollection 
-	extends no.collections.NucleusCollection
-  implements no.collections.INuclearCollection
+	extends no.collections.RoundNucleusCollection
+  implements no.collections.NucleusCollection
 {
 
 	// failure  codes
@@ -118,7 +118,7 @@ public class AsymmetricNucleusCollection
     // export the profiles for each nucleus
     for(int i=0; i<this.getNucleusCount();i++){
 
-      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+      Nucleus n = (Nucleus)this.getNucleus(i);
 
       outLine.append( paths[i]        +"\t"+
                       n.getPosition() +"\t"+

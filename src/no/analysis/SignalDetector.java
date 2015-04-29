@@ -11,7 +11,7 @@ import no.components.NuclearSignal;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.imports.ImageImporter;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.StatsMap;
 
 
@@ -79,7 +79,7 @@ public class SignalDetector {
 	 * @param n - the nucleus to add signals to
 	 * @param stack - the ImageStack with signal channels
 	 */
-	public void run(INuclearFunctions n, ImageStack stack){
+	public void run(Nucleus n, ImageStack stack){
 
 		SignalCollection signalCollection = n.getSignalCollection();
 

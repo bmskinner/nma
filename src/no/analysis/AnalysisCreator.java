@@ -26,7 +26,7 @@ import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.gui.AnalysisSetup;
 import no.gui.MainWindow;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 
 
@@ -65,11 +65,11 @@ public class AnalysisCreator {
 	private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
 	// the raw input from nucleus detector
-	private Map<File, NucleusCollection> folderCollection;
+	private Map<File, RoundNucleusCollection> folderCollection;
 
-	private List<INuclearCollection> nuclearPopulations = new ArrayList<INuclearCollection>(0);
+	private List<NucleusCollection> nuclearPopulations = new ArrayList<NucleusCollection>(0);
 	
-	private List<INuclearCollection> finalPopulations = new ArrayList<INuclearCollection>(0);
+	private List<NucleusCollection> finalPopulations = new ArrayList<NucleusCollection>(0);
 
 	/*
     -----------------------
@@ -134,7 +134,7 @@ public class AnalysisCreator {
    * outside the AnalysisCreator
    * @return the collections of nuclei
    */
-  public List<INuclearCollection> getPopulations(){
+  public List<NucleusCollection> getPopulations(){
 	  return this.finalPopulations;
   }
 
@@ -150,7 +150,7 @@ public class AnalysisCreator {
    * they were found. 
    *
    * @return      the nuclei in each folder analysed
-   * @see         NucleusCollection
+   * @see         RoundNucleusCollection
    */
 
   public void runAnalysis(){
@@ -212,23 +212,23 @@ public class AnalysisCreator {
 
 	  try{
 		  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
-		  Constructor<?> nucleusConstructor = analysisOptions.getNucleusClass().getConstructor(new Class<?>[]{Nucleus.class});
+		  Constructor<?> nucleusConstructor = analysisOptions.getNucleusClass().getConstructor(new Class<?>[]{RoundNucleus.class});
 		  logger.log("Prepared constructors",Logger.DEBUG);
 		  
 		  for (File key : keys) {
-			  NucleusCollection collection = folderCollection.get(key);
+			  RoundNucleusCollection collection = folderCollection.get(key);
 
 			  try{
-				  INuclearCollection spermNuclei = (INuclearCollection) collectionConstructor.newInstance(key, collection.getOutputFolderName(), "analysable", logger.getLogfile());
+				  NucleusCollection spermNuclei = (NucleusCollection) collectionConstructor.newInstance(key, collection.getOutputFolderName(), "analysable", logger.getLogfile());
 				  logger.log("Created collection instance",Logger.DEBUG);
 
 				  mw.log(key.getAbsolutePath()+"   Nuclei: "+collection.getNucleusCount());
 
 				  logger.log("Detecting nucleus border points");
 				  for(int i=0;i<collection.getNucleusCount();i++){
-					  INuclearFunctions p = collection.getNucleus(i);
+					  Nucleus p = collection.getNucleus(i);
 
-					  INuclearFunctions subNucleus  = (INuclearFunctions) nucleusConstructor.newInstance(p);
+					  Nucleus subNucleus  = (Nucleus) nucleusConstructor.newInstance(p);
 					  subNucleus.findPointsAroundBorder();
 
 					  spermNuclei.addNucleus(subNucleus);
@@ -256,7 +256,7 @@ public class AnalysisCreator {
 	  mw.log("Beginning analysis");
 	  logger.log("Beginning population analysis");
 
-	  for(INuclearCollection r : this.nuclearPopulations){
+	  for(NucleusCollection r : this.nuclearPopulations){
 
 		  File folder = r.getFolder();
 		  //		  mw.log(spacerString);
@@ -270,7 +270,7 @@ public class AnalysisCreator {
 
 			  nucleusCounts.put("input", r.getNucleusCount());
 			  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class, File.class});
-			  INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed", logger.getLogfile());
+			  NucleusCollection failedNuclei = (NucleusCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed", logger.getLogfile());
 
 			  mw.logc("Filtering collection...");
 			  boolean ok = CollectionFilterer.run(r, failedNuclei); // put fails into failedNuclei, remove from r
@@ -378,9 +378,9 @@ public class AnalysisCreator {
 		  }
 
 		  finalPopulations.add(r);
-		  ArrayList<INuclearCollection> signalPopulations = dividePopulationBySignals(r);
+		  ArrayList<NucleusCollection> signalPopulations = dividePopulationBySignals(r);
 		  
-		  for(INuclearCollection p : signalPopulations){
+		  for(NucleusCollection p : signalPopulations){
 
 			  nucleusCounts.put(p.getType(), p.getNucleusCount());
 
@@ -477,9 +477,9 @@ public class AnalysisCreator {
       nuclei with red signals, with green signals, without red signals and without green signals
     Only include the 'without' populations if there is a 'with' population.
   */
-  public ArrayList<INuclearCollection> dividePopulationBySignals(INuclearCollection r){
+  public ArrayList<NucleusCollection> dividePopulationBySignals(NucleusCollection r){
 
-	  ArrayList<INuclearCollection> signalPopulations = new ArrayList<INuclearCollection>(0);
+	  ArrayList<NucleusCollection> signalPopulations = new ArrayList<NucleusCollection>(0);
 	  logger.log("Dividing population by signals...");
 	  try{
 
@@ -487,18 +487,18 @@ public class AnalysisCreator {
 
 		  List<Integer> channels = r.getSignalChannels();
 		  for(int channel : channels){
-			  List<INuclearFunctions> list = r.getNucleiWithSignals(channel);
+			  List<Nucleus> list = r.getNucleiWithSignals(channel);
 			  if(!list.isEmpty()){
-				  INuclearCollection listCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "Signals_in_channel_"+channel, r.getDebugFile());
-				  for(INuclearFunctions n : list){
+				  NucleusCollection listCollection = (NucleusCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "Signals_in_channel_"+channel, r.getDebugFile());
+				  for(Nucleus n : list){
 					  listCollection.addNucleus( n );
 				  }
 				  signalPopulations.add(listCollection);
 
-				  List<INuclearFunctions> notList = r.getNucleiWithSignals(-channel);
+				  List<Nucleus> notList = r.getNucleiWithSignals(-channel);
 				  if(!notList.isEmpty()){
-					  INuclearCollection notListCollection = (INuclearCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "No_signals_in_channel_"+channel, r.getDebugFile());
-					  for(INuclearFunctions n : notList){
+					  NucleusCollection notListCollection = (NucleusCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "No_signals_in_channel_"+channel, r.getDebugFile());
+					  for(Nucleus n : notList){
 						  notListCollection.addNucleus( n );
 					  }
 					  signalPopulations.add(notListCollection);
@@ -522,7 +522,7 @@ public class AnalysisCreator {
 
   public void exportAnalysisLog(){
 
-    for(INuclearCollection r : this.nuclearPopulations){
+    for(NucleusCollection r : this.nuclearPopulations){
       
       StringBuilder outLine = new StringBuilder();
       SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");

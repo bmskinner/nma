@@ -12,7 +12,7 @@
  import java.util.List;
 
 import no.components.NucleusBorderPoint;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import ij.IJ;
 import ij.process.FloatPolygon;
 
@@ -140,7 +140,7 @@ public class Utils {
 	  * @param n the nucleus
 	  * @return
 	  */
-	 public static FloatPolygon createPolygon(INuclearFunctions n){
+	 public static FloatPolygon createPolygon(Nucleus n){
 		 float[] xpoints = new float[n.getLength()];
 		 float[] ypoints = new float[n.getLength()];
 

@@ -22,12 +22,12 @@ import javax.swing.JButton;
 
 import no.analysis.AnalysisCreator;
 import no.analysis.ProfileSegmenter;
-import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;
 import no.imports.PopulationImporter;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.MappingFileParser;
 
 import java.awt.event.MouseAdapter;
@@ -92,7 +92,7 @@ public class MainWindow extends JFrame {
 	
 	private ChartPanel cp;
 	
-	private HashMap<String, INuclearCollection> analysisPopulations = new HashMap<String, INuclearCollection>();;
+	private HashMap<String, NucleusCollection> analysisPopulations = new HashMap<String, NucleusCollection>();;
 
 
 	/**
@@ -242,7 +242,7 @@ public class MainWindow extends JFrame {
 	}
 	
 	public void postAnalysis(){
-		PopulationSplitWindow splitter = new PopulationSplitWindow(new ArrayList<INuclearCollection>(this.analysisPopulations.values()));
+		PopulationSplitWindow splitter = new PopulationSplitWindow(new ArrayList<NucleusCollection>(this.analysisPopulations.values()));
 
 		try{
 			File f = splitter.addMappingFile();
@@ -251,7 +251,7 @@ public class MainWindow extends JFrame {
 
 			if(!f.exists()) return;
 
-			INuclearCollection subjectCollection = splitter.getCollection();
+			NucleusCollection subjectCollection = splitter.getCollection();
 			if(subjectCollection==null) return;
 
 			// import and parse the mapping file
@@ -259,13 +259,13 @@ public class MainWindow extends JFrame {
 
 			// create a new collection to hold the nuclei
 			Constructor<?> collectionConstructor = subjectCollection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
-			INuclearCollection remapCollection = (INuclearCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), 
+			NucleusCollection remapCollection = (NucleusCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), 
 																										subjectCollection.getOutputFolderName(), 
 																										f.getName(), 
 																										subjectCollection.getDebugFile());
 
 			// add nuclei to the new population based on the mapping info
-			for(INuclearFunctions n : subjectCollection.getNuclei()){
+			for(Nucleus n : subjectCollection.getNuclei()){
 				if(pathList.contains(n.getPath()+"\t"+n.getNucleusNumber())){
 					remapCollection.addNucleus(n);
 				}
@@ -290,11 +290,11 @@ public class MainWindow extends JFrame {
 				analysisCreator.run();
 				// post-analysis displays: make a new class eventually to handle gui? Or do it here
 
-				List<INuclearCollection> result = analysisCreator.getPopulations();
+				List<NucleusCollection> result = analysisCreator.getPopulations();
 				updateStatsPanel(result.get(0));
 				updateProfileImage(result.get(0));
 				
-				for(INuclearCollection c : result){
+				for(NucleusCollection c : result){
 					String key = c.getOutputFolderName()+" - "+c.getType()+" - "+c.getNucleusCount()+" nuclei";
 					MainWindow.this.analysisPopulations.put(key, c);
 				}
@@ -310,7 +310,7 @@ public class MainWindow extends JFrame {
 		OpenDialog fileDialog = new OpenDialog("Select a save file...");
 		String fileName = fileDialog.getPath();
 		if(fileName==null) return;
-		INuclearCollection collection = PopulationImporter.readPopulation(new File(fileName), this);
+		NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), this);
 		String key = collection.getOutputFolderName()+" - "+collection.getType()+" - "+collection.getNucleusCount()+" nuclei";
 		MainWindow.this.analysisPopulations.put(key, collection);
 		log("Opened collection: "+collection.getType());
@@ -339,7 +339,7 @@ public class MainWindow extends JFrame {
 	}
 	
 	
-	public void updateStatsPanel(INuclearCollection collection){
+	public void updateStatsPanel(NucleusCollection collection){
 		// format the numbers and make into a tablemodel
 		DecimalFormat df = new DecimalFormat("#.00"); 
 		lblStatusLine.setText("Showing: "+collection.getOutputFolderName()+" - "+collection.getFolder()+" - "+collection.getType());
@@ -361,7 +361,7 @@ public class MainWindow extends JFrame {
 		table.setModel(model);
 	}
 	
-	public void updateProfileImage(INuclearCollection collection){
+	public void updateProfileImage(NucleusCollection collection){
 		
 		try {
 			
@@ -412,7 +412,7 @@ public class MainWindow extends JFrame {
 		if(this.analysisPopulations.size()==0){
 			model.addElement("No populations");
 		} else {
-			for(INuclearCollection c : this.analysisPopulations.values()){
+			for(NucleusCollection c : this.analysisPopulations.values()){
 				model.addElement(c.getOutputFolderName()+" - "+c.getType()+" - "+c.getNucleusCount()+" nuclei");
 			}
 		}
@@ -426,14 +426,14 @@ public class MainWindow extends JFrame {
 
 			String key = populationList.getSelectedValue();
 			if(!key.equals("No populations")){
-				INuclearCollection c = MainWindow.this.analysisPopulations.get(key);
+				NucleusCollection c = MainWindow.this.analysisPopulations.get(key);
 				updateStatsPanel(c);
 				updateProfileImage(c);
 			}
 		}
 	}
 	
-	private XYDataset createSegmentDataset(INuclearCollection collection){
+	private XYDataset createSegmentDataset(NucleusCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 		Profile xpoints = profile.getPositions(100);
@@ -476,7 +476,7 @@ public class MainWindow extends JFrame {
 		ds.addSeries("Q75", data75);
 
 		// add the individual nuclei
-		for(INuclearFunctions n : collection.getNuclei()){
+		for(Nucleus n : collection.getNuclei()){
 			Profile angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(profile.size());
 			double[][] ndata = { xpoints.asArray(), angles.asArray() };
 			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);

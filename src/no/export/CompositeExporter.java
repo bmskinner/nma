@@ -13,8 +13,8 @@ import ij.process.ImageProcessor;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-import no.collections.INuclearCollection;
-import no.nuclei.INuclearFunctions;
+import no.collections.NucleusCollection;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 import no.utility.Utils;
 
@@ -22,7 +22,7 @@ public class CompositeExporter {
 
 	private static Logger logger;
 
-	public static boolean run(INuclearCollection collection){
+	public static boolean run(NucleusCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "CompositeExporter");
 
@@ -48,7 +48,7 @@ public class CompositeExporter {
 			ImageProcessor finalProcessor = finalImage.getProcessor();
 			finalProcessor.setBackgroundValue(0);
 
-			for(INuclearFunctions n : collection.getNuclei()){
+			for(Nucleus n : collection.getNuclei()){
 
 				String path = n.getAnnotatedImagePath();
 

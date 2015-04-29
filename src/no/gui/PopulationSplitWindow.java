@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.collections.INuclearCollection;
 import no.collections.NucleusCollection;
+import no.collections.RoundNucleusCollection;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 
@@ -17,10 +17,10 @@ import ij.io.OpenDialog;
 public class PopulationSplitWindow {
 
 	private GenericDialog gd;
-	private List<INuclearCollection> collections = new ArrayList<INuclearCollection>(0);
+	private List<NucleusCollection> collections = new ArrayList<NucleusCollection>(0);
 //	private MainWindow mw;
 
-	public PopulationSplitWindow(List<INuclearCollection> collections){
+	public PopulationSplitWindow(List<NucleusCollection> collections){
 		this.collections = collections;
 //		this.mw = mw;
 //		gd = new GenericDialog("Finish analysis?");
@@ -43,11 +43,11 @@ public class PopulationSplitWindow {
 //		
 //	}
 	
-	public INuclearCollection getCollection(){
+	public NucleusCollection getCollection(){
 		gd = new GenericDialog("Select nuclear population");
 		
 		List<String> items = new ArrayList<String>(0);
-		for(INuclearCollection collection : this.collections){
+		for(NucleusCollection collection : this.collections){
 			items.add(collection.getType());
 		}
 		
@@ -57,12 +57,12 @@ public class PopulationSplitWindow {
 
 	    
 	    String collectionType = gd.getNextChoice();
-	    for(INuclearCollection collection : this.collections){
+	    for(NucleusCollection collection : this.collections){
 			if(collection.getType().equals(collectionType)){
 				return collection;
 			}
 		}
-	    return new NucleusCollection();
+	    return new RoundNucleusCollection();
 	}
 	
 	public File addMappingFile(){

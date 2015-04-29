@@ -34,7 +34,7 @@ public class ShellCreator {
 
 	ImageStack image;
 	Roi originalRoi;
-	INuclearFunctions nucleus;
+	Nucleus nucleus;
 
 	double[] dapiDensities;
 	double[] signalProportions;
@@ -47,7 +47,7 @@ public class ShellCreator {
 	*
 	* @param nucleus the nucleus to analyse
 	*/
-	public ShellCreator(INuclearFunctions n){
+	public ShellCreator(Nucleus n){
 
 		FloatPolygon polygon = Utils.createPolygon(n);
 		originalRoi = new PolygonRoi(polygon, Roi.POLYGON);
@@ -192,7 +192,7 @@ public class ShellCreator {
 
         String outPath = nucleus.getNucleusFolder().getAbsolutePath()+
                         File.separator+
-                        Nucleus.IMAGE_PREFIX+
+                        RoundNucleus.IMAGE_PREFIX+
                         nucleus.getNucleusNumber()+
                         ".shells.tiff";
         IJ.saveAsTiff(shellImage, outPath);

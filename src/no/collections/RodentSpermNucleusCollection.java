@@ -152,7 +152,7 @@ public class RodentSpermNucleusCollection
     // export the profiles for each nucleus
     for(int i=0; i<this.getNucleusCount();i++){
 
-      INuclearFunctions n = (INuclearFunctions)this.getNucleus(i);
+      Nucleus n = (Nucleus)this.getNucleus(i);
 
       outLine.append(paths[i]      +"\t"+
                       n.getPosition() +"\t"+

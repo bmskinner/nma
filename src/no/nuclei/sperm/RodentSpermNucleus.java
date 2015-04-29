@@ -26,7 +26,7 @@ extends SpermNucleus
 	private List<NucleusBorderPoint> humpRoi;
 
 	// Requires a sperm nucleus object to construct from
-	public RodentSpermNucleus(Nucleus n){
+	public RodentSpermNucleus(RoundNucleus n){
 		super(n);
 		// this.findPointsAroundBorder();
 	}

@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Set;
 
 import no.collections.AsymmetricNucleusCollection;
-import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
 import no.components.XYPoint;
 import no.export.TableExporter;
 import no.imports.ImageImporter;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 import no.utility.Utils;
 
@@ -20,7 +20,7 @@ public class SignalAnalysis {
 
 	private static Logger logger;
 
-	public static boolean run(INuclearCollection collection){
+	public static boolean run(NucleusCollection collection){
 		
 		logger = new Logger(collection.getDebugFile(), "SignalAnalysis");
 
@@ -31,7 +31,7 @@ public class SignalAnalysis {
 
 		try {
 			logger.log("Exporting distance matrix...");
-			for(INuclearFunctions n : collection.getNuclei()){
+			for(Nucleus n : collection.getNuclei()){
 				n.exportSignalDistanceMatrix();
 				
 				// if asymmetric, calculate the angle from the tail
@@ -58,7 +58,7 @@ public class SignalAnalysis {
 		return true;
 	}
 
-	private static void exportSignalStats(INuclearCollection collection){
+	private static void exportSignalStats(NucleusCollection collection){
 
 		logger.log("Exporting signal stats...");
 		for(int channel : collection.getSignalChannels()){
@@ -89,7 +89,7 @@ public class SignalAnalysis {
 		logger.log("Signal stats exported");
 	}
 
-	public static void exportDistancesBetweenSingleSignals(INuclearCollection collection){
+	public static void exportDistancesBetweenSingleSignals(NucleusCollection collection){
 
 		logger.log("Exporting distance between signals...");
 		TableExporter tableExporter = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
@@ -103,7 +103,7 @@ public class SignalAnalysis {
 		tableExporter.addColumnHeading("NORMALISED_DISTANCE");
 		tableExporter.addColumnHeading("PATH");
 
-		for(INuclearFunctions n : collection.getNuclei()){
+		for(Nucleus n : collection.getNuclei()){
 
 			if(	n.getSignalCount(ImageImporter.FIRST_SIGNAL_CHANNEL)  ==1 && 
 					n.getSignalCount(ImageImporter.FIRST_SIGNAL_CHANNEL+1)==1){

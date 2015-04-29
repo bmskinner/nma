@@ -8,7 +8,7 @@ import java.util.List;
 
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Utils;
 
 /**
@@ -69,7 +69,7 @@ public class SegmentFitter {
 	 * Run the segment fitter on the given nucleus
 	 * @param n the nucleus to fit to the current median profile
 	 */
-	public void fit(INuclearFunctions n){
+	public void fit(Nucleus n){
 		if(n==null){
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
@@ -116,7 +116,7 @@ public class SegmentFitter {
 	 * @param n the nucleus to recombine
 	 * @return a profile
 	 */
-	public Profile recombine(INuclearFunctions n){
+	public Profile recombine(Nucleus n){
 		if(n==null){
 			throw new IllegalArgumentException("Test nucleus is null");
 		}

@@ -27,7 +27,7 @@ public class SpermNucleus
   * @param n the Nucleus to construct from
   * @return a SpermNucleus
   */
-  public SpermNucleus(Nucleus n){
+  public SpermNucleus(RoundNucleus n){
   	super(n);
   }
 

@@ -6,13 +6,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileAggregate;
 import no.components.ProfileCollection;
 import no.export.TableExporter;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 
 /**
@@ -25,7 +25,7 @@ public class MorphologyAnalysis {
 	
 	private static Logger logger;
 	
-	public static boolean run(INuclearCollection collection){
+	public static boolean run(NucleusCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
 		try{
@@ -69,7 +69,7 @@ public class MorphologyAnalysis {
 
 	}
 
-	private static void runProfiler(INuclearCollection collection, String pointType){
+	private static void runProfiler(NucleusCollection collection, String pointType){
 				
 		// use the median profile of this aggregate to find the tail point
 		collection.findTailIndexInMedianCurve();
@@ -94,7 +94,7 @@ public class MorphologyAnalysis {
 
 	}
 	
-	private static void initialiseProfileCollection(INuclearCollection collection){
+	private static void initialiseProfileCollection(NucleusCollection collection){
 		ProfileCollection pc = collection.getProfileCollection();
 		
 		// aggregates
@@ -113,7 +113,7 @@ public class MorphologyAnalysis {
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
-	public static boolean reapplyProfiles(INuclearCollection collection, INuclearCollection sourceCollection){
+	public static boolean reapplyProfiles(NucleusCollection collection, NucleusCollection sourceCollection){
 		
 		logger.log("Applying existing segmentation profile to population...");
 		
@@ -150,12 +150,12 @@ public class MorphologyAnalysis {
 	 * @param pointType
 	 * @param length
 	 */
-	private static void createProfileAggregateFromPoint(INuclearCollection collection, String pointType, int length){
+	private static void createProfileAggregateFromPoint(NucleusCollection collection, String pointType, int length){
 
 		ProfileAggregate profileAggregate = new ProfileAggregate(length);
 		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
 		
-		for(INuclearFunctions n : collection.getNuclei()){
+		for(Nucleus n : collection.getNuclei()){
 			profileAggregate.addValues(n.getAngleProfile(pointType));
 		}
 
@@ -167,12 +167,12 @@ public class MorphologyAnalysis {
 		collection.getProfileCollection().addProfile(pointType+"75", q75);
 	}
 
-	private static void createProfileAggregateFromPoint(INuclearCollection collection, String pointType){
+	private static void createProfileAggregateFromPoint(NucleusCollection collection, String pointType){
 
 		ProfileAggregate profileAggregate = new ProfileAggregate((int)collection.getMedianArrayLength());
 		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
 
-		for(INuclearFunctions n : collection.getNuclei()){
+		for(Nucleus n : collection.getNuclei()){
 			profileAggregate.addValues(n.getAngleProfile(pointType));
 		}
 
@@ -187,7 +187,7 @@ public class MorphologyAnalysis {
 
 	}
 
-	private static void createProfileAggregates(INuclearCollection collection){
+	private static void createProfileAggregates(NucleusCollection collection){
 		try{
 			for( String pointType : collection.getProfileCollection().getProfileKeys() ){
 				createProfileAggregateFromPoint(collection, pointType);   
@@ -198,7 +198,7 @@ public class MorphologyAnalysis {
 		}
 	}
 	
-	private static void exportProfiles(INuclearCollection collection){
+	private static void exportProfiles(NucleusCollection collection){
 
 		ProfileCollection pc = collection.getProfileCollection();
 		// get the profile plots created
@@ -211,7 +211,7 @@ public class MorphologyAnalysis {
 //		pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
 	}
 
-	private static double compareProfilesToMedian(INuclearCollection collection, String pointType){
+	private static double compareProfilesToMedian(NucleusCollection collection, String pointType){
 		double[] scores = collection.getDifferencesToMedianFromPoint(pointType);
 		double result = 0;
 		for(double s : scores){
@@ -220,7 +220,7 @@ public class MorphologyAnalysis {
 		return result;
 	}
 	
-	private static void runSegmentation(INuclearCollection collection, String pointType){
+	private static void runSegmentation(NucleusCollection collection, String pointType){
 		logger.log("Beginning segmentation...");
 		try{	
 			createSegments(collection, pointType);
@@ -243,7 +243,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void createSegments(INuclearCollection collection, String pointType){
+	private static void createSegments(NucleusCollection collection, String pointType){
 		// get the segments within the median curve
 		ProfileCollection pc = collection.getProfileCollection();
 
@@ -262,7 +262,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void assignSegments(INuclearCollection collection, String pointType){
+	private static void assignSegments(NucleusCollection collection, String pointType){
 
 		logger.log("Assigning segments to nuclei...");
 		
@@ -271,7 +271,7 @@ public class MorphologyAnalysis {
 		// find the corresponding point in each Nucleus
 		Profile medianToCompare = pc.getProfile(pointType);
 		for(int i= 0; i<collection.getNucleusCount();i++){ 
-			INuclearFunctions n = collection.getNucleus(i);
+			Nucleus n = collection.getNucleus(i);
 			
 			// remove any existing segments
 			n.clearSegments();
@@ -311,7 +311,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void reviseSegments(INuclearCollection collection, String pointType){
+	private static void reviseSegments(NucleusCollection collection, String pointType){
 		logger.log("Refining segment assignments...");
 		
 		ProfileCollection pc = collection.getProfileCollection();
@@ -327,7 +327,7 @@ public class MorphologyAnalysis {
 		SegmentFitter fitter = new SegmentFitter(pc.getProfile(pointType), segments);
 		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
-		for(INuclearFunctions n : collection.getNuclei()){ 
+		for(Nucleus n : collection.getNuclei()){ 
 			fitter.fit(n);
 
 			// recombine the segments at the lengths of the median profile segments
@@ -346,7 +346,7 @@ public class MorphologyAnalysis {
 		logger.log("Segment assignments refined");
 	}
 	
-	private static void applySegmentsToOtherPointTypes(INuclearCollection collection, String pointType){
+	private static void applySegmentsToOtherPointTypes(NucleusCollection collection, String pointType){
 
 		ProfileCollection pc = collection.getProfileCollection();
 		
@@ -357,7 +357,7 @@ public class MorphologyAnalysis {
 		pc.addSegments(collection.getOrientationPoint(), pointType, offset);
 	}
 
-	private static void drawProfileCollection(INuclearCollection collection, String pointType){
+	private static void drawProfileCollection(NucleusCollection collection, String pointType){
 
 		ProfileCollection pc = collection.getFrankenCollection();
 
@@ -373,7 +373,7 @@ public class MorphologyAnalysis {
 
 	}
 	
-	private static void exportVariabilityRegions(INuclearCollection collection, String pointType){
+	private static void exportVariabilityRegions(NucleusCollection collection, String pointType){
 		
 		ProfileCollection pc = collection.getFrankenCollection();
 		
@@ -399,7 +399,7 @@ public class MorphologyAnalysis {
 		}
 
 		for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-			INuclearFunctions n = collection.getNucleus(i);
+			Nucleus n = collection.getNucleus(i);
 			tableExport.addRow("ID",		n.getPath()+"-"+n.getNucleusNumber());
 			tableExport.addRow("AREA",		n.getArea());
 			tableExport.addRow("PERIMETER",n.getPerimeter());
@@ -419,11 +419,11 @@ public class MorphologyAnalysis {
 		tableExport.export("log.variability_regions."+collection.getType());
 	}
 
-	private static void exportSegments(INuclearCollection collection, String pointType){
+	private static void exportSegments(NucleusCollection collection, String pointType){
 		
 		logger.log("Exporting segments...");
 		// export the individual segment files for each nucleus
-		for(INuclearFunctions n : collection.getNuclei()){
+		for(Nucleus n : collection.getNuclei()){
 			n.exportSegments();
 		}
 
@@ -441,7 +441,7 @@ public class MorphologyAnalysis {
 					tableExport.addColumnHeading(seg.getSegmentType());
 				}
 
-				for(INuclearFunctions n : collection.getNuclei()){
+				for(Nucleus n : collection.getNuclei()){
 
 					tableExport.addRow("PATH", n.getPath());
 					tableExport.addRow("POSITION", n.getPosition());
@@ -460,7 +460,7 @@ public class MorphologyAnalysis {
 		}
 	}
 
-	private static void exportClusteringScript(INuclearCollection collection){
+	private static void exportClusteringScript(NucleusCollection collection){
 
 		StringBuilder outLine = new StringBuilder();
 

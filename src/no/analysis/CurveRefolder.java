@@ -18,10 +18,10 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
-import no.nuclei.INuclearFunctions;
 import no.nuclei.Nucleus;
+import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
-import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import no.utility.*;
 import no.components.*;
 
@@ -32,7 +32,7 @@ public class CurveRefolder{
 	private Profile q25;
 	private Profile q75;
 
-	private INuclearFunctions refoldNucleus;
+	private Nucleus refoldNucleus;
 //	private Nucleus testNucleus;
 
 	private Plot nucleusPlot;
@@ -56,14 +56,14 @@ public class CurveRefolder{
 
 	private double plotLimit;
 	
-	public static void run(INuclearCollection collection, Class<?> nucleusClass, String refoldMode){
+	public static void run(NucleusCollection collection, Class<?> nucleusClass, String refoldMode){
 
 	    try{ 
 
 	      // make an entirely new nucleus to play with
-	      INuclearFunctions n = (INuclearFunctions)collection.getNucleusMostSimilarToMedian("tail");
-	      Constructor<?> nucleusConstructor = nucleusClass.getConstructor(new Class[]{Nucleus.class});
-	      INuclearFunctions refoldCandidate  = (INuclearFunctions) nucleusConstructor.newInstance(n);
+	      Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian("tail");
+	      Constructor<?> nucleusConstructor = nucleusClass.getConstructor(new Class[]{RoundNucleus.class});
+	      Nucleus refoldCandidate  = (Nucleus) nucleusConstructor.newInstance(n);
 	    
 	      if(refoldCandidate==null){
 	        throw new Exception("Null reference to nucleus refold candidate");
@@ -111,7 +111,7 @@ public class CurveRefolder{
 	    } 
 	  }
 
-	public CurveRefolder(Profile target, Profile q25, Profile q75, INuclearFunctions n){
+	public CurveRefolder(Profile target, Profile q25, Profile q75, Nucleus n){
 		this.targetCurve = target;
 		this.q25 = q25.interpolate(n.getLength());
 		this.q75 = q75.interpolate(n.getLength());
@@ -395,7 +395,7 @@ public class CurveRefolder{
 		
 		for(int i=0; i<refoldNucleus.getLength(); i++){
 
-			Nucleus testNucleus = new Nucleus( (Nucleus)refoldNucleus);
+			RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
 
 			double score = testNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
 			// IJ.log("    Internal score: "+(int)score);
@@ -461,7 +461,7 @@ public class CurveRefolder{
 		double distanceFromZero = 180;
 
 		// get the angle from the tail to the vertical axis line
-		double tailAngle = Nucleus.findAngleBetweenXYPoints( bottomPoint, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
+		double tailAngle = RoundNucleus.findAngleBetweenXYPoints( bottomPoint, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
 			if(bottomPoint.getX()<0){
 				tailAngle = 360-tailAngle; // correct for measuring the smallest angle
 			}
@@ -502,7 +502,7 @@ public class CurveRefolder{
 
 			XYPoint p = refoldNucleus.getPoint(i);
 			double distance = p.getLengthTo(refoldNucleus.getCentreOfMass());
-			double oldAngle = Nucleus.findAngleBetweenXYPoints( p, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
+			double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
 				oldAngle = 360-oldAngle;
 			}
@@ -519,11 +519,11 @@ public class CurveRefolder{
 		Using a list of signal locations, draw on
 		the consensus plot.
 	*/
-	public void addSignalsToConsensus(INuclearCollection collection){
+	public void addSignalsToConsensus(NucleusCollection collection){
 
 		for(int i= 0; i<collection.getNuclei().size();i++){ // for each roi
 
-			INuclearFunctions n = collection.getNuclei().get(i);
+			Nucleus n = collection.getNuclei().get(i);
 
 			ImageProcessor plotIP = nucleusPlot.getImagePlus().getProcessor();
 			Calibration cal = nucleusPlot.getImagePlus().getCalibration();
@@ -558,7 +558,7 @@ public class CurveRefolder{
 						double signalDistance = distanceToBorder * fractionalDistance;
 
 						if(angle==0){ // no angle was calculated, so spread the points based on distance from CoM
-							angle = signalCount == Nucleus.RED_CHANNEL ? 360 * fractionalDistance : 360 * fractionalDistance + 180;
+							angle = signalCount == RoundNucleus.RED_CHANNEL ? 360 * fractionalDistance : 360 * fractionalDistance + 180;
 						}
 
 						// adjust X and Y because we are now counting angles from the vertical axis
@@ -617,7 +617,7 @@ public class CurveRefolder{
 		for(int i=0;i<refoldNucleus.getLength();i++){
 			XYPoint p = refoldNucleus.getBorderPoint(i);
 			double distance = p.getLengthTo(refoldNucleus.getCentreOfMass());
-			double pAngle = Nucleus.findAngleBetweenXYPoints( p, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
+			double pAngle = RoundNucleus.findAngleBetweenXYPoints( p, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
 				pAngle = 360-pAngle;
 			}
@@ -637,7 +637,7 @@ public class CurveRefolder{
 		-----------------------
 	*/
 
-	public void exportProfileOfRefoldedImage(INuclearCollection collection){
+	public void exportProfileOfRefoldedImage(NucleusCollection collection){
 	 
 		String logFile = collection.getLogFileName("logConsensusNucleus");
 
@@ -666,7 +666,7 @@ public class CurveRefolder{
 		IJ.append( outLine.toString(), logFile);
 	}
 
-	public void exportImage(INuclearCollection collection){
+	public void exportImage(NucleusCollection collection){
 		ImagePlus plot = nucleusPlot.getImagePlus();
 		Calibration cal = plot.getCalibration();
 		cal.setUnit("pixels");

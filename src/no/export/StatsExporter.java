@@ -2,16 +2,16 @@ package no.export;
 
 import java.io.File;
 
-import no.collections.INuclearCollection;
+import no.collections.NucleusCollection;
 import no.components.Profile;
-import no.nuclei.INuclearFunctions;
+import no.nuclei.Nucleus;
 import no.utility.Logger;
 
 public class StatsExporter {
 	
 	private static Logger logger;
 
-	public static boolean run(INuclearCollection collection){
+	public static boolean run(NucleusCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "StatsExporter");
 		try{
@@ -26,7 +26,7 @@ public class StatsExporter {
 		return true;
 	}
 	
-	public static void exportNuclearStats(INuclearCollection collection, String filename){
+	public static void exportNuclearStats(NucleusCollection collection, String filename){
 
 		TableExporter nuclearStats = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		nuclearStats.addColumn("AREA",                       collection.getAreas());
@@ -41,20 +41,20 @@ public class StatsExporter {
 		nuclearStats.export(filename+"."+collection.getType());
 	}
 
-	public static void exportImagePaths(INuclearCollection collection, String filename){
+	public static void exportImagePaths(NucleusCollection collection, String filename){
 		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		logger.addColumn("PATH",     collection.getCleanNucleusPaths());
 		logger.addColumn("POSITION", collection.getPositions());
 		logger.export(filename+"."+collection.getType());
 	}
 	
-	public static void exportAngleProfiles(INuclearCollection collection){
-		for(INuclearFunctions n : collection.getNuclei()){ // for each roi
+	public static void exportAngleProfiles(NucleusCollection collection){
+		for(Nucleus n : collection.getNuclei()){ // for each roi
 			n.exportAngleProfile();
 		}
 	}
 
-	public static void exportMediansOfProfile(INuclearCollection collection, String filename){
+	public static void exportMediansOfProfile(NucleusCollection collection, String filename){
 
 		Profile normalisedMedian = collection.getProfileCollection().getProfile("tail");
 		Profile interpolatedMedian = normalisedMedian.interpolate((int)collection.getMedianNuclearPerimeter());
