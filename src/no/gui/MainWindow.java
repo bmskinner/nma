@@ -57,6 +57,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.XYDataset;
 
 import javax.swing.JTabbedPane;
@@ -71,7 +73,7 @@ public class MainWindow extends JFrame {
 	private JTextArea textArea = new JTextArea();;
 	private JLabel lblStatusLine = new JLabel("No analysis open");
 	private final JPanel panelAggregates = new JPanel();
-	private JTable table;
+	private JTable tablePopulationStats;
 	private final JPanel panelGeneralData = new JPanel();
 	
 	private final JPanel panelPopulations = new JPanel();
@@ -80,6 +82,7 @@ public class MainWindow extends JFrame {
 	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
 	private ChartPanel consensusChartPanel;
+	private ChartPanel boxplotChartPanel;
 	
 	private HashMap<String, NucleusCollection> analysisPopulations = new HashMap<String, NucleusCollection>();;
 
@@ -146,7 +149,6 @@ public class MainWindow extends JFrame {
 			JPanel panelFooter = new JPanel();
 			contentPane.add(panelFooter, BorderLayout.SOUTH);
 			
-//		JLabel lblStatusLine = new JLabel("No analysis open");
 			panelFooter.add(lblStatusLine);
 			contentPane.add(panelGeneralData, BorderLayout.CENTER);
 			panelGeneralData.setLayout(new BoxLayout(panelGeneralData, BoxLayout.Y_AXIS));
@@ -174,19 +176,6 @@ public class MainWindow extends JFrame {
 			
 			panelPopulations.add(populationList);
 			
-			JPanel panelStats = new JPanel();
-			panel.add(panelStats);
-			panelStats.setLayout(new BoxLayout(panelStats, BoxLayout.Y_AXIS));
-			
-			JLabel lblPopulationStatistics = new JLabel("Statistics");
-			lblPopulationStatistics.setAlignmentX(Component.CENTER_ALIGNMENT);
-			lblPopulationStatistics.setHorizontalAlignment(SwingConstants.CENTER);
-			panelStats.add(lblPopulationStatistics);
-			
-			table = new JTable();
-			table.setEnabled(false);
-			table.setModel(DatasetCreator.createStatsTable(null));
-			panelStats.add(table);
 			panelGeneralData.add(panelAggregates);
 			
 			panelAggregates.setLayout(new BoxLayout(panelAggregates, BoxLayout.Y_AXIS));
@@ -227,15 +216,37 @@ public class MainWindow extends JFrame {
 					null, null, null);
 			XYPlot consensusPlot = consensusChart.getXYPlot();
 			consensusPlot.setBackgroundPaint(Color.WHITE);
+			consensusPlot.getDomainAxis().setVisible(false);
+			consensusPlot.getRangeAxis().setVisible(false);
+			
 			consensusChartPanel = new ChartPanel(consensusChart);
-			tabbedPane.addTab("Consensus", null, consensusChartPanel, null);
+			panel.add(consensusChartPanel);
+			
+			//---------------
+			// Create the general stats page
+			//---------------
+			
+			JPanel panelGeneralStats = new JPanel();
+			tabbedPane.addTab("Basic statistics", null, panelGeneralStats, null);
+			panelGeneralStats.setLayout(new BorderLayout(0, 0));
+			
+			tablePopulationStats = new JTable();
+			panelGeneralStats.add(tablePopulationStats, BorderLayout.NORTH);
+			tablePopulationStats.setEnabled(false);
+			tablePopulationStats.setModel(DatasetCreator.createStatsTable(null));
+			
+			//---------------
+			// Create the boxplot chart
+			//---------------
+			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+			boxplotChartPanel = new ChartPanel(boxplotChart);
+			tabbedPane.addTab("Boxplots", null, boxplotChartPanel, null);
 			
 
 		} catch (Exception e) {
 			IJ.log("Error in Main");
 			e.printStackTrace();
 		}
-//		panelAggregates.setVisible(true);
 		
 	}
 	
@@ -298,7 +309,6 @@ public class MainWindow extends JFrame {
 		Thread thr = new Thread() {
 			public void run() {
 				lblStatusLine.setText("New analysis in progress");
-//				panelAggregates.remove(ic);
 				
 				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
 				analysisCreator.run();
@@ -336,13 +346,14 @@ public class MainWindow extends JFrame {
 		updateStatsPanel(collection);
 		updateProfileImage(collection);
 		updateConsensusImage(collection);
+		updateBoxplots(collection);
 	}
 	
 	public void updateStatsPanel(NucleusCollection collection){
 		// format the numbers and make into a tablemodel
 		lblStatusLine.setText("Showing: "+collection.getOutputFolderName()+" - "+collection.getFolder()+" - "+collection.getType());
 		TableModel model = DatasetCreator.createStatsTable(collection);
-		table.setModel(model);
+		tablePopulationStats.setModel(model);
 	}
 	
 	public JFreeChart makeProfileChart(XYDataset ds){
@@ -404,6 +415,8 @@ public class MainWindow extends JFrame {
 					null, null, null);
 			XYPlot consensusPlot = consensusChart.getXYPlot();
 			consensusPlot.setBackgroundPaint(Color.WHITE);
+			consensusPlot.getDomainAxis().setVisible(false);
+			consensusPlot.getRangeAxis().setVisible(false);
 			consensusChartPanel.setChart(consensusChart);
 			
 		} else {
@@ -425,6 +438,9 @@ public class MainWindow extends JFrame {
 			XYPlot plot = chart.getXYPlot();
 			plot.getDomainAxis().setRange(-max,max);
 			plot.getRangeAxis().setRange(-max,max);
+			
+			plot.getDomainAxis().setVisible(false);
+			plot.getRangeAxis().setVisible(false);
 
 			plot.setBackgroundPaint(Color.WHITE);
 			plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
@@ -447,6 +463,15 @@ public class MainWindow extends JFrame {
 			}	
 			consensusChartPanel.setChart(chart);
 		}
+	}
+	
+	public void updateBoxplots(NucleusCollection collection){
+		
+		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+		list.add(collection);
+		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createAreaBoxplotDataset(list);
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		boxplotChartPanel.setChart(boxplotChart);
 	}
 	
 	public void updatePopulationList(){

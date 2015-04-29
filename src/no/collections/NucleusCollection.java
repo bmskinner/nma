@@ -5,6 +5,7 @@ import no.nuclei.Nucleus;
 import java.io.File;
 import java.util.List;
 
+import no.components.AnalysisOptions;
 import no.components.NuclearSignal;
 import no.components.ProfileCollection;
 
@@ -35,6 +36,9 @@ public interface NucleusCollection
 
 	
 	public Nucleus getConsensusNucleus();
+	
+	public AnalysisOptions getAnalysisOptions();
+	public void setAnalysisOptions(AnalysisOptions analysisOptions);
 	/*
 		-----------------------
 		Getters for aggregate stats

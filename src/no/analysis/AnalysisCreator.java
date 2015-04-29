@@ -20,6 +20,7 @@ import java.util.*;
 
 import no.nuclei.*;
 import no.collections.*;
+import no.components.AnalysisOptions;
 import no.export.CompositeExporter;
 import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
@@ -39,7 +40,8 @@ public class AnalysisCreator {
 	private Logger logger;
 //	debugFile;
 	
-	private AnalysisSetup analysisOptions;
+	private AnalysisSetup analysisSetup; // make the gui
+	private AnalysisOptions analysisOptions; // store the options
 	private int mappingCount = 0;
 
 	private Date startTime; // the time the analysis began
@@ -83,8 +85,10 @@ public class AnalysisCreator {
 	  
   public void initialise(){
 
-	  analysisOptions = new AnalysisSetup();
-	  if(analysisOptions.run()){
+	  analysisSetup = new AnalysisSetup();
+	  if(analysisSetup.run()){
+		  
+		  this.analysisOptions = analysisSetup.getOptions();
 		  
 		  mw.log("Directory: "+analysisOptions.getFolder().getName());
 
@@ -187,6 +191,19 @@ public class AnalysisCreator {
 
   private void  setDetectionParameters(NucleusDetector detector){
 	  logger.log("Setting detection parameters...", Logger.DEBUG);
+	  
+	  logger.log("Min size: "+analysisOptions.getMinNucleusSize(), Logger.DEBUG);
+	  logger.log("Max size: "+analysisOptions.getMaxNucleusSize(), Logger.DEBUG);
+	  logger.log("Min circ: "+analysisOptions.getMinNucleusCirc(), Logger.DEBUG);
+	  logger.log("Max circ: "+analysisOptions.getMaxNucleusCirc(), Logger.DEBUG);
+	  logger.log("Nucleus threshold: "+analysisOptions.getNucleusThreshold(), Logger.DEBUG);
+
+	  logger.log("Profile window: "+analysisOptions.getAngleProfileWindowSize(), Logger.DEBUG);
+	  
+	  logger.log("Signal threshold: "+analysisOptions.getSignalThreshold(), Logger.DEBUG);
+	  logger.log("Signal min: "+analysisOptions.getMinSignalSize(), Logger.DEBUG);
+	  logger.log("Signal max: "+analysisOptions.getMaxSignalFraction(), Logger.DEBUG);
+	  
 	  detector.setMinNucleusSize(analysisOptions.getMinNucleusSize()); 
 	  detector.setMaxNucleusSize(analysisOptions.getMaxNucleusSize());
 	  detector.setThreshold(analysisOptions.getNucleusThreshold());
@@ -257,6 +274,8 @@ public class AnalysisCreator {
 	  logger.log("Beginning population analysis");
 
 	  for(NucleusCollection r : this.nuclearPopulations){
+		  
+		  r.setAnalysisOptions(analysisOptions);
 
 		  File folder = r.getFolder();
 		  //		  mw.log(spacerString);
@@ -387,6 +406,8 @@ public class AnalysisCreator {
 		  ArrayList<NucleusCollection> signalPopulations = dividePopulationBySignals(r);
 		  
 		  for(NucleusCollection p : signalPopulations){
+			  
+			  p.setAnalysisOptions(analysisOptions);
 
 			  nucleusCounts.put(p.getType(), p.getNucleusCount());
 
