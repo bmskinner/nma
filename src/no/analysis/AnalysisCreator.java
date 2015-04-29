@@ -365,7 +365,13 @@ public class AnalysisCreator {
 
 		  // refold the median consensus nucleus
 		  if(analysisOptions.refoldNucleus()){
-			  CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+			  mw.logc("Refolding profile...");
+			  ok = CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
 		  }
 
 		  // export the population to a save file for later

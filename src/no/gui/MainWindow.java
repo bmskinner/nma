@@ -1,11 +1,7 @@
 package no.gui;
 
 import ij.IJ;
-import ij.ImagePlus;
-import ij.gui.ImageCanvas;
-import ij.gui.Plot;
 import ij.io.OpenDialog;
-import ij.process.ByteProcessor;
 
 import java.awt.BorderLayout;
 
@@ -14,7 +10,6 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
 import javax.swing.JLabel;
@@ -23,9 +18,6 @@ import javax.swing.JButton;
 import no.analysis.AnalysisCreator;
 import no.analysis.ProfileSegmenter;
 import no.collections.NucleusCollection;
-import no.components.NucleusBorderSegment;
-import no.components.Profile;
-import no.components.ProfileCollection;
 import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
 import no.utility.MappingFileParser;
@@ -38,7 +30,6 @@ import javax.swing.JTextArea;
 import java.awt.SystemColor;
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +47,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
-import java.awt.Paint;
 
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
@@ -67,10 +57,9 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
+
+import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame {
 
@@ -87,10 +76,10 @@ public class MainWindow extends JFrame {
 	
 	private final JPanel panelPopulations = new JPanel();
 	private JList<String> populationList;
-	
-	private ImageCanvas ic = new ImageCanvas(new ImagePlus(null, new ByteProcessor(600,400)));
-	
-	private ChartPanel cp;
+		
+	private ChartPanel profileChartPanel;
+	private ChartPanel frankenChartPanel;
+	private ChartPanel consensusChartPanel;
 	
 	private HashMap<String, NucleusCollection> analysisPopulations = new HashMap<String, NucleusCollection>();;
 
@@ -102,7 +91,7 @@ public class MainWindow extends JFrame {
 		try {
 			setTitle("Nuclear Morphology Analysis");
 			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-			setBounds(100, 100, 992, 514);
+			setBounds(100, 100, 1012, 604);
 			contentPane = new JPanel();
 			contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 			contentPane.setLayout(new BorderLayout(0, 0));
@@ -174,13 +163,14 @@ public class MainWindow extends JFrame {
 			
 
 			DefaultListModel<String> model = new DefaultListModel<String>();
-			model.addElement("No populations");
+			model.addElement("No populations");;
+			
 			populationList = new JList<String>(model);
-			populationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);;
+			populationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			
 			ListSelectionModel listSelectionModel = populationList.getSelectionModel();
 			listSelectionModel.addListSelectionListener(
-			                        new ListSelectionHandler());
+                    new ListSelectionHandler());
 			
 			panelPopulations.add(populationList);
 			
@@ -195,28 +185,52 @@ public class MainWindow extends JFrame {
 			
 			table = new JTable();
 			table.setEnabled(false);
-			table.setModel(this.createStatsPanel());
+			table.setModel(DatasetCreator.createStatsTable(null));
 			panelStats.add(table);
-			
-			JLabel lblAggregates = new JLabel("Segmented Profile");
-			lblAggregates.setAlignmentX(Component.CENTER_ALIGNMENT);
 			panelGeneralData.add(panelAggregates);
 			
 			panelAggregates.setLayout(new BoxLayout(panelAggregates, BoxLayout.Y_AXIS));
-			panelAggregates.add(lblAggregates);
 			
+			JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			panelAggregates.add(tabbedPane);
 			
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
+			//---------------
+			// Create the regular profile chart
+			//---------------
+			JFreeChart profileChart = ChartFactory.createXYLineChart(null,
 		            "Position", "Angle", null);
-			XYPlot plot = chart.getXYPlot();
+			XYPlot plot = profileChart.getXYPlot();
 			plot.getDomainAxis().setRange(0,100);
 			plot.getRangeAxis().setRange(0,360);
 			plot.setBackgroundPaint(Color.WHITE);
-
-			cp = new ChartPanel(chart);
 			
-//			panelAggregates.add(ic);
-			panelAggregates.add(cp);
+			profileChartPanel = new ChartPanel(profileChart);
+			tabbedPane.addTab("Profile", null, profileChartPanel, null);
+			
+			//---------------
+			// Create the franken profile chart
+			//---------------
+			JFreeChart frankenChart = ChartFactory.createXYLineChart(null,
+					"Position", "Angle", null);
+			XYPlot frankenPlot = frankenChart.getXYPlot();
+			frankenPlot.getDomainAxis().setRange(0,100);
+			frankenPlot.getRangeAxis().setRange(0,360);
+			frankenPlot.setBackgroundPaint(Color.WHITE);
+
+			frankenChartPanel = new ChartPanel(frankenChart);
+			tabbedPane.addTab("FrankenProfile", null, frankenChartPanel, null);
+			
+			//---------------
+			// Create the consensus chart
+			//---------------
+			JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
+					null, null, null);
+			XYPlot consensusPlot = consensusChart.getXYPlot();
+			consensusPlot.setBackgroundPaint(Color.WHITE);
+			consensusChartPanel = new ChartPanel(consensusChart);
+			tabbedPane.addTab("Consensus", null, consensusChartPanel, null);
+			
+
 		} catch (Exception e) {
 			IJ.log("Error in Main");
 			e.printStackTrace();
@@ -272,7 +286,7 @@ public class MainWindow extends JFrame {
 			}
 			this.analysisPopulations.put(remapCollection.getOutputFolderName()+" - "+remapCollection.getType()+" - "+remapCollection.getNucleusCount()+" nuclei", remapCollection);
 			log("Created subcollection from mapping file");
-			updateStatsPanel(remapCollection);
+			updatePanels(remapCollection);
 			updatePopulationList();
 		} catch(Exception e){
 			
@@ -291,8 +305,7 @@ public class MainWindow extends JFrame {
 				// post-analysis displays: make a new class eventually to handle gui? Or do it here
 
 				List<NucleusCollection> result = analysisCreator.getPopulations();
-				updateStatsPanel(result.get(0));
-				updateProfileImage(result.get(0));
+				updatePanels(result.get(0));
 				
 				for(NucleusCollection c : result){
 					String key = c.getOutputFolderName()+" - "+c.getType()+" - "+c.getNucleusCount()+" nuclei";
@@ -315,69 +328,107 @@ public class MainWindow extends JFrame {
 		MainWindow.this.analysisPopulations.put(key, collection);
 		log("Opened collection: "+collection.getType());
 		
-		updateStatsPanel(collection);
-		updateProfileImage(collection);
+		updatePanels(collection);
 		updatePopulationList();
 	}
 	
-	private TableModel createStatsPanel(){
-		String[] columnNames = {"Field", "Value"};
-
-		Object[][] data = {
-				{"Nuclei", null},
-				{"Median area", null},
-				{"Median perimeter", null},
-				{"Median feret", null},
-				{"Signal channels", null},
-				{"Profile window", null},
-				{"Ran", null},
-				{"Type", null}
-		};
-
-		TableModel model = new DefaultTableModel(data, columnNames);
-		return model;
+	public void updatePanels(NucleusCollection collection){
+		updateStatsPanel(collection);
+		updateProfileImage(collection);
+		updateConsensusImage(collection);
 	}
-	
 	
 	public void updateStatsPanel(NucleusCollection collection){
 		// format the numbers and make into a tablemodel
-		DecimalFormat df = new DecimalFormat("#.00"); 
 		lblStatusLine.setText("Showing: "+collection.getOutputFolderName()+" - "+collection.getFolder()+" - "+collection.getType());
-
-		String[] columnNames = {"Field", "Value"};
-
-		Object[][] data = {
-				{"Nuclei", collection.getNucleusCount()},
-				{"Median area", df.format(collection.getMedianNuclearArea())},
-				{"Median perimeter", df.format(collection.getMedianNuclearPerimeter())},
-				{"Median feret", df.format(collection.getMedianFeretLength())},
-				{"Signal channels", collection.getSignalChannels().size()},
-				{"Profile window", collection.getProfileWindowSize()},
-				{"Ran", collection.getOutputFolderName()},
-				{"Type", collection.getClass().getSimpleName()}
-		};
-
-		TableModel model = new DefaultTableModel(data, columnNames);
+		TableModel model = DatasetCreator.createStatsTable(collection);
 		table.setModel(model);
+	}
+	
+	public JFreeChart makeProfileChart(XYDataset ds){
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+				                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+				                false);
+		
+		
+		XYPlot plot = chart.getXYPlot();
+		plot.getDomainAxis().setRange(0,100);
+		plot.getRangeAxis().setRange(0,360);
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+
+		int seriesCount = plot.getSeriesCount();
+
+		for (int i = 0; i < seriesCount; i++) {
+			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+			String name = (String) ds.getSeriesKey(i);
+			if(name.startsWith("Seg_")){
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+				plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
+			} 
+			if(name.startsWith("Nucleus_")){
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+			} 
+			if(name.startsWith("Q")){
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+			} 
+			
+		}	
+		return chart;
 	}
 	
 	public void updateProfileImage(NucleusCollection collection){
 		
 		try {
 			
-			XYDataset ds = createSegmentDataset(collection);
-						
+			XYDataset ds = DatasetCreator.createSegmentDataset(collection);
+			JFreeChart chart = makeProfileChart(ds);
+			profileChartPanel.setChart(chart);
+			
+//			XYDataset fs = DatasetCreator.createFrankenSegmentDataset(collection);
+//			JFreeChart frankenChart = makeProfileChart(fs);
+//			frankenChartPanel.setChart(frankenChart);
+			
+		} catch (Exception e) {
+			log("Error in plotting frankenprofile or profile");
+		} 
+	}
+	
+	public void updateConsensusImage(NucleusCollection collection){
+		if(collection.getConsensusNucleus()==null){
+			// add button to run analysis
+			JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
+					null, null, null);
+			XYPlot consensusPlot = consensusChart.getXYPlot();
+			consensusPlot.setBackgroundPaint(Color.WHITE);
+			consensusChartPanel.setChart(consensusChart);
+			
+		} else {
+			XYDataset ds = DatasetCreator.createNucleusOutline(collection);
 			JFreeChart chart = 
 					ChartFactory.createXYLineChart(null,
-					                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+					                null, null, ds, PlotOrientation.VERTICAL, true, true,
 					                false);
 			
+			double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
+			double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
+
+			// ensure that the scales for each axis are the same
+			double max = Math.max(maxX, maxY);
+
+			// ensure there is room for expansion of the target nucleus due to IQR
+			max *=  1.25;		
 			
 			XYPlot plot = chart.getXYPlot();
-			plot.getDomainAxis().setRange(0,100);
-			plot.getRangeAxis().setRange(0,360);
+			plot.getDomainAxis().setRange(-max,max);
+			plot.getRangeAxis().setRange(-max,max);
+
 			plot.setBackgroundPaint(Color.WHITE);
-			plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+			plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+			plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
 
 			int seriesCount = plot.getSeriesCount();
 
@@ -388,22 +439,14 @@ public class MainWindow extends JFrame {
 					plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
 					plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
 				} 
-				if(name.startsWith("Nucleus_")){
-					plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-					plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-				} 
 				if(name.startsWith("Q")){
 					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
 					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
 				} 
 				
-			}			
-
-			cp.setChart(chart);
-			
-		} catch (Exception e) {
-			log("Error in plotting");
-		} 
+			}	
+			consensusChartPanel.setChart(chart);
+		}
 	}
 	
 	public void updatePopulationList(){
@@ -427,62 +470,8 @@ public class MainWindow extends JFrame {
 			String key = populationList.getSelectedValue();
 			if(!key.equals("No populations")){
 				NucleusCollection c = MainWindow.this.analysisPopulations.get(key);
-				updateStatsPanel(c);
-				updateProfileImage(c);
+				updatePanels(c);
 			}
 		}
-	}
-	
-	private XYDataset createSegmentDataset(NucleusCollection collection){
-		DefaultXYDataset ds = new DefaultXYDataset();
-		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
-		Profile xpoints = profile.getPositions(100);
-		
-		// rendering order will be first on top
-		
-		// add the segments
-
-		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
-
-		for(NucleusBorderSegment seg : segments){
-
-			if(seg.getStartIndex()>seg.getEndIndex()){ // case when array wraps
-
-				// beginning of array
-				Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
-				Profile subPointsA = xpoints.getSubregion(0, seg.getEndIndex());
-				double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
-				ds.addSeries(seg.getSegmentType(), dataA);
-
-				// end of array
-				Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
-				Profile subPointsB = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
-				double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
-				ds.addSeries(seg.getSegmentType(), dataB);
-				continue;
-			} 
-			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
-			Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
-			double[][] data = { subPoints.asArray(), subProfile.asArray() };
-			ds.addSeries(seg.getSegmentType(), data);
-		}
-
-		// make the IQR
-		Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
-		Profile profile75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
-		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
-		ds.addSeries("Q25", data25);
-		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
-		ds.addSeries("Q75", data75);
-
-		// add the individual nuclei
-		for(Nucleus n : collection.getNuclei()){
-			Profile angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(profile.size());
-			double[][] ndata = { xpoints.asArray(), angles.asArray() };
-			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
-		}
-
-
-		return ds;
 	}
 }

@@ -20,6 +20,7 @@ public interface NucleusCollection
 	public String DEFAULT_REFERENCE_POINT = null;
 
 	public void addNucleus(Nucleus r);
+	public void addConsensusNucleus(Nucleus n);
 
 //	public void annotateAndExportNuclei();
 
@@ -32,6 +33,8 @@ public interface NucleusCollection
 	 */
 	public Nucleus getNucleusMostSimilarToMedian(String pointType);
 
+	
+	public Nucleus getConsensusNucleus();
 	/*
 		-----------------------
 		Getters for aggregate stats

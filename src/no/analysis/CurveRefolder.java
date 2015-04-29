@@ -37,9 +37,9 @@ public class CurveRefolder{
 
 	private Plot nucleusPlot;
 //	private PlotWindow nucleusPlotWindow;
+	
+	private static Logger logger;
 
-//	private Plot anglePlot;
-//	private PlotWindow anglePlotWindow;
 
 	public static final int FAST_MODE = 0; // default; iterate until convergence
 	public static final int INTENSIVE_MODE = 1; // iterate until value
@@ -56,60 +56,66 @@ public class CurveRefolder{
 
 	private double plotLimit;
 	
-	public static void run(NucleusCollection collection, Class<?> nucleusClass, String refoldMode){
+	public static boolean run(NucleusCollection collection, Class<?> nucleusClass, String refoldMode){
 
-	    try{ 
+		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
+		try{ 
 
-	      // make an entirely new nucleus to play with
-	      Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian("tail");
-	      Constructor<?> nucleusConstructor = nucleusClass.getConstructor(new Class[]{RoundNucleus.class});
-	      Nucleus refoldCandidate  = (Nucleus) nucleusConstructor.newInstance(n);
-	    
-	      if(refoldCandidate==null){
-	        throw new Exception("Null reference to nucleus refold candidate");
-	      }
+			// make an entirely new nucleus to play with
+			Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian("tail");
+			Constructor<?> nucleusConstructor = nucleusClass.getConstructor(new Class[]{RoundNucleus.class});
+			Nucleus refoldCandidate  = (Nucleus) nucleusConstructor.newInstance(n);
 
-	      IJ.log("    Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
-	      IJ.log("    Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber());
+			if(refoldCandidate==null){
+				throw new Exception("Null reference to nucleus refold candidate");
+			}
 
-	      Profile targetProfile = collection.getProfileCollection().getProfile("tail");
-	      Profile q25 = collection.getProfileCollection().getProfile("tail25");
-	      Profile q75 = collection.getProfileCollection().getProfile("tail75");
+			logger.log("Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
+			logger.log("Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber(), Logger.DEBUG);
 
-	      if(targetProfile==null){
-	        throw new Exception("Null reference to target profile");
-	      }
-	      if(q25==null || q75==null){
-	        throw new Exception("Null reference to q25 or q75 profile");
-	      }
+			Profile targetProfile = collection.getProfileCollection().getProfile("tail");
+			Profile q25 = collection.getProfileCollection().getProfile("tail25");
+			Profile q75 = collection.getProfileCollection().getProfile("tail75");
 
-	      CurveRefolder refolder = new CurveRefolder(targetProfile, q25, q75, refoldCandidate);
-	      refolder.setMode(refoldMode);
-	      refolder.refoldCurve();
+			if(targetProfile==null){
+				throw new Exception("Null reference to target profile");
+			}
+			if(q25==null || q75==null){
+				throw new Exception("Null reference to q25 or q75 profile");
+			}
 
-	      // orient refolded nucleus to put tail at the bottom
-	      refolder.putPointAtBottom(refoldCandidate.getBorderTag("tail"));
+			CurveRefolder refolder = new CurveRefolder(targetProfile, q25, q75, refoldCandidate);
+			refolder.setMode(refoldMode);
+			refolder.refoldCurve();
 
-	      // if rodent sperm, put tip on left if needed
-	      if(refoldCandidate.getClass().equals(RodentSpermNucleus.class)){
-	        // IJ.log("    Rodent nucleus found");
-	        if(refoldCandidate.getBorderTag("tip").getX()>0){
-	          // IJ.log("    Flipping nucleus");
-	          refoldCandidate.flipXAroundPoint(refoldCandidate.getCentreOfMass());
-	        }
-	      }
+			// orient refolded nucleus to put tail at the bottom
+			refolder.putPointAtBottom(refoldCandidate.getBorderTag("tail"));
 
-	      refolder.plotNucleus();
+			// if rodent sperm, put tip on left if needed
+			if(refoldCandidate.getClass().equals(RodentSpermNucleus.class)){
 
-	      // draw signals on the refolded nucleus
-	      refolder.addSignalsToConsensus(collection);
-	      refolder.exportImage(collection);
-	      refolder.exportProfileOfRefoldedImage(collection);
+				if(refoldCandidate.getBorderTag("tip").getX()>0){
+					refoldCandidate.flipXAroundPoint(refoldCandidate.getCentreOfMass());
+				}
+			}
 
-	    } catch(Exception e){
-	      IJ.log("    Unable to refold nucleus: "+e.getMessage());
-	    } 
-	  }
+			refolder.plotNucleus();
+
+			// draw signals on the refolded nucleus
+			refolder.addSignalsToConsensus(collection);
+			refolder.exportImage(collection);
+			refolder.exportProfileOfRefoldedImage(collection);
+			collection.addConsensusNucleus(refoldCandidate);
+
+		} catch(Exception e){
+			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return false;
+		} 
+		return true;
+	}
 
 	public CurveRefolder(Profile target, Profile q25, Profile q75, Nucleus n){
 		this.targetCurve = target;
