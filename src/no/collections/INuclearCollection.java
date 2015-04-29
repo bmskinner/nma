@@ -107,19 +107,19 @@ public interface INuclearCollection
 
 	public double[] getPointToPointDistances(String pointTypeA, String pointTypeB);
 
-	public void refilterNuclei(INuclearCollection failedCollection);
+//	public void refilterNuclei(INuclearCollection failedCollection);
 
 	public String getLogFileName(String filename);
 
-	public void exportFilterStats();
+//	public void exportFilterStats();
 
 	
 	/*
 		Draw the charts of the profiles of the nuclei within this collecion.
 	*/
-	public void drawProfilePlots();
-
-	public void drawBoxplots();
+//	public void drawProfilePlots();
+//
+//	public void drawBoxplots();
 
 //	public void addSignalsToProfileCharts();
 

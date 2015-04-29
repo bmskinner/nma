@@ -15,9 +15,8 @@ import java.util.*;
 import no.collections.INuclearCollection;
 import no.nuclei.*;
 import no.components.*;
-import no.utility.Logger;
+//import no.utility.Logger;
 import no.utility.Stats;
-import no.utility.Utils;
 
 public class NucleusCollection
 implements INuclearCollection 
@@ -28,25 +27,27 @@ implements INuclearCollection
 	private File debugFile;
 	private String collectionType; // for annotating image names
 	
-	private Logger logger;
+//	private Logger logger;
 
-	public static final int FAILURE_THRESHOLD = 1;
-	public static final int FAILURE_FERET     = 2;
-	public static final int FAILURE_ARRAY     = 4;
-	public static final int FAILURE_AREA      = 8;
-	public static final int FAILURE_PERIM     = 16;
-	public static final int FAILURE_OTHER     = 32;
-	public static final int FAILURE_SIGNALS   = 64;
+//	public static final int FAILURE_THRESHOLD = 1;
+//	public static final int FAILURE_FERET     = 2;
+//	public static final int FAILURE_ARRAY     = 4;
+//	public static final int FAILURE_AREA      = 8;
+//	public static final int FAILURE_PERIM     = 16;
+//	public static final int FAILURE_OTHER     = 32;
+//	public static final int FAILURE_SIGNALS   = 64;
 	
 	private String DEFAULT_REFERENCE_POINT = "head";
 	private String DEFAULT_ORIENTAITION_POINT = "tail";
 
-	private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
-	private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
+//	private double maxDifferenceFromMedian = 1.6; // used to filter the nuclei, and remove those too small, large or irregular to be real
+//	private double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	protected ProfileCollection profileCollection = new ProfileCollection("regular");
 	protected ProfileCollection frankenCollection = new ProfileCollection("franken");
+	
+	private INuclearFunctions consensusNucleus;
 
 	private List<INuclearFunctions> nucleiCollection = new ArrayList<INuclearFunctions>(0); // store all the nuclei analysed
 
@@ -55,7 +56,7 @@ implements INuclearCollection
 	  this.outputFolder = outputFolder;
 	  this.debugFile = debugFile;
 //	  this.debugFile = new File(folder.getAbsolutePath()+File.separator+outputFolder+File.separator+"log.debug.txt");
-	  this.logger = new Logger(this.debugFile, "NucleusCollection");
+//	  this.logger = new Logger(this.debugFile, "NucleusCollection");
 	  this.collectionType = type;
   }
 
@@ -413,11 +414,11 @@ implements INuclearCollection
 			  try{
 				  d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
 			  } catch(Exception e){
-				  logger.log("Unable to get difference to median profile: "+i+": "+pointType, Logger.ERROR);
+//				  logger.log("Unable to get difference to median profile: "+i+": "+pointType, Logger.ERROR);
 			  }
 		  }
 	  } catch(Exception e){
-		  logger.log("Error getting differences from point "+pointType+": "+e.getMessage(), Logger.ERROR);
+//		  logger.log("Error getting differences from point "+pointType+": "+e.getMessage(), Logger.ERROR);
 		  this.profileCollection.printKeys(this.debugFile);
 	  }
 	  return d;
@@ -487,96 +488,96 @@ implements INuclearCollection
     conjoined nuclei and blobs too small to be nuclei
     Use path length to remove poorly thresholded nuclei
   */
-  public void refilterNuclei(INuclearCollection failedCollection){
-
-    logger.log("Filtering nuclei...");
-    double medianArea = this.getMedianNuclearArea();
-    double medianPerimeter = this.getMedianNuclearPerimeter();
-    double medianPathLength = this.getMedianPathLength();
-    double medianArrayLength = this.getMedianArrayLength();
-    double medianFeretLength = this.getMedianFeretLength();
-
-    int beforeSize = this.getNucleusCount();
-
-    double maxPathLength = medianPathLength * this.maxWibblinessFromMedian;
-    double minArea = medianArea / this.maxDifferenceFromMedian;
-    double maxArea = medianArea * this.maxDifferenceFromMedian;
-    double maxPerim = medianPerimeter * this.maxDifferenceFromMedian;
-    double minPerim = medianPerimeter / this.maxDifferenceFromMedian;
-    double minFeret = medianFeretLength / this.maxDifferenceFromMedian;
-
-    int area = 0;
-    int perim = 0;
-    int pathlength = 0;
-    int arraylength = 0;
-    int feretlength = 0;
-
-    logger.log("Prefiltered values found");
-//    IJ.append("Prefiltered:\r\n", this.getDebugFile().getAbsolutePath());
-    this.exportFilterStats();
-
-    for(int i=0;i<this.getNucleusCount();i++){
-      INuclearFunctions n = this.getNucleus(i);
-      
-      if(n.getArea() > maxArea || n.getArea() < minArea ){
-        n.updateFailureCode(FAILURE_AREA);
-        area++;
-      }
-      if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
-        n.updateFailureCode(FAILURE_PERIM);
-        perim++;
-      }
-      if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
-        n.updateFailureCode(FAILURE_THRESHOLD);
-        pathlength++;
-      }
-      if(n.getLength() > medianArrayLength * maxDifferenceFromMedian || n.getLength() < medianArrayLength / maxDifferenceFromMedian ){
-        n.updateFailureCode(FAILURE_ARRAY);
-         arraylength++;
-      }
-
-      if(n.getFeret() < minFeret){
-        n.updateFailureCode(FAILURE_FERET);
-        feretlength++;
-      }
-      
-      if(n.getFailureCode() > 0){
-        failedCollection.addNucleus(n);
-      }
-    }
-
-    for( INuclearFunctions f : failedCollection.getNuclei()){ // should be safer than the i-- above
-      this.getNuclei().remove(f);
-    }
-      
-
-    medianArea = this.getMedianNuclearArea();
-    medianPerimeter = this.getMedianNuclearPerimeter();
-    medianPathLength = this.getMedianPathLength();
-    medianArrayLength = this.getMedianArrayLength();
-    medianFeretLength = this.getMedianFeretLength();
-
-    int afterSize = this.getNucleusCount();
-    int removed = beforeSize - afterSize;
-
-    logger.log("Postfiltered values found");
-    this.exportFilterStats();
-    logger.log("Removed due to size or length issues: "+removed+" nuclei");
-    logger.log("Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei");
-    logger.log("Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei");
-    logger.log("Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei");
-    logger.log("Due to array length: "+arraylength+" nuclei");
-    logger.log("Due to feret length: "+feretlength+" nuclei");
-    logger.log("Remaining: "+this.getNucleusCount()+" nuclei");
+//  public void refilterNuclei(INuclearCollection failedCollection){
+//
+//    logger.log("Filtering nuclei...");
+//    double medianArea = this.getMedianNuclearArea();
+//    double medianPerimeter = this.getMedianNuclearPerimeter();
+//    double medianPathLength = this.getMedianPathLength();
+//    double medianArrayLength = this.getMedianArrayLength();
+//    double medianFeretLength = this.getMedianFeretLength();
+//
+//    int beforeSize = this.getNucleusCount();
+//
+//    double maxPathLength = medianPathLength * this.maxWibblinessFromMedian;
+//    double minArea = medianArea / this.maxDifferenceFromMedian;
+//    double maxArea = medianArea * this.maxDifferenceFromMedian;
+//    double maxPerim = medianPerimeter * this.maxDifferenceFromMedian;
+//    double minPerim = medianPerimeter / this.maxDifferenceFromMedian;
+//    double minFeret = medianFeretLength / this.maxDifferenceFromMedian;
+//
+//    int area = 0;
+//    int perim = 0;
+//    int pathlength = 0;
+//    int arraylength = 0;
+//    int feretlength = 0;
+//
+//    logger.log("Prefiltered values found");
+////    IJ.append("Prefiltered:\r\n", this.getDebugFile().getAbsolutePath());
+//    this.exportFilterStats();
+//
+//    for(int i=0;i<this.getNucleusCount();i++){
+//      INuclearFunctions n = this.getNucleus(i);
+//      
+//      if(n.getArea() > maxArea || n.getArea() < minArea ){
+//        n.updateFailureCode(FAILURE_AREA);
+//        area++;
+//      }
+//      if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
+//        n.updateFailureCode(FAILURE_PERIM);
+//        perim++;
+//      }
+//      if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
+//        n.updateFailureCode(FAILURE_THRESHOLD);
+//        pathlength++;
+//      }
+//      if(n.getLength() > medianArrayLength * maxDifferenceFromMedian || n.getLength() < medianArrayLength / maxDifferenceFromMedian ){
+//        n.updateFailureCode(FAILURE_ARRAY);
+//         arraylength++;
+//      }
+//
+//      if(n.getFeret() < minFeret){
+//        n.updateFailureCode(FAILURE_FERET);
+//        feretlength++;
+//      }
+//      
+//      if(n.getFailureCode() > 0){
+//        failedCollection.addNucleus(n);
+//      }
+//    }
+//
+//    for( INuclearFunctions f : failedCollection.getNuclei()){ // should be safer than the i-- above
+//      this.getNuclei().remove(f);
+//    }
+//      
+//
+//    medianArea = this.getMedianNuclearArea();
+//    medianPerimeter = this.getMedianNuclearPerimeter();
+//    medianPathLength = this.getMedianPathLength();
+//    medianArrayLength = this.getMedianArrayLength();
+//    medianFeretLength = this.getMedianFeretLength();
+//
+//    int afterSize = this.getNucleusCount();
+//    int removed = beforeSize - afterSize;
+//
+//    logger.log("Postfiltered values found");
+//    this.exportFilterStats();
+//    logger.log("Removed due to size or length issues: "+removed+" nuclei");
+//    logger.log("Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei");
+//    logger.log("Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei");
+//    logger.log("Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei");
+//    logger.log("Due to array length: "+arraylength+" nuclei");
+//    logger.log("Due to feret length: "+feretlength+" nuclei");
+//    logger.log("Remaining: "+this.getNucleusCount()+" nuclei");
+////    
+////    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+////    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+////    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+////    IJ.append("  Due to array length: "+arraylength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+////    IJ.append("  Due to feret length: "+feretlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
+////    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei");
 //    
-//    IJ.append("  Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-//    IJ.append("  Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-//    IJ.append("  Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-//    IJ.append("  Due to array length: "+arraylength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-//    IJ.append("  Due to feret length: "+feretlength+" nuclei\r\n", this.getDebugFile().getAbsolutePath());
-//    IJ.log("    Remaining: "+this.getNucleusCount()+" nuclei");
-    
-  }
+//  }
 
   /*
     -----------------
@@ -616,82 +617,82 @@ implements INuclearCollection
     return file;
   }
 
-  public void exportFilterStats(){
-
-    double medianArea = this.getMedianNuclearArea();
-    double medianPerimeter = this.getMedianNuclearPerimeter();
-    double medianPathLength = this.getMedianPathLength();
-    double medianArrayLength = this.getMedianArrayLength();
-    double medianFeretLength = this.getMedianFeretLength();
-
-    logger.log("Area: "        +(int)medianArea);
-    logger.log("Perimeter: "   +(int)medianPerimeter);
-    logger.log("Path length: " +(int)medianPathLength);
-    logger.log("Array length: "+(int)medianArrayLength);
-    logger.log("Feret length: "+(int)medianFeretLength);
-    
-//    IJ.append("    Area: "        +(int)medianArea       +"\r\n",  this.getDebugFile().getAbsolutePath());
-//    IJ.append("    Perimeter: "   +(int)medianPerimeter  +"\r\n",  this.getDebugFile().getAbsolutePath());
-//    IJ.append("    Path length: " +(int)medianPathLength +"\r\n",  this.getDebugFile().getAbsolutePath());
-//    IJ.append("    Array length: "+(int)medianArrayLength+"\r\n",  this.getDebugFile().getAbsolutePath());
-//    IJ.append("    Feret length: "+(int)medianFeretLength+"\r\n",  this.getDebugFile().getAbsolutePath());
-  }
+//  public void exportFilterStats(){
+//
+//    double medianArea = this.getMedianNuclearArea();
+//    double medianPerimeter = this.getMedianNuclearPerimeter();
+//    double medianPathLength = this.getMedianPathLength();
+//    double medianArrayLength = this.getMedianArrayLength();
+//    double medianFeretLength = this.getMedianFeretLength();
+//
+//    logger.log("Area: "        +(int)medianArea);
+//    logger.log("Perimeter: "   +(int)medianPerimeter);
+//    logger.log("Path length: " +(int)medianPathLength);
+//    logger.log("Array length: "+(int)medianArrayLength);
+//    logger.log("Feret length: "+(int)medianFeretLength);
+//    
+////    IJ.append("    Area: "        +(int)medianArea       +"\r\n",  this.getDebugFile().getAbsolutePath());
+////    IJ.append("    Perimeter: "   +(int)medianPerimeter  +"\r\n",  this.getDebugFile().getAbsolutePath());
+////    IJ.append("    Path length: " +(int)medianPathLength +"\r\n",  this.getDebugFile().getAbsolutePath());
+////    IJ.append("    Array length: "+(int)medianArrayLength+"\r\n",  this.getDebugFile().getAbsolutePath());
+////    IJ.append("    Feret length: "+(int)medianFeretLength+"\r\n",  this.getDebugFile().getAbsolutePath());
+//  }
 
   /*
     Draw the charts of the profiles of the nuclei within this collecion.
    */
-  public void drawProfilePlots(){
-
-//	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
-
-	  for( String pointType : this.profileCollection.getPlotKeys() ){
-
-		  List<Profile> profiles = new ArrayList<Profile>(0);
-
-		  for(int i=0;i<this.getNucleusCount();i++){
-
-			  INuclearFunctions n = this.getNucleus(i);
-
-			  profiles.add(n.getAngleProfile(pointType));
-		  }
-		  this.profileCollection.drawProfilePlots(pointType, profiles);
-	  }   
-  }
+//  public void drawProfilePlots(){
+//
+////	  this.profileCollection.preparePlots(CHART_WINDOW_WIDTH, CHART_WINDOW_HEIGHT, this.getMaxProfileLength());
+//
+//	  for( String pointType : this.profileCollection.getPlotKeys() ){
+//
+//		  List<Profile> profiles = new ArrayList<Profile>(0);
+//
+//		  for(int i=0;i<this.getNucleusCount();i++){
+//
+//			  INuclearFunctions n = this.getNucleus(i);
+//
+//			  profiles.add(n.getAngleProfile(pointType));
+//		  }
+//		  this.profileCollection.drawProfilePlots(pointType, profiles);
+//	  }   
+//  }
   
   /** 
    * For each of the point types in the profile collection, add boxplot showing
    * the tail position
    */
-  public void drawBoxplots(){
-	  for( String pointType : this.profileCollection.getPlotKeys() ){
-		  drawBoxplotFromPoint(pointType, "tail");
-	  }
-  }
+//  public void drawBoxplots(){
+//	  for( String pointType : this.profileCollection.getPlotKeys() ){
+//		  drawBoxplotFromPoint(pointType, "tail");
+//	  }
+//  }
 
   /*
     Draw a boxplot on the normalised plots. Specify which BorderPointOfInterest is to be plotted.
    */
-  private void drawBoxplotFromPoint(String profilePointType, String boxPointType){
-
-	  // get the tail positions with the head offset applied
-	  List<Double> pointIndexes = new ArrayList<Double>(0);
-	  //	  double[] xPoints = new double[this.getNucleusCount()];
-	  for(int i= 0; i<this.getNucleusCount();i++){
-
-		  INuclearFunctions n = this.getNucleus(i);
-
-		  // get the index of the NBP with the boxPointType
-		  int boxIndex = n.getBorderIndex(boxPointType);
-		  // get the index of the NBP with the profilePointType; the new zero
-		  int profileIndex = n.getBorderIndex(profilePointType);
-
-		  // find the offset position of boxPoint, using profilePoint as a zero. 
-		  int offsetIndex = Utils.wrapIndex( boxIndex - profileIndex , n.getLength() );
-
-		  // normalise to 100
-		  //		  xPoints[i] =  (   (double) offsetIndex / (double) n.getLength()  ) * 100;
-		  pointIndexes.add((   (double) offsetIndex / (double) n.getLength()  ) * 100);
-	  }
-	  this.profileCollection.addBoxplot(profilePointType, pointIndexes);
-  }
+//  private void drawBoxplotFromPoint(String profilePointType, String boxPointType){
+//
+//	  // get the tail positions with the head offset applied
+//	  List<Double> pointIndexes = new ArrayList<Double>(0);
+//	  //	  double[] xPoints = new double[this.getNucleusCount()];
+//	  for(int i= 0; i<this.getNucleusCount();i++){
+//
+//		  INuclearFunctions n = this.getNucleus(i);
+//
+//		  // get the index of the NBP with the boxPointType
+//		  int boxIndex = n.getBorderIndex(boxPointType);
+//		  // get the index of the NBP with the profilePointType; the new zero
+//		  int profileIndex = n.getBorderIndex(profilePointType);
+//
+//		  // find the offset position of boxPoint, using profilePoint as a zero. 
+//		  int offsetIndex = Utils.wrapIndex( boxIndex - profileIndex , n.getLength() );
+//
+//		  // normalise to 100
+//		  //		  xPoints[i] =  (   (double) offsetIndex / (double) n.getLength()  ) * 100;
+//		  pointIndexes.add((   (double) offsetIndex / (double) n.getLength()  ) * 100);
+//	  }
+//	  this.profileCollection.addBoxplot(profilePointType, pointIndexes);
+//  }
 }

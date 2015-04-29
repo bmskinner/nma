@@ -1,11 +1,16 @@
 package no.components;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 // this holds the index of a feature in a median profile
-public class ProfileFeature {
+public class ProfileFeature implements Serializable {
 	 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Map<String, Integer> featureIndex = new HashMap<String, Integer>();
 
 	public ProfileFeature(){

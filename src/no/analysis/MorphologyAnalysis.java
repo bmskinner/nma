@@ -100,9 +100,9 @@ public class MorphologyAnalysis {
 		// aggregates
 		createProfileAggregateFromPoint(collection, collection.getReferencePoint());
 		// plots
-		pc.preparePlot(collection.getReferencePoint()  , INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-		pc.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-		
+//		pc.preparePlot(collection.getReferencePoint()  , INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+//		pc.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+//		
 		// features
 		
 	}
@@ -129,9 +129,9 @@ public class MorphologyAnalysis {
 			
 			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
 			pc.addSegments(sourceCollection.getOrientationPoint(), sc.getSegments(orientationPoint));
-			pc.preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-			pc.addMedianLineToPlots(orientationPoint);
-			pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
+//			pc.preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+//			pc.addMedianLineToPlots(orientationPoint);
+//			pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
 		} catch (Exception e) {
 			logger.log("Error reapplying profiles: "+e.getMessage(), Logger.ERROR);
 			for(StackTraceElement el : e.getStackTrace()){
@@ -204,11 +204,11 @@ public class MorphologyAnalysis {
 		// get the profile plots created
 //		pc.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
 		// export the profiles
-		collection.drawProfilePlots();
-
-		pc.addMedianLineToPlots(collection.getOrientationPoint());
-
-		pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
+//		collection.drawProfilePlots();
+//
+//		pc.addMedianLineToPlots(collection.getOrientationPoint());
+//
+//		pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
 	}
 
 	private static double compareProfilesToMedian(INuclearCollection collection, String pointType){
@@ -339,9 +339,9 @@ public class MorphologyAnalysis {
 		frankenCollection.addNucleusProfiles(pointType, frankenProfiles);
 		// update the profile aggregate
 		frankenCollection.createProfileAggregateFromPoint(    pointType, (int) collection.getMedianArrayLength()    );
-		frankenCollection.preparePlot(collection.getReferencePoint()  , INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-		frankenCollection.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-		
+//		frankenCollection.preparePlot(collection.getReferencePoint()  , INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+//		frankenCollection.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+//		
 		collection.setFrankenCollection(frankenCollection);
 		logger.log("Segment assignments refined");
 	}
@@ -364,12 +364,12 @@ public class MorphologyAnalysis {
 		// get the nucleus profiles
 		List<Profile> profiles = pc.getNucleusProfiles(pointType);
 
-		pc.drawProfilePlots(pointType, profiles);
-		pc.addMedianLineToPlots(pointType);
-
-		pc.exportProfilePlots(collection.getFolder()+
-				File.separator+
-				collection.getOutputFolderName(), collection.getType());
+//		pc.drawProfilePlots(pointType, profiles);
+//		pc.addMedianLineToPlots(pointType);
+//
+//		pc.exportProfilePlots(collection.getFolder()+
+//				File.separator+
+//				collection.getOutputFolderName(), collection.getType());
 
 	}
 	

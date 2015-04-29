@@ -272,14 +272,24 @@ public class AnalysisCreator {
 			  Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class, File.class});
 			  INuclearCollection failedNuclei = (INuclearCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed", logger.getLogfile());
 
-			  r.refilterNuclei(failedNuclei); // put fails into failedNuclei, remove from r
+			  mw.logc("Filtering collection...");
+			  boolean ok = CollectionFilterer.run(r, failedNuclei); // put fails into failedNuclei, remove from r
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
+			  
+//			  r.refilterNuclei(failedNuclei); 
 			  if(failedNuclei.getNucleusCount()>0){
-				  mw.log("Exporting failed nuclei");
-				  logger.log("Exporting failed nuclei");
-
-				  CompositeExporter.run(failedNuclei);
+				  mw.logc("Exporting failed nuclei...");
+				  ok = CompositeExporter.run(failedNuclei);
+				  if(ok){
+					  mw.log("OK");
+				  } else {
+					  mw.log("Error");
+				  }
 				  nucleusCounts.put("failed", failedNuclei.getNucleusCount());
-				  logger.log("Failed nuclei exported");
 			  }
 
 		  } catch(InstantiationException e){

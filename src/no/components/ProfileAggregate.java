@@ -2,6 +2,7 @@ package no.components;
 
 import ij.IJ;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,8 +12,12 @@ import no.exceptions.ProfileException;
 import no.utility.Stats;
 import no.utility.Utils;
 
-public class ProfileAggregate {
+public class ProfileAggregate implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private Map<Double, Collection<Double>> aggregate = new HashMap<Double, Collection<Double>>();
 	private double  profileIncrement;
 	private int length;
@@ -227,26 +232,26 @@ public class ProfileAggregate {
 		}
 	}
 
-	public void print(){
-		IJ.log("Printing profile aggregate: length: "+this.length+" inc: "+this.profileIncrement);
-		for(int i=0;i<length;i++){
-			double x = xPositions[i];
-
-			try{
-				if(aggregate.containsKey(x)){
-					Collection<Double> values = aggregate.get(x);
-					String line = "    "+x+"\t";
-					for(Double d : values){
-						line += d+"\t";
-					}
-					IJ.log(line);
-				} else {
-					IJ.log(x+"\t");
-				}
-			} catch(Exception e){
-				IJ.log("    Error printing x: "+x);
-			}
-		}
-		IJ.log("");
-	}
+//	public void print(){
+//		IJ.log("Printing profile aggregate: length: "+this.length+" inc: "+this.profileIncrement);
+//		for(int i=0;i<length;i++){
+//			double x = xPositions[i];
+//
+//			try{
+//				if(aggregate.containsKey(x)){
+//					Collection<Double> values = aggregate.get(x);
+//					String line = "    "+x+"\t";
+//					for(Double d : values){
+//						line += d+"\t";
+//					}
+//					IJ.log(line);
+//				} else {
+//					IJ.log(x+"\t");
+//				}
+//			} catch(Exception e){
+//				IJ.log("    Error printing x: "+x);
+//			}
+//		}
+//		IJ.log("");
+//	}
 }

@@ -39,7 +39,14 @@ public class PopulationExporter {
 //					output.writeObject(collection.getFolder());
 //					output.writeObject(collection.getOutputFolderName());
 //					output.writeObject(collection.getType());
+//					
+//					output.writeObject(collection.getReferencePoint());
+//					output.writeObject(collection.getOrientationPoint());
+//					
 //					output.writeObject(collection.getNuclei());
+//					
+//					output.writeObject(collection.getProfileCollection());
+					
 
 					logger.log("Save complete");
 
