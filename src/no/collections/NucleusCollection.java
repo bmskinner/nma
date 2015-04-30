@@ -109,34 +109,17 @@ public interface NucleusCollection
 
 	public double[] getDifferencesToMedianFromPoint(String pointType);
 
-	// get the plot from the collection corresponding to the given pointType of interest
-//	public Plot getPlot(String pointType, String plotType);
-
 	public int[] getPointIndexes(String pointType);
 
 	public double[] getPointToPointDistances(String pointTypeA, String pointTypeB);
 
-//	public void refilterNuclei(INuclearCollection failedCollection);
-
 	public String getLogFileName(String filename);
 
-//	public void exportFilterStats();
-
-	
-	/*
-		Draw the charts of the profiles of the nuclei within this collecion.
-	*/
-//	public void drawProfilePlots();
-//
-//	public void drawBoxplots();
-
-//	public void addSignalsToProfileCharts();
 
 	public ProfileCollection getProfileCollection();
 	public ProfileCollection getFrankenCollection();
 	public void setFrankenCollection (ProfileCollection frankenCollection);
 	
-//	public void exportProfiles();
 	
 	public void findTailIndexInMedianCurve();
 	
@@ -145,5 +128,6 @@ public interface NucleusCollection
 	public int getSignalCount();
 	
 	public List<NuclearSignal> getSignals(int channel);
+	
 
 }

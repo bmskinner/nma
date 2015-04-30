@@ -1,8 +1,5 @@
 package no.gui;
 
-
-import ij.IJ;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -167,6 +164,7 @@ public class DatasetCreator {
 					{"Signal min size", null},
 					{"Signal max fraction", null},
 					{"Consensus folded", null},
+					{"Refold mode", null},
 					{"Ran", null},
 					{"Type", null}
 			};
@@ -190,6 +188,7 @@ public class DatasetCreator {
 				{"Signal min size", collection.getAnalysisOptions().getMinSignalSize()},
 				{"Signal max fraction", collection.getAnalysisOptions().getMaxSignalFraction()},
 				{"Consensus folded", collection.getAnalysisOptions().refoldNucleus()},
+				{"Refold mode", collection.getAnalysisOptions().getRefoldMode()},
 				{"Ran", collection.getOutputFolderName()},
 				{"Type", collection.getAnalysisOptions().getNucleusClass().getSimpleName()}
 		};
@@ -336,7 +335,7 @@ public class DatasetCreator {
 		// Confirms the issue is with the XYPoint positions assigned to each IQR 
 //		scaledRange.reverse();
 		int offset = -n.getBorderIndex(collection.getOrientationPoint())-20;
-		scaledRange = scaledRange.offset(offset);
+//		scaledRange = scaledRange.offset(offset);
 //		IJ.log("Offset: "+offset);
 //		int ref = n.getBorderIndex(collection.getReferencePoint());
 //		IJ.log("Ref point: "+ref);

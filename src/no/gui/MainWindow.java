@@ -80,6 +80,8 @@ public class MainWindow extends JFrame {
 	
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 	private JList<String> populationList;
+	
+	private JTabbedPane tabbedPane;
 		
 	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
@@ -91,6 +93,9 @@ public class MainWindow extends JFrame {
 	private ChartPanel minFeretBoxplotChartPanel;
 	
 	private ChartPanel variabilityChartPanel; 
+	
+	private ChartPanel shellsChartPanel; 
+	private JPanel shellsPanel;
 	
 	private HashMap<String, NucleusCollection> analysisPopulations = new HashMap<String, NucleusCollection>();;
 
@@ -188,7 +193,7 @@ public class MainWindow extends JFrame {
 			
 			panelAggregates.setLayout(new BoxLayout(panelAggregates, BoxLayout.Y_AXIS));
 			
-			JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 			panelAggregates.add(tabbedPane);
 			
 			//---------------
@@ -279,6 +284,17 @@ public class MainWindow extends JFrame {
 			variabilityChartPanel = new ChartPanel(variablityChart);
 			tabbedPane.addTab("Variability", null, variabilityChartPanel, null);
 			
+			//---------------
+			// Create the shells chart
+			//---------------
+			JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
+			shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
+			shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
+			shellsChartPanel = new ChartPanel(shellsChart);
+			tabbedPane.addTab("Shells", null, shellsChartPanel, null);
+			
+			
+			
 			
 
 		} catch (Exception e) {
@@ -367,17 +383,25 @@ public class MainWindow extends JFrame {
 		thr.start();		
 	}
 	
-	public void loadNuclei(){
-		OpenDialog fileDialog = new OpenDialog("Select a save file...");
-		String fileName = fileDialog.getPath();
-		if(fileName==null) return;
-		NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), this);
-		String key = collection.getOutputFolderName()+" - "+collection.getType()+" - "+collection.getNucleusCount()+" nuclei";
-		MainWindow.this.analysisPopulations.put(key, collection);
-		log("Opened collection: "+collection.getType());
+	public void newShellAnalysis(){
 		
-		updatePanels(collection);
-		updatePopulationList();
+	}
+	
+	public void loadNuclei(){
+		try {
+			OpenDialog fileDialog = new OpenDialog("Select a save file...");
+			String fileName = fileDialog.getPath();
+			if(fileName==null) return;
+			NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), this);
+			String key = collection.getOutputFolderName()+" - "+collection.getType()+" - "+collection.getNucleusCount()+" nuclei";
+			MainWindow.this.analysisPopulations.put(key, collection);
+			log("Opened collection: "+collection.getType());
+			
+			updatePanels(collection);
+			updatePopulationList();
+		} catch (Exception e) {
+			log("Error opening file: "+e.getMessage());
+		}
 	}
 	
 	public void updatePanels(NucleusCollection collection){
@@ -385,11 +409,17 @@ public class MainWindow extends JFrame {
 		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
 		list.add(collection);
 		
-		updateStatsPanel(collection);
-		updateProfileImage(collection);
-		updateConsensusImage(collection);
-		updateBoxplots(collection);
-		updateVariabilityChart(list);
+		try {
+			updateStatsPanel(collection);
+			updateProfileImage(collection);
+			updateConsensusImage(collection);
+			updateBoxplots(collection);
+			updateVariabilityChart(list);
+			updateShellPanel(collection);
+		} catch (Exception e) {
+			log("Error updating panels: "+e.getMessage());
+			e.printStackTrace();
+		}
 	}
 	
 	public void updateStatsPanel(NucleusCollection collection){
@@ -451,60 +481,83 @@ public class MainWindow extends JFrame {
 		} 
 	}
 	
+	public void updateShellPanel(NucleusCollection collection){
+		// if collection has shell results, display
+		
+		// else,  no shell analysis in the population
+		// have a panel ready with a button to run the analysis
+		shellsPanel = new JPanel(); // container in tab if no shell chart
+		shellsPanel.setLayout(new BoxLayout(shellsPanel, BoxLayout.Y_AXIS));
+		JButton btnShellAnalysis = new JButton("Run shell analysis");
+		btnShellAnalysis.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				newShellAnalysis();
+			}
+		});
+		shellsPanel.add(btnShellAnalysis);
+		tabbedPane.setComponentAt(5, shellsPanel);
+	}
+	
 	public void updateConsensusImage(NucleusCollection collection){
-		if(collection.getConsensusNucleus()==null){
-			// add button to run analysis
-			JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-					null, null, null);
-			XYPlot consensusPlot = consensusChart.getXYPlot();
-			consensusPlot.setBackgroundPaint(Color.WHITE);
-			consensusPlot.getDomainAxis().setVisible(false);
-			consensusPlot.getRangeAxis().setVisible(false);
-			consensusChartPanel.setChart(consensusChart);
-			
-		} else {
-			XYDataset ds = DatasetCreator.createNucleusOutline(collection);
-			JFreeChart chart = 
-					ChartFactory.createXYLineChart(null,
-					                null, null, ds, PlotOrientation.VERTICAL, true, true,
-					                false);
-			
-			double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
-			double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
-
-			// ensure that the scales for each axis are the same
-			double max = Math.max(maxX, maxY);
-
-			// ensure there is room for expansion of the target nucleus due to IQR
-			max *=  1.25;		
-			
-			XYPlot plot = chart.getXYPlot();
-			plot.getDomainAxis().setRange(-max,max);
-			plot.getRangeAxis().setRange(-max,max);
-			
-			plot.getDomainAxis().setVisible(false);
-			plot.getRangeAxis().setVisible(false);
-
-			plot.setBackgroundPaint(Color.WHITE);
-			plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-			plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-
-			int seriesCount = plot.getSeriesCount();
-
-			for (int i = 0; i < seriesCount; i++) {
-				plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-				String name = (String) ds.getSeriesKey(i);
-				if(name.startsWith("Seg_")){
-					plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-					plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
-				} 
-				if(name.startsWith("Q")){
-					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-				} 
+		try {
+			if(collection.getConsensusNucleus()==null){
+				// add button to run analysis
+				JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
+						null, null, null);
+				XYPlot consensusPlot = consensusChart.getXYPlot();
+				consensusPlot.setBackgroundPaint(Color.WHITE);
+				consensusPlot.getDomainAxis().setVisible(false);
+				consensusPlot.getRangeAxis().setVisible(false);
+				consensusChartPanel.setChart(consensusChart);
 				
-			}	
-			consensusChartPanel.setChart(chart);
+			} else {
+				XYDataset ds = DatasetCreator.createNucleusOutline(collection);
+				JFreeChart chart = 
+						ChartFactory.createXYLineChart(null,
+						                null, null, ds, PlotOrientation.VERTICAL, true, true,
+						                false);
+				
+				double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
+				double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
+
+				// ensure that the scales for each axis are the same
+				double max = Math.max(maxX, maxY);
+
+				// ensure there is room for expansion of the target nucleus due to IQR
+				max *=  1.25;		
+				
+				XYPlot plot = chart.getXYPlot();
+				plot.getDomainAxis().setRange(-max,max);
+				plot.getRangeAxis().setRange(-max,max);
+				
+				plot.getDomainAxis().setVisible(false);
+				plot.getRangeAxis().setVisible(false);
+
+				plot.setBackgroundPaint(Color.WHITE);
+				plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+				plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+
+				int seriesCount = plot.getSeriesCount();
+
+				for (int i = 0; i < seriesCount; i++) {
+					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+					String name = (String) ds.getSeriesKey(i);
+					if(name.startsWith("Seg_")){
+						plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+						plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
+					} 
+					if(name.startsWith("Q")){
+						plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+						plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+					} 
+					
+				}	
+				consensusChartPanel.setChart(chart);
+			}
+		} catch (Exception e) {
+			log("Error drawing consensus nucleus: "+e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	
@@ -517,10 +570,14 @@ public class MainWindow extends JFrame {
 		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
 		list.add(collection);
 		
-		updateAreaBoxplot(list);
-		updatePerimBoxplot(list);
-		updateMaxFeretBoxplot(list);
-		updateMinFeretBoxplot(list);
+		try {
+			updateAreaBoxplot(list);
+			updatePerimBoxplot(list);
+			updateMaxFeretBoxplot(list);
+			updateMinFeretBoxplot(list);
+		} catch (Exception e) {
+			log("Error updating boxplots: "+e.getMessage());
+		}
 	}
 	
 	/**
@@ -603,21 +660,24 @@ public class MainWindow extends JFrame {
 	
 	
 	public void updateVariabilityChart(List<NucleusCollection> list){
-		NucleusCollection n = list.get(0);
-		XYDataset ds = DatasetCreator.createIQRVariabilityDataset(n);
-		JFreeChart chart = makeProfileChart(ds);
-		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
-		plot.getDomainAxis().setRange(0,100);
-		plot.getRangeAxis().setLabel("IQR");
-		plot.getRangeAxis().setAutoRange(true);
-		List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
-		for(Integer i : maxima){
-			plot.addDomainMarker(new ValueMarker(i, Color.BLACK, new BasicStroke(1.0f)));
-		}
-		
-		variabilityChartPanel.setChart(chart);
-		
+		try {
+			NucleusCollection n = list.get(0);
+			XYDataset ds = DatasetCreator.createIQRVariabilityDataset(n);
+			JFreeChart chart = makeProfileChart(ds);
+			XYPlot plot = chart.getXYPlot();
+			plot.setBackgroundPaint(Color.WHITE);
+			plot.getDomainAxis().setRange(0,100);
+			plot.getRangeAxis().setLabel("IQR");
+			plot.getRangeAxis().setAutoRange(true);
+			List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
+			for(Integer i : maxima){
+				plot.addDomainMarker(new ValueMarker(i, Color.BLACK, new BasicStroke(1.0f)));
+			}
+			
+			variabilityChartPanel.setChart(chart);
+		} catch (Exception e) {
+			log("Error drawing variability chart: "+e.getMessage());
+		}	
 	}
 	
 	/**
