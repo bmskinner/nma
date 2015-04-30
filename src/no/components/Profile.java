@@ -561,10 +561,41 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
+
+  /**
+   * Divide all values within the profile by a given value
+   * @param divider the value to divide by
+   * @return the new profile
+   */
+  public Profile divide(double divider){
+	  double[] result = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { // for each position in sperm
+		  result[i] = array[i] / divider;
+	  }
+	  return new Profile(result);
+  }
+
+  /**
+   * Divide all values within the profile by the values within the given Profile
+   * @param divider the profile to divide by. Must be the same length as this profile
+   * @return the new profile
+   */
+  public Profile divide(Profile divider){
+	  if(this.size()!=divider.size()){
+		  throw new IllegalArgumentException("Profile sizes do not match");
+	  }
+	  double[] result = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { // for each position in sperm
+		  result[i] = array[i] / divider.get(i);
+	  }
+	  return new Profile(result);
+  }
   
   /**
-   * Multiply all values within the profile by the value within the given Profile
-   * @param multiplier the profile to multiply by. Must be the same length as this profile
+   * Add all values within the profile by the value within the given Profile
+   * @param adder the profile to add. Must be the same length as this profile
    * @return the new profile
    */
   public Profile add(Profile adder){
@@ -575,6 +606,23 @@ public class Profile implements Serializable {
 
 	  for (int i=0; i<array.length; i++) { // for each position in sperm
 		  result[i] = array[i] + adder.get(i);
+	  }
+	  return new Profile(result);
+  }
+  
+  /**
+   * Subtract all values within the profile by the value within the given Profile
+   * @param adder the profile to subtract. Must be the same length as this profile
+   * @return the new profile
+   */
+  public Profile subtract(Profile sub){
+	  if(this.size()!=sub.size()){
+		  throw new IllegalArgumentException("Profile sizes do not match");
+	  }
+	  double[] result = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { // for each position in sperm
+		  result[i] = array[i] - sub.get(i);
 	  }
 	  return new Profile(result);
   }

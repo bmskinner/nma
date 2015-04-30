@@ -119,7 +119,7 @@ public class ProfileAggregate implements Serializable {
 			int newLength = this.length <= 200 ? this.length-5 : 200;
 			IJ.log("    "+e.getMessage()+": rescaling to "+newLength);
 			this.rescaleProfile(newLength);
-			result = this.getMedian();
+			result = this.getMedian(); // recurse through this function until we get a profile
 		}
 		return result;
 	}

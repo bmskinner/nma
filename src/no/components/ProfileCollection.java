@@ -20,7 +20,6 @@ public class ProfileCollection implements Serializable {
 	private Map<String, ProfileFeature> 	features 	= new HashMap<String, ProfileFeature>();
 	private Map<String, Profile> 			profiles 	= new HashMap<String, Profile>(0); 
 	private Map<String, ProfileAggregate> 	aggregates 	= new HashMap<String, ProfileAggregate>();
-//	private transient Map<String, ProfilePlot> 		plots 		= new HashMap<String, ProfilePlot>();
 	private String collectionName; // the name of the NucleusCollection - e.g analysable, red, not_red
 	
 	private Map<String, List<NucleusBorderSegment>> segments = new HashMap<String, List<NucleusBorderSegment>>();
@@ -65,18 +64,7 @@ public class ProfileCollection implements Serializable {
 			throw new IllegalArgumentException("The requested aggregate key does not exist: "+s);
 		}
 	}
-	
-//	public ProfilePlot getPlots(String s){
-//		if(s==null){
-//			throw new IllegalArgumentException("The requested plot key is null: "+s);
-//		}
-//		if(plots.containsKey(s)){	
-//			return plots.get(s);
-//		} else {
-//			throw new IllegalArgumentException("The requested plot key does not exist: "+s);
-//		}		
-//	}
-	
+		
 	public List<NucleusBorderSegment> getSegments(String s){
 		if(s==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+s);
@@ -118,14 +106,7 @@ public class ProfileCollection implements Serializable {
 	public void addAggregate(String s, ProfileAggregate p){
 		aggregates.put(s, p);
 	}
-	
-//	public void addPlots(String s, ProfilePlot p){
-//		if(s==null || p==null){
-//			throw new IllegalArgumentException("String or Profile is null");
-//		}
-//		plots.put(s, p);
-//	}
-	
+
 	public void addSegments(String s, List<NucleusBorderSegment> n){
 		if(s==null || n==null || n.isEmpty()){
 			throw new IllegalArgumentException("String or segment list is null or empty");
@@ -268,7 +249,7 @@ public class ProfileCollection implements Serializable {
 	 * @param pointType the profile type to use
 	 * @return the profile
 	 */
-	private Profile getIQRProfile(String pointType){
+	public Profile getIQRProfile(String pointType){
 		
 		ProfileAggregate profileAggregate = this.getAggregate(pointType);
 
@@ -326,31 +307,7 @@ public class ProfileCollection implements Serializable {
 		for(int i : values.keySet()){
 			result.add(values.get(i));
 //			IJ.log("    Variable index "+values.get(i));
-		}
-		
-//		// draw the IQR - only needed during debugging. Can be removed later.
-//		Plot  plot = this.getPlots(pointType).get("iqr");
-//		double[] xPoints  = iqrProfile.getPositions(100).asArray();
-//		plot.setColor(Color.DARK_GRAY);
-//		plot.addPoints(xPoints, iqrProfile.asArray(), Plot.LINE);
-//		plot.setColor(Color.LIGHT_GRAY);
-//		plot.addPoints(xPoints, iqrProfile.smooth(3).asArray(), Plot.LINE);
-//		plot.setColor(Color.DARK_GRAY);
-//		for(int i=0;i<maxima.size();i++){
-//			double x = xPoints[i];
-//			if(maxima.get(i)==1){
-//				plot.drawLine(x, 0, x, iqrProfile.get(i) );
-//			}
-//		}
-//		plot.setColor(Color.RED);
-//		for(int i : values.keySet()){
-//			int index = values.get(i);
-//			double x = xPoints[index];
-//			plot.drawLine(x, iqrProfile.get(index), x, displayMaxima.get(index));
-//		}
-//		// end of stuff that can be removed
-		
-		
+		}		
 		return result;
 	}
 	
@@ -394,97 +351,7 @@ public class ProfileCollection implements Serializable {
 //			this.addPlots(pointType, plotHash);
 //		}
 //	}   
-	
-//	public void preparePlot(String pointType, int width, int height, double maxLength){
-//
-//		Plot  rawPlot = new Plot( "Raw "       +pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-//		Plot normPlot = new Plot( "Normalised "+pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-//		Plot  iqrPlot = new Plot( "IQR "       +pointType+"-indexed plot", "Position", "IQR", Plot.Y_GRID | Plot.X_GRID);
-//
-//		rawPlot.setLimits(0,maxLength,CHART_SCALE_Y_MIN,CHART_SCALE_Y_MAX);
-//		rawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-//		rawPlot.setYTicks(true);
-//		rawPlot.setColor(Color.BLACK);
-//		rawPlot.drawLine(0, 180, maxLength, 180); 
-//		rawPlot.setColor(Color.LIGHT_GRAY);
-//
-//		normPlot.setLimits(0,100,CHART_SCALE_Y_MIN,CHART_SCALE_Y_MAX);
-//		normPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-//		normPlot.setYTicks(true);
-//		normPlot.setColor(Color.BLACK);
-//		normPlot.drawLine(0, 180, 100, 180); 
-//		normPlot.setColor(Color.LIGHT_GRAY);
-//
-//		iqrPlot.setLimits(0,100,0,50);
-//		iqrPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-//		iqrPlot.setYTicks(true);
-//		iqrPlot.setColor(Color.BLACK);
-//		iqrPlot.setColor(Color.LIGHT_GRAY);
-//
-//		ProfilePlot plotHash = new ProfilePlot();
-//		plotHash.add("raw" , rawPlot );
-//		plotHash.add("norm", normPlot);
-//		plotHash.add("iqr" , iqrPlot);
-//		this.addPlots(pointType, plotHash);
-//	}   
 
-
-//	public void addMedianLineToPlots(String pointType){
-//
-//		Plot plot = this.getPlots(pointType).get("norm");
-//
-//		ProfileAggregate profileAggregate = this.getAggregate(pointType);
-//
-//		double[] xmedians        =  profileAggregate.getXPositions().asArray();
-//		//			double[] ymedians        =  profileAggregate.getMedian().asArray();
-//		double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
-//		double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
-//
-//		// add the median lines to the chart
-//		//			plot.setColor(Color.BLACK);
-//		//			plot.setLineWidth(3);
-//		//			plot.addPoints(xmedians, ymedians, Plot.LINE);
-//		this.appendSegmentsToPlot(	this.getPlots(pointType).get("norm"), 
-//				this.getProfile(pointType),
-//				this.getSegments(pointType));
-//
-//		// add the IQR
-//		plot.setColor(Color.DARK_GRAY);
-//		plot.setLineWidth(2);
-//		plot.addPoints(xmedians, lowQuartiles, Plot.LINE);
-//		plot.addPoints(xmedians, uppQuartiles, Plot.LINE);
-//
-//	}
-
-//	
-//	public void addBoxplot(String pointType, List<Double> indexes){
-//
-//		double[] xPoints = new double[indexes.size()];
-//		for(int i= 0; i<indexes.size();i++){
-//			xPoints[i] = indexes.get(i);
-//		}
-//		// get the tail positions with the head offset applied
-//		double[] yPoints = new double[xPoints.length];
-//		Arrays.fill(yPoints, CHART_TAIL_BOX_Y_MID); // all dots at y=CHART_TAIL_BOX_Y_MID
-//
-//		Plot plot = this.getPlots(pointType).get("norm");
-//		plot.setColor(Color.LIGHT_GRAY);
-//		plot.addPoints(xPoints, yPoints, Plot.DOT);
-//
-//		// median tail positions
-//		double tailQ50 = Stats.quartile(xPoints, 50);
-//		double tailQ25 = Stats.quartile(xPoints, 25);
-//		double tailQ75 = Stats.quartile(xPoints, 75);
-//
-//		plot.setColor(Color.DARK_GRAY);
-//		plot.setLineWidth(1);
-//		plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MAX, tailQ75, CHART_TAIL_BOX_Y_MAX);
-//		plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MIN);
-//		plot.drawLine(tailQ25, CHART_TAIL_BOX_Y_MIN, tailQ25, CHART_TAIL_BOX_Y_MAX);
-//		plot.drawLine(tailQ75, CHART_TAIL_BOX_Y_MIN, tailQ75, CHART_TAIL_BOX_Y_MAX);
-//		plot.drawLine(tailQ50, CHART_TAIL_BOX_Y_MIN, tailQ50, CHART_TAIL_BOX_Y_MAX);
-//	}
-//	
 
 //	public void addSignalsToProfileChart(String pointType, List<XYPoint> signals, Color colour){
 //		// setup the plot for getting signals
@@ -528,96 +395,7 @@ public class ProfileCollection implements Serializable {
 //
 //	}
 
-//	public void exportProfilePlots(String folder, String nucleusCollectionType){
-//
-//		for( String pointType : this.getPlotKeys() ){
-//
-//			for(String key: this.getPlots(pointType).getKeys()){
-//				String filename = folder+
-//						File.separator+
-//						"plot."+
-//						pointType+
-//						"."+
-//						this.collectionName+
-//						"."+
-//						nucleusCollectionType;
-//				this.getPlots(pointType).export(key, filename);
-//
-//			}
-//		}  
-//	}
 		
-//	public void appendSegmentsToPlot(Plot segPlot, Profile profile, List<NucleusBorderSegment> segments){
-//
-//		int narrowLine = 2;
-////		int wideLine = 10;
-//		int verticalLine = 2;
-//
-//		int baseLineY = 5;
-//
-//		// draw 180 degree line
-////		segPlot.setLineWidth(narrowLine);
-////		segPlot.setColor(Color.DARK_GRAY);
-//////		segPlot.drawLine(0, 180, profile.size(),180);			
-//
-//		
-//		double[] xpoints = profile.getPositions(100).asArray();
-//		double[] ypoints = profile.asArray();
-//		// draw the background black median line for contrast
-////		segPlot.setLineWidth(wideLine);
-////		segPlot.addPoints(xpoints, ypoints, Plot.LINE);
-////		segPlot.setLineWidth(narrowLine);
-//
-//		// draw the coloured segments
-//		int i=0;
-//		for(NucleusBorderSegment b : segments){
-//
-//			//			IJ.log("Segment "+i);
-//			//			b.print();
-//
-//			segPlot.setLineWidth(4);
-//			if(i==0 && segments.size()==ProfileSegmenter.colourList.size()+1){ // avoid colour wrapping when segment number is 1 more than the colour list
-//				segPlot.setColor(Color.MAGENTA);
-//			} else{
-//				segPlot.setColor(ProfileSegmenter.getColor(i));
-//			}
-//
-//			//			IJ.log("    Colour: "+getColor(i));
-//			if(b.getStartIndex()<b.getEndIndex()){
-//
-//				// draw the coloured line at the base of the plot
-//				segPlot.drawLine(xpoints[b.getStartIndex()], baseLineY, xpoints[b.getEndIndex()], baseLineY);
-//				//				IJ.log("    Line from "+b.getStartIndex()+" to "+b.getEndIndex());
-//
-//				// draw the section of the profile
-//				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), b.getEndIndex());
-//				double[] yPart = Arrays.copyOfRange(ypoints, b.getStartIndex(), b.getEndIndex());
-//				segPlot.setLineWidth(narrowLine);
-//				segPlot.addPoints(xPart, yPart, Plot.LINE);
-//				segPlot.setLineWidth(4);
-//
-//			} else { // handle wrap arounds
-//				segPlot.drawLine(0, baseLineY, xpoints[b.getEndIndex()], baseLineY);
-//				segPlot.drawLine(xpoints[b.getStartIndex()], baseLineY, 100, baseLineY);
-//				//				IJ.log("    Line from 0 to "+b.getEndIndex()+" and "+b.getStartIndex()+" to "+profile.size());
-//
-//				double[] xPart = Arrays.copyOfRange(xpoints, b.getStartIndex(), profile.size()-1);
-//				double[] yPart = Arrays.copyOfRange(ypoints, b.getStartIndex(), profile.size()-1);
-//				segPlot.setLineWidth(narrowLine);
-//				segPlot.addPoints(xPart, yPart, Plot.LINE);
-//				xPart = Arrays.copyOfRange(xpoints, 0, b.getEndIndex());
-//				yPart = Arrays.copyOfRange(ypoints, 0, b.getEndIndex());
-//				segPlot.addPoints(xPart, yPart, Plot.LINE);
-//				segPlot.setLineWidth(4);
-//
-//			}
-//			// draw the vertical lines
-//			segPlot.setColor(Color.LIGHT_GRAY);
-//			segPlot.setLineWidth(verticalLine);
-//			segPlot.drawLine(xpoints[b.getStartIndex()], 0, xpoints[b.getStartIndex()],360);			
-//			segPlot.setLineWidth(1);
-//			i++;
-//		}				
-//	}
+
 
 }

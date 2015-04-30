@@ -56,37 +56,6 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
   }
 
   /*
-    -----------------------
-    Annotate features of the nucleus
-    -----------------------
-  */
-
-  // draw the points considered as sperm tails
-//  public void annotateEstimatedTailPoints(){
-//	  ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
-//		ImageProcessor ip = annotatedImage.getProcessor();
-////    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-//    ip.setLineWidth(3);
-//    ip.setColor(Color.GRAY);
-//    for(int j=0; j<this.getEstimatedTailPoints().size();j++){
-//      NucleusBorderPoint p = this.getEstimatedTailPoints().get(j);
-//      ip.drawDot(p.getXAsInt(), p.getYAsInt());
-//    }
-//    IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
-//  }
-
-//  public void annotateFeatures(){
-//
-//    this.annotateEstimatedTailPoints();
-//  }
-
-  /*
-    -----------------------
-    Find rotations based on tail point
-    -----------------------
-  */
-
-  /*
     Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
     Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
     Returns an angle
@@ -103,10 +72,4 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
       return 0-angle;
     }
   }
-
-  /*
-    -----------------------
-    Measure signal positions
-    -----------------------
-  */
 }

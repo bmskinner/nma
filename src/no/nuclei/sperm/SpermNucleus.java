@@ -41,51 +41,5 @@ public class SpermNucleus
     
   }
 
-  /*
-    -----------------------
-    Get sperm nucleus features
-    -----------------------
-  */
-
-
-  /*
-    -----------------------
-    Set sperm nucleus features
-    -----------------------
-  */
-
-
-  /*
-    -----------------------
-    Get raw and normalised profile and values
-    -----------------------
-  */
-
-
-
-  /*
-    -----------------------
-    Annotate features of the nucleus
-    -----------------------
-  */
-
-
-  /*
-    -----------------------
-    Find rotations based on tail point
-    -----------------------
-  */
-
-  /*
-    Find the angle that the nucleus must be rotated to make the CoM-tail vertical.
-    Uses the angle between [sperm tail x,0], sperm tail, and sperm CoM
-    Returns an angle
-  */
-
-  /*
-    -----------------------
-    Measure signal positions
-    -----------------------
-  */
 
 }

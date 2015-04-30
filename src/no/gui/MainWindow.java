@@ -54,9 +54,11 @@ import javax.swing.ListSelectionModel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.XYDataset;
@@ -72,17 +74,23 @@ public class MainWindow extends JFrame {
 	private JPanel contentPane;
 	private JTextArea textArea = new JTextArea();;
 	private JLabel lblStatusLine = new JLabel("No analysis open");
-	private final JPanel panelAggregates = new JPanel();
+	private final JPanel panelAggregates = new JPanel(); // holds consensus, tab and population panels
 	private JTable tablePopulationStats;
-	private final JPanel panelGeneralData = new JPanel();
+	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
 	
-	private final JPanel panelPopulations = new JPanel();
+	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 	private JList<String> populationList;
 		
 	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
 	private ChartPanel consensusChartPanel;
-	private ChartPanel boxplotChartPanel;
+	
+	private ChartPanel areaBoxplotChartPanel;
+	private ChartPanel perimBoxplotChartPanel;
+	private ChartPanel maxFeretBoxplotChartPanel;
+	private ChartPanel minFeretBoxplotChartPanel;
+	
+	private ChartPanel variabilityChartPanel; 
 	
 	private HashMap<String, NucleusCollection> analysisPopulations = new HashMap<String, NucleusCollection>();;
 
@@ -234,13 +242,43 @@ public class MainWindow extends JFrame {
 			panelGeneralStats.add(tablePopulationStats, BorderLayout.NORTH);
 			tablePopulationStats.setEnabled(false);
 			tablePopulationStats.setModel(DatasetCreator.createStatsTable(null));
+						
+			//---------------
+			// Create panel for split boxplots
+			//---------------
+			JPanel boxplotSplitPanel = new JPanel(); // main container in tab
+			
+			boxplotSplitPanel.setLayout(new BoxLayout(boxplotSplitPanel, BoxLayout.X_AXIS));
+			JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+			areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
+			boxplotSplitPanel.add(areaBoxplotChartPanel);
+			
+			JFreeChart perimBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+			perimBoxplotChartPanel = new ChartPanel(perimBoxplot);
+			boxplotSplitPanel.add(perimBoxplotChartPanel);
+			
+			JFreeChart maxFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+			maxFeretBoxplotChartPanel = new ChartPanel(maxFeretBoxplot);
+			boxplotSplitPanel.add(maxFeretBoxplotChartPanel);
+			
+			JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+			minFeretBoxplotChartPanel = new ChartPanel(minFeretBoxplot);
+			boxplotSplitPanel.add(minFeretBoxplotChartPanel);
+			
+			tabbedPane.addTab("Boxplots", null, boxplotSplitPanel, null);
 			
 			//---------------
-			// Create the boxplot chart
+			// Create the variability chart
 			//---------------
-			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			boxplotChartPanel = new ChartPanel(boxplotChart);
-			tabbedPane.addTab("Boxplots", null, boxplotChartPanel, null);
+			JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
+					"Position", "IQR", null);
+			XYPlot variabilityPlot = variablityChart.getXYPlot();
+			variabilityPlot.setBackgroundPaint(Color.WHITE);
+			variabilityPlot.getDomainAxis().setRange(0,100);
+			
+			variabilityChartPanel = new ChartPanel(variablityChart);
+			tabbedPane.addTab("Variability", null, variabilityChartPanel, null);
+			
 			
 
 		} catch (Exception e) {
@@ -343,10 +381,15 @@ public class MainWindow extends JFrame {
 	}
 	
 	public void updatePanels(NucleusCollection collection){
+		
+		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+		list.add(collection);
+		
 		updateStatsPanel(collection);
 		updateProfileImage(collection);
 		updateConsensusImage(collection);
 		updateBoxplots(collection);
+		updateVariabilityChart(list);
 	}
 	
 	public void updateStatsPanel(NucleusCollection collection){
@@ -465,15 +508,85 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	/**
+	 * Update all the boxplots for the given collection
+	 * @param collection
+	 */
 	public void updateBoxplots(NucleusCollection collection){
 		
 		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
 		list.add(collection);
-		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createAreaBoxplotDataset(list);
-		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-		boxplotChartPanel.setChart(boxplotChart);
+		
+		updateAreaBoxplot(list);
+		updatePerimBoxplot(list);
+		updateMaxFeretBoxplot(list);
+		updateMinFeretBoxplot(list);
 	}
 	
+	/**
+	 * Update the boxplot panel for areas with a list of NucleusCollections
+	 * @param list
+	 */
+	public void updateAreaBoxplot(List<NucleusCollection> list){
+		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createAreaBoxplotDataset(list);
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		formatBoxplotChart(boxplotChart);
+		areaBoxplotChartPanel.setChart(boxplotChart);
+	}
+	
+	/**
+	 * Update the boxplot panel for perimeters with a list of NucleusCollections
+	 * @param list
+	 */
+	public void updatePerimBoxplot(List<NucleusCollection> list){
+		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createPerimBoxplotDataset(list);
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		formatBoxplotChart(boxplotChart);
+		perimBoxplotChartPanel.setChart(boxplotChart);
+	}
+	
+	/**
+	 * Update the boxplot panel for longest diameter across CoM with a list of NucleusCollections
+	 * @param list
+	 */
+	public void updateMaxFeretBoxplot(List<NucleusCollection> list){
+		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createMaxFeretBoxplotDataset(list);
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		formatBoxplotChart(boxplotChart);
+		maxFeretBoxplotChartPanel.setChart(boxplotChart);
+	}
+
+	/**
+	 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
+	 * @param list
+	 */
+	public void updateMinFeretBoxplot(List<NucleusCollection> list){
+		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createMinFeretBoxplotDataset(list);
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		formatBoxplotChart(boxplotChart);
+		minFeretBoxplotChartPanel.setChart(boxplotChart);
+	}
+	
+	/**
+	 * Apply the default formatting to a boxplot
+	 * @param boxplot
+	 */
+	public void formatBoxplotChart(JFreeChart boxplot){
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+		plot.setRenderer(renderer);
+		renderer.setUseOutlinePaintForWhiskers(true);   
+		renderer.setBaseOutlinePaint(Color.BLACK);
+		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+		renderer.setSeriesPaint(0, Color.LIGHT_GRAY);
+		renderer.setMeanVisible(false);
+	}
+
+	
+	/**
+	 *  Find the populations in memory, and display them in the population chooser
+	 */
 	public void updatePopulationList(){
 				
 		DefaultListModel<String> model = new DefaultListModel<String>();
@@ -489,6 +602,30 @@ public class MainWindow extends JFrame {
 	}
 	
 	
+	public void updateVariabilityChart(List<NucleusCollection> list){
+		NucleusCollection n = list.get(0);
+		XYDataset ds = DatasetCreator.createIQRVariabilityDataset(n);
+		JFreeChart chart = makeProfileChart(ds);
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.getDomainAxis().setRange(0,100);
+		plot.getRangeAxis().setLabel("IQR");
+		plot.getRangeAxis().setAutoRange(true);
+		List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
+		for(Integer i : maxima){
+			plot.addDomainMarker(new ValueMarker(i, Color.BLACK, new BasicStroke(1.0f)));
+		}
+		
+		variabilityChartPanel.setChart(chart);
+		
+	}
+	
+	/**
+	 * Listen for selections to the population list. Switch between single population,
+	 * or multiple selections
+	 * @author bms41
+	 *
+	 */
 	class ListSelectionHandler implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent e) {
 

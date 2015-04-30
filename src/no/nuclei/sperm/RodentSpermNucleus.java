@@ -102,19 +102,6 @@ extends SpermNucleus
 
   /*
     -----------------------
-    Get and set sperm nucleus features
-    -----------------------
-  */
-  // public void setInitialConsensusTail(NucleusBorderPoint p){
-  //   this.initialConsensusTail = p;
-  // }
-
-  // public NucleusBorderPoint getInitialConsensusTail(){
-  //   return this.initialConsensusTail;
-  // }
-
-  /*
-    -----------------------
     Qualities of a sperm head
     -----------------------
   */
@@ -328,22 +315,6 @@ extends SpermNucleus
       }
 
     }
-
-    // Construct new float polygons
-//    float[] roi1X = new float[ roi1.size()];
-//    float[] roi2X = new float[ roi2.size()];
-//    float[] roi1Y = new float[ roi1.size()];
-//    float[] roi2Y = new float[ roi2.size()];
-
-//    for(int i=0;i<roi1.size();i++){
-//      roi1X[i] = (float) roi1.get(i).getX();
-//      roi1Y[i] = (float) roi1.get(i).getY();
-//    }
-//
-//    for(int i=0;i<roi2.size();i++){
-//      roi2X[i] = (float) roi2.get(i).getX();
-//      roi2Y[i] = (float) roi2.get(i).getY();
-//    }
     
     // default
     this.hookRoi = roi2;
@@ -354,19 +325,10 @@ extends SpermNucleus
       if(roi1.get(i).overlaps(this.getBorderTag("tip"))){
     	  this.hookRoi = roi1;
           this.humpRoi = roi2;
-//        this.hookRoi = new FloatPolygon( roi1X, roi1Y);
-//        this.humpRoi = new FloatPolygon( roi2X, roi2Y);
         break;
       }
     }
 
-//    for(int i=0;i<roi2.size();i++){
-//      if(roi2.get(i).overlaps(this.getBorderTag("tip"))){
-//        this.hookRoi = new FloatPolygon( roi2X, roi2Y);
-//        this.humpRoi = new FloatPolygon( roi1X, roi1Y);
-//         break;
-//      }
-//    }
   }
 
   /*
@@ -404,45 +366,4 @@ extends SpermNucleus
 //    	channel++;
     }
   }
-
-
-  /*
-    -----------------------
-    Methods for exporting data
-    -----------------------
-  */
-
-
-  /*
-    -----------------------
-    Annotate nucleus
-    -----------------------
-  */
-
-//  public void annotateFeatures(){
-//
-////    ImageProcessor ip = this.getAnnotatedImage().getProcessor();
-//    ImagePlus annotatedImage = new ImagePlus(this.getAnnotatedImagePath());
-//	ImageProcessor ip = annotatedImage.getProcessor();
-//    //draw the sperm tip 
-//    ip.setLineWidth(5);
-//    ip.setColor(Color.YELLOW);
-//    ip.drawDot( this.getBorderTag("tip").getXAsInt(), 
-//                this.getBorderTag("tip").getYAsInt());
-//
-//
-//    this.annotateEstimatedTailPoints();
-//    this.annotateTail();
-//
-//    // line from tail to intsersection point; should pass through CoM   
-//    if(this.getBorderTag("intersectionPoint").getX()!=0 && this.getBorderTag("intersectionPoint").getY()!=0){ // handle failed nuclei in which this analysis was not performed
-//      ip.setLineWidth(1);
-//      ip.setColor(Color.YELLOW);
-//      ip.drawLine(this.getBorderTag("tail").getXAsInt(),
-//                  this.getBorderTag("tail").getYAsInt(), 
-//                  this.getBorderTag("intersectionPoint").getXAsInt(), 
-//                  this.getBorderTag("intersectionPoint").getYAsInt());
-//    }
-//    IJ.saveAsTiff(annotatedImage, this.getAnnotatedImagePath());
-//  }
 }

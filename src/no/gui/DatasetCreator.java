@@ -1,9 +1,8 @@
 package no.gui;
 
 
-import ij.gui.Plot;
+import ij.IJ;
 
-import java.awt.Color;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,6 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import no.analysis.ProfileSegmenter;
 import no.collections.NucleusCollection;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
@@ -27,18 +25,10 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 public class DatasetCreator {
-
-	public static XYDataset createSegmentDataset(NucleusCollection collection){
-		DefaultXYDataset ds = new DefaultXYDataset();
-		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+	
+	private static XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds){
+		
 		Profile xpoints = profile.getPositions(100);
-		
-		// rendering order will be first on top
-		
-		// add the segments
-
-		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
-
 		for(NucleusBorderSegment seg : segments){
 
 			if(seg.getStartIndex()>seg.getEndIndex()){ // case when array wraps
@@ -61,6 +51,19 @@ public class DatasetCreator {
 			double[][] data = { subPoints.asArray(), subProfile.asArray() };
 			ds.addSeries(seg.getSegmentType(), data);
 		}
+		return ds;
+	}
+
+	public static XYDataset createSegmentDataset(NucleusCollection collection){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+		Profile xpoints = profile.getPositions(100);
+		
+		// rendering order will be first on top
+		
+		// add the segments
+		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+		addSegmentsFromProfile(segments, profile, ds);
 
 		// make the IQR
 		Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
@@ -79,6 +82,13 @@ public class DatasetCreator {
 		return ds;
 	}
 	
+	public static XYDataset createIQRVariabilityDataset(NucleusCollection collection){
+		Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
+		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+		XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset());		
+		return ds;
+	}
+		
 	public static XYDataset createFrankenSegmentDataset(NucleusCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getFrankenCollection().getProfile(collection.getOrientationPoint());
@@ -98,13 +108,13 @@ public class DatasetCreator {
 				Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
 				Profile subPointsA = xpoints.getSubregion(0, seg.getEndIndex());
 				double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
-				ds.addSeries(seg.getSegmentType(), dataA);
+				ds.addSeries(seg.getSegmentType()+"_1", dataA);
 
 				// end of array
 				Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
 				Profile subPointsB = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
 				double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
-				ds.addSeries(seg.getSegmentType(), dataB);
+				ds.addSeries(seg.getSegmentType()+"_2", dataB);
 				continue;
 			} 
 			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
@@ -186,47 +196,87 @@ public class DatasetCreator {
 
 		return new DefaultTableModel(data, columnNames);
 	}
-		
+				
 	public static BoxAndWhiskerCategoryDataset createAreaBoxplotDataset(List<NucleusCollection> collections) {
                 
-        DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-        
-        for (int i=0; i < collections.size(); i++) {
-        		NucleusCollection c = collections.get(i);
-     		
-                List<Double> areas = new ArrayList<Double>();
-                List<Double> perims = new ArrayList<Double>();
-                List<Double> feret = new ArrayList<Double>();
-                List<Double> minFeret = new ArrayList<Double>();
-                
-                for (double d : c.getAreas()) {
-                	areas.add(new Double(d));
-                }
-                for (double d : c.getPerimeters()) {
-                	perims.add(new Double(d));
-                }
-                for (double d : c.getFerets()) {
-                	feret.add(new Double(d));
-                }
-                for (double d : c.getMinFerets()) {
-                	minFeret.add(new Double(d));
-                }
-                
-                dataset.add(areas, c.getType(), "Area");
-                dataset.add(perims, c.getType(), "Perimeter");
-                dataset.add(feret, c.getType(), "Max feret"); 
-                dataset.add(minFeret, c.getType(), "Min feret"); 
-        }
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
-        return dataset;
-    }
+		for (int i=0; i < collections.size(); i++) {
+			NucleusCollection c = collections.get(i);
+
+			List<Double> list = new ArrayList<Double>();
+
+			
+			for (double d : c.getAreas()) {
+				list.add(new Double(d));
+			}
+			dataset.add(list, c.getType(), "Area");
+		}
+
+		return dataset;
+	}
+	
+	public static BoxAndWhiskerCategoryDataset createPerimBoxplotDataset(List<NucleusCollection> collections) {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+			NucleusCollection c = collections.get(i);
+
+			List<Double> list = new ArrayList<Double>();
+
+			
+			for (double d : c.getPerimeters()) {
+				list.add(new Double(d));
+			}
+			dataset.add(list, c.getType(), "Perimeter");
+		}
+
+		return dataset;
+	}
+	
+	public static BoxAndWhiskerCategoryDataset createMinFeretBoxplotDataset(List<NucleusCollection> collections) {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+			NucleusCollection c = collections.get(i);
+
+			List<Double> list = new ArrayList<Double>();
+
+			for (double d : c.getMinFerets()) {
+				list.add(new Double(d));
+			}
+			dataset.add(list, c.getType(), "Min feret");
+		}
+
+		return dataset;
+	}
+	
+	public static BoxAndWhiskerCategoryDataset createMaxFeretBoxplotDataset(List<NucleusCollection> collections) {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+			NucleusCollection c = collections.get(i);
+
+			List<Double> list = new ArrayList<Double>();
+
+			for (double d : c.getFerets()) {
+				list.add(new Double(d));
+			}
+			dataset.add(list, c.getType(), "Max feret");
+		}
+
+		return dataset;
+	}
 
 	
 	public static XYDataset createNucleusOutline(NucleusCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Nucleus n = collection.getConsensusNucleus();
-		Profile q25 = collection.getProfileCollection().getProfile("tail25");
-		Profile q75 = collection.getProfileCollection().getProfile("tail75");
+		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
+		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
 		
 
 		// Add lines to show the IQR of the angle profile at each point
@@ -248,6 +298,10 @@ public class DatasetCreator {
 		double min = Math.min(n.getMinX(), n.getMinY());
 		double max = Math.max(n.getMaxX(), n.getMaxY());
 		double scale = Math.min(Math.abs(min), Math.abs(max));
+		
+		Profile iqrRange = q75.subtract(q25);
+		Profile scaledRange = iqrRange.divide(iqrRange.getMax()); // iqr as fraction of total variability
+		scaledRange = scaledRange.multiply(scale/10); // set to 10% min radius
 
 
 		// rendering order will be first on top
@@ -274,29 +328,43 @@ public class DatasetCreator {
 		}
 
 		// add the IQR
-		int tailIndex = n.getBorderIndex("tail");
+		// error here - the nucleus is not starting from the same point as the iqr
+		// perhaps a reverse order issue? No. Still offset.
+		// Also a problem with order. IQR is doubling back towards tail; 
+			// the final point is correct (tailindex-1), but the rest are off by ~8
+			// moved back to innerIQRX[i] from innerIQRX[index]; everything joins up again. 
+		// Confirms the issue is with the XYPoint positions assigned to each IQR 
+//		scaledRange.reverse();
+		int offset = -n.getBorderIndex(collection.getOrientationPoint())-20;
+		scaledRange = scaledRange.offset(offset);
+//		IJ.log("Offset: "+offset);
+//		int ref = n.getBorderIndex(collection.getReferencePoint());
+//		IJ.log("Ref point: "+ref);
+		
+		
+		// what we need to do is match the profile positions to the borderpoints
+		
+		int tailIndex = n.getBorderIndex(collection.getOrientationPoint());
 
 		for(int i=0; i<n.getLength(); i++){
 
-			int index = Utils.wrapIndex(i + tailIndex, n.getLength());
+			int index = Utils.wrapIndex(i + tailIndex, n.getLength()); // start from the orientation point
 
-			int prevIndex = Utils.wrapIndex(i-3 + tailIndex, n.getLength());
-			int nextIndex = Utils.wrapIndex(i+3 + tailIndex, n.getLength());
+			int prevIndex = Utils.wrapIndex(index-3, n.getLength());
+			int nextIndex = Utils.wrapIndex(index+3, n.getLength());
 
-			// IJ.log("Getting point: "+index);
-			XYPoint p = n.getPoint( index  );
+			XYPoint p = n.getBorderPoint( index  );
 
-			double distance = ((q75.get(index) - q25.get(index))/maxIQR)*(scale/10); // scale to maximum of 10% the minimum diameter 
 			
-			// use scaling factor
-			// normalise distances to the plot
-
+			// decide the angle at which to place the iqr points
+			// make a line between points 3 ahead and behind. 
+			// get the orthogonal line, running through the XYPoint
 			Equation eq = new Equation(n.getPoint( prevIndex  ), n.getPoint( nextIndex  ));
 			// move the line to the index point, and find the orthogonal line
 			Equation perp = eq.translate(p).getPerpendicular(p);
-
-			XYPoint aPoint = perp.getPointOnLine(p, (0-distance));
-			XYPoint bPoint = perp.getPointOnLine(p, distance);
+			
+			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(i)));
+			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(i));
 
 			XYPoint innerPoint = Utils.createPolygon(n).contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
 			XYPoint outerPoint = Utils.createPolygon(n).contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
@@ -318,4 +386,6 @@ public class DatasetCreator {
 		ds.addSeries("Q75", outer);
 		return ds;
 	}
+	
+	
 }
