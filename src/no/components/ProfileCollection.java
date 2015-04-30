@@ -252,15 +252,17 @@ public class ProfileCollection implements Serializable {
 	public Profile getIQRProfile(String pointType){
 		
 		ProfileAggregate profileAggregate = this.getAggregate(pointType);
-
-		double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
-		double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
 		
-		double[] iqr = new double[lowQuartiles.length];
-		for(int i=0;i<iqr.length;i++){
-			iqr[i] = uppQuartiles[i] - lowQuartiles[i]; 
-		}
-		return new Profile(iqr);
+		return profileAggregate.getQuartile(75).subtract(profileAggregate.getQuartile(25));
+
+//		double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
+//		double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
+//		
+//		double[] iqr = new double[lowQuartiles.length];
+//		for(int i=0;i<iqr.length;i++){
+//			iqr[i] = uppQuartiles[i] - lowQuartiles[i]; 
+//		}
+//		return new Profile(iqr);
 	}
 	
 	/**

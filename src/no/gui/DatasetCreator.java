@@ -79,6 +79,30 @@ public class DatasetCreator {
 		return ds;
 	}
 	
+	public static XYDataset createMultiProfileDataset(List<NucleusCollection> list){
+		DefaultXYDataset ds = new DefaultXYDataset();
+
+		int i=0;
+		for(NucleusCollection collection : list){
+			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+			Profile xpoints = profile.getPositions(100);
+			double[][] data = { xpoints.asArray(), profile.asArray() };
+			ds.addSeries("Profile_"+i, data);
+
+			// rendering order will be first on top
+
+			// make the IQR
+			Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
+			Profile profile75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
+			double[][] data25 = { xpoints.asArray(), profile25.asArray() };
+			ds.addSeries("Q25_"+i, data25);
+			double[][] data75 = { xpoints.asArray(), profile75.asArray() };
+			ds.addSeries("Q75_"+i, data75);
+			i++;
+		}
+		return ds;
+	}
+	
 	public static XYDataset createIQRVariabilityDataset(NucleusCollection collection){
 		Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
 		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
@@ -205,11 +229,10 @@ public class DatasetCreator {
 
 			List<Double> list = new ArrayList<Double>();
 
-			
 			for (double d : c.getAreas()) {
 				list.add(new Double(d));
 			}
-			dataset.add(list, c.getType(), "Area");
+			dataset.add(list, c.getType()+"_"+i, "Area");
 		}
 
 		return dataset;
@@ -228,7 +251,7 @@ public class DatasetCreator {
 			for (double d : c.getPerimeters()) {
 				list.add(new Double(d));
 			}
-			dataset.add(list, c.getType(), "Perimeter");
+			dataset.add(list, c.getType()+"_"+i, "Perimeter");
 		}
 
 		return dataset;
@@ -246,7 +269,7 @@ public class DatasetCreator {
 			for (double d : c.getMinFerets()) {
 				list.add(new Double(d));
 			}
-			dataset.add(list, c.getType(), "Min feret");
+			dataset.add(list, c.getType()+"_"+i, "Min feret");
 		}
 
 		return dataset;
@@ -264,7 +287,7 @@ public class DatasetCreator {
 			for (double d : c.getFerets()) {
 				list.add(new Double(d));
 			}
-			dataset.add(list, c.getType(), "Max feret");
+			dataset.add(list, c.getType()+"_"+i, "Max feret");
 		}
 
 		return dataset;
@@ -334,7 +357,7 @@ public class DatasetCreator {
 			// moved back to innerIQRX[i] from innerIQRX[index]; everything joins up again. 
 		// Confirms the issue is with the XYPoint positions assigned to each IQR 
 //		scaledRange.reverse();
-		int offset = -n.getBorderIndex(collection.getOrientationPoint())-20;
+//		int offset = -n.getBorderIndex(collection.getOrientationPoint())-20;
 //		scaledRange = scaledRange.offset(offset);
 //		IJ.log("Offset: "+offset);
 //		int ref = n.getBorderIndex(collection.getReferencePoint());
@@ -386,5 +409,28 @@ public class DatasetCreator {
 		return ds;
 	}
 	
-	
+	public static XYDataset createMultiNucleusOutline(List<NucleusCollection> list){
+		
+		DefaultXYDataset ds = new DefaultXYDataset();
+
+		int i=0;
+		for(NucleusCollection collection : list){
+			Nucleus n = collection.getConsensusNucleus();
+			
+			double[] xpoints = new double[n.getLength()];
+			double[] ypoints = new double[n.getLength()];
+			
+			int j =0;
+			
+			for(NucleusBorderPoint p : n.getBorderList()){
+				xpoints[j] = p.getX();
+				ypoints[j] = p.getY();
+				j++;
+			}
+			double[][] data = { xpoints, ypoints };
+			ds.addSeries("Nucleus_"+i, data);
+			i++;
+		}
+		return ds;
+	}
 }

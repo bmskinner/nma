@@ -18,6 +18,7 @@ import javax.swing.JButton;
 import no.analysis.AnalysisCreator;
 import no.analysis.ProfileSegmenter;
 import no.collections.NucleusCollection;
+import no.components.Profile;
 import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
 import no.utility.MappingFileParser;
@@ -181,7 +182,7 @@ public class MainWindow extends JFrame {
 			model.addElement("No populations");;
 			
 			populationList = new JList<String>(model);
-			populationList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			populationList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 			
 			ListSelectionModel listSelectionModel = populationList.getSelectionModel();
 			listSelectionModel.addListSelectionListener(
@@ -351,7 +352,9 @@ public class MainWindow extends JFrame {
 			}
 			this.analysisPopulations.put(remapCollection.getOutputFolderName()+" - "+remapCollection.getType()+" - "+remapCollection.getNucleusCount()+" nuclei", remapCollection);
 			log("Created subcollection from mapping file");
-			updatePanels(remapCollection);
+			List<NucleusCollection> list = new ArrayList<NucleusCollection>();
+			list.add(remapCollection);
+			updatePanels(list);
 			updatePopulationList();
 		} catch(Exception e){
 			
@@ -369,7 +372,7 @@ public class MainWindow extends JFrame {
 				// post-analysis displays: make a new class eventually to handle gui? Or do it here
 
 				List<NucleusCollection> result = analysisCreator.getPopulations();
-				updatePanels(result.get(0));
+				updatePanels(result);
 				
 				for(NucleusCollection c : result){
 					String key = c.getOutputFolderName()+" - "+c.getType()+" - "+c.getNucleusCount()+" nuclei";
@@ -397,33 +400,37 @@ public class MainWindow extends JFrame {
 			MainWindow.this.analysisPopulations.put(key, collection);
 			log("Opened collection: "+collection.getType());
 			
-			updatePanels(collection);
+			List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+			list.add(collection);
+			
+			updatePanels(list);
 			updatePopulationList();
 		} catch (Exception e) {
 			log("Error opening file: "+e.getMessage());
 		}
 	}
 	
-	public void updatePanels(NucleusCollection collection){
+	public void updatePanels(List<NucleusCollection> list){
 		
-		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-		list.add(collection);
+//		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+//		list.add(collection);
 		
 		try {
-			updateStatsPanel(collection);
-			updateProfileImage(collection);
-			updateConsensusImage(collection);
-			updateBoxplots(collection);
+			updateStatsPanel(list);
+			updateProfileImage(list);
+			updateConsensusImage(list);
+			updateBoxplots(list);
 			updateVariabilityChart(list);
-			updateShellPanel(collection);
+			updateShellPanel(list);
 		} catch (Exception e) {
 			log("Error updating panels: "+e.getMessage());
 			e.printStackTrace();
 		}
 	}
 	
-	public void updateStatsPanel(NucleusCollection collection){
+	public void updateStatsPanel(List<NucleusCollection> list){
 		// format the numbers and make into a tablemodel
+		NucleusCollection collection = list.get(0);
 		lblStatusLine.setText("Showing: "+collection.getOutputFolderName()+" - "+collection.getFolder()+" - "+collection.getType());
 		TableModel model = DatasetCreator.createStatsTable(collection);
 		tablePopulationStats.setModel(model);
@@ -464,13 +471,40 @@ public class MainWindow extends JFrame {
 		return chart;
 	}
 	
-	public void updateProfileImage(NucleusCollection collection){
+	public void updateProfileImage(List<NucleusCollection> list){
 		
+		NucleusCollection collection = list.get(0);
 		try {
-			
-			XYDataset ds = DatasetCreator.createSegmentDataset(collection);
-			JFreeChart chart = makeProfileChart(ds);
-			profileChartPanel.setChart(chart);
+			if(list.size()==1){
+
+				// full segment colouring
+				XYDataset ds = DatasetCreator.createSegmentDataset(collection);
+				JFreeChart chart = makeProfileChart(ds);
+				profileChartPanel.setChart(chart);
+			} else {
+				// many profiles, colour them all the same
+				XYDataset ds = DatasetCreator.createMultiProfileDataset(list);
+				JFreeChart chart = makeProfileChart(ds);
+				XYPlot plot = chart.getXYPlot();
+				int seriesCount = plot.getSeriesCount();
+
+				for (int i = 0; i < seriesCount; i++) {
+					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.TRUE);
+					String name = (String) ds.getSeriesKey(i);
+					if(name.startsWith("Profile_")){
+						plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+						
+					}  
+					if(name.startsWith("Q")){
+						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+					} 
+					// get the group id from teh name, and make colour
+					String[] names = name.split("_");
+					plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(Integer.parseInt(names[1])));
+					
+				}	
+				profileChartPanel.setChart(chart);
+			}
 			
 //			XYDataset fs = DatasetCreator.createFrankenSegmentDataset(collection);
 //			JFreeChart frankenChart = makeProfileChart(fs);
@@ -481,8 +515,9 @@ public class MainWindow extends JFrame {
 		} 
 	}
 	
-	public void updateShellPanel(NucleusCollection collection){
+	public void updateShellPanel(List<NucleusCollection> list){
 		// if collection has shell results, display
+		NucleusCollection collection = list.get(0);
 		
 		// else,  no shell analysis in the population
 		// have a panel ready with a button to run the analysis
@@ -499,60 +534,90 @@ public class MainWindow extends JFrame {
 		tabbedPane.setComponentAt(5, shellsPanel);
 	}
 	
-	public void updateConsensusImage(NucleusCollection collection){
+	public void updateConsensusImage(List<NucleusCollection> list){
+
+		NucleusCollection collection = list.get(0);
 		try {
-			if(collection.getConsensusNucleus()==null){
-				// add button to run analysis
-				JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-						null, null, null);
-				XYPlot consensusPlot = consensusChart.getXYPlot();
-				consensusPlot.setBackgroundPaint(Color.WHITE);
-				consensusPlot.getDomainAxis().setVisible(false);
-				consensusPlot.getRangeAxis().setVisible(false);
-				consensusChartPanel.setChart(consensusChart);
-				
-			} else {
-				XYDataset ds = DatasetCreator.createNucleusOutline(collection);
+			if(list.size()==1){
+				if(collection.getConsensusNucleus()==null){
+					// add button to run analysis
+					JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
+							null, null, null);
+					XYPlot consensusPlot = consensusChart.getXYPlot();
+					consensusPlot.setBackgroundPaint(Color.WHITE);
+					consensusPlot.getDomainAxis().setVisible(false);
+					consensusPlot.getRangeAxis().setVisible(false);
+					consensusChartPanel.setChart(consensusChart);
+
+				} else {
+					XYDataset ds = DatasetCreator.createNucleusOutline(collection);
+					JFreeChart chart = 
+							ChartFactory.createXYLineChart(null,
+									null, null, ds, PlotOrientation.VERTICAL, true, true,
+									false);
+
+					double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
+					double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
+
+					// ensure that the scales for each axis are the same
+					double max = Math.max(maxX, maxY);
+
+					// ensure there is room for expansion of the target nucleus due to IQR
+					max *=  1.25;		
+
+					XYPlot plot = chart.getXYPlot();
+					plot.getDomainAxis().setRange(-max,max);
+					plot.getRangeAxis().setRange(-max,max);
+
+					plot.getDomainAxis().setVisible(false);
+					plot.getRangeAxis().setVisible(false);
+
+					plot.setBackgroundPaint(Color.WHITE);
+					plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+					plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+
+					int seriesCount = plot.getSeriesCount();
+
+					for (int i = 0; i < seriesCount; i++) {
+						plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+						String name = (String) ds.getSeriesKey(i);
+						if(name.startsWith("Seg_")){
+							plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+							plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
+						} 
+						if(name.startsWith("Q")){
+							plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+							plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+						} 
+
+					}	
+					consensusChartPanel.setChart(chart);
+				} 
+			}else {
+				// multiple nuclei
+				XYDataset ds = DatasetCreator.createMultiNucleusOutline(list);
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
-						                null, null, ds, PlotOrientation.VERTICAL, true, true,
-						                false);
-				
-				double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
-				double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
-
-				// ensure that the scales for each axis are the same
-				double max = Math.max(maxX, maxY);
-
-				// ensure there is room for expansion of the target nucleus due to IQR
-				max *=  1.25;		
-				
+								null, null, ds, PlotOrientation.VERTICAL, true, true,
+								false);
 				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(-max,max);
-				plot.getRangeAxis().setRange(-max,max);
-				
 				plot.getDomainAxis().setVisible(false);
 				plot.getRangeAxis().setVisible(false);
-
 				plot.setBackgroundPaint(Color.WHITE);
 				plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
 				plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-
+				
 				int seriesCount = plot.getSeriesCount();
-
+				
 				for (int i = 0; i < seriesCount; i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.TRUE);
 					String name = (String) ds.getSeriesKey(i);
-					if(name.startsWith("Seg_")){
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-						plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
-					} 
-					if(name.startsWith("Q")){
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-						plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-					} 
-					
-				}	
+					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+
+					// get the group id from the name, and make colour
+					String[] names = name.split("_");
+					plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(Integer.parseInt(names[1])));
+				}
 				consensusChartPanel.setChart(chart);
 			}
 		} catch (Exception e) {
@@ -565,11 +630,8 @@ public class MainWindow extends JFrame {
 	 * Update all the boxplots for the given collection
 	 * @param collection
 	 */
-	public void updateBoxplots(NucleusCollection collection){
-		
-		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-		list.add(collection);
-		
+	public void updateBoxplots(List<NucleusCollection> list){
+				
 		try {
 			updateAreaBoxplot(list);
 			updatePerimBoxplot(list);
@@ -636,7 +698,10 @@ public class MainWindow extends JFrame {
 		renderer.setUseOutlinePaintForWhiskers(true);   
 		renderer.setBaseOutlinePaint(Color.BLACK);
 		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-		renderer.setSeriesPaint(0, Color.LIGHT_GRAY);
+		for(int i=0;i<plot.getDataset().getRowCount();i++){
+			Color color = i%2==0 ? Color.LIGHT_GRAY : Color.DARK_GRAY;
+			renderer.setSeriesPaint(i, color);
+		}
 		renderer.setMeanVisible(false);
 	}
 
@@ -670,8 +735,10 @@ public class MainWindow extends JFrame {
 			plot.getRangeAxis().setLabel("IQR");
 			plot.getRangeAxis().setAutoRange(true);
 			List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
+			Profile xpoints = n.getProfileCollection().getProfile(n.getOrientationPoint()).getPositions(100);
 			for(Integer i : maxima){
-				plot.addDomainMarker(new ValueMarker(i, Color.BLACK, new BasicStroke(1.0f)));
+//				log("Maxima at "+i);
+				plot.addDomainMarker(new ValueMarker(xpoints.get(i), Color.BLACK, new BasicStroke(1.0f)));
 			}
 			
 			variabilityChartPanel.setChart(chart);
@@ -688,12 +755,32 @@ public class MainWindow extends JFrame {
 	 */
 	class ListSelectionHandler implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent e) {
+			
+			List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+			
+			ListSelectionModel lsm = (ListSelectionModel)e.getSource();
 
-			String key = populationList.getSelectedValue();
-			if(!key.equals("No populations")){
-				NucleusCollection c = MainWindow.this.analysisPopulations.get(key);
-				updatePanels(c);
+//			int firstIndex = e.getFirstIndex();
+//			int lastIndex = e.getLastIndex();
+//			boolean isAdjusting = e.getValueIsAdjusting();
+
+			if (!lsm.isSelectionEmpty()) {
+				// Find out which indexes are selected.
+				int minIndex = lsm.getMinSelectionIndex();
+				int maxIndex = lsm.getMaxSelectionIndex();
+				for (int i = minIndex; i <= maxIndex; i++) {
+					if (lsm.isSelectedIndex(i)) {
+						String key = populationList.getModel().getElementAt(i);
+						if(!key.equals("No populations")){
+							list.add(analysisPopulations.get(key));
+							
+						}
+
+					}
+				}
+				updatePanels(list);
 			}
+
 		}
 	}
 }
