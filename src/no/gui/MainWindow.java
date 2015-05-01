@@ -205,7 +205,6 @@ public class MainWindow extends JFrame {
 			          int index = theList.locationToIndex(arg0.getPoint());
 			          if (index >= 0) {
 			            Object o = theList.getModel().getElementAt(index);
-			           log("Double-clicked on: " + o.toString());
 			           UUID id = MainWindow.this.populationNames.get(o.toString());
 			           renameCollection(MainWindow.this.analysisPopulations.get(id));
 			          }
@@ -414,10 +413,16 @@ public class MainWindow extends JFrame {
 	
 	public void renameCollection(NucleusCollection collection){
 		String inputValue = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
-		collection.setName(inputValue);
-		this.populationNames.put(inputValue, collection.getID());
-		log("New name: "+inputValue);
-		updatePopulationList();
+		// validate
+		if(this.populationNames.containsKey(inputValue)){
+			log("Name exists, aborting");
+		} else {
+
+			collection.setName(inputValue);
+			this.populationNames.put(inputValue, collection.getID());
+			log("New name: "+inputValue);
+			updatePopulationList();
+		}
 	}
 	
 	public void newShellAnalysis(){
@@ -852,7 +857,8 @@ public class MainWindow extends JFrame {
 					if (lsm.isSelectedIndex(i)) {
 						String key = populationList.getModel().getElementAt(i);
 						if(!key.equals("No populations")){
-							list.add(analysisPopulations.get(key));
+							
+							list.add(analysisPopulations.get(populationNames.get(key)));
 							
 						}
 

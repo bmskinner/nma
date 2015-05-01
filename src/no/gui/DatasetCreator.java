@@ -464,7 +464,7 @@ public class DatasetCreator {
 				j++;
 			}
 			double[][] data = { xpoints, ypoints };
-			ds.addSeries("Nucleus_"+i, data);
+			ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
 			i++;
 		}
 		return ds;
