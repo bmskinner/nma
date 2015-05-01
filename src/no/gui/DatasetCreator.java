@@ -193,57 +193,96 @@ public class DatasetCreator {
 	 * @param collection
 	 * @return
 	 */
-	public static TableModel createStatsTable(NucleusCollection collection){
-		
-		String[] columnNames = {"Field", "Value"};
-		
-		if(collection==null){
-			Object[][] data = {
-					{"Nuclei", null},
-					{"Median area", null},
-					{"Median perimeter", null},
-					{"Median feret", null},
-					{"Signal channels", null},
-					{"Profile window", null},
-					{"Nucleus threshold", null},
-					{"Nucleus min size", null},
-					{"Nucleus max size", null},
-					{"Nucleus min circ", null},
-					{"Nucleus max circ", null},
-					{"Signal threshold", null},
-					{"Signal min size", null},
-					{"Signal max fraction", null},
-					{"Consensus folded", null},
-					{"Refold mode", null},
-					{"Ran", null},
-					{"Type", null}
-			};
-			return new DefaultTableModel(data, columnNames);
-		}
-		// format the numbers and make into a tablemodel
-		DecimalFormat df = new DecimalFormat("#.00"); 
-		Object[][] data = {
-				{"Nuclei", collection.getNucleusCount()},
-				{"Median area", df.format(collection.getMedianNuclearArea())},
-				{"Median perimeter", df.format(collection.getMedianNuclearPerimeter())},
-				{"Median feret", df.format(collection.getMedianFeretLength())},
-				{"Signal channels", collection.getSignalChannels().size()},
-				{"Profile window", collection.getAnalysisOptions().getAngleProfileWindowSize()},
-				{"Nucleus threshold", collection.getAnalysisOptions().getNucleusThreshold()},
-				{"Nucleus min size", collection.getAnalysisOptions().getMinNucleusSize()},
-				{"Nucleus max size", collection.getAnalysisOptions().getMaxNucleusSize()},
-				{"Nucleus min circ", collection.getAnalysisOptions().getMinNucleusCirc()},
-				{"Nucleus max circ", collection.getAnalysisOptions().getMaxNucleusCirc()},
-				{"Signal threshold", collection.getAnalysisOptions().getSignalThreshold()},
-				{"Signal min size", collection.getAnalysisOptions().getMinSignalSize()},
-				{"Signal max fraction", collection.getAnalysisOptions().getMaxSignalFraction()},
-				{"Consensus folded", collection.getAnalysisOptions().refoldNucleus()},
-				{"Refold mode", collection.getAnalysisOptions().getRefoldMode()},
-				{"Ran", collection.getOutputFolderName()},
-				{"Type", collection.getAnalysisOptions().getNucleusClass().getSimpleName()}
-		};
+	public static TableModel createStatsTable(List<NucleusCollection> list){
 
-		return new DefaultTableModel(data, columnNames);
+		DefaultTableModel model = new DefaultTableModel();
+
+		Object[] columnData = {
+				"Nuclei", 
+				"Median area",
+				"Median perimeter",
+				"Median feret",
+				"Signal channels",
+				"Profile window",
+				"Nucleus threshold",
+				"Nucleus min size",
+				"Nucleus max size",
+				"Nucleus min circ",
+				"Nucleus max circ",
+				"Signal threshold",
+				"Signal min size",
+				"Signal max fraction",
+				"Consensus folded",
+				"Refold mode",
+				"Ran",
+				"Type"};
+		model.addColumn("Field", columnData);
+		
+		if(list==null){
+			model.addColumn("Null");
+		} else {
+
+			// format the numbers and make into a tablemodel
+			DecimalFormat df = new DecimalFormat("#.00"); 
+
+			for(NucleusCollection collection : list){
+
+				Object[] collectionData = {
+						collection.getNucleusCount(),
+						df.format(collection.getMedianNuclearArea()),
+						df.format(collection.getMedianNuclearPerimeter()),
+						df.format(collection.getMedianFeretLength()),
+						collection.getSignalChannels().size(),
+						collection.getAnalysisOptions().getAngleProfileWindowSize(),
+						collection.getAnalysisOptions().getNucleusThreshold(),
+						collection.getAnalysisOptions().getMinNucleusSize(),
+						collection.getAnalysisOptions().getMaxNucleusSize(),
+						collection.getAnalysisOptions().getMinNucleusCirc(),
+						collection.getAnalysisOptions().getMaxNucleusCirc(),
+						collection.getAnalysisOptions().getSignalThreshold(),
+						collection.getAnalysisOptions().getMinSignalSize(),
+						collection.getAnalysisOptions().getMaxSignalFraction(),
+						collection.getAnalysisOptions().refoldNucleus(),
+						collection.getAnalysisOptions().getRefoldMode(),
+						collection.getOutputFolderName(),
+						collection.getAnalysisOptions().getNucleusClass().getSimpleName()				
+				};
+
+				model.addColumn(collection.getName(), collectionData);
+			}
+		}
+		return model;	
+
+//		
+//		if(collection==null){
+//			
+//			};
+//			return new DefaultTableModel(data, columnNames);
+//		}
+//		// format the numbers and make into a tablemodel
+//		DecimalFormat df = new DecimalFormat("#.00"); 
+//		Object[][] data = {
+//				{"Nuclei", collection.getNucleusCount()},
+//				{"Median area", df.format(collection.getMedianNuclearArea())},
+//				{"Median perimeter", df.format(collection.getMedianNuclearPerimeter())},
+//				{"Median feret", df.format(collection.getMedianFeretLength())},
+//				{"Signal channels", collection.getSignalChannels().size()},
+//				{"Profile window", collection.getAnalysisOptions().getAngleProfileWindowSize()},
+//				{"Nucleus threshold", collection.getAnalysisOptions().getNucleusThreshold()},
+//				{"Nucleus min size", collection.getAnalysisOptions().getMinNucleusSize()},
+//				{"Nucleus max size", collection.getAnalysisOptions().getMaxNucleusSize()},
+//				{"Nucleus min circ", collection.getAnalysisOptions().getMinNucleusCirc()},
+//				{"Nucleus max circ", collection.getAnalysisOptions().getMaxNucleusCirc()},
+//				{"Signal threshold", collection.getAnalysisOptions().getSignalThreshold()},
+//				{"Signal min size", collection.getAnalysisOptions().getMinSignalSize()},
+//				{"Signal max fraction", collection.getAnalysisOptions().getMaxSignalFraction()},
+//				{"Consensus folded", collection.getAnalysisOptions().refoldNucleus()},
+//				{"Refold mode", collection.getAnalysisOptions().getRefoldMode()},
+//				{"Ran", collection.getOutputFolderName()},
+//				{"Type", collection.getAnalysisOptions().getNucleusClass().getSimpleName()}
+//		};
+//
+//		return new DefaultTableModel(data, columnNames);
 	}
 				
 	public static BoxAndWhiskerCategoryDataset createAreaBoxplotDataset(List<NucleusCollection> collections) {

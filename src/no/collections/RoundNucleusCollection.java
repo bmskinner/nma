@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import no.collections.NucleusCollection;
 import no.components.AnalysisOptions;
@@ -35,6 +36,8 @@ implements NucleusCollection, Serializable
 	private String outputFolder;
 	private File debugFile;
 	private String collectionType; // for annotating image names
+	private String name;
+	private UUID guid = java.util.UUID.randomUUID();
 		
 	private String DEFAULT_REFERENCE_POINT = "head";
 	private String DEFAULT_ORIENTAITION_POINT = "tail";
@@ -54,6 +57,7 @@ implements NucleusCollection, Serializable
 	  this.outputFolder = outputFolder;
 	  this.debugFile = debugFile;
 	  this.collectionType = type;
+	  this.name = outputFolder+" - "+type;
   }
 
   // used only for getting classes in setup of analysis
@@ -67,6 +71,18 @@ implements NucleusCollection, Serializable
     types of nucleus eligable
     -----------------------
   */
+  
+  public void setName(String s){
+	  this.name = s;
+  }
+  
+  public String getName(){
+	  return this.name;
+  }
+  
+  public UUID getID(){
+	  return this.guid;
+  }
 
   public void addNucleus(Nucleus r){
 	  this.nucleiCollection.add(r);

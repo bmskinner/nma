@@ -4,6 +4,7 @@ import no.nuclei.Nucleus;
 
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 import no.components.AnalysisOptions;
 import no.components.NuclearSignal;
@@ -44,6 +45,10 @@ public interface NucleusCollection
 		Getters for aggregate stats
 		-----------------------
 	*/
+	
+	public void setName(String s);
+	public String getName();
+	public UUID getID();
 	
 	public String getReferencePoint();
 	public String getOrientationPoint();

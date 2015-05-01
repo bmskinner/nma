@@ -249,8 +249,9 @@ public class MainWindow extends JFrame {
 			panelGeneralStats.setLayout(new BorderLayout(0, 0));
 			
 			tablePopulationStats = new JTable();
-			panelGeneralStats.add(tablePopulationStats, BorderLayout.NORTH);
+			panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
 			tablePopulationStats.setEnabled(false);
+			panelGeneralStats.add(tablePopulationStats.getTableHeader(), BorderLayout.NORTH);
 			tablePopulationStats.setModel(DatasetCreator.createStatsTable(null));
 						
 			//---------------
@@ -434,9 +435,9 @@ public class MainWindow extends JFrame {
 	
 	public void updateStatsPanel(List<NucleusCollection> list){
 		// format the numbers and make into a tablemodel
-		NucleusCollection collection = list.get(0);
-		lblStatusLine.setText("Showing: "+collection.getOutputFolderName()+" - "+collection.getFolder()+" - "+collection.getType());
-		TableModel model = DatasetCreator.createStatsTable(collection);
+//		NucleusCollection collection = list.get(0);
+//		lblStatusLine.setText("Showing: "+collection.getOutputFolderName()+" - "+collection.getFolder()+" - "+collection.getType());
+		TableModel model = DatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
 	}
 	
