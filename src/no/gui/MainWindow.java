@@ -34,10 +34,14 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import java.awt.Font;
@@ -102,7 +106,8 @@ public class MainWindow extends JFrame {
 	private ChartPanel shellsChartPanel; 
 	private JPanel shellsPanel;
 	
-	private HashMap<String, NucleusCollection> analysisPopulations = new HashMap<String, NucleusCollection>();;
+	private HashMap<UUID, NucleusCollection> analysisPopulations = new HashMap<UUID, NucleusCollection>();
+	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 
 
 	/**
@@ -191,6 +196,22 @@ public class MainWindow extends JFrame {
 			ListSelectionModel listSelectionModel = populationList.getSelectionModel();
 			listSelectionModel.addListSelectionListener(
                     new ListSelectionHandler());
+			
+			populationList.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					JList<String> theList = (JList<String>) arg0.getSource();
+			        if (arg0.getClickCount() == 2) {
+			          int index = theList.locationToIndex(arg0.getPoint());
+			          if (index >= 0) {
+			            Object o = theList.getModel().getElementAt(index);
+			           log("Double-clicked on: " + o.toString());
+			           UUID id = MainWindow.this.populationNames.get(o.toString());
+			           renameCollection(MainWindow.this.analysisPopulations.get(id));
+			          }
+			        }
+				}
+			});
 			
 			panelPopulations.add(populationList);
 			
@@ -355,7 +376,7 @@ public class MainWindow extends JFrame {
 					remapCollection.addNucleus(n);
 				}
 			}
-			this.analysisPopulations.put(remapCollection.getOutputFolderName()+" - "+remapCollection.getType()+" - "+remapCollection.getNucleusCount()+" nuclei", remapCollection);
+			this.analysisPopulations.put(remapCollection.getID(), remapCollection);
 			log("Created subcollection from mapping file");
 			List<NucleusCollection> list = new ArrayList<NucleusCollection>();
 			list.add(remapCollection);
@@ -380,8 +401,8 @@ public class MainWindow extends JFrame {
 				updatePanels(result);
 				
 				for(NucleusCollection c : result){
-					String key = c.getOutputFolderName()+" - "+c.getType()+" - "+c.getNucleusCount()+" nuclei";
-					MainWindow.this.analysisPopulations.put(key, c);
+					MainWindow.this.analysisPopulations.put(c.getID(), c);
+					MainWindow.this.populationNames.put(c.getName(), c.getID());
 				}
 				
 				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisPopulations.size()+" populations ready to view");
@@ -391,28 +412,41 @@ public class MainWindow extends JFrame {
 		thr.start();		
 	}
 	
+	public void renameCollection(NucleusCollection collection){
+		String inputValue = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
+		collection.setName(inputValue);
+		this.populationNames.put(inputValue, collection.getID());
+		log("New name: "+inputValue);
+		updatePopulationList();
+	}
+	
 	public void newShellAnalysis(){
 		
 	}
 	
 	public void loadNuclei(){
-		try {
-			OpenDialog fileDialog = new OpenDialog("Select a save file...");
-			String fileName = fileDialog.getPath();
-			if(fileName==null) return;
-			NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), this);
-			String key = collection.getOutputFolderName()+" - "+collection.getType()+" - "+collection.getNucleusCount()+" nuclei";
-			MainWindow.this.analysisPopulations.put(key, collection);
-			log("Opened collection: "+collection.getType());
-			
-			List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-			list.add(collection);
-			
-			updatePanels(list);
-			updatePopulationList();
-		} catch (Exception e) {
-			log("Error opening file: "+e.getMessage());
-		}
+		Thread thr = new Thread() {
+			public void run() {
+				try {
+					OpenDialog fileDialog = new OpenDialog("Select a save file...");
+					String fileName = fileDialog.getPath();
+					if(fileName==null) return;
+					NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), MainWindow.this);
+					MainWindow.this.analysisPopulations.put(collection.getID(), collection);
+					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
+					log("Opened collection: "+collection.getType());
+
+					List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+					list.add(collection);
+
+					updatePanels(list);
+					updatePopulationList();
+				} catch (Exception e) {
+					log("Error opening file: "+e.getMessage());
+				}
+			}
+		};
+		thr.start();
 	}
 	
 	public void updatePanels(List<NucleusCollection> list){
@@ -762,7 +796,7 @@ public class MainWindow extends JFrame {
 			model.addElement("No populations");
 		} else {
 			for(NucleusCollection c : this.analysisPopulations.values()){
-				model.addElement(c.getOutputFolderName()+" - "+c.getType()+" - "+c.getNucleusCount()+" nuclei");
+				model.addElement(c.getName());
 			}
 		}
 		populationList.setModel(model);

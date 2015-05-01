@@ -214,12 +214,13 @@ public class DatasetCreator {
 				"Signal max fraction",
 				"Consensus folded",
 				"Refold mode",
+				"Number of signals",
 				"Ran",
 				"Type"};
 		model.addColumn("Field", columnData);
 		
 		if(list==null){
-			model.addColumn("Null");
+			model.addColumn("No data loaded");
 		} else {
 
 			// format the numbers and make into a tablemodel
@@ -244,6 +245,7 @@ public class DatasetCreator {
 						collection.getAnalysisOptions().getMaxSignalFraction(),
 						collection.getAnalysisOptions().refoldNucleus(),
 						collection.getAnalysisOptions().getRefoldMode(),
+						collection.getSignalCount(),
 						collection.getOutputFolderName(),
 						collection.getAnalysisOptions().getNucleusClass().getSimpleName()				
 				};
@@ -252,37 +254,6 @@ public class DatasetCreator {
 			}
 		}
 		return model;	
-
-//		
-//		if(collection==null){
-//			
-//			};
-//			return new DefaultTableModel(data, columnNames);
-//		}
-//		// format the numbers and make into a tablemodel
-//		DecimalFormat df = new DecimalFormat("#.00"); 
-//		Object[][] data = {
-//				{"Nuclei", collection.getNucleusCount()},
-//				{"Median area", df.format(collection.getMedianNuclearArea())},
-//				{"Median perimeter", df.format(collection.getMedianNuclearPerimeter())},
-//				{"Median feret", df.format(collection.getMedianFeretLength())},
-//				{"Signal channels", collection.getSignalChannels().size()},
-//				{"Profile window", collection.getAnalysisOptions().getAngleProfileWindowSize()},
-//				{"Nucleus threshold", collection.getAnalysisOptions().getNucleusThreshold()},
-//				{"Nucleus min size", collection.getAnalysisOptions().getMinNucleusSize()},
-//				{"Nucleus max size", collection.getAnalysisOptions().getMaxNucleusSize()},
-//				{"Nucleus min circ", collection.getAnalysisOptions().getMinNucleusCirc()},
-//				{"Nucleus max circ", collection.getAnalysisOptions().getMaxNucleusCirc()},
-//				{"Signal threshold", collection.getAnalysisOptions().getSignalThreshold()},
-//				{"Signal min size", collection.getAnalysisOptions().getMinSignalSize()},
-//				{"Signal max fraction", collection.getAnalysisOptions().getMaxSignalFraction()},
-//				{"Consensus folded", collection.getAnalysisOptions().refoldNucleus()},
-//				{"Refold mode", collection.getAnalysisOptions().getRefoldMode()},
-//				{"Ran", collection.getOutputFolderName()},
-//				{"Type", collection.getAnalysisOptions().getNucleusClass().getSimpleName()}
-//		};
-//
-//		return new DefaultTableModel(data, columnNames);
 	}
 				
 	public static BoxAndWhiskerCategoryDataset createAreaBoxplotDataset(List<NucleusCollection> collections) {
