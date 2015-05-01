@@ -60,9 +60,13 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.JTabbedPane;
 
@@ -473,36 +477,71 @@ public class MainWindow extends JFrame {
 	
 	public void updateProfileImage(List<NucleusCollection> list){
 		
-		NucleusCollection collection = list.get(0);
 		try {
 			if(list.size()==1){
 
 				// full segment colouring
-				XYDataset ds = DatasetCreator.createSegmentDataset(collection);
+				XYDataset ds = DatasetCreator.createSegmentDataset(list.get(0));
 				JFreeChart chart = makeProfileChart(ds);
 				profileChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				XYDataset ds = DatasetCreator.createMultiProfileDataset(list);
-				JFreeChart chart = makeProfileChart(ds);
-				XYPlot plot = chart.getXYPlot();
-				int seriesCount = plot.getSeriesCount();
+				List<XYSeriesCollection> ds = DatasetCreator.createMultiProfileIQRDataset(list);				
+				
+				XYDataset profileDS = DatasetCreator.createMultiProfileDataset(list);
+				
+				JFreeChart chart = 
+						ChartFactory.createXYLineChart(null,
+						                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
+						                false);
 
-				for (int i = 0; i < seriesCount; i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.TRUE);
-					String name = (String) ds.getSeriesKey(i);
-					if(name.startsWith("Profile_")){
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-						
-					}  
-					if(name.startsWith("Q")){
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-					} 
-					// get the group id from teh name, and make colour
+				XYPlot plot = chart.getXYPlot();
+				plot.getDomainAxis().setRange(0,100);
+				plot.getRangeAxis().setRange(0,360);
+				plot.setBackgroundPaint(Color.WHITE);
+				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+				
+				int i=0;
+				for(XYSeriesCollection c : ds){
+
+					// find the series index
+					String name = (String) c.getSeriesKey(0);
 					String[] names = name.split("_");
-					plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(Integer.parseInt(names[1])));
+					int index = Integer.parseInt(names[1]);
 					
+					// add to dataset
+					plot.setDataset(i, c);
+					
+					// make a transparent color based on teh profile segmenter system
+					Color pColor = ProfileSegmenter.getColor(index);
+					Color color = new Color(pColor.getRed(), pColor.getGreen(), pColor.getBlue(), 128);
+					
+					
+					XYDifferenceRenderer xydr = new XYDifferenceRenderer(color, color, false);
+					
+					// go through each series in the collection, and set the line colour
+					for(int series=0;series<c.getSeriesCount();series++){
+						xydr.setSeriesPaint(series, color);
+						xydr.setSeriesVisibleInLegend(series, false);
+						
+					}
+					plot.setRenderer(i, xydr);
+					
+					
+					i++;
+				}
+
+				plot.setDataset(i, profileDS);
+				plot.setRenderer(i, new StandardXYItemRenderer());
+
+				for (int j = 0; j < profileDS.getSeriesCount(); j++) {
+					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.TRUE);
+					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
+					String name = (String) profileDS.getSeriesKey(j);
+					String[] names = name.split("_");
+					plot.getRenderer(i).setSeriesPaint(j, ProfileSegmenter.getColor(Integer.parseInt(names[1])).darker());
 				}	
+				
 				profileChartPanel.setChart(chart);
 			}
 			
@@ -617,6 +656,11 @@ public class MainWindow extends JFrame {
 					// get the group id from the name, and make colour
 					String[] names = name.split("_");
 					plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(Integer.parseInt(names[1])));
+					if(name.startsWith("Q")){
+						// make the IQR distinct from the median
+						plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(Integer.parseInt(names[1])).darker());
+					}
+					
 				}
 				consensusChartPanel.setChart(chart);
 			}
@@ -699,7 +743,8 @@ public class MainWindow extends JFrame {
 		renderer.setBaseOutlinePaint(Color.BLACK);
 		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
 		for(int i=0;i<plot.getDataset().getRowCount();i++){
-			Color color = i%2==0 ? Color.LIGHT_GRAY : Color.DARK_GRAY;
+//			Color color = i%2==0 ? Color.LIGHT_GRAY : Color.DARK_GRAY;
+			Color color = ProfileSegmenter.getColor(i);
 			renderer.setSeriesPaint(i, color);
 		}
 		renderer.setMeanVisible(false);

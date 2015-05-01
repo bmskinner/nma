@@ -20,6 +20,8 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 
 public class DatasetCreator {
 	
@@ -79,7 +81,7 @@ public class DatasetCreator {
 		return ds;
 	}
 	
-	public static XYDataset createMultiProfileDataset(List<NucleusCollection> list){
+	public static DefaultXYDataset createMultiProfileDataset(List<NucleusCollection> list){
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		int i=0;
@@ -88,19 +90,43 @@ public class DatasetCreator {
 			Profile xpoints = profile.getPositions(100);
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
+			i++;
+		}
+		return ds;
+	}
+	
+	public static List<XYSeriesCollection> createMultiProfileIQRDataset(List<NucleusCollection> list){
+
+		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
+
+		int i=0;
+		for(NucleusCollection collection : list){
+			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+			Profile xpoints = profile.getPositions(100);
 
 			// rendering order will be first on top
 
 			// make the IQR
 			Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
 			Profile profile75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
-			double[][] data25 = { xpoints.asArray(), profile25.asArray() };
-			ds.addSeries("Q25_"+i, data25);
-			double[][] data75 = { xpoints.asArray(), profile75.asArray() };
-			ds.addSeries("Q75_"+i, data75);
-			i++;
+			
+			XYSeries series25 = new XYSeries("Q25_"+i);
+			for(int j=0; j<profile25.size();j++){
+				series25.add(xpoints.get(j), profile25.get(j));
+			}
+			
+			XYSeries series75 = new XYSeries("Q75_"+i);
+			for(int j=0; j<profile75.size();j++){
+				series75.add(xpoints.get(j), profile75.get(j));
+			}
+			
+			XYSeriesCollection xsc = new XYSeriesCollection();
+		    xsc.addSeries(series25);
+		    xsc.addSeries(series75);
+		    result.add(xsc);
+		    i++;
 		}
-		return ds;
+		return result;
 	}
 	
 	public static XYDataset createIQRVariabilityDataset(NucleusCollection collection){

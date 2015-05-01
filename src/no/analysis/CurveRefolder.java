@@ -145,7 +145,7 @@ public class CurveRefolder{
 		try{
 			double score = refoldNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
 			
-			IJ.log("    Refolding curve: initial score: "+(int)score);
+			logger.log("Refolding curve: initial score: "+(int)score, Logger.INFO);
 
 			double originalScore = score;
 			double prevScore = score*2;
@@ -156,9 +156,7 @@ public class CurveRefolder{
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					i++;
-					if(i%50==0){
-						IJ.log("    Iteration "+i+": "+(int)score);
-					}
+					logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
 				}
 			}
 
@@ -169,7 +167,7 @@ public class CurveRefolder{
 					score = this.iterateOverNucleus();
 					i++;
 					if(i%50==0){
-						IJ.log("    Iteration "+i+": "+(int)score);
+						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
 					}
 				}
 			}
@@ -181,11 +179,11 @@ public class CurveRefolder{
 					score = this.iterateOverNucleus();
 					i++;
 					if(i%50==0){
-						IJ.log("    Iteration "+i+": "+(int)score);
+						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
 					}
 				}
 			}
-			IJ.log("    Refolded curve: final score: "+(int)score);
+			logger.log("Refolded curve: final score: "+(int)score, Logger.INFO);
 		} catch(Exception e){
 			throw new Exception("Cannot calculate scores: "+e);
 		}
@@ -353,7 +351,7 @@ public class CurveRefolder{
 				nucleusPlot.addPoints(xpoints, ypoints, Plot.LINE);
 			}
 		} else { // segment list was empty, fall back on black and white
-			IJ.log("    Cannot add segments to consensus");
+			logger.log("Cannot add segments to consensus",Logger.ERROR);
 			
 			double[] xPoints = new double[refoldNucleus.getLength()+1];
 			double[] yPoints = new double[refoldNucleus.getLength()+1];
@@ -492,7 +490,7 @@ public class CurveRefolder{
 			}
 		}
 
-		IJ.log("    Rotating by "+(int)angleToRotate);
+		logger.log("Rotating by "+(int)angleToRotate,Logger.DEBUG);
 		return angleToRotate;
 	}
 
@@ -644,30 +642,30 @@ public class CurveRefolder{
 	*/
 
 	public void exportProfileOfRefoldedImage(NucleusCollection collection){
-	 
-		String logFile = collection.getLogFileName("logConsensusNucleus");
+
+		String logFile = collection.getLogFileName("log.consensusNucleus");
 
 		StringBuilder outLine = new StringBuilder();
 
 		outLine.append(	"X_INT\t"+
-										"Y_INT\t"+
-										"X_DOUBLE\t"+
-										"Y_DOUBLE\t"+
-										"INTERIOR_ANGLE\t"+
-										"NORMALISED_PROFILE_X\t"+
-										"DISTANCE_PROFILE\r\n");
+				"Y_INT\t"+
+				"X_DOUBLE\t"+
+				"Y_DOUBLE\t"+
+				"INTERIOR_ANGLE\t"+
+				"NORMALISED_PROFILE_X\t"+
+				"DISTANCE_PROFILE\r\n");
 
 		for(int i=0;i<refoldNucleus.getLength();i++){
 
 			double normalisedX = ((double)i/(double)refoldNucleus.getLength())*100; // normalise to 100 length
-			
+
 			outLine.append( refoldNucleus.getPoint(i).getXAsInt()        				    +"\t"+
-											refoldNucleus.getPoint(i).getYAsInt()            				+"\t"+
-											refoldNucleus.getPoint(i).getX()                  			+"\t"+
-											refoldNucleus.getPoint(i).getY()                  			+"\t"+
-											refoldNucleus.getAngle(i)													      +"\t"+
-											normalisedX                                             +"\t"+
-											refoldNucleus.getPoint(i).getDistanceAcrossCoM()  			+"\r\n");
+					refoldNucleus.getPoint(i).getYAsInt()            				+"\t"+
+					refoldNucleus.getPoint(i).getX()                  			+"\t"+
+					refoldNucleus.getPoint(i).getY()                  			+"\t"+
+					refoldNucleus.getAngle(i)													      +"\t"+
+					normalisedX                                             +"\t"+
+					refoldNucleus.getPoint(i).getDistanceAcrossCoM()  			+"\r\n");
 		}
 		IJ.append( outLine.toString(), logFile);
 	}
