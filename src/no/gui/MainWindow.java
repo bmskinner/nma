@@ -10,10 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
 import javax.swing.JLabel;
@@ -40,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
@@ -52,10 +48,8 @@ import javax.swing.JTable;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GridLayout;
 
-import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 
 import org.jfree.chart.ChartFactory;
@@ -89,7 +83,6 @@ public class MainWindow extends JFrame {
 	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
 	
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
-	private JList<String> populationList;
 	private JTable populationTable;
 	
 	private JTabbedPane tabbedPane;
@@ -194,11 +187,6 @@ public class MainWindow extends JFrame {
 			panel.add(panelPopulations);
 			panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
 			
-			// label
-//			JLabel lblPopulations = new JLabel("Populations");
-//			lblPopulations.setAlignmentX(Component.CENTER_ALIGNMENT);
-//			panelPopulations.add(lblPopulations);
-			
 			// table approach
 			DefaultTableModel populationTableModel = new DefaultTableModel();
 			populationTableModel.addColumn("Population");
@@ -217,10 +205,9 @@ public class MainWindow extends JFrame {
 			populationTable.setCellSelectionEnabled(false);
 			populationTable.setColumnSelectionAllowed(false);
 			populationTable.setRowSelectionAllowed(true);
-//			
-//			PopulationTableCellRenderer mcr = new PopulationTableCellRenderer();
-//			populationTable.getColumnModel().getColumn(2).setCellRenderer(mcr);
-//			populationTable.getColumnModel().getColumn(0).setCellRenderer(mcr);
+			populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
+			populationTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+			populationTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 						
 			populationTable.addMouseListener(new MouseAdapter() {
 				@Override
@@ -846,7 +833,6 @@ public class MainWindow extends JFrame {
 			}
 
 			populationTable.setModel(populationTableModel);
-			populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
 		}
 
 	}
@@ -908,6 +894,8 @@ public class MainWindow extends JFrame {
 			List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
 			
 			ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+			
+			List<Integer> selectedIndexes = new ArrayList<Integer>(0);
 
 			if (!lsm.isSelectionEmpty()) {
 				// Find out which indexes are selected.
@@ -920,12 +908,16 @@ public class MainWindow extends JFrame {
 						if(!key.equals("No populations")){
 							
 							list.add(analysisPopulations.get(populationNames.get(key)));
+							selectedIndexes.add(i);
 							
 						}
 
 					}
 				}
 				updatePanels(list);
+				populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
+				populationTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+				populationTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 			}
 
 		}
@@ -934,18 +926,25 @@ public class MainWindow extends JFrame {
 	public class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
 		private static final long serialVersionUID = 1L;
+		List<Integer> list;
+		
+		public PopulationTableCellRenderer(List<Integer> list){
+			super();
+			this.list = list;
+		}
+		
+		public PopulationTableCellRenderer(){
+			super();
+			this.list = new ArrayList<Integer>(0);
+		}
 
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-//	        java.awt.Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//	        cellComponent.setBackground(ProfileSegmenter.getColor(row));
-//	        return cellComponent;
 	        
 	      //Cells are by default rendered as a JLabel.
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-
-	        if (column==2) {
-	          l.setBackground(ProfileSegmenter.getColor(row));
+	        if (list.contains(row)) {
+	          l.setBackground(ProfileSegmenter.getColor(list.indexOf(row)));
 	        } else {
 	          l.setBackground(Color.WHITE);
 	        }
