@@ -10,6 +10,10 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
 import javax.swing.JLabel;
@@ -37,11 +41,9 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import java.awt.Font;
@@ -66,7 +68,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.XYDataset;
@@ -89,6 +90,7 @@ public class MainWindow extends JFrame {
 	
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 	private JList<String> populationList;
+	private JTable populationTable;
 	
 	private JTabbedPane tabbedPane;
 		
@@ -135,9 +137,14 @@ public class MainWindow extends JFrame {
 			textArea.setRows(9);
 			textArea.setColumns(40);
 			
+			
 			JLabel lblAnalysisLog = new JLabel("Analysis Log");
 			lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
 			scrollPane.setColumnHeaderView(lblAnalysisLog);
+			
+			//---------------
+			// Create the header buttons
+			//---------------
 			
 			JPanel panelHeader = new JPanel();
 			contentPane.add(panelHeader, BorderLayout.NORTH);
@@ -179,40 +186,62 @@ public class MainWindow extends JFrame {
 			JPanel panel = new JPanel();
 			panelGeneralData.add(panel);
 			panel.setLayout(new GridLayout(0, 2, 0, 0));
+			
+			//---------------
+			// Create the populations list
+			//---------------
+			
 			panel.add(panelPopulations);
 			panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
 			
-			JLabel lblPopulations = new JLabel("Populations");
-			lblPopulations.setAlignmentX(Component.CENTER_ALIGNMENT);
-			panelPopulations.add(lblPopulations);
+			// label
+//			JLabel lblPopulations = new JLabel("Populations");
+//			lblPopulations.setAlignmentX(Component.CENTER_ALIGNMENT);
+//			panelPopulations.add(lblPopulations);
 			
-
-			DefaultListModel<String> model = new DefaultListModel<String>();
-			model.addElement("No populations");;
-			
-			populationList = new JList<String>(model);
-			populationList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-			
-			ListSelectionModel listSelectionModel = populationList.getSelectionModel();
-			listSelectionModel.addListSelectionListener(
-                    new ListSelectionHandler());
-			
-			populationList.addMouseListener(new MouseAdapter() {
+			// table approach
+			DefaultTableModel populationTableModel = new DefaultTableModel();
+			populationTableModel.addColumn("Population");
+			populationTableModel.addColumn("Nuclei");
+			populationTableModel.addColumn("");
+			populationTable = new JTable() {
 				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					JList<String> theList = (JList<String>) arg0.getSource();
-			        if (arg0.getClickCount() == 2) {
-			          int index = theList.locationToIndex(arg0.getPoint());
+				public boolean isCellEditable(int rowIndex, int vColIndex) {
+					return false;
+				}
+				
+				
+			};
+			populationTable.setModel(populationTableModel);
+			populationTable.setEnabled(true);
+			populationTable.setCellSelectionEnabled(false);
+			populationTable.setColumnSelectionAllowed(false);
+			populationTable.setRowSelectionAllowed(true);
+//			
+//			PopulationTableCellRenderer mcr = new PopulationTableCellRenderer();
+//			populationTable.getColumnModel().getColumn(2).setCellRenderer(mcr);
+//			populationTable.getColumnModel().getColumn(0).setCellRenderer(mcr);
+						
+			populationTable.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					JTable table = (JTable) e.getSource();
+			        if (e.getClickCount() == 2) {
+			          int index = table.rowAtPoint((e.getPoint()));
 			          if (index >= 0) {
-			            Object o = theList.getModel().getElementAt(index);
-			           UUID id = MainWindow.this.populationNames.get(o.toString());
-			           renameCollection(MainWindow.this.analysisPopulations.get(id));
+			        	  Object o = table.getModel().getValueAt(index, 0);
+			        	  UUID id = MainWindow.this.populationNames.get(o.toString());
+			        	  renameCollection(MainWindow.this.analysisPopulations.get(id));
 			          }
 			        }
 				}
 			});
 			
-			panelPopulations.add(populationList);
+			ListSelectionModel tableSelectionModel = populationTable.getSelectionModel();
+			tableSelectionModel.addListSelectionListener(new ListSelectionHandler());
+			
+			JScrollPane populationScrollPane = new JScrollPane(populationTable);
+			panelPopulations.add(populationScrollPane);
 			
 			panelGeneralData.add(panelAggregates);
 			
@@ -412,16 +441,20 @@ public class MainWindow extends JFrame {
 	}
 	
 	public void renameCollection(NucleusCollection collection){
-		String inputValue = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
+		String newName = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
 		// validate
-		if(this.populationNames.containsKey(inputValue)){
-			log("Name exists, aborting");
-		} else {
-
-			collection.setName(inputValue);
-			this.populationNames.put(inputValue, collection.getID());
-			log("New name: "+inputValue);
-			updatePopulationList();
+		if(!newName.isEmpty() && newName!=null){
+		
+			if(this.populationNames.containsKey(newName)){
+				log("Name exists, aborting");
+			} else {
+				String oldName = collection.getName();
+				collection.setName(newName);
+				this.populationNames.put(newName, collection.getID());
+				this.populationNames.remove(oldName);
+				log("Collection renamed: "+newName);
+				updatePopulationList();
+			}
 		}
 	}
 	
@@ -575,7 +608,7 @@ public class MainWindow extends JFrame {
 				plot.setRenderer(i, new StandardXYItemRenderer());
 
 				for (int j = 0; j < profileDS.getSeriesCount(); j++) {
-					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.TRUE);
+					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
 					String name = (String) profileDS.getSeriesKey(j);
 					String[] names = name.split("_");
@@ -596,12 +629,17 @@ public class MainWindow extends JFrame {
 	
 	public void updateShellPanel(List<NucleusCollection> list){
 		// if collection has shell results, display
-		NucleusCollection collection = list.get(0);
+//		NucleusCollection collection = list.get(0);
 		
 		// else,  no shell analysis in the population
 		// have a panel ready with a button to run the analysis
 		shellsPanel = new JPanel(); // container in tab if no shell chart
-		shellsPanel.setLayout(new BoxLayout(shellsPanel, BoxLayout.Y_AXIS));
+//		shellsPanel.setLayout(new BoxLayout(shellsPanel, BoxLayout.Y_AXIS));
+		shellsPanel.setLayout(new BorderLayout(0,0));
+		JLabel lbl = new JLabel("No shell results available");
+		lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		shellsPanel.add(lbl, BorderLayout.NORTH);
+		
 		JButton btnShellAnalysis = new JButton("Run shell analysis");
 		btnShellAnalysis.addMouseListener(new MouseAdapter() {
 			@Override
@@ -609,7 +647,7 @@ public class MainWindow extends JFrame {
 				newShellAnalysis();
 			}
 		});
-		shellsPanel.add(btnShellAnalysis);
+		shellsPanel.add(btnShellAnalysis, BorderLayout.CENTER);
 		tabbedPane.setComponentAt(5, shellsPanel);
 	}
 	
@@ -689,7 +727,7 @@ public class MainWindow extends JFrame {
 				int seriesCount = plot.getSeriesCount();
 				
 				for (int i = 0; i < seriesCount; i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.TRUE);
+					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
 					String name = (String) ds.getSeriesKey(i);
 					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
 
@@ -795,38 +833,64 @@ public class MainWindow extends JFrame {
 	 *  Find the populations in memory, and display them in the population chooser
 	 */
 	public void updatePopulationList(){
-				
-		DefaultListModel<String> model = new DefaultListModel<String>();
-		if(this.analysisPopulations.size()==0){
-			model.addElement("No populations");
-		} else {
+					
+		// new method using table
+		if(this.analysisPopulations.size()>0){
+			DefaultTableModel populationTableModel = new DefaultTableModel();
+			populationTableModel.addColumn("Population");
+			populationTableModel.addColumn("Nuclei");
+			populationTableModel.addColumn("");
 			for(NucleusCollection c : this.analysisPopulations.values()){
-				model.addElement(c.getName());
+				Object[] data  = {c.getName(),c.getNucleusCount(), null};
+				populationTableModel.addRow( data );
 			}
+
+			populationTable.setModel(populationTableModel);
+			populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
 		}
-		populationList.setModel(model);
-		populationList.setVisible(true);		
+
 	}
 	
 	
 	public void updateVariabilityChart(List<NucleusCollection> list){
 		try {
-			NucleusCollection n = list.get(0);
-			XYDataset ds = DatasetCreator.createIQRVariabilityDataset(n);
-			JFreeChart chart = makeProfileChart(ds);
-			XYPlot plot = chart.getXYPlot();
-			plot.setBackgroundPaint(Color.WHITE);
-			plot.getDomainAxis().setRange(0,100);
-			plot.getRangeAxis().setLabel("IQR");
-			plot.getRangeAxis().setAutoRange(true);
-			List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
-			Profile xpoints = n.getProfileCollection().getProfile(n.getOrientationPoint()).getPositions(100);
-			for(Integer i : maxima){
-//				log("Maxima at "+i);
-				plot.addDomainMarker(new ValueMarker(xpoints.get(i), Color.BLACK, new BasicStroke(1.0f)));
+			XYDataset ds = DatasetCreator.createIQRVariabilityDataset(list);
+			if(list.size()==1){
+				NucleusCollection n = list.get(0);
+				JFreeChart chart = makeProfileChart(ds);
+				XYPlot plot = chart.getXYPlot();
+				plot.setBackgroundPaint(Color.WHITE);
+				plot.getDomainAxis().setRange(0,100);
+				plot.getRangeAxis().setLabel("IQR");
+				plot.getRangeAxis().setAutoRange(true);
+				List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
+				Profile xpoints = n.getProfileCollection().getProfile(n.getOrientationPoint()).getPositions(100);
+				for(Integer i : maxima){
+					//				log("Maxima at "+i);
+					plot.addDomainMarker(new ValueMarker(xpoints.get(i), Color.BLACK, new BasicStroke(1.0f)));
+				}
+
+				variabilityChartPanel.setChart(chart);
+			} else { // multiple nuclei
+				JFreeChart chart = 
+						ChartFactory.createXYLineChart(null,
+						                "Position", "IQR", ds, PlotOrientation.VERTICAL, true, true,
+						                false);
+
+				XYPlot plot = chart.getXYPlot();
+				plot.getDomainAxis().setRange(0,100);
+				plot.getRangeAxis().setAutoRange(true);
+				plot.setBackgroundPaint(Color.WHITE);
+
+				for (int j = 0; j < ds.getSeriesCount(); j++) {
+					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
+					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+					String name = (String) ds.getSeriesKey(j);
+					String[] names = name.split("_");
+					plot.getRenderer().setSeriesPaint(j, ProfileSegmenter.getColor(Integer.parseInt(names[1])));
+				}	
+				variabilityChartPanel.setChart(chart);
 			}
-			
-			variabilityChartPanel.setChart(chart);
 		} catch (Exception e) {
 			log("Error drawing variability chart: "+e.getMessage());
 		}	
@@ -845,17 +909,14 @@ public class MainWindow extends JFrame {
 			
 			ListSelectionModel lsm = (ListSelectionModel)e.getSource();
 
-//			int firstIndex = e.getFirstIndex();
-//			int lastIndex = e.getLastIndex();
-//			boolean isAdjusting = e.getValueIsAdjusting();
-
 			if (!lsm.isSelectionEmpty()) {
 				// Find out which indexes are selected.
 				int minIndex = lsm.getMinSelectionIndex();
 				int maxIndex = lsm.getMaxSelectionIndex();
 				for (int i = minIndex; i <= maxIndex; i++) {
 					if (lsm.isSelectedIndex(i)) {
-						String key = populationList.getModel().getElementAt(i);
+//						String key = populationList.getModel().getElementAt(i);
+						String key = (String) populationTable.getModel().getValueAt(i, 0); // row i, column 0
 						if(!key.equals("No populations")){
 							
 							list.add(analysisPopulations.get(populationNames.get(key)));
@@ -868,5 +929,29 @@ public class MainWindow extends JFrame {
 			}
 
 		}
+	}
+	
+	public class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+//	        java.awt.Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+//	        cellComponent.setBackground(ProfileSegmenter.getColor(row));
+//	        return cellComponent;
+	        
+	      //Cells are by default rendered as a JLabel.
+	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+
+	        if (column==2) {
+	          l.setBackground(ProfileSegmenter.getColor(row));
+	        } else {
+	          l.setBackground(Color.WHITE);
+	        }
+
+	      //Return the JLabel which renders the cell.
+	      return l;
+	    }
 	}
 }

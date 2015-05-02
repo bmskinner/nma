@@ -129,11 +129,27 @@ public class DatasetCreator {
 		return result;
 	}
 	
-	public static XYDataset createIQRVariabilityDataset(NucleusCollection collection){
-		Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
-		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
-		XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset());		
-		return ds;
+	public static XYDataset createIQRVariabilityDataset(List<NucleusCollection> list){
+
+		if(list.size()==1){
+			NucleusCollection collection = list.get(0);
+			Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
+			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset());	
+			return ds;
+		} else {
+			int i = 0;
+			DefaultXYDataset ds = new DefaultXYDataset();
+			for(NucleusCollection collection : list){
+				Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
+				Profile xpoints = profile.getPositions(100);
+				double[][] data = { xpoints.asArray(), profile.asArray() };
+				ds.addSeries("Profile_"+i+"_"+collection.getName(), data);
+				i++;
+			}
+			return ds;
+		}
+		
 	}
 		
 	public static XYDataset createFrankenSegmentDataset(NucleusCollection collection){
