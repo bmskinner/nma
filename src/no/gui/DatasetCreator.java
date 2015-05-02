@@ -36,13 +36,13 @@ public class DatasetCreator {
 				Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
 				Profile subPointsA = xpoints.getSubregion(0, seg.getEndIndex());
 				double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
-				ds.addSeries(seg.getSegmentType(), dataA);
+				ds.addSeries(seg.getSegmentType()+"_A", dataA);
 
 				// end of array
 				Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
 				Profile subPointsB = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
 				double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
-				ds.addSeries(seg.getSegmentType(), dataB);
+				ds.addSeries(seg.getSegmentType()+"_B", dataB);
 				continue;
 			} 
 			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
