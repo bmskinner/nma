@@ -1,5 +1,9 @@
 package no.gui;
 
+import ij.IJ;
+
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,15 +11,20 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import no.analysis.CurveRefolder;
 import no.collections.NucleusCollection;
+import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.XYPoint;
 import no.nuclei.Nucleus;
+import no.nuclei.RoundNucleus;
 import no.utility.Equation;
 import no.utility.Utils;
 
+import org.jfree.chart.annotations.XYAnnotation;
+import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -484,5 +493,70 @@ public class DatasetCreator {
 			i++;
 		}
 		return ds;
+	}
+	
+	
+
+	public static XYPoint getXYCoordinatesForSignal(NuclearSignal n, Nucleus outline){
+		double angle = n.getAngle();
+
+		double fractionalDistance = n.getFractionalDistanceFromCoM();
+
+		// determine the total distance to the border at this angle
+		double distanceToBorder = CurveRefolder.getDistanceFromAngle(angle, outline);
+
+		// convert to fractional distance to signal
+		double signalDistance = distanceToBorder * fractionalDistance;
+
+		// adjust X and Y because we are now counting angles from the vertical axis
+		double signalX = Utils.getXComponentOfAngle(signalDistance, angle-90);
+		double signalY = Utils.getYComponentOfAngle(signalDistance, angle-90);
+		return new XYPoint(signalX, signalY);
+	}
+	
+	public static XYDataset createSignalCoMDataset(NucleusCollection collection){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		if(collection.getSignalCount()>0){
+
+			for(int channel : collection.getSignalChannels()){
+
+				double[] xpoints = new double[collection.getSignals(channel).size()];
+				double[] ypoints = new double[collection.getSignals(channel).size()];
+
+				int signalCount = 0;
+				for(NuclearSignal n : collection.getSignals(channel)){
+
+					XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+					
+//					IJ.log("A: "+angle+"  D: "+signalDistance+"  X: "+signalX+"  Y: "+signalY);
+					xpoints[signalCount] = p.getX();
+					ypoints[signalCount] = p.getY();
+					signalCount++;
+					
+				}
+				double[][] data = { xpoints, ypoints };
+				ds.addSeries("Channel_"+channel, data);
+			}
+		}
+		return ds;
+	}
+	
+	public static List<Shape> createSignalRadiusDataset(NucleusCollection collection, int channel){
+
+		List<Shape> result = new ArrayList<Shape>(0);
+		if(collection.getSignalCount()>0){
+
+			for(NuclearSignal n : collection.getSignals(channel)){
+				XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+				
+				// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
+				double offset = n.getRadius(); 
+
+				result.add(new Ellipse2D.Double(p.getX()-offset, p.getY()-offset, n.getRadius()*2, n.getRadius()*2));
+			}
+
+		}
+		return result;
 	}
 }

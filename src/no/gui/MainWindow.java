@@ -26,6 +26,7 @@ import no.utility.MappingFileParser;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 
 import javax.swing.JTextArea;
 
@@ -49,12 +50,15 @@ import javax.swing.JTable;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.Shape;
 
 import javax.swing.ListSelectionModel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYAnnotation;
+import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
@@ -62,6 +66,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.XYDataset;
@@ -100,6 +106,10 @@ public class MainWindow extends JFrame {
 	
 	private ChartPanel shellsChartPanel; 
 	private JPanel shellsPanel;
+	
+	private ChartPanel signalsChartPanel; // consensus nucleus plus signals
+	private JPanel signalsPanel;// signals container for chart and stats table
+	private JTable signalStatsTable;
 	
 	private HashMap<UUID, NucleusCollection> analysisPopulations = new HashMap<UUID, NucleusCollection>();
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
@@ -335,7 +345,33 @@ public class MainWindow extends JFrame {
 			shellsChartPanel = new ChartPanel(shellsChart);
 			tabbedPane.addTab("Shells", null, shellsChartPanel, null);
 			
+			//---------------
+			// Create the signals panel
+			//---------------
+			signalsPanel = new JPanel(); // main container in tab
+			signalsPanel.setLayout(new BoxLayout(signalsPanel, BoxLayout.X_AXIS));
 			
+			
+			DefaultTableModel signalsTableModel = new DefaultTableModel();
+			signalsTableModel.addColumn("Field");
+			signalsTableModel.addColumn("");
+			
+			signalStatsTable = new JTable(); // table  for basic stats
+			signalStatsTable.setModel(signalsTableModel);
+			signalStatsTable.setEnabled(false);
+			signalsPanel.add(signalStatsTable);
+			
+			JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
+					null, null, null);
+			XYPlot signalsPlot = signalsChart.getXYPlot();
+			signalsPlot.setBackgroundPaint(Color.WHITE);
+			signalsPlot.getDomainAxis().setVisible(false);
+			signalsPlot.getRangeAxis().setVisible(false);
+			
+			signalsChartPanel = new ChartPanel(signalsChart);
+			signalsPanel.add(signalsChartPanel);
+
+			tabbedPane.addTab("Signals", null, signalsPanel, null);
 			
 			
 
@@ -486,10 +522,16 @@ public class MainWindow extends JFrame {
 			updateBoxplots(list);
 			updateVariabilityChart(list);
 			updateShellPanel(list);
+			updateSignalsPanel(list);
 		} catch (Exception e) {
 			log("Error updating panels: "+e.getMessage());
 			e.printStackTrace();
 		}
+	}
+	
+	private int getIndexFromLabel(String label){
+		String[] names = label.split("_");
+		return Integer.parseInt(names[1]);
 	}
 	
 	public void updateStatsPanel(List<NucleusCollection> list){
@@ -519,8 +561,9 @@ public class MainWindow extends JFrame {
 			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
 			String name = (String) ds.getSeriesKey(i);
 			if(name.startsWith("Seg_")){
+				int colourIndex = getIndexFromLabel(name);
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
+				plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(colourIndex));
 			} 
 			if(name.startsWith("Nucleus_")){
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
@@ -638,6 +681,55 @@ public class MainWindow extends JFrame {
 		tabbedPane.setComponentAt(5, shellsPanel);
 	}
 	
+	public JFreeChart makeConsensusChart(NucleusCollection collection){
+		XYDataset ds = DatasetCreator.createNucleusOutline(collection);
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+		
+
+		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
+		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
+
+		// ensure that the scales for each axis are the same
+		double max = Math.max(maxX, maxY);
+
+		// ensure there is room for expansion of the target nucleus due to IQR
+		max *=  1.25;		
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setDataset(0, ds);
+		plot.getDomainAxis().setRange(-max,max);
+		plot.getRangeAxis().setRange(-max,max);
+
+		plot.getDomainAxis().setVisible(false);
+		plot.getRangeAxis().setVisible(false);
+
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+
+		int seriesCount = plot.getSeriesCount();
+
+		for (int i = 0; i < seriesCount; i++) {
+			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+			String name = (String) ds.getSeriesKey(i);
+			
+			if(name.startsWith("Seg_")){
+				int colourIndex = getIndexFromLabel(name);
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+				plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(colourIndex));
+			} 
+			if(name.startsWith("Q")){
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+			} 
+
+		}	
+		return chart;
+	}
+	
 	public void updateConsensusImage(List<NucleusCollection> list){
 
 		NucleusCollection collection = list.get(0);
@@ -654,47 +746,7 @@ public class MainWindow extends JFrame {
 					consensusChartPanel.setChart(consensusChart);
 
 				} else {
-					XYDataset ds = DatasetCreator.createNucleusOutline(collection);
-					JFreeChart chart = 
-							ChartFactory.createXYLineChart(null,
-									null, null, ds, PlotOrientation.VERTICAL, true, true,
-									false);
-
-					double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
-					double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
-
-					// ensure that the scales for each axis are the same
-					double max = Math.max(maxX, maxY);
-
-					// ensure there is room for expansion of the target nucleus due to IQR
-					max *=  1.25;		
-
-					XYPlot plot = chart.getXYPlot();
-					plot.getDomainAxis().setRange(-max,max);
-					plot.getRangeAxis().setRange(-max,max);
-
-					plot.getDomainAxis().setVisible(false);
-					plot.getRangeAxis().setVisible(false);
-
-					plot.setBackgroundPaint(Color.WHITE);
-					plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-					plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-
-					int seriesCount = plot.getSeriesCount();
-
-					for (int i = 0; i < seriesCount; i++) {
-						plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-						String name = (String) ds.getSeriesKey(i);
-						if(name.startsWith("Seg_")){
-							plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-							plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(i));
-						} 
-						if(name.startsWith("Q")){
-							plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-							plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-						} 
-
-					}	
+					JFreeChart chart = makeConsensusChart(collection);
 					consensusChartPanel.setChart(chart);
 				} 
 			}else {
@@ -836,8 +888,7 @@ public class MainWindow extends JFrame {
 		}
 
 	}
-	
-	
+		
 	public void updateVariabilityChart(List<NucleusCollection> list){
 		try {
 			XYDataset ds = DatasetCreator.createIQRVariabilityDataset(list);
@@ -871,9 +922,8 @@ public class MainWindow extends JFrame {
 				for (int j = 0; j < ds.getSeriesCount(); j++) {
 					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-					String name = (String) ds.getSeriesKey(j);
-					String[] names = name.split("_");
-					plot.getRenderer().setSeriesPaint(j, ProfileSegmenter.getColor(Integer.parseInt(names[1])));
+					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
+					plot.getRenderer().setSeriesPaint(j, ProfileSegmenter.getColor(index));
 				}	
 				variabilityChartPanel.setChart(chart);
 			}
@@ -882,11 +932,42 @@ public class MainWindow extends JFrame {
 		}	
 	}
 	
+	public void updateSignalsPanel(List<NucleusCollection> list){
+		try {
+			NucleusCollection collection = list.get(0);
+			XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
+			JFreeChart chart = makeConsensusChart(collection);
+			
+			XYPlot plot = chart.getXYPlot();
+			plot.setDataset(1, signalCoMs);
+			
+			XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
+			for(int series=0;series<signalCoMs.getSeriesCount();series++){
+				
+				rend.setSeriesPaint(series, Color.RED);
+				rend.setBaseLinesVisible(false);
+				rend.setBaseShapesVisible(true);
+			}
+			plot.setRenderer(1, rend);
+			
+			for(int channel : collection.getSignalChannels()){
+				List<Shape> shapes = DatasetCreator.createSignalRadiusDataset(collection, channel);
+				for(Shape s : shapes){
+					XYShapeAnnotation an = new XYShapeAnnotation( s, null,
+						       null, new Color(255,0,0,20)); // layer transparent signals
+					plot.addAnnotation(an);
+				}
+			}
+			signalsChartPanel.setChart(chart);
+		} catch(Exception e){
+			log("Error updating signals: "+e.getMessage());
+		}
+	}
+	
 	/**
 	 * Listen for selections to the population list. Switch between single population,
 	 * or multiple selections
-	 * @author bms41
-	 *
+	 * 
 	 */
 	class ListSelectionHandler implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent e) {
@@ -923,6 +1004,10 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	/**
+	 * Allows for cell background to be coloured based on poition in a list
+	 *
+	 */
 	public class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
 		private static final long serialVersionUID = 1L;

@@ -121,5 +121,7 @@ public class SignalDetector {
 			} 
 			signalCollection.addChannel(signals, channel);
 		} 
+		n.calculateSignalDistancesFromCoM();
+		n.calculateFractionalSignalDistancesFromCoM();
 	}
 }

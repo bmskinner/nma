@@ -556,7 +556,7 @@ public class CurveRefolder{
 						double diameter = s.getRadius() * 2;
 
 						// determine the total distance to the border at this angle
-						double distanceToBorder = getDistanceFromAngle(angle);
+						double distanceToBorder = getDistanceFromAngle(angle, refoldNucleus);
 
 						// convert to fractional distance to signal
 						double signalDistance = distanceToBorder * fractionalDistance;
@@ -609,7 +609,7 @@ public class CurveRefolder{
 		}
 	}
 
-	private double getDistanceFromAngle(double angle){
+	public static double getDistanceFromAngle(double angle, Nucleus n){
 
 		// go through the nucleus outline
 		// measure the angle to the tail and the distance to the CoM
@@ -618,10 +618,10 @@ public class CurveRefolder{
 		double bestDiff = 180;
 		double bestDistance = 180;
 
-		for(int i=0;i<refoldNucleus.getLength();i++){
-			XYPoint p = refoldNucleus.getBorderPoint(i);
-			double distance = p.getLengthTo(refoldNucleus.getCentreOfMass());
-			double pAngle = RoundNucleus.findAngleBetweenXYPoints( p, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
+		for(int i=0;i<n.getLength();i++){
+			XYPoint p = n.getBorderPoint(i);
+			double distance = p.getLengthTo(n.getCentreOfMass());
+			double pAngle = RoundNucleus.findAngleBetweenXYPoints( p, n.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
 				pAngle = 360-pAngle;
 			}

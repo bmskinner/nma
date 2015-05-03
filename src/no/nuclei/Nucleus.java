@@ -86,7 +86,8 @@ public interface Nucleus
 
   public List<NucleusBorderPoint> getBorderList();
 
-
+public void calculateFractionalSignalDistancesFromCoM();
+public void calculateSignalDistancesFromCoM();
 	
 	/*
     -----------------------
@@ -101,11 +102,6 @@ public interface Nucleus
 
   public void updateFailureCode(int i);
 
-//  public void setMinSignalSize(double d);
-//
-//  public void setMaxSignalFraction(double d);
-//
-//  public void setSignalThreshold(int i);
 
   public void setBorderList(List<NucleusBorderPoint> list);
 

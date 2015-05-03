@@ -565,7 +565,7 @@ public class RoundNucleus
 		For each signal within the nucleus, calculate the distance to the nCoM
 		and update the signal
 	*/
-	private void calculateSignalDistancesFromCoM(){
+	public void calculateSignalDistancesFromCoM(){
 		
 //		IJ.log("Getting signal distances");
 //		this.signalCollection.print();
@@ -585,7 +585,7 @@ public class RoundNucleus
 		mass as a fraction of the distance from the nuclear CoM, through the 
 		signal CoM, to the nuclear border
 	*/
-	private void calculateFractionalSignalDistancesFromCoM(){
+	public void calculateFractionalSignalDistancesFromCoM(){
 
 		this.calculateClosestBorderToSignals();
 
