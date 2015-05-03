@@ -1,7 +1,5 @@
 package no.gui;
 
-import ij.IJ;
-
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
@@ -19,14 +17,12 @@ import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.XYPoint;
 import no.nuclei.Nucleus;
-import no.nuclei.RoundNucleus;
 import no.utility.Equation;
 import no.utility.Utils;
 
-import org.jfree.chart.annotations.XYAnnotation;
-import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -648,5 +644,49 @@ public class DatasetCreator {
 		}
 //		IJ.log("Created model");
 		return model;	
+	}
+	
+	public static HistogramDataset createSignalAngleHistogramDataset(List<NucleusCollection> list){
+		HistogramDataset ds = new HistogramDataset();
+		for(NucleusCollection collection : list){
+			
+			for(int channel : collection.getSignalChannels()){
+
+				if(collection.getSignalCount(channel)>0){
+
+					List<Double> angles = new ArrayList<Double>(0);
+
+					for(Nucleus n : collection.getNuclei()){
+						angles.addAll(n.getSignalCollection().getAngles(channel));
+					}
+					double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
+					ds.addSeries("Channel_"+channel+"_"+collection.getName(), values, 12);
+				}
+			}
+			
+		}
+		return ds;
+	}
+	
+	public static HistogramDataset createSignalDistanceHistogramDataset(List<NucleusCollection> list){
+		HistogramDataset ds = new HistogramDataset();
+		for(NucleusCollection collection : list){
+
+			for(int channel : collection.getSignalChannels()){
+
+				if(collection.getSignalCount(channel)>0){
+
+					List<Double> angles = new ArrayList<Double>(0);
+
+					for(Nucleus n : collection.getNuclei()){
+						angles.addAll(n.getSignalCollection().getDistances(channel));
+					}
+					double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
+					ds.addSeries("Channel_"+channel+"_"+collection.getName(), values, 12);
+				}
+			}
+
+		}
+		return ds;
 	}
 }

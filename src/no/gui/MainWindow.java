@@ -63,13 +63,18 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -111,6 +116,10 @@ public class MainWindow extends JFrame {
 	private JPanel signalsPanel;// signals container for chart and stats table
 	private JTable signalStatsTable;
 	
+	private ChartPanel signalAngleChartPanel; // consensus nucleus plus signals
+	private ChartPanel signalDistanceChartPanel; // consensus nucleus plus signals
+	private JPanel signalHistogramPanel;// signals container for chart and stats table
+
 	private HashMap<UUID, NucleusCollection> analysisPopulations = new HashMap<UUID, NucleusCollection>();
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 
@@ -373,11 +382,26 @@ public class MainWindow extends JFrame {
 
 			tabbedPane.addTab("Signals", null, signalsPanel, null);
 			
+			//---------------
+			// Create the signal histograms panel
+			//---------------
+			signalHistogramPanel = new JPanel(); // main container in tab
+			signalHistogramPanel.setLayout(new BoxLayout(signalHistogramPanel, BoxLayout.Y_AXIS));
+			JFreeChart signalAngleChart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+			signalAngleChart.getPlot().setBackgroundPaint(Color.white);
+			signalAngleChartPanel = new ChartPanel(signalAngleChart);
+			
+			JFreeChart signalDistanceChart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+			signalDistanceChart.getPlot().setBackgroundPaint(Color.white);
+			signalDistanceChartPanel = new ChartPanel(signalDistanceChart);
+			
+			signalHistogramPanel.add(signalAngleChartPanel);
+			signalHistogramPanel.add(signalDistanceChartPanel);
+			tabbedPane.addTab("Signal histograms", null, signalHistogramPanel, null);
 			
 
 		} catch (Exception e) {
-			IJ.log("Error in Main");
-			e.printStackTrace();
+			IJ.log("Error initialising Main: "+e.getMessage());
 		}
 		
 	}
@@ -523,6 +547,7 @@ public class MainWindow extends JFrame {
 			updateVariabilityChart(list);
 			updateShellPanel(list);
 			updateSignalsPanel(list);
+			updateSignalHistogramPanel(list);
 		} catch (Exception e) {
 			log("Error updating panels: "+e.getMessage());
 			e.printStackTrace();
@@ -1020,6 +1045,69 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	private void updateSignalHistogramPanel(List<NucleusCollection> list){
+		try {
+			updateSignalAngleHistogram(list);
+			updateSignalDistanceHistogram(list);
+		} catch (Exception e) {
+			log("Error updating signal histograms: "+e.getMessage());
+		}
+	}
+	
+	private void updateSignalAngleHistogram(List<NucleusCollection> list){
+		try {
+			HistogramDataset ds = DatasetCreator.createSignalAngleHistogramDataset(list);
+			JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
+			XYPlot plot = chart.getXYPlot();
+			plot.setBackgroundPaint(Color.white);
+			XYBarRenderer rend = new XYBarRenderer();
+			rend.setBarPainter(new StandardXYBarPainter());
+			rend.setShadowVisible(false);
+			plot.setRenderer(rend);
+			plot.getDomainAxis().setRange(0,360);
+			for (int j = 0; j < ds.getSeriesCount(); j++) {
+				plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
+				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+				int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
+				plot.getRenderer().setSeriesPaint(j, getSignalColour(index, true, 128));
+			}	
+			signalAngleChartPanel.setChart(chart);
+		} catch (Exception e) {
+			log("Error updating angle histograms: "+e.getMessage());
+			JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+			chart.getPlot().setBackgroundPaint(Color.white);
+			signalAngleChartPanel.setChart(chart);
+		}
+		
+		
+	}
+
+	private void updateSignalDistanceHistogram(List<NucleusCollection> list){
+		try {
+			HistogramDataset ds = DatasetCreator.createSignalDistanceHistogramDataset(list);
+			JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
+			XYPlot plot = chart.getXYPlot();
+			plot.setBackgroundPaint(Color.white);
+			XYBarRenderer rend = new XYBarRenderer();
+			rend.setBarPainter(new StandardXYBarPainter());
+			rend.setShadowVisible(false);
+			plot.setRenderer(rend);
+			plot.getDomainAxis().setRange(0,1);
+			for (int j = 0; j < ds.getSeriesCount(); j++) {
+				plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
+				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+				int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
+				plot.getRenderer().setSeriesPaint(j, getSignalColour(index, true, 128));
+			}	
+			signalDistanceChartPanel.setChart(chart);
+		} catch (Exception e) {
+			log("Error updating distance histograms: "+e.getMessage());
+			JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+			chart.getPlot().setBackgroundPaint(Color.white);
+			signalDistanceChartPanel.setChart(chart);
+		}
+	}
+	
 	/**
 	 * Listen for selections to the population list. Switch between single population,
 	 * or multiple selections
@@ -1109,7 +1197,6 @@ public class MainWindow extends JFrame {
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 	        int choose = ((row-1)/8)+2;
 	        Color colour = (row-1) % 8 == 0 ? MainWindow.this.getSignalColour(  choose   ) : Color.WHITE;
-//	        IJ.log(row+" "+choose+"  "+colour.toString());
 	        
 	        l.setBackground(colour);
 
