@@ -623,7 +623,6 @@ public class DatasetCreator {
 
 				for(int channel : collection.getSignalChannels()){
 					if(collection.getSignalCount(channel)>0){
-//						IJ.log("Adding channel "+channel);
 						rowData.add("");
 						rowData.add(channel);
 						rowData.add(collection.getSignalCount(channel));
@@ -633,12 +632,18 @@ public class DatasetCreator {
 						rowData.add(df.format(collection.getMedianSignalAngle(channel)));
 						rowData.add(df.format(collection.getMedianSignalFeret(channel)));
 						rowData.add(df.format(collection.getMedianSignalDistance(channel)));
+					} else {
+						rowData.add("");
+						rowData.add("");
+						rowData.add("");
+						rowData.add("");
+						rowData.add("");
+						rowData.add("");
+						rowData.add("");
+						rowData.add("");
 					}
 				}
 				model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
-//				for(Object o : rowData){
-//					IJ.log(o.toString());
-//				}
 			}
 		}
 //		IJ.log("Created model");
