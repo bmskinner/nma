@@ -240,7 +240,9 @@ public class DatasetCreator {
 				"Consensus folded",
 				"Refold mode",
 				"Number of signals",
-				"Ran",
+				"Signals per nucleus",
+				"Run date",
+				"Run time",
 				"Type"};
 		model.addColumn("Field", columnData);
 		
@@ -252,6 +254,17 @@ public class DatasetCreator {
 			DecimalFormat df = new DecimalFormat("#.00"); 
 
 			for(NucleusCollection collection : list){
+				
+				// only display refold mode if nucleus was refolded
+				String refoldMode = collection.getAnalysisOptions().refoldNucleus() 
+									? collection.getAnalysisOptions().getRefoldMode()
+									: "N/A";
+									
+				String[] times = collection.getOutputFolderName().split("_");
+				String date = times[0];
+				String time = times[1];
+				
+				double signalPerNucleus = (double) collection.getSignalCount()/  (double) collection.getNucleusCount();
 
 				Object[] collectionData = {
 						collection.getNucleusCount(),
@@ -269,9 +282,11 @@ public class DatasetCreator {
 						collection.getAnalysisOptions().getMinSignalSize(),
 						collection.getAnalysisOptions().getMaxSignalFraction(),
 						collection.getAnalysisOptions().refoldNucleus(),
-						collection.getAnalysisOptions().getRefoldMode(),
+						refoldMode,
 						collection.getSignalCount(),
-						collection.getOutputFolderName(),
+						df.format(signalPerNucleus),
+						date,
+						time,
 						collection.getAnalysisOptions().getNucleusClass().getSimpleName()				
 				};
 
@@ -558,5 +573,75 @@ public class DatasetCreator {
 
 		}
 		return result;
+	}
+	
+	public static TableModel createSignalStatsTable(List<NucleusCollection> list){
+
+		DefaultTableModel model = new DefaultTableModel();
+		
+		List<Object> fieldNames = new ArrayList<Object>(0);
+		
+		// find the collection with the most channels
+		// this defines  the number of rows
+
+		if(list==null){
+			model.addColumn("No data loaded");
+			
+		} else {
+			
+			int maxChannels = 0;
+			for(NucleusCollection collection : list){
+				maxChannels = Math.max(collection.getSignalChannels().size(), maxChannels);
+			}
+			
+			// create the row names
+			fieldNames.add("Number of channels");
+			
+			for(int i=0;i<maxChannels;i++){
+				fieldNames.add("");
+				fieldNames.add("Channel");
+				fieldNames.add("Signals");
+				fieldNames.add("Signals per nucleus");
+				fieldNames.add("Median area");
+				fieldNames.add("Median angle");
+				fieldNames.add("Median feret");
+				fieldNames.add("Median distance from CoM");
+			}
+			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
+			
+//			IJ.log("Added headers");
+				
+			// format the numbers and make into a tablemodel
+			DecimalFormat df = new DecimalFormat("#.00"); 
+
+			// make a new column for each collection
+			for(NucleusCollection collection : list){
+				
+//				IJ.log("Adding collection");
+				List<Object> rowData = new ArrayList<Object>(0);
+				rowData.add(collection.getSignalChannels().size());
+
+				for(int channel : collection.getSignalChannels()){
+					if(collection.getSignalCount(channel)>0){
+//						IJ.log("Adding channel "+channel);
+						rowData.add("");
+						rowData.add(channel);
+						rowData.add(collection.getSignalCount(channel));
+						double signalPerNucleus = (double) collection.getSignalCount(channel)/  (double) collection.getNucleiWithSignals(channel).size();
+						rowData.add(df.format(signalPerNucleus));
+						rowData.add(df.format(collection.getMedianSignalArea(channel)));
+						rowData.add(df.format(collection.getMedianSignalAngle(channel)));
+						rowData.add(df.format(collection.getMedianSignalFeret(channel)));
+						rowData.add(df.format(collection.getMedianSignalDistance(channel)));
+					}
+				}
+				model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
+//				for(Object o : rowData){
+//					IJ.log(o.toString());
+//				}
+			}
+		}
+//		IJ.log("Created model");
+		return model;	
 	}
 }

@@ -402,6 +402,66 @@ public void addConsensusNucleus(Nucleus n){
   public int getProfileWindowSize(){
 	  return this.getNucleus(0).getAngleProfileWindowSize();
   }
+  
+  /**
+   * Get the median area of the signals in the given channel
+   * @param channel
+   * @return the median area
+   */
+  public double getMedianSignalArea(int channel){
+	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Double> a = new ArrayList<Double>(0);
+	  for(Nucleus n : nuclei){
+		  a.addAll(n.getSignalCollection().getAreas(channel));
+
+	  }
+	  return Stats.quartile(a.toArray(new Double[0]), 50);
+  }
+  
+  /**
+   * Get the median angle of the signals in the given channel
+   * @param channel
+   * @return the median angle
+   */
+  public double getMedianSignalAngle(int channel){
+	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Double> a = new ArrayList<Double>(0);
+	  for(Nucleus n : nuclei){
+		  a.addAll(n.getSignalCollection().getAngles(channel));
+
+	  }
+	  return Stats.quartile(a.toArray(new Double[0]), 50);
+  }
+  
+  /**
+   * Get the median feret of the signals in the given channel
+   * @param channel
+   * @return the median feret
+   */
+  public double getMedianSignalFeret(int channel){
+	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Double> a = new ArrayList<Double>(0);
+	  for(Nucleus n : nuclei){
+		  a.addAll(n.getSignalCollection().getFerets(channel));
+
+	  }
+	  return Stats.quartile(a.toArray(new Double[0]), 50);
+  }
+  
+  /**
+   * Get the median fractional distance from the nucleus CoM of the signals in the given channel
+   * @param channel
+   * @return the median distance
+   */
+  public double getMedianSignalDistance(int channel){
+	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Double> a = new ArrayList<Double>(0);
+	  for(Nucleus n : nuclei){
+		  a.addAll(n.getSignalCollection().getDistances(channel));
+
+	  }
+	  return Stats.quartile(a.toArray(new Double[0]), 50);
+  }
 
   /** 
    * Return the nuclei that have signals in the given channel. If negative, this will give the nuclei

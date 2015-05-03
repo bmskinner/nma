@@ -90,6 +90,7 @@ public interface NucleusCollection
 	public Nucleus getNucleus(int i);
 	
 	public List<Integer> getSignalChannels();
+	public int getSignalCount(int channel);
 
 	public int getRedSignalCount();
 
@@ -107,6 +108,11 @@ public interface NucleusCollection
 	public double getMedianFeretLength();
 
 	public double getMaxProfileLength();
+	
+	public double getMedianSignalDistance(int channel);
+	public double getMedianSignalFeret(int channel);
+	public double getMedianSignalAngle(int channel);
+	public double getMedianSignalArea(int channel);
 	
 	public int getProfileWindowSize();
 

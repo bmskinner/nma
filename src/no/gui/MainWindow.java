@@ -351,15 +351,16 @@ public class MainWindow extends JFrame {
 			signalsPanel = new JPanel(); // main container in tab
 			signalsPanel.setLayout(new BoxLayout(signalsPanel, BoxLayout.X_AXIS));
 			
-			
+
 			DefaultTableModel signalsTableModel = new DefaultTableModel();
-			signalsTableModel.addColumn("Field");
+			signalsTableModel.addColumn("");
 			signalsTableModel.addColumn("");
 			
 			signalStatsTable = new JTable(); // table  for basic stats
 			signalStatsTable.setModel(signalsTableModel);
 			signalStatsTable.setEnabled(false);
-			signalsPanel.add(signalStatsTable);
+			JScrollPane signalStatsScrollPane = new JScrollPane(signalStatsTable);
+			signalsPanel.add(signalStatsScrollPane);
 			
 			JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
 					null, null, null);
@@ -367,7 +368,6 @@ public class MainWindow extends JFrame {
 			signalsPlot.setBackgroundPaint(Color.WHITE);
 			signalsPlot.getDomainAxis().setVisible(false);
 			signalsPlot.getRangeAxis().setVisible(false);
-			
 			signalsChartPanel = new ChartPanel(signalsChart);
 			signalsPanel.add(signalsChartPanel);
 
@@ -535,7 +535,7 @@ public class MainWindow extends JFrame {
 	}
 	
 	// methods for getting signal colours. Defaults are no transparency
-	private Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
+	public Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
 		Color result;
 		switch (channel){
 			case 1: result = transparent ? new Color(0,0,255,defaultAlpha) : Color.BLUE;
@@ -552,11 +552,11 @@ public class MainWindow extends JFrame {
 		return result;
 	}
 	
-	private Color getSignalColour(int channel, boolean transparent){
+	public Color getSignalColour(int channel, boolean transparent){
 		return getSignalColour(channel, transparent, 10);
 	}
 	
-	private Color getSignalColour(int channel){
+	public Color getSignalColour(int channel){
 		return getSignalColour(channel, false);
 	}
 	
@@ -959,6 +959,24 @@ public class MainWindow extends JFrame {
 	}
 	
 	public void updateSignalsPanel(List<NucleusCollection> list){
+		updateSignalConsensusChart(list);
+		updateSignalStatsPanel(list);
+	}
+	
+	private void updateSignalStatsPanel(List<NucleusCollection> list){
+		try{
+		TableModel model = DatasetCreator.createSignalStatsTable(list);
+		signalStatsTable.setModel(model);
+		} catch (Exception e){
+			log("Error updating signal stats: "+e.getMessage());
+		}
+		int columns = signalStatsTable.getColumnModel().getColumnCount();
+		for(int i=1;i<columns;i++){
+			signalStatsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+		}
+	}
+	
+	private void updateSignalConsensusChart(List<NucleusCollection> list){
 		try {
 			NucleusCollection collection = list.get(0);
 			XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
@@ -973,6 +991,7 @@ public class MainWindow extends JFrame {
 				rend.setSeriesPaint(series, getSignalColour(channel, false));
 				rend.setBaseLinesVisible(false);
 				rend.setBaseShapesVisible(true);
+				rend.setBaseSeriesVisibleInLegend(false);
 			}
 			plot.setRenderer(1, rend);
 			
@@ -1070,6 +1089,29 @@ public class MainWindow extends JFrame {
 	        } else {
 	          l.setBackground(Color.WHITE);
 	        }
+
+	      //Return the JLabel which renders the cell.
+	      return l;
+	    }
+	}
+	
+	/**
+	 * Allows for cell background to be coloured based on poition in a list
+	 *
+	 */
+	public class StatsTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	        
+	      //Cells are by default rendered as a JLabel.
+	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+	        int choose = ((row-1)/8)+2;
+	        Color colour = (row-1) % 8 == 0 ? MainWindow.this.getSignalColour(  choose   ) : Color.WHITE;
+//	        IJ.log(row+" "+choose+"  "+colour.toString());
+	        
+	        l.setBackground(colour);
 
 	      //Return the JLabel which renders the cell.
 	      return l;
