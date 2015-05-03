@@ -534,6 +534,32 @@ public class MainWindow extends JFrame {
 		return Integer.parseInt(names[1]);
 	}
 	
+	// methods for getting signal colours. Defaults are no transparency
+	private Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
+		Color result;
+		switch (channel){
+			case 1: result = transparent ? new Color(0,0,255,defaultAlpha) : Color.BLUE;
+					break;
+			case 2: result = transparent ? new Color(255,0,0,defaultAlpha) : Color.RED;
+					break;
+			case 3: result = transparent ? new Color(0,255,0,defaultAlpha) :Color.GREEN;
+					break;
+			case 4: result = transparent ? new Color(0,255,255,defaultAlpha) : Color.CYAN;
+					break;
+			default: result = transparent ?  new Color(128,128,128,defaultAlpha) : Color.LIGHT_GRAY;
+			break;
+		}
+		return result;
+	}
+	
+	private Color getSignalColour(int channel, boolean transparent){
+		return getSignalColour(channel, transparent, 10);
+	}
+	
+	private Color getSignalColour(int channel){
+		return getSignalColour(channel, false);
+	}
+	
 	public void updateStatsPanel(List<NucleusCollection> list){
 		// format the numbers and make into a tablemodel
 //		NucleusCollection collection = list.get(0);
@@ -943,8 +969,8 @@ public class MainWindow extends JFrame {
 			
 			XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
 			for(int series=0;series<signalCoMs.getSeriesCount();series++){
-				
-				rend.setSeriesPaint(series, Color.RED);
+				int channel = series+2; // channel is from 2, series from 0
+				rend.setSeriesPaint(series, getSignalColour(channel, false));
 				rend.setBaseLinesVisible(false);
 				rend.setBaseShapesVisible(true);
 			}
@@ -952,9 +978,20 @@ public class MainWindow extends JFrame {
 			
 			for(int channel : collection.getSignalChannels()){
 				List<Shape> shapes = DatasetCreator.createSignalRadiusDataset(collection, channel);
+				
+				int signalCount = shapes.size();
+				int alpha 	= signalCount > 255 
+							? 2 
+							: signalCount > 128 
+							? 8
+							: signalCount > 64
+							? 16
+							: signalCount > 32
+							? 20
+							: 20;
 				for(Shape s : shapes){
 					XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-						       null, new Color(255,0,0,20)); // layer transparent signals
+						       null, getSignalColour(channel, true, alpha)); // layer transparent signals
 					plot.addAnnotation(an);
 				}
 			}
