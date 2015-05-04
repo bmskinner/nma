@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.*;
 
 import no.nuclei.*;
+import no.utility.Logger;
 import no.utility.Utils;
 import no.components.*;
 import no.export.ImageExporter;
@@ -35,6 +36,8 @@ public class ShellCreator {
 	ImageStack image;
 	Roi originalRoi;
 	Nucleus nucleus;
+	
+	Logger logger;
 
 	double[] dapiDensities;
 	double[] signalProportions;
@@ -47,13 +50,15 @@ public class ShellCreator {
 	*
 	* @param nucleus the nucleus to analyse
 	*/
-	public ShellCreator(Nucleus n){
+	public ShellCreator(Nucleus n, File log){
 
+		this.logger = new Logger(log, "ShellCreator");
 		FloatPolygon polygon = Utils.createPolygon(n);
 		originalRoi = new PolygonRoi(polygon, Roi.POLYGON);
-		this.image = ImageImporter.convert(new ImagePlus(n.getOriginalImagePath()));
-//		this.image = n.getImagePlanes();
+		this.image = ImageImporter.importImage(new File(n.getOriginalImagePath()), logger.getLogfile()); //(new ImagePlus(n.getOriginalImagePath()));
 		this.nucleus = n;
+		
+		logger.log("Imported image with "+image.getSize()+" slices", Logger.DEBUG);
 	}
 
 	/**
@@ -170,6 +175,7 @@ public class ShellCreator {
 		double[] normalisedSignal = normalise(this.signalProportions, this.dapiDensities);
 
 		if(new Double(normalisedSignal[0]).isNaN()){
+			logger.log("Result is not a number", Logger.ERROR);
 			throw new Exception("Result is not a number");
 		}
 		return normalisedSignal;
@@ -229,25 +235,30 @@ public class ShellCreator {
 	*/
 	private double[] getSignalDensities(List<XYPoint> signalPoints, int channel){
 		if(signalPoints.size()==0){
+			logger.log("No points found in ROI", Logger.ERROR);
 			throw new IllegalArgumentException("No points found in ROI");
 		}
 		double[] result = new double[shellCount];
 
-		int i=0;
-		for( Roi r : shells){
+		try {
+			int i=0;
+			for( Roi r : shells){
 
-			double density = 0;
+				double density = 0;
 
-			for(XYPoint p : signalPoints){
+				for(XYPoint p : signalPoints){
 
-				if(r.contains(p.getXAsInt(), p.getYAsInt())){
-					// find the value of the signal
-					ImageProcessor ip = image.getProcessor(channel);
-					density += (double) ip.getPixel(p.getXAsInt(), p.getYAsInt());	 
+					if(r.contains(p.getXAsInt(), p.getYAsInt())){
+						// find the value of the signal
+						ImageProcessor ip = image.getProcessor(channel);
+						density += (double) ip.getPixel(p.getXAsInt(), p.getYAsInt());	 
+					}
 				}
+				result[i] = density;
+				i++;
 			}
-			result[i] = density;
-			i++;
+		} catch (Exception e) {
+			logger.log("Error getting signal densities: "+e.getMessage(), Logger.ERROR);
 		}
 		return result;
 	}
@@ -262,20 +273,25 @@ public class ShellCreator {
 	*/
 	private double[] getProportions(double[] counts){
 		if(new Double(counts[0]).isNaN()){
+			logger.log("Not a number within ShellAnalyser.getProportions", Logger.ERROR);
 			throw new IllegalArgumentException("Not a number within ShellAnalyser.getProportions");
 		}
 		double[] proportions = new double[shellCount];
 
-		double total = 0;
-		for(double d : counts){
-			total+=d;
-		}
+		try {
+			double total = 0;
+			for(double d : counts){
+				total+=d;
+			}
 
-		// subtract inner from outer shells
-		for(int i=0; i<shellCount; i++){
+			// subtract inner from outer shells
+			for(int i=0; i<shellCount; i++){
 
-			double realCount = i==shellCount-1 ? counts[i] : counts[i] - counts[i+1];
-			proportions[i] = realCount / total; // fraction of total pixels
+				double realCount = i==shellCount-1 ? counts[i] : counts[i] - counts[i+1];
+				proportions[i] = realCount / total; // fraction of total pixels
+			}
+		} catch (Exception e) {
+			logger.log("Error getting signal proportions: "+e.getMessage(), Logger.ERROR);
 		}
 		return proportions;
 	}

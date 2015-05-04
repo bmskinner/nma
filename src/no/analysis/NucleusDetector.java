@@ -355,7 +355,8 @@ public class NucleusDetector {
           Opener localOpener = new Opener();
           ImagePlus image = localOpener.openImage(file.getAbsolutePath());   
           
-          ImageStack imageStack = ImageImporter.convert(image);
+//          ImageStack imageStack = ImageImporter.convert(image);
+          ImageStack imageStack = ImageImporter.importImage(file, logger.getLogfile());
           
           // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
           makeFolder(folder);
@@ -477,9 +478,13 @@ public class NucleusDetector {
 		  
 		  // save out the image stacks rather than hold within the nucleus
 		  try{
-			  IJ.saveAsTiff(new ImagePlus(null, smallRegion), currentNucleus.getOriginalImagePath());
-			  IJ.saveAsTiff(new ImagePlus(null, largeRegion), currentNucleus.getEnlargedImagePath());
+			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getOriginalImagePath());
+			  IJ.saveAsTiff(ImageExporter.convert(largeRegion), currentNucleus.getEnlargedImagePath());
 			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
+			  
+//			  IJ.saveAsTiff(new ImagePlus(null, smallRegion), currentNucleus.getOriginalImagePath());
+//			  IJ.saveAsTiff(new ImagePlus(null, largeRegion), currentNucleus.getEnlargedImagePath());
+//			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
 
 		  } catch(Exception e){
 			  mw.log("Error saving original, enlarged or annotated image: "+e.getMessage());

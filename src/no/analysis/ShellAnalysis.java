@@ -8,6 +8,7 @@ import java.util.Map;
 import no.collections.NucleusCollection;
 import no.collections.RoundNucleusCollection;
 import no.components.NuclearSignal;
+import no.components.ShellResult;
 import no.nuclei.Nucleus;
 import no.utility.Logger;
 
@@ -25,7 +26,7 @@ public class ShellAnalysis {
 	public static boolean run(NucleusCollection collection, int shells){
 		
 		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
-		
+	
 		if(collection.getSignalCount()==0){
 			logger.log("No signals in population",Logger.DEBUG);
 			return true; // only bother if there are signals
@@ -47,7 +48,7 @@ public class ShellAnalysis {
 			// make the shells and measure the values
 			for(Nucleus n : collection.getNuclei()){
 
-				ShellCreator shellAnalyser = new ShellCreator(n);
+				ShellCreator shellAnalyser = new ShellCreator(n, logger.getLogfile());
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
 
@@ -70,8 +71,11 @@ public class ShellAnalysis {
 
 			// get stats and export
 			for(int channel : counters.keySet()){
-				counters.get(channel).export(new File(collection.getLogFileName( "log.shells."+channel  )));
+				ShellCounter channelCounter = counters.get(channel);
+				channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
+				collection.addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
 			}
+			
 			logger.log("Shell analysis complete");
 		} catch (Exception e) {
 			logger.log("Error in shell analysis: "+e.getMessage(), Logger.ERROR);

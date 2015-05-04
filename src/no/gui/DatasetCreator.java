@@ -15,13 +15,17 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.ShellResult;
 import no.components.XYPoint;
 import no.nuclei.Nucleus;
 import no.utility.Equation;
 import no.utility.Utils;
 
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
@@ -686,6 +690,28 @@ public class DatasetCreator {
 				}
 			}
 
+		}
+		return ds;
+	}
+	
+	public static CategoryDataset createShellBarChartDataset(List<NucleusCollection> list){
+		DefaultStatisticalCategoryDataset ds = new DefaultStatisticalCategoryDataset();
+		for(NucleusCollection collection : list){
+
+			for(int channel : collection.getSignalChannels()){
+				ShellResult r = collection.getShellResult(channel);
+				
+				for(int shell = 0; shell<r.getNumberOfShells();shell++){
+					Double d = r.getMeans().get(shell);
+					Double std = r.getStandardErrors().get(shell);
+					ds.add(d*100, std.doubleValue()*100, "Channel_"+channel+"_"+collection.getName(), String.valueOf(shell)); 
+					// we need the string value for shell otherwise we get error
+					// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
+					// ditto the doublevalue for std
+
+				}
+				
+			}
 		}
 		return ds;
 	}

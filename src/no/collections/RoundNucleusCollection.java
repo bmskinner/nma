@@ -12,7 +12,9 @@ package no.collections;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import no.collections.NucleusCollection;
@@ -21,6 +23,7 @@ import no.components.NuclearSignal;
 import no.components.Profile;
 import no.components.ProfileCollection;
 import no.components.ProfileFeature;
+import no.components.ShellResult;
 import no.nuclei.Nucleus;
 import no.utility.Stats;
 
@@ -49,6 +52,7 @@ implements NucleusCollection, Serializable
 	private Nucleus consensusNucleus;
 	
 	private AnalysisOptions analysisOptions;
+	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 
 	private List<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
 
@@ -88,6 +92,13 @@ implements NucleusCollection, Serializable
 	  this.nucleiCollection.add(r);
   }
   
+  public void addShellResult(int channel, ShellResult result){
+	  this.shellResults.put(channel, result);
+  }
+  
+  public ShellResult getShellResult(int channel){
+	  return this.shellResults.get(channel);
+  }
 
 
   public AnalysisOptions getAnalysisOptions() {

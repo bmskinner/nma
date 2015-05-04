@@ -47,7 +47,7 @@ public class ShellCounter {
 		}
 	}
 	
-	private List<Double> getMeans() throws Exception{
+	public List<Double> getMeans() throws Exception{
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
 			result.add(Stats.mean(getShell(i)));
@@ -55,7 +55,7 @@ public class ShellCounter {
 		return result;
 	}
 	
-	private List<Double> getStandardErrors() throws Exception{
+	public List<Double> getStandardErrors() throws Exception{
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
 			result.add(Stats.stderr(getShell(i)));

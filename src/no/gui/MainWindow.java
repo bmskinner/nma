@@ -66,12 +66,15 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
@@ -710,26 +713,49 @@ public class MainWindow extends JFrame {
 	
 	public void updateShellPanel(List<NucleusCollection> list){
 		// if collection has shell results, display
-//		NucleusCollection collection = list.get(0);
-		
-		// else,  no shell analysis in the population
-		// have a panel ready with a button to run the analysis
-		shellsPanel = new JPanel(); // container in tab if no shell chart
-//		shellsPanel.setLayout(new BoxLayout(shellsPanel, BoxLayout.Y_AXIS));
-		shellsPanel.setLayout(new BorderLayout(0,0));
-		JLabel lbl = new JLabel("No shell results available");
-		lbl.setHorizontalAlignment(SwingConstants.CENTER);
-		shellsPanel.add(lbl, BorderLayout.NORTH);
-		
-		JButton btnShellAnalysis = new JButton("Run shell analysis");
-		btnShellAnalysis.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				newShellAnalysis();
-			}
-		});
-		shellsPanel.add(btnShellAnalysis, BorderLayout.CENTER);
-		tabbedPane.setComponentAt(5, shellsPanel);
+		//		NucleusCollection collection = list.get(0);
+		if(list.size()==1){
+			
+			CategoryDataset ds = DatasetCreator.createShellBarChartDataset(list);
+			JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", ds);
+			shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
+			shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
+			StatisticalBarRenderer rend = new StatisticalBarRenderer();
+			rend.setBarPainter(new StandardBarPainter());
+			rend.setShadowVisible(false);
+			rend.setErrorIndicatorPaint(Color.black);
+			rend.setErrorIndicatorStroke(new BasicStroke(2));
+			shellsChart.getCategoryPlot().setRenderer(rend);
+			
+			for (int j = 0; j < ds.getRowCount(); j++) {
+				rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
+				rend.setSeriesStroke(j, new BasicStroke(2));
+				int index = getIndexFromLabel( (String) ds.getRowKey((j)));
+				rend.setSeriesPaint(j, getSignalColour(index));
+			}	
+			
+			shellsChartPanel.setChart(shellsChart);
+		} else {
+
+			// else,  no shell analysis in the population
+			// have a panel ready with a button to run the analysis
+			shellsPanel = new JPanel(); // container in tab if no shell chart
+			//		shellsPanel.setLayout(new BoxLayout(shellsPanel, BoxLayout.Y_AXIS));
+			shellsPanel.setLayout(new BorderLayout(0,0));
+			JLabel lbl = new JLabel("No shell results available");
+			lbl.setHorizontalAlignment(SwingConstants.CENTER);
+			shellsPanel.add(lbl, BorderLayout.NORTH);
+
+			JButton btnShellAnalysis = new JButton("Run shell analysis");
+			btnShellAnalysis.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					newShellAnalysis();
+				}
+			});
+			shellsPanel.add(btnShellAnalysis, BorderLayout.CENTER);
+			tabbedPane.setComponentAt(5, shellsPanel);
+		}
 	}
 	
 	public JFreeChart makeConsensusChart(NucleusCollection collection){

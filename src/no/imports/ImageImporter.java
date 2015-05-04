@@ -1,5 +1,8 @@
 package no.imports;
 
+import java.io.File;
+
+import no.utility.Logger;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
@@ -19,8 +22,30 @@ public class ImageImporter {
 	public static final int RGB_GREEN = 1;
 	public static final int RGB_BLUE = 2;
 	
+	private static Logger logger;
+	
 	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB };
-			
+	
+	
+	/**
+	 * Import and convert the image in the given file to an ImageStack
+	 * @param f the file to import
+	 * @return the ImageStack
+	 */
+	public static ImageStack importImage(File f, File log){
+		logger = new Logger(log, "ImageImporter");
+		ImageStack stack = null;
+		try{
+			if(f.isFile()){
+				logger.log("Importing image: "+f.getAbsolutePath(), Logger.DEBUG);
+				ImagePlus image = new ImagePlus(f.getAbsolutePath());
+				stack = convert(image);
+			}
+		} catch (Exception e){
+			logger.log("Error importing image: "+e.getMessage(), Logger.ERROR);
+		}
+		return stack;
+	}
 	/**
 	 * Create an ImageStack from the input image
 	 * @param image the image to be converted to a stack
@@ -28,6 +53,7 @@ public class ImageImporter {
 	 */
 	public static ImageStack convert(ImagePlus image){
 		if(image==null){
+			logger.log("Input image is null", Logger.ERROR);
 			throw new IllegalArgumentException("Input image is null");
 		}
 		
@@ -39,16 +65,20 @@ public class ImageImporter {
 			}
 		}
 		if(!ok ){
+			logger.log("Cannot handle image type: "+image.getType(), Logger.ERROR);
 			throw new IllegalArgumentException("Cannot handle image type: "+image.getType());
 		}
 				
+		logger.log("Image is type: "+image.getType());
 		// do the conversions
 		ImageStack result = null;
 		if(image.getType()==ImagePlus.GRAY8){
+			logger.log("Converting greyscale to stack",Logger.DEBUG);
 			result = convertGreyscale(image);
 		}
 		
 		if(image.getType()==ImagePlus.COLOR_RGB){
+			logger.log("Converting RGB to stack",Logger.DEBUG);
 			result = convertRGB(image);
 		}
 		
@@ -83,6 +113,7 @@ public class ImageImporter {
 	    result.addSlice(channels[ImageImporter.RGB_RED].getProcessor());
 	    result.addSlice(channels[ImageImporter.RGB_GREEN].getProcessor());
 	    result.deleteSlice(1); // remove the blank first slice
+	    logger.log("New stack has "+result.getSize()+" slices",Logger.DEBUG);
 //	    ImagePlus demo = new ImagePlus(null, result);
 //	    
 //	    demo.show();
