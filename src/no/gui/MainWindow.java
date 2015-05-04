@@ -18,6 +18,7 @@ import javax.swing.JButton;
 
 import no.analysis.AnalysisCreator;
 import no.analysis.ProfileSegmenter;
+import no.analysis.ShellAnalysis;
 import no.collections.NucleusCollection;
 import no.components.Profile;
 import no.imports.PopulationImporter;
@@ -508,8 +509,34 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
-	public void newShellAnalysis(){
-		
+	public void newShellAnalysis(NucleusCollection collection){
+		String shellString = JOptionPane.showInputDialog(this, "Number of shells", 5);
+		final UUID id = collection.getID();
+		// validate
+		if(!shellString.isEmpty() && shellString!=null){
+			final int shellCount = Integer.parseInt(shellString);
+			Thread thr = new Thread() {
+				public void run() {
+					try{
+						logc("Running shell analysis...");
+						boolean ok = ShellAnalysis.run(MainWindow.this.analysisPopulations.get(id), shellCount);
+						if(ok){
+							log("OK");
+						} else {
+							log("Error");
+						}
+						
+						List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+						list.add(MainWindow.this.analysisPopulations.get(id));
+						updatePanels(list);
+						
+					} catch (Exception e){
+						log("Error in shell analysis");
+					}
+				}
+			};
+			thr.start();
+		}
 	}
 	
 	public void loadNuclei(){
@@ -539,9 +566,6 @@ public class MainWindow extends JFrame {
 	
 	public void updatePanels(List<NucleusCollection> list){
 		
-//		List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-//		list.add(collection);
-		
 		try {
 			updateStatsPanel(list);
 			updateProfileImage(list);
@@ -553,7 +577,9 @@ public class MainWindow extends JFrame {
 			updateSignalHistogramPanel(list);
 		} catch (Exception e) {
 			log("Error updating panels: "+e.getMessage());
-			e.printStackTrace();
+			for(StackTraceElement el : e.getStackTrace()){
+				log(el.toString());
+			}
 		}
 	}
 	
@@ -710,52 +736,65 @@ public class MainWindow extends JFrame {
 			log("Error in plotting frankenprofile or profile");
 		} 
 	}
-	
+		
 	public void updateShellPanel(List<NucleusCollection> list){
-		// if collection has shell results, display
-		//		NucleusCollection collection = list.get(0);
-		if(list.size()==1){
+
+		if(list.size()==1){ // single collection is easy
 			
-			CategoryDataset ds = DatasetCreator.createShellBarChartDataset(list);
-			JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", ds);
-			shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
-			shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
-			StatisticalBarRenderer rend = new StatisticalBarRenderer();
-			rend.setBarPainter(new StandardBarPainter());
-			rend.setShadowVisible(false);
-			rend.setErrorIndicatorPaint(Color.black);
-			rend.setErrorIndicatorStroke(new BasicStroke(2));
-			shellsChart.getCategoryPlot().setRenderer(rend);
-			
-			for (int j = 0; j < ds.getRowCount(); j++) {
-				rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
-				rend.setSeriesStroke(j, new BasicStroke(2));
-				int index = getIndexFromLabel( (String) ds.getRowKey((j)));
-				rend.setSeriesPaint(j, getSignalColour(index));
-			}	
-			
-			shellsChartPanel.setChart(shellsChart);
+			NucleusCollection collection = list.get(0);
+
+			if(collection.hasShellResult()){ // only if there is something to display
+
+				CategoryDataset ds = DatasetCreator.createShellBarChartDataset(list);
+				JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", ds);
+				shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
+				shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
+				StatisticalBarRenderer rend = new StatisticalBarRenderer();
+				rend.setBarPainter(new StandardBarPainter());
+				rend.setShadowVisible(false);
+				rend.setErrorIndicatorPaint(Color.black);
+				rend.setErrorIndicatorStroke(new BasicStroke(2));
+				shellsChart.getCategoryPlot().setRenderer(rend);
+
+				for (int j = 0; j < ds.getRowCount(); j++) {
+					rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
+					rend.setSeriesStroke(j, new BasicStroke(2));
+					int index = getIndexFromLabel( (String) ds.getRowKey((j)));
+					rend.setSeriesPaint(j, getSignalColour(index));
+				}	
+
+				shellsChartPanel.setChart(shellsChart);
+			} else { // no shell analysis available
+				shellsPanel = makeNoShellAnalysisAvailablePanel(true, collection); // allow option to run analysis
+				tabbedPane.setComponentAt(5, shellsPanel);
+			}
 		} else {
 
-			// else,  no shell analysis in the population
-			// have a panel ready with a button to run the analysis
-			shellsPanel = new JPanel(); // container in tab if no shell chart
-			//		shellsPanel.setLayout(new BoxLayout(shellsPanel, BoxLayout.Y_AXIS));
-			shellsPanel.setLayout(new BorderLayout(0,0));
-			JLabel lbl = new JLabel("No shell results available");
-			lbl.setHorizontalAlignment(SwingConstants.CENTER);
-			shellsPanel.add(lbl, BorderLayout.NORTH);
+			// Multiple populations. Do not display
+			shellsPanel = makeNoShellAnalysisAvailablePanel(false, null); // container in tab if no shell chart
+			tabbedPane.setComponentAt(5, shellsPanel);
+		}
+	}
+	
+	private JPanel makeNoShellAnalysisAvailablePanel(boolean showRunButton, NucleusCollection collection){
+		JPanel panel = new JPanel(); // container in tab if no shell chart
+		final UUID id = collection.getID();
+		panel.setLayout(new BorderLayout(0,0));
+		JLabel lbl = new JLabel("No shell results available");
+		lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		panel.add(lbl, BorderLayout.NORTH);
 
+		if(showRunButton && collection !=null){
 			JButton btnShellAnalysis = new JButton("Run shell analysis");
 			btnShellAnalysis.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					newShellAnalysis();
+					newShellAnalysis(MainWindow.this.analysisPopulations.get(id));
 				}
 			});
-			shellsPanel.add(btnShellAnalysis, BorderLayout.CENTER);
-			tabbedPane.setComponentAt(5, shellsPanel);
+			panel.add(btnShellAnalysis, BorderLayout.CENTER);
 		}
+		return panel;
 	}
 	
 	public JFreeChart makeConsensusChart(NucleusCollection collection){

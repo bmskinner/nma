@@ -100,6 +100,20 @@ implements NucleusCollection, Serializable
 	  return this.shellResults.get(channel);
   }
 
+  /**
+   * Test if the collection has a ShellResult in any channel
+   * 
+   */
+  public boolean hasShellResult(){
+	  boolean b = false;
+	  for(int channel : this.getSignalChannels()){
+		  if(this.getShellResult(channel)!=null){
+			  b = true;
+		  }
+	  }
+	  return b;
+  }
+
 
   public AnalysisOptions getAnalysisOptions() {
 	  return analysisOptions;
@@ -356,6 +370,15 @@ public void addConsensusNucleus(Nucleus n){
 
 	  } // end nucleus iterations
 	  return count;
+  }
+  
+  public boolean hasSignals(int channel){
+	  if(this.getSignalCount(channel)>0){
+		  return true;
+	  } else{
+		  return false;
+	  }
+	  
   }
 
   /**

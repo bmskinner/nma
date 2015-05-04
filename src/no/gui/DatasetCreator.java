@@ -699,18 +699,21 @@ public class DatasetCreator {
 		for(NucleusCollection collection : list){
 
 			for(int channel : collection.getSignalChannels()){
-				ShellResult r = collection.getShellResult(channel);
 				
-				for(int shell = 0; shell<r.getNumberOfShells();shell++){
-					Double d = r.getMeans().get(shell);
-					Double std = r.getStandardErrors().get(shell);
-					ds.add(d*100, std.doubleValue()*100, "Channel_"+channel+"_"+collection.getName(), String.valueOf(shell)); 
-					// we need the string value for shell otherwise we get error
-					// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
-					// ditto the doublevalue for std
+				if(collection.hasSignals(channel)){
+					ShellResult r = collection.getShellResult(channel);
 
+
+					for(int shell = 0; shell<r.getNumberOfShells();shell++){
+						Double d = r.getMeans().get(shell);
+						Double std = r.getStandardErrors().get(shell);
+						ds.add(d*100, std.doubleValue()*100, "Channel_"+channel+"_"+collection.getName(), String.valueOf(shell)); 
+						// we need the string value for shell otherwise we get error
+						// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
+						// ditto the doublevalue for std
+
+					}
 				}
-				
 			}
 		}
 		return ds;

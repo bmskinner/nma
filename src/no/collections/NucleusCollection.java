@@ -97,8 +97,11 @@ public interface NucleusCollection
 
 	public int getGreenSignalCount();
 	
+	public boolean hasSignals(int channel);
+	
 	public void addShellResult(int channel, ShellResult result);
 	public ShellResult getShellResult(int channel);
+	public boolean hasShellResult();
 
 	// allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
 	public double getMedianNuclearArea();

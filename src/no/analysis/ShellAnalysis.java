@@ -32,10 +32,6 @@ public class ShellAnalysis {
 			return true; // only bother if there are signals
 		}
 		
-		if(collection.getClass() != RoundNucleusCollection.class){
-			logger.log("Not a round nucleus; skipping");
-			return true; // only analyse round nuclei
-		}
 		logger.log("Performing shell analysis...");
 		
 		try {
@@ -53,8 +49,9 @@ public class ShellAnalysis {
 				shellAnalyser.exportImage();
 
 				for(int channel : n.getSignalChannels()){
-					List<NuclearSignal> signalGroup = n.getSignals(channel); 
-					if(!signalGroup.isEmpty()){
+					if(collection.hasSignals(channel)){
+						List<NuclearSignal> signalGroup = n.getSignals(channel); 
+
 						ShellCounter counter = counters.get(channel);
 
 						for(NuclearSignal s : signalGroup){
@@ -71,9 +68,11 @@ public class ShellAnalysis {
 
 			// get stats and export
 			for(int channel : counters.keySet()){
-				ShellCounter channelCounter = counters.get(channel);
-				channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
-				collection.addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+				if(collection.hasSignals(channel)){
+					ShellCounter channelCounter = counters.get(channel);
+					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
+					collection.addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+				}
 			}
 			
 			logger.log("Shell analysis complete");

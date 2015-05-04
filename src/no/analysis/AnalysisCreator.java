@@ -346,12 +346,16 @@ public class AnalysisCreator {
 		  }
 
 		  // Perform shell analysis with 5 shells by default
-		  mw.logc("Running shell analysis...");
-		  ok = ShellAnalysis.run(r, 5);
-		  if(ok){
-			  mw.log("OK");
+		  if(r.getClass() != RoundNucleusCollection.class){
+			  logger.log("Not a round nucleus; skipping");
 		  } else {
-			  mw.log("Error");
+			  mw.logc("Running shell analysis...");
+			  ok = ShellAnalysis.run(r, 5);
+			  if(ok){
+				  mw.log("OK");
+			  } else {
+				  mw.log("Error");
+			  }
 		  }
 
 		  // export the stats files
@@ -435,12 +439,16 @@ public class AnalysisCreator {
 			  }
 
 			  // Perform shell analysis with 5 shells by default
-			  mw.logc("Running shell analysis...");
-			  ok = ShellAnalysis.run(p, 5);
-			  if(ok){
-				  mw.log("OK");
+			  if(p.getClass() != RoundNucleusCollection.class){
+				  logger.log("Not a round nucleus; skipping");
 			  } else {
-				  mw.log("Error");
+				  mw.logc("Running shell analysis...");
+				  ok = ShellAnalysis.run(r, 5);
+				  if(ok){
+					  mw.log("OK");
+				  } else {
+					  mw.log("Error");
+				  }
 			  }
 
 			  // export the stats files
