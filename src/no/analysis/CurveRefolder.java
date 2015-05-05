@@ -162,7 +162,7 @@ public class CurveRefolder{
 
 			if(this.mode==INTENSIVE_MODE){
 
-				while(score > (originalScore*0.6) && i<1000){ // iterate until 0.6 original score, or 1000 iterations
+				while(score > (originalScore*0.1) && i<1000){ // iterate until 0.6 original score, or 1000 iterations
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					i++;
@@ -174,7 +174,7 @@ public class CurveRefolder{
 
 			if(this.mode==BRUTAL_MODE){
 
-				while(score > (originalScore*0.5) && i<10000){ // iterate until 0.5 original score, or 10000 iterations
+				while(score > (originalScore*0.1) && i<10000){ // iterate until 0.1 original score, or 10000 iterations
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					i++;

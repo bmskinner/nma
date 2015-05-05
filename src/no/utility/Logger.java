@@ -1,6 +1,8 @@
 package no.utility;
 
 import java.io.File;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 
 import ij.IJ;
 
@@ -26,7 +28,8 @@ public class Logger {
 	 */
 	public void log(String s, String priority){
 		long time = System.currentTimeMillis();
-		String result = IJ.append(time+"\t"+priority+"\t"+this.className+"\t"+s+"\r", file.getAbsolutePath());
+		String ts = calcDate(time);
+		String result = IJ.append(ts+"\t"+priority+"\t"+this.className+"\t"+s+"\r", file.getAbsolutePath());
 		if(result!=null){
 			IJ.log("Error in logging: "+file.getAbsolutePath());
 		}
@@ -43,4 +46,12 @@ public class Logger {
 	public File getLogfile(){
 		return this.file;
 	}
+	
+	private String calcDate(long millisecs) {
+
+	    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS");
+	    Date date = new Date(millisecs);
+	    return df.format(date);
+	  }
+
 }
