@@ -371,6 +371,23 @@ public class DatasetCreator {
 		return dataset;
 	}
 
+	public static BoxAndWhiskerCategoryDataset createDifferenceBoxplotDataset(List<NucleusCollection> collections) {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+			NucleusCollection c = collections.get(i);
+
+			List<Double> list = new ArrayList<Double>();
+
+			for (double d : c.getDifferencesToMedianFromPoint(c.getOrientationPoint())) {
+				list.add(new Double(d));
+			}
+			dataset.add(list, c.getType()+"_"+i, "Difference to median");
+		}
+
+		return dataset;
+	}
 	
 	public static XYDataset createNucleusOutline(NucleusCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();

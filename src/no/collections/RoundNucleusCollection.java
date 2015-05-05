@@ -370,14 +370,31 @@ public void addConsensusNucleus(Nucleus n){
 	  } // end nucleus iterations
 	  return count;
   }
-  
+
+  /**
+   * Test whether the current population has signals in any channel
+   * @return
+   */
+  public boolean hasSignals(){
+	  for(int i : this.getSignalChannels()){
+		  if(this.hasSignals(i)){
+			  return true;
+		  }
+	  }
+	  return false;
+  }
+
+  /**
+   * Test whether the current population has signals in the given channel
+   * @return
+   */
   public boolean hasSignals(int channel){
 	  if(this.getSignalCount(channel)>0){
 		  return true;
 	  } else{
 		  return false;
 	  }
-	  
+
   }
 
   /**

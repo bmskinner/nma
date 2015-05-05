@@ -49,7 +49,6 @@ import javax.swing.JTable;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Shape;
 
@@ -106,6 +105,7 @@ public class MainWindow extends JFrame {
 	private ChartPanel perimBoxplotChartPanel;
 	private ChartPanel maxFeretBoxplotChartPanel;
 	private ChartPanel minFeretBoxplotChartPanel;
+	private ChartPanel differenceBoxplotChartPanel;
 	
 	private ChartPanel variabilityChartPanel; 
 	
@@ -330,6 +330,10 @@ public class MainWindow extends JFrame {
 			JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
 			minFeretBoxplotChartPanel = new ChartPanel(minFeretBoxplot);
 			boxplotSplitPanel.add(minFeretBoxplotChartPanel);
+			
+			JFreeChart differenceBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+			differenceBoxplotChartPanel = new ChartPanel(differenceBoxplot);
+			boxplotSplitPanel.add(differenceBoxplotChartPanel);
 			
 			tabbedPane.addTab("Boxplots", null, boxplotSplitPanel, null);
 			
@@ -773,25 +777,33 @@ public class MainWindow extends JFrame {
 				shellsChartPanel.setChart(shellsChart);
 				tabbedPane.setComponentAt(5, shellsChartPanel);
 			} else { // no shell analysis available
-				shellsPanel = makeNoShellAnalysisAvailablePanel(true, collection); // allow option to run analysis
-				tabbedPane.setComponentAt(5, shellsPanel);
+
+				if(collection.hasSignals()){
+					// if signals, offer to run
+					shellsPanel = makeNoShellAnalysisAvailablePanel(true, collection, "No shell results available; run new analysis?"); // allow option to run analysis
+					tabbedPane.setComponentAt(5, shellsPanel);
+				} else {
+					// otherwise don't show button
+					shellsPanel = makeNoShellAnalysisAvailablePanel(false, null, "No signals in population"); // container in tab if no shell chart
+					tabbedPane.setComponentAt(5, shellsPanel);
+				}
 			}
 		} else {
 
 			// Multiple populations. Do not display
-			shellsPanel = makeNoShellAnalysisAvailablePanel(false, null); // container in tab if no shell chart
+			// container in tab if no shell chart
+			shellsPanel = makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
 			tabbedPane.setComponentAt(5, shellsPanel);
 		}
 	}
 	
-	private JPanel makeNoShellAnalysisAvailablePanel(boolean showRunButton, NucleusCollection collection){
+	private JPanel makeNoShellAnalysisAvailablePanel(boolean showRunButton, NucleusCollection collection, String label){
 		JPanel panel = new JPanel(); // container in tab if no shell chart
 		
 		panel.setLayout(new BorderLayout(0,0));
-		JLabel lbl = new JLabel("Cannot display shell results for multiple populations");
+		JLabel lbl = new JLabel(label);
 		
 		if(showRunButton && collection !=null){
-			lbl.setText("No shell results available; run new analysis?"); 
 			final UUID id = collection.getID();
 			JButton btnShellAnalysis = new JButton("Run shell analysis");
 			btnShellAnalysis.addMouseListener(new MouseAdapter() {
@@ -924,6 +936,7 @@ public class MainWindow extends JFrame {
 			updatePerimBoxplot(list);
 			updateMaxFeretBoxplot(list);
 			updateMinFeretBoxplot(list);
+			updateDifferenceBoxplot(list);
 		} catch (Exception e) {
 			log("Error updating boxplots: "+e.getMessage());
 		}
@@ -971,6 +984,17 @@ public class MainWindow extends JFrame {
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
 		minFeretBoxplotChartPanel.setChart(boxplotChart);
+	}
+	
+	/**
+	 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
+	 * @param list
+	 */
+	public void updateDifferenceBoxplot(List<NucleusCollection> list){
+		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createDifferenceBoxplotDataset(list);
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		formatBoxplotChart(boxplotChart);
+		differenceBoxplotChartPanel.setChart(boxplotChart);
 	}
 	
 	/**
@@ -1078,43 +1102,60 @@ public class MainWindow extends JFrame {
 	
 	private void updateSignalConsensusChart(List<NucleusCollection> list){
 		try {
-			NucleusCollection collection = list.get(0);
-			XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
-			JFreeChart chart = makeConsensusChart(collection);
-			
-			XYPlot plot = chart.getXYPlot();
-			plot.setDataset(1, signalCoMs);
-			
-			XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
-			for(int series=0;series<signalCoMs.getSeriesCount();series++){
-				int channel = series+2; // channel is from 2, series from 0
-				rend.setSeriesPaint(series, getSignalColour(channel, false));
-				rend.setBaseLinesVisible(false);
-				rend.setBaseShapesVisible(true);
-				rend.setBaseSeriesVisibleInLegend(false);
-			}
-			plot.setRenderer(1, rend);
-			
-			for(int channel : collection.getSignalChannels()){
-				List<Shape> shapes = DatasetCreator.createSignalRadiusDataset(collection, channel);
-				
-				int signalCount = shapes.size();
-				int alpha 	= signalCount > 255 
-							? 2 
-							: signalCount > 128 
-							? 8
-							: signalCount > 64
-							? 16
-							: signalCount > 32
-							? 20
-							: 20;
-				for(Shape s : shapes){
-					XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-						       null, getSignalColour(channel, true, alpha)); // layer transparent signals
-					plot.addAnnotation(an);
+
+			if(list.size()==1){
+
+				NucleusCollection collection = list.get(0);
+				XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
+				JFreeChart chart = makeConsensusChart(collection);
+
+				XYPlot plot = chart.getXYPlot();
+				plot.setDataset(1, signalCoMs);
+
+				XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
+				for(int series=0;series<signalCoMs.getSeriesCount();series++){
+					int channel = series+2; // channel is from 2, series from 0
+					rend.setSeriesPaint(series, getSignalColour(channel, false));
+					rend.setBaseLinesVisible(false);
+					rend.setBaseShapesVisible(true);
+					rend.setBaseSeriesVisibleInLegend(false);
 				}
+				plot.setRenderer(1, rend);
+
+				for(int channel : collection.getSignalChannels()){
+					List<Shape> shapes = DatasetCreator.createSignalRadiusDataset(collection, channel);
+
+					int signalCount = shapes.size();
+					
+					int alpha = (int) Math.floor( 255 / ((double) signalCount) );
+					alpha = alpha < 5 ? 5 : alpha > 128 ? 128 : alpha;
+
+//					int alpha 	= signalCount > 255 
+//								? 2 
+//								: signalCount > 128 
+//								? 8
+//								: signalCount > 64
+//								? 16
+//								: signalCount > 32
+//								? 20
+//								: 20;
+								
+					for(Shape s : shapes){
+						XYShapeAnnotation an = new XYShapeAnnotation( s, null,
+								null, getSignalColour(channel, true, alpha)); // layer transparent signals
+						plot.addAnnotation(an);
+					}
+				}
+				signalsChartPanel.setChart(chart);
+			} else { // multiple populations. Avoid confusion with blank chart
+				JFreeChart chart = ChartFactory.createXYLineChart(null,  // chart for conseusns
+						null, null, null);
+				XYPlot plot = chart.getXYPlot();
+				plot.setBackgroundPaint(Color.WHITE);
+				plot.getDomainAxis().setVisible(false);
+				plot.getRangeAxis().setVisible(false);
+				signalsChartPanel.setChart(chart);
 			}
-			signalsChartPanel.setChart(chart);
 		} catch(Exception e){
 			log("Error updating signals: "+e.getMessage());
 		}

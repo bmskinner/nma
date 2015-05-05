@@ -98,6 +98,7 @@ public interface NucleusCollection
 	public int getGreenSignalCount();
 	
 	public boolean hasSignals(int channel);
+	public boolean hasSignals();
 	
 	public void addShellResult(int channel, ShellResult result);
 	public ShellResult getShellResult(int channel);

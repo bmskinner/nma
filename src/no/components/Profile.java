@@ -143,7 +143,8 @@ public class Profile implements Serializable {
 
       double thisValue = profile1.get(j);
       double testValue = profile2.get(j);
-      difference += Math.abs(thisValue - testValue);
+//      difference += Math.abs(thisValue - testValue); // absolute difference
+      difference += Math.pow(thisValue - testValue, 2); // square difference - highlights extremes
     }
     return difference;
   }
