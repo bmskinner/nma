@@ -800,7 +800,6 @@ public class MainWindow extends JFrame {
 					newShellAnalysis(MainWindow.this.analysisPopulations.get(id));
 				}
 			});
-			btnShellAnalysis.setPreferredSize(new Dimension(200,100));
 			panel.add(btnShellAnalysis, BorderLayout.SOUTH);
 		}
 		lbl.setHorizontalAlignment(SwingConstants.CENTER);

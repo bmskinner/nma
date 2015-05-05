@@ -614,7 +614,7 @@ public class DatasetCreator {
 //			IJ.log("Added headers");
 				
 			// format the numbers and make into a tablemodel
-			DecimalFormat df = new DecimalFormat("#.00"); 
+			DecimalFormat df = new DecimalFormat("#0.00"); 
 
 			// make a new column for each collection
 			for(NucleusCollection collection : list){
