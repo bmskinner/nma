@@ -485,7 +485,18 @@ public class MainWindow extends JFrame {
 				}
 				
 				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisPopulations.size()+" populations ready to view");
-				updatePopulationList();				
+				updatePopulationList();	
+				
+				ListSelectionModel lsm = MainWindow.this.populationTable.getSelectionModel();
+				int index = 0;
+				for(NucleusCollection c : MainWindow.this.analysisPopulations.values()){
+					index++;
+					if(c.getID().equals(result.get(0).getID())){
+						lsm.setSelectionInterval(index, index); // set the selection to the first result
+					}
+				}
+				
+				
 			}
 		};
 		thr.start();		
