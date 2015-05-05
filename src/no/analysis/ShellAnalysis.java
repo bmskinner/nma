@@ -32,7 +32,7 @@ public class ShellAnalysis {
 			return true; // only bother if there are signals
 		}
 		
-		logger.log("Performing shell analysis...");
+		logger.log("Performing shell analysis with "+shells+" shells...");
 		
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);

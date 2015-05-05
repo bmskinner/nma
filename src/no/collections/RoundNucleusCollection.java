@@ -105,13 +105,12 @@ implements NucleusCollection, Serializable
    * 
    */
   public boolean hasShellResult(){
-	  boolean b = false;
-	  for(int channel : this.getSignalChannels()){
-		  if(this.getShellResult(channel)!=null){
-			  b = true;
+	  for(Integer channel : this.getSignalChannels()){
+		  if(this.shellResults.containsKey(channel)){
+			  return true;
 		  }
 	  }
-	  return b;
+	  return false;
   }
 
 

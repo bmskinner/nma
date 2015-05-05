@@ -241,6 +241,7 @@ public class DatasetCreator {
 				"Refold mode",
 				"Number of signals",
 				"Signals per nucleus",
+				"Shell analysis run",
 				"Run date",
 				"Run time",
 				"Type"};
@@ -251,7 +252,7 @@ public class DatasetCreator {
 		} else {
 
 			// format the numbers and make into a tablemodel
-			DecimalFormat df = new DecimalFormat("#.00"); 
+			DecimalFormat df = new DecimalFormat("#0.00"); 
 
 			for(NucleusCollection collection : list){
 				
@@ -285,6 +286,7 @@ public class DatasetCreator {
 						refoldMode,
 						collection.getSignalCount(),
 						df.format(signalPerNucleus),
+						collection.hasShellResult(),
 						date,
 						time,
 						collection.getAnalysisOptions().getNucleusClass().getSimpleName()				
@@ -702,7 +704,6 @@ public class DatasetCreator {
 				
 				if(collection.hasSignals(channel)){
 					ShellResult r = collection.getShellResult(channel);
-
 
 					for(int shell = 0; shell<r.getNumberOfShells();shell++){
 						Double d = r.getMeans().get(shell);

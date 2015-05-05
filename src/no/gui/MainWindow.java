@@ -27,7 +27,6 @@ import no.utility.MappingFileParser;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 
 import javax.swing.JTextArea;
 
@@ -50,6 +49,7 @@ import javax.swing.JTable;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Shape;
 
@@ -58,13 +58,11 @@ import javax.swing.ListSelectionModel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
@@ -72,10 +70,8 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
@@ -505,37 +501,43 @@ public class MainWindow extends JFrame {
 				this.populationNames.remove(oldName);
 				log("Collection renamed: "+newName);
 				updatePopulationList();
+				
+				List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+				list.add(collection);
+				updatePanels(list);
 			}
 		}
 	}
 	
 	public void newShellAnalysis(NucleusCollection collection){
-		String shellString = JOptionPane.showInputDialog(this, "Number of shells", 5);
-		final UUID id = collection.getID();
-		// validate
-		if(!shellString.isEmpty() && shellString!=null){
-			final int shellCount = Integer.parseInt(shellString);
-			Thread thr = new Thread() {
-				public void run() {
-					try{
-						logc("Running shell analysis...");
-						boolean ok = ShellAnalysis.run(MainWindow.this.analysisPopulations.get(id), shellCount);
-						if(ok){
-							log("OK");
-						} else {
-							log("Error");
+		if(collection!=null){
+			String shellString = JOptionPane.showInputDialog(this, "Number of shells", 5);
+			final UUID id = collection.getID();
+			// validate
+			if(!shellString.isEmpty() && shellString!=null){
+				final int shellCount = Integer.parseInt(shellString);
+				Thread thr = new Thread() {
+					public void run() {
+						try{
+							logc("Running shell analysis...");
+							boolean ok = ShellAnalysis.run(MainWindow.this.analysisPopulations.get(id), shellCount);
+							if(ok){
+								log("OK");
+							} else {
+								log("Error");
+							}
+
+							List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+							list.add(MainWindow.this.analysisPopulations.get(id));
+							updatePanels(list);
+
+						} catch (Exception e){
+							log("Error in shell analysis");
 						}
-						
-						List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-						list.add(MainWindow.this.analysisPopulations.get(id));
-						updatePanels(list);
-						
-					} catch (Exception e){
-						log("Error in shell analysis");
 					}
-				}
-			};
-			thr.start();
+				};
+				thr.start();
+			}
 		}
 	}
 	
@@ -564,23 +566,28 @@ public class MainWindow extends JFrame {
 		thr.start();
 	}
 	
-	public void updatePanels(List<NucleusCollection> list){
-		
-		try {
-			updateStatsPanel(list);
-			updateProfileImage(list);
-			updateConsensusImage(list);
-			updateBoxplots(list);
-			updateVariabilityChart(list);
-			updateShellPanel(list);
-			updateSignalsPanel(list);
-			updateSignalHistogramPanel(list);
-		} catch (Exception e) {
-			log("Error updating panels: "+e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				log(el.toString());
+	public void updatePanels(final List<NucleusCollection> list){
+
+		Thread thr = new Thread() {
+			public void run() {
+				try {
+					updateStatsPanel(list);
+					updateProfileImage(list);
+					updateConsensusImage(list);
+					updateBoxplots(list);
+					updateVariabilityChart(list);
+					updateShellPanel(list);
+					updateSignalsPanel(list);
+					updateSignalHistogramPanel(list);
+				} catch (Exception e) {
+					log("Error updating panels: "+e.getMessage());
+					for(StackTraceElement el : e.getStackTrace()){
+						log(el.toString());
+					}
+				}
 			}
-		}
+		};
+		thr.start();
 	}
 	
 	private int getIndexFromLabel(String label){
@@ -616,8 +623,6 @@ public class MainWindow extends JFrame {
 	
 	public void updateStatsPanel(List<NucleusCollection> list){
 		// format the numbers and make into a tablemodel
-//		NucleusCollection collection = list.get(0);
-//		lblStatusLine.setText("Showing: "+collection.getOutputFolderName()+" - "+collection.getFolder()+" - "+collection.getType());
 		TableModel model = DatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
 	}
@@ -742,6 +747,8 @@ public class MainWindow extends JFrame {
 		if(list.size()==1){ // single collection is easy
 			
 			NucleusCollection collection = list.get(0);
+//			log("Selected collection: "+collection.getName());
+//			log("Shells: "+collection.hasShellResult());
 
 			if(collection.hasShellResult()){ // only if there is something to display
 
@@ -764,6 +771,7 @@ public class MainWindow extends JFrame {
 				}	
 
 				shellsChartPanel.setChart(shellsChart);
+				tabbedPane.setComponentAt(5, shellsChartPanel);
 			} else { // no shell analysis available
 				shellsPanel = makeNoShellAnalysisAvailablePanel(true, collection); // allow option to run analysis
 				tabbedPane.setComponentAt(5, shellsPanel);
@@ -778,13 +786,13 @@ public class MainWindow extends JFrame {
 	
 	private JPanel makeNoShellAnalysisAvailablePanel(boolean showRunButton, NucleusCollection collection){
 		JPanel panel = new JPanel(); // container in tab if no shell chart
-		final UUID id = collection.getID();
+		
 		panel.setLayout(new BorderLayout(0,0));
-		JLabel lbl = new JLabel("No shell results available");
-		lbl.setHorizontalAlignment(SwingConstants.CENTER);
-		panel.add(lbl, BorderLayout.NORTH);
-
+		JLabel lbl = new JLabel("Cannot display shell results for multiple populations");
+		
 		if(showRunButton && collection !=null){
+			lbl.setText("No shell results available; run new analysis?"); 
+			final UUID id = collection.getID();
 			JButton btnShellAnalysis = new JButton("Run shell analysis");
 			btnShellAnalysis.addMouseListener(new MouseAdapter() {
 				@Override
@@ -792,8 +800,11 @@ public class MainWindow extends JFrame {
 					newShellAnalysis(MainWindow.this.analysisPopulations.get(id));
 				}
 			});
-			panel.add(btnShellAnalysis, BorderLayout.CENTER);
+			btnShellAnalysis.setPreferredSize(new Dimension(200,100));
+			panel.add(btnShellAnalysis, BorderLayout.SOUTH);
 		}
+		lbl.setHorizontalAlignment(SwingConstants.CENTER);
+		panel.add(lbl, BorderLayout.NORTH);
 		return panel;
 	}
 	
@@ -1197,6 +1208,7 @@ public class MainWindow extends JFrame {
 						String key = (String) populationTable.getModel().getValueAt(i, 0); // row i, column 0
 						if(!key.equals("No populations")){
 							
+							// get uuid from populationNames, then population via uuid from analysisPopulations
 							list.add(analysisPopulations.get(populationNames.get(key)));
 							selectedIndexes.add(i);
 							
@@ -1204,10 +1216,10 @@ public class MainWindow extends JFrame {
 
 					}
 				}
-				updatePanels(list);
+				String count = list.size() == 1 ? "population" : "populations"; // it matters to ME
+				lblStatusLine.setText(list.size()+" "+count+"  selected");
 				populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
-				populationTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-				populationTable.getColumnModel().getColumn(2).setPreferredWidth(5);
+				updatePanels(list);
 			}
 
 		}

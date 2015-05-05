@@ -443,7 +443,7 @@ public class AnalysisCreator {
 				  logger.log("Not a round nucleus; skipping");
 			  } else {
 				  mw.logc("Running shell analysis...");
-				  ok = ShellAnalysis.run(r, 5);
+				  ok = ShellAnalysis.run(p, 5);
 				  if(ok){
 					  mw.log("OK");
 				  } else {
