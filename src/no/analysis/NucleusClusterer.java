@@ -2,12 +2,9 @@ package no.analysis;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import no.collections.NucleusCollection;
@@ -57,6 +54,8 @@ public class NucleusClusterer {
 	public boolean cluster(NucleusCollection collection){
 		
 		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
+		
+		logger.log("Beginning clustering of population");
 				
 		try {
 						
@@ -69,6 +68,8 @@ public class NucleusClusterer {
 			try {
 				
 				HierarchicalClusterer clusterer = new HierarchicalClusterer();
+				logger.log("Clusterer is hierarchical");
+				logger.log("Clusterer options: "+options.toString(), Logger.DEBUG);
 //				if(type==NucleusClusterer.HIERARCHICAL){
 //					clusterer = new HierarchicalClusterer();
 //				}
@@ -87,7 +88,8 @@ public class NucleusClusterer {
 				// construct new collections for each cluster
 				Constructor<?> collectionConstructor = collection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
 				
-				IJ.log("Clusters : "+clusterer.numberOfClusters());
+				logger.log("Clusters : "+clusterer.numberOfClusters(), Logger.DEBUG);
+
 				for(int i=0;i<clusterer.numberOfClusters();i++ ){
 					NucleusCollection clusterCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
 							collection.getOutputFolderName(), 
@@ -110,24 +112,23 @@ public class NucleusClusterer {
 					 if(collection.getNucleus(id)!=null){
 						 cluster.addNucleus(collection.getNucleus(id));
 					 } else {
-						 IJ.log("Error: nucleus with ID "+id+" is not found");
+						 logger.log("Error: nucleus with ID "+id+" is not found", Logger.ERROR);
 					 }
 					 
 				}
 						
-//				IJ.log("INFO IS: \n "+ clusterer);
 
 			} catch (Exception e) {
-				IJ.log("Error in clustering: "+e.getMessage());
+				logger.log("Error in clustering: "+e.getMessage(), Logger.ERROR);
 				for(StackTraceElement el : e.getStackTrace()){
-					IJ.log(el.toString());
+					logger.log(el.toString(), Logger.STACK);
 				}
 				return false;
 			}
 		} catch (Exception e) {
-			IJ.log("Error in assignments: "+e.getMessage());
+			logger.log("Error in assignments: "+e.getMessage(), Logger.ERROR);
 			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
+				logger.log(el.toString(), Logger.STACK);
 			}
 			return false;
 		}
@@ -228,7 +229,7 @@ public class NucleusClusterer {
 			//		options[2] = "-N";
 			//		options[3] = "2";
 		}
-		if(this.type==NucleusClusterer.EM){
+		if(this.type==NucleusClusterer.HIERARCHICAL){
 			options = new String[4];
 			options[0] = "-N";                 // max. iterations
 			options[1] = "4";
