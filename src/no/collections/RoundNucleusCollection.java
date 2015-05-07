@@ -40,7 +40,7 @@ implements NucleusCollection, Serializable
 	private File debugFile;
 	private String collectionType; // for annotating image names
 	private String name;
-	private UUID guid = java.util.UUID.randomUUID();
+	private UUID guid;
 		
 	private String DEFAULT_REFERENCE_POINT = "head";
 	private String DEFAULT_ORIENTAITION_POINT = "tail";
@@ -55,6 +55,7 @@ implements NucleusCollection, Serializable
 	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 
 	private List<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
+	private Map<UUID, Nucleus> mappedCollection  = new HashMap<UUID, Nucleus>();
 
   public RoundNucleusCollection(File folder, String outputFolder, String type, File debugFile){
 	  this.folder = folder;
@@ -62,6 +63,7 @@ implements NucleusCollection, Serializable
 	  this.debugFile = debugFile;
 	  this.collectionType = type;
 	  this.name = outputFolder+" - "+type;
+	  this.guid = java.util.UUID.randomUUID();
   }
 
   // used only for getting classes in setup of analysis
@@ -90,6 +92,7 @@ implements NucleusCollection, Serializable
 
   public void addNucleus(Nucleus r){
 	  this.nucleiCollection.add(r);
+	  this.mappedCollection.put(r.getID(), r);
   }
   
   public void addShellResult(int channel, ShellResult result){
@@ -111,6 +114,14 @@ implements NucleusCollection, Serializable
 		  }
 	  }
 	  return false;
+  }
+  
+  public boolean hasConsensusNucleus(){
+	  if(this.consensusNucleus==null){
+		  return false;
+	  } else {
+		  return true;
+	  }
   }
 
 
@@ -155,9 +166,12 @@ public void addConsensusNucleus(Nucleus n){
 
   /*
     -----------------------
-    Getters for aggregate stats
+    Getters
     -----------------------
   */
+  public Nucleus getNucleus(UUID id){
+	  return this.mappedCollection.get(id);
+  }
   
   public Nucleus getConsensusNucleus(){
 	  return this.consensusNucleus;

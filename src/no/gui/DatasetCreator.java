@@ -503,28 +503,31 @@ public class DatasetCreator {
 		ds.addSeries("Q75", outer);
 		return ds;
 	}
-	
+
 	public static XYDataset createMultiNucleusOutline(List<NucleusCollection> list){
-		
+
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		int i=0;
 		for(NucleusCollection collection : list){
-			Nucleus n = collection.getConsensusNucleus();
-			
-			double[] xpoints = new double[n.getLength()];
-			double[] ypoints = new double[n.getLength()];
-			
-			int j =0;
-			
-			for(NucleusBorderPoint p : n.getBorderList()){
-				xpoints[j] = p.getX();
-				ypoints[j] = p.getY();
-				j++;
+			if(collection.hasConsensusNucleus()){
+				Nucleus n = collection.getConsensusNucleus();
+
+				double[] xpoints = new double[n.getLength()];
+				double[] ypoints = new double[n.getLength()];
+
+				int j =0;
+
+				for(NucleusBorderPoint p : n.getBorderList()){
+					xpoints[j] = p.getX();
+					ypoints[j] = p.getY();
+					j++;
+				}
+				double[][] data = { xpoints, ypoints };
+				ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
 			}
-			double[][] data = { xpoints, ypoints };
-			ds.addSeries("Nucleus_"+i+"_"+collection.getName(), data);
 			i++;
+
 		}
 		return ds;
 	}

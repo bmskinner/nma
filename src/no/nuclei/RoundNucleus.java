@@ -43,6 +43,9 @@ public class RoundNucleus
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	private UUID uuid;// = java.util.UUID.randomUUID();
+	
 	public static final int RED_CHANNEL   = 0;
 	public static final int GREEN_CHANNEL = 1;
 	public static final int BLUE_CHANNEL  = 2;
@@ -107,6 +110,7 @@ public class RoundNucleus
 		this.sourceFile      = file;
 		this.nucleusNumber   = number;
 		this.position        = position;
+		this.uuid 			 = java.util.UUID.randomUUID();
 	}
 
 	public RoundNucleus(){
@@ -114,7 +118,8 @@ public class RoundNucleus
 	}
 
 	public RoundNucleus(RoundNucleus n){
-//		this.setRoi(n.getRoi());
+
+		this.setID(n.getID());
 		this.setPosition(n.getPosition());
 
 		this.setSourceFile(n.getSourceFile());
@@ -132,7 +137,6 @@ public class RoundNucleus
 		
 		this.setSignals(n.getSignalCollection());
 
-//		this.setPolygon(n.getPolygon());
 		this.setDistanceProfile(n.getDistanceProfile());
 
 		this.setBorderTags(n.getBorderTags());
@@ -199,9 +203,9 @@ public class RoundNucleus
 		-----------------------
 	*/
 
-//	public Roi getRoi(){
-//		return this.roi;
-//	}
+	public UUID getID(){
+		return this.uuid;
+	}
 
 	public String getPath(){
 		return this.sourceFile.getAbsolutePath();
@@ -366,6 +370,10 @@ public class RoundNucleus
 		Protected setters for subclasses
 		-----------------------
 	*/
+	
+	public void setID(UUID id){
+		this.uuid = id;
+	}
 
 	public void setOutputFolder(String f){
 		this.outputFolder = f;

@@ -1,46 +1,204 @@
 package no.analysis;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import no.collections.NucleusCollection;
+import no.components.Profile;
+import no.components.ProfileCollection;
+import no.nuclei.Nucleus;
+import ij.IJ;
 import weka.clusterers.EM;
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 
 
 public class NucleusClusterer {
-
-
-	public void cluster(){
+	
+	private Map<Instance, UUID> nucleusMap = new HashMap<Instance, UUID>();
+	private Map<Integer, NucleusCollection> clusterMap = new HashMap<Integer, NucleusCollection>();
 		
-		// instance holds data
-		// Create empty instance with three attribute values
-		Instance inst = new SparseInstance(3);
+	public NucleusClusterer(){
+		
+	}
+	
+	public NucleusCollection getCluster(int cluster){
+		return this.clusterMap.get(cluster);
+	}
+	
+	public int getNumberOfClusters(){
+		return clusterMap.size();
+	}
 
-		// Set instance's values for the attributes "length", "weight", and "position"
-		inst.setValue(0, 5.3);
-		inst.setValue(1, 300);
-		inst.setValue(2, "first");
-
-		// Set instance's dataset to be the dataset "race"
-//		inst.setDataset(race);
-
-		// create Instances to hold Instance
-		Instances instances = new Instances( (Instances)null);
-		instances.add(inst);
+	public boolean cluster(NucleusCollection collection){
 				
-		
-		// create the clusterer to run on the Instances
+		try {
+						
+			// create Instances to hold Instance
+			Instances instances = makeAttributesAndInstances(collection);
+
+			// create the clusterer to run on the Instances
+			String[] options = makeClusteringOptions();
+
+			try {
+				EM clusterer = new EM();   // new instance of clusterer
+				clusterer.setOptions(options);     // set the options
+				clusterer.buildClusterer(instances);    // build the clusterer
+								
+				
+				// construct new collections for each cluster
+				Constructor<?> collectionConstructor = collection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+				
+				IJ.log("Clusters : "+clusterer.numberOfClusters());
+				for(int i=0;i<clusterer.numberOfClusters();i++ ){
+					NucleusCollection clusterCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
+							collection.getOutputFolderName(), 
+							collection.getType(), 
+							collection.getDebugFile());
+					clusterCollection.setName(collection.getType()+"_Cluster_"+i);
+					clusterCollection.setAnalysisOptions(collection.getAnalysisOptions());
+					clusterMap.put(i, clusterCollection);
+				}
+
+				for(Instance inst : nucleusMap.keySet()){
+					
+					UUID id = nucleusMap.get(inst);
+//					Instance inst = enumerated_instances.instance(index);
+					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
+//					 IJ.log("instance "+index+" is in cluster "+ clusterNumber)  ; //       #pretty print results
+					 NucleusCollection cluster = clusterMap.get(clusterNumber);
+					 
+					 // should never be null
+					 if(collection.getNucleus(id)!=null){
+						 cluster.addNucleus(collection.getNucleus(id));
+					 } else {
+						 IJ.log("Error: nucleus with ID "+id+" is not found");
+					 }
+					 
+				}
+						
+//				IJ.log("INFO IS: \n "+ clusterer);
+
+			} catch (Exception e) {
+				IJ.log("Error in clustering: "+e.getMessage());
+				for(StackTraceElement el : e.getStackTrace()){
+					IJ.log(el.toString());
+				}
+				return false;
+			}
+		} catch (Exception e) {
+			IJ.log("Error in assignments: "+e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+			return false;
+		}
+		return true;
+	}
+	
+	private Instances makeAttributesAndInstances(NucleusCollection collection){
+		// make Attributes on which to cluster
+		//		Attribute id = new Attribute("id", List); 
+
+		Attribute area = new Attribute("area"); 
+		Attribute perimeter = new Attribute("perimeter"); 
+		Attribute point1 = new Attribute("point1"); 
+		Attribute point2 = new Attribute("point2"); 
+		Attribute point3 = new Attribute("point3"); 
+
+
+		// hold the attributes in a Vector
+		FastVector attributes = new FastVector(5);
+
+		//		attributes.addElement(id);
+		attributes.addElement(area);
+		attributes.addElement(perimeter);
+		attributes.addElement(point1);
+		attributes.addElement(point2);
+		attributes.addElement(point3);
+
+		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
+
+
+		ProfileCollection pc = collection.getFrankenCollection();
+		String pointType = collection.getReferencePoint();
+
+		// get the nucleus profiles
+		List<Profile> profiles = pc.getNucleusProfiles(pointType);
+
+		// get the regions with the highest variability within the population
+		List<Integer> variableIndexes = pc.findMostVariableRegions(pointType);
+
+		// these points are indexes in the frankenstein profile. Find the points in each nucleus profile that they
+		// compare to 
+		// interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
+
+
+		// create Instance for each nucleus and add to Instances
+		int i = 0;
+		for(Nucleus n : collection.getNuclei()){
+
+			// instance holds data
+			// Create empty instance with five attribute values
+			Instance inst = new SparseInstance(5);
+
+			// Set instance's values for the attributes
+			//			inst.setValue(id, n.getID().toString());
+			inst.setValue(area, n.getArea());
+			inst.setValue(perimeter, n.getPerimeter());
+
+			// add the mean of the variability window
+			Profile frankenProfile = profiles.get(i);
+			Profile interpolatedProfile = frankenProfile.interpolate(pc.getProfile(pointType).size());
+			
+			int attributeIndex = 2;
+			for(int index : variableIndexes){
+				// get the points in a window centred on the index
+				Profile window = interpolatedProfile.getWindow(index, 10);
+
+				double total = 0;
+				for(int j=0; j<21;j++){ // index plus 10 positions to either side
+					total += window.get(j);
+				}
+				total = total/21;
+				
+				Attribute point = (Attribute) attributes.elementAt(attributeIndex);
+				inst.setValue(point, total);
+				attributeIndex++;
+			}
+
+//
+//
+//				
+//				inst.setValue(point2, Math.random());
+//				inst.setValue(point3, Math.random());
+				instances.add(inst);
+				nucleusMap.put(inst, n.getID());
+				
+			i++;
+		}
+		return instances;
+	}
+	
+	private String[] makeClusteringOptions(){
 		String[] options = new String[2];
 		options[0] = "-I";                 // max. iterations
 		options[1] = "100";
-		try {
-			EM clusterer = new EM();   // new instance of clusterer
-			clusterer.setOptions(options);     // set the options
-			clusterer.buildClusterer(instances);    // build the clusterer
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
+//		options[2] = "-N";
+//		options[3] = "2";
+		return options;
 	}
+	
+
 
 }

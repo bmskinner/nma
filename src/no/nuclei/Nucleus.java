@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import no.components.SignalCollection;
 import no.components.XYPoint;
@@ -20,7 +21,7 @@ public interface Nucleus
 
   // public Nucleus copy();
 
-//	public Roi getRoi();
+  	public UUID getID();
   
 	public String getPath();
 

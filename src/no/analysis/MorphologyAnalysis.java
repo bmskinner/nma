@@ -115,6 +115,7 @@ public class MorphologyAnalysis {
 	 */
 	public static boolean reapplyProfiles(NucleusCollection collection, NucleusCollection sourceCollection){
 		
+		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
 		logger.log("Applying existing segmentation profile to population...");
 		
 		try {
@@ -129,9 +130,7 @@ public class MorphologyAnalysis {
 			
 			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
 			pc.addSegments(sourceCollection.getOrientationPoint(), sc.getSegments(orientationPoint));
-//			pc.preparePlots(INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-//			pc.addMedianLineToPlots(orientationPoint);
-//			pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
+
 		} catch (Exception e) {
 			logger.log("Error reapplying profiles: "+e.getMessage(), Logger.ERROR);
 			for(StackTraceElement el : e.getStackTrace()){
@@ -418,7 +417,7 @@ public class MorphologyAnalysis {
 
 		tableExport.export("log.variability_regions."+collection.getType());
 	}
-
+	
 	private static void exportSegments(NucleusCollection collection, String pointType){
 		
 		logger.log("Exporting segments...");

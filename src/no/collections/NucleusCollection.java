@@ -51,6 +51,8 @@ public interface NucleusCollection
 	public String getName();
 	public UUID getID();
 	
+	public Nucleus getNucleus(UUID id);
+	
 	public String getReferencePoint();
 	public String getOrientationPoint();
 
@@ -99,6 +101,7 @@ public interface NucleusCollection
 	
 	public boolean hasSignals(int channel);
 	public boolean hasSignals();
+	public boolean hasConsensusNucleus();
 	
 	public void addShellResult(int channel, ShellResult result);
 	public ShellResult getShellResult(int channel);

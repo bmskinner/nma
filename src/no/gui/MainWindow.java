@@ -17,6 +17,9 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 
 import no.analysis.AnalysisCreator;
+import no.analysis.CurveRefolder;
+import no.analysis.MorphologyAnalysis;
+import no.analysis.NucleusClusterer;
 import no.analysis.ProfileSegmenter;
 import no.analysis.ShellAnalysis;
 import no.collections.NucleusCollection;
@@ -119,6 +122,8 @@ public class MainWindow extends JFrame {
 	private ChartPanel signalAngleChartPanel; // consensus nucleus plus signals
 	private ChartPanel signalDistanceChartPanel; // consensus nucleus plus signals
 	private JPanel signalHistogramPanel;// signals container for chart and stats table
+	
+	private JPanel clusteringPanel;// container for clustering options and display
 
 	private HashMap<UUID, NucleusCollection> analysisPopulations = new HashMap<UUID, NucleusCollection>();
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
@@ -403,6 +408,13 @@ public class MainWindow extends JFrame {
 			signalHistogramPanel.add(signalDistanceChartPanel);
 			tabbedPane.addTab("Signal histograms", null, signalHistogramPanel, null);
 			
+			//---------------
+			// Create the signal histograms panel
+			//---------------
+			clusteringPanel = new JPanel();
+			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
+			tabbedPane.addTab("Clusters", null, clusteringPanel, null);
+			
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -502,6 +514,58 @@ public class MainWindow extends JFrame {
 		thr.start();		
 	}
 	
+	public void clusterAnalysis(NucleusCollection collection){
+		if(collection !=null){
+			final UUID id = collection.getID();
+			Thread thr = new Thread() {
+				public void run() {
+					try{
+						logc("Running cluster analysis...");
+						NucleusClusterer clusterer = new NucleusClusterer();
+						boolean ok = clusterer.cluster(MainWindow.this.analysisPopulations.get(id));
+						if(ok){
+							log("OK");
+						} else {
+							log("Error");
+						}
+
+						for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
+							NucleusCollection c = clusterer.getCluster(cluster);
+							log("Cluster "+cluster+":");
+
+							logc("Reapplying morphology...");
+							ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisPopulations.get(id));
+							if(ok){
+								log("OK");
+							} else {
+								log("Error");
+							}
+							
+							logc("Refolding profile...");
+							  ok = CurveRefolder.run(c, c.getAnalysisOptions().getNucleusClass(), c.getAnalysisOptions().getRefoldMode());
+							  if(ok){
+								  log("OK");
+							  } else {
+								  log("Error");
+							  }
+
+							MainWindow.this.analysisPopulations.put(c.getID(), c);
+							MainWindow.this.populationNames.put(c.getName(), c.getID());
+
+						}
+						updatePopulationList();	
+
+
+					} catch (Exception e){
+						log("Error in cluster analysis: "+e.getMessage());
+					}
+				}
+			};
+			thr.start();
+		}
+
+	}
+	
 	public void renameCollection(NucleusCollection collection){
 		String newName = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
 		// validate
@@ -594,6 +658,7 @@ public class MainWindow extends JFrame {
 					updateShellPanel(list);
 					updateSignalsPanel(list);
 					updateSignalHistogramPanel(list);
+					updateClusteringPanel(list);
 				} catch (Exception e) {
 					log("Error updating panels: "+e.getMessage());
 					for(StackTraceElement el : e.getStackTrace()){
@@ -884,7 +949,7 @@ public class MainWindow extends JFrame {
 		NucleusCollection collection = list.get(0);
 		try {
 			if(list.size()==1){
-				if(collection.getConsensusNucleus()==null){
+				if(!collection.hasConsensusNucleus()){
 					// add button to run analysis
 					JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
 							null, null, null);
@@ -1100,8 +1165,8 @@ public class MainWindow extends JFrame {
 	
 	private void updateSignalStatsPanel(List<NucleusCollection> list){
 		try{
-		TableModel model = DatasetCreator.createSignalStatsTable(list);
-		signalStatsTable.setModel(model);
+			TableModel model = DatasetCreator.createSignalStatsTable(list);
+			signalStatsTable.setModel(model);
 		} catch (Exception e){
 			log("Error updating signal stats: "+e.getMessage());
 		}
@@ -1111,53 +1176,91 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	private void updateClusteringPanel(List<NucleusCollection> list){
+		
+		if(list.size()==1){
+			NucleusCollection collection = list.get(0);
+			final UUID id = collection.getID();
+			
+			clusteringPanel = new JPanel();
+			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
+
+			JButton btnNewClusterAnalysis = new JButton("Cluster population");
+			btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					clusterAnalysis(MainWindow.this.analysisPopulations.get(id));
+				}
+			});
+			clusteringPanel.add(btnNewClusterAnalysis);
+			tabbedPane.setComponentAt(8, clusteringPanel);
+			
+		} else {
+			clusteringPanel = new JPanel();
+			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
+			tabbedPane.setComponentAt(8, clusteringPanel);
+		}
+		
+	}
+	
 	private void updateSignalConsensusChart(List<NucleusCollection> list){
 		try {
 
 			if(list.size()==1){
 
 				NucleusCollection collection = list.get(0);
-				XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
-				JFreeChart chart = makeConsensusChart(collection);
 
-				XYPlot plot = chart.getXYPlot();
-				plot.setDataset(1, signalCoMs);
+				if(collection.hasConsensusNucleus()){ // if a refold is available
+					XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
+					JFreeChart chart = makeConsensusChart(collection);
 
-				XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
-				for(int series=0;series<signalCoMs.getSeriesCount();series++){
-					int channel = series+2; // channel is from 2, series from 0
-					rend.setSeriesPaint(series, getSignalColour(channel, false));
-					rend.setBaseLinesVisible(false);
-					rend.setBaseShapesVisible(true);
-					rend.setBaseSeriesVisibleInLegend(false);
-				}
-				plot.setRenderer(1, rend);
+					XYPlot plot = chart.getXYPlot();
+					plot.setDataset(1, signalCoMs);
 
-				for(int channel : collection.getSignalChannels()){
-					List<Shape> shapes = DatasetCreator.createSignalRadiusDataset(collection, channel);
-
-					int signalCount = shapes.size();
-					
-					int alpha = (int) Math.floor( 255 / ((double) signalCount) );
-					alpha = alpha < 5 ? 5 : alpha > 128 ? 128 : alpha;
-
-//					int alpha 	= signalCount > 255 
-//								? 2 
-//								: signalCount > 128 
-//								? 8
-//								: signalCount > 64
-//								? 16
-//								: signalCount > 32
-//								? 20
-//								: 20;
-								
-					for(Shape s : shapes){
-						XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-								null, getSignalColour(channel, true, alpha)); // layer transparent signals
-						plot.addAnnotation(an);
+					XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
+					for(int series=0;series<signalCoMs.getSeriesCount();series++){
+						int channel = series+2; // channel is from 2, series from 0
+						rend.setSeriesPaint(series, getSignalColour(channel, false));
+						rend.setBaseLinesVisible(false);
+						rend.setBaseShapesVisible(true);
+						rend.setBaseSeriesVisibleInLegend(false);
 					}
+					plot.setRenderer(1, rend);
+
+					for(int channel : collection.getSignalChannels()){
+						List<Shape> shapes = DatasetCreator.createSignalRadiusDataset(collection, channel);
+
+						int signalCount = shapes.size();
+
+						int alpha = (int) Math.floor( 255 / ((double) signalCount) );
+						alpha = alpha < 5 ? 5 : alpha > 128 ? 128 : alpha;
+
+						//					int alpha 	= signalCount > 255 
+						//								? 2 
+						//								: signalCount > 128 
+						//								? 8
+						//								: signalCount > 64
+						//								? 16
+						//								: signalCount > 32
+						//								? 20
+						//								: 20;
+
+						for(Shape s : shapes){
+							XYShapeAnnotation an = new XYShapeAnnotation( s, null,
+									null, getSignalColour(channel, true, alpha)); // layer transparent signals
+							plot.addAnnotation(an);
+						}
+					}
+					signalsChartPanel.setChart(chart);
+				} else { // no consensus to display
+					JFreeChart chart = ChartFactory.createXYLineChart(null,  // chart for conseusns
+							null, null, null);
+					XYPlot plot = chart.getXYPlot();
+					plot.setBackgroundPaint(Color.WHITE);
+					plot.getDomainAxis().setVisible(false);
+					plot.getRangeAxis().setVisible(false);
+					signalsChartPanel.setChart(chart);
 				}
-				signalsChartPanel.setChart(chart);
 			} else { // multiple populations. Avoid confusion with blank chart
 				JFreeChart chart = ChartFactory.createXYLineChart(null,  // chart for conseusns
 						null, null, null);
