@@ -14,8 +14,11 @@ import no.collections.NucleusCollection;
 import no.components.Profile;
 import no.components.ProfileCollection;
 import no.nuclei.Nucleus;
+import no.utility.Logger;
 import ij.IJ;
+import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
+import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -25,11 +28,22 @@ import weka.core.SparseInstance;
 
 public class NucleusClusterer {
 	
+	public static final int EM = 0; // expectation maximisation
+	public static final int HIERARCHICAL = 1;
+	
 	private Map<Instance, UUID> nucleusMap = new HashMap<Instance, UUID>();
 	private Map<Integer, NucleusCollection> clusterMap = new HashMap<Integer, NucleusCollection>();
+	
+	private int type = NucleusClusterer.EM;
+	
+	private Logger logger;
 		
 	public NucleusClusterer(){
 		
+	}
+	
+	public void setType(int type){
+		this.type = type;
 	}
 	
 	public NucleusCollection getCluster(int cluster){
@@ -41,6 +55,8 @@ public class NucleusClusterer {
 	}
 
 	public boolean cluster(NucleusCollection collection){
+		
+		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
 				
 		try {
 						
@@ -51,9 +67,21 @@ public class NucleusClusterer {
 			String[] options = makeClusteringOptions();
 
 			try {
-				EM clusterer = new EM();   // new instance of clusterer
+				
+				HierarchicalClusterer clusterer = new HierarchicalClusterer();
+//				if(type==NucleusClusterer.HIERARCHICAL){
+//					clusterer = new HierarchicalClusterer();
+//				}
+//				if(type==NucleusClusterer.EM){
+//					clusterer = new EM();   // new instance of clusterer
+//				}
+//				HierarchicalClusterer clusterer = new HierarchicalClusterer();
+				
+//				
 				clusterer.setOptions(options);     // set the options
 				clusterer.buildClusterer(instances);    // build the clusterer
+				String graph = clusterer.graph();
+				IJ.log(graph);
 								
 				
 				// construct new collections for each cluster
@@ -191,11 +219,23 @@ public class NucleusClusterer {
 	}
 	
 	private String[] makeClusteringOptions(){
-		String[] options = new String[2];
-		options[0] = "-I";                 // max. iterations
-		options[1] = "100";
-//		options[2] = "-N";
-//		options[3] = "2";
+		
+		String[] options = null;
+		if(this.type==NucleusClusterer.EM){
+			options = new String[2];
+			options[0] = "-I";                 // max. iterations
+			options[1] = "100";
+			//		options[2] = "-N";
+			//		options[3] = "2";
+		}
+		if(this.type==NucleusClusterer.EM){
+			options = new String[4];
+			options[0] = "-N";                 // max. iterations
+			options[1] = "4";
+			options[2] = "-L";                 // max. iterations
+			options[3] = "WARD";
+		}
+		
 		return options;
 	}
 	

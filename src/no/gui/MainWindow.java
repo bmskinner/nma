@@ -525,6 +525,7 @@ public class MainWindow extends JFrame {
 						boolean ok = clusterer.cluster(MainWindow.this.analysisPopulations.get(id));
 						if(ok){
 							log("OK");
+							log("Found "+clusterer.getNumberOfClusters()+" clusters");
 						} else {
 							log("Error");
 						}
