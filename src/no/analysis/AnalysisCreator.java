@@ -70,8 +70,10 @@ public class AnalysisCreator {
 	private Map<File, RoundNucleusCollection> folderCollection;
 
 	private List<NucleusCollection> nuclearPopulations = new ArrayList<NucleusCollection>(0);
+	private List<AnalysisDataset> nuclearDatasets = new ArrayList<AnalysisDataset>(0);
 	
 	private List<NucleusCollection> finalPopulations = new ArrayList<NucleusCollection>(0);
+	private List<AnalysisDataset> finalDatasets = new ArrayList<AnalysisDataset>(0);
 
 	/*
     -----------------------
@@ -140,6 +142,15 @@ public class AnalysisCreator {
    */
   public List<NucleusCollection> getPopulations(){
 	  return this.finalPopulations;
+  }
+  
+  /**
+   * Get the datasets from this analysis. Allows re/sub analysis to take place
+   * outside the AnalysisCreator
+   * @return the datasets
+   */
+  public List<AnalysisDataset> getDatasets(){
+	  return this.finalDatasets;
   }
 
   /*
@@ -274,7 +285,7 @@ public class AnalysisCreator {
 	  logger.log("Beginning population analysis");
 
 	  for(NucleusCollection r : this.nuclearPopulations){
-		  
+		  		  
 		  r.setAnalysisOptions(analysisOptions);
 
 		  File folder = r.getFolder();
@@ -407,6 +418,8 @@ public class AnalysisCreator {
 		  }
 
 		  finalPopulations.add(r);
+		  AnalysisDataset dataset = new AnalysisDataset(r);
+		  
 		  ArrayList<NucleusCollection> signalPopulations = dividePopulationBySignals(r);
 		  
 		  for(NucleusCollection p : signalPopulations){
@@ -502,7 +515,9 @@ public class AnalysisCreator {
 			  }
 //			  PopulationExporter.savePopulation(p);
 			  finalPopulations.add(p);
+			  dataset.addChildCollection(p);
 		  }
+		  finalDatasets.add(dataset);
 		  collectionNucleusCounts.put(folder, nucleusCounts);
 	  }
   }

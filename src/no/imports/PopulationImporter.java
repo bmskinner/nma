@@ -1,7 +1,5 @@
 package no.imports;
 
-import ij.IJ;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,10 +8,9 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.analysis.AnalysisDataset;
 import no.collections.NucleusCollection;
-import no.collections.RoundNucleusCollection;
 import no.gui.MainWindow;
-import no.nuclei.Nucleus;
 import no.utility.Logger;
 
 public class PopulationImporter {
@@ -57,20 +54,6 @@ public class PopulationImporter {
 
 				mw.log("OK");
 				collection = (NucleusCollection) inputList.get(0);
-//				mw.log("Read "+inputList.size()+" items");
-
-//				File folder = (File) inputList.get(0);
-//				String outputFolder = (String) inputList.get(1);
-//				String type = (String)inputList.get(2);
-//				collection = new NucleusCollection(folder, outputFolder, type, logger.getLogfile());
-
-//				@SuppressWarnings("unchecked")
-//				List<INuclearFunctions> list = (List<INuclearFunctions>) inputList.get(3);
-//
-//				for(INuclearFunctions n : list){
-//					collection.addNucleus(n);
-////					IJ.log("Found "+n.getClass().getSimpleName());
-//				}
 
 				mw.log("File imported");
 
@@ -86,6 +69,49 @@ public class PopulationImporter {
 			e1.printStackTrace();
 		}
 		return collection;
+	}
+	
+	public static AnalysisDataset readDataset(File inputFile){
+
+		if(!inputFile.exists()){
+			throw new IllegalArgumentException("Requested file does not exist");
+		}
+
+		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
+
+		AnalysisDataset dataset = null;
+
+		FileInputStream fis;
+		try {
+			fis = new FileInputStream(inputFile.getAbsolutePath());
+
+			ObjectInputStream ois = new ObjectInputStream(fis);
+
+			List<Object> inputList = new ArrayList<Object>(0);
+
+			try{
+				Object inputObject = ois.readObject();
+				while (inputObject != null){
+					inputList.add(inputObject);
+					inputObject = ois.readObject();
+				}
+			} catch (Exception e) { // exception occurs on reaching EOF
+
+				dataset = (AnalysisDataset) inputList.get(0);
+
+			} finally {
+				ois.close();
+				fis.close();
+			}
+		} catch (FileNotFoundException e1) {
+			logger.log("File not found: "+inputFile.getAbsolutePath()+" : "+e1.getMessage(), Logger.ERROR);
+		} catch (IOException e1) {
+			logger.log("File IO error: "+e1.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e1.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		}
+		return dataset;
 	}
 
 

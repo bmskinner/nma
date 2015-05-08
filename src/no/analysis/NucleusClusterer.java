@@ -2,6 +2,7 @@ package no.analysis;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,56 +68,25 @@ public class NucleusClusterer {
 
 			try {
 				
-				HierarchicalClusterer clusterer = new HierarchicalClusterer();
-				logger.log("Clusterer is hierarchical");
+
+				logger.log("Clusterer is type "+type);
 				logger.log("Clusterer options: "+options.toString(), Logger.DEBUG);
-//				if(type==NucleusClusterer.HIERARCHICAL){
-//					clusterer = new HierarchicalClusterer();
-//				}
-//				if(type==NucleusClusterer.EM){
-//					clusterer = new EM();   // new instance of clusterer
-//				}
-//				HierarchicalClusterer clusterer = new HierarchicalClusterer();
 				
-//				
-				clusterer.setOptions(options);     // set the options
-				clusterer.buildClusterer(instances);    // build the clusterer
-				String graph = clusterer.graph();
-				IJ.log(graph);
-								
-				
-				// construct new collections for each cluster
-				Constructor<?> collectionConstructor = collection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
-				
-				logger.log("Clusters : "+clusterer.numberOfClusters(), Logger.DEBUG);
-
-				for(int i=0;i<clusterer.numberOfClusters();i++ ){
-					NucleusCollection clusterCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
-							collection.getOutputFolderName(), 
-							collection.getType(), 
-							collection.getDebugFile());
-					clusterCollection.setName(collection.getType()+"_Cluster_"+i);
-					clusterCollection.setAnalysisOptions(collection.getAnalysisOptions());
-					clusterMap.put(i, clusterCollection);
+				if(type==NucleusClusterer.HIERARCHICAL){
+					HierarchicalClusterer clusterer = new HierarchicalClusterer();
+					clusterer.setOptions(options);     // set the options
+					clusterer.buildClusterer(instances);    // build the clusterer
+					assignClusters(clusterer, collection);		
+					String graph = clusterer.graph();
+					IJ.log(graph);
 				}
-
-				for(Instance inst : nucleusMap.keySet()){
-					
-					UUID id = nucleusMap.get(inst);
-//					Instance inst = enumerated_instances.instance(index);
-					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
-//					 IJ.log("instance "+index+" is in cluster "+ clusterNumber)  ; //       #pretty print results
-					 NucleusCollection cluster = clusterMap.get(clusterNumber);
-					 
-					 // should never be null
-					 if(collection.getNucleus(id)!=null){
-						 cluster.addNucleus(collection.getNucleus(id));
-					 } else {
-						 logger.log("Error: nucleus with ID "+id+" is not found", Logger.ERROR);
-					 }
-					 
+				
+				if(type==NucleusClusterer.EM){
+					EM clusterer = new EM();   // new instance of clusterer
+					clusterer.setOptions(options);     // set the options
+					clusterer.buildClusterer(instances);    // build the clusterer
+					assignClusters(clusterer, collection);		
 				}
-						
 
 			} catch (Exception e) {
 				logger.log("Error in clustering: "+e.getMessage(), Logger.ERROR);
@@ -135,7 +105,78 @@ public class NucleusClusterer {
 		return true;
 	}
 	
-	private Instances makeAttributesAndInstances(NucleusCollection collection){
+	private void assignClusters(Clusterer clusterer, NucleusCollection collection){
+		try {
+			// construct new collections for each cluster
+			Constructor<?> collectionConstructor = collection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+			
+			logger.log("Clusters : "+clusterer.numberOfClusters(), Logger.DEBUG);
+
+			for(int i=0;i<clusterer.numberOfClusters();i++ ){
+				NucleusCollection clusterCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
+						collection.getOutputFolderName(), 
+						collection.getType(), 
+						collection.getDebugFile());
+				clusterCollection.setName(collection.getType()+"_Cluster_"+i);
+				clusterCollection.setAnalysisOptions(collection.getAnalysisOptions());
+				clusterMap.put(i, clusterCollection);
+			}
+
+			for(Instance inst : nucleusMap.keySet()){
+				
+				UUID id = nucleusMap.get(inst);
+//			Instance inst = enumerated_instances.instance(index);
+				int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
+//			 IJ.log("instance "+index+" is in cluster "+ clusterNumber)  ; //       #pretty print results
+				 NucleusCollection cluster = clusterMap.get(clusterNumber);
+				 
+				 // should never be null
+				 if(collection.getNucleus(id)!=null){
+					 cluster.addNucleus(collection.getNucleus(id));
+				 } else {
+					 logger.log("Error: nucleus with ID "+id+" is not found", Logger.ERROR);
+				 }
+				 
+			}
+		} catch (NoSuchMethodException e) {
+			logger.log("Error: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (SecurityException e) {
+			logger.log("Error: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (InstantiationException e) {
+			logger.log("Error: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (IllegalAccessException e) {
+			logger.log("Error: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (IllegalArgumentException e) {
+			logger.log("Error: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (InvocationTargetException e) {
+			logger.log("Error: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (Exception e) {
+			logger.log("Error: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		}
+	}
+	
+ 	private Instances makeAttributesAndInstances(NucleusCollection collection){
 		// make Attributes on which to cluster
 		//		Attribute id = new Attribute("id", List); 
 

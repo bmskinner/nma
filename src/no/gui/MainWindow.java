@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JButton;
 
 import no.analysis.AnalysisCreator;
+import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
 import no.analysis.MorphologyAnalysis;
 import no.analysis.NucleusClusterer;
@@ -127,6 +128,8 @@ public class MainWindow extends JFrame {
 
 	private HashMap<UUID, NucleusCollection> analysisPopulations = new HashMap<UUID, NucleusCollection>();
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
+	
+	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
 
 
 	/**
@@ -175,6 +178,10 @@ public class MainWindow extends JFrame {
 			});
 			panelHeader.add(btnNewAnalysis);
 			
+			//---------------
+			// load saved collection button
+			//---------------
+			
 			JButton btnLoadSavedNuclei = new JButton("Load saved nuclei");
 			btnLoadSavedNuclei.addMouseListener(new MouseAdapter() {
 				@Override
@@ -183,6 +190,23 @@ public class MainWindow extends JFrame {
 				}
 			});
 			panelHeader.add(btnLoadSavedNuclei);
+			
+			//---------------
+			// load saved dataset button
+			//---------------
+			
+			JButton btnLoadSavedDataset = new JButton("Load analysis dataset");
+			btnLoadSavedDataset.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					loadDataset();
+				}
+			});
+			panelHeader.add(btnLoadSavedDataset);
+			
+			//---------------
+			// post analysis button
+			//---------------
 			
 			JButton btnPostanalysisMapping = new JButton("Post-analysis mapping");
 			btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
@@ -486,27 +510,54 @@ public class MainWindow extends JFrame {
 				
 				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
 				analysisCreator.run();
-				// post-analysis displays: make a new class eventually to handle gui? Or do it here
 
-				List<NucleusCollection> result = analysisCreator.getPopulations();
-				updatePanels(result);
+//				List<NucleusCollection> result = analysisCreator.getPopulations();
+				List<AnalysisDataset> datasets = analysisCreator.getDatasets();
 				
-				for(NucleusCollection c : result){
-					MainWindow.this.analysisPopulations.put(c.getID(), c);
-					MainWindow.this.populationNames.put(c.getName(), c.getID());
+				if(datasets.size()==0 || datasets==null){
+					log("No datasets returned");
 				}
+//				updatePanels(result);
+				
+//				// old style population lists
+//				for(NucleusCollection c : result){
+//					MainWindow.this.analysisPopulations.put(c.getID(), c);
+//					MainWindow.this.populationNames.put(c.getName(), c.getID());
+//				}
+				
+				// new style datasets
+				
+				
+				for(AnalysisDataset d : datasets){
+
+					// old style population lists
+					MainWindow.this.analysisDatasets.put(d.getUUID(), d);
+					MainWindow.this.analysisPopulations.put(d.getUUID(), d.getCollection());
+					MainWindow.this.populationNames.put(d.getCollection().getName(), d.getUUID());
+					
+					
+					for(AnalysisDataset child : d.getChildDatasets()){
+						MainWindow.this.analysisDatasets.put(d.getUUID(), d);
+						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
+						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
+					}
+					
+					d.save();
+
+				}
+								
 				
 				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisPopulations.size()+" populations ready to view");
 				updatePopulationList();	
 				
-				ListSelectionModel lsm = MainWindow.this.populationTable.getSelectionModel();
-				int index = 0;
-				for(NucleusCollection c : MainWindow.this.analysisPopulations.values()){
-					index++;
-					if(c.getID().equals(result.get(0).getID())){
-						lsm.setSelectionInterval(index, index); // set the selection to the first result
-					}
-				}
+//				ListSelectionModel lsm = MainWindow.this.populationTable.getSelectionModel();
+//				int index = 0;
+//				for(NucleusCollection c : MainWindow.this.analysisPopulations.values()){
+//					index++;
+//					if(c.getID().equals(result.get(0).getID())){
+//						lsm.setSelectionInterval(index, index); // set the selection to the first result
+//					}
+//				}
 				
 				
 			}
@@ -522,6 +573,7 @@ public class MainWindow extends JFrame {
 					try{
 						logc("Running cluster analysis...");
 						NucleusClusterer clusterer = new NucleusClusterer();
+						clusterer.setType(NucleusClusterer.HIERARCHICAL);
 						boolean ok = clusterer.cluster(MainWindow.this.analysisPopulations.get(id));
 						if(ok){
 							log("OK");
@@ -529,6 +581,14 @@ public class MainWindow extends JFrame {
 						} else {
 							log("Error");
 						}
+
+						AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
+
+//						if(parent==null){
+//							log("Dataset "+id.toString()+" not present");
+//							parent = new AnalysisDataset(MainWindow.this.analysisPopulations.get(id));
+//							MainWindow.this.analysisDatasets.put(parent.getUUID(), parent);
+//						}
 
 						for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
 							NucleusCollection c = clusterer.getCluster(cluster);
@@ -541,20 +601,24 @@ public class MainWindow extends JFrame {
 							} else {
 								log("Error");
 							}
-							
-							logc("Refolding profile...");
-							  ok = CurveRefolder.run(c, c.getAnalysisOptions().getNucleusClass(), c.getAnalysisOptions().getRefoldMode());
-							  if(ok){
-								  log("OK");
-							  } else {
-								  log("Error");
-							  }
+
+//							logc("Refolding profile...");
+//							ok = CurveRefolder.run(c, c.getAnalysisOptions().getNucleusClass(), c.getAnalysisOptions().getRefoldMode());
+//							if(ok){
+//								log("OK");
+//							} else {
+//								log("Error");
+//							}
+
+							// attach the clusters to their parent collection
+							parent.addChildCollection(c);
 
 							MainWindow.this.analysisPopulations.put(c.getID(), c);
 							MainWindow.this.populationNames.put(c.getName(), c.getID());
 
 						}
 						updatePopulationList();	
+						parent.save();
 
 
 					} catch (Exception e){
@@ -632,6 +696,10 @@ public class MainWindow extends JFrame {
 					MainWindow.this.analysisPopulations.put(collection.getID(), collection);
 					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
 					log("Opened collection: "+collection.getType());
+					
+					// make a new dataset for the collection
+					AnalysisDataset dataset = new AnalysisDataset(collection);
+					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
 
 					List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
 					list.add(collection);
@@ -640,6 +708,45 @@ public class MainWindow extends JFrame {
 					updatePopulationList();
 				} catch (Exception e) {
 					log("Error opening file: "+e.getMessage());
+				}
+			}
+		};
+		thr.start();
+	}
+	
+	public void loadDataset(){
+		Thread thr = new Thread() {
+			public void run() {
+				try {
+					OpenDialog fileDialog = new OpenDialog("Select a saved dataset...");
+					String fileName = fileDialog.getPath();
+					if(fileName==null) return;
+					
+					// read the dataset
+					AnalysisDataset dataset = PopulationImporter.readDataset(new File(fileName));
+					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
+					
+					// update the old style population list
+					NucleusCollection collection = dataset.getCollection();
+					MainWindow.this.analysisPopulations.put(collection.getID(), collection);
+					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
+					
+					for(AnalysisDataset child : dataset.getChildDatasets()){
+						MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
+						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
+						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
+					}
+					
+					log("Opened dataset: "+collection.getType());
+					log("Dataset contains: "+dataset.getChildCount()+" subsets");
+
+					List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+					list.add(collection);
+
+					updatePanels(list);
+					updatePopulationList();
+				} catch (Exception e) {
+					log("Error opening dataset: "+e.getMessage());
 				}
 			}
 		};
