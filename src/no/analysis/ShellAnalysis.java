@@ -23,10 +23,12 @@ public class ShellAnalysis {
 	 * @param collection the collection of nuclei to analyse
 	 * @param shells the number of shells per nucleus
 	 */
-	public static boolean run(NucleusCollection collection, int shells){
+	public static boolean run(AnalysisDataset dataset, int shells){
+		
+		NucleusCollection collection = dataset.getCollection();
 		
 		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
-	
+		
 		if(collection.getSignalCount()==0){
 			logger.log("No signals in population",Logger.DEBUG);
 			return true; // only bother if there are signals
@@ -71,7 +73,7 @@ public class ShellAnalysis {
 				if(collection.hasSignals(channel)){
 					ShellCounter channelCounter = counters.get(channel);
 					channelCounter.export(new File(collection.getLogFileName( "log.shells."+channel  )));
-					collection.addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
+					dataset.addShellResult(channel, new ShellResult(channelCounter.getMeans(), channelCounter.getStandardErrors()));
 				}
 			}
 			

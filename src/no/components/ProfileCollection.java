@@ -1,8 +1,5 @@
 package no.components;
 
-import ij.IJ;
-
-import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,12 +11,13 @@ import no.utility.Utils;
 public class ProfileCollection implements Serializable {
 		
 	private static final long serialVersionUID = 1L;
-	public static final int CHART_WINDOW_HEIGHT     = 400;
-	public static final int CHART_WINDOW_WIDTH      = 600;
+//	public static final int CHART_WINDOW_HEIGHT     = 400;
+//	public static final int CHART_WINDOW_WIDTH      = 600;
 	
 	private Map<String, ProfileFeature> 	features 	= new HashMap<String, ProfileFeature>();
 	private Map<String, Profile> 			profiles 	= new HashMap<String, Profile>(0); 
 	private Map<String, ProfileAggregate> 	aggregates 	= new HashMap<String, ProfileAggregate>();
+	
 	private String collectionName; // the name of the NucleusCollection - e.g analysable, red, not_red
 	
 	private Map<String, List<NucleusBorderSegment>> segments = new HashMap<String, List<NucleusBorderSegment>>();
@@ -166,51 +164,51 @@ public class ProfileCollection implements Serializable {
 		this.addProfile(pointType+"75", q75);
 	}
 	
-	public void printKeys(){
-//		IJ.log("    Plots:");
-//		for(String s : this.getPlotKeys()){
-//			IJ.log("     "+s);
-//		}
-		IJ.log("    Profiles:");
+	public String printKeys(){
+		
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("    Profiles:\t");
 		for(String s : this.getProfileKeys()){
-			IJ.log("     "+s);
+			builder.append("     "+s+"\t");
 		}
-		IJ.log("    Aggregates:");
+		builder.append("    Aggregates:\t");
 		for(String s : this.getAggregateKeys()){
-			IJ.log("     "+s);
+			builder.append("     "+s+"\t");
 		}
-		IJ.log("    Features:");
+		builder.append("    Features:\t");
 		for(String s : this.getFeatureKeys()){
-			IJ.log("     "+s);
+			builder.append("     "+s+"\t");
 		}
-		IJ.log("    Segments:");
+		builder.append("    Segments:\t");
 		for(String s : this.getSegmentKeys()){
-			IJ.log("     "+s);
+			builder.append("     "+s+"\t");
 		}
+		return builder.toString();
 	}
 	
-	public void printKeys(File file){
-//		IJ.append("    Plots:", file.getAbsolutePath());
-//		for(String s : this.getPlotKeys()){
+//	public void printKeys(File file){
+////		IJ.append("    Plots:", file.getAbsolutePath());
+////		for(String s : this.getPlotKeys()){
+////			IJ.append("     "+s, file.getAbsolutePath());
+////		}
+//		IJ.append("    Profiles:", file.getAbsolutePath());
+//		for(String s : this.getProfileKeys()){
 //			IJ.append("     "+s, file.getAbsolutePath());
 //		}
-		IJ.append("    Profiles:", file.getAbsolutePath());
-		for(String s : this.getProfileKeys()){
-			IJ.append("     "+s, file.getAbsolutePath());
-		}
-		IJ.append("    Aggregates:", file.getAbsolutePath());
-		for(String s : this.getAggregateKeys()){
-			IJ.append("     "+s, file.getAbsolutePath());
-		}
-		IJ.append("    Features:", file.getAbsolutePath());
-		for(String s : this.getFeatureKeys()){
-			IJ.append("     "+s, file.getAbsolutePath());
-		}
-		IJ.append("    Segments:", file.getAbsolutePath());
-		for(String s : this.getSegmentKeys()){
-			IJ.append("     "+s, file.getAbsolutePath());
-		}
-	}
+//		IJ.append("    Aggregates:", file.getAbsolutePath());
+//		for(String s : this.getAggregateKeys()){
+//			IJ.append("     "+s, file.getAbsolutePath());
+//		}
+//		IJ.append("    Features:", file.getAbsolutePath());
+//		for(String s : this.getFeatureKeys()){
+//			IJ.append("     "+s, file.getAbsolutePath());
+//		}
+//		IJ.append("    Segments:", file.getAbsolutePath());
+//		for(String s : this.getSegmentKeys()){
+//			IJ.append("     "+s, file.getAbsolutePath());
+//		}
+//	}
 	
 	// Get keys
 //	public Set<String> getPlotKeys(){
@@ -312,92 +310,4 @@ public class ProfileCollection implements Serializable {
 		}		
 		return result;
 	}
-	
-	// Set up the plots within the collection
-
-//	public void preparePlots(int width, int height, double maxLength){
-//		List<String> keys = this.getProfileKeys();
-//		if(keys==null || keys.size()==0){
-//			keys.addAll(getAggregateKeys()); //backup
-//		}
-//		for( String pointType : keys ){
-//
-//			Plot  rawPlot = new Plot( "Raw "       +pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-//			Plot normPlot = new Plot( "Normalised "+pointType+"-indexed plot", "Position", "Angle", Plot.Y_GRID | Plot.X_GRID);
-//			Plot  iqrPlot = new Plot( "IQR "       +pointType+"-indexed plot", "Position", "IQR", Plot.Y_GRID | Plot.X_GRID);
-//
-//			rawPlot.setLimits(0,maxLength,CHART_SCALE_Y_MIN,CHART_SCALE_Y_MAX);
-//			rawPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-//			rawPlot.setYTicks(true);
-//			rawPlot.setColor(Color.BLACK);
-//			rawPlot.drawLine(0, 180, maxLength, 180); 
-//			rawPlot.setColor(Color.LIGHT_GRAY);
-//
-//			normPlot.setLimits(0,100,CHART_SCALE_Y_MIN,CHART_SCALE_Y_MAX);
-//			normPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-//			normPlot.setYTicks(true);
-//			normPlot.setColor(Color.BLACK);
-//			normPlot.drawLine(0, 180, 100, 180); 
-//			normPlot.setColor(Color.LIGHT_GRAY);
-//			
-//			iqrPlot.setLimits(0,100,0,50);
-//			iqrPlot.setSize(CHART_WINDOW_WIDTH,CHART_WINDOW_HEIGHT);
-//			iqrPlot.setYTicks(true);
-//			iqrPlot.setColor(Color.BLACK);
-//			iqrPlot.setColor(Color.LIGHT_GRAY);
-//
-//			ProfilePlot plotHash = new ProfilePlot();
-//			plotHash.add("raw" , rawPlot );
-//			plotHash.add("norm", normPlot);
-//			plotHash.add("iqr" , iqrPlot);
-//			this.addPlots(pointType, plotHash);
-//		}
-//	}   
-
-
-//	public void addSignalsToProfileChart(String pointType, List<XYPoint> signals, Color colour){
-//		// setup the plot for getting signals
-//		Plot plot = this.getPlots(pointType).get("norm");
-//		plot.setColor(Color.LIGHT_GRAY);
-//		plot.setLineWidth(1);
-//		plot.drawLine(0,CHART_SIGNAL_Y_LINE_MIN,100,CHART_SIGNAL_Y_LINE_MIN);
-//		plot.drawLine(0,CHART_SIGNAL_Y_LINE_MAX,100,CHART_SIGNAL_Y_LINE_MAX);
-//
-//		double[] xPoints = new double[signals.size()];
-//		double[] yPoints = new double[signals.size()];
-//
-//		// turn the XYPoints into an array
-//		for(int i= 0; i<signals.size();i++){
-//			xPoints[i] = signals.get(i).getX();
-//			yPoints[i] = signals.get(i).getY();
-//		}
-//		plot.setColor(colour);
-//		plot.setLineWidth(2);
-//		plot.addPoints( xPoints, yPoints, Plot.DOT);
-//	}
-//	
-//	public void drawProfilePlots(String pointType, List<Profile> profiles){
-//
-//		Plot  rawPlot = this.getPlots(pointType).get("raw");
-//		Plot normPlot = this.getPlots(pointType).get("norm");
-//
-//		for(int i=0;i<profiles.size();i++){
-//
-//			Profile p = profiles.get(i);
-//
-//			double[] xPointsRaw  = p.getPositions(p.size()).asArray();
-//			double[] xPointsNorm = p.getPositions(100).asArray();
-//
-//			rawPlot.setColor(Color.LIGHT_GRAY);
-//			rawPlot.addPoints(xPointsRaw, p.asArray(), Plot.LINE);
-//
-//			normPlot.setColor(Color.LIGHT_GRAY);
-//			normPlot.addPoints(xPointsNorm, p.asArray(), Plot.LINE);
-//		}
-//
-//	}
-
-		
-
-
 }

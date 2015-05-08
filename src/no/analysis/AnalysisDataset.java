@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import no.collections.NucleusCollection;
+import no.components.AnalysisOptions;
+import no.components.ShellResult;
 import no.export.PopulationExporter;
 
 
@@ -25,6 +27,9 @@ public class AnalysisDataset implements Serializable {
 	private Map<UUID, AnalysisDataset> childCollections = new HashMap<UUID, AnalysisDataset>(); // hold the UUID of any child collections
 	private NucleusCollection thisCollection;
 	private File savePath; // the file to save the analysis to
+	
+	private AnalysisOptions analysisOptions;
+	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 	
 	
 	public AnalysisDataset(NucleusCollection collection){
@@ -44,8 +49,18 @@ public class AnalysisDataset implements Serializable {
 		}
 		UUID id = collection.getID();
 		AnalysisDataset childDataset = new AnalysisDataset(collection, this.savePath);
+		childDataset.setAnalysisOptions(this.getAnalysisOptions());
 
 		this.childCollections.put(id, childDataset);
+
+	}
+	
+	public void addChildDataset(AnalysisDataset dataset){
+		if(dataset==null){
+			throw new IllegalArgumentException("Nucleus collection is null");
+		}
+		UUID id = dataset.getUUID();
+		this.childCollections.put(id, dataset);
 
 	}
 	
@@ -114,5 +129,34 @@ public class AnalysisDataset implements Serializable {
 			PopulationExporter.saveAnalysisDataset(this);
 		}
 	}
+	
+	  public void addShellResult(int channel, ShellResult result){
+		  this.shellResults.put(channel, result);
+	  }
+	  
+	  public ShellResult getShellResult(int channel){
+		  return this.shellResults.get(channel);
+	  }
+
+	  /**
+	   * Test if the collection has a ShellResult in any channel
+	   * 
+	   */
+	  public boolean hasShellResult(){
+		  for(Integer channel : this.thisCollection.getSignalChannels()){
+			  if(this.shellResults.containsKey(channel)){
+				  return true;
+			  }
+		  }
+		  return false;
+	  }
+	  
+	  public AnalysisOptions getAnalysisOptions() {
+		  return analysisOptions;
+	  }
+
+	  public void setAnalysisOptions(AnalysisOptions analysisOptions) {
+		  this.analysisOptions = analysisOptions;
+	  }
 
 }

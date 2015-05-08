@@ -31,9 +31,6 @@ public class RoundNucleusCollection
 implements NucleusCollection, Serializable 
 {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private File folder; // the source of the nuclei
 	private String outputFolder;
@@ -52,7 +49,7 @@ implements NucleusCollection, Serializable
 	private Nucleus consensusNucleus;
 	
 	private AnalysisOptions analysisOptions;
-	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
+//	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 
 	private List<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
 	private Map<UUID, Nucleus> mappedCollection  = new HashMap<UUID, Nucleus>();
@@ -95,26 +92,26 @@ implements NucleusCollection, Serializable
 	  this.mappedCollection.put(r.getID(), r);
   }
   
-  public void addShellResult(int channel, ShellResult result){
-	  this.shellResults.put(channel, result);
-  }
-  
-  public ShellResult getShellResult(int channel){
-	  return this.shellResults.get(channel);
-  }
-
-  /**
-   * Test if the collection has a ShellResult in any channel
-   * 
-   */
-  public boolean hasShellResult(){
-	  for(Integer channel : this.getSignalChannels()){
-		  if(this.shellResults.containsKey(channel)){
-			  return true;
-		  }
-	  }
-	  return false;
-  }
+//  public void addShellResult(int channel, ShellResult result){
+//	  this.shellResults.put(channel, result);
+//  }
+//  
+//  public ShellResult getShellResult(int channel){
+//	  return this.shellResults.get(channel);
+//  }
+//
+//  /**
+//   * Test if the collection has a ShellResult in any channel
+//   * 
+//   */
+//  public boolean hasShellResult(){
+//	  for(Integer channel : this.getSignalChannels()){
+//		  if(this.shellResults.containsKey(channel)){
+//			  return true;
+//		  }
+//	  }
+//	  return false;
+//  }
   
   public boolean hasConsensusNucleus(){
 	  if(this.consensusNucleus==null){
@@ -125,13 +122,13 @@ implements NucleusCollection, Serializable
   }
 
 
-  public AnalysisOptions getAnalysisOptions() {
-	  return analysisOptions;
-  }
-
-  public void setAnalysisOptions(AnalysisOptions analysisOptions) {
-	  this.analysisOptions = analysisOptions;
-  }
+//  public AnalysisOptions getAnalysisOptions() {
+//	  return analysisOptions;
+//  }
+//
+//  public void setAnalysisOptions(AnalysisOptions analysisOptions) {
+//	  this.analysisOptions = analysisOptions;
+//  }
 
 public void addConsensusNucleus(Nucleus n){
 	  this.consensusNucleus = n;
@@ -577,7 +574,7 @@ public void addConsensusNucleus(Nucleus n){
 		  }
 	  } catch(Exception e){
 //		  logger.log("Error getting differences from point "+pointType+": "+e.getMessage(), Logger.ERROR);
-		  this.profileCollection.printKeys(this.debugFile);
+//		  this.profileCollection.printKeys(this.debugFile);
 	  }
 	  return d;
   }

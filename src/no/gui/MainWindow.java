@@ -26,8 +26,6 @@ import no.analysis.ShellAnalysis;
 import no.collections.NucleusCollection;
 import no.components.Profile;
 import no.imports.PopulationImporter;
-import no.nuclei.Nucleus;
-import no.utility.MappingFileParser;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -36,7 +34,6 @@ import javax.swing.JTextArea;
 
 import java.awt.SystemColor;
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +50,7 @@ import javax.swing.JTable;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Shape;
 
@@ -85,14 +83,11 @@ import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextArea textArea = new JTextArea();;
 	private JLabel lblStatusLine = new JLabel("No analysis open");
-	private final JPanel panelAggregates = new JPanel(); // holds consensus, tab and population panels
+//	private final JPanel panelAggregates = new JPanel(); // holds consensus, tab and population panels
 	private JTable tablePopulationStats;
 	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
 	
@@ -126,7 +121,7 @@ public class MainWindow extends JFrame {
 	
 	private JPanel clusteringPanel;// container for clustering options and display
 
-	private HashMap<UUID, NucleusCollection> analysisPopulations = new HashMap<UUID, NucleusCollection>();
+//	private HashMap<UUID, NucleusCollection> analysisPopulations = new HashMap<UUID, NucleusCollection>();
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
@@ -208,14 +203,14 @@ public class MainWindow extends JFrame {
 			// post analysis button
 			//---------------
 			
-			JButton btnPostanalysisMapping = new JButton("Post-analysis mapping");
-			btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					postAnalysis();
-				}
-			});
-			panelHeader.add(btnPostanalysisMapping);
+//			JButton btnPostanalysisMapping = new JButton("Post-analysis mapping");
+//			btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
+//				@Override
+//				public void mouseClicked(MouseEvent arg0) {
+//					postAnalysis();
+//				}
+//			});
+//			panelHeader.add(btnPostanalysisMapping);
 			
 			JPanel panelFooter = new JPanel();
 			contentPane.add(panelFooter, BorderLayout.SOUTH);
@@ -231,7 +226,7 @@ public class MainWindow extends JFrame {
 			//---------------
 			// Create the populations list
 			//---------------
-			
+			panelPopulations.setMinimumSize(new Dimension(0, 100));
 			panel.add(panelPopulations);
 			panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
 			
@@ -245,8 +240,7 @@ public class MainWindow extends JFrame {
 				public boolean isCellEditable(int rowIndex, int vColIndex) {
 					return false;
 				}
-				
-				
+
 			};
 			populationTable.setModel(populationTableModel);
 			populationTable.setEnabled(true);
@@ -256,6 +250,7 @@ public class MainWindow extends JFrame {
 			populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
 			populationTable.getColumnModel().getColumn(0).setPreferredWidth(120);
 			populationTable.getColumnModel().getColumn(2).setPreferredWidth(5);
+//			setVisibleRowCount(populationTable, 6);
 						
 			populationTable.addMouseListener(new MouseAdapter() {
 				@Override
@@ -266,7 +261,7 @@ public class MainWindow extends JFrame {
 			          if (index >= 0) {
 			        	  Object o = table.getModel().getValueAt(index, 0);
 			        	  UUID id = MainWindow.this.populationNames.get(o.toString());
-			        	  renameCollection(MainWindow.this.analysisPopulations.get(id));
+			        	  renameCollection(MainWindow.this.analysisDatasets.get(id));
 			          }
 			        }
 				}
@@ -278,12 +273,9 @@ public class MainWindow extends JFrame {
 			JScrollPane populationScrollPane = new JScrollPane(populationTable);
 			panelPopulations.add(populationScrollPane);
 			
-			panelGeneralData.add(panelAggregates);
-			
-			panelAggregates.setLayout(new BoxLayout(panelAggregates, BoxLayout.Y_AXIS));
-			
-			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-			panelAggregates.add(tabbedPane);
+//			panelGeneralData.add(panelAggregates);
+//			
+//			panelAggregates.setLayout(new BoxLayout(panelAggregates, BoxLayout.Y_AXIS));
 			
 			//---------------
 			// Create the regular profile chart
@@ -295,9 +287,6 @@ public class MainWindow extends JFrame {
 			plot.getRangeAxis().setRange(0,360);
 			plot.setBackgroundPaint(Color.WHITE);
 			
-			profileChartPanel = new ChartPanel(profileChart);
-			tabbedPane.addTab("Profile", null, profileChartPanel, null);
-			
 			//---------------
 			// Create the franken profile chart
 			//---------------
@@ -307,9 +296,6 @@ public class MainWindow extends JFrame {
 			frankenPlot.getDomainAxis().setRange(0,100);
 			frankenPlot.getRangeAxis().setRange(0,360);
 			frankenPlot.setBackgroundPaint(Color.WHITE);
-
-			frankenChartPanel = new ChartPanel(frankenChart);
-			tabbedPane.addTab("FrankenProfile", null, frankenChartPanel, null);
 			
 			//---------------
 			// Create the consensus chart
@@ -323,48 +309,15 @@ public class MainWindow extends JFrame {
 			
 			consensusChartPanel = new ChartPanel(consensusChart);
 			panel.add(consensusChartPanel);
-			
-			//---------------
-			// Create the general stats page
-			//---------------
-			
-			JPanel panelGeneralStats = new JPanel();
-			tabbedPane.addTab("Basic statistics", null, panelGeneralStats, null);
-			panelGeneralStats.setLayout(new BorderLayout(0, 0));
-			
-			tablePopulationStats = new JTable();
-			panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
-			tablePopulationStats.setEnabled(false);
-			panelGeneralStats.add(tablePopulationStats.getTableHeader(), BorderLayout.NORTH);
-			tablePopulationStats.setModel(DatasetCreator.createStatsTable(null));
-						
-			//---------------
-			// Create panel for split boxplots
-			//---------------
-			JPanel boxplotSplitPanel = new JPanel(); // main container in tab
-			
-			boxplotSplitPanel.setLayout(new BoxLayout(boxplotSplitPanel, BoxLayout.X_AXIS));
 			JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
-			boxplotSplitPanel.add(areaBoxplotChartPanel);
 			
 			JFreeChart perimBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			perimBoxplotChartPanel = new ChartPanel(perimBoxplot);
-			boxplotSplitPanel.add(perimBoxplotChartPanel);
 			
 			JFreeChart maxFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			maxFeretBoxplotChartPanel = new ChartPanel(maxFeretBoxplot);
-			boxplotSplitPanel.add(maxFeretBoxplotChartPanel);
 			
 			JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			minFeretBoxplotChartPanel = new ChartPanel(minFeretBoxplot);
-			boxplotSplitPanel.add(minFeretBoxplotChartPanel);
 			
 			JFreeChart differenceBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			differenceBoxplotChartPanel = new ChartPanel(differenceBoxplot);
-			boxplotSplitPanel.add(differenceBoxplotChartPanel);
-			
-			tabbedPane.addTab("Boxplots", null, boxplotSplitPanel, null);
 			
 			//---------------
 			// Create the variability chart
@@ -375,15 +328,75 @@ public class MainWindow extends JFrame {
 			variabilityPlot.setBackgroundPaint(Color.WHITE);
 			variabilityPlot.getDomainAxis().setRange(0,100);
 			
-			variabilityChartPanel = new ChartPanel(variablityChart);
-			tabbedPane.addTab("Variability", null, variabilityChartPanel, null);
-			
 			//---------------
 			// Create the shells chart
 			//---------------
 			JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
 			shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 			shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
+			
+
+			DefaultTableModel signalsTableModel = new DefaultTableModel();
+			signalsTableModel.addColumn("");
+			signalsTableModel.addColumn("");
+			
+			JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
+					null, null, null);
+			XYPlot signalsPlot = signalsChart.getXYPlot();
+			signalsPlot.setBackgroundPaint(Color.WHITE);
+			signalsPlot.getDomainAxis().setVisible(false);
+			signalsPlot.getRangeAxis().setVisible(false);
+			JFreeChart signalAngleChart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+			signalAngleChart.getPlot().setBackgroundPaint(Color.white);
+			
+			JFreeChart signalDistanceChart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+			signalDistanceChart.getPlot().setBackgroundPaint(Color.white);
+			
+			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+			panelGeneralData.add(tabbedPane);
+			
+			profileChartPanel = new ChartPanel(profileChart);
+			tabbedPane.addTab("Profile", null, profileChartPanel, null);
+			
+			frankenChartPanel = new ChartPanel(frankenChart);
+			tabbedPane.addTab("FrankenProfile", null, frankenChartPanel, null);
+
+			//---------------
+			// Create the general stats page
+			//---------------
+
+			JPanel panelGeneralStats = new JPanel();
+			tabbedPane.addTab("Basic statistics", null, panelGeneralStats, null);
+			panelGeneralStats.setLayout(new BorderLayout(0, 0));
+
+			tablePopulationStats = new JTable();
+			panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
+			tablePopulationStats.setEnabled(false);
+			panelGeneralStats.add(tablePopulationStats.getTableHeader(), BorderLayout.NORTH);
+			tablePopulationStats.setModel(DatasetCreator.createStatsTable(null));
+
+			//---------------
+			// Create panel for split boxplots
+			//---------------
+			JPanel boxplotSplitPanel = new JPanel(); // main container in tab
+			
+			boxplotSplitPanel.setLayout(new BoxLayout(boxplotSplitPanel, BoxLayout.X_AXIS));
+			areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
+			boxplotSplitPanel.add(areaBoxplotChartPanel);
+			perimBoxplotChartPanel = new ChartPanel(perimBoxplot);
+			boxplotSplitPanel.add(perimBoxplotChartPanel);
+			maxFeretBoxplotChartPanel = new ChartPanel(maxFeretBoxplot);
+			boxplotSplitPanel.add(maxFeretBoxplotChartPanel);
+			minFeretBoxplotChartPanel = new ChartPanel(minFeretBoxplot);
+			boxplotSplitPanel.add(minFeretBoxplotChartPanel);
+			differenceBoxplotChartPanel = new ChartPanel(differenceBoxplot);
+			boxplotSplitPanel.add(differenceBoxplotChartPanel);
+			
+			tabbedPane.addTab("Boxplots", null, boxplotSplitPanel, null);
+			
+			variabilityChartPanel = new ChartPanel(variablityChart);
+//			variabilityChartPanel.setMinimumSize(new Dimension(200,200));
+			tabbedPane.addTab("Variability", null, variabilityChartPanel, null);
 			shellsChartPanel = new ChartPanel(shellsChart);
 			tabbedPane.addTab("Shells", null, shellsChartPanel, null);
 			
@@ -393,45 +406,28 @@ public class MainWindow extends JFrame {
 			signalsPanel = new JPanel(); // main container in tab
 			signalsPanel.setLayout(new BoxLayout(signalsPanel, BoxLayout.X_AXIS));
 			
-
-			DefaultTableModel signalsTableModel = new DefaultTableModel();
-			signalsTableModel.addColumn("");
-			signalsTableModel.addColumn("");
-			
 			signalStatsTable = new JTable(); // table  for basic stats
 			signalStatsTable.setModel(signalsTableModel);
 			signalStatsTable.setEnabled(false);
 			JScrollPane signalStatsScrollPane = new JScrollPane(signalStatsTable);
 			signalsPanel.add(signalStatsScrollPane);
-			
-			JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
-					null, null, null);
-			XYPlot signalsPlot = signalsChart.getXYPlot();
-			signalsPlot.setBackgroundPaint(Color.WHITE);
-			signalsPlot.getDomainAxis().setVisible(false);
-			signalsPlot.getRangeAxis().setVisible(false);
 			signalsChartPanel = new ChartPanel(signalsChart);
 			signalsPanel.add(signalsChartPanel);
-
-			tabbedPane.addTab("Signals", null, signalsPanel, null);
 			
+			tabbedPane.addTab("Signals", null, signalsPanel, null);
+
 			//---------------
 			// Create the signal histograms panel
 			//---------------
 			signalHistogramPanel = new JPanel(); // main container in tab
 			signalHistogramPanel.setLayout(new BoxLayout(signalHistogramPanel, BoxLayout.Y_AXIS));
-			JFreeChart signalAngleChart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-			signalAngleChart.getPlot().setBackgroundPaint(Color.white);
 			signalAngleChartPanel = new ChartPanel(signalAngleChart);
-			
-			JFreeChart signalDistanceChart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-			signalDistanceChart.getPlot().setBackgroundPaint(Color.white);
 			signalDistanceChartPanel = new ChartPanel(signalDistanceChart);
-			
+
 			signalHistogramPanel.add(signalAngleChartPanel);
 			signalHistogramPanel.add(signalDistanceChartPanel);
 			tabbedPane.addTab("Signal histograms", null, signalHistogramPanel, null);
-			
+
 			//---------------
 			// Create the signal histograms panel
 			//---------------
@@ -445,6 +441,22 @@ public class MainWindow extends JFrame {
 		}
 		
 	}
+	
+//	/**
+//	 * Ensure the population table displays properly
+//	 * @param table the table
+//	 * @param rows the desired number of rows
+//	 */
+//	public static void setVisibleRowCount(JTable table, int rows){ 
+//	    int height = 0; 
+//	    for(int row=0; row<rows; row++) 
+//	        height += table.getRowHeight(row); 
+//	 
+//	    table.setPreferredScrollableViewportSize(new Dimension( 
+//	            table.getPreferredScrollableViewportSize().width, 
+//	            height 
+//	    )); 
+//	}
 	
 	/**
 	 * Standard log - append a newline
@@ -462,45 +474,45 @@ public class MainWindow extends JFrame {
 		textArea.append(s);
 	}
 	
-	public void postAnalysis(){
-		PopulationSplitWindow splitter = new PopulationSplitWindow(new ArrayList<NucleusCollection>(this.analysisPopulations.values()));
-
-		try{
-			File f = splitter.addMappingFile();
-
-			if(f==null) return;
-
-			if(!f.exists()) return;
-
-			NucleusCollection subjectCollection = splitter.getCollection();
-			if(subjectCollection==null) return;
-
-			// import and parse the mapping file
-			List<String> pathList = MappingFileParser.parse(f);
-
-			// create a new collection to hold the nuclei
-			Constructor<?> collectionConstructor = subjectCollection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
-			NucleusCollection remapCollection = (NucleusCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), 
-																										subjectCollection.getOutputFolderName(), 
-																										f.getName(), 
-																										subjectCollection.getDebugFile());
-
-			// add nuclei to the new population based on the mapping info
-			for(Nucleus n : subjectCollection.getNuclei()){
-				if(pathList.contains(n.getPath()+"\t"+n.getNucleusNumber())){
-					remapCollection.addNucleus(n);
-				}
-			}
-			this.analysisPopulations.put(remapCollection.getID(), remapCollection);
-			log("Created subcollection from mapping file");
-			List<NucleusCollection> list = new ArrayList<NucleusCollection>();
-			list.add(remapCollection);
-			updatePanels(list);
-			updatePopulationList();
-		} catch(Exception e){
-			
-		}
-	}
+//	public void postAnalysis(){
+//		PopulationSplitWindow splitter = new PopulationSplitWindow(new ArrayList<NucleusCollection>(this.analysisPopulations.values()));
+//
+//		try{
+//			File f = splitter.addMappingFile();
+//
+//			if(f==null) return;
+//
+//			if(!f.exists()) return;
+//
+//			NucleusCollection subjectCollection = splitter.getCollection();
+//			if(subjectCollection==null) return;
+//
+//			// import and parse the mapping file
+//			List<String> pathList = MappingFileParser.parse(f);
+//
+//			// create a new collection to hold the nuclei
+//			Constructor<?> collectionConstructor = subjectCollection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
+//			NucleusCollection remapCollection = (NucleusCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), 
+//																										subjectCollection.getOutputFolderName(), 
+//																										f.getName(), 
+//																										subjectCollection.getDebugFile());
+//
+//			// add nuclei to the new population based on the mapping info
+//			for(Nucleus n : subjectCollection.getNuclei()){
+//				if(pathList.contains(n.getPath()+"\t"+n.getNucleusNumber())){
+//					remapCollection.addNucleus(n);
+//				}
+//			}
+//			this.analysisPopulations.put(remapCollection.getID(), remapCollection);
+//			log("Created subcollection from mapping file");
+//			List<NucleusCollection> list = new ArrayList<NucleusCollection>();
+//			list.add(remapCollection);
+//			updatePanels(list);
+//			updatePopulationList();
+//		} catch(Exception e){
+//			
+//		}
+//	}
 	
 	public void newAnalysis(){
 
@@ -532,13 +544,13 @@ public class MainWindow extends JFrame {
 
 					// old style population lists
 					MainWindow.this.analysisDatasets.put(d.getUUID(), d);
-					MainWindow.this.analysisPopulations.put(d.getUUID(), d.getCollection());
+//					MainWindow.this.analysisPopulations.put(d.getUUID(), d.getCollection());
 					MainWindow.this.populationNames.put(d.getCollection().getName(), d.getUUID());
 					
 					
 					for(AnalysisDataset child : d.getChildDatasets()){
-						MainWindow.this.analysisDatasets.put(d.getUUID(), d);
-						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
+						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
+//						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
 						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
 					}
 					
@@ -547,7 +559,7 @@ public class MainWindow extends JFrame {
 				}
 								
 				
-				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisPopulations.size()+" populations ready to view");
+				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisDatasets.size()+" populations ready to view");
 				updatePopulationList();	
 				
 //				ListSelectionModel lsm = MainWindow.this.populationTable.getSelectionModel();
@@ -574,7 +586,7 @@ public class MainWindow extends JFrame {
 						logc("Running cluster analysis...");
 						NucleusClusterer clusterer = new NucleusClusterer();
 						clusterer.setType(NucleusClusterer.HIERARCHICAL);
-						boolean ok = clusterer.cluster(MainWindow.this.analysisPopulations.get(id));
+						boolean ok = clusterer.cluster(MainWindow.this.analysisDatasets.get(id).getCollection());
 						if(ok){
 							log("OK");
 							log("Found "+clusterer.getNumberOfClusters()+" clusters");
@@ -595,7 +607,7 @@ public class MainWindow extends JFrame {
 							log("Cluster "+cluster+":");
 
 							logc("Reapplying morphology...");
-							ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisPopulations.get(id));
+							ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisDatasets.get(id).getCollection());
 							if(ok){
 								log("OK");
 							} else {
@@ -613,7 +625,7 @@ public class MainWindow extends JFrame {
 							// attach the clusters to their parent collection
 							parent.addChildCollection(c);
 
-							MainWindow.this.analysisPopulations.put(c.getID(), c);
+							MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
 							MainWindow.this.populationNames.put(c.getName(), c.getID());
 
 						}
@@ -631,7 +643,8 @@ public class MainWindow extends JFrame {
 
 	}
 	
-	public void renameCollection(NucleusCollection collection){
+	public void renameCollection(AnalysisDataset dataset){
+		NucleusCollection collection = dataset.getCollection();
 		String newName = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
 		// validate
 		if(!newName.isEmpty() && newName!=null){
@@ -646,14 +659,16 @@ public class MainWindow extends JFrame {
 				log("Collection renamed: "+newName);
 				updatePopulationList();
 				
-				List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-				list.add(collection);
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+				list.add(dataset);
 				updatePanels(list);
 			}
 		}
 	}
 	
-	public void newShellAnalysis(NucleusCollection collection){
+	public void newShellAnalysis(AnalysisDataset dataset){
+		
+		NucleusCollection collection = dataset.getCollection();
 		if(collection!=null){
 			String shellString = JOptionPane.showInputDialog(this, "Number of shells", 5);
 			final UUID id = collection.getID();
@@ -664,15 +679,15 @@ public class MainWindow extends JFrame {
 					public void run() {
 						try{
 							logc("Running shell analysis...");
-							boolean ok = ShellAnalysis.run(MainWindow.this.analysisPopulations.get(id), shellCount);
+							boolean ok = ShellAnalysis.run(MainWindow.this.analysisDatasets.get(id), shellCount);
 							if(ok){
 								log("OK");
 							} else {
 								log("Error");
 							}
 
-							List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-							list.add(MainWindow.this.analysisPopulations.get(id));
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+							list.add(MainWindow.this.analysisDatasets.get(id));
 							updatePanels(list);
 
 						} catch (Exception e){
@@ -693,16 +708,18 @@ public class MainWindow extends JFrame {
 					String fileName = fileDialog.getPath();
 					if(fileName==null) return;
 					NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), MainWindow.this);
-					MainWindow.this.analysisPopulations.put(collection.getID(), collection);
+					
+					MainWindow.this.analysisDatasets.put(collection.getID(), new AnalysisDataset(collection));
 					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
 					log("Opened collection: "+collection.getType());
 					
 					// make a new dataset for the collection
 					AnalysisDataset dataset = new AnalysisDataset(collection);
 					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
+					
 
-					List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-					list.add(collection);
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+					list.add(dataset);
 
 					updatePanels(list);
 					updatePopulationList();
@@ -728,20 +745,20 @@ public class MainWindow extends JFrame {
 					
 					// update the old style population list
 					NucleusCollection collection = dataset.getCollection();
-					MainWindow.this.analysisPopulations.put(collection.getID(), collection);
+//					MainWindow.this.analysisPopulations.put(collection.getID(), collection);
 					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
 					
 					for(AnalysisDataset child : dataset.getChildDatasets()){
-						MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
-						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
+						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
+//						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
 						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
 					}
 					
 					log("Opened dataset: "+collection.getType());
 					log("Dataset contains: "+dataset.getChildCount()+" subsets");
 
-					List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
-					list.add(collection);
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+					list.add(dataset);
 
 					updatePanels(list);
 					updatePopulationList();
@@ -753,13 +770,14 @@ public class MainWindow extends JFrame {
 		thr.start();
 	}
 	
-	public void updatePanels(final List<NucleusCollection> list){
+	public void updatePanels(final List<AnalysisDataset> list){
 
 		Thread thr = new Thread() {
 			public void run() {
 				try {
 					updateStatsPanel(list);
 					updateProfileImage(list);
+//					updateFrankenProfileChart(list);
 					updateConsensusImage(list);
 					updateBoxplots(list);
 					updateVariabilityChart(list);
@@ -809,7 +827,7 @@ public class MainWindow extends JFrame {
 		return getSignalColour(channel, false);
 	}
 	
-	public void updateStatsPanel(List<NucleusCollection> list){
+	public void updateStatsPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
 		TableModel model = DatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
@@ -851,13 +869,13 @@ public class MainWindow extends JFrame {
 		return chart;
 	}
 	
-	public void updateProfileImage(List<NucleusCollection> list){
+	public void updateProfileImage(List<AnalysisDataset> list){
 		
 		try {
 			if(list.size()==1){
 
 				// full segment colouring
-				XYDataset ds = DatasetCreator.createSegmentDataset(list.get(0));
+				XYDataset ds = DatasetCreator.createSegmentDataset(list.get(0).getCollection());
 				JFreeChart chart = makeProfileChart(ds);
 				profileChartPanel.setChart(chart);
 			} else {
@@ -921,24 +939,97 @@ public class MainWindow extends JFrame {
 				profileChartPanel.setChart(chart);
 			}
 			
-//			XYDataset fs = DatasetCreator.createFrankenSegmentDataset(collection);
-//			JFreeChart frankenChart = makeProfileChart(fs);
-//			frankenChartPanel.setChart(frankenChart);
-			
 		} catch (Exception e) {
-			log("Error in plotting frankenprofile or profile");
+			log("Error in plotting profile");
 		} 
 	}
 		
-	public void updateShellPanel(List<NucleusCollection> list){
+	public void updateFrankenProfileChart(List<AnalysisDataset> list){
+		
+		try {
+			if(list.size()==1){
+
+				// full segment colouring
+				XYDataset ds = DatasetCreator.createFrankenSegmentDataset(list.get(0).getCollection());
+				JFreeChart chart = makeProfileChart(ds);
+				frankenChartPanel.setChart(chart);
+			} else {
+				// many profiles, colour them all the same
+				List<XYSeriesCollection> ds = DatasetCreator.createMultiProfileIQRFrankenDataset(list);				
+				
+				XYDataset profileDS = DatasetCreator.createMultiProfileFrankenDataset(list);
+				
+				JFreeChart chart = 
+						ChartFactory.createXYLineChart(null,
+						                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
+						                false);
+
+				XYPlot plot = chart.getXYPlot();
+				plot.getDomainAxis().setRange(0,100);
+				plot.getRangeAxis().setRange(0,360);
+				plot.setBackgroundPaint(Color.WHITE);
+				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+				
+				int i=0;
+				for(XYSeriesCollection c : ds){
+
+					// find the series index
+					String name = (String) c.getSeriesKey(0);
+					String[] names = name.split("_");
+					int index = Integer.parseInt(names[1]);
+					
+					// add to dataset
+					plot.setDataset(i, c);
+					
+					// make a transparent color based on teh profile segmenter system
+					Color pColor = ProfileSegmenter.getColor(index);
+					Color color = new Color(pColor.getRed(), pColor.getGreen(), pColor.getBlue(), 128);
+					
+					
+					XYDifferenceRenderer xydr = new XYDifferenceRenderer(color, color, false);
+					
+					// go through each series in the collection, and set the line colour
+					for(int series=0;series<c.getSeriesCount();series++){
+						xydr.setSeriesPaint(series, color);
+						xydr.setSeriesVisibleInLegend(series, false);
+						
+					}
+					plot.setRenderer(i, xydr);
+					
+					
+					i++;
+				}
+
+				plot.setDataset(i, profileDS);
+				plot.setRenderer(i, new StandardXYItemRenderer());
+
+				for (int j = 0; j < profileDS.getSeriesCount(); j++) {
+					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.FALSE);
+					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
+					String name = (String) profileDS.getSeriesKey(j);
+					String[] names = name.split("_");
+					plot.getRenderer(i).setSeriesPaint(j, ProfileSegmenter.getColor(Integer.parseInt(names[1])).darker());
+				}	
+				
+				frankenChartPanel.setChart(chart);
+			}
+						
+		} catch (Exception e) {
+			log("Error in plotting frankenprofile");
+			for(StackTraceElement el : e.getStackTrace()){
+				log(el.toString());
+			}
+		} 
+	}
+	
+	public void updateShellPanel(List<AnalysisDataset> list){
 
 		if(list.size()==1){ // single collection is easy
 			
-			NucleusCollection collection = list.get(0);
-//			log("Selected collection: "+collection.getName());
-//			log("Shells: "+collection.hasShellResult());
+			AnalysisDataset dataset = list.get(0);
+			NucleusCollection collection = dataset.getCollection();
 
-			if(collection.hasShellResult()){ // only if there is something to display
+			if(dataset.hasShellResult()){ // only if there is something to display
 
 				CategoryDataset ds = DatasetCreator.createShellBarChartDataset(list);
 				JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", ds);
@@ -993,7 +1084,7 @@ public class MainWindow extends JFrame {
 			btnShellAnalysis.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					newShellAnalysis(MainWindow.this.analysisPopulations.get(id));
+					newShellAnalysis(MainWindow.this.analysisDatasets.get(id));
 				}
 			});
 			panel.add(btnShellAnalysis, BorderLayout.SOUTH);
@@ -1052,9 +1143,9 @@ public class MainWindow extends JFrame {
 		return chart;
 	}
 	
-	public void updateConsensusImage(List<NucleusCollection> list){
+	public void updateConsensusImage(List<AnalysisDataset> list){
 
-		NucleusCollection collection = list.get(0);
+		NucleusCollection collection = list.get(0).getCollection();
 		try {
 			if(list.size()==1){
 				if(!collection.hasConsensusNucleus()){
@@ -1113,7 +1204,7 @@ public class MainWindow extends JFrame {
 	 * Update all the boxplots for the given collection
 	 * @param collection
 	 */
-	public void updateBoxplots(List<NucleusCollection> list){
+	public void updateBoxplots(List<AnalysisDataset> list){
 				
 		try {
 			updateAreaBoxplot(list);
@@ -1130,7 +1221,7 @@ public class MainWindow extends JFrame {
 	 * Update the boxplot panel for areas with a list of NucleusCollections
 	 * @param list
 	 */
-	public void updateAreaBoxplot(List<NucleusCollection> list){
+	public void updateAreaBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createAreaBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
@@ -1141,7 +1232,7 @@ public class MainWindow extends JFrame {
 	 * Update the boxplot panel for perimeters with a list of NucleusCollections
 	 * @param list
 	 */
-	public void updatePerimBoxplot(List<NucleusCollection> list){
+	public void updatePerimBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createPerimBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
@@ -1152,7 +1243,7 @@ public class MainWindow extends JFrame {
 	 * Update the boxplot panel for longest diameter across CoM with a list of NucleusCollections
 	 * @param list
 	 */
-	public void updateMaxFeretBoxplot(List<NucleusCollection> list){
+	public void updateMaxFeretBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createMaxFeretBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
@@ -1163,7 +1254,7 @@ public class MainWindow extends JFrame {
 	 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
 	 * @param list
 	 */
-	public void updateMinFeretBoxplot(List<NucleusCollection> list){
+	public void updateMinFeretBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createMinFeretBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
@@ -1174,7 +1265,7 @@ public class MainWindow extends JFrame {
 	 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
 	 * @param list
 	 */
-	public void updateDifferenceBoxplot(List<NucleusCollection> list){
+	public void updateDifferenceBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createDifferenceBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
@@ -1208,12 +1299,13 @@ public class MainWindow extends JFrame {
 	public void updatePopulationList(){
 					
 		// new method using table
-		if(this.analysisPopulations.size()>0){
+		if(this.analysisDatasets.size()>0){
 			DefaultTableModel populationTableModel = new DefaultTableModel();
 			populationTableModel.addColumn("Population");
 			populationTableModel.addColumn("Nuclei");
 			populationTableModel.addColumn("");
-			for(NucleusCollection c : this.analysisPopulations.values()){
+			for(AnalysisDataset d : this.analysisDatasets.values()){
+				NucleusCollection c = d.getCollection();
 				Object[] data  = {c.getName(),c.getNucleusCount(), null};
 				populationTableModel.addRow( data );
 			}
@@ -1223,11 +1315,11 @@ public class MainWindow extends JFrame {
 
 	}
 		
-	public void updateVariabilityChart(List<NucleusCollection> list){
+	public void updateVariabilityChart(List<AnalysisDataset> list){
 		try {
 			XYDataset ds = DatasetCreator.createIQRVariabilityDataset(list);
 			if(list.size()==1){
-				NucleusCollection n = list.get(0);
+				NucleusCollection n = list.get(0).getCollection();
 				JFreeChart chart = makeProfileChart(ds);
 				XYPlot plot = chart.getXYPlot();
 				plot.setBackgroundPaint(Color.WHITE);
@@ -1266,12 +1358,12 @@ public class MainWindow extends JFrame {
 		}	
 	}
 	
-	public void updateSignalsPanel(List<NucleusCollection> list){
+	public void updateSignalsPanel(List<AnalysisDataset> list){
 		updateSignalConsensusChart(list);
 		updateSignalStatsPanel(list);
 	}
 	
-	private void updateSignalStatsPanel(List<NucleusCollection> list){
+	private void updateSignalStatsPanel(List<AnalysisDataset> list){
 		try{
 			TableModel model = DatasetCreator.createSignalStatsTable(list);
 			signalStatsTable.setModel(model);
@@ -1284,10 +1376,10 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
-	private void updateClusteringPanel(List<NucleusCollection> list){
+	private void updateClusteringPanel(List<AnalysisDataset> list){
 		
 		if(list.size()==1){
-			NucleusCollection collection = list.get(0);
+			NucleusCollection collection = list.get(0).getCollection();
 			final UUID id = collection.getID();
 			
 			clusteringPanel = new JPanel();
@@ -1297,7 +1389,7 @@ public class MainWindow extends JFrame {
 			btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					clusterAnalysis(MainWindow.this.analysisPopulations.get(id));
+					clusterAnalysis(MainWindow.this.analysisDatasets.get(id).getCollection());
 				}
 			});
 			clusteringPanel.add(btnNewClusterAnalysis);
@@ -1311,12 +1403,12 @@ public class MainWindow extends JFrame {
 		
 	}
 	
-	private void updateSignalConsensusChart(List<NucleusCollection> list){
+	private void updateSignalConsensusChart(List<AnalysisDataset> list){
 		try {
 
 			if(list.size()==1){
 
-				NucleusCollection collection = list.get(0);
+				NucleusCollection collection = list.get(0).getCollection();
 
 				if(collection.hasConsensusNucleus()){ // if a refold is available
 					XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
@@ -1383,7 +1475,7 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
-	private void updateSignalHistogramPanel(List<NucleusCollection> list){
+	private void updateSignalHistogramPanel(List<AnalysisDataset> list){
 		try {
 			updateSignalAngleHistogram(list);
 			updateSignalDistanceHistogram(list);
@@ -1392,7 +1484,7 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
-	private void updateSignalAngleHistogram(List<NucleusCollection> list){
+	private void updateSignalAngleHistogram(List<AnalysisDataset> list){
 		try {
 			HistogramDataset ds = DatasetCreator.createSignalAngleHistogramDataset(list);
 			JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
@@ -1420,7 +1512,7 @@ public class MainWindow extends JFrame {
 		
 	}
 
-	private void updateSignalDistanceHistogram(List<NucleusCollection> list){
+	private void updateSignalDistanceHistogram(List<AnalysisDataset> list){
 		try {
 			HistogramDataset ds = DatasetCreator.createSignalDistanceHistogramDataset(list);
 			JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
@@ -1454,7 +1546,7 @@ public class MainWindow extends JFrame {
 	class ListSelectionHandler implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent e) {
 			
-			List<NucleusCollection> list = new ArrayList<NucleusCollection>(0);
+			List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
 			
 			ListSelectionModel lsm = (ListSelectionModel)e.getSource();
 			
@@ -1466,22 +1558,28 @@ public class MainWindow extends JFrame {
 				int maxIndex = lsm.getMaxSelectionIndex();
 				for (int i = minIndex; i <= maxIndex; i++) {
 					if (lsm.isSelectedIndex(i)) {
-//						String key = populationList.getModel().getElementAt(i);
+
 						String key = (String) populationTable.getModel().getValueAt(i, 0); // row i, column 0
 						if(!key.equals("No populations")){
 							
-							// get uuid from populationNames, then population via uuid from analysisPopulations
-							list.add(analysisPopulations.get(populationNames.get(key)));
+							// get uuid from populationNames, then population via uuid from analysisDatasets
+//							list.add(analysisPospulations.get(populationNames.get(key)));
+							datasets.add(analysisDatasets.get(populationNames.get(key)));
 							selectedIndexes.add(i);
 							
 						}
 
 					}
 				}
-				String count = list.size() == 1 ? "population" : "populations"; // it matters to ME
-				lblStatusLine.setText(list.size()+" "+count+"  selected");
+				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
+				lblStatusLine.setText(datasets.size()+" "+count+"  selected");
 				populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
-				updatePanels(list);
+
+				if(datasets.isEmpty()){
+					log("Error: list is empty");
+				} else {
+					updatePanels(datasets);
+				}
 			}
 
 		}

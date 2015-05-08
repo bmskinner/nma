@@ -39,8 +39,8 @@ public interface NucleusCollection
 	
 	public Nucleus getConsensusNucleus();
 	
-	public AnalysisOptions getAnalysisOptions();
-	public void setAnalysisOptions(AnalysisOptions analysisOptions);
+//	public AnalysisOptions getAnalysisOptions();
+//	public void setAnalysisOptions(AnalysisOptions analysisOptions);
 	/*
 		-----------------------
 		Getters for aggregate stats
@@ -103,9 +103,9 @@ public interface NucleusCollection
 	public boolean hasSignals();
 	public boolean hasConsensusNucleus();
 	
-	public void addShellResult(int channel, ShellResult result);
-	public ShellResult getShellResult(int channel);
-	public boolean hasShellResult();
+//	public void addShellResult(int channel, ShellResult result);
+//	public ShellResult getShellResult(int channel);
+//	public boolean hasShellResult();
 
 	// allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
 	public double getMedianNuclearArea();

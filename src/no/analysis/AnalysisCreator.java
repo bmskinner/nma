@@ -285,9 +285,10 @@ public class AnalysisCreator {
 	  logger.log("Beginning population analysis");
 
 	  for(NucleusCollection r : this.nuclearPopulations){
+		  
+		  AnalysisDataset dataset = new AnalysisDataset(r);
+		  dataset.setAnalysisOptions(analysisOptions);
 		  		  
-		  r.setAnalysisOptions(analysisOptions);
-
 		  File folder = r.getFolder();
 		  //		  mw.log(spacerString);
 		  mw.log("Analysing: "+folder.getName());
@@ -361,7 +362,7 @@ public class AnalysisCreator {
 			  logger.log("Not a round nucleus; skipping");
 		  } else {
 			  mw.logc("Running shell analysis...");
-			  ok = ShellAnalysis.run(r, 5);
+			  ok = ShellAnalysis.run(dataset, 5);
 			  if(ok){
 				  mw.log("OK");
 			  } else {
@@ -418,13 +419,13 @@ public class AnalysisCreator {
 		  }
 
 		  finalPopulations.add(r);
-		  AnalysisDataset dataset = new AnalysisDataset(r);
-		  
+		  		  
 		  ArrayList<NucleusCollection> signalPopulations = dividePopulationBySignals(r);
 		  
 		  for(NucleusCollection p : signalPopulations){
 			  
-			  p.setAnalysisOptions(analysisOptions);
+			  AnalysisDataset subDataset = new AnalysisDataset(p, dataset.getSavePath());
+			  subDataset.setAnalysisOptions(analysisOptions);
 
 			  nucleusCounts.put(p.getType(), p.getNucleusCount());
 
@@ -456,7 +457,7 @@ public class AnalysisCreator {
 				  logger.log("Not a round nucleus; skipping");
 			  } else {
 				  mw.logc("Running shell analysis...");
-				  ok = ShellAnalysis.run(p, 5);
+				  ok = ShellAnalysis.run(subDataset, 5);
 				  if(ok){
 					  mw.log("OK");
 				  } else {
@@ -491,14 +492,6 @@ public class AnalysisCreator {
 			  } else {
 				  mw.log("Error");
 			  }
-			  
-//
-//			  SignalAnalysis.run(p);
-//			  ShellAnalysis.run(p, 5);
-//			  StatsExporter.run(p);
-//
-//			  NucleusAnnotator.run(p);
-//			  CompositeExporter.run(p);
 
 			  if(analysisOptions.refoldNucleus()){
 				  CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
@@ -515,7 +508,7 @@ public class AnalysisCreator {
 			  }
 //			  PopulationExporter.savePopulation(p);
 			  finalPopulations.add(p);
-			  dataset.addChildCollection(p);
+			  dataset.addChildDataset(subDataset);
 		  }
 		  finalDatasets.add(dataset);
 		  collectionNucleusCounts.put(folder, nucleusCounts);

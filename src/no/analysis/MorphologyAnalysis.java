@@ -1,7 +1,5 @@
 package no.analysis;
 
-import ij.IJ;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +33,7 @@ public class MorphologyAnalysis {
 			String pointType = collection.getReferencePoint();
 
 			// setup the plots and profile agregates
-			initialiseProfileCollection(collection);
+//			initialiseProfileCollection(collection);
 
 			// profile the collection
 			runProfiler(collection, pointType);
@@ -46,24 +44,28 @@ public class MorphologyAnalysis {
 			// export the core data
 
 			// run the exports
-			exportProfiles(collection);
+//			exportProfiles(collection);
 			exportSegments(collection, pointType);
-			exportClusteringScript(collection);
+//			exportClusteringScript(collection);
 
 			// begin migrating these export functions up
-			exportVariabilityRegions(collection, pointType);
-			drawProfileCollection(   collection, pointType);
+//			exportVariabilityRegions(collection, pointType);
+//			drawProfileCollection(   collection, pointType);
 
 			logger.log("Core morphology analysis complete");
 			return true;
 		} catch(Exception e){
 			
 			logger.log("Error in morphology analysis: "+e.getMessage(), Logger.ERROR);
-			logger.log(e.getStackTrace().toString(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			
 			logger.log("Collection keys:", Logger.ERROR);
-			collection.getProfileCollection().printKeys(collection.getDebugFile());
+			logger.log(collection.getProfileCollection().printKeys(), Logger.ERROR);
+			
 			logger.log("FrankenCollection keys:", Logger.ERROR);
-			collection.getFrankenCollection().printKeys(collection.getDebugFile());
+			logger.log(collection.getFrankenCollection().printKeys(), Logger.ERROR);
 			return false;
 		}
 
@@ -71,9 +73,11 @@ public class MorphologyAnalysis {
 
 	private static void runProfiler(NucleusCollection collection, String pointType){
 				
+		createProfileAggregateFromPoint(collection, pointType);
+		
 		// use the median profile of this aggregate to find the tail point
 		collection.findTailIndexInMedianCurve();
-
+		
 		// carry out iterative offsetting to refine the tail point estimate
 		double score = compareProfilesToMedian(collection, pointType);
 		double prevScore = score+1;
@@ -94,18 +98,12 @@ public class MorphologyAnalysis {
 
 	}
 	
-	private static void initialiseProfileCollection(NucleusCollection collection){
-		ProfileCollection pc = collection.getProfileCollection();
-		
-		// aggregates
-		createProfileAggregateFromPoint(collection, collection.getReferencePoint());
-		// plots
-//		pc.preparePlot(collection.getReferencePoint()  , INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-//		pc.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+//	private static void initialiseProfileCollection(NucleusCollection collection){
+//		ProfileCollection pc = collection.getProfileCollection();
 //		
-		// features
-		
-	}
+//		// aggregates
+//		createProfileAggregateFromPoint(collection, collection.getReferencePoint());
+//	}
 	
 	/**
 	 * When a population needs to be reanalysed do not offset nuclei or recalculate best fits;
@@ -130,6 +128,12 @@ public class MorphologyAnalysis {
 			
 			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
 			pc.addSegments(sourceCollection.getOrientationPoint(), sc.getSegments(orientationPoint));
+			
+			
+//			// copied from segmentation
+//			reviseSegments(collection, orientationPoint);	
+//			createProfileAggregates(collection);
+//			applySegmentsToOtherPointTypes(collection, orientationPoint);
 
 		} catch (Exception e) {
 			logger.log("Error reapplying profiles: "+e.getMessage(), Logger.ERROR);
@@ -193,22 +197,24 @@ public class MorphologyAnalysis {
 			}
 		} catch(Exception e){
 			logger.log("Error creating profile aggregates: "+e.getMessage(), Logger.ERROR);
-			collection.getProfileCollection().printKeys(collection.getDebugFile());
+			logger.log(collection.getProfileCollection().printKeys());
 		}
 	}
 	
-	private static void exportProfiles(NucleusCollection collection){
-
-		ProfileCollection pc = collection.getProfileCollection();
-		// get the profile plots created
-//		pc.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-		// export the profiles
-//		collection.drawProfilePlots();
+	
+//	private static void exportProfiles(NucleusCollection collection){
 //
-//		pc.addMedianLineToPlots(collection.getOrientationPoint());
-//
-//		pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
-	}
+//		ProfileCollection pc = collection.getProfileCollection();
+//		// get the profile plots created
+////		pc.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
+//		// export the profiles
+////		collection.drawProfilePlots();
+////
+////		pc.addMedianLineToPlots(collection.getOrientationPoint());
+////
+////		pc.exportProfilePlots(collection.getOutputFolder().getAbsolutePath(), collection.getType());
+//	}
+	
 
 	private static double compareProfilesToMedian(NucleusCollection collection, String pointType){
 		double[] scores = collection.getDifferencesToMedianFromPoint(pointType);
@@ -338,9 +344,16 @@ public class MorphologyAnalysis {
 		frankenCollection.addNucleusProfiles(pointType, frankenProfiles);
 		// update the profile aggregate
 		frankenCollection.createProfileAggregateFromPoint(    pointType, (int) collection.getMedianArrayLength()    );
-//		frankenCollection.preparePlot(collection.getReferencePoint()  , INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-//		frankenCollection.preparePlot(collection.getOrientationPoint(), INuclearCollection.CHART_WINDOW_WIDTH, INuclearCollection.CHART_WINDOW_HEIGHT, collection.getMaxProfileLength());
-//		
+		
+		// Added in for completeness
+		// apply the frankenprofile segments to other point types
+//		Profile referenceProfile = frankenCollection.getProfile(pointType);
+//		Profile orientProfile = frankenCollection.getProfile(collection.getOrientationPoint());
+//		int offset = orientProfile.getSlidingWindowOffset(referenceProfile);
+//		frankenCollection.addSegments(collection.getOrientationPoint(), pointType, offset);
+
+		
+		
 		collection.setFrankenCollection(frankenCollection);
 		logger.log("Segment assignments refined");
 	}
@@ -356,67 +369,60 @@ public class MorphologyAnalysis {
 		pc.addSegments(collection.getOrientationPoint(), pointType, offset);
 	}
 
-	private static void drawProfileCollection(NucleusCollection collection, String pointType){
-
-		ProfileCollection pc = collection.getFrankenCollection();
-
-		// get the nucleus profiles
-		List<Profile> profiles = pc.getNucleusProfiles(pointType);
-
-//		pc.drawProfilePlots(pointType, profiles);
-//		pc.addMedianLineToPlots(pointType);
+//	private static void drawProfileCollection(NucleusCollection collection, String pointType){
 //
-//		pc.exportProfilePlots(collection.getFolder()+
-//				File.separator+
-//				collection.getOutputFolderName(), collection.getType());
-
-	}
+//		ProfileCollection pc = collection.getFrankenCollection();
+//
+//		// get the nucleus profiles
+//		List<Profile> profiles = pc.getNucleusProfiles(pointType);
+//
+//	}
 	
-	private static void exportVariabilityRegions(NucleusCollection collection, String pointType){
-		
-		ProfileCollection pc = collection.getFrankenCollection();
-		
-		// get the nucleus profiles
-		List<Profile> profiles = pc.getNucleusProfiles(pointType);
-		
-		// get the regions with the highest variability within the population
-		List<Integer> variableIndexes = pc.findMostVariableRegions(pointType);
-
-		// these points are indexes in the frankenstein profile. Find the points in each nucleus profile that they
-		// compare to 
-		// interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
-		// export clustering info
-		TableExporter tableExport = new TableExporter(collection.getOutputFolder());
-		tableExport.addColumnHeading("ID");
-		tableExport.addColumnHeading("AREA");
-		tableExport.addColumnHeading("PERIMETER");
-		for(int index : variableIndexes){
-			// get the points in a window centred on the index
-			for(int i=0; i<21;i++){ // index plus 10 positions to either side
-				tableExport.addColumnHeading("IQR_INDEX_"+index+"_"+i);
-			}
-		}
-
-		for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-			Nucleus n = collection.getNucleus(i);
-			tableExport.addRow("ID",		n.getPath()+"-"+n.getNucleusNumber());
-			tableExport.addRow("AREA",		n.getArea());
-			tableExport.addRow("PERIMETER",n.getPerimeter());
-			Profile frankenProfile = profiles.get(i);
-			Profile interpolatedProfile = frankenProfile.interpolate(pc.getProfile(pointType).size());
-			for(int index : variableIndexes){
-				// get the points in a window centred on the index
-				Profile window = interpolatedProfile.getWindow(index, 10);
-				for(int j=0; j<21;j++){ // index plus 10 positions to either side
-					tableExport.addRow("IQR_INDEX_"+index+"_"+j, window.get(j));
-				}
-
-			}
-
-		}
-
-		tableExport.export("log.variability_regions."+collection.getType());
-	}
+//	private static void exportVariabilityRegions(NucleusCollection collection, String pointType){
+//		
+//		ProfileCollection pc = collection.getFrankenCollection();
+//		
+//		// get the nucleus profiles
+//		List<Profile> profiles = pc.getNucleusProfiles(pointType);
+//		
+//		// get the regions with the highest variability within the population
+//		List<Integer> variableIndexes = pc.findMostVariableRegions(pointType);
+//
+//		// these points are indexes in the frankenstein profile. Find the points in each nucleus profile that they
+//		// compare to 
+//		// interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
+//		// export clustering info
+//		TableExporter tableExport = new TableExporter(collection.getOutputFolder());
+//		tableExport.addColumnHeading("ID");
+//		tableExport.addColumnHeading("AREA");
+//		tableExport.addColumnHeading("PERIMETER");
+//		for(int index : variableIndexes){
+//			// get the points in a window centred on the index
+//			for(int i=0; i<21;i++){ // index plus 10 positions to either side
+//				tableExport.addColumnHeading("IQR_INDEX_"+index+"_"+i);
+//			}
+//		}
+//
+//		for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
+//			Nucleus n = collection.getNucleus(i);
+//			tableExport.addRow("ID",		n.getPath()+"-"+n.getNucleusNumber());
+//			tableExport.addRow("AREA",		n.getArea());
+//			tableExport.addRow("PERIMETER",n.getPerimeter());
+//			Profile frankenProfile = profiles.get(i);
+//			Profile interpolatedProfile = frankenProfile.interpolate(pc.getProfile(pointType).size());
+//			for(int index : variableIndexes){
+//				// get the points in a window centred on the index
+//				Profile window = interpolatedProfile.getWindow(index, 10);
+//				for(int j=0; j<21;j++){ // index plus 10 positions to either side
+//					tableExport.addRow("IQR_INDEX_"+index+"_"+j, window.get(j));
+//				}
+//
+//			}
+//
+//		}
+//
+//		tableExport.export("log.variability_regions."+collection.getType());
+//	}
 	
 	private static void exportSegments(NucleusCollection collection, String pointType){
 		
@@ -458,26 +464,27 @@ public class MorphologyAnalysis {
 			logger.log("Error exporting segments: "+e.getMessage(), Logger.ERROR);
 		}
 	}
+	
 
-	private static void exportClusteringScript(NucleusCollection collection){
-
-		StringBuilder outLine = new StringBuilder();
-
-		String path = collection.getFolder().getAbsolutePath()+File.separator+collection.getOutputFolderName()+File.separator;
-		path = path.replace("\\", "\\\\");// escape folder separator for R
-		outLine.append("path = \""+path+"\"\r\n"); 
-
-		outLine.append("nuclei = read.csv(paste(path,\"log.segments.analysable.txt\", sep=\"\"),header=T, sep=\"\\t\")\r\n");
-		outLine.append("d <- dist(as.matrix(nuclei))\r\n");
-		outLine.append("hc <- hclust(d, method=\"ward.D2\")\r\n");
-		outLine.append("ct <- cutree(hc, k=5)\r\n");
-		outLine.append("nuclei <- cbind(ct, nuclei , deparse.level=1)\r\n");
-		outLine.append("tt <- table(nuclei $ct)\r\n");
-		outLine.append("for (i in 1:dim(tt)) {\r\n");
-		outLine.append("\tsub <- subset(nuclei , ct==i)\r\n");
-		outLine.append("\twrite.table(subset(sub, select=c(PATH, POSITION)), file=paste(path,\"mapping_cluster\",i,\".analysable.txt\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\r\n");
-		outLine.append("}\r\n");
-
-		IJ.append(outLine.toString(), path+"clusteringScript.r");
-	}
+//	private static void exportClusteringScript(NucleusCollection collection){
+//
+//		StringBuilder outLine = new StringBuilder();
+//
+//		String path = collection.getFolder().getAbsolutePath()+File.separator+collection.getOutputFolderName()+File.separator;
+//		path = path.replace("\\", "\\\\");// escape folder separator for R
+//		outLine.append("path = \""+path+"\"\r\n"); 
+//
+//		outLine.append("nuclei = read.csv(paste(path,\"log.segments.analysable.txt\", sep=\"\"),header=T, sep=\"\\t\")\r\n");
+//		outLine.append("d <- dist(as.matrix(nuclei))\r\n");
+//		outLine.append("hc <- hclust(d, method=\"ward.D2\")\r\n");
+//		outLine.append("ct <- cutree(hc, k=5)\r\n");
+//		outLine.append("nuclei <- cbind(ct, nuclei , deparse.level=1)\r\n");
+//		outLine.append("tt <- table(nuclei $ct)\r\n");
+//		outLine.append("for (i in 1:dim(tt)) {\r\n");
+//		outLine.append("\tsub <- subset(nuclei , ct==i)\r\n");
+//		outLine.append("\twrite.table(subset(sub, select=c(PATH, POSITION)), file=paste(path,\"mapping_cluster\",i,\".analysable.txt\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\r\n");
+//		outLine.append("}\r\n");
+//
+//		IJ.append(outLine.toString(), path+"clusteringScript.r");
+//	}
 }
