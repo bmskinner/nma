@@ -1,5 +1,7 @@
 package no.analysis;
 
+import ij.IJ;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -13,7 +15,6 @@ import no.components.Profile;
 import no.components.ProfileCollection;
 import no.nuclei.Nucleus;
 import no.utility.Logger;
-import ij.IJ;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
 import weka.clusterers.HierarchicalClusterer;
@@ -32,20 +33,30 @@ public class NucleusClusterer {
 	private Map<Instance, UUID> nucleusMap = new HashMap<Instance, UUID>();
 	private Map<Integer, NucleusCollection> clusterMap = new HashMap<Integer, NucleusCollection>();
 	
+	private String newickTree;
+	
 	private int type = NucleusClusterer.EM;
 	
 	private Logger logger;
 		
-	public NucleusClusterer(){
-		
+	public NucleusClusterer(int type){
+		this.type = type;
 	}
 	
 	public void setType(int type){
-		this.type = type;
+		
 	}
 	
 	public NucleusCollection getCluster(int cluster){
 		return this.clusterMap.get(cluster);
+	}
+	
+	public String getNewickTree(){
+		if(this.type==NucleusClusterer.HIERARCHICAL){
+			return this.newickTree;
+		} else{
+			return null;
+		}
 	}
 	
 	public int getNumberOfClusters(){
@@ -77,8 +88,7 @@ public class NucleusClusterer {
 					clusterer.setOptions(options);     // set the options
 					clusterer.buildClusterer(instances);    // build the clusterer
 					assignClusters(clusterer, collection);		
-					String graph = clusterer.graph();
-					IJ.log(graph);
+					this.newickTree = clusterer.graph();
 				}
 				
 				if(type==NucleusClusterer.EM){

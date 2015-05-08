@@ -4,8 +4,10 @@ import ij.IJ;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -30,6 +32,9 @@ public class AnalysisDataset implements Serializable {
 	
 	private AnalysisOptions analysisOptions;
 	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
+	
+	private List<UUID> clusterResults = new ArrayList<UUID>(0);
+	private String newickTree;
 	
 	
 	public AnalysisDataset(NucleusCollection collection){
@@ -157,6 +162,36 @@ public class AnalysisDataset implements Serializable {
 
 	  public void setAnalysisOptions(AnalysisOptions analysisOptions) {
 		  this.analysisOptions = analysisOptions;
+	  }
+	  
+	  public void addCluster(AnalysisDataset dataset){
+		  this.addChildDataset(dataset);
+		  this.clusterResults.add(dataset.getUUID());
+	  }
+	  
+	  public void addCluster(NucleusCollection collection){
+		  this.addChildCollection(collection);
+		  this.clusterResults.add(collection.getID());
+	  }
+	  
+	  public List<UUID> getClusterIDs(){
+		  return this.clusterResults;
+	  }
+	  
+	  public boolean hasClusters(){
+		  if(this.clusterResults.size()>0){
+			  return true;
+		  } else {
+			  return false;
+		  }
+	  }
+	  
+	  public void setClusterTree(String s){
+		  this.newickTree = s;
+	  }
+	  
+	  public String getClusterTree(){
+		  return this.newickTree;
 	  }
 
 }

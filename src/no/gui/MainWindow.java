@@ -13,6 +13,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 
@@ -42,6 +43,7 @@ import java.util.UUID;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
+import javax.swing.JTree;
 import javax.swing.SwingConstants;
 
 import java.awt.Font;
@@ -177,14 +179,14 @@ public class MainWindow extends JFrame {
 			// load saved collection button
 			//---------------
 			
-			JButton btnLoadSavedNuclei = new JButton("Load saved nuclei");
-			btnLoadSavedNuclei.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					loadNuclei();
-				}
-			});
-			panelHeader.add(btnLoadSavedNuclei);
+//			JButton btnLoadSavedNuclei = new JButton("Load saved nuclei");
+//			btnLoadSavedNuclei.addMouseListener(new MouseAdapter() {
+//				@Override
+//				public void mouseClicked(MouseEvent arg0) {
+//					loadNuclei();
+//				}
+//			});
+//			panelHeader.add(btnLoadSavedNuclei);
 			
 			//---------------
 			// load saved dataset button
@@ -198,6 +200,24 @@ public class MainWindow extends JFrame {
 				}
 			});
 			panelHeader.add(btnLoadSavedDataset);
+			
+			//---------------
+			// save button
+			//---------------
+			
+			JButton btnSavePopulation = new JButton("Save");
+			btnSavePopulation.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
+						if(d.hasChildren()){
+							d.save();
+							log("Saved dataset "+d.getCollection().getName());
+						}
+					}
+				}
+			});
+			panelHeader.add(btnSavePopulation);
 			
 			//---------------
 			// post analysis button
@@ -560,17 +580,7 @@ public class MainWindow extends JFrame {
 								
 				
 				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisDatasets.size()+" populations ready to view");
-				updatePopulationList();	
-				
-//				ListSelectionModel lsm = MainWindow.this.populationTable.getSelectionModel();
-//				int index = 0;
-//				for(NucleusCollection c : MainWindow.this.analysisPopulations.values()){
-//					index++;
-//					if(c.getID().equals(result.get(0).getID())){
-//						lsm.setSelectionInterval(index, index); // set the selection to the first result
-//					}
-//				}
-				
+				updatePopulationList();			
 				
 			}
 		};
@@ -584,54 +594,50 @@ public class MainWindow extends JFrame {
 				public void run() {
 					try{
 						logc("Running cluster analysis...");
-						NucleusClusterer clusterer = new NucleusClusterer();
-						clusterer.setType(NucleusClusterer.HIERARCHICAL);
-						boolean ok = clusterer.cluster(MainWindow.this.analysisDatasets.get(id).getCollection());
+						
+						NucleusClusterer clusterer = new NucleusClusterer(NucleusClusterer.HIERARCHICAL);
+						
+						AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
+						boolean ok = clusterer.cluster(parent.getCollection());
 						if(ok){
 							log("OK");
 							log("Found "+clusterer.getNumberOfClusters()+" clusters");
+
+							parent.setClusterTree(clusterer.getNewickTree());
+
+							for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
+								NucleusCollection c = clusterer.getCluster(cluster);
+								log("Cluster "+cluster+":");
+
+								logc("Reapplying morphology...");
+								ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisDatasets.get(id).getCollection());
+								if(ok){
+									log("OK");
+								} else {
+									log("Error");
+								}
+
+								//							logc("Refolding profile...");
+								//							ok = CurveRefolder.run(c, c.getAnalysisOptions().getNucleusClass(), c.getAnalysisOptions().getRefoldMode());
+								//							if(ok){
+								//								log("OK");
+								//							} else {
+								//								log("Error");
+								//							}
+
+								// attach the clusters to their parent collection
+								parent.addCluster(c);
+								//							parent.addChildCollection(c);
+
+								MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
+								MainWindow.this.populationNames.put(c.getName(), c.getID());
+
+							}
+							updatePopulationList();	
+//							parent.save();
 						} else {
 							log("Error");
 						}
-
-						AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
-
-//						if(parent==null){
-//							log("Dataset "+id.toString()+" not present");
-//							parent = new AnalysisDataset(MainWindow.this.analysisPopulations.get(id));
-//							MainWindow.this.analysisDatasets.put(parent.getUUID(), parent);
-//						}
-
-						for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
-							NucleusCollection c = clusterer.getCluster(cluster);
-							log("Cluster "+cluster+":");
-
-							logc("Reapplying morphology...");
-							ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisDatasets.get(id).getCollection());
-							if(ok){
-								log("OK");
-							} else {
-								log("Error");
-							}
-
-//							logc("Refolding profile...");
-//							ok = CurveRefolder.run(c, c.getAnalysisOptions().getNucleusClass(), c.getAnalysisOptions().getRefoldMode());
-//							if(ok){
-//								log("OK");
-//							} else {
-//								log("Error");
-//							}
-
-							// attach the clusters to their parent collection
-							parent.addChildCollection(c);
-
-							MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
-							MainWindow.this.populationNames.put(c.getName(), c.getID());
-
-						}
-						updatePopulationList();	
-						parent.save();
-
 
 					} catch (Exception e){
 						log("Error in cluster analysis: "+e.getMessage());
@@ -700,36 +706,36 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
-	public void loadNuclei(){
-		Thread thr = new Thread() {
-			public void run() {
-				try {
-					OpenDialog fileDialog = new OpenDialog("Select a save file...");
-					String fileName = fileDialog.getPath();
-					if(fileName==null) return;
-					NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), MainWindow.this);
-					
-					MainWindow.this.analysisDatasets.put(collection.getID(), new AnalysisDataset(collection));
-					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
-					log("Opened collection: "+collection.getType());
-					
-					// make a new dataset for the collection
-					AnalysisDataset dataset = new AnalysisDataset(collection);
-					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
-					
-
-					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-					list.add(dataset);
-
-					updatePanels(list);
-					updatePopulationList();
-				} catch (Exception e) {
-					log("Error opening file: "+e.getMessage());
-				}
-			}
-		};
-		thr.start();
-	}
+//	public void loadNuclei(){
+//		Thread thr = new Thread() {
+//			public void run() {
+//				try {
+//					OpenDialog fileDialog = new OpenDialog("Select a save file...");
+//					String fileName = fileDialog.getPath();
+//					if(fileName==null) return;
+//					NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), MainWindow.this);
+//					
+//					MainWindow.this.analysisDatasets.put(collection.getID(), new AnalysisDataset(collection));
+//					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
+//					log("Opened collection: "+collection.getType());
+//					
+//					// make a new dataset for the collection
+//					AnalysisDataset dataset = new AnalysisDataset(collection);
+//					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
+//					
+//
+//					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+//					list.add(dataset);
+//
+//					updatePanels(list);
+//					updatePopulationList();
+//				} catch (Exception e) {
+//					log("Error opening file: "+e.getMessage());
+//				}
+//			}
+//		};
+//		thr.start();
+//	}
 	
 	public void loadDataset(){
 		Thread thr = new Thread() {
@@ -1379,20 +1385,44 @@ public class MainWindow extends JFrame {
 	private void updateClusteringPanel(List<AnalysisDataset> list){
 		
 		if(list.size()==1){
-			NucleusCollection collection = list.get(0).getCollection();
+			AnalysisDataset dataset = list.get(0);
+			NucleusCollection collection = dataset.getCollection();
 			final UUID id = collection.getID();
 			
 			clusteringPanel = new JPanel();
 			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
+			
+			if(!dataset.hasClusters()){ // only allow clustering once per population
 
-			JButton btnNewClusterAnalysis = new JButton("Cluster population");
-			btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					clusterAnalysis(MainWindow.this.analysisDatasets.get(id).getCollection());
+				JButton btnNewClusterAnalysis = new JButton("Cluster population");
+				btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+						clusterAnalysis(MainWindow.this.analysisDatasets.get(id).getCollection());
+					}
+				});
+				clusteringPanel.add(btnNewClusterAnalysis);
+				
+			} else { // clusters present, show the tree if available
+				JLabel label = new JLabel(dataset.getClusterTree());
+				clusteringPanel.add(label);
+				
+				List<UUID> childIDList = dataset.getClusterIDs();
+
+				DefaultMutableTreeNode top = new DefaultMutableTreeNode("root node");
+				DefaultMutableTreeNode category = new DefaultMutableTreeNode(dataset.getCollection().getName());
+				for(UUID childID : childIDList){
+					AnalysisDataset childDataset = MainWindow.this.analysisDatasets.get(childID);
+					DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDataset.getCollection().getName());
+					category.add(childNode);
 				}
-			});
-			clusteringPanel.add(btnNewClusterAnalysis);
+				top.add(category);
+				JTree tree = new JTree(top);
+				tree.setRootVisible( false );
+				JScrollPane treeView = new JScrollPane(tree);
+				clusteringPanel.add(treeView);
+			}
+			
 			tabbedPane.setComponentAt(8, clusteringPanel);
 			
 		} else {
