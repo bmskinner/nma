@@ -123,7 +123,6 @@ public class MainWindow extends JFrame {
 	
 	private JPanel clusteringPanel;// container for clustering options and display
 
-//	private HashMap<UUID, NucleusCollection> analysisPopulations = new HashMap<UUID, NucleusCollection>();
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
@@ -1407,19 +1406,15 @@ public class MainWindow extends JFrame {
 				JLabel label = new JLabel(dataset.getClusterTree());
 				clusteringPanel.add(label);
 				
-//				List<UUID> childIDList = dataset.getClusterIDs();
-
 				DefaultMutableTreeNode top = new DefaultMutableTreeNode("root node");
 				DefaultMutableTreeNode category = addChildNodes(id);
-//				DefaultMutableTreeNode category = new DefaultMutableTreeNode(dataset.getCollection().getName());
-//				for(UUID childID : childIDList){
-//					AnalysisDataset childDataset = MainWindow.this.analysisDatasets.get(childID);
-//					DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDataset.getCollection().getName());
-//					category.add(childNode);
-//				}
+
 				top.add(category);
 				JTree tree = new JTree(top);
 				tree.setRootVisible( false );
+				for (int i = 0; i < tree.getRowCount(); i++) { // ensure we start with all open
+					tree.expandRow(i);
+				}
 				JScrollPane treeView = new JScrollPane(tree);
 				clusteringPanel.add(treeView);
 			}
