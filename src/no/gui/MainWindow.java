@@ -10,12 +10,24 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
+
+import org.jdesktop.swingx.JXTreeTable;
+import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
+import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
+
+
+
+import org.jdesktop.swingx.treetable.TreeTableNode;
 
 import no.analysis.AnalysisCreator;
 import no.analysis.AnalysisDataset;
@@ -38,6 +50,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.JOptionPane;
@@ -95,6 +108,7 @@ public class MainWindow extends JFrame {
 	
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 	private JTable populationTable;
+	private JXTreeTable treeTable;
 	
 	private JTabbedPane tabbedPane;
 		
@@ -250,31 +264,74 @@ public class MainWindow extends JFrame {
 			panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
 			
 			// table approach
-			DefaultTableModel populationTableModel = new DefaultTableModel();
-			populationTableModel.addColumn("Population");
-			populationTableModel.addColumn("Nuclei");
-			populationTableModel.addColumn("");
-			populationTable = new JTable() {
-				@Override
-				public boolean isCellEditable(int rowIndex, int vColIndex) {
-					return false;
-				}
-
-			};
-			populationTable.setModel(populationTableModel);
-			populationTable.setEnabled(true);
-			populationTable.setCellSelectionEnabled(false);
-			populationTable.setColumnSelectionAllowed(false);
-			populationTable.setRowSelectionAllowed(true);
-			populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
-			populationTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-			populationTable.getColumnModel().getColumn(2).setPreferredWidth(5);
+//			DefaultTableModel populationTableModel = new DefaultTableModel();
+//			populationTableModel.addColumn("Population");
+//			populationTableModel.addColumn("Nuclei");
+//			populationTableModel.addColumn("");
+//			populationTable = new JTable() {
+//				@Override
+//				public boolean isCellEditable(int rowIndex, int vColIndex) {
+//					return false;
+//				}
+//
+//			};
+//			populationTable.setModel(populationTableModel);
+//			populationTable.setEnabled(true);
+//			populationTable.setCellSelectionEnabled(false);
+//			populationTable.setColumnSelectionAllowed(false);
+//			populationTable.setRowSelectionAllowed(true);
+//			populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
+//			populationTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+//			populationTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 //			setVisibleRowCount(populationTable, 6);
+			
+			
 						
-			populationTable.addMouseListener(new MouseAdapter() {
+//			populationTable.addMouseListener(new MouseAdapter() {
+//				@Override
+//				public void mouseClicked(MouseEvent e) {
+//					JTable table = (JTable) e.getSource();
+//			        if (e.getClickCount() == 2) {
+//			          int index = table.rowAtPoint((e.getPoint()));
+//			          if (index >= 0) {
+//			        	  Object o = table.getModel().getValueAt(index, 0);
+//			        	  UUID id = MainWindow.this.populationNames.get(o.toString());
+//			        	  renameCollection(MainWindow.this.analysisDatasets.get(id));
+//			          }
+//			        }
+//				}
+//			});
+//			
+//			ListSelectionModel tableSelectionModel = populationTable.getSelectionModel();
+//			tableSelectionModel.addListSelectionListener(new ListSelectionHandler());
+			
+//			JScrollPane populationScrollPane = new JScrollPane(populationTable);
+//			panelPopulations.add(populationScrollPane);
+			
+			// tree table approach
+			List<String> columns = new ArrayList<String>();
+			columns.add("Population");
+			columns.add("Nuclei");
+			columns.add("");
+
+			DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
+			DefaultMutableTreeTableNode  root = new DefaultMutableTreeTableNode ("root node");
+			treeTableModel.setRoot(root);
+			treeTableModel.setColumnIdentifiers(columns);
+			
+			treeTable = new JXTreeTable(treeTableModel);
+			treeTable.setEnabled(true);
+			treeTable.setCellSelectionEnabled(false);
+			treeTable.setColumnSelectionAllowed(false);
+			treeTable.setRowSelectionAllowed(true);
+			treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
+			treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+			treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
+			
+			treeTable.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
-					JTable table = (JTable) e.getSource();
+					JXTreeTable table = (JXTreeTable) e.getSource();
 			        if (e.getClickCount() == 2) {
 			          int index = table.rowAtPoint((e.getPoint()));
 			          if (index >= 0) {
@@ -286,10 +343,10 @@ public class MainWindow extends JFrame {
 				}
 			});
 			
-			ListSelectionModel tableSelectionModel = populationTable.getSelectionModel();
-			tableSelectionModel.addListSelectionListener(new ListSelectionHandler());
+			TreeSelectionModel tableSelectionModel = treeTable.getTreeSelectionModel();
+			tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
 			
-			JScrollPane populationScrollPane = new JScrollPane(populationTable);
+			JScrollPane populationScrollPane = new JScrollPane(treeTable);
 			panelPopulations.add(populationScrollPane);
 			
 //			panelGeneralData.add(panelAggregates);
@@ -1305,20 +1362,69 @@ public class MainWindow extends JFrame {
 					
 		// new method using table
 		if(this.analysisDatasets.size()>0){
-			DefaultTableModel populationTableModel = new DefaultTableModel();
-			populationTableModel.addColumn("Population");
-			populationTableModel.addColumn("Nuclei");
-			populationTableModel.addColumn("");
-			for(AnalysisDataset d : this.analysisDatasets.values()){
-				NucleusCollection c = d.getCollection();
-				Object[] data  = {c.getName(),c.getNucleusCount(), null};
-				populationTableModel.addRow( data );
-			}
+//			DefaultTableModel populationTableModel = new DefaultTableModel();
+//			populationTableModel.addColumn("Population");
+//			populationTableModel.addColumn("Nuclei");
+//			populationTableModel.addColumn("");
+//			for(AnalysisDataset d : this.analysisDatasets.values()){
+//				NucleusCollection c = d.getCollection();
+//				Object[] data  = {c.getName(),c.getNucleusCount(), null};
+//				populationTableModel.addRow( data );
+//			}
+//
+//			populationTable.setModel(populationTableModel);
 
-			populationTable.setModel(populationTableModel);
+
+			// new method using treetable
+			List<String> columns = new ArrayList<String>();
+			columns.add("Population");
+			columns.add("Nuclei");
+			columns.add("");
+
+			DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
+			PopulationTreeTableNode  root = new PopulationTreeTableNode ("root node");
+			treeTableModel.setRoot(root);
+			treeTableModel.setColumnIdentifiers(columns);
+			for(AnalysisDataset d : this.analysisDatasets.values()){
+				if(d.isRoot()){
+					root.add( addTreeTableChildNodes(d.getUUID()));
+				}
+			}
+			treeTable.setTreeTableModel(treeTableModel);
 		}
 
 	}
+	
+	private PopulationTreeTableNode addTreeTableChildNodes(UUID id){
+		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
+		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset.getCollection().getName());
+		category.setValueAt(dataset.getCollection().getName(), 0);
+		category.setValueAt(dataset.getCollection().getNucleusCount(), 1);
+				
+		Set<UUID> childIDList = dataset.getChildUUIDs();
+		for(UUID childID : childIDList){
+			PopulationTreeTableNode childNode = addTreeTableChildNodes(childID);
+			category.add(childNode);
+		}
+		return category;
+	}
+	
+//	private void addTreeTableChildValues(DefaultTreeTableModel treeTableModel){
+//
+//		TreeTableNode root = treeTableModel.getRoot();
+//		for(int index = 0 ; index <treeTableModel.getChildCount(root); index++){
+//			TreeTableNode child = (TreeTableNode) treeTableModel.getChild(root, index);
+//			child.
+//			treeTableModel.setValueAt(dataset.getCollection().getNucleusCount(), category, 1);
+//		}
+//		
+//		
+//		Set<UUID> childIDList = dataset.getAllChildUUIDs();
+//		for(UUID childID : childIDList){
+////			DefaultMutableTreeTableNode childNode = addTreeTableChildNodes(childID, treeTableModel);
+//			category.add(childNode);
+//		}
+//	}
 		
 	public void updateVariabilityChart(List<AnalysisDataset> list){
 		try {
@@ -1610,7 +1716,8 @@ public class MainWindow extends JFrame {
 				}
 				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
 				lblStatusLine.setText(datasets.size()+" "+count+"  selected");
-				populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
+//				populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
+				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
 
 				if(datasets.isEmpty()){
 					log("Error: list is empty");
@@ -1619,6 +1726,46 @@ public class MainWindow extends JFrame {
 				}
 			}
 
+		}
+	}
+	
+	class TreeSelectionHandler implements TreeSelectionListener {
+		public void valueChanged(TreeSelectionEvent e) {
+			
+			List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
+			
+			TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
+			
+			List<Integer> selectedIndexes = new ArrayList<Integer>(0);
+
+			if (!lsm.isSelectionEmpty()) {
+				// Find out which indexes are selected.
+				int minIndex = lsm.getMinSelectionRow();
+				int maxIndex = lsm.getMaxSelectionRow();
+				for (int i = minIndex; i <= maxIndex; i++) {
+					if (lsm.isRowSelected(i)) {
+
+						String key = (String) treeTable.getModel().getValueAt(i, 0); // row i, column 0
+						if(!key.equals("No populations")){
+							
+							// get uuid from populationNames, then population via uuid from analysisDatasets
+							datasets.add(analysisDatasets.get(populationNames.get(key)));
+							selectedIndexes.add(i);
+							
+						}
+
+					}
+				}
+				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
+				lblStatusLine.setText(datasets.size()+" "+count+"  selected");
+				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
+
+				if(datasets.isEmpty()){
+					log("Error: list is empty");
+				} else {
+					updatePanels(datasets);
+				}
+			}
 		}
 	}
 	
@@ -1677,5 +1824,26 @@ public class MainWindow extends JFrame {
 	      //Return the JLabel which renders the cell.
 	      return l;
 	    }
+	}
+	
+	class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
+		
+		Object[] columnData = new Object[3];
+
+		PopulationTreeTableNode(String name) {
+			super(name);
+		}
+		
+		public int getColumnCount() {
+		    return 3;
+		}
+
+		public Object getValueAt(int column){
+			return columnData[column];
+		}
+		
+		public void setValueAt(Object aValue, int column){
+			columnData[column] = aValue;
+		}
 	}
 }

@@ -288,6 +288,7 @@ public class AnalysisCreator {
 		  
 		  AnalysisDataset dataset = new AnalysisDataset(r);
 		  dataset.setAnalysisOptions(analysisOptions);
+		  dataset.setRoot(true);
 		  		  
 		  File folder = r.getFolder();
 		  //		  mw.log(spacerString);

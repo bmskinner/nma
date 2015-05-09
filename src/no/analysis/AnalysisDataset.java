@@ -36,15 +36,19 @@ public class AnalysisDataset implements Serializable {
 	private List<UUID> clusterResults = new ArrayList<UUID>(0);
 	private String newickTree;
 	
+	private boolean isRoot;
+	
 	
 	public AnalysisDataset(NucleusCollection collection){
 		this.thisCollection = collection;
 		this.savePath = new File(collection.getOutputFolder()+File.separator+collection.getType()+".nmd"); // nmd Nuclear Morphology Dataset
+		this.isRoot = false;
 	}
 	
 	public AnalysisDataset(NucleusCollection collection, File saveFile){
 		this.thisCollection = collection;
 		this.savePath = saveFile;
+		this.isRoot = false;
 	}
 	
 	
@@ -192,6 +196,14 @@ public class AnalysisDataset implements Serializable {
 	  
 	  public String getClusterTree(){
 		  return this.newickTree;
+	  }
+	  
+	  public boolean isRoot(){
+		  return  this.isRoot;
+	  }
+	  
+	  public void setRoot(boolean b){
+		  this.isRoot = b;
 	  }
 
 }
