@@ -127,8 +127,7 @@ public class NucleusClusterer {
 						collection.getOutputFolderName(), 
 						collection.getType(), 
 						collection.getDebugFile());
-				clusterCollection.setName(collection.getType()+"_Cluster_"+i);
-//				clusterCollection.setAnalysisOptions(collection.getAnalysisOptions());
+				clusterCollection.setName(collection.getName()+"_Cluster_"+i);
 				clusterMap.put(i, clusterCollection);
 			}
 

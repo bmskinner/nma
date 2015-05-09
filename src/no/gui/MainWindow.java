@@ -1407,15 +1407,16 @@ public class MainWindow extends JFrame {
 				JLabel label = new JLabel(dataset.getClusterTree());
 				clusteringPanel.add(label);
 				
-				List<UUID> childIDList = dataset.getClusterIDs();
+//				List<UUID> childIDList = dataset.getClusterIDs();
 
 				DefaultMutableTreeNode top = new DefaultMutableTreeNode("root node");
-				DefaultMutableTreeNode category = new DefaultMutableTreeNode(dataset.getCollection().getName());
-				for(UUID childID : childIDList){
-					AnalysisDataset childDataset = MainWindow.this.analysisDatasets.get(childID);
-					DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDataset.getCollection().getName());
-					category.add(childNode);
-				}
+				DefaultMutableTreeNode category = addChildNodes(id);
+//				DefaultMutableTreeNode category = new DefaultMutableTreeNode(dataset.getCollection().getName());
+//				for(UUID childID : childIDList){
+//					AnalysisDataset childDataset = MainWindow.this.analysisDatasets.get(childID);
+//					DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(childDataset.getCollection().getName());
+//					category.add(childNode);
+//				}
 				top.add(category);
 				JTree tree = new JTree(top);
 				tree.setRootVisible( false );
@@ -1431,6 +1432,17 @@ public class MainWindow extends JFrame {
 			tabbedPane.setComponentAt(8, clusteringPanel);
 		}
 		
+	}
+	
+	private DefaultMutableTreeNode addChildNodes(UUID id){
+		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
+		DefaultMutableTreeNode category = new DefaultMutableTreeNode(dataset.getCollection().getName());
+		List<UUID> childIDList = dataset.getClusterIDs();
+		for(UUID childID : childIDList){
+			DefaultMutableTreeNode childNode = addChildNodes(childID);
+			category.add(childNode);
+		}
+		return category;
 	}
 	
 	private void updateSignalConsensusChart(List<AnalysisDataset> list){
