@@ -1021,7 +1021,7 @@ public class MainWindow extends JFrame {
 			}
 						
 		} catch (Exception e) {
-			log("Error in plotting frankenprofile");
+			log("Error in plotting frankenprofile: "+e.getMessage());
 			for(StackTraceElement el : e.getStackTrace()){
 				log(el.toString());
 			}

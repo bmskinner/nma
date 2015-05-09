@@ -118,22 +118,31 @@ public class MorphologyAnalysis {
 			String referencePoint = collection.getReferencePoint();
 			String orientationPoint = collection.getOrientationPoint();
 			
-			createProfileAggregateFromPoint(collection, referencePoint, (int)sourceCollection.getMedianArrayLength());
-			createProfileAggregateFromPoint(collection, orientationPoint, (int)sourceCollection.getMedianArrayLength());
+			// use the same array length as the source collection to avoid segment slippage
+			int profileLength = sourceCollection.getProfileCollection().getProfile(referencePoint).size();
+			createProfileAggregateFromPoint(collection, referencePoint, profileLength);
+			createProfileAggregateFromPoint(collection, orientationPoint, profileLength);
+//			createProfileAggregateFromPoint(collection, referencePoint, (int)sourceCollection.getMedianArrayLength());
+//			createProfileAggregateFromPoint(collection, orientationPoint, (int)sourceCollection.getMedianArrayLength());
 			
 			ProfileCollection pc = collection.getProfileCollection();
 			ProfileCollection sc = sourceCollection.getProfileCollection();
 			
-			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
-			pc.addSegments(sourceCollection.getOrientationPoint(), sc.getSegments(orientationPoint));
 			
-//			IJ.log("Regular: "+pc.printKeys());
-//			IJ.log("Franken: "+collection.getFrankenCollection().printKeys());
-//			// copied from segmentation
-//			reviseSegments(collection, orientationPoint);	
+			// What happens when the array length is greater in the source collection? 
+			// Segments are added that no longer have an index
+			// We need to scale the segments to the array length of the new collection
+			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
+			pc.addSegments(orientationPoint, sc.getSegments(orientationPoint));
+			
+			// At hthis point the collection has only a regular profile collection.
+			// no frankenprofile has been copied.
+			// Create a new frankenprofile
+			// copied from segmentation
+			reviseSegments(collection, referencePoint);	
 //			createProfileAggregates(collection);
-//			applySegmentsToOtherPointTypes(collection, orientationPoint);
-//			IJ.log("Regular: "+pc.printKeys());
+			applySegmentsToOtherPointTypes(collection, referencePoint);
+//			IJ.log("Regular: "+collection.getProfileCollection().printKeys());
 //			IJ.log("Franken: "+collection.getFrankenCollection().printKeys());
 
 		} catch (Exception e) {

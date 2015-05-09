@@ -471,8 +471,34 @@ public class Profile implements Serializable {
    * @return a Profile
    */
   public Profile getSubregion(int indexStart, int indexEnd){
-	  double[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
-	  return new Profile(result);
+	  try{
+		  if(indexStart <= indexEnd ){
+			  double[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
+			  return new Profile(result);
+		  } else { // case when array wraps
+			  if(indexStart > indexEnd){
+				  double[] resultA = Arrays.copyOfRange(array,indexStart, this.size()-1);
+				  double[] resultB = Arrays.copyOfRange(array,0, indexEnd);
+				  double[] result = new double[resultA.length+resultB.length];
+				  int index = 0;
+				  for(double d : resultA){
+					  result[index] = d;
+					  index++;
+				  }
+				  for(double d : resultB){
+					  result[index] = d;
+					  index++;
+				  }
+				  return new Profile(result);
+			  } else{
+				  return null; // should never be reached
+			  }
+		  }
+	  } catch (Exception e){
+		  IJ.log("Error getting profile subregion: "+indexStart+" - "+indexEnd+" in size "+this.size());
+		  return null;
+	  }
+
   }
 
   public Profile calculateDeltas(int windowSize){

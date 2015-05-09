@@ -1,5 +1,7 @@
 package no.gui;
 
+import ij.IJ;
+
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
@@ -24,7 +26,6 @@ import no.utility.Equation;
 import no.utility.Utils;
 
 import org.jfree.data.category.CategoryDataset;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
@@ -41,20 +42,27 @@ public class DatasetCreator {
 		Profile xpoints = profile.getPositions(100);
 		for(NucleusBorderSegment seg : segments){
 
-			if(seg.getStartIndex()>seg.getEndIndex()){ // case when array wraps
+			if(seg.getStartIndex()>seg.getEndIndex()){ // case when array wraps. We need to plot the two ends as separate series
+				
+				// franken profiles may have skipping issues on segment remapping
+				// catch them here before drawing. Needs fixing upstream
+				if(seg.getStartIndex()<profile.size()){
 
-				// beginning of array
-				Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
-				Profile subPointsA = xpoints.getSubregion(0, seg.getEndIndex());
-				double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
-				ds.addSeries(seg.getSegmentType()+"_A", dataA);
+					// beginning of array
+					Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
+					Profile subPointsA  = xpoints.getSubregion(0, seg.getEndIndex());
+					double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
+					ds.addSeries(seg.getSegmentType()+"_A", dataA);
 
-				// end of array
-				Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
-				Profile subPointsB = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
-				double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
-				ds.addSeries(seg.getSegmentType()+"_B", dataB);
-				continue;
+					// end of array
+					Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
+					Profile subPointsB  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
+					double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
+					ds.addSeries(seg.getSegmentType()+"_B", dataB);
+					continue;
+				} else { // there is an error in the segment assignment; skip and warn
+					IJ.log("Profile skipping issue: "+seg.getSegmentType()+" : "+seg.getStartIndex()+" - "+seg.getEndIndex()+" in total of "+profile.size());
+				}
 			} 
 			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
 			Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
