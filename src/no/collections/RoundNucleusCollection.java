@@ -43,9 +43,8 @@ implements NucleusCollection, Serializable
 	private String DEFAULT_ORIENTAITION_POINT = "tail";
 
 	//this holds the mapping of tail indexes etc in the median profile arrays
-	protected ProfileCollection profileCollection = new ProfileCollection("regular");
-	protected ProfileCollection frankenCollection = new ProfileCollection("franken");
-	
+	protected Map<String, ProfileCollection> profileCollections = new HashMap<String, ProfileCollection>();
+		
 	private Nucleus consensusNucleus;
 	
 	private AnalysisOptions analysisOptions;
@@ -61,11 +60,7 @@ implements NucleusCollection, Serializable
 	  this.collectionType = type;
 	  this.name = outputFolder+" - "+type;
 	  this.guid = java.util.UUID.randomUUID();
-  }
-
-  // used only for getting classes in setup of analysis
-  public RoundNucleusCollection(){
-
+	  profileCollections.put(NucleusCollection.REGULAR_PROFILE, new ProfileCollection());
   }
 
   /*
@@ -91,28 +86,7 @@ implements NucleusCollection, Serializable
 	  this.nucleiCollection.add(r);
 	  this.mappedCollection.put(r.getID(), r);
   }
-  
-//  public void addShellResult(int channel, ShellResult result){
-//	  this.shellResults.put(channel, result);
-//  }
-//  
-//  public ShellResult getShellResult(int channel){
-//	  return this.shellResults.get(channel);
-//  }
-//
-//  /**
-//   * Test if the collection has a ShellResult in any channel
-//   * 
-//   */
-//  public boolean hasShellResult(){
-//	  for(Integer channel : this.getSignalChannels()){
-//		  if(this.shellResults.containsKey(channel)){
-//			  return true;
-//		  }
-//	  }
-//	  return false;
-//  }
-  
+    
   public boolean hasConsensusNucleus(){
 	  if(this.consensusNucleus==null){
 		  return false;
@@ -122,21 +96,13 @@ implements NucleusCollection, Serializable
   }
 
 
-//  public AnalysisOptions getAnalysisOptions() {
-//	  return analysisOptions;
-//  }
-//
-//  public void setAnalysisOptions(AnalysisOptions analysisOptions) {
-//	  this.analysisOptions = analysisOptions;
-//  }
-
-public void addConsensusNucleus(Nucleus n){
+  public void addConsensusNucleus(Nucleus n){
 	  this.consensusNucleus = n;
   }
-  
+    
   public void calculateOffsets(){
 
-	  Profile medianToCompare = this.profileCollection.getProfile(DEFAULT_REFERENCE_POINT); // returns a median profile with head at 0
+	  Profile medianToCompare = getProfileCollection("regular").getProfile(DEFAULT_REFERENCE_POINT); // returns a median profile with head at 0
 
 	  for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
 		  Nucleus n = this.getNucleus(i);
@@ -182,12 +148,28 @@ public void addConsensusNucleus(Nucleus n){
 	  return this.DEFAULT_ORIENTAITION_POINT;
   }
   
+  public ProfileCollection getProfileCollection(String type){
+	  if(this.profileCollections.containsKey(type)){
+		  return this.profileCollections.get(type);
+	  } else {
+		  throw new IllegalArgumentException("ProfileCollection key "+type+" not present");
+	  }
+  }
+  
+  public void setProfileCollection(String type, ProfileCollection p){
+	  this.profileCollections.put(type, p);
+  }
+  
   public ProfileCollection getProfileCollection(){
-	  return this.profileCollection;
+	  return getProfileCollection(NucleusCollection.REGULAR_PROFILE);
   }
   
   public ProfileCollection getFrankenCollection(){
-	  return this.frankenCollection;
+	  return getProfileCollection(NucleusCollection.FRANKEN_PROFILE);
+  }
+  
+  public void setFrankenCollection (ProfileCollection frankenCollection){
+	  this.setProfileCollection(NucleusCollection.FRANKEN_PROFILE, frankenCollection);
   }
 
   public File getFolder(){
@@ -549,10 +531,6 @@ public void addConsensusNucleus(Nucleus n){
 	  return result;
   }
 
-  public void setFrankenCollection (ProfileCollection frankenCollection){
-	  this.frankenCollection = frankenCollection;
-  }
-
 /*
     --------------------
     Profile methods
@@ -563,7 +541,7 @@ public void addConsensusNucleus(Nucleus n){
 	  double[] d = new double[this.getNucleusCount()];
 	  try{
 
-		  Profile medianProfile = this.profileCollection.getProfile(pointType);
+		  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
 		  for(int i=0;i<this.getNucleusCount();i++){
 			  Nucleus n = this.getNucleus(i);
 			  try{
@@ -621,14 +599,16 @@ public void addConsensusNucleus(Nucleus n){
   */
 
   public void findTailIndexInMedianCurve(){
+	  
+	ProfileCollection pc = this.getProfileCollection();
 
-    Profile medianProfile = this.profileCollection.getProfile("head");
+    Profile medianProfile = pc.getProfile(this.getReferencePoint());
     
 	int tailIndex = (int) Math.floor(medianProfile.size()/2);
 	  
 	  Profile tailProfile = medianProfile.offset(tailIndex);
-	  this.profileCollection.addProfile("tail", tailProfile);
-	  this.profileCollection.addFeature("head", new ProfileFeature("tail", tailIndex));
+	  pc.addProfile(this.getOrientationPoint(), tailProfile);
+	  pc.addFeature(this.getReferencePoint(), new ProfileFeature(this.getOrientationPoint(), tailIndex));
   }
 
   /*
@@ -639,7 +619,7 @@ public void addConsensusNucleus(Nucleus n){
 
   public Nucleus getNucleusMostSimilarToMedian(String pointType){
     
-    Profile medianProfile = this.profileCollection.getProfile(pointType); // the profile we compare the nucleus to
+    Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
     Nucleus n = (Nucleus) this.getNucleus(0); // default to the first nucleus
 
     double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));

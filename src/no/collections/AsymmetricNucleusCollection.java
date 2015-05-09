@@ -22,10 +22,6 @@ public class AsymmetricNucleusCollection
   implements no.collections.NucleusCollection
 {
 
-	// failure  codes
-//	public static final int FAILURE_HEAD = 128;
-//	public static final int FAILURE_TAIL = 256;
-
 
 	private boolean differencesCalculated = false;
 
@@ -34,11 +30,6 @@ public class AsymmetricNucleusCollection
 	public AsymmetricNucleusCollection(File folder, String outputFolder, String type, File debugFile){
 		super(folder, outputFolder, type, debugFile);
 	}
-
-  
-  public AsymmetricNucleusCollection(){
-
-  }
 
 
   /*

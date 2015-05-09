@@ -62,7 +62,7 @@ public class PopulationSplitWindow {
 				return collection;
 			}
 		}
-	    return new RoundNucleusCollection();
+	    return null;
 	}
 	
 	public File addMappingFile(){

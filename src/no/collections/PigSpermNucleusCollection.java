@@ -23,14 +23,6 @@ public class PigSpermNucleusCollection
 	  super(folder, outputFolder, type, debugFile);
   }
 
-  public PigSpermNucleusCollection(){
-    
-  }
-
-//  @Override
-//  public void measureProfilePositions(){
-//    this.measureProfilePositions("head");
-//  }
 
   /*
     -----------------------
@@ -42,7 +34,7 @@ public class PigSpermNucleusCollection
   public void findTailIndexInMedianCurve(){
 	  // can't use regular tail detector, because it's based on NucleusBorderPoints
 
-	  Profile medianProfile = this.profileCollection.getProfile("head");
+	  Profile medianProfile = this.getProfileCollection().getProfile(this.getReferencePoint());
 
 	  Profile minima = medianProfile.getLocalMaxima(5); // window size 5
 
@@ -76,8 +68,8 @@ public class PigSpermNucleusCollection
 	  }
 	  // IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
 	  Profile tailProfile = medianProfile.offset(tailIndex);
-	  this.profileCollection.addProfile("tail", tailProfile);
-	  this.profileCollection.addFeature("head", new ProfileFeature("tail", tailIndex));
+	  this.getProfileCollection().addProfile("tail", tailProfile);
+	  this.getProfileCollection().addFeature("head", new ProfileFeature("tail", tailIndex));
 
   }
 
@@ -88,7 +80,7 @@ public class PigSpermNucleusCollection
   @Override
   public void calculateOffsets(){
 
-    Profile medianToCompare = this.profileCollection.getProfile("head"); // returns a median profile with head at 0
+    Profile medianToCompare = this.getProfileCollection().getProfile("head"); // returns a median profile with head at 0
 
     for(int i= 0; i<this.getNucleusCount();i++){ // for each roi
       PigSpermNucleus n = (PigSpermNucleus)this.getNucleus(i);

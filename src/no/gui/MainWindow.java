@@ -783,7 +783,7 @@ public class MainWindow extends JFrame {
 				try {
 					updateStatsPanel(list);
 					updateProfileImage(list);
-//					updateFrankenProfileChart(list);
+					updateFrankenProfileChart(list);
 					updateConsensusImage(list);
 					updateBoxplots(list);
 					updateVariabilityChart(list);

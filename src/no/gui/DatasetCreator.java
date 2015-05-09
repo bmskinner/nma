@@ -113,7 +113,7 @@ public class DatasetCreator {
 		int i=0;
 		for(AnalysisDataset dataset : list){
 			NucleusCollection collection = dataset.getCollection();
-			Profile profile = collection.getFrankenCollection().getProfile(collection.getOrientationPoint());
+			Profile profile = collection.getFrankenCollection().getProfile(collection.getReferencePoint());
 			Profile xpoints = profile.getPositions(100);
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
@@ -163,14 +163,14 @@ public class DatasetCreator {
 		int i=0;
 		for(AnalysisDataset dataset : list){
 			NucleusCollection collection = dataset.getCollection();
-			Profile profile = collection.getFrankenCollection().getProfile(collection.getOrientationPoint());
+			Profile profile = collection.getFrankenCollection().getProfile(collection.getReferencePoint());
 			Profile xpoints = profile.getPositions(100);
 
 			// rendering order will be first on top
 
 			// make the IQR
-			Profile profile25 = collection.getFrankenCollection().getProfile(collection.getOrientationPoint()+"25");
-			Profile profile75 = collection.getFrankenCollection().getProfile(collection.getOrientationPoint()+"75");
+			Profile profile25 = collection.getFrankenCollection().getProfile(collection.getReferencePoint()+"25");
+			Profile profile75 = collection.getFrankenCollection().getProfile(collection.getReferencePoint()+"75");
 			
 			XYSeries series25 = new XYSeries("Q25_"+i);
 			for(int j=0; j<profile25.size();j++){
@@ -217,36 +217,28 @@ public class DatasetCreator {
 		
 	public static XYDataset createFrankenSegmentDataset(NucleusCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
-		Profile profile = collection.getFrankenCollection().getProfile(collection.getOrientationPoint());
+		Profile profile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
 		Profile xpoints = profile.getPositions(100);
-
+		
 		// rendering order will be first on top
-
+		
 		// add the segments
+		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getReferencePoint());
+		addSegmentsFromProfile(segments, profile, ds);
 
-		List<NucleusBorderSegment> segments = collection.getFrankenCollection().getSegments(collection.getOrientationPoint());
+		// make the IQR
+		Profile profile25 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"25");
+		Profile profile75 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"75");
+		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
+		ds.addSeries("Q25", data25);
+		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
+		ds.addSeries("Q75", data75);
 
-		for(NucleusBorderSegment seg : segments){
-
-			if(seg.getStartIndex()>seg.getEndIndex()){ // case when array wraps
-
-				// beginning of array
-				Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
-				Profile subPointsA = xpoints.getSubregion(0, seg.getEndIndex());
-				double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
-				ds.addSeries(seg.getSegmentType()+"_1", dataA);
-
-				// end of array
-				Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
-				Profile subPointsB = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
-				double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
-				ds.addSeries(seg.getSegmentType()+"_2", dataB);
-				continue;
-			} 
-			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
-			Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
-			double[][] data = { subPoints.asArray(), subProfile.asArray() };
-			ds.addSeries(seg.getSegmentType(), data);
+		// add the individual nuclei
+		for(Nucleus n : collection.getNuclei()){
+			Profile angles = n.getAngleProfile(collection.getReferencePoint()).interpolate(profile.size());
+			double[][] ndata = { xpoints.asArray(), angles.asArray() };
+			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
 		}
 		return ds;
 	}

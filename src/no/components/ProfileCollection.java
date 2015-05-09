@@ -6,28 +6,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import no.utility.Utils;
 
 public class ProfileCollection implements Serializable {
 		
 	private static final long serialVersionUID = 1L;
-//	public static final int CHART_WINDOW_HEIGHT     = 400;
-//	public static final int CHART_WINDOW_WIDTH      = 600;
 	
 	private Map<String, ProfileFeature> 	features 	= new HashMap<String, ProfileFeature>();
 	private Map<String, Profile> 			profiles 	= new HashMap<String, Profile>(0); 
 	private Map<String, ProfileAggregate> 	aggregates 	= new HashMap<String, ProfileAggregate>();
-	
-	private String collectionName; // the name of the NucleusCollection - e.g analysable, red, not_red
-	
+		
 	private Map<String, List<NucleusBorderSegment>> segments = new HashMap<String, List<NucleusBorderSegment>>();
 	private Map<String, List<Profile>> nucleusProfileList    = new HashMap<String, List<Profile>>();
 	
-		
-	public ProfileCollection(String name){
-		this.collectionName = name;
-	}
 	
+	public ProfileCollection(){
+
+	}
+		
 	// Get features
 	
 	public ProfileFeature getFeature(String s){
@@ -186,34 +183,7 @@ public class ProfileCollection implements Serializable {
 		}
 		return builder.toString();
 	}
-	
-//	public void printKeys(File file){
-////		IJ.append("    Plots:", file.getAbsolutePath());
-////		for(String s : this.getPlotKeys()){
-////			IJ.append("     "+s, file.getAbsolutePath());
-////		}
-//		IJ.append("    Profiles:", file.getAbsolutePath());
-//		for(String s : this.getProfileKeys()){
-//			IJ.append("     "+s, file.getAbsolutePath());
-//		}
-//		IJ.append("    Aggregates:", file.getAbsolutePath());
-//		for(String s : this.getAggregateKeys()){
-//			IJ.append("     "+s, file.getAbsolutePath());
-//		}
-//		IJ.append("    Features:", file.getAbsolutePath());
-//		for(String s : this.getFeatureKeys()){
-//			IJ.append("     "+s, file.getAbsolutePath());
-//		}
-//		IJ.append("    Segments:", file.getAbsolutePath());
-//		for(String s : this.getSegmentKeys()){
-//			IJ.append("     "+s, file.getAbsolutePath());
-//		}
-//	}
-	
-	// Get keys
-//	public Set<String> getPlotKeys(){
-//		return plots.keySet();
-//	}
+		
 	
 	// get the profile keys without IQR headings
 	public List<String> getProfileKeys(){

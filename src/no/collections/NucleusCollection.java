@@ -13,13 +13,17 @@ import no.components.ShellResult;
 
 public interface NucleusCollection
 {
-	public static final int CHART_WINDOW_HEIGHT     = 400;
-	public static final int CHART_WINDOW_WIDTH      = 500;
-	public static final int CHART_TAIL_BOX_Y_MIN    = 325;
-	public static final int CHART_TAIL_BOX_Y_MID    = 340;
-	public static final int CHART_TAIL_BOX_Y_MAX    = 355;
-	public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-	public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
+//	public static final int CHART_WINDOW_HEIGHT     = 400;
+//	public static final int CHART_WINDOW_WIDTH      = 500;
+//	public static final int CHART_TAIL_BOX_Y_MIN    = 325;
+//	public static final int CHART_TAIL_BOX_Y_MID    = 340;
+//	public static final int CHART_TAIL_BOX_Y_MAX    = 355;
+//	public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
+//	public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
+	
+	public static final String REGULAR_PROFILE = "regular";
+	public static final String FRANKEN_PROFILE = "franken";
+	
 	public String DEFAULT_REFERENCE_POINT = null;
 
 	public void addNucleus(Nucleus r);
