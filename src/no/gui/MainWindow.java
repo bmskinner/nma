@@ -223,7 +223,7 @@ public class MainWindow extends JFrame {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
 					for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
-						if(d.hasChildren()){
+						if(d.isRoot()){
 							d.save();
 							log("Saved dataset "+d.getCollection().getName());
 						}
@@ -805,19 +805,18 @@ public class MainWindow extends JFrame {
 					AnalysisDataset dataset = PopulationImporter.readDataset(new File(fileName));
 					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
 					
-					// update the old style population list
+					// update the population list
 					NucleusCollection collection = dataset.getCollection();
-//					MainWindow.this.analysisPopulations.put(collection.getID(), collection);
-					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
+					MainWindow.this.populationNames.put(dataset.getName(), dataset.getUUID());
 					
-					for(AnalysisDataset child : dataset.getChildDatasets()){
+					for(AnalysisDataset child : dataset.getAllChildDatasets() ){
+//						log("Imported: "+child.getName());
 						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
-//						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
-						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
+						MainWindow.this.populationNames.put(child.getName(), child.getUUID());
 					}
 					
 					log("Opened dataset: "+collection.getType());
-					log("Dataset contains: "+dataset.getChildCount()+" subsets");
+//					log("Dataset contains: "+dataset.getChildCount()+" subsets");
 
 					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 					list.add(dataset);

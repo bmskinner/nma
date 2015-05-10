@@ -81,6 +81,14 @@ public class AnalysisDataset implements Serializable {
 		return this.thisCollection.getID();
 	}
 	
+	public String getName(){
+		return this.thisCollection.getName();
+	}
+	
+	public void setName(String s){
+		this.thisCollection.setName(s);
+	}
+	
 	public File getSavePath(){
 		return this.savePath;
 	}
@@ -125,6 +133,21 @@ public class AnalysisDataset implements Serializable {
 	
 	public Collection<AnalysisDataset> getChildDatasets(){
 		return this.childCollections.values();
+	}
+	
+	// recursive version of get child datasets
+	public List<AnalysisDataset> getAllChildDatasets(){
+//		IJ.log("Traversing "+this.getName());
+		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>(0);
+		for(AnalysisDataset d : this.getChildDatasets()){ // the direct descendents of this dataset
+			result.add(d);
+			
+//			IJ.log("Fetching child "+d.getName()+" of "+this.getName());
+			if(this.hasChildren()){
+				result.addAll(d.getAllChildDatasets());
+			}
+		}
+		return result;
 	}
 	
 	public NucleusCollection getCollection(){
