@@ -1338,7 +1338,7 @@ public class MainWindow extends JFrame {
 			columns.add("");
 
 			DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
-			PopulationTreeTableNode  root = new PopulationTreeTableNode ("root node");
+			PopulationTreeTableNode  root = new PopulationTreeTableNode (java.util.UUID.randomUUID());
 			treeTableModel.setRoot(root);
 			treeTableModel.setColumnIdentifiers(columns);
 			for(AnalysisDataset d : this.analysisDatasets.values()){
@@ -1353,7 +1353,7 @@ public class MainWindow extends JFrame {
 	
 	private PopulationTreeTableNode addTreeTableChildNodes(UUID id){
 		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
-		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset.getCollection().getName());
+		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset.getUUID());
 		category.setValueAt(dataset.getName(), 0);
 		category.setValueAt(dataset.getCollection().getNucleusCount(), 1);
 				
@@ -1684,7 +1684,8 @@ public class MainWindow extends JFrame {
 				for (int i = minIndex; i <= maxIndex; i++) {
 					if (lsm.isRowSelected(i)) {
 						
-//						UUID id = (UUID) treeTable.getModel().getValueAt(i, 3); // row i, column 0
+//						PopulationTreeTableNode node = (PopulationTreeTableNode) treeTable.getTreeTableModel().getChild(treeTable.getTreeTableModel().getRoot(), i);
+//						UUID id = node.getID();
 //						datasets.add(analysisDatasets.get(id));
 //						selectedIndexes.add(i);
 
@@ -1771,10 +1772,16 @@ public class MainWindow extends JFrame {
 	
 	class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
 		
-		Object[] columnData = new Object[4];
+		Object[] columnData = new Object[3];
+		UUID nodeID;
 
-		PopulationTreeTableNode(String name) {
-			super(name);
+		PopulationTreeTableNode(UUID id) {
+			super(id.toString());
+			this.nodeID = id;
+		}
+		
+		public UUID getID(){
+			return this.nodeID;
 		}
 		
 		public int getColumnCount() {
