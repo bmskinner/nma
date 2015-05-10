@@ -761,38 +761,7 @@ public class MainWindow extends JFrame {
 			}
 		}
 	}
-	
-//	public void loadNuclei(){
-//		Thread thr = new Thread() {
-//			public void run() {
-//				try {
-//					OpenDialog fileDialog = new OpenDialog("Select a save file...");
-//					String fileName = fileDialog.getPath();
-//					if(fileName==null) return;
-//					NucleusCollection collection = PopulationImporter.readPopulation(new File(fileName), MainWindow.this);
-//					
-//					MainWindow.this.analysisDatasets.put(collection.getID(), new AnalysisDataset(collection));
-//					MainWindow.this.populationNames.put(collection.getName(), collection.getID());
-//					log("Opened collection: "+collection.getType());
-//					
-//					// make a new dataset for the collection
-//					AnalysisDataset dataset = new AnalysisDataset(collection);
-//					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
-//					
-//
-//					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-//					list.add(dataset);
-//
-//					updatePanels(list);
-//					updatePopulationList();
-//				} catch (Exception e) {
-//					log("Error opening file: "+e.getMessage());
-//				}
-//			}
-//		};
-//		thr.start();
-//	}
-	
+		
 	public void loadDataset(){
 		Thread thr = new Thread() {
 			public void run() {
@@ -1361,18 +1330,6 @@ public class MainWindow extends JFrame {
 					
 		// new method using table
 		if(this.analysisDatasets.size()>0){
-//			DefaultTableModel populationTableModel = new DefaultTableModel();
-//			populationTableModel.addColumn("Population");
-//			populationTableModel.addColumn("Nuclei");
-//			populationTableModel.addColumn("");
-//			for(AnalysisDataset d : this.analysisDatasets.values()){
-//				NucleusCollection c = d.getCollection();
-//				Object[] data  = {c.getName(),c.getNucleusCount(), null};
-//				populationTableModel.addRow( data );
-//			}
-//
-//			populationTable.setModel(populationTableModel);
-
 
 			// new method using treetable
 			List<String> columns = new ArrayList<String>();
@@ -1397,7 +1354,7 @@ public class MainWindow extends JFrame {
 	private PopulationTreeTableNode addTreeTableChildNodes(UUID id){
 		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
 		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset.getCollection().getName());
-		category.setValueAt(dataset.getCollection().getName(), 0);
+		category.setValueAt(dataset.getName(), 0);
 		category.setValueAt(dataset.getCollection().getNucleusCount(), 1);
 				
 		Set<UUID> childIDList = dataset.getChildUUIDs();
@@ -1407,24 +1364,7 @@ public class MainWindow extends JFrame {
 		}
 		return category;
 	}
-	
-//	private void addTreeTableChildValues(DefaultTreeTableModel treeTableModel){
-//
-//		TreeTableNode root = treeTableModel.getRoot();
-//		for(int index = 0 ; index <treeTableModel.getChildCount(root); index++){
-//			TreeTableNode child = (TreeTableNode) treeTableModel.getChild(root, index);
-//			child.
-//			treeTableModel.setValueAt(dataset.getCollection().getNucleusCount(), category, 1);
-//		}
-//		
-//		
-//		Set<UUID> childIDList = dataset.getAllChildUUIDs();
-//		for(UUID childID : childIDList){
-////			DefaultMutableTreeTableNode childNode = addTreeTableChildNodes(childID, treeTableModel);
-//			category.add(childNode);
-//		}
-//	}
-		
+			
 	public void updateVariabilityChart(List<AnalysisDataset> list){
 		try {
 			XYDataset ds = DatasetCreator.createIQRVariabilityDataset(list);
@@ -1743,6 +1683,10 @@ public class MainWindow extends JFrame {
 				int maxIndex = lsm.getMaxSelectionRow();
 				for (int i = minIndex; i <= maxIndex; i++) {
 					if (lsm.isRowSelected(i)) {
+						
+//						UUID id = (UUID) treeTable.getModel().getValueAt(i, 3); // row i, column 0
+//						datasets.add(analysisDatasets.get(id));
+//						selectedIndexes.add(i);
 
 						String key = (String) treeTable.getModel().getValueAt(i, 0); // row i, column 0
 						if(!key.equals("No populations")){
@@ -1827,7 +1771,7 @@ public class MainWindow extends JFrame {
 	
 	class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
 		
-		Object[] columnData = new Object[3];
+		Object[] columnData = new Object[4];
 
 		PopulationTreeTableNode(String name) {
 			super(name);
