@@ -69,6 +69,8 @@ public interface NucleusCollection
 	public File getDebugFile();
 
 	public String getType();
+	
+	public List<File> getImageFiles();
 
 	public double[] getPerimeters();
 
@@ -88,7 +90,7 @@ public interface NucleusCollection
 
 	public String[] getCleanNucleusPaths();
 
-	public String[] getPositions();
+	public double[][] getPositions();
 
 	public int getNucleusCount();
 

@@ -47,7 +47,7 @@ public class MorphologyAnalysis {
 
 			// run the exports
 //			exportProfiles(collection);
-			exportSegments(collection, pointType);
+//			exportSegments(collection, pointType);
 //			exportClusteringScript(collection);
 
 			// begin migrating these export functions up
@@ -370,46 +370,46 @@ public class MorphologyAnalysis {
 		pc.addSegments(collection.getOrientationPoint(), pointType, offset);
 	}
 	
-	private static void exportSegments(NucleusCollection collection, String pointType){
-		
-		logger.log("Exporting segments...");
-		// export the individual segment files for each nucleus
-		for(Nucleus n : collection.getNuclei()){
-			n.exportSegments();
-		}
-
-		// also export the group stats for each segment
-		TableExporter tableExport = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
-		tableExport.addColumnHeading("PATH"    );
-		tableExport.addColumnHeading("POSITION");
-
-		
-		try{
-			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(pointType);
-			if(!segments.isEmpty()){
-
-				for(NucleusBorderSegment seg : segments){
-					tableExport.addColumnHeading(seg.getSegmentType());
-				}
-
-				for(Nucleus n : collection.getNuclei()){
-
-					tableExport.addRow("PATH", n.getPath());
-					tableExport.addRow("POSITION", n.getPosition());
-
-					for(NucleusBorderSegment seg : segments){
-						NucleusBorderSegment nucSeg = n.getSegmentTag(seg.getSegmentType());
-						// export the segment length as a fraction of the total array length
-						tableExport.addRow(seg.getSegmentType(),   (double)nucSeg.length(n.getLength())/(double)n.getLength()      );
-					}
-				}
-				tableExport.export("log.segments."+collection.getType());
-				logger.log("Segments exported");
-			}
-		}catch(Exception e){
-			logger.log("Error exporting segments: "+e.getMessage(), Logger.ERROR);
-		}
-	}
+//	private static void exportSegments(NucleusCollection collection, String pointType){
+//		
+//		logger.log("Exporting segments...");
+//		// export the individual segment files for each nucleus
+//		for(Nucleus n : collection.getNuclei()){
+//			n.exportSegments();
+//		}
+//
+//		// also export the group stats for each segment
+//		TableExporter tableExport = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
+//		tableExport.addColumnHeading("PATH"    );
+//		tableExport.addColumnHeading("POSITION");
+//
+//		
+//		try{
+//			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(pointType);
+//			if(!segments.isEmpty()){
+//
+//				for(NucleusBorderSegment seg : segments){
+//					tableExport.addColumnHeading(seg.getSegmentType());
+//				}
+//
+//				for(Nucleus n : collection.getNuclei()){
+//
+//					tableExport.addRow("PATH", n.getPath());
+//					tableExport.addRow("POSITION", n.getPosition());
+//
+//					for(NucleusBorderSegment seg : segments){
+//						NucleusBorderSegment nucSeg = n.getSegmentTag(seg.getSegmentType());
+//						// export the segment length as a fraction of the total array length
+//						tableExport.addRow(seg.getSegmentType(),   (double)nucSeg.length(n.getLength())/(double)n.getLength()      );
+//					}
+//				}
+//				tableExport.export("log.segments."+collection.getType());
+//				logger.log("Segments exported");
+//			}
+//		}catch(Exception e){
+//			logger.log("Error exporting segments: "+e.getMessage(), Logger.ERROR);
+//		}
+//	}
 	
 
 //	private static void exportClusteringScript(NucleusCollection collection){

@@ -59,7 +59,6 @@ public class AnalysisDataset implements Serializable {
 		UUID id = collection.getID();
 		AnalysisDataset childDataset = new AnalysisDataset(collection, this.savePath);
 		childDataset.setAnalysisOptions(this.getAnalysisOptions());
-
 		this.childCollections.put(id, childDataset);
 
 	}

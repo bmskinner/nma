@@ -44,7 +44,7 @@ public class StatsExporter {
 	public static void exportImagePaths(NucleusCollection collection, String filename){
 		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		logger.addColumn("PATH",     collection.getCleanNucleusPaths());
-		logger.addColumn("POSITION", collection.getPositions());
+//		logger.addColumn("POSITION", collection.getPositions());
 		logger.export(filename+"."+collection.getType());
 	}
 	

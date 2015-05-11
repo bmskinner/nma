@@ -193,6 +193,21 @@ implements NucleusCollection, Serializable
   public String getType(){
     return this.collectionType;
   }
+  
+  /**
+   * Get the distinct source image file list for all nuclei in the collection 
+   * @return
+   */
+  public List<File> getImageFiles(){
+	  List<File> result = new ArrayList<File>(0);
+	  for(Nucleus n : this.getNuclei()){
+		  
+		  if(!result.contains( n.getSourceFile() )){
+			  result.add(n.getSourceFile());
+		  }
+	  }
+	  return result;
+  }
 
   public double[] getPerimeters(){
 
@@ -283,8 +298,8 @@ implements NucleusCollection, Serializable
     return s;
   }
 
-  public String[] getPositions(){
-    String[] s = new String[nucleiCollection.size()];
+  public double[][] getPositions(){
+    double[][] s = new double[nucleiCollection.size()][4];
 
     for(int i=0;i<nucleiCollection.size();i++){
       s[i] = nucleiCollection.get(i).getPosition();

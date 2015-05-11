@@ -56,7 +56,7 @@ public class RoundNucleus
 	public static final int ALL_POINTS = 0;
 	public static final int BORDER_POINTS = 1;
 	public static final int BORDER_TAGS = 2;
-
+	
 	public static final String IMAGE_PREFIX = "export.";
 
 	private int nucleusNumber; // the number of the nucleus in the current image
@@ -70,7 +70,9 @@ public class RoundNucleus
 	private double feret;       // the maximum diameter
 	private double area;        // the nuclear area
 
-	private String position; // the position of the centre of the ROI bounding rectangle in the original image as "x.y"
+//	private String position; // the position of the centre of the ROI bounding rectangle in the original image as "x.y"
+	
+	private double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
 
 	/*
 		The following fields are part of the redesign of the whole system. Instead of storing border points within
@@ -95,7 +97,7 @@ public class RoundNucleus
 	
 	protected SignalCollection signalCollection = new SignalCollection();
 
-	public RoundNucleus (Roi roi, File file, int number, String position) { // construct from an roi
+	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 
 		if(roi==null || file==null || Integer.valueOf(number)==null || position==null){
 			throw new IllegalArgumentException("Nucleus constructor argument is null");
@@ -109,7 +111,7 @@ public class RoundNucleus
 		
 		this.sourceFile      = file;
 		this.nucleusNumber   = number;
-		this.position        = position;
+		this.orignalPosition = position;
 		this.uuid 			 = java.util.UUID.randomUUID();
 	}
 
@@ -212,8 +214,8 @@ public class RoundNucleus
 	}
 
 	// defensive copy
-	public String getPosition(){
-		return new String(this.position);
+	public double[] getPosition(){
+		return this.orignalPosition;
 	}
 
 	public File getSourceFile(){
@@ -379,8 +381,8 @@ public class RoundNucleus
 		this.outputFolder = f;
 	}
 
-	public void setPosition(String p){
-		this.position = p;
+	public void setPosition(double[] p){
+		this.orignalPosition = p;
 	}
 
 	public void setPerimeter(double d){

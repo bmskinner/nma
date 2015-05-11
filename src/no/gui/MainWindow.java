@@ -233,17 +233,21 @@ public class MainWindow extends JFrame {
 			panelHeader.add(btnSavePopulation);
 			
 			//---------------
-			// post analysis button
+			// FISH mapping button
 			//---------------
 			
-//			JButton btnPostanalysisMapping = new JButton("Post-analysis mapping");
-//			btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
-//				@Override
-//				public void mouseClicked(MouseEvent arg0) {
-//					postAnalysis();
-//				}
-//			});
-//			panelHeader.add(btnPostanalysisMapping);
+			JButton btnPostanalysisMapping = new JButton("Post-FISH mapping");
+			btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					postAnalysis();
+				}
+			});
+			panelHeader.add(btnPostanalysisMapping);
+			
+			//---------------
+			// Footer
+			//---------------
 			
 			JPanel panelFooter = new JPanel();
 			contentPane.add(panelFooter, BorderLayout.SOUTH);
@@ -550,45 +554,45 @@ public class MainWindow extends JFrame {
 		textArea.append(s);
 	}
 	
-//	public void postAnalysis(){
-//		PopulationSplitWindow splitter = new PopulationSplitWindow(new ArrayList<NucleusCollection>(this.analysisPopulations.values()));
-//
-//		try{
-//			File f = splitter.addMappingFile();
-//
-//			if(f==null) return;
-//
-//			if(!f.exists()) return;
-//
-//			NucleusCollection subjectCollection = splitter.getCollection();
-//			if(subjectCollection==null) return;
-//
-//			// import and parse the mapping file
-//			List<String> pathList = MappingFileParser.parse(f);
-//
-//			// create a new collection to hold the nuclei
-//			Constructor<?> collectionConstructor = subjectCollection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class});
-//			NucleusCollection remapCollection = (NucleusCollection) collectionConstructor.newInstance(subjectCollection.getFolder(), 
-//																										subjectCollection.getOutputFolderName(), 
-//																										f.getName(), 
-//																										subjectCollection.getDebugFile());
-//
-//			// add nuclei to the new population based on the mapping info
-//			for(Nucleus n : subjectCollection.getNuclei()){
-//				if(pathList.contains(n.getPath()+"\t"+n.getNucleusNumber())){
-//					remapCollection.addNucleus(n);
-//				}
-//			}
-//			this.analysisPopulations.put(remapCollection.getID(), remapCollection);
-//			log("Created subcollection from mapping file");
-//			List<NucleusCollection> list = new ArrayList<NucleusCollection>();
-//			list.add(remapCollection);
-//			updatePanels(list);
-//			updatePopulationList();
-//		} catch(Exception e){
-//			
-//		}
-//	}
+	public void postAnalysis(){
+
+		try{
+			
+			int i = 0; // prototype - get the first dataset available
+			for(UUID id : MainWindow.this.analysisDatasets.keySet()){
+
+				if(i==0){
+					AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
+
+//					IJ.log("Creating analysis");
+					FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset);
+					
+					NucleusCollection sub = fishMapper.getSubCollection();
+//					IJ.log("Found subcollection: "+sub.getName()+" with "+sub.getNucleusCount()+" nuclei");
+					if(sub.getNucleusCount()>0){
+
+						logc("Reapplying morphology...");
+						boolean ok = MorphologyAnalysis.reapplyProfiles(sub, MainWindow.this.analysisDatasets.get(id).getCollection());
+						if(ok){
+							log("OK");
+						} else {
+							log("Error");
+						}
+
+						dataset.addChildCollection(sub);
+
+						MainWindow.this.analysisDatasets.put(sub.getID(), dataset.getChildDataset(sub.getID()));
+						MainWindow.this.populationNames.put(sub.getName(), sub.getID());
+
+						updatePopulationList();	
+					}
+				}
+				i++;
+			}
+		} catch(Exception e){
+			log("Error in FISH remapping: "+e.getMessage());
+		}
+	}
 	
 	public void newAnalysis(){
 

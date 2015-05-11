@@ -453,9 +453,10 @@ public class NucleusDetector {
 	  double ybase = nucleus.getYBase();
 
 	  Rectangle bounds = nucleus.getBounds();
-	  double xCentre = xbase+(bounds.getWidth()/2);
-	  double yCentre = ybase+(bounds.getHeight()/2);
-	  String position = xCentre+"-"+yCentre; // store the centre of the rectangle for remapping
+//	  double xCentre = xbase+(bounds.getWidth()/2);
+//	  double yCentre = ybase+(bounds.getHeight()/2);
+	  double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
+//	  String position = xCentre+"-"+yCentre; // store the centre of the rectangle for remapping
 
 	  try{
 	  	// Enlarge the ROI, so we can do nucleus detection on the resulting original images
@@ -466,7 +467,7 @@ public class NucleusDetector {
 		  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
 		  
 		  // turn roi into Nucleus for manipulation
-		  RoundNucleus currentNucleus = new RoundNucleus(nucleus, path, nucleusNumber, position);
+		  RoundNucleus currentNucleus = new RoundNucleus(nucleus, path, nucleusNumber, originalPosition);
 	
 		  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
 		  currentNucleus.setArea(values.get("Area")); 

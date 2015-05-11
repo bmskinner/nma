@@ -16,16 +16,24 @@ import no.components.NuclearSignal;
 public interface Nucleus
 {
   
+	// index values for selecting original positions
+	public static final int X_BASE = 0;
+	public static final int Y_BASE = 1;
+	public static final int WIDTH = 2;
+	public static final int HEIGHT = 3;
+
 	public void findPointsAroundBorder();
-  public void intitialiseNucleus(int angleProfileWindowSize);
+	public void intitialiseNucleus(int angleProfileWindowSize);
 
-  // public Nucleus copy();
+	// public Nucleus copy();
 
-  	public UUID getID();
-  
+	public UUID getID();
+
 	public String getPath();
 
-	public String getPosition();
+	public double[] getPosition();
+
+	public void setPosition(double[] d);
 
 	public File getSourceFile();
 
