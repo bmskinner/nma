@@ -97,6 +97,14 @@ import org.jfree.data.xy.XYSeriesCollection;
 import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame {
+	
+	private static final int PROFILE_TAB = 0;
+	private static final int FRANKEN_TAB = 1;
+	private static final int STATS_TAB = 2;
+	private static final int BOXPLOTS_TAB = 3;
+	private static final int VARIABILITY_TAB = 4;
+	private static final int SIGNALS_TAB = 5;
+	private static final int CLUSTERS_TAB = 6;
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -111,6 +119,7 @@ public class MainWindow extends JFrame {
 	private JXTreeTable treeTable;
 	
 	private JTabbedPane tabbedPane;
+	private JTabbedPane signalsTabPane;
 		
 	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
@@ -266,52 +275,7 @@ public class MainWindow extends JFrame {
 			panelPopulations.setMinimumSize(new Dimension(0, 100));
 			panel.add(panelPopulations);
 			panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
-			
-			// table approach
-//			DefaultTableModel populationTableModel = new DefaultTableModel();
-//			populationTableModel.addColumn("Population");
-//			populationTableModel.addColumn("Nuclei");
-//			populationTableModel.addColumn("");
-//			populationTable = new JTable() {
-//				@Override
-//				public boolean isCellEditable(int rowIndex, int vColIndex) {
-//					return false;
-//				}
-//
-//			};
-//			populationTable.setModel(populationTableModel);
-//			populationTable.setEnabled(true);
-//			populationTable.setCellSelectionEnabled(false);
-//			populationTable.setColumnSelectionAllowed(false);
-//			populationTable.setRowSelectionAllowed(true);
-//			populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
-//			populationTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-//			populationTable.getColumnModel().getColumn(2).setPreferredWidth(5);
-//			setVisibleRowCount(populationTable, 6);
-			
-			
 						
-//			populationTable.addMouseListener(new MouseAdapter() {
-//				@Override
-//				public void mouseClicked(MouseEvent e) {
-//					JTable table = (JTable) e.getSource();
-//			        if (e.getClickCount() == 2) {
-//			          int index = table.rowAtPoint((e.getPoint()));
-//			          if (index >= 0) {
-//			        	  Object o = table.getModel().getValueAt(index, 0);
-//			        	  UUID id = MainWindow.this.populationNames.get(o.toString());
-//			        	  renameCollection(MainWindow.this.analysisDatasets.get(id));
-//			          }
-//			        }
-//				}
-//			});
-//			
-//			ListSelectionModel tableSelectionModel = populationTable.getSelectionModel();
-//			tableSelectionModel.addListSelectionListener(new ListSelectionHandler());
-			
-//			JScrollPane populationScrollPane = new JScrollPane(populationTable);
-//			panelPopulations.add(populationScrollPane);
-			
 			// tree table approach
 			List<String> columns = new ArrayList<String>();
 			columns.add("Population");
@@ -478,7 +442,13 @@ public class MainWindow extends JFrame {
 //			variabilityChartPanel.setMinimumSize(new Dimension(200,200));
 			tabbedPane.addTab("Variability", null, variabilityChartPanel, null);
 			shellsChartPanel = new ChartPanel(shellsChart);
-			tabbedPane.addTab("Shells", null, shellsChartPanel, null);
+			
+			
+			//---------------
+			// Create the signals tab panel
+			//---------------
+			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
+			tabbedPane.addTab("Signals", null, signalsTabPane, null);
 			
 			//---------------
 			// Create the signals panel
@@ -489,12 +459,14 @@ public class MainWindow extends JFrame {
 			signalStatsTable = new JTable(); // table  for basic stats
 			signalStatsTable.setModel(signalsTableModel);
 			signalStatsTable.setEnabled(false);
+			
 			JScrollPane signalStatsScrollPane = new JScrollPane(signalStatsTable);
 			signalsPanel.add(signalStatsScrollPane);
 			signalsChartPanel = new ChartPanel(signalsChart);
 			signalsPanel.add(signalsChartPanel);
 			
-			tabbedPane.addTab("Signals", null, signalsPanel, null);
+			signalsTabPane.addTab("Overview", null, signalsPanel, null);
+			
 
 			//---------------
 			// Create the signal histograms panel
@@ -506,10 +478,11 @@ public class MainWindow extends JFrame {
 
 			signalHistogramPanel.add(signalAngleChartPanel);
 			signalHistogramPanel.add(signalDistanceChartPanel);
-			tabbedPane.addTab("Signal histograms", null, signalHistogramPanel, null);
+			signalsTabPane.addTab("Signal histograms", null, signalHistogramPanel, null);
+			signalsTabPane.addTab("Shells", null, shellsChartPanel, null);
 
 			//---------------
-			// Create the signal histograms panel
+			// Create the clusters panel
 			//---------------
 			clusteringPanel = new JPanel();
 			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
@@ -1095,17 +1068,17 @@ public class MainWindow extends JFrame {
 				}	
 
 				shellsChartPanel.setChart(shellsChart);
-				tabbedPane.setComponentAt(5, shellsChartPanel);
+				signalsTabPane.setComponentAt(2, shellsChartPanel);
 			} else { // no shell analysis available
 
 				if(collection.hasSignals()){
 					// if signals, offer to run
 					shellsPanel = makeNoShellAnalysisAvailablePanel(true, collection, "No shell results available; run new analysis?"); // allow option to run analysis
-					tabbedPane.setComponentAt(5, shellsPanel);
+					signalsTabPane.setComponentAt(2, shellsPanel);
 				} else {
 					// otherwise don't show button
 					shellsPanel = makeNoShellAnalysisAvailablePanel(false, null, "No signals in population"); // container in tab if no shell chart
-					tabbedPane.setComponentAt(5, shellsPanel);
+					signalsTabPane.setComponentAt(2, shellsPanel);
 				}
 			}
 		} else {
@@ -1113,7 +1086,7 @@ public class MainWindow extends JFrame {
 			// Multiple populations. Do not display
 			// container in tab if no shell chart
 			shellsPanel = makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
-			tabbedPane.setComponentAt(5, shellsPanel);
+			signalsTabPane.setComponentAt(2, shellsPanel);
 		}
 	}
 	
@@ -1485,12 +1458,12 @@ public class MainWindow extends JFrame {
 				clusteringPanel.add(treeView);
 			}
 			
-			tabbedPane.setComponentAt(8, clusteringPanel);
+			tabbedPane.setComponentAt(MainWindow.CLUSTERS_TAB, clusteringPanel);
 			
 		} else {
 			clusteringPanel = new JPanel();
 			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
-			tabbedPane.setComponentAt(8, clusteringPanel);
+			tabbedPane.setComponentAt(MainWindow.CLUSTERS_TAB, clusteringPanel);
 		}
 		
 	}
