@@ -2,6 +2,7 @@ package no.gui;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.io.DirectoryChooser;
 import ij.process.FloatPolygon;
@@ -32,6 +33,8 @@ import javax.swing.border.EmptyBorder;
 
 import no.analysis.AnalysisDataset;
 import no.collections.NucleusCollection;
+import no.export.ImageExporter;
+import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 import no.utility.Utils;
 
@@ -283,7 +286,9 @@ public class FishMappingWindow extends JDialog {
 		
 		String imageName = preFile.getName();
 		
-		ImagePlus preImage = new ImagePlus(preFile.getAbsolutePath());
+//		ImagePlus preImage = new ImagePlus(preFile.getAbsolutePath());
+		ImageStack preStack = ImageImporter.importImage(preFile, this.preFISHDataset.getDebugFile());
+		ImagePlus preImage = ImageExporter.convert(preStack);
 
 		final ImageProcessor ip = preImage.getProcessor();
 		

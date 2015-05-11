@@ -783,6 +783,8 @@ public class MainWindow extends JFrame {
 					String fileName = fileDialog.getPath();
 					if(fileName==null) return;
 					
+					logc("Opening dataset...");
+					
 					// read the dataset
 					AnalysisDataset dataset = PopulationImporter.readDataset(new File(fileName));
 					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
@@ -796,7 +798,7 @@ public class MainWindow extends JFrame {
 						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
 						MainWindow.this.populationNames.put(child.getName(), child.getUUID());
 					}
-					
+					log("OK");
 					log("Opened dataset: "+collection.getType());
 //					log("Dataset contains: "+dataset.getChildCount()+" subsets");
 
