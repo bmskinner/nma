@@ -410,14 +410,14 @@ public class AnalysisCreator {
 			  }
 		  }
 
-		  // export the population to a save file for later
-		  mw.logc("Saving to file...");
-		  ok = PopulationExporter.savePopulation(r);
-		  if(ok){
-			  mw.log("OK");
-		  } else {
-			  mw.log("Error");
-		  }
+//		  // export the population to a save file for later
+//		  mw.logc("Saving to file...");
+//		  ok = PopulationExporter.saveAnalysisDataset(dataset);
+//		  if(ok){
+//			  mw.log("OK");
+//		  } else {
+//			  mw.log("Error");
+//		  }
 
 		  finalPopulations.add(r);
 		  		  
@@ -500,19 +500,28 @@ public class AnalysisCreator {
 
 			  // export the population to a save file for later
 			// export the population to a save file for later
-			  mw.logc("Saving to file...");
-			  ok = PopulationExporter.savePopulation(p);
-			  if(ok){
-				  mw.log("OK");
-			  } else {
-				  mw.log("Error");
-			  }
+//			  mw.logc("Saving to file...");
+//			  ok = PopulationExporter.savePopulation(p);
+//			  if(ok){
+//				  mw.log("OK");
+//			  } else {
+//				  mw.log("Error");
+//			  }
 //			  PopulationExporter.savePopulation(p);
 			  finalPopulations.add(p);
 			  dataset.addChildDataset(subDataset);
 		  }
 		  finalDatasets.add(dataset);
 		  collectionNucleusCounts.put(folder, nucleusCounts);
+
+		  // export the population to a save file for later
+		  mw.logc("Saving to file...");
+		  ok = PopulationExporter.saveAnalysisDataset(dataset);
+		  if(ok){
+			  mw.log("OK");
+		  } else {
+			  mw.log("Error");
+		  }
 	  }
   }
 

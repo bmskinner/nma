@@ -557,38 +557,47 @@ public class MainWindow extends JFrame {
 	public void postAnalysis(){
 
 		try{
-			
-			int i = 0; // prototype - get the first dataset available
-			for(UUID id : MainWindow.this.analysisDatasets.keySet()){
 
-				if(i==0){
-					AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
+			String[] names = this.populationNames.keySet().toArray(new String[0]);
 
-//					IJ.log("Creating analysis");
-					FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset);
-					
-					NucleusCollection sub = fishMapper.getSubCollection();
-//					IJ.log("Found subcollection: "+sub.getName()+" with "+sub.getNucleusCount()+" nuclei");
-					if(sub.getNucleusCount()>0){
+			String selectedValue = (String) JOptionPane.showInputDialog(null,
+					"Choose population", "FISH Remapping",
+					JOptionPane.INFORMATION_MESSAGE, null,
+					names, names[0]);
 
-						logc("Reapplying morphology...");
-						boolean ok = MorphologyAnalysis.reapplyProfiles(sub, MainWindow.this.analysisDatasets.get(id).getCollection());
-						if(ok){
-							log("OK");
-						} else {
-							log("Error");
-						}
+			UUID id = this.populationNames.get(selectedValue);
 
-						dataset.addChildCollection(sub);
+			//			int i = 0; // prototype - get the first dataset available
+			//			for(UUID id : MainWindow.this.analysisDatasets.keySet()){
+			//
+			//				if(i==0){
+			AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
 
-						MainWindow.this.analysisDatasets.put(sub.getID(), dataset.getChildDataset(sub.getID()));
-						MainWindow.this.populationNames.put(sub.getName(), sub.getID());
+			//					IJ.log("Creating analysis");
+			FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset);
 
-						updatePopulationList();	
-					}
+			NucleusCollection sub = fishMapper.getSubCollection();
+			//					IJ.log("Found subcollection: "+sub.getName()+" with "+sub.getNucleusCount()+" nuclei");
+			if(sub.getNucleusCount()>0){
+
+				logc("Reapplying morphology...");
+				boolean ok = MorphologyAnalysis.reapplyProfiles(sub, MainWindow.this.analysisDatasets.get(id).getCollection());
+				if(ok){
+					log("OK");
+				} else {
+					log("Error");
 				}
-				i++;
+
+				dataset.addChildCollection(sub);
+
+				MainWindow.this.analysisDatasets.put(sub.getID(), dataset.getChildDataset(sub.getID()));
+				MainWindow.this.populationNames.put(sub.getName(), sub.getID());
+
+				updatePopulationList();	
 			}
+			//				}
+			//				i++;
+
 		} catch(Exception e){
 			log("Error in FISH remapping: "+e.getMessage());
 		}
@@ -1351,8 +1360,14 @@ public class MainWindow extends JFrame {
 				}
 			}
 			treeTable.setTreeTableModel(treeTableModel);
-		}
 
+			int row = 0;
+			while (row < treeTable.getRowCount()) {
+				treeTable.expandRow(row);
+				row++;
+			}
+		
+		}
 	}
 	
 	private PopulationTreeTableNode addTreeTableChildNodes(UUID id){

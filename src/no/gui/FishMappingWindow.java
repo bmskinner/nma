@@ -140,19 +140,21 @@ public class FishMappingWindow extends JDialog {
 		
 		// panel for text labels
 		JPanel headingPanel = new JPanel();
-		headingPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		headingPanel.setLayout(new BoxLayout(headingPanel, BoxLayout.Y_AXIS));
 		
 		JLabel headingLabel = new JLabel("Select nuclei to keep for analysis", JLabel.LEFT);
-		headingPanel.add(headingLabel, BorderLayout.NORTH);
+		headingPanel.add(headingLabel);
+		JLabel helpLabel = new JLabel("Yellow nuclei are in the population; green are selected for remapping", JLabel.LEFT);
+		headingPanel.add(helpLabel);
 		final JLabel fileLabel = new JLabel("", JLabel.RIGHT);
-		headingPanel.add(fileLabel, BorderLayout.NORTH);
+		headingPanel.add(fileLabel);
 		
 		contentPanel.add(headingPanel, BorderLayout.NORTH);
 		//---------------
 		// add the next image button
 		//---------------
 		JPanel buttonPane = new JPanel();
-		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
 		final JButton prevButton = new JButton("Previous");
 		final JButton nextButton = new JButton("Next");
@@ -311,7 +313,7 @@ public class FishMappingWindow extends JDialog {
 				
 		// open the images as ImageIcons
 		// find the size of the image to scale proportionally
-		final int smallWidth = 400;
+		final int smallWidth = 500;
 		double ratio = (double) originalWidth / (double) originalHeight;
 		final int smallHeight = (int) (smallWidth / ratio);
 		
