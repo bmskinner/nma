@@ -66,6 +66,7 @@ import javax.swing.JTable;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Shape;
@@ -344,6 +345,11 @@ public class MainWindow extends JFrame {
 			consensusPlot.getRangeAxis().setVisible(false);
 			
 			consensusChartPanel = new ChartPanel(consensusChart);
+			
+			JButton runRefoldingButton = new JButton("Refold");
+			consensusChartPanel.add(runRefoldingButton);
+			runRefoldingButton.setVisible(false);
+			
 			panel.add(consensusChartPanel);
 			JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
 			
@@ -767,6 +773,46 @@ public class MainWindow extends JFrame {
 				};
 				thr.start();
 			}
+		}
+	}
+	
+	public void refoldNucleus(AnalysisDataset dataset){
+		NucleusCollection collection = dataset.getCollection();
+		if(collection!=null){
+			final UUID id = collection.getID();
+
+			Thread thr = new Thread() {
+				public void run() {
+					try{
+						AnalysisDataset d = MainWindow.this.analysisDatasets.get(id);
+
+						for(Component c : consensusChartPanel.getComponents() ){
+							if(c.getClass()==JButton.class){
+								c.setVisible(false);
+							}
+						}
+						
+						logc("Refolding profile...");
+						boolean ok = CurveRefolder.run(d.getCollection(), 
+								d.getAnalysisOptions().getNucleusClass(), 
+								"Fast");
+						if(ok){
+							log("OK");
+							d.getAnalysisOptions().setRefoldNucleus(true);
+							d.getAnalysisOptions().setRefoldMode("Fast");
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+							list.add(d);
+							updatePanels(list);
+
+						} else {
+							log("Error");
+						}
+					} catch(Exception e){
+						log("Error refolding");
+					}
+				}
+			};
+			thr.start();
 		}
 	}
 		
@@ -1209,8 +1255,30 @@ public class MainWindow extends JFrame {
 					consensusPlot.getDomainAxis().setVisible(false);
 					consensusPlot.getRangeAxis().setVisible(false);
 					consensusChartPanel.setChart(consensusChart);
+					
+					final UUID id = collection.getID();
+							
+					for(Component c : consensusChartPanel.getComponents() ){
+						if(c.getClass()==JButton.class){
+							
+							c.addMouseListener(new MouseAdapter() {
+								@Override
+								public void mouseClicked(MouseEvent arg0) {
+									AnalysisDataset d = MainWindow.this.analysisDatasets.get(id);
+									MainWindow.this.refoldNucleus(d);
+									
+								}
+							});
+							c.setVisible(true);
+						}
+					}
 
 				} else {
+					for(Component c : consensusChartPanel.getComponents() ){
+						if(c.getClass()==JButton.class){
+							c.setVisible(false);
+						}
+					}
 					JFreeChart chart = makeConsensusChart(collection);
 					consensusChartPanel.setChart(chart);
 				} 
@@ -1245,6 +1313,11 @@ public class MainWindow extends JFrame {
 					
 				}
 				consensusChartPanel.setChart(chart);
+				for(Component c : consensusChartPanel.getComponents() ){
+					if(c.getClass()==JButton.class){
+						c.setVisible(false);
+					}
+				}
 			}
 		} catch (Exception e) {
 			log("Error drawing consensus nucleus: "+e.getMessage());
@@ -1476,19 +1549,19 @@ public class MainWindow extends JFrame {
 				clusteringPanel.add(btnNewClusterAnalysis);
 				
 			} else { // clusters present, show the tree if available
-				JLabel label = new JLabel(dataset.getClusterTree());
-				clusteringPanel.add(label);
+				JTextArea label = new JTextArea(dataset.getClusterTree());
+				label.setLineWrap(true);
 				
-				DefaultMutableTreeNode top = new DefaultMutableTreeNode("root node");
-				DefaultMutableTreeNode category = addChildNodes(id);
-
-				top.add(category);
-				JTree tree = new JTree(top);
-				tree.setRootVisible( false );
-				for (int i = 0; i < tree.getRowCount(); i++) { // ensure we start with all open
-					tree.expandRow(i);
-				}
-				JScrollPane treeView = new JScrollPane(tree);
+//				DefaultMutableTreeNode top = new DefaultMutableTreeNode("root node");
+//				DefaultMutableTreeNode category = addChildNodes(id);
+//
+//				top.add(category);
+//				JTree tree = new JTree(top);
+//				tree.setRootVisible( false );
+//				for (int i = 0; i < tree.getRowCount(); i++) { // ensure we start with all open
+//					tree.expandRow(i);
+//				}
+				JScrollPane treeView = new JScrollPane(label);
 				clusteringPanel.add(treeView);
 			}
 			
