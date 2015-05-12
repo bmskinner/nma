@@ -81,7 +81,7 @@ public class FishMappingWindow extends JDialog {
 
 				this.subCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
 						collection.getOutputFolderName(), 
-						"SubColletion", 
+						"SubCollection", 
 						collection.getDebugFile()
 						);
 

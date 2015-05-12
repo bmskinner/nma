@@ -37,6 +37,8 @@ public class NucleusClusterer {
 	
 	private int type = NucleusClusterer.EM;
 	
+	private Map<String, Object> optionMap;
+	
 	private Logger logger;
 		
 	public NucleusClusterer(int type){
@@ -268,6 +270,11 @@ public class NucleusClusterer {
 		}
 		return instances;
 	}
+ 	
+ 	public void setClusteringOptions(Map<String, Object> options){
+ 		this.optionMap = options;
+ 		setType( (Integer) options.get("type")); 
+ 	}
 	
 	private String[] makeClusteringOptions(){
 		
@@ -281,9 +288,9 @@ public class NucleusClusterer {
 		}
 		if(this.type==NucleusClusterer.HIERARCHICAL){
 			options = new String[4];
-			options[0] = "-N";                 // max. iterations
-			options[1] = "4";
-			options[2] = "-L";                 // max. iterations
+			options[0] = "-N";                 // number of clusters
+			options[1] = String.valueOf((Integer) optionMap.get("-N"));
+			options[2] = "-L";                 // algorithm
 			options[3] = "WARD";
 		}
 		

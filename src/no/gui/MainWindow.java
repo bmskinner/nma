@@ -50,6 +50,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -199,20 +200,7 @@ public class MainWindow extends JFrame {
 				}
 			});
 			panelHeader.add(btnNewAnalysis);
-			
-			//---------------
-			// load saved collection button
-			//---------------
-			
-//			JButton btnLoadSavedNuclei = new JButton("Load saved nuclei");
-//			btnLoadSavedNuclei.addMouseListener(new MouseAdapter() {
-//				@Override
-//				public void mouseClicked(MouseEvent arg0) {
-//					loadNuclei();
-//				}
-//			});
-//			panelHeader.add(btnLoadSavedNuclei);
-			
+						
 			//---------------
 			// load saved dataset button
 			//---------------
@@ -236,7 +224,9 @@ public class MainWindow extends JFrame {
 				public void mouseClicked(MouseEvent arg0) {
 					for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
 						if(d.isRoot()){
+							logc("Saving dataset...");
 							d.save();
+							log("OK");
 							log("Saved dataset "+d.getCollection().getName());
 						}
 					}
@@ -320,9 +310,6 @@ public class MainWindow extends JFrame {
 			JScrollPane populationScrollPane = new JScrollPane(treeTable);
 			panelPopulations.add(populationScrollPane);
 			
-//			panelGeneralData.add(panelAggregates);
-//			
-//			panelAggregates.setLayout(new BoxLayout(panelAggregates, BoxLayout.Y_AXIS));
 			
 			//---------------
 			// Create the regular profile chart
@@ -657,9 +644,19 @@ public class MainWindow extends JFrame {
 			Thread thr = new Thread() {
 				public void run() {
 					try{
+						
+						
+						ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
+						Map<String, Object> options = clusterSetup.getOptions();
+						for(String key : options.keySet()){
+							IJ.log(key+": "+options.get(key).toString());
+						}
+						clusterSetup.dispose();
+						
 						logc("Running cluster analysis...");
 						
 						NucleusClusterer clusterer = new NucleusClusterer(NucleusClusterer.HIERARCHICAL);
+						clusterer.setClusteringOptions(options);
 						
 						AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
 						boolean ok = clusterer.cluster(parent.getCollection());
