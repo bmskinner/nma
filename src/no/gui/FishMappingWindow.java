@@ -300,7 +300,7 @@ public class FishMappingWindow extends JDialog {
 		// get the conversion factor to find original image coordinates when we click the scaled image
 		final double conversion = (double) smallWidth / (double) originalWidth;
 		
-		ImagePlus preSmall;
+		final ImagePlus preSmall;
 //		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
 		if(ip.getWidth()>smallWidth){
 			preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
@@ -310,6 +310,7 @@ public class FishMappingWindow extends JDialog {
 
 		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
 		preImageLabel.setIcon(preImageIcon);
+		preSmall.close();
 		
 		preImageLabel.addMouseListener(new MouseAdapter() {
 		    @Override
@@ -321,8 +322,14 @@ public class FishMappingWindow extends JDialog {
 		    	// problem occurs when images smaller than desired width are upscaled
 		    	int x = e.getX();
 		    	int y = e.getY();
-		    	int originalX = (int) ( (double) x / (double) conversion);
-		    	int originalY = (int) ( (double)y / (double) conversion);
+		    	int originalX = ip.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
+		    	int originalY = ip.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
+		    	
+		    	int w = preSmall.getWidth();
+		    	int h = preSmall.getHeight();
+		    	
+//		    	IJ.log("");
+//		    	IJ.log("Click: x: "+x+", y: "+y+" : origx: "+originalX+", origy: "+originalY+" : w: "+w+" , h: "+h);
 		    	
 		    	for(Nucleus n : imageNuclei){
 
@@ -335,13 +342,14 @@ public class FishMappingWindow extends JDialog {
 		    		// there is one point in each roi that when clicked, replaces with another image
 		    		// see testing set 4 -> 2
 		    		// somehow the ip is set to a different image file
+		    		// the roi overlap is correct for the wrong nucleus
 		    		
 		    		if(roi.contains(originalX, originalY)){
 
 		    			drawNucleus(n, ip, e, roi);
-		    			IJ.log("Conversion: "+conversion);
-		    			IJ.log("Click: "+x+", "+y+" : "+originalX+", "+originalY);
-		    			IJ.log("Nucleus positions: "+positions[0]+", "+positions[1]+" : "+positions[2]+", "+positions[3]);
+//		    			IJ.log("Conversion: "+conversion);
+//		    			IJ.log("Click: "+x+", "+y+" : "+originalX+", "+originalY);
+//		    			IJ.log("Nucleus positions: "+positions[0]+", "+positions[1]+" : "+positions[2]+", "+positions[3]);
 		    			
 		    			ip.setColor(Color.CYAN);
 		    			ip.drawOval(originalX, originalY, 3, 3);
@@ -356,6 +364,7 @@ public class FishMappingWindow extends JDialog {
 
 			    		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
 			    		preImageLabel.setIcon(preImageIcon);
+			    		preSmall.close();
 		    		}
 		    	}
 		    }
