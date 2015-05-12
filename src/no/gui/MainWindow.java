@@ -623,11 +623,17 @@ public class MainWindow extends JFrame {
 					// old style population lists
 					MainWindow.this.analysisDatasets.put(d.getUUID(), d);
 //					MainWindow.this.analysisPopulations.put(d.getUUID(), d.getCollection());
-					MainWindow.this.populationNames.put(d.getCollection().getName(), d.getUUID());
+					if(MainWindow.this.populationNames.containsKey(d.getName())){
+						d.setName(d.getName()+"_1");
+					}
+					MainWindow.this.populationNames.put(d.getName(), d.getUUID());
 					
 					
 					for(AnalysisDataset child : d.getChildDatasets()){
 						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
+						if(MainWindow.this.populationNames.containsKey(child.getName())){
+							child.setName(child.getName()+"_1");
+						}
 //						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
 						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
 					}
@@ -688,6 +694,9 @@ public class MainWindow extends JFrame {
 								//							parent.addChildCollection(c);
 
 								MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
+								if(MainWindow.this.populationNames.containsKey(c.getName())){
+									c.setName(c.getName()+"_1");
+								}
 								MainWindow.this.populationNames.put(c.getName(), c.getID());
 
 							}
@@ -872,6 +881,11 @@ public class MainWindow extends JFrame {
 		// format the numbers and make into a tablemodel
 		TableModel model = DatasetCreator.createVennTable(list);
 		vennTable.setModel(model);
+		int columns = vennTable.getColumnModel().getColumnCount();
+		for(int i=1;i<columns;i++){
+			vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
+
+		}
 	}
 	
 	public JFreeChart makeProfileChart(XYDataset ds){
@@ -1781,6 +1795,42 @@ public class MainWindow extends JFrame {
 	        Color colour = (row-1) % 8 == 0 ? MainWindow.this.getSignalColour(  choose   ) : Color.WHITE;
 	        
 	        l.setBackground(colour);
+
+	      //Return the JLabel which renders the cell.
+	      return l;
+	    }
+	}
+	
+	/**
+	 * Allows for cell background to be coloured based on value in cell
+	 *
+	 */
+	public class VennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	        
+	      //Cells are by default rendered as a JLabel.
+	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+	        String cellContents = l.getText();
+	        if(cellContents!=null && !cellContents.equals("")){ // ensure value
+//	        	IJ.log(cellContents);
+	        	String[] array = cellContents.split("%");
+//	        	 IJ.log(array[0]);
+		        String[] array2 = array[0].split("\\(");
+//		        IJ.log(array2[1]);
+		        double pct = Double.valueOf(array2[1]);
+		        
+//		        IJ.log("Pct: "+pct);
+		        double colourIndex = 255 - ((pct/100) * 255);
+		        
+		        Color colour = new Color((int) colourIndex,(int) colourIndex, 255);
+		        l.setBackground(colour);
+	        } else {
+	            l.setBackground(Color.LIGHT_GRAY);
+	        }
 
 	      //Return the JLabel which renders the cell.
 	      return l;
