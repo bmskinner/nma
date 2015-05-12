@@ -277,7 +277,7 @@ public class NucleusClusterer {
  	public void setClusteringOptions(Map<String, Object> options){
  		this.optionMap = options;
  		this.type =  (Integer) options.get("type"); 
- 		IJ.log("Input type: "+this.type);
+// 		IJ.log("Input type: "+this.type);
  	}
 	
 	private String[] makeClusteringOptions(){

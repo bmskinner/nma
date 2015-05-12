@@ -4,6 +4,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 import ij.io.DirectoryChooser;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
@@ -12,6 +13,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -41,7 +43,10 @@ import no.utility.Utils;
 public class FishMappingWindow extends JDialog {
 
 	private static final long serialVersionUID = 1L;
+	public static final int NUCLEUS_OUTLINE_WIDTH = 3;
 	private final JPanel contentPanel = new JPanel();
+	
+	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	
 	private AnalysisDataset preFISHDataset;
 	private File postFISHImageDirectory;
@@ -49,13 +54,20 @@ public class FishMappingWindow extends JDialog {
 	private JLabel preImageLabel;
 	private JLabel postImageLabel;
 	
+	JButton prevButton;
+	JButton nextButton;
+	
+	JLabel fileLabel;
+	
 	private JPanel imagePane;
 	
 	private boolean isFinished = false;
 	
-	private NucleusCollection subCollection;
+	private NucleusCollection subCollectionLeft;
+	private NucleusCollection subCollectionRight;
 	
-	private List<UUID> selectedNuclei = new ArrayList<UUID>(0);
+	private List<UUID> selectedNucleiLeft = new ArrayList<UUID>(0);
+	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0);
 	
 	private int currentImage = 0;
 	
@@ -79,9 +91,15 @@ public class FishMappingWindow extends JDialog {
 				
 				Constructor<?> collectionConstructor =  dataset.getAnalysisOptions().getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
 
-				this.subCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
+				this.subCollectionLeft = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
 						collection.getOutputFolderName(), 
-						"SubCollection", 
+						"SubCollectionLeft", 
+						collection.getDebugFile()
+						);
+				
+				this.subCollectionRight = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
+						collection.getOutputFolderName(), 
+						"SubCollectionRight", 
 						collection.getDebugFile()
 						);
 
@@ -128,8 +146,11 @@ public class FishMappingWindow extends JDialog {
 		return this.isFinished;
 	}
 	
-	public NucleusCollection getSubCollection(){
-		return this.subCollection;
+	public List<NucleusCollection> getSubCollections(){
+		List<NucleusCollection> result = new ArrayList<NucleusCollection>(0);
+		result.add(subCollectionLeft);
+		result.add(subCollectionRight);
+		return result;
 	}
 		
 	public void createGUI(){
@@ -149,7 +170,7 @@ public class FishMappingWindow extends JDialog {
 		headingPanel.add(headingLabel);
 		JLabel helpLabel = new JLabel("Yellow nuclei are in the population; green are selected for remapping", JLabel.LEFT);
 		headingPanel.add(helpLabel);
-		final JLabel fileLabel = new JLabel("", JLabel.RIGHT);
+		fileLabel = new JLabel("", JLabel.RIGHT);
 		headingPanel.add(fileLabel);
 		
 		contentPanel.add(headingPanel, BorderLayout.NORTH);
@@ -159,77 +180,17 @@ public class FishMappingWindow extends JDialog {
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
-		final JButton prevButton = new JButton("Previous");
-		final JButton nextButton = new JButton("Next");
-		prevButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				currentImage--;
-				
-				if(currentImage==0){
-					prevButton.setEnabled(false);
-				}
-				if(currentImage>0){
-					prevButton.setEnabled(true);
-				}
-				
-				if(currentImage<FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size()-1){
-					nextButton.setText("Next");
-				}
-				
-				
-//				IJ.log("Opening "+currentImage);
-				File imagefile = FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().get(currentImage);
-				fileLabel.setText("Image file: "+imagefile.getAbsolutePath());
-				openImages(imagefile);
-
-			}
-		});
+//		final JButton prevButton = new JButton("Previous");
+//		final JButton nextButton = new JButton("Next");
+		prevButton = new JButton("Previous");
+		nextButton = new JButton("Next");
+		
+		nextButton.addMouseListener(new NextButtonClickedAdapter());
+		prevButton.addMouseListener(new PrevButtonClickedAdapter());
+		
 		prevButton.setEnabled(false);
 		buttonPane.add(prevButton);
 
-
-		nextButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				currentImage++;
-				
-				if(currentImage==0){
-					prevButton.setEnabled(false);
-				}
-				if(currentImage>0){
-					prevButton.setEnabled(true);
-				}
-				
-				if(nextButton.getText().equals("Next")){
-
-					if(currentImage==FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size()-1){
-						// set next click to be end
-						nextButton.setText("Done");
-					}
-
-					
-//					IJ.log("Opening "+currentImage);
-					File imagefile = FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().get(currentImage);
-					fileLabel.setText("Image file: "+imagefile.getAbsolutePath());
-					openImages(imagefile);
-					
-					
-				} else { // end of analysis; make a collection from all the nuclei selected
-					for(Nucleus n : FishMappingWindow.this.preFISHDataset.getCollection().getNuclei()){
-						if (FishMappingWindow.this.selectedNuclei.contains(n.getID())){
-							FishMappingWindow.this.subCollection.addNucleus(n);
-						}
-					}
-					FishMappingWindow.this.subCollection.setName(FishMappingWindow.this.preFISHDataset.getName()+"_subset");
-					FishMappingWindow.this.setVisible(false);
-					FishMappingWindow.this.isFinished = true;
-				}
-				
-			}
-		});
 		buttonPane.add(nextButton);
 
 		//---------------
@@ -239,7 +200,7 @@ public class FishMappingWindow extends JDialog {
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent arg0) {
+			public void mousePressed(MouseEvent arg0) {
 				FishMappingWindow.this.dispose();			
 			}
 		});
@@ -274,7 +235,7 @@ public class FishMappingWindow extends JDialog {
 		
 		File firstImage = this.preFISHDataset.getCollection().getImageFiles().get(0);
 		fileLabel.setText("Image file: "+firstImage.getAbsolutePath());
-		openImages(firstImage);
+		openImages(firstImage, null);
 
 		this.pack(); 
 		this.setVisible(true);
@@ -282,113 +243,181 @@ public class FishMappingWindow extends JDialog {
 	
 	
 	// open the images for pre and post. Annotate the nuclei
-	private void openImages(final File preFile){
+	private void openImages(File preFile, MouseEvent sourceEvent){
 		
-		String imageName = preFile.getName();
+		if(sourceEvent!=null){
 		
-//		ImagePlus preImage = new ImagePlus(preFile.getAbsolutePath());
-		ImageStack preStack = ImageImporter.importImage(preFile, this.preFISHDataset.getDebugFile());
-		ImagePlus preImage = ImageExporter.convert(preStack);
+			if(sourceEvent.getSource() != nextButton && sourceEvent.getSource() != prevButton){
+				IJ.log("openImages triggered spuriously: "+sourceEvent.getSource().getClass().getName());
+			}
+		} else {
+			IJ.log("Null trigger for openimages");
+		}
+				
+		final ImageStack preStack = ImageImporter.importImage(preFile, this.preFISHDataset.getDebugFile());
+		final ImagePlus preImage = ImageExporter.convert(preStack);
 
 		final ImageProcessor ip = preImage.getProcessor();
+		final List<Nucleus> imageNuclei = this.preFISHDataset.getCollection().getNuclei(preFile);
 		
-		for(Nucleus n : this.preFISHDataset.getCollection().getNuclei()){
-			
-			if(n.getSourceFile().equals(preFile)){ // these are the nuclei in the image; draw them
-				
-				// if present in list, colour green, else yellow
-				if(FishMappingWindow.this.selectedNuclei.contains(n.getID())){
-    				ip.setColor(Color.GREEN);
+		for(Nucleus n : imageNuclei){
+
+//			IJ.log(n.getImageName());
+			// if present in list, colour green, else yellow
+			if(selectedNucleiLeft.contains(n.getID())){
+				ip.setColor(Color.GREEN);
+			} else {
+
+				if(selectedNucleiRight.contains(n.getID())){
+					ip.setColor(Color.MAGENTA);
+
 				} else {
-    				ip.setColor(Color.YELLOW);
+					ip.setColor(Color.YELLOW);
 				}
-								
-				double[] positions = n.getPosition();
-				FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-				roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-				ip.setLineWidth(2);
-				ip.draw(roi);
-				
 			}
+
+			double[] positions = n.getPosition();
+			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+			ip.setLineWidth(2);
+			ip.draw(roi);
+
 		}
+	
 		
 		int originalWidth = ip.getWidth();
 		int originalHeight = ip.getHeight();
 				
-		// open the images as ImageIcons
-		// find the size of the image to scale proportionally
-		final int smallWidth = 500;
+
+		// set the image width to be less than half the screen width
+		final int smallWidth = (int) ((double) screenSize.getWidth() * 0.45);
+		
+		// keep the image aspect ratio
 		double ratio = (double) originalWidth / (double) originalHeight;
 		final int smallHeight = (int) (smallWidth / ratio);
 		
 		// get the conversion factor to find original image coordinates when we click the scaled image
 		final double conversion = (double) smallWidth / (double) originalWidth;
 		
-		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+		ImagePlus preSmall;
+//		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+		if(ip.getWidth()>smallWidth){
+			preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+		} else {
+			preSmall = new ImagePlus("small", ip);
+		}
 
 		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
 		preImageLabel.setIcon(preImageIcon);
 		
-		preImageLabel.addMouseListener(new MouseAdapter() 
-		{
+		preImageLabel.addMouseListener(new MouseAdapter() {
 		    @Override
-		    public void mouseClicked(MouseEvent e) 
-		    {
-		        //statement
+		    public void mousePressed(MouseEvent e) {
+		    	
+//		    	int correction = 10;
+		    	
+		        // correct scaling 
+		    	// problem occurs when images smaller than desired width are upscaled
 		    	int x = e.getX();
 		    	int y = e.getY();
-		    	int originalX = (int) (x / conversion);
-		    	int originalY = (int) (y / conversion);
-//		    	IJ.log("Click: "+x+", "+y+" : "+originalX+", "+originalY);
-		    	for(Nucleus n : FishMappingWindow.this.preFISHDataset.getCollection().getNuclei()){
+		    	int originalX = (int) ( (double) x / (double) conversion);
+		    	int originalY = (int) ( (double)y / (double) conversion);
+		    	
+		    	for(Nucleus n : imageNuclei){
+
+		    		double[] positions = n.getPosition();
 		    		
-		    		if(n.getSourceFile().equals(preFile)){
+		    		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+		    		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+		    		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
 
-		    			double[] positions = n.getPosition();
-		    			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-		    			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-		    			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-		    			if(roi.contains(originalX, originalY)){
-		    				
-		    				// if present in list, remove it, otherwise add it
-		    				if(FishMappingWindow.this.selectedNuclei.contains(n.getID())){
-		    					
-		    					FishMappingWindow.this.selectedNuclei.remove(n.getID());
-			    				ip.setColor(Color.YELLOW);
-		    					
-		    				} else {
-		    					FishMappingWindow.this.selectedNuclei.add(n.getID());
-			    				ip.setColor(Color.GREEN);
-		    				}
-		    				
-		    				// update the image
-		    				roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-		    				ip.setLineWidth(2);
-		    				ip.draw(roi);
-		    				ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+		    		// there is one point in each roi that when clicked, replaces with another image
+		    		// see testing set 4 -> 2
+		    		// somehow the ip is set to a different image file
+		    		
+		    		if(roi.contains(originalX, originalY)){
 
-		    				ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
-		    				preImageLabel.setIcon(preImageIcon);
+		    			drawNucleus(n, ip, e, roi);
+		    			IJ.log("Conversion: "+conversion);
+		    			IJ.log("Click: "+x+", "+y+" : "+originalX+", "+originalY);
+		    			IJ.log("Nucleus positions: "+positions[0]+", "+positions[1]+" : "+positions[2]+", "+positions[3]);
+		    			
+		    			ip.setColor(Color.CYAN);
+		    			ip.drawOval(originalX, originalY, 3, 3);
+		    			
+		    			ImagePlus preSmall;
+		    			if(ip.getWidth()>smallWidth){
+		    				preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+		    			} else {
+		    				preSmall = new ImagePlus("small", ip);
 		    			}
+//		    			ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+
+			    		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
+			    		preImageLabel.setIcon(preImageIcon);
 		    		}
-					
 		    	}
 		    }
 		});
 
-
+		// Open the image from the post FISH directory
+		String imageName = preFile.getName(); // the file name e.g. P60.tif
 		String postFile = this.postFISHImageDirectory.getAbsolutePath()+File.separator+imageName;
 		ImagePlus postImage = new ImagePlus(postFile);
 		
-		ImagePlus postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
+		// make an image icon and display
+		ImagePlus postSmall;
+//		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+		if(ip.getWidth()>smallWidth){
+			postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
+		} else {
+			postSmall = postImage;
+		}
+		
+//		ImagePlus postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
 		ImageIcon postImageIcon = new ImageIcon(postSmall.getBufferedImage());
 		postImageLabel.setIcon(postImageIcon);
 		
 //		IJ.log("Opened post-image: "+postFile);
 
 	}
-	
+
+	private void drawNucleus(Nucleus n, ImageProcessor ip, MouseEvent e, Roi roi){
+
+
+		// if present in list, remove it, otherwise add it
+		if(FishMappingWindow.this.selectedNucleiLeft.contains(n.getID()) ||  FishMappingWindow.this.selectedNucleiRight.contains(n.getID()) ){
+
+			FishMappingWindow.this.selectedNucleiLeft.remove(n.getID());
+			FishMappingWindow.this.selectedNucleiRight.remove(n.getID());
+			ip.setColor(Color.YELLOW);
+
+		} else {
+
+			if((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){ // right button
+				FishMappingWindow.this.selectedNucleiRight.add(n.getID());
+				FishMappingWindow.this.selectedNucleiLeft.remove(n.getID());
+				ip.setColor(Color.MAGENTA);
+			}
+
+			if((e.getModifiers() & InputEvent.BUTTON1_MASK)	== InputEvent.BUTTON1_MASK){ // left button
+				FishMappingWindow.this.selectedNucleiLeft.add(n.getID());
+				FishMappingWindow.this.selectedNucleiRight.remove(n.getID());
+				ip.setColor(Color.GREEN);
+			}
+
+		}
+
+		// update the image
+		double[] positions = n.getPosition();
+		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+		ip.setLineWidth(2);
+		ip.draw(roi);
+	}
+
+
+
 	private boolean getPostFISHDirectory(){
 		DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of post-FISH images...");
 	    String folderName = localOpenDialog.getDirectory();
@@ -407,5 +436,150 @@ public class FishMappingWindow extends JDialog {
 	    this.postFISHImageDirectory = folder;
 	    return true;
 	}
+	
+	
+	class NextButtonClickedAdapter extends MouseAdapter {
+		
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			
+			if(arg0.getSource()==nextButton){
 
+				currentImage++;
+
+				if(currentImage==0){
+					FishMappingWindow.this.prevButton.setEnabled(false);
+				}
+				if(currentImage>0){
+					prevButton.setEnabled(true);
+				}
+
+				if(nextButton.getText().equals("Next")){
+
+					if(currentImage==FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size()-1){
+						// set next click to be end
+						nextButton.setText("Done");
+					}
+
+
+					//				IJ.log("Opening "+currentImage);
+					File imagefile = FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().get(currentImage);
+					int imageDisplayCount = currentImage+1;
+					String progress = "Image "+imageDisplayCount+" of "+FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size();
+					fileLabel.setText("Image file: "+imagefile.getAbsolutePath()+" : "+progress);
+					openImages(imagefile, arg0);
+
+
+				} else { // end of analysis; make a collection from all the nuclei selected
+					for(Nucleus n : FishMappingWindow.this.preFISHDataset.getCollection().getNuclei()){
+						if (FishMappingWindow.this.selectedNucleiLeft.contains(n.getID())){
+							FishMappingWindow.this.subCollectionLeft.addNucleus(n);
+						}
+						if (FishMappingWindow.this.selectedNucleiRight.contains(n.getID())){
+							FishMappingWindow.this.subCollectionRight.addNucleus(n);
+						}
+
+					}
+					FishMappingWindow.this.subCollectionLeft.setName(FishMappingWindow.this.preFISHDataset.getName()+"_left_subset");
+					FishMappingWindow.this.subCollectionRight.setName(FishMappingWindow.this.preFISHDataset.getName()+"_right_subset");
+					FishMappingWindow.this.setVisible(false);
+					FishMappingWindow.this.isFinished = true;
+				}
+			} else {
+				IJ.log("Next button got spurious trigger");
+			}
+		}
+	}
+	
+
+	class PrevButtonClickedAdapter extends MouseAdapter {
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			
+			if(arg0.getSource()==prevButton){
+			currentImage--;
+			
+			if(currentImage==0){
+				prevButton.setEnabled(false);
+			}
+			if(currentImage>0){
+				prevButton.setEnabled(true);
+			}
+			
+			if(currentImage<FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size()-1){
+				nextButton.setText("Next");
+			}
+			
+			
+//			IJ.log("Opening "+currentImage);
+			File imagefile = FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().get(currentImage);
+			int imageDisplayCount = currentImage+1;
+			String progress = "Image "+imageDisplayCount+" of "+FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size();
+			fileLabel.setText("Image file: "+imagefile.getAbsolutePath()+" : "+progress);
+			openImages(imagefile, arg0);
+			} else {
+				IJ.log("Prev button got spurious trigger");
+			}
+		}
+	}
+	
+//	class ImageClickedAdapter extends MouseAdapter {
+//
+//		 @Override
+//		    public void mousePressed(MouseEvent e) {
+//		    	
+//		    	
+//		        //statement
+//		    	int x = e.getX();
+//		    	int y = e.getY();
+//		    	int originalX = (int) (x / conversion);
+//		    	int originalY = (int) (y / conversion);
+////		    	IJ.log("Click: "+x+", "+y+" : "+originalX+", "+originalY);
+//		    	for(Nucleus n : FishMappingWindow.this.preFISHDataset.getCollection().getNuclei()){
+//		    		
+//		    		if(n.getSourceFile().equals(preFile)){
+//
+//		    			double[] positions = n.getPosition();
+//		    			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+//		    			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+//		    			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+//		    			
+//		    			if(roi.contains(originalX, originalY)){
+//		    				
+//		    				// if present in list, remove it, otherwise add it
+//		    				if(FishMappingWindow.this.selectedNucleiLeft.contains(n.getID()) ||  FishMappingWindow.this.selectedNucleiRight.contains(n.getID()) ){
+//
+//		    					FishMappingWindow.this.selectedNucleiLeft.remove(n.getID());
+//		    					FishMappingWindow.this.selectedNucleiRight.remove(n.getID());
+//			    				ip.setColor(Color.YELLOW);
+//		    					
+//		    				} else {
+//		    					
+//		    					if((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){ // right button
+//		    						FishMappingWindow.this.selectedNucleiRight.add(n.getID());
+//			    					ip.setColor(Color.MAGENTA);
+//		    					}
+//
+//		    					if((e.getModifiers() & InputEvent.BUTTON1_MASK)	== InputEvent.BUTTON1_MASK){ // left button
+//		    						FishMappingWindow.this.selectedNucleiLeft.add(n.getID());
+//			    					ip.setColor(Color.GREEN);
+//		    					}
+//		    					
+//		    				}
+//		    				
+//		    				// update the image
+//		    				roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+//		    				ip.setLineWidth(2);
+//		    				ip.draw(roi);
+//		    				ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+//
+//		    				ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
+//		    				preImageLabel.setIcon(preImageIcon);
+//		    			}
+//		    		}
+//					
+//		    	}
+//		    }
+//	}
 }

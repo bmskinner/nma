@@ -56,6 +56,7 @@ public interface NucleusCollection
 	public UUID getID();
 	
 	public Nucleus getNucleus(UUID id);
+	public List<Nucleus> getNuclei(File imageFile);
 	
 	public String getReferencePoint();
 	public String getOrientationPoint();

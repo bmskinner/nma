@@ -159,6 +159,8 @@ public class MainWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public MainWindow() {
+		
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		try {
 			setTitle("Nuclear Morphology Analysis");
 			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -543,36 +545,32 @@ public class MainWindow extends JFrame {
 
 			UUID id = this.populationNames.get(selectedValue);
 
-			//			int i = 0; // prototype - get the first dataset available
-			//			for(UUID id : MainWindow.this.analysisDatasets.keySet()){
-			//
-			//				if(i==0){
 			AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
 
 			//					IJ.log("Creating analysis");
 			FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset);
 
-			NucleusCollection sub = fishMapper.getSubCollection();
-			//					IJ.log("Found subcollection: "+sub.getName()+" with "+sub.getNucleusCount()+" nuclei");
-			if(sub.getNucleusCount()>0){
+			List<NucleusCollection> subs = fishMapper.getSubCollections();
+			for(NucleusCollection sub : subs){
+				//					IJ.log("Found subcollection: "+sub.getName()+" with "+sub.getNucleusCount()+" nuclei");
+				if(sub.getNucleusCount()>0){
 
-				logc("Reapplying morphology...");
-				boolean ok = MorphologyAnalysis.reapplyProfiles(sub, MainWindow.this.analysisDatasets.get(id).getCollection());
-				if(ok){
-					log("OK");
-				} else {
-					log("Error");
+					logc("Reapplying morphology...");
+					boolean ok = MorphologyAnalysis.reapplyProfiles(sub, MainWindow.this.analysisDatasets.get(id).getCollection());
+					if(ok){
+						log("OK");
+					} else {
+						log("Error");
+					}
+
+					dataset.addChildCollection(sub);
+
+					MainWindow.this.analysisDatasets.put(sub.getID(), dataset.getChildDataset(sub.getID()));
+					MainWindow.this.populationNames.put(sub.getName(), sub.getID());
+
 				}
-
-				dataset.addChildCollection(sub);
-
-				MainWindow.this.analysisDatasets.put(sub.getID(), dataset.getChildDataset(sub.getID()));
-				MainWindow.this.populationNames.put(sub.getName(), sub.getID());
-
-				updatePopulationList();	
 			}
-			//				}
-			//				i++;
+			updatePopulationList();	
 
 		} catch(Exception e){
 			log("Error in FISH remapping: "+e.getMessage());
@@ -648,60 +646,62 @@ public class MainWindow extends JFrame {
 						
 						ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
 						Map<String, Object> options = clusterSetup.getOptions();
-						for(String key : options.keySet()){
-							IJ.log(key+": "+options.get(key).toString());
+//						for(String key : options.keySet()){
+//							IJ.log(key+": "+options.get(key).toString());
+//						}
+						if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
+
+							logc("Running cluster analysis...");
+
+							NucleusClusterer clusterer = new NucleusClusterer(  (Integer) options.get("type") );
+							clusterer.setClusteringOptions(options);
+
+							AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
+							boolean ok = clusterer.cluster(parent.getCollection());
+							if(ok){
+								log("OK");
+								log("Found "+clusterer.getNumberOfClusters()+" clusters");
+
+								parent.setClusterTree(clusterer.getNewickTree());
+
+								for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
+									NucleusCollection c = clusterer.getCluster(cluster);
+									log("Cluster "+cluster+":");
+
+									logc("Reapplying morphology...");
+									ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisDatasets.get(id).getCollection());
+									if(ok){
+										log("OK");
+									} else {
+										log("Error");
+									}
+
+									//							logc("Refolding profile...");
+									//							ok = CurveRefolder.run(c, c.getAnalysisOptions().getNucleusClass(), c.getAnalysisOptions().getRefoldMode());
+									//							if(ok){
+									//								log("OK");
+									//							} else {
+									//								log("Error");
+									//							}
+
+									// attach the clusters to their parent collection
+									parent.addCluster(c);
+									//							parent.addChildCollection(c);
+
+									MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
+									if(MainWindow.this.populationNames.containsKey(c.getName())){
+										c.setName(c.getName()+"_1");
+									}
+									MainWindow.this.populationNames.put(c.getName(), c.getID());
+
+								}
+								updatePopulationList();	
+								//							parent.save();
+							} else {
+								log("Error");
+							}
 						}
 						clusterSetup.dispose();
-						
-						logc("Running cluster analysis...");
-						
-						NucleusClusterer clusterer = new NucleusClusterer(  (Integer) options.get("type") );
-						clusterer.setClusteringOptions(options);
-						
-						AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
-						boolean ok = clusterer.cluster(parent.getCollection());
-						if(ok){
-							log("OK");
-							log("Found "+clusterer.getNumberOfClusters()+" clusters");
-
-							parent.setClusterTree(clusterer.getNewickTree());
-
-							for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
-								NucleusCollection c = clusterer.getCluster(cluster);
-								log("Cluster "+cluster+":");
-
-								logc("Reapplying morphology...");
-								ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisDatasets.get(id).getCollection());
-								if(ok){
-									log("OK");
-								} else {
-									log("Error");
-								}
-
-								//							logc("Refolding profile...");
-								//							ok = CurveRefolder.run(c, c.getAnalysisOptions().getNucleusClass(), c.getAnalysisOptions().getRefoldMode());
-								//							if(ok){
-								//								log("OK");
-								//							} else {
-								//								log("Error");
-								//							}
-
-								// attach the clusters to their parent collection
-								parent.addCluster(c);
-								//							parent.addChildCollection(c);
-
-								MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
-								if(MainWindow.this.populationNames.containsKey(c.getName())){
-									c.setName(c.getName()+"_1");
-								}
-								MainWindow.this.populationNames.put(c.getName(), c.getID());
-
-							}
-							updatePopulationList();	
-//							parent.save();
-						} else {
-							log("Error");
-						}
 
 					} catch (Exception e){
 						log("Error in cluster analysis: "+e.getMessage());

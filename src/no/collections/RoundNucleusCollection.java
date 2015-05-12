@@ -318,6 +318,21 @@ implements NucleusCollection, Serializable
   public Nucleus getNucleus(int i){
     return this.nucleiCollection.get(i);
   }
+  
+  /**
+   * Get the nuclei within the specified image
+   * @param image the file to search
+   * @return the list of nuclei
+   */
+  public List<Nucleus> getNuclei(File imageFile){
+	  List<Nucleus> result = new ArrayList<Nucleus>(0);
+	  for(Nucleus n : this.getNuclei()){
+		  if(n.getSourceFile().equals(imageFile)){
+			  result.add(n);
+		  }
+	  }
+	  return result;
+  }
 
   public int getRedSignalCount(){
     int count = 0;
