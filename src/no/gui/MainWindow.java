@@ -1825,6 +1825,13 @@ public class MainWindow extends JFrame {
 		        
 		        Color colour = new Color((int) colourIndex,(int) colourIndex, 255);
 		        l.setBackground(colour);
+		        
+		        if(pct>60){
+		        	l.setForeground(Color.WHITE);
+		        } else {
+		        	l.setForeground(Color.black);
+		        }
+		        
 	        } else {
 	            l.setBackground(Color.LIGHT_GRAY);
 	        }

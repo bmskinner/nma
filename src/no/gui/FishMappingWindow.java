@@ -172,8 +172,10 @@ public class FishMappingWindow extends JDialog {
 		
 		JLabel headingLabel = new JLabel("Select nuclei to keep for analysis", JLabel.LEFT);
 		headingPanel.add(headingLabel);
-		JLabel helpLabel = new JLabel("Yellow nuclei are in the population; green are selected for remapping", JLabel.LEFT);
+		JLabel helpLabel = new JLabel("Yellow nuclei are available to select", JLabel.LEFT);
+		JLabel helpLabel2 = new JLabel("Click nuclei to add them to a sub-population", JLabel.LEFT);
 		headingPanel.add(helpLabel);
+		headingPanel.add(helpLabel2);
 		fileLabel = new JLabel("", JLabel.RIGHT);
 		headingPanel.add(fileLabel);
 		
@@ -338,9 +340,6 @@ public class FishMappingWindow extends JDialog {
 		    		if(roi.contains(originalX, originalY)){
 
 		    			drawNucleus(n, openProcessor, e, roi);
-		    			
-		    			openProcessor.setColor(Color.CYAN);
-		    			openProcessor.drawOval(originalX, originalY, 3, 3);
 		    			
 		    			ImagePlus preSmall;
 		    			if(openProcessor.getWidth()>smallWidth){
@@ -516,58 +515,5 @@ public class FishMappingWindow extends JDialog {
 			}
 		}
 	}
-	
-//	class ImageClickedAdapter extends MouseAdapter {
-//
-//		@Override
-//		public void mousePressed(MouseEvent e) {
-//
-//
-//			// correct scaling 
-//			int x = e.getX();
-//			int y = e.getY();
-//			int originalX = openProcessor.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
-//			int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
-//
-//
-//			List<Nucleus> imageNuclei = FishMappingWindow.this.preFISHDataset.getCollection().getNuclei(openFile);
-//			IJ.log("");
-//			for(Nucleus n : imageNuclei){
-//
-//				IJ.log("Checking "+n.getImageName()+"-"+n.getNucleusNumber());
-//
-//				double[] positions = n.getPosition();
-//
-//				FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-//				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-//				roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-//
-//				// there is one point in each roi that when clicked, replaces with another image
-//				// see testing set 4 -> 2
-//				// somehow the ip is set to a different image file
-//				// the roi overlap is correct for the wrong nucleus
-//
-//				if(roi.contains(originalX, originalY)){
-//
-//					drawNucleus(n, openProcessor, e, roi);
-//					IJ.log("  Match found");
-//
-//					openProcessor.setColor(Color.CYAN);
-//					openProcessor.drawOval(originalX, originalY, 3, 3);
-//
-//					ImagePlus preSmall;
-//					if(openProcessor.getWidth()>smallWidth){
-//						preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
-//						IJ.log("  resized");
-//					} else {
-//						preSmall = new ImagePlus("small", openProcessor);
-//						IJ.log("  raw");
-//					}
-//
-//					ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
-//					preImageLabel.setIcon(preImageIcon);
-//				}
-//			}
-//		}
-//	}
+
 }
