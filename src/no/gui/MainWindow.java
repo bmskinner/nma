@@ -145,6 +145,9 @@ public class MainWindow extends JFrame {
 	private JPanel signalHistogramPanel;// signals container for chart and stats table
 	
 	private JPanel clusteringPanel;// container for clustering options and display
+	
+	private JPanel vennPanel; // show overlaps between populations
+	private JTable vennTable;
 
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
@@ -488,6 +491,19 @@ public class MainWindow extends JFrame {
 			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
 			tabbedPane.addTab("Clusters", null, clusteringPanel, null);
 			
+			//---------------
+			// Create the Venn panel
+			//---------------
+			vennPanel = new JPanel();
+			vennPanel.setLayout(new BorderLayout());
+			tabbedPane.addTab("Venn", null, vennPanel, null);
+			
+			vennTable = new JTable();
+			vennPanel.add(vennTable, BorderLayout.CENTER);
+			vennTable.setEnabled(false);
+			vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
+			vennTable.setModel(DatasetCreator.createVennTable(null));
+			
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -803,6 +819,7 @@ public class MainWindow extends JFrame {
 					updateSignalsPanel(list);
 					updateSignalHistogramPanel(list);
 					updateClusteringPanel(list);
+					updateVennPanel(list);
 				} catch (Exception e) {
 					log("Error updating panels: "+e.getMessage());
 					for(StackTraceElement el : e.getStackTrace()){
@@ -849,6 +866,12 @@ public class MainWindow extends JFrame {
 		// format the numbers and make into a tablemodel
 		TableModel model = DatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
+	}
+	
+	public void updateVennPanel(List<AnalysisDataset> list){
+		// format the numbers and make into a tablemodel
+		TableModel model = DatasetCreator.createVennTable(list);
+		vennTable.setModel(model);
 	}
 	
 	public JFreeChart makeProfileChart(XYDataset ds){

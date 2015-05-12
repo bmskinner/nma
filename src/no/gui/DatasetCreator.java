@@ -338,6 +338,54 @@ public class DatasetCreator {
 		}
 		return model;	
 	}
+	
+	public static TableModel createVennTable(List<AnalysisDataset> list){
+		DefaultTableModel model = new DefaultTableModel();
+		
+		if(list==null){
+			Object[] columnData = {""};
+			model.addColumn("Population", columnData );
+			model.addColumn("", columnData );
+			return model;
+		}
+		
+		// set rows
+		Object[] columnData = new Object[list.size()];
+		int row = 0;
+		for(AnalysisDataset dataset : list){
+			columnData[row] = dataset.getName();
+			row++;
+		}
+		model.addColumn("Population", columnData);
+		
+		// add columns
+		for(AnalysisDataset dataset : list){
+			
+			Object[] popData = new Object[list.size()];
+			
+			int i = 0;
+			for(AnalysisDataset dataset2 : list){
+				
+				if(dataset2.getUUID().equals(dataset.getUUID())){
+					popData[i] = "";
+				} else {
+					// compare the number of shared nucleus ids
+					int shared = 0;
+					for(Nucleus n : dataset.getCollection().getNuclei()){
+						if( dataset2.getCollection().getNuclei().contains(n)){
+							shared++;
+						}
+					}
+					DecimalFormat df = new DecimalFormat("#0.00"); 
+					double pct = ((double) shared / (double) dataset2.getCollection().getNucleusCount())*100;
+					popData[i] = shared+" ("+df.format(pct)+"% of row)";
+				}
+				i++;
+			}
+			model.addColumn(dataset.getName(), popData);
+		}
+		return model;
+	}
 				
 	public static BoxAndWhiskerCategoryDataset createAreaBoxplotDataset(List<AnalysisDataset> collections) {
                 
