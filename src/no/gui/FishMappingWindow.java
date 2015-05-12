@@ -16,6 +16,7 @@ import java.awt.FlowLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -58,6 +59,9 @@ public class FishMappingWindow extends JDialog {
 	JButton nextButton;
 	
 	JLabel fileLabel;
+	
+	private File openFile;
+	private ImageProcessor openProcessor;
 	
 	private JPanel imagePane;
 	
@@ -235,7 +239,7 @@ public class FishMappingWindow extends JDialog {
 		
 		File firstImage = this.preFISHDataset.getCollection().getImageFiles().get(0);
 		fileLabel.setText("Image file: "+firstImage.getAbsolutePath());
-		openImages(firstImage, null);
+		openImages(firstImage);
 
 		this.pack(); 
 		this.setVisible(true);
@@ -243,36 +247,29 @@ public class FishMappingWindow extends JDialog {
 	
 	
 	// open the images for pre and post. Annotate the nuclei
-	private void openImages(File preFile, MouseEvent sourceEvent){
-		
-		if(sourceEvent!=null){
-		
-			if(sourceEvent.getSource() != nextButton && sourceEvent.getSource() != prevButton){
-				IJ.log("openImages triggered spuriously: "+sourceEvent.getSource().getClass().getName());
-			}
-		} else {
-			IJ.log("Null trigger for openimages");
-		}
+	private void openImages(File preFile){
 				
-		final ImageStack preStack = ImageImporter.importImage(preFile, this.preFISHDataset.getDebugFile());
-		final ImagePlus preImage = ImageExporter.convert(preStack);
+		openFile = preFile;
+				
+		ImageStack preStack = ImageImporter.importImage(preFile, this.preFISHDataset.getDebugFile());
+		ImagePlus preImage = ImageExporter.convert(preStack);
 
-		final ImageProcessor ip = preImage.getProcessor();
-		final List<Nucleus> imageNuclei = this.preFISHDataset.getCollection().getNuclei(preFile);
+		openProcessor = preImage.getProcessor();
+		List<Nucleus> imageNuclei = this.preFISHDataset.getCollection().getNuclei(openFile);
 		
+
 		for(Nucleus n : imageNuclei){
 
-//			IJ.log(n.getImageName());
 			// if present in list, colour green, else yellow
 			if(selectedNucleiLeft.contains(n.getID())){
-				ip.setColor(Color.GREEN);
+				openProcessor.setColor(Color.GREEN);
 			} else {
 
 				if(selectedNucleiRight.contains(n.getID())){
-					ip.setColor(Color.MAGENTA);
+					openProcessor.setColor(Color.MAGENTA);
 
 				} else {
-					ip.setColor(Color.YELLOW);
+					openProcessor.setColor(Color.YELLOW);
 				}
 			}
 
@@ -280,14 +277,13 @@ public class FishMappingWindow extends JDialog {
 			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
 			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-			ip.setLineWidth(2);
-			ip.draw(roi);
+			openProcessor.setLineWidth(2);
+			openProcessor.draw(roi);
 
 		}
 	
-		
-		int originalWidth = ip.getWidth();
-		int originalHeight = ip.getHeight();
+		int originalWidth = openProcessor.getWidth();
+		int originalHeight = openProcessor.getHeight();
 				
 
 		// set the image width to be less than half the screen width
@@ -301,70 +297,60 @@ public class FishMappingWindow extends JDialog {
 		final double conversion = (double) smallWidth / (double) originalWidth;
 		
 		final ImagePlus preSmall;
-//		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
-		if(ip.getWidth()>smallWidth){
-			preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+
+		
+		if(openProcessor.getWidth()>smallWidth){
+			preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
 		} else {
-			preSmall = new ImagePlus("small", ip);
+			preSmall = new ImagePlus("small", openProcessor);
 		}
 
 		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
 		preImageLabel.setIcon(preImageIcon);
-		preSmall.close();
+
+		
+		// stop the listeners building up and overlapping
+		for(MouseListener m : preImageLabel.getMouseListeners()){
+			preImageLabel.removeMouseListener(m);
+		}
 		
 		preImageLabel.addMouseListener(new MouseAdapter() {
 		    @Override
 		    public void mousePressed(MouseEvent e) {
-		    	
-//		    	int correction = 10;
-		    	
+		    			    
 		        // correct scaling 
-		    	// problem occurs when images smaller than desired width are upscaled
 		    	int x = e.getX();
 		    	int y = e.getY();
-		    	int originalX = ip.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
-		    	int originalY = ip.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
+		    	int originalX = openProcessor.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
+		    	int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
 		    	
-		    	int w = preSmall.getWidth();
-		    	int h = preSmall.getHeight();
 		    	
-//		    	IJ.log("");
-//		    	IJ.log("Click: x: "+x+", y: "+y+" : origx: "+originalX+", origy: "+originalY+" : w: "+w+" , h: "+h);
-		    	
+		    	List<Nucleus> imageNuclei = FishMappingWindow.this.preFISHDataset.getCollection().getNuclei(openFile);
 		    	for(Nucleus n : imageNuclei){
+		    		
 
 		    		double[] positions = n.getPosition();
 		    		
 		    		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
 		    		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 		    		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-
-		    		// there is one point in each roi that when clicked, replaces with another image
-		    		// see testing set 4 -> 2
-		    		// somehow the ip is set to a different image file
-		    		// the roi overlap is correct for the wrong nucleus
 		    		
 		    		if(roi.contains(originalX, originalY)){
 
-		    			drawNucleus(n, ip, e, roi);
-//		    			IJ.log("Conversion: "+conversion);
-//		    			IJ.log("Click: "+x+", "+y+" : "+originalX+", "+originalY);
-//		    			IJ.log("Nucleus positions: "+positions[0]+", "+positions[1]+" : "+positions[2]+", "+positions[3]);
+		    			drawNucleus(n, openProcessor, e, roi);
 		    			
-		    			ip.setColor(Color.CYAN);
-		    			ip.drawOval(originalX, originalY, 3, 3);
+		    			openProcessor.setColor(Color.CYAN);
+		    			openProcessor.drawOval(originalX, originalY, 3, 3);
 		    			
 		    			ImagePlus preSmall;
-		    			if(ip.getWidth()>smallWidth){
-		    				preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+		    			if(openProcessor.getWidth()>smallWidth){
+		    				preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
 		    			} else {
-		    				preSmall = new ImagePlus("small", ip);
+		    				preSmall = new ImagePlus("small", openProcessor);
 		    			}
-//		    			ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
 
 			    		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
 			    		preImageLabel.setIcon(preImageIcon);
-			    		preSmall.close();
 		    		}
 		    	}
 		    }
@@ -378,7 +364,7 @@ public class FishMappingWindow extends JDialog {
 		// make an image icon and display
 		ImagePlus postSmall;
 //		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
-		if(ip.getWidth()>smallWidth){
+		if(openProcessor.getWidth()>smallWidth){
 			postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
 		} else {
 			postSmall = postImage;
@@ -387,8 +373,6 @@ public class FishMappingWindow extends JDialog {
 //		ImagePlus postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
 		ImageIcon postImageIcon = new ImageIcon(postSmall.getBufferedImage());
 		postImageLabel.setIcon(postImageIcon);
-		
-//		IJ.log("Opened post-image: "+postFile);
 
 	}
 
@@ -476,7 +460,7 @@ public class FishMappingWindow extends JDialog {
 					int imageDisplayCount = currentImage+1;
 					String progress = "Image "+imageDisplayCount+" of "+FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size();
 					fileLabel.setText("Image file: "+imagefile.getAbsolutePath()+" : "+progress);
-					openImages(imagefile, arg0);
+					openImages(imagefile);
 
 
 				} else { // end of analysis; make a collection from all the nuclei selected
@@ -526,7 +510,7 @@ public class FishMappingWindow extends JDialog {
 			int imageDisplayCount = currentImage+1;
 			String progress = "Image "+imageDisplayCount+" of "+FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size();
 			fileLabel.setText("Image file: "+imagefile.getAbsolutePath()+" : "+progress);
-			openImages(imagefile, arg0);
+			openImages(imagefile);
 			} else {
 				IJ.log("Prev button got spurious trigger");
 			}
@@ -535,60 +519,55 @@ public class FishMappingWindow extends JDialog {
 	
 //	class ImageClickedAdapter extends MouseAdapter {
 //
-//		 @Override
-//		    public void mousePressed(MouseEvent e) {
-//		    	
-//		    	
-//		        //statement
-//		    	int x = e.getX();
-//		    	int y = e.getY();
-//		    	int originalX = (int) (x / conversion);
-//		    	int originalY = (int) (y / conversion);
-////		    	IJ.log("Click: "+x+", "+y+" : "+originalX+", "+originalY);
-//		    	for(Nucleus n : FishMappingWindow.this.preFISHDataset.getCollection().getNuclei()){
-//		    		
-//		    		if(n.getSourceFile().equals(preFile)){
+//		@Override
+//		public void mousePressed(MouseEvent e) {
 //
-//		    			double[] positions = n.getPosition();
-//		    			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-//		    			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-//		    			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-//		    			
-//		    			if(roi.contains(originalX, originalY)){
-//		    				
-//		    				// if present in list, remove it, otherwise add it
-//		    				if(FishMappingWindow.this.selectedNucleiLeft.contains(n.getID()) ||  FishMappingWindow.this.selectedNucleiRight.contains(n.getID()) ){
 //
-//		    					FishMappingWindow.this.selectedNucleiLeft.remove(n.getID());
-//		    					FishMappingWindow.this.selectedNucleiRight.remove(n.getID());
-//			    				ip.setColor(Color.YELLOW);
-//		    					
-//		    				} else {
-//		    					
-//		    					if((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){ // right button
-//		    						FishMappingWindow.this.selectedNucleiRight.add(n.getID());
-//			    					ip.setColor(Color.MAGENTA);
-//		    					}
+//			// correct scaling 
+//			int x = e.getX();
+//			int y = e.getY();
+//			int originalX = openProcessor.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
+//			int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
 //
-//		    					if((e.getModifiers() & InputEvent.BUTTON1_MASK)	== InputEvent.BUTTON1_MASK){ // left button
-//		    						FishMappingWindow.this.selectedNucleiLeft.add(n.getID());
-//			    					ip.setColor(Color.GREEN);
-//		    					}
-//		    					
-//		    				}
-//		    				
-//		    				// update the image
-//		    				roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-//		    				ip.setLineWidth(2);
-//		    				ip.draw(roi);
-//		    				ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
 //
-//		    				ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
-//		    				preImageLabel.setIcon(preImageIcon);
-//		    			}
-//		    		}
-//					
-//		    	}
-//		    }
+//			List<Nucleus> imageNuclei = FishMappingWindow.this.preFISHDataset.getCollection().getNuclei(openFile);
+//			IJ.log("");
+//			for(Nucleus n : imageNuclei){
+//
+//				IJ.log("Checking "+n.getImageName()+"-"+n.getNucleusNumber());
+//
+//				double[] positions = n.getPosition();
+//
+//				FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+//				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+//				roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+//
+//				// there is one point in each roi that when clicked, replaces with another image
+//				// see testing set 4 -> 2
+//				// somehow the ip is set to a different image file
+//				// the roi overlap is correct for the wrong nucleus
+//
+//				if(roi.contains(originalX, originalY)){
+//
+//					drawNucleus(n, openProcessor, e, roi);
+//					IJ.log("  Match found");
+//
+//					openProcessor.setColor(Color.CYAN);
+//					openProcessor.drawOval(originalX, originalY, 3, 3);
+//
+//					ImagePlus preSmall;
+//					if(openProcessor.getWidth()>smallWidth){
+//						preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
+//						IJ.log("  resized");
+//					} else {
+//						preSmall = new ImagePlus("small", openProcessor);
+//						IJ.log("  raw");
+//					}
+//
+//					ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
+//					preImageLabel.setIcon(preImageIcon);
+//				}
+//			}
+//		}
 //	}
 }
