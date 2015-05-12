@@ -83,7 +83,10 @@ public class NucleusClusterer {
 				
 
 				logger.log("Clusterer is type "+type);
-				logger.log("Clusterer options: "+options.toString(), Logger.DEBUG);
+				for(String s : options){
+					logger.log("Clusterer options: "+s, Logger.DEBUG);
+				}
+				
 				
 				if(type==NucleusClusterer.HIERARCHICAL){
 					HierarchicalClusterer clusterer = new HierarchicalClusterer();
@@ -273,7 +276,8 @@ public class NucleusClusterer {
  	
  	public void setClusteringOptions(Map<String, Object> options){
  		this.optionMap = options;
- 		setType( (Integer) options.get("type")); 
+ 		this.type =  (Integer) options.get("type"); 
+ 		IJ.log("Input type: "+this.type);
  	}
 	
 	private String[] makeClusteringOptions(){
@@ -287,6 +291,8 @@ public class NucleusClusterer {
 			//		options[3] = "2";
 		}
 		if(this.type==NucleusClusterer.HIERARCHICAL){
+			
+			Object o = optionMap.get("-N");
 			options = new String[4];
 			options[0] = "-N";                 // number of clusters
 			options[1] = String.valueOf((Integer) optionMap.get("-N"));

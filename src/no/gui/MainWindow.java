@@ -655,7 +655,7 @@ public class MainWindow extends JFrame {
 						
 						logc("Running cluster analysis...");
 						
-						NucleusClusterer clusterer = new NucleusClusterer(NucleusClusterer.HIERARCHICAL);
+						NucleusClusterer clusterer = new NucleusClusterer(  (Integer) options.get("type") );
 						clusterer.setClusteringOptions(options);
 						
 						AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
