@@ -25,10 +25,6 @@ import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
-
-
-import org.jdesktop.swingx.treetable.TreeTableNode;
-
 import no.analysis.AnalysisCreator;
 import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
@@ -42,8 +38,6 @@ import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -66,7 +60,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
-import javax.swing.JTree;
 import javax.swing.SwingConstants;
 
 import java.awt.Font;
@@ -76,10 +69,8 @@ import javax.swing.JTable;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Desktop.Action;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.HeadlessException;
 import java.awt.Shape;
 
 import javax.swing.ListSelectionModel;
@@ -118,6 +109,7 @@ public class MainWindow extends JFrame {
 	private static final int VARIABILITY_TAB = 4;
 	private static final int SIGNALS_TAB = 5;
 	private static final int CLUSTERS_TAB = 6;
+	private static final int VENN_TAB = 6;
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
