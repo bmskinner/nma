@@ -154,7 +154,7 @@ public class AnalysisDataset implements Serializable {
 	public NucleusCollection getCollection(){
 		return this.thisCollection;
 	}
-	
+
 	public void save(){
 		if(savePath==null){
 			IJ.log("No save path defined");
@@ -162,101 +162,102 @@ public class AnalysisDataset implements Serializable {
 			PopulationExporter.saveAnalysisDataset(this);
 		}
 	}
-	
-	  public void addShellResult(int channel, ShellResult result){
-		  this.shellResults.put(channel, result);
-	  }
-	  
-	  public ShellResult getShellResult(int channel){
-		  return this.shellResults.get(channel);
-	  }
 
-	  /**
-	   * Test if the collection has a ShellResult in any channel
-	   * 
-	   */
-	  public boolean hasShellResult(){
-		  for(Integer channel : this.thisCollection.getSignalChannels()){
-			  if(this.shellResults.containsKey(channel)){
-				  return true;
-			  }
-		  }
-		  return false;
-	  }
-	  
-	  public AnalysisOptions getAnalysisOptions() {
-		  return analysisOptions;
-	  }
 
-	  public void setAnalysisOptions(AnalysisOptions analysisOptions) {
-		  this.analysisOptions = analysisOptions;
-	  }
-	  
-	  public void addCluster(AnalysisDataset dataset){
-		  this.addChildDataset(dataset);
-		  this.clusterResults.add(dataset.getUUID());
-	  }
-	  
-	  public void addCluster(NucleusCollection collection){
-		  this.addChildCollection(collection);
-		  this.clusterResults.add(collection.getID());
-	  }
-	  
-	  public List<UUID> getClusterIDs(){
-		  return this.clusterResults;
-	  }
-	  
-	  public boolean hasClusters(){
-		  if(this.clusterResults.size()>0){
-			  return true;
-		  } else {
-			  return false;
-		  }
-	  }
-	  
-	  public void setClusterTree(String s){
-		  this.newickTree = s;
-	  }
-	  
-	  public String getClusterTree(){
-		  return this.newickTree;
-	  }
-	  
-	  public boolean isRoot(){
-		  return  this.isRoot;
-	  }
-	  
-	  public void setRoot(boolean b){
-		  this.isRoot = b;
-	  }
-	  
-	  /**
-	   * Delete the child AnalysisDataset specified
-	   * @param id the UUID of the child to delete
-	   */
-	  public void deleteChild(UUID id){
-		  if(this.childCollections.containsKey(id)){
-			  this.childCollections.remove(id);
-		  }
-		  if(this.clusterResults.contains(id)){
-			  this.clusterResults.remove(id);
-		  }
-	  }
-	  
-	  public boolean hasChild(AnalysisDataset child){
-		  if(this.childCollections.containsKey(child.getUUID())){
-			  return true;
-		  } else {
-			  return false;
-		  }
-	  }
-	  
-	  public boolean hasChild(UUID child){
-		  if(this.childCollections.containsKey(child)){
-			  return true;
-		  } else {
-			  return false;
-		  }
-	  }
+	public void addShellResult(int channel, ShellResult result){
+		this.shellResults.put(channel, result);
+	}
+
+	public ShellResult getShellResult(int channel){
+		return this.shellResults.get(channel);
+	}
+
+	/**
+	 * Test if the collection has a ShellResult in any channel
+	 * 
+	 */
+	public boolean hasShellResult(){
+		for(Integer channel : this.thisCollection.getSignalChannels()){
+			if(this.shellResults.containsKey(channel)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public AnalysisOptions getAnalysisOptions() {
+		return analysisOptions;
+	}
+
+	public void setAnalysisOptions(AnalysisOptions analysisOptions) {
+		this.analysisOptions = analysisOptions;
+	}
+
+	public void addCluster(AnalysisDataset dataset){
+		this.addChildDataset(dataset);
+		this.clusterResults.add(dataset.getUUID());
+	}
+
+	public void addCluster(NucleusCollection collection){
+		this.addChildCollection(collection);
+		this.clusterResults.add(collection.getID());
+	}
+
+	public List<UUID> getClusterIDs(){
+		return this.clusterResults;
+	}
+
+	public boolean hasClusters(){
+		if(this.clusterResults.size()>0){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public void setClusterTree(String s){
+		this.newickTree = s;
+	}
+
+	public String getClusterTree(){
+		return this.newickTree;
+	}
+
+	public boolean isRoot(){
+		return  this.isRoot;
+	}
+
+	public void setRoot(boolean b){
+		this.isRoot = b;
+	}
+
+	/**
+	 * Delete the child AnalysisDataset specified
+	 * @param id the UUID of the child to delete
+	 */
+	public void deleteChild(UUID id){
+		if(this.childCollections.containsKey(id)){
+			this.childCollections.remove(id);
+		}
+		if(this.clusterResults.contains(id)){
+			this.clusterResults.remove(id);
+		}
+	}
+
+	public boolean hasChild(AnalysisDataset child){
+		if(this.childCollections.containsKey(child.getUUID())){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public boolean hasChild(UUID child){
+		if(this.childCollections.containsKey(child)){
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 }

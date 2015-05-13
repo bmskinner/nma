@@ -1,7 +1,9 @@
 package no.gui;
 
 import ij.IJ;
+import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
+import ij.io.SaveDialog;
 
 import java.awt.BorderLayout;
 
@@ -34,6 +36,7 @@ import no.analysis.ProfileSegmenter;
 import no.analysis.ShellAnalysis;
 import no.collections.NucleusCollection;
 import no.components.Profile;
+import no.export.PopulationExporter;
 import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
 
@@ -531,21 +534,6 @@ public class MainWindow extends JFrame {
 		
 	}
 	
-//	/**
-//	 * Ensure the population table displays properly
-//	 * @param table the table
-//	 * @param rows the desired number of rows
-//	 */
-//	public static void setVisibleRowCount(JTable table, int rows){ 
-//	    int height = 0; 
-//	    for(int row=0; row<rows; row++) 
-//	        height += table.getRowHeight(row); 
-//	 
-//	    table.setPreferredScrollableViewportSize(new Dimension( 
-//	            table.getPreferredScrollableViewportSize().width, 
-//	            height 
-//	    )); 
-//	}
 	
 	/**
 	 * Standard log - append a newline
@@ -844,6 +832,7 @@ public class MainWindow extends JFrame {
 					
 					// read the dataset
 					AnalysisDataset dataset = PopulationImporter.readDataset(new File(fileName));
+					dataset.setRoot(true);
 					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
 					
 					// update the population list
@@ -1856,15 +1845,17 @@ public class MainWindow extends JFrame {
 					log("Error: list is empty");
 					populationPopup.disableAll();
 				} else {
-					if(datasets.size()>1){
+					if(datasets.size()>1){ // multiple populations
 						populationPopup.enableAll();
 						populationPopup.disableSplit();
+						populationPopup.disableSave();
 						
-					} else {
+					} else { // single population
 						populationPopup.enableDelete();
 						populationPopup.disableMerge();
+						populationPopup.enableSave();
 						
-						if(!datasets.get(0).hasChildren()){
+						if(!datasets.get(0).hasChildren()){ // cannot split population without children yet
 							populationPopup.disableSplit();
 						} else {
 							populationPopup.enableSplit();
@@ -2010,6 +2001,7 @@ public class MainWindow extends JFrame {
 		JMenuItem mergeMenuItem = new JMenuItem(new MergeCollectionAction());;
 		JMenuItem deleteMenuItem = new JMenuItem(new DeleteCollectionAction());
 		JMenuItem splitMenuItem = new JMenuItem(new SplitCollectionAction());
+		JMenuItem saveMenuItem = new JMenuItem(new SaveCollectionAction());
 				
 		public PopulationListPopupMenu() {
 			
@@ -2018,6 +2010,7 @@ public class MainWindow extends JFrame {
 			this.add(mergeMenuItem);
 			this.add(deleteMenuItem);
 			this.add(splitMenuItem);
+			this.add(saveMenuItem);
 			
 	    }
 		
@@ -2025,12 +2018,14 @@ public class MainWindow extends JFrame {
 			enableMerge();
 			enableDelete();
 			enableSplit();
+			enableSave();
 		}
 		
 		public void disableAll(){
 			disableMerge();
 			disableDelete();
 			disableSplit();
+			disableSave();
 		}
 		
 		public void enableMerge(){
@@ -2055,6 +2050,14 @@ public class MainWindow extends JFrame {
 		
 		public void disableSplit(){
 			splitMenuItem.setEnabled(false);
+		}
+		
+		public void enableSave(){
+			saveMenuItem.setEnabled(true);
+		}
+		
+		public void disableSave(){
+			saveMenuItem.setEnabled(false);
 		}
 	}
 	
@@ -2313,6 +2316,36 @@ public class MainWindow extends JFrame {
 				
 	        }   else {
 	        	log("Cannot split multiple collections");
+	        }
+	    }
+	}
+	
+	class SaveCollectionAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public SaveCollectionAction() {
+	        super("Save as...");
+	    }
+		
+	    public void actionPerformed(ActionEvent e) {
+	        
+	        List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+	        
+	        if(datasets.size()==1){
+
+	        	AnalysisDataset d = datasets.get(0);
+	        	SaveDialog saveDialog = new SaveDialog("Save as...", d.getName(), ".nmd");
+	        	
+	        	String fileName = saveDialog.getFileName();
+	    	    String folderName = saveDialog.getDirectory();
+	    	    
+	    	    File saveFile = new File(folderName+File.separator+fileName);
+
+    	    	logc("Saving as "+saveFile.getAbsolutePath()+"...");
+    	    	PopulationExporter.saveAnalysisDataset(d, saveFile);
+        		log("OK");
+        		log("Saved dataset "+d.getCollection().getName());
+	    	    
 	        }
 	    }
 	}

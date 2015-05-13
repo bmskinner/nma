@@ -69,17 +69,11 @@ public class PopulationExporter {
 		return true;
 	}
 	
-	public static boolean saveAnalysisDataset(AnalysisDataset dataset){
-
+	public static boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
 		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
 
 		try{
-
-			// Since we're creating a save format, go with nmb: Nuclear Morphology Binary
-			File saveFile = dataset.getSavePath();
-			if(saveFile.exists()){
-				saveFile.delete();
-			}
+			// Since we're creating a save format, go with nmd: Nuclear Morphology Dataset
 			logger.log("Saving dataset to "+saveFile.getAbsolutePath());
 
 			try{
@@ -91,12 +85,10 @@ public class PopulationExporter {
 				try{
 
 					output.writeObject(dataset);
-			
-
 					logger.log("Save complete");
 
 				} catch(IOException e){
-					logger.log("    Unable to save dataset: "+e.getMessage(), Logger.ERROR);
+					logger.log("Unable to save dataset: "+e.getMessage(), Logger.ERROR);
 					for(StackTraceElement el : e.getStackTrace()){
 						logger.log(el.toString(), Logger.STACK);
 					}
@@ -115,6 +107,26 @@ public class PopulationExporter {
 				return false;
 			}
 			
+		} catch(Exception e){
+			logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean saveAnalysisDataset(AnalysisDataset dataset){
+
+		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
+
+		try{
+
+			// Since we're creating a save format, go with nmb: Nuclear Morphology Binary
+			File saveFile = dataset.getSavePath();
+			if(saveFile.exists()){
+				saveFile.delete();
+			}
+			saveAnalysisDataset(dataset, saveFile);
+						
 		} catch(Exception e){
 			logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
 			return false;
