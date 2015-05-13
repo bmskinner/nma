@@ -229,5 +229,34 @@ public class AnalysisDataset implements Serializable {
 	  public void setRoot(boolean b){
 		  this.isRoot = b;
 	  }
+	  
+	  /**
+	   * Delete the child AnalysisDataset specified
+	   * @param id the UUID of the child to delete
+	   */
+	  public void deleteChild(UUID id){
+		  if(this.childCollections.containsKey(id)){
+			  this.childCollections.remove(id);
+		  }
+		  if(this.clusterResults.contains(id)){
+			  this.clusterResults.remove(id);
+		  }
+	  }
+	  
+	  public boolean hasChild(AnalysisDataset child){
+		  if(this.childCollections.containsKey(child.getUUID())){
+			  return true;
+		  } else {
+			  return false;
+		  }
+	  }
+	  
+	  public boolean hasChild(UUID child){
+		  if(this.childCollections.containsKey(child)){
+			  return true;
+		  } else {
+			  return false;
+		  }
+	  }
 
 }

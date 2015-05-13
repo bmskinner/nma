@@ -39,7 +39,11 @@ import no.analysis.ShellAnalysis;
 import no.collections.NucleusCollection;
 import no.components.Profile;
 import no.imports.PopulationImporter;
+import no.nuclei.Nucleus;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -47,6 +51,8 @@ import javax.swing.JTextArea;
 
 import java.awt.SystemColor;
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +60,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.AbstractAction;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
 import javax.swing.JTree;
@@ -67,8 +76,10 @@ import javax.swing.JTable;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop.Action;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Shape;
 
 import javax.swing.ListSelectionModel;
@@ -292,25 +303,45 @@ public class MainWindow extends JFrame {
 			treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
 			treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 			
+//			final PopulationListPopupMenu popup = new PopulationListPopupMenu();
+			
+			treeTable.setComponentPopupMenu(new PopulationListPopupMenu());
+			
 			treeTable.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent e) {
+					
 					JXTreeTable table = (JXTreeTable) e.getSource();
-			        if (e.getClickCount() == 2) {
-			          int index = table.rowAtPoint((e.getPoint()));
-			          if (index >= 0) {
-			        	  Object o = table.getModel().getValueAt(index, 0);
-			        	  UUID id = MainWindow.this.populationNames.get(o.toString());
-			        	  renameCollection(MainWindow.this.analysisDatasets.get(id));
-			          }
-			        }
+					
+					// double click
+					if (e.getClickCount() == 2) {
+						int index = table.rowAtPoint((e.getPoint()));
+						if (index >= 0) {
+							Object o = table.getModel().getValueAt(index, 0);
+							UUID id = MainWindow.this.populationNames.get(o.toString());
+							renameCollection(MainWindow.this.analysisDatasets.get(id));
+						}
+					}
+
 				}
+				
+//				public void mouseReleased(MouseEvent e) {
+//			        maybeShowPopup(e);
+//			    }
+//
+//			    private void maybeShowPopup(MouseEvent e) {
+//			        if (e.isPopupTrigger()) {
+//			            popup.show(e.getComponent(),
+//			                       e.getX(), e.getY());
+//			        }
+//			    }
 			});
-			
+
 			TreeSelectionModel tableSelectionModel = treeTable.getTreeSelectionModel();
 			tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
 			
-			JScrollPane populationScrollPane = new JScrollPane(treeTable);
+			JScrollPane populationScrollPane = new JScrollPane(treeTable);		
+			
 			panelPopulations.add(populationScrollPane);
 			
 			
@@ -598,17 +629,8 @@ public class MainWindow extends JFrame {
 				if(datasets.size()==0 || datasets==null){
 					log("No datasets returned");
 				}
-//				updatePanels(result);
-				
-//				// old style population lists
-//				for(NucleusCollection c : result){
-//					MainWindow.this.analysisPopulations.put(c.getID(), c);
-//					MainWindow.this.populationNames.put(c.getName(), c.getID());
-//				}
 				
 				// new style datasets
-				
-				
 				for(AnalysisDataset d : datasets){
 
 					// old style population lists
@@ -1448,6 +1470,9 @@ public class MainWindow extends JFrame {
 				treeTable.expandRow(row);
 				row++;
 			}
+			
+			treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+			treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 		
 		}
 	}
@@ -1769,9 +1794,41 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	
+	public List<AnalysisDataset> getSelectedRowsFromTreeTable(){
+
+		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
+
+		TreeSelectionModel lsm = treeTable.getTreeSelectionModel();
+
+		List<Integer> selectedIndexes = new ArrayList<Integer>(0);
+
+		if (!lsm.isSelectionEmpty()) {
+			// Find out which indexes are selected.
+			int minIndex = lsm.getMinSelectionRow();
+			int maxIndex = lsm.getMaxSelectionRow();
+			for (int i = minIndex; i <= maxIndex; i++) {
+				if (lsm.isRowSelected(i)) {
+
+					String key = (String) treeTable.getModel().getValueAt(i, 0); // row i, column 0
+					if(!key.equals("No populations")){
+
+						// get uuid from populationNames, then population via uuid from analysisDatasets
+						datasets.add(analysisDatasets.get(populationNames.get(key)));
+						selectedIndexes.add(i);
+
+					}
+
+				}
+			}
+		}
+		return datasets;
+	}
+	
 	class TreeSelectionHandler implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 			
+//			List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 			List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
 			
 			TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
@@ -1785,10 +1842,6 @@ public class MainWindow extends JFrame {
 				for (int i = minIndex; i <= maxIndex; i++) {
 					if (lsm.isRowSelected(i)) {
 						
-//						PopulationTreeTableNode node = (PopulationTreeTableNode) treeTable.getTreeTableModel().getChild(treeTable.getTreeTableModel().getRoot(), i);
-//						UUID id = node.getID();
-//						datasets.add(analysisDatasets.get(id));
-//						selectedIndexes.add(i);
 
 						String key = (String) treeTable.getModel().getValueAt(i, 0); // row i, column 0
 						if(!key.equals("No populations")){
@@ -1813,6 +1866,7 @@ public class MainWindow extends JFrame {
 			}
 		}
 	}
+	
 	
 	/**
 	 * Allows for cell background to be coloured based on poition in a list
@@ -1940,4 +1994,189 @@ public class MainWindow extends JFrame {
 			columnData[column] = aValue;
 		}
 	}
+	
+	public class PopulationListPopupMenu extends JPopupMenu {   //implements ActionListener{
+				
+		private static final long serialVersionUID = 1L;
+		JMenuItem mergeMenuItem = new JMenuItem(new MergeCollectionAction());;
+		JMenuItem deleteMenuItem = new JMenuItem(new DeleteCollectionAction());
+		JMenuItem splitMenuItem = new JMenuItem(new SplitCollectionAction());
+				
+		public PopulationListPopupMenu() {
+			
+			super("Popup");
+			
+			this.add(mergeMenuItem);
+			this.add(deleteMenuItem);
+			this.add(splitMenuItem);
+			
+			mergeMenuItem.setEnabled(false);
+	    }
+	}
+	
+	class MergeCollectionAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public MergeCollectionAction() {
+	        super("Merge");
+	    }
+		
+	    public void actionPerformed(ActionEvent e) {
+	        log("Merging collection...");
+	        List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+	        for(AnalysisDataset d : datasets){
+	        	
+	        }
+	    }
+	}
+	
+	class DeleteCollectionAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public DeleteCollectionAction() {
+	        super("Delete");
+	    }
+		
+		public void actionPerformed(ActionEvent e) {
+
+			List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(!datasets.isEmpty()){
+				
+				if(datasets.size()==1){
+					logc("Deleting collection...");
+				} else {
+					logc("Deleting collections...");
+				}
+
+				for(AnalysisDataset d : datasets){
+
+					// remove all children of the collection
+					for(UUID u : d.getAllChildUUIDs()){
+
+						populationNames.remove(analysisDatasets.get(u).getName());
+						analysisDatasets.remove(u);
+						if(d.hasChild(u)){
+							d.deleteChild(u);
+						}
+					}
+
+					// remove the collection mapping from parents
+					for(AnalysisDataset parent : analysisDatasets.values()){
+						if(parent.hasChild(d)){
+							parent.deleteChild(d.getUUID());
+						}
+					}
+
+					// then remove the collection itself
+					populationNames.remove(d.getName());
+					analysisDatasets.remove(d.getUUID());
+				}
+				updatePopulationList();	
+				log("OK");
+			}
+		}
+	}
+	
+	class SplitCollectionAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public SplitCollectionAction() {
+	        super("Split");
+	    }
+		
+	    public void actionPerformed(ActionEvent e) {
+	        
+	        List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+	        if(datasets.size()==1){
+	        	try {
+					log("Splitting collection...");
+					AnalysisDataset dataset = datasets.get(0);
+					
+					// create a JDialog of options
+					
+					// get the names of subpopulations
+					List<String> nameList = new ArrayList<String>(0);
+					for(AnalysisDataset child : dataset.getAllChildDatasets()){
+						nameList.add(child.getName());
+					}
+					
+					String[] names = nameList.toArray(new String[0]);
+
+					String selectedValue = (String) JOptionPane.showInputDialog(null,
+							"Give me nuclei that are NOT present within the following population", "Split population",
+							JOptionPane.PLAIN_MESSAGE, null,
+							names, names[0]);
+					
+					// find the population to subtract
+					AnalysisDataset negative = analysisDatasets.get(  populationNames.get(selectedValue)  );
+					
+					// prepare a new collection
+					NucleusCollection collection = dataset.getCollection();
+
+					Constructor<?> collectionConstructor =  dataset.getAnalysisOptions().getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+
+					NucleusCollection newCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
+							collection.getOutputFolderName(), 
+							"Subtraction", 
+							collection.getDebugFile()
+							);
+					
+					for(Nucleus n : collection.getNuclei()){
+						if(! negative.getCollection().getNuclei().contains(n)){
+							newCollection.addNucleus(n);
+						}
+					}
+					newCollection.setName("Not_in_"+negative.getName());
+					UUID newID = newCollection.getID();
+					
+					if(newCollection.getNucleusCount()>0){
+
+						logc("Reapplying morphology...");
+						boolean ok = MorphologyAnalysis.reapplyProfiles(newCollection, dataset.getCollection());
+						if(ok){
+							log("OK");
+						} else {
+							log("Error");
+						}
+					}
+					
+					
+					dataset.addChildCollection(newCollection);
+					
+					populationNames.put(newCollection.getName(), newID);
+					analysisDatasets.put(newID, dataset.getChildDataset(newID));
+					updatePopulationList();
+					
+					
+				} catch (HeadlessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (NoSuchMethodException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (SecurityException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvocationTargetException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				
+	        }   
+	    }
+	}
+	
 }
