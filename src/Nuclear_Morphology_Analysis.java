@@ -11,11 +11,8 @@
   It also generates a profile of the nuclear shape, allowing
   morphology comparisons
  */
-import java.awt.EventQueue;
-import java.awt.event.MouseEvent;
 
 import ij.plugin.PlugIn;
-import no.analysis.AnalysisCreator;
 import no.gui.MainWindow;
 
 public class Nuclear_Morphology_Analysis
@@ -39,10 +36,13 @@ implements PlugIn
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 
 
 		//		AnalysisCreator analysisCreator = new AnalysisCreator();
 		//		analysisCreator.run();
 	}
+
 }
 

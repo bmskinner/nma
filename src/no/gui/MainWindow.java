@@ -602,6 +602,8 @@ public class MainWindow extends JFrame {
 			public void run() {
 				lblStatusLine.setText("New analysis in progress");
 				
+//				AnalysisSetupWindow test = new AnalysisSetupWindow();
+				
 				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
 				analysisCreator.run();
 
