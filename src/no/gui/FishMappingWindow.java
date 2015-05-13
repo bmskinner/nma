@@ -19,8 +19,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -91,53 +89,14 @@ public class FishMappingWindow extends JDialog {
 		if(this.getPostFISHDirectory()){
 
 			try {
-				NucleusCollection collection = dataset.getCollection();
+//				NucleusCollection collection = dataset.getCollection();
 				
-				Constructor<?> collectionConstructor =  dataset.getAnalysisOptions().getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
-
-				this.subCollectionLeft = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
-						collection.getOutputFolderName(), 
-						"SubCollectionLeft", 
-						collection.getDebugFile()
-						);
+				this.subCollectionLeft  = MainWindow.makeNewCollection(dataset, "SubCollectionLeft");
+				this.subCollectionRight = MainWindow.makeNewCollection(dataset, "SubCollectionRight");
 				
-				this.subCollectionRight = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
-						collection.getOutputFolderName(), 
-						"SubCollectionRight", 
-						collection.getDebugFile()
-						);
-
-				// only proceed with making GUI if there is something to analyse
-//				IJ.log("Preparing GUI");
 				createGUI();
 
-				// iterate through the pre and post-FISH images, higlighting pre-FISH nuclei
-			} catch (NoSuchMethodException e) {
-				IJ.log(e.getMessage());
-				for(StackTraceElement el : e.getStackTrace()){
-					IJ.log(el.toString());
-				}
-			} catch (SecurityException e) {
-				IJ.log(e.getMessage());
-				for(StackTraceElement el : e.getStackTrace()){
-					IJ.log(el.toString());
-				}
-			} catch (InstantiationException e) {
-				IJ.log(e.getMessage());
-				for(StackTraceElement el : e.getStackTrace()){
-					IJ.log(el.toString());
-				}
-			} catch (IllegalAccessException e) {
-				IJ.log(e.getMessage());
-				for(StackTraceElement el : e.getStackTrace()){
-					IJ.log(el.toString());
-				}
-			} catch (IllegalArgumentException e) {
-				IJ.log(e.getMessage());
-				for(StackTraceElement el : e.getStackTrace()){
-					IJ.log(el.toString());
-				}
-			} catch (InvocationTargetException e) {
+			} catch (Exception e) {
 				IJ.log(e.getMessage());
 				for(StackTraceElement el : e.getStackTrace()){
 					IJ.log(el.toString());

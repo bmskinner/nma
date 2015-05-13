@@ -2010,7 +2010,6 @@ public class MainWindow extends JFrame {
 			this.add(deleteMenuItem);
 			this.add(splitMenuItem);
 			
-			mergeMenuItem.setEnabled(false);
 	    }
 	}
 	
@@ -2018,19 +2017,124 @@ public class MainWindow extends JFrame {
 
 		private static final long serialVersionUID = 1L;
 		public MergeCollectionAction() {
-	        super("Merge");
-	    }
-		
-	    public void actionPerformed(ActionEvent e) {
-	        log("Merging collection...");
-	        List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			super("Merge");
+		}
 
-	        for(AnalysisDataset d : datasets){
-	        	
-	        }
-	    }
+		public void actionPerformed(ActionEvent e) {
+
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(datasets.size()>1){
+
+				Thread thr = new Thread() {
+					public void run() {
+
+						log("Merging collection...");
+
+						// check all collections are of the same type
+						boolean newRoot = false;
+						Class<?> testClass = datasets.get(0).getAnalysisOptions().getCollectionClass();
+						for(AnalysisDataset d : datasets){
+
+							if(d.getAnalysisOptions().getCollectionClass()!=testClass){
+								log("Error: cannot merge collections of different class");
+								return;
+							}
+
+							// check if a root population is included in the merge;
+							// if so, we must make the result a root population too
+							// otherwise, it may be a subpopulation
+							if(d.isRoot()){
+								newRoot = true;
+							}
+						}
+
+						AnalysisDataset mergeParent = null;
+						if(!newRoot) { // unless we have forced root above
+							// check if all datasets are children of one root dataset
+							for(AnalysisDataset parent : analysisDatasets.values()){
+								if(parent.isRoot()){ // only look at top level datasets for now
+									boolean ok = true; 
+									for(AnalysisDataset d : datasets){
+										if(!parent.hasChild(d)){
+											ok = false;
+										}
+									}
+									if(ok){
+										mergeParent = parent;
+									}
+								}
+							}
+
+							// if a merge parent was found, new collection is not root
+							if(mergeParent!=null){
+								newRoot = false;
+							} else {
+								newRoot = true; // if we cannot find a consistent parent, make a new root population
+							}
+						}
+
+
+						// add the nuclei from each population to the new collection
+						NucleusCollection newCollection = makeNewCollection(datasets.get(0), "Merged");
+						for(AnalysisDataset d : datasets){
+
+							for(Nucleus n : d.getCollection().getNuclei()){
+								if(!newCollection.getNuclei().contains(n)){
+									newCollection.addNucleus(n);
+								}
+							}
+
+						}
+
+						// create the dataset; has no analysis options at present
+						AnalysisDataset newDataset = new AnalysisDataset(newCollection);
+						newDataset.setName("Merge_of_datasets");
+						newDataset.setRoot(newRoot);
+
+						// if applicable, add the new dataset to a parent
+						if(newRoot==false && mergeParent!=null){
+
+							logc("Reapplying morphology...");
+							boolean ok = MorphologyAnalysis.reapplyProfiles(newCollection, mergeParent.getCollection());
+							if(ok){
+								log("OK");
+							} else {
+								log("Error");
+							}
+							newDataset.setAnalysisOptions(mergeParent.getAnalysisOptions());
+							newDataset.getAnalysisOptions().setRefoldNucleus(false);
+
+							mergeParent.addChildDataset(newDataset);
+						} else {
+							// otherwise, it is a new root population
+							// we need to run a fresh morphology analysis
+							logc("Running morphology analysis...");
+							boolean ok = MorphologyAnalysis.run(newDataset.getCollection());
+							if(ok){
+								log("OK");
+							} else {
+								log("Error");
+							}
+							newDataset.setAnalysisOptions(datasets.get(0).getAnalysisOptions());
+							newDataset.getAnalysisOptions().setRefoldNucleus(false);
+						}
+
+						// add the new collection to the list
+						populationNames.put(newDataset.getName(), newDataset.getUUID());
+						analysisDatasets.put(newDataset.getUUID(), newDataset);
+						updatePopulationList();
+					}
+				};
+				thr.start();
+
+			} else {
+				log("Cannot merge single dataset");
+			}
+
+		}
 	}
-	
+
 	class DeleteCollectionAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -2092,91 +2196,129 @@ public class MainWindow extends JFrame {
 
 	        if(datasets.size()==1){
 	        	try {
-					log("Splitting collection...");
-					AnalysisDataset dataset = datasets.get(0);
-					
-					// create a JDialog of options
-					
-					// get the names of subpopulations
-					List<String> nameList = new ArrayList<String>(0);
-					for(AnalysisDataset child : dataset.getAllChildDatasets()){
-						nameList.add(child.getName());
-					}
-					
-					String[] names = nameList.toArray(new String[0]);
+	        		
+	        		AnalysisDataset dataset = datasets.get(0);
 
-					String selectedValue = (String) JOptionPane.showInputDialog(null,
-							"Give me nuclei that are NOT present within the following population", "Split population",
-							JOptionPane.PLAIN_MESSAGE, null,
-							names, names[0]);
-					
-					// find the population to subtract
-					AnalysisDataset negative = analysisDatasets.get(  populationNames.get(selectedValue)  );
-					
-					// prepare a new collection
-					NucleusCollection collection = dataset.getCollection();
+	        		if(dataset.hasChildren()){
+	        			log("Splitting collection...");
 
-					Constructor<?> collectionConstructor =  dataset.getAnalysisOptions().getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+	        			// create a JDialog of options
+	        			// get the names of subpopulations
+	        			List<String> nameList = new ArrayList<String>(0);
+	        			for(AnalysisDataset child : dataset.getAllChildDatasets()){
+	        				nameList.add(child.getName());
+	        			}
 
-					NucleusCollection newCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
-							collection.getOutputFolderName(), 
-							"Subtraction", 
-							collection.getDebugFile()
-							);
-					
-					for(Nucleus n : collection.getNuclei()){
-						if(! negative.getCollection().getNuclei().contains(n)){
-							newCollection.addNucleus(n);
-						}
-					}
-					newCollection.setName("Not_in_"+negative.getName());
-					UUID newID = newCollection.getID();
-					
-					if(newCollection.getNucleusCount()>0){
+	        			String[] names = nameList.toArray(new String[0]);
 
-						logc("Reapplying morphology...");
-						boolean ok = MorphologyAnalysis.reapplyProfiles(newCollection, dataset.getCollection());
-						if(ok){
-							log("OK");
-						} else {
-							log("Error");
-						}
-					}
-					
-					
-					dataset.addChildCollection(newCollection);
-					
-					populationNames.put(newCollection.getName(), newID);
-					analysisDatasets.put(newID, dataset.getChildDataset(newID));
-					updatePopulationList();
-					
-					
-				} catch (HeadlessException e1) {
-					// TODO Auto-generated catch block
+	        			String selectedValue = (String) JOptionPane.showInputDialog(null,
+	        					"Give me nuclei that are NOT present within the following population", "Split population",
+	        					JOptionPane.PLAIN_MESSAGE, null,
+	        					names, names[0]);
+
+	        			// find the population to subtract
+	        			AnalysisDataset negative = analysisDatasets.get(  populationNames.get(selectedValue)  );
+
+	        			// prepare a new collection
+	        			NucleusCollection collection = dataset.getCollection();
+
+	        			NucleusCollection newCollection = makeNewCollection(dataset, "Subtraction");
+
+	        			for(Nucleus n : collection.getNuclei()){
+	        				if(! negative.getCollection().getNuclei().contains(n)){
+	        					newCollection.addNucleus(n);
+	        				}
+	        			}
+	        			newCollection.setName("Not_in_"+negative.getName());
+	        			UUID newID = newCollection.getID();
+
+	        			if(newCollection.getNucleusCount()>0){
+
+	        				logc("Reapplying morphology...");
+	        				boolean ok = MorphologyAnalysis.reapplyProfiles(newCollection, dataset.getCollection());
+	        				if(ok){
+	        					log("OK");
+	        				} else {
+	        					log("Error");
+	        				}
+	        			}
+
+
+	        			dataset.addChildCollection(newCollection);
+
+	        			populationNames.put(newCollection.getName(), newID);
+	        			analysisDatasets.put(newID, dataset.getChildDataset(newID));
+	        			updatePopulationList();
+	        			
+	        		} else {
+	        			log("Cannot split; no children in dataset");
+	        		}
+
+
+				} catch (Exception e1) {
 					e1.printStackTrace();
-				} catch (NoSuchMethodException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (SecurityException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InstantiationException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IllegalAccessException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IllegalArgumentException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InvocationTargetException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				} 
 				
-				
-	        }   
+	        }   else {
+	        	log("Cannot split multiple collections");
+	        }
 	    }
+	}
+	
+	/**
+	 * Create a new NucleusCollection of the same class as the given dataset
+	 * @param template the dataset to base on for analysis options, folders
+	 * @param name the collection name
+	 * @return a new empty collection
+	 */
+	public static NucleusCollection makeNewCollection(AnalysisDataset template, String name){
+
+		NucleusCollection newCollection = null;
+
+		try {
+
+			NucleusCollection templateCollection = template.getCollection();
+
+			Constructor<?> collectionConstructor =  template.getAnalysisOptions().getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+
+			newCollection = (NucleusCollection) collectionConstructor.newInstance(templateCollection.getFolder(), 
+					templateCollection.getOutputFolderName(), 
+					name, 
+					templateCollection.getDebugFile()
+					);
+
+		} catch (NoSuchMethodException e) {
+			IJ.log(e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		} catch (SecurityException e) {
+			IJ.log(e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		} catch (InstantiationException e) {
+			IJ.log(e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		} catch (IllegalAccessException e) {
+			IJ.log(e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		} catch (IllegalArgumentException e) {
+			IJ.log(e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		} catch (InvocationTargetException e) {
+			IJ.log(e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		}
+		return newCollection;
 	}
 	
 }
