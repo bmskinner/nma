@@ -130,6 +130,7 @@ public class MainWindow extends JFrame {
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 	private JTable populationTable;
 	private JXTreeTable treeTable;
+	private PopulationListPopupMenu populationPopup;
 	
 	private JTabbedPane tabbedPane;
 	private JTabbedPane signalsTabPane;
@@ -303,9 +304,10 @@ public class MainWindow extends JFrame {
 			treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
 			treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 			
-//			final PopulationListPopupMenu popup = new PopulationListPopupMenu();
+			populationPopup = new PopulationListPopupMenu();
+			populationPopup.disableAll();
 			
-			treeTable.setComponentPopupMenu(new PopulationListPopupMenu());
+			treeTable.setComponentPopupMenu(populationPopup);
 			
 			treeTable.addMouseListener(new MouseAdapter() {
 				@Override
@@ -1860,7 +1862,22 @@ public class MainWindow extends JFrame {
 
 				if(datasets.isEmpty()){
 					log("Error: list is empty");
+					populationPopup.disableAll();
 				} else {
+					if(datasets.size()>1){
+						populationPopup.enableAll();
+						populationPopup.disableSplit();
+						
+					} else {
+						populationPopup.enableDelete();
+						populationPopup.disableMerge();
+						
+						if(!datasets.get(0).hasChildren()){
+							populationPopup.disableSplit();
+						} else {
+							populationPopup.enableSplit();
+						}
+					}
 					updatePanels(datasets);
 				}
 			}
@@ -2011,6 +2028,42 @@ public class MainWindow extends JFrame {
 			this.add(splitMenuItem);
 			
 	    }
+		
+		public void enableAll(){
+			enableMerge();
+			enableDelete();
+			enableSplit();
+		}
+		
+		public void disableAll(){
+			disableMerge();
+			disableDelete();
+			disableSplit();
+		}
+		
+		public void enableMerge(){
+			mergeMenuItem.setEnabled(true);
+		}
+		
+		public void disableMerge(){
+			mergeMenuItem.setEnabled(false);
+		}
+		
+		public void enableDelete(){
+			deleteMenuItem.setEnabled(true);
+		}
+		
+		public void disableDelete(){
+			deleteMenuItem.setEnabled(false);
+		}
+		
+		public void enableSplit(){
+			splitMenuItem.setEnabled(true);
+		}
+		
+		public void disableSplit(){
+			splitMenuItem.setEnabled(false);
+		}
 	}
 	
 	class MergeCollectionAction extends AbstractAction {
@@ -2025,6 +2078,13 @@ public class MainWindow extends JFrame {
 			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 
 			if(datasets.size()>1){
+				
+				if(datasets.size()==2){ // check we are not merging a parent and child (would just get child)
+					if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
+						log("No. That would be silly.");
+						return;
+					}
+				}
 
 				Thread thr = new Thread() {
 					public void run() {
