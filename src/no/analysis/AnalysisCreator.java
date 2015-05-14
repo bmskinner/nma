@@ -88,51 +88,51 @@ public class AnalysisCreator {
 		this.initialise();
 	}
 	  
-  public void initialise(){
+	public void initialise(){
 
-//	  analysisSetup = new AnalysisSetup();
-//	  if(analysisSetup.run()){
-	  
-	  AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow();
-		 if( analysisSetup.getOptions()!=null){
+		//	  analysisSetup = new AnalysisSetup();
+		//	  if(analysisSetup.run()){
 
-		  this.analysisOptions = analysisSetup.getOptions();
-		  getImageDirectory();
-		  
-		  mw.log("Directory: "+analysisOptions.getFolder().getName());
+		AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow();
+		if( analysisSetup.getOptions()!=null){
 
-		  this.startTime = Calendar.getInstance().getTime();
-		  this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
-		  
-		  // craete the analysis folder early. Did not before in case folder had no images
-		  File analysisFolder = new File(analysisOptions.getFolder().getAbsolutePath()+File.separator+outputFolderName);
-		  if(!analysisFolder.exists()){
-			  analysisFolder.mkdir();
-		  }
-		  this.logger = new Logger( new File(analysisOptions.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
-//		  mw.log("Debug at: "+logger.getLogfile().getAbsolutePath());
-		  logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
-		  logger.log("Directory: "+analysisOptions.getFolder().getName());
-		  this.readyToRun = true;
-	  }
-  }
-  
-  private boolean getImageDirectory(){
+			this.analysisOptions = analysisSetup.getOptions();
+			//		  getImageDirectory();
 
-	    DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
-	    String folderName = localOpenDialog.getDirectory();
+			mw.log("Directory: "+analysisOptions.getFolder().getName());
 
-	    if(folderName==null) return false; // user cancelled
-	    analysisOptions.setFolder( new File(folderName));
+			this.startTime = Calendar.getInstance().getTime();
+			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
-	    if(analysisOptions.isReanalysis()){
-	      OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
-	      String fileName = fileDialog.getPath();
-	      if(fileName==null) return false;
-	      analysisOptions.setMappingFile(new File(fileName));
-	    }
-	    return true;
+			// craete the analysis folder early. Did not before in case folder had no images
+			File analysisFolder = new File(analysisOptions.getFolder().getAbsolutePath()+File.separator+outputFolderName);
+			if(!analysisFolder.exists()){
+				analysisFolder.mkdir();
+			}
+			this.logger = new Logger( new File(analysisOptions.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
+			//		  mw.log("Debug at: "+logger.getLogfile().getAbsolutePath());
+			logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
+			logger.log("Directory: "+analysisOptions.getFolder().getName());
+			this.readyToRun = true;
+		}
 	}
+//  
+//  private boolean getImageDirectory(){
+//
+//	    DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
+//	    String folderName = localOpenDialog.getDirectory();
+//
+//	    if(folderName==null) return false; // user cancelled
+//	    analysisOptions.setFolder( new File(folderName));
+//
+//	    if(analysisOptions.isReanalysis()){
+//	      OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
+//	      String fileName = fileDialog.getPath();
+//	      if(fileName==null) return false;
+//	      analysisOptions.setMappingFile(new File(fileName));
+//	    }
+//	    return true;
+//	}
 
   public void run(){
     

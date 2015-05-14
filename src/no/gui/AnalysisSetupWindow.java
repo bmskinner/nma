@@ -1,12 +1,15 @@
 package no.gui;
 
 import ij.IJ;
+import ij.io.DirectoryChooser;
+import ij.io.OpenDialog;
 
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.FlowLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -36,6 +39,7 @@ import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.io.File;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,12 +140,13 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 
 		// add the other settings
-		JPanel settingsPanel = new JPanel();
-		settingsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
+//		JPanel settingsPanel = new JPanel();
+//		settingsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+//		settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
 
-		settingsPanel.add(makeSettingsPanel());
-		contentPane.add(settingsPanel, BorderLayout.CENTER);
+//		settingsPanel.add(makeSettingsPanel());
+		
+		contentPane.add(makeSettingsPanel(), BorderLayout.CENTER);
 
 	}
 
@@ -193,6 +198,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		btnOk.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				getImageDirectory();
 				AnalysisSetupWindow.this.setVisible(false);
 			}
 		});
@@ -212,26 +218,31 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 	private JPanel makeSettingsPanel(){
 		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		JLabel lblDetectionSettings = new JLabel("Detection settings", JLabel.CENTER);
-		panel.add(lblDetectionSettings);
-		panel.add(makeDetectionSettingsPanel());
+		panel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
+		
+//		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		Dimension minSize = new Dimension(10, 20);
-		Dimension prefSize = new Dimension(20, 20);
-		Dimension maxSize = new Dimension(Short.MAX_VALUE, 20);
-		panel.add(new Box.Filler(minSize, prefSize, maxSize));
+		panel.add(makeDetectionSettingsPanel(), c);
 
-		JLabel lblRefoldSettings = new JLabel("Refolding settings", JLabel.CENTER);
-		panel.add(lblRefoldSettings);
-		panel.add(makeRefoldSettingsPanel());
+//		Dimension minSize = new Dimension(10, 10);
+//		Dimension prefSize = new Dimension(10, 10);
+//		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+//		panel.add(new Box.Filler(minSize, prefSize, maxSize));
+
+		JPanel refoldPanel = makeRefoldSettingsPanel();
+		panel.add(refoldPanel, c);
 
 		return panel;
 	}
+	
 
 	private JPanel makeDetectionSettingsPanel(){
 
 		JPanel panel = new JPanel();
+		panel.setBorder(BorderFactory.createTitledBorder("Detection settings"));
 		panel.setLayout(new GridBagLayout());
 
 		JLabel[] labels = new JLabel[9];
@@ -276,6 +287,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private JPanel makeRefoldSettingsPanel(){
 
 		JPanel panel = new JPanel();
+		panel.setBorder(BorderFactory.createTitledBorder("Refold settings"));
 
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		refoldCheckBox = new JCheckBox("Refold nucleus");
@@ -339,8 +351,8 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 			c.weightx = 0.0;                       //reset to default
 			container.add(labels[i], c);
 
-			Dimension minSize = new Dimension(5, 5);
-			Dimension prefSize = new Dimension(5, 5);
+			Dimension minSize = new Dimension(10, 5);
+			Dimension prefSize = new Dimension(10, 5);
 			Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
 			c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
 			c.fill = GridBagConstraints.NONE;      //reset to default
@@ -494,5 +506,22 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 	}
 
+	
+	private boolean getImageDirectory(){
+
+		DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
+		String folderName = localOpenDialog.getDirectory();
+
+		if(folderName==null) return false; // user cancelled
+		analysisOptions.setFolder( new File(folderName));
+
+		if(analysisOptions.isReanalysis()){
+			OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
+			String fileName = fileDialog.getPath();
+			if(fileName==null) return false;
+			analysisOptions.setMappingFile(new File(fileName));
+		}
+		return true;
+	}
 }
 
