@@ -13,6 +13,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -31,6 +33,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.MouseInputAdapter;
 
 import no.analysis.AnalysisDataset;
 import no.collections.NucleusCollection;
@@ -188,8 +191,10 @@ public class FishMappingWindow extends JDialog {
 		ImageIcon preImage = new ImageIcon(new BufferedImage(100,100,BufferedImage.TYPE_INT_RGB));
 		ImageIcon postImage = new ImageIcon(new BufferedImage(100,100,BufferedImage.TYPE_INT_RGB));
 		
-		preImageLabel = new JLabel("", preImage, JLabel.CENTER);
+//		preImageLabel = new JLabel("", preImage, JLabel.CENTER);
 		postImageLabel = new JLabel("", postImage, JLabel.CENTER);
+		
+		preImageLabel = new DrawableImageArea(preImage);
 		
 		preImageLabel.addMouseListener(new MouseAdapter() {
 		    @Override
@@ -479,4 +484,162 @@ public class FishMappingWindow extends JDialog {
 		}
 	}
 
+	private class DrawableImageArea extends JLabel {
+		Rectangle currentRect = null;
+
+		Rectangle rectToDraw = null;
+
+		Rectangle previousRectDrawn = new Rectangle();
+
+//		FishMappingWindow controller;
+
+		public DrawableImageArea(ImageIcon image) {
+			super("", image, JLabel.CENTER); //This component displays an image.
+//			this.controller = controller;
+			setOpaque(true);
+			setMinimumSize(new Dimension(10, 10)); //don't hog space
+
+			MyListener myListener = new MyListener();
+			addMouseListener(myListener);
+			addMouseMotionListener(myListener);
+		}
+
+		private class MyListener extends MouseInputAdapter {
+			public void mousePressed(MouseEvent e) {
+				int x = e.getX();
+				int y = e.getY();
+				currentRect = new Rectangle(x, y, 0, 0);
+				updateDrawableRect(getWidth(), getHeight());
+				repaint();
+			}
+
+			public void mouseDragged(MouseEvent e) {
+				updateSize(e);
+			}
+
+			public void mouseReleased(MouseEvent e) {
+				updateSize(e);
+				
+				 // correct scaling 
+		    	int x = currentRect.x;
+		    	int y = currentRect.y;
+		    	int originalX = openProcessor.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
+		    	int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
+		    	
+		    	int originalWidth = openProcessor.getWidth()>smallWidth ? (int) ( (double) currentRect.getWidth() / (double) conversion) : (int) currentRect.getWidth();
+		    	int originalHeight = openProcessor.getWidth()>smallWidth ? (int) ( (double) currentRect.getHeight() / (double) conversion) : (int) currentRect.getHeight();
+		    	
+		    	Rectangle originalRect = new Rectangle(originalX, originalY, originalWidth, originalHeight);
+		    	
+		    	List<Nucleus> imageNuclei = FishMappingWindow.this.preFISHDataset.getCollection().getNuclei(openFile);
+		    	for(Nucleus n : imageNuclei){
+
+		    		if(originalRect.contains(n.getCentreOfMass().getX(), n.getCentreOfMass().getY())){
+		    			double[] positions = n.getPosition();
+		    			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+		    			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+		    			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+
+		    			FishMappingWindow.this.selectedNucleiLeft.add(n.getID());
+		    			FishMappingWindow.this.selectedNucleiRight.remove(n.getID());
+		    			openProcessor.setColor(Color.GREEN);
+
+		    			// update the image
+
+		    			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+		    			openProcessor.setLineWidth(2);
+		    			openProcessor.draw(roi);
+		    		}
+
+		    	}
+		    	ImagePlus preSmall;
+		    	if(openProcessor.getWidth()>smallWidth){
+		    		preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
+		    	} else {
+		    		preSmall = new ImagePlus("small", openProcessor);
+		    	}
+
+		    	ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
+		    	preImageLabel.setIcon(preImageIcon);
+			}
+
+			/*
+			 * Update the size of the current rectangle and call repaint.
+			 * Because currentRect always has the same origin, translate it if
+			 * the width or height is negative.
+			 * 
+			 * For efficiency (though that isn't an issue for this program),
+			 * specify the painting region using arguments to the repaint()
+			 * call.
+			 *  
+			 */
+			void updateSize(MouseEvent e) {
+				int x = e.getX();
+				int y = e.getY();
+				currentRect.setSize(x - currentRect.x, y - currentRect.y);
+				updateDrawableRect(getWidth(), getHeight());
+				Rectangle totalRepaint = rectToDraw.union(previousRectDrawn);
+				repaint(totalRepaint.x, totalRepaint.y, totalRepaint.width,
+						totalRepaint.height);
+			}
+		}
+
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g); //paints the background and image
+
+			//If currentRect exists, paint a box on top.
+			if (currentRect != null) {
+				//Draw a rectangle on top of the image.
+				g.setXORMode(Color.white); //Color of line varies
+				//depending on image colors
+				g.drawRect(rectToDraw.x, rectToDraw.y, rectToDraw.width - 1,
+						rectToDraw.height - 1);
+
+			}
+		}
+
+		private void updateDrawableRect(int compWidth, int compHeight) {
+			int x = currentRect.x;
+			int y = currentRect.y;
+			int width = currentRect.width;
+			int height = currentRect.height;
+
+			//Make the width and height positive, if necessary.
+			if (width < 0) {
+				width = 0 - width;
+				x = x - width + 1;
+				if (x < 0) {
+					width += x;
+					x = 0;
+				}
+			}
+			if (height < 0) {
+				height = 0 - height;
+				y = y - height + 1;
+				if (y < 0) {
+					height += y;
+					y = 0;
+				}
+			}
+
+			//The rectangle shouldn't extend past the drawing area.
+			if ((x + width) > compWidth) {
+				width = compWidth - x;
+			}
+			if ((y + height) > compHeight) {
+				height = compHeight - y;
+			}
+
+			//Update rectToDraw after saving old value.
+			if (rectToDraw != null) {
+				previousRectDrawn.setBounds(rectToDraw.x, rectToDraw.y,
+						rectToDraw.width, rectToDraw.height);
+				rectToDraw.setBounds(x, y, width, height);
+			} else {
+				rectToDraw = new Rectangle(x, y, width, height);
+			}
+		}
+	}
 }
+
+
