@@ -11,6 +11,8 @@ can be varied in the nucleus and signal detection
 package no.analysis;
 
 import ij.IJ;
+import ij.io.DirectoryChooser;
+import ij.io.OpenDialog;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -26,6 +28,7 @@ import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.gui.AnalysisSetup;
+import no.gui.AnalysisSetupWindow;
 import no.gui.MainWindow;
 import no.nuclei.Nucleus;
 import no.utility.Logger;
@@ -87,10 +90,14 @@ public class AnalysisCreator {
 	  
   public void initialise(){
 
-	  analysisSetup = new AnalysisSetup();
-	  if(analysisSetup.run()){
-		  
+//	  analysisSetup = new AnalysisSetup();
+//	  if(analysisSetup.run()){
+	  
+	  AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow();
+		 if( analysisSetup.getOptions()!=null){
+
 		  this.analysisOptions = analysisSetup.getOptions();
+		  getImageDirectory();
 		  
 		  mw.log("Directory: "+analysisOptions.getFolder().getName());
 
@@ -109,6 +116,23 @@ public class AnalysisCreator {
 		  this.readyToRun = true;
 	  }
   }
+  
+  private boolean getImageDirectory(){
+
+	    DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of images...");
+	    String folderName = localOpenDialog.getDirectory();
+
+	    if(folderName==null) return false; // user cancelled
+	    analysisOptions.setFolder( new File(folderName));
+
+	    if(analysisOptions.isReanalysis()){
+	      OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
+	      String fileName = fileDialog.getPath();
+	      if(fileName==null) return false;
+	      analysisOptions.setMappingFile(new File(fileName));
+	    }
+	    return true;
+	}
 
   public void run(){
     
