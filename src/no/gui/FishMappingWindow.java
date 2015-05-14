@@ -73,6 +73,10 @@ public class FishMappingWindow extends JDialog {
 	
 	private int currentImage = 0;
 	
+	private double conversion;
+	private int smallWidth; 
+	private int smallHeight;
+	
 	/**
 	 * Create the dialog.
 	 */
@@ -187,6 +191,47 @@ public class FishMappingWindow extends JDialog {
 		preImageLabel = new JLabel("", preImage, JLabel.CENTER);
 		postImageLabel = new JLabel("", postImage, JLabel.CENTER);
 		
+		preImageLabel.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mousePressed(MouseEvent e) {
+		    			    
+		        // correct scaling 
+		    	int x = e.getX();
+		    	int y = e.getY();
+		    	int originalX = openProcessor.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
+		    	int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
+		    	
+		    	
+		    	List<Nucleus> imageNuclei = FishMappingWindow.this.preFISHDataset.getCollection().getNuclei(openFile);
+		    	for(Nucleus n : imageNuclei){
+		    		
+
+		    		double[] positions = n.getPosition();
+		    		
+		    		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+		    		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+		    		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+		    		
+		    		if(roi.contains(originalX, originalY)){
+
+		    			drawNucleus(n, openProcessor, e, roi);
+		    			
+		    			ImagePlus preSmall;
+		    			if(openProcessor.getWidth()>smallWidth){
+		    				preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
+		    			} else {
+		    				preSmall = new ImagePlus("small", openProcessor);
+		    			}
+
+			    		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
+			    		preImageLabel.setIcon(preImageIcon);
+		    		}
+		    	}
+		    }
+		});
+		
+		
+		
 		
 		imagePane.add(preImageLabel);
 		Dimension minSize = new Dimension(10, 100);
@@ -248,14 +293,17 @@ public class FishMappingWindow extends JDialog {
 				
 
 		// set the image width to be less than half the screen width
-		final int smallWidth = (int) ((double) screenSize.getWidth() * 0.45);
+		smallWidth = (int) ((double) screenSize.getWidth() * 0.45);
+//		final int smallWidth = (int) ((double) screenSize.getWidth() * 0.45);
 		
 		// keep the image aspect ratio
 		double ratio = (double) originalWidth / (double) originalHeight;
-		final int smallHeight = (int) (smallWidth / ratio);
+		smallHeight = (int) (smallWidth / ratio);
+//		final int smallHeight = (int) (smallWidth / ratio);
 		
 		// get the conversion factor to find original image coordinates when we click the scaled image
-		final double conversion = (double) smallWidth / (double) originalWidth;
+		conversion = (double) smallWidth / (double) originalWidth;
+//		final double conversion = (double) smallWidth / (double) originalWidth;
 		
 		final ImagePlus preSmall;
 
@@ -270,50 +318,6 @@ public class FishMappingWindow extends JDialog {
 		preImageLabel.setIcon(preImageIcon);
 
 		
-		// stop the listeners building up and overlapping
-		for(MouseListener m : preImageLabel.getMouseListeners()){
-			preImageLabel.removeMouseListener(m);
-		}
-		
-		preImageLabel.addMouseListener(new MouseAdapter() {
-		    @Override
-		    public void mousePressed(MouseEvent e) {
-		    			    
-		        // correct scaling 
-		    	int x = e.getX();
-		    	int y = e.getY();
-		    	int originalX = openProcessor.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
-		    	int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
-		    	
-		    	
-		    	List<Nucleus> imageNuclei = FishMappingWindow.this.preFISHDataset.getCollection().getNuclei(openFile);
-		    	for(Nucleus n : imageNuclei){
-		    		
-
-		    		double[] positions = n.getPosition();
-		    		
-		    		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-		    		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-		    		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-		    		
-		    		if(roi.contains(originalX, originalY)){
-
-		    			drawNucleus(n, openProcessor, e, roi);
-		    			
-		    			ImagePlus preSmall;
-		    			if(openProcessor.getWidth()>smallWidth){
-		    				preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
-		    			} else {
-		    				preSmall = new ImagePlus("small", openProcessor);
-		    			}
-
-			    		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
-			    		preImageLabel.setIcon(preImageIcon);
-		    		}
-		    	}
-		    }
-		});
-
 		// Open the image from the post FISH directory
 		String imageName = preFile.getName(); // the file name e.g. P60.tif
 		String postFile = this.postFISHImageDirectory.getAbsolutePath()+File.separator+imageName;
