@@ -9,6 +9,10 @@
 */  
 package no.nuclei.sperm;
 
+import ij.gui.Roi;
+
+import java.io.File;
+
 import no.nuclei.*;
 
 public class SpermNucleus
@@ -30,16 +34,10 @@ public class SpermNucleus
   public SpermNucleus(RoundNucleus n){
   	super(n);
   }
-
-  /**
-  * Empty constructor. Can be used for class
-  * identification (as in AnalysisCreator) 
-  *
-  * @return an empty SpermNucleus
-  */
-  public SpermNucleus(){
-    
-  }
+  
+  public SpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
+		super(roi, file, number, position);
+	}
 
 
 }

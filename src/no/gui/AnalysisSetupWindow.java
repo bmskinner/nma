@@ -86,8 +86,6 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel(500,	100, 50000, 1));
 	private JSpinner txtMaxNuclearSize = new JSpinner(new SpinnerNumberModel(10000,	100, 50000, 1));
-	//	private JTextField txtXOffset;
-	//	private JTextField txtYOffset;
 
 	private JSpinner txtProfileWindowSize = new JSpinner(new SpinnerNumberModel(15,	5, 50, 1));
 
@@ -137,14 +135,6 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 		// add the buttons
 		contentPane.add(makeLowerButtonPanel(), BorderLayout.SOUTH);
-
-
-		// add the other settings
-//		JPanel settingsPanel = new JPanel();
-//		settingsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-//		settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
-
-//		settingsPanel.add(makeSettingsPanel());
 		
 		contentPane.add(makeSettingsPanel(), BorderLayout.CENTER);
 
@@ -173,6 +163,9 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 		analysisOptions.setXoffset(0);
 		analysisOptions.setYoffset(0);
+				
+		analysisOptions.setCollectionClass(RodentSpermNucleusCollection.class);
+		analysisOptions.setNucleusClass(RodentSpermNucleus.class);
 	}
 
 	private JPanel makeNucleusTypePanel(){
@@ -183,7 +176,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		panel.add(new JLabel("Nucleus type"));
 
 		nucleusSelectionBox = new JComboBox(nucleusClassTypes.keySet().toArray(new String[0]));
-		nucleusSelectionBox.setSelectedIndex(0);
+		nucleusSelectionBox.setSelectedIndex(1);
 		nucleusSelectionBox.setActionCommand("Nucleus type");
 		nucleusSelectionBox.addActionListener(this);
 		panel.add(nucleusSelectionBox);
@@ -222,15 +215,9 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
-		
-//		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
 		panel.add(makeDetectionSettingsPanel(), c);
 
-//		Dimension minSize = new Dimension(10, 10);
-//		Dimension prefSize = new Dimension(10, 10);
-//		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-//		panel.add(new Box.Filler(minSize, prefSize, maxSize));
 
 		JPanel refoldPanel = makeRefoldSettingsPanel();
 		panel.add(refoldPanel, c);

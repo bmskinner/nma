@@ -137,7 +137,10 @@ public void calculateSignalDistancesFromCoM();
 
   public void calculatePathLength();
 
-
+  public void setArea(double d);
+  public void setFeret(double d);
+  public void setPerimeter(double d);
+  
   /*
     -----------------------
     Process signals

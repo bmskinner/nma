@@ -5,6 +5,10 @@
 */  
 package no.nuclei.sperm;
 
+import ij.gui.Roi;
+
+import java.io.File;
+
 import no.nuclei.*;
 import no.components.*;
 
@@ -31,14 +35,10 @@ public class PigSpermNucleus
     public PigSpermNucleus(RoundNucleus n){
       super(n);
     }
-
-    /**
-    * Empty constructor. Can be used for class
-    * identification (as in AnalysisCreator) 
-    */
-    public PigSpermNucleus(){
-
-    }
+    
+    public PigSpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
+		super(roi, file, number, position);
+	}
 
   /**
   * {@inheritDoc}

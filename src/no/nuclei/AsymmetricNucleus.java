@@ -12,6 +12,9 @@
 package no.nuclei;
 
 
+import ij.gui.Roi;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,9 +34,9 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
     super(n);
   }
 
-  public AsymmetricNucleus(){
-
-  }
+  public AsymmetricNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
+		super(roi, file, number, position);
+	}
 
   /*
     -----------------------

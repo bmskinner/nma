@@ -8,6 +8,9 @@
 */  
 package no.nuclei.sperm;
 
+import ij.gui.Roi;
+
+import java.io.File;
 import java.util.*;
 
 import no.nuclei.*;
@@ -31,8 +34,9 @@ extends SpermNucleus
 		// this.findPointsAroundBorder();
 	}
 
-	// empty object
-	public RodentSpermNucleus(){
+	
+	public RodentSpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
+		super(roi, file, number, position);
 	}
 
 	/*

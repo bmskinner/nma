@@ -59,20 +59,20 @@ public class RoundNucleus
 	
 	public static final String IMAGE_PREFIX = "export.";
 
-	private int nucleusNumber; // the number of the nucleus in the current image
-	private int failureCode = 0; // stores a code to explain why the nucleus failed filters
+	protected int nucleusNumber; // the number of the nucleus in the current image
+	protected int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
-	private int angleProfileWindowSize;
+	protected int angleProfileWindowSize;
 
 	// private double medianAngle; // the median interior angle
-	private double perimeter;   // the nuclear perimeter
-	private double pathLength;  // the angle path length - measures wibbliness in border
-	private double feret;       // the maximum diameter
-	private double area;        // the nuclear area
+	protected double perimeter;   // the nuclear perimeter
+	protected double pathLength;  // the angle path length - measures wibbliness in border
+	protected double feret;       // the maximum diameter
+	protected double area;        // the nuclear area
 
 //	private String position; // the position of the centre of the ROI bounding rectangle in the original image as "x.y"
 	
-	private double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
+	protected double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
 
 	/*
 		The following fields are part of the redesign of the whole system. Instead of storing border points within
@@ -81,19 +81,19 @@ public class RoundNucleus
 		BorderPoints are made; everything references the copy in the Nucleus. Given this, the points of interest 
 		(now borderTags) need only to be indexes.
 	*/
-	private Profile angleProfile; // 
-	private Profile distanceProfile; // holds distances through CoM to opposite border
-	private Profile singleDistanceProfile; // holds distances from CoM, not through CoM
-	private List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
-	private List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
-	private Map<String, Integer> borderTags  = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
-	private Map<String, Integer> segmentTags = new HashMap<String, Integer>(0);
+	protected Profile angleProfile; // 
+	protected Profile distanceProfile; // holds distances through CoM to opposite border
+	protected Profile singleDistanceProfile; // holds distances from CoM, not through CoM
+	protected List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
+	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
+	protected Map<String, Integer> borderTags  = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+	protected Map<String, Integer> segmentTags = new HashMap<String, Integer>(0);
 
-	private XYPoint centreOfMass;
+	protected XYPoint centreOfMass;
 
-	private File sourceFile;    // the image from which the nucleus came
-	private File nucleusFolder; // the folder to store nucleus information
-	private String outputFolder;  // the top-level path in which to store outputs; has analysis date
+	protected File sourceFile;    // the image from which the nucleus came
+	protected File nucleusFolder; // the folder to store nucleus information
+	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date
 	
 	protected SignalCollection signalCollection = new SignalCollection();
 
@@ -119,7 +119,7 @@ public class RoundNucleus
 		// for subclasses to access
 	}
 
-	public RoundNucleus(RoundNucleus n){
+	public RoundNucleus(Nucleus n){
 
 		this.setID(n.getID());
 		this.setPosition(n.getPosition());
@@ -1254,19 +1254,4 @@ public class RoundNucleus
 			addBorderTag(s, newIndex);
 		}
 	}
-	
-//	public FloatPolygon createPolygon(){
-//		float[] xpoints = new float[this.getLength()];
-//		float[] ypoints = new float[this.getLength()];
-//		
-//		for(int i=0;i<this.getLength();i++){
-//			NucleusBorderPoint p = this.getBorderPoint(i);
-//			xpoints[i] = (float) p.getX();
-//			ypoints[i] = (float) p.getY();
-//		}
-//		
-//		return new FloatPolygon(xpoints, ypoints, this.getLength());
-//		
-//	}
-
 }

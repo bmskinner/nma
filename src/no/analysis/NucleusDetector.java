@@ -17,6 +17,8 @@ import ij.plugin.RoiEnlarger;
 
 import java.awt.Rectangle;
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import no.nuclei.*;
@@ -36,31 +38,20 @@ public class NucleusDetector {
 
   private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
 
-  /* DEFAULT VALUES FOR DECIDING IF AN OBJECT IS A NUCLEUS */
-  protected double minNucleusSize  = 500;
-  protected double maxNucleusSize  = 10000;
-  protected double minNucleusCirc  = 0.4;
-  protected double maxNucleusCirc  = 1;
-
-  private int angleProfileWindowSize  = 23;
-
-  protected int nucleusThreshold = 36;
-
   // counts of nuclei processed
   protected int totalNuclei        = 0;
 
-  private  int    signalThreshold = 70;
-  private  double   minSignalSize = 5;
-  private  double   maxSignalFraction = 0.5;
 
-	private File inputFolder;
+  private File inputFolder;
   protected String outputFolder;
   protected File debugFile;
-  
-  private Logger logger;
-  
+
+  protected AnalysisOptions analysisOptions;
+
+  protected Logger logger;
+
   protected MainWindow mw;
-  private Map<File, RoundNucleusCollection> collectionGroup = new HashMap<File, RoundNucleusCollection>();
+  private Map<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
 
 
   /**
@@ -70,11 +61,12 @@ public class NucleusDetector {
   * @param inputFolder the folder to analyse
   * @param outputFolder the name of the folder for results
   */
-  public NucleusDetector(File inputFolder, String outputFolder, MainWindow mw, File debugFile){
-	  this.inputFolder = inputFolder;
+  public NucleusDetector(String outputFolder, MainWindow mw, File debugFile, AnalysisOptions options){
+	  this.inputFolder = options.getFolder();
 	  this.outputFolder = outputFolder;
 	  this.mw = mw;
 	  this.debugFile = debugFile;
+	  this.analysisOptions = options;
 	  logger = new Logger(debugFile, "NucleusDetector");
   }
 
@@ -83,13 +75,15 @@ public class NucleusDetector {
   * Run the detector on the input folder
   */
   public void runDetector(){
-    try{
-    	logger.log("Running nucleus detector");
-      processFolder(this.inputFolder);
-    } catch(Exception e){
-    	logger.log("Error in processing folder: "+e, Logger.ERROR);
-//      IJ.log("Error in processing folder: "+e);
-    }
+	  try{
+		  logger.log("Running nucleus detector");
+		  processFolder(this.inputFolder);
+	  } catch(Exception e){
+		  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
+		  for(StackTraceElement el : e.getStackTrace()){
+			  logger.log(el.toString(), Logger.STACK);
+		  }
+	  }
   }
 
   /*
@@ -118,134 +112,6 @@ public class NucleusDetector {
     return NucleusDetector.prefixesToIgnore;
   }
 
-  public int getThreshold(){
-    return this.nucleusThreshold;
-  }
-
-	/*
-    -------------------
-    Settings for nucleus detection
-    -------------------
-  */
-
-  /**
-  * Set minimum size of a nucleus in pixels
-  *
-  *  @param d the minimum size
-  */
-  public void setMinNucleusSize(double d){
-	  if(Double.valueOf(d)==null){
-		  throw new IllegalArgumentException("Value is null");
-	  }
-	  if(d<=0){
-		  throw new IllegalArgumentException("Min nucleus size is 0 or less");
-	  }
-	  this.minNucleusSize = d;
-  } 
-
-  /**
-  * Set maximum size of a nucleus in pixels
-  *
-  *  @param d the maximum size
-  */
-  public void setMaxNucleusSize(double d){
-	  if(Double.valueOf(d)==null){
-		  throw new IllegalArgumentException("Value is null");
-	  }
-	  if(d<=0){
-		  throw new IllegalArgumentException("Max nucleus size is 0 or less");
-	  }
-	  this.maxNucleusSize = d;
-  }   
-
-  /**
-  * Set minimum circularity of a nucleus
-  *
-  *  @param d the minimum circularity
-  */
-  public void setMinNucleusCirc(double d){
-	  if(Double.valueOf(d)==null){
-		  throw new IllegalArgumentException("Value is null");
-	  }
-	  if(d<0 || d>1){
-		  throw new IllegalArgumentException("Value is outside range 0-1");
-	  }
-	  this.minNucleusCirc = d;
-  }
-
-  /**
-  * Set maximum circularity of a nucleus
-  *
-  *  @param d the maximum circularity
-  */
-  public void setMaxNucleusCirc(double d){
-	  if(Double.valueOf(d)==null){
-		  throw new IllegalArgumentException("Value is null");
-	  }
-	  if(d<0 || d>1){
-		  throw new IllegalArgumentException("Value is outside range 0-1");
-	  }
-	  this.maxNucleusCirc = d;
-  }
-
-  /**
-  * Set the image thresholding for detecting nuclei
-  *
-  *  @param i the threshold
-  */
-  public void setThreshold(int i){
-	  if(Integer.valueOf(i)==null){
-		  throw new IllegalArgumentException("Value is null");
-	  }
-	  if(i<0 || i>255){
-		  throw new IllegalArgumentException("Value is outside range 0-255");
-	  }
-	  this.nucleusThreshold = i;
-  } 
-
-  /*
-    -------------------
-    Settings for signal detection
-    -------------------
-  */
-
-
-  /**
-  * Set the image thresholding for detecting signals
-  *
-  *  @param i the threshold
-  */
-  public void setSignalThreshold(int i){
-    this.signalThreshold = i;
-  }
-
-  /**
-  * Set minimum size of a signal in pixels
-  *
-  *  @param d the signal size
-  */
-  public void setMinSignalSize(double d){
-    this.minSignalSize = d;
-  }
-
-  /**
-  * Set maximum fraction of nuclear area a signal can take up
-  *
-  *  @param d the signal size
-  */
-  public void setMaxSignalFraction(double d){
-    this.maxSignalFraction = d;
-  }
-
-  /**
-  * Set the window size for angle profiling in the nuclei
-  *
-  *  @param i the window size
-  */
-  public void setAngleProfileWindowSize(int i){
-    this.angleProfileWindowSize = i;
-  }
-
   /**
   * Add a NucleusCollection to the group, using the source folder
   * name as a key.
@@ -265,12 +131,12 @@ public class NucleusDetector {
   *
   *  @return a Map of a folder to its nuclei
   */
-  public Map<File, RoundNucleusCollection> getNucleiCollections(){
+  public Map<File, NucleusCollection> getNucleiCollections(){
     // remove any empty collections before returning
     List<File> toRemove = new ArrayList<File>(0);
     Set<File> keys = collectionGroup.keySet();
     for (File key : keys) {
-      RoundNucleusCollection collection = collectionGroup.get(key);
+    	NucleusCollection collection = collectionGroup.get(key);
       if(collection.getNucleusCount()==0){
         toRemove.add(key);
       }    
@@ -332,6 +198,125 @@ public class NucleusDetector {
     }
     return output;
   }
+  
+  private NucleusCollection createNewCollection(File folder){
+
+	  NucleusCollection newCollection = null;
+
+	  try {
+
+		  Constructor<?> collectionConstructor =  analysisOptions
+				  .getCollectionClass()
+				  .getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+
+		  newCollection = (NucleusCollection) collectionConstructor.newInstance(folder, 
+				  outputFolder, 
+				  "analysable", 
+				  this.debugFile);
+
+	  } catch (NoSuchMethodException e) {
+		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
+		  for(StackTraceElement el : e.getStackTrace()){
+			  logger.log(el.toString(), Logger.STACK);
+		  }
+	  } catch (SecurityException e) {
+		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
+		  for(StackTraceElement el : e.getStackTrace()){
+			  logger.log(el.toString(), Logger.STACK);
+		  }
+	  } catch (InstantiationException e) {
+		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
+		  for(StackTraceElement el : e.getStackTrace()){
+			  logger.log(el.toString(), Logger.STACK);
+		  }
+	  } catch (IllegalAccessException e) {
+		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
+		  for(StackTraceElement el : e.getStackTrace()){
+			  logger.log(el.toString(), Logger.STACK);
+		  }
+	  } catch (IllegalArgumentException e) {
+		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
+		  for(StackTraceElement el : e.getStackTrace()){
+			  logger.log(el.toString(), Logger.STACK);
+		  }
+	  } catch (InvocationTargetException e) {
+		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
+		  for(StackTraceElement el : e.getStackTrace()){
+			  logger.log(el.toString(), Logger.STACK);
+		  }
+	  } catch (NullPointerException e) {
+		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
+		  for(StackTraceElement el : e.getStackTrace()){
+			  logger.log(el.toString(), Logger.STACK);
+		  }
+	  }
+	  return newCollection;
+  }
+  
+  private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition){
+
+	  Nucleus n = null;
+//	  RoundNucleus currentNucleus = new RoundNucleus(nucleus, path, nucleusNumber, originalPosition);
+//	  Class<double[]> arrayClass = double[].class;
+	  
+	  try {
+		  
+		  Constructor<?> nucleusConstructor = null;
+		  
+		  Constructor<?>[]  list = analysisOptions.getNucleusClass().getConstructors();
+		  for(Constructor<?> c : list){
+			  Class<?>[] classes = c.getParameterTypes();
+//			  for(Class<?> cl : classes){
+////				  IJ.log(cl.getSimpleName());
+//			  }
+			  if(classes.length==4){
+				  nucleusConstructor = analysisOptions
+				  .getNucleusClass()
+				  .getConstructor(classes);
+			  }
+//			  IJ.log("");
+		  }
+
+
+
+		  n = (Nucleus) nucleusConstructor.newInstance(roi, 
+				  path, 
+				  nucleusNumber, 
+				  originalPosition);
+
+	  } catch (NoSuchMethodException e) {
+		  IJ.log(e.getMessage());
+		  for(StackTraceElement el : e.getStackTrace()){
+			  IJ.log(el.toString());
+		  }
+	  } catch (SecurityException e) {
+		  IJ.log(e.getMessage());
+		  for(StackTraceElement el : e.getStackTrace()){
+			  IJ.log(el.toString());
+		  }
+	  } catch (InstantiationException e) {
+		  IJ.log(e.getMessage());
+		  for(StackTraceElement el : e.getStackTrace()){
+			  IJ.log(el.toString());
+		  }
+	  } catch (IllegalAccessException e) {
+		  IJ.log(e.getMessage());
+		  for(StackTraceElement el : e.getStackTrace()){
+			  IJ.log(el.toString());
+		  }
+	  } catch (IllegalArgumentException e) {
+		  IJ.log(e.getMessage());
+		  for(StackTraceElement el : e.getStackTrace()){
+			  IJ.log(el.toString());
+		  }
+	  } catch (InvocationTargetException e) {
+		  IJ.log(e.getMessage());
+		  for(StackTraceElement el : e.getStackTrace()){
+			  IJ.log(el.toString());
+		  }
+	  }
+	  return n;
+  }
 
 
   /**
@@ -340,38 +325,40 @@ public class NucleusDetector {
   *
   * @param folder the folder of images to be analysed
   */
-	protected void processFolder(File folder){
+  protected void processFolder(File folder){
 
-    File[] listOfFiles = folder.listFiles();
-    RoundNucleusCollection folderCollection = new RoundNucleusCollection(folder, this.outputFolder, folder.getName(), this.debugFile);
-    this.collectionGroup.put(folder, folderCollection);
- 
-    for (File file : listOfFiles) {
+	  File[] listOfFiles = folder.listFiles();
+	  
+	  NucleusCollection folderCollection = createNewCollection(folder);
+//	  RoundNucleusCollection folderCollection = new RoundNucleusCollection(folder, this.outputFolder, folder.getName(), this.debugFile);
+	  this.collectionGroup.put(folder, folderCollection);
 
-      boolean ok = this.checkFile(file);
-            
-      if(ok){
-        try {
-          Opener localOpener = new Opener();
-          ImagePlus image = localOpener.openImage(file.getAbsolutePath());   
-          
-//          ImageStack imageStack = ImageImporter.convert(image);
-          ImageStack imageStack = ImageImporter.importImage(file, logger.getLogfile());
-          
-          // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
-          makeFolder(folder);
-          processImage(imageStack, file);
-          image.close();
+	  for (File file : listOfFiles) {
 
-        } catch (Exception e) { // end try
-        	logger.log("Error in image processing: "+e.getMessage(), Logger.ERROR);
-        } // end catch
-      } else { // if !ok
-        if(file.isDirectory()){ // recurse over any sub folders
-          processFolder(file);
-        }
-      } // end else if !ok
-    } // end for (File)
+		  boolean ok = this.checkFile(file);
+
+		  if(ok){
+			  try {
+				  Opener localOpener = new Opener();
+				  ImagePlus image = localOpener.openImage(file.getAbsolutePath());   
+
+				  //          ImageStack imageStack = ImageImporter.convert(image);
+				  ImageStack imageStack = ImageImporter.importImage(file, logger.getLogfile());
+
+				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
+				  makeFolder(folder);
+				  processImage(imageStack, file);
+				  image.close();
+
+			  } catch (Exception e) { // end try
+				  logger.log("Error in image processing: "+e.getMessage(), Logger.ERROR);
+			  } // end catch
+		  } else { // if !ok
+			  if(file.isDirectory()){ // recurse over any sub folders
+				  processFolder(file);
+			  }
+		  } // end else if !ok
+	  } // end for (File)
   } // end function
 
 	/**
@@ -382,16 +369,15 @@ public class NucleusDetector {
 	 */
 	protected List<Roi> getROIs(ImageStack image){
 		Detector detector = new Detector();
-		detector.setMaxSize(this.maxNucleusSize);
-		detector.setMinSize(this.minNucleusSize);
-		detector.setMinCirc(this.minNucleusCirc);
-		detector.setMaxCirc(this.maxNucleusCirc);
-		detector.setThreshold(this.nucleusThreshold);
+		detector.setMaxSize(analysisOptions.getMaxNucleusSize());
+		detector.setMinSize(analysisOptions.getMinNucleusSize());
+		detector.setMinCirc(analysisOptions.getMinNucleusCirc());
+		detector.setMaxCirc(analysisOptions.getMaxNucleusCirc());
+		detector.setThreshold(analysisOptions.getNucleusThreshold());
 		detector.setChannel(ImageImporter.COUNTERSTAIN);
 		try{
 			detector.run(image);
 		} catch(Exception e){
-//			mw.log("Error in nucleus detection: "+e.getMessage());
 			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
 		}
 		return detector.getRoiList();
@@ -467,7 +453,9 @@ public class NucleusDetector {
 		  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
 		  
 		  // turn roi into Nucleus for manipulation
-		  RoundNucleus currentNucleus = new RoundNucleus(nucleus, path, nucleusNumber, originalPosition);
+		  Nucleus currentNucleus = createNucleus(nucleus, path, nucleusNumber, originalPosition);
+		  
+//		  RoundNucleus currentNucleus = new RoundNucleus(nucleus, path, nucleusNumber, originalPosition);
 	
 		  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
 		  currentNucleus.setArea(values.get("Area")); 
@@ -475,7 +463,7 @@ public class NucleusDetector {
 		  currentNucleus.setPerimeter(values.get("Perim"));
 	
 		  currentNucleus.setOutputFolder(this.outputFolder);
-		  currentNucleus.intitialiseNucleus(this.angleProfileWindowSize);
+		  currentNucleus.intitialiseNucleus(analysisOptions.getAngleProfileWindowSize());
 		  
 		  // save out the image stacks rather than hold within the nucleus
 		  try{
@@ -483,20 +471,21 @@ public class NucleusDetector {
 			  IJ.saveAsTiff(ImageExporter.convert(largeRegion), currentNucleus.getEnlargedImagePath());
 			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
 			  
-//			  IJ.saveAsTiff(new ImagePlus(null, smallRegion), currentNucleus.getOriginalImagePath());
-//			  IJ.saveAsTiff(new ImagePlus(null, largeRegion), currentNucleus.getEnlargedImagePath());
-//			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
 
 		  } catch(Exception e){
 			  mw.log("Error saving original, enlarged or annotated image: "+e.getMessage());
 			  logger.log("Error saving original, enlarged or annotated image: "+e.getMessage(), Logger.ERROR);
 		  }
 		  
-		  SignalDetector signalDetector = new SignalDetector(this.signalThreshold, this.minSignalSize, this.maxSignalFraction);
+		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getSignalThreshold(), 
+				  												analysisOptions.getMinSignalSize(), 
+				  												analysisOptions.getMaxSignalFraction());
 		  signalDetector.run(currentNucleus, smallRegion);
+		  
+		  currentNucleus.findPointsAroundBorder();
 	
 		  // if everything checks out, add the measured parameters to the global pool
-		  RoundNucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
+		  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
 		  collectionToAddTo.addNucleus(currentNucleus);
 	  }catch(Exception e){
 		  logger.log(" Error in nucleus assignment: "+e.getMessage(), Logger.ERROR);

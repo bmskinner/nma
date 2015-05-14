@@ -50,9 +50,9 @@ public class AnalysisSetup{
 		collectionClassTypes.put(ROUND_NUCLEUS, RoundNucleusCollection.class);
 
 		nucleusClassTypes = new HashMap<Integer, Class<?>>();
-		nucleusClassTypes.put(RODENT_SPERM_NUCLEUS, new RodentSpermNucleus().getClass());
-		nucleusClassTypes.put(PIG_SPERM_NUCLEUS, new PigSpermNucleus().getClass());
-		nucleusClassTypes.put(ROUND_NUCLEUS, new RoundNucleus().getClass());
+		nucleusClassTypes.put(RODENT_SPERM_NUCLEUS, RodentSpermNucleus.class);
+		nucleusClassTypes.put(PIG_SPERM_NUCLEUS, PigSpermNucleus.class);
+		nucleusClassTypes.put(ROUND_NUCLEUS, RoundNucleus.class);
 	}
 
 	public AnalysisSetup(){

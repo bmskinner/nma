@@ -8,7 +8,6 @@
 */  
 package no.analysis;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -19,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import no.components.AnalysisOptions;
 import no.components.XYPoint;
 import no.gui.MainWindow;
 import no.utility.Logger;
@@ -29,7 +29,6 @@ public class NucleusRefinder
 {
 
   private File pathList; // the file of paths and coordinates
-  private Logger logger;
 
   private int xOffset;
   private int yOffset;
@@ -47,18 +46,18 @@ public class NucleusRefinder
   /*
     Constructors
   */
-	public NucleusRefinder(File inputFolder, String outputFolder, File pathList, MainWindow mw, File debugFile){
-		super(inputFolder, outputFolder, mw, debugFile);
-    this.pathList = pathList;
-    this.logger = new Logger(debugFile, "NucleusRefinder");
+  public NucleusRefinder(String outputFolder, File pathList, MainWindow mw, File debugFile, AnalysisOptions options){
+	  super( outputFolder, mw, debugFile, options);
+	  this.pathList = pathList;
+	  this.logger = new Logger(debugFile, "NucleusRefinder");
 
-    // get the image names and coordinates from the pathList
-    try{
-      parsePathList(this.pathList);
-    } catch(IOException e){
-      IJ.log("IOException in NucleusRefinder.parsePathList(): "+e.getMessage());
-    }
-	}
+	  // get the image names and coordinates from the pathList
+	  try{
+		  parsePathList(this.pathList);
+	  } catch(IOException e){
+		  logger.log("Error parsing path list: "+e.getMessage(), Logger.ERROR);
+	  }
+  }
 
 
   public void parsePathList(File file) throws IOException {
@@ -184,7 +183,7 @@ public class NucleusRefinder
       ImagePlus templateImage = makeGreyscaleFromBlue(template);
 
       // INSERT IMAGE ALIGNMENT HERE
-      ImageAligner aligner = new ImageAligner(templateImage, imageToOffset, this.getThreshold());
+      ImageAligner aligner = new ImageAligner(templateImage, imageToOffset, analysisOptions.getNucleusThreshold());
       aligner.setXOffset(this.xOffset);
       aligner.setYOffset(this.yOffset);
       aligner.run();
