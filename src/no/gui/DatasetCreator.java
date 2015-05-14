@@ -283,6 +283,7 @@ public class DatasetCreator {
 				"Shell analysis run",
 				"Run date",
 				"Run time",
+				"Collection source",
 				"Type"};
 		model.addColumn("Field", columnData);
 		
@@ -330,6 +331,7 @@ public class DatasetCreator {
 						dataset.hasShellResult(),
 						date,
 						time,
+						collection.getFolder(),
 						options.getNucleusClass().getSimpleName()				
 				};
 

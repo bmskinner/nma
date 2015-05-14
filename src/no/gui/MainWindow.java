@@ -617,21 +617,14 @@ public class MainWindow extends JFrame {
 				// new style datasets
 				for(AnalysisDataset d : datasets){
 
-					// old style population lists
 					MainWindow.this.analysisDatasets.put(d.getUUID(), d);
-//					MainWindow.this.analysisPopulations.put(d.getUUID(), d.getCollection());
-					if(MainWindow.this.populationNames.containsKey(d.getName())){
-						d.setName(d.getName()+"_1");
-					}
+					d.setName(checkName(d.getName()));
 					MainWindow.this.populationNames.put(d.getName(), d.getUUID());
 					
 					
 					for(AnalysisDataset child : d.getChildDatasets()){
 						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
-						if(MainWindow.this.populationNames.containsKey(child.getName())){
-							child.setName(child.getName()+"_1");
-						}
-//						MainWindow.this.analysisPopulations.put(child.getUUID(), child.getCollection());
+						child.setName(checkName(child.getName()));
 						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
 					}
 					
@@ -646,6 +639,14 @@ public class MainWindow extends JFrame {
 			}
 		};
 		thr.start();		
+	}
+	
+	public String checkName(String name){
+		String result = name;
+		if(MainWindow.this.populationNames.containsKey(name)){
+			result = checkName(name+"_1");
+		}
+		return result;
 	}
 	
 	public void clusterAnalysis(NucleusCollection collection){
