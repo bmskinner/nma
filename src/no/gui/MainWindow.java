@@ -162,6 +162,8 @@ public class MainWindow extends JFrame {
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
+	
+	private HashMap<Integer, UUID> treeListOrder = new HashMap<Integer, UUID>();
 
 
 	/**
@@ -692,16 +694,18 @@ public class MainWindow extends JFrame {
 				
 				// new style datasets
 				for(AnalysisDataset d : datasets){
-
-					MainWindow.this.analysisDatasets.put(d.getUUID(), d);
-					d.setName(checkName(d.getName()));
-					MainWindow.this.populationNames.put(d.getName(), d.getUUID());
+					
+					addDataset(d);
+//					d.setName(checkName(d.getName()));
+//					MainWindow.this.analysisDatasets.put(d.getUUID(), d);
+//					MainWindow.this.populationNames.put(d.getName(), d.getUUID());
 					
 					
 					for(AnalysisDataset child : d.getChildDatasets()){
-						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
-						child.setName(checkName(child.getName()));
-						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
+						addDataset(child);
+//						child.setName(checkName(child.getName()));
+//						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
+//						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
 					}
 					
 					d.save();
@@ -717,6 +721,27 @@ public class MainWindow extends JFrame {
 		thr.start();		
 	}
 	
+	/**
+	 * Add the given dataset to the main population list
+	 * Check that the name is valid, and update if needed
+	 * @param d the dataset to add
+	 */
+	public void addDataset(AnalysisDataset d){
+		d.setName(checkName(d.getName()));
+		MainWindow.this.analysisDatasets.put(d.getUUID(), d);
+		MainWindow.this.populationNames.put(d.getName(), d.getUUID());
+		
+		if(d.isRoot()){ // add to the list of datasets that can be ordered
+			treeListOrder.put(treeListOrder.size(), d.getUUID()); // add to the end of the list
+		}
+	}
+	
+	/**
+	 * Check that the name of the dataset is not already in the list of datasets
+	 * If the name is used, adjust and check again
+	 * @param name the suggested name
+	 * @return a valid name
+	 */
 	public String checkName(String name){
 		String result = name;
 		if(MainWindow.this.populationNames.containsKey(name)){
@@ -765,23 +790,15 @@ public class MainWindow extends JFrame {
 										log("Error");
 									}
 
-									//							logc("Refolding profile...");
-									//							ok = CurveRefolder.run(c, c.getAnalysisOptions().getNucleusClass(), c.getAnalysisOptions().getRefoldMode());
-									//							if(ok){
-									//								log("OK");
-									//							} else {
-									//								log("Error");
-									//							}
-
 									// attach the clusters to their parent collection
 									parent.addCluster(c);
-									//							parent.addChildCollection(c);
 
-									MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
-									if(MainWindow.this.populationNames.containsKey(c.getName())){
-										c.setName(c.getName()+"_1");
-									}
-									MainWindow.this.populationNames.put(c.getName(), c.getID());
+									addDataset(parent.getChildDataset(c.getID()));
+//									MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
+//									if(MainWindow.this.populationNames.containsKey(c.getName())){
+//										c.setName(c.getName()+"_1");
+//									}
+//									MainWindow.this.populationNames.put(c.getName(), c.getID());
 
 								}
 								updatePopulationList();	
@@ -912,19 +929,22 @@ public class MainWindow extends JFrame {
 					// read the dataset
 					AnalysisDataset dataset = PopulationImporter.readDataset(new File(fileName));
 					dataset.setRoot(true);
-					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
+					
+					addDataset(dataset);
+//					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
 					
 					// update the population list
-					NucleusCollection collection = dataset.getCollection();
-					MainWindow.this.populationNames.put(dataset.getName(), dataset.getUUID());
+//					NucleusCollection collection = dataset.getCollection();
+//					MainWindow.this.populationNames.put(dataset.getName(), dataset.getUUID());
 					
 					for(AnalysisDataset child : dataset.getAllChildDatasets() ){
 //						log("Imported: "+child.getName());
-						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
-						MainWindow.this.populationNames.put(child.getName(), child.getUUID());
+						addDataset(child);
+//						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
+//						MainWindow.this.populationNames.put(child.getName(), child.getUUID());
 					}
 					log("OK");
-					log("Opened dataset: "+collection.getType());
+					log("Opened dataset: "+dataset.getName());
 //					log("Dataset contains: "+dataset.getChildCount()+" subsets");
 
 					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
@@ -1508,11 +1528,18 @@ public class MainWindow extends JFrame {
 			PopulationTreeTableNode  root = new PopulationTreeTableNode (java.util.UUID.randomUUID());
 			treeTableModel.setRoot(root);
 			treeTableModel.setColumnIdentifiers(columns);
-			for(AnalysisDataset d : this.analysisDatasets.values()){
-				if(d.isRoot()){
-					root.add( addTreeTableChildNodes(d.getUUID()));
-				}
+			
+			for(int i : treeListOrder.keySet()){
+				
+				AnalysisDataset rootDataset = analysisDatasets.get(treeListOrder.get(i));
+				root.add( addTreeTableChildNodes(rootDataset.getUUID()));
 			}
+			
+//			for(AnalysisDataset d : this.analysisDatasets.values()){
+//				if(d.isRoot()){
+//					root.add( addTreeTableChildNodes(d.getUUID()));
+//				}
+//			}
 			treeTable.setTreeTableModel(treeTableModel);
 
 			int row = 0;
@@ -1922,6 +1949,17 @@ public class MainWindow extends JFrame {
 						populationPopup.enableSave();
 						populationPopup.enableExtract();
 						
+						// check if we can move the dataset
+						if(treeListOrder.size()>1 && datasets.get(0).isRoot()){
+							populationPopup.enableMenuUp();
+							populationPopup.enableMenuDown();
+						} else {
+							populationPopup.disableMenuUp();
+							populationPopup.disableMenuDown();
+						}
+						
+						
+						
 						if(!datasets.get(0).hasChildren()){ // cannot split population without children yet
 							populationPopup.disableSplit();
 						} else {
@@ -2070,6 +2108,8 @@ public class MainWindow extends JFrame {
 		JMenuItem splitMenuItem = new JMenuItem(new SplitCollectionAction());
 		JMenuItem saveMenuItem = new JMenuItem(new SaveCollectionAction());
 		JMenuItem extractMenuItem = new JMenuItem(new ExtractNucleiCollectionAction());
+		JMenuItem moveUpMenuItem = new JMenuItem(new MoveDatasetUpAction());
+		JMenuItem moveDownMenuItem = new JMenuItem(new MoveDatasetDownAction());
 				
 		public PopulationListPopupMenu() {
 			
@@ -2080,6 +2120,8 @@ public class MainWindow extends JFrame {
 			this.add(splitMenuItem);
 			this.add(saveMenuItem);
 			this.add(extractMenuItem);
+			this.add(moveUpMenuItem);
+			this.add(moveDownMenuItem);
 			
 	    }
 		
@@ -2089,6 +2131,8 @@ public class MainWindow extends JFrame {
 			enableSplit();
 			enableSave();
 			enableExtract();
+			enableMenuUp();
+			enableMenuDown();
 		}
 		
 		public void disableAll(){
@@ -2097,6 +2141,8 @@ public class MainWindow extends JFrame {
 			disableSplit();
 			disableSave();
 			disableExtract();
+			disableMenuUp();
+			disableMenuDown();
 		}
 		
 		public void enableMerge(){
@@ -2137,6 +2183,22 @@ public class MainWindow extends JFrame {
 		
 		public void disableExtract(){
 			extractMenuItem.setEnabled(false);
+		}
+		
+		public void enableMenuUp(){
+			moveUpMenuItem.setEnabled(true);
+		}
+		
+		public void disableMenuUp(){
+			moveUpMenuItem.setEnabled(false);
+		}
+		
+		public void enableMenuDown(){
+			moveDownMenuItem.setEnabled(true);
+		}
+		
+		public void disableMenuDown(){
+			moveDownMenuItem.setEnabled(false);
 		}
 	}
 	
@@ -2403,30 +2465,36 @@ public class MainWindow extends JFrame {
 
 		private static final long serialVersionUID = 1L;
 		public SaveCollectionAction() {
-	        super("Save as...");
-	    }
-		
-	    public void actionPerformed(ActionEvent e) {
-	        
-	        List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-	        
-	        if(datasets.size()==1){
+			super("Save as...");
+		}
 
-	        	AnalysisDataset d = datasets.get(0);
-	        	SaveDialog saveDialog = new SaveDialog("Save as...", d.getName(), ".nmd");
-	        	
-	        	String fileName = saveDialog.getFileName();
-	    	    String folderName = saveDialog.getDirectory();
-	    	    
-	    	    File saveFile = new File(folderName+File.separator+fileName);
+		public void actionPerformed(ActionEvent e) {
 
-    	    	logc("Saving as "+saveFile.getAbsolutePath()+"...");
-    	    	PopulationExporter.saveAnalysisDataset(d, saveFile);
-        		log("OK");
-        		log("Saved dataset "+d.getCollection().getName());
-	    	    
-	        }
-	    }
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(datasets.size()==1){
+
+				Thread thr = new Thread() {
+					public void run() {
+
+						AnalysisDataset d = datasets.get(0);
+						SaveDialog saveDialog = new SaveDialog("Save as...", d.getName(), ".nmd");
+
+						String fileName = saveDialog.getFileName();
+						String folderName = saveDialog.getDirectory();
+
+						File saveFile = new File(folderName+File.separator+fileName);
+
+						logc("Saving as "+saveFile.getAbsolutePath()+"...");
+						PopulationExporter.saveAnalysisDataset(d, saveFile);
+						log("OK");
+						log("Saved dataset "+d.getCollection().getName());
+					}
+				};
+
+				thr.start();
+			}
+		}
 	}
 	
 	class ExtractNucleiCollectionAction extends AbstractAction {
@@ -2473,6 +2541,74 @@ public class MainWindow extends JFrame {
 	        	thr.start();
 	        }
 	    }
+	}
+	
+	class MoveDatasetUpAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public MoveDatasetUpAction() {
+			super("Move up");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(datasets.size()==1){
+
+				AnalysisDataset dataToMove = datasets.get(0);
+
+				int oldValue = 0;
+				int newValue = 0;
+				for(int i : treeListOrder.keySet()){
+					if(treeListOrder.get(i)==dataToMove.getUUID()){
+
+						oldValue = i; 
+						if(oldValue>0){ // do not change if already at the top
+							newValue = i-1;
+						}
+					}
+				}
+				UUID replacedID = treeListOrder.get(newValue); // find the dataset currently holding the spot
+				treeListOrder.put(newValue, dataToMove.getUUID()); // move the dataset up
+				treeListOrder.put(oldValue, replacedID); // move the dataset in place down
+				updatePopulationList();
+			}
+		}
+	}
+	
+	class MoveDatasetDownAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public MoveDatasetDownAction() {
+			super("Move down");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(datasets.size()==1){
+
+				AnalysisDataset dataToMove = datasets.get(0);
+
+				int oldValue = 0;
+				int newValue = 0;
+				for(int i : treeListOrder.keySet()){
+					if(treeListOrder.get(i)==dataToMove.getUUID()){
+
+						oldValue = i; 
+						if(oldValue<treeListOrder.size()-1){ // do not change if already at the bottom
+							newValue = i+1;
+						}
+					}
+				}
+				UUID replacedID = treeListOrder.get(newValue); // find the dataset currently holding the spot
+				treeListOrder.put(newValue, dataToMove.getUUID()); // move the dataset up
+				treeListOrder.put(oldValue, replacedID); // move the dataset in place down
+				updatePopulationList();
+			}
+		}
 	}
 	
 	/**
