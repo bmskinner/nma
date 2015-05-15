@@ -163,7 +163,7 @@ public class MainWindow extends JFrame {
 	
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
 	
-	private HashMap<Integer, UUID> treeListOrder = new HashMap<Integer, UUID>();
+	private HashMap<Integer, UUID> treeListOrder = new HashMap<Integer, UUID>(); // order the root datasets
 
 
 	/**
@@ -629,6 +629,11 @@ public class MainWindow extends JFrame {
 		textArea.append(s);
 	}
 	
+	
+	/**
+	 * Compare morphology images with post-FISH images, and select nuclei into new
+	 * sub-populations
+	 */
 	public void postAnalysis(){
 
 		try{
@@ -674,6 +679,10 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	
+	/**
+	 * Call the setup of a new analysis, and add the results to the dataset list 
+	 */
 	public void newAnalysis(){
 
 		Thread thr = new Thread() {
@@ -750,6 +759,13 @@ public class MainWindow extends JFrame {
 		return result;
 	}
 	
+	
+
+	/**
+	 * Call the setup for a new cluster analysis of an existing dataset.
+	 * Results are added to the dataset list.
+	 * @param collection the collection to cluster
+	 */
 	public void clusterAnalysis(NucleusCollection collection){
 		if(collection !=null){
 			final UUID id = collection.getID();
@@ -819,6 +835,12 @@ public class MainWindow extends JFrame {
 
 	}
 	
+	
+
+	/**
+	 * Rename an existing dataset and update the population list.
+	 * @param dataset the dataset to rename
+	 */
 	public void renameCollection(AnalysisDataset dataset){
 		NucleusCollection collection = dataset.getCollection();
 		String newName = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
@@ -842,6 +864,12 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	
+
+	/**
+	 * Call the setup for a new shell analysis on the given dataset,
+	 * @param dataset the dataset to analyse
+	 */
 	public void newShellAnalysis(AnalysisDataset dataset){
 		
 		NucleusCollection collection = dataset.getCollection();
@@ -876,6 +904,12 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	
+
+	/**
+	 * Refold the consensus nucleus for the given dataset using default parameters
+	 * @param dataset the dataset to refold
+	 */
 	public void refoldNucleus(AnalysisDataset dataset){
 		NucleusCollection collection = dataset.getCollection();
 		if(collection!=null){
@@ -916,6 +950,12 @@ public class MainWindow extends JFrame {
 		}
 	}
 		
+	
+
+	/**
+	 * Call an open dialog to choose a saved .nbd dataset. The opened dataset
+	 * will be added to the bottom of the dataset list.
+	 */
 	public void loadDataset(){
 		Thread thr = new Thread() {
 			public void run() {
@@ -960,6 +1000,10 @@ public class MainWindow extends JFrame {
 		thr.start();
 	}
 	
+	/**
+	 * Update the display panels with information from the given datasets
+	 * @param list the datasets to display
+	 */
 	public void updatePanels(final List<AnalysisDataset> list){
 
 		Thread thr = new Thread() {
@@ -987,12 +1031,25 @@ public class MainWindow extends JFrame {
 		thr.start();
 	}
 	
+	/**
+	 * Get a series or dataset index for colour selection when drawing charts. The index
+	 * is set in the DatasetCreator as part of the label
+	 * @param label the label to extract the index from 
+	 * @return the index found
+	 */
 	private int getIndexFromLabel(String label){
 		String[] names = label.split("_");
 		return Integer.parseInt(names[1]);
 	}
 	
-	// methods for getting signal colours. Defaults are no transparency
+
+	/**
+	 * Get a colour for displaying the given channel specifying transparency and alpha options
+	 * @param channel the channel to display
+	 * @param transparent is the colour transparent
+	 * @param defaultAlpha the transparency level
+	 * @return a colour
+	 */
 	public Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
 		Color result;
 		switch (channel){
@@ -1010,20 +1067,39 @@ public class MainWindow extends JFrame {
 		return result;
 	}
 	
+	/**
+	 * Get a colour for displaying the given channel specifying transparency
+	 * @param channel the channel to display
+	 * @param transparent is the colour transparent
+	 * @return a colour with the default transparency
+	 */
 	public Color getSignalColour(int channel, boolean transparent){
 		return getSignalColour(channel, transparent, 10);
 	}
 	
+	/**
+	 * Get a colour for displaying the given channel without transparency
+	 * @param channel the channel to display
+	 * @return a solid colour
+	 */	
 	public Color getSignalColour(int channel){
 		return getSignalColour(channel, false);
 	}
 	
+	/**
+	 * Update the stats panel with data from the given datasets
+	 * @param list the datasets
+	 */
 	public void updateStatsPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
 		TableModel model = DatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
 	}
 	
+	/**
+	 * Update the venn panel with data from the given datasets
+	 * @param list the datasets
+	 */
 	public void updateVennPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
 		TableModel model = DatasetCreator.createVennTable(list);
@@ -1071,6 +1147,10 @@ public class MainWindow extends JFrame {
 		return chart;
 	}
 	
+	/**
+	 * Update the profile panel with data from the given datasets
+	 * @param list the datasets
+	 */	
 	public void updateProfileImage(List<AnalysisDataset> list){
 		
 		try {
@@ -1146,6 +1226,10 @@ public class MainWindow extends JFrame {
 		} 
 	}
 		
+	/**
+	 * Update the frankenprofile panel with data from the given datasets
+	 * @param list the datasets
+	 */	
 	public void updateFrankenProfileChart(List<AnalysisDataset> list){
 		
 		try {
@@ -1224,6 +1308,10 @@ public class MainWindow extends JFrame {
 		} 
 	}
 	
+	/**
+	 * Update the shells panel with data from the given datasets
+	 * @param list the datasets
+	 */
 	public void updateShellPanel(List<AnalysisDataset> list){
 
 		if(list.size()==1){ // single collection is easy
@@ -1274,6 +1362,13 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	/**
+	 * Create a panel to display when a shell analysis is not available
+	 * @param showRunButton should there be an option to run a shell analysis on the dataset
+	 * @param collection the nucleus collection from the dataset
+	 * @param label the text to display on the panel
+	 * @return a panel to put in the shell tab
+	 */
 	private JPanel makeNoShellAnalysisAvailablePanel(boolean showRunButton, NucleusCollection collection, String label){
 		JPanel panel = new JPanel(); // container in tab if no shell chart
 		
@@ -1296,6 +1391,13 @@ public class MainWindow extends JFrame {
 		return panel;
 	}
 	
+	
+
+	/**
+	 * Create a consenusus chart for the given nucleus collection
+	 * @param collection the NucleusCollection to draw the consensus from
+	 * @return the consensus chart
+	 */
 	public JFreeChart makeConsensusChart(NucleusCollection collection){
 		XYDataset ds = DatasetCreator.createNucleusOutline(collection);
 		JFreeChart chart = 
@@ -1345,6 +1447,12 @@ public class MainWindow extends JFrame {
 		return chart;
 	}
 	
+	
+	/**
+	 * Update the consensus nucleus panel with data from the given datasets. Produces a blank
+	 * chart if no refolded nuclei are present
+	 * @param list the datasets
+	 */	
 	public void updateConsensusImage(List<AnalysisDataset> list){
 
 		NucleusCollection collection = list.get(0).getCollection();
@@ -1511,7 +1619,8 @@ public class MainWindow extends JFrame {
 
 	
 	/**
-	 *  Find the populations in memory, and display them in the population chooser
+	 *  Find the populations in memory, and display them in the population chooser. 
+	 *  Root populations are ordered according to position in the treeListOrder map.
 	 */
 	public void updatePopulationList(){
 					
@@ -1902,6 +2011,10 @@ public class MainWindow extends JFrame {
 		return datasets;
 	}
 	
+	/**
+	 * Establish the rows in the population tree that are currently selected.
+	 * Set the possible menu options accordingly, and call the panel updates
+	 */
 	class TreeSelectionHandler implements TreeSelectionListener {
 		public void valueChanged(TreeSelectionEvent e) {
 			

@@ -394,6 +394,9 @@ public class NucleusDetector {
 
 		mw.log("File:  "+path.getName());
 		logger.log("File:  "+path.getName(), Logger.DEBUG);
+		
+		// here before running the thresholding, do an edge detection, then pass on
+		
 		List<Roi> roiList = getROIs(image);
 		if(roiList.isEmpty()){
 			mw.log("  No usable nuclei in image");
