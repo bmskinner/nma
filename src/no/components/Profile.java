@@ -50,13 +50,20 @@ public class Profile implements Serializable {
   }
 
   public double get(int i){
-    double result = 0;
-    try {
-      result = this.array[i];
-    } catch(Exception e){
-      IJ.log("Cannot get value from profile: "+e.getMessage());
-    }
-    return result;
+	  double result = 0;
+
+	  try {
+		  if(i>=array.length){
+			  throw new Exception("Requested value "+i+" is beyond profile end");
+		  }
+		  result = this.array[i];
+	  } catch(Exception e){
+		  IJ.log("Cannot get value from profile: "+e.getMessage());
+		  for(StackTraceElement el : e.getStackTrace()){
+			  IJ.log(el.toString());
+		  }
+	  }
+	  return result;
   }
 
   public double getMax(){

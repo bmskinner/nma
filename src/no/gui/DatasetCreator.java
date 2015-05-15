@@ -483,9 +483,10 @@ public class DatasetCreator {
 	public static XYDataset createNucleusOutline(NucleusCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Nucleus n = collection.getConsensusNucleus();
-		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
-		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
+		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
+		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75").interpolate(n.getLength());
 		
+//		IJ.log("Nucleus: "+n.getLength()+" q25 "+q25.size()+" q75 "+q75.size());
 
 		// Add lines to show the IQR of the angle profile at each point
 		double[] innerIQRX = new double[n.getLength()+1];
@@ -495,6 +496,7 @@ public class DatasetCreator {
 
 		// find the maximum difference between IQRs
 		double maxIQR = 0;
+
 		for(int i=0; i<n.getLength(); i++){
 			if(q75.get(i) - q25.get(i)>maxIQR){
 				maxIQR = q75.get(i) - q25.get(i);

@@ -378,18 +378,18 @@ public class MainWindow extends JFrame {
 		// save button
 		//---------------
 
-		JButton btnSavePopulation = new JButton("Save");
+		JButton btnSavePopulation = new JButton("Save all");
 		btnSavePopulation.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
 					if(d.isRoot()){
-						logc("Saving dataset...");
+						logc("Saving dataset "+d.getCollection().getName()+"...");
 						d.save();
 						log("OK");
-						log("Saved dataset "+d.getCollection().getName());
 					}
 				}
+				log("All root datasets saved");
 			}
 		});
 		panelHeader.add(btnSavePopulation);
@@ -616,7 +616,7 @@ public class MainWindow extends JFrame {
 	 * @param s the string to log
 	 */
 	public void log(String s){
-		textArea.append(s+"\n");
+		logc(s+"\n");
 	}
 	
 	/**
