@@ -133,6 +133,7 @@ public class MainWindow extends JFrame {
 	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
 	private ChartPanel consensusChartPanel;
+	private JButton runRefoldingButton;
 	
 	private ChartPanel areaBoxplotChartPanel;
 	private ChartPanel perimBoxplotChartPanel;
@@ -178,169 +179,37 @@ public class MainWindow extends JFrame {
 			contentPane.setLayout(new BorderLayout(0, 0));
 			setContentPane(contentPane);
 			
-			JScrollPane scrollPane = new JScrollPane();
-			contentPane.add(scrollPane, BorderLayout.WEST);
-			textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
-			DefaultCaret caret = (DefaultCaret)textArea.getCaret();
-			caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-			
-			scrollPane.setViewportView(textArea);
-			textArea.setBackground(SystemColor.menu);
-			textArea.setEditable(false);
-			textArea.setRows(9);
-			textArea.setColumns(40);
-			
-			
-			JLabel lblAnalysisLog = new JLabel("Analysis Log");
-			lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
-			scrollPane.setColumnHeaderView(lblAnalysisLog);
-			
+
+			//---------------
+			// Create the log panel
+			//---------------
+			contentPane.add(createLogPanel(), BorderLayout.WEST);
+
 			//---------------
 			// Create the header buttons
 			//---------------
-			
-			JPanel panelHeader = new JPanel();
-			contentPane.add(panelHeader, BorderLayout.NORTH);
-//		
-			JButton btnNewAnalysis = new JButton("New analysis");
-			btnNewAnalysis.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					newAnalysis();
-				}
-			});
-			panelHeader.add(btnNewAnalysis);
-						
-			//---------------
-			// load saved dataset button
-			//---------------
-			
-			JButton btnLoadSavedDataset = new JButton("Load analysis dataset");
-			btnLoadSavedDataset.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					loadDataset();
-				}
-			});
-			panelHeader.add(btnLoadSavedDataset);
-			
-			//---------------
-			// save button
-			//---------------
-			
-			JButton btnSavePopulation = new JButton("Save");
-			btnSavePopulation.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
-						if(d.isRoot()){
-							logc("Saving dataset...");
-							d.save();
-							log("OK");
-							log("Saved dataset "+d.getCollection().getName());
-						}
-					}
-				}
-			});
-			panelHeader.add(btnSavePopulation);
-			
-			//---------------
-			// FISH mapping button
-			//---------------
-			
-			JButton btnPostanalysisMapping = new JButton("Post-FISH mapping");
-			btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					postAnalysis();
-				}
-			});
-			panelHeader.add(btnPostanalysisMapping);
-			
+			contentPane.add(createHeaderButtons(), BorderLayout.NORTH);
+
 			//---------------
 			// Footer
 			//---------------
+			contentPane.add(createFooterRow(), BorderLayout.SOUTH);
 			
-			JPanel panelFooter = new JPanel();
-			contentPane.add(panelFooter, BorderLayout.SOUTH);
+			//---------------
+			// General data
+			//---------------
 			
-			panelFooter.add(lblStatusLine);
 			contentPane.add(panelGeneralData, BorderLayout.CENTER);
 			panelGeneralData.setLayout(new BoxLayout(panelGeneralData, BoxLayout.Y_AXIS));
 			
+			// make a panel for the populations and consensus chart
 			JPanel panel = new JPanel();
-			panelGeneralData.add(panel);
+			
 			panel.setLayout(new GridLayout(0, 2, 0, 0));
+			createPopulationsPanel();
+			panel.add(panelPopulations);		
 			
-			//---------------
-			// Create the populations list
-			//---------------
-			panelPopulations.setMinimumSize(new Dimension(0, 100));
-			panel.add(panelPopulations);
-			panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
-						
-			// tree table approach
-			List<String> columns = new ArrayList<String>();
-			columns.add("Population");
-			columns.add("Nuclei");
-			columns.add("");
-
-			DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
-			DefaultMutableTreeTableNode  root = new DefaultMutableTreeTableNode ("root node");
-			treeTableModel.setRoot(root);
-			treeTableModel.setColumnIdentifiers(columns);
-			
-			treeTable = new JXTreeTable(treeTableModel);
-			treeTable.setEnabled(true);
-			treeTable.setCellSelectionEnabled(false);
-			treeTable.setColumnSelectionAllowed(false);
-			treeTable.setRowSelectionAllowed(true);
-			treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
-			treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-			treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
-			
-			populationPopup = new PopulationListPopupMenu();
-			populationPopup.disableAll();
-			
-			treeTable.setComponentPopupMenu(populationPopup);
-			
-			treeTable.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					
-					JXTreeTable table = (JXTreeTable) e.getSource();
-					
-					// double click
-					if (e.getClickCount() == 2) {
-						int index = table.rowAtPoint((e.getPoint()));
-						if (index >= 0) {
-							Object o = table.getModel().getValueAt(index, 0);
-							UUID id = MainWindow.this.populationNames.get(o.toString());
-							renameCollection(MainWindow.this.analysisDatasets.get(id));
-						}
-					}
-
-				}
-				
-//				public void mouseReleased(MouseEvent e) {
-//			        maybeShowPopup(e);
-//			    }
-//
-//			    private void maybeShowPopup(MouseEvent e) {
-//			        if (e.isPopupTrigger()) {
-//			            popup.show(e.getComponent(),
-//			                       e.getX(), e.getY());
-//			        }
-//			    }
-			});
-
-			TreeSelectionModel tableSelectionModel = treeTable.getTreeSelectionModel();
-			tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
-			
-			JScrollPane populationScrollPane = new JScrollPane(treeTable);		
-			
-			panelPopulations.add(populationScrollPane);
-			
+			panelGeneralData.add(panel);
 			
 			//---------------
 			// Create the regular profile chart
@@ -365,30 +234,10 @@ public class MainWindow extends JFrame {
 			//---------------
 			// Create the consensus chart
 			//---------------
-			JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-					null, null, null);
-			XYPlot consensusPlot = consensusChart.getXYPlot();
-			consensusPlot.setBackgroundPaint(Color.WHITE);
-			consensusPlot.getDomainAxis().setVisible(false);
-			consensusPlot.getRangeAxis().setVisible(false);
-			
-			consensusChartPanel = new ChartPanel(consensusChart);
-			
-			JButton runRefoldingButton = new JButton("Refold");
-			consensusChartPanel.add(runRefoldingButton);
-			runRefoldingButton.setVisible(false);
-			
+			createConsensusChartPanel();
 			panel.add(consensusChartPanel);
-			JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
 			
-			JFreeChart perimBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			
-			JFreeChart maxFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			
-			JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			
-			JFreeChart differenceBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			
+						
 			//---------------
 			// Create the variability chart
 			//---------------
@@ -398,31 +247,10 @@ public class MainWindow extends JFrame {
 			variabilityPlot.setBackgroundPaint(Color.WHITE);
 			variabilityPlot.getDomainAxis().setRange(0,100);
 			
-			//---------------
-			// Create the shells chart
-			//---------------
-			JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
-			shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
-			shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
-			
 
-			DefaultTableModel signalsTableModel = new DefaultTableModel();
-			signalsTableModel.addColumn("");
-			signalsTableModel.addColumn("");
-			
-			JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
-					null, null, null);
-			XYPlot signalsPlot = signalsChart.getXYPlot();
-			signalsPlot.setBackgroundPaint(Color.WHITE);
-			signalsPlot.getDomainAxis().setVisible(false);
-			signalsPlot.getRangeAxis().setVisible(false);
-			JFreeChart signalAngleChart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-			signalAngleChart.getPlot().setBackgroundPaint(Color.white);
-			
-			JFreeChart signalDistanceChart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-			signalDistanceChart.getPlot().setBackgroundPaint(Color.white);
-			
+//			JScrollPane tabScrollPane = new JScrollPane();
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+//			tabScrollPane.add(tabbedPane);
 			panelGeneralData.add(tabbedPane);
 			
 			profileChartPanel = new ChartPanel(profileChart);
@@ -448,64 +276,23 @@ public class MainWindow extends JFrame {
 			//---------------
 			// Create panel for split boxplots
 			//---------------
-			JPanel boxplotSplitPanel = new JPanel(); // main container in tab
+			tabbedPane.addTab("Boxplots", createBoxplotsPanel());
 			
-			boxplotSplitPanel.setLayout(new BoxLayout(boxplotSplitPanel, BoxLayout.X_AXIS));
-			areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
-			boxplotSplitPanel.add(areaBoxplotChartPanel);
-			perimBoxplotChartPanel = new ChartPanel(perimBoxplot);
-			boxplotSplitPanel.add(perimBoxplotChartPanel);
-			maxFeretBoxplotChartPanel = new ChartPanel(maxFeretBoxplot);
-			boxplotSplitPanel.add(maxFeretBoxplotChartPanel);
-			minFeretBoxplotChartPanel = new ChartPanel(minFeretBoxplot);
-			boxplotSplitPanel.add(minFeretBoxplotChartPanel);
-			differenceBoxplotChartPanel = new ChartPanel(differenceBoxplot);
-			boxplotSplitPanel.add(differenceBoxplotChartPanel);
-			
-			tabbedPane.addTab("Boxplots", null, boxplotSplitPanel, null);
-			
+			//---------------
+			// Create variabillity chart
+			//---------------
+
 			variabilityChartPanel = new ChartPanel(variablityChart);
-//			variabilityChartPanel.setMinimumSize(new Dimension(200,200));
 			tabbedPane.addTab("Variability", null, variabilityChartPanel, null);
-			shellsChartPanel = new ChartPanel(shellsChart);
+//			shellsChartPanel = new ChartPanel(shellsChart);
 			
 			
 			//---------------
 			// Create the signals tab panel
 			//---------------
-			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
-			tabbedPane.addTab("Signals", null, signalsTabPane, null);
+			signalsTabPane = createSignalsTabPanel();
+			tabbedPane.addTab("Signals", signalsTabPane);
 			
-			//---------------
-			// Create the signals panel
-			//---------------
-			signalsPanel = new JPanel(); // main container in tab
-			signalsPanel.setLayout(new BoxLayout(signalsPanel, BoxLayout.X_AXIS));
-			
-			signalStatsTable = new JTable(); // table  for basic stats
-			signalStatsTable.setModel(signalsTableModel);
-			signalStatsTable.setEnabled(false);
-			
-			JScrollPane signalStatsScrollPane = new JScrollPane(signalStatsTable);
-			signalsPanel.add(signalStatsScrollPane);
-			signalsChartPanel = new ChartPanel(signalsChart);
-			signalsPanel.add(signalsChartPanel);
-			
-			signalsTabPane.addTab("Overview", null, signalsPanel, null);
-			
-
-			//---------------
-			// Create the signal histograms panel
-			//---------------
-			signalHistogramPanel = new JPanel(); // main container in tab
-			signalHistogramPanel.setLayout(new BoxLayout(signalHistogramPanel, BoxLayout.Y_AXIS));
-			signalAngleChartPanel = new ChartPanel(signalAngleChart);
-			signalDistanceChartPanel = new ChartPanel(signalDistanceChart);
-
-			signalHistogramPanel.add(signalAngleChartPanel);
-			signalHistogramPanel.add(signalDistanceChartPanel);
-			signalsTabPane.addTab("Signal histograms", null, signalHistogramPanel, null);
-			signalsTabPane.addTab("Shells", null, shellsChartPanel, null);
 
 			//---------------
 			// Create the clusters panel
@@ -534,6 +321,295 @@ public class MainWindow extends JFrame {
 		
 	}
 	
+	/**
+	 * Create the log panel for updates
+	 * @return a scrollable panel
+	 */
+	private JScrollPane createLogPanel(){
+		JScrollPane scrollPane = new JScrollPane();
+		textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		
+		scrollPane.setViewportView(textArea);
+		textArea.setBackground(SystemColor.menu);
+		textArea.setEditable(false);
+		textArea.setRows(9);
+		textArea.setColumns(40);
+		
+		
+		JLabel lblAnalysisLog = new JLabel("Analysis Log");
+		lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
+		scrollPane.setColumnHeaderView(lblAnalysisLog);
+		return scrollPane;
+	}
+	
+	/**
+	 * Create the panel of primary buttons
+	 * @return a panel
+	 */
+	private JPanel createHeaderButtons(){
+
+		JPanel panelHeader = new JPanel();
+
+		JButton btnNewAnalysis = new JButton("New analysis");
+		btnNewAnalysis.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				newAnalysis();
+			}
+		});
+		panelHeader.add(btnNewAnalysis);
+
+		//---------------
+		// load saved dataset button
+		//---------------
+
+		JButton btnLoadSavedDataset = new JButton("Load analysis dataset");
+		btnLoadSavedDataset.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				loadDataset();
+			}
+		});
+		panelHeader.add(btnLoadSavedDataset);
+
+		//---------------
+		// save button
+		//---------------
+
+		JButton btnSavePopulation = new JButton("Save");
+		btnSavePopulation.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
+					if(d.isRoot()){
+						logc("Saving dataset...");
+						d.save();
+						log("OK");
+						log("Saved dataset "+d.getCollection().getName());
+					}
+				}
+			}
+		});
+		panelHeader.add(btnSavePopulation);
+
+		//---------------
+		// FISH mapping button
+		//---------------
+
+		JButton btnPostanalysisMapping = new JButton("Post-FISH mapping");
+		btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				postAnalysis();
+			}
+		});
+		panelHeader.add(btnPostanalysisMapping);
+		return panelHeader;
+	}
+	
+	
+	
+	/**
+	 * Create the status panel at the base of the window
+	 * @return the panel
+	 */
+	private JPanel createFooterRow(){
+		JPanel panel = new JPanel();
+		panel.add(lblStatusLine);
+		return panel;
+	}
+	
+	/**
+	 * Create the tree for populations analysed
+	 */
+	private void createPopulationsPanel(){
+		//---------------
+		// Create the populations list
+		//---------------
+		panelPopulations.setMinimumSize(new Dimension(50, 100));
+//		panel.add(panelPopulations);
+		panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
+					
+		// tree table approach
+		List<String> columns = new ArrayList<String>();
+		columns.add("Population");
+		columns.add("Nuclei");
+		columns.add("");
+
+		DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
+		DefaultMutableTreeTableNode  root = new DefaultMutableTreeTableNode ("root node");
+		treeTableModel.setRoot(root);
+		treeTableModel.setColumnIdentifiers(columns);
+		
+		treeTable = new JXTreeTable(treeTableModel);
+		treeTable.setEnabled(true);
+		treeTable.setCellSelectionEnabled(false);
+		treeTable.setColumnSelectionAllowed(false);
+		treeTable.setRowSelectionAllowed(true);
+		treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
+		treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+		treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
+		
+		populationPopup = new PopulationListPopupMenu();
+		populationPopup.disableAll();
+		
+		treeTable.setComponentPopupMenu(populationPopup);
+		
+		treeTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				JXTreeTable table = (JXTreeTable) e.getSource();
+				
+				// double click
+				if (e.getClickCount() == 2) {
+					int index = table.rowAtPoint((e.getPoint()));
+					if (index >= 0) {
+						Object o = table.getModel().getValueAt(index, 0);
+						UUID id = MainWindow.this.populationNames.get(o.toString());
+						renameCollection(MainWindow.this.analysisDatasets.get(id));
+					}
+				}
+
+			}
+		});
+
+		TreeSelectionModel tableSelectionModel = treeTable.getTreeSelectionModel();
+		tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
+		
+		JScrollPane populationScrollPane = new JScrollPane(treeTable);		
+		
+		panelPopulations.add(populationScrollPane);
+	}
+	
+	/**
+	 * Create the chart that will hold the refolded consensus nucleus
+	 */
+	private void createConsensusChartPanel(){
+		JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
+				null, null, null);
+		XYPlot consensusPlot = consensusChart.getXYPlot();
+		consensusPlot.setBackgroundPaint(Color.WHITE);
+		consensusPlot.getDomainAxis().setVisible(false);
+		consensusPlot.getRangeAxis().setVisible(false);
+		
+		consensusChartPanel = new ChartPanel(consensusChart);
+
+		runRefoldingButton = new JButton("Refold");
+
+		runRefoldingButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+
+				List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+				if(datasets.size()==1){
+
+					AnalysisDataset d = datasets.get(0);
+					MainWindow.this.refoldNucleus(d);
+				}
+
+			}
+		});
+		runRefoldingButton.setVisible(false);
+		consensusChartPanel.add(runRefoldingButton);
+	}
+	
+	
+	private JTabbedPane createSignalsTabPanel(){
+		JTabbedPane signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
+				
+		signalsPanel = new JPanel(); // main container in tab
+		signalsPanel.setLayout(new BoxLayout(signalsPanel, BoxLayout.X_AXIS));
+
+		// Stats panel & consensus
+		
+		DefaultTableModel signalsTableModel = new DefaultTableModel();
+		signalsTableModel.addColumn("");
+		signalsTableModel.addColumn("");
+		signalStatsTable = new JTable(); // table  for basic stats
+		signalStatsTable.setModel(signalsTableModel);
+		signalStatsTable.setEnabled(false);
+		
+		JScrollPane signalStatsScrollPane = new JScrollPane(signalStatsTable);
+		signalsPanel.add(signalStatsScrollPane);
+		
+
+		JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
+				null, null, null);
+		XYPlot signalsPlot = signalsChart.getXYPlot();
+		signalsPlot.setBackgroundPaint(Color.WHITE);
+		signalsPlot.getDomainAxis().setVisible(false);
+		signalsPlot.getRangeAxis().setVisible(false);
+		JFreeChart signalAngleChart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+		signalAngleChart.getPlot().setBackgroundPaint(Color.white);
+		
+		signalsChartPanel = new ChartPanel(signalsChart);
+		signalsPanel.add(signalsChartPanel);
+		
+		
+		
+		JFreeChart signalDistanceChart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+		signalDistanceChart.getPlot().setBackgroundPaint(Color.white);
+		
+		//---------------
+		// Create the shells panel
+		//---------------
+		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
+		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
+		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
+		shellsChartPanel = new ChartPanel(shellsChart);
+		
+		signalsTabPane.addTab("Overview", null, signalsPanel, null);
+		
+
+		//---------------
+		// Create the signal histograms panel
+		//---------------
+		signalHistogramPanel = new JPanel(); // main container in tab
+		signalHistogramPanel.setLayout(new BoxLayout(signalHistogramPanel, BoxLayout.Y_AXIS));
+		signalAngleChartPanel = new ChartPanel(signalAngleChart);
+		signalDistanceChartPanel = new ChartPanel(signalDistanceChart);
+
+		signalHistogramPanel.add(signalAngleChartPanel);
+		signalHistogramPanel.add(signalDistanceChartPanel);
+		signalsTabPane.addTab("Signal histograms", null, signalHistogramPanel, null);
+		signalsTabPane.addTab("Shells", null, shellsChartPanel, null);
+		return signalsTabPane;
+	}
+	
+	
+	private JPanel createBoxplotsPanel(){
+		JPanel boxplotSplitPanel = new JPanel(); // main container in tab
+
+		boxplotSplitPanel.setLayout(new BoxLayout(boxplotSplitPanel, BoxLayout.X_AXIS));
+		
+		JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+		JFreeChart perimBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+		JFreeChart maxFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+		JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+		JFreeChart differenceBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
+		
+		
+		areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
+		boxplotSplitPanel.add(areaBoxplotChartPanel);
+		
+		perimBoxplotChartPanel = new ChartPanel(perimBoxplot);
+		boxplotSplitPanel.add(perimBoxplotChartPanel);
+		
+		maxFeretBoxplotChartPanel = new ChartPanel(maxFeretBoxplot);
+		boxplotSplitPanel.add(maxFeretBoxplotChartPanel);
+		
+		minFeretBoxplotChartPanel = new ChartPanel(minFeretBoxplot);
+		boxplotSplitPanel.add(minFeretBoxplotChartPanel);
+		
+		differenceBoxplotChartPanel = new ChartPanel(differenceBoxplot);
+		boxplotSplitPanel.add(differenceBoxplotChartPanel);
+		
+		return boxplotSplitPanel;
+	}
 	
 	/**
 	 * Standard log - append a newline
@@ -1265,28 +1341,16 @@ public class MainWindow extends JFrame {
 					consensusChartPanel.setChart(consensusChart);
 					
 					final UUID id = collection.getID();
-							
-					for(Component c : consensusChartPanel.getComponents() ){
-						if(c.getClass()==JButton.class){
-							
-							c.addMouseListener(new MouseAdapter() {
-								@Override
-								public void mouseClicked(MouseEvent arg0) {
-									AnalysisDataset d = MainWindow.this.analysisDatasets.get(id);
-									MainWindow.this.refoldNucleus(d);
-									
-								}
-							});
-							c.setVisible(true);
-						}
-					}
+					runRefoldingButton.setVisible(true);
+
 
 				} else {
-					for(Component c : consensusChartPanel.getComponents() ){
-						if(c.getClass()==JButton.class){
-							c.setVisible(false);
-						}
-					}
+					runRefoldingButton.setVisible(false);
+//					for(Component c : consensusChartPanel.getComponents() ){
+//						if(c.getClass()==JButton.class){
+//							c.setVisible(false);
+//						}
+//					}
 					JFreeChart chart = makeConsensusChart(collection);
 					consensusChartPanel.setChart(chart);
 				} 
@@ -2374,34 +2438,39 @@ public class MainWindow extends JFrame {
 		
 	    public void actionPerformed(ActionEvent e) {
 	        
-	        List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-	        
+	        final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
 	        if(datasets.size()==1){
 
-	        	AnalysisDataset d = datasets.get(0);
-	        	
-	        	DirectoryChooser openDialog = new DirectoryChooser("Select directory to export images...");
-	    	    String folderName = openDialog.getDirectory();
+	        	Thread thr = new Thread() {
+	        		public void run() {
 
-	    	    if(folderName==null) return; // user cancelled
-	    	   
-	    	    File folder =  new File(folderName);
-	    	    
-	    	    if(!folder.isDirectory() ){
-	    	    	return;
-	    	    }
-	    	    if(!folder.exists()){
-	    	    	return; // check folder is ok
-	    	    }
+	        			AnalysisDataset d = datasets.get(0);
 
-    	    	logc("Extracting nuclei from collection...");
-    	    	boolean ok = PopulationExporter.extractNucleiToFolder(d, folder);
-        		if(ok){ 
-        			log("OK");
-        		} else {
-        			log("Error");
-        		}
-	    	    
+	        			DirectoryChooser openDialog = new DirectoryChooser("Select directory to export images...");
+	        			String folderName = openDialog.getDirectory();
+
+	        			if(folderName==null) return; // user cancelled
+
+	        			File folder =  new File(folderName);
+
+	        			if(!folder.isDirectory() ){
+	        				return;
+	        			}
+	        			if(!folder.exists()){
+	        				return; // check folder is ok
+	        			}
+
+	        			logc("Extracting nuclei from collection...");
+	        			boolean ok = PopulationExporter.extractNucleiToFolder(d, folder);
+	        			if(ok){ 
+	        				log("OK");
+	        			} else {
+	        				log("Error");
+	        			}
+	        		}
+	        	};
+	        	thr.start();
 	        }
 	    }
 	}
