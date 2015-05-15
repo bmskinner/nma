@@ -1849,14 +1849,14 @@ public class MainWindow extends JFrame {
 					populationPopup.disableAll();
 				} else {
 					if(datasets.size()>1){ // multiple populations
-						populationPopup.enableAll();
-						populationPopup.disableSplit();
-						populationPopup.disableSave();
+						populationPopup.disableAll();
+						populationPopup.enableMerge();
 						
 					} else { // single population
 						populationPopup.enableDelete();
 						populationPopup.disableMerge();
 						populationPopup.enableSave();
+						populationPopup.enableExtract();
 						
 						if(!datasets.get(0).hasChildren()){ // cannot split population without children yet
 							populationPopup.disableSplit();
@@ -2005,6 +2005,7 @@ public class MainWindow extends JFrame {
 		JMenuItem deleteMenuItem = new JMenuItem(new DeleteCollectionAction());
 		JMenuItem splitMenuItem = new JMenuItem(new SplitCollectionAction());
 		JMenuItem saveMenuItem = new JMenuItem(new SaveCollectionAction());
+		JMenuItem extractMenuItem = new JMenuItem(new ExtractNucleiCollectionAction());
 				
 		public PopulationListPopupMenu() {
 			
@@ -2014,6 +2015,7 @@ public class MainWindow extends JFrame {
 			this.add(deleteMenuItem);
 			this.add(splitMenuItem);
 			this.add(saveMenuItem);
+			this.add(extractMenuItem);
 			
 	    }
 		
@@ -2022,6 +2024,7 @@ public class MainWindow extends JFrame {
 			enableDelete();
 			enableSplit();
 			enableSave();
+			enableExtract();
 		}
 		
 		public void disableAll(){
@@ -2029,6 +2032,7 @@ public class MainWindow extends JFrame {
 			disableDelete();
 			disableSplit();
 			disableSave();
+			disableExtract();
 		}
 		
 		public void enableMerge(){
@@ -2061,6 +2065,14 @@ public class MainWindow extends JFrame {
 		
 		public void disableSave(){
 			saveMenuItem.setEnabled(false);
+		}
+		
+		public void enableExtract(){
+			extractMenuItem.setEnabled(true);
+		}
+		
+		public void disableExtract(){
+			extractMenuItem.setEnabled(false);
 		}
 	}
 	
@@ -2348,6 +2360,47 @@ public class MainWindow extends JFrame {
     	    	PopulationExporter.saveAnalysisDataset(d, saveFile);
         		log("OK");
         		log("Saved dataset "+d.getCollection().getName());
+	    	    
+	        }
+	    }
+	}
+	
+	class ExtractNucleiCollectionAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public ExtractNucleiCollectionAction() {
+	        super("Extract nuclei...");
+	    }
+		
+	    public void actionPerformed(ActionEvent e) {
+	        
+	        List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+	        
+	        if(datasets.size()==1){
+
+	        	AnalysisDataset d = datasets.get(0);
+	        	
+	        	DirectoryChooser openDialog = new DirectoryChooser("Select directory to export images...");
+	    	    String folderName = openDialog.getDirectory();
+
+	    	    if(folderName==null) return; // user cancelled
+	    	   
+	    	    File folder =  new File(folderName);
+	    	    
+	    	    if(!folder.isDirectory() ){
+	    	    	return;
+	    	    }
+	    	    if(!folder.exists()){
+	    	    	return; // check folder is ok
+	    	    }
+
+    	    	logc("Extracting nuclei from collection...");
+    	    	boolean ok = PopulationExporter.extractNucleiToFolder(d, folder);
+        		if(ok){ 
+        			log("OK");
+        		} else {
+        			log("Error");
+        		}
 	    	    
 	        }
 	    }
