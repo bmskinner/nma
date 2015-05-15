@@ -1942,6 +1942,7 @@ public class MainWindow extends JFrame {
 					if(datasets.size()>1){ // multiple populations
 						populationPopup.disableAll();
 						populationPopup.enableMerge();
+						populationPopup.enableDelete();
 						
 					} else { // single population
 						populationPopup.enableDelete();
@@ -1951,8 +1952,21 @@ public class MainWindow extends JFrame {
 						
 						// check if we can move the dataset
 						if(treeListOrder.size()>1 && datasets.get(0).isRoot()){
-							populationPopup.enableMenuUp();
-							populationPopup.enableMenuDown();
+							
+							// check if the selected dataset is at the top of the list
+							if(treeListOrder.get(0)!=datasets.get(0).getUUID()){
+								populationPopup.enableMenuUp();
+							} else {
+								populationPopup.disableMenuUp();
+							}
+							
+							// check if the selected dataset is at the bottom of the list
+							if(treeListOrder.get(treeListOrder.size()-1)!=datasets.get(0).getUUID()){
+								populationPopup.enableMenuDown();
+							} else {
+								populationPopup.disableMenuDown();
+							}
+							
 						} else {
 							populationPopup.disableMenuUp();
 							populationPopup.disableMenuDown();
@@ -2115,13 +2129,16 @@ public class MainWindow extends JFrame {
 			
 			super("Popup");
 			
+			this.add(moveUpMenuItem);
+			this.add(moveDownMenuItem);
+			this.addSeparator();
 			this.add(mergeMenuItem);
 			this.add(deleteMenuItem);
 			this.add(splitMenuItem);
+			this.addSeparator();
 			this.add(saveMenuItem);
 			this.add(extractMenuItem);
-			this.add(moveUpMenuItem);
-			this.add(moveDownMenuItem);
+			
 			
 	    }
 		
