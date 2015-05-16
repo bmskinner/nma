@@ -7,8 +7,10 @@ import ij.plugin.RGBStackMerge;
 import ij.process.ByteProcessor;
 
 /**
- * This handles the flattening of the image stacks used
+ * This class handles the flattening of the image stacks used
  * internally by a Nucleus into an RGB image.
+ * @author Ben Skinner
+ *
  */
 public class ImageExporter {
 	

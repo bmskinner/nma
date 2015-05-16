@@ -14,14 +14,18 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.io.Opener;
 import ij.plugin.RoiEnlarger;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import no.nuclei.*;
+import no.utility.CannyEdgeDetector;
 import no.utility.Logger;
 import no.utility.StatsMap;
 import no.collections.*;
@@ -373,7 +377,8 @@ public class NucleusDetector {
 		detector.setMinSize(analysisOptions.getMinNucleusSize());
 		detector.setMinCirc(analysisOptions.getMinNucleusCirc());
 		detector.setMaxCirc(analysisOptions.getMaxNucleusCirc());
-		detector.setThreshold(analysisOptions.getNucleusThreshold());
+		detector.setThreshold(60); // testing the edge detector. Make variable later
+//		detector.setThreshold(analysisOptions.getNucleusThreshold());
 		detector.setChannel(ImageImporter.COUNTERSTAIN);
 		try{
 			detector.run(image);
@@ -396,8 +401,9 @@ public class NucleusDetector {
 		logger.log("File:  "+path.getName(), Logger.DEBUG);
 		
 		// here before running the thresholding, do an edge detection, then pass on
-		
-		List<Roi> roiList = getROIs(image);
+		ImageStack searchStack = runEdgeDetector(image);
+
+		List<Roi> roiList = getROIs(searchStack);
 		if(roiList.isEmpty()){
 			mw.log("  No usable nuclei in image");
 			logger.log("No usable nuclei in image", Logger.DEBUG);
@@ -418,6 +424,37 @@ public class NucleusDetector {
 			}
 			nucleusNumber++;
 		} 
+	}
+	
+	
+	/**
+	 * Use edge detection to produce an image with potential edges highlighted
+	 * for the detector
+	 * @param image the stack to process
+	 * @return a stack with edges highlighted
+	 */
+	private ImageStack runEdgeDetector(ImageStack image){
+		// using IJ Sobel detector
+		// here before running the thresholding, do an edge detection, then pass on
+//		ImageProcessor ip = image.getProcessor(ImageImporter.COUNTERSTAIN);
+//		ByteProcessor edgeIp = new ByteProcessor(ip, false);
+//		edgeIp.findEdges();
+//		ImagePlus searchImage = new ImagePlus(null, edgeIp);
+//		ImageStack searchStack = ImageImporter.convert(searchImage);
+		
+		// using canny detector
+		logger.log("Creating edge detector", Logger.DEBUG);
+		CannyEdgeDetector canny = new CannyEdgeDetector();
+		canny.setSourceImage(image.getProcessor(ImageImporter.COUNTERSTAIN).getBufferedImage());
+		canny.setLowThreshold( 0.1f);
+		canny.setHighThreshold( 1.5f);
+		canny.process();
+		BufferedImage edges = canny.getEdgesImage();
+		ImagePlus searchImage = new ImagePlus(null, edges);
+		ImageStack searchStack = ImageImporter.convert(searchImage);
+//		searchImage.show();
+		searchImage.close();
+		return searchStack;
 	}
 
 

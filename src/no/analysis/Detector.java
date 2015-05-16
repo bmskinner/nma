@@ -122,7 +122,7 @@ public class Detector{
 	  RoiManager manager = new RoiManager(true);
 	  // run the particle analyser
 	  ResultsTable rt = new ResultsTable();
-	  ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES, 
+	  ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES | ParticleAnalyzer.INCLUDE_HOLES, 
 			  ParticleAnalyzer.FERET ,
 			  rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
 	  try {
