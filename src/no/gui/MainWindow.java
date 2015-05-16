@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.AbstractAction;
+import javax.swing.Box;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -158,6 +159,13 @@ public class MainWindow extends JFrame {
 	
 	private JPanel vennPanel; // show overlaps between populations
 	private JTable vennTable;
+	
+	private JPanel wilcoxonPanel; // compare populations
+	private JTable wilcoxonAreaTable;
+	private JTable wilcoxonPerimTable;
+	private JTable wilcoxonFeretTable;
+	private JTable wilcoxonMinFeretTable;
+	private JTable wilcoxonDifferenceTable;
 
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
@@ -315,6 +323,63 @@ public class MainWindow extends JFrame {
 			vennTable.setEnabled(false);
 			vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
 			vennTable.setModel(DatasetCreator.createVennTable(null));
+			
+			
+			//---------------
+			// Create the Wilcoxon test panel
+			//---------------
+			wilcoxonPanel = new JPanel();
+			wilcoxonPanel.setLayout(new BorderLayout());
+			tabbedPane.addTab("Wilcoxon", null, wilcoxonPanel, null);
+			
+			JPanel wilcoxonPartsPanel = new JPanel();
+			wilcoxonPartsPanel.setLayout(new BoxLayout(wilcoxonPartsPanel, BoxLayout.Y_AXIS));
+			
+			Dimension minSize = new Dimension(10, 10);
+			Dimension prefSize = new Dimension(10, 10);
+			Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
+			
+			wilcoxonPartsPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank-sum test)"));
+			wilcoxonPartsPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistic"));
+			wilcoxonPartsPanel.add(new JLabel("Below the diagonal: p-value"));
+			
+			wilcoxonPartsPanel.add(new JLabel("Areas"));
+			wilcoxonAreaTable = new JTable();
+			wilcoxonPartsPanel.add(wilcoxonAreaTable);
+			wilcoxonAreaTable.setEnabled(false);
+			wilcoxonPanel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
+			wilcoxonAreaTable.setModel(DatasetCreator.createWilcoxonAreaTable(null));
+			
+			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
+			wilcoxonPartsPanel.add(new JLabel("Perimeters"));
+			wilcoxonPerimTable = new JTable();
+			wilcoxonPartsPanel.add(wilcoxonPerimTable);
+			wilcoxonPerimTable.setEnabled(false);
+			wilcoxonPerimTable.setModel(DatasetCreator.createWilcoxonPerimeterTable(null));
+			
+			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
+			wilcoxonPartsPanel.add(new JLabel("Min feret"));
+			wilcoxonMinFeretTable = new JTable();
+			wilcoxonPartsPanel.add(wilcoxonMinFeretTable);
+			wilcoxonMinFeretTable.setEnabled(false);
+			wilcoxonMinFeretTable.setModel(DatasetCreator.createWilcoxonMinFeretTable(null));
+			
+			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
+			wilcoxonPartsPanel.add(new JLabel("Feret"));
+			wilcoxonFeretTable = new JTable();
+			wilcoxonPartsPanel.add(wilcoxonFeretTable);
+			wilcoxonFeretTable.setEnabled(false);
+			wilcoxonFeretTable.setModel(DatasetCreator.createWilcoxonMaxFeretTable(null));
+			
+			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
+			wilcoxonPartsPanel.add(new JLabel("Differences to median"));
+			wilcoxonDifferenceTable = new JTable();
+			wilcoxonPartsPanel.add(wilcoxonDifferenceTable);
+			wilcoxonDifferenceTable.setEnabled(false);
+			wilcoxonDifferenceTable.setModel(DatasetCreator.createWilcoxonVariabilityTable(null));
+			
+			wilcoxonPanel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
 			
 
 		} catch (Exception e) {
@@ -1020,6 +1085,7 @@ public class MainWindow extends JFrame {
 					updateSignalHistogramPanel(list);
 					updateClusteringPanel(list);
 					updateVennPanel(list);
+					updateWilcoxonPanel(list);
 				} catch (Exception e) {
 					log("Error updating panels: "+e.getMessage());
 					for(StackTraceElement el : e.getStackTrace()){
@@ -1108,6 +1174,45 @@ public class MainWindow extends JFrame {
 		for(int i=1;i<columns;i++){
 			vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
 
+		}
+	}
+	
+	/**
+	 * Update the wilcoxon panel with data from the given datasets
+	 * @param list the datasets
+	 */
+	public void updateWilcoxonPanel(List<AnalysisDataset> list){
+		// format the numbers and make into a tablemodel
+
+		wilcoxonAreaTable.setModel(DatasetCreator.createWilcoxonAreaTable(list));
+		
+		int columns = wilcoxonAreaTable.getColumnModel().getColumnCount();
+		for(int i=1;i<columns;i++){
+			wilcoxonAreaTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+		}
+		
+		wilcoxonPerimTable.setModel(DatasetCreator.createWilcoxonPerimeterTable(list));
+		columns = wilcoxonPerimTable.getColumnModel().getColumnCount();
+		for(int i=1;i<columns;i++){
+			wilcoxonPerimTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+		}
+		
+		wilcoxonMinFeretTable.setModel(DatasetCreator.createWilcoxonMinFeretTable(list));
+		columns = wilcoxonMinFeretTable.getColumnModel().getColumnCount();
+		for(int i=1;i<columns;i++){
+			wilcoxonMinFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+		}
+		
+		wilcoxonFeretTable.setModel(DatasetCreator.createWilcoxonMaxFeretTable(list));
+		columns = wilcoxonFeretTable.getColumnModel().getColumnCount();
+		for(int i=1;i<columns;i++){
+			wilcoxonFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+		}
+		
+		wilcoxonDifferenceTable.setModel(DatasetCreator.createWilcoxonVariabilityTable(list));
+		columns = wilcoxonDifferenceTable.getColumnModel().getColumnCount();
+		for(int i=1;i<columns;i++){
+			wilcoxonDifferenceTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 	}
 	
@@ -2191,6 +2296,43 @@ public class MainWindow extends JFrame {
 		        	l.setForeground(Color.black);
 		        }
 		        
+	        } else {
+	            l.setBackground(Color.LIGHT_GRAY);
+	        }
+
+	      //Return the JLabel which renders the cell.
+	      return l;
+	    }
+	}
+	
+	/**
+	 * Allows for cell background to be coloured based on value in cell
+	 *
+	 */
+	public class WilcoxonTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	        
+	      //Cells are by default rendered as a JLabel.
+	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+	        String cellContents = l.getText();
+	        if(cellContents!=null && !cellContents.equals("")){ // ensure value
+//	        	
+		        double pvalue = Double.valueOf(cellContents);
+		        
+		        Color colour = Color.WHITE; // default
+		        if(pvalue<=0.05){
+		        	colour = Color.YELLOW;
+		        }
+		        
+		        if(pvalue<=0.01){
+		        	colour = Color.GREEN;
+		        }
+		        l.setBackground(colour);
+
 	        } else {
 	            l.setBackground(Color.LIGHT_GRAY);
 	        }
