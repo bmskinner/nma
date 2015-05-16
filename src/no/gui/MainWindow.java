@@ -114,6 +114,9 @@ public class MainWindow extends JFrame {
 	private static final int SIGNALS_TAB = 5;
 	private static final int CLUSTERS_TAB = 6;
 	private static final int VENN_TAB = 6;
+	
+	private static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
+	private static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -341,8 +344,9 @@ public class MainWindow extends JFrame {
 			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
 			
 			wilcoxonPartsPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank-sum test)"));
-			wilcoxonPartsPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistic"));
-			wilcoxonPartsPanel.add(new JLabel("Below the diagonal: p-value"));
+			wilcoxonPartsPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
+			wilcoxonPartsPanel.add(new JLabel("Below the diagonal: p-values"));
+			wilcoxonPartsPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highligted in yellow and green"));
 			
 			wilcoxonPartsPanel.add(new JLabel("Areas"));
 			wilcoxonAreaTable = new JTable();
@@ -2324,11 +2328,19 @@ public class MainWindow extends JFrame {
 		        double pvalue = Double.valueOf(cellContents);
 		        
 		        Color colour = Color.WHITE; // default
-		        if(pvalue<=0.05){
+		        
+		        int numberOfTests = 5; // correct for the different variables measured;
+		        double divisor = (double) (   (table.getColumnCount()-2)  * numberOfTests); // for > 2 datasets with numberOFtests tests per dataset
+		        
+		        double fivePct = MainWindow.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni correction
+		        double onePct = MainWindow.ONE_PERCENT_SIGNIFICANCE_LEVEL /   divisor;
+//		        IJ.log("Columns: "+table.getColumnCount());
+		        
+		        if(pvalue<=fivePct){
 		        	colour = Color.YELLOW;
 		        }
 		        
-		        if(pvalue<=0.01){
+		        if(pvalue<=onePct){
 		        	colour = Color.GREEN;
 		        }
 		        l.setBackground(colour);

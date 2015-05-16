@@ -390,21 +390,16 @@ public class DatasetCreator {
 		return model;
 	}
 				
-	/**
-	 * Carry out pairwise wilcoxon rank-sum test on the perimeters of the given datasets
-	 * @param list the datasets to test
-	 * @return a tablemodel for display
-	 */
-	public static TableModel createWilcoxonPerimeterTable(List<AnalysisDataset> list){
+	private static DefaultTableModel makeEmptyWilcoxonTable(List<AnalysisDataset> list){
 		DefaultTableModel model = new DefaultTableModel();
-		
+
 		if(list==null){
 			Object[] columnData = {""};
 			model.addColumn("Population", columnData );
 			model.addColumn("", columnData );
 			return model;
 		}
-		
+
 		// set rows
 		Object[] columnData = new Object[list.size()];
 		int row = 0;
@@ -413,8 +408,37 @@ public class DatasetCreator {
 			row++;
 		}
 		model.addColumn("Population", columnData);
-		
+		return  model;
+	}
+	
+	private static double runWilcoxonTest(double[] dataset1, double[] dataset2, boolean getPValue){
+
+		double result;
+		MannWhitneyUTest test = new MannWhitneyUTest();
+
+		if(getPValue){ // above diagonal, p-value
+			result = test.mannWhitneyUTest(dataset1, dataset2); // correct for the number of datasets tested
+
+		} else { // below diagonal, U statistic
+			result = test.mannWhitneyU(dataset1, dataset2);
+		}
+		return result;
+	}
+	
+	/**
+	 * Carry out pairwise wilcoxon rank-sum test on the perimeters of the given datasets
+	 * @param list the datasets to test
+	 * @return a tablemodel for display
+	 */
+	public static TableModel createWilcoxonPerimeterTable(List<AnalysisDataset> list){
+
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
+		if(list==null){
+			return model;
+		}
+
 		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : list){
 			
 			Object[] popData = new Object[list.size()];
@@ -427,17 +451,10 @@ public class DatasetCreator {
 					popData[i] = "";
 					getPValue = true;
 				} else {
-					// run a new test
-					MannWhitneyUTest test = new MannWhitneyUTest();
-					DecimalFormat df = new DecimalFormat("#0.0000"); 
-					if(getPValue){ // above diagonal, p-value
-						double pvalue = test.mannWhitneyUTest(dataset.getCollection().getPerimeters(), dataset2.getCollection().getPerimeters());
-
-						popData[i] = df.format(pvalue);
-					} else { // below diagonal, U statistic
-						double mannU = test.mannWhitneyU(dataset.getCollection().getPerimeters(), dataset2.getCollection().getPerimeters());
-						popData[i] = df.format(mannU);
-					}
+					popData[i] = df.format( runWilcoxonTest( 
+							dataset.getCollection().getPerimeters(), 
+							dataset2.getCollection().getPerimeters(), 
+							getPValue) );
 				}
 				i++;
 			}
@@ -452,25 +469,13 @@ public class DatasetCreator {
 	 * @return a tablemodel for display
 	 */
 	public static TableModel createWilcoxonMinFeretTable(List<AnalysisDataset> list){
-		DefaultTableModel model = new DefaultTableModel();
-		
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
 		if(list==null){
-			Object[] columnData = {""};
-			model.addColumn("Population", columnData );
-			model.addColumn("", columnData );
 			return model;
 		}
 		
-		// set rows
-		Object[] columnData = new Object[list.size()];
-		int row = 0;
-		for(AnalysisDataset dataset : list){
-			columnData[row] = dataset.getName();
-			row++;
-		}
-		model.addColumn("Population", columnData);
-		
 		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : list){
 			
 			Object[] popData = new Object[list.size()];
@@ -483,17 +488,10 @@ public class DatasetCreator {
 					popData[i] = "";
 					getPValue = true;
 				} else {
-					// run a new test
-					MannWhitneyUTest test = new MannWhitneyUTest();
-					DecimalFormat df = new DecimalFormat("#0.0000"); 
-					if(getPValue){ // above diagonal, p-value
-						double pvalue = test.mannWhitneyUTest(dataset.getCollection().getMinFerets(), dataset2.getCollection().getMinFerets());
-
-						popData[i] = df.format(pvalue);
-					} else { // below diagonal, U statistic
-						double mannU = test.mannWhitneyU(dataset.getCollection().getMinFerets(), dataset2.getCollection().getMinFerets());
-						popData[i] = df.format(mannU);
-					}
+					popData[i] = df.format( runWilcoxonTest( 
+							dataset.getCollection().getMinFerets(), 
+							dataset2.getCollection().getMinFerets(), 
+							getPValue) );
 				}
 				i++;
 			}
@@ -508,25 +506,13 @@ public class DatasetCreator {
 	 * @return a tablemodel for display
 	 */
 	public static TableModel createWilcoxonMaxFeretTable(List<AnalysisDataset> list){
-		DefaultTableModel model = new DefaultTableModel();
-		
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
 		if(list==null){
-			Object[] columnData = {""};
-			model.addColumn("Population", columnData );
-			model.addColumn("", columnData );
 			return model;
 		}
 		
-		// set rows
-		Object[] columnData = new Object[list.size()];
-		int row = 0;
-		for(AnalysisDataset dataset : list){
-			columnData[row] = dataset.getName();
-			row++;
-		}
-		model.addColumn("Population", columnData);
-		
 		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : list){
 			
 			Object[] popData = new Object[list.size()];
@@ -539,17 +525,10 @@ public class DatasetCreator {
 					popData[i] = "";
 					getPValue = true;
 				} else {
-					// run a new test
-					MannWhitneyUTest test = new MannWhitneyUTest();
-					DecimalFormat df = new DecimalFormat("#0.0000"); 
-					if(getPValue){ // above diagonal, p-value
-						double pvalue = test.mannWhitneyUTest(dataset.getCollection().getFerets(), dataset2.getCollection().getFerets());
-
-						popData[i] = df.format(pvalue);
-					} else { // below diagonal, U statistic
-						double mannU = test.mannWhitneyU(dataset.getCollection().getFerets(), dataset2.getCollection().getFerets());
-						popData[i] = df.format(mannU);
-					}
+					popData[i] = df.format( runWilcoxonTest( 
+							dataset.getCollection().getFerets(), 
+							dataset2.getCollection().getFerets(), 
+							getPValue) );
 				}
 				i++;
 			}
@@ -564,25 +543,13 @@ public class DatasetCreator {
 	 * @return a tablemodel for display
 	 */
 	public static TableModel createWilcoxonVariabilityTable(List<AnalysisDataset> list){
-		DefaultTableModel model = new DefaultTableModel();
-		
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
 		if(list==null){
-			Object[] columnData = {""};
-			model.addColumn("Population", columnData );
-			model.addColumn("", columnData );
 			return model;
 		}
 		
-		// set rows
-		Object[] columnData = new Object[list.size()];
-		int row = 0;
-		for(AnalysisDataset dataset : list){
-			columnData[row] = dataset.getName();
-			row++;
-		}
-		model.addColumn("Population", columnData);
-		
 		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : list){
 			
 			Object[] popData = new Object[list.size()];
@@ -590,34 +557,19 @@ public class DatasetCreator {
 			int i = 0;
 			boolean getPValue = false;
 			for(AnalysisDataset dataset2 : list){
-				
+
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
 					getPValue = true;
 				} else {
-					// run a new test
-					MannWhitneyUTest test = new MannWhitneyUTest();
-					DecimalFormat df = new DecimalFormat("#0.0000"); 
-					if(getPValue){ // above diagonal, p-value
-						double pvalue = test.mannWhitneyUTest(dataset.getCollection()
-																.getDifferencesToMedianFromPoint(dataset.getCollection()
-																		.getOrientationPoint()  ), 
-															dataset2.getCollection()
-																.getDifferencesToMedianFromPoint(dataset2.getCollection()
-																		.getOrientationPoint() )
-																	);
-
-						popData[i] = df.format(pvalue);
-					} else { // below diagonal, U statistic
-						double mannU = test.mannWhitneyU(dataset.getCollection()
-															.getDifferencesToMedianFromPoint(dataset.getCollection()
-																	.getOrientationPoint()  ), 
-														dataset2.getCollection()
-															.getDifferencesToMedianFromPoint(dataset2.getCollection()
-																	.getOrientationPoint() )
-																);
-						popData[i] = df.format(mannU);
-					}
+					popData[i] = df.format( runWilcoxonTest( 
+							dataset.getCollection()
+							.getDifferencesToMedianFromPoint(dataset.getCollection()
+									.getOrientationPoint()  ), 
+									dataset2.getCollection()
+									.getDifferencesToMedianFromPoint(dataset2.getCollection()
+											.getOrientationPoint() ), 
+											getPValue) );
 				}
 				i++;
 			}
@@ -632,25 +584,13 @@ public class DatasetCreator {
 	 * @return a tablemodel for display
 	 */
 	public static TableModel createWilcoxonAreaTable(List<AnalysisDataset> list){
-		DefaultTableModel model = new DefaultTableModel();
-		
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
 		if(list==null){
-			Object[] columnData = {""};
-			model.addColumn("Population", columnData );
-			model.addColumn("", columnData );
 			return model;
 		}
 		
-		// set rows
-		Object[] columnData = new Object[list.size()];
-		int row = 0;
-		for(AnalysisDataset dataset : list){
-			columnData[row] = dataset.getName();
-			row++;
-		}
-		model.addColumn("Population", columnData);
-		
 		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(AnalysisDataset dataset : list){
 			
 			Object[] popData = new Object[list.size()];
@@ -663,17 +603,10 @@ public class DatasetCreator {
 					popData[i] = "";
 					getPValue = true;
 				} else {
-					// run a new test
-					MannWhitneyUTest test = new MannWhitneyUTest();
-					DecimalFormat df = new DecimalFormat("#0.0000"); 
-					if(getPValue){ // above diagonal, p-value
-						double pvalue = test.mannWhitneyUTest(dataset.getCollection().getAreas(), dataset2.getCollection().getAreas());
-
-						popData[i] = df.format(pvalue);
-					} else { // below diagonal, U statistic
-						double mannU = test.mannWhitneyU(dataset.getCollection().getAreas(), dataset2.getCollection().getAreas());
-						popData[i] = df.format(mannU);
-					}
+					popData[i] = df.format( runWilcoxonTest( 
+							dataset.getCollection().getAreas(), 
+							dataset2.getCollection().getAreas(), 
+							getPValue) );
 				}
 				i++;
 			}
