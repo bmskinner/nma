@@ -269,7 +269,12 @@ public class DatasetCreator {
 				"Median feret",
 				"Signal channels",
 				"Profile window",
+				"Nucleus detection method",
 				"Nucleus threshold",
+				"Canny low threshold",
+				"Canny high threshold",
+				"Canny kernel radius",
+				"Canny kernel width",
 				"Nucleus min size",
 				"Nucleus max size",
 				"Nucleus min circ",
@@ -309,6 +314,13 @@ public class DatasetCreator {
 				String time = times[1];
 				
 				double signalPerNucleus = (double) collection.getSignalCount()/  (double) collection.getNucleusCount();
+				
+				String detectionMethod = options.isUseCanny() ? "Canny edge detection" : "Thresholding";
+				String nucleusThreshold = options.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
+				String cannyLowThreshold = options.isUseCanny() ? String.valueOf(options.getLowThreshold()) : "N/A";
+				String cannyHighThreshold = options.isUseCanny() ? String.valueOf(options.getHighThreshold()) : "N/A";
+				String cannyKernelRadius = options.isUseCanny() ? String.valueOf(options.getKernelRadius()) : "N/A";
+				String cannyKernelWidth = options.isUseCanny() ? String.valueOf(options.getKernelWidth()) : "N/A";
 
 				Object[] collectionData = {
 						collection.getNucleusCount(),
@@ -317,7 +329,12 @@ public class DatasetCreator {
 						df.format(collection.getMedianFeretLength()),
 						collection.getSignalChannels().size(),
 						options.getAngleProfileWindowSize(),
-						options.getNucleusThreshold(),
+						detectionMethod,
+						nucleusThreshold,
+						cannyLowThreshold,
+						cannyHighThreshold,
+						cannyKernelRadius,
+						cannyKernelWidth,
 						options.getMinNucleusSize(),
 						options.getMaxNucleusSize(),
 						options.getMinNucleusCirc(),

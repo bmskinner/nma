@@ -331,63 +331,15 @@ public class MainWindow extends JFrame {
 			//---------------
 			// Create the Wilcoxon test panel
 			//---------------
-			wilcoxonPanel = new JPanel();
-			wilcoxonPanel.setLayout(new BorderLayout());
+			wilcoxonPanel = createWilcoxonPanel();
+//			wilcoxonPanel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
 			tabbedPane.addTab("Wilcoxon", null, wilcoxonPanel, null);
-			
-			JPanel wilcoxonPartsPanel = new JPanel();
-			wilcoxonPartsPanel.setLayout(new BoxLayout(wilcoxonPartsPanel, BoxLayout.Y_AXIS));
-			
-			Dimension minSize = new Dimension(10, 10);
-			Dimension prefSize = new Dimension(10, 10);
-			Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
-			
-			wilcoxonPartsPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank-sum test)"));
-			wilcoxonPartsPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
-			wilcoxonPartsPanel.add(new JLabel("Below the diagonal: p-values"));
-			wilcoxonPartsPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highligted in yellow and green"));
-			
-			wilcoxonPartsPanel.add(new JLabel("Areas"));
-			wilcoxonAreaTable = new JTable();
-			wilcoxonPartsPanel.add(wilcoxonAreaTable);
-			wilcoxonAreaTable.setEnabled(false);
-			wilcoxonPanel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
-			wilcoxonAreaTable.setModel(DatasetCreator.createWilcoxonAreaTable(null));
-			
-			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
-			wilcoxonPartsPanel.add(new JLabel("Perimeters"));
-			wilcoxonPerimTable = new JTable();
-			wilcoxonPartsPanel.add(wilcoxonPerimTable);
-			wilcoxonPerimTable.setEnabled(false);
-			wilcoxonPerimTable.setModel(DatasetCreator.createWilcoxonPerimeterTable(null));
-			
-			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
-			wilcoxonPartsPanel.add(new JLabel("Min feret"));
-			wilcoxonMinFeretTable = new JTable();
-			wilcoxonPartsPanel.add(wilcoxonMinFeretTable);
-			wilcoxonMinFeretTable.setEnabled(false);
-			wilcoxonMinFeretTable.setModel(DatasetCreator.createWilcoxonMinFeretTable(null));
-			
-			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
-			wilcoxonPartsPanel.add(new JLabel("Feret"));
-			wilcoxonFeretTable = new JTable();
-			wilcoxonPartsPanel.add(wilcoxonFeretTable);
-			wilcoxonFeretTable.setEnabled(false);
-			wilcoxonFeretTable.setModel(DatasetCreator.createWilcoxonMaxFeretTable(null));
-			
-			wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
-			wilcoxonPartsPanel.add(new JLabel("Differences to median"));
-			wilcoxonDifferenceTable = new JTable();
-			wilcoxonPartsPanel.add(wilcoxonDifferenceTable);
-			wilcoxonDifferenceTable.setEnabled(false);
-			wilcoxonDifferenceTable.setModel(DatasetCreator.createWilcoxonVariabilityTable(null));
-			
-			wilcoxonPanel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
-			
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
 		}
 		
 	}
@@ -680,6 +632,69 @@ public class MainWindow extends JFrame {
 		boxplotSplitPanel.add(differenceBoxplotChartPanel);
 		
 		return boxplotSplitPanel;
+	}
+	
+	/**
+	 * Create the panel that will hold the statistical tests between populations
+	 */
+	private JPanel createWilcoxonPanel(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+//		tabbedPane.addTab("Wilcoxon", null, wilcoxonPanel, null);
+		
+		JPanel wilcoxonPartsPanel = new JPanel();
+		wilcoxonPartsPanel.setLayout(new BoxLayout(wilcoxonPartsPanel, BoxLayout.Y_AXIS));
+		
+		Dimension minSize = new Dimension(10, 10);
+		Dimension prefSize = new Dimension(10, 10);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+		wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
+		
+		wilcoxonPartsPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank-sum test)"));
+		wilcoxonPartsPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
+		wilcoxonPartsPanel.add(new JLabel("Below the diagonal: p-values"));
+		wilcoxonPartsPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highligted in yellow and green"));
+		
+		wilcoxonAreaTable = new JTable(DatasetCreator.createWilcoxonAreaTable(null));
+		addWilconxonTable(wilcoxonPartsPanel, wilcoxonAreaTable, "Areas");
+		panel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
+
+		
+		wilcoxonPerimTable = new JTable(DatasetCreator.createWilcoxonPerimeterTable(null));
+		addWilconxonTable(wilcoxonPartsPanel, wilcoxonPerimTable, "Perimeters");
+		
+		wilcoxonMinFeretTable = new JTable(DatasetCreator.createWilcoxonMinFeretTable(null));
+		addWilconxonTable(wilcoxonPartsPanel, wilcoxonMinFeretTable, "Min feret");
+
+		
+		wilcoxonFeretTable = new JTable(DatasetCreator.createWilcoxonMaxFeretTable(null));
+		addWilconxonTable(wilcoxonPartsPanel, wilcoxonFeretTable, "Feret");
+		
+		
+		wilcoxonDifferenceTable = new JTable(DatasetCreator.createWilcoxonVariabilityTable(null));
+		addWilconxonTable(wilcoxonPartsPanel, wilcoxonDifferenceTable, "Differences to median");
+		
+		panel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
+		return panel;
+	}
+	
+	/**
+	 * Prepare a wilcoxon table
+	 * @param panel the JPanel to add the table to
+	 * @param table the table to add
+	 * @param model the model to provide
+	 * @param label the label for the table
+	 */
+	private void addWilconxonTable(JPanel panel, JTable table, String label){
+		Dimension minSize = new Dimension(10, 10);
+		Dimension prefSize = new Dimension(10, 10);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+		panel.add(new Box.Filler(minSize, prefSize, maxSize));
+		panel.add(new JLabel(label));
+//		table = new JTable();
+		panel.add(table);
+		table.setEnabled(false);
+//		table.setModel(model);
 	}
 	
 	/**
