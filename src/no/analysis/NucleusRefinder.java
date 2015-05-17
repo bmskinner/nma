@@ -204,7 +204,7 @@ public class NucleusRefinder
     updateFileMap(path); // map from new to old
     if(!fileMap.containsKey(path)){ return; } // skip images with no nuclei to catch
 
-    List<Roi> roiList = getROIs(image);
+    List<Roi> roiList = getROIs(image, true);
     int i = 0;
 
     if(!offsets.containsKey(path)){

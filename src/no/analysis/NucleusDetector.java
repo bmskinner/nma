@@ -11,10 +11,12 @@ package no.analysis;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.io.Opener;
 import ij.plugin.RoiEnlarger;
 import ij.process.ByteProcessor;
+import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
@@ -27,7 +29,9 @@ import java.util.*;
 import no.nuclei.*;
 import no.utility.CannyEdgeDetector;
 import no.utility.Logger;
+import no.utility.Stats;
 import no.utility.StatsMap;
+import no.utility.Utils;
 import no.collections.*;
 import no.components.*;
 import no.export.ImageExporter;
@@ -369,15 +373,20 @@ public class NucleusDetector {
 	 * Detects nuclei within the given image.
 	 *
 	 * @param image the ImagePlus to be analysed
+	 * @param closed should the detector get only closed polygons, or open lines
 	 * @return the Map linking an roi to its stats
 	 */
-	protected List<Roi> getROIs(ImageStack image){
+	protected List<Roi> getROIs(ImageStack image, boolean closed){
 		Detector detector = new Detector();
 		detector.setMaxSize(analysisOptions.getMaxNucleusSize());
-		detector.setMinSize(analysisOptions.getMinNucleusSize());
+		
+		if(closed){
+			detector.setMinSize(analysisOptions.getMinNucleusSize()); // get polygon rois
+		} else {
+			detector.setMinSize(0); // get line rois
+		}
 		detector.setMinCirc(analysisOptions.getMinNucleusCirc());
 		detector.setMaxCirc(analysisOptions.getMaxNucleusCirc());
-//		detector.setThreshold(60); // testing the edge detector. Make variable later
 		detector.setThreshold(analysisOptions.getNucleusThreshold());
 		detector.setChannel(ImageImporter.COUNTERSTAIN);
 		try{
@@ -408,7 +417,40 @@ public class NucleusDetector {
 			searchStack = image;
 		}
 
-		List<Roi> roiList = getROIs(searchStack);
+		// get polygon rois of correct size
+		
+		List<Roi> roiList = getROIs(searchStack, true);
+				
+		if(analysisOptions.isUseCanny()){ // add recheck with line-rois		
+			
+			List<Roi> roiLineList = getROIs(searchStack, false);
+			mw.log("\tFound "+roiLineList.size()+" line ROIs");
+			if(!roiLineList.isEmpty()){
+				for(Roi r : roiLineList){
+
+						PolygonRoi p = new PolygonRoi(r.getFloatPolygon(), PolygonRoi.POLYGON);
+
+						Detector detector = new Detector();
+						detector.setChannel(ImageImporter.COUNTERSTAIN);
+						StatsMap values = detector.measure(p, image);
+//						mw.log("\tROI area "+values.get("Area"));
+						if(values.get("Area")>analysisOptions.getMinNucleusSize()   &&  values.get("Area")<analysisOptions.getMaxNucleusSize()){
+							boolean ok = true;
+							mw.log("\tArea "+values.get("Area")+" found: checking overlaps");
+							for(Roi poly : roiList){ //is the roi already defined?
+								if(poly.contains(  values.get("XM").intValue(), values.get("YM").intValue())){
+									ok= false;
+								}
+							}
+							if(ok) { // add the new polyline roi
+								mw.log("\tAdded line ROI");
+								roiList.add(p);
+							}
+						}
+				}
+			}
+		}
+		
 		if(roiList.isEmpty()){
 			mw.log("  No usable nuclei in image");
 			logger.log("No usable nuclei in image", Logger.DEBUG);
@@ -439,18 +481,35 @@ public class NucleusDetector {
 	 * @return a stack with edges highlighted
 	 */
 	private ImageStack runEdgeDetector(ImageStack image){
-		// using IJ Sobel detector
-		// here before running the thresholding, do an edge detection, then pass on
-//		ImageProcessor ip = image.getProcessor(ImageImporter.COUNTERSTAIN);
-//		ByteProcessor edgeIp = new ByteProcessor(ip, false);
-//		edgeIp.findEdges();
-//		ImagePlus searchImage = new ImagePlus(null, edgeIp);
-//		ImageStack searchStack = ImageImporter.convert(searchImage);
 		
 		// using canny detector
+
+//		ImageProcessor median = image.getProcessor(ImageImporter.COUNTERSTAIN);
+//		double[] values = new double[ median.getWidth()*median.getHeight() ];
+//		try {
+//			int i=0;
+//			for(int w = 0; w<median.getWidth();w++){
+//				for(int h = 0; h<median.getHeight();h++){
+//					values[i] = (double) median.get(w, h);
+//					
+//					i++;
+//				}
+//			}
+//		} catch (Exception e) {
+//			IJ.log(e.getMessage());
+//		}
+
+//		double medianPixel = Stats.quartile(values, 50);
+//		double sigma = 0.33; // default value
+//		double lower = Math.max(0  , (1.0 - sigma) * medianPixel  ) ;
+//		double upper = Math.min(255, (1.0 + sigma) * medianPixel  ) ;
+		
 		logger.log("Creating edge detector", Logger.DEBUG);
 		CannyEdgeDetector canny = new CannyEdgeDetector();
 		canny.setSourceImage(image.getProcessor(ImageImporter.COUNTERSTAIN).getBufferedImage());
+//		canny.setLowThreshold(  (float) lower );
+//		canny.setHighThreshold( (float) upper);
+//		mw.log("\tAuto canny low: "+lower+" ; high: "+upper+" from median "+medianPixel);
 		canny.setLowThreshold( analysisOptions.getLowThreshold() );
 		canny.setHighThreshold( analysisOptions.getHighThreshold());
 		canny.setGaussianKernelRadius(analysisOptions.getKernelRadius());
@@ -459,6 +518,10 @@ public class NucleusDetector {
 		BufferedImage edges = canny.getEdgesImage();
 		ImagePlus searchImage = new ImagePlus(null, edges);
 		ImageStack searchStack = ImageImporter.convert(searchImage);
+		
+		// add morphological closing
+//		adapt the grey morphology jar
+		
 //		searchImage.show();
 		searchImage.close();
 		return searchStack;
