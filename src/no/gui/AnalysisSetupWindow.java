@@ -90,9 +90,9 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private JRadioButton nucleusEdgeButton = new JRadioButton("Edge detection");
 	private ButtonGroup nucleusDetectionMethodGroup;
 
-	private JSpinner cannyLowThreshold = new JSpinner(new SpinnerNumberModel(0.1f,	0, 10f, 0.01f));
-	private JSpinner cannyHighThreshold = new JSpinner(new SpinnerNumberModel(1.5f,	0, 20f, 0.01f));
-	private JSpinner cannyKernelRadius = new JSpinner(new SpinnerNumberModel(2f,	0, 20f, 0.01f));
+	private JSpinner cannyLowThreshold = new JSpinner(new SpinnerNumberModel(0.1,	0, 10, 0.05));
+	private JSpinner cannyHighThreshold = new JSpinner(new SpinnerNumberModel(1.5,	0, 20, 0.05));
+	private JSpinner cannyKernelRadius = new JSpinner(new SpinnerNumberModel(2,	0, 20, 0.05));
 	private JSpinner cannyKernelWidth = new JSpinner(new SpinnerNumberModel(16,	1, 50, 1));
 	
 	// other detection parameters
@@ -111,7 +111,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private JSpinner minSignalSizeSpinner = new JSpinner(new SpinnerNumberModel(5,	1, 10000, 1));
 	private JSpinner maxSignalFractSpinner = new JSpinner(new SpinnerNumberModel(0.5, 0, 1, 0.05));
 
-	//	private String[] nucleusTypes = { "Round nucleus", "Rodent sperm", "Pig sperm"};
+
 	private JComboBox nucleusSelectionBox;
 
 	private JCheckBox refoldCheckBox;
@@ -590,19 +590,30 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 			if(e.getSource()==cannyLowThreshold){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
-				this.analysisOptions.setLowThreshold( (Float) j.getValue());
+				
+				if( (Double) j.getValue() > (Double) cannyHighThreshold.getValue() ){
+					j.setValue( cannyHighThreshold.getValue() );
+				}
+				Double doubleValue = (Double) j.getValue();
+				this.analysisOptions.setLowThreshold(    doubleValue.floatValue() );
 			}
 			
 			if(e.getSource()==cannyHighThreshold){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
-				this.analysisOptions.setHighThreshold( (Float) j.getValue());
+				
+				if( (Double) j.getValue() < (Double) cannyLowThreshold.getValue() ){
+					j.setValue( cannyLowThreshold.getValue() );
+				}
+				Double doubleValue = (Double) j.getValue();
+				this.analysisOptions.setHighThreshold( doubleValue.floatValue() );
 			}
 			
 			if(e.getSource()==cannyKernelRadius){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
-				this.analysisOptions.setKernelRadius( (Float) j.getValue());
+				Double doubleValue = (Double) j.getValue();
+				this.analysisOptions.setKernelRadius( doubleValue.floatValue());
 			}
 			
 			if(e.getSource()==cannyKernelWidth){
