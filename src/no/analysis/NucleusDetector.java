@@ -377,8 +377,8 @@ public class NucleusDetector {
 		detector.setMinSize(analysisOptions.getMinNucleusSize());
 		detector.setMinCirc(analysisOptions.getMinNucleusCirc());
 		detector.setMaxCirc(analysisOptions.getMaxNucleusCirc());
-		detector.setThreshold(60); // testing the edge detector. Make variable later
-//		detector.setThreshold(analysisOptions.getNucleusThreshold());
+//		detector.setThreshold(60); // testing the edge detector. Make variable later
+		detector.setThreshold(analysisOptions.getNucleusThreshold());
 		detector.setChannel(ImageImporter.COUNTERSTAIN);
 		try{
 			detector.run(image);
@@ -401,7 +401,12 @@ public class NucleusDetector {
 		logger.log("File:  "+path.getName(), Logger.DEBUG);
 		
 		// here before running the thresholding, do an edge detection, then pass on
-		ImageStack searchStack = runEdgeDetector(image);
+		ImageStack searchStack = null;
+		if( this.analysisOptions.isUseCanny()) {
+			searchStack = runEdgeDetector(image);
+		} else {
+			searchStack = image;
+		}
 
 		List<Roi> roiList = getROIs(searchStack);
 		if(roiList.isEmpty()){
@@ -446,8 +451,10 @@ public class NucleusDetector {
 		logger.log("Creating edge detector", Logger.DEBUG);
 		CannyEdgeDetector canny = new CannyEdgeDetector();
 		canny.setSourceImage(image.getProcessor(ImageImporter.COUNTERSTAIN).getBufferedImage());
-		canny.setLowThreshold( 0.1f);
-		canny.setHighThreshold( 1.5f);
+		canny.setLowThreshold( analysisOptions.getLowThreshold() );
+		canny.setHighThreshold( analysisOptions.getHighThreshold());
+		canny.setGaussianKernelRadius(analysisOptions.getKernelRadius());
+		canny.setGaussianKernelWidth(analysisOptions.getKernelWidth());
 		canny.process();
 		BufferedImage edges = canny.getEdgesImage();
 		ImagePlus searchImage = new ImagePlus(null, edges);

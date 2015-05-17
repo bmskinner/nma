@@ -83,6 +83,19 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	
+	
+	// nucleus detection method
+	private JRadioButton nucleusThresholdButton = new JRadioButton("Threshold");
+	private JRadioButton nucleusEdgeButton = new JRadioButton("Edge detection");
+	private ButtonGroup nucleusDetectionMethodGroup;
+
+	private JSpinner cannyLowThreshold = new JSpinner(new SpinnerNumberModel(0.1f,	0, 10f, 0.01f));
+	private JSpinner cannyHighThreshold = new JSpinner(new SpinnerNumberModel(1.5f,	0, 20f, 0.01f));
+	private JSpinner cannyKernelRadius = new JSpinner(new SpinnerNumberModel(2f,	0, 20f, 0.01f));
+	private JSpinner cannyKernelWidth = new JSpinner(new SpinnerNumberModel(16,	1, 50, 1));
+	
+	// other detection parameters
 
 	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel(500,	100, 50000, 1));
 	private JSpinner txtMaxNuclearSize = new JSpinner(new SpinnerNumberModel(10000,	100, 50000, 1));
@@ -166,6 +179,12 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 				
 		analysisOptions.setCollectionClass(RodentSpermNucleusCollection.class);
 		analysisOptions.setNucleusClass(RodentSpermNucleus.class);
+		
+		analysisOptions.setUseCanny(false);
+		analysisOptions.setLowThreshold(0.1f);
+		analysisOptions.setHighThreshold(1.5f);
+		analysisOptions.setKernelRadius(2f);
+		analysisOptions.setKernelWidth(16);
 	}
 
 	private JPanel makeNucleusTypePanel(){
@@ -216,12 +235,75 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.gridwidth = GridBagConstraints.REMAINDER;     //end row
 
+		panel.add(makeNucleusDetectionSettingsPanel(),c);
 		panel.add(makeDetectionSettingsPanel(), c);
+		panel.add(makeRefoldSettingsPanel(), c);
 
+		return panel;
+	}
+	
+	private JPanel makeNucleusDetectionSettingsPanel(){
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(BorderFactory.createTitledBorder("Nucleus detection"));
+		panel.setLayout(new GridBagLayout());
+		
+		nucleusThresholdButton.setSelected(true);
+		nucleusThresholdButton.setActionCommand("NucleusDetectionThreshold");
+		nucleusEdgeButton.setActionCommand("NucleusDetectionEdge");
 
-		JPanel refoldPanel = makeRefoldSettingsPanel();
-		panel.add(refoldPanel, c);
+		//Group the radio buttons.
+		nucleusDetectionMethodGroup = new ButtonGroup();
+		nucleusDetectionMethodGroup.add(nucleusThresholdButton);
+		nucleusDetectionMethodGroup.add(nucleusEdgeButton);
+		
+		nucleusThresholdButton.addActionListener(this);
+		nucleusEdgeButton.addActionListener(this);
+		
+		panel.add(nucleusThresholdButton);
+		panel.add(nucleusEdgeButton);
+		
+		GridBagConstraints c = new GridBagConstraints();
+		Dimension minSize = new Dimension(10, 5);
+		Dimension prefSize = new Dimension(10, 5);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
+		c.gridwidth = GridBagConstraints.REMAINDER; //next-to-last
+		c.fill = GridBagConstraints.NONE;      //reset to default
+		c.weightx = 0.0;                       //reset to default
+		panel.add(new Box.Filler(minSize, prefSize, maxSize),c);
+		
+		
+		// add the canny settings
+		JLabel[] labels = new JLabel[5];
+		JSpinner[] fields = new JSpinner[5];
+		
+		labels[0] = new JLabel("Nucleus threshold");
+		labels[1] = new JLabel("Canny low threshold");
+		labels[2] = new JLabel("Canny high threshold");
+		labels[3] = new JLabel("Canny kernel radius");
+		labels[4] = new JLabel("Canny kernel width");
 
+		fields[0] = nucleusThresholdSpinner;
+		fields[1] = cannyLowThreshold;
+		fields[2] = cannyHighThreshold;
+		fields[3] = cannyKernelRadius;
+		fields[4] = cannyKernelWidth;
+		
+		// add the change listeners
+		nucleusThresholdSpinner.addChangeListener(this);
+		cannyLowThreshold.addChangeListener(this);
+		cannyHighThreshold.addChangeListener(this);
+		cannyKernelRadius.addChangeListener(this);
+		cannyKernelWidth.addChangeListener(this);
+		
+		// stating default is threshold on
+		cannyLowThreshold.setEnabled(false);
+		cannyHighThreshold.setEnabled(false);
+		cannyKernelRadius.setEnabled(false);
+		cannyKernelWidth.setEnabled(false);
+		
+		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
+		
 		return panel;
 	}
 	
@@ -232,31 +314,31 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		panel.setBorder(BorderFactory.createTitledBorder("Detection settings"));
 		panel.setLayout(new GridBagLayout());
 
-		JLabel[] labels = new JLabel[9];
-		JSpinner[] fields = new JSpinner[9];
+		JLabel[] labels = new JLabel[8];
+		JSpinner[] fields = new JSpinner[8];
 
-		labels[0] = new JLabel("Nucleus threshold");
-		labels[1] = new JLabel("Signal threshold");
-		labels[2] = new JLabel("Min nucleus size");
-		labels[3] = new JLabel("Max nucleus size");
-		labels[4] = new JLabel("Min nucleus circ");
-		labels[5] = new JLabel("Max nucleus circ");
-		labels[6] = new JLabel("Min signal size");
-		labels[7] = new JLabel("Max signal fraction");
-		labels[8] = new JLabel("Profile window");
+//		labels[0] = new JLabel("Nucleus threshold");
+		labels[0] = new JLabel("Signal threshold");
+		labels[1] = new JLabel("Min nucleus size");
+		labels[2] = new JLabel("Max nucleus size");
+		labels[3] = new JLabel("Min nucleus circ");
+		labels[4] = new JLabel("Max nucleus circ");
+		labels[5] = new JLabel("Min signal size");
+		labels[6] = new JLabel("Max signal fraction");
+		labels[7] = new JLabel("Profile window");
 
 
-		fields[0] = nucleusThresholdSpinner;
-		fields[1] = signalThresholdSpinner;
-		fields[2] = txtMinNuclearSize;
-		fields[3] = txtMaxNuclearSize;
-		fields[4] = minNuclearCircSpinner;
-		fields[5] = maxNuclearCircSpinner;
-		fields[6] = minSignalSizeSpinner;
-		fields[7] = maxSignalFractSpinner;
-		fields[8] = txtProfileWindowSize;
+//		fields[0] = nucleusThresholdSpinner;
+		fields[0] = signalThresholdSpinner;
+		fields[1] = txtMinNuclearSize;
+		fields[2] = txtMaxNuclearSize;
+		fields[3] = minNuclearCircSpinner;
+		fields[4] = maxNuclearCircSpinner;
+		fields[5] = minSignalSizeSpinner;
+		fields[6] = maxSignalFractSpinner;
+		fields[7] = txtProfileWindowSize;
 		
-		nucleusThresholdSpinner.addChangeListener(this);
+//		nucleusThresholdSpinner.addChangeListener(this);
 		signalThresholdSpinner.addChangeListener(this);
 		txtMinNuclearSize.addChangeListener(this);
 		txtMaxNuclearSize.addChangeListener(this);
@@ -356,6 +438,26 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
+		if(e.getActionCommand().equals("NucleusDetectionThreshold")){
+			this.analysisOptions.setUseCanny(false);
+			cannyLowThreshold.setEnabled(false);
+			cannyHighThreshold.setEnabled(false);
+			cannyKernelRadius.setEnabled(false);
+			cannyKernelWidth.setEnabled(false);
+			nucleusThresholdSpinner.setEnabled(true);
+			
+		}
+		
+		if(e.getActionCommand().equals("NucleusDetectionEdge")){
+			this.analysisOptions.setUseCanny(true);
+			cannyLowThreshold.setEnabled(true);
+			cannyHighThreshold.setEnabled(true);
+			cannyKernelRadius.setEnabled(true);
+			cannyKernelWidth.setEnabled(true);
+			nucleusThresholdSpinner.setEnabled(false);
+			
+		}
+		
 		if(e.getActionCommand().equals("Nucleus type")){
 			String type = (String) nucleusSelectionBox.getSelectedItem();
 			this.analysisOptions.setNucleusClass(nucleusClassTypes.get(type));
@@ -483,6 +585,30 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
 				this.analysisOptions.setAngleProfileWindowSize(  (Integer) j.getValue());
+			}
+			
+			if(e.getSource()==cannyLowThreshold){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				this.analysisOptions.setLowThreshold( (Float) j.getValue());
+			}
+			
+			if(e.getSource()==cannyHighThreshold){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				this.analysisOptions.setHighThreshold( (Float) j.getValue());
+			}
+			
+			if(e.getSource()==cannyKernelRadius){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				this.analysisOptions.setKernelRadius( (Float) j.getValue());
+			}
+			
+			if(e.getSource()==cannyKernelWidth){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				this.analysisOptions.setKernelWidth( (Integer) j.getValue());
 			}
 			
 			

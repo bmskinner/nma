@@ -12,6 +12,14 @@ public class AnalysisOptions implements Serializable {
 	private  double maxNucleusSize;
 	private  double minNucleusCirc;
 	private  double maxNucleusCirc;
+	
+	// values for Canny edge deteection
+	private boolean useCanny; 
+	private float lowThreshold;
+	private float highThreshold;
+	private float kernelRadius;
+	private int   kernelWidth;
+	private boolean normaliseContrast; 
 
 	private int angleProfileWindowSize;
 
@@ -227,5 +235,65 @@ public class AnalysisOptions implements Serializable {
 
 	public void setMaxSignalFraction(double maxSignalFraction) {
 		this.maxSignalFraction = maxSignalFraction;
+	}
+
+
+	public float getLowThreshold() {
+		return lowThreshold;
+	}
+
+
+	public void setLowThreshold(float lowThreshold) {
+		this.lowThreshold = lowThreshold;
+	}
+
+
+	public float getHighThreshold() {
+		return highThreshold;
+	}
+
+
+	public void setHighThreshold(float highThreshold) {
+		this.highThreshold = highThreshold;
+	}
+
+
+	public float getKernelRadius() {
+		return kernelRadius;
+	}
+
+
+	public void setKernelRadius(float kernelRadius) {
+		this.kernelRadius = kernelRadius;
+	}
+
+
+	public int getKernelWidth() {
+		return kernelWidth;
+	}
+
+
+	public void setKernelWidth(int kernelWidth) {
+		this.kernelWidth = kernelWidth;
+	}
+
+
+	public boolean isNormaliseContrast() {
+		return normaliseContrast;
+	}
+
+
+	public void setNormaliseContrast(boolean normaliseContrast) {
+		this.normaliseContrast = normaliseContrast;
+	}
+
+
+	public boolean isUseCanny() {
+		return useCanny;
+	}
+
+
+	public void setUseCanny(boolean useCanny) {
+		this.useCanny = useCanny;
 	}
 }
