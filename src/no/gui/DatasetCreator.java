@@ -320,8 +320,8 @@ public class DatasetCreator {
 				String detectionMethod = options.isUseCanny() ? "Canny edge detection" : "Thresholding";
 				String nucleusThreshold = options.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
 				String cannyAutoThreshold = options.isUseCanny() ? String.valueOf(options.isCannyAutoThreshold()) : "N/A";
-				String cannyLowThreshold = options.isUseCanny() ? String.valueOf(options.getLowThreshold()) : "N/A";
-				String cannyHighThreshold = options.isUseCanny() ? String.valueOf(options.getHighThreshold()) : "N/A";
+				String cannyLowThreshold = options.isUseCanny()  && !options.isCannyAutoThreshold() ? String.valueOf(options.getLowThreshold()) : "N/A";
+				String cannyHighThreshold = options.isUseCanny() && !options.isCannyAutoThreshold() ? String.valueOf(options.getHighThreshold()) : "N/A";
 				String cannyKernelRadius = options.isUseCanny() ? String.valueOf(options.getKernelRadius()) : "N/A";
 				String cannyKernelWidth = options.isUseCanny() ? String.valueOf(options.getKernelWidth()) : "N/A";
 				String cannyClosingRadius = options.isUseCanny() ? String.valueOf(options.getClosingObjectRadius()) : "N/A";

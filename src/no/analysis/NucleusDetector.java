@@ -462,8 +462,8 @@ public class NucleusDetector {
 			// find the median intensity of the image
 			double medianPixel = getMedianIntensity(image);
 			
-			// if the median is >5, this is probably an inverted image.
-			// invert it back to black on white
+			// if the median is >128, this is probably an inverted image.
+			// invert it so the thresholds will work
 			if(medianPixel>128){
 				logger.log("Detected high median ("+medianPixel+"); inverting");
 				image.getProcessor(ImageImporter.COUNTERSTAIN).invert();
