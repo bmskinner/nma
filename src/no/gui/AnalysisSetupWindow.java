@@ -64,6 +64,27 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private static final String RODENT_SPERM_NUCLEUS = "Rodent sperm";
 	private static final String PIG_SPERM_NUCLEUS = "Pig sperm";
 	private static final String ROUND_NUCLEUS = "Round nucleus";
+	
+	private static final double DEFAULT_CANNY_LOW_THRESHOLD = 0.5;
+	private static final double DEFAULT_CANNY_HIGH_THRESHOLD = 7.5;
+	private static final double DEFAULT_CANNY_KERNEL_RADIUS = 2;
+	private static final int    DEFAULT_CANNY_KERNEL_WIDTH = 16;
+	private static final int    DEFAULT_CLOSING_OBJECT_RADIUS = 5;
+	
+	private static final double DEFAULT_MIN_NUCLEUS_SIZE = 2000;
+	private static final double DEFAULT_MAX_NUCLEUS_SIZE = 10000;
+	private static final double DEFAULT_MIN_NUCLEUS_CIRC = 0.2;
+	private static final double DEFAULT_MAX_NUCLEUS_CIRC = 0.8;
+	private static final int    DEFAULT_NUCLEUS_THRESHOLD = 36;
+	
+	private static final int    DEFAULT_SIGNAL_THRESHOLD = 36;
+	private static final int    DEFAULT_MIN_SIGNAL_SIZE = 5;
+	private static final double DEFAULT_MAX_SIGNAL_FRACTION = 0.5;
+	
+	private static final int    DEFAULT_PROFILE_WINDOW_SIZE = 15;
+	
+	private static final String DEFAULT_REFOLD_MODE = "Fast";
+	
 
 	private static Map<String, Class<?>>  collectionClassTypes;
 	private static Map<String, Class<?>>  nucleusClassTypes;
@@ -90,28 +111,28 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private JRadioButton nucleusEdgeButton = new JRadioButton("Edge detection");
 	private ButtonGroup nucleusDetectionMethodGroup;
 
-	private JSpinner cannyLowThreshold = new JSpinner(new SpinnerNumberModel(0.5,	0, 10, 0.05));
-	private JSpinner cannyHighThreshold = new JSpinner(new SpinnerNumberModel(1.5,	0, 20, 0.05));
-	private JSpinner cannyKernelRadius = new JSpinner(new SpinnerNumberModel(2,	0, 20, 0.05));
-	private JSpinner cannyKernelWidth = new JSpinner(new SpinnerNumberModel(16,	1, 50, 1));
-	private JSpinner closingObjectRadiusSpinner = new JSpinner(new SpinnerNumberModel(5, 1,100 , 1));
+	private JSpinner cannyLowThreshold = new JSpinner(new SpinnerNumberModel(DEFAULT_CANNY_LOW_THRESHOLD,	0, 10, 0.05));
+	private JSpinner cannyHighThreshold = new JSpinner(new SpinnerNumberModel(DEFAULT_CANNY_HIGH_THRESHOLD,	0, 20, 0.05));
+	private JSpinner cannyKernelRadius = new JSpinner(new SpinnerNumberModel(DEFAULT_CANNY_KERNEL_RADIUS,	0, 20, 0.05));
+	private JSpinner cannyKernelWidth = new JSpinner(new SpinnerNumberModel(DEFAULT_CANNY_KERNEL_WIDTH,	1, 50, 1));
+	private JSpinner closingObjectRadiusSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_CLOSING_OBJECT_RADIUS, 1,100 , 1));
 	private JCheckBox cannyAutoThresholdCheckBox;
 	
 	// other detection parameters
 
-	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel(2000,	100, 50000, 1));
-	private JSpinner txtMaxNuclearSize = new JSpinner(new SpinnerNumberModel(10000,	100, 50000, 1));
+	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel(DEFAULT_MIN_NUCLEUS_SIZE,	100, 50000, 1));
+	private JSpinner txtMaxNuclearSize = new JSpinner(new SpinnerNumberModel(DEFAULT_MAX_NUCLEUS_SIZE,	100, 50000, 1));
 
-	private JSpinner txtProfileWindowSize = new JSpinner(new SpinnerNumberModel(15,	5, 50, 1));
+	private JSpinner txtProfileWindowSize = new JSpinner(new SpinnerNumberModel(DEFAULT_PROFILE_WINDOW_SIZE,	5, 50, 1));
 
-	private JSpinner nucleusThresholdSpinner = new JSpinner(new SpinnerNumberModel(36,	0, 255, 1));
-	private JSpinner signalThresholdSpinner = new JSpinner(new SpinnerNumberModel(70,	0, 255, 1));
+	private JSpinner nucleusThresholdSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_NUCLEUS_THRESHOLD,	0, 255, 1));
+	private JSpinner signalThresholdSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SIGNAL_THRESHOLD,	0, 255, 1));
 
-	private JSpinner minNuclearCircSpinner = new JSpinner(new SpinnerNumberModel(0,	0, 1, 0.05));
-	private JSpinner maxNuclearCircSpinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 0.05));
+	private JSpinner minNuclearCircSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MIN_NUCLEUS_CIRC,	0, 1, 0.05));
+	private JSpinner maxNuclearCircSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MAX_NUCLEUS_CIRC,	0, 1, 0.05));
 
-	private JSpinner minSignalSizeSpinner = new JSpinner(new SpinnerNumberModel(5,	1, 10000, 1));
-	private JSpinner maxSignalFractSpinner = new JSpinner(new SpinnerNumberModel(0.5, 0, 1, 0.05));
+	private JSpinner minSignalSizeSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MIN_SIGNAL_SIZE,	1, 10000, 1));
+	private JSpinner maxSignalFractSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MAX_SIGNAL_FRACTION, 0, 1, 0.05));
 
 
 	private JComboBox nucleusSelectionBox;
@@ -156,25 +177,25 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	}
 
 	public void setDefaultOptions(){
-		analysisOptions.setNucleusThreshold(36);
-		analysisOptions.setSignalThreshold(70);
+		analysisOptions.setNucleusThreshold(DEFAULT_NUCLEUS_THRESHOLD);
+		analysisOptions.setSignalThreshold(DEFAULT_SIGNAL_THRESHOLD);
 
-		analysisOptions.setMinNucleusSize(2000);
-		analysisOptions.setMaxNucleusSize(10000);
+		analysisOptions.setMinNucleusSize(DEFAULT_MIN_NUCLEUS_SIZE);
+		analysisOptions.setMaxNucleusSize(DEFAULT_MAX_NUCLEUS_SIZE);
 
-		analysisOptions.setMinNucleusCirc(0.0);
-		analysisOptions.setMaxNucleusCirc(1.0);
+		analysisOptions.setMinNucleusCirc(DEFAULT_MIN_NUCLEUS_CIRC);
+		analysisOptions.setMaxNucleusCirc(DEFAULT_MAX_NUCLEUS_CIRC);
 
-		analysisOptions.setMinSignalSize(5);
-		analysisOptions.setMaxSignalFraction(0.5);
+		analysisOptions.setMinSignalSize(DEFAULT_MIN_SIGNAL_SIZE);
+		analysisOptions.setMaxSignalFraction(DEFAULT_MAX_SIGNAL_FRACTION);
 
-		analysisOptions.setAngleProfileWindowSize(15);
+		analysisOptions.setAngleProfileWindowSize(DEFAULT_PROFILE_WINDOW_SIZE);
 
 		analysisOptions.setPerformReanalysis(false);
 		analysisOptions.setRealignMode(true);
 
 		analysisOptions.setRefoldNucleus(true);
-		analysisOptions.setRefoldMode("Fast");
+		analysisOptions.setRefoldMode(DEFAULT_REFOLD_MODE);
 
 		analysisOptions.setXoffset(0);
 		analysisOptions.setYoffset(0);
@@ -184,11 +205,11 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		
 		analysisOptions.setUseCanny(false);
 		analysisOptions.setCannyAutoThreshold(false);
-		analysisOptions.setLowThreshold(2.0f);
-		analysisOptions.setHighThreshold(7.5f);
-		analysisOptions.setKernelRadius(2f);
-		analysisOptions.setKernelWidth(16);
-		analysisOptions.setClosingObjectRadius(5);
+		analysisOptions.setLowThreshold( (float) DEFAULT_CANNY_LOW_THRESHOLD);
+		analysisOptions.setHighThreshold((float) DEFAULT_CANNY_HIGH_THRESHOLD);
+		analysisOptions.setKernelRadius((float)DEFAULT_CANNY_KERNEL_RADIUS);
+		analysisOptions.setKernelWidth(DEFAULT_CANNY_KERNEL_WIDTH);
+		analysisOptions.setClosingObjectRadius(DEFAULT_CLOSING_OBJECT_RADIUS);
 		
 	}
 

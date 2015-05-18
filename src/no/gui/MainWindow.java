@@ -405,6 +405,7 @@ public class MainWindow extends JFrame {
 		btnSavePopulation.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				log("Saving root populations...");
 				for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
 					if(d.isRoot()){
 						logc("Saving dataset "+d.getCollection().getName()+"...");
