@@ -26,6 +26,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import mmorpho.MorphoProcessor;
+import mmorpho.StructureElement;
 import no.nuclei.*;
 import no.utility.CannyEdgeDetector;
 import no.utility.Logger;
@@ -421,35 +423,35 @@ public class NucleusDetector {
 		
 		List<Roi> roiList = getROIs(searchStack, true);
 				
-		if(analysisOptions.isUseCanny()){ // add recheck with line-rois		
-			
-			List<Roi> roiLineList = getROIs(searchStack, false);
-			mw.log("\tFound "+roiLineList.size()+" line ROIs");
-			if(!roiLineList.isEmpty()){
-				for(Roi r : roiLineList){
-
-						PolygonRoi p = new PolygonRoi(r.getFloatPolygon(), PolygonRoi.POLYGON);
-
-						Detector detector = new Detector();
-						detector.setChannel(ImageImporter.COUNTERSTAIN);
-						StatsMap values = detector.measure(p, image);
-//						mw.log("\tROI area "+values.get("Area"));
-						if(values.get("Area")>analysisOptions.getMinNucleusSize()   &&  values.get("Area")<analysisOptions.getMaxNucleusSize()){
-							boolean ok = true;
-							mw.log("\tArea "+values.get("Area")+" found: checking overlaps");
-							for(Roi poly : roiList){ //is the roi already defined?
-								if(poly.contains(  values.get("XM").intValue(), values.get("YM").intValue())){
-									ok= false;
-								}
-							}
-							if(ok) { // add the new polyline roi
-								mw.log("\tAdded line ROI");
-								roiList.add(p);
-							}
-						}
-				}
-			}
-		}
+//		if(analysisOptions.isUseCanny()){ // add recheck with line-rois		
+//			
+//			List<Roi> roiLineList = getROIs(searchStack, false);
+//			mw.log("\tFound "+roiLineList.size()+" line ROIs");
+//			if(!roiLineList.isEmpty()){
+//				for(Roi r : roiLineList){
+//
+//						PolygonRoi p = new PolygonRoi(r.getFloatPolygon(), PolygonRoi.POLYGON);
+//
+//						Detector detector = new Detector();
+//						detector.setChannel(ImageImporter.COUNTERSTAIN);
+//						StatsMap values = detector.measure(p, image);
+////						mw.log("\tROI area "+values.get("Area"));
+//						if(values.get("Area")>analysisOptions.getMinNucleusSize()   &&  values.get("Area")<analysisOptions.getMaxNucleusSize()){
+//							boolean ok = true;
+//							mw.log("\tArea "+values.get("Area")+" found: checking overlaps");
+//							for(Roi poly : roiList){ //is the roi already defined?
+//								if(poly.contains(  values.get("XM").intValue(), values.get("YM").intValue())){
+//									ok= false;
+//								}
+//							}
+//							if(ok) { // add the new polyline roi
+//								mw.log("\tAdded line ROI");
+//								roiList.add(p);
+//							}
+//						}
+//				}
+//			}
+//		}
 		
 		if(roiList.isEmpty()){
 			mw.log("  No usable nuclei in image");
@@ -517,14 +519,42 @@ public class NucleusDetector {
 		canny.process();
 		BufferedImage edges = canny.getEdgesImage();
 		ImagePlus searchImage = new ImagePlus(null, edges);
-		ImageStack searchStack = ImageImporter.convert(searchImage);
 		
 		// add morphological closing
-//		adapt the grey morphology jar
+		ByteProcessor bp = searchImage.getProcessor().convertToByteProcessor();
+//		IJ.log("Made byte processor");
+		morphologyClose( bp);
+		ImagePlus bi= new ImagePlus(null, bp);
+		ImageStack searchStack = ImageImporter.convert(bi);
 		
-//		searchImage.show();
+		
+//		adapt the grey morphology jar
+		bi.close();
+//		bi.show();
 		searchImage.close();
 		return searchStack;
+	}
+	
+	private void morphologyClose(ImageProcessor ip){
+		try {
+			int shift=1;
+			int radius = 7;
+			int[] offset = {0,0};
+			int eltype = 0; //circle
+			
+			StructureElement se = new StructureElement(eltype,  shift,  radius, offset);
+//			IJ.log("Made se");
+			MorphoProcessor mp = new MorphoProcessor(se);
+//			IJ.log("Made mp");
+			mp.fclose(ip);
+//			IJ.log("Closed");
+		} catch (Exception e) {
+			IJ.log("Error in closing: "+e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		}
+		
 	}
 
 
