@@ -7,6 +7,7 @@ import ij.io.SaveDialog;
 
 import java.awt.BorderLayout;
 
+import javax.lang.model.element.Element;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -2210,7 +2211,11 @@ public class MainWindow extends JFrame {
 							populationPopup.disableMenuDown();
 						}
 						
-						
+						if(datasets.get(0).isRoot()){
+							populationPopup.enableReplaceFolder();
+						} else {
+							populationPopup.disableReplaceFolder();
+						}
 						
 						if(!datasets.get(0).hasChildren()){ // cannot split population without children yet
 							populationPopup.disableSplit();
@@ -2407,6 +2412,7 @@ public class MainWindow extends JFrame {
 		JMenuItem extractMenuItem = new JMenuItem(new ExtractNucleiCollectionAction());
 		JMenuItem moveUpMenuItem = new JMenuItem(new MoveDatasetUpAction());
 		JMenuItem moveDownMenuItem = new JMenuItem(new MoveDatasetDownAction());
+		JMenuItem replaceFolderMenuItem = new JMenuItem(new ReplaceNucleusFolderAction());
 				
 		public PopulationListPopupMenu() {
 			
@@ -2421,6 +2427,7 @@ public class MainWindow extends JFrame {
 			this.addSeparator();
 			this.add(saveMenuItem);
 			this.add(extractMenuItem);
+			this.add(replaceFolderMenuItem);
 			
 			
 	    }
@@ -2433,6 +2440,8 @@ public class MainWindow extends JFrame {
 			enableExtract();
 			enableMenuUp();
 			enableMenuDown();
+			enableReplaceFolder();
+			
 		}
 		
 		public void disableAll(){
@@ -2443,6 +2452,7 @@ public class MainWindow extends JFrame {
 			disableExtract();
 			disableMenuUp();
 			disableMenuDown();
+			disableReplaceFolder();
 		}
 		
 		public void enableMerge(){
@@ -2499,6 +2509,14 @@ public class MainWindow extends JFrame {
 		
 		public void disableMenuDown(){
 			moveDownMenuItem.setEnabled(false);
+		}
+		
+		public void enableReplaceFolder(){
+			replaceFolderMenuItem.setEnabled(true);
+		}
+		
+		public void disableReplaceFolder(){
+			replaceFolderMenuItem.setEnabled(false);
 		}
 	}
 	
@@ -2913,6 +2931,40 @@ public class MainWindow extends JFrame {
 		}
 	}
 	
+	class ReplaceNucleusFolderAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public ReplaceNucleusFolderAction() {
+			super("Change folder");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			DirectoryChooser localOpenDialog = new DirectoryChooser("Select new directory of images...");
+			String folderName = localOpenDialog.getDirectory();
+
+			if(folderName!=null) { 
+
+				File newFolder = new File(folderName);
+
+				final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+				if(datasets.size()==1){
+
+					AnalysisDataset d = datasets.get(0);
+					for(Nucleus n : d.getCollection().getNuclei()){
+						try{
+							n.updateSourceFolder(newFolder);
+						} catch(Exception e1){
+							log("Error renaming nucleus: "+e1.getMessage());
+						}
+					}
+				}
+			}
+
+		}
+	}
+
 	/**
 	 * Create a new NucleusCollection of the same class as the given dataset
 	 * @param template the dataset to base on for analysis options, folders

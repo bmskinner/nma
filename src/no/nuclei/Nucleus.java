@@ -270,5 +270,6 @@ public void calculateSignalDistancesFromCoM();
   public Map<String, Integer> getBorderTags();
   public void addSegment(NucleusBorderSegment n);
   public void reverse();
-public String getOutputFolderName();
+  public String getOutputFolderName();
+  public void updateSourceFolder(File newFolder);
 }

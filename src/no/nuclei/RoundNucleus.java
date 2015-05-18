@@ -1254,4 +1254,17 @@ public class RoundNucleus
 			addBorderTag(s, newIndex);
 		}
 	}
+	
+	public void updateSourceFolder(File newFolder){
+		File oldFile = this.getSourceFile();
+		String oldName = oldFile.getName();
+		File newFile = new File(newFolder+File.separator+oldName);
+		if(newFile.exists()){
+			this.setSourceFile(newFile);
+			this.setNucleusFolder(new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension()));
+		} else {
+			throw new IllegalArgumentException("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
+		}
+		
+	}
 }
