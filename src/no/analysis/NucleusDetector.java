@@ -453,60 +453,70 @@ public class NucleusDetector {
 	 * @return a stack with edges highlighted
 	 */
 	private ImageStack runEdgeDetector(ImageStack image){
-		
-		// using canny detector
-		
-		// calculation of auto threshold
-		if(analysisOptions.isCannyAutoThreshold()){
 
-			// find the median intensity of the image
-			double medianPixel = getMedianIntensity(image);
-			
-			// if the median is >128, this is probably an inverted image.
-			// invert it so the thresholds will work
-			if(medianPixel>128){
-				logger.log("Detected high median ("+medianPixel+"); inverting");
-				image.getProcessor(ImageImporter.COUNTERSTAIN).invert();
-				medianPixel = getMedianIntensity(image);
+		//		bi.show();
+		ImageStack searchStack = null;
+		try {
+			// using canny detector
+
+			// calculation of auto threshold
+			if(analysisOptions.isCannyAutoThreshold()){
+
+				// find the median intensity of the image
+				double medianPixel = getMedianIntensity(image);
+
+				// if the median is >128, this is probably an inverted image.
+				// invert it so the thresholds will work
+				if(medianPixel>128){
+					logger.log("Detected high median ("+medianPixel+"); inverting");
+					image.getProcessor(ImageImporter.COUNTERSTAIN).invert();
+					medianPixel = getMedianIntensity(image);
+				}
+
+				// set the thresholds either side of the median
+				double sigma = 0.33; // default value - TODO: enable change
+				double lower = Math.max(0  , (1.0 - (2.5 * sigma)  ) * medianPixel  ) ;
+				lower = lower < 0.1 ? 0.1 : lower; // hard limit
+				double upper = Math.min(255, (1.0 + (0.6 * sigma)  ) * medianPixel  ) ;
+				upper = upper < 0.3 ? 0.3 : upper; // hard limit
+				analysisOptions.setLowThreshold(  (float)  lower);
+				analysisOptions.setHighThreshold( (float)  upper);
+				logger.log("Auto thresholding: low: "+lower+"  high: "+upper, Logger.DEBUG);
 			}
-			
-			// set the thresholds either side of the median
-			double sigma = 0.33; // default value - TODO: enable change
-			double lower = Math.max(0  , (1.0 - (2.5 * sigma)  ) * medianPixel  ) ;
-			double upper = Math.min(255, (1.0 + (0.6 * sigma)  ) * medianPixel  ) ;
-			analysisOptions.setLowThreshold(  (float)  lower);
-			analysisOptions.setHighThreshold( (float)  upper);
-			logger.log("Auto thresholding: low: "+lower+"  high: "+upper, Logger.DEBUG);
+
+			logger.log("Creating edge detector", Logger.DEBUG);
+			CannyEdgeDetector canny = new CannyEdgeDetector();
+			canny.setSourceImage(image.getProcessor(ImageImporter.COUNTERSTAIN).getBufferedImage());
+			canny.setLowThreshold( analysisOptions.getLowThreshold() );
+			canny.setHighThreshold( analysisOptions.getHighThreshold());
+			canny.setGaussianKernelRadius(analysisOptions.getKernelRadius());
+			canny.setGaussianKernelWidth(analysisOptions.getKernelWidth());
+
+			canny.process();
+			BufferedImage edges = canny.getEdgesImage();
+			ImagePlus searchImage = new ImagePlus(null, edges);
+
+
+			// add morphological closing
+			ByteProcessor bp = searchImage.getProcessor().convertToByteProcessor();
+
+			morphologyClose( bp);
+			ImagePlus bi= new ImagePlus(null, bp);
+			searchStack = ImageImporter.convert(bi);
+
+
+			//		searchImage.show();
+			//		bi.show();
+			bi.close();
+			searchImage.close();
+
+			logger.log("Edge detection complete", Logger.DEBUG);
+		} catch (Exception e) {
+			logger.log("Error in dege detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
 		}
-		
-		logger.log("Creating edge detector", Logger.DEBUG);
-		CannyEdgeDetector canny = new CannyEdgeDetector();
-		canny.setSourceImage(image.getProcessor(ImageImporter.COUNTERSTAIN).getBufferedImage());
-		canny.setLowThreshold( analysisOptions.getLowThreshold() );
-		canny.setHighThreshold( analysisOptions.getHighThreshold());
-		canny.setGaussianKernelRadius(analysisOptions.getKernelRadius());
-		canny.setGaussianKernelWidth(analysisOptions.getKernelWidth());
-		
-		canny.process();
-		BufferedImage edges = canny.getEdgesImage();
-		ImagePlus searchImage = new ImagePlus(null, edges);
-		
-
-		// add morphological closing
-		ByteProcessor bp = searchImage.getProcessor().convertToByteProcessor();
-
-		morphologyClose( bp);
-		ImagePlus bi= new ImagePlus(null, bp);
-//		bi.show();
-		ImageStack searchStack = ImageImporter.convert(bi);
-		
-		
-//		searchImage.show();
-//		bi.show();
-		bi.close();
-		searchImage.close();
-		
-		logger.log("Edge detection complete", Logger.DEBUG);
 		return searchStack;
 	}
 	

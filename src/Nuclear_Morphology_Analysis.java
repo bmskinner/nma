@@ -12,6 +12,7 @@
   morphology comparisons
  */
 
+import ij.IJ;
 import ij.plugin.PlugIn;
 import no.gui.MainWindow;
 
@@ -28,7 +29,8 @@ implements PlugIn
 		try {
 			java.awt.EventQueue.invokeLater(new Runnable() {
 				public void run() {
-										
+					IJ.setBackgroundColor(0, 0, 0);	 // default background is black
+					
 					MainWindow frame = new MainWindow();
 					frame.setVisible(true);
 				}
