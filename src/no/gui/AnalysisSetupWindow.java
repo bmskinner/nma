@@ -95,6 +95,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private JSpinner cannyKernelRadius = new JSpinner(new SpinnerNumberModel(2,	0, 20, 0.05));
 	private JSpinner cannyKernelWidth = new JSpinner(new SpinnerNumberModel(16,	1, 50, 1));
 	private JSpinner closingObjectRadiusSpinner = new JSpinner(new SpinnerNumberModel(5, 1,100 , 1));
+	private JCheckBox cannyAutoThresholdCheckBox;
 	
 	// other detection parameters
 
@@ -182,6 +183,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		analysisOptions.setNucleusClass(RodentSpermNucleus.class);
 		
 		analysisOptions.setUseCanny(false);
+		analysisOptions.setCannyAutoThreshold(false);
 		analysisOptions.setLowThreshold(2.0f);
 		analysisOptions.setHighThreshold(7.5f);
 		analysisOptions.setKernelRadius(2f);
@@ -275,6 +277,13 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		c.weightx = 0.0;                       //reset to default
 		panel.add(new Box.Filler(minSize, prefSize, maxSize),c);
 		
+		cannyAutoThresholdCheckBox = new JCheckBox("Canny auto threshold");
+		cannyAutoThresholdCheckBox.setSelected(false);
+		cannyAutoThresholdCheckBox.setActionCommand("CannyAutoThreshold");
+		cannyAutoThresholdCheckBox.addActionListener(this);
+		panel.add(cannyAutoThresholdCheckBox);
+		panel.add(new Box.Filler(minSize, prefSize, maxSize),c);
+		
 		
 		// add the canny settings
 		JLabel[] labels = new JLabel[6];
@@ -303,6 +312,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		closingObjectRadiusSpinner.addChangeListener(this);
 		
 		// stating default is threshold on
+		cannyAutoThresholdCheckBox.setEnabled(false);
 		cannyLowThreshold.setEnabled(false);
 		cannyHighThreshold.setEnabled(false);
 		cannyKernelRadius.setEnabled(false);
@@ -447,6 +457,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 		if(e.getActionCommand().equals("NucleusDetectionThreshold")){
 			this.analysisOptions.setUseCanny(false);
+			cannyAutoThresholdCheckBox.setEnabled(false);
 			cannyLowThreshold.setEnabled(false);
 			cannyHighThreshold.setEnabled(false);
 			cannyKernelRadius.setEnabled(false);
@@ -458,6 +469,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		
 		if(e.getActionCommand().equals("NucleusDetectionEdge")){
 			this.analysisOptions.setUseCanny(true);
+			cannyAutoThresholdCheckBox.setEnabled(true);
 			cannyLowThreshold.setEnabled(true);
 			cannyHighThreshold.setEnabled(true);
 			cannyKernelRadius.setEnabled(true);
@@ -465,6 +477,19 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 			closingObjectRadiusSpinner.setEnabled(true);
 			nucleusThresholdSpinner.setEnabled(false);
 			
+		}
+		
+		if(e.getActionCommand().equals("CannyAutoThreshold")){
+
+			if(cannyAutoThresholdCheckBox.isSelected()){
+				analysisOptions.setCannyAutoThreshold(true);
+				cannyLowThreshold.setEnabled(false);
+				cannyHighThreshold.setEnabled(false);
+			} else {
+				analysisOptions.setCannyAutoThreshold(false);
+				cannyLowThreshold.setEnabled(true);
+				cannyHighThreshold.setEnabled(true);
+			}
 		}
 		
 		if(e.getActionCommand().equals("Nucleus type")){

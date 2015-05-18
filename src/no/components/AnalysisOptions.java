@@ -15,6 +15,7 @@ public class AnalysisOptions implements Serializable {
 	
 	// values for Canny edge deteection
 	private boolean useCanny; 
+	private boolean cannyAutoThreshold;
 	private float lowThreshold;
 	private float highThreshold;
 	private float kernelRadius;
@@ -307,5 +308,15 @@ public class AnalysisOptions implements Serializable {
 
 	public void setClosingObjectRadius(int closingObjectRadius) {
 		this.closingObjectRadius = closingObjectRadius;
+	}
+
+
+	public boolean isCannyAutoThreshold() {
+		return cannyAutoThreshold;
+	}
+
+
+	public void setCannyAutoThreshold(boolean cannyAutoThreshold) {
+		this.cannyAutoThreshold = cannyAutoThreshold;
 	}
 }

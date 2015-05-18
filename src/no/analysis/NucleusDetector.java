@@ -455,34 +455,33 @@ public class NucleusDetector {
 	private ImageStack runEdgeDetector(ImageStack image){
 		
 		// using canny detector
-		// calculation of auto threshold - to be enabled
+		
+		// calculation of auto threshold
+		if(analysisOptions.isCannyAutoThreshold()){
 
-//		ImageProcessor median = image.getProcessor(ImageImporter.COUNTERSTAIN);
-//		double[] values = new double[ median.getWidth()*median.getHeight() ];
-//		try {
-//			int i=0;
-//			for(int w = 0; w<median.getWidth();w++){
-//				for(int h = 0; h<median.getHeight();h++){
-//					values[i] = (double) median.get(w, h);
-//					
-//					i++;
-//				}
-//			}
-//		} catch (Exception e) {
-//			IJ.log(e.getMessage());
-//		}
-
-//		double medianPixel = Stats.quartile(values, 50);
-//		double sigma = 0.33; // default value
-//		double lower = Math.max(0  , (1.0 - sigma) * medianPixel  ) ;
-//		double upper = Math.min(255, (1.0 + sigma) * medianPixel  ) ;
+			// find the median intensity of the image
+			double medianPixel = getMedianIntensity(image);
+			
+			// if the median is >5, this is probably an inverted image.
+			// invert it back to black on white
+			if(medianPixel>128){
+				logger.log("Detected high median ("+medianPixel+"); inverting");
+				image.getProcessor(ImageImporter.COUNTERSTAIN).invert();
+				medianPixel = getMedianIntensity(image);
+			}
+			
+			// set the thresholds either side of the median
+			double sigma = 0.33; // default value - TODO: enable change
+			double lower = Math.max(0  , (1.0 - (2.5 * sigma)  ) * medianPixel  ) ;
+			double upper = Math.min(255, (1.0 + (0.6 * sigma)  ) * medianPixel  ) ;
+			analysisOptions.setLowThreshold(  (float)  lower);
+			analysisOptions.setHighThreshold( (float)  upper);
+			logger.log("Auto thresholding: low: "+lower+"  high: "+upper, Logger.DEBUG);
+		}
 		
 		logger.log("Creating edge detector", Logger.DEBUG);
 		CannyEdgeDetector canny = new CannyEdgeDetector();
 		canny.setSourceImage(image.getProcessor(ImageImporter.COUNTERSTAIN).getBufferedImage());
-//		canny.setLowThreshold(  (float) lower );
-//		canny.setHighThreshold( (float) upper);
-//		mw.log("\tAuto canny low: "+lower+" ; high: "+upper+" from median "+medianPixel);
 		canny.setLowThreshold( analysisOptions.getLowThreshold() );
 		canny.setHighThreshold( analysisOptions.getHighThreshold());
 		canny.setGaussianKernelRadius(analysisOptions.getKernelRadius());
@@ -509,6 +508,27 @@ public class NucleusDetector {
 		
 		logger.log("Edge detection complete", Logger.DEBUG);
 		return searchStack;
+	}
+	
+	private double getMedianIntensity(ImageStack image){
+		ImageProcessor median = image.getProcessor(ImageImporter.COUNTERSTAIN);
+		double[] values = new double[ median.getWidth()*median.getHeight() ];
+		try {
+			int i=0;
+			for(int w = 0; w<median.getWidth();w++){
+				for(int h = 0; h<median.getHeight();h++){
+					values[i] = (double) median.get(w, h);
+
+					i++;
+				}
+			}
+		} catch (Exception e) {
+			logger.log("Error getting median image intensity: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		}
+		return Stats.quartile(values, 50);
 	}
 	
 	private void morphologyClose(ImageProcessor ip){
