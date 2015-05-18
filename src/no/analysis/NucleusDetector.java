@@ -492,20 +492,21 @@ public class NucleusDetector {
 		BufferedImage edges = canny.getEdgesImage();
 		ImagePlus searchImage = new ImagePlus(null, edges);
 		
-		searchImage.show();
+
 		// add morphological closing
 		ByteProcessor bp = searchImage.getProcessor().convertToByteProcessor();
-//		IJ.log("Made byte processor");
+
 		morphologyClose( bp);
 		ImagePlus bi= new ImagePlus(null, bp);
-		bi.show();
+//		bi.show();
 		ImageStack searchStack = ImageImporter.convert(bi);
 		
 		
-//		adapt the grey morphology jar
-//		bi.close();
+//		searchImage.show();
 //		bi.show();
-//		searchImage.close();
+		bi.close();
+		searchImage.close();
+		
 		logger.log("Edge detection complete", Logger.DEBUG);
 		return searchStack;
 	}

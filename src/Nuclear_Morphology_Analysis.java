@@ -28,6 +28,7 @@ implements PlugIn
 		try {
 			java.awt.EventQueue.invokeLater(new Runnable() {
 				public void run() {
+										
 					MainWindow frame = new MainWindow();
 					frame.setVisible(true);
 				}

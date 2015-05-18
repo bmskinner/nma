@@ -103,6 +103,7 @@ public class Detector{
 		  throw new IllegalArgumentException("Not a valid channel for this image in Detector.findInImage():"+this.channel);
 	  }
 	  ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
+	  
 //	  searchProcessor.smooth();
 	  searchProcessor.threshold(this.threshold);
 
