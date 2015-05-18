@@ -422,37 +422,7 @@ public class NucleusDetector {
 		// get polygon rois of correct size
 		
 		List<Roi> roiList = getROIs(searchStack, true);
-				
-//		if(analysisOptions.isUseCanny()){ // add recheck with line-rois		
-//			
-//			List<Roi> roiLineList = getROIs(searchStack, false);
-//			mw.log("\tFound "+roiLineList.size()+" line ROIs");
-//			if(!roiLineList.isEmpty()){
-//				for(Roi r : roiLineList){
-//
-//						PolygonRoi p = new PolygonRoi(r.getFloatPolygon(), PolygonRoi.POLYGON);
-//
-//						Detector detector = new Detector();
-//						detector.setChannel(ImageImporter.COUNTERSTAIN);
-//						StatsMap values = detector.measure(p, image);
-////						mw.log("\tROI area "+values.get("Area"));
-//						if(values.get("Area")>analysisOptions.getMinNucleusSize()   &&  values.get("Area")<analysisOptions.getMaxNucleusSize()){
-//							boolean ok = true;
-//							mw.log("\tArea "+values.get("Area")+" found: checking overlaps");
-//							for(Roi poly : roiList){ //is the roi already defined?
-//								if(poly.contains(  values.get("XM").intValue(), values.get("YM").intValue())){
-//									ok= false;
-//								}
-//							}
-//							if(ok) { // add the new polyline roi
-//								mw.log("\tAdded line ROI");
-//								roiList.add(p);
-//							}
-//						}
-//				}
-//			}
-//		}
-		
+						
 		if(roiList.isEmpty()){
 			mw.log("  No usable nuclei in image");
 			logger.log("No usable nuclei in image", Logger.DEBUG);
@@ -477,7 +447,7 @@ public class NucleusDetector {
 	
 	
 	/**
-	 * Use edge detection to produce an image with potential edges highlighted
+	 * Use Canny edge detection to produce an image with potential edges highlighted
 	 * for the detector
 	 * @param image the stack to process
 	 * @return a stack with edges highlighted
@@ -485,6 +455,7 @@ public class NucleusDetector {
 	private ImageStack runEdgeDetector(ImageStack image){
 		
 		// using canny detector
+		// calculation of auto threshold - to be enabled
 
 //		ImageProcessor median = image.getProcessor(ImageImporter.COUNTERSTAIN);
 //		double[] values = new double[ median.getWidth()*median.getHeight() ];
@@ -516,37 +487,44 @@ public class NucleusDetector {
 		canny.setHighThreshold( analysisOptions.getHighThreshold());
 		canny.setGaussianKernelRadius(analysisOptions.getKernelRadius());
 		canny.setGaussianKernelWidth(analysisOptions.getKernelWidth());
+		
 		canny.process();
 		BufferedImage edges = canny.getEdgesImage();
 		ImagePlus searchImage = new ImagePlus(null, edges);
 		
+		searchImage.show();
 		// add morphological closing
 		ByteProcessor bp = searchImage.getProcessor().convertToByteProcessor();
 //		IJ.log("Made byte processor");
 		morphologyClose( bp);
 		ImagePlus bi= new ImagePlus(null, bp);
+		bi.show();
 		ImageStack searchStack = ImageImporter.convert(bi);
 		
 		
 //		adapt the grey morphology jar
-		bi.close();
+//		bi.close();
 //		bi.show();
-		searchImage.close();
+//		searchImage.close();
+		logger.log("Edge detection complete", Logger.DEBUG);
 		return searchStack;
 	}
 	
 	private void morphologyClose(ImageProcessor ip){
 		try {
+			
 			int shift=1;
-			int radius = 7;
+			int radius = analysisOptions.getClosingObjectRadius();
 			int[] offset = {0,0};
 			int eltype = 0; //circle
+			logger.log("Closing objects with circle of radius "+radius, Logger.DEBUG);
 			
 			StructureElement se = new StructureElement(eltype,  shift,  radius, offset);
 //			IJ.log("Made se");
 			MorphoProcessor mp = new MorphoProcessor(se);
 //			IJ.log("Made mp");
 			mp.fclose(ip);
+			logger.log("Objects closed", Logger.DEBUG);
 //			IJ.log("Closed");
 		} catch (Exception e) {
 			IJ.log("Error in closing: "+e.getMessage());

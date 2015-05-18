@@ -19,6 +19,8 @@ public class AnalysisOptions implements Serializable {
 	private float highThreshold;
 	private float kernelRadius;
 	private int   kernelWidth;
+	private int   closingObjectRadius; // for morphological closing
+	
 	private boolean normaliseContrast; 
 
 	private int angleProfileWindowSize;
@@ -295,5 +297,15 @@ public class AnalysisOptions implements Serializable {
 
 	public void setUseCanny(boolean useCanny) {
 		this.useCanny = useCanny;
+	}
+
+
+	public int getClosingObjectRadius() {
+		return closingObjectRadius;
+	}
+
+
+	public void setClosingObjectRadius(int closingObjectRadius) {
+		this.closingObjectRadius = closingObjectRadius;
 	}
 }

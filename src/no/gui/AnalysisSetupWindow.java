@@ -90,14 +90,15 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private JRadioButton nucleusEdgeButton = new JRadioButton("Edge detection");
 	private ButtonGroup nucleusDetectionMethodGroup;
 
-	private JSpinner cannyLowThreshold = new JSpinner(new SpinnerNumberModel(0.1,	0, 10, 0.05));
+	private JSpinner cannyLowThreshold = new JSpinner(new SpinnerNumberModel(0.5,	0, 10, 0.05));
 	private JSpinner cannyHighThreshold = new JSpinner(new SpinnerNumberModel(1.5,	0, 20, 0.05));
 	private JSpinner cannyKernelRadius = new JSpinner(new SpinnerNumberModel(2,	0, 20, 0.05));
 	private JSpinner cannyKernelWidth = new JSpinner(new SpinnerNumberModel(16,	1, 50, 1));
+	private JSpinner closingObjectRadiusSpinner = new JSpinner(new SpinnerNumberModel(5, 1,100 , 1));
 	
 	// other detection parameters
 
-	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel(500,	100, 50000, 1));
+	private JSpinner txtMinNuclearSize = new JSpinner(new SpinnerNumberModel(2000,	100, 50000, 1));
 	private JSpinner txtMaxNuclearSize = new JSpinner(new SpinnerNumberModel(10000,	100, 50000, 1));
 
 	private JSpinner txtProfileWindowSize = new JSpinner(new SpinnerNumberModel(15,	5, 50, 1));
@@ -157,7 +158,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		analysisOptions.setNucleusThreshold(36);
 		analysisOptions.setSignalThreshold(70);
 
-		analysisOptions.setMinNucleusSize(500);
+		analysisOptions.setMinNucleusSize(2000);
 		analysisOptions.setMaxNucleusSize(10000);
 
 		analysisOptions.setMinNucleusCirc(0.0);
@@ -181,10 +182,12 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		analysisOptions.setNucleusClass(RodentSpermNucleus.class);
 		
 		analysisOptions.setUseCanny(false);
-		analysisOptions.setLowThreshold(0.1f);
-		analysisOptions.setHighThreshold(1.5f);
+		analysisOptions.setLowThreshold(2.0f);
+		analysisOptions.setHighThreshold(7.5f);
 		analysisOptions.setKernelRadius(2f);
 		analysisOptions.setKernelWidth(16);
+		analysisOptions.setClosingObjectRadius(5);
+		
 	}
 
 	private JPanel makeNucleusTypePanel(){
@@ -274,20 +277,22 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		
 		
 		// add the canny settings
-		JLabel[] labels = new JLabel[5];
-		JSpinner[] fields = new JSpinner[5];
+		JLabel[] labels = new JLabel[6];
+		JSpinner[] fields = new JSpinner[6];
 		
 		labels[0] = new JLabel("Nucleus threshold");
 		labels[1] = new JLabel("Canny low threshold");
 		labels[2] = new JLabel("Canny high threshold");
 		labels[3] = new JLabel("Canny kernel radius");
 		labels[4] = new JLabel("Canny kernel width");
+		labels[5] = new JLabel("Closing radius");
 
 		fields[0] = nucleusThresholdSpinner;
 		fields[1] = cannyLowThreshold;
 		fields[2] = cannyHighThreshold;
 		fields[3] = cannyKernelRadius;
 		fields[4] = cannyKernelWidth;
+		fields[5] = closingObjectRadiusSpinner;
 		
 		// add the change listeners
 		nucleusThresholdSpinner.addChangeListener(this);
@@ -295,12 +300,14 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		cannyHighThreshold.addChangeListener(this);
 		cannyKernelRadius.addChangeListener(this);
 		cannyKernelWidth.addChangeListener(this);
+		closingObjectRadiusSpinner.addChangeListener(this);
 		
 		// stating default is threshold on
 		cannyLowThreshold.setEnabled(false);
 		cannyHighThreshold.setEnabled(false);
 		cannyKernelRadius.setEnabled(false);
 		cannyKernelWidth.setEnabled(false);
+		closingObjectRadiusSpinner.setEnabled(false);
 		
 		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
 		
@@ -444,6 +451,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 			cannyHighThreshold.setEnabled(false);
 			cannyKernelRadius.setEnabled(false);
 			cannyKernelWidth.setEnabled(false);
+			closingObjectRadiusSpinner.setEnabled(false);
 			nucleusThresholdSpinner.setEnabled(true);
 			
 		}
@@ -454,6 +462,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 			cannyHighThreshold.setEnabled(true);
 			cannyKernelRadius.setEnabled(true);
 			cannyKernelWidth.setEnabled(true);
+			closingObjectRadiusSpinner.setEnabled(true);
 			nucleusThresholdSpinner.setEnabled(false);
 			
 		}
@@ -620,6 +629,12 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
 				this.analysisOptions.setKernelWidth( (Integer) j.getValue());
+			}
+			
+			if(e.getSource()==closingObjectRadiusSpinner){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				this.analysisOptions.setClosingObjectRadius( (Integer) j.getValue());
 			}
 			
 			

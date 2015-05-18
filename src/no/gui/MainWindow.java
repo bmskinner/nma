@@ -2616,8 +2616,9 @@ public class MainWindow extends JFrame {
 						}
 
 						// add the new collection to the list
-						populationNames.put(newDataset.getName(), newDataset.getUUID());
-						analysisDatasets.put(newDataset.getUUID(), newDataset);
+						addDataset(newDataset);
+//						populationNames.put(newDataset.getName(), newDataset.getUUID());
+//						analysisDatasets.put(newDataset.getUUID(), newDataset);
 						updatePopulationList();
 					}
 				};
@@ -2741,8 +2742,9 @@ public class MainWindow extends JFrame {
 
 	        			dataset.addChildCollection(newCollection);
 
-	        			populationNames.put(newCollection.getName(), newID);
-	        			analysisDatasets.put(newID, dataset.getChildDataset(newID));
+	        			addDataset(dataset.getChildDataset(newID));
+//	        			populationNames.put(newCollection.getName(), newID);
+//	        			analysisDatasets.put(newID, dataset.getChildDataset(newID));
 	        			updatePopulationList();
 	        			
 	        		} else {

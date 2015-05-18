@@ -275,6 +275,7 @@ public class DatasetCreator {
 				"Canny high threshold",
 				"Canny kernel radius",
 				"Canny kernel width",
+				"Closing radius",
 				"Nucleus min size",
 				"Nucleus max size",
 				"Nucleus min circ",
@@ -321,6 +322,7 @@ public class DatasetCreator {
 				String cannyHighThreshold = options.isUseCanny() ? String.valueOf(options.getHighThreshold()) : "N/A";
 				String cannyKernelRadius = options.isUseCanny() ? String.valueOf(options.getKernelRadius()) : "N/A";
 				String cannyKernelWidth = options.isUseCanny() ? String.valueOf(options.getKernelWidth()) : "N/A";
+				String cannyClosingRadius = options.isUseCanny() ? String.valueOf(options.getClosingObjectRadius()) : "N/A";
 
 				Object[] collectionData = {
 						collection.getNucleusCount(),
@@ -335,6 +337,7 @@ public class DatasetCreator {
 						cannyHighThreshold,
 						cannyKernelRadius,
 						cannyKernelWidth,
+						cannyClosingRadius,
 						options.getMinNucleusSize(),
 						options.getMaxNucleusSize(),
 						options.getMinNucleusCirc(),
