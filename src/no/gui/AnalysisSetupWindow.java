@@ -521,14 +521,21 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 			if(type.equals(ROUND_NUCLEUS)){
 				this.analysisOptions.setMinNucleusCirc(  0.0 );
 				this.analysisOptions.setMaxNucleusCirc(  1.0 );
+				minNuclearCircSpinner.setValue(0.0);
+				maxNuclearCircSpinner.setValue(1.0);
+				
 			}
 			if(type.equals(RODENT_SPERM_NUCLEUS)){
 				this.analysisOptions.setMinNucleusCirc(  0.2 );
 				this.analysisOptions.setMaxNucleusCirc(  0.8 );
+				minNuclearCircSpinner.setValue(0.2);
+				maxNuclearCircSpinner.setValue(0.8);
 			}
 			if(type.equals(PIG_SPERM_NUCLEUS)){
 				this.analysisOptions.setMinNucleusCirc(  0.2 );
 				this.analysisOptions.setMaxNucleusCirc(  0.8 );
+				minNuclearCircSpinner.setValue(0.2);
+				maxNuclearCircSpinner.setValue(0.8);
 			}
 		}
 

@@ -107,8 +107,15 @@ import org.jfree.data.xy.XYSeriesCollection;
 import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame {
-	
-	private String version;
+		
+	/**
+	 * The fields for setting the version. Version will be stored in AnalysisDatasets.
+	 * Backwards compatability should be maintained between bugfix increments, but is not
+	 * guaranteed between revision or major version increments.
+	 */
+	public static final int VERSION_MAJOR    = 1;
+	public static final int VERSION_REVISION = 7;
+	public static final int VERSION_BUGFIX   = 1;
 	
 	private static final int PROFILE_TAB = 0;
 	private static final int FRANKEN_TAB = 1;
@@ -190,7 +197,7 @@ public class MainWindow extends JFrame {
 		
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		try {
-			setTitle("Nuclear Morphology Analysis");
+			setTitle("Nuclear Morphology Analysis v"+getVersion());
 			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			setBounds(100, 100, 1012, 604);
 			contentPane = new JPanel();
@@ -439,7 +446,41 @@ public class MainWindow extends JFrame {
 		return panelHeader;
 	}
 	
+	/**
+	 * Get the program version
+	 * @return the version
+	 */
+	public String getVersion(){
+		return VERSION_MAJOR+"."+VERSION_REVISION+"."+VERSION_BUGFIX;
+	}
 	
+	/**
+	 * Check a version string to see if the program will be able to open a 
+	 * dataset. The major version must be the same, while the revision of the
+	 * dataset must be equal to or greater than the program revision. Bugfixing
+	 * versions are not checked for.
+	 * @param version
+	 * @return a pass or fail
+	 */
+	public boolean checkVersion(String version){
+		boolean ok = true;
+		
+		if(version==null){
+			return false;
+		}
+		
+		String[] parts = version.split("\\.");
+		
+		// major version MUST be the same
+		if(Integer.valueOf(parts[0])!=this.VERSION_MAJOR){
+			ok = false;
+		}
+		// dataset revision must be equal or greater to program
+		if(Integer.valueOf(parts[1])<this.VERSION_MAJOR){
+			ok = false;
+		}
+		return ok;
+	}
 	
 	/**
 	 * Create the status panel at the base of the window
@@ -832,8 +873,7 @@ public class MainWindow extends JFrame {
 		MainWindow.this.populationNames.put(d.getName(), d.getUUID());
 		
 		if(d.isRoot()){ // add to the list of datasets that can be ordered
-			treeOrderMap.put(d.getUUID(), treeOrderMap.size());
-//			treeListOrder.put(treeListOrder.size(), d.getUUID()); // add to the end of the list
+			treeOrderMap.put(d.getUUID(), treeOrderMap.size()); // add to the end of the list
 		}
 	}
 	
@@ -1060,32 +1100,35 @@ public class MainWindow extends JFrame {
 					
 					// read the dataset
 					AnalysisDataset dataset = PopulationImporter.readDataset(new File(fileName));
-					dataset.setRoot(true);
 					
-					addDataset(dataset);
-//					MainWindow.this.analysisDatasets.put(dataset.getUUID(), dataset);
-					
-					// update the population list
-//					NucleusCollection collection = dataset.getCollection();
-//					MainWindow.this.populationNames.put(dataset.getName(), dataset.getUUID());
-					
-					for(AnalysisDataset child : dataset.getAllChildDatasets() ){
-//						log("Imported: "+child.getName());
-						addDataset(child);
-//						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
-//						MainWindow.this.populationNames.put(child.getName(), child.getUUID());
+					if(checkVersion( dataset.getVersion() )){
+
+						dataset.setRoot(true);
+						
+						addDataset(dataset);
+						
+						for(AnalysisDataset child : dataset.getAllChildDatasets() ){
+							addDataset(child);
+						}
+						
+						log("OK");
+						log("Opened dataset: "+dataset.getName());
+	//					log("Dataset contains: "+dataset.getChildCount()+" subsets");
+	
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+						list.add(dataset);
+	
+						updatePanels(list);
+						updatePopulationList();
+					} else {
+						log("Unable to open dataset version: "+ dataset.getVersion());
 					}
-					log("OK");
-					log("Opened dataset: "+dataset.getName());
-//					log("Dataset contains: "+dataset.getChildCount()+" subsets");
-
-					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-					list.add(dataset);
-
-					updatePanels(list);
-					updatePopulationList();
 				} catch (Exception e) {
+					log("Error");
 					log("Error opening dataset: "+e.getMessage());
+					for(StackTraceElement el : e.getStackTrace()){
+						IJ.log(el.toString());
+					}
 				}
 			}
 		};
@@ -2186,40 +2229,46 @@ public class MainWindow extends JFrame {
 						populationPopup.enableDelete();
 						
 					} else { // single population
+						AnalysisDataset d = datasets.get(0);
 						populationPopup.enableDelete();
 						populationPopup.disableMerge();
 						populationPopup.enableSave();
 						populationPopup.enableExtract();
 						
 						// check if we can move the dataset
-						if(treeOrderMap.size()>1 && datasets.get(0).isRoot()){
-							
-							// check if the selected dataset is at the top of the list
-							if(treeOrderMap.get(0)!=datasets.get(0).getUUID()){
-								populationPopup.enableMenuUp();
-							} else {
+						if(d.isRoot()){
+
+							if(treeOrderMap.size()>1){
+
+								// check if the selected dataset is at the top of the list
+								if(treeOrderMap.get(0)==d.getUUID()){
+									populationPopup.disableMenuUp();
+								} else {
+									populationPopup.enableMenuUp();
+								}
+
+								// check if the selected dataset is at the bottom of the list
+								if(treeOrderMap.get(treeOrderMap.size()-1)==d.getUUID()){
+									populationPopup.disableMenuDown();
+								} else {
+									populationPopup.enableMenuDown();
+								}
+
+							} else { // only one or zero datasets in the pogram 
 								populationPopup.disableMenuUp();
-							}
-							
-							// check if the selected dataset is at the bottom of the list
-							if(treeOrderMap.get(treeOrderMap.size()-1)!=datasets.get(0).getUUID()){
-								populationPopup.enableMenuDown();
-							} else {
 								populationPopup.disableMenuDown();
 							}
-							
+
+							// only root datasets can replace folder mappings
+							populationPopup.enableReplaceFolder();
+
 						} else {
+							populationPopup.disableReplaceFolder();
 							populationPopup.disableMenuUp();
 							populationPopup.disableMenuDown();
 						}
-						
-						if(datasets.get(0).isRoot()){
-							populationPopup.enableReplaceFolder();
-						} else {
-							populationPopup.disableReplaceFolder();
-						}
-						
-						if(!datasets.get(0).hasChildren()){ // cannot split population without children yet
+
+						if(!d.hasChildren()){ // cannot split population without children yet
 							populationPopup.disableSplit();
 						} else {
 							populationPopup.enableSplit();

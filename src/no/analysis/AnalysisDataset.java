@@ -16,6 +16,7 @@ import no.collections.NucleusCollection;
 import no.components.AnalysisOptions;
 import no.components.ShellResult;
 import no.export.PopulationExporter;
+import no.gui.MainWindow;
 
 
 /**
@@ -45,14 +46,19 @@ public class AnalysisDataset implements Serializable {
 		this.thisCollection = collection;
 		this.savePath = new File(collection.getOutputFolder()+File.separator+collection.getType()+".nmd"); // nmd Nuclear Morphology Dataset
 		this.isRoot = false;
+		this.version = MainWindow.VERSION_MAJOR+"."+MainWindow.VERSION_REVISION+"."+MainWindow.VERSION_BUGFIX;
 	}
 	
 	public AnalysisDataset(NucleusCollection collection, File saveFile){
 		this.thisCollection = collection;
 		this.savePath = saveFile;
 		this.isRoot = false;
+		this.version = MainWindow.VERSION_MAJOR+"."+MainWindow.VERSION_REVISION+"."+MainWindow.VERSION_BUGFIX;
 	}
 	
+	public String getVersion(){
+		return this.version;
+	}
 	
 	public void addChildCollection(NucleusCollection collection){
 		if(collection==null){

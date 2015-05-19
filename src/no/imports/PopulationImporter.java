@@ -35,12 +35,6 @@ public class PopulationImporter {
 
 			ObjectInputStream ois = new ObjectInputStream(fis);
 
-			// the original output order for the population
-			//	    output.writeObject(collection.getFolder());
-			//		output.writeObject(collection.getOutputFolderName());
-			//		output.writeObject(collection.getType());
-			//		output.writeObject(collection.getNuclei());
-
 			mw.logc("Reading file...");
 			List<Object> inputList = new ArrayList<Object>(0);
 
