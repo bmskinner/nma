@@ -11,13 +11,10 @@ import java.awt.FlowLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JSpinner;
-import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JSlider;
 import javax.swing.JRadioButton;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -28,27 +25,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.Insets;
 import java.io.File;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import no.analysis.AnalysisCreator;
 import no.collections.PigSpermNucleusCollection;
 import no.collections.RodentSpermNucleusCollection;
 import no.collections.RoundNucleusCollection;
@@ -154,6 +146,10 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		setVisible(true);
 	}
 
+	/**
+	 * Get the current options 
+	 * @return an AnalysisOptions
+	 */
 	public AnalysisOptions getOptions(){
 		return this.analysisOptions;
 	}
@@ -176,6 +172,9 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 	}
 
+	/**
+	 * Populate the analysis options with the defaults specified above
+	 */
 	public void setDefaultOptions(){
 		analysisOptions.setNucleusThreshold(DEFAULT_NUCLEUS_THRESHOLD);
 		analysisOptions.setSignalThreshold(DEFAULT_SIGNAL_THRESHOLD);
@@ -424,6 +423,11 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		return panel;
 	}
 
+	/**
+	 * Currently not enabled. Can hold settings for automated remapping of pre- and 
+	 * post-FISHed nuclei
+	 * @return
+	 */
 	private JPanel makeRenappingSettingsPanel(){
 
 		JPanel panel = new JPanel();

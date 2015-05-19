@@ -7,7 +7,6 @@ import ij.io.SaveDialog;
 
 import java.awt.BorderLayout;
 
-import javax.lang.model.element.Element;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -701,7 +700,7 @@ public class MainWindow extends JFrame {
 		wilcoxonPartsPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank-sum test)"));
 		wilcoxonPartsPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
 		wilcoxonPartsPanel.add(new JLabel("Below the diagonal: p-values"));
-		wilcoxonPartsPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highligted in yellow and green"));
+		wilcoxonPartsPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
 		
 		wilcoxonAreaTable = new JTable(DatasetCreator.createWilcoxonAreaTable(null));
 		addWilconxonTable(wilcoxonPartsPanel, wilcoxonAreaTable, "Areas");
@@ -2338,9 +2337,10 @@ public class MainWindow extends JFrame {
 	    }
 	}
 	
+	
 	/**
-	 * Allows for cell background to be coloured based on value in cell
-	 *
+	 * Colour table cell background to show pairwise comparisons. All cells are white, apart
+	 * from the diagonal, which is made light grey
 	 */
 	public class VennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
@@ -2381,9 +2381,12 @@ public class MainWindow extends JFrame {
 	    }
 	}
 	
+	
 	/**
-	 * Allows for cell background to be coloured based on value in cell
-	 *
+	 * Colour a table cell background based on its value to show statistical 
+	 * significance. Shows yellow for values below a Bonferroni-corrected cutoff
+	 * of 0.05, and green for values below a Bonferroni-corrected cutoff
+	 * of 0.01
 	 */
 	public class WilcoxonTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
