@@ -178,7 +178,7 @@ public class MainWindow extends JFrame {
 	
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
 	
-	private HashMap<Integer, UUID> treeListOrder = new HashMap<Integer, UUID>(); // order the root datasets
+//	private HashMap<Integer, UUID> treeListOrder = new HashMap<Integer, UUID>(); // order the root datasets
 	
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 
@@ -833,7 +833,7 @@ public class MainWindow extends JFrame {
 		
 		if(d.isRoot()){ // add to the list of datasets that can be ordered
 			treeOrderMap.put(d.getUUID(), treeOrderMap.size());
-			treeListOrder.put(treeListOrder.size(), d.getUUID()); // add to the end of the list
+//			treeListOrder.put(treeListOrder.size(), d.getUUID()); // add to the end of the list
 		}
 	}
 	
@@ -1472,6 +1472,9 @@ public class MainWindow extends JFrame {
 				}	
 
 				shellsChartPanel.setChart(shellsChart);
+				
+
+				
 				signalsTabPane.setComponentAt(2, shellsChartPanel);
 			} else { // no shell analysis available
 
@@ -1756,43 +1759,36 @@ public class MainWindow extends JFrame {
 	 */
 	public void updatePopulationList(){
 					
-		// new method using table
+		// new method using treetable
+		List<String> columns = new ArrayList<String>();
+		columns.add("Population");
+		columns.add("Nuclei");
+		columns.add("");
+
+		DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
+		PopulationTreeTableNode  root = new PopulationTreeTableNode (java.util.UUID.randomUUID());
+		treeTableModel.setRoot(root);
+		treeTableModel.setColumnIdentifiers(columns);
+		
+		
 		if(this.analysisDatasets.size()>0){
-
-			// new method using treetable
-			List<String> columns = new ArrayList<String>();
-			columns.add("Population");
-			columns.add("Nuclei");
-			columns.add("");
-
-			DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
-			PopulationTreeTableNode  root = new PopulationTreeTableNode (java.util.UUID.randomUUID());
-			treeTableModel.setRoot(root);
-			treeTableModel.setColumnIdentifiers(columns);
-			
-			for(int i : treeListOrder.keySet()){
+			for(UUID id : treeOrderMap.getIDs()){
 				
-				AnalysisDataset rootDataset = analysisDatasets.get(treeListOrder.get(i));
+				AnalysisDataset rootDataset = analysisDatasets.get(id);
 				root.add( addTreeTableChildNodes(rootDataset.getUUID()));
 			}
-			
-//			for(AnalysisDataset d : this.analysisDatasets.values()){
-//				if(d.isRoot()){
-//					root.add( addTreeTableChildNodes(d.getUUID()));
-//				}
-//			}
-			treeTable.setTreeTableModel(treeTableModel);
-
-			int row = 0;
-			while (row < treeTable.getRowCount()) {
-				treeTable.expandRow(row);
-				row++;
-			}
-			
-			treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-			treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
-		
 		}
+		
+		treeTable.setTreeTableModel(treeTableModel);
+
+		int row = 0;
+		while (row < treeTable.getRowCount()) {
+			treeTable.expandRow(row);
+			row++;
+		}
+		
+		treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+		treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 	}
 	
 	private PopulationTreeTableNode addTreeTableChildNodes(UUID id){
@@ -2177,7 +2173,7 @@ public class MainWindow extends JFrame {
 					}
 				}
 				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
-				lblStatusLine.setText(datasets.size()+" "+count+"  selected");
+				lblStatusLine.setText(datasets.size()+" "+count+" selected");
 				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
 
 				if(datasets.isEmpty()){
@@ -2196,17 +2192,17 @@ public class MainWindow extends JFrame {
 						populationPopup.enableExtract();
 						
 						// check if we can move the dataset
-						if(treeListOrder.size()>1 && datasets.get(0).isRoot()){
+						if(treeOrderMap.size()>1 && datasets.get(0).isRoot()){
 							
 							// check if the selected dataset is at the top of the list
-							if(treeListOrder.get(0)!=datasets.get(0).getUUID()){
+							if(treeOrderMap.get(0)!=datasets.get(0).getUUID()){
 								populationPopup.enableMenuUp();
 							} else {
 								populationPopup.disableMenuUp();
 							}
 							
 							// check if the selected dataset is at the bottom of the list
-							if(treeListOrder.get(treeListOrder.size()-1)!=datasets.get(0).getUUID()){
+							if(treeOrderMap.get(treeOrderMap.size()-1)!=datasets.get(0).getUUID()){
 								populationPopup.enableMenuDown();
 							} else {
 								populationPopup.disableMenuDown();
@@ -2674,17 +2670,23 @@ public class MainWindow extends JFrame {
 				} else {
 					logc("Deleting collections...");
 				}
-
+				
+				// get the ids as a list, so we don't iterate over datasets
+				// when we could delete a child of the list in progress
+				List<UUID> list = new ArrayList<UUID>(0);
 				for(AnalysisDataset d : datasets){
+					list.add(d.getUUID());
+				}
+
+				for(UUID id : list){
 					
 					// check dataset still exists
-					if(populationNames.containsKey(analysisDatasets.get(d.getUUID()).getName())){
+					if(analysisDatasets.containsKey(id)){
 						
+						AnalysisDataset d = analysisDatasets.get(id);
 
 						if(d.isRoot()){
-							
-							int position = treeOrderMap.get(d.getUUID());
-	
+								
 							// remove all children of the collection
 							for(UUID u : d.getAllChildUUIDs()){
 	
@@ -2697,8 +2699,8 @@ public class MainWindow extends JFrame {
 							}
 							
 							populationNames.remove(d.getName());
-							analysisDatasets.remove(d.getUUID());
-							treeOrderMap.remove(position);
+							analysisDatasets.remove(id);
+							treeOrderMap.remove(id);
 							
 						} else { // not root
 							
@@ -2715,16 +2717,6 @@ public class MainWindow extends JFrame {
 
 						}
 
-						//						// remove the collection mapping from parents
-						//						for(AnalysisDataset parent : analysisDatasets.values()){
-						//							if(parent.hasChild(d)){
-						//								parent.deleteChild(d.getUUID());
-						//							}
-						//						}
-						//	
-						//						// then remove the collection itself
-						//						populationNames.remove(d.getName());
-						//						analysisDatasets.remove(d.getUUID());
 					}
 				}
 				updatePopulationList();	
@@ -2915,8 +2907,8 @@ public class MainWindow extends JFrame {
 
 				int oldValue = 0;
 				int newValue = 0;
-				for(int i : treeListOrder.keySet()){
-					if(treeListOrder.get(i)==dataToMove.getUUID()){
+				for(int i : treeOrderMap.getPositions()){
+					if(treeOrderMap.get(i)==dataToMove.getUUID()){
 
 						oldValue = i; 
 						if(oldValue>0){ // do not change if already at the top
@@ -2924,9 +2916,9 @@ public class MainWindow extends JFrame {
 						}
 					}
 				}
-				UUID replacedID = treeListOrder.get(newValue); // find the dataset currently holding the spot
-				treeListOrder.put(newValue, dataToMove.getUUID()); // move the dataset up
-				treeListOrder.put(oldValue, replacedID); // move the dataset in place down
+				UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
+				treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
+				treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
 				updatePopulationList();
 			}
 		}
@@ -2949,18 +2941,18 @@ public class MainWindow extends JFrame {
 
 				int oldValue = 0;
 				int newValue = 0;
-				for(int i : treeListOrder.keySet()){
-					if(treeListOrder.get(i)==dataToMove.getUUID()){
+				for(int i : treeOrderMap.getPositions()){
+					if(treeOrderMap.get(i)==dataToMove.getUUID()){
 
 						oldValue = i; 
-						if(oldValue<treeListOrder.size()-1){ // do not change if already at the bottom
+						if(oldValue<treeOrderMap.size()-1){ // do not change if already at the bottom
 							newValue = i+1;
 						}
 					}
 				}
-				UUID replacedID = treeListOrder.get(newValue); // find the dataset currently holding the spot
-				treeListOrder.put(newValue, dataToMove.getUUID()); // move the dataset up
-				treeListOrder.put(oldValue, replacedID); // move the dataset in place down
+				UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
+				treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
+				treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
 				updatePopulationList();
 			}
 		}

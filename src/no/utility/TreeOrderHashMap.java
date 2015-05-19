@@ -1,6 +1,7 @@
 package no.utility;
 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 
 public class TreeOrderHashMap {
@@ -46,5 +47,13 @@ public class TreeOrderHashMap {
 	
 	public int size(){
 		return forward.size();
+	}
+	
+	public Set<Integer> getPositions(){
+		return reverse.keySet();
+	}
+	
+	public Set<UUID> getIDs(){
+		return forward.keySet();
 	}
 }
