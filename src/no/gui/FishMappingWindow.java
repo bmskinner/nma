@@ -104,7 +104,7 @@ public class FishMappingWindow extends JDialog {
 				createGUI();
 
 			} catch (Exception e) {
-				IJ.log(e.getMessage());
+				IJ.log("Error creating mapping window: "+e.getMessage());
 				for(StackTraceElement el : e.getStackTrace()){
 					IJ.log(el.toString());
 				}
@@ -247,10 +247,15 @@ public class FishMappingWindow extends JDialog {
 		
 		contentPanel.add(imagePane, BorderLayout.CENTER);
 
-		
 		File firstImage = this.preFISHDataset.getCollection().getImageFiles().get(0);
-		fileLabel.setText("Image file: "+firstImage.getAbsolutePath());
-		openImages(firstImage);
+		if(firstImage.exists()){
+			fileLabel.setText("Image file: "+firstImage.getAbsolutePath());
+			openImages(firstImage);
+		} else {
+			firstImage = this.preFISHDataset.getCollection().getImageFiles().get(1);
+			fileLabel.setText("Image file: "+firstImage.getAbsolutePath());
+			openImages(firstImage);
+		}
 
 		this.pack(); 
 		this.setVisible(true);
@@ -326,20 +331,23 @@ public class FishMappingWindow extends JDialog {
 		// Open the image from the post FISH directory
 		String imageName = preFile.getName(); // the file name e.g. P60.tif
 		String postFile = this.postFISHImageDirectory.getAbsolutePath()+File.separator+imageName;
-		ImagePlus postImage = new ImagePlus(postFile);
-		
-		// make an image icon and display
-		ImagePlus postSmall;
-//		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
-		if(openProcessor.getWidth()>smallWidth){
-			postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
-		} else {
-			postSmall = postImage;
+		File post = new File(postFile);
+		if(post.exists()){
+			ImagePlus postImage = new ImagePlus(postFile);
+
+			// make an image icon and display
+			ImagePlus postSmall;
+			//		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+			if(openProcessor.getWidth()>smallWidth){
+				postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
+			} else {
+				postSmall = postImage;
+			}
+
+			//		ImagePlus postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
+			ImageIcon postImageIcon = new ImageIcon(postSmall.getBufferedImage());
+			postImageLabel.setIcon(postImageIcon);
 		}
-		
-//		ImagePlus postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
-		ImageIcon postImageIcon = new ImageIcon(postSmall.getBufferedImage());
-		postImageLabel.setIcon(postImageIcon);
 
 	}
 
