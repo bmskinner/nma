@@ -18,7 +18,6 @@ import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -139,7 +138,7 @@ public class FishMappingWindow extends JDialog {
 		JLabel headingLabel = new JLabel("Select nuclei to keep for analysis", JLabel.LEFT);
 		headingPanel.add(headingLabel);
 		JLabel helpLabel = new JLabel("Yellow nuclei are available to select", JLabel.LEFT);
-		JLabel helpLabel2 = new JLabel("Click nuclei to add them to a sub-population", JLabel.LEFT);
+		JLabel helpLabel2 = new JLabel("Click nuclei with left or right button to add them to a sub-population", JLabel.LEFT);
 		headingPanel.add(helpLabel);
 		headingPanel.add(helpLabel2);
 		fileLabel = new JLabel("", JLabel.RIGHT);
@@ -152,8 +151,6 @@ public class FishMappingWindow extends JDialog {
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
 		
-//		final JButton prevButton = new JButton("Previous");
-//		final JButton nextButton = new JButton("Next");
 		prevButton = new JButton("Previous");
 		nextButton = new JButton("Next");
 		
@@ -261,8 +258,12 @@ public class FishMappingWindow extends JDialog {
 		this.setVisible(true);
 	}
 	
-	
-	// open the images for pre and post. Annotate the nuclei
+	/**
+	 * Open the selected pre-FISH image file, annotate nuclei, and find the post-FISH image file.
+	 * Large images are scaled to take up a maximum width of 0.45 the screen, allowing pre- and post-
+	 * side by side.
+	 * @param preFile the pre-FISH image
+	 */
 	private void openImages(File preFile){
 				
 		openFile = preFile;
@@ -304,16 +305,13 @@ public class FishMappingWindow extends JDialog {
 
 		// set the image width to be less than half the screen width
 		smallWidth = (int) ((double) screenSize.getWidth() * 0.45);
-//		final int smallWidth = (int) ((double) screenSize.getWidth() * 0.45);
 		
 		// keep the image aspect ratio
 		double ratio = (double) originalWidth / (double) originalHeight;
 		smallHeight = (int) (smallWidth / ratio);
-//		final int smallHeight = (int) (smallWidth / ratio);
 		
 		// get the conversion factor to find original image coordinates when we click the scaled image
 		conversion = (double) smallWidth / (double) originalWidth;
-//		final double conversion = (double) smallWidth / (double) originalWidth;
 		
 		final ImagePlus preSmall;
 
@@ -328,7 +326,22 @@ public class FishMappingWindow extends JDialog {
 		preImageLabel.setIcon(preImageIcon);
 
 		
-		// Open the image from the post FISH directory
+		try {
+			openPostImage(preFile);
+		} catch (Exception e) {
+			IJ.log("Error opening post-image: "+e.getMessage());
+
+			e.printStackTrace();
+		}
+
+	}
+	
+	/**
+	 * Open the post-FISH file corresponding to the filename of the pre-FISH file.
+	 * If the file is not found, a blank image is shown instead.
+	 * @param preFile the pre-FISH image file
+	 */
+	private void openPostImage(File preFile) {
 		String imageName = preFile.getName(); // the file name e.g. P60.tif
 		String postFile = this.postFISHImageDirectory.getAbsolutePath()+File.separator+imageName;
 		File post = new File(postFile);
@@ -347,8 +360,10 @@ public class FishMappingWindow extends JDialog {
 			//		ImagePlus postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
 			ImageIcon postImageIcon = new ImageIcon(postSmall.getBufferedImage());
 			postImageLabel.setIcon(postImageIcon);
+		} else {
+			ImageIcon postImage = new ImageIcon(new BufferedImage(smallWidth,smallHeight,BufferedImage.TYPE_INT_RGB));
+			postImageLabel = new JLabel("", postImage, JLabel.CENTER);
 		}
-
 	}
 
 	private void drawNucleus(Nucleus n, ImageProcessor ip, MouseEvent e, Roi roi){
@@ -386,6 +401,10 @@ public class FishMappingWindow extends JDialog {
 
 
 
+	/**
+	 * Choose the directory containing the post-FISH images
+	 * @return true if the directory is valid, false otherwise
+	 */
 	private boolean getPostFISHDirectory(){
 		DirectoryChooser localOpenDialog = new DirectoryChooser("Select directory of post-FISH images...");
 	    String folderName = localOpenDialog.getDirectory();

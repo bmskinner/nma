@@ -517,6 +517,19 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 			String type = (String) nucleusSelectionBox.getSelectedItem();
 			this.analysisOptions.setNucleusClass(nucleusClassTypes.get(type));
 			this.analysisOptions.setCollectionClass(collectionClassTypes.get(type));
+			
+			if(type.equals(ROUND_NUCLEUS)){
+				this.analysisOptions.setMinNucleusCirc(  0.0 );
+				this.analysisOptions.setMaxNucleusCirc(  1.0 );
+			}
+			if(type.equals(RODENT_SPERM_NUCLEUS)){
+				this.analysisOptions.setMinNucleusCirc(  0.2 );
+				this.analysisOptions.setMaxNucleusCirc(  0.8 );
+			}
+			if(type.equals(PIG_SPERM_NUCLEUS)){
+				this.analysisOptions.setMinNucleusCirc(  0.2 );
+				this.analysisOptions.setMaxNucleusCirc(  0.8 );
+			}
 		}
 
 

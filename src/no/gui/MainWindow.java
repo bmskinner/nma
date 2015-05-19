@@ -40,6 +40,7 @@ import no.components.Profile;
 import no.export.PopulationExporter;
 import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
+import no.utility.TreeOrderHashMap;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -106,6 +107,8 @@ import org.jfree.data.xy.XYSeriesCollection;
 import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame {
+	
+	private String version;
 	
 	private static final int PROFILE_TAB = 0;
 	private static final int FRANKEN_TAB = 1;
@@ -176,6 +179,8 @@ public class MainWindow extends JFrame {
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
 	
 	private HashMap<Integer, UUID> treeListOrder = new HashMap<Integer, UUID>(); // order the root datasets
+	
+	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 
 
 	/**
@@ -827,6 +832,7 @@ public class MainWindow extends JFrame {
 		MainWindow.this.populationNames.put(d.getName(), d.getUUID());
 		
 		if(d.isRoot()){ // add to the list of datasets that can be ordered
+			treeOrderMap.put(d.getUUID(), treeOrderMap.size());
 			treeListOrder.put(treeListOrder.size(), d.getUUID()); // add to the end of the list
 		}
 	}
@@ -2670,27 +2676,56 @@ public class MainWindow extends JFrame {
 				}
 
 				for(AnalysisDataset d : datasets){
+					
+					// check dataset still exists
+					if(populationNames.containsKey(analysisDatasets.get(d.getUUID()).getName())){
+						
 
-					// remove all children of the collection
-					for(UUID u : d.getAllChildUUIDs()){
+						if(d.isRoot()){
+							
+							int position = treeOrderMap.get(d.getUUID());
+	
+							// remove all children of the collection
+							for(UUID u : d.getAllChildUUIDs()){
+	
+								if(populationNames.containsKey(analysisDatasets.get(u).getName())){
+	
+									populationNames.remove(analysisDatasets.get(u).getName());
+									analysisDatasets.remove(u);
+								}
+	
+							}
+							
+							populationNames.remove(d.getName());
+							analysisDatasets.remove(d.getUUID());
+							treeOrderMap.remove(position);
+							
+						} else { // not root
+							
+							// remove all children of the collection
+							for(UUID u : d.getAllChildUUIDs()){
+	
+								if(populationNames.containsKey(analysisDatasets.get(u).getName())){
+	
+									populationNames.remove(analysisDatasets.get(u).getName());
+									analysisDatasets.remove(u);
+								}
+	
+							}
 
-						populationNames.remove(analysisDatasets.get(u).getName());
-						analysisDatasets.remove(u);
-						if(d.hasChild(u)){
-							d.deleteChild(u);
 						}
-					}
 
-					// remove the collection mapping from parents
-					for(AnalysisDataset parent : analysisDatasets.values()){
-						if(parent.hasChild(d)){
-							parent.deleteChild(d.getUUID());
-						}
+						//						// remove the collection mapping from parents
+						//						for(AnalysisDataset parent : analysisDatasets.values()){
+						//							if(parent.hasChild(d)){
+						//								parent.deleteChild(d.getUUID());
+						//							}
+						//						}
+						//	
+						//						// then remove the collection itself
+						//						populationNames.remove(d.getName());
+						//						analysisDatasets.remove(d.getUUID());
 					}
-
-					// then remove the collection itself
-					populationNames.remove(d.getName());
-					analysisDatasets.remove(d.getUUID());
 				}
 				updatePopulationList();	
 				log("OK");
@@ -2944,12 +2979,15 @@ public class MainWindow extends JFrame {
 			String folderName = localOpenDialog.getDirectory();
 
 			if(folderName!=null) { 
+				
+				
 
 				File newFolder = new File(folderName);
 
 				final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 
 				if(datasets.size()==1){
+					log("Updating folder to "+folderName );
 
 					AnalysisDataset d = datasets.get(0);
 					for(Nucleus n : d.getCollection().getNuclei()){
@@ -2959,7 +2997,9 @@ public class MainWindow extends JFrame {
 							log("Error renaming nucleus: "+e1.getMessage());
 						}
 					}
+					log("Folder updated");
 				}
+				
 			}
 
 		}

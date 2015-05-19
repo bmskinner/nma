@@ -20,6 +20,16 @@ public class Nuclear_Morphology_Analysis
 implements PlugIn
 
 {
+	
+	
+	/**
+	 * The fields for setting the version. Version will be stored in AnalysisDatasets.
+	 * Backwards compatability should be maintained between bugfix increments, but is not
+	 * guaranteed between revision or major version increments.
+	 */
+//	public static final int versionMajor = 1;
+//	public static final int versionRevision = 8;
+//	public static final int versionBugfix = 0;
 
 	/* 
     The first method to be run when the plugin starts.
@@ -39,13 +49,11 @@ implements PlugIn
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-
-
-		//		AnalysisCreator analysisCreator = new AnalysisCreator();
-		//		analysisCreator.run();
 	}
+	
+//	public String getVersion(){
+//		return versionMajor+"."+versionRevision+"."+versionBugfix;
+//	}
 
 }
 
