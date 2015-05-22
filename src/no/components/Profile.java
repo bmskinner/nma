@@ -645,6 +645,21 @@ public class Profile implements Serializable {
   }
   
   /**
+   * Add the given value to all points within the profile
+   * @param adder the value to add.
+   * @return the new profile
+   */
+  public Profile add(double value){
+
+	  double[] result = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { // for each position in sperm
+		  result[i] = array[i] + value;
+	  }
+	  return new Profile(result);
+  }
+  
+  /**
    * Subtract all values within the profile by the value within the given Profile
    * @param adder the profile to subtract. Must be the same length as this profile
    * @return the new profile
