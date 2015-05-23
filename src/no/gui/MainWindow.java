@@ -2243,6 +2243,7 @@ public class MainWindow extends JFrame {
 						if(d.isRoot()){
 
 							if(treeOrderMap.size()>1){
+								populationPopup.enableApplySegmentation();
 
 								// check if the selected dataset is at the top of the list
 								if(treeOrderMap.get(0)==d.getUUID()){
@@ -2266,7 +2267,12 @@ public class MainWindow extends JFrame {
 							// only root datasets can replace folder mappings
 							populationPopup.enableReplaceFolder();
 
-						} else {
+						} else { // not root
+							
+							if(treeOrderMap.size()>1){
+								populationPopup.enableApplySegmentation();
+							}
+							
 							populationPopup.disableReplaceFolder();
 							populationPopup.disableMenuUp();
 							populationPopup.disableMenuDown();
@@ -2473,6 +2479,7 @@ public class MainWindow extends JFrame {
 		JMenuItem moveDownMenuItem = new JMenuItem(new MoveDatasetDownAction());
 		JMenuItem replaceFolderMenuItem = new JMenuItem(new ReplaceNucleusFolderAction());
 		JMenuItem exportStatsMenuItem = new JMenuItem(new ExportDatasetStatsAction());
+		JMenuItem applySegmentationMenuItem = new JMenuItem(new ApplySegmentProfileAction());
 				
 		public PopulationListPopupMenu() {
 			
@@ -2487,10 +2494,10 @@ public class MainWindow extends JFrame {
 			this.addSeparator();
 			this.add(saveMenuItem);
 			this.add(extractMenuItem);
-			this.add(replaceFolderMenuItem);
 			this.add(exportStatsMenuItem);
-			
-			
+			this.addSeparator();
+			this.add(replaceFolderMenuItem);
+			this.add(applySegmentationMenuItem);
 	    }
 		
 		public void enableAll(){
@@ -2503,6 +2510,7 @@ public class MainWindow extends JFrame {
 			enableMenuDown();
 			enableReplaceFolder();
 			enableExportStats();
+			enableApplySegmentation();
 			
 		}
 		
@@ -2516,6 +2524,7 @@ public class MainWindow extends JFrame {
 			disableMenuDown();
 			disableReplaceFolder();
 			disableExportStats();
+			disableApplySegmentation();
 		}
 		
 		public void enableMerge(){
@@ -2588,6 +2597,14 @@ public class MainWindow extends JFrame {
 		
 		public void disableExportStats(){
 			exportStatsMenuItem.setEnabled(false);
+		}
+		
+		public void enableApplySegmentation(){
+			applySegmentationMenuItem.setEnabled(true);
+		}
+		
+		public void disableApplySegmentation(){
+			applySegmentationMenuItem.setEnabled(false);
 		}
 	}
 	
@@ -3079,20 +3096,76 @@ public class MainWindow extends JFrame {
 
 			if(datasets.size()==1){
 				// TODO make new thread
-				AnalysisDataset d = datasets.get(0);
-				try{
+				Thread thr = new Thread() {
+					public void run() {
 
-					logc("Exporting stats...");
-					boolean ok = StatsExporter.run(d.getCollection());
-					if(ok){
-						log("OK");
-					} else {
-						log("Error");
+						AnalysisDataset d = datasets.get(0);
+						try{
+
+							logc("Exporting stats...");
+							boolean ok = StatsExporter.run(d.getCollection());
+							if(ok){
+								log("OK");
+							} else {
+								log("Error");
+							}
+						} catch(Exception e1){
+							log("Error in stats export: "+e1.getMessage());
+						}
 					}
-				} catch(Exception e1){
-					log("Error in stats export: "+e1.getMessage());
-				}
+				};
+				thr.run();
+			}
 
+		}
+	}
+	
+	class ApplySegmentProfileAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public ApplySegmentProfileAction() {
+			super("Apply segmentation profile");
+		}
+		// note - this will overwrite the stats for any collection with the same name in the output folder
+		public void actionPerformed(ActionEvent e) {
+
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(datasets.size()==1){
+				// TODO make new thread
+				Thread thr = new Thread() {
+					public void run() {
+
+						AnalysisDataset d = datasets.get(0);
+						try{
+							
+							// get the desired population
+							String[] names = populationNames.keySet().toArray(new String[0]);
+
+							String selectedValue = (String) JOptionPane.showInputDialog(null,
+									"Choose population", "Reapply segmentation",
+									JOptionPane.INFORMATION_MESSAGE, null,
+									names, names[0]);
+
+							if(selectedValue!=null){
+
+								UUID id = populationNames.get(selectedValue);
+								AnalysisDataset source = analysisDatasets.get(id);
+
+								logc("Reapplying morphology...");
+								boolean ok = MorphologyAnalysis.reapplyProfiles(d.getCollection(), source.getCollection());
+								if(ok){
+									log("OK");
+								} else {
+									log("Error");
+								}
+							}
+						} catch(Exception e1){
+							log("Error applying morphology: "+e1.getMessage());
+						}
+					}
+				};
+				thr.run();
 			}
 
 		}
