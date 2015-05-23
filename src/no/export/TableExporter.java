@@ -50,6 +50,14 @@ public class TableExporter {
 		this.addColumn(s, values);
 	}
 	
+	public void addColumn(String s, Integer[] array){
+		if(s==null || array==null){
+			throw new IllegalArgumentException("Column or array is null");
+		}
+		String[] values = Utils.getStringFromInteger(array);
+		this.addColumn(s, values);
+	}
+	
 	public void addColumn(String s, int[] array){
 		if(s==null || array==null){
 			throw new IllegalArgumentException("Column or array is null");

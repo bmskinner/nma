@@ -37,6 +37,7 @@ import no.analysis.ShellAnalysis;
 import no.collections.NucleusCollection;
 import no.components.Profile;
 import no.export.PopulationExporter;
+import no.export.StatsExporter;
 import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
 import no.utility.TreeOrderHashMap;
@@ -464,8 +465,9 @@ public class MainWindow extends JFrame {
 	public boolean checkVersion(String version){
 		boolean ok = true;
 		
-		if(version==null){
-			return false;
+		if(version==null){ // allow for debugging, but warn
+			log("No version info found: functions may not work as expected");
+			return true;
 		}
 		
 		String[] parts = version.split("\\.");
@@ -474,9 +476,11 @@ public class MainWindow extends JFrame {
 		if(Integer.valueOf(parts[0])!=this.VERSION_MAJOR){
 			ok = false;
 		}
-		// dataset revision must be equal or greater to program
-		if(Integer.valueOf(parts[1])<this.VERSION_MAJOR){
-			ok = false;
+		// dataset revision should be equal or greater to program
+		if(Integer.valueOf(parts[1])<this.VERSION_REVISION){
+			log("Dataset was created with an older version of the program");
+			log("Some functionality may not work as expected");
+//			ok = false;
 		}
 		return ok;
 	}
@@ -2233,6 +2237,7 @@ public class MainWindow extends JFrame {
 						populationPopup.disableMerge();
 						populationPopup.enableSave();
 						populationPopup.enableExtract();
+						populationPopup.enableExportStats();
 						
 						// check if we can move the dataset
 						if(d.isRoot()){
@@ -2467,6 +2472,7 @@ public class MainWindow extends JFrame {
 		JMenuItem moveUpMenuItem = new JMenuItem(new MoveDatasetUpAction());
 		JMenuItem moveDownMenuItem = new JMenuItem(new MoveDatasetDownAction());
 		JMenuItem replaceFolderMenuItem = new JMenuItem(new ReplaceNucleusFolderAction());
+		JMenuItem exportStatsMenuItem = new JMenuItem(new ExportDatasetStatsAction());
 				
 		public PopulationListPopupMenu() {
 			
@@ -2482,6 +2488,7 @@ public class MainWindow extends JFrame {
 			this.add(saveMenuItem);
 			this.add(extractMenuItem);
 			this.add(replaceFolderMenuItem);
+			this.add(exportStatsMenuItem);
 			
 			
 	    }
@@ -2495,6 +2502,7 @@ public class MainWindow extends JFrame {
 			enableMenuUp();
 			enableMenuDown();
 			enableReplaceFolder();
+			enableExportStats();
 			
 		}
 		
@@ -2507,6 +2515,7 @@ public class MainWindow extends JFrame {
 			disableMenuUp();
 			disableMenuDown();
 			disableReplaceFolder();
+			disableExportStats();
 		}
 		
 		public void enableMerge(){
@@ -2571,6 +2580,14 @@ public class MainWindow extends JFrame {
 		
 		public void disableReplaceFolder(){
 			replaceFolderMenuItem.setEnabled(false);
+		}
+		
+		public void enableExportStats(){
+			exportStatsMenuItem.setEnabled(true);
+		}
+		
+		public void disableExportStats(){
+			exportStatsMenuItem.setEnabled(false);
 		}
 	}
 	
@@ -3049,6 +3066,37 @@ public class MainWindow extends JFrame {
 		}
 	}
 
+	class ExportDatasetStatsAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public ExportDatasetStatsAction() {
+			super("Export stats");
+		}
+		// note - this will overwrite the stats for any collection with the same name in the output folder
+		public void actionPerformed(ActionEvent e) {
+
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(datasets.size()==1){
+				// TODO make new thread
+				AnalysisDataset d = datasets.get(0);
+				try{
+
+					logc("Exporting stats...");
+					boolean ok = StatsExporter.run(d.getCollection());
+					if(ok){
+						log("OK");
+					} else {
+						log("Error");
+					}
+				} catch(Exception e1){
+					log("Error in stats export: "+e1.getMessage());
+				}
+
+			}
+
+		}
+	}
 	/**
 	 * Create a new NucleusCollection of the same class as the given dataset
 	 * @param template the dataset to base on for analysis options, folders

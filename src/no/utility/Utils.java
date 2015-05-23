@@ -74,6 +74,19 @@ public class Utils {
 		 }
 		 return s;
 	 }
+	
+	/**
+	 * Create a String array from an Integer array for exports
+	 * @param d the Integer array
+	 * @return a String array
+	 */
+	public static String[] getStringFromInteger(Integer[] d){
+		 String[] s = new String[d.length];
+		 for (int i = 0; i < s.length; i++){
+			 s[i] = String.valueOf(d[i]);
+		 }
+		 return s;
+	 }
 
 	/**
 	 * Create a double array from an int array

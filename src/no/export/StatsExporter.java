@@ -1,9 +1,13 @@
 package no.export;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import no.collections.NucleusCollection;
+import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.ProfileCollection;
 import no.nuclei.Nucleus;
 import no.utility.Logger;
 
@@ -17,7 +21,9 @@ public class StatsExporter {
 		try{
 			exportNuclearStats(collection, "log.stats");
 			exportImagePaths(collection, "log.imagePaths");
+			exportSegmentStats(collection, "log.segmentStats");
 			exportAngleProfiles(collection);
+			exportSegmentProfiles(collection);
 			exportMediansOfProfile(collection, "log.medians");
 		} catch (Exception e){
 			logger.log("Error in stats export: "+e.getMessage(), Logger.ERROR);
@@ -52,6 +58,32 @@ public class StatsExporter {
 		for(Nucleus n : collection.getNuclei()){ // for each roi
 			n.exportAngleProfile();
 		}
+	}
+	
+	public static void exportSegmentProfiles(NucleusCollection collection){
+		for(Nucleus n : collection.getNuclei()){ // for each roi
+			n.exportSegments();
+		}
+	}
+	
+	public static void exportSegmentStats(NucleusCollection collection, String filename){
+		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
+
+		ProfileCollection pc = collection.getProfileCollection();
+		List<NucleusBorderSegment> segs = pc.getSegments(collection.getOrientationPoint());
+		for(NucleusBorderSegment segment : segs){
+			String s = segment.getSegmentType();
+			
+			List<Integer> list = new ArrayList<Integer>(0);
+			for(Nucleus n : collection.getNuclei()){
+				NucleusBorderSegment seg = n.getSegmentTag(s);
+				list.add(seg.length(n.getLength()));
+			}
+			logger.addColumn(s, list.toArray(new Integer[0]));
+		}
+		
+
+		logger.export(filename+"."+collection.getType());
 	}
 
 	public static void exportMediansOfProfile(NucleusCollection collection, String filename){
