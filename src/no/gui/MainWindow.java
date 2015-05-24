@@ -43,6 +43,7 @@ import no.nuclei.Nucleus;
 import no.utility.TreeOrderHashMap;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -61,6 +62,9 @@ import java.util.UUID;
 
 import javax.swing.AbstractAction;
 import javax.swing.Box;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -106,7 +110,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.JTabbedPane;
 
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements ActionListener {
 		
 	/**
 	 * The fields for setting the version. Version will be stored in AnalysisDatasets.
@@ -180,6 +184,10 @@ public class MainWindow extends JFrame {
 	private JTable wilcoxonFeretTable;
 	private JTable wilcoxonMinFeretTable;
 	private JTable wilcoxonDifferenceTable;
+	
+	private ChartPanel segmentsBoxplotChartPanel; // for displaying the legnth of a given segment
+	private JPanel segmentsBoxplotPanel;// container for boxplots chart and decoration
+	private JComboBox segmentSelectionBox; // choose which segments to compare
 
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
@@ -345,8 +353,13 @@ public class MainWindow extends JFrame {
 			// Create the Wilcoxon test panel
 			//---------------
 			wilcoxonPanel = createWilcoxonPanel();
-//			wilcoxonPanel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
 			tabbedPane.addTab("Wilcoxon", null, wilcoxonPanel, null);
+			
+			//---------------
+			// Create the segments boxplot panel
+			//---------------
+			segmentsBoxplotPanel = createSegmentBoxplotsPanel();
+			tabbedPane.addTab("Segments", null, segmentsBoxplotPanel, null);
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -685,6 +698,39 @@ public class MainWindow extends JFrame {
 		return boxplotSplitPanel;
 	}
 	
+	private JPanel createSegmentBoxplotsPanel(){
+		JPanel panel = new JPanel(); // main container in tab
+
+		panel.setLayout(new BorderLayout());
+		
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+
+		segmentsBoxplotChartPanel = new ChartPanel(boxplot);
+		panel.add(segmentsBoxplotChartPanel, BorderLayout.CENTER);
+		
+		segmentSelectionBox = new JComboBox();
+		segmentSelectionBox.setActionCommand("SegmentBoxplotChoice");
+		segmentSelectionBox.addActionListener(this);
+		panel.add(segmentSelectionBox, BorderLayout.NORTH);
+		
+
+
+		return panel;
+	}
+		
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if(e.getActionCommand().equals("SegmentBoxplotChoice")){
+			String segName = (String) segmentSelectionBox.getSelectedItem();
+			// create the appropriate chart
+			//TODO
+			updateSegmentsBoxplot(getSelectedRowsFromTreeTable(), segName);
+			
+		}
+	}
+	
+	
 	/**
 	 * Create the panel that will hold the statistical tests between populations
 	 */
@@ -728,6 +774,7 @@ public class MainWindow extends JFrame {
 		panel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
 		return panel;
 	}
+	
 	
 	/**
 	 * Prepare a wilcoxon table
@@ -1159,6 +1206,15 @@ public class MainWindow extends JFrame {
 					updateClusteringPanel(list);
 					updateVennPanel(list);
 					updateWilcoxonPanel(list);
+					
+					if(list!=null){
+						// get the list of segments from the datasets
+						ComboBoxModel aModel = new DefaultComboBoxModel(list.get(0).getCollection().getSegmentNames().toArray(new String[0]));
+						segmentSelectionBox.setModel(aModel);
+						segmentSelectionBox.setSelectedIndex(0);
+						updateSegmentsBoxplot(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
+					}
+					
 				} catch (Exception e) {
 					log("Error updating panels: "+e.getMessage());
 					for(StackTraceElement el : e.getStackTrace()){
@@ -1797,7 +1853,16 @@ public class MainWindow extends JFrame {
 		}
 		renderer.setMeanVisible(false);
 	}
+	
 
+	
+	public void updateSegmentsBoxplot(List<AnalysisDataset> list, String segName){
+		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createSegmentLengthDataset(list, segName);
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		formatBoxplotChart(boxplotChart);
+		segmentsBoxplotChartPanel.setChart(boxplotChart);
+	}
+	
 	
 	/**
 	 *  Find the populations in memory, and display them in the population chooser. 
@@ -1836,6 +1901,7 @@ public class MainWindow extends JFrame {
 		treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
 		treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 	}
+	
 	
 	private PopulationTreeTableNode addTreeTableChildNodes(UUID id){
 		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
@@ -2226,6 +2292,7 @@ public class MainWindow extends JFrame {
 					log("Error: list is empty");
 					populationPopup.disableAll();
 				} else {
+					
 					if(datasets.size()>1){ // multiple populations
 						populationPopup.disableAll();
 						populationPopup.enableMerge();
@@ -2248,14 +2315,18 @@ public class MainWindow extends JFrame {
 								// check if the selected dataset is at the top of the list
 								if(treeOrderMap.get(0)==d.getUUID()){
 									populationPopup.disableMenuUp();
+//									populationPopup.disableMenuDown();
 								} else {
 									populationPopup.enableMenuUp();
+//									populationPopup.enableMenuDown();
 								}
 
 								// check if the selected dataset is at the bottom of the list
 								if(treeOrderMap.get(treeOrderMap.size()-1)==d.getUUID()){
 									populationPopup.disableMenuDown();
+//									populationPopup.disableMenuUp();
 								} else {
+//									populationPopup.enableMenuUp();
 									populationPopup.enableMenuDown();
 								}
 
@@ -2986,26 +3057,27 @@ public class MainWindow extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 
 			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			
+//			for(int i=0; i<treeOrderMap.size();i++){
+//				IJ.log(i+": "+analysisDatasets.get(treeOrderMap.get(i)).getName());
+//			}
 
 			if(datasets.size()==1){
 
 				AnalysisDataset dataToMove = datasets.get(0);
 
-				int oldValue = 0;
-				int newValue = 0;
-				for(int i : treeOrderMap.getPositions()){
-					if(treeOrderMap.get(i)==dataToMove.getUUID()){
+				int oldValue = treeOrderMap.get(dataToMove.getUUID());
+				int newValue = oldValue;
+				if(oldValue>0){ // do not change if already at the top
+					newValue = oldValue-1;
+//					IJ.log("Moving "+oldValue+" to "+newValue);
 
-						oldValue = i; 
-						if(oldValue>0){ // do not change if already at the top
-							newValue = i-1;
-						}
-					}
+					UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
+					treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
+					treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
+					updatePopulationList();
 				}
-				UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
-				treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
-				treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
-				updatePopulationList();
+				
 			}
 		}
 	}
@@ -3018,28 +3090,29 @@ public class MainWindow extends JFrame {
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			
+//			for(int i=0; i<treeOrderMap.size();i++){
+//				IJ.log(i+": "+analysisDatasets.get(treeOrderMap.get(i)).getName());
+//			}
 
 			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 
 			if(datasets.size()==1){
 
 				AnalysisDataset dataToMove = datasets.get(0);
+				
+				int oldValue = treeOrderMap.get(dataToMove.getUUID());
+				int newValue = oldValue;
+				if(oldValue<treeOrderMap.size()-1){ // do not change if already at the bottom
+					newValue = oldValue+1;
+//					IJ.log("Moving "+oldValue+" to "+newValue);
 
-				int oldValue = 0;
-				int newValue = 0;
-				for(int i : treeOrderMap.getPositions()){
-					if(treeOrderMap.get(i)==dataToMove.getUUID()){
-
-						oldValue = i; 
-						if(oldValue<treeOrderMap.size()-1){ // do not change if already at the bottom
-							newValue = i+1;
-						}
-					}
+					UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
+					treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
+					treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
+					updatePopulationList();
 				}
-				UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
-				treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
-				treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
-				updatePopulationList();
+				
 			}
 		}
 	}

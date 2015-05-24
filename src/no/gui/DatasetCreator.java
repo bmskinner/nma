@@ -19,6 +19,7 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.ProfileCollection;
 import no.components.ShellResult;
 import no.components.XYPoint;
 import no.nuclei.Nucleus;
@@ -732,6 +733,27 @@ public class DatasetCreator {
 			dataset.add(list, c.getType()+"_"+i, "Difference to median");
 		}
 
+		return dataset;
+	}
+	
+	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, String segName) {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+
+			NucleusCollection collection = collections.get(i).getCollection();
+
+
+			List<Integer> list = new ArrayList<Integer>(0);
+
+			for(Nucleus n : collection.getNuclei()){
+				NucleusBorderSegment seg = n.getSegmentTag(segName);
+				list.add(seg.length(n.getLength()));
+			}
+
+			dataset.add(list, segName+"_"+i, "Segment length: "+segName);
+		}
 		return dataset;
 	}
 	

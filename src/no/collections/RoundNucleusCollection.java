@@ -20,6 +20,7 @@ import java.util.UUID;
 import no.collections.NucleusCollection;
 import no.components.AnalysisOptions;
 import no.components.NuclearSignal;
+import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;
 import no.components.ProfileFeature;
@@ -561,11 +562,26 @@ implements NucleusCollection, Serializable
 	  return result;
   }
 
-/*
+  /*
     --------------------
     Profile methods
     --------------------
-  */
+   */
+
+  /**
+   * Get a list of all the segments currently within the profile collection
+   * @return
+   */
+  public List<String> getSegmentNames(){
+
+	  List<String> result = new ArrayList<String>(0);
+	  ProfileCollection pc = this.getProfileCollection();
+	  List<NucleusBorderSegment> segs = pc.getSegments(this.getOrientationPoint());
+	  for(NucleusBorderSegment segment : segs){
+		  result.add(segment.getSegmentType());
+	  }
+	  return result;
+  }
 
   public double[] getDifferencesToMedianFromPoint(String pointType){
 	  double[] d = new double[this.getNucleusCount()];

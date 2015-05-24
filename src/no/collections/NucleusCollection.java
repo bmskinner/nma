@@ -158,5 +158,7 @@ public interface NucleusCollection
 	
 	public List<NuclearSignal> getSignals(int channel);
 	
+	public List<String> getSegmentNames();
+	
 
 }
