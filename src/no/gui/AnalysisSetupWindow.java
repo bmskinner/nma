@@ -63,8 +63,8 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private static final int    DEFAULT_CANNY_KERNEL_WIDTH = 16;
 	private static final int    DEFAULT_CLOSING_OBJECT_RADIUS = 5;
 	
-	private static final double DEFAULT_MIN_NUCLEUS_SIZE = 2000;
-	private static final double DEFAULT_MAX_NUCLEUS_SIZE = 10000;
+	private static final int    DEFAULT_MIN_NUCLEUS_SIZE = 2000;
+	private static final int    DEFAULT_MAX_NUCLEUS_SIZE = 10000;
 	private static final double DEFAULT_MIN_NUCLEUS_CIRC = 0.2;
 	private static final double DEFAULT_MAX_NUCLEUS_CIRC = 0.8;
 	private static final int    DEFAULT_NUCLEUS_THRESHOLD = 36;
@@ -647,9 +647,9 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 				j.commitEdit();
 				
 				// ensure never larger than the largest nucleus
-				if( (Integer) j.getValue() > (Integer) txtMaxNuclearSize.getValue() ){
-					j.setValue( txtMaxNuclearSize.getValue() );
-				}
+//				if( (Integer) j.getValue() > (Integer) txtMaxNuclearSize.getValue() ){
+//					j.setValue( txtMaxNuclearSize.getValue() );
+//				}
 				
 				this.analysisOptions.setMinSignalSize(  (Integer) j.getValue());
 			}
