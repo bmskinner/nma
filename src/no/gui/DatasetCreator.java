@@ -235,6 +235,7 @@ public class DatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
 		Profile xpoints = profile.getPositions(100);
+		Profile xpointsAdj = xpoints.add(0.5);
 		
 		// rendering order will be first on top
 		
@@ -245,9 +246,9 @@ public class DatasetCreator {
 		// make the IQR
 		Profile profile25 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"25");
 		Profile profile75 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"75");
-		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
+		double[][] data25 = { xpointsAdj.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
-		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
+		double[][] data75 = { xpointsAdj.asArray(), profile75.asArray() };
 		ds.addSeries("Q75", data75);
 
 		// add the individual nuclei
