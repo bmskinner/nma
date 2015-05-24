@@ -1,6 +1,8 @@
 package no.utility;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,11 +15,8 @@ public class TreeOrderHashMap {
 	}
 	
 	public void put(UUID id, Integer i){
-		
-		if(!forward.containsKey(id) && !forward.containsValue(i)){
-			forward.put(id, i);
-			reverse.put(i, id);
-		}
+		forward.put(id, i);
+		reverse.put(i, id);
 	}
 	
 	public UUID get(Integer i){
@@ -49,11 +48,20 @@ public class TreeOrderHashMap {
 		return forward.size();
 	}
 	
-	public Set<Integer> getPositions(){
-		return reverse.keySet();
+	public List<Integer> getPositions(){
+		List<Integer> result = new ArrayList<Integer>(0);
+		for(int i = 0; i<this.size();i++){
+			result.add(i);
+		}
+		return result;
+//		return reverse.keySet();
 	}
 	
-	public Set<UUID> getIDs(){
-		return forward.keySet();
+	public List<UUID> getIDs(){
+		List<UUID> result = new ArrayList<UUID>(0);
+		for(int i = 0; i<this.size();i++){
+			result.add(this.get(i));
+		}
+		return result;
 	}
 }
