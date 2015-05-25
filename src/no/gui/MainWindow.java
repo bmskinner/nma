@@ -118,8 +118,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * guaranteed between revision or major version increments.
 	 */
 	public static final int VERSION_MAJOR    = 1;
-	public static final int VERSION_REVISION = 7;
-	public static final int VERSION_BUGFIX   = 1;
+	public static final int VERSION_REVISION = 8;
+	public static final int VERSION_BUGFIX   = 0;
 	
 	private static final int PROFILE_TAB = 0;
 	private static final int FRANKEN_TAB = 1;

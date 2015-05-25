@@ -53,14 +53,14 @@ public class DatasetCreator {
 					// beginning of array
 					Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
 					Profile subPointsA  = xpoints.getSubregion(0, seg.getEndIndex());
-					subPointsA = subPointsA.add(0.5); // correct for median being at the start of the bin
+//					subPointsA = subPointsA.add(0.5); // correct for median being at the start of the bin
 					double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
 					ds.addSeries(seg.getSegmentType()+"_A", dataA);
 
 					// end of array
 					Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
 					Profile subPointsB  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
-					subPointsB = subPointsB.add(0.5); // correct for median being at the start of the bin
+//					subPointsB = subPointsB.add(0.5); // correct for median being at the start of the bin
 					double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
 					ds.addSeries(seg.getSegmentType()+"_B", dataB);
 					continue;
@@ -70,7 +70,7 @@ public class DatasetCreator {
 			} 
 			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
 			Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
-			subPoints = subPoints.add(0.5); // correct for median being at the start of the bin
+//			subPoints = subPoints.add(0.5); // correct for median being at the start of the bin
 			double[][] data = { subPoints.asArray(), subProfile.asArray() };
 			ds.addSeries(seg.getSegmentType(), data);
 		}
@@ -81,7 +81,7 @@ public class DatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 		Profile xpoints = profile.getPositions(100);
-		Profile xpointsAdj = xpoints.add(0.5);
+//		Profile xpointsAdj = xpoints.add(0.5);
 		
 		// rendering order will be first on top
 		
@@ -92,9 +92,9 @@ public class DatasetCreator {
 		// make the IQR
 		Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
 		Profile profile75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
-		double[][] data25 = { xpointsAdj.asArray(), profile25.asArray() };
+		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
-		double[][] data75 = { xpointsAdj.asArray(), profile75.asArray() };
+		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
 		ds.addSeries("Q75", data75);
 
 		// add the individual nuclei
@@ -114,7 +114,7 @@ public class DatasetCreator {
 			NucleusCollection collection = dataset.getCollection();
 			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 			Profile xpoints = profile.getPositions(100);
-			xpoints = xpoints.add(0.5);
+//			xpoints = xpoints.add(0.5);
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			i++;
@@ -130,7 +130,7 @@ public class DatasetCreator {
 			NucleusCollection collection = dataset.getCollection();
 			Profile profile = collection.getFrankenCollection().getProfile(collection.getReferencePoint());
 			Profile xpoints = profile.getPositions(100);
-			xpoints = xpoints.add(0.5);
+//			xpoints = xpoints.add(0.5);
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			i++;
@@ -235,7 +235,7 @@ public class DatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
 		Profile xpoints = profile.getPositions(100);
-		Profile xpointsAdj = xpoints.add(0.5);
+//		Profile xpointsAdj = xpoints.add(0.5);
 		
 		// rendering order will be first on top
 		
@@ -246,9 +246,9 @@ public class DatasetCreator {
 		// make the IQR
 		Profile profile25 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"25");
 		Profile profile75 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"75");
-		double[][] data25 = { xpointsAdj.asArray(), profile25.asArray() };
+		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
-		double[][] data75 = { xpointsAdj.asArray(), profile75.asArray() };
+		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
 		ds.addSeries("Q75", data75);
 
 		// add the individual nuclei
