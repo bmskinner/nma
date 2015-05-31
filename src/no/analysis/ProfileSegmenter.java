@@ -19,6 +19,25 @@ public class ProfileSegmenter {
 	
 	// these are the colours for segments in the order they will loop
 	static {
+
+		
+		// For making pretty charts
+//		colourList.add(Color.ORANGE);
+//		colourList.add(Color.YELLOW);
+//		colourList.add(Color.BLUE);
+//		colourList.add(Color.CYAN);
+		
+//		colourList.add(Color.BLUE);
+//		colourList.add(Color.GREEN);
+//		colourList.add(Color.ORANGE);
+		
+//		colourList.add(Color.BLUE);
+//		colourList.add(new Color(0,102,0));
+//		colourList.add(Color.GREEN);
+//		colourList.add(new Color(102,255,102));
+//		colourList.add(Color.ORANGE);
+//
+//		 Regular
 		colourList.add(Color.RED);
 		colourList.add(Color.ORANGE);
 		colourList.add(Color.GREEN);
@@ -27,6 +46,16 @@ public class ProfileSegmenter {
 		colourList.add(Color.CYAN);
 		colourList.add(Color.YELLOW);
 		colourList.add(Color.PINK);
+		
+		// Draw unsegmented profile
+//		colourList.add(Color.BLACK);
+//		colourList.add(Color.BLACK);
+//		colourList.add(Color.BLACK);
+//		colourList.add(Color.BLACK);
+//		colourList.add(Color.BLACK);
+//		colourList.add(Color.BLACK);
+//		colourList.add(Color.BLACK);
+//		colourList.add(Color.BLACK);
 	}
 	
 	/**

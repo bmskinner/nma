@@ -119,7 +119,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 */
 	public static final int VERSION_MAJOR    = 1;
 	public static final int VERSION_REVISION = 8;
-	public static final int VERSION_BUGFIX   = 0;
+	public static final int VERSION_BUGFIX   = 1;
 	
 	private static final int PROFILE_TAB = 0;
 	private static final int FRANKEN_TAB = 1;
@@ -128,7 +128,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	private static final int VARIABILITY_TAB = 4;
 	private static final int SIGNALS_TAB = 5;
 	private static final int CLUSTERS_TAB = 6;
-	private static final int VENN_TAB = 6;
+	private static final int VENN_TAB = 7;
 	
 	private static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 	private static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
@@ -192,8 +192,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
-	
-//	private HashMap<Integer, UUID> treeListOrder = new HashMap<Integer, UUID>(); // order the root datasets
 	
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 
@@ -2870,6 +2868,10 @@ public class MainWindow extends JFrame implements ActionListener {
 									analysisDatasets.remove(u);
 								}
 	
+							}
+							if(populationNames.containsKey(analysisDatasets.get(id).getName())){
+								populationNames.remove(d.getName());
+								analysisDatasets.remove(id);
 							}
 
 						}
