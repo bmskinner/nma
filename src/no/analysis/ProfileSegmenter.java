@@ -10,6 +10,7 @@ import java.util.List;
 
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.gui.ColourSelecter;
 
 // this is used to divide a median profile into segments of interest
 // it can also take a list of segments, and apply them
@@ -143,10 +144,10 @@ public class ProfileSegmenter {
 	 * @param i the number of the colour to return
 	 * @return a colour
 	 */
-	public static Color getColor(int i){		
-		Color color = ProfileSegmenter.colourList.get(i % ProfileSegmenter.colourList.size());
-		return color;
-	}
+//	public static Color getColor(int i){		
+//		Color color = ProfileSegmenter.colourList.get(i % ProfileSegmenter.colourList.size());
+//		return color;
+//	}
 	
 	/**
 	 * Draw the current segmented profile to screen
@@ -187,7 +188,7 @@ public class ProfileSegmenter {
 			if(i==0 && segments.size()==colourList.size()+1){ // avoid colour wrapping when segment number is 1 more than the colour list
 				segPlot.setColor(Color.MAGENTA);
 			} else{
-				segPlot.setColor(getColor(i));
+				segPlot.setColor(ColourSelecter.getSegmentColor(i));
 			}
 			
 //			IJ.log("    Colour: "+getColor(i));

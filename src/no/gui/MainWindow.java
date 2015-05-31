@@ -1236,48 +1236,48 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 
-	/**
-	 * Get a colour for displaying the given channel specifying transparency and alpha options
-	 * @param channel the channel to display
-	 * @param transparent is the colour transparent
-	 * @param defaultAlpha the transparency level
-	 * @return a colour
-	 */
-	public Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
-		Color result;
-		switch (channel){
-			case 1: result = transparent ? new Color(0,0,255,defaultAlpha) : Color.BLUE;
-					break;
-			case 2: result = transparent ? new Color(255,0,0,defaultAlpha) : Color.RED;
-					break;
-			case 3: result = transparent ? new Color(0,255,0,defaultAlpha) :Color.GREEN;
-					break;
-			case 4: result = transparent ? new Color(0,255,255,defaultAlpha) : Color.CYAN;
-					break;
-			default: result = transparent ?  new Color(128,128,128,defaultAlpha) : Color.LIGHT_GRAY;
-			break;
-		}
-		return result;
-	}
-	
-	/**
-	 * Get a colour for displaying the given channel specifying transparency
-	 * @param channel the channel to display
-	 * @param transparent is the colour transparent
-	 * @return a colour with the default transparency
-	 */
-	public Color getSignalColour(int channel, boolean transparent){
-		return getSignalColour(channel, transparent, 10);
-	}
-	
-	/**
-	 * Get a colour for displaying the given channel without transparency
-	 * @param channel the channel to display
-	 * @return a solid colour
-	 */	
-	public Color getSignalColour(int channel){
-		return getSignalColour(channel, false);
-	}
+//	/**
+//	 * Get a colour for displaying the given channel specifying transparency and alpha options
+//	 * @param channel the channel to display
+//	 * @param transparent is the colour transparent
+//	 * @param defaultAlpha the transparency level
+//	 * @return a colour
+//	 */
+//	public Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
+//		Color result;
+//		switch (channel){
+//			case 1: result = transparent ? new Color(0,0,255,defaultAlpha) : Color.BLUE;
+//					break;
+//			case 2: result = transparent ? new Color(255,0,0,defaultAlpha) : Color.RED;
+//					break;
+//			case 3: result = transparent ? new Color(0,255,0,defaultAlpha) :Color.GREEN;
+//					break;
+//			case 4: result = transparent ? new Color(0,255,255,defaultAlpha) : Color.CYAN;
+//					break;
+//			default: result = transparent ?  new Color(128,128,128,defaultAlpha) : Color.LIGHT_GRAY;
+//			break;
+//		}
+//		return result;
+//	}
+//	
+//	/**
+//	 * Get a colour for displaying the given channel specifying transparency
+//	 * @param channel the channel to display
+//	 * @param transparent is the colour transparent
+//	 * @return a colour with the default transparency
+//	 */
+//	public Color getSignalColour(int channel, boolean transparent){
+//		return getSignalColour(channel, transparent, 10);
+//	}
+//	
+//	/**
+//	 * Get a colour for displaying the given channel without transparency
+//	 * @param channel the channel to display
+//	 * @return a solid colour
+//	 */	
+//	public Color getSignalColour(int channel){
+//		return getSignalColour(channel, false);
+//	}
 	
 	/**
 	 * Update the stats panel with data from the given datasets
@@ -1364,7 +1364,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(name.startsWith("Seg_")){
 				int colourIndex = getIndexFromLabel(name);
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(colourIndex));
+				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
 			} 
 			if(name.startsWith("Nucleus_")){
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
@@ -1421,7 +1421,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.setDataset(i, c);
 					
 					// make a transparent color based on teh profile segmenter system
-					Color pColor = ProfileSegmenter.getColor(index);
+					Color pColor = ColourSelecter.getSegmentColor(index);
 					Color color = new Color(pColor.getRed(), pColor.getGreen(), pColor.getBlue(), 128);
 					
 					
@@ -1447,7 +1447,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
 					String name = (String) profileDS.getSeriesKey(j);
 					String[] names = name.split("_");
-					plot.getRenderer(i).setSeriesPaint(j, ProfileSegmenter.getColor(Integer.parseInt(names[1])).darker());
+					plot.getRenderer(i).setSeriesPaint(j, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])).darker());
 				}	
 				
 				profileChartPanel.setChart(chart);
@@ -1500,7 +1500,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.setDataset(i, c);
 					
 					// make a transparent color based on teh profile segmenter system
-					Color pColor = ProfileSegmenter.getColor(index);
+					Color pColor = ColourSelecter.getSegmentColor(index);
 					Color color = new Color(pColor.getRed(), pColor.getGreen(), pColor.getBlue(), 128);
 					
 					
@@ -1526,7 +1526,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
 					String name = (String) profileDS.getSeriesKey(j);
 					String[] names = name.split("_");
-					plot.getRenderer(i).setSeriesPaint(j, ProfileSegmenter.getColor(Integer.parseInt(names[1])).darker());
+					plot.getRenderer(i).setSeriesPaint(j, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])).darker());
 				}	
 				
 				frankenChartPanel.setChart(chart);
@@ -1568,7 +1568,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
 					rend.setSeriesStroke(j, new BasicStroke(2));
 					int index = getIndexFromLabel( (String) ds.getRowKey((j)));
-					rend.setSeriesPaint(j, getSignalColour(index));
+					rend.setSeriesPaint(j, ColourSelecter.getSignalColour(index));
 				}	
 
 				shellsChartPanel.setChart(shellsChart);
@@ -1671,7 +1671,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(name.startsWith("Seg_")){
 				int colourIndex = getIndexFromLabel(name);
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(colourIndex));
+				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
 			} 
 			if(name.startsWith("Q")){
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
@@ -1740,10 +1740,10 @@ public class MainWindow extends JFrame implements ActionListener {
 
 					// get the group id from the name, and make colour
 					String[] names = name.split("_");
-					plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(Integer.parseInt(names[1])));
+					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])));
 					if(name.startsWith("Q")){
 						// make the IQR distinct from the median
-						plot.getRenderer().setSeriesPaint(i, ProfileSegmenter.getColor(Integer.parseInt(names[1])).darker());
+						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])).darker());
 					}
 					
 				}
@@ -1846,7 +1846,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
 		for(int i=0;i<plot.getDataset().getRowCount();i++){
 //			Color color = i%2==0 ? Color.LIGHT_GRAY : Color.DARK_GRAY;
-			Color color = ProfileSegmenter.getColor(i);
+			Color color = ColourSelecter.getSegmentColor(i);
 			renderer.setSeriesPaint(i, color);
 		}
 		renderer.setMeanVisible(false);
@@ -1949,7 +1949,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-					plot.getRenderer().setSeriesPaint(j, ProfileSegmenter.getColor(index));
+					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSegmentColor(index));
 				}	
 				variabilityChartPanel.setChart(chart);
 			}
@@ -2052,7 +2052,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
 					for(int series=0;series<signalCoMs.getSeriesCount();series++){
 						int channel = series+2; // channel is from 2, series from 0
-						rend.setSeriesPaint(series, getSignalColour(channel, false));
+						rend.setSeriesPaint(series, ColourSelecter.getSignalColour(channel, false));
 						rend.setBaseLinesVisible(false);
 						rend.setBaseShapesVisible(true);
 						rend.setBaseSeriesVisibleInLegend(false);
@@ -2079,7 +2079,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 						for(Shape s : shapes){
 							XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-									null, getSignalColour(channel, true, alpha)); // layer transparent signals
+									null, ColourSelecter.getSignalColour(channel, true, alpha)); // layer transparent signals
 							plot.addAnnotation(an);
 						}
 					}
@@ -2131,7 +2131,7 @@ public class MainWindow extends JFrame implements ActionListener {
 				plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 				int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-				plot.getRenderer().setSeriesPaint(j, getSignalColour(index, true, 128));
+				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index, true, 128));
 			}	
 			signalAngleChartPanel.setChart(chart);
 		} catch (Exception e) {
@@ -2159,7 +2159,7 @@ public class MainWindow extends JFrame implements ActionListener {
 				plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 				int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-				plot.getRenderer().setSeriesPaint(j, getSignalColour(index, true, 128));
+				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index, true, 128));
 			}	
 			signalDistanceChartPanel.setChart(chart);
 		} catch (Exception e) {
@@ -2385,7 +2385,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
 	        if (list.contains(row)) {
-	          l.setBackground(ProfileSegmenter.getColor(list.indexOf(row)));
+	          l.setBackground(ColourSelecter.getSegmentColor(list.indexOf(row)));
 	        } else {
 	          l.setBackground(Color.WHITE);
 	        }
@@ -2408,7 +2408,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	      //Cells are by default rendered as a JLabel.
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 	        int choose = ((row-1)/8)+2;
-	        Color colour = (row-1) % 8 == 0 ? MainWindow.this.getSignalColour(  choose   ) : Color.WHITE;
+	        Color colour = (row-1) % 8 == 0 ? ColourSelecter.getSignalColour(  choose   ) : Color.WHITE;
 	        
 	        l.setBackground(colour);
 
