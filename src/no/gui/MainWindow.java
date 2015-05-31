@@ -1235,49 +1235,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		return Integer.parseInt(names[1]);
 	}
 	
-
-//	/**
-//	 * Get a colour for displaying the given channel specifying transparency and alpha options
-//	 * @param channel the channel to display
-//	 * @param transparent is the colour transparent
-//	 * @param defaultAlpha the transparency level
-//	 * @return a colour
-//	 */
-//	public Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
-//		Color result;
-//		switch (channel){
-//			case 1: result = transparent ? new Color(0,0,255,defaultAlpha) : Color.BLUE;
-//					break;
-//			case 2: result = transparent ? new Color(255,0,0,defaultAlpha) : Color.RED;
-//					break;
-//			case 3: result = transparent ? new Color(0,255,0,defaultAlpha) :Color.GREEN;
-//					break;
-//			case 4: result = transparent ? new Color(0,255,255,defaultAlpha) : Color.CYAN;
-//					break;
-//			default: result = transparent ?  new Color(128,128,128,defaultAlpha) : Color.LIGHT_GRAY;
-//			break;
-//		}
-//		return result;
-//	}
-//	
-//	/**
-//	 * Get a colour for displaying the given channel specifying transparency
-//	 * @param channel the channel to display
-//	 * @param transparent is the colour transparent
-//	 * @return a colour with the default transparency
-//	 */
-//	public Color getSignalColour(int channel, boolean transparent){
-//		return getSignalColour(channel, transparent, 10);
-//	}
-//	
-//	/**
-//	 * Get a colour for displaying the given channel without transparency
-//	 * @param channel the channel to display
-//	 * @return a solid colour
-//	 */	
-//	public Color getSignalColour(int channel){
-//		return getSignalColour(channel, false);
-//	}
 	
 	/**
 	 * Update the stats panel with data from the given datasets

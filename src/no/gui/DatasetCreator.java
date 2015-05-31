@@ -7,6 +7,7 @@ import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -406,9 +407,15 @@ public class DatasetCreator {
 					// compare the number of shared nucleus ids
 					int shared = 0;
 					for(Nucleus n : dataset.getCollection().getNuclei()){
-						if( dataset2.getCollection().getNuclei().contains(n)){
-							shared++;
+						UUID n1id = n.getID();
+						for(Nucleus n2 : dataset2.getCollection().getNuclei()){
+							if( n2.getID().equals(n1id)){
+								shared++;
+							}
 						}
+//						if( dataset2.getCollection().getNuclei().contains(n)){
+//							shared++;
+//						}
 					}
 					DecimalFormat df = new DecimalFormat("#0.00"); 
 					double pct = ((double) shared / (double) dataset2.getCollection().getNucleusCount())*100;
