@@ -16,6 +16,7 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.SignalCollection;
+import no.gui.ColourSelecter;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 import no.utility.Logger;
@@ -131,7 +132,7 @@ public class NucleusAnnotator {
 				PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 
 				// avoid colour wrapping when segment number is 1 more than the colour list
-				Color color = i==0 && n.getSegments().size()==9 ? Color.MAGENTA : ProfileSegmenter.getColor(i);
+				Color color = i==0 && n.getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getSegmentColor(i);
 
 				ip.setColor(color);
 				ip.setLineWidth(2);

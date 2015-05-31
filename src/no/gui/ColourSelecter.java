@@ -46,6 +46,14 @@ public class ColourSelecter {
 		signalColourList.add(Color.LIGHT_GRAY);
 	}
 	
+	public static int getSegmentListSize(){
+		return ColourSelecter.segmentColourList.size();
+	}
+	
+	public static int getSignalListSize(){
+		return ColourSelecter.signalColourList.size();
+	}
+	
 	/**
 	 * Get an appropriate segment colour for the given number.
 	 * Loops through 8 colours.

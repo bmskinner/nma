@@ -22,6 +22,7 @@ import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
 import no.collections.NucleusCollection;
+import no.gui.ColourSelecter;
 import no.utility.*;
 import no.components.*;
 
@@ -344,7 +345,7 @@ public class CurveRefolder{
 				}
 
 				// avoid colour wrapping when segment number is 1 more than the colour list
-				Color color = i==0 && segmentList.size()==9 ? Color.MAGENTA : ProfileSegmenter.getColor(i);
+				Color color = i==0 && segmentList.size()==9 ? Color.MAGENTA : ColourSelecter.getSegmentColor(i);
 
 				nucleusPlot.setColor(color);
 				nucleusPlot.setLineWidth(3);

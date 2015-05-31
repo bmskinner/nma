@@ -15,50 +15,7 @@ import no.gui.ColourSelecter;
 // this is used to divide a median profile into segments of interest
 // it can also take a list of segments, and apply them
 public class ProfileSegmenter {
-	
-	public static List<Color> colourList = new ArrayList<Color>(0);
-	
-	// these are the colours for segments in the order they will loop
-	static {
-
 		
-		// For making pretty charts
-//		colourList.add(Color.ORANGE);
-//		colourList.add(Color.YELLOW);
-//		colourList.add(Color.BLUE);
-//		colourList.add(Color.CYAN);
-		
-//		colourList.add(Color.BLUE);
-//		colourList.add(Color.GREEN);
-//		colourList.add(Color.ORANGE);
-		
-//		colourList.add(Color.BLUE);
-//		colourList.add(new Color(0,102,0));
-//		colourList.add(Color.GREEN);
-//		colourList.add(new Color(102,255,102));
-//		colourList.add(Color.ORANGE);
-//
-//		 Regular
-		colourList.add(Color.RED);
-		colourList.add(Color.ORANGE);
-		colourList.add(Color.GREEN);
-		colourList.add(Color.MAGENTA);
-		colourList.add(Color.DARK_GRAY);
-		colourList.add(Color.CYAN);
-		colourList.add(Color.YELLOW);
-		colourList.add(Color.PINK);
-		
-		// Draw unsegmented profile
-//		colourList.add(Color.BLACK);
-//		colourList.add(Color.BLACK);
-//		colourList.add(Color.BLACK);
-//		colourList.add(Color.BLACK);
-//		colourList.add(Color.BLACK);
-//		colourList.add(Color.BLACK);
-//		colourList.add(Color.BLACK);
-//		colourList.add(Color.BLACK);
-	}
-	
 	/**
 	 * The smallest number of points a segment can contain. 
 	 * Increasing this value will make the segment fitting more robust, 
@@ -185,7 +142,7 @@ public class ProfileSegmenter {
 //			b.print();
 						
 			segPlot.setLineWidth(4);
-			if(i==0 && segments.size()==colourList.size()+1){ // avoid colour wrapping when segment number is 1 more than the colour list
+			if(i==0 && segments.size()==ColourSelecter.getSegmentListSize()+1){ // avoid colour wrapping when segment number is 1 more than the colour list
 				segPlot.setColor(Color.MAGENTA);
 			} else{
 				segPlot.setColor(ColourSelecter.getSegmentColor(i));
