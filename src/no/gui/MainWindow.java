@@ -125,11 +125,12 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private static final int PROFILE_TAB = 0;
 	private static final int STATS_TAB = 1;
-	private static final int BOXPLOTS_TAB = 2;
-	private static final int VARIABILITY_TAB = 3;
-	private static final int SIGNALS_TAB = 4;
-	private static final int CLUSTERS_TAB = 5;
-	private static final int VENN_TAB = 6;
+	private static final int ANALYSIS_TAB = 2;
+	private static final int BOXPLOTS_TAB = 3;
+	private static final int VARIABILITY_TAB = 4;
+	private static final int SIGNALS_TAB = 5;
+	private static final int CLUSTERS_TAB = 6;
+	private static final int VENN_TAB = 7;
 	
 	private static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 	private static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
@@ -140,6 +141,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JLabel lblStatusLine = new JLabel("No analysis open");
 //	private final JPanel panelAggregates = new JPanel(); // holds consensus, tab and population panels
 	private JTable tablePopulationStats;
+	private JTable tableAnalysisParamters;
 	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
 	
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
@@ -180,7 +182,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JPanel vennPanel; // show overlaps between populations
 	private JTable vennTable;
 	
-	private JPanel wilcoxonPanel; // compare populations
+	private JScrollPane wilcoxonPanel; // compare populations
 	private JTable wilcoxonAreaTable;
 	private JTable wilcoxonPerimTable;
 	private JTable wilcoxonFeretTable;
@@ -265,10 +267,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			variabilityPlot.setBackgroundPaint(Color.WHITE);
 			variabilityPlot.getDomainAxis().setRange(0,100);
 			
-
-//			JScrollPane tabScrollPane = new JScrollPane();
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-//			tabScrollPane.add(tabbedPane);
 			panelGeneralData.add(tabbedPane);
 			
 			JTabbedPane profilesPane = createProfilesPanel();
@@ -277,16 +276,11 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			// Create the general stats page
 			//---------------
-
-			JPanel panelGeneralStats = new JPanel();
-			tabbedPane.addTab("Basic statistics", null, panelGeneralStats, null);
-			panelGeneralStats.setLayout(new BorderLayout(0, 0));
-
-			tablePopulationStats = new JTable();
-			panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
-			tablePopulationStats.setEnabled(false);
-			panelGeneralStats.add(tablePopulationStats.getTableHeader(), BorderLayout.NORTH);
-			tablePopulationStats.setModel(DatasetCreator.createStatsTable(null));
+			JScrollPane statsPanel = createStatsPanel();
+			tabbedPane.addTab("Basic statistics", null, statsPanel, null);
+			
+			JScrollPane parametersPanel = createAnalysisParametersPanel();
+			tabbedPane.addTab("Analysis info", null, parametersPanel, null);
 
 			//---------------
 			// Create panel for split boxplots
@@ -495,7 +489,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		JTabbedPane profilesTabPanel = new JTabbedPane(JTabbedPane.TOP);
 		Dimension minimumChartSize = new Dimension(50, 100);
-		Dimension preferredChartSize = new Dimension(400, 200);
+		Dimension preferredChartSize = new Dimension(400, 300);
 		
 		//---------------
 		// Create the regular profile chart
@@ -740,6 +734,39 @@ public class MainWindow extends JFrame implements ActionListener {
 		return signalsTabPane;
 	}
 	
+	private JScrollPane createStatsPanel(){
+		
+		JScrollPane scrollPane = new JScrollPane();
+		JPanel panelGeneralStats = new JPanel();
+		
+		panelGeneralStats.setLayout(new BorderLayout(0, 0));
+
+		tablePopulationStats = new JTable();
+		panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
+		tablePopulationStats.setEnabled(false);
+
+		scrollPane.setViewportView(panelGeneralStats);
+		scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
+		tablePopulationStats.setModel(DatasetCreator.createStatsTable(null));
+		return scrollPane;
+	}
+	
+	private JScrollPane createAnalysisParametersPanel(){
+		
+		JScrollPane scrollPane = new JScrollPane();
+		JPanel panel = new JPanel();
+		
+		panel.setLayout(new BorderLayout(0, 0));
+
+		tableAnalysisParamters = new JTable();
+		tableAnalysisParamters.setModel(DatasetCreator.createAnalysisParametersTable(null));
+		tableAnalysisParamters.setEnabled(false);
+		panel.add(tableAnalysisParamters, BorderLayout.CENTER);
+
+		scrollPane.setViewportView(panel);
+		scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
+		return scrollPane;
+	}
 	
 	private JPanel createBoxplotsPanel(){
 		JPanel boxplotSplitPanel = new JPanel(); // main container in tab
@@ -815,8 +842,10 @@ public class MainWindow extends JFrame implements ActionListener {
 	/**
 	 * Create the panel that will hold the statistical tests between populations
 	 */
-	private JPanel createWilcoxonPanel(){
+	private JScrollPane createWilcoxonPanel(){
+		JScrollPane scrollPane = new JScrollPane();
 		JPanel panel = new JPanel();
+		scrollPane.setViewportView(panel);
 		panel.setLayout(new BorderLayout());
 //		tabbedPane.addTab("Wilcoxon", null, wilcoxonPanel, null);
 		
@@ -835,7 +864,8 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		wilcoxonAreaTable = new JTable(DatasetCreator.createWilcoxonAreaTable(null));
 		addWilconxonTable(wilcoxonPartsPanel, wilcoxonAreaTable, "Areas");
-		panel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
+//		panel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
+		scrollPane.setColumnHeaderView(wilcoxonAreaTable.getTableHeader());
 
 		
 		wilcoxonPerimTable = new JTable(DatasetCreator.createWilcoxonPerimeterTable(null));
@@ -853,7 +883,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		addWilconxonTable(wilcoxonPartsPanel, wilcoxonDifferenceTable, "Differences to median");
 		
 		panel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
-		return panel;
+		return scrollPane;
 	}
 	
 	
@@ -1276,6 +1306,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			public void run() {
 				try {
 					updateStatsPanel(list);
+					updateAnalysisParametersPanel(list);
 					updateProfileImage(list);
 					updateRawProfileImage(list, false);
 					updateFrankenProfileChart(list);
@@ -1318,6 +1349,17 @@ public class MainWindow extends JFrame implements ActionListener {
 		String[] names = label.split("_");
 		return Integer.parseInt(names[1]);
 	}
+	
+	/**
+	 * Update the analysis panel with data from the given datasets
+	 * @param list the datasets
+	 */
+	public void updateAnalysisParametersPanel(List<AnalysisDataset> list){
+		// format the numbers and make into a tablemodel
+		TableModel model = DatasetCreator.createAnalysisParametersTable(list);
+		tableAnalysisParamters.setModel(model);
+	}
+	
 	
 	
 	/**

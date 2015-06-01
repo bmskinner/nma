@@ -369,21 +369,16 @@ public class DatasetCreator {
 	}
 
 	/**
-	 * Create a table model of basic stats from a nucleus collection.
+	 * Create a table model of analysis parameters from a nucleus collection.
 	 * If null parameter is passed, will create an empty table
 	 * @param collection
 	 * @return
 	 */
-	public static TableModel createStatsTable(List<AnalysisDataset> list){
+	public static TableModel createAnalysisParametersTable(List<AnalysisDataset> list){
 
 		DefaultTableModel model = new DefaultTableModel();
 
 		Object[] columnData = {
-				"Nuclei", 
-				"Median area",
-				"Median perimeter",
-				"Median feret",
-				"Signal channels",
 				"Profile window",
 				"Nucleus detection method",
 				"Nucleus threshold",
@@ -402,14 +397,12 @@ public class DatasetCreator {
 				"Signal max fraction",
 				"Consensus folded",
 				"Refold mode",
-				"Number of signals",
-				"Signals per nucleus",
 				"Shell analysis run",
 				"Run date",
 				"Run time",
 				"Collection source",
 				"Type"};
-		model.addColumn("Field", columnData);
+		model.addColumn("", columnData);
 		
 		if(list==null){
 			model.addColumn("No data loaded");
@@ -430,9 +423,7 @@ public class DatasetCreator {
 				String[] times = collection.getOutputFolderName().split("_");
 				String date = times[0];
 				String time = times[1];
-				
-				double signalPerNucleus = (double) collection.getSignalCount()/  (double) collection.getNucleusCount();
-				
+								
 				String detectionMethod = options.isUseCanny() ? "Canny edge detection" : "Thresholding";
 				String nucleusThreshold = options.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
 				String cannyAutoThreshold = options.isUseCanny() ? String.valueOf(options.isCannyAutoThreshold()) : "N/A";
@@ -443,11 +434,6 @@ public class DatasetCreator {
 				String cannyClosingRadius = options.isUseCanny() ? String.valueOf(options.getClosingObjectRadius()) : "N/A";
 
 				Object[] collectionData = {
-						collection.getNucleusCount(),
-						df.format(collection.getMedianNuclearArea()),
-						df.format(collection.getMedianNuclearPerimeter()),
-						df.format(collection.getMedianFeretLength()),
-						collection.getSignalChannels().size(),
 						options.getAngleProfileWindowSize(),
 						detectionMethod,
 						nucleusThreshold,
@@ -466,13 +452,60 @@ public class DatasetCreator {
 						options.getMaxSignalFraction(),
 						options.refoldNucleus(),
 						refoldMode,
-						collection.getSignalCount(),
-						df.format(signalPerNucleus),
 						dataset.hasShellResult(),
 						date,
 						time,
 						collection.getFolder(),
 						options.getNucleusClass().getSimpleName()				
+				};
+
+				model.addColumn(collection.getName(), collectionData);
+			}
+		}
+		return model;	
+	}
+	
+	
+	/**
+	 * Create a table model of basic stats from a nucleus collection.
+	 * If null parameter is passed, will create an empty table
+	 * @param collection
+	 * @return
+	 */
+	public static TableModel createStatsTable(List<AnalysisDataset> list){
+
+		DefaultTableModel model = new DefaultTableModel();
+
+		Object[] columnData = {
+				"Nuclei", 
+				"Median area",
+				"Median perimeter",
+				"Median feret",
+				"Signal channels",
+				"Number of signals",
+				"Signals per nucleus"};
+		model.addColumn("", columnData);
+		
+		if(list==null){
+			model.addColumn("No data loaded");
+		} else {
+
+			// format the numbers and make into a tablemodel
+			DecimalFormat df = new DecimalFormat("#0.00"); 
+
+			for(AnalysisDataset dataset : list){
+				NucleusCollection collection = dataset.getCollection();
+								
+				double signalPerNucleus = (double) collection.getSignalCount()/  (double) collection.getNucleusCount();
+				
+				Object[] collectionData = {
+						collection.getNucleusCount(),
+						df.format(collection.getMedianNuclearArea()),
+						df.format(collection.getMedianNuclearPerimeter()),
+						df.format(collection.getMedianFeretLength()),
+						collection.getSignalChannels().size(),
+						collection.getSignalCount(),
+						df.format(signalPerNucleus)
 				};
 
 				model.addColumn(collection.getName(), collectionData);
