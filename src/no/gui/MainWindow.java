@@ -234,23 +234,26 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			
 			contentPane.add(panelGeneralData, BorderLayout.CENTER);
-			panelGeneralData.setLayout(new BoxLayout(panelGeneralData, BoxLayout.Y_AXIS));
+//			panelGeneralData.setLayout(new BoxLayout(panelGeneralData, BoxLayout.Y_AXIS));
+			panelGeneralData.setLayout(new GridLayout(2, 0, 0, 0));
 			
 			// make a panel for the populations and consensus chart
-			JPanel panel = new JPanel();
+			JPanel topGeneralPanel = new JPanel();
+			topGeneralPanel.setLayout(new GridLayout(0, 2, 0, 0));
+			panelGeneralData.add(topGeneralPanel);
 			
-			panel.setLayout(new GridLayout(0, 2, 0, 0));
+			
 			createPopulationsPanel();
-			panel.add(panelPopulations);		
+			topGeneralPanel.add(panelPopulations);		
 			
-			panelGeneralData.add(panel);
+			
 			
 			
 			//---------------
 			// Create the consensus chart
 			//---------------
 			createConsensusChartPanel();
-			panel.add(consensusChartPanel);
+			topGeneralPanel.add(consensusChartPanel);
 			
 						
 			//---------------
@@ -338,6 +341,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			segmentsBoxplotPanel = createSegmentBoxplotsPanel();
 			tabbedPane.addTab("Segments", null, segmentsBoxplotPanel, null);
+//			this.pack();
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -490,6 +494,9 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JTabbedPane createProfilesPanel(){
 		
 		JTabbedPane profilesTabPanel = new JTabbedPane(JTabbedPane.TOP);
+		Dimension minimumChartSize = new Dimension(50, 100);
+		Dimension preferredChartSize = new Dimension(400, 200);
+		
 		//---------------
 		// Create the regular profile chart
 		//---------------
@@ -500,6 +507,10 @@ public class MainWindow extends JFrame implements ActionListener {
 		plot.getRangeAxis().setRange(0,360);
 		plot.setBackgroundPaint(Color.WHITE);
 		profileChartPanel = new ChartPanel(profileChart);
+		profileChartPanel.setMinimumSize(minimumChartSize);
+		profileChartPanel.setPreferredSize(preferredChartSize);
+		profileChartPanel.setMinimumDrawWidth( 0 );
+		profileChartPanel.setMinimumDrawHeight( 0 );
 		
 		//---------------
 		// Create the franken profile chart
@@ -511,6 +522,11 @@ public class MainWindow extends JFrame implements ActionListener {
 		frankenPlot.getRangeAxis().setRange(0,360);
 		frankenPlot.setBackgroundPaint(Color.WHITE);
 		frankenChartPanel = new ChartPanel(frankenChart);
+		frankenChartPanel.setMinimumSize(minimumChartSize);
+		frankenChartPanel.setPreferredSize(preferredChartSize);
+		frankenChartPanel.setMinimumDrawWidth( 0 );
+		frankenChartPanel.setMinimumDrawHeight( 0 );
+		
 		
 		//---------------
 		// Create the raw profile chart
@@ -524,6 +540,10 @@ public class MainWindow extends JFrame implements ActionListener {
 		rawPlot.getRangeAxis().setRange(0,360);
 		rawPlot.setBackgroundPaint(Color.WHITE);
 		rawChartPanel = new ChartPanel(rawChart);
+		rawChartPanel.setMinimumDrawWidth( 0 );
+		rawChartPanel.setMinimumDrawHeight( 0 );
+		rawPanel.setMinimumSize(minimumChartSize);
+		rawPanel.setPreferredSize(preferredChartSize);
 		rawPanel.add(rawChartPanel, BorderLayout.CENTER);
 		
 		JRadioButton leftButton  = new JRadioButton("Left");
@@ -556,7 +576,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		profilesTabPanel.addTab("Normalised", null, profileChartPanel, null);
 		profilesTabPanel.addTab("Raw", null, rawPanel, null);
 		profilesTabPanel.addTab("FrankenProfile", null, frankenChartPanel, null);
-		
+				
 		return profilesTabPanel;
 		
 	}

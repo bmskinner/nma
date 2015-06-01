@@ -57,8 +57,8 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private static final String PIG_SPERM_NUCLEUS = "Pig sperm";
 	private static final String ROUND_NUCLEUS = "Round nucleus";
 	
-	private static final double DEFAULT_CANNY_LOW_THRESHOLD = 0.5;
-	private static final double DEFAULT_CANNY_HIGH_THRESHOLD = 7.5;
+	private static final double DEFAULT_CANNY_LOW_THRESHOLD = 0.1;
+	private static final double DEFAULT_CANNY_HIGH_THRESHOLD = 1.5;
 	private static final double DEFAULT_CANNY_KERNEL_RADIUS = 2;
 	private static final int    DEFAULT_CANNY_KERNEL_WIDTH = 16;
 	private static final int    DEFAULT_CLOSING_OBJECT_RADIUS = 5;
