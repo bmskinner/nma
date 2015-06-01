@@ -107,6 +107,7 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -190,6 +191,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JTable wilcoxonDifferenceTable;
 	
 	private ChartPanel segmentsBoxplotChartPanel; // for displaying the legnth of a given segment
+	private ChartPanel segmentsProfileChartPanel; // for displaying the profiles of a given segment
+	
 	private JPanel segmentsBoxplotPanel;// container for boxplots chart and decoration
 	private JComboBox segmentSelectionBox; // choose which segments to compare
 
@@ -333,8 +336,15 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			// Create the segments boxplot panel
 			//---------------
+			JPanel segmentsPanel = new JPanel();
+			segmentsPanel.setLayout(new GridLayout(0,2,0,0));
+			
+			JPanel segmentProfilePanel  = createSegmentProfilePanel();
 			segmentsBoxplotPanel = createSegmentBoxplotsPanel();
-			tabbedPane.addTab("Segments", null, segmentsBoxplotPanel, null);
+			
+			segmentsPanel.add(segmentProfilePanel);
+			segmentsPanel.add(segmentsBoxplotPanel);
+			tabbedPane.addTab("Segments", null, segmentsPanel, null);
 //			this.pack();
 
 		} catch (Exception e) {
@@ -798,6 +808,28 @@ public class MainWindow extends JFrame implements ActionListener {
 		return boxplotSplitPanel;
 	}
 	
+	private JPanel createSegmentProfilePanel(){
+		
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		Dimension minimumChartSize = new Dimension(50, 100);
+		Dimension preferredChartSize = new Dimension(400, 300);
+		JFreeChart profileChart = ChartFactory.createXYLineChart(null,
+	            "Position", "Angle", null);
+		XYPlot plot = profileChart.getXYPlot();
+		plot.getDomainAxis().setRange(0,100);
+		plot.getRangeAxis().setRange(0,360);
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		segmentsProfileChartPanel = new ChartPanel(profileChart);
+		segmentsProfileChartPanel.setMinimumSize(minimumChartSize);
+		segmentsProfileChartPanel.setPreferredSize(preferredChartSize);
+		segmentsProfileChartPanel.setMinimumDrawWidth( 0 );
+		segmentsProfileChartPanel.setMinimumDrawHeight( 0 );
+		panel.add(segmentsProfileChartPanel, BorderLayout.CENTER);
+		return panel;
+	}
+	
 	private JPanel createSegmentBoxplotsPanel(){
 		JPanel panel = new JPanel(); // main container in tab
 
@@ -826,6 +858,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			// create the appropriate chart
 			//TODO
 			updateSegmentsBoxplot(getSelectedRowsFromTreeTable(), segName);
+			updateSegmentsProfile(getSelectedRowsFromTreeTable(), segName);
 			
 		}
 		
@@ -1326,6 +1359,7 @@ public class MainWindow extends JFrame implements ActionListener {
 						segmentSelectionBox.setModel(aModel);
 						segmentSelectionBox.setSelectedIndex(0);
 						updateSegmentsBoxplot(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
+						updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
 					}
 					
 				} catch (Exception e) {
@@ -2029,6 +2063,44 @@ public class MainWindow extends JFrame implements ActionListener {
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
 		segmentsBoxplotChartPanel.setChart(boxplotChart);
+	}
+	
+	public void updateSegmentsProfile(List<AnalysisDataset> list, String segName){
+		DefaultXYDataset ds = DatasetCreator.createMultiProfileSegmentDataset(list, segName);
+		try {
+				
+				JFreeChart chart = 
+						ChartFactory.createXYLineChart(null,
+						                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+						                false);
+
+				XYPlot plot = chart.getXYPlot();
+				plot.getDomainAxis().setRange(0,100);
+				plot.getRangeAxis().setRange(0,360);
+				plot.setBackgroundPaint(Color.WHITE);
+				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+				
+				for (int i = 0; i < plot.getSeriesCount(); i++) {
+					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+					String name = (String) ds.getSeriesKey(i);
+					if(name.startsWith("Seg_")){
+						int colourIndex = getIndexFromLabel(name);
+						plot.getRenderer().setSeriesStroke(i, new BasicStroke(4));
+						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
+					} 
+					if(name.startsWith("Profile_")){
+						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+						plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+					} 
+					
+				}	
+								
+				segmentsProfileChartPanel.setChart(chart);
+			
+			
+		} catch (Exception e) {
+			log("Error in plotting segment profile");
+		} 
 	}
 	
 	

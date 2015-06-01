@@ -73,9 +73,29 @@ public class DatasetCreator {
 			Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
 //			subPoints = subPoints.add(0.5); // correct for median being at the start of the bin
 			double[][] data = { subPoints.asArray(), subProfile.asArray() };
-			ds.addSeries(seg.getSegmentType(), data);
+			
+			// check if the series key is taken
+			String seriesName = checkName(ds, seg.getSegmentType());
+			
+			ds.addSeries(seriesName, data);
 		}
 		return ds;
+	}
+	
+	// check if the series key is taken
+	private static String checkName(XYDataset ds, String name){
+		String result = name;
+		boolean ok = true;
+		for(int i=0;i<ds.getSeriesCount();i++){
+			if(ds.getSeriesKey(i).equals(name)){
+				ok=false; // do not allow the same name to be added twice
+			}
+		}
+		if(!ok){
+			result = checkName(ds, name+"_1");
+		} 
+		return result;
+
 	}
 
 //	public static XYDataset createSegmentDataset(NucleusCollection collection, String type){
@@ -84,6 +104,33 @@ public class DatasetCreator {
 //		
 //		return ds;
 //	}
+	public static DefaultXYDataset createMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName){
+		
+		DefaultXYDataset ds = new DefaultXYDataset();
+		for (int i=0; i < list.size(); i++) {
+
+			NucleusCollection collection = list.get(i).getCollection();
+			
+			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+			Profile xpoints = profile.getPositions(100);
+			double[][] data = { xpoints.asArray(), profile.asArray() };
+			ds.addSeries("Profile_"+i, data);
+
+			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
+			
+			// add only the segment of interest
+			for(NucleusBorderSegment seg : segments){
+				if(seg.getSegmentType().equals(segName)){
+					segmentsToAdd.add(seg);
+				}
+			}
+			addSegmentsFromProfile(segmentsToAdd, profile, ds, 100);
+			
+
+		}
+		return ds;
+	}
 	
 	public static XYDataset createNormalisedSegmentDataset(NucleusCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
