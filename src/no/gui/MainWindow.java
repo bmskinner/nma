@@ -32,7 +32,6 @@ import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
 import no.analysis.MorphologyAnalysis;
 import no.analysis.NucleusClusterer;
-import no.analysis.ProfileSegmenter;
 import no.analysis.ShellAnalysis;
 import no.collections.NucleusCollection;
 import no.components.Profile;
@@ -65,6 +64,7 @@ import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -192,6 +192,13 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private ChartPanel segmentsBoxplotChartPanel; // for displaying the legnth of a given segment
 	private ChartPanel segmentsProfileChartPanel; // for displaying the profiles of a given segment
+	
+	// 
+	private JCheckBox    normSegmentCheckBox = new JCheckBox("Normalised");	// to toggle raw or normalised segment profiles in segmentsProfileChartPanel
+	private JRadioButton rawSegmentLeftButton  = new JRadioButton("Left"); // left align raw segment profiles in segmentsProfileChartPanel
+	private JRadioButton rawSegmentRightButton = new JRadioButton("Right"); // right align raw segment profiles in segmentsProfileChartPanel
+	
+	
 	
 	private JPanel segmentsBoxplotPanel;// container for boxplots chart and decoration
 	private JComboBox segmentSelectionBox; // choose which segments to compare
@@ -827,6 +834,35 @@ public class MainWindow extends JFrame implements ActionListener {
 		segmentsProfileChartPanel.setMinimumDrawWidth( 0 );
 		segmentsProfileChartPanel.setMinimumDrawHeight( 0 );
 		panel.add(segmentsProfileChartPanel, BorderLayout.CENTER);
+		
+		
+		// checkbox to select raw or normalised profiles
+		normSegmentCheckBox.setSelected(true);
+		normSegmentCheckBox.setActionCommand("NormalisedSegmentProfile");
+		normSegmentCheckBox.addActionListener(this);
+		
+		// make buttons to select raw profiles
+		rawSegmentLeftButton.setSelected(true);
+		rawSegmentLeftButton.setActionCommand("LeftAlignSegmentProfile");
+		rawSegmentRightButton.setActionCommand("RightAlignSegmentProfile");
+		rawSegmentLeftButton.addActionListener(this);
+		rawSegmentRightButton.addActionListener(this);
+		rawSegmentLeftButton.setEnabled(false);
+		rawSegmentRightButton.setEnabled(false);
+		
+
+		//Group the radio buttons.
+		final ButtonGroup alignGroup = new ButtonGroup();
+		alignGroup.add(rawSegmentLeftButton);
+		alignGroup.add(rawSegmentRightButton);
+		
+		JPanel alignPanel = new JPanel();
+		alignPanel.setLayout(new BoxLayout(alignPanel, BoxLayout.X_AXIS));
+
+		alignPanel.add(normSegmentCheckBox);
+		alignPanel.add(rawSegmentLeftButton);
+		alignPanel.add(rawSegmentRightButton);
+		panel.add(alignPanel, BorderLayout.NORTH);
 		return panel;
 	}
 	
@@ -858,7 +894,17 @@ public class MainWindow extends JFrame implements ActionListener {
 			// create the appropriate chart
 			//TODO
 			updateSegmentsBoxplot(getSelectedRowsFromTreeTable(), segName);
-			updateSegmentsProfile(getSelectedRowsFromTreeTable(), segName);
+			
+			if(  normSegmentCheckBox.isSelected()){
+				updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), true, false);
+			} else {
+				
+				if(  rawSegmentLeftButton.isSelected()){
+					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, false);
+				} else {
+					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, true);
+				}
+			}
 			
 		}
 		
@@ -868,6 +914,33 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		if(e.getActionCommand().equals("RightAlignRawProfile")){
 			updateRawProfileImage(getSelectedRowsFromTreeTable(), true);
+		}
+		
+		if(e.getActionCommand().equals("LeftAlignSegmentProfile")){
+			updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, false);
+		}
+		
+		if(e.getActionCommand().equals("RightAlignSegmentProfile")){
+			updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, true);
+		}
+		
+		if(e.getActionCommand().equals("NormalisedSegmentProfile")){
+
+			if(  normSegmentCheckBox.isSelected()){
+				rawSegmentLeftButton.setEnabled(false);
+				rawSegmentRightButton.setEnabled(false);
+				updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), true, false);
+			} else {
+				rawSegmentLeftButton.setEnabled(true);
+				rawSegmentRightButton.setEnabled(true);
+				
+				if(  rawSegmentLeftButton.isSelected()){
+					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, false);
+				} else {
+					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, true);
+				}
+			}
+			
 		}
 	}
 	
@@ -1359,7 +1432,7 @@ public class MainWindow extends JFrame implements ActionListener {
 						segmentSelectionBox.setModel(aModel);
 						segmentSelectionBox.setSelectedIndex(0);
 						updateSegmentsBoxplot(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
-						updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
+						updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), true, false); // get segname from panel
 					}
 					
 				} catch (Exception e) {
@@ -2065,8 +2138,14 @@ public class MainWindow extends JFrame implements ActionListener {
 		segmentsBoxplotChartPanel.setChart(boxplotChart);
 	}
 	
-	public void updateSegmentsProfile(List<AnalysisDataset> list, String segName){
-		DefaultXYDataset ds = DatasetCreator.createMultiProfileSegmentDataset(list, segName);
+	public void updateSegmentsProfile(List<AnalysisDataset> list, String segName, boolean normalised, boolean rightAlign){
+		
+		DefaultXYDataset ds = null;
+		if(normalised){
+			ds = DatasetCreator.createMultiProfileSegmentDataset(list, segName);
+		} else {
+			ds = DatasetCreator.createRawMultiProfileSegmentDataset(list, segName, rightAlign);
+		}
 		try {
 				
 				JFreeChart chart = 
@@ -2075,7 +2154,19 @@ public class MainWindow extends JFrame implements ActionListener {
 						                false);
 
 				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,100);
+				
+				if(!normalised){
+					int length = 100;
+					for(AnalysisDataset d : list){
+						if(   (int) d.getCollection().getMedianArrayLength()>length){
+							length = (int) d.getCollection().getMedianArrayLength();
+						}
+					}
+					plot.getDomainAxis().setRange(0,length);
+				} else {
+					plot.getDomainAxis().setRange(0,100);
+				}
+
 				plot.getRangeAxis().setRange(0,360);
 				plot.setBackgroundPaint(Color.WHITE);
 				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));

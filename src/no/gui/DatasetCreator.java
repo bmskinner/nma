@@ -40,9 +40,18 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 public class DatasetCreator {
 	
-	private static XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length){
+	/**
+	 * Add individual segments from a profile to a dataset. Offset them to the given length
+	 * @param segments the list of segments to add
+	 * @param profile the profile against which to add them
+	 * @param ds the dataset the segments are to be added to
+	 * @param length the profile length
+	 * @return the updated dataset
+	 */
+	private static XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset){
 		
 		Profile xpoints = profile.getPositions(length);
+		xpoints = xpoints.add(offset);
 		for(NucleusBorderSegment seg : segments){
 
 			if(seg.getStartIndex()>seg.getEndIndex()){ // case when array wraps. We need to plot the two ends as separate series
@@ -82,7 +91,12 @@ public class DatasetCreator {
 		return ds;
 	}
 	
-	// check if the series key is taken
+	/**
+	 * Check if the string for the series key is aleady used. If so, append _1 and check again
+	 * @param ds the dataset of series
+	 * @param name the name to check
+	 * @return a valid name
+	 */
 	private static String checkName(XYDataset ds, String name){
 		String result = name;
 		boolean ok = true;
@@ -98,12 +112,14 @@ public class DatasetCreator {
 
 	}
 
-//	public static XYDataset createSegmentDataset(NucleusCollection collection, String type){
-//		DefaultXYDataset ds = null;
-//		
-//		
-//		return ds;
-//	}
+
+	/**
+	 * Create a line chart dataset for comparing segment lengths. Each normalised profile will be drawn in full, 
+	 * plus the given segment within each profile. 
+	 * @param list the datasets to draw
+	 * @param segName the segment to add in each dataset
+	 * @return an XYDataset to plot
+	 */
 	public static DefaultXYDataset createMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName){
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -125,9 +141,63 @@ public class DatasetCreator {
 					segmentsToAdd.add(seg);
 				}
 			}
-			addSegmentsFromProfile(segmentsToAdd, profile, ds, 100);
+			addSegmentsFromProfile(segmentsToAdd, profile, ds, 100, 0);
 			
 
+		}
+		return ds;
+	}
+	
+	/**
+	 * For offsetting a raw profile to the right. Find the maximum length of profile in the dataset.
+	 * @param list the datasets to check
+	 * @return the maximum length
+	 */
+	public static double getMaximumProfileLength(List<AnalysisDataset> list){
+		double length = 100;
+		for(AnalysisDataset dataset : list){
+			length = dataset.getCollection().getMedianArrayLength()>length ? dataset.getCollection().getMedianArrayLength() : length;
+		}
+		return length;
+	}
+	
+	/**
+	 * Create raw profiles for each given AnalysisDataset. Offset them to left or right, and add the given segment 
+	 * @param list the datasets
+	 * @param segName the segment to display
+	 * @param rightAlign alignment to left or right
+	 * @return a dataset to plot
+	 */
+	public static DefaultXYDataset createRawMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName, boolean rightAlign){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		double length = getMaximumProfileLength(list);
+
+		for (int i=0; i < list.size(); i++) {
+			NucleusCollection collection = list.get(i).getCollection();
+			
+			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+			Profile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
+			
+			double offset = 0;
+			if(rightAlign){
+				double differenceToMaxLength = length - collection.getMedianArrayLength();
+				offset = differenceToMaxLength;
+				xpoints = xpoints.add(differenceToMaxLength);
+			}
+			double[][] data = { xpoints.asArray(), profile.asArray() };
+			ds.addSeries("Profile_"+i, data);
+			
+			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
+			
+			// add only the segment of interest
+			for(NucleusBorderSegment seg : segments){
+				if(seg.getSegmentType().equals(segName)){
+					segmentsToAdd.add(seg);
+				}
+			}
+			addSegmentsFromProfile(segmentsToAdd, profile, ds, (int) collection.getMedianArrayLength(), offset);
 		}
 		return ds;
 	}
@@ -142,7 +212,7 @@ public class DatasetCreator {
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
-		addSegmentsFromProfile(segments, profile, ds, 100);
+		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
 		Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
@@ -171,7 +241,7 @@ public class DatasetCreator {
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
-		addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength());
+		addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), 0);
 
 		// make the IQR
 		Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
@@ -209,10 +279,7 @@ public class DatasetCreator {
 	public static DefaultXYDataset createRawMultiProfileDataset(List<AnalysisDataset> list, boolean rightAlign){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		double length = 100;
-		for(AnalysisDataset dataset : list){
-			length = dataset.getCollection().getMedianArrayLength()>length ? dataset.getCollection().getMedianArrayLength() : length;
-		}
+		double length = getMaximumProfileLength(list);
 
 		int i=0;
 		for(AnalysisDataset dataset : list){
@@ -368,7 +435,7 @@ public class DatasetCreator {
 			NucleusCollection collection = list.get(0).getCollection();
 			Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
 			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
-			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100);	
+			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
 			return ds;
 		} else {
 			int i = 0;
@@ -396,7 +463,7 @@ public class DatasetCreator {
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getReferencePoint());
-		addSegmentsFromProfile(segments, profile, ds, 100);
+		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
 		Profile profile25 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"25");
