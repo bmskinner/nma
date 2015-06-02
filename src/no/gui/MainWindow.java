@@ -43,6 +43,8 @@ import no.utility.TreeOrderHashMap;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -82,6 +84,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Shape;
 
@@ -252,24 +256,49 @@ public class MainWindow extends JFrame implements ActionListener {
 			contentPane.add(panelGeneralData, BorderLayout.CENTER);
 //			panelGeneralData.setLayout(new BoxLayout(panelGeneralData, BoxLayout.Y_AXIS));
 			panelGeneralData.setLayout(new GridLayout(2, 0, 0, 0));
+//			panelGeneralData.setLayout(new GridBagLayout());
 			
 			// make a panel for the populations and consensus chart
-			JPanel topGeneralPanel = new JPanel();
-			topGeneralPanel.setLayout(new GridLayout(0, 2, 0, 0));
+			final JPanel topGeneralPanel = new JPanel();
+//			topGeneralPanel.setLayout(new GridLayout(0, 2, 0, 0));
+			topGeneralPanel.setLayout(new GridBagLayout());
+			
+//			GridBagConstraints generalPanelConstraints = new GridBagConstraints();
+//			generalPanelConstraints.gridwidth = GridBagConstraints.REMAINDER;     // last
+//			generalPanelConstraints.fill = GridBagConstraints.BOTH;
+//			generalPanelConstraints.weightx = 1.0;
+			
 			panelGeneralData.add(topGeneralPanel);
 			
-			
-			createPopulationsPanel();
-			topGeneralPanel.add(panelPopulations);		
-			
-			
-			
+			//reset to default
 			
 			//---------------
 			// Create the consensus chart
 			//---------------
+			createPopulationsPanel();
 			createConsensusChartPanel();
-			topGeneralPanel.add(consensusChartPanel);
+			
+			
+			GridBagConstraints c = new GridBagConstraints();			
+			c.gridwidth = GridBagConstraints.RELATIVE;     //next to last
+			c.fill = GridBagConstraints.BOTH;
+			c.weightx = 1.0;
+			topGeneralPanel.add(panelPopulations, c);	
+			
+			c.anchor = GridBagConstraints.WEST;
+			c.gridwidth = GridBagConstraints.REMAINDER; //end of row
+			c.fill = GridBagConstraints.BOTH;      //reset to default
+			c.weightx = 0.0;   
+			topGeneralPanel.add(consensusChartPanel, c);
+			
+
+	        topGeneralPanel.addComponentListener(new ComponentAdapter() {
+	            @Override
+	            public void componentResized(ComponentEvent e) {
+	                resizePreview(consensusChartPanel, topGeneralPanel);
+	            }
+	        });
+			
 			
 						
 			//---------------
@@ -600,7 +629,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		//---------------
 		// Create the populations list
 		//---------------
-		panelPopulations.setMinimumSize(new Dimension(50, 100));
+		panelPopulations.setMinimumSize(new Dimension(100, 100));
 //		panel.add(panelPopulations);
 		panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
 					
@@ -687,7 +716,16 @@ public class MainWindow extends JFrame implements ActionListener {
 		});
 		runRefoldingButton.setVisible(false);
 		consensusChartPanel.add(runRefoldingButton);
+		consensusChartPanel.setMinimumSize(new Dimension(200, 200));
 	}
+	
+	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
+        int w = container.getWidth();
+        int h = container.getHeight();
+        int size =  Math.min(w, h);
+        innerPanel.setPreferredSize(new Dimension(size, size));
+        container.revalidate();
+    }
 	
 	
 	private JTabbedPane createSignalsTabPanel(){
