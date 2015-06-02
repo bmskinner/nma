@@ -157,6 +157,10 @@ public class MainWindow extends JFrame implements ActionListener {
 	private ChartPanel frankenChartPanel;
 	private ChartPanel consensusChartPanel;
 	private ChartPanel rawChartPanel;
+	
+	private JRadioButton rawProfileLeftButton  = new JRadioButton("Left"); // left align raw profiles in rawChartPanel
+	private JRadioButton rawProfileRightButton = new JRadioButton("Right"); // right align raw profiles in rawChartPanel
+	
 	private JButton runRefoldingButton;
 	
 	private ChartPanel areaBoxplotChartPanel;
@@ -557,28 +561,25 @@ public class MainWindow extends JFrame implements ActionListener {
 		rawPanel.setPreferredSize(preferredChartSize);
 		rawPanel.add(rawChartPanel, BorderLayout.CENTER);
 		
-		JRadioButton leftButton  = new JRadioButton("Left");
-		JRadioButton rightButton = new JRadioButton("Right");
+		rawProfileLeftButton.setSelected(true);
 		
-		leftButton.setSelected(true);
-		
-		leftButton.setActionCommand("LeftAlignRawProfile");
-		rightButton.setActionCommand("RightAlignRawProfile");
-		leftButton.addActionListener(this);
-		rightButton.addActionListener(this);
+		rawProfileLeftButton.setActionCommand("LeftAlignRawProfile");
+		rawProfileRightButton.setActionCommand("RightAlignRawProfile");
+		rawProfileLeftButton.addActionListener(this);
+		rawProfileRightButton.addActionListener(this);
 		
 
 		//Group the radio buttons.
 		final ButtonGroup alignGroup = new ButtonGroup();
-		alignGroup.add(leftButton);
-		alignGroup.add(rightButton);
+		alignGroup.add(rawProfileLeftButton);
+		alignGroup.add(rawProfileRightButton);
 		
 		JPanel alignPanel = new JPanel();
 		alignPanel.setLayout(new BoxLayout(alignPanel, BoxLayout.X_AXIS));
 
 		
-		alignPanel.add(leftButton);
-		alignPanel.add(rightButton);
+		alignPanel.add(rawProfileLeftButton);
+		alignPanel.add(rawProfileRightButton);
 		rawPanel.add(alignPanel, BorderLayout.NORTH);
 		
 		//---------------
@@ -1414,7 +1415,13 @@ public class MainWindow extends JFrame implements ActionListener {
 					updateStatsPanel(list);
 					updateAnalysisParametersPanel(list);
 					updateProfileImage(list);
-					updateRawProfileImage(list, false);
+					
+					if(rawProfileRightButton.isSelected()){
+						updateRawProfileImage(list, true);
+					} else {
+						updateRawProfileImage(list, false);
+					}
+					
 					updateFrankenProfileChart(list);
 					updateConsensusImage(list);
 					updateBoxplots(list);
@@ -1575,16 +1582,16 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(list.size()==1){
 
 				// full segment colouring
-				XYDataset ds = DatasetCreator.createRawSegmentDataset(list.get(0).getCollection());
+				XYDataset ds = DatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), false);
 				JFreeChart chart = makeProfileChart(ds);
 				XYPlot plot = chart.getXYPlot();
 				plot.getDomainAxis().setRange(0,list.get(0).getCollection().getMedianArrayLength());
 				rawChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> ds = DatasetCreator.createRawMultiProfileIQRDataset(list, rightAlign);				
+				List<XYSeriesCollection> ds = DatasetCreator.createMultiProfileIQRDataset(list, false, rightAlign);				
 				
-				XYDataset profileDS = DatasetCreator.createRawMultiProfileDataset(list, rightAlign);
+				XYDataset profileDS = DatasetCreator.createMultiProfileDataset(list, false, rightAlign);
 				
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
@@ -1666,14 +1673,14 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(list.size()==1){
 
 				// full segment colouring
-				XYDataset ds = DatasetCreator.createNormalisedSegmentDataset(list.get(0).getCollection());
+				XYDataset ds = DatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), true);
 				JFreeChart chart = makeProfileChart(ds);
 				profileChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> ds = DatasetCreator.createMultiProfileIQRDataset(list);				
+				List<XYSeriesCollection> ds = DatasetCreator.createMultiProfileIQRDataset(list, true, false);				
 				
-				XYDataset profileDS = DatasetCreator.createMultiProfileDataset(list);
+				XYDataset profileDS = DatasetCreator.createMultiProfileDataset(list, true, false);
 				
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
