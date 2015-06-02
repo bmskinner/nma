@@ -242,11 +242,14 @@ public class AnalysisDataset implements Serializable {
 	 * @param id the UUID of the child to delete
 	 */
 	public void deleteChild(UUID id){
-		if(this.childCollections.containsKey(id)){
+		if(this.hasChild(id)){
 			this.childCollections.remove(id);
-		}
-		if(this.clusterResults.contains(id)){
-			this.clusterResults.remove(id);
+//			IJ.log("    Removed child id");
+			
+			if(this.clusterResults.contains(id)){
+				this.clusterResults.remove(id);
+//				IJ.log("    Removed cluster id");
+			}
 		}
 	}
 

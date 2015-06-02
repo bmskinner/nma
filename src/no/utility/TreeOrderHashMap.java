@@ -1,5 +1,7 @@
 package no.utility;
 
+import ij.IJ;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +31,7 @@ public class TreeOrderHashMap {
 	
 	public void remove(UUID id){
 		Integer i = get(id);
-		forward.remove(id);
-		reverse.remove(i);
+		this.remove(i);
 	}
 	
 	public void remove(Integer i){
@@ -63,5 +64,11 @@ public class TreeOrderHashMap {
 			result.add(this.get(i));
 		}
 		return result;
+	}
+	
+	public void print(){
+		for(Integer i : reverse.keySet()){
+			IJ.log(i+" : "+reverse.get(i).toString());
+		}
 	}
 }

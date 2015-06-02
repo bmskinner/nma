@@ -2121,6 +2121,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		treeTableModel.setRoot(root);
 		treeTableModel.setColumnIdentifiers(columns);
 		
+//		treeOrderMap.print();
 		
 		if(this.analysisDatasets.size()>0){
 			for(UUID id : treeOrderMap.getIDs()){
@@ -3077,48 +3078,76 @@ public class MainWindow extends JFrame implements ActionListener {
 
 				for(UUID id : list){
 					
+//					IJ.log("Removing " +id.toString());
 					// check dataset still exists
 					if(analysisDatasets.containsKey(id)){
+
+//						IJ.log("   Dataset exists");
 						
 						AnalysisDataset d = analysisDatasets.get(id);
 
-						if(d.isRoot()){
+//						if(d.isRoot()){
 								
 							// remove all children of the collection
-							for(UUID u : d.getAllChildUUIDs()){
-	
-								if(populationNames.containsKey(analysisDatasets.get(u).getName())){
-	
-									populationNames.remove(analysisDatasets.get(u).getName());
-									analysisDatasets.remove(u);
-								}
-	
+						for(UUID u : d.getAllChildUUIDs()){
+							String name = analysisDatasets.get(u).getName();
+//							IJ.log("   Removing children");
+							if(analysisDatasets.containsKey(u)){
+								analysisDatasets.remove(u);
 							}
+//							IJ.log("   Removed child id");
 							
-							populationNames.remove(d.getName());
-							analysisDatasets.remove(id);
-							treeOrderMap.remove(id);
-							
-						} else { // not root
-							
-							// remove all children of the collection
-							for(UUID u : d.getAllChildUUIDs()){
-	
-								if(populationNames.containsKey(analysisDatasets.get(u).getName())){
-	
-									populationNames.remove(analysisDatasets.get(u).getName());
-									analysisDatasets.remove(u);
-								}
-	
+							if(populationNames.containsValue(u)){
+								populationNames.remove(name);
 							}
-							if(populationNames.containsKey(analysisDatasets.get(id).getName())){
-								populationNames.remove(d.getName());
-								analysisDatasets.remove(id);
-							}
+//							IJ.log("   Removed child name");
+							
 
+							d.deleteChild(u);
+//							IJ.log("   Deleted child");
+//
 						}
+						
+						for(UUID parentID : analysisDatasets.keySet()){
+							AnalysisDataset parent = analysisDatasets.get(parentID);
+							if(parent.hasChild(id)){
+								parent.deleteChild(id);
+							}
+						}
+//						IJ.log("   Deleted indirect children");
+						
+						
+//						IJ.log("   Clearing maps");
+						populationNames.remove(d.getName());
+						analysisDatasets.remove(id);
+
+						if(d.isRoot()){
+//							IJ.log("   Removing root");
+							treeOrderMap.remove(id);
+						}
+						
+							
+//						} else { // not root
+//							
+//							// remove all children of the collection
+//							for(UUID u : d.getAllChildUUIDs()){
+//	
+//								if(populationNames.containsKey(analysisDatasets.get(u).getName())){
+//	
+//									populationNames.remove(analysisDatasets.get(u).getName());
+//									analysisDatasets.remove(u);
+//								}
+//	
+//							}
+//							if(populationNames.containsKey(analysisDatasets.get(id).getName())){
+//								populationNames.remove(d.getName());
+//								analysisDatasets.remove(id);
+//							}
+//
+//						}
 
 					}
+//					IJ.log("   Cleared " +id.toString());
 				}
 				updatePopulationList();	
 				log("OK");
