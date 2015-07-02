@@ -10,6 +10,7 @@ public class TubulinTailDetector {
 	
 	
 	// import image with tubulin in green channel
+	//	Select file - must match dimensions of existing nucleus file if added secondarily.
 	
 	// edge / threshold to find tubulin stain
 	
@@ -25,6 +26,8 @@ public class TubulinTailDetector {
 	// convert area roi to line roi if needed
 	
 	// create line selection
+	
+	// provide line roi to store in SpermTail object
 	
 	// straighten / measure
 
