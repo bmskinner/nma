@@ -1,9 +1,9 @@
-package cell;
+package components;
 
 /**
  * There can be many types of flagellum; the type of interest mainly
  * is the sperm tail. This interface describes the method available 
- * to flagellae
+ * to flagella
  * @author bms41
  *
  */
