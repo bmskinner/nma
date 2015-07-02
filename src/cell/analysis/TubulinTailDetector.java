@@ -1,4 +1,4 @@
-package no.analysis;
+package cell.analysis;
 
 
 
@@ -17,9 +17,10 @@ public class TubulinTailDetector {
 	
 	// skeletonise
 	
-	// detect particles area 0
+	// detect particles area 0-Infinity
 	
 	// check each roi: print outline
+	// this is the step that tells us what the roi model looks like
 	
 	// convert area roi to line roi if needed
 	
