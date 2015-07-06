@@ -7,6 +7,7 @@ import ij.gui.Roi;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Constants;
 import no.components.NuclearSignal;
 import no.components.SignalCollection;
 import no.components.XYPoint;
@@ -86,7 +87,7 @@ public class SignalDetector {
 		// find the signals
 		// within nuclear roi, analyze particles in colour channels
 		// the nucleus is in index 1, so from 2 to end
-		for(int channel=ImageImporter.FIRST_SIGNAL_CHANNEL;channel<=stack.getSize();channel++){
+		for(int channel=Constants.FIRST_SIGNAL_CHANNEL;channel<=stack.getSize();channel++){
 
 			Detector detector = new Detector();
 			detector.setMaxSize(n.getArea() * this.maxSignalFraction);

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import utility.Constants;
 import no.collections.AsymmetricNucleusCollection;
 import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
@@ -105,11 +106,11 @@ public class SignalAnalysis {
 
 		for(Nucleus n : collection.getNuclei()){
 
-			if(	n.getSignalCount(ImageImporter.FIRST_SIGNAL_CHANNEL)  ==1 && 
-					n.getSignalCount(ImageImporter.FIRST_SIGNAL_CHANNEL+1)==1){
+			if(	n.getSignalCount(Constants.FIRST_SIGNAL_CHANNEL)  ==1 && 
+					n.getSignalCount(Constants.FIRST_SIGNAL_CHANNEL+1)==1){
 
-				NuclearSignal r = n.getSignals(ImageImporter.FIRST_SIGNAL_CHANNEL).get(0);
-				NuclearSignal g = n.getSignals(ImageImporter.FIRST_SIGNAL_CHANNEL+1).get(0);
+				NuclearSignal r = n.getSignals(Constants.FIRST_SIGNAL_CHANNEL).get(0);
+				NuclearSignal g = n.getSignals(Constants.FIRST_SIGNAL_CHANNEL+1).get(0);
 
 				XYPoint rCoM = r.getCentreOfMass();
 				XYPoint gCoM = g.getCentreOfMass();

@@ -18,6 +18,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.*;
 
+import utility.Constants;
 import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
@@ -563,7 +564,7 @@ public class CurveRefolder{
 						double signalDistance = distanceToBorder * fractionalDistance;
 
 						if(angle==0){ // no angle was calculated, so spread the points based on distance from CoM
-							angle = signalCount == RoundNucleus.RED_CHANNEL ? 360 * fractionalDistance : 360 * fractionalDistance + 180;
+							angle = signalCount == Constants.RGB_RED ? 360 * fractionalDistance : 360 * fractionalDistance + 180;
 						}
 
 						// adjust X and Y because we are now counting angles from the vertical axis

@@ -115,6 +115,8 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import utility.Constants;
+
 import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame implements ActionListener {
@@ -137,9 +139,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	private static final int CLUSTERS_TAB = 6;
 	private static final int VENN_TAB = 7;
 	
-	private static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
-	private static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
-
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextArea textArea = new JTextArea();;
@@ -2866,8 +2865,8 @@ public class MainWindow extends JFrame implements ActionListener {
 		        int numberOfTests = 5; // correct for the different variables measured;
 		        double divisor = (double) (   (table.getColumnCount()-2)  * numberOfTests); // for > 2 datasets with numberOFtests tests per dataset
 		        
-		        double fivePct = MainWindow.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni correction
-		        double onePct = MainWindow.ONE_PERCENT_SIGNIFICANCE_LEVEL /   divisor;
+		        double fivePct = Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni correction
+		        double onePct = Constants.ONE_PERCENT_SIGNIFICANCE_LEVEL /   divisor;
 //		        IJ.log("Columns: "+table.getColumnCount());
 		        
 		        if(pvalue<=fivePct){

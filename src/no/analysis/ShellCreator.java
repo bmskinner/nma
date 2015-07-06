@@ -22,6 +22,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.*;
 
+import utility.Constants;
 import no.nuclei.*;
 import no.utility.Logger;
 import no.utility.Utils;
@@ -113,7 +114,7 @@ public class ShellCreator {
 	*/
 	public void createShells(){
 
-		ImagePlus searchImage = new ImagePlus(null, image.getProcessor(ImageImporter.COUNTERSTAIN).duplicate()); // blue channel
+		ImagePlus searchImage = new ImagePlus(null, image.getProcessor(Constants.COUNTERSTAIN).duplicate()); // blue channel
 		ImageProcessor ip = searchImage.getProcessor();
 
 		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
@@ -313,7 +314,7 @@ public class ShellCreator {
 
 			for(XYPoint p : points){
 				// find the value of the signal
-				ImageProcessor ip = image.getProcessor(ImageImporter.COUNTERSTAIN);
+				ImageProcessor ip = image.getProcessor(Constants.COUNTERSTAIN);
 				density += (double)ip.getPixel(p.getXAsInt(), p.getYAsInt());	 
 			}
 			densities[i] = density;

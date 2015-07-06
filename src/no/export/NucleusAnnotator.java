@@ -10,6 +10,7 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 import java.util.List;
 
+import utility.Constants;
 import no.analysis.ProfileSegmenter;
 import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
@@ -149,9 +150,9 @@ public class NucleusAnnotator {
 		SignalCollection signalCollection = n.getSignalCollection();
 		for( int i : signalCollection.getChannels()){
 			List<NuclearSignal> signals = signalCollection.getSignals(i);
-			Color colour = i==ImageImporter.FIRST_SIGNAL_CHANNEL 
+			Color colour = i==Constants.FIRST_SIGNAL_CHANNEL 
 						 ? Color.RED 
-						 : i==ImageImporter.FIRST_SIGNAL_CHANNEL+1 
+						 : i==Constants.FIRST_SIGNAL_CHANNEL+1 
 						 	? Color.GREEN 
 						 	: Color.WHITE;
 			

@@ -2,6 +2,7 @@ package no.imports;
 
 import java.io.File;
 
+import utility.Constants;
 import no.utility.Logger;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -14,14 +15,7 @@ import ij.plugin.ChannelSplitter;
  *
  */
 public class ImageImporter {
-	
-	public static final int COUNTERSTAIN = 1; // ImageStack slices are numbered from 1; first slice is blue
-	public static final int FIRST_SIGNAL_CHANNEL = 2; // ImageStack slices are numbered from 1; first slice is blue
-	
-	public static final int RGB_RED = 0;
-	public static final int RGB_GREEN = 1;
-	public static final int RGB_BLUE = 2;
-	
+
 	private static Logger logger;
 	
 	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB };
@@ -109,9 +103,9 @@ public class ImageImporter {
 		// split out colour channel
 	    ImagePlus[] channels = ChannelSplitter.split(image);
 	    
-	    result.addSlice("counterstain", channels[ImageImporter.RGB_BLUE].getProcessor());
-	    result.addSlice(channels[ImageImporter.RGB_RED].getProcessor());
-	    result.addSlice(channels[ImageImporter.RGB_GREEN].getProcessor());
+	    result.addSlice("counterstain", channels[Constants.RGB_BLUE].getProcessor());
+	    result.addSlice(channels[Constants.RGB_RED].getProcessor());
+	    result.addSlice(channels[Constants.RGB_GREEN].getProcessor());
 	    result.deleteSlice(1); // remove the blank first slice
 	    logger.log("New stack has "+result.getSize()+" slices",Logger.DEBUG);
 //	    ImagePlus demo = new ImagePlus(null, result);

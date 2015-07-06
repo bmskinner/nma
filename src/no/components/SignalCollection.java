@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import utility.Constants;
 import no.imports.ImageImporter;
 
 /**
@@ -47,7 +48,7 @@ public class SignalCollection implements Serializable {
 		if(list==null || Integer.valueOf(channel)==null){
 			throw new IllegalArgumentException("Signal list or channel is null");
 		}
-		if(channel==ImageImporter.COUNTERSTAIN){
+		if(channel==Constants.COUNTERSTAIN){
 			throw new IllegalArgumentException("Channel is reserved for nucleus");
 		}
 		collection.put(channel, list);
@@ -363,7 +364,7 @@ public class SignalCollection implements Serializable {
 		if(Integer.valueOf(channel)==null){
 			throw new IllegalArgumentException("Channel is null");
 		}
-		if(channel==ImageImporter.COUNTERSTAIN){
+		if(channel==Constants.COUNTERSTAIN){
 			throw new IllegalArgumentException("Channel is reserved for nucleus");
 		}
 	}

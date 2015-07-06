@@ -1,5 +1,6 @@
 package no.export;
 
+import utility.Constants;
 import no.imports.ImageImporter;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -49,9 +50,9 @@ public class ImageExporter {
 		//	      }
 
 		ImagePlus[] images = new ImagePlus[3];
-		images[ImageImporter.RGB_RED]   = new ImagePlus("red",   new ByteProcessor(stack.getWidth(), stack.getHeight(), blank));  
-		images[ImageImporter.RGB_GREEN] = new ImagePlus("green", new ByteProcessor(stack.getWidth(), stack.getHeight(), blank));
-		images[ImageImporter.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(ImageImporter.COUNTERSTAIN));      
+		images[Constants.RGB_RED]   = new ImagePlus("red",   new ByteProcessor(stack.getWidth(), stack.getHeight(), blank));  
+		images[Constants.RGB_GREEN] = new ImagePlus("green", new ByteProcessor(stack.getWidth(), stack.getHeight(), blank));
+		images[Constants.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(Constants.COUNTERSTAIN));      
 
 		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
 
@@ -67,9 +68,9 @@ public class ImageExporter {
 	private static ImagePlus mergeStack(ImageStack stack){
 
 		ImagePlus[] images = new ImagePlus[3];
-		images[ImageImporter.RGB_RED]   = new ImagePlus("red", stack.getProcessor(ImageImporter.FIRST_SIGNAL_CHANNEL));  
-		images[ImageImporter.RGB_GREEN] = new ImagePlus("green", stack.getProcessor(3));  
-		images[ImageImporter.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(ImageImporter.COUNTERSTAIN));      
+		images[Constants.RGB_RED]   = new ImagePlus("red", stack.getProcessor(Constants.FIRST_SIGNAL_CHANNEL));  
+		images[Constants.RGB_GREEN] = new ImagePlus("green", stack.getProcessor(3));  
+		images[Constants.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(Constants.COUNTERSTAIN));      
 
 		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
 		

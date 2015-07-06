@@ -26,6 +26,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import utility.Constants;
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import no.nuclei.*;
@@ -390,7 +391,7 @@ public class NucleusDetector {
 		detector.setMinCirc(analysisOptions.getMinNucleusCirc());
 		detector.setMaxCirc(analysisOptions.getMaxNucleusCirc());
 		detector.setThreshold(analysisOptions.getNucleusThreshold());
-		detector.setChannel(ImageImporter.COUNTERSTAIN);
+		detector.setChannel(Constants.COUNTERSTAIN);
 		try{
 			detector.run(image);
 		} catch(Exception e){
@@ -469,7 +470,7 @@ public class NucleusDetector {
 				// invert it so the thresholds will work
 				if(medianPixel>128){
 					logger.log("Detected high median ("+medianPixel+"); inverting");
-					image.getProcessor(ImageImporter.COUNTERSTAIN).invert();
+					image.getProcessor(Constants.COUNTERSTAIN).invert();
 					medianPixel = getMedianIntensity(image);
 				}
 
@@ -486,7 +487,7 @@ public class NucleusDetector {
 
 			logger.log("Creating edge detector", Logger.DEBUG);
 			CannyEdgeDetector canny = new CannyEdgeDetector();
-			canny.setSourceImage(image.getProcessor(ImageImporter.COUNTERSTAIN).getBufferedImage());
+			canny.setSourceImage(image.getProcessor(Constants.COUNTERSTAIN).getBufferedImage());
 			canny.setLowThreshold( analysisOptions.getLowThreshold() );
 			canny.setHighThreshold( analysisOptions.getHighThreshold());
 			canny.setGaussianKernelRadius(analysisOptions.getKernelRadius());
@@ -521,7 +522,7 @@ public class NucleusDetector {
 	}
 	
 	private double getMedianIntensity(ImageStack image){
-		ImageProcessor median = image.getProcessor(ImageImporter.COUNTERSTAIN);
+		ImageProcessor median = image.getProcessor(Constants.COUNTERSTAIN);
 		double[] values = new double[ median.getWidth()*median.getHeight() ];
 		try {
 			int i=0;
@@ -580,7 +581,7 @@ public class NucleusDetector {
 
 	  // measure the area, density etc within the nucleus
 	  Detector detector = new Detector();
-	  detector.setChannel(ImageImporter.COUNTERSTAIN);
+	  detector.setChannel(Constants.COUNTERSTAIN);
 	  StatsMap values = detector.measure(nucleus, image);
 
 	  // save the position of the roi, for later use
@@ -679,7 +680,7 @@ public class NucleusDetector {
 	  Roi rectangle = new Roi(x, y, w, h);
 	  
 	  ImageStack result = new ImageStack(w, h);
-	  for(int i=ImageImporter.COUNTERSTAIN; i<=stack.getSize();i++){ // ImageStack starts at 1
+	  for(int i=Constants.COUNTERSTAIN; i<=stack.getSize();i++){ // ImageStack starts at 1
 		  ImagePlus image = new ImagePlus(null, stack.getProcessor(i));
 		  
 		  image.setRoi(rectangle);

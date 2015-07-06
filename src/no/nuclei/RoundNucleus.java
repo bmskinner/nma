@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
+import utility.Constants;
 import no.analysis.ProfileSegmenter;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
@@ -46,11 +47,10 @@ public class RoundNucleus
 	
 	private UUID uuid;// = java.util.UUID.randomUUID();
 	
-	public static final int RED_CHANNEL   = 0;
-	public static final int GREEN_CHANNEL = 1;
-	public static final int BLUE_CHANNEL  = 2;
-	public static final int NOT_RED_CHANNEL  = 3;
-	public static final int NOT_GREEN_CHANNEL  = 4;
+//	public static final int RED_CHANNEL   = 0;
+//	public static final int GREEN_CHANNEL = 1;
+//	public static final int BLUE_CHANNEL  = 2;
+	
 
 	// for debugging - use in calling dumpInfo()
 	public static final int ALL_POINTS = 0;
@@ -564,11 +564,11 @@ public class RoundNucleus
 
 
 	public void addRedSignal(NuclearSignal n){
-		this.addSignal(n, ImageImporter.FIRST_SIGNAL_CHANNEL);
+		this.addSignal(n, Constants.FIRST_SIGNAL_CHANNEL);
 	}
 
 	public void addGreenSignal(NuclearSignal n){
-		this.addSignal(n, ImageImporter.FIRST_SIGNAL_CHANNEL+1);
+		this.addSignal(n, Constants.FIRST_SIGNAL_CHANNEL+1);
 	}
 
 	 /*
