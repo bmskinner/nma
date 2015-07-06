@@ -4,12 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Logger;
 import no.collections.NucleusCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;
 import no.nuclei.Nucleus;
-import no.utility.Logger;
 
 public class StatsExporter {
 	

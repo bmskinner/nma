@@ -18,19 +18,15 @@ import java.util.Map;
 import java.util.UUID;
 
 import utility.Constants;
+import utility.Stats;
 import no.collections.NucleusCollection;
-import no.components.AnalysisOptions;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;
-import no.components.ProfileFeature;
-import no.components.ShellResult;
 import no.nuclei.Nucleus;
-import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.PigSpermNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
-import no.utility.Stats;
 
 public class NucleusCollection
 implements Serializable 
@@ -49,17 +45,11 @@ implements Serializable
 	
 	private Class<?> nucleusClass;
 		
-//	private String DEFAULT_REFERENCE_POINT = "head";
-//	private String DEFAULT_ORIENTAITION_POINT = "tail";
-
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	protected Map<String, ProfileCollection> profileCollections = new HashMap<String, ProfileCollection>();
 		
 	private Nucleus consensusNucleus;
 	
-//	private AnalysisOptions analysisOptions;
-//	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
-
 	private List<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
 	private Map<UUID, Nucleus> mappedCollection  = new HashMap<UUID, Nucleus>();
 
@@ -619,10 +609,6 @@ implements Serializable
     return result;
   }
 
-  // get the plot from the collection corresponding to the given pointType of interest
-//  public Plot getPlot(String pointType, String plotType){
-//    return this.plotCollection.get(pointType).get(plotType);
-//  }
 
   public int[] getPointIndexes(String pointType){
     int[] d = new int[this.getNucleusCount()];

@@ -8,12 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utility.Constants;
+import utility.StatsMap;
 import no.components.NuclearSignal;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
-import no.utility.StatsMap;
 
 
 public class SignalDetector {

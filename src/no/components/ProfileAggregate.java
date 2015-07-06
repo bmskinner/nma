@@ -8,9 +8,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import utility.Stats;
+import utility.Utils;
 import no.exceptions.ProfileException;
-import no.utility.Stats;
-import no.utility.Utils;
 
 public class ProfileAggregate implements Serializable {
 	

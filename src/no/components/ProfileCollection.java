@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import no.utility.Utils;
+import utility.Utils;
 
 public class ProfileCollection implements Serializable {
 		

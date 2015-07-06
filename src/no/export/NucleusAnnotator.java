@@ -11,6 +11,8 @@ import java.awt.Color;
 import java.util.List;
 
 import utility.Constants;
+import utility.Logger;
+import utility.Utils;
 import no.analysis.ProfileSegmenter;
 import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
@@ -20,8 +22,6 @@ import no.components.SignalCollection;
 import no.gui.ColourSelecter;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
-import no.utility.Logger;
-import no.utility.Utils;
 
 public class NucleusAnnotator {
 	

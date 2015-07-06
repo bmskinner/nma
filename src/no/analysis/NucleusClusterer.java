@@ -14,7 +14,7 @@ import no.collections.NucleusCollection;
 import no.components.Profile;
 import no.components.ProfileCollection;
 import no.nuclei.Nucleus;
-import no.utility.Logger;
+import utility.Logger;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
 import weka.clusterers.HierarchicalClusterer;

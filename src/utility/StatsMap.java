@@ -1,4 +1,4 @@
-package no.utility;
+package utility;
 
 import java.util.HashMap;
 import java.util.Set;

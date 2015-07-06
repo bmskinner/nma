@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import utility.Logger;
 import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
 import no.components.ShellResult;
 import no.nuclei.Nucleus;
-import no.utility.Logger;
 
 public class ShellAnalysis {
 	

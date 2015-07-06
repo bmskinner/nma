@@ -18,10 +18,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import utility.Logger;
 import no.components.AnalysisOptions;
 import no.components.XYPoint;
 import no.gui.MainWindow;
-import no.utility.Logger;
 import no.analysis.ImageAligner;
 
 public class NucleusRefinder

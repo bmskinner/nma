@@ -18,6 +18,9 @@ import java.io.Serializable;
 import java.util.*;
 
 import utility.Constants;
+import utility.Equation;
+import utility.Stats;
+import utility.Utils;
 import no.analysis.ProfileSegmenter;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
@@ -27,9 +30,6 @@ import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.export.TableExporter;
 import no.imports.ImageImporter;
-import no.utility.Equation;
-import no.utility.Stats;
-import no.utility.Utils;
 
 
 /**

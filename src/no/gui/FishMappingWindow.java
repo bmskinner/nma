@@ -34,12 +34,12 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputAdapter;
 
+import utility.Utils;
 import no.analysis.AnalysisDataset;
 import no.collections.NucleusCollection;
 import no.export.ImageExporter;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
-import no.utility.Utils;
 
 public class FishMappingWindow extends JDialog {
 

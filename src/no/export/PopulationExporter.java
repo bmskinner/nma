@@ -10,10 +10,10 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
+import utility.Logger;
 import no.analysis.AnalysisDataset;
 import no.collections.NucleusCollection;
 import no.nuclei.Nucleus;
-import no.utility.Logger;
 
 public class PopulationExporter {
 	

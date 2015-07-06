@@ -13,10 +13,10 @@ import ij.process.ImageProcessor;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
+import utility.Logger;
+import utility.Utils;
 import no.collections.NucleusCollection;
 import no.nuclei.Nucleus;
-import no.utility.Logger;
-import no.utility.Utils;
 
 public class CompositeExporter {
 

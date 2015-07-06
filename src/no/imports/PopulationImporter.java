@@ -8,10 +8,10 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Logger;
 import no.analysis.AnalysisDataset;
 import no.collections.NucleusCollection;
 import no.gui.MainWindow;
-import no.utility.Logger;
 
 public class PopulationImporter {
 	

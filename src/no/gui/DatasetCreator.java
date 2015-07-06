@@ -23,8 +23,6 @@ import no.components.Profile;
 import no.components.ShellResult;
 import no.components.XYPoint;
 import no.nuclei.Nucleus;
-import no.utility.Equation;
-import no.utility.Utils;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.jfree.data.category.CategoryDataset;
@@ -36,6 +34,9 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+
+import utility.Equation;
+import utility.Utils;
 
 public class DatasetCreator {
 	

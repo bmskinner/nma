@@ -8,7 +8,7 @@
 package no.analysis;
 import java.util.*;
 
-import no.utility.StatsMap;
+import utility.StatsMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

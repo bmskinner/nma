@@ -9,7 +9,7 @@ package no.components;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import no.utility.Utils;
+import utility.Utils;
 import ij.IJ;
 
 public class Profile implements Serializable {

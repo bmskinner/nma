@@ -4,7 +4,7 @@
 	-----------------------
 	Line equations
 */  
-package no.utility;
+package utility;
 
 import no.components.XYPoint;
 

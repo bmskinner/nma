@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import no.utility.Utils;
+import utility.Utils;
 
 // this will take columns of data, and write them out to a specified folder
 // Since the data is arbitrary and only for export, convert everything to strings. 

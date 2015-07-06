@@ -7,7 +7,7 @@
   from CLI with different parameter
 */
 
-package no.utility;
+package utility;
 
 import java.util.*;
 import java.util.Scanner;

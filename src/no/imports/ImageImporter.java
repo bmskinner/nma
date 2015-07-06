@@ -3,7 +3,7 @@ package no.imports;
 import java.io.File;
 
 import utility.Constants;
-import no.utility.Logger;
+import utility.Logger;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;

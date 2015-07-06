@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import utility.Logger;
 import no.collections.NucleusCollection;
 import no.components.AnalysisOptions;
 import no.export.CompositeExporter;
@@ -33,7 +34,6 @@ import no.gui.AnalysisSetupWindow;
 import no.gui.MainWindow;
 import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
-import no.utility.Logger;
 
 
 public class AnalysisCreator {

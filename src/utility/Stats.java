@@ -7,7 +7,7 @@
   other classes
 */
 
- package no.utility;
+ package utility;
 
  import java.util.*;
 

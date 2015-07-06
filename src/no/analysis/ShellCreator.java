@@ -23,9 +23,9 @@ import java.io.File;
 import java.util.*;
 
 import utility.Constants;
+import utility.Logger;
+import utility.Utils;
 import no.nuclei.*;
-import no.utility.Logger;
-import no.utility.Utils;
 import no.components.*;
 import no.export.ImageExporter;
 import no.imports.ImageImporter;

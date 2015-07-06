@@ -1,8 +1,8 @@
 package no.analysis;
 
+import utility.Logger;
 import no.collections.NucleusCollection;
 import no.nuclei.Nucleus;
-import no.utility.Logger;
 
 public class CollectionFilterer {
 

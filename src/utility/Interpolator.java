@@ -1,4 +1,4 @@
-package no.utility;
+package utility;
 
 import ij.measure.CurveFitter;
 

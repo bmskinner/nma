@@ -15,7 +15,7 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
-import no.utility.Stats;
+import utility.Stats;
 
 /**
  *

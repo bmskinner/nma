@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Logger;
 import no.collections.NucleusCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
@@ -17,7 +18,6 @@ import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.PigSpermNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
-import no.utility.Logger;
 
 /**
  * This is the core of the morphology analysis pipeline.

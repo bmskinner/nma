@@ -39,7 +39,6 @@ import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
-import no.utility.TreeOrderHashMap;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -116,6 +115,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import utility.Constants;
+import utility.TreeOrderHashMap;
 
 import javax.swing.JTabbedPane;
 

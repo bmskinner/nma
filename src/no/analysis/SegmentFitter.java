@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import utility.Utils;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.nuclei.Nucleus;
-import no.utility.Utils;
 
 /**
  * This takes a median profile plus segments, and a real profile plus segments from
