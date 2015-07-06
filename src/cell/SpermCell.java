@@ -21,5 +21,38 @@ public class SpermCell implements Cell, Serializable {
 	public SpermCell(){
 		this.uuid = java.util.UUID.randomUUID();
 	}
+
+	public UUID getUuid() {
+		return uuid;
+	}
+
+	public Nucleus getNucleus() {
+		return nucleus;
+	}
+
+	public void setNucleus(Nucleus nucleus) {
+		this.nucleus = nucleus;
+	}
+
+	public Flagellum getTail() {
+		return tail;
+	}
+
+	public void setTail(Flagellum tail) {
+		this.tail = tail;
+	}
+
+	public List<Mitochondrion> getMitochondria() {
+		return mitochondria;
+	}
+
+	public void setMitochondria(List<Mitochondrion> mitochondria) {
+		this.mitochondria = mitochondria;
+	}
+	
+	public void addMitochondrion(Mitochondrion mitochondrion) {
+		this.mitochondria.add(mitochondrion);
+	}
+	
 	
 }

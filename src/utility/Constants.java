@@ -22,9 +22,11 @@ public class Constants {
 		
 		
 		// structural components of the cell
-		public static final int COMPONENT_NUCLEUS 		= 0;
-		public static final int COMPONENT_SPERM_TAIL	= 1;
-		public static final int COMPONENT_MITOCHONDRION = 2;
+		public static final String COMPONENT_NUCLEUS		= "Nucleus";
+		public static final String COMPONENT_SPERM_TAIL		= "Sperm tail";
+		public static final String COMPONENT_MITOCHONDRION	= "Mitochondria";
+		public static final String COMPONENT_NUCLEAR_SIGNAL	= "Nuclear signal";
+		public static final String COMPONENT_ACROSOME		= "Acrosome";
 		
 		
 		

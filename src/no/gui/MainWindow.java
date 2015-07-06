@@ -2927,6 +2927,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		JMenuItem replaceFolderMenuItem = new JMenuItem(new ReplaceNucleusFolderAction());
 		JMenuItem exportStatsMenuItem = new JMenuItem(new ExportDatasetStatsAction());
 		JMenuItem applySegmentationMenuItem = new JMenuItem(new ApplySegmentProfileAction());
+		JMenuItem addTailStainMenuItem = new JMenuItem(new AddTailStainAction());
 				
 		public PopulationListPopupMenu() {
 			
@@ -2945,6 +2946,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			this.addSeparator();
 			this.add(replaceFolderMenuItem);
 			this.add(applySegmentationMenuItem);
+			this.addSeparator();
+			this.add(addTailStainMenuItem);
 	    }
 		
 		public void enableAll(){
@@ -3651,6 +3654,47 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		}
 	}
+	
+	/**
+	 * Add a images containing tubulin stained tails
+	 * @author bms41
+	 *
+	 */
+	class AddTailStainAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+		public AddTailStainAction() {
+			super("Add tail stain");
+		}
+		// note - this will overwrite the stats for any collection with the same name in the output folder
+		public void actionPerformed(ActionEvent e) {
+
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(datasets.size()==1){
+				// TODO make new thread
+				Thread thr = new Thread() {
+					public void run() {
+
+						AnalysisDataset d = datasets.get(0);
+						try{
+							
+							// create dialog to get image folder and channel
+							// run tail detector
+							
+							
+						} catch(Exception e1){
+							log("Error adding tail stain: "+e1.getMessage());
+						}
+					}
+				};
+				thr.run();
+			}
+
+		}
+	}
+	
+	
 	/**
 	 * Create a new NucleusCollection of the same class as the given dataset
 	 * @param template the dataset to base on for analysis options, folders

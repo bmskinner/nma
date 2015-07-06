@@ -1,5 +1,6 @@
 package components;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.UUID;
 
@@ -17,8 +18,13 @@ public class SpermTail implements Flagellum, Serializable {
 	
 	private UUID uuid;
 	
-	public SpermTail(){
+	protected File sourceFile;    // the image from which the tail came
+	protected int sourceChannel; // the channel in the source image
+	
+	public SpermTail(File source, int channel){
 		this.uuid = java.util.UUID.randomUUID();
+		this.sourceFile = source;
+		this.sourceChannel = channel;
 	}
 
 }

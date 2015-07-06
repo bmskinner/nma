@@ -53,9 +53,13 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 	private AnalysisOptions analysisOptions = new AnalysisOptions();
 
+	// types of nucleus
 	private static final String RODENT_SPERM_NUCLEUS = "Rodent sperm";
 	private static final String PIG_SPERM_NUCLEUS = "Pig sperm";
 	private static final String ROUND_NUCLEUS = "Round nucleus";
+	
+	// types of signal
+	
 	
 	private static final double DEFAULT_CANNY_LOW_THRESHOLD = 0.1;
 	private static final double DEFAULT_CANNY_HIGH_THRESHOLD = 1.5;
@@ -127,7 +131,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private JSpinner maxSignalFractSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MAX_SIGNAL_FRACTION, 0, 1, 0.05));
 
 
-	private JComboBox nucleusSelectionBox;
+	private JComboBox<String> nucleusSelectionBox;
 
 	private JCheckBox refoldCheckBox;
 	private JRadioButton refoldFastButton = new JRadioButton("Fast");
@@ -219,7 +223,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		//		JLabel lblNucleusType = new JLabel("Nucleus type");
 		panel.add(new JLabel("Nucleus type"));
 
-		nucleusSelectionBox = new JComboBox(nucleusClassTypes.keySet().toArray(new String[0]));
+		nucleusSelectionBox = new JComboBox<String>(nucleusClassTypes.keySet().toArray(new String[0]));
 		nucleusSelectionBox.setSelectedIndex(1);
 		nucleusSelectionBox.setActionCommand("Nucleus type");
 		nucleusSelectionBox.addActionListener(this);

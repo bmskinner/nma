@@ -79,6 +79,7 @@ public class ImageImporter {
 		return result;
 	}
 	
+	
 	/**
 	 * @param image the image to convert
 	 * @return a stack with the input image as position 0
