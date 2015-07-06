@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import no.collections.NucleusCollection;
-import no.collections.RoundNucleusCollection;
 import no.components.NuclearSignal;
 import no.components.ShellResult;
 import no.nuclei.Nucleus;

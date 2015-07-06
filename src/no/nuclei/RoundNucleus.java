@@ -47,9 +47,7 @@ public class RoundNucleus
 	
 	private UUID uuid;// = java.util.UUID.randomUUID();
 	
-//	public static final int RED_CHANNEL   = 0;
-//	public static final int GREEN_CHANNEL = 1;
-//	public static final int BLUE_CHANNEL  = 2;
+	private Class<?> nucleusClass;
 	
 
 	// for debugging - use in calling dumpInfo()

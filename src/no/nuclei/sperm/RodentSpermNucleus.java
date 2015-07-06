@@ -24,6 +24,8 @@ extends SpermNucleus
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	public String DEFAULT_REFERENCE_POINT = "tip";
 
 	private List<NucleusBorderPoint> hookRoi;
 	private List<NucleusBorderPoint> humpRoi;

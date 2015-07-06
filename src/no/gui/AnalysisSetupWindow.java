@@ -41,9 +41,6 @@ import java.util.Map;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import no.collections.PigSpermNucleusCollection;
-import no.collections.RodentSpermNucleusCollection;
-import no.collections.RoundNucleusCollection;
 import no.components.AnalysisOptions;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.PigSpermNucleus;
@@ -82,15 +79,15 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private static final String DEFAULT_REFOLD_MODE = "Fast";
 	
 
-	private static Map<String, Class<?>>  collectionClassTypes;
+//	private static Map<String, Class<?>>  collectionClassTypes;
 	private static Map<String, Class<?>>  nucleusClassTypes;
 
 	static
 	{
-		collectionClassTypes = new HashMap<String, Class<?>>();
-		collectionClassTypes.put(RODENT_SPERM_NUCLEUS, RodentSpermNucleusCollection.class);
-		collectionClassTypes.put(PIG_SPERM_NUCLEUS, PigSpermNucleusCollection.class);
-		collectionClassTypes.put(ROUND_NUCLEUS, RoundNucleusCollection.class);
+//		collectionClassTypes = new HashMap<String, Class<?>>();
+//		collectionClassTypes.put(RODENT_SPERM_NUCLEUS, RodentSpermNucleusCollection.class);
+//		collectionClassTypes.put(PIG_SPERM_NUCLEUS, PigSpermNucleusCollection.class);
+//		collectionClassTypes.put(ROUND_NUCLEUS, RoundNucleusCollection.class);
 
 		nucleusClassTypes = new HashMap<String, Class<?>>();
 		nucleusClassTypes.put(RODENT_SPERM_NUCLEUS, RodentSpermNucleus.class);
@@ -203,7 +200,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		analysisOptions.setXoffset(0);
 		analysisOptions.setYoffset(0);
 				
-		analysisOptions.setCollectionClass(RodentSpermNucleusCollection.class);
+//		analysisOptions.setCollectionClass(RodentSpermNucleusCollection.class);
 		analysisOptions.setNucleusClass(RodentSpermNucleus.class);
 		
 		analysisOptions.setUseCanny(false);
@@ -524,7 +521,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		if(e.getActionCommand().equals("Nucleus type")){
 			String type = (String) nucleusSelectionBox.getSelectedItem();
 			this.analysisOptions.setNucleusClass(nucleusClassTypes.get(type));
-			this.analysisOptions.setCollectionClass(collectionClassTypes.get(type));
+//			this.analysisOptions.setCollectionClass(collectionClassTypes.get(type));
 			
 			if(type.equals(ROUND_NUCLEUS)){
 				this.analysisOptions.setMinNucleusCirc(  0.0 );

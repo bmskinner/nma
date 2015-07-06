@@ -31,7 +31,7 @@ public class AnalysisOptions implements Serializable {
 	/**
 	 * The class of NucleusCollection to use in the analysis
 	 */
-	private Class<?> collectionClass;
+//	private Class<?> collectionClass;
 
 	/**
 	 * Should a reanalysis be performed?
@@ -118,9 +118,9 @@ public class AnalysisOptions implements Serializable {
 		return this.nucleusClass;
 	}
 
-	public Class<?> getCollectionClass(){
-		return this.collectionClass;
-	}
+//	public Class<?> getCollectionClass(){
+//		return this.collectionClass;
+//	}
 
 	public String getRefoldMode(){
 		return this.refoldMode;
@@ -186,9 +186,9 @@ public class AnalysisOptions implements Serializable {
 	}
 
 
-	public void setCollectionClass(Class<?> collectionClass) {
-		this.collectionClass = collectionClass;
-	}
+//	public void setCollectionClass(Class<?> collectionClass) {
+//		this.collectionClass = collectionClass;
+//	}
 
 
 	public void setPerformReanalysis(boolean performReanalysis) {

@@ -13,10 +13,7 @@ package no.analysis;
 import ij.IJ;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 
 import no.collections.NucleusCollection;
-import no.collections.RoundNucleusCollection;
 import no.components.AnalysisOptions;
 import no.export.CompositeExporter;
 import no.export.NucleusAnnotator;
@@ -36,6 +32,7 @@ import no.export.StatsExporter;
 import no.gui.AnalysisSetupWindow;
 import no.gui.MainWindow;
 import no.nuclei.Nucleus;
+import no.nuclei.RoundNucleus;
 import no.utility.Logger;
 
 
@@ -239,9 +236,11 @@ public class AnalysisCreator {
 			try{
 
 				nucleusCounts.put("input", r.getNucleusCount());
-				Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class, File.class});
-				NucleusCollection failedNuclei = (NucleusCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed", logger.getLogfile());
+//				Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class, File.class});
+//				NucleusCollection failedNuclei = (NucleusCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed", logger.getLogfile());
+				NucleusCollection failedNuclei = new NucleusCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), analysisOptions.getNucleusClass());
 
+				
 				mw.logc("Filtering collection...");
 				boolean ok = CollectionFilterer.run(r, failedNuclei); // put fails into failedNuclei, remove from r
 				if(ok){
@@ -250,7 +249,6 @@ public class AnalysisCreator {
 					mw.log("Error");
 				}
 
-				//			  r.refilterNuclei(failedNuclei); 
 				if(failedNuclei.getNucleusCount()>0){
 					mw.logc("Exporting failed nuclei...");
 					ok = CompositeExporter.run(failedNuclei);
@@ -261,15 +259,9 @@ public class AnalysisCreator {
 					}
 					nucleusCounts.put("failed", failedNuclei.getNucleusCount());
 				}
-
-			} catch(InstantiationException e){
+				
+			} catch(Exception e){
 				logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
-			} catch(IllegalAccessException e){
-				logger.log("Cannot access constructor: "+e.getMessage(), Logger.ERROR);
-			} catch(InvocationTargetException e){
-				logger.log("Cannot invoke constructor: "+e.getMessage(), Logger.ERROR);
-			} catch(NoSuchMethodException e){
-				logger.log("Cannot find constructor: "+e.getMessage(), Logger.ERROR);
 			}
 
 			//		  mw.log(spacerString);
@@ -297,7 +289,7 @@ public class AnalysisCreator {
 			}
 
 			// Perform shell analysis with 5 shells by default
-			if(r.getClass() != RoundNucleusCollection.class){
+			if(r.getNucleusClass() != RoundNucleus.class){
 				logger.log("Not a round nucleus; skipping");
 			} else {
 				mw.logc("Running shell analysis...");
@@ -383,7 +375,7 @@ public class AnalysisCreator {
 				}
 
 				// Perform shell analysis with 5 shells by default
-				if(p.getClass() != RoundNucleusCollection.class){
+				if(p.getNucleusClass() != RoundNucleus.class){
 					logger.log("Not a round nucleus; skipping");
 				} else {
 					mw.logc("Running shell analysis...");
@@ -455,13 +447,18 @@ public class AnalysisCreator {
 		logger.log("Dividing population by signals...");
 		try{
 
-			Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+//			Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
 
 			List<Integer> channels = r.getSignalChannels();
 			for(int channel : channels){
 				List<Nucleus> list = r.getNucleiWithSignals(channel);
 				if(!list.isEmpty()){
-					NucleusCollection listCollection = (NucleusCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "Signals_in_channel_"+channel, r.getDebugFile());
+					NucleusCollection listCollection = new NucleusCollection(r.getFolder(), 
+							r.getOutputFolderName(), 
+							"Signals_in_channel_"+channel, 
+							r.getDebugFile(), 
+							r.getNucleusClass());
+					
 					for(Nucleus n : list){
 						listCollection.addNucleus( n );
 					}
@@ -469,7 +466,12 @@ public class AnalysisCreator {
 
 					List<Nucleus> notList = r.getNucleiWithSignals(-channel);
 					if(!notList.isEmpty()){
-						NucleusCollection notListCollection = (NucleusCollection) collectionConstructor.newInstance(r.getFolder(), r.getOutputFolderName(), "No_signals_in_channel_"+channel, r.getDebugFile());
+						NucleusCollection notListCollection = new NucleusCollection(r.getFolder(), 
+								r.getOutputFolderName(), 
+								"No_signals_in_channel_"+channel, 
+								r.getDebugFile(), 
+								r.getNucleusClass());
+						
 						for(Nucleus n : notList){
 							notListCollection.addNucleus( n );
 						}
@@ -479,14 +481,8 @@ public class AnalysisCreator {
 				}
 			}
 
-		} catch(InstantiationException e){
+		} catch(Exception e){
 			logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
-		} catch(IllegalAccessException e){
-			logger.log("Cannot access constructor: "+e.getMessage(), Logger.ERROR);
-		} catch(InvocationTargetException e){
-			logger.log("Cannot invoke constructor: "+e.getMessage(), Logger.ERROR);
-		} catch(NoSuchMethodException e){
-			logger.log("Cannot find constructor: "+e.getMessage(), Logger.ERROR);
 		}
 
 		return signalPopulations;
@@ -528,7 +524,7 @@ public class AnalysisCreator {
 			outLine.append("\tSignal max. fraction: "+analysisOptions.getMaxSignalFraction()+"\r\n");
 			outLine.append("\tAngle profile window: "+analysisOptions.getAngleProfileWindowSize()+"\r\n");
 			outLine.append("\tNucleus class       : "+analysisOptions.getNucleusClass().getSimpleName()+"\r\n");
-			outLine.append("\tCollection class    : "+analysisOptions.getCollectionClass().getSimpleName()+"\r\n");
+//			outLine.append("\tCollection class    : "+analysisOptions.getCollectionClass().getSimpleName()+"\r\n");
 			outLine.append("\tRefolding mode      : "+analysisOptions.getRefoldMode()+"\r\n");
 			outLine.append("-------------------------\r\n");
 			outLine.append("Populations:\r\n");

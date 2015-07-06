@@ -14,9 +14,9 @@ import components.Mitochondrion;
  * @author bms41
  *
  */
-public interface Cell {
+public interface Cell extends Nucleus, Flagellum {
 
-	public UUID getUuid();
+	public UUID getCellId();
 
 	public Nucleus getNucleus();
 

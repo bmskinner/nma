@@ -11,8 +11,12 @@ import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileAggregate;
 import no.components.ProfileCollection;
+import no.components.ProfileFeature;
 import no.export.TableExporter;
 import no.nuclei.Nucleus;
+import no.nuclei.RoundNucleus;
+import no.nuclei.sperm.PigSpermNucleus;
+import no.nuclei.sperm.RodentSpermNucleus;
 import no.utility.Logger;
 
 /**
@@ -79,7 +83,7 @@ public class MorphologyAnalysis {
 		createProfileAggregateFromPoint(collection, pointType);
 		
 		// use the median profile of this aggregate to find the tail point
-		collection.findTailIndexInMedianCurve();
+		findTailIndexInMedianCurve(collection);
 		
 		// carry out iterative offsetting to refine the tail point estimate
 		double score = compareProfilesToMedian(collection, pointType);
@@ -88,8 +92,8 @@ public class MorphologyAnalysis {
 			createProfileAggregateFromPoint(collection, pointType);
 			
 			// we need to allow each nucleus collection type handle tail finding and offsetting itself
-			collection.findTailIndexInMedianCurve();
-			collection.calculateOffsets(); 
+			findTailIndexInMedianCurve(collection);
+			calculateOffsets(collection); 
 
 			prevScore = score;
 			score = compareProfilesToMedian(collection, pointType);
@@ -102,6 +106,180 @@ public class MorphologyAnalysis {
 		createProfileAggregateFromPoint(collection, collection.getOrientationPoint());
 
 	}
+	
+	
+	  /*
+    
+  */
+
+	/**
+	 * Identify tail in median profile and offset nuclei profiles. For a 
+	 * regular round nucleus, the tail is one of the points of longest
+	 *  diameter, and lowest angle
+	 * @param collection the nucleus collection
+	 * @param nucleusClass the class of nucleus
+	 */
+	public static void findTailIndexInMedianCurve(NucleusCollection collection){
+
+		if(collection.getNucleusClass() == RoundNucleus.class){
+
+			ProfileCollection pc = collection.getProfileCollection();
+
+			Profile medianProfile = pc.getProfile(collection.getReferencePoint());
+
+			int tailIndex = (int) Math.floor(medianProfile.size()/2);
+
+			Profile tailProfile = medianProfile.offset(tailIndex);
+			pc.addProfile(collection.getOrientationPoint(), tailProfile);
+			pc.addFeature(collection.getReferencePoint(), new ProfileFeature(collection.getOrientationPoint(), tailIndex));
+		}
+
+		if(collection.getNucleusClass() == PigSpermNucleus.class){
+			Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
+
+			Profile minima = medianProfile.getLocalMaxima(5); // window size 5
+
+			//    double minDiff = medianProfile.size();
+			double minAngle = 180;
+			int tailIndex = 0;
+
+			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
+			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
+
+			if(minima.size()==0){
+				IJ.log("    Error: no minima found in median line");
+				tailIndex = 100; // set to roughly the middle of the array for the moment
+
+			} else{
+
+				for(int i = 0; i<minima.size();i++){
+					if(minima.get(i)==1){
+						int index = (int)minima.get(i);
+
+						//          int toEnd = medianProfile.size() - index;
+						//          int diff = Math.abs(index - toEnd);
+
+						double angle = medianProfile.get(index);
+						if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
+							minAngle = angle;
+							tailIndex = index;
+						}
+					}
+				}
+			}
+			// IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
+			Profile tailProfile = medianProfile.offset(tailIndex);
+			collection.getProfileCollection().addProfile("tail", tailProfile);
+			collection.getProfileCollection().addFeature("head", new ProfileFeature("tail", tailIndex));
+		}
+
+		if(collection.getNucleusClass() == RodentSpermNucleus.class){
+			// can't use regular tail detector, because it's based on NucleusBorderPoints
+			// get minima in curve, then find the lowest minima / minima furthest from both ends
+
+			Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
+
+			Profile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
+
+			//		double minDiff = medianProfile.size();
+			double minAngle = 180;
+			int tailIndex = 0;
+
+			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
+			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
+
+			for(int i = 0; i<minima.size();i++){
+				if( (int)minima.get(i)==1){
+					int index = i;
+
+					double angle = medianProfile.get(index);
+					if(angle<minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
+						minAngle = angle;
+						tailIndex = index;
+					}
+				}
+			}
+			Profile tailProfile = medianProfile.offset(tailIndex);
+			collection.getProfileCollection().addProfile(collection.getOrientationPoint(), tailProfile);
+			collection.getProfileCollection().addFeature(collection.getReferencePoint(), new ProfileFeature(collection.getOrientationPoint(), tailIndex)); // set the tail-index in the tip normalised profile
+		}
+	}
+	
+	
+	/**
+	 * Offset the position of the tail in each nucleus based on the difference to the median
+	 * @param collection the nuclei
+	 * @param nucleusClass the class of nucleus
+	 */
+	public static void calculateOffsets(NucleusCollection collection){
+
+		if(collection.getNucleusClass() == RoundNucleus.class){
+
+
+			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
+
+			for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
+				Nucleus n = collection.getNucleus(i);
+
+				// returns the positive offset index of this profile which best matches the median profile
+				int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+				n.addBorderTag(collection.getReferencePoint(), newHeadIndex);
+
+				// check if flipping the profile will help
+
+				double differenceToMedian1 = n.getAngleProfile(collection.getReferencePoint()).differenceToProfile(medianToCompare);
+				n.reverse();
+				double differenceToMedian2 = n.getAngleProfile(collection.getReferencePoint()).differenceToProfile(medianToCompare);
+
+				if(differenceToMedian1<differenceToMedian2){
+					n.reverse(); // put it back if no better
+				}
+
+				// also update the tail position
+				int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+				n.addBorderTag("tail", tailIndex);
+			}
+		}
+		
+		if(collection.getNucleusClass() == RodentSpermNucleus.class){
+			
+			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getOrientationPoint()); // returns a median profile
+
+		    for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
+		      RodentSpermNucleus n = (RodentSpermNucleus)collection.getNucleus(i);
+
+
+		      // THE NEW WAY
+		      int newTailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+
+		      n.addBorderTag("tail", newTailIndex);
+
+		      // also update the head position
+		      int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
+		      n.addBorderTag("head", headIndex);
+		      n.splitNucleusToHeadAndHump();
+		    }
+			
+		}
+		
+		if(collection.getNucleusClass() == PigSpermNucleus.class){
+			Profile medianToCompare = collection.getProfileCollection().getProfile("head"); // returns a median profile with head at 0
+
+			for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
+				PigSpermNucleus n = (PigSpermNucleus)collection.getNucleus(i);
+
+				// returns the positive offset index of this profile which best matches the median profile
+				int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+
+				n.addBorderTag("head", newHeadIndex);
+
+				// also update the head position
+				int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+				n.addBorderTag("tail", tailIndex);
+			}
+		}
+	}
+
 	
 	/**
 	 * When a population needs to be reanalysed do not offset nuclei or recalculate best fits;

@@ -1,164 +1,683 @@
+/* 
+  -----------------------
+  NUCLEUS COLLECTION CLASS
+  -----------------------
+  This class contains the nuclei that pass detection criteria
+  Provides aggregate stats
+  It enables offsets to be calculated based on the median normalised curves
+*/
+
 package no.collections;
 
-import no.nuclei.Nucleus;
-
 import java.io.File;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
+import utility.Constants;
+import no.collections.NucleusCollection;
 import no.components.AnalysisOptions;
 import no.components.NuclearSignal;
+import no.components.NucleusBorderSegment;
+import no.components.Profile;
 import no.components.ProfileCollection;
+import no.components.ProfileFeature;
 import no.components.ShellResult;
+import no.nuclei.Nucleus;
+import no.nuclei.RoundNucleus;
+import no.nuclei.sperm.PigSpermNucleus;
+import no.nuclei.sperm.RodentSpermNucleus;
+import no.utility.Stats;
 
-public interface NucleusCollection
+public class NucleusCollection
+implements Serializable 
 {
-//	public static final int CHART_WINDOW_HEIGHT     = 400;
-//	public static final int CHART_WINDOW_WIDTH      = 500;
-//	public static final int CHART_TAIL_BOX_Y_MIN    = 325;
-//	public static final int CHART_TAIL_BOX_Y_MID    = 340;
-//	public static final int CHART_TAIL_BOX_Y_MAX    = 355;
-//	public static final int CHART_SIGNAL_Y_LINE_MIN = 275;
-//	public static final int CHART_SIGNAL_Y_LINE_MAX = 315;
-	
+
 	public static final String REGULAR_PROFILE = "regular";
 	public static final String FRANKEN_PROFILE = "franken";
 	
-	public String DEFAULT_REFERENCE_POINT = null;
-
-	public void addNucleus(Nucleus r);
-	public void addConsensusNucleus(Nucleus n);
-
-//	public void annotateAndExportNuclei();
-
-	/**
-	 * Find the Nucleus with a profile most closely matching the median 
-	 * of the population
-	 * 
-	 * @param pointType the median profile type to search
-	 * @return the nucleus
-	 */
-	public Nucleus getNucleusMostSimilarToMedian(String pointType);
-
+	private static final long serialVersionUID = 1L;
+	private File folder; // the source of the nuclei
+	private String outputFolder;
+	private File debugFile;
+	private String collectionType; // for annotating image names
+	private String name;
+	private UUID guid;
 	
-	public Nucleus getConsensusNucleus();
+	private Class<?> nucleusClass;
+		
+//	private String DEFAULT_REFERENCE_POINT = "head";
+//	private String DEFAULT_ORIENTAITION_POINT = "tail";
+
+	//this holds the mapping of tail indexes etc in the median profile arrays
+	protected Map<String, ProfileCollection> profileCollections = new HashMap<String, ProfileCollection>();
+		
+	private Nucleus consensusNucleus;
 	
-//	public AnalysisOptions getAnalysisOptions();
-//	public void setAnalysisOptions(AnalysisOptions analysisOptions);
-	/*
-		-----------------------
-		Getters for aggregate stats
-		-----------------------
-	*/
-	
-	public void setName(String s);
-	public String getName();
-	public UUID getID();
-	
-	public Nucleus getNucleus(UUID id);
-	public List<Nucleus> getNuclei(File imageFile);
-	
-	public String getReferencePoint();
-	public String getOrientationPoint();
+//	private AnalysisOptions analysisOptions;
+//	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 
-	public File getFolder();
-	
-	public File getOutputFolder();
-	
-	public String getOutputFolderName();
+	private List<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
+	private Map<UUID, Nucleus> mappedCollection  = new HashMap<UUID, Nucleus>();
 
-	public File getDebugFile();
+  public NucleusCollection(File folder, String outputFolder, String type, File debugFile, Class<?> nucleusClass){
+	  this.folder = folder;
+	  this.outputFolder = outputFolder;
+	  this.debugFile = debugFile;
+	  this.collectionType = type;
+	  this.name = outputFolder+" - "+type;
+	  this.guid = java.util.UUID.randomUUID();
+	  this.nucleusClass = nucleusClass;
+	  profileCollections.put(NucleusCollection.REGULAR_PROFILE, new ProfileCollection());
+  }
 
-	public String getType();
-	
-	public List<File> getImageFiles();
+  /*
+    -----------------------
+    Define adders for all
+    types of nucleus eligable
+    -----------------------
+  */
+  
+  public void setName(String s){
+	  this.name = s;
+  }
+  
+  public String getName(){
+	  return this.name;
+  }
+  
+  public UUID getID(){
+	  return this.guid;
+  }
 
-	public double[] getPerimeters();
-
-	public double[] getAreas();
-
-	public double[] getFerets();
-	
-	public double[] getMinFerets();
-
-	public double[] getPathLengths();
-
-	public double[] getArrayLengths();
-
-	public double[] getMedianDistanceBetweenPoints();
-
-	public String[] getNucleusPaths();
-
-	public String[] getCleanNucleusPaths();
-
-	public double[][] getPositions();
-
-	public int getNucleusCount();
-
-	public List<Nucleus> getNuclei();
-
-	public Nucleus getNucleus(int i);
-	
-	public List<Integer> getSignalChannels();
-	public int getSignalCount(int channel);
-
-	public int getRedSignalCount();
-
-	public int getGreenSignalCount();
-	
-	public boolean hasSignals(int channel);
-	public boolean hasSignals();
-	public boolean hasConsensusNucleus();
-	
-//	public void addShellResult(int channel, ShellResult result);
-//	public ShellResult getShellResult(int channel);
-//	public boolean hasShellResult();
-
-	// allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
-	public double getMedianNuclearArea();
-
-	public double getMedianNuclearPerimeter();
-
-	public double getMedianPathLength();
-
-	public double getMedianArrayLength();
-
-	public double getMedianFeretLength();
-
-	public double getMaxProfileLength();
-	
-	public double getMedianSignalDistance(int channel);
-	public double getMedianSignalFeret(int channel);
-	public double getMedianSignalAngle(int channel);
-	public double getMedianSignalArea(int channel);
-	
-	public int getProfileWindowSize();
-
-	public List<Nucleus> getNucleiWithSignals(int channel);
-
-	public double[] getDifferencesToMedianFromPoint(String pointType);
-
-	public int[] getPointIndexes(String pointType);
-
-	public double[] getPointToPointDistances(String pointTypeA, String pointTypeB);
-
-	public String getLogFileName(String filename);
+  public void addNucleus(Nucleus r){
+	  this.nucleiCollection.add(r);
+	  this.mappedCollection.put(r.getID(), r);
+  }
+    
+  public boolean hasConsensusNucleus(){
+	  if(this.consensusNucleus==null){
+		  return false;
+	  } else {
+		  return true;
+	  }
+  }
 
 
-	public ProfileCollection getProfileCollection();
-	public ProfileCollection getFrankenCollection();
-	public void setFrankenCollection (ProfileCollection frankenCollection);
-	
-	
-	public void findTailIndexInMedianCurve();
-	
-	public void calculateOffsets();
-	
-	public int getSignalCount();
-	
-	public List<NuclearSignal> getSignals(int channel);
-	
-	public List<String> getSegmentNames();
-	
+  public void addConsensusNucleus(Nucleus n){
+	  this.consensusNucleus = n;
+  }
+    
+  /*
+    -----------------------
+    Getters
+    -----------------------
+  */
+  public Nucleus getNucleus(UUID id){
+	  return this.mappedCollection.get(id);
+  }
+  
+  public Class<?> getNucleusClass(){
+	  return this.nucleusClass;
+  }
+  
+  public Nucleus getConsensusNucleus(){
+	  return this.consensusNucleus;
+  }
+  
+  public String getReferencePoint(){
+	  	  
+	  if(this.nucleusClass == PigSpermNucleus.class){
+		  return Constants.PIG_SPERM_NUCLEUS_REFERENCE_POINT;
+	  }
+	  
+	  if(this.nucleusClass == RodentSpermNucleus.class){
+		  return Constants.RODENT_SPERM_NUCLEUS_REFERENCE_POINT;
+	  }
+	  
+	  // default if not defined above
+	  return Constants.ROUND_NUCLEUS_REFERENCE_POINT;
 
+  }
+  
+  public String getOrientationPoint(){
+	  if(this.nucleusClass == PigSpermNucleus.class){
+		  return Constants.PIG_SPERM_NUCLEUS_ORIENTATION_POINT;
+	  }
+	  
+	  if(this.nucleusClass == RodentSpermNucleus.class){
+		  return Constants.RODENT_SPERM_NUCLEUS_ORIENTATION_POINT;
+	  }
+	  
+	  // default if not defined above
+	  return Constants.ROUND_NUCLEUS_ORIENTATION_POINT;
+  }
+  
+  public ProfileCollection getProfileCollection(String type){
+	  if(this.profileCollections.containsKey(type)){
+		  return this.profileCollections.get(type);
+	  } else {
+		  throw new IllegalArgumentException("ProfileCollection key "+type+" not present");
+	  }
+  }
+  
+  public void setProfileCollection(String type, ProfileCollection p){
+	  this.profileCollections.put(type, p);
+  }
+  
+  public ProfileCollection getProfileCollection(){
+	  return getProfileCollection(NucleusCollection.REGULAR_PROFILE);
+  }
+  
+  public ProfileCollection getFrankenCollection(){
+	  return getProfileCollection(NucleusCollection.FRANKEN_PROFILE);
+  }
+  
+  public void setFrankenCollection (ProfileCollection frankenCollection){
+	  this.setProfileCollection(NucleusCollection.FRANKEN_PROFILE, frankenCollection);
+  }
+
+  public File getFolder(){
+    return this.folder;
+  }
+
+  public String getOutputFolderName(){
+    return this.outputFolder;
+  }
+  
+  public File getOutputFolder(){
+	    return new File(this.getFolder()+File.separator+this.getOutputFolderName());
+	  }
+  
+  
+
+  public File getDebugFile(){
+    return this.debugFile;
+  }
+
+  public String getType(){
+    return this.collectionType;
+  }
+  
+  /**
+   * Get the distinct source image file list for all nuclei in the collection 
+   * @return
+   */
+  public List<File> getImageFiles(){
+	  List<File> result = new ArrayList<File>(0);
+	  for(Nucleus n : this.getNuclei()){
+		  
+		  if(!result.contains( n.getSourceFile() )){
+			  result.add(n.getSourceFile());
+		  }
+	  }
+	  return result;
+  }
+
+  public double[] getPerimeters(){
+
+    double[] d = new double[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      d[i] = nucleiCollection.get(i).getPerimeter();
+    }
+    return d;
+  }
+
+  public double[] getAreas(){
+
+    double[] d = new double[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      d[i] = nucleiCollection.get(i).getArea();
+    }
+    return d;
+  }
+
+  public double[] getFerets(){
+
+    double[] d = new double[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      d[i] = nucleiCollection.get(i).getFeret();
+    }
+    return d;
+  }
+  
+  public double[] getMinFerets(){
+
+	    double[] d = new double[nucleiCollection.size()];
+
+	    for(int i=0;i<nucleiCollection.size();i++){
+	      d[i] = nucleiCollection.get(i).getNarrowestDiameter();
+	    }
+	    return d;
+	  }
+
+  public double[] getPathLengths(){
+
+    double[] d = new double[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      d[i] = nucleiCollection.get(i).getPathLength();
+    }
+    return d;
+  }
+
+  public double[] getArrayLengths(){
+
+    double[] d = new double[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      d[i] = nucleiCollection.get(i).getLength();
+    }
+    return d;
+  }
+
+  public double[] getMedianDistanceBetweenPoints(){
+
+    double[] d = new double[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      d[i] = nucleiCollection.get(i).getMedianDistanceBetweenPoints();
+    }
+    return d;
+  }
+
+  public String[] getNucleusPaths(){
+    String[] s = new String[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      s[i] = nucleiCollection.get(i).getPath(); //+"-"+nucleiCollection.get(i).getNucleusNumber();
+    }
+    return s;
+  }
+
+  public String[] getCleanNucleusPaths(){
+    String[] s = new String[nucleiCollection.size()];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      Nucleus n = nucleiCollection.get(i);
+      s[i] = n.getPath();
+    }
+    return s;
+  }
+
+  public double[][] getPositions(){
+    double[][] s = new double[nucleiCollection.size()][4];
+
+    for(int i=0;i<nucleiCollection.size();i++){
+      s[i] = nucleiCollection.get(i).getPosition();
+    }
+    return s;
+  }
+
+  public int getNucleusCount(){
+    return this.nucleiCollection.size();
+  }
+
+  public List<Nucleus> getNuclei(){
+    return this.nucleiCollection;
+  }
+
+  public Nucleus getNucleus(int i){
+    return this.nucleiCollection.get(i);
+  }
+  
+  /**
+   * Get the nuclei within the specified image
+   * @param image the file to search
+   * @return the list of nuclei
+   */
+  public List<Nucleus> getNuclei(File imageFile){
+	  List<Nucleus> result = new ArrayList<Nucleus>(0);
+	  for(Nucleus n : this.getNuclei()){
+		  if(n.getSourceFile().equals(imageFile)){
+			  result.add(n);
+		  }
+	  }
+	  return result;
+  }
+
+  public int getRedSignalCount(){
+    int count = 0;
+    for(int i=0;i<nucleiCollection.size();i++){
+      count += nucleiCollection.get(i).getSignalCount(1);
+    }
+    return count;
+  }
+
+  public int getGreenSignalCount(){
+    int count = 0;
+    for(int i=0;i<nucleiCollection.size();i++){
+      count += nucleiCollection.get(i).getSignalCount(2);
+    }
+    return count;
+  }
+  
+  /**
+   * Find the signal channels present within the nuclei of the collection
+   * @return the list of channels. Order is not guaranteed
+   */
+  public List<Integer> getSignalChannels(){
+	  List<Integer> result = new ArrayList<Integer>(0);
+	  for(int i= 0; i<this.getNucleusCount();i++){
+		  Nucleus n = this.getNucleus(i);
+		  for( int channel : n.getSignalCollection().getChannels()){
+			  if(!result.contains(channel)){
+				  result.add(channel);
+			  }
+		  }
+	  } // end nucleus iterations
+	  return result;
+  }
+  
+  /**
+   * Find the total number of signals within all nuclei of the collection.
+   * @return the total
+   */
+  public int getSignalCount(){
+	  int count = 0;
+	  for(int i : this.getSignalChannels()){
+		  count+= this.getSignalCount(i);
+	  }
+	  return count;
+  }
+  
+  /**
+   * Get the number of signals in the given channel
+   * @param channel the channel to search
+   * @return the count
+   */
+  public int getSignalCount(int channel){
+	  int count = 0;
+	  for(int i= 0; i<this.getNucleusCount();i++){
+		  Nucleus n = this.getNucleus(i);
+		  count += n.getSignalCount(channel);
+
+	  } // end nucleus iterations
+	  return count;
+  }
+
+  /**
+   * Test whether the current population has signals in any channel
+   * @return
+   */
+  public boolean hasSignals(){
+	  for(int i : this.getSignalChannels()){
+		  if(this.hasSignals(i)){
+			  return true;
+		  }
+	  }
+	  return false;
+  }
+
+  /**
+   * Test whether the current population has signals in the given channel
+   * @return
+   */
+  public boolean hasSignals(int channel){
+	  if(this.getSignalCount(channel)>0){
+		  return true;
+	  } else{
+		  return false;
+	  }
+
+  }
+
+  /**
+   * Get all the signals from all nuclei in the given channel
+   * @param channel the channel to search
+   * @return a list of signals
+   */
+  public List<NuclearSignal> getSignals(int channel){
+
+	  List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
+
+	  for(int i= 0; i<this.getNucleusCount();i++){
+		  Nucleus n = this.getNucleus(i);
+		  result.addAll(n.getSignals(channel));
+
+	  } // end nucleus iterations
+	  return result;
+  }
+  
+  // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
+  public double getMedianNuclearArea(){
+    double[] areas = this.getAreas();
+    double median = Stats.quartile(areas, 50);
+    return median;
+  }
+
+  public double getMedianNuclearPerimeter(){
+    double[] p = this.getPerimeters();
+    double median = Stats.quartile(p, 50);
+    return median;
+  }
+
+  public double getMedianPathLength(){
+    double[] p = this.getPathLengths();
+    double median = Stats.quartile(p, 50);
+    return median;
+  }
+
+  public double getMedianArrayLength(){
+    double[] p = this.getArrayLengths();
+    double median = Stats.quartile(p, 50);
+    return median;
+  }
+
+  public double getMedianFeretLength(){
+    double[] p = this.getFerets();
+    double median = Stats.quartile(p, 50);
+    return median;
+  }
+
+  public double getMaxProfileLength(){
+	  return Stats.max(this.getArrayLengths());
+  }
+  
+  public int getProfileWindowSize(){
+	  return this.getNucleus(0).getAngleProfileWindowSize();
+  }
+  
+  /**
+   * Get the median area of the signals in the given channel
+   * @param channel
+   * @return the median area
+   */
+  public double getMedianSignalArea(int channel){
+	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Double> a = new ArrayList<Double>(0);
+	  for(Nucleus n : nuclei){
+		  a.addAll(n.getSignalCollection().getAreas(channel));
+
+	  }
+	  return Stats.quartile(a.toArray(new Double[0]), 50);
+  }
+  
+  /**
+   * Get the median angle of the signals in the given channel
+   * @param channel
+   * @return the median angle
+   */
+  public double getMedianSignalAngle(int channel){
+	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Double> a = new ArrayList<Double>(0);
+	  for(Nucleus n : nuclei){
+		  a.addAll(n.getSignalCollection().getAngles(channel));
+
+	  }
+	  return Stats.quartile(a.toArray(new Double[0]), 50);
+  }
+  
+  /**
+   * Get the median feret of the signals in the given channel
+   * @param channel
+   * @return the median feret
+   */
+  public double getMedianSignalFeret(int channel){
+	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Double> a = new ArrayList<Double>(0);
+	  for(Nucleus n : nuclei){
+		  a.addAll(n.getSignalCollection().getFerets(channel));
+
+	  }
+	  return Stats.quartile(a.toArray(new Double[0]), 50);
+  }
+  
+  /**
+   * Get the median fractional distance from the nucleus CoM of the signals in the given channel
+   * @param channel
+   * @return the median distance
+   */
+  public double getMedianSignalDistance(int channel){
+	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Double> a = new ArrayList<Double>(0);
+	  for(Nucleus n : nuclei){
+		  a.addAll(n.getSignalCollection().getDistances(channel));
+
+	  }
+	  return Stats.quartile(a.toArray(new Double[0]), 50);
+  }
+
+  /** 
+   * Return the nuclei that have signals in the given channel. If negative, this will give the nuclei
+   * that do NOT have signals in the given channel.
+   * @param channel the channel 
+   * @return a list of nuclei
+   */
+  public List<Nucleus> getNucleiWithSignals(int channel){
+	  List<Nucleus> result = new ArrayList<Nucleus>(0);
+
+	  for(Nucleus n : this.nucleiCollection){
+
+		  if(channel>0){
+			  if(n.hasSignal(channel)){
+				  result.add(n);
+			  }
+		  }
+		  if(channel<0){
+			  if(!n.hasSignal(Math.abs(channel))){
+				  result.add(n);
+			  }
+		  }
+	  }
+	  return result;
+  }
+
+  /*
+    --------------------
+    Profile methods
+    --------------------
+   */
+
+  /**
+   * Get a list of all the segments currently within the profile collection
+   * @return
+   */
+  public List<String> getSegmentNames(){
+
+	  List<String> result = new ArrayList<String>(0);
+	  ProfileCollection pc = this.getProfileCollection();
+	  List<NucleusBorderSegment> segs = pc.getSegments(this.getOrientationPoint());
+	  for(NucleusBorderSegment segment : segs){
+		  result.add(segment.getSegmentType());
+	  }
+	  return result;
+  }
+
+  public double[] getDifferencesToMedianFromPoint(String pointType){
+	  double[] d = new double[this.getNucleusCount()];
+	  try{
+
+		  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+		  for(int i=0;i<this.getNucleusCount();i++){
+			  Nucleus n = this.getNucleus(i);
+			  try{
+				  d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
+			  } catch(Exception e){
+//				  logger.log("Unable to get difference to median profile: "+i+": "+pointType, Logger.ERROR);
+			  }
+		  }
+	  } catch(Exception e){
+//		  logger.log("Error getting differences from point "+pointType+": "+e.getMessage(), Logger.ERROR);
+//		  this.profileCollection.printKeys(this.debugFile);
+	  }
+	  return d;
+  }
+
+  public double compareProfilesToMedian(String pointType){
+    double[] scores = this.getDifferencesToMedianFromPoint(pointType);
+    double result = 0;
+    for(double s : scores){
+      result += s;
+    }
+    return result;
+  }
+
+  // get the plot from the collection corresponding to the given pointType of interest
+//  public Plot getPlot(String pointType, String plotType){
+//    return this.plotCollection.get(pointType).get(plotType);
+//  }
+
+  public int[] getPointIndexes(String pointType){
+    int[] d = new int[this.getNucleusCount()];
+
+    for(int i=0;i<this.getNucleusCount();i++){
+      Nucleus n = this.getNucleus(i);
+      d[i] = n.getBorderIndex(pointType);
+    }
+    return d;
+  }
+
+  public double[] getPointToPointDistances(String pointTypeA, String pointTypeB){
+    double[] d = new double[this.getNucleusCount()];
+    for(int i=0;i<this.getNucleusCount();i++){
+      Nucleus n = this.getNucleus(i);
+      d[i] = n.getBorderTag(pointTypeA).getLengthTo(n.getBorderTag(pointTypeB));
+    }
+    return d;
+  }
+
+  /*
+    -----------------
+    Profile functions
+    -----------------
+  */
+
+  public Nucleus getNucleusMostSimilarToMedian(String pointType){
+    
+    Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
+    Nucleus n = (Nucleus) this.getNucleus(0); // default to the first nucleus
+
+    double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
+    for(Nucleus p : this.getNuclei()){
+      int index = n.getBorderIndex(pointType);
+      double nDifference = p.getAngleProfile().offset(index).differenceToProfile(medianProfile);
+      if(nDifference<difference){
+        difference = nDifference;
+        n = p;
+      }
+    }
+    return n;
+  }
+
+  /*
+    -----------------
+    Export functions
+    -----------------
+  */
+
+  public String getLogFileName(String filename){
+    String file = this.getFolder()+File.separator+this.getOutputFolderName()+File.separator+filename+"."+getType()+".txt";
+    File f = new File(file);
+    if(f.exists()){
+      f.delete();
+    }
+    return file;
+  }
 }

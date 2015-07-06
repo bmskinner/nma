@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Set;
 
 import utility.Constants;
-import no.collections.AsymmetricNucleusCollection;
+import no.nuclei.AsymmetricNucleus;
 import no.collections.NucleusCollection;
 import no.components.NuclearSignal;
 import no.components.XYPoint;
 import no.export.TableExporter;
 import no.imports.ImageImporter;
+import no.nuclei.AsymmetricNucleus;
 import no.nuclei.Nucleus;
 import no.utility.Logger;
 import no.utility.Utils;
@@ -36,7 +37,7 @@ public class SignalAnalysis {
 				n.exportSignalDistanceMatrix();
 				
 				// if asymmetric, calculate the angle from the tail
-				if(AsymmetricNucleusCollection.class.isAssignableFrom(collection.getClass())){
+				if(AsymmetricNucleus.class.isAssignableFrom(collection.getNucleusClass())){
 					n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
 				}
 			}

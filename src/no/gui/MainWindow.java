@@ -3085,10 +3085,10 @@ public class MainWindow extends JFrame implements ActionListener {
 
 						// check all collections are of the same type
 						boolean newRoot = false;
-						Class<?> testClass = datasets.get(0).getAnalysisOptions().getCollectionClass();
+						Class<?> testClass = datasets.get(0).getAnalysisOptions().getNucleusClass();
 						for(AnalysisDataset d : datasets){
 
-							if(d.getAnalysisOptions().getCollectionClass()!=testClass){
+							if(d.getAnalysisOptions().getNucleusClass()!=testClass){
 								log("Error: cannot merge collections of different class");
 								return;
 							}
@@ -3709,45 +3709,19 @@ public class MainWindow extends JFrame implements ActionListener {
 
 			NucleusCollection templateCollection = template.getCollection();
 
-			Constructor<?> collectionConstructor =  template.getAnalysisOptions().getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
-
-			newCollection = (NucleusCollection) collectionConstructor.newInstance(templateCollection.getFolder(), 
+			newCollection = new NucleusCollection(templateCollection.getFolder(), 
 					templateCollection.getOutputFolderName(), 
 					name, 
-					templateCollection.getDebugFile()
+					templateCollection.getDebugFile(),
+					templateCollection.getNucleusClass()
 					);
 
-		} catch (NoSuchMethodException e) {
+		} catch (Exception e) {
 			IJ.log(e.getMessage());
 			for(StackTraceElement el : e.getStackTrace()){
 				IJ.log(el.toString());
 			}
-		} catch (SecurityException e) {
-			IJ.log(e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
-		} catch (InstantiationException e) {
-			IJ.log(e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
-		} catch (IllegalAccessException e) {
-			IJ.log(e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
-		} catch (IllegalArgumentException e) {
-			IJ.log(e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
-		} catch (InvocationTargetException e) {
-			IJ.log(e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
-		}
+		} 
 		return newCollection;
 	}
 	

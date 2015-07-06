@@ -130,7 +130,7 @@ public class NucleusDetector {
   *  @param file a folder to be analysed
   *  @param collection the collection of nuclei found
   */
-  public void addNucleusCollection(File file, RoundNucleusCollection collection){
+  public void addNucleusCollection(File file, NucleusCollection collection){
     this.collectionGroup.put(file, collection);
   }
 
@@ -216,46 +216,13 @@ public class NucleusDetector {
 
 	  try {
 
-		  Constructor<?> collectionConstructor =  analysisOptions
-				  .getCollectionClass()
-				  .getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
-
-		  newCollection = (NucleusCollection) collectionConstructor.newInstance(folder, 
+		  newCollection = new NucleusCollection(folder, 
 				  outputFolder, 
 				  "analysable", 
-				  this.debugFile);
+				  this.debugFile,
+				  analysisOptions.getNucleusClass());
 
-	  } catch (NoSuchMethodException e) {
-		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
-		  }
-	  } catch (SecurityException e) {
-		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
-		  }
-	  } catch (InstantiationException e) {
-		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
-		  }
-	  } catch (IllegalAccessException e) {
-		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
-		  }
-	  } catch (IllegalArgumentException e) {
-		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
-		  }
-	  } catch (InvocationTargetException e) {
-		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
-		  }
-	  } catch (NullPointerException e) {
+	  } catch (Exception e) {
 		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
 		  for(StackTraceElement el : e.getStackTrace()){
 			  logger.log(el.toString(), Logger.STACK);
@@ -267,8 +234,6 @@ public class NucleusDetector {
   private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition){
 
 	  Nucleus n = null;
-//	  RoundNucleus currentNucleus = new RoundNucleus(nucleus, path, nucleusNumber, originalPosition);
-//	  Class<double[]> arrayClass = double[].class;
 	  
 	  try {
 		  
@@ -277,15 +242,12 @@ public class NucleusDetector {
 		  Constructor<?>[]  list = analysisOptions.getNucleusClass().getConstructors();
 		  for(Constructor<?> c : list){
 			  Class<?>[] classes = c.getParameterTypes();
-//			  for(Class<?> cl : classes){
-////				  IJ.log(cl.getSimpleName());
-//			  }
+
 			  if(classes.length==4){
 				  nucleusConstructor = analysisOptions
 				  .getNucleusClass()
 				  .getConstructor(classes);
 			  }
-//			  IJ.log("");
 		  }
 
 

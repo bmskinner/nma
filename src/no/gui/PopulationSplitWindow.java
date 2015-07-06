@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.collections.NucleusCollection;
-import no.collections.RoundNucleusCollection;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 

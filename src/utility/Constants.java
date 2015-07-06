@@ -29,6 +29,14 @@ public class Constants {
 		public static final String COMPONENT_ACROSOME		= "Acrosome";
 		
 		
+		// reference and orientation points for nucleus types
+		public static final String ROUND_NUCLEUS_REFERENCE_POINT 			= "head";
+		public static final String ROUND_NUCLEUS_ORIENTATION_POINT 			= "tail";
 		
+		public static final String RODENT_SPERM_NUCLEUS_REFERENCE_POINT 	= "tip";
+		public static final String RODENT_SPERM_NUCLEUS_ORIENTATION_POINT 	= "tail";
 		
+		public static final String PIG_SPERM_NUCLEUS_REFERENCE_POINT 		= "head";
+		public static final String PIG_SPERM_NUCLEUS_ORIENTATION_POINT 		= "tail";
+
 }
