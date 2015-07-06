@@ -23,8 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cell.Cell;
 import utility.Logger;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.export.CompositeExporter;
 import no.export.NucleusAnnotator;
@@ -72,12 +73,12 @@ public class AnalysisCreator {
 	private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
 	// the raw input from nucleus detector
-	private Map<File, NucleusCollection> folderCollection;
+	private Map<File, CellCollection> folderCollection;
 
-	private List<NucleusCollection> nuclearPopulations = new ArrayList<NucleusCollection>(0);
+	private List<CellCollection> nuclearPopulations = new ArrayList<CellCollection>(0);
 	private List<AnalysisDataset> nuclearDatasets = new ArrayList<AnalysisDataset>(0);
 
-	private List<NucleusCollection> finalPopulations = new ArrayList<NucleusCollection>(0);
+	private List<CellCollection> finalPopulations = new ArrayList<CellCollection>(0);
 	private List<AnalysisDataset> finalDatasets = new ArrayList<AnalysisDataset>(0);
 
 	/*
@@ -141,7 +142,7 @@ public class AnalysisCreator {
 	 * outside the AnalysisCreator
 	 * @return the collections of nuclei
 	 */
-	public List<NucleusCollection> getPopulations(){
+	public List<CellCollection> getPopulations(){
 		return this.finalPopulations;
 	}
 
@@ -210,7 +211,7 @@ public class AnalysisCreator {
 		logger.log("Assigning nucleus types");
 
 		for (File key : keys) {
-			NucleusCollection collection = folderCollection.get(key);
+			CellCollection collection = folderCollection.get(key);
 			this.nuclearPopulations.add(collection);
 		}
 	}
@@ -219,7 +220,7 @@ public class AnalysisCreator {
 		mw.log("Beginning analysis");
 		logger.log("Beginning population analysis");
 
-		for(NucleusCollection r : this.nuclearPopulations){
+		for(CellCollection r : this.nuclearPopulations){
 
 			AnalysisDataset dataset = new AnalysisDataset(r);
 			dataset.setAnalysisOptions(analysisOptions);
@@ -238,7 +239,7 @@ public class AnalysisCreator {
 				nucleusCounts.put("input", r.getNucleusCount());
 //				Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class, File.class});
 //				NucleusCollection failedNuclei = (NucleusCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed", logger.getLogfile());
-				NucleusCollection failedNuclei = new NucleusCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), analysisOptions.getNucleusClass());
+				CellCollection failedNuclei = new CellCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), analysisOptions.getNucleusClass());
 
 				
 				mw.logc("Filtering collection...");
@@ -342,9 +343,9 @@ public class AnalysisCreator {
 
 			finalPopulations.add(r);
 
-			ArrayList<NucleusCollection> signalPopulations = dividePopulationBySignals(r);
+			ArrayList<CellCollection> signalPopulations = dividePopulationBySignals(r);
 
-			for(NucleusCollection p : signalPopulations){
+			for(CellCollection p : signalPopulations){
 
 				AnalysisDataset subDataset = new AnalysisDataset(p, dataset.getSavePath());
 				subDataset.setAnalysisOptions(analysisOptions);
@@ -441,9 +442,9 @@ public class AnalysisCreator {
       nuclei with red signals, with green signals, without red signals and without green signals
     Only include the 'without' populations if there is a 'with' population.
 	 */
-	public ArrayList<NucleusCollection> dividePopulationBySignals(NucleusCollection r){
+	public ArrayList<CellCollection> dividePopulationBySignals(CellCollection r){
 
-		ArrayList<NucleusCollection> signalPopulations = new ArrayList<NucleusCollection>(0);
+		ArrayList<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
 		logger.log("Dividing population by signals...");
 		try{
 
@@ -451,29 +452,29 @@ public class AnalysisCreator {
 
 			List<Integer> channels = r.getSignalChannels();
 			for(int channel : channels){
-				List<Nucleus> list = r.getNucleiWithSignals(channel);
+				List<Cell> list = r.getCellsWithNuclearSignals(channel);
 				if(!list.isEmpty()){
-					NucleusCollection listCollection = new NucleusCollection(r.getFolder(), 
+					CellCollection listCollection = new CellCollection(r.getFolder(), 
 							r.getOutputFolderName(), 
 							"Signals_in_channel_"+channel, 
 							r.getDebugFile(), 
 							r.getNucleusClass());
 					
-					for(Nucleus n : list){
-						listCollection.addNucleus( n );
+					for(Cell c : list){
+						listCollection.addCell( c );
 					}
 					signalPopulations.add(listCollection);
 
-					List<Nucleus> notList = r.getNucleiWithSignals(-channel);
+					List<Cell> notList = r.getCellsWithNuclearSignals(-channel);
 					if(!notList.isEmpty()){
-						NucleusCollection notListCollection = new NucleusCollection(r.getFolder(), 
+						CellCollection notListCollection = new CellCollection(r.getFolder(), 
 								r.getOutputFolderName(), 
 								"No_signals_in_channel_"+channel, 
 								r.getDebugFile(), 
 								r.getNucleusClass());
 						
-						for(Nucleus n : notList){
-							notListCollection.addNucleus( n );
+						for(Cell c : list){
+							notListCollection.addCell( c );
 						}
 						signalPopulations.add(notListCollection);
 					}
@@ -490,7 +491,7 @@ public class AnalysisCreator {
 
 	public void exportAnalysisLog(){
 
-		for(NucleusCollection r : this.nuclearPopulations){
+		for(CellCollection r : this.nuclearPopulations){
 
 			StringBuilder outLine = new StringBuilder();
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");

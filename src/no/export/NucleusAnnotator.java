@@ -14,7 +14,7 @@ import utility.Constants;
 import utility.Logger;
 import utility.Utils;
 import no.analysis.ProfileSegmenter;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
@@ -27,7 +27,7 @@ public class NucleusAnnotator {
 	
 	private static Logger logger;
 	
-	public static boolean run(NucleusCollection collection){
+	public static boolean run(CellCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
 		try{

@@ -17,9 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import cell.Cell;
 import utility.Constants;
 import utility.Stats;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
@@ -28,7 +29,7 @@ import no.nuclei.Nucleus;
 import no.nuclei.sperm.PigSpermNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
 
-public class NucleusCollection
+public class CellCollection
 implements Serializable 
 {
 
@@ -50,10 +51,10 @@ implements Serializable
 		
 	private Nucleus consensusNucleus;
 	
-	private List<Nucleus> nucleiCollection = new ArrayList<Nucleus>(0); // store all the nuclei analysed
-	private Map<UUID, Nucleus> mappedCollection  = new HashMap<UUID, Nucleus>();
+	private List<Cell> cellCollection = new ArrayList<Cell>(0); // store all the nuclei analysed
+	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();
 
-  public NucleusCollection(File folder, String outputFolder, String type, File debugFile, Class<?> nucleusClass){
+  public CellCollection(File folder, String outputFolder, String type, File debugFile, Class<?> nucleusClass){
 	  this.folder = folder;
 	  this.outputFolder = outputFolder;
 	  this.debugFile = debugFile;
@@ -61,7 +62,7 @@ implements Serializable
 	  this.name = outputFolder+" - "+type;
 	  this.guid = java.util.UUID.randomUUID();
 	  this.nucleusClass = nucleusClass;
-	  profileCollections.put(NucleusCollection.REGULAR_PROFILE, new ProfileCollection());
+	  profileCollections.put(CellCollection.REGULAR_PROFILE, new ProfileCollection());
   }
 
   /*
@@ -83,9 +84,14 @@ implements Serializable
 	  return this.guid;
   }
 
-  public void addNucleus(Nucleus r){
-	  this.nucleiCollection.add(r);
-	  this.mappedCollection.put(r.getID(), r);
+  public void addCell(Cell r){
+	  this.cellCollection.add(r);
+	  this.mappedCollection.put(r.getCellId(), r);
+  }
+  
+  public void removeCell(Cell c){
+	  this.mappedCollection.remove(c);
+	  this.cellCollection.remove(c);
   }
     
   public boolean hasConsensusNucleus(){
@@ -106,7 +112,7 @@ implements Serializable
     Getters
     -----------------------
   */
-  public Nucleus getNucleus(UUID id){
+  public Cell getCell(UUID id){
 	  return this.mappedCollection.get(id);
   }
   
@@ -159,15 +165,15 @@ implements Serializable
   }
   
   public ProfileCollection getProfileCollection(){
-	  return getProfileCollection(NucleusCollection.REGULAR_PROFILE);
+	  return getProfileCollection(CellCollection.REGULAR_PROFILE);
   }
   
   public ProfileCollection getFrankenCollection(){
-	  return getProfileCollection(NucleusCollection.FRANKEN_PROFILE);
+	  return getProfileCollection(CellCollection.FRANKEN_PROFILE);
   }
   
   public void setFrankenCollection (ProfileCollection frankenCollection){
-	  this.setProfileCollection(NucleusCollection.FRANKEN_PROFILE, frankenCollection);
+	  this.setProfileCollection(CellCollection.FRANKEN_PROFILE, frankenCollection);
   }
 
   public File getFolder(){
@@ -209,112 +215,121 @@ implements Serializable
 
   public double[] getPerimeters(){
 
-    double[] d = new double[nucleiCollection.size()];
+    double[] d = new double[cellCollection.size()];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      d[i] = nucleiCollection.get(i).getPerimeter();
+    for(int i=0;i<cellCollection.size();i++){
+      d[i] = cellCollection.get(i).getNucleus().getPerimeter();
     }
     return d;
   }
 
   public double[] getAreas(){
 
-    double[] d = new double[nucleiCollection.size()];
+    double[] d = new double[cellCollection.size()];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      d[i] = nucleiCollection.get(i).getArea();
+    for(int i=0;i<cellCollection.size();i++){
+      d[i] = cellCollection.get(i).getNucleus().getArea();
     }
     return d;
   }
 
   public double[] getFerets(){
 
-    double[] d = new double[nucleiCollection.size()];
+    double[] d = new double[cellCollection.size()];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      d[i] = nucleiCollection.get(i).getFeret();
+    for(int i=0;i<cellCollection.size();i++){
+      d[i] = cellCollection.get(i).getNucleus().getFeret();
     }
     return d;
   }
   
   public double[] getMinFerets(){
 
-	    double[] d = new double[nucleiCollection.size()];
+	    double[] d = new double[cellCollection.size()];
 
-	    for(int i=0;i<nucleiCollection.size();i++){
-	      d[i] = nucleiCollection.get(i).getNarrowestDiameter();
+	    for(int i=0;i<cellCollection.size();i++){
+	      d[i] = cellCollection.get(i).getNucleus().getNarrowestDiameter();
 	    }
 	    return d;
 	  }
 
   public double[] getPathLengths(){
 
-    double[] d = new double[nucleiCollection.size()];
+    double[] d = new double[cellCollection.size()];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      d[i] = nucleiCollection.get(i).getPathLength();
+    for(int i=0;i<cellCollection.size();i++){
+      d[i] = cellCollection.get(i).getNucleus().getPathLength();
     }
     return d;
   }
 
   public double[] getArrayLengths(){
 
-    double[] d = new double[nucleiCollection.size()];
+    double[] d = new double[cellCollection.size()];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      d[i] = nucleiCollection.get(i).getLength();
+    for(int i=0;i<cellCollection.size();i++){
+      d[i] = cellCollection.get(i).getNucleus().getLength();
     }
     return d;
   }
 
   public double[] getMedianDistanceBetweenPoints(){
 
-    double[] d = new double[nucleiCollection.size()];
+    double[] d = new double[cellCollection.size()];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      d[i] = nucleiCollection.get(i).getMedianDistanceBetweenPoints();
+    for(int i=0;i<cellCollection.size();i++){
+      d[i] = cellCollection.get(i).getNucleus().getMedianDistanceBetweenPoints();
     }
     return d;
   }
 
   public String[] getNucleusPaths(){
-    String[] s = new String[nucleiCollection.size()];
+    String[] s = new String[cellCollection.size()];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      s[i] = nucleiCollection.get(i).getPath(); //+"-"+nucleiCollection.get(i).getNucleusNumber();
+    for(int i=0;i<cellCollection.size();i++){
+      s[i] = cellCollection.get(i).getNucleus().getPath(); //+"-"+nucleiCollection.get(i).getNucleusNumber();
     }
     return s;
   }
 
   public String[] getCleanNucleusPaths(){
-    String[] s = new String[nucleiCollection.size()];
+    String[] s = new String[cellCollection.size()];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      Nucleus n = nucleiCollection.get(i);
+    for(int i=0;i<cellCollection.size();i++){
+      Nucleus n = cellCollection.get(i).getNucleus();
       s[i] = n.getPath();
     }
     return s;
   }
 
   public double[][] getPositions(){
-    double[][] s = new double[nucleiCollection.size()][4];
+    double[][] s = new double[cellCollection.size()][4];
 
-    for(int i=0;i<nucleiCollection.size();i++){
-      s[i] = nucleiCollection.get(i).getPosition();
+    for(int i=0;i<cellCollection.size();i++){
+      s[i] = cellCollection.get(i).getNucleus().getPosition();
     }
     return s;
   }
 
   public int getNucleusCount(){
-    return this.nucleiCollection.size();
+    return this.cellCollection.size();
   }
+  
+  public List<Cell> getCells(){
+	    return this.cellCollection;
+	  }
 
   public List<Nucleus> getNuclei(){
-    return this.nucleiCollection;
+	  List<Nucleus> result = new ArrayList<Nucleus>(0);
+	  for(Cell c : this.cellCollection){
+		  result.add(c.getNucleus());
+	  }
+	  
+    return result;
   }
 
-  public Nucleus getNucleus(int i){
-    return this.nucleiCollection.get(i);
+  public Cell getCell(int i){
+    return this.cellCollection.get(i);
   }
   
   /**
@@ -334,16 +349,16 @@ implements Serializable
 
   public int getRedSignalCount(){
     int count = 0;
-    for(int i=0;i<nucleiCollection.size();i++){
-      count += nucleiCollection.get(i).getSignalCount(1);
+    for(int i=0;i<cellCollection.size();i++){
+      count += cellCollection.get(i).getNucleus().getSignalCount(1);
     }
     return count;
   }
 
   public int getGreenSignalCount(){
     int count = 0;
-    for(int i=0;i<nucleiCollection.size();i++){
-      count += nucleiCollection.get(i).getSignalCount(2);
+    for(int i=0;i<cellCollection.size();i++){
+      count += cellCollection.get(i).getNucleus().getSignalCount(2);
     }
     return count;
   }
@@ -355,7 +370,7 @@ implements Serializable
   public List<Integer> getSignalChannels(){
 	  List<Integer> result = new ArrayList<Integer>(0);
 	  for(int i= 0; i<this.getNucleusCount();i++){
-		  Nucleus n = this.getNucleus(i);
+		  Nucleus n = this.getCell(i).getNucleus();
 		  for( int channel : n.getSignalCollection().getChannels()){
 			  if(!result.contains(channel)){
 				  result.add(channel);
@@ -385,7 +400,7 @@ implements Serializable
   public int getSignalCount(int channel){
 	  int count = 0;
 	  for(int i= 0; i<this.getNucleusCount();i++){
-		  Nucleus n = this.getNucleus(i);
+		  Nucleus n = this.getCell(i).getNucleus();
 		  count += n.getSignalCount(channel);
 
 	  } // end nucleus iterations
@@ -428,7 +443,7 @@ implements Serializable
 	  List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
 
 	  for(int i= 0; i<this.getNucleusCount();i++){
-		  Nucleus n = this.getNucleus(i);
+		  Nucleus n = this.getCell(i).getNucleus();
 		  result.addAll(n.getSignals(channel));
 
 	  } // end nucleus iterations
@@ -471,7 +486,7 @@ implements Serializable
   }
   
   public int getProfileWindowSize(){
-	  return this.getNucleus(0).getAngleProfileWindowSize();
+	  return this.getCell(0).getNucleus().getAngleProfileWindowSize();
   }
   
   /**
@@ -480,9 +495,10 @@ implements Serializable
    * @return the median area
    */
   public double getMedianSignalArea(int channel){
-	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Cell> cells = getCellsWithNuclearSignals(channel);
 	  List<Double> a = new ArrayList<Double>(0);
-	  for(Nucleus n : nuclei){
+	  for(Cell c : cells){
+		  Nucleus n = c.getNucleus();
 		  a.addAll(n.getSignalCollection().getAreas(channel));
 
 	  }
@@ -495,9 +511,10 @@ implements Serializable
    * @return the median angle
    */
   public double getMedianSignalAngle(int channel){
-	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Cell> cells = getCellsWithNuclearSignals(channel);
 	  List<Double> a = new ArrayList<Double>(0);
-	  for(Nucleus n : nuclei){
+	  for(Cell c : cells){
+		  Nucleus n = c.getNucleus();
 		  a.addAll(n.getSignalCollection().getAngles(channel));
 
 	  }
@@ -510,9 +527,10 @@ implements Serializable
    * @return the median feret
    */
   public double getMedianSignalFeret(int channel){
-	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Cell> cells = getCellsWithNuclearSignals(channel);
 	  List<Double> a = new ArrayList<Double>(0);
-	  for(Nucleus n : nuclei){
+	  for(Cell c : cells){
+		  Nucleus n = c.getNucleus();
 		  a.addAll(n.getSignalCollection().getFerets(channel));
 
 	  }
@@ -525,9 +543,10 @@ implements Serializable
    * @return the median distance
    */
   public double getMedianSignalDistance(int channel){
-	  List<Nucleus> nuclei = getNucleiWithSignals(channel);
+	  List<Cell> cells = getCellsWithNuclearSignals(channel);
 	  List<Double> a = new ArrayList<Double>(0);
-	  for(Nucleus n : nuclei){
+	  for(Cell c : cells){
+		  Nucleus n = c.getNucleus();
 		  a.addAll(n.getSignalCollection().getDistances(channel));
 
 	  }
@@ -540,19 +559,20 @@ implements Serializable
    * @param channel the channel 
    * @return a list of nuclei
    */
-  public List<Nucleus> getNucleiWithSignals(int channel){
-	  List<Nucleus> result = new ArrayList<Nucleus>(0);
+  public List<Cell> getCellsWithNuclearSignals(int channel){
+	  List<Cell> result = new ArrayList<Cell>(0);
 
-	  for(Nucleus n : this.nucleiCollection){
+	  for(Cell c : this.cellCollection){
+		  Nucleus n = c.getNucleus();
 
 		  if(channel>0){
 			  if(n.hasSignal(channel)){
-				  result.add(n);
+				  result.add(c);
 			  }
 		  }
 		  if(channel<0){
 			  if(!n.hasSignal(Math.abs(channel))){
-				  result.add(n);
+				  result.add(c);
 			  }
 		  }
 	  }
@@ -586,7 +606,7 @@ implements Serializable
 
 		  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
 		  for(int i=0;i<this.getNucleusCount();i++){
-			  Nucleus n = this.getNucleus(i);
+			  Nucleus n = this.getCell(i).getNucleus();
 			  try{
 				  d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
 			  } catch(Exception e){
@@ -614,7 +634,7 @@ implements Serializable
     int[] d = new int[this.getNucleusCount()];
 
     for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getNucleus(i);
+      Nucleus n = this.getCell(i).getNucleus();
       d[i] = n.getBorderIndex(pointType);
     }
     return d;
@@ -623,7 +643,7 @@ implements Serializable
   public double[] getPointToPointDistances(String pointTypeA, String pointTypeB){
     double[] d = new double[this.getNucleusCount()];
     for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getNucleus(i);
+      Nucleus n = this.getCell(i).getNucleus();
       d[i] = n.getBorderTag(pointTypeA).getLengthTo(n.getBorderTag(pointTypeB));
     }
     return d;
@@ -638,7 +658,7 @@ implements Serializable
   public Nucleus getNucleusMostSimilarToMedian(String pointType){
     
     Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
-    Nucleus n = (Nucleus) this.getNucleus(0); // default to the first nucleus
+    Nucleus n = (Nucleus) this.getCell(0).getNucleus(); // default to the first nucleus
 
     double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
     for(Nucleus p : this.getNuclei()){

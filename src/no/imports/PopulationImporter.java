@@ -10,7 +10,7 @@ import java.util.List;
 
 import utility.Logger;
 import no.analysis.AnalysisDataset;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.gui.MainWindow;
 
 public class PopulationImporter {
@@ -18,7 +18,7 @@ public class PopulationImporter {
 	private static Logger logger;
 
 
-	public static NucleusCollection readPopulation(File inputFile, MainWindow mw){
+	public static CellCollection readPopulation(File inputFile, MainWindow mw){
 		
 		if(!inputFile.exists()){
 			mw.log("Requested file does not exist");
@@ -27,7 +27,7 @@ public class PopulationImporter {
 		
 		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
 
-		NucleusCollection collection = null;
+		CellCollection collection = null;
 
 		FileInputStream fis;
 		try {
@@ -47,7 +47,7 @@ public class PopulationImporter {
 			} catch (Exception e) { // exception occurs on reaching EOF
 
 				mw.log("OK");
-				collection = (NucleusCollection) inputList.get(0);
+				collection = (CellCollection) inputList.get(0);
 
 				mw.log("File imported");
 

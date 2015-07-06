@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.Profile;
 import no.components.ProfileCollection;
 import no.nuclei.Nucleus;
@@ -31,7 +31,7 @@ public class NucleusClusterer {
 	public static final int HIERARCHICAL = 1;
 	
 	private Map<Instance, UUID> nucleusMap = new HashMap<Instance, UUID>();
-	private Map<Integer, NucleusCollection> clusterMap = new HashMap<Integer, NucleusCollection>();
+	private Map<Integer, CellCollection> clusterMap = new HashMap<Integer, CellCollection>();
 	
 	private String newickTree;
 	
@@ -49,7 +49,7 @@ public class NucleusClusterer {
 		
 	}
 	
-	public NucleusCollection getCluster(int cluster){
+	public CellCollection getCluster(int cluster){
 		return this.clusterMap.get(cluster);
 	}
 	
@@ -65,7 +65,7 @@ public class NucleusClusterer {
 		return clusterMap.size();
 	}
 
-	public boolean cluster(NucleusCollection collection){
+	public boolean cluster(CellCollection collection){
 		
 		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
 		
@@ -120,18 +120,20 @@ public class NucleusClusterer {
 		return true;
 	}
 	
-	private void assignClusters(Clusterer clusterer, NucleusCollection collection){
+	private void assignClusters(Clusterer clusterer, CellCollection collection){
 		try {
 			// construct new collections for each cluster
-			Constructor<?> collectionConstructor = collection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
+//			Constructor<?> collectionConstructor = collection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
 			
 			logger.log("Clusters : "+clusterer.numberOfClusters(), Logger.DEBUG);
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
-				NucleusCollection clusterCollection = (NucleusCollection) collectionConstructor.newInstance(collection.getFolder(), 
+				CellCollection clusterCollection = new CellCollection(collection.getFolder(), 
 						collection.getOutputFolderName(), 
 						collection.getType(), 
-						collection.getDebugFile());
+						collection.getDebugFile(), 
+						collection.getNucleusClass());
+				
 				clusterCollection.setName(collection.getName()+"_Cluster_"+i);
 				clusterMap.put(i, clusterCollection);
 			}
@@ -142,13 +144,13 @@ public class NucleusClusterer {
 //			Instance inst = enumerated_instances.instance(index);
 				int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
 //			 IJ.log("instance "+index+" is in cluster "+ clusterNumber)  ; //       #pretty print results
-				 NucleusCollection cluster = clusterMap.get(clusterNumber);
+				 CellCollection cluster = clusterMap.get(clusterNumber);
 				 
 				 // should never be null
-				 if(collection.getNucleus(id)!=null){
-					 cluster.addNucleus(collection.getNucleus(id));
+				 if(collection.getCell(id)!=null){
+					 cluster.addCell(collection.getCell(id));
 				 } else {
-					 logger.log("Error: nucleus with ID "+id+" is not found", Logger.ERROR);
+					 logger.log("Error: cell with ID "+id+" is not found", Logger.ERROR);
 				 }
 				 
 			}
@@ -190,7 +192,7 @@ public class NucleusClusterer {
 		}
 	}
 	
- 	private Instances makeAttributesAndInstances(NucleusCollection collection){
+ 	private Instances makeAttributesAndInstances(CellCollection collection){
 		// make Attributes on which to cluster
 		//		Attribute id = new Attribute("id", List); 
 

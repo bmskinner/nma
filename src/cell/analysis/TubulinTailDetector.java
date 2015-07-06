@@ -3,7 +3,6 @@ package cell.analysis;
 import java.io.File;
 
 import cell.Cell;
-import cell.SpermCell;
 import no.analysis.AnalysisDataset;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
@@ -29,7 +28,7 @@ public class TubulinTailDetector {
 			File image = new File(folder + n.getImageName());
 			SpermTail tail = detectTail(image, channel, n);
 			
-			Cell cell = new SpermCell();
+			Cell cell = new Cell();
 			cell.setNucleus(n);
 			cell.setTail(tail);
 			

@@ -33,7 +33,7 @@ import no.analysis.CurveRefolder;
 import no.analysis.MorphologyAnalysis;
 import no.analysis.NucleusClusterer;
 import no.analysis.ShellAnalysis;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.Profile;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
@@ -114,6 +114,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import cell.Cell;
 import utility.Constants;
 import utility.TreeOrderHashMap;
 
@@ -1089,8 +1090,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			//					IJ.log("Creating analysis");
 			FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset);
 
-			List<NucleusCollection> subs = fishMapper.getSubCollections();
-			for(NucleusCollection sub : subs){
+			List<CellCollection> subs = fishMapper.getSubCollections();
+			for(CellCollection sub : subs){
 				//					IJ.log("Found subcollection: "+sub.getName()+" with "+sub.getNucleusCount()+" nuclei");
 				if(sub.getNucleusCount()>0){
 
@@ -1203,7 +1204,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * Results are added to the dataset list.
 	 * @param collection the collection to cluster
 	 */
-	public void clusterAnalysis(NucleusCollection collection){
+	public void clusterAnalysis(CellCollection collection){
 		if(collection !=null){
 			final UUID id = collection.getID();
 			Thread thr = new Thread() {
@@ -1232,7 +1233,7 @@ public class MainWindow extends JFrame implements ActionListener {
 								parent.setClusterTree(clusterer.getNewickTree());
 
 								for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
-									NucleusCollection c = clusterer.getCluster(cluster);
+									CellCollection c = clusterer.getCluster(cluster);
 									log("Cluster "+cluster+":");
 
 									logc("Reapplying morphology...");
@@ -1279,7 +1280,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param dataset the dataset to rename
 	 */
 	public void renameCollection(AnalysisDataset dataset){
-		NucleusCollection collection = dataset.getCollection();
+		CellCollection collection = dataset.getCollection();
 		String newName = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
 		// validate
 		if(!newName.isEmpty() && newName!=null){
@@ -1309,7 +1310,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 */
 	public void newShellAnalysis(AnalysisDataset dataset){
 		
-		NucleusCollection collection = dataset.getCollection();
+		CellCollection collection = dataset.getCollection();
 		if(collection!=null){
 			String shellString = JOptionPane.showInputDialog(this, "Number of shells", 5);
 			final UUID id = collection.getID();
@@ -1348,7 +1349,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param dataset the dataset to refold
 	 */
 	public void refoldNucleus(AnalysisDataset dataset){
-		NucleusCollection collection = dataset.getCollection();
+		CellCollection collection = dataset.getCollection();
 		if(collection!=null){
 			final UUID id = collection.getID();
 
@@ -1870,7 +1871,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		if(list.size()==1){ // single collection is easy
 			
 			AnalysisDataset dataset = list.get(0);
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 
 			if(dataset.hasShellResult()){ // only if there is something to display
 
@@ -1925,7 +1926,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param label the text to display on the panel
 	 * @return a panel to put in the shell tab
 	 */
-	private JPanel makeNoShellAnalysisAvailablePanel(boolean showRunButton, NucleusCollection collection, String label){
+	private JPanel makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
 		JPanel panel = new JPanel(); // container in tab if no shell chart
 		
 		panel.setLayout(new BorderLayout(0,0));
@@ -1954,7 +1955,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param collection the NucleusCollection to draw the consensus from
 	 * @return the consensus chart
 	 */
-	public JFreeChart makeConsensusChart(NucleusCollection collection){
+	public JFreeChart makeConsensusChart(CellCollection collection){
 		XYDataset ds = DatasetCreator.createNucleusOutline(collection);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -2011,7 +2012,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 */	
 	public void updateConsensusImage(List<AnalysisDataset> list){
 
-		NucleusCollection collection = list.get(0).getCollection();
+		CellCollection collection = list.get(0).getCollection();
 		try {
 			if(list.size()==1){
 				if(!collection.hasConsensusNucleus()){
@@ -2297,7 +2298,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		try {
 			XYDataset ds = DatasetCreator.createIQRVariabilityDataset(list);
 			if(list.size()==1){
-				NucleusCollection n = list.get(0).getCollection();
+				CellCollection n = list.get(0).getCollection();
 				JFreeChart chart = makeProfileChart(ds);
 				XYPlot plot = chart.getXYPlot();
 				plot.setBackgroundPaint(Color.WHITE);
@@ -2358,7 +2359,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		if(list.size()==1){
 			AnalysisDataset dataset = list.get(0);
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 			final UUID id = collection.getID();
 			
 			clusteringPanel = new JPanel();
@@ -2418,7 +2419,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 			if(list.size()==1){
 
-				NucleusCollection collection = list.get(0).getCollection();
+				CellCollection collection = list.get(0).getCollection();
 
 				if(collection.hasConsensusNucleus()){ // if a refold is available
 					XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
@@ -3128,12 +3129,12 @@ public class MainWindow extends JFrame implements ActionListener {
 
 
 						// add the nuclei from each population to the new collection
-						NucleusCollection newCollection = makeNewCollection(datasets.get(0), "Merged");
+						CellCollection newCollection = makeNewCollection(datasets.get(0), "Merged");
 						for(AnalysisDataset d : datasets){
 
-							for(Nucleus n : d.getCollection().getNuclei()){
-								if(!newCollection.getNuclei().contains(n)){
-									newCollection.addNucleus(n);
+							for(Cell n : d.getCollection().getCells()){
+								if(!newCollection.getCells().contains(n)){
+									newCollection.addCell(n);
 								}
 							}
 
@@ -3330,13 +3331,13 @@ public class MainWindow extends JFrame implements ActionListener {
 	        			AnalysisDataset negative = analysisDatasets.get(  populationNames.get(selectedValue)  );
 
 	        			// prepare a new collection
-	        			NucleusCollection collection = dataset.getCollection();
+	        			CellCollection collection = dataset.getCollection();
 
-	        			NucleusCollection newCollection = makeNewCollection(dataset, "Subtraction");
+	        			CellCollection newCollection = makeNewCollection(dataset, "Subtraction");
 
-	        			for(Nucleus n : collection.getNuclei()){
-	        				if(! negative.getCollection().getNuclei().contains(n)){
-	        					newCollection.addNucleus(n);
+	        			for(Cell n : collection.getCells()){
+	        				if(! negative.getCollection().getCells().contains(n)){
+	        					newCollection.addCell(n);
 	        				}
 	        			}
 	        			newCollection.setName("Not_in_"+negative.getName());
@@ -3701,15 +3702,15 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param name the collection name
 	 * @return a new empty collection
 	 */
-	public static NucleusCollection makeNewCollection(AnalysisDataset template, String name){
+	public static CellCollection makeNewCollection(AnalysisDataset template, String name){
 
-		NucleusCollection newCollection = null;
+		CellCollection newCollection = null;
 
 		try {
 
-			NucleusCollection templateCollection = template.getCollection();
+			CellCollection templateCollection = template.getCollection();
 
-			newCollection = new NucleusCollection(templateCollection.getFolder(), 
+			newCollection = new CellCollection(templateCollection.getFolder(), 
 					templateCollection.getOutputFolderName(), 
 					name, 
 					templateCollection.getDebugFile(),

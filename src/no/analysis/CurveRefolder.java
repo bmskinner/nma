@@ -25,7 +25,7 @@ import utility.Utils;
 import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.gui.ColourSelecter;
 import no.components.*;
 
@@ -60,7 +60,7 @@ public class CurveRefolder{
 
 	private double plotLimit;
 	
-	public static boolean run(NucleusCollection collection, Class<?> nucleusClass, String refoldMode){
+	public static boolean run(CellCollection collection, Class<?> nucleusClass, String refoldMode){
 
 		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
 		try{ 
@@ -527,7 +527,7 @@ public class CurveRefolder{
 		Using a list of signal locations, draw on
 		the consensus plot.
 	*/
-	public void addSignalsToConsensus(NucleusCollection collection){
+	public void addSignalsToConsensus(CellCollection collection){
 
 		for(int i= 0; i<collection.getNuclei().size();i++){ // for each roi
 
@@ -645,7 +645,7 @@ public class CurveRefolder{
 		-----------------------
 	*/
 
-	public void exportProfileOfRefoldedImage(NucleusCollection collection){
+	public void exportProfileOfRefoldedImage(CellCollection collection){
 
 		String logFile = collection.getLogFileName("log.consensusNucleus");
 
@@ -674,7 +674,7 @@ public class CurveRefolder{
 		IJ.append( outLine.toString(), logFile);
 	}
 
-	public void exportImage(NucleusCollection collection){
+	public void exportImage(CellCollection collection){
 		ImagePlus plot = nucleusPlot.getImagePlus();
 		Calibration cal = plot.getCalibration();
 		cal.setUnit("pixels");

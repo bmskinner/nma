@@ -12,19 +12,12 @@ import java.util.UUID;
  * @author bms41
  *
  */
-public class SpermTail implements Flagellum, Serializable {
+public class SpermTail extends Flagellum implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
-	private UUID uuid;
-	
-	protected File sourceFile;    // the image from which the tail came
-	protected int sourceChannel; // the channel in the source image
-	
+
 	public SpermTail(File source, int channel){
-		this.uuid = java.util.UUID.randomUUID();
-		this.sourceFile = source;
-		this.sourceChannel = channel;
+		super(source, channel);
 	}
 
 }

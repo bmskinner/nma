@@ -21,6 +21,17 @@ public class Constants {
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
 		
 		
+		// types of cells we can analyse
+		public static final String CELL_TYPE_ROUND = "Round cell";
+		public static final String CELL_TYPE_SPERM = "Sperm cell";
+		
+		// types of  nuclei we can analyse
+		public static final String NUCLEUS_ROUND 		= "Round nucleus";
+		public static final String NUCLEUS_RODENT_SPERM = "Rodent sperm nucleus";
+		public static final String NUCLEUS_PIG_SPERM 	= "Pig sperm nucleus";
+		
+		
+		
 		// structural components of the cell
 		public static final String COMPONENT_NUCLEUS		= "Nucleus";
 		public static final String COMPONENT_SPERM_TAIL		= "Sperm tail";

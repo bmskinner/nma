@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import utility.Logger;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.ShellResult;
 import no.nuclei.Nucleus;
@@ -24,7 +24,7 @@ public class ShellAnalysis {
 	 */
 	public static boolean run(AnalysisDataset dataset, int shells){
 		
-		NucleusCollection collection = dataset.getCollection();
+		CellCollection collection = dataset.getCollection();
 		
 		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
 		

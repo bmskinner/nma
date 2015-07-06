@@ -26,6 +26,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import cell.Cell;
 import utility.CannyEdgeDetector;
 import utility.Constants;
 import utility.Logger;
@@ -62,7 +63,7 @@ public class NucleusDetector {
   protected Logger logger;
 
   protected MainWindow mw;
-  private Map<File, NucleusCollection> collectionGroup = new HashMap<File, NucleusCollection>();
+  private Map<File, CellCollection> collectionGroup = new HashMap<File, CellCollection>();
 
 
   /**
@@ -130,7 +131,7 @@ public class NucleusDetector {
   *  @param file a folder to be analysed
   *  @param collection the collection of nuclei found
   */
-  public void addNucleusCollection(File file, NucleusCollection collection){
+  public void addNucleusCollection(File file, CellCollection collection){
     this.collectionGroup.put(file, collection);
   }
 
@@ -142,12 +143,12 @@ public class NucleusDetector {
   *
   *  @return a Map of a folder to its nuclei
   */
-  public Map<File, NucleusCollection> getNucleiCollections(){
+  public Map<File, CellCollection> getNucleiCollections(){
     // remove any empty collections before returning
     List<File> toRemove = new ArrayList<File>(0);
     Set<File> keys = collectionGroup.keySet();
     for (File key : keys) {
-    	NucleusCollection collection = collectionGroup.get(key);
+    	CellCollection collection = collectionGroup.get(key);
       if(collection.getNucleusCount()==0){
         toRemove.add(key);
       }    
@@ -210,13 +211,13 @@ public class NucleusDetector {
     return output;
   }
   
-  private NucleusCollection createNewCollection(File folder){
+  private CellCollection createNewCollection(File folder){
 
-	  NucleusCollection newCollection = null;
+	  CellCollection newCollection = null;
 
 	  try {
 
-		  newCollection = new NucleusCollection(folder, 
+		  newCollection = new CellCollection(folder, 
 				  outputFolder, 
 				  "analysable", 
 				  this.debugFile,
@@ -234,7 +235,6 @@ public class NucleusDetector {
   private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition){
 
 	  Nucleus n = null;
-	  
 	  try {
 		  
 		  Constructor<?> nucleusConstructor = null;
@@ -302,7 +302,7 @@ public class NucleusDetector {
 
 	  File[] listOfFiles = folder.listFiles();
 	  
-	  NucleusCollection folderCollection = createNewCollection(folder);
+	  CellCollection folderCollection = createNewCollection(folder);
 //	  RoundNucleusCollection folderCollection = new RoundNucleusCollection(folder, this.outputFolder, folder.getName(), this.debugFile);
 	  this.collectionGroup.put(folder, folderCollection);
 
@@ -597,8 +597,11 @@ public class NucleusDetector {
 		  currentNucleus.findPointsAroundBorder();
 	
 		  // if everything checks out, add the measured parameters to the global pool
-		  NucleusCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
-		  collectionToAddTo.addNucleus(currentNucleus);
+		  Cell c = new Cell();
+		  c.setNucleus(currentNucleus);
+		  
+		  CellCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
+		  collectionToAddTo.addCell(c);
 	  }catch(Exception e){
 		  logger.log(" Error in nucleus assignment: "+e.getMessage(), Logger.ERROR);
 		  mw.log("    Error in nucleus assignment: "+e.getMessage());

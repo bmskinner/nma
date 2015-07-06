@@ -1,10 +1,10 @@
 package cell;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
 import no.nuclei.Nucleus;
-
 import components.Flagellum;
 import components.Mitochondrion;
 
@@ -14,21 +14,45 @@ import components.Mitochondrion;
  * @author bms41
  *
  */
-public interface Cell extends Nucleus, Flagellum {
+public class Cell implements Serializable {
 
-	public UUID getCellId();
+	private static final long serialVersionUID = 1L;
 
-	public Nucleus getNucleus();
-
-	public void setNucleus(Nucleus nucleus);
-
-	public Flagellum getTail();
-
-	public void setTail(Flagellum tail);
-
-	public List<Mitochondrion> getMitochondria();
-
-	public void setMitochondria(List<Mitochondrion> mitochondria);
+	protected UUID uuid;
 	
-	public void addMitochondrion(Mitochondrion mitochondrion);
+	protected Nucleus nucleus;
+	protected List<Mitochondrion> mitochondria; // unknown staining patterns so far
+	protected Flagellum tail;	
+	
+	public UUID getCellId() {
+		return uuid;
+	}
+
+	public Nucleus getNucleus() {
+		return nucleus;
+	}
+
+	public void setNucleus(Nucleus nucleus) {
+		this.nucleus = nucleus;
+	}
+
+	public List<Mitochondrion> getMitochondria() {
+		return mitochondria;
+	}
+
+	public void setMitochondria(List<Mitochondrion> mitochondria) {
+		this.mitochondria = mitochondria;
+	}
+	
+	public void addMitochondrion(Mitochondrion mitochondrion) {
+		this.mitochondria.add(mitochondrion);
+	}
+	
+	public Flagellum getTail() {
+		return tail;
+	}
+
+	public void setTail(Flagellum tail) {
+		this.tail = tail;
+	}
 }

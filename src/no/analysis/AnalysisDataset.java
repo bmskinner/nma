@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.ShellResult;
 import no.export.PopulationExporter;
@@ -28,7 +28,7 @@ public class AnalysisDataset implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private Map<UUID, AnalysisDataset> childCollections = new HashMap<UUID, AnalysisDataset>(); // hold the UUID of any child collections
-	private NucleusCollection thisCollection;
+	private CellCollection thisCollection;
 	private File savePath; // the file to save the analysis to
 	
 	private AnalysisOptions analysisOptions;
@@ -42,14 +42,14 @@ public class AnalysisDataset implements Serializable {
 	private boolean isRoot;
 	
 	
-	public AnalysisDataset(NucleusCollection collection){
+	public AnalysisDataset(CellCollection collection){
 		this.thisCollection = collection;
 		this.savePath = new File(collection.getOutputFolder()+File.separator+collection.getType()+".nmd"); // nmd Nuclear Morphology Dataset
 		this.isRoot = false;
 		this.version = MainWindow.VERSION_MAJOR+"."+MainWindow.VERSION_REVISION+"."+MainWindow.VERSION_BUGFIX;
 	}
 	
-	public AnalysisDataset(NucleusCollection collection, File saveFile){
+	public AnalysisDataset(CellCollection collection, File saveFile){
 		this.thisCollection = collection;
 		this.savePath = saveFile;
 		this.isRoot = false;
@@ -60,7 +60,7 @@ public class AnalysisDataset implements Serializable {
 		return this.version;
 	}
 	
-	public void addChildCollection(NucleusCollection collection){
+	public void addChildCollection(CellCollection collection){
 		if(collection==null){
 			throw new IllegalArgumentException("Nucleus collection is null");
 		}
@@ -157,7 +157,7 @@ public class AnalysisDataset implements Serializable {
 		return result;
 	}
 	
-	public NucleusCollection getCollection(){
+	public CellCollection getCollection(){
 		return this.thisCollection;
 	}
 
@@ -204,7 +204,7 @@ public class AnalysisDataset implements Serializable {
 		this.clusterResults.add(dataset.getUUID());
 	}
 
-	public void addCluster(NucleusCollection collection){
+	public void addCluster(CellCollection collection){
 		this.addChildCollection(collection);
 		this.clusterResults.add(collection.getID());
 	}

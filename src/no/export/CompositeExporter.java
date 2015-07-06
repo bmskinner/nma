@@ -15,14 +15,14 @@ import java.io.File;
 
 import utility.Logger;
 import utility.Utils;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.nuclei.Nucleus;
 
 public class CompositeExporter {
 
 	private static Logger logger;
 
-	public static boolean run(NucleusCollection collection){
+	public static boolean run(CellCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "CompositeExporter");
 

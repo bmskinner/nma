@@ -34,9 +34,10 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputAdapter;
 
+import cell.Cell;
 import utility.Utils;
 import no.analysis.AnalysisDataset;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.export.ImageExporter;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
@@ -67,8 +68,8 @@ public class FishMappingWindow extends JDialog {
 	
 	private boolean isFinished = false;
 	
-	private NucleusCollection subCollectionLeft;
-	private NucleusCollection subCollectionRight;
+	private CellCollection subCollectionLeft;
+	private CellCollection subCollectionRight;
 	
 	private List<UUID> selectedNucleiLeft = new ArrayList<UUID>(0);
 	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0);
@@ -115,8 +116,8 @@ public class FishMappingWindow extends JDialog {
 		return this.isFinished;
 	}
 	
-	public List<NucleusCollection> getSubCollections(){
-		List<NucleusCollection> result = new ArrayList<NucleusCollection>(0);
+	public List<CellCollection> getSubCollections(){
+		List<CellCollection> result = new ArrayList<CellCollection>(0);
 		result.add(subCollectionLeft);
 		result.add(subCollectionRight);
 		return result;
@@ -458,12 +459,12 @@ public class FishMappingWindow extends JDialog {
 
 
 				} else { // end of analysis; make a collection from all the nuclei selected
-					for(Nucleus n : FishMappingWindow.this.preFISHDataset.getCollection().getNuclei()){
-						if (FishMappingWindow.this.selectedNucleiLeft.contains(n.getID())){
-							FishMappingWindow.this.subCollectionLeft.addNucleus(n);
+					for(Cell n : FishMappingWindow.this.preFISHDataset.getCollection().getCells()){
+						if (FishMappingWindow.this.selectedNucleiLeft.contains(n.getCellId())){
+							FishMappingWindow.this.subCollectionLeft.addCell(n);
 						}
-						if (FishMappingWindow.this.selectedNucleiRight.contains(n.getID())){
-							FishMappingWindow.this.subCollectionRight.addNucleus(n);
+						if (FishMappingWindow.this.selectedNucleiRight.contains(n.getCellId())){
+							FishMappingWindow.this.subCollectionRight.addCell(n);
 						}
 
 					}

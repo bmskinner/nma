@@ -1,7 +1,8 @@
 package no.analysis;
 
+import cell.Cell;
 import utility.Logger;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.nuclei.Nucleus;
 
 public class CollectionFilterer {
@@ -20,7 +21,7 @@ public class CollectionFilterer {
 	private static double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
 
-	public static boolean run(NucleusCollection collection, NucleusCollection failCollection){
+	public static boolean run(CellCollection collection, CellCollection failCollection){
 
 		logger = new Logger(collection.getDebugFile(), "CollectionFilterer");
 		try{
@@ -39,7 +40,7 @@ public class CollectionFilterer {
 		return true;
 	}
 	
-	private static void refilterNuclei(NucleusCollection collection, NucleusCollection failCollection){
+	private static void refilterNuclei(CellCollection collection, CellCollection failCollection){
 
 	    double medianArea = collection.getMedianNuclearArea();
 	    double medianPerimeter = collection.getMedianNuclearPerimeter();
@@ -66,8 +67,9 @@ public class CollectionFilterer {
 //	    IJ.append("Prefiltered:\r\n", this.getDebugFile().getAbsolutePath());
 	    exportFilterStats(collection);
 
-	    for(int i=0;i<collection.getNucleusCount();i++){
-	      Nucleus n = collection.getNucleus(i);
+	    for(Cell c : collection.getCells()){
+//	    for(int i=0;i<collection.getNucleusCount();i++){
+	      Nucleus n = c.getNucleus();
 	      
 	      if(n.getArea() > maxArea || n.getArea() < minArea ){
 	        n.updateFailureCode(FAILURE_AREA);
@@ -92,12 +94,12 @@ public class CollectionFilterer {
 	      }
 	      
 	      if(n.getFailureCode() > 0){
-	        failCollection.addNucleus(n);
+	        failCollection.addCell(c);
 	      }
 	    }
 
-	    for( Nucleus f : failCollection.getNuclei()){ // should be safer than the i-- above
-	    	collection.getNuclei().remove(f);
+	    for( Cell f : failCollection.getCells()){ // should be safer than the i-- above
+	    	collection.removeCell(f);
 	    }
 	      
 
@@ -122,7 +124,7 @@ public class CollectionFilterer {
 	    
 	  }
 	
-	public static void exportFilterStats(NucleusCollection collection){
+	public static void exportFilterStats(CellCollection collection){
 
 	    double medianArea = collection.getMedianNuclearArea();
 	    double medianPerimeter = collection.getMedianNuclearPerimeter();

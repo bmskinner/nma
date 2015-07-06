@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utility.Logger;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileAggregate;
@@ -29,7 +29,7 @@ public class MorphologyAnalysis {
 	
 	private static Logger logger;
 	
-	public static boolean run(NucleusCollection collection){
+	public static boolean run(CellCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
 		try{
@@ -77,7 +77,7 @@ public class MorphologyAnalysis {
 
 	}
 
-	private static void runProfiler(NucleusCollection collection, String pointType){
+	private static void runProfiler(CellCollection collection, String pointType){
 		
 		// default is to make profile aggregate from reference point
 		createProfileAggregateFromPoint(collection, pointType);
@@ -119,7 +119,7 @@ public class MorphologyAnalysis {
 	 * @param collection the nucleus collection
 	 * @param nucleusClass the class of nucleus
 	 */
-	public static void findTailIndexInMedianCurve(NucleusCollection collection){
+	public static void findTailIndexInMedianCurve(CellCollection collection){
 
 		if(collection.getNucleusClass() == RoundNucleus.class){
 
@@ -211,7 +211,7 @@ public class MorphologyAnalysis {
 	 * @param collection the nuclei
 	 * @param nucleusClass the class of nucleus
 	 */
-	public static void calculateOffsets(NucleusCollection collection){
+	public static void calculateOffsets(CellCollection collection){
 
 		if(collection.getNucleusClass() == RoundNucleus.class){
 
@@ -219,7 +219,7 @@ public class MorphologyAnalysis {
 			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
 
 			for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-				Nucleus n = collection.getNucleus(i);
+				Nucleus n = collection.getCell(i).getNucleus();
 
 				// returns the positive offset index of this profile which best matches the median profile
 				int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
@@ -246,7 +246,7 @@ public class MorphologyAnalysis {
 			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getOrientationPoint()); // returns a median profile
 
 		    for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-		      RodentSpermNucleus n = (RodentSpermNucleus)collection.getNucleus(i);
+		      RodentSpermNucleus n = (RodentSpermNucleus)collection.getCell(i).getNucleus();
 
 
 		      // THE NEW WAY
@@ -266,7 +266,7 @@ public class MorphologyAnalysis {
 			Profile medianToCompare = collection.getProfileCollection().getProfile("head"); // returns a median profile with head at 0
 
 			for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-				PigSpermNucleus n = (PigSpermNucleus)collection.getNucleus(i);
+				PigSpermNucleus n = (PigSpermNucleus)collection.getCell(i).getNucleus();
 
 				// returns the positive offset index of this profile which best matches the median profile
 				int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
@@ -287,7 +287,7 @@ public class MorphologyAnalysis {
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
-	public static boolean reapplyProfiles(NucleusCollection collection, NucleusCollection sourceCollection){
+	public static boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection){
 		
 		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
 		logger.log("Applying existing segmentation profile to population...");
@@ -341,7 +341,7 @@ public class MorphologyAnalysis {
 	 * @param pointType
 	 * @param length
 	 */
-	private static void createProfileAggregateFromPoint(NucleusCollection collection, String pointType, int length){
+	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType, int length){
 
 		ProfileAggregate profileAggregate = new ProfileAggregate(length);
 		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
@@ -358,7 +358,7 @@ public class MorphologyAnalysis {
 		collection.getProfileCollection().addProfile(pointType+"75", q75);
 	}
 
-	private static void createProfileAggregateFromPoint(NucleusCollection collection, String pointType){
+	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType){
 
 		ProfileAggregate profileAggregate = new ProfileAggregate((int)collection.getMedianArrayLength());
 		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
@@ -378,7 +378,7 @@ public class MorphologyAnalysis {
 
 	}
 
-	private static void createProfileAggregates(NucleusCollection collection){
+	private static void createProfileAggregates(CellCollection collection){
 		try{
 			for( String pointType : collection.getProfileCollection().getProfileKeys() ){
 				createProfileAggregateFromPoint(collection, pointType);   
@@ -390,7 +390,7 @@ public class MorphologyAnalysis {
 	}
 	
 
-	private static double compareProfilesToMedian(NucleusCollection collection, String pointType){
+	private static double compareProfilesToMedian(CellCollection collection, String pointType){
 		double[] scores = collection.getDifferencesToMedianFromPoint(pointType);
 		double result = 0;
 		for(double s : scores){
@@ -399,7 +399,7 @@ public class MorphologyAnalysis {
 		return result;
 	}
 	
-	private static void runSegmentation(NucleusCollection collection, String pointType){
+	private static void runSegmentation(CellCollection collection, String pointType){
 		logger.log("Beginning segmentation...");
 		try{	
 			createSegments(collection, pointType);
@@ -427,7 +427,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void createSegments(NucleusCollection collection, String pointType){
+	private static void createSegments(CellCollection collection, String pointType){
 		// get the segments within the median curve
 		ProfileCollection pc = collection.getProfileCollection();
 
@@ -446,7 +446,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void assignSegments(NucleusCollection collection, String pointType){
+	private static void assignSegments(CellCollection collection, String pointType){
 
 		logger.log("Assigning segments to nuclei...");
 		
@@ -455,7 +455,7 @@ public class MorphologyAnalysis {
 		// find the corresponding point in each Nucleus
 		Profile medianToCompare = pc.getProfile(pointType);
 		for(int i= 0; i<collection.getNucleusCount();i++){ 
-			Nucleus n = collection.getNucleus(i);
+			Nucleus n = collection.getCell(i).getNucleus();
 			
 			// remove any existing segments
 			n.clearSegments();
@@ -495,7 +495,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void reviseSegments(NucleusCollection collection, String pointType){
+	private static void reviseSegments(CellCollection collection, String pointType){
 		logger.log("Refining segment assignments...");
 		
 		ProfileCollection pc = collection.getProfileCollection();
@@ -537,7 +537,7 @@ public class MorphologyAnalysis {
 		logger.log("Segment assignments refined");
 	}
 	
-	private static void applySegmentsToOtherPointTypes(NucleusCollection collection, String pointType){
+	private static void applySegmentsToOtherPointTypes(CellCollection collection, String pointType){
 
 		ProfileCollection pc = collection.getProfileCollection();
 		

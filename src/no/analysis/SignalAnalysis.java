@@ -10,7 +10,7 @@ import utility.Constants;
 import utility.Logger;
 import utility.Utils;
 import no.nuclei.AsymmetricNucleus;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.XYPoint;
 import no.export.TableExporter;
@@ -22,7 +22,7 @@ public class SignalAnalysis {
 
 	private static Logger logger;
 
-	public static boolean run(NucleusCollection collection){
+	public static boolean run(CellCollection collection){
 		
 		logger = new Logger(collection.getDebugFile(), "SignalAnalysis");
 
@@ -60,7 +60,7 @@ public class SignalAnalysis {
 		return true;
 	}
 
-	private static void exportSignalStats(NucleusCollection collection){
+	private static void exportSignalStats(CellCollection collection){
 
 		logger.log("Exporting signal stats...");
 		for(int channel : collection.getSignalChannels()){
@@ -91,7 +91,7 @@ public class SignalAnalysis {
 		logger.log("Signal stats exported");
 	}
 
-	public static void exportDistancesBetweenSingleSignals(NucleusCollection collection){
+	public static void exportDistancesBetweenSingleSignals(CellCollection collection){
 
 		logger.log("Exporting distance between signals...");
 		TableExporter tableExporter = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());

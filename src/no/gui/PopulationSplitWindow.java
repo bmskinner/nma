@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 
@@ -16,10 +16,10 @@ import ij.io.OpenDialog;
 public class PopulationSplitWindow {
 
 	private GenericDialog gd;
-	private List<NucleusCollection> collections = new ArrayList<NucleusCollection>(0);
+	private List<CellCollection> collections = new ArrayList<CellCollection>(0);
 //	private MainWindow mw;
 
-	public PopulationSplitWindow(List<NucleusCollection> collections){
+	public PopulationSplitWindow(List<CellCollection> collections){
 		this.collections = collections;
 //		this.mw = mw;
 //		gd = new GenericDialog("Finish analysis?");
@@ -42,11 +42,11 @@ public class PopulationSplitWindow {
 //		
 //	}
 	
-	public NucleusCollection getCollection(){
+	public CellCollection getCollection(){
 		gd = new GenericDialog("Select nuclear population");
 		
 		List<String> items = new ArrayList<String>(0);
-		for(NucleusCollection collection : this.collections){
+		for(CellCollection collection : this.collections){
 			items.add(collection.getType());
 		}
 		
@@ -56,7 +56,7 @@ public class PopulationSplitWindow {
 
 	    
 	    String collectionType = gd.getNextChoice();
-	    for(NucleusCollection collection : this.collections){
+	    for(CellCollection collection : this.collections){
 			if(collection.getType().equals(collectionType)){
 				return collection;
 			}

@@ -12,14 +12,14 @@ import java.nio.channels.FileChannel;
 
 import utility.Logger;
 import no.analysis.AnalysisDataset;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.nuclei.Nucleus;
 
 public class PopulationExporter {
 	
 	private static Logger logger;
 
-	public static boolean savePopulation(NucleusCollection collection){
+	public static boolean savePopulation(CellCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "PopulationExporter");
 

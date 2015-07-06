@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utility.Logger;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;
@@ -15,7 +15,7 @@ public class StatsExporter {
 	
 	private static Logger logger;
 
-	public static boolean run(NucleusCollection collection){
+	public static boolean run(CellCollection collection){
 
 		logger = new Logger(collection.getDebugFile(), "StatsExporter");
 		try{
@@ -32,7 +32,7 @@ public class StatsExporter {
 		return true;
 	}
 	
-	public static void exportNuclearStats(NucleusCollection collection, String filename){
+	public static void exportNuclearStats(CellCollection collection, String filename){
 
 		TableExporter nuclearStats = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		nuclearStats.addColumn("AREA",                       collection.getAreas());
@@ -47,26 +47,26 @@ public class StatsExporter {
 		nuclearStats.export(filename+"."+collection.getType());
 	}
 
-	public static void exportImagePaths(NucleusCollection collection, String filename){
+	public static void exportImagePaths(CellCollection collection, String filename){
 		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		logger.addColumn("PATH",     collection.getCleanNucleusPaths());
 //		logger.addColumn("POSITION", collection.getPositions());
 		logger.export(filename+"."+collection.getType());
 	}
 	
-	public static void exportAngleProfiles(NucleusCollection collection){
+	public static void exportAngleProfiles(CellCollection collection){
 		for(Nucleus n : collection.getNuclei()){ // for each roi
 			n.exportAngleProfile();
 		}
 	}
 	
-	public static void exportSegmentProfiles(NucleusCollection collection){
+	public static void exportSegmentProfiles(CellCollection collection){
 		for(Nucleus n : collection.getNuclei()){ // for each roi
 			n.exportSegments();
 		}
 	}
 	
-	public static void exportSegmentStats(NucleusCollection collection, String filename){
+	public static void exportSegmentStats(CellCollection collection, String filename){
 		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 
 		ProfileCollection pc = collection.getProfileCollection();
@@ -86,7 +86,7 @@ public class StatsExporter {
 		logger.export(filename+"."+collection.getType());
 	}
 
-	public static void exportMediansOfProfile(NucleusCollection collection, String filename){
+	public static void exportMediansOfProfile(CellCollection collection, String filename){
 
 		Profile normalisedMedian = collection.getProfileCollection().getProfile("tail");
 		Profile interpolatedMedian = normalisedMedian.interpolate((int)collection.getMedianNuclearPerimeter());

@@ -14,7 +14,7 @@ import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
-import no.collections.NucleusCollection;
+import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
@@ -125,7 +125,7 @@ public class DatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		for (int i=0; i < list.size(); i++) {
 
-			NucleusCollection collection = list.get(i).getCollection();
+			CellCollection collection = list.get(i).getCollection();
 			
 			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 			Profile xpoints = profile.getPositions(100);
@@ -176,7 +176,7 @@ public class DatasetCreator {
 		double length = getMaximumProfileLength(list);
 
 		for (int i=0; i < list.size(); i++) {
-			NucleusCollection collection = list.get(i).getCollection();
+			CellCollection collection = list.get(i).getCollection();
 			
 			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 			Profile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
@@ -212,7 +212,7 @@ public class DatasetCreator {
 	 * @param normalised normalise profile length to 100, or show raw
 	 * @return a dataset
 	 */
-	public static XYDataset createSegmentedProfileDataset(NucleusCollection collection, boolean normalised){
+	public static XYDataset createSegmentedProfileDataset(CellCollection collection, boolean normalised){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 		Profile xpoints = null;
@@ -258,7 +258,7 @@ public class DatasetCreator {
 
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
 			AnalysisDataset dataset = list.get(i);
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 			Profile xpoints = null;
 			
@@ -286,7 +286,7 @@ public class DatasetCreator {
 
 		int i=0;
 		for(AnalysisDataset dataset : list){
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 			Profile profile = collection.getFrankenCollection().getProfile(collection.getReferencePoint());
 			Profile xpoints = profile.getPositions(100);
 //			xpoints = xpoints.add(0.5);
@@ -313,7 +313,7 @@ public class DatasetCreator {
 
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
 			AnalysisDataset dataset = list.get(i);
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 			
 			Profile xpoints = null;
@@ -359,7 +359,7 @@ public class DatasetCreator {
 
 		int i=0;
 		for(AnalysisDataset dataset : list){
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 			Profile profile = collection.getFrankenCollection().getProfile(collection.getReferencePoint());
 			Profile xpoints = profile.getPositions(100);
 
@@ -391,7 +391,7 @@ public class DatasetCreator {
 	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list){
 
 		if(list.size()==1){
-			NucleusCollection collection = list.get(0).getCollection();
+			CellCollection collection = list.get(0).getCollection();
 			Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
 			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
 			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
@@ -400,7 +400,7 @@ public class DatasetCreator {
 			int i = 0;
 			DefaultXYDataset ds = new DefaultXYDataset();
 			for(AnalysisDataset dataset : list){
-				NucleusCollection collection = dataset.getCollection();
+				CellCollection collection = dataset.getCollection();
 				Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
 				Profile xpoints = profile.getPositions(100);
 				double[][] data = { xpoints.asArray(), profile.asArray() };
@@ -412,7 +412,7 @@ public class DatasetCreator {
 		
 	}
 		
-	public static XYDataset createFrankenSegmentDataset(NucleusCollection collection){
+	public static XYDataset createFrankenSegmentDataset(CellCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
 		Profile xpoints = profile.getPositions(100);
@@ -485,7 +485,7 @@ public class DatasetCreator {
 			DecimalFormat df = new DecimalFormat("#0.00"); 
 
 			for(AnalysisDataset dataset : list){
-				NucleusCollection collection = dataset.getCollection();
+				CellCollection collection = dataset.getCollection();
 				AnalysisOptions options = dataset.getAnalysisOptions();
 				
 				// only display refold mode if nucleus was refolded
@@ -567,7 +567,7 @@ public class DatasetCreator {
 			DecimalFormat df = new DecimalFormat("#0.00"); 
 
 			for(AnalysisDataset dataset : list){
-				NucleusCollection collection = dataset.getCollection();
+				CellCollection collection = dataset.getCollection();
 								
 				double signalPerNucleus = (double) collection.getSignalCount()/  (double) collection.getNucleusCount();
 				
@@ -871,7 +871,7 @@ public class DatasetCreator {
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
-			NucleusCollection c = collections.get(i).getCollection();
+			CellCollection c = collections.get(i).getCollection();
 
 			List<Double> list = new ArrayList<Double>();
 
@@ -889,7 +889,7 @@ public class DatasetCreator {
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
-			NucleusCollection c = collections.get(i).getCollection();
+			CellCollection c = collections.get(i).getCollection();
 
 			List<Double> list = new ArrayList<Double>();
 
@@ -908,7 +908,7 @@ public class DatasetCreator {
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
-			NucleusCollection c = collections.get(i).getCollection();
+			CellCollection c = collections.get(i).getCollection();
 
 			List<Double> list = new ArrayList<Double>();
 
@@ -926,7 +926,7 @@ public class DatasetCreator {
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
-			NucleusCollection c = collections.get(i).getCollection();
+			CellCollection c = collections.get(i).getCollection();
 
 			List<Double> list = new ArrayList<Double>();
 
@@ -944,7 +944,7 @@ public class DatasetCreator {
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
-			NucleusCollection c = collections.get(i).getCollection();
+			CellCollection c = collections.get(i).getCollection();
 
 			List<Double> list = new ArrayList<Double>();
 
@@ -963,7 +963,7 @@ public class DatasetCreator {
 
 		for (int i=0; i < collections.size(); i++) {
 
-			NucleusCollection collection = collections.get(i).getCollection();
+			CellCollection collection = collections.get(i).getCollection();
 
 
 			List<Integer> list = new ArrayList<Integer>(0);
@@ -978,7 +978,7 @@ public class DatasetCreator {
 		return dataset;
 	}
 	
-	public static XYDataset createNucleusOutline(NucleusCollection collection){
+	public static XYDataset createNucleusOutline(CellCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Nucleus n = collection.getConsensusNucleus();
 		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
@@ -1101,7 +1101,7 @@ public class DatasetCreator {
 
 		int i=0;
 		for(AnalysisDataset dataset : list){
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 			if(collection.hasConsensusNucleus()){
 				Nucleus n = collection.getConsensusNucleus();
 
@@ -1143,7 +1143,7 @@ public class DatasetCreator {
 		return new XYPoint(signalX, signalY);
 	}
 	
-	public static XYDataset createSignalCoMDataset(NucleusCollection collection){
+	public static XYDataset createSignalCoMDataset(CellCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		if(collection.getSignalCount()>0){
@@ -1171,7 +1171,7 @@ public class DatasetCreator {
 		return ds;
 	}
 	
-	public static List<Shape> createSignalRadiusDataset(NucleusCollection collection, int channel){
+	public static List<Shape> createSignalRadiusDataset(CellCollection collection, int channel){
 
 		List<Shape> result = new ArrayList<Shape>(0);
 		if(collection.getSignalCount()>0){
@@ -1205,7 +1205,7 @@ public class DatasetCreator {
 			
 			int maxChannels = 0;
 			for(AnalysisDataset dataset : list){
-				NucleusCollection collection = dataset.getCollection();
+				CellCollection collection = dataset.getCollection();
 				maxChannels = Math.max(collection.getSignalChannels().size(), maxChannels);
 			}
 			
@@ -1231,7 +1231,7 @@ public class DatasetCreator {
 
 			// make a new column for each collection
 			for(AnalysisDataset dataset : list){
-				NucleusCollection collection = dataset.getCollection();
+				CellCollection collection = dataset.getCollection();
 				
 //				IJ.log("Adding collection");
 				List<Object> rowData = new ArrayList<Object>(0);
@@ -1242,7 +1242,7 @@ public class DatasetCreator {
 						rowData.add("");
 						rowData.add(channel);
 						rowData.add(collection.getSignalCount(channel));
-						double signalPerNucleus = (double) collection.getSignalCount(channel)/  (double) collection.getNucleiWithSignals(channel).size();
+						double signalPerNucleus = (double) collection.getSignalCount(channel)/  (double) collection.getCellsWithNuclearSignals(channel).size();
 						rowData.add(df.format(signalPerNucleus));
 						rowData.add(df.format(collection.getMedianSignalArea(channel)));
 						rowData.add(df.format(collection.getMedianSignalAngle(channel)));
@@ -1269,7 +1269,7 @@ public class DatasetCreator {
 	public static HistogramDataset createSignalAngleHistogramDataset(List<AnalysisDataset> list){
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 			
 			for(int channel : collection.getSignalChannels()){
 
@@ -1292,7 +1292,7 @@ public class DatasetCreator {
 	public static HistogramDataset createSignalDistanceHistogramDataset(List<AnalysisDataset> list){
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 
 			for(int channel : collection.getSignalChannels()){
 
@@ -1316,7 +1316,7 @@ public class DatasetCreator {
 		DefaultStatisticalCategoryDataset ds = new DefaultStatisticalCategoryDataset();
 		for(AnalysisDataset dataset : list){
 			
-			NucleusCollection collection = dataset.getCollection();
+			CellCollection collection = dataset.getCollection();
 
 			for(int channel : collection.getSignalChannels()){
 				
