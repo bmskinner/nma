@@ -22,6 +22,7 @@ public class Constants {
 		
 		
 		// types of cells we can analyse
+		public static final String CELL_TYPE_GENERIC = "Cell"; // this is the only type in use
 		public static final String CELL_TYPE_ROUND = "Round cell";
 		public static final String CELL_TYPE_SPERM = "Sperm cell";
 		

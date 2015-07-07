@@ -38,6 +38,7 @@ import mmorpho.StructureElement;
 import no.nuclei.*;
 import no.collections.*;
 import no.components.*;
+import no.components.AnalysisOptions.CannyOptions;
 import no.export.ImageExporter;
 import no.gui.MainWindow;
 import no.imports.ImageImporter;
@@ -376,7 +377,7 @@ public class NucleusDetector {
 		
 		// here before running the thresholding, do an edge detection, then pass on
 		ImageStack searchStack = null;
-		if( this.analysisOptions.isUseCanny()) {
+		if( this.analysisOptions.getNucleusCannyOptions().isUseCanny()) {
 			searchStack = runEdgeDetector(image);
 		} else {
 			searchStack = image;
@@ -421,9 +422,10 @@ public class NucleusDetector {
 		ImageStack searchStack = null;
 		try {
 			// using canny detector
+			CannyOptions nucleusCannyOptions = analysisOptions.getNucleusCannyOptions();
 
 			// calculation of auto threshold
-			if(analysisOptions.isCannyAutoThreshold()){
+			if(nucleusCannyOptions.isCannyAutoThreshold()){
 
 				// find the median intensity of the image
 				double medianPixel = getMedianIntensity(image);
@@ -442,18 +444,18 @@ public class NucleusDetector {
 				lower = lower < 0.1 ? 0.1 : lower; // hard limit
 				double upper = Math.min(255, (1.0 + (0.6 * sigma)  ) * medianPixel  ) ;
 				upper = upper < 0.3 ? 0.3 : upper; // hard limit
-				analysisOptions.setLowThreshold(  (float)  lower);
-				analysisOptions.setHighThreshold( (float)  upper);
+				nucleusCannyOptions.setLowThreshold(  (float)  lower);
+				nucleusCannyOptions.setHighThreshold( (float)  upper);
 				logger.log("Auto thresholding: low: "+lower+"  high: "+upper, Logger.DEBUG);
 			}
 
 			logger.log("Creating edge detector", Logger.DEBUG);
 			CannyEdgeDetector canny = new CannyEdgeDetector();
 			canny.setSourceImage(image.getProcessor(Constants.COUNTERSTAIN).getBufferedImage());
-			canny.setLowThreshold( analysisOptions.getLowThreshold() );
-			canny.setHighThreshold( analysisOptions.getHighThreshold());
-			canny.setGaussianKernelRadius(analysisOptions.getKernelRadius());
-			canny.setGaussianKernelWidth(analysisOptions.getKernelWidth());
+			canny.setLowThreshold( nucleusCannyOptions.getLowThreshold() );
+			canny.setHighThreshold( nucleusCannyOptions.getHighThreshold());
+			canny.setGaussianKernelRadius(nucleusCannyOptions.getKernelRadius());
+			canny.setGaussianKernelWidth(nucleusCannyOptions.getKernelWidth());
 
 			canny.process();
 			BufferedImage edges = canny.getEdgesImage();
@@ -508,7 +510,7 @@ public class NucleusDetector {
 		try {
 			
 			int shift=1;
-			int radius = analysisOptions.getClosingObjectRadius();
+			int radius = analysisOptions.getNucleusCannyOptions().getClosingObjectRadius();
 			int[] offset = {0,0};
 			int eltype = 0; //circle
 			logger.log("Closing objects with circle of radius "+radius, Logger.DEBUG);

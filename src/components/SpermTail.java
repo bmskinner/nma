@@ -1,5 +1,7 @@
 package components;
 
+import ij.gui.Roi;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.UUID;
@@ -15,9 +17,13 @@ import java.util.UUID;
 public class SpermTail extends Flagellum implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+	
+	
 
-	public SpermTail(File source, int channel){
-		super(source, channel);
+	public SpermTail(File source, int channel, Roi skeleton, Roi border){
+		super(source, channel, skeleton, border);
 	}
+	
+	
 
 }

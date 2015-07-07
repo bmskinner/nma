@@ -37,6 +37,8 @@ public class AnalysisDataset implements Serializable {
 	private List<UUID> clusterResults = new ArrayList<UUID>(0);
 	private String newickTree;
 	
+	private File debugFile;
+	
 	private String version;
 	
 	private boolean isRoot;

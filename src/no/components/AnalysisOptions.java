@@ -13,14 +13,8 @@ public class AnalysisOptions implements Serializable {
 	private  double minNucleusCirc;
 	private  double maxNucleusCirc;
 	
-	// values for Canny edge deteection
-	private boolean useCanny; 
-	private boolean cannyAutoThreshold;
-	private float lowThreshold;
-	private float highThreshold;
-	private float kernelRadius;
-	private int   kernelWidth;
-	private int   closingObjectRadius; // for morphological closing
+	private CannyOptions nucleusCannyOptions;
+	private CannyOptions tailCannyOptions;
 	
 	private boolean normaliseContrast; 
 
@@ -28,10 +22,6 @@ public class AnalysisOptions implements Serializable {
 
 	private Class<?> nucleusClass;
 
-	/**
-	 * The class of NucleusCollection to use in the analysis
-	 */
-//	private Class<?> collectionClass;
 
 	/**
 	 * Should a reanalysis be performed?
@@ -60,7 +50,8 @@ public class AnalysisOptions implements Serializable {
 
 
 	public AnalysisOptions(){
-
+		this.nucleusCannyOptions = new CannyOptions();
+		this.tailCannyOptions = new CannyOptions();
 	}
 
 
@@ -117,10 +108,6 @@ public class AnalysisOptions implements Serializable {
 	public Class<?> getNucleusClass(){
 		return this.nucleusClass;
 	}
-
-//	public Class<?> getCollectionClass(){
-//		return this.collectionClass;
-//	}
 
 	public String getRefoldMode(){
 		return this.refoldMode;
@@ -186,11 +173,6 @@ public class AnalysisOptions implements Serializable {
 	}
 
 
-//	public void setCollectionClass(Class<?> collectionClass) {
-//		this.collectionClass = collectionClass;
-//	}
-
-
 	public void setPerformReanalysis(boolean performReanalysis) {
 		this.performReanalysis = performReanalysis;
 	}
@@ -240,47 +222,6 @@ public class AnalysisOptions implements Serializable {
 		this.maxSignalFraction = maxSignalFraction;
 	}
 
-
-	public float getLowThreshold() {
-		return lowThreshold;
-	}
-
-
-	public void setLowThreshold(float lowThreshold) {
-		this.lowThreshold = lowThreshold;
-	}
-
-
-	public float getHighThreshold() {
-		return highThreshold;
-	}
-
-
-	public void setHighThreshold(float highThreshold) {
-		this.highThreshold = highThreshold;
-	}
-
-
-	public float getKernelRadius() {
-		return kernelRadius;
-	}
-
-
-	public void setKernelRadius(float kernelRadius) {
-		this.kernelRadius = kernelRadius;
-	}
-
-
-	public int getKernelWidth() {
-		return kernelWidth;
-	}
-
-
-	public void setKernelWidth(int kernelWidth) {
-		this.kernelWidth = kernelWidth;
-	}
-
-
 	public boolean isNormaliseContrast() {
 		return normaliseContrast;
 	}
@@ -291,32 +232,97 @@ public class AnalysisOptions implements Serializable {
 	}
 
 
-	public boolean isUseCanny() {
-		return useCanny;
+	public CannyOptions getNucleusCannyOptions(){
+		return this.nucleusCannyOptions;
 	}
-
-
-	public void setUseCanny(boolean useCanny) {
-		this.useCanny = useCanny;
+	
+	public CannyOptions getTailCannyOptions(){
+		return this.tailCannyOptions;
 	}
+	
+	public class CannyOptions implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		
+		// values for Canny edge deteection
+		private boolean useCanny; 
+		private boolean cannyAutoThreshold;
+		private float lowThreshold;
+		private float highThreshold;
+		private float kernelRadius;
+		private int   kernelWidth;
+		private int   closingObjectRadius; // for morphological closing
+		
+		public CannyOptions(){
+			
+		}
+		
+		public boolean isUseCanny() {
+			return useCanny;
+		}
 
 
-	public int getClosingObjectRadius() {
-		return closingObjectRadius;
-	}
+		public void setUseCanny(boolean useCanny) {
+			this.useCanny = useCanny;
+		}
 
 
-	public void setClosingObjectRadius(int closingObjectRadius) {
-		this.closingObjectRadius = closingObjectRadius;
-	}
+		public int getClosingObjectRadius() {
+			return closingObjectRadius;
+		}
 
 
-	public boolean isCannyAutoThreshold() {
-		return cannyAutoThreshold;
-	}
+		public void setClosingObjectRadius(int closingObjectRadius) {
+			this.closingObjectRadius = closingObjectRadius;
+		}
 
 
-	public void setCannyAutoThreshold(boolean cannyAutoThreshold) {
-		this.cannyAutoThreshold = cannyAutoThreshold;
+		public boolean isCannyAutoThreshold() {
+			return cannyAutoThreshold;
+		}
+
+
+		public void setCannyAutoThreshold(boolean cannyAutoThreshold) {
+			this.cannyAutoThreshold = cannyAutoThreshold;
+		}
+		
+		public float getLowThreshold() {
+			return lowThreshold;
+		}
+
+
+		public void setLowThreshold(float lowThreshold) {
+			this.lowThreshold = lowThreshold;
+		}
+
+
+		public float getHighThreshold() {
+			return highThreshold;
+		}
+
+
+		public void setHighThreshold(float highThreshold) {
+			this.highThreshold = highThreshold;
+		}
+
+
+		public float getKernelRadius() {
+			return kernelRadius;
+		}
+
+
+		public void setKernelRadius(float kernelRadius) {
+			this.kernelRadius = kernelRadius;
+		}
+
+
+		public int getKernelWidth() {
+			return kernelWidth;
+		}
+
+
+		public void setKernelWidth(int kernelWidth) {
+			this.kernelWidth = kernelWidth;
+		}
 	}
 }

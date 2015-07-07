@@ -42,6 +42,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import no.components.AnalysisOptions;
+import no.components.AnalysisOptions.CannyOptions;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.PigSpermNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
@@ -63,6 +64,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private static final double DEFAULT_CANNY_KERNEL_RADIUS = 2;
 	private static final int    DEFAULT_CANNY_KERNEL_WIDTH = 16;
 	private static final int    DEFAULT_CLOSING_OBJECT_RADIUS = 5;
+	private static final int    DEFAULT_TAIL_CLOSING_OBJECT_RADIUS = 3;
 	
 	private static final int    DEFAULT_MIN_NUCLEUS_SIZE = 2000;
 	private static final int    DEFAULT_MAX_NUCLEUS_SIZE = 10000;
@@ -203,13 +205,25 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 //		analysisOptions.setCollectionClass(RodentSpermNucleusCollection.class);
 		analysisOptions.setNucleusClass(RodentSpermNucleus.class);
 		
-		analysisOptions.setUseCanny(false);
-		analysisOptions.setCannyAutoThreshold(false);
-		analysisOptions.setLowThreshold( (float) DEFAULT_CANNY_LOW_THRESHOLD);
-		analysisOptions.setHighThreshold((float) DEFAULT_CANNY_HIGH_THRESHOLD);
-		analysisOptions.setKernelRadius((float)DEFAULT_CANNY_KERNEL_RADIUS);
-		analysisOptions.setKernelWidth(DEFAULT_CANNY_KERNEL_WIDTH);
-		analysisOptions.setClosingObjectRadius(DEFAULT_CLOSING_OBJECT_RADIUS);
+		CannyOptions nucleusCannyOptions = analysisOptions.getNucleusCannyOptions();
+		
+		nucleusCannyOptions.setUseCanny(false);
+		nucleusCannyOptions.setCannyAutoThreshold(false);
+		nucleusCannyOptions.setLowThreshold( (float) DEFAULT_CANNY_LOW_THRESHOLD);
+		nucleusCannyOptions.setHighThreshold((float) DEFAULT_CANNY_HIGH_THRESHOLD);
+		nucleusCannyOptions.setKernelRadius((float)DEFAULT_CANNY_KERNEL_RADIUS);
+		nucleusCannyOptions.setKernelWidth(DEFAULT_CANNY_KERNEL_WIDTH);
+		nucleusCannyOptions.setClosingObjectRadius(DEFAULT_CLOSING_OBJECT_RADIUS);
+		
+		CannyOptions tailCannyOptions = analysisOptions.getTailCannyOptions();
+		
+		tailCannyOptions.setUseCanny(true);
+		tailCannyOptions.setCannyAutoThreshold(false);
+		tailCannyOptions.setLowThreshold( (float) DEFAULT_CANNY_LOW_THRESHOLD);
+		tailCannyOptions.setHighThreshold((float) DEFAULT_CANNY_HIGH_THRESHOLD);
+		tailCannyOptions.setKernelRadius((float)DEFAULT_CANNY_KERNEL_RADIUS);
+		tailCannyOptions.setKernelWidth(DEFAULT_CANNY_KERNEL_WIDTH);
+		tailCannyOptions.setClosingObjectRadius(DEFAULT_TAIL_CLOSING_OBJECT_RADIUS);
 		
 	}
 
@@ -482,7 +496,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals("NucleusDetectionThreshold")){
-			this.analysisOptions.setUseCanny(false);
+			this.analysisOptions.getNucleusCannyOptions().setUseCanny(false);
 			cannyAutoThresholdCheckBox.setEnabled(false);
 			cannyLowThreshold.setEnabled(false);
 			cannyHighThreshold.setEnabled(false);
@@ -494,7 +508,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		}
 		
 		if(e.getActionCommand().equals("NucleusDetectionEdge")){
-			this.analysisOptions.setUseCanny(true);
+			this.analysisOptions.getNucleusCannyOptions().setUseCanny(true);
 			cannyAutoThresholdCheckBox.setEnabled(true);
 			cannyLowThreshold.setEnabled(true);
 			cannyHighThreshold.setEnabled(true);
@@ -508,11 +522,11 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		if(e.getActionCommand().equals("CannyAutoThreshold")){
 
 			if(cannyAutoThresholdCheckBox.isSelected()){
-				analysisOptions.setCannyAutoThreshold(true);
+				analysisOptions.getNucleusCannyOptions().setCannyAutoThreshold(true);
 				cannyLowThreshold.setEnabled(false);
 				cannyHighThreshold.setEnabled(false);
 			} else {
-				analysisOptions.setCannyAutoThreshold(false);
+				analysisOptions.getNucleusCannyOptions().setCannyAutoThreshold(false);
 				cannyLowThreshold.setEnabled(true);
 				cannyHighThreshold.setEnabled(true);
 			}
@@ -675,7 +689,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 					j.setValue( cannyHighThreshold.getValue() );
 				}
 				Double doubleValue = (Double) j.getValue();
-				this.analysisOptions.setLowThreshold(    doubleValue.floatValue() );
+				this.analysisOptions.getNucleusCannyOptions().setLowThreshold(    doubleValue.floatValue() );
 			}
 			
 			if(e.getSource()==cannyHighThreshold){
@@ -686,26 +700,26 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 					j.setValue( cannyLowThreshold.getValue() );
 				}
 				Double doubleValue = (Double) j.getValue();
-				this.analysisOptions.setHighThreshold( doubleValue.floatValue() );
+				this.analysisOptions.getNucleusCannyOptions().setHighThreshold( doubleValue.floatValue() );
 			}
 			
 			if(e.getSource()==cannyKernelRadius){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
 				Double doubleValue = (Double) j.getValue();
-				this.analysisOptions.setKernelRadius( doubleValue.floatValue());
+				this.analysisOptions.getNucleusCannyOptions().setKernelRadius( doubleValue.floatValue());
 			}
 			
 			if(e.getSource()==cannyKernelWidth){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
-				this.analysisOptions.setKernelWidth( (Integer) j.getValue());
+				this.analysisOptions.getNucleusCannyOptions().setKernelWidth( (Integer) j.getValue());
 			}
 			
 			if(e.getSource()==closingObjectRadiusSpinner){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
-				this.analysisOptions.setClosingObjectRadius( (Integer) j.getValue());
+				this.analysisOptions.getNucleusCannyOptions().setClosingObjectRadius( (Integer) j.getValue());
 			}
 			
 			

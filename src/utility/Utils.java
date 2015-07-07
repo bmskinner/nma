@@ -167,7 +167,12 @@ public class Utils {
 
 	 }
 
-	 public static FloatPolygon createPolygon(List<NucleusBorderPoint> list){
+	 /**
+	 * Turn the border points in a nucleus into a polygon
+	 * @param list the list of border points
+	 * @return
+	 */
+	public static FloatPolygon createPolygon(List<NucleusBorderPoint> list){
 		 float[] xpoints = new float[list.size()];
 		 float[] ypoints = new float[list.size()];
 
@@ -179,4 +184,26 @@ public class Utils {
 
 		 return new FloatPolygon(xpoints, ypoints, list.size());
 	 }
+	
+	/**
+	 * Turn the border points in a nucleus into a polygon, offset
+	 * to the original positions of the ROI in the source image
+	 * @param n the nucleus
+	 * @return a polygon
+	 */
+	public static FloatPolygon createOriginalPolygon(Nucleus n){
+		 float[] xpoints = new float[n.getLength()];
+		 float[] ypoints = new float[n.getLength()]; 
+
+		 for(int i=0;i<n.getLength();i++){
+			 NucleusBorderPoint p = n.getBorderPoint(i);
+			 xpoints[i] = (float) p.getX() + (float) n.getPosition()[0];
+			 ypoints[i] = (float) p.getY() + (float) n.getPosition()[1];
+		 }
+
+		 return new FloatPolygon(xpoints, ypoints, n.getLength());
+
+	 }
+	
+	
  }

@@ -16,6 +16,7 @@ import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
 import no.collections.CellCollection;
 import no.components.AnalysisOptions;
+import no.components.AnalysisOptions.CannyOptions;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
@@ -496,15 +497,17 @@ public class DatasetCreator {
 				String[] times = collection.getOutputFolderName().split("_");
 				String date = times[0];
 				String time = times[1];
+				
+				CannyOptions nucleusCannyOptions = options.getNucleusCannyOptions();
 								
-				String detectionMethod = options.isUseCanny() ? "Canny edge detection" : "Thresholding";
-				String nucleusThreshold = options.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
-				String cannyAutoThreshold = options.isUseCanny() ? String.valueOf(options.isCannyAutoThreshold()) : "N/A";
-				String cannyLowThreshold = options.isUseCanny()  && !options.isCannyAutoThreshold() ? String.valueOf(options.getLowThreshold()) : "N/A";
-				String cannyHighThreshold = options.isUseCanny() && !options.isCannyAutoThreshold() ? String.valueOf(options.getHighThreshold()) : "N/A";
-				String cannyKernelRadius = options.isUseCanny() ? String.valueOf(options.getKernelRadius()) : "N/A";
-				String cannyKernelWidth = options.isUseCanny() ? String.valueOf(options.getKernelWidth()) : "N/A";
-				String cannyClosingRadius = options.isUseCanny() ? String.valueOf(options.getClosingObjectRadius()) : "N/A";
+				String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
+				String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
+				String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
+				String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
+				String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
+				String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : "N/A";
+				String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : "N/A";
+				String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
 
 				Object[] collectionData = {
 						options.getAngleProfileWindowSize(),

@@ -74,6 +74,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import java.awt.Font;
 
@@ -115,6 +116,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import cell.Cell;
+import cell.analysis.TubulinTailDetector;
 import utility.Constants;
 import utility.TreeOrderHashMap;
 
@@ -128,8 +130,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * guaranteed between revision or major version increments.
 	 */
 	public static final int VERSION_MAJOR    = 1;
-	public static final int VERSION_REVISION = 8;
-	public static final int VERSION_BUGFIX   = 1;
+	public static final int VERSION_REVISION = 9;
+	public static final int VERSION_BUGFIX   = 0;
 	
 	private static final int PROFILE_TAB = 0;
 	private static final int STATS_TAB = 1;
@@ -3580,7 +3582,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 
 			if(datasets.size()==1){
-				// TODO make new thread
+
 				Thread thr = new Thread() {
 					public void run() {
 
@@ -3667,34 +3669,91 @@ public class MainWindow extends JFrame implements ActionListener {
 		public AddTailStainAction() {
 			super("Add tail stain");
 		}
-		// note - this will overwrite the stats for any collection with the same name in the output folder
+
 		public void actionPerformed(ActionEvent e) {
 
 			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 
 			if(datasets.size()==1){
-				// TODO make new thread
-				Thread thr = new Thread() {
-					public void run() {
 
-						AnalysisDataset d = datasets.get(0);
-						try{
-							
-							// create dialog to get image folder and channel
-							// run tail detector
-							
-							
-						} catch(Exception e1){
-							log("Error adding tail stain: "+e1.getMessage());
-						}
+				final AnalysisDataset d = datasets.get(0);
+				try{
+
+					// create dialog to get image folder
+					DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
+					String folderName = openDialog.getDirectory();
+
+					if(folderName==null) return; // user cancelled
+
+					final File folder =  new File(folderName);
+
+					if(!folder.isDirectory() ){
+						return;
 					}
-				};
-				thr.run();
+					if(!folder.exists()){
+						return; // check folder is ok
+					}
+					// create dialog to get image channel
+
+					Object[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
+					String channelName = (String)JOptionPane.showInputDialog(
+							MainWindow.this,
+							"Select channel",
+							"Select channel",
+							JOptionPane.PLAIN_MESSAGE,
+							null,
+							possibilities,
+							"Green");
+
+					final int channel = channelName.equals("Red") 
+							? Constants.RGB_RED
+									: channelName.equals("Green") 
+									? Constants.RGB_GREEN
+											: Constants.RGB_BLUE;
+
+
+					Runnable runTailDetector = new Runnable() {
+						@Override
+						public void run() { 
+							// run tail detector
+							logc("Detecting tails with tubulin stain...");
+							boolean ok = TubulinTailDetector.run(d, folder, channel);
+							if(ok){
+								log("OK");
+							} else {
+								log("Error");
+							}
+						}
+					};
+
+					SwingUtilities.invokeLater(runTailDetector);
+
+					//					Thread thr = new Thread() {
+					//						public void run() {
+					//
+					//							// run tail detector
+					//							logc("Detecting tails with tubulin stain...");
+					//							boolean ok = TubulinTailDetector.run(d, folder, channel);
+					//							if(ok){
+					//								log("OK");
+					//							} else {
+					//								log("Error");
+					//							}
+					//						}
+					//					};
+					//					thr.run();
+
+
+				} catch(Exception e1){
+					log("Error adding tail stain: "+e1.getMessage());
+				}
+			} else {
+				log("Cannot run on multiple datasets at once");
 			}
 
 		}
 	}
-	
+
 	
 	/**
 	 * Create a new NucleusCollection of the same class as the given dataset
