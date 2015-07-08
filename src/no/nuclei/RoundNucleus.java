@@ -55,6 +55,12 @@ public class RoundNucleus
 	public static final int BORDER_POINTS = 1;
 	public static final int BORDER_TAGS = 2;
 	
+	// indices in  the originalPositions array
+	public static final int X_BASE 	= 0;
+	public static final int Y_BASE 	= 1;
+	public static final int WIDTH 	= 2;
+	public static final int HEIGHT 	= 3;
+	
 	public static final String IMAGE_PREFIX = "export.";
 
 	protected int nucleusNumber; // the number of the nucleus in the current image
@@ -344,7 +350,15 @@ public class RoundNucleus
 		}
 		return result;
 	}
-
+	
+	public List<NucleusBorderPoint> getOffsetBorderList(){
+		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
+		for(NucleusBorderPoint p : borderList){
+			result.add(new NucleusBorderPoint( p.getX() - orignalPosition[X_BASE], p.getY() - orignalPosition[Y_BASE]));
+		}
+		return result;
+	}
+	
 	public int getAngleProfileWindowSize(){
 		return this.angleProfileWindowSize;
 	}

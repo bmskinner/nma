@@ -60,11 +60,15 @@ public class TubulinTailDetector {
 
 				Nucleus n = c.getNucleus();
 				logger.log("Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber(), Logger.DEBUG);
+				
 				// get the image in the folder with the same name as the
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getImageName());
 				logger.log("Tail in: "+imageFile.getAbsolutePath(), Logger.DEBUG);
 				SpermTail tail = null;
+				
+				
+				// attempt to detect the tails in the image
 				try{
 					tail = detectTail(imageFile, channel, n, dataset.getAnalysisOptions());
 				} catch(Exception e){
@@ -101,16 +105,14 @@ public class TubulinTailDetector {
 	 * @param n the nucleus to which the tail should attach
 	 * @return a SpermTail object
 	 */
-	private static SpermTail detectTail(File f, int channel, Nucleus n, AnalysisOptions options){
+	private static SpermTail detectTail(File tubulinFile, int channel, Nucleus n, AnalysisOptions options){
 		
 		SpermTail tail = null;
 		
 		// import image with tubulin in  channel
-		ImageStack stack = ImageImporter.importImage(f, logger.getLogfile());
+		ImageStack stack = ImageImporter.importImage(tubulinFile, logger.getLogfile());
 		
-//		ImagePlus searchImage = new ImagePlus(null, stack);
-//		searchImage.show();
-		
+		// the stack in the ImageStack must be converted from the given rgb channel 
 		int stackNumber = channel == Constants.RGB_BLUE 
 						? Constants.COUNTERSTAIN
 						: channel == Constants.RGB_RED
@@ -120,6 +122,7 @@ public class TubulinTailDetector {
 		
 		// file must match dimensions of existing nucleus image file
 		if( checkDimensions(stack, n)){
+			
 			// edge / threshold to find tubulin stain
 			ImageStack edges = runEdgeDetector(stack, options, stackNumber);
 			
@@ -127,96 +130,149 @@ public class TubulinTailDetector {
 			List<Roi> borderRois = getROIs(edges, true, 1);
 			logger.log("Found "+borderRois.size()+" potential tails in image", Logger.INFO);
 			
-			// fill rois with white
-			ByteProcessor bp = (ByteProcessor) edges.getProcessor(1);
-			bp.setColor(Color.WHITE);
-			for(Roi r : borderRois){
-				logger.log("Filling roi", Logger.DEBUG);
-				bp.fill(r);
-			}
-			ImagePlus bpImage = new ImagePlus(n.getImageName()+"-"+n.getNucleusNumber()+" byte image", bp);
-//			bpImage.show();
+			// create the skeletons of the detected objects
+			ImageStack skeletonStack = skeletoniseStack(edges, borderRois);
 			
-			
-			BinaryProcessor binp = new BinaryProcessor((ByteProcessor) bp.duplicate());
-			ImagePlus binpImage = new ImagePlus(n.getImageName()+"-"+n.getNucleusNumber()+" binary image", binp);
-//			binpImage.show();
-			// skeletonise the filled rois
-			
-			ByteProcessor binp2 = (ByteProcessor) bp.duplicate();
-			BinaryProcessor skp = new BinaryProcessor((ByteProcessor) binp2);
-			
-			Skeletonize3D_ skelly = new Skeletonize3D_();
-			skelly.setup("", binpImage);
-			skelly.run(skp);
-			
-			logger.log("Skeletonized the image", Logger.DEBUG);
-
-			
-			ImageStack skeletonStack = ImageStack.create(binp.getWidth(), binp.getHeight(), 0, 8);
-			skeletonStack.addSlice("skeleton", binp);
-			skeletonStack.deleteSlice(1); // remove the blank first slice
-			
-			
-			// detect particles area 0-Infinity
+			// detect the skeletons as rois (particles area 0-Infinity)
 			List<Roi> skeletons = getROIs(skeletonStack, false, 1);
 			
-			
-			// Get rois of the correct size
-			List<Roi> usableSkeletons = new ArrayList<Roi>(0);
-
-			for(Roi r : skeletons){
-				if(r.getLength()>1000){
-					usableSkeletons.add(r);
-				}
-			}
+			// Get rois of the correct length
+			List<Roi> usableSkeletons = filterSkeletons(skeletons, 1000);
 			
 			// print the roi details to the log
 			logger.log("Found "+usableSkeletons.size()+" potential tails in image", Logger.INFO);
 			
-			// ensure that the positions of the nucleus are corrected to
-			// match the original image
-			FloatPolygon nucleusOutline = Utils.createOriginalPolygon(n);
-
+			// from the list of possible tails in the image, 
+			// find the one that overlaps the current nucleus
+			tail = getTailMatchingNucleus(usableSkeletons, borderRois, n, tubulinFile, channel);
 			
-			for(Roi skeleton : usableSkeletons){
-				
-				boolean tailOverlap = false;
-								
-				logger.log("Assessing skeleton: Length : "+skeleton.getLength(), Logger.DEBUG);
-
-				float[] xpoints = skeleton.getFloatPolygon().xpoints;
-				float[] ypoints = skeleton.getFloatPolygon().ypoints;
-							
-				// objects that overlap with the nucleus are kept
-				for(int i=0;i<xpoints.length;i++){
-										
-					if(nucleusOutline.contains(xpoints[i], ypoints[i])){
-						tailOverlap = true;
-					}
-				}
-				
-				
-				if(tailOverlap){
-					// if a tail overlaps the nucleus, get the correstponding border roi
-					Roi tailBorder = null;
-					for(Roi border : borderRois){
-						if (border.getFloatPolygon().contains(xpoints[0], ypoints[0])
-								&& border.getFloatPolygon().contains(xpoints[xpoints.length-1], ypoints[ypoints.length-1])){
-							tailBorder = border;
-						}
-					}
-					if(tailBorder!=null){
-						tail = new SpermTail(f, channel, skeleton, tailBorder);
-						logger.log("Found matching tail", Logger.DEBUG);
-					}
-				}
-			}
 			
 		} else {
 			logger.log("Dimensions of image do not match");
 		}
 
+		return tail;
+	}
+	
+	/**
+	 * Run the skeletonising on the given image stack. Return a new stack with
+	 * skeletons only
+	 * @param stack the  stack to skeletonise
+	 * @param objects the listof rois to skeletonise
+	 * @return a new stack
+	 */
+	private static ImageStack skeletoniseStack(ImageStack stack, List<Roi> objects){
+
+		// fill rois with white
+		ByteProcessor bp = (ByteProcessor) stack.getProcessor(1);
+		bp.setColor(Color.WHITE);
+		for(Roi r : objects){
+			logger.log("Filling roi", Logger.DEBUG);
+			bp.fill(r);
+		}
+
+		// create duplicate images for debugging
+		// only the skeletonised image is used 
+		ImagePlus bpImage = new ImagePlus("byte image", bp);
+		//					bpImage.show();
+
+
+		BinaryProcessor binp = new BinaryProcessor((ByteProcessor) bp.duplicate());
+		ImagePlus binpImage = new ImagePlus("binary image", binp);
+		//					binpImage.show();
+
+
+		ByteProcessor binp2 = (ByteProcessor) bp.duplicate();
+		BinaryProcessor skp = new BinaryProcessor((ByteProcessor) binp2);
+
+		// skeletonise the filled rois
+		Skeletonize3D_ skelly = new Skeletonize3D_();
+		skelly.setup("", binpImage);
+		skelly.run(skp);
+
+		logger.log("Skeletonized the image", Logger.DEBUG);
+
+		// make a new imageStack from the skeletonised images
+		ImageStack skeletonStack = ImageStack.create(binp.getWidth(), binp.getHeight(), 0, 8);
+		skeletonStack.addSlice("skeleton", binp);
+		skeletonStack.deleteSlice(1); // remove the blank first slice
+		return skeletonStack;
+	}
+	
+	
+	/**
+	 * From a list of skeleton rois, get only those greater than or equal to the given length
+	 * @param skeletons the roi list
+	 * @param minLength the minumum length
+	 * @return a list of passing rois
+	 */
+	private static List<Roi> filterSkeletons(List<Roi> skeletons, int minLength){
+		List<Roi> result = new ArrayList<Roi>(0);
+
+		for(Roi r : skeletons){
+			if(r.getLength()>=minLength){
+				result.add(r);
+			}
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * From a list of skeletons, find the skeleton overlapping a given nucleus. 
+	 * Find the border outline associated with that skeleton, and create a new 
+	 * sperm tail
+	 * @param usableSkeletons the list of skeleton rois
+	 * @param borderRois the list of tail border rois
+	 * @param n the nucleus
+	 * @param tubulinFile the image file with the tubulin stain
+	 * @param channel the rgb channel with the tubulin stain (0 if greyscale)
+	 * @return a sperm tail or null if none found
+	 */
+	private static SpermTail getTailMatchingNucleus(List<Roi> usableSkeletons, List<Roi> borderRois, Nucleus n, File tubulinFile, int channel){
+		
+		// ensure that the positions of the nucleus are corrected to
+		// match the original image
+		
+		SpermTail tail = null;
+		FloatPolygon nucleusOutline = Utils.createOriginalPolygon(n);
+		
+		for(Roi skeleton : usableSkeletons){
+			
+			boolean tailOverlap = false;
+							
+			logger.log("Assessing skeleton: Length : "+skeleton.getLength(), Logger.DEBUG);
+
+			float[] xpoints = skeleton.getFloatPolygon().xpoints;
+			float[] ypoints = skeleton.getFloatPolygon().ypoints;
+						
+			// objects that overlap with the nucleus at some point are kept
+			for(int i=0;i<xpoints.length;i++){
+									
+				if(nucleusOutline.contains(xpoints[i], ypoints[i])){
+					tailOverlap = true;
+				}
+			}
+			
+			
+			if(tailOverlap){
+				// if a tail overlaps the nucleus, get the corresponding border roi
+				Roi tailBorder = null;
+//				position = null;
+				for(Roi border : borderRois){
+					if (border.getFloatPolygon().contains(xpoints[0], ypoints[0])
+							&& border.getFloatPolygon().contains(xpoints[xpoints.length-1], ypoints[ypoints.length-1])){
+						tailBorder = border;
+						
+					}
+				}
+				if(tailBorder!=null){
+					
+					tail = new SpermTail(tubulinFile, channel, skeleton, tailBorder);
+					logger.log("Found matching tail", Logger.DEBUG);
+				}
+			}
+		}
 		return tail;
 	}
 	
@@ -293,6 +349,12 @@ public class TubulinTailDetector {
 		return searchStack;
 	}
 	
+	/**
+	 * Run a morphological closing on the given image processor. Radius is
+	 * provided by the CannyOptions
+	 * @param ip the image processor to close
+	 * @param options the options for this canny operation
+	 */
 	private static void morphologyClose(ImageProcessor ip, CannyOptions options){
 		try {
 			
@@ -319,11 +381,11 @@ public class TubulinTailDetector {
 	}
 	
 	/**
-	 * Detects nuclei within the given image.
+	 * Detects objects within the given image.
 	 *
 	 * @param image the ImagePlus to be analysed
 	 * @param closed should the detector get only closed polygons, or open lines
-	 * @param channel the stach of the image to search
+	 * @param channel the stack of the image to search
 	 * @return the Map linking an roi to its stats
 	 */
 	private static List<Roi> getROIs(ImageStack image, boolean closed, int channel){
