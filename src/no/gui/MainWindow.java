@@ -119,6 +119,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
+import datasets.NucleusDatasetCreator;
 import datasets.TailDatasetCreator;
 import utility.Constants;
 import utility.TreeOrderHashMap;
@@ -373,7 +374,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			vennPanel.add(vennTable, BorderLayout.CENTER);
 			vennTable.setEnabled(false);
 			vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
-			vennTable.setModel(DatasetCreator.createVennTable(null));
+			vennTable.setModel(NucleusDatasetCreator.createVennTable(null));
 			
 			
 			//---------------
@@ -815,7 +816,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		scrollPane.setViewportView(panelGeneralStats);
 		scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
-		tablePopulationStats.setModel(DatasetCreator.createStatsTable(null));
+		tablePopulationStats.setModel(NucleusDatasetCreator.createStatsTable(null));
 		return scrollPane;
 	}
 	
@@ -827,7 +828,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		panel.setLayout(new BorderLayout(0, 0));
 
 		tableAnalysisParamters = new JTable();
-		tableAnalysisParamters.setModel(DatasetCreator.createAnalysisParametersTable(null));
+		tableAnalysisParamters.setModel(NucleusDatasetCreator.createAnalysisParametersTable(null));
 		tableAnalysisParamters.setEnabled(false);
 		panel.add(tableAnalysisParamters, BorderLayout.CENTER);
 
@@ -1071,24 +1072,24 @@ public class MainWindow extends JFrame implements ActionListener {
 		wilcoxonPartsPanel.add(new JLabel("Below the diagonal: p-values"));
 		wilcoxonPartsPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
 		
-		wilcoxonAreaTable = new JTable(DatasetCreator.createWilcoxonAreaTable(null));
+		wilcoxonAreaTable = new JTable(NucleusDatasetCreator.createWilcoxonAreaTable(null));
 		addWilconxonTable(wilcoxonPartsPanel, wilcoxonAreaTable, "Areas");
 //		panel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
 		scrollPane.setColumnHeaderView(wilcoxonAreaTable.getTableHeader());
 
 		
-		wilcoxonPerimTable = new JTable(DatasetCreator.createWilcoxonPerimeterTable(null));
+		wilcoxonPerimTable = new JTable(NucleusDatasetCreator.createWilcoxonPerimeterTable(null));
 		addWilconxonTable(wilcoxonPartsPanel, wilcoxonPerimTable, "Perimeters");
 		
-		wilcoxonMinFeretTable = new JTable(DatasetCreator.createWilcoxonMinFeretTable(null));
+		wilcoxonMinFeretTable = new JTable(NucleusDatasetCreator.createWilcoxonMinFeretTable(null));
 		addWilconxonTable(wilcoxonPartsPanel, wilcoxonMinFeretTable, "Min feret");
 
 		
-		wilcoxonFeretTable = new JTable(DatasetCreator.createWilcoxonMaxFeretTable(null));
+		wilcoxonFeretTable = new JTable(NucleusDatasetCreator.createWilcoxonMaxFeretTable(null));
 		addWilconxonTable(wilcoxonPartsPanel, wilcoxonFeretTable, "Feret");
 		
 		
-		wilcoxonDifferenceTable = new JTable(DatasetCreator.createWilcoxonVariabilityTable(null));
+		wilcoxonDifferenceTable = new JTable(NucleusDatasetCreator.createWilcoxonVariabilityTable(null));
 		addWilconxonTable(wilcoxonPartsPanel, wilcoxonDifferenceTable, "Differences to median");
 		
 		panel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
@@ -1582,7 +1583,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 */
 	public void updateAnalysisParametersPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = DatasetCreator.createAnalysisParametersTable(list);
+		TableModel model = NucleusDatasetCreator.createAnalysisParametersTable(list);
 		tableAnalysisParamters.setModel(model);
 	}
 	
@@ -1594,7 +1595,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 */
 	public void updateStatsPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = DatasetCreator.createStatsTable(list);
+		TableModel model = NucleusDatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
 	}
 	
@@ -1604,7 +1605,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 */
 	public void updateVennPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = DatasetCreator.createVennTable(list);
+		TableModel model = NucleusDatasetCreator.createVennTable(list);
 		vennTable.setModel(model);
 		int columns = vennTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
@@ -1620,32 +1621,32 @@ public class MainWindow extends JFrame implements ActionListener {
 	public void updateWilcoxonPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
 
-		wilcoxonAreaTable.setModel(DatasetCreator.createWilcoxonAreaTable(list));
+		wilcoxonAreaTable.setModel(NucleusDatasetCreator.createWilcoxonAreaTable(list));
 		
 		int columns = wilcoxonAreaTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonAreaTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 		
-		wilcoxonPerimTable.setModel(DatasetCreator.createWilcoxonPerimeterTable(list));
+		wilcoxonPerimTable.setModel(NucleusDatasetCreator.createWilcoxonPerimeterTable(list));
 		columns = wilcoxonPerimTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonPerimTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 		
-		wilcoxonMinFeretTable.setModel(DatasetCreator.createWilcoxonMinFeretTable(list));
+		wilcoxonMinFeretTable.setModel(NucleusDatasetCreator.createWilcoxonMinFeretTable(list));
 		columns = wilcoxonMinFeretTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonMinFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 		
-		wilcoxonFeretTable.setModel(DatasetCreator.createWilcoxonMaxFeretTable(list));
+		wilcoxonFeretTable.setModel(NucleusDatasetCreator.createWilcoxonMaxFeretTable(list));
 		columns = wilcoxonFeretTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 		
-		wilcoxonDifferenceTable.setModel(DatasetCreator.createWilcoxonVariabilityTable(list));
+		wilcoxonDifferenceTable.setModel(NucleusDatasetCreator.createWilcoxonVariabilityTable(list));
 		columns = wilcoxonDifferenceTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonDifferenceTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
@@ -1694,16 +1695,16 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(list.size()==1){
 
 				// full segment colouring
-				XYDataset ds = DatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), false);
+				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), false);
 				JFreeChart chart = makeProfileChart(ds);
 				XYPlot plot = chart.getXYPlot();
 				plot.getDomainAxis().setRange(0,list.get(0).getCollection().getMedianArrayLength());
 				rawChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> ds = DatasetCreator.createMultiProfileIQRDataset(list, false, rightAlign);				
+				List<XYSeriesCollection> ds = NucleusDatasetCreator.createMultiProfileIQRDataset(list, false, rightAlign);				
 				
-				XYDataset profileDS = DatasetCreator.createMultiProfileDataset(list, false, rightAlign);
+				XYDataset profileDS = NucleusDatasetCreator.createMultiProfileDataset(list, false, rightAlign);
 				
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
@@ -1785,14 +1786,14 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(list.size()==1){
 
 				// full segment colouring
-				XYDataset ds = DatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), true);
+				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), true);
 				JFreeChart chart = makeProfileChart(ds);
 				profileChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> ds = DatasetCreator.createMultiProfileIQRDataset(list, true, false);				
+				List<XYSeriesCollection> ds = NucleusDatasetCreator.createMultiProfileIQRDataset(list, true, false);				
 				
-				XYDataset profileDS = DatasetCreator.createMultiProfileDataset(list, true, false);
+				XYDataset profileDS = NucleusDatasetCreator.createMultiProfileDataset(list, true, false);
 				
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
@@ -1864,14 +1865,14 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(list.size()==1){
 
 				// full segment colouring
-				XYDataset ds = DatasetCreator.createFrankenSegmentDataset(list.get(0).getCollection());
+				XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(list.get(0).getCollection());
 				JFreeChart chart = makeProfileChart(ds);
 				frankenChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> ds = DatasetCreator.createMultiProfileIQRFrankenDataset(list);				
+				List<XYSeriesCollection> ds = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(list);				
 				
-				XYDataset profileDS = DatasetCreator.createMultiProfileFrankenDataset(list);
+				XYDataset profileDS = NucleusDatasetCreator.createMultiProfileFrankenDataset(list);
 				
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
@@ -1949,7 +1950,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 			if(dataset.hasShellResult()){ // only if there is something to display
 
-				CategoryDataset ds = DatasetCreator.createShellBarChartDataset(list);
+				CategoryDataset ds = NucleusDatasetCreator.createShellBarChartDataset(list);
 				JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", ds);
 				shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 				shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
@@ -2031,7 +2032,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @return the consensus chart
 	 */
 	public JFreeChart makeConsensusChart(CellCollection collection){
-		XYDataset ds = DatasetCreator.createNucleusOutline(collection);
+		XYDataset ds = NucleusDatasetCreator.createNucleusOutline(collection);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -2090,7 +2091,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 //		log("Getting datasets");
 		
-		XYDataset nucleus = DatasetCreator.createNucleusOutline(cell);
+		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell);
 		plot.setDataset(0, nucleus);
 		plot.setRenderer(0, new DefaultXYItemRenderer());
 		plot.getRenderer(0).setSeriesStroke(0, new BasicStroke(2));
@@ -2157,7 +2158,7 @@ public class MainWindow extends JFrame implements ActionListener {
 				} 
 			}else {
 				// multiple nuclei
-				XYDataset ds = DatasetCreator.createMultiNucleusOutline(list);
+				XYDataset ds = NucleusDatasetCreator.createMultiNucleusOutline(list);
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
 								null, null, ds, PlotOrientation.VERTICAL, true, true,
@@ -2220,7 +2221,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param list
 	 */
 	public void updateAreaBoxplot(List<AnalysisDataset> list){
-		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createAreaBoxplotDataset(list);
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createAreaBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
 		areaBoxplotChartPanel.setChart(boxplotChart);
@@ -2231,7 +2232,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param list
 	 */
 	public void updatePerimBoxplot(List<AnalysisDataset> list){
-		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createPerimBoxplotDataset(list);
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createPerimBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
 		perimBoxplotChartPanel.setChart(boxplotChart);
@@ -2242,7 +2243,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param list
 	 */
 	public void updateMaxFeretBoxplot(List<AnalysisDataset> list){
-		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createMaxFeretBoxplotDataset(list);
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createMaxFeretBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
 		maxFeretBoxplotChartPanel.setChart(boxplotChart);
@@ -2253,7 +2254,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param list
 	 */
 	public void updateMinFeretBoxplot(List<AnalysisDataset> list){
-		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createMinFeretBoxplotDataset(list);
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createMinFeretBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
 		minFeretBoxplotChartPanel.setChart(boxplotChart);
@@ -2264,7 +2265,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @param list
 	 */
 	public void updateDifferenceBoxplot(List<AnalysisDataset> list){
-		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createDifferenceBoxplotDataset(list);
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createDifferenceBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
 		differenceBoxplotChartPanel.setChart(boxplotChart);
@@ -2293,7 +2294,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 	
 	public void updateSegmentsBoxplot(List<AnalysisDataset> list, String segName){
-		BoxAndWhiskerCategoryDataset ds = DatasetCreator.createSegmentLengthDataset(list, segName);
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
 		formatBoxplotChart(boxplotChart);
 		segmentsBoxplotChartPanel.setChart(boxplotChart);
@@ -2303,9 +2304,9 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		DefaultXYDataset ds = null;
 		if(normalised){
-			ds = DatasetCreator.createMultiProfileSegmentDataset(list, segName);
+			ds = NucleusDatasetCreator.createMultiProfileSegmentDataset(list, segName);
 		} else {
-			ds = DatasetCreator.createRawMultiProfileSegmentDataset(list, segName, rightAlign);
+			ds = NucleusDatasetCreator.createRawMultiProfileSegmentDataset(list, segName, rightAlign);
 		}
 		try {
 				
@@ -2412,7 +2413,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			
 	public void updateVariabilityChart(List<AnalysisDataset> list){
 		try {
-			XYDataset ds = DatasetCreator.createIQRVariabilityDataset(list);
+			XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list);
 			if(list.size()==1){
 				CellCollection n = list.get(0).getCollection();
 				JFreeChart chart = makeProfileChart(ds);
@@ -2460,7 +2461,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private void updateSignalStatsPanel(List<AnalysisDataset> list){
 		try{
-			TableModel model = DatasetCreator.createSignalStatsTable(list);
+			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
 			signalStatsTable.setModel(model);
 		} catch (Exception e){
 			log("Error updating signal stats: "+e.getMessage());
@@ -2538,7 +2539,7 @@ public class MainWindow extends JFrame implements ActionListener {
 				CellCollection collection = list.get(0).getCollection();
 
 				if(collection.hasConsensusNucleus()){ // if a refold is available
-					XYDataset signalCoMs = DatasetCreator.createSignalCoMDataset(collection);
+					XYDataset signalCoMs = NucleusDatasetCreator.createSignalCoMDataset(collection);
 					JFreeChart chart = makeConsensusChart(collection);
 
 					XYPlot plot = chart.getXYPlot();
@@ -2555,7 +2556,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.setRenderer(1, rend);
 
 					for(int channel : collection.getSignalChannels()){
-						List<Shape> shapes = DatasetCreator.createSignalRadiusDataset(collection, channel);
+						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(collection, channel);
 
 						int signalCount = shapes.size();
 
@@ -2613,7 +2614,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private void updateSignalAngleHistogram(List<AnalysisDataset> list){
 		try {
-			HistogramDataset ds = DatasetCreator.createSignalAngleHistogramDataset(list);
+			HistogramDataset ds = NucleusDatasetCreator.createSignalAngleHistogramDataset(list);
 			JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
 			XYPlot plot = chart.getXYPlot();
 			plot.setBackgroundPaint(Color.white);
@@ -2641,7 +2642,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 	private void updateSignalDistanceHistogram(List<AnalysisDataset> list){
 		try {
-			HistogramDataset ds = DatasetCreator.createSignalDistanceHistogramDataset(list);
+			HistogramDataset ds = NucleusDatasetCreator.createSignalDistanceHistogramDataset(list);
 			JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
 			XYPlot plot = chart.getXYPlot();
 			plot.setBackgroundPaint(Color.white);

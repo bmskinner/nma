@@ -1,4 +1,4 @@
-package no.gui;
+package datasets;
 
 import ij.IJ;
 
@@ -43,7 +43,7 @@ import components.Flagellum;
 import utility.Equation;
 import utility.Utils;
 
-public class DatasetCreator {
+public class NucleusDatasetCreator {
 	
 	/**
 	 * Add individual segments from a profile to a dataset. Offset them to the given length
