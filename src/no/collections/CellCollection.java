@@ -83,6 +83,14 @@ implements Serializable
   public UUID getID(){
 	  return this.guid;
   }
+  
+  public List<UUID> getCellIds(){
+	  List<UUID> result = new ArrayList<UUID>(0);
+	  for(Cell c : cellCollection){
+		  result.add(c.getCellId());
+	  }
+	  return  result;
+  }
 
   public void addCell(Cell r){
 	  this.cellCollection.add(r);

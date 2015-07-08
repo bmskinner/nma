@@ -36,6 +36,10 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import cell.Cell;
+
+import components.Flagellum;
+
 import utility.Equation;
 import utility.Utils;
 
@@ -1095,6 +1099,27 @@ public class DatasetCreator {
 		ds.addSeries("Q25", inner);
 		double[][] outer = { outerIQRX, outerIQRY };
 		ds.addSeries("Q75", outer);
+		return ds;
+	}
+	
+	public static XYDataset createNucleusOutline(Cell cell){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		Nucleus nucleus = cell.getNucleus();
+		
+		double[] xpoints = new double[nucleus.getOffsetBorderList().size()];
+		double[] ypoints = new double[nucleus.getOffsetBorderList().size()];
+		
+		int i =0;
+		for(XYPoint p : nucleus.getOffsetBorderList()){
+			xpoints[i] = p.getX();
+			ypoints[i] = p.getY();
+			i++;
+		}
+		
+		double[][] data = { xpoints, ypoints };
+		ds.addSeries("Nucleus Border", data);
+		
 		return ds;
 	}
 

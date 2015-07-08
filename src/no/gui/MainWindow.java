@@ -117,6 +117,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
+import datasets.TailDatasetCreator;
 import utility.Constants;
 import utility.TreeOrderHashMap;
 
@@ -212,6 +213,10 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private JPanel segmentsBoxplotPanel;// container for boxplots chart and decoration
 	private JComboBox segmentSelectionBox; // choose which segments to compare
+	
+	private JPanel cellOutlinePanel; // container for showing the nucleus and tail for each cell
+	private ChartPanel cellOutlineChartPanel; // holds the chart with the cell
+	private JComboBox<UUID> cellSelectionBox; // choose which cell to look at individually
 
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
@@ -388,6 +393,9 @@ public class MainWindow extends JFrame implements ActionListener {
 			segmentsPanel.add(segmentsBoxplotPanel);
 			tabbedPane.addTab("Segments", null, segmentsPanel, null);
 //			this.pack();
+			
+			cellOutlinePanel = createCellOutlinesPanel();
+			tabbedPane.addTab("Cells", null, cellOutlinePanel, null);
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -926,6 +934,24 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		return panel;
 	}
+	
+	private JPanel createCellOutlinesPanel(){
+		JPanel panel = new JPanel(); // main container in tab
+
+		panel.setLayout(new BorderLayout());
+		
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+				null, null, null);       
+
+		cellOutlineChartPanel = new ChartPanel(chart);
+		panel.add(cellOutlineChartPanel, BorderLayout.CENTER);
+		
+		cellSelectionBox = new JComboBox<UUID>();
+		cellSelectionBox.setActionCommand("CellSelectionChoice");
+		cellSelectionBox.addActionListener(this);
+		
+		return panel;
+	}
 		
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -945,6 +971,17 @@ public class MainWindow extends JFrame implements ActionListener {
 				} else {
 					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, true);
 				}
+			}
+			
+		}
+		
+		if(e.getActionCommand().equals("CellSelectionChoice")){
+			UUID id = (UUID) cellSelectionBox.getSelectedItem();
+//			String cellName = (String) cellSelectionBox.getSelectedItem();
+			List<AnalysisDataset> list = getSelectedRowsFromTreeTable();
+			if(list.size()==1){
+				Cell cell = list.get(0).getCollection().getCell(id);
+				updateCellOutlineChart(cell);
 			}
 			
 		}
@@ -1480,6 +1517,10 @@ public class MainWindow extends JFrame implements ActionListener {
 						segmentSelectionBox.setSelectedIndex(0);
 						updateSegmentsBoxplot(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
 						updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), true, false); // get segname from panel
+						
+						
+						ComboBoxModel<UUID> cellModel = new DefaultComboBoxModel<UUID>(list.get(0).getCollection().getCellIds().toArray(new UUID[0]));
+						cellSelectionBox.setModel(cellModel);
 					}
 					
 				} catch (Exception e) {
@@ -1951,6 +1992,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 	
+	
 
 	/**
 	 * Create a consenusus chart for the given nucleus collection
@@ -2004,6 +2046,21 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		}	
 		return chart;
+	}
+	
+	public void updateCellOutlineChart(Cell cell){
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+		
+		XYPlot plot = chart.getXYPlot();
+		XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
+		XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
+		XYDataset nucleus = DatasetCreator.createNucleusOutline(cell);
+		plot.setDataset(0, tailBorder);
+		plot.setDataset(1, skeleton);
+		plot.setDataset(2, nucleus);
 	}
 	
 	
