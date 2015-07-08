@@ -2093,7 +2093,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell);
 		plot.setDataset(0, nucleus);
-		plot.setRenderer(0, new DefaultXYItemRenderer());
+		plot.setRenderer(0, new XYLineAndShapeRenderer());
 		plot.getRenderer(0).setSeriesStroke(0, new BasicStroke(2));
 		plot.getRenderer(0).setSeriesPaint(0, Color.BLUE);
 		
@@ -2103,8 +2103,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
 			plot.setDataset(1, skeleton);
 			plot.setDataset(2, tailBorder);
-			plot.setRenderer(1, new DefaultXYItemRenderer());
-			plot.setRenderer(2, new DefaultXYItemRenderer());
+			plot.setRenderer(1, new XYLineAndShapeRenderer());
+			plot.setRenderer(2, new XYLineAndShapeRenderer());
 			
 			for(int i=0; i<plot.getDataset(1).getSeriesCount();i++){
 				plot.getRenderer(1).setSeriesStroke(i, new BasicStroke(2));

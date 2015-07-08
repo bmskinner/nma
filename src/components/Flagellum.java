@@ -4,6 +4,7 @@ import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +18,7 @@ import no.components.XYPoint;
  * @author bms41
  *
  */
-public class Flagellum {
+public class Flagellum implements Serializable {
 	
 	// indices in  the originalPositions array
 	public static final int X_BASE 	= 0;
@@ -35,6 +36,8 @@ public class Flagellum {
 	protected double length; // the length of the skeleton
 	protected double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
 	
+	protected XYPoint nucleusIntersection;
+	
 	protected List<XYPoint> skeletonPoints = new ArrayList<XYPoint>(0); 
 	protected List<XYPoint> borderPoints   = new ArrayList<XYPoint>(0); 
 	
@@ -49,12 +52,12 @@ public class Flagellum {
 				 border.getPolygon().getBounds().getHeight()};
 		
 		
-		FloatPolygon skeletonPolygon = skeleton.getFloatPolygon();
+		FloatPolygon skeletonPolygon = skeleton.getInterpolatedPolygon(1, true);
 		for(int i=0; i<skeletonPolygon.npoints; i++){
 			skeletonPoints.add(new XYPoint( skeletonPolygon.xpoints[i], skeletonPolygon.ypoints[i]));
 		}
 		
-		FloatPolygon borderPolygon = border.getFloatPolygon();
+		FloatPolygon borderPolygon = border.getInterpolatedPolygon(1, true);
 		for(int i=0; i<borderPolygon.npoints; i++){
 			borderPoints.add(new XYPoint( borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
 		}

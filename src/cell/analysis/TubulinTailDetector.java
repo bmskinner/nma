@@ -276,6 +276,10 @@ public class TubulinTailDetector {
 		return tail;
 	}
 	
+//	private Roi makePolylineFromPolygon(Roi polygon){
+//		// go around the roi. If the next pint
+//	}
+	
 	/**
 	 * Check that the dimensions of the input image are the same as the 
 	 * image used to detect the nucleus. 
