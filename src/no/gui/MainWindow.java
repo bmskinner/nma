@@ -102,10 +102,12 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
+import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
@@ -216,7 +218,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private JPanel cellOutlinePanel; // container for showing the nucleus and tail for each cell
 	private ChartPanel cellOutlineChartPanel; // holds the chart with the cell
-	private JComboBox<UUID> cellSelectionBox; // choose which cell to look at individually
+	private JComboBox<String> cellSelectionBox; // choose which cell to look at individually
 
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
@@ -946,44 +948,67 @@ public class MainWindow extends JFrame implements ActionListener {
 		cellOutlineChartPanel = new ChartPanel(chart);
 		panel.add(cellOutlineChartPanel, BorderLayout.CENTER);
 		
-		cellSelectionBox = new JComboBox<UUID>();
+		cellSelectionBox = new JComboBox<String>();
 		cellSelectionBox.setActionCommand("CellSelectionChoice");
 		cellSelectionBox.addActionListener(this);
+		panel.add(cellSelectionBox, BorderLayout.NORTH);
 		
 		return panel;
 	}
 		
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		List<AnalysisDataset> list = getSelectedRowsFromTreeTable();
 
 		if(e.getActionCommand().equals("SegmentBoxplotChoice")){
 			String segName = (String) segmentSelectionBox.getSelectedItem();
 			// create the appropriate chart
 			//TODO
-			updateSegmentsBoxplot(getSelectedRowsFromTreeTable(), segName);
+			updateSegmentsBoxplot(list, segName);
 			
 			if(  normSegmentCheckBox.isSelected()){
-				updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), true, false);
+				updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), true, false);
 			} else {
 				
 				if(  rawSegmentLeftButton.isSelected()){
-					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, false);
+					updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), false, false);
 				} else {
-					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, true);
+					updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), false, true);
 				}
 			}
 			
 		}
 		
 		if(e.getActionCommand().equals("CellSelectionChoice")){
-			UUID id = (UUID) cellSelectionBox.getSelectedItem();
-//			String cellName = (String) cellSelectionBox.getSelectedItem();
-			List<AnalysisDataset> list = getSelectedRowsFromTreeTable();
-			if(list.size()==1){
-				Cell cell = list.get(0).getCollection().getCell(id);
-				updateCellOutlineChart(cell);
-			}
-			
+//			IJ.log("Cell choice fired");
+//			IJ.log("Model size at choice: "+cellSelectionBox.getModel().getSize());
+//			String s = cellSelectionBox.getItemAt(0);
+//			IJ.log("First item: "+s);
+//			IJ.log("Selected index: "+cellSelectionBox.getSelectedIndex());
+			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
+//			IJ.log("Selected item: "+name);
+//			String name = (String) cellSelectionBox.getSelectedItem();
+//			if(name!=null){
+//				log(name);
+				UUID id = UUID.fromString(name);
+//				IJ.log("Created UUID: "+id.toString());
+				
+				if(list.size()>0){	
+					try{
+
+						Cell cell = list.get(0).getCollection().getCell(id);
+//						IJ.log("Cell: "+cell.getCellId().toString());
+//						IJ.log("Updating chart");
+						updateCellOutlineChart(cell);
+					} catch (Exception e1){
+						IJ.log("Error fetching cell: "+e1.getMessage());
+						for(StackTraceElement e2 : e1.getStackTrace()){
+							IJ.log(e2.toString());
+						}
+					}
+				}
+
 		}
 		
 		if(e.getActionCommand().equals("LeftAlignRawProfile")){
@@ -1512,15 +1537,21 @@ public class MainWindow extends JFrame implements ActionListener {
 					
 					if(list!=null){
 						// get the list of segments from the datasets
-						ComboBoxModel aModel = new DefaultComboBoxModel(list.get(0).getCollection().getSegmentNames().toArray(new String[0]));
+						ComboBoxModel<String> aModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getSegmentNames().toArray(new String[0]));
 						segmentSelectionBox.setModel(aModel);
 						segmentSelectionBox.setSelectedIndex(0);
 						updateSegmentsBoxplot(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
 						updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), true, false); // get segname from panel
 						
-						
-						ComboBoxModel<UUID> cellModel = new DefaultComboBoxModel<UUID>(list.get(0).getCollection().getCellIds().toArray(new UUID[0]));
-						cellSelectionBox.setModel(cellModel);
+						if(list.size()==1){
+//							IJ.log("Creating cell id list");
+							ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getCellIdsAsStrings().toArray(new String[0]));
+							cellSelectionBox.setModel(cellModel);
+//							IJ.log("Model size: "+cellModel.getSize());
+							cellSelectionBox.setSelectedIndex(0);
+						} //else {
+//							cellSelectionBox.setModel(null);
+//						}
 					}
 					
 				} catch (Exception e) {
@@ -2049,18 +2080,44 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 	public void updateCellOutlineChart(Cell cell){
+		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
 						false);
 		
 		XYPlot plot = chart.getXYPlot();
-		XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
-		XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
+		
+//		log("Getting datasets");
+		
 		XYDataset nucleus = DatasetCreator.createNucleusOutline(cell);
-		plot.setDataset(0, tailBorder);
-		plot.setDataset(1, skeleton);
-		plot.setDataset(2, nucleus);
+		plot.setDataset(0, nucleus);
+		plot.setRenderer(0, new DefaultXYItemRenderer());
+		plot.getRenderer(0).setSeriesStroke(0, new BasicStroke(2));
+		plot.getRenderer(0).setSeriesPaint(0, Color.BLUE);
+		
+		if(cell.hasTail()){
+			
+			XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
+			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
+			plot.setDataset(1, skeleton);
+			plot.setDataset(2, tailBorder);
+			plot.setRenderer(1, new DefaultXYItemRenderer());
+			plot.setRenderer(2, new DefaultXYItemRenderer());
+			
+			for(int i=0; i<plot.getDataset(1).getSeriesCount();i++){
+				plot.getRenderer(1).setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer(1).setSeriesPaint(i, Color.BLACK);
+			}
+			
+			for(int i=0; i<plot.getDataset(2).getSeriesCount();i++){
+				plot.getRenderer(2).setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer(2).setSeriesPaint(i, Color.GREEN);
+			}
+		}
+
+		this.cellOutlineChartPanel.setChart(chart);
+//		log("Updated chart");
 	}
 	
 	

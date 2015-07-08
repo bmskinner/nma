@@ -351,10 +351,10 @@ public class RoundNucleus
 		return result;
 	}
 	
-	public List<NucleusBorderPoint> getOffsetBorderList(){
+	public List<NucleusBorderPoint> getOriginalBorderList(){
 		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
 		for(NucleusBorderPoint p : borderList){
-			result.add(new NucleusBorderPoint( p.getX() - orignalPosition[X_BASE], p.getY() - orignalPosition[Y_BASE]));
+			result.add(new NucleusBorderPoint( p.getX() + orignalPosition[X_BASE], p.getY() + orignalPosition[Y_BASE]));
 		}
 		return result;
 	}

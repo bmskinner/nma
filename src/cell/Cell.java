@@ -24,6 +24,10 @@ public class Cell implements Serializable {
 	protected List<Mitochondrion> mitochondria; // unknown staining patterns so far
 	protected Flagellum tail;	
 	
+	public Cell(){
+		this.uuid = java.util.UUID.randomUUID();
+	}
+	
 	public UUID getCellId() {
 		return uuid;
 	}
@@ -54,5 +58,29 @@ public class Cell implements Serializable {
 
 	public void setTail(Flagellum tail) {
 		this.tail = tail;
+	}
+	
+	public boolean hasNucleus(){
+		if(this.nucleus!=null){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean hasTail(){
+		if(this.tail!=null){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean hasMitochondria(){
+		if(this.mitochondria.isEmpty()){
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

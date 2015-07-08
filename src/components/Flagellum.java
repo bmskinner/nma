@@ -49,13 +49,13 @@ public class Flagellum {
 				 border.getPolygon().getBounds().getHeight()};
 		
 		
-		FloatPolygon polygon = skeleton.getFloatPolygon();
-		for(int i=0; i<polygon.npoints; i++){
-			skeletonPoints.add(new XYPoint( polygon.xpoints[i], polygon.ypoints[i]));
+		FloatPolygon skeletonPolygon = skeleton.getFloatPolygon();
+		for(int i=0; i<skeletonPolygon.npoints; i++){
+			skeletonPoints.add(new XYPoint( skeletonPolygon.xpoints[i], skeletonPolygon.ypoints[i]));
 		}
 		
 		FloatPolygon borderPolygon = border.getFloatPolygon();
-		for(int i=0; i<polygon.npoints; i++){
+		for(int i=0; i<borderPolygon.npoints; i++){
 			borderPoints.add(new XYPoint( borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
 		}
 		
@@ -74,6 +74,10 @@ public class Flagellum {
 		return this.skeletonPoints;
 	}
 	
+	/**
+	 * Fetch the skeleton offset to zero
+	 * @return
+	 */
 	public List<XYPoint> getOffsetSkeleton(){
 		List<XYPoint> result = new ArrayList<XYPoint>(0);
 		for(XYPoint p : skeletonPoints){

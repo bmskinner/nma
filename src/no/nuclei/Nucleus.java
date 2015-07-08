@@ -13,8 +13,7 @@ import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.NuclearSignal;
 
-public interface Nucleus
-{
+public interface Nucleus {
 
 	// index values for selecting original positions
 	public static final int X_BASE = 0;
@@ -94,7 +93,7 @@ public interface Nucleus
 	public boolean hasGreenSignal();
 
 	public List<NucleusBorderPoint> getBorderList();
-	public List<NucleusBorderPoint> getOffsetBorderList();
+	public List<NucleusBorderPoint> getOriginalBorderList();
 
 	public void calculateFractionalSignalDistancesFromCoM();
 	public void calculateSignalDistancesFromCoM();

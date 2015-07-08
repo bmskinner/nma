@@ -91,6 +91,14 @@ implements Serializable
 	  }
 	  return  result;
   }
+  
+  public List<String> getCellIdsAsStrings(){
+	  List<String> result = new ArrayList<String>(0);
+	  for(Cell c : cellCollection){
+		  result.add(c.getCellId().toString());
+	  }
+	  return  result;
+  }
 
   public void addCell(Cell r){
 	  this.cellCollection.add(r);

@@ -1107,11 +1107,11 @@ public class DatasetCreator {
 		
 		Nucleus nucleus = cell.getNucleus();
 		
-		double[] xpoints = new double[nucleus.getOffsetBorderList().size()];
-		double[] ypoints = new double[nucleus.getOffsetBorderList().size()];
+		double[] xpoints = new double[nucleus.getOriginalBorderList().size()];
+		double[] ypoints = new double[nucleus.getOriginalBorderList().size()];
 		
 		int i =0;
-		for(XYPoint p : nucleus.getOffsetBorderList()){
+		for(XYPoint p : nucleus.getOriginalBorderList()){
 			xpoints[i] = p.getX();
 			ypoints[i] = p.getY();
 			i++;
@@ -1119,7 +1119,7 @@ public class DatasetCreator {
 		
 		double[][] data = { xpoints, ypoints };
 		ds.addSeries("Nucleus Border", data);
-		
+//		IJ.log("Created nucleus border dataset");
 		return ds;
 	}
 
