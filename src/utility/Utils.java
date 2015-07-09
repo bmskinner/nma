@@ -87,6 +87,19 @@ public class Utils {
 		 }
 		 return s;
 	 }
+	
+	/**
+	 * Create a float array from an Integer list
+	 * @param d the Integer list
+	 * @return a float array
+	 */
+	public static float[] getFloatArrayFromIntegerList(List<Integer> d){
+		 float[] f = new float[d.size()];
+		 for (int i = 0; i < f.length; i++){
+			 f[i] = d.get(i);
+		 }
+		 return f;
+	 }
 
 	/**
 	 * Create a double array from an int array

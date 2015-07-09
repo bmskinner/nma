@@ -1,12 +1,18 @@
 package cell.analysis;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import Skeletonize3D_.Skeletonize3D_;
+import skeleton_analysis.AnalyzeSkeleton_;
+import skeleton_analysis.Edge;
+import skeleton_analysis.Graph;
+import skeleton_analysis.SkeletonResult;
+import skeleton_analysis.Vertex;
 import utility.CannyEdgeDetector;
 import utility.Constants;
 import utility.Logger;
@@ -16,13 +22,16 @@ import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import no.analysis.AnalysisDataset;
 import no.analysis.Detector;
+import no.analysis.NucleusDetector;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.CannyOptions;
+import no.components.XYPoint;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
@@ -39,6 +48,8 @@ import components.SpermTail;
 public class TubulinTailDetector {
 	
 	private static Logger logger;
+	
+	private static final int WHITE = 255;
 	
 	/**
 	 * Run the analysis on a dataset with nuclei defined. Take tubulin-stained
@@ -133,11 +144,18 @@ public class TubulinTailDetector {
 			// create the skeletons of the detected objects
 			ImageStack skeletonStack = skeletoniseStack(edges, borderRois);
 			
+			List<Graph> prunedList = pruneStack(skeletonStack);
+			
+			
 			// detect the skeletons as rois (particles area 0-Infinity)
-			List<Roi> skeletons = getROIs(skeletonStack, false, 1);
+			// this is a bad idea - returns the outline of the skeleton, not a skeleton
+//			List<Roi> skeletons = getROIs(skeletonStack, false, 1);
+			// in the skeletonised imagestack, there is only one stack 
+//			List<Roi> usableSkeletons = getSkeletons(borderRois, skeletonStack, 1);
+			List<Roi> usableSkeletons = getSkeletons(prunedList);
 			
 			// Get rois of the correct length
-			List<Roi> usableSkeletons = filterSkeletons(skeletons, 1000);
+//			List<Roi> usableSkeletons = filterSkeletons(skeletons, 1000);
 			
 			// print the roi details to the log
 			logger.log("Found "+usableSkeletons.size()+" potential tails in image", Logger.INFO);
@@ -148,7 +166,7 @@ public class TubulinTailDetector {
 			
 			
 		} else {
-			logger.log("Dimensions of image do not match");
+			logger.log("Dimensions of image do not match", Logger.ERROR);
 		}
 
 		return tail;
@@ -200,13 +218,233 @@ public class TubulinTailDetector {
 	}
 	
 	
+	private static List<Graph> pruneStack(ImageStack stack){
+		AnalyzeSkeleton_ an = new AnalyzeSkeleton_();
+		
+//		public SkeletonResult run(
+//				int pruneIndex,
+//				boolean pruneEnds,			
+//				boolean shortPath,
+//				ImagePlus origIP,
+//				boolean silent,
+//				boolean verbose)
+		
+		// copy the input - not changing it for now
+		ImagePlus image = new ImagePlus(null, stack.getProcessor(1).duplicate());
+		
+		an.setup("", image);
+		
+		// 0 - do not prune
+		// 1- prune shortest
+		SkeletonResult result = an.run(1, false, true, image, true, false);
+
+		
+		// an array of all the graphs in the image (skeletons)
+//		result.get
+		
+		Graph[] graphs = result.getGraph();
+		List<Graph> potentialTails = new ArrayList<Graph>(0);
+		
+		for (Graph g : graphs){
+			
+			// clear all visits
+			for(Vertex v : g.getVertices()){
+				v.setVisited(false);
+			}
+			
+			Vertex root = g.getRoot();
+			root.setVisited(true);
+			
+			// check if it overlaps the tail roi
+//			for(skeleton_analysis.Point p : root.getPoints()){
+////				
+////				XYPoint start = new XYPoint(p.x, p.y);
+////				logger.log("Graph root: "+p.x+","+p.y);
+//
+//			}
+			
+			
+			
+			// find the longest path
+			
+//			root.getPoints();
+			
+			
+			
+//			logger.log("Building chain of edges");
+
+//			List<Edge> list = findNextLongestBranch(root, new ArrayList<Edge>(0));
+			
+//			logger.log("Traversed graph: found chain of "+list.size()+" edges", Logger.DEBUG);
+			
+			double total = 0;
+			
+			for(Edge e : g.getEdges()){
+				
+				if(e.getLength()>500){
+					potentialTails.add(g);
+				}
+				
+			}
+			
+//			for(Edge e : list){
+////				logger.log("\tMeasuring edge length");
+//				
+//				if(e != null){
+//					total += e.getLength();
+//				}
+//				
+//				if(total>500){
+//					potentialTails.add(g);
+//				}
+//			}
+			
+//			logger.log("Found longest path in graph: "+total);
+
+		}
+		
+		
+		for(Graph g : potentialTails){
+			logger.log("Potential tail graph found");
+			for(Edge e : g.getEdges()){
+				logger.log("\tEdge length: "+e.getLength());
+//				e.getV1().getPoints().get(0)
+			}
+
+		}
+
+//		ImageStack labelledStack = an.getResultImage(false);
+//		ImagePlus labelledImage = new ImagePlus("labelled image", labelledStack.getProcessor(1));
+//		labelledImage.show();
+		return potentialTails;
+	}
+	
+	/**
+	 * Given a graph vertex and a list of edges, find the next longest edge
+	 * @param v the vertex
+	 * @param list the edges
+	 * @return the list updated with the next longest branch from the vertex
+	 */
+	private static List<Edge> findNextLongestBranch(Vertex v, List<Edge> list){
+
+		double maxLength = 0;
+		Edge longestEdge = null;
+		Vertex longestEnd = null;
+//		logger.log("\tBeginning traversal", Logger.DEBUG);
+		
+		if(v==null){ // stop when no more unvisited vertices are added
+//			logger.log("\tEndpoint reached", Logger.DEBUG);
+			return list;
+		}
+		
+//		logger.log("\tVertex has "+v.getBranches().size()+" branches", Logger.DEBUG);
+
+		for(Edge e : v.getBranches()){
+			
+			Vertex end = e.getOppositeVertex(v);
+			
+			// only consider the branch if the far end leads somewhere new
+			if(!end.isVisited()){
+				
+//				logger.log("\t\tEdge length: "+e.getLength(), Logger.DEBUG);
+							
+				maxLength 	= e.getLength() > maxLength
+							? e.getLength()
+							: maxLength;
+							
+				longestEdge = e.getLength() > maxLength
+							? e
+							: longestEdge;
+				
+				longestEnd = e.getLength() > maxLength
+						? end
+						: longestEnd;
+				
+				end.setVisited(true);
+			}
+			
+		}
+//		longestEnd.setVisited(true);
+		list.add(longestEdge);
+		list = findNextLongestBranch(longestEnd, list);
+		return list;
+		
+	}
+	
+	/**
+	 * Find skeletons witin the given stack and border rois
+	 * @param borderRois the tail borders in the image
+	 * @param skeletonStack the imagestack with skeletons
+	 * @param stackNumber the position in the stack of the skeleton
+	 * @return a list of skeletons as Polyline rois
+	 */
+	private static List<Roi> getSkeletons(List<Roi> borderRois, ImageStack skeletonStack, int stackNumber){
+		
+		List<Roi> result = new ArrayList<Roi>(0);
+		
+		for(Roi borderRoi : borderRois){
+			
+			// get the endpoints of the skeleton
+			List<XYPoint> ends = findSkeletonEndpoints(borderRoi, skeletonStack, stackNumber);
+			
+			// pruning step when needed
+			if(ends.size()==0){
+				logger.log("No skeleton endpoints found");
+			} else {
+
+				if(ends.size()>2){
+					logger.log("Too many endpoints: pruning needed");
+				} else {
+					// pick a random end
+					XYPoint end1 = ends.get(0);
+					Roi line = buildPolyLine(end1, skeletonStack, stackNumber);
+					result.add(line);
+					logger.log("Added polyline roi");
+				}
+			}
+			
+		}
+		
+		return result;
+	}
+	
+	private static List<Roi> getSkeletons(List<Graph> graphs){
+		List<Roi> result = new ArrayList<Roi>(0);
+		
+		for(Graph g : graphs){
+			for(Edge e : g.getEdges()){
+				if(e.getLength()>500){
+					
+					List<Integer> xpoints = new ArrayList<Integer>(0);
+					List<Integer> ypoints = new ArrayList<Integer>(0);
+					
+					for(skeleton_analysis.Point p : e.getSlabs()){
+
+						xpoints.add(p.x);
+						ypoints.add(p.y);
+
+					}
+					
+					result.add(new PolygonRoi(Utils.getFloatArrayFromIntegerList(xpoints), 
+							Utils.getFloatArrayFromIntegerList(ypoints),
+							PolygonRoi.POLYLINE));
+					
+				}
+			}
+		}
+		
+		
+		return result;
+	}
+	
+	
 	/**
 	 * From a list of skeleton rois, get only those greater than or equal to the given length
 	 * @param skeletons the roi list
 	 * @param minLength the minumum length
 	 * @return a list of passing rois
 	 */
-	private static List<Roi> filterSkeletons(List<Roi> skeletons, int minLength){
+ 	private static List<Roi> filterSkeletons(List<Roi> skeletons, int minLength){
 		List<Roi> result = new ArrayList<Roi>(0);
 
 		for(Roi r : skeletons){
@@ -276,9 +514,153 @@ public class TubulinTailDetector {
 		return tail;
 	}
 	
-//	private Roi makePolylineFromPolygon(Roi polygon){
-//		// go around the roi. If the next pint
-//	}
+	/**
+	 * Find potential endpoints within the given skeleton and roi
+	 * @param borderPolygon the roi with the tail border
+	 * @param skeletonStack the ImageStack containing the skeleton
+	 * @param stackNumber the stack in the ImageStack with the skeleton
+	 * @return a list of XYPoints representing skeleton branch ends
+	 */
+	private static List<XYPoint> findSkeletonEndpoints(Roi borderPolygon, ImageStack skeletonStack, int stackNumber){
+		
+		List<XYPoint> result = new ArrayList<XYPoint>(0);
+		// go around the roi. If the next point
+		try {
+			
+			logger.log("Identifying skeleton endpoints");
+						
+			ByteProcessor p = (ByteProcessor) skeletonStack.getProcessor(stackNumber);
+			
+			// loop through pixels in image
+			for(int x=0; x<p.getWidth(); x++){
+				
+				for(int y=0; y<p.getHeight(); y++){
+					
+					if(borderPolygon.contains(x, y)){ // only consider pixels within the roi
+												 
+						 if(p.getPixel(x, y)==WHITE){ // if the pixel is white
+							 
+							// if only one contact, add as endpoint
+							 
+							 XYPoint potentialEndpoint = new XYPoint(x,y);
+//							 logger.log("Potential endpoint at "+x+","+y);
+							 List<XYPoint> connectedPoints = getJoiningPoints(p, x, y);
+							 logger.log("\tTotal: "+connectedPoints.size()+" connections");
+//							 IJ.log(x+","+y+" connects to "+connectedPoints.size()+" points");
+							 if(connectedPoints.size()==1){
+								 result.add(potentialEndpoint);
+							 }
+						 }
+					}
+					
+				}
+			}
+			
+
+		} catch (Exception e) {
+			logger.log("Error getting tail border region as stack: "+e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		}
+	
+		return result;
+	}
+	
+	/**
+	 * Create a polyline from a given endpoint of a skeleton. Looks for adjacent white
+	 * pixels, and continues until another endpoint is reached. Does not work on unpruned
+	 * skeletons - i.e only two endpoints are expected.
+	 * @param startPoint the pixel from which to begin building
+	 * @param skeletonStack the stack with the skeleton
+	 * @param stackNumber the position of the skeleton in the stack
+	 * @return
+	 */
+	private static PolygonRoi buildPolyLine(XYPoint startPoint, ImageStack skeletonStack, int stackNumber){
+		
+		PolygonRoi result = null;
+		logger.log("Building polyline", Logger.DEBUG);
+		
+		// the lists from which to make the line
+		List<Integer> xpoints = new ArrayList<Integer>(0);
+		List<Integer> ypoints = new ArrayList<Integer>(0);
+		
+		ByteProcessor processor = (ByteProcessor) skeletonStack.getProcessor(stackNumber);
+		
+		List<XYPoint> previousPoints = new ArrayList<XYPoint>(0);
+		previousPoints.add(startPoint);
+//		XYPoint prevPoint = startPoint;
+		XYPoint currentPoint = startPoint;
+		boolean extend = true;
+				
+		while(extend){
+
+			xpoints.add(currentPoint.getXAsInt());
+			ypoints.add(currentPoint.getYAsInt());
+//			logger.log("\tAdded point: "+currentPoint.toString());
+			
+			List<XYPoint> list = getJoiningPoints(processor, currentPoint.getXAsInt(), currentPoint.getYAsInt());
+			
+			// get the number of joining points
+			// stop building the chain when an endpoint is reached
+			if(list.size()==1 && currentPoint != startPoint){
+				extend = false;
+				break;
+			} else {			
+
+				// add only point that is NOT previously seen
+				for(XYPoint p : list){
+					boolean ok = true;
+					for(XYPoint prevPoint : previousPoints){
+						if(p.overlaps(prevPoint)){
+							ok = false;
+						}
+					}
+					
+					if(ok){
+						previousPoints.add(currentPoint);
+						currentPoint = p;
+					}
+				}
+			}
+		}
+		
+		logger.log("\tLine created of length: "+xpoints.size(), Logger.DEBUG);
+
+		// convert the list to float for the polygon roi constructor
+		result = new PolygonRoi(Utils.getFloatArrayFromIntegerList(xpoints), 
+								Utils.getFloatArrayFromIntegerList(ypoints),
+								PolygonRoi.POLYLINE);
+		return result;
+	}
+	
+	/**
+	 * Find the points in the 3x3 pixel box surrounding the given point
+	 * that have a value of 255 (white)
+	 * @param processor the image processor (binary processor)
+	 * @param p the point to search from
+	 * @return a list of white connected points
+	 */
+	private static List<XYPoint> getJoiningPoints(ImageProcessor processor, int x, int y){
+		
+		List<XYPoint> result = new ArrayList<XYPoint>(0);
+		XYPoint centre = new XYPoint(x,y);
+		
+		for(int i=x-1; i<=x+1; i++){
+			
+			for(int j=y-1; j<=y+1; j++){
+				
+//				logger.log("\t"+i+","+j+" : "+processor.getPixel(i, j), Logger.DEBUG);
+				
+				XYPoint p = new XYPoint(i,j);
+				
+				if(processor.getPixel(i, j)==WHITE && !p.overlaps(centre)){ // ensure we don't count the centre pixel
+					result.add(p);
+				}
+			}
+		}
+		return result;
+	}
 	
 	/**
 	 * Check that the dimensions of the input image are the same as the 

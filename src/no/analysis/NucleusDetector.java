@@ -620,7 +620,7 @@ public class NucleusDetector {
    * @param stack
  * @throws Exception 
    */
-  private ImageStack getRoiAsStack(Roi roi, ImageStack stack) throws Exception{
+  public static ImageStack getRoiAsStack(Roi roi, ImageStack stack) throws Exception {
 	  if(roi==null || stack == null){
 		  throw new IllegalArgumentException("ROI or stack is null");
 	  }
