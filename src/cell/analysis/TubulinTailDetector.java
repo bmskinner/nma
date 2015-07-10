@@ -6,6 +6,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.JProgressBar;
+import javax.swing.SwingWorker;
 
 import Skeletonize3D_.Skeletonize3D_;
 import skeleton_analysis.AnalyzeSkeleton_;
@@ -45,11 +49,100 @@ import components.SpermTail;
  * This class is to test ideas for detecting sperm tails stained with
  * anti-tubulin
  */
-public class TubulinTailDetector {
+public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	
 	private static Logger logger;
+
+	private final AnalysisDataset dataset;
+	private final File folder;
+	private final int channel;
+	private final JProgressBar progressBar;
 	
 	private static final int WHITE = 255;
+	
+	public TubulinTailDetector(AnalysisDataset dataset, File folder, int channel, JProgressBar progressBar){
+		this.dataset = dataset;
+		this.folder = folder;
+		this.channel = channel;
+		this.progressBar = progressBar;
+	}
+	
+	@Override
+	protected void process( List<Integer> integers ) {
+		//update the percentage of the progress bar that is done
+		int amount = integers.get( integers.size() - 1 );
+		progressBar.setValue(amount);
+	}
+	
+	@Override
+	protected  Boolean doInBackground() {
+		boolean result = true;
+		logger = new Logger(dataset.getDebugFile(), "TubulinTailDetector");
+		logger.log("Beginning tail detection", Logger.INFO);
+
+		try{
+			int progress = 0;
+			for(Cell c : dataset.getCollection().getCells()){
+
+				Nucleus n = c.getNucleus();
+				logger.log("Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber(), Logger.DEBUG);
+				
+				// get the image in the folder with the same name as the
+				// nucleus source image
+				File imageFile = new File(folder + File.separator + n.getImageName());
+				logger.log("Tail in: "+imageFile.getAbsolutePath(), Logger.DEBUG);
+//				SpermTail tail = null;
+				
+				
+				// attempt to detect the tails in the image
+				try{
+					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions());
+					
+					for(SpermTail tail : tails){
+						c.addTail(tail);
+					}
+					
+				} catch(Exception e){
+					logger.log("Error detecting tail: "+e.getMessage(), Logger.ERROR);
+					for(StackTraceElement el : e.getStackTrace()){
+						logger.log(el.toString(), Logger.STACK);
+					}
+				}
+				
+				progress++;
+				publish(progress);
+			}
+		} catch (Exception e){
+			logger.log("Error in tubulin tail detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return false;
+		}
+
+		return result;
+	}
+
+	@Override
+	public void done() {
+		
+//		progressBar.rem
+		
+//		try {
+//			if(get()){
+//				log("OK");
+//			} else {
+//				log("Error");
+//			}
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ExecutionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+	} 
 	
 	/**
 	 * Run the analysis on a dataset with nuclei defined. Take tubulin-stained

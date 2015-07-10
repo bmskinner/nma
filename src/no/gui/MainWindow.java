@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Box;
@@ -70,11 +71,13 @@ import javax.swing.JComboBox;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import java.awt.Font;
 
@@ -3295,8 +3298,6 @@ public class MainWindow extends JFrame implements ActionListener {
 
 						// add the new collection to the list
 						addDataset(newDataset);
-//						populationNames.put(newDataset.getName(), newDataset.getUUID());
-//						analysisDatasets.put(newDataset.getUUID(), newDataset);
 						updatePopulationList();
 					}
 				};
@@ -3828,23 +3829,66 @@ public class MainWindow extends JFrame implements ActionListener {
 									: channelName.equals("Green") 
 									? Constants.RGB_GREEN
 											: Constants.RGB_BLUE;
+					
+//					JProgressBar progressBar = new JProgressBar(0, d.getCollection().getNucleusCount());
+//					panelGeneralData.add(progressBar);
+					
+//					TubulinTailDetector worker = new TubulinTailDetector(d, folder, channel, progressBar);
+					
+					SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>(){ // integer for progress?
 
-
-					Runnable runTailDetector = new Runnable() {
 						@Override
-						public void run() { 
-							// run tail detector
+						public Boolean doInBackground() {
 							logc("Detecting tails with tubulin stain...");
 							boolean ok = TubulinTailDetector.run(d, folder, channel);
-							if(ok){
-								log("OK");
-							} else {
-								log("Error");
-							}
+							return ok;
 						}
-					};
 
-					SwingUtilities.invokeLater(runTailDetector);
+						@Override
+						public void done() {
+							
+							try {
+								if(get()){
+									log("OK");
+								} else {
+									log("Error");
+								}
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (ExecutionException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+						} 
+					};
+					
+					worker.execute();
+//					if(worker.get()){
+//						log("OK");
+//					} else {
+//						log("Error");
+//					}
+//					panelGeneralData.remove(progressBar);
+					
+
+
+//					Runnable runTailDetector = new Runnable() {
+//						@Override
+//						public void run() { 
+//							// run tail detector
+//							logc("Detecting tails with tubulin stain...");
+//							boolean ok = TubulinTailDetector.run(d, folder, channel);
+//							if(ok){
+//								log("OK");
+//							} else {
+//								log("Error");
+//							}
+//						}
+//					};
+//
+//					SwingUtilities.invokeLater(runTailDetector);
 
 					//					Thread thr = new Thread() {
 					//						public void run() {
