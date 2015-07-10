@@ -2109,11 +2109,14 @@ public class MainWindow extends JFrame implements ActionListener {
 			for(int i=0; i<plot.getDataset(1).getSeriesCount();i++){
 				plot.getRenderer(1).setSeriesStroke(i, new BasicStroke(2));
 				plot.getRenderer(1).setSeriesPaint(i, Color.BLACK);
+//				plot.getRenderer(1).setSeriesItemLabelsVisible(i, false);
+				plot.getRenderer(1).setSeriesVisibleInLegend(i, false);
 			}
 			
 			for(int i=0; i<plot.getDataset(2).getSeriesCount();i++){
 				plot.getRenderer(2).setSeriesStroke(i, new BasicStroke(2));
 				plot.getRenderer(2).setSeriesPaint(i, Color.GREEN);
+				plot.getRenderer(2).setSeriesVisibleInLegend(i, false);
 			}
 		}
 

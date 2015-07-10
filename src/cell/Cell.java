@@ -1,6 +1,7 @@
 package cell;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,10 +23,12 @@ public class Cell implements Serializable {
 	
 	protected Nucleus nucleus;
 	protected List<Mitochondrion> mitochondria; // unknown staining patterns so far
-	protected Flagellum tail;	
+	protected List<Flagellum> tails;	
 	
 	public Cell(){
 		this.uuid = java.util.UUID.randomUUID();
+		mitochondria = new ArrayList<Mitochondrion>(0);
+		tails = new ArrayList<Flagellum>(0);
 	}
 	
 	public UUID getCellId() {
@@ -52,12 +55,16 @@ public class Cell implements Serializable {
 		this.mitochondria.add(mitochondrion);
 	}
 	
-	public Flagellum getTail() {
-		return tail;
+	public List<Flagellum> getTails(){
+		return this.tails;
+	}
+	
+	public Flagellum getTail(int i) {
+		return tails.get(i);
 	}
 
-	public void setTail(Flagellum tail) {
-		this.tail = tail;
+	public void addTail(Flagellum tail) {
+		this.tails.add(tail);
 	}
 	
 	public boolean hasNucleus(){
@@ -69,7 +76,7 @@ public class Cell implements Serializable {
 	}
 	
 	public boolean hasTail(){
-		if(this.tail!=null){
+		if(this.tails.size()>0){
 			return true;
 		} else {
 			return false;
