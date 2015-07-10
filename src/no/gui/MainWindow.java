@@ -91,6 +91,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Shape;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.ListSelectionModel;
 
@@ -120,11 +122,13 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import components.SpermTail;
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
 import datasets.NucleusDatasetCreator;
 import datasets.TailDatasetCreator;
 import utility.Constants;
+import utility.Logger;
 import utility.TreeOrderHashMap;
 
 import javax.swing.JTabbedPane;
@@ -158,6 +162,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JTable tableAnalysisParamters;
 	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
 	
+	private JPanel logPanel;
+	private JPanel progressPanel;
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 	private JTable populationTable;
 	private JXTreeTable treeTable;
@@ -250,7 +256,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			// Create the log panel
 			//---------------
-			contentPane.add(createLogPanel(), BorderLayout.WEST);
+			logPanel = createLogPanel();
+			contentPane.add(logPanel, BorderLayout.WEST);
 
 			//---------------
 			// Create the header buttons
@@ -416,7 +423,9 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * Create the log panel for updates
 	 * @return a scrollable panel
 	 */
-	private JScrollPane createLogPanel(){
+	private JPanel createLogPanel(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
 		JScrollPane scrollPane = new JScrollPane();
 		textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
@@ -432,7 +441,14 @@ public class MainWindow extends JFrame implements ActionListener {
 		JLabel lblAnalysisLog = new JLabel("Analysis Log");
 		lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
 		scrollPane.setColumnHeaderView(lblAnalysisLog);
-		return scrollPane;
+		panel.add(scrollPane, BorderLayout.CENTER);
+
+		progressPanel = new JPanel();
+		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
+		progressPanel.add(new JLabel("Analyses in progress:"));
+		panel.add(progressPanel, BorderLayout.SOUTH);
+		
+		return panel;
 	}
 	
 	/**
@@ -715,22 +731,9 @@ public class MainWindow extends JFrame implements ActionListener {
 		consensusChartPanel = new ChartPanel(consensusChart);
 
 		runRefoldingButton = new JButton("Refold");
-
-		runRefoldingButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-
-				List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-
-				if(datasets.size()==1){
-
-					AnalysisDataset d = datasets.get(0);
-					MainWindow.this.refoldNucleus(d);
-				}
-
-			}
-		});
+		runRefoldingButton.addActionListener(new RefoldNucleusAction());
 		runRefoldingButton.setVisible(false);
+		
 		consensusChartPanel.add(runRefoldingButton);
 		consensusChartPanel.setMinimumSize(new Dimension(200, 200));
 	}
@@ -983,35 +986,25 @@ public class MainWindow extends JFrame implements ActionListener {
 			}
 			
 		}
-		
-		if(e.getActionCommand().equals("CellSelectionChoice")){
-//			IJ.log("Cell choice fired");
-//			IJ.log("Model size at choice: "+cellSelectionBox.getModel().getSize());
-//			String s = cellSelectionBox.getItemAt(0);
-//			IJ.log("First item: "+s);
-//			IJ.log("Selected index: "+cellSelectionBox.getSelectedIndex());
-			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
-//			IJ.log("Selected item: "+name);
-//			String name = (String) cellSelectionBox.getSelectedItem();
-//			if(name!=null){
-//				log(name);
-				UUID id = UUID.fromString(name);
-//				IJ.log("Created UUID: "+id.toString());
-				
-				if(list.size()>0){	
-					try{
 
-						Cell cell = list.get(0).getCollection().getCell(id);
-//						IJ.log("Cell: "+cell.getCellId().toString());
-//						IJ.log("Updating chart");
-						updateCellOutlineChart(cell);
-					} catch (Exception e1){
-						IJ.log("Error fetching cell: "+e1.getMessage());
-						for(StackTraceElement e2 : e1.getStackTrace()){
-							IJ.log(e2.toString());
-						}
+		if(e.getActionCommand().equals("CellSelectionChoice")){
+
+			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
+
+			UUID id = UUID.fromString(name);
+
+			if(list.size()>0){	
+				try{
+
+					Cell cell = list.get(0).getCollection().getCell(id);
+					updateCellOutlineChart(cell);
+				} catch (Exception e1){
+					IJ.log("Error fetching cell: "+e1.getMessage());
+					for(StackTraceElement e2 : e1.getStackTrace()){
+						IJ.log(e2.toString());
 					}
 				}
+			}
 
 		}
 		
@@ -1416,45 +1409,56 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * Refold the consensus nucleus for the given dataset using default parameters
 	 * @param dataset the dataset to refold
 	 */
-	public void refoldNucleus(AnalysisDataset dataset){
-		CellCollection collection = dataset.getCollection();
-		if(collection!=null){
-			final UUID id = collection.getID();
-
-			Thread thr = new Thread() {
-				public void run() {
-					try{
-						AnalysisDataset d = MainWindow.this.analysisDatasets.get(id);
-
-						for(Component c : consensusChartPanel.getComponents() ){
-							if(c.getClass()==JButton.class){
-								c.setVisible(false);
-							}
-						}
-						
-						logc("Refolding profile...");
-						boolean ok = CurveRefolder.run(d.getCollection(), 
-								d.getAnalysisOptions().getNucleusClass(), 
-								"Fast");
-						if(ok){
-							log("OK");
-							d.getAnalysisOptions().setRefoldNucleus(true);
-							d.getAnalysisOptions().setRefoldMode("Fast");
-							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-							list.add(d);
-							updatePanels(list);
-
-						} else {
-							log("Error");
-						}
-					} catch(Exception e){
-						log("Error refolding");
-					}
-				}
-			};
-			thr.start();
-		}
-	}
+//	public void refoldNucleus(AnalysisDataset dataset){
+//		CellCollection collection = dataset.getCollection();
+//		if(collection!=null){
+//			final UUID id = collection.getID();
+//
+//			Thread thr = new Thread() {
+//				public void run() {
+//					try{
+//						
+//						progressBar = new JProgressBar(0, d.getCollection().getNucleusCount());
+//						progressBar.setString("Curve refolding in progress");
+//						progressBar.setStringPainted(true);
+//						
+//						AnalysisDataset d = MainWindow.this.analysisDatasets.get(id);
+//
+//						for(Component c : consensusChartPanel.getComponents() ){
+//							if(c.getClass()==JButton.class){
+//								c.setVisible(false);
+//							}
+//						}
+//						CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
+//								d.getAnalysisOptions().getNucleusClass(), 
+//								"Fast");
+//						
+//						
+//						
+////						logc("Refolding profile...");
+//						boolean ok = CurveRefolder.run(d.getCollection(), 
+//								d.getAnalysisOptions().getNucleusClass(), 
+//								"Fast");
+//						if(ok){
+//							log("OK");
+//							d.getAnalysisOptions().setRefoldNucleus(true);
+//							d.getAnalysisOptions().setRefoldMode("Fast");
+//							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+//							list.add(d);
+//							updatePanels(list);
+//
+//						} else {
+//							log("Error");
+//						}
+//					} catch(Exception e){
+//						log("Error refolding");
+//					}
+//				}
+//			};
+//			thr.start();
+//		}
+//		
+//	}
 		
 	
 
@@ -3778,24 +3782,30 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 	/**
-	 * Add a images containing tubulin stained tails
+	 * Add images containing tubulin stained tails
 	 * @author bms41
 	 *
 	 */
-	class AddTailStainAction extends AbstractAction {
+	class AddTailStainAction extends AbstractAction implements PropertyChangeListener {
 
 		private static final long serialVersionUID = 1L;
+		JProgressBar progressBar = null;
+				
 		public AddTailStainAction() {
 			super("Add tail stain");
 		}
 
 		public void actionPerformed(ActionEvent e) {
-
+			
 			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 
 			if(datasets.size()==1){
 
 				final AnalysisDataset d = datasets.get(0);
+				
+				progressBar = new JProgressBar(0, d.getCollection().getNucleusCount());
+				progressBar.setString("Tail detection in progress");
+				progressBar.setStringPainted(true);
 				try{
 
 					// create dialog to get image folder
@@ -3830,81 +3840,16 @@ public class MainWindow extends JFrame implements ActionListener {
 									? Constants.RGB_GREEN
 											: Constants.RGB_BLUE;
 					
-//					JProgressBar progressBar = new JProgressBar(0, d.getCollection().getNucleusCount());
-//					panelGeneralData.add(progressBar);
 					
-//					TubulinTailDetector worker = new TubulinTailDetector(d, folder, channel, progressBar);
 					
-					SwingWorker<Boolean, Void> worker = new SwingWorker<Boolean, Void>(){ // integer for progress?
-
-						@Override
-						public Boolean doInBackground() {
-							logc("Detecting tails with tubulin stain...");
-							boolean ok = TubulinTailDetector.run(d, folder, channel);
-							return ok;
-						}
-
-						@Override
-						public void done() {
-							
-							try {
-								if(get()){
-									log("OK");
-								} else {
-									log("Error");
-								}
-							} catch (InterruptedException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (ExecutionException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-
-						} 
-					};
+					// only draw the progress bar after decision not to cancel is made 
+					progressPanel.add(progressBar);
+					contentPane.revalidate();
+					contentPane.repaint();
 					
-					worker.execute();
-//					if(worker.get()){
-//						log("OK");
-//					} else {
-//						log("Error");
-//					}
-//					panelGeneralData.remove(progressBar);
-					
-
-
-//					Runnable runTailDetector = new Runnable() {
-//						@Override
-//						public void run() { 
-//							// run tail detector
-//							logc("Detecting tails with tubulin stain...");
-//							boolean ok = TubulinTailDetector.run(d, folder, channel);
-//							if(ok){
-//								log("OK");
-//							} else {
-//								log("Error");
-//							}
-//						}
-//					};
-//
-//					SwingUtilities.invokeLater(runTailDetector);
-
-					//					Thread thr = new Thread() {
-					//						public void run() {
-					//
-					//							// run tail detector
-					//							logc("Detecting tails with tubulin stain...");
-					//							boolean ok = TubulinTailDetector.run(d, folder, channel);
-					//							if(ok){
-					//								log("OK");
-					//							} else {
-					//								log("Error");
-					//							}
-					//						}
-					//					};
-					//					thr.run();
-
+					TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
+					t.addPropertyChangeListener(this);
+					t.execute();
 
 				} catch(Exception e1){
 					log("Error adding tail stain: "+e1.getMessage());
@@ -3913,6 +3858,92 @@ public class MainWindow extends JFrame implements ActionListener {
 				log("Cannot run on multiple datasets at once");
 			}
 
+		}
+
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			int value = (Integer) evt.getNewValue();
+			progressBar.setValue(value);
+						
+			if(evt.getPropertyName().equals("Finished")){
+				progressPanel.remove(progressBar);
+				contentPane.revalidate();
+				contentPane.repaint();
+			}
+			
+		}
+	}
+	
+	/**
+	 * Refold the consensus nucleus for the selected dataset using default parameters
+	 */
+	class RefoldNucleusAction extends AbstractAction implements PropertyChangeListener {
+		
+		private static final long serialVersionUID = 1L;
+		JProgressBar progressBar = null;
+		AnalysisDataset d = null;
+		
+		public RefoldNucleusAction() {
+			super("Refold nucleus");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+
+			if(datasets.size()==1){
+
+				d = datasets.get(0);
+
+				try{
+
+					progressBar = new JProgressBar(0, CurveRefolder.MAX_ITERATIONS_FAST);
+					progressBar.setString("Curve refolding in progress");
+					progressBar.setStringPainted(true);
+
+					for(Component c : consensusChartPanel.getComponents() ){
+						if(c.getClass()==JButton.class){
+							c.setVisible(false);
+						}
+					}
+					
+					progressPanel.add(progressBar);
+					contentPane.revalidate();
+					contentPane.repaint();
+					
+					CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
+							d.getAnalysisOptions().getNucleusClass(), 
+							"Fast");
+
+					refolder.addPropertyChangeListener(this);
+					refolder.execute();
+	
+				} catch(Exception e1){
+					log("Error refolding nucleus");
+				}
+			}
+		}
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			int value = (Integer) evt.getNewValue();
+			progressBar.setValue(value);
+
+			if(evt.getPropertyName().equals("Finished")){
+				progressPanel.remove(progressBar);
+				contentPane.revalidate();
+				contentPane.repaint();
+
+				d.getAnalysisOptions().setRefoldNucleus(true);
+				d.getAnalysisOptions().setRefoldMode("Fast");
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+				list.add(d);
+				updatePanels(list);
+			}
+
+			if(evt.getPropertyName().equals("Error")){
+				log("Error refolding nucleus");
+			}
 		}
 	}
 

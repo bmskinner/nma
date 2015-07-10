@@ -12,6 +12,9 @@
   morphology comparisons
  */
 
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 import ij.IJ;
 import ij.plugin.PlugIn;
 import no.gui.MainWindow;
@@ -29,6 +32,23 @@ implements PlugIn
 			java.awt.EventQueue.invokeLater(new Runnable() {
 				public void run() {
 					IJ.setBackgroundColor(0, 0, 0);	 // default background is black
+					
+					try {
+						UIManager.setLookAndFeel(
+						        UIManager.getSystemLookAndFeelClassName());
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InstantiationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (UnsupportedLookAndFeelException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					
 					MainWindow frame = new MainWindow();
 					frame.setVisible(true);

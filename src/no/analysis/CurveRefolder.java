@@ -17,6 +17,9 @@ import java.awt.Color;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.SwingWorker;
 
 import utility.Constants;
 import utility.Equation;
@@ -30,7 +33,7 @@ import no.gui.ColourSelecter;
 import no.components.*;
 
 
-public class CurveRefolder{
+public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 	private Profile targetCurve;
 	private Profile q25;
@@ -41,6 +44,7 @@ public class CurveRefolder{
 
 	private Plot nucleusPlot;
 //	private PlotWindow nucleusPlotWindow;
+	private CellCollection collection;
 	
 	private static Logger logger;
 
@@ -49,6 +53,10 @@ public class CurveRefolder{
 	public static final int INTENSIVE_MODE = 1; // iterate until value
 	public static final int BRUTAL_MODE = 2; // iterate until value
 	private int mode = FAST_MODE;
+	
+	public static final int MAX_ITERATIONS_FAST 		= 50;
+	public static final int MAX_ITERATIONS_INTENSIVE 	= 1000;
+	public static final int MAX_ITERATIONS_BRUTAL 		= 10000;
 
 	public static Map<String, Integer> MODES = new LinkedHashMap<String, Integer>();
 
@@ -60,8 +68,86 @@ public class CurveRefolder{
 
 	private double plotLimit;
 	
-	public static boolean run(CellCollection collection, Class<?> nucleusClass, String refoldMode){
+	@Override
+	protected Boolean doInBackground() {
+		
+		boolean ok =  this.run(true); // need a parameter to distinguish from the run() of SwingWorker
+		return ok;
+	}
+	
+	@Override
+	protected void process( List<Integer> integers ) {
+		//update the number of entries added
+		int lastCycle = integers.get(integers.size()-1);
+		
+		int maxCycles = this.mode == FAST_MODE
+						? MAX_ITERATIONS_FAST
+						: this.mode == FAST_MODE
+							? MAX_ITERATIONS_INTENSIVE
+							: MAX_ITERATIONS_BRUTAL;
 
+		int percent = (int) ( (double) lastCycle / (double) maxCycles * 100);
+
+		setProgress(percent); // the integer representation of the percent
+	}
+	
+	@Override
+	public void done() {
+		try {
+			if(this.get()){
+				firePropertyChange("Finished", getProgress(), -1);
+			} else {
+				firePropertyChange("Error", getProgress(), -2);
+			}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	} 
+	
+	public boolean run(boolean b){ // parameter b does nothing - only to distinguish from SwingWorker
+
+		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
+		try{ 
+
+			this.refoldCurve();
+
+			// orient refolded nucleus to put tail at the bottom
+			this.putPointAtBottom(refoldNucleus.getBorderTag("tail"));
+
+			// if rodent sperm, put tip on left if needed
+			if(refoldNucleus.getClass().equals(RodentSpermNucleus.class)){
+
+				if(refoldNucleus.getBorderTag("tip").getX()>0){
+					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
+				}
+			}
+
+			this.plotNucleus();
+
+			// draw signals on the refolded nucleus
+			this.addSignalsToConsensus(collection);
+			this.exportImage(collection);
+			this.exportProfileOfRefoldedImage(collection);
+			collection.addConsensusNucleus(refoldNucleus);
+
+		} catch(Exception e){
+			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return false;
+		} 
+		return true;
+	}
+	
+	public CurveRefolder(CellCollection collection, Class<?> nucleusClass, String refoldMode){
+		
+		
 		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
 		try{ 
 
@@ -88,45 +174,31 @@ public class CurveRefolder{
 				throw new Exception("Null reference to q25 or q75 profile");
 			}
 
-			CurveRefolder refolder = new CurveRefolder(targetProfile, q25, q75, refoldCandidate);
-			refolder.setMode(refoldMode);
-			refolder.refoldCurve();
-
-			// orient refolded nucleus to put tail at the bottom
-			refolder.putPointAtBottom(refoldCandidate.getBorderTag("tail"));
-
-			// if rodent sperm, put tip on left if needed
-			if(refoldCandidate.getClass().equals(RodentSpermNucleus.class)){
-
-				if(refoldCandidate.getBorderTag("tip").getX()>0){
-					refoldCandidate.flipXAroundPoint(refoldCandidate.getCentreOfMass());
-				}
-			}
-
-			refolder.plotNucleus();
-
-			// draw signals on the refolded nucleus
-			refolder.addSignalsToConsensus(collection);
-			refolder.exportImage(collection);
-			refolder.exportProfileOfRefoldedImage(collection);
-			collection.addConsensusNucleus(refoldCandidate);
+			
+			this.targetCurve = targetProfile;
+			this.q25 = q25.interpolate(n.getLength());
+			this.q75 = q75.interpolate(n.getLength());
+			this.refoldNucleus = refoldCandidate;
+			this.collection = collection;
+			
+			
+			this.setMode(refoldMode);
+			
 
 		} catch(Exception e){
 			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
 			for(StackTraceElement el : e.getStackTrace()){
 				logger.log(el.toString(), Logger.STACK);
 			}
-			return false;
 		} 
-		return true;
 	}
 
-	public CurveRefolder(Profile target, Profile q25, Profile q75, Nucleus n){
-		this.targetCurve = target;
-		this.q25 = q25.interpolate(n.getLength());
-		this.q75 = q75.interpolate(n.getLength());
-		this.refoldNucleus = n;
-	}
+//	public CurveRefolder(Profile target, Profile q25, Profile q75, Nucleus n){
+//		this.targetCurve = target;
+//		this.q25 = q25.interpolate(n.getLength());
+//		this.q75 = q75.interpolate(n.getLength());
+//		this.refoldNucleus = n;
+//	}
 
 	/*
 		The main function to be called externally;
@@ -156,20 +228,22 @@ public class CurveRefolder{
 			int i=0;
 
 			if(this.mode==FAST_MODE){
-				while( (prevScore - score)/prevScore > 0.001 || i<50){ // iterate until converging
+				while( (prevScore - score)/prevScore > 0.001 || i<MAX_ITERATIONS_FAST){ // iterate until converging
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					i++;
+					publish(i);
 					logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
 				}
 			}
 
 			if(this.mode==INTENSIVE_MODE){
 
-				while(score > (originalScore*0.1) && i<1000){ // iterate until 0.6 original score, or 1000 iterations
+				while(score > (originalScore*0.1) && i<MAX_ITERATIONS_INTENSIVE){ // iterate until 0.6 original score, or 1000 iterations
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					i++;
+					publish(i);
 					if(i%50==0){
 						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
 					}
@@ -178,10 +252,11 @@ public class CurveRefolder{
 
 			if(this.mode==BRUTAL_MODE){
 
-				while(score > (originalScore*0.1) && i<10000){ // iterate until 0.1 original score, or 10000 iterations
+				while(score > (originalScore*0.1) && i<MAX_ITERATIONS_BRUTAL){ // iterate until 0.1 original score, or 10000 iterations
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					i++;
+					publish(i);
 					if(i%50==0){
 						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
 					}

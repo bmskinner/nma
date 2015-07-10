@@ -1,14 +1,11 @@
 package cell.analysis;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
 import Skeletonize3D_.Skeletonize3D_;
@@ -16,7 +13,6 @@ import skeleton_analysis.AnalyzeSkeleton_;
 import skeleton_analysis.Edge;
 import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
-import skeleton_analysis.Vertex;
 import utility.CannyEdgeDetector;
 import utility.Constants;
 import utility.Logger;
@@ -26,10 +22,8 @@ import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import no.analysis.AnalysisDataset;
 import no.analysis.Detector;
-import no.analysis.NucleusDetector;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.CannyOptions;
-import no.components.XYPoint;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 import ij.IJ;
@@ -47,7 +41,10 @@ import components.SpermTail;
 
 /**
  * This class is to test ideas for detecting sperm tails stained with
- * anti-tubulin
+ * anti-tubulin. It can be consetucted as SwingWorker for GUI incorpoation,
+ * or the static method run() can be called directly for scripted use. When used
+ * as a SwingWorker, the reported progress will be the number of cells processed, and
+ * upon completion, a "Finished" property change event is fired.
  */
 public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	
@@ -56,22 +53,20 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	private final AnalysisDataset dataset;
 	private final File folder;
 	private final int channel;
-	private final JProgressBar progressBar;
 	
 	private static final int WHITE = 255;
 	
-	public TubulinTailDetector(AnalysisDataset dataset, File folder, int channel, JProgressBar progressBar){
+	public TubulinTailDetector(AnalysisDataset dataset, File folder, int channel){
 		this.dataset = dataset;
 		this.folder = folder;
 		this.channel = channel;
-		this.progressBar = progressBar;
 	}
 	
 	@Override
 	protected void process( List<Integer> integers ) {
-		//update the percentage of the progress bar that is done
+		//update the number of entries added
 		int amount = integers.get( integers.size() - 1 );
-		progressBar.setValue(amount);
+		setProgress(amount);
 	}
 	
 	@Override
@@ -96,7 +91,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 				
 				// attempt to detect the tails in the image
 				try{
-					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions());
+					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions(), logger.getLogfile());
 					
 					for(SpermTail tail : tails){
 						c.addTail(tail);
@@ -125,22 +120,8 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 
 	@Override
 	public void done() {
-		
-//		progressBar.rem
-		
-//		try {
-//			if(get()){
-//				log("OK");
-//			} else {
-//				log("Error");
-//			}
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (ExecutionException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+
+		firePropertyChange("Finished", getProgress(), -1);
 
 	} 
 	
@@ -174,14 +155,16 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 				
 				// attempt to detect the tails in the image
 				try{
-					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions());
+					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions(), logger.getLogfile());
 					
 					for(SpermTail tail : tails){
 						c.addTail(tail);
 					}
 					
 				} catch(Exception e){
-					logger.log("Error detecting tail: "+e.getMessage(), Logger.ERROR);
+					logger.log("Error detecting tail: "
+								+e.getMessage()+": "
+								+e.getCause().getMessage(), Logger.ERROR);
 					for(StackTraceElement el : e.getStackTrace()){
 						logger.log(el.toString(), Logger.STACK);
 					}
@@ -189,7 +172,10 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 				
 			}
 		} catch (Exception e){
-			logger.log("Error in tubulin tail detection: "+e.getMessage(), Logger.ERROR);
+			logger.log("Error in tubulin tail detection: "
+					+e.getMessage()+": "
+					+e.getCause().getMessage(), Logger.ERROR);
+			
 			for(StackTraceElement el : e.getStackTrace()){
 				logger.log(el.toString(), Logger.STACK);
 			}
@@ -209,12 +195,24 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	 * @param n the nucleus to which the tail should attach
 	 * @return a SpermTail object
 	 */
-	private static List<SpermTail> detectTail(File tubulinFile, int channel, Nucleus n, AnalysisOptions options){
+	public static List<SpermTail> detectTail(File tubulinFile, int channel, Nucleus n, AnalysisOptions options, File log){
 		
+		logger = new Logger(log, "TubulinTailDetector");
 		List<SpermTail> tails = new ArrayList<SpermTail>(0);
-		
+		logger.log("Running on image: "+tubulinFile.getAbsolutePath());
 		// import image with tubulin in  channel
-		ImageStack stack = ImageImporter.importImage(tubulinFile, logger.getLogfile());
+		ImageStack stack = null;
+		try{
+			stack = ImageImporter.importImage(tubulinFile, logger.getLogfile());
+		} catch (Exception e){
+			logger.log("Error importing image as stack: "
+					+e.getMessage(), Logger.ERROR);
+
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return tails; // return the empty list
+		}
 		
 		// the stack in the ImageStack must be converted from the given rgb channel 
 		int stackNumber = channel == Constants.RGB_BLUE 
@@ -336,7 +334,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		// remove shading from annotation
 		ip.threshold(1);
 		ImagePlus image = new ImagePlus("make graph", ip);
-		image.show();
+//		image.show();
 		an.setup("", image);
 		
 		// 0 - do not prune
@@ -487,7 +485,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 
 		ImageStack labelledStack = an.getLabeledSkeletons();
 		ImagePlus labelledImage = new ImagePlus("pruned image", labelledStack.getProcessor(1));
-		labelledImage.show();
+//		labelledImage.show();
 		return labelledStack;
 	}
 	

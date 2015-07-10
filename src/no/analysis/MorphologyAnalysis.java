@@ -38,28 +38,15 @@ public class MorphologyAnalysis {
 
 			String pointType = collection.getReferencePoint();
 
-			// setup the plots and profile agregates
-//			initialiseProfileCollection(collection);
-
 			// profile the collection from head/tip, then apply to tail
 			runProfiler(collection, pointType);
 
 			// segment the profiles from head
 			runSegmentation(collection, pointType);
 
-			// export the core data
-
-			// run the exports
-//			exportProfiles(collection);
-//			exportSegments(collection, pointType);
-//			exportClusteringScript(collection);
-
-			// begin migrating these export functions up
-//			exportVariabilityRegions(collection, pointType);
-//			drawProfileCollection(   collection, pointType);
-
 			logger.log("Core morphology analysis complete");
 			return true;
+			
 		} catch(Exception e){
 			
 			logger.log("Error in morphology analysis: "+e.getMessage(), Logger.ERROR);

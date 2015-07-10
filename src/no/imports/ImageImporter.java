@@ -34,6 +34,8 @@ public class ImageImporter {
 				logger.log("Importing image: "+f.getAbsolutePath(), Logger.DEBUG);
 				ImagePlus image = new ImagePlus(f.getAbsolutePath());
 				stack = convert(image);
+			} else {
+				logger.log("Not a file: "+f.getAbsolutePath(), Logger.DEBUG);
 			}
 		} catch (Exception e){
 			logger.log("Error importing image: "+e.getMessage(), Logger.ERROR);

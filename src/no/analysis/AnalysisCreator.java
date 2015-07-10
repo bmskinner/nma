@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import cell.Cell;
 import utility.Logger;
@@ -333,12 +334,33 @@ public class AnalysisCreator {
 			// refold the median consensus nucleus
 			if(analysisOptions.refoldNucleus()){
 				mw.logc("Refolding profile...");
-				ok = CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
-				if(ok){
-					mw.log("OK");
-				} else {
-					mw.log("Error");
+				
+				CurveRefolder refolder = new CurveRefolder(r, 
+						analysisOptions.getNucleusClass(), 
+						analysisOptions.getRefoldMode());
+				
+				refolder.execute();
+				try {
+					if(refolder.get()){
+						mw.log("OK");
+					} else {
+						mw.log("Error");
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+				
+				
+//				ok = CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+//				if(ok){
+//					mw.log("OK");
+//				} else {
+//					mw.log("Error");
+//				}
 			}
 
 			finalPopulations.add(r);
@@ -417,7 +439,27 @@ public class AnalysisCreator {
 				}
 
 				if(analysisOptions.refoldNucleus()){
-					CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
+					
+					CurveRefolder refolder = new CurveRefolder(p, 
+							analysisOptions.getNucleusClass(), 
+							analysisOptions.getRefoldMode());
+					
+					refolder.execute();
+					try {
+						if(refolder.get()){
+							mw.log("OK");
+						} else {
+							mw.log("Error");
+						}
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+//					CurveRefolder.run(p, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
 				}
 
 				finalPopulations.add(p);
