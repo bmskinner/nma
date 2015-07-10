@@ -43,7 +43,7 @@ public class StatsExporter {
 		nuclearStats.addColumn("MIN_FERET",                  collection.getMinFerets());
 		nuclearStats.addColumn("NORM_TAIL_INDEX",            collection.getPointIndexes("tail"));
 		nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       collection.getDifferencesToMedianFromPoint("tail"));
-		nuclearStats.addColumn("PATH",                       collection.getNucleusPaths());
+		nuclearStats.addColumn("PATH",                       collection.getNucleusImagePaths());
 		nuclearStats.export(filename+"."+collection.getType());
 	}
 

@@ -236,10 +236,10 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 			ImageStack skeletonStack = skeletoniseStack(edges, borderRois);
 			
 			// prune the shortest branches of the stack, ready for graph creation
-			ImageStack prunedStack = pruneStack(skeletonStack);
+//			ImageStack prunedStack = pruneStack(skeletonStack);
 			
 			// detect the skeletons as graph objects, and prune shortest branches
-			List<Graph> skeletonGraphs = makeGraphsFromStack(prunedStack);
+			List<Graph> skeletonGraphs = makeGraphsFromStack(skeletonStack);
 			
 			// turn the graphs into line rois
 			List<Roi> skeletons = getSkeletons(skeletonGraphs);

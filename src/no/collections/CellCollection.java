@@ -136,6 +136,16 @@ implements Serializable
 	  return this.nucleusClass;
   }
   
+  public Cell getCell(String path){
+	  for(Cell c : this.getCells()){
+		  Nucleus n = c.getNucleus();
+		  if(n.getPathAndNumber().equals(path)){
+			  return c;
+		  }
+	  }
+	  return null;
+  }
+  
   public Nucleus getConsensusNucleus(){
 	  return this.consensusNucleus;
   }
@@ -298,12 +308,23 @@ implements Serializable
     }
     return d;
   }
+  
+  public String[] getNucleusImagePaths(){
+	    String[] s = new String[cellCollection.size()];
 
-  public String[] getNucleusPaths(){
+	    for(int i=0;i<cellCollection.size();i++){
+	    	Nucleus n = cellCollection.get(i).getNucleus();
+	      s[i] = n.getPath();
+	    }
+	    return s;
+	  }
+
+  public String[] getNucleusPathsAndNumbers(){
     String[] s = new String[cellCollection.size()];
 
     for(int i=0;i<cellCollection.size();i++){
-      s[i] = cellCollection.get(i).getNucleus().getPath(); //+"-"+nucleiCollection.get(i).getNucleusNumber();
+    	Nucleus n = cellCollection.get(i).getNucleus();
+      s[i] = n.getPathAndNumber(); //+"-"+nucleiCollection.get(i).getNucleusNumber();
     }
     return s;
   }

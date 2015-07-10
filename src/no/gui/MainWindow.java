@@ -990,13 +990,17 @@ public class MainWindow extends JFrame implements ActionListener {
 		if(e.getActionCommand().equals("CellSelectionChoice")){
 
 			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
-
-			UUID id = UUID.fromString(name);
+			
+			
+//			UUID id = UUID.fromString(name);
 
 			if(list.size()>0){	
 				try{
 
-					Cell cell = list.get(0).getCollection().getCell(id);
+					
+//					Cell cell = list.get(0).getCollection().getCell(id);
+					Cell cell = list.get(0).getCollection().getCell(name);
+					
 					updateCellOutlineChart(cell);
 				} catch (Exception e1){
 					IJ.log("Error fetching cell: "+e1.getMessage());
@@ -1401,66 +1405,7 @@ public class MainWindow extends JFrame implements ActionListener {
 				thr.start();
 			}
 		}
-	}
-	
-	
-
-	/**
-	 * Refold the consensus nucleus for the given dataset using default parameters
-	 * @param dataset the dataset to refold
-	 */
-//	public void refoldNucleus(AnalysisDataset dataset){
-//		CellCollection collection = dataset.getCollection();
-//		if(collection!=null){
-//			final UUID id = collection.getID();
-//
-//			Thread thr = new Thread() {
-//				public void run() {
-//					try{
-//						
-//						progressBar = new JProgressBar(0, d.getCollection().getNucleusCount());
-//						progressBar.setString("Curve refolding in progress");
-//						progressBar.setStringPainted(true);
-//						
-//						AnalysisDataset d = MainWindow.this.analysisDatasets.get(id);
-//
-//						for(Component c : consensusChartPanel.getComponents() ){
-//							if(c.getClass()==JButton.class){
-//								c.setVisible(false);
-//							}
-//						}
-//						CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
-//								d.getAnalysisOptions().getNucleusClass(), 
-//								"Fast");
-//						
-//						
-//						
-////						logc("Refolding profile...");
-//						boolean ok = CurveRefolder.run(d.getCollection(), 
-//								d.getAnalysisOptions().getNucleusClass(), 
-//								"Fast");
-//						if(ok){
-//							log("OK");
-//							d.getAnalysisOptions().setRefoldNucleus(true);
-//							d.getAnalysisOptions().setRefoldMode("Fast");
-//							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-//							list.add(d);
-//							updatePanels(list);
-//
-//						} else {
-//							log("Error");
-//						}
-//					} catch(Exception e){
-//						log("Error refolding");
-//					}
-//				}
-//			};
-//			thr.start();
-//		}
-//		
-//	}
-		
-	
+	}	
 
 	/**
 	 * Call an open dialog to choose a saved .nbd dataset. The opened dataset
@@ -1553,7 +1498,8 @@ public class MainWindow extends JFrame implements ActionListener {
 						
 						if(list.size()==1){
 //							IJ.log("Creating cell id list");
-							ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getCellIdsAsStrings().toArray(new String[0]));
+							ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getNucleusPathsAndNumbers());
+//							ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getCellIdsAsStrings().toArray(new String[0]));
 							cellSelectionBox.setModel(cellModel);
 //							IJ.log("Model size: "+cellModel.getSize());
 							cellSelectionBox.setSelectedIndex(0);
@@ -3368,7 +3314,6 @@ public class MainWindow extends JFrame implements ActionListener {
 							
 
 							d.deleteChild(u);
-//							IJ.log("   Deleted child");
 //
 						}
 						
@@ -3378,40 +3323,13 @@ public class MainWindow extends JFrame implements ActionListener {
 								parent.deleteChild(id);
 							}
 						}
-//						IJ.log("   Deleted indirect children");
-						
-						
-//						IJ.log("   Clearing maps");
 						populationNames.remove(d.getName());
 						analysisDatasets.remove(id);
 
 						if(d.isRoot()){
-//							IJ.log("   Removing root");
 							treeOrderMap.remove(id);
 						}
-						
-							
-//						} else { // not root
-//							
-//							// remove all children of the collection
-//							for(UUID u : d.getAllChildUUIDs()){
-//	
-//								if(populationNames.containsKey(analysisDatasets.get(u).getName())){
-//	
-//									populationNames.remove(analysisDatasets.get(u).getName());
-//									analysisDatasets.remove(u);
-//								}
-//	
-//							}
-//							if(populationNames.containsKey(analysisDatasets.get(id).getName())){
-//								populationNames.remove(d.getName());
-//								analysisDatasets.remove(id);
-//							}
-//
-//						}
-
 					}
-//					IJ.log("   Cleared " +id.toString());
 				}
 				updatePopulationList();	
 				log("OK");
