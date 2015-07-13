@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
@@ -24,6 +25,7 @@ import no.analysis.AnalysisDataset;
 import no.analysis.Detector;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.CannyOptions;
+import no.components.XYPoint;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 import ij.IJ;
@@ -31,6 +33,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.plugin.filter.Binary;
 import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
@@ -121,7 +124,23 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	@Override
 	public void done() {
 
-		firePropertyChange("Finished", getProgress(), -1);
+		try {
+			if(this.get()){
+				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);
+			} else {
+				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+			}
+		} catch (InterruptedException e) {
+			logger.log("Error in tubulin tail detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (ExecutionException e) {
+			logger.log("Error in tubulin tail detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		}
 
 	} 
 	
@@ -255,8 +274,8 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 			tails = buildSpermTails(skeletons, borderRois, tubulinFile, channel);
 			
 			// from the list of possible tails in the image, 
-			// find the one that overlaps the current nucleus
-//			getTailMatchingNucleus(skeletons, borderRois, n, tubulinFile, channel);
+			// find the ones that overlap the current nucleus
+			tails = getTailsMatchingNucleus(tails, n);
 			
 			
 		} else {
@@ -275,7 +294,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	 */
 	private static ImageStack skeletoniseStack(ImageStack stack, List<Roi> objects){
 
-		// fill rois with white
+		// fill rois with white so they are properly skeletonised
 		ByteProcessor bp = (ByteProcessor) stack.getProcessor(1);
 		bp.setColor(Color.WHITE);
 		for(Roi r : objects){
@@ -285,29 +304,44 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 
 		// create duplicate images for debugging
 		// only the skeletonised image is used 
-//		ImagePlus bpImage = new ImagePlus("byte image", bp);
-		//					bpImage.show();
+		ImagePlus filledByteImage = new ImagePlus("filled byte image", bp);
+		filledByteImage.show();
+		
+		// create a copy of the filled processor and display for debugging
+		BinaryProcessor binaryProcessor = new BinaryProcessor((ByteProcessor) bp.duplicate());
+		ImagePlus binaryImage = new ImagePlus("binary image", binaryProcessor);
+//		binaryImage.show();
+		
+		AnalysisOptions options = new AnalysisOptions(); 
+		options.getTailCannyOptions().setClosingObjectRadius(5);
+		morphologyClose(binaryProcessor, options.getTailCannyOptions());
+		
+		// fill remaining holes in the image
+		Binary binary = new Binary();
+		binary.setup("fill", binaryImage);
+		binary.run(binaryProcessor);
 
 
-		BinaryProcessor binp = new BinaryProcessor((ByteProcessor) bp.duplicate());
-		ImagePlus binpImage = new ImagePlus("binary image", binp);
-		//					binpImage.show();
+		// create a copy of the filled processor and convert to a binary processor
+		ByteProcessor duplicateBinaryProcessor = (ByteProcessor) binaryProcessor.duplicate();
+		BinaryProcessor skeletonisableProcessor = new BinaryProcessor((ByteProcessor) duplicateBinaryProcessor);
+		ImagePlus skeletonisableImage = new ImagePlus("binary image", skeletonisableProcessor);
+		skeletonisableImage.show();
 
-
-		ByteProcessor binp2 = (ByteProcessor) bp.duplicate();
-		BinaryProcessor skp = new BinaryProcessor((ByteProcessor) binp2);
-
-		// skeletonise the filled rois
+		// skeletonise the binary image
 		Skeletonize3D_ skelly = new Skeletonize3D_();
-		skelly.setup("", binpImage);
-		skelly.run(skp);
+		skelly.setup("", binaryImage);
+		skelly.run(skeletonisableProcessor);
 
 		logger.log("Skeletonized the image", Logger.DEBUG);
 
 		// make a new imageStack from the skeletonised images
-		ImageStack skeletonStack = ImageStack.create(binp.getWidth(), binp.getHeight(), 0, 8);
-		skeletonStack.addSlice("skeleton", binp);
+		ImageStack skeletonStack = ImageStack.create(binaryProcessor.getWidth(), binaryProcessor.getHeight(), 0, 8);
+		skeletonStack.addSlice("skeleton", binaryProcessor);
 		skeletonStack.deleteSlice(1); // remove the blank first slice
+		ImagePlus skeletonImage = new ImagePlus("skeleton image", skeletonStack.getProcessor(1));
+		skeletonImage.show();
+		
 		return skeletonStack;
 	}
 	
@@ -556,51 +590,63 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	 * @param channel the rgb channel with the tubulin stain (0 if greyscale)
 	 * @return a sperm tail or null if none found
 	 */
-	private static SpermTail getTailMatchingNucleus(List<Roi> usableSkeletons, List<Roi> borderRois, Nucleus n, File tubulinFile, int channel){
+	private static List<SpermTail> getTailsMatchingNucleus(List<SpermTail> tails, Nucleus n){
 		
 		// ensure that the positions of the nucleus are corrected to
 		// match the original image
-		
-		SpermTail tail = null;
+		List<SpermTail> result = new ArrayList<SpermTail>(0);
 		FloatPolygon nucleusOutline = Utils.createOriginalPolygon(n);
 		
-		for(Roi skeleton : usableSkeletons){
+		for(SpermTail tail : tails){
 			
-			boolean tailOverlap = false;
-							
-			logger.log("Assessing skeleton: Length : "+skeleton.getLength(), Logger.DEBUG);
-
-			float[] xpoints = skeleton.getFloatPolygon().xpoints;
-			float[] ypoints = skeleton.getFloatPolygon().ypoints;
-						
-			// objects that overlap with the nucleus at some point are kept
-			for(int i=0;i<xpoints.length;i++){
-									
-				if(nucleusOutline.contains(xpoints[i], ypoints[i])){
-					tailOverlap = true;
-				}
-			}
-			
-			
-			if(tailOverlap){
-				// if a tail overlaps the nucleus, get the corresponding border roi
-				Roi tailBorder = null;
-//				position = null;
-				for(Roi border : borderRois){
-					if (border.getFloatPolygon().contains(xpoints[0], ypoints[0])
-							&& border.getFloatPolygon().contains(xpoints[xpoints.length-1], ypoints[ypoints.length-1])){
-						tailBorder = border;
-						
-					}
-				}
-				if(tailBorder!=null){
-					
-					tail = new SpermTail(tubulinFile, channel, skeleton, tailBorder);
-					logger.log("Found matching tail", Logger.DEBUG);
+			List<XYPoint> skeleton = tail.getSkeleton();
+			for(XYPoint p : skeleton){
+				if(nucleusOutline.contains( (float) p.getX(), (float) p.getY())){
+					result.add(tail);
+					logger.log("Found tail matching nucleus", Logger.DEBUG);
 				}
 			}
 		}
-		return tail;
+			
+
+//			for(Roi skeleton : usableSkeletons){
+//
+//				boolean tailOverlap = false;
+//
+//				logger.log("Assessing skeleton: Length : "+skeleton.getLength(), Logger.DEBUG);
+//
+//				float[] xpoints = skeleton.getFloatPolygon().xpoints;
+//				float[] ypoints = skeleton.getFloatPolygon().ypoints;
+//
+//				// objects that overlap with the nucleus at some point are kept
+//				for(int i=0;i<xpoints.length;i++){
+//
+//					if(nucleusOutline.contains(xpoints[i], ypoints[i])){
+//						tailOverlap = true;
+//					}
+//				}
+//
+//
+//				if(tailOverlap){
+//					// if a tail overlaps the nucleus, get the corresponding border roi
+//					Roi tailBorder = null;
+//					//				position = null;
+//					for(Roi border : borderRois){
+//						if (border.getFloatPolygon().contains(xpoints[0], ypoints[0])
+//								&& border.getFloatPolygon().contains(xpoints[xpoints.length-1], ypoints[ypoints.length-1])){
+//							tailBorder = border;
+//
+//						}
+//					}
+//					if(tailBorder!=null){
+//
+//						tail = new SpermTail(tubulinFile, channel, skeleton, tailBorder);
+//						logger.log("Found matching tail", Logger.DEBUG);
+//					}
+//				}
+//			}
+//		}
+		return result;
 	}
 	
 	/**
@@ -863,7 +909,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 
 			logger.log("Edge detection complete", Logger.DEBUG);
 		} catch (Exception e) {
-			logger.log("Error in dege detection: "+e.getMessage(), Logger.ERROR);
+			logger.log("Error in edge detection: "+e.getMessage(), Logger.ERROR);
 			for(StackTraceElement el : e.getStackTrace()){
 				logger.log(el.toString(), Logger.STACK);
 			}

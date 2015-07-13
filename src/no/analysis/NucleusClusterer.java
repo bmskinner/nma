@@ -5,11 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.SwingWorker;
 
 import no.collections.CellCollection;
 import no.components.Profile;
 import no.components.ProfileCollection;
 import no.nuclei.Nucleus;
+import utility.Constants;
 import utility.Logger;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
@@ -21,7 +25,7 @@ import weka.core.Instances;
 import weka.core.SparseInstance;
 
 
-public class NucleusClusterer {
+public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	
 	public static final int EM = 0; // expectation maximisation
 	public static final int HIERARCHICAL = 1;
@@ -37,8 +41,52 @@ public class NucleusClusterer {
 	
 	private Logger logger;
 		
-	public NucleusClusterer(int type){
+	private CellCollection collection;
+	
+	public NucleusClusterer(int type, CellCollection collection){
 		this.type = type;
+		this.collection = collection;
+	}
+	
+	
+	@Override
+	protected void process(List<Integer> integers){
+//		// get last published value
+//		int amount = integers.get( integers.size() - 1 );
+//		
+//		// total number of nuclei
+//		int total = dataset.getCollection().getNucleusCount();
+//		
+//		// express as percent as int
+//		int progress = (int) (((double) amount / (double) total)*100);
+//		setProgress(progress);
+	}
+	
+	@Override
+	protected Boolean doInBackground() {
+		boolean ok = cluster(collection);
+		return ok;
+	}
+	
+	@Override
+	protected void done(){
+		try {
+			if(this.get()){
+				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);
+			} else {
+				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+			}
+		} catch (InterruptedException e) {
+			logger.log("Error in clustering: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (ExecutionException e) {
+			logger.log("Error in clustering: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		}
 	}
 	
 	public void setType(int type){

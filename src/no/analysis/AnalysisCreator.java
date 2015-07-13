@@ -490,8 +490,6 @@ public class AnalysisCreator {
 		logger.log("Dividing population by signals...");
 		try{
 
-//			Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
-
 			List<Integer> channels = r.getSignalChannels();
 			for(int channel : channels){
 				List<Cell> list = r.getCellsWithNuclearSignals(channel);
@@ -515,7 +513,7 @@ public class AnalysisCreator {
 								r.getDebugFile(), 
 								r.getNucleusClass());
 						
-						for(Cell c : list){
+						for(Cell c : notList){
 							notListCollection.addCell( c );
 						}
 						signalPopulations.add(notListCollection);

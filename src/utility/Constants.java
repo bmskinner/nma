@@ -50,5 +50,11 @@ public class Constants {
 		
 		public static final String PIG_SPERM_NUCLEUS_REFERENCE_POINT 		= "head";
 		public static final String PIG_SPERM_NUCLEUS_ORIENTATION_POINT 		= "tail";
+		
+		// SwingWorker states for progress bars (can only pass ints)
+		public static final int PROGRESS_FINISHED 	= -1; // signal cleanup of progress bar
+		public static final int PROGRESS_ERROR		= -2; // signal error occurred in analysis
+		public static final int PROGRESS_COOLDOWN 	= -3; // signal switch to indeterminate bar
+		
 
 }

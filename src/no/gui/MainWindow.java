@@ -51,15 +51,12 @@ import javax.swing.JTextArea;
 
 import java.awt.SystemColor;
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Box;
@@ -76,8 +73,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 
 import java.awt.Font;
 
@@ -107,12 +102,10 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
-import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
@@ -122,13 +115,11 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import components.SpermTail;
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
 import datasets.NucleusDatasetCreator;
 import datasets.TailDatasetCreator;
 import utility.Constants;
-import utility.Logger;
 import utility.TreeOrderHashMap;
 
 import javax.swing.JTabbedPane;
@@ -1269,74 +1260,66 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * Results are added to the dataset list.
 	 * @param collection the collection to cluster
 	 */
-	public void clusterAnalysis(CellCollection collection){
-		if(collection !=null){
-			final UUID id = collection.getID();
-			Thread thr = new Thread() {
-				public void run() {
-					try{
-						
-						
-						ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
-						Map<String, Object> options = clusterSetup.getOptions();
-//						for(String key : options.keySet()){
-//							IJ.log(key+": "+options.get(key).toString());
-//						}
-						if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-
-							logc("Running cluster analysis...");
-
-							NucleusClusterer clusterer = new NucleusClusterer(  (Integer) options.get("type") );
-							clusterer.setClusteringOptions(options);
-
-							AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
-							boolean ok = clusterer.cluster(parent.getCollection());
-							if(ok){
-								log("OK");
-								log("Found "+clusterer.getNumberOfClusters()+" clusters");
-
-								parent.setClusterTree(clusterer.getNewickTree());
-
-								for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
-									CellCollection c = clusterer.getCluster(cluster);
-									log("Cluster "+cluster+":");
-
-									logc("Reapplying morphology...");
-									ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisDatasets.get(id).getCollection());
-									if(ok){
-										log("OK");
-									} else {
-										log("Error");
-									}
-
-									// attach the clusters to their parent collection
-									parent.addCluster(c);
-
-									addDataset(parent.getChildDataset(c.getID()));
-//									MainWindow.this.analysisDatasets.put(c.getID(), parent.getChildDataset(c.getID()));
-//									if(MainWindow.this.populationNames.containsKey(c.getName())){
-//										c.setName(c.getName()+"_1");
+//	public void clusterAnalysis(CellCollection collection){
+//		if(collection !=null){
+//			final UUID id = collection.getID();
+//			Thread thr = new Thread() {
+//				public void run() {
+//					try{
+//						
+//						
+//						ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
+//						Map<String, Object> options = clusterSetup.getOptions();
+//
+//						if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
+//
+//							logc("Running cluster analysis...");
+//
+//							NucleusClusterer clusterer = new NucleusClusterer(  (Integer) options.get("type") );
+//							clusterer.setClusteringOptions(options);
+//
+//							AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
+//							boolean ok = clusterer.cluster(parent.getCollection());
+//							if(ok){
+//								log("OK");
+//								log("Found "+clusterer.getNumberOfClusters()+" clusters");
+//
+//								parent.setClusterTree(clusterer.getNewickTree());
+//
+//								for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
+//									CellCollection c = clusterer.getCluster(cluster);
+//									log("Cluster "+cluster+":");
+//
+//									logc("Reapplying morphology...");
+//									ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisDatasets.get(id).getCollection());
+//									if(ok){
+//										log("OK");
+//									} else {
+//										log("Error");
 //									}
-//									MainWindow.this.populationNames.put(c.getName(), c.getID());
-
-								}
-								updatePopulationList();	
-								//							parent.save();
-							} else {
-								log("Error");
-							}
-						}
-						clusterSetup.dispose();
-
-					} catch (Exception e){
-						log("Error in cluster analysis: "+e.getMessage());
-					}
-				}
-			};
-			thr.start();
-		}
-
-	}
+//
+//									// attach the clusters to their parent collection
+//									parent.addCluster(c);
+//
+//									addDataset(parent.getChildDataset(c.getID()));
+//
+//								}
+//								updatePopulationList();	
+//							} else {
+//								log("Error");
+//							}
+//						}
+//						clusterSetup.dispose();
+//
+//					} catch (Exception e){
+//						log("Error in cluster analysis: "+e.getMessage());
+//					}
+//				}
+//			};
+//			thr.start();
+//		}
+//
+//	}
 	
 	
 
@@ -1367,46 +1350,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 	}
 	
-	
-
-	/**
-	 * Call the setup for a new shell analysis on the given dataset,
-	 * @param dataset the dataset to analyse
-	 */
-	public void newShellAnalysis(AnalysisDataset dataset){
-		
-		CellCollection collection = dataset.getCollection();
-		if(collection!=null){
-			String shellString = JOptionPane.showInputDialog(this, "Number of shells", 5);
-			final UUID id = collection.getID();
-			// validate
-			if(!shellString.isEmpty() && shellString!=null){
-				final int shellCount = Integer.parseInt(shellString);
-				Thread thr = new Thread() {
-					public void run() {
-						try{
-							logc("Running shell analysis...");
-							boolean ok = ShellAnalysis.run(MainWindow.this.analysisDatasets.get(id), shellCount);
-							if(ok){
-								log("OK");
-							} else {
-								log("Error");
-							}
-
-							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-							list.add(MainWindow.this.analysisDatasets.get(id));
-							updatePanels(list);
-
-						} catch (Exception e){
-							log("Error in shell analysis");
-						}
-					}
-				};
-				thr.start();
-			}
-		}
-	}	
-
 	/**
 	 * Call an open dialog to choose a saved .nbd dataset. The opened dataset
 	 * will be added to the bottom of the dataset list.
@@ -1961,14 +1904,15 @@ public class MainWindow extends JFrame implements ActionListener {
 		JLabel lbl = new JLabel(label);
 		
 		if(showRunButton && collection !=null){
-			final UUID id = collection.getID();
+//			final UUID id = collection.getID();
 			JButton btnShellAnalysis = new JButton("Run shell analysis");
-			btnShellAnalysis.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					newShellAnalysis(MainWindow.this.analysisDatasets.get(id));
-				}
-			});
+			btnShellAnalysis.addActionListener(new ShellAnalysisAction());
+//			btnShellAnalysis.addMouseListener(new MouseAdapter() {
+//				@Override
+//				public void mouseClicked(MouseEvent arg0) {
+//					newShellAnalysis(MainWindow.this.analysisDatasets.get(id));
+//				}
+//			});
 			panel.add(btnShellAnalysis, BorderLayout.SOUTH);
 		}
 		lbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -2441,12 +2385,13 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(!dataset.hasClusters()){ // only allow clustering once per population
 
 				JButton btnNewClusterAnalysis = new JButton("Cluster population");
-				btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-						clusterAnalysis(MainWindow.this.analysisDatasets.get(id).getCollection());
-					}
-				});
+				btnNewClusterAnalysis.addActionListener(new ClusterAnalysisAction());
+//				btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
+//					@Override
+//					public void mouseClicked(MouseEvent arg0) {
+//						clusterAnalysis(MainWindow.this.analysisDatasets.get(id).getCollection());
+//					}
+//				});
 				clusteringPanel.add(btnNewClusterAnalysis);
 				
 			} else { // clusters present, show the tree if available
@@ -3707,7 +3652,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	class AddTailStainAction extends AbstractAction implements PropertyChangeListener {
 
 		private static final long serialVersionUID = 1L;
-		JProgressBar progressBar = null;
+		private JProgressBar progressBar = null;
 				
 		public AddTailStainAction() {
 			super("Add tail stain");
@@ -3789,6 +3734,10 @@ public class MainWindow extends JFrame implements ActionListener {
 				contentPane.repaint();
 			}
 			
+			if(evt.getPropertyName().equals("Cooldown")){
+				progressBar.setIndeterminate(true);
+			}
+			
 		}
 	}
 	
@@ -3798,7 +3747,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	class RefoldNucleusAction extends AbstractAction implements PropertyChangeListener {
 		
 		private static final long serialVersionUID = 1L;
-		JProgressBar progressBar = null;
+		private JProgressBar progressBar = null;
 		AnalysisDataset d = null;
 		
 		public RefoldNucleusAction() {
@@ -3861,6 +3810,195 @@ public class MainWindow extends JFrame implements ActionListener {
 
 			if(evt.getPropertyName().equals("Error")){
 				log("Error refolding nucleus");
+			}
+			
+			if(evt.getPropertyName().equals("Cooldown")){
+				progressBar.setIndeterminate(true);
+			}
+		}
+	}
+	
+	
+	/**
+	 * Run a new shell analysis
+	 */
+	class ShellAnalysisAction extends AbstractAction implements PropertyChangeListener {
+		
+		private static final long serialVersionUID = 1L;
+		private JProgressBar progressBar = null;
+		AnalysisDataset d = null;
+		int shellCount = 0;
+		
+		public ShellAnalysisAction() {
+			super("Shell Analysis");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			
+
+			if(datasets.size()==1){
+
+				d = datasets.get(0);
+				
+				String shellString = JOptionPane.showInputDialog(MainWindow.this, "Number of shells", 5);
+				
+				// validate
+				if(!shellString.isEmpty() && shellString!=null){
+					shellCount = Integer.parseInt(shellString);
+				} else {
+					return;
+				}
+
+				try{
+
+					progressBar = new JProgressBar(0, CurveRefolder.MAX_ITERATIONS_FAST);
+					progressBar.setString("Shell analysis in progress");
+					progressBar.setStringPainted(true);
+					
+					progressPanel.add(progressBar);
+					contentPane.revalidate();
+					contentPane.repaint();
+					
+					ShellAnalysis analysis = new ShellAnalysis(d,shellCount);
+
+					analysis.addPropertyChangeListener(this);
+					analysis.execute();
+	
+				} catch(Exception e1){
+					log("Error refolding nucleus");
+				}
+			}
+		}
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			int value = (Integer) evt.getNewValue();
+			progressBar.setValue(value);
+
+			if(evt.getPropertyName().equals("Finished")){
+				progressPanel.remove(progressBar);
+				contentPane.revalidate();
+				contentPane.repaint();
+				
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+				list.add(d);
+				updatePanels(list);
+			}
+
+			if(evt.getPropertyName().equals("Error")){
+				log("Error running shell analysis");
+			}
+			
+			if(evt.getPropertyName().equals("Cooldown")){
+				progressBar.setIndeterminate(true);
+			}
+		}
+	}
+	
+	
+	
+	/**
+	 * Run a new clustering on the selected dataset
+	 * @author bms41
+	 *
+	 */
+	class ClusterAnalysisAction extends AbstractAction implements PropertyChangeListener {
+		
+		private static final long serialVersionUID = 1L;
+		private JProgressBar progressBar = null;
+		AnalysisDataset d = null;
+		NucleusClusterer clusterer = null;
+		
+		public ClusterAnalysisAction() {
+			super("Cluster Analysis");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			
+
+			if(datasets.size()==1){
+
+				d = datasets.get(0);
+				
+				try{
+					
+					
+					ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
+					Map<String, Object> options = clusterSetup.getOptions();
+
+					if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
+						
+						progressBar = new JProgressBar(0, 100);
+						progressBar.setString("Cluster analysis in progress");
+						progressBar.setIndeterminate(true);
+						progressBar.setStringPainted(true);
+						
+						progressPanel.add(progressBar);
+						contentPane.revalidate();
+						contentPane.repaint();
+
+
+						clusterer = new NucleusClusterer(  (Integer) options.get("type"), d.getCollection() );
+						clusterer.setClusteringOptions(options);
+						
+						clusterer.addPropertyChangeListener(this);
+						clusterer.execute();
+
+					}
+					clusterSetup.dispose();
+
+				} catch (Exception e1){
+					log("Error in cluster analysis: "+e1.getMessage());
+				}
+			}
+		}
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			int value = (Integer) evt.getNewValue();
+			progressBar.setValue(value);
+
+			if(evt.getPropertyName().equals("Finished")){
+				
+				progressPanel.remove(progressBar);
+				contentPane.revalidate();
+				contentPane.repaint();
+				
+				log("Found "+clusterer.getNumberOfClusters()+" clusters");
+
+				d.setClusterTree(clusterer.getNewickTree());
+
+				for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
+					CellCollection c = clusterer.getCluster(cluster);
+					log("Cluster "+cluster+":");
+
+					logc("Reapplying morphology...");
+					boolean ok = MorphologyAnalysis.reapplyProfiles(c, d.getCollection());
+					if(ok){
+						log("OK");
+					} else {
+						log("Error");
+					}
+
+					// attach the clusters to their parent collection
+					d.addCluster(c);
+
+					addDataset(d.getChildDataset(c.getID()));
+
+				}
+				updatePopulationList();	
+			}
+
+			if(evt.getPropertyName().equals("Error")){
+				log("Error running cluster analysis");
+			}
+			
+			if(evt.getPropertyName().equals("Cooldown")){
+				progressBar.setIndeterminate(true);
 			}
 		}
 	}

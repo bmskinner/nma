@@ -95,16 +95,20 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	public void done() {
 		try {
 			if(this.get()){
-				firePropertyChange("Finished", getProgress(), -1);
+				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);
 			} else {
-				firePropertyChange("Error", getProgress(), -2);
+				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
 			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
 		}
 		
 	} 
@@ -115,6 +119,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		try{ 
 
 			this.refoldCurve();
+			
+			firePropertyChange("Cooldown", getProgress(), Constants.PROGRESS_COOLDOWN);
 
 			// orient refolded nucleus to put tail at the bottom
 			this.putPointAtBottom(refoldNucleus.getBorderTag("tail"));

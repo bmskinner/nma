@@ -61,6 +61,10 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	
 	private static final double DEFAULT_CANNY_LOW_THRESHOLD = 0.1;
 	private static final double DEFAULT_CANNY_HIGH_THRESHOLD = 1.5;
+	
+	private static final double DEFAULT_CANNY_TAIL_LOW_THRESHOLD = 0.1;
+	private static final double DEFAULT_CANNY_TAIL_HIGH_THRESHOLD = 0.5;
+	
 	private static final double DEFAULT_CANNY_KERNEL_RADIUS = 2;
 	private static final int    DEFAULT_CANNY_KERNEL_WIDTH = 16;
 	private static final int    DEFAULT_CLOSING_OBJECT_RADIUS = 5;
@@ -219,8 +223,8 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		
 		tailCannyOptions.setUseCanny(true);
 		tailCannyOptions.setCannyAutoThreshold(false);
-		tailCannyOptions.setLowThreshold( (float) DEFAULT_CANNY_LOW_THRESHOLD);
-		tailCannyOptions.setHighThreshold((float) DEFAULT_CANNY_HIGH_THRESHOLD);
+		tailCannyOptions.setLowThreshold( (float) DEFAULT_CANNY_TAIL_LOW_THRESHOLD);
+		tailCannyOptions.setHighThreshold((float) DEFAULT_CANNY_TAIL_HIGH_THRESHOLD);
 		tailCannyOptions.setKernelRadius((float)DEFAULT_CANNY_KERNEL_RADIUS);
 		tailCannyOptions.setKernelWidth(DEFAULT_CANNY_KERNEL_WIDTH);
 		tailCannyOptions.setClosingObjectRadius(DEFAULT_TAIL_CLOSING_OBJECT_RADIUS);
