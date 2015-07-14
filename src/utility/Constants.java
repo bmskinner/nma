@@ -55,6 +55,9 @@ public class Constants {
 		public static final String ROUND_NUCLEUS_REFERENCE_POINT 			= "head";
 		public static final String ROUND_NUCLEUS_ORIENTATION_POINT 			= "tail";
 		
+		public static final String ASYMMETRIC_NUCLEUS_REFERENCE_POINT 		= "head";
+		public static final String ASYMMETRIC_NUCLEUS_ORIENTATION_POINT 	= "tail";
+		
 		public static final String RODENT_SPERM_NUCLEUS_REFERENCE_POINT 	= "tip";
 		public static final String RODENT_SPERM_NUCLEUS_ORIENTATION_POINT 	= "tail";
 		

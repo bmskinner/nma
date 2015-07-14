@@ -1093,14 +1093,16 @@ public class RoundNucleus
 	}
 
 	// Ensure only copies of border points get returned
+	/* (non-Javadoc)
+	 * @see no.nuclei.Nucleus#getBorderTag(java.lang.String)
+	 */
 	public NucleusBorderPoint getBorderTag(String s){
 		NucleusBorderPoint result = new NucleusBorderPoint(0,0);
 		if(this.getBorderIndex(s)>-1){
 			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
+		} else {
+			return null;
 		}
-		// } else {
-		// 	IJ.log("    Error: cannot find border tag in Nucleus.getBorderTag(\""+s+"\")");
-		// }
 		return result;
 	}
 

@@ -233,8 +233,20 @@ public interface Nucleus {
 
 	public void updatePoint(int i, double x, double y);
 
+	/**
+	 * Fetch the NucleusBorderPoint associated with the given
+	 * tag name. If the tag does not exist, returns null
+	 * @param s the tag name
+	 * @return the border point with this tag
+	 */
 	public NucleusBorderPoint getBorderTag(String s);
 
+	/**
+	 * Get the index of the border point with the given tag.
+	 * If the point does not exist, returns -1
+	 * @param s the tag name
+	 * @return the index of the border in borderList
+	 */
 	public int getBorderIndex(String s);
 
 	public Set<String> getTags();
