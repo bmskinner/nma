@@ -69,7 +69,9 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	protected void process( List<Integer> integers ) {
 		//update the number of entries added
 		int amount = integers.get( integers.size() - 1 );
-		setProgress(amount);
+		int totalCells = dataset.getCollection().getNucleusCount();
+		int percent = (int) ( (double) amount / (double) totalCells * 100);
+		setProgress(percent); // the integer representation of the percent
 	}
 	
 	@Override

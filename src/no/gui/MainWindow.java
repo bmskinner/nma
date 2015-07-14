@@ -81,6 +81,7 @@ import javax.swing.JTable;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -722,7 +723,14 @@ public class MainWindow extends JFrame implements ActionListener {
 		consensusChartPanel = new ChartPanel(consensusChart);
 
 		runRefoldingButton = new JButton("Refold");
-		runRefoldingButton.addActionListener(new RefoldNucleusAction());
+//		runRefoldingButton.addActionListener(new RefoldNucleusAction());
+
+		runRefoldingButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				new RefoldNucleusAction();
+			}
+		});
 		runRefoldingButton.setVisible(false);
 		
 		consensusChartPanel.add(runRefoldingButton);
@@ -1252,75 +1260,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 		return result;
 	}
-	
-	
-
-	/**
-	 * Call the setup for a new cluster analysis of an existing dataset.
-	 * Results are added to the dataset list.
-	 * @param collection the collection to cluster
-	 */
-//	public void clusterAnalysis(CellCollection collection){
-//		if(collection !=null){
-//			final UUID id = collection.getID();
-//			Thread thr = new Thread() {
-//				public void run() {
-//					try{
-//						
-//						
-//						ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
-//						Map<String, Object> options = clusterSetup.getOptions();
-//
-//						if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-//
-//							logc("Running cluster analysis...");
-//
-//							NucleusClusterer clusterer = new NucleusClusterer(  (Integer) options.get("type") );
-//							clusterer.setClusteringOptions(options);
-//
-//							AnalysisDataset parent = MainWindow.this.analysisDatasets.get(id);
-//							boolean ok = clusterer.cluster(parent.getCollection());
-//							if(ok){
-//								log("OK");
-//								log("Found "+clusterer.getNumberOfClusters()+" clusters");
-//
-//								parent.setClusterTree(clusterer.getNewickTree());
-//
-//								for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
-//									CellCollection c = clusterer.getCluster(cluster);
-//									log("Cluster "+cluster+":");
-//
-//									logc("Reapplying morphology...");
-//									ok = MorphologyAnalysis.reapplyProfiles(c, MainWindow.this.analysisDatasets.get(id).getCollection());
-//									if(ok){
-//										log("OK");
-//									} else {
-//										log("Error");
-//									}
-//
-//									// attach the clusters to their parent collection
-//									parent.addCluster(c);
-//
-//									addDataset(parent.getChildDataset(c.getID()));
-//
-//								}
-//								updatePopulationList();	
-//							} else {
-//								log("Error");
-//							}
-//						}
-//						clusterSetup.dispose();
-//
-//					} catch (Exception e){
-//						log("Error in cluster analysis: "+e.getMessage());
-//					}
-//				}
-//			};
-//			thr.start();
-//		}
-//
-//	}
-	
 	
 
 	/**
@@ -1906,13 +1845,14 @@ public class MainWindow extends JFrame implements ActionListener {
 		if(showRunButton && collection !=null){
 //			final UUID id = collection.getID();
 			JButton btnShellAnalysis = new JButton("Run shell analysis");
-			btnShellAnalysis.addActionListener(new ShellAnalysisAction());
-//			btnShellAnalysis.addMouseListener(new MouseAdapter() {
-//				@Override
-//				public void mouseClicked(MouseEvent arg0) {
+//			btnShellAnalysis.addActionListener(new ShellAnalysisAction());
+			btnShellAnalysis.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					new ShellAnalysisAction();
 //					newShellAnalysis(MainWindow.this.analysisDatasets.get(id));
-//				}
-//			});
+				}
+			});
 			panel.add(btnShellAnalysis, BorderLayout.SOUTH);
 		}
 		lbl.setHorizontalAlignment(SwingConstants.CENTER);
@@ -2385,13 +2325,14 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(!dataset.hasClusters()){ // only allow clustering once per population
 
 				JButton btnNewClusterAnalysis = new JButton("Cluster population");
-				btnNewClusterAnalysis.addActionListener(new ClusterAnalysisAction());
-//				btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
-//					@Override
-//					public void mouseClicked(MouseEvent arg0) {
+//				btnNewClusterAnalysis.addActionListener(new ClusterAnalysisAction());
+				btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+						new ClusterAnalysisAction();
 //						clusterAnalysis(MainWindow.this.analysisDatasets.get(id).getCollection());
-//					}
-//				});
+					}
+				});
 				clusteringPanel.add(btnNewClusterAnalysis);
 				
 			} else { // clusters present, show the tree if available
@@ -2946,7 +2887,18 @@ public class MainWindow extends JFrame implements ActionListener {
 		JMenuItem replaceFolderMenuItem = new JMenuItem(new ReplaceNucleusFolderAction());
 		JMenuItem exportStatsMenuItem = new JMenuItem(new ExportDatasetStatsAction());
 		JMenuItem applySegmentationMenuItem = new JMenuItem(new ApplySegmentProfileAction());
-		JMenuItem addTailStainMenuItem = new JMenuItem(new AddTailStainAction());
+		
+		JMenuItem addTailStainMenuItem = new JMenuItem( new AbstractAction("Add tail stain"){
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				new AddTailStainAction();				
+			}
+			
+		});
+				
 				
 		public PopulationListPopupMenu() {
 			
@@ -3077,6 +3029,36 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 	}
 	
+	/**
+	 * Create a new NucleusCollection of the same class as the given dataset
+	 * @param template the dataset to base on for analysis options, folders
+	 * @param name the collection name
+	 * @return a new empty collection
+	 */
+	public static CellCollection makeNewCollection(AnalysisDataset template, String name){
+
+		CellCollection newCollection = null;
+
+		try {
+
+			CellCollection templateCollection = template.getCollection();
+
+			newCollection = new CellCollection(templateCollection.getFolder(), 
+					templateCollection.getOutputFolderName(), 
+					name, 
+					templateCollection.getDebugFile(),
+					templateCollection.getNucleusClass()
+					);
+
+		} catch (Exception e) {
+			IJ.log(e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		} 
+		return newCollection;
+	}
+	
 	class MergeCollectionAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -3089,7 +3071,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 
 			if(datasets.size()>1){
-				
+
 				if(datasets.size()==2){ // check we are not merging a parent and child (would just get child)
 					if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
 						log("No. That would be silly.");
@@ -3346,8 +3328,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	        			dataset.addChildCollection(newCollection);
 
 	        			addDataset(dataset.getChildDataset(newID));
-//	        			populationNames.put(newCollection.getName(), newID);
-//	        			analysisDatasets.put(newID, dataset.getChildDataset(newID));
 	        			updatePopulationList();
 	        			
 	        		} else {
@@ -3643,395 +3623,287 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		}
 	}
+		
+	
+	/**
+	 * Contains a progress bar and handling methods for when an action
+	 * is triggered. Subclassed for each action type.
+	 * @author bms41
+	 *
+	 */
+	abstract class ProgressableAction implements PropertyChangeListener{
+
+		protected AnalysisDataset d = null;
+		protected JProgressBar progressBar = null;
+		protected String errorMessage = null;
+		
+		public ProgressableAction(String barMessage, String errorMessage){
+			this.progressBar = new JProgressBar(0, 100);
+			this.progressBar.setString(barMessage);
+			this.progressBar.setStringPainted(true);
+			this.errorMessage = errorMessage;
+			
+			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			
+			if(datasets.size()==1){
+
+				d = datasets.get(0);
+				
+				progressPanel.add(this.progressBar);
+				contentPane.revalidate();
+				contentPane.repaint();				
+			} else {
+				log("Unable to analyse more than one dataset");
+			}
+		}
+		
+		public void cancel(){
+			progressPanel.remove(this.progressBar);
+			contentPane.revalidate();
+			contentPane.repaint();
+		}
+		
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			
+			int value = (Integer) evt.getNewValue(); // should be percent
+			
+			this.progressBar.setValue(value);
+
+			if(evt.getPropertyName().equals("Finished")){
+				finished();
+			}
+
+			if(evt.getPropertyName().equals("Error")){
+				error();
+			}
+			
+			if(evt.getPropertyName().equals("Cooldown")){
+				cooldown();
+			}
+			
+		}
+		
+		/**
+		 * The method run when the analysis has completed
+		 */
+		public void finished(){
+			progressPanel.remove(this.progressBar);
+			contentPane.revalidate();
+			contentPane.repaint();
+
+			d.getAnalysisOptions().setRefoldNucleus(true);
+			d.getAnalysisOptions().setRefoldMode("Fast");
+			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+			list.add(d);
+			updatePanels(list);
+		}
+		
+		/**
+		 * Runs when an error was encountered in the analysis
+		 */
+		public void error(){
+			log(this.errorMessage);
+		}
+		
+		/**
+		 * Runs if a cooldown signal is received. Use to set progress bars
+		 * to an indeterminate state when no reliable progress metric is 
+		 * available
+		 */
+		public void cooldown(){
+			this.progressBar.setIndeterminate(true);
+		}
+		
+	}
+	
 	
 	/**
 	 * Add images containing tubulin stained tails
 	 * @author bms41
 	 *
 	 */
-	class AddTailStainAction extends AbstractAction implements PropertyChangeListener {
-
-		private static final long serialVersionUID = 1L;
-		private JProgressBar progressBar = null;
-				
+	class AddTailStainAction extends ProgressableAction {
+		
 		public AddTailStainAction() {
-			super("Add tail stain");
-		}
-
-		public void actionPerformed(ActionEvent e) {
+			super("Tail detection in progress", "Error in tail detection");
 			
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
+			String folderName = openDialog.getDirectory();
 
-			if(datasets.size()==1){
+			if(folderName==null) return; // user cancelled
 
-				final AnalysisDataset d = datasets.get(0);
-				
-				progressBar = new JProgressBar(0, d.getCollection().getNucleusCount());
-				progressBar.setString("Tail detection in progress");
-				progressBar.setStringPainted(true);
-				try{
+			final File folder =  new File(folderName);
 
-					// create dialog to get image folder
-					DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
-					String folderName = openDialog.getDirectory();
-
-					if(folderName==null) return; // user cancelled
-
-					final File folder =  new File(folderName);
-
-					if(!folder.isDirectory() ){
-						return;
-					}
-					if(!folder.exists()){
-						return; // check folder is ok
-					}
-					// create dialog to get image channel
-
-					Object[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
-					String channelName = (String)JOptionPane.showInputDialog(
-							MainWindow.this,
-							"Select channel",
-							"Select channel",
-							JOptionPane.PLAIN_MESSAGE,
-							null,
-							possibilities,
-							"Green");
-
-					final int channel = channelName.equals("Red") 
-							? Constants.RGB_RED
-									: channelName.equals("Green") 
-									? Constants.RGB_GREEN
-											: Constants.RGB_BLUE;
-					
-					
-					
-					// only draw the progress bar after decision not to cancel is made 
-					progressPanel.add(progressBar);
-					contentPane.revalidate();
-					contentPane.repaint();
-					
-					TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
-					t.addPropertyChangeListener(this);
-					t.execute();
-
-				} catch(Exception e1){
-					log("Error adding tail stain: "+e1.getMessage());
-				}
-			} else {
-				log("Cannot run on multiple datasets at once");
+			if(!folder.isDirectory() ){
+				this.cancel();
+				return;
 			}
-
-		}
-
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			int value = (Integer) evt.getNewValue();
-			progressBar.setValue(value);
-						
-			if(evt.getPropertyName().equals("Finished")){
-				progressPanel.remove(progressBar);
-				contentPane.revalidate();
-				contentPane.repaint();
+			if(!folder.exists()){
+				this.cancel();
+				return; // check folder is ok
 			}
+			// create dialog to get image channel
+
+			Object[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
+			String channelName = (String)JOptionPane.showInputDialog(
+					MainWindow.this,
+					"Select channel",
+					"Select channel",
+					JOptionPane.PLAIN_MESSAGE,
+					null,
+					possibilities,
+					"Green");
+
+			final int channel = channelName.equals("Red") 
+					? Constants.RGB_RED
+							: channelName.equals("Green") 
+							? Constants.RGB_GREEN
+									: Constants.RGB_BLUE;
 			
-			if(evt.getPropertyName().equals("Cooldown")){
-				progressBar.setIndeterminate(true);
-			}
 			
+			TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
+			t.addPropertyChangeListener(this);
+			t.execute();
 		}
 	}
 	
 	/**
 	 * Refold the consensus nucleus for the selected dataset using default parameters
 	 */
-	class RefoldNucleusAction extends AbstractAction implements PropertyChangeListener {
-		
-		private static final long serialVersionUID = 1L;
-		private JProgressBar progressBar = null;
-		AnalysisDataset d = null;
-		
+	class RefoldNucleusAction extends ProgressableAction {
+
 		public RefoldNucleusAction() {
-			super("Refold nucleus");
-		}
+			super("Curve refolding in progress", "Error refolding nucleus");
 
-		public void actionPerformed(ActionEvent e) {
+			try{
 
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-
-			if(datasets.size()==1){
-
-				d = datasets.get(0);
-
-				try{
-
-					progressBar = new JProgressBar(0, CurveRefolder.MAX_ITERATIONS_FAST);
-					progressBar.setString("Curve refolding in progress");
-					progressBar.setStringPainted(true);
-
-					for(Component c : consensusChartPanel.getComponents() ){
-						if(c.getClass()==JButton.class){
-							c.setVisible(false);
-						}
+				for(Component c : consensusChartPanel.getComponents() ){
+					if(c.getClass()==JButton.class){
+						c.setVisible(false);
 					}
-					
-					progressPanel.add(progressBar);
-					contentPane.revalidate();
-					contentPane.repaint();
-					
-					CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
-							d.getAnalysisOptions().getNucleusClass(), 
-							"Fast");
-
-					refolder.addPropertyChangeListener(this);
-					refolder.execute();
-	
-				} catch(Exception e1){
-					log("Error refolding nucleus");
 				}
-			}
-		}
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			int value = (Integer) evt.getNewValue();
-			progressBar.setValue(value);
 
-			if(evt.getPropertyName().equals("Finished")){
-				progressPanel.remove(progressBar);
-				contentPane.revalidate();
-				contentPane.repaint();
 
-				d.getAnalysisOptions().setRefoldNucleus(true);
-				d.getAnalysisOptions().setRefoldMode("Fast");
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-				list.add(d);
-				updatePanels(list);
-			}
+				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
+						d.getAnalysisOptions().getNucleusClass(), 
+						"Fast");
 
-			if(evt.getPropertyName().equals("Error")){
+				refolder.addPropertyChangeListener(this);
+				refolder.execute();
+
+			} catch(Exception e1){
+				this.cancel();
 				log("Error refolding nucleus");
 			}
-			
-			if(evt.getPropertyName().equals("Cooldown")){
-				progressBar.setIndeterminate(true);
-			}
 		}
 	}
-	
+		
 	
 	/**
-	 * Run a new shell analysis
+	 * Run a new shell analysis on the selected dataset
 	 */
-	class ShellAnalysisAction extends AbstractAction implements PropertyChangeListener {
-		
-		private static final long serialVersionUID = 1L;
-		private JProgressBar progressBar = null;
-		AnalysisDataset d = null;
-		int shellCount = 0;
-		
+	class ShellAnalysisAction extends ProgressableAction {
+				
 		public ShellAnalysisAction() {
-			super("Shell Analysis");
-		}
-
-		public void actionPerformed(ActionEvent e) {
+			super("Shell analysis in progress", "Error in shell analysis");
 			
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			String shellString = JOptionPane.showInputDialog(MainWindow.this, "Number of shells", 5);
 			
-
-			if(datasets.size()==1){
-
-				d = datasets.get(0);
-				
-				String shellString = JOptionPane.showInputDialog(MainWindow.this, "Number of shells", 5);
-				
-				// validate
-				if(!shellString.isEmpty() && shellString!=null){
-					shellCount = Integer.parseInt(shellString);
-				} else {
-					return;
-				}
-
-				try{
-
-					progressBar = new JProgressBar(0, CurveRefolder.MAX_ITERATIONS_FAST);
-					progressBar.setString("Shell analysis in progress");
-					progressBar.setStringPainted(true);
-					
-					progressPanel.add(progressBar);
-					contentPane.revalidate();
-					contentPane.repaint();
-					
-					ShellAnalysis analysis = new ShellAnalysis(d,shellCount);
-
-					analysis.addPropertyChangeListener(this);
-					analysis.execute();
-	
-				} catch(Exception e1){
-					log("Error refolding nucleus");
-				}
-			}
-		}
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			int value = (Integer) evt.getNewValue();
-			progressBar.setValue(value);
-
-			if(evt.getPropertyName().equals("Finished")){
-				progressPanel.remove(progressBar);
-				contentPane.revalidate();
-				contentPane.repaint();
-				
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-				list.add(d);
-				updatePanels(list);
-			}
-
-			if(evt.getPropertyName().equals("Error")){
-				log("Error running shell analysis");
+			// validate
+			int shellCount = 0;
+			if(!shellString.isEmpty() && shellString!=null){
+				shellCount = Integer.parseInt(shellString);
+			} else {
+				this.cancel();
+				return;
 			}
 			
-			if(evt.getPropertyName().equals("Cooldown")){
-				progressBar.setIndeterminate(true);
-			}
+			ShellAnalysis analysis = new ShellAnalysis(d,shellCount);
+
+			analysis.addPropertyChangeListener(this);
+			analysis.execute();	
 		}
 	}
-	
-	
-	
+
 	/**
 	 * Run a new clustering on the selected dataset
 	 * @author bms41
 	 *
 	 */
-	class ClusterAnalysisAction extends AbstractAction implements PropertyChangeListener {
+	class ClusterAnalysisAction extends ProgressableAction {
 		
-		private static final long serialVersionUID = 1L;
-		private JProgressBar progressBar = null;
-		AnalysisDataset d = null;
 		NucleusClusterer clusterer = null;
 		
 		public ClusterAnalysisAction() {
-			super("Cluster Analysis");
-		}
-
-		public void actionPerformed(ActionEvent e) {
+			super("Cluster analysis in progress", "Error in cluster analysis");
 			
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-			
+			ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
+			Map<String, Object> options = clusterSetup.getOptions();
 
-			if(datasets.size()==1){
-
-				d = datasets.get(0);
+			if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 				
-				try{
-					
-					
-					ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
-					Map<String, Object> options = clusterSetup.getOptions();
-
-					if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-						
-						progressBar = new JProgressBar(0, 100);
-						progressBar.setString("Cluster analysis in progress");
-						progressBar.setIndeterminate(true);
-						progressBar.setStringPainted(true);
-						
-						progressPanel.add(progressBar);
-						contentPane.revalidate();
-						contentPane.repaint();
-
-
-						clusterer = new NucleusClusterer(  (Integer) options.get("type"), d.getCollection() );
-						clusterer.setClusteringOptions(options);
-						
-						clusterer.addPropertyChangeListener(this);
-						clusterer.execute();
-
-					}
-					clusterSetup.dispose();
-
-				} catch (Exception e1){
-					log("Error in cluster analysis: "+e1.getMessage());
-				}
-			}
-		}
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			int value = (Integer) evt.getNewValue();
-			progressBar.setValue(value);
-
-			if(evt.getPropertyName().equals("Finished")){
+				progressBar = new JProgressBar(0, 100);
+				progressBar.setString("Cluster analysis in progress");
+				progressBar.setIndeterminate(true);
+				progressBar.setStringPainted(true);
 				
-				progressPanel.remove(progressBar);
+				progressPanel.add(progressBar);
 				contentPane.revalidate();
 				contentPane.repaint();
+
+
+				clusterer = new NucleusClusterer(  (Integer) options.get("type"), d.getCollection() );
+				clusterer.setClusteringOptions(options);
 				
-				log("Found "+clusterer.getNumberOfClusters()+" clusters");
+				clusterer.addPropertyChangeListener(this);
+				clusterer.execute();
 
-				d.setClusterTree(clusterer.getNewickTree());
-
-				for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
-					CellCollection c = clusterer.getCluster(cluster);
-					log("Cluster "+cluster+":");
-
-					logc("Reapplying morphology...");
-					boolean ok = MorphologyAnalysis.reapplyProfiles(c, d.getCollection());
-					if(ok){
-						log("OK");
-					} else {
-						log("Error");
-					}
-
-					// attach the clusters to their parent collection
-					d.addCluster(c);
-
-					addDataset(d.getChildDataset(c.getID()));
-
-				}
-				updatePopulationList();	
+			} else {
+				this.cancel();
 			}
-
-			if(evt.getPropertyName().equals("Error")){
-				log("Error running cluster analysis");
-			}
-			
-			if(evt.getPropertyName().equals("Cooldown")){
-				progressBar.setIndeterminate(true);
-			}
+			clusterSetup.dispose();
 		}
-	}
+		
+		
+		/* (non-Javadoc)
+		 * Overrides because we need to carry out the morphology reprofiling
+		 * on each cluster
+		 * @see no.gui.MainWindow.ProgressableAction#finished()
+		 */
+		@Override
+		public void finished() {
 
-	
-	/**
-	 * Create a new NucleusCollection of the same class as the given dataset
-	 * @param template the dataset to base on for analysis options, folders
-	 * @param name the collection name
-	 * @return a new empty collection
-	 */
-	public static CellCollection makeNewCollection(AnalysisDataset template, String name){
+			progressPanel.remove(progressBar);
+			contentPane.revalidate();
+			contentPane.repaint();
 
-		CellCollection newCollection = null;
+			log("Found "+clusterer.getNumberOfClusters()+" clusters");
 
-		try {
+			d.setClusterTree(clusterer.getNewickTree());
 
-			CellCollection templateCollection = template.getCollection();
+			for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
+				CellCollection c = clusterer.getCluster(cluster);
+				log("Cluster "+cluster+":");
 
-			newCollection = new CellCollection(templateCollection.getFolder(), 
-					templateCollection.getOutputFolderName(), 
-					name, 
-					templateCollection.getDebugFile(),
-					templateCollection.getNucleusClass()
-					);
+				logc("Reapplying morphology...");
+				boolean ok = MorphologyAnalysis.reapplyProfiles(c, d.getCollection());
+				if(ok){
+					log("OK");
+				} else {
+					log("Error");
+				}
 
-		} catch (Exception e) {
-			IJ.log(e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
+				// attach the clusters to their parent collection
+				d.addCluster(c);
+
+				addDataset(d.getChildDataset(c.getID()));
+
 			}
-		} 
-		return newCollection;
+			updatePopulationList();	
+
+		}
 	}
 	
 }
