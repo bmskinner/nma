@@ -1176,13 +1176,13 @@ public class NucleusDatasetCreator {
 		
 		if(collection.getSignalCount()>0){
 
-			for(int channel : collection.getSignalGroups()){
+			for(int group : collection.getSignalGroups()){
 
-				double[] xpoints = new double[collection.getSignals(channel).size()];
-				double[] ypoints = new double[collection.getSignals(channel).size()];
+				double[] xpoints = new double[collection.getSignals(group).size()];
+				double[] ypoints = new double[collection.getSignals(group).size()];
 
 				int signalCount = 0;
-				for(NuclearSignal n : collection.getSignals(channel)){
+				for(NuclearSignal n : collection.getSignals(group)){
 
 					XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 					
@@ -1193,18 +1193,18 @@ public class NucleusDatasetCreator {
 					
 				}
 				double[][] data = { xpoints, ypoints };
-				ds.addSeries("Channel_"+channel, data);
+				ds.addSeries("Group"+group, data);
 			}
 		}
 		return ds;
 	}
 	
-	public static List<Shape> createSignalRadiusDataset(CellCollection collection, int channel){
+	public static List<Shape> createSignalRadiusDataset(CellCollection collection, int signalGroup){
 
 		List<Shape> result = new ArrayList<Shape>(0);
-		if(collection.getSignalCount()>0){
+		if(collection.hasSignals(signalGroup)){
 
-			for(NuclearSignal n : collection.getSignals(channel)){
+			for(NuclearSignal n : collection.getSignals(signalGroup)){
 				XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 				
 				// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
@@ -1223,6 +1223,8 @@ public class NucleusDatasetCreator {
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
 		
+		int numberOfRowsPerSignalGroup = 11;
+		
 		// find the collection with the most channels
 		// this defines  the number of rows
 
@@ -1234,13 +1236,13 @@ public class NucleusDatasetCreator {
 			int maxChannels = 0;
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
-				maxChannels = Math.max(collection.getSignalGroups().size(), maxChannels);
+				maxChannels = Math.max(collection.getHighestSignalGroup(), maxChannels);
 			}
 			
 			// create the row names
-			fieldNames.add("Number of channels");
+			fieldNames.add("Number of signal groups");
 			
-			for(int i=0;i<maxChannels;i++){
+			for(int i=0;i<=maxChannels;i++){
 				fieldNames.add("");
 				fieldNames.add("Signal group");
 				fieldNames.add("Group name");
@@ -1283,14 +1285,10 @@ public class NucleusDatasetCreator {
 						rowData.add(df.format(collection.getMedianSignalFeret(signalGroup)));
 						rowData.add(df.format(collection.getMedianSignalDistance(signalGroup)));
 					} else {
-						rowData.add("");
-						rowData.add("");
-						rowData.add("");
-						rowData.add("");
-						rowData.add("");
-						rowData.add("");
-						rowData.add("");
-						rowData.add("");
+						
+						for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
+							rowData.add("");
+						}
 					}
 				}
 				model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
@@ -1305,17 +1303,17 @@ public class NucleusDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			
-			for(int channel : collection.getSignalGroups()){
+			for(int signalGroup : collection.getSignalGroups()){
 
-				if(collection.getSignalCount(channel)>0){
+				if(collection.hasSignals(signalGroup)){
 
 					List<Double> angles = new ArrayList<Double>(0);
 
 					for(Nucleus n : collection.getNuclei()){
-						angles.addAll(n.getSignalCollection().getAngles(channel));
+						angles.addAll(n.getSignalCollection().getAngles(signalGroup));
 					}
 					double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
-					ds.addSeries("Channel_"+channel+"_"+collection.getName(), values, 12);
+					ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
 				}
 			}
 			
@@ -1328,17 +1326,20 @@ public class NucleusDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 
-			for(int channel : collection.getSignalGroups()){
-
-				if(collection.getSignalCount(channel)>0){
+			for(int signalGroup : collection.getSignalGroups()){
+//				IJ.log("Group "+signalGroup);
+				
+				if(collection.hasSignals(signalGroup)){
+//					IJ.log("    Has signals");
 
 					List<Double> angles = new ArrayList<Double>(0);
 
 					for(Nucleus n : collection.getNuclei()){
-						angles.addAll(n.getSignalCollection().getDistances(channel));
+						angles.addAll(n.getSignalCollection().getDistances(signalGroup));
 					}
 					double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
-					ds.addSeries("Channel_"+channel+"_"+collection.getName(), values, 12);
+//					IJ.log("    Count: "+values.length);
+					ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
 				}
 			}
 

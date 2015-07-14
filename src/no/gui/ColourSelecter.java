@@ -39,10 +39,11 @@ public class ColourSelecter {
 		segmentColourList.add(Color.YELLOW);
 		segmentColourList.add(Color.PINK);
 				
-		signalColourList.add(Color.BLUE);
+		
 		signalColourList.add(Color.RED);
 		signalColourList.add(Color.GREEN);
 		signalColourList.add(Color.CYAN);
+		signalColourList.add(Color.BLUE);
 		signalColourList.add(Color.LIGHT_GRAY);
 	}
 	
@@ -73,9 +74,9 @@ public class ColourSelecter {
 	 * @return a colour
 	 */
 	public static Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
-		int i = channel-1;
+//		int i = channel-1;
 		Color result;
-		Color color = ColourSelecter.signalColourList.get(i % ColourSelecter.signalColourList.size());
+		Color color = ColourSelecter.signalColourList.get(channel % ColourSelecter.signalColourList.size());
 		result = transparent ? new Color(color.getRed(),color.getGreen(),color.getBlue(),defaultAlpha) : color;
 		return result;
 	}

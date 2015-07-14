@@ -7,30 +7,58 @@ import ij.gui.Roi;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import javax.swing.SwingWorker;
+
+import cell.Cell;
+import components.SpermTail;
 import utility.Constants;
 import utility.Logger;
 import utility.StatsMap;
+import utility.Utils;
+import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.components.NuclearSignal;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.imports.ImageImporter;
+import no.nuclei.AsymmetricNucleus;
 import no.nuclei.Nucleus;
 
 
-public class SignalDetector {
-
-	private  int    signalThreshold = 70;
-	private  double   minSignalSize = 5;
-	private  double   maxSignalFraction = 0.5;
+public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	
+	protected NuclearSignalOptions options;
 	protected Logger logger;
+	protected File folder;
+	protected AnalysisDataset dataset;
+	protected int channel;
+	protected int signalGroup;
+	protected String channelName;
 
 	/**
 	 * Empty constructor. Detector will have default values
 	 */
 	public SignalDetector(){
 		
+	}
+	
+	/**
+	 * For use when running on an existing dataset
+	 * @param d the dataset to add signals to
+	 * @param folder the folder of images
+	 * @param channel the RGB channel to search
+	 * @param options the analysis options
+	 * @param group the signal group to add signals to
+	 */
+	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName){
+		this.options	 = options;
+		this.logger		 = new Logger(d.getDebugFile(), "SignalDetector");
+		this.folder		 = folder;
+		this.channel	 = channel;
+		this.signalGroup = group;
+		this.channelName = channelName;
+		this.dataset	 = d;
 	}
 	
 	
@@ -40,45 +68,153 @@ public class SignalDetector {
 	 * @param minSize - the minumum size of a signal in pixels
 	 * @param maxFraction - the maximum fractional area of the nucleus covered
 	 */
-	public SignalDetector(int threshold, double minSize, double maxFraction, File debugFile){
-		this.setSignalThreshold(threshold);
-		this.setMaxSignalFraction(maxFraction);
-		this.setMinSignalSize(minSize);
+	public SignalDetector(NuclearSignalOptions options, File debugFile){
+		this.options = options;
 		this.logger = new Logger(debugFile, "SignalDetector");
 		logger.log("Created signal detector", Logger.DEBUG);
 	}
-
-	/**
-	 * Set the threshold level
-	 * @param i the new threshold
-	 */
-	public void setSignalThreshold(int i){
-		if(i<0){
-			throw new IllegalArgumentException("Value must be positive");
-		}
-		this.signalThreshold = i;
+	
+	@Override
+	protected void process( List<Integer> integers ) {
+		//update the number of entries added
+		int amount = integers.get( integers.size() - 1 );
+		int totalCells = dataset.getCollection().getNucleusCount();
+		int percent = (int) ( (double) amount / (double) totalCells * 100);
+		setProgress(percent); // the integer representation of the percent
 	}
+	
+	@Override
+	protected Boolean doInBackground() throws Exception {
+		boolean result = true;
+		logger.log("Beginning signal detection in channel "+channel, Logger.INFO);
 
-	/**
-	 * Set the minimum size
-	 * @param d - the minumum size of a signal in pixels
-	 */
-	public void setMinSignalSize(double d){
-		if(d<0){
-			throw new IllegalArgumentException("Value must be positive");
+		try{
+			int progress = 0;
+			for(Cell c : dataset.getCollection().getCells()){
+
+				Nucleus n = c.getNucleus();
+				logger.log("Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber(), Logger.DEBUG);
+				
+				// get the image in the folder with the same name as the
+				// nucleus source image
+				File imageFile = new File(folder + File.separator + n.getImageName());
+				logger.log("Source file: "+imageFile.getAbsolutePath(), Logger.DEBUG);
+
+				try{
+					
+					ImageStack stack = ImageImporter.importImage(imageFile, logger.getLogfile());
+					
+					detectSignal(imageFile, stack, n);
+					
+					
+				} catch(Exception e){
+					logger.log("Error detecting signal: "+e.getMessage(), Logger.ERROR);
+					for(StackTraceElement el : e.getStackTrace()){
+						logger.log(el.toString(), Logger.STACK);
+					}
+				}
+				
+				progress++;
+				publish(progress);
+			}
+		} catch (Exception e){
+			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return false;
 		}
-		this.minSignalSize = d;
+
+		return result;
 	}
+	
+	@Override
+	public void done() {
 
-	/**
-	 * Set the maximum fraction
-	 * @param d - the maximum fractional area of the nucleus covered
-	 */
-	public void setMaxSignalFraction(double d){
-		if(d<0 || d>1){
-			throw new IllegalArgumentException("Value must be between 0 and 1");
+		try {
+			if(this.get()){
+				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);
+			} else {
+				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+			}
+		} catch (InterruptedException e) {
+			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (ExecutionException e) {
+			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
 		}
-		this.maxSignalFraction = d;
+
+	} 
+	
+	private void detectSignal(File sourceFile, ImageStack stack, Nucleus n){
+		
+		
+		SignalCollection signalCollection = n.getSignalCollection();
+		
+		// choose the right stack number for the channel
+		int stackNumber = channel==Constants.RGB_RED 
+						? Constants.FIRST_SIGNAL_CHANNEL
+						: channel==Constants.RGB_GREEN
+							? Constants.FIRST_SIGNAL_CHANNEL+1
+							: Constants.COUNTERSTAIN;
+		
+		// create a new detector
+		Detector detector = new Detector();
+		detector.setMaxSize(n.getArea() * options.getMaxFraction());
+		detector.setMinSize(options.getMinSize());
+		detector.setMinCirc(options.getMinCirc());
+		detector.setMaxCirc(options.getMaxCirc());
+		detector.setThreshold(options.getSignalThreshold());
+		detector.setStackNumber(stackNumber);
+		try{
+			detector.run(stack);
+		} catch(Exception e){
+			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		}
+		List<Roi> roiList = detector.getRoiList();
+
+		ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
+
+		if(!roiList.isEmpty()){
+			
+			logger.log(roiList.size()+" signals in stack "+stackNumber, Logger.DEBUG);
+
+			for( Roi r : roiList){
+				
+				StatsMap values = detector.measure(r, stack);
+				NuclearSignal s = new NuclearSignal( r, 
+						values.get("Area"), 
+						values.get("Feret"), 
+						values.get("Perim"), 
+						new XYPoint(values.get("XM")-n.getPosition()[Nucleus.X_BASE], 
+									values.get("YM")-n.getPosition()[Nucleus.Y_BASE]),
+						n.getImageName()+"-"+n.getNucleusNumber());
+
+				// only keep the signal if it is within the nucleus
+				if(Utils.createPolygon(n).contains(	(float) s.getCentreOfMass().getX(), 
+													(float) s.getCentreOfMass().getY())){
+					signals.add(s);
+				}
+				
+			}
+		} else {
+			logger.log("No signal in stack "+stackNumber, Logger.DEBUG);
+		}
+		signalCollection.addSignalGroup(signals, signalGroup, sourceFile, channel);
+		signalCollection.setSignalGroupName(signalGroup, channelName);
+		n.calculateSignalDistancesFromCoM();
+		n.calculateFractionalSignalDistancesFromCoM();
+		if(AsymmetricNucleus.class.isAssignableFrom(dataset.getCollection().getNucleusClass())){
+			n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
+		}
 	}
 
 	/**
@@ -103,16 +239,19 @@ public class SignalDetector {
 			
 			// create a new detector to find the signals
 			Detector detector = new Detector();
-			detector.setMaxSize(n.getArea() * this.maxSignalFraction);
-			detector.setMinSize(this.minSignalSize);
-			detector.setMinCirc(0);
-			detector.setMaxCirc(1);
-			detector.setThreshold(this.signalThreshold);
+			detector.setMaxSize(n.getArea() * options.getMaxFraction());
+			detector.setMinSize(options.getMinSize());
+			detector.setMinCirc(options.getMinCirc());
+			detector.setMaxCirc(options.getMaxCirc());
+			detector.setThreshold(options.getSignalThreshold());
 			detector.setStackNumber(stackNumber);
 			try{
 				detector.run(stack);
 			} catch(Exception e){
-				IJ.log("Error in signal detection: "+e.getMessage());
+				logger.log("Error in signal detection: "+e.getMessage());
+				for(StackTraceElement el : e.getStackTrace()){
+					logger.log(el.toString(), Logger.STACK);
+				}
 			}
 			List<Roi> roiList = detector.getRoiList();
 

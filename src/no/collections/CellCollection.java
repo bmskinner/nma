@@ -383,34 +383,17 @@ implements Serializable
 	  }
 	  return result;
   }
-
-  public int getRedSignalCount(){
-    int count = 0;
-    for(int i=0;i<cellCollection.size();i++){
-      count += cellCollection.get(i).getNucleus().getSignalCount(1);
-    }
-    return count;
-  }
-
-  public int getGreenSignalCount(){
-    int count = 0;
-    for(int i=0;i<cellCollection.size();i++){
-      count += cellCollection.get(i).getNucleus().getSignalCount(2);
-    }
-    return count;
-  }
   
   /**
-   * Find the signal channels present within the nuclei of the collection
-   * @return the list of channels. Order is not guaranteed
+   * Find the signal groups present within the nuclei of the collection
+   * @return the list of groups. Order is not guaranteed
    */
   public List<Integer> getSignalGroups(){
 	  List<Integer> result = new ArrayList<Integer>(0);
-	  for(int i= 0; i<this.getNucleusCount();i++){
-		  Nucleus n = this.getCell(i).getNucleus();
-		  for( int channel : n.getSignalCollection().getSignalGroups()){
-			  if(!result.contains(channel)){
-				  result.add(channel);
+	  for(Nucleus n : this.getNuclei()){
+		  for( int group : n.getSignalCollection().getSignalGroups()){
+			  if(!result.contains(group)){
+				  result.add(group);
 			  }
 		  }
 	  } // end nucleus iterations
@@ -457,22 +440,21 @@ implements Serializable
    */
   public int getSignalCount(){
 	  int count = 0;
-	  for(int i : this.getSignalGroups()){
-		  count+= this.getSignalCount(i);
+	  for(int signalGroup : this.getSignalGroups()){
+		  count+= this.getSignalCount(signalGroup);
 	  }
 	  return count;
   }
   
   /**
-   * Get the number of signals in the given channel
-   * @param channel the channel to search
+   * Get the number of signals in the given group
+   * @param signalGroup the group to search
    * @return the count
    */
-  public int getSignalCount(int channel){
+  public int getSignalCount(int signalGroup){
 	  int count = 0;
-	  for(int i= 0; i<this.getNucleusCount();i++){
-		  Nucleus n = this.getCell(i).getNucleus();
-		  count += n.getSignalCount(channel);
+	  for(Nucleus n : this.getNuclei()){
+		  count += n.getSignalCount(signalGroup);
 
 	  } // end nucleus iterations
 	  return count;
@@ -492,11 +474,11 @@ implements Serializable
   }
 
   /**
-   * Test whether the current population has signals in the given channel
+   * Test whether the current population has signals in the given group
    * @return
    */
-  public boolean hasSignals(int channel){
-	  if(this.getSignalCount(channel)>0){
+  public boolean hasSignals(int signalGroup){
+	  if(this.getSignalCount(signalGroup)>0){
 		  return true;
 	  } else{
 		  return false;

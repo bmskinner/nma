@@ -366,17 +366,13 @@ public class RoundNucleus
 	public int getFailureCode(){
 		return this.failureCode;
 	}
-
-	public boolean hasRedSignal(){
-		return hasSignal(1);
-	}
-
-	public boolean hasGreenSignal(){
-		return hasSignal(2);
-	}
 		
-	public boolean hasSignal(int channel){
-		return signalCollection.hasSignal(channel);
+	/* (non-Javadoc)
+	 * Check if the given signal group contains signals
+	 * @see no.nuclei.Nucleus#hasSignal(int)
+	 */
+	public boolean hasSignal(int signalGroup){
+		return signalCollection.hasSignal(signalGroup);
 	}
 
 	/*
@@ -575,13 +571,13 @@ public class RoundNucleus
 	}
 
 
-	public void addRedSignal(NuclearSignal n){
-		this.addSignal(n, Constants.FIRST_SIGNAL_CHANNEL);
-	}
-
-	public void addGreenSignal(NuclearSignal n){
-		this.addSignal(n, Constants.FIRST_SIGNAL_CHANNEL+1);
-	}
+//	public void addRedSignal(NuclearSignal n){
+//		this.addSignal(n, Constants.FIRST_SIGNAL_CHANNEL);
+//	}
+//
+//	public void addGreenSignal(NuclearSignal n){
+//		this.addSignal(n, Constants.FIRST_SIGNAL_CHANNEL+1);
+//	}
 
 	 /*
 		For each signal within the nucleus, calculate the distance to the nCoM
@@ -910,8 +906,8 @@ public class RoundNucleus
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
 	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
 
-		for( int i : signalCollection.getSignalGroups()){
-			List<NuclearSignal> signals = signalCollection.getSignals(i);
+		for( int signalGroup : signalCollection.getSignalGroups()){
+			List<NuclearSignal> signals = signalCollection.getSignals(signalGroup);
 
 			if(!signals.isEmpty()){
 

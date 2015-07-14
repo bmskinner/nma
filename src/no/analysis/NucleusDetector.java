@@ -586,16 +586,14 @@ public class NucleusDetector {
 			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getOriginalImagePath());
 			  IJ.saveAsTiff(ImageExporter.convert(largeRegion), currentNucleus.getEnlargedImagePath());
 			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
-			  
-
 		  } catch(Exception e){
-			  mw.log("Error saving original, enlarged or annotated image: "+e.getMessage());
 			  logger.log("Error saving original, enlarged or annotated image: "+e.getMessage(), Logger.ERROR);
+			  for(StackTraceElement element : e.getStackTrace()){
+				  logger.log(element.toString(), Logger.STACK);
+			  }
 		  }
 		  
-		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getNuclearSignalOptions("default").getSignalThreshold(), 
-				  												analysisOptions.getNuclearSignalOptions("default").getMinSize(), 
-				  												analysisOptions.getNuclearSignalOptions("default").getMaxFraction(),
+		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getNuclearSignalOptions("default"),
 				  												this.debugFile);
 		  signalDetector.run(currentNucleus, smallRegion, currentNucleus.getSourceFile());
 		  
@@ -604,14 +602,14 @@ public class NucleusDetector {
 		  // if everything checks out, add the measured parameters to the global pool
 		  Cell c = new Cell();
 		  c.setNucleus(currentNucleus);
-		  
-		  
 		  collectionToAddTo.addCell(c);
+		  
+		  
 	  }catch(Exception e){
 		  logger.log(" Error in nucleus assignment: "+e.getMessage(), Logger.ERROR);
 		  mw.log("    Error in nucleus assignment: "+e.getMessage());
 		  for(StackTraceElement element : e.getStackTrace()){
-			  mw.log("    "+element.toString());
+			  logger.log(element.toString(), Logger.STACK);
 		  }
 	  }
   }

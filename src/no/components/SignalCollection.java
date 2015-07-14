@@ -49,6 +49,13 @@ public class SignalCollection implements Serializable {
 		
 	}
 	
+	/**
+	 * Add a list of nuclear signals to the collection
+	 * @param list the signals
+	 * @param signalGroup the group id
+	 * @param sourceFile the file the signals originated from
+	 * @param sourceChannel the channel the signals originated from
+	 */
 	public void addSignalGroup(ArrayList<NuclearSignal> list, int signalGroup, File sourceFile, int sourceChannel){
 		if(list==null || Integer.valueOf(sourceChannel)==null || sourceFile==null || Integer.valueOf(signalGroup)==null){
 			throw new IllegalArgumentException("Signal list or channel is null");
@@ -90,7 +97,7 @@ public class SignalCollection implements Serializable {
 	 */
 	public void addSignals(List<NuclearSignal> list, String signalGroupName){
 		if(list==null){
-			throw new IllegalArgumentException("Signal or channel is null");
+			throw new IllegalArgumentException("Signal or group is null");
 		}
 		checkSignalGroup(signalGroupName);
 		this.addSignals(list, names.get(signalGroupName));
@@ -403,16 +410,16 @@ public class SignalCollection implements Serializable {
 	 */
 	private void checkSignalGroup(int signalGroup){
 		if(Integer.valueOf(signalGroup)==null){
-			throw new IllegalArgumentException("Channel is null");
+			throw new IllegalArgumentException("Group is null");
 		}
 	}
 	
 	private void checkSignalGroup(String signalGroupName){
 		if(signalGroupName==null){
-			throw new IllegalArgumentException("Channel is null");
+			throw new IllegalArgumentException("Group is null");
 		}
 		if(!names.containsKey(signalGroupName)){
-			throw new IllegalArgumentException("Channel name not present: "+signalGroupName);
+			throw new IllegalArgumentException("Group name not present: "+signalGroupName);
 		}
 	}
 	

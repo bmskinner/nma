@@ -33,7 +33,9 @@ import no.analysis.CurveRefolder;
 import no.analysis.MorphologyAnalysis;
 import no.analysis.NucleusClusterer;
 import no.analysis.ShellAnalysis;
+import no.analysis.SignalDetector;
 import no.collections.CellCollection;
+import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.components.Profile;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
@@ -1393,7 +1395,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	/**
 	 * Get a series or dataset index for colour selection when drawing charts. The index
-	 * is set in the DatasetCreator as part of the label
+	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
 	 * @param label the label to extract the index from 
 	 * @return the index found
 	 */
@@ -2379,7 +2381,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 					XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
 					for(int series=0;series<signalCoMs.getSeriesCount();series++){
-						int channel = series+2; // channel is from 2, series from 0
+						int channel = series;  //+2; // channel is from 2, series from 0
 						rend.setSeriesPaint(series, ColourSelecter.getSignalColour(channel, false));
 						rend.setBaseLinesVisible(false);
 						rend.setBaseShapesVisible(true);
@@ -2387,27 +2389,17 @@ public class MainWindow extends JFrame implements ActionListener {
 					}
 					plot.setRenderer(1, rend);
 
-					for(int channel : collection.getSignalGroups()){
-						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(collection, channel);
+					for(int signalGroup : collection.getSignalGroups()){
+						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(collection, signalGroup);
 
 						int signalCount = shapes.size();
 
 						int alpha = (int) Math.floor( 255 / ((double) signalCount) );
 						alpha = alpha < 5 ? 5 : alpha > 128 ? 128 : alpha;
 
-						//					int alpha 	= signalCount > 255 
-						//								? 2 
-						//								: signalCount > 128 
-						//								? 8
-						//								: signalCount > 64
-						//								? 16
-						//								: signalCount > 32
-						//								? 20
-						//								: 20;
-
 						for(Shape s : shapes){
 							XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-									null, ColourSelecter.getSignalColour(channel, true, alpha)); // layer transparent signals
+									null, ColourSelecter.getSignalColour(signalGroup, true, alpha)); // layer transparent signals
 							plot.addAnnotation(an);
 						}
 					}
@@ -2441,29 +2433,41 @@ public class MainWindow extends JFrame implements ActionListener {
 			updateSignalDistanceHistogram(list);
 		} catch (Exception e) {
 			log("Error updating signal histograms: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				log(e1.toString());
+			}
 		}
 	}
 	
 	private void updateSignalAngleHistogram(List<AnalysisDataset> list){
 		try {
 			HistogramDataset ds = NucleusDatasetCreator.createSignalAngleHistogramDataset(list);
-			JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
-			XYPlot plot = chart.getXYPlot();
-			plot.setBackgroundPaint(Color.white);
-			XYBarRenderer rend = new XYBarRenderer();
-			rend.setBarPainter(new StandardXYBarPainter());
-			rend.setShadowVisible(false);
-			plot.setRenderer(rend);
-			plot.getDomainAxis().setRange(0,360);
-			for (int j = 0; j < ds.getSeriesCount(); j++) {
-				plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
-				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-				int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index, true, 128));
-			}	
-			signalAngleChartPanel.setChart(chart);
+			if(ds.getSeriesCount()>0){
+				JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
+				XYPlot plot = chart.getXYPlot();
+				plot.setBackgroundPaint(Color.white);
+				XYBarRenderer rend = new XYBarRenderer();
+				rend.setBarPainter(new StandardXYBarPainter());
+				rend.setShadowVisible(false);
+				plot.setRenderer(rend);
+				plot.getDomainAxis().setRange(0,360);
+				for (int j = 0; j < ds.getSeriesCount(); j++) {
+					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
+					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
+					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index, true, 128));
+				}	
+				signalAngleChartPanel.setChart(chart);
+			} else {
+				JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+				chart.getPlot().setBackgroundPaint(Color.white);
+				signalAngleChartPanel.setChart(chart);
+			}
 		} catch (Exception e) {
 			log("Error updating angle histograms: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				log(e1.toString());
+			}
 			JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
 			chart.getPlot().setBackgroundPaint(Color.white);
 			signalAngleChartPanel.setChart(chart);
@@ -2475,23 +2479,33 @@ public class MainWindow extends JFrame implements ActionListener {
 	private void updateSignalDistanceHistogram(List<AnalysisDataset> list){
 		try {
 			HistogramDataset ds = NucleusDatasetCreator.createSignalDistanceHistogramDataset(list);
-			JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
-			XYPlot plot = chart.getXYPlot();
-			plot.setBackgroundPaint(Color.white);
-			XYBarRenderer rend = new XYBarRenderer();
-			rend.setBarPainter(new StandardXYBarPainter());
-			rend.setShadowVisible(false);
-			plot.setRenderer(rend);
-			plot.getDomainAxis().setRange(0,1);
-			for (int j = 0; j < ds.getSeriesCount(); j++) {
-				plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
-				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-				int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index, true, 128));
-			}	
-			signalDistanceChartPanel.setChart(chart);
+			
+			if(ds.getSeriesCount()>0){
+				JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
+				XYPlot plot = chart.getXYPlot();
+				plot.setBackgroundPaint(Color.white);
+				XYBarRenderer rend = new XYBarRenderer();
+				rend.setBarPainter(new StandardXYBarPainter());
+				rend.setShadowVisible(false);
+				plot.setRenderer(rend);
+				plot.getDomainAxis().setRange(0,1);
+				for (int j = 0; j < ds.getSeriesCount(); j++) {
+					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
+					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
+					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index, true, 128));
+				}	
+				signalDistanceChartPanel.setChart(chart);
+			} else {
+				JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+				chart.getPlot().setBackgroundPaint(Color.white);
+				signalAngleChartPanel.setChart(chart);
+			}
 		} catch (Exception e) {
 			log("Error updating distance histograms: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				log(e1.toString());
+			}
 			JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
 			chart.getPlot().setBackgroundPaint(Color.white);
 			signalDistanceChartPanel.setChart(chart);
@@ -2736,8 +2750,16 @@ public class MainWindow extends JFrame implements ActionListener {
 	        
 	      //Cells are by default rendered as a JLabel.
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-	        int choose = ((row-1)/11)+2;
-	        Color colour = (row-1) % 11 == 0 ? ColourSelecter.getSignalColour(  choose   ) : Color.WHITE;
+	        
+	        int numberOfRowsPerSignalGroup = 11;
+	        
+	        // calculate the colour to be adding
+	        int indexToColourise = ((row-1)/numberOfRowsPerSignalGroup);
+	        
+	        // make the cells white unless they are a multiple of the number of groups (ie a header)
+	        Color colour = (row-1) % numberOfRowsPerSignalGroup == 0 
+	        			 ? ColourSelecter.getSignalColour(  indexToColourise   ) 
+	        			 : Color.WHITE;
 	        
 	        l.setBackground(colour);
 
@@ -2889,6 +2911,17 @@ public class MainWindow extends JFrame implements ActionListener {
 			}
 			
 		});
+		
+		JMenuItem addNuclearSignalMenuItem = new JMenuItem( new AbstractAction("Add nuclear signal"){
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				new AddNuclearSignalAction();				
+			}
+			
+		});
 				
 				
 		public PopulationListPopupMenu() {
@@ -2910,6 +2943,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			this.add(applySegmentationMenuItem);
 			this.addSeparator();
 			this.add(addTailStainMenuItem);
+			this.add(addNuclearSignalMenuItem);
 	    }
 		
 		public void enableAll(){
@@ -3760,6 +3794,64 @@ public class MainWindow extends JFrame implements ActionListener {
 			
 			
 			TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
+			t.addPropertyChangeListener(this);
+			t.execute();
+		}
+	}
+	
+	/**
+	 * Add images containing nuclear signals
+	 * @author bms41
+	 *
+	 */
+	class AddNuclearSignalAction extends ProgressableAction {
+		
+		public AddNuclearSignalAction() {
+			super("Signal detection in progress", "Error in signal detection");
+			
+			DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
+			String folderName = openDialog.getDirectory();
+
+			if(folderName==null) return; // user cancelled
+
+			final File folder =  new File(folderName);
+
+			if(!folder.isDirectory() ){
+				this.cancel();
+				return;
+			}
+			if(!folder.exists()){
+				this.cancel();
+				return; // check folder is ok
+			}
+			// create dialog to get image channel
+
+			Object[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
+			String channelName = (String)JOptionPane.showInputDialog(
+					MainWindow.this,
+					"Select channel",
+					"Select channel",
+					JOptionPane.PLAIN_MESSAGE,
+					null,
+					possibilities,
+					"Green");
+
+			final int channel = channelName.equals("Red") 
+					? Constants.RGB_RED
+							: channelName.equals("Green") 
+							? Constants.RGB_GREEN
+									: Constants.RGB_BLUE;
+			
+			// get the name of the signal channel
+			String signalGroupName = (String)JOptionPane.showInputDialog("Enter signal group name");
+			
+			// eventually, add dialog for non-default detection options
+			NuclearSignalOptions options = d.getAnalysisOptions().getNuclearSignalOptions("default");
+			
+			// the new signal group is one more than the highest in the collection
+			int newSignalGroup = d.getCollection().getHighestSignalGroup()+1;
+			
+			SignalDetector t = new SignalDetector(d, folder, channel, options, newSignalGroup, signalGroupName);
 			t.addPropertyChangeListener(this);
 			t.execute();
 		}

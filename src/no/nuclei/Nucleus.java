@@ -88,10 +88,6 @@ public interface Nucleus {
 
 	public boolean hasSignal(int channel);
 
-	public boolean hasRedSignal();
-
-	public boolean hasGreenSignal();
-
 	public List<NucleusBorderPoint> getBorderList();
 	public List<NucleusBorderPoint> getOriginalBorderList();
 
@@ -147,9 +143,6 @@ public interface Nucleus {
     -----------------------
 	 */
 
-	public void addRedSignal(NuclearSignal n);
-
-	public void addGreenSignal(NuclearSignal n);
 
 	/*
     -----------------------

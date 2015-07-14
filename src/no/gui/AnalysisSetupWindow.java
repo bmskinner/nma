@@ -189,6 +189,8 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		analysisOptions.getNuclearSignalOptions("default").setThreshold(DEFAULT_SIGNAL_THRESHOLD);
 		analysisOptions.getNuclearSignalOptions("default").setMinSize(DEFAULT_MIN_SIGNAL_SIZE);
 		analysisOptions.getNuclearSignalOptions("default").setMaxFraction(DEFAULT_MAX_SIGNAL_FRACTION);
+		analysisOptions.getNuclearSignalOptions("default").setMinCirc(0);
+		analysisOptions.getNuclearSignalOptions("default").setMaxCirc(1);
 
 		analysisOptions.setAngleProfileWindowSize(DEFAULT_PROFILE_WINDOW_SIZE);
 
@@ -201,7 +203,6 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		analysisOptions.setXoffset(0);
 		analysisOptions.setYoffset(0);
 				
-//		analysisOptions.setCollectionClass(RodentSpermNucleusCollection.class);
 		analysisOptions.setNucleusClass(RodentSpermNucleus.class);
 		
 		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");

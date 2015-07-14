@@ -9,7 +9,6 @@ public class AnalysisOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private  int    nucleusThreshold;
-//	private  int    signalThreshold;
 	private  double minNucleusSize;
 	private  double maxNucleusSize;
 	private  double minNucleusCirc;
@@ -18,10 +17,7 @@ public class AnalysisOptions implements Serializable {
 	private Map<String, CannyOptions> edgeDetection = new HashMap<String, CannyOptions>(0);
 	
 	private Map<String, NuclearSignalOptions> signalDetection = new HashMap<String, NuclearSignalOptions>(0);
-	
-//	private CannyOptions nucleusCannyOptions;
-//	private CannyOptions tailCannyOptions;
-	
+		
 	private boolean normaliseContrast; 
 
 	private int angleProfileWindowSize;
@@ -50,15 +46,10 @@ public class AnalysisOptions implements Serializable {
 	private int xoffset;
 	private int yoffset;
 
-//	private  double minSignalSize;
-//	private  double maxSignalFraction;
-
-
-
 	public AnalysisOptions(){
 		
-		edgeDetection.put("nucleus", new CannyOptions());
-		edgeDetection.put("tail", new CannyOptions());
+		this.addCannyOptions("nucleus");
+		this.addCannyOptions("tail");
 		signalDetection.put("default", new NuclearSignalOptions());
 	}
 
@@ -81,10 +72,6 @@ public class AnalysisOptions implements Serializable {
 		return this.nucleusThreshold;
 	}
 
-//	public int getSignalThreshold(){
-//		return this.signalThreshold;
-//	}
-
 	public double getMinNucleusSize(){
 		return this.minNucleusSize;
 	}
@@ -100,14 +87,6 @@ public class AnalysisOptions implements Serializable {
 	public double getMaxNucleusCirc(){
 		return this.maxNucleusCirc;
 	}
-
-//	public double getMinSignalSize(){
-//		return this.minSignalSize;
-//	}
-
-//	public double getMaxSignalFraction(){
-//		return this.maxSignalFraction;
-//	}
 
 	public int getAngleProfileWindowSize(){
 		return this.angleProfileWindowSize;
@@ -144,12 +123,6 @@ public class AnalysisOptions implements Serializable {
 	public void setNucleusThreshold(int nucleusThreshold) {
 		this.nucleusThreshold = nucleusThreshold;
 	}
-
-
-//	public void setSignalThreshold(int signalThreshold) {
-//		this.signalThreshold = signalThreshold;
-//	}
-
 
 	public void setMinNucleusSize(double minNucleusSize) {
 		this.minNucleusSize = minNucleusSize;
@@ -219,16 +192,6 @@ public class AnalysisOptions implements Serializable {
 	public void setYoffset(int yoffset) {
 		this.yoffset = yoffset;
 	}
-
-
-//	public void setMinSignalSize(double minSignalSize) {
-//		this.minSignalSize = minSignalSize;
-//	}
-//
-//
-//	public void setMaxSignalFraction(double maxSignalFraction) {
-//		this.maxSignalFraction = maxSignalFraction;
-//	}
 
 	public boolean isNormaliseContrast() {
 		return normaliseContrast;
