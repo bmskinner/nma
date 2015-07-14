@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import utility.Constants;
 import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.ShellResult;
@@ -48,14 +49,14 @@ public class AnalysisDataset implements Serializable {
 		this.thisCollection = collection;
 		this.savePath = new File(collection.getOutputFolder()+File.separator+collection.getType()+".nmd"); // nmd Nuclear Morphology Dataset
 		this.isRoot = false;
-		this.version = MainWindow.VERSION_MAJOR+"."+MainWindow.VERSION_REVISION+"."+MainWindow.VERSION_BUGFIX;
+		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
 	
 	public AnalysisDataset(CellCollection collection, File saveFile){
 		this.thisCollection = collection;
 		this.savePath = saveFile;
 		this.isRoot = false;
-		this.version = MainWindow.VERSION_MAJOR+"."+MainWindow.VERSION_REVISION+"."+MainWindow.VERSION_BUGFIX;
+		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
 	
 	public String getVersion(){
@@ -185,7 +186,7 @@ public class AnalysisDataset implements Serializable {
 	 * 
 	 */
 	public boolean hasShellResult(){
-		for(Integer channel : this.thisCollection.getSignalChannels()){
+		for(Integer channel : this.thisCollection.getSignalGroups()){
 			if(this.shellResults.containsKey(channel)){
 				return true;
 			}

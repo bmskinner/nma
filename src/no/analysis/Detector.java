@@ -30,7 +30,7 @@ public class Detector{
   private double maxCirc;
 
   private int  threshold;
-  private int channel;
+  private int stackNumber;
 
   private Roi[] roiArray;
 
@@ -60,8 +60,8 @@ public class Detector{
   	this.threshold = i;
   }
 
-  public void setChannel(int i){
-  	this.channel = i;
+  public void setStackNumber(int i){
+  	this.stackNumber = i;
   }
   
   public void run(ImageStack image){
@@ -82,7 +82,7 @@ public class Detector{
 		  throw new IllegalArgumentException("Minimum circularity >= maximum circularity");
 	  }
 
-	  if(this.channel==0 || this.channel > image.getSize()){
+	  if(this.stackNumber==0 || this.stackNumber > image.getSize()){
 		  throw new IllegalArgumentException("Not a valid channel for this image");
 	  }
 	  findInImage(image);
@@ -99,10 +99,10 @@ public class Detector{
   private void findInImage(ImageStack image){
 
 	  // Note - the channels in an ImageStack are numbered from 1
-	  if(this.channel==0 || this.channel > image.getSize()){
-		  throw new IllegalArgumentException("Not a valid channel for this image in Detector.findInImage():"+this.channel);
+	  if(this.stackNumber==0 || this.stackNumber > image.getSize()){
+		  throw new IllegalArgumentException("Not a valid channel for this image in Detector.findInImage():"+this.stackNumber);
 	  }
-	  ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
+	  ImageProcessor searchProcessor = image.getProcessor(this.stackNumber).duplicate();
 	  
 //	  searchProcessor.smooth();
 	  searchProcessor.threshold(this.threshold);
@@ -151,13 +151,13 @@ public class Detector{
 	  if(image==null || roi==null){
 		  throw new IllegalArgumentException("Image or roi is null");
 	  }
-	  if(image.getProcessor(this.channel)==null){
+	  if(image.getProcessor(this.stackNumber)==null){
 		  throw new IllegalArgumentException("Not a valid channel for this image");
 	  }
-	  if(this.channel==0 || this.channel>image.getSize()){
+	  if(this.stackNumber==0 || this.stackNumber>image.getSize()){
 		  throw new IllegalArgumentException("Channel out of range for this image");
 	  }
-	  ImageProcessor searchProcessor = image.getProcessor(this.channel).duplicate();
+	  ImageProcessor searchProcessor = image.getProcessor(this.stackNumber).duplicate();
 	  ImagePlus imp = new ImagePlus(null, searchProcessor);
 	  imp.setRoi(roi);
 	  ResultsTable rt = new ResultsTable();

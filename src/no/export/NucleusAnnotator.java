@@ -148,7 +148,7 @@ public class NucleusAnnotator {
 		
 		ip.setLineWidth(3);
 		SignalCollection signalCollection = n.getSignalCollection();
-		for( int i : signalCollection.getChannels()){
+		for( int i : signalCollection.getSignalGroups()){
 			List<NuclearSignal> signals = signalCollection.getSignals(i);
 			Color colour = i==Constants.FIRST_SIGNAL_CHANNEL 
 						 ? Color.RED 

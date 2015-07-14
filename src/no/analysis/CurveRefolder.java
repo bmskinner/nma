@@ -621,7 +621,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			cal.pixelHeight = 1;
 
 			int signalCount = 0;
-			for( int j : n.getSignalCollection().getChannels()){
+			for( int j : n.getSignalCollection().getSignalGroups()){
 				List<NuclearSignal> signals = n.getSignalCollection().getSignals(j);
 				
 				Color colour = signalCount== 0 ? new Color(255,0,0,50) : new Color(0,255,0,50);

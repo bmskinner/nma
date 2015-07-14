@@ -60,7 +60,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
-			for(int channel : collection.getSignalChannels()){
+			for(int channel : collection.getSignalGroups()){
 				counters.put(channel, new ShellCounter(shells));
 			}
 
@@ -157,7 +157,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
-			for(int channel : collection.getSignalChannels()){
+			for(int channel : collection.getSignalGroups()){
 				counters.put(channel, new ShellCounter(shells));
 			}
 

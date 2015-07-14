@@ -545,7 +545,7 @@ public class RoundNucleus
 	*/
 	
 	public Set<Integer> getSignalChannels(){
-		return signalCollection.getChannels();
+		return signalCollection.getSignalGroups();
 	}
 	
 	public List<List<NuclearSignal>> getSignals(){
@@ -910,7 +910,7 @@ public class RoundNucleus
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
 	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
 
-		for( int i : signalCollection.getChannels()){
+		for( int i : signalCollection.getSignalGroups()){
 			List<NuclearSignal> signals = signalCollection.getSignals(i);
 
 			if(!signals.isEmpty()){

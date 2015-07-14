@@ -5,6 +5,7 @@ import ij.IJ;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,15 +16,13 @@ import no.imports.ImageImporter;
 
 /**
  * This holds all the signals within a nucleus, within a hash.
- * The hash key is the channel number from which they were found,
+ * The hash key is the signal group number from which they were found.
+ * The signal group number accesses (a) the nuclear signals (b) the file
+ *  they came from and (c) the channel within the file they came from 
  * and links to the channel number in the ImageStack for the nucleus.
- *
  */
 public class SignalCollection implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -31,10 +30,16 @@ public class SignalCollection implements Serializable {
 	 */
 	private Map<Integer, ArrayList<NuclearSignal>> collection = new HashMap<Integer, ArrayList<NuclearSignal>>();
 	
+	// the files that hold the image for the given channel
+	private Map<Integer, File> sourceFiles = new HashMap<Integer, File>(0);
+	
+	// the channel with the signal in the source image
+	private Map<Integer, Integer> sourceChannels = new HashMap<Integer, Integer>(0);
+	
 	/**
 	 * Holds the names of the channels for presentation purposes
 	 */
-	private Map<String, Integer> names = new HashMap<String, Integer>();
+	private Map<Integer, String > names = new HashMap<Integer, String>();
 	
 	public SignalCollection(){
 		
@@ -44,62 +49,62 @@ public class SignalCollection implements Serializable {
 		
 	}
 	
-	public void addChannel(ArrayList<NuclearSignal> list, int channel){
-		if(list==null || Integer.valueOf(channel)==null){
+	public void addSignalGroup(ArrayList<NuclearSignal> list, int signalGroup, File sourceFile, int sourceChannel){
+		if(list==null || Integer.valueOf(sourceChannel)==null || sourceFile==null || Integer.valueOf(signalGroup)==null){
 			throw new IllegalArgumentException("Signal list or channel is null");
 		}
-		if(channel==Constants.COUNTERSTAIN){
-			throw new IllegalArgumentException("Channel is reserved for nucleus");
-		}
-		collection.put(channel, list);
+		
+		collection.put(signalGroup, list);
+		sourceFiles.put(signalGroup, sourceFile);
+		sourceChannels.put(signalGroup, sourceChannel);
 	}
 	
 	/**
-	 * Add a single signal to the given channel
+	 * Add a single signal to the given signal group
 	 * @param n the signal
-	 * @param channel the channel
+	 * @param signalGroup the signal group
 	 */
-	public void addSignal(NuclearSignal n, int channel){
-		checkChannel(channel);
-		collection.get(channel).add(n);
+	public void addSignal(NuclearSignal n, int signalGroup){
+		checkSignalGroup(signalGroup);
+		collection.get(signalGroup).add(n);
 	}
 	
 	/**
-	 * Append a list of signals to the given channel
+	 * Append a list of signals to the given signal group
 	 * @param list the signals
-	 * @param channel the channel
+	 * @param signalGroup the signal group
 	 */
-	public void addSignals(List<NuclearSignal> list, int channel){
+	public void addSignals(List<NuclearSignal> list, int signalGroup){
 		if(list==null){
 			throw new IllegalArgumentException("Signal is null");
 		}
-		checkChannel(channel);
-		collection.get(channel).addAll(list);
+		checkSignalGroup(signalGroup);
+		collection.get(signalGroup).addAll(list);
 	}
 
 	
 	/**
-	 * Append a list of signals to the given channel
+	 * Append a list of signals to the given signal group
 	 * @param list the signals
-	 * @param channel the channel name
+	 * @param signalGroupName the signal group name
 	 */
-	public void addSignals(List<NuclearSignal> list, String channel){
+	public void addSignals(List<NuclearSignal> list, String signalGroupName){
 		if(list==null){
 			throw new IllegalArgumentException("Signal or channel is null");
 		}
-		checkChannel(channel);
-		this.addSignals(list, names.get(channel));
+		checkSignalGroup(signalGroupName);
+		this.addSignals(list, names.get(signalGroupName));
 	}
 	
 	
 	/**
-	 * Get all the signals in all planes, as a list of lists
+	 * Get all the signals in all signal groups, as a list of lists
 	 * @return the list of signal lists
 	 */
 	public ArrayList<List<NuclearSignal>> getSignals(){
 		ArrayList<List<NuclearSignal>> result = new ArrayList<List<NuclearSignal>>(0);
-		for(int channel : this.getChannels()){
-			result.add(getSignals(channel));
+		for(int signalGroup : this.getSignalGroups()){
+			result.add(getSignals(signalGroup));
 		}
 		return result;
 	}
@@ -110,7 +115,7 @@ public class SignalCollection implements Serializable {
 	 * @return a list of signals
 	 */
 	public List<NuclearSignal> getSignals(int channel){
-		checkChannel(channel);
+		checkSignalGroup(channel);
 		if(this.hasSignal(channel)){
 			return this.collection.get(channel);
 		} else {
@@ -124,7 +129,7 @@ public class SignalCollection implements Serializable {
 	 * @return a list of signals
 	 */
 	public List<NuclearSignal> getSignals(String channel){
-		checkChannel(channel);
+		checkSignalGroup(channel);
 		if(this.hasSignal(channel)){
 			return this.collection.get(names.get(channel));
 		} else {
@@ -133,91 +138,127 @@ public class SignalCollection implements Serializable {
 	}
 	
 	/**
+	 * Get the file containing the signals in the given signal group
+	 * @param signalGroup the group id
+	 * @return the File with the signals
+	 */
+	public File getSourceFile(int signalGroup){
+		return this.sourceFiles.get(signalGroup);
+	}
+	
+	/**
+	 * Get the channel containing the signals in the given signal group
+	 * @param signalGroup the group id
+	 * @return the RGB channel with the signals (0 if greyscale)
+	 */
+	public int getSourceChannel(int signalGroup){
+		return this.sourceChannels.get(signalGroup);
+	}
+	
+	/**
 	 * Set the channel name
 	 * @param channel the channel to name
 	 * @param name the new name
 	 */
-	public void setChannelName(int channel, String name){
-		if(Integer.valueOf(channel)==null || name==null){
+	public void setSignalGroupName(int signalGroup, String name){
+		if(Integer.valueOf(signalGroup)==null || name==null){
 			throw new IllegalArgumentException("Channel or name is null");
 		}
-		names.put(name, channel);
+		names.put(signalGroup, name);
 	}
 	
-	public String getChannelName(int channel){
-		if(Integer.valueOf(channel)==null){
+	public String getSignalGroupName(int signalGroup){
+		if(Integer.valueOf(signalGroup)==null){
 			throw new IllegalArgumentException("Channel is null");
 		}
-		if(!names.containsValue(channel)){
+		if(!names.containsKey(signalGroup)){
 			throw new IllegalArgumentException("Channel name is not present");
 		}
-		String result = null;
-		for(String name : getChannelNames()){
-			if(names.get(name)==channel){
-				result=name;
-			}
-		}
+		String result = names.get(signalGroup);
 		return result;
 	}
 	
 	/**
-	 * Get the names of channels which have been named; ignores unnamed channels
+	 * Get the channel of the source image containing the given signal
+	 * group
+	 * @param signalGroup the group
+	 * @return the RGB channel (0 if greyscale)
+	 */
+	public int getSignalChannel(int signalGroup){
+		if(Integer.valueOf(signalGroup)==null){
+			throw new IllegalArgumentException("Channel is null");
+		}
+		return this.sourceChannels.get(signalGroup);
+	}
+	
+	/**
+	 * Get the names of signal groups which have been named; ignores unnamed channels
 	 * @return the set of names
 	 */
-	public Set<String> getChannelNames(){
-		return names.keySet();
+	public Collection<String> getSignalGroupNames(){
+		return names.values();
 	}
 	
 	/**
 	 * Get the channel codes
 	 * @return the set of names
 	 */
-	public Set<Integer> getChannels(){
+	public Set<Integer> getSignalGroups(){
 		return collection.keySet();
 	}
 	
 	/**
-	 * Get the number of signal channels
-	 * @return the number of signal channels
+	 * Get the number of signal groups
+	 * @return the number of signal groups
 	 */
-	public int numberOfChannels(){
+	public int numberOfSignalGroups(){
 		return collection.size();
 	}
 	
 	/**
-	 * Get the total number of signals in all channels
+	 * Get the total number of signals in all groups
 	 * @return the count
 	 */
 	public int numberOfSignals(){
 		int count=0;
-		for(int channel : collection.keySet()){
-			count += numberOfSignals(channel);
+		for(int group : collection.keySet()){
+			count += numberOfSignals(group);
 		}
 		return count;
 	}
 	
-	public boolean hasSignal(int channel){
-		if(Integer.valueOf(channel)==null){
-			throw new IllegalArgumentException("Channel is null");
+	/**
+	 * Check if the signal group contains signals in this collection
+	 * @param signalGroup the group id
+	 * @return yes or no
+	 */
+	public boolean hasSignal(int signalGroup){
+		if(Integer.valueOf(signalGroup)==null){
+			throw new IllegalArgumentException("Signal group is null");
 		}
-		if(!collection.containsKey(channel)){
+		if(!collection.containsKey(signalGroup)){
 			return false;
 		}
-		if(collection.get(channel).isEmpty()){
+		if(collection.get(signalGroup).isEmpty()){
 			return false;
 		} else {
 			return true;
 		}
 	}
 	
-	public boolean hasSignal(String channel){
-		if(channel==null){
+	/**
+	 * Check if the signal group contains signals in this collection
+	 * @param signalGroup the group name
+	 * @return yes or no
+	 */
+	public boolean hasSignal(String signalGroupName){
+		if(signalGroupName==null){
 			throw new IllegalArgumentException("Channel is null");
 		}
-		if(!collection.containsValue(channel)){
+		if(!collection.containsValue(signalGroupName)){
 			return false;
 		}
-		if(collection.get(channel).isEmpty()){
+		if(collection.get(signalGroupName).isEmpty()){
 			return false;
 		} else {
 			return true;
@@ -229,19 +270,19 @@ public class SignalCollection implements Serializable {
 	 * @param channel the channel
 	 * @return the count
 	 */
-	public int numberOfSignals(int channel){
-		checkChannel(channel);
-		return collection.get(channel).size();
+	public int numberOfSignals(int signalGroup){
+		checkSignalGroup(signalGroup);
+		return collection.get(signalGroup).size();
 	}
 	
 	/**
-	 * Get the total number of signals in a given channel
-	 * @param channel the channel name
+	 * Get the total number of signals in a given signal group
+	 * @param signalGroup the group name
 	 * @return the count
 	 */
-	public int numberOfSignals(String channel){
-		checkChannel(channel);
-		return numberOfSignals(names.get(channel));
+	public int numberOfSignals(String signalGroupName){
+		checkSignalGroup(signalGroupName);
+		return numberOfSignals(names.get(signalGroupName));
 	}
 	
 	/**
@@ -360,28 +401,25 @@ public class SignalCollection implements Serializable {
 	 * Given the id of a channel, make sure it is suitable to use
 	 * @param channel the channel to check
 	 */
-	private void checkChannel(int channel){
-		if(Integer.valueOf(channel)==null){
+	private void checkSignalGroup(int signalGroup){
+		if(Integer.valueOf(signalGroup)==null){
 			throw new IllegalArgumentException("Channel is null");
-		}
-		if(channel==Constants.COUNTERSTAIN){
-			throw new IllegalArgumentException("Channel is reserved for nucleus");
 		}
 	}
 	
-	private void checkChannel(String channel){
-		if(channel==null){
+	private void checkSignalGroup(String signalGroupName){
+		if(signalGroupName==null){
 			throw new IllegalArgumentException("Channel is null");
 		}
-		if(!names.containsKey(channel)){
-			throw new IllegalArgumentException("Channel name not present: "+channel);
+		if(!names.containsKey(signalGroupName)){
+			throw new IllegalArgumentException("Channel name not present: "+signalGroupName);
 		}
 	}
 	
 	// the print function bypasses all input checks to show everything present
 	public void print(){
-		for(int channel : this.collection.keySet()){
-			IJ.log("    Channel "+channel+": "+this.collection.get(channel).size());
+		for(int signalGroup : this.collection.keySet()){
+			IJ.log("    Signal group "+signalGroup+": "+this.collection.get(signalGroup).size());
 		}
 	}
 	
@@ -390,8 +428,8 @@ public class SignalCollection implements Serializable {
 	 * @param channel the signal channel
 	 * @return the areas
 	 */
-	public List<Double> getAreas(int channel){
-		List<NuclearSignal> list = getSignals(channel);
+	public List<Double> getAreas(int signalGroup){
+		List<NuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){
 			result.add(list.get(i).getArea());
@@ -404,8 +442,8 @@ public class SignalCollection implements Serializable {
 	 * @param channel the signal channel
 	 * @return the angles
 	 */
-	public List<Double> getAngles(int channel){
-		List<NuclearSignal> list = getSignals(channel);
+	public List<Double> getAngles(int signalGroup){
+		List<NuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){
 			result.add(list.get(i).getAngle());
@@ -418,8 +456,8 @@ public class SignalCollection implements Serializable {
 	 * @param channel the signal channel
 	 * @return the ferets
 	 */
-	public List<Double> getFerets(int channel){
-		List<NuclearSignal> list = getSignals(channel);
+	public List<Double> getFerets(int signalGroup){
+		List<NuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){
 			result.add(list.get(i).getFeret());
@@ -432,8 +470,8 @@ public class SignalCollection implements Serializable {
 	 * @param channel the signal channel
 	 * @return the distances
 	 */
-	public List<Double> getDistances(int channel){
-		List<NuclearSignal> list = getSignals(channel);
+	public List<Double> getDistances(int signalGroup){
+		List<NuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){
 			result.add(list.get(i).getFractionalDistanceFromCoM());

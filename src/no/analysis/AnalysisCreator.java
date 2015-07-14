@@ -283,6 +283,7 @@ public class AnalysisCreator {
 
 			// measure general nuclear organisation
 			mw.logc("Running signal analysis...");
+			logger.log("Preparing for signal analysis");
 			ok = SignalAnalysis.run(r);
 			if(ok){
 				mw.log("OK");
@@ -292,7 +293,7 @@ public class AnalysisCreator {
 
 			// Perform shell analysis with 5 shells by default
 			if(r.getNucleusClass() != RoundNucleus.class){
-				logger.log("Not a round nucleus; skipping");
+				logger.log("Not a round nucleus; skipping shell analysis");
 			} else {
 				mw.logc("Running shell analysis...");
 				ok = ShellAnalysis.run(dataset, 5);
@@ -490,13 +491,14 @@ public class AnalysisCreator {
 		logger.log("Dividing population by signals...");
 		try{
 
-			List<Integer> channels = r.getSignalChannels();
-			for(int channel : channels){
-				List<Cell> list = r.getCellsWithNuclearSignals(channel);
+			List<Integer> signalGroups = r.getSignalGroups();
+			for(int signalGroup : signalGroups){
+				List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
 				if(!list.isEmpty()){
+					logger.log("Found nuclei with signals in group "+signalGroup);
 					CellCollection listCollection = new CellCollection(r.getFolder(), 
 							r.getOutputFolderName(), 
-							"Signals_in_channel_"+channel, 
+							"Signals_in_group_"+signalGroup, 
 							r.getDebugFile(), 
 							r.getNucleusClass());
 					
@@ -505,11 +507,12 @@ public class AnalysisCreator {
 					}
 					signalPopulations.add(listCollection);
 
-					List<Cell> notList = r.getCellsWithNuclearSignals(-channel);
+					List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
 					if(!notList.isEmpty()){
+						logger.log("Found nuclei without signals in group "+signalGroup);
 						CellCollection notListCollection = new CellCollection(r.getFolder(), 
 								r.getOutputFolderName(), 
-								"No_signals_in_channel_"+channel, 
+								"No_signals_in_group_"+signalGroup, 
 								r.getDebugFile(), 
 								r.getNucleusClass());
 						

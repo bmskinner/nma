@@ -355,7 +355,7 @@ extends SpermNucleus
 
     // update signal angles with hook or hump side
 
-    for( int i : signalCollection.getChannels()){
+    for( int i : signalCollection.getSignalGroups()){
     	List<NuclearSignal> signals = signalCollection.getSignals(i);
 
     	if(!signals.isEmpty()){

@@ -404,16 +404,50 @@ implements Serializable
    * Find the signal channels present within the nuclei of the collection
    * @return the list of channels. Order is not guaranteed
    */
-  public List<Integer> getSignalChannels(){
+  public List<Integer> getSignalGroups(){
 	  List<Integer> result = new ArrayList<Integer>(0);
 	  for(int i= 0; i<this.getNucleusCount();i++){
 		  Nucleus n = this.getCell(i).getNucleus();
-		  for( int channel : n.getSignalCollection().getChannels()){
+		  for( int channel : n.getSignalCollection().getSignalGroups()){
 			  if(!result.contains(channel)){
 				  result.add(channel);
 			  }
 		  }
 	  } // end nucleus iterations
+	  return result;
+  }
+  
+  public String getSignalGroupName(int signalGroup){
+	  String result = null;
+	  
+	  for(Nucleus n : this.getNuclei()){
+		  if(n.hasSignal(signalGroup)){
+			  result = n.getSignalCollection().getSignalGroupName(signalGroup);
+		  }
+	  }
+	  return result;
+  }
+  
+  public int getSignalChannel(int signalGroup){
+	  int result = 0;
+	  
+	  for(Nucleus n : this.getNuclei()){
+		  if(n.hasSignal(signalGroup)){
+			  result = n.getSignalCollection().getSignalChannel(signalGroup);
+		  }
+	  }
+	  return result;
+  }
+  
+  public String getSignalSourceFolder(int signalGroup){
+	  String result = null;
+	  
+	  for(Nucleus n : this.getNuclei()){
+		  if(n.hasSignal(signalGroup)){
+			  File file = n.getSignalCollection().getSourceFile(signalGroup);
+			  result = file.getParentFile().getAbsolutePath();
+		  }
+	  }
 	  return result;
   }
   
@@ -423,7 +457,7 @@ implements Serializable
    */
   public int getSignalCount(){
 	  int count = 0;
-	  for(int i : this.getSignalChannels()){
+	  for(int i : this.getSignalGroups()){
 		  count+= this.getSignalCount(i);
 	  }
 	  return count;
@@ -449,7 +483,7 @@ implements Serializable
    * @return
    */
   public boolean hasSignals(){
-	  for(int i : this.getSignalChannels()){
+	  for(int i : this.getSignalGroups()){
 		  if(this.hasSignals(i)){
 			  return true;
 		  }
@@ -468,6 +502,22 @@ implements Serializable
 		  return false;
 	  }
 
+  }
+  
+  /**
+   * Check the signal groups for all nuclei in the colleciton, and
+   * return the highest signal group present, or 0 if no signal groups
+   * are present
+ * @return the highest signal group
+ */
+  public int getHighestSignalGroup(){
+	  int maxGroup = 0;
+	  for(Nucleus n : this.getNuclei()){
+		  for(int group : n.getSignalCollection().getSignalGroups()){
+			  maxGroup = group > maxGroup ? group : maxGroup;
+		  }
+	  }
+	  return maxGroup;
   }
 
   /**
@@ -532,7 +582,7 @@ implements Serializable
    * @return the median area
    */
   public double getMedianSignalArea(int channel){
-	  List<Cell> cells = getCellsWithNuclearSignals(channel);
+	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
 	  List<Double> a = new ArrayList<Double>(0);
 	  for(Cell c : cells){
 		  Nucleus n = c.getNucleus();
@@ -548,7 +598,7 @@ implements Serializable
    * @return the median angle
    */
   public double getMedianSignalAngle(int channel){
-	  List<Cell> cells = getCellsWithNuclearSignals(channel);
+	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
 	  List<Double> a = new ArrayList<Double>(0);
 	  for(Cell c : cells){
 		  Nucleus n = c.getNucleus();
@@ -564,7 +614,7 @@ implements Serializable
    * @return the median feret
    */
   public double getMedianSignalFeret(int channel){
-	  List<Cell> cells = getCellsWithNuclearSignals(channel);
+	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
 	  List<Double> a = new ArrayList<Double>(0);
 	  for(Cell c : cells){
 		  Nucleus n = c.getNucleus();
@@ -580,7 +630,7 @@ implements Serializable
    * @return the median distance
    */
   public double getMedianSignalDistance(int channel){
-	  List<Cell> cells = getCellsWithNuclearSignals(channel);
+	  List<Cell> cells = getCellsWithNuclearSignals(channel, true);
 	  List<Double> a = new ArrayList<Double>(0);
 	  for(Cell c : cells){
 		  Nucleus n = c.getNucleus();
@@ -591,24 +641,25 @@ implements Serializable
   }
 
   /** 
-   * Return the nuclei that have signals in the given channel. If negative, this will give the nuclei
+   * Return the nuclei that have signals in the given channel. If 
+   * prepended with '-' , this will give the nuclei
    * that do NOT have signals in the given channel.
    * @param channel the channel 
+   * @param with return cells with a signal?
    * @return a list of nuclei
    */
-  public List<Cell> getCellsWithNuclearSignals(int channel){
+  public List<Cell> getCellsWithNuclearSignals(int signalGroup, boolean withSignal){
 	  List<Cell> result = new ArrayList<Cell>(0);
 
 	  for(Cell c : this.cellCollection){
 		  Nucleus n = c.getNucleus();
 
-		  if(channel>0){
-			  if(n.hasSignal(channel)){
+		  if(withSignal){
+			  if(n.hasSignal(signalGroup)){
 				  result.add(c);
 			  }
-		  }
-		  if(channel<0){
-			  if(!n.hasSignal(Math.abs(channel))){
+		  } else {
+			  if(!n.hasSignal(Math.abs(signalGroup))){
 				  result.add(c);
 			  }
 		  }

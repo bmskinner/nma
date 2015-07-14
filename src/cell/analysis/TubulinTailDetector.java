@@ -970,7 +970,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		detector.setMinCirc(0);
 		detector.setMaxCirc(0.5);
 		detector.setThreshold(30);
-		detector.setChannel(channel);
+		detector.setStackNumber(channel);
 		try{
 			detector.run(image);
 		} catch(Exception e){

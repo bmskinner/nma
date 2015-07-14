@@ -260,6 +260,9 @@ public class ShellCreator {
 			}
 		} catch (Exception e) {
 			logger.log("Error getting signal densities: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement e1 : e.getStackTrace()){
+				logger.log(e1.toString(), Logger.STACK);
+			}
 		}
 		return result;
 	}
@@ -293,6 +296,9 @@ public class ShellCreator {
 			}
 		} catch (Exception e) {
 			logger.log("Error getting signal proportions: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement e1 : e.getStackTrace()){
+				logger.log(e1.toString(), Logger.STACK);
+			}
 		}
 		return proportions;
 	}

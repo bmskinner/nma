@@ -354,7 +354,7 @@ public class NucleusDetector {
 		detector.setMinCirc(analysisOptions.getMinNucleusCirc());
 		detector.setMaxCirc(analysisOptions.getMaxNucleusCirc());
 		detector.setThreshold(analysisOptions.getNucleusThreshold());
-		detector.setChannel(Constants.COUNTERSTAIN);
+		detector.setStackNumber(Constants.COUNTERSTAIN);
 		try{
 			detector.run(image);
 		} catch(Exception e){
@@ -545,7 +545,7 @@ public class NucleusDetector {
 
 	  // measure the area, density etc within the nucleus
 	  Detector detector = new Detector();
-	  detector.setChannel(Constants.COUNTERSTAIN);
+	  detector.setStackNumber(Constants.COUNTERSTAIN);
 	  StatsMap values = detector.measure(nucleus, image);
 
 	  // save the position of the roi, for later use
@@ -568,6 +568,8 @@ public class NucleusDetector {
 		  
 		  // turn roi into Nucleus for manipulation
 		  Nucleus currentNucleus = createNucleus(nucleus, path, nucleusNumber, originalPosition);
+		  
+		  CellCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
 		  
 //		  RoundNucleus currentNucleus = new RoundNucleus(nucleus, path, nucleusNumber, originalPosition);
 	
@@ -593,8 +595,9 @@ public class NucleusDetector {
 		  
 		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getSignalThreshold(), 
 				  												analysisOptions.getMinSignalSize(), 
-				  												analysisOptions.getMaxSignalFraction());
-		  signalDetector.run(currentNucleus, smallRegion);
+				  												analysisOptions.getMaxSignalFraction(),
+				  												this.debugFile);
+		  signalDetector.run(currentNucleus, smallRegion, currentNucleus.getSourceFile());
 		  
 		  currentNucleus.findPointsAroundBorder();
 	
@@ -602,7 +605,7 @@ public class NucleusDetector {
 		  Cell c = new Cell();
 		  c.setNucleus(currentNucleus);
 		  
-		  CellCollection collectionToAddTo = collectionGroup.get( new File(currentNucleus.getDirectory()));
+		  
 		  collectionToAddTo.addCell(c);
 	  }catch(Exception e){
 		  logger.log(" Error in nucleus assignment: "+e.getMessage(), Logger.ERROR);

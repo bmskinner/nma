@@ -583,7 +583,7 @@ public class NucleusDatasetCreator {
 						df.format(collection.getMedianNuclearArea()),
 						df.format(collection.getMedianNuclearPerimeter()),
 						df.format(collection.getMedianFeretLength()),
-						collection.getSignalChannels().size(),
+						collection.getSignalGroups().size(),
 						collection.getSignalCount(),
 						df.format(signalPerNucleus)
 				};
@@ -1176,7 +1176,7 @@ public class NucleusDatasetCreator {
 		
 		if(collection.getSignalCount()>0){
 
-			for(int channel : collection.getSignalChannels()){
+			for(int channel : collection.getSignalGroups()){
 
 				double[] xpoints = new double[collection.getSignals(channel).size()];
 				double[] ypoints = new double[collection.getSignals(channel).size()];
@@ -1234,7 +1234,7 @@ public class NucleusDatasetCreator {
 			int maxChannels = 0;
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
-				maxChannels = Math.max(collection.getSignalChannels().size(), maxChannels);
+				maxChannels = Math.max(collection.getSignalGroups().size(), maxChannels);
 			}
 			
 			// create the row names
@@ -1242,7 +1242,10 @@ public class NucleusDatasetCreator {
 			
 			for(int i=0;i<maxChannels;i++){
 				fieldNames.add("");
+				fieldNames.add("Signal group");
+				fieldNames.add("Group name");
 				fieldNames.add("Channel");
+				fieldNames.add("Source");
 				fieldNames.add("Signals");
 				fieldNames.add("Signals per nucleus");
 				fieldNames.add("Median area");
@@ -1263,19 +1266,22 @@ public class NucleusDatasetCreator {
 				
 //				IJ.log("Adding collection");
 				List<Object> rowData = new ArrayList<Object>(0);
-				rowData.add(collection.getSignalChannels().size());
+				rowData.add(collection.getSignalGroups().size());
 
-				for(int channel : collection.getSignalChannels()){
-					if(collection.getSignalCount(channel)>0){
+				for(int signalGroup : collection.getSignalGroups()){
+					if(collection.getSignalCount(signalGroup)>0){
 						rowData.add("");
-						rowData.add(channel);
-						rowData.add(collection.getSignalCount(channel));
-						double signalPerNucleus = (double) collection.getSignalCount(channel)/  (double) collection.getCellsWithNuclearSignals(channel).size();
+						rowData.add(signalGroup);
+						rowData.add(collection.getSignalGroupName(signalGroup));
+						rowData.add(collection.getSignalChannel(signalGroup));
+						rowData.add(collection.getSignalSourceFolder(signalGroup));
+						rowData.add(collection.getSignalCount(signalGroup));
+						double signalPerNucleus = (double) collection.getSignalCount(signalGroup)/  (double) collection.getCellsWithNuclearSignals(signalGroup, true).size();
 						rowData.add(df.format(signalPerNucleus));
-						rowData.add(df.format(collection.getMedianSignalArea(channel)));
-						rowData.add(df.format(collection.getMedianSignalAngle(channel)));
-						rowData.add(df.format(collection.getMedianSignalFeret(channel)));
-						rowData.add(df.format(collection.getMedianSignalDistance(channel)));
+						rowData.add(df.format(collection.getMedianSignalArea(signalGroup)));
+						rowData.add(df.format(collection.getMedianSignalAngle(signalGroup)));
+						rowData.add(df.format(collection.getMedianSignalFeret(signalGroup)));
+						rowData.add(df.format(collection.getMedianSignalDistance(signalGroup)));
 					} else {
 						rowData.add("");
 						rowData.add("");
@@ -1299,7 +1305,7 @@ public class NucleusDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			
-			for(int channel : collection.getSignalChannels()){
+			for(int channel : collection.getSignalGroups()){
 
 				if(collection.getSignalCount(channel)>0){
 
@@ -1322,7 +1328,7 @@ public class NucleusDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 
-			for(int channel : collection.getSignalChannels()){
+			for(int channel : collection.getSignalGroups()){
 
 				if(collection.getSignalCount(channel)>0){
 
@@ -1346,7 +1352,7 @@ public class NucleusDatasetCreator {
 			
 			CellCollection collection = dataset.getCollection();
 
-			for(int channel : collection.getSignalChannels()){
+			for(int channel : collection.getSignalGroups()){
 				
 				if(collection.hasSignals(channel)){
 					ShellResult r = dataset.getShellResult(channel);

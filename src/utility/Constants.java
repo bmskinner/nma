@@ -1,6 +1,16 @@
 package utility;
 
 public class Constants {
+	
+	/**
+	 * The fields for setting the version. Version will be stored in AnalysisDatasets.
+	 * Backwards compatability should be maintained between bugfix increments, but is not
+	 * guaranteed between revision or major version increments.
+	 */
+	public static final int VERSION_MAJOR    = 1;
+	public static final int VERSION_REVISION = 9;
+	public static final int VERSION_BUGFIX   = 0;
+	
 
 		// RGB colour channels
 		public static final int RGB_RED = 0;

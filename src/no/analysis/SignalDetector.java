@@ -4,10 +4,12 @@ import ij.IJ;
 import ij.ImageStack;
 import ij.gui.Roi;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import utility.Constants;
+import utility.Logger;
 import utility.StatsMap;
 import no.components.NuclearSignal;
 import no.components.SignalCollection;
@@ -21,12 +23,14 @@ public class SignalDetector {
 	private  int    signalThreshold = 70;
 	private  double   minSignalSize = 5;
 	private  double   maxSignalFraction = 0.5;
+	
+	protected Logger logger;
 
 	/**
 	 * Empty constructor. Detector will have default values
 	 */
 	public SignalDetector(){
-
+		
 	}
 	
 	
@@ -36,10 +40,12 @@ public class SignalDetector {
 	 * @param minSize - the minumum size of a signal in pixels
 	 * @param maxFraction - the maximum fractional area of the nucleus covered
 	 */
-	public SignalDetector(int threshold, double minSize, double maxFraction){
+	public SignalDetector(int threshold, double minSize, double maxFraction, File debugFile){
 		this.setSignalThreshold(threshold);
 		this.setMaxSignalFraction(maxFraction);
 		this.setMinSignalSize(minSize);
+		this.logger = new Logger(debugFile, "SignalDetector");
+		logger.log("Created signal detector", Logger.DEBUG);
 	}
 
 	/**
@@ -80,22 +86,29 @@ public class SignalDetector {
 	 * @param n - the nucleus to add signals to
 	 * @param stack - the ImageStack with signal channels
 	 */
-	public void run(Nucleus n, ImageStack stack){
+	public void run(Nucleus n, ImageStack stack, File sourceFile){
 
+		logger.log("Running signal detector", Logger.DEBUG);
 		SignalCollection signalCollection = n.getSignalCollection();
+		
 
 		// find the signals
 		// within nuclear roi, analyze particles in colour channels
 		// the nucleus is in index 1, so from 2 to end
-		for(int channel=Constants.FIRST_SIGNAL_CHANNEL;channel<=stack.getSize();channel++){
+		for(int stackNumber=Constants.FIRST_SIGNAL_CHANNEL;stackNumber<=stack.getSize();stackNumber++){
 
+			// assume rgb image, with blue as counterstain for now
+			int channel = stackNumber==Constants.FIRST_SIGNAL_CHANNEL ? 0 : 1;
+			String channelName = stackNumber==Constants.FIRST_SIGNAL_CHANNEL ? "Red" : "Green";
+			
+			// create a new detector to find the signals
 			Detector detector = new Detector();
 			detector.setMaxSize(n.getArea() * this.maxSignalFraction);
 			detector.setMinSize(this.minSignalSize);
 			detector.setMinCirc(0);
 			detector.setMaxCirc(1);
 			detector.setThreshold(this.signalThreshold);
-			detector.setChannel(channel);
+			detector.setStackNumber(stackNumber);
 			try{
 				detector.run(stack);
 			} catch(Exception e){
@@ -106,6 +119,8 @@ public class SignalDetector {
 			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
 
 			if(!roiList.isEmpty()){
+				
+				logger.log(roiList.size()+" signals in stack "+stackNumber, Logger.DEBUG);
 
 				for( Roi r : roiList){
 
@@ -119,8 +134,11 @@ public class SignalDetector {
 
 					signals.add(s);
 				}
-			} 
-			signalCollection.addChannel(signals, channel);
+			} else {
+				logger.log("No signal in stack "+stackNumber, Logger.DEBUG);
+			}
+			signalCollection.addSignalGroup(signals, channel, sourceFile, channel);
+			signalCollection.setSignalGroupName(channel, channelName);
 		} 
 		n.calculateSignalDistancesFromCoM();
 		n.calculateFractionalSignalDistancesFromCoM();

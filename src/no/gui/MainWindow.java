@@ -126,16 +126,7 @@ import utility.TreeOrderHashMap;
 import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame implements ActionListener {
-		
-	/**
-	 * The fields for setting the version. Version will be stored in AnalysisDatasets.
-	 * Backwards compatability should be maintained between bugfix increments, but is not
-	 * guaranteed between revision or major version increments.
-	 */
-	public static final int VERSION_MAJOR    = 1;
-	public static final int VERSION_REVISION = 9;
-	public static final int VERSION_BUGFIX   = 0;
-	
+			
 	private static final int PROFILE_TAB = 0;
 	private static final int STATS_TAB = 1;
 	private static final int ANALYSIS_TAB = 2;
@@ -514,7 +505,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 * @return the version
 	 */
 	public String getVersion(){
-		return VERSION_MAJOR+"."+VERSION_REVISION+"."+VERSION_BUGFIX;
+		return Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
 	
 	/**
@@ -536,14 +527,13 @@ public class MainWindow extends JFrame implements ActionListener {
 		String[] parts = version.split("\\.");
 		
 		// major version MUST be the same
-		if(Integer.valueOf(parts[0])!=this.VERSION_MAJOR){
+		if(Integer.valueOf(parts[0])!=Constants.VERSION_MAJOR){
 			ok = false;
 		}
 		// dataset revision should be equal or greater to program
-		if(Integer.valueOf(parts[1])<this.VERSION_REVISION){
+		if(Integer.valueOf(parts[1])<Constants.VERSION_REVISION){
 			log("Dataset was created with an older version of the program");
 			log("Some functionality may not work as expected");
-//			ok = false;
 		}
 		return ok;
 	}
@@ -2397,7 +2387,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					}
 					plot.setRenderer(1, rend);
 
-					for(int channel : collection.getSignalChannels()){
+					for(int channel : collection.getSignalGroups()){
 						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(collection, channel);
 
 						int signalCount = shapes.size();
@@ -2734,7 +2724,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 	/**
-	 * Allows for cell background to be coloured based on poition in a list
+	 * Allows for cell background to be coloured based on poition in a list. Used to colour
+	 * the signal stats list
 	 *
 	 */
 	public class StatsTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
@@ -2745,8 +2736,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	        
 	      //Cells are by default rendered as a JLabel.
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-	        int choose = ((row-1)/8)+2;
-	        Color colour = (row-1) % 8 == 0 ? ColourSelecter.getSignalColour(  choose   ) : Color.WHITE;
+	        int choose = ((row-1)/11)+2;
+	        Color colour = (row-1) % 11 == 0 ? ColourSelecter.getSignalColour(  choose   ) : Color.WHITE;
 	        
 	        l.setBackground(colour);
 
@@ -3030,7 +3021,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 	/**
-	 * Create a new NucleusCollection of the same class as the given dataset
+	 * Create a new CellCollection of the same class as the given dataset
 	 * @param template the dataset to base on for analysis options, folders
 	 * @param name the collection name
 	 * @return a new empty collection
@@ -3438,10 +3429,6 @@ public class MainWindow extends JFrame implements ActionListener {
 
 			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
 			
-//			for(int i=0; i<treeOrderMap.size();i++){
-//				IJ.log(i+": "+analysisDatasets.get(treeOrderMap.get(i)).getName());
-//			}
-
 			if(datasets.size()==1){
 
 				AnalysisDataset dataToMove = datasets.get(0);
@@ -3450,7 +3437,6 @@ public class MainWindow extends JFrame implements ActionListener {
 				int newValue = oldValue;
 				if(oldValue>0){ // do not change if already at the top
 					newValue = oldValue-1;
-//					IJ.log("Moving "+oldValue+" to "+newValue);
 
 					UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
 					treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
@@ -3627,7 +3613,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	/**
 	 * Contains a progress bar and handling methods for when an action
-	 * is triggered. Subclassed for each action type.
+	 * is triggered as a SwingWorker. Subclassed for each action type.
 	 * @author bms41
 	 *
 	 */
@@ -3657,10 +3643,14 @@ public class MainWindow extends JFrame implements ActionListener {
 			}
 		}
 		
-		public void cancel(){
+		private void removeProgressBar(){
 			progressPanel.remove(this.progressBar);
 			contentPane.revalidate();
 			contentPane.repaint();
+		}
+		
+		public void cancel(){
+			removeProgressBar();
 		}
 		
 		
@@ -3669,7 +3659,14 @@ public class MainWindow extends JFrame implements ActionListener {
 			
 			int value = (Integer) evt.getNewValue(); // should be percent
 			
-			this.progressBar.setValue(value);
+			if(value >=0 && value <=100){
+				
+				if(this.progressBar.isIndeterminate()){
+					this.progressBar.setIndeterminate(false);
+				}
+				
+				this.progressBar.setValue(value);
+			}
 
 			if(evt.getPropertyName().equals("Finished")){
 				finished();
@@ -3689,9 +3686,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		 * The method run when the analysis has completed
 		 */
 		public void finished(){
-			progressPanel.remove(this.progressBar);
-			contentPane.revalidate();
-			contentPane.repaint();
+			removeProgressBar();
 
 			d.getAnalysisOptions().setRefoldNucleus(true);
 			d.getAnalysisOptions().setRefoldMode("Fast");
@@ -3705,6 +3700,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		 */
 		public void error(){
 			log(this.errorMessage);
+			removeProgressBar();
 		}
 		
 		/**

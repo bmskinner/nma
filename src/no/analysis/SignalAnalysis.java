@@ -1,21 +1,15 @@
 package no.analysis;
 
-import java.awt.Color;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import utility.Constants;
 import utility.Logger;
-import utility.Utils;
 import no.nuclei.AsymmetricNucleus;
 import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.XYPoint;
 import no.export.TableExporter;
-import no.imports.ImageImporter;
-import no.nuclei.AsymmetricNucleus;
 import no.nuclei.Nucleus;
 
 public class SignalAnalysis {
@@ -29,6 +23,12 @@ public class SignalAnalysis {
 		if(collection.getSignalCount()==0){
 			logger.log("No signals found in collection", Logger.DEBUG);
 			return true;
+		} else {
+			List<Integer> groups = collection.getSignalGroups();
+			logger.log("Collection has "+groups.size()+" signal groups", Logger.DEBUG);
+			for(int signalGroup : groups){
+				logger.log("Group "+signalGroup+": "+collection.getSignalCount(signalGroup)+" signals", Logger.DEBUG);
+			}
 		}
 
 		try {
@@ -63,7 +63,7 @@ public class SignalAnalysis {
 	private static void exportSignalStats(CellCollection collection){
 
 		logger.log("Exporting signal stats...");
-		for(int channel : collection.getSignalChannels()){
+		for(int channel : collection.getSignalGroups()){
 			TableExporter tableExporter = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 			tableExporter.addColumnHeading("SIGNAL_AREA");
 			tableExporter.addColumnHeading("SIGNAL_ANGLE");
