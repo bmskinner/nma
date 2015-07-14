@@ -62,11 +62,11 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	}
 	
 	
+
 	/**
-	 * Constructor specifying detection parameters.
-	 * @param threshold - the signal threshold level
-	 * @param minSize - the minumum size of a signal in pixels
-	 * @param maxFraction - the maximum fractional area of the nucleus covered
+	 * Constructor for use in AnalysisCreator.
+	 * @param options the analysis options
+	 * @param debugFile the log file
 	 */
 	public SignalDetector(NuclearSignalOptions options, File debugFile){
 		this.options = options;
@@ -212,7 +212,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		signalCollection.setSignalGroupName(signalGroup, channelName);
 		n.calculateSignalDistancesFromCoM();
 		n.calculateFractionalSignalDistancesFromCoM();
-		if(AsymmetricNucleus.class.isAssignableFrom(dataset.getCollection().getNucleusClass())){
+		if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
 			n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
 		}
 	}
@@ -224,62 +224,72 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 */
 	public void run(Nucleus n, ImageStack stack, File sourceFile){
 
-		logger.log("Running signal detector", Logger.DEBUG);
-		SignalCollection signalCollection = n.getSignalCollection();
 		
+		
+		for(int i = Constants.RGB_RED; i< Constants.RGB_BLUE; i++){
+			logger.log("Running signal detector on channel "+i, Logger.DEBUG);
+			this.channel	 = i;
+			this.signalGroup = i;
+			this.channelName = i==Constants.RGB_RED ? "Red" : "Green";
+			detectSignal(sourceFile, stack, n);
+		}
+		
+		
+		
+//		SignalCollection signalCollection = n.getSignalCollection();
 
 		// find the signals
 		// within nuclear roi, analyze particles in colour channels
 		// the nucleus is in index 1, so from 2 to end
-		for(int stackNumber=Constants.FIRST_SIGNAL_CHANNEL;stackNumber<=stack.getSize();stackNumber++){
-
-			// assume rgb image, with blue as counterstain for now
-			int channel = stackNumber==Constants.FIRST_SIGNAL_CHANNEL ? 0 : 1;
-			String channelName = stackNumber==Constants.FIRST_SIGNAL_CHANNEL ? "Red" : "Green";
-			
-			// create a new detector to find the signals
-			Detector detector = new Detector();
-			detector.setMaxSize(n.getArea() * options.getMaxFraction());
-			detector.setMinSize(options.getMinSize());
-			detector.setMinCirc(options.getMinCirc());
-			detector.setMaxCirc(options.getMaxCirc());
-			detector.setThreshold(options.getSignalThreshold());
-			detector.setStackNumber(stackNumber);
-			try{
-				detector.run(stack);
-			} catch(Exception e){
-				logger.log("Error in signal detection: "+e.getMessage());
-				for(StackTraceElement el : e.getStackTrace()){
-					logger.log(el.toString(), Logger.STACK);
-				}
-			}
-			List<Roi> roiList = detector.getRoiList();
-
-			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
-
-			if(!roiList.isEmpty()){
-				
-				logger.log(roiList.size()+" signals in stack "+stackNumber, Logger.DEBUG);
-
-				for( Roi r : roiList){
-
-					StatsMap values = detector.measure(r, stack);
-					NuclearSignal s = new NuclearSignal( r, 
-							values.get("Area"), 
-							values.get("Feret"), 
-							values.get("Perim"), 
-							new XYPoint(values.get("XM"), values.get("YM")),
-							n.getImageName()+"-"+n.getNucleusNumber());
-
-					signals.add(s);
-				}
-			} else {
-				logger.log("No signal in stack "+stackNumber, Logger.DEBUG);
-			}
-			signalCollection.addSignalGroup(signals, channel, sourceFile, channel);
-			signalCollection.setSignalGroupName(channel, channelName);
-		} 
-		n.calculateSignalDistancesFromCoM();
-		n.calculateFractionalSignalDistancesFromCoM();
+//		for(int stackNumber=Constants.FIRST_SIGNAL_CHANNEL;stackNumber<=stack.getSize();stackNumber++){
+//
+//			// assume rgb image, with blue as counterstain for now
+//			int channel = stackNumber==Constants.FIRST_SIGNAL_CHANNEL ? 0 : 1;
+//			String channelName = stackNumber==Constants.FIRST_SIGNAL_CHANNEL ? "Red" : "Green";
+//			
+//			// create a new detector to find the signals
+//			Detector detector = new Detector();
+//			detector.setMaxSize(n.getArea() * options.getMaxFraction());
+//			detector.setMinSize(options.getMinSize());
+//			detector.setMinCirc(options.getMinCirc());
+//			detector.setMaxCirc(options.getMaxCirc());
+//			detector.setThreshold(options.getSignalThreshold());
+//			detector.setStackNumber(stackNumber);
+//			try{
+//				detector.run(stack);
+//			} catch(Exception e){
+//				logger.log("Error in signal detection: "+e.getMessage());
+//				for(StackTraceElement el : e.getStackTrace()){
+//					logger.log(el.toString(), Logger.STACK);
+//				}
+//			}
+//			List<Roi> roiList = detector.getRoiList();
+//
+//			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
+//
+//			if(!roiList.isEmpty()){
+//				
+//				logger.log(roiList.size()+" signals in stack "+stackNumber, Logger.DEBUG);
+//
+//				for( Roi r : roiList){
+//
+//					StatsMap values = detector.measure(r, stack);
+//					NuclearSignal s = new NuclearSignal( r, 
+//							values.get("Area"), 
+//							values.get("Feret"), 
+//							values.get("Perim"), 
+//							new XYPoint(values.get("XM"), values.get("YM")),
+//							n.getImageName()+"-"+n.getNucleusNumber());
+//
+//					signals.add(s);
+//				}
+//			} else {
+//				logger.log("No signal in stack "+stackNumber, Logger.DEBUG);
+//			}
+//			signalCollection.addSignalGroup(signals, channel, sourceFile, channel);
+//			signalCollection.setSignalGroupName(channel, channelName);
+//		} 
+//		n.calculateSignalDistancesFromCoM();
+//		n.calculateFractionalSignalDistancesFromCoM();
 	}
 }
