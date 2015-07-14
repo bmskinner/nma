@@ -377,7 +377,7 @@ public class NucleusDetector {
 		
 		// here before running the thresholding, do an edge detection, then pass on
 		ImageStack searchStack = null;
-		if( this.analysisOptions.getNucleusCannyOptions().isUseCanny()) {
+		if( this.analysisOptions.getCannyOptions("nucleus").isUseCanny()) {
 			searchStack = runEdgeDetector(image);
 		} else {
 			searchStack = image;
@@ -422,7 +422,7 @@ public class NucleusDetector {
 		ImageStack searchStack = null;
 		try {
 			// using canny detector
-			CannyOptions nucleusCannyOptions = analysisOptions.getNucleusCannyOptions();
+			CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
 
 			// calculation of auto threshold
 			if(nucleusCannyOptions.isCannyAutoThreshold()){
@@ -510,7 +510,7 @@ public class NucleusDetector {
 		try {
 			
 			int shift=1;
-			int radius = analysisOptions.getNucleusCannyOptions().getClosingObjectRadius();
+			int radius = analysisOptions.getCannyOptions("nucleus").getClosingObjectRadius();
 			int[] offset = {0,0};
 			int eltype = 0; //circle
 			logger.log("Closing objects with circle of radius "+radius, Logger.DEBUG);
@@ -593,9 +593,9 @@ public class NucleusDetector {
 			  logger.log("Error saving original, enlarged or annotated image: "+e.getMessage(), Logger.ERROR);
 		  }
 		  
-		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getSignalThreshold(), 
-				  												analysisOptions.getMinSignalSize(), 
-				  												analysisOptions.getMaxSignalFraction(),
+		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getNuclearSignalOptions("default").getSignalThreshold(), 
+				  												analysisOptions.getNuclearSignalOptions("default").getMinSize(), 
+				  												analysisOptions.getNuclearSignalOptions("default").getMaxFraction(),
 				  												this.debugFile);
 		  signalDetector.run(currentNucleus, smallRegion, currentNucleus.getSourceFile());
 		  

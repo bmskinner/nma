@@ -2,19 +2,25 @@ package no.components;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AnalysisOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private  int    nucleusThreshold;
-	private  int    signalThreshold;
+//	private  int    signalThreshold;
 	private  double minNucleusSize;
 	private  double maxNucleusSize;
 	private  double minNucleusCirc;
 	private  double maxNucleusCirc;
 	
-	private CannyOptions nucleusCannyOptions;
-	private CannyOptions tailCannyOptions;
+	private Map<String, CannyOptions> edgeDetection = new HashMap<String, CannyOptions>(0);
+	
+	private Map<String, NuclearSignalOptions> signalDetection = new HashMap<String, NuclearSignalOptions>(0);
+	
+//	private CannyOptions nucleusCannyOptions;
+//	private CannyOptions tailCannyOptions;
 	
 	private boolean normaliseContrast; 
 
@@ -44,14 +50,16 @@ public class AnalysisOptions implements Serializable {
 	private int xoffset;
 	private int yoffset;
 
-	private  double minSignalSize;
-	private  double maxSignalFraction;
+//	private  double minSignalSize;
+//	private  double maxSignalFraction;
 
 
 
 	public AnalysisOptions(){
-		this.nucleusCannyOptions = new CannyOptions();
-		this.tailCannyOptions = new CannyOptions();
+		
+		edgeDetection.put("nucleus", new CannyOptions());
+		edgeDetection.put("tail", new CannyOptions());
+		signalDetection.put("default", new NuclearSignalOptions());
 	}
 
 
@@ -73,9 +81,9 @@ public class AnalysisOptions implements Serializable {
 		return this.nucleusThreshold;
 	}
 
-	public int getSignalThreshold(){
-		return this.signalThreshold;
-	}
+//	public int getSignalThreshold(){
+//		return this.signalThreshold;
+//	}
 
 	public double getMinNucleusSize(){
 		return this.minNucleusSize;
@@ -93,13 +101,13 @@ public class AnalysisOptions implements Serializable {
 		return this.maxNucleusCirc;
 	}
 
-	public double getMinSignalSize(){
-		return this.minSignalSize;
-	}
+//	public double getMinSignalSize(){
+//		return this.minSignalSize;
+//	}
 
-	public double getMaxSignalFraction(){
-		return this.maxSignalFraction;
-	}
+//	public double getMaxSignalFraction(){
+//		return this.maxSignalFraction;
+//	}
 
 	public int getAngleProfileWindowSize(){
 		return this.angleProfileWindowSize;
@@ -138,9 +146,9 @@ public class AnalysisOptions implements Serializable {
 	}
 
 
-	public void setSignalThreshold(int signalThreshold) {
-		this.signalThreshold = signalThreshold;
-	}
+//	public void setSignalThreshold(int signalThreshold) {
+//		this.signalThreshold = signalThreshold;
+//	}
 
 
 	public void setMinNucleusSize(double minNucleusSize) {
@@ -213,14 +221,14 @@ public class AnalysisOptions implements Serializable {
 	}
 
 
-	public void setMinSignalSize(double minSignalSize) {
-		this.minSignalSize = minSignalSize;
-	}
-
-
-	public void setMaxSignalFraction(double maxSignalFraction) {
-		this.maxSignalFraction = maxSignalFraction;
-	}
+//	public void setMinSignalSize(double minSignalSize) {
+//		this.minSignalSize = minSignalSize;
+//	}
+//
+//
+//	public void setMaxSignalFraction(double maxSignalFraction) {
+//		this.maxSignalFraction = maxSignalFraction;
+//	}
 
 	public boolean isNormaliseContrast() {
 		return normaliseContrast;
@@ -230,15 +238,23 @@ public class AnalysisOptions implements Serializable {
 	public void setNormaliseContrast(boolean normaliseContrast) {
 		this.normaliseContrast = normaliseContrast;
 	}
-
-
-	public CannyOptions getNucleusCannyOptions(){
-		return this.nucleusCannyOptions;
+	
+	public CannyOptions getCannyOptions(String type){
+		return edgeDetection.get(type); 
 	}
 	
-	public CannyOptions getTailCannyOptions(){
-		return this.tailCannyOptions;
+	public void addCannyOptions(String type){
+		edgeDetection.put(type, new CannyOptions()); 
 	}
+	
+	public NuclearSignalOptions getNuclearSignalOptions(String type){
+		return this.signalDetection.get(type);
+	}
+	
+	public void addNuclearSignalOptions(String type){
+		signalDetection.put(type, new NuclearSignalOptions());
+	}
+
 	
 	public class CannyOptions implements Serializable {
 
@@ -324,5 +340,67 @@ public class AnalysisOptions implements Serializable {
 		public void setKernelWidth(int kernelWidth) {
 			this.kernelWidth = kernelWidth;
 		}
+	}
+	
+	
+	
+	/**
+	 * Allow each signal group to have independent signal detection options
+	 *
+	 */
+	public class NuclearSignalOptions implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		private int threshold;
+		private double minCirc;
+		private double maxCirc;
+		
+		private double minSize;
+		private double maxFraction;
+		
+		public NuclearSignalOptions(){
+			
+		}
+		
+		public int getSignalThreshold(){
+			return this.threshold;
+		}
+
+		public double getMinSize(){
+			return this.minSize;
+		}
+
+		public double getMaxFraction(){
+			return this.maxFraction;
+		}
+
+		public double getMinCirc(){
+			return this.minCirc;
+		}
+
+		public double getMaxCirc(){
+			return this.maxCirc;
+		}
+
+		public void setThreshold(int threshold) {
+			this.threshold = threshold;
+		}
+
+		public void setMinCirc(double minCirc) {
+			this.minCirc = minCirc;
+		}
+
+		public void setMaxCirc(double maxCirc) {
+			this.maxCirc = maxCirc;
+		}
+
+		public void setMinSize(double minSize) {
+			this.minSize = minSize;
+		}
+
+		public void setMaxFraction(double maxFraction) {
+			this.maxFraction = maxFraction;
+		}
+
 	}
 }

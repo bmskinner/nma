@@ -502,7 +502,7 @@ public class NucleusDatasetCreator {
 				String date = times[0];
 				String time = times[1];
 				
-				CannyOptions nucleusCannyOptions = options.getNucleusCannyOptions();
+				CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
 								
 				String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
 				String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
@@ -527,9 +527,9 @@ public class NucleusDatasetCreator {
 						options.getMaxNucleusSize(),
 						options.getMinNucleusCirc(),
 						options.getMaxNucleusCirc(),
-						options.getSignalThreshold(),
-						options.getMinSignalSize(),
-						options.getMaxSignalFraction(),
+						options.getNuclearSignalOptions("default").getSignalThreshold(),
+						options.getNuclearSignalOptions("default").getMinSize(),
+						options.getNuclearSignalOptions("default").getMaxFraction(),
 						options.refoldNucleus(),
 						refoldMode,
 						dataset.hasShellResult(),

@@ -563,9 +563,9 @@ public class AnalysisCreator {
 			outLine.append("\tNucleus maximum size: "+analysisOptions.getMaxNucleusSize()+"\r\n");
 			outLine.append("\tNucleus minimum circ: "+analysisOptions.getMinNucleusCirc()+"\r\n");
 			outLine.append("\tNucleus maximum circ: "+analysisOptions.getMaxNucleusCirc()+"\r\n");
-			outLine.append("\tSignal thresholding : "+analysisOptions.getSignalThreshold()+"\r\n");
-			outLine.append("\tSignal minimum size : "+analysisOptions.getMinSignalSize()+"\r\n");
-			outLine.append("\tSignal max. fraction: "+analysisOptions.getMaxSignalFraction()+"\r\n");
+			outLine.append("\tSignal thresholding : "+analysisOptions.getNuclearSignalOptions("default").getSignalThreshold()+"\r\n");
+			outLine.append("\tSignal minimum size : "+analysisOptions.getNuclearSignalOptions("default").getMinSize()+"\r\n");
+			outLine.append("\tSignal max. fraction: "+analysisOptions.getNuclearSignalOptions("default").getMaxFraction()+"\r\n");
 			outLine.append("\tAngle profile window: "+analysisOptions.getAngleProfileWindowSize()+"\r\n");
 			outLine.append("\tNucleus class       : "+analysisOptions.getNucleusClass().getSimpleName()+"\r\n");
 //			outLine.append("\tCollection class    : "+analysisOptions.getCollectionClass().getSimpleName()+"\r\n");

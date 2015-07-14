@@ -315,8 +315,8 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //		binaryImage.show();
 		
 		AnalysisOptions options = new AnalysisOptions(); 
-		options.getTailCannyOptions().setClosingObjectRadius(5);
-		morphologyClose(binaryProcessor, options.getTailCannyOptions());
+		options.getCannyOptions("tail").setClosingObjectRadius(5);
+		morphologyClose(binaryProcessor, options.getCannyOptions("tail"));
 		
 		// fill remaining holes in the image
 		Binary binary = new Binary();
@@ -883,7 +883,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		ImageStack searchStack = null;
 		try {
 			// using canny detector
-			CannyOptions tailCannyOptions = options.getTailCannyOptions();
+			CannyOptions tailCannyOptions = options.getCannyOptions("tail");
 
 			logger.log("Creating edge detector", Logger.DEBUG);
 			CannyEdgeDetector canny = new CannyEdgeDetector();
