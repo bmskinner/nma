@@ -2369,6 +2369,8 @@ public class MainWindow extends JFrame implements ActionListener {
 		try {
 
 			if(list.size()==1){
+				
+				signalsChartPanel.setVisible(true);
 
 				CellCollection collection = list.get(0).getCollection();
 
@@ -2405,6 +2407,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					}
 					signalsChartPanel.setChart(chart);
 				} else { // no consensus to display
+										
 					JFreeChart chart = ChartFactory.createXYLineChart(null,  // chart for conseusns
 							null, null, null);
 					XYPlot plot = chart.getXYPlot();
@@ -2414,13 +2417,16 @@ public class MainWindow extends JFrame implements ActionListener {
 					signalsChartPanel.setChart(chart);
 				}
 			} else { // multiple populations. Avoid confusion with blank chart
-				JFreeChart chart = ChartFactory.createXYLineChart(null,  // chart for conseusns
-						null, null, null);
-				XYPlot plot = chart.getXYPlot();
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.getDomainAxis().setVisible(false);
-				plot.getRangeAxis().setVisible(false);
-				signalsChartPanel.setChart(chart);
+				
+				signalsChartPanel.setVisible(false);
+				
+//				JFreeChart chart = ChartFactory.createXYLineChart(null,  // chart for conseusns
+//						null, null, null);
+//				XYPlot plot = chart.getXYPlot();
+//				plot.setBackgroundPaint(Color.WHITE);
+//				plot.getDomainAxis().setVisible(false);
+//				plot.getRangeAxis().setVisible(false);
+//				signalsChartPanel.setChart(chart);
 			}
 		} catch(Exception e){
 			log("Error updating signals: "+e.getMessage());
@@ -2497,9 +2503,9 @@ public class MainWindow extends JFrame implements ActionListener {
 				}	
 				signalDistanceChartPanel.setChart(chart);
 			} else {
-				JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
+				JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
 				chart.getPlot().setBackgroundPaint(Color.white);
-				signalAngleChartPanel.setChart(chart);
+				signalDistanceChartPanel.setChart(chart);
 			}
 		} catch (Exception e) {
 			log("Error updating distance histograms: "+e.getMessage());
@@ -3843,9 +3849,11 @@ public class MainWindow extends JFrame implements ActionListener {
 									: Constants.RGB_BLUE;
 			
 			// get the name of the signal channel
-			String signalGroupName = (String)JOptionPane.showInputDialog("Enter signal group name");
+			String signalGroupName = (String) JOptionPane.showInputDialog("Enter signal group name");
 			
 			// eventually, add dialog for non-default detection options
+//			JOptionPane.showInputDialog(new SignalDetectionSettingsPanel(d.getAnalysisOptions(), signalGroupName));
+			
 			NuclearSignalOptions options = d.getAnalysisOptions().getNuclearSignalOptions("default");
 			
 			// the new signal group is one more than the highest in the collection

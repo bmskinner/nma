@@ -50,7 +50,7 @@ public class AnalysisOptions implements Serializable {
 		
 		this.addCannyOptions("nucleus");
 		this.addCannyOptions("tail");
-		signalDetection.put("default", new NuclearSignalOptions());
+		this.addNuclearSignalOptions("default");
 	}
 
 
@@ -321,8 +321,13 @@ public class AnalysisOptions implements Serializable {
 		private double minSize;
 		private double maxFraction;
 		
+		// do we get everthing above a threshold (forward)
+		// or take the brightest pixels downwards up to the max signal fraction (reverse)
+		// default is false, forward threshold
+		private boolean reverseThreshold; 
+		
 		public NuclearSignalOptions(){
-			
+			this.reverseThreshold = false;
 		}
 		
 		public int getSignalThreshold(){
@@ -363,6 +368,14 @@ public class AnalysisOptions implements Serializable {
 
 		public void setMaxFraction(double maxFraction) {
 			this.maxFraction = maxFraction;
+		}
+
+		public boolean isReverseThreshold() {
+			return reverseThreshold;
+		}
+
+		public void setReverseThreshold(boolean reverseThreshold) {
+			this.reverseThreshold = reverseThreshold;
 		}
 
 	}

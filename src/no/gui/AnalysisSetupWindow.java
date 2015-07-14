@@ -277,6 +277,9 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 		panel.add(makeNucleusDetectionSettingsPanel(),c);
 		panel.add(makeDetectionSettingsPanel(), c);
+		
+//		SignalDetectionSettingsPanel signalPanel = new SignalDetectionSettingsPanel(this.analysisOptions, "test");
+//		panel.add(signalPanel.getPanel(), c);
 		panel.add(makeRefoldSettingsPanel(), c);
 
 		return panel;

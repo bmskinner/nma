@@ -45,9 +45,7 @@ public class AnalysisCreator {
 	private static final String spacerString = "------------";
 
 	private Logger logger;
-	//	debugFile;
 
-	//	private AnalysisSetup analysisSetup; // make the gui
 	private AnalysisOptions analysisOptions; // store the options
 	private int mappingCount = 0;
 
@@ -238,11 +236,9 @@ public class AnalysisCreator {
 			try{
 
 				nucleusCounts.put("input", r.getNucleusCount());
-//				Constructor<?> collectionConstructor = analysisOptions.getCollectionClass().getConstructor(new Class[]{File.class, String.class, String.class, File.class});
-//				NucleusCollection failedNuclei = (NucleusCollection) collectionConstructor.newInstance(folder, r.getOutputFolderName(), "failed", logger.getLogfile());
 				CellCollection failedNuclei = new CellCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), analysisOptions.getNucleusClass());
 
-				
+//				boolean ok;
 				mw.logc("Filtering collection...");
 				boolean ok = CollectionFilterer.run(r, failedNuclei); // put fails into failedNuclei, remove from r
 				if(ok){
@@ -355,13 +351,6 @@ public class AnalysisCreator {
 					e.printStackTrace();
 				}
 				
-				
-//				ok = CurveRefolder.run(r, analysisOptions.getNucleusClass(), analysisOptions.getRefoldMode());
-//				if(ok){
-//					mw.log("OK");
-//				} else {
-//					mw.log("Error");
-//				}
 			}
 
 			finalPopulations.add(r);
