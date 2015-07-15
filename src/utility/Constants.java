@@ -69,5 +69,24 @@ public class Constants {
 		public static final int PROGRESS_ERROR		= -2; // signal error occurred in analysis
 		public static final int PROGRESS_COOLDOWN 	= -3; // signal switch to indeterminate bar
 		
+		
+		/**
+		 * Given an RGB channel, get the ImageStack stack for internal use
+		 * @param channel the channel
+		 * @return the stack
+		 */
+		public static int rgbToStack(int channel){
+			
+			if(channel < 0){
+				throw new IllegalArgumentException("Channel cannot be less than 0");
+			}
+			
+			int stackNumber = channel==Constants.RGB_RED 
+					? Constants.FIRST_SIGNAL_CHANNEL
+					: channel==Constants.RGB_GREEN
+						? Constants.FIRST_SIGNAL_CHANNEL+1
+						: Constants.COUNTERSTAIN;
+			return stackNumber;
+		}		
 
 }

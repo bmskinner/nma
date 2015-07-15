@@ -28,7 +28,7 @@ import no.nuclei.Nucleus;
 
 public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	
-	protected NuclearSignalOptions options;
+	protected NuclearSignalOptions options = null;
 	protected Logger logger;
 	protected File folder;
 	protected AnalysisDataset dataset;
@@ -151,17 +151,36 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 
 	} 
 	
+	
+	/**
+	 * Call the appropriate signal detection method based on the analysis options
+	 * @param sourceFile the file the image came from
+	 * @param stack the imagestack
+	 * @param n the nucleus
+	 */
 	private void detectSignal(File sourceFile, ImageStack stack, Nucleus n){
 		
+		if(options==null || !options.isReverseThreshold()){
+			detectForwardThresholdSignal(sourceFile, stack, n);
+		} else {
+			detectReverseThresholdSignal(sourceFile, stack, n);
+		}
 		
+		
+	}
+	
+	/**
+	 * Detect a signal in a given stack by standard forward thresholding
+	 * and add to the given nucleus
+	 * @param sourceFile the file the image came from
+	 * @param stack the imagestack
+	 * @param n the nucleus
+	 */
+	private void detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
 		SignalCollection signalCollection = n.getSignalCollection();
 		
 		// choose the right stack number for the channel
-		int stackNumber = channel==Constants.RGB_RED 
-						? Constants.FIRST_SIGNAL_CHANNEL
-						: channel==Constants.RGB_GREEN
-							? Constants.FIRST_SIGNAL_CHANNEL+1
-							: Constants.COUNTERSTAIN;
+		int stackNumber = Constants.rgbToStack(channel);
 		
 		// create a new detector
 		Detector detector = new Detector();
@@ -223,16 +242,38 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 			}
 		}
 	}
+	
+	/**
+	 * Detect a signal in a given stack by reverse thresholding
+	 * and add to the given nucleus. Find the brightest pixels in
+	 * the nuclear roi. If < maxSignalFraction, get dimmer pixels and
+	 * remeasure. Continue until signal size is met. Works best with 
+	 * maxSignalFraction of ~0.1 for a chromosome paint
+	 * @param sourceFile the file the image came from
+	 * @param stack the imagestack
+	 * @param n the nucleus
+	 */
+	private void detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
+		
+//		get the region bounded by the nuclear roi
+//		for max intensity (255) , downwards, count pixels with that intensity
+//		if count / area < fraction, continue
+		
+		// when brightest pixels inside nucleus found
+		// create new image from these
+		// run particle detector
+		// create signals
+	}
 
 	/**
 	 * Find signals in the given ImageStack, and add them to the given nucleus
+	 * Called by AnalysisCreator when SwingWorker functions not needed
+	 * TODO: remove dependency on this method
 	 * @param n - the nucleus to add signals to
 	 * @param stack - the ImageStack with signal channels
 	 */
 	public void run(Nucleus n, ImageStack stack, File sourceFile){
 
-		
-		
 		for(int i = Constants.RGB_RED; i< Constants.RGB_BLUE; i++){
 			logger.log("Running signal detector on channel "+i, Logger.DEBUG);
 			this.channel	 = i;
@@ -240,63 +281,5 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 			this.channelName = i==Constants.RGB_RED ? "Red" : "Green";
 			detectSignal(sourceFile, stack, n);
 		}
-		
-		
-		
-//		SignalCollection signalCollection = n.getSignalCollection();
-
-		// find the signals
-		// within nuclear roi, analyze particles in colour channels
-		// the nucleus is in index 1, so from 2 to end
-//		for(int stackNumber=Constants.FIRST_SIGNAL_CHANNEL;stackNumber<=stack.getSize();stackNumber++){
-//
-//			// assume rgb image, with blue as counterstain for now
-//			int channel = stackNumber==Constants.FIRST_SIGNAL_CHANNEL ? 0 : 1;
-//			String channelName = stackNumber==Constants.FIRST_SIGNAL_CHANNEL ? "Red" : "Green";
-//			
-//			// create a new detector to find the signals
-//			Detector detector = new Detector();
-//			detector.setMaxSize(n.getArea() * options.getMaxFraction());
-//			detector.setMinSize(options.getMinSize());
-//			detector.setMinCirc(options.getMinCirc());
-//			detector.setMaxCirc(options.getMaxCirc());
-//			detector.setThreshold(options.getSignalThreshold());
-//			detector.setStackNumber(stackNumber);
-//			try{
-//				detector.run(stack);
-//			} catch(Exception e){
-//				logger.log("Error in signal detection: "+e.getMessage());
-//				for(StackTraceElement el : e.getStackTrace()){
-//					logger.log(el.toString(), Logger.STACK);
-//				}
-//			}
-//			List<Roi> roiList = detector.getRoiList();
-//
-//			ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
-//
-//			if(!roiList.isEmpty()){
-//				
-//				logger.log(roiList.size()+" signals in stack "+stackNumber, Logger.DEBUG);
-//
-//				for( Roi r : roiList){
-//
-//					StatsMap values = detector.measure(r, stack);
-//					NuclearSignal s = new NuclearSignal( r, 
-//							values.get("Area"), 
-//							values.get("Feret"), 
-//							values.get("Perim"), 
-//							new XYPoint(values.get("XM"), values.get("YM")),
-//							n.getImageName()+"-"+n.getNucleusNumber());
-//
-//					signals.add(s);
-//				}
-//			} else {
-//				logger.log("No signal in stack "+stackNumber, Logger.DEBUG);
-//			}
-//			signalCollection.addSignalGroup(signals, channel, sourceFile, channel);
-//			signalCollection.setSignalGroupName(channel, channelName);
-//		} 
-//		n.calculateSignalDistancesFromCoM();
-//		n.calculateFractionalSignalDistancesFromCoM();
 	}
 }

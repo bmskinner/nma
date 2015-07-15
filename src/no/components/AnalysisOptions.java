@@ -210,12 +210,38 @@ public class AnalysisOptions implements Serializable {
 		edgeDetection.put(type, new CannyOptions()); 
 	}
 	
+	/**
+	 * Check if the given type name is already present
+	 * @param type the name to check
+	 * @return present or not
+	 */
+	public boolean hasCannyOptions(String type){
+		if(this.edgeDetection.containsKey(type)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	public NuclearSignalOptions getNuclearSignalOptions(String type){
 		return this.signalDetection.get(type);
 	}
 	
 	public void addNuclearSignalOptions(String type){
 		signalDetection.put(type, new NuclearSignalOptions());
+	}
+	
+	/**
+	 * Check if the given type name is already present
+	 * @param type the name to check
+	 * @return present or not
+	 */
+	public boolean hasSignalDetectionOptions(String type){
+		if(this.signalDetection.containsKey(type)){
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	

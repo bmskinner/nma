@@ -2408,25 +2408,11 @@ public class MainWindow extends JFrame implements ActionListener {
 					signalsChartPanel.setChart(chart);
 				} else { // no consensus to display
 										
-					JFreeChart chart = ChartFactory.createXYLineChart(null,  // chart for conseusns
-							null, null, null);
-					XYPlot plot = chart.getXYPlot();
-					plot.setBackgroundPaint(Color.WHITE);
-					plot.getDomainAxis().setVisible(false);
-					plot.getRangeAxis().setVisible(false);
-					signalsChartPanel.setChart(chart);
+					signalsChartPanel.setVisible(false);
 				}
-			} else { // multiple populations. Avoid confusion with blank chart
+			} else { // multiple populations
 				
 				signalsChartPanel.setVisible(false);
-				
-//				JFreeChart chart = ChartFactory.createXYLineChart(null,  // chart for conseusns
-//						null, null, null);
-//				XYPlot plot = chart.getXYPlot();
-//				plot.setBackgroundPaint(Color.WHITE);
-//				plot.getDomainAxis().setVisible(false);
-//				plot.getRangeAxis().setVisible(false);
-//				signalsChartPanel.setChart(chart);
 			}
 		} catch(Exception e){
 			log("Error updating signals: "+e.getMessage());
@@ -3683,6 +3669,14 @@ public class MainWindow extends JFrame implements ActionListener {
 			}
 		}
 		
+		/**
+		 * Change the progress message from the default in the constructor
+		 * @param messsage the string to display
+		 */
+		public void setProgressMessage(String messsage){
+			this.progressBar.setString(messsage);
+		}
+		
 		private void removeProgressBar(){
 			progressPanel.remove(this.progressBar);
 			contentPane.revalidate();
@@ -3814,54 +3808,49 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		public AddNuclearSignalAction() {
 			super("Signal detection in progress", "Error in signal detection");
-			
-			DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
-			String folderName = openDialog.getDirectory();
 
-			if(folderName==null) return; // user cancelled
+			try{
+				// add dialog for non-default detection options
+				SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(d.getAnalysisOptions());
+				
+				final int channel = analysisSetup.getChannel();
+				final String signalGroupName = analysisSetup.getSignalGroupName();
 
-			final File folder =  new File(folderName);
 
-			if(!folder.isDirectory() ){
-				this.cancel();
-				return;
+				NuclearSignalOptions options = d.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
+
+				// the new signal group is one more than the highest in the collection
+				int newSignalGroup = d.getCollection().getHighestSignalGroup()+1;
+				
+				// get the folder of images
+				DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
+				String folderName = openDialog.getDirectory();
+
+				if(folderName==null) return; // user cancelled
+
+				final File folder =  new File(folderName);
+
+				if(!folder.isDirectory() ){
+					this.cancel();
+					return;
+				}
+				if(!folder.exists()){
+					this.cancel();
+					return; // check folder is ok
+				}
+				
+
+				SignalDetector t = new SignalDetector(d, folder, channel, options, newSignalGroup, signalGroupName);
+				this.setProgressMessage("Signal detection in progress: "+signalGroupName);
+				t.addPropertyChangeListener(this);
+				t.execute();
+			} catch (Exception e){
+				IJ.log("Error in signal analysis: "+e.getMessage());
+				for(StackTraceElement e1 : e.getStackTrace()){
+					IJ.log(e1.toString());
+				}
 			}
-			if(!folder.exists()){
-				this.cancel();
-				return; // check folder is ok
-			}
-			// create dialog to get image channel
-
-			Object[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
-			String channelName = (String)JOptionPane.showInputDialog(
-					MainWindow.this,
-					"Select channel",
-					"Select channel",
-					JOptionPane.PLAIN_MESSAGE,
-					null,
-					possibilities,
-					"Green");
-
-			final int channel = channelName.equals("Red") 
-					? Constants.RGB_RED
-							: channelName.equals("Green") 
-							? Constants.RGB_GREEN
-									: Constants.RGB_BLUE;
 			
-			// get the name of the signal channel
-			String signalGroupName = (String) JOptionPane.showInputDialog("Enter signal group name");
-			
-			// eventually, add dialog for non-default detection options
-//			JOptionPane.showInputDialog(new SignalDetectionSettingsPanel(d.getAnalysisOptions(), signalGroupName));
-			
-			NuclearSignalOptions options = d.getAnalysisOptions().getNuclearSignalOptions("default");
-			
-			// the new signal group is one more than the highest in the collection
-			int newSignalGroup = d.getCollection().getHighestSignalGroup()+1;
-			
-			SignalDetector t = new SignalDetector(d, folder, channel, options, newSignalGroup, signalGroupName);
-			t.addPropertyChangeListener(this);
-			t.execute();
 		}
 	}
 	
