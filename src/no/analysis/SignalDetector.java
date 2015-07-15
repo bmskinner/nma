@@ -3,10 +3,14 @@ package no.analysis;
 import ij.IJ;
 import ij.ImageStack;
 import ij.gui.Roi;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
@@ -228,7 +232,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 			logger.log("No signal in stack "+stackNumber, Logger.DEBUG);
 		}
 		
-		if(!signals.isEmpty()){ // only add groups if they contain  signals
+//		if(!signals.isEmpty()){ // only add groups if they contain  signals
 			signalCollection.addSignalGroup(signals, signalGroup, sourceFile, channel);
 			signalCollection.setSignalGroupName(signalGroup, channelName);
 			n.calculateSignalDistancesFromCoM();
@@ -240,7 +244,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 					n.calculateSignalAnglesFromPoint(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT));
 				}
 			}
-		}
+//		}
 	}
 	
 	/**
@@ -255,14 +259,64 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 */
 	private void detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
 		
+//		SignalCollection signalCollection = n.getSignalCollection();
+		logger.log("Beginning reverse detection for nucleus");
+		// choose the right stack number for the channel
+		int stackNumber = Constants.rgbToStack(channel);
+		
+		ImageProcessor ip = stack.getProcessor(stackNumber);
+		FloatPolygon polygon = Utils.createOriginalPolygon(n);
+		
+		// map brightness to count
+		Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0);
+		for(int i=0;i<256;i++){
+			counts.put(i, 0);
+		}
+		
+		
 //		get the region bounded by the nuclear roi
 //		for max intensity (255) , downwards, count pixels with that intensity
 //		if count / area < fraction, continue
 		
-		// when brightest pixels inside nucleus found
-		// create new image from these
-		// run particle detector
-		// create signals
+		//sort the pixels in the roi to bins
+		for(int width = 0; width<ip.getWidth();width++){
+			for(int height = 0; height<ip.getHeight();height++){
+				
+				if(polygon.contains( (float) width, (float) height)){
+					int brightness = ip.getPixel(width, height);
+					int oldCount = counts.get(brightness);
+					counts.put(brightness, oldCount+1);
+				}
+				
+			}
+		}
+		
+//		logger.log("Counts created", Logger.DEBUG);
+//		for(int i=0;i<256;i++){
+//			logger.log("Level "+i+": "+counts.get(i), Logger.DEBUG);
+//		}
+		
+		// find the threshold from the bins
+		int area = (int) ( n.getArea() * options.getMaxFraction());
+		int total = 0;
+		int threshold = 0; // the value to threshold at
+		
+		for(int brightness = 255; brightness>0; brightness--){
+			
+			total += counts.get(brightness); 
+			
+			if(total>area){
+				threshold = brightness+1;
+				break;
+			}
+		}
+		logger.log("Threshold set at: "+threshold);
+		
+		// now we have the reverse threshold value, do the thresholding 
+		// and find signal rois
+		options.setThreshold(threshold);
+		detectForwardThresholdSignal(sourceFile, stack, n);
+
 	}
 
 	/**

@@ -593,9 +593,9 @@ public class NucleusDetector {
 			  }
 		  }
 		  
-		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getNuclearSignalOptions("default"),
-				  												this.debugFile);
-		  signalDetector.run(currentNucleus, image, currentNucleus.getSourceFile());
+//		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getNuclearSignalOptions("default"),
+//				  												this.debugFile);
+//		  signalDetector.run(currentNucleus, image, currentNucleus.getSourceFile());
 		  
 		  currentNucleus.findPointsAroundBorder();
 	

@@ -2491,7 +2491,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index, true, 128));
+					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index-1, true, 128));
 				}	
 				signalAngleChartPanel.setChart(chart);
 			} else {
@@ -2529,7 +2529,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index, true, 128));
+					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index-1, true, 128));
 				}	
 				signalDistanceChartPanel.setChart(chart);
 			} else {
