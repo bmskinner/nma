@@ -208,15 +208,18 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		} else {
 			logger.log("No signal in stack "+stackNumber, Logger.DEBUG);
 		}
-		signalCollection.addSignalGroup(signals, signalGroup, sourceFile, channel);
-		signalCollection.setSignalGroupName(signalGroup, channelName);
-		n.calculateSignalDistancesFromCoM();
-		n.calculateFractionalSignalDistancesFromCoM();
 		
-		if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-			if(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT)!=null){
-				
-				n.calculateSignalAnglesFromPoint(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT));
+		if(!signals.isEmpty()){ // only add groups if they contain  signals
+			signalCollection.addSignalGroup(signals, signalGroup, sourceFile, channel);
+			signalCollection.setSignalGroupName(signalGroup, channelName);
+			n.calculateSignalDistancesFromCoM();
+			n.calculateFractionalSignalDistancesFromCoM();
+
+			if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
+				if(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT)!=null){
+
+					n.calculateSignalAnglesFromPoint(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT));
+				}
 			}
 		}
 	}
