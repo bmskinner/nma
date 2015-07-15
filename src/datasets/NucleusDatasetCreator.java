@@ -17,6 +17,7 @@ import no.analysis.CurveRefolder;
 import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.CannyOptions;
+import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
@@ -37,9 +38,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import cell.Cell;
-
 import components.Flagellum;
-
 import utility.Equation;
 import utility.Utils;
 
@@ -1217,14 +1216,18 @@ public class NucleusDatasetCreator {
 		return result;
 	}
 	
+	/**
+	 * Create a table of signal stats for the given list of datasets. This table
+	 * covers size, number of signals
+	 * @param list the AnalysisDatasets to include
+	 * @return a table model
+	 */
 	public static TableModel createSignalStatsTable(List<AnalysisDataset> list){
 
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
-		
-		int numberOfRowsPerSignalGroup = 11;
-		
+				
 		// find the collection with the most channels
 		// this defines  the number of rows
 
@@ -1255,6 +1258,8 @@ public class NucleusDatasetCreator {
 				fieldNames.add("Median feret");
 				fieldNames.add("Median distance from CoM");
 			}
+			
+			int numberOfRowsPerSignalGroup = fieldNames.size()/(maxChannels+1);
 			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
 			
 //			IJ.log("Added headers");
@@ -1284,6 +1289,103 @@ public class NucleusDatasetCreator {
 						rowData.add(df.format(collection.getMedianSignalAngle(signalGroup)));
 						rowData.add(df.format(collection.getMedianSignalFeret(signalGroup)));
 						rowData.add(df.format(collection.getMedianSignalDistance(signalGroup)));
+					} else {
+						
+						for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
+							rowData.add("");
+						}
+					}
+				}
+				model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
+			}
+		}
+//		IJ.log("Created model");
+		return model;	
+	}
+	
+	/**
+	 * Create a table of signal stats for the given list of datasets. This table
+	 * covers analysis parameters for the signals
+	 * @param list the AnalysisDatasets to include
+	 * @return a table model
+	 */
+	public static TableModel createSignalDetectionParametersTable(List<AnalysisDataset> list){
+
+		DefaultTableModel model = new DefaultTableModel();
+		
+		List<Object> fieldNames = new ArrayList<Object>(0);
+				
+		// find the collection with the most channels
+		// this defines  the number of rows
+
+		if(list==null){
+			model.addColumn("No data loaded");
+			
+		} else {
+			
+			int maxChannels = 0;
+			for(AnalysisDataset dataset : list){
+				CellCollection collection = dataset.getCollection();
+				maxChannels = Math.max(collection.getHighestSignalGroup(), maxChannels);
+			}
+			
+			// create the row names
+			fieldNames.add("Number of signal groups");
+			
+			for(int i=0;i<=maxChannels;i++){
+				fieldNames.add("");
+				fieldNames.add("Signal group");
+				fieldNames.add("Group name");
+				fieldNames.add("Channel");
+				fieldNames.add("Source");
+				fieldNames.add("Threshold");
+				fieldNames.add("Min size");
+				fieldNames.add("Max fraction");
+				fieldNames.add("Min circ");
+				fieldNames.add("Max circ");
+				fieldNames.add("Reverse threshold");
+			}
+			
+			int numberOfRowsPerSignalGroup = fieldNames.size()/ (maxChannels+1);
+			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
+			
+//			IJ.log("Added headers");
+				
+			// format the numbers and make into a tablemodel
+			DecimalFormat df = new DecimalFormat("#0.00"); 
+
+			// make a new column for each collection
+			for(AnalysisDataset dataset : list){
+				CellCollection collection = dataset.getCollection();
+				
+//				IJ.log("Adding collection");
+				List<Object> rowData = new ArrayList<Object>(0);
+				rowData.add(collection.getSignalGroups().size());
+
+				for(int signalGroup : collection.getSignalGroups()){
+					
+					NuclearSignalOptions ns = dataset.getAnalysisOptions()
+													.getNuclearSignalOptions(collection.getSignalGroupName(signalGroup));
+					
+					// TODO separate options for red and green channels from start
+					if(ns==null){
+						ns = dataset.getAnalysisOptions()
+								.getNuclearSignalOptions("default");
+					}
+					
+					if(collection.getSignalCount(signalGroup)>0){
+						rowData.add("");
+						rowData.add(signalGroup);
+						rowData.add(collection.getSignalGroupName(signalGroup));
+						rowData.add(collection.getSignalChannel(signalGroup));
+						rowData.add(collection.getSignalSourceFolder(signalGroup));
+						rowData.add(ns.getSignalThreshold());
+						rowData.add(ns.getMinSize());
+						rowData.add(df.format(ns.getMaxFraction()));
+						rowData.add(df.format(ns.getMinCirc()));
+						rowData.add(df.format(ns.getMaxCirc()));
+						rowData.add(ns.isReverseThreshold());
+						
 					} else {
 						
 						for(int i = 0; i<numberOfRowsPerSignalGroup;i++){

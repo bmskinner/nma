@@ -181,6 +181,8 @@ public class MainWindow extends JFrame implements ActionListener {
 	private ChartPanel signalsChartPanel; // consensus nucleus plus signals
 	private JPanel signalsPanel;// signals container for chart and stats table
 	private JTable signalStatsTable;
+	private JPanel signalAnalysisSetupPanel;
+	private JTable signalAnalysisSetupTable;
 	
 	private ChartPanel signalAngleChartPanel; // consensus nucleus plus signals
 	private ChartPanel signalDistanceChartPanel; // consensus nucleus plus signals
@@ -744,8 +746,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		signalsPanel = new JPanel(); // main container in tab
 		signalsPanel.setLayout(new BoxLayout(signalsPanel, BoxLayout.X_AXIS));
 
-		// Stats panel & consensus
-		
+		// Stats panel
 		DefaultTableModel signalsTableModel = new DefaultTableModel();
 		signalsTableModel.addColumn("");
 		signalsTableModel.addColumn("");
@@ -757,6 +758,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		signalsPanel.add(signalStatsScrollPane);
 		
 
+		// consensus chart
 		JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
 				null, null, null);
 		XYPlot signalsPlot = signalsChart.getXYPlot();
@@ -797,6 +799,23 @@ public class MainWindow extends JFrame implements ActionListener {
 		signalHistogramPanel.add(signalDistanceChartPanel);
 		signalsTabPane.addTab("Signal histograms", null, signalHistogramPanel, null);
 		signalsTabPane.addTab("Shells", null, shellsChartPanel, null);
+		
+		
+		//---------------
+		// Create the signal analysis settings panel
+		//---------------
+		signalAnalysisSetupPanel = new JPanel(new BorderLayout());
+				
+		signalAnalysisSetupTable  = new JTable(new DefaultTableModel());
+		signalAnalysisSetupTable.setEnabled(false);
+		JScrollPane signalAnalysisSetupScrollPane = new JScrollPane(signalAnalysisSetupTable);
+		signalAnalysisSetupPanel.add(signalAnalysisSetupScrollPane, BorderLayout.CENTER);
+		signalsTabPane.addTab("Detection settings", null, signalAnalysisSetupPanel, null);
+		
+		
+		//---------------
+		// Return the panel
+		//---------------
 		return signalsTabPane;
 	}
 	
@@ -1358,6 +1377,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					updateShellPanel(list);
 					updateSignalsPanel(list);
 					updateSignalHistogramPanel(list);
+					updateSignalAnalysisSetupPanel(list);
 					updateClusteringPanel(list);
 					updateVennPanel(list);
 					updateWilcoxonPanel(list);
@@ -2291,6 +2311,10 @@ public class MainWindow extends JFrame implements ActionListener {
 		updateSignalStatsPanel(list);
 	}
 	
+	/**
+	 * Update the signal stats with the given datasets
+	 * @param list the datasets
+	 */
 	private void updateSignalStatsPanel(List<AnalysisDataset> list){
 		try{
 			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
@@ -2302,6 +2326,26 @@ public class MainWindow extends JFrame implements ActionListener {
 		for(int i=1;i<columns;i++){
 			signalStatsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
 		}
+	}
+	
+	/**
+	 * Update the signal analysis detection settings with the given datasets
+	 * @param list the datasets
+	 */
+	private void updateSignalAnalysisSetupPanel(List<AnalysisDataset> list){
+		try{
+			TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(list);
+			this.signalAnalysisSetupTable.setModel(model);
+		} catch (Exception e){
+			log("Error updating signal analysis: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				log(e1.toString());
+			}
+		}
+//		int columns = signalAnalysisSetupTable.getColumnModel().getColumnCount();
+//		for(int i=1;i<columns;i++){
+//			signalAnalysisSetupTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+//		}
 	}
 	
 	private void updateClusteringPanel(List<AnalysisDataset> list){
@@ -2742,7 +2786,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	        
 	      //Cells are by default rendered as a JLabel.
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-	        
+	        	        
 	        int numberOfRowsPerSignalGroup = 11;
 	        
 	        // calculate the colour to be adding

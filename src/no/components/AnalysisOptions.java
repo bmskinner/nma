@@ -202,6 +202,12 @@ public class AnalysisOptions implements Serializable {
 		this.normaliseContrast = normaliseContrast;
 	}
 	
+	/**
+	 * Get the canny options associated with the
+	 * given type, or null if not present
+	 * @param type the name to check
+	 * @return canny detection options
+	 */
 	public CannyOptions getCannyOptions(String type){
 		return edgeDetection.get(type); 
 	}
@@ -223,6 +229,12 @@ public class AnalysisOptions implements Serializable {
 		}
 	}
 	
+	/**
+	 * Get the nuclear signal options associated with the
+	 * given type, or null if not present
+	 * @param type the name to check
+	 * @return nuclear detection options
+	 */
 	public NuclearSignalOptions getNuclearSignalOptions(String type){
 		return this.signalDetection.get(type);
 	}
