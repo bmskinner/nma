@@ -1115,7 +1115,53 @@ public class NucleusDatasetCreator {
 //		IJ.log("Created nucleus border dataset");
 		return ds;
 	}
+	
+	/**
+	 * Create a dataset for the signal groups in the cell. Each signalGroup
+	 * is a new series
+	 * @param cell the cell to get signals from
+	 * @return a dataset for charting
+	 */
+	public static List<DefaultXYDataset> createSignalOutlines(Cell cell, AnalysisDataset dataset){
+		
+		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>(0);
+		
+		Nucleus nucleus = cell.getNucleus();
+		
+		for(int signalGroup : nucleus.getSignalGroups()){
+			
+			DefaultXYDataset groupDataset = new DefaultXYDataset();
 
+			for(NuclearSignal signal : nucleus.getSignals(signalGroup)){
+				
+				if(dataset.isSignalGroupVisible(signalGroup)){ // only add the groups that are set to visible
+
+					double[] xpoints = new double[signal.getBorder().size()];
+					double[] ypoints = new double[signal.getBorder().size()];
+
+					int i =0;
+					for(XYPoint p : signal.getBorder()){
+						xpoints[i] = p.getX();
+						ypoints[i] = p.getY();
+						i++;
+					}
+					double[][] data = { xpoints, ypoints };
+					groupDataset.addSeries("Group_"+signalGroup+"_signal", data);
+				
+				result.add(groupDataset);
+				}
+			}
+			
+		}
+		return result;
+	}
+
+	/**
+	 * Given a list of analysis datasets, get the outlines of the consensus
+	 * nuclei they contain
+	 * @param list the analysis datasets
+	 * @return a chartable dataset
+	 */
 	public static XYDataset createMultiNucleusOutline(List<AnalysisDataset> list){
 
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -1164,48 +1210,56 @@ public class NucleusDatasetCreator {
 		return new XYPoint(signalX, signalY);
 	}
 	
-	public static XYDataset createSignalCoMDataset(CellCollection collection){
+	public static XYDataset createSignalCoMDataset(AnalysisDataset dataset){
 		DefaultXYDataset ds = new DefaultXYDataset();
-		
-		if(collection.getSignalCount()>0){
+		CellCollection collection = dataset.getCollection();
+
+		if(collection.hasSignals()){
 
 			for(int group : collection.getSignalGroups()){
 
-				double[] xpoints = new double[collection.getSignals(group).size()];
-				double[] ypoints = new double[collection.getSignals(group).size()];
+				if(dataset.isSignalGroupVisible(group)){
 
-				int signalCount = 0;
-				for(NuclearSignal n : collection.getSignals(group)){
+					double[] xpoints = new double[collection.getSignals(group).size()];
+					double[] ypoints = new double[collection.getSignals(group).size()];
 
-					XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
-					
-//					IJ.log("A: "+angle+"  D: "+signalDistance+"  X: "+signalX+"  Y: "+signalY);
-					xpoints[signalCount] = p.getX();
-					ypoints[signalCount] = p.getY();
-					signalCount++;
-					
+					int signalCount = 0;
+					for(NuclearSignal n : collection.getSignals(group)){
+
+						XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+
+						//					IJ.log("A: "+angle+"  D: "+signalDistance+"  X: "+signalX+"  Y: "+signalY);
+						xpoints[signalCount] = p.getX();
+						ypoints[signalCount] = p.getY();
+						signalCount++;
+
+					}
+					double[][] data = { xpoints, ypoints };
+					ds.addSeries("Group_"+group, data);
 				}
-				double[][] data = { xpoints, ypoints };
-				ds.addSeries("Group"+group, data);
 			}
 		}
 		return ds;
 	}
 	
-	public static List<Shape> createSignalRadiusDataset(CellCollection collection, int signalGroup){
+	public static List<Shape> createSignalRadiusDataset(AnalysisDataset dataset, int signalGroup){
 
+		CellCollection collection = dataset.getCollection();
 		List<Shape> result = new ArrayList<Shape>(0);
-		if(collection.hasSignals(signalGroup)){
+		
+		if(dataset.isSignalGroupVisible(signalGroup)){
+			if(collection.hasSignals(signalGroup)){
 
-			for(NuclearSignal n : collection.getSignals(signalGroup)){
-				XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
-				
-				// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
-				double offset = n.getRadius(); 
+				for(NuclearSignal n : collection.getSignals(signalGroup)){
+					XYPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
-				result.add(new Ellipse2D.Double(p.getX()-offset, p.getY()-offset, n.getRadius()*2, n.getRadius()*2));
+					// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
+					double offset = n.getRadius(); 
+
+					result.add(new Ellipse2D.Double(p.getX()-offset, p.getY()-offset, n.getRadius()*2, n.getRadius()*2));
+				}
+
 			}
-
 		}
 		return result;
 	}
@@ -1407,16 +1461,19 @@ public class NucleusDatasetCreator {
 			CellCollection collection = dataset.getCollection();
 			
 			for(int signalGroup : collection.getSignalGroups()){
+				
+				if(dataset.isSignalGroupVisible(signalGroup)){
 
-				if(collection.hasSignals(signalGroup)){
+					if(collection.hasSignals(signalGroup)){
 
-					List<Double> angles = new ArrayList<Double>(0);
+						List<Double> angles = new ArrayList<Double>(0);
 
-					for(Nucleus n : collection.getNuclei()){
-						angles.addAll(n.getSignalCollection().getAngles(signalGroup));
+						for(Nucleus n : collection.getNuclei()){
+							angles.addAll(n.getSignalCollection().getAngles(signalGroup));
+						}
+						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
+						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
 					}
-					double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
-					ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
 				}
 			}
 			
@@ -1430,19 +1487,19 @@ public class NucleusDatasetCreator {
 			CellCollection collection = dataset.getCollection();
 
 			for(int signalGroup : collection.getSignalGroups()){
-//				IJ.log("Group "+signalGroup);
 				
-				if(collection.hasSignals(signalGroup)){
-//					IJ.log("    Has signals");
+				if(dataset.isSignalGroupVisible(signalGroup)){
 
-					List<Double> angles = new ArrayList<Double>(0);
+					if(collection.hasSignals(signalGroup)){
 
-					for(Nucleus n : collection.getNuclei()){
-						angles.addAll(n.getSignalCollection().getDistances(signalGroup));
+						List<Double> angles = new ArrayList<Double>(0);
+
+						for(Nucleus n : collection.getNuclei()){
+							angles.addAll(n.getSignalCollection().getDistances(signalGroup));
+						}
+						double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
+						ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
 					}
-					double[] values = Utils.getdoubleFromDouble(angles.toArray(new Double[0]));
-//					IJ.log("    Count: "+values.length);
-					ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
 				}
 			}
 

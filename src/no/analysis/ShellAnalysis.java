@@ -73,7 +73,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
 
-				for(int channel : n.getSignalChannels()){
+				for(int channel : n.getSignalGroups()){
 					if(collection.hasSignals(channel)){
 						List<NuclearSignal> signalGroup = n.getSignals(channel); 
 
@@ -169,7 +169,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
 
-				for(int channel : n.getSignalChannels()){
+				for(int channel : n.getSignalGroups()){
 					if(collection.hasSignals(channel)){
 						List<NuclearSignal> signalGroup = n.getSignals(channel); 
 

@@ -86,7 +86,18 @@ public interface Nucleus {
 
 	public int getFailureCode();
 
-	public boolean hasSignal(int channel);
+	/**
+	 * Check if the given signal group has a signal in this nucleus
+	 * @param channel the signal group
+	 * @return
+	 */
+	public boolean hasSignal(int signalGroup);
+	
+	/**
+	 * Check if any of the signal groups in the nucleus have a signal
+	 * @return
+	 */
+	public boolean hasSignal();
 
 	public List<NucleusBorderPoint> getBorderList();
 	public List<NucleusBorderPoint> getOriginalBorderList();
@@ -267,11 +278,38 @@ public interface Nucleus {
 
 	public void setSegments(List<NucleusBorderSegment> newList);
 	public SignalCollection getSignalCollection();
+	
+	
 	public int getSignalCount();
-	public int getSignalCount(int channel);
-	public List<NuclearSignal> getSignals(int channel);
+	public int getSignalCount(int signalGroup);
+	
+	
+	/**
+	 * @param n the signal
+	 * @param signalGroup the signal group to add to
+	 */
+	public void addSignal(NuclearSignal n, int signalGroup);
+	
+	
+	/**
+	 * Get a copy of the signals in the given signal group
+	 * @param signalGroup the group
+	 * @return a list of COPIES of the nuclear signals in the group
+	 */
+	public List<NuclearSignal> getSignals(int signalGroup);
+	
+	/**
+	 * Get the signals in the nucleus by group as a list of lists
+	 * @return the list of lists
+	 */
 	public List<List<NuclearSignal>> getSignals();
-	public Set<Integer> getSignalChannels();
+	
+	/**
+	 * Get the signal groups in the current signal collection
+	 * @return the set of group ids
+	 */
+	public Set<Integer> getSignalGroups();
+	
 	public Map<String, Integer> getBorderTags();
 	public void addSegment(NucleusBorderSegment n);
 	public void reverse();

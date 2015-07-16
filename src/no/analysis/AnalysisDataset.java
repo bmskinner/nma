@@ -35,6 +35,8 @@ public class AnalysisDataset implements Serializable {
 	private AnalysisOptions analysisOptions;
 	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 	
+	private Map<Integer, Boolean> signalGroupsVisible = new HashMap<Integer, Boolean>(0);
+	
 	private List<UUID> clusterResults = new ArrayList<UUID>(0);
 	private String newickTree;
 	
@@ -256,6 +258,11 @@ public class AnalysisDataset implements Serializable {
 		}
 	}
 
+	/**
+	 * Check if the given dataset is a child dataset of this
+	 * @param child the dataset to test
+	 * @return
+	 */
 	public boolean hasChild(AnalysisDataset child){
 		if(this.childCollections.containsKey(child.getUUID())){
 			return true;
@@ -264,11 +271,38 @@ public class AnalysisDataset implements Serializable {
 		}
 	}
 
+	/**
+	 * Check if the given dataset is a child dataset of this
+	 * @param child
+	 * @return
+	 */
 	public boolean hasChild(UUID child){
 		if(this.childCollections.containsKey(child)){
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	/**
+	 * Set the given signal group to be visible in plots
+	 * @param signalGroup the group
+	 * @param b visible or not
+	 */
+	public void setSignalGroupVisible(int signalGroup, boolean b){
+		this.signalGroupsVisible.put(signalGroup, b);
+	}
+	
+	/**
+	 * Check if the given signal group is visible in plots
+	 * @param signalGroup the group
+	 * @return
+	 */
+	public boolean isSignalGroupVisible(int signalGroup){
+		if(this.signalGroupsVisible.containsKey(signalGroup)){
+			return this.signalGroupsVisible.get(signalGroup);
+		} else {
+			return true; // default true - only store the false toggle as needed
 		}
 	}
 

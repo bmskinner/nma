@@ -43,7 +43,8 @@ public class ColourSelecter {
 		signalColourList.add(Color.RED);
 		signalColourList.add(Color.GREEN);
 		signalColourList.add(Color.CYAN);
-		signalColourList.add(Color.BLUE);
+		signalColourList.add(Color.MAGENTA);
+		signalColourList.add(Color.YELLOW);
 		signalColourList.add(Color.LIGHT_GRAY);
 	}
 	

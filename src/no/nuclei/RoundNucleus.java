@@ -374,6 +374,16 @@ public class RoundNucleus
 	public boolean hasSignal(int signalGroup){
 		return signalCollection.hasSignal(signalGroup);
 	}
+	
+	public boolean hasSignal(){
+		boolean result = false;
+		for(int signalGroup : signalCollection.getSignalGroups()){
+			if(this.hasSignal(signalGroup)){
+				result = true;
+			}
+		}
+		return result;
+	}
 
 	/*
 		-----------------------
@@ -540,7 +550,7 @@ public class RoundNucleus
 		-----------------------
 	*/
 	
-	public Set<Integer> getSignalChannels(){
+	public Set<Integer> getSignalGroups(){
 		return signalCollection.getSignalGroups();
 	}
 	
@@ -548,9 +558,10 @@ public class RoundNucleus
 		return this.signalCollection.getSignals();
 	}
 		
-	public List<NuclearSignal> getSignals(int channel){
+
+	public List<NuclearSignal> getSignals(int signalGroup){
 		List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
-		List<NuclearSignal> signals = this.signalCollection.getSignals(channel);
+		List<NuclearSignal> signals = this.signalCollection.getSignals(signalGroup);
 		for( NuclearSignal n : signals){
 			result.add(new NuclearSignal(n));
 		}
@@ -563,21 +574,12 @@ public class RoundNucleus
 	
 	/**
 	 * @param n the signal
-	 * @param channel Channel 0 is for the nucleus; count from 1
+	 * @param signalGroup the signal group to add to
 	 */
-	public void addSignal(NuclearSignal n, int channel){
-		List<NuclearSignal> signals = this.signalCollection.getSignals(channel);
-		signals.add(n);
+	public void addSignal(NuclearSignal n, int signalGroup){
+		this.signalCollection.addSignal(n, signalGroup);
 	}
 
-
-//	public void addRedSignal(NuclearSignal n){
-//		this.addSignal(n, Constants.FIRST_SIGNAL_CHANNEL);
-//	}
-//
-//	public void addGreenSignal(NuclearSignal n){
-//		this.addSignal(n, Constants.FIRST_SIGNAL_CHANNEL+1);
-//	}
 
 	 /*
 		For each signal within the nucleus, calculate the distance to the nCoM
