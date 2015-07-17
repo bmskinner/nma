@@ -15,7 +15,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -67,6 +67,7 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
@@ -87,7 +88,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Shape;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -96,19 +96,11 @@ import javax.swing.ListSelectionModel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.StandardBarPainter;
-import org.jfree.chart.renderer.category.StatisticalBarRenderer;
-import org.jfree.chart.renderer.xy.StandardXYBarPainter;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
@@ -147,7 +139,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	private PopulationListPopupMenu populationPopup;
 	
 	private JTabbedPane tabbedPane;
-//	private JTabbedPane signalsTabPane;
 	
 	private NucleusProfilesPanel nucleusProfilesPanel;
 	
@@ -304,7 +295,6 @@ public class MainWindow extends JFrame implements ActionListener {
 			// Create the signals tab panel
 			//---------------
 			signalsDetailPanel  = new SignalsDetailPanel();
-//			signalsTabPane = createSignalsTabPanel();
 			tabbedPane.addTab("Signals", signalsDetailPanel);
 			
 
@@ -712,7 +702,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		segmentsBoxplotChartPanel = new ChartPanel(boxplot);
 		panel.add(segmentsBoxplotChartPanel, BorderLayout.CENTER);
 		
-		segmentSelectionBox = new JComboBox();
+		segmentSelectionBox = new JComboBox<String>();
 		segmentSelectionBox.setActionCommand("SegmentBoxplotChoice");
 		segmentSelectionBox.addActionListener(this);
 		panel.add(segmentSelectionBox, BorderLayout.NORTH);
@@ -772,16 +762,6 @@ public class MainWindow extends JFrame implements ActionListener {
 			}
 			
 		}
-		
-//		if(e.getActionCommand().startsWith("GroupVisble_")){
-//			
-//			int signalGroup = this.getIndexFromLabel(e.getActionCommand());
-//			JCheckBox box = (JCheckBox) e.getSource();
-//			AnalysisDataset d = list.get(0);
-//			d.setSignalGroupVisible(signalGroup, box.isSelected());
-//			updateSignalConsensusChart(list);
-//			updateSignalHistogramPanel(list);
-//		}
 	}
 	
 	
@@ -1036,14 +1016,29 @@ public class MainWindow extends JFrame implements ActionListener {
 				try {
 					
 //					FileFilter filter = new FileFilter(); TODO: make select ndb only
-					OpenDialog fileDialog = new OpenDialog("Select a saved dataset...");
-					String fileName = fileDialog.getPath();
-					if(fileName==null) return;
+					FileNameExtensionFilter filter = new FileNameExtensionFilter("Nuclear morphology datasets", "nmd");
+					
+					File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
+					JFileChooser fc = new JFileChooser("Select a saved dataset...");
+					if(defaultDir.exists()){
+						fc = new JFileChooser(defaultDir);
+					}
+					fc.setFileFilter(filter);
+
+					int returnVal = fc.showOpenDialog(fc);
+					if (returnVal != 0)	{
+						return;
+					}
+					File file = fc.getSelectedFile();
+//					
+					if(file.isDirectory()){
+						return;
+					}
 					
 					logc("Opening dataset...");
 					
 					// read the dataset
-					AnalysisDataset dataset = PopulationImporter.readDataset(new File(fileName));
+					AnalysisDataset dataset = PopulationImporter.readDataset(file);
 					
 					if(checkVersion( dataset.getVersion() )){
 
@@ -1923,25 +1918,28 @@ public class MainWindow extends JFrame implements ActionListener {
 		JMenuItem applySegmentationMenuItem = new JMenuItem(new ApplySegmentProfileAction());
 		
 		JMenuItem addTailStainMenuItem = new JMenuItem( new AbstractAction("Add tail stain"){
-
 			private static final long serialVersionUID = 1L;
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				new AddTailStainAction();				
 			}
-			
 		});
 		
 		JMenuItem addNuclearSignalMenuItem = new JMenuItem( new AbstractAction("Add nuclear signal"){
-
 			private static final long serialVersionUID = 1L;
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				new AddNuclearSignalAction();				
 			}
-			
+		});
+		
+		
+		JMenuItem performShellAnalysisMenuItem = new JMenuItem( new AbstractAction("Run shell analysis"){
+			private static final long serialVersionUID = 1L;
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				new ShellAnalysisAction();				
+			}
 		});
 				
 				
@@ -1965,6 +1963,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			this.addSeparator();
 			this.add(addTailStainMenuItem);
 			this.add(addNuclearSignalMenuItem);
+			this.add(performShellAnalysisMenuItem);
 	    }
 		
 		public void enableAll(){
