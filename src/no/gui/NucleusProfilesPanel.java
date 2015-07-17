@@ -17,6 +17,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 
 import no.analysis.AnalysisDataset;
+import no.collections.CellCollection;
+import no.components.Profile;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -39,6 +41,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
 	private ChartPanel rawChartPanel;
+	private ChartPanel variabilityChartPanel; 
 	
 	private JRadioButton rawProfileLeftButton  = new JRadioButton("Left"); // left align raw profiles in rawChartPanel
 	private JRadioButton rawProfileRightButton = new JRadioButton("Right"); // right align raw profiles in rawChartPan
@@ -124,11 +127,22 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		rawPanel.add(alignPanel, BorderLayout.NORTH);
 		
 		//---------------
+		// Create the variability chart
+		//---------------
+		JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
+				"Position", "IQR", null);
+		XYPlot variabilityPlot = variablityChart.getXYPlot();
+		variabilityPlot.setBackgroundPaint(Color.WHITE);
+		variabilityPlot.getDomainAxis().setRange(0,100);
+		variabilityChartPanel = new ChartPanel(variablityChart);
+		
+		//---------------
 		// Add to the tabbed panel
 		//---------------
 		profilesTabPanel.addTab("Normalised", null, profileChartPanel, null);
 		profilesTabPanel.addTab("Raw", null, rawPanel, null);
 		profilesTabPanel.addTab("FrankenProfile", null, frankenChartPanel, null);
+		profilesTabPanel.addTab("Variability", null, variabilityChartPanel, null);
 		this.add(profilesTabPanel, BorderLayout.CENTER);
 
 	}
@@ -144,6 +158,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		}
 		
 		updateFrankenProfileChart(list);
+		updateVariabilityChart(list);
 	}
 	
 	/**
@@ -438,6 +453,49 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 				IJ.log(el.toString());
 			}
 		} 
+	}
+	
+	public void updateVariabilityChart(List<AnalysisDataset> list){
+		try {
+			XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list);
+			if(list.size()==1){
+				CellCollection n = list.get(0).getCollection();
+				JFreeChart chart = makeProfileChart(ds);
+				XYPlot plot = chart.getXYPlot();
+				plot.setBackgroundPaint(Color.WHITE);
+				plot.getDomainAxis().setRange(0,100);
+				plot.getRangeAxis().setLabel("IQR");
+				plot.getRangeAxis().setAutoRange(true);
+				List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
+				Profile xpoints = n.getProfileCollection().getProfile(n.getOrientationPoint()).getPositions(100);
+				for(Integer i : maxima){
+					//				log("Maxima at "+i);
+					plot.addDomainMarker(new ValueMarker(xpoints.get(i), Color.BLACK, new BasicStroke(1.0f)));
+				}
+
+				variabilityChartPanel.setChart(chart);
+			} else { // multiple nuclei
+				JFreeChart chart = 
+						ChartFactory.createXYLineChart(null,
+						                "Position", "IQR", ds, PlotOrientation.VERTICAL, true, true,
+						                false);
+
+				XYPlot plot = chart.getXYPlot();
+				plot.getDomainAxis().setRange(0,100);
+				plot.getRangeAxis().setAutoRange(true);
+				plot.setBackgroundPaint(Color.WHITE);
+
+				for (int j = 0; j < ds.getSeriesCount(); j++) {
+					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
+					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
+					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSegmentColor(index));
+				}	
+				variabilityChartPanel.setChart(chart);
+			}
+		} catch (Exception e) {
+			IJ.log("Error drawing variability chart: "+e.getMessage());
+		}	
 	}
 
 	@Override
