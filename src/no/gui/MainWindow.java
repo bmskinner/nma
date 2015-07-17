@@ -144,7 +144,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JPanel contentPane;
 	private JTextArea textArea = new JTextArea();;
 	private JLabel lblStatusLine = new JLabel("No analysis open");
-//	private final JPanel panelAggregates = new JPanel(); // holds consensus, tab and population panels
+
 	private JTable tablePopulationStats;
 	private JTable tableAnalysisParamters;
 	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
@@ -170,11 +170,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JButton runRefoldingButton;
 	
 	private NuclearBoxplotsPanel nuclearBoxplotsPanel;
-//	private ChartPanel areaBoxplotChartPanel;
-//	private ChartPanel perimBoxplotChartPanel;
-//	private ChartPanel maxFeretBoxplotChartPanel;
-//	private ChartPanel minFeretBoxplotChartPanel;
-//	private ChartPanel differenceBoxplotChartPanel;
 	
 	private ChartPanel variabilityChartPanel; 
 	
@@ -218,12 +213,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JPanel segmentsBoxplotPanel;// container for boxplots chart and decoration
 	private JComboBox segmentSelectionBox; // choose which segments to compare
 	
-	private JPanel cellOutlinePanel; // container for showing the nucleus and tail for each cell
-	private JPanel cellStatsPanel; // container for showing the info on the selected cell
-	private JTable cellStatsTable; // individual cell stats
-	
-	private ChartPanel cellOutlineChartPanel; // holds the chart with the cell
-	private JComboBox<String> cellSelectionBox; // choose which cell to look at individually
+	private CellDetailPanel cellDetailPanel;
 
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
@@ -401,10 +391,12 @@ public class MainWindow extends JFrame implements ActionListener {
 			segmentsPanel.add(segmentProfilePanel);
 			segmentsPanel.add(segmentsBoxplotPanel);
 			tabbedPane.addTab("Segments", null, segmentsPanel, null);
-//			this.pack();
-			
-			cellOutlinePanel = createCellOutlinesPanel();
-			tabbedPane.addTab("Cells", null, cellOutlinePanel, null);
+
+			//---------------
+			// Create the cells panel
+			//---------------
+			cellDetailPanel = new CellDetailPanel();
+			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -891,37 +883,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
 		return scrollPane;
 	}
-	
-//	private JPanel createBoxplotsPanel(){
-//		JPanel boxplotSplitPanel = new JPanel(); // main container in tab
-//
-//		boxplotSplitPanel.setLayout(new BoxLayout(boxplotSplitPanel, BoxLayout.X_AXIS));
-//		
-//		JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-//		JFreeChart perimBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-//		JFreeChart maxFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-//		JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-//		JFreeChart differenceBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
-//		
-//		
-//		areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
-//		boxplotSplitPanel.add(areaBoxplotChartPanel);
-//		
-//		perimBoxplotChartPanel = new ChartPanel(perimBoxplot);
-//		boxplotSplitPanel.add(perimBoxplotChartPanel);
-//		
-//		maxFeretBoxplotChartPanel = new ChartPanel(maxFeretBoxplot);
-//		boxplotSplitPanel.add(maxFeretBoxplotChartPanel);
-//		
-//		minFeretBoxplotChartPanel = new ChartPanel(minFeretBoxplot);
-//		boxplotSplitPanel.add(minFeretBoxplotChartPanel);
-//		
-//		differenceBoxplotChartPanel = new ChartPanel(differenceBoxplot);
-//		boxplotSplitPanel.add(differenceBoxplotChartPanel);
-//		
-//		return boxplotSplitPanel;
-//	}
-	
+		
 	private JPanel createSegmentProfilePanel(){
 		
 		JPanel panel = new JPanel();
@@ -992,37 +954,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		return panel;
 	}
-	
-	private JPanel createCellOutlinesPanel(){
-		JPanel panel = new JPanel(); // main container in tab
-		panel.setLayout(new BorderLayout());
-		
-		// make the chart for each nucleus
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-				null, null, null);       
-
-		cellOutlineChartPanel = new ChartPanel(chart);
-		panel.add(cellOutlineChartPanel, BorderLayout.CENTER);
-		
-		// make the combobox for selecting nuclei
-		cellSelectionBox = new JComboBox<String>();
-		cellSelectionBox.setActionCommand("CellSelectionChoice");
-		cellSelectionBox.addActionListener(this);
-		panel.add(cellSelectionBox, BorderLayout.NORTH);
-		
-		// make the stats panel
-//		cellStatsPanel = new JPanel(new BorderLayout());
-		JScrollPane statsScrollPane = new JScrollPane();
-		
-		cellStatsTable = new JTable(CellDatasetCreator.createCellInfoTable(null));
-		statsScrollPane.setViewportView(cellStatsTable);
-		statsScrollPane.setColumnHeaderView(cellStatsTable.getTableHeader());
-//		cellStatsPanel.add(  cellStatsTable, BorderLayout.CENTER  );
-		panel.add(statsScrollPane, BorderLayout.WEST);
-		
-		return panel;
-	}
-		
+			
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
@@ -1045,30 +977,6 @@ public class MainWindow extends JFrame implements ActionListener {
 				}
 			}
 			
-		}
-
-		if(e.getActionCommand().equals("CellSelectionChoice")){
-
-			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
-			
-			
-//			UUID id = UUID.fromString(name);
-
-			if(list.size()==1){	
-				try{
-
-					AnalysisDataset d = list.get(0);
-					Cell cell = d.getCollection().getCell(name);
-					
-					updateCellOutlineChart(cell, d);
-				} catch (Exception e1){
-					IJ.log("Error fetching cell: "+e1.getMessage());
-					for(StackTraceElement e2 : e1.getStackTrace()){
-						IJ.log(e2.toString());
-					}
-				}
-			}
-
 		}
 		
 		if(e.getActionCommand().equals("LeftAlignRawProfile")){
@@ -1446,6 +1354,8 @@ public class MainWindow extends JFrame implements ActionListener {
 					updateVennPanel(list);
 					updateWilcoxonPanel(list);
 					
+					cellDetailPanel.updateList(list);
+					
 					if(list!=null){
 						// get the list of segments from the datasets
 						ComboBoxModel<String> aModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getSegmentNames().toArray(new String[0]));
@@ -1453,17 +1363,7 @@ public class MainWindow extends JFrame implements ActionListener {
 						segmentSelectionBox.setSelectedIndex(0);
 						updateSegmentsBoxplot(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
 						updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), true, false); // get segname from panel
-						
-						if(list.size()==1){
-//							IJ.log("Creating cell id list");
-							ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getNucleusPathsAndNumbers());
-//							ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getCellIdsAsStrings().toArray(new String[0]));
-							cellSelectionBox.setModel(cellModel);
-//							IJ.log("Model size: "+cellModel.getSize());
-							cellSelectionBox.setSelectedIndex(0);
-						} //else {
-//							cellSelectionBox.setModel(null);
-//						}
+						 
 					}
 					
 				} catch (Exception e) {
@@ -1993,113 +1893,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		return chart;
 	}
 	
-	public void updateCellOutlineChart(Cell cell, AnalysisDataset dataset){
-		
-		// update the stats table
-		cellStatsTable.setModel(CellDatasetCreator.createCellInfoTable(cell));
-		
-		// make an empty chart
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
-						false);
-		
-		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
-		plot.getRangeAxis().setInverted(true);
-		
-		// make a hash to track the contents of each dataset produced
-		Map<Integer, String> hash = new HashMap<Integer, String>(0); 
-		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
-		
-		
-		// get the nucleus dataset
-		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell);
-		hash.put(hash.size(), "Nucleus"); // add to the first free entry
-		datasetHash.put(datasetHash.size(), nucleus);
-		
-		
-		// get the signals datasets and add each group to the hash
-		if(cell.getNucleus().hasSignal()){
-			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
-			
-			for(XYDataset d : signalsDatasets){
-				
-				String name = "default_0";
-				for (int i = 0; i < d.getSeriesCount(); i++) {
-					name = (String) d.getSeriesKey(i);	
-				}
-				int signalGroup = getIndexFromLabel(name);
-				hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
-				datasetHash.put(datasetHash.size(), d);
-			}
-		}
-		
-		// get tail datasets if present
-		if(cell.hasTail()){
-			
-			XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
-			hash.put(hash.size(), "TailBorder");
-			datasetHash.put(datasetHash.size(), tailBorder);
-			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
-			hash.put(hash.size(), "TailSkeleton");
-			datasetHash.put(datasetHash.size(), skeleton);
-		}
-
-		// set the rendering options for each dataset type
-		
-		for(int key : hash.keySet()){
-
-			plot.setDataset(key, datasetHash.get(key));
-			plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
-			
-
-			// go through each series in the dataset
-			for(int i=0; i<plot.getDataset(key).getSeriesCount();i++){
-				
-				// all datasets use the same stroke
-				plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
-
-				// nucleus colour
-				if(hash.get(key).equals("Nucleus")){
-
-					plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
-				}
-
-				// signal colours
-				if(hash.get(key).startsWith("SignalGroup_")){
-					
-					int colourIndex = getIndexFromLabel(hash.get(key));
-
-					plot.getRenderer(key).setSeriesPaint(i, ColourSelecter.getSignalColour(colourIndex-1, true, 128));
-					plot.getRenderer(key).setSeriesVisibleInLegend(i, true);
-
-				}
-
-				// tail border
-				if(hash.get(key).equals("TailBorder")){
-
-					plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
-					plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
-
-				}
-
-				
-				// tail skeleton
-				if(hash.get(key).equals("TailSkeleton")){
-
-					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
-					plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
-
-				}
-			}
-
-		}
-		
-		
-		this.cellOutlineChartPanel.setChart(chart);
-	}
-	
 	
 	/**
 	 * Update the consensus nucleus panel with data from the given datasets. Produces a blank
@@ -2177,101 +1970,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			e.printStackTrace();
 		}
 	}
-	
-	/**
-	 * Update all the boxplots for the given collection
-	 * @param collection
-	 */
-//	public void updateBoxplots(List<AnalysisDataset> list){
-//				
-//		try {
-//			updateAreaBoxplot(list);
-//			updatePerimBoxplot(list);
-//			updateMaxFeretBoxplot(list);
-//			updateMinFeretBoxplot(list);
-//			updateDifferenceBoxplot(list);
-//		} catch (Exception e) {
-//			log("Error updating boxplots: "+e.getMessage());
-//		}
-//	}
-	
-//	/**
-//	 * Update the boxplot panel for areas with a list of NucleusCollections
-//	 * @param list
-//	 */
-//	public void updateAreaBoxplot(List<AnalysisDataset> list){
-//		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createAreaBoxplotDataset(list);
-//		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-//		formatBoxplotChart(boxplotChart);
-//		areaBoxplotChartPanel.setChart(boxplotChart);
-//	}
-//	
-//	/**
-//	 * Update the boxplot panel for perimeters with a list of NucleusCollections
-//	 * @param list
-//	 */
-//	public void updatePerimBoxplot(List<AnalysisDataset> list){
-//		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createPerimBoxplotDataset(list);
-//		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-//		formatBoxplotChart(boxplotChart);
-//		perimBoxplotChartPanel.setChart(boxplotChart);
-//	}
-//	
-//	/**
-//	 * Update the boxplot panel for longest diameter across CoM with a list of NucleusCollections
-//	 * @param list
-//	 */
-//	public void updateMaxFeretBoxplot(List<AnalysisDataset> list){
-//		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createMaxFeretBoxplotDataset(list);
-//		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-//		formatBoxplotChart(boxplotChart);
-//		maxFeretBoxplotChartPanel.setChart(boxplotChart);
-//	}
-//
-//	/**
-//	 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
-//	 * @param list
-//	 */
-//	public void updateMinFeretBoxplot(List<AnalysisDataset> list){
-//		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createMinFeretBoxplotDataset(list);
-//		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-//		formatBoxplotChart(boxplotChart);
-//		minFeretBoxplotChartPanel.setChart(boxplotChart);
-//	}
-//	
-//	/**
-//	 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
-//	 * @param list
-//	 */
-//	public void updateDifferenceBoxplot(List<AnalysisDataset> list){
-//		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createDifferenceBoxplotDataset(list);
-//		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-//		formatBoxplotChart(boxplotChart);
-//		differenceBoxplotChartPanel.setChart(boxplotChart);
-//	}
-	
-	/**
-	 * Apply the default formatting to a boxplot
-	 * @param boxplot
-	 */
-//	public void formatBoxplotChart(JFreeChart boxplot){
-//		CategoryPlot plot = boxplot.getCategoryPlot();
-//		plot.setBackgroundPaint(Color.WHITE);
-//		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-//		plot.setRenderer(renderer);
-//		renderer.setUseOutlinePaintForWhiskers(true);   
-//		renderer.setBaseOutlinePaint(Color.BLACK);
-//		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-//		for(int i=0;i<plot.getDataset().getRowCount();i++){
-////			Color color = i%2==0 ? Color.LIGHT_GRAY : Color.DARK_GRAY;
-//			Color color = ColourSelecter.getSegmentColor(i);
-//			renderer.setSeriesPaint(i, color);
-//		}
-//		renderer.setMeanVisible(false);
-//	}
-	
-
-	
+		
 	public void updateSegmentsBoxplot(List<AnalysisDataset> list, String segName){
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 

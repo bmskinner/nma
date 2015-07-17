@@ -22,6 +22,7 @@ import datasets.NucleusDatasetCreator;
 
 public class NuclearBoxplotsPanel extends JPanel {
 	
+	private static final long serialVersionUID = 1L;
 	private ChartPanel areaBoxplotChartPanel;
 	private ChartPanel perimBoxplotChartPanel;
 	private ChartPanel maxFeretBoxplotChartPanel;
@@ -32,12 +33,24 @@ public class NuclearBoxplotsPanel extends JPanel {
 		
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-		JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-		JFreeChart perimBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-		JFreeChart maxFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-		JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-		JFreeChart differenceBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
+		JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(	null, 
+																		null, 
+																		null, 
+																		new DefaultBoxAndWhiskerCategoryDataset(), 
+																		false);	
+		formatBoxplotChart(areaBoxplot);
 		
+		JFreeChart perimBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+		formatBoxplotChart(perimBoxplot);
+		
+		JFreeChart maxFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+		formatBoxplotChart(maxFeretBoxplot);
+		
+		JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+		formatBoxplotChart(minFeretBoxplot);
+		
+		JFreeChart differenceBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
+		formatBoxplotChart(differenceBoxplot);
 		
 		areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
 		this.add(areaBoxplotChartPanel);
