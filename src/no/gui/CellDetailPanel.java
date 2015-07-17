@@ -7,13 +7,17 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -43,7 +47,8 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 	private ChartPanel cellOutlineChartPanel; // holds the chart with the cell
 	private JComboBox<String> cellSelectionBox; // choose which cell to look at individually
 	private List<AnalysisDataset> list;
-	
+	private AnalysisDataset activeDataset;	
+	private Cell activeCell;
 	
 	public CellDetailPanel() {
 
@@ -67,6 +72,42 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 		JScrollPane statsScrollPane = new JScrollPane();
 		
 		cellStatsTable = new JTable(CellDatasetCreator.createCellInfoTable(null));
+		cellStatsTable.setEnabled(false);
+		
+		cellStatsTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				JTable table = (JTable) e.getSource();
+				
+				// double click
+				if (e.getClickCount() == 2) {
+					int row = table.rowAtPoint((e.getPoint()));
+
+					String value = table.getModel().getValueAt(row+1, 0).toString();
+					if(value.equals("Signal group")){
+						String groupString = table.getModel().getValueAt(row+1, 1).toString();
+						int signalGroup = Integer.valueOf(groupString);
+						
+						Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+						
+						Color newColor = JColorChooser.showDialog(
+			                     CellDetailPanel.this,
+			                     "Choose signal Color",
+			                     oldColour);
+						
+						if(newColor != null){
+							activeDataset.setSignalGroupColour(signalGroup, newColor);
+							updateCell(activeCell);
+						}
+					}
+						
+				}
+
+			}
+		});
+		
+		
 		statsScrollPane.setViewportView(cellStatsTable);
 		statsScrollPane.setColumnHeaderView(cellStatsTable.getTableHeader());
 
@@ -78,18 +119,19 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 		this.list = list;
 		
 		if(list.size()==1){
-
-			ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getNucleusPathsAndNumbers());
+			activeDataset = list.get(0);
+			ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(activeDataset.getCollection().getNucleusPathsAndNumbers());
 			cellSelectionBox.setModel(cellModel);
 			cellSelectionBox.setSelectedIndex(0);
 		} 
 	}
 	
-	private void updateCell(Cell cell, AnalysisDataset dataset){
+	private void updateCell(Cell cell){
 		
 		// update the stats table
 		cellStatsTable.setModel(CellDatasetCreator.createCellInfoTable(cell));
-		
+		cellStatsTable.getColumnModel().getColumn(1).setCellRenderer(new StatsTableCellRenderer());
+
 		// make an empty chart
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -113,7 +155,7 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 		
 		// get the signals datasets and add each group to the hash
 		if(cell.getNucleus().hasSignal()){
-			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
+			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, activeDataset);
 			
 			for(XYDataset d : signalsDatasets){
 				
@@ -151,6 +193,7 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 				
 				// all datasets use the same stroke
 				plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
 
 				// nucleus colour
 				if(hash.get(key).equals("Nucleus")){
@@ -162,18 +205,15 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 				if(hash.get(key).startsWith("SignalGroup_")){
 					
 					int colourIndex = getIndexFromLabel(hash.get(key));
-
-					plot.getRenderer(key).setSeriesPaint(i, ColourSelecter.getSignalColour(colourIndex-1, true, 128));
-					plot.getRenderer(key).setSeriesVisibleInLegend(i, true);
-
+					Color colour = activeDataset.getSignalGroupColour(colourIndex);
+					plot.getRenderer(key).setSeriesPaint(i, colour);
+//					plot.getRenderer(key).setSeriesPaint(i, ColourSelecter.getSignalColour(colourIndex-1, true, 128));
 				}
 
 				// tail border
 				if(hash.get(key).equals("TailBorder")){
 
 					plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
-					plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
-
 				}
 
 				
@@ -181,8 +221,6 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 				if(hash.get(key).equals("TailSkeleton")){
 
 					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
-					plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
-
 				}
 			}
 
@@ -213,11 +251,10 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 
 			if(list.size()==1){	
 				try{
-
-					AnalysisDataset d = list.get(0);
-					Cell cell = d.getCollection().getCell(name);
 					
-					updateCell(cell, d);
+//					Cell cell = activeDataset.getCollection().getCell(name);
+					activeCell = activeDataset.getCollection().getCell(name);
+					updateCell(activeCell);
 				} catch (Exception e1){
 					IJ.log("Error fetching cell: "+e1.getMessage());
 					for(StackTraceElement e2 : e1.getStackTrace()){
@@ -228,6 +265,42 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 
 		}
 		
+	}
+	
+	
+	/**
+	 * Allows for cell background to be coloured based on position in a list. Used to colour
+	 * the signal stats list
+	 *
+	 */
+	private class StatsTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+			// default cell colour is white
+			Color colour = Color.WHITE;
+
+			// get the value in the first column of the row below
+			if(row<table.getModel().getRowCount()-1){
+				String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
+
+				if(nextRowHeader.equals("Signal group")){
+					// we want to colour this cell preemptively
+					// get the signal group from the table
+					String groupString = table.getModel().getValueAt(row+1, 1).toString();
+					colour = activeDataset.getSignalGroupColour(Integer.valueOf(groupString));
+//					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
+				}
+			}
+			//Cells are by default rendered as a JLabel.
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			l.setBackground(colour);
+
+			//Return the JLabel which renders the cell.
+			return l;
+		}
 	}
 
 }

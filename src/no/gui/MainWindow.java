@@ -2,7 +2,6 @@ package no.gui;
 
 import ij.IJ;
 import ij.io.DirectoryChooser;
-import ij.io.OpenDialog;
 import ij.io.SaveDialog;
 
 import java.awt.BorderLayout;
@@ -14,7 +13,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
@@ -173,7 +171,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	
 	private JPanel segmentsBoxplotPanel;// container for boxplots chart and decoration
-	private JComboBox segmentSelectionBox; // choose which segments to compare
+	private JComboBox<String> segmentSelectionBox; // choose which segments to compare
 	
 	private CellDetailPanel cellDetailPanel;
 
@@ -1015,7 +1013,6 @@ public class MainWindow extends JFrame implements ActionListener {
 			public void run() {
 				try {
 					
-//					FileFilter filter = new FileFilter(); TODO: make select ndb only
 					FileNameExtensionFilter filter = new FileNameExtensionFilter("Nuclear morphology datasets", "nmd");
 					
 					File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
@@ -1092,7 +1089,6 @@ public class MainWindow extends JFrame implements ActionListener {
 					nuclearBoxplotsPanel.update(list);
 					
 					signalsDetailPanel.update(list);
-//					TODO: add new shell analysis to popup menu
 
 					updateClusteringPanel(list);
 					updateVennPanel(list);
@@ -1320,17 +1316,11 @@ public class MainWindow extends JFrame implements ActionListener {
 					consensusPlot.getRangeAxis().setVisible(false);
 					consensusChartPanel.setChart(consensusChart);
 					
-					final UUID id = collection.getID();
 					runRefoldingButton.setVisible(true);
 
 
 				} else {
 					runRefoldingButton.setVisible(false);
-//					for(Component c : consensusChartPanel.getComponents() ){
-//						if(c.getClass()==JButton.class){
-//							c.setVisible(false);
-//						}
-//					}
 					JFreeChart chart = makeConsensusChart(collection);
 					consensusChartPanel.setChart(chart);
 				} 
@@ -1501,8 +1491,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		if(list.size()==1){
 			AnalysisDataset dataset = list.get(0);
-			CellCollection collection = dataset.getCollection();
-			final UUID id = collection.getID();
+//			CellCollection collection = dataset.getCollection();
 			
 			clusteringPanel = new JPanel();
 			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
@@ -1510,12 +1499,11 @@ public class MainWindow extends JFrame implements ActionListener {
 			if(!dataset.hasClusters()){ // only allow clustering once per population
 
 				JButton btnNewClusterAnalysis = new JButton("Cluster population");
-//				btnNewClusterAnalysis.addActionListener(new ClusterAnalysisAction());
 				btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent arg0) {
 						new ClusterAnalysisAction();
-//						clusterAnalysis(MainWindow.this.analysisDatasets.get(id).getCollection());
+
 					}
 				});
 				clusteringPanel.add(btnNewClusterAnalysis);
@@ -1524,15 +1512,6 @@ public class MainWindow extends JFrame implements ActionListener {
 				JTextArea label = new JTextArea(dataset.getClusterTree());
 				label.setLineWrap(true);
 				
-//				DefaultMutableTreeNode top = new DefaultMutableTreeNode("root node");
-//				DefaultMutableTreeNode category = addChildNodes(id);
-//
-//				top.add(category);
-//				JTree tree = new JTree(top);
-//				tree.setRootVisible( false );
-//				for (int i = 0; i < tree.getRowCount(); i++) { // ensure we start with all open
-//					tree.expandRow(i);
-//				}
 				JScrollPane treeView = new JScrollPane(label);
 				clusteringPanel.add(treeView);
 			}
@@ -2668,7 +2647,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	/**
 	 * Contains a progress bar and handling methods for when an action
 	 * is triggered as a SwingWorker. Subclassed for each action type.
-	 * @author bms41
 	 *
 	 */
 	abstract class ProgressableAction implements PropertyChangeListener{

@@ -75,7 +75,6 @@ public class ColourSelecter {
 	 * @return a colour
 	 */
 	public static Color getSignalColour(int channel, boolean transparent, int defaultAlpha){
-//		int i = channel-1;
 		Color result;
 		Color color = ColourSelecter.signalColourList.get(channel % ColourSelecter.signalColourList.size());
 		result = transparent ? new Color(color.getRed(),color.getGreen(),color.getBlue(),defaultAlpha) : color;
@@ -99,5 +98,27 @@ public class ColourSelecter {
 	 */	
 	public static Color getSignalColour(int channel){
 		return getSignalColour(channel, false);
+	}
+	
+	/**
+	 * Get a transparent version of a colour
+	 * @param c the input colour
+	 * @param transparent flag
+	 * @param defaultAlpha the alpha level
+	 * @return the new colour
+	 */
+	public static Color getTransparentColour(Color c, boolean transparent, int defaultAlpha){
+		Color result = transparent ? new Color(c.getRed(),c.getGreen(),c.getBlue(),defaultAlpha) : c;
+		return result;
+	}
+	
+	/**
+	 * Get a transparent version of a colour using default transparency (10)
+	 * @param c the input colour
+	 * @param transparent flag
+	 * @return  a colour with the default transparency
+	 */
+	public static Color getTransparentColour(Color c, boolean transparent){
+		return getTransparentColour(c, transparent, 10);
 	}
 }

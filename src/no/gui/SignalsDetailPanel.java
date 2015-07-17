@@ -521,20 +521,6 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 		
 		panel.setLayout(new BorderLayout(0,0));
 		JLabel lbl = new JLabel(label);
-		
-//		if(showRunButton && collection !=null){
-//			final UUID id = collection.getID();
-//			JButton btnShellAnalysis = new JButton("Run shell analysis");
-//			btnShellAnalysis.addActionListener(new ShellAnalysisAction());
-//			btnShellAnalysis.addMouseListener(new MouseAdapter() {
-//				@Override
-//				public void mouseClicked(MouseEvent arg0) {
-//					new MainWindow.ShellAnalysisAction();
-////					new ShellAnalysisAction();
-//				}
-//			});
-//			panel.add(btnShellAnalysis, BorderLayout.SOUTH);
-//		}
 		lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		panel.add(lbl, BorderLayout.NORTH);
 		return panel;
@@ -577,24 +563,28 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 		private static final long serialVersionUID = 1L;
 
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	        
-	      //Cells are by default rendered as a JLabel.
-	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-	        	        
-	        int numberOfRowsPerSignalGroup = 11;
-	        
-	        // calculate the colour to be adding
-	        int indexToColourise = ((row-1)/numberOfRowsPerSignalGroup);
-	        
-	        // make the cells white unless they are a multiple of the number of groups (ie a header)
-	        Color colour = (row-1) % numberOfRowsPerSignalGroup == 0 
-	        			 ? ColourSelecter.getSignalColour(  indexToColourise   ) 
-	        			 : Color.WHITE;
-	        
-	        l.setBackground(colour);
 
-	      //Return the JLabel which renders the cell.
-	      return l;
-	    }
+			// default cell colour is white
+			Color colour = Color.WHITE;
+
+			// get the value in the first column of the row below
+			if(row<table.getModel().getRowCount()-1){
+				String nextRowHeader = table.getModel().getValueAt(row+1, 0).toString();
+
+				if(nextRowHeader.equals("Signal group")){
+					// we want to colour this cell preemptively
+					// get the signal group from the table
+					String groupString = table.getModel().getValueAt(row+1, 1).toString();
+					
+					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
+				}
+			}
+			//Cells are by default rendered as a JLabel.
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			l.setBackground(colour);
+
+			//Return the JLabel which renders the cell.
+			return l;
+		}
 	}
 }

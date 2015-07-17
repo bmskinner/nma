@@ -2,6 +2,7 @@ package no.analysis;
 
 import ij.IJ;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.ShellResult;
 import no.export.PopulationExporter;
+import no.gui.ColourSelecter;
 import no.gui.MainWindow;
 
 
@@ -33,9 +35,9 @@ public class AnalysisDataset implements Serializable {
 	private File savePath; // the file to save the analysis to
 	
 	private AnalysisOptions analysisOptions;
-	private Map<Integer, ShellResult> shellResults = new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
-	
-	private Map<Integer, Boolean> signalGroupsVisible = new HashMap<Integer, Boolean>(0);
+	private Map<Integer, ShellResult> shellResults 		= new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
+	private Map<Integer, Boolean> signalGroupsVisible 	= new HashMap<Integer, Boolean>(0);
+	private Map<Integer, Color> signalGroupColours 		= new HashMap<Integer, Color>(0); // allow saving of colour choices
 	
 	private List<UUID> clusterResults = new ArrayList<UUID>(0);
 	private String newickTree;
@@ -305,5 +307,31 @@ public class AnalysisDataset implements Serializable {
 			return true; // default true - only store the false toggle as needed
 		}
 	}
+	
+	/**
+	 * Get the set colour for the signal group, or the default colour if
+	 * none is set
+	 * @param signalGroup the group
+	 * @return a colour
+	 */
+	public Color getSignalGroupColour(int signalGroup){
+		if(this.signalGroupColours.containsKey(signalGroup)){
+			return this.signalGroupColours.get(signalGroup);
+		} else {
+//			The default is the colour selection model for the entire program
+			return ColourSelecter.getSignalColour(  signalGroup-1); 
+		}
+	}
+	
+	/**
+	 * Set the given signal group colour for plots
+	 * @param signalGroup the group
+	 * @param colour the colour
+	 */
+	public void setSignalGroupColour(int signalGroup, Color colour){
+		this.signalGroupColours.put(signalGroup, colour);
+	}
+	
+	
 
 }
