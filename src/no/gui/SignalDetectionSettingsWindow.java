@@ -38,7 +38,7 @@ public class SignalDetectionSettingsWindow extends JDialog implements ChangeList
 	private static final long serialVersionUID = 1L;
 	private static final int    DEFAULT_SIGNAL_THRESHOLD = 70;
 	private static final int    DEFAULT_MIN_SIGNAL_SIZE = 5;
-	private static final double DEFAULT_MAX_SIGNAL_FRACTION = 0.5;
+	private static final double DEFAULT_MAX_SIGNAL_FRACTION = 0.1;
 	private static final double DEFAULT_MIN_CIRC = 0.0;
 	private static final double DEFAULT_MAX_CIRC = 1.0;
 			

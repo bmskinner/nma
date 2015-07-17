@@ -310,11 +310,19 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 				break;
 			}
 		}
-		logger.log("Threshold set at: "+threshold);
+		
+		
+		// only use the calculated threshold if it is larger than
+		// the given minimum
+		if(threshold > options.getSignalThreshold()){
+			logger.log("Threshold set at: "+threshold);
+			options.setThreshold(threshold);
+		} else {
+			logger.log("Threshold kept at minimum: "+options.getSignalThreshold());
+		}
 		
 		// now we have the reverse threshold value, do the thresholding 
 		// and find signal rois
-		options.setThreshold(threshold);
 		detectForwardThresholdSignal(sourceFile, stack, n);
 
 	}

@@ -56,8 +56,6 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private static final String PIG_SPERM_NUCLEUS = "Pig sperm";
 	private static final String ROUND_NUCLEUS = "Round nucleus";
 	
-	// types of signal
-	
 	
 	private static final double DEFAULT_CANNY_LOW_THRESHOLD = 0.1;
 	private static final double DEFAULT_CANNY_HIGH_THRESHOLD = 1.5;
@@ -75,17 +73,11 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private static final double DEFAULT_MIN_NUCLEUS_CIRC = 0.2;
 	private static final double DEFAULT_MAX_NUCLEUS_CIRC = 0.8;
 	private static final int    DEFAULT_NUCLEUS_THRESHOLD = 36;
-	
-	private static final int    DEFAULT_SIGNAL_THRESHOLD = 70;
-	private static final int    DEFAULT_MIN_SIGNAL_SIZE = 5;
-	private static final double DEFAULT_MAX_SIGNAL_FRACTION = 0.5;
-	
+		
 	private static final int    DEFAULT_PROFILE_WINDOW_SIZE = 15;
 	
 	private static final String DEFAULT_REFOLD_MODE = "Fast";
 	
-
-//	private static Map<String, Class<?>>  collectionClassTypes;
 	private static Map<String, Class<?>>  nucleusClassTypes;
 
 	static
@@ -120,14 +112,9 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 	private JSpinner txtProfileWindowSize = new JSpinner(new SpinnerNumberModel(DEFAULT_PROFILE_WINDOW_SIZE,	5, 50, 1));
 
 	private JSpinner nucleusThresholdSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_NUCLEUS_THRESHOLD,	0, 255, 1));
-	private JSpinner signalThresholdSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SIGNAL_THRESHOLD,	0, 255, 1));
 
 	private JSpinner minNuclearCircSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MIN_NUCLEUS_CIRC,	0, 1, 0.05));
 	private JSpinner maxNuclearCircSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MAX_NUCLEUS_CIRC,	0, 1, 0.05));
-
-	private JSpinner minSignalSizeSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MIN_SIGNAL_SIZE,	1, 10000, 1));
-	private JSpinner maxSignalFractSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_MAX_SIGNAL_FRACTION, 0, 1, 0.05));
-
 
 	private JComboBox<String> nucleusSelectionBox;
 
@@ -185,12 +172,6 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 
 		analysisOptions.setMinNucleusCirc(DEFAULT_MIN_NUCLEUS_CIRC);
 		analysisOptions.setMaxNucleusCirc(DEFAULT_MAX_NUCLEUS_CIRC);
-
-		analysisOptions.getNuclearSignalOptions("default").setThreshold(DEFAULT_SIGNAL_THRESHOLD);
-		analysisOptions.getNuclearSignalOptions("default").setMinSize(DEFAULT_MIN_SIGNAL_SIZE);
-		analysisOptions.getNuclearSignalOptions("default").setMaxFraction(DEFAULT_MAX_SIGNAL_FRACTION);
-		analysisOptions.getNuclearSignalOptions("default").setMinCirc(0);
-		analysisOptions.getNuclearSignalOptions("default").setMaxCirc(1);
 
 		analysisOptions.setAngleProfileWindowSize(DEFAULT_PROFILE_WINDOW_SIZE);
 
@@ -369,38 +350,38 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 		panel.setBorder(BorderFactory.createTitledBorder("Detection settings"));
 		panel.setLayout(new GridBagLayout());
 
-		JLabel[] labels = new JLabel[8];
-		JSpinner[] fields = new JSpinner[8];
+		JLabel[] labels = new JLabel[5];
+		JSpinner[] fields = new JSpinner[5];
 
 //		labels[0] = new JLabel("Nucleus threshold");
-		labels[0] = new JLabel("Signal threshold");
-		labels[1] = new JLabel("Min nucleus size");
-		labels[2] = new JLabel("Max nucleus size");
-		labels[3] = new JLabel("Min nucleus circ");
-		labels[4] = new JLabel("Max nucleus circ");
-		labels[5] = new JLabel("Min signal size");
-		labels[6] = new JLabel("Max signal fraction");
-		labels[7] = new JLabel("Profile window");
+//		labels[0] = new JLabel("Signal threshold");
+		labels[0] = new JLabel("Min nucleus size");
+		labels[1] = new JLabel("Max nucleus size");
+		labels[2] = new JLabel("Min nucleus circ");
+		labels[3] = new JLabel("Max nucleus circ");
+//		labels[5] = new JLabel("Min signal size");
+//		labels[6] = new JLabel("Max signal fraction");
+		labels[4] = new JLabel("Profile window");
 
 
 //		fields[0] = nucleusThresholdSpinner;
-		fields[0] = signalThresholdSpinner;
-		fields[1] = txtMinNuclearSize;
-		fields[2] = txtMaxNuclearSize;
-		fields[3] = minNuclearCircSpinner;
-		fields[4] = maxNuclearCircSpinner;
-		fields[5] = minSignalSizeSpinner;
-		fields[6] = maxSignalFractSpinner;
-		fields[7] = txtProfileWindowSize;
+//		fields[0] = signalThresholdSpinner;
+		fields[0] = txtMinNuclearSize;
+		fields[1] = txtMaxNuclearSize;
+		fields[2] = minNuclearCircSpinner;
+		fields[3] = maxNuclearCircSpinner;
+//		fields[5] = minSignalSizeSpinner;
+//		fields[6] = maxSignalFractSpinner;
+		fields[4] = txtProfileWindowSize;
 		
 //		nucleusThresholdSpinner.addChangeListener(this);
-		signalThresholdSpinner.addChangeListener(this);
+//		signalThresholdSpinner.addChangeListener(this);
 		txtMinNuclearSize.addChangeListener(this);
 		txtMaxNuclearSize.addChangeListener(this);
 		minNuclearCircSpinner.addChangeListener(this);
 		maxNuclearCircSpinner.addChangeListener(this);
-		minSignalSizeSpinner.addChangeListener(this);
-		maxSignalFractSpinner.addChangeListener(this);
+//		minSignalSizeSpinner.addChangeListener(this);
+//		maxSignalFractSpinner.addChangeListener(this);
 		txtProfileWindowSize.addChangeListener(this);
 
 		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
@@ -606,11 +587,11 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 				this.analysisOptions.setNucleusThreshold(  (Integer) j.getValue());
 			}
 
-			if(e.getSource()==signalThresholdSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				this.analysisOptions.getNuclearSignalOptions("default").setThreshold(  (Integer) j.getValue());
-			}
+//			if(e.getSource()==signalThresholdSpinner){
+//				JSpinner j = (JSpinner) e.getSource();
+//				j.commitEdit();
+//				this.analysisOptions.getNuclearSignalOptions("default").setThreshold(  (Integer) j.getValue());
+//			}
 
 			if(e.getSource()==txtMinNuclearSize){
 				JSpinner j = (JSpinner) e.getSource();
@@ -659,25 +640,7 @@ public class AnalysisSetupWindow extends JDialog implements ActionListener, Chan
 				
 				this.analysisOptions.setMaxNucleusCirc(  (Double) j.getValue());
 			}
-			
-			if(e.getSource()==minSignalSizeSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				
-				// ensure never larger than the largest nucleus
-//				if( (Integer) j.getValue() > (Integer) txtMaxNuclearSize.getValue() ){
-//					j.setValue( txtMaxNuclearSize.getValue() );
-//				}
-				
-				this.analysisOptions.getNuclearSignalOptions("default").setMinSize(  (Integer) j.getValue());
-			}
-			
-			if(e.getSource()==maxSignalFractSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				this.analysisOptions.getNuclearSignalOptions("default").setMaxFraction(  (Double) j.getValue());
-			}
-			
+						
 			if(e.getSource()==txtProfileWindowSize){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
