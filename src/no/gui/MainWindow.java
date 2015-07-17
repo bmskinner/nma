@@ -201,8 +201,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			// Create the log panel
 			//---------------
-			logPanel = createLogPanel();
-			contentPane.add(logPanel, BorderLayout.WEST);
+//			logPanel = createLogPanel();
+//			contentPane.add(logPanel, BorderLayout.WEST);
 
 			//---------------
 			// Create the header buttons
@@ -242,10 +242,18 @@ public class MainWindow extends JFrame implements ActionListener {
 			createConsensusChartPanel();
 			
 			
+			
+			
 			GridBagConstraints c = new GridBagConstraints();			
-			c.gridwidth = GridBagConstraints.RELATIVE;     //next to last
+			c.gridwidth = 1;     // frist
 			c.fill = GridBagConstraints.BOTH;
 			c.weightx = 1.0;
+			
+			logPanel = createLogPanel();
+			
+			topGeneralPanel.add(logPanel, c);
+			
+			c.gridwidth = GridBagConstraints.RELATIVE;     //next to last
 			topGeneralPanel.add(panelPopulations, c);	
 			
 			c.anchor = GridBagConstraints.WEST;
@@ -377,8 +385,8 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		progressPanel = new JPanel();
 		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
-		progressPanel.add(new JLabel("Analyses in progress:"));
-		panel.add(progressPanel, BorderLayout.SOUTH);
+//		progressPanel.add(new JLabel("Analyses in progress:"));
+		panel.add(progressPanel, BorderLayout.NORTH);
 		
 		return panel;
 	}

@@ -207,7 +207,6 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 					int colourIndex = getIndexFromLabel(hash.get(key));
 					Color colour = activeDataset.getSignalGroupColour(colourIndex);
 					plot.getRenderer(key).setSeriesPaint(i, colour);
-//					plot.getRenderer(key).setSeriesPaint(i, ColourSelecter.getSignalColour(colourIndex-1, true, 128));
 				}
 
 				// tail border

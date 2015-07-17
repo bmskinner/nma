@@ -16,6 +16,7 @@ import no.components.NuclearSignal;
 public interface Nucleus {
 
 	// index values for selecting original positions
+	// indices in  the originalPositions array
 	public static final int X_BASE = 0;
 	public static final int Y_BASE = 1;
 	public static final int WIDTH = 2;

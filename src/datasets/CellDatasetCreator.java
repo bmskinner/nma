@@ -1,5 +1,7 @@
 package datasets;
 
+import ij.IJ;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +70,8 @@ public class CellDatasetCreator {
 					
 					fieldNames.add("Signal CoM");
 					
-					int comX = s.getCentreOfMass().getXAsInt()+n.X_BASE;
-					int comY = s.getCentreOfMass().getYAsInt()+n.Y_BASE;
+					int comX = s.getCentreOfMass().getXAsInt()+ (int) n.getPosition()[Nucleus.X_BASE];
+					int comY = s.getCentreOfMass().getYAsInt()+ (int) n.getPosition()[Nucleus.Y_BASE];
 					rowData.add(comX+", "+comY);
 				}			
 				

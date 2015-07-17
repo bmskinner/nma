@@ -1146,9 +1146,9 @@ public class NucleusDatasetCreator {
 						i++;
 					}
 					double[][] data = { xpoints, ypoints };
-					groupDataset.addSeries("Group_"+signalGroup+"_signal", data);
+					groupDataset.addSeries("Group_"+signalGroup, data);
 				
-				result.add(groupDataset);
+					result.add(groupDataset);
 				}
 			}
 			
