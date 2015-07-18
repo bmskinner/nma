@@ -154,7 +154,7 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 	private void updateSegmentsBoxplot(List<AnalysisDataset> list, String segName){
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-		formatBoxplotChart(boxplotChart);
+		formatBoxplotChart(boxplotChart, list);
 		segmentsBoxplotChartPanel.setChart(boxplotChart);
 	}
 	
@@ -276,8 +276,49 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 		return Integer.parseInt(names[1]);
 	}
 	
+//	/**
+//	 * Apply the default formatting to a boxplot
+//	 * @param boxplot
+//	 */
+//	private void formatBoxplotChart(JFreeChart boxplot){
+//		CategoryPlot plot = boxplot.getCategoryPlot();
+//		plot.setBackgroundPaint(Color.WHITE);
+//		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+//		plot.setRenderer(renderer);
+//		renderer.setUseOutlinePaintForWhiskers(true);   
+//		renderer.setBaseOutlinePaint(Color.BLACK);
+//		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+//		for(int i=0;i<plot.getDataset().getRowCount();i++){
+//			Color color = ColourSelecter.getSegmentColor(i);
+//			renderer.setSeriesPaint(i, color);
+//		}
+//		renderer.setMeanVisible(false);
+//	}
+	
 	/**
-	 * Apply the default formatting to a boxplot
+	 * Apply the default formatting to a boxplot with list
+	 * @param boxplot
+	 */
+	private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
+		formatBoxplotChart(boxplot);
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
+		
+		for(int i=0;i<plot.getDataset().getRowCount();i++){
+			
+			AnalysisDataset d = list.get(i);
+
+			Color color = d.getDatasetColour() == null 
+						? ColourSelecter.getSegmentColor(i)
+						: d.getDatasetColour();
+						
+						renderer.setSeriesPaint(i, color);
+		}
+		renderer.setMeanVisible(false);
+	}
+	
+	/**
+	 * Apply basic formatting to the charts, without any series added
 	 * @param boxplot
 	 */
 	private void formatBoxplotChart(JFreeChart boxplot){
@@ -288,11 +329,6 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 		renderer.setUseOutlinePaintForWhiskers(true);   
 		renderer.setBaseOutlinePaint(Color.BLACK);
 		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-		for(int i=0;i<plot.getDataset().getRowCount();i++){
-			Color color = ColourSelecter.getSegmentColor(i);
-			renderer.setSeriesPaint(i, color);
-		}
-		renderer.setMeanVisible(false);
 	}
 
 }

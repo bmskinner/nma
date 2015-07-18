@@ -250,15 +250,14 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 					plot.setDataset(i, c);
 					
 					// make a transparent color based on teh profile segmenter system
-					Color pColor = ColourSelecter.getSegmentColor(index);
-					Color color = new Color(pColor.getRed(), pColor.getGreen(), pColor.getBlue(), 128);
+					Color profileColour = list.get(index).getDatasetColour();
+					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
 					
-					
-					XYDifferenceRenderer xydr = new XYDifferenceRenderer(color, color, false);
+					XYDifferenceRenderer xydr = new XYDifferenceRenderer(iqrColour, iqrColour, false);
 					
 					// go through each series in the collection, and set the line colour
 					for(int series=0;series<c.getSeriesCount();series++){
-						xydr.setSeriesPaint(series, color);
+						xydr.setSeriesPaint(series, iqrColour);
 						xydr.setSeriesVisibleInLegend(series, false);
 						
 					}
@@ -275,8 +274,11 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
 					String name = (String) profileDS.getSeriesKey(j);
-					String[] names = name.split("_");
-					plot.getRenderer(i).setSeriesPaint(j, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])).darker());
+					
+					int index = getIndexFromLabel(name); 
+					Color profileColour = list.get(index).getDatasetColour();
+					
+					plot.getRenderer(i).setSeriesPaint(j, profileColour.darker());
 				}	
 				
 				profileChartPanel.setChart(chart);
@@ -342,8 +344,6 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 					
 					// make a transparent color based on teh profile segmenter system
 					Color profileColour = list.get(index).getDatasetColour();
-					
-//					Color profileColour = ColourSelecter.getSegmentColor(index);
 					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
 					
 					// fill beteween the upper and lower IQR with single colour; do not show shapes
@@ -417,22 +417,21 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 
 					// find the series index
 					String name = (String) c.getSeriesKey(0);
-					String[] names = name.split("_");
-					int index = Integer.parseInt(names[1]);
+					int index = getIndexFromLabel(name); 
 					
 					// add to dataset
 					plot.setDataset(i, c);
 					
 					// make a transparent color based on teh profile segmenter system
-					Color pColor = ColourSelecter.getSegmentColor(index);
-					Color color = new Color(pColor.getRed(), pColor.getGreen(), pColor.getBlue(), 128);
+					Color profileColour = list.get(index).getDatasetColour();
+					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
 					
 					
-					XYDifferenceRenderer xydr = new XYDifferenceRenderer(color, color, false);
+					XYDifferenceRenderer xydr = new XYDifferenceRenderer(iqrColour, iqrColour, false);
 					
 					// go through each series in the collection, and set the line colour
 					for(int series=0;series<c.getSeriesCount();series++){
-						xydr.setSeriesPaint(series, color);
+						xydr.setSeriesPaint(series, iqrColour);
 						xydr.setSeriesVisibleInLegend(series, false);
 						
 					}
@@ -449,8 +448,9 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
 					String name = (String) profileDS.getSeriesKey(j);
-					String[] names = name.split("_");
-					plot.getRenderer(i).setSeriesPaint(j, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])).darker());
+					int index = getIndexFromLabel(name); 
+					Color profileColour = list.get(index).getDatasetColour();
+					plot.getRenderer(i).setSeriesPaint(j, profileColour.darker());
 				}	
 				
 				frankenChartPanel.setChart(chart);
@@ -478,7 +478,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 				List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
 				Profile xpoints = n.getProfileCollection().getProfile(n.getOrientationPoint()).getPositions(100);
 				for(Integer i : maxima){
-					//				log("Maxima at "+i);
+
 					plot.addDomainMarker(new ValueMarker(xpoints.get(i), Color.BLACK, new BasicStroke(1.0f)));
 				}
 
@@ -498,7 +498,8 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSegmentColor(index));
+					Color profileColour = list.get(index).getDatasetColour();
+					plot.getRenderer().setSeriesPaint(j, profileColour);
 				}	
 				variabilityChartPanel.setChart(chart);
 			}
