@@ -38,6 +38,7 @@ public class AnalysisDataset implements Serializable {
 	private Map<Integer, ShellResult> shellResults 		= new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 	private Map<Integer, Boolean> signalGroupsVisible 	= new HashMap<Integer, Boolean>(0);
 	private Map<Integer, Color> signalGroupColours 		= new HashMap<Integer, Color>(0); // allow saving of colour choices
+	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
 	private List<UUID> clusterResults = new ArrayList<UUID>(0);
 	private String newickTree;
@@ -332,6 +333,22 @@ public class AnalysisDataset implements Serializable {
 		this.signalGroupColours.put(signalGroup, colour);
 	}
 	
+	/**
+	 * Set the dataset colour (used in comparisons between datasets)
+	 * @param colour the new colour
+	 */
+	public void setDatasetColour(Color colour){
+		this.datasetColour = colour;
+	}
+	
+	
+	/**
+	 * Get the currently set dataset colour, or null if not set
+	 * @return colour or null
+	 */
+	public Color getDatasetColour(){
+		return this.datasetColour;
+	}
 	
 
 }

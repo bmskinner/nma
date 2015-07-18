@@ -153,12 +153,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JPanel vennPanel; // show overlaps between populations
 	private JTable vennTable;
 	
-	private JScrollPane wilcoxonPanel; // compare populations
-	private JTable wilcoxonAreaTable;
-	private JTable wilcoxonPerimTable;
-	private JTable wilcoxonFeretTable;
-	private JTable wilcoxonMinFeretTable;
-	private JTable wilcoxonDifferenceTable;
+	private WilcoxonDetailPanel wilcoxonDetailPanel;
 	
 	private ChartPanel segmentsBoxplotChartPanel; // for displaying the legnth of a given segment
 	private ChartPanel segmentsProfileChartPanel; // for displaying the profiles of a given segment
@@ -197,13 +192,6 @@ public class MainWindow extends JFrame implements ActionListener {
 			contentPane.setLayout(new BorderLayout(0, 0));
 			setContentPane(contentPane);
 			
-
-			//---------------
-			// Create the log panel
-			//---------------
-//			logPanel = createLogPanel();
-//			contentPane.add(logPanel, BorderLayout.WEST);
-
 			//---------------
 			// Create the header buttons
 			//---------------
@@ -241,9 +229,9 @@ public class MainWindow extends JFrame implements ActionListener {
 			createPopulationsPanel();
 			createConsensusChartPanel();
 			
-			
-			
-			
+			//---------------
+			// Create the log panel
+			//---------------
 			GridBagConstraints c = new GridBagConstraints();			
 			c.gridwidth = 1;     // frist
 			c.fill = GridBagConstraints.BOTH;
@@ -328,8 +316,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			// Create the Wilcoxon test panel
 			//---------------
-			wilcoxonPanel = createWilcoxonPanel();
-			tabbedPane.addTab("Wilcoxon", null, wilcoxonPanel, null);
+			wilcoxonDetailPanel = new WilcoxonDetailPanel();
+			tabbedPane.addTab("Wilcoxon", null, wilcoxonDetailPanel, null);
 			
 			//---------------
 			// Create the segments boxplot panel
@@ -770,74 +758,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 	}
 	
-	
-	/**
-	 * Create the panel that will hold the statistical tests between populations
-	 */
-	private JScrollPane createWilcoxonPanel(){
-		JScrollPane scrollPane = new JScrollPane();
-		JPanel panel = new JPanel();
-		scrollPane.setViewportView(panel);
-		panel.setLayout(new BorderLayout());
-//		tabbedPane.addTab("Wilcoxon", null, wilcoxonPanel, null);
-		
-		JPanel wilcoxonPartsPanel = new JPanel();
-		wilcoxonPartsPanel.setLayout(new BoxLayout(wilcoxonPartsPanel, BoxLayout.Y_AXIS));
-		
-		Dimension minSize = new Dimension(10, 10);
-		Dimension prefSize = new Dimension(10, 10);
-		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-		wilcoxonPartsPanel.add(new Box.Filler(minSize, prefSize, maxSize));
-		
-		wilcoxonPartsPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank-sum test)"));
-		wilcoxonPartsPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
-		wilcoxonPartsPanel.add(new JLabel("Below the diagonal: p-values"));
-		wilcoxonPartsPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
-		
-		wilcoxonAreaTable = new JTable(NucleusDatasetCreator.createWilcoxonAreaTable(null));
-		addWilconxonTable(wilcoxonPartsPanel, wilcoxonAreaTable, "Areas");
-//		panel.add(wilcoxonAreaTable.getTableHeader(), BorderLayout.NORTH);
-		scrollPane.setColumnHeaderView(wilcoxonAreaTable.getTableHeader());
-
-		
-		wilcoxonPerimTable = new JTable(NucleusDatasetCreator.createWilcoxonPerimeterTable(null));
-		addWilconxonTable(wilcoxonPartsPanel, wilcoxonPerimTable, "Perimeters");
-		
-		wilcoxonMinFeretTable = new JTable(NucleusDatasetCreator.createWilcoxonMinFeretTable(null));
-		addWilconxonTable(wilcoxonPartsPanel, wilcoxonMinFeretTable, "Min feret");
-
-		
-		wilcoxonFeretTable = new JTable(NucleusDatasetCreator.createWilcoxonMaxFeretTable(null));
-		addWilconxonTable(wilcoxonPartsPanel, wilcoxonFeretTable, "Feret");
-		
-		
-		wilcoxonDifferenceTable = new JTable(NucleusDatasetCreator.createWilcoxonVariabilityTable(null));
-		addWilconxonTable(wilcoxonPartsPanel, wilcoxonDifferenceTable, "Differences to median");
-		
-		panel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
-		return scrollPane;
-	}
-	
-	
-	/**
-	 * Prepare a wilcoxon table
-	 * @param panel the JPanel to add the table to
-	 * @param table the table to add
-	 * @param model the model to provide
-	 * @param label the label for the table
-	 */
-	private void addWilconxonTable(JPanel panel, JTable table, String label){
-		Dimension minSize = new Dimension(10, 10);
-		Dimension prefSize = new Dimension(10, 10);
-		Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-		panel.add(new Box.Filler(minSize, prefSize, maxSize));
-		panel.add(new JLabel(label));
-//		table = new JTable();
-		panel.add(table);
-		table.setEnabled(false);
-//		table.setModel(model);
-	}
-	
 	/**
 	 * Standard log - append a newline
 	 * @param s the string to log
@@ -913,13 +833,10 @@ public class MainWindow extends JFrame implements ActionListener {
 		Thread thr = new Thread() {
 			public void run() {
 				lblStatusLine.setText("New analysis in progress");
-				
-//				AnalysisSetupWindow test = new AnalysisSetupWindow();
-				
+								
 				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
 				analysisCreator.run();
 
-//				List<NucleusCollection> result = analysisCreator.getPopulations();
 				List<AnalysisDataset> datasets = analysisCreator.getDatasets();
 				
 				if(datasets.size()==0 || datasets==null){
@@ -929,24 +846,16 @@ public class MainWindow extends JFrame implements ActionListener {
 				// new style datasets
 				for(AnalysisDataset d : datasets){
 					
-					addDataset(d);
-//					d.setName(checkName(d.getName()));
-//					MainWindow.this.analysisDatasets.put(d.getUUID(), d);
-//					MainWindow.this.populationNames.put(d.getName(), d.getUUID());
-					
+					addDataset(d);				
 					
 					for(AnalysisDataset child : d.getChildDatasets()){
 						addDataset(child);
-//						child.setName(checkName(child.getName()));
-//						MainWindow.this.analysisDatasets.put(child.getUUID(), child);
-//						MainWindow.this.populationNames.put(child.getCollection().getName(), child.getUUID());
 					}
 					
 					d.save();
 
 				}
 								
-				
 				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisDatasets.size()+" populations ready to view");
 				updatePopulationList();			
 				
@@ -1056,8 +965,7 @@ public class MainWindow extends JFrame implements ActionListener {
 						}
 						
 						log("OK");
-						log("Opened dataset: "+dataset.getName());
-	//					log("Dataset contains: "+dataset.getChildCount()+" subsets");
+//						log("Opened dataset: "+dataset.getName());
 	
 						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 						list.add(dataset);
@@ -1100,7 +1008,7 @@ public class MainWindow extends JFrame implements ActionListener {
 
 					updateClusteringPanel(list);
 					updateVennPanel(list);
-					updateWilcoxonPanel(list);
+					wilcoxonDetailPanel.update(list);
 					
 					cellDetailPanel.updateList(list);
 					
@@ -1173,44 +1081,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 	}
 	
-	/**
-	 * Update the wilcoxon panel with data from the given datasets
-	 * @param list the datasets
-	 */
-	public void updateWilcoxonPanel(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
-
-		wilcoxonAreaTable.setModel(NucleusDatasetCreator.createWilcoxonAreaTable(list));
-		
-		int columns = wilcoxonAreaTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonAreaTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonPerimTable.setModel(NucleusDatasetCreator.createWilcoxonPerimeterTable(list));
-		columns = wilcoxonPerimTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonPerimTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonMinFeretTable.setModel(NucleusDatasetCreator.createWilcoxonMinFeretTable(list));
-		columns = wilcoxonMinFeretTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonMinFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonFeretTable.setModel(NucleusDatasetCreator.createWilcoxonMaxFeretTable(list));
-		columns = wilcoxonFeretTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonDifferenceTable.setModel(NucleusDatasetCreator.createWilcoxonVariabilityTable(list));
-		columns = wilcoxonDifferenceTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonDifferenceTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-	}
 	
 	public JFreeChart makeProfileChart(XYDataset ds){
 		JFreeChart chart = 
@@ -1816,53 +1686,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 	
-	/**
-	 * Colour a table cell background based on its value to show statistical 
-	 * significance. Shows yellow for values below a Bonferroni-corrected cutoff
-	 * of 0.05, and green for values below a Bonferroni-corrected cutoff
-	 * of 0.01
-	 */
-	public class WilcoxonTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-
-		private static final long serialVersionUID = 1L;
-
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	        
-	      //Cells are by default rendered as a JLabel.
-	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-	        String cellContents = l.getText();
-	        if(cellContents!=null && !cellContents.equals("")){ // ensure value
-//	        	
-		        double pvalue = Double.valueOf(cellContents);
-		        
-		        Color colour = Color.WHITE; // default
-		        
-		        int numberOfTests = 5; // correct for the different variables measured;
-		        double divisor = (double) (   (table.getColumnCount()-2)  * numberOfTests); // for > 2 datasets with numberOFtests tests per dataset
-		        
-		        double fivePct = Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni correction
-		        double onePct = Constants.ONE_PERCENT_SIGNIFICANCE_LEVEL /   divisor;
-//		        IJ.log("Columns: "+table.getColumnCount());
-		        
-		        if(pvalue<=fivePct){
-		        	colour = Color.YELLOW;
-		        }
-		        
-		        if(pvalue<=onePct){
-		        	colour = Color.GREEN;
-		        }
-		        l.setBackground(colour);
-
-	        } else {
-	            l.setBackground(Color.LIGHT_GRAY);
-	        }
-
-	      //Return the JLabel which renders the cell.
-	      return l;
-	    }
-	}
-	
 	class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
 		
 		Object[] columnData = new Object[3];
@@ -2238,6 +2061,8 @@ public class MainWindow extends JFrame implements ActionListener {
 					logc("Deleting collections...");
 				}
 				
+//				TODO: this still has problems with multiple datasets
+				
 				// get the ids as a list, so we don't iterate over datasets
 				// when we could delete a child of the list in progress
 				List<UUID> list = new ArrayList<UUID>(0);
@@ -2246,13 +2071,9 @@ public class MainWindow extends JFrame implements ActionListener {
 				}
 
 				for(UUID id : list){
-					
-//					IJ.log("Removing " +id.toString());
 					// check dataset still exists
 					if(analysisDatasets.containsKey(id)){
 
-//						IJ.log("   Dataset exists");
-						
 						AnalysisDataset d = analysisDatasets.get(id);
 
 //						if(d.isRoot()){
@@ -2264,13 +2085,10 @@ public class MainWindow extends JFrame implements ActionListener {
 							if(analysisDatasets.containsKey(u)){
 								analysisDatasets.remove(u);
 							}
-//							IJ.log("   Removed child id");
 							
 							if(populationNames.containsValue(u)){
 								populationNames.remove(name);
-							}
-//							IJ.log("   Removed child name");
-							
+							}						
 
 							d.deleteChild(u);
 //
