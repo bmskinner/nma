@@ -8,10 +8,13 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -69,6 +72,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 	private JPanel signalHistogramPanel;// signals container for chart and stats table
 	
 	private List<AnalysisDataset> list;
+	private AnalysisDataset activeDataset;
 
 	/**
 	 * Create the panel.
@@ -91,6 +95,40 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 		signalStatsTable = new JTable(); // table  for basic stats
 		signalStatsTable.setModel(signalsTableModel);
 		signalStatsTable.setEnabled(false);
+		
+		signalStatsTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				JTable table = (JTable) e.getSource();
+				
+				// double click
+				if (e.getClickCount() == 2) {
+					int row = table.rowAtPoint((e.getPoint()));
+
+					String value = table.getModel().getValueAt(row+1, 0).toString();
+					if(value.equals("Signal group")){
+						String groupString = table.getModel().getValueAt(row+1, 1).toString();
+						int signalGroup = Integer.valueOf(groupString);
+						
+						Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+						
+						Color newColor = JColorChooser.showDialog(
+			                     SignalsDetailPanel.this,
+			                     "Choose signal Color",
+			                     oldColour);
+						
+						if(newColor != null){
+							activeDataset.setSignalGroupColour(signalGroup, newColor);
+							updateSignalsPanel(list);
+							updateSignalHistogramPanel(list);
+						}
+					}
+						
+				}
+
+			}
+		});
 		
 		JScrollPane signalStatsScrollPane = new JScrollPane(signalStatsTable);
 		signalsPanel.add(signalStatsScrollPane);
@@ -329,8 +367,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 					int seriesGroup = getIndexFromLabel(name);
 					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-
-					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(seriesGroup-1, true, 128));
+					Color colour = activeDataset.getSignalGroupColour(seriesGroup);
+					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
+//					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(seriesGroup-1, true, 128));
 				}	
 				signalAngleChartPanel.setChart(chart);
 			} else {
@@ -368,7 +407,8 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(index-1, true, 128));
+					Color colour = activeDataset.getSignalGroupColour(index);
+					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
 				}	
 				signalDistanceChartPanel.setChart(chart);
 			} else {
@@ -391,10 +431,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 		try {
 
 			if(list.size()==1){
+				this.activeDataset = list.get(0);
 				
-				AnalysisDataset dataset = list.get(0);
-				
-				signalSelectionVisiblePanel = createSignalsVisiblePanel(dataset);
+				signalSelectionVisiblePanel = createSignalsVisiblePanel(activeDataset);
 				signalConsensusAndCheckboxPanel.add(signalSelectionVisiblePanel, BorderLayout.NORTH);
 				signalConsensusAndCheckboxPanel.setVisible(true);
 
@@ -402,7 +441,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 
 				if(collection.hasConsensusNucleus()){ // if a refold is available
 					
-					XYDataset signalCoMs = NucleusDatasetCreator.createSignalCoMDataset(dataset);
+					XYDataset signalCoMs = NucleusDatasetCreator.createSignalCoMDataset(activeDataset);
 					JFreeChart chart = makeConsensusChart(collection);
 
 					XYPlot plot = chart.getXYPlot();
@@ -412,7 +451,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 					for(int series=0;series<signalCoMs.getSeriesCount();series++){
 						String name = (String) signalCoMs.getSeriesKey(series);
 						int seriesGroup = getIndexFromLabel(name);
-						rend.setSeriesPaint(series, ColourSelecter.getSignalColour(seriesGroup-1, false));
+						Color colour = activeDataset.getSignalGroupColour(seriesGroup);
+						rend.setSeriesPaint(series, colour);
+//						rend.setSeriesPaint(series, ColourSelecter.getSignalColour(seriesGroup-1, false));
 						rend.setBaseLinesVisible(false);
 						rend.setBaseShapesVisible(true);
 						rend.setBaseSeriesVisibleInLegend(false);
@@ -420,16 +461,18 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 					plot.setRenderer(1, rend);
 
 					for(int signalGroup : collection.getSignalGroups()){
-						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
+						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(activeDataset, signalGroup);
 
 						int signalCount = shapes.size();
 
 						int alpha = (int) Math.floor( 255 / ((double) signalCount) );
 						alpha = alpha < 5 ? 5 : alpha > 128 ? 128 : alpha;
+						
+						Color colour = activeDataset.getSignalGroupColour(signalGroup);
 
 						for(Shape s : shapes){
 							XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-									null, ColourSelecter.getSignalColour(signalGroup-1, true, alpha)); // layer transparent signals
+									null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
 							plot.addAnnotation(an);
 						}
 					}
@@ -575,8 +618,8 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 					// we want to colour this cell preemptively
 					// get the signal group from the table
 					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					
-					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
+					colour = activeDataset.getSignalGroupColour(Integer.valueOf(groupString));
+//					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
 				}
 			}
 			//Cells are by default rendered as a JLabel.
