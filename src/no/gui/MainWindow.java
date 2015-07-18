@@ -539,7 +539,9 @@ public class MainWindow extends JFrame implements ActionListener {
 						if(newColor != null){
 							dataset.setDatasetColour(newColor);
 						}
+//						treeTable.repaint();
 						updatePanels(MainWindow.this.getSelectedRowsFromTreeTable());
+						
 					}
 				}
 			}
@@ -1423,16 +1425,15 @@ public class MainWindow extends JFrame implements ActionListener {
 	public class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
 		private static final long serialVersionUID = 1L;
-		List<Integer> list;
+		List<Integer> indexList = new ArrayList<Integer>(0);
 		
 		public PopulationTableCellRenderer(List<Integer> list){
 			super();
-			this.list = list;
+			this.indexList = list;
 		}
 		
 		public PopulationTableCellRenderer(){
 			super();
-			this.list = new ArrayList<Integer>(0);
 		}
 
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -1440,20 +1441,22 @@ public class MainWindow extends JFrame implements ActionListener {
 	      //Cells are by default rendered as a JLabel.
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-	        if (list.contains(row)) {
+	        if (indexList.contains(row)) {
 	        	
 	        	// get the analysis dataset corresponding to this row
-	        	AnalysisDataset d = MainWindow.this.getSelectedRowsFromTreeTable().get(row);
+	        	String populationName = (String) table.getModel().getValueAt(row, 0);
+	        	UUID id = MainWindow.this.populationNames.get(populationName);
+				AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
 	        	
+				
 	        	// if a preferred colour is specified, use it, otherwise go for defaults
-	        	Color colour 	= d.getDatasetColour() == null 
-	        					? ColourSelecter.getSegmentColor(list.indexOf(row))
-	        					: d.getDatasetColour();
+	        	Color colour 	= dataset.getDatasetColour() == null 
+	        					? ColourSelecter.getSegmentColor(indexList.indexOf(row))
+	        					: dataset.getDatasetColour();
 
 	        	l.setBackground(colour);
-//	        	l.setBackground(ColourSelecter.getSegmentColor(list.indexOf(row)));
 	        } else {
-	        	l.setBackground(Color.WHITE);
+	        	l.setBackground(Color.WHITE); // only colour the selected rows
 	        }
 
 	      //Return the JLabel which renders the cell.
