@@ -1099,13 +1099,19 @@ public class MainWindow extends JFrame implements ActionListener {
 					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
 					String name = (String) ds.getSeriesKey(i);
 					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+					
+					int index = getIndexFromLabel(name);
+					AnalysisDataset d = list.get(index);
+					
+					Color color = d.getDatasetColour() == null 
+							? ColourSelecter.getSegmentColor(i)
+							: d.getDatasetColour();
 
 					// get the group id from the name, and make colour
-					String[] names = name.split("_");
-					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])));
+					plot.getRenderer().setSeriesPaint(i, color);
 					if(name.startsWith("Q")){
 						// make the IQR distinct from the median
-						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])).darker());
+						plot.getRenderer().setSeriesPaint(i, color.darker());
 					}
 					
 				}
