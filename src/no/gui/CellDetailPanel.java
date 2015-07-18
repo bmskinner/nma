@@ -57,6 +57,7 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 		// make the chart for each nucleus
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null);       
+		chart.setBackgroundPaint(Color.WHITE);
 
 		cellOutlineChartPanel = new ChartPanel(chart);
 		this.add(cellOutlineChartPanel, BorderLayout.CENTER);

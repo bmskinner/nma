@@ -64,6 +64,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
@@ -138,27 +139,22 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private JTabbedPane tabbedPane;
 	
-	private NucleusProfilesPanel nucleusProfilesPanel;
+	private NucleusProfilesPanel 	nucleusProfilesPanel;
+	private SignalsDetailPanel 		signalsDetailPanel;
+	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;
+	private WilcoxonDetailPanel 	wilcoxonDetailPanel;
+	private SegmentsDetailPanel 	segmentsDetailPanel;
+	private CellDetailPanel 		cellDetailPanel;
 	
-	private SignalsDetailPanel signalsDetailPanel;
-		
 	private ChartPanel consensusChartPanel;
-
-	private JButton runRefoldingButton;
 	
-	private NuclearBoxplotsPanel nuclearBoxplotsPanel;
-		
+	private JButton runRefoldingButton;
+
 	private JPanel clusteringPanel;// container for clustering options and display
 	
 	private JPanel vennPanel; // show overlaps between populations
 	private JTable vennTable;
 	
-	private WilcoxonDetailPanel wilcoxonDetailPanel;
-	
-	private SegmentsDetailPanel segmentsDetailPanel;
-	
-	private CellDetailPanel cellDetailPanel;
-
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
@@ -517,18 +513,38 @@ public class MainWindow extends JFrame implements ActionListener {
 				
 				JXTreeTable table = (JXTreeTable) e.getSource();
 				
+				int row		= table.rowAtPoint((e.getPoint()));
+				int column 	= table.columnAtPoint(e.getPoint());
+				String populationName = (String) table.getModel().getValueAt(row, 0);
+				
 				// double click
 				if (e.getClickCount() == 2) {
-					int index = table.rowAtPoint((e.getPoint()));
-					if (index >= 0) {
-						Object o = table.getModel().getValueAt(index, 0);
-						UUID id = MainWindow.this.populationNames.get(o.toString());
-						renameCollection(MainWindow.this.analysisDatasets.get(id));
+					
+					UUID id = MainWindow.this.populationNames.get(populationName);
+					AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
+					
+					if (row >= 0 && column == 0) { // first (names) column						
+						renameCollection(dataset);
+					}
+					
+					if(row >= 0 && column == 2){ // third (colours) column
+						
+						Color oldColour = ColourSelecter.getSegmentColor( row );
+						
+						Color newColor = JColorChooser.showDialog(
+			                     MainWindow.this,
+			                     "Choose dataset Color",
+			                     oldColour);
+						
+						if(newColor != null){
+							dataset.setDatasetColour(newColor);
+						}
+						updatePanels(MainWindow.this.getSelectedRowsFromTreeTable());
 					}
 				}
-
 			}
 		});
+		
 
 		TreeSelectionModel tableSelectionModel = treeTable.getTreeSelectionModel();
 		tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
@@ -1425,9 +1441,19 @@ public class MainWindow extends JFrame implements ActionListener {
 	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
 	        if (list.contains(row)) {
-	          l.setBackground(ColourSelecter.getSegmentColor(list.indexOf(row)));
+	        	
+	        	// get the analysis dataset corresponding to this row
+	        	AnalysisDataset d = MainWindow.this.getSelectedRowsFromTreeTable().get(row);
+	        	
+	        	// if a preferred colour is specified, use it, otherwise go for defaults
+	        	Color colour 	= d.getDatasetColour() == null 
+	        					? ColourSelecter.getSegmentColor(list.indexOf(row))
+	        					: d.getDatasetColour();
+
+	        	l.setBackground(colour);
+//	        	l.setBackground(ColourSelecter.getSegmentColor(list.indexOf(row)));
 	        } else {
-	          l.setBackground(Color.WHITE);
+	        	l.setBackground(Color.WHITE);
 	        }
 
 	      //Return the JLabel which renders the cell.

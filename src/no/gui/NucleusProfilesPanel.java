@@ -300,69 +300,78 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 				rawChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> ds = NucleusDatasetCreator.createMultiProfileIQRDataset(list, false, rightAlign);				
-				
-				XYDataset profileDS = NucleusDatasetCreator.createMultiProfileDataset(list, false, rightAlign);
+				List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, false, rightAlign);				
+				XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, false, rightAlign);
 				
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
 						                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
 						                false);
 				
-				// find the maximum profile length
+				// find the maximum profile length - used when rendering raw profiles
 				int length = 100;
 				for(AnalysisDataset d : list){
-					if(   (int) d.getCollection().getMedianArrayLength()>length){
-						length = (int) d.getCollection().getMedianArrayLength();
-					}
+					length = (int) Math.max( d.getCollection().getMedianArrayLength(), length);
+
 				}
 				
-
+				// set basic range and colour
 				XYPlot plot = chart.getXYPlot();
 				plot.getDomainAxis().setRange(0,length);
 				plot.getRangeAxis().setRange(0,360);
 				plot.setBackgroundPaint(Color.WHITE);
+				
+				// add 180 degree horizontal line
 				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
 				
-				int i=0;
-				for(XYSeriesCollection c : ds){
+				int lastSeries = 0;
 
-					// find the series index
-					String name = (String) c.getSeriesKey(0);
-					String[] names = name.split("_");
-					int index = Integer.parseInt(names[1]);
-					
+				for(int i=0;i<iqrProfiles.size();i++){
+					XYSeriesCollection seriesCollection = iqrProfiles.get(i);
+
 					// add to dataset
-					plot.setDataset(i, c);
+					plot.setDataset(i, seriesCollection);
+					
+					
+					// find the series index
+					String name = (String) seriesCollection.getSeriesKey(0);
+					
+					// index should be the position in the AnalysisDatase list
+					// see construction in NucleusDatasetCreator
+					int index = getIndexFromLabel(name); 
 					
 					// make a transparent color based on teh profile segmenter system
-					Color pColor = ColourSelecter.getSegmentColor(index);
-					Color color = new Color(pColor.getRed(), pColor.getGreen(), pColor.getBlue(), 128);
+					Color profileColour = list.get(index).getDatasetColour();
 					
+//					Color profileColour = ColourSelecter.getSegmentColor(index);
+					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
 					
-					XYDifferenceRenderer xydr = new XYDifferenceRenderer(color, color, false);
+					// fill beteween the upper and lower IQR with single colour; do not show shapes
+					XYDifferenceRenderer differenceRenderer = new XYDifferenceRenderer(iqrColour, iqrColour, false);
 					
 					// go through each series in the collection, and set the line colour
-					for(int series=0;series<c.getSeriesCount();series++){
-						xydr.setSeriesPaint(series, color);
-						xydr.setSeriesVisibleInLegend(series, false);
+					for(int series=0;series<seriesCollection.getSeriesCount();series++){
+						differenceRenderer.setSeriesPaint(series, iqrColour);
+						differenceRenderer.setSeriesVisibleInLegend(series, false);
 						
 					}
-					plot.setRenderer(i, xydr);
-					
-					
-					i++;
+					plot.setRenderer(i, differenceRenderer);
+
+					lastSeries++; // track the count of series
 				}
 
-				plot.setDataset(i, profileDS);
-				plot.setRenderer(i, new StandardXYItemRenderer());
+				plot.setDataset(lastSeries, medianProfiles);
+				StandardXYItemRenderer medianRenderer = new StandardXYItemRenderer();
+				plot.setRenderer(lastSeries, medianRenderer);
 
-				for (int j = 0; j < profileDS.getSeriesCount(); j++) {
-					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.FALSE);
-					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
-					String name = (String) profileDS.getSeriesKey(j);
-					String[] names = name.split("_");
-					plot.getRenderer(i).setSeriesPaint(j, ColourSelecter.getSegmentColor(Integer.parseInt(names[1])).darker());
+				for (int j = 0; j < medianProfiles.getSeriesCount(); j++) {
+					medianRenderer.setSeriesVisibleInLegend(j, Boolean.FALSE);
+					medianRenderer.setSeriesStroke(j, new BasicStroke(2));
+					String name = (String) medianProfiles.getSeriesKey(j);
+					int index = getIndexFromLabel(name); 
+					Color profileColour = list.get(index).getDatasetColour();
+
+					medianRenderer.setSeriesPaint(j, profileColour.darker());
 				}	
 				
 				rawChartPanel.setChart(chart);

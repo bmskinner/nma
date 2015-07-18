@@ -219,8 +219,8 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 		// TODO Auto-generated method stub
 		if(arg0.getActionCommand().equals("SegmentBoxplotChoice")){
 			String segName = (String) segmentSelectionBox.getSelectedItem();
+			
 			// create the appropriate chart
-			//TODO
 			updateSegmentsBoxplot(list, segName);
 			
 			if(  normSegmentCheckBox.isSelected()){
