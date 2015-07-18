@@ -155,18 +155,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private WilcoxonDetailPanel wilcoxonDetailPanel;
 	
-	private ChartPanel segmentsBoxplotChartPanel; // for displaying the legnth of a given segment
-	private ChartPanel segmentsProfileChartPanel; // for displaying the profiles of a given segment
-	
-	// 
-	private JCheckBox    normSegmentCheckBox = new JCheckBox("Normalised");	// to toggle raw or normalised segment profiles in segmentsProfileChartPanel
-	private JRadioButton rawSegmentLeftButton  = new JRadioButton("Left"); // left align raw segment profiles in segmentsProfileChartPanel
-	private JRadioButton rawSegmentRightButton = new JRadioButton("Right"); // right align raw segment profiles in segmentsProfileChartPanel
-	
-	
-	
-	private JPanel segmentsBoxplotPanel;// container for boxplots chart and decoration
-	private JComboBox<String> segmentSelectionBox; // choose which segments to compare
+	private SegmentsDetailPanel segmentsDetailPanel;
 	
 	private CellDetailPanel cellDetailPanel;
 
@@ -322,15 +311,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			// Create the segments boxplot panel
 			//---------------
-			JPanel segmentsPanel = new JPanel();
-			segmentsPanel.setLayout(new GridLayout(0,2,0,0));
-			
-			JPanel segmentProfilePanel  = createSegmentProfilePanel();
-			segmentsBoxplotPanel = createSegmentBoxplotsPanel();
-			
-			segmentsPanel.add(segmentProfilePanel);
-			segmentsPanel.add(segmentsBoxplotPanel);
-			tabbedPane.addTab("Segments", null, segmentsPanel, null);
+			segmentsDetailPanel = new SegmentsDetailPanel();
+			tabbedPane.addTab("Segments", null, segmentsDetailPanel, null);
 
 			//---------------
 			// Create the cells panel
@@ -635,127 +617,11 @@ public class MainWindow extends JFrame implements ActionListener {
 		return scrollPane;
 	}
 		
-	private JPanel createSegmentProfilePanel(){
-		
-		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
-		Dimension minimumChartSize = new Dimension(50, 100);
-		Dimension preferredChartSize = new Dimension(400, 300);
-		JFreeChart profileChart = ChartFactory.createXYLineChart(null,
-	            "Position", "Angle", null);
-		XYPlot plot = profileChart.getXYPlot();
-		plot.getDomainAxis().setRange(0,100);
-		plot.getRangeAxis().setRange(0,360);
-		plot.setBackgroundPaint(Color.WHITE);
-		
-		segmentsProfileChartPanel = new ChartPanel(profileChart);
-		segmentsProfileChartPanel.setMinimumSize(minimumChartSize);
-		segmentsProfileChartPanel.setPreferredSize(preferredChartSize);
-		segmentsProfileChartPanel.setMinimumDrawWidth( 0 );
-		segmentsProfileChartPanel.setMinimumDrawHeight( 0 );
-		panel.add(segmentsProfileChartPanel, BorderLayout.CENTER);
-		
-		
-		// checkbox to select raw or normalised profiles
-		normSegmentCheckBox.setSelected(true);
-		normSegmentCheckBox.setActionCommand("NormalisedSegmentProfile");
-		normSegmentCheckBox.addActionListener(this);
-		
-		// make buttons to select raw profiles
-		rawSegmentLeftButton.setSelected(true);
-		rawSegmentLeftButton.setActionCommand("LeftAlignSegmentProfile");
-		rawSegmentRightButton.setActionCommand("RightAlignSegmentProfile");
-		rawSegmentLeftButton.addActionListener(this);
-		rawSegmentRightButton.addActionListener(this);
-		rawSegmentLeftButton.setEnabled(false);
-		rawSegmentRightButton.setEnabled(false);
-		
-
-		//Group the radio buttons.
-		final ButtonGroup alignGroup = new ButtonGroup();
-		alignGroup.add(rawSegmentLeftButton);
-		alignGroup.add(rawSegmentRightButton);
-		
-		JPanel alignPanel = new JPanel();
-		alignPanel.setLayout(new BoxLayout(alignPanel, BoxLayout.X_AXIS));
-
-		alignPanel.add(normSegmentCheckBox);
-		alignPanel.add(rawSegmentLeftButton);
-		alignPanel.add(rawSegmentRightButton);
-		panel.add(alignPanel, BorderLayout.NORTH);
-		return panel;
-	}
-	
-	private JPanel createSegmentBoxplotsPanel(){
-		JPanel panel = new JPanel(); // main container in tab
-
-		panel.setLayout(new BorderLayout());
-		
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-
-		segmentsBoxplotChartPanel = new ChartPanel(boxplot);
-		panel.add(segmentsBoxplotChartPanel, BorderLayout.CENTER);
-		
-		segmentSelectionBox = new JComboBox<String>();
-		segmentSelectionBox.setActionCommand("SegmentBoxplotChoice");
-		segmentSelectionBox.addActionListener(this);
-		panel.add(segmentSelectionBox, BorderLayout.NORTH);
-		
-
-
-		return panel;
-	}
 			
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		List<AnalysisDataset> list = getSelectedRowsFromTreeTable();
-
-		if(e.getActionCommand().equals("SegmentBoxplotChoice")){
-			String segName = (String) segmentSelectionBox.getSelectedItem();
-			// create the appropriate chart
-			//TODO
-			updateSegmentsBoxplot(list, segName);
-			
-			if(  normSegmentCheckBox.isSelected()){
-				updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), true, false);
-			} else {
-				
-				if(  rawSegmentLeftButton.isSelected()){
-					updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), false, false);
-				} else {
-					updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), false, true);
-				}
-			}
-			
-		}
-				
-		if(e.getActionCommand().equals("LeftAlignSegmentProfile")){
-			updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, false);
-		}
-		
-		if(e.getActionCommand().equals("RightAlignSegmentProfile")){
-			updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, true);
-		}
-		
-		if(e.getActionCommand().equals("NormalisedSegmentProfile")){
-
-			if(  normSegmentCheckBox.isSelected()){
-				rawSegmentLeftButton.setEnabled(false);
-				rawSegmentRightButton.setEnabled(false);
-				updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), true, false);
-			} else {
-				rawSegmentLeftButton.setEnabled(true);
-				rawSegmentRightButton.setEnabled(true);
-				
-				if(  rawSegmentLeftButton.isSelected()){
-					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, false);
-				} else {
-					updateSegmentsProfile(getSelectedRowsFromTreeTable(), (String) segmentSelectionBox.getSelectedItem(), false, true);
-				}
-			}
-			
-		}
 	}
 	
 	/**
@@ -1012,15 +878,8 @@ public class MainWindow extends JFrame implements ActionListener {
 					
 					cellDetailPanel.updateList(list);
 					
-					if(list!=null){
-						// get the list of segments from the datasets
-						ComboBoxModel<String> aModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getSegmentNames().toArray(new String[0]));
-						segmentSelectionBox.setModel(aModel);
-						segmentSelectionBox.setSelectedIndex(0);
-						updateSegmentsBoxplot(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
-						updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), true, false); // get segname from panel
-						 
-					}
+					segmentsDetailPanel.update(list);
+
 					
 				} catch (Exception e) {
 					log("Error updating panels: "+e.getMessage());
@@ -1245,69 +1104,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 	}
 		
-	public void updateSegmentsBoxplot(List<AnalysisDataset> list, String segName){
-		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName);
-		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-//		formatBoxplotChart(boxplotChart);
-		segmentsBoxplotChartPanel.setChart(boxplotChart);
-	}
-	
-	public void updateSegmentsProfile(List<AnalysisDataset> list, String segName, boolean normalised, boolean rightAlign){
-		
-		DefaultXYDataset ds = null;
-		if(normalised){
-			ds = NucleusDatasetCreator.createMultiProfileSegmentDataset(list, segName);
-		} else {
-			ds = NucleusDatasetCreator.createRawMultiProfileSegmentDataset(list, segName, rightAlign);
-		}
-		try {
-				
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-						                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
-						                false);
-
-				XYPlot plot = chart.getXYPlot();
-				
-				if(!normalised){
-					int length = 100;
-					for(AnalysisDataset d : list){
-						if(   (int) d.getCollection().getMedianArrayLength()>length){
-							length = (int) d.getCollection().getMedianArrayLength();
-						}
-					}
-					plot.getDomainAxis().setRange(0,length);
-				} else {
-					plot.getDomainAxis().setRange(0,100);
-				}
-
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
-				
-				for (int i = 0; i < plot.getSeriesCount(); i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-					String name = (String) ds.getSeriesKey(i);
-					if(name.startsWith("Seg_")){
-						int colourIndex = getIndexFromLabel(name);
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(4));
-						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-					} 
-					if(name.startsWith("Profile_")){
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-						plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-					} 
-					
-				}	
-								
-				segmentsProfileChartPanel.setChart(chart);
-			
-			
-		} catch (Exception e) {
-			log("Error in plotting segment profile");
-		} 
-	}
-	
 	
 	/**
 	 *  Find the populations in memory, and display them in the population chooser. 
@@ -1441,7 +1237,6 @@ public class MainWindow extends JFrame implements ActionListener {
 						if(!key.equals("No populations")){
 							
 							// get uuid from populationNames, then population via uuid from analysisDatasets
-//							list.add(analysisPospulations.get(populationNames.get(key)));
 							datasets.add(analysisDatasets.get(populationNames.get(key)));
 							selectedIndexes.add(i);
 							
@@ -1451,7 +1246,6 @@ public class MainWindow extends JFrame implements ActionListener {
 				}
 				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
 				lblStatusLine.setText(datasets.size()+" "+count+"  selected");
-//				populationTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
 				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
 
 				if(datasets.isEmpty()){
