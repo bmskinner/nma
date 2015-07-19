@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -19,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
@@ -138,7 +140,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 							updateSignalsPanel(list);
 							updateSignalHistogramPanel(list);
 							updateAreaBoxplot(list);
-							fireSignalChangeEvent();
+							fireSignalChangeEvent("SignalColourUpdate");
 						}
 					}
 						
@@ -615,11 +617,23 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	 */
 	private JPanel makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
 		JPanel panel = new JPanel(); // container in tab if no shell chart
-		
 		panel.setLayout(new BorderLayout(0,0));
 		JLabel lbl = new JLabel(label);
 		lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		panel.add(lbl, BorderLayout.NORTH);
+		
+		JButton button = new JButton();
+		button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				fireSignalChangeEvent("RunShellAnalysis");
+			}
+		});
+		
+		if(showRunButton){
+			panel.add(button, BorderLayout.SOUTH);
+		}
+		
 		return panel;
 	}
 	
@@ -744,12 +758,13 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
         listeners.remove( l );
     }
      
-    private synchronized void fireSignalChangeEvent() {
-        SignalChangeEvent event = new SignalChangeEvent( this, "SignalColourUpdate" );
+    private synchronized void fireSignalChangeEvent(String message) {
+        SignalChangeEvent event = new SignalChangeEvent( this, message );
         Iterator iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
         }
     }
+    
 
 }

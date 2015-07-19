@@ -106,7 +106,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 	private JTable tablePopulationStats;
 	private JTable tableAnalysisParamters;
-//	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
 	
 	private JPanel logPanel;
 	private JPanel progressPanel;
@@ -264,7 +263,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
 					topRow, tabbedPane);
 			
-			contentPane.add(panelMain, BorderLayout.CENTER); // will divide into two rows
+			contentPane.add(panelMain, BorderLayout.CENTER);
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -790,21 +789,16 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 					
 					nucleusProfilesPanel.update(list);
 					consensusNucleusPanel.update(list);
-//					updateConsensusImage(list);
-					
+
 					nuclearBoxplotsPanel.update(list);
-					
 					signalsDetailPanel.update(list);
 
 					updateClusteringPanel(list);
 					vennDetailPanel.update(list);
 					wilcoxonDetailPanel.update(list);
-					
 					cellDetailPanel.updateList(list);
-					
 					segmentsDetailPanel.update(list);
-
-					
+	
 				} catch (Exception e) {
 					log("Error updating panels: "+e.getMessage());
 					for(StackTraceElement el : e.getStackTrace()){
@@ -2186,13 +2180,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 			try{
 
-//				for(Component c : consensusChartPanel.getComponents() ){
-//					if(c.getClass()==JButton.class){
-//						c.setVisible(false);
-//					}
-//				}
-
-
 				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
 						d.getAnalysisOptions().getNucleusClass(), 
 						"Fast");
@@ -2319,10 +2306,12 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-//		IJ.log(event.type());
 		if(event.type().equals("RefoldNucleusFired")){
-//			IJ.log("Heard refold");
 			new RefoldNucleusAction();
+		}
+		
+		if(event.type().equals("RunShellAnalysis")){
+			new ShellAnalysisAction();
 		}
 		
 	}	
