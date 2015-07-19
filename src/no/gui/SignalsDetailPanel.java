@@ -729,6 +729,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
+		
 		updateSignalsPanel(list);
 		updateSignalHistogramPanel(list);
 		updateAreaBoxplot(list);

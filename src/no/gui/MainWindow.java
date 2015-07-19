@@ -9,8 +9,6 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -18,7 +16,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
@@ -55,26 +52,18 @@ import java.awt.SystemColor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.AbstractAction;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
 import javax.swing.SwingConstants;
@@ -117,13 +106,13 @@ import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame implements ActionListener {
 			
-	private static final int PROFILE_TAB = 0;
-	private static final int STATS_TAB = 1;
-	private static final int ANALYSIS_TAB = 2;
-	private static final int BOXPLOTS_TAB = 3;
-	private static final int SIGNALS_TAB = 4;
-	private static final int CLUSTERS_TAB = 5;
-	private static final int VENN_TAB = 6;
+	private static final int PROFILE_TAB 	= 0;
+	private static final int STATS_TAB 		= 1;
+	private static final int ANALYSIS_TAB	= 2;
+	private static final int BOXPLOTS_TAB	= 3;
+	private static final int SIGNALS_TAB 	= 4;
+	private static final int CLUSTERS_TAB 	= 5;
+	private static final int VENN_TAB 		= 6;
 	
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -149,16 +138,14 @@ public class MainWindow extends JFrame implements ActionListener {
 	private WilcoxonDetailPanel 	wilcoxonDetailPanel;
 	private SegmentsDetailPanel 	segmentsDetailPanel;
 	private CellDetailPanel 		cellDetailPanel;
+	private VennDetailPanel			vennDetailPanel;
 	
 	private ChartPanel consensusChartPanel;
 	
 	private JButton runRefoldingButton;
 
 	private JPanel clusteringPanel;// container for clustering options and display
-	
-	private JPanel vennPanel; // show overlaps between populations
-	private JTable vennTable;
-	
+		
 	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
 	
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
@@ -290,15 +277,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			// Create the Venn panel
 			//---------------
-			vennPanel = new JPanel();
-			vennPanel.setLayout(new BorderLayout());
-			tabbedPane.addTab("Venn", null, vennPanel, null);
-			
-			vennTable = new JTable();
-			vennPanel.add(vennTable, BorderLayout.CENTER);
-			vennTable.setEnabled(false);
-			vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
-			vennTable.setModel(NucleusDatasetCreator.createVennTable(null));
+			vennDetailPanel = new VennDetailPanel();
+			tabbedPane.addTab("Venn", null, vennDetailPanel, null);
 			
 			
 			//---------------
@@ -902,7 +882,7 @@ public class MainWindow extends JFrame implements ActionListener {
 					signalsDetailPanel.update(list);
 
 					updateClusteringPanel(list);
-					updateVennPanel(list);
+					vennDetailPanel.update(list);
 					wilcoxonDetailPanel.update(list);
 					
 					cellDetailPanel.updateList(list);
@@ -953,59 +933,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		TableModel model = NucleusDatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
 	}
-	
-	/**
-	 * Update the venn panel with data from the given datasets
-	 * @param list the datasets
-	 */
-	public void updateVennPanel(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusDatasetCreator.createVennTable(list);
-		vennTable.setModel(model);
-		int columns = vennTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
-
-		}
-	}
-	
-	
-//	private JFreeChart makeProfileChart(XYDataset ds){
-//		JFreeChart chart = 
-//				ChartFactory.createXYLineChart(null,
-//				                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
-//				                false);
-//		
-//		
-//		XYPlot plot = chart.getXYPlot();
-//		plot.getDomainAxis().setRange(0,100);
-//		plot.getRangeAxis().setRange(0,360);
-//		plot.setBackgroundPaint(Color.WHITE);
-//		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
-//
-//		int seriesCount = plot.getSeriesCount();
-//
-//		for (int i = 0; i < seriesCount; i++) {
-//			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-//			String name = (String) ds.getSeriesKey(i);
-//			if(name.startsWith("Seg_")){
-//				int colourIndex = getIndexFromLabel(name);
-//				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-//				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-//			} 
-//			if(name.startsWith("Nucleus_")){
-//				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-//				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-//			} 
-//			if(name.startsWith("Q")){
-//				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-//				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-//			} 
-//			
-//		}	
-//		return chart;
-//	}
-	
 
 	/**
 	 * Create a consenusus chart for the given nucleus collection
@@ -1234,17 +1161,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 		
 	}
-	
-//	private DefaultMutableTreeNode addChildNodes(UUID id){
-//		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
-//		DefaultMutableTreeNode category = new DefaultMutableTreeNode(dataset.getCollection().getName());
-//		List<UUID> childIDList = dataset.getClusterIDs();
-//		for(UUID childID : childIDList){
-//			DefaultMutableTreeNode childNode = addChildNodes(childID);
-//			category.add(childNode);
-//		}
-//		return category;
-//	}
 	
 	
 	/**
@@ -1482,50 +1398,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	    }
 	}
 
-	
-	/**
-	 * Colour table cell background to show pairwise comparisons. All cells are white, apart
-	 * from the diagonal, which is made light grey
-	 */
-	public class VennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-
-		private static final long serialVersionUID = 1L;
-
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	        
-	      //Cells are by default rendered as a JLabel.
-	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-	        String cellContents = l.getText();
-	        if(cellContents!=null && !cellContents.equals("")){ // ensure value
-//	        	IJ.log(cellContents);
-	        	String[] array = cellContents.split("%");
-//	        	 IJ.log(array[0]);
-		        String[] array2 = array[0].split("\\(");
-//		        IJ.log(array2[1]);
-		        double pct = Double.valueOf(array2[1]);
-		        
-//		        IJ.log("Pct: "+pct);
-		        double colourIndex = 255 - ((pct/100) * 255);
-		        
-		        Color colour = new Color((int) colourIndex,(int) colourIndex, 255);
-		        l.setBackground(colour);
-		        
-		        if(pct>60){
-		        	l.setForeground(Color.WHITE);
-		        } else {
-		        	l.setForeground(Color.black);
-		        }
-		        
-	        } else {
-	            l.setBackground(Color.LIGHT_GRAY);
-	        }
-
-	      //Return the JLabel which renders the cell.
-	      return l;
-	    }
-	}
-	
+		
 	
 	class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
 		
