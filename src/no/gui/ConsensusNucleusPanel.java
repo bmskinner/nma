@@ -7,6 +7,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -43,7 +44,7 @@ public class ConsensusNucleusPanel extends JPanel {
 	
 	public ConsensusNucleusPanel() {
 
-		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+		this.setLayout(new FlowLayout());
 		JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
 				null, null, null);
 		XYPlot consensusPlot = consensusChart.getXYPlot();
@@ -67,6 +68,15 @@ public class ConsensusNucleusPanel extends JPanel {
 		consensusChartPanel.add(runRefoldingButton);
 		consensusChartPanel.setMinimumSize(new Dimension(200, 200));
 		
+		
+		
+		
+		consensusChartPanel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				resizePreview(consensusChartPanel, ConsensusNucleusPanel.this);
+			}
+		});
 		
 		this.addComponentListener(new ComponentAdapter() {
 			@Override
@@ -231,8 +241,8 @@ public class ConsensusNucleusPanel extends JPanel {
         int w = container.getWidth();
         int h = container.getHeight();
         int size =  Math.min(w, h);
-        innerPanel.setSize(size, size);
-//        innerPanel.setPreferredSize(new Dimension(size, size));
+//        innerPanel.setSize(size, size);
+        innerPanel.setPreferredSize(new Dimension(size, size));
 //        innerPanel.setMaximumSize(	new Dimension(size, size));
         container.revalidate();
     }

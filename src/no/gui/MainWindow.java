@@ -161,16 +161,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			//---------------
 			contentPane.add(createFooterRow(), BorderLayout.SOUTH);
 			
-			//---------------
-			// General data
-			//---------------
-	
-			// make a panel for the log, populations and consensus chart
-			JPanel topRow = new JPanel();
-			
-			topRow.setLayout(new GridBagLayout());
-						
-			//reset to default
 			
 			//---------------
 			// Create the consensus chart
@@ -183,8 +173,9 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			// Create the log panel
 			//---------------
 			logPanel = createLogPanel();
+			
 			//Create a split pane 
-			JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+			JSplitPane logAndPopulations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 					logPanel, panelPopulations);
 
 			//Provide minimum sizes for the two components in the split pane
@@ -193,24 +184,8 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			panelPopulations.setMinimumSize(minimumSize);
 			
 			
-			GridBagConstraints c = new GridBagConstraints();			
-			c.gridwidth = GridBagConstraints.RELATIVE;
-			c.fill = GridBagConstraints.BOTH;
-			c.weightx = 1.0;
-			
-			
-			
-			topRow.add(splitPane, c);
-
-			
-//			c.gridwidth = GridBagConstraints.RELATIVE;     //next to last
-//			topRow.add(panelPopulations, c);
-			
-			c.anchor = GridBagConstraints.WEST;
-			c.gridwidth = GridBagConstraints.REMAINDER; //end of row
-			c.fill = GridBagConstraints.BOTH;      //reset to default
-			c.weightx = 0.0;   
-			topRow.add(consensusNucleusPanel, c);
+			JSplitPane topRow = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+					logAndPopulations, consensusNucleusPanel);
 			
 			
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
