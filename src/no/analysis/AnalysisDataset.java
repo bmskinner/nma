@@ -36,8 +36,9 @@ public class AnalysisDataset implements Serializable {
 	
 	private AnalysisOptions analysisOptions;
 	private Map<Integer, ShellResult> shellResults 		= new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
-	private Map<Integer, Boolean> signalGroupsVisible 	= new HashMap<Integer, Boolean>(0);
-	private Map<Integer, Color> signalGroupColours 		= new HashMap<Integer, Color>(0); // allow saving of colour choices
+	
+	private Map<Integer, Boolean> 	signalGroupsVisible 	= new HashMap<Integer, Boolean>(0); // is the given signal group shown in plots
+	private Map<Integer, Color> 	signalGroupColours 		= new HashMap<Integer, Color>(0); // allow saving of colour choices
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
 	private List<UUID> clusterResults = new ArrayList<UUID>(0);
@@ -152,12 +153,11 @@ public class AnalysisDataset implements Serializable {
 	
 	// recursive version of get child datasets
 	public List<AnalysisDataset> getAllChildDatasets(){
-//		IJ.log("Traversing "+this.getName());
+
 		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>(0);
 		for(AnalysisDataset d : this.getChildDatasets()){ // the direct descendents of this dataset
 			result.add(d);
 			
-//			IJ.log("Fetching child "+d.getName()+" of "+this.getName());
 			if(this.hasChildren()){
 				result.addAll(d.getAllChildDatasets());
 			}
@@ -168,15 +168,6 @@ public class AnalysisDataset implements Serializable {
 	public CellCollection getCollection(){
 		return this.thisCollection;
 	}
-
-	public void save(){
-		if(savePath==null){
-			IJ.log("No save path defined");
-		} else {
-			PopulationExporter.saveAnalysisDataset(this);
-		}
-	}
-
 
 	public void addShellResult(int channel, ShellResult result){
 		this.shellResults.put(channel, result);

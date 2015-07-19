@@ -55,6 +55,7 @@ import java.awt.SystemColor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,8 +164,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
 	
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
-
-
+	
 	/**
 	 * Create the frame.
 	 */
@@ -320,6 +320,12 @@ public class MainWindow extends JFrame implements ActionListener {
 			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
 			
 			
+			//---------------
+			// Register change listeners
+			//---------------
+			signalsDetailPanel.addSignalChangeListener(cellDetailPanel);
+			cellDetailPanel.addSignalChangeListener(signalsDetailPanel); // allow the panels to communicate colour updates
+			
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -356,7 +362,6 @@ public class MainWindow extends JFrame implements ActionListener {
 
 		progressPanel = new JPanel();
 		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
-//		progressPanel.add(new JLabel("Analyses in progress:"));
 		panel.add(progressPanel, BorderLayout.NORTH);
 		
 		return panel;
@@ -404,7 +409,8 @@ public class MainWindow extends JFrame implements ActionListener {
 				for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
 					if(d.isRoot()){
 						logc("Saving dataset "+d.getCollection().getName()+"...");
-						d.save();
+						PopulationExporter.saveAnalysisDataset(d);
+//						d.save();
 						log("OK");
 					}
 				}
@@ -740,8 +746,8 @@ public class MainWindow extends JFrame implements ActionListener {
 					for(AnalysisDataset child : d.getChildDatasets()){
 						addDataset(child);
 					}
-					
-					d.save();
+					PopulationExporter.saveAnalysisDataset(d);
+//					d.save();
 
 				}
 								
@@ -964,41 +970,41 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 	
-	public JFreeChart makeProfileChart(XYDataset ds){
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-				                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
-				                false);
-		
-		
-		XYPlot plot = chart.getXYPlot();
-		plot.getDomainAxis().setRange(0,100);
-		plot.getRangeAxis().setRange(0,360);
-		plot.setBackgroundPaint(Color.WHITE);
-		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
-
-		int seriesCount = plot.getSeriesCount();
-
-		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-			String name = (String) ds.getSeriesKey(i);
-			if(name.startsWith("Seg_")){
-				int colourIndex = getIndexFromLabel(name);
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-			} 
-			if(name.startsWith("Nucleus_")){
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-			} 
-			if(name.startsWith("Q")){
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-			} 
-			
-		}	
-		return chart;
-	}
+//	private JFreeChart makeProfileChart(XYDataset ds){
+//		JFreeChart chart = 
+//				ChartFactory.createXYLineChart(null,
+//				                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+//				                false);
+//		
+//		
+//		XYPlot plot = chart.getXYPlot();
+//		plot.getDomainAxis().setRange(0,100);
+//		plot.getRangeAxis().setRange(0,360);
+//		plot.setBackgroundPaint(Color.WHITE);
+//		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+//
+//		int seriesCount = plot.getSeriesCount();
+//
+//		for (int i = 0; i < seriesCount; i++) {
+//			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+//			String name = (String) ds.getSeriesKey(i);
+//			if(name.startsWith("Seg_")){
+//				int colourIndex = getIndexFromLabel(name);
+//				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+//				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
+//			} 
+//			if(name.startsWith("Nucleus_")){
+//				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+//				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+//			} 
+//			if(name.startsWith("Q")){
+//				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+//				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+//			} 
+//			
+//		}	
+//		return chart;
+//	}
 	
 
 	/**
@@ -1229,16 +1235,16 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 	}
 	
-	private DefaultMutableTreeNode addChildNodes(UUID id){
-		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
-		DefaultMutableTreeNode category = new DefaultMutableTreeNode(dataset.getCollection().getName());
-		List<UUID> childIDList = dataset.getClusterIDs();
-		for(UUID childID : childIDList){
-			DefaultMutableTreeNode childNode = addChildNodes(childID);
-			category.add(childNode);
-		}
-		return category;
-	}
+//	private DefaultMutableTreeNode addChildNodes(UUID id){
+//		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
+//		DefaultMutableTreeNode category = new DefaultMutableTreeNode(dataset.getCollection().getName());
+//		List<UUID> childIDList = dataset.getClusterIDs();
+//		for(UUID childID : childIDList){
+//			DefaultMutableTreeNode childNode = addChildNodes(childID);
+//			category.add(childNode);
+//		}
+//		return category;
+//	}
 	
 	
 	/**
@@ -1317,6 +1323,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		}
 		return datasets;
 	}
+	
 	
 	/**
 	 * Establish the rows in the population tree that are currently selected.
@@ -2461,6 +2468,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			
 			TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
 			t.addPropertyChangeListener(this);
+			this.setProgressMessage("Tail detection in progress:"+d.getName());
 			t.execute();
 		}
 	}
@@ -2545,6 +2553,7 @@ public class MainWindow extends JFrame implements ActionListener {
 						"Fast");
 
 				refolder.addPropertyChangeListener(this);
+				this.setProgressMessage("Curve refolding in progress:"+d.getName());
 				refolder.execute();
 
 			} catch(Exception e1){

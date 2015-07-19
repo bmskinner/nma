@@ -14,6 +14,8 @@ import java.awt.geom.Ellipse2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -53,7 +55,7 @@ import org.jfree.data.xy.XYDataset;
 
 import datasets.NucleusDatasetCreator;
 
-public class SignalsDetailPanel extends JPanel implements ActionListener {
+public class SignalsDetailPanel extends JPanel implements ActionListener, SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -84,6 +86,8 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 	
 	private List<AnalysisDataset> list;
 	private AnalysisDataset activeDataset;
+	
+	private List<Object> listeners = new ArrayList<Object>();
 
 	/**
 	 * Create the panel.
@@ -134,6 +138,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 							updateSignalsPanel(list);
 							updateSignalHistogramPanel(list);
 							updateAreaBoxplot(list);
+							fireSignalChangeEvent();
 						}
 					}
 						
@@ -720,5 +725,29 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 		renderer.setBaseOutlinePaint(Color.BLACK);
 		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
 	}
+
+
+	@Override
+	public void signalChangeReceived(SignalChangeEvent event) {
+		updateSignalsPanel(list);
+		updateSignalHistogramPanel(list);
+		updateAreaBoxplot(list);
+	}
+	
+	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
+        listeners.add( l );
+    }
+    
+    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
+        listeners.remove( l );
+    }
+     
+    private synchronized void fireSignalChangeEvent() {
+        SignalChangeEvent event = new SignalChangeEvent( this, "Signal" );
+        Iterator iterator = listeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+        }
+    }
 
 }

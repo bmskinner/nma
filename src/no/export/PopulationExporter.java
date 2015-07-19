@@ -113,6 +113,9 @@ public class PopulationExporter {
 			
 		} catch(Exception e){
 			logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
 			return false;
 		}
 		return true;

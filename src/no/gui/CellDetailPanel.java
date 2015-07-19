@@ -10,7 +10,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +42,7 @@ import datasets.CellDatasetCreator;
 import datasets.NucleusDatasetCreator;
 import datasets.TailDatasetCreator;
 
-public class CellDetailPanel extends JPanel implements ActionListener {
+public class CellDetailPanel extends JPanel implements ActionListener, SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -51,6 +53,8 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 	private List<AnalysisDataset> list;
 	private AnalysisDataset activeDataset;	
 	private Cell activeCell;
+	
+	private List<Object> listeners = new ArrayList<Object>();
 	
 	public CellDetailPanel() {
 
@@ -102,6 +106,7 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 						if(newColor != null){
 							activeDataset.setSignalGroupColour(signalGroup, newColor);
 							updateCell(activeCell);
+							fireSignalChangeEvent();
 						}
 					}
 						
@@ -269,6 +274,22 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 		
 	}
 	
+	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
+        listeners.add( l );
+    }
+    
+    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
+        listeners.remove( l );
+    }
+     
+    private synchronized void fireSignalChangeEvent() {
+        SignalChangeEvent event = new SignalChangeEvent( this, "Signal" );
+        Iterator iterator = listeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+        }
+    }
+	
 	
 	/**
 	 * Allows for cell background to be coloured based on position in a list. Used to colour
@@ -303,6 +324,13 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 			//Return the JLabel which renders the cell.
 			return l;
 		}
+	}
+
+
+	@Override
+	public void signalChangeReceived(SignalChangeEvent event) {
+		updateCell(activeCell);
+
 	}
 
 }
