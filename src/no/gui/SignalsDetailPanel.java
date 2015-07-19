@@ -729,10 +729,11 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
-		
-		updateSignalsPanel(list);
-		updateSignalHistogramPanel(list);
-		updateAreaBoxplot(list);
+		if(event.type().equals("SignalColourUpdate")){
+			updateSignalsPanel(list);
+			updateSignalHistogramPanel(list);
+			updateAreaBoxplot(list);
+		}
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
@@ -744,7 +745,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     }
      
     private synchronized void fireSignalChangeEvent() {
-        SignalChangeEvent event = new SignalChangeEvent( this, "Signal" );
+        SignalChangeEvent event = new SignalChangeEvent( this, "SignalColourUpdate" );
         Iterator iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );

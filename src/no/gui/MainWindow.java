@@ -41,8 +41,6 @@ import no.nuclei.Nucleus;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -72,29 +70,15 @@ import java.awt.Font;
 
 import javax.swing.JTable;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.beans.ExceptionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.ListSelectionModel;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
 
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
@@ -104,7 +88,7 @@ import utility.TreeOrderHashMap;
 
 import javax.swing.JTabbedPane;
 
-public class MainWindow extends JFrame implements ActionListener {
+public class MainWindow extends JFrame implements ActionListener, SignalChangeListener {
 			
 	private static final int PROFILE_TAB 	= 0;
 	private static final int STATS_TAB 		= 1;
@@ -130,6 +114,9 @@ public class MainWindow extends JFrame implements ActionListener {
 	private JXTreeTable treeTable;
 	private PopulationListPopupMenu populationPopup;
 	
+	private ConsensusNucleusPanel	consensusNucleusPanel;
+	
+	// bottom panel tabs
 	private JTabbedPane tabbedPane;
 	
 	private NucleusProfilesPanel 	nucleusProfilesPanel;
@@ -139,10 +126,6 @@ public class MainWindow extends JFrame implements ActionListener {
 	private SegmentsDetailPanel 	segmentsDetailPanel;
 	private CellDetailPanel 		cellDetailPanel;
 	private VennDetailPanel			vennDetailPanel;
-	
-	private ChartPanel consensusChartPanel;
-	
-	private JButton runRefoldingButton;
 
 	private JPanel clusteringPanel;// container for clustering options and display
 		
@@ -202,7 +185,9 @@ public class MainWindow extends JFrame implements ActionListener {
 			// Create the consensus chart
 			//---------------
 			createPopulationsPanel();
-			createConsensusChartPanel();
+			consensusNucleusPanel = new ConsensusNucleusPanel();
+			consensusNucleusPanel.addSignalChangeListener(this);
+//			createConsensusChartPanel();
 			
 			//---------------
 			// Create the log panel
@@ -223,15 +208,7 @@ public class MainWindow extends JFrame implements ActionListener {
 			c.gridwidth = GridBagConstraints.REMAINDER; //end of row
 			c.fill = GridBagConstraints.BOTH;      //reset to default
 			c.weightx = 0.0;   
-			topGeneralPanel.add(consensusChartPanel, c);
-			
-
-	        topGeneralPanel.addComponentListener(new ComponentAdapter() {
-	            @Override
-	            public void componentResized(ComponentEvent e) {
-	                resizePreview(consensusChartPanel, topGeneralPanel);
-	            }
-	        });
+			topGeneralPanel.add(consensusNucleusPanel, c);
 			
 			
 
@@ -546,52 +523,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		
 		panelPopulations.add(populationScrollPane);
 	}
-	
-	/**
-	 * Create the chart that will hold the refolded consensus nucleus
-	 */
-	private void createConsensusChartPanel(){
-		JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-				null, null, null);
-		XYPlot consensusPlot = consensusChart.getXYPlot();
-		consensusPlot.setBackgroundPaint(Color.WHITE);
-		consensusPlot.getDomainAxis().setVisible(false);
-		consensusPlot.getRangeAxis().setVisible(false);
-		
-		consensusChartPanel = new ChartPanel(consensusChart);
-
-		runRefoldingButton = new JButton("Refold");
-//		runRefoldingButton.addActionListener(new RefoldNucleusAction());
-
-		runRefoldingButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				new RefoldNucleusAction();
-			}
-		});
-		runRefoldingButton.setVisible(false);
-		
-		consensusChartPanel.add(runRefoldingButton);
-		consensusChartPanel.setMinimumSize(new Dimension(200, 200));
-	}
-	
-	
-	
-	/**
-	 * Alter the size of the given panel to keep the aspect ratio constant.
-	 * The minimum of the width or height of the container is used as the
-	 * preferred size of the chart
-	 * @param innerPanel the chart to constrain
-	 * @param container the contining panel
-	 */
-	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
-        int w = container.getWidth();
-        int h = container.getHeight();
-        int size =  Math.min(w, h);
-        innerPanel.setPreferredSize(new Dimension(size, size));
-        container.revalidate();
-    }
-		
+			
 	private JScrollPane createStatsPanel(){
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -875,7 +807,8 @@ public class MainWindow extends JFrame implements ActionListener {
 					updateAnalysisParametersPanel(list);
 					
 					nucleusProfilesPanel.update(list);
-					updateConsensusImage(list);
+					consensusNucleusPanel.update(list);
+//					updateConsensusImage(list);
 					
 					nuclearBoxplotsPanel.update(list);
 					
@@ -900,18 +833,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		};
 		thr.start();
 	}
-	
-	/**
-	 * Get a series or dataset index for colour selection when drawing charts. The index
-	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
-	 * @param label the label to extract the index from 
-	 * @return the index found
-	 */
-	private int getIndexFromLabel(String label){
-		String[] names = label.split("_");
-		return Integer.parseInt(names[1]);
-	}
-	
+		
 	/**
 	 * Update the analysis panel with data from the given datasets
 	 * @param list the datasets
@@ -932,138 +854,6 @@ public class MainWindow extends JFrame implements ActionListener {
 		// format the numbers and make into a tablemodel
 		TableModel model = NucleusDatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
-	}
-
-	/**
-	 * Create a consenusus chart for the given nucleus collection
-	 * @param collection the NucleusCollection to draw the consensus from
-	 * @return the consensus chart
-	 */
-	public JFreeChart makeConsensusChart(CellCollection collection){
-		XYDataset ds = NucleusDatasetCreator.createNucleusOutline(collection);
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
-						false);
-		
-
-		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
-		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
-
-		// ensure that the scales for each axis are the same
-		double max = Math.max(maxX, maxY);
-
-		// ensure there is room for expansion of the target nucleus due to IQR
-		max *=  1.25;		
-
-		XYPlot plot = chart.getXYPlot();
-		plot.setDataset(0, ds);
-		plot.getDomainAxis().setRange(-max,max);
-		plot.getRangeAxis().setRange(-max,max);
-
-		plot.getDomainAxis().setVisible(false);
-		plot.getRangeAxis().setVisible(false);
-
-		plot.setBackgroundPaint(Color.WHITE);
-		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-
-		int seriesCount = plot.getSeriesCount();
-
-		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-			String name = (String) ds.getSeriesKey(i);
-			
-			if(name.startsWith("Seg_")){
-				int colourIndex = getIndexFromLabel(name);
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-			} 
-			if(name.startsWith("Q")){
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-			} 
-
-		}	
-		return chart;
-	}
-	
-	
-	/**
-	 * Update the consensus nucleus panel with data from the given datasets. Produces a blank
-	 * chart if no refolded nuclei are present
-	 * @param list the datasets
-	 */	
-	public void updateConsensusImage(List<AnalysisDataset> list){
-
-		CellCollection collection = list.get(0).getCollection();
-		try {
-			if(list.size()==1){
-				if(!collection.hasConsensusNucleus()){
-					// add button to run analysis
-					JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-							null, null, null);
-					XYPlot consensusPlot = consensusChart.getXYPlot();
-					consensusPlot.setBackgroundPaint(Color.WHITE);
-					consensusPlot.getDomainAxis().setVisible(false);
-					consensusPlot.getRangeAxis().setVisible(false);
-					consensusChartPanel.setChart(consensusChart);
-					
-					runRefoldingButton.setVisible(true);
-
-
-				} else {
-					runRefoldingButton.setVisible(false);
-					JFreeChart chart = makeConsensusChart(collection);
-					consensusChartPanel.setChart(chart);
-				} 
-			}else {
-				// multiple nuclei
-				XYDataset ds = NucleusDatasetCreator.createMultiNucleusOutline(list);
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-								null, null, ds, PlotOrientation.VERTICAL, true, true,
-								false);
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setVisible(false);
-				plot.getRangeAxis().setVisible(false);
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-				plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-				
-				int seriesCount = plot.getSeriesCount();
-				
-				for (int i = 0; i < seriesCount; i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-					String name = (String) ds.getSeriesKey(i);
-					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-					
-					int index = getIndexFromLabel(name);
-					AnalysisDataset d = list.get(index);
-					
-					Color color = d.getDatasetColour() == null 
-							? ColourSelecter.getSegmentColor(i)
-							: d.getDatasetColour();
-
-					// get the group id from the name, and make colour
-					plot.getRenderer().setSeriesPaint(i, color);
-					if(name.startsWith("Q")){
-						// make the IQR distinct from the median
-						plot.getRenderer().setSeriesPaint(i, color.darker());
-					}
-					
-				}
-				consensusChartPanel.setChart(chart);
-				for(Component c : consensusChartPanel.getComponents() ){
-					if(c.getClass()==JButton.class){
-						c.setVisible(false);
-					}
-				}
-			}
-		} catch (Exception e) {
-			log("Error drawing consensus nucleus: "+e.getMessage());
-			e.printStackTrace();
-		}
 	}
 		
 	
@@ -2414,11 +2204,11 @@ public class MainWindow extends JFrame implements ActionListener {
 
 			try{
 
-				for(Component c : consensusChartPanel.getComponents() ){
-					if(c.getClass()==JButton.class){
-						c.setVisible(false);
-					}
-				}
+//				for(Component c : consensusChartPanel.getComponents() ){
+//					if(c.getClass()==JButton.class){
+//						c.setVisible(false);
+//					}
+//				}
 
 
 				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
@@ -2540,5 +2330,18 @@ public class MainWindow extends JFrame implements ActionListener {
 			updatePopulationList();	
 
 		}
+	}
+
+
+	
+	@Override
+	public void signalChangeReceived(SignalChangeEvent event) {
+		
+//		IJ.log(event.type());
+		if(event.type().equals("RefoldNucleusFired")){
+//			IJ.log("Heard refold");
+			new RefoldNucleusAction();
+		}
+		
 	}	
 }

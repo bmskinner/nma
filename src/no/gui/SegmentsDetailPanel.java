@@ -125,7 +125,7 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 		panel.setLayout(new BorderLayout());
 		
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
-		boxplot.setBackgroundPaint(Color.WHITE);
+		boxplot.getPlot().setBackgroundPaint(Color.WHITE);
 		
 		segmentsBoxplotChartPanel = new ChartPanel(boxplot);
 		panel.add(segmentsBoxplotChartPanel, BorderLayout.CENTER);

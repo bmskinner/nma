@@ -283,7 +283,7 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
     }
      
     private synchronized void fireSignalChangeEvent() {
-        SignalChangeEvent event = new SignalChangeEvent( this, "Signal" );
+        SignalChangeEvent event = new SignalChangeEvent( this, "SignalColourUpdate" );
         Iterator iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
@@ -329,7 +329,9 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
-		updateCell(activeCell);
+		if(event.type().equals("SignalColourUpdate")){
+			updateCell(activeCell);
+		}
 
 	}
 
