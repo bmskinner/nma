@@ -64,6 +64,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
+import javax.swing.JSplitPane;
 import javax.swing.SwingConstants;
 
 import java.awt.Font;
@@ -105,7 +106,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 	private JTable tablePopulationStats;
 	private JTable tableAnalysisParamters;
-	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
+//	private final JPanel panelGeneralData = new JPanel(); // holds the tabs
 	
 	private JPanel logPanel;
 	private JPanel progressPanel;
@@ -163,22 +164,12 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			//---------------
 			// General data
 			//---------------
+	
+			// make a panel for the log, populations and consensus chart
+			JPanel topRow = new JPanel();
 			
-			contentPane.add(panelGeneralData, BorderLayout.CENTER);
-			panelGeneralData.setLayout(new GridLayout(2, 0, 0, 0));
-			
-			// make a panel for the populations and consensus chart
-			final JPanel topGeneralPanel = new JPanel();
-//			topGeneralPanel.setLayout(new GridLayout(0, 2, 0, 0));
-			topGeneralPanel.setLayout(new GridBagLayout());
-			
-//			GridBagConstraints generalPanelConstraints = new GridBagConstraints();
-//			generalPanelConstraints.gridwidth = GridBagConstraints.REMAINDER;     // last
-//			generalPanelConstraints.fill = GridBagConstraints.BOTH;
-//			generalPanelConstraints.weightx = 1.0;
-			
-			panelGeneralData.add(topGeneralPanel);
-			
+			topRow.setLayout(new GridBagLayout());
+						
 			//reset to default
 			
 			//---------------
@@ -187,34 +178,43 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			createPopulationsPanel();
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			consensusNucleusPanel.addSignalChangeListener(this);
-//			createConsensusChartPanel();
 			
 			//---------------
 			// Create the log panel
 			//---------------
+			logPanel = createLogPanel();
+			//Create a split pane 
+			JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+					logPanel, panelPopulations);
+
+			//Provide minimum sizes for the two components in the split pane
+			Dimension minimumSize = new Dimension(200, 200);
+			logPanel.setMinimumSize(minimumSize);
+			panelPopulations.setMinimumSize(minimumSize);
+			
+			
 			GridBagConstraints c = new GridBagConstraints();			
-			c.gridwidth = 1;     // frist
+			c.gridwidth = GridBagConstraints.RELATIVE;
 			c.fill = GridBagConstraints.BOTH;
 			c.weightx = 1.0;
 			
-			logPanel = createLogPanel();
 			
-			topGeneralPanel.add(logPanel, c);
 			
-			c.gridwidth = GridBagConstraints.RELATIVE;     //next to last
-			topGeneralPanel.add(panelPopulations, c);	
+			topRow.add(splitPane, c);
+
+			
+//			c.gridwidth = GridBagConstraints.RELATIVE;     //next to last
+//			topRow.add(panelPopulations, c);
 			
 			c.anchor = GridBagConstraints.WEST;
 			c.gridwidth = GridBagConstraints.REMAINDER; //end of row
 			c.fill = GridBagConstraints.BOTH;      //reset to default
 			c.weightx = 0.0;   
-			topGeneralPanel.add(consensusNucleusPanel, c);
+			topRow.add(consensusNucleusPanel, c);
 			
 			
-
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-			panelGeneralData.add(tabbedPane);
-			
+
 			//---------------
 			// Create the profiles
 			//---------------
@@ -283,6 +283,13 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			signalsDetailPanel.addSignalChangeListener(cellDetailPanel);
 			cellDetailPanel.addSignalChangeListener(signalsDetailPanel); // allow the panels to communicate colour updates
 			
+			//---------------
+			// Add the top and bottom rows to the main panel
+			//---------------
+			JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+					topRow, tabbedPane);
+			
+			contentPane.add(panelMain, BorderLayout.CENTER); // will divide into two rows
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());

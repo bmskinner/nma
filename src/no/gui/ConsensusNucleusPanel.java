@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -42,7 +43,7 @@ public class ConsensusNucleusPanel extends JPanel {
 	
 	public ConsensusNucleusPanel() {
 
-		this.setLayout(new BorderLayout());
+		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
 				null, null, null);
 		XYPlot consensusPlot = consensusChart.getXYPlot();
@@ -65,14 +66,16 @@ public class ConsensusNucleusPanel extends JPanel {
 		
 		consensusChartPanel.add(runRefoldingButton);
 		consensusChartPanel.setMinimumSize(new Dimension(200, 200));
-		this.add(consensusChartPanel, BorderLayout.CENTER);
 		
-        this.addComponentListener(new ComponentAdapter() {
-        @Override
-        public void componentResized(ComponentEvent e) {
-            resizePreview(consensusChartPanel, ConsensusNucleusPanel.this);
-        }
-    });
+		
+		this.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				resizePreview(consensusChartPanel, ConsensusNucleusPanel.this);
+			}
+		});
+		
+		this.add(consensusChartPanel);
 	}
 	
 	/**
@@ -157,7 +160,7 @@ public class ConsensusNucleusPanel extends JPanel {
 	 * @param collection the NucleusCollection to draw the consensus from
 	 * @return the consensus chart
 	 */
-	public JFreeChart makeConsensusChart(CellCollection collection){
+	private JFreeChart makeConsensusChart(CellCollection collection){
 		XYDataset ds = NucleusDatasetCreator.createNucleusOutline(collection);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -228,7 +231,9 @@ public class ConsensusNucleusPanel extends JPanel {
         int w = container.getWidth();
         int h = container.getHeight();
         int size =  Math.min(w, h);
-        innerPanel.setPreferredSize(new Dimension(size, size));
+        innerPanel.setSize(size, size);
+//        innerPanel.setPreferredSize(new Dimension(size, size));
+//        innerPanel.setMaximumSize(	new Dimension(size, size));
         container.revalidate();
     }
 	
