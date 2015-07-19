@@ -9,6 +9,8 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -87,6 +89,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.beans.ExceptionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -315,6 +318,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			//---------------
 			cellDetailPanel = new CellDetailPanel();
 			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
+			
+			
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -2653,6 +2658,5 @@ public class MainWindow extends JFrame implements ActionListener {
 			updatePopulationList();	
 
 		}
-	}
-	
+	}	
 }

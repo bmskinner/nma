@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
@@ -28,6 +29,7 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -38,13 +40,14 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	
-	private ChartPanel profileChartPanel;
+//	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
-	private ChartPanel rawChartPanel;
+	private ChartPanel profilesPanel;
 	private ChartPanel variabilityChartPanel; 
 	
 	private JRadioButton rawProfileLeftButton  = new JRadioButton("Left"); // left align raw profiles in rawChartPanel
 	private JRadioButton rawProfileRightButton = new JRadioButton("Right"); // right align raw profiles in rawChartPan
+	private JCheckBox    normCheckBox 	= new JCheckBox("Normalised");	// to toggle raw or normalised segment profiles in segmentsProfileChartPanel
 	
 	private List<AnalysisDataset> list;
 
@@ -56,20 +59,6 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		Dimension minimumChartSize = new Dimension(50, 100);
 		Dimension preferredChartSize = new Dimension(400, 300);
 		
-		//---------------
-		// Create the regular profile chart
-		//---------------
-		JFreeChart profileChart = ChartFactory.createXYLineChart(null,
-	            "Position", "Angle", null);
-		XYPlot plot = profileChart.getXYPlot();
-		plot.getDomainAxis().setRange(0,100);
-		plot.getRangeAxis().setRange(0,360);
-		plot.setBackgroundPaint(Color.WHITE);
-		profileChartPanel = new ChartPanel(profileChart);
-		profileChartPanel.setMinimumSize(minimumChartSize);
-		profileChartPanel.setPreferredSize(preferredChartSize);
-		profileChartPanel.setMinimumDrawWidth( 0 );
-		profileChartPanel.setMinimumDrawHeight( 0 );
 		
 		//---------------
 		// Create the franken profile chart
@@ -98,19 +87,29 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		rawPlot.getDomainAxis().setRange(0,100);
 		rawPlot.getRangeAxis().setRange(0,360);
 		rawPlot.setBackgroundPaint(Color.WHITE);
-		rawChartPanel = new ChartPanel(rawChart);
-		rawChartPanel.setMinimumDrawWidth( 0 );
-		rawChartPanel.setMinimumDrawHeight( 0 );
+		profilesPanel = new ChartPanel(rawChart);
+		profilesPanel.setMinimumDrawWidth( 0 );
+		profilesPanel.setMinimumDrawHeight( 0 );
 		rawPanel.setMinimumSize(minimumChartSize);
 		rawPanel.setPreferredSize(preferredChartSize);
-		rawPanel.add(rawChartPanel, BorderLayout.CENTER);
+		rawPanel.add(profilesPanel, BorderLayout.CENTER);
 		
 		rawProfileLeftButton.setSelected(true);
 		
 		rawProfileLeftButton.setActionCommand("LeftAlignRawProfile");
 		rawProfileRightButton.setActionCommand("RightAlignRawProfile");
+		
 		rawProfileLeftButton.addActionListener(this);
 		rawProfileRightButton.addActionListener(this);
+		
+		rawProfileLeftButton.setEnabled(false);
+		rawProfileRightButton.setEnabled(false);
+		
+		// checkbox to select raw or normalised profiles
+		normCheckBox.setSelected(true);
+		normCheckBox.setEnabled(false);
+		normCheckBox.setActionCommand("NormalisedProfile");
+		normCheckBox.addActionListener(this);
 		
 
 		//Group the radio buttons.
@@ -121,7 +120,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		JPanel alignPanel = new JPanel();
 		alignPanel.setLayout(new BoxLayout(alignPanel, BoxLayout.X_AXIS));
 
-		
+		alignPanel.add(normCheckBox);
 		alignPanel.add(rawProfileLeftButton);
 		alignPanel.add(rawProfileRightButton);
 		rawPanel.add(alignPanel, BorderLayout.NORTH);
@@ -139,8 +138,8 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		//---------------
 		// Add to the tabbed panel
 		//---------------
-		profilesTabPanel.addTab("Normalised", null, profileChartPanel, null);
-		profilesTabPanel.addTab("Raw", null, rawPanel, null);
+//		profilesTabPanel.addTab("Normalised", null, profileChartPanel, null);
+		profilesTabPanel.addTab("Profiles", null, rawPanel, null);
 		profilesTabPanel.addTab("FrankenProfile", null, frankenChartPanel, null);
 		profilesTabPanel.addTab("Variability", null, variabilityChartPanel, null);
 		this.add(profilesTabPanel, BorderLayout.CENTER);
@@ -148,17 +147,29 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 	}
 	
 	public void update(List<AnalysisDataset> list){
+		
 		this.list = list;
-		updateProfileImage(list);
 		
-		if(rawProfileRightButton.isSelected()){
-			updateRawProfileImage(list, true);
+		if(!list.isEmpty()){
+			normCheckBox.setEnabled(true);
+			if(  normCheckBox.isSelected()){
+				updateProfiles(list, true, false);
+			} else {			
+				if(  rawProfileLeftButton.isSelected()){
+					updateProfiles(list, false, false);
+				} else {
+					updateProfiles(list, false, true);
+				}
+			}
+
+			updateFrankenProfileChart(list);
+			updateVariabilityChart(list);
 		} else {
-			updateRawProfileImage(list, false);
+			// if the list is empty, do not enable controls
+			normCheckBox.setEnabled(false);
+			rawProfileLeftButton.setEnabled(false);
+			rawProfileRightButton.setEnabled(false);
 		}
-		
-		updateFrankenProfileChart(list);
-		updateVariabilityChart(list);
 	}
 	
 	/**
@@ -207,103 +218,36 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		}	
 		return chart;
 	}
-	
+		
 	/**
 	 * Update the profile panel with data from the given datasets
 	 * @param list the datasets
+	 * @param normalised flag for raw or normalised lengths
+	 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 	 */	
-	private void updateProfileImage(List<AnalysisDataset> list){
-		
+	private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign){
+
 		try {
 			if(list.size()==1){
-
+				
+				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), normalised);
+				
 				// full segment colouring
-				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), true);
 				JFreeChart chart = makeProfileChart(ds);
-				profileChartPanel.setChart(chart);
-			} else {
-				// many profiles, colour them all the same
-				List<XYSeriesCollection> ds = NucleusDatasetCreator.createMultiProfileIQRDataset(list, true, false);				
-				
-				XYDataset profileDS = NucleusDatasetCreator.createMultiProfileDataset(list, true, false);
-				
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-						                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
-						                false);
-
 				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,100);
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
 				
-				int i=0;
-				for(XYSeriesCollection c : ds){
-
-					// find the series index
-					String name = (String) c.getSeriesKey(0);
-					String[] names = name.split("_");
-					int index = Integer.parseInt(names[1]);
-					
-					// add to dataset
-					plot.setDataset(i, c);
-					
-					// make a transparent color based on teh profile segmenter system
-					Color profileColour = list.get(index).getDatasetColour();
-					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
-					
-					XYDifferenceRenderer xydr = new XYDifferenceRenderer(iqrColour, iqrColour, false);
-					
-					// go through each series in the collection, and set the line colour
-					for(int series=0;series<c.getSeriesCount();series++){
-						xydr.setSeriesPaint(series, iqrColour);
-						xydr.setSeriesVisibleInLegend(series, false);
-						
-					}
-					plot.setRenderer(i, xydr);
-					
-					
-					i++;
+				// length of chart depends on whether the profile is normalised
+				if(normalised){
+					plot.getDomainAxis().setRange(0,100);
+				} else {
+					plot.getDomainAxis().setRange(0,list.get(0).getCollection().getMedianArrayLength());
 				}
-
-				plot.setDataset(i, profileDS);
-				plot.setRenderer(i, new StandardXYItemRenderer());
-
-				for (int j = 0; j < profileDS.getSeriesCount(); j++) {
-					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.FALSE);
-					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
-					String name = (String) profileDS.getSeriesKey(j);
-					
-					int index = getIndexFromLabel(name); 
-					Color profileColour = list.get(index).getDatasetColour();
-					
-					plot.getRenderer(i).setSeriesPaint(j, profileColour.darker());
-				}	
+				profilesPanel.setChart(chart);
 				
-				profileChartPanel.setChart(chart);
-			}
-			
-		} catch (Exception e) {
-			IJ.log("Error in plotting profile");
-		} 
-	}
-	
-	private void updateRawProfileImage(List<AnalysisDataset> list, boolean rightAlign){
-		
-		try {
-			if(list.size()==1){
-
-				// full segment colouring
-				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), false);
-				JFreeChart chart = makeProfileChart(ds);
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,list.get(0).getCollection().getMedianArrayLength());
-				rawChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, false, rightAlign);				
-				XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, false, rightAlign);
+				List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign);				
+				XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign);
 				
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
@@ -312,75 +256,90 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 				
 				// find the maximum profile length - used when rendering raw profiles
 				int length = 100;
-				for(AnalysisDataset d : list){
-					length = (int) Math.max( d.getCollection().getMedianArrayLength(), length);
 
-				}
-				
-				// set basic range and colour
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,length);
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
-				
-				// add 180 degree horizontal line
-				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
-				
-				int lastSeries = 0;
-
-				for(int i=0;i<iqrProfiles.size();i++){
-					XYSeriesCollection seriesCollection = iqrProfiles.get(i);
-
-					// add to dataset
-					plot.setDataset(i, seriesCollection);
-					
-					
-					// find the series index
-					String name = (String) seriesCollection.getSeriesKey(0);
-					
-					// index should be the position in the AnalysisDatase list
-					// see construction in NucleusDatasetCreator
-					int index = getIndexFromLabel(name); 
-					
-					// make a transparent color based on teh profile segmenter system
-					Color profileColour = list.get(index).getDatasetColour();
-					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
-					
-					// fill beteween the upper and lower IQR with single colour; do not show shapes
-					XYDifferenceRenderer differenceRenderer = new XYDifferenceRenderer(iqrColour, iqrColour, false);
-					
-					// go through each series in the collection, and set the line colour
-					for(int series=0;series<seriesCollection.getSeriesCount();series++){
-						differenceRenderer.setSeriesPaint(series, iqrColour);
-						differenceRenderer.setSeriesVisibleInLegend(series, false);
-						
+				if(!normalised){
+					for(AnalysisDataset d : list){
+						length = (int) Math.max( d.getCollection().getMedianArrayLength(), length);
 					}
-					plot.setRenderer(i, differenceRenderer);
-
-					lastSeries++; // track the count of series
 				}
-
-				plot.setDataset(lastSeries, medianProfiles);
-				StandardXYItemRenderer medianRenderer = new StandardXYItemRenderer();
-				plot.setRenderer(lastSeries, medianRenderer);
-
-				for (int j = 0; j < medianProfiles.getSeriesCount(); j++) {
-					medianRenderer.setSeriesVisibleInLegend(j, Boolean.FALSE);
-					medianRenderer.setSeriesStroke(j, new BasicStroke(2));
-					String name = (String) medianProfiles.getSeriesKey(j);
-					int index = getIndexFromLabel(name); 
-					Color profileColour = list.get(index).getDatasetColour();
-
-					medianRenderer.setSeriesPaint(j, profileColour.darker());
-				}	
 				
-				rawChartPanel.setChart(chart);
+				formatMultiProfileChart(chart, iqrProfiles, medianProfiles, length);				
+				profilesPanel.setChart(chart);
 			}
 			
 		} catch (Exception e) {
 			IJ.log("Error in plotting profile");
 		} 
 	}
+	
+	private void formatMultiProfileChart(JFreeChart chart, List<XYSeriesCollection> iqrProfiles, XYDataset medianProfiles, int length){
+
+		// set basic range and colour
+		XYPlot plot = chart.getXYPlot();
+		plot.getDomainAxis().setRange(0,length);
+		plot.getRangeAxis().setRange(0,360);
+		plot.setBackgroundPaint(Color.WHITE);
+
+		// add 180 degree horizontal line
+		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+
+		int lastSeries = 0;
+
+		for(int i=0;i<iqrProfiles.size();i++){
+			XYSeriesCollection seriesCollection = iqrProfiles.get(i);
+
+			// add to dataset
+			plot.setDataset(i, seriesCollection);
+
+
+			// find the series index
+			String name = (String) seriesCollection.getSeriesKey(0);
+
+			// index should be the position in the AnalysisDatase list
+			// see construction in NucleusDatasetCreator
+			int index = getIndexFromLabel(name); 
+
+			// make a transparent color based on teh profile segmenter system
+			Color profileColour = list.get(index).getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(i)
+					: list.get(index).getDatasetColour();
+
+					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
+
+					// fill beteween the upper and lower IQR with single colour; do not show shapes
+					XYDifferenceRenderer differenceRenderer = new XYDifferenceRenderer(iqrColour, iqrColour, false);
+
+					// go through each series in the collection, and set the line colour
+					for(int series=0;series<seriesCollection.getSeriesCount();series++){
+						differenceRenderer.setSeriesPaint(series, iqrColour);
+						differenceRenderer.setSeriesVisibleInLegend(series, false);
+
+					}
+					plot.setRenderer(i, differenceRenderer);
+
+					lastSeries++; // track the count of series
+		}
+
+		plot.setDataset(lastSeries, medianProfiles);
+		StandardXYItemRenderer medianRenderer = new StandardXYItemRenderer();
+		plot.setRenderer(lastSeries, medianRenderer);
+
+		for (int j = 0; j < medianProfiles.getSeriesCount(); j++) {
+			medianRenderer.setSeriesVisibleInLegend(j, Boolean.FALSE);
+			medianRenderer.setSeriesStroke(j, new BasicStroke(2));
+			String name = (String) medianProfiles.getSeriesKey(j);
+			int index = getIndexFromLabel(name); 
+			
+			Color profileColour = list.get(index).getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(j)
+					: list.get(index).getDatasetColour();
+					
+			medianRenderer.setSeriesPaint(j, profileColour.darker());
+		}
+		
+	}
+	
+	
 	
 	/**
 	 * Update the frankenprofile panel with data from the given datasets
@@ -397,62 +356,15 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 				frankenChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> ds = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(list);				
-				
-				XYDataset profileDS = NucleusDatasetCreator.createMultiProfileFrankenDataset(list);
+				List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset( list);				
+				XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileFrankenDataset(	  list);
 				
 				JFreeChart chart = 
 						ChartFactory.createXYLineChart(null,
 						                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
 						                false);
-
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,100);
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
 				
-				int i=0;
-				for(XYSeriesCollection c : ds){
-
-					// find the series index
-					String name = (String) c.getSeriesKey(0);
-					int index = getIndexFromLabel(name); 
-					
-					// add to dataset
-					plot.setDataset(i, c);
-					
-					// make a transparent color based on teh profile segmenter system
-					Color profileColour = list.get(index).getDatasetColour();
-					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
-					
-					
-					XYDifferenceRenderer xydr = new XYDifferenceRenderer(iqrColour, iqrColour, false);
-					
-					// go through each series in the collection, and set the line colour
-					for(int series=0;series<c.getSeriesCount();series++){
-						xydr.setSeriesPaint(series, iqrColour);
-						xydr.setSeriesVisibleInLegend(series, false);
-						
-					}
-					plot.setRenderer(i, xydr);
-					
-					
-					i++;
-				}
-
-				plot.setDataset(i, profileDS);
-				plot.setRenderer(i, new StandardXYItemRenderer());
-
-				for (int j = 0; j < profileDS.getSeriesCount(); j++) {
-					plot.getRenderer(i).setSeriesVisibleInLegend(j, Boolean.FALSE);
-					plot.getRenderer(i).setSeriesStroke(j, new BasicStroke(2));
-					String name = (String) profileDS.getSeriesKey(j);
-					int index = getIndexFromLabel(name); 
-					Color profileColour = list.get(index).getDatasetColour();
-					plot.getRenderer(i).setSeriesPaint(j, profileColour.darker());
-				}	
-				
+				formatMultiProfileChart(chart, iqrProfiles, medianProfiles, 100);
 				frankenChartPanel.setChart(chart);
 			}
 						
@@ -498,7 +410,11 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-					Color profileColour = list.get(index).getDatasetColour();
+					Color profileColour = list.get(index).getDatasetColour() == null 
+							? ColourSelecter.getSegmentColor(index)
+							: list.get(index).getDatasetColour();
+					
+//					Color profileColour = list.get(index).getDatasetColour();
 					plot.getRenderer().setSeriesPaint(j, profileColour);
 				}	
 				variabilityChartPanel.setChart(chart);
@@ -512,11 +428,32 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().equals("LeftAlignRawProfile")){
-			updateRawProfileImage(list, false);
+			updateProfiles(list, false, false);
+//			updateRawProfileImage(list, false);
 		}
 		
 		if(e.getActionCommand().equals("RightAlignRawProfile")){
-			updateRawProfileImage(list, true);
+//			updateRawProfileImage(list, true);
+			updateProfiles(list, false, true);
+		}
+		
+		if(e.getActionCommand().equals("NormalisedProfile")){
+
+			if(  normCheckBox.isSelected()){
+				rawProfileLeftButton.setEnabled(false);
+				rawProfileRightButton.setEnabled(false);
+				updateProfiles(list, true, false);
+			} else {
+				rawProfileLeftButton.setEnabled(true);
+				rawProfileRightButton.setEnabled(true);
+				
+				if(  rawProfileLeftButton.isSelected()){
+					updateProfiles(list, false, false);
+				} else {
+					updateProfiles(list, false, true);
+				}
+			}
+			
 		}
 		
 	}

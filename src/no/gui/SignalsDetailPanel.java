@@ -10,6 +10,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -31,15 +35,19 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYShapeAnnotation;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
+import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
@@ -59,12 +67,15 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 	private JTable signalAnalysisSetupTable;
 	private JPanel signalSelectionVisiblePanel;
 	private JPanel signalConsensusAndCheckboxPanel;
+	private JPanel boxplotsPanel;
+	private ChartPanel areaBoxplotChartPanel;
 	private JTabbedPane signalsTabPane;
 	
 	private static final int TAB_OVERVIEW 	= 0;
 	private static final int TAB_HISTOGRAMS = 1;
 	private static final int TAB_SHELLS 	= 2;
 	private static final int TAB_SETTINGS 	= 3;
+	private static final int TAB_BOXPLOTS 	= 4;
 	
 	
 	private ChartPanel signalAngleChartPanel; // consensus nucleus plus signals
@@ -122,6 +133,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 							activeDataset.setSignalGroupColour(signalGroup, newColor);
 							updateSignalsPanel(list);
 							updateSignalHistogramPanel(list);
+							updateAreaBoxplot(list);
 						}
 					}
 						
@@ -196,6 +208,18 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 		JScrollPane signalAnalysisSetupScrollPane = new JScrollPane(signalAnalysisSetupTable);
 		signalAnalysisSetupPanel.add(signalAnalysisSetupScrollPane, BorderLayout.CENTER);
 		signalsTabPane.addTab("Detection settings", null, signalAnalysisSetupPanel, null);
+		
+		//---------------
+		// Create the signal boxplots panel
+		//---------------
+		boxplotsPanel = new JPanel(new BorderLayout());
+		
+		JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+		formatBoxplotChart(areaBoxplot);
+		areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
+		boxplotsPanel.add(areaBoxplotChartPanel);
+		signalsTabPane.addTab("Boxplots", null, boxplotsPanel, null);
+		
 		this.add(signalsTabPane, BorderLayout.CENTER);
 	}
 
@@ -206,6 +230,24 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 		updateSignalsPanel(list);
 		updateSignalHistogramPanel(list);
 		updateSignalAnalysisSetupPanel(list);
+		updateAreaBoxplot(list);
+	}
+	
+	/**
+	 * Update the boxplot panel for areas with a list of NucleusCollections
+	 * @param list
+	 */
+	private void updateAreaBoxplot(List<AnalysisDataset> list){
+		if(list.size()==1){
+			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSignalAreaBoxplotDataset(list.get(0));
+			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+			formatBoxplotChart(boxplotChart, list);
+			areaBoxplotChartPanel.setChart(boxplotChart);
+		} else {
+			JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
+			formatBoxplotChart(areaBoxplot);
+			areaBoxplotChartPanel.setChart(areaBoxplot);
+		}
 	}
 	
 	private void updateSignalsPanel(List<AnalysisDataset> list){
@@ -322,6 +364,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 
 		for (int i = 0; i < seriesCount; i++) {
 			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+			Shape circle = new Ellipse2D.Double(0, 0, 2, 2);
+			plot.getRenderer().setSeriesShape(i, circle);
+			
 			String name = (String) ds.getSeriesKey(i);
 			
 			if(name.startsWith("Seg_")){
@@ -449,6 +494,10 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 
 					XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
 					for(int series=0;series<signalCoMs.getSeriesCount();series++){
+						
+						Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
+						rend.setSeriesShape(series, circle);
+						
 						String name = (String) signalCoMs.getSeriesKey(series);
 						int seriesGroup = getIndexFromLabel(name);
 						Color colour = activeDataset.getSignalGroupColour(seriesGroup);
@@ -465,8 +514,8 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 
 						int signalCount = shapes.size();
 
-						int alpha = (int) Math.floor( 255 / ((double) signalCount) );
-						alpha = alpha < 5 ? 5 : alpha > 128 ? 128 : alpha;
+						int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
+						alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
 						
 						Color colour = activeDataset.getSignalGroupColour(signalGroup);
 
@@ -630,4 +679,46 @@ public class SignalsDetailPanel extends JPanel implements ActionListener {
 			return l;
 		}
 	}
+	
+	/**
+	 * Apply the default formatting to a boxplot with list
+	 * @param boxplot
+	 */
+	private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
+		formatBoxplotChart(boxplot);
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
+
+		CategoryDataset ds = plot.getDataset(0);
+
+		for(int series=0;series<ds.getRowCount();series++){
+			String name = (String) ds.getRowKey(series);
+			int seriesGroup = getIndexFromLabel(name);
+
+			Color color = activeDataset.getSignalGroupColour(seriesGroup) == null 
+					? ColourSelecter.getSegmentColor(series)
+							: activeDataset.getSignalGroupColour(seriesGroup);
+
+					renderer.setSeriesPaint(series, color);
+
+
+		}
+
+		renderer.setMeanVisible(false);
+	}
+	
+	/**
+	 * Apply basic formatting to the charts, without any series added
+	 * @param boxplot
+	 */
+	private void formatBoxplotChart(JFreeChart boxplot){
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+		plot.setRenderer(renderer);
+		renderer.setUseOutlinePaintForWhiskers(true);   
+		renderer.setBaseOutlinePaint(Color.BLACK);
+		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+	}
+
 }

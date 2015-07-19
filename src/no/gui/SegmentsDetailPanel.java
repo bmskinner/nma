@@ -90,6 +90,7 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 		
 		// checkbox to select raw or normalised profiles
 		normSegmentCheckBox.setSelected(true);
+		normSegmentCheckBox.setEnabled(false);
 		normSegmentCheckBox.setActionCommand("NormalisedSegmentProfile");
 		normSegmentCheckBox.addActionListener(this);
 		
@@ -140,14 +141,20 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 	public void update(List<AnalysisDataset> list){
 		this.list = list;
 		
-		if(list!=null){
-			// get the list of segments from the datasets
+		if(list!=null && !list.isEmpty()){
+			normSegmentCheckBox.setEnabled(true);
+			// get the list of segments from the first dataset
 			ComboBoxModel<String> aModel = new DefaultComboBoxModel<String>(list.get(0).getCollection().getSegmentNames().toArray(new String[0]));
 			segmentSelectionBox.setModel(aModel);
 			segmentSelectionBox.setSelectedIndex(0);
 			updateSegmentsBoxplot(list, (String) segmentSelectionBox.getSelectedItem()); // get segname from panel
 			updateSegmentsProfile(list, (String) segmentSelectionBox.getSelectedItem(), true, false); // get segname from panel
 			 
+		} else {
+			// if the list is empty, do not enable controls
+			normSegmentCheckBox.setEnabled(false);
+			rawSegmentLeftButton.setEnabled(false);
+			rawSegmentRightButton.setEnabled(false);
 		}
 	}
 	

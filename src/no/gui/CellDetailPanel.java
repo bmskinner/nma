@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.ChangeEvent;
 
 import no.analysis.AnalysisDataset;
 
@@ -252,10 +254,10 @@ public class CellDetailPanel extends JPanel implements ActionListener {
 			if(list.size()==1){	
 				try{
 					
-//					Cell cell = activeDataset.getCollection().getCell(name);
 					activeCell = activeDataset.getCollection().getCell(name);
 					updateCell(activeCell);
 				} catch (Exception e1){
+					
 					IJ.log("Error fetching cell: "+e1.getMessage());
 					for(StackTraceElement e2 : e1.getStackTrace()){
 						IJ.log(e2.toString());

@@ -1507,6 +1507,29 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
+	/**
+	 * Create a boxplot dataset for signal areas
+	 * @param dataset the AnalysisDataset to get signal info from
+	 * @return a boxplot dataset
+	 */
+	public static BoxAndWhiskerCategoryDataset createSignalAreaBoxplotDataset(AnalysisDataset dataset) {
+
+		DefaultBoxAndWhiskerCategoryDataset result = new DefaultBoxAndWhiskerCategoryDataset();
+
+		CellCollection c = dataset.getCollection();
+		
+		for(int signalGroup : c.getSignalGroups()){
+			
+			List<Double> list = new ArrayList<Double>();
+			for(NuclearSignal s : c.getSignals(signalGroup)){
+				
+				list.add(s.getArea());
+			}
+			result.add(list, "Group_"+signalGroup, "Area");
+		}
+		return result;
+	}
+	
 	public static CategoryDataset createShellBarChartDataset(List<AnalysisDataset> list){
 		DefaultStatisticalCategoryDataset ds = new DefaultStatisticalCategoryDataset();
 		for(AnalysisDataset dataset : list){
