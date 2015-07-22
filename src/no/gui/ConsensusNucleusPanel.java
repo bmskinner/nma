@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -46,7 +48,12 @@ public class ConsensusNucleusPanel extends JPanel {
 	
 	public ConsensusNucleusPanel() {
 
-		this.setLayout(new FlowLayout());
+		this.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridwidth = 1;
+		c.fill = GridBagConstraints.BOTH;      //reset to default
+		c.weightx = 0.0;         
+		
 		JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
 				null, null, null);
 		XYPlot consensusPlot = consensusChart.getXYPlot();
@@ -73,12 +80,12 @@ public class ConsensusNucleusPanel extends JPanel {
 		
 		
 		
-		consensusChartPanel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				resizePreview(consensusChartPanel, ConsensusNucleusPanel.this);
-			}
-		});
+//		consensusChartPanel.addComponentListener(new ComponentAdapter() {
+//			@Override
+//			public void componentResized(ComponentEvent e) {
+//				resizePreview(consensusChartPanel, ConsensusNucleusPanel.this);
+//			}
+//		});
 		
 		this.addComponentListener(new ComponentAdapter() {
 			@Override
@@ -87,7 +94,7 @@ public class ConsensusNucleusPanel extends JPanel {
 			}
 		});
 		
-		this.add(consensusChartPanel);
+		this.add(consensusChartPanel, c);
 	}
 	
 	/**

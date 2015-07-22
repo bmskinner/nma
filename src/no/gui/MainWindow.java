@@ -5,6 +5,8 @@ import ij.io.DirectoryChooser;
 import ij.io.SaveDialog;
 
 import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,7 +32,6 @@ import no.nuclei.Nucleus;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,7 +117,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			logPanel = new LogPanel();
 			
-			//Create a split pane 
+			//---------------
+			// Create the split view
+			//---------------
 			JSplitPane logAndPopulations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 					logPanel, populationsPanel);
 
@@ -125,21 +128,28 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			logPanel.setMinimumSize(minimumSize);
 			populationsPanel.setMinimumSize(minimumSize);
 			
+			
+			//---------------
+			// Make the top row panel
+			//---------------
 			JPanel topRow = new JPanel();
 			
+			GridBagConstraints c = new GridBagConstraints();
+			c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
+			c.fill = GridBagConstraints.BOTH;      //reset to default
+			c.weightx = 1.0;       
+			c.weighty = 1.0;
+			
+			topRow.setLayout(new GridBagLayout());
+//			topRow.setLayout(new BoxLayout(topRow, BoxLayout.X_AXIS));
+			topRow.add(logAndPopulations, c);
 			
 			
-//			GridBagConstraints c = new GridBagConstraints();
-//			c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
-//			c.fill = GridBagConstraints.BOTH;      //reset to default
-//			c.weightx = 0.0;                       //reset to default
-			
-			topRow.setLayout(new BoxLayout(topRow, BoxLayout.X_AXIS));
-			topRow.add(logAndPopulations);
-			
-			
-//			c.gridwidth = GridBagConstraints.REMAINDER; //next-to-last
-			topRow.add(consensusNucleusPanel);
+			c.gridwidth = GridBagConstraints.REMAINDER; //last
+			c.weightx = 0.5;
+			c.weighty = 1.0;
+			c.fill = GridBagConstraints.BOTH;      //reset to default
+			topRow.add(consensusNucleusPanel, c);
 			
 			
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
