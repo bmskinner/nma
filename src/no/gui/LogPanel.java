@@ -16,7 +16,7 @@ public class LogPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	
-	private JTextArea textArea = new JTextArea();;
+	private JTextArea textArea = new JTextArea();
 	
 	private JPanel 					logPanel;				// messages and errors
 	private JPanel 					progressPanel;			// progress bars for analyses

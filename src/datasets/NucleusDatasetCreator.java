@@ -978,13 +978,43 @@ public class NucleusDatasetCreator {
 		return dataset;
 	}
 	
+	/**
+	 * Get the outline of the consensus nucleus. No segmentation, no IQR
+	 * @param dataset
+	 * @return
+	 */
+	public static XYDataset createBareNucleusOutline(AnalysisDataset dataset){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		Nucleus n = dataset.getCollection().getConsensusNucleus();
+		
+		double[] xpoints = new double[n.getLength()+1];
+		double[] ypoints = new double[n.getLength()+1];
+		
+		for(int i=0; i<n.getLength();i++){
+			NucleusBorderPoint p = n.getBorderPoint(i);
+			xpoints[i] = p.getX();
+			ypoints[i] = p.getY();
+		}
+		// complete the line
+		xpoints[n.getLength()] = xpoints[0];
+		ypoints[n.getLength()] = ypoints[0];
+		
+		double[][] data = { xpoints, ypoints };
+		ds.addSeries("Outline", data);
+		return ds;
+	}
+	
+	/**
+	 * Create an outline of the consensus nucleus, and apply segment colours
+	 * @param collection
+	 * @return
+	 */
 	public static XYDataset createNucleusOutline(CellCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Nucleus n = collection.getConsensusNucleus();
 		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
 		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75").interpolate(n.getLength());
 		
-//		IJ.log("Nucleus: "+n.getLength()+" q25 "+q25.size()+" q75 "+q75.size());
 
 		// Add lines to show the IQR of the angle profile at each point
 		double[] innerIQRX = new double[n.getLength()+1];
@@ -1035,21 +1065,7 @@ public class NucleusDatasetCreator {
 			}
 		}
 
-		// add the IQR
-		// error here - the nucleus is not starting from the same point as the iqr
-		// perhaps a reverse order issue? No. Still offset.
-		// Also a problem with order. IQR is doubling back towards tail; 
-			// the final point is correct (tailindex-1), but the rest are off by ~8
-			// moved back to innerIQRX[i] from innerIQRX[index]; everything joins up again. 
-		// Confirms the issue is with the XYPoint positions assigned to each IQR 
-//		scaledRange.reverse();
-//		int offset = -n.getBorderIndex(collection.getOrientationPoint())-20;
-//		scaledRange = scaledRange.offset(offset);
-//		IJ.log("Offset: "+offset);
-//		int ref = n.getBorderIndex(collection.getReferencePoint());
-//		IJ.log("Ref point: "+ref);
-		
-		
+		// add the IQR	
 		// what we need to do is match the profile positions to the borderpoints
 		
 		int tailIndex = n.getBorderIndex(collection.getOrientationPoint());
@@ -1095,6 +1111,12 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
+	/**
+	 * Get the outline for a specific nucleus in a dataset. Sets the position
+	 * to the original coordinates in the image 
+	 * @param cell
+	 * @return
+	 */
 	public static XYDataset createNucleusOutline(Cell cell){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		

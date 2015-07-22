@@ -472,7 +472,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 				}
 								
-//				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisDatasets.size()+" populations ready to view");
+				lblStatusLine.setText("New analysis complete: "
+										+populationsPanel.getDatasetCount()
+										+" populations ready to view");
 				populationsPanel.update();		
 				
 			}

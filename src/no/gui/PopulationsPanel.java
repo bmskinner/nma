@@ -191,6 +191,14 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 	}
 	
 	/**
+	 * Get the number of datasets currently loaded
+	 * @return
+	 */
+	public int getDatasetCount(){
+		return this.analysisDatasets.size();
+	}
+	
+	/**
 	 * Get the datasets currently selected
 	 * @return
 	 */
