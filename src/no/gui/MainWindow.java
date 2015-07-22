@@ -128,30 +128,26 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			logPanel.setMinimumSize(minimumSize);
 			populationsPanel.setMinimumSize(minimumSize);
 			
-			
 			//---------------
 			// Make the top row panel
 			//---------------
 			JPanel topRow = new JPanel();
 			
 			GridBagConstraints c = new GridBagConstraints();
-			c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
-			c.fill = GridBagConstraints.BOTH;      //reset to default
-			c.weightx = 1.0;       
+			c.gridwidth = GridBagConstraints.RELATIVE; 	// next-to-last element
+			c.fill = GridBagConstraints.BOTH;     		// fill both axes of container
+			c.weightx = 1.0;       						// maximum weighting
 			c.weighty = 1.0;
 			
 			topRow.setLayout(new GridBagLayout());
-//			topRow.setLayout(new BoxLayout(topRow, BoxLayout.X_AXIS));
 			topRow.add(logAndPopulations, c);
-			
-			
-			c.gridwidth = GridBagConstraints.REMAINDER; //last
-			c.weightx = 0.5;
-			c.weighty = 1.0;
-			c.fill = GridBagConstraints.BOTH;      //reset to default
+
+			c.gridwidth = GridBagConstraints.REMAINDER; //last element in row
+			c.weightx = 0.5;							// allow padding on x axis
+			c.weighty = 1.0;							// max weighting on y axis
+			c.fill = GridBagConstraints.BOTH;      		// fill to bounds where possible
 			topRow.add(consensusNucleusPanel, c);
-			
-			
+
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
 			//---------------
