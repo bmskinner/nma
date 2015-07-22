@@ -20,6 +20,7 @@ import no.components.ShellResult;
 import no.export.PopulationExporter;
 import no.gui.ColourSelecter;
 import no.gui.MainWindow;
+import no.nuclei.Nucleus;
 
 
 /**
@@ -37,6 +38,7 @@ public class AnalysisDataset implements Serializable {
 	private AnalysisOptions analysisOptions;
 	private Map<Integer, ShellResult> shellResults 		= new HashMap<Integer, ShellResult>(0); // store shell analysis for each channel
 	
+	private Map<Integer, String>	signalGroupsAdded		= new HashMap<Integer, String>(0);	// store the names of the groups added
 	private Map<Integer, Boolean> 	signalGroupsVisible 	= new HashMap<Integer, Boolean>(0); // is the given signal group shown in plots
 	private Map<Integer, Color> 	signalGroupColours 		= new HashMap<Integer, Color>(0); // allow saving of colour choices
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
@@ -323,6 +325,38 @@ public class AnalysisDataset implements Serializable {
 	public void setSignalGroupColour(int signalGroup, Color colour){
 		this.signalGroupColours.put(signalGroup, colour);
 	}
+	
+	
+	/**
+	 * Get the name of the signal group
+	 * @param signalGroup the group the fetch
+	 * @return
+	 */
+	public String getSignalGroupName(int signalGroup){
+		return this.signalGroupsAdded.get(signalGroup);
+	}
+	
+	/**
+	 * Set the given signal group name
+	 * @param signalGroup
+	 * @param name
+	 */
+	public void setSignalGroupName(int signalGroup, String name){
+		this.signalGroupsAdded.put(signalGroup, name);
+	}
+	
+	  /**
+	   * Return the highest signal group present, or 0 if no signal groups
+	   * are present
+	 * @return the highest signal group
+	 */
+	  public int getHighestSignalGroup(){
+		  int maxGroup = 0;
+		  for(Integer n : signalGroupsAdded.keySet()){
+			  maxGroup = n > maxGroup ? n : maxGroup; 
+		  }
+		  return maxGroup;
+	  }
 	
 	/**
 	 * Set the dataset colour (used in comparisons between datasets)

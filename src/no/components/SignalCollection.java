@@ -211,7 +211,7 @@ public class SignalCollection implements Serializable {
 	 * @return the set of names
 	 */
 	public Set<Integer> getSignalGroups(){
-		return collection.keySet();
+		return names.keySet();
 	}
 	
 	/**

@@ -146,7 +146,6 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 	 */
 	public void update(){
 					
-		// new method using treetable
 		List<String> columns = new ArrayList<String>();
 		columns.add("Population");
 		columns.add("Nuclei");
@@ -191,6 +190,10 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		return category;
 	}
 	
+	/**
+	 * Get the datasets currently selected
+	 * @return
+	 */
 	public List<AnalysisDataset> getSelectedDatasets(){
 
 		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);

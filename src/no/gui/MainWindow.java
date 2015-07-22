@@ -74,27 +74,26 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	private JTextArea textArea = new JTextArea();;
 	private JLabel lblStatusLine = new JLabel("No analysis open");
 
-	private JTable tablePopulationStats;
-	private JTable tableAnalysisParamters;
+//	private JTable tablePopulationStats;
+//	private JTable tableAnalysisParamters;
 	
-	private JPanel logPanel;
-	private JPanel progressPanel;
+	private JPanel 					logPanel;				// messages and errors
+	private JPanel 					progressPanel;			// progress bars for analyses
 	
-	private PopulationsPanel 		populationsPanel; // holds and selects open datasets
+	private PopulationsPanel 		populationsPanel; 		// holds and selects open datasets
+	private ConsensusNucleusPanel	consensusNucleusPanel; 	// show refolded nuclei if present
 	
-	private ConsensusNucleusPanel	consensusNucleusPanel;
+	private JTabbedPane 			tabbedPane;				// bottom panel tabs. Contains:
 	
-	// bottom panel tabs
-	private JTabbedPane tabbedPane;
-	
-	private NucleusProfilesPanel 	nucleusProfilesPanel;
-	private SignalsDetailPanel 		signalsDetailPanel;
-	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;
-	private WilcoxonDetailPanel 	wilcoxonDetailPanel;
-	private SegmentsDetailPanel 	segmentsDetailPanel;
-	private CellDetailPanel 		cellDetailPanel;
-	private VennDetailPanel			vennDetailPanel;
-	private ClusterDetailPanel		clusterDetailPanel;
+	private NucleusProfilesPanel 	nucleusProfilesPanel; 	// the angle profiles
+	private AnalysisDetailPanel		analysisDetailPanel;	// nucleus detection parameters and stats
+	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
+	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
+	private WilcoxonDetailPanel 	wilcoxonDetailPanel;	// stats test between populations
+	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
+	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
+	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
+	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 			
 	/**
 	 * Create the frame.
@@ -104,7 +103,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		try {
 			setTitle("Nuclear Morphology Analysis v"+getVersion());
-			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			setBounds(100, 100, 1012, 604);
 			contentPane = new JPanel();
 			contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -174,11 +172,12 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			//---------------
 			// Create the general stats page
 			//---------------
-			JScrollPane statsPanel = createStatsPanel();
-			tabbedPane.addTab("Basic statistics", null, statsPanel, null);
-			
-			JScrollPane parametersPanel = createAnalysisParametersPanel();
-			tabbedPane.addTab("Analysis info", null, parametersPanel, null);
+//			JScrollPane statsPanel = createStatsPanel();
+//			tabbedPane.addTab("Basic statistics", null, statsPanel, null);
+//			
+//			JScrollPane parametersPanel = createAnalysisParametersPanel();
+			analysisDetailPanel = new AnalysisDetailPanel();
+			tabbedPane.addTab("Analysis info", analysisDetailPanel);
 
 			//---------------
 			// Create panel for split boxplots
@@ -397,39 +396,39 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	}
 		
 			
-	private JScrollPane createStatsPanel(){
-		
-		JScrollPane scrollPane = new JScrollPane();
-		JPanel panelGeneralStats = new JPanel();
-		
-		panelGeneralStats.setLayout(new BorderLayout(0, 0));
-
-		tablePopulationStats = new JTable();
-		panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
-		tablePopulationStats.setEnabled(false);
-
-		scrollPane.setViewportView(panelGeneralStats);
-		scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
-		tablePopulationStats.setModel(NucleusDatasetCreator.createStatsTable(null));
-		return scrollPane;
-	}
-	
-	private JScrollPane createAnalysisParametersPanel(){
-		
-		JScrollPane scrollPane = new JScrollPane();
-		JPanel panel = new JPanel();
-		
-		panel.setLayout(new BorderLayout(0, 0));
-
-		tableAnalysisParamters = new JTable();
-		tableAnalysisParamters.setModel(NucleusDatasetCreator.createAnalysisParametersTable(null));
-		tableAnalysisParamters.setEnabled(false);
-		panel.add(tableAnalysisParamters, BorderLayout.CENTER);
-
-		scrollPane.setViewportView(panel);
-		scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
-		return scrollPane;
-	}
+//	private JScrollPane createStatsPanel(){
+//		
+//		JScrollPane scrollPane = new JScrollPane();
+//		JPanel panelGeneralStats = new JPanel();
+//		
+//		panelGeneralStats.setLayout(new BorderLayout(0, 0));
+//
+//		tablePopulationStats = new JTable();
+//		panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
+//		tablePopulationStats.setEnabled(false);
+//
+//		scrollPane.setViewportView(panelGeneralStats);
+//		scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
+//		tablePopulationStats.setModel(NucleusDatasetCreator.createStatsTable(null));
+//		return scrollPane;
+//	}
+//	
+//	private JScrollPane createAnalysisParametersPanel(){
+//		
+//		JScrollPane scrollPane = new JScrollPane();
+//		JPanel panel = new JPanel();
+//		
+//		panel.setLayout(new BorderLayout(0, 0));
+//
+//		tableAnalysisParamters = new JTable();
+//		tableAnalysisParamters.setModel(NucleusDatasetCreator.createAnalysisParametersTable(null));
+//		tableAnalysisParamters.setEnabled(false);
+//		panel.add(tableAnalysisParamters, BorderLayout.CENTER);
+//
+//		scrollPane.setViewportView(panel);
+//		scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
+//		return scrollPane;
+//	}
 		
 			
 	@Override
@@ -621,8 +620,10 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		Thread thr = new Thread() {
 			public void run() {
 				try {
-					updateStatsPanel(list);
-					updateAnalysisParametersPanel(list);
+					
+					analysisDetailPanel.update(list);
+//					updateStatsPanel(list);
+//					updateAnalysisParametersPanel(list);
 					
 					nucleusProfilesPanel.update(list);
 					consensusNucleusPanel.update(list);
@@ -631,7 +632,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 					signalsDetailPanel.update(list);
 
 					clusterDetailPanel.update(list);
-//					updateClusteringPanel(list);
 					vennDetailPanel.update(list);
 					wilcoxonDetailPanel.update(list);
 					cellDetailPanel.updateList(list);
@@ -648,27 +648,27 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		thr.start();
 	}
 		
-	/**
-	 * Update the analysis panel with data from the given datasets
-	 * @param list the datasets
-	 */
-	public void updateAnalysisParametersPanel(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusDatasetCreator.createAnalysisParametersTable(list);
-		tableAnalysisParamters.setModel(model);
-	}
-	
-	
-	
-	/**
-	 * Update the stats panel with data from the given datasets
-	 * @param list the datasets
-	 */
-	public void updateStatsPanel(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusDatasetCreator.createStatsTable(list);
-		tablePopulationStats.setModel(model);
-	}
+//	/**
+//	 * Update the analysis panel with data from the given datasets
+//	 * @param list the datasets
+//	 */
+//	public void updateAnalysisParametersPanel(List<AnalysisDataset> list){
+//		// format the numbers and make into a tablemodel
+//		TableModel model = NucleusDatasetCreator.createAnalysisParametersTable(list);
+//		tableAnalysisParamters.setModel(model);
+//	}
+//	
+//	
+//	
+//	/**
+//	 * Update the stats panel with data from the given datasets
+//	 * @param list the datasets
+//	 */
+//	public void updateStatsPanel(List<AnalysisDataset> list){
+//		// format the numbers and make into a tablemodel
+//		TableModel model = NucleusDatasetCreator.createStatsTable(list);
+//		tablePopulationStats.setModel(model);
+//	}
 		
 	
 	/**
@@ -1373,7 +1373,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 				NuclearSignalOptions options = d.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
 
 				// the new signal group is one more than the highest in the collection
-				int newSignalGroup = d.getCollection().getHighestSignalGroup()+1;
+				int newSignalGroup = d.getHighestSignalGroup()+1;
 				
 				// get the folder of images
 				DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
@@ -1394,6 +1394,8 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 					this.cancel();
 					return; // check folder is ok
 				}
+				
+				d.setSignalGroupName(newSignalGroup, signalGroupName);
 				
 
 				SignalDetector t = new SignalDetector(d, folder, channel, options, newSignalGroup, signalGroupName);
