@@ -62,18 +62,18 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	
 	public static final String SOURCE_COMPONENT = "SignalsDetailPanel"; 
 	
-	private ChartPanel shellsChartPanel; 
-	private JPanel shellsPanel;
+	private ChartPanel 	shellsChartPanel; 
+	private JPanel 		shellsPanel;
 	
-	private ChartPanel signalsChartPanel; // consensus nucleus plus signals
-	private JPanel signalsPanel;// signals container for chart and stats table
-	private JTable signalStatsTable;
-	private JPanel signalAnalysisSetupPanel;
-	private JTable signalAnalysisSetupTable;
-	private JPanel signalConsensusAndCheckboxPanel;
-	private JPanel boxplotsPanel;
-	private JPanel checkboxPanel;
-	private ChartPanel areaBoxplotChartPanel;
+	private ChartPanel 	consensusChartPanel; 		// consensus nucleus plus signals
+	private JPanel 		overviewPanel;				// signals container for chart and stats table
+	private JTable 		statsTable;					// table for signal stats
+	private JPanel 		analysisSetupPanel;			// panel for analysis parameters
+	private JTable 		analysisSetupTable;			// table for analysis parameters
+	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
+	private JPanel 		boxplotsPanel;
+	private JPanel 		checkboxPanel;
+	private ChartPanel 	areaBoxplotChartPanel;
 	private JTabbedPane signalsTabPane;
 	
 	private static final int TAB_OVERVIEW 	= 0;
@@ -83,9 +83,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	private static final int TAB_BOXPLOTS 	= 4;
 	
 	
-	private ChartPanel 	signalAngleChartPanel; 		// consensus nucleus plus signals
-	private ChartPanel 	signalDistanceChartPanel; 	// consensus nucleus plus signals
-	private JPanel 		signalHistogramPanel;		// signals container for chart and stats table
+	private ChartPanel 	angleChartPanel; 		// 
+	private ChartPanel 	distanceChartPanel; 	// 
+	private JPanel 		signalHistogramPanel;		// histograms panel
 	
 	private List<AnalysisDataset> list;
 	private AnalysisDataset activeDataset;
@@ -104,36 +104,32 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 
 			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-			signalsPanel = createOverviewPanel();
-			signalsTabPane.addTab("Overview", null, signalsPanel, null);
+			overviewPanel = createOverviewPanel();
+			signalsTabPane.addTab("Overview", overviewPanel);
 //			IJ.log("Made overview");
 			//---------------
 			// Distance and angle histograms charts
 			//---------------
 			signalHistogramPanel = createHistogramsPanel(); // main container in tab
-			signalsTabPane.addTab("Signal histograms", null, signalHistogramPanel, null);
+			signalsTabPane.addTab("Signal histograms", signalHistogramPanel);
 //			IJ.log("Made signals");
 			//---------------
 			// Create the shells panel
 			//---------------
-			JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
-			shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
-			shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
-			shellsChartPanel = new ChartPanel(shellsChart);
-
-			signalsTabPane.addTab("Shells", null, shellsChartPanel, null);
+			shellsPanel = createShellsPanel();
+			signalsTabPane.addTab("Shells", shellsPanel);
 //			IJ.log("Made shells");
 
 			//---------------
 			// Create the signal analysis settings panel
 			//---------------
-			signalAnalysisSetupPanel = new JPanel(new BorderLayout());
+			analysisSetupPanel = new JPanel(new BorderLayout());
 
-			signalAnalysisSetupTable  = new JTable(new DefaultTableModel());
-			signalAnalysisSetupTable.setEnabled(false);
-			JScrollPane signalAnalysisSetupScrollPane = new JScrollPane(signalAnalysisSetupTable);
-			signalAnalysisSetupPanel.add(signalAnalysisSetupScrollPane, BorderLayout.CENTER);
-			signalsTabPane.addTab("Detection settings", null, signalAnalysisSetupPanel, null);
+			analysisSetupTable  = new JTable(new DefaultTableModel());
+			analysisSetupTable.setEnabled(false);
+			JScrollPane signalAnalysisSetupScrollPane = new JScrollPane(analysisSetupTable);
+			analysisSetupPanel.add(signalAnalysisSetupScrollPane, BorderLayout.CENTER);
+			signalsTabPane.addTab("Detection settings", null, analysisSetupPanel, null);
 
 			//---------------
 			// Create the signal boxplots panel
@@ -166,11 +162,11 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		DefaultTableModel signalsTableModel = new DefaultTableModel();
 		signalsTableModel.addColumn("");
 		signalsTableModel.addColumn("");
-		signalStatsTable = new JTable(); // table  for basic stats
-		signalStatsTable.setModel(signalsTableModel);
-		signalStatsTable.setEnabled(false);
+		statsTable = new JTable(); // table  for basic stats
+		statsTable.setModel(signalsTableModel);
+		statsTable.setEnabled(false);
 		
-		signalStatsTable.addMouseListener(new MouseAdapter() {
+		statsTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				
@@ -204,14 +200,14 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			}
 		});
 		
-		JScrollPane signalStatsScrollPane = new JScrollPane(signalStatsTable);
+		JScrollPane signalStatsScrollPane = new JScrollPane(statsTable);
 		panel.add(signalStatsScrollPane);
 		
 		//---------------
 		// Consensus chart
 		//---------------
-		signalConsensusAndCheckboxPanel = createConsensusPanel();
-		panel.add(signalConsensusAndCheckboxPanel);
+		consensusAndCheckboxPanel = createConsensusPanel();
+		panel.add(consensusAndCheckboxPanel);
 		return panel;
 	}
 	
@@ -229,22 +225,24 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 				
 		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
 		// this allows a checkbox panel to be added to the JPanel later
-		signalsChartPanel = new ChartPanel(signalsChart);
-		panel.add(signalsChartPanel, BorderLayout.CENTER);
+		consensusChartPanel = new ChartPanel(signalsChart);
+		panel.add(consensusChartPanel, BorderLayout.CENTER);
 		
-//		signalsChartPanel.addComponentListener(new ComponentAdapter() {
-//			@Override
-//			public void componentResized(ComponentEvent e) {
-//				resizePreview(signalsChartPanel, panel);
-//			}
-//		});
-//		
-//		this.addComponentListener(new ComponentAdapter() {
-//			@Override
-//			public void componentResized(ComponentEvent e) {
-//				resizePreview(signalsChartPanel, panel);
-//			}
-//		});
+		consensusChartPanel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				resizePreview(consensusChartPanel, panel);
+			}
+		});
+		
+		panel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				resizePreview(consensusChartPanel, panel);
+			}
+		});
+		
+		
 		checkboxPanel = createSignalCheckboxPanel(null);
 		
 		panel.add(checkboxPanel, BorderLayout.NORTH);
@@ -261,11 +259,22 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		
 		JPanel panel = new JPanel(); // main container in tab
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		signalAngleChartPanel = new ChartPanel(signalAngleChart);
-		signalDistanceChartPanel = new ChartPanel(signalDistanceChart);
+		angleChartPanel = new ChartPanel(signalAngleChart);
+		distanceChartPanel = new ChartPanel(signalDistanceChart);
 
-		panel.add(signalAngleChartPanel);
-		panel.add(signalDistanceChartPanel);
+		panel.add(angleChartPanel);
+		panel.add(distanceChartPanel);
+		return panel;
+	}
+	
+	
+	private JPanel createShellsPanel(){
+		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
+		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
+		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
+		shellsChartPanel = new ChartPanel(shellsChart);
+		JPanel panel = new JPanel();
+		panel.add(shellsChartPanel);
 		return panel;
 	}
 	
@@ -312,13 +321,13 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	private void updateSignalStatsPanel(List<AnalysisDataset> list){
 		try{
 			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
-			signalStatsTable.setModel(model);
+			statsTable.setModel(model);
 		} catch (Exception e){
 			fireSignalChangeEvent("Log_"+"Error updating signal stats: "+e.getMessage());
 		}
-		int columns = signalStatsTable.getColumnModel().getColumnCount();
+		int columns = statsTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
-			signalStatsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+			statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
 		}
 	}
 	
@@ -329,7 +338,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	private void updateSignalAnalysisSetupPanel(List<AnalysisDataset> list){
 		try{
 			TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(list);
-			this.signalAnalysisSetupTable.setModel(model);
+			this.analysisSetupTable.setModel(model);
 		} catch (Exception e){
 			fireSignalChangeEvent("Log_"+"Error updating signal analysis: "+e.getMessage());
 			for(StackTraceElement e1 : e.getStackTrace()){
@@ -455,13 +464,13 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 					Color colour = activeDataset.getSignalGroupColour(seriesGroup);
 					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
-//					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getSignalColour(seriesGroup-1, true, 128));
+
 				}	
-				signalAngleChartPanel.setChart(chart);
+				angleChartPanel.setChart(chart);
 			} else {
 				JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
 				chart.getPlot().setBackgroundPaint(Color.white);
-				signalAngleChartPanel.setChart(chart);
+				angleChartPanel.setChart(chart);
 			}
 		} catch (Exception e) {
 			IJ.log("Error updating angle histograms: "+e.getMessage());
@@ -470,7 +479,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			}
 			JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
 			chart.getPlot().setBackgroundPaint(Color.white);
-			signalAngleChartPanel.setChart(chart);
+			angleChartPanel.setChart(chart);
 		}
 		
 		
@@ -496,11 +505,11 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 					Color colour = activeDataset.getSignalGroupColour(index);
 					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
 				}	
-				signalDistanceChartPanel.setChart(chart);
+				distanceChartPanel.setChart(chart);
 			} else {
 				JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
 				chart.getPlot().setBackgroundPaint(Color.white);
-				signalDistanceChartPanel.setChart(chart);
+				distanceChartPanel.setChart(chart);
 			}
 		} catch (Exception e) {
 			IJ.log("Error updating distance histograms: "+e.getMessage());
@@ -509,7 +518,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			}
 			JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
 			chart.getPlot().setBackgroundPaint(Color.white);
-			signalDistanceChartPanel.setChart(chart);
+			distanceChartPanel.setChart(chart);
 		}
 	}
 	
@@ -518,20 +527,17 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 
 			if(list.size()==1){
 				this.activeDataset = list.get(0);
-				
-				// get rid of any checkboxes present
-//				signalConsensusAndCheckboxPanel.remove(checkboxPanel);
-				
+								
 				// make a new panel for the active dataset
 				checkboxPanel = createSignalCheckboxPanel(activeDataset);
 				
 				// add this new panel
-				signalConsensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
-				signalConsensusAndCheckboxPanel.revalidate();
-				signalConsensusAndCheckboxPanel.repaint();
-				signalConsensusAndCheckboxPanel.setVisible(true);
+				consensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
+				consensusAndCheckboxPanel.revalidate();
+				consensusAndCheckboxPanel.repaint();
+				consensusAndCheckboxPanel.setVisible(true);
 
-				CellCollection collection = list.get(0).getCollection();
+				CellCollection collection = activeDataset.getCollection();
 
 				if(collection.hasConsensusNucleus()){ // if a refold is available
 					
@@ -551,7 +557,6 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 						int seriesGroup = getIndexFromLabel(name);
 						Color colour = activeDataset.getSignalGroupColour(seriesGroup);
 						rend.setSeriesPaint(series, colour);
-//						rend.setSeriesPaint(series, ColourSelecter.getSignalColour(seriesGroup-1, false));
 						rend.setBaseLinesVisible(false);
 						rend.setBaseShapesVisible(true);
 						rend.setBaseSeriesVisibleInLegend(false);
@@ -574,14 +579,14 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 							plot.addAnnotation(an);
 						}
 					}
-					signalsChartPanel.setChart(chart);
+					consensusChartPanel.setChart(chart);
 				} else { // no consensus to display
 										
-					signalConsensusAndCheckboxPanel.setVisible(false);
+					consensusAndCheckboxPanel.setVisible(false);
 				}
 			} else { // multiple populations
 				
-				signalConsensusAndCheckboxPanel.setVisible(false);
+				consensusAndCheckboxPanel.setVisible(false);
 			}
 		} catch(Exception e){
 			IJ.log("Error updating signals: "+e.getMessage());

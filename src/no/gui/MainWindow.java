@@ -468,7 +468,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						populationsPanel.addDataset(child);
 					}
 					PopulationExporter.saveAnalysisDataset(d);
-//					d.save();
 
 				}
 								
@@ -1151,48 +1150,60 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 *
 	 */
 	class AddTailStainAction extends ProgressableAction {
-		
+
 		public AddTailStainAction() {
-			super("Tail detection in progress", "Error in tail detection");
-			
-			DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
-			String folderName = openDialog.getDirectory();
+			super("Tail detection", "Error in tail detection");
+			try{
+				DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
+				String folderName = openDialog.getDirectory();
 
-			if(folderName==null) return; // user cancelled
+				if(folderName==null) return; // user cancelled
 
-			final File folder =  new File(folderName);
+				final File folder =  new File(folderName);
 
-			if(!folder.isDirectory() ){
+				if(!folder.isDirectory() ){
+					this.cancel();
+					return;
+				}
+				if(!folder.exists()){
+					this.cancel();
+					return; // check folder is ok
+				}
+				// create dialog to get image channel
+
+				Object[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
+				String channelName = (String)JOptionPane.showInputDialog(
+						MainWindow.this,
+						"Select channel",
+						"Select channel",
+						JOptionPane.PLAIN_MESSAGE,
+						null,
+						possibilities,
+						"Green");
+
+				if(channelName==null){
+					this.cancel();
+					return;
+				}
+
+				final int channel = channelName.equals("Red") 
+						? Constants.RGB_RED
+								: channelName.equals("Green") 
+								? Constants.RGB_GREEN
+										: Constants.RGB_BLUE;
+
+
+				TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
+				t.addPropertyChangeListener(this);
+				this.setProgressMessage("Tail detection:"+d.getName());
+				t.execute();
+			} catch(Exception e){
 				this.cancel();
-				return;
+				IJ.log("Error in tail analysis: "+e.getMessage());
+				for(StackTraceElement e1 : e.getStackTrace()){
+					IJ.log(e1.toString());
+				}
 			}
-			if(!folder.exists()){
-				this.cancel();
-				return; // check folder is ok
-			}
-			// create dialog to get image channel
-
-			Object[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
-			String channelName = (String)JOptionPane.showInputDialog(
-					MainWindow.this,
-					"Select channel",
-					"Select channel",
-					JOptionPane.PLAIN_MESSAGE,
-					null,
-					possibilities,
-					"Green");
-
-			final int channel = channelName.equals("Red") 
-					? Constants.RGB_RED
-							: channelName.equals("Green") 
-							? Constants.RGB_GREEN
-									: Constants.RGB_BLUE;
-			
-			
-			TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
-			t.addPropertyChangeListener(this);
-			this.setProgressMessage("Tail detection in progress:"+d.getName());
-			t.execute();
 		}
 	}
 	
@@ -1246,6 +1257,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				t.addPropertyChangeListener(this);
 				t.execute();
 			} catch (Exception e){
+				this.cancel();
 				IJ.log("Error in signal analysis: "+e.getMessage());
 				for(StackTraceElement e1 : e.getStackTrace()){
 					IJ.log(e1.toString());

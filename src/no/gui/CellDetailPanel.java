@@ -193,13 +193,15 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		// set the rendering options for each dataset type
 		
 		for(int key : hash.keySet()){
+			
+//			IJ.log("Drawing dataset "+hash.get(key));
 
 			plot.setDataset(key, datasetHash.get(key));
 			plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
 			
-
+			int seriesCount = plot.getDataset(key).getSeriesCount();
 			// go through each series in the dataset
-			for(int i=0; i<plot.getDataset(key).getSeriesCount();i++){
+			for(int i=0; i<seriesCount;i++){
 				
 				// all datasets use the same stroke
 				plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
@@ -213,8 +215,8 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 
 				// signal colours
 				if(hash.get(key).startsWith("SignalGroup_")){
-					
 					int colourIndex = getIndexFromLabel(hash.get(key));
+//					IJ.log("Drawing signal "+i+" of "+seriesCount+" in series group "+colourIndex);
 					Color colour = activeDataset.getSignalGroupColour(colourIndex);
 					plot.getRenderer(key).setSeriesPaint(i, colour);
 				}
