@@ -36,6 +36,8 @@ import datasets.NucleusDatasetCreator;
 public class ConsensusNucleusPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String SOURCE_COMPONENT = "ConsensusNucleusPanel"; 
 
 	private ChartPanel consensusChartPanel;
 	private JButton runRefoldingButton;
@@ -59,7 +61,7 @@ public class ConsensusNucleusPanel extends JPanel {
 		runRefoldingButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				fireRefoldEvent();
+				fireSignalChangeEvent("RefoldNucleusFired");
 				runRefoldingButton.setVisible(false);
 			}
 		});
@@ -255,13 +257,12 @@ public class ConsensusNucleusPanel extends JPanel {
         listeners.remove( l );
     }
      
-    private synchronized void fireRefoldEvent() {
+    private synchronized void fireSignalChangeEvent(String message) {
     	
-        SignalChangeEvent event = new SignalChangeEvent( this, "RefoldNucleusFired" );
+        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
         Iterator iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-//            IJ.log("Fired refold");
         }
     }
     

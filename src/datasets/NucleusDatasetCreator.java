@@ -1425,7 +1425,7 @@ public class NucleusDatasetCreator {
 									.getNuclearSignalOptions("default");
 						}
 						
-						if(collection.getSignalCount(signalGroup)>0){
+//						if(collection.getSignalCount(signalGroup)>0){
 							rowData.add("");
 							rowData.add(signalGroup);
 							rowData.add(collection.getSignalGroupName(signalGroup));
@@ -1438,12 +1438,12 @@ public class NucleusDatasetCreator {
 							rowData.add(df.format(ns.getMaxCirc()));
 							rowData.add(ns.isReverseThreshold());
 							
-						} else {
-							
-							for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
-								rowData.add("");
-							}
-						}
+//						} else {
+//							
+//							for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
+//								rowData.add("");
+//							}
+//						}
 					}
 					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
 				}

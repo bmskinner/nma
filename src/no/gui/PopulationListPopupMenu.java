@@ -1,0 +1,268 @@
+package no.gui;
+
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+
+public class PopulationListPopupMenu extends JPopupMenu {
+	
+	public static final String SOURCE_COMPONENT = "PopupMenu"; 
+
+	private static final long serialVersionUID = 1L;
+	JMenuItem mergeMenuItem = new JMenuItem( new AbstractAction("Merge"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("MergeCollectionAction");				
+		}
+	});
+	
+	JMenuItem deleteMenuItem = new JMenuItem( new AbstractAction("Delete"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("DeleteCollectionAction");				
+		}
+	});
+	
+	JMenuItem splitMenuItem = new JMenuItem( new AbstractAction("Split"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("SplitCollectionAction");				
+		}
+	});
+	JMenuItem saveMenuItem = new JMenuItem( new AbstractAction("Save as..."){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("SaveCollectionAction");				
+		}
+	});
+	
+	JMenuItem extractMenuItem = new JMenuItem( new AbstractAction("Extract nuclei"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("ExtractNucleiAction");				
+		}
+	});
+	
+	JMenuItem moveUpMenuItem = new JMenuItem( new AbstractAction("Move up"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("MoveDatasetUpAction");				
+		}
+	});
+	
+	JMenuItem moveDownMenuItem = new JMenuItem( new AbstractAction("Move down"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("MoveDatasetDownAction");				
+		}
+	});
+	
+	JMenuItem replaceFolderMenuItem = new JMenuItem( new AbstractAction("Change folder"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("ChangeNucleusFolderAction");				
+		}
+	});
+	
+	JMenuItem exportStatsMenuItem = new JMenuItem( new AbstractAction("Export stats"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("ExportDatasetStatsAction");				
+		}
+	});
+	JMenuItem applySegmentationMenuItem = new JMenuItem( new AbstractAction("Reapply profile"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("ReapplySegmentProfileAction");				
+		}
+	});
+	
+	JMenuItem addTailStainMenuItem = new JMenuItem( new AbstractAction("Add tail stain"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("AddTailStainAction");			
+		}
+	});
+	
+	JMenuItem addNuclearSignalMenuItem = new JMenuItem( new AbstractAction("Add nuclear signal"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("AddNuclearSignalAction");	
+		}
+	});
+	
+	
+	JMenuItem performShellAnalysisMenuItem = new JMenuItem( new AbstractAction("Run shell analysis"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("NewShellAnalysisAction");	
+		}
+	});
+	
+	private List<Object> listeners = new ArrayList<Object>();
+			
+			
+	public PopulationListPopupMenu() {
+		
+		super("Popup");
+		
+		this.add(moveUpMenuItem);
+		this.add(moveDownMenuItem);
+		this.addSeparator();
+		this.add(mergeMenuItem);
+		this.add(deleteMenuItem);
+		this.add(splitMenuItem);
+		this.addSeparator();
+		this.add(saveMenuItem);
+		this.add(extractMenuItem);
+		this.add(exportStatsMenuItem);
+		this.addSeparator();
+		this.add(replaceFolderMenuItem);
+		this.add(applySegmentationMenuItem);
+		this.addSeparator();
+		this.add(addTailStainMenuItem);
+		this.add(addNuclearSignalMenuItem);
+		this.add(performShellAnalysisMenuItem);
+    }
+	
+	public void enableAll(){
+		enableMerge();
+		enableDelete();
+		enableSplit();
+		enableSave();
+		enableExtract();
+		enableMenuUp();
+		enableMenuDown();
+		enableReplaceFolder();
+		enableExportStats();
+		enableApplySegmentation();
+		
+	}
+	
+	public void disableAll(){
+		disableMerge();
+		disableDelete();
+		disableSplit();
+		disableSave();
+		disableExtract();
+		disableMenuUp();
+		disableMenuDown();
+		disableReplaceFolder();
+		disableExportStats();
+		disableApplySegmentation();
+	}
+	
+	public void enableMerge(){
+		mergeMenuItem.setEnabled(true);
+	}
+	
+	public void disableMerge(){
+		mergeMenuItem.setEnabled(false);
+	}
+	
+	public void enableDelete(){
+		deleteMenuItem.setEnabled(true);
+	}
+	
+	public void disableDelete(){
+		deleteMenuItem.setEnabled(false);
+	}
+	
+	public void enableSplit(){
+		splitMenuItem.setEnabled(true);
+	}
+	
+	public void disableSplit(){
+		splitMenuItem.setEnabled(false);
+	}
+	
+	public void enableSave(){
+		saveMenuItem.setEnabled(true);
+	}
+	
+	public void disableSave(){
+		saveMenuItem.setEnabled(false);
+	}
+	
+	public void enableExtract(){
+		extractMenuItem.setEnabled(true);
+	}
+	
+	public void disableExtract(){
+		extractMenuItem.setEnabled(false);
+	}
+	
+	public void enableMenuUp(){
+		moveUpMenuItem.setEnabled(true);
+	}
+	
+	public void disableMenuUp(){
+		moveUpMenuItem.setEnabled(false);
+	}
+	
+	public void enableMenuDown(){
+		moveDownMenuItem.setEnabled(true);
+	}
+	
+	public void disableMenuDown(){
+		moveDownMenuItem.setEnabled(false);
+	}
+	
+	public void enableReplaceFolder(){
+		replaceFolderMenuItem.setEnabled(true);
+	}
+	
+	public void disableReplaceFolder(){
+		replaceFolderMenuItem.setEnabled(false);
+	}
+	
+	public void enableExportStats(){
+		exportStatsMenuItem.setEnabled(true);
+	}
+	
+	public void disableExportStats(){
+		exportStatsMenuItem.setEnabled(false);
+	}
+	
+	public void enableApplySegmentation(){
+		applySegmentationMenuItem.setEnabled(true);
+	}
+	
+	public void disableApplySegmentation(){
+		applySegmentationMenuItem.setEnabled(false);
+	}
+	
+	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
+        listeners.add( l );
+    }
+    
+    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
+        listeners.remove( l );
+    }
+     
+    private synchronized void fireSignalChangeEvent(String message) {
+        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT);
+        Iterator<Object> iterator = listeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+        }
+    }
+}

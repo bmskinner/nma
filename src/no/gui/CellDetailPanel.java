@@ -45,6 +45,8 @@ import datasets.TailDatasetCreator;
 public class CellDetailPanel extends JPanel implements ActionListener, SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String SOURCE_COMPONENT = "CellDetailPanel"; 
 
 	private JTable cellStatsTable; // individual cell stats
 	
@@ -106,7 +108,7 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 						if(newColor != null){
 							activeDataset.setSignalGroupColour(signalGroup, newColor);
 							updateCell(activeCell);
-							fireSignalChangeEvent();
+							fireSignalChangeEvent("SignalColourUpdate");
 						}
 					}
 						
@@ -282,8 +284,8 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
         listeners.remove( l );
     }
      
-    private synchronized void fireSignalChangeEvent() {
-        SignalChangeEvent event = new SignalChangeEvent( this, "SignalColourUpdate" );
+    private synchronized void fireSignalChangeEvent(String message) {
+        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
         Iterator iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );

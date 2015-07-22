@@ -61,6 +61,8 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String SOURCE_COMPONENT = "SignalsDetailPanel"; 
+	
 	private ChartPanel shellsChartPanel; 
 	private JPanel shellsPanel;
 	
@@ -759,7 +761,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     }
      
     private synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent( this, message );
+        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
         Iterator iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );

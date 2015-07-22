@@ -9,21 +9,11 @@ import java.awt.BorderLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableModel;
 import javax.swing.text.DefaultCaret;
-import javax.swing.tree.TreeSelectionModel;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-
-import org.jdesktop.swingx.JXTreeTable;
-import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
-import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
-import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import no.analysis.AnalysisCreator;
 import no.analysis.AnalysisDataset;
@@ -49,18 +39,13 @@ import javax.swing.JTextArea;
 import java.awt.SystemColor;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.AbstractAction;
-import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
@@ -71,34 +56,19 @@ import java.awt.Font;
 
 import javax.swing.JTable;
 
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
-import javax.swing.ListSelectionModel;
 
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
 import datasets.NucleusDatasetCreator;
 import utility.Constants;
-import utility.TreeOrderHashMap;
 
 import javax.swing.JTabbedPane;
 
 public class MainWindow extends JFrame implements ActionListener, SignalChangeListener {
-			
-	private static final int PROFILE_TAB 	= 0;
-	private static final int STATS_TAB 		= 1;
-	private static final int ANALYSIS_TAB	= 2;
-	private static final int BOXPLOTS_TAB	= 3;
-	private static final int SIGNALS_TAB 	= 4;
-	private static final int CLUSTERS_TAB 	= 5;
-	private static final int VENN_TAB 		= 6;
-	
+				
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private JTextArea textArea = new JTextArea();;
@@ -109,10 +79,8 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	
 	private JPanel logPanel;
 	private JPanel progressPanel;
-	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
-	private JTable populationTable;
-	private JXTreeTable treeTable;
-	private PopulationListPopupMenu populationPopup;
+	
+	private PopulationsPanel 		populationsPanel; // holds and selects open datasets
 	
 	private ConsensusNucleusPanel	consensusNucleusPanel;
 	
@@ -126,15 +94,8 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	private SegmentsDetailPanel 	segmentsDetailPanel;
 	private CellDetailPanel 		cellDetailPanel;
 	private VennDetailPanel			vennDetailPanel;
-
-	private JPanel clusteringPanel;// container for clustering options and display
-		
-	private HashMap<String, UUID> populationNames = new HashMap<String, UUID>();
-	
-	private HashMap<UUID, AnalysisDataset> analysisDatasets = new HashMap<UUID, AnalysisDataset>();
-	
-	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
-	
+	private ClusterDetailPanel		clusterDetailPanel;
+			
 	/**
 	 * Create the frame.
 	 */
@@ -164,7 +125,10 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			//---------------
 			// Create the consensus chart
 			//---------------
-			createPopulationsPanel();
+			populationsPanel = new PopulationsPanel();
+			populationsPanel.addSignalChangeListener(this);
+			
+//			createPopulationsPanel();
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			consensusNucleusPanel.addSignalChangeListener(this);
 			
@@ -175,16 +139,28 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			
 			//Create a split pane 
 			JSplitPane logAndPopulations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-					logPanel, panelPopulations);
+					logPanel, populationsPanel);
 
 			//Provide minimum sizes for the two components in the split pane
 			Dimension minimumSize = new Dimension(200, 200);
 			logPanel.setMinimumSize(minimumSize);
-			panelPopulations.setMinimumSize(minimumSize);
+			populationsPanel.setMinimumSize(minimumSize);
+			
+			JPanel topRow = new JPanel();
 			
 			
-			JSplitPane topRow = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-					logAndPopulations, consensusNucleusPanel);
+			
+//			GridBagConstraints c = new GridBagConstraints();
+//			c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
+//			c.fill = GridBagConstraints.BOTH;      //reset to default
+//			c.weightx = 0.0;                       //reset to default
+			
+			topRow.setLayout(new BoxLayout(topRow, BoxLayout.X_AXIS));
+			topRow.add(logAndPopulations);
+			
+			
+//			c.gridwidth = GridBagConstraints.REMAINDER; //next-to-last
+			topRow.add(consensusNucleusPanel);
 			
 			
 			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -221,9 +197,9 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			//---------------
 			// Create the clusters panel
 			//---------------
-			clusteringPanel = new JPanel();
-			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
-			tabbedPane.addTab("Clusters", null, clusteringPanel, null);
+			clusterDetailPanel = new ClusterDetailPanel();
+			clusterDetailPanel.addSignalChangeListener(this);
+			tabbedPane.addTab("Clusters", clusterDetailPanel);
 			
 			//---------------
 			// Create the Venn panel
@@ -344,7 +320,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				log("Saving root populations...");
-				for(AnalysisDataset d : MainWindow.this.analysisDatasets.values()){
+				for(AnalysisDataset d : populationsPanel.getRootDatasets()){
 					if(d.isRoot()){
 						logc("Saving dataset "+d.getCollection().getName()+"...");
 						PopulationExporter.saveAnalysisDataset(d);
@@ -420,90 +396,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		return panel;
 	}
 		
-	/**
-	 * Create the tree for populations analysed
-	 */
-	private void createPopulationsPanel(){
-		//---------------
-		// Create the populations list
-		//---------------
-		panelPopulations.setMinimumSize(new Dimension(100, 100));
-
-		panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
-					
-		// tree table approach
-		List<String> columns = new ArrayList<String>();
-		columns.add("Population");
-		columns.add("Nuclei");
-		columns.add("");
-
-		DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
-		DefaultMutableTreeTableNode  root = new DefaultMutableTreeTableNode ("root node");
-		treeTableModel.setRoot(root);
-		treeTableModel.setColumnIdentifiers(columns);
-		
-		treeTable = new JXTreeTable(treeTableModel);
-		treeTable.setEnabled(true);
-		treeTable.setCellSelectionEnabled(false);
-		treeTable.setColumnSelectionAllowed(false);
-		treeTable.setRowSelectionAllowed(true);
-		treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
-		treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-		treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
-		
-		populationPopup = new PopulationListPopupMenu();
-		populationPopup.disableAll();
-		
-		treeTable.setComponentPopupMenu(populationPopup);
-		
-		treeTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-				JXTreeTable table = (JXTreeTable) e.getSource();
-				
-				int row		= table.rowAtPoint((e.getPoint()));
-				int column 	= table.columnAtPoint(e.getPoint());
-				String populationName = (String) table.getModel().getValueAt(row, 0);
-				
-				// double click
-				if (e.getClickCount() == 2) {
-					
-					UUID id = MainWindow.this.populationNames.get(populationName);
-					AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
-					
-					if (row >= 0 && column == 0) { // first (names) column						
-						renameCollection(dataset);
-					}
-					
-					if(row >= 0 && column == 2){ // third (colours) column
-						
-						Color oldColour = ColourSelecter.getSegmentColor( row );
-						
-						Color newColor = JColorChooser.showDialog(
-			                     MainWindow.this,
-			                     "Choose dataset Color",
-			                     oldColour);
-						
-						if(newColor != null){
-							dataset.setDatasetColour(newColor);
-						}
-//						treeTable.repaint();
-						updatePanels(MainWindow.this.getSelectedRowsFromTreeTable());
-						
-					}
-				}
-			}
-		});
-		
-
-		TreeSelectionModel tableSelectionModel = treeTable.getTreeSelectionModel();
-		tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
-		
-		JScrollPane populationScrollPane = new JScrollPane(treeTable);		
-		
-		panelPopulations.add(populationScrollPane);
-	}
 			
 	private JScrollPane createStatsPanel(){
 		
@@ -543,7 +435,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		List<AnalysisDataset> list = getSelectedRowsFromTreeTable();
+//		List<AnalysisDataset> list = getSelectedRowsFromTreeTable();
 	}
 	
 	/**
@@ -571,27 +463,26 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 		try{
 
-			String[] names = this.populationNames.keySet().toArray(new String[0]);
+			String[] names = populationsPanel.getPopulationNames().toArray(new String[0]);
 
 			String selectedValue = (String) JOptionPane.showInputDialog(null,
 					"Choose population", "FISH Remapping",
 					JOptionPane.INFORMATION_MESSAGE, null,
 					names, names[0]);
 
-			UUID id = this.populationNames.get(selectedValue);
+			UUID id = populationsPanel.getUuidFromName(selectedValue);
 
-			AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
+			AnalysisDataset dataset = populationsPanel.getDataset(id);
 
-			//					IJ.log("Creating analysis");
 			FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset);
 
 			List<CellCollection> subs = fishMapper.getSubCollections();
 			for(CellCollection sub : subs){
-				//					IJ.log("Found subcollection: "+sub.getName()+" with "+sub.getNucleusCount()+" nuclei");
+
 				if(sub.getNucleusCount()>0){
 
 					logc("Reapplying morphology...");
-					boolean ok = MorphologyAnalysis.reapplyProfiles(sub, MainWindow.this.analysisDatasets.get(id).getCollection());
+					boolean ok = MorphologyAnalysis.reapplyProfiles(sub, dataset.getCollection());
 					if(ok){
 						log("OK");
 					} else {
@@ -599,13 +490,16 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 					}
 
 					dataset.addChildCollection(sub);
-
-					MainWindow.this.analysisDatasets.put(sub.getID(), dataset.getChildDataset(sub.getID()));
-					MainWindow.this.populationNames.put(sub.getName(), sub.getID());
+					
+					// get the dataset craeted by adding a child collection, and put it inthe populations list
+					populationsPanel.addDataset(dataset.getChildDataset(sub.getID()));
+//
+//					MainWindow.this.analysisDatasets.put(sub.getID(), dataset.getChildDataset(sub.getID()));
+//					MainWindow.this.populationNames.put(sub.getName(), sub.getID());
 
 				}
 			}
-			updatePopulationList();	
+			populationsPanel.update();	
 
 		} catch(Exception e){
 			log("Error in FISH remapping: "+e.getMessage());
@@ -634,81 +528,24 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 				// new style datasets
 				for(AnalysisDataset d : datasets){
 					
-					addDataset(d);				
+					populationsPanel.addDataset(d);				
 					
 					for(AnalysisDataset child : d.getChildDatasets()){
-						addDataset(child);
+						populationsPanel.addDataset(child);
 					}
 					PopulationExporter.saveAnalysisDataset(d);
 //					d.save();
 
 				}
 								
-				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisDatasets.size()+" populations ready to view");
-				updatePopulationList();			
+//				lblStatusLine.setText("New analysis complete: "+MainWindow.this.analysisDatasets.size()+" populations ready to view");
+				populationsPanel.update();		
 				
 			}
 		};
 		thr.start();		
 	}
-	
-	/**
-	 * Add the given dataset to the main population list
-	 * Check that the name is valid, and update if needed
-	 * @param d the dataset to add
-	 */
-	public void addDataset(AnalysisDataset d){
-		d.setName(checkName(d.getName()));
-		MainWindow.this.analysisDatasets.put(d.getUUID(), d);
-		MainWindow.this.populationNames.put(d.getName(), d.getUUID());
 		
-		if(d.isRoot()){ // add to the list of datasets that can be ordered
-			treeOrderMap.put(d.getUUID(), treeOrderMap.size()); // add to the end of the list
-		}
-	}
-	
-	/**
-	 * Check that the name of the dataset is not already in the list of datasets
-	 * If the name is used, adjust and check again
-	 * @param name the suggested name
-	 * @return a valid name
-	 */
-	public String checkName(String name){
-		String result = name;
-		if(MainWindow.this.populationNames.containsKey(name)){
-			result = checkName(name+"_1");
-		}
-		return result;
-	}
-	
-
-	/**
-	 * Rename an existing dataset and update the population list.
-	 * @param dataset the dataset to rename
-	 */
-	public void renameCollection(AnalysisDataset dataset){
-		CellCollection collection = dataset.getCollection();
-		String newName = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
-		// validate
-		if(!newName.isEmpty() && newName!=null){
-		
-			if(this.populationNames.containsKey(newName)){
-				log("Name exists, aborting");
-			} else {
-				String oldName = collection.getName();
-				collection.setName(newName);
-				this.populationNames.put(newName, collection.getID());
-				this.populationNames.remove(oldName);
-				log("Collection renamed: "+newName);
-				updatePopulationList();
-				
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-				list.add(dataset);
-				updatePanels(list);
-			}
-		}
-	}
-	
 	/**
 	 * Call an open dialog to choose a saved .nbd dataset. The opened dataset
 	 * will be added to the bottom of the dataset list.
@@ -746,10 +583,10 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 						dataset.setRoot(true);
 						
-						addDataset(dataset);
+						populationsPanel.addDataset(dataset);
 						
 						for(AnalysisDataset child : dataset.getAllChildDatasets() ){
-							addDataset(child);
+							populationsPanel.addDataset(child);
 						}
 						
 						log("OK");
@@ -759,7 +596,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 						list.add(dataset);
 	
 						updatePanels(list);
-						updatePopulationList();
+						populationsPanel.update();
 					} else {
 						log("Unable to open dataset version: "+ dataset.getVersion());
 					}
@@ -793,7 +630,8 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 					nuclearBoxplotsPanel.update(list);
 					signalsDetailPanel.update(list);
 
-					updateClusteringPanel(list);
+					clusterDetailPanel.update(list);
+//					updateClusteringPanel(list);
 					vennDetailPanel.update(list);
 					wilcoxonDetailPanel.update(list);
 					cellDetailPanel.updateList(list);
@@ -834,537 +672,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		
 	
 	/**
-	 *  Find the populations in memory, and display them in the population chooser. 
-	 *  Root populations are ordered according to position in the treeListOrder map.
-	 */
-	public void updatePopulationList(){
-					
-		// new method using treetable
-		List<String> columns = new ArrayList<String>();
-		columns.add("Population");
-		columns.add("Nuclei");
-		columns.add("");
-
-		DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
-		PopulationTreeTableNode  root = new PopulationTreeTableNode (java.util.UUID.randomUUID());
-		treeTableModel.setRoot(root);
-		treeTableModel.setColumnIdentifiers(columns);
-		
-//		treeOrderMap.print();
-		
-		if(this.analysisDatasets.size()>0){
-			for(UUID id : treeOrderMap.getIDs()){
-				
-				AnalysisDataset rootDataset = analysisDatasets.get(id);
-				root.add( addTreeTableChildNodes(rootDataset.getUUID()));
-			}
-		}
-		
-		treeTable.setTreeTableModel(treeTableModel);
-
-		int row = 0;
-		while (row < treeTable.getRowCount()) {
-			treeTable.expandRow(row);
-			row++;
-		}
-		
-		treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-		treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
-	}
-	
-	
-	private PopulationTreeTableNode addTreeTableChildNodes(UUID id){
-		AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
-		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset.getUUID());
-		category.setValueAt(dataset.getName(), 0);
-		category.setValueAt(dataset.getCollection().getNucleusCount(), 1);
-				
-		Set<UUID> childIDList = dataset.getChildUUIDs();
-		for(UUID childID : childIDList){
-			PopulationTreeTableNode childNode = addTreeTableChildNodes(childID);
-			category.add(childNode);
-		}
-		return category;
-	}
-				
-
-	
-	private void updateClusteringPanel(List<AnalysisDataset> list){
-		
-		if(list.size()==1){
-			AnalysisDataset dataset = list.get(0);
-//			CellCollection collection = dataset.getCollection();
-			
-			clusteringPanel = new JPanel();
-			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
-			
-			if(!dataset.hasClusters()){ // only allow clustering once per population
-
-				JButton btnNewClusterAnalysis = new JButton("Cluster population");
-				btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-						new ClusterAnalysisAction();
-
-					}
-				});
-				clusteringPanel.add(btnNewClusterAnalysis);
-				
-			} else { // clusters present, show the tree if available
-				JTextArea label = new JTextArea(dataset.getClusterTree());
-				label.setLineWrap(true);
-				
-				JScrollPane treeView = new JScrollPane(label);
-				clusteringPanel.add(treeView);
-			}
-			
-			tabbedPane.setComponentAt(MainWindow.CLUSTERS_TAB, clusteringPanel);
-			
-		} else {
-			clusteringPanel = new JPanel();
-			clusteringPanel.setLayout(new BoxLayout(clusteringPanel, BoxLayout.Y_AXIS));
-			tabbedPane.setComponentAt(MainWindow.CLUSTERS_TAB, clusteringPanel);
-		}
-		
-	}
-	
-	
-	/**
-	 * Listen for selections to the population list. Switch between single population,
-	 * or multiple selections
-	 * 
-	 */
-	class ListSelectionHandler implements ListSelectionListener {
-		public void valueChanged(ListSelectionEvent e) {
-			
-			List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
-			
-			ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-			
-			List<Integer> selectedIndexes = new ArrayList<Integer>(0);
-
-			if (!lsm.isSelectionEmpty()) {
-				// Find out which indexes are selected.
-				int minIndex = lsm.getMinSelectionIndex();
-				int maxIndex = lsm.getMaxSelectionIndex();
-				for (int i = minIndex; i <= maxIndex; i++) {
-					if (lsm.isSelectedIndex(i)) {
-
-						String key = (String) populationTable.getModel().getValueAt(i, 0); // row i, column 0
-						if(!key.equals("No populations")){
-							
-							// get uuid from populationNames, then population via uuid from analysisDatasets
-							datasets.add(analysisDatasets.get(populationNames.get(key)));
-							selectedIndexes.add(i);
-							
-						}
-
-					}
-				}
-				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
-				lblStatusLine.setText(datasets.size()+" "+count+"  selected");
-				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
-
-				if(datasets.isEmpty()){
-					log("Error: list is empty");
-				} else {
-					updatePanels(datasets);
-				}
-			}
-
-		}
-	}
-	
-	
-	public List<AnalysisDataset> getSelectedRowsFromTreeTable(){
-
-		List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
-
-		TreeSelectionModel lsm = treeTable.getTreeSelectionModel();
-
-		List<Integer> selectedIndexes = new ArrayList<Integer>(0);
-
-		if (!lsm.isSelectionEmpty()) {
-			// Find out which indexes are selected.
-			int minIndex = lsm.getMinSelectionRow();
-			int maxIndex = lsm.getMaxSelectionRow();
-			for (int i = minIndex; i <= maxIndex; i++) {
-				if (lsm.isRowSelected(i)) {
-
-					String key = (String) treeTable.getModel().getValueAt(i, 0); // row i, column 0
-					if(!key.equals("No populations")){
-
-						// get uuid from populationNames, then population via uuid from analysisDatasets
-						datasets.add(analysisDatasets.get(populationNames.get(key)));
-						selectedIndexes.add(i);
-
-					}
-
-				}
-			}
-		}
-		return datasets;
-	}
-	
-	
-	/**
-	 * Establish the rows in the population tree that are currently selected.
-	 * Set the possible menu options accordingly, and call the panel updates
-	 */
-	class TreeSelectionHandler implements TreeSelectionListener {
-		public void valueChanged(TreeSelectionEvent e) {
-			
-//			List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-			List<AnalysisDataset> datasets = new ArrayList<AnalysisDataset>(0);
-			
-			TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
-			
-			List<Integer> selectedIndexes = new ArrayList<Integer>(0);
-
-			if (!lsm.isSelectionEmpty()) {
-				// Find out which indexes are selected.
-				int minIndex = lsm.getMinSelectionRow();
-				int maxIndex = lsm.getMaxSelectionRow();
-				for (int i = minIndex; i <= maxIndex; i++) {
-					if (lsm.isRowSelected(i)) {
-						
-
-						String key = (String) treeTable.getModel().getValueAt(i, 0); // row i, column 0
-						if(!key.equals("No populations")){
-							
-							// get uuid from populationNames, then population via uuid from analysisDatasets
-							datasets.add(analysisDatasets.get(populationNames.get(key)));
-							selectedIndexes.add(i);
-							
-						}
-
-					}
-				}
-				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
-				lblStatusLine.setText(datasets.size()+" "+count+" selected");
-				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
-
-				if(datasets.isEmpty()){
-					log("Error: list is empty");
-					populationPopup.disableAll();
-				} else {
-					
-					if(datasets.size()>1){ // multiple populations
-						populationPopup.disableAll();
-						populationPopup.enableMerge();
-						populationPopup.enableDelete();
-						
-					} else { // single population
-						AnalysisDataset d = datasets.get(0);
-						populationPopup.enableDelete();
-						populationPopup.disableMerge();
-						populationPopup.enableSave();
-						populationPopup.enableExtract();
-						populationPopup.enableExportStats();
-						
-						// check if we can move the dataset
-						if(d.isRoot()){
-
-							if(treeOrderMap.size()>1){
-								populationPopup.enableApplySegmentation();
-
-								// check if the selected dataset is at the top of the list
-								if(treeOrderMap.get(0)==d.getUUID()){
-									populationPopup.disableMenuUp();
-//									populationPopup.disableMenuDown();
-								} else {
-									populationPopup.enableMenuUp();
-//									populationPopup.enableMenuDown();
-								}
-
-								// check if the selected dataset is at the bottom of the list
-								if(treeOrderMap.get(treeOrderMap.size()-1)==d.getUUID()){
-									populationPopup.disableMenuDown();
-//									populationPopup.disableMenuUp();
-								} else {
-//									populationPopup.enableMenuUp();
-									populationPopup.enableMenuDown();
-								}
-
-							} else { // only one or zero datasets in the pogram 
-								populationPopup.disableMenuUp();
-								populationPopup.disableMenuDown();
-							}
-
-							// only root datasets can replace folder mappings
-							populationPopup.enableReplaceFolder();
-
-						} else { // not root
-							
-							if(treeOrderMap.size()>1){
-								populationPopup.enableApplySegmentation();
-							}
-							
-							populationPopup.disableReplaceFolder();
-							populationPopup.disableMenuUp();
-							populationPopup.disableMenuDown();
-						}
-
-						if(!d.hasChildren()){ // cannot split population without children yet
-							populationPopup.disableSplit();
-						} else {
-							populationPopup.enableSplit();
-						}
-					}
-					updatePanels(datasets);
-				}
-			}
-		}
-	}
-	
-	
-	/**
-	 * Allows for cell background to be coloured based on poition in a list
-	 *
-	 */
-	public class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-
-		private static final long serialVersionUID = 1L;
-		List<Integer> indexList = new ArrayList<Integer>(0);
-		
-		public PopulationTableCellRenderer(List<Integer> list){
-			super();
-			this.indexList = list;
-		}
-		
-		public PopulationTableCellRenderer(){
-			super();
-		}
-
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	        
-	      //Cells are by default rendered as a JLabel.
-	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-	        if (indexList.contains(row)) {
-	        	
-	        	// get the analysis dataset corresponding to this row
-	        	String populationName = (String) table.getModel().getValueAt(row, 0);
-	        	UUID id = MainWindow.this.populationNames.get(populationName);
-				AnalysisDataset dataset = MainWindow.this.analysisDatasets.get(id);
-	        	
-				
-	        	// if a preferred colour is specified, use it, otherwise go for defaults
-	        	Color colour 	= dataset.getDatasetColour() == null 
-	        					? ColourSelecter.getSegmentColor(indexList.indexOf(row))
-	        					: dataset.getDatasetColour();
-
-	        	l.setBackground(colour);
-	        } else {
-	        	l.setBackground(Color.WHITE); // only colour the selected rows
-	        }
-
-	      //Return the JLabel which renders the cell.
-	      return l;
-	    }
-	}
-
-		
-	
-	class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
-		
-		Object[] columnData = new Object[3];
-		UUID nodeID;
-
-		PopulationTreeTableNode(UUID id) {
-			super(id.toString());
-			this.nodeID = id;
-		}
-		
-		public UUID getID(){
-			return this.nodeID;
-		}
-		
-		public int getColumnCount() {
-		    return 3;
-		}
-
-		public Object getValueAt(int column){
-			return columnData[column];
-		}
-		
-		public void setValueAt(Object aValue, int column){
-			columnData[column] = aValue;
-		}
-	}
-	
-	public class PopulationListPopupMenu extends JPopupMenu {   //implements ActionListener{
-				
-		private static final long serialVersionUID = 1L;
-		JMenuItem mergeMenuItem = new JMenuItem(new MergeCollectionAction());;
-		JMenuItem deleteMenuItem = new JMenuItem(new DeleteCollectionAction());
-		JMenuItem splitMenuItem = new JMenuItem(new SplitCollectionAction());
-		JMenuItem saveMenuItem = new JMenuItem(new SaveCollectionAction());
-		JMenuItem extractMenuItem = new JMenuItem(new ExtractNucleiCollectionAction());
-		JMenuItem moveUpMenuItem = new JMenuItem(new MoveDatasetUpAction());
-		JMenuItem moveDownMenuItem = new JMenuItem(new MoveDatasetDownAction());
-		JMenuItem replaceFolderMenuItem = new JMenuItem(new ReplaceNucleusFolderAction());
-		JMenuItem exportStatsMenuItem = new JMenuItem(new ExportDatasetStatsAction());
-		JMenuItem applySegmentationMenuItem = new JMenuItem(new ApplySegmentProfileAction());
-		
-		JMenuItem addTailStainMenuItem = new JMenuItem( new AbstractAction("Add tail stain"){
-			private static final long serialVersionUID = 1L;
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new AddTailStainAction();				
-			}
-		});
-		
-		JMenuItem addNuclearSignalMenuItem = new JMenuItem( new AbstractAction("Add nuclear signal"){
-			private static final long serialVersionUID = 1L;
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new AddNuclearSignalAction();				
-			}
-		});
-		
-		
-		JMenuItem performShellAnalysisMenuItem = new JMenuItem( new AbstractAction("Run shell analysis"){
-			private static final long serialVersionUID = 1L;
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				new ShellAnalysisAction();				
-			}
-		});
-				
-				
-		public PopulationListPopupMenu() {
-			
-			super("Popup");
-			
-			this.add(moveUpMenuItem);
-			this.add(moveDownMenuItem);
-			this.addSeparator();
-			this.add(mergeMenuItem);
-			this.add(deleteMenuItem);
-			this.add(splitMenuItem);
-			this.addSeparator();
-			this.add(saveMenuItem);
-			this.add(extractMenuItem);
-			this.add(exportStatsMenuItem);
-			this.addSeparator();
-			this.add(replaceFolderMenuItem);
-			this.add(applySegmentationMenuItem);
-			this.addSeparator();
-			this.add(addTailStainMenuItem);
-			this.add(addNuclearSignalMenuItem);
-			this.add(performShellAnalysisMenuItem);
-	    }
-		
-		public void enableAll(){
-			enableMerge();
-			enableDelete();
-			enableSplit();
-			enableSave();
-			enableExtract();
-			enableMenuUp();
-			enableMenuDown();
-			enableReplaceFolder();
-			enableExportStats();
-			enableApplySegmentation();
-			
-		}
-		
-		public void disableAll(){
-			disableMerge();
-			disableDelete();
-			disableSplit();
-			disableSave();
-			disableExtract();
-			disableMenuUp();
-			disableMenuDown();
-			disableReplaceFolder();
-			disableExportStats();
-			disableApplySegmentation();
-		}
-		
-		public void enableMerge(){
-			mergeMenuItem.setEnabled(true);
-		}
-		
-		public void disableMerge(){
-			mergeMenuItem.setEnabled(false);
-		}
-		
-		public void enableDelete(){
-			deleteMenuItem.setEnabled(true);
-		}
-		
-		public void disableDelete(){
-			deleteMenuItem.setEnabled(false);
-		}
-		
-		public void enableSplit(){
-			splitMenuItem.setEnabled(true);
-		}
-		
-		public void disableSplit(){
-			splitMenuItem.setEnabled(false);
-		}
-		
-		public void enableSave(){
-			saveMenuItem.setEnabled(true);
-		}
-		
-		public void disableSave(){
-			saveMenuItem.setEnabled(false);
-		}
-		
-		public void enableExtract(){
-			extractMenuItem.setEnabled(true);
-		}
-		
-		public void disableExtract(){
-			extractMenuItem.setEnabled(false);
-		}
-		
-		public void enableMenuUp(){
-			moveUpMenuItem.setEnabled(true);
-		}
-		
-		public void disableMenuUp(){
-			moveUpMenuItem.setEnabled(false);
-		}
-		
-		public void enableMenuDown(){
-			moveDownMenuItem.setEnabled(true);
-		}
-		
-		public void disableMenuDown(){
-			moveDownMenuItem.setEnabled(false);
-		}
-		
-		public void enableReplaceFolder(){
-			replaceFolderMenuItem.setEnabled(true);
-		}
-		
-		public void disableReplaceFolder(){
-			replaceFolderMenuItem.setEnabled(false);
-		}
-		
-		public void enableExportStats(){
-			exportStatsMenuItem.setEnabled(true);
-		}
-		
-		public void disableExportStats(){
-			exportStatsMenuItem.setEnabled(false);
-		}
-		
-		public void enableApplySegmentation(){
-			applySegmentationMenuItem.setEnabled(true);
-		}
-		
-		public void disableApplySegmentation(){
-			applySegmentationMenuItem.setEnabled(false);
-		}
-	}
-	
-	/**
 	 * Create a new CellCollection of the same class as the given dataset
 	 * @param template the dataset to base on for analysis options, folders
 	 * @param name the collection name
@@ -1403,7 +710,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 		public void actionPerformed(ActionEvent e) {
 
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 
 			if(datasets.size()>1){
 
@@ -1440,7 +747,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 						AnalysisDataset mergeParent = null;
 						if(!newRoot) { // unless we have forced root above
 							// check if all datasets are children of one root dataset
-							for(AnalysisDataset parent : analysisDatasets.values()){
+							for(AnalysisDataset parent : populationsPanel.getAllDatasets()){
 								if(parent.isRoot()){ // only look at top level datasets for now
 									boolean ok = true; 
 									for(AnalysisDataset d : datasets){
@@ -1509,8 +816,8 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 						}
 
 						// add the new collection to the list
-						addDataset(newDataset);
-						updatePopulationList();
+						populationsPanel.addDataset(newDataset);
+						populationsPanel.update();
 					}
 				};
 				thr.start();
@@ -1522,77 +829,76 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		}
 	}
 
-	class DeleteCollectionAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public DeleteCollectionAction() {
-	        super("Delete");
-	    }
-		
-		public void actionPerformed(ActionEvent e) {
-
-			List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-
-			if(!datasets.isEmpty()){
-				
-				if(datasets.size()==1){
-					logc("Deleting collection...");
-				} else {
-					logc("Deleting collections...");
-				}
-				
-//				TODO: this still has problems with multiple datasets
-				
-				// get the ids as a list, so we don't iterate over datasets
-				// when we could delete a child of the list in progress
-				List<UUID> list = new ArrayList<UUID>(0);
-				for(AnalysisDataset d : datasets){
-					list.add(d.getUUID());
-				}
-
-				for(UUID id : list){
-					// check dataset still exists
-					if(analysisDatasets.containsKey(id)){
-
-						AnalysisDataset d = analysisDatasets.get(id);
-
-//						if(d.isRoot()){
-								
-							// remove all children of the collection
-						for(UUID u : d.getAllChildUUIDs()){
-							String name = analysisDatasets.get(u).getName();
-//							IJ.log("   Removing children");
-							if(analysisDatasets.containsKey(u)){
-								analysisDatasets.remove(u);
-							}
-							
-							if(populationNames.containsValue(u)){
-								populationNames.remove(name);
-							}						
-
-							d.deleteChild(u);
+//	class DeleteCollectionAction extends AbstractAction {
 //
-						}
-						
-						for(UUID parentID : analysisDatasets.keySet()){
-							AnalysisDataset parent = analysisDatasets.get(parentID);
-							if(parent.hasChild(id)){
-								parent.deleteChild(id);
-							}
-						}
-						populationNames.remove(d.getName());
-						analysisDatasets.remove(id);
-
-						if(d.isRoot()){
-							treeOrderMap.remove(id);
-						}
-					}
-				}
-				updatePopulationList();	
-				log("OK");
-			}
-		}
-	}
+//		private static final long serialVersionUID = 1L;
+//		public DeleteCollectionAction() {
+//	        super("Delete");
+//	    }
+//		
+//		public void actionPerformed(ActionEvent e) {
+//
+//			List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
+//
+//			if(!datasets.isEmpty()){
+//				
+//				if(datasets.size()==1){
+//					logc("Deleting collection...");
+//				} else {
+//					logc("Deleting collections...");
+//				}
+//				
+////				TODO: this still has problems with multiple datasets
+//				
+//				// get the ids as a list, so we don't iterate over datasets
+//				// when we could delete a child of the list in progress
+//				List<UUID> list = new ArrayList<UUID>(0);
+//				for(AnalysisDataset d : datasets){
+//					list.add(d.getUUID());
+//				}
+//
+//				for(UUID id : list){
+//					// check dataset still exists
+//					if(populationsPanel.hasDataset(id)){
+//
+//						AnalysisDataset d = populationsPanel.getDataset(id);
+//
+//								
+//						// remove all children of the collection
+//						for(UUID u : d.getAllChildUUIDs()){
+//							String name = populationsPanel.getDataset(u).getName();
+//
+//							if(analysisDatasets.containsKey(u)){
+//								analysisDatasets.remove(u);
+//							}
+//							
+//							if(populationNames.containsValue(u)){
+//								populationNames.remove(name);
+//							}						
+//
+//							d.deleteChild(u);
+////
+//						}
+//						
+//						for(UUID parentID : analysisDatasets.keySet()){
+//							AnalysisDataset parent = analysisDatasets.get(parentID);
+//							if(parent.hasChild(id)){
+//								parent.deleteChild(id);
+//							}
+//						}
+//						populationNames.remove(d.getName());
+//						analysisDatasets.remove(id);
+//
+//						if(d.isRoot()){
+//							treeOrderMap.remove(id);
+//						}
+//					}
+//				}
+//				populationsPanel.update();
+//				log("OK");
+//			}
+//		}
+//	}
 	
 	class SplitCollectionAction extends AbstractAction {
 
@@ -1603,7 +909,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		
 	    public void actionPerformed(ActionEvent e) {
 	        
-	        List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+	        List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 
 	        if(datasets.size()==1){
 	        	try {
@@ -1628,7 +934,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	        					names, names[0]);
 
 	        			// find the population to subtract
-	        			AnalysisDataset negative = analysisDatasets.get(  populationNames.get(selectedValue)  );
+	        			AnalysisDataset negative = populationsPanel.getDataset(selectedValue);
 
 	        			// prepare a new collection
 	        			CellCollection collection = dataset.getCollection();
@@ -1657,8 +963,8 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 	        			dataset.addChildCollection(newCollection);
 
-	        			addDataset(dataset.getChildDataset(newID));
-	        			updatePopulationList();
+	        			populationsPanel.addDataset(dataset.getChildDataset(newID));
+	        			populationsPanel.update();
 	        			
 	        		} else {
 	        			log("Cannot split; no children in dataset");
@@ -1684,7 +990,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 		public void actionPerformed(ActionEvent e) {
 
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 
 			if(datasets.size()==1){
 
@@ -1720,7 +1026,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		
 	    public void actionPerformed(ActionEvent e) {
 	        
-	        final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+	        final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 
 	        if(datasets.size()==1){
 
@@ -1756,72 +1062,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	        }
 	    }
 	}
-	
-	class MoveDatasetUpAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public MoveDatasetUpAction() {
-			super("Move up");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-			
-			if(datasets.size()==1){
-
-				AnalysisDataset dataToMove = datasets.get(0);
-
-				int oldValue = treeOrderMap.get(dataToMove.getUUID());
-				int newValue = oldValue;
-				if(oldValue>0){ // do not change if already at the top
-					newValue = oldValue-1;
-
-					UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
-					treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
-					treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
-					updatePopulationList();
-				}
-				
-			}
-		}
-	}
-	
-	class MoveDatasetDownAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public MoveDatasetDownAction() {
-			super("Move down");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			
-//			for(int i=0; i<treeOrderMap.size();i++){
-//				IJ.log(i+": "+analysisDatasets.get(treeOrderMap.get(i)).getName());
-//			}
-
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
-
-			if(datasets.size()==1){
-
-				AnalysisDataset dataToMove = datasets.get(0);
-				
-				int oldValue = treeOrderMap.get(dataToMove.getUUID());
-				int newValue = oldValue;
-				if(oldValue<treeOrderMap.size()-1){ // do not change if already at the bottom
-					newValue = oldValue+1;
-//					IJ.log("Moving "+oldValue+" to "+newValue);
-
-					UUID replacedID = treeOrderMap.get(newValue); // find the dataset currently holding the spot
-					treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
-					treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
-					updatePopulationList();
-				}
-				
-			}
-		}
-	}
-	
+		
 	class ReplaceNucleusFolderAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -1840,7 +1081,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 				File newFolder = new File(folderName);
 
-				final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+				final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 
 				if(datasets.size()==1){
 					log("Updating folder to "+folderName );
@@ -1870,7 +1111,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		// note - this will overwrite the stats for any collection with the same name in the output folder
 		public void actionPerformed(ActionEvent e) {
 
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 
 			if(datasets.size()==1){
 
@@ -1907,7 +1148,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		// note - this will overwrite the stats for any collection with the same name in the output folder
 		public void actionPerformed(ActionEvent e) {
 
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 
 			if(datasets.size()==1){
 				// TODO make new thread
@@ -1918,7 +1159,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 						try{
 							
 							// get the desired population
-							String[] names = populationNames.keySet().toArray(new String[0]);
+							String[] names = populationsPanel.getPopulationNames().toArray(new String[0]);
 
 							String selectedValue = (String) JOptionPane.showInputDialog(null,
 									"Choose population", "Reapply segmentation",
@@ -1927,8 +1168,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 							if(selectedValue!=null){
 
-								UUID id = populationNames.get(selectedValue);
-								AnalysisDataset source = analysisDatasets.get(id);
+								AnalysisDataset source = populationsPanel.getDataset(selectedValue);
 
 								logc("Reapplying morphology...");
 								boolean ok = MorphologyAnalysis.reapplyProfiles(d.getCollection(), source.getCollection());
@@ -1967,7 +1207,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			this.progressBar.setStringPainted(true);
 			this.errorMessage = errorMessage;
 			
-			final List<AnalysisDataset> datasets = getSelectedRowsFromTreeTable();
+			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 			
 			if(datasets.size()==1){
 
@@ -2293,10 +1533,10 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 				// attach the clusters to their parent collection
 				d.addCluster(c);
 
-				addDataset(d.getChildDataset(c.getID()));
+				populationsPanel.addDataset(d.getChildDataset(c.getID()));
 
 			}
-			updatePopulationList();	
+			populationsPanel.update();
 
 		}
 	}
@@ -2314,5 +1554,52 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			new ShellAnalysisAction();
 		}
 		
+		if(event.type().equals("NewClusterAnalysis")){
+			new ClusterAnalysisAction();
+		}
+		
+		if(event.type().equals("MergeCollectionAction")){
+			new MergeCollectionAction();
+		}
+		
+		if(event.type().equals("SplitCollectionAction")){
+			new SplitCollectionAction();
+		}
+		
+		if(event.type().equals("SaveCollectionAction")){
+			new SaveCollectionAction();
+		}
+		
+		if(event.type().equals("ExtractNucleiAction")){
+			new ExtractNucleiCollectionAction();
+		}
+		
+		if(event.type().equals("ChangeNucleusFolderAction")){
+			new ReplaceNucleusFolderAction();
+		}
+		
+		if(event.type().equals("ExportDatasetStatsAction")){
+			new ExportDatasetStatsAction();
+		}
+		
+		if(event.type().equals("ReapplySegmentProfileAction")){
+			new ApplySegmentProfileAction();
+		}
+		
+		if(event.type().equals("AddTailStainAction")){
+			new AddTailStainAction();
+		}
+		
+		if(event.type().equals("AddNuclearSignalAction")){
+			new AddNuclearSignalAction();
+		}
+		
+		if(event.type().equals("NewShellAnalysisAction")){
+			new ShellAnalysisAction();
+		}
+		
+		if(event.type().equals("UpdatePanels")){
+			this.updatePanels(populationsPanel.getSelectedDatasets());
+		}
 	}	
 }

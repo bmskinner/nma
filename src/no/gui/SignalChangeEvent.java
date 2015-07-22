@@ -5,16 +5,18 @@ import java.util.EventObject;
 public class SignalChangeEvent extends EventObject{
 
 	private static final long serialVersionUID = 1L;
-	private String eventType;
+	private String message;
+	private String sourceName;
 
 	/**
 	 * Create an event from a source, with the given message
 	 * @param source
 	 * @param type
 	 */
-	public SignalChangeEvent( Object source, String type ) {
+	public SignalChangeEvent( Object source, String message, String sourceName ) {
 		super( source );
-		eventType = type;
+		this.message 	= message;
+		this.sourceName = sourceName;
 	}
 	
 	/**
@@ -22,7 +24,15 @@ public class SignalChangeEvent extends EventObject{
 	 * @return
 	 */
 	public String type() {
-		return eventType;
+		return message;
+	}
+	
+	/**
+	 * The name of the component that fired the event
+	 * @return
+	 */
+	public String sourceName(){
+		return this.sourceName;
 	}
 
 }
