@@ -441,6 +441,69 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		}
 	}
 	
+	private void deleteDataset(){
+		List<AnalysisDataset> datasets = getSelectedDatasets();
+
+		if(!datasets.isEmpty()){
+
+			// only delete single collections for now
+			if(datasets.size()==1){
+
+				//TODO: this still has problems with multiple datasets
+
+				// get the ids as a list, so we don't iterate over datasets
+				// when we could delete a child of the list in progress
+				List<UUID> list = new ArrayList<UUID>(0);
+				for(AnalysisDataset d : datasets){
+					list.add(d.getUUID());
+				}
+
+				for(UUID id : list){
+					// check dataset still exists
+					if(this.hasDataset(id)){
+
+						AnalysisDataset d = this.getDataset(id);
+
+
+						// remove all children of the collection
+						for(UUID u : d.getAllChildUUIDs()){
+							String name = this.getDataset(u).getName();
+
+							if(analysisDatasets.containsKey(u)){
+								analysisDatasets.remove(u);
+							}
+
+							if(populationNames.containsValue(u)){
+								populationNames.remove(name);
+							}						
+
+							d.deleteChild(u);
+
+						}
+
+						for(UUID parentID : analysisDatasets.keySet()){
+							AnalysisDataset parent = analysisDatasets.get(parentID);
+							if(parent.hasChild(id)){
+								parent.deleteChild(id);
+							}
+						}
+						populationNames.remove(d.getName());
+						analysisDatasets.remove(id);
+
+						if(d.isRoot()){
+							treeOrderMap.remove(id);
+						}
+					}
+				}
+				this.update();
+
+			}
+		}
+	}
+	
+	
+	
+	
 	/**
 	 * Establish the rows in the population tree that are currently selected.
 	 * Set the possible menu options accordingly, and call the panel updates
@@ -495,6 +558,9 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 						populationPopup.enableSave();
 						populationPopup.enableExtract();
 						populationPopup.enableExportStats();
+						populationPopup.enableAddTailStain();
+						populationPopup.enableAddNuclearSignal();
+						populationPopup.enableRunShellAnalysis();
 						
 						// check if we can move the dataset
 						if(d.isRoot()){
@@ -663,6 +729,10 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		
 		if(event.type().equals("RenameDatasetUpAction")){
 			moveDatasetUp();
+		}
+		
+		if(event.type().equals("DeleteCollectionAction")){
+			deleteDataset();
 		}
 		
 		

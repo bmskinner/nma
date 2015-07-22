@@ -10,8 +10,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.TableModel;
-import javax.swing.text.DefaultCaret;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 
@@ -30,13 +28,9 @@ import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.JTextArea;
-
-import java.awt.SystemColor;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,14 +41,8 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
 import javax.swing.BoxLayout;
 import javax.swing.JSplitPane;
-import javax.swing.SwingConstants;
-
-import java.awt.Font;
-
-import javax.swing.JTable;
 
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
@@ -62,24 +50,18 @@ import java.beans.PropertyChangeListener;
 
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
-import datasets.NucleusDatasetCreator;
 import utility.Constants;
 
 import javax.swing.JTabbedPane;
 
-public class MainWindow extends JFrame implements ActionListener, SignalChangeListener {
+public class MainWindow extends JFrame implements SignalChangeListener {
 				
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextArea textArea = new JTextArea();;
-	private JLabel lblStatusLine = new JLabel("No analysis open");
 
-//	private JTable tablePopulationStats;
-//	private JTable tableAnalysisParamters;
+	private JLabel lblStatusLine = new JLabel("No analysis open");
 	
-	private JPanel 					logPanel;				// messages and errors
-	private JPanel 					progressPanel;			// progress bars for analyses
-	
+	private LogPanel				logPanel;				// progress and messages
 	private PopulationsPanel 		populationsPanel; 		// holds and selects open datasets
 	private ConsensusNucleusPanel	consensusNucleusPanel; 	// show refolded nuclei if present
 	
@@ -126,14 +108,13 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			populationsPanel = new PopulationsPanel();
 			populationsPanel.addSignalChangeListener(this);
 			
-//			createPopulationsPanel();
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			consensusNucleusPanel.addSignalChangeListener(this);
 			
 			//---------------
 			// Create the log panel
 			//---------------
-			logPanel = createLogPanel();
+			logPanel = new LogPanel();
 			
 			//Create a split pane 
 			JSplitPane logAndPopulations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
@@ -172,10 +153,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 			//---------------
 			// Create the general stats page
 			//---------------
-//			JScrollPane statsPanel = createStatsPanel();
-//			tabbedPane.addTab("Basic statistics", null, statsPanel, null);
-//			
-//			JScrollPane parametersPanel = createAnalysisParametersPanel();
 			analysisDetailPanel = new AnalysisDetailPanel();
 			tabbedPane.addTab("Analysis info", analysisDetailPanel);
 
@@ -249,36 +226,36 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		
 	}
 	
-	/**
-	 * Create the log panel for updates
-	 * @return a scrollable panel
-	 */
-	private JPanel createLogPanel(){
-		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
-		JScrollPane scrollPane = new JScrollPane();
-		textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
-		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		
-		scrollPane.setViewportView(textArea);
-		textArea.setBackground(SystemColor.menu);
-		textArea.setEditable(false);
-		textArea.setRows(9);
-		textArea.setColumns(40);
-		
-		
-		JLabel lblAnalysisLog = new JLabel("Analysis Log");
-		lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
-		scrollPane.setColumnHeaderView(lblAnalysisLog);
-		panel.add(scrollPane, BorderLayout.CENTER);
-
-		progressPanel = new JPanel();
-		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
-		panel.add(progressPanel, BorderLayout.NORTH);
-		
-		return panel;
-	}
+//	/**
+//	 * Create the log panel for updates
+//	 * @return a scrollable panel
+//	 */
+//	private JPanel createLogPanel(){
+//		JPanel panel = new JPanel();
+//		panel.setLayout(new BorderLayout());
+//		JScrollPane scrollPane = new JScrollPane();
+//		textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+//		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+//		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+//		
+//		scrollPane.setViewportView(textArea);
+//		textArea.setBackground(SystemColor.menu);
+//		textArea.setEditable(false);
+//		textArea.setRows(9);
+//		textArea.setColumns(40);
+//		
+//		
+//		JLabel lblAnalysisLog = new JLabel("Analysis Log");
+//		lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
+//		scrollPane.setColumnHeaderView(lblAnalysisLog);
+//		panel.add(scrollPane, BorderLayout.CENTER);
+//
+//		progressPanel = new JPanel();
+//		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
+//		panel.add(progressPanel, BorderLayout.NORTH);
+//		
+//		return panel;
+//	}
 	
 	/**
 	 * Create the panel of primary buttons
@@ -394,55 +371,13 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		panel.add(lblStatusLine);
 		return panel;
 	}
-		
-			
-//	private JScrollPane createStatsPanel(){
-//		
-//		JScrollPane scrollPane = new JScrollPane();
-//		JPanel panelGeneralStats = new JPanel();
-//		
-//		panelGeneralStats.setLayout(new BorderLayout(0, 0));
-//
-//		tablePopulationStats = new JTable();
-//		panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
-//		tablePopulationStats.setEnabled(false);
-//
-//		scrollPane.setViewportView(panelGeneralStats);
-//		scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
-//		tablePopulationStats.setModel(NucleusDatasetCreator.createStatsTable(null));
-//		return scrollPane;
-//	}
-//	
-//	private JScrollPane createAnalysisParametersPanel(){
-//		
-//		JScrollPane scrollPane = new JScrollPane();
-//		JPanel panel = new JPanel();
-//		
-//		panel.setLayout(new BorderLayout(0, 0));
-//
-//		tableAnalysisParamters = new JTable();
-//		tableAnalysisParamters.setModel(NucleusDatasetCreator.createAnalysisParametersTable(null));
-//		tableAnalysisParamters.setEnabled(false);
-//		panel.add(tableAnalysisParamters, BorderLayout.CENTER);
-//
-//		scrollPane.setViewportView(panel);
-//		scrollPane.setColumnHeaderView(tableAnalysisParamters.getTableHeader());
-//		return scrollPane;
-//	}
-		
-			
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		
-//		List<AnalysisDataset> list = getSelectedRowsFromTreeTable();
-	}
 	
 	/**
 	 * Standard log - append a newline
 	 * @param s the string to log
 	 */
 	public void log(String s){
-		logc(s+"\n");
+		logPanel.log(s);
 	}
 	
 	/**
@@ -450,7 +385,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	 * @param s the string to log
 	 */
 	public void logc(String s){
-		textArea.append(s);
+		logPanel.logc(s);
 	}
 	
 	
@@ -647,29 +582,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		};
 		thr.start();
 	}
-		
-//	/**
-//	 * Update the analysis panel with data from the given datasets
-//	 * @param list the datasets
-//	 */
-//	public void updateAnalysisParametersPanel(List<AnalysisDataset> list){
-//		// format the numbers and make into a tablemodel
-//		TableModel model = NucleusDatasetCreator.createAnalysisParametersTable(list);
-//		tableAnalysisParamters.setModel(model);
-//	}
-//	
-//	
-//	
-//	/**
-//	 * Update the stats panel with data from the given datasets
-//	 * @param list the datasets
-//	 */
-//	public void updateStatsPanel(List<AnalysisDataset> list){
-//		// format the numbers and make into a tablemodel
-//		TableModel model = NucleusDatasetCreator.createStatsTable(list);
-//		tablePopulationStats.setModel(model);
-//	}
-		
+				
 	
 	/**
 	 * Create a new CellCollection of the same class as the given dataset
@@ -828,77 +741,6 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 		}
 	}
-
-//	class DeleteCollectionAction extends AbstractAction {
-//
-//		private static final long serialVersionUID = 1L;
-//		public DeleteCollectionAction() {
-//	        super("Delete");
-//	    }
-//		
-//		public void actionPerformed(ActionEvent e) {
-//
-//			List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-//
-//			if(!datasets.isEmpty()){
-//				
-//				if(datasets.size()==1){
-//					logc("Deleting collection...");
-//				} else {
-//					logc("Deleting collections...");
-//				}
-//				
-////				TODO: this still has problems with multiple datasets
-//				
-//				// get the ids as a list, so we don't iterate over datasets
-//				// when we could delete a child of the list in progress
-//				List<UUID> list = new ArrayList<UUID>(0);
-//				for(AnalysisDataset d : datasets){
-//					list.add(d.getUUID());
-//				}
-//
-//				for(UUID id : list){
-//					// check dataset still exists
-//					if(populationsPanel.hasDataset(id)){
-//
-//						AnalysisDataset d = populationsPanel.getDataset(id);
-//
-//								
-//						// remove all children of the collection
-//						for(UUID u : d.getAllChildUUIDs()){
-//							String name = populationsPanel.getDataset(u).getName();
-//
-//							if(analysisDatasets.containsKey(u)){
-//								analysisDatasets.remove(u);
-//							}
-//							
-//							if(populationNames.containsValue(u)){
-//								populationNames.remove(name);
-//							}						
-//
-//							d.deleteChild(u);
-////
-//						}
-//						
-//						for(UUID parentID : analysisDatasets.keySet()){
-//							AnalysisDataset parent = analysisDatasets.get(parentID);
-//							if(parent.hasChild(id)){
-//								parent.deleteChild(id);
-//							}
-//						}
-//						populationNames.remove(d.getName());
-//						analysisDatasets.remove(id);
-//
-//						if(d.isRoot()){
-//							treeOrderMap.remove(id);
-//						}
-//					}
-//				}
-//				populationsPanel.update();
-//				log("OK");
-//			}
-//		}
-//	}
 	
 	class SplitCollectionAction extends AbstractAction {
 
@@ -1213,7 +1055,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 
 				d = datasets.get(0);
 				
-				progressPanel.add(this.progressBar);
+				logPanel.addProgressBar(this.progressBar);
 				contentPane.revalidate();
 				contentPane.repaint();				
 			} else {
@@ -1230,7 +1072,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		}
 		
 		private void removeProgressBar(){
-			progressPanel.remove(this.progressBar);
+			logPanel.removeProgressBar(this.progressBar);
 			contentPane.revalidate();
 			contentPane.repaint();
 		}
@@ -1354,13 +1196,12 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	
 	/**
 	 * Add images containing nuclear signals
-	 * @author bms41
 	 *
 	 */
 	class AddNuclearSignalAction extends ProgressableAction {
 		
 		public AddNuclearSignalAction() {
-			super("Signal detection in progress", "Error in signal detection");
+			super("Signal detection", "Error in signal detection");
 
 			try{
 				// add dialog for non-default detection options
@@ -1418,7 +1259,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	class RefoldNucleusAction extends ProgressableAction {
 
 		public RefoldNucleusAction() {
-			super("Curve refolding in progress", "Error refolding nucleus");
+			super("Curve refolding", "Error refolding nucleus");
 
 			try{
 
@@ -1444,7 +1285,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 	class ShellAnalysisAction extends ProgressableAction {
 				
 		public ShellAnalysisAction() {
-			super("Shell analysis in progress", "Error in shell analysis");
+			super("Shell analysis", "Error in shell analysis");
 			
 			String shellString = JOptionPane.showInputDialog(MainWindow.this, "Number of shells", 5);
 			
@@ -1474,7 +1315,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		NucleusClusterer clusterer = null;
 		
 		public ClusterAnalysisAction() {
-			super("Cluster analysis in progress", "Error in cluster analysis");
+			super("Cluster analysis", "Error in cluster analysis");
 			
 			ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
 			Map<String, Object> options = clusterSetup.getOptions();
@@ -1486,7 +1327,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 				progressBar.setIndeterminate(true);
 				progressBar.setStringPainted(true);
 				
-				progressPanel.add(progressBar);
+				logPanel.addProgressBar(progressBar);
 				contentPane.revalidate();
 				contentPane.repaint();
 
@@ -1512,7 +1353,7 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		@Override
 		public void finished() {
 
-			progressPanel.remove(progressBar);
+			logPanel.removeProgressBar(progressBar);
 			contentPane.revalidate();
 			contentPane.repaint();
 
@@ -1602,6 +1443,11 @@ public class MainWindow extends JFrame implements ActionListener, SignalChangeLi
 		
 		if(event.type().equals("UpdatePanels")){
 			this.updatePanels(populationsPanel.getSelectedDatasets());
+		}
+		
+		if(event.type().startsWith("Log_")){
+			String s = event.type().replace("Log_", "");
+			log(s);
 		}
 	}	
 }

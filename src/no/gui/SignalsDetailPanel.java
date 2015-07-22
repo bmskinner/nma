@@ -10,11 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.geom.Ellipse2D;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -263,8 +259,6 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		
 		updateSignalConsensusChart(list);
 		updateSignalStatsPanel(list);
-//		contentPane.revalidate();
-//		contentPane.repaint();	
 	}
 	
 	/**
@@ -276,7 +270,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
 			signalStatsTable.setModel(model);
 		} catch (Exception e){
-			IJ.log("Error updating signal stats: "+e.getMessage());
+			fireSignalChangeEvent("Log_"+"Error updating signal stats: "+e.getMessage());
 		}
 		int columns = signalStatsTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
@@ -293,9 +287,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(list);
 			this.signalAnalysisSetupTable.setModel(model);
 		} catch (Exception e){
-			IJ.log("Error updating signal analysis: "+e.getMessage());
+			fireSignalChangeEvent("Log_"+"Error updating signal analysis: "+e.getMessage());
 			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
+				fireSignalChangeEvent("Log_"+e1.toString());
 			}
 		}
 	}
@@ -762,7 +756,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
      
     private synchronized void fireSignalChangeEvent(String message) {
         SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
-        Iterator iterator = listeners.iterator();
+        Iterator<Object> iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
         }

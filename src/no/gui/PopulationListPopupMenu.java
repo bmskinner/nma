@@ -154,6 +154,9 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		enableReplaceFolder();
 		enableExportStats();
 		enableApplySegmentation();
+		enableAddTailStain();
+		this.enableAddNuclearSignal();
+		this.enableRunShellAnalysis();
 		
 	}
 	
@@ -168,6 +171,9 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		disableReplaceFolder();
 		disableExportStats();
 		disableApplySegmentation();
+		this.disableAddTailStain();
+		this.disableAddNuclearSignal();
+		this.disableRunShellAnalysis();
 	}
 	
 	public void enableMerge(){
@@ -249,6 +255,32 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	public void disableApplySegmentation(){
 		applySegmentationMenuItem.setEnabled(false);
 	}
+		
+	public void enableAddTailStain(){
+		addTailStainMenuItem.setEnabled(true);
+	}
+	
+	public void disableAddTailStain(){
+		addTailStainMenuItem.setEnabled(false);
+	}
+	
+	public void enableAddNuclearSignal(){
+		addNuclearSignalMenuItem.setEnabled(true);
+	}
+	
+	public void disableAddNuclearSignal(){
+		addNuclearSignalMenuItem.setEnabled(false);
+	}
+	
+	public void enableRunShellAnalysis(){
+		performShellAnalysisMenuItem.setEnabled(true);
+	}
+	
+	public void disableRunShellAnalysis(){
+		performShellAnalysisMenuItem.setEnabled(false);
+	}
+	
+	
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
         listeners.add( l );
