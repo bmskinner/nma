@@ -158,9 +158,9 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 				
 		if(this.analysisDatasets.size()>0){
 			for(UUID id : treeOrderMap.getIDs()){
-				
+												
 				AnalysisDataset rootDataset = analysisDatasets.get(id);
-				root.add( addTreeTableChildNodes(rootDataset.getUUID()));
+				root.add( addTreeTableChildNodes(    rootDataset    )     );
 			}
 		}
 		
@@ -176,15 +176,28 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
 	}
 	
-	private PopulationTreeTableNode addTreeTableChildNodes(UUID id){
-		AnalysisDataset dataset = PopulationsPanel.this.analysisDatasets.get(id);
-		PopulationTreeTableNode category = new PopulationTreeTableNode(dataset.getUUID());
+	/**
+	 * Create a node in the tree table, recursively adding all
+	 * the children of the given dataset id. If the child of a
+	 * dataset is not already in the names list, add it
+	 * @param dataset the dataset to add
+	 * @return
+	 */
+	private PopulationTreeTableNode addTreeTableChildNodes(AnalysisDataset dataset){
+		
+		UUID id = dataset.getUUID();
+		if(!this.hasDataset(id)){
+			this.addDataset(dataset);
+		}
+
+		PopulationTreeTableNode category = new PopulationTreeTableNode(id);
 		category.setValueAt(dataset.getName(), 0);
 		category.setValueAt(dataset.getCollection().getNucleusCount(), 1);
 				
-		Set<UUID> childIDList = dataset.getChildUUIDs();
-		for(UUID childID : childIDList){
-			PopulationTreeTableNode childNode = addTreeTableChildNodes(childID);
+		
+//		Set<UUID> childIDList = dataset.getChildUUIDs();
+		for(AnalysisDataset childDataset : dataset.getChildDatasets()){
+			PopulationTreeTableNode childNode = addTreeTableChildNodes(childDataset);
 			category.add(childNode);
 		}
 		return category;

@@ -563,17 +563,13 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		Thread thr = new Thread() {
 			public void run() {
 				try {
-					
-					analysisDetailPanel.update(list);
-//					updateStatsPanel(list);
-//					updateAnalysisParametersPanel(list);
+
+					consensusNucleusPanel.update(list);
 					
 					nucleusProfilesPanel.update(list);
-					consensusNucleusPanel.update(list);
-
+					analysisDetailPanel.update(list);
 					nuclearBoxplotsPanel.update(list);
 					signalsDetailPanel.update(list);
-
 					clusterDetailPanel.update(list);
 					vennDetailPanel.update(list);
 					wilcoxonDetailPanel.update(list);
@@ -1124,11 +1120,11 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		public void finished(){
 			removeProgressBar();
 
-			d.getAnalysisOptions().setRefoldNucleus(true);
-			d.getAnalysisOptions().setRefoldMode("Fast");
+			
+			populationsPanel.update(); // get any new populations
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 			list.add(d);
-			updatePanels(list);
+			updatePanels(list); // update with the current population
 		}
 		
 		/**
@@ -1260,9 +1256,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				
 
 				SignalDetector t = new SignalDetector(d, folder, channel, options, newSignalGroup, signalGroupName);
-				this.setProgressMessage("Signal detection in progress: "+signalGroupName);
+				this.setProgressMessage("Signal detection: "+signalGroupName);
 				t.addPropertyChangeListener(this);
 				t.execute();
+				
+				
+				
 			} catch (Exception e){
 				this.cancel();
 				IJ.log("Error in signal analysis: "+e.getMessage());
@@ -1271,7 +1270,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				}
 			}
 			
-		}
+		}		
 	}
 	
 	/**
@@ -1297,6 +1296,14 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				log("Error refolding nucleus");
 			}
 		}
+		
+		@Override
+		public void finished(){
+			d.getAnalysisOptions().setRefoldNucleus(true);
+			d.getAnalysisOptions().setRefoldMode("Fast");
+			super.finished();;
+		}
+
 	}
 		
 	

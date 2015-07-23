@@ -130,7 +130,7 @@ public class ProfileAggregate implements Serializable {
 			result = calculateQuartile(quartile);
 		} catch(ProfileException e){
 			result = this.getMedian(); // median is the only method that rescales, so should have been called before this
-			IJ.log("    Cannot find quartile; falling back on median");
+//			IJ.log("    Cannot find quartile; falling back on median");
 		}
 		return result;
 	}

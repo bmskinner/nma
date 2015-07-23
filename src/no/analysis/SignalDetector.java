@@ -21,13 +21,18 @@ import utility.Constants;
 import utility.Logger;
 import utility.StatsMap;
 import utility.Utils;
+import no.collections.CellCollection;
 import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.components.NuclearSignal;
 import no.components.SignalCollection;
 import no.components.XYPoint;
+import no.export.CompositeExporter;
+import no.export.NucleusAnnotator;
+import no.export.StatsExporter;
 import no.imports.ImageImporter;
 import no.nuclei.AsymmetricNucleus;
 import no.nuclei.Nucleus;
+import no.nuclei.RoundNucleus;
 
 
 public class SignalDetector extends SwingWorker<Boolean, Integer> {
@@ -121,6 +126,15 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 				progress++;
 				publish(progress);
 			}
+			
+			// divide population into clusters with and without signals
+			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
+			
+			for(CellCollection collection : signalPopulations){
+				processSubPopulation(collection);
+			}
+			
+			
 		} catch (Exception e){
 			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
 			for(StackTraceElement el : e.getStackTrace()){
@@ -137,7 +151,8 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 
 		try {
 			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);
+				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);			
+				
 			} else {
 				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
 			}
@@ -154,6 +169,81 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		}
 
 	} 
+	
+	/**
+	 * Create child datasets for signal populations
+	 * and perform basic analyses
+	 * @param collection
+	 */
+	private void processSubPopulation(CellCollection collection){
+
+		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
+		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
+
+		logger.log("Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
+
+		// use the same segmentation from the initial analysis
+		MorphologyAnalysis.reapplyProfiles(collection, dataset.getCollection());
+
+
+//		 measure general nuclear organisation
+//		SignalAnalysis.run(collection);
+
+		// Perform shell analysis with 5 shells by default
+//		if(collection.getNucleusClass() == RoundNucleus.class){
+//			ShellAnalysis.run(subDataset, 5);
+//		}
+		dataset.addChildDataset(subDataset);
+	}
+	
+	/*
+    Given a complete collection of nuclei, split it into up to 4 populations;
+      nuclei with red signals, with green signals, without red signals and without green signals
+    Only include the 'without' populations if there is a 'with' population.
+	 */
+	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
+
+		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
+		logger.log("Dividing population by signals...");
+		try{
+
+			List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
+			if(!list.isEmpty()){
+				logger.log("Found nuclei with signals in group "+signalGroup);
+				CellCollection listCollection = new CellCollection(r.getFolder(), 
+						r.getOutputFolderName(), 
+						"Signals_in_group_"+signalGroup, 
+						r.getDebugFile(), 
+						r.getNucleusClass());
+
+				for(Cell c : list){
+					listCollection.addCell( c );
+				}
+				signalPopulations.add(listCollection);
+
+				List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
+				if(!notList.isEmpty()){
+					logger.log("Found nuclei without signals in group "+signalGroup);
+					CellCollection notListCollection = new CellCollection(r.getFolder(), 
+							r.getOutputFolderName(), 
+							"No_signals_in_group_"+signalGroup, 
+							r.getDebugFile(), 
+							r.getNucleusClass());
+
+					for(Cell c : notList){
+						notListCollection.addCell( c );
+					}
+					signalPopulations.add(notListCollection);
+				}
+
+			}
+
+		} catch(Exception e){
+			logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
+		}
+
+		return signalPopulations;
+	}
 	
 	
 	/**
