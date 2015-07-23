@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -23,6 +24,7 @@ public class ClusterDetailPanel extends JPanel {
 	public static final String SOURCE_COMPONENT = "ClusterDetailPanel"; 
 	private JPanel clustersPanel;
 	private List<Object> listeners = new ArrayList<Object>();
+	private JButton clusterButton;
 
 	public ClusterDetailPanel() {
 		
@@ -30,6 +32,17 @@ public class ClusterDetailPanel extends JPanel {
 
 		clustersPanel.setLayout(new BoxLayout(clustersPanel, BoxLayout.Y_AXIS));
 		this.add(clustersPanel, BorderLayout.CENTER);
+		
+		clusterButton = new JButton("Cluster population");
+		clusterButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				fireSignalChangeEvent("NewClusterAnalysis");
+
+			}
+		});
+		this.add(clusterButton, BorderLayout.SOUTH);
+		clusterButton.setVisible(false);
 
 	}
 	
@@ -43,28 +56,25 @@ public class ClusterDetailPanel extends JPanel {
 			
 			if(!dataset.hasClusters()){ // only allow clustering once per population
 
-				JButton btnNewClusterAnalysis = new JButton("Cluster population");
-				btnNewClusterAnalysis.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-						fireSignalChangeEvent("NewClusterAnalysis");
-
-					}
-				});
-				clustersPanel.add(btnNewClusterAnalysis);
+				clusterButton.setVisible(true);
 				
 			} else { // clusters present, show the tree if available
+				JLabel header = new JLabel("Clusters present");
+				clustersPanel.add(header);
+				
 				JTextArea label = new JTextArea(dataset.getClusterTree());
 				label.setLineWrap(true);
 				
 				JScrollPane treeView = new JScrollPane(label);
 				clustersPanel.add(treeView);
+				clusterButton.setVisible(false);
 			}
 			
 			
 		} else {
 			clustersPanel = new JPanel();
 			clustersPanel.setLayout(new BoxLayout(clustersPanel, BoxLayout.Y_AXIS));
+			clusterButton.setVisible(false);
 		}
 		
 	}

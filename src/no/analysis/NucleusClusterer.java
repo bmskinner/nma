@@ -9,6 +9,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import cell.Cell;
 import no.collections.CellCollection;
 import no.components.Profile;
 import no.components.ProfileCollection;
@@ -30,7 +31,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	public static final int EM = 0; // expectation maximisation
 	public static final int HIERARCHICAL = 1;
 	
-	private Map<Instance, UUID> nucleusMap = new HashMap<Instance, UUID>();
+	private Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 	private Map<Integer, CellCollection> clusterMap = new HashMap<Integer, CellCollection>();
 	
 	private String newickTree;
@@ -167,8 +168,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	private void assignClusters(Clusterer clusterer, CellCollection collection){
 		try {
 			// construct new collections for each cluster
-//			Constructor<?> collectionConstructor = collection.getClass().getConstructor(new Class<?>[]{File.class, String.class, String.class, File.class});
-			
+
 			logger.log("Clusters : "+clusterer.numberOfClusters(), Logger.DEBUG);
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
@@ -182,10 +182,10 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				clusterMap.put(i, clusterCollection);
 			}
 
-			for(Instance inst : nucleusMap.keySet()){
+			for(Instance inst : cellToInstanceMap.keySet()){
 				
-				UUID id = nucleusMap.get(inst);
-//			Instance inst = enumerated_instances.instance(index);
+				UUID id = cellToInstanceMap.get(inst);
+
 				int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
 //			 IJ.log("instance "+index+" is in cluster "+ clusterNumber)  ; //       #pretty print results
 				 CellCollection cluster = clusterMap.get(clusterNumber);
@@ -197,36 +197,6 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 					 logger.log("Error: cell with ID "+id+" is not found", Logger.ERROR);
 				 }
 				 
-			}
-		} catch (NoSuchMethodException e) {
-			logger.log("Error: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
-		} catch (SecurityException e) {
-			logger.log("Error: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
-		} catch (InstantiationException e) {
-			logger.log("Error: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
-		} catch (IllegalAccessException e) {
-			logger.log("Error: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
-		} catch (IllegalArgumentException e) {
-			logger.log("Error: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
-		} catch (InvocationTargetException e) {
-			logger.log("Error: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
 			}
 		} catch (Exception e) {
 			logger.log("Error: "+e.getMessage(), Logger.ERROR);
@@ -276,8 +246,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 		// create Instance for each nucleus and add to Instances
 		int i = 0;
-		for(Nucleus n : collection.getNuclei()){
+		for(Cell c : collection.getCells()){
 
+			Nucleus n = c.getNucleus();
 			// instance holds data
 			// Create empty instance with five attribute values
 			Instance inst = new SparseInstance(5);
@@ -307,13 +278,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				attributeIndex++;
 			}
 
-//
-//
-//				
-//				inst.setValue(point2, Math.random());
-//				inst.setValue(point3, Math.random());
-				instances.add(inst);
-				nucleusMap.put(inst, n.getID());
+
+			instances.add(inst);
+			cellToInstanceMap.put(inst, c.getCellId());
 				
 			i++;
 		}
