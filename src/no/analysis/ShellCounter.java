@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package no.analysis;
 
 import ij.IJ;
@@ -15,31 +13,43 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
+import utility.Logger;
 import utility.Stats;
 
-/**
- *
- */
 public class ShellCounter {
 	
 	int numberOfShells;
 	Map<Integer, ArrayList<Double>> shellValues = new LinkedHashMap<Integer, ArrayList<Double>>(0); // store the values
 	
-	public ShellCounter(int numberOfShells){
+	Logger logger;
+	
+	public ShellCounter(int numberOfShells, File log){
+		
+		this.logger = new Logger(log, "ShellCounter");
+		
 		this.numberOfShells = numberOfShells;
 		for(int i=0;i<numberOfShells;i++){
 			shellValues.put(i, new ArrayList<Double>(0));
 		}
+		
 	}
 	
+	/**
+	 * Add an array of values to the current shell
+	 * @param values
+	 * @throws IllegalArgumentException
+	 */
 	public void addValues(double[] values) throws IllegalArgumentException{
 		if(values.length!=this.numberOfShells){
 			throw new IllegalArgumentException("Input array is wrong size");
 		}
+		
+		// check the first entry in the list is a value
 		Double firstShell = new Double(values[0]);
         if(firstShell.isNaN()){
         	throw new IllegalArgumentException("Argument is not a number");
         }
+        
         
 		for(int i=0;i<numberOfShells;i++){
 			List<Double> shell = shellValues.get(i);
@@ -50,7 +60,8 @@ public class ShellCounter {
 	public List<Double> getMeans() throws Exception{
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<numberOfShells;i++){
-			result.add(Stats.mean(getShell(i)));
+			double[] values = getShell(i);
+			result.add(Stats.mean(values));
 		}
 		return result;
 	}
@@ -143,20 +154,49 @@ public class ShellCounter {
 			ChiSquareTest test = new ChiSquareTest();
 			chi = test.chiSquare(expected, observed);
 			} catch(Exception e){
-				IJ.log("    Error getting chi-square value: "+e.getMessage());
+				logger.log("Error getting chi square values: "+e.getMessage(), Logger.ERROR);
+				for(StackTraceElement e1 : e.getStackTrace()){
+					logger.log(e1.toString(), Logger.STACK);
+				}
+				this.print();
 		}
 		return chi;
 	}
 	
+	/**
+	 * Get the values within the current shell. If a value
+	 * is NaN, return 0
+	 * @param shell the shell to return
+	 * @return
+	 */
 	private double[] getShell(int shell){
 		List<Double> values = shellValues.get(shell);
 		double[] array = new double[values.size()];
-		for(int i=0;i<array.length;i++){
-			array[i] = values.get(i);
+		
+		try{
+			for(int i=0;i<array.length;i++){
+
+				// if the value is not a number, put zero
+				array[i] = values.get(i).isNaN() 
+						? 0
+								: values.get(i);
+			}
+		} catch(Exception e){
+			logger.log("Error getting shell values: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement e1 : e.getStackTrace()){
+				logger.log(e1.toString(), Logger.STACK);
+			}
+			this.print();
 		}
 		return array;
 	}
 
+	/**
+	 * Get the observed values as a long array. Long is needed
+	 * for the chi-square test
+	 * @return the observerd shell values
+	 * @throws Exception
+	 */
 	private long[] getObserved() throws Exception{
 		long[] observed = new long[numberOfShells];
 		int count = shellValues.get(0).size();
@@ -168,19 +208,32 @@ public class ShellCounter {
 		return observed;
 	}
 	
+ 	/**
+ 	 * Get the expected values for chi-sqare test, assuming
+ 	 * an equal proportion of signal per shell
+ 	 * @return the expected values
+ 	 */
  	private double[] getExpected(){
 		double[] expected = new double[numberOfShells];
 		double count = shellValues.get(0).size();
 		for(int i=0;i<numberOfShells; i++){
 			expected[i] = ((double)1/(double)numberOfShells) * count;
-//			IJ.log("E: "+expected[i]);
 		}
 		return expected;
 	}
 		
+ 	/**
+ 	 * Get the number of signals measured
+ 	 * @return
+ 	 */
  	public int size(){
  		return shellValues.get(0).size();
  	}
+ 	
+ 	
+	/**
+	 * For debugging - print the contents of the dataset to log
+	 */
 	public void print(){
 		if(this.size()==0){ // don't make empty log files
 			return;

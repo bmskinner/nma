@@ -173,6 +173,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			// Create the signals tab panel
 			//---------------
 			signalsDetailPanel  = new SignalsDetailPanel();
+			signalsDetailPanel.addSignalChangeListener(this);
 			tabbedPane.addTab("Signals", signalsDetailPanel);
 			
 
@@ -1413,7 +1414,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			new RefoldNucleusAction();
 		}
 		
+		
 		if(event.type().equals("RunShellAnalysis")){
+			log("Shell analysis selected");
 			new ShellAnalysisAction();
 		}
 		

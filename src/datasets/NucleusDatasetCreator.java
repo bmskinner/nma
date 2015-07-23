@@ -1562,15 +1562,15 @@ public class NucleusDatasetCreator {
 			
 			CellCollection collection = dataset.getCollection();
 
-			for(int channel : collection.getSignalGroups()){
+			for(int signalGroup : collection.getSignalGroups()){
 				
-				if(collection.hasSignals(channel)){
-					ShellResult r = dataset.getShellResult(channel);
+				if(collection.hasSignals(signalGroup)){
+					ShellResult r = dataset.getShellResult(signalGroup);
 
 					for(int shell = 0; shell<r.getNumberOfShells();shell++){
 						Double d = r.getMeans().get(shell);
 						Double std = r.getStandardErrors().get(shell);
-						ds.add(d*100, std.doubleValue()*100, "Channel_"+channel+"_"+collection.getName(), String.valueOf(shell)); 
+						ds.add(d*100, std.doubleValue()*100, "Group_"+signalGroup+"_"+collection.getName(), String.valueOf(shell)); 
 						// we need the string value for shell otherwise we get error
 						// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
 						// ditto the doublevalue for std

@@ -24,6 +24,7 @@ import java.util.*;
 
 import utility.Constants;
 import utility.Logger;
+import utility.StatsMap;
 import utility.Utils;
 import no.nuclei.*;
 import no.components.*;
@@ -34,9 +35,9 @@ public class ShellCreator {
 
 	int shellCount = 5;
 
-	ImageStack image;
-	Roi originalRoi;
-	Nucleus nucleus;
+	ImageStack 	nucleusStack; 	// the stack to work on 
+	Roi 		nucleusRoi;		// the nuclear roi
+	Nucleus 	nucleus;		// the nucleus
 	
 	Logger logger;
 
@@ -54,12 +55,11 @@ public class ShellCreator {
 	public ShellCreator(Nucleus n, File log){
 
 		this.logger = new Logger(log, "ShellCreator");
-		FloatPolygon polygon = Utils.createPolygon(n);
-		originalRoi = new PolygonRoi(polygon, Roi.POLYGON);
-		this.image = ImageImporter.importImage(new File(n.getOriginalImagePath()), logger.getLogfile()); //(new ImagePlus(n.getOriginalImagePath()));
 		this.nucleus = n;
 		
-		logger.log("Imported image with "+image.getSize()+" slices", Logger.DEBUG);
+		nucleusRoi = new PolygonRoi(Utils.createOriginalPolygon(n), Roi.POLYGON);
+		this.nucleusStack = ImageImporter.importImage(n.getSourceFile(), logger.getLogfile());
+		
 	}
 
 	/**
@@ -114,31 +114,61 @@ public class ShellCreator {
 	*/
 	public void createShells(){
 
-		ImagePlus searchImage = new ImagePlus(null, image.getProcessor(Constants.COUNTERSTAIN).duplicate()); // blue channel
+		logger.log("Creating shells", Logger.DEBUG);
+		ImagePlus searchImage = new ImagePlus(null, nucleusStack.getProcessor(Constants.COUNTERSTAIN).duplicate()); // blue channel
 		ImageProcessor ip = searchImage.getProcessor();
-
-		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
-		double initialArea = stats.area;
 		
+		Detector detector = new Detector();
+		detector.setStackNumber(Constants.COUNTERSTAIN);
+		StatsMap values = detector.measure(nucleusRoi, nucleusStack);
 
-		double area = initialArea;
+//		ImageStatistics stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
+		double initialArea = values.get("Area");
+		
+//		IJ.log("Nuclear area: "+initialArea);
+//		double area = initialArea;
 
+		// start with the entire nucleus, and shrink shell by shell
 		for(int i=shellCount; i>0; i--){
 
-//			RoiEnlarger enlarger = new RoiEnlarger();
-			Roi shrinkingRoi = (Roi) originalRoi.clone();
+			// take the original roi
+			Roi shrinkingRoi = (Roi) nucleusRoi.clone();
+			
+			
+			
+			// get the maximum faction of the total area this
+			// shell should occupy
+			// i.e shell 5 of 5 is 1 (all area)
+			double maxFraction = (double)i/(double)shellCount;
+			
+			// the max area for this shell
+			double maxArea = initialArea * maxFraction;
 
-			double maxArea = initialArea * ((double)i/(double)shellCount);
-
+			double area = initialArea;
+			
+//			IJ.log("Shell "+i+":  Max area: "+maxArea+" ("+maxFraction+")");
+			
 			while(area>maxArea){
 
+//				Roi newRoi = new PolygonRoi(shrinkingPolygon, Roi.POLYGON);
 				shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, -1);
+				
+//				shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, -1);
 				ip.resetRoi();
 				ip.setRoi(shrinkingRoi); 
-				stats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
-				area = stats.area;
+//				ImageStatistics imgStats = ImageStatistics.getStatistics(ip, Measurements.AREA, searchImage.getCalibration()); 
+//				area = imgStats.area;
+				StatsMap statsValues = detector.measure(shrinkingRoi, nucleusStack);
+				area =statsValues.get("Area");
+				
+//				shrinkingPolygon = newRoi.getFloatPolygon();
+//				IJ.log("    Area: "+area);
 			}
-			shells.add((Roi)shrinkingRoi.clone());
+			
+//			FloatPolygon shrinkingPolygon = shrinkingRoi.getFloatPolygon();
+			FloatPolygon polygon = shrinkingRoi.getFloatPolygon();
+			
+			shells.add( new PolygonRoi(polygon, Roi.POLYGON));
 		}
 
 		// find the dapi density in each shell
@@ -154,32 +184,39 @@ public class ShellCreator {
 	* @return an array of signal proportions in each shell
 	 * @throws Exception 
 	*/
-	public double[] findShell(NuclearSignal signal, int channel) throws Exception{
+	public double[] findShell(NuclearSignal signal, int channel, ImageStack signalImage) throws Exception{
 
-		// IJ.log(" Finding shells");
-
-//		Roi signalRoi = signal.getRoi();
 		FloatPolygon polygon = Utils.createPolygon(signal.getBorder());
 		Roi signalRoi = new PolygonRoi(polygon, Roi.POLYGON);
-//		IJ.log("    Signal ROI: "+signalRoi.getBounds().x+","+signalRoi.getBounds().y);
 		
 		// Get a list of all the points within the ROI
 		List<XYPoint> signalPoints = getXYPoints(signalRoi);
 
-		// now test each point for which shell it is in
-		double[] signalDensities = getSignalDensities(signalPoints, channel);
-
-		// find the proportion of signal within each shell
-		this.signalProportions = getProportions(signalDensities);
-
-		// normalise the signals to the dapi intensity
-		double[] normalisedSignal = normalise(this.signalProportions, this.dapiDensities);
-
-		if(new Double(normalisedSignal[0]).isNaN()){
-			logger.log("Result is not a number", Logger.ERROR);
-			throw new Exception("Result is not a number");
+		// initialise result as zerod array, in case
+		// no signals are found
+		double[] result = new double[shellCount];
+		for(int i=0;i<shellCount;i++){
+			result[i] = 0;
 		}
-		return normalisedSignal;
+		
+		if(!signalPoints.isEmpty()){
+			// now test each point for which shell it is in
+			double[] signalDensities = getSignalDensities(signalPoints, channel, signalImage);
+
+			// find the proportion of signal within each shell
+			this.signalProportions = getProportions(signalDensities);
+
+			// normalise the signals to the dapi intensity
+			result = normalise(this.signalProportions, this.dapiDensities);
+
+			if(new Double(result[0]).isNaN()){
+				logger.log("Result is not a number", Logger.ERROR);
+				throw new Exception("Result is not a number");
+			}
+		} else {
+//			IJ.log("    Signal roi is empty");
+		}
+		return result;
 	}
 
 	
@@ -187,7 +224,7 @@ public class ShellCreator {
 	 * Draw the shells on the nucleus, and export the image to the Nucleus folder.
 	 */
 	public void exportImage(){
-	  ImagePlus shellImage = ImageExporter.convert(image);
+	  ImagePlus shellImage = ImageExporter.convert(nucleusStack);
       ImageProcessor ip = shellImage.getProcessor();
       List<Roi> shells = this.getShells();
       if(shells.size()>0){ // check we actually got shells out
@@ -207,61 +244,119 @@ public class ShellCreator {
 	}
 	
 	/**
-	*	Find the XYPoints within an ROI
+	*	Find the pixels within an roi. Create XYPoints
+	*	and return as a list
 	*
-	* @param signaRoi the ROI to convert
+	* @param roi the ROI to convert
 	* @return a list of XYPoints within the roi
 	*/
 	private List<XYPoint> getXYPoints(Roi roi){
 	
 		Rectangle roiBounds = roi.getBounds();
-
+		
+		FloatPolygon polygon = roi.getInterpolatedPolygon(0.5,true);
+		
 		// Get a list of all the points within the ROI
-		List<XYPoint> roiPoints = new ArrayList<XYPoint>(0);
-		for(int x=(int)roiBounds.getX(); x<roiBounds.getWidth()+roiBounds.getX(); x++){
-			for(int y=(int)roiBounds.getY(); y<roiBounds.getHeight()+roiBounds.getY(); y++){
-				if(roi.contains(x, y)){
-					roiPoints.add(new XYPoint(x, y));
+		List<XYPoint> result = new ArrayList<XYPoint>(0);
+		
+		// get the bounding box of the roi
+		// make a list of all the pixels in the roi
+		int minX = (int) roi.getXBase();
+		int maxX = minX + (int) roiBounds.getWidth();
+		
+		int minY = (int)roi.getYBase();
+		int maxY = minY + (int) roiBounds.getHeight();
+		
+		
+//		IJ.log("    X base: "+minX
+//				+"  Y base: "+minY
+//				+"  X max: "+maxX
+//				+"  Y max: "+maxY);
+		
+		for(int x=minX; x<=maxX; x++){
+			for(int y=minY; y<=maxY; y++){
+				
+				if(polygon.contains(x, y)){
+//					IJ.log(x+", "+y);
+					result.add(new XYPoint(x, y));
 				}
 			}
 		}
-		return roiPoints;
+		
+		if(result.isEmpty()){
+//			IJ.log("    Roi has no pixels");
+			logger.log("No points found in roi", Logger.ERROR);
+			logger.log("X base: "+minX
+					+"  Y base: "+minY
+					+"  X max: "+maxX
+					+"  Y max: "+maxY, Logger.DEBUG);
+		} else {
+//			IJ.log("    Roi of area "+result.size());
+		}
+		return result;
 	}
 
 	/**
-	*	Find overlaps between a signal and shells
+	* Find overlaps between a signal and shells. Returns a zerod 
+	* array if nothing found
 	*
 	* @param signaPoints the list of XYPoints within the signal ROI
 	* @return an array of signal densities per shell, outer to centre
 	*/
-	private double[] getSignalDensities(List<XYPoint> signalPoints, int channel){
-		if(signalPoints.size()==0){
-			logger.log("No points found in ROI", Logger.ERROR);
+	private double[] getSignalDensities(List<XYPoint> signalPoints, int channel, ImageStack signalImage){
+		if(signalPoints.isEmpty()){
 			throw new IllegalArgumentException("No points found in ROI");
 		}
+		
+		int stackNumber = Constants.rgbToStack(channel);
+		
+		// create result array
 		double[] result = new double[shellCount];
 
 		try {
-			int i=0;
-			for( Roi r : shells){
+			for(int i=0;i<shellCount;i++){
 
-				double density = 0;
+				Roi roi = shells.get(i);
+				double xbase = roi.getXBase();
+				double ybase = roi.getYBase();
+				
+				double maxX = roi.getBounds().getWidth()+xbase;
+				double maxY = roi.getBounds().getHeight()+ybase;
+				
+//				IJ.log("    Shell: X base: "+xbase
+//						+"  Y base: "+ybase
+//						+"  X max: "+maxX
+//						+"  Y max: "+maxY);
+				
+				int density = 0;
 
 				for(XYPoint p : signalPoints){
-
-					if(r.contains(p.getXAsInt(), p.getYAsInt())){
+					
+					int x = p.getXAsInt();
+					int y = p.getYAsInt();
+					
+					if(roi.contains(x, y)){
 						// find the value of the signal
-						ImageProcessor ip = image.getProcessor(channel);
-						density += (double) ip.getPixel(p.getXAsInt(), p.getYAsInt());	 
+//						IJ.log("    Roi contains pixel "+x+", "+y);
+						ImageProcessor ip = signalImage.getProcessor(stackNumber);
+						density += ip.getPixel(x, y);	 
+//						IJ.log("    Stack  "+stackNumber+" (channel "+channel+"): "+ip.getPixel(x, y));
+					} else {
+//						IJ.log("    Roi does not contain pixel "+x+", "+y);
 					}
 				}
-				result[i] = density;
-				i++;
+				result[i] = (double) density;
+//				IJ.log("    Density in shell "+i+": "+density);
 			}
 		} catch (Exception e) {
 			logger.log("Error getting signal densities: "+e.getMessage(), Logger.ERROR);
 			for(StackTraceElement e1 : e.getStackTrace()){
 				logger.log(e1.toString(), Logger.STACK);
+			}
+			
+			// zero result
+			for(int i=0;i<shellCount;i++){
+				result[i] = 0;
 			}
 		}
 		return result;
@@ -280,27 +375,43 @@ public class ShellCreator {
 			logger.log("Not a number within ShellAnalyser.getProportions", Logger.ERROR);
 			throw new IllegalArgumentException("Not a number within ShellAnalyser.getProportions");
 		}
-		double[] proportions = new double[shellCount];
+		
+		double[] result = new double[shellCount];
 
 		try {
-			double total = 0;
+			double total = 0; // the total number of pixels in the nucleus
 			for(double d : counts){
 				total+=d;
+			}
+			
+			if(total==0){
+				logger.log("No pixels found when getting proportions", Logger.DEBUG);
 			}
 
 			// subtract inner from outer shells
 			for(int i=0; i<shellCount; i++){
 
+				// if this is the last shell, use the given number
+				// otherwise, subtract from the shell above
 				double realCount = i==shellCount-1 ? counts[i] : counts[i] - counts[i+1];
-				proportions[i] = realCount / total; // fraction of total pixels
+				
+				result[i] 	= total==0 			 // if there are no pixels
+							? 0					 // return a 0
+							: realCount / total; // otherwise fraction of total pixels
+//				IJ.log("    Proportion in shell "+i+": "+result[i]);
 			}
 		} catch (Exception e) {
 			logger.log("Error getting signal proportions: "+e.getMessage(), Logger.ERROR);
 			for(StackTraceElement e1 : e.getStackTrace()){
 				logger.log(e1.toString(), Logger.STACK);
 			}
+			
+			// zero result
+			for(int i=0;i<shellCount;i++){
+				result[i] = 0;
+			}
 		}
-		return proportions;
+		return result;
 	}
 
 	/**
@@ -320,7 +431,7 @@ public class ShellCreator {
 
 			for(XYPoint p : points){
 				// find the value of the signal
-				ImageProcessor ip = image.getProcessor(Constants.COUNTERSTAIN);
+				ImageProcessor ip = nucleusStack.getProcessor(Constants.COUNTERSTAIN);
 				density += (double)ip.getPixel(p.getXAsInt(), p.getYAsInt());	 
 			}
 			densities[i] = density;
@@ -351,23 +462,24 @@ public class ShellCreator {
 		
 		double[] norm = new double[shellCount];
 		double total = 0;
-//		String line = "";
+
 		// perform the dapi normalisation, and get the signal total
 		for(int i=0; i<shellCount; i++){
 			norm[i] = signals[i] / dapi[i];
 			total += norm[i];
-//			line += norm[i]+"  ";
 		}
-//		IJ.log(line+"  "+total);
 
 		// express the normalised signal as a fraction of the total
-//		line = "";
+
 		double[] result = new double[shellCount];
 		for(int i=0; i<shellCount; i++){
-			result[i] = norm[i] / total;
-//			line += result[i]+"  ";
+			
+			
+			result[i] =  total==0 		 // if the total is 0
+					  ? 0 				 // don't try dividing by 0
+					  : norm[i] / total; // otherwise get the fraction of the total signal
 		}
-//		IJ.log(line);
+
 		return result;
 	}
 

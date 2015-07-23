@@ -273,8 +273,8 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
 		shellsChartPanel = new ChartPanel(shellsChart);
-		JPanel panel = new JPanel();
-		panel.add(shellsChartPanel);
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(shellsChartPanel, BorderLayout.CENTER);
 		return panel;
 	}
 	
@@ -610,7 +610,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			if(dataset.hasShellResult()){ // only if there is something to display
 
 				CategoryDataset ds = NucleusDatasetCreator.createShellBarChartDataset(list);
-				JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", ds);
+				JFreeChart shellsChart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", ds);
 				shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
 				shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
 				StatisticalBarRenderer rend = new StatisticalBarRenderer();
@@ -624,14 +624,13 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 					rend.setSeriesVisibleInLegend(j, Boolean.FALSE);
 					rend.setSeriesStroke(j, new BasicStroke(2));
 					int index = getIndexFromLabel( (String) ds.getRowKey((j)));
-					rend.setSeriesPaint(j, ColourSelecter.getSignalColour(index));
+					Color colour = dataset.getSignalGroupColour(index);
+					rend.setSeriesPaint(j, colour);
 				}	
 
 				shellsChartPanel.setChart(shellsChart);
+				signalsTabPane.setComponentAt(2, shellsChartPanel);
 				
-
-				
-//				signalsTabPane.setComponentAt(2, shellsChartPanel);
 			} else { // no shell analysis available
 
 				if(collection.hasSignals()){
@@ -669,7 +668,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		panel.add(lbl, BorderLayout.NORTH);
 		
-		JButton button = new JButton();
+		JButton button = new JButton("Run new shell analysis");
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {

@@ -1,5 +1,8 @@
 package no.analysis;
 
+import ij.IJ;
+import ij.ImageStack;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +16,7 @@ import utility.Logger;
 import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.ShellResult;
+import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 
 public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
@@ -60,8 +64,8 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
-			for(int channel : collection.getSignalGroups()){
-				counters.put(channel, new ShellCounter(shells));
+			for(int signalGroup : collection.getSignalGroups()){
+				counters.put(signalGroup, new ShellCounter(shells, logger.getLogfile()));
 			}
 
 			// make the shells and measure the values
@@ -69,22 +73,39 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 			int progress = 0;
 			for(Nucleus n : collection.getNuclei()){
 
+//				IJ.log("Nucleus "+n.getPathAndNumber());
+				
 				ShellCreator shellAnalyser = new ShellCreator(n, logger.getLogfile());
+//				IJ.log("Making shells");
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
 
-				for(int channel : n.getSignalGroups()){
-					if(collection.hasSignals(channel)){
-						List<NuclearSignal> signalGroup = n.getSignals(channel); 
+				for(int signalGroup : n.getSignalGroups()){
+					if(collection.hasSignals(signalGroup)){
+						List<NuclearSignal> signals = n.getSignals(signalGroup); 
+						
+						File imageFile = n.getSignalCollection().getSourceFile(signalGroup);
+						ImageStack signalStack = ImageImporter.importImage(imageFile, logger.getLogfile());
+						
+						
+//						IJ.log("Signal group "+signalGroup);
+//						IJ.log("Found "+signals.size()+" signals");
 
-						ShellCounter counter = counters.get(channel);
+						ShellCounter counter = counters.get(signalGroup);
 
-						for(NuclearSignal s : signalGroup){
+						for(NuclearSignal s : signals){
 							try {
-								double[] signalPerShell = shellAnalyser.findShell(s, channel);
+//								IJ.log("   Getting signal");
+								int channel = n.getSignalCollection().getSourceChannel(signalGroup);
+								
+								double[] signalPerShell = shellAnalyser.findShell(s, channel, signalStack);
 								counter.addValues(signalPerShell);
 							} catch (Exception e) {
+//								IJ.log("Error: "+e.getMessage());
 								logger.log("Error in signal in shell analysis: "+e.getMessage(), Logger.ERROR);
+								for(StackTraceElement el : e.getStackTrace()){
+									logger.log(el.toString(), Logger.STACK);
+								}
 							}
 						} // end for signals
 					} // end if signals
@@ -109,6 +130,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 			for(StackTraceElement el : e.getStackTrace()){
 				logger.log(el.toString(), Logger.STACK);
 			}
+			
 			return false;
 		}
 		return true;
@@ -158,7 +180,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
 			for(int channel : collection.getSignalGroups()){
-				counters.put(channel, new ShellCounter(shells));
+				counters.put(channel, new ShellCounter(shells, logger.getLogfile()));
 			}
 
 			// make the shells and measure the values
@@ -172,12 +194,15 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 				for(int channel : n.getSignalGroups()){
 					if(collection.hasSignals(channel)){
 						List<NuclearSignal> signalGroup = n.getSignals(channel); 
+						
+						File imageFile = n.getSignalCollection().getSourceFile(channel);
+						ImageStack signalStack = ImageImporter.importImage(imageFile, logger.getLogfile());
 
 						ShellCounter counter = counters.get(channel);
 
 						for(NuclearSignal s : signalGroup){
 							try {
-								double[] signalPerShell = shellAnalyser.findShell(s, channel);
+								double[] signalPerShell = shellAnalyser.findShell(s, channel, signalStack);
 								counter.addValues(signalPerShell);
 							} catch (Exception e) {
 								logger.log("Error in signal in shell analysis: "+e.getMessage(), Logger.ERROR);
