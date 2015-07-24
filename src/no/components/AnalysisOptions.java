@@ -261,6 +261,19 @@ public class AnalysisOptions implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 		
+		public static final double DEFAULT_CANNY_LOW_THRESHOLD = 0.1;
+		public static final double DEFAULT_CANNY_HIGH_THRESHOLD = 1.5;
+		
+		public static final double DEFAULT_CANNY_TAIL_LOW_THRESHOLD = 0.1;
+		public static final double DEFAULT_CANNY_TAIL_HIGH_THRESHOLD = 0.5;
+		
+		public static final double DEFAULT_CANNY_KERNEL_RADIUS = 2;
+		public static final int    DEFAULT_CANNY_KERNEL_WIDTH = 16;
+		public static final int    DEFAULT_CLOSING_OBJECT_RADIUS = 5;
+		public static final int    DEFAULT_TAIL_CLOSING_OBJECT_RADIUS = 3;
+		
+		
+		
 		// values for Canny edge deteection
 		private boolean useCanny; 
 		private boolean cannyAutoThreshold;
@@ -350,6 +363,12 @@ public class AnalysisOptions implements Serializable {
 	 *
 	 */
 	public class NuclearSignalOptions implements Serializable {
+		
+		public static final int    DEFAULT_SIGNAL_THRESHOLD		 	= 70;
+		public static final int    DEFAULT_MIN_SIGNAL_SIZE 			= 5;
+		public static final double DEFAULT_MAX_SIGNAL_FRACTION 		= 0.1;
+		public static final double DEFAULT_MIN_CIRC 				= 0.0;
+		public static final double DEFAULT_MAX_CIRC 				= 1.0;
 
 		private static final long serialVersionUID = 1L;
 		private int threshold;

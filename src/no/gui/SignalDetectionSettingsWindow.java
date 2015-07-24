@@ -4,19 +4,14 @@ import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import javax.swing.Box;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -32,7 +27,7 @@ import utility.Constants;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.NuclearSignalOptions;
 
-public class SignalDetectionSettingsWindow extends JDialog implements ChangeListener {
+public class SignalDetectionSettingsWindow extends SettingsDialog implements ChangeListener {
 
 	private JPanel contentPanel;
 	private static final long serialVersionUID = 1L;
@@ -96,8 +91,7 @@ public class SignalDetectionSettingsWindow extends JDialog implements ChangeList
 	
 	private void makePanel(){
 		
-		String[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
-		channelSelection = new JComboBox<String>(possibilities);
+		channelSelection = new JComboBox<String>(channelOptionStrings);
 		
 		groupName = new JTextField();
 		
@@ -276,35 +270,6 @@ public class SignalDetectionSettingsWindow extends JDialog implements ChangeList
 			for(StackTraceElement e2 : e1.getStackTrace()){
 				IJ.log(e2.toString());
 			}
-		}
-	}
-
-	private void addLabelTextRows(JLabel[] labels,
-			Component[] fields,
-			GridBagLayout gridbag,
-			Container container) {
-		GridBagConstraints c = new GridBagConstraints();
-		c.anchor = GridBagConstraints.EAST;
-		int numLabels = labels.length;
-
-		for (int i = 0; i < numLabels; i++) {
-			c.gridwidth = 1; //next-to-last
-			c.fill = GridBagConstraints.NONE;      //reset to default
-			c.weightx = 0.0;                       //reset to default
-			container.add(labels[i], c);
-
-			Dimension minSize = new Dimension(10, 5);
-			Dimension prefSize = new Dimension(10, 5);
-			Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
-			c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
-			c.fill = GridBagConstraints.NONE;      //reset to default
-			c.weightx = 0.0;                       //reset to default
-			container.add(new Box.Filler(minSize, prefSize, maxSize),c);
-
-			c.gridwidth = GridBagConstraints.REMAINDER;     //end row
-			c.fill = GridBagConstraints.HORIZONTAL;
-			c.weightx = 1.0;
-			container.add(fields[i], c);
 		}
 	}
 
