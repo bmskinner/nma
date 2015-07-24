@@ -42,7 +42,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
-import javax.swing.BoxLayout;
 import javax.swing.JSplitPane;
 
 import java.awt.Dimension;
@@ -1165,7 +1164,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
 				String folderName = openDialog.getDirectory();
 
-				if(folderName==null) return; // user cancelled
+				if(folderName==null){
+					this.cancel();
+					return; // user cancelled
+				}
 
 				final File folder =  new File(folderName);
 
