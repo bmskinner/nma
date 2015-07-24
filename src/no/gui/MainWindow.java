@@ -1157,6 +1157,11 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		public AddTailStainAction() {
 			super("Tail detection", "Error in tail detection");
 			try{
+				
+				TailDetectionSettingsWindow analysisSetup = new TailDetectionSettingsWindow(d.getAnalysisOptions());
+				
+				final int channel = analysisSetup.getChannel();
+				
 				DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
 				String folderName = openDialog.getDirectory();
 
@@ -1172,29 +1177,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					this.cancel();
 					return; // check folder is ok
 				}
-				// create dialog to get image channel
-
-				Object[] possibilities = {"Greyscale", "Red", "Green", "Blue"};
-				String channelName = (String)JOptionPane.showInputDialog(
-						MainWindow.this,
-						"Select channel",
-						"Select channel",
-						JOptionPane.PLAIN_MESSAGE,
-						null,
-						possibilities,
-						"Green");
-
-				if(channelName==null){
-					this.cancel();
-					return;
-				}
-
-				final int channel = channelName.equals("Red") 
-						? Constants.RGB_RED
-								: channelName.equals("Green") 
-								? Constants.RGB_GREEN
-										: Constants.RGB_BLUE;
-
 
 				TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
 				t.addPropertyChangeListener(this);
