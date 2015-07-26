@@ -130,25 +130,24 @@ public class NucleusRefinder
     An addition to the check file, that ensures the image 
     is in the list of images with nuclei to recapture
   */
-  @Override
-  protected boolean checkFile(File file){
-    boolean ok = super.checkFile(file);
-            
-    if(ok){
-
-      ok = false;
-      //check that the image is in the list to be analysed
-      for( HashMap<File, XYPoint> hash : nucleiToFind ){
-        Set<File> fileSet = hash.keySet();
-        for(File oldFile : fileSet){ // will only be one entry in this hash
-          if(oldFile.getName().equals(file.getName() ) ){
-            ok = true;
-          }
-        }
-      }
-    }
-    return ok;
-  }
+//  protected boolean checkFiles(File file){
+//    boolean ok = NucleusDetector.checkFile(file);
+//            
+//    if(ok){
+//
+//      ok = false;
+//      //check that the image is in the list to be analysed
+//      for( HashMap<File, XYPoint> hash : nucleiToFind ){
+//        Set<File> fileSet = hash.keySet();
+//        for(File oldFile : fileSet){ // will only be one entry in this hash
+//          if(oldFile.getName().equals(file.getName() ) ){
+//            ok = true;
+//          }
+//        }
+//      }
+//    }
+//    return ok;
+//  }
 
   private ImagePlus makeGreyscaleFromBlue(ImagePlus image){
 

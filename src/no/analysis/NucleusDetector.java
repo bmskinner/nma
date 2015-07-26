@@ -25,6 +25,9 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.SwingWorker;
 
 import cell.Cell;
 import utility.CannyEdgeDetector;
@@ -43,7 +46,7 @@ import no.export.ImageExporter;
 import no.gui.MainWindow;
 import no.imports.ImageImporter;
 
-public class NucleusDetector {
+public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
   protected static final String IMAGE_PREFIX = "export.";
 
@@ -53,6 +56,8 @@ public class NucleusDetector {
 
   // counts of nuclei processed
   protected int totalNuclei        = 0;
+  
+  protected int totalImages;
 
 
   private File inputFolder;
@@ -80,6 +85,7 @@ public class NucleusDetector {
 	  this.mw = mw;
 	  this.debugFile = debugFile;
 	  this.analysisOptions = options;
+	  this.totalImages = NucleusDetector.countSuitableImages(analysisOptions.getFolder());
 	  logger = new Logger(debugFile, "NucleusDetector");
   }
 
@@ -87,17 +93,68 @@ public class NucleusDetector {
   /**
   * Run the detector on the input folder
   */
-  public void runDetector(){
-	  try{
-		  logger.log("Running nucleus detector");
-		  processFolder(this.inputFolder);
-	  } catch(Exception e){
-		  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
+//  public void runDetector(){
+//	  try{
+//		  logger.log("Running nucleus detector");
+//		  processFolder(this.inputFolder);
+//	  } catch(Exception e){
+//		  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
+//		  for(StackTraceElement el : e.getStackTrace()){
+//			  logger.log(el.toString(), Logger.STACK);
+//		  }
+//	  }
+//  }
+  
+  
+  @Override
+	protected void process( List<Integer> integers ) {
+		//update the number of entries added
+		int amount = integers.get( integers.size() - 1 );
+		int percent = (int) ( (double) amount / (double) totalImages * 100);
+		setProgress(percent); // the integer representation of the percent
+	}
+	
+	@Override
+	protected Boolean doInBackground() throws Exception {
+
+		boolean result = false;
+		try{
+			  logger.log("Running nucleus detector");
+			  processFolder(this.inputFolder);
+			  result = true;
+		  } catch(Exception e){
+			  result = false;
+			  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
+			  for(StackTraceElement el : e.getStackTrace()){
+				  logger.log(el.toString(), Logger.STACK);
+			  }
 		  }
-	  }
-  }
+		return result;
+	}
+	
+	@Override
+	public void done() {
+
+//		try {
+//			if(this.get()){
+//				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);			
+//				
+//			} else {
+//				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+//			}
+//		} catch (InterruptedException e) {
+//			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
+//			for(StackTraceElement el : e.getStackTrace()){
+//				logger.log(el.toString(), Logger.STACK);
+//			}
+//		} catch (ExecutionException e) {
+//			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
+//			for(StackTraceElement el : e.getStackTrace()){
+//				logger.log(el.toString(), Logger.STACK);
+//			}
+//		}
+
+	} 
 
   /*
     -------------------
@@ -172,7 +229,7 @@ public class NucleusDetector {
   *  @param file the File to check
   *  @return a true or false of whether the file passed checks
   */
-  protected boolean checkFile(File file){
+  protected static boolean checkFile(File file){
     boolean ok = false;
     if (file.isFile()) {
 
@@ -191,6 +248,35 @@ public class NucleusDetector {
       }
     }
     return ok;
+  }
+  
+  /**
+   * Count the number of images in the given folder
+   * that are suitable for analysis. Rcursive over 
+   * subfolders.
+   * @param folder the folder to count
+   * @return the number of analysable image files
+   */
+  public static int countSuitableImages(File folder){
+
+	  File[] listOfFiles = folder.listFiles();
+
+	  int result = 0;
+
+	  for (File file : listOfFiles) {
+
+		  boolean ok = checkFile(file);
+
+		  if(ok){
+			  result++;
+
+		  } else { 
+			  if(file.isDirectory()){ // recurse over any sub folders
+				  result += countSuitableImages(file);
+			  }
+		  } 
+	  } 
+	  return result;
   }
 
   /**
@@ -309,7 +395,7 @@ public class NucleusDetector {
 
 	  for (File file : listOfFiles) {
 
-		  boolean ok = this.checkFile(file);
+		  boolean ok = checkFile(file);
 
 		  if(ok){
 			  try {

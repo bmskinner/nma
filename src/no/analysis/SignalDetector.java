@@ -1,6 +1,5 @@
 package no.analysis;
 
-import ij.IJ;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -16,7 +15,6 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import cell.Cell;
-import components.SpermTail;
 import utility.Constants;
 import utility.Logger;
 import utility.StatsMap;
@@ -415,23 +413,5 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		// and find signal rois
 		detectForwardThresholdSignal(sourceFile, stack, n);
 
-	}
-
-	/**
-	 * Find signals in the given ImageStack, and add them to the given nucleus
-	 * Called by AnalysisCreator when SwingWorker functions not needed
-	 * TODO: remove dependency on this method
-	 * @param n - the nucleus to add signals to
-	 * @param stack - the ImageStack with signal channels
-	 */
-	public void run(Nucleus n, ImageStack stack, File sourceFile){
-
-		for(int i = Constants.RGB_RED; i< Constants.RGB_BLUE; i++){
-			logger.log("Running signal detector on channel "+i, Logger.DEBUG);
-			this.channel	 = i;
-			this.signalGroup = i;
-			this.channelName = i==Constants.RGB_RED ? "Red" : "Green";
-			detectSignal(sourceFile, stack, n);
-		}
 	}
 }

@@ -20,9 +20,11 @@ import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
 import no.analysis.MorphologyAnalysis;
 import no.analysis.NucleusClusterer;
+import no.analysis.NucleusDetector;
 import no.analysis.ShellAnalysis;
 import no.analysis.SignalDetector;
 import no.collections.CellCollection;
+import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
@@ -33,7 +35,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -51,6 +56,7 @@ import java.beans.PropertyChangeListener;
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
 import utility.Constants;
+import utility.Logger;
 
 import javax.swing.JTabbedPane;
 
@@ -231,38 +237,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		}
 		
 	}
-	
-//	/**
-//	 * Create the log panel for updates
-//	 * @return a scrollable panel
-//	 */
-//	private JPanel createLogPanel(){
-//		JPanel panel = new JPanel();
-//		panel.setLayout(new BorderLayout());
-//		JScrollPane scrollPane = new JScrollPane();
-//		textArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
-//		DefaultCaret caret = (DefaultCaret)textArea.getCaret();
-//		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-//		
-//		scrollPane.setViewportView(textArea);
-//		textArea.setBackground(SystemColor.menu);
-//		textArea.setEditable(false);
-//		textArea.setRows(9);
-//		textArea.setColumns(40);
-//		
-//		
-//		JLabel lblAnalysisLog = new JLabel("Analysis Log");
-//		lblAnalysisLog.setHorizontalAlignment(SwingConstants.CENTER);
-//		scrollPane.setColumnHeaderView(lblAnalysisLog);
-//		panel.add(scrollPane, BorderLayout.CENTER);
-//
-//		progressPanel = new JPanel();
-//		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
-//		panel.add(progressPanel, BorderLayout.NORTH);
-//		
-//		return panel;
-//	}
-	
+		
 	/**
 	 * Create the panel of primary buttons
 	 * @return a panel
@@ -275,7 +250,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		btnNewAnalysis.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				newAnalysis();
+				
+				new NewMorphologyAnalysisAction();
+//				newAnalysis();
 			}
 		});
 		panelHeader.add(btnNewAnalysis);
@@ -323,7 +300,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				postAnalysis();
+				fishMapping();
 			}
 		});
 		panelHeader.add(btnPostanalysisMapping);
@@ -399,7 +376,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 * Compare morphology images with post-FISH images, and select nuclei into new
 	 * sub-populations
 	 */
-	public void postAnalysis(){
+	public void fishMapping(){
 
 		try{
 
@@ -433,9 +410,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					
 					// get the dataset craeted by adding a child collection, and put it inthe populations list
 					populationsPanel.addDataset(dataset.getChildDataset(sub.getID()));
-//
-//					MainWindow.this.analysisDatasets.put(sub.getID(), dataset.getChildDataset(sub.getID()));
-//					MainWindow.this.populationNames.put(sub.getName(), sub.getID());
 
 				}
 			}
@@ -457,7 +431,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				lblStatusLine.setText("New analysis in progress");
 								
 				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
-				analysisCreator.run();
+//				analysisCreator.run();
+				analysisCreator.execute();
 
 				List<AnalysisDataset> datasets = analysisCreator.getDatasets();
 				
@@ -1119,7 +1094,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		public void finished(){
 			removeProgressBar();
 
-			
 			populationsPanel.update(); // get any new populations
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 			list.add(d);
@@ -1393,6 +1367,89 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			}
 			populationsPanel.update();
 
+		}
+	}
+	
+	
+	/**
+	 * Run a new shell analysis on the selected dataset
+	 */
+	class NewMorphologyAnalysisAction extends ProgressableAction {
+				
+		private AnalysisCreator analysis;
+		private AnalysisOptions options;
+		private Date startTime;
+		private String outputFolderName;
+		
+		public NewMorphologyAnalysisAction() {
+			super("Nuclear analysis", "Error in analysis");
+									
+			lblStatusLine.setText("New analysis in progress");
+			
+			
+			AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow();
+			if( analysisSetup.getOptions()!=null){
+
+				options = analysisSetup.getOptions();
+
+				log("Directory: "+options.getFolder().getName());
+
+				this.startTime = Calendar.getInstance().getTime();
+				this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+
+				// craete the analysis folder early. Did not before in case folder had no images
+				File analysisFolder = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName);
+				if(!analysisFolder.exists()){
+					analysisFolder.mkdir();
+				}
+				Logger logger = new Logger( new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
+
+				logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
+				logger.log("Directory: "+options.getFolder().getName());
+				
+				NucleusDetector detector = new NucleusDetector(this.outputFolderName, MainWindow.this, logger.getLogfile(), options);
+				detector.addPropertyChangeListener(this);
+//				detector.runDetector();
+				detector.execute();
+				
+				private List<CellCollection> finalPopulations = new ArrayList<CellCollection>(0);
+				private List<AnalysisDataset> finalDatasets = new ArrayList<AnalysisDataset>(0);
+
+				this.folderCollection = detector.getNucleiCollections();
+				logger.log("Imported folder(s)");
+				mw.log("Imported folder(s)");
+				this.analysisRun = true;
+			}
+			
+			
+		}
+		
+		@Override
+		public void finished(){
+			
+			List<AnalysisDataset> datasets = analysis.getDatasets();
+			
+			if(datasets.size()==0 || datasets==null){
+				log("No datasets returned");
+			}
+			
+			// new style datasets
+			for(AnalysisDataset d : datasets){
+				
+				populationsPanel.addDataset(d);				
+				
+				for(AnalysisDataset child : d.getChildDatasets()){
+					populationsPanel.addDataset(child);
+				}
+				PopulationExporter.saveAnalysisDataset(d);
+
+			}
+							
+			lblStatusLine.setText("New analysis complete: "
+									+populationsPanel.getDatasetCount()
+									+" populations ready to view");
+			
+			super.finished();
 		}
 	}
 
