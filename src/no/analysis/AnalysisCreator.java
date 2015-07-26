@@ -45,7 +45,7 @@ import no.nuclei.RoundNucleus;
 
 public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements PropertyChangeListener {
 
-	private MainWindow mw; // use to log and update gui
+//	private MainWindow mw; // use to log and update gui
 
 	private static final String spacerString = "------------";
 
@@ -79,7 +79,7 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 	private Map<File, LinkedHashMap<String, Integer>> collectionNucleusCounts = new HashMap<File, LinkedHashMap<String, Integer>>();
 
 	// the raw input from nucleus detector
-	private Map<File, CellCollection> folderCollection;
+//	private Map<File, CellCollection> folderCollection;
 
 	private List<CellCollection> nuclearPopulations = new ArrayList<CellCollection>(0);
 //	private List<AnalysisDataset> nuclearDatasets = new ArrayList<AnalysisDataset>(0);
@@ -92,9 +92,10 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
     Constructors
     -----------------------
 	 */
-	public AnalysisCreator(MainWindow mw){
-		this.mw = mw;
-		this.initialise();
+	public AnalysisCreator(List<CellCollection> collections){
+//		this.mw = mw;
+		this.nuclearPopulations = collections;
+//		this.initialise();
 	}
 
 //	public void initialise(){
@@ -125,9 +126,10 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 	@Override
 	protected void process( List<Integer> integers ) {
 		//update the number of entries added
-		// just pass through the values from NucleusDetector
+		int total = this.nuclearPopulations.size();
 		int amount = integers.get( integers.size() - 1 );
-		setProgress(amount); // the integer representation of the percent
+		int percent = (int) ( (double) amount / (double) total * 100);
+		setProgress(percent); // the integer representation of the percent
 	}
 	
 	@Override
@@ -135,19 +137,19 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 
 		boolean result = false;
 		try{
-			if(!analysisOptions.isReanalysis()){
-				this.runAnalysis();
-			} else {
-				this.runReAnalysis();
-			}
-			this.assignNucleusTypes();
+//			if(!analysisOptions.isReanalysis()){
+//				this.runAnalysis();
+//			} else {
+//				this.runReAnalysis();
+//			}
+//			this.assignNucleusTypes();
 			this.analysePopulations();
 			//		this.exportAnalysisLog();
 
-			mw.log(spacerString);
-			mw.log("All done!" );
-			mw.log(spacerString);
-			logger.log("All done!");
+//			mw.log(spacerString);
+//			mw.log("All done!" );
+//			mw.log(spacerString);
+//			logger.log("All done!");
 			result = true;
 		} catch (Exception e){
 			result = false;
@@ -204,9 +206,9 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 	 * outside the AnalysisCreator
 	 * @return the collections of nuclei
 	 */
-	public List<CellCollection> getPopulations(){
-		return this.finalPopulations;
-	}
+//	public List<CellCollection> getPopulations(){
+//		return this.finalPopulations;
+//	}
 
 	/**
 	 * Get the datasets from this analysis. Allows re/sub analysis to take place
@@ -232,56 +234,57 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 	 * @see         RoundNucleusCollection
 	 */
 
-	public void runAnalysis(){
-		NucleusDetector detector = new NucleusDetector(this.outputFolderName, this.mw, logger.getLogfile(), analysisOptions);
-		detector.addPropertyChangeListener(this);
-//		detector.runDetector();
-		detector.execute();
-
-		this.folderCollection = detector.getNucleiCollections();
-		logger.log("Imported folder(s)");
-		mw.log("Imported folder(s)");
-		this.analysisRun = true;
-	}
+//	public void runAnalysis(){
+//		NucleusDetector detector = new NucleusDetector(this.outputFolderName, this.mw, logger.getLogfile(), analysisOptions);
+//		detector.addPropertyChangeListener(this);
+////		detector.runDetector();
+//		detector.execute();
+//
+//		this.folderCollection = detector.getNucleiCollections();
+//		logger.log("Imported folder(s)");
+//		mw.log("Imported folder(s)");
+//		this.analysisRun = true;
+//	}
 
 	/**
 	 * Run an analysis of selected nuclei based on a mapping file
 	 *
 	 * @return      the nuclei in each folder analysed
 	 */
-	public void runReAnalysis(){
-		NucleusRefinder detector = new NucleusRefinder(this.outputFolderName, analysisOptions.getMappingFile(), this.mw, logger.getLogfile(), analysisOptions);
-		//	  setDetectionParameters(detector);
-		detector.setXOffset(analysisOptions.getXOffset());
-		detector.setYOffset(analysisOptions.getYOffset());
-		detector.setRealignMode(analysisOptions.realignImages());
-//		detector.runDetector();
-		this.folderCollection = detector.getNucleiCollections();
-		this.mappingCount = detector.getMappingCount();
-
-		logger.log("Imported folder(s)");
-		mw.log("Imported folder(s)");
-		this.reAnalysisRun = true;
-	}
+//	public void runReAnalysis(){
+//		NucleusRefinder detector = new NucleusRefinder(this.outputFolderName, analysisOptions.getMappingFile(), this.mw, logger.getLogfile(), analysisOptions);
+//		//	  setDetectionParameters(detector);
+//		detector.setXOffset(analysisOptions.getXOffset());
+//		detector.setYOffset(analysisOptions.getYOffset());
+//		detector.setRealignMode(analysisOptions.realignImages());
+////		detector.runDetector();
+//		this.folderCollection = detector.getNucleiCollections();
+//		this.mappingCount = detector.getMappingCount();
+//
+//		logger.log("Imported folder(s)");
+//		mw.log("Imported folder(s)");
+//		this.reAnalysisRun = true;
+//	}
 
 	/*
     Use reflection to assign the correct class to the nuclei and populations
 	 */
-	public void assignNucleusTypes(){
-
-		Set<File> keys = this.folderCollection.keySet();
-		logger.log("Assigning nucleus types");
-
-		for (File key : keys) {
-			CellCollection collection = folderCollection.get(key);
-			this.nuclearPopulations.add(collection);
-		}
-	}
+//	public void assignNucleusTypes(){
+//
+//		Set<File> keys = this.folderCollection.keySet();
+//		logger.log("Assigning nucleus types");
+//
+//		for (File key : keys) {
+//			CellCollection collection = folderCollection.get(key);
+//			this.nuclearPopulations.add(collection);
+//		}
+//	}
 
 	public void analysePopulations(){
-		mw.log("Beginning analysis");
+//		mw.log("Beginning analysis");
 		logger.log("Beginning population analysis");
 
+		int progress = 0;
 		for(CellCollection r : this.nuclearPopulations){
 
 			AnalysisDataset dataset = new AnalysisDataset(r);
@@ -290,7 +293,7 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 
 			File folder = r.getFolder();
 			//		  mw.log(spacerString);
-			mw.log("Analysing: "+folder.getName());
+//			mw.log("Analysing: "+folder.getName());
 			logger.log("Analysing: "+folder.getName());
 			//		  mw.log(spacerString);
 
@@ -302,21 +305,21 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 				CellCollection failedNuclei = new CellCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), analysisOptions.getNucleusClass());
 
 //				boolean ok;
-				mw.logc("Filtering collection...");
+//				mw.logc("Filtering collection...");
 				boolean ok = CollectionFilterer.run(r, failedNuclei); // put fails into failedNuclei, remove from r
 				if(ok){
-					mw.log("OK");
+//					mw.log("OK");
 				} else {
-					mw.log("Error");
+//					mw.log("Error");
 				}
 
 				if(failedNuclei.getNucleusCount()>0){
-					mw.logc("Exporting failed nuclei...");
+//					mw.logc("Exporting failed nuclei...");
 					ok = CompositeExporter.run(failedNuclei);
 					if(ok){
-						mw.log("OK");
+//						mw.log("OK");
 					} else {
-						mw.log("Error");
+//						mw.log("Error");
 					}
 					nucleusCounts.put("failed", failedNuclei.getNucleusCount());
 				}
@@ -326,18 +329,18 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 			}
 
 			//		  mw.log(spacerString);
-			mw.log("Population: "+r.getType());
-			mw.log("Population: "+r.getNucleusCount()+" nuclei");
+//			mw.log("Population: "+r.getType());
+//			mw.log("Population: "+r.getNucleusCount()+" nuclei");
 			logger.log("Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
 			//		  mw.log(spacerString);
 
 			// core analysis - align profiles and segment
-			mw.logc("Running morphology analysis...");
+//			mw.logc("Running morphology analysis...");
 			boolean ok = MorphologyAnalysis.run(r);
 			if(ok){
-				mw.log("OK");
+//				mw.log("OK");
 			} else {
-				mw.log("Error");
+//				mw.log("Error");
 			}
 
 			// measure general nuclear organisation
@@ -364,36 +367,36 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 //			}
 
 			// export the stats files
-			mw.logc("Exporting stats...");
+//			mw.logc("Exporting stats...");
 			ok = StatsExporter.run(r);
 			if(ok){
-				mw.log("OK");
+//				mw.log("OK");
 			} else {
-				mw.log("Error");
+//				mw.log("Error");
 			}
 
 			// annotate the nuclei in the population
-			mw.logc("Annotating nuclei...");
+//			mw.logc("Annotating nuclei...");
 			ok = NucleusAnnotator.run(r);
 			if(ok){
-				mw.log("OK");
+//				mw.log("OK");
 			} else {
-				mw.log("Error");
+//				mw.log("Error");
 			}
 
 
 			// make a composite image of all nuclei in the collection
-			mw.logc("Exporting composite...");
+//			mw.logc("Exporting composite...");
 			ok = CompositeExporter.run(r);
 			if(ok){
-				mw.log("OK");
+//				mw.log("OK");
 			} else {
-				mw.log("Error");
+//				mw.log("Error");
 			}
 
 			// refold the median consensus nucleus
 			if(analysisOptions.refoldNucleus()){
-				mw.logc("Refolding profile...");
+//				mw.logc("Refolding profile...");
 				
 				CurveRefolder refolder = new CurveRefolder(r, 
 						analysisOptions.getNucleusClass(), 
@@ -402,9 +405,9 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 				refolder.execute();
 				try {
 					if(refolder.get()){
-						mw.log("OK");
+//						mw.log("OK");
 					} else {
-						mw.log("Error");
+//						mw.log("Error");
 					}
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -522,13 +525,16 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 			collectionNucleusCounts.put(folder, nucleusCounts);
 
 			// export the population to a save file for later
-			mw.logc("Saving to file...");
+//			mw.logc("Saving to file...");
 			ok = PopulationExporter.saveAnalysisDataset(dataset);
 			if(ok){
-				mw.log("OK");
+//				mw.log("OK");
 			} else {
-				mw.log("Error");
+//				mw.log("Error");
 			}
+			
+			progress++;
+			publish(progress);
 		}
 	}
 

@@ -1412,8 +1412,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 //				detector.runDetector();
 				detector.execute();
 				
-				private List<CellCollection> finalPopulations = new ArrayList<CellCollection>(0);
-				private List<AnalysisDataset> finalDatasets = new ArrayList<AnalysisDataset>(0);
 
 				this.folderCollection = detector.getNucleiCollections();
 				logger.log("Imported folder(s)");
