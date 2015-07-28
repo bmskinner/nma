@@ -17,6 +17,7 @@ import javax.swing.JButton;
 
 import no.analysis.AnalysisCreator;
 import no.analysis.AnalysisDataset;
+import no.analysis.CollectionFilterer;
 import no.analysis.CurveRefolder;
 import no.analysis.MorphologyAnalysis;
 import no.analysis.NucleusClusterer;
@@ -26,6 +27,8 @@ import no.analysis.SignalDetector;
 import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.NuclearSignalOptions;
+import no.export.CompositeExporter;
+import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.imports.PopulationImporter;
@@ -39,9 +42,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
@@ -424,43 +429,43 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	/**
 	 * Call the setup of a new analysis, and add the results to the dataset list 
 	 */
-	public void newAnalysis(){
-
-		Thread thr = new Thread() {
-			public void run() {
-				lblStatusLine.setText("New analysis in progress");
-								
-				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
-//				analysisCreator.run();
-				analysisCreator.execute();
-
-				List<AnalysisDataset> datasets = analysisCreator.getDatasets();
-				
-				if(datasets.size()==0 || datasets==null){
-					log("No datasets returned");
-				}
-				
-				// new style datasets
-				for(AnalysisDataset d : datasets){
-					
-					populationsPanel.addDataset(d);				
-					
-					for(AnalysisDataset child : d.getChildDatasets()){
-						populationsPanel.addDataset(child);
-					}
-					PopulationExporter.saveAnalysisDataset(d);
-
-				}
-								
-				lblStatusLine.setText("New analysis complete: "
-										+populationsPanel.getDatasetCount()
-										+" populations ready to view");
-				populationsPanel.update();		
-				
-			}
-		};
-		thr.start();		
-	}
+//	public void newAnalysis(){
+//
+//		Thread thr = new Thread() {
+//			public void run() {
+//				lblStatusLine.setText("New analysis in progress");
+//								
+//				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
+////				analysisCreator.run();
+//				analysisCreator.execute();
+//
+//				List<AnalysisDataset> datasets = analysisCreator.getDatasets();
+//				
+//				if(datasets.size()==0 || datasets==null){
+//					log("No datasets returned");
+//				}
+//				
+//				// new style datasets
+//				for(AnalysisDataset d : datasets){
+//					
+//					populationsPanel.addDataset(d);				
+//					
+//					for(AnalysisDataset child : d.getChildDatasets()){
+//						populationsPanel.addDataset(child);
+//					}
+//					PopulationExporter.saveAnalysisDataset(d);
+//
+//				}
+//								
+//				lblStatusLine.setText("New analysis complete: "
+//										+populationsPanel.getDatasetCount()
+//										+" populations ready to view");
+//				populationsPanel.update();		
+//				
+//			}
+//		};
+//		thr.start();		
+//	}
 		
 	/**
 	 * Call an open dialog to choose a saved .nbd dataset. The opened dataset
@@ -1029,15 +1034,15 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			
 			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 			
-			if(datasets.size()==1){
-
-				d = datasets.get(0);
-				
+			if(datasets.size()>1){
+				log("Unable to analyse more than one dataset");
+			} else {
+				if(datasets.size()==1){
+					d = datasets.get(0);
+				}
 				logPanel.addProgressBar(this.progressBar);
 				contentPane.revalidate();
-				contentPane.repaint();				
-			} else {
-				log("Unable to analyse more than one dataset");
+				contentPane.repaint();
 			}
 		}
 		
@@ -1259,7 +1264,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		public void finished(){
 			d.getAnalysisOptions().setRefoldNucleus(true);
 			d.getAnalysisOptions().setRefoldMode("Fast");
-			super.finished();;
+			super.finished();
 		}
 
 	}
@@ -1339,10 +1344,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		@Override
 		public void finished() {
 
-			logPanel.removeProgressBar(progressBar);
-			contentPane.revalidate();
-			contentPane.repaint();
-
 			log("Found "+clusterer.getNumberOfClusters()+" clusters");
 
 			d.setClusterTree(clusterer.getNewickTree());
@@ -1366,6 +1367,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			}
 			populationsPanel.update();
+			super.finished();
 
 		}
 	}
@@ -1376,8 +1378,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	class NewMorphologyAnalysisAction extends ProgressableAction {
 				
-		private AnalysisCreator analysis;
 		private AnalysisOptions options;
+		private NucleusDetector detector;
 		private Date startTime;
 		private String outputFolderName;
 		
@@ -1411,12 +1413,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				detector.addPropertyChangeListener(this);
 //				detector.runDetector();
 				detector.execute();
+				analysisSetup.dispose();
 				
-
-				this.folderCollection = detector.getNucleiCollections();
-				logger.log("Imported folder(s)");
-				mw.log("Imported folder(s)");
-				this.analysisRun = true;
+//				logger.log("Imported folder(s)");
+//				log("Imported folder(s)");
 			}
 			
 			
@@ -1425,7 +1425,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		@Override
 		public void finished(){
 			
-			List<AnalysisDataset> datasets = analysis.getDatasets();
+			List<CellCollection> folderCollection = detector.getNucleiCollections();
+			// insert analyse populations from  analysis creator
+			List<AnalysisDataset> datasets = analysePopulations(folderCollection);			
+//			List<AnalysisDataset> datasets = analysis.getDatasets();
 			
 			if(datasets.size()==0 || datasets==null){
 				log("No datasets returned");
@@ -1449,6 +1452,140 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			
 			super.finished();
 		}
+		
+		public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
+			log("Beginning analysis");
+			
+			List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
+
+			for(CellCollection r : folderCollection){
+				
+				Logger logger = new Logger(r.getDebugFile(), "PopulationAnalysis");
+
+				AnalysisDataset dataset = new AnalysisDataset(r);
+				dataset.setAnalysisOptions(options);
+				dataset.setRoot(true);
+
+				File folder = r.getFolder();
+				logger.log("Analysing: "+folder.getName());
+
+				LinkedHashMap<String, Integer> nucleusCounts = new LinkedHashMap<String, Integer>();
+
+				try{
+
+					nucleusCounts.put("input", r.getNucleusCount());
+					CellCollection failedNuclei = new CellCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), options.getNucleusClass());
+
+//					boolean ok;
+//					mw.logc("Filtering collection...");
+					boolean ok = CollectionFilterer.run(r, failedNuclei); // put fails into failedNuclei, remove from r
+					if(ok){
+//						mw.log("OK");
+					} else {
+//						mw.log("Error");
+					}
+
+					if(failedNuclei.getNucleusCount()>0){
+//						mw.logc("Exporting failed nuclei...");
+						ok = CompositeExporter.run(failedNuclei);
+						if(ok){
+//							mw.log("OK");
+						} else {
+//							mw.log("Error");
+						}
+						nucleusCounts.put("failed", failedNuclei.getNucleusCount());
+					}
+					
+				} catch(Exception e){
+					logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
+				}
+
+				//		  mw.log(spacerString);
+//				mw.log("Population: "+r.getType());
+//				mw.log("Population: "+r.getNucleusCount()+" nuclei");
+				logger.log("Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
+				//		  mw.log(spacerString);
+
+				// core analysis - align profiles and segment
+//				mw.logc("Running morphology analysis...");
+				boolean ok = MorphologyAnalysis.run(r);
+				if(ok){
+//					mw.log("OK");
+				} else {
+//					mw.log("Error");
+				}
+
+				// export the stats files
+//				mw.logc("Exporting stats...");
+				ok = StatsExporter.run(r);
+				if(ok){
+//					mw.log("OK");
+				} else {
+//					mw.log("Error");
+				}
+
+				// annotate the nuclei in the population
+//				mw.logc("Annotating nuclei...");
+				ok = NucleusAnnotator.run(r);
+				if(ok){
+//					mw.log("OK");
+				} else {
+//					mw.log("Error");
+				}
+
+
+				// make a composite image of all nuclei in the collection
+//				mw.logc("Exporting composite...");
+				ok = CompositeExporter.run(r);
+				if(ok){
+//					mw.log("OK");
+				} else {
+//					mw.log("Error");
+				}
+
+				// refold the median consensus nucleus
+				if(options.refoldNucleus()){
+//					mw.logc("Refolding profile...");
+					
+					CurveRefolder refolder = new CurveRefolder(r, 
+							options.getNucleusClass(), 
+							options.getRefoldMode());
+					
+					refolder.execute();
+					try {
+						if(refolder.get()){
+//							mw.log("OK");
+						} else {
+//							mw.log("Error");
+						}
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				}
+
+//				finalPopulations.add(r);
+
+				result.add(dataset);
+//				collectionNucleusCounts.put(folder, nucleusCounts);
+
+				// export the population to a save file for later
+//				mw.logc("Saving to file...");
+				ok = PopulationExporter.saveAnalysisDataset(dataset);
+				if(ok){
+//					mw.log("OK");
+				} else {
+//					mw.log("Error");
+				}
+
+			}
+			return result;
+		}
+		
 	}
 
 

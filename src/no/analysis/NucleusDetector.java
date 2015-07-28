@@ -58,6 +58,8 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   protected int totalNuclei        = 0;
   
   protected int totalImages;
+  
+  private int progress;
 
 
   private File inputFolder;
@@ -85,7 +87,6 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 	  this.mw = mw;
 	  this.debugFile = debugFile;
 	  this.analysisOptions = options;
-	  this.totalImages = NucleusDetector.countSuitableImages(analysisOptions.getFolder());
 	  logger = new Logger(debugFile, "NucleusDetector");
   }
 
@@ -118,6 +119,9 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 	protected Boolean doInBackground() throws Exception {
 
 		boolean result = false;
+		progress = 0;
+		
+		this.totalImages = NucleusDetector.countSuitableImages(analysisOptions.getFolder());
 		try{
 			  logger.log("Running nucleus detector");
 			  processFolder(this.inputFolder);
@@ -135,24 +139,24 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 	@Override
 	public void done() {
 
-//		try {
-//			if(this.get()){
-//				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);			
-//				
-//			} else {
-//				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
-//			}
-//		} catch (InterruptedException e) {
-//			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
-//			for(StackTraceElement el : e.getStackTrace()){
-//				logger.log(el.toString(), Logger.STACK);
-//			}
-//		} catch (ExecutionException e) {
-//			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
-//			for(StackTraceElement el : e.getStackTrace()){
-//				logger.log(el.toString(), Logger.STACK);
-//			}
-//		}
+		try {
+			if(this.get()){
+				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);			
+				
+			} else {
+				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+			}
+		} catch (InterruptedException e) {
+			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		} catch (ExecutionException e) {
+			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+		}
 
 	} 
 
@@ -201,7 +205,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   *
   *  @return a Map of a folder to its nuclei
   */
-  public Map<File, CellCollection> getNucleiCollections(){
+  public List<CellCollection> getNucleiCollections(){
     // remove any empty collections before returning
     List<File> toRemove = new ArrayList<File>(0);
     Set<File> keys = collectionGroup.keySet();
@@ -216,7 +220,13 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
     while(iter.hasNext()){
       collectionGroup.remove(iter.next());
     }
-    return this.collectionGroup;
+//    return this.collectionGroup;
+    List<CellCollection> result = new ArrayList<CellCollection>();
+    for(CellCollection c : collectionGroup.values()){
+    	result.add(c);
+    }
+    return result;
+    
   }
 
   /**
@@ -413,6 +423,9 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  } catch (Exception e) { // end try
 				  logger.log("Error in image processing: "+e.getMessage(), Logger.ERROR);
 			  } // end catch
+			  
+			  progress++;
+			  publish(progress);
 		  } else { // if !ok
 			  if(file.isDirectory()){ // recurse over any sub folders
 				  processFolder(file);
