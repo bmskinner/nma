@@ -11,12 +11,10 @@ package no.analysis;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.io.Opener;
 import ij.plugin.RoiEnlarger;
 import ij.process.ByteProcessor;
-import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
@@ -35,7 +33,6 @@ import utility.Constants;
 import utility.Logger;
 import utility.Stats;
 import utility.StatsMap;
-import utility.Utils;
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import no.nuclei.*;
@@ -276,9 +273,17 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			if(analysisOptions.refoldNucleus()){
 				mw.logc("Refolding profile...");
 				
-				CurveRefolder refolder = new CurveRefolder(r, 
-						analysisOptions.getNucleusClass(), 
-						analysisOptions.getRefoldMode());
+				CurveRefolder refolder = null;
+				try {
+					refolder = new CurveRefolder(r, 
+							analysisOptions.getNucleusClass(), 
+							analysisOptions.getRefoldMode());
+				} catch (Exception e1) {
+					logger.log("Error in refolding: "+e1.getMessage(), Logger.ERROR);
+					for(StackTraceElement e2 : e1.getStackTrace()){
+						logger.log(e2.toString(), Logger.STACK);
+					}
+				}
 				
 				refolder.execute();
 				try {

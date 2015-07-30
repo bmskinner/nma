@@ -19,6 +19,7 @@ import no.analysis.AnalysisCreator;
 import no.analysis.AnalysisDataset;
 import no.analysis.CollectionFilterer;
 import no.analysis.CurveRefolder;
+import no.analysis.DatasetMerger;
 import no.analysis.MorphologyAnalysis;
 import no.analysis.NucleusClusterer;
 import no.analysis.NucleusDetector;
@@ -597,133 +598,134 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		return newCollection;
 	}
 	
-	class MergeCollectionAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public MergeCollectionAction() {
-			super("Merge");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-
-			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-
-			if(datasets.size()>1){
-
-				if(datasets.size()==2){ // check we are not merging a parent and child (would just get child)
-					if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
-						log("No. That would be silly.");
-						return;
-					}
-				}
-
-				Thread thr = new Thread() {
-					public void run() {
-
-						log("Merging collection...");
-
-						// check all collections are of the same type
-						boolean newRoot = false;
-						Class<?> testClass = datasets.get(0).getAnalysisOptions().getNucleusClass();
-						for(AnalysisDataset d : datasets){
-
-							if(d.getAnalysisOptions().getNucleusClass()!=testClass){
-								log("Error: cannot merge collections of different class");
-								return;
-							}
-
-							// check if a root population is included in the merge;
-							// if so, we must make the result a root population too
-							// otherwise, it may be a subpopulation
-							if(d.isRoot()){
-								newRoot = true;
-							}
-						}
-
-						AnalysisDataset mergeParent = null;
-						if(!newRoot) { // unless we have forced root above
-							// check if all datasets are children of one root dataset
-							for(AnalysisDataset parent : populationsPanel.getAllDatasets()){
-								if(parent.isRoot()){ // only look at top level datasets for now
-									boolean ok = true; 
-									for(AnalysisDataset d : datasets){
-										if(!parent.hasChild(d)){
-											ok = false;
-										}
-									}
-									if(ok){
-										mergeParent = parent;
-									}
-								}
-							}
-
-							// if a merge parent was found, new collection is not root
-							if(mergeParent!=null){
-								newRoot = false;
-							} else {
-								newRoot = true; // if we cannot find a consistent parent, make a new root population
-							}
-						}
-
-
-						// add the nuclei from each population to the new collection
-						CellCollection newCollection = makeNewCollection(datasets.get(0), "Merged");
-						for(AnalysisDataset d : datasets){
-
-							for(Cell n : d.getCollection().getCells()){
-								if(!newCollection.getCells().contains(n)){
-									newCollection.addCell(n);
-								}
-							}
-
-						}
-
-						// create the dataset; has no analysis options at present
-						AnalysisDataset newDataset = new AnalysisDataset(newCollection);
-						newDataset.setName("Merge_of_datasets");
-						newDataset.setRoot(newRoot);
-
-						// if applicable, add the new dataset to a parent
-						if(newRoot==false && mergeParent!=null){
-
-							logc("Reapplying morphology...");
-							boolean ok = MorphologyAnalysis.reapplyProfiles(newCollection, mergeParent.getCollection());
-							if(ok){
-								log("OK");
-							} else {
-								log("Error");
-							}
-							newDataset.setAnalysisOptions(mergeParent.getAnalysisOptions());
-							newDataset.getAnalysisOptions().setRefoldNucleus(false);
-
-							mergeParent.addChildDataset(newDataset);
-						} else {
-							// otherwise, it is a new root population
-							// we need to run a fresh morphology analysis
-							logc("Running morphology analysis...");
-							boolean ok = MorphologyAnalysis.run(newDataset.getCollection());
-							if(ok){
-								log("OK");
-							} else {
-								log("Error");
-							}
-							newDataset.setAnalysisOptions(datasets.get(0).getAnalysisOptions());
-							newDataset.getAnalysisOptions().setRefoldNucleus(false);
-						}
-
-						// add the new collection to the list
-						populationsPanel.addDataset(newDataset);
-						populationsPanel.update();
-					}
-				};
-				thr.start();
-
-			} else {
-				log("Cannot merge single dataset");
-			}
-
-		}
-	}
+//	class MergeCollectionAction extends AbstractAction {
+//
+//		private static final long serialVersionUID = 1L;
+//		public MergeCollectionAction() {
+//			super("Merge");
+//		}
+//
+//		public void actionPerformed(ActionEvent e) {
+//
+//			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
+//
+//			if(datasets.size()>1){
+//				log("Prepare to merge");
+//
+//				if(datasets.size()==2){ // check we are not merging a parent and child (would just get child)
+//					if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
+//						log("No. That would be silly.");
+//						return;
+//					}
+//				}
+//
+//				Thread thr = new Thread() {
+//					public void run() {
+//
+//						log("Merging collection...");
+//
+//						// check all collections are of the same type
+//						boolean newRoot = false;
+//						Class<?> testClass = datasets.get(0).getAnalysisOptions().getNucleusClass();
+//						for(AnalysisDataset d : datasets){
+//
+//							if(d.getAnalysisOptions().getNucleusClass()!=testClass){
+//								log("Error: cannot merge collections of different class");
+//								return;
+//							}
+//
+//							// check if a root population is included in the merge;
+//							// if so, we must make the result a root population too
+//							// otherwise, it may be a subpopulation
+//							if(d.isRoot()){
+//								newRoot = true;
+//							}
+//						}
+//
+//						AnalysisDataset mergeParent = null;
+//						if(!newRoot) { // unless we have forced root above
+//							// check if all datasets are children of one root dataset
+//							for(AnalysisDataset parent : populationsPanel.getAllDatasets()){
+//								if(parent.isRoot()){ // only look at top level datasets for now
+//									boolean ok = true; 
+//									for(AnalysisDataset d : datasets){
+//										if(!parent.hasChild(d)){
+//											ok = false;
+//										}
+//									}
+//									if(ok){
+//										mergeParent = parent;
+//									}
+//								}
+//							}
+//
+//							// if a merge parent was found, new collection is not root
+//							if(mergeParent!=null){
+//								newRoot = false;
+//							} else {
+//								newRoot = true; // if we cannot find a consistent parent, make a new root population
+//							}
+//						}
+//
+//
+//						// add the nuclei from each population to the new collection
+//						CellCollection newCollection = makeNewCollection(datasets.get(0), "Merged");
+//						for(AnalysisDataset d : datasets){
+//
+//							for(Cell n : d.getCollection().getCells()){
+//								if(!newCollection.getCells().contains(n)){
+//									newCollection.addCell(n);
+//								}
+//							}
+//
+//						}
+//
+//						// create the dataset; has no analysis options at present
+//						AnalysisDataset newDataset = new AnalysisDataset(newCollection);
+//						newDataset.setName("Merge_of_datasets");
+//						newDataset.setRoot(newRoot);
+//
+//						// if applicable, add the new dataset to a parent
+//						if(newRoot==false && mergeParent!=null){
+//
+//							logc("Reapplying morphology...");
+//							boolean ok = MorphologyAnalysis.reapplyProfiles(newCollection, mergeParent.getCollection());
+//							if(ok){
+//								log("OK");
+//							} else {
+//								log("Error");
+//							}
+//							newDataset.setAnalysisOptions(mergeParent.getAnalysisOptions());
+//							newDataset.getAnalysisOptions().setRefoldNucleus(false);
+//
+//							mergeParent.addChildDataset(newDataset);
+//						} else {
+//							// otherwise, it is a new root population
+//							// we need to run a fresh morphology analysis
+//							logc("Running morphology analysis...");
+//							boolean ok = MorphologyAnalysis.run(newDataset.getCollection());
+//							if(ok){
+//								log("OK");
+//							} else {
+//								log("Error");
+//							}
+//							newDataset.setAnalysisOptions(datasets.get(0).getAnalysisOptions());
+//							newDataset.getAnalysisOptions().setRefoldNucleus(false);
+//						}
+//
+//						// add the new collection to the list
+//						populationsPanel.addDataset(newDataset);
+//						populationsPanel.update();
+//					}
+//				};
+//				thr.start();
+//
+//			} else {
+//				log("Cannot merge single dataset");
+//			}
+//
+//		}
+//	}
 	
 	class SplitCollectionAction extends AbstractAction {
 
@@ -1023,6 +1025,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	abstract class ProgressableAction implements PropertyChangeListener{
 
 		protected AnalysisDataset d = null;
+		protected List<AnalysisDataset> datasets;
 		protected JProgressBar progressBar = null;
 		protected String errorMessage = null;
 		
@@ -1031,19 +1034,19 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			this.progressBar.setString(barMessage);
 			this.progressBar.setStringPainted(true);
 			this.errorMessage = errorMessage;
+			this.datasets = populationsPanel.getSelectedDatasets();
 			
-			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-			
-			if(datasets.size()>1){
-				log("Unable to analyse more than one dataset");
-			} else {
+//			if(datasets.size()>1){
+				
+//				log("Unable to analyse more than one dataset");
+//			} else {
 				if(datasets.size()==1){
 					d = datasets.get(0);
 				}
 				logPanel.addProgressBar(this.progressBar);
 				contentPane.revalidate();
 				contentPane.repaint();
-			}
+//			}
 		}
 		
 		/**
@@ -1455,6 +1458,59 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			}
 		}
 		
+	}
+	
+	
+	/**
+	 * Run a new shell analysis on the selected dataset
+	 */
+	class MergeCollectionAction extends ProgressableAction {
+				
+		
+		DatasetMerger merger;
+		
+		public MergeCollectionAction() {
+			super("Merging", "Error merging");
+			
+			List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
+			
+			merger = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE);
+
+			merger.addPropertyChangeListener(this);
+			merger.execute();	
+		}
+		
+		@Override
+		public void finished(){
+			
+//			IJ.log("Finishing");
+			List<AnalysisDataset> datasets = merger.getResults();
+			
+			if(datasets.size()==0 || datasets==null){
+				this.cancel();
+			} else {
+				// new style datasets
+				for(AnalysisDataset d : datasets){
+					
+					populationsPanel.addDataset(d);				
+					
+					for(AnalysisDataset child : d.getChildDatasets()){
+						populationsPanel.addDataset(child);
+					}
+					PopulationExporter.saveAnalysisDataset(d);
+
+				}
+				
+				this.d = datasets.get(0); // avoid nulls
+								
+				lblStatusLine.setText("Merge complete: "
+										+populationsPanel.getDatasetCount()
+										+" populations ready to view");
+				
+				log("Merge complete");	
+				super.finished();
+			}
+		}
 	}
 
 

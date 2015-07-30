@@ -398,9 +398,15 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 			if(analysisOptions.refoldNucleus()){
 //				mw.logc("Refolding profile...");
 				
-				CurveRefolder refolder = new CurveRefolder(r, 
-						analysisOptions.getNucleusClass(), 
-						analysisOptions.getRefoldMode());
+				CurveRefolder refolder = null;
+				try {
+					refolder = new CurveRefolder(r, 
+							analysisOptions.getNucleusClass(), 
+							analysisOptions.getRefoldMode());
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				
 				refolder.execute();
 				try {
