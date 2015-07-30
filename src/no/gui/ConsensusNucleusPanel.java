@@ -103,70 +103,85 @@ public class ConsensusNucleusPanel extends JPanel {
 	 * @param list the datasets
 	 */	
 	public void update(List<AnalysisDataset> list){
-
-		CellCollection collection = list.get(0).getCollection();
 		try {
-			if(list.size()==1){
-				if(!collection.hasConsensusNucleus()){
-					// add button to run analysis
-					JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-							null, null, null);
-					XYPlot consensusPlot = consensusChart.getXYPlot();
-					consensusPlot.setBackgroundPaint(Color.WHITE);
-					consensusPlot.getDomainAxis().setVisible(false);
-					consensusPlot.getRangeAxis().setVisible(false);
-					consensusChartPanel.setChart(consensusChart);
-					
-					runRefoldingButton.setVisible(true);
+			if(!list.isEmpty()){
+				CellCollection collection = list.get(0).getCollection();
+
+				if(list.size()==1){
+					if(!collection.hasConsensusNucleus()){
+
+						// add button to run analysis
+						JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
+								null, null, null);
+						XYPlot consensusPlot = consensusChart.getXYPlot();
+						consensusPlot.setBackgroundPaint(Color.WHITE);
+						consensusPlot.getDomainAxis().setVisible(false);
+						consensusPlot.getRangeAxis().setVisible(false);
+						consensusChartPanel.setChart(consensusChart);
+
+						runRefoldingButton.setVisible(true);
 
 
-				} else {
-					runRefoldingButton.setVisible(false);
-					JFreeChart chart = makeConsensusChart(collection);
+					} else {
+						runRefoldingButton.setVisible(false);
+						JFreeChart chart = makeConsensusChart(collection);
+						consensusChartPanel.setChart(chart);
+					} 
+				}else {
+					// multiple nuclei
+					XYDataset ds = NucleusDatasetCreator.createMultiNucleusOutline(list);
+					JFreeChart chart = 
+							ChartFactory.createXYLineChart(null,
+									null, null, ds, PlotOrientation.VERTICAL, true, true,
+									false);
+					XYPlot plot = chart.getXYPlot();
+					plot.getDomainAxis().setVisible(false);
+					plot.getRangeAxis().setVisible(false);
+					plot.setBackgroundPaint(Color.WHITE);
+					plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+					plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+
+					int seriesCount = plot.getSeriesCount();
+
+					for (int i = 0; i < seriesCount; i++) {
+						plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+						String name = (String) ds.getSeriesKey(i);
+						plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+
+						int index = getIndexFromLabel(name);
+						AnalysisDataset d = list.get(index);
+
+						Color color = d.getDatasetColour() == null 
+								? ColourSelecter.getSegmentColor(i)
+										: d.getDatasetColour();
+
+								// get the group id from the name, and make colour
+								plot.getRenderer().setSeriesPaint(i, color);
+								if(name.startsWith("Q")){
+									// make the IQR distinct from the median
+									plot.getRenderer().setSeriesPaint(i, color.darker());
+								}
+
+					}
 					consensusChartPanel.setChart(chart);
-				} 
-			}else {
-				// multiple nuclei
-				XYDataset ds = NucleusDatasetCreator.createMultiNucleusOutline(list);
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-								null, null, ds, PlotOrientation.VERTICAL, true, true,
-								false);
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setVisible(false);
-				plot.getRangeAxis().setVisible(false);
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-				plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-				
-				int seriesCount = plot.getSeriesCount();
-				
-				for (int i = 0; i < seriesCount; i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-					String name = (String) ds.getSeriesKey(i);
-					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-					
-					int index = getIndexFromLabel(name);
-					AnalysisDataset d = list.get(index);
-					
-					Color color = d.getDatasetColour() == null 
-							? ColourSelecter.getSegmentColor(i)
-							: d.getDatasetColour();
+					for(Component c : consensusChartPanel.getComponents() ){
+						if(c.getClass()==JButton.class){
+							c.setVisible(false);
+						}
+					}
+				}
 
-					// get the group id from the name, and make colour
-					plot.getRenderer().setSeriesPaint(i, color);
-					if(name.startsWith("Q")){
-						// make the IQR distinct from the median
-						plot.getRenderer().setSeriesPaint(i, color.darker());
-					}
-					
-				}
-				consensusChartPanel.setChart(chart);
-				for(Component c : consensusChartPanel.getComponents() ){
-					if(c.getClass()==JButton.class){
-						c.setVisible(false);
-					}
-				}
+			} else { // no datasets in the list
+				// add button to run analysis
+				JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
+						null, null, null);
+				XYPlot consensusPlot = consensusChart.getXYPlot();
+				consensusPlot.setBackgroundPaint(Color.WHITE);
+				consensusPlot.getDomainAxis().setVisible(false);
+				consensusPlot.getRangeAxis().setVisible(false);
+				consensusChartPanel.setChart(consensusChart);
+
+				runRefoldingButton.setVisible(false);
 			}
 		} catch (Exception e) {
 			IJ.log("Error drawing consensus nucleus: "+e.getMessage());

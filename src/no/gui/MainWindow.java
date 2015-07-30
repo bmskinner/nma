@@ -1251,7 +1251,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						"Fast");
 
 				refolder.addPropertyChangeListener(this);
-				this.setProgressMessage("Curve refolding in progress:"+d.getName());
+				this.setProgressMessage("Curve refolding:"+d.getName());
 				refolder.execute();
 
 			} catch(Exception e1){
@@ -1409,14 +1409,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
 				logger.log("Directory: "+options.getFolder().getName());
 				
-				NucleusDetector detector = new NucleusDetector(this.outputFolderName, MainWindow.this, logger.getLogfile(), options);
+				detector = new NucleusDetector(this.outputFolderName, MainWindow.this, logger.getLogfile(), options);
 				detector.addPropertyChangeListener(this);
-//				detector.runDetector();
 				detector.execute();
 				analysisSetup.dispose();
 				
-//				logger.log("Imported folder(s)");
-//				log("Imported folder(s)");
+//				IJ.log("Importing folder(s)");
 			}
 			
 			
@@ -1425,165 +1423,33 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		@Override
 		public void finished(){
 			
-			List<CellCollection> folderCollection = detector.getNucleiCollections();
-			// insert analyse populations from  analysis creator
-			List<AnalysisDataset> datasets = analysePopulations(folderCollection);			
-//			List<AnalysisDataset> datasets = analysis.getDatasets();
+			List<AnalysisDataset> datasets = detector.getDatasets();
 			
 			if(datasets.size()==0 || datasets==null){
 				log("No datasets returned");
-			}
-			
-			// new style datasets
-			for(AnalysisDataset d : datasets){
-				
-				populationsPanel.addDataset(d);				
-				
-				for(AnalysisDataset child : d.getChildDatasets()){
-					populationsPanel.addDataset(child);
-				}
-				PopulationExporter.saveAnalysisDataset(d);
+			} else {
+				// new style datasets
+				for(AnalysisDataset d : datasets){
+					
+					populationsPanel.addDataset(d);				
+					
+					for(AnalysisDataset child : d.getChildDatasets()){
+						populationsPanel.addDataset(child);
+					}
+					PopulationExporter.saveAnalysisDataset(d);
 
+				}
+				
+				this.d = datasets.get(0); // avoid nulls
+								
+				lblStatusLine.setText("New analysis complete: "
+										+populationsPanel.getDatasetCount()
+										+" populations ready to view");
+				
+				log("--------\nAll done!\n--------");	
 			}
-							
-			lblStatusLine.setText("New analysis complete: "
-									+populationsPanel.getDatasetCount()
-									+" populations ready to view");
-			
+
 			super.finished();
-		}
-		
-		public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
-			log("Beginning analysis");
-			
-			List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
-
-			for(CellCollection r : folderCollection){
-				
-				Logger logger = new Logger(r.getDebugFile(), "PopulationAnalysis");
-
-				AnalysisDataset dataset = new AnalysisDataset(r);
-				dataset.setAnalysisOptions(options);
-				dataset.setRoot(true);
-
-				File folder = r.getFolder();
-				logger.log("Analysing: "+folder.getName());
-
-				LinkedHashMap<String, Integer> nucleusCounts = new LinkedHashMap<String, Integer>();
-
-				try{
-
-					nucleusCounts.put("input", r.getNucleusCount());
-					CellCollection failedNuclei = new CellCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), options.getNucleusClass());
-
-//					boolean ok;
-//					mw.logc("Filtering collection...");
-					boolean ok = CollectionFilterer.run(r, failedNuclei); // put fails into failedNuclei, remove from r
-					if(ok){
-//						mw.log("OK");
-					} else {
-//						mw.log("Error");
-					}
-
-					if(failedNuclei.getNucleusCount()>0){
-//						mw.logc("Exporting failed nuclei...");
-						ok = CompositeExporter.run(failedNuclei);
-						if(ok){
-//							mw.log("OK");
-						} else {
-//							mw.log("Error");
-						}
-						nucleusCounts.put("failed", failedNuclei.getNucleusCount());
-					}
-					
-				} catch(Exception e){
-					logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
-				}
-
-				//		  mw.log(spacerString);
-//				mw.log("Population: "+r.getType());
-//				mw.log("Population: "+r.getNucleusCount()+" nuclei");
-				logger.log("Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
-				//		  mw.log(spacerString);
-
-				// core analysis - align profiles and segment
-//				mw.logc("Running morphology analysis...");
-				boolean ok = MorphologyAnalysis.run(r);
-				if(ok){
-//					mw.log("OK");
-				} else {
-//					mw.log("Error");
-				}
-
-				// export the stats files
-//				mw.logc("Exporting stats...");
-				ok = StatsExporter.run(r);
-				if(ok){
-//					mw.log("OK");
-				} else {
-//					mw.log("Error");
-				}
-
-				// annotate the nuclei in the population
-//				mw.logc("Annotating nuclei...");
-				ok = NucleusAnnotator.run(r);
-				if(ok){
-//					mw.log("OK");
-				} else {
-//					mw.log("Error");
-				}
-
-
-				// make a composite image of all nuclei in the collection
-//				mw.logc("Exporting composite...");
-				ok = CompositeExporter.run(r);
-				if(ok){
-//					mw.log("OK");
-				} else {
-//					mw.log("Error");
-				}
-
-				// refold the median consensus nucleus
-				if(options.refoldNucleus()){
-//					mw.logc("Refolding profile...");
-					
-					CurveRefolder refolder = new CurveRefolder(r, 
-							options.getNucleusClass(), 
-							options.getRefoldMode());
-					
-					refolder.execute();
-					try {
-						if(refolder.get()){
-//							mw.log("OK");
-						} else {
-//							mw.log("Error");
-						}
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-				}
-
-//				finalPopulations.add(r);
-
-				result.add(dataset);
-//				collectionNucleusCounts.put(folder, nucleusCounts);
-
-				// export the population to a save file for later
-//				mw.logc("Saving to file...");
-				ok = PopulationExporter.saveAnalysisDataset(dataset);
-				if(ok){
-//					mw.log("OK");
-				} else {
-//					mw.log("Error");
-				}
-
-			}
-			return result;
 		}
 		
 	}

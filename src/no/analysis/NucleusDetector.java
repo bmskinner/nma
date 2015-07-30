@@ -42,7 +42,11 @@ import no.nuclei.*;
 import no.collections.*;
 import no.components.*;
 import no.components.AnalysisOptions.CannyOptions;
+import no.export.CompositeExporter;
 import no.export.ImageExporter;
+import no.export.NucleusAnnotator;
+import no.export.PopulationExporter;
+import no.export.StatsExporter;
 import no.gui.MainWindow;
 import no.imports.ImageImporter;
 
@@ -72,6 +76,8 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
   protected MainWindow mw;
   private Map<File, CellCollection> collectionGroup = new HashMap<File, CellCollection>();
+  
+  List<AnalysisDataset> datasets;
 
 
   /**
@@ -125,7 +131,16 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		try{
 			  logger.log("Running nucleus detector");
 			  processFolder(this.inputFolder);
+			  
+			  firePropertyChange("Cooldown", getProgress(), Constants.PROGRESS_COOLDOWN);
+				
+			  List<CellCollection> folderCollection = this.getNucleiCollections();
+				// insert analyse populations from  analysis creator
+			  datasets = analysePopulations(folderCollection);		
+			 
 			  result = true;
+			  
+			  
 		  } catch(Exception e){
 			  result = false;
 			  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
@@ -159,6 +174,144 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		}
 
 	} 
+	
+	
+	public List<AnalysisDataset> getDatasets(){
+		return this.datasets;
+	}
+	
+	public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
+//		IJ.log("Beginning analysis");
+		
+		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
+
+		for(CellCollection r : folderCollection){
+			
+			Logger logger = new Logger(r.getDebugFile(), "PopulationAnalysis");
+
+			AnalysisDataset dataset = new AnalysisDataset(r);
+			dataset.setAnalysisOptions(analysisOptions);
+			dataset.setRoot(true);
+
+			File folder = r.getFolder();
+			logger.log("Analysing: "+folder.getName());
+
+			LinkedHashMap<String, Integer> nucleusCounts = new LinkedHashMap<String, Integer>();
+
+			try{
+
+				nucleusCounts.put("input", r.getNucleusCount());
+				CellCollection failedNuclei = new CellCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), analysisOptions.getNucleusClass());
+
+//				boolean ok;
+//				mw.logc("Filtering collection...");
+				boolean ok = CollectionFilterer.run(r, failedNuclei); // put fails into failedNuclei, remove from r
+				if(ok){
+//					mw.log("OK");
+				} else {
+//					mw.log("Error");
+				}
+
+				if(failedNuclei.getNucleusCount()>0){
+//					mw.logc("Exporting failed nuclei...");
+					ok = CompositeExporter.run(failedNuclei);
+					if(ok){
+//						mw.log("OK");
+					} else {
+//						mw.log("Error");
+					}
+					nucleusCounts.put("failed", failedNuclei.getNucleusCount());
+				}
+				
+			} catch(Exception e){
+				logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
+			}
+
+			//		  mw.log(spacerString);
+//			mw.log("Population: "+r.getType());
+//			mw.log("Population: "+r.getNucleusCount()+" nuclei");
+			logger.log("Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
+			//		  mw.log(spacerString);
+
+			// core analysis - align profiles and segment
+//			mw.logc("Running morphology analysis...");
+			boolean ok = MorphologyAnalysis.run(r);
+			if(ok){
+//				mw.log("OK");
+			} else {
+//				mw.log("Error");
+			}
+
+			// export the stats files
+//			mw.logc("Exporting stats...");
+			ok = StatsExporter.run(r);
+			if(ok){
+//				mw.log("OK");
+			} else {
+//				mw.log("Error");
+			}
+
+			// annotate the nuclei in the population
+//			mw.logc("Annotating nuclei...");
+			ok = NucleusAnnotator.run(r);
+			if(ok){
+//				mw.log("OK");
+			} else {
+//				mw.log("Error");
+			}
+
+
+			// make a composite image of all nuclei in the collection
+//			mw.logc("Exporting composite...");
+			ok = CompositeExporter.run(r);
+			if(ok){
+//				mw.log("OK");
+			} else {
+//				mw.log("Error");
+			}
+
+			// refold the median consensus nucleus
+			if(analysisOptions.refoldNucleus()){
+//				mw.logc("Refolding profile...");
+				
+				CurveRefolder refolder = new CurveRefolder(r, 
+						analysisOptions.getNucleusClass(), 
+						analysisOptions.getRefoldMode());
+				
+				refolder.execute();
+				try {
+					if(refolder.get()){
+//						mw.log("OK");
+					} else {
+//						mw.log("Error");
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+
+//			finalPopulations.add(r);
+
+			result.add(dataset);
+//			collectionNucleusCounts.put(folder, nucleusCounts);
+
+			// export the population to a save file for later
+//			mw.logc("Saving to file...");
+			ok = PopulationExporter.saveAnalysisDataset(dataset);
+			if(ok){
+//				mw.log("OK");
+			} else {
+//				mw.log("Error");
+			}
+
+		}
+		return result;
+	}
 
   /*
     -------------------
