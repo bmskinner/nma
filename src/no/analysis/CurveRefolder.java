@@ -71,8 +71,43 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	@Override
 	protected Boolean doInBackground() {
 		
-		boolean ok =  this.run(true); // need a parameter to distinguish from the run() of SwingWorker
-		return ok;
+		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
+		try{ 
+
+			this.refoldCurve();
+			
+			firePropertyChange("Cooldown", getProgress(), Constants.PROGRESS_COOLDOWN);
+
+			// orient refolded nucleus to put tail at the bottom
+			this.putPointAtBottom(refoldNucleus.getBorderTag("tail"));
+
+			// if rodent sperm, put tip on left if needed
+			if(refoldNucleus.getClass().equals(RodentSpermNucleus.class)){
+
+				if(refoldNucleus.getBorderTag("tip").getX()>0){
+					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
+				}
+			}
+
+			this.plotNucleus();
+
+			// draw signals on the refolded nucleus
+			this.addSignalsToConsensus(collection);
+			this.exportImage(collection);
+			this.exportProfileOfRefoldedImage(collection);
+			collection.addConsensusNucleus(refoldNucleus);
+
+		} catch(Exception e){
+			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement el : e.getStackTrace()){
+				logger.log(el.toString(), Logger.STACK);
+			}
+			return false;
+		} 
+		return true;
+		
+//		boolean ok =  this.run(true); // need a parameter to distinguish from the run() of SwingWorker
+//		return ok;
 	}
 	
 	@Override
@@ -113,49 +148,49 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		
 	} 
 	
-	public boolean run(boolean b){ // parameter b does nothing - only to distinguish from SwingWorker
-
-		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
-		try{ 
-
-			this.refoldCurve();
-			
-			firePropertyChange("Cooldown", getProgress(), Constants.PROGRESS_COOLDOWN);
-
-			// orient refolded nucleus to put tail at the bottom
-			this.putPointAtBottom(refoldNucleus.getBorderTag("tail"));
-
-			// if rodent sperm, put tip on left if needed
-			if(refoldNucleus.getClass().equals(RodentSpermNucleus.class)){
-
-				if(refoldNucleus.getBorderTag("tip").getX()>0){
-					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
-				}
-			}
-
-			this.plotNucleus();
-
-			// draw signals on the refolded nucleus
-			this.addSignalsToConsensus(collection);
-			this.exportImage(collection);
-			this.exportProfileOfRefoldedImage(collection);
-			collection.addConsensusNucleus(refoldNucleus);
-
-		} catch(Exception e){
-			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
-			return false;
-		} 
-		return true;
-	}
+//	public boolean run(boolean b){ // parameter b does nothing - only to distinguish from SwingWorker
+//
+//		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
+//		try{ 
+//
+//			this.refoldCurve();
+//			
+//			firePropertyChange("Cooldown", getProgress(), Constants.PROGRESS_COOLDOWN);
+//
+//			// orient refolded nucleus to put tail at the bottom
+//			this.putPointAtBottom(refoldNucleus.getBorderTag("tail"));
+//
+//			// if rodent sperm, put tip on left if needed
+//			if(refoldNucleus.getClass().equals(RodentSpermNucleus.class)){
+//
+//				if(refoldNucleus.getBorderTag("tip").getX()>0){
+//					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
+//				}
+//			}
+//
+//			this.plotNucleus();
+//
+//			// draw signals on the refolded nucleus
+//			this.addSignalsToConsensus(collection);
+//			this.exportImage(collection);
+//			this.exportProfileOfRefoldedImage(collection);
+//			collection.addConsensusNucleus(refoldNucleus);
+//
+//		} catch(Exception e){
+//			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
+//			for(StackTraceElement el : e.getStackTrace()){
+//				logger.log(el.toString(), Logger.STACK);
+//			}
+//			return false;
+//		} 
+//		return true;
+//	}
 	
-	public CurveRefolder(CellCollection collection, Class<?> nucleusClass, String refoldMode){
+	public CurveRefolder(CellCollection collection, Class<?> nucleusClass, String refoldMode) throws Exception{
 		
 		
 		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
-		try{ 
+//		try{ 
 
 			// make an entirely new nucleus to play with
 			Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian("tail");
@@ -191,12 +226,12 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			this.setMode(refoldMode);
 			
 
-		} catch(Exception e){
-			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
-		} 
+//		} catch(Exception e){
+//			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);
+//			for(StackTraceElement el : e.getStackTrace()){
+//				logger.log(el.toString(), Logger.STACK);
+//			}
+//		} 
 	}
 
 //	public CurveRefolder(Profile target, Profile q25, Profile q75, Nucleus n){

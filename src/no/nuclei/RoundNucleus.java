@@ -120,7 +120,7 @@ public class RoundNucleus
 		// for subclasses to access
 	}
 
-	public RoundNucleus(Nucleus n){
+	public RoundNucleus(RoundNucleus n){
 
 		this.setID(n.getID());
 		this.setPosition(n.getPosition());

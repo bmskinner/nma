@@ -1414,7 +1414,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				detector.execute();
 				analysisSetup.dispose();
 				
-//				IJ.log("Importing folder(s)");
+			} else {
+								
+				analysisSetup.dispose();
+				this.cancel();
 			}
 			
 			
@@ -1427,6 +1430,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			
 			if(datasets.size()==0 || datasets==null){
 				log("No datasets returned");
+				this.cancel();
 			} else {
 				// new style datasets
 				for(AnalysisDataset d : datasets){
@@ -1447,9 +1451,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 										+" populations ready to view");
 				
 				log("--------\nAll done!\n--------");	
+				super.finished();
 			}
-
-			super.finished();
 		}
 		
 	}
