@@ -15,9 +15,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 
-import no.analysis.AnalysisCreator;
 import no.analysis.AnalysisDataset;
-import no.analysis.CollectionFilterer;
 import no.analysis.CurveRefolder;
 import no.analysis.DatasetMerger;
 import no.analysis.MorphologyAnalysis;
@@ -28,8 +26,6 @@ import no.analysis.SignalDetector;
 import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.NuclearSignalOptions;
-import no.export.CompositeExporter;
-import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.imports.PopulationImporter;
@@ -43,11 +39,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
@@ -426,48 +420,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		}
 	}
 	
-	
-	/**
-	 * Call the setup of a new analysis, and add the results to the dataset list 
-	 */
-//	public void newAnalysis(){
-//
-//		Thread thr = new Thread() {
-//			public void run() {
-//				lblStatusLine.setText("New analysis in progress");
-//								
-//				AnalysisCreator analysisCreator = new AnalysisCreator(MainWindow.this);
-////				analysisCreator.run();
-//				analysisCreator.execute();
-//
-//				List<AnalysisDataset> datasets = analysisCreator.getDatasets();
-//				
-//				if(datasets.size()==0 || datasets==null){
-//					log("No datasets returned");
-//				}
-//				
-//				// new style datasets
-//				for(AnalysisDataset d : datasets){
-//					
-//					populationsPanel.addDataset(d);				
-//					
-//					for(AnalysisDataset child : d.getChildDatasets()){
-//						populationsPanel.addDataset(child);
-//					}
-//					PopulationExporter.saveAnalysisDataset(d);
-//
-//				}
-//								
-//				lblStatusLine.setText("New analysis complete: "
-//										+populationsPanel.getDatasetCount()
-//										+" populations ready to view");
-//				populationsPanel.update();		
-//				
-//			}
-//		};
-//		thr.start();		
-//	}
-		
+			
 	/**
 	 * Call an open dialog to choose a saved .nbd dataset. The opened dataset
 	 * will be added to the bottom of the dataset list.
@@ -597,136 +550,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		} 
 		return newCollection;
 	}
-	
-//	class MergeCollectionAction extends AbstractAction {
-//
-//		private static final long serialVersionUID = 1L;
-//		public MergeCollectionAction() {
-//			super("Merge");
-//		}
-//
-//		public void actionPerformed(ActionEvent e) {
-//
-//			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-//
-//			if(datasets.size()>1){
-//				log("Prepare to merge");
-//
-//				if(datasets.size()==2){ // check we are not merging a parent and child (would just get child)
-//					if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
-//						log("No. That would be silly.");
-//						return;
-//					}
-//				}
-//
-//				Thread thr = new Thread() {
-//					public void run() {
-//
-//						log("Merging collection...");
-//
-//						// check all collections are of the same type
-//						boolean newRoot = false;
-//						Class<?> testClass = datasets.get(0).getAnalysisOptions().getNucleusClass();
-//						for(AnalysisDataset d : datasets){
-//
-//							if(d.getAnalysisOptions().getNucleusClass()!=testClass){
-//								log("Error: cannot merge collections of different class");
-//								return;
-//							}
-//
-//							// check if a root population is included in the merge;
-//							// if so, we must make the result a root population too
-//							// otherwise, it may be a subpopulation
-//							if(d.isRoot()){
-//								newRoot = true;
-//							}
-//						}
-//
-//						AnalysisDataset mergeParent = null;
-//						if(!newRoot) { // unless we have forced root above
-//							// check if all datasets are children of one root dataset
-//							for(AnalysisDataset parent : populationsPanel.getAllDatasets()){
-//								if(parent.isRoot()){ // only look at top level datasets for now
-//									boolean ok = true; 
-//									for(AnalysisDataset d : datasets){
-//										if(!parent.hasChild(d)){
-//											ok = false;
-//										}
-//									}
-//									if(ok){
-//										mergeParent = parent;
-//									}
-//								}
-//							}
-//
-//							// if a merge parent was found, new collection is not root
-//							if(mergeParent!=null){
-//								newRoot = false;
-//							} else {
-//								newRoot = true; // if we cannot find a consistent parent, make a new root population
-//							}
-//						}
-//
-//
-//						// add the nuclei from each population to the new collection
-//						CellCollection newCollection = makeNewCollection(datasets.get(0), "Merged");
-//						for(AnalysisDataset d : datasets){
-//
-//							for(Cell n : d.getCollection().getCells()){
-//								if(!newCollection.getCells().contains(n)){
-//									newCollection.addCell(n);
-//								}
-//							}
-//
-//						}
-//
-//						// create the dataset; has no analysis options at present
-//						AnalysisDataset newDataset = new AnalysisDataset(newCollection);
-//						newDataset.setName("Merge_of_datasets");
-//						newDataset.setRoot(newRoot);
-//
-//						// if applicable, add the new dataset to a parent
-//						if(newRoot==false && mergeParent!=null){
-//
-//							logc("Reapplying morphology...");
-//							boolean ok = MorphologyAnalysis.reapplyProfiles(newCollection, mergeParent.getCollection());
-//							if(ok){
-//								log("OK");
-//							} else {
-//								log("Error");
-//							}
-//							newDataset.setAnalysisOptions(mergeParent.getAnalysisOptions());
-//							newDataset.getAnalysisOptions().setRefoldNucleus(false);
-//
-//							mergeParent.addChildDataset(newDataset);
-//						} else {
-//							// otherwise, it is a new root population
-//							// we need to run a fresh morphology analysis
-//							logc("Running morphology analysis...");
-//							boolean ok = MorphologyAnalysis.run(newDataset.getCollection());
-//							if(ok){
-//								log("OK");
-//							} else {
-//								log("Error");
-//							}
-//							newDataset.setAnalysisOptions(datasets.get(0).getAnalysisOptions());
-//							newDataset.getAnalysisOptions().setRefoldNucleus(false);
-//						}
-//
-//						// add the new collection to the list
-//						populationsPanel.addDataset(newDataset);
-//						populationsPanel.update();
-//					}
-//				};
-//				thr.start();
-//
-//			} else {
-//				log("Cannot merge single dataset");
-//			}
-//
-//		}
-//	}
-	
+		
 	class SplitCollectionAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -1462,7 +1286,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	
 	
 	/**
-	 * Run a new shell analysis on the selected dataset
+	 * Merge the selected datasets
 	 */
 	class MergeCollectionAction extends ProgressableAction {
 				
