@@ -381,6 +381,10 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		panel.add(refoldFastButton);
 		panel.add(refoldIntensiveButton);
 		panel.add(refoldBrutalButton);
+		
+		refoldFastButton.setEnabled(false);
+		refoldIntensiveButton.setEnabled(false);
+		refoldBrutalButton.setEnabled(false);
 
 		return panel;
 	}
