@@ -9,7 +9,7 @@ public class Constants {
 	 */
 	public static final int VERSION_MAJOR    = 1;
 	public static final int VERSION_REVISION = 9;
-	public static final int VERSION_BUGFIX   = 1;
+	public static final int VERSION_BUGFIX   = 2;
 	
 
 		// RGB colour channels

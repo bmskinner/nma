@@ -51,9 +51,9 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	private AnalysisOptions analysisOptions = new AnalysisOptions();
 
 	// types of nucleus
-	private static final String RODENT_SPERM_NUCLEUS = "Rodent sperm";
-	private static final String PIG_SPERM_NUCLEUS = "Pig sperm";
-	private static final String ROUND_NUCLEUS = "Round nucleus";
+	private static final String RODENT_SPERM_NUCLEUS 	= "Rodent sperm";
+	private static final String PIG_SPERM_NUCLEUS 		= "Pig sperm";
+	private static final String ROUND_NUCLEUS 			= "Round nucleus";
 	
 	private static final int    DEFAULT_MIN_NUCLEUS_SIZE = 2000;
 	private static final int    DEFAULT_MAX_NUCLEUS_SIZE = 10000;
@@ -162,7 +162,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		analysisOptions.setPerformReanalysis(false);
 		analysisOptions.setRealignMode(true);
 
-		analysisOptions.setRefoldNucleus(true);
+		analysisOptions.setRefoldNucleus(false);
 		analysisOptions.setRefoldMode(DEFAULT_REFOLD_MODE);
 
 		analysisOptions.setXoffset(0);
@@ -172,7 +172,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		
 		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
 		
-		nucleusCannyOptions.setUseCanny(false);
+		nucleusCannyOptions.setUseCanny(true);
 		nucleusCannyOptions.setCannyAutoThreshold(false);
 		nucleusCannyOptions.setLowThreshold( (float) CannyOptions.DEFAULT_CANNY_LOW_THRESHOLD);
 		nucleusCannyOptions.setHighThreshold((float) CannyOptions.DEFAULT_CANNY_HIGH_THRESHOLD);
@@ -359,7 +359,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		refoldCheckBox = new JCheckBox("Refold nucleus");
-		refoldCheckBox.setSelected(true);
+		refoldCheckBox.setSelected(false);
 		refoldCheckBox.setActionCommand("Refold nucleus");
 		refoldCheckBox.addActionListener(this);
 		panel.add(refoldCheckBox);
