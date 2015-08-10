@@ -131,5 +131,21 @@ public class ProfileTest {
 			assertEquals(data[i]+"x"+constant+"should be "+expected[i], expected[i], result.asArray()[i],0);
 		}
 	}
+	
+	@Test
+	public void interpolationShouldLinearExtend(){
+		double[] data       = { 10, 11, 12, 13, 14, 15 };
+		double[] expected   = { 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 12.5 };
+		
+		Profile tester = new Profile(data);
+		Profile result = tester.interpolate(12);
+		
+		double[] output = result.asArray();	
+		
+		for( int i =0;i<expected.length; i++){
+			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
+		}
+		
+	}
 
 }

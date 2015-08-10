@@ -227,87 +227,96 @@ public class Profile implements Serializable {
     }
   }  
 
-  // newLength must be larger than current
-  // Make this profile the length specified
-  public Profile interpolate(int newLength){
+  /**
+   * Make this profile the length specified.
+   * @param newLength the new array length
+   * @return an interpolated profile
+   */
+  public Profile interpolate(int newLength) {
 
     if(newLength < this.size()){
-      // throw new Exception("Cannot interpolate to a smaller array!");
+    	System.out.println("Interpolating to a smaller array!");
+//       throw new Exception("Cannot interpolate to a smaller array!");
     }
     
     double[] newArray = new double[newLength];
+    
     // where in the old curve index is the new curve index?
     for (int i=0; i<newLength; i++) {
       // we have a point in the new curve.
       // we want to know which points it lay between in the old curve
-      double oldIndex = ( (double)i / (double)newLength)*array.length; // get the frational index position needed
-      double interpolatedValue = interpolateValue(oldIndex);
-      newArray[i] = interpolatedValue;
+      double oldIndex = ( (double)i / (double)newLength) * (double) array.length; // get the fractional index position needed
+      
+      // get the value in the old profile at the given fractional index position
+      newArray[i] = interpolateValue(oldIndex);
     }
     return new Profile(newArray);
   }
 
-  /*
-    Take an index position from a non-normalised profile
-    Normalise it
-    Find the corresponding angle in the median curve
-    Interpolate as needed
-  */
+  /**
+   * Take an index position from a non-normalised profile. Normalise it
+   * Find the corresponding angle in the median curve.
+   * Interpolate as needed
+   * @param normIndex the fractional index position to find within this profile
+   * @return an interpolated value
+   */
   private double interpolateValue(double normIndex){
 
-    // convert index to 1 window boundaries
-    int index1 = (int)Math.round(normIndex);
-    int index2 = index1 > normIndex
-                        ? index1 - 1
-                        : index1 + 1;
+	  // convert index to 1 window boundaries
+	  // This allows us to see the array indexes above and below the desired
+	  // fractional index. From these, we can interpolate the fractional component.
+	  // NOTE: this does not account for curves. Interpolation is linear.
+	  int index1 = (int) Math.round(normIndex);
+	  int index2 	= index1 > normIndex
+			  		? index1 - 1
+					: index1 + 1;
+	  
+//	  System.out.println("Index selection "+normIndex+": "+index1+" and "+index2);
 
-    int indexLower = index1 < index2
-                        ? index1
-                        : index2;
+	  // Decide which of the two indexes is the higher, and which is the lower
+	  int indexLower 	= index1 < index2
+			  			? index1
+			  			: index2;
 
-    int indexHigher = index2 < index1
-                             ? index2
-                             : index1;
-    
-//    int absIndex = (int) Math.abs((normIndex - indexLower));
+	  int indexHigher 	= index2 > index1
+			  			? index2
+			  			: index1;
+	  
+//	  System.out.println("Set indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
-    // wrap the arrays
-    indexLower  = Utils.wrapIndex(indexLower , this.size());
-    indexHigher = Utils.wrapIndex(indexHigher, this.size());
-    
-//    int indexTwoLower = Utils.wrapIndex(indexLower-1 , this.size());
-//    int indexTwoHigher = Utils.wrapIndex(indexHigher+1 , this.size());
+	  // wrap the arrays
+	  indexLower  = Utils.wrapIndex(indexLower , this.size());
+	  indexHigher = Utils.wrapIndex(indexHigher, this.size());
+//	  System.out.println("Wrapped indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
-    // get the angle values in the profile at the given indices
-//    double valueTwoHigher = array[indexTwoHigher ];
-//    double valueTwoLower = array[indexTwoLower ];
-    double valueHigher = array[indexLower ];
-    double valueLower  = array[indexHigher];
-    
-//    double[] xvalues = { -1, 0, 1, 2 };
-//    double[] yvalues = { valueTwoLower, valueLower, valueHigher, valueTwoHigher };
-//
-//    double interpolatedValue = 0;
-//    try{
-//    	Interpolator interpolator = new Interpolator(xvalues, yvalues);
-//    	interpolatedValue = interpolator.find(absIndex);
-//    } catch(Exception e){
-//    	// interpolate on a straight line between the points if the Interpolator fails
-//    	double valueDifference = valueHigher - valueLower;
-//    	double positionToFind = indexHigher - normIndex;
-//    	interpolatedValue = (valueDifference * positionToFind) + valueLower;
-//    	IJ.log("    Error in cubic interpolator: falling back to linear");
-//    }
-    
-    double valueDifference = valueHigher - valueLower;
-	double positionToFind = indexHigher - normIndex;
-	double linearInterpolatedValue = (valueDifference * positionToFind) + valueLower;
-////	IJ.log("    L: "+linearInterpolatedValue+" C: "+interpolatedValue);
-//	if(Math.abs(interpolatedValue)>Math.abs(linearInterpolatedValue*2) || Math.abs(interpolatedValue)< Math.abs(linearInterpolatedValue/2)){
-//		interpolatedValue = linearInterpolatedValue;
-////		IJ.log("    Ambiguous curve; falling back to linear interpolation"); 
-//	}
-    return linearInterpolatedValue;
+	  // get the values at these indexes
+	  double valueHigher = array[ indexHigher ];
+	  double valueLower  = array[ indexLower  ];
+//	  System.out.println("Wrapped values "+normIndex+": "+valueLower+" and "+valueHigher);
+
+	  // calculate the difference between values
+	  // this can be negative
+	  double valueDifference = valueHigher - valueLower;
+//	  System.out.println("Difference "+normIndex+": "+valueDifference);
+	  
+	  // calculate the distance into the region to go
+	  double offset = normIndex - indexLower;
+//	  System.out.println("Offset "+normIndex+": "+offset);
+	  
+
+	  // add the offset to the lower index
+	  double positionToFind = indexLower + offset;
+	  positionToFind = Utils.wrapIndex(positionToFind , this.size());
+//	  System.out.println("Position to find "+normIndex+": "+positionToFind);
+	  
+	  // calculate the value to be added to the lower index value
+	  double newValue = valueDifference * offset; // 0 for 0, full difference for 1
+//	  System.out.println("New value "+normIndex+": "+newValue);
+	  
+	  double linearInterpolatedValue = newValue + valueLower;
+//	  System.out.println("Interpolated "+normIndex+": "+linearInterpolatedValue);
+
+	  return linearInterpolatedValue;
   }
 
   /*
