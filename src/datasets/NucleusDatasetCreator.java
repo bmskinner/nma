@@ -948,10 +948,10 @@ public class NucleusDatasetCreator {
 
 			List<Double> list = new ArrayList<Double>();
 
-			for (double d : c.getDifferencesToMedianFromPoint(c.getOrientationPoint())) {
+			for (double d : c.getNormalisedDifferencesToMedianFromPoint(c.getOrientationPoint())) {
 				list.add(new Double(d));
 			}
-			dataset.add(list, c.getType()+"_"+i, "Difference to median");
+			dataset.add(list, c.getType()+"_"+i, "Perimeter-normalised difference to median");
 		}
 
 		return dataset;

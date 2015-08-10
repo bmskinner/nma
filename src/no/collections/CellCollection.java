@@ -9,6 +9,8 @@
 
 package no.collections;
 
+import ij.IJ;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -670,6 +672,11 @@ implements Serializable
 	  return result;
   }
 
+  /**
+   * Get the differences to the median profile for each nucleus
+   * @param pointType the point to fetch profiles from
+   * @return an array of differences
+   */
   public double[] getDifferencesToMedianFromPoint(String pointType){
 	  double[] d = new double[this.getNucleusCount()];
 	  try{
@@ -686,6 +693,32 @@ implements Serializable
 	  } catch(Exception e){
 //		  logger.log("Error getting differences from point "+pointType+": "+e.getMessage(), Logger.ERROR);
 //		  this.profileCollection.printKeys(this.debugFile);
+	  }
+	  return d;
+  }
+  
+  /**
+   * Get the differences to the median profile for each nucleus, normalised to the
+   * perimeter of the nucleus
+   * @param pointType the point to fetch profiles from
+   * @return an array of normalised differences
+   */
+  public double[] getNormalisedDifferencesToMedianFromPoint(String pointType){
+	  double[] d = new double[this.getNucleusCount()];
+	  try{
+
+		  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+		  for(int i=0;i<this.getNucleusCount();i++){
+			  Nucleus n = this.getCell(i).getNucleus();
+			  try{
+				  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
+				  d[i] = diff / n.getPerimeter();
+			  } catch(Exception e){
+				  IJ.log("Unable to get normalised difference to median profile: "+i+": "+pointType);
+			  }
+		  }
+	  } catch(Exception e){
+		  IJ.log("Error getting differences from point "+pointType+": "+e.getMessage());
 	  }
 	  return d;
   }
