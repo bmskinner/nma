@@ -26,7 +26,9 @@ import no.gui.ColourSelecter;
 public class AnalysisDataset implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private Map<UUID, AnalysisDataset> childCollections = new HashMap<UUID, AnalysisDataset>(); // hold the UUID of any child collections
+	private Map<UUID, AnalysisDataset> childCollections  = new HashMap<UUID, AnalysisDataset>(); // hold the UUID of any child collections
+	private Map<UUID, AnalysisDataset> parentCollections = new HashMap<UUID, AnalysisDataset>(); // parents of this dataset
+	
 	private CellCollection thisCollection;
 	private File savePath; // the file to save the analysis to
 	
@@ -39,6 +41,7 @@ public class AnalysisDataset implements Serializable {
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
 	private List<UUID> clusterResults = new ArrayList<UUID>(0);
+	private List<UUID> mergeParents	  = new ArrayList<UUID>(0); // hold the ids of datasets merged to create this dataset
 	private String newickTree;
 	
 	private File debugFile;
@@ -83,12 +86,48 @@ public class AnalysisDataset implements Serializable {
 		}
 		UUID id = dataset.getUUID();
 		this.childCollections.put(id, dataset);
-
+		dataset.addParentDataset(this);
 	}
 	
 	public void removeChildCollection(UUID id){
 		this.childCollections.remove(id);
+		if(this.clusterResults.contains(id)){
+			this.clusterResults.remove(id);
+		}
 	}
+	
+	
+	/**
+	 * Add the given dataset as a parent
+	 * @param dataset
+	 */
+	public void addParentDataset(AnalysisDataset dataset){
+		if(dataset==null){
+			throw new IllegalArgumentException("Nucleus collection is null");
+		}
+		UUID id = dataset.getUUID();
+		this.parentCollections.put(id, dataset);
+		
+		// if this dataset has a parent, it cannot be root
+		// TODO: multiple dataset sharing between roots
+		if(this.isRoot){
+			this.setRoot(false);
+		}
+
+	}
+	
+	/**
+	 * Remove the given dataset from the list of parents
+	 * and any lists that depend on parents
+	 * @param id the UUID to remove
+	 */
+	public void removeParentDataset(UUID id){
+		this.parentCollections.remove(id);
+		if(this.mergeParents.contains(id)){
+			this.mergeParents.remove(id);
+		}
+	}
+	
 	
 	public UUID getUUID(){
 		return this.thisCollection.getID();
@@ -114,11 +153,20 @@ public class AnalysisDataset implements Serializable {
 		return this.thisCollection.getDebugFile();
 	}
 	
+	/**
+	 * Get all the direct children of this dataset
+	 * @return
+	 */
 	public Set<UUID> getChildUUIDs(){
 		return this.childCollections.keySet();
 	}
 	
-	// recursive version of get UUIDs
+	/**
+	 * Recursive version of getChildUUIDs.
+	 * Get the children of this dataset, and all
+	 * their children
+	 * @return
+	 */
 	public Set<UUID> getAllChildUUIDs(){
 		Set<UUID> idlist = this.getChildUUIDs();
 		for(UUID id : idlist){
@@ -128,14 +176,27 @@ public class AnalysisDataset implements Serializable {
 		return idlist;
 	}
 	
+	/**
+	 * Get the specificed child
+	 * @param id the child UUID
+	 * @return
+	 */
 	public AnalysisDataset getChildDataset(UUID id){
 		return this.childCollections.get(id);
 	}
 	
+	/**
+	 * Get the number of direct children of this dataset
+	 * @return
+	 */
 	public int getChildCount(){
 		return this.childCollections.size();
 	}
 	
+	/**
+	 * Check if the dataset has children
+	 * @return
+	 */
 	public boolean hasChildren(){
 		if(this.childCollections.size()>0){
 			return true;
@@ -144,11 +205,20 @@ public class AnalysisDataset implements Serializable {
 		}
 	}
 	
+	/**
+	 * Get all the direct children of this dataset
+	 * @return
+	 */
 	public Collection<AnalysisDataset> getChildDatasets(){
 		return this.childCollections.values();
 	}
 	
-	// recursive version of get child datasets
+	/**
+	 * Recursive version of get child datasets
+	 * Get all the direct children of this dataset, 
+	 * and all their children.
+	 * @return
+	 */
 	public List<AnalysisDataset> getAllChildDatasets(){
 
 		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>(0);
@@ -162,6 +232,10 @@ public class AnalysisDataset implements Serializable {
 		return result;
 	}
 	
+	/**
+	 * Get the collection in this dataset
+	 * @return
+	 */
 	public CellCollection getCollection(){
 		return this.thisCollection;
 	}
@@ -281,9 +355,22 @@ public class AnalysisDataset implements Serializable {
 	 * @return
 	 */
 	public boolean isChild(AnalysisDataset parent){
-		if(parent.hasChild(this)){
+		if(this.parentCollections.containsKey(parent.getUUID())){
 			return true;
 		} else{
+			return false;
+		}
+	}
+	
+	/**
+	 * Check if this dataset is the child of the given dataset
+	 * @param parent the parent dataset
+	 * @return
+	 */
+	public boolean isChild(UUID parent){
+		if(this.parentCollections.containsKey(parent)){
+			return true;
+		} else {
 			return false;
 		}
 	}
