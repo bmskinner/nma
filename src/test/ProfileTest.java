@@ -128,7 +128,7 @@ public class ProfileTest {
 		
 		// there is no assertArrayEquals for double[]
 		for( int i =0;i<data.length; i++){
-			assertEquals(data[i]+"x"+constant+"should be "+expected[i], expected[i], result.asArray()[i],0);
+			assertEquals(data[i]+"x"+constant+" should be "+expected[i], expected[i], result.asArray()[i],0);
 		}
 	}
 	

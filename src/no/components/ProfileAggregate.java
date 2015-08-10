@@ -1,3 +1,4 @@
+
 package no.components;
 
 import ij.IJ;
@@ -12,11 +13,16 @@ import utility.Stats;
 import utility.Utils;
 import no.exceptions.ProfileException;
 
+/**
+ * This class holds the aggregates of individual profiles, so that a 
+ * median profile can be created. It also holds the methods for repairing
+ * median profiles when too few nuclei are present to calculate a precise
+ * profile
+ * @author bms41
+ *
+ */
 public class ProfileAggregate implements Serializable {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Map<Double, Collection<Double>> aggregate = new HashMap<Double, Collection<Double>>();
 	private double  profileIncrement;

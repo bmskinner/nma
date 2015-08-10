@@ -1,9 +1,3 @@
-/*
-	DISTANCE PROFILE
-
-	Holds the distances from the centre of mass
-*/
-
 package no.components;
 
 import java.io.Serializable;
@@ -12,6 +6,15 @@ import java.util.Arrays;
 import utility.Utils;
 import ij.IJ;
 
+/**
+ * Holds arrays of values with wrapping and provides
+ * methods to manipulate them. Used for distance and angle
+ * profiles.
+ */
+/**
+ * @author bms41
+ *
+ */
 public class Profile implements Serializable {
 
 	/**
@@ -23,138 +26,188 @@ public class Profile implements Serializable {
 	private static final int ARRAY_AFTER = 1;
 
 
+	
+	/**
+	 * Constructor for a new Profile, based on an array of values.
+	 * @param values the array to use
+	 */
 	public Profile(double[] values){
 
 		this.array = new double[values.length];
 		for(int i=0; i<this.array.length; i++){
-      array[i] = values[i];
-    }
+			array[i] = values[i];
+		}
 	}
 
-  public Profile(Profile p){
+	/**
+	 * Constructor based on an existing Profile. Makes a copy 
+	 * of the existing Profile
+	 * @param p the profile to copy
+	 */
+	public Profile(Profile p){
 
-    this.array = new double[p.size()];
-    for(int i=0; i<this.array.length; i++){
-      array[i] = p.get(i);
-    }
-  }
+		this.array = new double[p.size()];
+		for(int i=0; i<this.array.length; i++){
+			array[i] = p.get(i);
+		}
+	}
 
 
-  /*
-    ---------------------
-    Getters
-    ---------------------
-  */
-  public int size(){
-    return array.length;
-  }
 
-  public double get(int i){
-	  double result = 0;
+	/**
+	 * Get the length of the array in the profile
+	 * @return the size of the profile
+	 */
+	public int size(){
+		return array.length;
+	}
 
-	  try {
-		  if(i>=array.length){
-			  throw new Exception("Requested value "+i+" is beyond profile end");
-		  }
-		  result = this.array[i];
-	  } catch(Exception e){
-		  IJ.log("Cannot get value from profile: "+e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  }
-	  return result;
-  }
+	
+	/**
+	 * Get the value at the given index
+	 * @param index the index
+	 * @return the value at the index
+	 */
+	public double get(int index){
+		double result = 0;
 
-  public double getMax(){
-    double max = 0;
-    for(int i=0; i<array.length;i++){
-      if(array[i]>max){
-        max = array[i];
-      }
-    }
-    return max;
-  }
+		try {
+			if(index>=array.length){
+				throw new Exception("Requested value "+index+" is beyond profile end");
+			}
+			result = this.array[index];
+		} catch(Exception e){
+			IJ.log("Cannot get value from profile: "+e.getMessage());
+			for(StackTraceElement el : e.getStackTrace()){
+				IJ.log(el.toString());
+			}
+		}
+		return result;
+	}
 
-  public int getIndexOfMax(){
-    double max = 0;
-    int maxIndex = 0;
-    for(int i=0; i<array.length;i++){
-      if(array[i]>max){
-        max = array[i];
-        maxIndex = i;
-      }
-    }
-    return maxIndex;
-  }
+	
+	/**
+	 * Get the maximum value in the profile
+	 * @return the maximum value
+	 */
+	public double getMax(){
+		double max = 0;
+		for(int i=0; i<array.length;i++){
+			if(array[i]>max){
+				max = array[i];
+			}
+		}
+		return max;
+	}
 
-  public double getMin(){
-    double min = this.getMax();
-    for(int i=0; i<array.length;i++){
-      if(array[i]<min){
-        min = array[i];
-      }
-    }
-    return min;
-  }
+	/**
+	 * Get the index of the maximum value in the profile
+	 * @return the index
+	 */
+	public int getIndexOfMax(){
+		double max = 0;
+		int maxIndex = 0;
+		for(int i=0; i<array.length;i++){
+			if(array[i]>max){
+				max = array[i];
+				maxIndex = i;
+			}
+		}
+		return maxIndex;
+	}
 
-  public int getIndexOfMin(){
-    double min = this.getMax();
-    int minIndex = 0;
-    for(int i=0; i<array.length;i++){
-      if(array[i]<min){
-        min = array[i];
-        minIndex = i;
-      }
-    }
-    return minIndex;
-  }
+	/**
+	 * Get the minimum value in the profile
+	 * @return the minimum value
+	 */
+	public double getMin(){
+		double min = this.getMax();
+		for(int i=0; i<array.length;i++){
+			if(array[i]<min){
+				min = array[i];
+			}
+		}
+		return min;
+	}
 
-  public double[] asArray(){
-    return this.array;
-  }
+	/**
+	 * Get the index of the minimum value in the profile
+	 * @return the index
+	 */
+	public int getIndexOfMin(){
+		double min = this.getMax();
+		int minIndex = 0;
+		for(int i=0; i<array.length;i++){
+			if(array[i]<min){
+				min = array[i];
+				minIndex = i;
+			}
+		}
+		return minIndex;
+	}
+
+	/**
+	 * Get the array from the profile
+	 * @return an array of values
+	 */
+	public double[] asArray(){
+		return this.array;
+	}
   
-  public Profile getPositions(int length){
-	  double [] result = new double[array.length];
-	  for(int i=0;i<array.length;i++){
-		  result[i] = (double) i / (double) array.length * (double) length;
-	  }
-	  return new Profile(result);
-  }
+	
+	/**
+	 * Get an X-axis; get a position
+	 * for each point on the scale 0-<length>
+	 * @param length the length to scale to
+	 * @return a profile with the positions as values
+	 */
+	public Profile getPositions(int length){
+		double [] result = new double[array.length];
+		for(int i=0;i<array.length;i++){
+			result[i] = (double) i / (double) array.length * (double) length;
+		}
+		return new Profile(result);
+	}
 
-  // The testProfile must have been offset appropriately
-  public double differenceToProfile(Profile testProfile){
+	/**
+	 * Calculate the square differences between this profile and
+	 * a given profile. The shorter profile is interpolated.
+	 * The testProfile must have been offset appropriately to avoid 
+	 * spurious differences.
+	 * @param testProfile the profile to compare to 
+	 * @return the sum-of-squares difference
+	 */
+	public double differenceToProfile(Profile testProfile){
 
-    // the test profile needs to be matched to this profile
-    // whichever is smaller must be interpolated 
-    Profile profile1 = this.copy();
-    Profile profile2 = testProfile;
+		// the test profile needs to be matched to this profile
+		// whichever is smaller must be interpolated 
+		Profile profile1 = this.copy();
+		Profile profile2 = testProfile;
 
-    try{
-      if(profile2.size()<profile1.size()){
-        profile2 = profile2.interpolate(this.size());
-      } else {
-        profile1 = profile1.interpolate(testProfile.size());
-      }
-    } catch(Exception e){
-      IJ.log("Error interpolating profiles: "+e.getMessage());
-      IJ.log("Profile 1: ");
-      profile1.print();
-      IJ.log("Profile 2: ");
-      profile2.print();
-    }
+		try{
+			if(profile2.size()<profile1.size()){
+				profile2 = profile2.interpolate(this.size());
+			} else {
+				profile1 = profile1.interpolate(testProfile.size());
+			}
+		} catch(Exception e){
+			IJ.log("Error interpolating profiles: "+e.getMessage());
+			IJ.log("Profile 1: ");
+			profile1.print();
+			IJ.log("Profile 2: ");
+			profile2.print();
+		}
 
-    double difference = 0;
+		double difference = 0;
 
-    for(int j=0; j<this.size(); j++){ // for each point round the array
+		for(int j=0; j<this.size(); j++){ // for each point round the array
 
-      double thisValue = profile1.get(j);
-      double testValue = profile2.get(j);
-//      difference += Math.abs(thisValue - testValue); // absolute difference
-      difference += Math.pow(thisValue - testValue, 2); // square difference - highlights extremes
-    }
-    return difference;
-  }
+			double thisValue = profile1.get(j);
+			double testValue = profile2.get(j);
+			difference += Math.pow(thisValue - testValue, 2); // square difference - highlights extremes
+		}
+		return difference;
+	}
 
   /*
     --------------------
@@ -162,70 +215,82 @@ public class Profile implements Serializable {
     --------------------
   */
 
-  public Profile copy(){
-    return new Profile(this.array);
-  }
+	/**
+	 * Alternative to the constructor from profile
+	 * @return a new profile with the same values as this
+	 */
+	public Profile copy(){
+		return new Profile(this.array);
+	}
 
-  public Profile offset(int j){
-    double[] newArray = new double[this.size()];
-    for(int i=0;i<this.size();i++){
-      newArray[i] = this.array[ Utils.wrapIndex( i+j , this.size() ) ];
-    }
-    return new Profile(newArray);
-  }
+	/**
+	 * Copy the profile and offset it to start from the given index
+	 * @param j the index to start from
+	 * @return a new offset Profile
+	 */
+	public Profile offset(int j){
+		double[] newArray = new double[this.size()];
+		for(int i=0;i<this.size();i++){
+			newArray[i] = this.array[ Utils.wrapIndex( i+j , this.size() ) ];
+		}
+		return new Profile(newArray);
+	}
   
-  /**
-   * Perform a window-averaging smooth of the profile with the given window size
-   * @param windowSize the size of the window
-   * @return
-   */
-  public Profile smooth(int windowSize){
+	/**
+	 * Perform a window-averaging smooth of the profile with the given window size
+	 * @param windowSize the size of the window
+	 * @return
+	 */
+	public Profile smooth(int windowSize){
 
-	  double[] result = new double[this.size()];
+		double[] result = new double[this.size()];
 
-	  for (int i=0; i<array.length; i++) { // for each position
+		for (int i=0; i<array.length; i++) { // for each position
 
-		  double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
-		  double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
+			double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+			double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
 
-		  double average = array[i];
-		  for(int k=0;k<prevValues.length;k++){ 
-			  average += prevValues[k] + nextValues[k];	        
-		  }
+			double average = array[i];
+			for(int k=0;k<prevValues.length;k++){ 
+				average += prevValues[k] + nextValues[k];	        
+			}
 
-		  result[i] = average / (windowSize*2 + 1);
-	  }
-	  return new Profile(result);
-  }
+			result[i] = average / (windowSize*2 + 1);
+		}
+		return new Profile(result);
+	}
   
-  /**
-   * Get an array of the values <windowSize> before or after the current point
-   * @param position the position in the array
-   * @param windowSize the number of points to find
-   * @param type find points before or after
-   * @return
-   */
-  private double[] getValues(int position, int windowSize, int type){
+	/**
+	 * Get an array of the values <windowSize> before or after the current point
+	 * @param position the position in the array
+	 * @param windowSize the number of points to find
+	 * @param type find points before or after
+	 * @return an array of values
+	 */
+	private double[] getValues(int position, int windowSize, int type){
 
-	  double[] values = new double[windowSize]; // slots for previous angles
-	  for(int j=0;j<values.length;j++){
+		double[] values = new double[windowSize]; // slots for previous angles
+		for(int j=0;j<values.length;j++){
 
-		  // If type was before, multiply by -1; if after, multiply by 1
-		  int index = Utils.wrapIndex( position + ((j+1)*type)  , this.size() );
-		  values[j] = array[index];
-	  }
-	  return values;
-  }
+			// If type was before, multiply by -1; if after, multiply by 1
+			int index = Utils.wrapIndex( position + ((j+1)*type)  , this.size() );
+			values[j] = array[index];
+		}
+		return values;
+	}
 
-  public void reverse(){
+	/**
+	 * Reverse the profile. Does not copy.
+	 */
+	public void reverse(){
 
-    double tmp;
-    for (int i = 0; i < this.array.length / 2; i++) {
-        tmp = this.array[i];
-        this.array[i] = this.array[this.array.length - 1 - i];
-        this.array[this.array.length - 1 - i] = tmp;
-    }
-  }  
+		double tmp;
+		for (int i = 0; i < this.array.length / 2; i++) {
+			tmp = this.array[i];
+			this.array[i] = this.array[this.array.length - 1 - i];
+			this.array[this.array.length - 1 - i] = tmp;
+		}
+	}  
 
   /**
    * Make this profile the length specified.
@@ -323,25 +388,24 @@ public class Profile implements Serializable {
     Interpolate another profile to match this, and move this profile
     along it one index at a time. Find the point of least difference, 
     and return this offset. Returns the positive offset to this profile
-  */
+   */
   public int getSlidingWindowOffset(Profile testProfile){
 
-    double lowestScore = this.differenceToProfile(testProfile);
-    int index = 0;
-    for(int i=0;i<this.size();i++){
+	  double lowestScore = this.differenceToProfile(testProfile);
+	  int index = 0;
+	  for(int i=0;i<this.size();i++){
 
-      Profile offsetProfile = this.offset(i);
+		  Profile offsetProfile = this.offset(i);
 
-      double score = offsetProfile.differenceToProfile(testProfile);
-      if(score<lowestScore){
-        lowestScore=score;
-        index=i;
-      }
+		  double score = offsetProfile.differenceToProfile(testProfile);
+		  if(score<lowestScore){
+			  lowestScore=score;
+			  index=i;
+		  }
 
-    }
-    return index;
+	  }
+	  return index;
   }
-
 
 
   /*
