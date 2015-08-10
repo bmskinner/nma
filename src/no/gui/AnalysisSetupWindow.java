@@ -40,6 +40,7 @@ import java.util.Map;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import utility.Constants;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.CannyOptions;
 import no.nuclei.RoundNucleus;
@@ -51,9 +52,9 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	private AnalysisOptions analysisOptions = new AnalysisOptions();
 
 	// types of nucleus
-	private static final String RODENT_SPERM_NUCLEUS 	= "Rodent sperm";
-	private static final String PIG_SPERM_NUCLEUS 		= "Pig sperm";
-	private static final String ROUND_NUCLEUS 			= "Round nucleus";
+//	private static final String RODENT_SPERM_NUCLEUS 	= "Rodent sperm";
+//	private static final String PIG_SPERM_NUCLEUS 		= "Pig sperm";
+//	private static final String ROUND_NUCLEUS 			= "Round nucleus";
 	
 	private static final int    DEFAULT_MIN_NUCLEUS_SIZE = 2000;
 	private static final int    DEFAULT_MAX_NUCLEUS_SIZE = 10000;
@@ -70,9 +71,9 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	static
 	{
 		nucleusClassTypes = new HashMap<String, Class<?>>();
-		nucleusClassTypes.put(RODENT_SPERM_NUCLEUS, RodentSpermNucleus.class);
-		nucleusClassTypes.put(PIG_SPERM_NUCLEUS, PigSpermNucleus.class);
-		nucleusClassTypes.put(ROUND_NUCLEUS, RoundNucleus.class);
+		nucleusClassTypes.put(Constants.Nucleus.RODENT_SPERM.string(), RodentSpermNucleus.class);
+		nucleusClassTypes.put(Constants.Nucleus.PIG_SPERM.string()	, PigSpermNucleus.class);
+		nucleusClassTypes.put(Constants.Nucleus.ROUND.string()		, RoundNucleus.class);
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -449,20 +450,20 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 			this.analysisOptions.setNucleusClass(nucleusClassTypes.get(type));
 //			this.analysisOptions.setCollectionClass(collectionClassTypes.get(type));
 			
-			if(type.equals(ROUND_NUCLEUS)){
+			if(type.equals(Constants.Nucleus.ROUND.string())){
 				this.analysisOptions.setMinNucleusCirc(  0.0 );
 				this.analysisOptions.setMaxNucleusCirc(  1.0 );
 				minNuclearCircSpinner.setValue(0.0);
 				maxNuclearCircSpinner.setValue(1.0);
 				
 			}
-			if(type.equals(RODENT_SPERM_NUCLEUS)){
+			if(type.equals(Constants.Nucleus.RODENT_SPERM.string())){
 				this.analysisOptions.setMinNucleusCirc(  0.2 );
 				this.analysisOptions.setMaxNucleusCirc(  0.8 );
 				minNuclearCircSpinner.setValue(0.2);
 				maxNuclearCircSpinner.setValue(0.8);
 			}
-			if(type.equals(PIG_SPERM_NUCLEUS)){
+			if(type.equals(Constants.Nucleus.PIG_SPERM.string())){
 				this.analysisOptions.setMinNucleusCirc(  0.2 );
 				this.analysisOptions.setMaxNucleusCirc(  0.8 );
 				minNuclearCircSpinner.setValue(0.2);

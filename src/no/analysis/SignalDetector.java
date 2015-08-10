@@ -327,9 +327,9 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		n.calculateFractionalSignalDistancesFromCoM();
 
 		if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-			if(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT)!=null){
+			if(n.getBorderTag(Constants.Nucleus.ASYMMETRIC.orientationPoint())!=null){
 
-				n.calculateSignalAnglesFromPoint(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT));
+				n.calculateSignalAnglesFromPoint(n.getBorderTag(Constants.Nucleus.ASYMMETRIC.orientationPoint()));
 			}
 		}
 
