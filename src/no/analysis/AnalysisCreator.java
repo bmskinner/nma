@@ -162,10 +162,10 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 
 		try {
 			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);			
+				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());			
 				
 			} else {
-				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
 			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);

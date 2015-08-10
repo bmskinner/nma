@@ -71,9 +71,9 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	public void done() {
 		try {
 			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);
+				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
 			} else {
-				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
 			logger.log("Unable to refold nucleus: "+e.getMessage(), Logger.ERROR);

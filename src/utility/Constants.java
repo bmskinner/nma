@@ -30,13 +30,7 @@ public class Constants {
 		public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
 		
-		
-		// SwingWorker states for progress bars (can only pass ints)
-		public static final int PROGRESS_FINISHED 	= -1; // signal cleanup of progress bar
-		public static final int PROGRESS_ERROR		= -2; // signal error occurred in analysis
-		public static final int PROGRESS_COOLDOWN 	= -3; // signal switch to indeterminate bar
-		
-		
+				
 		/**
 		 * Given an RGB channel, get the ImageStack stack for internal use
 		 * @param channel the channel
@@ -124,6 +118,28 @@ public class Constants {
 		    
 		    public String string(){
 		    	return this.asString;
+		    }
+		}
+		
+
+		/**
+		 *  SwingWorker states for progress bars (can only pass ints).
+		 *  This allows the bar to switch appropriately
+		 *
+		 */
+		public enum Progress {
+			FINISHED (-1),   // signal cleanup of progress bar
+			ERROR 	 (-2),	// signal error occurred in analysis
+			COOLDOWN (-3);	// signal switch to indeterminate bar
+			
+			private final int code;
+			
+			Progress(int code) {
+		        this.code = code;
+			}
+		    
+		    public int code(){
+		    	return this.code;
 		    }
 		}
 
