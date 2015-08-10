@@ -1,7 +1,5 @@
 package no.analysis;
 
-import ij.IJ;
-
 import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
@@ -17,10 +15,7 @@ import utility.Constants;
 import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.ShellResult;
-import no.export.PopulationExporter;
 import no.gui.ColourSelecter;
-import no.gui.MainWindow;
-import no.nuclei.Nucleus;
 
 
 /**
@@ -276,6 +271,19 @@ public class AnalysisDataset implements Serializable {
 		if(this.childCollections.containsKey(child)){
 			return true;
 		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Check if this dataset is the child of the given dataset
+	 * @param parent the parent dataset
+	 * @return
+	 */
+	public boolean isChild(AnalysisDataset parent){
+		if(parent.hasChild(this)){
+			return true;
+		} else{
 			return false;
 		}
 	}
