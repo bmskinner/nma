@@ -273,37 +273,39 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			if(analysisOptions.refoldNucleus()){
 				mw.logc("Refolding profile...");
 				
-				CurveRefolder refolder = null;
-				try {
-					refolder = new CurveRefolder(r, 
-							analysisOptions.getNucleusClass(), 
-							analysisOptions.getRefoldMode());
-				} catch (Exception e1) {
-					logger.log("Error in refolding: "+e1.getMessage(), Logger.ERROR);
-					for(StackTraceElement e2 : e1.getStackTrace()){
-						logger.log(e2.toString(), Logger.STACK);
-					}
-				}
+				 mw. new RefoldNucleusAction(dataset);
 				
-				refolder.execute();
-				try {
-					if(refolder.get()){
-						mw.log("OK");
-					} else {
-						mw.log("Error");
-					}
-				} catch (InterruptedException e) {
-					logger.log("Error in refolding: "+e.getMessage(), Logger.ERROR);
-					for(StackTraceElement el : e.getStackTrace()){
-						logger.log(el.toString(), Logger.STACK);
-					}
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					logger.log("Error in refolding: "+e.getMessage(), Logger.ERROR);
-					for(StackTraceElement el : e.getStackTrace()){
-						logger.log(el.toString(), Logger.STACK);
-					}
-				}
+//				CurveRefolder refolder = null;
+//				try {
+//					refolder = new CurveRefolder(r, 
+//							analysisOptions.getNucleusClass(), 
+//							analysisOptions.getRefoldMode());
+//				} catch (Exception e1) {
+//					logger.log("Error in refolding: "+e1.getMessage(), Logger.ERROR);
+//					for(StackTraceElement e2 : e1.getStackTrace()){
+//						logger.log(e2.toString(), Logger.STACK);
+//					}
+//				}
+//				
+//				refolder.execute();
+//				try {
+//					if(refolder.get()){
+//						mw.log("OK");
+//					} else {
+//						mw.log("Error");
+//					}
+//				} catch (InterruptedException e) {
+//					logger.log("Error in refolding: "+e.getMessage(), Logger.ERROR);
+//					for(StackTraceElement el : e.getStackTrace()){
+//						logger.log(el.toString(), Logger.STACK);
+//					}
+//					e.printStackTrace();
+//				} catch (ExecutionException e) {
+//					logger.log("Error in refolding: "+e.getMessage(), Logger.ERROR);
+//					for(StackTraceElement el : e.getStackTrace()){
+//						logger.log(el.toString(), Logger.STACK);
+//					}
+//				}
 				
 			}
 

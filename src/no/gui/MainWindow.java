@@ -1066,11 +1066,38 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	/**
 	 * Refold the consensus nucleus for the selected dataset using default parameters
 	 */
-	class RefoldNucleusAction extends ProgressableAction {
+	public class RefoldNucleusAction extends ProgressableAction {
 
+		/**
+		 * Refold the currently selected dataset
+		 */
 		public RefoldNucleusAction() {
 			super("Curve refolding", "Error refolding nucleus");
 
+			try{
+
+				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
+						d.getAnalysisOptions().getNucleusClass(), 
+						"Fast");
+
+				refolder.addPropertyChangeListener(this);
+				this.setProgressMessage("Curve refolding:"+d.getName());
+				refolder.execute();
+
+			} catch(Exception e1){
+				this.cancel();
+				log("Error refolding nucleus");
+			}
+		}
+		
+		/**
+		 * Refold the given dataset
+		 * @param dataset
+		 */
+		public RefoldNucleusAction(AnalysisDataset dataset){
+			super("Curve refolding", "Error refolding nucleus");
+			this.d = dataset;
+			
 			try{
 
 				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
@@ -1267,6 +1294,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					for(AnalysisDataset child : d.getChildDatasets()){
 						populationsPanel.addDataset(child);
 					}
+					
 					PopulationExporter.saveAnalysisDataset(d);
 
 				}

@@ -98,23 +98,6 @@ extends no.components.XYPoint
       }
     }
 
-//  public void setMidpoint(){
-//    int midpoint  = (int)Math.floor(this.getBlockSize()/2);
-//    if(this.getPositionWithinBlock() == midpoint){
-//      this.isMidpoint = true;
-//    } else {
-//      this.isMidpoint =false;
-//    }
-//  }
-
-//  public boolean isMidpoint(){
-//    int midpoint  = (int)Math.floor(this.getBlockSize()/2);
-//    if(this.getPositionWithinBlock() == midpoint && this.getPositionWithinBlock() !=0){
-//      return true;
-//    } else {
-//      return false;
-//    }
-//  }
 
   public double getMinAngle(){
     return this.minAngle;
