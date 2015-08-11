@@ -216,8 +216,13 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		btnOk.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				getImageDirectory();
-				AnalysisSetupWindow.this.setVisible(false);
+				if(getImageDirectory()){
+					AnalysisSetupWindow.this.setVisible(false);
+				} else {
+					analysisOptions = null;
+					AnalysisSetupWindow.this.dispose();
+				}
+				
 			}
 		});
 
@@ -227,6 +232,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		btnCancel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				analysisOptions = null;
 				AnalysisSetupWindow.this.dispose();
 			}
 		});
