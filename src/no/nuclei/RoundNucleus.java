@@ -999,11 +999,11 @@ public class RoundNucleus
 	/**
 	 * Export an image of the raw profile for this nucleus to
 	 * the nucleus folder 
-	 */
-	public void exportProfilePlotImage(){
-		ProfileSegmenter segmenter = new ProfileSegmenter(this.getAngleProfile(), this.segmentList);
-		segmenter.draw(this.getNucleusFolder()+File.separator+RoundNucleus.IMAGE_PREFIX+this.nucleusNumber+".segments.tiff");
-	}
+//	 */
+//	public void exportProfilePlotImage(){
+//		ProfileSegmenter segmenter = new ProfileSegmenter(this.getAngleProfile(), this.segmentList);
+//		segmenter.draw(this.getNucleusFolder()+File.separator+RoundNucleus.IMAGE_PREFIX+this.nucleusNumber+".segments.tiff");
+//	}
 
 	 /*
 		Get a readout of the state of the nucleus

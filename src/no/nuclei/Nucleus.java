@@ -231,7 +231,7 @@ public interface Nucleus {
 	public Map<String, Integer> getSegmentMap( );
 	public Profile getSingleDistanceProfile();
 
-	public void exportProfilePlotImage();
+//	public void exportProfilePlotImage();
 
 	public void dumpInfo(int type);
 
