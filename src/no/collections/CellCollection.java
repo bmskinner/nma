@@ -39,12 +39,12 @@ implements Serializable
 	public static final String FRANKEN_PROFILE = "franken";
 	
 	private static final long serialVersionUID = 1L;
-	private File folder; // the source of the nuclei
-	private String outputFolder;
-	private File debugFile;
-	private String collectionType; // for annotating image names
-	private String name;
-	private UUID guid;
+	private File 	folder; 		// the source of the nuclei
+	private String 	outputFolder;	// the location to save out data
+	private File 	debugFile;		// the location of the debug file 
+	private String 	collectionType; // for annotating image names
+	private String 	name;			// the name of the collection
+	private UUID 	guid;			// the collection id
 	
 	private Class<?> nucleusClass;
 		

@@ -106,7 +106,12 @@ public class ProfileAggregate implements Serializable {
 	 */
 	public Profile getXPositions(){
 		double[] result = new double[length];
+		
+		// start counting half a bin below zero
+		// this sets the value to the bin centre
 		double x = -this.profileIncrement/2;
+		
+		// add the bin size for each positions
 		for(int i=0;i<length;i++){
 			x += profileIncrement;
 			result[i] = x;
@@ -114,6 +119,10 @@ public class ProfileAggregate implements Serializable {
 		return new Profile(result);
 	}
 
+	/**
+	 * Get the number of values within each bin as a profile
+	 * @return
+	 */
 	public Profile getNumberOfPoints(){
 		double[] result = new double[length];
 
