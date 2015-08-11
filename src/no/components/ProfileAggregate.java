@@ -91,6 +91,14 @@ public class ProfileAggregate implements Serializable {
 			}
 		}        
 	}
+	
+	/**
+	 * Get the size of the bins covering the range 0-100
+	 * @return
+	 */
+	public double getBinSize(){
+		return this.profileIncrement;
+	}
 
 	/**
 	 * Get the x-axis positions of the centre of each bin.
