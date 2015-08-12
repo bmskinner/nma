@@ -264,6 +264,5 @@ public abstract class BorderSegment implements Serializable{
 		}
 	}
 	
-	public void 
 
 }

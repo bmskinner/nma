@@ -121,9 +121,9 @@ public class NucleusAnnotator {
 
 				NucleusBorderSegment seg = n.getSegmentTag("Seg_"+i);
 
-				float[] xpoints = new float[seg.length(n.getLength())+1];
-				float[] ypoints = new float[seg.length(n.getLength())+1];
-				for(int j=0; j<=seg.length(n.getLength());j++){
+				float[] xpoints = new float[seg.length()+1];
+				float[] ypoints = new float[seg.length()+1];
+				for(int j=0; j<=seg.length();j++){
 					int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getLength());
 					NucleusBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
 					xpoints[j] = (float) p.getX();

@@ -1019,7 +1019,7 @@ public class NucleusDatasetCreator {
 
 			for(Nucleus n : collection.getNuclei()){
 				NucleusBorderSegment seg = n.getSegmentTag(segName);
-				list.add(seg.length(n.getLength()));
+				list.add(seg.length());
 			}
 
 			dataset.add(list, segName+"_"+i, "Segment length: "+segName);
@@ -1100,9 +1100,9 @@ public class NucleusDatasetCreator {
 
 				NucleusBorderSegment seg = n.getSegmentTag("Seg_"+i);
 
-				double[] xpoints = new double[seg.length(n.getLength())+1];
-				double[] ypoints = new double[seg.length(n.getLength())+1];
-				for(int j=0; j<=seg.length(n.getLength());j++){
+				double[] xpoints = new double[seg.length()+1];
+				double[] ypoints = new double[seg.length()+1];
+				for(int j=0; j<=seg.length();j++){
 					int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getLength());
 					NucleusBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
 					xpoints[j] = p.getX();

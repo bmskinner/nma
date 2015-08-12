@@ -77,7 +77,7 @@ public class StatsExporter {
 			List<Integer> list = new ArrayList<Integer>(0);
 			for(Nucleus n : collection.getNuclei()){
 				NucleusBorderSegment seg = n.getSegmentTag(s);
-				list.add(seg.length(n.getLength()));
+				list.add(seg.length());
 			}
 			logger.addColumn(s, list.toArray(new Integer[0]));
 		}

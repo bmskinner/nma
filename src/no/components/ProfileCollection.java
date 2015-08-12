@@ -127,7 +127,7 @@ public class ProfileCollection implements Serializable {
 			int newStart = Utils.wrapIndex( s.getStartIndex()+ offset , getProfile(referencePoint).size());
 			int newEnd = Utils.wrapIndex( s.getEndIndex()+ offset , getProfile(referencePoint).size());
 			
-			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd);
+			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, s.getTotalLength());
 			c.setSegmentType(s.getSegmentType());
 			
 			result.add(c);

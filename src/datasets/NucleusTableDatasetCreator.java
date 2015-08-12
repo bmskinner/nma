@@ -66,7 +66,7 @@ public class NucleusTableDatasetCreator {
 				List<Object> rowData = new ArrayList<Object>(0);
 				
 				rowData.add("");
-				rowData.add(segment.length(nucleus.getLength()));
+				rowData.add(segment.length());
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
 

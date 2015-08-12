@@ -83,7 +83,7 @@ public class ProfileSegmenter {
 					&& Math.abs(dDeltas.get(i)) > variationRange*0.02
 					&& segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
 				// we've hit a new segment
-				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd);
+				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
 				seg.setSegmentType("Seg_"+segCount);
 				segments.add(seg);
 				segmentStart = i;

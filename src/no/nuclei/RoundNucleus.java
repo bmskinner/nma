@@ -985,7 +985,7 @@ public class RoundNucleus
 
 		for(NucleusBorderSegment seg :this.getSegments() ){
 			logger.addRow("SEGMENT" , seg.getSegmentType());
-			logger.addRow("PERIMETER_LENGTH" , seg.length(this.getLength()));
+			logger.addRow("PERIMETER_LENGTH" , seg.length());
 			logger.addRow("START_INDEX" , seg.getStartIndex());
 			logger.addRow("END_INDEX" , seg.getEndIndex());
 
@@ -1184,7 +1184,7 @@ public class RoundNucleus
 			int newStart = Utils.wrapIndex( s.getStartIndex()- offset , this.getLength());
 			int newEnd = Utils.wrapIndex( s.getEndIndex()- offset , this.getLength());
 			
-			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd);
+			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, this.getLength());
 			c.setSegmentType(s.getSegmentType());
 			
 			result.add(c);
