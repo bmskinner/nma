@@ -202,7 +202,35 @@ public class NucleusBorderSegment  implements Serializable{
 		IJ.log("Updated");
 	}
 
-
+	/**
+	 * Set the next segment in the profile from this
+	 * @param s
+	 */
+	public void setNextSegment(NucleusBorderSegment s){
+		if(s.getTotalLength() != this.getTotalLength()){
+			throw new IllegalArgumentException("Segment has a different total length");
+		}
+		if(s.getStartIndex() != this.getEndIndex()){
+			throw new IllegalArgumentException("Segment start does not overlap end");
+		}
+		
+		this.nextSegment = s;
+	}
+	
+	/**
+	 * Set the previous segment in the profile from this
+	 * @param s
+	 */
+	public void setPrevSegment(NucleusBorderSegment s){
+		if(s.getTotalLength() != this.getTotalLength()){
+			throw new IllegalArgumentException("Segment has a different total length");
+		}
+		if(s.getEndIndex() != this.getStartIndex()){
+			throw new IllegalArgumentException("Segment end does not overlap start");
+		}
+		
+		this.prevSegment = s;
+	}
 
 	public void setSegmentType(String s){
 		this.segmentType = s;
