@@ -43,12 +43,7 @@ public class SegmentFitter {
 	 * when creating new segment profiles
 	 */
 	private static int POINTS_TO_TEST = 50;
-	
-	/**
-	 * The smallest number of points a segment can contain. 
-	 */
-//	private static int MIN_SEGMENT_SIZE = 5;
-	
+		
 	/**
 	 * Construct with a median profile and list of segments. The originals will not be modified
 	 * @param medianProfile the profile
@@ -261,9 +256,9 @@ public class SegmentFitter {
 				}
 				
 				// add a penalty if the proposed new segment is shorter that the minimum segment length
-				if(newSeg.length()<ProfileSegmenter.MIN_SEGMENT_SIZE){
+				if(newSeg.length()<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
 					// penalty increases the smaller we go below the minimum
-					score += (ProfileSegmenter.MIN_SEGMENT_SIZE - newSeg.length()) * SegmentFitter.PENALTY_SHRINK;
+					score += (NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH - newSeg.length()) * SegmentFitter.PENALTY_SHRINK;
 				}
 				
 				if(score<minScore){
@@ -314,7 +309,7 @@ public class SegmentFitter {
 			// the new end point is the start point, plus half the minimum segment size
 			// The penalty for segments < MIN_SEGMENT_SIZE should bring this up again, but
 			// if there really is a shrinkage, this will hit on it faster
-			int newEndIndex = Utils.wrapIndex(seg.getStartIndex()+ProfileSegmenter.MIN_SEGMENT_SIZE/2, this.testProfile.size());
+			int newEndIndex = Utils.wrapIndex(seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2, this.testProfile.size());
 			seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex, unalteredSeg.getTotalLength());
 			
 //			int shortenValue = 
@@ -323,9 +318,9 @@ public class SegmentFitter {
 		}
 		
 		// if the segment is otherwise too short, update the end position
-		if( segLength<ProfileSegmenter.MIN_SEGMENT_SIZE/2){
+		if( segLength<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2){
 			// find the number of points needed to make the segment long enough
-			int extension = ProfileSegmenter.MIN_SEGMENT_SIZE/2 - segLength;
+			int extension = NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2 - segLength;
 			// get the index of the new end point
 			int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+extension, this.testProfile.size());
 			// add the new end index position to the segment
