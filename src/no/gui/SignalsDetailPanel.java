@@ -65,14 +65,13 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	private ChartPanel 	shellsChartPanel; 
 	private JPanel 		shellsPanel;
 	
-	private ChartPanel 	consensusChartPanel; 		// consensus nucleus plus signals
-	private JPanel 		overviewPanel;				// signals container for chart and stats table
-	private JTable 		statsTable;					// table for signal stats
+	
+	private OverviewPanel overviewPanel; 			//container for chart and stats table
+
 	private JPanel 		analysisSetupPanel;			// panel for analysis parameters
 	private JTable 		analysisSetupTable;			// table for analysis parameters
-	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
+
 	private JPanel 		boxplotsPanel;
-	private JPanel 		checkboxPanel;
 	private ChartPanel 	areaBoxplotChartPanel;
 	private JTabbedPane signalsTabPane;
 	
@@ -99,14 +98,13 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		
 		try{
 
-//			IJ.log("Buildig signals panel");
 			this.setLayout(new BorderLayout());
 
 			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-			overviewPanel = createOverviewPanel();
+			overviewPanel = new OverviewPanel();
 			signalsTabPane.addTab("Overview", overviewPanel);
-//			IJ.log("Made overview");
+
 			//---------------
 			// Distance and angle histograms charts
 			//---------------
@@ -152,103 +150,103 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		}
 	}
 	
-	private JPanel createOverviewPanel(){
-		JPanel panel = new JPanel(); // main container in tab
-		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-
-		//---------------
-		// Stats panel
-		//---------------
-		DefaultTableModel signalsTableModel = new DefaultTableModel();
-		signalsTableModel.addColumn("");
-		signalsTableModel.addColumn("");
-		statsTable = new JTable(); // table  for basic stats
-		statsTable.setModel(signalsTableModel);
-		statsTable.setEnabled(false);
-		
-		statsTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-				JTable table = (JTable) e.getSource();
-				
-				// double click
-				if (e.getClickCount() == 2) {
-					int row = table.rowAtPoint((e.getPoint()));
-
-					String value = table.getModel().getValueAt(row+1, 0).toString();
-					if(value.equals("Signal group")){
-						String groupString = table.getModel().getValueAt(row+1, 1).toString();
-						int signalGroup = Integer.valueOf(groupString);
-						
-						Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
-						
-						Color newColor = JColorChooser.showDialog(
-			                     SignalsDetailPanel.this,
-			                     "Choose signal Color",
-			                     oldColour);
-						
-						if(newColor != null){
-							activeDataset.setSignalGroupColour(signalGroup, newColor);
-							update(list);
-							fireSignalChangeEvent("SignalColourUpdate");
-						}
-					}
-						
-				}
-
-			}
-		});
-		
-		JScrollPane signalStatsScrollPane = new JScrollPane(statsTable);
-		panel.add(signalStatsScrollPane);
-		
-		//---------------
-		// Consensus chart
-		//---------------
-		consensusAndCheckboxPanel = createConsensusPanel();
-		panel.add(consensusAndCheckboxPanel);
-		return panel;
-	}
+//	private JPanel createOverviewPanel(){
+//		JPanel panel = new JPanel(); // main container in tab
+//		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+//
+//		//---------------
+//		// Stats panel
+//		//---------------
+//		DefaultTableModel signalsTableModel = new DefaultTableModel();
+//		signalsTableModel.addColumn("");
+//		signalsTableModel.addColumn("");
+//		statsTable = new JTable(); // table  for basic stats
+//		statsTable.setModel(signalsTableModel);
+//		statsTable.setEnabled(false);
+//		
+//		statsTable.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				
+//				JTable table = (JTable) e.getSource();
+//				
+//				// double click
+//				if (e.getClickCount() == 2) {
+//					int row = table.rowAtPoint((e.getPoint()));
+//
+//					String value = table.getModel().getValueAt(row+1, 0).toString();
+//					if(value.equals("Signal group")){
+//						String groupString = table.getModel().getValueAt(row+1, 1).toString();
+//						int signalGroup = Integer.valueOf(groupString);
+//						
+//						Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+//						
+//						Color newColor = JColorChooser.showDialog(
+//			                     SignalsDetailPanel.this,
+//			                     "Choose signal Color",
+//			                     oldColour);
+//						
+//						if(newColor != null){
+//							activeDataset.setSignalGroupColour(signalGroup, newColor);
+//							update(list);
+//							fireSignalChangeEvent("SignalColourUpdate");
+//						}
+//					}
+//						
+//				}
+//
+//			}
+//		});
+//		
+//		JScrollPane signalStatsScrollPane = new JScrollPane(statsTable);
+//		panel.add(signalStatsScrollPane);
+//		
+//		//---------------
+//		// Consensus chart
+//		//---------------
+//		consensusAndCheckboxPanel = createConsensusPanel();
+//		panel.add(consensusAndCheckboxPanel);
+//		return panel;
+//	}
 	
-	private JPanel createConsensusPanel(){
-		
-		final JPanel panel = new JPanel(new BorderLayout());
-		// make a blank chart for signal locations on a consensus nucleus
-		JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
-				null, null, null);
-		XYPlot signalsPlot = signalsChart.getXYPlot();
-
-		signalsPlot.setBackgroundPaint(Color.WHITE);
-		signalsPlot.getDomainAxis().setVisible(false);
-		signalsPlot.getRangeAxis().setVisible(false);
-				
-		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
-		// this allows a checkbox panel to be added to the JPanel later
-		consensusChartPanel = new ChartPanel(signalsChart);
-		panel.add(consensusChartPanel, BorderLayout.CENTER);
-		
-		consensusChartPanel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				resizePreview(consensusChartPanel, panel);
-			}
-		});
-		
-		panel.addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				resizePreview(consensusChartPanel, panel);
-			}
-		});
-		
-		
-		checkboxPanel = createSignalCheckboxPanel(null);
-		
-		panel.add(checkboxPanel, BorderLayout.NORTH);
-
-		return panel;
-	}
+//	private JPanel createConsensusPanel(){
+//		
+//		final JPanel panel = new JPanel(new BorderLayout());
+//		// make a blank chart for signal locations on a consensus nucleus
+//		JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
+//				null, null, null);
+//		XYPlot signalsPlot = signalsChart.getXYPlot();
+//
+//		signalsPlot.setBackgroundPaint(Color.WHITE);
+//		signalsPlot.getDomainAxis().setVisible(false);
+//		signalsPlot.getRangeAxis().setVisible(false);
+//				
+//		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
+//		// this allows a checkbox panel to be added to the JPanel later
+//		consensusChartPanel = new ChartPanel(signalsChart);
+//		panel.add(consensusChartPanel, BorderLayout.CENTER);
+//		
+//		consensusChartPanel.addComponentListener(new ComponentAdapter() {
+//			@Override
+//			public void componentResized(ComponentEvent e) {
+//				resizePreview(consensusChartPanel, panel);
+//			}
+//		});
+//		
+//		panel.addComponentListener(new ComponentAdapter() {
+//			@Override
+//			public void componentResized(ComponentEvent e) {
+//				resizePreview(consensusChartPanel, panel);
+//			}
+//		});
+//		
+//		
+//		checkboxPanel = createSignalCheckboxPanel(null);
+//		
+//		panel.add(checkboxPanel, BorderLayout.NORTH);
+//
+//		return panel;
+//	}
 	
 	private JPanel createHistogramsPanel(){
 		JFreeChart signalAngleChart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
@@ -289,9 +287,11 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	
 	public void update(List<AnalysisDataset> list){
 		this.list = list;
+		if(list.size()==1){
+			this.activeDataset = list.get(0);
+		}
 		updateShellPanel(list);
-		updateSignalConsensusChart(list);
-		updateSignalStatsPanel(list);
+		overviewPanel.update(list);
 		updateSignalHistogramPanel(list);
 		updateSignalAnalysisSetupPanel(list);
 		updateAreaBoxplot(list);
@@ -314,22 +314,22 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		}
 	}
 		
-	/**
-	 * Update the signal stats with the given datasets
-	 * @param list the datasets
-	 */
-	private void updateSignalStatsPanel(List<AnalysisDataset> list){
-		try{
-			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
-			statsTable.setModel(model);
-		} catch (Exception e){
-			fireSignalChangeEvent("Log_"+"Error updating signal stats: "+e.getMessage());
-		}
-		int columns = statsTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
-		}
-	}
+//	/**
+//	 * Update the signal stats with the given datasets
+//	 * @param list the datasets
+//	 */
+//	private void updateSignalStatsPanel(List<AnalysisDataset> list){
+//		try{
+//			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
+//			statsTable.setModel(model);
+//		} catch (Exception e){
+//			fireSignalChangeEvent("Log_"+"Error updating signal stats: "+e.getMessage());
+//		}
+//		int columns = statsTable.getColumnModel().getColumnCount();
+//		for(int i=1;i<columns;i++){
+//			statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+//		}
+//	}
 	
 	/**
 	 * Update the signal analysis detection settings with the given datasets
@@ -347,44 +347,44 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		}
 	}
 	
-	/**
-	 * Create the checkboxes that set each signal channel visible or not
-	 */
-	private JPanel createSignalCheckboxPanel(AnalysisDataset d){
-		JPanel panel = new JPanel();
-		
-		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		
-		if(d!=null){
-			try {
-
-				for(int signalGroup : d.getCollection().getSignalGroups()){
-
-					boolean visible = d.isSignalGroupVisible(signalGroup);
-
-					String name = d.getCollection().getSignalGroupName(signalGroup);
-					// make a checkbox for each signal group in the dataset
-					JCheckBox box = new JCheckBox(name);
-
-					// get the status within each dataset
-					box.setSelected(visible);
-
-					// apply the appropriate action 
-					box.setActionCommand("GroupVisble_"+signalGroup);
-					box.addActionListener(this);
-					panel.add(box);
-
-				}
-
-			} catch(Exception e){
-				IJ.log("Error creating signal checkboxes: "+e.getMessage());
-				for(StackTraceElement e1 : e.getStackTrace()){
-					IJ.log(e1.toString());
-				}
-			}
-		}
-		return panel;
-	}
+//	/**
+//	 * Create the checkboxes that set each signal channel visible or not
+//	 */
+//	private JPanel createSignalCheckboxPanel(AnalysisDataset d){
+//		JPanel panel = new JPanel();
+//		
+//		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+//		
+//		if(d!=null){
+//			try {
+//
+//				for(int signalGroup : d.getCollection().getSignalGroups()){
+//
+//					boolean visible = d.isSignalGroupVisible(signalGroup);
+//
+//					String name = d.getCollection().getSignalGroupName(signalGroup);
+//					// make a checkbox for each signal group in the dataset
+//					JCheckBox box = new JCheckBox(name);
+//
+//					// get the status within each dataset
+//					box.setSelected(visible);
+//
+//					// apply the appropriate action 
+//					box.setActionCommand("GroupVisble_"+signalGroup);
+//					box.addActionListener(this);
+//					panel.add(box);
+//
+//				}
+//
+//			} catch(Exception e){
+//				IJ.log("Error creating signal checkboxes: "+e.getMessage());
+//				for(StackTraceElement e1 : e.getStackTrace()){
+//					IJ.log(e1.toString());
+//				}
+//			}
+//		}
+//		return panel;
+//	}
 	
 	/**
 	 * Create a consenusus chart for the given nucleus collection
@@ -522,79 +522,79 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		}
 	}
 	
-	private void updateSignalConsensusChart(List<AnalysisDataset> list){
-		try {
-
-			if(list.size()==1){
-				this.activeDataset = list.get(0);
-								
-				// make a new panel for the active dataset
-				checkboxPanel = createSignalCheckboxPanel(activeDataset);
-				
-				// add this new panel
-				consensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
-				consensusAndCheckboxPanel.revalidate();
-				consensusAndCheckboxPanel.repaint();
-				consensusAndCheckboxPanel.setVisible(true);
-
-				CellCollection collection = activeDataset.getCollection();
-
-				if(collection.hasConsensusNucleus()){ // if a refold is available
-					
-					XYDataset signalCoMs = NucleusDatasetCreator.createSignalCoMDataset(activeDataset);
-					JFreeChart chart = makeConsensusChart(activeDataset);
-
-					XYPlot plot = chart.getXYPlot();
-					plot.setDataset(1, signalCoMs);
-
-					XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
-					for(int series=0;series<signalCoMs.getSeriesCount();series++){
-						
-						Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
-						rend.setSeriesShape(series, circle);
-						
-						String name = (String) signalCoMs.getSeriesKey(series);
-						int seriesGroup = getIndexFromLabel(name);
-						Color colour = activeDataset.getSignalGroupColour(seriesGroup);
-						rend.setSeriesPaint(series, colour);
-						rend.setBaseLinesVisible(false);
-						rend.setBaseShapesVisible(true);
-						rend.setBaseSeriesVisibleInLegend(false);
-					}
-					plot.setRenderer(1, rend);
-
-					for(int signalGroup : collection.getSignalGroups()){
-						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(activeDataset, signalGroup);
-
-						int signalCount = shapes.size();
-
-						int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
-						alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
-						
-						Color colour = activeDataset.getSignalGroupColour(signalGroup);
-
-						for(Shape s : shapes){
-							XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-									null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
-							plot.addAnnotation(an);
-						}
-					}
-					consensusChartPanel.setChart(chart);
-				} else { // no consensus to display
-										
-					consensusAndCheckboxPanel.setVisible(false);
-				}
-			} else { // multiple populations
-				
-				consensusAndCheckboxPanel.setVisible(false);
-			}
-		} catch(Exception e){
-			IJ.log("Error updating signals: "+e.getMessage());
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
-			}
-		}
-	}
+//	private void updateSignalConsensusChart(List<AnalysisDataset> list){
+//		try {
+//
+//			if(list.size()==1){
+//				this.activeDataset = list.get(0);
+//								
+//				// make a new panel for the active dataset
+//				checkboxPanel = createSignalCheckboxPanel(activeDataset);
+//				
+//				// add this new panel
+//				consensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
+//				consensusAndCheckboxPanel.revalidate();
+//				consensusAndCheckboxPanel.repaint();
+//				consensusAndCheckboxPanel.setVisible(true);
+//
+//				CellCollection collection = activeDataset.getCollection();
+//
+//				if(collection.hasConsensusNucleus()){ // if a refold is available
+//					
+//					XYDataset signalCoMs = NucleusDatasetCreator.createSignalCoMDataset(activeDataset);
+//					JFreeChart chart = makeConsensusChart(activeDataset);
+//
+//					XYPlot plot = chart.getXYPlot();
+//					plot.setDataset(1, signalCoMs);
+//
+//					XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
+//					for(int series=0;series<signalCoMs.getSeriesCount();series++){
+//						
+//						Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
+//						rend.setSeriesShape(series, circle);
+//						
+//						String name = (String) signalCoMs.getSeriesKey(series);
+//						int seriesGroup = getIndexFromLabel(name);
+//						Color colour = activeDataset.getSignalGroupColour(seriesGroup);
+//						rend.setSeriesPaint(series, colour);
+//						rend.setBaseLinesVisible(false);
+//						rend.setBaseShapesVisible(true);
+//						rend.setBaseSeriesVisibleInLegend(false);
+//					}
+//					plot.setRenderer(1, rend);
+//
+//					for(int signalGroup : collection.getSignalGroups()){
+//						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(activeDataset, signalGroup);
+//
+//						int signalCount = shapes.size();
+//
+//						int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
+//						alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+//						
+//						Color colour = activeDataset.getSignalGroupColour(signalGroup);
+//
+//						for(Shape s : shapes){
+//							XYShapeAnnotation an = new XYShapeAnnotation( s, null,
+//									null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
+//							plot.addAnnotation(an);
+//						}
+//					}
+//					consensusChartPanel.setChart(chart);
+//				} else { // no consensus to display
+//										
+//					consensusAndCheckboxPanel.setVisible(false);
+//				}
+//			} else { // multiple populations
+//				
+//				consensusAndCheckboxPanel.setVisible(false);
+//			}
+//		} catch(Exception e){
+//			IJ.log("Error updating signals: "+e.getMessage());
+//			for(StackTraceElement e1 : e.getStackTrace()){
+//				IJ.log(e1.toString());
+//			}
+//		}
+//	}
 	
 	/**
 	 * Update the shells panel with data from the given datasets
@@ -704,7 +704,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			JCheckBox box = (JCheckBox) e.getSource();
 			AnalysisDataset d = list.get(0);
 			d.setSignalGroupVisible(signalGroup, box.isSelected());
-			updateSignalConsensusChart(list);
+			overviewPanel.update(list);
 			updateSignalHistogramPanel(list);
 		}
 		
@@ -808,6 +808,261 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
         }
+    }
+    
+    
+    protected class OverviewPanel extends JPanel{
+    	
+    	private static final long serialVersionUID = 1L;
+    	
+    	private ChartPanel 	chartPanel; 		// consensus nucleus plus signals
+    	private JTable 		statsTable;					// table for signal stats
+    	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
+    	private JPanel		checkboxPanel;
+    	
+    	
+    	protected OverviewPanel(){
+    		
+    		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+    		JScrollPane scrollPane = createStatsPane();
+    		this.add(scrollPane);
+    		
+    	
+    		consensusAndCheckboxPanel = createConsensusPanel();
+    		this.add(consensusAndCheckboxPanel);
+    		
+    	}
+    	
+    	private JScrollPane createStatsPane(){
+    		DefaultTableModel tableModel = new DefaultTableModel();
+    		tableModel.addColumn("");
+    		tableModel.addColumn("");
+    		statsTable = new JTable(); // table  for basic stats
+    		statsTable.setModel(tableModel);
+    		statsTable.setEnabled(false);
+    		
+    		statsTable.addMouseListener(new MouseAdapter() {
+    			@Override
+    			public void mouseClicked(MouseEvent e) {
+    				
+    				JTable table = (JTable) e.getSource();
+    				
+    				// double click
+    				if (e.getClickCount() == 2) {
+    					int row = table.rowAtPoint((e.getPoint()));
+
+    					String value = table.getModel().getValueAt(row+1, 0).toString();
+    					if(value.equals("Signal group")){
+    						String groupString = table.getModel().getValueAt(row+1, 1).toString();
+    						int signalGroup = Integer.valueOf(groupString);
+    						
+    						Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+    						
+    						Color newColor = JColorChooser.showDialog(
+    			                     SignalsDetailPanel.this,
+    			                     "Choose signal Color",
+    			                     oldColour);
+    						
+    						if(newColor != null){
+    							activeDataset.setSignalGroupColour(signalGroup, newColor);
+    							SignalsDetailPanel.this.update(list);
+    							fireSignalChangeEvent("SignalColourUpdate");
+    						}
+    					}
+    						
+    				}
+
+    			}
+    		});
+    		
+    		JScrollPane scrollPane = new JScrollPane(statsTable);
+    		return scrollPane;
+    	}
+    	
+    	private JPanel createConsensusPanel(){
+    		
+    		final JPanel panel = new JPanel(new BorderLayout());
+    		// make a blank chart for signal locations on a consensus nucleus
+    		JFreeChart signalsChart = ChartFactory.createXYLineChart(null,  // chart for conseusns
+    				null, null, null);
+    		XYPlot signalsPlot = signalsChart.getXYPlot();
+
+    		signalsPlot.setBackgroundPaint(Color.WHITE);
+    		signalsPlot.getDomainAxis().setVisible(false);
+    		signalsPlot.getRangeAxis().setVisible(false);
+    				
+    		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
+    		// this allows a checkbox panel to be added to the JPanel later
+    		chartPanel = new ChartPanel(signalsChart);
+    		panel.add(chartPanel, BorderLayout.CENTER);
+    		
+    		chartPanel.addComponentListener(new ComponentAdapter() {
+    			@Override
+    			public void componentResized(ComponentEvent e) {
+    				resizePreview(chartPanel, panel);
+    			}
+    		});
+    		
+    		panel.addComponentListener(new ComponentAdapter() {
+    			@Override
+    			public void componentResized(ComponentEvent e) {
+    				resizePreview(chartPanel, panel);
+    			}
+    		});
+    		
+    		
+    		checkboxPanel = createSignalCheckboxPanel(null);
+    		
+    		panel.add(checkboxPanel, BorderLayout.NORTH);
+
+    		return panel;
+    	}
+    	
+    	/**
+    	 * Create the checkboxes that set each signal channel visible or not
+    	 */
+    	private JPanel createSignalCheckboxPanel(AnalysisDataset d){
+    		JPanel panel = new JPanel();
+    		
+    		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+    		
+    		if(d!=null){
+    			try {
+
+    				for(int signalGroup : d.getCollection().getSignalGroups()){
+
+    					boolean visible = d.isSignalGroupVisible(signalGroup);
+
+    					String name = d.getCollection().getSignalGroupName(signalGroup);
+    					// make a checkbox for each signal group in the dataset
+    					JCheckBox box = new JCheckBox(name);
+
+    					// get the status within each dataset
+    					box.setSelected(visible);
+
+    					// apply the appropriate action 
+    					box.setActionCommand("GroupVisble_"+signalGroup);
+    					box.addActionListener(SignalsDetailPanel.this);
+    					panel.add(box);
+
+    				}
+
+    			} catch(Exception e){
+    				IJ.log("Error creating signal checkboxes: "+e.getMessage());
+    				for(StackTraceElement e1 : e.getStackTrace()){
+    					IJ.log(e1.toString());
+    				}
+    			}
+    		}
+    		return panel;
+    	}
+    	
+    	protected void update(List<AnalysisDataset> list){
+    		updateCheckboxPanel(list);
+    		updateSignalConsensusChart(list);
+    		updateSignalStatsPanel(list);
+    	}
+    	
+    	/**
+    	 * Update the signal stats with the given datasets
+    	 * @param list the datasets
+    	 */
+    	private void updateSignalStatsPanel(List<AnalysisDataset> list){
+    		try{
+    			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
+    			statsTable.setModel(model);
+    		} catch (Exception e){
+    			fireSignalChangeEvent("Log_"+"Error updating signal stats: "+e.getMessage());
+    		}
+    		int columns = statsTable.getColumnModel().getColumnCount();
+    		for(int i=1;i<columns;i++){
+    			statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+    		}
+    	}
+    	
+    	private void updateCheckboxPanel(List<AnalysisDataset> list){
+    		if(list.size()==1){
+								
+				// make a new panel for the active dataset
+				consensusAndCheckboxPanel.remove(checkboxPanel);
+				checkboxPanel = createSignalCheckboxPanel(activeDataset);
+	
+				// add this new panel
+				consensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
+				consensusAndCheckboxPanel.revalidate();
+				consensusAndCheckboxPanel.repaint();
+				consensusAndCheckboxPanel.setVisible(true);
+    		}
+    	}
+    	
+    	
+    	private void updateSignalConsensusChart(List<AnalysisDataset> list){
+    		try {
+
+    			if(list.size()==1){
+    								
+    				CellCollection collection = activeDataset.getCollection();
+
+    				if(collection.hasConsensusNucleus()){ // if a refold is available
+    					
+    					XYDataset signalCoMs = NucleusDatasetCreator.createSignalCoMDataset(activeDataset);
+    					JFreeChart chart = makeConsensusChart(activeDataset);
+
+    					XYPlot plot = chart.getXYPlot();
+    					plot.setDataset(1, signalCoMs);
+
+    					XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
+    					for(int series=0;series<signalCoMs.getSeriesCount();series++){
+    						
+    						Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
+    						rend.setSeriesShape(series, circle);
+    						
+    						String name = (String) signalCoMs.getSeriesKey(series);
+    						int seriesGroup = getIndexFromLabel(name);
+    						Color colour = activeDataset.getSignalGroupColour(seriesGroup);
+    						rend.setSeriesPaint(series, colour);
+    						rend.setBaseLinesVisible(false);
+    						rend.setBaseShapesVisible(true);
+    						rend.setBaseSeriesVisibleInLegend(false);
+    					}
+    					plot.setRenderer(1, rend);
+
+    					for(int signalGroup : collection.getSignalGroups()){
+    						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(activeDataset, signalGroup);
+
+    						int signalCount = shapes.size();
+
+    						int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
+    						alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+    						
+    						Color colour = activeDataset.getSignalGroupColour(signalGroup);
+
+    						for(Shape s : shapes){
+    							XYShapeAnnotation an = new XYShapeAnnotation( s, null,
+    									null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
+    							plot.addAnnotation(an);
+    						}
+    					}
+    					chartPanel.setChart(chart);
+    				} else { // no consensus to display
+    										
+    					consensusAndCheckboxPanel.setVisible(false);
+    				}
+    			} else { // multiple populations
+    				
+    				consensusAndCheckboxPanel.setVisible(false);
+    			}
+    		} catch(Exception e){
+    			IJ.log("Error updating signals: "+e.getMessage());
+    			for(StackTraceElement e1 : e.getStackTrace()){
+    				IJ.log(e1.toString());
+    			}
+    		}
+    	}
+    	
+    	
+    	
     }
     
 
