@@ -220,18 +220,9 @@ public interface Nucleus {
 
 	public void exportSegments();
 
-	/*
-    Export the current image state, with
-    any annotations to export.nn.annotated.tiff
-	 */
-	//  public void exportAnnotatedImage();
-
-	//  public void annotateNucleusImage();
 
 	public Map<String, Integer> getSegmentMap( );
 	public Profile getSingleDistanceProfile();
-
-//	public void exportProfilePlotImage();
 
 	public void dumpInfo(int type);
 
@@ -261,23 +252,66 @@ public interface Nucleus {
 	 */
 	public int getBorderIndex(String s);
 
+	/**
+	 * Get a set of all the tags present within this nucleus
+	 * @return
+	 */
 	public Set<String> getTags();
 
+	/**
+	 * Get a list of all the segments within the nucleus
+	 * @return
+	 */
 	public List<NucleusBorderSegment> getSegments();
+	
+	/**
+	 * Create a list of segments offset to a reference point. This point
+	 * will be the new zero index in the segment list
+	 * @param pointType the border tag to offset against
+	 */
+	public List<NucleusBorderSegment> getSegments(String pointType);
 
+	/**
+	 * Get the segment with the given name
+	 * @param s the name
+	 * @return
+	 */
 	public NucleusBorderSegment getSegmentTag(String s);
 
+	/**
+	 * Set the name of the given NucleusBorderPoint
+	 * @param name the new name
+	 * @param i the index of the border point
+	 */
 	public void addBorderTag(String name, int i);
 
+	/**
+	 * Add a name to the given segment
+	 * @param name the new name
+	 * @param i the segment number
+	 */
 	public void addSegmentTag(String name, int i);
 
+	/**
+	 * Remove all segments from this nucleus
+	 */
 	public void clearSegments();
 
+	/**
+	 * Calculate a new angle profile with the given window size. It
+	 * will replace the existing angle profile
+	 * @param angleProfileWindowSize the window size
+	 */
 	public void calculateAngleProfile(int angleProfileWindowSize);
 
-	//  public FloatPolygon createPolygon();
 
+	/**
+	 * Set the segmention of the nucleus to the given list
+	 * @param newList the list of segments
+	 */
 	public void setSegments(List<NucleusBorderSegment> newList);
+	
+	
 	public SignalCollection getSignalCollection();
 	
 	
@@ -312,6 +346,7 @@ public interface Nucleus {
 	public Set<Integer> getSignalGroups();
 	
 	public Map<String, Integer> getBorderTags();
+	
 	public void addSegment(NucleusBorderSegment n);
 	public void reverse();
 	public String getOutputFolderName();

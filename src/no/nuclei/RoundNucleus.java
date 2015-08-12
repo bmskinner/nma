@@ -1163,6 +1163,36 @@ public class RoundNucleus
 		return this.segmentList;
 	}
 	
+	/**
+	 * Create a list of segments offset to a reference point
+	 * @param pointType the border tag to offset against
+	 */
+	public List<NucleusBorderSegment> getSegments(String pointType){
+		if(pointType==null){
+			throw new IllegalArgumentException("String or offset is null or empty");
+		}
+		
+		if(!this.borderTags.containsKey(pointType)){
+			throw new IllegalArgumentException("Point type does not exist in nucleus: "+pointType);
+		}
+		List<NucleusBorderSegment> referenceList =  getSegments();
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
+		
+		int offset = this.getBorderIndex(pointType); // this is our new zero
+		for(NucleusBorderSegment s : referenceList){
+			
+			int newStart = Utils.wrapIndex( s.getStartIndex()- offset , this.getLength());
+			int newEnd = Utils.wrapIndex( s.getEndIndex()- offset , this.getLength());
+			
+			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd);
+			c.setSegmentType(s.getSegmentType());
+			
+			result.add(c);
+		}
+		
+		return result;
+	}
+	
 	public void setSegments(List<NucleusBorderSegment> segments){
 		this.segmentList = segments;
 	}

@@ -39,6 +39,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import cell.Cell;
 import components.Flagellum;
+import utility.Constants;
 import utility.Equation;
 import utility.Utils;
 
@@ -467,6 +468,29 @@ public class NucleusDatasetCreator {
 			double[][] ndata = { xpoints.asArray(), angles.asArray() };
 			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
 		}
+		return ds;
+	}
+	
+	/**
+	 * Create a segmented dataset for an individual nucleus
+	 * @param nucleus the nucleus to draw
+	 * @return
+	 */
+	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		Profile profile = nucleus.getAngleProfile(Constants.Nucleus.RODENT_SPERM.referencePoint());
+		Profile xpoints = profile.getPositions(100);
+		
+		// rendering order will be first on top
+		
+		// add the segments
+		List<NucleusBorderSegment> segments = nucleus.getSegments();
+		addSegmentsFromProfile(segments, profile, ds, 100, 0, 0);
+		
+		double[][] ndata = { xpoints.asArray(), profile.asArray() };
+		ds.addSeries("Nucleus_"+nucleus.getImageName()+"-"+nucleus.getNucleusNumber(), ndata);
+		
 		return ds;
 	}
 
