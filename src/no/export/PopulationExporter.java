@@ -73,6 +73,12 @@ public class PopulationExporter {
 		return true;
 	}
 	
+	/**
+	 * Save the given dataset to the given file
+	 * @param dataset the dataset
+	 * @param saveFile the file to save as
+	 * @return
+	 */
 	public static boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
 		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
 
@@ -121,6 +127,11 @@ public class PopulationExporter {
 		return true;
 	}
 	
+	/**
+	 * Save the given dataset to it's preferred save path
+	 * @param dataset the dataset
+	 * @return ok or not
+	 */
 	public static boolean saveAnalysisDataset(AnalysisDataset dataset){
 
 		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");

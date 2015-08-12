@@ -12,23 +12,6 @@ public class ColourSelecter {
 	// these are the colours for segments in the order they will loop
 	static {
 
-		
-		// For making pretty charts
-//		colourList.add(Color.ORANGE);
-//		colourList.add(Color.YELLOW);
-//		colourList.add(Color.BLUE);
-//		colourList.add(Color.CYAN);
-		
-//		colourList.add(Color.BLUE);
-//		colourList.add(Color.GREEN);
-//		colourList.add(Color.ORANGE);
-		
-//		colourList.add(Color.BLUE);
-//		colourList.add(new Color(0,102,0));
-//		colourList.add(Color.GREEN);
-//		colourList.add(new Color(102,255,102));
-//		colourList.add(Color.ORANGE);
-//
 //		 Regular
 		segmentColourList.add(Color.RED);
 		segmentColourList.add(Color.ORANGE);
@@ -38,6 +21,8 @@ public class ColourSelecter {
 		segmentColourList.add(Color.CYAN);
 		segmentColourList.add(Color.YELLOW);
 		segmentColourList.add(Color.PINK);
+		segmentColourList.add( new Color(0,153,0)); // 
+		segmentColourList.add(new Color(135,206,235)); // sky blue
 				
 		
 		signalColourList.add(Color.RED);

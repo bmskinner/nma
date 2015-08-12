@@ -131,7 +131,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  logger.log("Running nucleus detector");
 			  processFolder(this.inputFolder);
 			  
-			  firePropertyChange("Cooldown", getProgress(), Constants.PROGRESS_COOLDOWN);
+			  firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 				
 			  List<CellCollection> folderCollection = this.getNucleiCollections();
 				// insert analyse populations from  analysis creator
@@ -155,10 +155,10 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
 		try {
 			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);			
+				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());			
 				
 			} else {
-				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
 			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);

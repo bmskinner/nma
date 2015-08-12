@@ -149,10 +149,10 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 
 		try {
 			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);			
+				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());			
 				
 			} else {
-				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
 			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
@@ -327,9 +327,9 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		n.calculateFractionalSignalDistancesFromCoM();
 
 		if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-			if(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT)!=null){
+			if(n.getBorderTag(Constants.Nucleus.ASYMMETRIC.orientationPoint())!=null){
 
-				n.calculateSignalAnglesFromPoint(n.getBorderTag(Constants.ASYMMETRIC_NUCLEUS_ORIENTATION_POINT));
+				n.calculateSignalAnglesFromPoint(n.getBorderTag(Constants.Nucleus.ASYMMETRIC.orientationPoint()));
 			}
 		}
 

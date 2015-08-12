@@ -7,12 +7,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.BoxLayout;
 import javax.swing.JColorChooser;
@@ -26,6 +29,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
+import no.export.PopulationExporter;
 
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
@@ -377,8 +381,41 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 	 */
 	private String checkName(String name){
 		String result = name;
+		System.out.println("Testing "+name);
+
 		if(this.populationNames.containsKey(name)){
-			result = checkName(name+"_1");
+			
+			System.out.println("Found existing "+name);
+			
+			Pattern pattern = Pattern.compile("_(\\d+)$");
+			Matcher matcher = pattern.matcher(name);
+			
+			int digit = 0;
+			
+			while (matcher.find()) {
+			
+				System.out.println("Matched regex: "+matcher.toString());
+				System.out.println("Matched on "+matcher.group(1));
+				
+				digit = Integer.valueOf(matcher.group(1));
+				System.out.println("Found "+name+": changing to "+digit);
+					
+				if(digit>0){
+					digit++;
+					System.out.println("Found "+name+": changing to "+digit);
+//					IJ.log("Found "+name+": changing to "+digit);
+					name = matcher.replaceFirst("_"+digit);
+				}
+				
+			}
+			
+			if(digit == 0) {
+				name = name+"_1";
+				System.out.println("No matches - appending _1");
+			}
+			result = checkName(name);
+		} else {
+			System.out.println("No matches to "+name+": returning");
 		}
 		return result;
 	}
@@ -394,13 +431,20 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		if(!newName.isEmpty() && newName!=null){
 		
 			if(this.populationNames.containsKey(newName)){
-				IJ.log("Name exists, aborting");
+				fireSignalChangeEvent("Log_Name exists, aborting");
 			} else {
 				String oldName = collection.getName();
 				collection.setName(newName);
 				this.populationNames.put(newName, collection.getID());
 				this.populationNames.remove(oldName);
-				IJ.log("Collection renamed: "+newName);
+				fireSignalChangeEvent("Log_Collection renamed: "+newName);
+				
+				
+				File saveFile = dataset.getSavePath();
+				if(saveFile.exists()){
+					saveFile.delete();
+				}
+				PopulationExporter.saveAnalysisDataset(dataset);
 				update();
 				
 				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);

@@ -280,15 +280,13 @@ public class MorphologyAnalysis {
 		logger.log("Applying existing segmentation profile to population...");
 		
 		try {
-			String referencePoint = collection.getReferencePoint();
+			String referencePoint   = collection.getReferencePoint();
 			String orientationPoint = collection.getOrientationPoint();
 			
 			// use the same array length as the source collection to avoid segment slippage
 			int profileLength = sourceCollection.getProfileCollection().getProfile(referencePoint).size();
 			createProfileAggregateFromPoint(collection, referencePoint, profileLength);
 			createProfileAggregateFromPoint(collection, orientationPoint, profileLength);
-//			createProfileAggregateFromPoint(collection, referencePoint, (int)sourceCollection.getMedianArrayLength());
-//			createProfileAggregateFromPoint(collection, orientationPoint, (int)sourceCollection.getMedianArrayLength());
 			
 			ProfileCollection pc = collection.getProfileCollection();
 			ProfileCollection sc = sourceCollection.getProfileCollection();
@@ -305,10 +303,8 @@ public class MorphologyAnalysis {
 			// Create a new frankenprofile
 			// copied from segmentation
 			reviseSegments(collection, referencePoint);	
-//			createProfileAggregates(collection);
 			applySegmentsToOtherPointTypes(collection, referencePoint);
-//			IJ.log("Regular: "+collection.getProfileCollection().printKeys());
-//			IJ.log("Franken: "+collection.getFrankenCollection().printKeys());
+
 
 		} catch (Exception e) {
 			logger.log("Error reapplying profiles: "+e.getMessage(), Logger.ERROR);

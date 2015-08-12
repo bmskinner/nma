@@ -113,7 +113,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 				publish(progress);
 				progress++;
 			}
-			firePropertyChange("Cooldown", getProgress(), Constants.PROGRESS_COOLDOWN);
+			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// get stats and export
 			for(int channel : counters.keySet()){
@@ -140,9 +140,9 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 	public void done() {
 		try {
 			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.PROGRESS_FINISHED);
+				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
 			} else {
-				firePropertyChange("Error", getProgress(), Constants.PROGRESS_ERROR);
+				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
 			logger.log("Error in shell analysis: "+e.getMessage(), Logger.ERROR);

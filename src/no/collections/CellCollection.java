@@ -39,12 +39,12 @@ implements Serializable
 	public static final String FRANKEN_PROFILE = "franken";
 	
 	private static final long serialVersionUID = 1L;
-	private File folder; // the source of the nuclei
-	private String outputFolder;
-	private File debugFile;
-	private String collectionType; // for annotating image names
-	private String name;
-	private UUID guid;
+	private File 	folder; 		// the source of the nuclei
+	private String 	outputFolder;	// the location to save out data
+	private File 	debugFile;		// the location of the debug file 
+	private String 	collectionType; // for annotating image names
+	private String 	name;			// the name of the collection
+	private UUID 	guid;			// the collection id
 	
 	private Class<?> nucleusClass;
 		
@@ -155,29 +155,29 @@ implements Serializable
   public String getReferencePoint(){
 	  	  
 	  if(this.nucleusClass == PigSpermNucleus.class){
-		  return Constants.PIG_SPERM_NUCLEUS_REFERENCE_POINT;
+		  return Constants.Nucleus.PIG_SPERM.referencePoint();
 	  }
 	  
 	  if(this.nucleusClass == RodentSpermNucleus.class){
-		  return Constants.RODENT_SPERM_NUCLEUS_REFERENCE_POINT;
+		  return Constants.Nucleus.RODENT_SPERM.referencePoint();
 	  }
 	  
 	  // default if not defined above
-	  return Constants.ROUND_NUCLEUS_REFERENCE_POINT;
+	  return Constants.Nucleus.ROUND.referencePoint();
 
   }
   
   public String getOrientationPoint(){
 	  if(this.nucleusClass == PigSpermNucleus.class){
-		  return Constants.PIG_SPERM_NUCLEUS_ORIENTATION_POINT;
+		  return Constants.Nucleus.PIG_SPERM.orientationPoint();
 	  }
 	  
 	  if(this.nucleusClass == RodentSpermNucleus.class){
-		  return Constants.RODENT_SPERM_NUCLEUS_ORIENTATION_POINT;
+		  return Constants.Nucleus.RODENT_SPERM.orientationPoint();
 	  }
 	  
 	  // default if not defined above
-	  return Constants.ROUND_NUCLEUS_ORIENTATION_POINT;
+	  return Constants.Nucleus.ROUND.orientationPoint();
   }
   
   public ProfileCollection getProfileCollection(String type){

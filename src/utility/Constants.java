@@ -26,46 +26,7 @@ public class Constants {
 		public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
 		
-		
-		// types of cells we can analyse
-		public static final String CELL_TYPE_GENERIC = "Cell"; // this is the only type in use
-		public static final String CELL_TYPE_ROUND = "Round cell";
-		public static final String CELL_TYPE_SPERM = "Sperm cell";
-		
-		// types of  nuclei we can analyse
-		public static final String NUCLEUS_ROUND 		= "Round nucleus";
-		public static final String NUCLEUS_RODENT_SPERM = "Rodent sperm nucleus";
-		public static final String NUCLEUS_PIG_SPERM 	= "Pig sperm nucleus";
-		
-		
-		
-		// structural components of the cell
-		public static final String COMPONENT_NUCLEUS		= "Nucleus";
-		public static final String COMPONENT_SPERM_TAIL		= "Sperm tail";
-		public static final String COMPONENT_MITOCHONDRION	= "Mitochondria";
-		public static final String COMPONENT_NUCLEAR_SIGNAL	= "Nuclear signal";
-		public static final String COMPONENT_ACROSOME		= "Acrosome";
-		
-		
-		// reference and orientation points for nucleus types
-		public static final String ROUND_NUCLEUS_REFERENCE_POINT 			= "head";
-		public static final String ROUND_NUCLEUS_ORIENTATION_POINT 			= "tail";
-		
-		public static final String ASYMMETRIC_NUCLEUS_REFERENCE_POINT 		= "head";
-		public static final String ASYMMETRIC_NUCLEUS_ORIENTATION_POINT 	= "tail";
-		
-		public static final String RODENT_SPERM_NUCLEUS_REFERENCE_POINT 	= "tip";
-		public static final String RODENT_SPERM_NUCLEUS_ORIENTATION_POINT 	= "tail";
-		
-		public static final String PIG_SPERM_NUCLEUS_REFERENCE_POINT 		= "head";
-		public static final String PIG_SPERM_NUCLEUS_ORIENTATION_POINT 		= "tail";
-		
-		// SwingWorker states for progress bars (can only pass ints)
-		public static final int PROGRESS_FINISHED 	= -1; // signal cleanup of progress bar
-		public static final int PROGRESS_ERROR		= -2; // signal error occurred in analysis
-		public static final int PROGRESS_COOLDOWN 	= -3; // signal switch to indeterminate bar
-		
-		
+				
 		/**
 		 * Given an RGB channel, get the ImageStack stack for internal use
 		 * @param channel the channel
@@ -83,6 +44,99 @@ public class Constants {
 						? Constants.FIRST_SIGNAL_CHANNEL+1
 						: Constants.COUNTERSTAIN;
 			return stackNumber;
-		}		
+		}
+		
+		public enum CellComponent {
+			NUCLEUS 		("Nucleus"			), 
+			SPERM_TAIL 		("Sperm tail"		), 
+			MITOCHONDRION 	("Mitochondrion"	), 
+			NUCLEAR_SIGNAL	("Nuclear signal"	), 
+			ACROSOME 		("Acrosome"			);
+			
+		    private final String asString;   
+		    
+		    CellComponent(String value) {
+		        this.asString = value;
+			}
+		    
+		    public String string(){
+		    	return this.asString;
+		    }
+		}
+		
+		/**
+		 * The types of nuclei we are able to analyse,
+		 * with the reference and orientation points to be used.
+		 * The reference point is the best identifiable point on the
+		 * nucleus when aligning profiles. The orientation point is the point
+		 * placed at the bottom when rotating a consensus nucleus.
+		 *
+		 */
+		public enum Nucleus {
+			ROUND 		 ("Round nucleus"		 , "head", "tail"), 
+			ASYMMETRIC 	 ("Asymmetric nucleus"	 , "head", "tail"),
+			RODENT_SPERM ("Rodent sperm nucleus" , "tip" , "tail"), 
+			PIG_SPERM 	 ("Pig sperm nucleus"	 , "head", "tail");
+			
+		    private final String asString;   
+		    private final String referencePoint;
+		    private final String orientationPoint;
+		    
+		    Nucleus(String string, String referencePoint, String orientationPoint) {
+		        this.asString = string;
+		        this.referencePoint = referencePoint;
+		        this.orientationPoint = orientationPoint;
+			}
+		    
+		    public String string(){
+		    	return this.asString;
+		    }
+		    
+		    public String orientationPoint(){
+		    	return this.orientationPoint;
+		    }
+		    
+		    public String referencePoint(){
+		    	return this.referencePoint;
+		    }
+		}
+		
+		public enum Cell {
+			GENERIC ("Cell"), 
+			ROUND 	("Round cell"),
+			SPERM	("Sperm cell");
+			
+			private final String asString;
+			
+			Cell(String string) {
+		        this.asString = string;
+			}
+		    
+		    public String string(){
+		    	return this.asString;
+		    }
+		}
+		
+
+		/**
+		 *  SwingWorker states for progress bars (can only pass ints).
+		 *  This allows the bar to switch appropriately
+		 *
+		 */
+		public enum Progress {
+			FINISHED (-1),   // signal cleanup of progress bar
+			ERROR 	 (-2),	// signal error occurred in analysis
+			COOLDOWN (-3);	// signal switch to indeterminate bar
+			
+			private final int code;
+			
+			Progress(int code) {
+		        this.code = code;
+			}
+		    
+		    public int code(){
+		    	return this.code;
+		    }
+		}
 
 }
