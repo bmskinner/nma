@@ -17,9 +17,9 @@ import ij.IJ;
 
 public class NucleusBorderSegment  implements Serializable{
 
-	/**
-	 * 
-	 */
+
+	public static final int MINIMUM_SEGMENT_LENGTH = 5; // the smallest number of values in a segment
+	
 	private static final long serialVersionUID = 1L;
 	private int startIndex;
 	private int endIndex;
@@ -27,8 +27,8 @@ public class NucleusBorderSegment  implements Serializable{
 	
 	private int totalLength; // the total length of the profile that this segment is a part of 
 	
-	private NucleusBorderSegment prevSegment; // track the previous segment in the profile
-	private NucleusBorderSegment nextSegment; // track the next segment in the profile
+	private NucleusBorderSegment prevSegment = null; // track the previous segment in the profile
+	private NucleusBorderSegment nextSegment = null; // track the next segment in the profile
 
 	public NucleusBorderSegment(int startIndex, int endIndex, int total){
 		this.startIndex = startIndex;
@@ -161,7 +161,7 @@ public class NucleusBorderSegment  implements Serializable{
 	public boolean contains(int index){
 		
 		if(index < 0 || index > this.getTotalLength()){
-			throw new IllegalArgumentException(" Index is outsize the total profile length: "+index);
+			throw new IllegalArgumentException("Index is outside the total profile length: "+index);
 		}
 		
 		boolean result = false;
@@ -186,20 +186,46 @@ public class NucleusBorderSegment  implements Serializable{
 	 */
 	public void update(int startIndex, int endIndex){
 		
-		if(startIndex < 0 || startIndex > this.getTotalLength() || endIndex < 0 || endIndex > this.getTotalLength()){
-			throw new IllegalArgumentException(" Index is outside the total profile length");
+		IJ.log("Preparing to update segment");
+		// Check the incoming data
+		if(startIndex < 0 || startIndex > this.getTotalLength()){
+			throw new IllegalArgumentException("Start index is outside the total profile length: "+startIndex);
 		}
-						
-		NucleusBorderSegment prev = this.prevSegment();
-		prev.update(prev.getStartIndex(), startIndex);
+		if(endIndex < 0 || endIndex > this.getTotalLength()){
+			throw new IllegalArgumentException("End index is outside the total profile length: "+endIndex);
+		}
+
+		// Check that the new positions will not make the segment too small
+		if(startIndex<endIndex){ // not wrapping
+			if(endIndex-startIndex < MINIMUM_SEGMENT_LENGTH){
+				throw new IllegalArgumentException("Segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
+			}
+		} else { // wrapping
+			if(  (this.getTotalLength()-startIndex) + endIndex < MINIMUM_SEGMENT_LENGTH  ){
+				throw new IllegalArgumentException("Segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
+			}
+		}
 		
-		NucleusBorderSegment next = this.nextSegment();
-		next.update(endIndex, next.getEndIndex());
-		
-		this.startIndex = startIndex;
-		this.endIndex = endIndex;
-		//TODO: check that this does not infinitely recurse
-		IJ.log("Updated");
+		// wrap in if to ensure we don't go in circles forever when testing a circular profile
+		if(this.getStartIndex()!=startIndex){
+			IJ.log("Updating start");
+			if(this.hasPrevSegment()){
+				NucleusBorderSegment prev = this.prevSegment();
+				prev.update(prev.getStartIndex(), startIndex);
+			}
+			this.startIndex = startIndex;
+			IJ.log("Updated start");
+		}
+			
+		if(this.getEndIndex()!=endIndex){
+			IJ.log("Updating end");
+			if(this.hasNextSegment()){
+				NucleusBorderSegment next = this.nextSegment();
+				next.update(endIndex, next.getEndIndex());
+			}
+			this.endIndex = endIndex;
+			IJ.log("Updated end");
+		}
 	}
 
 	/**
@@ -211,7 +237,7 @@ public class NucleusBorderSegment  implements Serializable{
 			throw new IllegalArgumentException("Segment has a different total length");
 		}
 		if(s.getStartIndex() != this.getEndIndex()){
-			throw new IllegalArgumentException("Segment start does not overlap end");
+			throw new IllegalArgumentException("Segment start ("+s.getStartIndex()+") does not overlap this end: "+this.getEndIndex());
 		}
 		
 		this.nextSegment = s;
@@ -226,10 +252,34 @@ public class NucleusBorderSegment  implements Serializable{
 			throw new IllegalArgumentException("Segment has a different total length");
 		}
 		if(s.getEndIndex() != this.getStartIndex()){
-			throw new IllegalArgumentException("Segment end does not overlap start");
+			throw new IllegalArgumentException("Segment end ("+s.getEndIndex()+") does not overlap start: "+this.getStartIndex());
 		}
 		
 		this.prevSegment = s;
+	}
+	
+	/**
+	 * Check if a next segment has been added
+	 * @return
+	 */
+	public boolean hasNextSegment(){
+		if(this.nextSegment()!=null){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Check if a previous segment has been added
+	 * @return
+	 */
+	public boolean hasPrevSegment(){
+		if(this.prevSegment()!=null){
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void setSegmentType(String s){

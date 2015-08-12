@@ -4,6 +4,8 @@ package no.analysis;
 //import ij.gui.Plot;
 
 //import java.awt.Color;
+import ij.IJ;
+
 import java.util.ArrayList;
 //import java.util.Arrays;
 import java.util.List;
@@ -68,6 +70,10 @@ public class ProfileSegmenter {
 		int segmentEnd = 0;
 		int segLength = 0;
 		int segCount = 0;
+		
+		NucleusBorderSegment prevSegment = null;
+		
+		try{
 		for(int i=0;i<profile.size();i++){
 			segmentEnd = i;
 			segLength++;
@@ -85,15 +91,32 @@ public class ProfileSegmenter {
 				// we've hit a new segment
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
 				seg.setSegmentType("Seg_"+segCount);
+				
+				if(prevSegment!=null){
+					seg.setPrevSegment(prevSegment);
+					prevSegment.setNextSegment(seg);
+				} 
 				segments.add(seg);
+				
+				prevSegment = seg;
 				segmentStart = i;
 				segLength=0;
 				segCount++;
 			}
 		}
 		// join up segments at start and end of profile if needed
-		NucleusBorderSegment seg = segments.get(0);
-		seg.update(segmentStart, seg.getEndIndex()); // merge the segments around 0	
+		
+		NucleusBorderSegment first = segments.get(0);
+		first.update(segmentStart, first.getEndIndex()); // merge the segments around 0	
+		prevSegment.setNextSegment(first);
+		first.setPrevSegment(prevSegment);
+		
+		} catch (Exception e){
+			IJ.log("Error in segmentation: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				IJ.log(e1.toString());
+			}
+		}
 
 		return segments;
 	}

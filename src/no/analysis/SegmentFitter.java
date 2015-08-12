@@ -219,7 +219,7 @@ public class SegmentFitter {
 	private List<NucleusBorderSegment> runFitter(List<NucleusBorderSegment> testList){
 
 		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>(0);
-		int profileLength = this.testProfile.size();
+//		int profileLength = this.testProfile.size();
 		int segmentCount  = testList.size();
 		
 //		IJ.log("");
@@ -229,11 +229,11 @@ public class SegmentFitter {
 			int oldLength = seg.length();
 			
 //			NucleusBorderSegment prevSeg = new NucleusBorderSegment(newList.get(  Utils.wrapIndex(i-1, segmentCount)  ));
-			NucleusBorderSegment prevSeg = i==0 ? new NucleusBorderSegment(testList.get(segmentCount-1)) : new NucleusBorderSegment(newList.get( i-1 ));
+//			NucleusBorderSegment prevSeg = i==0 ? new NucleusBorderSegment(testList.get(segmentCount-1)) : new NucleusBorderSegment(newList.get( i-1 ));
 			
 //			seg.print();
 			// basic checks - is the segment long enough, does it wrap, offset from the previous fitting
-			seg = preprocessSegment(seg, prevSeg);
+//			seg = preprocessSegment(seg, prevSeg);
 						
 			double score =  compareSegments(this.medianSegments.get(i), seg);
 			double minScore = score;
@@ -244,24 +244,26 @@ public class SegmentFitter {
 			for(int j=0;j<SegmentFitter.POINTS_TO_TEST;j++){
 				
 				// make the new segment
-				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, profileLength);
-				NucleusBorderSegment newSeg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex, profileLength);
-				newSeg.setSegmentType("Seg_"+i);
+//				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, profileLength);
+				NucleusBorderSegment newSeg = new NucleusBorderSegment(seg);
+//				newSeg.setSegmentType("Seg_"+i);
 				
-				int newLength = newSeg.length();
+				newSeg.lengthenEnd(j);
+				
+//				int newLength = newSeg.length();
 								
 				// get the score for the new segment
 				score = compareSegments(this.medianSegments.get(i), newSeg);
 				
 				// add a penalty for each point that makes the segment longer
-				if(newLength>oldLength){
-					score += (newLength-oldLength) * SegmentFitter.PENALTY_GROW ;
+				if(newSeg.length()>oldLength){
+					score += (newSeg.length()-oldLength) * SegmentFitter.PENALTY_GROW ;
 				}
 				
 				// add a penalty if the proposed new segment is shorter that the minimum segment length
-				if(newLength<ProfileSegmenter.MIN_SEGMENT_SIZE){
+				if(newSeg.length()<ProfileSegmenter.MIN_SEGMENT_SIZE){
 					// penalty increases the smaller we go below the minimum
-					score += (ProfileSegmenter.MIN_SEGMENT_SIZE - newLength) * SegmentFitter.PENALTY_SHRINK;
+					score += (ProfileSegmenter.MIN_SEGMENT_SIZE - newSeg.length()) * SegmentFitter.PENALTY_SHRINK;
 				}
 				
 				if(score<minScore){
@@ -269,17 +271,17 @@ public class SegmentFitter {
 					bestSeg = newSeg;
 				}
 				
-//				IJ.log("      Endpoint offset "+j+": "+score);	
+				IJ.log("      Endpoint offset "+j+": "+score);	
 			}
 			newList.add(bestSeg);
-			if(i==segmentCount-1){ 
-				// this is the last segment; 
-				// set the start index of the first segment to be
-				// the end index for this segment
-				newList.set(0, new NucleusBorderSegment(bestSeg.getEndIndex(), newList.get(0).getEndIndex(), profileLength));
-				newList.get(0).setSegmentType("Seg_"+0);
-				
-			}
+//			if(i==segmentCount-1){ 
+//				// this is the last segment; 
+//				// set the start index of the first segment to be
+//				// the end index for this segment
+//				newList.set(0, new NucleusBorderSegment(bestSeg.getEndIndex(), newList.get(0).getEndIndex(), profileLength));
+//				newList.get(0).setSegmentType("Seg_"+0);
+//				
+//			}
 //			bestSeg.print();	
 
 		}
@@ -292,16 +294,18 @@ public class SegmentFitter {
 	 * @param prev the previous segment in the list
 	 * @return the process segment for fitting
 	 */
-	private NucleusBorderSegment preprocessSegment(NucleusBorderSegment seg, NucleusBorderSegment prev){
-		if(seg==null || prev==null){
+	private NucleusBorderSegment preprocessSegment(NucleusBorderSegment seg){
+		if(seg==null){
 			throw new IllegalArgumentException("Current of previous segment is null");
 		}
+		
+		NucleusBorderSegment prev = seg.prevSegment();
 		
 		NucleusBorderSegment unalteredSeg = new NucleusBorderSegment(seg);
 		int segLength = seg.length();
 		
 		// carry over the offset from the previous segment
-		seg = new NucleusBorderSegment(prev.getEndIndex(), seg.getEndIndex(), unalteredSeg.getTotalLength());
+//		seg = new NucleusBorderSegment(prev.getEndIndex(), seg.getEndIndex(), unalteredSeg.getTotalLength());
 
 		// if the endpoint has ended up before the start point, the segment was not originally wrapping,
 		// correct the posiiton
@@ -312,6 +316,10 @@ public class SegmentFitter {
 			// if there really is a shrinkage, this will hit on it faster
 			int newEndIndex = Utils.wrapIndex(seg.getStartIndex()+ProfileSegmenter.MIN_SEGMENT_SIZE/2, this.testProfile.size());
 			seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex, unalteredSeg.getTotalLength());
+			
+//			int shortenValue = 
+//			
+//			seg.shortenEnd(value);
 		}
 		
 		// if the segment is otherwise too short, update the end position
