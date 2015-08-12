@@ -37,6 +37,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -285,9 +286,10 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 			
 			
 			XYPlot plot = chart.getXYPlot();
-			plot.getDomainAxis().setRange(0,100);
+			plot.getDomainAxis().setRange(0,nucleus.getLength());
 			plot.getRangeAxis().setRange(0,360);
 			plot.setBackgroundPaint(Color.WHITE);
+			plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(1.0f)));
 			
 			int seriesCount = plot.getSeriesCount();
 

@@ -11,6 +11,7 @@ import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
 import datasets.NucleusDatasetCreator;
+import datasets.NucleusTableDatasetCreator;
 
 public class VennDetailPanel extends JPanel {
 
@@ -27,7 +28,7 @@ public class VennDetailPanel extends JPanel {
 		this.add(vennTable, BorderLayout.CENTER);
 		vennTable.setEnabled(false);
 		this.add(vennTable.getTableHeader(), BorderLayout.NORTH);
-		vennTable.setModel(NucleusDatasetCreator.createVennTable(null));
+		vennTable.setModel(NucleusTableDatasetCreator.createVennTable(null));
 
 	}
 	
@@ -37,7 +38,7 @@ public class VennDetailPanel extends JPanel {
 	 */
 	public void update(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = NucleusDatasetCreator.createVennTable(list);
+		TableModel model = NucleusTableDatasetCreator.createVennTable(list);
 		vennTable.setModel(model);
 		int columns = vennTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){

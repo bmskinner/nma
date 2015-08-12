@@ -15,6 +15,7 @@ import javax.swing.JTable;
 import utility.Constants;
 import no.analysis.AnalysisDataset;
 import datasets.NucleusDatasetCreator;
+import datasets.NucleusTableDatasetCreator;
 
 public class WilcoxonDetailPanel extends JPanel {
 
@@ -48,23 +49,23 @@ public class WilcoxonDetailPanel extends JPanel {
 		infoPanel.add(new JLabel("Below the diagonal: p-values"));
 		infoPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
 		
-		wilcoxonAreaTable = new JTable(NucleusDatasetCreator.createWilcoxonAreaTable(null));
+		wilcoxonAreaTable = new JTable(NucleusTableDatasetCreator.createWilcoxonAreaTable(null));
 		addWilconxonTable(panel, wilcoxonAreaTable, "Areas");
 		scrollPane.setColumnHeaderView(wilcoxonAreaTable.getTableHeader());
 
 		
-		wilcoxonPerimTable = new JTable(NucleusDatasetCreator.createWilcoxonPerimeterTable(null));
+		wilcoxonPerimTable = new JTable(NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null));
 		addWilconxonTable(panel, wilcoxonPerimTable, "Perimeters");
 		
-		wilcoxonMinFeretTable = new JTable(NucleusDatasetCreator.createWilcoxonMinFeretTable(null));
+		wilcoxonMinFeretTable = new JTable(NucleusTableDatasetCreator.createWilcoxonMinFeretTable(null));
 		addWilconxonTable(panel, wilcoxonMinFeretTable, "Min feret");
 
 		
-		wilcoxonFeretTable = new JTable(NucleusDatasetCreator.createWilcoxonMaxFeretTable(null));
+		wilcoxonFeretTable = new JTable(NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(null));
 		addWilconxonTable(panel, wilcoxonFeretTable, "Feret");
 		
 		
-		wilcoxonDifferenceTable = new JTable(NucleusDatasetCreator.createWilcoxonVariabilityTable(null));
+		wilcoxonDifferenceTable = new JTable(NucleusTableDatasetCreator.createWilcoxonVariabilityTable(null));
 		addWilconxonTable(panel, wilcoxonDifferenceTable, "Differences to median");
 		
 //		panel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
@@ -96,32 +97,32 @@ public class WilcoxonDetailPanel extends JPanel {
 	public void update(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
 
-		wilcoxonAreaTable.setModel(NucleusDatasetCreator.createWilcoxonAreaTable(list));
+		wilcoxonAreaTable.setModel(NucleusTableDatasetCreator.createWilcoxonAreaTable(list));
 		
 		int columns = wilcoxonAreaTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonAreaTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 		
-		wilcoxonPerimTable.setModel(NucleusDatasetCreator.createWilcoxonPerimeterTable(list));
+		wilcoxonPerimTable.setModel(NucleusTableDatasetCreator.createWilcoxonPerimeterTable(list));
 		columns = wilcoxonPerimTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonPerimTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 		
-		wilcoxonMinFeretTable.setModel(NucleusDatasetCreator.createWilcoxonMinFeretTable(list));
+		wilcoxonMinFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list));
 		columns = wilcoxonMinFeretTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonMinFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 		
-		wilcoxonFeretTable.setModel(NucleusDatasetCreator.createWilcoxonMaxFeretTable(list));
+		wilcoxonFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list));
 		columns = wilcoxonFeretTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 		}
 		
-		wilcoxonDifferenceTable.setModel(NucleusDatasetCreator.createWilcoxonVariabilityTable(list));
+		wilcoxonDifferenceTable.setModel(NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list));
 		columns = wilcoxonDifferenceTable.getColumnModel().getColumnCount();
 		for(int i=1;i<columns;i++){
 			wilcoxonDifferenceTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
