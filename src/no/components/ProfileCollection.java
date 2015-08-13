@@ -78,14 +78,16 @@ public class ProfileCollection implements Serializable {
 	
 	/**
 	 * Create a list of segments based on an offset of existing segments
-	 * @param pointToAdd the name of the pointType to add
+	 * @param s the name of the point type
 	 */
 	public List<NucleusBorderSegment> getSegments(String s){
 		if(s==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+s);
 		}
 
-		int offset = getOffset(s);
+		// this must be negative offset for segments
+		int offset = -getOffset(s);
+
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
 		NucleusBorderSegment prev = null;
 		for(NucleusBorderSegment seg : segments){

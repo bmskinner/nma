@@ -61,35 +61,42 @@ public class MorphologyAnalysis {
 
 	}
 
+	/**
+	 * Calculaate the median profile of the colleciton, and generate the
+	 * best fit offsets of each nucleus to match
+	 * @param collection
+	 * @param pointType
+	 */
 	private static void runProfiler(CellCollection collection, String pointType){
 		
 		ProfileCollection pc = collection.getProfileCollection();
+		
 		// default is to make profile aggregate from reference point
 		pc.createProfileAggregate(collection);
 		
-		// use the median profile of this aggregate to find the tail point
+		// use the median profile of this aggregate to find the orientation point ("tail")
 		TailFinder.findTailIndexInMedianCurve(collection);
 		
-		// carry out iterative offsetting to refine the tail point estimate
+		// carry out iterative offsetting to refine the orientation point estimate
 		double score = compareProfilesToMedian(collection, pointType);
 		double prevScore = score+1;
 		while(score < prevScore){
+			
+			// rebuild the aggregate - needed if the orientaion point index has changed in any nuclei
 			pc.createProfileAggregate(collection);
 			
-			// we need to allow each nucleus collection type handle tail finding and offsetting itself
+			// carry out the orientation point detection in the median again
 			TailFinder.findTailIndexInMedianCurve(collection);
+			
+			// apply offsets to each nucleus in the collection
 			Offsetter.calculateOffsets(collection); 
 
 			prevScore = score;
+			
+			// get the difference between aligned profiles and the median
 			score = compareProfilesToMedian(collection, pointType);
 			logger.log("Reticulating splines: score: "+(int)score);
 		}
-		
-		// update the median profile with the final offset locations
-		
-		// create a profile aggregate for the orientation point
-//		createProfileAggregateFromPoint(collection, collection.getOrientationPoint());
-
 	}
 		
 	/**
@@ -142,61 +149,12 @@ public class MorphologyAnalysis {
 	}
 	
 	/**
-	 * A temp addition to allow a remapping median to be the same length as the original population median.
-	 * Otherwise the segment remapping will fail
+	 * Get the total differences to the median for all the nuclei in
+	 * the collection
 	 * @param collection
 	 * @param pointType
-	 * @param length
+	 * @return
 	 */
-//	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType, int length){
-//
-//		ProfileAggregate profileAggregate = new ProfileAggregate(length);
-//		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
-//		
-//		for(Nucleus n : collection.getNuclei()){
-//			profileAggregate.addValues(n.getAngleProfile(pointType));
-//		}
-//
-////		Profile medians = profileAggregate.getMedian();
-////		Profile q25     = profileAggregate.getQuartile(25);
-////		Profile q75     = profileAggregate.getQuartile(75);
-////		collection.getProfileCollection().addProfile(pointType, medians);
-////		collection.getProfileCollection().addProfile(pointType+"25", q25);
-////		collection.getProfileCollection().addProfile(pointType+"75", q75);
-//	}
-
-//	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType){
-//
-//		ProfileAggregate profileAggregate = new ProfileAggregate((int)collection.getMedianArrayLength());
-//		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
-//
-//		for(Nucleus n : collection.getNuclei()){
-//			profileAggregate.addValues(n.getAngleProfile(pointType));
-//		}
-//
-////		Profile medians = profileAggregate.getMedian();
-////		Profile q25     = profileAggregate.getQuartile(25);
-////		Profile q75     = profileAggregate.getQuartile(75);
-////		
-////		ProfileCollection pc = collection.getProfileCollection();
-////		pc.addProfile(pointType, medians);
-////		pc.addProfile(pointType+"25", q25);
-////		pc.addProfile(pointType+"75", q75);
-//
-//	}
-
-//	private static void createProfileAggregates(CellCollection collection){
-//		try{
-//			for( String pointType : collection.getProfileCollection().getProfileKeys() ){
-//				createProfileAggregateFromPoint(collection, pointType);   
-//			}
-//		} catch(Exception e){
-//			logger.log("Error creating profile aggregates: "+e.getMessage(), Logger.ERROR);
-//			logger.log(collection.getProfileCollection().printKeys());
-//		}
-//	}
-	
-
 	private static double compareProfilesToMedian(CellCollection collection, String pointType){
 		double[] scores = collection.getDifferencesToMedianFromPoint(pointType);
 		double result = 0;
@@ -206,24 +164,34 @@ public class MorphologyAnalysis {
 		return result;
 	}
 	
+	/**
+	 * Run the segmentation part of the analysis. 
+	 * @param collection
+	 * @param pointType
+	 */
 	private static void runSegmentation(CellCollection collection, String pointType){
 		logger.log("Beginning segmentation...");
 		try{	
-			createSegments(collection, pointType);
-			assignSegments(collection, pointType);
 			
+			// generate segments in the median profile
+			createSegments(collection);
+			
+			// map the segments from the median directly onto the nuclei
+			assignSegments(collection);
+			
+			// adjust the segments to better fit each nucleus
 			reviseSegments(collection, pointType);		
-//			
-			// At this point, the franken collection contains tip/head values only
-			
+	
+			// update the aggregate in case any borders have changed
 			collection.getProfileCollection().createProfileAggregate(collection);
-			
-//			applySegmentsToOtherPointTypes(collection, pointType);
-			
+						
 			// At this point, the franken collection still contains tip/head values only
 			
 		} catch(Exception e){
 			logger.log("Error segmenting: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement e1 : e.getStackTrace()){
+				logger.log(e1.toString(), Logger.STACK);
+			}
 			collection.getProfileCollection().printKeys();
 		}
 		logger.log("Segmentation complete");
@@ -232,18 +200,21 @@ public class MorphologyAnalysis {
 	/**
 	 * Run the segmenter on the median profile for the given point type
 	 * @param collection
-	 * @param pointType
 	 */
-	private static void createSegments(CellCollection collection, String pointType){
-		// get the segments within the median curve
+	private static void createSegments(CellCollection collection){
+		
 		ProfileCollection pc = collection.getProfileCollection();
 
-		Profile medianToCompare = pc.getProfile(pointType);
+		// the reference point is always index 0, so the segments will match
+		// the profile
+		Profile median = pc.getProfile(collection.getReferencePoint());
 
-		ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
+		ProfileSegmenter segmenter = new ProfileSegmenter(median);		  
 		List<NucleusBorderSegment> segments = segmenter.segment();
 
-		logger.log("Found "+segments.size()+" segments in "+pointType+" profile");
+		logger.log("Found "+segments.size()+" segments in "+collection.getReferencePoint()+" profile");
+		
+		// Add the segments to the collection
 		pc.addSegments(segments);
 	}
 
@@ -253,17 +224,17 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void assignSegments(CellCollection collection, String pointType){
+	private static void assignSegments(CellCollection collection){
 
 		logger.log("Assigning segments to nuclei...");
 		
 		ProfileCollection pc = collection.getProfileCollection();
 
 		// find the corresponding point in each Nucleus
-		Profile medianToCompare = pc.getProfile(pointType);
-		for(int i= 0; i<collection.getNucleusCount();i++){ 
-			Nucleus n = collection.getCell(i).getNucleus();
-			assignSegmentsToNucleus(n, pc.getSegments(pointType), medianToCompare);
+		Profile median = pc.getProfile(collection.getReferencePoint());
+		
+		for(Nucleus n : collection.getNuclei()){
+			assignSegmentsToNucleus(n, pc.getSegments(collection.getReferencePoint()), median);
 		}
 		logger.log("Segments assigned to nuclei");
 	}
@@ -351,29 +322,10 @@ public class MorphologyAnalysis {
 		// update the profile aggregate
 		frankenCollection.createProfileAggregate(  collection   );
 		
-		// Added in for completeness
-		// apply the frankenprofile segments to other point type
-//		Profile referenceProfile = frankenCollection.getProfile(pointType);
-//		Profile orientProfile = frankenCollection.getProfile(collection.getOrientationPoint());
-//		int offset = orientProfile.getSlidingWindowOffset(referenceProfile);
-//		frankenCollection.addSegments(collection.getOrientationPoint(), pointType, offset);
-//		frankenCollection.createProfileAggregateFromPoint(    collection.getOrientationPoint(), (int) collection.getMedianArrayLength()    );
-		
-		
 		collection.setFrankenCollection(frankenCollection);
 		logger.log("Segment assignments refined");
 	}
 	
-//	private static void applySegmentsToOtherPointTypes(CellCollection collection, String pointType){
-//
-//		ProfileCollection pc = collection.getProfileCollection();
-//		
-//		Profile referenceProfile = pc.getProfile(pointType);
-//		Profile orientProfile = pc.getProfile(collection.getOrientationPoint());
-//		int offset = orientProfile.getSlidingWindowOffset(referenceProfile);
-//		
-//		pc.addSegments(collection.getOrientationPoint(), pointType, offset);
-//	}
 	
 	public static class TailFinder {
 
@@ -499,7 +451,7 @@ public class MorphologyAnalysis {
 	
 	public static class Offsetter {
 		
-		public static void calculateOffsetsInRoundNuclei(CellCollection collection){
+		private static void calculateOffsetsInRoundNuclei(CellCollection collection){
 			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
 
 			for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
@@ -526,25 +478,32 @@ public class MorphologyAnalysis {
 		}
 		
 		
-		public static void calculateOffsetsInRodentSpermNuclei(CellCollection collection){
-			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getOrientationPoint()); // returns a median profile
+		private static void calculateOffsetsInRodentSpermNuclei(CellCollection collection){
+			
+			// Get the median profile starting from the orientation point
+			Profile median = collection.getProfileCollection().getProfile(collection.getOrientationPoint()); // returns a median profile
 
-		    for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-		      RodentSpermNucleus n = (RodentSpermNucleus)collection.getCell(i).getNucleus();
+			// go through each nucleus
+			for(Nucleus n : collection.getNuclei()){
+				
+				// ensure the correct class is chosen
+				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
 
-		      int newTailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+				// get the offset for the best fit to the median profile
+				int newTailIndex = nucleus.getAngleProfile().getSlidingWindowOffset(median);
 
-		      n.addBorderTag(Constants.Nucleus.RODENT_SPERM.orientationPoint(), newTailIndex);
+				// add the offset of the tail to the nucleus
+				nucleus.addBorderTag(collection.getOrientationPoint(), newTailIndex);
 
-		      // also update the head position
-		      int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
-		      n.addBorderTag("head", headIndex);
-		      n.splitNucleusToHeadAndHump();
-		    }
+				// also update the head position - the point opposite the tail through the CoM
+				int headIndex = nucleus.getIndex(nucleus.findOppositeBorder( nucleus.getPoint(newTailIndex) ));
+				nucleus.addBorderTag("head", headIndex);
+				nucleus.splitNucleusToHeadAndHump();
+			}
 		}
 		
-		public static void calculateOffsetsInPigSpermNuclei(CellCollection collection){
-			Profile medianToCompare = collection.getProfileCollection().getProfile("head"); // returns a median profile with head at 0
+		private static void calculateOffsetsInPigSpermNuclei(CellCollection collection){
+			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
 
 			for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
 				PigSpermNucleus n = (PigSpermNucleus)collection.getCell(i).getNucleus();

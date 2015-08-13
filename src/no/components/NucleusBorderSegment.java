@@ -186,7 +186,6 @@ public class NucleusBorderSegment  implements Serializable{
 	 */
 	public void update(int startIndex, int endIndex){
 		
-//		IJ.log("Preparing to update segment: "+this.getSegmentType());
 //		 Check the incoming data
 		if(startIndex < 0 || startIndex > this.getTotalLength()){
 			throw new IllegalArgumentException("Start index is outside the total profile length: "+startIndex);
@@ -219,8 +218,6 @@ public class NucleusBorderSegment  implements Serializable{
 				NucleusBorderSegment prev = this.prevSegment();
 				prev.update(prev.getStartIndex(), startIndex);
 			}
-			
-//			IJ.log("Updated start: "+this.getSegmentType());
 		}
 			
 		if(this.getEndIndex()!=endIndex){
@@ -230,8 +227,6 @@ public class NucleusBorderSegment  implements Serializable{
 				NucleusBorderSegment next = this.nextSegment();
 				next.update(endIndex, next.getEndIndex());
 			}
-			
-//			IJ.log("Updated end: "+this.getSegmentType());
 		}
 	}
 	
