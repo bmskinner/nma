@@ -2,10 +2,12 @@ package no.analysis;
 
 import ij.IJ;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import utility.Logger;
 import utility.Utils;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
@@ -19,6 +21,8 @@ import no.nuclei.Nucleus;
  * problem with Yqdels in an otherwise WT population
  */
 public class SegmentFitter {
+	
+	private static Logger logger;
 
 	/**
 	 * The multiplier to add to best-fit scores when shrinking a segment below the 
@@ -49,7 +53,7 @@ public class SegmentFitter {
 	 * @param medianProfile the profile
 	 * @param medianSegments the list of segments within the profile
 	 */
-	public SegmentFitter(Profile medianProfile, List<NucleusBorderSegment> medianSegments){
+	public SegmentFitter(Profile medianProfile, List<NucleusBorderSegment> medianSegments, File logFile){
 		if(medianProfile==null || medianSegments==null){
 			throw new IllegalArgumentException("Median profile or segment list is null");
 		}
@@ -58,6 +62,7 @@ public class SegmentFitter {
 		for(NucleusBorderSegment seg : medianSegments){
 			this.medianSegments.add(new NucleusBorderSegment(seg));
 		}
+		logger = new Logger(logFile, "SegmentFitter");
 	}
 	
 	/**
@@ -66,9 +71,11 @@ public class SegmentFitter {
 	 */
 	public void fit(Nucleus n){
 		if(n==null){
+			logger.log("Test nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
 		if(n.getSegments()==null){
+			logger.log("Nucleus has no segments", Logger.ERROR);
 			throw new IllegalArgumentException("Nucleus has no segments");
 		}
 		
@@ -78,7 +85,7 @@ public class SegmentFitter {
 		for(NucleusBorderSegment seg : n.getSegments()){
 			this.testSegments.add(new NucleusBorderSegment(seg));
 		}
-		
+		logger.log("Fitting nucleus "+n.getPathAndNumber(), Logger.INFO);
 		try{
 			List<NucleusBorderSegment> newList = this.runFitter(this.testSegments);
 			
@@ -99,10 +106,13 @@ public class SegmentFitter {
 			
 			// modify tail point to nearest segment end
 //			this.remapBorderPoints(n, newList);
+			logger.log("Fitted nucleus "+n.getPathAndNumber(), Logger.INFO);
 			
 		} catch(Exception e){
-			IJ.log("    Error refitting segments: "+e.getMessage());
-			e.printStackTrace();
+			logger.log("Error refitting segments: "+e.getMessage(), Logger.ERROR);
+			for(StackTraceElement e1 : e.getStackTrace()){
+				logger.log(e1.toString(), Logger.STACK);
+			}
 		}
 	}
 	
@@ -113,9 +123,11 @@ public class SegmentFitter {
 	 */
 	public Profile recombine(Nucleus n){
 		if(n==null){
+			logger.log("Recombined nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
 		if(n.getSegments()==null){
+			logger.log("Nucleus has no segments", Logger.ERROR);
 			throw new IllegalArgumentException("Nucleus has no segments");
 		}
 		Profile testMedian = new Profile(n.getAngleProfile());
@@ -172,36 +184,36 @@ public class SegmentFitter {
 			NucleusBorderSegment   testSeg = testSegs.get(i);
 
 			// interpolate the test segments to the length of the median segments
-			Profile testSegProfile = this.getSegmentProfile(testSeg, testMedian);
+			Profile testSegProfile = testMedian.getSubregion(testSeg); //this.getSegmentProfile(testSeg, testMedian);
 			Profile revisedProfile = testSegProfile.interpolate(targetSeg.length());
 			finalSegmentProfiles.add(revisedProfile);
 		}
-		return this.merge(finalSegmentProfiles);
+		return Profile.merge(finalSegmentProfiles);
 	}
 	
-	/**
-	 * Given a list of ordered profiles, merge them into one 
-	 * contiguous profile
-	 * @param list the list of profiles to merge
-	 * @return the merged profile
-	 */
-	private Profile merge(List<Profile> list){
-		if(list==null || list.size()==0){
-			throw new IllegalArgumentException("Profile list is null or empty");
-		}
-		Profile result = new Profile(new double[0]);
-		List<Double> combinedList = new ArrayList<Double>(0);
-		
-		for(Profile p : list){
-			double[] values = p.asArray();
-			List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
-			combinedList.addAll(valueList);
-		}
-		
-		Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
-		result = new Profile(Utils.getdoubleFromDouble(combinedArray));
-		return result;
-	}
+//	/**
+//	 * Given a list of ordered profiles, merge them into one 
+//	 * contiguous profile
+//	 * @param list the list of profiles to merge
+//	 * @return the merged profile
+//	 */
+//	private Profile merge(List<Profile> list){
+//		if(list==null || list.size()==0){
+//			throw new IllegalArgumentException("Profile list is null or empty");
+//		}
+//		Profile result = new Profile(new double[0]);
+//		List<Double> combinedList = new ArrayList<Double>(0);
+//		
+//		for(Profile p : list){
+//			double[] values = p.asArray();
+//			List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
+//			combinedList.addAll(valueList);
+//		}
+//		
+//		Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
+//		result = new Profile(Utils.getdoubleFromDouble(combinedArray));
+//		return result;
+//	}
 	
 	/**
 	 * for each test segment: compare with median segment
@@ -235,38 +247,41 @@ public class SegmentFitter {
 			NucleusBorderSegment bestSeg = seg;
 			
 			// TODO: allow rotation through the entire profile
-//			for(int j=0;j<this.testProfile.size();j++){
-			for(int j=0;j<SegmentFitter.POINTS_TO_TEST;j++){
+			for(int j=-SegmentFitter.POINTS_TO_TEST;j<SegmentFitter.POINTS_TO_TEST;j++){
 				
-				// make the new segment
-//				int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+j, profileLength);
-				NucleusBorderSegment newSeg = new NucleusBorderSegment(seg);
-//				newSeg.setSegmentType("Seg_"+i);
+				// make a copy of the segment
+				NucleusBorderSegment tempSeg = new NucleusBorderSegment(seg);
 				
-				newSeg.lengthenEnd(j);
 				
-//				int newLength = newSeg.length();
-								
-				// get the score for the new segment
-				score = compareSegments(this.medianSegments.get(i), newSeg);
-				
-				// add a penalty for each point that makes the segment longer
-				if(newSeg.length()>oldLength){
-					score += (newSeg.length()-oldLength) * SegmentFitter.PENALTY_GROW ;
+				try{
+					// lengthen the new segment by the given amount
+					tempSeg.lengthenEnd(j);
+					
+					// get the score for the new segment
+					score = compareSegments(this.medianSegments.get(i), tempSeg);
+					
+					// add a penalty for each point that makes the segment longer
+					if(tempSeg.length()>oldLength){
+						score += (tempSeg.length()-oldLength) * SegmentFitter.PENALTY_GROW ;
+					}
+					
+					// add a penalty if the proposed new segment is shorter that the minimum segment length
+					if(tempSeg.length()<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+						// penalty increases the smaller we go below the minimum
+						score += (NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH - tempSeg.length()) * SegmentFitter.PENALTY_SHRINK;
+					}
+					
+					if(score<minScore){
+						minScore=score;
+						bestSeg = tempSeg;
+					}
+					
+					IJ.log("      Endpoint offset "+j+": "+score);	
+				} catch(IllegalArgumentException e){
+					IJ.log(j+": "+e.getMessage());
 				}
 				
-				// add a penalty if the proposed new segment is shorter that the minimum segment length
-				if(newSeg.length()<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-					// penalty increases the smaller we go below the minimum
-					score += (NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH - newSeg.length()) * SegmentFitter.PENALTY_SHRINK;
-				}
-				
-				if(score<minScore){
-					minScore=score;
-					bestSeg = newSeg;
-				}
-				
-				IJ.log("      Endpoint offset "+j+": "+score);	
+							
 			}
 			newList.add(bestSeg);
 //			if(i==segmentCount-1){ 
@@ -277,7 +292,7 @@ public class SegmentFitter {
 //				newList.get(0).setSegmentType("Seg_"+0);
 //				
 //			}
-//			bestSeg.print();	
+			bestSeg.print();	
 
 		}
 		return newList;
@@ -289,46 +304,46 @@ public class SegmentFitter {
 	 * @param prev the previous segment in the list
 	 * @return the process segment for fitting
 	 */
-	private NucleusBorderSegment preprocessSegment(NucleusBorderSegment seg){
-		if(seg==null){
-			throw new IllegalArgumentException("Current of previous segment is null");
-		}
-		
-		NucleusBorderSegment prev = seg.prevSegment();
-		
-		NucleusBorderSegment unalteredSeg = new NucleusBorderSegment(seg);
-		int segLength = seg.length();
-		
-		// carry over the offset from the previous segment
-//		seg = new NucleusBorderSegment(prev.getEndIndex(), seg.getEndIndex(), unalteredSeg.getTotalLength());
-
-		// if the endpoint has ended up before the start point, the segment was not originally wrapping,
-		// correct the posiiton
-		if(seg.getEndIndex()<seg.getStartIndex() && !unalteredSeg.contains(0)){
-
-			// the new end point is the start point, plus half the minimum segment size
-			// The penalty for segments < MIN_SEGMENT_SIZE should bring this up again, but
-			// if there really is a shrinkage, this will hit on it faster
-			int newEndIndex = Utils.wrapIndex(seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2, this.testProfile.size());
-			seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex, unalteredSeg.getTotalLength());
-			
-//			int shortenValue = 
+//	private NucleusBorderSegment preprocessSegment(NucleusBorderSegment seg){
+//		if(seg==null){
+//			throw new IllegalArgumentException("Current of previous segment is null");
+//		}
+//		
+//		NucleusBorderSegment prev = seg.prevSegment();
+//		
+//		NucleusBorderSegment unalteredSeg = new NucleusBorderSegment(seg);
+//		int segLength = seg.length();
+//		
+//		// carry over the offset from the previous segment
+////		seg = new NucleusBorderSegment(prev.getEndIndex(), seg.getEndIndex(), unalteredSeg.getTotalLength());
+//
+//		// if the endpoint has ended up before the start point, the segment was not originally wrapping,
+//		// correct the posiiton
+//		if(seg.getEndIndex()<seg.getStartIndex() && !unalteredSeg.contains(0)){
+//
+//			// the new end point is the start point, plus half the minimum segment size
+//			// The penalty for segments < MIN_SEGMENT_SIZE should bring this up again, but
+//			// if there really is a shrinkage, this will hit on it faster
+//			int newEndIndex = Utils.wrapIndex(seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2, this.testProfile.size());
+//			seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex, unalteredSeg.getTotalLength());
 //			
-//			seg.shortenEnd(value);
-		}
-		
-		// if the segment is otherwise too short, update the end position
-		if( segLength<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2){
-			// find the number of points needed to make the segment long enough
-			int extension = NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2 - segLength;
-			// get the index of the new end point
-			int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+extension, this.testProfile.size());
-			// add the new end index position to the segment
-			seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex, unalteredSeg.getTotalLength());
-		}
-		seg.setSegmentType(unalteredSeg.getSegmentType());
-		return seg;
-	}
+////			int shortenValue = 
+////			
+////			seg.shortenEnd(value);
+//		}
+//		
+//		// if the segment is otherwise too short, update the end position
+//		if( segLength<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2){
+//			// find the number of points needed to make the segment long enough
+//			int extension = NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH/2 - segLength;
+//			// get the index of the new end point
+//			int newEndIndex = Utils.wrapIndex(seg.getEndIndex()+extension, this.testProfile.size());
+//			// add the new end index position to the segment
+//			seg = new NucleusBorderSegment(seg.getStartIndex(), newEndIndex, unalteredSeg.getTotalLength());
+//		}
+//		seg.setSegmentType(unalteredSeg.getSegmentType());
+//		return seg;
+//	}
 	
 	/**
 	 * Compare two segments
@@ -338,8 +353,8 @@ public class SegmentFitter {
 	 */
 	private double compareSegments(NucleusBorderSegment reference, NucleusBorderSegment test){
 		
-		Profile refProfile  = getSegmentProfile(reference, this.medianProfile); // make a profile from the segment
-		Profile subjProfile = getSegmentProfile(test, this.testProfile);
+		Profile refProfile  = this.medianProfile.getSubregion(reference); //getSegmentProfile(reference, this.medianProfile); // make a profile from the segment
+		Profile subjProfile = this.medianProfile.getSubregion(test); //getSegmentProfile(test, this.testProfile);
 		
 		return refProfile.differenceToProfile(subjProfile);
 	}
@@ -350,30 +365,30 @@ public class SegmentFitter {
 	 * @param p the profile to get values from
 	 * @return a profile containing the profile values covered by the segment 
 	 */
-	private Profile getSegmentProfile(NucleusBorderSegment seg, Profile p){
-		if(seg==null || p==null){
-			throw new IllegalArgumentException("Profile or segment is null");
-		}
-		
-		double[] ref = p.asArray();
-		Profile result = new Profile(new double[0]);
-		if(seg.getStartIndex() < seg.getEndIndex()){ // most segments
-			double[] segment = Arrays.copyOfRange(ref, seg.getStartIndex(), seg.getEndIndex());
-			result = new Profile(segment);
-		} else{ // a wrapping end segment
-			double[] first = Arrays.copyOfRange(ref, 0, seg.getEndIndex());
-			double[] last  = Arrays.copyOfRange(ref, seg.getStartIndex(), ref.length);
-			
-			List<Double> firstHalf = Arrays.asList(Utils.getDoubleFromdouble(first));
-			List<Double> lastHalf  = Arrays.asList(Utils.getDoubleFromdouble(last));
-			
-			List<Double> combinedList = new ArrayList<Double>(0);
-			combinedList.addAll(lastHalf); // they need to be in the correct order as the span the gap
-			combinedList.addAll(firstHalf);
-			
-			Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
-			result = new Profile(Utils.getdoubleFromDouble(combinedArray));
-		}
-		return result;
-	}
+//	private Profile getSegmentProfile(NucleusBorderSegment seg, Profile p){
+//		if(seg==null || p==null){
+//			throw new IllegalArgumentException("Profile or segment is null");
+//		}
+//		
+//		double[] ref = p.asArray();
+//		Profile result = new Profile(new double[0]);
+//		if(seg.getStartIndex() < seg.getEndIndex()){ // most segments
+//			double[] segment = Arrays.copyOfRange(ref, seg.getStartIndex(), seg.getEndIndex());
+//			result = new Profile(segment);
+//		} else{ // a wrapping end segment
+//			double[] first = Arrays.copyOfRange(ref, 0, seg.getEndIndex());
+//			double[] last  = Arrays.copyOfRange(ref, seg.getStartIndex(), ref.length);
+//			
+//			List<Double> firstHalf = Arrays.asList(Utils.getDoubleFromdouble(first));
+//			List<Double> lastHalf  = Arrays.asList(Utils.getDoubleFromdouble(last));
+//			
+//			List<Double> combinedList = new ArrayList<Double>(0);
+//			combinedList.addAll(lastHalf); // they need to be in the correct order as the span the gap
+//			combinedList.addAll(firstHalf);
+//			
+//			Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
+//			result = new Profile(Utils.getdoubleFromDouble(combinedArray));
+//		}
+//		return result;
+//	}
 }

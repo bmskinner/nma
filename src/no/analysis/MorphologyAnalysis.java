@@ -444,6 +444,7 @@ public class MorphologyAnalysis {
 			n.clearSegments();
 
 			// go through each segment defined for the median curve
+			NucleusBorderSegment prevSeg = null;
 			int j=0;
 			for(NucleusBorderSegment b : pc.getSegments(pointType)){
 				
@@ -463,11 +464,17 @@ public class MorphologyAnalysis {
 
 				// create a segment at these points
 				NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getLength());
+				if(prevSeg != null){
+					seg.setPrevSegment(prevSeg);
+					prevSeg.setNextSegment(seg);
+				}
+				prevSeg = seg;
 				seg.setSegmentType("Seg_"+j);
 				n.addSegment(seg);
 				n.addSegmentTag("Seg_"+j, j);
 				j++;
 			}
+			prevSeg.setNextSegment(n.getSegmentTag("Seg_"+0)); // ensure they match up at the end
 		}
 		logger.log("Segments assigned to nuclei");
 	}
@@ -491,7 +498,7 @@ public class MorphologyAnalysis {
 		frankenCollection.addAggregate( pointType, new ProfileAggregate((int)collection.getMedianArrayLength()));
 		frankenCollection.addSegments(pointType, segments);
 
-		SegmentFitter fitter = new SegmentFitter(pc.getProfile(pointType), segments);
+		SegmentFitter fitter = new SegmentFitter(pc.getProfile(pointType), segments, logger.getLogfile());
 		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
 		for(Nucleus n : collection.getNuclei()){ 

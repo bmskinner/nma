@@ -1,7 +1,9 @@
 package no.components;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import utility.Utils;
 import ij.IJ;
@@ -580,6 +582,19 @@ public class Profile implements Serializable {
 	  }
 
   }
+  
+  /**
+   * Fetch a sub-region of the profile defined by the given segment
+   * @param segment the segment to find
+   * @return a Profile
+   */
+  public Profile getSubregion(NucleusBorderSegment segment){
+	  
+	  if(segment==null){
+		  throw new IllegalArgumentException("Segment is null");
+	  }
+	  return this.getSubregion(segment.getStartIndex(), segment.getEndIndex());
+  }
 
   public Profile calculateDeltas(int windowSize){
 
@@ -629,7 +644,7 @@ public class Profile implements Serializable {
 
 
 		  double delta = 	array[i]	-  array[prev_i] +
-				  			array[next_i]- array[i];
+				  array[next_i]- array[i];
 
 
 		  deltas[i] = delta;
@@ -637,7 +652,7 @@ public class Profile implements Serializable {
 	  Profile result = new Profile(deltas);
 	  return result;
   }
-  
+
   /**
    * Multiply all values within the profile by a given value
    * @param multiplier the value to multiply by
@@ -651,7 +666,7 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
-  
+
   /**
    * Multiply all values within the profile by the value within the given Profile
    * @param multiplier the profile to multiply by. Must be the same length as this profile
@@ -699,7 +714,7 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
-  
+
   /**
    * Add all values within the profile by the value within the given Profile
    * @param adder the profile to add. Must be the same length as this profile
@@ -716,7 +731,7 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
-  
+
   /**
    * Add the given value to all points within the profile
    * @param adder the value to add.
@@ -731,7 +746,7 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
-  
+
   /**
    * Subtract all values within the profile by the value within the given Profile
    * @param adder the profile to subtract. Must be the same length as this profile
@@ -751,8 +766,33 @@ public class Profile implements Serializable {
 
   // use for debugging
   public void print(){
-    for (int i=0; i<array.length; i++) {
-      IJ.log("Point "+i+": "+array[i]);
-    }
+	  for (int i=0; i<array.length; i++) {
+		  IJ.log("Point "+i+": "+array[i]);
+	  }
+  }
+
+
+  /**
+   * Given a list of ordered profiles, merge them into one 
+   * contiguous profile
+   * @param list the list of profiles to merge
+   * @return the merged profile
+   */
+  public static Profile merge(List<Profile> list){
+	  if(list==null || list.size()==0){
+		  throw new IllegalArgumentException("Profile list is null or empty");
+	  }
+	  Profile result = new Profile(new double[0]);
+	  List<Double> combinedList = new ArrayList<Double>(0);
+
+	  for(Profile p : list){
+		  double[] values = p.asArray();
+		  List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
+		  combinedList.addAll(valueList);
+	  }
+
+	  Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
+	  result = new Profile(Utils.getdoubleFromDouble(combinedArray));
+	  return result;
   }
 }

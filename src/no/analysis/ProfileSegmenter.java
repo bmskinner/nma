@@ -1,21 +1,15 @@
 package no.analysis;
 
 
-//import ij.gui.Plot;
-
-//import java.awt.Color;
 import ij.IJ;
 
 import java.util.ArrayList;
-//import java.util.Arrays;
 import java.util.List;
 
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
-//import no.gui.ColourSelecter;
 
-// this is used to divide a median profile into segments of interest
-// it can also take a list of segments, and apply them
+// Divide a median profile into segments of interest
 public class ProfileSegmenter {
 		
 	/**
@@ -47,10 +41,10 @@ public class ProfileSegmenter {
 	 * @param p the profile
 	 * @param n a list of segments
 	 */
-	public ProfileSegmenter(Profile p, List<NucleusBorderSegment> n){
-		this.profile = p;
-		this.segments = n;
-	}
+//	public ProfileSegmenter(Profile p, List<NucleusBorderSegment> n){
+//		this.profile = p;
+//		this.segments = n;
+//	}
 	
 	/**
 	 * Get the deltas and find minima and maxima. These switch between segments
@@ -59,7 +53,7 @@ public class ProfileSegmenter {
 	public List<NucleusBorderSegment> segment(){
 		Profile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW);
 		Profile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW);
-		Profile either = minima.add(maxima);
+		Profile breakpoint = minima.add(maxima);
 		Profile deltas = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima and maxima should be near 0 
 		Profile dDeltas = deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second differential
 		double dMax = dDeltas.getMax();
@@ -80,14 +74,14 @@ public class ProfileSegmenter {
 			
 			// when we get to the end of the profile, seglength must  be discounted, so we can wrap
 			// ditto for the beginning of the profile
-			if(i>profile.size()-ProfileSegmenter.MIN_SEGMENT_SIZE || i<ProfileSegmenter.MIN_SEGMENT_SIZE){
-				segLength = ProfileSegmenter.MIN_SEGMENT_SIZE;
+			if(i>profile.size()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH || i<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+				segLength = NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH;
 			}
 
 			// We want a minima or maxima, and the value must be distinct from its surroundings			
-			if( either.get(i)==1 
+			if( breakpoint.get(i)==1 
 					&& Math.abs(dDeltas.get(i)) > variationRange*0.02
-					&& segLength>= ProfileSegmenter.MIN_SEGMENT_SIZE){
+					&& segLength>= NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
 				// we've hit a new segment
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
 				seg.setSegmentType("Seg_"+segCount);
