@@ -11,6 +11,7 @@ import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
 import datasets.NucleusDatasetCreator;
+import datasets.NucleusTableDatasetCreator;
 
 /**
  * Holds the nuclear detection parameters and basic stats about the
@@ -54,7 +55,7 @@ public class AnalysisDetailPanel extends JPanel {
 	 */
 	private void updateAnalysisParametersPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = NucleusDatasetCreator.createAnalysisParametersTable(list);
+		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
 		tableAnalysisParamters.setModel(model);
 	}
 	
@@ -66,7 +67,7 @@ public class AnalysisDetailPanel extends JPanel {
 	 */
 	private void updateStatsPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = NucleusDatasetCreator.createStatsTable(list);
+		TableModel model = NucleusTableDatasetCreator.createStatsTable(list);
 		tablePopulationStats.setModel(model);
 	}
 	
@@ -83,7 +84,7 @@ public class AnalysisDetailPanel extends JPanel {
 
 		scrollPane.setViewportView(panelGeneralStats);
 		scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
-		tablePopulationStats.setModel(NucleusDatasetCreator.createStatsTable(null));
+		tablePopulationStats.setModel(NucleusTableDatasetCreator.createStatsTable(null));
 		return scrollPane;
 	}
 	
@@ -95,7 +96,7 @@ public class AnalysisDetailPanel extends JPanel {
 		panel.setLayout(new BorderLayout(0, 0));
 
 		tableAnalysisParamters = new JTable();
-		tableAnalysisParamters.setModel(NucleusDatasetCreator.createAnalysisParametersTable(null));
+		tableAnalysisParamters.setModel(NucleusTableDatasetCreator.createAnalysisParametersTable(null));
 		tableAnalysisParamters.setEnabled(false);
 		panel.add(tableAnalysisParamters, BorderLayout.CENTER);
 
