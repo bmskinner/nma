@@ -15,14 +15,13 @@ public class ProfileCollection implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private ProfileAggregate 	aggregate;
-	private Map<String, Integer> offsets = new HashMap<String, Integer>();
-			
+	
+	private Map<String, Integer> offsets 		= new HashMap<String, Integer>();
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 	private List<Profile> nucleusProfileList    = new ArrayList<Profile>();
 	
 	
 	public ProfileCollection(){
-
 	}
 			
 	/**
@@ -130,9 +129,13 @@ public class ProfileCollection implements Serializable {
 		}
 		return result;
 	}
-	
-	// Add or update features
-	
+		
+	/**
+	 * Add an offset for the given point type. The offset is used
+	 * to fetch profiles the begin at the point of interest.
+	 * @param pointType the point
+	 * @param offset the position of the point in the profile
+	 */
 	public void addOffset(String pointType, int offset){
 		if(pointType==null){
 			throw new IllegalArgumentException("String is null");
@@ -140,45 +143,27 @@ public class ProfileCollection implements Serializable {
 		offsets.put(pointType, offset);
 	}
 	
+	/**
+	 * Add a list of segments for the profile
+	 * @param n the segment list
+	 */
 	public void addSegments(List<NucleusBorderSegment> n){
 		if(n==null || n.isEmpty()){
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
 		segments = n;
 	}
-	
-//	/**
-//	 * Create a list of segments based on an offset of existing segments
-//	 * This is an alternative to re-segmenting while transition to indexing is in progress
-//	 * @param pointToAdd the name of the pointType to add
-//	 * @param referencePoint the name of the pointType to take segments from
-//	 * @param offset the offset to apply to each segment
-//	 */
-//	public void addSegments(String pointToAdd, String referencePoint, int offset){
-//		if(pointToAdd==null || referencePoint==null || Integer.valueOf(offset)==null){
-//			throw new IllegalArgumentException("String or offset is null or empty");
-//		}
-//		List<NucleusBorderSegment> referenceList =  getSegments(referencePoint);
-//		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-//		for(NucleusBorderSegment s : referenceList){
-//			
-//			int newStart = Utils.wrapIndex( s.getStartIndex()+ offset , getProfile(referencePoint).size());
-//			int newEnd = Utils.wrapIndex( s.getEndIndex()+ offset , getProfile(referencePoint).size());
-//			
-//			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, s.getTotalLength());
-//			c.setSegmentType(s.getSegmentType());
-//			
-//			result.add(c);
-//		}
-//		
-//		segments.put(pointToAdd, result);
-//	}
-	
-	public void addNucleusProfiles(List<Profile> n){
-		if(n==null || n.isEmpty()){
+		
+	/**
+	 * Add individual nucleus profiles to teh collection.
+	 * This allows frankenmedian creation
+	 * @param profiles the list of profiles
+	 */
+	public void addNucleusProfiles(List<Profile> profiles){
+		if(profiles==null || profiles.isEmpty()){
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
-		nucleusProfileList = n;
+		nucleusProfileList = profiles;
 	}
 	
 	/**
@@ -209,6 +194,10 @@ public class ProfileCollection implements Serializable {
 
 	}
 	
+	/**
+	 * Get the points associated with offsets currently present
+	 * @return a string with the points
+	 */
 	public String printKeys(){
 		
 		StringBuilder builder = new StringBuilder();
@@ -219,11 +208,6 @@ public class ProfileCollection implements Serializable {
 		}
 		return builder.toString();
 	}
-		
-		
-//	public Set<String> getSegmentKeys(){
-//		return segments.keySet();
-//	}
 	
 	/**
 	 * Turn the IQR (difference between Q25, Q75) of the median into a profile.
@@ -232,18 +216,10 @@ public class ProfileCollection implements Serializable {
 	 */
 	public Profile getIQRProfile(String pointType){
 		
-		ProfileAggregate profileAggregate = this.getAggregate();
-		
-		return profileAggregate.getQuartile(75).subtract(profileAggregate.getQuartile(25));
-
-//		double[] lowQuartiles    =  profileAggregate.getQuartile(25).asArray();
-//		double[] uppQuartiles    =  profileAggregate.getQuartile(75).asArray();
-//		
-//		double[] iqr = new double[lowQuartiles.length];
-//		for(int i=0;i<iqr.length;i++){
-//			iqr[i] = uppQuartiles[i] - lowQuartiles[i]; 
-//		}
-//		return new Profile(iqr);
+		int offset = getOffset(pointType);
+		Profile q25 = getAggregate().getQuartile(25).offset(offset);
+		Profile q75 = getAggregate().getQuartile(75).offset(offset);
+		return q75.subtract(q25);
 	}
 	
 	/**
