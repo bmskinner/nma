@@ -12,6 +12,7 @@ package no.collections;
 import ij.IJ;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -220,6 +221,23 @@ implements Serializable
 
   public File getDebugFile(){
     return this.debugFile;
+  }
+  
+  /**
+   * Allow the collection to update the debug file location
+   * @param f the new file
+   */
+  public void setDebugFile(File f){
+	  try {
+		  if(!f.exists()){
+			  f.createNewFile();
+		  }
+		  if(f.canWrite()){
+			  this.debugFile = f;
+		  }
+	  } catch (IOException e) {
+		  IJ.log("Unable to update debug file location");
+	  }
   }
 
   public String getType(){

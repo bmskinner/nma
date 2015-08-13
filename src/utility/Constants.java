@@ -30,7 +30,9 @@ public class Constants {
 		public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
 		
-				
+			
+		public static final String DEBUG_FILE_NAME = "log.debug.txt";
+		
 		/**
 		 * Given an RGB channel, get the ImageStack stack for internal use
 		 * @param channel the channel
