@@ -55,7 +55,7 @@ public class NucleusDatasetCreator {
 	 * @param binSize the size of the ProfileAggregate bins, to adjust the offset of the median
 	 * @return the updated dataset
 	 */
-	private static XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset, double binSize){
+	private static XYDataset addSegmentsFromProfile(List<NucleusBorderSegment> segments, Profile profile, DefaultXYDataset ds, int length, double offset){
 		
 		Profile xpoints = profile.getPositions(length);
 		xpoints = xpoints.add(offset);
@@ -140,10 +140,6 @@ public class NucleusDatasetCreator {
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			
-			double binSize = collection.getProfileCollection()
-										.getAggregate(collection.getOrientationPoint())
-										.getBinSize();
-
 			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
 			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
 			
@@ -154,7 +150,7 @@ public class NucleusDatasetCreator {
 				}
 			}
 			if(!segmentsToAdd.isEmpty()){
-				addSegmentsFromProfile(segmentsToAdd, profile, ds, 100, 0, binSize);
+				addSegmentsFromProfile(segmentsToAdd, profile, ds, 100, 0);
 			}
 			
 
@@ -189,11 +185,7 @@ public class NucleusDatasetCreator {
 
 		for (int i=0; i < list.size(); i++) {
 			CellCollection collection = list.get(i).getCollection();
-			
-			double binSize = collection.getProfileCollection()
-					.getAggregate(collection.getOrientationPoint())
-					.getBinSize();
-			
+
 			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 			Profile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
 			
@@ -216,7 +208,7 @@ public class NucleusDatasetCreator {
 				}
 			}
 			if(!segmentsToAdd.isEmpty()){
-				addSegmentsFromProfile(segmentsToAdd, profile, ds, (int) collection.getMedianArrayLength(), offset, binSize);
+				addSegmentsFromProfile(segmentsToAdd, profile, ds, (int) collection.getMedianArrayLength(), offset);
 			}
 		}
 		return ds;
@@ -231,10 +223,6 @@ public class NucleusDatasetCreator {
 	public static XYDataset createSegmentedProfileDataset(CellCollection collection, boolean normalised){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		double binSize = collection.getProfileCollection()
-				.getAggregate(collection.getOrientationPoint())
-				.getBinSize();
-		
 		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 		Profile xpoints = null;
 		if(normalised){
@@ -248,9 +236,9 @@ public class NucleusDatasetCreator {
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
 		if(normalised){
-			addSegmentsFromProfile(segments, profile, ds, 100, 0, binSize);
+			addSegmentsFromProfile(segments, profile, ds, 100, 0);
 		} else {
-			addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), 0, binSize);
+			addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), 0);
 		}
 
 		// make the IQR
@@ -415,12 +403,9 @@ public class NucleusDatasetCreator {
 			CellCollection collection = list.get(0).getCollection();
 			Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
 			
-			double binSize = collection.getProfileCollection()
-					.getAggregate(collection.getOrientationPoint())
-					.getBinSize();
 			
 			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
-			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0, binSize);	
+			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
 			return ds;
 		} else {
 			int i = 0;
@@ -442,17 +427,12 @@ public class NucleusDatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Profile profile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
 		Profile xpoints = profile.getPositions(100);
-//		Profile xpointsAdj = xpoints.add(0.5);
-		
-		double binSize = collection.getProfileCollection()
-				.getAggregate(collection.getReferencePoint())
-				.getBinSize();
 		
 		// rendering order will be first on top
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getReferencePoint());
-		addSegmentsFromProfile(segments, profile, ds, 100, 0, binSize);
+		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
 		Profile profile25 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"25");
@@ -486,7 +466,7 @@ public class NucleusDatasetCreator {
 		
 		// add the segments
 		List<NucleusBorderSegment> segments = nucleus.getSegments(Constants.Nucleus.RODENT_SPERM.referencePoint());
-		addSegmentsFromProfile(segments, profile, ds, nucleus.getLength(), 0, 0);
+		addSegmentsFromProfile(segments, profile, ds, nucleus.getLength(), 0);
 		
 		double[][] ndata = { xpoints.asArray(), profile.asArray() };
 		ds.addSeries("Nucleus_"+nucleus.getImageName()+"-"+nucleus.getNucleusNumber(), ndata);

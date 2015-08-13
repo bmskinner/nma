@@ -65,8 +65,9 @@ public class MorphologyAnalysis {
 
 	private static void runProfiler(CellCollection collection, String pointType){
 		
+		ProfileCollection pc = collection.getProfileCollection();
 		// default is to make profile aggregate from reference point
-		createProfileAggregateFromPoint(collection, pointType);
+		pc.createProfileAggregate(collection);
 		
 		// use the median profile of this aggregate to find the tail point
 		TailFinder.findTailIndexInMedianCurve(collection);
@@ -75,7 +76,7 @@ public class MorphologyAnalysis {
 		double score = compareProfilesToMedian(collection, pointType);
 		double prevScore = score+1;
 		while(score < prevScore){
-			createProfileAggregateFromPoint(collection, pointType);
+			pc.createProfileAggregate(collection);
 			
 			// we need to allow each nucleus collection type handle tail finding and offsetting itself
 			TailFinder.findTailIndexInMedianCurve(collection);
@@ -89,7 +90,7 @@ public class MorphologyAnalysis {
 		// update the median profile with the final offset locations
 		
 		// create a profile aggregate for the orientation point
-		createProfileAggregateFromPoint(collection, collection.getOrientationPoint());
+//		createProfileAggregateFromPoint(collection, collection.getOrientationPoint());
 
 	}
 		
@@ -110,10 +111,10 @@ public class MorphologyAnalysis {
 			
 			// use the same array length as the source collection to avoid segment slippage
 			int profileLength = sourceCollection.getProfileCollection().getProfile(referencePoint).size();
-			createProfileAggregateFromPoint(collection, referencePoint, profileLength);
-			createProfileAggregateFromPoint(collection, orientationPoint, profileLength);
-			
 			ProfileCollection pc = collection.getProfileCollection();
+			pc.createProfileAggregate(collection, profileLength);
+			
+			
 			ProfileCollection sc = sourceCollection.getProfileCollection();
 			
 			
@@ -149,53 +150,53 @@ public class MorphologyAnalysis {
 	 * @param pointType
 	 * @param length
 	 */
-	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType, int length){
+//	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType, int length){
+//
+//		ProfileAggregate profileAggregate = new ProfileAggregate(length);
+//		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
+//		
+//		for(Nucleus n : collection.getNuclei()){
+//			profileAggregate.addValues(n.getAngleProfile(pointType));
+//		}
+//
+////		Profile medians = profileAggregate.getMedian();
+////		Profile q25     = profileAggregate.getQuartile(25);
+////		Profile q75     = profileAggregate.getQuartile(75);
+////		collection.getProfileCollection().addProfile(pointType, medians);
+////		collection.getProfileCollection().addProfile(pointType+"25", q25);
+////		collection.getProfileCollection().addProfile(pointType+"75", q75);
+//	}
 
-		ProfileAggregate profileAggregate = new ProfileAggregate(length);
-		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
-		
-		for(Nucleus n : collection.getNuclei()){
-			profileAggregate.addValues(n.getAngleProfile(pointType));
-		}
+//	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType){
+//
+//		ProfileAggregate profileAggregate = new ProfileAggregate((int)collection.getMedianArrayLength());
+//		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
+//
+//		for(Nucleus n : collection.getNuclei()){
+//			profileAggregate.addValues(n.getAngleProfile(pointType));
+//		}
+//
+////		Profile medians = profileAggregate.getMedian();
+////		Profile q25     = profileAggregate.getQuartile(25);
+////		Profile q75     = profileAggregate.getQuartile(75);
+////		
+////		ProfileCollection pc = collection.getProfileCollection();
+////		pc.addProfile(pointType, medians);
+////		pc.addProfile(pointType+"25", q25);
+////		pc.addProfile(pointType+"75", q75);
+//
+//	}
 
-		Profile medians = profileAggregate.getMedian();
-		Profile q25     = profileAggregate.getQuartile(25);
-		Profile q75     = profileAggregate.getQuartile(75);
-		collection.getProfileCollection().addProfile(pointType, medians);
-		collection.getProfileCollection().addProfile(pointType+"25", q25);
-		collection.getProfileCollection().addProfile(pointType+"75", q75);
-	}
-
-	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType){
-
-		ProfileAggregate profileAggregate = new ProfileAggregate((int)collection.getMedianArrayLength());
-		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
-
-		for(Nucleus n : collection.getNuclei()){
-			profileAggregate.addValues(n.getAngleProfile(pointType));
-		}
-
-		Profile medians = profileAggregate.getMedian();
-		Profile q25     = profileAggregate.getQuartile(25);
-		Profile q75     = profileAggregate.getQuartile(75);
-		
-		ProfileCollection pc = collection.getProfileCollection();
-		pc.addProfile(pointType, medians);
-		pc.addProfile(pointType+"25", q25);
-		pc.addProfile(pointType+"75", q75);
-
-	}
-
-	private static void createProfileAggregates(CellCollection collection){
-		try{
-			for( String pointType : collection.getProfileCollection().getProfileKeys() ){
-				createProfileAggregateFromPoint(collection, pointType);   
-			}
-		} catch(Exception e){
-			logger.log("Error creating profile aggregates: "+e.getMessage(), Logger.ERROR);
-			logger.log(collection.getProfileCollection().printKeys());
-		}
-	}
+//	private static void createProfileAggregates(CellCollection collection){
+//		try{
+//			for( String pointType : collection.getProfileCollection().getProfileKeys() ){
+//				createProfileAggregateFromPoint(collection, pointType);   
+//			}
+//		} catch(Exception e){
+//			logger.log("Error creating profile aggregates: "+e.getMessage(), Logger.ERROR);
+//			logger.log(collection.getProfileCollection().printKeys());
+//		}
+//	}
 	
 
 	private static double compareProfilesToMedian(CellCollection collection, String pointType){
@@ -217,7 +218,7 @@ public class MorphologyAnalysis {
 //			
 			// At this point, the franken collection contains tip/head values only
 			
-			createProfileAggregates(collection);
+			collection.getProfileCollection().createProfileAggregate(collection);
 			
 			applySegmentsToOtherPointTypes(collection, pointType);
 			
@@ -332,7 +333,8 @@ public class MorphologyAnalysis {
 		ProfileCollection frankenCollection = new ProfileCollection();
 
 		// fill the frankenCollection  with the segment information previously calculated
-		frankenCollection.addAggregate( pointType, new ProfileAggregate((int)collection.getMedianArrayLength()));
+		frankenCollection.createProfileAggregate(collection);
+//		frankenCollection.addAggregate( pointType, new ProfileAggregate((int)collection.getMedianArrayLength()));
 		frankenCollection.addSegments(pointType, segments);
 
 		SegmentFitter fitter = new SegmentFitter(pc.getProfile(pointType), segments, logger.getLogfile());
@@ -344,12 +346,12 @@ public class MorphologyAnalysis {
 			// recombine the segments at the lengths of the median profile segments
 			// what does it look like?
 			Profile recombinedProfile = fitter.recombine(n);
-			frankenCollection.getAggregate(pointType).addValues(recombinedProfile);
+			frankenCollection.getAggregate().addValues(recombinedProfile);
 			frankenProfiles.add(recombinedProfile);
 		}
 		frankenCollection.addNucleusProfiles(pointType, frankenProfiles);
 		// update the profile aggregate
-		frankenCollection.createProfileAggregateFromPoint(    pointType, (int) collection.getMedianArrayLength()    );
+		frankenCollection.createProfileAggregate(  collection   );
 		
 		// Added in for completeness
 		// apply the frankenprofile segments to other point type
@@ -403,12 +405,15 @@ public class MorphologyAnalysis {
 					}
 				}
 			}
-			Profile tailProfile = medianProfile.offset(tailIndex);
-			collection.getProfileCollection().addProfile(collection.getOrientationPoint(), tailProfile);
-			collection.getProfileCollection()
-			.addFeature(collection.getReferencePoint(), 
-					new ProfileFeature(collection.getOrientationPoint(), tailIndex)
-					); // set the tail-index in the tip normalised profile
+//			Profile tailProfile = medianProfile.offset(tailIndex);
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
+			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
+			
+//			collection.getProfileCollection().addProfile(collection.getOrientationPoint(), tailProfile);
+//			collection.getProfileCollection()
+//			.addFeature(collection.getReferencePoint(), 
+//					new ProfileFeature(collection.getOrientationPoint(), tailIndex)
+//					); // set the tail-index in the tip normalised profile
 		}
 
 		private static void findTailInPigSpermMedian(CellCollection collection){
@@ -445,9 +450,12 @@ public class MorphologyAnalysis {
 				}
 			}
 			// IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-			Profile tailProfile = medianProfile.offset(tailIndex);
-			collection.getProfileCollection().addProfile("tail", tailProfile);
-			collection.getProfileCollection().addFeature("head", new ProfileFeature("tail", tailIndex));
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
+			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
+			
+//			Profile tailProfile = medianProfile.offset(tailIndex);
+//			collection.getProfileCollection().addProfile("tail", tailProfile);
+//			collection.getProfileCollection().addFeature("head", new ProfileFeature("tail", tailIndex));
 		}
 
 		private static void findTailInRoundMedian(CellCollection collection){
@@ -456,10 +464,14 @@ public class MorphologyAnalysis {
 			Profile medianProfile = pc.getProfile(collection.getReferencePoint());
 
 			int tailIndex = (int) Math.floor(medianProfile.size()/2);
+			
+			
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
+			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
 
-			Profile tailProfile = medianProfile.offset(tailIndex);
-			pc.addProfile(collection.getOrientationPoint(), tailProfile);
-			pc.addFeature(collection.getReferencePoint(), new ProfileFeature(collection.getOrientationPoint(), tailIndex));
+//			Profile tailProfile = medianProfile.offset(tailIndex);
+//			pc.addProfile(collection.getOrientationPoint(), tailProfile);
+//			pc.addFeature(collection.getReferencePoint(), new ProfileFeature(collection.getOrientationPoint(), tailIndex));
 
 		}
 
