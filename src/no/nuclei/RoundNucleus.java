@@ -1145,6 +1145,9 @@ public class RoundNucleus
 	
 	public void addSegment(NucleusBorderSegment n){
 		this.segmentList.add(n);
+		if(n.getSegmentType()!=null){
+			this.addSegmentTag(n.getSegmentType(), this.segmentList.indexOf(n));
+		}
 	}
 
 	public Map<String, Integer> getSegmentMap( ){

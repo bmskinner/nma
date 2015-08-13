@@ -9,7 +9,10 @@ import java.util.List;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 
-// Divide a median profile into segments of interest
+/**
+ * Divide a profile into segments of interest based on
+ * minima and maxima.
+ */
 public class ProfileSegmenter {
 		
 	/**
@@ -28,23 +31,16 @@ public class ProfileSegmenter {
 	private Profile profile; // the profile to segment
 	List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
 	
+	/**
+	 * Constructed from a profile
+	 * @param p
+	 */
 	public ProfileSegmenter(Profile p){
 		if(p==null){
 			throw new IllegalArgumentException("Profile is null");
 		}
 		this.profile = p;
 	}
-	
-	/**
-	 * Create using existing segments. Can then be used to draw plots
-	 * without calling the segmenting method
-	 * @param p the profile
-	 * @param n a list of segments
-	 */
-//	public ProfileSegmenter(Profile p, List<NucleusBorderSegment> n){
-//		this.profile = p;
-//		this.segments = n;
-//	}
 	
 	/**
 	 * Get the deltas and find minima and maxima. These switch between segments
@@ -68,53 +64,62 @@ public class ProfileSegmenter {
 		NucleusBorderSegment prevSegment = null;
 		
 		try{
-		for(int i=0;i<profile.size();i++){
-			segmentEnd = i;
-			segLength++;
 			
-			// when we get to the end of the profile, seglength must  be discounted, so we can wrap
-			// ditto for the beginning of the profile
-			if(i>profile.size()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH || i<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-				segLength = NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH;
-			}
+			// iterate through the profile, looking for breakpoints
+			for(int index=0; index<profile.size(); index++){
+				segmentEnd = index;
+				segLength++;
 
-			// We want a minima or maxima, and the value must be distinct from its surroundings			
-			if( breakpoint.get(i)==1 
-					&& Math.abs(dDeltas.get(i)) > variationRange*0.02
-					&& segLength>= NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-				// we've hit a new segment
-				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
-				seg.setSegmentType("Seg_"+segCount);
-				
-				if(prevSegment!=null){
-					seg.setPrevSegment(prevSegment);
-					prevSegment.setNextSegment(seg);
-				} 
-				segments.add(seg);
-				
-				prevSegment = seg;
-				segmentStart = i;
-				segLength=0;
-				segCount++;
+				// when we get to the end of the profile, seglength must  be discounted, so we can wrap
+				// ditto for the beginning of the profile
+				if(index>profile.size()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH || index<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+					segLength = NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH;
+				}
+
+				// We want a minima or maxima, and the value must be distinct from its surroundings			
+				if( breakpoint.get(index)==1 
+						&& Math.abs(dDeltas.get(index)) > variationRange*0.02
+						&& segLength >= NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+					
+					// we've hit a new segment
+					NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
+					seg.setSegmentType("Seg_"+segCount);
+
+					// if a previous segment has been defined (i.e iteration 1+)
+					// set the links
+					if(prevSegment!=null){
+						seg.setPrevSegment(prevSegment);
+						prevSegment.setNextSegment(seg);
+					} 
+					segments.add(seg);
+
+					prevSegment = seg;
+					segmentStart = index; // start the next segment at this position
+					segLength=0;
+					segCount++;
+				}
 			}
-		}
-		// join up segments at start and end of profile if needed
-		
-		NucleusBorderSegment first = segments.get(0);
-		first.update(segmentStart, first.getEndIndex()); // merge the segments around 0	
-		prevSegment.setNextSegment(first);
-		first.setPrevSegment(prevSegment);
-		
+			// join up segments at start and end of profile
+			NucleusBorderSegment first = segments.get(0);
+			
+			// the start point of the first segment must be set to the end point of the 
+			// last segment before they can be linked
+			first.update(prevSegment.getEndIndex(), first.getEndIndex());
+			
+			// Now link them together
+			prevSegment.setNextSegment(first);
+			first.setPrevSegment(prevSegment);
+
 		} catch (Exception e){
 			IJ.log("Error in segmentation: "+e.getMessage());
 			for(StackTraceElement e1 : e.getStackTrace()){
 				IJ.log(e1.toString());
 			}
 		}
-
+		
 		return segments;
 	}
-	
+
 	/**
 	 * For debugging. Print the details of each segment found 
 	 */

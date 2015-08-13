@@ -186,8 +186,8 @@ public class NucleusBorderSegment  implements Serializable{
 	 */
 	public void update(int startIndex, int endIndex){
 		
-//		IJ.log("Preparing to update segment");
-		// Check the incoming data
+//		IJ.log("Preparing to update segment: "+this.getSegmentType());
+//		 Check the incoming data
 		if(startIndex < 0 || startIndex > this.getTotalLength()){
 			throw new IllegalArgumentException("Start index is outside the total profile length: "+startIndex);
 		}
@@ -206,27 +206,35 @@ public class NucleusBorderSegment  implements Serializable{
 			}
 		}
 		
-		// wrap in if to ensure we don't go in circles forever when testing a circular profile
+		// don't update things that have not changed
+		if(this.getStartIndex()==startIndex && this.getEndIndex()==endIndex){
+			return;
+		}
+		
+//		 wrap in if to ensure we don't go in circles forever when testing a circular profile
 		if(this.getStartIndex()!=startIndex){
-//			IJ.log("Updating start");
+			this.startIndex = startIndex;
+//			IJ.log("Updating start: "+this.getSegmentType());
 			if(this.hasPrevSegment()){
 				NucleusBorderSegment prev = this.prevSegment();
 				prev.update(prev.getStartIndex(), startIndex);
 			}
-			this.startIndex = startIndex;
-//			IJ.log("Updated start");
+			
+//			IJ.log("Updated start: "+this.getSegmentType());
 		}
 			
 		if(this.getEndIndex()!=endIndex){
-//			IJ.log("Updating end");
+			this.endIndex = endIndex;
+//			IJ.log("Updating end: "+this.getSegmentType());
 			if(this.hasNextSegment()){
 				NucleusBorderSegment next = this.nextSegment();
 				next.update(endIndex, next.getEndIndex());
 			}
-			this.endIndex = endIndex;
-//			IJ.log("Updated end");
+			
+//			IJ.log("Updated end: "+this.getSegmentType());
 		}
 	}
+	
 
 	/**
 	 * Set the next segment in the profile from this
@@ -287,7 +295,7 @@ public class NucleusBorderSegment  implements Serializable{
 	}
 	
 	public void print(){
-		IJ.log("    Segment from "+this.startIndex+" to "+this.endIndex);
+		IJ.log("    Segment from "+this.startIndex+" to "+this.endIndex+"; previous: "+this.hasPrevSegment()+"; next: "+this.hasNextSegment());
 	}
 
 }

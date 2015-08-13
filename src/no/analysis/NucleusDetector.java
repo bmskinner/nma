@@ -593,7 +593,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		  } else { // if !ok
 			  if(file.isDirectory()){ // recurse over any sub folders
 				  processFolder(file);
-			  }
+			  } 
 		  } // end else if !ok
 	  } // end for (File)
   } // end function

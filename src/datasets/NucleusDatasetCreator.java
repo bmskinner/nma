@@ -64,21 +64,21 @@ public class NucleusDatasetCreator {
 			if(seg.getStartIndex()>seg.getEndIndex()){ // case when array wraps. We need to plot the two ends as separate series
 				
 				// franken profiles may have skipping issues on segment remapping
-				// catch them here before drawing. Needs fixing upstream
+				// TODO catch them here before drawing. Needs fixing upstream
 				if(seg.getStartIndex()<profile.size()){
 										
 
 					// beginning of array
 					Profile subProfileA = profile.getSubregion(0, seg.getEndIndex());
 					Profile subPointsA  = xpoints.getSubregion(0, seg.getEndIndex());
-					subPointsA = subPointsA.add(binSize/2); // correct for median being at the start of the bin
+//					subPointsA = subPointsA.add(binSize/2); // correct for median being at the start of the bin
 					double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
 					ds.addSeries(seg.getSegmentType()+"_A", dataA);
 
 					// end of array
 					Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
 					Profile subPointsB  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
-					subPointsB = subPointsB.add(binSize/2); // correct for median being at the start of the bin
+//					subPointsB = subPointsB.add(binSize/2); // correct for median being at the start of the bin
 					double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
 					ds.addSeries(seg.getSegmentType()+"_B", dataB);
 					continue;
@@ -86,8 +86,8 @@ public class NucleusDatasetCreator {
 					IJ.log("Profile skipping issue: "+seg.getSegmentType()+" : "+seg.getStartIndex()+" - "+seg.getEndIndex()+" in total of "+profile.size());
 				}
 			} 
-			Profile subProfile = profile.getSubregion(seg.getStartIndex(), seg.getEndIndex());
-			Profile subPoints  = xpoints.getSubregion(seg.getStartIndex(), seg.getEndIndex());
+			Profile subProfile = profile.getSubregion(seg);
+			Profile subPoints  = xpoints.getSubregion(seg);
 //			subPoints = subPoints.add(0.5); // correct for median being at the start of the bin
 			double[][] data = { subPoints.asArray(), subProfile.asArray() };
 			

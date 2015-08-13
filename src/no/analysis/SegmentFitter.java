@@ -36,10 +36,10 @@ public class SegmentFitter {
 	 */
 	static final double PENALTY_GROW   = 1;
 	
-	private Profile medianProfile; // the profile to align against
+	private final Profile medianProfile; // the profile to align against
 	private Profile   testProfile; // the profile to adjust
 	
-	List<NucleusBorderSegment> medianSegments;
+	final List<NucleusBorderSegment> medianSegments;
 	List<NucleusBorderSegment>   testSegments;
 	
 	/**
@@ -66,10 +66,14 @@ public class SegmentFitter {
 	}
 	
 	/**
-	 * Run the segment fitter on the given nucleus
+	 * Run the segment fitter on the given nucleus. It will take the segments
+	 * loaded into the fitter upon cosntruction, and apply them to the nucleus
+	 * angle profile.
 	 * @param n the nucleus to fit to the current median profile
 	 */
 	public void fit(Nucleus n){
+		
+		// Input checks
 		if(n==null){
 			logger.log("Test nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
@@ -82,26 +86,35 @@ public class SegmentFitter {
 		this.testProfile = new Profile(n.getAngleProfile());
 		this.testSegments = new ArrayList<NucleusBorderSegment>(0);
 		
+		
+		// Make a copy of the segments in the nucleus
 		for(NucleusBorderSegment seg : n.getSegments()){
 			this.testSegments.add(new NucleusBorderSegment(seg));
 		}
+		
+		// Begin fitting the segments to the median
 		logger.log("Fitting nucleus "+n.getPathAndNumber(), Logger.INFO);
 		try{
-			List<NucleusBorderSegment> newList = this.runFitter(this.testSegments);
 			
-	//		Profile revisedProfile = this.recombineSegments(newList, testProfile);
-//			IJ.log(n.getImageName()+"-"+n.getNucleusNumber());
+			// test how well the nucleus profile matches the median
 			double score = testProfile.differenceToProfile(medianProfile);
-//			IJ.log("Start score: "+score);
-			double prevScore = score+1;
+			
+			// get the best fit of segments to the median
+			List<NucleusBorderSegment> newList = this.runFitter(this.testSegments);
+					
+			logger.log("Start score: "+score, Logger.DEBUG);
+
+			double prevScore = score+1; // so we don't immediately end the loop
+			
 			while(score<prevScore){
 				newList = runFitter(newList);
 				Profile revisedProfile = this.recombineSegments(newList, testProfile);
 				prevScore = score;
 				score = revisedProfile.differenceToProfile(medianProfile);
-//				IJ.log("Score: "+score);
+				logger.log("Score: "+score, Logger.DEBUG);
+
 			}
-//			IJ.log("Final score: "+score);
+			logger.log("Final score: "+score, Logger.DEBUG);
 			n.setSegments(newList);
 			
 			// modify tail point to nearest segment end
@@ -117,7 +130,7 @@ public class SegmentFitter {
 	}
 	
 	/**
-	 * Join the segmnets within the given nucleus into Frankenstein's Profile 
+	 * Join the segments within the given nucleus into Frankenstein's Profile. 
 	 * @param n the nucleus to recombine
 	 * @return a profile
 	 */
@@ -167,54 +180,51 @@ public class SegmentFitter {
 //		
 //	}
 	
-	private Profile recombineSegments(List<NucleusBorderSegment> testSegs, Profile testMedian){
-		if(testSegs==null || testSegs.isEmpty()){
+	/**
+	 * Perform the recombination of segments from a nucleus. It takes each segment
+	 * and interpolates it to the length of the corresponding median segment.
+	 * @param testSegs the segments to adjust
+	 * @param testMedian the median profile
+	 * @return a profile constructed from the stretched segments
+	 */
+	private Profile recombineSegments(List<NucleusBorderSegment> segments, Profile median){
+		
+		// Input checking
+		if(segments==null || segments.isEmpty()){
 			throw new IllegalArgumentException("Segment list is null or empty");
 		}
-		if(testMedian==null){
+		if(median==null){
 			throw new IllegalArgumentException("Test profile is null in recombiner");
 		}
+		logger.log("Recombining segments to FrankenProfile", Logger.DEBUG);
+		
+		
+		// the profiles derived from each segment will be merged to a single 
+		// profile at the end
 		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
 
 		// go through each segment
-		for(int i=0; i<testSegs.size();i++){
-			NucleusBorderSegment targetSeg = this.medianSegments.get(i);
+		for(int i=0; i<segments.size();i++){
+			
+			// The relevant segment from the median profile
+			NucleusBorderSegment 	medianSegment = this.medianSegments.get(i);
 
-			// we may need to trim out the last element, because the segments share endpoints
-			NucleusBorderSegment   testSeg = testSegs.get(i);
+			// Segments share endpoints
+			// As a result, the last index should be removed from each segment for best fitting
+			NucleusBorderSegment 	testSeg = segments.get(i);
+
+			// get the region within the segment as a new profile
+			Profile testSegProfile = median.getSubregion(testSeg);
 
 			// interpolate the test segments to the length of the median segments
-			Profile testSegProfile = testMedian.getSubregion(testSeg); //this.getSegmentProfile(testSeg, testMedian);
-			Profile revisedProfile = testSegProfile.interpolate(targetSeg.length());
+			Profile revisedProfile = testSegProfile.interpolate(medianSegment.length());
+			
+			// Put the new profile into the list
 			finalSegmentProfiles.add(revisedProfile);
 		}
 		return Profile.merge(finalSegmentProfiles);
 	}
-	
-//	/**
-//	 * Given a list of ordered profiles, merge them into one 
-//	 * contiguous profile
-//	 * @param list the list of profiles to merge
-//	 * @return the merged profile
-//	 */
-//	private Profile merge(List<Profile> list){
-//		if(list==null || list.size()==0){
-//			throw new IllegalArgumentException("Profile list is null or empty");
-//		}
-//		Profile result = new Profile(new double[0]);
-//		List<Double> combinedList = new ArrayList<Double>(0);
-//		
-//		for(Profile p : list){
-//			double[] values = p.asArray();
-//			List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
-//			combinedList.addAll(valueList);
-//		}
-//		
-//		Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
-//		result = new Profile(Utils.getdoubleFromDouble(combinedArray));
-//		return result;
-//	}
-	
+		
 	/**
 	 * for each test segment: compare with median segment
 	 *	increase or decrease the test endpoint
@@ -224,66 +234,88 @@ public class SegmentFitter {
 	 *  update the nucleus
 	 */
 	private List<NucleusBorderSegment> runFitter(List<NucleusBorderSegment> testList){
+		
+		// Input check
+		if(testList==null || testList.isEmpty()){
+			throw new IllegalArgumentException("Segment list is null or empty");
+		}
+		
+		logger.log("Fitting list", Logger.DEBUG);
 
-		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>(0);
-//		int profileLength = this.testProfile.size();
+		// A new list to hold the fitted segments
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
+
+		// the number of segments input
 		int segmentCount  = testList.size();
 		
-//		IJ.log("");
+
 		for(int i=0; i<segmentCount;i++){
-//			IJ.log("    Segment "+i);			
+					
 			NucleusBorderSegment seg = testList.get(i);
 			int oldLength = seg.length();
 			
-//			NucleusBorderSegment prevSeg = new NucleusBorderSegment(newList.get(  Utils.wrapIndex(i-1, segmentCount)  ));
-//			NucleusBorderSegment prevSeg = i==0 ? new NucleusBorderSegment(testList.get(segmentCount-1)) : new NucleusBorderSegment(newList.get( i-1 ));
+//			logger.log("Fitting segment "+i+": "+seg.getSegmentType(), Logger.DEBUG);
 			
-//			seg.print();
 			// basic checks - is the segment long enough, does it wrap, offset from the previous fitting
 //			seg = preprocessSegment(seg, prevSeg);
 						
 			double score =  compareSegments(this.medianSegments.get(i), seg);
+			
+//			logger.log("Score "+score, Logger.DEBUG);
+			
+			
 			double minScore = score;
 			NucleusBorderSegment bestSeg = seg;
 			
 			// TODO: allow rotation through the entire profile
 			for(int j=-SegmentFitter.POINTS_TO_TEST;j<SegmentFitter.POINTS_TO_TEST;j++){
-				
-				// make a copy of the segment
-				NucleusBorderSegment tempSeg = new NucleusBorderSegment(seg);
-				
-				
-				try{
-					// lengthen the new segment by the given amount
-					tempSeg.lengthenEnd(j);
+
+				// only refit if the change does not shrink the segment too much
+				// only applies if j is negative
+				if(seg.length()+j > NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
 					
-					// get the score for the new segment
-					score = compareSegments(this.medianSegments.get(i), tempSeg);
+//					logger.log("Testing segment length change of "+j, Logger.DEBUG);
 					
-					// add a penalty for each point that makes the segment longer
-					if(tempSeg.length()>oldLength){
-						score += (tempSeg.length()-oldLength) * SegmentFitter.PENALTY_GROW ;
+					// make a copy of the segment
+					NucleusBorderSegment tempSeg = new NucleusBorderSegment(seg);
+
+
+					try{
+						// lengthen the new segment by the given amount
+						tempSeg.lengthenEnd(j);
+//						logger.log("Adjusted segment length", Logger.DEBUG);
+
+						// get the score for the new segment
+						score = compareSegments(this.medianSegments.get(i), tempSeg);
+
+						// add a penalty for each point that makes the segment longer
+						if(tempSeg.length()>oldLength){
+							score += (tempSeg.length()-oldLength) * SegmentFitter.PENALTY_GROW ;
+						}
+
+						// add a penalty if the proposed new segment is shorter that the minimum segment length
+						if(tempSeg.length()<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+							// penalty increases the smaller we go below the minimum
+							score += (NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH - tempSeg.length()) * SegmentFitter.PENALTY_SHRINK;
+						}
+						
+//						logger.log("New score: "+score, Logger.DEBUG);
+
+						if(score<minScore){
+							minScore=score;
+							bestSeg = tempSeg;
+						}
+
+					} catch(IllegalArgumentException e){
+						logger.log("Error in arguments: "+e.getMessage(), Logger.ERROR);
 					}
-					
-					// add a penalty if the proposed new segment is shorter that the minimum segment length
-					if(tempSeg.length()<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-						// penalty increases the smaller we go below the minimum
-						score += (NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH - tempSeg.length()) * SegmentFitter.PENALTY_SHRINK;
-					}
-					
-					if(score<minScore){
-						minScore=score;
-						bestSeg = tempSeg;
-					}
-					
-					IJ.log("      Endpoint offset "+j+": "+score);	
-				} catch(IllegalArgumentException e){
-					IJ.log(j+": "+e.getMessage());
-				}
-				
-							
+
+				}	
 			}
-			newList.add(bestSeg);
+			
+//			logger.log("Min score found as "+minScore, Logger.DEBUG);
+
+			result.add(bestSeg);
 //			if(i==segmentCount-1){ 
 //				// this is the last segment; 
 //				// set the start index of the first segment to be
@@ -292,10 +324,10 @@ public class SegmentFitter {
 //				newList.get(0).setSegmentType("Seg_"+0);
 //				
 //			}
-			bestSeg.print();	
+//			bestSeg.print();	
 
 		}
-		return newList;
+		return result;
 	}
 	
 	/**
@@ -358,37 +390,4 @@ public class SegmentFitter {
 		
 		return refProfile.differenceToProfile(subjProfile);
 	}
-	
-	/**
-	 * Create a profile from a segment
-	 * @param seg the segment to convert
-	 * @param p the profile to get values from
-	 * @return a profile containing the profile values covered by the segment 
-	 */
-//	private Profile getSegmentProfile(NucleusBorderSegment seg, Profile p){
-//		if(seg==null || p==null){
-//			throw new IllegalArgumentException("Profile or segment is null");
-//		}
-//		
-//		double[] ref = p.asArray();
-//		Profile result = new Profile(new double[0]);
-//		if(seg.getStartIndex() < seg.getEndIndex()){ // most segments
-//			double[] segment = Arrays.copyOfRange(ref, seg.getStartIndex(), seg.getEndIndex());
-//			result = new Profile(segment);
-//		} else{ // a wrapping end segment
-//			double[] first = Arrays.copyOfRange(ref, 0, seg.getEndIndex());
-//			double[] last  = Arrays.copyOfRange(ref, seg.getStartIndex(), ref.length);
-//			
-//			List<Double> firstHalf = Arrays.asList(Utils.getDoubleFromdouble(first));
-//			List<Double> lastHalf  = Arrays.asList(Utils.getDoubleFromdouble(last));
-//			
-//			List<Double> combinedList = new ArrayList<Double>(0);
-//			combinedList.addAll(lastHalf); // they need to be in the correct order as the span the gap
-//			combinedList.addAll(firstHalf);
-//			
-//			Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
-//			result = new Profile(Utils.getdoubleFromDouble(combinedArray));
-//		}
-//		return result;
-//	}
 }
