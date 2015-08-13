@@ -47,6 +47,18 @@ public class CellDatasetCreator {
 			
 			fieldNames.add("Perimeter");
 			rowData.add(df.format(n.getPerimeter()));
+			
+			fieldNames.add("Max feret");
+			rowData.add(df.format(n.getFeret()));
+			
+			fieldNames.add("Min feret");
+			rowData.add(df.format(n.getNarrowestDiameter()));
+			
+			fieldNames.add("Nucleus CoM");
+			rowData.add(n.getCentreOfMass().toString());
+			
+			fieldNames.add("Nucleus position");
+			rowData.add(n.getPosition()[0]+"-"+n.getPosition()[1]);
 
 			// add info for signals
 			for(int signalGroup : n.getSignalGroups()){
