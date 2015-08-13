@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import no.collections.CellCollection;
 import no.nuclei.Nucleus;
@@ -15,37 +14,17 @@ public class ProfileCollection implements Serializable {
 		
 	private static final long serialVersionUID = 1L;
 	
-	private ProfileAggregate aggregate;
+	private ProfileAggregate 	aggregate;
 	private Map<String, Integer> offsets = new HashMap<String, Integer>();
-	
-	
-	// alter this; we store ONE aggregate, no profiles, and a series of features
-	// requesting a profile will make the offset appropriately
-//	private Map<String, ProfileFeature> 	features 	= new HashMap<String, ProfileFeature>();
-//	private Map<String, Profile> 			profiles 	= new HashMap<String, Profile>(0); 
-//	private Map<String, ProfileAggregate> 	aggregates 	= new HashMap<String, ProfileAggregate>();
-		
-	private Map<String, List<NucleusBorderSegment>> segments = new HashMap<String, List<NucleusBorderSegment>>();
-	private Map<String, List<Profile>> nucleusProfileList    = new HashMap<String, List<Profile>>();
+			
+	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+	private List<Profile> nucleusProfileList    = new ArrayList<Profile>();
 	
 	
 	public ProfileCollection(){
 
 	}
-		
-	// Get features
-	
-//	public ProfileFeature getFeature(String s){
-//		if(s==null){
-//			throw new IllegalArgumentException("The requested feature key is null: "+s);
-//		}
-//		if(features.containsKey(s)){	
-//			return features.get(s);
-//		} else {
-//			throw new IllegalArgumentException("The requested feature key does not exist: "+s);
-//		}
-//	}
-	
+			
 	/**
 	 * Get the offset needed to transform a profile to start from the given 
 	 * point type
@@ -54,12 +33,12 @@ public class ProfileCollection implements Serializable {
 	 */
 	public int getOffset(String pointType){
 		if(pointType==null){
-			throw new IllegalArgumentException("The requested feature key is null: "+pointType);
+			throw new IllegalArgumentException("The requested offset key is null: "+pointType);
 		}
 		if(offsets.containsKey(pointType)){	
 			return offsets.get(pointType);
 		} else {
-			throw new IllegalArgumentException("The requested feature key does not exist: "+pointType);
+			throw new IllegalArgumentException("The requested offset key does not exist: "+pointType);
 		}
 	}
 	
@@ -88,12 +67,6 @@ public class ProfileCollection implements Serializable {
 		
 		int indexOffset = offsets.get(pointType);
 		return getAggregate().getMedian().offset(indexOffset);
-		
-//		if(profiles.containsKey(s)){	
-//			return profiles.get(s);
-//		} else {
-//			throw new IllegalArgumentException("The requested profile key does not exist: "+s);
-//		}
 	}
 
 	/**
@@ -104,37 +77,58 @@ public class ProfileCollection implements Serializable {
 		return aggregate;
 	}
 	
-//	public ProfileAggregate getAggregate(String s){
-//		if(s==null){
-//			throw new IllegalArgumentException("The requested aggregate key is null: "+s);
-//		}
-//		if(aggregates.containsKey(s)){	
-//			return aggregates.get(s);
-//		} else {
-//			throw new IllegalArgumentException("The requested aggregate key does not exist: "+s);
-//		}
-//	}
-		
+	/**
+	 * Create a list of segments based on an offset of existing segments
+	 * @param pointToAdd the name of the pointType to add
+	 */
 	public List<NucleusBorderSegment> getSegments(String s){
 		if(s==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+s);
 		}
-		if(segments.containsKey(s)){	
-			return segments.get(s);
-		} else {
-			throw new IllegalArgumentException("The requested segment key does not exist: "+s);
+
+		int offset = getOffset(s);
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
+		NucleusBorderSegment prev = null;
+		for(NucleusBorderSegment seg : segments){
+			
+			int newStart 	= Utils.wrapIndex( seg.getStartIndex()+ offset , seg.getTotalLength());
+			int newEnd 		= Utils.wrapIndex( seg.getEndIndex()+ offset , seg.getTotalLength());
+			
+			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, seg.getTotalLength());
+			c.setSegmentType(seg.getSegmentType());
+			
+			if(prev!=null){
+				c.setPrevSegment(prev);
+				prev.setNextSegment(c);
+			}
+			prev = c;
+			
+			result.add(c);
 		}
+		
+		result.get(0).setPrevSegment(prev);
+		prev.setNextSegment(result.get(0));
+		return result;
 	}
 	
+	/**
+	 * Get the nucleus profiles offset to the requested key. 
+	 * This will not be as accurate as a nucleus by nucleus approach, 
+	 * in which the keys are linked directly to indexes. Use only when no choice
+	 * i.e for frankenprofiles. With frankenprofiles, the profiles are mapped to
+	 * the median already, so the offsets should match up
+	 * @param s the key to offset to 
+	 * @return a list of profiles offset to the given key
+	 */
 	public List<Profile> getNucleusProfiles(String s){
 		if(s==null){
 			throw new IllegalArgumentException("The requested profile list key is null: "+s);
 		}
-		if(nucleusProfileList.containsKey(s)){	
-			return nucleusProfileList.get(s);
-		} else {
-			throw new IllegalArgumentException("The requested profile list key does not exist: "+s);
+		List<Profile> result = new ArrayList<Profile>();
+		for(Profile p : nucleusProfileList){
+			result.add(new Profile(p.offset(this.getOffset(s))));
 		}
+		return result;
 	}
 	
 	// Add or update features
@@ -146,63 +140,45 @@ public class ProfileCollection implements Serializable {
 		offsets.put(pointType, offset);
 	}
 	
-//	public void addFeature(String s, ProfileFeature p){
-//		if(s==null || p==null){
-//			throw new IllegalArgumentException("String or Profile is null");
-//		}
-//		features.put(s, p);
-//	}
-	
-//	public void addProfile(String s, Profile p){
-//		if(s==null || p==null){
-//			throw new IllegalArgumentException("String or Profile is null");
-//		}
-//		profiles.put(s, p);
-//	}
-	
-//	public void addAggregate(String s, ProfileAggregate p){
-//		aggregates.put(s, p);
-//	}
-
-	public void addSegments(String s, List<NucleusBorderSegment> n){
-		if(s==null || n==null || n.isEmpty()){
+	public void addSegments(List<NucleusBorderSegment> n){
+		if(n==null || n.isEmpty()){
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
-		segments.put(s, n);
+		segments = n;
 	}
 	
-	/**
-	 * Create a list of segments based on an offset of existing segments
-	 * This is an alternative to re-segmenting while transition to indexing is in progress
-	 * @param pointToAdd the name of the pointType to add
-	 * @param referencePoint the name of the pointType to take segments from
-	 * @param offset the offset to apply to each segment
-	 */
-	public void addSegments(String pointToAdd, String referencePoint, int offset){
-		if(pointToAdd==null || referencePoint==null || Integer.valueOf(offset)==null){
-			throw new IllegalArgumentException("String or offset is null or empty");
-		}
-		List<NucleusBorderSegment> referenceList =  getSegments(referencePoint);
-		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-		for(NucleusBorderSegment s : referenceList){
-			
-			int newStart = Utils.wrapIndex( s.getStartIndex()+ offset , getProfile(referencePoint).size());
-			int newEnd = Utils.wrapIndex( s.getEndIndex()+ offset , getProfile(referencePoint).size());
-			
-			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, s.getTotalLength());
-			c.setSegmentType(s.getSegmentType());
-			
-			result.add(c);
-		}
-		
-		segments.put(pointToAdd, result);
-	}
+//	/**
+//	 * Create a list of segments based on an offset of existing segments
+//	 * This is an alternative to re-segmenting while transition to indexing is in progress
+//	 * @param pointToAdd the name of the pointType to add
+//	 * @param referencePoint the name of the pointType to take segments from
+//	 * @param offset the offset to apply to each segment
+//	 */
+//	public void addSegments(String pointToAdd, String referencePoint, int offset){
+//		if(pointToAdd==null || referencePoint==null || Integer.valueOf(offset)==null){
+//			throw new IllegalArgumentException("String or offset is null or empty");
+//		}
+//		List<NucleusBorderSegment> referenceList =  getSegments(referencePoint);
+//		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
+//		for(NucleusBorderSegment s : referenceList){
+//			
+//			int newStart = Utils.wrapIndex( s.getStartIndex()+ offset , getProfile(referencePoint).size());
+//			int newEnd = Utils.wrapIndex( s.getEndIndex()+ offset , getProfile(referencePoint).size());
+//			
+//			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, s.getTotalLength());
+//			c.setSegmentType(s.getSegmentType());
+//			
+//			result.add(c);
+//		}
+//		
+//		segments.put(pointToAdd, result);
+//	}
 	
-	public void addNucleusProfiles(String s, List<Profile> n){
-		if(s==null || n==null || n.isEmpty()){
+	public void addNucleusProfiles(List<Profile> n){
+		if(n==null || n.isEmpty()){
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
-		nucleusProfileList.put(s, n);
+		nucleusProfileList = n;
 	}
 	
 	/**
@@ -233,76 +209,21 @@ public class ProfileCollection implements Serializable {
 
 	}
 	
-//	public void createProfileAggregateFromPoint(CellCollection collection, String pointType, int length){
-//		if(pointType==null){
-//			throw new IllegalArgumentException("Point type is null");
-//		}
-//		if(length<0){
-//			throw new IllegalArgumentException("Requested length is negative");
-//		}
-//
-//		ProfileAggregate profileAggregate = this.getAggregate();
-//		for(Nucleus n : collection.getNuclei()){
-//			profileAggregate.addValues(n.getAngleProfile(pointType));
-//		}
-////		Profile medians = profileAggregate.getMedian();
-////		Profile q25     = profileAggregate.getQuartile(25);
-////		Profile q75     = profileAggregate.getQuartile(75);
-////		this.addProfile(pointType, medians);
-////		this.addProfile(pointType+"25", q25);
-////		this.addProfile(pointType+"75", q75);
-//	}
-	
 	public String printKeys(){
 		
 		StringBuilder builder = new StringBuilder();
 
-//		builder.append("    Profiles:\t");
-//		for(String s : this.getProfileKeys()){
-//			builder.append("     "+s+"\t");
-//		}
-//		builder.append("    Aggregates:\t");
-//		for(String s : this.getAggregateKeys()){
-//			builder.append("     "+s+"\t");
-//		}
-//		builder.append("    Features:\t");
-//		for(String s : this.getFeatureKeys()){
-//			builder.append("     "+s+"\t");
-//		}
-		builder.append("    Segments:\t");
-		for(String s : this.getSegmentKeys()){
+		builder.append("    Point types:\t");
+		for(String s : this.offsets.keySet()){
 			builder.append("     "+s+"\t");
 		}
 		return builder.toString();
 	}
 		
-	
-//	// get the profile keys without IQR headings
-//	public List<String> getProfileKeys(){
-//		List<String> result = new ArrayList<String>();
-//		for(String s : profiles.keySet()){
-//			if(!s.endsWith("5")){
-//				result.add(s);
-//			}
-//		}
-//		return result;
+		
+//	public Set<String> getSegmentKeys(){
+//		return segments.keySet();
 //	}
-//	
-//	public Set<String> getProfileKeysPlusIQRs(){
-//		return profiles.keySet();
-//	}
-	
-//	public Set<String> getAggregateKeys(){
-//		return aggregates.keySet();
-//	}
-	
-//	public Set<String> getFeatureKeys(){
-//		return features.keySet();
-//	}
-	
-	public Set<String> getSegmentKeys(){
-		return segments.keySet();
-	}
 	
 	/**
 	 * Turn the IQR (difference between Q25, Q75) of the median into a profile.

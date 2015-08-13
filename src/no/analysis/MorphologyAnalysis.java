@@ -121,15 +121,15 @@ public class MorphologyAnalysis {
 			// What happens when the array length is greater in the source collection? 
 			// Segments are added that no longer have an index
 			// We need to scale the segments to the array length of the new collection
-			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
-			pc.addSegments(orientationPoint, sc.getSegments(orientationPoint));
+//			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
+//			pc.addSegments(orientationPoint, sc.getSegments(orientationPoint));
 			
 			// At hthis point the collection has only a regular profile collection.
 			// no frankenprofile has been copied.
 			// Create a new frankenprofile
 			// copied from segmentation
 			reviseSegments(collection, referencePoint);	
-			applySegmentsToOtherPointTypes(collection, referencePoint);
+//			applySegmentsToOtherPointTypes(collection, referencePoint);
 
 
 		} catch (Exception e) {
@@ -220,7 +220,7 @@ public class MorphologyAnalysis {
 			
 			collection.getProfileCollection().createProfileAggregate(collection);
 			
-			applySegmentsToOtherPointTypes(collection, pointType);
+//			applySegmentsToOtherPointTypes(collection, pointType);
 			
 			// At this point, the franken collection still contains tip/head values only
 			
@@ -246,7 +246,7 @@ public class MorphologyAnalysis {
 		List<NucleusBorderSegment> segments = segmenter.segment();
 
 		logger.log("Found "+segments.size()+" segments in "+pointType+" profile");
-		pc.addSegments(pointType, segments);
+		pc.addSegments(segments);
 	}
 
 	/**
@@ -335,7 +335,7 @@ public class MorphologyAnalysis {
 		// fill the frankenCollection  with the segment information previously calculated
 		frankenCollection.createProfileAggregate(collection);
 //		frankenCollection.addAggregate( pointType, new ProfileAggregate((int)collection.getMedianArrayLength()));
-		frankenCollection.addSegments(pointType, segments);
+		frankenCollection.addSegments(segments);
 
 		SegmentFitter fitter = new SegmentFitter(pc.getProfile(pointType), segments, logger.getLogfile());
 		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
@@ -349,7 +349,7 @@ public class MorphologyAnalysis {
 			frankenCollection.getAggregate().addValues(recombinedProfile);
 			frankenProfiles.add(recombinedProfile);
 		}
-		frankenCollection.addNucleusProfiles(pointType, frankenProfiles);
+		frankenCollection.addNucleusProfiles(frankenProfiles);
 		// update the profile aggregate
 		frankenCollection.createProfileAggregate(  collection   );
 		
@@ -366,22 +366,23 @@ public class MorphologyAnalysis {
 		logger.log("Segment assignments refined");
 	}
 	
-	private static void applySegmentsToOtherPointTypes(CellCollection collection, String pointType){
-
-		ProfileCollection pc = collection.getProfileCollection();
-		
-		Profile referenceProfile = pc.getProfile(pointType);
-		Profile orientProfile = pc.getProfile(collection.getOrientationPoint());
-		int offset = orientProfile.getSlidingWindowOffset(referenceProfile);
-		
-		pc.addSegments(collection.getOrientationPoint(), pointType, offset);
-	}
+//	private static void applySegmentsToOtherPointTypes(CellCollection collection, String pointType){
+//
+//		ProfileCollection pc = collection.getProfileCollection();
+//		
+//		Profile referenceProfile = pc.getProfile(pointType);
+//		Profile orientProfile = pc.getProfile(collection.getOrientationPoint());
+//		int offset = orientProfile.getSlidingWindowOffset(referenceProfile);
+//		
+//		pc.addSegments(collection.getOrientationPoint(), pointType, offset);
+//	}
 	
 	public static class TailFinder {
 
 		private static void findTailInRodentSpermMedian(CellCollection collection){
 			// can't use regular tail detector, because it's based on NucleusBorderPoints
 			// get minima in curve, then find the lowest minima / minima furthest from both ends
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
 
 			Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
 
@@ -406,7 +407,6 @@ public class MorphologyAnalysis {
 				}
 			}
 //			Profile tailProfile = medianProfile.offset(tailIndex);
-			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
 			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
 			
 //			collection.getProfileCollection().addProfile(collection.getOrientationPoint(), tailProfile);
@@ -417,6 +417,8 @@ public class MorphologyAnalysis {
 		}
 
 		private static void findTailInPigSpermMedian(CellCollection collection){
+			
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
 			Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
 
 			Profile minima = medianProfile.getLocalMaxima(5); // window size 5
@@ -449,16 +451,14 @@ public class MorphologyAnalysis {
 					}
 				}
 			}
-			// IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
-			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
+
 			
-//			Profile tailProfile = medianProfile.offset(tailIndex);
-//			collection.getProfileCollection().addProfile("tail", tailProfile);
-//			collection.getProfileCollection().addFeature("head", new ProfileFeature("tail", tailIndex));
+			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
 		}
 
 		private static void findTailInRoundMedian(CellCollection collection){
+			
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
 			ProfileCollection pc = collection.getProfileCollection();
 
 			Profile medianProfile = pc.getProfile(collection.getReferencePoint());
@@ -466,7 +466,7 @@ public class MorphologyAnalysis {
 			int tailIndex = (int) Math.floor(medianProfile.size()/2);
 			
 			
-			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
+			
 			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
 
 //			Profile tailProfile = medianProfile.offset(tailIndex);
