@@ -465,7 +465,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						}
 						
 						// update the log file to the same folder as the dataset
-						File logFile = new File(file.getParent()+Constants.DEBUG_FILE_NAME);
+						File logFile = new File(file.getParent()+File.separator+file.getName().replace(".nmd", ".log.txt"));
+						
 						dataset.getCollection().setDebugFile(logFile);
 						
 						log("OK");
