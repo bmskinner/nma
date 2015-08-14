@@ -6,6 +6,7 @@ import ij.IJ;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Logger;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 
@@ -30,7 +31,7 @@ public class ProfileSegmenter {
 	
 	private Profile profile; // the profile to segment
 	List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
-	
+		
 	/**
 	 * Constructed from a profile
 	 * @param p
@@ -99,12 +100,25 @@ public class ProfileSegmenter {
 					segCount++;
 				}
 			}
+			// debug check
+//			for(NucleusBorderSegment seg : segments){
+//				seg.print();
+//			}
+			
+			
 			// join up segments at start and end of profile
 			NucleusBorderSegment first = segments.get(0);
 			
 			// the start point of the first segment must be set to the end point of the 
 			// last segment before they can be linked
-			first.update(prevSegment.getEndIndex(), first.getEndIndex());
+			try{
+				first.update(prevSegment.getEndIndex(), first.getEndIndex());
+			} catch (Exception e){
+				IJ.log("Error updating segment: "+e.getMessage());
+				for(StackTraceElement e1 : e.getStackTrace()){
+					IJ.log(e1.toString());
+				}
+			}
 			
 			// Now link them together
 			prevSegment.setNextSegment(first);

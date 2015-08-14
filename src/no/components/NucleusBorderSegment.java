@@ -11,6 +11,8 @@
 package no.components;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import utility.Utils;
 import ij.IJ;
@@ -18,7 +20,7 @@ import ij.IJ;
 public class NucleusBorderSegment  implements Serializable{
 
 
-	public static final int MINIMUM_SEGMENT_LENGTH = 5; // the smallest number of values in a segment
+	public static final int MINIMUM_SEGMENT_LENGTH = 10; // the smallest number of values in a segment
 	
 	private static final long serialVersionUID = 1L;
 	private int startIndex;
@@ -101,9 +103,9 @@ public class NucleusBorderSegment  implements Serializable{
 	 * is adjusted to keep the segments in sync
 	 * @param value the amount to shorten
 	 */
-	public void shortenStart(int value){
+	public boolean shortenStart(int value){
 		int newValue = Utils.wrapIndex(this.getStartIndex()+value, this.getTotalLength());
-		this.update(newValue, this.getEndIndex());
+		return this.update(newValue, this.getEndIndex());
 	}
 	
 	/**
@@ -112,9 +114,9 @@ public class NucleusBorderSegment  implements Serializable{
 	 * is adjusted to keep the segments in sync
 	 * @param value the amount to shorten
 	 */
-	public void shortenEnd(int value){
+	public boolean shortenEnd(int value){
 		int newValue = Utils.wrapIndex(this.getEndIndex()-value, this.getTotalLength());
-		this.update(this.getStartIndex(), newValue);
+		return this.update(this.getStartIndex(), newValue);
 
 	}
 	
@@ -124,9 +126,9 @@ public class NucleusBorderSegment  implements Serializable{
 	 * is adjusted to keep the segments in sync
 	 * @param value the amount to shorten
 	 */
-	public void lengthenStart(int value){
+	public boolean lengthenStart(int value){
 		int newValue = Utils.wrapIndex( this.getStartIndex()-value, this.getTotalLength());
-		this.update(newValue, this.getEndIndex());
+		return this.update(newValue, this.getEndIndex());
 	}
 	
 	/**
@@ -135,21 +137,33 @@ public class NucleusBorderSegment  implements Serializable{
 	 * is adjusted to keep the segments in sync
 	 * @param value the amount to shorten
 	 */
-	public void lengthenEnd(int value){
+	public boolean lengthenEnd(int value){
 		int newValue = Utils.wrapIndex( this.getEndIndex()+value, this.getTotalLength());
-		this.update(this.getStartIndex(), newValue);
+		return this.update(this.getStartIndex(), newValue);
 	}
-	
+		
 	/**
 	 * Get the length of this segment. Accounts
 	 * for array wrapping
 	 * @return
 	 */
 	public int length(){
-		if(this.getEndIndex()<this.getStartIndex()){ // the segment wraps
-			return this.getEndIndex() + (this.getTotalLength()-this.getStartIndex());
+		return testLength(this.getStartIndex(), this.getEndIndex());
+	}
+	
+	/**
+	 * Test the effect of new start and end indexes on the length
+	 * of the segment. Use for validating updates. Also called by
+	 * length() using real values
+	 * @param start the new start index
+	 * @param end the new end index
+	 * @return the new segment length
+	 */
+	public int testLength(int start, int end){
+		if(end<start){ // the segment wraps
+			return end + (this.getTotalLength()-start);
 		} else{
-			return this.getEndIndex() - this.getStartIndex();
+			return end - start;
 		}
 	}
 	
@@ -159,18 +173,30 @@ public class NucleusBorderSegment  implements Serializable{
 	 * @return
 	 */
 	public boolean contains(int index){
-		
+		return testContains(this.getStartIndex() , this.getEndIndex(), index);
+	}
+	
+	/**
+	 * Test if the segment would contain the given index if it had
+	 * the specified start and end indexes. Acts as a wrapper for the real
+	 * contains()
+	 * @param start the start to test
+	 * @param end the end to test
+	 * @param index the index to test
+	 * @return 
+	 */
+	public boolean testContains(int start, int end, int index){
 		if(index < 0 || index > this.getTotalLength()){
 			throw new IllegalArgumentException("Index is outside the total profile length: "+index);
 		}
 		
 		boolean result = false;
-		if(this.getEndIndex()<this.getStartIndex()){ // wrapped
-			if(index<=this.getEndIndex() || index>this.getStartIndex()){
+		if(end<start){ // wrapped
+			if(index<=end || index>start){
 				result=true;
 			}
 		} else{ // regular
-			if(index>=this.getStartIndex() && index<this.getEndIndex()){
+			if(index>=start && index<end){
 				result=true;
 			}
 		}
@@ -184,32 +210,78 @@ public class NucleusBorderSegment  implements Serializable{
 	 * @param start the new start index
 	 * @param end the new end index
 	 */
-	public void update(int startIndex, int endIndex){
+	public boolean update(int startIndex, int endIndex){
 		
 //		 Check the incoming data
 		if(startIndex < 0 || startIndex > this.getTotalLength()){
-			throw new IllegalArgumentException("Start index is outside the total profile length: "+startIndex);
+			throw new IllegalArgumentException("Start index is outside the profile range: "+startIndex);
 		}
 		if(endIndex < 0 || endIndex > this.getTotalLength()){
-			throw new IllegalArgumentException("End index is outside the total profile length: "+endIndex);
+			throw new IllegalArgumentException("End index is outside the profile range: "+endIndex);
 		}
 
-		// Check that the new positions will not make the segment too small
-		if(startIndex<endIndex){ // not wrapping
-			if(endIndex-startIndex < MINIMUM_SEGMENT_LENGTH){
-				throw new IllegalArgumentException("Segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
+//		// Check that the new positions will not make this segment too small
+		if(testLength(startIndex, endIndex) < MINIMUM_SEGMENT_LENGTH){
+			throw new IllegalArgumentException("Segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
+		}
+		
+//		// don't update things that have not changed
+//		if(this.getStartIndex()==startIndex && this.getEndIndex()==endIndex){
+//			return;
+//		}
+		
+		// Check that next and previous segments are not invalidated by length change
+		// i.e the max length increase backwards is up to the MIN_SEG_LENGTH of the
+		// previous segment, and the max length increase forwards is up to the 
+		// MIN_SEG_LENGTH of the next segment
+		
+		if(this.hasPrevSegment()){
+			if(this.prevSegment().testLength(this.prevSegment().getStartIndex(), startIndex) < MINIMUM_SEGMENT_LENGTH){
+				return false;
+				//			throw new IllegalArgumentException("Previous segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
 			}
-		} else { // wrapping
-			if(  (this.getTotalLength()-startIndex) + endIndex < MINIMUM_SEGMENT_LENGTH  ){
-				throw new IllegalArgumentException("Segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
+		}
+		if(this.hasNextSegment()){
+
+			if(this.nextSegment().testLength(endIndex, this.nextSegment().getEndIndex()) < MINIMUM_SEGMENT_LENGTH){
+				return false;
+				//			throw new IllegalArgumentException("Previous segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
 			}
 		}
 		
-		// don't update things that have not changed
-		if(this.getStartIndex()==startIndex && this.getEndIndex()==endIndex){
-			return;
+		// check that updating will not cause segments to overlap or invert
+		// i.e. where a start becomes greater than an end without begin part of
+		// an array wrap
+		if(startIndex > endIndex){
+			
+			if(!this.testContains(startIndex , endIndex, 0)){
+//			if(!this.contains(0)){
+				throw new IllegalArgumentException("Operation would cause this segment to invert");
+			}
+			
 		}
 		
+		// also test the effect on the next and previous segments
+		if(this.hasPrevSegment()){
+			if(this.prevSegment().getStartIndex() > startIndex){
+
+				if(!this.prevSegment().testContains(this.prevSegment().getStartIndex(), startIndex, 0)){
+					throw new IllegalArgumentException("Operation would cause this segment to invert");
+				}
+			}
+		}
+
+		if(this.hasNextSegment()){
+			if( endIndex > this.nextSegment().getEndIndex()){
+				if(!this.nextSegment().testContains(endIndex, this.nextSegment().getEndIndex(), 0)){
+					throw new IllegalArgumentException("Operation would cause this segment to invert");
+				}
+			}
+		}
+		
+		// All checks have been passed; the update can proceed
+		
+
 //		 wrap in if to ensure we don't go in circles forever when testing a circular profile
 		if(this.getStartIndex()!=startIndex){
 			this.startIndex = startIndex;
@@ -228,6 +300,7 @@ public class NucleusBorderSegment  implements Serializable{
 				next.update(endIndex, next.getEndIndex());
 			}
 		}
+		return true;
 	}
 	
 
@@ -290,7 +363,73 @@ public class NucleusBorderSegment  implements Serializable{
 	}
 	
 	public void print(){
-		IJ.log("    Segment from "+this.startIndex+" to "+this.endIndex+"; previous: "+this.hasPrevSegment()+"; next: "+this.hasNextSegment());
+		IJ.log("    Segment "
+				+this.getSegmentType()
+				+": "+this.startIndex+" - "+this.endIndex+" of "
+				+this.getTotalLength()
+				+"; prev: "+this.hasPrevSegment()
+				+"; next: "+this.hasNextSegment());
+	}
+	
+	public String toString(){
+		return new String("Segment "
+				+this.getSegmentType()
+				+": "+this.startIndex+" - "+this.endIndex+" of "
+				+this.getTotalLength()
+				+"; prev: "+this.hasPrevSegment()
+				+"; next: "+this.hasNextSegment());
+	}
+	
+	/**
+	 * Given a list of segments, link them together into a circle.
+	 * Links start and end properly.
+	 * @param list
+	 */
+	public static void linkSegments(List<NucleusBorderSegment> list){
+		if(list==null || list.isEmpty()){
+			throw new IllegalArgumentException("List of segments is null or empty");
+		}
+		
+		NucleusBorderSegment prevSeg = null;
+
+		for(NucleusBorderSegment segment : list){
+
+			if(prevSeg != null){
+				segment.setPrevSegment(prevSeg);
+				prevSeg.setNextSegment(segment);
+			}
+
+			prevSeg = segment;
+		}
+		NucleusBorderSegment firstSegment = list.get(0);
+		boolean ok = firstSegment.update(prevSeg.getEndIndex(), firstSegment.getEndIndex());
+		if(!ok){
+			IJ.log("Error fitting final segment");
+		}
+
+		prevSeg.setNextSegment(firstSegment); // ensure they match up at the end
+		firstSegment.setPrevSegment(prevSeg);
+	}
+	
+	/**
+	 * Move the segments by the given amount, without shrinking them.
+	 * @param list the list of segments
+	 * @param value the amount to nudge
+	 * @return a new list of segments
+	 */
+	public static List<NucleusBorderSegment> nudge(List<NucleusBorderSegment> list, int value){
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
+		
+		for(NucleusBorderSegment segment : list){
+			
+			result.add( new NucleusBorderSegment(segment.getStartIndex()+value, 
+												segment.getEndIndex()	+value, 
+												segment.getTotalLength() ));
+		}
+		
+		linkSegments(result);
+		
+		return result;
 	}
 
 }

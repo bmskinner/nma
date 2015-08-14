@@ -3,6 +3,7 @@ package test;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -47,25 +48,61 @@ public class SegmentFitterTest {
 		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
 		
 		Profile median = createRodentSpermMedianProfile();		
-		String programDir = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
-		File log = new File(programDir+File.separator+"log.txt");
+//		String programDir = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		File log = new File("Z:\\log.txt");
+		if(log.exists()){
+			log.delete();
+		}
 		List<NucleusBorderSegment> segments = getMedianRodentSpermSegments(); 
 		
 		
 		System.out.println("Beginning test");
 
-		// get the rename method and make it accessible
-		Class<?> c;
 		try {
-			c = Class.forName("no.gui.MorphologyAnalysis");
-		
-		Method method = c.getDeclaredMethod("assignSegmentsToNucleus", new Class[] {Nucleus.class, List.class, Profile.class });
-		method.setAccessible(true);
+			
+			// get the method and make it accessible
+			Class<?>[] partypes = new Class[3];
+			partypes[0] = Nucleus.class;
+			partypes[1] = List.class;
+			partypes[2] = Profile.class;
+			
+			
+			Class<?> cls = Class.forName("no.analysis.MorphologyAnalysis");
+			Method method = cls.getDeclaredMethod("assignSegmentsToNucleus", partypes);
+			method.setAccessible(true);
 
-		// Try assigning segments to the nucleus
-		method.invoke(null, n, segments, median);
+			// Try assigning segments to the nucleus
+			method.invoke(null, n, segments, median);
+			
+			System.out.println("Assigned segments:");
+			int length = 0;
+			for(NucleusBorderSegment seg : n.getSegments()){
+				seg.print();
+				assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
+				assertTrue(seg.hasNextSegment());
+				assertTrue(seg.hasPrevSegment());
+				
+				length += seg.length();
+				
+			}
+			assertEquals("Lengths should match", n.getLength(), length);
+			
+			System.out.println("Running fitter");
+			
+			SegmentFitter fitter = new SegmentFitter(median, segments, log);
+			
+			fitter.fit(n);
+			length = 0;
+			for(NucleusBorderSegment seg : n.getSegments()){
+				seg.print();
+				assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
+				assertTrue(seg.hasNextSegment());
+				assertTrue(seg.hasPrevSegment());
+				
+				length += seg.length();
+			}
+			assertEquals("Lengths should match", n.getLength(), length);
 
-//		assertEquals("First pass values should be identical", newName, firstPass );
 		} catch (ClassNotFoundException e) {
 			fail("Class error");
 			e.printStackTrace();
@@ -85,16 +122,7 @@ public class SegmentFitterTest {
 			e.printStackTrace();
 			fail("Method error");
 		} 
-		
-		SegmentFitter fitter = new SegmentFitter(median, segments, log);
-		
-		fitter.fit(n);
-		
-		for( NucleusBorderSegment seg : n.getSegments()){
-			seg.print();
-		}
-		
-//		fail("Not yet implemented");
+
 	}
 
 }

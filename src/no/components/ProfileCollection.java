@@ -106,9 +106,11 @@ public class ProfileCollection implements Serializable {
 			
 			result.add(c);
 		}
+		NucleusBorderSegment first = result.get(0);
+		first.update(prev.getEndIndex(), first.getEndIndex());
 		
-		result.get(0).setPrevSegment(prev);
-		prev.setNextSegment(result.get(0));
+		first.setPrevSegment(prev);
+		prev.setNextSegment(first);
 		return result;
 	}
 	

@@ -276,13 +276,19 @@ public class MorphologyAnalysis {
 				seg.setPrevSegment(prevSeg);
 				prevSeg.setNextSegment(seg);
 			}
-			prevSeg = seg;
+			
 			seg.setSegmentType(segment.getSegmentType());
 			n.addSegment(seg);
-
+			
+			prevSeg = seg;
 		}
-		NucleusBorderSegment firstSegment = n.getSegmentTag("Seg_0");
-		prevSeg.setNextSegment(n.getSegmentTag("Seg_0")); // ensure they match up at the end
+		NucleusBorderSegment firstSegment = n.getSegments().get(0);
+		boolean ok = firstSegment.update(prevSeg.getEndIndex(), firstSegment.getEndIndex());
+		if(!ok){
+			IJ.log("Error fitting final segment");
+		}
+
+		prevSeg.setNextSegment(firstSegment); // ensure they match up at the end
 		firstSegment.setPrevSegment(prevSeg);
 	}
 

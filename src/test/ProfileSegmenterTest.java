@@ -21,7 +21,7 @@ public class ProfileSegmenterTest {
 	 */
 	@Test
 	public void segmentMedianProfile() {
-		
+		System.out.println("Beginning median segmentation");
 		Profile median = SegmentFitterTest.createRodentSpermMedianProfile();				
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);
 		
@@ -34,6 +34,7 @@ public class ProfileSegmenterTest {
 			assertTrue(seg.hasPrevSegment());
 			
 			length += seg.length();
+			seg.print();
 		}
 		
 		assertEquals("Lengths should match", median.size(), length);
@@ -46,10 +47,13 @@ public class ProfileSegmenterTest {
 	 */
 	@Test
 	public void segmentNucleusProfile(){
+		System.out.println("Beginning nucleus segmentation");
 		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
 		ProfileSegmenter segmenter = new ProfileSegmenter(n.getAngleProfile());
 				
 		List<NucleusBorderSegment> list  = segmenter.segment();
+		
+		
 			
 		int length = 0;
 		for(NucleusBorderSegment seg : list){
@@ -58,6 +62,7 @@ public class ProfileSegmenterTest {
 			assertTrue(seg.hasPrevSegment());
 			
 			length += seg.length();
+			seg.print();
 		}
 		
 		assertEquals("Lengths should match", n.getAngleProfile().size(), length);
