@@ -238,7 +238,7 @@ public class NucleusDatasetCreator {
 		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 		Profile xpoints = null;
 		if(normalised){
-			xpoints = profile.getPositions(100);
+			xpoints = profile.getPositions( (int) collection.getMedianArrayLength());
 		} else {
 			xpoints = profile.getPositions( (int) collection.getMedianArrayLength());
 		}
@@ -248,7 +248,7 @@ public class NucleusDatasetCreator {
 		// add the segments
 		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
 		if(normalised){
-			addSegmentsFromProfile(segments, profile, ds, 100, 0, binSize);
+			addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), 0, binSize);
 		} else {
 			addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), 0, binSize);
 		}
@@ -263,8 +263,20 @@ public class NucleusDatasetCreator {
 
 		// add the individual nuclei
 		for(Nucleus n : collection.getNuclei()){
-			Profile angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(profile.size());
-			double[][] ndata = { xpoints.asArray(), angles.asArray() };
+			
+			Profile angles  = null;
+			Profile x = null;
+			if(normalised){
+				angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(profile.size());
+				x = xpoints;
+			} else {
+				angles = n.getAngleProfile(collection.getOrientationPoint());
+				x = angles.getPositions(n.getLength());
+			}
+			
+			
+//			Profile angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(profile.size());
+			double[][] ndata = { x.asArray(), angles.asArray() };
 			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
 		}
 		return ds;
