@@ -730,7 +730,12 @@ implements Serializable
 			  Nucleus n = this.getCell(i).getNucleus();
 			  try{
 				  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
-				  d[i] = diff / n.getPerimeter();
+				  
+				// use the differences in degrees, rather than square degreees for plotting
+				  double rootDiff = Math.sqrt(diff);
+				  
+				  // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+				  d[i] = rootDiff / n.getPerimeter();
 			  } catch(Exception e){
 				  IJ.log("Unable to get normalised difference to median profile: "+i+": "+pointType);
 			  }
