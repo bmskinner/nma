@@ -88,7 +88,7 @@ public class NuclearBoxplotsPanel extends JPanel {
 	 */
 	private void updateAreaBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createAreaBoxplotDataset(list);
-		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Pixels", ds, false); 
 		formatBoxplotChart(boxplotChart, list);
 		areaBoxplotChartPanel.setChart(boxplotChart);
 	}
@@ -99,7 +99,7 @@ public class NuclearBoxplotsPanel extends JPanel {
 	 */
 	private void updatePerimBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createPerimBoxplotDataset(list);
-		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Pixels", ds, false); 
 		formatBoxplotChart(boxplotChart, list);
 		perimBoxplotChartPanel.setChart(boxplotChart);
 	}
@@ -110,7 +110,7 @@ public class NuclearBoxplotsPanel extends JPanel {
 	 */
 	private void updateMaxFeretBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createMaxFeretBoxplotDataset(list);
-		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Pixels", ds, false); 
 		formatBoxplotChart(boxplotChart, list);
 		maxFeretBoxplotChartPanel.setChart(boxplotChart);
 	}
@@ -121,7 +121,7 @@ public class NuclearBoxplotsPanel extends JPanel {
 	 */
 	private void updateMinFeretBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createMinFeretBoxplotDataset(list);
-		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Pixels", ds, false); 
 		formatBoxplotChart(boxplotChart, list);
 		minFeretBoxplotChartPanel.setChart(boxplotChart);
 	}
@@ -132,7 +132,7 @@ public class NuclearBoxplotsPanel extends JPanel {
 	 */
 	private void updateDifferenceBoxplot(List<AnalysisDataset> list){
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createDifferenceBoxplotDataset(list);
-		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
+		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Degrees per perimeter unit", ds, false); 
 		formatBoxplotChart(boxplotChart, list);
 		differenceBoxplotChartPanel.setChart(boxplotChart);
 	}

@@ -464,8 +464,13 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 							populationsPanel.addDataset(child);
 						}
 						
+						// update the log file to the same folder as the dataset
+						File logFile = new File(file.getParent()+File.separator+file.getName().replace(".nmd", ".log.txt"));
+						
+						dataset.getCollection().setDebugFile(logFile);
+						
 						log("OK");
-//						log("Opened dataset: "+dataset.getName());
+//						
 	
 						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 						list.add(dataset);

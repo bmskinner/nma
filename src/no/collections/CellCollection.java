@@ -12,6 +12,7 @@ package no.collections;
 import ij.IJ;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -220,6 +221,23 @@ implements Serializable
 
   public File getDebugFile(){
     return this.debugFile;
+  }
+  
+  /**
+   * Allow the collection to update the debug file location
+   * @param f the new file
+   */
+  public void setDebugFile(File f){
+	  try {
+		  if(!f.exists()){
+			  f.createNewFile();
+		  }
+		  if(f.canWrite()){
+			  this.debugFile = f;
+		  }
+	  } catch (IOException e) {
+		  IJ.log("Unable to update debug file location");
+	  }
   }
 
   public String getType(){
@@ -712,7 +730,12 @@ implements Serializable
 			  Nucleus n = this.getCell(i).getNucleus();
 			  try{
 				  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
-				  d[i] = diff / n.getPerimeter();
+				  
+				// use the differences in degrees, rather than square degreees for plotting
+				  double rootDiff = Math.sqrt(diff);
+				  
+				  // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+				  d[i] = rootDiff / n.getPerimeter();
 			  } catch(Exception e){
 				  IJ.log("Unable to get normalised difference to median profile: "+i+": "+pointType);
 			  }
