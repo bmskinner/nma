@@ -237,6 +237,81 @@ public class SegmentFitter {
 		}
 		return Profile.merge(finalSegmentProfiles);
 	}
+	
+	/**
+	 * In progress version of fitter for 1.10.0
+	 * @param testList
+	 * @return
+	 * @throws Exception 
+	 */
+	private List<NucleusBorderSegment> runFitter(List<NucleusBorderSegment> testList) throws Exception{
+		// Input check
+		if(testList==null || testList.isEmpty()){
+			logger.log("Segment list is null or empty", Logger.ERROR);
+			throw new IllegalArgumentException("Segment list is null or empty");
+		}
+
+		logger.log("Fitting list", Logger.DEBUG);
+		
+		// A new list to hold the fitted segments
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
+		
+		// we want to check every possible configuration of segmentation
+		
+		// it should be a whole-segmentation based comparison
+		// Whenever a change is made, assess the impact on the entire profile comparison, segment to segment
+		
+		// see the initial state
+		double bestScore = 0;
+		try{
+			bestScore = compareSegmentationPatterns(testList, medianSegments);
+		}catch(IllegalArgumentException e){
+			logger.log(e.getMessage());
+			throw new Exception("Error getting segmentation pattern: "+e.getMessage());
+		}
+		
+		for(int changeValue = -POINTS_TO_TEST; changeValue<POINTS_TO_TEST; changeValue++){
+			
+			//	change the length from +length to -length, testing the effect at each step
+//		 	rotate the segment set through the nucleus, testing position with new lengths
+			// keep only the effects which reduce score
+			
+			double score = compareSegmentationPatterns(testList, medianSegments);
+			logger.log("Change: "+changeValue+"\tScore: "+score, Logger.DEBUG);
+			// For each segment:
+			for(int i=0; i<testList.size();i++){
+				
+				NucleusBorderSegment segment = testList.get(i);
+				
+				if(segment.lengthenEnd(changeValue)){ // not permitted if it violates length constraint
+
+					
+					try{
+						score = compareSegmentationPatterns(testList, medianSegments);
+					}catch(IllegalArgumentException e){
+						logger.log(e.getMessage());
+						throw new Exception("Error getting segmentation pattern: "+e.getMessage());
+					}
+					
+					bestScore = score < bestScore ? score : bestScore;
+					result = score < bestScore ? testList : result;
+					
+					List<NucleusBorderSegment> newList = NucleusBorderSegment.nudge(testList, changeValue);
+					try{
+						score = compareSegmentationPatterns(testList, medianSegments);
+					}catch(IllegalArgumentException e){
+						logger.log(e.getMessage());
+						throw new Exception("Error getting segmentation pattern: "+e.getMessage());
+					}
+					bestScore = score < bestScore ? score : bestScore;
+					result = score < bestScore ? newList : result;
+				}
+			}
+		}
+		logger.log("Best score: "+bestScore, Logger.DEBUG);
+		logger.log("Fitted segments to nucleus", Logger.DEBUG);
+		return result;
+	}
 		
 	/**
 	 * for each test segment: compare with median segment
@@ -246,113 +321,113 @@ public class SegmentFitter {
 	 *  next segment
 	 *  update the nucleus
 	 */
-	private List<NucleusBorderSegment> runFitter(List<NucleusBorderSegment> testList){
-		
-		// Input check
-		if(testList==null || testList.isEmpty()){
-			logger.log("Segment list is null or empty", Logger.ERROR);
-			throw new IllegalArgumentException("Segment list is null or empty");
-		}
-		
-		logger.log("Fitting list", Logger.DEBUG);
-
-		// A new list to hold the fitted segments
-		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-
-		// the number of segments input
-		int segmentCount  = testList.size();
-		
-		
-
-		for(int i=0; i<segmentCount;i++){
-			
-			// make a copy of the test list of segments, so we can interrogate each
-			// segment separately without distorting the entire set via linkage
-			List<NucleusBorderSegment> tempList = new ArrayList<NucleusBorderSegment>(0);
-			for(NucleusBorderSegment segment : testList){
-				tempList.add(new NucleusBorderSegment(segment));
-			}
-			NucleusBorderSegment.linkSegments(tempList);
-			
-			// now get the appropriate segment from teh temp list
-					
-			NucleusBorderSegment seg = tempList.get(i);
-			int oldLength = seg.length();
-			
-//			logger.log("Fitting segment "+i+": "+seg.getSegmentType(), Logger.DEBUG);
-			
-						
-			double score =  compareSegments(this.medianSegments.get(i), seg);
-			
-//			logger.log("Score "+score, Logger.DEBUG);
-			
-			
-			double minScore = score;
-			int valueChange = 0;
-			NucleusBorderSegment bestSeg = seg;
-			
-			// TODO: allow rotation through the entire profile
-			for(int j=-SegmentFitter.POINTS_TO_TEST;j<SegmentFitter.POINTS_TO_TEST;j++){
-				
-				// before we try lengthening or shortening segments, see if they fit better
-				// at the same size, but moved along a bit
-				List<NucleusBorderSegment> nudgeList = NucleusBorderSegment.nudge(tempList, j);
-
-				// only refit if the change does not shrink the segment too much
-				if(seg.length()+j > NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-					
-//					logger.log("Testing segment length change of "+j, Logger.DEBUG);
-					
-					// make a copy of the segment to work with
-					NucleusBorderSegment tempSeg = new NucleusBorderSegment(seg);
-					
-					try{
-						// try to lengthen the new segment by the given amount
-						if(tempSeg.lengthenEnd(j)){
-							
-							// If the change suceeded, get the score
-							// logger.log("Adjusted segment length", Logger.DEBUG);
-
-							// get the score for the new segment
-							score = compareSegments(this.medianSegments.get(i), tempSeg);
-
-							// add a penalty for each point that makes the segment longer
-							if(tempSeg.length()>oldLength){
-								score += (tempSeg.length()-oldLength) * SegmentFitter.PENALTY_GROW ;
-							}
-
-							// add a penalty if the proposed new segment is shorter that the minimum segment length
-							//						if(tempSeg.length()<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-							//							// penalty increases the smaller we go below the minimum
-							//							score += (NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH - tempSeg.length()) * SegmentFitter.PENALTY_SHRINK;
-							//						}
-
-							//						logger.log("New score: "+score, Logger.DEBUG);
-
-							if(score<minScore){
-								minScore=score;
-								bestSeg = tempSeg;
-								valueChange = j;
-							}
-						}
-
-					} catch(IllegalArgumentException e){
-						logger.log("Error in arguments: "+e.getMessage(), Logger.ERROR);
-					}
-
-				}	
-			}
-			
-			logger.log("Min score found as "+minScore+" with offset "+valueChange, Logger.DEBUG);
-			logger.log(bestSeg.toString(), Logger.INFO);
-
-//			testList.get(i).update(bestSeg.getStartIndex(), bestSeg.getEndIndex());
-			result.add(bestSeg);
-
-
-		}
-		return result;
-	}
+//	private List<NucleusBorderSegment> runFitter(List<NucleusBorderSegment> testList){
+//		
+//		// Input check
+//		if(testList==null || testList.isEmpty()){
+//			logger.log("Segment list is null or empty", Logger.ERROR);
+//			throw new IllegalArgumentException("Segment list is null or empty");
+//		}
+//		
+//		logger.log("Fitting list", Logger.DEBUG);
+//
+//		// A new list to hold the fitted segments
+//		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
+//
+//		// the number of segments input
+//		int segmentCount  = testList.size();
+//		
+//		
+//
+//		for(int i=0; i<segmentCount;i++){
+//			
+//			// make a copy of the test list of segments, so we can interrogate each
+//			// segment separately without distorting the entire set via linkage
+//			List<NucleusBorderSegment> tempList = new ArrayList<NucleusBorderSegment>(0);
+//			for(NucleusBorderSegment segment : testList){
+//				tempList.add(new NucleusBorderSegment(segment));
+//			}
+//			NucleusBorderSegment.linkSegments(tempList);
+//			
+//			// now get the appropriate segment from teh temp list
+//					
+//			NucleusBorderSegment seg = tempList.get(i);
+//			int oldLength = seg.length();
+//			
+////			logger.log("Fitting segment "+i+": "+seg.getSegmentType(), Logger.DEBUG);
+//			
+//						
+//			double score =  compareSegments(this.medianSegments.get(i), seg);
+//			
+////			logger.log("Score "+score, Logger.DEBUG);
+//			
+//			
+//			double minScore = score;
+//			int valueChange = 0;
+//			NucleusBorderSegment bestSeg = seg;
+//			
+//			// TODO: allow rotation through the entire profile
+//			for(int j=-SegmentFitter.POINTS_TO_TEST;j<SegmentFitter.POINTS_TO_TEST;j++){
+//				
+//				// before we try lengthening or shortening segments, see if they fit better
+//				// at the same size, but moved along a bit
+//				List<NucleusBorderSegment> nudgeList = NucleusBorderSegment.nudge(tempList, j);
+//
+//				// only refit if the change does not shrink the segment too much
+//				if(seg.length()+j > NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+//					
+////					logger.log("Testing segment length change of "+j, Logger.DEBUG);
+//					
+//					// make a copy of the segment to work with
+//					NucleusBorderSegment tempSeg = new NucleusBorderSegment(seg);
+//					
+//					try{
+//						// try to lengthen the new segment by the given amount
+//						if(tempSeg.lengthenEnd(j)){
+//							
+//							// If the change suceeded, get the score
+//							// logger.log("Adjusted segment length", Logger.DEBUG);
+//
+//							// get the score for the new segment
+//							score = compareSegments(this.medianSegments.get(i), tempSeg);
+//
+//							// add a penalty for each point that makes the segment longer
+//							if(tempSeg.length()>oldLength){
+//								score += (tempSeg.length()-oldLength) * SegmentFitter.PENALTY_GROW ;
+//							}
+//
+//							// add a penalty if the proposed new segment is shorter that the minimum segment length
+//							//						if(tempSeg.length()<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+//							//							// penalty increases the smaller we go below the minimum
+//							//							score += (NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH - tempSeg.length()) * SegmentFitter.PENALTY_SHRINK;
+//							//						}
+//
+//							//						logger.log("New score: "+score, Logger.DEBUG);
+//
+//							if(score<minScore){
+//								minScore=score;
+//								bestSeg = tempSeg;
+//								valueChange = j;
+//							}
+//						}
+//
+//					} catch(IllegalArgumentException e){
+//						logger.log("Error in arguments: "+e.getMessage(), Logger.ERROR);
+//					}
+//
+//				}	
+//			}
+//			
+//			logger.log("Min score found as "+minScore+" with offset "+valueChange, Logger.DEBUG);
+//			logger.log(bestSeg.toString(), Logger.INFO);
+//
+////			testList.get(i).update(bestSeg.getStartIndex(), bestSeg.getEndIndex());
+//			result.add(bestSeg);
+//
+//
+//		}
+//		return result;
+//	}
 		
 	/**
 	 * Compare two segments in the same profile
@@ -361,10 +436,42 @@ public class SegmentFitter {
 	 * @return the sum of square differences between the segments
 	 */
 	private double compareSegments(NucleusBorderSegment reference, NucleusBorderSegment test){
+		if(reference == null){
+			throw new IllegalArgumentException("Reference segment is null or empty");
+		}
+		if(test == null){
+			throw new IllegalArgumentException("Test segment is null or empty");
+		}
 		
 		Profile refProfile  = this.medianProfile.getSubregion(reference);
 		Profile subjProfile = this.medianProfile.getSubregion(test);
 		
 		return refProfile.differenceToProfile(subjProfile);
+	}
+	
+	/**
+	 * Get the score for an entire segment list of a profile. Tests the effect of  changing one segment
+	 * on the entire set
+	 * @param reference
+	 * @param test
+	 * @return the score
+	 */
+	private double  compareSegmentationPatterns(List<NucleusBorderSegment> reference, List<NucleusBorderSegment> test){
+		if(reference == null || reference.isEmpty()){
+			throw new IllegalArgumentException("Reference segment list is null or empty");
+		}
+		if(test == null || test.isEmpty()){
+			throw new IllegalArgumentException("Test segment list is null or empty");
+		}
+		
+		if(reference.size()!=test.size()){
+			throw new IllegalArgumentException("Lists are of different lengths");
+		}
+		
+		double result = 0;
+		for( int i=0; i<reference.size(); i++){
+			result += compareSegments(reference.get(i), test.get(i));
+		}
+		return result;
 	}
 }

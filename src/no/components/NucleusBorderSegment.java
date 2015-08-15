@@ -222,7 +222,8 @@ public class NucleusBorderSegment  implements Serializable{
 
 //		// Check that the new positions will not make this segment too small
 		if(testLength(startIndex, endIndex) < MINIMUM_SEGMENT_LENGTH){
-			throw new IllegalArgumentException("Segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
+			return false;
+//			throw new IllegalArgumentException("Segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
 		}
 		
 //		// don't update things that have not changed
@@ -256,7 +257,8 @@ public class NucleusBorderSegment  implements Serializable{
 			
 			if(!this.testContains(startIndex , endIndex, 0)){
 //			if(!this.contains(0)){
-				throw new IllegalArgumentException("Operation would cause this segment to invert");
+				return false;
+//				throw new IllegalArgumentException("Operation would cause this segment to invert");
 			}
 			
 		}
@@ -266,7 +268,8 @@ public class NucleusBorderSegment  implements Serializable{
 			if(this.prevSegment().getStartIndex() > startIndex){
 
 				if(!this.prevSegment().testContains(this.prevSegment().getStartIndex(), startIndex, 0)){
-					throw new IllegalArgumentException("Operation would cause this segment to invert");
+					return false;
+//					throw new IllegalArgumentException("Operation would cause this segment to invert");
 				}
 			}
 		}
@@ -274,7 +277,8 @@ public class NucleusBorderSegment  implements Serializable{
 		if(this.hasNextSegment()){
 			if( endIndex > this.nextSegment().getEndIndex()){
 				if(!this.nextSegment().testContains(endIndex, this.nextSegment().getEndIndex(), 0)){
-					throw new IllegalArgumentException("Operation would cause this segment to invert");
+					return false;
+//					throw new IllegalArgumentException("Operation would cause this segment to invert");
 				}
 			}
 		}
@@ -422,8 +426,8 @@ public class NucleusBorderSegment  implements Serializable{
 		
 		for(NucleusBorderSegment segment : list){
 			
-			result.add( new NucleusBorderSegment(segment.getStartIndex()+value, 
-												segment.getEndIndex()	+value, 
+			result.add( new NucleusBorderSegment(Utils.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
+												Utils.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
 												segment.getTotalLength() ));
 		}
 		

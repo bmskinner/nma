@@ -53,6 +53,12 @@ public class SegmentFitterTest {
 		if(log.exists()){
 			log.delete();
 		}
+		if(!log.canRead()){
+			log = new File("E:\\log.txt");
+		}
+		if(log.exists()){
+			log.delete();
+		}
 		List<NucleusBorderSegment> segments = getMedianRodentSpermSegments(); 
 		
 		
