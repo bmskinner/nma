@@ -435,5 +435,23 @@ public class NucleusBorderSegment  implements Serializable{
 		
 		return result;
 	}
+	
+	/**
+	 * Make a copy of the given list of linked segments
+	 * @param list the segments to copy
+	 * @return a new list
+	 */
+	public static List<NucleusBorderSegment> copy(List<NucleusBorderSegment> list){
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
+		
+		for(NucleusBorderSegment segment : list){
+			
+			result.add( new NucleusBorderSegment(segment));
+		}
+		
+		linkSegments(result);
+		
+		return result;
+	}
 
 }

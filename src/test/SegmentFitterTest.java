@@ -63,6 +63,7 @@ public class SegmentFitterTest {
 		
 		
 		System.out.println("Beginning test");
+		System.out.println("Median profile length: "+median.size());
 
 		try {
 			
