@@ -66,7 +66,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		// Create the franken profile chart
 		//---------------
 		JFreeChart frankenChart = MorphologyChartFactory.makeEmptyProfileChart();
-		frankenChartPanel = new ChartPanel(frankenChart);
+		frankenChartPanel  = MorphologyChartFactory.makeProfileChartPanel(frankenChart);
 		frankenChartPanel.setMinimumSize(minimumChartSize);
 		frankenChartPanel.setPreferredSize(preferredChartSize);
 		frankenChartPanel.setMinimumDrawWidth( 0 );
@@ -79,7 +79,8 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		JPanel rawPanel = new JPanel();
 		rawPanel.setLayout(new BorderLayout());
 		JFreeChart rawChart = MorphologyChartFactory.makeEmptyProfileChart();
-		profilesPanel = new ChartPanel(rawChart);
+		profilesPanel = MorphologyChartFactory.makeProfileChartPanel(rawChart);
+		
 		profilesPanel.setMinimumDrawWidth( 0 );
 		profilesPanel.setMinimumDrawHeight( 0 );
 		rawPanel.setMinimumSize(minimumChartSize);

@@ -10,6 +10,7 @@ import no.components.Profile;
 import no.gui.ColourSelecter;
 
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
@@ -28,6 +29,7 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeEmptyProfileChart(){
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				"Position", "Angle", null);
+		
 		XYPlot plot = chart.getXYPlot();
 		plot.getDomainAxis().setRange(0,100);
 		plot.getRangeAxis().setRange(0,360);
@@ -83,6 +85,12 @@ public class MorphologyChartFactory {
 			if(name.startsWith("Q")){
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
 				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+			} 
+			
+			// simple profiles
+			if(name.startsWith("Profile_")){
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
 			} 
 			
 		}	
@@ -235,6 +243,19 @@ public class MorphologyChartFactory {
 			plot.getRenderer().setSeriesPaint(j, profileColour);
 		}	
 		return chart;
+	}
+	
+	public static ChartPanel makeProfileChartPanel(JFreeChart chart){
+		ChartPanel panel = new ChartPanel(chart){
+			@Override
+			public void restoreAutoBounds() {
+				XYPlot plot = (XYPlot) this.getChart().getPlot();
+				plot.getRangeAxis().setRange(0, 360);
+				plot.getDomainAxis().setAutoRange(true);				
+				return;
+			} 
+		};
+		return panel;
 	}
 
 }

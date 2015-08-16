@@ -79,7 +79,7 @@ public class SegmentFitter {
 			logger.log("Test nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
-		if(n.getSegments()==null){
+		if(n.getSegments()==null || n.getSegments().isEmpty()){
 			logger.log("Nucleus has no segments", Logger.ERROR);
 			throw new IllegalArgumentException("Nucleus has no segments");
 		}

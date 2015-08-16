@@ -42,6 +42,7 @@ import org.jfree.data.xy.XYDataset;
 
 import cell.Cell;
 import datasets.CellDatasetCreator;
+import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 import datasets.TailDatasetCreator;
@@ -273,14 +274,15 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		protected ProfilePanel(){
 			this.setLayout(new BorderLayout());
 			
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
-					"Position", "Angle", null);
-			XYPlot plot = chart.getXYPlot();
-			plot.getDomainAxis().setRange(0,100);
-			plot.getRangeAxis().setRange(0,360);
-			plot.setBackgroundPaint(Color.WHITE);
+			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
+//			JFreeChart chart = ChartFactory.createXYLineChart(null,
+//					"Position", "Angle", null);
+//			XYPlot plot = chart.getXYPlot();
+//			plot.getDomainAxis().setRange(0,100);
+//			plot.getRangeAxis().setRange(0,360);
+//			plot.setBackgroundPaint(Color.WHITE);
 			
-			profileChartPanel = new ChartPanel(chart);
+			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); // new ChartPanel(chart);
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
 		}
@@ -288,49 +290,15 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		protected void update(Cell cell){
 
 			if(cell==null){
-				JFreeChart chart = ChartFactory.createXYLineChart(null,
-						"Position", "Angle", null);
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,100);
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
+				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
 				profileChartPanel.setChart(chart);
 
 			} else {
 				
 				Nucleus nucleus = cell.getNucleus();
 
-				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
-
-				// full segment colouring
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-								"Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
-								false);
-
-
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,nucleus.getLength());
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(1.0f)));
-
-				int seriesCount = plot.getSeriesCount();
-
-				for (int i = 0; i < seriesCount; i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-					String name = (String) ds.getSeriesKey(i);
-					if(name.startsWith("Seg_")){
-						int colourIndex = getIndexFromLabel(name);
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-					} 
-					if(name.startsWith("Nucleus_")){
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-						plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-					} 
-
-				}	
+				XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
+				JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, nucleus.getLength());
 
 				profileChartPanel.setChart(chart);
 			}

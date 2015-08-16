@@ -34,6 +34,7 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
 public class SegmentsDetailPanel extends JPanel implements ActionListener {
@@ -73,14 +74,10 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 		panel.setLayout(new BorderLayout());
 		Dimension minimumChartSize = new Dimension(50, 100);
 		Dimension preferredChartSize = new Dimension(400, 300);
-		JFreeChart profileChart = ChartFactory.createXYLineChart(null,
-	            "Position", "Angle", null);
-		XYPlot plot = profileChart.getXYPlot();
-		plot.getDomainAxis().setRange(0,100);
-		plot.getRangeAxis().setRange(0,360);
-		plot.setBackgroundPaint(Color.WHITE);
 		
-		segmentsProfileChartPanel = new ChartPanel(profileChart);
+		JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart();
+		segmentsProfileChartPanel= MorphologyChartFactory.makeProfileChartPanel(profileChart);
+		
 		segmentsProfileChartPanel.setMinimumSize(minimumChartSize);
 		segmentsProfileChartPanel.setPreferredSize(preferredChartSize);
 		segmentsProfileChartPanel.setMinimumDrawWidth( 0 );
@@ -174,44 +171,57 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 			ds = NucleusDatasetCreator.createRawMultiProfileSegmentDataset(list, segName, rightAlign);
 		}
 		try {
-				
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-						                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
-						                false);
-
-				XYPlot plot = chart.getXYPlot();
-				
-				if(!normalised){
-					int length = 100;
-					for(AnalysisDataset d : list){
-						if(   (int) d.getCollection().getMedianArrayLength()>length){
-							length = (int) d.getCollection().getMedianArrayLength();
-						}
+			JFreeChart chart = null;
+			if(normalised){
+				chart = MorphologyChartFactory.makeProfileChart(ds, 100);
+			} else {
+				int length = 100;
+				for(AnalysisDataset d : list){
+					if(   (int) d.getCollection().getMedianArrayLength()>length){
+						length = (int) d.getCollection().getMedianArrayLength();
 					}
-					plot.getDomainAxis().setRange(0,length);
-				} else {
-					plot.getDomainAxis().setRange(0,100);
 				}
-
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
-				
-				for (int i = 0; i < plot.getSeriesCount(); i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-					String name = (String) ds.getSeriesKey(i);
-					if(name.startsWith("Seg_")){
-						int colourIndex = getIndexFromLabel(name);
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(4));
-						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-					} 
-					if(name.startsWith("Profile_")){
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-						plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-					} 
-					
-				}	
+				chart = MorphologyChartFactory.makeProfileChart(ds, length);
+			}
+			
+			
+//				JFreeChart chart = 
+//						ChartFactory.createXYLineChart(null,
+//						                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+//						                false);
+//
+//				XYPlot plot = chart.getXYPlot();
+//				
+//				if(!normalised){
+//					int length = 100;
+//					for(AnalysisDataset d : list){
+//						if(   (int) d.getCollection().getMedianArrayLength()>length){
+//							length = (int) d.getCollection().getMedianArrayLength();
+//						}
+//					}
+//					plot.getDomainAxis().setRange(0,length);
+//				} else {
+//					plot.getDomainAxis().setRange(0,100);
+//				}
+//
+//				plot.getRangeAxis().setRange(0,360);
+//				plot.setBackgroundPaint(Color.WHITE);
+//				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+//				
+//				for (int i = 0; i < plot.getSeriesCount(); i++) {
+//					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+//					String name = (String) ds.getSeriesKey(i);
+//					if(name.startsWith("Seg_")){
+//						int colourIndex = getIndexFromLabel(name);
+//						plot.getRenderer().setSeriesStroke(i, new BasicStroke(4));
+//						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
+//					} 
+//					if(name.startsWith("Profile_")){
+//						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+//						plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+//					} 
+//					
+//				}	
 								
 				segmentsProfileChartPanel.setChart(chart);
 			
