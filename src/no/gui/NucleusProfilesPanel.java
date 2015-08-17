@@ -178,7 +178,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 				
 				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), normalised);
 				
-				int length = (int) list.get(0).getCollection().getMedianArrayLength() ;
+				int length = 100 ; // default if normalised
 
 				// if we set raw values, get the maximum nucleus length
 				if(!normalised){
@@ -186,11 +186,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 						length = (int) Math.max( n.getLength(), length);
 					}
 				}
-				
-//				int length 	= normalised 
-//							? (int) list.get(0).getCollection().getMedianArrayLength() 
-//							: (int) list.get(0).getCollection().getMedianArrayLength();
-				
+								
 				// full segment colouring
 				JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, length);
 				profilesPanel.setChart(chart);

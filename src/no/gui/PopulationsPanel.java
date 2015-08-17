@@ -18,13 +18,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListSelectionModel;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import no.analysis.AnalysisDataset;
@@ -374,6 +378,38 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 	}
 	
 	/**
+	 * Select the given dataset in the tree table
+	 * @param dataset the dataset to select
+	 */
+	public void selectDataset(AnalysisDataset dataset){
+
+		TreeSelectionModel selectedRows = treeTable.getTreeSelectionModel();
+		int index = getIndexOfDataset(dataset);
+				
+		TreePath path = treeTable.getPathForRow(index);
+		if(path!=null){
+			selectedRows.setSelectionPath(path);
+		}
+	}
+	
+	/**
+	 * Get the index of the given dataset in the tree table.
+	 * @return the index
+	 */
+	private int getIndexOfDataset(AnalysisDataset dataset){
+		int index = 0;
+		
+		for(int row = 0; row< treeTable.getRowCount(); row++){
+			String populationName = (String) treeTable.getModel().getValueAt(row, 0);
+			
+			if(dataset.getName().equals(populationName)){
+				index = row;
+			}
+		}
+		return index;
+	}
+	
+	/**
 	 * Check that the name of the dataset is not already in the list of datasets
 	 * If the name is used, adjust and check again
 	 * @param name the suggested name
@@ -447,8 +483,7 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 				PopulationExporter.saveAnalysisDataset(dataset);
 				update();
 				
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-				list.add(dataset);
+				selectDataset(dataset);
 				fireSignalChangeEvent("UpdatePanels");
 			}
 		}

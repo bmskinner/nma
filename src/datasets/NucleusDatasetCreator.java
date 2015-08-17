@@ -569,6 +569,12 @@ public class NucleusDatasetCreator {
 		return dataset;
 	}
 	
+	/**
+	 * Get the lengths of the given segment in the collections
+	 * @param collections
+	 * @param segName
+	 * @return
+	 */
 	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, String segName) {
 
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
@@ -586,6 +592,35 @@ public class NucleusDatasetCreator {
 			}
 
 			dataset.add(list, segName+"_"+i, "Segment length: "+segName);
+		}
+		return dataset;
+	}
+	
+	public static BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<AnalysisDataset> datasets) {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < datasets.size(); i++) {
+
+			CellCollection collection = datasets.get(i).getCollection();
+
+			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getReferencePoint());
+			
+			for(NucleusBorderSegment medianSeg : segments){
+				
+				int medianSegmentLength = medianSeg.length();
+				
+				List<Integer> list = new ArrayList<Integer>(0);
+				
+				for(Nucleus n : collection.getNuclei()){
+					NucleusBorderSegment seg = n.getSegmentTag(medianSeg.getSegmentType());
+					
+					int differenceToMedian = medianSegmentLength - seg.length();
+					list.add(differenceToMedian);
+				}
+				
+				dataset.add(list, medianSeg.getSegmentType(), "Segment length: "+medianSeg.getSegmentType());
+			}
 		}
 		return dataset;
 	}

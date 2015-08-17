@@ -12,11 +12,15 @@ import no.gui.ColourSelecter;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -257,5 +261,55 @@ public class MorphologyChartFactory {
 		};
 		return panel;
 	}
+	
+	/**
+	 * Create an empty boxplot
+	 * @return
+	 */
+	public static JFreeChart makeEmptyBoxplot(){
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
+		boxplot.getPlot().setBackgroundPaint(Color.WHITE);
+		return boxplot;
+	}
+	
+	/**
+	 * Create and format a boxplot based on a dataset
+	 * @param ds the dataset
+	 * @return
+	 */
+	public static JFreeChart makeSegmentBoxplot(BoxAndWhiskerCategoryDataset ds, List<AnalysisDataset> list){
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false);	
+		
+		if(list.size()>1){
+			return makeEmptyBoxplot();
+		}
+		
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+		plot.setRenderer(renderer);
+		renderer.setUseOutlinePaintForWhiskers(true);   
+		renderer.setBaseOutlinePaint(Color.BLACK);
+		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+		
+		if(list!=null && !list.isEmpty()){
+						
+			for(int i=0;i<plot.getDataset().getRowCount();i++){
+				
+				AnalysisDataset d = list.get(0);
+
+				Color color = d.getDatasetColour() == null 
+							? ColourSelecter.getSegmentColor(i)
+							: d.getDatasetColour();
+							
+							renderer.setSeriesPaint(i, color);
+			}
+			renderer.setMeanVisible(false);
+		}
+		
+		return boxplot;
+	}
+	
+	
 
 }

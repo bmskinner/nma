@@ -26,6 +26,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
@@ -121,8 +122,8 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 
 		panel.setLayout(new BorderLayout());
 		
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
-		boxplot.getPlot().setBackgroundPaint(Color.WHITE);
+		JFreeChart boxplot = MorphologyChartFactory.makeEmptyBoxplot();
+
 		
 		segmentsBoxplotChartPanel = new ChartPanel(boxplot);
 		panel.add(segmentsBoxplotChartPanel, BorderLayout.CENTER);
@@ -156,9 +157,8 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 	}
 	
 	private void updateSegmentsBoxplot(List<AnalysisDataset> list, String segName){
-		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName);
-		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-		formatBoxplotChart(boxplotChart, list);
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
+		JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
 		segmentsBoxplotChartPanel.setChart(boxplotChart);
 	}
 	
@@ -182,48 +182,8 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 					}
 				}
 				chart = MorphologyChartFactory.makeProfileChart(ds, length);
-			}
-			
-			
-//				JFreeChart chart = 
-//						ChartFactory.createXYLineChart(null,
-//						                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
-//						                false);
-//
-//				XYPlot plot = chart.getXYPlot();
-//				
-//				if(!normalised){
-//					int length = 100;
-//					for(AnalysisDataset d : list){
-//						if(   (int) d.getCollection().getMedianArrayLength()>length){
-//							length = (int) d.getCollection().getMedianArrayLength();
-//						}
-//					}
-//					plot.getDomainAxis().setRange(0,length);
-//				} else {
-//					plot.getDomainAxis().setRange(0,100);
-//				}
-//
-//				plot.getRangeAxis().setRange(0,360);
-//				plot.setBackgroundPaint(Color.WHITE);
-//				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
-//				
-//				for (int i = 0; i < plot.getSeriesCount(); i++) {
-//					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-//					String name = (String) ds.getSeriesKey(i);
-//					if(name.startsWith("Seg_")){
-//						int colourIndex = getIndexFromLabel(name);
-//						plot.getRenderer().setSeriesStroke(i, new BasicStroke(4));
-//						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-//					} 
-//					if(name.startsWith("Profile_")){
-//						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-//						plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-//					} 
-//					
-//				}	
-								
-				segmentsProfileChartPanel.setChart(chart);
+			}								
+			segmentsProfileChartPanel.setChart(chart);
 			
 			
 		} catch (Exception e) {
@@ -281,71 +241,4 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 		}
 		
 	}
-	
-	/**
-	 * Get a series or dataset index for colour selection when drawing charts. The index
-	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
-	 * @param label the label to extract the index from 
-	 * @return the index found
-	 */
-	private int getIndexFromLabel(String label){
-		String[] names = label.split("_");
-		return Integer.parseInt(names[1]);
-	}
-	
-//	/**
-//	 * Apply the default formatting to a boxplot
-//	 * @param boxplot
-//	 */
-//	private void formatBoxplotChart(JFreeChart boxplot){
-//		CategoryPlot plot = boxplot.getCategoryPlot();
-//		plot.setBackgroundPaint(Color.WHITE);
-//		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-//		plot.setRenderer(renderer);
-//		renderer.setUseOutlinePaintForWhiskers(true);   
-//		renderer.setBaseOutlinePaint(Color.BLACK);
-//		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-//		for(int i=0;i<plot.getDataset().getRowCount();i++){
-//			Color color = ColourSelecter.getSegmentColor(i);
-//			renderer.setSeriesPaint(i, color);
-//		}
-//		renderer.setMeanVisible(false);
-//	}
-	
-	/**
-	 * Apply the default formatting to a boxplot with list
-	 * @param boxplot
-	 */
-	private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
-		formatBoxplotChart(boxplot);
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
-		
-		for(int i=0;i<plot.getDataset().getRowCount();i++){
-			
-			AnalysisDataset d = list.get(i);
-
-			Color color = d.getDatasetColour() == null 
-						? ColourSelecter.getSegmentColor(i)
-						: d.getDatasetColour();
-						
-						renderer.setSeriesPaint(i, color);
-		}
-		renderer.setMeanVisible(false);
-	}
-	
-	/**
-	 * Apply basic formatting to the charts, without any series added
-	 * @param boxplot
-	 */
-	private void formatBoxplotChart(JFreeChart boxplot){
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		plot.setBackgroundPaint(Color.WHITE);
-		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-		plot.setRenderer(renderer);
-		renderer.setUseOutlinePaintForWhiskers(true);   
-		renderer.setBaseOutlinePaint(Color.BLACK);
-		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-	}
-
 }

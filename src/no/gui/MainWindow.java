@@ -477,6 +477,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	
 						updatePanels(list);
 						populationsPanel.update();
+						populationsPanel.selectDataset(dataset);
+						
 					} else {
 						log("Unable to open dataset version: "+ dataset.getVersion());
 					}
@@ -934,7 +936,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			populationsPanel.update(); // get any new populations
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 			list.add(d);
+			populationsPanel.selectDataset(d);
 			updatePanels(list); // update with the current population
+			
 		}
 		
 		/**
