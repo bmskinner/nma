@@ -7,6 +7,7 @@ import utility.Logger;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
+import ij.process.ImageConverter;
 
 /**
  * This class takes any given input image, and will convert it
@@ -18,7 +19,7 @@ public class ImageImporter {
 
 	private static Logger logger;
 	
-	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB };
+	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 	
 	
 	/**
@@ -64,18 +65,23 @@ public class ImageImporter {
 			logger.log("Cannot handle image type: "+image.getType(), Logger.ERROR);
 			throw new IllegalArgumentException("Cannot handle image type: "+image.getType());
 		}
-				
+						
 		logger.log("Image is type: "+image.getType());
 		// do the conversions
 		ImageStack result = null;
 		if(image.getType()==ImagePlus.GRAY8){
-			logger.log("Converting greyscale to stack",Logger.DEBUG);
+			logger.log("Converting 8 bit greyscale to stack",Logger.DEBUG);
 			result = convertGreyscale(image);
 		}
 		
 		if(image.getType()==ImagePlus.COLOR_RGB){
 			logger.log("Converting RGB to stack",Logger.DEBUG);
 			result = convertRGB(image);
+		}
+		
+		if(image.getType()==ImagePlus.GRAY16){
+			logger.log("Converting 16 bit greyscale to 8 bit stack",Logger.DEBUG);
+			result = convert16bitGrey(image);
 		}
 		
 		return result;
@@ -115,5 +121,17 @@ public class ImageImporter {
 //	    
 //	    demo.show();
 	    return result;
+	}
+	
+	/**
+	 * Convert a 16 bit greyscale image. For now, this just down
+	 * converts to an 8 bit image.
+	 * @param image the 16 bit image to convert
+	 * @return the stack
+	 */
+	private static ImageStack convert16bitGrey(ImagePlus image){
+		ImageConverter converter = new ImageConverter(image);
+		converter.convertToGray8();
+		return convertGreyscale(image);
 	}
 }
