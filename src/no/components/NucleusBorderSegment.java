@@ -31,6 +31,8 @@ public class NucleusBorderSegment  implements Serializable{
 	
 	private NucleusBorderSegment prevSegment = null; // track the previous segment in the profile
 	private NucleusBorderSegment nextSegment = null; // track the next segment in the profile
+	
+	private String lastFailReason;
 
 	public NucleusBorderSegment(int startIndex, int endIndex, int total){
 		this.startIndex = startIndex;
@@ -52,6 +54,10 @@ public class NucleusBorderSegment  implements Serializable{
 		Getters
 		----------------
 	*/
+	
+	public String getLastFailReason(){
+		return this.lastFailReason;
+	}
 
 	public int getStartIndex(){
 		return this.startIndex;
@@ -160,11 +166,34 @@ public class NucleusBorderSegment  implements Serializable{
 	 * @return the new segment length
 	 */
 	public int testLength(int start, int end){
-		if(end<start){ // the segment wraps
+		if(wraps(start, end)){ // the segment wraps
 			return end + (this.getTotalLength()-start);
 		} else{
 			return end - start;
 		}
+	}
+	
+	/**
+	 * Check if the segment would wrap with the given start
+	 * and end points (i.e contains 0)
+	 * @param start the start index
+	 * @param end the end index
+	 * @return
+	 */
+	public boolean wraps(int start, int end){
+		if(end<start){ // the segment wraps
+			return true;
+		} else{
+			return false;
+		}
+	}
+	
+	/**
+	 * Test if the segment currently wraps
+	 * @return
+	 */
+	public boolean wraps(){
+		return wraps(this.getStartIndex(), this.getEndIndex());
 	}
 	
 	/**
@@ -191,7 +220,7 @@ public class NucleusBorderSegment  implements Serializable{
 		}
 		
 		boolean result = false;
-		if(end<start){ // wrapped
+		if(wraps(start, end)){ // wrapped
 			if(index<=end || index>start){
 				result=true;
 			}
@@ -212,6 +241,7 @@ public class NucleusBorderSegment  implements Serializable{
 	 */
 	public boolean update(int startIndex, int endIndex){
 		
+		this.lastFailReason = "No fail";
 //		 Check the incoming data
 		if(startIndex < 0 || startIndex > this.getTotalLength()){
 			throw new IllegalArgumentException("Start index is outside the profile range: "+startIndex);
@@ -221,16 +251,12 @@ public class NucleusBorderSegment  implements Serializable{
 		}
 
 //		// Check that the new positions will not make this segment too small
-		if(testLength(startIndex, endIndex) < MINIMUM_SEGMENT_LENGTH){
+		int testLength = testLength(startIndex, endIndex);
+		if(testLength < MINIMUM_SEGMENT_LENGTH){
+			this.lastFailReason = startIndex+"-"+endIndex+": segment length ("+testLength+") cannot be smaller than "+MINIMUM_SEGMENT_LENGTH;
 			return false;
-//			throw new IllegalArgumentException("Segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
 		}
-		
-//		// don't update things that have not changed
-//		if(this.getStartIndex()==startIndex && this.getEndIndex()==endIndex){
-//			return;
-//		}
-		
+				
 		// Check that next and previous segments are not invalidated by length change
 		// i.e the max length increase backwards is up to the MIN_SEG_LENGTH of the
 		// previous segment, and the max length increase forwards is up to the 
@@ -238,15 +264,15 @@ public class NucleusBorderSegment  implements Serializable{
 		
 		if(this.hasPrevSegment()){
 			if(this.prevSegment().testLength(this.prevSegment().getStartIndex(), startIndex) < MINIMUM_SEGMENT_LENGTH){
+				this.lastFailReason = startIndex+"-"+endIndex+": Previous segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH;
 				return false;
-				//			throw new IllegalArgumentException("Previous segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
 			}
 		}
 		if(this.hasNextSegment()){
 
 			if(this.nextSegment().testLength(endIndex, this.nextSegment().getEndIndex()) < MINIMUM_SEGMENT_LENGTH){
+				this.lastFailReason = startIndex+"-"+endIndex+": Next segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH;
 				return false;
-				//			throw new IllegalArgumentException("Previous segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH);
 			}
 		}
 		
@@ -256,9 +282,8 @@ public class NucleusBorderSegment  implements Serializable{
 		if(startIndex > endIndex){
 			
 			if(!this.testContains(startIndex , endIndex, 0)){
-//			if(!this.contains(0)){
+				this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause this segment to invert";
 				return false;
-//				throw new IllegalArgumentException("Operation would cause this segment to invert");
 			}
 			
 		}
@@ -267,18 +292,33 @@ public class NucleusBorderSegment  implements Serializable{
 		if(this.hasPrevSegment()){
 			if(this.prevSegment().getStartIndex() > startIndex){
 
-				if(!this.prevSegment().testContains(this.prevSegment().getStartIndex(), startIndex, 0)){
+				if(!this.prevSegment().wraps() && this.prevSegment().wraps(startIndex, endIndex)){
+					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause prev segment to invert";
 					return false;
-//					throw new IllegalArgumentException("Operation would cause this segment to invert");
+				}
+				
+				// another wrapping test - if the new positions induce a wrap, the segment should contain 0
+				if(this.prevSegment().wraps(startIndex, endIndex) && !this.prevSegment().testContains(startIndex, endIndex, 0)){
+					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause prev segment to invert";
+					return false;
 				}
 			}
 		}
 
 		if(this.hasNextSegment()){
 			if( endIndex > this.nextSegment().getEndIndex()){
-				if(!this.nextSegment().testContains(endIndex, this.nextSegment().getEndIndex(), 0)){
+				
+				// if the next segment goes from not wrapping to wrapping when this segment is altered,
+				// an inversion must have occurred. Prevent.
+				if(!this.nextSegment().wraps() && this.nextSegment().wraps(startIndex, endIndex)){
+					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause next segment to invert";
 					return false;
-//					throw new IllegalArgumentException("Operation would cause this segment to invert");
+				}
+				
+				// another wrapping test - if the new positions induce a wrap, the segment should contain 0
+				if(this.nextSegment().wraps(startIndex, endIndex) && !this.nextSegment().testContains(startIndex, endIndex, 0)){
+					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause next segment to invert";
+					return false;
 				}
 			}
 		}
@@ -289,7 +329,6 @@ public class NucleusBorderSegment  implements Serializable{
 //		 wrap in if to ensure we don't go in circles forever when testing a circular profile
 		if(this.getStartIndex()!=startIndex){
 			this.startIndex = startIndex;
-//			IJ.log("Updating start: "+this.getSegmentType());
 			if(this.hasPrevSegment()){
 				NucleusBorderSegment prev = this.prevSegment();
 				prev.update(prev.getStartIndex(), startIndex);
@@ -298,7 +337,7 @@ public class NucleusBorderSegment  implements Serializable{
 			
 		if(this.getEndIndex()!=endIndex){
 			this.endIndex = endIndex;
-//			IJ.log("Updating end: "+this.getSegmentType());
+
 			if(this.hasNextSegment()){
 				NucleusBorderSegment next = this.nextSegment();
 				next.update(endIndex, next.getEndIndex());

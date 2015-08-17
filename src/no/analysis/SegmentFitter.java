@@ -1,14 +1,10 @@
 package no.analysis;
 
-import ij.IJ;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import utility.Logger;
-import utility.Utils;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.nuclei.Nucleus;
@@ -98,21 +94,6 @@ public class SegmentFitter {
 			
 			// get the best fit of segments to the median
 			List<NucleusBorderSegment> newList = this.runFitter(this.testSegments);
-					
-//			logger.log("Start score: "+score, Logger.DEBUG);
-//			logger.log("New list size: "+newList.size(), Logger.DEBUG);
-//
-//			double prevScore = score+1; // so we don't immediately end the loop
-//			
-//			while(score<prevScore){
-//				newList = runFitter(newList);
-//				Profile revisedProfile = this.recombineSegments(newList, testProfile);
-//				prevScore = score;
-//				score = revisedProfile.differenceToProfile(medianProfile);
-//				logger.log("Score: "+score, Logger.DEBUG);
-//
-//			}
-//			logger.log("Final score: "+score, Logger.DEBUG);
 			n.setSegments(newList);
 			
 			// modify tail point to nearest segment end
@@ -258,201 +239,136 @@ public class SegmentFitter {
 		
 		// A new list to hold the fitted segments
 		List<NucleusBorderSegment> result = NucleusBorderSegment.copy(testList);
+		List<NucleusBorderSegment> tempList = NucleusBorderSegment.copy(testList);
 		
-		// we want to check every possible configuration of segmentation
-		
-		// it should be a whole-segmentation based comparison
-		// Whenever a change is made, assess the impact on the entire profile comparison, segment to segment
-		
-		// see the initial state
-		double bestScore = 0;
-		int bestChange = 0;
-		try{
-			bestScore = compareSegmentationPatterns(medianSegments, testList, medianProfile, testProfile);
-		}catch(IllegalArgumentException e){
-			logger.log(e.getMessage());
-			throw new Exception("Error getting segmentation pattern: "+e.getMessage());
-		}
-		
-		for(int changeValue = -POINTS_TO_TEST; changeValue<POINTS_TO_TEST; changeValue++){
+		for(int segmentNumber = 0; segmentNumber < tempList.size();segmentNumber++){
 			
-			//	change the length from +length to -length, testing the effect at each step
-//		 	rotate the segment set through the nucleus, testing position with new lengths
-			// keep only the effects which reduce score
-			List<NucleusBorderSegment> tempList = NucleusBorderSegment.copy(testList);
-			
+			NucleusBorderSegment segment = tempList.get(segmentNumber);
 			double score = compareSegmentationPatterns(medianSegments, tempList, medianProfile, testProfile);
-			logger.log("Change: "+changeValue+"\tStart score: "+score, Logger.DEBUG);
-			// For each segment:
-			for(int i=0; i<tempList.size();i++){
-				
-				NucleusBorderSegment segment = tempList.get(i);
-				logger.log("Testing segment: "+segment.getSegmentType(), Logger.DEBUG);
-				
-				if(segment.lengthenEnd(changeValue)){ // not permitted if it violates length constraint
-
-					
-					try{
-						score = compareSegmentationPatterns(medianSegments, tempList, medianProfile, testProfile);
-						logger.log("\tLengthen score:\t"+score, Logger.DEBUG);
-					}catch(IllegalArgumentException e){
-						logger.log(e.getMessage());
-						throw new Exception("Error getting segmentation pattern: "+e.getMessage());
-					}
-					
-					if(score < bestScore){
-						result = tempList;
-						bestChange = changeValue;
-						bestScore = score;
-						logger.log("\tNew best score:\t"+score, Logger.DEBUG);
-					}
-
-					
-					List<NucleusBorderSegment> newList = NucleusBorderSegment.nudge(tempList, changeValue);
-					try{
-						score = compareSegmentationPatterns(medianSegments, newList, medianProfile, testProfile);
-						logger.log("\tNudge score:\t"+score, Logger.DEBUG);
-					}catch(IllegalArgumentException e){
-						logger.log(e.getMessage());
-						throw new Exception("Error getting segmentation pattern: "+e.getMessage());
-					}
-					
-					if(score < bestScore){
-						result = tempList;
-						bestChange = changeValue;
-						bestScore = score;
-						logger.log("\tNew best score:\t"+score, Logger.DEBUG);
-					}
-				} else {
-					logger.log("\tNot a valid change to segment", Logger.DEBUG);
-				}
-			}
+			logger.log("Segment\t"+segment.getSegmentType()
+					+"\tLength "+segment.length()
+					+"\t"+segment.getStartIndex()
+					+"-"+segment.getEndIndex() );
+			logger.log("\tInitial score: "+score, Logger.DEBUG);
+			
+			// find the best length and offset change to make to the segment
+			tempList = testLength(tempList, segmentNumber);
+			
+			// copy this to the result
+			result = NucleusBorderSegment.copy(tempList);						
 		}
-		logger.log("Best score: "+bestScore, Logger.DEBUG);
-		logger.log("Fitted segments to nucleus: change of "+bestChange, Logger.DEBUG);
-		for(NucleusBorderSegment seg : result){
-			logger.log("Fitted segmnet: "+seg.toString(), Logger.DEBUG);
+		
+		for(int segmentNumber = 0; segmentNumber < tempList.size();segmentNumber++){
+			logger.log("Fitted segment: "+result.get(segmentNumber).toString(), Logger.DEBUG);
 		}
+		
 		
 		return result;
 	}
-		
+	
 	/**
-	 * for each test segment: compare with median segment
-	 *	increase or decrease the test endpoint
-	 *  score again
-	 *  get the lowest score within ?10 border points either side
-	 *  next segment
-	 *  update the nucleus
+	 * Test the effect of changing length on the given segment from the list
+	 * @param list
+	 * @param segmnetNumber the segment to test
+	 * @return
 	 */
-//	private List<NucleusBorderSegment> runFitter(List<NucleusBorderSegment> testList){
-//		
-//		// Input check
-//		if(testList==null || testList.isEmpty()){
-//			logger.log("Segment list is null or empty", Logger.ERROR);
-//			throw new IllegalArgumentException("Segment list is null or empty");
-//		}
-//		
-//		logger.log("Fitting list", Logger.DEBUG);
-//
-//		// A new list to hold the fitted segments
-//		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-//
-//		// the number of segments input
-//		int segmentCount  = testList.size();
-//		
-//		
-//
-//		for(int i=0; i<segmentCount;i++){
-//			
-//			// make a copy of the test list of segments, so we can interrogate each
-//			// segment separately without distorting the entire set via linkage
-//			List<NucleusBorderSegment> tempList = new ArrayList<NucleusBorderSegment>(0);
-//			for(NucleusBorderSegment segment : testList){
-//				tempList.add(new NucleusBorderSegment(segment));
-//			}
-//			NucleusBorderSegment.linkSegments(tempList);
-//			
-//			// now get the appropriate segment from teh temp list
-//					
-//			NucleusBorderSegment seg = tempList.get(i);
-//			int oldLength = seg.length();
-//			
-////			logger.log("Fitting segment "+i+": "+seg.getSegmentType(), Logger.DEBUG);
-//			
-//						
-//			double score =  compareSegments(this.medianSegments.get(i), seg);
-//			
-////			logger.log("Score "+score, Logger.DEBUG);
-//			
-//			
-//			double minScore = score;
-//			int valueChange = 0;
-//			NucleusBorderSegment bestSeg = seg;
-//			
-//			// TODO: allow rotation through the entire profile
-//			for(int j=-SegmentFitter.POINTS_TO_TEST;j<SegmentFitter.POINTS_TO_TEST;j++){
-//				
-//				// before we try lengthening or shortening segments, see if they fit better
-//				// at the same size, but moved along a bit
-//				List<NucleusBorderSegment> nudgeList = NucleusBorderSegment.nudge(tempList, j);
-//
-//				// only refit if the change does not shrink the segment too much
-//				if(seg.length()+j > NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-//					
-////					logger.log("Testing segment length change of "+j, Logger.DEBUG);
-//					
-//					// make a copy of the segment to work with
-//					NucleusBorderSegment tempSeg = new NucleusBorderSegment(seg);
-//					
-//					try{
-//						// try to lengthen the new segment by the given amount
-//						if(tempSeg.lengthenEnd(j)){
-//							
-//							// If the change suceeded, get the score
-//							// logger.log("Adjusted segment length", Logger.DEBUG);
-//
-//							// get the score for the new segment
-//							score = compareSegments(this.medianSegments.get(i), tempSeg);
-//
-//							// add a penalty for each point that makes the segment longer
-//							if(tempSeg.length()>oldLength){
-//								score += (tempSeg.length()-oldLength) * SegmentFitter.PENALTY_GROW ;
-//							}
-//
-//							// add a penalty if the proposed new segment is shorter that the minimum segment length
-//							//						if(tempSeg.length()<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-//							//							// penalty increases the smaller we go below the minimum
-//							//							score += (NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH - tempSeg.length()) * SegmentFitter.PENALTY_SHRINK;
-//							//						}
-//
-//							//						logger.log("New score: "+score, Logger.DEBUG);
-//
-//							if(score<minScore){
-//								minScore=score;
-//								bestSeg = tempSeg;
-//								valueChange = j;
-//							}
-//						}
-//
-//					} catch(IllegalArgumentException e){
-//						logger.log("Error in arguments: "+e.getMessage(), Logger.ERROR);
-//					}
-//
-//				}	
-//			}
-//			
-//			logger.log("Min score found as "+minScore+" with offset "+valueChange, Logger.DEBUG);
-//			logger.log(bestSeg.toString(), Logger.INFO);
-//
-////			testList.get(i).update(bestSeg.getStartIndex(), bestSeg.getEndIndex());
-//			result.add(bestSeg);
-//
-//
-//		}
-//		return result;
-//	}
+	private List<NucleusBorderSegment> testLength(List<NucleusBorderSegment> list, int segmentNumber) throws Exception {
 		
+		// by default, return the same list that came in
+		List<NucleusBorderSegment> result = NucleusBorderSegment.copy(list);
+		
+		NucleusBorderSegment segment = list.get(segmentNumber);
+		
+		double bestScore = compareSegmentationPatterns(medianSegments, list, medianProfile, testProfile);
+
+		
+		// the most extreme negative offset to apply to the end of this segment
+		// without making the length invalid
+		int minimumChange = 0 - (segment.length() - NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH);
+		
+		// the maximum length offset to apply
+		// we can't go beyond the end of the next segment anyway, so use that as the cutoff
+		// how far from current end to next segment end?
+		int maximumChange = segment.testLength(segment.getEndIndex(), segment.nextSegment().getEndIndex());
+		
+//		int maximumChange = segment.length() * 3; // segment.getTotalLength() - segment.length();
+		
+		logger.log("\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
+		
+		for(int changeValue = minimumChange; changeValue < maximumChange; changeValue++){
+			
+			// apply all changes to a fresh copy of the list
+			List<NucleusBorderSegment> testList = NucleusBorderSegment.copy(list);
+			NucleusBorderSegment testSegment = testList.get(segmentNumber);
+			
+			
+			if(testSegment.lengthenEnd(changeValue)){ // not permitted if it violates length constraint
+
+				
+				try{
+					double score = compareSegmentationPatterns(medianSegments, testList, medianProfile, testProfile);
+//					logger.log("\tLengthen "+changeValue+":\tScore:\t"+score, Logger.DEBUG);
+					
+					if(score < bestScore){
+						bestScore 	= score;
+						result = NucleusBorderSegment.copy(testList);
+						logger.log("\tNew best score:\t"+score, Logger.DEBUG);
+					}
+				}catch(IllegalArgumentException e){
+					logger.log(e.getMessage());
+					throw new Exception("Error getting segmentation pattern: "+e.getMessage());
+				}
+				
+				
+				// test if nudging the lengthened segment with will help
+				int nudge = testNudge(testList);
+				testList = NucleusBorderSegment.nudge(testList, nudge);
+				double score = compareSegmentationPatterns(medianSegments, testList, medianProfile, testProfile);
+				if(score < bestScore){
+					bestScore = score;
+					result = NucleusBorderSegment.copy(testList);
+					logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
+				}
+										
+			} else {
+//				logger.log("\tLengthen "+changeValue+":\tInvalid length change:\t"+testSegment.getLastFailReason(), Logger.DEBUG);
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Find the nudge to the given list of segments that gives the best
+	 * fit to the median profile
+	 * @param list the segment list
+	 * @return the best nudge value to use
+	 * @throws Exception when the segmentation comparison fails
+	 */
+	private int testNudge(List<NucleusBorderSegment> list) throws Exception {
+		
+		int totalLength = list.get(0).getTotalLength();
+		double score = 0;
+		double bestScore = 0;
+		int bestNudge = 0;
+		
+		for( int nudge = 0; nudge<totalLength; nudge++){
+			List<NucleusBorderSegment> newList = NucleusBorderSegment.nudge(list, nudge);
+			try{
+				score = compareSegmentationPatterns(medianSegments, newList, medianProfile, testProfile);
+//				logger.log("\tNudge "+nudge+":\tScore:\t"+score, Logger.DEBUG);
+			}catch(IllegalArgumentException e){
+				logger.log(e.getMessage());
+				throw new Exception("Nudge error: error getting segmentation pattern: "+e.getMessage());
+			}
+			
+			if(score < bestScore){
+				bestScore = score;
+				bestNudge = nudge;
+			}
+		}
+		return bestNudge;
+	}
+				
 	/**
 	 * Get the sum-of-squares difference betweene two segments in the given profile
 	 * @param reference the reference segment

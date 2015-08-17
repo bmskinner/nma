@@ -50,10 +50,7 @@ public class SegmentFitterTest {
 		Profile median = createRodentSpermMedianProfile();		
 //		String programDir = getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
 		File log = new File("Z:\\log.txt");
-		if(log.exists()){
-			log.delete();
-		}
-		if(!log.canRead()){
+		if(!log.getParentFile().exists()){
 			log = new File("E:\\log.txt");
 		}
 		if(log.exists()){
