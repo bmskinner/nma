@@ -1,5 +1,7 @@
 package no.gui;
 
+import ij.IJ;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
@@ -38,12 +40,16 @@ public class VennDetailPanel extends JPanel {
 	 */
 	public void update(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createVennTable(list);
-		vennTable.setModel(model);
-		int columns = vennTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
-
+		
+		if(!list.isEmpty() && list!=null){
+			TableModel model = NucleusTableDatasetCreator.createVennTable(list);
+			vennTable.setModel(model);
+			int columns = vennTable.getColumnModel().getColumnCount();
+//			IJ.log("Columns: "+columns);
+			for(int i=1;i<columns;i++){
+//				IJ.log("Column: "+i);
+				vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
+			}
 		}
 	}
 	
