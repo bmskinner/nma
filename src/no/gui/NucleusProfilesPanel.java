@@ -20,6 +20,7 @@ import javax.swing.JTabbedPane;
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.Profile;
+import no.components.ProfileCollection;
 import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
@@ -240,6 +241,11 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 						
 		} catch (Exception e) {
 			IJ.log("Error in plotting frankenprofile: "+e.getMessage());
+			for(AnalysisDataset d : list){
+				IJ.log(d.getName());
+				ProfileCollection f = d.getCollection().getFrankenCollection();
+				IJ.log(f.printKeys());
+			}
 			for(StackTraceElement el : e.getStackTrace()){
 				IJ.log(el.toString());
 			}

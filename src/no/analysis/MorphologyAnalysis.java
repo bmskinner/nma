@@ -307,11 +307,22 @@ public class MorphologyAnalysis {
 		// make a new profile collection to hold the frankendata
 		ProfileCollection frankenCollection = new ProfileCollection();
 
-		// fill the frankenCollection  with the segment information previously calculated
+		// create a new profile aggregate for the collection
 		frankenCollection.createProfileAggregate(collection);
-//		frankenCollection.addAggregate( pointType, new ProfileAggregate((int)collection.getMedianArrayLength()));
+		
+		
+		// add the correct offset keys
+		// These are the same as the profile collection keys, and have
+		// the same positions (since a franken profile is based on the median)
+		for(String key : pc.getOffsetKeys()){
+			frankenCollection.addOffset(key, pc.getOffset(key));
+		}
+
+		// copy the segments from the profile collection
 		frankenCollection.addSegments(segments);
 
+		
+		// run the segment fitter on each nucleus
 		SegmentFitter fitter = new SegmentFitter(pc.getProfile(pointType), segments, logger.getLogfile());
 		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
@@ -324,10 +335,14 @@ public class MorphologyAnalysis {
 			frankenCollection.getAggregate().addValues(recombinedProfile);
 			frankenProfiles.add(recombinedProfile);
 		}
+		
+		// add all the nucleus frankenprofiles to the frankencollection
 		frankenCollection.addNucleusProfiles(frankenProfiles);
+		
 		// update the profile aggregate
 		frankenCollection.createProfileAggregate(  collection   );
 		
+		// attach the frankencollection to the cellcollection
 		collection.setFrankenCollection(frankenCollection);
 		logger.log("Segment assignments refined");
 	}

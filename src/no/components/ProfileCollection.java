@@ -42,6 +42,18 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
+	 * Get all the offset keys attached to this profile collection
+	 * @return
+	 */
+	public List<String> getOffsetKeys(){
+		List<String> result = new ArrayList<String>();
+		for(String s: offsets.keySet()){
+			result.add(s);
+		}
+		return result;
+	}
+	
+	/**
 	 * Get the requested profile. Generates it dynamically from the
 	 * appropriate ProfileAggregate each time
 	 * @param s the profile to find
