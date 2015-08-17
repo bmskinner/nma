@@ -251,8 +251,16 @@ public class NucleusDatasetCreator {
 
 		// add the individual nuclei
 		for(Nucleus n : collection.getNuclei()){
-			Profile angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(profile.size());
-			double[][] ndata = { xpoints.asArray(), angles.asArray() };
+			Profile angles  = null;
+			Profile x		= null;
+			if(normalised){
+				angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate((int)collection.getMedianArrayLength());
+				x = xpoints;
+			} else {
+				angles = n.getAngleProfile(collection.getOrientationPoint());
+				x = angles.getPositions(n.getLength());
+			}
+			double[][] ndata = { x.asArray(), angles.asArray() };
 			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
 		}
 		return ds;
