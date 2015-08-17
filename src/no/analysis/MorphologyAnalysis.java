@@ -119,8 +119,13 @@ public class MorphologyAnalysis {
 			ProfileCollection pc = collection.getProfileCollection();
 			pc.createProfileAggregate(collection, profileLength);
 			
-			
+
 			ProfileCollection sc = sourceCollection.getProfileCollection();
+			
+			// copy the offset keys from the source collection
+			for(String offsetKey : sc.getOffsetKeys()){
+				pc.addOffset(offsetKey, sc.getOffset(offsetKey));
+			}
 			
 			
 			// What happens when the array length is greater in the source collection? 
