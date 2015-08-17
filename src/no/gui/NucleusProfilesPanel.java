@@ -177,7 +177,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		try {
 			if(list.size()==1){
 				
-				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), normalised);
+				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), normalised, rightAlign);
 				
 				int length = 100 ; // default if normalised
 
