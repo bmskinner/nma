@@ -19,6 +19,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.XYDataset;
@@ -254,8 +255,15 @@ public class MorphologyChartFactory {
 			@Override
 			public void restoreAutoBounds() {
 				XYPlot plot = (XYPlot) this.getChart().getPlot();
+				
+				int length = 100;
+				for(int i = 0; i<plot.getDatasetCount();i++){
+					XYDataset dataset = plot.getDataset(i);
+					Number maximum = DatasetUtilities.findMaximumDomainValue(dataset);
+					length = maximum.intValue() > length ? maximum.intValue() : length;
+				}
 				plot.getRangeAxis().setRange(0, 360);
-				plot.getDomainAxis().setAutoRange(true);				
+				plot.getDomainAxis().setRange(0, length);				
 				return;
 			} 
 		};
