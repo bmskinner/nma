@@ -321,7 +321,7 @@ public class SegmentFitter {
 				
 				
 				// test if nudging the lengthened segment with will help
-				int nudge = testNudge(testList);
+				int nudge = testNudge(testList, testSegment.length());
 				testList = NucleusBorderSegment.nudge(testList, nudge);
 				double score = compareSegmentationPatterns(medianSegments, testList, medianProfile, testProfile);
 				if(score < bestScore){
@@ -341,17 +341,18 @@ public class SegmentFitter {
 	 * Find the nudge to the given list of segments that gives the best
 	 * fit to the median profile
 	 * @param list the segment list
+	 * @param length the length to cycle through. Use the segment length for simple measure
 	 * @return the best nudge value to use
 	 * @throws Exception when the segmentation comparison fails
 	 */
-	private int testNudge(List<NucleusBorderSegment> list) throws Exception {
+	private int testNudge(List<NucleusBorderSegment> list, int length) throws Exception {
 		
-		int totalLength = list.get(0).getTotalLength();
+//		int totalLength = list.get(0).getTotalLength();
 		double score = 0;
 		double bestScore = 0;
 		int bestNudge = 0;
 		
-		for( int nudge = 0; nudge<totalLength; nudge++){
+		for( int nudge = -length; nudge<length; nudge++){
 			List<NucleusBorderSegment> newList = NucleusBorderSegment.nudge(list, nudge);
 			try{
 				score = compareSegmentationPatterns(medianSegments, newList, medianProfile, testProfile);
