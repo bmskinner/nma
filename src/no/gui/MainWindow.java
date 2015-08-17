@@ -934,6 +934,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			populationsPanel.update(); // get any new populations
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 			list.add(d);
+			PopulationExporter.saveAnalysisDataset(d);
 			updatePanels(list); // update with the current population
 		}
 		
