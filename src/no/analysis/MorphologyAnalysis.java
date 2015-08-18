@@ -489,9 +489,9 @@ public class MorphologyAnalysis {
 
 				// check if flipping the profile will help
 
-				double differenceToMedian1 = n.getAngleProfile(collection.getReferencePoint()).differenceToProfile(medianToCompare);
+				double differenceToMedian1 = n.getAngleProfile(collection.getReferencePoint()).absoluteSquareDifference(medianToCompare);
 				n.reverse();
-				double differenceToMedian2 = n.getAngleProfile(collection.getReferencePoint()).differenceToProfile(medianToCompare);
+				double differenceToMedian2 = n.getAngleProfile(collection.getReferencePoint()).absoluteSquareDifference(medianToCompare);
 
 				if(differenceToMedian1<differenceToMedian2){
 					n.reverse(); // put it back if no better

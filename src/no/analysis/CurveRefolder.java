@@ -172,7 +172,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		}
 
 		try{
-			double score = refoldNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
+			double score = refoldNucleus.getAngleProfile("tail").absoluteSquareDifference(targetCurve);
 			
 			logger.log("Refolding curve: initial score: "+(int)score, Logger.INFO);
 
@@ -262,7 +262,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		Profile refoldProfile = refoldNucleus.getAngleProfile("tail");
 //		Profile interpolatedTargetCurve = targetCurve.interpolate(refoldProfile.size());
 
-		double similarityScore = refoldProfile.differenceToProfile(targetCurve);
+		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);
 
 		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
 		double minDistance = medianDistanceBetweenPoints * 0.5;
@@ -276,7 +276,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 			RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
 
-			double score = testNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
+			double score = testNucleus.getAngleProfile("tail").absoluteSquareDifference(targetCurve);
 			// IJ.log("    Internal score: "+(int)score);
 
 			NucleusBorderPoint p = testNucleus.getPoint(i);
@@ -309,7 +309,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 				throw new Exception("Cannot calculate angle profile: "+e);
 			}
 
-			score = testNucleus.getAngleProfile("tail").differenceToProfile(targetCurve);
+			score = testNucleus.getAngleProfile("tail").absoluteSquareDifference(targetCurve);
 			// IJ.log("    Internal score: "+(int)score);
 
 			// do not apply change  if the distance from teh surrounding points changes too much

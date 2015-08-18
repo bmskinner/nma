@@ -90,7 +90,7 @@ public class SegmentFitter {
 		try{
 			
 			// test how well the nucleus profile matches the median
-			double score = testProfile.differenceToProfile(medianProfile);
+			double score = testProfile.absoluteSquareDifference(medianProfile);
 			
 			// get the best fit of segments to the median
 			List<NucleusBorderSegment> newList = this.runFitter(this.testSegments);
@@ -107,25 +107,7 @@ public class SegmentFitter {
 			}
 		}
 	}
-	
-	/**
-	 * Make a copy of the segments in the nucleus, and ensure
-	 * they link up properly
-	 * @param n the nucleus to copy
-	 */
-//	private List<NucleusBorderSegment> copyExistingNucleusSegments(Nucleus n){
-////		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-//		logger.log("Copying nucleus segments");
-//		
-//		List<NucleusBorderSegment> result = NucleusBorderSegment.copy(n.getSegments());
-////		for(NucleusBorderSegment seg : n.getSegments()){
-////			result.add(new NucleusBorderSegment(seg));
-////		}
-////		NucleusBorderSegment.linkSegments(testSegments);
-////		logger.log("Segments copied and linked");
-//		return result;
-//	}
-	
+		
 	/**
 	 * Join the segments within the given nucleus into Frankenstein's Profile. 
 	 * @param n the nucleus to recombine
@@ -396,7 +378,7 @@ public class SegmentFitter {
 		Profile refProfile  = referenceProfile.getSubregion(reference);
 		Profile subjProfile = testProfile.getSubregion(test);
 		
-		return refProfile.differenceToProfile(subjProfile);
+		return refProfile.weightedSquareDifference(subjProfile);
 	}
 	
 	/**

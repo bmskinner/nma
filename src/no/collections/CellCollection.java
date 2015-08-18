@@ -703,7 +703,7 @@ implements Serializable
 		  for(int i=0;i<this.getNucleusCount();i++){
 			  Nucleus n = this.getCell(i).getNucleus();
 			  try{
-				  d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
+				  d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
 			  } catch(Exception e){
 //				  logger.log("Unable to get difference to median profile: "+i+": "+pointType, Logger.ERROR);
 			  }
@@ -729,7 +729,7 @@ implements Serializable
 		  for(int i=0;i<this.getNucleusCount();i++){
 			  Nucleus n = this.getCell(i).getNucleus();
 			  try{
-				  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
+				  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
 				  
 				// use the differences in degrees, rather than square degreees for plotting
 				  double rootDiff = Math.sqrt(diff);
@@ -789,7 +789,7 @@ implements Serializable
     double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
     for(Nucleus p : this.getNuclei()){
       int index = n.getBorderIndex(pointType);
-      double nDifference = p.getAngleProfile().offset(index).differenceToProfile(medianProfile);
+      double nDifference = p.getAngleProfile().offset(index).absoluteSquareDifference(medianProfile);
       if(nDifference<difference){
         difference = nDifference;
         n = p;
