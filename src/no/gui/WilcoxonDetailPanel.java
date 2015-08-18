@@ -96,36 +96,38 @@ public class WilcoxonDetailPanel extends JPanel {
 	 */
 	public void update(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
+		if(!list.isEmpty() && list!=null){
 
-		wilcoxonAreaTable.setModel(NucleusTableDatasetCreator.createWilcoxonAreaTable(list));
-		
-		int columns = wilcoxonAreaTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonAreaTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonPerimTable.setModel(NucleusTableDatasetCreator.createWilcoxonPerimeterTable(list));
-		columns = wilcoxonPerimTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonPerimTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonMinFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list));
-		columns = wilcoxonMinFeretTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonMinFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list));
-		columns = wilcoxonFeretTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonDifferenceTable.setModel(NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list));
-		columns = wilcoxonDifferenceTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonDifferenceTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+			wilcoxonAreaTable.setModel(NucleusTableDatasetCreator.createWilcoxonAreaTable(list));
+
+			int columns = wilcoxonAreaTable.getColumnModel().getColumnCount();
+			for(int i=1;i<columns;i++){
+				wilcoxonAreaTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+			}
+
+			wilcoxonPerimTable.setModel(NucleusTableDatasetCreator.createWilcoxonPerimeterTable(list));
+			columns = wilcoxonPerimTable.getColumnModel().getColumnCount();
+			for(int i=1;i<columns;i++){
+				wilcoxonPerimTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+			}
+
+			wilcoxonMinFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list));
+			columns = wilcoxonMinFeretTable.getColumnModel().getColumnCount();
+			for(int i=1;i<columns;i++){
+				wilcoxonMinFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+			}
+
+			wilcoxonFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list));
+			columns = wilcoxonFeretTable.getColumnModel().getColumnCount();
+			for(int i=1;i<columns;i++){
+				wilcoxonFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+			}
+
+			wilcoxonDifferenceTable.setModel(NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list));
+			columns = wilcoxonDifferenceTable.getColumnModel().getColumnCount();
+			for(int i=1;i<columns;i++){
+				wilcoxonDifferenceTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+			}
 		}
 	}
 	

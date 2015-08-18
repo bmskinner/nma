@@ -1248,7 +1248,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		private String outputFolderName;
 		
 		public NewMorphologyAnalysisAction() {
-			super("Nuclear analysis", "Error in analysis");
+			super("Nucleus detection", "Error in analysis");
 									
 			lblStatusLine.setText("New analysis in progress");
 			
