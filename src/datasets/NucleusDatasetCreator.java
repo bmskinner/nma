@@ -242,6 +242,7 @@ public class NucleusDatasetCreator {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
+		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
 		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
@@ -249,7 +250,7 @@ public class NucleusDatasetCreator {
 		if(normalised){
 			xpoints = profile.getPositions(100);
 		} else {
-			xpoints = profile.getPositions( (int) collection.getMedianArrayLength());
+			xpoints = profile.getPositions( medianProfileLength );
 			
 			if(rightAlign){
 				double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
@@ -281,7 +282,9 @@ public class NucleusDatasetCreator {
 			Profile angles  = null;
 			Profile x		= null;
 			if(normalised){
-				angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate((int)collection.getMedianArrayLength());
+				
+				int length = xpoints.size();
+				angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(length);
 				x = xpoints;
 			} else {
 				angles = n.getAngleProfile(collection.getOrientationPoint());
@@ -292,7 +295,18 @@ public class NucleusDatasetCreator {
 				}
 			}
 			double[][] ndata = { x.asArray(), angles.asArray() };
+			try{
 			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
+			} catch(Exception e){
+				IJ.log("Error forming data series:"+e.getMessage());
+				IJ.log("Angles:"+angles.size());
+				IJ.log("xpoints:"+xpoints.size());
+				IJ.log("x:"+x.size());
+				
+				for(StackTraceElement e1 : e.getStackTrace()){
+					IJ.log(e1.toString());
+				}
+			}
 		}
 		return ds;
 	}
@@ -814,25 +828,52 @@ public class NucleusDatasetCreator {
 	 * Get the outline for a specific nucleus in a dataset. Sets the position
 	 * to the original coordinates in the image 
 	 * @param cell
+	 * @param segmented add the segments?
 	 * @return
 	 */
-	public static XYDataset createNucleusOutline(Cell cell){
+	public static XYDataset createNucleusOutline(Cell cell, boolean segmented){
 		DefaultXYDataset ds = new DefaultXYDataset();
-		
+
 		Nucleus nucleus = cell.getNucleus();
-		
-		double[] xpoints = new double[nucleus.getOriginalBorderList().size()];
-		double[] ypoints = new double[nucleus.getOriginalBorderList().size()];
-		
-		int i =0;
-		for(XYPoint p : nucleus.getOriginalBorderList()){
-			xpoints[i] = p.getX();
-			ypoints[i] = p.getY();
-			i++;
+
+		if(segmented){
+
+			// add the segments
+			List<NucleusBorderSegment> segmentList = nucleus.getAngleProfile().getSegments();
+			if(!segmentList.isEmpty()){ // only draw if there are segments
+				for(int i=0;i<segmentList.size();i++){
+
+					NucleusBorderSegment seg = nucleus.getAngleProfile().getSegment("Seg_"+i);
+
+					double[] xpoints = new double[seg.length()+1];
+					double[] ypoints = new double[seg.length()+1];
+					for(int j=0; j<=seg.length();j++){
+						int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getLength());
+						NucleusBorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
+						xpoints[j] = p.getX();
+						ypoints[j] = p.getY();
+					}
+
+					double[][] data = { xpoints, ypoints };
+					ds.addSeries("Seg_"+i, data);
+				}
+			}
+
+		} else {
+			double[] xpoints = new double[nucleus.getOriginalBorderList().size()];
+			double[] ypoints = new double[nucleus.getOriginalBorderList().size()];
+
+			int i =0;
+			for(XYPoint p : nucleus.getOriginalBorderList()){
+				xpoints[i] = p.getX();
+				ypoints[i] = p.getY();
+				i++;
+			}
+
+			double[][] data = { xpoints, ypoints };
+			ds.addSeries("Nucleus Border", data);
+
 		}
-		
-		double[][] data = { xpoints, ypoints };
-		ds.addSeries("Nucleus Border", data);
 		return ds;
 	}
 	
@@ -842,33 +883,33 @@ public class NucleusDatasetCreator {
 	 * @param cell the cell to draw
 	 * @return
 	 */
-	public static XYDataset createSegmentedNucleusOutline(Cell cell){
-		DefaultXYDataset ds = new DefaultXYDataset();
-		
-		Nucleus nucleus = cell.getNucleus();
-		
-		// add the segments
-		List<NucleusBorderSegment> segmentList = nucleus.getAngleProfile().getSegments();
-		if(!segmentList.isEmpty()){ // only draw if there are segments
-			for(int i=0;i<segmentList.size();i++){
-
-				NucleusBorderSegment seg = nucleus.getAngleProfile().getSegment("Seg_"+i);
-				
-				double[] xpoints = new double[seg.length()+1];
-				double[] ypoints = new double[seg.length()+1];
-				for(int j=0; j<=seg.length();j++){
-					int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getLength());
-					NucleusBorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
-					xpoints[j] = p.getX();
-					ypoints[j] = p.getY();
-				}
-
-				double[][] data = { xpoints, ypoints };
-				ds.addSeries("Seg_"+i, data);
-			}
-		}
-		return ds;
-	}
+//	public static XYDataset createSegmentedNucleusOutline(Cell cell){
+//		DefaultXYDataset ds = new DefaultXYDataset();
+//		
+//		Nucleus nucleus = cell.getNucleus();
+//		
+//		// add the segments
+//		List<NucleusBorderSegment> segmentList = nucleus.getAngleProfile().getSegments();
+//		if(!segmentList.isEmpty()){ // only draw if there are segments
+//			for(int i=0;i<segmentList.size();i++){
+//
+//				NucleusBorderSegment seg = nucleus.getAngleProfile().getSegment("Seg_"+i);
+//				
+//				double[] xpoints = new double[seg.length()+1];
+//				double[] ypoints = new double[seg.length()+1];
+//				for(int j=0; j<=seg.length();j++){
+//					int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getLength());
+//					NucleusBorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
+//					xpoints[j] = p.getX();
+//					ypoints[j] = p.getY();
+//				}
+//
+//				double[][] data = { xpoints, ypoints };
+//				ds.addSeries("Seg_"+i, data);
+//			}
+//		}
+//		return ds;
+//	}
 	
 	/**
 	 * Create a dataset for the signal groups in the cell. Each signalGroup

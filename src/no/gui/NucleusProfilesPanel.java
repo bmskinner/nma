@@ -212,7 +212,11 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 			}
 			
 		} catch (Exception e) {
-			IJ.log("Error in plotting profile");
+			IJ.log("Error in plotting profile: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				IJ.log(e1.toString());
+			}
+			
 		} 
 	}
 	

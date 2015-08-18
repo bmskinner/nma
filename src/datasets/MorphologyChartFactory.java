@@ -362,7 +362,7 @@ public class MorphologyChartFactory {
 
 
 		// get the nucleus dataset
-		XYDataset nucleus = NucleusDatasetCreator.createSegmentedNucleusOutline(cell);
+		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell, true);
 		hash.put(hash.size(), "Nucleus"); // add to the first free entry
 		datasetHash.put(datasetHash.size(), nucleus);
 

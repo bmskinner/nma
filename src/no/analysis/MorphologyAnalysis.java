@@ -117,30 +117,35 @@ public class MorphologyAnalysis {
 			
 			// use the same array length as the source collection to avoid segment slippage
 			int profileLength = sourceCollection.getProfileCollection().getProfile(referencePoint).size();
+			
+			// get the empty profile collection from the new CellCollection
 			ProfileCollection pc = collection.getProfileCollection();
+			
+			// make an aggregate from the nuclei. A new median profile must necessarily result.
+			// By default, the aggregates are created from the reference point
 			pc.createProfileAggregate(collection, profileLength);
 			
-
+			// copy the offset keys from the source collection
 			ProfileCollection sc = sourceCollection.getProfileCollection();
 			
-			// copy the offset keys from the source collection
 			for(String offsetKey : sc.getOffsetKeys()){
-				pc.addOffset(offsetKey, sc.getOffset(offsetKey));
+				int offset = sc.getOffset(offsetKey);
+				pc.addOffset(offsetKey, offset);
+				logger.log("Setting "+offsetKey+" to "+offset);
 			}
 			
 			
 			// What happens when the array length is greater in the source collection? 
 			// Segments are added that no longer have an index
 			// We need to scale the segments to the array length of the new collection
-//			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
-//			pc.addSegments(orientationPoint, sc.getSegments(orientationPoint));
+			pc.addSegments(sc.getSegments(referencePoint));
+
 			
-			// At hthis point the collection has only a regular profile collection.
-			// no frankenprofile has been copied.
-			// Create a new frankenprofile
-			// copied from segmentation
+			// At this point the collection has only a regular profile collection.
+			// No Frankenprofile has been copied.
+
 			reviseSegments(collection, referencePoint);	
-//			applySegmentsToOtherPointTypes(collection, referencePoint);
+
 
 
 		} catch (Exception e) {

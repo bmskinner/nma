@@ -477,13 +477,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	
 						updatePanels(list);
 						populationsPanel.update();
-						populationsPanel.selectDataset(dataset);
+//						populationsPanel.selectDataset(dataset);
 						
 					} else {
 						log("Unable to open dataset version: "+ dataset.getVersion());
 					}
 				} catch (Exception e) {
-					log("Error");
 					log("Error opening dataset: "+e.getMessage());
 					for(StackTraceElement el : e.getStackTrace()){
 						IJ.log(el.toString());
@@ -1176,16 +1175,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			Map<String, Object> options = clusterSetup.getOptions();
 
 			if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-//				
-//				progressBar = new JProgressBar(0, 100);
-//				progressBar.setString("Cluster analysis in progress");
-//				progressBar.setIndeterminate(true);
-//				progressBar.setStringPainted(true);
-//				
-//				logPanel.addProgressBar(progressBar);
-//				contentPane.revalidate();
-//				contentPane.repaint();
-
 
 				clusterer = new NucleusClusterer(  (Integer) options.get("type"), d.getCollection() );
 				clusterer.setClusteringOptions(options);

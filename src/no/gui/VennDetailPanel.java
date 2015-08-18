@@ -26,11 +26,10 @@ public class VennDetailPanel extends JPanel {
 		
 		this.setLayout(new BorderLayout());
 		
-		vennTable = new JTable();
+		vennTable = new JTable(NucleusTableDatasetCreator.createVennTable(null));
 		this.add(vennTable, BorderLayout.CENTER);
 		vennTable.setEnabled(false);
 		this.add(vennTable.getTableHeader(), BorderLayout.NORTH);
-		vennTable.setModel(NucleusTableDatasetCreator.createVennTable(null));
 
 	}
 	
@@ -42,8 +41,7 @@ public class VennDetailPanel extends JPanel {
 		// format the numbers and make into a tablemodel
 		
 		if(!list.isEmpty() && list!=null){
-			TableModel model = NucleusTableDatasetCreator.createVennTable(list);
-			vennTable.setModel(model);
+			vennTable.setModel( NucleusTableDatasetCreator.createVennTable(list));
 			int columns = vennTable.getColumnModel().getColumnCount();
 
 			for(int i=1;i<columns;i++){
