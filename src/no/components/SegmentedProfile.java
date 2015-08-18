@@ -1,5 +1,7 @@
 package no.components;
 
+import ij.IJ;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -189,11 +191,34 @@ public class SegmentedProfile extends Profile implements Serializable {
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
 		
-		return segment.update(startIndex, endIndex);
+		if( segment.update(startIndex, endIndex)){
+			return true;
+		} else{
+//			
+			if(testLinked()){
+				return false;
+			} else {
+				IJ.log("Error updating SegmentedProfile: segments unlinked: "+segment.getLastFailReason());
+				IJ.log(segment.toString());
+				return false;
+			}
+		}
 		
 		// how to test wrapping
-		
-//		return false;
+	}
+	
+	/**
+	 * Test if the all the segments are currently linked
+	 * @return
+	 */
+	private boolean testLinked(){
+		boolean result = true;
+		for(NucleusBorderSegment seg : this.segments){
+			if(!seg.hasNextSegment()  || !seg.hasPrevSegment()){
+				result = false;
+			}
+		}
+		return result;
 	}
 	
 	/**

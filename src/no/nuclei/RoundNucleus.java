@@ -774,19 +774,6 @@ public class RoundNucleus
 		return orthgonalPoint;
 	}
 	
-	// given a point ,find the String tag of the segment it belongs to 
-//	public String getSegmentOfPoint(int i){
-//		String segment = "";
-//		for(String s : this.getSegmentTags()){
-//			
-//			NucleusBorderSegment b = this.getSegmentTag(s);
-//			if(b.contains(i)){
-//				segment = s;
-//			}
-//		}
-//		return segment;
-//	}
-
 	/*
 		This will find the point in a list that is closest to any local maximum
 		in the border profile, wherever that maximum may be
@@ -1134,85 +1121,9 @@ public class RoundNucleus
 		return this.borderTags.keySet();
 	}
 
-//	public NucleusBorderSegment getSegmentTag(String s){
-//		if(s==null){
-//			throw new IllegalArgumentException("Requested tag is null");
-//		}
-//		if(!this.segmentTags.containsKey(s)){
-//			throw new IllegalArgumentException("Requested tag is not present: "+s);
-//		}
-//		return new NucleusBorderSegment(this.segmentList.get(this.segmentTags.get(s)));
-//	}
-
 	public void addBorderTag(String name, int i){
 		this.borderTags.put(name, i);
 	}
-//
-//	public void addSegmentTag(String name, int i){
-//		this.segmentTags.put(name, i);
-//	}
-	
-//	public void addSegment(NucleusBorderSegment n){
-//		this.segmentList.add(n);
-//		if(n.getSegmentType()!=null){
-//			this.addSegmentTag(n.getSegmentType(), this.segmentList.indexOf(n));
-//		}
-//	}
-
-//	public Map<String, Integer> getSegmentMap( ){
-//		return this.segmentTags;
-//	}
-//	
-//	public Set<String> getSegmentTags(){
-//		return this.segmentTags.keySet();
-//	}
-//	
-//	public NucleusBorderSegment getSegment(int i){
-//		return this.segmentList.get(i);
-//	}
-//	
-//	public List<NucleusBorderSegment> getSegments(){
-//		return this.segmentList;
-//	}
-	
-	/**
-	 * Create a list of segments offset to a reference point
-	 * @param pointType the border tag to offset against
-	 */
-//	public List<NucleusBorderSegment> getSegments(String pointType){
-//		if(pointType==null){
-//			throw new IllegalArgumentException("String or offset is null or empty");
-//		}
-//		
-//		if(!this.borderTags.containsKey(pointType)){
-//			throw new IllegalArgumentException("Point type does not exist in nucleus: "+pointType);
-//		}
-//		List<NucleusBorderSegment> referenceList =  getSegments();
-//		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-//		
-//		int offset = this.getBorderIndex(pointType); // this is our new zero
-//		for(NucleusBorderSegment s : referenceList){
-//			
-//			int newStart = Utils.wrapIndex( s.getStartIndex()- offset , this.getLength());
-//			int newEnd = Utils.wrapIndex( s.getEndIndex()- offset , this.getLength());
-//			
-//			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, this.getLength());
-//			c.setSegmentType(s.getSegmentType());
-//			
-//			result.add(c);
-//		}
-//		
-//		return result;
-//	}
-	
-//	public void setSegments(List<NucleusBorderSegment> segments){
-//		this.segmentList = segments;
-//	}
-	
-//	public void clearSegments(){
-//		this.segmentList = new ArrayList<NucleusBorderSegment>(0);
-//		this.segmentTags = new HashMap<String, Integer>(0);
-//	}
 
 	private void calculateDistanceProfile(){
 

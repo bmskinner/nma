@@ -109,31 +109,7 @@ public class ProfileCollection implements Serializable {
 		// this must be negative offset for segments
 		int offset = -getOffset(s);
 
-		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-		NucleusBorderSegment prev = null;
-		for(NucleusBorderSegment seg : segments){
-			
-			int newStart 	= Utils.wrapIndex( seg.getStartIndex()+ offset , seg.getTotalLength());
-			int newEnd 		= Utils.wrapIndex( seg.getEndIndex()+ offset , seg.getTotalLength());
-			
-			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, seg.getTotalLength());
-			c.setName(seg.getName());
-			
-			if(prev!=null){
-				c.setPrevSegment(prev);
-				prev.setNextSegment(c);
-			}
-			prev = c;
-			
-			result.add(c);
-		}
-		NucleusBorderSegment.linkSegments(result);
-		
-//		NucleusBorderSegment first = result.get(0);
-//		first.update(prev.getEndIndex(), first.getEndIndex());
-//		
-//		first.setPrevSegment(prev);
-//		prev.setNextSegment(first);
+		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(segments, offset);
 		return result;
 	}
 	
@@ -233,7 +209,7 @@ public class ProfileCollection implements Serializable {
 		}
 		aggregate = new ProfileAggregate(length);
 		for(Profile profile : nucleusProfileList){
-			aggregate.addValues(profile.interpolate(length));
+			aggregate.addValues(profile);
 		}
 		
 	}

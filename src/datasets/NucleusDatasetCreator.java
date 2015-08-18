@@ -501,28 +501,32 @@ public class NucleusDatasetCreator {
 		
 	public static XYDataset createFrankenSegmentDataset(CellCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
-		Profile profile = collection.getFrankenCollection().getProfile(collection.getOrientationPoint());
+		
+		String pointType = collection.getOrientationPoint();
+		Profile profile = collection.getFrankenCollection().getProfile(pointType);
 		Profile xpoints = profile.getPositions(100);
 		
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(pointType);
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
-		Profile profile25 = collection.getFrankenCollection().getProfile(collection.getOrientationPoint()+"25");
-		Profile profile75 = collection.getFrankenCollection().getProfile(collection.getOrientationPoint()+"75");
+		Profile profile25 = collection.getFrankenCollection().getProfile(pointType+"25");
+		Profile profile75 = collection.getFrankenCollection().getProfile(pointType+"75");
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
 		ds.addSeries("Q75", data75);
 
 		// add the individual nuclei
-		for(Nucleus n : collection.getNuclei()){
-			Profile angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(profile.size());
+		int profileCount = 0;
+		for(Profile angles : collection.getFrankenCollection().getNucleusProfiles(pointType)){
+
 			double[][] ndata = { xpoints.asArray(), angles.asArray() };
-			ds.addSeries("Nucleus_"+n.getImageName()+"-"+n.getNucleusNumber(), ndata);
+			ds.addSeries("Nucleus_"+profileCount, ndata);
+			profileCount++;
 		}
 		return ds;
 	}

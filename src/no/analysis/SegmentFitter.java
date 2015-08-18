@@ -101,7 +101,7 @@ public class SegmentFitter {
 	 * @param n the nucleus to recombine
 	 * @return a profile
 	 */
-	public Profile recombine(Nucleus n){
+	public Profile recombine(Nucleus n, String pointType){
 		if(n==null){
 			logger.log("Recombined nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
@@ -110,7 +110,7 @@ public class SegmentFitter {
 			logger.log("Nucleus has no segments", Logger.ERROR);
 			throw new IllegalArgumentException("Nucleus has no segments");
 		}
-		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile());
+		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(pointType));
 		Profile frankenProfile = recombineSegments(nucleusProfile);
 		
 		return frankenProfile;
@@ -166,27 +166,43 @@ public class SegmentFitter {
 		// profile at the end
 		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
 
-		// go through each segment
-		for(NucleusBorderSegment testSeg : profile.getSegments()){
-			
-			String name = testSeg.getName();
-			
-			// The relevant segment from the median profile
-			NucleusBorderSegment 	medianSegment = this.medianProfile.getSegment(name);
-
-			// get the region within the segment as a new profile
-			Profile testSegProfile = profile.getSubregion(testSeg);
-
-			// interpolate the test segments to the length of the median segments
-			Profile revisedProfile = testSegProfile.interpolate(medianSegment.length());
-			
-			logger.log("\tAdjusted segment "+name+":\t"+testSeg.length()+" -> "+medianSegment.length(), Logger.DEBUG);
-			
-			// Put the new profile into the list
+		// The reference point is between segment 0 and 1 in rodent sperm
+		// This may need to change if it does not hold for other cells.
+		// The goal is to start the frankenprofile from the reference point
+		for(int i = 1; i<medianProfile.getSegmentCount();i++){
+			String name = "Seg_"+i;
+			Profile revisedProfile = interpolateSegment(name, profile);
 			finalSegmentProfiles.add(revisedProfile);
 		}
+		String name = "Seg_0";
+		Profile revisedProfile = interpolateSegment(name, profile);
+		finalSegmentProfiles.add(revisedProfile);
+
 		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
 		return mergedProfile;
+	}
+	
+	/**
+	 * The interpolation step of frankenprofile creation
+	 * @param name the segment to interpolate
+	 * @param profile the profile to take it from
+	 * @return the interpolated profile
+	 */
+	private Profile interpolateSegment(String name, SegmentedProfile profile){
+
+		NucleusBorderSegment testSeg = profile.getSegment(name);
+		// The relevant segment from the median profile
+		NucleusBorderSegment 	medianSegment = this.medianProfile.getSegment(name);
+
+		// get the region within the segment as a new profile
+		Profile testSegProfile = profile.getSubregion(testSeg);
+
+		// interpolate the test segments to the length of the median segments
+		Profile revisedProfile = testSegProfile.interpolate(medianSegment.length());
+
+		logger.log("\tAdjusted segment "+name+":\t"+testSeg.getStartIndex()+"-"+testSeg.getEndIndex()+"\t"+testSeg.length()+" -> "+medianSegment.length(), Logger.DEBUG);
+
+		return revisedProfile;
 	}
 	
 	/**
