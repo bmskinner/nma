@@ -2,7 +2,9 @@ package no.components;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class provides consistency and error checking for segmnentation
@@ -13,8 +15,9 @@ public class SegmentedProfile extends Profile implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
-
+	// the segments
+	protected List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+	
 	/**
 	 * Construct using a regular profile and a list of border segments
 	 * @param p the profile
@@ -65,6 +68,29 @@ public class SegmentedProfile extends Profile implements Serializable {
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Replace the segments in the profile with the given list
+	 * @param segments
+	 */
+	public void setSegments(List<NucleusBorderSegment> segments){
+		if(segments==null || segments.isEmpty()){
+			throw new IllegalArgumentException("Segment lsit is null or empty");
+		}
+		
+		if(segments.get(0).getTotalLength()!=this.size()){
+			throw new IllegalArgumentException("Segment lsit is from a different total length");
+		}
+		
+		this.segments = NucleusBorderSegment.copy(segments);
+	}
+	
+	/**
+	 * Remove the segments from this profile
+	 */
+	public void clearSegments(){
+		this.segments = new ArrayList<NucleusBorderSegment>(0);
 	}
 	
 	/**
@@ -126,8 +152,36 @@ public class SegmentedProfile extends Profile implements Serializable {
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
 		
+		segment.update(startIndex, endIndex);
+		
 		// how to test wrapping
 		
 		return false;
+	}
+	
+	/**
+	 * Adjust the start position of the given segment by the given amount.
+	 * @param segment the segment to apply the change to
+	 * @param amount the number of indexes to move
+	 * @return did the update succeed
+	 */
+	public boolean adjustSegmentStart(NucleusBorderSegment segment, int amount){
+		if(!this.contains(segment)){
+			throw new IllegalArgumentException("Segment is not part of this profile");
+		}
+		return this.update(segment, segment.getStartIndex()+amount, segment.getEndIndex());
+	}
+	
+	/**
+	 * Adjust the end position of the given segment by the given amount.
+	 * @param segment the segment to apply the change to
+	 * @param amount the number of indexes to move
+	 * @return did the update succeed
+	 */
+	public boolean adjustSegmentEnd(NucleusBorderSegment segment, int amount){
+		if(!this.contains(segment)){
+			throw new IllegalArgumentException("Segment is not part of this profile");
+		}
+		return this.update(segment, segment.getStartIndex(), segment.getEndIndex()+amount);
 	}
 }

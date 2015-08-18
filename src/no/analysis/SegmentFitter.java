@@ -7,6 +7,7 @@ import java.util.List;
 import utility.Logger;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.SegmentedProfile;
 import no.nuclei.Nucleus;
 
 /**
@@ -59,6 +60,23 @@ public class SegmentFitter {
 		for(NucleusBorderSegment seg : medianSegments){
 			this.medianSegments.add(new NucleusBorderSegment(seg));
 		}
+		logger = new Logger(logFile, "SegmentFitter");
+	}
+	
+	/**
+	 * Construct with a median profile containing segments. The originals will not be modified
+	 * @param medianProfile the profile
+	 * @param logFile the file for logging status
+	 */
+	public SegmentFitter(SegmentedProfile medianProfile, File logFile){
+		if(medianProfile==null){
+			logger.log("Segmented profile is null", Logger.ERROR);
+			throw new IllegalArgumentException("Median profile is null");
+		}
+		
+		this.medianProfile  = new SegmentedProfile(medianProfile);
+		this.medianSegments = medianProfile.getSegments();
+		
 		logger = new Logger(logFile, "SegmentFitter");
 	}
 	
