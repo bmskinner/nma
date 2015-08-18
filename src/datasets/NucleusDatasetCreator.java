@@ -641,6 +641,12 @@ public class NucleusDatasetCreator {
 		return dataset;
 	}
 	
+	/**
+	 * Get the variability of each segment in terms of length difference to the median
+	 * profile segment
+	 * @param datasets
+	 * @return
+	 */
 	public static BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<AnalysisDataset> datasets) {
 
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
@@ -649,7 +655,7 @@ public class NucleusDatasetCreator {
 
 			CellCollection collection = datasets.get(i).getCollection();
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getReferencePoint());
+			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
 			
 			for(NucleusBorderSegment medianSeg : segments){
 				
@@ -664,7 +670,7 @@ public class NucleusDatasetCreator {
 					list.add(differenceToMedian);
 				}
 				
-				dataset.add(list, medianSeg.getSegmentType(), "Segment length: "+medianSeg.getSegmentType());
+				dataset.add(list, medianSeg.getSegmentType(), medianSeg.getSegmentType());
 			}
 		}
 		return dataset;

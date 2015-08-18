@@ -12,6 +12,7 @@ import no.gui.ColourSelecter;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
@@ -313,6 +314,8 @@ public class MorphologyChartFactory {
 							renderer.setSeriesPaint(i, color);
 			}
 			renderer.setMeanVisible(false);
+			renderer.setItemMargin(0.02);
+			renderer.setMaximumBarWidth(0.08);
 		}
 		
 		return boxplot;
