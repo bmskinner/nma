@@ -101,7 +101,7 @@ public class SegmentFitter {
 	 * @param n the nucleus to recombine
 	 * @return a profile
 	 */
-	public SegmentedProfile recombine(Nucleus n){
+	public Profile recombine(Nucleus n){
 		if(n==null){
 			logger.log("Recombined nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
@@ -110,9 +110,10 @@ public class SegmentFitter {
 			logger.log("Nucleus has no segments", Logger.ERROR);
 			throw new IllegalArgumentException("Nucleus has no segments");
 		}
-		SegmentedProfile testMedian = new SegmentedProfile(n.getAngleProfile());
+		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile());
+		Profile frankenProfile = recombineSegments(nucleusProfile);
 		
-		return new SegmentedProfile(recombineSegments(testMedian));
+		return frankenProfile;
 	}
 	
 	/**
@@ -153,9 +154,9 @@ public class SegmentFitter {
 	 * @param testMedian the median profile
 	 * @return a profile constructed from the stretched segments
 	 */
-	private SegmentedProfile recombineSegments(SegmentedProfile median){
+	private Profile recombineSegments(SegmentedProfile profile){
 		
-		if(median==null){
+		if(profile==null){
 			throw new IllegalArgumentException("Test profile is null in recombiner");
 		}
 		logger.log("Recombining segments to FrankenProfile", Logger.DEBUG);
@@ -166,7 +167,7 @@ public class SegmentFitter {
 		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
 
 		// go through each segment
-		for(NucleusBorderSegment testSeg : median.getSegments()){
+		for(NucleusBorderSegment testSeg : profile.getSegments()){
 			
 			String name = testSeg.getName();
 			
@@ -174,16 +175,18 @@ public class SegmentFitter {
 			NucleusBorderSegment 	medianSegment = this.medianProfile.getSegment(name);
 
 			// get the region within the segment as a new profile
-			Profile testSegProfile = median.getSubregion(testSeg);
+			Profile testSegProfile = profile.getSubregion(testSeg);
 
 			// interpolate the test segments to the length of the median segments
 			Profile revisedProfile = testSegProfile.interpolate(medianSegment.length());
 			
+			logger.log("\tAdjusted segment "+name+":\t"+testSeg.length()+" -> "+medianSegment.length(), Logger.DEBUG);
+			
 			// Put the new profile into the list
 			finalSegmentProfiles.add(revisedProfile);
 		}
-		Profile merged = new Profile( Profile.merge(finalSegmentProfiles));
-		return new SegmentedProfile(merged);
+		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
+		return mergedProfile;
 	}
 	
 	/**
@@ -214,12 +217,12 @@ public class SegmentFitter {
 			NucleusBorderSegment segment = tempProfile.getSegment(name);
 			
 			// get the initial score for the segment and log it
-			double score = compareSegmentationPatterns(medianProfile, tempProfile);
-			logger.log("Segment\t"+segment.getName()
-					+"\tLength "+segment.length()
-					+"\t"+segment.getStartIndex()
-					+"-"+segment.getEndIndex() );
-			logger.log("\tInitial score: "+score, Logger.DEBUG);
+//			double score = compareSegmentationPatterns(medianProfile, tempProfile);
+//			logger.log("Segment\t"+segment.getName()
+//					+"\tLength "+segment.length()
+//					+"\t"+segment.getStartIndex()
+//					+"-"+segment.getEndIndex() );
+//			logger.log("\tInitial score: "+score, Logger.DEBUG);
 			
 			// find the best length and offset change
 			// apply them to the profile
@@ -229,9 +232,9 @@ public class SegmentFitter {
 			result 	 = new SegmentedProfile(tempProfile);				
 		}
 		
-		for(String name : result.getSegmentNames()){
-			logger.log("Fitted segment: "+result.getSegment(name).toString(), Logger.DEBUG);
-		}
+//		for(String name : result.getSegmentNames()){
+////			logger.log("Fitted segment: "+result.getSegment(name).toString(), Logger.DEBUG);
+//		}
 		
 		
 		return result;
@@ -266,7 +269,7 @@ public class SegmentFitter {
 		// we can't go beyond the end of the next segment anyway, so use that as the cutoff
 		// how far from current end to next segment end?
 		int maximumChange = segment.testLength(segment.getEndIndex(), segment.nextSegment().getEndIndex());		
-		logger.log("\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
+//		logger.log("\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
 		
 		
 		// Try all the possible values in the valid range of changes
@@ -285,7 +288,7 @@ public class SegmentFitter {
 					if(score < bestScore){
 						bestScore 	= score;
 						result = new SegmentedProfile(testProfile);
-						logger.log("\tNew best score:\t"+score+"\tLengthen:\t"+changeValue, Logger.DEBUG);
+//						logger.log("\tNew best score:\t"+score+"\tLengthen:\t"+changeValue, Logger.DEBUG);
 					}
 				}catch(IllegalArgumentException e){
 					logger.log(e.getMessage());
@@ -301,7 +304,7 @@ public class SegmentFitter {
 				if(score < bestScore){
 					bestScore = score;
 					result = new SegmentedProfile(testProfile);
-					logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
+//					logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
 				}
 										
 			} else {

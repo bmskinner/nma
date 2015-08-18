@@ -222,6 +222,24 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
+	 * This allows the generation of a frankenMedian from stored FrankenProfiles.
+	 * Rather than using the real nucleus profile data, it calls the list of 
+	 * recombined profiles previously generated. the profiles should also all start
+	 * from the reference point.
+	 */
+	public void createProfileAggregateFromInternalProfiles(int length){
+		if(this.nucleusProfileList==null || this.nucleusProfileList.isEmpty()){
+			throw new IllegalArgumentException("The internal profile list is empty");
+		}
+		aggregate = new ProfileAggregate(length);
+		for(Profile profile : nucleusProfileList){
+			aggregate.addValues(profile.interpolate(length));
+		}
+		
+	}
+	
+	
+	/**
 	 * Get the points associated with offsets currently present
 	 * @return a string with the points
 	 */

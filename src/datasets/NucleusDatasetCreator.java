@@ -22,6 +22,7 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.ProfileCollection;
 import no.components.SegmentedProfile;
 import no.components.ShellResult;
 import no.components.XYPoint;
@@ -358,12 +359,61 @@ public class NucleusDatasetCreator {
 			CellCollection collection = dataset.getCollection();
 			Profile profile = collection.getFrankenCollection().getProfile(collection.getOrientationPoint());
 			Profile xpoints = profile.getPositions(100);
-//			xpoints = xpoints.add(0.5);
+
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			i++;
 		}
 		return ds;
+	}
+	
+	/**
+	 * Create an IQR series from a profilecollection
+	 * @param pc the ProfileCollection
+	 * @param point the reference or orientation point 
+	 * @param series the index of the series
+	 * @param length the maximum length of the dataset
+	 * @param medianLength the median length of the collection profile
+	 * @param normalised should the data be normalised to 100
+	 * @param rightAlign should the data be aligned to the right
+	 * @return a new series
+	 */
+	private static XYSeriesCollection addMultiProfileIQRSeries(ProfileCollection pc, String point, int series, double length, double medianLength, boolean normalised, boolean rightAlign){
+		Profile profile = pc.getProfile(point);
+		
+		Profile xpoints = null;
+		if(normalised){
+			xpoints = profile.getPositions(100);
+			
+		} else {
+			xpoints = profile.getPositions( (int) medianLength );
+		}
+		
+		if(rightAlign){
+			double differenceToMaxLength = length - medianLength;
+			xpoints = xpoints.add(differenceToMaxLength);
+		}
+
+		// rendering order will be first on top
+
+		// make the IQR
+		Profile profile25 = pc.getProfile(point+"25");
+		Profile profile75 = pc.getProfile(point+"75");
+		
+		XYSeries series25 = new XYSeries("Q25_"+series);
+		for(int j=0; j<profile25.size();j++){
+			series25.add(xpoints.get(j), profile25.get(j));
+		}
+		
+		XYSeries series75 = new XYSeries("Q75_"+series);
+		for(int j=0; j<profile75.size();j++){
+			series75.add(xpoints.get(j), profile75.get(j));
+		}
+		
+		XYSeriesCollection xsc = new XYSeriesCollection();
+	    xsc.addSeries(series25);
+	    xsc.addSeries(series75);
+	    return xsc;
 	}
 	
 	
@@ -383,74 +433,40 @@ public class NucleusDatasetCreator {
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
 			AnalysisDataset dataset = list.get(i);
 			CellCollection collection = dataset.getCollection();
-			Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
 			
-			Profile xpoints = null;
-			if(normalised){
-				xpoints = profile.getPositions(100);
-				
-			} else {
-				xpoints = profile.getPositions( (int) collection.getMedianArrayLength());
-			}
-			
-			if(rightAlign){
-				double differenceToMaxLength = length - dataset.getCollection().getMedianArrayLength();
-				xpoints = xpoints.add(differenceToMaxLength);
-			}
-
-			// rendering order will be first on top
-
-			// make the IQR
-			Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
-			Profile profile75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
-			
-			XYSeries series25 = new XYSeries("Q25_"+i);
-			for(int j=0; j<profile25.size();j++){
-				series25.add(xpoints.get(j), profile25.get(j));
-			}
-			
-			XYSeries series75 = new XYSeries("Q75_"+i);
-			for(int j=0; j<profile75.size();j++){
-				series75.add(xpoints.get(j), profile75.get(j));
-			}
-			
-			XYSeriesCollection xsc = new XYSeriesCollection();
-		    xsc.addSeries(series25);
-		    xsc.addSeries(series75);
+			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(), 
+										collection.getOrientationPoint(),
+										i,
+										length,
+										collection.getMedianArrayLength(),
+										normalised,
+										rightAlign);
 		    result.add(xsc);
 		}
 		return result;
 	}
 	
 	
+	/**
+	 * Get the IQR for the frankenmedian in a list of datasets
+	 * @param list
+	 * @return
+	 */
 	public static List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list){
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 
 		int i=0;
 		for(AnalysisDataset dataset : list){
+			
 			CellCollection collection = dataset.getCollection();
-			Profile profile = collection.getFrankenCollection().getProfile(collection.getOrientationPoint());
-			Profile xpoints = profile.getPositions(100);
-
-			// rendering order will be first on top
-
-			// make the IQR
-			Profile profile25 = collection.getFrankenCollection().getProfile(collection.getOrientationPoint()+"25");
-			Profile profile75 = collection.getFrankenCollection().getProfile(collection.getOrientationPoint()+"75");
 			
-			XYSeries series25 = new XYSeries("Q25_"+i);
-			for(int j=0; j<profile25.size();j++){
-				series25.add(xpoints.get(j), profile25.get(j));
-			}
-			
-			XYSeries series75 = new XYSeries("Q75_"+i);
-			for(int j=0; j<profile75.size();j++){
-				series75.add(xpoints.get(j), profile75.get(j));
-			}
-			
-			XYSeriesCollection xsc = new XYSeriesCollection();
-		    xsc.addSeries(series25);
-		    xsc.addSeries(series75);
+			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getFrankenCollection(), 
+					collection.getOrientationPoint(),
+					i,
+					100,
+					100,
+					true,
+					false);
 		    result.add(xsc);
 		    i++;
 		}
@@ -485,7 +501,7 @@ public class NucleusDatasetCreator {
 		
 	public static XYDataset createFrankenSegmentDataset(CellCollection collection){
 		DefaultXYDataset ds = new DefaultXYDataset();
-		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+		Profile profile = collection.getFrankenCollection().getProfile(collection.getOrientationPoint());
 		Profile xpoints = profile.getPositions(100);
 		
 		// rendering order will be first on top
@@ -495,8 +511,8 @@ public class NucleusDatasetCreator {
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
-		Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
-		Profile profile75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
+		Profile profile25 = collection.getFrankenCollection().getProfile(collection.getOrientationPoint()+"25");
+		Profile profile75 = collection.getFrankenCollection().getProfile(collection.getOrientationPoint()+"75");
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
