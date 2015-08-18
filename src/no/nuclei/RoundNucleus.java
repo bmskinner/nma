@@ -96,6 +96,8 @@ public class RoundNucleus
 	protected File nucleusFolder; // the folder to store nucleus information
 	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date
 	
+	protected double scale; // allow conversion between pixels and SI units. The length of a pixel in metres
+	
 	protected SignalCollection signalCollection = new SignalCollection();
 
 	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
@@ -334,6 +336,14 @@ public class RoundNucleus
 
 	public int getLength(){
 		return this.borderList.size();
+	}
+	
+	public double getScale(){
+		return this.scale;
+	}
+	
+	public void setScale(double scale){
+		this.scale = scale;
 	}
 
 	public NucleusBorderPoint getBorderPoint(int i){

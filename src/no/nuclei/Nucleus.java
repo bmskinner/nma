@@ -63,7 +63,6 @@ public interface Nucleus {
 
 	public NucleusBorderPoint getPoint(int i);
 
-	//	public FloatPolygon getPolygon();
 
 	public double getArea();
 
@@ -82,7 +81,20 @@ public interface Nucleus {
 	public Profile getDistanceProfile();
 
 	public int getLength();
-
+	
+	
+	/**
+	 * Get the length of a pixel in metres
+	 * @return
+	 */
+	public double getScale();
+	
+	
+	/**
+	 * Set the length of a pixel in micrometres
+	 */
+	public void setScale(double scale);
+	
 	public NucleusBorderPoint getBorderPoint(int i);
 
 	public int getFailureCode();

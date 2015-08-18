@@ -239,4 +239,16 @@ public class Utils {
 	 }
 	
 	
+	/**
+	 * Convert the length in pixels into a length in microns.
+	 * Assumes that the scale is in metres
+	 * @param pixels the number of pixels
+	 * @param scale the size of a pixel in metres
+	 * @return
+	 */
+	public static double micronLength(double pixels, double scale){
+		double microns = pixels * scale;
+		return microns;
+	}
+	
  }

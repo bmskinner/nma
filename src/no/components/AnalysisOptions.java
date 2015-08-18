@@ -21,6 +21,8 @@ public class AnalysisOptions implements Serializable {
 	private boolean normaliseContrast; 
 
 	private int angleProfileWindowSize;
+	
+	private double scale; // hold the length of a pixel in metres
 
 	private Class<?> nucleusClass;
 
@@ -119,6 +121,16 @@ public class AnalysisOptions implements Serializable {
 	public int getYOffset(){
 		return  this.yoffset;
 	}
+
+	public double getScale() {
+		return scale;
+	}
+
+
+	public void setScale(double scale) {
+		this.scale = scale;
+	}
+
 
 	public void setNucleusThreshold(int nucleusThreshold) {
 		this.nucleusThreshold = nucleusThreshold;
