@@ -2,7 +2,9 @@ package datasets;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
@@ -20,11 +22,15 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
+
+import cell.Cell;
 
 public class MorphologyChartFactory {
 	
@@ -322,5 +328,129 @@ public class MorphologyChartFactory {
 	}
 	
 	
+	/**
+	 * Create an empty chart as a placeholder for nucleus outlines
+	 * and consensus chart panels
+	 * @return
+	 */
+	public static JFreeChart makeEmptyNucleusOutlineChart(){
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+				null, null, null);       
+		chart.getPlot().setBackgroundPaint(Color.WHITE);
+		return chart;
+	}
+	
+	/**
+	 * Get a chart contaning the details of the given cell from the given dataset
+	 * @param cell the cell to draw
+	 * @param dataset the dataset the cell came from
+	 * @return
+	 */
+	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset){
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.getRangeAxis().setInverted(true);
+
+		// make a hash to track the contents of each dataset produced
+		Map<Integer, String> hash = new HashMap<Integer, String>(0); 
+		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
+
+
+		// get the nucleus dataset
+		XYDataset nucleus = NucleusDatasetCreator.createSegmentedNucleusOutline(cell);
+		hash.put(hash.size(), "Nucleus"); // add to the first free entry
+		datasetHash.put(datasetHash.size(), nucleus);
+
+
+		// get the signals datasets and add each group to the hash
+		if(cell.getNucleus().hasSignal()){
+			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
+
+			for(XYDataset d : signalsDatasets){
+
+				String name = "default_0";
+				for (int i = 0; i < d.getSeriesCount(); i++) {
+					name = (String) d.getSeriesKey(i);	
+				}
+				int signalGroup = getIndexFromLabel(name);
+				hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
+				datasetHash.put(datasetHash.size(), d);
+			}
+		}
+
+		// get tail datasets if present
+		if(cell.hasTail()){
+
+			XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
+			hash.put(hash.size(), "TailBorder");
+			datasetHash.put(datasetHash.size(), tailBorder);
+			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
+			hash.put(hash.size(), "TailSkeleton");
+			datasetHash.put(datasetHash.size(), skeleton);
+		}
+
+		// set the rendering options for each dataset type
+
+		for(int key : hash.keySet()){
+
+			//				IJ.log("Drawing dataset "+hash.get(key));
+
+			plot.setDataset(key, datasetHash.get(key));
+			plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
+
+			int seriesCount = plot.getDataset(key).getSeriesCount();
+			// go through each series in the dataset
+			for(int i=0; i<seriesCount;i++){
+
+				// all datasets use the same stroke
+				plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
+
+				// Basic nucleus colour
+				if(hash.get(key).equals("Nucleus")){
+
+//					plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
+					String name = (String) plot.getDataset(key).getSeriesKey(i);
+					int colourIndex = getIndexFromLabel(name);
+					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
+				}
+				
+				// Segments
+				if(hash.get(key).startsWith("Seg_")){
+					
+					
+//					plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
+				}
+
+				// signal colours
+				if(hash.get(key).startsWith("SignalGroup_")){
+					int colourIndex = getIndexFromLabel(hash.get(key));
+					//						IJ.log("Drawing signal "+i+" of "+seriesCount+" in series group "+colourIndex);
+					Color colour = dataset.getSignalGroupColour(colourIndex);
+					plot.getRenderer(key).setSeriesPaint(i, colour);
+				}
+
+				// tail border
+				if(hash.get(key).equals("TailBorder")){
+
+					plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
+				}
+
+
+				// tail skeleton
+				if(hash.get(key).equals("TailSkeleton")){
+
+					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
+				}
+			}
+
+		}
+		return chart;
+	}
 
 }

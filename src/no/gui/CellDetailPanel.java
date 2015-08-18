@@ -274,14 +274,7 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		protected ProfilePanel(){
 			this.setLayout(new BorderLayout());
 			
-			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
-//			JFreeChart chart = ChartFactory.createXYLineChart(null,
-//					"Position", "Angle", null);
-//			XYPlot plot = chart.getXYPlot();
-//			plot.getDomainAxis().setRange(0,100);
-//			plot.getRangeAxis().setRange(0,360);
-//			plot.setBackgroundPaint(Color.WHITE);
-			
+			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();		
 			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); // new ChartPanel(chart);
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
@@ -317,9 +310,7 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 			
 			// make the chart for each nucleus
 			this.setLayout(new BorderLayout());
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
-					null, null, null);       
-			chart.getPlot().setBackgroundPaint(Color.WHITE);
+			JFreeChart chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
 
 			panel = new ChartPanel(chart);
 			
@@ -329,112 +320,13 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		
 		protected void update(Cell cell){
 			
-			
+			JFreeChart chart;
 			if(cell==null){
-				JFreeChart chart = ChartFactory.createXYLineChart(null,
-						null, null, null);       
-				chart.getPlot().setBackgroundPaint(Color.WHITE);
-				panel.setChart(chart);
-
+				chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
 			} else {
-
-				// make an empty chart
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-								null, null, null, PlotOrientation.VERTICAL, true, true,
-								false);
-
-				XYPlot plot = chart.getXYPlot();
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.getRangeAxis().setInverted(true);
-
-				// make a hash to track the contents of each dataset produced
-				Map<Integer, String> hash = new HashMap<Integer, String>(0); 
-				Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
-
-
-				// get the nucleus dataset
-				XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell);
-				hash.put(hash.size(), "Nucleus"); // add to the first free entry
-				datasetHash.put(datasetHash.size(), nucleus);
-
-
-				// get the signals datasets and add each group to the hash
-				if(cell.getNucleus().hasSignal()){
-					List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, activeDataset);
-
-					for(XYDataset d : signalsDatasets){
-
-						String name = "default_0";
-						for (int i = 0; i < d.getSeriesCount(); i++) {
-							name = (String) d.getSeriesKey(i);	
-						}
-						int signalGroup = getIndexFromLabel(name);
-						hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
-						datasetHash.put(datasetHash.size(), d);
-					}
-				}
-
-				// get tail datasets if present
-				if(cell.hasTail()){
-
-					XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
-					hash.put(hash.size(), "TailBorder");
-					datasetHash.put(datasetHash.size(), tailBorder);
-					XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
-					hash.put(hash.size(), "TailSkeleton");
-					datasetHash.put(datasetHash.size(), skeleton);
-				}
-
-				// set the rendering options for each dataset type
-
-				for(int key : hash.keySet()){
-
-					//				IJ.log("Drawing dataset "+hash.get(key));
-
-					plot.setDataset(key, datasetHash.get(key));
-					plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
-
-					int seriesCount = plot.getDataset(key).getSeriesCount();
-					// go through each series in the dataset
-					for(int i=0; i<seriesCount;i++){
-
-						// all datasets use the same stroke
-						plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
-						plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
-
-						// nucleus colour
-						if(hash.get(key).equals("Nucleus")){
-
-							plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
-						}
-
-						// signal colours
-						if(hash.get(key).startsWith("SignalGroup_")){
-							int colourIndex = getIndexFromLabel(hash.get(key));
-							//						IJ.log("Drawing signal "+i+" of "+seriesCount+" in series group "+colourIndex);
-							Color colour = activeDataset.getSignalGroupColour(colourIndex);
-							plot.getRenderer(key).setSeriesPaint(i, colour);
-						}
-
-						// tail border
-						if(hash.get(key).equals("TailBorder")){
-
-							plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
-						}
-
-
-						// tail skeleton
-						if(hash.get(key).equals("TailSkeleton")){
-
-							plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
-						}
-					}
-
-				}
-
-				panel.setChart(chart);
+				chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset);
 			}
+			panel.setChart(chart);
 		}
 
 	}

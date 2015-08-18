@@ -25,14 +25,14 @@ public class NucleusBorderSegment  implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private int startIndex;
 	private int endIndex;
-	private String segmentType;
+	private String name = null;
 	
 	private int totalLength; // the total length of the profile that this segment is a part of 
 	
 	private NucleusBorderSegment prevSegment = null; // track the previous segment in the profile
 	private NucleusBorderSegment nextSegment = null; // track the next segment in the profile
 	
-	private String lastFailReason;
+	private String lastFailReason = "No fail";
 
 	public NucleusBorderSegment(int startIndex, int endIndex, int total){
 		this.startIndex = startIndex;
@@ -41,9 +41,9 @@ public class NucleusBorderSegment  implements Serializable{
 	}
 
 	public NucleusBorderSegment(NucleusBorderSegment n){
-		this.startIndex = n.getStartIndex();
-		this.endIndex = n.getEndIndex();
-		this.segmentType = n.getSegmentType();
+		this.startIndex  = n.getStartIndex();
+		this.endIndex 	 = n.getEndIndex();
+		this.name 		 = n.getName();
 		this.totalLength = n.getTotalLength();
 		this.nextSegment = n.nextSegment();
 		this.prevSegment = n.prevSegment();
@@ -67,8 +67,11 @@ public class NucleusBorderSegment  implements Serializable{
 		return this.endIndex;
 	}
 
-	public String getSegmentType(){
-		return this.segmentType;
+	public String getName(){
+		if(this.name==null){
+			IJ.log("Name is null on segment getName()");
+		}
+		return this.name;
 	}
 
 	// when using this, use wrapIndex()!
@@ -401,13 +404,13 @@ public class NucleusBorderSegment  implements Serializable{
 		}
 	}
 
-	public void setSegmentType(String s){
-		this.segmentType = s;
+	public void setName(String s){
+		this.name = s;
 	}
 	
 	public void print(){
 		IJ.log("    Segment "
-				+this.getSegmentType()
+				+this.getName()
 				+": "+this.startIndex+" - "+this.endIndex+" of "
 				+this.getTotalLength()
 				+"; prev: "+this.hasPrevSegment()
@@ -416,7 +419,7 @@ public class NucleusBorderSegment  implements Serializable{
 	
 	public String toString(){
 		return new String("Segment "
-				+this.getSegmentType()
+				+this.getName()
 				+": "+this.startIndex+" - "+this.endIndex+" of "
 				+this.getTotalLength()
 				+"; prev: "+this.hasPrevSegment()
@@ -447,7 +450,7 @@ public class NucleusBorderSegment  implements Serializable{
 		NucleusBorderSegment firstSegment = list.get(0);
 		boolean ok = firstSegment.update(prevSeg.getEndIndex(), firstSegment.getEndIndex());
 		if(!ok){
-			IJ.log("Error fitting final segment");
+			IJ.log("Error fitting final segment: "+firstSegment.getLastFailReason());
 		}
 
 		prevSeg.setNextSegment(firstSegment); // ensure they match up at the end
@@ -465,9 +468,13 @@ public class NucleusBorderSegment  implements Serializable{
 		
 		for(NucleusBorderSegment segment : list){
 			
-			result.add( new NucleusBorderSegment(Utils.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
-												Utils.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
-												segment.getTotalLength() ));
+			NucleusBorderSegment newSeg = new NucleusBorderSegment(Utils.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
+					Utils.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
+					segment.getTotalLength() );
+			
+			newSeg.setName(segment.getName());
+			
+			result.add( newSeg );
 		}
 		
 		linkSegments(result);

@@ -84,7 +84,7 @@ public class ProfileSegmenter {
 					
 					// we've hit a new segment
 					NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
-					seg.setSegmentType("Seg_"+segCount);
+					seg.setName("Seg_"+segCount);
 
 					// if a previous segment has been defined (i.e iteration 1+)
 					// set the links

@@ -252,7 +252,7 @@ public class Profile implements Serializable {
 
 			double value1 = profile1.get(j);
 			double value2 = profile2.get(j);
-			
+						
 			// get the difference away from 180 degrees for the test profile
 			double normalised2 = Math.abs(  value2 - 180  );
 			
@@ -263,7 +263,7 @@ public class Profile implements Serializable {
 				of 0 degrees from the 180 degree baseline will get a weighting of 0
 				(i.e. does not count if it is perfectly straight)
 			*/
-			double weight = 1/180 * normalised2;
+			double weight = (double) ( 1.0/180.0) * normalised2;
 			
 			// the difference between the two profiles at this point
 			double difference = value1 - value2;

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import no.components.SegmentedProfile;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.components.Profile;
@@ -74,7 +75,27 @@ public interface Nucleus {
 
 	public double getPerimeter();
 
-	public Profile getAngleProfile();
+	/**
+	 * Get the angle profile
+	 * @return
+	 */
+	public SegmentedProfile getAngleProfile();
+	
+	/**
+	 * Get the angle profile offset to start at the given point
+	 * @param pointType the point to start at
+	 * @return a copy of the segmented profile
+	 */
+	public SegmentedProfile getAngleProfile(String pointType);
+
+	
+	/**
+	 * Update the angle profile to the given segmented profile
+	 * @param profile
+	 */
+	public void setAngleProfile(SegmentedProfile profile);
+	
+	
 
 	public int getAngleProfileWindowSize();
 
@@ -233,12 +254,10 @@ public interface Nucleus {
 	public void exportSegments();
 
 
-	public Map<String, Integer> getSegmentMap( );
+//	public Map<String, Integer> getSegmentMap( );
 	public Profile getSingleDistanceProfile();
 
 	public void dumpInfo(int type);
-
-	public Profile getAngleProfile(String pointType);
 
 	public double getAngle(int index);
 
@@ -274,21 +293,21 @@ public interface Nucleus {
 	 * Get a list of all the segments within the nucleus
 	 * @return
 	 */
-	public List<NucleusBorderSegment> getSegments();
-	
-	/**
-	 * Create a list of segments offset to a reference point. This point
-	 * will be the new zero index in the segment list
-	 * @param pointType the border tag to offset against
-	 */
-	public List<NucleusBorderSegment> getSegments(String pointType);
-
-	/**
-	 * Get the segment with the given name
-	 * @param s the name
-	 * @return
-	 */
-	public NucleusBorderSegment getSegmentTag(String s);
+//	public List<NucleusBorderSegment> getSegments();
+//	
+//	/**
+//	 * Create a list of segments offset to a reference point. This point
+//	 * will be the new zero index in the segment list
+//	 * @param pointType the border tag to offset against
+//	 */
+//	public List<NucleusBorderSegment> getSegments(String pointType);
+//
+//	/**
+//	 * Get the segment with the given name
+//	 * @param s the name
+//	 * @return
+//	 */
+//	public NucleusBorderSegment getSegmentTag(String s);
 
 	/**
 	 * Set the name of the given NucleusBorderPoint
@@ -297,17 +316,17 @@ public interface Nucleus {
 	 */
 	public void addBorderTag(String name, int i);
 
-	/**
-	 * Add a name to the given segment
-	 * @param name the new name
-	 * @param i the segment number
-	 */
-	public void addSegmentTag(String name, int i);
-
-	/**
-	 * Remove all segments from this nucleus
-	 */
-	public void clearSegments();
+//	/**
+//	 * Add a name to the given segment
+//	 * @param name the new name
+//	 * @param i the segment number
+//	 */
+//	public void addSegmentTag(String name, int i);
+//
+//	/**
+//	 * Remove all segments from this nucleus
+//	 */
+//	public void clearSegments();
 
 	/**
 	 * Calculate a new angle profile with the given window size. It
@@ -321,7 +340,7 @@ public interface Nucleus {
 	 * Set the segmention of the nucleus to the given list
 	 * @param newList the list of segments
 	 */
-	public void setSegments(List<NucleusBorderSegment> newList);
+//	public void setSegments(List<NucleusBorderSegment> newList);
 	
 	
 	public SignalCollection getSignalCollection();
@@ -359,7 +378,7 @@ public interface Nucleus {
 	
 	public Map<String, Integer> getBorderTags();
 	
-	public void addSegment(NucleusBorderSegment n);
+//	public void addSegment(NucleusBorderSegment n);
 	public void reverse();
 	public String getOutputFolderName();
 	public void updateSourceFolder(File newFolder);

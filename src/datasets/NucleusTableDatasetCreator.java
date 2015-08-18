@@ -55,7 +55,7 @@ public class NucleusTableDatasetCreator {
 
 
 			// get the offset segments
-			List<NucleusBorderSegment> segments = nucleus.getSegments(referencePoint);
+			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(referencePoint).getSegments();
 
 			// create the row names
 			fieldNames.add("Colour");
@@ -75,7 +75,7 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
 
-				model.addColumn(segment.getSegmentType(), rowData.toArray(new Object[0])); // separate column per segment
+				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
 			}
 
 			// format the numbers and make into a tablemodel

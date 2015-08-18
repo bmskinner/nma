@@ -45,11 +45,13 @@ public class VennDetailPanel extends JPanel {
 			TableModel model = NucleusTableDatasetCreator.createVennTable(list);
 			vennTable.setModel(model);
 			int columns = vennTable.getColumnModel().getColumnCount();
-//			IJ.log("Columns: "+columns);
+
 			for(int i=1;i<columns;i++){
-//				IJ.log("Column: "+i);
+
 				vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
 			}
+		} else {
+			vennTable.setModel(NucleusTableDatasetCreator.createVennTable(null));
 		}
 	}
 	

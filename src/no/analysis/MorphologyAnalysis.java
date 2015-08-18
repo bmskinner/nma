@@ -11,6 +11,7 @@ import no.collections.CellCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;
+import no.components.SegmentedProfile;
 import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.PigSpermNucleus;
@@ -236,10 +237,10 @@ public class MorphologyAnalysis {
 		ProfileCollection pc = collection.getProfileCollection();
 
 		// find the corresponding point in each Nucleus
-		Profile median = pc.getProfile(collection.getReferencePoint());
+		SegmentedProfile median = pc.getSegmentedProfile(collection.getReferencePoint());
 		
 		for(Nucleus n : collection.getNuclei()){
-			assignSegmentsToNucleus(n, pc.getSegments(collection.getReferencePoint()), median);
+			assignSegmentsToNucleus(n, median);
 		}
 		logger.log("Segments assigned to nuclei");
 	}
@@ -248,18 +249,20 @@ public class MorphologyAnalysis {
 	 * Assign the given segments to the nucleus, finding the best match of the nucleus
 	 * profile to the median profile
 	 * @param n the nucleus to segment
-	 * @param segments the segmnets to fit
-	 * @param median the median profile
+	 * @param median the segmented median profile
 	 */
-	private static void assignSegmentsToNucleus(Nucleus n, List<NucleusBorderSegment> segments, Profile median){
+	private static void assignSegmentsToNucleus(Nucleus n, SegmentedProfile median){
 				
-		// remove any existing segments
-		n.clearSegments();
+		// remove any existing segments in the nucleus
+		SegmentedProfile nucleusProfile = n.getAngleProfile();
+		nucleusProfile.clearSegments();
+		
+		List<NucleusBorderSegment> nucleusSegments = new ArrayList<NucleusBorderSegment>();
 
 		// go through each segment defined for the median curve
 		NucleusBorderSegment prevSeg = null;
 
-		for(NucleusBorderSegment segment : segments){
+		for(NucleusBorderSegment segment : median.getSegments()){
 			
 			// get the positions the segment begins and ends in the median profile
 			int startIndexInMedian 	= segment.getStartIndex();
@@ -282,19 +285,14 @@ public class MorphologyAnalysis {
 				prevSeg.setNextSegment(seg);
 			}
 			
-			seg.setSegmentType(segment.getSegmentType());
-			n.addSegment(seg);
+			seg.setName(segment.getName());
+			nucleusSegments.add(seg);
 			
 			prevSeg = seg;
 		}
-		NucleusBorderSegment firstSegment = n.getSegments().get(0);
-		boolean ok = firstSegment.update(prevSeg.getEndIndex(), firstSegment.getEndIndex());
-		if(!ok){
-			IJ.log("Error fitting final segment");
-		}
-
-		prevSeg.setNextSegment(firstSegment); // ensure they match up at the end
-		firstSegment.setPrevSegment(prevSeg);
+		NucleusBorderSegment.linkSegments(nucleusSegments);
+		nucleusProfile.setSegments(nucleusSegments);
+		n.setAngleProfile(nucleusProfile);
 	}
 
 	/**
@@ -328,7 +326,7 @@ public class MorphologyAnalysis {
 
 		
 		// run the segment fitter on each nucleus
-		SegmentFitter fitter = new SegmentFitter(pc.getProfile(pointType), segments, logger.getLogfile());
+		SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType), logger.getLogfile());
 		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
 		for(Nucleus n : collection.getNuclei()){ 

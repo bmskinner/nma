@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import utility.Utils;
+
 /**
  * This class provides consistency and error checking for segmnentation
  * applied to profiles.
@@ -43,6 +45,41 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
+	 * Construct using a basic profile. Two segments are created 
+	 * that span the entire profile, half each
+	 * @param profile
+	 */
+	public SegmentedProfile(Profile profile){
+		super(profile);
+		int midpoint = profile.size()/2;
+		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, profile.size());
+		segment1.setName("Seg_1");
+		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, profile.size());
+		segment2.setName("Seg_2");
+		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+		segments.add(segment1);
+		segments.add(segment2);
+		this.segments = segments;
+	}
+	
+	/**
+	 * Construct from an array of values
+	 * @param values
+	 */
+	public SegmentedProfile(double[] values){
+		super(values);
+		int midpoint = values.length/2;
+		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, values.length);
+		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, values.length);
+		segment1.setName("Seg_1");
+		segment2.setName("Seg_2");
+		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+		segments.add(segment1);
+		segments.add(segment2);
+		this.segments = segments;
+	}
+	
+	/**
 	 * Get a copy of the segments in this profile
 	 * @return
 	 */
@@ -52,7 +89,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	
 	/**
 	 * Get the segment with the given name. Returns null if no segment
-	 * is found
+	 * is found. Gets the actual segment, not a copy
 	 * @param name
 	 * @return
 	 */
@@ -63,7 +100,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		NucleusBorderSegment result = null;
 		for(NucleusBorderSegment seg : this.segments){
-			if(seg.getSegmentType().equals(name)){
+			if(seg.getName().equals(name)){
 				result = seg;
 			}
 		}
@@ -76,11 +113,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 */
 	public void setSegments(List<NucleusBorderSegment> segments){
 		if(segments==null || segments.isEmpty()){
-			throw new IllegalArgumentException("Segment lsit is null or empty");
+			throw new IllegalArgumentException("Segment list is null or empty");
 		}
 		
 		if(segments.get(0).getTotalLength()!=this.size()){
-			throw new IllegalArgumentException("Segment lsit is from a different total length");
+			throw new IllegalArgumentException("Segment list is from a different total length");
 		}
 		
 		this.segments = NucleusBorderSegment.copy(segments);
@@ -100,7 +137,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	public List<String> getSegmentNames(){
 		List<String> result = new ArrayList<String>();
 		for(NucleusBorderSegment seg : this.segments){
-			result.add(seg.getSegmentType());
+			result.add(seg.getName());
 		}
 		return result;
 	}
@@ -123,7 +160,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		boolean result = false;
 		for(NucleusBorderSegment seg : this.segments){
-			if(seg.getSegmentType().equals(segment.getSegmentType())
+			if(seg.getName().equals(segment.getName())
 					&& seg.getStartIndex()==segment.getStartIndex()
 					&& seg.getEndIndex()==segment.getEndIndex()
 					&& seg.getTotalLength()==this.size()
@@ -152,11 +189,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
 		
-		segment.update(startIndex, endIndex);
+		return segment.update(startIndex, endIndex);
 		
 		// how to test wrapping
 		
-		return false;
+//		return false;
 	}
 	
 	/**
@@ -165,11 +202,16 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param amount the number of indexes to move
 	 * @return did the update succeed
 	 */
-	public boolean adjustSegmentStart(NucleusBorderSegment segment, int amount){
-		if(!this.contains(segment)){
+	public boolean adjustSegmentStart(String name, int amount){
+		if(!this.getSegmentNames().contains(name)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
-		return this.update(segment, segment.getStartIndex()+amount, segment.getEndIndex());
+		
+		// get the segment within this profile, not a copy that looks the same
+		NucleusBorderSegment segmentToUpdate = this.getSegment(name);
+		
+		int newValue = Utils.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
+		return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
 	}
 	
 	/**
@@ -178,10 +220,29 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param amount the number of indexes to move
 	 * @return did the update succeed
 	 */
-	public boolean adjustSegmentEnd(NucleusBorderSegment segment, int amount){
-		if(!this.contains(segment)){
+	public boolean adjustSegmentEnd(String name, int amount){
+		if(!this.getSegmentNames().contains(name)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
-		return this.update(segment, segment.getStartIndex(), segment.getEndIndex()+amount);
+		
+		// get the segment within this profile, not a copy that looks the same
+		NucleusBorderSegment segmentToUpdate = this.getSegment(name);
+				
+		int newValue = Utils.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
+		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
+	}
+	
+	public void nudgeSegments(int amount){
+		this.segments = NucleusBorderSegment.nudge(getSegments(), amount);
+	}
+	
+	public SegmentedProfile offset(int amount){
+	
+		Profile offsetProfile = super.offset(amount);
+		
+		// offset the segments
+		List<NucleusBorderSegment> segments = NucleusBorderSegment.nudge(getSegments(), -amount);
+		SegmentedProfile copy = new SegmentedProfile(offsetProfile, segments);
+		return copy;
 	}
 }

@@ -72,11 +72,11 @@ public class StatsExporter {
 		ProfileCollection pc = collection.getProfileCollection();
 		List<NucleusBorderSegment> segs = pc.getSegments(collection.getOrientationPoint());
 		for(NucleusBorderSegment segment : segs){
-			String s = segment.getSegmentType();
+			String s = segment.getName();
 			
 			List<Integer> list = new ArrayList<Integer>(0);
 			for(Nucleus n : collection.getNuclei()){
-				NucleusBorderSegment seg = n.getSegmentTag(s);
+				NucleusBorderSegment seg = n.getAngleProfile().getSegment(s);
 				list.add(seg.length());
 			}
 			logger.addColumn(s, list.toArray(new Integer[0]));

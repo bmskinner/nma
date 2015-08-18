@@ -95,22 +95,6 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 	  logger = new Logger(debugFile, "NucleusDetector");
   }
 
-
-  /**
-  * Run the detector on the input folder
-  */
-//  public void runDetector(){
-//	  try{
-//		  logger.log("Running nucleus detector");
-//		  processFolder(this.inputFolder);
-//	  } catch(Exception e){
-//		  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
-//		  for(StackTraceElement el : e.getStackTrace()){
-//			  logger.log(el.toString(), Logger.STACK);
-//		  }
-//	  }
-//  }
-  
   
   @Override
 	protected void process( List<Integer> integers ) {
@@ -134,7 +118,8 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 				
 			  List<CellCollection> folderCollection = this.getNucleiCollections();
-				// insert analyse populations from  analysis creator
+
+			  // Run the analysis pipeline
 			  datasets = analysePopulations(folderCollection);		
 			 
 			  result = true;

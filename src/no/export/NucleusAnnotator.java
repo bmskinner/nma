@@ -116,10 +116,10 @@ public class NucleusAnnotator {
 	private static void annotateSegments(ImagePlus image, Nucleus n){
 		ImageProcessor ip = image.getProcessor();
 
-		if(n.getSegments().size()>0){ // only draw if there are segments
-			for(int i=0;i<n.getSegments().size();i++){
+		if(n.getAngleProfile().getSegments().size()>0){ // only draw if there are segments
+			for(int i=0;i<n.getAngleProfile().getSegments().size();i++){
 
-				NucleusBorderSegment seg = n.getSegmentTag("Seg_"+i);
+				NucleusBorderSegment seg = n.getAngleProfile().getSegment("Seg_"+i);
 
 				float[] xpoints = new float[seg.length()+1];
 				float[] ypoints = new float[seg.length()+1];
@@ -133,7 +133,7 @@ public class NucleusAnnotator {
 				PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 
 				// avoid colour wrapping when segment number is 1 more than the colour list
-				Color color = i==0 && n.getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getSegmentColor(i);
+				Color color = i==0 && n.getAngleProfile().getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getSegmentColor(i);
 
 				ip.setColor(color);
 				ip.setLineWidth(2);

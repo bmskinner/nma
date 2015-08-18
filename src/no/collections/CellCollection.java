@@ -685,7 +685,7 @@ implements Serializable
 	  ProfileCollection pc = this.getProfileCollection();
 	  List<NucleusBorderSegment> segs = pc.getSegments(this.getOrientationPoint());
 	  for(NucleusBorderSegment segment : segs){
-		  result.add(segment.getSegmentType());
+		  result.add(segment.getName());
 	  }
 	  return result;
   }

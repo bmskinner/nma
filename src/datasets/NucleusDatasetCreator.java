@@ -22,6 +22,7 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.SegmentedProfile;
 import no.components.ShellResult;
 import no.components.XYPoint;
 import no.nuclei.Nucleus;
@@ -71,19 +72,19 @@ public class NucleusDatasetCreator {
 					Profile subPointsA  = xpoints.getSubregion(0, seg.getEndIndex());
 
 					double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
-					ds.addSeries(seg.getSegmentType()+"_A", dataA);
+					ds.addSeries(seg.getName()+"_A", dataA);
 
 					// end of array
 					Profile subProfileB = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
 					Profile subPointsB  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
 					
 					double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
-					ds.addSeries(seg.getSegmentType()+"_B", dataB);
+					ds.addSeries(seg.getName()+"_B", dataB);
 					
 					continue; // move on to the next segment
 					
 				} else { // there is an error in the segment assignment; skip and warn
-					IJ.log("Profile skipping issue: "+seg.getSegmentType()+" : "+seg.getStartIndex()+" - "+seg.getEndIndex()+" in total of "+profile.size());
+					IJ.log("Profile skipping issue: "+seg.getName()+" : "+seg.getStartIndex()+" - "+seg.getEndIndex()+" in total of "+profile.size());
 				}
 			} 
 			Profile subProfile = profile.getSubregion(seg);
@@ -92,7 +93,7 @@ public class NucleusDatasetCreator {
 			double[][] data = { subPoints.asArray(), subProfile.asArray() };
 			
 			// check if the series key is taken
-			String seriesName = checkSeriesName(ds, seg.getSegmentType());
+			String seriesName = checkSeriesName(ds, seg.getName());
 			
 			ds.addSeries(seriesName, data);
 		}
@@ -145,7 +146,7 @@ public class NucleusDatasetCreator {
             
             // add only the segment of interest
             for(NucleusBorderSegment seg : segments){
-                if(seg.getSegmentType().equals(segName)){
+                if(seg.getName().equals(segName)){
                     segmentsToAdd.add(seg);
                 }
             }
@@ -220,7 +221,7 @@ public class NucleusDatasetCreator {
 			
 			// add only the segment of interest
 			for(NucleusBorderSegment seg : segments){
-				if(seg.getSegmentType().equals(segName)){
+				if(seg.getName().equals(segName)){
 					segmentsToAdd.add(seg);
 				}
 			}
@@ -504,13 +505,13 @@ public class NucleusDatasetCreator {
 	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus){
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		Profile profile = nucleus.getAngleProfile(Constants.Nucleus.RODENT_SPERM.referencePoint());
+		SegmentedProfile profile = nucleus.getAngleProfile(Constants.Nucleus.RODENT_SPERM.referencePoint());
 		Profile xpoints = profile.getPositions(nucleus.getLength());
 		
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = nucleus.getSegments(Constants.Nucleus.RODENT_SPERM.referencePoint());
+		List<NucleusBorderSegment> segments = profile.getSegments();
 		addSegmentsFromProfile(segments, profile, ds, nucleus.getLength(), 0);
 		
 		double[][] ndata = { xpoints.asArray(), profile.asArray() };
@@ -632,7 +633,7 @@ public class NucleusDatasetCreator {
 			List<Integer> list = new ArrayList<Integer>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				NucleusBorderSegment seg = n.getSegmentTag(segName);
+				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 				list.add(seg.length());
 			}
 
@@ -664,13 +665,13 @@ public class NucleusDatasetCreator {
 				List<Integer> list = new ArrayList<Integer>(0);
 				
 				for(Nucleus n : collection.getNuclei()){
-					NucleusBorderSegment seg = n.getSegmentTag(medianSeg.getSegmentType());
+					NucleusBorderSegment seg = n.getAngleProfile().getSegment(medianSeg.getName());
 					
 					int differenceToMedian = medianSegmentLength - seg.length();
 					list.add(differenceToMedian);
 				}
 				
-				dataset.add(list, medianSeg.getSegmentType(), medianSeg.getSegmentType());
+				dataset.add(list, medianSeg.getName(), medianSeg.getName());
 			}
 		}
 		return dataset;
@@ -743,11 +744,11 @@ public class NucleusDatasetCreator {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segmentList = n.getSegments();
+		List<NucleusBorderSegment> segmentList = n.getAngleProfile().getSegments();
 		if(!segmentList.isEmpty()){ // only draw if there are segments
 			for(int i=0;i<segmentList.size();i++){
 
-				NucleusBorderSegment seg = n.getSegmentTag("Seg_"+i);
+				NucleusBorderSegment seg = n.getAngleProfile().getSegment("Seg_"+i);
 
 				double[] xpoints = new double[seg.length()+1];
 				double[] ypoints = new double[seg.length()+1];
@@ -832,7 +833,40 @@ public class NucleusDatasetCreator {
 		
 		double[][] data = { xpoints, ypoints };
 		ds.addSeries("Nucleus Border", data);
-//		IJ.log("Created nucleus border dataset");
+		return ds;
+	}
+	
+	/**
+	 * Get the segmented outline for a specific nucleus in a dataset. Sets the position
+	 * to the original coordinates in the image 
+	 * @param cell the cell to draw
+	 * @return
+	 */
+	public static XYDataset createSegmentedNucleusOutline(Cell cell){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		Nucleus nucleus = cell.getNucleus();
+		
+		// add the segments
+		List<NucleusBorderSegment> segmentList = nucleus.getAngleProfile().getSegments();
+		if(!segmentList.isEmpty()){ // only draw if there are segments
+			for(int i=0;i<segmentList.size();i++){
+
+				NucleusBorderSegment seg = nucleus.getAngleProfile().getSegment("Seg_"+i);
+				
+				double[] xpoints = new double[seg.length()+1];
+				double[] ypoints = new double[seg.length()+1];
+				for(int j=0; j<=seg.length();j++){
+					int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getLength());
+					NucleusBorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
+					xpoints[j] = p.getX();
+					ypoints[j] = p.getY();
+				}
+
+				double[][] data = { xpoints, ypoints };
+				ds.addSeries("Seg_"+i, data);
+			}
+		}
 		return ds;
 	}
 	

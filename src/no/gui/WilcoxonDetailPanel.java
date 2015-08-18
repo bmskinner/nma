@@ -128,6 +128,12 @@ public class WilcoxonDetailPanel extends JPanel {
 			for(int i=1;i<columns;i++){
 				wilcoxonDifferenceTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
 			}
+		} else {
+			wilcoxonAreaTable.setModel(NucleusTableDatasetCreator.createWilcoxonAreaTable(null));
+			wilcoxonPerimTable.setModel(NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null));
+			wilcoxonMinFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMinFeretTable(null));
+			wilcoxonFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(null));
+			wilcoxonDifferenceTable.setModel(NucleusTableDatasetCreator.createWilcoxonVariabilityTable(null));
 		}
 	}
 	

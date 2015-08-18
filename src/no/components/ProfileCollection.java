@@ -79,6 +79,15 @@ public class ProfileCollection implements Serializable {
 		int indexOffset = offsets.get(pointType);
 		return getAggregate().getMedian().offset(indexOffset);
 	}
+	
+	
+	public SegmentedProfile getSegmentedProfile(String s){
+		if(s==null){
+			throw new IllegalArgumentException("The requested profile key is null: "+s);
+		}
+		SegmentedProfile result = new SegmentedProfile(getProfile(s), getSegments(s));
+		return result;
+	}
 
 	/**
 	 * Get the profile aggregate for this collection
@@ -108,7 +117,7 @@ public class ProfileCollection implements Serializable {
 			int newEnd 		= Utils.wrapIndex( seg.getEndIndex()+ offset , seg.getTotalLength());
 			
 			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, seg.getTotalLength());
-			c.setSegmentType(seg.getSegmentType());
+			c.setName(seg.getName());
 			
 			if(prev!=null){
 				c.setPrevSegment(prev);

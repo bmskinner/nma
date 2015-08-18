@@ -43,11 +43,18 @@ public class AnalysisDetailPanel extends JPanel {
 
 	}
 	
+	/**
+	 * Trigger an update of the panel with the given list of datasets
+	 * to display
+	 * @param list
+	 */
 	public void update(List<AnalysisDataset> list){
+
 		updateAnalysisParametersPanel(list);
 		updateStatsPanel(list);
+
 	}
-	
+		
 	
 	/**
 	 * Update the analysis panel with data from the given datasets
@@ -55,8 +62,12 @@ public class AnalysisDetailPanel extends JPanel {
 	 */
 	private void updateAnalysisParametersPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
-		tableAnalysisParamters.setModel(model);
+		if(list!=null && !list.isEmpty()){
+			TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
+			tableAnalysisParamters.setModel(model);
+		} else {
+			tableAnalysisParamters.setModel(NucleusTableDatasetCreator.createAnalysisParametersTable(null));
+		}
 	}
 	
 	
@@ -66,9 +77,13 @@ public class AnalysisDetailPanel extends JPanel {
 	 * @param list the datasets
 	 */
 	private void updateStatsPanel(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createStatsTable(list);
-		tablePopulationStats.setModel(model);
+		
+		if(list!=null && !list.isEmpty()){
+			TableModel model = NucleusTableDatasetCreator.createStatsTable(list);
+			tablePopulationStats.setModel(model);
+		} else {
+			tablePopulationStats.setModel(NucleusTableDatasetCreator.createStatsTable(null));
+		}
 	}
 	
 	private JScrollPane createStatsPanel(){

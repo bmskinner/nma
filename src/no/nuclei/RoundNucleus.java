@@ -26,6 +26,7 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.SegmentedProfile;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.export.TableExporter;
@@ -82,7 +83,7 @@ public class RoundNucleus
 		BorderPoints are made; everything references the copy in the Nucleus. Given this, the points of interest 
 		(now borderTags) need only to be indexes.
 	*/
-	protected Profile angleProfile; // 
+	protected SegmentedProfile angleProfile; // 
 	protected Profile distanceProfile; // holds distances through CoM to opposite border
 	protected Profile singleDistanceProfile; // holds distances from CoM, not through CoM
 	protected List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
@@ -143,13 +144,11 @@ public class RoundNucleus
 		this.setSignals(n.getSignalCollection());
 
 		this.setDistanceProfile(n.getDistanceProfile());
+		this.setAngleProfile(n.getAngleProfile());
 
 		this.setBorderTags(n.getBorderTags());
 		this.setBorderList(n.getBorderList());
-		
-		this.setSegmentMap(n.getSegmentMap());
-		this.setSegments(n.getSegments());
-		
+				
 		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
 	}
@@ -165,8 +164,8 @@ public class RoundNucleus
 
 		int tailIndex = this.getDistanceProfile().getIndexOfMax();
 		NucleusBorderPoint tailPoint = this.getPoint(tailIndex);
-		addBorderTag("tail", tailIndex);
-    	addBorderTag("head", this.getIndex(this.findOppositeBorder(tailPoint)));
+		addBorderTag(Constants.Nucleus.ROUND.orientationPoint(), tailIndex);
+    	addBorderTag(Constants.Nucleus.ROUND.referencePoint(), this.getIndex(this.findOppositeBorder(tailPoint)));
 	}
 
 	public void intitialiseNucleus(int angleProfileWindowSize){
@@ -776,17 +775,17 @@ public class RoundNucleus
 	}
 	
 	// given a point ,find the String tag of the segment it belongs to 
-	public String getSegmentOfPoint(int i){
-		String segment = "";
-		for(String s : this.getSegmentTags()){
-			
-			NucleusBorderSegment b = this.getSegmentTag(s);
-			if(b.contains(i)){
-				segment = s;
-			}
-		}
-		return segment;
-	}
+//	public String getSegmentOfPoint(int i){
+//		String segment = "";
+//		for(String s : this.getSegmentTags()){
+//			
+//			NucleusBorderSegment b = this.getSegmentTag(s);
+//			if(b.contains(i)){
+//				segment = s;
+//			}
+//		}
+//		return segment;
+//	}
 
 	/*
 		This will find the point in a list that is closest to any local maximum
@@ -974,7 +973,7 @@ public class RoundNucleus
 			logger.addRow("SD_PROFILE"          , this.singleDistanceProfile.get(i));
 			logger.addRow("IS_SD_MIN"           , sdMinima.get(i));
 			logger.addRow("DISTANCE_PROFILE"    , this.getDistance(i)	);
-			logger.addRow("SEGMENT"             , this.getSegmentOfPoint(i));
+//			logger.addRow("SEGMENT"             , this.getSegmentOfPoint(i));
 			
 		}
 		logger.export(""+this.getNucleusNumber());
@@ -993,8 +992,8 @@ public class RoundNucleus
 		logger.addColumnHeading("PERIMETER_LENGTH");
 		logger.addColumnHeading("DISTANCE_END_TO_END");
 
-		for(NucleusBorderSegment seg :this.getSegments() ){
-			logger.addRow("SEGMENT" , seg.getSegmentType());
+		for(NucleusBorderSegment seg :this.getAngleProfile().getSegments() ){
+			logger.addRow("SEGMENT" , seg.getName());
 			logger.addRow("PERIMETER_LENGTH" , seg.length());
 			logger.addRow("START_INDEX" , seg.getStartIndex());
 			logger.addRow("END_INDEX" , seg.getEndIndex());
@@ -1046,18 +1045,18 @@ public class RoundNucleus
 		-----------------------
 	*/
 
-	public Profile getAngleProfile(){
-		return new Profile(this.angleProfile);
+	public SegmentedProfile getAngleProfile(){
+		return new SegmentedProfile(this.angleProfile);
 	}
 
 	// returns a copy
-	public Profile getAngleProfile(String pointType){ // USE getAngleProfile
+	public SegmentedProfile getAngleProfile(String pointType){
 		int offset = this.borderTags.get(pointType);
-		return new Profile(this.angleProfile.offset(offset));
+		return new SegmentedProfile(this.angleProfile.offset(offset));
 	}
 
-	public void setAngleProfile(Profile p){
-		this.angleProfile = new Profile(p);
+	public void setAngleProfile(SegmentedProfile p){
+		this.angleProfile = new SegmentedProfile(p);
 	}
 
 	public double getAngle(int index){
@@ -1135,85 +1134,85 @@ public class RoundNucleus
 		return this.borderTags.keySet();
 	}
 
-	public NucleusBorderSegment getSegmentTag(String s){
-		if(s==null){
-			throw new IllegalArgumentException("Requested tag is null");
-		}
-		if(!this.segmentTags.containsKey(s)){
-			throw new IllegalArgumentException("Requested tag is not present: "+s);
-		}
-		return new NucleusBorderSegment(this.segmentList.get(this.segmentTags.get(s)));
-	}
+//	public NucleusBorderSegment getSegmentTag(String s){
+//		if(s==null){
+//			throw new IllegalArgumentException("Requested tag is null");
+//		}
+//		if(!this.segmentTags.containsKey(s)){
+//			throw new IllegalArgumentException("Requested tag is not present: "+s);
+//		}
+//		return new NucleusBorderSegment(this.segmentList.get(this.segmentTags.get(s)));
+//	}
 
 	public void addBorderTag(String name, int i){
 		this.borderTags.put(name, i);
 	}
+//
+//	public void addSegmentTag(String name, int i){
+//		this.segmentTags.put(name, i);
+//	}
+	
+//	public void addSegment(NucleusBorderSegment n){
+//		this.segmentList.add(n);
+//		if(n.getSegmentType()!=null){
+//			this.addSegmentTag(n.getSegmentType(), this.segmentList.indexOf(n));
+//		}
+//	}
 
-	public void addSegmentTag(String name, int i){
-		this.segmentTags.put(name, i);
-	}
-	
-	public void addSegment(NucleusBorderSegment n){
-		this.segmentList.add(n);
-		if(n.getSegmentType()!=null){
-			this.addSegmentTag(n.getSegmentType(), this.segmentList.indexOf(n));
-		}
-	}
-
-	public Map<String, Integer> getSegmentMap( ){
-		return this.segmentTags;
-	}
-	
-	public Set<String> getSegmentTags(){
-		return this.segmentTags.keySet();
-	}
-	
-	public NucleusBorderSegment getSegment(int i){
-		return this.segmentList.get(i);
-	}
-	
-	public List<NucleusBorderSegment> getSegments(){
-		return this.segmentList;
-	}
+//	public Map<String, Integer> getSegmentMap( ){
+//		return this.segmentTags;
+//	}
+//	
+//	public Set<String> getSegmentTags(){
+//		return this.segmentTags.keySet();
+//	}
+//	
+//	public NucleusBorderSegment getSegment(int i){
+//		return this.segmentList.get(i);
+//	}
+//	
+//	public List<NucleusBorderSegment> getSegments(){
+//		return this.segmentList;
+//	}
 	
 	/**
 	 * Create a list of segments offset to a reference point
 	 * @param pointType the border tag to offset against
 	 */
-	public List<NucleusBorderSegment> getSegments(String pointType){
-		if(pointType==null){
-			throw new IllegalArgumentException("String or offset is null or empty");
-		}
-		
-		if(!this.borderTags.containsKey(pointType)){
-			throw new IllegalArgumentException("Point type does not exist in nucleus: "+pointType);
-		}
-		List<NucleusBorderSegment> referenceList =  getSegments();
-		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-		
-		int offset = this.getBorderIndex(pointType); // this is our new zero
-		for(NucleusBorderSegment s : referenceList){
-			
-			int newStart = Utils.wrapIndex( s.getStartIndex()- offset , this.getLength());
-			int newEnd = Utils.wrapIndex( s.getEndIndex()- offset , this.getLength());
-			
-			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, this.getLength());
-			c.setSegmentType(s.getSegmentType());
-			
-			result.add(c);
-		}
-		
-		return result;
-	}
+//	public List<NucleusBorderSegment> getSegments(String pointType){
+//		if(pointType==null){
+//			throw new IllegalArgumentException("String or offset is null or empty");
+//		}
+//		
+//		if(!this.borderTags.containsKey(pointType)){
+//			throw new IllegalArgumentException("Point type does not exist in nucleus: "+pointType);
+//		}
+//		List<NucleusBorderSegment> referenceList =  getSegments();
+//		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
+//		
+//		int offset = this.getBorderIndex(pointType); // this is our new zero
+//		for(NucleusBorderSegment s : referenceList){
+//			
+//			int newStart = Utils.wrapIndex( s.getStartIndex()- offset , this.getLength());
+//			int newEnd = Utils.wrapIndex( s.getEndIndex()- offset , this.getLength());
+//			
+//			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd, this.getLength());
+//			c.setSegmentType(s.getSegmentType());
+//			
+//			result.add(c);
+//		}
+//		
+//		return result;
+//	}
 	
-	public void setSegments(List<NucleusBorderSegment> segments){
-		this.segmentList = segments;
-	}
+//	public void setSegments(List<NucleusBorderSegment> segments){
+//		this.segmentList = segments;
+//	}
 	
-	public void clearSegments(){
-		this.segmentList = new ArrayList<NucleusBorderSegment>(0);
-		this.segmentTags = new HashMap<String, Integer>(0);
-	}
+//	public void clearSegments(){
+//		this.segmentList = new ArrayList<NucleusBorderSegment>(0);
+//		this.segmentTags = new HashMap<String, Integer>(0);
+//	}
 
 	private void calculateDistanceProfile(){
 
@@ -1257,12 +1256,6 @@ public class RoundNucleus
 
 			double angle = RoundNucleus.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
 
-			// IJ.log("Comparing points: "+angle);
-			// IJ.log("    Before: ("+indexBefore+") "+pointBefore.getX()+"  "+pointBefore.getY());
-			// IJ.log("    i     : ("+i          +") "+      point.getX()+"  "+      point.getY());
-			// IJ.log("    After : ("+indexAfter +") "+ pointAfter.getX()+"  "+ pointAfter.getY());
-			// IJ.log("");
-
 			// find the halfway point between the first and last points.
 				// is this within the roi?
 				// if yes, keep min angle as interior angle
@@ -1279,12 +1272,12 @@ public class RoundNucleus
 				angles[i] = 360-angle;
 			}
 		}
-		this.setAngleProfile( new Profile(angles)  );
+		this.setAngleProfile( new SegmentedProfile(angles)  );
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}
 
 	public void reverse(){
-		Profile aProfile = this.getAngleProfile();
+		SegmentedProfile aProfile = this.getAngleProfile();
 		aProfile.reverse();
 		this.setAngleProfile(aProfile);
 
