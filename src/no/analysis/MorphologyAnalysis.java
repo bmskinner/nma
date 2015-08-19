@@ -289,6 +289,7 @@ public class MorphologyAnalysis {
 				int endIndex 	= n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
 
 				// create a segment at these points
+				// ensure that the segment meets length requirements
 				NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getLength());
 				if(prevSeg != null){
 					seg.setPrevSegment(prevSeg);

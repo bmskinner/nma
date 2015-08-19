@@ -227,7 +227,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 					AnalysisSetupWindow.this.setVisible(false);
 				} else {
 					analysisOptions = null;
-					AnalysisSetupWindow.this.dispose();
+					AnalysisSetupWindow.this.setVisible(false);
 				}
 				
 			}
@@ -240,7 +240,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				analysisOptions = null;
-				AnalysisSetupWindow.this.dispose();
+				AnalysisSetupWindow.this.setVisible(false);
 			}
 		});
 		panel.add(btnCancel);

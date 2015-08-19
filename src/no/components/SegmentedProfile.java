@@ -200,9 +200,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 			// if the proposed start or end index is found in another segment
 			// that is not next or prev, do not proceed
 			if(testSeg.contains(startIndex) || testSeg.contains(endIndex)){
+								
 				if(!testSeg.getName().equals(segment.getName())
-						|| !testSeg.getName().equals(nextSegment.getName())
-						|| !testSeg.getName().equals(prevSegment.getName())){
+						&& !testSeg.getName().equals(nextSegment.getName())
+						&& !testSeg.getName().equals(prevSegment.getName())){
+					segment.setLastFailReason("Index out of bounds of next and prev");
 					return false;
 				}
 			}

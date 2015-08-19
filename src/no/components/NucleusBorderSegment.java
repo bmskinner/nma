@@ -19,8 +19,11 @@ import ij.IJ;
 
 public class NucleusBorderSegment  implements Serializable{
 
-
-	public static final int MINIMUM_SEGMENT_LENGTH = 10; // the smallest number of values in a segment
+	// the smallest number of values in a segment
+	// Set to 2 (a start and an end) so that the minimum length
+	// in the ProfileSegmenter can be interpolated downwards without
+	// causing errors when fitting segments to individual nuclei
+	public static final int MINIMUM_SEGMENT_LENGTH = 2; 
 	
 	private static final long serialVersionUID = 1L;
 	private int startIndex;
@@ -35,6 +38,20 @@ public class NucleusBorderSegment  implements Serializable{
 	private String lastFailReason = "No fail";
 
 	public NucleusBorderSegment(int startIndex, int endIndex, int total){
+		
+		// ensure that the segment meets minimum length requirements
+		int testLength = 0;
+		if(startIndex < endIndex){ // no wrap
+			testLength = endIndex - startIndex;
+		} else { // wrap
+			testLength = endIndex + (total-startIndex);
+		}
+		
+		if(testLength < MINIMUM_SEGMENT_LENGTH){
+			throw new IllegalArgumentException("Cannot create segment of length "
+						+ testLength
+						+ ": shorter than "+MINIMUM_SEGMENT_LENGTH);
+		}
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
 		this.totalLength = total;
@@ -57,6 +74,10 @@ public class NucleusBorderSegment  implements Serializable{
 	
 	public String getLastFailReason(){
 		return this.lastFailReason;
+	}
+	
+	public void setLastFailReason(String reason){
+		this.lastFailReason = reason;
 	}
 
 	public int getStartIndex(){

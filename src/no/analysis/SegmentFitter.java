@@ -35,6 +35,8 @@ public class SegmentFitter {
 	
 	private 	SegmentedProfile medianProfile; // the profile to align against
 	
+	private boolean debug = false;
+	
 	/**
 	 * The number of points ahead and behind to test
 	 * when creating new segment profiles
@@ -214,8 +216,9 @@ public class SegmentFitter {
 		// interpolate the test segments to the length of the median segments
 		Profile revisedProfile = testSegProfile.interpolate(medianSegment.length());
 
-		logger.log("\tAdjusted segment "+name+":\t"+testSeg.getStartIndex()+"-"+testSeg.getEndIndex()+"\t"+testSeg.length()+" -> "+medianSegment.length(), Logger.DEBUG);
-
+		if(debug){
+			logger.log("\tAdjusted segment "+name+":\t"+testSeg.getStartIndex()+"-"+testSeg.getEndIndex()+"\t"+testSeg.length()+" -> "+medianSegment.length(), Logger.DEBUG);
+		}
 		return revisedProfile;
 	}
 	
@@ -247,12 +250,14 @@ public class SegmentFitter {
 			NucleusBorderSegment segment = tempProfile.getSegment(name);
 			
 			// get the initial score for the segment and log it
-//			double score = compareSegmentationPatterns(medianProfile, tempProfile);
-//			logger.log("Segment\t"+segment.getName()
-//					+"\tLength "+segment.length()
-//					+"\t"+segment.getStartIndex()
-//					+"-"+segment.getEndIndex() );
-//			logger.log("\tInitial score: "+score, Logger.DEBUG);
+			if(debug){
+			double score = compareSegmentationPatterns(medianProfile, tempProfile);
+			logger.log("Segment\t"+segment.getName()
+					+"\tLength "+segment.length()
+					+"\t"+segment.getStartIndex()
+					+"-"+segment.getEndIndex() );
+			logger.log("\tInitial score: "+score, Logger.DEBUG);
+			}
 			
 			// find the best length and offset change
 			// apply them to the profile
@@ -262,9 +267,11 @@ public class SegmentFitter {
 			result 	 = new SegmentedProfile(tempProfile);				
 		}
 		
-//		for(String name : result.getSegmentNames()){
-////			logger.log("Fitted segment: "+result.getSegment(name).toString(), Logger.DEBUG);
-//		}
+		if(debug){
+			for(String name : result.getSegmentNames()){
+				logger.log("Fitted segment: "+result.getSegment(name).toString(), Logger.DEBUG);
+			}
+		}
 		
 		
 		return result;
@@ -298,15 +305,19 @@ public class SegmentFitter {
 		// the maximum length offset to apply
 		// we can't go beyond the end of the next segment anyway, so use that as the cutoff
 		// how far from current end to next segment end?
-		int maximumChange = segment.testLength(segment.getEndIndex(), segment.nextSegment().getEndIndex());		
-//		logger.log("\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
-		
+		int maximumChange = segment.testLength(segment.getEndIndex(), segment.nextSegment().getEndIndex());	
+		if(debug){
+			logger.log("\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
+		}
 		
 		// Try all the possible values in the valid range of changes
 		for(int changeValue = minimumChange; changeValue < maximumChange; changeValue++){
 			
 			// apply all changes to a fresh copy of the profile
 			SegmentedProfile testProfile = new SegmentedProfile(profile);
+//			if(debug){
+//				logger.log("\tTesting length change "+changeValue);
+//			}
 
 			// not permitted if it violates length constraint
 			if(testProfile.adjustSegmentEnd(name, changeValue)){
@@ -314,12 +325,16 @@ public class SegmentFitter {
 				// anything that gets in here should be valid
 				try{
 					double score = compareSegmentationPatterns(medianProfile, testProfile);
-//					logger.log("\tLengthen "+changeValue+":\tScore:\t"+score, Logger.DEBUG);
+					if(debug){
+						logger.log("\tLengthen "+changeValue+":\tScore:\t"+score, Logger.DEBUG);
+					}
 					
 					if(score < bestScore){
 						bestScore 	= score;
 						result = new SegmentedProfile(testProfile);
-//						logger.log("\tNew best score:\t"+score+"\tLengthen:\t"+changeValue, Logger.DEBUG);
+						if(debug){
+							logger.log("\tNew best score:\t"+score+"\tLengthen:\t"+changeValue, Logger.DEBUG);
+						}
 					}
 				}catch(IllegalArgumentException e){
 					// throw a new edxception rather than trying a nudge a problem profile
@@ -336,11 +351,18 @@ public class SegmentFitter {
 				if(score < bestScore){
 					bestScore = score;
 					result = new SegmentedProfile(testProfile);
-//					logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
+					if(debug){
+						logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
+					}
 				}
 										
 			} else {
-//				logger.log("\tLengthen "+changeValue+":\tInvalid length change:\t"+segment.getLastFailReason()+"\t"+segment.toString(), Logger.DEBUG);
+				if(debug){
+					logger.log("\tLengthen "+changeValue
+						+":\tInvalid length change:\t"
+						+testProfile.getSegment(name).getLastFailReason()
+						+"\t"+segment.toString(), Logger.DEBUG);
+				}
 			}
 		}
 		return result;

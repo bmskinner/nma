@@ -73,14 +73,14 @@ public class ProfileSegmenter {
 
 				// when we get to the end of the profile, seglength must  be discounted, so we can wrap
 				// ditto for the beginning of the profile
-				if(index>profile.size()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH || index<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
-					segLength = NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH;
+				if(index>profile.size()-MIN_SEGMENT_SIZE || index<MIN_SEGMENT_SIZE){
+					segLength = MIN_SEGMENT_SIZE;
 				}
 
 				// We want a minima or maxima, and the value must be distinct from its surroundings			
 				if( breakpoint.get(index)==1 
 						&& Math.abs(dDeltas.get(index)) > variationRange*0.02
-						&& segLength >= NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH){
+						&& segLength >= MIN_SEGMENT_SIZE){
 					
 					// we've hit a new segment
 					NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
