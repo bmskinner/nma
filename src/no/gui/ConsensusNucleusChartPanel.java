@@ -34,9 +34,21 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		resetItem.addActionListener(this);
 		resetItem.setActionCommand("RotateReset");
 		
+		JMenuItem offsetItem = new JMenuItem("Offset...");
+		offsetItem.addActionListener(this);
+		offsetItem.setActionCommand("OffsetAction");
+		
+		JMenuItem resetOffsetItem = new JMenuItem("Reset offset to zero");
+		resetOffsetItem.addActionListener(this);
+		resetOffsetItem.setActionCommand("OffsetReset");
+		
 		popup.add(alignItem);
 		popup.add(rotateItem);
 		popup.add(resetItem);
+		popup.addSeparator();
+		popup.add(offsetItem);
+		popup.add(resetOffsetItem);
+		
 		this.setPopupMenu(popup);
 
 	}
@@ -62,6 +74,14 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		// reset the rotation to the orientation point (tail)
 		if(arg0.getActionCommand().equals("RotateReset")){
 			fireSignalChangeEvent("RotateReset");
+		}
+		
+		if(arg0.getActionCommand().equals("OffsetAction")){
+			fireSignalChangeEvent("OffsetAction");
+		}
+		
+		if(arg0.getActionCommand().equals("OffsetReset")){
+			fireSignalChangeEvent("OffsetReset");
 		}
 		
 		

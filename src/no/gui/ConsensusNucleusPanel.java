@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -25,6 +26,7 @@ import javax.swing.SpinnerNumberModel;
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.NucleusBorderPoint;
+import no.components.XYPoint;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -304,7 +306,11 @@ public class ConsensusNucleusPanel extends JPanel implements SignalChangeListene
 						SpinnerNumberModel sModel = new SpinnerNumberModel(0, -360, 360, 1.0);
 						JSpinner spinner = new JSpinner(sModel);
 						
-						int option = JOptionPane.showOptionDialog(null, spinner, "Choose the amount to rotate", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+						int option = JOptionPane.showOptionDialog(null, 
+								spinner, 
+								"Choose the amount to rotate", 
+								JOptionPane.OK_CANCEL_OPTION, 
+								JOptionPane.QUESTION_MESSAGE, null, null, null);
 						if (option == JOptionPane.CANCEL_OPTION) {
 						    // user hit cancel
 						} else if (option == JOptionPane.OK_OPTION)	{
@@ -335,6 +341,64 @@ public class ConsensusNucleusPanel extends JPanel implements SignalChangeListene
 					}
 				} else {
 					log("Cannot rotate: must have one dataset selected");
+				}
+			}
+			
+			if(event.type().equals("OffsetAction")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+
+						// get the x and y offset
+						SpinnerNumberModel xModel = new SpinnerNumberModel(0, -100, 100, 0.1);
+						SpinnerNumberModel yModel = new SpinnerNumberModel(0, -100, 100, 0.1);
+				        
+						JSpinner xSpinner = new JSpinner(xModel);
+						JSpinner ySpinner = new JSpinner(yModel);
+						
+						JSpinner[] spinners = { xSpinner, ySpinner };
+						
+						int option = JOptionPane.showOptionDialog(null, 
+								spinners, 
+								"Choose the amount to offset x and y", 
+								JOptionPane.OK_CANCEL_OPTION, 
+								JOptionPane.QUESTION_MESSAGE, null, null, null);
+						if (option == JOptionPane.CANCEL_OPTION) {
+						    // user hit cancel
+						} else if (option == JOptionPane.OK_OPTION)	{
+							
+							// offset by 90 because reasons?
+							double x = (Double) xSpinner.getModel().getValue();
+							double y = (Double) ySpinner.getModel().getValue();
+							
+							activeDataset.getCollection().getConsensusNucleus().offset(x, y);;
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							this.update(list);
+						}
+
+					}
+				} else {
+					log("Cannot offset: must have one dataset selected");
+				}
+			}
+			
+			if(event.type().equals("OffsetReset")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+
+						double x = 0;
+						double y = 0;
+						XYPoint point = new XYPoint(x, y);
+						
+						activeDataset.getCollection().getConsensusNucleus().moveCentreOfMass(point);;
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+						list.add(activeDataset);
+						this.update(list);
+					}
+				} else {
+					log("Cannot offset: must have one dataset selected");
 				}
 			}
 

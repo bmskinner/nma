@@ -36,8 +36,10 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	private XYPoint getPositionAfterRotation(NucleusBorderPoint point, double angle){
 		
 		// get the angle from the tail to the vertical axis
-		double tailAngle = findAngleBetweenXYPoints( point, this.getCentreOfMass(), new XYPoint(0,-10));
-		if(point.getX()<0){
+		double tailAngle = findAngleBetweenXYPoints( point, 
+				this.getCentreOfMass(), 
+				new XYPoint(this.getCentreOfMass().getX(),-10));
+		if(point.getX()<this.getCentreOfMass().getX()){
 			tailAngle = 360-tailAngle; // correct for measuring the smallest angle
 		}
 		// get a copy of the new bottom point
@@ -50,8 +52,8 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 		double newAngle = tailAngle + angle;
 
 		// get the new X and Y coordinates of the point after rotation
-		double newX = Utils.getXComponentOfAngle(distance, newAngle);
-		double newY = Utils.getYComponentOfAngle(distance, newAngle);
+		double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+		double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
 		return new XYPoint(newX, newY);
 	}
 	
@@ -73,12 +75,14 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 
 			XYPoint newPoint = getPositionAfterRotation(bottomPoint, angle);
 
+			// get the absolute distance from the vertical
+			double distanceFromCoM = Math.abs(newPoint.getX()-this.getCentreOfMass().getX());
 			// if the new x position is closer to the central vertical line
 			// AND the y position is below zero
 			// this is a better rotation
-			if(Math.abs(newPoint.getX()) < distanceFromZero && newPoint.getY() < 0){
+			if( distanceFromCoM < distanceFromZero && newPoint.getY() < this.getCentreOfMass().getY()){
 				angleToRotate = angle;
-				distanceFromZero = Math.abs(newPoint.getX());
+				distanceFromZero = distanceFromCoM;
 			}
 		}
 		this.rotate(angleToRotate);
@@ -125,20 +129,30 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	 * @param angle
 	 */
 	public void rotate(double angle){
-		
-		for(NucleusBorderPoint p : this.getBorderList()){
-
+			
+		for(int i=0; i<this.getLength(); i++){
+			XYPoint p = this.getBorderPoint(i);
+			
+			
+			// get the distance from this point to the centre of mass
 			double distance = p.getLengthTo(this.getCentreOfMass());
-			double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, this.getCentreOfMass(), new XYPoint(0,-10));
-			if(p.getX()<0){
+			
+			// get the angle between the centre of mass, the point and a
+			// point directly under the centre of mass
+			double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
+					this.getCentreOfMass(), 
+					new XYPoint(this.getCentreOfMass().getX(),-10));
+			
+			
+			if(p.getX()<this.getCentreOfMass().getX()){
 				oldAngle = 360-oldAngle;
 			}
 
 			double newAngle = oldAngle + angle;
-			double newX = Utils.getXComponentOfAngle(distance, newAngle);
-			double newY = Utils.getYComponentOfAngle(distance, newAngle);
+			double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+			double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
 
-			this.updatePoint(this.getIndex(p), newX, newY);
+			this.updatePoint(i, newX, newY);
 		}
 	}
 	
@@ -151,19 +165,45 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	public void moveCentreOfMass(XYPoint point){
 
 		XYPoint centreOfMass = this.getCentreOfMass();
-		double xOffset = centreOfMass.getX() - point.getX();
-		double yOffset = centreOfMass.getY() - point.getY() ;
+		
+		// get the difference between the x and y positions 
+		// of the points as offsets to apply
+		double xOffset = point.getX() - centreOfMass.getX();
+		double yOffset = point.getY() - centreOfMass.getY();
 
-		this.setCentreOfMass(point);
+		// update the centre of mass
+		
 
+		/// update each border point
 		for(int i=0; i<this.getLength(); i++){
 			XYPoint p = this.getBorderPoint(i);
 
-			double x = p.getX() - xOffset;
-			double y = p.getY() - yOffset;
+			double x = p.getX() + xOffset;
+			double y = p.getY() + yOffset;
 
 			this.updatePoint(i, x, y );
 		}
+		this.setCentreOfMass(point);
+	}
+	
+	/**
+	 * Translate the XY coordinates of each border point so that
+	 * the nuclear centre of mass is at the given point
+	 * @param point the new centre of mass
+	 */
+	public void offset(double xOffset, double yOffset){
+
+		XYPoint centreOfMass = this.getCentreOfMass();
+
+		// get the difference between the x and y positions 
+		// of the points as offsets to apply
+		xOffset = xOffset - centreOfMass.getX();
+		yOffset = yOffset - centreOfMass.getY();
+		
+		XYPoint newCentreOfMass = new XYPoint(xOffset, yOffset);
+
+		// update the positions
+		this.moveCentreOfMass(newCentreOfMass);
 	}
 
 }
