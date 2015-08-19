@@ -45,8 +45,8 @@ public class Logger {
 	
 	/**
 	 * Log an exception message with the corresponding stack trace
-	 * @param message
-	 * @param e
+	 * @param message a message describing the error
+	 * @param e the exception that occurred
 	 */
 	public void error(String message, Exception e){
 		log(message+": "+e.getMessage(), Logger.ERROR);

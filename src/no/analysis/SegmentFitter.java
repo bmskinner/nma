@@ -235,7 +235,7 @@ public class SegmentFitter {
 			throw new IllegalArgumentException("Profile is null in runFitter()");
 		}
 
-		logger.log("Fitting segments", Logger.DEBUG);
+		logger.log("Fitting segments", Logger.INFO);
 		
 		// By default, return the input profile
 		SegmentedProfile result 	 = new SegmentedProfile(profile);
@@ -251,12 +251,12 @@ public class SegmentFitter {
 			
 			// get the initial score for the segment and log it
 			if(debug){
-			double score = compareSegmentationPatterns(medianProfile, tempProfile);
-			logger.log("Segment\t"+segment.getName()
-					+"\tLength "+segment.length()
-					+"\t"+segment.getStartIndex()
-					+"-"+segment.getEndIndex() );
-			logger.log("\tInitial score: "+score, Logger.DEBUG);
+				double score = compareSegmentationPatterns(medianProfile, tempProfile);
+				logger.log("Segment\t"+segment.getName()
+						+"\tLength "+segment.length()
+						+"\t"+segment.getStartIndex()
+						+"-"+segment.getEndIndex(), Logger.DEBUG );
+				logger.log("\tInitial score: "+score, Logger.DEBUG);
 			}
 			
 			// find the best length and offset change
