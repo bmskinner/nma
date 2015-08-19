@@ -1086,7 +1086,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			try{
 
 				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
-						d.getAnalysisOptions().getNucleusClass(), 
 						"Fast");
 
 				refolder.addPropertyChangeListener(this);
@@ -1110,7 +1109,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			try{
 
 				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
-						d.getAnalysisOptions().getNucleusClass(), 
 						"Fast");
 
 				refolder.addPropertyChangeListener(this);

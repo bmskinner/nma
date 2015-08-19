@@ -16,6 +16,7 @@ import javax.swing.SwingWorker;
 import utility.Constants;
 import utility.Logger;
 import utility.Utils;
+import no.nuclei.ConsensusNucleus;
 import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
@@ -27,7 +28,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 	private Profile targetCurve;
 
-	private Nucleus refoldNucleus;
+	private ConsensusNucleus refoldNucleus;
 
 	private CellCollection collection;
 	
@@ -50,6 +51,43 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		MODES.put("Intensive", INTENSIVE_MODE);
 		MODES.put("Brutal", BRUTAL_MODE);
 	}
+			
+	/**
+	 * construct from a collection of cells and the mode of refolding
+	 * @param collection
+	 * @param refoldMode
+	 * @throws Exception
+	 */
+	public CurveRefolder(CellCollection collection, String refoldMode) throws Exception{
+		
+		
+		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
+
+		// make an entirely new nucleus to play with
+		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian("tail");	
+		ConsensusNucleus refoldCandidate = new ConsensusNucleus(n, collection.getNucleusClass());
+
+
+		logger.log("Refolding nucleus of class: "+collection.getNucleusClass().getSimpleName());
+		logger.log("Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber(), Logger.DEBUG);
+
+		Profile targetProfile 	= collection.getProfileCollection().getProfile("tail");
+		Profile q25 			= collection.getProfileCollection().getProfile("tail25");
+		Profile q75 			= collection.getProfileCollection().getProfile("tail75");
+
+		if(targetProfile==null){
+			throw new Exception("Null reference to target profile");
+		}
+		if(q25==null || q75==null){
+			throw new Exception("Null reference to q25 or q75 profile");
+		}
+
+
+		this.targetCurve 	= targetProfile;
+		this.refoldNucleus 	= refoldCandidate;
+		this.collection 	= collection;
+		this.setMode(refoldMode);
+	}
 	
 	@Override
 	protected Boolean doInBackground() {
@@ -62,10 +100,11 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// orient refolded nucleus to put tail at the bottom
-			this.putPointAtBottom(refoldNucleus.getBorderTag("tail"));
+			refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag("tail"));
+//			this.putPointAtBottom(refoldNucleus.getBorderTag("tail"));
 
 			// if rodent sperm, put tip on left if needed
-			if(refoldNucleus.getClass().equals(RodentSpermNucleus.class)){
+			if(refoldNucleus.getType().equals(RodentSpermNucleus.class)){
 
 				if(refoldNucleus.getBorderTag("tip").getX()>0){
 					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
@@ -121,43 +160,6 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		}
 		
 	} 
-		
-	public CurveRefolder(CellCollection collection, Class<?> nucleusClass, String refoldMode) throws Exception{
-		
-		
-		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
-
-		// make an entirely new nucleus to play with
-		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian("tail");
-		Constructor<?> nucleusConstructor = nucleusClass.getConstructor(new Class[]{RoundNucleus.class});
-		Nucleus refoldCandidate  = (Nucleus) nucleusConstructor.newInstance(n);
-
-		if(refoldCandidate==null){
-			throw new Exception("Null reference to nucleus refold candidate");
-		}
-
-		logger.log("Refolding nucleus of class: "+refoldCandidate.getClass().getSimpleName());
-		logger.log("Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber(), Logger.DEBUG);
-
-		Profile targetProfile 	= collection.getProfileCollection().getProfile("tail");
-		Profile q25 			= collection.getProfileCollection().getProfile("tail25");
-		Profile q75 			= collection.getProfileCollection().getProfile("tail75");
-
-		if(targetProfile==null){
-			throw new Exception("Null reference to target profile");
-		}
-		if(q25==null || q75==null){
-			throw new Exception("Null reference to q25 or q75 profile");
-		}
-
-
-		this.targetCurve 	= targetProfile;
-		this.refoldNucleus 	= refoldCandidate;
-		this.collection 	= collection;
-
-
-		this.setMode(refoldMode);
-	}
 
 	/*
 		The main function to be called externally;
@@ -166,7 +168,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	public void refoldCurve() throws Exception {
 
 		try{
-			this.moveCoMtoZero();
+			refoldNucleus.moveCentreOfMass(new XYPoint(0, 0));
 		} catch(Exception e){
 			throw new Exception("Unable to move centre of mass");
 		}
@@ -223,29 +225,6 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 	public void setMode(String s){
 		this.mode = CurveRefolder.MODES.get(s);
-	}
-
-	/*
-		Translate the XY coordinates of each point so that
-		the nuclear centre of mass is at 0,0.
-		Affects refoldNucleus, which is only a copy of the median nucleus
-	*/
-	private void moveCoMtoZero(){
-
-		XYPoint centreOfMass = refoldNucleus.getCentreOfMass();
-		double xOffset = centreOfMass.getX();
-		double yOffset = centreOfMass.getY();
-
-		refoldNucleus.setCentreOfMass(new XYPoint(0,0));
-
-		for(int i=0; i<refoldNucleus.getLength(); i++){
-			XYPoint p = refoldNucleus.getBorderPoint(i);
-
-			double x = p.getX() - xOffset;
-			double y = p.getY() - yOffset;
-
-			refoldNucleus.updatePoint(i, x, y );
-		}
 	}
 
 
@@ -326,72 +305,6 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			}
 		}
 		return similarityScore;
-	}
-
-	/*
-		This is used only for the consensus image.
-		The consenus nucleus needs to be oriented with
-		a given point at the bottom. Assumes CoM is at 0,0.
-		Find the angle of rotation needed to put the point atthe bottom
-	*/
-	private double findRotationAngle(NucleusBorderPoint bottomPoint){
-		// find the angle to rotate
-		double angleToRotate = 0;
-		double distanceFromZero = 180;
-
-		// get the angle from the tail to the vertical axis line
-		double tailAngle = RoundNucleus.findAngleBetweenXYPoints( bottomPoint, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
-			if(bottomPoint.getX()<0){
-				tailAngle = 360-tailAngle; // correct for measuring the smallest angle
-			}
-
-		for(int i=0;i<360;i++){
-
-			// get a copy of the bottom point
-			XYPoint p = new XYPoint( bottomPoint.getX(), bottomPoint.getY() );
-			
-			// get the distance from tail to CoM
-			double distance = p.getLengthTo(refoldNucleus.getCentreOfMass());
-
-			// add the rotation amount
-			double newAngle = tailAngle + i;
-
-			double newX = Utils.getXComponentOfAngle(distance, newAngle);
-			double newY = Utils.getYComponentOfAngle(distance, newAngle);
-
-			if(Math.abs(newX) < distanceFromZero && newY < 0){
-				angleToRotate = i;
-				distanceFromZero = Math.abs(newX);
-			}
-		}
-
-		logger.log("Rotating by "+(int)angleToRotate,Logger.DEBUG);
-		return angleToRotate;
-	}
-
-	/*
-		Given a point, rotate the roi around the CoM so that  the point
-		is at the bottom
-	*/
-	public void putPointAtBottom(NucleusBorderPoint bottomPoint){
-
-		double angleToRotate = findRotationAngle(bottomPoint);
-
-		for(int i=0;i<refoldNucleus.getLength();i++){
-
-			XYPoint p = refoldNucleus.getPoint(i);
-			double distance = p.getLengthTo(refoldNucleus.getCentreOfMass());
-			double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, refoldNucleus.getCentreOfMass(), new XYPoint(0,-10));
-			if(p.getX()<0){
-				oldAngle = 360-oldAngle;
-			}
-
-			double newAngle = oldAngle + angleToRotate;
-			double newX = Utils.getXComponentOfAngle(distance, newAngle);
-			double newY = Utils.getYComponentOfAngle(distance, newAngle);
-
-			refoldNucleus.updatePoint(i, newX, newY);
-		}
 	}
 
 	public static double getDistanceFromAngle(double angle, Nucleus n){
