@@ -401,7 +401,6 @@ public class AnalysisCreator extends SwingWorker<Boolean, Integer> implements Pr
 				CurveRefolder refolder = null;
 				try {
 					refolder = new CurveRefolder(r, 
-							analysisOptions.getNucleusClass(), 
 							analysisOptions.getRefoldMode());
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block

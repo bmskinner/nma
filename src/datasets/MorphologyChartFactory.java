@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.Profile;
@@ -370,9 +373,11 @@ public class MorphologyChartFactory {
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				null, null, null);       
 		chart.getPlot().setBackgroundPaint(Color.WHITE);
+		chart.getXYPlot().getDomainAxis().setVisible(false);
+		chart.getXYPlot().getRangeAxis().setVisible(false);
 		return chart;
 	}
-	
+		
 	/**
 	 * Create a consenusus chart for the given nucleus collection
 	 * @param collection the NucleusCollection to draw the consensus from

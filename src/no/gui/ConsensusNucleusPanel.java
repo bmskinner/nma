@@ -3,11 +3,9 @@ package no.gui;
 import ij.IJ;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ComponentAdapter;
@@ -18,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
@@ -33,15 +30,16 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
+import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
-public class ConsensusNucleusPanel extends JPanel {
+public class ConsensusNucleusPanel extends JPanel implements SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	
 	public static final String SOURCE_COMPONENT = "ConsensusNucleusPanel"; 
 
-	private ChartPanel consensusChartPanel;
+	private ConsensusNucleusChartPanel consensusChartPanel;
 	private JButton runRefoldingButton;
 	
 	private List<Object> listeners = new ArrayList<Object>();
@@ -54,15 +52,11 @@ public class ConsensusNucleusPanel extends JPanel {
 		c.fill = GridBagConstraints.BOTH;      //reset to default
 		c.weightx = 0.0;         
 		
-		JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-				null, null, null);
-		XYPlot consensusPlot = consensusChart.getXYPlot();
-		consensusPlot.setBackgroundPaint(Color.WHITE);
-		consensusPlot.getDomainAxis().setVisible(false);
-		consensusPlot.getRangeAxis().setVisible(false);
+		JFreeChart consensusChart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
 		
-		consensusChartPanel = new ChartPanel(consensusChart);
-
+		consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
+		consensusChartPanel.addSignalChangeListener(this);
+		
 		runRefoldingButton = new JButton("Refold");
 
 		runRefoldingButton.addMouseListener(new MouseAdapter() {
@@ -77,15 +71,6 @@ public class ConsensusNucleusPanel extends JPanel {
 		consensusChartPanel.add(runRefoldingButton);
 		consensusChartPanel.setMinimumSize(new Dimension(200, 200));
 		
-		
-		
-		
-//		consensusChartPanel.addComponentListener(new ComponentAdapter() {
-//			@Override
-//			public void componentResized(ComponentEvent e) {
-//				resizePreview(consensusChartPanel, ConsensusNucleusPanel.this);
-//			}
-//		});
 		
 		this.addComponentListener(new ComponentAdapter() {
 			@Override
@@ -111,14 +96,8 @@ public class ConsensusNucleusPanel extends JPanel {
 					if(!collection.hasConsensusNucleus()){
 
 						// add button to run analysis
-						JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-								null, null, null);
-						XYPlot consensusPlot = consensusChart.getXYPlot();
-						consensusPlot.setBackgroundPaint(Color.WHITE);
-						consensusPlot.getDomainAxis().setVisible(false);
-						consensusPlot.getRangeAxis().setVisible(false);
+						JFreeChart consensusChart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
 						consensusChartPanel.setChart(consensusChart);
-
 						runRefoldingButton.setVisible(true);
 
 
@@ -292,6 +271,22 @@ public class ConsensusNucleusPanel extends JPanel {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
         }
     }
+    
+    private void log(String message){
+    	fireSignalChangeEvent("Log_"+message);
+    }
+
+	@Override
+	public void signalChangeReceived(SignalChangeEvent event) {
+		
+		// pass on log messages back to the main window
+		if(event.sourceName().equals(ConsensusNucleusChartPanel.SOURCE_COMPONENT)){
+			if(event.type().startsWith("Log_")){
+				fireSignalChangeEvent(event.type());
+			}
+		}
+		
+	}
     
     
 

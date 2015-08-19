@@ -105,9 +105,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			
 		} catch (Exception e){
-			IJ.log("Error making signal panel: "+e.getMessage());
+			log("Error making signal panel: "+e.getMessage());
 			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
+				log(e1.toString());
 			}
 		}
 	}
@@ -261,6 +261,14 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
         }
     }
     
+    /**
+     * Send a log message to the main window
+     * @param message
+     */
+    private void log(String message){
+    	fireSignalChangeEvent("Log_"+message);
+    }
+    
     
     protected class OverviewPanel extends JPanel{
     	
@@ -400,9 +408,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     				}
 
     			} catch(Exception e){
-    				IJ.log("Error creating signal checkboxes: "+e.getMessage());
+    				log("Error creating signal checkboxes: "+e.getMessage());
     				for(StackTraceElement e1 : e.getStackTrace()){
-    					IJ.log(e1.toString());
+    					log(e1.toString());
     				}
     			}
     		}
@@ -424,7 +432,7 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
     			statsTable.setModel(model);
     		} catch (Exception e){
-    			fireSignalChangeEvent("Log_"+"Error updating signal stats: "+e.getMessage());
+    			log("Error updating signal stats: "+e.getMessage());
     		}
     		int columns = statsTable.getColumnModel().getColumnCount();
     		for(int i=1;i<columns;i++){
@@ -473,9 +481,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 //    				consensusAndCheckboxPanel.setVisible(false);
     			}
     		} catch(Exception e){
-    			IJ.log("Error updating signals: "+e.getMessage());
+    			log("Error updating signals: "+e.getMessage());
     			for(StackTraceElement e1 : e.getStackTrace()){
-    				IJ.log(e1.toString());
+    				log(e1.toString());
     			}
     		}
     	}
