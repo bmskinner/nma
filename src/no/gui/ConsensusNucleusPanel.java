@@ -19,6 +19,8 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
@@ -298,23 +300,22 @@ public class ConsensusNucleusPanel extends JPanel implements SignalChangeListene
 				if(activeDataset!=null){
 
 					if(activeDataset.getCollection().hasConsensusNucleus()){
-
-						String s = (String)JOptionPane.showInputDialog(
-								this,
-								"Choose the amount to rotate:",
-								"Set rotation angle",
-								JOptionPane.PLAIN_MESSAGE,
-								null,
-								null,
-								"0");
-
-						double angle = Double.valueOf(s);
-
-						// offset by 90 because reasons?
-						activeDataset.getCollection().getConsensusNucleus().rotate(angle-90);
-						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-						list.add(activeDataset);
-						this.update(list);
+						
+						SpinnerNumberModel sModel = new SpinnerNumberModel(0, -360, 360, 1.0);
+						JSpinner spinner = new JSpinner(sModel);
+						
+						int option = JOptionPane.showOptionDialog(null, spinner, "Choose the amount to rotate", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+						if (option == JOptionPane.CANCEL_OPTION) {
+						    // user hit cancel
+						} else if (option == JOptionPane.OK_OPTION)	{
+							
+							// offset by 90 because reasons?
+							double angle = (Double) spinner.getModel().getValue();
+							activeDataset.getCollection().getConsensusNucleus().rotate(angle-90);
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							this.update(list);
+						}
 					}
 				} else {
 					log("Cannot rotate: must have one dataset selected");

@@ -48,10 +48,9 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		// Align two points to the vertical
 		if(arg0.getActionCommand().equals("AlignVertical")){
 			
+			fireSignalChangeEvent("AlignVertical");
 			// select points, do rotation
-			log("Select the top point");
 			// wait for click, get point nearest, wait for click, get point nearest
-			
 			// run rotation
 		}
 		
