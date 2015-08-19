@@ -26,6 +26,7 @@ import no.components.ProfileCollection;
 import no.components.SegmentedProfile;
 import no.components.ShellResult;
 import no.components.XYPoint;
+import no.nuclei.ConsensusNucleus;
 import no.nuclei.Nucleus;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
@@ -752,9 +753,9 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static XYDataset createNucleusOutline(CellCollection collection) throws Exception{
+	public static XYDataset createNucleusOutline(CellCollection collection) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
-		Nucleus n = collection.getConsensusNucleus();
+		ConsensusNucleus n = collection.getConsensusNucleus();
 		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
 		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75").interpolate(n.getLength());
 		
@@ -790,9 +791,10 @@ public class NucleusDatasetCreator {
 		// add the segments
 		List<NucleusBorderSegment> segmentList = n.getAngleProfile().getSegments();
 		if(!segmentList.isEmpty()){ // only draw if there are segments
-			for(int i=0;i<segmentList.size();i++){
+			
+			for(String name : n.getAngleProfile().getSegmentNames()){
 
-				NucleusBorderSegment seg = n.getAngleProfile().getSegment("Seg_"+i);
+				NucleusBorderSegment seg = n.getAngleProfile().getSegment(name);
 
 				double[] xpoints = new double[seg.length()+1];
 				double[] ypoints = new double[seg.length()+1];
@@ -804,7 +806,7 @@ public class NucleusDatasetCreator {
 				}
 
 				double[][] data = { xpoints, ypoints };
-				ds.addSeries("Seg_"+i, data);
+				ds.addSeries(name, data);
 			}
 		}
 

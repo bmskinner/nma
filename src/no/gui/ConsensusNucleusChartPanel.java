@@ -26,7 +26,17 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		alignItem.addActionListener(this);
 		alignItem.setActionCommand("AlignVertical");
 		
+		JMenuItem rotateItem = new JMenuItem("Rotate by...");
+		rotateItem.addActionListener(this);
+		rotateItem.setActionCommand("RotateConsensus");
+		
+		JMenuItem resetItem = new JMenuItem("Reset rotation to tail");
+		resetItem.addActionListener(this);
+		resetItem.setActionCommand("RotateReset");
+		
 		popup.add(alignItem);
+		popup.add(rotateItem);
+		popup.add(resetItem);
 		this.setPopupMenu(popup);
 
 	}
@@ -35,7 +45,7 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 	public void actionPerformed(ActionEvent arg0) {
 		super.actionPerformed(arg0);
 		
-		// handle the new menu items
+		// Align two points to the vertical
 		if(arg0.getActionCommand().equals("AlignVertical")){
 			
 			// select points, do rotation
@@ -44,6 +54,19 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 			
 			// run rotation
 		}
+		
+		// Rotate the consensus in the chart by the given amount
+		if(arg0.getActionCommand().equals("RotateConsensus")){
+			fireSignalChangeEvent("RotateConsensus");
+		}
+		
+		// reset the rotation to the orientation point (tail)
+		if(arg0.getActionCommand().equals("RotateReset")){
+			fireSignalChangeEvent("RotateReset");
+		}
+		
+		
+		
 		
 	}
 

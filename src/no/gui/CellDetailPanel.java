@@ -281,23 +281,23 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		}
 		
 		protected void update(Cell cell){
-			
+
 			try{
 
-			if(cell==null){
-				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
-				profileChartPanel.setChart(chart);
+				if(cell==null){
+					JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
+					profileChartPanel.setChart(chart);
 
-			} else {
-				
-				Nucleus nucleus = cell.getNucleus();
+				} else {
 
-				XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
-				JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, nucleus.getLength());
+					Nucleus nucleus = cell.getNucleus();
 
-				profileChartPanel.setChart(chart);
-			}
-			
+					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
+					JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, nucleus.getLength());
+
+					profileChartPanel.setChart(chart);
+				}
+
 			} catch(Exception e){
 				fireSignalChangeEvent("Log_Error updating cell panel");
 			}

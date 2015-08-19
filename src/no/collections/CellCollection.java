@@ -28,6 +28,7 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;
+import no.nuclei.ConsensusNucleus;
 import no.nuclei.Nucleus;
 import no.nuclei.sperm.PigSpermNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
@@ -52,7 +53,7 @@ implements Serializable
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	protected Map<String, ProfileCollection> profileCollections = new HashMap<String, ProfileCollection>();
 		
-	private Nucleus consensusNucleus;
+	private ConsensusNucleus consensusNucleus;
 	
 	private List<Cell> cellCollection = new ArrayList<Cell>(0); // store all the nuclei analysed
 	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();
@@ -122,7 +123,7 @@ implements Serializable
   }
 
 
-  public void addConsensusNucleus(Nucleus n){
+  public void addConsensusNucleus(ConsensusNucleus n){
 	  this.consensusNucleus = n;
   }
     
@@ -149,7 +150,7 @@ implements Serializable
 	  return null;
   }
   
-  public Nucleus getConsensusNucleus(){
+  public ConsensusNucleus getConsensusNucleus(){
 	  return this.consensusNucleus;
   }
   

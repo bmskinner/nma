@@ -17,10 +17,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
+import no.components.NucleusBorderPoint;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -41,6 +43,8 @@ public class ConsensusNucleusPanel extends JPanel implements SignalChangeListene
 
 	private ConsensusNucleusChartPanel consensusChartPanel;
 	private JButton runRefoldingButton;
+	
+	private AnalysisDataset activeDataset;
 	
 	private List<Object> listeners = new ArrayList<Object>();
 	
@@ -88,11 +92,13 @@ public class ConsensusNucleusPanel extends JPanel implements SignalChangeListene
 	 * @param list the datasets
 	 */	
 	public void update(List<AnalysisDataset> list){
+		activeDataset = null;
 		try {
 			if(!list.isEmpty()){
 				CellCollection collection = list.get(0).getCollection();
 
 				if(list.size()==1){
+					activeDataset = list.get(0);
 					if(!collection.hasConsensusNucleus()){
 
 						// add button to run analysis
@@ -178,7 +184,10 @@ public class ConsensusNucleusPanel extends JPanel implements SignalChangeListene
 		try{
 			ds = NucleusDatasetCreator.createNucleusOutline(collection);
 		} catch(Exception e){
-			IJ.log("error making consensus");
+			log("Error making consensus: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				log(e1.toString());
+			}
 		}
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -284,6 +293,50 @@ public class ConsensusNucleusPanel extends JPanel implements SignalChangeListene
 			if(event.type().startsWith("Log_")){
 				fireSignalChangeEvent(event.type());
 			}
+			
+			if(event.type().equals("RotateConsensus")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+
+						String s = (String)JOptionPane.showInputDialog(
+								this,
+								"Choose the amount to rotate:",
+								"Set rotation angle",
+								JOptionPane.PLAIN_MESSAGE,
+								null,
+								null,
+								"0");
+
+						double angle = Double.valueOf(s);
+
+						// offset by 90 because reasons?
+						activeDataset.getCollection().getConsensusNucleus().rotate(angle-90);
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+						list.add(activeDataset);
+						this.update(list);
+					}
+				} else {
+					log("Cannot rotate: must have one dataset selected");
+				}
+			}
+			
+			if(event.type().equals("RotateReset")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+
+						NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getOrientationPoint());
+						activeDataset.getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+						list.add(activeDataset);
+						this.update(list);
+					}
+				} else {
+					log("Cannot rotate: must have one dataset selected");
+				}
+			}
+
 		}
 		
 	}

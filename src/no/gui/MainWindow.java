@@ -1081,7 +1081,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		 * Refold the currently selected dataset
 		 */
 		public RefoldNucleusAction() {
-			super("Curve refolding", "Error refolding nucleus");
+			super("Refolding", "Error refolding nucleus");
 
 			try{
 
@@ -1089,7 +1089,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						"Fast");
 
 				refolder.addPropertyChangeListener(this);
-				this.setProgressMessage("Curve refolding:"+d.getName());
+				this.setProgressMessage("Refolding:"+d.getName());
 				refolder.execute();
 
 			} catch(Exception e1){
@@ -1103,7 +1103,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		 * @param dataset
 		 */
 		public RefoldNucleusAction(AnalysisDataset dataset){
-			super("Curve refolding", "Error refolding nucleus");
+			super("Refolding", "Error refolding nucleus");
 			this.d = dataset;
 			
 			try{
@@ -1112,7 +1112,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						"Fast");
 
 				refolder.addPropertyChangeListener(this);
-				this.setProgressMessage("Curve refolding:"+d.getName());
+				this.setProgressMessage("Refolding:"+d.getName());
 				refolder.execute();
 
 			} catch(Exception e1){

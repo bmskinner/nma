@@ -635,9 +635,9 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     			TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(list);
     			table.setModel(model);
     		} catch (Exception e){
-    			fireSignalChangeEvent("Log_"+"Error updating signal analysis: "+e.getMessage());
+    			log("Error updating signal analysis: "+e.getMessage());
     			for(StackTraceElement e1 : e.getStackTrace()){
-    				fireSignalChangeEvent("Log_"+e1.toString());
+    				log(e1.toString());
     			}
     		}
     	}

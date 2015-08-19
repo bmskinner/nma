@@ -121,13 +121,13 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	}
 	
 	/**
-	 * Rotate the nucleus by the given amount 
+	 * Rotate the nucleus by the given amount around the centre of mass
 	 * @param angle
 	 */
 	public void rotate(double angle){
-		for(int i=0;i<this.getLength();i++){
+		
+		for(NucleusBorderPoint p : this.getBorderList()){
 
-			XYPoint p = this.getPoint(i);
 			double distance = p.getLengthTo(this.getCentreOfMass());
 			double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, this.getCentreOfMass(), new XYPoint(0,-10));
 			if(p.getX()<0){
@@ -138,7 +138,7 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 			double newX = Utils.getXComponentOfAngle(distance, newAngle);
 			double newY = Utils.getYComponentOfAngle(distance, newAngle);
 
-			this.updatePoint(i, newX, newY);
+			this.updatePoint(this.getIndex(p), newX, newY);
 		}
 	}
 	
