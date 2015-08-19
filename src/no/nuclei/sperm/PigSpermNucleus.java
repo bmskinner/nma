@@ -31,8 +31,9 @@ public class PigSpermNucleus
   * to the SpermNucleus constructor
   *
   * @param n the Nucleus to construct from
+ * @throws Exception 
   */
-    public PigSpermNucleus(RoundNucleus n){
+    public PigSpermNucleus(RoundNucleus n) throws Exception{
       super(n);
     }
     
@@ -46,9 +47,10 @@ public class PigSpermNucleus
   * This method overrides the Nucleus method, and uses a single measure
   * to find the pig sperm tail. This is using the maximum angle in the 
   * Profile.
+ * @throws Exception 
   */
     @Override
-    public void findPointsAroundBorder(){
+    public void findPointsAroundBorder() throws Exception{
 
       NucleusBorderPoint tailPoint1 = this.findTailByMinima();
       int tailPointIndex2 = this.findTailByMaxima();
@@ -85,9 +87,10 @@ public class PigSpermNucleus
     * using the lowest angles in the Profile. The two lowest
     * minima should be either side of the tail. Not currently
     * used.
+     * @throws Exception 
     * @see Profile
     */
-    public NucleusBorderPoint findTailByMinima(){
+    public NucleusBorderPoint findTailByMinima() throws Exception{
 
       // the two lowest minima are at the tail-end corners. 
       // between them lies the tail. Find the two lowest minima,
@@ -127,9 +130,10 @@ public class PigSpermNucleus
     * This method attempts to find the pig sperm tail point
     * using the highest angle in the Profile. The highest point 
     * should be at the tail, since the nucleus has an inward 'dent'
+     * @throws Exception 
     * @see Profile
     */
-    public int findTailByMaxima(){
+    public int findTailByMaxima() throws Exception{
       // the tail is the ?only local maximum with an interior angle above the 180 line
 
      int tailPoint = this.getAngleProfile().getIndexOfMax();

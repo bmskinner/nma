@@ -123,7 +123,7 @@ public class RoundNucleus
 		// for subclasses to access
 	}
 
-	public RoundNucleus(RoundNucleus n){
+	public RoundNucleus(RoundNucleus n) throws Exception{
 
 		this.setID(n.getID());
 		this.setPosition(n.getPosition());
@@ -160,7 +160,7 @@ public class RoundNucleus
 	* nucleus is to get the longest diameter and set this as
 	*  the head/tail axis.
 	*/
-	public void findPointsAroundBorder(){
+	public void findPointsAroundBorder() throws Exception{
 
 		int tailIndex = this.getDistanceProfile().getIndexOfMax();
 		NucleusBorderPoint tailPoint = this.getPoint(tailIndex);
@@ -778,7 +778,7 @@ public class RoundNucleus
 		This will find the point in a list that is closest to any local maximum
 		in the border profile, wherever that maximum may be
 	*/
-	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list){
+	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception{
 
 		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
@@ -801,7 +801,7 @@ public class RoundNucleus
 		This will find the point in a list that is closest to any local minimum
 		in the border profile, wherever that minimum may be
 	*/
-	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list){
+	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception{
 
 		Profile minima = this.getAngleProfile().getLocalMinima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
@@ -922,7 +922,7 @@ public class RoundNucleus
 		Print key data to the image log file
 		Overwrites any existing log
 	*/   
-	public void exportAngleProfile(){
+	public void exportAngleProfile() throws Exception{
 		
 		TableExporter logger = new TableExporter(this.getNucleusFolder());
 		logger.addColumnHeading("X_INT");
@@ -969,8 +969,9 @@ public class RoundNucleus
 	
 	/**
 	 * Export the individual segments in this nucleus
+	 * @throws Exception 
 	 */
-	public void exportSegments(){
+	public void exportSegments() throws Exception{
 
 		TableExporter logger = new TableExporter(this.getNucleusFolder());
 		logger.addColumnHeading("SEGMENT");
@@ -1032,17 +1033,17 @@ public class RoundNucleus
 		-----------------------
 	*/
 
-	public SegmentedProfile getAngleProfile(){
+	public SegmentedProfile getAngleProfile() throws Exception{
 		return new SegmentedProfile(this.angleProfile);
 	}
 
 	// returns a copy
-	public SegmentedProfile getAngleProfile(String pointType){
+	public SegmentedProfile getAngleProfile(String pointType) throws Exception{
 		int offset = this.borderTags.get(pointType);
 		return new SegmentedProfile(this.angleProfile.offset(offset));
 	}
 
-	public void setAngleProfile(SegmentedProfile p){
+	public void setAngleProfile(SegmentedProfile p) throws Exception{
 		this.angleProfile = new SegmentedProfile(p);
 	}
 
@@ -1152,7 +1153,7 @@ public class RoundNucleus
 		this.singleDistanceProfile = new Profile(profile);
 	}
 
-	public void calculateAngleProfile(int angleProfileWindowSize){
+	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception{
 
 		double[] angles = new double[this.getLength()];
 
@@ -1187,7 +1188,7 @@ public class RoundNucleus
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}
 
-	public void reverse(){
+	public void reverse() throws Exception{
 		SegmentedProfile aProfile = this.getAngleProfile();
 		aProfile.reverse();
 		this.setAngleProfile(aProfile);

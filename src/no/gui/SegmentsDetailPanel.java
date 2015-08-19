@@ -157,20 +157,25 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 	}
 	
 	private void updateSegmentsBoxplot(List<AnalysisDataset> list, String segName){
-		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
-		JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
-		segmentsBoxplotChartPanel.setChart(boxplotChart);
+		try{
+			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
+			JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
+			segmentsBoxplotChartPanel.setChart(boxplotChart);
+		} catch (Exception e){
+			IJ.log("Error updating segments boxplot");
+		}
 	}
 	
 	private void updateSegmentsProfile(List<AnalysisDataset> list, String segName, boolean normalised, boolean rightAlign){
 		
 		DefaultXYDataset ds = null;
-		if(normalised){
-			ds = NucleusDatasetCreator.createMultiProfileSegmentDataset(list, segName);
-		} else {
-			ds = NucleusDatasetCreator.createRawMultiProfileSegmentDataset(list, segName, rightAlign);
-		}
 		try {
+			if(normalised){
+				ds = NucleusDatasetCreator.createMultiProfileSegmentDataset(list, segName);
+			} else {
+				ds = NucleusDatasetCreator.createRawMultiProfileSegmentDataset(list, segName, rightAlign);
+			}
+
 			JFreeChart chart = null;
 			if(normalised){
 				chart = MorphologyChartFactory.makeProfileChart(ds, 100);
@@ -184,8 +189,8 @@ public class SegmentsDetailPanel extends JPanel implements ActionListener {
 				chart = MorphologyChartFactory.makeProfileChart(ds, length);
 			}								
 			segmentsProfileChartPanel.setChart(chart);
-			
-			
+
+
 		} catch (Exception e) {
 			IJ.log("Error in plotting segment profile");
 		} 

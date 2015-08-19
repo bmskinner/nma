@@ -281,6 +281,8 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		}
 		
 		protected void update(Cell cell){
+			
+			try{
 
 			if(cell==null){
 				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
@@ -294,6 +296,10 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 				JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, nucleus.getLength());
 
 				profileChartPanel.setChart(chart);
+			}
+			
+			} catch(Exception e){
+				fireSignalChangeEvent("Log_Error updating cell panel");
 			}
 
 		}
@@ -320,6 +326,8 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		
 		protected void update(Cell cell){
 			
+			try{
+			
 			JFreeChart chart;
 			if(cell==null){
 				chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
@@ -327,6 +335,9 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 				chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset);
 			}
 			panel.setChart(chart);
+			}catch(Exception e){
+				IJ.log("Error updating outline chart");
+			}
 		}
 
 	}
@@ -413,7 +424,12 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 			
 			scrollPane = new JScrollPane();
 						
-			table = new JTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+			try {
+				table = new JTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			table.setEnabled(false);
 						
 			scrollPane.setViewportView(table);
@@ -425,9 +441,19 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		protected void update(Cell cell){
 			
 			if(cell==null){
-				table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+				try {
+					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
-				table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
+				try {
+					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 				Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
 

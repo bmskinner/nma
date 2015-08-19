@@ -28,8 +28,9 @@ public class NucleusTableDatasetCreator {
 	 * covers size, number of signals
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
+	 * @throws Exception 
 	 */
-	public static TableModel createSegmentStatsTable(Nucleus nucleus){
+	public static TableModel createSegmentStatsTable(Nucleus nucleus) throws Exception{
 
 		DefaultTableModel model = new DefaultTableModel();
 

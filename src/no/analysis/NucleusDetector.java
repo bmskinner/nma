@@ -127,10 +127,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  
 		  } catch(Exception e){
 			  result = false;
-			  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
-			  for(StackTraceElement el : e.getStackTrace()){
-				  logger.log(el.toString(), Logger.STACK);
-			  }
+			  logger.error("Error in processing folder", e);
 		  }
 		return result;
 	}
@@ -146,15 +143,10 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in nucleus detection", e);
+
 		} catch (ExecutionException e) {
-			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in nucleus detection", e);
 		}
 
 	} 
@@ -450,8 +442,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
       try{
         output.mkdir();
       } catch(Exception e) {
-//        mw.log("Failed to create directory: "+e);
-        logger.log("Failed to create directory: "+e.getMessage(), Logger.ERROR);
+        logger.error("Failed to create directory", e);
       }
     }
     return output;
@@ -470,10 +461,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				  analysisOptions.getNucleusClass());
 
 	  } catch (Exception e) {
-		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
-		  }
+		  logger.error("Error creating collection", e);
 	  }
 	  return newCollection;
   }
@@ -502,37 +490,10 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				  path, 
 				  nucleusNumber, 
 				  originalPosition);
+		  
+	  } catch(Exception e){
+		  logger.error("Error creating nucleus", e);
 
-	  } catch (NoSuchMethodException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (SecurityException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (InstantiationException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (IllegalAccessException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (IllegalArgumentException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (InvocationTargetException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
 	  }
 	  return n;
   }
@@ -606,7 +567,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		try{
 			detector.run(image);
 		} catch(Exception e){
-			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
+			logger.error("Error in nucleus detection", e);
 		}
 		return detector.getRoiList();
 	}
@@ -725,10 +686,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
 			logger.log("Edge detection complete", Logger.DEBUG);
 		} catch (Exception e) {
-			logger.log("Error in dege detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in edge detection", e);
 		}
 		return searchStack;
 	}
@@ -746,10 +704,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				}
 			}
 		} catch (Exception e) {
-			logger.log("Error getting median image intensity: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error getting median image intensity", e);
 		}
 		return Stats.quartile(values, 50);
 	}
@@ -771,10 +726,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			logger.log("Objects closed", Logger.DEBUG);
 //			IJ.log("Closed");
 		} catch (Exception e) {
-			IJ.log("Error in closing: "+e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
+			logger.error("Error in morphology closing", e);
 		}
 		
 	}
@@ -835,10 +787,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  IJ.saveAsTiff(ImageExporter.convert(largeRegion), currentNucleus.getEnlargedImagePath());
 			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
 		  } catch(Exception e){
-			  logger.log("Error saving original, enlarged or annotated image: "+e.getMessage(), Logger.ERROR);
-			  for(StackTraceElement element : e.getStackTrace()){
-				  logger.log(element.toString(), Logger.STACK);
-			  }
+			  logger.error("Error saving original, enlarged or annotated image",e);
 		  }
 		  
 //		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getNuclearSignalOptions("default"),
@@ -854,11 +803,8 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		  
 		  
 	  }catch(Exception e){
-		  logger.log(" Error in nucleus assignment: "+e.getMessage(), Logger.ERROR);
+		  logger.error(" Error in nucleus assignment", e);
 		  mw.log("    Error in nucleus assignment: "+e.getMessage());
-		  for(StackTraceElement element : e.getStackTrace()){
-			  logger.log(element.toString(), Logger.STACK);
-		  }
 	  }
   }
   

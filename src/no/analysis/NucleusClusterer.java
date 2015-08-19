@@ -209,6 +209,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
  	private Instances makeAttributesAndInstances(CellCollection collection){
 		// make Attributes on which to cluster
 		//		Attribute id = new Attribute("id", List); 
+ 		
 
 		Attribute area = new Attribute("area"); 
 		Attribute perimeter = new Attribute("perimeter"); 
@@ -229,6 +230,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
+		try{
 
 		ProfileCollection pc = collection.getFrankenCollection();
 		String pointType = collection.getReferencePoint();
@@ -283,6 +285,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			cellToInstanceMap.put(inst, c.getCellId());
 				
 			i++;
+		}
+		} catch(Exception e){
+			logger.error("Error making instances", e);
 		}
 		return instances;
 	}

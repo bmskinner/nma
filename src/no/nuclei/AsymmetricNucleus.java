@@ -30,7 +30,7 @@ public class AsymmetricNucleus
 	private static final long serialVersionUID = 1L;
 private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
 
-  public AsymmetricNucleus(RoundNucleus n){
+  public AsymmetricNucleus(RoundNucleus n) throws Exception{
     super(n);
   }
 

@@ -12,14 +12,14 @@ import test.SegmentFitterTest;
 public class SegmentedProfileTest {
 
 
-	public static SegmentedProfile createMedianProfile(){
+	public static SegmentedProfile createMedianProfile() throws Exception{
 				
 		SegmentedProfile profile = SegmentFitterTest.createRodentSpermMedianProfile();	
 		profile.setSegments(SegmentFitterTest.getMedianRodentSpermSegments());
 		return profile;
 	}
 	
-	public static SegmentedProfile createNucleusProfile(){
+	public static SegmentedProfile createNucleusProfile() throws Exception{
 		
 		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
 		SegmentedProfile profile = n.getAngleProfile();	

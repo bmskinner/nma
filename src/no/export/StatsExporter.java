@@ -55,46 +55,65 @@ public class StatsExporter {
 	}
 	
 	public static void exportAngleProfiles(CellCollection collection){
-		for(Nucleus n : collection.getNuclei()){ // for each roi
-			n.exportAngleProfile();
+		try{
+			for(Nucleus n : collection.getNuclei()){ // for each roi
+				n.exportAngleProfile();
+			}
+		}catch (Exception e){
+			logger.error("Error in angle profile export", e);
 		}
+
 	}
 	
 	public static void exportSegmentProfiles(CellCollection collection){
-		for(Nucleus n : collection.getNuclei()){ // for each roi
-			n.exportSegments();
+		try {
+			for(Nucleus n : collection.getNuclei()){ // for each roi
+				n.exportSegments();
+			}
+		} catch (Exception e){
+			logger.error("Error in segment export", e);
 		}
 	}
 	
 	public static void exportSegmentStats(CellCollection collection, String filename){
-		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
+		try {
+			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 
-		ProfileCollection pc = collection.getProfileCollection();
-		List<NucleusBorderSegment> segs = pc.getSegments(collection.getOrientationPoint());
-		for(NucleusBorderSegment segment : segs){
-			String s = segment.getName();
-			
-			List<Integer> list = new ArrayList<Integer>(0);
-			for(Nucleus n : collection.getNuclei()){
-				NucleusBorderSegment seg = n.getAngleProfile().getSegment(s);
-				list.add(seg.length());
+			ProfileCollection pc = collection.getProfileCollection();
+			List<NucleusBorderSegment> segs = pc.getSegments(collection.getOrientationPoint());
+			for(NucleusBorderSegment segment : segs){
+				String s = segment.getName();
+
+				List<Integer> list = new ArrayList<Integer>(0);
+				for(Nucleus n : collection.getNuclei()){
+					NucleusBorderSegment seg = n.getAngleProfile().getSegment(s);
+					list.add(seg.length());
+				}
+				logger.addColumn(s, list.toArray(new Integer[0]));
 			}
-			logger.addColumn(s, list.toArray(new Integer[0]));
-		}
-		
 
-		logger.export(filename+"."+collection.getType());
+
+			logger.export(filename+"."+collection.getType());
+
+		} catch (Exception e){
+			logger.error("Error in segment stats export", e);
+		}
 	}
 
 	public static void exportMediansOfProfile(CellCollection collection, String filename){
+		
+		try {
 
-		Profile normalisedMedian = collection.getProfileCollection().getProfile("tail");
-		Profile interpolatedMedian = normalisedMedian.interpolate((int)collection.getMedianNuclearPerimeter());
+			Profile normalisedMedian = collection.getProfileCollection().getProfile("tail");
+			Profile interpolatedMedian = normalisedMedian.interpolate((int)collection.getMedianNuclearPerimeter());
 
-		TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
-		logger.addColumn("X_POSITION",   interpolatedMedian.getPositions(interpolatedMedian.size()).asArray());
-		logger.addColumn("ANGLE_MEDIAN", interpolatedMedian.asArray());
-		logger.export(filename+"."+collection.getType());
+			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
+			logger.addColumn("X_POSITION",   interpolatedMedian.getPositions(interpolatedMedian.size()).asArray());
+			logger.addColumn("ANGLE_MEDIAN", interpolatedMedian.asArray());
+			logger.export(filename+"."+collection.getType());
+		}catch (Exception e){
+			logger.error("Error in median stats export", e);
+		}
 	}
 
 }

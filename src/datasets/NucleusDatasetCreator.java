@@ -130,7 +130,7 @@ public class NucleusDatasetCreator {
      * @param segName the segment to add in each dataset
      * @return an XYDataset to plot
      */
-    public static DefaultXYDataset createMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName){
+    public static DefaultXYDataset createMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName) throws Exception{
         
         DefaultXYDataset ds = new DefaultXYDataset();
         for (int i=0; i < list.size(); i++) {
@@ -196,8 +196,9 @@ public class NucleusDatasetCreator {
 	 * @param segName the segment to display
 	 * @param rightAlign alignment to left or right
 	 * @return a dataset to plot
+	 * @throws Exception 
 	 */
-	public static DefaultXYDataset createRawMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName, boolean rightAlign){
+	public static DefaultXYDataset createRawMultiProfileSegmentDataset(List<AnalysisDataset> list, String segName, boolean rightAlign) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		double length = getMaximumMedianProfileLength(list);
@@ -238,8 +239,9 @@ public class NucleusDatasetCreator {
 	 * @param collection the NucleusCollection
 	 * @param normalised normalise profile length to 100, or show raw
 	 * @return a dataset
+	 * @throws Exception 
 	 */
-	public static XYDataset createSegmentedProfileDataset(CellCollection collection, boolean normalised, boolean rightAlign){
+	public static XYDataset createSegmentedProfileDataset(CellCollection collection, boolean normalised, boolean rightAlign) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
@@ -320,8 +322,9 @@ public class NucleusDatasetCreator {
 	 * @param normalised is the length normalised to 100 
 	 * @param rightAlign is a non-normalised dataset hung to the right
 	 * @return
+	 * @throws Exception 
 	 */
-	public static DefaultXYDataset createMultiProfileDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign){
+	public static DefaultXYDataset createMultiProfileDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		double length = getMaximumMedianProfileLength(list);
@@ -351,7 +354,7 @@ public class NucleusDatasetCreator {
 	}
 	
 	
-	public static DefaultXYDataset createMultiProfileFrankenDataset(List<AnalysisDataset> list){
+	public static DefaultXYDataset createMultiProfileFrankenDataset(List<AnalysisDataset> list) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		int i=0;
@@ -377,8 +380,9 @@ public class NucleusDatasetCreator {
 	 * @param normalised should the data be normalised to 100
 	 * @param rightAlign should the data be aligned to the right
 	 * @return a new series
+	 * @throws Exception 
 	 */
-	private static XYSeriesCollection addMultiProfileIQRSeries(ProfileCollection pc, String point, int series, double length, double medianLength, boolean normalised, boolean rightAlign){
+	private static XYSeriesCollection addMultiProfileIQRSeries(ProfileCollection pc, String point, int series, double length, double medianLength, boolean normalised, boolean rightAlign) throws Exception{
 		Profile profile = pc.getProfile(point);
 		
 		Profile xpoints = null;
@@ -423,8 +427,9 @@ public class NucleusDatasetCreator {
 	 * @param normalised should the data be normalised or raw length
 	 * @param rightAlign should raw data be aligned to the right edge of the plot
 	 * @return a dataset
+	 * @throws Exception 
 	 */
-	public static List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign){
+	public static List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign) throws Exception{
 
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 		
@@ -451,8 +456,9 @@ public class NucleusDatasetCreator {
 	 * Get the IQR for the frankenmedian in a list of datasets
 	 * @param list
 	 * @return
+	 * @throws Exception 
 	 */
-	public static List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list){
+	public static List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list) throws Exception{
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 
 		int i=0;
@@ -473,7 +479,7 @@ public class NucleusDatasetCreator {
 		return result;
 	}
 	
-	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list){
+	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list) throws Exception{
 
 		if(list.size()==1){
 			CellCollection collection = list.get(0).getCollection();
@@ -499,7 +505,7 @@ public class NucleusDatasetCreator {
 		
 	}
 		
-	public static XYDataset createFrankenSegmentDataset(CellCollection collection){
+	public static XYDataset createFrankenSegmentDataset(CellCollection collection) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		String pointType = collection.getOrientationPoint();
@@ -535,8 +541,9 @@ public class NucleusDatasetCreator {
 	 * Create a segmented dataset for an individual nucleus.
 	 * @param nucleus the nucleus to draw
 	 * @return
+	 * @throws Exception 
 	 */
-	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus){
+	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		SegmentedProfile profile = nucleus.getAngleProfile(Constants.Nucleus.RODENT_SPERM.referencePoint());
@@ -654,8 +661,9 @@ public class NucleusDatasetCreator {
 	 * @param collections
 	 * @param segName
 	 * @return
+	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, String segName) {
+	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, String segName) throws Exception {
 
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
@@ -681,8 +689,9 @@ public class NucleusDatasetCreator {
 	 * profile segment
 	 * @param datasets
 	 * @return
+	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<AnalysisDataset> datasets) {
+	public static BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<AnalysisDataset> datasets) throws Exception {
 
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
@@ -741,8 +750,9 @@ public class NucleusDatasetCreator {
 	 * Create an outline of the consensus nucleus, and apply segment colours
 	 * @param collection
 	 * @return
+	 * @throws Exception 
 	 */
-	public static XYDataset createNucleusOutline(CellCollection collection){
+	public static XYDataset createNucleusOutline(CellCollection collection) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		Nucleus n = collection.getConsensusNucleus();
 		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
@@ -850,8 +860,9 @@ public class NucleusDatasetCreator {
 	 * @param cell
 	 * @param segmented add the segments?
 	 * @return
+	 * @throws Exception 
 	 */
-	public static XYDataset createNucleusOutline(Cell cell, boolean segmented){
+	public static XYDataset createNucleusOutline(Cell cell, boolean segmented) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		Nucleus nucleus = cell.getNucleus();

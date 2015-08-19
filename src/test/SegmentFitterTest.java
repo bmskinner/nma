@@ -48,24 +48,23 @@ public class SegmentFitterTest {
 	@Test
 	public void assignMedianToNucleus() {
 		
-		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
-		
-		SegmentedProfile median = SegmentedProfileTest.createMedianProfile();
-
-		File log = new File("Z:\\log.txt");
-		if(!log.getParentFile().exists()){
-			log = new File("E:\\log.txt");
-		}
-		if(log.exists()){
-			log.delete();
-		}
-		
-		
-		System.out.println("Beginning test");
-		System.out.println("Median profile length: "+median.size());
-
 		try {
-			
+			Nucleus n = NucleusTest.createTestRodentSpermNucleus();
+
+			SegmentedProfile median = SegmentedProfileTest.createMedianProfile();
+
+			File log = new File("Z:\\log.txt");
+			if(!log.getParentFile().exists()){
+				log = new File("E:\\log.txt");
+			}
+			if(log.exists()){
+				log.delete();
+			}
+
+
+			System.out.println("Beginning test");
+			System.out.println("Median profile length: "+median.size());
+
 			// get the method and make it accessible
 			Class<?>[] partypes = new Class[2];
 			partypes[0] = Nucleus.class;
@@ -126,7 +125,10 @@ public class SegmentFitterTest {
 		} catch (NoSuchMethodException e) {
 			e.printStackTrace();
 			fail("Method error");
-		} 
+		} catch (Exception e){
+			e.printStackTrace();
+			fail("Other error");
+		}
 
 	}
 

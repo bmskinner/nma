@@ -41,7 +41,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * and segments
 	 * @param profile the segmented profile to copy
 	 */
-	public SegmentedProfile(SegmentedProfile profile){
+	public SegmentedProfile(SegmentedProfile profile) throws Exception {
 		super(profile.array);
 		this.segments = NucleusBorderSegment.copy(profile.getSegments());
 	}
@@ -85,7 +85,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * Get a copy of the segments in this profile
 	 * @return
 	 */
-	public List<NucleusBorderSegment> getSegments(){
+	public List<NucleusBorderSegment> getSegments() throws Exception {
 		return NucleusBorderSegment.copy(this.segments);
 	}
 	
@@ -113,7 +113,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * Replace the segments in the profile with the given list
 	 * @param segments
 	 */
-	public void setSegments(List<NucleusBorderSegment> segments){
+	public void setSegments(List<NucleusBorderSegment> segments) throws Exception {
 		if(segments==null || segments.isEmpty()){
 			throw new IllegalArgumentException("Segment list is null or empty");
 		}
@@ -184,27 +184,46 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @return did the update succeed
 	 */
 	public boolean update(NucleusBorderSegment segment, int startIndex, int endIndex){
-		
-		// use this to wrap the NucleusBorderSegment update code. Test inversion effects
-		
+				
 		if(!this.contains(segment)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
 		
+		// test effect on all segments in list: the update should
+		// not allow the endpoints to move within a segment other than
+		// next or prev
+		NucleusBorderSegment nextSegment = segment.nextSegment();
+		NucleusBorderSegment prevSegment = segment.prevSegment();
+		
+		for(NucleusBorderSegment testSeg : this.segments){
+			
+			// if the proposed start or end index is found in another segment
+			// that is not next or prev, do not proceed
+			if(testSeg.contains(startIndex) || testSeg.contains(endIndex)){
+				if(!testSeg.getName().equals(segment.getName())
+						|| !testSeg.getName().equals(nextSegment.getName())
+						|| !testSeg.getName().equals(prevSegment.getName())){
+					return false;
+				}
+			}
+		}
+		
+		// the basic checks have been passed; the update will not damage linkage
+		// Allow the segment to determine if the update is valid and apply it
+		
 		if( segment.update(startIndex, endIndex)){
 			return true;
 		} else{
-//			
+//			// If something is wrong, linkage may have been disrupted. Check for debugging
 			if(testLinked()){
 				return false;
 			} else {
+				
 				IJ.log("Error updating SegmentedProfile: segments unlinked: "+segment.getLastFailReason());
 				IJ.log(segment.toString());
 				return false;
 			}
 		}
-		
-		// how to test wrapping
 	}
 	
 	/**
@@ -257,16 +276,19 @@ public class SegmentedProfile extends Profile implements Serializable {
 		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
 	}
 	
-	public void nudgeSegments(int amount){
+	public void nudgeSegments(int amount) throws Exception {
 		this.segments = NucleusBorderSegment.nudge(getSegments(), amount);
 	}
 	
-	public SegmentedProfile offset(int amount){
+	public SegmentedProfile offset(int amount) throws Exception {
 	
 		Profile offsetProfile = super.offset(amount);
 		
 		// offset the segments
-		List<NucleusBorderSegment> segments = NucleusBorderSegment.nudge(getSegments(), -amount);
+		List<NucleusBorderSegment> segments = null;
+
+		segments = NucleusBorderSegment.nudge(getSegments(), -amount);
+
 		SegmentedProfile copy = new SegmentedProfile(offsetProfile, segments);
 		return copy;
 	}

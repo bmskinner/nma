@@ -59,7 +59,7 @@ public class ProfileCollection implements Serializable {
 	 * @param s the profile to find
 	 * @return the profile
 	 */
-	public Profile getProfile(String s){
+	public Profile getProfile(String s) throws Exception {
 		if(s==null){
 			throw new IllegalArgumentException("The requested profile key is null: "+s);
 		}
@@ -81,7 +81,7 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	
-	public SegmentedProfile getSegmentedProfile(String s){
+	public SegmentedProfile getSegmentedProfile(String s) throws Exception {
 		if(s==null){
 			throw new IllegalArgumentException("The requested profile key is null: "+s);
 		}
@@ -109,7 +109,13 @@ public class ProfileCollection implements Serializable {
 		// this must be negative offset for segments
 		int offset = -getOffset(s);
 
-		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(segments, offset);
+		List<NucleusBorderSegment> result = null;
+		try {
+			result = NucleusBorderSegment.nudge(segments, offset);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return result;
 	}
 	
@@ -122,7 +128,7 @@ public class ProfileCollection implements Serializable {
 	 * @param s the key to offset to 
 	 * @return a list of profiles offset to the given key
 	 */
-	public List<Profile> getNucleusProfiles(String s){
+	public List<Profile> getNucleusProfiles(String s) throws Exception {
 		if(s==null){
 			throw new IllegalArgumentException("The requested profile list key is null: "+s);
 		}
@@ -173,8 +179,9 @@ public class ProfileCollection implements Serializable {
 	 * Create the profile aggregate from the given collection, with a set length
 	 * @param collection the Cellcollection
 	 * @param length the length of the aggregate
+	 * @throws Exception 
 	 */
-	public void createProfileAggregate(CellCollection collection, int length){
+	public void createProfileAggregate(CellCollection collection, int length) throws Exception{
 		if(length<0){
 			throw new IllegalArgumentException("Requested length is negative");
 		}
@@ -190,8 +197,9 @@ public class ProfileCollection implements Serializable {
 	 * Create the profile aggregate from the given collection, with using the 
 	 * collection median length to determine bin sizes
 	 * @param collection the Cellcollection
+	 * @throws Exception 
 	 */
-	public void createProfileAggregate(CellCollection collection){
+	public void createProfileAggregate(CellCollection collection) throws Exception{
 		
 		createProfileAggregate(collection, (int)collection.getMedianArrayLength());
 
@@ -235,7 +243,7 @@ public class ProfileCollection implements Serializable {
 	 * @param pointType the profile type to use
 	 * @return the profile
 	 */
-	public Profile getIQRProfile(String pointType){
+	public Profile getIQRProfile(String pointType) throws Exception {
 		
 		int offset = getOffset(pointType);
 		Profile q25 = getAggregate().getQuartile(25).offset(offset);
@@ -246,7 +254,7 @@ public class ProfileCollection implements Serializable {
 	/**
 	 * Find the points in the profile that are most variable
 	 */
-	public List<Integer> findMostVariableRegions(String pointType){
+	public List<Integer> findMostVariableRegions(String pointType) throws Exception {
 		
 		// get the IQR and maxima
 		Profile iqrProfile = getIQRProfile(pointType);

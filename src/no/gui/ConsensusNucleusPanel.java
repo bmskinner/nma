@@ -195,7 +195,12 @@ public class ConsensusNucleusPanel extends JPanel {
 	 * @return the consensus chart
 	 */
 	private JFreeChart makeConsensusChart(CellCollection collection){
-		XYDataset ds = NucleusDatasetCreator.createNucleusOutline(collection);
+		XYDataset ds = null;
+		try{
+			ds = NucleusDatasetCreator.createNucleusOutline(collection);
+		} catch(Exception e){
+			IJ.log("error making consensus");
+		}
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,

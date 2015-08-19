@@ -33,7 +33,7 @@ public class SegmentFitter {
 	 */
 	static final double PENALTY_GROW   = 20;
 	
-	private final 	SegmentedProfile medianProfile; // the profile to align against
+	private 	SegmentedProfile medianProfile; // the profile to align against
 	
 	/**
 	 * The number of points ahead and behind to test
@@ -52,9 +52,15 @@ public class SegmentFitter {
 			throw new IllegalArgumentException("Median profile is null");
 		}
 		
-		this.medianProfile  = new SegmentedProfile(medianProfile);
-		
 		logger = new Logger(logFile, "SegmentFitter");
+		this.medianProfile = null;
+		try {
+			this.medianProfile  = new SegmentedProfile(medianProfile);
+		} catch (Exception e) {
+			logger.error("Error initialising fitter", e);
+		}
+		
+		
 	}
 	
 	/**
@@ -70,9 +76,14 @@ public class SegmentFitter {
 			logger.log("Test nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
-		if(n.getAngleProfile().getSegments()==null || n.getAngleProfile().getSegments().isEmpty()){
-			logger.log("Nucleus has no segments", Logger.ERROR);
-			throw new IllegalArgumentException("Nucleus has no segments");
+		
+		try {
+			if(n.getAngleProfile().getSegments()==null || n.getAngleProfile().getSegments().isEmpty()){
+				logger.log("Nucleus has no segments", Logger.ERROR);
+				throw new IllegalArgumentException("Nucleus has no segments");
+			}
+		} catch (Exception e1) {
+			logger.error("Error getting segments", e1);
 		}
 		
 		
@@ -89,10 +100,7 @@ public class SegmentFitter {
 			logger.log("Fitted nucleus "+n.getPathAndNumber(), Logger.INFO);
 			
 		} catch(Exception e){
-			logger.log("Error refitting segments: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement e1 : e.getStackTrace()){
-				logger.log(e1.toString(), Logger.STACK);
-			}
+			logger.error("Error refitting segments", e);
 		}
 	}
 		
@@ -106,12 +114,18 @@ public class SegmentFitter {
 			logger.log("Recombined nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
-		if(n.getAngleProfile().getSegments()==null){
-			logger.log("Nucleus has no segments", Logger.ERROR);
-			throw new IllegalArgumentException("Nucleus has no segments");
+		Profile frankenProfile = null;
+		try {
+			if(n.getAngleProfile().getSegments()==null){
+				logger.log("Nucleus has no segments", Logger.ERROR);
+				throw new IllegalArgumentException("Nucleus has no segments");
+			}
+
+			SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(pointType));
+			frankenProfile = recombineSegments(nucleusProfile);
+		} catch(Exception e){
+			logger.error("Error recombining segments", e);
 		}
-		SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(pointType));
-		Profile frankenProfile = recombineSegments(nucleusProfile);
 		
 		return frankenProfile;
 	}
@@ -296,7 +310,8 @@ public class SegmentFitter {
 
 			// not permitted if it violates length constraint
 			if(testProfile.adjustSegmentEnd(name, changeValue)){
-							
+					
+				// anything that gets in here should be valid
 				try{
 					double score = compareSegmentationPatterns(medianProfile, testProfile);
 //					logger.log("\tLengthen "+changeValue+":\tScore:\t"+score, Logger.DEBUG);
@@ -307,7 +322,8 @@ public class SegmentFitter {
 //						logger.log("\tNew best score:\t"+score+"\tLengthen:\t"+changeValue, Logger.DEBUG);
 					}
 				}catch(IllegalArgumentException e){
-					logger.log(e.getMessage());
+					// throw a new edxception rather than trying a nudge a problem profile
+					logger.log(e.getMessage(), Logger.ERROR);
 					throw new Exception("Error getting segmentation pattern: "+e.getMessage());
 				}
 				
@@ -324,7 +340,7 @@ public class SegmentFitter {
 				}
 										
 			} else {
-//				logger.log("\tLengthen "+changeValue+":\tInvalid length change:\t"+segment.getLastFailReason(), Logger.DEBUG);
+//				logger.log("\tLengthen "+changeValue+":\tInvalid length change:\t"+segment.getLastFailReason()+"\t"+segment.toString(), Logger.DEBUG);
 			}
 		}
 		return result;
@@ -354,8 +370,8 @@ public class SegmentFitter {
 //				logger.log("\tNudge "+nudge+":\tScore:\t"+score, Logger.DEBUG);
 				
 			}catch(IllegalArgumentException e){
-				logger.log(e.getMessage());
-				throw new Exception("Nudge error: error getting segmentation pattern: "+e.getMessage());
+				logger.error("Nudge error getting segmentation pattern: ", e);
+				throw new Exception("Nudge error getting segmentation pattern");
 			}
 			
 			if(score < bestScore){

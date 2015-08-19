@@ -296,8 +296,9 @@ public class Profile implements Serializable {
 	 * Copy the profile and offset it to start from the given index
 	 * @param j the index to start from
 	 * @return a new offset Profile
+	 * @throws Exception 
 	 */
-	public Profile offset(int j){
+	public Profile offset(int j) throws Exception{
 		double[] newArray = new double[this.size()];
 		for(int i=0;i<this.size();i++){
 			newArray[i] = this.array[ Utils.wrapIndex( i+j , this.size() ) ];
@@ -458,7 +459,7 @@ public class Profile implements Serializable {
     along it one index at a time. Find the point of least difference, 
     and return this offset. Returns the positive offset to this profile
    */
-  public int getSlidingWindowOffset(Profile testProfile){
+  public int getSlidingWindowOffset(Profile testProfile) throws Exception {
 
 	  double lowestScore = this.absoluteSquareDifference(testProfile);
 	  int index = 0;

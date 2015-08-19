@@ -38,7 +38,7 @@ public class NucleusAnnotator {
 			logger.log("Annotation complete");
 
 		}catch(Exception e){
-			logger.log("Error in annotaion: "+e.getMessage(), Logger.ERROR);
+			logger.error("Error in annotation", e);
 			return false;
 		}
 		return true;
@@ -116,29 +116,34 @@ public class NucleusAnnotator {
 	private static void annotateSegments(ImagePlus image, Nucleus n){
 		ImageProcessor ip = image.getProcessor();
 
-		if(n.getAngleProfile().getSegments().size()>0){ // only draw if there are segments
-			for(int i=0;i<n.getAngleProfile().getSegments().size();i++){
+		try{
 
-				NucleusBorderSegment seg = n.getAngleProfile().getSegment("Seg_"+i);
+			if(n.getAngleProfile().getSegments().size()>0){ // only draw if there are segments
+				for(int i=0;i<n.getAngleProfile().getSegments().size();i++){
 
-				float[] xpoints = new float[seg.length()+1];
-				float[] ypoints = new float[seg.length()+1];
-				for(int j=0; j<=seg.length();j++){
-					int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getLength());
-					NucleusBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
-					xpoints[j] = (float) p.getX();
-					ypoints[j] = (float) p.getY();
+					NucleusBorderSegment seg = n.getAngleProfile().getSegment("Seg_"+i);
+
+					float[] xpoints = new float[seg.length()+1];
+					float[] ypoints = new float[seg.length()+1];
+					for(int j=0; j<=seg.length();j++){
+						int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getLength());
+						NucleusBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+						xpoints[j] = (float) p.getX();
+						ypoints[j] = (float) p.getY();
+					}
+
+					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+
+					// avoid colour wrapping when segment number is 1 more than the colour list
+					Color color = i==0 && n.getAngleProfile().getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getSegmentColor(i);
+
+					ip.setColor(color);
+					ip.setLineWidth(2);
+					ip.draw(segRoi);
 				}
-
-				PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
-
-				// avoid colour wrapping when segment number is 1 more than the colour list
-				Color color = i==0 && n.getAngleProfile().getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getSegmentColor(i);
-
-				ip.setColor(color);
-				ip.setLineWidth(2);
-				ip.draw(segRoi);
 			}
+		} catch(Exception e){
+			logger.error("Error annotating segments", e);
 		}
 	}
 	

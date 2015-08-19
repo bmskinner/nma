@@ -430,8 +430,9 @@ public class NucleusBorderSegment  implements Serializable{
 	 * Given a list of segments, link them together into a circle.
 	 * Links start and end properly.
 	 * @param list
+	 * @throws Exception 
 	 */
-	public static void linkSegments(List<NucleusBorderSegment> list){
+	public static void linkSegments(List<NucleusBorderSegment> list) throws Exception{
 		if(list==null || list.isEmpty()){
 			throw new IllegalArgumentException("List of segments is null or empty");
 		}
@@ -450,7 +451,8 @@ public class NucleusBorderSegment  implements Serializable{
 		NucleusBorderSegment firstSegment = list.get(0);
 		boolean ok = firstSegment.update(prevSeg.getEndIndex(), firstSegment.getEndIndex());
 		if(!ok){
-			IJ.log("Error fitting final segment: "+firstSegment.getLastFailReason());
+			throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());
+//			IJ.log("Error fitting final segment: "+firstSegment.getLastFailReason());
 		}
 
 		prevSeg.setNextSegment(firstSegment); // ensure they match up at the end
@@ -462,8 +464,9 @@ public class NucleusBorderSegment  implements Serializable{
 	 * @param list the list of segments
 	 * @param value the amount to nudge
 	 * @return a new list of segments
+	 * @throws Exception 
 	 */
-	public static List<NucleusBorderSegment> nudge(List<NucleusBorderSegment> list, int value){
+	public static List<NucleusBorderSegment> nudge(List<NucleusBorderSegment> list, int value) throws Exception{
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		
 		for(NucleusBorderSegment segment : list){
@@ -486,8 +489,9 @@ public class NucleusBorderSegment  implements Serializable{
 	 * Make a copy of the given list of linked segments
 	 * @param list the segments to copy
 	 * @return a new list
+	 * @throws Exception 
 	 */
-	public static List<NucleusBorderSegment> copy(List<NucleusBorderSegment> list){
+	public static List<NucleusBorderSegment> copy(List<NucleusBorderSegment> list) throws Exception{
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		
 		for(NucleusBorderSegment segment : list){

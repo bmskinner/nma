@@ -23,7 +23,7 @@ public interface Nucleus {
 	public static final int WIDTH = 2;
 	public static final int HEIGHT = 3;
 
-	public void findPointsAroundBorder();
+	public void findPointsAroundBorder() throws Exception;
 	public void intitialiseNucleus(int angleProfileWindowSize);
 
 	// public Nucleus copy();
@@ -78,22 +78,25 @@ public interface Nucleus {
 	/**
 	 * Get the angle profile
 	 * @return
+	 * @throws Exception 
 	 */
-	public SegmentedProfile getAngleProfile();
+	public SegmentedProfile getAngleProfile() throws Exception;
 	
 	/**
 	 * Get the angle profile offset to start at the given point
 	 * @param pointType the point to start at
 	 * @return a copy of the segmented profile
+	 * @throws Exception 
 	 */
-	public SegmentedProfile getAngleProfile(String pointType);
+	public SegmentedProfile getAngleProfile(String pointType) throws Exception;
 
 	
 	/**
 	 * Update the angle profile to the given segmented profile
 	 * @param profile
+	 * @throws Exception 
 	 */
-	public void setAngleProfile(SegmentedProfile profile);
+	public void setAngleProfile(SegmentedProfile profile) throws Exception;
 	
 	
 
@@ -215,13 +218,13 @@ public interface Nucleus {
     This will find the point in a list that is closest to any local maximum
     in the border profile, wherever that maximum may be
 	 */
-	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list);
+	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception;
 
 	/*
     This will find the point in a list that is closest to any local minimum
     in the border profile, wherever that minimum may be
 	 */
-	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list);
+	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception;
 
 
 	// find the point with the narrowest diameter through the CoM
@@ -249,9 +252,9 @@ public interface Nucleus {
     Print key data to the image log file
     Overwrites any existing log
 	 */   
-	public void exportAngleProfile();
+	public void exportAngleProfile() throws Exception;
 
-	public void exportSegments();
+	public void exportSegments() throws Exception;
 
 
 //	public Map<String, Integer> getSegmentMap( );
@@ -332,8 +335,9 @@ public interface Nucleus {
 	 * Calculate a new angle profile with the given window size. It
 	 * will replace the existing angle profile
 	 * @param angleProfileWindowSize the window size
+	 * @throws Exception 
 	 */
-	public void calculateAngleProfile(int angleProfileWindowSize);
+	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception;
 
 
 	/**
@@ -379,7 +383,7 @@ public interface Nucleus {
 	public Map<String, Integer> getBorderTags();
 	
 //	public void addSegment(NucleusBorderSegment n);
-	public void reverse();
+	public void reverse() throws Exception;
 	public String getOutputFolderName();
 	public void updateSourceFolder(File newFolder);
 }

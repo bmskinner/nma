@@ -18,6 +18,7 @@ import no.components.NucleusBorderPoint;
 import no.components.Profile;
 import no.components.XYPoint;
 import no.nuclei.RoundNucleus;
+import utility.Constants;
 import utility.Equation;
 import utility.Utils;
 
@@ -32,7 +33,7 @@ extends SpermNucleus
 	private List<NucleusBorderPoint> humpRoi;
 
 	// Requires a sperm nucleus object to construct from
-	public RodentSpermNucleus(RoundNucleus n){
+	public RodentSpermNucleus(RoundNucleus n) throws Exception{
 		super(n);
 		// this.findPointsAroundBorder();
 	}
@@ -46,7 +47,7 @@ extends SpermNucleus
     Identify key points: tip, estimated tail position
 	 */
 	@Override
-	public void findPointsAroundBorder(){
+	public void findPointsAroundBorder() throws Exception{
 
 		// find tip - use the least angle method
 		int tipIndex = this.getAngleProfile().getIndexOfMin();
@@ -137,12 +138,12 @@ extends SpermNucleus
     else returns false
     counts the number of points above 180 degrees in each half of the array
   */
-  public boolean isProfileOrientationOK(){
+  public boolean isProfileOrientationOK() throws Exception{
 
     int frontPoints = 0;
     int rearPoints = 0;
 
-    Profile profile = this.getAngleProfile("tip");
+    Profile profile = this.getAngleProfile(Constants.Nucleus.RODENT_SPERM.referencePoint());
 
     int midPoint = (int) (this.getLength()/2) ;
     for(int i=0; i<this.getLength();i++){ // integrate points over 180
@@ -172,24 +173,24 @@ extends SpermNucleus
     Detect the tail based on a list of local minima in an NucleusBorderPoint array.
     The putative tail is the point furthest from the sum of the distances from the CoM and the tip
   */
-  public NucleusBorderPoint findTailPointFromMinima(){
+  public NucleusBorderPoint findTailPointFromMinima() throws Exception{
   
     // we cannot be sure that the greatest distance between two points will be the endpoints
     // because the hook may begin to curve back on itself. We supplement this basic distance with
     // the distances of each point from the centre of mass. The points with the combined greatest
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
-    double tipToCoMDistance = this.getBorderTag("tip").getLengthTo(this.getCentreOfMass());
+    double tipToCoMDistance = this.getBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint()).getLengthTo(this.getCentreOfMass());
     Profile array = this.getAngleProfile().getLocalMinima(5);
 
     double maxDistance = 0;
-    NucleusBorderPoint tail = this.getBorderTag("tip"); // start at tip, move round
+    NucleusBorderPoint tail = this.getBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint()); // start at tip, move round
 
     for(int i=0; i<array.size();i++){
       if(array.get(i)==1){
             
         double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getPoint(i));
-        double distanceBetweenEnds = this.getBorderTag("tip").getLengthTo(getPoint(i));
+        double distanceBetweenEnds = this.getBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint()).getLengthTo(getPoint(i));
         
         double totalDistance = distanceAcrossCoM + distanceBetweenEnds;
 
@@ -216,7 +217,7 @@ extends SpermNucleus
     // Measure the length; if < min length..., store equation and border(s)
 
     double minDistance = this.getFeret();
-    NucleusBorderPoint reference = this.getBorderTag("tip");
+    NucleusBorderPoint reference = this.getBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint());
 
     for(int i=0;i<this.getLength();i++){
 

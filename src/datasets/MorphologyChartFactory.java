@@ -129,7 +129,7 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the x axis
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiProfileChart(List<AnalysisDataset> list, XYDataset medianProfiles, List<XYSeriesCollection> iqrProfiles, int xLength){
+	public static JFreeChart makeMultiProfileChart(List<AnalysisDataset> list, XYDataset medianProfiles, List<XYSeriesCollection> iqrProfiles, int xLength)  throws Exception{
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
@@ -210,7 +210,7 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, XYDataset ds, int xLength){
+	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, XYDataset ds, int xLength) throws Exception {
 		CellCollection n = list.get(0).getCollection();
 		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength);
 		XYPlot plot = chart.getXYPlot();
@@ -345,8 +345,9 @@ public class MorphologyChartFactory {
 	 * @param cell the cell to draw
 	 * @param dataset the dataset the cell came from
 	 * @return
+	 * @throws Exception 
 	 */
-	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset){
+	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset) throws Exception{
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,

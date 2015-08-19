@@ -30,8 +30,9 @@ public class SpermNucleus
   *
   * @param n the Nucleus to construct from
   * @return a SpermNucleus
+ * @throws Exception 
   */
-  public SpermNucleus(RoundNucleus n){
+  public SpermNucleus(RoundNucleus n) throws Exception{
   	super(n);
   }
   

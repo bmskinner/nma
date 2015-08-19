@@ -781,7 +781,7 @@ implements Serializable
     -----------------
   */
 
-  public Nucleus getNucleusMostSimilarToMedian(String pointType){
+  public Nucleus getNucleusMostSimilarToMedian(String pointType) throws Exception {
     
     Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
     Nucleus n = (Nucleus) this.getCell(0).getNucleus(); // default to the first nucleus
