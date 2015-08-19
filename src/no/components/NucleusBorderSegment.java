@@ -266,15 +266,30 @@ public class NucleusBorderSegment  implements Serializable{
 		// MIN_SEG_LENGTH of the next segment
 		
 		if(this.hasPrevSegment()){
-			if(this.prevSegment().testLength(this.prevSegment().getStartIndex(), startIndex) < MINIMUM_SEGMENT_LENGTH){
-				this.lastFailReason = startIndex+"-"+endIndex+": Previous segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH;
+			int prevTestLength = this.prevSegment().testLength(this.prevSegment().getStartIndex(), startIndex);
+			if( prevTestLength < MINIMUM_SEGMENT_LENGTH){
+				this.lastFailReason = startIndex
+						+"-"+endIndex
+						+": Previous segment length cannot be smaller than "
+						+MINIMUM_SEGMENT_LENGTH
+						+"; would be "
+						+this.prevSegment().getStartIndex()+"-"
+						+startIndex
+						+"("+prevTestLength+")";
 				return false;
 			}
 		}
 		if(this.hasNextSegment()){
-
-			if(this.nextSegment().testLength(endIndex, this.nextSegment().getEndIndex()) < MINIMUM_SEGMENT_LENGTH){
-				this.lastFailReason = startIndex+"-"+endIndex+": Next segment length cannot be smaller than "+MINIMUM_SEGMENT_LENGTH;
+			int nextTestLength = this.nextSegment().testLength(endIndex, this.nextSegment().getEndIndex());
+			if( nextTestLength < MINIMUM_SEGMENT_LENGTH){
+				this.lastFailReason = startIndex
+						+"-"+endIndex
+						+": Next segment length cannot be smaller than "
+						+MINIMUM_SEGMENT_LENGTH
+						+"; would be "
+						+endIndex+"-"
+						+this.nextSegment().getEndIndex()
+						+"("+nextTestLength+")";
 				return false;
 			}
 		}
@@ -449,6 +464,7 @@ public class NucleusBorderSegment  implements Serializable{
 			prevSeg = segment;
 		}
 		NucleusBorderSegment firstSegment = list.get(0);
+				
 		boolean ok = firstSegment.update(prevSeg.getEndIndex(), firstSegment.getEndIndex());
 		if(!ok){
 			throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());

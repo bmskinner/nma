@@ -26,7 +26,7 @@ public class StatsExporter {
 			exportSegmentProfiles(collection);
 			exportMediansOfProfile(collection, "log.medians");
 		} catch (Exception e){
-			logger.log("Error in stats export: "+e.getMessage(), Logger.ERROR);
+			logger.error("Error in stats export", e);
 			return false;
 		}
 		return true;
