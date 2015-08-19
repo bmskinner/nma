@@ -54,6 +54,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
+import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
 public class SignalsDetailPanel extends JPanel implements ActionListener, SignalChangeListener {
@@ -69,13 +70,6 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	private ShellsPanel		shellsPanel;
 
 	private JTabbedPane signalsTabPane;
-//	
-//	private static final int TAB_OVERVIEW 	= 0;
-//	private static final int TAB_HISTOGRAMS = 1;
-//	private static final int TAB_SHELLS 	= 2;
-//	private static final int TAB_SETTINGS 	= 3;
-//	private static final int TAB_BOXPLOTS 	= 4;
-
 	
 	private List<AnalysisDataset> list;
 	private AnalysisDataset activeDataset;
@@ -140,54 +134,6 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 		boxplotPanel.update(list);
 	}
 
-	/**
-	 * Create a consenusus chart for the given nucleus collection
-	 * @param collection the NucleusCollection to draw the consensus from
-	 * @return the consensus chart
-	 */
-	public JFreeChart makeConsensusChart(AnalysisDataset dataset){
-		CellCollection collection = dataset.getCollection();
-		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
-						false);
-		
-
-		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
-		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
-
-		// ensure that the scales for each axis are the same
-		double max = Math.max(maxX, maxY);
-
-		// ensure there is room for expansion of the target nucleus due to IQR
-		max *=  1.25;		
-
-		XYPlot plot = chart.getXYPlot();
-		plot.setDataset(0, ds);
-		plot.getDomainAxis().setRange(-max,max);
-		plot.getRangeAxis().setRange(-max,max);
-
-		plot.getDomainAxis().setVisible(false);
-		plot.getRangeAxis().setVisible(false);
-
-		plot.setBackgroundPaint(Color.WHITE);
-		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-
-		int seriesCount = plot.getSeriesCount();
-
-		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-			Shape circle = new Ellipse2D.Double(0, 0, 2, 2);
-			plot.getRenderer().setSeriesShape(i, circle);
-			plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-			plot.getRenderer().setSeriesPaint(i, Color.BLACK);
-		}	
-		return chart;
-	}
-
-	
 	/**
 	 * Get a series or dataset index for colour selection when drawing charts. The index
 	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
@@ -254,42 +200,42 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	 * Apply the default formatting to a boxplot with list
 	 * @param boxplot
 	 */
-	private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
-		formatBoxplotChart(boxplot);
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
-
-		CategoryDataset ds = plot.getDataset(0);
-
-		for(int series=0;series<ds.getRowCount();series++){
-			String name = (String) ds.getRowKey(series);
-			int seriesGroup = getIndexFromLabel(name);
-
-			Color color = activeDataset.getSignalGroupColour(seriesGroup) == null 
-					? ColourSelecter.getSegmentColor(series)
-							: activeDataset.getSignalGroupColour(seriesGroup);
-
-					renderer.setSeriesPaint(series, color);
-
-
-		}
-
-		renderer.setMeanVisible(false);
-	}
+//	private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
+//		formatBoxplotChart(boxplot);
+//		CategoryPlot plot = boxplot.getCategoryPlot();
+//		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
+//
+//		CategoryDataset ds = plot.getDataset(0);
+//
+//		for(int series=0;series<ds.getRowCount();series++){
+//			String name = (String) ds.getRowKey(series);
+//			int seriesGroup = getIndexFromLabel(name);
+//
+//			Color color = activeDataset.getSignalGroupColour(seriesGroup) == null 
+//					? ColourSelecter.getSegmentColor(series)
+//							: activeDataset.getSignalGroupColour(seriesGroup);
+//
+//					renderer.setSeriesPaint(series, color);
+//
+//
+//		}
+//
+//		renderer.setMeanVisible(false);
+//	}
 	
 	/**
 	 * Apply basic formatting to the charts, without any series added
 	 * @param boxplot
 	 */
-	private void formatBoxplotChart(JFreeChart boxplot){
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		plot.setBackgroundPaint(Color.WHITE);
-		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-		plot.setRenderer(renderer);
-		renderer.setUseOutlinePaintForWhiskers(true);   
-		renderer.setBaseOutlinePaint(Color.BLACK);
-		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-	}
+//	private void formatBoxplotChart(JFreeChart boxplot){
+//		CategoryPlot plot = boxplot.getCategoryPlot();
+//		plot.setBackgroundPaint(Color.WHITE);
+//		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+//		plot.setRenderer(renderer);
+//		renderer.setUseOutlinePaintForWhiskers(true);   
+//		renderer.setBaseOutlinePaint(Color.BLACK);
+//		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+//	}
 
 
 	@Override
@@ -512,51 +458,19 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     				if(collection.hasConsensusNucleus()){ // if a refold is available
     					
     					XYDataset signalCoMs = NucleusDatasetCreator.createSignalCoMDataset(activeDataset);
-    					JFreeChart chart = makeConsensusChart(activeDataset);
-
-    					XYPlot plot = chart.getXYPlot();
-    					plot.setDataset(1, signalCoMs);
-
-    					XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
-    					for(int series=0;series<signalCoMs.getSeriesCount();series++){
-    						
-    						Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
-    						rend.setSeriesShape(series, circle);
-    						
-    						String name = (String) signalCoMs.getSeriesKey(series);
-    						int seriesGroup = getIndexFromLabel(name);
-    						Color colour = activeDataset.getSignalGroupColour(seriesGroup);
-    						rend.setSeriesPaint(series, colour);
-    						rend.setBaseLinesVisible(false);
-    						rend.setBaseShapesVisible(true);
-    						rend.setBaseSeriesVisibleInLegend(false);
-    					}
-    					plot.setRenderer(1, rend);
-
-    					for(int signalGroup : collection.getSignalGroups()){
-    						List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(activeDataset, signalGroup);
-
-    						int signalCount = shapes.size();
-
-    						int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
-    						alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
-    						
-    						Color colour = activeDataset.getSignalGroupColour(signalGroup);
-
-    						for(Shape s : shapes){
-    							XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-    									null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
-    							plot.addAnnotation(an);
-    						}
-    					}
+    					JFreeChart chart = MorphologyChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset, signalCoMs);
     					chartPanel.setChart(chart);
     				} else { // no consensus to display
-    										
-    					consensusAndCheckboxPanel.setVisible(false);
+    							
+    					JFreeChart chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
+    					chartPanel.setChart(chart);
     				}
     			} else { // multiple populations
     				
-    				consensusAndCheckboxPanel.setVisible(false);
+    				JFreeChart chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
+					chartPanel.setChart(chart);
+					
+//    				consensusAndCheckboxPanel.setVisible(false);
     			}
     		} catch(Exception e){
     			IJ.log("Error updating signals: "+e.getMessage());
@@ -565,9 +479,6 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     			}
     		}
     	}
-    	
-    	
-    	
     }
     
     protected class HistogramPanel extends JPanel{
@@ -735,13 +646,8 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     	protected BoxplotPanel(){
 
     		this.setLayout(new BorderLayout());
-    		JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, 
-    														null,
-    														null, 
-    														new DefaultBoxAndWhiskerCategoryDataset(), 
-    														false);	        
-			formatBoxplotChart(areaBoxplot);
-			
+    		
+    		JFreeChart areaBoxplot = MorphologyChartFactory.makeEmptyBoxplot();
 			chartPanel = new ChartPanel(areaBoxplot);
 			this.add(chartPanel);
     	}
@@ -753,12 +659,10 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
     	protected void update(List<AnalysisDataset> list){
     		if(list.size()==1){
     			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSignalAreaBoxplotDataset(list.get(0));
-    			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false); 
-    			formatBoxplotChart(boxplotChart, list);
+    			JFreeChart boxplotChart = MorphologyChartFactory.makeSignalAreaBoxplot(ds, list.get(0));
     			chartPanel.setChart(boxplotChart);
     		} else {
-    			JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-    			formatBoxplotChart(areaBoxplot);
+    			JFreeChart areaBoxplot = MorphologyChartFactory.makeEmptyBoxplot();
     			chartPanel.setChart(areaBoxplot);
     		}
     	}

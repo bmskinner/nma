@@ -422,7 +422,7 @@ public class SegmentFitter {
 		Profile refProfile  = referenceProfile.getSubregion(reference);
 		Profile subjProfile = testProfile.getSubregion(test);
 		
-		return refProfile.weightedSquareDifference(subjProfile);
+		return refProfile.absoluteSquareDifference(subjProfile);
 	}
 	
 	/**

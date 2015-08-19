@@ -402,14 +402,9 @@ public class MorphologyAnalysis {
 						}
 					}
 				}
-				//			Profile tailProfile = medianProfile.offset(tailIndex);
+
 				collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
 
-				//			collection.getProfileCollection().addProfile(collection.getOrientationPoint(), tailProfile);
-				//			collection.getProfileCollection()
-				//			.addFeature(collection.getReferencePoint(), 
-				//					new ProfileFeature(collection.getOrientationPoint(), tailIndex)
-				//					); // set the tail-index in the tip normalised profile
 			} catch(Exception e){
 				logger.error("Error finding tail", e);
 			}
@@ -511,8 +506,7 @@ public class MorphologyAnalysis {
 			try{
 				Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
 
-				for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-					Nucleus n = collection.getCell(i).getNucleus();
+				for(Nucleus n : collection.getNuclei()){
 
 					// returns the positive offset index of this profile which best matches the median profile
 					int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
@@ -555,10 +549,12 @@ public class MorphologyAnalysis {
 
 					// add the offset of the tail to the nucleus
 					nucleus.addBorderTag(collection.getOrientationPoint(), newTailIndex);
+					
 
-					// also update the head position - the point opposite the tail through the CoM
+					// also update the head position (same as round reference point)
+					// - the point opposite the tail through the CoM
 					int headIndex = nucleus.getIndex(nucleus.findOppositeBorder( nucleus.getPoint(newTailIndex) ));
-					nucleus.addBorderTag("head", headIndex);
+					nucleus.addBorderTag(Constants.Nucleus.ROUND.referencePoint(), headIndex);
 					nucleus.splitNucleusToHeadAndHump();
 				}
 			}catch(Exception e){

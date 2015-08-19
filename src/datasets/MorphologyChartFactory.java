@@ -2,6 +2,8 @@ package datasets;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import no.gui.ColourSelecter;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -23,6 +26,7 @@ import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
@@ -283,8 +287,20 @@ public class MorphologyChartFactory {
 	 */
 	public static JFreeChart makeEmptyBoxplot(){
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
-		boxplot.getPlot().setBackgroundPaint(Color.WHITE);
+		formatBoxplot(boxplot);
 		return boxplot;
+	}
+	
+	private static void formatBoxplot(JFreeChart boxplot){
+		boxplot.getPlot().setBackgroundPaint(Color.WHITE);
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+		plot.setRenderer(renderer);
+		renderer.setUseOutlinePaintForWhiskers(true);   
+		renderer.setBaseOutlinePaint(Color.BLACK);
+		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+		renderer.setMeanVisible(false);
 	}
 	
 	/**
@@ -295,17 +311,14 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeSegmentBoxplot(BoxAndWhiskerCategoryDataset ds, List<AnalysisDataset> list){
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false);	
 		
+		
 		if(list.size()>1){
 			return makeEmptyBoxplot();
 		}
 		
+		formatBoxplot(boxplot);
 		CategoryPlot plot = boxplot.getCategoryPlot();
-		plot.setBackgroundPaint(Color.WHITE);
-		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-		plot.setRenderer(renderer);
-		renderer.setUseOutlinePaintForWhiskers(true);   
-		renderer.setBaseOutlinePaint(Color.BLACK);
-		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
 		
 		if(list!=null && !list.isEmpty()){
 						
@@ -327,6 +340,26 @@ public class MorphologyChartFactory {
 		return boxplot;
 	}
 	
+	public static JFreeChart makeSignalAreaBoxplot(BoxAndWhiskerCategoryDataset ds, AnalysisDataset dataset){
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false);
+		formatBoxplot(boxplot);
+		
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
+
+		for(int series=0;series<ds.getRowCount();series++){
+			String name = (String) ds.getRowKey(series);
+			int seriesGroup = getIndexFromLabel(name);
+
+			Color color = dataset.getSignalGroupColour(seriesGroup) == null 
+					? ColourSelecter.getSegmentColor(series)
+							: dataset.getSignalGroupColour(seriesGroup);
+
+					renderer.setSeriesPaint(series, color);
+		}		
+		return boxplot;
+	}
+	
 	
 	/**
 	 * Create an empty chart as a placeholder for nucleus outlines
@@ -340,6 +373,96 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
+	/**
+	 * Create a consenusus chart for the given nucleus collection
+	 * @param collection the NucleusCollection to draw the consensus from
+	 * @return the consensus chart
+	 */
+	public static JFreeChart makeNucleusOutlineChart(AnalysisDataset dataset){
+		CellCollection collection = dataset.getCollection();
+		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
+		JFreeChart chart = makeEmptyNucleusOutlineChart();
+		
+
+		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
+		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
+
+		// ensure that the scales for each axis are the same
+		double max = Math.max(maxX, maxY);
+
+		// ensure there is room for expansion of the target nucleus due to IQR
+		max *=  1.25;		
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setDataset(0, ds);
+		plot.getDomainAxis().setRange(-max,max);
+		plot.getRangeAxis().setRange(-max,max);
+
+		plot.getDomainAxis().setVisible(false);
+		plot.getRangeAxis().setVisible(false);
+
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
+
+		int seriesCount = plot.getSeriesCount();
+
+		for (int i = 0; i < seriesCount; i++) {
+			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+			plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+			plot.getRenderer().setSeriesPaint(i, Color.BLACK);
+		}	
+		return chart;
+	}
+	
+	/**
+	 * Create a nucleus outline chart with nuclear signals drawn as transparent
+	 * circles
+	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
+	 * @param signalCoMs the dataset with the signal centre of masses
+	 * @return
+	 */
+	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset, XYDataset signalCoMs){
+		JFreeChart chart = MorphologyChartFactory.makeNucleusOutlineChart(dataset);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setDataset(1, signalCoMs);
+
+		XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
+		for(int series=0;series<signalCoMs.getSeriesCount();series++){
+
+			Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
+			rend.setSeriesShape(series, circle);
+
+			String name = (String) signalCoMs.getSeriesKey(series);
+			int seriesGroup = getIndexFromLabel(name);
+			Color colour = dataset.getSignalGroupColour(seriesGroup);
+			rend.setSeriesPaint(series, colour);
+			rend.setBaseLinesVisible(false);
+			rend.setBaseShapesVisible(true);
+			rend.setBaseSeriesVisibleInLegend(false);
+		}
+		plot.setRenderer(1, rend);
+
+		for(int signalGroup : dataset.getCollection().getSignalGroups()){
+			List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
+
+			int signalCount = shapes.size();
+
+			int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
+			alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+
+			Color colour = dataset.getSignalGroupColour(signalGroup);
+
+			for(Shape s : shapes){
+				XYShapeAnnotation an = new XYShapeAnnotation( s, null,
+						null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
+				plot.addAnnotation(an);
+			}
+		}
+		return chart;
+	}
+
 	/**
 	 * Get a chart contaning the details of the given cell from the given dataset
 	 * @param cell the cell to draw

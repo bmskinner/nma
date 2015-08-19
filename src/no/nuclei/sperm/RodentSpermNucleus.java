@@ -268,7 +268,7 @@ extends SpermNucleus
     // determine the coordinates of the point intersected as int
     // for each xvalue of each point in array, get the line y value
     // at the point the yvalues are closest and not the tail point is the intersesction
-    Equation lineEquation = new Equation(this.getCentreOfMass(), this.getBorderTag("tail"));
+    Equation lineEquation = new Equation(this.getCentreOfMass(), this.getBorderTag(Constants.Nucleus.RODENT_SPERM.orientationPoint()));
     double minDeltaY = 100;
     int minDeltaYIndex = 0;
 
@@ -277,7 +277,7 @@ extends SpermNucleus
         double y = this.getBorderPoint(i).getY();
         double yOnLine = lineEquation.getY(x);
 
-        double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag("tail"));
+        double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag(Constants.Nucleus.RODENT_SPERM.orientationPoint()));
 
         double deltaY = Math.abs(y - yOnLine);
         if(deltaY < minDeltaY && distanceToTail > this.getFeret()/2){ // exclude points too close to the tail
@@ -301,7 +301,7 @@ extends SpermNucleus
 
     for(int i = 0; i<this.getLength();i++){
 
-      int currentIndex = Utils.wrapIndex(this.getBorderIndex("tail")+i, this.getLength()); // start at the tail, and go around the array
+      int currentIndex = Utils.wrapIndex(this.getBorderIndex(Constants.Nucleus.RODENT_SPERM.orientationPoint())+i, this.getLength()); // start at the tail, and go around the array
       
       NucleusBorderPoint p = getPoint(currentIndex);
 
@@ -310,7 +310,7 @@ extends SpermNucleus
       }
       if(currentIndex==intersectionPointIndex && !changeRoi){ // until we hit the intersection point. Then, close the polygon of roi1 back to the tip. Switch to roi2
         roi1.add(p);
-        roi1.add(this.getBorderTag("tail"));
+        roi1.add(this.getBorderTag(Constants.Nucleus.RODENT_SPERM.orientationPoint()));
         roi2.add(this.getBorderTag("intersectionPoint"));
         changeRoi = true;
       }
@@ -318,7 +318,7 @@ extends SpermNucleus
         roi2.add(p);
       }
 
-      if(currentIndex==this.getBorderIndex("tail") && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
+      if(currentIndex==this.getBorderIndex(Constants.Nucleus.RODENT_SPERM.orientationPoint()) && changeRoi){ // after reaching the tail again, close the polygon back to the intersection point
         roi2.add(this.getBorderTag("intersectionPoint"));
       }
 
@@ -330,7 +330,7 @@ extends SpermNucleus
 
 //    check if we need to swap
     for(int i=0;i<roi1.size();i++){
-      if(roi1.get(i).overlaps(this.getBorderTag("tip"))){
+      if(roi1.get(i).overlaps(this.getBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint()))){
     	  this.hookRoi = roi1;
           this.humpRoi = roi2;
         break;
@@ -366,12 +366,8 @@ extends SpermNucleus
     				angle = 360 - angle;
     			}
     			n.setAngle(angle);
-
-    			// set the final angle
-//    			this.updateSignalAngle(channel, i, angle);
     		}
     	}
-//    	channel++;
     }
   }
 }
