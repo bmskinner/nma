@@ -123,7 +123,7 @@ public class RoundNucleus
 		// for subclasses to access
 	}
 
-	public RoundNucleus(RoundNucleus n) throws Exception{
+	public RoundNucleus(RoundNucleus n) throws Exception {
 
 		this.setID(n.getID());
 		this.setPosition(n.getPosition());
@@ -215,7 +215,6 @@ public class RoundNucleus
 		return this.sourceFile.getAbsolutePath();
 	}
 
-	// defensive copy
 	public double[] getPosition(){
 		return this.orignalPosition;
 	}
@@ -317,9 +316,6 @@ public class RoundNucleus
 		return new NucleusBorderPoint(this.borderList.get(i));
 	}
 
-//	public FloatPolygon getPolygon(){
-//		return this.smoothedPolygon;
-//	}
 	
 	public double getArea(){
 		return this.area;
@@ -434,13 +430,6 @@ public class RoundNucleus
 		this.signalCollection = collection;
 	}
 
-//	public void setPolygon(FloatPolygon p){
-//		this.smoothedPolygon = p;
-//	}
-
-//	protected void setRoi(Roi d){
-//		this.roi = d;
-//	}
 
 	protected void setSourceFile(File d){
 		this.sourceFile = d;

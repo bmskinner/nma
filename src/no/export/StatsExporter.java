@@ -32,7 +32,7 @@ public class StatsExporter {
 		return true;
 	}
 	
-	public static void exportNuclearStats(CellCollection collection, String filename){
+	public static void exportNuclearStats(CellCollection collection, String filename) throws Exception {
 
 		TableExporter nuclearStats = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 		nuclearStats.addColumn("AREA",                       collection.getAreas());

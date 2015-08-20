@@ -232,7 +232,7 @@ public class MorphologyAnalysis {
 	 * @param pointType
 	 * @return
 	 */
-	private static double compareProfilesToMedian(CellCollection collection, String pointType){
+	private static double compareProfilesToMedian(CellCollection collection, String pointType) throws Exception {
 		double[] scores = collection.getDifferencesToMedianFromPoint(pointType);
 		double result = 0;
 		for(double s : scores){
@@ -635,8 +635,8 @@ public class MorphologyAnalysis {
 			try{
 				Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
 
-				for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-					PigSpermNucleus n = (PigSpermNucleus)collection.getCell(i).getNucleus();
+				for(Nucleus nucleus : collection.getNuclei()){
+					PigSpermNucleus n = (PigSpermNucleus) nucleus;
 
 					// returns the positive offset index of this profile which best matches the median profile
 					int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);

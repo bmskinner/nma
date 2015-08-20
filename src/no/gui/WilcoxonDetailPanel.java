@@ -27,7 +27,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	private JTable wilcoxonMinFeretTable;
 	private JTable wilcoxonDifferenceTable;
 
-	public WilcoxonDetailPanel() {
+	public WilcoxonDetailPanel() throws Exception {
 		this.setLayout(new BorderLayout());
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -93,8 +93,9 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	/**
 	 * Update the wilcoxon panel with data from the given datasets
 	 * @param list the datasets
+	 * @throws Exception 
 	 */
-	public void update(List<AnalysisDataset> list){
+	public void update(List<AnalysisDataset> list) throws Exception{
 		// format the numbers and make into a tablemodel
 		if(!list.isEmpty() && list!=null){
 			

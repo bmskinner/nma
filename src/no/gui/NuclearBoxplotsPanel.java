@@ -129,8 +129,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	/**
 	 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
 	 * @param list
+	 * @throws Exception 
 	 */
-	private void updateDifferenceBoxplot(List<AnalysisDataset> list){
+	private void updateDifferenceBoxplot(List<AnalysisDataset> list) throws Exception{
 		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createDifferenceBoxplotDataset(list);
 		JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Degrees per perimeter unit", ds, false); 
 		formatBoxplotChart(boxplotChart, list);

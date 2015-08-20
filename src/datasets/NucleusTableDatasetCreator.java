@@ -450,8 +450,9 @@ public class NucleusTableDatasetCreator {
 	 * Carry out pairwise wilcoxon rank-sum test on the variability of the given datasets
 	 * @param list the datasets to test
 	 * @return a tablemodel for display
+	 * @throws Exception 
 	 */
-	public static TableModel createWilcoxonVariabilityTable(List<AnalysisDataset> list){
+	public static TableModel createWilcoxonVariabilityTable(List<AnalysisDataset> list) throws Exception{
 		DefaultTableModel model = makeEmptyWilcoxonTable(list);
 		if(list==null){
 			return model;

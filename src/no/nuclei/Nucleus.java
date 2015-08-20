@@ -26,20 +26,47 @@ public interface Nucleus {
 	public void findPointsAroundBorder() throws Exception;
 	public void intitialiseNucleus(int angleProfileWindowSize);
 
-	// public Nucleus copy();
-
 	public UUID getID();
 
 	public String getPath();
 
+	/**
+	 * Get the position of the nucleus in the 
+	 * original image. The indexes in the double are
+	 * 0 - X_BASE of the bounding box
+	 * 1 - Y_BASE of the bounding box
+	 * 2 - WIDTH of the bounding box
+	 * 3 - HEIGHT of the bounding box
+	 * @return
+	 */
 	public double[] getPosition();
 
+	/**
+	 * Set the position of the nucleus in the original
+	 * image. See getPosition() for values to use.
+	 * @param d
+	 * @see getPosition()
+	 */
 	public void setPosition(double[] d);
 
+	/**
+	 * Get the absolute path of the original image
+	 * @return
+	 */
 	public File getSourceFile();
 
+	/**
+	 * Get the absolute path to the folder containing
+	 * the details of this nucleus. It will have the
+	 * format /SourceDir/ImageName/
+	 * @return
+	 */
 	public File getNucleusFolder();
 
+	/**
+	 * Get the name of the image the nucleus was found in
+	 * @return
+	 */
 	public String getImageName();
 	
 	
@@ -51,37 +78,98 @@ public interface Nucleus {
 	 */
 	public String getNameAndNumber();
 
+	/**
+	 * Get the absolute path to use to save annotated
+	 * images of the nucleus as a string
+	 * @return
+	 */
 	public String getAnnotatedImagePath();
 
+	/**
+	 * Get the absolute path to use to save a copy of
+	 * the nucleus as a string
+	 * @return
+	 */
 	public String getOriginalImagePath();
 
+	/**
+	 * Get the absolute path to use to save an enlarged region
+	 * around the nucleus as a string
+	 * @return
+	 */
 	public String getEnlargedImagePath();
 
+	/**
+	 * Get the name of the image the nucleus was found in
+	 * without the file extension
+	 * @return
+	 */
 	public String getImageNameWithoutExtension();
 
+	/**
+	 * Get the top level path for the analysis being performed.
+	 * This is the folder with the analysis date and time.
+	 * TODO: Deprecate. This should be only a feature of the collection.
+	 * @return
+	 */
 	public File getOutputFolder();
 
+	/**
+	 * Get the directory in which the image containing
+	 * the nucleus is found
+	 * @return
+	 */
 	public String getDirectory();
 
+	/**
+	 * Get the absolute path to the image containing the nucleus
+	 * without the file extension. Used when making paths to the 
+	 * nucleus folder
+	 * @return
+	 */
 	public String getPathWithoutExtension();
 
+	/**
+	 * Get the number of the nucleus in the image
+	 * @return
+	 */
 	public int getNucleusNumber();
 
 	public String getPathAndNumber();
 
+	/**
+	 * Get the position of the centre of mass of the nucleus
+	 * @return
+	 */
 	public XYPoint getCentreOfMass();
 
 	public NucleusBorderPoint getPoint(int i);
 
 
+	/**
+	 * Get the area of the nucleus in pixels
+	 * @return
+	 */
 	public double getArea();
 
+	/**
+	 * Get the maximum caliper diameter across the nucleus in pixels
+	 * @return
+	 */
 	public double getFeret();
 
+	/**
+	 * Get the narrowest diameter through the centre of mass in pixels
+	 * @return
+	 */
 	public double getNarrowestDiameter();
 
 	public double getPathLength();
 
+	/**
+	 * Get the perimeter of the nucleus in pixels
+	 * @return
+	 */
 	public double getPerimeter();
 
 	/**
@@ -117,7 +205,7 @@ public interface Nucleus {
 	
 	
 	/**
-	 * Get the length of a pixel in metres
+	 * Get the length of a pixel in micrometres
 	 * @return
 	 */
 	public double getScale();

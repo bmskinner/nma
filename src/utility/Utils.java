@@ -75,6 +75,14 @@ public class Utils {
 		 return s;
 	 }
 	
+	public static int[] getintFromInteger(Integer[] i){
+		int[] result = new int[i.length];
+		for (int j = 0; j < i.length; j++){
+			result[j] = i[j];
+		}
+		return result;
+	}
+	
 	/**
 	 * Create a String array from an Integer array for exports
 	 * @param d the Integer array

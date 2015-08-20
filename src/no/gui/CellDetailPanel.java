@@ -139,43 +139,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		segmentStatsPanel.update(cell);
 	}
 	
-	/**
-	 * Get a series or dataset index for colour selection when drawing charts. The index
-	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
-	 * @param label the label to extract the index from 
-	 * @return the index found
-	 */
-	private int getIndexFromLabel(String label){
-		String[] names = label.split("_");
-		return Integer.parseInt(names[1]);
-	}
-	
-
-//	@Override
-//	public void actionPerformed(ActionEvent arg0) {
-//
-//		if(arg0.getActionCommand().equals("CellSelectionChoice")){
-//
-//			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
-//
-//			if(list.size()==1){	
-//				try{
-//					
-//					activeCell = activeDataset.getCollection().getCell(name);
-//					updateCell(activeCell);
-//				} catch (Exception e1){
-//					
-//					IJ.log("Error fetching cell: "+e1.getMessage());
-//					for(StackTraceElement e2 : e1.getStackTrace()){
-//						IJ.log(e2.toString());
-//					}
-//				}
-//			}
-//
-//		}
-//		
-//	}
-		
 	
 	/**
 	 * Allows for cell background to be coloured based on position in a list. Used to colour
@@ -281,21 +244,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		 * @param dataset
 		 */
 		protected void updateDataset(AnalysisDataset dataset){
+			DefaultMutableTreeNode root =
+					new DefaultMutableTreeNode("Cells");
 			
 			if(dataset!=null){
-				DefaultMutableTreeNode root =
-						new DefaultMutableTreeNode("Cells");
 				createNodes(root, dataset);
-
-				TreeModel model = new DefaultTreeModel(root);
-
-				tree.setModel(model);
-				
-			} else {
-				TreeModel model = new DefaultTreeModel(null);
-				tree.setModel(model);
-			}
-			
+			} 
+			TreeModel model = new DefaultTreeModel(root);
+			tree.setModel(model);
 		}
 		
 		/**
