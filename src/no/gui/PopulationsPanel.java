@@ -42,12 +42,10 @@ import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import utility.TreeOrderHashMap;
 
-public class PopulationsPanel extends JPanel implements SignalChangeListener {
+public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String SOURCE_COMPONENT = "PopulationsPanel"; 
-	
+		
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 
 	private JXTreeTable treeTable;
@@ -58,8 +56,6 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 	
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 	
-	private List<Object> listeners = new ArrayList<Object>();
-
 	public PopulationsPanel() {
 		
 		this.setLayout(new BorderLayout());
@@ -467,13 +463,13 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		if(!newName.isEmpty() && newName!=null){
 		
 			if(this.populationNames.containsKey(newName)){
-				fireSignalChangeEvent("Log_Name exists, aborting");
+				log("Name exists, aborting");
 			} else {
 				String oldName = collection.getName();
 				collection.setName(newName);
 				this.populationNames.put(newName, collection.getID());
 				this.populationNames.remove(oldName);
-				fireSignalChangeEvent("Log_Collection renamed: "+newName);
+				log("Collection renamed: "+newName);
 				
 				
 				File saveFile = dataset.getSavePath();
@@ -638,7 +634,7 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 					}
 				}
 				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
-//				lblStatusLine.setText(datasets.size()+" "+count+" selected");
+				status(datasets.size()+" "+count+" selected");
 				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
 
 				if(datasets.isEmpty()){
@@ -716,23 +712,7 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 			}
 		}
 	}
-	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-     
-    private synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
-        Iterator<Object> iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
-	
+		
 	/**
 	 * Allows for cell background to be coloured based on poition in a list
 	 *

@@ -38,7 +38,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
-public class SegmentsDetailPanel extends JPanel implements ActionListener {
+public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 

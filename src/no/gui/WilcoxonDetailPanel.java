@@ -17,7 +17,7 @@ import no.analysis.AnalysisDataset;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 
-public class WilcoxonDetailPanel extends JPanel {
+public class WilcoxonDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
 	

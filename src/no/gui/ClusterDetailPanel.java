@@ -4,8 +4,6 @@ package no.gui;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -17,13 +15,12 @@ import javax.swing.JTextArea;
 
 import no.analysis.AnalysisDataset;
 
-public class ClusterDetailPanel extends JPanel {
+public class ClusterDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
 	
 	public static final String SOURCE_COMPONENT = "ClusterDetailPanel"; 
 	private JPanel clustersPanel;
-	private List<Object> listeners = new ArrayList<Object>();
 	private JButton clusterButton;
 
 	public ClusterDetailPanel() {
@@ -78,22 +75,4 @@ public class ClusterDetailPanel extends JPanel {
 		}
 		
 	}
-	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-	
-    private synchronized void fireSignalChangeEvent(String message) {
-    	
-        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT);
-        Iterator<Object> iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
-
 }

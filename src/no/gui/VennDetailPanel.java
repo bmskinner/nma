@@ -1,21 +1,16 @@
 package no.gui;
 
-import ij.IJ;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
 
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
-import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 
-public class VennDetailPanel extends JPanel {
+public class VennDetailPanel extends DetailPanel {
 
 
 	private static final long serialVersionUID = 1L;

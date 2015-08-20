@@ -47,7 +47,7 @@ import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 import datasets.TailDatasetCreator;
 
-public class CellDetailPanel extends JPanel implements ActionListener, SignalChangeListener {
+public class CellDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -62,9 +62,7 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 	protected OutlinePanel 	 	outlinePanel; 		// the outline of the cell and detected objects
 	protected CellStatsPanel 	cellStatsPanel;		// the stats table
 	protected SegmentStatsPanel segmentStatsPanel;	// details of the individual segments
-	
-	private List<Object> listeners = new ArrayList<Object>();
-	
+		
 	public CellDetailPanel() {
 
 		this.setLayout(new BorderLayout());
@@ -167,23 +165,7 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		}
 		
 	}
-	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-     
-    private synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
-        Iterator iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
-	
+		
 	
 	/**
 	 * Allows for cell background to be coloured based on position in a list. Used to colour

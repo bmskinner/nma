@@ -20,7 +20,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import datasets.NucleusDatasetCreator;
 
-public class NuclearBoxplotsPanel extends JPanel {
+public class NuclearBoxplotsPanel extends DetailPanel {
 	
 	private static final long serialVersionUID = 1L;
 	private ChartPanel areaBoxplotChartPanel;

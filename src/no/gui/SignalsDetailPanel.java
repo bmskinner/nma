@@ -57,12 +57,10 @@ import org.jfree.data.xy.XYDataset;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
-public class SignalsDetailPanel extends JPanel implements ActionListener, SignalChangeListener {
+public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String SOURCE_COMPONENT = "SignalsDetailPanel"; 
-	
+		
 	private OverviewPanel	overviewPanel; 	//container for chart and stats table
 	private HistogramPanel 	histogramPanel;
 	private AnalysisPanel	analysisPanel;
@@ -73,8 +71,6 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 	
 	private List<AnalysisDataset> list;
 	private AnalysisDataset activeDataset;
-	
-	private List<Object> listeners = new ArrayList<Object>();
 
 	/**
 	 * Create the panel.
@@ -244,31 +240,6 @@ public class SignalsDetailPanel extends JPanel implements ActionListener, Signal
 			update(list);
 		}
 	}
-	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-     
-    private synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
-        Iterator<Object> iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
-    
-    /**
-     * Send a log message to the main window
-     * @param message
-     */
-    private void log(String message){
-    	fireSignalChangeEvent("Log_"+message);
-    }
-    
     
     protected class OverviewPanel extends JPanel{
     	

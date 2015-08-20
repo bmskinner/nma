@@ -18,7 +18,7 @@ import datasets.NucleusTableDatasetCreator;
  * population
  *
  */
-public class AnalysisDetailPanel extends JPanel {
+public class AnalysisDetailPanel extends DetailPanel {
 
 
 	private static final long serialVersionUID = 1L;

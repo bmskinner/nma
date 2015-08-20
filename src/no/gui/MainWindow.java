@@ -530,38 +530,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		};
 		thr.start();
 	}
-				
-	
-	/**
-	 * Create a new CellCollection of the same class as the given dataset
-	 * @param template the dataset to base on for analysis options, folders
-	 * @param name the collection name
-	 * @return a new empty collection
-	 */
-	public static CellCollection makeNewCollection(AnalysisDataset template, String name){
-
-		CellCollection newCollection = null;
-
-		try {
-
-			CellCollection templateCollection = template.getCollection();
-
-			newCollection = new CellCollection(templateCollection.getFolder(), 
-					templateCollection.getOutputFolderName(), 
-					name, 
-					templateCollection.getDebugFile(),
-					templateCollection.getNucleusClass()
-					);
-
-		} catch (Exception e) {
-			IJ.log(e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
-		} 
-		return newCollection;
-	}
-		
+						
 	class SplitCollectionAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -601,7 +570,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	        			// prepare a new collection
 	        			CellCollection collection = dataset.getCollection();
 
-	        			CellCollection newCollection = makeNewCollection(dataset, "Subtraction");
+	        			CellCollection newCollection = new CellCollection(dataset, "Subtraction");
 
 	        			for(Cell n : collection.getCells()){
 	        				if(! negative.getCollection().getCells().contains(n)){

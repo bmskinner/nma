@@ -39,18 +39,15 @@ import org.jfree.data.xy.XYDataset;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
-public class ConsensusNucleusPanel extends JPanel implements SignalChangeListener {
+public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String SOURCE_COMPONENT = "ConsensusNucleusPanel"; 
 
 	private ConsensusNucleusChartPanel consensusChartPanel;
 	private JButton runRefoldingButton;
 	
 	private AnalysisDataset activeDataset;
-	
-	private List<Object> listeners = new ArrayList<Object>();
+
 	
 	public ConsensusNucleusPanel() {
 
@@ -268,27 +265,6 @@ public class ConsensusNucleusPanel extends JPanel implements SignalChangeListene
         container.revalidate();
     }
 	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-     
-    private synchronized void fireSignalChangeEvent(String message) {
-    	
-        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
-        Iterator iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
-    
-    private void log(String message){
-    	fireSignalChangeEvent("Log_"+message);
-    }
-
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		

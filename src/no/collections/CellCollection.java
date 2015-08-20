@@ -23,6 +23,7 @@ import java.util.UUID;
 import cell.Cell;
 import utility.Constants;
 import utility.Stats;
+import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderSegment;
@@ -67,6 +68,21 @@ implements Serializable
 	  this.guid = java.util.UUID.randomUUID();
 	  this.nucleusClass = nucleusClass;
 	  profileCollections.put(CellCollection.REGULAR_PROFILE, new ProfileCollection());
+  }
+  
+  /**
+   * Construct from a template dataset
+   * @param template the dataset to base on for analysis options, folders
+   * @param name the collection name
+   */
+  public CellCollection(AnalysisDataset template, String name){
+
+	  this(template.getCollection().getFolder(), 
+			  template.getCollection().getOutputFolderName(), 
+			  name, 
+			  template.getCollection().getDebugFile(),
+			  template.getCollection().getNucleusClass()
+			  );
   }
 
   /*

@@ -38,12 +38,11 @@ import org.jfree.data.xy.XYSeriesCollection;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
-public class NucleusProfilesPanel extends JPanel implements ActionListener {
+public class NucleusProfilesPanel extends DetailPanel implements ActionListener {
 
 
 	private static final long serialVersionUID = 1L;
 	
-//	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
 	private ChartPanel profilesPanel;
 	private ChartPanel variabilityChartPanel; 
