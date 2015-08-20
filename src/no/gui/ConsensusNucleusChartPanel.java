@@ -25,6 +25,7 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		JMenuItem alignItem = new JMenuItem("Align vertical");
 		alignItem.addActionListener(this);
 		alignItem.setActionCommand("AlignVertical");
+		alignItem.setEnabled(false);
 		
 		JMenuItem rotateItem = new JMenuItem("Rotate by...");
 		rotateItem.addActionListener(this);

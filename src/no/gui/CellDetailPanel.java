@@ -25,7 +25,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableColumn;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
 
 import no.analysis.AnalysisDataset;
 import no.nuclei.Nucleus;
@@ -47,17 +53,15 @@ import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 import datasets.TailDatasetCreator;
 
-public class CellDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
+public class CellDetailPanel extends DetailPanel implements SignalChangeListener, TreeSelectionListener {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String SOURCE_COMPONENT = "CellDetailPanel"; 
-
-	private JComboBox<String> 	cellSelectionBox; 	// choose which cell to look at individually
 	private 	List<AnalysisDataset> list;
 	protected AnalysisDataset activeDataset;	
 	private Cell activeCell;
 	
+	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
 	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
 	protected OutlinePanel 	 	outlinePanel; 		// the outline of the cell and detected objects
 	protected CellStatsPanel 	cellStatsPanel;		// the stats table
@@ -67,32 +71,36 @@ public class CellDetailPanel extends DetailPanel implements ActionListener, Sign
 
 		this.setLayout(new BorderLayout());
 		
+		cellsListPanel = new CellsListPanel();
+		this.add(cellsListPanel, BorderLayout.WEST);
+		
 		// make the chart for each nucleus
 		outlinePanel = new OutlinePanel();
-		this.add(outlinePanel, BorderLayout.CENTER);
+		this.add(outlinePanel, BorderLayout.EAST);
+			
+		JPanel centrePanel = createCentrePanel();
+		this.add(centrePanel, BorderLayout.CENTER);
 		
-		// make the combobox for selecting nuclei
-		cellSelectionBox = new JComboBox<String>();
-		cellSelectionBox.setActionCommand("CellSelectionChoice");
-		cellSelectionBox.addActionListener(this);
-		this.add(cellSelectionBox, BorderLayout.NORTH);
-		
-		
-		JPanel westPanel = new JPanel();
-		westPanel.setLayout(new BoxLayout(westPanel, BoxLayout.Y_AXIS));
+	}
+	
+	/**
+	 * Create the central column panel
+	 * @return
+	 */
+	private JPanel createCentrePanel(){
+		JPanel centrePanel = new JPanel();
+		centrePanel.setLayout(new BoxLayout(centrePanel, BoxLayout.Y_AXIS));
 		
 		
 		cellStatsPanel = new CellStatsPanel();
-		westPanel.add(cellStatsPanel);
+		centrePanel.add(cellStatsPanel);
 		
 		profilePanel = new ProfilePanel();
-		westPanel.add(profilePanel);
+		centrePanel.add(profilePanel);
 		
 		segmentStatsPanel = new SegmentStatsPanel();
-		westPanel.add(segmentStatsPanel);
-		
-		this.add(westPanel, BorderLayout.WEST);
-		
+		centrePanel.add(segmentStatsPanel);
+		return centrePanel;
 	}
 	
 	/**
@@ -104,14 +112,12 @@ public class CellDetailPanel extends DetailPanel implements ActionListener, Sign
 		this.list = list;
 		
 		if(list.size()==1){
+			
 			activeDataset = list.get(0);
-			ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(activeDataset.getCollection().getNucleusPathsAndNumbers());
-			cellSelectionBox.setModel(cellModel);
-			cellSelectionBox.setSelectedIndex(0);
+			cellsListPanel.updateDataset(activeDataset);
 		} else {
 			
-			ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>();
-			cellSelectionBox.setModel(cellModel);
+			cellsListPanel.updateDataset(null);
 			updateCell(null);
 		}
 	}
@@ -141,30 +147,30 @@ public class CellDetailPanel extends DetailPanel implements ActionListener, Sign
 	}
 	
 
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-
-		if(arg0.getActionCommand().equals("CellSelectionChoice")){
-
-			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
-
-			if(list.size()==1){	
-				try{
-					
-					activeCell = activeDataset.getCollection().getCell(name);
-					updateCell(activeCell);
-				} catch (Exception e1){
-					
-					IJ.log("Error fetching cell: "+e1.getMessage());
-					for(StackTraceElement e2 : e1.getStackTrace()){
-						IJ.log(e2.toString());
-					}
-				}
-			}
-
-		}
-		
-	}
+//	@Override
+//	public void actionPerformed(ActionEvent arg0) {
+//
+//		if(arg0.getActionCommand().equals("CellSelectionChoice")){
+//
+//			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
+//
+//			if(list.size()==1){	
+//				try{
+//					
+//					activeCell = activeDataset.getCollection().getCell(name);
+//					updateCell(activeCell);
+//				} catch (Exception e1){
+//					
+//					IJ.log("Error fetching cell: "+e1.getMessage());
+//					for(StackTraceElement e2 : e1.getStackTrace()){
+//						IJ.log(e2.toString());
+//					}
+//				}
+//			}
+//
+//		}
+//		
+//	}
 		
 	
 	/**
@@ -243,6 +249,63 @@ public class CellDetailPanel extends DetailPanel implements ActionListener, Sign
 
 	}
 	
+	/**
+	 * Hold the list of cells within the current active dataset
+	 *
+	 */
+	protected class CellsListPanel extends JPanel {
+		
+		private static final long serialVersionUID = 1L;
+		private JTree tree;
+		
+		protected CellsListPanel(){
+			this.setLayout(new BorderLayout());
+			
+			TreeModel model = new DefaultTreeModel(null);
+			tree = new JTree(model);
+			tree.addTreeSelectionListener(CellDetailPanel.this);
+			
+			JScrollPane scrollPane = new JScrollPane(tree);
+			this.add(scrollPane, BorderLayout.CENTER);
+		}
+		
+		
+		/**
+		 * Trigger an update with a given dataset
+		 * @param dataset
+		 */
+		protected void updateDataset(AnalysisDataset dataset){
+			
+			if(dataset!=null){
+				DefaultMutableTreeNode root =
+						new DefaultMutableTreeNode("Cells");
+				createNodes(root, dataset);
+
+				TreeModel model = new DefaultTreeModel(root);
+
+				tree.setModel(model);
+				
+			} else {
+				TreeModel model = new DefaultTreeModel(null);
+				tree.setModel(model);
+			}
+			
+		}
+		
+		/**
+		 * Create the nodes in the tree
+		 * @param root the root node
+		 * @param dataset the dataset to use
+		 */
+		private void createNodes(DefaultMutableTreeNode root, AnalysisDataset dataset){
+		    
+		    for(Cell cell : dataset.getCollection().getCells()){	
+		    	String name = cell.getNucleus().getPathAndNumber();
+		    	root.add(new DefaultMutableTreeNode(name));
+		    }
+		}
+	}
+	
 	
 	/**
 	 * Show the profile for the nuclei in the given cell
@@ -257,7 +320,7 @@ public class CellDetailPanel extends DetailPanel implements ActionListener, Sign
 			this.setLayout(new BorderLayout());
 			
 			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();		
-			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); // new ChartPanel(chart);
+			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); 
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
 		}
@@ -445,6 +508,28 @@ public class CellDetailPanel extends DetailPanel implements ActionListener, Sign
 				}
 			}
 		}
+	}
+
+
+	@Override
+	public void valueChanged(TreeSelectionEvent arg0) {
+		// TODO Auto-generated method stub
+		String name = arg0.getPath().getLastPathComponent().toString();
+		
+		if(list.size()==1){	
+			try{
+				
+				activeCell = activeDataset.getCollection().getCell(name);
+				updateCell(activeCell);
+			} catch (Exception e1){
+				
+				IJ.log("Error fetching cell: "+e1.getMessage());
+				for(StackTraceElement e2 : e1.getStackTrace()){
+					IJ.log(e2.toString());
+				}
+			}
+		}
+		
 	}
 
 }
