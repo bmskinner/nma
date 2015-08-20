@@ -390,6 +390,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		update();
 	}
 	
+	public void selectDataset(UUID id){
+		this.selectDataset(this.getDataset(id));
+	}
+	
 	/**
 	 * Get the index of the given dataset in the tree table.
 	 * @return the index

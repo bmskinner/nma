@@ -63,6 +63,8 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   protected int totalImages;
   
   private int progress;
+  
+  private boolean debug = false;
 
 
   private File inputFolder;
@@ -87,11 +89,12 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   * @param outputFolder the name of the folder for results
   */
   public NucleusDetector(String outputFolder, MainWindow mw, File debugFile, AnalysisOptions options){
-	  this.inputFolder = options.getFolder();
-	  this.outputFolder = outputFolder;
-	  this.mw = mw;
-	  this.debugFile = debugFile;
-	  this.analysisOptions = options;
+	  this.inputFolder 		= options.getFolder();
+	  this.outputFolder 	= outputFolder;
+	  this.mw 				= mw;
+	  this.debugFile 		= debugFile;
+	  this.analysisOptions 	= options;
+	  
 	  logger = new Logger(debugFile, "NucleusDetector");
   }
 
@@ -115,11 +118,20 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  logger.log("Running nucleus detector");
 			  processFolder(this.inputFolder);
 			  
+			  if(debug){
+				  logger.log("Folder processed", Logger.DEBUG);
+			  }
 			  firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
-				
+			  
+			  if(debug){
+				  logger.log("Getting collections", Logger.DEBUG);
+			  }
 			  List<CellCollection> folderCollection = this.getNucleiCollections();
 
 			  // Run the analysis pipeline
+			  if(debug){
+				  logger.log("Analysing collections", Logger.DEBUG);
+			  }
 			  datasets = analysePopulations(folderCollection);		
 			 
 			  result = true;
@@ -158,12 +170,13 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 	
 	public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
 		mw.log("Beginning analysis");
-		
+		 if(debug){
+			 logger.log("Beginning analysis", Logger.DEBUG);
+		 }
 		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
 
 		for(CellCollection r : folderCollection){
 			
-			Logger logger = new Logger(r.getDebugFile(), "PopulationAnalysis");
 
 			AnalysisDataset dataset = new AnalysisDataset(r);
 			dataset.setAnalysisOptions(analysisOptions);
@@ -251,39 +264,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				mw.logc("Refolding profile...");
 				
 				 mw. new RefoldNucleusAction(dataset);
-				
-//				CurveRefolder refolder = null;
-//				try {
-//					refolder = new CurveRefolder(r, 
-//							analysisOptions.getNucleusClass(), 
-//							analysisOptions.getRefoldMode());
-//				} catch (Exception e1) {
-//					logger.log("Error in refolding: "+e1.getMessage(), Logger.ERROR);
-//					for(StackTraceElement e2 : e1.getStackTrace()){
-//						logger.log(e2.toString(), Logger.STACK);
-//					}
-//				}
-//				
-//				refolder.execute();
-//				try {
-//					if(refolder.get()){
-//						mw.log("OK");
-//					} else {
-//						mw.log("Error");
-//					}
-//				} catch (InterruptedException e) {
-//					logger.log("Error in refolding: "+e.getMessage(), Logger.ERROR);
-//					for(StackTraceElement el : e.getStackTrace()){
-//						logger.log(el.toString(), Logger.STACK);
-//					}
-//					e.printStackTrace();
-//				} catch (ExecutionException e) {
-//					logger.log("Error in refolding: "+e.getMessage(), Logger.ERROR);
-//					for(StackTraceElement el : e.getStackTrace()){
-//						logger.log(el.toString(), Logger.STACK);
-//					}
-//				}
-				
+
 			}
 
 			result.add(dataset);
@@ -347,27 +328,40 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   *  @return a Map of a folder to its nuclei
   */
   public List<CellCollection> getNucleiCollections(){
-    // remove any empty collections before returning
-    List<File> toRemove = new ArrayList<File>(0);
-    Set<File> keys = collectionGroup.keySet();
-    for (File key : keys) {
-    	CellCollection collection = collectionGroup.get(key);
-      if(collection.getNucleusCount()==0){
-        toRemove.add(key);
-      }    
-    }
+	  // remove any empty collections before returning
+	  if(debug){
+		  logger.log("Getting all collections", Logger.DEBUG);
+	  }
+	  List<File> toRemove = new ArrayList<File>(0);
+	  
+	  if(debug){
+		  logger.log("Testing nucleus counts", Logger.DEBUG);
+	  }
+	  Set<File> keys = collectionGroup.keySet();
+	  for (File key : keys) {
+		  CellCollection collection = collectionGroup.get(key);
+		  if(collection.size()==0){
+			  logger.log("Removing collection "+key.toString(), Logger.DEBUG);
+			  toRemove.add(key);
+		  }    
+	  }
+	  if(debug){
+		  logger.log("Got collections to remove", Logger.DEBUG);
+	  }
 
-    Iterator<File> iter = toRemove.iterator();
-    while(iter.hasNext()){
-      collectionGroup.remove(iter.next());
-    }
-//    return this.collectionGroup;
-    List<CellCollection> result = new ArrayList<CellCollection>();
-    for(CellCollection c : collectionGroup.values()){
-    	result.add(c);
-    }
-    return result;
-    
+	  Iterator<File> iter = toRemove.iterator();
+	  while(iter.hasNext()){
+		  collectionGroup.remove(iter.next());
+	  }
+	  if(debug){
+		  logger.log("Removed collections", Logger.DEBUG);
+	  }
+	  List<CellCollection> result = new ArrayList<CellCollection>();
+	  for(CellCollection c : collectionGroup.values()){
+		  result.add(c);
+	  }
+	  return result;
+
   }
 
   /**
@@ -753,10 +747,8 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 	  double ybase = nucleus.getYBase();
 
 	  Rectangle bounds = nucleus.getBounds();
-//	  double xCentre = xbase+(bounds.getWidth()/2);
-//	  double yCentre = ybase+(bounds.getHeight()/2);
+
 	  double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
-//	  String position = xCentre+"-"+yCentre; // store the centre of the rectangle for remapping
 
 	  try{
 	  	// Enlarge the ROI, so we can do nucleus detection on the resulting original images
@@ -799,6 +791,9 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		  // if everything checks out, add the measured parameters to the global pool
 		  Cell c = new Cell();
 		  c.setNucleus(currentNucleus);
+		  if(debug){
+			  logger.log("Adding cell");
+		  }
 		  collectionToAddTo.addCell(c);
 		  
 		  

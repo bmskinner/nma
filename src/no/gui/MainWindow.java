@@ -214,6 +214,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			cellDetailPanel = new CellDetailPanel();
 			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
+			cellDetailPanel.addSignalChangeListener(this);
 			
 			
 			//---------------
@@ -1402,6 +1403,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			this.updatePanels(populationsPanel.getSelectedDatasets());
 		}
 		
+		if(event.type().equals("UpdatePopulationPanel")){
+			this.populationsPanel.update();
+		}
+		
 		if(event.type().startsWith("Log_")){
 			String s = event.type().replace("Log_", "");
 			log(s);
@@ -1410,6 +1415,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		if(event.type().startsWith("Status_")){
 			String s = event.type().replace("Status_", "");
 			setStatus(s);
+		}
+		
+		if(event.type().startsWith("SelectDataset_")){
+			String s = event.type().replace("SelectDataset_", "");
+			UUID id = UUID.fromString(s);
+			this.populationsPanel.selectDataset(id);
 		}
 		
 		if(event.type().startsWith("ExtractSource_")){

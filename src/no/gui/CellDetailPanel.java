@@ -38,6 +38,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import no.analysis.AnalysisDataset;
+import no.analysis.MorphologyAnalysis;
 import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
@@ -265,10 +266,21 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							// delete the cell
 							Cell cell = activeDataset.getCollection().getCell(pathName);
 							activeDataset.getCollection().removeCell(cell);
+							try {
+//								CellDetailPanel.this.log("Refreshing dataset");
+								MorphologyAnalysis.refresh(activeDataset.getCollection());
+
+							} catch (Exception e1) {
+								log("Error deleting cell: "+e1.getMessage());
+							}
 							
 							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 							list.add(activeDataset);
 							CellDetailPanel.this.updateList(list);
+							CellDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
+							CellDetailPanel.this.fireSignalChangeEvent("UpdatePopulationPanel");
+							CellDetailPanel.this.fireSignalChangeEvent("SelectDataset_"+activeDataset.getUUID().toString());
+							
 						}
 						
 					}
@@ -347,7 +359,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 
 			} catch(Exception e){
-				fireSignalChangeEvent("Log_Error updating cell panel");
+				log("Error updating cell panel");
 			}
 
 		}

@@ -123,11 +123,11 @@ implements Serializable
   }
   
   public void removeCell(Cell c){
-	  this.mappedCollection.remove(c);
+	  this.mappedCollection.remove(c.getCellId());
   }
   
   public int size(){
-	  return this.size();
+	  return mappedCollection.size();
   }
     
   public boolean hasConsensusNucleus(){
