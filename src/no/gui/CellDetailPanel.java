@@ -5,10 +5,12 @@ import ij.IJ;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -80,6 +82,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 		JPanel centrePanel = createCentrePanel();
 		this.add(centrePanel, BorderLayout.CENTER);
+		centrePanel.setMinimumSize(new Dimension(200,200));
+		this.revalidate();
 		
 	}
 	
@@ -261,7 +265,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		protected CellsListPanel(){
 			this.setLayout(new BorderLayout());
 			
-			TreeModel model = new DefaultTreeModel(null);
+			DefaultMutableTreeNode root =
+					new DefaultMutableTreeNode("Cells");
+			TreeModel model = new DefaultTreeModel(root);
 			tree = new JTree(model);
 			tree.addTreeSelectionListener(CellDetailPanel.this);
 			
@@ -300,7 +306,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private void createNodes(DefaultMutableTreeNode root, AnalysisDataset dataset){
 		    
 		    for(Cell cell : dataset.getCollection().getCells()){	
-		    	String name = cell.getNucleus().getPathAndNumber();
+		    	String name = cell.getNucleus().getNameAndNumber();
 		    	root.add(new DefaultMutableTreeNode(name));
 		    }
 		}
@@ -516,10 +522,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		// TODO Auto-generated method stub
 		String name = arg0.getPath().getLastPathComponent().toString();
 		
+		String[] bits = name.split("-");
+		
+		String pathName = activeDataset.getCollection().getFolder()
+				+File.separator
+				+bits[0]
+				+File.separator
+				+bits[1];
+		
 		if(list.size()==1){	
 			try{
 				
-				activeCell = activeDataset.getCollection().getCell(name);
+				activeCell = activeDataset.getCollection().getCell(pathName);
 				updateCell(activeCell);
 			} catch (Exception e1){
 				

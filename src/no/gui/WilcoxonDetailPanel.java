@@ -110,7 +110,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 			setRenderer(wilcoxonFeretTable);
 			setRenderer(wilcoxonDifferenceTable);
 			
-			wilcoxonAreaTable = new JTable(NucleusTableDatasetCreator.createWilcoxonAreaTable(list));
+//			wilcoxonAreaTable = new JTable(NucleusTableDatasetCreator.createWilcoxonAreaTable(list));
 
 		} else {
 			wilcoxonAreaTable.setModel(NucleusTableDatasetCreator.createWilcoxonAreaTable(null));

@@ -41,6 +41,15 @@ public interface Nucleus {
 	public File getNucleusFolder();
 
 	public String getImageName();
+	
+	
+	/**
+	 * Get a representation of the nucleus name as
+	 * the name of the image plus the number of the nucleus.
+	 * For /P12.tiff nucleus 3 : P12.tiff-3
+	 * @return
+	 */
+	public String getNameAndNumber();
 
 	public String getAnnotatedImagePath();
 

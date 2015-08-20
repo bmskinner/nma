@@ -300,6 +300,10 @@ public class RoundNucleus
 	public int getNucleusNumber(){
 		return this.nucleusNumber;
 	}
+	
+	public String getNameAndNumber(){
+		return this.getImageName()+"-"+this.getNucleusNumber();
+	}
 
 	public String getPathAndNumber(){
 		return this.sourceFile+File.separator+this.nucleusNumber;
