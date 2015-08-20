@@ -2,6 +2,7 @@ package datasets;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -129,51 +130,68 @@ public class NucleusTableDatasetCreator {
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
 				AnalysisOptions options = dataset.getAnalysisOptions();
+
 				
-				// only display refold mode if nucleus was refolded
-				String refoldMode = options.refoldNucleus() 
-									? options.getRefoldMode()
+				// only display if there are options available
+				// This may not be the case for a merged dataset or its children
+				if(options!=null){ 
+
+					// only display refold mode if nucleus was refolded
+					String refoldMode = options.refoldNucleus() 
+							? options.getRefoldMode()
 									: "N/A";
-									
-				String[] times = collection.getOutputFolderName().split("_");
-				String date = times[0];
-				String time = times[1];
-				
-				CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
-								
-				String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
-				String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
-				String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
-				String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
-				String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
-				String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : "N/A";
-				String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : "N/A";
-				String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
 
-				Object[] collectionData = {
-						options.getAngleProfileWindowSize(),
-						detectionMethod,
-						nucleusThreshold,
-						cannyAutoThreshold,
-						cannyLowThreshold,
-						cannyHighThreshold,
-						cannyKernelRadius,
-						cannyKernelWidth,
-						cannyClosingRadius,
-						options.getMinNucleusSize(),
-						options.getMaxNucleusSize(),
-						df.format(options.getMinNucleusCirc()),
-						df.format(options.getMaxNucleusCirc()),
-						options.refoldNucleus(),
-						refoldMode,
-						dataset.hasShellResult(),
-						date,
-						time,
-						collection.getFolder(),
-						options.getNucleusClass().getSimpleName()				
-				};
+							String[] times = collection.getOutputFolderName().split("_");
+							String date = times[0];
+							String time = times[1];
 
-				model.addColumn(collection.getName(), collectionData);
+							CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
+
+							String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
+							String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
+							String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
+							String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
+							String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
+							String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : "N/A";
+							String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : "N/A";
+							String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
+
+							Object[] collectionData = {
+									options.getAngleProfileWindowSize(),
+									detectionMethod,
+									nucleusThreshold,
+									cannyAutoThreshold,
+									cannyLowThreshold,
+									cannyHighThreshold,
+									cannyKernelRadius,
+									cannyKernelWidth,
+									cannyClosingRadius,
+									options.getMinNucleusSize(),
+									options.getMaxNucleusSize(),
+									df.format(options.getMinNucleusCirc()),
+									df.format(options.getMaxNucleusCirc()),
+									options.refoldNucleus(),
+									refoldMode,
+									dataset.hasShellResult(),
+									date,
+									time,
+									collection.getFolder(),
+									options.getNucleusClass().getSimpleName()				
+							};
+
+							model.addColumn(collection.getName(), collectionData);
+				} else {
+					// there are no options to use; fill blank
+					Object[] collectionData =  new Object[columnData.length];
+					if(dataset.hasMergeSources()){
+						Arrays.fill(collectionData, "N/A - merged");
+
+					} else {
+						Arrays.fill(collectionData, "N/A");
+					}
+					
+					model.addColumn(collection.getName(), collectionData);
+				}
 			}
 		}
 		return model;	

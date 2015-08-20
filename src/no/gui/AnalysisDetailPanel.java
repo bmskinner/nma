@@ -66,15 +66,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 		TableModel model;
 		if(list!=null && !list.isEmpty()){
 			
-			// only show stats for the non-merged datasets, since the
-			// analysis options is null for merges
-			List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
-			for(AnalysisDataset dataset : list){
-				if(!dataset.hasMergeSources()){
-					newList.add(dataset);
-				}
-			}
-			model = NucleusTableDatasetCreator.createAnalysisParametersTable(newList);
+			model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
 			
 		} else {
 			model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);

@@ -315,7 +315,7 @@ public class MorphologyChartFactory {
 		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false);	
 		
 		
-		if(list.size()>1){
+		if(list.size()>1 || ds==null || list==null){
 			return makeEmptyBoxplot();
 		}
 		

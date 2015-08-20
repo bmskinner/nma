@@ -1406,5 +1406,31 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			String s = event.type().replace("Log_", "");
 			log(s);
 		}
+		
+		if(event.type().startsWith("Status_")){
+			String s = event.type().replace("Status_", "");
+			setStatus(s);
+		}
+		
+		if(event.type().startsWith("ExtractSource_")){
+			log("Recovering source dataset");
+			String name = event.type().replace("ExtractSource_", "");
+			// get the uuid of the dataset from the currently selected dataset
+			AnalysisDataset parent = populationsPanel.getSelectedDatasets().get(0);
+			for(UUID id : parent.getMergeSources()){
+				
+				AnalysisDataset child = parent.getMergeSource(id);
+				
+				// add the dataset to the populations panel
+				if(child.getName().equals(name)){
+					child.setRoot(true);
+					populationsPanel.addDataset(child);
+					populationsPanel.update();
+				}
+			}
+
+		}
+		
+		
 	}	
 }

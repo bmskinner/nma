@@ -31,6 +31,7 @@ public class ClusterDetailPanel extends DetailPanel {
 	private JScrollPane treeView;
 	
 	private JTable		mergeSources;
+	private JButton		getSourceButton = new JButton("Recover source");
 	
 	private JPanel		clusterPanel	= new JPanel(new BorderLayout());
 	private JPanel		mergePanel		= new JPanel(new BorderLayout());
@@ -84,11 +85,33 @@ public class ClusterDetailPanel extends DetailPanel {
 	
 	private JPanel makeMergeSourcesPanel(){
 		JPanel panel = new JPanel(new BorderLayout());
-		mergeSources = new JTable(makeBlankTable());
-		mergeSources.setEnabled(false);
+		mergeSources = new JTable(makeBlankTable()){
+			@Override
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+			    return false;
+			}
+		};
+		mergeSources.setEnabled(true);
+		mergeSources.setCellSelectionEnabled(false);
+		mergeSources.setColumnSelectionAllowed(false);
+		mergeSources.setRowSelectionAllowed(true);
 		
 		panel.add(mergeSources, BorderLayout.CENTER);
 		panel.add(mergeSources.getTableHeader(), BorderLayout.NORTH);
+		
+		getSourceButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				// get the dataset name selected
+				String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
+
+				fireSignalChangeEvent("ExtractSource_"+name);
+
+			}
+		});
+		getSourceButton.setVisible(false);
+		panel.add(getSourceButton, BorderLayout.SOUTH);
 		return panel;
 	}
 	
@@ -110,6 +133,7 @@ public class ClusterDetailPanel extends DetailPanel {
 	public void update(List<AnalysisDataset> list){
 		
 		clusterButton.setVisible(false);
+		getSourceButton.setVisible(false);
 		
 		if(list.size()==1){
 			AnalysisDataset dataset = list.get(0);
@@ -121,6 +145,7 @@ public class ClusterDetailPanel extends DetailPanel {
 				clusterButton.setVisible(true);
 				tree.setText("");
 				treeView.setVisible(false);
+
 				
 			} else {
 				 // clusters present, show the tree if available
@@ -153,6 +178,7 @@ public class ClusterDetailPanel extends DetailPanel {
 				model.addColumn("Nuclei", nuclei);
 
 				mergeSources.setModel(model);
+				getSourceButton.setVisible(true);
 				
 			} else {
 				mergeSources.setModel(makeBlankTable());
@@ -162,8 +188,8 @@ public class ClusterDetailPanel extends DetailPanel {
 			clusterButton.setVisible(false);
 			tree.setText("");
 			treeView.setVisible(false);
-			
 			mergeSources.setModel(makeBlankTable());
+			
 		}
 		
 	}

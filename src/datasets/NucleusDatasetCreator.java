@@ -694,6 +694,9 @@ public class NucleusDatasetCreator {
 	 */
 	public static BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<AnalysisDataset> datasets) throws Exception {
 
+		if(datasets==null || datasets.isEmpty()){
+			return null;
+		}
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < datasets.size(); i++) {
@@ -711,7 +714,12 @@ public class NucleusDatasetCreator {
 				for(Nucleus n : collection.getNuclei()){
 					NucleusBorderSegment seg = n.getAngleProfile().getSegment(medianSeg.getName());
 					
-					int differenceToMedian = medianSegmentLength - seg.length();
+					int differenceToMedian = 0;
+					// if seg is null, catch before we throw an error
+					if(seg!=null){
+						differenceToMedian = medianSegmentLength - seg.length();
+					}
+
 					list.add(differenceToMedian);
 				}
 				

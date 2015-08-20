@@ -162,7 +162,13 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 			JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
 			segmentsBoxplotChartPanel.setChart(boxplotChart);
 		} catch (Exception e){
-			IJ.log("Error updating segments boxplot");
+			IJ.log("Error updating segments boxplot: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				IJ.log(e1.toString());
+			}
+			JFreeChart boxplotChart = MorphologyChartFactory.makeEmptyBoxplot();
+			segmentsBoxplotChartPanel.setChart(boxplotChart);
+			
 		}
 	}
 	
