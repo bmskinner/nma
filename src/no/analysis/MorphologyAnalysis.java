@@ -158,6 +158,74 @@ public class MorphologyAnalysis {
 	}
 	
 	/**
+	 * Refresh the given collection. Create a new profile aggregate, and recalculate
+	 * the FrankenProfiles. Do not refit segments.
+	 * @param collection
+	 * @return
+	 */
+	public static boolean refresh(CellCollection collection){
+		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
+		logger.log("Refreshing mophology");
+		try{
+			
+			String pointType = collection.getReferencePoint();
+			
+			// get the empty profile collection from the new CellCollection
+			ProfileCollection pc = collection.getProfileCollection();
+
+			// make an aggregate from the nuclei. A new median profile must necessarily result.
+			// By default, the aggregates are created from the reference point
+			pc.createProfileAggregate(collection);
+			
+			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
+
+			// make a new profile collection to hold the frankendata
+			ProfileCollection frankenCollection = new ProfileCollection();
+
+			// add the correct offset keys
+			// These are the same as the profile collection keys, and have
+			// the same positions (since a franken profile is based on the median)
+			// The reference point is at index 0
+			for(String key : pc.getOffsetKeys()){
+				frankenCollection.addOffset(key, pc.getOffset(key));
+			}
+
+
+			// copy the segments from the profile collection
+			frankenCollection.addSegments(segments);
+
+			// At this point, the FrankenCollection is identical to the ProfileCollection
+			// We need to add the individual recombined frankenProfiles
+
+
+			// make a segment fitter to do the recombination of profiles
+			SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType), logger.getLogfile());
+			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
+
+			for(Nucleus n : collection.getNuclei()){ 
+				// recombine the segments at the lengths of the median profile segments
+				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
+				frankenProfiles.add(recombinedProfile);
+			}
+
+			// add all the nucleus frankenprofiles to the frankencollection
+			frankenCollection.addNucleusProfiles(frankenProfiles);
+
+			// update the profile aggregate
+			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
+			logger.log("FrankenProfile generated");
+
+			// attach the frankencollection to the cellcollection
+			collection.setFrankenCollection(frankenCollection);
+
+		} catch (Exception e) {
+			logger.error("Error reapplying profiles", e);
+			return false;
+		}
+		return true;
+	}
+	
+	/**
 	 * Get the total differences to the median for all the nuclei in
 	 * the collection
 	 * @param collection

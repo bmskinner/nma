@@ -27,7 +27,10 @@ public class AnalysisDataset implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private Map<UUID, AnalysisDataset> childCollections  = new HashMap<UUID, AnalysisDataset>(); // hold the UUID of any child collections
-	private Map<UUID, AnalysisDataset> parentCollections = new HashMap<UUID, AnalysisDataset>(); // parents of this dataset
+	
+	// Other datasets associated with this dataset, that will need to be saved out.
+	// Includes merge sources. Scope for expansion
+	private Map<UUID, AnalysisDataset> otherCollections = new HashMap<UUID, AnalysisDataset>();
 	
 	private CellCollection thisCollection;
 	private File savePath; // the file to save the analysis to
@@ -38,10 +41,14 @@ public class AnalysisDataset implements Serializable {
 	private Map<Integer, String>	signalGroupsAdded		= new HashMap<Integer, String>(0);	// store the names of the groups added
 	private Map<Integer, Boolean> 	signalGroupsVisible 	= new HashMap<Integer, Boolean>(0); // is the given signal group shown in plots
 	private Map<Integer, Color> 	signalGroupColours 		= new HashMap<Integer, Color>(0); // allow saving of colour choices
+	
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
-	private List<UUID> clusterResults = new ArrayList<UUID>(0);
-	private List<UUID> mergeParents	  = new ArrayList<UUID>(0); // hold the ids of datasets merged to create this dataset
+	private List<UUID> clusterResults = new ArrayList<UUID>(0); // hold the ids of clusters
+	
+	//The ids of datasets merged to create this dataset. The IDs must be present in
+	// otherCollections
+	private List<UUID> mergeSources	  = new ArrayList<UUID>(0);
 	private String newickTree;
 	
 	private File debugFile;
@@ -51,13 +58,26 @@ public class AnalysisDataset implements Serializable {
 	private boolean isRoot;
 	
 	
+	/**
+	 * Create a dataset from a cell collection. The save file is
+	 * set as the output folder of the collection
+	 * @param collection
+	 */
 	public AnalysisDataset(CellCollection collection){
 		this.thisCollection = collection;
-		this.savePath = new File(collection.getOutputFolder()+File.separator+collection.getType()+".nmd"); // nmd Nuclear Morphology Dataset
+		this.savePath = new File(collection.getOutputFolder()
+				+File.separator
+				+collection.getType()
+				+Constants.SAVE_FILE_EXTENSION); // nmd Nuclear Morphology Dataset
 		this.isRoot = false;
 		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
 	
+	/**
+	 * Create a dataset from a cell collection, with a defined
+	 * save file
+	 * @param collection
+	 */
 	public AnalysisDataset(CellCollection collection, File saveFile){
 		this.thisCollection = collection;
 		this.savePath = saveFile;
@@ -65,10 +85,19 @@ public class AnalysisDataset implements Serializable {
 		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
 	
+	/**
+	 * Get the software version used to create the dataset
+	 * @return
+	 */
 	public String getVersion(){
 		return this.version;
 	}
 	
+	/**
+	 * Add the given cell collection as a child to this dataset. A
+	 * new dataset is contructed to hold it.
+	 * @param collection the collection to add
+	 */
 	public void addChildCollection(CellCollection collection){
 		if(collection==null){
 			throw new IllegalArgumentException("Nucleus collection is null");
@@ -80,40 +109,52 @@ public class AnalysisDataset implements Serializable {
 
 	}
 	
+	/**
+	 * Add the given dataset as a child of this dataset
+	 * @param dataset
+	 */
 	public void addChildDataset(AnalysisDataset dataset){
 		if(dataset==null){
 			throw new IllegalArgumentException("Nucleus collection is null");
 		}
 		UUID id = dataset.getUUID();
 		this.childCollections.put(id, dataset);
-		dataset.addParentDataset(this);
 	}
 	
-	public void removeChildCollection(UUID id){
+	/**
+	 * Remove the child dataset with the given UUID
+	 * @param id
+	 */
+	private void removeChildCollection(UUID id){
 		this.childCollections.remove(id);
-		if(this.clusterResults.contains(id)){
-			this.clusterResults.remove(id);
-		}
 	}
 	
 	
 	/**
-	 * Add the given dataset as a parent
-	 * @param dataset
+	 * Add the given dataset as an associated dataset.
+	 * This is not a child, and must be added to an 
+	 * appropriate identifier list; this is handled by
+	 * the public functions calling this method
+	 * @param dataset the dataset to add
 	 */
-	public void addParentDataset(AnalysisDataset dataset){
+	private void addAssociatedDataset(AnalysisDataset dataset){
 		if(dataset==null){
-			throw new IllegalArgumentException("Nucleus collection is null");
+			throw new IllegalArgumentException("Dataset is null");
 		}
 		UUID id = dataset.getUUID();
-		this.parentCollections.put(id, dataset);
-		
-		// if this dataset has a parent, it cannot be root
-		// TODO: multiple dataset sharing between roots
-		if(this.isRoot){
-			this.setRoot(false);
-		}
-
+		this.otherCollections.put(id, dataset);
+	}
+	
+	/**
+	 * Get the associated dataset with the given id. Not public
+	 * beacause each associated dataset should have a further
+	 * classification, and should be retrieved through its own
+	 * method
+	 * @param id the dataset to get
+	 * @return the dataset or null
+	 */
+	private AnalysisDataset getAssociatedDataset(UUID id){
+		return this.otherCollections.get(id);
 	}
 	
 	/**
@@ -121,11 +162,9 @@ public class AnalysisDataset implements Serializable {
 	 * and any lists that depend on parents
 	 * @param id the UUID to remove
 	 */
-	public void removeParentDataset(UUID id){
-		this.parentCollections.remove(id);
-		if(this.mergeParents.contains(id)){
-			this.mergeParents.remove(id);
-		}
+	private void removeAssociatedDataset(UUID id){
+		this.otherCollections.remove(id);
+
 	}
 	
 	
@@ -133,22 +172,48 @@ public class AnalysisDataset implements Serializable {
 		return this.thisCollection.getID();
 	}
 	
+	/**
+	 * Get the name of the dataset. Passes through to
+	 * CellCollection
+	 * @return
+	 * @see CellCollection
+	 */
 	public String getName(){
 		return this.thisCollection.getName();
 	}
 	
+	/**
+	 * Set the name of the dataset. Passes through
+	 * to the CellCollection
+	 * @param s
+	 * @see CellCollection
+	 */
 	public void setName(String s){
 		this.thisCollection.setName(s);
 	}
 	
+	/**
+	 * Get the save file location
+	 * @return
+	 */
 	public File getSavePath(){
 		return this.savePath;
 	}
 	
+	/**
+	 * Set the path to save the dataset
+	 * @param file
+	 */
 	public void setSavePath(File file){
 		this.savePath = file;
 	}
 	
+	/**
+	 * Get the debug file for the dataset. Passes
+	 * through to cell collection for now
+	 * @return
+	 * @see CellCollection
+	 */
 	public File getDebugFile(){
 		return this.thisCollection.getDebugFile();
 	}
@@ -183,6 +248,62 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public AnalysisDataset getChildDataset(UUID id){
 		return this.childCollections.get(id);
+	}
+	
+	/**
+	 * Get the AnalysisDataset with the given id
+	 * that is a merge source to this dataset. 
+	 * @param id the UUID of the dataset
+	 * @return the dataset or null
+	 */
+	public AnalysisDataset getMergeSource(UUID id){
+		if(this.mergeSources.contains(id)){
+		return this.getAssociatedDataset(id);
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Add the given dataset as a merge source
+	 * @param dataset
+	 */
+	public void addMergeSource(AnalysisDataset dataset){
+		this.mergeSources.add(dataset.getUUID());
+		this.addAssociatedDataset(dataset);
+	}
+	
+	/**
+	 * Get the ids of all datasets considered merge sources to this
+	 * dataset
+	 * @return
+	 */
+	public List<UUID> getMergeSources(){
+		return this.mergeSources;
+	}
+	
+	/**
+	 * Test if a dataset with the given id is present
+	 * as a merge source
+	 * @param id the UUID to test
+	 * @return
+	 */
+	public boolean hasMergeSource(UUID id){
+		if(this.mergeSources.contains(id)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Test if a dataset is present
+	 * as a merge source
+	 * @param dataset the dataset to test
+	 * @return
+	 */
+	public boolean hasMergeSource(AnalysisDataset dataset){
+		return this.hasMergeSource(dataset.getUUID());
 	}
 	
 	/**
@@ -261,28 +382,53 @@ public class AnalysisDataset implements Serializable {
 		return false;
 	}
 
+	/**
+	 * Get the analysis options from this dataset
+	 * @return
+	 */
 	public AnalysisOptions getAnalysisOptions() {
 		return analysisOptions;
 	}
 
+	/**
+	 * Set the analysis options for the dataset
+	 * @param analysisOptions
+	 */
 	public void setAnalysisOptions(AnalysisOptions analysisOptions) {
 		this.analysisOptions = analysisOptions;
 	}
 
+	/**
+	 * Add the given dataset as a cluster result.
+	 * This is a form of child dataset
+	 * @param dataset
+	 */
 	public void addCluster(AnalysisDataset dataset){
 		this.addChildDataset(dataset);
 		this.clusterResults.add(dataset.getUUID());
 	}
 
-	public void addCluster(CellCollection collection){
+	/**
+	 * Add the given collection as a cluster result.
+	 * This is a form of child dataset
+	 * @param dataset
+	 */public void addCluster(CellCollection collection){
 		this.addChildCollection(collection);
 		this.clusterResults.add(collection.getID());
 	}
 
+	/**
+	 * Get the UUIDs of all clusters
+	 * @return
+	 */
 	public List<UUID> getClusterIDs(){
 		return this.clusterResults;
 	}
 
+	/**
+	 * Check if the dataset has clusters
+	 * @return
+	 */
 	public boolean hasClusters(){
 		if(this.clusterResults.size()>0){
 			return true;
@@ -291,6 +437,10 @@ public class AnalysisDataset implements Serializable {
 		}
 	}
 
+	/**
+	 * Set the newick tree describing the clusters
+	 * @param s
+	 */
 	public void setClusterTree(String s){
 		this.newickTree = s;
 	}
@@ -299,10 +449,18 @@ public class AnalysisDataset implements Serializable {
 		return this.newickTree;
 	}
 
+	/**
+	 * Check if the dataset is root
+	 * @return
+	 */
 	public boolean isRoot(){
 		return  this.isRoot;
 	}
 
+	/**
+	 * Set the dataset root status
+	 * @param b is the dataset root
+	 */
 	public void setRoot(boolean b){
 		this.isRoot = b;
 	}
@@ -313,13 +471,29 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public void deleteChild(UUID id){
 		if(this.hasChild(id)){
-			this.childCollections.remove(id);
-//			IJ.log("    Removed child id");
-			
-			if(this.clusterResults.contains(id)){
-				this.clusterResults.remove(id);
-//				IJ.log("    Removed cluster id");
-			}
+			this.removeChildCollection(id);
+		}
+	}
+	
+	/**
+	 * Delete the cluster with the given id
+	 * @param id
+	 */
+	public void deleteCluster(UUID id){
+		if(this.clusterResults.contains(id)){
+			this.deleteChild(id);
+			this.clusterResults.remove(id);
+		}
+	}
+	
+	/**
+	 * Delete an associated dataset
+	 * @param id
+	 */
+	public void deleteMergeSource(UUID id){
+		if(this.mergeSources.contains(id)){
+			this.removeAssociatedDataset(id);
+			this.otherCollections.remove(id);
 		}
 	}
 
@@ -348,33 +522,7 @@ public class AnalysisDataset implements Serializable {
 			return false;
 		}
 	}
-	
-	/**
-	 * Check if this dataset is the child of the given dataset
-	 * @param parent the parent dataset
-	 * @return
-	 */
-	public boolean isChild(AnalysisDataset parent){
-		if(this.parentCollections.containsKey(parent.getUUID())){
-			return true;
-		} else{
-			return false;
-		}
-	}
-	
-	/**
-	 * Check if this dataset is the child of the given dataset
-	 * @param parent the parent dataset
-	 * @return
-	 */
-	public boolean isChild(UUID parent){
-		if(this.parentCollections.containsKey(parent)){
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
+			
 	/**
 	 * Set the given signal group to be visible in plots
 	 * @param signalGroup the group

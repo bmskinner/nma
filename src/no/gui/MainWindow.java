@@ -48,6 +48,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JSplitPane;
+import javax.swing.SwingWorker;
 
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
@@ -369,6 +370,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	public void logc(String s){
 		logPanel.logc(s);
+	}
+	
+	public void setStatus(String message){
+		lblStatusLine.setText(message);
 	}
 	
 	
@@ -858,6 +863,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		protected List<AnalysisDataset> datasets;
 		protected JProgressBar progressBar = null;
 		protected String errorMessage = null;
+		protected SwingWorker<Boolean, Integer> worker;
 		
 		public ProgressableAction(String barMessage, String errorMessage){
 			this.progressBar = new JProgressBar(0, 100);
@@ -995,15 +1001,15 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					return; // check folder is ok
 				}
 
-				TubulinTailDetector t = new TubulinTailDetector(d, folder, channel);
-				t.addPropertyChangeListener(this);
+				worker = new TubulinTailDetector(d, folder, channel);
+				worker.addPropertyChangeListener(this);
 				this.setProgressMessage("Tail detection:"+d.getName());
-				t.execute();
+				worker.execute();
 			} catch(Exception e){
 				this.cancel();
-				IJ.log("Error in tail analysis: "+e.getMessage());
+				log("Error in tail analysis: "+e.getMessage());
 				for(StackTraceElement e1 : e.getStackTrace()){
-					IJ.log(e1.toString());
+					log(e1.toString());
 				}
 			}
 		}
@@ -1054,10 +1060,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				d.setSignalGroupName(newSignalGroup, signalGroupName);
 				
 
-				SignalDetector t = new SignalDetector(d, folder, channel, options, newSignalGroup, signalGroupName);
+				worker = new SignalDetector(d, folder, channel, options, newSignalGroup, signalGroupName);
 				this.setProgressMessage("Signal detection: "+signalGroupName);
-				t.addPropertyChangeListener(this);
-				t.execute();
+				worker.addPropertyChangeListener(this);
+				worker.execute();
 				
 				
 				
@@ -1085,12 +1091,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			try{
 
-				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
+				worker = new CurveRefolder(d.getCollection(), 
 						"Fast");
 
-				refolder.addPropertyChangeListener(this);
+				worker.addPropertyChangeListener(this);
 				this.setProgressMessage("Refolding:"+d.getName());
-				refolder.execute();
+				worker.execute();
 
 			} catch(Exception e1){
 				this.cancel();
@@ -1108,12 +1114,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			
 			try{
 
-				CurveRefolder refolder = new CurveRefolder(d.getCollection(), 
+				worker = new CurveRefolder(d.getCollection(), 
 						"Fast");
 
-				refolder.addPropertyChangeListener(this);
+				worker.addPropertyChangeListener(this);
 				this.setProgressMessage("Refolding:"+d.getName());
-				refolder.execute();
+				worker.execute();
 
 			} catch(Exception e1){
 				this.cancel();
@@ -1150,10 +1156,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				return;
 			}
 			
-			ShellAnalysis analysis = new ShellAnalysis(d,shellCount);
+			worker = new ShellAnalysis(d,shellCount);
 
-			analysis.addPropertyChangeListener(this);
-			analysis.execute();	
+			worker.addPropertyChangeListener(this);
+			worker.execute();	
 		}
 	}
 
@@ -1163,9 +1169,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 *
 	 */
 	class ClusterAnalysisAction extends ProgressableAction {
-		
-		NucleusClusterer clusterer = null;
-		
+				
 		public ClusterAnalysisAction() {
 			super("Cluster analysis", "Error in cluster analysis");
 			
@@ -1174,11 +1178,11 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
-				clusterer = new NucleusClusterer(  (Integer) options.get("type"), d.getCollection() );
-				clusterer.setClusteringOptions(options);
+				worker = new NucleusClusterer(  (Integer) options.get("type"), d.getCollection() );
+				((NucleusClusterer) worker).setClusteringOptions(options);
 				
-				clusterer.addPropertyChangeListener(this);
-				clusterer.execute();
+				worker.addPropertyChangeListener(this);
+				worker.execute();
 
 			} else {
 				this.cancel();
@@ -1195,12 +1199,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		@Override
 		public void finished() {
 
-			log("Found "+clusterer.getNumberOfClusters()+" clusters");
+			log("Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
-			d.setClusterTree(clusterer.getNewickTree());
+			d.setClusterTree(((NucleusClusterer) worker).getNewickTree());
 
-			for(int cluster=0;cluster<clusterer.getNumberOfClusters();cluster++){
-				CellCollection c = clusterer.getCluster(cluster);
+			for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
+				CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
 				log("Cluster "+cluster+":");
 
 				logc("Reapplying morphology...");
@@ -1237,7 +1241,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		public NewMorphologyAnalysisAction() {
 			super("Nucleus detection", "Error in analysis");
 									
-			lblStatusLine.setText("New analysis in progress");
+			setStatus("New analysis in progress");
 			
 			
 			AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow();
@@ -1298,7 +1302,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				
 				this.d = datasets.get(0); // avoid nulls
 								
-				lblStatusLine.setText("New analysis complete: "
+				setStatus("New analysis complete: "
 										+populationsPanel.getDatasetCount()
 										+" populations ready to view");
 				
@@ -1314,32 +1318,36 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 * Merge the selected datasets
 	 */
 	class MergeCollectionAction extends ProgressableAction {
-				
-		
-		DatasetMerger merger;
-		
+						
 		public MergeCollectionAction() {
 			super("Merging", "Error merging");
 			
 			List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 			
-			merger = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE);
+			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE);
 
-			merger.addPropertyChangeListener(this);
-			merger.execute();	
+			worker.addPropertyChangeListener(this);
+			worker.execute();	
 		}
 		
 		@Override
 		public void finished(){
 			
-//			IJ.log("Finishing");
-			List<AnalysisDataset> datasets = merger.getResults();
+			List<AnalysisDataset> datasets = ((DatasetMerger) worker).getResults();
 			
 			if(datasets.size()==0 || datasets==null){
 				this.cancel();
 			} else {
 				// new style datasets
 				for(AnalysisDataset d : datasets){
+					
+					boolean ok = MorphologyAnalysis.run(d.getCollection());
+					logc("Running new mophology...");
+					if(ok){
+						log("OK");
+					} else {
+						log("Error");
+					}
 					
 					populationsPanel.addDataset(d);				
 					
@@ -1352,9 +1360,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				
 				this.d = datasets.get(0); // avoid nulls
 								
-				lblStatusLine.setText("Merge complete: "
-										+populationsPanel.getDatasetCount()
-										+" populations ready to view");
+				setStatus("Merge complete: "
+								+populationsPanel.getDatasetCount()
+								+" populations ready to view");
 				
 				log("Merge complete");	
 				super.finished();

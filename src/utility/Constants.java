@@ -11,6 +11,9 @@ public class Constants {
 	public static final int VERSION_REVISION = 10;
 	public static final int VERSION_BUGFIX   = 0;
 	
+	// nmd = Nuclear Morphology Dataset
+	public static final String SAVE_FILE_EXTENSION = ".nmd";
+	
 
 		// RGB colour channels
 		public static final int RGB_RED = 0;
