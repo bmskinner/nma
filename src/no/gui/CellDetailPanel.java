@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -24,6 +25,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -233,6 +235,45 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			TreeModel model = new DefaultTreeModel(root);
 			tree = new JTree(model);
 			tree.addTreeSelectionListener(CellDetailPanel.this);
+			tree.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					
+					JTree tree = (JTree) e.getSource();
+					
+					String name = tree.getSelectionPath().getLastPathComponent().toString();
+					
+					String[] bits = name.split("-");
+					
+					String pathName = activeDataset.getCollection().getFolder()
+							+File.separator
+							+bits[0]
+							+File.separator
+							+bits[1];
+
+					
+					// double click - remove cell
+					
+					if (e.getClickCount() == 2) {
+						
+						int result = JOptionPane.showConfirmDialog(null,
+
+						        "Delete cell?", "Do you want to delete the cell?", JOptionPane.YES_NO_OPTION);
+						
+						if(result==JOptionPane.YES_OPTION){
+							
+							// delete the cell
+							Cell cell = activeDataset.getCollection().getCell(pathName);
+							activeDataset.getCollection().removeCell(cell);
+							
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							CellDetailPanel.this.updateList(list);
+						}
+						
+					}
+				}
+			});
 			
 			JScrollPane scrollPane = new JScrollPane(tree);
 			this.add(scrollPane, BorderLayout.CENTER);
