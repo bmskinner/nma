@@ -1,6 +1,7 @@
 package no.gui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -64,7 +65,16 @@ public class AnalysisDetailPanel extends DetailPanel {
 		// format the numbers and make into a tablemodel
 		TableModel model;
 		if(list!=null && !list.isEmpty()){
-			model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
+			
+			// only show stats for the non-merged datasets, since the
+			// analysis options is null for merges
+			List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+			for(AnalysisDataset dataset : list){
+				if(!dataset.hasMergeSources()){
+					newList.add(dataset);
+				}
+			}
+			model = NucleusTableDatasetCreator.createAnalysisParametersTable(newList);
 			
 		} else {
 			model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);

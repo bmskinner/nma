@@ -49,7 +49,7 @@ public class AnalysisDataset implements Serializable {
 	//The ids of datasets merged to create this dataset. The IDs must be present in
 	// otherCollections
 	private List<UUID> mergeSources	  = new ArrayList<UUID>(0);
-	private String newickTree;
+	private String newickTree = null;
 	
 	private File debugFile;
 	
@@ -307,6 +307,18 @@ public class AnalysisDataset implements Serializable {
 	}
 	
 	/**
+	 * Test if the dataset has merge sources
+	 * @return
+	 */
+	public boolean hasMergeSources(){
+		if(this.mergeSources.isEmpty()){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	/**
 	 * Get the number of direct children of this dataset
 	 * @return
 	 */
@@ -412,10 +424,20 @@ public class AnalysisDataset implements Serializable {
 	 * Add the given collection as a cluster result.
 	 * This is a form of child dataset
 	 * @param dataset
-	 */public void addCluster(CellCollection collection){
+	 */
+	public void addCluster(CellCollection collection){
 		this.addChildCollection(collection);
 		this.clusterResults.add(collection.getID());
 	}
+	
+	public boolean isCluster(UUID id){
+		if(this.clusterResults.contains(id)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 
 	/**
 	 * Get the UUIDs of all clusters
@@ -480,7 +502,7 @@ public class AnalysisDataset implements Serializable {
 	 * @param id
 	 */
 	public void deleteCluster(UUID id){
-		if(this.clusterResults.contains(id)){
+		if(isCluster(id)){
 			this.deleteChild(id);
 			this.clusterResults.remove(id);
 		}

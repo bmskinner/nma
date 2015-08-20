@@ -579,9 +579,14 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 						for(UUID parentID : analysisDatasets.keySet()){
 							AnalysisDataset parent = analysisDatasets.get(parentID);
+							
+							if(parent.isCluster(id)){
+								parent.deleteCluster(id);
+							}
 							if(parent.hasChild(id)){
 								parent.deleteChild(id);
 							}
+							
 						}
 						populationNames.remove(d.getName());
 						analysisDatasets.remove(id);

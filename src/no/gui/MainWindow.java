@@ -188,7 +188,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			clusterDetailPanel = new ClusterDetailPanel();
 			clusterDetailPanel.addSignalChangeListener(this);
-			tabbedPane.addTab("Clusters", clusterDetailPanel);
+			tabbedPane.addTab("Clusters and merges", clusterDetailPanel);
 			
 			//---------------
 			// Create the Venn panel
