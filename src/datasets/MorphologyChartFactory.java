@@ -365,62 +365,6 @@ public class MorphologyChartFactory {
 	
 	
 	/**
-	 * Create an empty chart as a placeholder for nucleus outlines
-	 * and consensus chart panels
-	 * @return
-	 */
-	public static JFreeChart makeEmptyNucleusOutlineChart(){
-		JFreeChart chart = ChartFactory.createXYLineChart(null,
-				null, null, null);       
-		chart.getPlot().setBackgroundPaint(Color.WHITE);
-		chart.getXYPlot().getDomainAxis().setVisible(false);
-		chart.getXYPlot().getRangeAxis().setVisible(false);
-		return chart;
-	}
-		
-	/**
-	 * Create a consenusus chart for the given nucleus collection
-	 * @param collection the NucleusCollection to draw the consensus from
-	 * @return the consensus chart
-	 */
-	public static JFreeChart makeNucleusOutlineChart(AnalysisDataset dataset){
-		CellCollection collection = dataset.getCollection();
-		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
-		JFreeChart chart = makeEmptyNucleusOutlineChart();
-		
-
-		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
-		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
-
-		// ensure that the scales for each axis are the same
-		double max = Math.max(maxX, maxY);
-
-		// ensure there is room for expansion of the target nucleus due to IQR
-		max *=  1.25;		
-
-		XYPlot plot = chart.getXYPlot();
-		plot.setDataset(0, ds);
-		plot.getDomainAxis().setRange(-max,max);
-		plot.getRangeAxis().setRange(-max,max);
-
-		plot.getDomainAxis().setVisible(false);
-		plot.getRangeAxis().setVisible(false);
-
-		plot.setBackgroundPaint(Color.WHITE);
-		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-
-		int seriesCount = plot.getSeriesCount();
-
-		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-			plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-			plot.getRenderer().setSeriesPaint(i, Color.BLACK);
-		}	
-		return chart;
-	}
-	
-	/**
 	 * Create a nucleus outline chart with nuclear signals drawn as transparent
 	 * circles
 	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
@@ -428,7 +372,7 @@ public class MorphologyChartFactory {
 	 * @return
 	 */
 	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset, XYDataset signalCoMs){
-		JFreeChart chart = MorphologyChartFactory.makeNucleusOutlineChart(dataset);
+		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
 
 		XYPlot plot = chart.getXYPlot();
 		plot.setDataset(1, signalCoMs);

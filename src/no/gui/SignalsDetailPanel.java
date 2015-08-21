@@ -54,6 +54,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
+import datasets.ConsensusNucleusChartFactory;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
@@ -441,12 +442,12 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     					chartPanel.setChart(chart);
     				} else { // no consensus to display
     							
-    					JFreeChart chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
+    					JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
     					chartPanel.setChart(chart);
     				}
     			} else { // multiple populations
     				
-    				JFreeChart chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
+    				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 					chartPanel.setChart(chart);
 					
 //    				consensusAndCheckboxPanel.setVisible(false);

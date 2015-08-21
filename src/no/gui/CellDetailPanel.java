@@ -53,6 +53,7 @@ import org.jfree.data.xy.XYDataset;
 
 import cell.Cell;
 import datasets.CellDatasetCreator;
+import datasets.ConsensusNucleusChartFactory;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
@@ -376,7 +377,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			// make the chart for each nucleus
 			this.setLayout(new BorderLayout());
-			JFreeChart chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
+			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 
 			panel = new ChartPanel(chart);
 			
@@ -390,7 +391,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			JFreeChart chart;
 			if(cell==null){
-				chart = MorphologyChartFactory.makeEmptyNucleusOutlineChart();
+				chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 			} else {
 				chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset);
 			}
