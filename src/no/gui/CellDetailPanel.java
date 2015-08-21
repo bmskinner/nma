@@ -354,7 +354,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					Nucleus nucleus = cell.getNucleus();
 
 					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
-					JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, nucleus.getLength());
+					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus);
 
 					profileChartPanel.setChart(chart);
 				}

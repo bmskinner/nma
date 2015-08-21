@@ -15,6 +15,7 @@ import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.Profile;
 import no.gui.ColourSelecter;
+import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -37,6 +38,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import utility.Utils;
 import cell.Cell;
 
 public class MorphologyChartFactory {
@@ -53,6 +55,26 @@ public class MorphologyChartFactory {
 		plot.getDomainAxis().setRange(0,100);
 		plot.getRangeAxis().setRange(0,360);
 		plot.setBackgroundPaint(Color.WHITE);
+		return chart;
+	}
+	
+	/**
+	 * Make a profle chart for a nucleus, and annotate the border points
+	 * @param ds
+	 * @param n
+	 * @return
+	 */
+	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n){
+		JFreeChart chart = makeProfileChart(ds, n.getLength());
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		for(String tag : n.getBorderTags().keySet()){
+			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
+			plot.addDomainMarker(new ValueMarker(index, Color.BLACK, new BasicStroke(2.0f)));
+		}
+		
+		
 		return chart;
 	}
 	

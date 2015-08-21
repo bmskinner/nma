@@ -301,7 +301,14 @@ public class RoundNucleus
 	public NucleusBorderPoint getPoint(int i){
 		return new NucleusBorderPoint(this.borderList.get(i));
 	}
-
+	
+	public String getReferencePoint(){
+		return Constants.Nucleus.ROUND.referencePoint();
+	}
+	
+	public String getOrientationPoint(){
+		return Constants.Nucleus.ROUND.orientationPoint();
+	}
 	
 	public double getArea(){
 		return this.area;

@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Constants;
 import no.components.*;
 
 public class AsymmetricNucleus
@@ -43,6 +44,16 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
     Get nucleus features
     -----------------------
   */
+  
+  	@Override
+	public String getReferencePoint(){
+		return Constants.Nucleus.ASYMMETRIC.referencePoint();
+	}
+  	
+  	@Override
+	public String getOrientationPoint(){
+		return Constants.Nucleus.ASYMMETRIC.orientationPoint();
+	}
 
   public List<NucleusBorderPoint> getEstimatedTailPoints(){
     return this.tailEstimatePoints;

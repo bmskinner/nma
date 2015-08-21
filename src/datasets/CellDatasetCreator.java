@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import utility.Utils;
 import cell.Cell;
 import no.components.NuclearSignal;
 import no.nuclei.Nucleus;
@@ -59,6 +60,14 @@ public class CellDatasetCreator {
 			
 			fieldNames.add("Nucleus position");
 			rowData.add(n.getPosition()[0]+"-"+n.getPosition()[1]);
+			
+			
+
+			for(String tag : n.getBorderTags().keySet()){
+				fieldNames.add(tag);
+				int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
+				rowData.add(index);
+			}
 
 			// add info for signals
 			for(int signalGroup : n.getSignalGroups()){

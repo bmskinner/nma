@@ -142,6 +142,10 @@ public interface Nucleus {
 	 * @return
 	 */
 	public XYPoint getCentreOfMass();
+	
+	public String getOrientationPoint();
+	
+	public String getReferencePoint();
 
 	public NucleusBorderPoint getPoint(int i);
 

@@ -9,6 +9,7 @@ import ij.gui.Roi;
 
 import java.io.File;
 
+import utility.Constants;
 import no.nuclei.*;
 import no.components.*;
 
@@ -75,6 +76,16 @@ public class PigSpermNucleus
       int headIndex = getIndex(this.findOppositeBorder(consensusTail));
       addBorderTag("head", headIndex);
     }
+    
+  	@Override
+	public String getReferencePoint(){
+		return Constants.Nucleus.PIG_SPERM.referencePoint();
+	}
+  	
+  	@Override
+	public String getOrientationPoint(){
+		return Constants.Nucleus.PIG_SPERM.orientationPoint();
+	}
 
     /*
       -----------------------

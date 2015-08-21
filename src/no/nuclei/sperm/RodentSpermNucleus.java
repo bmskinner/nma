@@ -42,6 +42,16 @@ extends SpermNucleus
 	public RodentSpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi, file, number, position);
 	}
+	
+  	@Override
+	public String getReferencePoint(){
+		return Constants.Nucleus.RODENT_SPERM.referencePoint();
+	}
+  	
+  	@Override
+	public String getOrientationPoint(){
+		return Constants.Nucleus.RODENT_SPERM.orientationPoint();
+	}
 
 	/*
     Identify key points: tip, estimated tail position
