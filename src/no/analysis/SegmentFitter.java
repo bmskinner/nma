@@ -37,6 +37,7 @@ public class SegmentFitter {
 	private 	SegmentedProfile medianProfile; // the profile to align against
 	
 	private boolean debug = false; // log debug info to file
+	private boolean optimise = false;
 	
 	// This holds tested profiles so that their scores do not have to be recalculated
 	private List<SegmentedProfile> testedProfiles = new ArrayList<SegmentedProfile>();
@@ -92,7 +93,7 @@ public class SegmentFitter {
 			logger.error("Error getting segments", e1);
 		}
 		
-		
+		long startTime = System.currentTimeMillis();
 		// Begin fitting the segments to the median
 		logger.log("Fitting nucleus "+n.getPathAndNumber(), Logger.INFO);
 		try{
@@ -103,7 +104,10 @@ public class SegmentFitter {
 			
 			// modify tail point to nearest segment end
 //			this.remapBorderPoints(n, newList);
+			long endTime = System.currentTimeMillis();
 			logger.log("Fitted nucleus "+n.getPathAndNumber(), Logger.INFO);
+			long time = endTime - startTime;
+			logger.log("Fitting took "+time+" milliseconds", Logger.DEBUG);
 			
 		} catch(Exception e){
 			logger.error("Error refitting segments", e);
@@ -330,12 +334,14 @@ public class SegmentFitter {
 				// testProfile should now contain updated segment endpoints
 				SegmentedProfile compareProfile = new SegmentedProfile(testProfile);
 				
-				// if this pattern has been seen, skip the rest of the test
-				if(hasBeenTested(compareProfile)){
-					if(debug){
-						logger.log("\tProfile has been tested");
+//				 if this pattern has been seen, skip the rest of the test
+				if(optimise){
+					if(hasBeenTested(compareProfile)){
+						if(debug){
+							logger.log("\tProfile has been tested");
+						}
+						continue;
 					}
-					continue;
 				}
 					
 				// anything that gets in here should be valid
@@ -371,8 +377,10 @@ public class SegmentFitter {
 						logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
 					}
 				}
+				if(optimise){
+					testedProfiles.add(compareProfile);
+				}
 				
-				testedProfiles.add(compareProfile);
 										
 			} else {
 				if(debug){
@@ -419,8 +427,10 @@ public class SegmentFitter {
 			SegmentedProfile newProfile = new SegmentedProfile(profile);
 			newProfile.nudgeSegments(nudge);
 			
-			if(hasBeenTested(newProfile)){
-				continue;
+			if(optimise){
+				if(hasBeenTested(newProfile)){
+					continue;
+				}
 			}
 			
 			try{
@@ -436,7 +446,9 @@ public class SegmentFitter {
 				bestScore = score;
 				bestNudge = nudge;
 			}
-			testedProfiles.add(newProfile);
+			if(optimise){
+				testedProfiles.add(newProfile);
+			}	
 		}
 		return bestNudge;
 	}

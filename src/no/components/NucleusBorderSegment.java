@@ -270,17 +270,30 @@ public class NucleusBorderSegment  implements Serializable{
 			throw new IllegalArgumentException("Index is outside the total profile length: "+index);
 		}
 		
-		boolean result = false;
 		if(wraps(start, end)){ // wrapped
 			if(index<=end || index>start){
-				result=true;
+				return true;
 			}
 		} else{ // regular
 			if(index>=start && index<end){
-				result=true;
+				return true;
 			}
 		}
-		return result;
+		return false;
+	}
+	
+	/**
+	 * Test if a proposed update affects this segment
+	 * @param startIndex
+	 * @param endIndex
+	 * @return
+	 */
+	private boolean updateAffectsThisSegment(int startIndex, int endIndex){
+		if(startIndex != this.getStartIndex() || endIndex != this.getEndIndex()){
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	/**
@@ -300,116 +313,125 @@ public class NucleusBorderSegment  implements Serializable{
 		if(endIndex < 0 || endIndex > this.getTotalLength()){
 			throw new IllegalArgumentException("End index is outside the profile range: "+endIndex);
 		}
-
-//		// Check that the new positions will not make this segment too small
-		int testLength = testLength(startIndex, endIndex);
-		if(testLength < MINIMUM_SEGMENT_LENGTH){
-			this.lastFailReason = startIndex+"-"+endIndex+": segment length ("+testLength+") cannot be smaller than "+MINIMUM_SEGMENT_LENGTH;
-			return false;
-		}
-				
-		// Check that next and previous segments are not invalidated by length change
-		// i.e the max length increase backwards is up to the MIN_SEG_LENGTH of the
-		// previous segment, and the max length increase forwards is up to the 
-		// MIN_SEG_LENGTH of the next segment
 		
-		if(this.hasPrevSegment()){
-			int prevTestLength = this.prevSegment().testLength(this.prevSegment().getStartIndex(), startIndex);
-			if( prevTestLength < MINIMUM_SEGMENT_LENGTH){
-				this.lastFailReason = startIndex
-						+"-"+endIndex
-						+": Previous segment length cannot be smaller than "
-						+MINIMUM_SEGMENT_LENGTH
-						+"; would be "
-						+this.prevSegment().getStartIndex()+"-"
-						+startIndex
-						+"("+prevTestLength+")";
+		// only run an update and checks if the update will actually
+		// cause changes to the segment. If not, return true so as not
+		// to interfere with other linked segments
+		if(updateAffectsThisSegment(startIndex, endIndex)){
+
+			// Check that the new positions will not make this segment too small
+			int testLength = testLength(startIndex, endIndex);
+			if(testLength < MINIMUM_SEGMENT_LENGTH){
+				this.lastFailReason = startIndex+"-"+endIndex+": segment length ("+testLength+") cannot be smaller than "+MINIMUM_SEGMENT_LENGTH;
 				return false;
 			}
-		}
-		if(this.hasNextSegment()){
-			int nextTestLength = this.nextSegment().testLength(endIndex, this.nextSegment().getEndIndex());
-			if( nextTestLength < MINIMUM_SEGMENT_LENGTH){
-				this.lastFailReason = startIndex
-						+"-"+endIndex
-						+": Next segment length cannot be smaller than "
-						+MINIMUM_SEGMENT_LENGTH
-						+"; would be "
-						+endIndex+"-"
-						+this.nextSegment().getEndIndex()
-						+"("+nextTestLength+")";
-				return false;
-			}
-		}
-		
-		// check that updating will not cause segments to overlap or invert
-		// i.e. where a start becomes greater than an end without begin part of
-		// an array wrap
-		if(startIndex > endIndex){
-			
-			if(!this.testContains(startIndex , endIndex, 0)){
-				this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause this segment to invert";
-				return false;
-			}
-			
-		}
-		
-		// also test the effect on the next and previous segments
-		if(this.hasPrevSegment()){
-			if(this.prevSegment().getStartIndex() > startIndex){
 
-				if(!this.prevSegment().wraps() && this.prevSegment().wraps(startIndex, endIndex)){
-					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause prev segment to invert";
-					return false;
-				}
-				
-				// another wrapping test - if the new positions induce a wrap, the segment should contain 0
-				if(this.prevSegment().wraps(startIndex, endIndex) && !this.prevSegment().testContains(startIndex, endIndex, 0)){
-					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause prev segment to invert";
-					return false;
-				}
-			}
-		}
+			// Check that next and previous segments are not invalidated by length change
+			// i.e the max length increase backwards is up to the MIN_SEG_LENGTH of the
+			// previous segment, and the max length increase forwards is up to the 
+			// MIN_SEG_LENGTH of the next segment
 
-		if(this.hasNextSegment()){
-			if( endIndex > this.nextSegment().getEndIndex()){
-				
-				// if the next segment goes from not wrapping to wrapping when this segment is altered,
-				// an inversion must have occurred. Prevent.
-				if(!this.nextSegment().wraps() && this.nextSegment().wraps(startIndex, endIndex)){
-					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause next segment to invert";
-					return false;
-				}
-				
-				// another wrapping test - if the new positions induce a wrap, the segment should contain 0
-				if(this.nextSegment().wraps(startIndex, endIndex) && !this.nextSegment().testContains(startIndex, endIndex, 0)){
-					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause next segment to invert";
-					return false;
-				}
-			}
-		}
-		
-		// All checks have been passed; the update can proceed
-		
-
-//		 wrap in if to ensure we don't go in circles forever when testing a circular profile
-		if(this.getStartIndex()!=startIndex){
-			this.startIndex = startIndex;
 			if(this.hasPrevSegment()){
-				NucleusBorderSegment prev = this.prevSegment();
-				prev.update(prev.getStartIndex(), startIndex);
+				int prevTestLength = this.prevSegment().testLength(this.prevSegment().getStartIndex(), startIndex);
+				if( prevTestLength < MINIMUM_SEGMENT_LENGTH){
+					this.lastFailReason = startIndex
+							+"-"+endIndex
+							+": Previous segment length cannot be smaller than "
+							+MINIMUM_SEGMENT_LENGTH
+							+"; would be "
+							+this.prevSegment().getStartIndex()+"-"
+							+startIndex
+							+"("+prevTestLength+")";
+					return false;
+				}
 			}
-		}
-			
-		if(this.getEndIndex()!=endIndex){
-			this.endIndex = endIndex;
+			if(this.hasNextSegment()){
+				int nextTestLength = this.nextSegment().testLength(endIndex, this.nextSegment().getEndIndex());
+				if( nextTestLength < MINIMUM_SEGMENT_LENGTH){
+					this.lastFailReason = startIndex
+							+"-"+endIndex
+							+": Next segment length cannot be smaller than "
+							+MINIMUM_SEGMENT_LENGTH
+							+"; would be "
+							+endIndex+"-"
+							+this.nextSegment().getEndIndex()
+							+"("+nextTestLength+")";
+					return false;
+				}
+			}
+
+			// check that updating will not cause segments to overlap or invert
+			// i.e. where a start becomes greater than an end without begin part of
+			// an array wrap
+			if(startIndex > endIndex){
+
+				if(!this.testContains(startIndex , endIndex, 0)){
+					this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause this segment to invert";
+					return false;
+				}
+
+			}
+
+			// also test the effect on the next and previous segments
+			if(this.hasPrevSegment()){
+				if(this.prevSegment().getStartIndex() > startIndex){
+
+					if(!this.prevSegment().wraps() && this.prevSegment().wraps(startIndex, endIndex)){
+						this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause prev segment to invert";
+						return false;
+					}
+
+					// another wrapping test - if the new positions induce a wrap, the segment should contain 0
+					if(this.prevSegment().wraps(startIndex, endIndex) && !this.prevSegment().testContains(startIndex, endIndex, 0)){
+						this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause prev segment to invert";
+						return false;
+					}
+				}
+			}
 
 			if(this.hasNextSegment()){
-				NucleusBorderSegment next = this.nextSegment();
-				next.update(endIndex, next.getEndIndex());
+				if( endIndex > this.nextSegment().getEndIndex()){
+
+					// if the next segment goes from not wrapping to wrapping when this segment is altered,
+					// an inversion must have occurred. Prevent.
+					if(!this.nextSegment().wraps() && this.nextSegment().wraps(startIndex, endIndex)){
+						this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause next segment to invert";
+						return false;
+					}
+
+					// another wrapping test - if the new positions induce a wrap, the segment should contain 0
+					if(this.nextSegment().wraps(startIndex, endIndex) && !this.nextSegment().testContains(startIndex, endIndex, 0)){
+						this.lastFailReason = startIndex+"-"+endIndex+": Operation would cause next segment to invert";
+						return false;
+					}
+				}
 			}
+
+			// All checks have been passed; the update can proceed
+
+
+			//		 wrap in if to ensure we don't go in circles forever when testing a circular profile
+			if(this.getStartIndex()!=startIndex){
+				this.startIndex = startIndex;
+				if(this.hasPrevSegment()){
+					NucleusBorderSegment prev = this.prevSegment();
+					prev.update(prev.getStartIndex(), startIndex);
+				}
+			}
+
+			if(this.getEndIndex()!=endIndex){
+				this.endIndex = endIndex;
+
+				if(this.hasNextSegment()){
+					NucleusBorderSegment next = this.nextSegment();
+					next.update(endIndex, next.getEndIndex());
+				}
+			}
+			return true;
+		} else {
+			// update does not affect this segment
+			return true;
 		}
-		return true;
 	}
 	
 

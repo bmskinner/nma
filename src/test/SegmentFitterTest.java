@@ -23,6 +23,7 @@ import no.nuclei.sperm.RodentSpermNucleus;
 import org.junit.Test;
 
 import test.no.components.SegmentedProfileTest;
+import utility.Logger;
 
 public class SegmentFitterTest {
 	
@@ -92,10 +93,14 @@ public class SegmentFitterTest {
 			assertEquals("Lengths should match", n.getLength(), length);
 			
 			System.out.println("Running fitter");
-			
+			long startTime = System.currentTimeMillis();
 			SegmentFitter fitter = new SegmentFitter(median, log);
 			
 			fitter.fit(n);
+			
+			long endTime = System.currentTimeMillis();
+			long time = endTime - startTime;
+			System.out.println("Fitting took "+time+" milliseconds");
 			length = 0;
 			for(NucleusBorderSegment seg : n.getAngleProfile().getSegments()){
 				seg.print();

@@ -282,6 +282,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 		this.segments = NucleusBorderSegment.nudge(getSegments(), amount);
 	}
 	
+	/* (non-Javadoc)
+	 * @see no.components.Profile#offset(int)
+	 * Offset the segment by the given amount. Returns a copy
+	 * of the profile.
+	 */
 	public SegmentedProfile offset(int amount) throws Exception {
 	
 		Profile offsetProfile = super.offset(amount);
