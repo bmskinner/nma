@@ -38,8 +38,8 @@ public class SegmentFitter {
 	
 	private boolean debug = false; // log debug info to file
 	
-	// This holds tested segments so that their scores do not have to be recalculated
-	private List<NucleusBorderSegment> testedSegmentPositions = new ArrayList<NucleusBorderSegment>();
+	// This holds tested profiles so that their scores do not have to be recalculated
+	private List<SegmentedProfile> testedProfiles = new ArrayList<SegmentedProfile>();
 	
 	/**
 	 * The number of points ahead and behind to test
@@ -238,6 +238,8 @@ public class SegmentFitter {
 			logger.log("Profile is null", Logger.ERROR);
 			throw new IllegalArgumentException("Profile is null in runFitter()");
 		}
+		
+		testedProfiles = new ArrayList<SegmentedProfile>();
 
 		logger.log("Fitting segments", Logger.INFO);
 		
@@ -291,10 +293,9 @@ public class SegmentFitter {
 		
 		// by default, return the same profile that came in
 		SegmentedProfile result = new SegmentedProfile(profile);
-		
+				
 		
 		// the segment in the input profile to work on
-		
 		NucleusBorderSegment segment = profile.getSegment(name);
 		
 		
@@ -323,18 +324,19 @@ public class SegmentFitter {
 				logger.log("\tTesting length change "+changeValue);
 			}
 			
-			NucleusBorderSegment checkedSegment = new NucleusBorderSegment(segment.getStartIndex(),
-					Utils.wrapIndex(segment.getEndIndex()+changeValue, segment.getTotalLength()),
-					segment.getTotalLength());
-			checkedSegment.setName(segment.getName());
-			if(hasBeenTested(checkedSegment)){
-				if(debug){
-					logger.log("\tSegment has been tested "+changeValue);
-				}
-				continue;
-			}
 			// not permitted if it violates length constraint
 			if(testProfile.adjustSegmentEnd(name, changeValue)){
+				
+				// testProfile should now contain updated segment endpoints
+				SegmentedProfile compareProfile = new SegmentedProfile(testProfile);
+				
+				// if this pattern has been seen, skip the rest of the test
+				if(hasBeenTested(compareProfile)){
+					if(debug){
+						logger.log("\tProfile has been tested");
+					}
+					continue;
+				}
 					
 				// anything that gets in here should be valid
 				try{
@@ -369,6 +371,8 @@ public class SegmentFitter {
 						logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
 					}
 				}
+				
+				testedProfiles.add(compareProfile);
 										
 			} else {
 				if(debug){
@@ -378,25 +382,22 @@ public class SegmentFitter {
 						+"\t"+segment.toString(), Logger.DEBUG);
 				}
 			}
-			testedSegmentPositions.add(checkedSegment);
+			
 		}
 		return result;
 	}
 	
 	/**
-	 * Check if the given segment has already been tested
+	 * Check if the given profile has already been tested
 	 * @param test
 	 * @return
 	 */
-	private boolean hasBeenTested(NucleusBorderSegment test){
-		boolean match = false;
-		for(NucleusBorderSegment check : testedSegmentPositions){
-			if(check.matches(test)){
-				match = true;
-				break;
-			}
+	private boolean hasBeenTested(SegmentedProfile test){
+		if(testedProfiles.contains(test)){
+			return true;
+		} else {
+			return false;
 		}
-		return match;
 	}
 	
 	/**
@@ -413,10 +414,14 @@ public class SegmentFitter {
 		double score 		= 0;
 		double bestScore 	= 0;
 		int bestNudge 		= 0;
-		
+				
 		for( int nudge = -length; nudge<length; nudge++){
 			SegmentedProfile newProfile = new SegmentedProfile(profile);
 			newProfile.nudgeSegments(nudge);
+			
+			if(hasBeenTested(newProfile)){
+				continue;
+			}
 			
 			try{
 				score = compareSegmentationPatterns(medianProfile, newProfile);
@@ -431,6 +436,7 @@ public class SegmentFitter {
 				bestScore = score;
 				bestNudge = nudge;
 			}
+			testedProfiles.add(newProfile);
 		}
 		return bestNudge;
 	}

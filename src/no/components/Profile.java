@@ -63,6 +63,28 @@ public class Profile implements Serializable {
 	public int size(){
 		return array.length;
 	}
+	
+	/**
+	 * Test if the values in this profile are the same 
+	 * as in the test profile (and have the same position)
+	 * @param test the profile to test
+	 * @return
+	 */
+	public boolean equals(Profile test){
+		if(test==null){
+			return false;
+		}
+		if(test.size()!=this.size()){
+			return false;
+		}
+		
+		for(int i=0;i<this.size();i++){
+			if(this.get(i)!=test.get(i)){
+				return false;
+			}
+		}
+		return true;
+	}
 
 	
 	/**

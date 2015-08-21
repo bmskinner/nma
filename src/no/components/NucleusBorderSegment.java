@@ -20,10 +20,10 @@ import ij.IJ;
 public class NucleusBorderSegment  implements Serializable{
 
 	// the smallest number of values in a segment
-	// Set to 2 (a start and an end) so that the minimum length
+	// Set to 3 (a start, midpoint and an end) so that the minimum length
 	// in the ProfileSegmenter can be interpolated downwards without
 	// causing errors when fitting segments to individual nuclei
-	public static final int MINIMUM_SEGMENT_LENGTH = 2; 
+	public static final int MINIMUM_SEGMENT_LENGTH = 3; 
 	
 	private static final long serialVersionUID = 1L;
 	private int startIndex;
@@ -187,15 +187,25 @@ public class NucleusBorderSegment  implements Serializable{
 	 * @param test
 	 * @return
 	 */
-	public boolean matches(NucleusBorderSegment test){
-		if(test.getStartIndex()==this.getStartIndex() 
-				&& test.getEndIndex()==this.getEndIndex()
-				&& test.getTotalLength()==this.getTotalLength()
-				&& test.getName().equals(this.getName())){
-			return  true;
-		} else {
+	public boolean equals(NucleusBorderSegment test){
+		
+		if(test==null){
 			return false;
 		}
+		
+		if(test.getTotalLength()!=this.getTotalLength()){
+			return false;
+		}
+		
+		if(!test.getName().equals(this.getName())){
+			return false;
+		}
+		
+		if(test.getStartIndex()!=this.getStartIndex() 
+				|| test.getEndIndex()!=this.getEndIndex()){
+			return false;
+		}
+		return true;
 	}
 	
 	/**

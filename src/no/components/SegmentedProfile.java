@@ -271,7 +271,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
 		
-		// get the segment within this profile, not a copy that looks the same
+		// get the segment within this profile, not a copy
 		NucleusBorderSegment segmentToUpdate = this.getSegment(name);
 				
 		int newValue = Utils.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
@@ -293,5 +293,38 @@ public class SegmentedProfile extends Profile implements Serializable {
 
 		SegmentedProfile copy = new SegmentedProfile(offsetProfile, segments);
 		return copy;
+	}
+	
+	/**
+	 * Test if the given profile values are the same as in
+	 * this profile.
+	 * @param profile
+	 * @return
+	 */
+	public boolean equals(SegmentedProfile profile){
+		if(!super.equals(profile)){
+			return false;
+		}
+		// check the segments
+		for(String name : this.getSegmentNames()){
+			if(!this.getSegment(name).equals(profile.getSegment(name))){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 * Returns the segments in this profile as a string
+	 */
+	@Override
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		for(String name : this.getSegmentNames()){
+			builder.append(this.getSegment(name).toString()+"\n");
+		}
+		return builder.toString();
 	}
 }
