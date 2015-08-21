@@ -61,6 +61,8 @@ public class CellDatasetCreator {
 			fieldNames.add("Nucleus position");
 			rowData.add(n.getPosition()[0]+"-"+n.getPosition()[1]);
 			
+			fieldNames.add("Scale (um/pixel)");
+			rowData.add(n.getScale());
 			
 
 			for(String tag : n.getBorderTags().keySet()){

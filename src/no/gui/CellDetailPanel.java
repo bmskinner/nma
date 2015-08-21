@@ -28,8 +28,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableColumn;
@@ -428,6 +430,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					// double click
 					if (e.getClickCount() == 2) {
 						int row = table.rowAtPoint((e.getPoint()));
+						String rowName = table.getModel().getValueAt(row, 0).toString();
 
 						String value = table.getModel().getValueAt(row+1, 0).toString();
 						if(value.equals("Signal group")){
@@ -447,6 +450,29 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								activeDataset.setSignalGroupColour(signalGroup, newColor);
 								updateCell(activeCell);
 								fireSignalChangeEvent("SignalColourUpdate");
+							}
+						}
+						
+						if(rowName.equals("Scale (um/pixel)")){
+							
+							SpinnerNumberModel sModel 
+								= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 0, 100, 0.001);
+							JSpinner spinner = new JSpinner(sModel);
+							
+							int option = JOptionPane.showOptionDialog(null, 
+									spinner, 
+									"Choose the new scale", 
+									JOptionPane.OK_CANCEL_OPTION, 
+									JOptionPane.QUESTION_MESSAGE, null, null, null);
+							if (option == JOptionPane.CANCEL_OPTION) {
+							    // user hit cancel
+							} else if (option == JOptionPane.OK_OPTION)	{
+								
+								// offset by 90 because reasons?
+								double scale = (Double) spinner.getModel().getValue();
+								activeCell.getNucleus().setScale(scale);
+								updateCell(activeCell);
+								
 							}
 						}
 							

@@ -769,6 +769,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		  currentNucleus.setArea(values.get("Area")); 
 		  currentNucleus.setFeret(values.get("Feret"));
 		  currentNucleus.setPerimeter(values.get("Perim"));
+		  currentNucleus.setScale(analysisOptions.getScale());
 	
 		  currentNucleus.setOutputFolder(this.outputFolder);
 		  currentNucleus.intitialiseNucleus(analysisOptions.getAngleProfileWindowSize());

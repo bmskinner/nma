@@ -64,7 +64,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		
 	private static final int    DEFAULT_PROFILE_WINDOW_SIZE = 15;
 	
-	private static final int    DEFAULT_SCALE = 1;
+	private static final double    DEFAULT_SCALE = 1.0;
 	
 	private static final String DEFAULT_REFOLD_MODE = "Fast";
 	
