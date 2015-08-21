@@ -78,7 +78,9 @@ public class ProfileSegmenter {
 				}
 
 				// We want a minima or maxima, and the value must be distinct from its surroundings			
-				if( breakpoint.get(index)==1 
+				if( ( (  maxima.get(index)==1 && profile.get(index)>180 )
+					||	( minima.get(index)==1 && profile.get(index)<180 ))
+//						|| breakpoint.get(index)==1 
 						&& Math.abs(dDeltas.get(index)) > variationRange*0.02
 						&& segLength >= MIN_SEGMENT_SIZE){
 					
