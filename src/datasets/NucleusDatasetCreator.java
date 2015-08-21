@@ -797,6 +797,7 @@ public class NucleusDatasetCreator {
 		// rendering order will be first on top
 		
 		// add the segments
+		
 		List<NucleusBorderSegment> segmentList = n.getAngleProfile().getSegments();
 		if(!segmentList.isEmpty()){ // only draw if there are segments
 			

@@ -1148,6 +1148,9 @@ public class RoundNucleus
 
 	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception{
 
+		// store segments to reapply later
+		List<NucleusBorderSegment> segments = this.getAngleProfile().getSegments();
+		
 		double[] angles = new double[this.getLength()];
 
 		for(int i=0; i<this.getLength();i++){
@@ -1177,7 +1180,9 @@ public class RoundNucleus
 				angles[i] = 360-angle;
 			}
 		}
-		this.setAngleProfile( new SegmentedProfile(angles)  );
+		SegmentedProfile newProfile = new SegmentedProfile(angles);
+		newProfile.setSegments(segments);
+		this.setAngleProfile( newProfile  );
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}
 

@@ -7,7 +7,8 @@
  */
 package no.analysis;
 
-import java.lang.reflect.Constructor;
+import ij.IJ;
+
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -29,7 +30,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	private Profile targetCurve;
 
 	private ConsensusNucleus refoldNucleus;
-
+	
 	private CellCollection collection;
 	
 	private static Logger logger;
@@ -66,7 +67,6 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		// make an entirely new nucleus to play with
 		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian("tail");	
 		ConsensusNucleus refoldCandidate = new ConsensusNucleus(n, collection.getNucleusClass());
-
 
 		logger.log("Refolding nucleus of class: "+collection.getNucleusClass().getSimpleName());
 		logger.log("Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber(), Logger.DEBUG);
@@ -238,8 +238,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	*/
 	private double iterateOverNucleus() throws Exception{
 
-		Profile refoldProfile = refoldNucleus.getAngleProfile("tail");
-//		Profile interpolatedTargetCurve = targetCurve.interpolate(refoldProfile.size());
+		SegmentedProfile refoldProfile = refoldNucleus.getAngleProfile("tail");
 
 		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);
 
@@ -259,10 +258,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			// IJ.log("    Internal score: "+(int)score);
 
 			NucleusBorderPoint p = testNucleus.getPoint(i);
-			
-//			double currentDistance = p.getLengthTo(new XYPoint(0,0));
-//			double newDistance = currentDistance; // default no change
-			// double newAngle = p.getAngle();
+
 
 			double oldX = p.getX();
 			double oldY = p.getY();
