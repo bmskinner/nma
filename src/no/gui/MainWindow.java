@@ -841,18 +841,14 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			this.progressBar.setStringPainted(true);
 			this.errorMessage = errorMessage;
 			this.datasets = populationsPanel.getSelectedDatasets();
-			
-//			if(datasets.size()>1){
-				
-//				log("Unable to analyse more than one dataset");
-//			} else {
-				if(datasets.size()==1){
-					d = datasets.get(0);
-				}
-				logPanel.addProgressBar(this.progressBar);
-				contentPane.revalidate();
-				contentPane.repaint();
-//			}
+
+			if(datasets.size()==1){
+				d = datasets.get(0);
+			}
+			logPanel.addProgressBar(this.progressBar);
+			contentPane.revalidate();
+			contentPane.repaint();
+
 		}
 		
 		/**
@@ -932,6 +928,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		 */
 		public void cooldown(){
 			this.progressBar.setIndeterminate(true);
+			contentPane.revalidate();
+			contentPane.repaint();
 		}
 		
 	}
