@@ -10,6 +10,9 @@ import javax.swing.JPopupMenu;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.xy.XYDataset;
 
 public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChangeListener{
 
@@ -53,6 +56,38 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		this.setPopupMenu(popup);
 
 	}
+	
+	@Override
+	public void restoreAutoBounds() {
+		XYPlot plot = (XYPlot) this.getChart().getPlot();
+		
+		int maxRange = 0;
+		
+		for(int i = 0; i<plot.getDatasetCount();i++){
+			XYDataset dataset = plot.getDataset(i);
+			
+			Number maxX = DatasetUtilities.findMaximumDomainValue(dataset);
+			Number minX = DatasetUtilities.findMinimumDomainValue(dataset);
+			
+			int absXmax = Math.abs(maxX.intValue());
+			int absXmin = Math.abs(minX.intValue());
+			int absX = absXmax > absXmin ? absXmax : absXmin;
+			
+			Number maxY = DatasetUtilities.findMaximumRangeValue(dataset);
+			Number minY = DatasetUtilities.findMinimumRangeValue(dataset);
+			
+			int absYmax = Math.abs(maxY.intValue());
+			int absYmin = Math.abs(minY.intValue());
+			int absY = absYmax > absYmin ? absYmax : absYmin;
+			
+			int datasetAbs = absX > absY ? absX : absY;
+			
+			maxRange = datasetAbs > maxRange ? datasetAbs : maxRange;
+		}
+		maxRange *= 1.1; // add 10% as a border
+		plot.getRangeAxis().setRange(-maxRange, maxRange);
+		plot.getDomainAxis().setRange(-maxRange, maxRange);				
+	} 
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {

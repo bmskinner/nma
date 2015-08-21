@@ -181,7 +181,11 @@ public class ClusterDetailPanel extends DetailPanel {
 				getSourceButton.setVisible(true);
 				
 			} else {
+				try{
 				mergeSources.setModel(makeBlankTable());
+				} catch (Exception e){
+//					TODO: fix error
+				}
 			}
 		} else { // more than one dataset selected
 			statusLabel.setText("Multiple datasets selected");
