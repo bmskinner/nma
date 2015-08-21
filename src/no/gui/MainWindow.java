@@ -1063,7 +1063,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						"Fast");
 
 				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Refolding:"+d.getName());
+				this.setProgressMessage("Refolding: "+d.getName());
 				worker.execute();
 
 			} catch(Exception e1){
@@ -1086,7 +1086,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						"Fast");
 
 				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Refolding:"+d.getName());
+				this.setProgressMessage("Refolding: "+d.getName());
 				worker.execute();
 
 			} catch(Exception e1){

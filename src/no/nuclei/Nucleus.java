@@ -24,7 +24,7 @@ public interface Nucleus {
 	public static final int HEIGHT = 3;
 
 	public void findPointsAroundBorder() throws Exception;
-	public void intitialiseNucleus(int angleProfileWindowSize);
+	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception;
 
 	public UUID getID();
 
@@ -274,9 +274,9 @@ public interface Nucleus {
     -----------------------
 	 */
 
-	public void setPathLength(double d);
+//	public void setPathLength(double d);
 
-	public void calculatePathLength();
+//	public void calculatePathLength();
 
 	public void setArea(double d);
 	public void setFeret(double d);

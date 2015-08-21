@@ -756,32 +756,18 @@ public class NucleusDatasetCreator {
 	}
 	
 	/**
-	 * Create an outline of the consensus nucleus, and apply segment colours
+	 * Create an outline of the consensus nucleus, and apply segments as separate series
 	 * @param collection
 	 * @return
 	 * @throws Exception 
 	 */
-	public static XYDataset createNucleusOutline(CellCollection collection) throws Exception {
+	public static XYDataset createSegmentedNucleusOutline(CellCollection collection) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		ConsensusNucleus n = collection.getConsensusNucleus();
 		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
 		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75").interpolate(n.getLength());
 		
 
-		// Add lines to show the IQR of the angle profile at each point
-		double[] innerIQRX = new double[n.getLength()+1];
-		double[] innerIQRY = new double[n.getLength()+1];
-		double[] outerIQRX = new double[n.getLength()+1];
-		double[] outerIQRY = new double[n.getLength()+1];
-
-		// find the maximum difference between IQRs
-		double maxIQR = 0;
-
-		for(int i=0; i<n.getLength(); i++){
-			if(q75.get(i) - q25.get(i)>maxIQR){
-				maxIQR = q75.get(i) - q25.get(i);
-			}
-		}
 
 		// get the maximum values from nuclear diameters
 		// get the limits  for the plot  	
@@ -796,14 +782,18 @@ public class NucleusDatasetCreator {
 
 		// rendering order will be first on top
 		
+		int tailIndex = n.getBorderIndex(collection.getOrientationPoint());
+		
 		// add the segments
 		
 		List<NucleusBorderSegment> segmentList = n.getAngleProfile().getSegments();
 		if(!segmentList.isEmpty()){ // only draw if there are segments
 			
 			for(String name : n.getAngleProfile().getSegmentNames()){
-
+				
 				NucleusBorderSegment seg = n.getAngleProfile().getSegment(name);
+				
+				addSegmentIQRToConsensus(seg, ds, n, scaledRange, tailIndex);
 
 				double[] xpoints = new double[seg.length()+1];
 				double[] ypoints = new double[seg.length()+1];
@@ -819,19 +809,38 @@ public class NucleusDatasetCreator {
 			}
 		}
 
-		// add the IQR	
+		
+		return ds;
+	}
+	
+	/**
+	 * Add the IQR for a segment to the given dataset
+	 * @param segment the segment to add
+	 * @param ds the dataset to add it to
+	 * @param n the consensus nucleus
+	 * @param scaledRange the IQR scale profile
+	 * @param tailIndex the index of the tail point in the nucleus profile
+	 */
+	private static void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, int tailIndex){
+				// add the IQR	
 		// what we need to do is match the profile positions to the borderpoints
 		
-		int tailIndex = n.getBorderIndex(collection.getOrientationPoint());
-
-		for(int i=0; i<n.getLength(); i++){
-
-			int index = Utils.wrapIndex(i + tailIndex, n.getLength()); // start from the orientation point
+		// Add lines to show the IQR of the angle profile at each point
+		double[] innerIQRX = new double[segment.length()];
+		double[] innerIQRY = new double[segment.length()];
+		double[] outerIQRX = new double[segment.length()];
+		double[] outerIQRY = new double[segment.length()];
+		
+		for(int i=0; i<segment.length(); i++){
+			
+			int index = Utils.wrapIndex(segment.getStartIndex()+i, n.getLength());
+			
+			
+			NucleusBorderPoint p = n.getBorderPoint(index); // get the border points in the segment
 
 			int prevIndex = Utils.wrapIndex(index-3, n.getLength());
 			int nextIndex = Utils.wrapIndex(index+3, n.getLength());
 
-			XYPoint p = n.getBorderPoint( index  );
 
 			
 			// decide the angle at which to place the iqr points
@@ -841,8 +850,8 @@ public class NucleusDatasetCreator {
 			// move the line to the index point, and find the orthogonal line
 			Equation perp = eq.translate(p).getPerpendicular(p);
 			
-			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(i)));
-			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(i));
+			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(index)));
+			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(index));
 
 			XYPoint innerPoint = Utils.createPolygon(n).contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
 			XYPoint outerPoint = Utils.createPolygon(n).contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
@@ -853,16 +862,11 @@ public class NucleusDatasetCreator {
 			outerIQRY[i] = outerPoint.getY();
 
 		}
-		innerIQRX[n.getLength()] = innerIQRX[0];
-		innerIQRY[n.getLength()] = innerIQRY[0];
-		outerIQRX[n.getLength()] = outerIQRX[0];
-		outerIQRY[n.getLength()] = outerIQRY[0];
 		
 		double[][] inner = { innerIQRX, innerIQRY };
-		ds.addSeries("Q25", inner);
+		ds.addSeries("Q25_"+segment.getName(), inner);
 		double[][] outer = { outerIQRX, outerIQRY };
-		ds.addSeries("Q75", outer);
-		return ds;
+		ds.addSeries("Q75_"+segment.getName(), outer);
 	}
 	
 	/**
@@ -918,41 +922,7 @@ public class NucleusDatasetCreator {
 		}
 		return ds;
 	}
-	
-	/**
-	 * Get the segmented outline for a specific nucleus in a dataset. Sets the position
-	 * to the original coordinates in the image 
-	 * @param cell the cell to draw
-	 * @return
-	 */
-//	public static XYDataset createSegmentedNucleusOutline(Cell cell){
-//		DefaultXYDataset ds = new DefaultXYDataset();
-//		
-//		Nucleus nucleus = cell.getNucleus();
-//		
-//		// add the segments
-//		List<NucleusBorderSegment> segmentList = nucleus.getAngleProfile().getSegments();
-//		if(!segmentList.isEmpty()){ // only draw if there are segments
-//			for(int i=0;i<segmentList.size();i++){
-//
-//				NucleusBorderSegment seg = nucleus.getAngleProfile().getSegment("Seg_"+i);
-//				
-//				double[] xpoints = new double[seg.length()+1];
-//				double[] ypoints = new double[seg.length()+1];
-//				for(int j=0; j<=seg.length();j++){
-//					int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getLength());
-//					NucleusBorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
-//					xpoints[j] = p.getX();
-//					ypoints[j] = p.getY();
-//				}
-//
-//				double[][] data = { xpoints, ypoints };
-//				ds.addSeries("Seg_"+i, data);
-//			}
-//		}
-//		return ds;
-//	}
-	
+		
 	/**
 	 * Create a dataset for the signal groups in the cell. Each signalGroup
 	 * is a new series

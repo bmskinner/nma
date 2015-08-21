@@ -1,5 +1,7 @@
 package datasets;
 
+import ij.IJ;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
@@ -141,7 +143,7 @@ public class ConsensusNucleusChartFactory {
 		XYDataset ds = null;
 		
 		CellCollection collection = dataset.getCollection();
-		ds = NucleusDatasetCreator.createNucleusOutline(collection);
+		ds = NucleusDatasetCreator.createSegmentedNucleusOutline(collection);
 			
 		JFreeChart chart = makeConsensusChart(ds);
 		double max = getconsensusChartRange(dataset);
@@ -171,17 +173,28 @@ public class ConsensusNucleusChartFactory {
 			
 			// colour the segments
 			if(name.startsWith("Seg_")){
-				int colourIndex = MorphologyChartFactory.getIndexFromLabel(name);
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
+//				int colourIndex = MorphologyChartFactory.getIndexFromLabel(name);
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer().setSeriesPaint(i, Color.BLACK);
+//				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
 			} 
 			
 			// colour the quartiles
 			if(name.startsWith("Q")){
 				
+				// get the segment component
+				// The dataset series name is Q25_Seg_1 etc
+				String segmentName = name.replaceAll("Q[2|7]5_", "");
+				int segIndex = MorphologyChartFactory.getIndexFromLabel(segmentName);
+				
+//				IJ.log("Drawing IQR for seg "+segmentName + " in "+name);
+				
 				if(showIQR){
-					plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+					plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+//					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+					Color colour = ColourSelecter.getSegmentColor(segIndex);
+					plot.getRenderer().setSeriesPaint(i, colour);
+					
 				} else {
 					plot.getRenderer().setSeriesVisible(i, false);
 				}

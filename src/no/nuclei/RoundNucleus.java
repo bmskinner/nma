@@ -83,7 +83,7 @@ public class RoundNucleus
 		BorderPoints are made; everything references the copy in the Nucleus. Given this, the points of interest 
 		(now borderTags) need only to be indexes.
 	*/
-	protected SegmentedProfile angleProfile; // 
+	protected SegmentedProfile angleProfile = null; // 
 	protected Profile distanceProfile; // holds distances through CoM to opposite border
 	protected Profile singleDistanceProfile; // holds distances from CoM, not through CoM
 	protected List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
@@ -135,7 +135,6 @@ public class RoundNucleus
 		this.setNucleusFolder(n.getNucleusFolder());
 		
 		this.setPerimeter(n.getPerimeter());
-		this.setPathLength(n.getPathLength());
 		this.setFeret(n.getFeret());
 		this.setArea(n.getArea());
 		this.setAngleProfile(n.getAngleProfile());
@@ -168,34 +167,21 @@ public class RoundNucleus
     	addBorderTag(Constants.Nucleus.ROUND.referencePoint(), this.getIndex(this.findOppositeBorder(tailPoint)));
 	}
 
-	public void intitialiseNucleus(int angleProfileWindowSize){
+	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception {
 
 		this.nucleusFolder = new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension());
 
 		if (!this.nucleusFolder.exists()) {
-			try{
-				this.nucleusFolder.mkdir();
-			} catch(Exception e) {
-				IJ.log("Failed to create directory"+this.nucleusFolder.toString()+": "+e.getMessage());
-			}
+			this.nucleusFolder.mkdir();
 		}
 
-//		this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
-//		for(int i=0; i<this.smoothedPolygon.npoints; i++){
-//			borderList.add(new NucleusBorderPoint( this.smoothedPolygon.xpoints[i], this.smoothedPolygon.ypoints[i]));
-//		}
 
 		// calculate angle profile
-		try{
-			this.calculateAngleProfile(angleProfileWindowSize);
-		} catch(Exception e){
-			IJ.log("Cannot create angle profile: "+e);
-		} 
+		this.calculateAngleProfile(angleProfileWindowSize);
 
 		// calc distances around nucleus through CoM
 		this.calculateDistanceProfile();
 		this.calculateSingleDistanceProfile();
-		this.calculatePathLength();
 
 		this.calculateSignalDistancesFromCoM();
 		this.calculateFractionalSignalDistancesFromCoM();
@@ -323,10 +309,6 @@ public class RoundNucleus
 
 	public double getFeret(){
 		return this.feret;
-	}
-
-	public double getPathLength(){
-		return this.pathLength;
 	}
 
 	public double getPerimeter(){
@@ -516,17 +498,9 @@ public class RoundNucleus
 		}
 	}
 
-	/*
-		-----------------------
-		Set miscellaneous features
-		-----------------------
-	*/
 
-	public void setPathLength(double d){
-		this.pathLength = d;
-	}
 
-	public void calculatePathLength(){
+	public double getPathLength(){
 		double pathLength = 0;
 
 		XYPoint prevPoint = new XYPoint(0,0);
@@ -539,7 +513,7 @@ public class RoundNucleus
 				pathLength += thisPoint.getLengthTo(prevPoint);
 				prevPoint = thisPoint;
 		}
-		this.setPathLength(pathLength);
+		return pathLength;
 	}
 
 
@@ -1148,8 +1122,13 @@ public class RoundNucleus
 
 	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception{
 
+		List<NucleusBorderSegment> segments = null;
 		// store segments to reapply later
-		List<NucleusBorderSegment> segments = this.getAngleProfile().getSegments();
+		if(this.angleProfile!=null){
+			if(this.getAngleProfile().hasSegments()){
+				segments = this.getAngleProfile().getSegments();
+			}
+		}
 		
 		double[] angles = new double[this.getLength()];
 
@@ -1181,7 +1160,9 @@ public class RoundNucleus
 			}
 		}
 		SegmentedProfile newProfile = new SegmentedProfile(angles);
-		newProfile.setSegments(segments);
+		if(segments!=null){
+			newProfile.setSegments(segments);
+		}
 		this.setAngleProfile( newProfile  );
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}

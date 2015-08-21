@@ -781,10 +781,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		  } catch(Exception e){
 			  logger.error("Error saving original, enlarged or annotated image",e);
 		  }
-		  
-//		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getNuclearSignalOptions("default"),
-//				  												this.debugFile);
-//		  signalDetector.run(currentNucleus, image, currentNucleus.getSourceFile());
+
 		  
 		  currentNucleus.findPointsAroundBorder();
 	

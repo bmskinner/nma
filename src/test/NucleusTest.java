@@ -35,7 +35,12 @@ public class NucleusTest {
 		n.setPerimeter(347.02);
 		n.setOutputFolder(null);
 
-		n.intitialiseNucleus(PROFILE_WINDOW);
+		try {
+			n.intitialiseNucleus(PROFILE_WINDOW);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return n;
 	}
 

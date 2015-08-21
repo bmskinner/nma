@@ -29,6 +29,10 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 */
 	public SegmentedProfile(Profile p, List<NucleusBorderSegment> segments){		
 		super(p);
+		
+		if(segments==null || segments.isEmpty()){
+			throw new IllegalArgumentException("Segment list is null or empty in profile contructor");
+		}
 		if(p.size() != segments.get(0).getTotalLength() ){
 			throw new IllegalArgumentException("Segments do not fit profile");
 		}
@@ -42,8 +46,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param profile the segmented profile to copy
 	 */
 	public SegmentedProfile(SegmentedProfile profile) throws Exception {
-		super(profile.array);
-		this.segments = NucleusBorderSegment.copy(profile.getSegments());
+		this(profile, NucleusBorderSegment.copy(profile.getSegments()));
 	}
 	
 	/**
@@ -79,6 +82,18 @@ public class SegmentedProfile extends Profile implements Serializable {
 		segments.add(segment1);
 		segments.add(segment2);
 		this.segments = segments;
+	}
+	
+	/**
+	 * Check if this profile contains segments
+	 * @return
+	 */
+	public boolean hasSegments(){
+		if(this.segments==null || this.segments.isEmpty()){
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 	/**

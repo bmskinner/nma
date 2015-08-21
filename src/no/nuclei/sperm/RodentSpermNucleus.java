@@ -51,7 +51,7 @@ extends SpermNucleus
 
 		// find tip - use the least angle method
 		int tipIndex = this.getAngleProfile().getIndexOfMin();
-		addBorderTag("tip", tipIndex);
+		addBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint(), tipIndex);
 
 		// decide if the profile is right or left handed; flip if needed
 		// IJ.log("    Nucleus "+this.getNucleusNumber());
