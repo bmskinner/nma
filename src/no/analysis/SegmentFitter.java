@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utility.Logger;
+import utility.Utils;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.SegmentedProfile;
@@ -35,7 +36,10 @@ public class SegmentFitter {
 	
 	private 	SegmentedProfile medianProfile; // the profile to align against
 	
-	private boolean debug = false;
+	private boolean debug = false; // log debug info to file
+	
+	// This holds tested segments so that their scores do not have to be recalculated
+	private List<NucleusBorderSegment> testedSegmentPositions = new ArrayList<NucleusBorderSegment>();
 	
 	/**
 	 * The number of points ahead and behind to test
@@ -315,10 +319,20 @@ public class SegmentFitter {
 			
 			// apply all changes to a fresh copy of the profile
 			SegmentedProfile testProfile = new SegmentedProfile(profile);
-//			if(debug){
-//				logger.log("\tTesting length change "+changeValue);
-//			}
-
+			if(debug){
+				logger.log("\tTesting length change "+changeValue);
+			}
+			
+			NucleusBorderSegment checkedSegment = new NucleusBorderSegment(segment.getStartIndex(),
+					Utils.wrapIndex(segment.getEndIndex()+changeValue, segment.getTotalLength()),
+					segment.getTotalLength());
+			checkedSegment.setName(segment.getName());
+			if(hasBeenTested(checkedSegment)){
+				if(debug){
+					logger.log("\tSegment has been tested "+changeValue);
+				}
+				continue;
+			}
 			// not permitted if it violates length constraint
 			if(testProfile.adjustSegmentEnd(name, changeValue)){
 					
@@ -364,8 +378,25 @@ public class SegmentFitter {
 						+"\t"+segment.toString(), Logger.DEBUG);
 				}
 			}
+			testedSegmentPositions.add(checkedSegment);
 		}
 		return result;
+	}
+	
+	/**
+	 * Check if the given segment has already been tested
+	 * @param test
+	 * @return
+	 */
+	private boolean hasBeenTested(NucleusBorderSegment test){
+		boolean match = false;
+		for(NucleusBorderSegment check : testedSegmentPositions){
+			if(check.matches(test)){
+				match = true;
+				break;
+			}
+		}
+		return match;
 	}
 	
 	/**

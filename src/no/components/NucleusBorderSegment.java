@@ -182,6 +182,23 @@ public class NucleusBorderSegment  implements Serializable{
 	}
 	
 	/**
+	 * Test if the given segment matches this segment in position, length
+	 * and name
+	 * @param test
+	 * @return
+	 */
+	public boolean matches(NucleusBorderSegment test){
+		if(test.getStartIndex()==this.getStartIndex() 
+				&& test.getEndIndex()==this.getEndIndex()
+				&& test.getTotalLength()==this.getTotalLength()
+				&& test.getName().equals(this.getName())){
+			return  true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
 	 * Test the effect of new start and end indexes on the length
 	 * of the segment. Use for validating updates. Also called by
 	 * length() using real values
