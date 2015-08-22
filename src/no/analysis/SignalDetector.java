@@ -464,31 +464,36 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		}
 
 		Profile histogramProfile= new Profile(d);
-		Profile deltas = histogramProfile.smooth(3).calculateDeltas(3);
-		Profile maxima = deltas.getLocalMaxima(3);
-		Profile minima = deltas.getLocalMaxima(3);
+		Profile smooth = histogramProfile.smooth(3);
+		Profile deltas = smooth.calculateDeltas(3);
+		Profile deltaS = deltas.smooth(3).smooth(3);
+		Profile maximaD = deltaS.getLocalMaxima(3, 0);
+		Profile minimaD = deltaS.getLocalMinima(3, 0);
+		Profile cumSum = deltaS.cumulativeSum();
 		
 		// log
 		if(debug){
 			for(int i =0; i<histogram.length; i++){
-				IJ.log("    "+i+": "+histogram[i]
-						+"  Delta: "+deltas.get(i)
-						+"  Max  : "+maxima.get(i)
-						+"  Min  : "+minima.get(i));
+				IJ.log(i+"|"+histogram[i]
+						+"|"+smooth.get(i)
+						+"|"+deltaS.get(i)
+						+"|"+maximaD.get(i)
+						+"|"+minimaD.get(i)
+						+"|"+cumSum.get(i));
 			}
 
 
 			for(int i =0; i<histogram.length; i++){
-				if(maxima.get(i)==1){
-					IJ.log("  Max at "+i);
-				}
-				if(minima.get(i)==1){
-					IJ.log("  Min at "+i);
-				}
+//				if(maxima.get(i)==1){
+//					IJ.log("  Max at "+i);
+//				}
+//				if(minima.get(i)==1){
+//					IJ.log("  Min at "+i);
+//				}
 
 			}
-			IJ.log("Max: "+deltas.getIndexOfMax());
-			IJ.log("Min: "+deltas.getIndexOfMin());	
+			IJ.log("Max: "+deltaS.getIndexOfMax());
+			IJ.log("Min: "+deltaS.getIndexOfMin());	
 			IJ.log("");
 		}
 		

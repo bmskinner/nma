@@ -576,6 +576,29 @@ public class Profile implements Serializable {
     // this.minimaCount =  count;
     return minimaProfile;
   }
+  
+  /**
+   * Get the local maxima that are above a threshold
+   * value
+   * @param windowSize the maxima window size
+   * @param threshold the threshold
+   * @return
+   */
+  public Profile getLocalMinima(int windowSize, double threshold){
+	  Profile minima = getLocalMinima(windowSize);
+
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+
+		  if(minima.get(i)==1 && this.get(i)<threshold){
+			  values[i] = 1;
+		  } else {
+			  values[i] = 0;
+		  } 
+	  }
+	  return new Profile(values);
+  }
 
   /**
    * Get the points considered local maxima for the given window
@@ -618,6 +641,29 @@ public class Profile implements Serializable {
 		  result[i] = isMaximum ? 1 : 0;
 	  }
 	  return new Profile(result);
+  }
+  
+  /**
+   * Get the local maxima that are above a threshold
+   * value
+   * @param windowSize the maxima window size
+   * @param threshold the threshold
+   * @return
+   */
+  public Profile getLocalMaxima(int windowSize, double threshold){
+	  Profile maxima = getLocalMaxima(windowSize);
+
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+
+		  if(maxima.get(i)==1 && this.get(i)>threshold){
+			  values[i] = 1;
+		  } else {
+			  values[i] = 0;
+		  } 
+	  }
+	  return new Profile(values);
   }
   
   /**
@@ -756,6 +802,35 @@ public class Profile implements Serializable {
 	  }
 	  Profile result = new Profile(deltas);
 	  return result;
+  }
+  
+  /**
+   * Get the absolute values from a profile
+   * @return
+   */
+  public Profile absolute(){
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+		  values[i] = Math.abs(this.get(i));
+	  }
+	  return new Profile(values);
+  }
+  
+  /**
+   * Get the cumulative sum of the values in the
+   * profile
+   * @return
+   */
+  public Profile cumulativeSum(){
+	  double[] values = new double[this.size()];
+
+	  double total = 0;
+	  for (int i=0; i<array.length; i++) { 
+		  total += this.get(i);
+		  values[i] = total;
+	  }
+	  return new Profile(values);
   }
 
   /**
