@@ -1097,9 +1097,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		
 		@Override
 		public void finished(){
+			super.finished();
 			d.getAnalysisOptions().setRefoldNucleus(true);
 			d.getAnalysisOptions().setRefoldMode("Fast");
-			super.finished();
 		}
 
 	}

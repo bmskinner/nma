@@ -95,7 +95,7 @@ public class SegmentFitter {
 		
 		long startTime = System.currentTimeMillis();
 		// Begin fitting the segments to the median
-		logger.log("Fitting nucleus "+n.getPathAndNumber(), Logger.INFO);
+//		logger.log("Fitting nucleus "+n.getPathAndNumber(), Logger.INFO);
 		try{
 			
 			// get the best fit of segments to the median

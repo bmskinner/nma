@@ -109,9 +109,19 @@ public class RoundNucleus
 
 		// convert the roi positions to a list of nucleus border points
 		FloatPolygon polygon = roi.getInterpolatedPolygon(1,true);
+		
 		for(int i=0; i<polygon.npoints; i++){
-			borderList.add(new NucleusBorderPoint( polygon.xpoints[i], polygon.ypoints[i]));
+			NucleusBorderPoint point = new NucleusBorderPoint( polygon.xpoints[i], polygon.ypoints[i]);
+			
+			if(i>0){
+				point.setPrevPoint(borderList.get(i-1));
+				point.prevPoint().setNextPoint(point);
+			}
+			borderList.add(point);
 		}
+		// link endpoints
+		borderList.get(borderList.size()-1).setNextPoint(borderList.get(0));
+		borderList.get(0).setNextPoint(borderList.get(borderList.size()-1));
 		
 		this.sourceFile      = file;
 		this.nucleusNumber   = number;
@@ -1110,7 +1120,7 @@ public class RoundNucleus
 				NucleusBorderPoint opp = findOppositeBorder(p);
 
 				profile[i] = p.getLengthTo(opp); 
-				p.setDistanceAcrossCoM(p.getLengthTo(opp)); // LEGACY
+//				p.setDistanceAcrossCoM(p.getLengthTo(opp)); // LEGACY
 		}
 		this.distanceProfile = new Profile(profile);
 	}
