@@ -416,12 +416,15 @@ public class MorphologyAnalysis {
 			SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType), logger.getLogfile());
 			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
+			int count = 0;
 			for(Nucleus n : collection.getNuclei()){ 
+				logger.log("Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.size()+")");
 				fitter.fit(n);
 
 				// recombine the segments at the lengths of the median profile segments
 				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
 				frankenProfiles.add(recombinedProfile);
+				count++;
 			}
 
 			// add all the nucleus frankenprofiles to the frankencollection

@@ -55,6 +55,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 	
 	private JRadioButton forwardThresholding = new JRadioButton("Forward");
 	private JRadioButton reverseThresholding = new JRadioButton("Reverse");
+	private JRadioButton histogramThresholding = new JRadioButton("Adaptive");
 	private ButtonGroup thresholdModeGroup;
 
 	/**
@@ -125,11 +126,15 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		thresholdModeGroup = new ButtonGroup();
 		thresholdModeGroup.add(forwardThresholding);
 		thresholdModeGroup.add(reverseThresholding);
+		thresholdModeGroup.add(histogramThresholding);
+		
 		forwardThresholding.setSelected(true);
 		
 		contentPanel.add(new JLabel("Threshold type"));
 		contentPanel.add(forwardThresholding);
 		contentPanel.add(reverseThresholding);
+		contentPanel.add(histogramThresholding);
+		
 	}
 	
 	/**
@@ -203,10 +208,15 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		
 		
 		if(forwardThresholding.isSelected()){
-			ns.setReverseThreshold(false);
-		} else {
-			ns.setReverseThreshold(true);
-		}
+			ns.setMode(NuclearSignalOptions.FORWARD);
+		} 
+		if(reverseThresholding.isSelected()){
+			ns.setMode(NuclearSignalOptions.REVERSE);
+		} 
+		
+		if(histogramThresholding.isSelected()){
+			ns.setMode(NuclearSignalOptions.HISTOGRAM);
+		} 
 		
 		this.channel = channelSelection.getSelectedItem().equals("Red") 
 				? Constants.RGB_RED

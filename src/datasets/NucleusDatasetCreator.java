@@ -1206,7 +1206,7 @@ public class NucleusDatasetCreator {
 					fieldNames.add("Max fraction");
 					fieldNames.add("Min circ");
 					fieldNames.add("Max circ");
-					fieldNames.add("Reverse threshold");
+					fieldNames.add("Signal detection");
 				}
 				
 				int numberOfRowsPerSignalGroup = fieldNames.size()/ (maxChannels+1);
@@ -1236,25 +1236,31 @@ public class NucleusDatasetCreator {
 									.getNuclearSignalOptions("default");
 						}
 						
-//						if(collection.getSignalCount(signalGroup)>0){
-							rowData.add("");
-							rowData.add(signalGroup);
-							rowData.add(collection.getSignalGroupName(signalGroup));
-							rowData.add(collection.getSignalChannel(signalGroup));
-							rowData.add(collection.getSignalSourceFolder(signalGroup));
-							rowData.add(  ns.isReverseThreshold() ? "Variable" : ns.getSignalThreshold());
-							rowData.add(ns.getMinSize());
-							rowData.add(df.format(ns.getMaxFraction()));
-							rowData.add(df.format(ns.getMinCirc()));
-							rowData.add(df.format(ns.getMaxCirc()));
-							rowData.add(ns.isReverseThreshold());
+						
+						Object signalThreshold = ns.getMode()==NuclearSignalOptions.FORWARD
+												? ns.getSignalThreshold()
+												: "Variable";
+												
+						Object signalMode = ns.getMode()==NuclearSignalOptions.FORWARD
+								? "Forward"
+								: ns.getMode()==NuclearSignalOptions.REVERSE
+									? "Reverse"
+									: "Adaptive";					
+												
+
+						rowData.add("");
+						rowData.add(signalGroup);
+						rowData.add(collection.getSignalGroupName(signalGroup));
+						rowData.add(collection.getSignalChannel(signalGroup));
+						rowData.add(collection.getSignalSourceFolder(signalGroup));
+						rowData.add(  signalThreshold );
+						rowData.add(ns.getMinSize());
+						rowData.add(df.format(ns.getMaxFraction()));
+						rowData.add(df.format(ns.getMinCirc()));
+						rowData.add(df.format(ns.getMaxCirc()));
+						rowData.add(signalMode);
 							
-//						} else {
-//							
-//							for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
-//								rowData.add("");
-//							}
-//						}
+
 					}
 					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
 				}

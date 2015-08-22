@@ -126,6 +126,8 @@ public class Profile implements Serializable {
 
 	/**
 	 * Get the index of the maximum value in the profile
+	 * If there are multiple values at maximum, this returns the
+	 * first only
 	 * @return the index
 	 */
 	public int getIndexOfMax(){
@@ -141,7 +143,8 @@ public class Profile implements Serializable {
 	}
 
 	/**
-	 * Get the minimum value in the profile
+	 * Get the minimum value in the profile.If there are multiple values 
+	 * at minimum, this returns the first only
 	 * @return the minimum value
 	 */
 	public double getMin(){
@@ -545,14 +548,14 @@ public class Profile implements Serializable {
 
         // for the first position in prevValues, compare to the current index
         if(k==0){
-          if( prevValues[k] < array[i] || 
-              nextValues[k] < array[i] ){
+          if( prevValues[k] <= array[i] || 
+              nextValues[k] <= array[i] ){
             ok = false;
           }
         } else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
           
-          if( prevValues[k] < prevValues[k-1] || 
-              nextValues[k] < nextValues[k-1]){
+          if( prevValues[k] <= prevValues[k-1] || 
+              nextValues[k] <= nextValues[k-1]){
             ok = false;
           }
         }
@@ -599,14 +602,14 @@ public class Profile implements Serializable {
 
 			  // for the first position in prevValues, compare to the current index
 			  if(k==0){
-				  if( prevValues[k] > array[i] || 
-						  nextValues[k] > array[i] ){
+				  if( prevValues[k] >= array[i] || 
+						  nextValues[k] >= array[i] ){
 					  isMaximum = false;
 				  }
 			  } else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
 
-				  if( prevValues[k] > prevValues[k-1] || 
-						  nextValues[k] > nextValues[k-1]){
+				  if( prevValues[k] >= prevValues[k-1] || 
+						  nextValues[k] >= nextValues[k-1]){
 					  isMaximum = false;
 				  }
 			  }
