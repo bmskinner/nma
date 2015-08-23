@@ -599,6 +599,33 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(values);
   }
+  
+  /**
+   * Get the local minima that are above a threshold
+   * value and have an absolute value greater than the given 
+   * fraction of the total value range in the profile
+   * @param windowSize the maxima window size
+   * @param threshold the threshold
+   * @param fraction the fraction threshold
+   * @return
+   */
+  public Profile getLocalMinima(int windowSize, double threshold, double fraction){
+	  Profile minima = getLocalMinima(windowSize, threshold);
+
+	  double[] values = new double[this.size()];
+	  
+	  double fractionThreshold = (this.getMax()-this.getMin()) * fraction;
+
+	  for (int i=0; i<array.length; i++) { 
+
+		  if(minima.get(i)==1 && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
+			  values[i] = 1;
+		  } else {
+			  values[i] = 0;
+		  } 
+	  }
+	  return new Profile(values);
+  }
 
   /**
    * Get the points considered local maxima for the given window
@@ -658,6 +685,33 @@ public class Profile implements Serializable {
 	  for (int i=0; i<array.length; i++) { 
 
 		  if(maxima.get(i)==1 && this.get(i)>threshold){
+			  values[i] = 1;
+		  } else {
+			  values[i] = 0;
+		  } 
+	  }
+	  return new Profile(values);
+  }
+  
+  /**
+   * Get the local maxima that are above a threshold
+   * value and have an absolute value greater than the given 
+   * fraction of the total value range in the profile
+   * @param windowSize the maxima window size
+   * @param threshold the threshold
+   * @param fraction the fraction threshold
+   * @return
+   */
+  public Profile getLocalMaxima(int windowSize, double threshold, double fraction){
+	  Profile minima = getLocalMaxima(windowSize, threshold);
+
+	  double[] values = new double[this.size()];
+	  
+	  double fractionThreshold = this.getMax()-this.getMin() * fraction;
+
+	  for (int i=0; i<array.length; i++) { 
+
+		  if(minima.get(i)==1 && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
 			  values[i] = 1;
 		  } else {
 			  values[i] = 0;
@@ -747,24 +801,21 @@ public class Profile implements Serializable {
 	  return this.getSubregion(segment.getStartIndex(), segment.getEndIndex());
   }
 
-  public Profile calculateDeltas(int windowSize){
+  /**
+   * Calculate the differences between the previous and next indexes
+   * across a given window size around this point
+ * @param windowSize
+ * @return
+ */
+public Profile calculateDeltas(int windowSize){
 
     double[] deltas = new double[this.size()];
 
-    double[] prevValues = new double[windowSize]; // slots for previous angles
-    double[] nextValues = new double[windowSize]; // slots for next angles
 
     for (int i=0; i<array.length; i++) { // for each position in sperm
-
-      for(int j=0;j<prevValues.length;j++){
-
-        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
-
-        // fill the lookup array
-        prevValues[j] = array[prev_i];
-        nextValues[j] = array[next_i];
-      }
+    	
+    	double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+    	double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
 
       double delta = 0;
       for(int k=0;k<prevValues.length;k++){
@@ -802,6 +853,34 @@ public class Profile implements Serializable {
 	  }
 	  Profile result = new Profile(deltas);
 	  return result;
+  }
+  
+  /**
+   * Log transform the profile to the given base
+   * @param base
+   * @return
+   */
+  public Profile log(double base){
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+		  values[i] = Math.log(this.get(i)) / Math.log(base);
+	  }
+	  return new Profile(values);
+  }
+  
+  /**
+   * Raise the values in the profile to the given exponent
+   * @param base
+   * @return
+   */
+  public Profile power(double exponent){
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+		  values[i] = Math.pow(this.get(i),exponent);
+	  }
+	  return new Profile(values);
   }
   
   /**

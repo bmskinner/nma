@@ -319,78 +319,121 @@ public class SegmentFitter {
 			logger.log("\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
 		}
 		
-		// Try all the possible values in the valid range of changes
-		for(int changeValue = minimumChange; changeValue < maximumChange; changeValue++){
-			
+		/* Trying all possible lengths takes a long time. Try adjusting lengths in a window of 
+		 * <changeWindowSize>, and finding the window with the best fit. Then drop down to individual
+		 * index changes to refine the match 
+		 */
+		int bestChangeWindow = 0;
+		int changeWindowSize = 10;
+		for(int changeWindow = minimumChange; changeWindow < maximumChange; changeWindow+=changeWindowSize){
+
+			// find the changeWindow with the best fit, 
 			// apply all changes to a fresh copy of the profile
+			SegmentedProfile testProfile = new SegmentedProfile(profile);
+			if(debug){
+				logger.log("\tTesting length change "+changeWindow);
+			}
+			testProfile = testChange(profile, name, changeWindow);
+			double score = compareSegmentationPatterns(medianProfile, testProfile);
+			if(score < bestScore){
+				bestChangeWindow = changeWindow;
+			}
+		}
+		
+		if(debug){
+			logger.log("\tBest fit window is length "+bestChangeWindow );
+		}
+		
+		int halfWindow = changeWindowSize / 2;
+		// now we have the best window,  drop down to a changeValue
+		for(int changeValue = bestChangeWindow - halfWindow; changeValue < bestChangeWindow+halfWindow; changeValue++){
 			SegmentedProfile testProfile = new SegmentedProfile(profile);
 			if(debug){
 				logger.log("\tTesting length change "+changeValue);
 			}
+			testProfile = testChange(profile, name, changeValue);
+			double score = compareSegmentationPatterns(medianProfile, testProfile);
+			if(score < bestScore){
+				result = testProfile;
+			}
+		}
+		
+		return result;
+	}
+		
+	private SegmentedProfile testChange(SegmentedProfile profile, String name, int changeValue) throws Exception {
+		
+		double bestScore = compareSegmentationPatterns(medianProfile, profile);
+		
+		// apply all changes to a fresh copy of the profile
+		SegmentedProfile result = new SegmentedProfile(profile);
+		SegmentedProfile testProfile = new SegmentedProfile(profile);
+		NucleusBorderSegment segment = profile.getSegment(name);
+		if(debug){
+			logger.log("\tTesting length change "+changeValue);
+		}
+		
+		// not permitted if it violates length constraint
+		if(testProfile.adjustSegmentEnd(name, changeValue)){
 			
-			// not permitted if it violates length constraint
-			if(testProfile.adjustSegmentEnd(name, changeValue)){
+			// testProfile should now contain updated segment endpoints
+			SegmentedProfile compareProfile = new SegmentedProfile(testProfile);
+			
+////				 if this pattern has been seen, skip the rest of the test
+//			if(optimise){
+//				if(hasBeenTested(compareProfile)){
+//					if(debug){
+//						logger.log("\tProfile has been tested");
+//					}
+//					continue;
+//				}
+//			}
 				
-				// testProfile should now contain updated segment endpoints
-				SegmentedProfile compareProfile = new SegmentedProfile(testProfile);
-				
-//				 if this pattern has been seen, skip the rest of the test
-				if(optimise){
-					if(hasBeenTested(compareProfile)){
-						if(debug){
-							logger.log("\tProfile has been tested");
-						}
-						continue;
-					}
-				}
-					
-				// anything that gets in here should be valid
-				try{
-					double score = compareSegmentationPatterns(medianProfile, testProfile);
-					if(debug){
-						logger.log("\tLengthen "+changeValue+":\tScore:\t"+score, Logger.DEBUG);
-					}
-					
-					if(score < bestScore){
-						bestScore 	= score;
-						result = new SegmentedProfile(testProfile);
-						if(debug){
-							logger.log("\tNew best score:\t"+score+"\tLengthen:\t"+changeValue, Logger.DEBUG);
-						}
-					}
-				}catch(IllegalArgumentException e){
-					// throw a new edxception rather than trying a nudge a problem profile
-					logger.log(e.getMessage(), Logger.ERROR);
-					throw new Exception("Error getting segmentation pattern: "+e.getMessage());
-				}
-				
-				
-				// test if nudging the lengthened segment with will help
-				int nudge = testNudge(testProfile, segment.length());
-				testProfile.nudgeSegments(nudge);
-
+			// anything that gets in here should be valid
+			try{
 				double score = compareSegmentationPatterns(medianProfile, testProfile);
+				if(debug){
+					logger.log("\tLengthen "+changeValue+":\tScore:\t"+score, Logger.DEBUG);
+				}
+				
 				if(score < bestScore){
-					bestScore = score;
+					bestScore 	= score;
 					result = new SegmentedProfile(testProfile);
 					if(debug){
-						logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
+						logger.log("\tNew best score:\t"+score+"\tLengthen:\t"+changeValue, Logger.DEBUG);
 					}
 				}
-				if(optimise){
-					testedProfiles.add(compareProfile);
-				}
-				
-										
-			} else {
-				if(debug){
-					logger.log("\tLengthen "+changeValue
-						+":\tInvalid length change:\t"
-						+testProfile.getSegment(name).getLastFailReason()
-						+"\t"+segment.toString(), Logger.DEBUG);
-				}
+			}catch(IllegalArgumentException e){
+				// throw a new edxception rather than trying a nudge a problem profile
+				logger.log(e.getMessage(), Logger.ERROR);
+				throw new Exception("Error getting segmentation pattern: "+e.getMessage());
 			}
 			
+			
+			// test if nudging the lengthened segment with will help
+			int nudge = testNudge(testProfile, segment.length());
+			testProfile.nudgeSegments(nudge);
+
+			double score = compareSegmentationPatterns(medianProfile, testProfile);
+			if(score < bestScore){
+				bestScore = score;
+				result = new SegmentedProfile(testProfile);
+				if(debug){
+					logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
+				}
+			}
+			if(optimise){
+				testedProfiles.add(compareProfile);
+			}
+			
+									
+		} else {
+			if(debug){
+				logger.log("\tLengthen "+changeValue
+					+":\tInvalid length change:\t"
+					+testProfile.getSegment(name).getLastFailReason()
+					+"\t"+segment.toString(), Logger.DEBUG);
+			}
 		}
 		return result;
 	}
