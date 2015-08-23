@@ -33,6 +33,7 @@ import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
+import no.components.ShellResult;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -54,6 +55,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
+import utility.Constants;
 import datasets.ConsensusNucleusChartFactory;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
@@ -663,6 +665,25 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     				}	
 
     				chartPanel.setChart(shellsChart);
+    				chartPanel.setVisible(true);
+    				
+    				statusLabel.setHorizontalAlignment(SwingConstants.LEFT);
+    				String label = "";
+    				for(int i=1; i<=dataset.getHighestSignalGroup();i++){
+    					ShellResult r = dataset.getShellResult(i);
+    						label += "Group "+i+": p="+r.getChiSquare();
+    						String sig 	= r.getChiSquare() < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL 
+    									? "Significantly different to random at 5% level"
+    									: "Not significantly different to random at 5% level";
+    						
+    						label += "; "+sig+"\n";
+    					
+    				}
+    				statusLabel.setText(label);
+    				statusLabel.setVisible(true);
+    				
+    				
+    				newAnalysis.setVisible(false);
     				
     			} else { // no shell analysis available
 

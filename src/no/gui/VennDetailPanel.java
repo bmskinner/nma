@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
 import datasets.NucleusTableDatasetCreator;
@@ -34,17 +35,19 @@ public class VennDetailPanel extends DetailPanel {
 	 */
 	public void update(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
+		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
 		
 		if(!list.isEmpty() && list!=null){
-			vennTable.setModel( NucleusTableDatasetCreator.createVennTable(list));
-			int columns = vennTable.getColumnModel().getColumnCount();
+			model = NucleusTableDatasetCreator.createVennTable(list);
+		}
+		vennTable.setModel(model);
+		
+		int columns = vennTable.getColumnModel().getColumnCount();
 
+		if(columns>1){
 			for(int i=1;i<columns;i++){
-
 				vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
 			}
-		} else {
-			vennTable.setModel(NucleusTableDatasetCreator.createVennTable(null));
 		}
 	}
 	
