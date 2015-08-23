@@ -372,6 +372,8 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 * the nuclear roi. If < maxSignalFraction, get dimmer pixels and
 	 * remeasure. Continue until signal size is met. Works best with 
 	 * maxSignalFraction of ~0.1 for a chromosome paint
+	 * TODO: assumes there is only one signal. Check that the detector picks
+	 * up an object of MIN_SIGNAL_SIZE before setting the threshold.
 	 * @param sourceFile the file the image came from
 	 * @param stack the imagestack
 	 * @param n the nucleus
@@ -473,49 +475,43 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 
 		}
 		
-//		double[] xArray = new double[histogram.length];
-//		for(int x=0; x<histogram.length; x++){
-//			xArray[x] = x;
-//		}
-//		Profile xValues = new Profile(xArray);
-//		Profile logX = xValues.log(10);
-		
-		// trim the histogram to the minimum signal intensity
-		// no point looking lower
+		/* trim the histogram to the minimum signal intensity.
+		 * No point looking lower, and the black pixels increase the
+		 * total range making it harder to carry out the range based minima
+		 * detection below
+		 */
 		int trimValue = options.getSignalThreshold();
 		Profile histogramProfile = new Profile(d);
 		Profile trimmedHisto = histogramProfile.getSubregion(trimValue, 255);
 		
-		// smooth the arrays and get the deltas
-		Profile trimSmooth = trimmedHisto.smooth(3);
-		Profile trimDS = trimSmooth.calculateDeltas(3).smooth(3).smooth(3);
+		// smooth the arrays,  get the deltas, and double smooth them
+		Profile trimDS = trimmedHisto.smooth(3).calculateDeltas(3).smooth(3).smooth(3);
 		
-		// find minima and maxima above or below zero, with a total 
-		// displacement more than 0.1 of the range of values in the delta
-		// profile
-		Profile maximaD = trimDS.getLocalMaxima(3, 0, 0.1);
+		/* find minima and maxima above or below zero, with a total 
+		 * displacement more than 0.1 of the range of values in the delta
+		 * profile
+		 */		
 		Profile minimaD = trimDS.getLocalMinima(3, 0, 0.1);
-		Profile cumSum = trimDS.cumulativeSum();
-		
-		// log
-		if(debug){
-			
-			for(int i =0; i<trimmedHisto.size(); i++){
-				IJ.log(i+"|"+trimSmooth.get(i)
-						+"|"+trimDS.get(i)
-						+"|"+maximaD.get(i)
-						+"|"+minimaD.get(i)
-						+"|"+cumSum.get(i));
-			}
-			IJ.log("");
-		}
-		
+
+		/* Set the threshold for this nucleus to the drop-off
+		* This is the highest local minimum detected in the 
+		* delta profile (if no minima were detected, we use the
+		* original signal threshold). 
+		*/ 
 		int maxIndex = trimValue;
 		for(int i =0; i<minimaD.size(); i++){
 			if(minimaD.get(i)==1){
 				maxIndex = i+trimValue;
 			}
 		}
+		/*
+		 * Add a bit more to the new threshold. This is because the minimum
+		 * of the delta profile is in middle of the background drop off;
+		 * we actually want to ignore the remainder of this background and just
+		 * keep the signal. Arbitrary at present. TODO: Find the best point. 
+		 */
+		maxIndex+=10;
+		
 		updateThreshold(maxIndex);
 		detectForwardThresholdSignal(sourceFile, stack, n);
 	}
