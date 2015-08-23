@@ -22,6 +22,11 @@ public interface Nucleus {
 	public static final int Y_BASE = 1;
 	public static final int WIDTH = 2;
 	public static final int HEIGHT = 3;
+	
+	// for debugging - use in calling dumpInfo()
+	public static final int ALL_POINTS = 0;
+	public static final int BORDER_POINTS = 1;
+	public static final int BORDER_TAGS = 2;
 
 	public void findPointsAroundBorder() throws Exception;
 	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception;

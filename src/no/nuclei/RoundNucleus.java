@@ -49,16 +49,7 @@ public class RoundNucleus
 	private UUID uuid;// = java.util.UUID.randomUUID();
 	
 	private Class<?> nucleusClass;
-	
 
-	// for debugging - use in calling dumpInfo()
-	public static final int ALL_POINTS = 0;
-	public static final int BORDER_POINTS = 1;
-	public static final int BORDER_TAGS = 2;
-	
-
-
-	
 	public static final String IMAGE_PREFIX = "export.";
 
 	protected int nucleusNumber; // the number of the nucleus in the current image

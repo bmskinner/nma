@@ -454,33 +454,36 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				public void mouseClicked(MouseEvent e) {
 					
 					JTable table = (JTable) e.getSource();
+					int row = table.rowAtPoint((e.getPoint()));
+					String rowName = table.getModel().getValueAt(row, 0).toString();
 					
 					// double click
 					if (e.getClickCount() == 2) {
-						int row = table.rowAtPoint((e.getPoint()));
-						String rowName = table.getModel().getValueAt(row, 0).toString();
-
-						String value = table.getModel().getValueAt(row+1, 0).toString();
-						if(value.equals("Signal group")){
-							
-							// the group number is in the next row down
-							String groupString = table.getModel().getValueAt(row+1, 1).toString();
-							int signalGroup = Integer.valueOf(groupString);
-							
-							Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
-							
-							Color newColor = JColorChooser.showDialog(
-				                     CellDetailPanel.this,
-				                     "Choose signal Color",
-				                     oldColour);
-							
-							if(newColor != null){
-								activeDataset.setSignalGroupColour(signalGroup, newColor);
-								updateCell(activeCell);
-								fireSignalChangeEvent("SignalColourUpdate");
+						
+						// Look for signal group colour
+						if(rowName.equals("")){
+							String value = table.getModel().getValueAt(row+1, 0).toString();
+							if(value.equals("Signal group")){
+								
+								// the group number is in the next row down
+								String groupString = table.getModel().getValueAt(row+1, 1).toString();
+								int signalGroup = Integer.valueOf(groupString);
+								
+								Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+								
+								Color newColor = JColorChooser.showDialog(
+					                     CellDetailPanel.this,
+					                     "Choose signal Color",
+					                     oldColour);
+								
+								if(newColor != null){
+									activeDataset.setSignalGroupColour(signalGroup, newColor);
+									updateCell(activeCell);
+									fireSignalChangeEvent("SignalColourUpdate");
+								}
 							}
 						}
-						
+
 						// Adjust the scale
 						if(rowName.equals("Scale (um/pixel)")){
 							

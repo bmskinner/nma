@@ -67,15 +67,21 @@ public class MorphologyChartFactory {
 	 */
 	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n){
 		JFreeChart chart = makeProfileChart(ds, n.getLength());
-		
+
 		XYPlot plot = chart.getXYPlot();
-		
+
 		for(String tag : n.getBorderTags().keySet()){
+			Color colour = Color.BLACK;
 			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
-			plot.addDomainMarker(new ValueMarker(index, Color.BLACK, new BasicStroke(2.0f)));
+
+			if(tag.equals(n.getOrientationPoint())){
+				colour = Color.BLUE;
+			}
+			if(tag.equals(n.getReferencePoint())){
+				colour = Color.ORANGE;
+			}
+			plot.addDomainMarker(new ValueMarker(index, colour, new BasicStroke(2.0f)));	
 		}
-		
-		
 		return chart;
 	}
 	
@@ -517,13 +523,21 @@ public class MorphologyChartFactory {
 				
 				
 				if(hash.get(key).equals("Tags")){
-						plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
+					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
+					String name = plot.getDataset(key).getSeriesKey(i).toString().replace("Tag_", "");
+					
+					if(name.equals(cell.getNucleus().getOrientationPoint())){
+						plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
+					}
+					if(name.equals(cell.getNucleus().getReferencePoint())){
+						plot.getRenderer(key).setSeriesPaint(i, Color.ORANGE);
+					}
+						
 				}
 
 				// signal colours
 				if(hash.get(key).startsWith("SignalGroup_")){
 					int colourIndex = getIndexFromLabel(hash.get(key));
-					//						IJ.log("Drawing signal "+i+" of "+seriesCount+" in series group "+colourIndex);
 					Color colour = dataset.getSignalGroupColour(colourIndex);
 					plot.getRenderer(key).setSeriesPaint(i, colour);
 				}
