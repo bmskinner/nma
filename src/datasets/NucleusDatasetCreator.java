@@ -951,8 +951,8 @@ public class NucleusDatasetCreator {
 
 					int i =0;
 					for(XYPoint p : signal.getBorder()){
-						xpoints[i] = p.getX();
-						ypoints[i] = p.getY();
+						xpoints[i] = p.getX() - nucleus.getPosition()[Nucleus.X_BASE];
+						ypoints[i] = p.getY() - nucleus.getPosition()[Nucleus.Y_BASE];
 						i++;
 					}
 					double[][] data = { xpoints, ypoints };

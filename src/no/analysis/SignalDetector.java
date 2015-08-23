@@ -39,6 +39,11 @@ import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 
 
+/**
+ * Methods for finding a FISH signal in a nucleus.
+ * TODO: For a paint, assume one or two signals per nucleus. 
+ * If more are detected, lower the threshold until the signals merge
+ */
 public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	
 	protected NuclearSignalOptions options = null;
@@ -49,7 +54,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	protected int signalGroup;
 	protected String channelName;
 	
-	private boolean debug = true;
+	private boolean debug = false;
 
 	/**
 	 * Empty constructor. Detector will have default values
@@ -105,7 +110,12 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 
 		try{
 			int progress = 0;
+			
+			int originalMinThreshold = options.getSignalThreshold();
 			for(Cell c : dataset.getCollection().getCells()){
+				
+				// reset the  min threshold for each cell
+				options.setThreshold(originalMinThreshold);
 
 				Nucleus n = c.getNucleus();
 				logger.log("Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber(), Logger.DEBUG);
@@ -462,40 +472,51 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 			d[i] = histogram[i];
 
 		}
-
-		Profile histogramProfile= new Profile(d);
-		Profile smooth = histogramProfile.smooth(3);
-		Profile deltas = smooth.calculateDeltas(3);
-		Profile deltaS = deltas.smooth(3).smooth(3);
-		Profile maximaD = deltaS.getLocalMaxima(3, 0);
-		Profile minimaD = deltaS.getLocalMinima(3, 0);
-		Profile cumSum = deltaS.cumulativeSum();
+		
+//		double[] xArray = new double[histogram.length];
+//		for(int x=0; x<histogram.length; x++){
+//			xArray[x] = x;
+//		}
+//		Profile xValues = new Profile(xArray);
+//		Profile logX = xValues.log(10);
+		
+		// trim the histogram to the minimum signal intensity
+		// no point looking lower
+		int trimValue = options.getSignalThreshold();
+		Profile histogramProfile = new Profile(d);
+		Profile trimmedHisto = histogramProfile.getSubregion(trimValue, 255);
+		
+		// smooth the arrays and get the deltas
+		Profile trimSmooth = trimmedHisto.smooth(3);
+		Profile trimDS = trimSmooth.calculateDeltas(3).smooth(3).smooth(3);
+		
+		// find minima and maxima above or below zero, with a total 
+		// displacement more than 0.1 of the range of values in the delta
+		// profile
+		Profile maximaD = trimDS.getLocalMaxima(3, 0, 0.1);
+		Profile minimaD = trimDS.getLocalMinima(3, 0, 0.1);
+		Profile cumSum = trimDS.cumulativeSum();
 		
 		// log
 		if(debug){
-			for(int i =0; i<histogram.length; i++){
-				IJ.log(i+"|"+histogram[i]
-						+"|"+smooth.get(i)
-						+"|"+deltaS.get(i)
+			
+			for(int i =0; i<trimmedHisto.size(); i++){
+				IJ.log(i+"|"+trimSmooth.get(i)
+						+"|"+trimDS.get(i)
 						+"|"+maximaD.get(i)
 						+"|"+minimaD.get(i)
 						+"|"+cumSum.get(i));
 			}
-
-
-			for(int i =0; i<histogram.length; i++){
-//				if(maxima.get(i)==1){
-//					IJ.log("  Max at "+i);
-//				}
-//				if(minima.get(i)==1){
-//					IJ.log("  Min at "+i);
-//				}
-
-			}
-			IJ.log("Max: "+deltaS.getIndexOfMax());
-			IJ.log("Min: "+deltaS.getIndexOfMin());	
 			IJ.log("");
 		}
 		
+		int maxIndex = trimValue;
+		for(int i =0; i<minimaD.size(); i++){
+			if(minimaD.get(i)==1){
+				maxIndex = i+trimValue;
+			}
+		}
+		updateThreshold(maxIndex);
+		detectForwardThresholdSignal(sourceFile, stack, n);
 	}
 }
