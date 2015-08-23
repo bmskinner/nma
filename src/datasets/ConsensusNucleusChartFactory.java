@@ -124,7 +124,7 @@ public class ConsensusNucleusChartFactory {
 	 */
 	private static double getconsensusChartRange(List<AnalysisDataset> list){
 		
-		double max = 0;
+		double max = 1;
 		for (AnalysisDataset dataset : list){
 			if(dataset.getCollection().hasConsensusNucleus()){
 				double datasetMax = getconsensusChartRange(dataset);
