@@ -182,14 +182,14 @@ public interface Nucleus {
 	public double getPerimeter();
 
 	/**
-	 * Get the angle profile
+	 * Get a copy of the angle profile
 	 * @return
 	 * @throws Exception 
 	 */
 	public SegmentedProfile getAngleProfile() throws Exception;
 	
 	/**
-	 * Get the angle profile offset to start at the given point
+	 * Get a copy of the angle profile offset to start at the given point
 	 * @param pointType the point to start at
 	 * @return a copy of the segmented profile
 	 * @throws Exception 
@@ -203,6 +203,15 @@ public interface Nucleus {
 	 * @throws Exception 
 	 */
 	public void setAngleProfile(SegmentedProfile profile) throws Exception;
+	
+	/**
+	 * Update the angle profile to the given segmented profile. The profile being used is offset
+	 * to start at the given point type, and so the offset is removed before the profile is assigned
+	 * @param p the profile
+	 * @param pointType the border tag the profile begins from
+	 * @throws Exception
+	 */
+	public void setAngleProfile(SegmentedProfile p, String pointType) throws Exception;
 	
 	
 

@@ -42,6 +42,8 @@ import javax.swing.tree.TreeModel;
 import no.analysis.AnalysisDataset;
 import no.analysis.MorphologyAnalysis;
 import no.components.NucleusBorderPoint;
+import no.components.NucleusBorderSegment;
+import no.components.SegmentedProfile;
 import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
@@ -589,6 +591,95 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						
 			try {
 				table = new JTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+				table.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						
+						JTable table = (JTable) e.getSource();
+						int row = table.rowAtPoint(e.getPoint());
+						String rowName = table.getModel().getValueAt(row, 0).toString();
+						
+						int column = table.columnAtPoint(e.getPoint());
+						String columnName = table.getModel().getColumnName(column);
+						
+						// double click
+						if (e.getClickCount() == 2) {
+							
+							Nucleus n = activeCell.getNucleus();
+							
+							if(columnName.startsWith("Seg_")){
+								
+								try {
+									SegmentedProfile profile = n.getAngleProfile(n.getReferencePoint());
+									NucleusBorderSegment seg = profile.getSegment(columnName);
+									
+									if(rowName.equals("Start index")){
+										SpinnerNumberModel sModel 
+										= new SpinnerNumberModel(seg.getStartIndex(), 
+												seg.prevSegment().getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
+												seg.getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+												1);
+										JSpinner spinner = new JSpinner(sModel);
+
+										int option = JOptionPane.showOptionDialog(null, 
+												spinner, 
+												"Choose the new segment start index", 
+												JOptionPane.OK_CANCEL_OPTION, 
+												JOptionPane.QUESTION_MESSAGE, null, null, null);
+										if (option == JOptionPane.CANCEL_OPTION) {
+											// user hit cancel
+										} else if (option == JOptionPane.OK_OPTION)	{
+											
+											int index = (Integer) spinner.getModel().getValue();
+											if(seg.update(index, seg.getEndIndex())){
+												n.setAngleProfile(profile, n.getReferencePoint());
+												updateCell(activeCell);
+											} else {
+												log("Update to index "+index+" failed: "+seg.getLastFailReason());
+											}
+											
+
+										}
+									}
+									
+									if(rowName.equals("End index")){
+										SpinnerNumberModel sModel 
+										= new SpinnerNumberModel(seg.getEndIndex(), 
+												seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
+												seg.nextSegment().getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+												1);
+										JSpinner spinner = new JSpinner(sModel);
+
+										int option = JOptionPane.showOptionDialog(null, 
+												spinner, 
+												"Choose the new segment start index", 
+												JOptionPane.OK_CANCEL_OPTION, 
+												JOptionPane.QUESTION_MESSAGE, null, null, null);
+										if (option == JOptionPane.CANCEL_OPTION) {
+											// user hit cancel
+										} else if (option == JOptionPane.OK_OPTION)	{
+											
+											int index = (Integer) spinner.getModel().getValue();
+											if(seg.update(seg.getStartIndex(), index)){
+												n.setAngleProfile(profile, n.getReferencePoint());
+												updateCell(activeCell);
+											} else {
+												log("Update to index "+index+" failed: "+seg.getLastFailReason());
+											}
+											
+
+										}
+									}
+									
+									
+									
+								} catch (Exception e1) {
+									error("Error getting segment", e1);
+								}
+							}
+						}
+					}
+				});
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

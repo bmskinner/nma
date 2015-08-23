@@ -1021,6 +1021,17 @@ public class RoundNucleus
 	public void setAngleProfile(SegmentedProfile p) throws Exception{
 		this.angleProfile = new SegmentedProfile(p);
 	}
+	
+	/**
+	 * 
+	 * @param p
+	 * @param pointType
+	 * @throws Exception
+	 */
+	public void setAngleProfile(SegmentedProfile p, String pointType) throws Exception{
+		int offset = this.borderTags.get(pointType);
+		this.angleProfile = new SegmentedProfile(p).offset(-offset);
+	}
 
 	public double getAngle(int index){
 		return this.angleProfile.get(index);
