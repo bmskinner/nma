@@ -45,6 +45,18 @@ public abstract class DetailPanel extends JPanel {
     public void status(String message){
     	fireSignalChangeEvent("Status_"+message);
     }
+    
+    /**
+     * Log an error to the main window
+     * @param message
+     * @param e
+     */
+    public void error(String message, Exception e){
+    	log(message+": "+e.getMessage());
+		for(StackTraceElement e1 : e.getStackTrace()){
+			log(e1.toString());
+		}
+    }
 	
     protected synchronized void fireSignalChangeEvent(String message) {
     	

@@ -102,10 +102,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			
 		} catch (Exception e){
-			log("Error making signal panel: "+e.getMessage());
-			for(StackTraceElement e1 : e.getStackTrace()){
-				log(e1.toString());
-			}
+			error("Error making signal panel", e);
 		}
 	}
 
@@ -193,48 +190,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		}
 	}
 	
-	/**
-	 * Apply the default formatting to a boxplot with list
-	 * @param boxplot
-	 */
-//	private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
-//		formatBoxplotChart(boxplot);
-//		CategoryPlot plot = boxplot.getCategoryPlot();
-//		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
-//
-//		CategoryDataset ds = plot.getDataset(0);
-//
-//		for(int series=0;series<ds.getRowCount();series++){
-//			String name = (String) ds.getRowKey(series);
-//			int seriesGroup = getIndexFromLabel(name);
-//
-//			Color color = activeDataset.getSignalGroupColour(seriesGroup) == null 
-//					? ColourSelecter.getSegmentColor(series)
-//							: activeDataset.getSignalGroupColour(seriesGroup);
-//
-//					renderer.setSeriesPaint(series, color);
-//
-//
-//		}
-//
-//		renderer.setMeanVisible(false);
-//	}
-	
-	/**
-	 * Apply basic formatting to the charts, without any series added
-	 * @param boxplot
-	 */
-//	private void formatBoxplotChart(JFreeChart boxplot){
-//		CategoryPlot plot = boxplot.getCategoryPlot();
-//		plot.setBackgroundPaint(Color.WHITE);
-//		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-//		plot.setRenderer(renderer);
-//		renderer.setUseOutlinePaintForWhiskers(true);   
-//		renderer.setBaseOutlinePaint(Color.BLACK);
-//		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-//	}
-
-
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		if(event.type().equals("SignalColourUpdate")){
@@ -380,10 +335,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     				}
 
     			} catch(Exception e){
-    				log("Error creating signal checkboxes: "+e.getMessage());
-    				for(StackTraceElement e1 : e.getStackTrace()){
-    					log(e1.toString());
-    				}
+    				error("Error creating signal checkboxes", e);
     			}
     		}
     		return panel;
@@ -453,10 +405,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 //    				consensusAndCheckboxPanel.setVisible(false);
     			}
     		} catch(Exception e){
-    			log("Error updating signals: "+e.getMessage());
-    			for(StackTraceElement e1 : e.getStackTrace()){
-    				log(e1.toString());
-    			}
+    			error("Error updating signals", e);
     		}
     	}
     }
@@ -603,15 +552,16 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	 * @param list the datasets
     	 */
     	protected void update(List<AnalysisDataset> list){
-    		try{
-    			TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(list);
-    			table.setModel(model);
-    		} catch (Exception e){
-    			log("Error updating signal analysis: "+e.getMessage());
-    			for(StackTraceElement e1 : e.getStackTrace()){
-    				log(e1.toString());
+    		
+    		TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(null);
+    		if(list!=null && !list.isEmpty()){
+    			try{
+    				model = NucleusDatasetCreator.createSignalDetectionParametersTable(list);
+    			} catch (Exception e){
+    				error("Error updating signal analysis", e);
     			}
     		}
+    		table.setModel(model);
     	}
 
     }
@@ -654,6 +604,8 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	private static final long serialVersionUID = 1L;
 
     	private ChartPanel 	chartPanel; 
+    	private JLabel 		statusLabel  = new JLabel();
+    	private JButton 	newAnalysis	 = new JButton("Run new shell analysis");
 
     	protected ShellsPanel(){
     		this.setLayout(new BorderLayout());
@@ -662,6 +614,18 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);
     		chartPanel = new ChartPanel(shellsChart);
     		this.add(chartPanel, BorderLayout.CENTER);
+    		
+    		this.add(statusLabel, BorderLayout.NORTH);
+    		statusLabel.setVisible(false);
+    		
+    		newAnalysis.addMouseListener(new MouseAdapter() {
+    			@Override
+    			public void mouseClicked(MouseEvent arg0) {
+    				fireSignalChangeEvent("RunShellAnalysis");
+    			}
+    		});
+    		newAnalysis.setVisible(false);
+    		this.add(newAnalysis, BorderLayout.SOUTH);
 
 
     	}
@@ -699,28 +663,22 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     				}	
 
     				chartPanel.setChart(shellsChart);
-//    				signalsTabPane.setComponentAt(2, chartPanel);
     				
     			} else { // no shell analysis available
 
     				if(collection.hasSignals()){
     					// if signals, offer to run
     					makeNoShellAnalysisAvailablePanel(true, collection, "No shell results available"); // allow option to run analysis
-//    					signalsTabPane.setComponentAt(TAB_SHELLS, shellsPanel);
     				} else {
     					// otherwise don't show button
     					makeNoShellAnalysisAvailablePanel(false, null, "No signals in population"); // container in tab if no shell chart
-//    					signalsTabPane.setComponentAt(TAB_SHELLS, shellsPanel);
     				}
     			}
     		} else {
     			
-//    			shellsPanel.setVisible(false);
-
     			// Multiple populations. Do not display
     			// container in tab if no shell chart
     			makeNoShellAnalysisAvailablePanel(false, null, "Cannot display shell results for multiple populations");
-//    			signalsTabPane.setComponentAt(TAB_SHELLS, shellsPanel);
     		}
     	}
     	
@@ -732,23 +690,13 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	 * @return a panel to put in the shell tab
     	 */
     	private void makeNoShellAnalysisAvailablePanel(boolean showRunButton, CellCollection collection, String label){
-    		this.remove(chartPanel);
-    		this.setLayout(new BorderLayout(0,0));
-    		JLabel lbl = new JLabel(label);
-    		lbl.setHorizontalAlignment(SwingConstants.CENTER);
-    		this.add(lbl, BorderLayout.NORTH);
-    		
-    		JButton button = new JButton("Run new shell analysis");
-    		button.addMouseListener(new MouseAdapter() {
-    			@Override
-    			public void mouseClicked(MouseEvent arg0) {
-    				fireSignalChangeEvent("RunShellAnalysis");
-    			}
-    		});
-    		
-    		if(showRunButton){
-    			this.add(button, BorderLayout.SOUTH);
-    		}
+    		chartPanel.setVisible(false);
+    		statusLabel.setText(label);
+    		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
+    		statusLabel.setVisible(true);
+
+    		newAnalysis.setVisible(showRunButton);
+
     		this.revalidate();
     		this.repaint();
   
