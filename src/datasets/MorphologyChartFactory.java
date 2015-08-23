@@ -13,6 +13,7 @@ import javax.swing.JPopupMenu;
 
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
+import no.components.NucleusBorderPoint;
 import no.components.Profile;
 import no.gui.ColourSelecter;
 import no.nuclei.Nucleus;
@@ -459,8 +460,12 @@ public class MorphologyChartFactory {
 		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell, true);
 		hash.put(hash.size(), "Nucleus"); // add to the first free entry
 		datasetHash.put(datasetHash.size(), nucleus);
-
-
+		
+		// get the index tags
+		XYDataset tags = NucleusDatasetCreator.createNucleusIndexTags(cell);
+		hash.put(hash.size(), "Tags"); // add to the first free entry
+		datasetHash.put(datasetHash.size(), tags);
+		
 		// get the signals datasets and add each group to the hash
 		if(cell.getNucleus().hasSignal()){
 			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
@@ -492,8 +497,6 @@ public class MorphologyChartFactory {
 
 		for(int key : hash.keySet()){
 
-			//				IJ.log("Drawing dataset "+hash.get(key));
-
 			plot.setDataset(key, datasetHash.get(key));
 			plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
 
@@ -507,18 +510,14 @@ public class MorphologyChartFactory {
 
 				// Basic nucleus colour
 				if(hash.get(key).equals("Nucleus")){
-
-//					plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
 					String name = (String) plot.getDataset(key).getSeriesKey(i);
 					int colourIndex = getIndexFromLabel(name);
 					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
 				}
 				
-				// Segments
-				if(hash.get(key).startsWith("Seg_")){
-					
-					
-//					plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
+				
+				if(hash.get(key).equals("Tags")){
+						plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
 				}
 
 				// signal colours

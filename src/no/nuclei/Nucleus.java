@@ -392,26 +392,13 @@ public interface Nucleus {
 	 * @return
 	 */
 	public Set<String> getTags();
-
+	
 	/**
-	 * Get a list of all the segments within the nucleus
+	 * Check if the nucleus has the given border tag
+	 * @param tag
 	 * @return
 	 */
-//	public List<NucleusBorderSegment> getSegments();
-//	
-//	/**
-//	 * Create a list of segments offset to a reference point. This point
-//	 * will be the new zero index in the segment list
-//	 * @param pointType the border tag to offset against
-//	 */
-//	public List<NucleusBorderSegment> getSegments(String pointType);
-//
-//	/**
-//	 * Get the segment with the given name
-//	 * @param s the name
-//	 * @return
-//	 */
-//	public NucleusBorderSegment getSegmentTag(String s);
+	public boolean hasBorderTag(String tag);
 
 	/**
 	 * Set the name of the given NucleusBorderPoint

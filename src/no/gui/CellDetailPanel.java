@@ -41,6 +41,7 @@ import javax.swing.tree.TreeModel;
 
 import no.analysis.AnalysisDataset;
 import no.analysis.MorphologyAnalysis;
+import no.components.NucleusBorderPoint;
 import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
@@ -53,6 +54,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import utility.Utils;
 import cell.Cell;
 import datasets.CellDatasetCreator;
 import datasets.ConsensusNucleusChartFactory;
@@ -425,7 +427,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			}
 			panel.setChart(chart);
 			}catch(Exception e){
-				IJ.log("Error updating outline chart");
+				error("Error updating outline chart", e);
 			}
 		}
 
@@ -479,6 +481,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							}
 						}
 						
+						// Adjust the scale
 						if(rowName.equals("Scale (um/pixel)")){
 							
 							SpinnerNumberModel sModel 
@@ -497,6 +500,50 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								// offset by 90 because reasons?
 								double scale = (Double) spinner.getModel().getValue();
 								activeCell.getNucleus().setScale(scale);
+								updateCell(activeCell);
+								
+							}
+						}
+						
+						// Adjust the point position of tags
+						Nucleus n = activeCell.getNucleus();
+						if(n.hasBorderTag(rowName)){
+							
+							String pointType = rowName;
+							
+							int index = Utils.wrapIndex(n.getBorderIndex(pointType)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
+							
+							SpinnerNumberModel sModel 
+								= new SpinnerNumberModel(index, 0, n.getLength(), 1);
+							JSpinner spinner = new JSpinner(sModel);
+							
+							int option = JOptionPane.showOptionDialog(null, 
+									spinner, 
+									"Choose the new "+pointType+" point", 
+									JOptionPane.OK_CANCEL_OPTION, 
+									JOptionPane.QUESTION_MESSAGE, null, null, null);
+							if (option == JOptionPane.CANCEL_OPTION) {
+							    // user hit cancel
+							} else if (option == JOptionPane.OK_OPTION)	{
+								
+								// the value chosen by the user
+								int chosenIndex = (Integer) spinner.getModel().getValue();
+								
+								// adjust to the actual point index
+								int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(n.getReferencePoint()), n.getLength());
+								
+								n.addBorderTag(pointType, pointIndex);
+								
+								if(pointType.equals(n.getOrientationPoint())){
+									if(n.hasBorderTag("intersectionPoint")){
+										// only rodent sperm use the intersection point, which is equivalent to the head.
+										NucleusBorderPoint newPoint = n.findOppositeBorder(n.getBorderTag(n.getOrientationPoint()));
+										n.addBorderTag("intersectionPoint", n.getIndex(newPoint));
+										n.addBorderTag("head", n.getIndex(newPoint));
+									}
+								}
+								
+								
 								updateCell(activeCell);
 								
 							}

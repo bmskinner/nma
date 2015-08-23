@@ -1109,6 +1109,14 @@ public class RoundNucleus
 	public void addBorderTag(String name, int i){
 		this.borderTags.put(name, i);
 	}
+	
+	public boolean hasBorderTag(String tag){
+		if(this.borderTags.containsKey(tag)){
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	private void calculateDistanceProfile(){
 

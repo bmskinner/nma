@@ -919,7 +919,23 @@ public class NucleusDatasetCreator {
 			double[][] data = { xpoints, ypoints };
 			ds.addSeries("Nucleus Border", data);
 
+		}		
+		return ds;
+	}
+	
+	public static XYDataset createNucleusIndexTags(Cell cell) throws Exception {
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+
+		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
+		for(String tag : nucleus.getBorderTags().keySet()){
+			NucleusBorderPoint tagPoint = nucleus.getBorderTag(tag);
+			double[] xpoints = { tagPoint.getX(), nucleus.getCentreOfMass().getX() };
+			double[] ypoints = { tagPoint.getY(), nucleus.getCentreOfMass().getY() };
+			double[][] data = { xpoints, ypoints };
+			ds.addSeries("Tag_"+tag, data);
 		}
+
 		return ds;
 	}
 		
