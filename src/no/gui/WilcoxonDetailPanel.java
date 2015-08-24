@@ -96,7 +96,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
-	public void update(List<AnalysisDataset> list) throws Exception{
+	public void update(List<AnalysisDataset> list) throws Exception {
 		// format the numbers and make into a tablemodel
 		TableModel areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(null);
 		TableModel perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null);
@@ -111,7 +111,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 			feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list);
 			minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list);
 			differenceModel	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list);
-		} 
+		}
 		
 		wilcoxonAreaTable.setModel(areaModel);
 		wilcoxonPerimTable.setModel(perimModel);

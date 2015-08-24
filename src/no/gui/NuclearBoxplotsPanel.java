@@ -1,7 +1,5 @@
 package no.gui;
 
-import ij.IJ;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;

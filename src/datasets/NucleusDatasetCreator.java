@@ -7,7 +7,6 @@ import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -15,8 +14,6 @@ import javax.swing.table.TableModel;
 import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
 import no.collections.CellCollection;
-import no.components.AnalysisOptions;
-import no.components.AnalysisOptions.CannyOptions;
 import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
@@ -29,7 +26,6 @@ import no.components.XYPoint;
 import no.nuclei.ConsensusNucleus;
 import no.nuclei.Nucleus;
 
-import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
@@ -41,9 +37,9 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import cell.Cell;
-import components.Flagellum;
 import utility.Constants;
 import utility.Equation;
+import utility.Stats;
 import utility.Utils;
 
 public class NucleusDatasetCreator {
@@ -1355,8 +1351,21 @@ public class NucleusDatasetCreator {
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
-			double[] values = collection.getAreas(); 
-			ds.addSeries("Area_"+collection.getName(), values, 12);
+			double[] values = collection.getAreas();
+
+			double min  = Stats.min(values);
+			double max = Stats.max(values);
+			
+			// use int truncation to round to nearest 100 above max
+			int maxRounded = (( (int)max + 99) / 100 ) * 100;
+			
+			// use int truncation to round to nearest 100 above min, then subtract 100
+			int minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
+			
+			// bind of width 50
+			int bins = ((maxRounded - minRounded) / 50);
+
+			ds.addSeries("Area_"+collection.getName(), values, bins, minRounded, maxRounded);
 		}
 		return ds;
 	}
@@ -1371,7 +1380,17 @@ public class NucleusDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			double[] values = collection.getPerimeters(); 
-			ds.addSeries("Perimeter_"+collection.getName(), values, 12);
+			
+			double min  = Stats.min(values);
+			double max = Stats.max(values);
+			
+			int maxRounded = (int) Math.ceil(max);
+			int minRounded = (int) Math.floor(min);
+			
+			// put bins of width 1
+			int bins = ((maxRounded - minRounded));
+			
+			ds.addSeries("Perimeter_"+collection.getName(), values, bins, minRounded, maxRounded);
 		}
 		return ds;
 	}
@@ -1386,7 +1405,17 @@ public class NucleusDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			double[] values = collection.getFerets(); 
-			ds.addSeries("Max feret_"+collection.getName(), values, 12);
+			
+			double min  = Stats.min(values);
+			double max = Stats.max(values);
+			
+			int maxRounded = (int) Math.ceil(max);
+			int minRounded = (int) Math.floor(min);
+			
+			// put bins of width 0.5
+			int bins = ((maxRounded - minRounded) * 2 );
+			
+			ds.addSeries("Max feret_"+collection.getName(), values, bins, minRounded, maxRounded);
 		}
 		return ds;
 	}
@@ -1402,7 +1431,15 @@ public class NucleusDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			double[] values = collection.getMinFerets(); 
-			ds.addSeries("Min diameter_"+collection.getName(), values, 12);
+			double min  = Stats.min(values);
+			double max = Stats.max(values);
+			
+			int maxRounded = (int) Math.ceil(max);
+			int minRounded = (int) Math.floor(min);
+			
+			// put bins of width 0.5
+			int bins = ((maxRounded - minRounded) * 2 );
+			ds.addSeries("Min diameter_"+collection.getName(), values, bins, minRounded, maxRounded);
 		}
 		return ds;
 	}
@@ -1418,7 +1455,15 @@ public class NucleusDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			double[] values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
-			ds.addSeries("Variability_"+collection.getName(), values, 12);
+			double min  = Stats.min(values);
+			double max = Stats.max(values);
+			
+			int maxRounded = (int) Math.ceil(max);
+			int minRounded = (int) Math.floor(min);
+			
+			// put bins of width 0.1
+			int bins = ((maxRounded - minRounded) * 10 );
+			ds.addSeries("Variability_"+collection.getName(), values, bins, minRounded, maxRounded);
 		}
 		return ds;
 	}

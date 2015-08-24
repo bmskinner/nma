@@ -299,27 +299,39 @@ public class NucleusTableDatasetCreator {
 		return model;
 	}
 				
+	/**
+	 * Create an empty table to display.
+	 * @param list
+	 * @return
+	 */
 	private static DefaultTableModel makeEmptyWilcoxonTable(List<AnalysisDataset> list){
 		DefaultTableModel model = new DefaultTableModel();
 
 		if(list==null){
-			Object[] columnData = {""};
+			Object[] columnData = { "" };
 			model.addColumn("Population", columnData );
 			model.addColumn("", columnData );
-			return model;
-		}
+		} else {
 
-		// set rows
-		Object[] columnData = new Object[list.size()];
-		int row = 0;
-		for(AnalysisDataset dataset : list){
-			columnData[row] = dataset.getName();
-			row++;
+			// set rows
+			Object[] columnData = new Object[list.size()];
+			int row = 0;
+			for(AnalysisDataset dataset : list){
+				columnData[row] = dataset.getName();
+				row++;
+			}
+			model.addColumn("Population", columnData);
 		}
-		model.addColumn("Population", columnData);
 		return  model;
 	}
 	
+	/**
+	 * Run a Wilcoxon test on the given datasets. 
+	 * @param dataset1
+	 * @param dataset2
+	 * @param getPValue
+	 * @return
+	 */
 	private static double runWilcoxonTest(double[] dataset1, double[] dataset2, boolean getPValue){
 
 		double result;
