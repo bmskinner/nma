@@ -6,16 +6,12 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -38,25 +34,20 @@ import no.components.ShellResult;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYShapeAnnotation;
-import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
 import utility.Constants;
 import datasets.ConsensusNucleusChartFactory;
+import datasets.HistogramChartFactory;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
@@ -418,25 +409,18 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	
     	private ChartPanel 	angleChartPanel; 		// 
     	private ChartPanel 	distanceChartPanel; 	// 
-//    	private JPanel 		signalHistogramPanel;		// histograms panel
-    	
-    	
+  	    	
     	protected HistogramPanel(){
     		
     		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    		JFreeChart signalAngleChart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-    		signalAngleChart.getPlot().setBackgroundPaint(Color.white);
-    		
-    		JFreeChart signalDistanceChart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-    		signalDistanceChart.getPlot().setBackgroundPaint(Color.white);
+    		JFreeChart signalAngleChart 	= HistogramChartFactory.createSignalAngleHistogram(null, null);
+    		JFreeChart signalDistanceChart 	= HistogramChartFactory.createSignalDistanceHistogram(null, null);
     		    		
-    		angleChartPanel = new ChartPanel(signalAngleChart);
-    		distanceChartPanel = new ChartPanel(signalDistanceChart);
+    		angleChartPanel 	= new ChartPanel(signalAngleChart);
+    		distanceChartPanel 	= new ChartPanel(signalDistanceChart);
 
     		this.add(angleChartPanel);
     		this.add(distanceChartPanel);
-    		
- 
     	}
     	
     	protected void update(List<AnalysisDataset> list){
@@ -445,90 +429,40 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     			updateSignalAngleHistogram(list);
     			updateSignalDistanceHistogram(list);
     		} catch (Exception e) {
-    			IJ.log("Error updating signal histograms: "+e.getMessage());
-    			for(StackTraceElement e1 : e.getStackTrace()){
-    				IJ.log(e1.toString());
-    			}
+    			error("Error updating signal histograms", e);
     		}
     	}
     	
     	private void updateSignalAngleHistogram(List<AnalysisDataset> list){
+    		
+    		JFreeChart chart = HistogramChartFactory.createSignalAngleHistogram(null, activeDataset);
     		try {
     			HistogramDataset ds = NucleusDatasetCreator.createSignalAngleHistogramDataset(list);
-    			if(ds.getSeriesCount()>0){
-    				JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
-    				XYPlot plot = chart.getXYPlot();
-    				plot.setBackgroundPaint(Color.white);
-    				XYBarRenderer rend = new XYBarRenderer();
-    				rend.setBarPainter(new StandardXYBarPainter());
-    				rend.setShadowVisible(false);
-    				plot.setRenderer(rend);
-    				plot.getDomainAxis().setRange(0,360);
-    				for (int j = 0; j < ds.getSeriesCount(); j++) {
-    					String name = (String) ds.getSeriesKey(j);
-    					int seriesGroup = getIndexFromLabel(name);
-    					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
-    					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-    					Color colour = activeDataset.getSignalGroupColour(seriesGroup);
-    					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
 
-    				}	
-    				angleChartPanel.setChart(chart);
-    			} else {
-    				JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-    				chart.getPlot().setBackgroundPaint(Color.white);
-    				angleChartPanel.setChart(chart);
+    			if(ds.getSeriesCount()>0){
+    				chart = HistogramChartFactory.createSignalAngleHistogram(ds, activeDataset);
     			}
+
     		} catch (Exception e) {
-    			IJ.log("Error updating angle histograms: "+e.getMessage());
-    			for(StackTraceElement e1 : e.getStackTrace()){
-    				IJ.log(e1.toString());
-    			}
-    			JFreeChart chart = ChartFactory.createHistogram(null, "Angle", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-    			chart.getPlot().setBackgroundPaint(Color.white);
-    			angleChartPanel.setChart(chart);
+    			error("Error updating angle histograms", e);
     		}
-    		
-    		
+    		angleChartPanel.setChart(chart);
     	}
 
     	private void updateSignalDistanceHistogram(List<AnalysisDataset> list){
+    		JFreeChart chart = HistogramChartFactory.createSignalDistanceHistogram(null, activeDataset);
     		try {
     			HistogramDataset ds = NucleusDatasetCreator.createSignalDistanceHistogramDataset(list);
-    			
+
     			if(ds.getSeriesCount()>0){
-    				JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", ds, PlotOrientation.VERTICAL, true, true, true);
-    				XYPlot plot = chart.getXYPlot();
-    				plot.setBackgroundPaint(Color.white);
-    				XYBarRenderer rend = new XYBarRenderer();
-    				rend.setBarPainter(new StandardXYBarPainter());
-    				rend.setShadowVisible(false);
-    				plot.setRenderer(rend);
-    				plot.getDomainAxis().setRange(0,1);
-    				for (int j = 0; j < ds.getSeriesCount(); j++) {
-    					plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
-    					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-    					int index = getIndexFromLabel( (String) ds.getSeriesKey(j));
-    					Color colour = activeDataset.getSignalGroupColour(index);
-    					plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
-    				}	
-    				distanceChartPanel.setChart(chart);
-    			} else {
-    				JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-    				chart.getPlot().setBackgroundPaint(Color.white);
-    				distanceChartPanel.setChart(chart);
+    				chart = HistogramChartFactory.createSignalDistanceHistogram(ds, activeDataset);
     			}
+
     		} catch (Exception e) {
-    			IJ.log("Error updating distance histograms: "+e.getMessage());
-    			for(StackTraceElement e1 : e.getStackTrace()){
-    				IJ.log(e1.toString());
-    			}
-    			JFreeChart chart = ChartFactory.createHistogram(null, "Distance", "Count", null, PlotOrientation.VERTICAL, true, true, true);
-    			chart.getPlot().setBackgroundPaint(Color.white);
-    			distanceChartPanel.setChart(chart);
+    			error("Error updating distance histograms", e);
     		}
+    		distanceChartPanel.setChart(chart);
     	}
-    	    	
     }
 
     protected class AnalysisPanel extends JPanel{

@@ -63,13 +63,9 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 */
 	private void updateAnalysisParametersPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model;
+		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);;
 		if(list!=null && !list.isEmpty()){
-			
 			model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
-			
-		} else {
-			model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);
 		}
 		tableAnalysisParamters.setModel(model);
 	}
@@ -81,12 +77,10 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 */
 	private void updateStatsPanel(List<AnalysisDataset> list){
-		TableModel model;
+		TableModel model = NucleusTableDatasetCreator.createStatsTable(null);
 		
 		if(list!=null && !list.isEmpty()){
 			model = NucleusTableDatasetCreator.createStatsTable(list);
-		} else {
-			model = NucleusTableDatasetCreator.createStatsTable(null);
 		}
 		tablePopulationStats.setModel(model);
 	}
