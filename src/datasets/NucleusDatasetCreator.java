@@ -1314,6 +1314,12 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
+	/**
+	 * Create a histogram of signal distances from the nuclear centre of mass for
+	 * the given list of datasets
+	 * @param list
+	 * @return
+	 */
 	public static HistogramDataset createSignalDistanceHistogramDataset(List<AnalysisDataset> list){
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
@@ -1336,6 +1342,83 @@ public class NucleusDatasetCreator {
 				}
 			}
 
+		}
+		return ds;
+	}
+	
+	/**
+	 * For the given list of datasets, get the nuclear areas as a histogram dataset
+	 * @param list
+	 * @return
+	 */
+	public static HistogramDataset createNuclearAreaHistogramDataset(List<AnalysisDataset> list){
+		HistogramDataset ds = new HistogramDataset();
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			double[] values = collection.getAreas(); 
+			ds.addSeries("Area_"+collection.getName(), values, 12);
+		}
+		return ds;
+	}
+	
+	/**
+	 * For the given list of datasets, get the nuclear perimeters as a histogram dataset
+	 * @param list
+	 * @return
+	 */
+	public static HistogramDataset createNuclearPerimeterHistogramDataset(List<AnalysisDataset> list){
+		HistogramDataset ds = new HistogramDataset();
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			double[] values = collection.getPerimeters(); 
+			ds.addSeries("Perimeter_"+collection.getName(), values, 12);
+		}
+		return ds;
+	}
+	
+	/**
+	 * For the given list of datasets, get the nuclear ferets as a histogram dataset
+	 * @param list
+	 * @return
+	 */
+	public static HistogramDataset createNuclearMaxFeretHistogramDataset(List<AnalysisDataset> list){
+		HistogramDataset ds = new HistogramDataset();
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			double[] values = collection.getFerets(); 
+			ds.addSeries("Max feret_"+collection.getName(), values, 12);
+		}
+		return ds;
+	}
+	
+	/**
+	 * For the given list of datasets, get the nuclear minimum diametes
+	 * across the centre of mass as a histogram dataset
+	 * @param list
+	 * @return
+	 */
+	public static HistogramDataset createNuclearMinDiameterHistogramDataset(List<AnalysisDataset> list){
+		HistogramDataset ds = new HistogramDataset();
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			double[] values = collection.getMinFerets(); 
+			ds.addSeries("Min diameter_"+collection.getName(), values, 12);
+		}
+		return ds;
+	}
+	
+	/**
+	 * For the given list of datasets, get the nuclear normalised variability as a histogram dataset
+	 * @param list
+	 * @return
+	 * @throws Exception  
+	 */
+	public static HistogramDataset createNuclearVariabilityHistogramDataset(List<AnalysisDataset> list) throws Exception {
+		HistogramDataset ds = new HistogramDataset();
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			double[] values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
+			ds.addSeries("Variability_"+collection.getName(), values, 12);
 		}
 		return ds;
 	}

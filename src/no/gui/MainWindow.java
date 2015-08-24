@@ -172,7 +172,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			// Create panel for split boxplots
 			//---------------
 			nuclearBoxplotsPanel  = new NuclearBoxplotsPanel();
-			tabbedPane.addTab("Boxplots", nuclearBoxplotsPanel);
+			tabbedPane.addTab("Nuclear charts", nuclearBoxplotsPanel);
 				
 			
 			//---------------
