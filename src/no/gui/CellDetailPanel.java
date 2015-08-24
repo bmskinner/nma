@@ -614,10 +614,15 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 									NucleusBorderSegment seg = profile.getSegment(columnName);
 									
 									if(rowName.equals("Start index")){
+//										SpinnerNumberModel sModel 
+//										= new SpinnerNumberModel(seg.getStartIndex(), 
+//												seg.prevSegment().getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
+//												seg.getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+//												1);
 										SpinnerNumberModel sModel 
 										= new SpinnerNumberModel(seg.getStartIndex(), 
-												seg.prevSegment().getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
-												seg.getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+												0, 
+												n.getLength(),
 												1);
 										JSpinner spinner = new JSpinner(sModel);
 
@@ -631,11 +636,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 										} else if (option == JOptionPane.OK_OPTION)	{
 											
 											int index = (Integer) spinner.getModel().getValue();
-											if(seg.update(index, seg.getEndIndex())){
+											if(profile.update(seg, index, seg.getEndIndex())){
+//											if(seg.update(index, seg.getEndIndex())){
 												n.setAngleProfile(profile, n.getReferencePoint());
 												updateCell(activeCell);
 											} else {
-												log("Update to index "+index+" failed: "+seg.getLastFailReason());
+												log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 											}
 											
 
@@ -643,28 +649,36 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 									}
 									
 									if(rowName.equals("End index")){
+//										SpinnerNumberModel sModel 
+//										= new SpinnerNumberModel(seg.getEndIndex(), 
+//												seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
+//												seg.nextSegment().getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+//												1);
 										SpinnerNumberModel sModel 
 										= new SpinnerNumberModel(seg.getEndIndex(), 
-												seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
-												seg.nextSegment().getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+												0, 
+												n.getLength(),
 												1);
 										JSpinner spinner = new JSpinner(sModel);
 
 										int option = JOptionPane.showOptionDialog(null, 
 												spinner, 
-												"Choose the new segment start index", 
+												"Choose the new segment end index", 
 												JOptionPane.OK_CANCEL_OPTION, 
 												JOptionPane.QUESTION_MESSAGE, null, null, null);
 										if (option == JOptionPane.CANCEL_OPTION) {
 											// user hit cancel
 										} else if (option == JOptionPane.OK_OPTION)	{
 											
+											
+											
 											int index = (Integer) spinner.getModel().getValue();
-											if(seg.update(seg.getStartIndex(), index)){
+											if(profile.update(seg, seg.getStartIndex(), index)){
+//											if(seg.update(seg.getStartIndex(), index)){
 												n.setAngleProfile(profile, n.getReferencePoint());
 												updateCell(activeCell);
 											} else {
-												log("Update to index "+index+" failed: "+seg.getLastFailReason());
+												log("Updating "+seg.getEndIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 											}
 											
 
