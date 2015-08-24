@@ -156,6 +156,7 @@ public class SegmentFitter {
 	private void remapBorderPoints(Nucleus n, ProfileCollection pc) throws Exception {
 		
 		if(pc==null){
+			logger.log("No profile collection found, skipping remapping", Logger.DEBUG);
 			return; // this allows the unit tests to skip this section if a profile collection has not been created
 		}
 		// not all the tags will be associated with endpoints;
@@ -177,9 +178,13 @@ public class SegmentFitter {
 				}
 			}
 			
-			// Get the same segment in the nucleus, and update the tag
-			NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(segName);
-			n.addBorderTag(tag, nSeg.getStartIndex());
+			if(segName!=null){
+				// Get the same segment in the nucleus, and update the tag
+				NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(segName);
+				n.addBorderTag(tag, nSeg.getStartIndex());
+			} else {
+				logger.log("Unable to remap border point "+tag, Logger.DEBUG);
+			}
 		}
 	}
 	
