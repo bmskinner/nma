@@ -102,6 +102,40 @@ public class NucleusBorderSegment  implements Serializable{
 	}
 	
 	/**
+	 * Get the shortest distance of the given index to the start
+	 * of the segment
+	 * @param index
+	 * @return
+	 */
+	public int getDistanceToStart(int index){
+
+		int startIndex 	= this.getStartIndex();
+
+		int distForwards 	= Math.abs(index - startIndex);
+		int distBackwards 	= this.length() - distForwards;
+		
+		int result = Math.min(distForwards, distBackwards);
+		return result;	
+	}
+	
+	/**
+	 * Get the shortest distance of the given index to the end
+	 * of the segment
+	 * @param index
+	 * @return
+	 */
+	public int getDistanceToEnd(int index){
+
+		int endIndex 	= this.getEndIndex();
+
+		int distForwards 	= Math.abs(index - endIndex);
+		int distBackwards 	= this.length() - distForwards;
+		
+		int result = Math.min(distForwards, distBackwards);
+		return result;	
+	}
+	
+	/**
 	 * get the total length of the profile that this segment is a part of 
 	 * @return
 	 */

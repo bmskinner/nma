@@ -182,7 +182,10 @@ public interface Nucleus {
 	public double getPerimeter();
 
 	/**
-	 * Get a copy of the angle profile
+	 * Get a copy of the angle profile. The first index of the profile
+	 * is the first border point in the border list. That is, there is no
+	 * consistency to the order of values across multiple nuclei. If consistency
+	 * is needed, specify a pointType
 	 * @return
 	 * @throws Exception 
 	 */
@@ -435,7 +438,9 @@ public interface Nucleus {
 
 	/**
 	 * Calculate a new angle profile with the given window size. It
-	 * will replace the existing angle profile
+	 * will replace the existing angle profile. It takes the point, 
+	 * a point <windowSize> behind and <windowSize> ahead, and calculates
+	 * the interior angle between them.
 	 * @param angleProfileWindowSize the window size
 	 * @throws Exception 
 	 */

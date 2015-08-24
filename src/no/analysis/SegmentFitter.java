@@ -1,5 +1,7 @@
 package no.analysis;
 
+import ij.IJ;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,7 @@ import utility.Logger;
 import utility.Utils;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.ProfileCollection;
 import no.components.SegmentedProfile;
 import no.nuclei.Nucleus;
 
@@ -75,8 +78,9 @@ public class SegmentFitter {
 	 * loaded into the fitter upon cosntruction, and apply them to the nucleus
 	 * angle profile.
 	 * @param n the nucleus to fit to the current median profile
+	 * @param pc the ProfileCollection from the CellCollection the nucleus belongs to
 	 */
-	public void fit(Nucleus n){
+	public void fit(Nucleus n, ProfileCollection pc){
 		
 		// Input checks
 		if(n==null){
@@ -95,19 +99,23 @@ public class SegmentFitter {
 		
 		long startTime = System.currentTimeMillis();
 		// Begin fitting the segments to the median
-//		logger.log("Fitting nucleus "+n.getPathAndNumber(), Logger.INFO);
+
 		try{
 			
 			// get the best fit of segments to the median
 			SegmentedProfile newProfile = this.runFitter(n.getAngleProfile());
 			n.setAngleProfile(newProfile);
 			
-			// modify tail point to nearest segment end
-//			this.remapBorderPoints(n, newList);
-			long endTime = System.currentTimeMillis();
+			// modify tail and head/tip point to nearest segment end
+			remapBorderPoints(n, pc);
+			
 			logger.log("Fitted nucleus "+n.getPathAndNumber(), Logger.INFO);
-			long time = endTime - startTime;
-			logger.log("Fitting took "+time+" milliseconds", Logger.DEBUG);
+			
+			if(debug){
+				long endTime = System.currentTimeMillis();
+				long time = endTime - startTime;
+				logger.log("Fitting took "+time+" milliseconds", Logger.DEBUG);
+			}
 			
 		} catch(Exception e){
 			logger.error("Error refitting segments", e);
@@ -141,35 +149,37 @@ public class SegmentFitter {
 	}
 	
 	/**
-	 * Move any border points to their closest segment end
+	 * Move any border points to the appropriate segment end
 	 * @param n the nucleus to fit
-	 * @param list the segments in the nucleus
+	 * @param pc the profile collection from the CellCollection
 	 */
-//	private void remapBorderPoints(INuclearFunctions n, List<NucleusBorderSegment> list){
-//		
-//		for(String pointTag : this.getFeatureKeys()){
-//			
-//		}
-//				
-//		for(String pointTag: n.getBorderTags().keySet()){
-//			int index = n.getBorderTags().get(pointTag); 
-//			
-//			int nearestIndex = index;
-//			int smallestDiff = n.getLength();
-//			
-//			for(NucleusBorderSegment seg : n.getSegments()){
-//				int difference = Math.abs(index - seg.getStartIndex());
-//				// find the best fitting segment start, so long as it is not too far
-//				// needed to stop head being moved in rodent or pig sperm
-//				if(difference < smallestDiff && difference <  (double)n.getLength()/4){
-//					nearestIndex = seg.getStartIndex();
-//					smallestDiff = difference;
-//				}
-//			}
-//			n.addBorderTag(pointTag, nearestIndex);
-//		}
-//		
-//	}
+	private void remapBorderPoints(Nucleus n, ProfileCollection pc) throws Exception {
+		
+
+		// not all the tags will be associated with endpoints;
+		// e.g. the intersection point. The orientation and 
+		// reference points should be updated though
+		String[] tags = { n.getReferencePoint() , n.getOrientationPoint() };
+		
+		for(String tag : tags){
+			
+			// get the segments the point should lie between
+			// from the median profile
+			String segName = null;
+			
+			// get the name of the segment with the tag at the start
+			for(NucleusBorderSegment seg : pc.getSegments(tag)){
+//				IJ.log("Median: "+seg.toString());
+				if(seg.getStartIndex()==0){
+					segName = seg.getName();
+				}
+			}
+			
+			// Get the same segment in the nucleus, and update the tag
+			NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(segName);
+			n.addBorderTag(tag, nSeg.getStartIndex());
+		}
+	}
 	
 	/**
 	 * Perform the recombination of segments from a nucleus. It takes each segment

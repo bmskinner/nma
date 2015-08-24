@@ -419,7 +419,7 @@ public class MorphologyAnalysis {
 			int count = 0;
 			for(Nucleus n : collection.getNuclei()){ 
 				logger.log("Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.size()+")");
-				fitter.fit(n);
+				fitter.fit(n, pc);
 
 				// recombine the segments at the lengths of the median profile segments
 				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
