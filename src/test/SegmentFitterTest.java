@@ -96,7 +96,7 @@ public class SegmentFitterTest {
 			long startTime = System.currentTimeMillis();
 			SegmentFitter fitter = new SegmentFitter(median, log);
 			
-			fitter.fit(n);
+			fitter.fit(n, null);
 			
 			long endTime = System.currentTimeMillis();
 			long time = endTime - startTime;

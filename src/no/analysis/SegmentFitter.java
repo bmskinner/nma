@@ -155,7 +155,9 @@ public class SegmentFitter {
 	 */
 	private void remapBorderPoints(Nucleus n, ProfileCollection pc) throws Exception {
 		
-
+		if(pc==null){
+			return; // this allows the unit tests to skip this section if a profile collection has not been created
+		}
 		// not all the tags will be associated with endpoints;
 		// e.g. the intersection point. The orientation and 
 		// reference points should be updated though
