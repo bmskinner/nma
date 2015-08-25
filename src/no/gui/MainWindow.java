@@ -26,6 +26,8 @@ import no.analysis.SignalDetector;
 import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.NuclearSignalOptions;
+import no.export.CompositeExporter;
+import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
 import no.imports.PopulationImporter;
@@ -83,6 +85,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
 	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
+	
+	private static final int MORPHOLOGY_ANALYSIS = 1;
+	private static final int STATS_EXPORT 		 = 2;
+	private static final int NUCLEUS_ANNOTATE	 = 4;
+	private static final int CURVE_REFOLD 		 = 8;
+	private static final int EXPORT_COMPOSITE	 = 16;
 			
 	/**
 	 * Create the frame.
@@ -403,16 +411,14 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			for(CellCollection sub : subs){
 
 				if(sub.getNucleusCount()>0){
+					
+					dataset.addChildCollection(sub);
+					
+					AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
 
 					logc("Reapplying morphology...");
-					boolean ok = MorphologyAnalysis.reapplyProfiles(sub, dataset.getCollection());
-					if(ok){
-						log("OK");
-					} else {
-						log("Error");
-					}
+					new MorphologyAnalysisAction(subDataset, dataset);
 
-					dataset.addChildCollection(sub);
 					
 					// get the dataset craeted by adding a child collection, and put it inthe populations list
 					populationsPanel.addDataset(dataset.getChildDataset(sub.getID()));
@@ -508,9 +514,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		Thread thr = new Thread() {
 			public void run() {
 				try {
-
-					consensusNucleusPanel.update(list);
 					
+					consensusNucleusPanel.update(list);
+
 					nucleusProfilesPanel.update(list);
 					analysisDetailPanel.update(list);
 					nuclearBoxplotsPanel.update(list);
@@ -520,7 +526,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					wilcoxonDetailPanel.update(list);
 					cellDetailPanel.updateList(list);
 					segmentsDetailPanel.update(list);
-	
+
 				} catch (Exception e) {
 					log("Error updating panels: "+e.getMessage());
 					for(StackTraceElement el : e.getStackTrace()){
@@ -581,19 +587,18 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	        			newCollection.setName("Not_in_"+negative.getName());
 	        			UUID newID = newCollection.getID();
 
+	        			dataset.addChildCollection(newCollection);
+	        			
 	        			if(newCollection.getNucleusCount()>0){
 
 	        				logc("Reapplying morphology...");
-	        				boolean ok = MorphologyAnalysis.reapplyProfiles(newCollection, dataset.getCollection());
-	        				if(ok){
-	        					log("OK");
-	        				} else {
-	        					log("Error");
-	        				}
+	        				
+	        				AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
+	        				new MorphologyAnalysisAction(newDataset, dataset);
 	        			}
 
 
-	        			dataset.addChildCollection(newCollection);
+	        			
 
 	        			populationsPanel.addDataset(dataset.getChildDataset(newID));
 	        			populationsPanel.update();
@@ -803,12 +808,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 								AnalysisDataset source = populationsPanel.getDataset(selectedValue);
 
 								logc("Reapplying morphology...");
-								boolean ok = MorphologyAnalysis.reapplyProfiles(d.getCollection(), source.getCollection());
-								if(ok){
-									log("OK");
-								} else {
-									log("Error");
-								}
+								new MorphologyAnalysisAction(d, source);
 							}
 						} catch(Exception e1){
 							log("Error applying morphology: "+e1.getMessage());
@@ -829,26 +829,29 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	abstract class ProgressableAction implements PropertyChangeListener{
 
-		protected AnalysisDataset d = null;
-		protected List<AnalysisDataset> datasets;
+		protected AnalysisDataset dataset = null; // the dataset being worked on
 		protected JProgressBar progressBar = null;
 		protected String errorMessage = null;
 		protected SwingWorker<Boolean, Integer> worker;
+		protected int downFlag = 0; // store flags to tell the action what to do after finishing
 		
-		public ProgressableAction(String barMessage, String errorMessage){
-			this.progressBar = new JProgressBar(0, 100);
+		public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage){
+			
+			this.errorMessage 	= errorMessage;
+			this.dataset 		= dataset;
+			this.progressBar 	= new JProgressBar(0, 100);
 			this.progressBar.setString(barMessage);
 			this.progressBar.setStringPainted(true);
-			this.errorMessage = errorMessage;
-			this.datasets = populationsPanel.getSelectedDatasets();
-
-			if(datasets.size()==1){
-				d = datasets.get(0);
-			}
+			
 			logPanel.addProgressBar(this.progressBar);
 			contentPane.revalidate();
 			contentPane.repaint();
 
+		}
+		
+		public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, int flag){
+			this(dataset, barMessage, errorMessage);
+			this.downFlag = flag;
 		}
 		
 		/**
@@ -906,9 +909,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			populationsPanel.update(); // get any new populations
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-			list.add(d);
-			PopulationExporter.saveAnalysisDataset(d);
-			populationsPanel.selectDataset(d);
+			list.add(dataset);
+			PopulationExporter.saveAnalysisDataset(dataset);
+			populationsPanel.selectDataset(dataset);
 			updatePanels(list); // update with the current population
 			
 		}
@@ -942,11 +945,11 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	class AddTailStainAction extends ProgressableAction {
 
-		public AddTailStainAction() {
-			super("Tail detection", "Error in tail detection");
+		public AddTailStainAction(AnalysisDataset dataset) {
+			super(dataset, "Tail detection", "Error in tail detection");
 			try{
 				
-				TailDetectionSettingsWindow analysisSetup = new TailDetectionSettingsWindow(d.getAnalysisOptions());
+				TailDetectionSettingsWindow analysisSetup = new TailDetectionSettingsWindow(dataset.getAnalysisOptions());
 				
 				final int channel = analysisSetup.getChannel();
 				
@@ -969,9 +972,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					return; // check folder is ok
 				}
 
-				worker = new TubulinTailDetector(d, folder, channel);
+				worker = new TubulinTailDetector(dataset, folder, channel);
 				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Tail detection:"+d.getName());
+				this.setProgressMessage("Tail detection:"+dataset.getName());
 				worker.execute();
 			} catch(Exception e){
 				this.cancel();
@@ -989,21 +992,23 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	class AddNuclearSignalAction extends ProgressableAction {
 		
-		public AddNuclearSignalAction() {
-			super("Signal detection", "Error in signal detection");
+		private int signalGroup = 0;
+		
+		public AddNuclearSignalAction(AnalysisDataset dataset) {
+			super(dataset, "Signal detection", "Error in signal detection");
 
 			try{
 				// add dialog for non-default detection options
-				SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(d.getAnalysisOptions());
+				SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(dataset.getAnalysisOptions());
 				
 				final int channel = analysisSetup.getChannel();
 				final String signalGroupName = analysisSetup.getSignalGroupName();
 
 
-				NuclearSignalOptions options = d.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
+				NuclearSignalOptions options = dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
 
 				// the new signal group is one more than the highest in the collection
-				int newSignalGroup = d.getHighestSignalGroup()+1;
+				int newSignalGroup = dataset.getHighestSignalGroup()+1;
 				
 				// get the folder of images
 				DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
@@ -1025,10 +1030,11 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					return; // check folder is ok
 				}
 				
-				d.setSignalGroupName(newSignalGroup, signalGroupName);
+				dataset.setSignalGroupName(newSignalGroup, signalGroupName);
+				this.signalGroup = newSignalGroup;
 				
 
-				worker = new SignalDetector(d, folder, channel, options, newSignalGroup, signalGroupName);
+				worker = new SignalDetector(dataset, folder, channel, options, newSignalGroup, signalGroupName);
 				this.setProgressMessage("Signal detection: "+signalGroupName);
 				worker.addPropertyChangeListener(this);
 				worker.execute();
@@ -1037,13 +1043,94 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				
 			} catch (Exception e){
 				this.cancel();
-				IJ.log("Error in signal analysis: "+e.getMessage());
+				log("Error in signal analysis: "+e.getMessage());
 				for(StackTraceElement e1 : e.getStackTrace()){
-					IJ.log(e1.toString());
+					log(e1.toString());
 				}
 			}
 			
-		}		
+		}	
+		
+		@Override
+		public void finished(){
+			// divide population into clusters with and without signals
+			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
+
+			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			for(CellCollection collection : signalPopulations){
+				
+				processSubPopulation(collection);
+				list.add(dataset.getChildDataset(collection.getID()));
+			}
+			// we have morphology analysis to carry out, so don't use the super finished
+			// use the same segmentation from the initial analysis
+			new MorphologyAnalysisAction(list, dataset);
+			cancel();
+		}
+
+		/**
+		 * Create child datasets for signal populations
+		 * and perform basic analyses
+		 * @param collection
+		 */
+		private void processSubPopulation(CellCollection collection){
+
+			AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
+			subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
+
+			log("Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
+
+			dataset.addChildDataset(subDataset);
+		}
+
+		/*
+	    Given a complete collection of nuclei, split it into up to 4 populations;
+	      nuclei with red signals, with green signals, without red signals and without green signals
+	    Only include the 'without' populations if there is a 'with' population.
+		 */
+		private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
+
+			List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
+			log("Dividing population by signals...");
+			try{
+
+				List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
+				if(!list.isEmpty()){
+					log("Found nuclei with signals in group "+signalGroup);
+					CellCollection listCollection = new CellCollection(r.getFolder(), 
+							r.getOutputFolderName(), 
+							"Signals_in_group_"+signalGroup, 
+							r.getDebugFile(), 
+							r.getNucleusClass());
+
+					for(Cell c : list){
+						listCollection.addCell( c );
+					}
+					signalPopulations.add(listCollection);
+
+					List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
+					if(!notList.isEmpty()){
+						log("Found nuclei without signals in group "+signalGroup);
+						CellCollection notListCollection = new CellCollection(r.getFolder(), 
+								r.getOutputFolderName(), 
+								"No_signals_in_group_"+signalGroup, 
+								r.getDebugFile(), 
+								r.getNucleusClass());
+
+						for(Cell c : notList){
+							notListCollection.addCell( c );
+						}
+						signalPopulations.add(notListCollection);
+					}
+
+				}
+
+			} catch(Exception e){
+				log("Cannot create collection: "+e.getMessage());
+			}
+
+			return signalPopulations;
+		}
 	}
 	
 	/**
@@ -1052,41 +1139,18 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	public class RefoldNucleusAction extends ProgressableAction {
 
 		/**
-		 * Refold the currently selected dataset
+		 * Refold the given selected dataset
 		 */
-		public RefoldNucleusAction() {
-			super("Refolding", "Error refolding nucleus");
+		public RefoldNucleusAction(AnalysisDataset dataset) {
+			super(dataset, "Refolding", "Error refolding nucleus");
 
 			try{
 
-				worker = new CurveRefolder(d.getCollection(), 
+				worker = new CurveRefolder(dataset.getCollection(), 
 						"Fast");
 
 				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Refolding: "+d.getName());
-				worker.execute();
-
-			} catch(Exception e1){
-				this.cancel();
-				log("Error refolding nucleus");
-			}
-		}
-		
-		/**
-		 * Refold the given dataset
-		 * @param dataset
-		 */
-		public RefoldNucleusAction(AnalysisDataset dataset){
-			super("Refolding", "Error refolding nucleus");
-			this.d = dataset;
-			
-			try{
-
-				worker = new CurveRefolder(d.getCollection(), 
-						"Fast");
-
-				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Refolding: "+d.getName());
+				this.setProgressMessage("Refolding: "+dataset.getName());
 				worker.execute();
 
 			} catch(Exception e1){
@@ -1098,8 +1162,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		@Override
 		public void finished(){
 			super.finished();
-			d.getAnalysisOptions().setRefoldNucleus(true);
-			d.getAnalysisOptions().setRefoldMode("Fast");
+			dataset.getAnalysisOptions().setRefoldNucleus(true);
+			dataset.getAnalysisOptions().setRefoldMode("Fast");
 		}
 
 	}
@@ -1110,8 +1174,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	class ShellAnalysisAction extends ProgressableAction {
 				
-		public ShellAnalysisAction() {
-			super("Shell analysis", "Error in shell analysis");
+		public ShellAnalysisAction(AnalysisDataset dataset) {
+			super(dataset, "Shell analysis", "Error in shell analysis");
 			
 			String shellString = JOptionPane.showInputDialog(MainWindow.this, "Number of shells", 5);
 			
@@ -1124,7 +1188,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				return;
 			}
 			
-			worker = new ShellAnalysis(d,shellCount);
+			worker = new ShellAnalysis(dataset,shellCount);
 
 			worker.addPropertyChangeListener(this);
 			worker.execute();	
@@ -1138,15 +1202,15 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	class ClusterAnalysisAction extends ProgressableAction {
 				
-		public ClusterAnalysisAction() {
-			super("Cluster analysis", "Error in cluster analysis");
+		public ClusterAnalysisAction(AnalysisDataset dataset) {
+			super(dataset, "Cluster analysis", "Error in cluster analysis");
 			
 			ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
 			Map<String, Object> options = clusterSetup.getOptions();
 
 			if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
-				worker = new NucleusClusterer(  (Integer) options.get("type"), d.getCollection() );
+				worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
 				((NucleusClusterer) worker).setClusteringOptions(options);
 				
 				worker.addPropertyChangeListener(this);
@@ -1169,24 +1233,21 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			log("Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
-			d.setClusterTree(((NucleusClusterer) worker).getNewickTree());
+			dataset.setClusterTree(((NucleusClusterer) worker).getNewickTree());
 
 			for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 				CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
+				
+				// attach the clusters to their parent collection
+				dataset.addCluster(c);
+				
 				log("Cluster "+cluster+":");
+				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 
 				logc("Reapplying morphology...");
-				boolean ok = MorphologyAnalysis.reapplyProfiles(c, d.getCollection());
-				if(ok){
-					log("OK");
-				} else {
-					log("Error");
-				}
+				new MorphologyAnalysisAction(clusterDataset, dataset);
 
-				// attach the clusters to their parent collection
-				d.addCluster(c);
-
-				populationsPanel.addDataset(d.getChildDataset(c.getID()));
+				populationsPanel.addDataset(clusterDataset);
 
 			}
 			populationsPanel.update();
@@ -1194,6 +1255,161 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 		}
 	}
+	
+	
+    public class MorphologyAnalysisAction extends ProgressableAction {
+
+    	private int mode = MorphologyAnalysis.MODE_NEW;
+    	private List<AnalysisDataset> processList = null;
+    	private AnalysisDataset source = null;
+    	
+                    
+    	/**
+    	 * Carry out a morphology analysis on a dataset, giving the mode
+    	 * @param dataset the dataset to work on 
+    	 * @param mode the type of morphology analysis to carry out
+    	 * @param downFlag the next analyses to perform
+    	 */
+    	public MorphologyAnalysisAction(AnalysisDataset dataset, int mode, int downFlag){
+    		super(dataset, "Morphology analysis", "Error in analysis", downFlag);
+    		this.mode = mode;
+
+    		String message = null;
+    		switch (this.mode) {
+    		case MorphologyAnalysis.MODE_COPY:  message = "Copying morphology";
+    		break;
+
+    		case MorphologyAnalysis.MODE_REFRESH: message = "Refreshing morphology";
+    		break;
+
+    		default: message = "Morphology analysis";
+    		break;  
+    		}
+
+    		this.setProgressMessage(message);
+    		this.cooldown();
+
+    		worker = new MorphologyAnalysis(this.dataset.getCollection(), mode);
+    		worker.addPropertyChangeListener(this);
+    		worker.execute();
+    	}
+    	
+    	/**
+    	 * Carry out a morphology analysis on a dataset, giving the mode
+    	 * @param list the datasets to work on 
+    	 * @param mode the type of morphology analysis to carry out
+    	 * @param downFlag the next analyses to perform
+    	 */
+    	public MorphologyAnalysisAction(List<AnalysisDataset> list, int mode, int downFlag){
+    		this(list.get(0), mode, downFlag); // take the first entry
+    		this.processList = list;
+    		processList.remove(0); // remove the first entry
+    	}
+      
+
+    	/**
+    	 * Copy the morphology information from the source dataset to the dataset
+    	 * @param dataset the target
+    	 * @param source the source
+    	 */
+    	public MorphologyAnalysisAction(AnalysisDataset dataset, AnalysisDataset source){
+    		super(dataset, "Copying morphology to "+dataset.getName(), "Error in analysis");
+
+    		this.mode = MorphologyAnalysis.MODE_COPY;
+    		this.source = source;
+    		// always copy when a source is given
+    		worker = new MorphologyAnalysis(dataset.getCollection(), source.getCollection());
+    		worker.addPropertyChangeListener(this);
+    		worker.execute();
+    	}
+    	
+    	/**
+    	 * Copy the morphology information from the source dataset to each dataset in a list
+    	 * @param list
+    	 * @param source
+    	 */
+    	public MorphologyAnalysisAction(List<AnalysisDataset> list, AnalysisDataset source){
+    		this(list.get(0), source); // take the first entry
+    		this.processList = list;
+    		processList.remove(0); // remove the first entry
+    	}
+      
+    	@Override
+    	public void finished(){
+
+
+    		if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
+    			logc("Exporting stats...");
+    			boolean ok = StatsExporter.run(dataset.getCollection());
+    			if(ok){
+    				log("OK");
+    			} else {
+    				log("Error");
+    			}
+    			downFlag &= ~STATS_EXPORT;
+    		}
+
+    		// annotate the nuclei in the population
+    		if(  (downFlag & NUCLEUS_ANNOTATE) == NUCLEUS_ANNOTATE){
+    			logc("Annotating nuclei...");
+    			boolean ok = NucleusAnnotator.run(dataset.getCollection());
+    			if(ok){
+    				log("OK");
+    			} else {
+    				log("Error");
+    			}
+    			downFlag &= ~NUCLEUS_ANNOTATE;
+    		}
+
+    		// make a composite image of all nuclei in the collection
+    		if(  (downFlag & EXPORT_COMPOSITE) == EXPORT_COMPOSITE){
+    			logc("Exporting composite...");
+    			boolean ok = CompositeExporter.run(dataset.getCollection());
+    			if(ok){
+    				log("OK");
+    			} else {
+    				log("Error");
+    			}
+    			downFlag &= ~EXPORT_COMPOSITE;
+    		}
+
+    		if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
+    			new RefoldNucleusAction(dataset);
+    			downFlag &= ~CURVE_REFOLD;
+    		}
+
+    		if(  (downFlag & MORPHOLOGY_ANALYSIS) == MORPHOLOGY_ANALYSIS){
+    			populationsPanel.addDataset(dataset);				
+
+    			for(AnalysisDataset child : dataset.getChildDatasets()){
+    				populationsPanel.addDataset(child);
+    			}
+
+    			PopulationExporter.saveAnalysisDataset(dataset);
+
+    			setStatus("New analysis complete: "
+    					+populationsPanel.getDatasetCount()
+    					+" populations ready to view");
+    			downFlag &= ~MORPHOLOGY_ANALYSIS;
+    		}
+    		
+    		// if no list was provided, or no more entries remain,
+    		// call the finish
+    		if(processList.isEmpty() || processList==null){
+    			super.finished();
+    		} else {
+    			// otherwise analyse the next item in the list
+    			cancel();
+    			if(mode == MorphologyAnalysis.MODE_COPY){
+    				new MorphologyAnalysisAction(processList, source);
+    			} else {
+    				new MorphologyAnalysisAction(processList, mode, downFlag);
+    			}
+    		}
+    		
+    	}
+    }
+
 	
 	
 	/**
@@ -1206,8 +1422,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		private Date startTime;
 		private String outputFolderName;
 		
+		public static final int NEW_ANALYSIS = 0;
+		
 		public NewMorphologyAnalysisAction() {
-			super("Nucleus detection", "Error in analysis");
+			super(null, "Nucleus detection", "Error in analysis");
 									
 			setStatus("New analysis in progress");
 			
@@ -1255,27 +1473,23 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				log("No datasets returned");
 				this.cancel();
 			} else {
-				// new style datasets
-				for(AnalysisDataset d : datasets){
-					
-					populationsPanel.addDataset(d);				
-					
-					for(AnalysisDataset child : d.getChildDatasets()){
-						populationsPanel.addDataset(child);
-					}
-					
-					PopulationExporter.saveAnalysisDataset(d);
-
+							
+				int flag = 0;
+				flag |= MORPHOLOGY_ANALYSIS;
+				flag |= STATS_EXPORT;
+				flag |= NUCLEUS_ANNOTATE;
+				flag |= EXPORT_COMPOSITE;
+				
+				if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
+					flag |= CURVE_REFOLD;
 				}
 				
-				this.d = datasets.get(0); // avoid nulls
-								
-				setStatus("New analysis complete: "
-										+populationsPanel.getDatasetCount()
-										+" populations ready to view");
+				// begin a recursive morphology analysis
+				new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag);
 				
-				log("--------\nAll done!\n--------");	
-				super.finished();
+				// do not call super finished, because there is no dataset for this action
+				// allow the morphology action to update the panels
+				cancel();
 			}
 		}
 		
@@ -1287,10 +1501,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	class MergeCollectionAction extends ProgressableAction {
 						
-		public MergeCollectionAction() {
-			super("Merging", "Error merging");
+		public MergeCollectionAction(List<AnalysisDataset> datasets) {
+			super(null, "Merging", "Error merging");
 			
-			List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
+//			List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 			
 			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE);
 
@@ -1309,13 +1523,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				// new style datasets
 				for(AnalysisDataset d : datasets){
 					
-					boolean ok = MorphologyAnalysis.run(d.getCollection());
-					logc("Running new mophology...");
-					if(ok){
-						log("OK");
-					} else {
-						log("Error");
-					}
+					int flag = MORPHOLOGY_ANALYSIS;
+					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
+
 					
 					populationsPanel.addDataset(d);				
 					
@@ -1326,7 +1536,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 				}
 				
-				this.d = datasets.get(0); // avoid nulls
+				this.dataset = datasets.get(0); // avoid nulls
 								
 				setStatus("Merge complete: "
 								+populationsPanel.getDatasetCount()
@@ -1337,6 +1547,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			}
 		}
 	}
+	
 
 
 	
@@ -1344,21 +1555,21 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
 		if(event.type().equals("RefoldNucleusFired")){
-			new RefoldNucleusAction();
+			new RefoldNucleusAction(populationsPanel.getSelectedDatasets().get(0));
 		}
 		
 		
 		if(event.type().equals("RunShellAnalysis")){
 			log("Shell analysis selected");
-			new ShellAnalysisAction();
+			new ShellAnalysisAction(populationsPanel.getSelectedDatasets().get(0));
 		}
 		
 		if(event.type().equals("NewClusterAnalysis")){
-			new ClusterAnalysisAction();
+			new ClusterAnalysisAction(populationsPanel.getSelectedDatasets().get(0));
 		}
 		
 		if(event.type().equals("MergeCollectionAction")){
-			new MergeCollectionAction();
+			new MergeCollectionAction(populationsPanel.getSelectedDatasets());
 		}
 		
 		if(event.type().equals("SplitCollectionAction")){
@@ -1386,15 +1597,15 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		}
 		
 		if(event.type().equals("AddTailStainAction")){
-			new AddTailStainAction();
+			new AddTailStainAction(populationsPanel.getSelectedDatasets().get(0));
 		}
 		
 		if(event.type().equals("AddNuclearSignalAction")){
-			new AddNuclearSignalAction();
+			new AddNuclearSignalAction(populationsPanel.getSelectedDatasets().get(0));
 		}
 		
 		if(event.type().equals("NewShellAnalysisAction")){
-			new ShellAnalysisAction();
+			new ShellAnalysisAction(populationsPanel.getSelectedDatasets().get(0));
 		}
 		
 		if(event.type().equals("UpdatePanels")){
@@ -1439,6 +1650,35 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			}
 
 		}
+		
+		if(event.type().startsWith("MorphologyRefresh_")){
+			String s = event.type().replace("MorphologyRefresh_", "");
+			UUID id = UUID.fromString(s);
+			AnalysisDataset d = populationsPanel.getDataset(id);
+			new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_REFRESH, 0);
+		}
+		
+		if(event.type().startsWith("MorphologyCopy_")){
+			String s = event.type().replace("MorphologyCopy_", "");
+			String[] array = s.split("|");
+			UUID targetID = UUID.fromString(array[0]);
+			UUID sourceID = UUID.fromString(array[1]);
+			
+			AnalysisDataset target = populationsPanel.getDataset(targetID);
+			AnalysisDataset source = populationsPanel.getDataset(sourceID);
+			
+			new MorphologyAnalysisAction(target, source);
+		}
+		
+		if(event.type().startsWith("MorphologyNew_")){
+			String s = event.type().replace("MorphologyNew_", "");
+			UUID id = UUID.fromString(s);
+			AnalysisDataset d = populationsPanel.getDataset(id);
+			int flag = 0;
+			flag |= MORPHOLOGY_ANALYSIS;
+			new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
+		}
+		
 		
 		
 	}	

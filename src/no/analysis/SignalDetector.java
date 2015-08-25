@@ -133,29 +133,23 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 					
 					
 				} catch(Exception e){
-					logger.log("Error detecting signal: "+e.getMessage(), Logger.ERROR);
-					for(StackTraceElement el : e.getStackTrace()){
-						logger.log(el.toString(), Logger.STACK);
-					}
+					logger.error("Error detecting signal", e);
 				}
 				
 				progress++;
 				publish(progress);
 			}
 			
-			// divide population into clusters with and without signals
-			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
-			
-			for(CellCollection collection : signalPopulations){
-				processSubPopulation(collection);
-			}
+//			// divide population into clusters with and without signals
+//			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
+//			
+//			for(CellCollection collection : signalPopulations){
+//				processSubPopulation(collection);
+//			}
 			
 			
 		} catch (Exception e){
-			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in signal detection", e);
 			return false;
 		}
 
@@ -173,85 +167,79 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in signal detection", e);
 		} catch (ExecutionException e) {
-			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in signal detection", e);
 		}
 
 	} 
 	
-	/**
-	 * Create child datasets for signal populations
-	 * and perform basic analyses
-	 * @param collection
-	 */
-	private void processSubPopulation(CellCollection collection){
-
-		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
-		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
-
-		logger.log("Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
-
-		// use the same segmentation from the initial analysis
-		MorphologyAnalysis.reapplyProfiles(collection, dataset.getCollection());
-
-		dataset.addChildDataset(subDataset);
-	}
-	
-	/*
-    Given a complete collection of nuclei, split it into up to 4 populations;
-      nuclei with red signals, with green signals, without red signals and without green signals
-    Only include the 'without' populations if there is a 'with' population.
-	 */
-	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
-
-		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
-		logger.log("Dividing population by signals...");
-		try{
-
-			List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
-			if(!list.isEmpty()){
-				logger.log("Found nuclei with signals in group "+signalGroup);
-				CellCollection listCollection = new CellCollection(r.getFolder(), 
-						r.getOutputFolderName(), 
-						"Signals_in_group_"+signalGroup, 
-						r.getDebugFile(), 
-						r.getNucleusClass());
-
-				for(Cell c : list){
-					listCollection.addCell( c );
-				}
-				signalPopulations.add(listCollection);
-
-				List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
-				if(!notList.isEmpty()){
-					logger.log("Found nuclei without signals in group "+signalGroup);
-					CellCollection notListCollection = new CellCollection(r.getFolder(), 
-							r.getOutputFolderName(), 
-							"No_signals_in_group_"+signalGroup, 
-							r.getDebugFile(), 
-							r.getNucleusClass());
-
-					for(Cell c : notList){
-						notListCollection.addCell( c );
-					}
-					signalPopulations.add(notListCollection);
-				}
-
-			}
-
-		} catch(Exception e){
-			logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
-		}
-
-		return signalPopulations;
-	}
+//	/**
+//	 * Create child datasets for signal populations
+//	 * and perform basic analyses
+//	 * @param collection
+//	 */
+//	private void processSubPopulation(CellCollection collection){
+//
+//		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
+//		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
+//
+//		logger.log("Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
+//
+//		// use the same segmentation from the initial analysis
+//		MorphologyAnalysis.reapplyProfiles(collection, dataset.getCollection());
+//
+//		dataset.addChildDataset(subDataset);
+//	}
+//	
+//	/*
+//    Given a complete collection of nuclei, split it into up to 4 populations;
+//      nuclei with red signals, with green signals, without red signals and without green signals
+//    Only include the 'without' populations if there is a 'with' population.
+//	 */
+//	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
+//
+//		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
+//		logger.log("Dividing population by signals...");
+//		try{
+//
+//			List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
+//			if(!list.isEmpty()){
+//				logger.log("Found nuclei with signals in group "+signalGroup);
+//				CellCollection listCollection = new CellCollection(r.getFolder(), 
+//						r.getOutputFolderName(), 
+//						"Signals_in_group_"+signalGroup, 
+//						r.getDebugFile(), 
+//						r.getNucleusClass());
+//
+//				for(Cell c : list){
+//					listCollection.addCell( c );
+//				}
+//				signalPopulations.add(listCollection);
+//
+//				List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
+//				if(!notList.isEmpty()){
+//					logger.log("Found nuclei without signals in group "+signalGroup);
+//					CellCollection notListCollection = new CellCollection(r.getFolder(), 
+//							r.getOutputFolderName(), 
+//							"No_signals_in_group_"+signalGroup, 
+//							r.getDebugFile(), 
+//							r.getNucleusClass());
+//
+//					for(Cell c : notList){
+//						notListCollection.addCell( c );
+//					}
+//					signalPopulations.add(notListCollection);
+//				}
+//
+//			}
+//
+//		} catch(Exception e){
+//			logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
+//		}
+//
+//		return signalPopulations;
+//	}
 	
 	
 	/**

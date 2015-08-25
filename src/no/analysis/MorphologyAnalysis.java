@@ -4,6 +4,9 @@ import ij.IJ;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.SwingWorker;
 
 import utility.Constants;
 import utility.Logger;
@@ -23,26 +26,93 @@ import no.nuclei.sperm.RodentSpermNucleus;
  * generates the median profiles, segments them, and applies the segments to
  * nuclei.
  */
-public class MorphologyAnalysis {
+public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 	
 	private static Logger logger;
-	
-	public static boolean run(CellCollection collection){
+    public static final int MODE_NEW     = 0;
+    public static final int MODE_COPY    = 1;
+    public static final int MODE_REFRESH = 2;
+    
+    private int totalNuclei = 0;
+    
+    private CellCollection collection; // the collection to work on
+    private CellCollection sourceCollection = null; // a collection to take segments from
+    private int mode = MODE_NEW; 				// the analysis mode
 
-		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
+    
+    /*
+      //////////////////////////////////////////////////
+      Constructors
+      //////////////////////////////////////////////////
+    */
+    
+    public MorphologyAnalysis(CellCollection collection, int mode){
+    	this.collection = collection;
+    	this.mode = mode;
+    }
+    
+    public MorphologyAnalysis(CellCollection collection, CellCollection source){
+    	this.collection = collection;
+    	this.mode = MODE_COPY;
+    	this.sourceCollection = source;
+    }
+    
+    /*
+      //////////////////////////////////////////////////
+      SwingWorker methods
+      //////////////////////////////////////////////////
+     */
+    
+    @Override
+    protected void process( List<Integer> integers ) {
+        int amount = integers.get( integers.size() - 1 );
+        int percent = (int) ( (double) amount / (double) totalNuclei * 100);
+        setProgress(percent); // the integer representation of the percent
+    }
+    
+    @Override
+    protected Boolean doInBackground() throws Exception {
+    	logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
+    	
 		try{
+//			IJ.log("Mode: "+mode);
+			// mode selection
+			if(mode == MODE_NEW){
 
-			logger.log("Beginning core morphology analysis");
+				logger.log("Beginning core morphology analysis");
 
-			String pointType = collection.getReferencePoint();
+				// we run the profiler and segmenter on each nucleus - may need to double
+				totalNuclei = collection.getNucleusCount(); 
 
-			// profile the collection from head/tip, then apply to tail
-			runProfiler(collection, pointType);
+				String pointType = collection.getReferencePoint();
 
-			// segment the profiles from head
-			runSegmentation(collection, pointType);
+				// profile the collection from head/tip, then apply to tail
+				runProfiler(collection, pointType);
 
-			logger.log("Core morphology analysis complete");
+				// segment the profiles from head
+				runSegmentation(collection, pointType);
+
+				logger.log("Core morphology analysis complete");
+			}
+			
+			if(mode == MODE_REFRESH){
+
+				logger.log("Refreshing morphology");
+				refresh(collection);
+				logger.log("Refresh complete");
+			}
+			
+			if(mode == MODE_COPY){
+//				IJ.log("Copying");
+				if(sourceCollection==null){
+					logger.log("Cannot copy: source collection is null");
+					return false;
+				}
+				totalNuclei = collection.getNucleusCount(); 
+				logger.log("Copying segmentation pattern");
+				reapplyProfiles(collection, sourceCollection);
+				logger.log("Copying complete");
+			}
 			return true;
 			
 		} catch(Exception e){
@@ -58,6 +128,73 @@ public class MorphologyAnalysis {
 		}
 
 	}
+    
+    @Override
+    public void done() {
+
+        try {
+            if(this.get()){
+                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
+
+            } else {
+                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+            }
+        } catch (InterruptedException e) {
+        	logger.error("Error in morphology application", e);
+        } catch (ExecutionException e) {
+            logger.error("Error in morphology application", e);
+            
+            logger.log("Collection keys:", Logger.ERROR);
+            logger.log(collection.getProfileCollection().printKeys(), Logger.ERROR);
+            
+            logger.log("FrankenCollection keys:", Logger.ERROR);
+            logger.log(collection.getFrankenCollection().printKeys(), Logger.ERROR);
+        }
+
+    } 
+
+    /*
+    //////////////////////////////////////////////////
+    Analysis methods
+    //////////////////////////////////////////////////
+   */
+    	
+	/**
+	 * The old run function. Copy for doInBackground and leave intact
+	 * @param collection
+	 * @return
+	 */
+//	public static boolean run(CellCollection collection){
+//
+//		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
+//		try{
+//
+//			logger.log("Beginning core morphology analysis");
+//
+//			String pointType = collection.getReferencePoint();
+//
+//			// profile the collection from head/tip, then apply to tail
+//			runProfiler(collection, pointType);
+//
+//			// segment the profiles from head
+//			runSegmentation(collection, pointType);
+//
+//			logger.log("Core morphology analysis complete");
+//			return true;
+//			
+//		} catch(Exception e){
+//			
+//			logger.error("Error in morphology analysis", e);
+//			
+//			logger.log("Collection keys:", Logger.ERROR);
+//			logger.log(collection.getProfileCollection().printKeys(), Logger.ERROR);
+//			
+//			logger.log("FrankenCollection keys:", Logger.ERROR);
+//			logger.log(collection.getFrankenCollection().printKeys(), Logger.ERROR);
+//			return false;
+//		}
+//
+//	}
 
 	/**
 	 * Calculaate the median profile of the colleciton, and generate the
@@ -107,7 +244,7 @@ public class MorphologyAnalysis {
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
-	public static boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection){
+	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection){
 		
 		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
 		logger.log("Applying existing segmentation profile to population...");
@@ -163,7 +300,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @return
 	 */
-	public static boolean refresh(CellCollection collection){
+	public boolean refresh(CellCollection collection){
 		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
 		logger.log("Refreshing mophology");
 		try{
@@ -202,10 +339,14 @@ public class MorphologyAnalysis {
 			SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType), logger.getLogfile());
 			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
+			int count = 0;
 			for(Nucleus n : collection.getNuclei()){ 
 				// recombine the segments at the lengths of the median profile segments
 				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
 				frankenProfiles.add(recombinedProfile);
+				count++;
+				publish(count);
+				
 			}
 
 			// add all the nucleus frankenprofiles to the frankencollection
@@ -246,7 +387,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void runSegmentation(CellCollection collection, String pointType){
+	private void runSegmentation(CellCollection collection, String pointType){
 		logger.log("Beginning segmentation...");
 		try{	
 			
@@ -386,7 +527,7 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void reviseSegments(CellCollection collection, String pointType){
+	private void reviseSegments(CellCollection collection, String pointType){
 		logger.log("Refining segment assignments...");
 		try{
 
@@ -416,7 +557,7 @@ public class MorphologyAnalysis {
 			SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType), logger.getLogfile());
 			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
-			int count = 0;
+			int count = 1;
 			for(Nucleus n : collection.getNuclei()){ 
 				logger.log("Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.size()+")");
 				fitter.fit(n, pc);
@@ -425,6 +566,7 @@ public class MorphologyAnalysis {
 				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
 				frankenProfiles.add(recombinedProfile);
 				count++;
+				publish(count); // publish the progress to gui
 			}
 
 			// add all the nucleus frankenprofiles to the frankencollection

@@ -223,60 +223,60 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			mw.log(spacerString);
 
 			// core analysis - align profiles and segment
-			mw.logc("Running morphology analysis...");
-			boolean ok = MorphologyAnalysis.run(r);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
-
-			// export the stats files
-			mw.logc("Exporting stats...");
-			ok = StatsExporter.run(r);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
-
-			// annotate the nuclei in the population
-			mw.logc("Annotating nuclei...");
-			ok = NucleusAnnotator.run(r);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
-
-
-			// make a composite image of all nuclei in the collection
-			mw.logc("Exporting composite...");
-			ok = CompositeExporter.run(r);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
-
-			// refold the median consensus nucleus
-			if(analysisOptions.refoldNucleus()){
-				mw.logc("Refolding profile...");
-				
-				 mw. new RefoldNucleusAction(dataset);
-
-			}
+//			mw.logc("Running morphology analysis...");
+//			boolean ok = MorphologyAnalysis.run(r);
+//			if(ok){
+//				mw.log("OK");
+//			} else {
+//				mw.log("Error");
+//			}
+//
+//			// export the stats files
+//			mw.logc("Exporting stats...");
+//			ok = StatsExporter.run(r);
+//			if(ok){
+//				mw.log("OK");
+//			} else {
+//				mw.log("Error");
+//			}
+//
+//			// annotate the nuclei in the population
+//			mw.logc("Annotating nuclei...");
+//			ok = NucleusAnnotator.run(r);
+//			if(ok){
+//				mw.log("OK");
+//			} else {
+//				mw.log("Error");
+//			}
+//
+//
+//			// make a composite image of all nuclei in the collection
+//			mw.logc("Exporting composite...");
+//			ok = CompositeExporter.run(r);
+//			if(ok){
+//				mw.log("OK");
+//			} else {
+//				mw.log("Error");
+//			}
+//
+//			// refold the median consensus nucleus
+//			if(analysisOptions.refoldNucleus()){
+//				mw.logc("Refolding profile...");
+//				
+//				 mw. new RefoldNucleusAction(dataset);
+//
+//			}
 
 			result.add(dataset);
 
-			// export the population to a save file for later
-			mw.logc("Saving to file...");
-			ok = PopulationExporter.saveAnalysisDataset(dataset);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
+//			// export the population to a save file for later
+//			mw.logc("Saving to file...");
+//			ok = PopulationExporter.saveAnalysisDataset(dataset);
+//			if(ok){
+//				mw.log("OK");
+//			} else {
+//				mw.log("Error");
+//			}
 
 		}
 		return result;

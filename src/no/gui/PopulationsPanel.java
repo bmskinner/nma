@@ -1,6 +1,5 @@
 package no.gui;
 
-import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -10,24 +9,19 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.BoxLayout;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultTreeSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -361,7 +355,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	/**
 	 * Add the given dataset to the main population list
 	 * Check that the name is valid, and update if needed
-	 * @param d the dataset to add
+	 * @param dataset the dataset to add
 	 */
 	public void addDataset(AnalysisDataset dataset){
 		dataset.setName(checkName(dataset.getName()));
@@ -625,14 +619,12 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
 			
 			List<Integer> selectedIndexes = new ArrayList<Integer>(0);
-
 			if (!lsm.isSelectionEmpty()) {
 				// Find out which indexes are selected.
 				int minIndex = lsm.getMinSelectionRow();
 				int maxIndex = lsm.getMaxSelectionRow();
 				for (int i = minIndex; i <= maxIndex; i++) {
 					if (lsm.isRowSelected(i)) {
-						
 
 						String key = (String) treeTable.getModel().getValueAt(i, 0); // row i, column 0
 						if(!key.equals("No populations")){
@@ -640,7 +632,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 							// get uuid from populationNames, then population via uuid from analysisDatasets
 							datasets.add(analysisDatasets.get(populationNames.get(key)));
 							selectedIndexes.add(i);
-							
 						}
 
 					}
@@ -650,7 +641,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
 
 				if(datasets.isEmpty()){
-					IJ.log("Error: list is empty");
 					populationPopup.disableAll();
 				} else {
 					

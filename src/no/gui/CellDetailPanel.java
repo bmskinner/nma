@@ -274,8 +274,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							Cell cell = activeDataset.getCollection().getCell(pathName);
 							activeDataset.getCollection().removeCell(cell);
 							try {
+								CellDetailPanel.this.fireSignalChangeEvent("MorphologyRefresh_"+activeDataset.getUUID().toString());
 //								CellDetailPanel.this.log("Refreshing dataset");
-								MorphologyAnalysis.refresh(activeDataset.getCollection());
+//								MorphologyAnalysis.refresh(activeDataset.getCollection());
 
 							} catch (Exception e1) {
 								log("Error deleting cell: "+e1.getMessage());
