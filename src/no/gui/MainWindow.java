@@ -1413,7 +1413,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	
 	
 	/**
-	 * Run a new shell analysis on the selected dataset
+	 * Run a new analysis
 	 */
 	class NewMorphologyAnalysisAction extends ProgressableAction {
 				
