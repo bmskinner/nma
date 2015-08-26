@@ -88,6 +88,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	
+	
+	// Flags to pass to ProgressableActions to determine the analyses
+	// to carry out in subsequently
 	private static final int ADD_POPULATION		 = 1;
 	private static final int STATS_EXPORT 		 = 2;
 	private static final int NUCLEUS_ANNOTATE	 = 4;
@@ -882,6 +885,15 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			removeProgressBar();
 		}
 		
+		/**
+		 * Use to manually remove the progress bar after an action is complete
+		 */
+		public void cleanup(){
+			if (this.worker.isDone() || this.worker.isCancelled()){
+				this.removeProgressBar();
+			}
+		}
+		
 		
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
@@ -1368,8 +1380,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     	@Override
     	public void finished(){
 
-//    		IJ.log("Finished morphology on "+dataset.getName());
-
     		if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
     			logc("Exporting stats...");
     			boolean ok = StatsExporter.run(dataset.getCollection());
@@ -1378,7 +1388,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			} else {
     				log("Error");
     			}
-//    			downFlag &= ~STATS_EXPORT;
     		}
 
     		// annotate the nuclei in the population
@@ -1390,7 +1399,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			} else {
     				log("Error");
     			}
-//    			downFlag &= ~NUCLEUS_ANNOTATE;
     		}
 
     		// make a composite image of all nuclei in the collection
@@ -1402,12 +1410,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			} else {
     				log("Error");
     			}
-//    			downFlag &= ~EXPORT_COMPOSITE;
     		}
 
     		if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
     			new RefoldNucleusAction(dataset);
-//    			downFlag &= ~CURVE_REFOLD;
     		}
 
     		if(  (downFlag & ADD_POPULATION) == ADD_POPULATION){
@@ -1417,13 +1423,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			for(AnalysisDataset child : dataset.getChildDatasets()){
     				populationsPanel.addDataset(child);
     			}
-
-//    			PopulationExporter.saveAnalysisDataset(dataset);
-
-//    			setStatus("Analysis complete: "
-//    					+populationsPanel.getDatasetCount()
-//    					+" populations ready to view");
-//    			downFlag &= ~MORPHOLOGY_ANALYSIS;
     		}
     		
     		if(  (downFlag & SAVE_DATASET) == SAVE_DATASET){
@@ -1434,11 +1433,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     		// if no list was provided, or no more entries remain,
     		// call the finish
     		if(processList.isEmpty() || processList==null){
-//    			IJ.log("Finished morphology list or no list");
+
     			super.finished();
     		} else {
     			// otherwise analyse the next item in the list
-//    			IJ.log("More items in list");
     			cancel();
     			if(mode == MorphologyAnalysis.MODE_COPY){
     				new MorphologyAnalysisAction(processList, source, downFlag);

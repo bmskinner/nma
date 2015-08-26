@@ -193,14 +193,15 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	 */
 	public void offset(double xOffset, double yOffset){
 
+		// get the existing centre of mass
 		XYPoint centreOfMass = this.getCentreOfMass();
 
-		// get the difference between the x and y positions 
-		// of the points as offsets to apply
-		xOffset = xOffset - centreOfMass.getX();
-		yOffset = yOffset - centreOfMass.getY();
-		
-		XYPoint newCentreOfMass = new XYPoint(xOffset, yOffset);
+		// find the position of the centre of mass after 
+		// adding the offsets
+		double newX =  centreOfMass.getX() + xOffset;
+		double newY =  centreOfMass.getY() + yOffset;
+
+		XYPoint newCentreOfMass = new XYPoint(newX, newY);
 
 		// update the positions
 		this.moveCentreOfMass(newCentreOfMass);
