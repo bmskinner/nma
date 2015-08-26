@@ -68,6 +68,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 			model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
 		}
 		tableAnalysisParamters.setModel(model);
+		tableAnalysisParamters.createDefaultColumnsFromModel();
 	}
 	
 	
@@ -110,6 +111,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 		panel.setLayout(new BorderLayout(0, 0));
 
 		tableAnalysisParamters = new JTable();
+		tableAnalysisParamters.setAutoCreateColumnsFromModel(false);
 		tableAnalysisParamters.setModel(NucleusTableDatasetCreator.createAnalysisParametersTable(null));
 		tableAnalysisParamters.setEnabled(false);
 		panel.add(tableAnalysisParamters, BorderLayout.CENTER);

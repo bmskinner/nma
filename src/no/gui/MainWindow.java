@@ -1420,9 +1420,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 //    			PopulationExporter.saveAnalysisDataset(dataset);
 
-    			setStatus("Analysis complete: "
-    					+populationsPanel.getDatasetCount()
-    					+" populations ready to view");
+//    			setStatus("Analysis complete: "
+//    					+populationsPanel.getDatasetCount()
+//    					+" populations ready to view");
 //    			downFlag &= ~MORPHOLOGY_ANALYSIS;
     		}
     		

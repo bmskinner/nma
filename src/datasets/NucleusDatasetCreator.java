@@ -1147,7 +1147,7 @@ public class NucleusDatasetCreator {
 					rowData.add(collection.getSignalGroups().size());
 	
 					for(int signalGroup : collection.getSignalGroups()){
-						if(collection.getSignalCount(signalGroup)>0){
+						if(collection.hasSignals(signalGroup)){
 							rowData.add("");
 							rowData.add(signalGroup);
 							rowData.add(collection.getSignalGroupName(signalGroup));

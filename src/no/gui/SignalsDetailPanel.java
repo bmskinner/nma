@@ -1,6 +1,8 @@
 package no.gui;
 
 
+import ij.IJ;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -214,6 +216,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		tableModel.addColumn("");
     		tableModel.addColumn("");
     		statsTable = new JTable(); // table  for basic stats
+    		statsTable.setAutoCreateColumnsFromModel(false);
     		statsTable.setModel(tableModel);
     		statsTable.setEnabled(false);
     		
@@ -353,13 +356,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     				}
     			}
     		}
-//    		try{
-////    			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
-////    			statsTable.setModel(model);
-//    		} catch (Exception e){
-//    			log("Error updating signal stats: "+e.getMessage());
-//    		}
-
+    		statsTable.createDefaultColumnsFromModel();
     	}
     	
     	private void updateCheckboxPanel(List<AnalysisDataset> list){
@@ -483,6 +480,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		this.setLayout(new BorderLayout());
 
     		table  = new JTable(new DefaultTableModel());
+    		table.setAutoCreateColumnsFromModel(false);
     		table.setEnabled(false);
     		scrollPane = new JScrollPane(table);
     		this.add(scrollPane, BorderLayout.CENTER);
@@ -493,16 +491,18 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	 * @param list the datasets
     	 */
     	protected void update(List<AnalysisDataset> list){
-    		
-    		TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(null);
-    		if(list!=null && !list.isEmpty()){
-    			try{
+    		try{
+    			TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(null);
+    			if(list!=null && !list.isEmpty()){
+
     				model = NucleusDatasetCreator.createSignalDetectionParametersTable(list);
-    			} catch (Exception e){
-    				error("Error updating signal analysis", e);
-    			}
+    			} 
+
+    			table.setModel(model);
+    			table.createDefaultColumnsFromModel();
+    		} catch (Exception e){
+    			error("Error updating signal analysis", e);
     		}
-    		table.setModel(model);
     	}
 
     }
