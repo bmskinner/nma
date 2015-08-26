@@ -88,11 +88,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	
-	private static final int MORPHOLOGY_ANALYSIS = 1;
+	private static final int ADD_POPULATION		 = 1;
 	private static final int STATS_EXPORT 		 = 2;
 	private static final int NUCLEUS_ANNOTATE	 = 4;
 	private static final int CURVE_REFOLD 		 = 8;
 	private static final int EXPORT_COMPOSITE	 = 16;
+	private static final int SAVE_DATASET		 = 32;
 			
 	/**
 	 * Create the frame.
@@ -405,11 +406,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			UUID id = populationsPanel.getUuidFromName(selectedValue);
 
-			AnalysisDataset dataset = populationsPanel.getDataset(id);
+			final AnalysisDataset dataset = populationsPanel.getDataset(id);
 
 			FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset);
 
 			List<CellCollection> subs = fishMapper.getSubCollections();
+			final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 			for(CellCollection sub : subs){
 
 				if(sub.getNucleusCount()>0){
@@ -417,17 +419,23 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					dataset.addChildCollection(sub);
 					
 					AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
-
-					logc("Reapplying morphology...");
-					new MorphologyAnalysisAction(subDataset, dataset);
-
-					
-					// get the dataset craeted by adding a child collection, and put it inthe populations list
-					populationsPanel.addDataset(dataset.getChildDataset(sub.getID()));
-
+					list.add(subDataset);
 				}
 			}
-			populationsPanel.update();	
+			
+			Thread thr = new Thread(){
+				public void run(){
+					logc("Reapplying morphology...");
+					new MorphologyAnalysisAction(list, dataset, ADD_POPULATION);
+				}
+			};
+			thr.start();
+			
+
+			
+			// get the dataset craeted by adding a child collection, and put it inthe populations list
+//			populationsPanel.addDataset(dataset.getChildDataset(sub.getID()));
+//			populationsPanel.update();	
 
 		} catch(Exception e){
 			log("Error in FISH remapping: "+e.getMessage());
@@ -596,7 +604,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	        				logc("Reapplying morphology...");
 	        				
 	        				AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
-	        				new MorphologyAnalysisAction(newDataset, dataset);
+	        				new MorphologyAnalysisAction(newDataset, dataset, null);
 	        			}
 
 
@@ -810,7 +818,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 								AnalysisDataset source = populationsPanel.getDataset(selectedValue);
 
 								logc("Reapplying morphology...");
-								new MorphologyAnalysisAction(d, source);
+								new MorphologyAnalysisAction(d, source, null);
 							}
 						} catch(Exception e1){
 							log("Error applying morphology: "+e1.getMessage());
@@ -835,7 +843,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		protected JProgressBar progressBar = null;
 		protected String errorMessage = null;
 		protected SwingWorker<Boolean, Integer> worker;
-		protected int downFlag = 0; // store flags to tell the action what to do after finishing
+		protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
 		
 		public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage){
 			
@@ -913,7 +921,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			populationsPanel.update(); // get any new populations
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 			list.add(dataset);
-			PopulationExporter.saveAnalysisDataset(dataset);
+			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+				PopulationExporter.saveAnalysisDataset(root);
+			}
+			
 			populationsPanel.selectDataset(dataset);
 			updatePanels(list); // update with the current population
 			
@@ -1067,7 +1078,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			}
 			// we have morphology analysis to carry out, so don't use the super finished
 			// use the same segmentation from the initial analysis
-			new MorphologyAnalysisAction(list, dataset);
+			new MorphologyAnalysisAction(list, dataset, null);
 			cancel();
 		}
 
@@ -1243,6 +1254,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			log("Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
 			dataset.setClusterTree(((NucleusClusterer) worker).getNewickTree());
+			
+			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 
 			for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 				CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
@@ -1250,17 +1263,15 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				// attach the clusters to their parent collection
 				dataset.addCluster(c);
 				
-				log("Cluster "+cluster+":");
+				log("Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
 				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-
-				logc("Reapplying morphology...");
-				new MorphologyAnalysisAction(clusterDataset, dataset);
-
-				populationsPanel.addDataset(clusterDataset);
+				list.add(clusterDataset);
 
 			}
-			populationsPanel.update();
-			super.finished();
+			
+			new MorphologyAnalysisAction(list, dataset, ADD_POPULATION);
+
+			cancel();
 
 		}
 	}
@@ -1328,11 +1339,14 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     	 * @param dataset the target
     	 * @param source the source
     	 */
-    	public MorphologyAnalysisAction(AnalysisDataset dataset, AnalysisDataset source){
+    	public MorphologyAnalysisAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag){
     		super(dataset, "Copying morphology to "+dataset.getName(), "Error in analysis");
 
     		this.mode = MorphologyAnalysis.MODE_COPY;
     		this.source = source;
+    		if(downFlag!=null){
+    			this.downFlag = downFlag;
+    		}
     		
     		// always copy when a source is given
     		worker = new MorphologyAnalysis(dataset.getCollection(), source.getCollection());
@@ -1345,11 +1359,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     	 * @param list
     	 * @param source
     	 */
-    	public MorphologyAnalysisAction(List<AnalysisDataset> list, AnalysisDataset source){
-    		this(list.get(0), source); // take the first entry
+    	public MorphologyAnalysisAction(List<AnalysisDataset> list, AnalysisDataset source, Integer downFlag){
+    		this(list.get(0), source, downFlag); // take the first entry
     		this.processList = list;
     		processList.remove(0); // remove the first entry
-//    		IJ.log("Started mophology list copy");
     	}
       
     	@Override
@@ -1389,7 +1402,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			} else {
     				log("Error");
     			}
-    			downFlag &= ~EXPORT_COMPOSITE;
+//    			downFlag &= ~EXPORT_COMPOSITE;
     		}
 
     		if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
@@ -1397,22 +1410,26 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 //    			downFlag &= ~CURVE_REFOLD;
     		}
 
-    		if(  (downFlag & MORPHOLOGY_ANALYSIS) == MORPHOLOGY_ANALYSIS){
+    		if(  (downFlag & ADD_POPULATION) == ADD_POPULATION){
     			
-//    			IJ.log("Adding items to population list");
     			populationsPanel.addDataset(dataset);				
 
     			for(AnalysisDataset child : dataset.getChildDatasets()){
     				populationsPanel.addDataset(child);
     			}
 
-    			PopulationExporter.saveAnalysisDataset(dataset);
+//    			PopulationExporter.saveAnalysisDataset(dataset);
 
-    			setStatus("New analysis complete: "
+    			setStatus("Analysis complete: "
     					+populationsPanel.getDatasetCount()
     					+" populations ready to view");
 //    			downFlag &= ~MORPHOLOGY_ANALYSIS;
     		}
+    		
+    		if(  (downFlag & SAVE_DATASET) == SAVE_DATASET){
+    			PopulationExporter.saveAnalysisDataset(dataset);
+    		}
+
     		
     		// if no list was provided, or no more entries remain,
     		// call the finish
@@ -1424,7 +1441,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 //    			IJ.log("More items in list");
     			cancel();
     			if(mode == MorphologyAnalysis.MODE_COPY){
-    				new MorphologyAnalysisAction(processList, source);
+    				new MorphologyAnalysisAction(processList, source, downFlag);
     			} else {
     				new MorphologyAnalysisAction(processList, mode, downFlag);
     			}
@@ -1503,10 +1520,11 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					public void run(){
 						
 						int flag = 0; // set the downstream analyses to run
-						flag |= MORPHOLOGY_ANALYSIS;
+						flag |= ADD_POPULATION;
 						flag |= STATS_EXPORT;
 						flag |= NUCLEUS_ANNOTATE;
 						flag |= EXPORT_COMPOSITE;
+						flag |= SAVE_DATASET;
 						
 						if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
 							flag |= CURVE_REFOLD;
@@ -1554,7 +1572,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				// new style datasets
 				for(AnalysisDataset d : datasets){
 					
-					int flag = MORPHOLOGY_ANALYSIS;
+					int flag = ADD_POPULATION;
 					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
 
 					
@@ -1586,7 +1604,16 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
 		if(event.type().equals("RefoldNucleusFired")){
-			new RefoldNucleusAction(populationsPanel.getSelectedDatasets().get(0));
+			
+			// run in a background thread
+			Thread thr = new Thread(){
+				
+				public void run(){
+					new RefoldNucleusAction(populationsPanel.getSelectedDatasets().get(0));
+				}
+				
+			};
+			thr.start();
 		}
 		
 		
@@ -1698,7 +1725,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			AnalysisDataset target = populationsPanel.getDataset(targetID);
 			AnalysisDataset source = populationsPanel.getDataset(sourceID);
 			
-			new MorphologyAnalysisAction(target, source);
+			new MorphologyAnalysisAction(target, source, null);
 		}
 		
 		if(event.type().startsWith("MorphologyNew_")){
@@ -1706,7 +1733,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			UUID id = UUID.fromString(s);
 			AnalysisDataset d = populationsPanel.getDataset(id);
 			int flag = 0;
-			flag |= MORPHOLOGY_ANALYSIS;
+			flag |= ADD_POPULATION;
 			new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
 		}
 		
