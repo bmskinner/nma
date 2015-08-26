@@ -67,13 +67,16 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
     protected void process( List<Integer> integers ) {
         int amount = integers.get( integers.size() - 1 );
         int percent = (int) ( (double) amount / (double) totalNuclei * 100);
-        setProgress(percent); // the integer representation of the percent
+        if(percent >= 0 && percent <=100){
+        	setProgress(percent); // the integer representation of the percent
+        }
     }
     
     @Override
     protected Boolean doInBackground() throws Exception {
     	logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
     	
+    	boolean result = true;
 		try{
 //			IJ.log("Mode: "+mode);
 			// mode selection
@@ -93,6 +96,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				runSegmentation(collection, pointType);
 
 				logger.log("Core morphology analysis complete");
+//				IJ.log("New analysis complete; head to done()");
 			}
 			
 			if(mode == MODE_REFRESH){
@@ -100,20 +104,21 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				logger.log("Refreshing morphology");
 				refresh(collection);
 				logger.log("Refresh complete");
+//				return true;
 			}
 			
 			if(mode == MODE_COPY){
 //				IJ.log("Copying");
 				if(sourceCollection==null){
 					logger.log("Cannot copy: source collection is null");
-					return false;
+					result = false;
+				} else {
+					totalNuclei = collection.getNucleusCount(); 
+					logger.log("Copying segmentation pattern");
+					reapplyProfiles(collection, sourceCollection);
+					logger.log("Copying complete");
 				}
-				totalNuclei = collection.getNucleusCount(); 
-				logger.log("Copying segmentation pattern");
-				reapplyProfiles(collection, sourceCollection);
-				logger.log("Copying complete");
 			}
-			return true;
 			
 		} catch(Exception e){
 			
@@ -124,16 +129,21 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			
 			logger.log("FrankenCollection keys:", Logger.ERROR);
 			logger.log(collection.getFrankenCollection().printKeys(), Logger.ERROR);
-			return false;
+			result = false;
 		}
 
+//		IJ.log("End of method reached; head to done() with result "+result);
+		return result;
 	}
     
     @Override
     public void done() {
+    	
+//    	IJ.log("Completed worker task; firing trigger");
 
         try {
             if(this.get()){
+//            	IJ.log("Successful worker task triggering");
                 firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
 
             } else {

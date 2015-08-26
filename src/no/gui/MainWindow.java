@@ -49,7 +49,9 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingWorker;
 
 import java.awt.Dimension;
@@ -875,19 +877,20 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			
+
 			int value = (Integer) evt.getNewValue(); // should be percent
+//			IJ.log("Property change: "+value);
 			
 			if(value >=0 && value <=100){
 				
 				if(this.progressBar.isIndeterminate()){
 					this.progressBar.setIndeterminate(false);
 				}
-				
 				this.progressBar.setValue(value);
 			}
 
 			if(evt.getPropertyName().equals("Finished")){
+//				IJ.log("Worker finished by trigger");
 				finished();
 			}
 
@@ -1261,7 +1264,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
     	private int mode = MorphologyAnalysis.MODE_NEW;
     	private List<AnalysisDataset> processList = null;
-    	private AnalysisDataset source = null;
+    	private AnalysisDataset source 			= null;
     	
                     
     	/**
@@ -1273,25 +1276,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     	public MorphologyAnalysisAction(AnalysisDataset dataset, int mode, int downFlag){
     		super(dataset, "Morphology analysis", "Error in analysis", downFlag);
     		this.mode = mode;
-
-    		String message = null;
-    		switch (this.mode) {
-    		case MorphologyAnalysis.MODE_COPY:  message = "Copying morphology";
-    		break;
-
-    		case MorphologyAnalysis.MODE_REFRESH: message = "Refreshing morphology";
-    		break;
-
-    		default: message = "Morphology analysis";
-    		break;  
-    		}
-
-    		this.setProgressMessage(message);
-    		this.cooldown();
-
-    		worker = new MorphologyAnalysis(this.dataset.getCollection(), mode);
-    		worker.addPropertyChangeListener(this);
-    		worker.execute();
+    		runNewAnalysis();
     	}
     	
     	/**
@@ -1301,9 +1286,34 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     	 * @param downFlag the next analyses to perform
     	 */
     	public MorphologyAnalysisAction(List<AnalysisDataset> list, int mode, int downFlag){
-    		this(list.get(0), mode, downFlag); // take the first entry
+    		super(list.get(0), "Morphology analysis", "Error in analysis", downFlag);
+    		this.mode = mode;
     		this.processList = list;
     		processList.remove(0); // remove the first entry
+    		
+    		runNewAnalysis();
+    	}
+    	
+    	private void runNewAnalysis(){
+    		
+    		String message = null;
+    		switch (this.mode) {
+    		case MorphologyAnalysis.MODE_COPY:  message = "Copying morphology";
+    		break;
+
+    		case MorphologyAnalysis.MODE_REFRESH: message = "Refreshing morphology";
+    		break;
+
+    		default: message = "Morphology analysis: "+dataset.getName();
+    		break;  
+    		}
+
+    		this.setProgressMessage(message);
+    		this.cooldown();
+
+    		worker = new MorphologyAnalysis(this.dataset.getCollection(), mode);
+    		worker.addPropertyChangeListener(this);
+    		worker.execute();
     	}
       
 
@@ -1317,6 +1327,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
     		this.mode = MorphologyAnalysis.MODE_COPY;
     		this.source = source;
+    		
     		// always copy when a source is given
     		worker = new MorphologyAnalysis(dataset.getCollection(), source.getCollection());
     		worker.addPropertyChangeListener(this);
@@ -1332,11 +1343,13 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     		this(list.get(0), source); // take the first entry
     		this.processList = list;
     		processList.remove(0); // remove the first entry
+//    		IJ.log("Started mophology list copy");
     	}
       
     	@Override
     	public void finished(){
 
+//    		IJ.log("Finished morphology on "+dataset.getName());
 
     		if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
     			logc("Exporting stats...");
@@ -1346,7 +1359,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			} else {
     				log("Error");
     			}
-    			downFlag &= ~STATS_EXPORT;
+//    			downFlag &= ~STATS_EXPORT;
     		}
 
     		// annotate the nuclei in the population
@@ -1358,7 +1371,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			} else {
     				log("Error");
     			}
-    			downFlag &= ~NUCLEUS_ANNOTATE;
+//    			downFlag &= ~NUCLEUS_ANNOTATE;
     		}
 
     		// make a composite image of all nuclei in the collection
@@ -1375,10 +1388,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
     		if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
     			new RefoldNucleusAction(dataset);
-    			downFlag &= ~CURVE_REFOLD;
+//    			downFlag &= ~CURVE_REFOLD;
     		}
 
     		if(  (downFlag & MORPHOLOGY_ANALYSIS) == MORPHOLOGY_ANALYSIS){
+    			
+//    			IJ.log("Adding items to population list");
     			populationsPanel.addDataset(dataset);				
 
     			for(AnalysisDataset child : dataset.getChildDatasets()){
@@ -1390,15 +1405,17 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			setStatus("New analysis complete: "
     					+populationsPanel.getDatasetCount()
     					+" populations ready to view");
-    			downFlag &= ~MORPHOLOGY_ANALYSIS;
+//    			downFlag &= ~MORPHOLOGY_ANALYSIS;
     		}
     		
     		// if no list was provided, or no more entries remain,
     		// call the finish
     		if(processList.isEmpty() || processList==null){
+//    			IJ.log("Finished morphology list or no list");
     			super.finished();
     		} else {
     			// otherwise analyse the next item in the list
+//    			IJ.log("More items in list");
     			cancel();
     			if(mode == MorphologyAnalysis.MODE_COPY){
     				new MorphologyAnalysisAction(processList, source);
@@ -1467,26 +1484,34 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		@Override
 		public void finished(){
 			
-			List<AnalysisDataset> datasets = detector.getDatasets();
+			final List<AnalysisDataset> datasets = detector.getDatasets();
 			
 			if(datasets.size()==0 || datasets==null){
 				log("No datasets returned");
 				this.cancel();
 			} else {
-							
-				int flag = 0;
-				flag |= MORPHOLOGY_ANALYSIS;
-				flag |= STATS_EXPORT;
-				flag |= NUCLEUS_ANNOTATE;
-				flag |= EXPORT_COMPOSITE;
-				
-				if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
-					flag |= CURVE_REFOLD;
-				}
-				
-				// begin a recursive morphology analysis
-				new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag);
-				
+
+				// run next analysis on a new thread to avoid blocking the EDT
+				Thread thr = new Thread(){
+					
+					public void run(){
+						
+						int flag = 0; // set the downstream analyses to run
+						flag |= MORPHOLOGY_ANALYSIS;
+						flag |= STATS_EXPORT;
+						flag |= NUCLEUS_ANNOTATE;
+						flag |= EXPORT_COMPOSITE;
+						
+						if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
+							flag |= CURVE_REFOLD;
+						}
+						// begin a recursive morphology analysis
+						new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag);
+					}
+					
+				};
+				thr.start();
+
 				// do not call super finished, because there is no dataset for this action
 				// allow the morphology action to update the panels
 				cancel();
