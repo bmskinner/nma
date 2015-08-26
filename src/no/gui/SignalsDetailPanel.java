@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
@@ -216,7 +217,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		tableModel.addColumn("");
     		tableModel.addColumn("");
     		statsTable = new JTable(); // table  for basic stats
-    		statsTable.setAutoCreateColumnsFromModel(false);
     		statsTable.setModel(tableModel);
     		statsTable.setEnabled(false);
     		
@@ -343,20 +343,26 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	 * Update the signal stats with the given datasets
     	 * @param list the datasets
     	 */
-    	private void updateSignalStatsPanel(List<AnalysisDataset> list){
+    	private void updateSignalStatsPanel(final List<AnalysisDataset> list){
     		
-    		TableModel model = NucleusDatasetCreator.createSignalStatsTable(list); 
-    		statsTable.setModel(model);
+    		SwingUtilities.invokeLater(new Runnable(){
+    			public void run(){
+    			
+    		    //Update the model here
+    				TableModel model = NucleusDatasetCreator.createSignalStatsTable(list); 
+    	    		statsTable.setModel(model);
+    	    		
+    	    		if(list!=null && !list.isEmpty()){
+    	    			int columns = statsTable.getColumnModel().getColumnCount();
+    	    			if(columns>1){
+    	    				for(int i=1;i<columns;i++){
+    	    					statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+    	    				}
+    	    			}
+    	    		}
+    			
+    		}});
     		
-    		if(list!=null && !list.isEmpty()){
-    			int columns = statsTable.getColumnModel().getColumnCount();
-    			if(columns>1){
-    				for(int i=1;i<columns;i++){
-    					statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
-    				}
-    			}
-    		}
-    		statsTable.createDefaultColumnsFromModel();
     	}
     	
     	private void updateCheckboxPanel(List<AnalysisDataset> list){
