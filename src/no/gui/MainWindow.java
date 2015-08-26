@@ -1180,21 +1180,27 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		public ShellAnalysisAction(AnalysisDataset dataset) {
 			super(dataset, "Shell analysis", "Error in shell analysis");
 			
-			String shellString = JOptionPane.showInputDialog(MainWindow.this, "Number of shells", 5);
+			SpinnerNumberModel sModel = new SpinnerNumberModel(5, 2, 10, 1);
+			JSpinner spinner = new JSpinner(sModel);
 			
-			// validate
-			int shellCount = 0;
-			if(!shellString.isEmpty() && shellString!=null){
-				shellCount = Integer.parseInt(shellString);
-			} else {
+			int option = JOptionPane.showOptionDialog(null, 
+					spinner, 
+					"Select number of shells", 
+					JOptionPane.OK_CANCEL_OPTION, 
+					JOptionPane.QUESTION_MESSAGE, null, null, null);
+			if (option == JOptionPane.CANCEL_OPTION) {
+			    // user hit cancel
 				this.cancel();
 				return;
-			}
-			
-			worker = new ShellAnalysis(dataset,shellCount);
+				
+			} else if (option == JOptionPane.OK_OPTION)	{
+				
+				int shellCount = (Integer) spinner.getModel().getValue();
+				worker = new ShellAnalysis(dataset,shellCount);
 
-			worker.addPropertyChangeListener(this);
-			worker.execute();	
+				worker.addPropertyChangeListener(this);
+				worker.execute();	
+			}
 		}
 	}
 

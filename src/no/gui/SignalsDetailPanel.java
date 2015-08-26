@@ -341,16 +341,25 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	 * @param list the datasets
     	 */
     	private void updateSignalStatsPanel(List<AnalysisDataset> list){
-    		try{
-    			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
-    			statsTable.setModel(model);
-    		} catch (Exception e){
-    			log("Error updating signal stats: "+e.getMessage());
+    		
+    		TableModel model = NucleusDatasetCreator.createSignalStatsTable(list); 
+    		statsTable.setModel(model);
+    		
+    		if(list!=null && !list.isEmpty()){
+    			int columns = statsTable.getColumnModel().getColumnCount();
+    			if(columns>1){
+    				for(int i=1;i<columns;i++){
+    					statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+    				}
+    			}
     		}
-    		int columns = statsTable.getColumnModel().getColumnCount();
-    		for(int i=1;i<columns;i++){
-    			statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
-    		}
+//    		try{
+////    			TableModel model = NucleusDatasetCreator.createSignalStatsTable(list);
+////    			statsTable.setModel(model);
+//    		} catch (Exception e){
+//    			log("Error updating signal stats: "+e.getMessage());
+//    		}
+
     	}
     	
     	private void updateCheckboxPanel(List<AnalysisDataset> list){
