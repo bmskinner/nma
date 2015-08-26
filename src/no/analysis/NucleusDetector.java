@@ -222,61 +222,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			logger.log("Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
 			mw.log(spacerString);
 
-			// core analysis - align profiles and segment
-//			mw.logc("Running morphology analysis...");
-//			boolean ok = MorphologyAnalysis.run(r);
-//			if(ok){
-//				mw.log("OK");
-//			} else {
-//				mw.log("Error");
-//			}
-//
-//			// export the stats files
-//			mw.logc("Exporting stats...");
-//			ok = StatsExporter.run(r);
-//			if(ok){
-//				mw.log("OK");
-//			} else {
-//				mw.log("Error");
-//			}
-//
-//			// annotate the nuclei in the population
-//			mw.logc("Annotating nuclei...");
-//			ok = NucleusAnnotator.run(r);
-//			if(ok){
-//				mw.log("OK");
-//			} else {
-//				mw.log("Error");
-//			}
-//
-//
-//			// make a composite image of all nuclei in the collection
-//			mw.logc("Exporting composite...");
-//			ok = CompositeExporter.run(r);
-//			if(ok){
-//				mw.log("OK");
-//			} else {
-//				mw.log("Error");
-//			}
-//
-//			// refold the median consensus nucleus
-//			if(analysisOptions.refoldNucleus()){
-//				mw.logc("Refolding profile...");
-//				
-//				 mw. new RefoldNucleusAction(dataset);
-//
-//			}
-
 			result.add(dataset);
-
-//			// export the population to a save file for later
-//			mw.logc("Saving to file...");
-//			ok = PopulationExporter.saveAnalysisDataset(dataset);
-//			if(ok){
-//				mw.log("OK");
-//			} else {
-//				mw.log("Error");
-//			}
 
 		}
 		return result;
@@ -442,23 +388,23 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
     return output;
   }
   
-  private CellCollection createNewCollection(File folder){
-
-	  CellCollection newCollection = null;
-
-	  try {
-
-		  newCollection = new CellCollection(folder, 
-				  outputFolder, 
-				  "analysable", 
-				  this.debugFile,
-				  analysisOptions.getNucleusClass());
-
-	  } catch (Exception e) {
-		  logger.error("Error creating collection", e);
-	  }
-	  return newCollection;
-  }
+//  private CellCollection createNewCollection(File folder){
+//
+//	  CellCollection newCollection = null;
+//
+//	  try {
+//
+//		  newCollection = new CellCollection(folder, 
+//				  outputFolder, 
+//				  "analysable", 
+//				  this.debugFile,
+//				  analysisOptions.getNucleusClass());
+//
+//	  } catch (Exception e) {
+//		  logger.error("Error creating collection", e);
+//	  }
+//	  return newCollection;
+//  }
   
   private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition){
 
@@ -503,7 +449,13 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
 	  File[] listOfFiles = folder.listFiles();
 	  
-	  CellCollection folderCollection = createNewCollection(folder);
+	  CellCollection folderCollection = new CellCollection(folder, 
+			  outputFolder, 
+			  folder.getName(), 
+			  this.debugFile,
+			  analysisOptions.getNucleusClass());
+	  
+//	  CellCollection folderCollection = createNewCollection(folder);
 //	  RoundNucleusCollection folderCollection = new RoundNucleusCollection(folder, this.outputFolder, folder.getName(), this.debugFile);
 	  this.collectionGroup.put(folder, folderCollection);
 
