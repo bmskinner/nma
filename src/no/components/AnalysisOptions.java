@@ -388,21 +388,17 @@ public class AnalysisOptions implements Serializable {
 		public static final int HISTOGRAM 	= 2;
 
 		private static final long serialVersionUID = 1L;
-		private int threshold;
-		private double minCirc;
-		private double maxCirc;
+		private int threshold		= DEFAULT_SIGNAL_THRESHOLD;
+		private double minCirc		= DEFAULT_MIN_CIRC;
+		private double maxCirc		= DEFAULT_MAX_CIRC;
 		
-		private double minSize;
-		private double maxFraction;
+		private double minSize 		= DEFAULT_MIN_SIGNAL_SIZE;
+		private double maxFraction	= DEFAULT_MAX_SIGNAL_FRACTION;
 		
-		// do we get everthing above a threshold (forward)
-		// or take the brightest pixels downwards up to the max signal fraction (reverse)
-		// default is false, forward threshold
-//		private boolean reverseThreshold;
 		private int detectionMode = NuclearSignalOptions.FORWARD;
 		
 		public NuclearSignalOptions(){
-//			this.reverseThreshold = false;
+//			
 		}
 		
 		public int getSignalThreshold(){
@@ -444,14 +440,6 @@ public class AnalysisOptions implements Serializable {
 		public void setMaxFraction(double maxFraction) {
 			this.maxFraction = maxFraction;
 		}
-
-//		public boolean isReverseThreshold() {
-//			return reverseThreshold;
-//		}
-//
-//		public void setReverseThreshold(boolean reverseThreshold) {
-//			this.reverseThreshold = reverseThreshold;
-//		}
 		
 		public int getMode(){
 			return this.detectionMode;

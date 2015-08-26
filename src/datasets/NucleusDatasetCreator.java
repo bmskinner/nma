@@ -1224,7 +1224,6 @@ public class NucleusDatasetCreator {
 				int numberOfRowsPerSignalGroup = fieldNames.size()/ (maxChannels+1);
 				model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
 				
-	//			IJ.log("Added headers");
 					
 				// format the numbers and make into a tablemodel
 				DecimalFormat df = new DecimalFormat("#0.00"); 
@@ -1233,7 +1232,6 @@ public class NucleusDatasetCreator {
 				for(AnalysisDataset dataset : list){
 					CellCollection collection = dataset.getCollection();
 					
-	//				IJ.log("Adding collection");
 					List<Object> rowData = new ArrayList<Object>(0);
 					rowData.add(collection.getSignalGroups().size());
 	
@@ -1242,36 +1240,39 @@ public class NucleusDatasetCreator {
 						NuclearSignalOptions ns = dataset.getAnalysisOptions()
 														.getNuclearSignalOptions(collection.getSignalGroupName(signalGroup));
 						
-						// TODO separate options for red and green channels from start
-						if(ns==null){
-							ns = dataset.getAnalysisOptions()
-									.getNuclearSignalOptions("default");
-						}
-						
-						
-						Object signalThreshold = ns.getMode()==NuclearSignalOptions.FORWARD
-												? ns.getSignalThreshold()
-												: "Variable";
-												
-						Object signalMode = ns.getMode()==NuclearSignalOptions.FORWARD
-								? "Forward"
-								: ns.getMode()==NuclearSignalOptions.REVERSE
-									? "Reverse"
-									: "Adaptive";					
-												
 
-						rowData.add("");
-						rowData.add(signalGroup);
-						rowData.add(collection.getSignalGroupName(signalGroup));
-						rowData.add(collection.getSignalChannel(signalGroup));
-						rowData.add(collection.getSignalSourceFolder(signalGroup));
-						rowData.add(  signalThreshold );
-						rowData.add(ns.getMinSize());
-						rowData.add(df.format(ns.getMaxFraction()));
-						rowData.add(df.format(ns.getMinCirc()));
-						rowData.add(df.format(ns.getMaxCirc()));
-						rowData.add(signalMode);
+						if(ns==null){ // occurs when no signals are present?
+//							ns = dataset.getAnalysisOptions()
+//									.getNuclearSignalOptions("default");
+							for(int i=0; i<numberOfRowsPerSignalGroup;i++){
+								rowData.add("");
+							}
 							
+							
+						} else {
+							Object signalThreshold = ns.getMode()==NuclearSignalOptions.FORWARD
+									? ns.getSignalThreshold()
+									: "Variable";
+
+							Object signalMode = ns.getMode()==NuclearSignalOptions.FORWARD
+											? "Forward"
+											: ns.getMode()==NuclearSignalOptions.REVERSE
+													? "Reverse"
+													: "Adaptive";					
+
+
+							rowData.add("");
+							rowData.add(signalGroup);
+							rowData.add(collection.getSignalGroupName(signalGroup));
+							rowData.add(collection.getSignalChannel(signalGroup));
+							rowData.add(collection.getSignalSourceFolder(signalGroup));
+							rowData.add(  signalThreshold );
+							rowData.add(ns.getMinSize());
+							rowData.add(df.format(ns.getMaxFraction()));
+							rowData.add(df.format(ns.getMinCirc()));
+							rowData.add(df.format(ns.getMaxCirc()));
+							rowData.add(signalMode);
+						}
 
 					}
 					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
