@@ -1,29 +1,17 @@
 package no.gui;
 
-import ij.IJ;
-
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JColorChooser;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -41,20 +29,13 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import no.analysis.AnalysisDataset;
-import no.analysis.MorphologyAnalysis;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.SegmentedProfile;
 import no.nuclei.Nucleus;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import utility.Utils;
@@ -64,7 +45,6 @@ import datasets.ConsensusNucleusChartFactory;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
-import datasets.TailDatasetCreator;
 
 public class CellDetailPanel extends DetailPanel implements SignalChangeListener, TreeSelectionListener {
 
@@ -400,7 +380,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 
 			} catch(Exception e){
-				log("Error updating cell panel");
+				error("Error updating cell panel", e);
 			}
 
 		}
@@ -744,7 +724,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
-		// TODO Auto-generated method stub
+
 		String name = arg0.getPath().getLastPathComponent().toString();
 		
 		String[] bits = name.split("-");
@@ -761,11 +741,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				activeCell = activeDataset.getCollection().getCell(pathName);
 				updateCell(activeCell);
 			} catch (Exception e1){
-				
-				IJ.log("Error fetching cell: "+e1.getMessage());
-				for(StackTraceElement e2 : e1.getStackTrace()){
-					IJ.log(e2.toString());
-				}
+				error("Error fetching cell", e1);
 			}
 		}
 		

@@ -284,10 +284,10 @@ public class NucleusDatasetCreator {
 			if(normalised){
 				
 				int length = xpoints.size();
-				angles = n.getAngleProfile(collection.getOrientationPoint()).interpolate(length);
+				angles = n.getAngleProfile(n.getOrientationPoint()).interpolate(length);
 				x = xpoints;
 			} else {
-				angles = n.getAngleProfile(collection.getOrientationPoint());
+				angles = n.getAngleProfile(n.getOrientationPoint());
 				x = angles.getPositions(n.getLength());
 				if(rightAlign){
 					double differenceToMaxLength = maxLength - n.getLength();
@@ -543,7 +543,7 @@ public class NucleusDatasetCreator {
 	public static XYDataset createSegmentedProfileDataset(Nucleus nucleus) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		SegmentedProfile profile = nucleus.getAngleProfile(Constants.Nucleus.RODENT_SPERM.referencePoint());
+		SegmentedProfile profile = nucleus.getAngleProfile(nucleus.getReferencePoint());
 		Profile xpoints = profile.getPositions(nucleus.getLength());
 		
 		// rendering order will be first on top

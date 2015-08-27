@@ -1686,8 +1686,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_REFRESH, 0);
 				
 			}});
-			
-			
+
 		}
 		
 		if(event.type().startsWith("MorphologyCopy_")){
@@ -1714,7 +1713,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			UUID id = UUID.fromString(s);
 			final AnalysisDataset d = populationsPanel.getDataset(id);
 			final int flag = ADD_POPULATION;
-//			flag |= ADD_POPULATION;
 			SwingUtilities.invokeLater(new Runnable(){
 				public void run(){
 				
