@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
@@ -33,22 +34,27 @@ public class VennDetailPanel extends DetailPanel {
 	 * Update the venn panel with data from the given datasets
 	 * @param list the datasets
 	 */
-	public void update(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
+	public void update(final List<AnalysisDataset> list){
 		
-		if(!list.isEmpty() && list!=null){
-			model = NucleusTableDatasetCreator.createVennTable(list);
-		}
-		vennTable.setModel(model);
-		
-		int columns = vennTable.getColumnModel().getColumnCount();
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+			
+				// format the numbers and make into a tablemodel
+				TableModel model = NucleusTableDatasetCreator.createVennTable(null);
+				
+				if(!list.isEmpty() && list!=null){
+					model = NucleusTableDatasetCreator.createVennTable(list);
+				}
+				vennTable.setModel(model);
+				
+				int columns = vennTable.getColumnModel().getColumnCount();
 
-		if(columns>1){
-			for(int i=1;i<columns;i++){
-				vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
-			}
-		}
+				if(columns>1){
+					for(int i=1;i<columns;i++){
+						vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
+					}
+				}
+		}});
 	}
 	
 	/**

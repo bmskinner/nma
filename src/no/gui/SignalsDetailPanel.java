@@ -108,16 +108,23 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     }
 
 	
-	public void update(List<AnalysisDataset> list){
-		this.list = list;
-		if(list.size()==1){
-			this.activeDataset = list.get(0);
-		}
-		shellsPanel.update(list);
-		overviewPanel.update(list);
-		histogramPanel.update(list);
-		analysisPanel.update(list);
-		boxplotPanel.update(list);
+	public void update(final List<AnalysisDataset> list){
+		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+			
+				SignalsDetailPanel.this.list = list;
+				if(list.size()==1){
+					activeDataset = list.get(0);
+				}
+				shellsPanel.update(list);
+				overviewPanel.update(list);
+				histogramPanel.update(list);
+				analysisPanel.update(list);
+				boxplotPanel.update(list);
+			
+		}});
+
 	}
 
 	/**

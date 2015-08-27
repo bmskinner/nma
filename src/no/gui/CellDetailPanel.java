@@ -32,6 +32,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableColumn;
@@ -122,18 +123,24 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 * will only be displayed if the list contains one dataset.
 	 * @param list the datsets
 	 */
-	public void updateList(List<AnalysisDataset> list){
-		this.list = list;
+	public void updateList(final List<AnalysisDataset> list){
 		
-		if(list.size()==1){
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
 			
-			activeDataset = list.get(0);
-			cellsListPanel.updateDataset(activeDataset);
-		} else {
+				CellDetailPanel.this.list = list;
+				
+				if(list.size()==1){
+					
+					activeDataset = list.get(0);
+					cellsListPanel.updateDataset(activeDataset);
+				} else {
+					
+					cellsListPanel.updateDataset(null);
+					updateCell(null);
+				}
 			
-			cellsListPanel.updateDataset(null);
-			updateCell(null);
-		}
+		}});
 	}
 	
 	

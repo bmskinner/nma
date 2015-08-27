@@ -647,71 +647,76 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					if(datasets.size()>1){ // multiple populations
 						populationPopup.disableAll();
 						populationPopup.enableMerge();
-						populationPopup.enableDelete();
+						populationPopup.disableDelete();
 						
 					} else { // single population
 						AnalysisDataset d = datasets.get(0);
-						populationPopup.enableDelete();
-						populationPopup.disableMerge();
-						populationPopup.enableSave();
-						populationPopup.enableExtract();
-						populationPopup.enableExportStats();
-						populationPopup.enableAddTailStain();
-						populationPopup.enableAddNuclearSignal();
-						populationPopup.enableRunShellAnalysis();
-						
-						// check if we can move the dataset
-						if(d.isRoot()){
-
-							if(treeOrderMap.size()>1){
-								populationPopup.enableApplySegmentation();
-
-								// check if the selected dataset is at the top of the list
-								if(treeOrderMap.get(0)==d.getUUID()){
-									populationPopup.disableMenuUp();
-//									populationPopup.disableMenuDown();
-								} else {
-									populationPopup.enableMenuUp();
-//									populationPopup.enableMenuDown();
-								}
-
-								// check if the selected dataset is at the bottom of the list
-								if(treeOrderMap.get(treeOrderMap.size()-1)==d.getUUID()){
-									populationPopup.disableMenuDown();
-//									populationPopup.disableMenuUp();
-								} else {
-//									populationPopup.enableMenuUp();
-									populationPopup.enableMenuDown();
-								}
-
-							} else { // only one or zero datasets in the pogram 
-								populationPopup.disableMenuUp();
-								populationPopup.disableMenuDown();
-							}
-
-							// only root datasets can replace folder mappings
-							populationPopup.enableReplaceFolder();
-
-						} else { // not root
-							
-							if(treeOrderMap.size()>1){
-								populationPopup.enableApplySegmentation();
-							}
-							
-							populationPopup.disableReplaceFolder();
-							populationPopup.disableMenuUp();
-							populationPopup.disableMenuDown();
-						}
-
-						if(!d.hasChildren()){ // cannot split population without children yet
-							populationPopup.disableSplit();
-						} else {
-							populationPopup.enableSplit();
-						}
+						setMenuForSingleDataset(d);
 					}
 					fireSignalChangeEvent("UpdatePanels");
 				}
 			}
+		}
+	}
+	
+	private void setMenuForSingleDataset(AnalysisDataset d){
+		
+		populationPopup.enableDelete();
+		populationPopup.disableMerge();
+		populationPopup.enableSave();
+		populationPopup.enableExtract();
+		populationPopup.enableExportStats();
+		populationPopup.enableAddTailStain();
+		populationPopup.enableAddNuclearSignal();
+		populationPopup.enableRunShellAnalysis();
+		
+		// check if we can move the dataset
+		if(d.isRoot()){
+
+			if(treeOrderMap.size()>1){
+				populationPopup.enableApplySegmentation();
+
+				// check if the selected dataset is at the top of the list
+				if(treeOrderMap.get(0).equals(d.getUUID())){
+					populationPopup.disableMenuUp();
+//					populationPopup.disableMenuDown();
+				} else {
+					populationPopup.enableMenuUp();
+//					populationPopup.enableMenuDown();
+				}
+
+				// check if the selected dataset is at the bottom of the list
+				if(treeOrderMap.get(treeOrderMap.size()-1).equals(d.getUUID())){
+					populationPopup.disableMenuDown();
+//					populationPopup.disableMenuUp();
+				} else {
+//					populationPopup.enableMenuUp();
+					populationPopup.enableMenuDown();
+				}
+
+			} else { // only one or zero datasets in the pogram 
+				populationPopup.disableMenuUp();
+				populationPopup.disableMenuDown();
+			}
+
+			// only root datasets can replace folder mappings
+			populationPopup.enableReplaceFolder();
+
+		} else { // not root
+			
+			if(treeOrderMap.size()>1){
+				populationPopup.enableApplySegmentation();
+			}
+			
+			populationPopup.disableReplaceFolder();
+			populationPopup.disableMenuUp();
+			populationPopup.disableMenuDown();
+		}
+
+		if(!d.hasChildren()){ // cannot split population without children yet
+			populationPopup.disableSplit();
+		} else {
+			populationPopup.enableSplit();
 		}
 	}
 		

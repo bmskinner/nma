@@ -218,7 +218,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		constraints.gridy = 0;
 		constraints.anchor = GridBagConstraints.CENTER;
 		
-		JButton rotateFwd = new JButton("-");
+		JButton rotateFwd = new JButton("-r");
 		rotateFwd.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -233,7 +233,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 
 		panel.add(rotateFwd, constraints);
 
-		JButton rotateBck = new JButton("+");
+		JButton rotateBck = new JButton("+r");
 		rotateBck.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -291,7 +291,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 						consensusChart = ConsensusNucleusChartFactory.makeSegmentedConsensusChart(activeDataset);
 						
 						// hide the refold button
-						runRefoldingButton.setVisible(false);
+						// temp - always show for debugging
+						runRefoldingButton.setVisible(true);
 						offsetsPanel.setVisible(true);
 					} else {
 						runRefoldingButton.setVisible(true);

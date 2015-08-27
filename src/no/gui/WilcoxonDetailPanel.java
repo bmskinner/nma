@@ -11,10 +11,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import utility.Constants;
 import no.analysis.AnalysisDataset;
+import no.gui.VennDetailPanel.VennTableCellRenderer;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 
@@ -96,34 +98,43 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
-	public void update(List<AnalysisDataset> list) throws Exception {
-		// format the numbers and make into a tablemodel
-		TableModel areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(null);
-		TableModel perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null);
-		TableModel feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(null);
-		TableModel minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(null);
-		TableModel differenceModel 	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(null);
-		
-		if(!list.isEmpty() && list!=null){
-			
-			areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(list);
-			perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(list);
-			feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list);
-			minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list);
-			differenceModel	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list);
-		}
-		
-		wilcoxonAreaTable.setModel(areaModel);
-		wilcoxonPerimTable.setModel(perimModel);
-		wilcoxonMinFeretTable.setModel(minFeretModel);
-		wilcoxonFeretTable.setModel(feretModel);
-		wilcoxonDifferenceTable.setModel(differenceModel);
+	public void update(final List<AnalysisDataset> list) throws Exception {
 
-		setRenderer(wilcoxonAreaTable);
-		setRenderer(wilcoxonPerimTable);
-		setRenderer(wilcoxonMinFeretTable);
-		setRenderer(wilcoxonFeretTable);
-		setRenderer(wilcoxonDifferenceTable);
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				try{
+					// format the numbers and make into a tablemodel
+					TableModel areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(null);
+					TableModel perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null);
+					TableModel feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(null);
+					TableModel minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(null);
+					TableModel differenceModel 	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(null);
+
+					if(!list.isEmpty() && list!=null){
+
+						areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(list);
+						perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(list);
+						feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list);
+						minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list);
+						differenceModel	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list);
+
+					}
+
+					wilcoxonAreaTable.setModel(areaModel);
+					wilcoxonPerimTable.setModel(perimModel);
+					wilcoxonMinFeretTable.setModel(minFeretModel);
+					wilcoxonFeretTable.setModel(feretModel);
+					wilcoxonDifferenceTable.setModel(differenceModel);
+
+					setRenderer(wilcoxonAreaTable);
+					setRenderer(wilcoxonPerimTable);
+					setRenderer(wilcoxonMinFeretTable);
+					setRenderer(wilcoxonFeretTable);
+					setRenderer(wilcoxonDifferenceTable);
+				} catch (Exception e) {
+					error("Error making Wilcoxon table", e);
+				}
+			}});
 	}
 	
 	private void setRenderer(JTable table){
