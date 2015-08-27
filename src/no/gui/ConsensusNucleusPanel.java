@@ -123,7 +123,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		constraints.gridy = 0;
 		constraints.anchor = GridBagConstraints.CENTER;
 		
-		JButton moveUp = new JButton("+x");
+		JButton moveUp = new JButton("+y");
 		moveUp.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -137,7 +137,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		});
 		panel.add(moveUp, constraints);
 		
-		JButton moveDown = new JButton("-x");
+		JButton moveDown = new JButton("-y");
 		moveDown.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -153,7 +153,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		constraints.gridy = 2;
 		panel.add(moveDown, constraints);
 		
-		JButton moveLeft = new JButton("-y");
+		JButton moveLeft = new JButton("-x");
 		moveLeft.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -169,7 +169,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		constraints.gridy = 1;
 		panel.add(moveLeft, constraints);
 		
-		JButton moveright = new JButton("-y");
+		JButton moveright = new JButton("+x");
 		moveright.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
