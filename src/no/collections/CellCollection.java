@@ -836,8 +836,7 @@ implements Serializable
 
     double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
     for(Nucleus p : this.getNuclei()){
-      int index = n.getBorderIndex(pointType);
-      double nDifference = p.getAngleProfile().offset(index).absoluteSquareDifference(medianProfile);
+      double nDifference = p.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);
       if(nDifference<difference){
         difference = nDifference;
         n = p;

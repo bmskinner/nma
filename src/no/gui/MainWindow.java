@@ -1182,7 +1182,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			} catch(Exception e1){
 				this.cancel();
-				log("Error refolding nucleus");
+				MainWindow.this.error("Error refolding nucleus", e1);
 			}
 		}
 		
@@ -1734,6 +1734,23 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			int flag = 0;
 			flag |= ADD_POPULATION;
 			new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
+		}
+		
+		if(event.type().startsWith("RefoldConsensus_")){
+			
+			String s = event.type().replace("RefoldConsensus_", "");
+			UUID id = UUID.fromString(s);
+			final AnalysisDataset d = populationsPanel.getDataset(id);
+			log("Refolding "+d.getName());
+			// run in a background thread
+			Thread thr = new Thread(){
+
+				public void run(){
+					new RefoldNucleusAction(d);
+				}
+
+			};
+			thr.start();
 		}
 		
 		

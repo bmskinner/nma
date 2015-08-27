@@ -59,13 +59,16 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	 * @param refoldMode
 	 * @throws Exception
 	 */
-	public CurveRefolder(CellCollection collection, String refoldMode) throws Exception{
+	public CurveRefolder(CellCollection collection, String refoldMode) throws Exception {
 		
 		
 		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
 
 		// make an entirely new nucleus to play with
-		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian("tail");	
+		logger.log("Fetching best refold candiate", Logger.DEBUG);
+		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(collection.getOrientationPoint());	
+		
+		logger.log("Creating consensus nucleus template", Logger.DEBUG);
 		ConsensusNucleus refoldCandidate = new ConsensusNucleus(n, collection.getNucleusClass());
 
 		logger.log("Refolding nucleus of class: "+collection.getNucleusClass().getSimpleName());

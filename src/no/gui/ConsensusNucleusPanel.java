@@ -75,7 +75,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		runRefoldingButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				fireSignalChangeEvent("RefoldNucleusFired");
+				fireSignalChangeEvent("RefoldConsensus_"+activeDataset.getUUID().toString());
 				runRefoldingButton.setVisible(false);
 			}
 		});
