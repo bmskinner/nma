@@ -387,6 +387,19 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		logPanel.logc(s);
 	}
 	
+	/**
+	 * Write an error message to the log panel,
+	 * together with the stack trace of the exception
+	 * @param message the message
+	 * @param e the exception
+	 */
+	public void error(String message, Exception e){
+		log(message+": "+e.getMessage());
+		for(StackTraceElement el : e.getStackTrace()){
+			log(el.toString());
+		}
+	}
+	
 	public void setStatus(String message){
 		lblStatusLine.setText(message);
 	}
@@ -502,16 +515,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	
 						updatePanels(list);
 						populationsPanel.update();
-//						populationsPanel.selectDataset(dataset);
 						
 					} else {
 						log("Unable to open dataset version: "+ dataset.getVersion());
 					}
 				} catch (Exception e) {
-					log("Error opening dataset: "+e.getMessage());
-					for(StackTraceElement el : e.getStackTrace()){
-						IJ.log(el.toString());
-					}
+					error("Error opening dataset", e);
 				}
 			}
 		};
@@ -541,10 +550,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					segmentsDetailPanel.update(list);
 
 				} catch (Exception e) {
-					log("Error updating panels: "+e.getMessage());
-					for(StackTraceElement el : e.getStackTrace()){
-						log(el.toString());
-					}
+					error("Error updating panels", e);
 				}
 			}
 		};
@@ -622,7 +628,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 
 				} catch (Exception e1) {
-					e1.printStackTrace();
+					error("Error splitting collection", e1);
 				} 
 				
 	        }   else {
@@ -779,7 +785,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 								log("Error");
 							}
 						} catch(Exception e1){
-							log("Error in stats export: "+e1.getMessage());
+							error("Error in stats export", e1);
 						}
 					}
 				};
@@ -824,7 +830,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 								new MorphologyAnalysisAction(d, source, null);
 							}
 						} catch(Exception e1){
-							log("Error applying morphology: "+e1.getMessage());
+							error("Error applying morphology", e1);
 						}
 					}
 				};
@@ -1004,10 +1010,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				worker.execute();
 			} catch(Exception e){
 				this.cancel();
-				log("Error in tail analysis: "+e.getMessage());
-				for(StackTraceElement e1 : e.getStackTrace()){
-					log(e1.toString());
-				}
+				MainWindow.this.error("Error in tail analysis", e);
+
 			}
 		}
 	}
@@ -1069,10 +1073,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				
 			} catch (Exception e){
 				this.cancel();
-				log("Error in signal analysis: "+e.getMessage());
-				for(StackTraceElement e1 : e.getStackTrace()){
-					log(e1.toString());
-				}
+				MainWindow.this.error("Error in signal analysis", e);
 			}
 			
 		}	
@@ -1152,7 +1153,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				}
 
 			} catch(Exception e){
-				log("Cannot create collection: "+e.getMessage());
+				MainWindow.this.error("Cannot create collection", e);
 			}
 
 			return signalPopulations;
