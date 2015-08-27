@@ -760,8 +760,8 @@ public class NucleusDatasetCreator {
 	public static XYDataset createSegmentedNucleusOutline(CellCollection collection) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		ConsensusNucleus n = collection.getConsensusNucleus();
-		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
-		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75").interpolate(n.getLength());
+		Profile q25 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"25").interpolate(n.getLength());
+		Profile q75 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"75").interpolate(n.getLength());
 		
 
 
