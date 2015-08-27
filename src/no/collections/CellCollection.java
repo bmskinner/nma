@@ -815,6 +815,12 @@ implements Serializable
 	  return Utils.getintFromInteger(list.toArray(new Integer[0]));
   }
 
+  /**
+   * Get the distances between two border tags for each nucleus
+   * @param pointTypeA
+   * @param pointTypeB
+   * @return
+   */
   public double[] getPointToPointDistances(String pointTypeA, String pointTypeB){
 	  List<Double> list = new ArrayList<Double>();
 	  for(Nucleus n : this.getNuclei()){
@@ -823,40 +829,40 @@ implements Serializable
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
-  /*
-    -----------------
-    Profile functions
-    -----------------
-  */
-
+  /**
+   * Get the nucleus with the lowest difference score to the median profile
+   * @param pointType the point to compare profiles from
+   * @return the best nucleus
+   * @throws Exception
+   */
   public Nucleus getNucleusMostSimilarToMedian(String pointType) throws Exception {
-    
-    Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
-    Nucleus n = this.getNuclei().get(0); // default to the first nucleus
 
-    double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
-    for(Nucleus p : this.getNuclei()){
-      double nDifference = p.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);
-      if(nDifference<difference){
-        difference = nDifference;
-        n = p;
-      }
-    }
-    return n;
+	  Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
+	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
+
+	  double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
+	  for(Nucleus p : this.getNuclei()){
+		  double nDifference = p.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);
+		  if(nDifference<difference){
+			  difference = nDifference;
+			  n = p;
+		  }
+	  }
+	  return n;
   }
 
-  /*
-    -----------------
-    Export functions
-    -----------------
-  */
 
+  /**
+   * Get the name of the log file for this collection
+   * @param filename
+   * @return
+   */
   public String getLogFileName(String filename){
-    String file = this.getFolder()+File.separator+this.getOutputFolderName()+File.separator+filename+"."+getType()+".txt";
-    File f = new File(file);
-    if(f.exists()){
-      f.delete();
-    }
-    return file;
+	  String file = this.getFolder()+File.separator+this.getOutputFolderName()+File.separator+filename+"."+getType()+".txt";
+	  File f = new File(file);
+	  if(f.exists()){
+		  f.delete();
+	  }
+	  return file;
   }
 }
