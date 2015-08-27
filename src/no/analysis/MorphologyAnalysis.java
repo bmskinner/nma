@@ -1,6 +1,6 @@
 package no.analysis;
 
-import ij.IJ;
+//import ij.IJ;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -230,6 +230,9 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			int profileLength = sourceCollection.getProfileCollection().getProfile(referencePoint).size();
 			
 			// get the empty profile collection from the new CellCollection
+			// TODO: if the target collection is not new, ie we are copying onto
+			// an existing segmenation pattern, then this profile collection will have
+			// offsets
 			ProfileCollection pc = collection.getProfileCollection();
 			
 			// make an aggregate from the nuclei. A new median profile must necessarily result.
@@ -237,6 +240,11 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			pc.createProfileAggregate(collection, profileLength);
 			
 			// copy the offset keys from the source collection
+			//TODO:
+			// If this is applied to a collection from an entirely difference source,
+			// rather than a child, then the offsets will be completely wrong. In that
+			// instance, we should probably keep the existing offset positions for head
+			// and tail
 			ProfileCollection sc = sourceCollection.getProfileCollection();
 			
 			for(String offsetKey : sc.getOffsetKeys()){
@@ -611,7 +619,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
 
 			if(minima.size()==0){
-				IJ.log("    Error: no minima found in median line");
+				logger.log("Error: no minima found in median line");
 				tailIndex = 100; // set to roughly the middle of the array for the moment
 
 			} else{

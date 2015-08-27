@@ -334,6 +334,31 @@ public class SegmentedProfile extends Profile implements Serializable {
 		return true;
 	}
 	
+	@Override
+	public void reverse() throws Exception {
+		super.reverse();
+		
+		// reverse the segments
+		// in a profile of 100
+		// if a segment began at 10 and ended at 20, it should begin at 80 and end at 90
+		
+		// if is begins at 90 and ends at 10, it should begin at 10 and end at 90
+		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+		for(NucleusBorderSegment seg : this.getSegments()){
+			
+			// invert the segment by swapping start and end
+			int newStart = (this.size()-1) - seg.getEndIndex();
+			int newEnd   = Utils.wrapIndex(newStart+seg.length(), this.size());
+			NucleusBorderSegment newSeg = new NucleusBorderSegment(newStart, newEnd, this.size());
+			newSeg.setName(seg.getName());
+			// since the order is reversed, add them to the top of the new list
+			segments.add(0,newSeg);
+		}
+		NucleusBorderSegment.linkSegments(segments);
+		this.setSegments(segments);
+		
+	}
+	
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
