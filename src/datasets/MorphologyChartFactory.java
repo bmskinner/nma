@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 
+
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.Profile;
@@ -77,6 +78,50 @@ public class MorphologyChartFactory {
 			}
 			plot.addDomainMarker(new ValueMarker(index, colour, new BasicStroke(2.0f)));	
 		}
+		return chart;
+	}
+	
+	/**
+	 * Create a segmented profile chart from a given XYDataset. Set the series 
+	 * colours for each component. Draw lines on the offset indexes
+	 * @param dataset the dataset the values come from
+	 * @param normalised should the scales be normalised
+	 * @param rightAligm should the chart be aligned to the right
+	 * @return a chart
+	 */
+	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign) throws Exception {
+		
+		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(dataset.getCollection(), normalised, rightAlign);
+		
+		int length = 100 ; // default if normalised
+
+		
+		// if we set raw values, get the maximum nucleus length
+		if(!normalised){
+			length = (int) dataset.getCollection().getMaxProfileLength();
+//			for(Nucleus n : dataset.getCollection().getNuclei()){
+//				length = (int) Math.max( n.getLength(), length);
+//			}
+		}
+		JFreeChart chart = makeProfileChart(ds, length);
+		
+		// mark the reference andorientation points
+		
+//		XYPlot plot = chart.getXYPlot();
+		
+		
+//		for (String tag : dataset.getCollection().getProfileCollection().getOffsetKeys()){
+//			Color colour = Color.BLACK;
+//			int index = Utils.wrapIndex(dataset.getCollection().getProfileCollection().getOffset(tag)- dataset.getCollection().getProfileCollection().getOffset(dataset.getCollection().getOrientationPoint()), xLength);
+//			if(tag.equals(dataset.getCollection().getOrientationPoint())){
+//				colour = Color.BLUE;
+//			}
+//			if(tag.equals(dataset.getCollection().getReferencePoint())){
+//				colour = Color.ORANGE;
+//			}
+//			plot.addDomainMarker(new ValueMarker(index, colour, new BasicStroke(2.0f)));	
+//			
+//		}
 		return chart;
 	}
 	
@@ -245,7 +290,6 @@ public class MorphologyChartFactory {
 		CellCollection n = list.get(0).getCollection();
 		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength);
 		XYPlot plot = chart.getXYPlot();
-//		plot.setBackgroundPaint(Color.WHITE);
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
 		List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());

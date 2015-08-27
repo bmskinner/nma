@@ -1,8 +1,5 @@
 package no.gui;
 
-import ij.IJ;
-
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -18,20 +15,12 @@ import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
-import no.components.Profile;
 import no.components.ProfileCollection;
-import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
-import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
@@ -175,20 +164,9 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 
 		try {
 			if(list.size()==1){
-				
-				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), normalised, rightAlign);
-				
-				int length = 100 ; // default if normalised
-
-				// if we set raw values, get the maximum nucleus length
-				if(!normalised){
-					for(Nucleus n : list.get(0).getCollection().getNuclei()){
-						length = (int) Math.max( n.getLength(), length);
-					}
-				}
-								
+			
 				// full segment colouring
-				JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, length);
+				JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign);
 				profilesPanel.setChart(chart);
 				
 			} else {
@@ -211,11 +189,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 			}
 			
 		} catch (Exception e) {
-			IJ.log("Error in plotting profile: "+e.getMessage());
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
-			}
-			
+			error("Error in plotting profile", e);			
 		} 
 	}
 	
@@ -243,15 +217,13 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 			}
 						
 		} catch (Exception e) {
-			IJ.log("Error in plotting frankenprofile: "+e.getMessage());
+			log("Error in plotting frankenprofile: "+e.getMessage());
 			for(AnalysisDataset d : list){
-				IJ.log(d.getName());
+				log(d.getName());
 				ProfileCollection f = d.getCollection().getFrankenCollection();
-				IJ.log(f.printKeys());
+				log(f.printKeys());
 			}
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
+			error("Error in plotting fankenprofile", e);
 		} 
 	}
 	
@@ -266,7 +238,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 				variabilityChartPanel.setChart(chart);
 			}
 		} catch (Exception e) {
-			IJ.log("Error drawing variability chart: "+e.getMessage());
+			error("Error in plotting variability chart", e);
 		}	
 	}
 
