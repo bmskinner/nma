@@ -759,9 +759,13 @@ public class NucleusDatasetCreator {
 	 */
 	public static XYDataset createSegmentedNucleusOutline(CellCollection collection) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		// get the consensus nucleus for the population
 		ConsensusNucleus n = collection.getConsensusNucleus();
-		Profile q25 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"25").interpolate(n.getLength());
-		Profile q75 = collection.getProfileCollection().getProfile(collection.getReferencePoint()+"75").interpolate(n.getLength());
+		
+		// get the quartile profiles
+		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
+		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75").interpolate(n.getLength());
 		
 
 
@@ -771,6 +775,8 @@ public class NucleusDatasetCreator {
 		double max = Math.max(n.getMaxX(), n.getMaxY());
 		double scale = Math.min(Math.abs(min), Math.abs(max));
 		
+		// find the range of the iqr, and scale the values in the iqr profile to 1/10 of the total range of the plot
+		//The scaled IQR is a profile beginning from the reference point
 		Profile iqrRange = q75.subtract(q25);
 		Profile scaledRange = iqrRange.divide(iqrRange.getMax()); // iqr as fraction of total variability
 		scaledRange = scaledRange.multiply(scale/10); // set to 10% min radius
@@ -785,12 +791,17 @@ public class NucleusDatasetCreator {
 		List<NucleusBorderSegment> segmentList = n.getAngleProfile().getSegments();
 		if(!segmentList.isEmpty()){ // only draw if there are segments
 			
+			// go through each segment by name
 			for(String name : n.getAngleProfile().getSegmentNames()){
 				
+				// get the segment from the angle profile of the consensus nucleus
 				NucleusBorderSegment seg = n.getAngleProfile().getSegment(name);
 				
+				// add the segment, taking the indexes from the segment, and drawing the values 
+				// in the scaled IQR profile at these positions
 				addSegmentIQRToConsensus(seg, ds, n, scaledRange, tailIndex);
 
+				// draw the segment itself
 				double[] xpoints = new double[seg.length()+1];
 				double[] ypoints = new double[seg.length()+1];
 				for(int j=0; j<=seg.length();j++){

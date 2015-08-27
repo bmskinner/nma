@@ -291,8 +291,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 						consensusChart = ConsensusNucleusChartFactory.makeSegmentedConsensusChart(activeDataset);
 						
 						// hide the refold button
-						// temp - always show for debugging
-						runRefoldingButton.setVisible(true);
+						runRefoldingButton.setVisible(false);
 						offsetsPanel.setVisible(true);
 					} else {
 						runRefoldingButton.setVisible(true);
