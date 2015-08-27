@@ -1188,6 +1188,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		
 		@Override
 		public void finished(){
+			// ensure the bar is gone, even if the cleanup fails
+			this.progressBar.setVisible(false);
 			super.finished();
 			dataset.getAnalysisOptions().setRefoldNucleus(true);
 			dataset.getAnalysisOptions().setRefoldMode("Fast");
@@ -1602,20 +1604,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-		if(event.type().equals("RefoldNucleusFired")){
-			
-			// run in a background thread
-			Thread thr = new Thread(){
-				
-				public void run(){
-					new RefoldNucleusAction(populationsPanel.getSelectedDatasets().get(0));
-				}
-				
-			};
-			thr.start();
-		}
-		
-		
 		if(event.type().equals("RunShellAnalysis")){
 			log("Shell analysis selected");
 			new ShellAnalysisAction(populationsPanel.getSelectedDatasets().get(0));
@@ -1741,7 +1729,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			String s = event.type().replace("RefoldConsensus_", "");
 			UUID id = UUID.fromString(s);
 			final AnalysisDataset d = populationsPanel.getDataset(id);
-			log("Refolding "+d.getName());
 			// run in a background thread
 			Thread thr = new Thread(){
 
