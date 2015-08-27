@@ -96,7 +96,6 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				runSegmentation(collection, pointType);
 
 				logger.log("Core morphology analysis complete");
-//				IJ.log("New analysis complete; head to done()");
 			}
 			
 			if(mode == MODE_REFRESH){
@@ -147,6 +146,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
                 firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
 
             } else {
+//            	IJ.log("Error worker task triggering");
                 firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
             }
         } catch (InterruptedException e) {
@@ -169,43 +169,6 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
     //////////////////////////////////////////////////
    */
     	
-	/**
-	 * The old run function. Copy for doInBackground and leave intact
-	 * @param collection
-	 * @return
-	 */
-//	public static boolean run(CellCollection collection){
-//
-//		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
-//		try{
-//
-//			logger.log("Beginning core morphology analysis");
-//
-//			String pointType = collection.getReferencePoint();
-//
-//			// profile the collection from head/tip, then apply to tail
-//			runProfiler(collection, pointType);
-//
-//			// segment the profiles from head
-//			runSegmentation(collection, pointType);
-//
-//			logger.log("Core morphology analysis complete");
-//			return true;
-//			
-//		} catch(Exception e){
-//			
-//			logger.error("Error in morphology analysis", e);
-//			
-//			logger.log("Collection keys:", Logger.ERROR);
-//			logger.log(collection.getProfileCollection().printKeys(), Logger.ERROR);
-//			
-//			logger.log("FrankenCollection keys:", Logger.ERROR);
-//			logger.log(collection.getFrankenCollection().printKeys(), Logger.ERROR);
-//			return false;
-//		}
-//
-//	}
-
 	/**
 	 * Calculaate the median profile of the colleciton, and generate the
 	 * best fit offsets of each nucleus to match

@@ -52,6 +52,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import java.awt.Dimension;
@@ -636,43 +637,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	        }
 	    }
 	}
-	
-	class SaveCollectionAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public SaveCollectionAction() {
-			super("Save as...");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-
-			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-
-			if(datasets.size()==1){
-
-				Thread thr = new Thread() {
-					public void run() {
-
-						AnalysisDataset d = datasets.get(0);
-						SaveDialog saveDialog = new SaveDialog("Save as...", d.getName(), ".nmd");
-
-						String fileName = saveDialog.getFileName();
-						String folderName = saveDialog.getDirectory();
-
-						File saveFile = new File(folderName+File.separator+fileName);
-
-						logc("Saving as "+saveFile.getAbsolutePath()+"...");
-						PopulationExporter.saveAnalysisDataset(d, saveFile);
-						log("OK");
-						log("Saved dataset "+d.getCollection().getName());
-					}
-				};
-
-				thr.start();
-			}
-		}
-	}
-	
+		
 	class ExtractNucleiCollectionAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -794,53 +759,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 		}
 	}
-	
-	class ApplySegmentProfileAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public ApplySegmentProfileAction() {
-			super("Apply segmentation profile");
-		}
-		// note - this will overwrite the stats for any collection with the same name in the output folder
-		public void actionPerformed(ActionEvent e) {
-
-			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-
-			if(datasets.size()==1){
-				// TODO make new thread
-				Thread thr = new Thread() {
-					public void run() {
-
-						AnalysisDataset d = datasets.get(0);
-						try{
-							
-							// get the desired population
-							String[] names = populationsPanel.getPopulationNames().toArray(new String[0]);
-
-							String selectedValue = (String) JOptionPane.showInputDialog(null,
-									"Choose population", "Reapply segmentation",
-									JOptionPane.INFORMATION_MESSAGE, null,
-									names, names[0]);
-
-							if(selectedValue!=null){
-
-								AnalysisDataset source = populationsPanel.getDataset(selectedValue);
-
-								logc("Reapplying morphology...");
-								new MorphologyAnalysisAction(d, source, null);
-							}
-						} catch(Exception e1){
-							error("Error applying morphology", e1);
-						}
-					}
-				};
-				thr.run();
-			}
-
-		}
-	}
 		
-	
 	/**
 	 * Contains a progress bar and handling methods for when an action
 	 * is triggered as a SwingWorker. Subclassed for each action type.
@@ -1188,11 +1107,13 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		
 		@Override
 		public void finished(){
+			Logger logger = new Logger(dataset.getDebugFile(), "MainWindow");
+    		logger.log("Refolding finished, cleaning up");
 			// ensure the bar is gone, even if the cleanup fails
 			this.progressBar.setVisible(false);
-			super.finished();
 			dataset.getAnalysisOptions().setRefoldNucleus(true);
 			dataset.getAnalysisOptions().setRefoldMode("Fast");
+			super.finished();
 		}
 
 	}
@@ -1382,7 +1303,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
       
     	@Override
     	public void finished(){
-
+    		Logger logger = new Logger(dataset.getDebugFile(), "MainWindow");
+    		logger.log("Morphology analysis finished");
     		if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
     			logc("Exporting stats...");
     			boolean ok = StatsExporter.run(dataset.getCollection());
@@ -1435,10 +1357,14 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     		
     		// if no list was provided, or no more entries remain,
     		// call the finish
-    		if(processList.isEmpty() || processList==null){
-
+    		if(processList==null){
+    			logger.log("Analysis complete, process list null, cleaning up");
+    			super.finished();
+    		} else if(processList.isEmpty()){
+    			logger.log("Analysis complete, process list empty, cleaning up");
     			super.finished();
     		} else {
+    			logger.log("Morphology analysis continuing");
     			// otherwise analyse the next item in the list
     			cancel();
     			if(mode == MorphologyAnalysis.MODE_COPY){
@@ -1604,13 +1530,15 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
+		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().get(0);
+		
 		if(event.type().equals("RunShellAnalysis")){
 			log("Shell analysis selected");
-			new ShellAnalysisAction(populationsPanel.getSelectedDatasets().get(0));
+			new ShellAnalysisAction(selectedDataset);
 		}
 		
 		if(event.type().equals("NewClusterAnalysis")){
-			new ClusterAnalysisAction(populationsPanel.getSelectedDatasets().get(0));
+			new ClusterAnalysisAction(selectedDataset);
 		}
 		
 		if(event.type().equals("MergeCollectionAction")){
@@ -1622,7 +1550,31 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		}
 		
 		if(event.type().equals("SaveCollectionAction")){
-			new SaveCollectionAction();
+
+			Thread thr = new Thread() {
+				public void run() {
+
+
+					SaveDialog saveDialog = new SaveDialog("Save as...", selectedDataset.getName(), ".nmd");
+
+					String fileName = saveDialog.getFileName();
+					String folderName = saveDialog.getDirectory();
+
+					File saveFile = new File(folderName+File.separator+fileName);
+
+					logc("Saving as "+saveFile.getAbsolutePath()+"...");
+					boolean ok = PopulationExporter.saveAnalysisDataset(selectedDataset, saveFile);
+					if(ok){
+						log("OK");
+					} else {
+						log("Error");
+					}
+
+				}
+			};
+
+			thr.start();
+
 		}
 		
 		if(event.type().equals("ExtractNucleiAction")){
@@ -1638,19 +1590,46 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		}
 		
 		if(event.type().equals("ReapplySegmentProfileAction")){
-			new ApplySegmentProfileAction();
+			
+			SwingUtilities.invokeLater(new Runnable(){
+				public void run(){
+				
+					try{
+
+						// get the names of other populations
+						List<String> nameList = populationsPanel.getPopulationNames();
+						nameList.remove(selectedDataset.getName());
+						
+						String[] names = nameList.toArray(new String[0]);
+
+						String selectedValue = (String) JOptionPane.showInputDialog(null,
+								"Choose population to take segments from", "Reapply segmentation",
+								JOptionPane.INFORMATION_MESSAGE, null,
+								names, names[0]);
+
+						if(selectedValue!=null){
+
+							AnalysisDataset source = populationsPanel.getDataset(selectedValue);
+
+							new MorphologyAnalysisAction(selectedDataset, source, null);
+						}
+					} catch(Exception e1){
+						error("Error applying morphology", e1);
+					}
+				
+			}});
 		}
 		
 		if(event.type().equals("AddTailStainAction")){
-			new AddTailStainAction(populationsPanel.getSelectedDatasets().get(0));
+			new AddTailStainAction(selectedDataset);
 		}
 		
 		if(event.type().equals("AddNuclearSignalAction")){
-			new AddNuclearSignalAction(populationsPanel.getSelectedDatasets().get(0));
+			new AddNuclearSignalAction(selectedDataset);
 		}
 		
 		if(event.type().equals("NewShellAnalysisAction")){
-			new ShellAnalysisAction(populationsPanel.getSelectedDatasets().get(0));
+			new ShellAnalysisAction(selectedDataset);
 		}
 		
 		if(event.type().equals("UpdatePanels")){
@@ -1681,7 +1660,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			log("Recovering source dataset");
 			String name = event.type().replace("ExtractSource_", "");
 			// get the uuid of the dataset from the currently selected dataset
-			AnalysisDataset parent = populationsPanel.getSelectedDatasets().get(0);
+			AnalysisDataset parent = selectedDataset;
 			for(UUID id : parent.getMergeSources()){
 				
 				AnalysisDataset child = parent.getMergeSource(id);
@@ -1699,8 +1678,16 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		if(event.type().startsWith("MorphologyRefresh_")){
 			String s = event.type().replace("MorphologyRefresh_", "");
 			UUID id = UUID.fromString(s);
-			AnalysisDataset d = populationsPanel.getDataset(id);
-			new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_REFRESH, 0);
+			final AnalysisDataset d = populationsPanel.getDataset(id);
+			
+			SwingUtilities.invokeLater(new Runnable(){
+				public void run(){
+				
+					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_REFRESH, 0);
+				
+			}});
+			
+			
 		}
 		
 		if(event.type().startsWith("MorphologyCopy_")){
@@ -1709,19 +1696,32 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			UUID targetID = UUID.fromString(array[0]);
 			UUID sourceID = UUID.fromString(array[1]);
 			
-			AnalysisDataset target = populationsPanel.getDataset(targetID);
-			AnalysisDataset source = populationsPanel.getDataset(sourceID);
+			final AnalysisDataset target = populationsPanel.getDataset(targetID);
+			final AnalysisDataset source = populationsPanel.getDataset(sourceID);
 			
-			new MorphologyAnalysisAction(target, source, null);
+			SwingUtilities.invokeLater(new Runnable(){
+				public void run(){
+				
+					new MorphologyAnalysisAction(target, source, null);
+				
+			}});
+			
+			
 		}
 		
 		if(event.type().startsWith("MorphologyNew_")){
 			String s = event.type().replace("MorphologyNew_", "");
 			UUID id = UUID.fromString(s);
-			AnalysisDataset d = populationsPanel.getDataset(id);
-			int flag = 0;
-			flag |= ADD_POPULATION;
-			new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
+			final AnalysisDataset d = populationsPanel.getDataset(id);
+			final int flag = ADD_POPULATION;
+//			flag |= ADD_POPULATION;
+			SwingUtilities.invokeLater(new Runnable(){
+				public void run(){
+				
+					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
+				
+			}});
+			
 		}
 		
 		if(event.type().startsWith("RefoldConsensus_")){
@@ -1729,15 +1729,13 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			String s = event.type().replace("RefoldConsensus_", "");
 			UUID id = UUID.fromString(s);
 			final AnalysisDataset d = populationsPanel.getDataset(id);
-			// run in a background thread
-			Thread thr = new Thread(){
-
+			
+			SwingUtilities.invokeLater(new Runnable(){
 				public void run(){
+				
 					new RefoldNucleusAction(d);
-				}
-
-			};
-			thr.start();
+				
+			}});
 		}
 		
 		
