@@ -91,14 +91,16 @@ public class MorphologyChartFactory {
 	 */
 	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign) throws Exception {
 		
-		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(dataset.getCollection(), normalised, rightAlign);
+		CellCollection collection = dataset.getCollection();
+		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign);
+		
 		
 		int length = 100 ; // default if normalised
 
 		
 		// if we set raw values, get the maximum nucleus length
 		if(!normalised){
-			length = (int) dataset.getCollection().getMaxProfileLength();
+			length = (int) collection.getMaxProfileLength();
 //			for(Nucleus n : dataset.getCollection().getNuclei()){
 //				length = (int) Math.max( n.getLength(), length);
 //			}
@@ -107,21 +109,39 @@ public class MorphologyChartFactory {
 		
 		// mark the reference andorientation points
 		
-//		XYPlot plot = chart.getXYPlot();
-		
-		
-//		for (String tag : dataset.getCollection().getProfileCollection().getOffsetKeys()){
-//			Color colour = Color.BLACK;
-//			int index = Utils.wrapIndex(dataset.getCollection().getProfileCollection().getOffset(tag)- dataset.getCollection().getProfileCollection().getOffset(dataset.getCollection().getOrientationPoint()), xLength);
-//			if(tag.equals(dataset.getCollection().getOrientationPoint())){
-//				colour = Color.BLUE;
-//			}
-//			if(tag.equals(dataset.getCollection().getReferencePoint())){
-//				colour = Color.ORANGE;
-//			}
-//			plot.addDomainMarker(new ValueMarker(index, colour, new BasicStroke(2.0f)));	
-//			
-//		}
+		XYPlot plot = chart.getXYPlot();
+
+		for (String tag : collection.getProfileCollection().getOffsetKeys()){
+			Color colour = Color.BLACK;
+			
+			// get the index of the tag
+			int index = collection.getProfileCollection().getOffset(tag);
+			
+			// get the offset from to the current draw point
+			int offset = collection.getProfileCollection().getOffset(collection.getOrientationPoint());
+			
+			// adjust the index to the offset
+			index = Utils.wrapIndex( index - offset, collection.getProfileCollection().getAggregate().length());
+			
+			if(normalised){ // set to the proportion of the point along the profile
+				index =  (int) (( (double) index / collection.getProfileCollection().getAggregate().length() ) * 100);
+			}
+			if(rightAlign && !normalised){
+				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
+				int amountToAdd = maxX - collection.getProfileCollection().getAggregate().length();
+				index += amountToAdd;
+				
+			}
+			
+			if(tag.equals(collection.getOrientationPoint())){
+				colour = Color.BLUE;
+			}
+			if(tag.equals(collection.getReferencePoint())){
+				colour = Color.ORANGE;
+			}
+			plot.addDomainMarker(new ValueMarker(index, colour, new BasicStroke(2.0f)));	
+			
+		}
 		return chart;
 	}
 	
