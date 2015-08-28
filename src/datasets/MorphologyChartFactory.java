@@ -123,13 +123,15 @@ public class MorphologyChartFactory {
 			// adjust the index to the offset
 			index = Utils.wrapIndex( index - offset, collection.getProfileCollection().getAggregate().length());
 			
+			double indexToDraw = index; // convert to a double to allow normalised positioning
+			
 			if(normalised){ // set to the proportion of the point along the profile
-				index =  (int) (( (double) index / collection.getProfileCollection().getAggregate().length() ) * 100);
+				indexToDraw =  (( indexToDraw / collection.getProfileCollection().getAggregate().length() ) * 100);
 			}
 			if(rightAlign && !normalised){
 				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
 				int amountToAdd = maxX - collection.getProfileCollection().getAggregate().length();
-				index += amountToAdd;
+				indexToDraw += amountToAdd;
 				
 			}
 			
@@ -139,7 +141,7 @@ public class MorphologyChartFactory {
 			if(tag.equals(collection.getReferencePoint())){
 				colour = Color.ORANGE;
 			}
-			plot.addDomainMarker(new ValueMarker(index, colour, new BasicStroke(2.0f)));	
+			plot.addDomainMarker(new ValueMarker(indexToDraw, colour, new BasicStroke(2.0f)));	
 			
 		}
 		return chart;
