@@ -3,6 +3,7 @@ package no.analysis;
 
 import ij.IJ;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,11 +40,12 @@ public class ProfileSegmenter {
 	 * Constructed from a profile
 	 * @param p
 	 */
-	public ProfileSegmenter(Profile p){
+	public ProfileSegmenter(Profile p, File debugFile){
 		if(p==null){
 			throw new IllegalArgumentException("Profile is null");
 		}
 		this.profile = p;
+		logger = new Logger(debugFile, "ProfileSegmenter");
 	}
 	
 	/**
@@ -91,6 +93,8 @@ public class ProfileSegmenter {
 					seg.setName("Seg_"+segCount);
 
 					segments.add(seg);
+					
+					logger.log("New segment found: "+seg.toString(), Logger.DEBUG);
 
 					segmentStart = index; // start the next segment at this position
 					segLength=0;
@@ -101,10 +105,7 @@ public class ProfileSegmenter {
 			NucleusBorderSegment.linkSegments(segments);
 
 		} catch (Exception e){
-			IJ.log("Error in segmentation: "+e.getMessage());
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
-			}
+			logger.error("Error in segmentation", e);
 		}
 		
 		return segments;

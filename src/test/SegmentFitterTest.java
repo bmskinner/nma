@@ -35,13 +35,22 @@ public class SegmentFitterTest {
 		return new SegmentedProfile(data);
 	}
 	
+	public static File makeLogFile(){
+		File log = new File("Z:\\log.txt");
+		if(!log.getParentFile().exists()){
+			log = new File("E:\\log.txt");
+		}
+		return log;
+	}
+	
 	/**
 	 * Get a list of segments within the median profile
 	 * @return
 	 */
 	public static List<NucleusBorderSegment> getMedianRodentSpermSegments(){
 		Profile median = createRodentSpermMedianProfile();
-		ProfileSegmenter segmenter = new ProfileSegmenter(median);
+		File log = makeLogFile();
+		ProfileSegmenter segmenter = new ProfileSegmenter(median, log);
 		List<NucleusBorderSegment> segments = segmenter.segment(); 
 		return segments;
 	}
@@ -54,10 +63,7 @@ public class SegmentFitterTest {
 
 			SegmentedProfile median = SegmentedProfileTest.createMedianProfile();
 
-			File log = new File("Z:\\log.txt");
-			if(!log.getParentFile().exists()){
-				log = new File("E:\\log.txt");
-			}
+			File log = makeLogFile();
 			if(log.exists()){
 				log.delete();
 			}

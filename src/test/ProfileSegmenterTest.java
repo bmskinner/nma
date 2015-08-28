@@ -22,8 +22,9 @@ public class ProfileSegmenterTest {
 	@Test
 	public void segmentMedianProfile() {
 		System.out.println("Beginning median segmentation");
-		Profile median = SegmentFitterTest.createRodentSpermMedianProfile();				
-		ProfileSegmenter segmenter = new ProfileSegmenter(median);
+		Profile median = SegmentFitterTest.createRodentSpermMedianProfile();	
+		File log = SegmentFitterTest.makeLogFile();
+		ProfileSegmenter segmenter = new ProfileSegmenter(median, log);
 		
 		List<NucleusBorderSegment> list  = segmenter.segment();
 				
@@ -51,7 +52,8 @@ public class ProfileSegmenterTest {
 		try{
 		System.out.println("Beginning nucleus segmentation");
 		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
-		ProfileSegmenter segmenter = new ProfileSegmenter(n.getAngleProfile());
+		File log = SegmentFitterTest.makeLogFile();
+		ProfileSegmenter segmenter = new ProfileSegmenter(n.getAngleProfile(), log);
 				
 		List<NucleusBorderSegment> list  = segmenter.segment();
 		

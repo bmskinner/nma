@@ -407,7 +407,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			// the profile
 			Profile median = pc.getProfile(collection.getReferencePoint());
 
-			ProfileSegmenter segmenter = new ProfileSegmenter(median);		  
+			ProfileSegmenter segmenter = new ProfileSegmenter(median, collection.getDebugFile());		  
 			List<NucleusBorderSegment> segments = segmenter.segment();
 
 			logger.log("Found "+segments.size()+" segments in "+collection.getReferencePoint()+" profile");
