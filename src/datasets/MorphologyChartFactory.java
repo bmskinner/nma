@@ -89,10 +89,10 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign) throws Exception {
+	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, String point) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();
-		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign);
+		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
 		
 		
 		int length = 100 ; // default if normalised
@@ -118,7 +118,7 @@ public class MorphologyChartFactory {
 			int index = collection.getProfileCollection().getOffset(tag);
 			
 			// get the offset from to the current draw point
-			int offset = collection.getProfileCollection().getOffset(collection.getOrientationPoint());
+			int offset = collection.getProfileCollection().getOffset(point);
 			
 			// adjust the index to the offset
 			index = Utils.wrapIndex( index - offset, collection.getProfileCollection().getAggregate().length());

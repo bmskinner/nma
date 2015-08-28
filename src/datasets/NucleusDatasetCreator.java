@@ -238,14 +238,16 @@ public class NucleusDatasetCreator {
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	public static XYDataset createSegmentedProfileDataset(CellCollection collection, boolean normalised, boolean rightAlign) throws Exception{
+	public static XYDataset createSegmentedProfileDataset(CellCollection collection, boolean normalised, boolean rightAlign, String point) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
+		
+//		String point = collection.getOrientationPoint();
 		
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection().getProfile(collection.getOrientationPoint());
+		Profile profile = collection.getProfileCollection().getProfile(point);
 		Profile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);
@@ -262,7 +264,7 @@ public class NucleusDatasetCreator {
 		// rendering order will be first on top
 		
 		// add the segments
-		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+		List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(point);
 		if(normalised){
 			addSegmentsFromProfile(segments, profile, ds, 100, 0);
 		} else {
@@ -270,8 +272,8 @@ public class NucleusDatasetCreator {
 		}
 
 		// make the IQR
-		Profile profile25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25");
-		Profile profile75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75");
+		Profile profile25 = collection.getProfileCollection().getProfile(point+"25");
+		Profile profile75 = collection.getProfileCollection().getProfile(point+"75");
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -284,10 +286,10 @@ public class NucleusDatasetCreator {
 			if(normalised){
 				
 				int length = xpoints.size();
-				angles = n.getAngleProfile(n.getOrientationPoint()).interpolate(length);
+				angles = n.getAngleProfile(point).interpolate(length);
 				x = xpoints;
 			} else {
-				angles = n.getAngleProfile(n.getOrientationPoint());
+				angles = n.getAngleProfile(point);
 				x = angles.getPositions(n.getLength());
 				if(rightAlign){
 					double differenceToMaxLength = maxLength - n.getLength();
