@@ -36,12 +36,14 @@ public class SegmentedProfileTest {
 
 			SegmentedProfile result = createMedianProfile();
 			result.reverse();
+			result.reverse();
 
 			for(String name : tester.getSegmentNames()){
 				NucleusBorderSegment testerSeg = tester.getSegment(name);
 				NucleusBorderSegment resultSeg = result.getSegment(name);
 				
 				assertEquals("Values should be identical", testerSeg.length(), resultSeg.length());
+				assertEquals("Values should be identical", testerSeg.toString(), resultSeg.toString());
 				System.out.println(testerSeg.toString());
 				System.out.println(resultSeg.toString());
 			}
