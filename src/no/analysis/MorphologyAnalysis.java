@@ -258,7 +258,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			// What happens when the array length is greater in the source collection? 
 			// Segments are added that no longer have an index
 			// We need to scale the segments to the array length of the new collection
-			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
+			pc.addSegments(sc.getSegments(referencePoint));
 
 			
 			// At this point the collection has only a regular profile collection.
@@ -311,7 +311,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 
 			// copy the segments from the profile collection
-			frankenCollection.addSegments(pointType, segments);
+			frankenCollection.addSegments(segments);
 
 			// At this point, the FrankenCollection is identical to the ProfileCollection
 			// We need to add the individual recombined frankenProfiles
@@ -413,7 +413,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			logger.log("Found "+segments.size()+" segments in "+collection.getReferencePoint()+" profile");
 
 			// Add the segments to the collection
-			pc.addSegments(collection.getReferencePoint(), segments);
+			pc.addSegments(segments);
 		} catch(Exception e){
 			logger.error("Error creating segments", e);
 		}
@@ -529,7 +529,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 
 			// copy the segments from the profile collection
-			frankenCollection.addSegments(pointType, segments);
+			frankenCollection.addSegments(segments);
 
 			// At this point, the FrankenCollection is identical to the ProfileCollection
 			// We need to add the individual recombined frankenProfiles

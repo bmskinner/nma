@@ -154,25 +154,36 @@ public class ProfileCollection implements Serializable {
 	
 	/**
 	 * Add a list of segments for the profile
-	 * @param pointType the point with the zero index in the segments
 	 * @param n the segment list
 	 */
-	public void addSegments(String pointType, List<NucleusBorderSegment> n){
+	public void addSegments(List<NucleusBorderSegment> n){
 		if(n==null || n.isEmpty()){
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
-		// this must be negative offset for segments
-		int offset = getOffset(pointType);
-
-		List<NucleusBorderSegment> result = null;
-		try {
-			result = NucleusBorderSegment.nudge(segments, offset);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		segments = result;
+		segments = n;
 	}
+	
+	/**
+	 * Add a list of segments for the profile
+	 * @param pointType the point with the zero index in the segments
+	 * @param n the segment list
+	 */
+//	public void addSegments(String pointType, List<NucleusBorderSegment> n){
+//		if(n==null || n.isEmpty()){
+//			throw new IllegalArgumentException("String or segment list is null or empty");
+//		}
+//		// this must be negative offset for segments
+//		int offset = getOffset(pointType);
+//
+//		List<NucleusBorderSegment> result = null;
+//		try {
+//			result = NucleusBorderSegment.nudge(segments, offset);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		segments = result;
+//	}
 		
 	/**
 	 * Add individual nucleus profiles to teh collection.

@@ -178,7 +178,7 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 		
 		if(list!=null && !list.isEmpty()){
 			updateSegmentsBoxplot(list); // get segname from panel
-			updateSegmentsProfile(list, null, true, false); // get segname from panel
+			updateSegmentsProfile(list, null, false, false); // get segname from panel
 			segmentStatsPanel.update(list.get(0));
 		}
 	}
@@ -303,71 +303,71 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 									SegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(collection.getReferencePoint());
 									NucleusBorderSegment seg = profile.getSegment(columnName);
 									
-									if(rowName.equals("Start index")){
-										SpinnerNumberModel sModel 
-										= new SpinnerNumberModel(seg.getStartIndex(), 
-												0, 
-												profile.size(),
-												1);
-										JSpinner spinner = new JSpinner(sModel);
-
-										int option = JOptionPane.showOptionDialog(null, 
-												spinner, 
-												"Choose the new segment start index", 
-												JOptionPane.OK_CANCEL_OPTION, 
-												JOptionPane.QUESTION_MESSAGE, null, null, null);
-										if (option == JOptionPane.CANCEL_OPTION) {
-											// user hit cancel
-										} else if (option == JOptionPane.OK_OPTION)	{
-											
-											int index = (Integer) spinner.getModel().getValue();
-											if(profile.update(seg, index, seg.getEndIndex())){
-//											if(seg.update(index, seg.getEndIndex())){
-												collection.getProfileCollection().addSegments(collection.getReferencePoint(), profile.getSegments());
-												update(activeDataset);
-											} else {
-												log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-											}
-											
-
-										}
-									}
+//									if(rowName.equals("Start index")){
+//										SpinnerNumberModel sModel 
+//										= new SpinnerNumberModel(seg.getStartIndex(), 
+//												0, 
+//												profile.size(),
+//												1);
+//										JSpinner spinner = new JSpinner(sModel);
+//
+//										int option = JOptionPane.showOptionDialog(null, 
+//												spinner, 
+//												"Choose the new segment start index", 
+//												JOptionPane.OK_CANCEL_OPTION, 
+//												JOptionPane.QUESTION_MESSAGE, null, null, null);
+//										if (option == JOptionPane.CANCEL_OPTION) {
+//											// user hit cancel
+//										} else if (option == JOptionPane.OK_OPTION)	{
+//											
+//											int index = (Integer) spinner.getModel().getValue();
+//											if(profile.update(seg, index, seg.getEndIndex())){
+////											if(seg.update(index, seg.getEndIndex())){
+//												collection.getProfileCollection().addSegments(collection.getReferencePoint(), profile.getSegments());
+//												update(activeDataset);
+//											} else {
+//												log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+//											}
+//											
+//
+//										}
+//									}
 									
-									if(rowName.equals("End index")){
+//									if(rowName.equals("End index")){
+////										SpinnerNumberModel sModel 
+////										= new SpinnerNumberModel(seg.getEndIndex(), 
+////												seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
+////												seg.nextSegment().getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+////												1);
 //										SpinnerNumberModel sModel 
 //										= new SpinnerNumberModel(seg.getEndIndex(), 
-//												seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
-//												seg.nextSegment().getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+//												0, 
+//												profile.size(),
 //												1);
-										SpinnerNumberModel sModel 
-										= new SpinnerNumberModel(seg.getEndIndex(), 
-												0, 
-												profile.size(),
-												1);
-										JSpinner spinner = new JSpinner(sModel);
-
-										int option = JOptionPane.showOptionDialog(null, 
-												spinner, 
-												"Choose the new segment end index", 
-												JOptionPane.OK_CANCEL_OPTION, 
-												JOptionPane.QUESTION_MESSAGE, null, null, null);
-										if (option == JOptionPane.CANCEL_OPTION) {
-											// user hit cancel
-										} else if (option == JOptionPane.OK_OPTION)	{
-											
-											
-											
-											int index = (Integer) spinner.getModel().getValue();
-											if(profile.update(seg, seg.getStartIndex(), index)){
-												collection.getProfileCollection().addSegments(collection.getReferencePoint(), profile.getSegments());
-												update(activeDataset);
-											} else {
-												log("Updating "+seg.getEndIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-											}
-											
-
-										}
-									}
+//										JSpinner spinner = new JSpinner(sModel);
+//
+//										int option = JOptionPane.showOptionDialog(null, 
+//												spinner, 
+//												"Choose the new segment end index", 
+//												JOptionPane.OK_CANCEL_OPTION, 
+//												JOptionPane.QUESTION_MESSAGE, null, null, null);
+//										if (option == JOptionPane.CANCEL_OPTION) {
+//											// user hit cancel
+//										} else if (option == JOptionPane.OK_OPTION)	{
+//											
+//											
+//											
+//											int index = (Integer) spinner.getModel().getValue();
+//											if(profile.update(seg, seg.getStartIndex(), index)){
+//												collection.getProfileCollection().addSegments(collection.getReferencePoint(), profile.getSegments());
+//												update(activeDataset);
+//											} else {
+//												log("Updating "+seg.getEndIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+//											}
+//											
+//
+//										}
+//									}
 									
 									
 									
