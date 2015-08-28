@@ -189,10 +189,10 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 			// carry out iterative offsetting to refine the orientation point estimate
 			double score = compareProfilesToMedian(collection, pointType);
-			double prevScore = score+1;
+			double prevScore = score*2;
 			while(score < prevScore){
 
-				// rebuild the aggregate - needed if the orientaion point index has changed in any nuclei
+				// rebuild the aggregate - needed if the orientation point index has changed in any nuclei
 				pc.createProfileAggregate(collection);
 
 				// carry out the orientation point detection in the median again
@@ -225,7 +225,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 		
 		try {
 			String referencePoint   = collection.getReferencePoint();
-			String orientationPoint = collection.getOrientationPoint();
+//			String orientationPoint = collection.getOrientationPoint();
 			
 			// use the same array length as the source collection to avoid segment slippage
 			int profileLength = sourceCollection.getProfileCollection().getProfile(referencePoint).size();
@@ -258,7 +258,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			// What happens when the array length is greater in the source collection? 
 			// Segments are added that no longer have an index
 			// We need to scale the segments to the array length of the new collection
-			pc.addSegments(sc.getSegments(referencePoint));
+			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
 
 			
 			// At this point the collection has only a regular profile collection.
@@ -311,7 +311,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 
 			// copy the segments from the profile collection
-			frankenCollection.addSegments(segments);
+			frankenCollection.addSegments(pointType, segments);
 
 			// At this point, the FrankenCollection is identical to the ProfileCollection
 			// We need to add the individual recombined frankenProfiles
@@ -413,7 +413,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			logger.log("Found "+segments.size()+" segments in "+collection.getReferencePoint()+" profile");
 
 			// Add the segments to the collection
-			pc.addSegments(segments);
+			pc.addSegments(collection.getReferencePoint(), segments);
 		} catch(Exception e){
 			logger.error("Error creating segments", e);
 		}
@@ -529,7 +529,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 
 			// copy the segments from the profile collection
-			frankenCollection.addSegments(segments);
+			frankenCollection.addSegments(pointType, segments);
 
 			// At this point, the FrankenCollection is identical to the ProfileCollection
 			// We need to add the individual recombined frankenProfiles

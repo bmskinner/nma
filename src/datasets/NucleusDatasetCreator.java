@@ -144,9 +144,9 @@ public class NucleusDatasetCreator {
             
             // add only the segment of interest
             for(NucleusBorderSegment seg : segments){
-                if(seg.getName().equals(segName)){
+//                if(seg.getName().equals(segName)){
                     segmentsToAdd.add(seg);
-                }
+//                }
             }
             if(!segmentsToAdd.isEmpty()){
                 addSegmentsFromProfile(segmentsToAdd, profile, ds, 100, 0);
@@ -220,9 +220,9 @@ public class NucleusDatasetCreator {
 			
 			// add only the segment of interest
 			for(NucleusBorderSegment seg : segments){
-				if(seg.getName().equals(segName)){
+//				if(seg.getName().equals(segName)){
 					segmentsToAdd.add(seg);
-				}
+//				}
 			}
 			if(!segmentsToAdd.isEmpty()){
 				addSegmentsFromProfile(segmentsToAdd, profile, ds, (int) collection.getMedianArrayLength(), offset);

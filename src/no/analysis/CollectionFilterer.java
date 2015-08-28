@@ -30,10 +30,7 @@ public class CollectionFilterer {
 			refilterNuclei(collection, failCollection);
 		} catch(Exception e){
 
-			logger.log("Error filtering: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error filtering", e);
 			return false;
 		} 
 		logger.log("Filtering complete");

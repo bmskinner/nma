@@ -25,8 +25,7 @@ import no.nuclei.sperm.RodentSpermNucleus;
 public class NucleusTableDatasetCreator {
 	
 	/**
-	 * Create a table of signal stats for the given list of datasets. This table
-	 * covers size, number of signals
+	 * Create a table of segment stats for the given nucleus.
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 * @throws Exception 
@@ -83,6 +82,55 @@ public class NucleusTableDatasetCreator {
 			// format the numbers and make into a tablemodel
 //			DecimalFormat df = new DecimalFormat("#0.00"); 
 
+		}
+		return model;	
+	}
+	
+	/**
+	 * Create a table of segment stats for median profile of the given dataset.
+	 * @param dataset the AnalysisDataset to include
+	 * @return a table model
+	 * @throws Exception 
+	 */
+	public static TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset) throws Exception {
+
+		DefaultTableModel model = new DefaultTableModel();
+
+		List<Object> fieldNames = new ArrayList<Object>(0);
+		
+		if(dataset==null){
+			model.addColumn("No data loaded");
+
+		} else {
+			CellCollection collection = dataset.getCollection();
+			// check which reference point to use
+			String point = collection.getOrientationPoint();
+
+
+			// get the offset segments
+			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(point);
+			//.getAngleProfile(referencePoint).getSegments();
+
+			// create the row names
+			fieldNames.add("Colour");
+			fieldNames.add("Length");
+			fieldNames.add("Start index");
+			fieldNames.add("End index");
+
+			model.addColumn("", fieldNames.toArray(new Object[0]));
+
+			for(NucleusBorderSegment segment : segments) {
+
+
+				List<Object> rowData = new ArrayList<Object>(0);
+				
+				rowData.add("");
+				rowData.add(segment.length());
+				rowData.add(segment.getStartIndex());
+				rowData.add(segment.getEndIndex());
+
+				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
+			}
 		}
 		return model;	
 	}
