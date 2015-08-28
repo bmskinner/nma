@@ -1,4 +1,4 @@
-package test;
+package test.no.components;
 
 import static org.junit.Assert.*;
 import no.components.Profile;
@@ -41,7 +41,6 @@ public class ProfileTest {
 		double[] data   = {0, 1, 2, 3,  4,  5 };
 		Profile tester = new Profile(data);
 		
-		// testing get()
 		double d = tester.get(2);
 		assertEquals("Values should be 2", 2, d,0);
 		
@@ -143,6 +142,30 @@ public class ProfileTest {
 		double[] output = result.asArray();	
 		
 		for( int i =0;i<expected.length; i++){
+			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
+		}
+		
+	}
+	
+	@Test
+	public void interpolationShouldShrinkWhenGivenLowerLength(){
+		double[] data       = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
+		double[] expected   = { 10, 12, 14, 16, 18, 20 };
+		
+		Profile tester = new Profile(data);
+		
+		Profile result = null;
+		try{
+			result = tester.interpolate(6);
+		} catch(Exception e){
+			System.out.println("Error interpolating: "+e.getMessage());
+			fail("Interpolation failed");
+		}
+		
+		double[] output = result.asArray();	
+		
+		for( int i =0;i<expected.length; i++){
+//			System.out.println(output[i]+" should be "+expected[i]);
 			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
 		}
 		

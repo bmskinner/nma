@@ -75,6 +75,14 @@ public class Utils {
 		 return s;
 	 }
 	
+	public static int[] getintFromInteger(Integer[] i){
+		int[] result = new int[i.length];
+		for (int j = 0; j < i.length; j++){
+			result[j] = i[j];
+		}
+		return result;
+	}
+	
 	/**
 	 * Create a String array from an Integer array for exports
 	 * @param d the Integer array
@@ -238,5 +246,17 @@ public class Utils {
 
 	 }
 	
+	
+	/**
+	 * Convert the length in pixels into a length in microns.
+	 * Assumes that the scale is in metres
+	 * @param pixels the number of pixels
+	 * @param scale the size of a pixel in metres
+	 * @return
+	 */
+	public static double micronLength(double pixels, double scale){
+		double microns = pixels * scale;
+		return microns;
+	}
 	
  }

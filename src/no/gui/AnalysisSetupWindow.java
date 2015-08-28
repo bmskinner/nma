@@ -64,6 +64,8 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		
 	private static final int    DEFAULT_PROFILE_WINDOW_SIZE = 15;
 	
+	private static final double    DEFAULT_SCALE = 1.0;
+	
 	private static final String DEFAULT_REFOLD_MODE = "Fast";
 	
 	private static Map<String, Class<?>>  nucleusClassTypes;
@@ -108,6 +110,9 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	private JRadioButton refoldIntensiveButton = new JRadioButton("Intensive");
 	private JRadioButton refoldBrutalButton = new JRadioButton("Brutal");
 	private ButtonGroup refoldModeGroup;
+	
+	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	0, 100, 0.001));
+
 
 	/**
 	 * Create the frame.
@@ -168,6 +173,8 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 
 		analysisOptions.setXoffset(0);
 		analysisOptions.setYoffset(0);
+		
+		analysisOptions.setScale(DEFAULT_SCALE);
 				
 		analysisOptions.setNucleusClass(RodentSpermNucleus.class);
 		
@@ -220,7 +227,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 					AnalysisSetupWindow.this.setVisible(false);
 				} else {
 					analysisOptions = null;
-					AnalysisSetupWindow.this.dispose();
+					AnalysisSetupWindow.this.setVisible(false);
 				}
 				
 			}
@@ -233,7 +240,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				analysisOptions = null;
-				AnalysisSetupWindow.this.dispose();
+				AnalysisSetupWindow.this.setVisible(false);
 			}
 		});
 		panel.add(btnCancel);
@@ -332,14 +339,15 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		panel.setBorder(BorderFactory.createTitledBorder("Detection settings"));
 		panel.setLayout(new GridBagLayout());
 
-		JLabel[] labels = new JLabel[5];
-		JSpinner[] fields = new JSpinner[5];
+		JLabel[] labels = new JLabel[6];
+		JSpinner[] fields = new JSpinner[6];
 
 		labels[0] = new JLabel("Min nucleus size");
 		labels[1] = new JLabel("Max nucleus size");
 		labels[2] = new JLabel("Min nucleus circ");
 		labels[3] = new JLabel("Max nucleus circ");
 		labels[4] = new JLabel("Profile window");
+		labels[5] = new JLabel("Scale (microns/pixel)");
 
 
 		fields[0] = txtMinNuclearSize;
@@ -347,12 +355,14 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		fields[2] = minNuclearCircSpinner;
 		fields[3] = maxNuclearCircSpinner;
 		fields[4] = txtProfileWindowSize;
+		fields[5] = scaleSpinner;
 		
 		txtMinNuclearSize.addChangeListener(this);
 		txtMaxNuclearSize.addChangeListener(this);
 		minNuclearCircSpinner.addChangeListener(this);
 		maxNuclearCircSpinner.addChangeListener(this);
 		txtProfileWindowSize.addChangeListener(this);
+		scaleSpinner.addChangeListener(this);
 
 		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
 
@@ -574,7 +584,13 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
 				this.analysisOptions.setAngleProfileWindowSize(  (Integer) j.getValue());
-			}			
+			}	
+			
+			if(e.getSource()==scaleSpinner){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				this.analysisOptions.setScale(  (Double) j.getValue());
+			}	
 			
 		} catch (ParseException e1) {
 			IJ.log("Parsing error in JSpinner");

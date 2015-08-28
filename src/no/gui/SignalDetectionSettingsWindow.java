@@ -5,6 +5,7 @@ import ij.IJ;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -55,6 +56,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 	
 	private JRadioButton forwardThresholding = new JRadioButton("Forward");
 	private JRadioButton reverseThresholding = new JRadioButton("Reverse");
+	private JRadioButton histogramThresholding = new JRadioButton("Adaptive");
 	private ButtonGroup thresholdModeGroup;
 
 	/**
@@ -99,7 +101,9 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		Component[] fields = new Component[7];
 
 		labels[0] = new JLabel("Channel");
-		labels[1] = new JLabel("Signal threshold");
+		labels[1] = new JLabel("Min signal threshold");
+		labels[1].setToolTipText("No pixels with lower intensity than this will be considered signal");
+		
 		labels[2] = new JLabel("Min signal size");
 		labels[3] = new JLabel("Max signal fraction");
 		labels[4] = new JLabel("Min signal circ");
@@ -125,11 +129,20 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		thresholdModeGroup = new ButtonGroup();
 		thresholdModeGroup.add(forwardThresholding);
 		thresholdModeGroup.add(reverseThresholding);
+		thresholdModeGroup.add(histogramThresholding);
+		
 		forwardThresholding.setSelected(true);
 		
-		contentPanel.add(new JLabel("Threshold type"));
-		contentPanel.add(forwardThresholding);
-		contentPanel.add(reverseThresholding);
+		GridBagConstraints columnConstraints = new GridBagConstraints();
+		columnConstraints.gridwidth = GridBagConstraints.REMAINDER;     //end row
+		columnConstraints.fill = GridBagConstraints.HORIZONTAL;
+		columnConstraints.weightx = 1.0;
+		
+		contentPanel.add(new JLabel("Threshold type"), columnConstraints);
+		contentPanel.add(forwardThresholding, columnConstraints);
+		contentPanel.add(reverseThresholding, columnConstraints);
+		contentPanel.add(histogramThresholding, columnConstraints);
+		
 	}
 	
 	/**
@@ -203,10 +216,15 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		
 		
 		if(forwardThresholding.isSelected()){
-			ns.setReverseThreshold(false);
-		} else {
-			ns.setReverseThreshold(true);
-		}
+			ns.setMode(NuclearSignalOptions.FORWARD);
+		} 
+		if(reverseThresholding.isSelected()){
+			ns.setMode(NuclearSignalOptions.REVERSE);
+		} 
+		
+		if(histogramThresholding.isSelected()){
+			ns.setMode(NuclearSignalOptions.HISTOGRAM);
+		} 
 		
 		this.channel = channelSelection.getSelectedItem().equals("Red") 
 				? Constants.RGB_RED

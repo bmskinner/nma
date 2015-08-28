@@ -1,102 +1,101 @@
 package no.gui;
 
-import ij.IJ;
-
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeSupport;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JColorChooser;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.event.ChangeEvent;
+import javax.swing.JTree;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableColumn;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
 
 import no.analysis.AnalysisDataset;
+import no.components.NucleusBorderPoint;
+import no.components.NucleusBorderSegment;
+import no.components.SegmentedProfile;
 import no.nuclei.Nucleus;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import utility.Utils;
 import cell.Cell;
 import datasets.CellDatasetCreator;
+import datasets.ConsensusNucleusChartFactory;
+import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
-import datasets.TailDatasetCreator;
 
-public class CellDetailPanel extends JPanel implements ActionListener, SignalChangeListener {
+public class CellDetailPanel extends DetailPanel implements SignalChangeListener, TreeSelectionListener {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String SOURCE_COMPONENT = "CellDetailPanel"; 
-
-	private JComboBox<String> 	cellSelectionBox; 	// choose which cell to look at individually
 	private 	List<AnalysisDataset> list;
 	protected AnalysisDataset activeDataset;	
 	private Cell activeCell;
 	
+	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
 	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
 	protected OutlinePanel 	 	outlinePanel; 		// the outline of the cell and detected objects
 	protected CellStatsPanel 	cellStatsPanel;		// the stats table
 	protected SegmentStatsPanel segmentStatsPanel;	// details of the individual segments
-	
-	private List<Object> listeners = new ArrayList<Object>();
-	
+		
 	public CellDetailPanel() {
 
 		this.setLayout(new BorderLayout());
 		
+		cellsListPanel = new CellsListPanel();
+		this.add(cellsListPanel, BorderLayout.WEST);
+		
 		// make the chart for each nucleus
 		outlinePanel = new OutlinePanel();
-		this.add(outlinePanel, BorderLayout.CENTER);
+		this.add(outlinePanel, BorderLayout.EAST);
+			
+		JPanel centrePanel = createCentrePanel();
+		this.add(centrePanel, BorderLayout.CENTER);
+		centrePanel.setMinimumSize(new Dimension(200,200));
+		this.revalidate();
 		
-		// make the combobox for selecting nuclei
-		cellSelectionBox = new JComboBox<String>();
-		cellSelectionBox.setActionCommand("CellSelectionChoice");
-		cellSelectionBox.addActionListener(this);
-		this.add(cellSelectionBox, BorderLayout.NORTH);
-		
-		
-		JPanel westPanel = new JPanel();
-		westPanel.setLayout(new BoxLayout(westPanel, BoxLayout.Y_AXIS));
+	}
+	
+	/**
+	 * Create the central column panel
+	 * @return
+	 */
+	private JPanel createCentrePanel(){
+		JPanel centrePanel = new JPanel();
+		centrePanel.setLayout(new BoxLayout(centrePanel, BoxLayout.Y_AXIS));
 		
 		
 		cellStatsPanel = new CellStatsPanel();
-		westPanel.add(cellStatsPanel);
+		centrePanel.add(cellStatsPanel);
 		
 		profilePanel = new ProfilePanel();
-		westPanel.add(profilePanel);
+		centrePanel.add(profilePanel);
 		
 		segmentStatsPanel = new SegmentStatsPanel();
-		westPanel.add(segmentStatsPanel);
-		
-		this.add(westPanel, BorderLayout.WEST);
-		
+		centrePanel.add(segmentStatsPanel);
+		return centrePanel;
 	}
 	
 	/**
@@ -104,20 +103,24 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 	 * will only be displayed if the list contains one dataset.
 	 * @param list the datsets
 	 */
-	public void updateList(List<AnalysisDataset> list){
-		this.list = list;
+	public void updateList(final List<AnalysisDataset> list){
 		
-		if(list.size()==1){
-			activeDataset = list.get(0);
-			ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>(activeDataset.getCollection().getNucleusPathsAndNumbers());
-			cellSelectionBox.setModel(cellModel);
-			cellSelectionBox.setSelectedIndex(0);
-		} else {
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
 			
-			ComboBoxModel<String> cellModel = new DefaultComboBoxModel<String>();
-			cellSelectionBox.setModel(cellModel);
-			updateCell(null);
-		}
+				CellDetailPanel.this.list = list;
+				
+				if(list.size()==1){
+					
+					activeDataset = list.get(0);
+					cellsListPanel.updateDataset(activeDataset);
+				} else {
+					
+					cellsListPanel.updateDataset(null);
+					updateCell(null);
+				}
+			
+		}});
 	}
 	
 	
@@ -132,59 +135,6 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		profilePanel.update(cell);
 		segmentStatsPanel.update(cell);
 	}
-	
-	/**
-	 * Get a series or dataset index for colour selection when drawing charts. The index
-	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
-	 * @param label the label to extract the index from 
-	 * @return the index found
-	 */
-	private int getIndexFromLabel(String label){
-		String[] names = label.split("_");
-		return Integer.parseInt(names[1]);
-	}
-	
-
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-
-		if(arg0.getActionCommand().equals("CellSelectionChoice")){
-
-			String name = cellSelectionBox.getItemAt(cellSelectionBox.getSelectedIndex());
-
-			if(list.size()==1){	
-				try{
-					
-					activeCell = activeDataset.getCollection().getCell(name);
-					updateCell(activeCell);
-				} catch (Exception e1){
-					
-					IJ.log("Error fetching cell: "+e1.getMessage());
-					for(StackTraceElement e2 : e1.getStackTrace()){
-						IJ.log(e2.toString());
-					}
-				}
-			}
-
-		}
-		
-	}
-	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-     
-    private synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
-        Iterator iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
 	
 	
 	/**
@@ -263,6 +213,135 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 
 	}
 	
+	/**
+	 * Hold the list of cells within the current active dataset
+	 *
+	 */
+	protected class CellsListPanel extends JPanel {
+		
+		private static final long serialVersionUID = 1L;
+		private JTree tree;
+		
+		protected CellsListPanel(){
+			this.setLayout(new BorderLayout());
+			
+			DefaultMutableTreeNode root =
+					new DefaultMutableTreeNode("Cells");
+			TreeModel model = new DefaultTreeModel(root);
+			tree = new JTree(model);
+			tree.addTreeSelectionListener(CellDetailPanel.this);
+			tree.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					
+					JTree tree = (JTree) e.getSource();
+					
+					String name = tree.getSelectionPath().getLastPathComponent().toString();
+					
+					String[] bits = name.split("-");
+					
+					String pathName = activeDataset.getCollection().getFolder()
+							+File.separator
+							+bits[0]
+							+File.separator
+							+bits[1];
+
+					
+					// double click - remove cell
+					
+					if (e.getClickCount() == 2) {
+						
+						int result = JOptionPane.showConfirmDialog(null,
+
+						        "Delete cell?", "Do you want to delete the cell?", JOptionPane.YES_NO_OPTION);
+						
+						if(result==JOptionPane.YES_OPTION){
+							
+							// delete the cell
+							Cell cell = activeDataset.getCollection().getCell(pathName);
+							activeDataset.getCollection().removeCell(cell);
+							try {
+								CellDetailPanel.this.fireSignalChangeEvent("MorphologyRefresh_"+activeDataset.getUUID().toString());
+//								CellDetailPanel.this.log("Refreshing dataset");
+//								MorphologyAnalysis.refresh(activeDataset.getCollection());
+
+							} catch (Exception e1) {
+								log("Error deleting cell: "+e1.getMessage());
+							}
+							
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							CellDetailPanel.this.updateList(list);
+							CellDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
+							CellDetailPanel.this.fireSignalChangeEvent("UpdatePopulationPanel");
+							CellDetailPanel.this.fireSignalChangeEvent("SelectDataset_"+activeDataset.getUUID().toString());
+							
+						}
+						
+					}
+				}
+			});
+			
+			JScrollPane scrollPane = new JScrollPane(tree);
+			this.add(scrollPane, BorderLayout.CENTER);
+		}
+		
+		
+		/**
+		 * Trigger an update with a given dataset
+		 * @param dataset
+		 */
+		protected void updateDataset(AnalysisDataset dataset){
+			DefaultMutableTreeNode root =
+					new DefaultMutableTreeNode("Cells");
+			
+			if(dataset!=null){
+				createNodes(root, dataset);
+			} 
+			TreeModel model = new DefaultTreeModel(root);
+			tree.setModel(model);
+		}
+		
+		/**
+		 * Create the nodes in the tree
+		 * @param root the root node
+		 * @param dataset the dataset to use
+		 */
+		private void createNodes(DefaultMutableTreeNode root, AnalysisDataset dataset){
+		    
+		    for(Cell cell : dataset.getCollection().getCells()){	
+		    	String name = cell.getNucleus().getNameAndNumber();
+		    	root.add(new DefaultMutableTreeNode(name));
+		    }
+		    sort(root);
+
+		}
+		
+		private DefaultMutableTreeNode sort(DefaultMutableTreeNode node){
+			for(int i = 0; i < node.getChildCount() - 1; i++) {
+		        DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
+		        String nt = child.getUserObject().toString();
+		        String ntToCompare = nt.replace(".tiff", "");
+		        
+		        for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
+		            DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
+		            String np = prevNode.getUserObject().toString();
+		            String npToCompare = np.replace(".tiff", "");
+
+		            if(ntToCompare.compareToIgnoreCase(npToCompare) > 0) {
+		                node.insert(child, j);
+		                node.insert(prevNode, i);
+		            }
+		        }
+		        if(child.getChildCount() > 0) {
+		            sort(child);
+		        }
+			}
+			return node;
+			
+		}
+	}
+	
 	
 	/**
 	 * Show the profile for the nuclei in the given cell
@@ -276,66 +355,32 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		protected ProfilePanel(){
 			this.setLayout(new BorderLayout());
 			
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
-					"Position", "Angle", null);
-			XYPlot plot = chart.getXYPlot();
-			plot.getDomainAxis().setRange(0,100);
-			plot.getRangeAxis().setRange(0,360);
-			plot.setBackgroundPaint(Color.WHITE);
-			
-			profileChartPanel = new ChartPanel(chart);
+			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();		
+			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); 
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
 		}
 		
 		protected void update(Cell cell){
 
-			if(cell==null){
-				JFreeChart chart = ChartFactory.createXYLineChart(null,
-						"Position", "Angle", null);
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,100);
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
-				profileChartPanel.setChart(chart);
+			try{
 
-			} else {
-				
-				Nucleus nucleus = cell.getNucleus();
+				if(cell==null){
+					JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
+					profileChartPanel.setChart(chart);
 
-				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
+				} else {
 
-				// full segment colouring
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-								"Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
-								false);
+					Nucleus nucleus = cell.getNucleus();
 
+					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
+					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus);
 
-				XYPlot plot = chart.getXYPlot();
-				plot.getDomainAxis().setRange(0,nucleus.getLength());
-				plot.getRangeAxis().setRange(0,360);
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(1.0f)));
+					profileChartPanel.setChart(chart);
+				}
 
-				int seriesCount = plot.getSeriesCount();
-
-				for (int i = 0; i < seriesCount; i++) {
-					plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-					String name = (String) ds.getSeriesKey(i);
-					if(name.startsWith("Seg_")){
-						int colourIndex = getIndexFromLabel(name);
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-						plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-					} 
-					if(name.startsWith("Nucleus_")){
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-						plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-					} 
-
-				}	
-
-				profileChartPanel.setChart(chart);
+			} catch(Exception e){
+				error("Error updating cell panel", e);
 			}
 
 		}
@@ -352,9 +397,7 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 			
 			// make the chart for each nucleus
 			this.setLayout(new BorderLayout());
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
-					null, null, null);       
-			chart.getPlot().setBackgroundPaint(Color.WHITE);
+			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 
 			panel = new ChartPanel(chart);
 			
@@ -364,111 +407,17 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		
 		protected void update(Cell cell){
 			
+			try{
 			
+			JFreeChart chart;
 			if(cell==null){
-				JFreeChart chart = ChartFactory.createXYLineChart(null,
-						null, null, null);       
-				chart.getPlot().setBackgroundPaint(Color.WHITE);
-				panel.setChart(chart);
-
+				chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 			} else {
-
-				// make an empty chart
-				JFreeChart chart = 
-						ChartFactory.createXYLineChart(null,
-								null, null, null, PlotOrientation.VERTICAL, true, true,
-								false);
-
-				XYPlot plot = chart.getXYPlot();
-				plot.setBackgroundPaint(Color.WHITE);
-				plot.getRangeAxis().setInverted(true);
-
-				// make a hash to track the contents of each dataset produced
-				Map<Integer, String> hash = new HashMap<Integer, String>(0); 
-				Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
-
-
-				// get the nucleus dataset
-				XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell);
-				hash.put(hash.size(), "Nucleus"); // add to the first free entry
-				datasetHash.put(datasetHash.size(), nucleus);
-
-
-				// get the signals datasets and add each group to the hash
-				if(cell.getNucleus().hasSignal()){
-					List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, activeDataset);
-
-					for(XYDataset d : signalsDatasets){
-
-						String name = "default_0";
-						for (int i = 0; i < d.getSeriesCount(); i++) {
-							name = (String) d.getSeriesKey(i);	
-						}
-						int signalGroup = getIndexFromLabel(name);
-						hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
-						datasetHash.put(datasetHash.size(), d);
-					}
-				}
-
-				// get tail datasets if present
-				if(cell.hasTail()){
-
-					XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
-					hash.put(hash.size(), "TailBorder");
-					datasetHash.put(datasetHash.size(), tailBorder);
-					XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
-					hash.put(hash.size(), "TailSkeleton");
-					datasetHash.put(datasetHash.size(), skeleton);
-				}
-
-				// set the rendering options for each dataset type
-
-				for(int key : hash.keySet()){
-
-					//				IJ.log("Drawing dataset "+hash.get(key));
-
-					plot.setDataset(key, datasetHash.get(key));
-					plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
-
-					int seriesCount = plot.getDataset(key).getSeriesCount();
-					// go through each series in the dataset
-					for(int i=0; i<seriesCount;i++){
-
-						// all datasets use the same stroke
-						plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
-						plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
-
-						// nucleus colour
-						if(hash.get(key).equals("Nucleus")){
-
-							plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
-						}
-
-						// signal colours
-						if(hash.get(key).startsWith("SignalGroup_")){
-							int colourIndex = getIndexFromLabel(hash.get(key));
-							//						IJ.log("Drawing signal "+i+" of "+seriesCount+" in series group "+colourIndex);
-							Color colour = activeDataset.getSignalGroupColour(colourIndex);
-							plot.getRenderer(key).setSeriesPaint(i, colour);
-						}
-
-						// tail border
-						if(hash.get(key).equals("TailBorder")){
-
-							plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
-						}
-
-
-						// tail skeleton
-						if(hash.get(key).equals("TailSkeleton")){
-
-							plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
-						}
-					}
-
-				}
-
-				panel.setChart(chart);
+				chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset);
+			}
+			panel.setChart(chart);
+			}catch(Exception e){
+				error("Error updating outline chart", e);
 			}
 		}
 
@@ -495,29 +444,101 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 				public void mouseClicked(MouseEvent e) {
 					
 					JTable table = (JTable) e.getSource();
+					int row = table.rowAtPoint((e.getPoint()));
+					String rowName = table.getModel().getValueAt(row, 0).toString();
 					
 					// double click
 					if (e.getClickCount() == 2) {
-						int row = table.rowAtPoint((e.getPoint()));
+						
+						// Look for signal group colour
+						if(rowName.equals("")){
+							String value = table.getModel().getValueAt(row+1, 0).toString();
+							if(value.equals("Signal group")){
+								
+								// the group number is in the next row down
+								String groupString = table.getModel().getValueAt(row+1, 1).toString();
+								int signalGroup = Integer.valueOf(groupString);
+								
+								Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+								
+								Color newColor = JColorChooser.showDialog(
+					                     CellDetailPanel.this,
+					                     "Choose signal Color",
+					                     oldColour);
+								
+								if(newColor != null){
+									activeDataset.setSignalGroupColour(signalGroup, newColor);
+									updateCell(activeCell);
+									fireSignalChangeEvent("SignalColourUpdate");
+								}
+							}
+						}
 
-						String value = table.getModel().getValueAt(row+1, 0).toString();
-						if(value.equals("Signal group")){
+						// Adjust the scale
+						if(rowName.equals("Scale (um/pixel)")){
 							
-							// the group number is in the next row down
-							String groupString = table.getModel().getValueAt(row+1, 1).toString();
-							int signalGroup = Integer.valueOf(groupString);
+							SpinnerNumberModel sModel 
+								= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 0, 100, 0.001);
+							JSpinner spinner = new JSpinner(sModel);
 							
-							Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
-							
-							Color newColor = JColorChooser.showDialog(
-				                     CellDetailPanel.this,
-				                     "Choose signal Color",
-				                     oldColour);
-							
-							if(newColor != null){
-								activeDataset.setSignalGroupColour(signalGroup, newColor);
+							int option = JOptionPane.showOptionDialog(null, 
+									spinner, 
+									"Choose the new scale", 
+									JOptionPane.OK_CANCEL_OPTION, 
+									JOptionPane.QUESTION_MESSAGE, null, null, null);
+							if (option == JOptionPane.CANCEL_OPTION) {
+							    // user hit cancel
+							} else if (option == JOptionPane.OK_OPTION)	{
+								
+								// offset by 90 because reasons?
+								double scale = (Double) spinner.getModel().getValue();
+								activeCell.getNucleus().setScale(scale);
 								updateCell(activeCell);
-								fireSignalChangeEvent("SignalColourUpdate");
+								
+							}
+						}
+						
+						// Adjust the point position of tags
+						Nucleus n = activeCell.getNucleus();
+						if(n.hasBorderTag(rowName)){
+							
+							String pointType = rowName;
+							
+							int index = Utils.wrapIndex(n.getBorderIndex(pointType)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
+							
+							SpinnerNumberModel sModel 
+								= new SpinnerNumberModel(index, 0, n.getLength(), 1);
+							JSpinner spinner = new JSpinner(sModel);
+							
+							int option = JOptionPane.showOptionDialog(null, 
+									spinner, 
+									"Choose the new "+pointType+" point", 
+									JOptionPane.OK_CANCEL_OPTION, 
+									JOptionPane.QUESTION_MESSAGE, null, null, null);
+							if (option == JOptionPane.CANCEL_OPTION) {
+							    // user hit cancel
+							} else if (option == JOptionPane.OK_OPTION)	{
+								
+								// the value chosen by the user
+								int chosenIndex = (Integer) spinner.getModel().getValue();
+								
+								// adjust to the actual point index
+								int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(n.getReferencePoint()), n.getLength());
+								
+								n.addBorderTag(pointType, pointIndex);
+								
+								if(pointType.equals(n.getOrientationPoint())){
+									if(n.hasBorderTag("intersectionPoint")){
+										// only rodent sperm use the intersection point, which is equivalent to the head.
+										NucleusBorderPoint newPoint = n.findOppositeBorder(n.getBorderTag(n.getOrientationPoint()));
+										n.addBorderTag("intersectionPoint", n.getIndex(newPoint));
+										n.addBorderTag("head", n.getIndex(newPoint));
+									}
+								}
+								
+								
+								updateCell(activeCell);
+								
 							}
 						}
 							
@@ -556,7 +577,115 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 			
 			scrollPane = new JScrollPane();
 						
-			table = new JTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+			try {
+				table = new JTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+				table.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						
+						JTable table = (JTable) e.getSource();
+						int row = table.rowAtPoint(e.getPoint());
+						String rowName = table.getModel().getValueAt(row, 0).toString();
+						
+						int column = table.columnAtPoint(e.getPoint());
+						String columnName = table.getModel().getColumnName(column);
+						
+						// double click
+						if (e.getClickCount() == 2) {
+							
+							Nucleus n = activeCell.getNucleus();
+							
+							if(columnName.startsWith("Seg_")){
+								
+								try {
+									SegmentedProfile profile = n.getAngleProfile(n.getReferencePoint());
+									NucleusBorderSegment seg = profile.getSegment(columnName);
+									
+									if(rowName.equals("Start index")){
+//										SpinnerNumberModel sModel 
+//										= new SpinnerNumberModel(seg.getStartIndex(), 
+//												seg.prevSegment().getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
+//												seg.getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+//												1);
+										SpinnerNumberModel sModel 
+										= new SpinnerNumberModel(seg.getStartIndex(), 
+												0, 
+												n.getLength(),
+												1);
+										JSpinner spinner = new JSpinner(sModel);
+
+										int option = JOptionPane.showOptionDialog(null, 
+												spinner, 
+												"Choose the new segment start index", 
+												JOptionPane.OK_CANCEL_OPTION, 
+												JOptionPane.QUESTION_MESSAGE, null, null, null);
+										if (option == JOptionPane.CANCEL_OPTION) {
+											// user hit cancel
+										} else if (option == JOptionPane.OK_OPTION)	{
+											
+											int index = (Integer) spinner.getModel().getValue();
+											if(profile.update(seg, index, seg.getEndIndex())){
+//											if(seg.update(index, seg.getEndIndex())){
+												n.setAngleProfile(profile, n.getReferencePoint());
+												updateCell(activeCell);
+											} else {
+												log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+											}
+											
+
+										}
+									}
+									
+									if(rowName.equals("End index")){
+//										SpinnerNumberModel sModel 
+//										= new SpinnerNumberModel(seg.getEndIndex(), 
+//												seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
+//												seg.nextSegment().getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
+//												1);
+										SpinnerNumberModel sModel 
+										= new SpinnerNumberModel(seg.getEndIndex(), 
+												0, 
+												n.getLength(),
+												1);
+										JSpinner spinner = new JSpinner(sModel);
+
+										int option = JOptionPane.showOptionDialog(null, 
+												spinner, 
+												"Choose the new segment end index", 
+												JOptionPane.OK_CANCEL_OPTION, 
+												JOptionPane.QUESTION_MESSAGE, null, null, null);
+										if (option == JOptionPane.CANCEL_OPTION) {
+											// user hit cancel
+										} else if (option == JOptionPane.OK_OPTION)	{
+											
+											
+											
+											int index = (Integer) spinner.getModel().getValue();
+											if(profile.update(seg, seg.getStartIndex(), index)){
+//											if(seg.update(seg.getStartIndex(), index)){
+												n.setAngleProfile(profile, n.getReferencePoint());
+												updateCell(activeCell);
+											} else {
+												log("Updating "+seg.getEndIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+											}
+											
+
+										}
+									}
+									
+									
+									
+								} catch (Exception e1) {
+									error("Error getting segment", e1);
+								}
+							}
+						}
+					}
+				});
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			table.setEnabled(false);
 						
 			scrollPane.setViewportView(table);
@@ -568,9 +697,19 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 		protected void update(Cell cell){
 			
 			if(cell==null){
-				table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+				try {
+					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
-				table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
+				try {
+					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
 				Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
 
@@ -580,6 +719,32 @@ public class CellDetailPanel extends JPanel implements ActionListener, SignalCha
 				}
 			}
 		}
+	}
+
+
+	@Override
+	public void valueChanged(TreeSelectionEvent arg0) {
+
+		String name = arg0.getPath().getLastPathComponent().toString();
+		
+		String[] bits = name.split("-");
+		
+		String pathName = activeDataset.getCollection().getFolder()
+				+File.separator
+				+bits[0]
+				+File.separator
+				+bits[1];
+		
+		if(list.size()==1){	
+			try{
+				
+				activeCell = activeDataset.getCollection().getCell(pathName);
+				updateCell(activeCell);
+			} catch (Exception e1){
+				error("Error fetching cell", e1);
+			}
+		}
+		
 	}
 
 }

@@ -8,18 +8,17 @@ public class Constants {
 	 * guaranteed between revision or major version increments.
 	 */
 	public static final int VERSION_MAJOR    = 1;
-	public static final int VERSION_REVISION = 9;
-	public static final int VERSION_BUGFIX   = 3;
+	public static final int VERSION_REVISION = 10;
+	public static final int VERSION_BUGFIX   = 0;
+	
+	// nmd = Nuclear Morphology Dataset
+	public static final String SAVE_FILE_EXTENSION = ".nmd";
 	
 
 		// RGB colour channels
 		public static final int RGB_RED = 0;
 		public static final int RGB_GREEN = 1;
-		public static final int RGB_BLUE = 2;
-		// thsese should no longer be used:
-//		public static final int NOT_RED_CHANNEL  = 3;
-//		public static final int NOT_GREEN_CHANNEL  = 4;
-		
+		public static final int RGB_BLUE = 2;	
 		
 		// imported images - stack positions
 		public static final int COUNTERSTAIN = 1; // ImageStack slices are numbered from 1; first slice is blue
@@ -29,10 +28,8 @@ public class Constants {
 		// statistical testing
 		public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
-		
-			
-		public static final String DEBUG_FILE_NAME = "log.debug.txt";
-		
+				
+				
 		/**
 		 * Given an RGB channel, get the ImageStack stack for internal use
 		 * @param channel the channel

@@ -1,7 +1,9 @@
 package no.components;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import utility.Utils;
 import ij.IJ;
@@ -21,7 +23,7 @@ public class Profile implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private double[] array;
+	protected double[] array;
 	private static final int ARRAY_BEFORE = -1;
 	private static final int ARRAY_AFTER = 1;
 
@@ -60,6 +62,28 @@ public class Profile implements Serializable {
 	 */
 	public int size(){
 		return array.length;
+	}
+	
+	/**
+	 * Test if the values in this profile are the same 
+	 * as in the test profile (and have the same position)
+	 * @param test the profile to test
+	 * @return
+	 */
+	public boolean equals(Profile test){
+		if(test==null){
+			return false;
+		}
+		if(test.size()!=this.size()){
+			return false;
+		}
+		
+		for(int i=0;i<this.size();i++){
+			if(this.get(i)!=test.get(i)){
+				return false;
+			}
+		}
+		return true;
 	}
 
 	
@@ -102,6 +126,8 @@ public class Profile implements Serializable {
 
 	/**
 	 * Get the index of the maximum value in the profile
+	 * If there are multiple values at maximum, this returns the
+	 * first only
 	 * @return the index
 	 */
 	public int getIndexOfMax(){
@@ -117,7 +143,8 @@ public class Profile implements Serializable {
 	}
 
 	/**
-	 * Get the minimum value in the profile
+	 * Get the minimum value in the profile.If there are multiple values 
+	 * at minimum, this returns the first only
 	 * @return the minimum value
 	 */
 	public double getMin(){
@@ -168,6 +195,34 @@ public class Profile implements Serializable {
 		}
 		return new Profile(result);
 	}
+	
+	/**
+	 * Check the lengths of the two profiles. Return the first profile
+	 * interpolated to the length of the longer.
+	 * @param profile1 the profile to return interpolated
+	 * @param profile2 the profile to compare
+	 * @return a new profile with the length of the longest input profile
+	 */
+	private Profile equaliseLengths(Profile profile1, Profile profile2){
+
+		try{
+			// profile 2 is smaller
+			// return profile 1 unchanged
+			if(profile2.size() < profile1.size() ){
+				return profile1;
+			} else {
+				// profile 1 is smaller; interpolate to profile 2 length
+				profile1 = profile1.interpolate(profile2.size());
+			}
+		} catch(Exception e){
+			IJ.log("Error interpolating profiles: "+e.getMessage());
+			IJ.log("Profile 1: ");
+			profile1.print();
+			IJ.log("Profile 2: ");
+			profile2.print();
+		}
+		return profile1;
+	}
 
 	/**
 	 * Calculate the square differences between this profile and
@@ -177,36 +232,75 @@ public class Profile implements Serializable {
 	 * @param testProfile the profile to compare to 
 	 * @return the sum-of-squares difference
 	 */
-	public double differenceToProfile(Profile testProfile){
+	public double absoluteSquareDifference(Profile testProfile){
 
 		// the test profile needs to be matched to this profile
 		// whichever is smaller must be interpolated 
-		Profile profile1 = this.copy();
-		Profile profile2 = testProfile;
-
-		try{
-			if(profile2.size()<profile1.size()){
-				profile2 = profile2.interpolate(this.size());
-			} else {
-				profile1 = profile1.interpolate(testProfile.size());
-			}
-		} catch(Exception e){
-			IJ.log("Error interpolating profiles: "+e.getMessage());
-			IJ.log("Profile 1: ");
-			profile1.print();
-			IJ.log("Profile 2: ");
-			profile2.print();
-		}
+		Profile profile1 = equaliseLengths(this.copy(), testProfile);
+		Profile profile2 = equaliseLengths(testProfile, this.copy());
 
 		double difference = 0;
 
-		for(int j=0; j<this.size(); j++){ // for each point round the array
+		for(int j=0; j<profile1.size(); j++){ // for each point round the array
 
 			double thisValue = profile1.get(j);
 			double testValue = profile2.get(j);
 			difference += Math.pow(thisValue - testValue, 2); // square difference - highlights extremes
 		}
 		return difference;
+	}
+	
+	/**
+	 * Calculate the sum of squares difference between this profile and
+	 * a given profile. Unlike the absolute difference, this value is weighted
+	 * to the difference from 180 degrees. That is, a difference of 5 degrees at
+	 * 170 (to 175) will count less than a difference of 5 degrees at 30 (to 35).
+	 * This promotes differences at regions of profile maxima, and minimises them at
+	 * constant straight regions.
+	 * @param testProfile the profile to compare
+	 * @return
+	 */
+	public double weightedSquareDifference(Profile testProfile){
+		
+		if(testProfile==null){
+			throw new IllegalArgumentException("Test profile is null");
+		}
+		
+		// Ensure both profiles have the same length, to allow
+		// point by point comparisons. The shorter is interpolated.
+		Profile profile1 = equaliseLengths(this.copy(), testProfile);
+		Profile profile2 = equaliseLengths(testProfile, this.copy());
+		
+		double result = 0;
+		
+		for(int j=0; j<profile1.size(); j++){ // for each point round the array
+
+			double value1 = profile1.get(j);
+			double value2 = profile2.get(j);
+						
+			// get the difference away from 180 degrees for the test profile
+			double normalised2 = Math.abs(  value2 - 180  );
+			
+			/*
+				Set the weighting to 1/180 multiplied by the difference	of the 
+				test profile to 180. Hence, a difference of 180 degrees from
+				the 180 degree baseline will get a weighting of 1, and a difference 
+				of 0 degrees from the 180 degree baseline will get a weighting of 0
+				(i.e. does not count if it is perfectly straight)
+			*/
+			double weight = (double) ( 1.0/180.0) * normalised2;
+			
+			// the difference between the two profiles at this point
+			double difference = value1 - value2;
+			
+			// apply the weighting
+			double weightedDifference = difference * weight;
+			
+			// add the square difference - highlights extremes
+			result += Math.pow(weightedDifference, 2); 
+		}
+		
+		return result;
 	}
 
   /*
@@ -227,8 +321,9 @@ public class Profile implements Serializable {
 	 * Copy the profile and offset it to start from the given index
 	 * @param j the index to start from
 	 * @return a new offset Profile
+	 * @throws Exception 
 	 */
-	public Profile offset(int j){
+	public Profile offset(int j) throws Exception{
 		double[] newArray = new double[this.size()];
 		for(int i=0;i<this.size();i++){
 			newArray[i] = this.array[ Utils.wrapIndex( i+j , this.size() ) ];
@@ -281,8 +376,9 @@ public class Profile implements Serializable {
 
 	/**
 	 * Reverse the profile. Does not copy.
+	 * @throws Exception 
 	 */
-	public void reverse(){
+	public void reverse() throws Exception{
 
 		double tmp;
 		for (int i = 0; i < this.array.length / 2; i++) {
@@ -389,15 +485,15 @@ public class Profile implements Serializable {
     along it one index at a time. Find the point of least difference, 
     and return this offset. Returns the positive offset to this profile
    */
-  public int getSlidingWindowOffset(Profile testProfile){
+  public int getSlidingWindowOffset(Profile testProfile) throws Exception {
 
-	  double lowestScore = this.differenceToProfile(testProfile);
+	  double lowestScore = this.absoluteSquareDifference(testProfile);
 	  int index = 0;
 	  for(int i=0;i<this.size();i++){
 
 		  Profile offsetProfile = this.offset(i);
 
-		  double score = offsetProfile.differenceToProfile(testProfile);
+		  double score = offsetProfile.absoluteSquareDifference(testProfile);
 		  if(score<lowestScore){
 			  lowestScore=score;
 			  index=i;
@@ -453,14 +549,14 @@ public class Profile implements Serializable {
 
         // for the first position in prevValues, compare to the current index
         if(k==0){
-          if( prevValues[k] < array[i] || 
-              nextValues[k] < array[i] ){
+          if( prevValues[k] <= array[i] || 
+              nextValues[k] <= array[i] ){
             ok = false;
           }
         } else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
           
-          if( prevValues[k] < prevValues[k-1] || 
-              nextValues[k] < nextValues[k-1]){
+          if( prevValues[k] <= prevValues[k-1] || 
+              nextValues[k] <= nextValues[k-1]){
             ok = false;
           }
         }
@@ -481,7 +577,63 @@ public class Profile implements Serializable {
     // this.minimaCount =  count;
     return minimaProfile;
   }
+  
+  /**
+   * Get the local maxima that are above a threshold
+   * value
+   * @param windowSize the maxima window size
+   * @param threshold the threshold
+   * @return
+   */
+  public Profile getLocalMinima(int windowSize, double threshold){
+	  Profile minima = getLocalMinima(windowSize);
 
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+
+		  if(minima.get(i)==1 && this.get(i)<threshold){
+			  values[i] = 1;
+		  } else {
+			  values[i] = 0;
+		  } 
+	  }
+	  return new Profile(values);
+  }
+  
+  /**
+   * Get the local minima that are above a threshold
+   * value and have an absolute value greater than the given 
+   * fraction of the total value range in the profile
+   * @param windowSize the maxima window size
+   * @param threshold the threshold
+   * @param fraction the fraction threshold
+   * @return
+   */
+  public Profile getLocalMinima(int windowSize, double threshold, double fraction){
+	  Profile minima = getLocalMinima(windowSize, threshold);
+
+	  double[] values = new double[this.size()];
+	  
+	  double fractionThreshold = (this.getMax()-this.getMin()) * fraction;
+
+	  for (int i=0; i<array.length; i++) { 
+
+		  if(minima.get(i)==1 && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
+			  values[i] = 1;
+		  } else {
+			  values[i] = 0;
+		  } 
+	  }
+	  return new Profile(values);
+  }
+
+  /**
+   * Get the points considered local maxima for the given window
+   * size as a Profile. Maxima are 1, other points are 0
+   * @param windowSize the window size to use
+   * @return
+   */
   public Profile getLocalMaxima(int windowSize){
 	  // go through array
 	  // look at points ahead and behind.
@@ -501,14 +653,14 @@ public class Profile implements Serializable {
 
 			  // for the first position in prevValues, compare to the current index
 			  if(k==0){
-				  if( prevValues[k] > array[i] || 
-						  nextValues[k] > array[i] ){
+				  if( prevValues[k] >= array[i] || 
+						  nextValues[k] >= array[i] ){
 					  isMaximum = false;
 				  }
 			  } else { // for the remainder of the positions in prevValues, compare to the prior prevAngle
 
-				  if( prevValues[k] > prevValues[k-1] || 
-						  nextValues[k] > nextValues[k-1]){
+				  if( prevValues[k] >= prevValues[k-1] || 
+						  nextValues[k] >= nextValues[k-1]){
 					  isMaximum = false;
 				  }
 			  }
@@ -517,6 +669,56 @@ public class Profile implements Serializable {
 		  result[i] = isMaximum ? 1 : 0;
 	  }
 	  return new Profile(result);
+  }
+  
+  /**
+   * Get the local maxima that are above a threshold
+   * value
+   * @param windowSize the maxima window size
+   * @param threshold the threshold
+   * @return
+   */
+  public Profile getLocalMaxima(int windowSize, double threshold){
+	  Profile maxima = getLocalMaxima(windowSize);
+
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+
+		  if(maxima.get(i)==1 && this.get(i)>threshold){
+			  values[i] = 1;
+		  } else {
+			  values[i] = 0;
+		  } 
+	  }
+	  return new Profile(values);
+  }
+  
+  /**
+   * Get the local maxima that are above a threshold
+   * value and have an absolute value greater than the given 
+   * fraction of the total value range in the profile
+   * @param windowSize the maxima window size
+   * @param threshold the threshold
+   * @param fraction the fraction threshold
+   * @return
+   */
+  public Profile getLocalMaxima(int windowSize, double threshold, double fraction){
+	  Profile minima = getLocalMaxima(windowSize, threshold);
+
+	  double[] values = new double[this.size()];
+	  
+	  double fractionThreshold = this.getMax()-this.getMin() * fraction;
+
+	  for (int i=0; i<array.length; i++) { 
+
+		  if(minima.get(i)==1 && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
+			  values[i] = 1;
+		  } else {
+			  values[i] = 0;
+		  } 
+	  }
+	  return new Profile(values);
   }
   
   /**
@@ -580,25 +782,41 @@ public class Profile implements Serializable {
 	  }
 
   }
+  
+  /**
+   * Fetch a sub-region of the profile defined by the given segment. The segment
+   * must originate from an equivalent profile (i.e. have the same totalLength
+   * as the profile)
+   * @param segment the segment to find
+   * @return a Profile
+   */
+  public Profile getSubregion(NucleusBorderSegment segment){
+	  
+	  if(segment==null){
+		  throw new IllegalArgumentException("Segment is null");
+	  }
+	  
+	  if(segment.getTotalLength()!=this.size()){
+		  throw new IllegalArgumentException("Segment comes from a different length profile");
+	  }
+	  return this.getSubregion(segment.getStartIndex(), segment.getEndIndex());
+  }
 
-  public Profile calculateDeltas(int windowSize){
+  /**
+   * Calculate the differences between the previous and next indexes
+   * across a given window size around this point
+ * @param windowSize
+ * @return
+ */
+public Profile calculateDeltas(int windowSize){
 
     double[] deltas = new double[this.size()];
 
-    double[] prevValues = new double[windowSize]; // slots for previous angles
-    double[] nextValues = new double[windowSize]; // slots for next angles
 
     for (int i=0; i<array.length; i++) { // for each position in sperm
-
-      for(int j=0;j<prevValues.length;j++){
-
-        int prev_i = Utils.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-        int next_i = Utils.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
-
-        // fill the lookup array
-        prevValues[j] = array[prev_i];
-        nextValues[j] = array[next_i];
-      }
+    	
+    	double[] prevValues = getValues(i, windowSize, Profile.ARRAY_BEFORE); // slots for previous angles
+    	double[] nextValues = getValues(i, windowSize, Profile.ARRAY_AFTER);
 
       double delta = 0;
       for(int k=0;k<prevValues.length;k++){
@@ -629,7 +847,7 @@ public class Profile implements Serializable {
 
 
 		  double delta = 	array[i]	-  array[prev_i] +
-				  			array[next_i]- array[i];
+				  array[next_i]- array[i];
 
 
 		  deltas[i] = delta;
@@ -638,6 +856,63 @@ public class Profile implements Serializable {
 	  return result;
   }
   
+  /**
+   * Log transform the profile to the given base
+   * @param base
+   * @return
+   */
+  public Profile log(double base){
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+		  values[i] = Math.log(this.get(i)) / Math.log(base);
+	  }
+	  return new Profile(values);
+  }
+  
+  /**
+   * Raise the values in the profile to the given exponent
+   * @param base
+   * @return
+   */
+  public Profile power(double exponent){
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+		  values[i] = Math.pow(this.get(i),exponent);
+	  }
+	  return new Profile(values);
+  }
+  
+  /**
+   * Get the absolute values from a profile
+   * @return
+   */
+  public Profile absolute(){
+	  double[] values = new double[this.size()];
+
+	  for (int i=0; i<array.length; i++) { 
+		  values[i] = Math.abs(this.get(i));
+	  }
+	  return new Profile(values);
+  }
+  
+  /**
+   * Get the cumulative sum of the values in the
+   * profile
+   * @return
+   */
+  public Profile cumulativeSum(){
+	  double[] values = new double[this.size()];
+
+	  double total = 0;
+	  for (int i=0; i<array.length; i++) { 
+		  total += this.get(i);
+		  values[i] = total;
+	  }
+	  return new Profile(values);
+  }
+
   /**
    * Multiply all values within the profile by a given value
    * @param multiplier the value to multiply by
@@ -651,7 +926,7 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
-  
+
   /**
    * Multiply all values within the profile by the value within the given Profile
    * @param multiplier the profile to multiply by. Must be the same length as this profile
@@ -699,7 +974,7 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
-  
+
   /**
    * Add all values within the profile by the value within the given Profile
    * @param adder the profile to add. Must be the same length as this profile
@@ -716,7 +991,7 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
-  
+
   /**
    * Add the given value to all points within the profile
    * @param adder the value to add.
@@ -731,7 +1006,7 @@ public class Profile implements Serializable {
 	  }
 	  return new Profile(result);
   }
-  
+
   /**
    * Subtract all values within the profile by the value within the given Profile
    * @param adder the profile to subtract. Must be the same length as this profile
@@ -751,8 +1026,33 @@ public class Profile implements Serializable {
 
   // use for debugging
   public void print(){
-    for (int i=0; i<array.length; i++) {
-      IJ.log("Point "+i+": "+array[i]);
-    }
+	  for (int i=0; i<array.length; i++) {
+		  IJ.log("Point "+i+": "+array[i]);
+	  }
+  }
+
+
+  /**
+   * Given a list of ordered profiles, merge them into one 
+   * contiguous profile
+   * @param list the list of profiles to merge
+   * @return the merged profile
+   */
+  public static Profile merge(List<Profile> list){
+	  if(list==null || list.size()==0){
+		  throw new IllegalArgumentException("Profile list is null or empty");
+	  }
+	  Profile result = new Profile(new double[0]);
+	  List<Double> combinedList = new ArrayList<Double>(0);
+
+	  for(Profile p : list){
+		  double[] values = p.asArray();
+		  List<Double> valueList = Arrays.asList(Utils.getDoubleFromdouble(values));
+		  combinedList.addAll(valueList);
+	  }
+
+	  Double[] combinedArray = (Double[]) combinedList.toArray(new Double[0]);
+	  result = new Profile(Utils.getdoubleFromDouble(combinedArray));
+	  return result;
   }
 }

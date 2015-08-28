@@ -23,11 +23,14 @@ import java.util.UUID;
 import cell.Cell;
 import utility.Constants;
 import utility.Stats;
+import utility.Utils;
+import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;
+import no.nuclei.ConsensusNucleus;
 import no.nuclei.Nucleus;
 import no.nuclei.sperm.PigSpermNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
@@ -40,6 +43,7 @@ implements Serializable
 	public static final String FRANKEN_PROFILE = "franken";
 	
 	private static final long serialVersionUID = 1L;
+	
 	private File 	folder; 		// the source of the nuclei
 	private String 	outputFolder;	// the location to save out data
 	private File 	debugFile;		// the location of the debug file 
@@ -47,25 +51,39 @@ implements Serializable
 	private String 	name;			// the name of the collection
 	private UUID 	guid;			// the collection id
 	
-	private Class<?> nucleusClass;
+	private Class<?> nucleusClass;	// the class of the nuclei this collection contains
 		
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	protected Map<String, ProfileCollection> profileCollections = new HashMap<String, ProfileCollection>();
 		
-	private Nucleus consensusNucleus;
+	private ConsensusNucleus consensusNucleus; 	// the refolded consensus nucleus
 	
-	private List<Cell> cellCollection = new ArrayList<Cell>(0); // store all the nuclei analysed
-	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();
+	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();	// store all the nuclei analysed
 
   public CellCollection(File folder, String outputFolder, String type, File debugFile, Class<?> nucleusClass){
 	  this.folder = folder;
 	  this.outputFolder = outputFolder;
 	  this.debugFile = debugFile;
 	  this.collectionType = type;
-	  this.name = outputFolder+" - "+type;
+	  this.name = type+" - "+outputFolder;
 	  this.guid = java.util.UUID.randomUUID();
 	  this.nucleusClass = nucleusClass;
 	  profileCollections.put(CellCollection.REGULAR_PROFILE, new ProfileCollection());
+  }
+  
+  /**
+   * Construct from a template dataset
+   * @param template the dataset to base on for analysis options, folders
+   * @param name the collection name
+   */
+  public CellCollection(AnalysisDataset template, String name){
+
+	  this(template.getCollection().getFolder(), 
+			  template.getCollection().getOutputFolderName(), 
+			  name, 
+			  template.getCollection().getDebugFile(),
+			  template.getCollection().getNucleusClass()
+			  );
   }
 
   /*
@@ -87,30 +105,29 @@ implements Serializable
 	  return this.guid;
   }
   
+  /**
+   * Get the UUIDs of all the cells in the collection
+   * @return
+   */
   public List<UUID> getCellIds(){
 	  List<UUID> result = new ArrayList<UUID>(0);
-	  for(Cell c : cellCollection){
-		  result.add(c.getCellId());
-	  }
-	  return  result;
-  }
-  
-  public List<String> getCellIdsAsStrings(){
-	  List<String> result = new ArrayList<String>(0);
-	  for(Cell c : cellCollection){
-		  result.add(c.getCellId().toString());
+
+	  for(UUID id : mappedCollection.keySet()){
+		  result.add(id);
 	  }
 	  return  result;
   }
 
   public void addCell(Cell r){
-	  this.cellCollection.add(r);
 	  this.mappedCollection.put(r.getCellId(), r);
   }
   
   public void removeCell(Cell c){
-	  this.mappedCollection.remove(c);
-	  this.cellCollection.remove(c);
+	  this.mappedCollection.remove(c.getCellId());
+  }
+  
+  public int size(){
+	  return mappedCollection.size();
   }
     
   public boolean hasConsensusNucleus(){
@@ -122,23 +139,31 @@ implements Serializable
   }
 
 
-  public void addConsensusNucleus(Nucleus n){
+  public void addConsensusNucleus(ConsensusNucleus n){
 	  this.consensusNucleus = n;
   }
     
-  /*
-    -----------------------
-    Getters
-    -----------------------
-  */
+
+  /**
+   * Get the cell with the given UUID
+   * @param id
+   * @return
+   */
   public Cell getCell(UUID id){
 	  return this.mappedCollection.get(id);
   }
+  
   
   public Class<?> getNucleusClass(){
 	  return this.nucleusClass;
   }
   
+  /**
+   * Get the cell with the given path
+   * @param path the path to the cell (uses the path-and-number format)
+   * @return
+   * @see Nucleus.getPathAndNumber()
+   */
   public Cell getCell(String path){
 	  for(Cell c : this.getCells()){
 		  Nucleus n = c.getNucleus();
@@ -149,7 +174,7 @@ implements Serializable
 	  return null;
   }
   
-  public Nucleus getConsensusNucleus(){
+  public ConsensusNucleus getConsensusNucleus(){
 	  return this.consensusNucleus;
   }
   
@@ -259,135 +284,180 @@ implements Serializable
 	  return result;
   }
 
+  /**
+   * Get the perimeters of the nuclei in this collection as
+   * an array
+   * @return
+   */
   public double[] getPerimeters(){
 
-    double[] d = new double[cellCollection.size()];
-
-    for(int i=0;i<cellCollection.size();i++){
-      d[i] = cellCollection.get(i).getNucleus().getPerimeter();
-    }
-    return d;
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(n.getPerimeter());
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
+  /**
+   * Get the areas of the nuclei in this collection as
+   * an array
+   * @return
+   */
   public double[] getAreas(){
 
-    double[] d = new double[cellCollection.size()];
-
-    for(int i=0;i<cellCollection.size();i++){
-      d[i] = cellCollection.get(i).getNucleus().getArea();
-    }
-    return d;
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(n.getArea());
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
+  /**
+   * Get the ferets of the nuclei in this collection as
+   * an array
+   * @return
+   */
   public double[] getFerets(){
 
-    double[] d = new double[cellCollection.size()];
-
-    for(int i=0;i<cellCollection.size();i++){
-      d[i] = cellCollection.get(i).getNucleus().getFeret();
-    }
-    return d;
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(n.getFeret());
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
   
+  /**
+   * Get the minimum diameters of the nuclei in this collection as
+   * an array
+   * @return
+   */
   public double[] getMinFerets(){
 
-	    double[] d = new double[cellCollection.size()];
-
-	    for(int i=0;i<cellCollection.size();i++){
-	      d[i] = cellCollection.get(i).getNucleus().getNarrowestDiameter();
-	    }
-	    return d;
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(n.getNarrowestDiameter());
 	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+  }
 
+  /**
+   * Get the path lengths of the nuclei in this collection as
+   * an array
+   * @return
+   */
   public double[] getPathLengths(){
 
-    double[] d = new double[cellCollection.size()];
-
-    for(int i=0;i<cellCollection.size();i++){
-      d[i] = cellCollection.get(i).getNucleus().getPathLength();
-    }
-    return d;
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(n.getPathLength());
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
+  /**
+   * Get the array lengths of the nuclei in this collection as
+   * an array
+   * @return
+   */
   public double[] getArrayLengths(){
 
-    double[] d = new double[cellCollection.size()];
-
-    for(int i=0;i<cellCollection.size();i++){
-      d[i] = cellCollection.get(i).getNucleus().getLength();
-    }
-    return d;
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(  (double) n.getLength());
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
-
+  
   public double[] getMedianDistanceBetweenPoints(){
 
-    double[] d = new double[cellCollection.size()];
-
-    for(int i=0;i<cellCollection.size();i++){
-      d[i] = cellCollection.get(i).getNucleus().getMedianDistanceBetweenPoints();
-    }
-    return d;
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(  (double) n.getMedianDistanceBetweenPoints());
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
   
   public String[] getNucleusImagePaths(){
-	    String[] s = new String[cellCollection.size()];
 
-	    for(int i=0;i<cellCollection.size();i++){
-	    	Nucleus n = cellCollection.get(i).getNucleus();
-	      s[i] = n.getPath();
-	    }
-	    return s;
+	  List<String> list = new ArrayList<String>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(  n.getPath());
 	  }
-
-  public String[] getNucleusPathsAndNumbers(){
-    String[] s = new String[cellCollection.size()];
-
-    for(int i=0;i<cellCollection.size();i++){
-    	Nucleus n = cellCollection.get(i).getNucleus();
-      s[i] = n.getPathAndNumber(); //+"-"+nucleiCollection.get(i).getNucleusNumber();
-    }
-    return s;
+	  return list.toArray(new String[0]);
   }
+  
+  public String[] getNucleusPathsAndNumbers(){
 
+	  List<String> list = new ArrayList<String>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(  n.getPathAndNumber());
+	  }
+	  return list.toArray(new String[0]);
+  }
+  
   public String[] getCleanNucleusPaths(){
-    String[] s = new String[cellCollection.size()];
 
-    for(int i=0;i<cellCollection.size();i++){
-      Nucleus n = cellCollection.get(i).getNucleus();
-      s[i] = n.getPath();
-    }
-    return s;
+	  List<String> list = new ArrayList<String>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(  n.getPath());
+	  }
+	  return list.toArray(new String[0]);
   }
 
   public double[][] getPositions(){
-    double[][] s = new double[cellCollection.size()][4];
-
-    for(int i=0;i<cellCollection.size();i++){
-      s[i] = cellCollection.get(i).getNucleus().getPosition();
-    }
-    return s;
+	  double[][] s = new double[size()][4];
+	  int i = 0;
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  s[i] = n.getPosition();
+		  i++;
+	  }
+	  return s;
   }
 
   public int getNucleusCount(){
-    return this.cellCollection.size();
+    return this.size();
   }
   
+  
+  /**
+   * Get the cells in this collection
+   * @return
+   */
   public List<Cell> getCells(){
-	    return this.cellCollection;
+	  List<Cell> result = new ArrayList<Cell>(0);
+	  for(Cell cell : mappedCollection.values()){
+		  result.add(cell);
 	  }
+	  return result;
+  }
 
+  /**
+   * Get the nuclei in this collection
+   * @return
+   */
   public List<Nucleus> getNuclei(){
 	  List<Nucleus> result = new ArrayList<Nucleus>(0);
-	  for(Cell c : this.cellCollection){
+	  for(Cell c : this.getCells()){
 		  result.add(c.getNucleus());
 	  }
-	  
-    return result;
+
+	  return result;
   }
 
-  public Cell getCell(int i){
-    return this.cellCollection.get(i);
-  }
+//  public Cell getCell(int i){
+//    return this.cellCollection.get(i);
+//  }
   
   /**
    * Get the nuclei within the specified image
@@ -530,12 +600,9 @@ implements Serializable
   public List<NuclearSignal> getSignals(int channel){
 
 	  List<NuclearSignal> result = new ArrayList<NuclearSignal>(0);
-
-	  for(int i= 0; i<this.getNucleusCount();i++){
-		  Nucleus n = this.getCell(i).getNucleus();
+	  for(Nucleus n : this.getNuclei()){
 		  result.addAll(n.getSignals(channel));
-
-	  } // end nucleus iterations
+	  }
 	  return result;
   }
   
@@ -574,9 +641,10 @@ implements Serializable
 	  return Stats.max(this.getArrayLengths());
   }
   
-  public int getProfileWindowSize(){
-	  return this.getCell(0).getNucleus().getAngleProfileWindowSize();
-  }
+//  public int getProfileWindowSize(){
+//	  this.mappedCollection.
+//	  return this.getCell(0).getNucleus().getAngleProfileWindowSize();
+//  }
   
   /**
    * Get the median area of the signals in the given channel
@@ -653,7 +721,7 @@ implements Serializable
   public List<Cell> getCellsWithNuclearSignals(int signalGroup, boolean withSignal){
 	  List<Cell> result = new ArrayList<Cell>(0);
 
-	  for(Cell c : this.cellCollection){
+	  for(Cell c : this.getCells()){
 		  Nucleus n = c.getNucleus();
 
 		  if(withSignal){
@@ -685,7 +753,7 @@ implements Serializable
 	  ProfileCollection pc = this.getProfileCollection();
 	  List<NucleusBorderSegment> segs = pc.getSegments(this.getOrientationPoint());
 	  for(NucleusBorderSegment segment : segs){
-		  result.add(segment.getSegmentType());
+		  result.add(segment.getName());
 	  }
 	  return result;
   }
@@ -695,24 +763,13 @@ implements Serializable
    * @param pointType the point to fetch profiles from
    * @return an array of differences
    */
-  public double[] getDifferencesToMedianFromPoint(String pointType){
-	  double[] d = new double[this.getNucleusCount()];
-	  try{
-
-		  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
-		  for(int i=0;i<this.getNucleusCount();i++){
-			  Nucleus n = this.getCell(i).getNucleus();
-			  try{
-				  d[i] = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
-			  } catch(Exception e){
-//				  logger.log("Unable to get difference to median profile: "+i+": "+pointType, Logger.ERROR);
-			  }
-		  }
-	  } catch(Exception e){
-//		  logger.log("Error getting differences from point "+pointType+": "+e.getMessage(), Logger.ERROR);
-//		  this.profileCollection.printKeys(this.debugFile);
+  public double[] getDifferencesToMedianFromPoint(String pointType) throws Exception {
+	  List<Double> list = new ArrayList<Double>();
+	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+	  for(Nucleus n : this.getNuclei()){
+		  list.add(n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
 	  }
-	  return d;
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
   
   /**
@@ -721,95 +778,91 @@ implements Serializable
    * @param pointType the point to fetch profiles from
    * @return an array of normalised differences
    */
-  public double[] getNormalisedDifferencesToMedianFromPoint(String pointType){
-	  double[] d = new double[this.getNucleusCount()];
-	  try{
+  public double[] getNormalisedDifferencesToMedianFromPoint(String pointType) throws Exception {
+	  List<Double> list = new ArrayList<Double>();
 
-		  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
-		  for(int i=0;i<this.getNucleusCount();i++){
-			  Nucleus n = this.getCell(i).getNucleus();
-			  try{
-				  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).differenceToProfile(medianProfile);
-				  
-				// use the differences in degrees, rather than square degreees for plotting
-				  double rootDiff = Math.sqrt(diff);
-				  
-				  // normalise to the number of points in the perimeter (approximately 1 point per pixel)
-				  d[i] = rootDiff / n.getPerimeter();
-			  } catch(Exception e){
-				  IJ.log("Unable to get normalised difference to median profile: "+i+": "+pointType);
-			  }
-		  }
-	  } catch(Exception e){
-		  IJ.log("Error getting differences from point "+pointType+": "+e.getMessage());
+	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+	  for(Nucleus n : this.getNuclei()){
+
+		  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+
+		  // use the differences in degrees, rather than square degreees for plotting
+		  double rootDiff = Math.sqrt(diff);
+
+		  // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+		  list.add(rootDiff / n.getPerimeter());
 	  }
-	  return d;
+
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
-  public double compareProfilesToMedian(String pointType){
-    double[] scores = this.getDifferencesToMedianFromPoint(pointType);
-    double result = 0;
-    for(double s : scores){
-      result += s;
-    }
-    return result;
+  public double compareProfilesToMedian(String pointType) throws Exception{
+	  double[] scores = this.getDifferencesToMedianFromPoint(pointType);
+	  double result = 0;
+	  for(double s : scores){
+		  result += s;
+	  }
+	  return result;
   }
 
 
   public int[] getPointIndexes(String pointType){
-    int[] d = new int[this.getNucleusCount()];
+	  List<Integer> list = new ArrayList<Integer>();
 
-    for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getCell(i).getNucleus();
-      d[i] = n.getBorderIndex(pointType);
-    }
-    return d;
+	  for(Nucleus n : this.getNuclei()){
+		  list.add(n.getBorderIndex(pointType));
+	  }
+	  return Utils.getintFromInteger(list.toArray(new Integer[0]));
   }
 
+  /**
+   * Get the distances between two border tags for each nucleus
+   * @param pointTypeA
+   * @param pointTypeB
+   * @return
+   */
   public double[] getPointToPointDistances(String pointTypeA, String pointTypeB){
-    double[] d = new double[this.getNucleusCount()];
-    for(int i=0;i<this.getNucleusCount();i++){
-      Nucleus n = this.getCell(i).getNucleus();
-      d[i] = n.getBorderTag(pointTypeA).getLengthTo(n.getBorderTag(pointTypeB));
-    }
-    return d;
+	  List<Double> list = new ArrayList<Double>();
+	  for(Nucleus n : this.getNuclei()){
+		  list.add(n.getBorderTag(pointTypeA).getLengthTo(n.getBorderTag(pointTypeB)));
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
-  /*
-    -----------------
-    Profile functions
-    -----------------
-  */
+  /**
+   * Get the nucleus with the lowest difference score to the median profile
+   * @param pointType the point to compare profiles from
+   * @return the best nucleus
+   * @throws Exception
+   */
+  public Nucleus getNucleusMostSimilarToMedian(String pointType) throws Exception {
 
-  public Nucleus getNucleusMostSimilarToMedian(String pointType){
-    
-    Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
-    Nucleus n = (Nucleus) this.getCell(0).getNucleus(); // default to the first nucleus
+	  Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
+	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
 
-    double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
-    for(Nucleus p : this.getNuclei()){
-      int index = n.getBorderIndex(pointType);
-      double nDifference = p.getAngleProfile().offset(index).differenceToProfile(medianProfile);
-      if(nDifference<difference){
-        difference = nDifference;
-        n = p;
-      }
-    }
-    return n;
+	  double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
+	  for(Nucleus p : this.getNuclei()){
+		  double nDifference = p.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);
+		  if(nDifference<difference){
+			  difference = nDifference;
+			  n = p;
+		  }
+	  }
+	  return n;
   }
 
-  /*
-    -----------------
-    Export functions
-    -----------------
-  */
 
+  /**
+   * Get the name of the log file for this collection
+   * @param filename
+   * @return
+   */
   public String getLogFileName(String filename){
-    String file = this.getFolder()+File.separator+this.getOutputFolderName()+File.separator+filename+"."+getType()+".txt";
-    File f = new File(file);
-    if(f.exists()){
-      f.delete();
-    }
-    return file;
+	  String file = this.getFolder()+File.separator+this.getOutputFolderName()+File.separator+filename+"."+getType()+".txt";
+	  File f = new File(file);
+	  if(f.exists()){
+		  f.delete();
+	  }
+	  return file;
   }
 }

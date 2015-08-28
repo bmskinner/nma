@@ -2,22 +2,41 @@ package datasets;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Shape;
+import java.awt.geom.Ellipse2D;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+
 
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.Profile;
 import no.gui.ColourSelecter;
+import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYShapeAnnotation;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.general.DatasetUtilities;
+import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
+
+import utility.Utils;
+import cell.Cell;
 
 public class MorphologyChartFactory {
 	
@@ -28,10 +47,103 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeEmptyProfileChart(){
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				"Position", "Angle", null);
+		
 		XYPlot plot = chart.getXYPlot();
 		plot.getDomainAxis().setRange(0,100);
 		plot.getRangeAxis().setRange(0,360);
 		plot.setBackgroundPaint(Color.WHITE);
+		return chart;
+	}
+	
+	/**
+	 * Make a profle chart for a nucleus, and annotate the border points
+	 * @param ds
+	 * @param n
+	 * @return
+	 */
+	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n){
+		JFreeChart chart = makeProfileChart(ds, n.getLength());
+
+		XYPlot plot = chart.getXYPlot();
+
+		for(String tag : n.getBorderTags().keySet()){
+			Color colour = Color.BLACK;
+			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
+
+			if(tag.equals(n.getOrientationPoint())){
+				colour = Color.BLUE;
+			}
+			if(tag.equals(n.getReferencePoint())){
+				colour = Color.ORANGE;
+			}
+			plot.addDomainMarker(new ValueMarker(index, colour, new BasicStroke(2.0f)));	
+		}
+		return chart;
+	}
+	
+	/**
+	 * Create a segmented profile chart from a given XYDataset. Set the series 
+	 * colours for each component. Draw lines on the offset indexes
+	 * @param dataset the dataset the values come from
+	 * @param normalised should the scales be normalised
+	 * @param rightAligm should the chart be aligned to the right
+	 * @return a chart
+	 */
+	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, String point) throws Exception {
+		
+		CellCollection collection = dataset.getCollection();
+		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
+		
+		
+		int length = 100 ; // default if normalised
+
+		
+		// if we set raw values, get the maximum nucleus length
+		if(!normalised){
+			length = (int) collection.getMaxProfileLength();
+//			for(Nucleus n : dataset.getCollection().getNuclei()){
+//				length = (int) Math.max( n.getLength(), length);
+//			}
+		}
+		JFreeChart chart = makeProfileChart(ds, length);
+		
+		// mark the reference andorientation points
+		
+		XYPlot plot = chart.getXYPlot();
+
+		for (String tag : collection.getProfileCollection().getOffsetKeys()){
+			Color colour = Color.BLACK;
+			
+			// get the index of the tag
+			int index = collection.getProfileCollection().getOffset(tag);
+			
+			// get the offset from to the current draw point
+			int offset = collection.getProfileCollection().getOffset(point);
+			
+			// adjust the index to the offset
+			index = Utils.wrapIndex( index - offset, collection.getProfileCollection().getAggregate().length());
+			
+			double indexToDraw = index; // convert to a double to allow normalised positioning
+			
+			if(normalised){ // set to the proportion of the point along the profile
+				indexToDraw =  (( indexToDraw / collection.getProfileCollection().getAggregate().length() ) * 100);
+			}
+			if(rightAlign && !normalised){
+				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
+				int amountToAdd = maxX - collection.getProfileCollection().getAggregate().length();
+				indexToDraw += amountToAdd;
+				
+			}
+			
+			if(tag.equals(collection.getOrientationPoint())){
+				colour = Color.BLUE;
+			}
+			if(tag.equals(collection.getReferencePoint())){
+				colour = Color.ORANGE;
+			}
+			plot.addDomainMarker(new ValueMarker(indexToDraw, colour, new BasicStroke(2.0f)));	
+			
+		}
 		return chart;
 	}
 	
@@ -85,6 +197,12 @@ public class MorphologyChartFactory {
 				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
 			} 
 			
+			// simple profiles
+			if(name.startsWith("Profile_")){
+				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+			} 
+			
 		}	
 		return chart;
 	}
@@ -109,7 +227,7 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the x axis
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiProfileChart(List<AnalysisDataset> list, XYDataset medianProfiles, List<XYSeriesCollection> iqrProfiles, int xLength){
+	public static JFreeChart makeMultiProfileChart(List<AnalysisDataset> list, XYDataset medianProfiles, List<XYSeriesCollection> iqrProfiles, int xLength)  throws Exception{
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
@@ -190,11 +308,10 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, XYDataset ds, int xLength){
+	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, XYDataset ds, int xLength) throws Exception {
 		CellCollection n = list.get(0).getCollection();
 		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength);
 		XYPlot plot = chart.getXYPlot();
-//		plot.setBackgroundPaint(Color.WHITE);
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
 		List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
@@ -234,6 +351,273 @@ public class MorphologyChartFactory {
 			
 			plot.getRenderer().setSeriesPaint(j, profileColour);
 		}	
+		return chart;
+	}
+	
+	public static ChartPanel makeProfileChartPanel(JFreeChart chart){
+		ChartPanel panel = new ChartPanel(chart){
+			@Override
+			public void restoreAutoBounds() {
+				XYPlot plot = (XYPlot) this.getChart().getPlot();
+				
+				int length = 100;
+				for(int i = 0; i<plot.getDatasetCount();i++){
+					XYDataset dataset = plot.getDataset(i);
+					Number maximum = DatasetUtilities.findMaximumDomainValue(dataset);
+					length = maximum.intValue() > length ? maximum.intValue() : length;
+				}
+				plot.getRangeAxis().setRange(0, 360);
+				plot.getDomainAxis().setRange(0, length);				
+				return;
+			} 
+		};
+		return panel;
+	}
+	
+	/**
+	 * Create an empty boxplot
+	 * @return
+	 */
+	public static JFreeChart makeEmptyBoxplot(){
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
+		formatBoxplot(boxplot);
+		return boxplot;
+	}
+	
+	private static void formatBoxplot(JFreeChart boxplot){
+		boxplot.getPlot().setBackgroundPaint(Color.WHITE);
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+		plot.setRenderer(renderer);
+		renderer.setUseOutlinePaintForWhiskers(true);   
+		renderer.setBaseOutlinePaint(Color.BLACK);
+		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+		renderer.setMeanVisible(false);
+	}
+	
+	/**
+	 * Create and format a boxplot based on a dataset
+	 * @param ds the dataset
+	 * @return
+	 */
+	public static JFreeChart makeSegmentBoxplot(BoxAndWhiskerCategoryDataset ds, List<AnalysisDataset> list){
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Index length difference to median", ds, false);	
+		
+		
+		if(list.size()>1 || ds==null || list==null){
+			return makeEmptyBoxplot();
+		}
+		
+		formatBoxplot(boxplot);
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
+				
+		if(list!=null && !list.isEmpty()){
+						
+			for(int i=0;i<plot.getDataset().getRowCount();i++){
+				Color color = ColourSelecter.getSegmentColor(i);
+				renderer.setSeriesPaint(i, color);
+			}
+			renderer.setMeanVisible(false);
+			renderer.setItemMargin(0.02);
+			renderer.setMaximumBarWidth(0.08);
+		}
+		
+		ValueMarker zeroMarker =
+	              new ValueMarker(0.00, Color.black, new BasicStroke(1.0f));
+
+	      plot.addRangeMarker(zeroMarker);
+		
+		return boxplot;
+	}
+	
+	public static JFreeChart makeSignalAreaBoxplot(BoxAndWhiskerCategoryDataset ds, AnalysisDataset dataset){
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false);
+		formatBoxplot(boxplot);
+		
+		CategoryPlot plot = boxplot.getCategoryPlot();
+		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
+
+		for(int series=0;series<ds.getRowCount();series++){
+			String name = (String) ds.getRowKey(series);
+			int seriesGroup = getIndexFromLabel(name);
+
+			Color color = dataset.getSignalGroupColour(seriesGroup) == null 
+					? ColourSelecter.getSegmentColor(series)
+							: dataset.getSignalGroupColour(seriesGroup);
+
+					renderer.setSeriesPaint(series, color);
+		}		
+		return boxplot;
+	}
+	
+	
+	/**
+	 * Create a nucleus outline chart with nuclear signals drawn as transparent
+	 * circles
+	 * @param dataset the AnalysisDataset to use to draw the consensus nucleus
+	 * @param signalCoMs the dataset with the signal centre of masses
+	 * @return
+	 */
+	public static JFreeChart makeSignalCoMNucleusOutlineChart(AnalysisDataset dataset, XYDataset signalCoMs){
+		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setDataset(1, signalCoMs);
+
+		XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
+		for(int series=0;series<signalCoMs.getSeriesCount();series++){
+
+			Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
+			rend.setSeriesShape(series, circle);
+
+			String name = (String) signalCoMs.getSeriesKey(series);
+			int seriesGroup = getIndexFromLabel(name);
+			Color colour = dataset.getSignalGroupColour(seriesGroup);
+			rend.setSeriesPaint(series, colour);
+			rend.setBaseLinesVisible(false);
+			rend.setBaseShapesVisible(true);
+			rend.setBaseSeriesVisibleInLegend(false);
+		}
+		plot.setRenderer(1, rend);
+
+		for(int signalGroup : dataset.getCollection().getSignalGroups()){
+			List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
+
+			int signalCount = shapes.size();
+
+			int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
+			alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+
+			Color colour = dataset.getSignalGroupColour(signalGroup);
+
+			for(Shape s : shapes){
+				XYShapeAnnotation an = new XYShapeAnnotation( s, null,
+						null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
+				plot.addAnnotation(an);
+			}
+		}
+		return chart;
+	}
+
+	/**
+	 * Get a chart contaning the details of the given cell from the given dataset
+	 * @param cell the cell to draw
+	 * @param dataset the dataset the cell came from
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset) throws Exception{
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						null, null, null, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.getRangeAxis().setInverted(true);
+
+		// make a hash to track the contents of each dataset produced
+		Map<Integer, String> hash = new HashMap<Integer, String>(0); 
+		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
+
+
+		// get the nucleus dataset
+		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell, true);
+		hash.put(hash.size(), "Nucleus"); // add to the first free entry
+		datasetHash.put(datasetHash.size(), nucleus);
+		
+		// get the index tags
+		XYDataset tags = NucleusDatasetCreator.createNucleusIndexTags(cell);
+		hash.put(hash.size(), "Tags"); // add to the first free entry
+		datasetHash.put(datasetHash.size(), tags);
+		
+		// get the signals datasets and add each group to the hash
+		if(cell.getNucleus().hasSignal()){
+			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
+
+			for(XYDataset d : signalsDatasets){
+
+				String name = "default_0";
+				for (int i = 0; i < d.getSeriesCount(); i++) {
+					name = (String) d.getSeriesKey(i);	
+				}
+				int signalGroup = getIndexFromLabel(name);
+				hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
+				datasetHash.put(datasetHash.size(), d);
+			}
+		}
+
+		// get tail datasets if present
+		if(cell.hasTail()){
+
+			XYDataset tailBorder = TailDatasetCreator.createTailOutline(cell);
+			hash.put(hash.size(), "TailBorder");
+			datasetHash.put(datasetHash.size(), tailBorder);
+			XYDataset skeleton = TailDatasetCreator.createTailSkeleton(cell);
+			hash.put(hash.size(), "TailSkeleton");
+			datasetHash.put(datasetHash.size(), skeleton);
+		}
+
+		// set the rendering options for each dataset type
+
+		for(int key : hash.keySet()){
+
+			plot.setDataset(key, datasetHash.get(key));
+			plot.setRenderer(key, new XYLineAndShapeRenderer(true, false));
+
+			int seriesCount = plot.getDataset(key).getSeriesCount();
+			// go through each series in the dataset
+			for(int i=0; i<seriesCount;i++){
+
+				// all datasets use the same stroke
+				plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
+
+				// Basic nucleus colour
+				if(hash.get(key).equals("Nucleus")){
+					String name = (String) plot.getDataset(key).getSeriesKey(i);
+					int colourIndex = getIndexFromLabel(name);
+					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
+				}
+				
+				
+				if(hash.get(key).equals("Tags")){
+					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
+					String name = plot.getDataset(key).getSeriesKey(i).toString().replace("Tag_", "");
+					
+					if(name.equals(cell.getNucleus().getOrientationPoint())){
+						plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
+					}
+					if(name.equals(cell.getNucleus().getReferencePoint())){
+						plot.getRenderer(key).setSeriesPaint(i, Color.ORANGE);
+					}
+						
+				}
+
+				// signal colours
+				if(hash.get(key).startsWith("SignalGroup_")){
+					int colourIndex = getIndexFromLabel(hash.get(key));
+					Color colour = dataset.getSignalGroupColour(colourIndex);
+					plot.getRenderer(key).setSeriesPaint(i, colour);
+				}
+
+				// tail border
+				if(hash.get(key).equals("TailBorder")){
+
+					plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
+				}
+
+
+				// tail skeleton
+				if(hash.get(key).equals("TailSkeleton")){
+
+					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
+				}
+			}
+
+		}
 		return chart;
 	}
 

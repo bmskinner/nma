@@ -26,6 +26,7 @@ import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
+import no.components.SegmentedProfile;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.export.TableExporter;
@@ -48,16 +49,7 @@ public class RoundNucleus
 	private UUID uuid;// = java.util.UUID.randomUUID();
 	
 	private Class<?> nucleusClass;
-	
 
-	// for debugging - use in calling dumpInfo()
-	public static final int ALL_POINTS = 0;
-	public static final int BORDER_POINTS = 1;
-	public static final int BORDER_TAGS = 2;
-	
-
-
-	
 	public static final String IMAGE_PREFIX = "export.";
 
 	protected int nucleusNumber; // the number of the nucleus in the current image
@@ -82,7 +74,7 @@ public class RoundNucleus
 		BorderPoints are made; everything references the copy in the Nucleus. Given this, the points of interest 
 		(now borderTags) need only to be indexes.
 	*/
-	protected Profile angleProfile; // 
+	protected SegmentedProfile angleProfile = null; // 
 	protected Profile distanceProfile; // holds distances through CoM to opposite border
 	protected Profile singleDistanceProfile; // holds distances from CoM, not through CoM
 	protected List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
@@ -96,6 +88,8 @@ public class RoundNucleus
 	protected File nucleusFolder; // the folder to store nucleus information
 	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date
 	
+	protected double scale; // allow conversion between pixels and SI units. The length of a pixel in metres
+	
 	protected SignalCollection signalCollection = new SignalCollection();
 
 	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
@@ -106,9 +100,19 @@ public class RoundNucleus
 
 		// convert the roi positions to a list of nucleus border points
 		FloatPolygon polygon = roi.getInterpolatedPolygon(1,true);
+		
 		for(int i=0; i<polygon.npoints; i++){
-			borderList.add(new NucleusBorderPoint( polygon.xpoints[i], polygon.ypoints[i]));
+			NucleusBorderPoint point = new NucleusBorderPoint( polygon.xpoints[i], polygon.ypoints[i]);
+			
+			if(i>0){
+				point.setPrevPoint(borderList.get(i-1));
+				point.prevPoint().setNextPoint(point);
+			}
+			borderList.add(point);
 		}
+		// link endpoints
+		borderList.get(borderList.size()-1).setNextPoint(borderList.get(0));
+		borderList.get(0).setNextPoint(borderList.get(borderList.size()-1));
 		
 		this.sourceFile      = file;
 		this.nucleusNumber   = number;
@@ -120,7 +124,7 @@ public class RoundNucleus
 		// for subclasses to access
 	}
 
-	public RoundNucleus(RoundNucleus n){
+	public RoundNucleus(RoundNucleus n) throws Exception {
 
 		this.setID(n.getID());
 		this.setPosition(n.getPosition());
@@ -132,7 +136,6 @@ public class RoundNucleus
 		this.setNucleusFolder(n.getNucleusFolder());
 		
 		this.setPerimeter(n.getPerimeter());
-		this.setPathLength(n.getPathLength());
 		this.setFeret(n.getFeret());
 		this.setArea(n.getArea());
 		this.setAngleProfile(n.getAngleProfile());
@@ -141,13 +144,11 @@ public class RoundNucleus
 		this.setSignals(n.getSignalCollection());
 
 		this.setDistanceProfile(n.getDistanceProfile());
+		this.setAngleProfile(n.getAngleProfile());
 
 		this.setBorderTags(n.getBorderTags());
 		this.setBorderList(n.getBorderList());
-		
-		this.setSegmentMap(n.getSegmentMap());
-		this.setSegments(n.getSegments());
-		
+				
 		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
 	}
@@ -159,42 +160,29 @@ public class RoundNucleus
 	* nucleus is to get the longest diameter and set this as
 	*  the head/tail axis.
 	*/
-	public void findPointsAroundBorder(){
+	public void findPointsAroundBorder() throws Exception{
 
 		int tailIndex = this.getDistanceProfile().getIndexOfMax();
 		NucleusBorderPoint tailPoint = this.getPoint(tailIndex);
-		addBorderTag("tail", tailIndex);
-    	addBorderTag("head", this.getIndex(this.findOppositeBorder(tailPoint)));
+		addBorderTag(Constants.Nucleus.ROUND.orientationPoint(), tailIndex);
+    	addBorderTag(Constants.Nucleus.ROUND.referencePoint(), this.getIndex(this.findOppositeBorder(tailPoint)));
 	}
 
-	public void intitialiseNucleus(int angleProfileWindowSize){
+	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception {
 
 		this.nucleusFolder = new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension());
 
 		if (!this.nucleusFolder.exists()) {
-			try{
-				this.nucleusFolder.mkdir();
-			} catch(Exception e) {
-				IJ.log("Failed to create directory"+this.nucleusFolder.toString()+": "+e.getMessage());
-			}
+			this.nucleusFolder.mkdir();
 		}
 
-//		this.smoothedPolygon = roi.getInterpolatedPolygon(1,true);
-//		for(int i=0; i<this.smoothedPolygon.npoints; i++){
-//			borderList.add(new NucleusBorderPoint( this.smoothedPolygon.xpoints[i], this.smoothedPolygon.ypoints[i]));
-//		}
 
 		// calculate angle profile
-		try{
-			this.calculateAngleProfile(angleProfileWindowSize);
-		} catch(Exception e){
-			IJ.log("Cannot create angle profile: "+e);
-		} 
+		this.calculateAngleProfile(angleProfileWindowSize);
 
 		// calc distances around nucleus through CoM
 		this.calculateDistanceProfile();
 		this.calculateSingleDistanceProfile();
-		this.calculatePathLength();
 
 		this.calculateSignalDistancesFromCoM();
 		this.calculateFractionalSignalDistancesFromCoM();
@@ -214,7 +202,6 @@ public class RoundNucleus
 		return this.sourceFile.getAbsolutePath();
 	}
 
-	// defensive copy
 	public double[] getPosition(){
 		return this.orignalPosition;
 	}
@@ -299,6 +286,10 @@ public class RoundNucleus
 	public int getNucleusNumber(){
 		return this.nucleusNumber;
 	}
+	
+	public String getNameAndNumber(){
+		return this.getImageName()+"-"+this.getNucleusNumber();
+	}
 
 	public String getPathAndNumber(){
 		return this.sourceFile+File.separator+this.nucleusNumber;
@@ -311,10 +302,14 @@ public class RoundNucleus
 	public NucleusBorderPoint getPoint(int i){
 		return new NucleusBorderPoint(this.borderList.get(i));
 	}
-
-//	public FloatPolygon getPolygon(){
-//		return this.smoothedPolygon;
-//	}
+	
+	public String getReferencePoint(){
+		return Constants.Nucleus.ROUND.referencePoint();
+	}
+	
+	public String getOrientationPoint(){
+		return Constants.Nucleus.ROUND.orientationPoint();
+	}
 	
 	public double getArea(){
 		return this.area;
@@ -324,16 +319,20 @@ public class RoundNucleus
 		return this.feret;
 	}
 
-	public double getPathLength(){
-		return this.pathLength;
-	}
-
 	public double getPerimeter(){
 		return this.perimeter;
 	}
 
 	public int getLength(){
 		return this.borderList.size();
+	}
+	
+	public double getScale(){
+		return this.scale;
+	}
+	
+	public void setScale(double scale){
+		this.scale = scale;
 	}
 
 	public NucleusBorderPoint getBorderPoint(int i){
@@ -421,13 +420,6 @@ public class RoundNucleus
 		this.signalCollection = collection;
 	}
 
-//	public void setPolygon(FloatPolygon p){
-//		this.smoothedPolygon = p;
-//	}
-
-//	protected void setRoi(Roi d){
-//		this.roi = d;
-//	}
 
 	protected void setSourceFile(File d){
 		this.sourceFile = d;
@@ -514,17 +506,9 @@ public class RoundNucleus
 		}
 	}
 
-	/*
-		-----------------------
-		Set miscellaneous features
-		-----------------------
-	*/
 
-	public void setPathLength(double d){
-		this.pathLength = d;
-	}
 
-	public void calculatePathLength(){
+	public double getPathLength(){
 		double pathLength = 0;
 
 		XYPoint prevPoint = new XYPoint(0,0);
@@ -537,7 +521,7 @@ public class RoundNucleus
 				pathLength += thisPoint.getLengthTo(prevPoint);
 				prevPoint = thisPoint;
 		}
-		this.setPathLength(pathLength);
+		return pathLength;
 	}
 
 
@@ -765,24 +749,11 @@ public class RoundNucleus
 		return orthgonalPoint;
 	}
 	
-	// given a point ,find the String tag of the segment it belongs to 
-	public String getSegmentOfPoint(int i){
-		String segment = "";
-		for(String s : this.getSegmentTags()){
-			
-			NucleusBorderSegment b = this.getSegmentTag(s);
-			if(b.contains(i)){
-				segment = s;
-			}
-		}
-		return segment;
-	}
-
 	/*
 		This will find the point in a list that is closest to any local maximum
 		in the border profile, wherever that maximum may be
 	*/
-	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list){
+	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception{
 
 		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
@@ -805,7 +776,7 @@ public class RoundNucleus
 		This will find the point in a list that is closest to any local minimum
 		in the border profile, wherever that minimum may be
 	*/
-	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list){
+	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception{
 
 		Profile minima = this.getAngleProfile().getLocalMinima(5);
 		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
@@ -926,7 +897,7 @@ public class RoundNucleus
 		Print key data to the image log file
 		Overwrites any existing log
 	*/   
-	public void exportAngleProfile(){
+	public void exportAngleProfile() throws Exception{
 		
 		TableExporter logger = new TableExporter(this.getNucleusFolder());
 		logger.addColumnHeading("X_INT");
@@ -964,7 +935,7 @@ public class RoundNucleus
 			logger.addRow("SD_PROFILE"          , this.singleDistanceProfile.get(i));
 			logger.addRow("IS_SD_MIN"           , sdMinima.get(i));
 			logger.addRow("DISTANCE_PROFILE"    , this.getDistance(i)	);
-			logger.addRow("SEGMENT"             , this.getSegmentOfPoint(i));
+//			logger.addRow("SEGMENT"             , this.getSegmentOfPoint(i));
 			
 		}
 		logger.export(""+this.getNucleusNumber());
@@ -973,8 +944,9 @@ public class RoundNucleus
 	
 	/**
 	 * Export the individual segments in this nucleus
+	 * @throws Exception 
 	 */
-	public void exportSegments(){
+	public void exportSegments() throws Exception{
 
 		TableExporter logger = new TableExporter(this.getNucleusFolder());
 		logger.addColumnHeading("SEGMENT");
@@ -983,9 +955,9 @@ public class RoundNucleus
 		logger.addColumnHeading("PERIMETER_LENGTH");
 		logger.addColumnHeading("DISTANCE_END_TO_END");
 
-		for(NucleusBorderSegment seg :this.getSegments() ){
-			logger.addRow("SEGMENT" , seg.getSegmentType());
-			logger.addRow("PERIMETER_LENGTH" , seg.length(this.getLength()));
+		for(NucleusBorderSegment seg :this.getAngleProfile().getSegments() ){
+			logger.addRow("SEGMENT" , seg.getName());
+			logger.addRow("PERIMETER_LENGTH" , seg.length());
 			logger.addRow("START_INDEX" , seg.getStartIndex());
 			logger.addRow("END_INDEX" , seg.getEndIndex());
 
@@ -1036,18 +1008,29 @@ public class RoundNucleus
 		-----------------------
 	*/
 
-	public Profile getAngleProfile(){
-		return new Profile(this.angleProfile);
+	public SegmentedProfile getAngleProfile() throws Exception{
+		return new SegmentedProfile(this.angleProfile);
 	}
 
 	// returns a copy
-	public Profile getAngleProfile(String pointType){ // USE getAngleProfile
+	public SegmentedProfile getAngleProfile(String pointType) throws Exception{
 		int offset = this.borderTags.get(pointType);
-		return new Profile(this.angleProfile.offset(offset));
+		return new SegmentedProfile(this.angleProfile.offset(offset));
 	}
 
-	public void setAngleProfile(Profile p){
-		this.angleProfile = new Profile(p);
+	public void setAngleProfile(SegmentedProfile p) throws Exception{
+		this.angleProfile = new SegmentedProfile(p);
+	}
+	
+	/**
+	 * 
+	 * @param p
+	 * @param pointType
+	 * @throws Exception
+	 */
+	public void setAngleProfile(SegmentedProfile p, String pointType) throws Exception{
+		int offset = this.borderTags.get(pointType);
+		this.angleProfile = new SegmentedProfile(p).offset(-offset);
 	}
 
 	public double getAngle(int index){
@@ -1125,81 +1108,16 @@ public class RoundNucleus
 		return this.borderTags.keySet();
 	}
 
-	public NucleusBorderSegment getSegmentTag(String s){
-		if(s==null){
-			throw new IllegalArgumentException("Requested tag is null");
-		}
-		if(!this.segmentTags.containsKey(s)){
-			throw new IllegalArgumentException("Requested tag is not present: "+s);
-		}
-		return new NucleusBorderSegment(this.segmentList.get(this.segmentTags.get(s)));
-	}
-
 	public void addBorderTag(String name, int i){
 		this.borderTags.put(name, i);
 	}
-
-	public void addSegmentTag(String name, int i){
-		this.segmentTags.put(name, i);
-	}
 	
-	public void addSegment(NucleusBorderSegment n){
-		this.segmentList.add(n);
-	}
-
-	public Map<String, Integer> getSegmentMap( ){
-		return this.segmentTags;
-	}
-	
-	public Set<String> getSegmentTags(){
-		return this.segmentTags.keySet();
-	}
-	
-	public NucleusBorderSegment getSegment(int i){
-		return this.segmentList.get(i);
-	}
-	
-	public List<NucleusBorderSegment> getSegments(){
-		return this.segmentList;
-	}
-	
-	/**
-	 * Create a list of segments offset to a reference point
-	 * @param pointType the border tag to offset against
-	 */
-	public List<NucleusBorderSegment> getSegments(String pointType){
-		if(pointType==null){
-			throw new IllegalArgumentException("String or offset is null or empty");
+	public boolean hasBorderTag(String tag){
+		if(this.borderTags.containsKey(tag)){
+			return true;
+		} else {
+			return false;
 		}
-		
-		if(!this.borderTags.containsKey(pointType)){
-			throw new IllegalArgumentException("Point type does not exist in nucleus: "+pointType);
-		}
-		List<NucleusBorderSegment> referenceList =  getSegments();
-		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>(0);
-		
-		int offset = this.getBorderIndex(pointType); // this is our new zero
-		for(NucleusBorderSegment s : referenceList){
-			
-			int newStart = Utils.wrapIndex( s.getStartIndex()- offset , this.getLength());
-			int newEnd = Utils.wrapIndex( s.getEndIndex()- offset , this.getLength());
-			
-			NucleusBorderSegment c = new NucleusBorderSegment(newStart, newEnd);
-			c.setSegmentType(s.getSegmentType());
-			
-			result.add(c);
-		}
-		
-		return result;
-	}
-	
-	public void setSegments(List<NucleusBorderSegment> segments){
-		this.segmentList = segments;
-	}
-	
-	public void clearSegments(){
-		this.segmentList = new ArrayList<NucleusBorderSegment>(0);
-		this.segmentTags = new HashMap<String, Integer>(0);
 	}
 
 	private void calculateDistanceProfile(){
@@ -1212,7 +1130,7 @@ public class RoundNucleus
 				NucleusBorderPoint opp = findOppositeBorder(p);
 
 				profile[i] = p.getLengthTo(opp); 
-				p.setDistanceAcrossCoM(p.getLengthTo(opp)); // LEGACY
+//				p.setDistanceAcrossCoM(p.getLengthTo(opp)); // LEGACY
 		}
 		this.distanceProfile = new Profile(profile);
 	}
@@ -1229,8 +1147,16 @@ public class RoundNucleus
 		this.singleDistanceProfile = new Profile(profile);
 	}
 
-	public void calculateAngleProfile(int angleProfileWindowSize){
+	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception{
 
+		List<NucleusBorderSegment> segments = null;
+		// store segments to reapply later
+		if(this.angleProfile!=null){
+			if(this.getAngleProfile().hasSegments()){
+				segments = this.getAngleProfile().getSegments();
+			}
+		}
+		
 		double[] angles = new double[this.getLength()];
 
 		for(int i=0; i<this.getLength();i++){
@@ -1243,12 +1169,6 @@ public class RoundNucleus
 			NucleusBorderPoint point       = this.borderList.get(i);
 
 			double angle = RoundNucleus.findAngleBetweenXYPoints(pointBefore, point, pointAfter);
-
-			// IJ.log("Comparing points: "+angle);
-			// IJ.log("    Before: ("+indexBefore+") "+pointBefore.getX()+"  "+pointBefore.getY());
-			// IJ.log("    i     : ("+i          +") "+      point.getX()+"  "+      point.getY());
-			// IJ.log("    After : ("+indexAfter +") "+ pointAfter.getX()+"  "+ pointAfter.getY());
-			// IJ.log("");
 
 			// find the halfway point between the first and last points.
 				// is this within the roi?
@@ -1266,12 +1186,16 @@ public class RoundNucleus
 				angles[i] = 360-angle;
 			}
 		}
-		this.setAngleProfile( new Profile(angles)  );
+		SegmentedProfile newProfile = new SegmentedProfile(angles);
+		if(segments!=null){
+			newProfile.setSegments(segments);
+		}
+		this.setAngleProfile( newProfile  );
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}
 
-	public void reverse(){
-		Profile aProfile = this.getAngleProfile();
+	public void reverse() throws Exception{
+		SegmentedProfile aProfile = this.getAngleProfile();
 		aProfile.reverse();
 		this.setAngleProfile(aProfile);
 

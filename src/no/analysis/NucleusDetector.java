@@ -63,6 +63,8 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   protected int totalImages;
   
   private int progress;
+  
+  private boolean debug = false;
 
 
   private File inputFolder;
@@ -87,30 +89,15 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   * @param outputFolder the name of the folder for results
   */
   public NucleusDetector(String outputFolder, MainWindow mw, File debugFile, AnalysisOptions options){
-	  this.inputFolder = options.getFolder();
-	  this.outputFolder = outputFolder;
-	  this.mw = mw;
-	  this.debugFile = debugFile;
-	  this.analysisOptions = options;
+	  this.inputFolder 		= options.getFolder();
+	  this.outputFolder 	= outputFolder;
+	  this.mw 				= mw;
+	  this.debugFile 		= debugFile;
+	  this.analysisOptions 	= options;
+	  
 	  logger = new Logger(debugFile, "NucleusDetector");
   }
 
-
-  /**
-  * Run the detector on the input folder
-  */
-//  public void runDetector(){
-//	  try{
-//		  logger.log("Running nucleus detector");
-//		  processFolder(this.inputFolder);
-//	  } catch(Exception e){
-//		  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
-//		  for(StackTraceElement el : e.getStackTrace()){
-//			  logger.log(el.toString(), Logger.STACK);
-//		  }
-//	  }
-//  }
-  
   
   @Override
 	protected void process( List<Integer> integers ) {
@@ -131,10 +118,20 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  logger.log("Running nucleus detector");
 			  processFolder(this.inputFolder);
 			  
+			  if(debug){
+				  logger.log("Folder processed", Logger.DEBUG);
+			  }
 			  firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
-				
+			  
+			  if(debug){
+				  logger.log("Getting collections", Logger.DEBUG);
+			  }
 			  List<CellCollection> folderCollection = this.getNucleiCollections();
-				// insert analyse populations from  analysis creator
+
+			  // Run the analysis pipeline
+			  if(debug){
+				  logger.log("Analysing collections", Logger.DEBUG);
+			  }
 			  datasets = analysePopulations(folderCollection);		
 			 
 			  result = true;
@@ -142,10 +139,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  
 		  } catch(Exception e){
 			  result = false;
-			  logger.log("Error in processing folder: "+e.getMessage(), Logger.ERROR);
-			  for(StackTraceElement el : e.getStackTrace()){
-				  logger.log(el.toString(), Logger.STACK);
-			  }
+			  logger.error("Error in processing folder", e);
 		  }
 		return result;
 	}
@@ -161,15 +155,10 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in nucleus detection", e);
+
 		} catch (ExecutionException e) {
-			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in nucleus detection", e);
 		}
 
 	} 
@@ -181,12 +170,13 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 	
 	public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
 		mw.log("Beginning analysis");
-		
+		 if(debug){
+			 logger.log("Beginning analysis", Logger.DEBUG);
+		 }
 		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
 
 		for(CellCollection r : folderCollection){
 			
-			Logger logger = new Logger(r.getDebugFile(), "PopulationAnalysis");
 
 			AnalysisDataset dataset = new AnalysisDataset(r);
 			dataset.setAnalysisOptions(analysisOptions);
@@ -232,93 +222,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			logger.log("Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
 			mw.log(spacerString);
 
-			// core analysis - align profiles and segment
-			mw.logc("Running morphology analysis...");
-			boolean ok = MorphologyAnalysis.run(r);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
-
-			// export the stats files
-			mw.logc("Exporting stats...");
-			ok = StatsExporter.run(r);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
-
-			// annotate the nuclei in the population
-			mw.logc("Annotating nuclei...");
-			ok = NucleusAnnotator.run(r);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
-
-
-			// make a composite image of all nuclei in the collection
-			mw.logc("Exporting composite...");
-			ok = CompositeExporter.run(r);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
-
-			// refold the median consensus nucleus
-			if(analysisOptions.refoldNucleus()){
-				mw.logc("Refolding profile...");
-				
-				 mw. new RefoldNucleusAction(dataset);
-				
-//				CurveRefolder refolder = null;
-//				try {
-//					refolder = new CurveRefolder(r, 
-//							analysisOptions.getNucleusClass(), 
-//							analysisOptions.getRefoldMode());
-//				} catch (Exception e1) {
-//					logger.log("Error in refolding: "+e1.getMessage(), Logger.ERROR);
-//					for(StackTraceElement e2 : e1.getStackTrace()){
-//						logger.log(e2.toString(), Logger.STACK);
-//					}
-//				}
-//				
-//				refolder.execute();
-//				try {
-//					if(refolder.get()){
-//						mw.log("OK");
-//					} else {
-//						mw.log("Error");
-//					}
-//				} catch (InterruptedException e) {
-//					logger.log("Error in refolding: "+e.getMessage(), Logger.ERROR);
-//					for(StackTraceElement el : e.getStackTrace()){
-//						logger.log(el.toString(), Logger.STACK);
-//					}
-//					e.printStackTrace();
-//				} catch (ExecutionException e) {
-//					logger.log("Error in refolding: "+e.getMessage(), Logger.ERROR);
-//					for(StackTraceElement el : e.getStackTrace()){
-//						logger.log(el.toString(), Logger.STACK);
-//					}
-//				}
-				
-			}
-
 			result.add(dataset);
-
-			// export the population to a save file for later
-			mw.logc("Saving to file...");
-			ok = PopulationExporter.saveAnalysisDataset(dataset);
-			if(ok){
-				mw.log("OK");
-			} else {
-				mw.log("Error");
-			}
 
 		}
 		return result;
@@ -370,27 +274,40 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   *  @return a Map of a folder to its nuclei
   */
   public List<CellCollection> getNucleiCollections(){
-    // remove any empty collections before returning
-    List<File> toRemove = new ArrayList<File>(0);
-    Set<File> keys = collectionGroup.keySet();
-    for (File key : keys) {
-    	CellCollection collection = collectionGroup.get(key);
-      if(collection.getNucleusCount()==0){
-        toRemove.add(key);
-      }    
-    }
+	  // remove any empty collections before returning
+	  if(debug){
+		  logger.log("Getting all collections", Logger.DEBUG);
+	  }
+	  List<File> toRemove = new ArrayList<File>(0);
+	  
+	  if(debug){
+		  logger.log("Testing nucleus counts", Logger.DEBUG);
+	  }
+	  Set<File> keys = collectionGroup.keySet();
+	  for (File key : keys) {
+		  CellCollection collection = collectionGroup.get(key);
+		  if(collection.size()==0){
+			  logger.log("Removing collection "+key.toString(), Logger.DEBUG);
+			  toRemove.add(key);
+		  }    
+	  }
+	  if(debug){
+		  logger.log("Got collections to remove", Logger.DEBUG);
+	  }
 
-    Iterator<File> iter = toRemove.iterator();
-    while(iter.hasNext()){
-      collectionGroup.remove(iter.next());
-    }
-//    return this.collectionGroup;
-    List<CellCollection> result = new ArrayList<CellCollection>();
-    for(CellCollection c : collectionGroup.values()){
-    	result.add(c);
-    }
-    return result;
-    
+	  Iterator<File> iter = toRemove.iterator();
+	  while(iter.hasNext()){
+		  collectionGroup.remove(iter.next());
+	  }
+	  if(debug){
+		  logger.log("Removed collections", Logger.DEBUG);
+	  }
+	  List<CellCollection> result = new ArrayList<CellCollection>();
+	  for(CellCollection c : collectionGroup.values()){
+		  result.add(c);
+	  }
+	  return result;
+
   }
 
   /**
@@ -465,33 +382,29 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
       try{
         output.mkdir();
       } catch(Exception e) {
-//        mw.log("Failed to create directory: "+e);
-        logger.log("Failed to create directory: "+e.getMessage(), Logger.ERROR);
+        logger.error("Failed to create directory", e);
       }
     }
     return output;
   }
   
-  private CellCollection createNewCollection(File folder){
-
-	  CellCollection newCollection = null;
-
-	  try {
-
-		  newCollection = new CellCollection(folder, 
-				  outputFolder, 
-				  "analysable", 
-				  this.debugFile,
-				  analysisOptions.getNucleusClass());
-
-	  } catch (Exception e) {
-		  logger.log("Error creating collection: "+e.getMessage(), Logger.ERROR);
-		  for(StackTraceElement el : e.getStackTrace()){
-			  logger.log(el.toString(), Logger.STACK);
-		  }
-	  }
-	  return newCollection;
-  }
+//  private CellCollection createNewCollection(File folder){
+//
+//	  CellCollection newCollection = null;
+//
+//	  try {
+//
+//		  newCollection = new CellCollection(folder, 
+//				  outputFolder, 
+//				  "analysable", 
+//				  this.debugFile,
+//				  analysisOptions.getNucleusClass());
+//
+//	  } catch (Exception e) {
+//		  logger.error("Error creating collection", e);
+//	  }
+//	  return newCollection;
+//  }
   
   private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition){
 
@@ -517,37 +430,10 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				  path, 
 				  nucleusNumber, 
 				  originalPosition);
+		  
+	  } catch(Exception e){
+		  logger.error("Error creating nucleus", e);
 
-	  } catch (NoSuchMethodException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (SecurityException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (InstantiationException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (IllegalAccessException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (IllegalArgumentException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
-	  } catch (InvocationTargetException e) {
-		  IJ.log(e.getMessage());
-		  for(StackTraceElement el : e.getStackTrace()){
-			  IJ.log(el.toString());
-		  }
 	  }
 	  return n;
   }
@@ -563,7 +449,13 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
 	  File[] listOfFiles = folder.listFiles();
 	  
-	  CellCollection folderCollection = createNewCollection(folder);
+	  CellCollection folderCollection = new CellCollection(folder, 
+			  outputFolder, 
+			  folder.getName(), 
+			  this.debugFile,
+			  analysisOptions.getNucleusClass());
+	  
+//	  CellCollection folderCollection = createNewCollection(folder);
 //	  RoundNucleusCollection folderCollection = new RoundNucleusCollection(folder, this.outputFolder, folder.getName(), this.debugFile);
 	  this.collectionGroup.put(folder, folderCollection);
 
@@ -593,7 +485,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		  } else { // if !ok
 			  if(file.isDirectory()){ // recurse over any sub folders
 				  processFolder(file);
-			  }
+			  } 
 		  } // end else if !ok
 	  } // end for (File)
   } // end function
@@ -621,7 +513,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		try{
 			detector.run(image);
 		} catch(Exception e){
-			logger.log("Error in nucleus detection: "+e.getMessage(), Logger.ERROR);
+			logger.error("Error in nucleus detection", e);
 		}
 		return detector.getRoiList();
 	}
@@ -740,10 +632,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
 			logger.log("Edge detection complete", Logger.DEBUG);
 		} catch (Exception e) {
-			logger.log("Error in dege detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in edge detection", e);
 		}
 		return searchStack;
 	}
@@ -761,10 +650,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				}
 			}
 		} catch (Exception e) {
-			logger.log("Error getting median image intensity: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error getting median image intensity", e);
 		}
 		return Stats.quartile(values, 50);
 	}
@@ -786,10 +672,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			logger.log("Objects closed", Logger.DEBUG);
 //			IJ.log("Closed");
 		} catch (Exception e) {
-			IJ.log("Error in closing: "+e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
+			logger.error("Error in morphology closing", e);
 		}
 		
 	}
@@ -816,10 +699,8 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 	  double ybase = nucleus.getYBase();
 
 	  Rectangle bounds = nucleus.getBounds();
-//	  double xCentre = xbase+(bounds.getWidth()/2);
-//	  double yCentre = ybase+(bounds.getHeight()/2);
+
 	  double[] originalPosition = {xbase, ybase, bounds.getWidth(), bounds.getHeight() };
-//	  String position = xCentre+"-"+yCentre; // store the centre of the rectangle for remapping
 
 	  try{
 	  	// Enlarge the ROI, so we can do nucleus detection on the resulting original images
@@ -840,6 +721,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		  currentNucleus.setArea(values.get("Area")); 
 		  currentNucleus.setFeret(values.get("Feret"));
 		  currentNucleus.setPerimeter(values.get("Perim"));
+		  currentNucleus.setScale(analysisOptions.getScale());
 	
 		  currentNucleus.setOutputFolder(this.outputFolder);
 		  currentNucleus.intitialiseNucleus(analysisOptions.getAngleProfileWindowSize());
@@ -850,30 +732,24 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  IJ.saveAsTiff(ImageExporter.convert(largeRegion), currentNucleus.getEnlargedImagePath());
 			  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
 		  } catch(Exception e){
-			  logger.log("Error saving original, enlarged or annotated image: "+e.getMessage(), Logger.ERROR);
-			  for(StackTraceElement element : e.getStackTrace()){
-				  logger.log(element.toString(), Logger.STACK);
-			  }
+			  logger.error("Error saving original, enlarged or annotated image",e);
 		  }
-		  
-//		  SignalDetector signalDetector = new SignalDetector(analysisOptions.getNuclearSignalOptions("default"),
-//				  												this.debugFile);
-//		  signalDetector.run(currentNucleus, image, currentNucleus.getSourceFile());
+
 		  
 		  currentNucleus.findPointsAroundBorder();
 	
 		  // if everything checks out, add the measured parameters to the global pool
 		  Cell c = new Cell();
 		  c.setNucleus(currentNucleus);
+		  if(debug){
+			  logger.log("Adding cell");
+		  }
 		  collectionToAddTo.addCell(c);
 		  
 		  
 	  }catch(Exception e){
-		  logger.log(" Error in nucleus assignment: "+e.getMessage(), Logger.ERROR);
+		  logger.error(" Error in nucleus assignment", e);
 		  mw.log("    Error in nucleus assignment: "+e.getMessage());
-		  for(StackTraceElement element : e.getStackTrace()){
-			  logger.log(element.toString(), Logger.STACK);
-		  }
 	  }
   }
   

@@ -37,19 +37,7 @@
   }
 
   public static double quartile(Double[] values, double lowerPercent) {
-
-    if (values == null || values.length == 0) {
-        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
-    }
-
-    // Rank order the values
-    Double[] v = new Double[values.length];
-    System.arraycopy(values, 0, v, 0, values.length);
-    Arrays.sort(v);
-
-    int n = (int) Math.round(v.length * lowerPercent / 100);
-    
-    return (double)v[n];
+	return quartile(Utils.getdoubleFromDouble(values), lowerPercent);
   }
 
   public static double mean(double[] m) {

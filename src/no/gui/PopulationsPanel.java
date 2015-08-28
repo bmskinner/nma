@@ -1,6 +1,5 @@
 package no.gui;
 
-import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -10,9 +9,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import no.analysis.AnalysisDataset;
@@ -38,12 +36,10 @@ import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import utility.TreeOrderHashMap;
 
-public class PopulationsPanel extends JPanel implements SignalChangeListener {
+public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String SOURCE_COMPONENT = "PopulationsPanel"; 
-	
+		
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 
 	private JXTreeTable treeTable;
@@ -54,8 +50,6 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 	
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 	
-	private List<Object> listeners = new ArrayList<Object>();
-
 	public PopulationsPanel() {
 		
 		this.setLayout(new BorderLayout());
@@ -361,7 +355,7 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 	/**
 	 * Add the given dataset to the main population list
 	 * Check that the name is valid, and update if needed
-	 * @param d the dataset to add
+	 * @param dataset the dataset to add
 	 */
 	public void addDataset(AnalysisDataset dataset){
 		dataset.setName(checkName(dataset.getName()));
@@ -371,6 +365,44 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list
 		}
+//		update();
+	}
+	
+	/**
+	 * Select the given dataset in the tree table
+	 * @param dataset the dataset to select
+	 */
+	public void selectDataset(AnalysisDataset dataset){
+
+		TreeSelectionModel selectedRows = treeTable.getTreeSelectionModel();
+		int index = getIndexOfDataset(dataset);
+				
+		TreePath path = treeTable.getPathForRow(index);
+		if(path!=null){
+			selectedRows.setSelectionPath(path);
+		}
+		update();
+	}
+	
+	public void selectDataset(UUID id){
+		this.selectDataset(this.getDataset(id));
+	}
+	
+	/**
+	 * Get the index of the given dataset in the tree table.
+	 * @return the index
+	 */
+	private int getIndexOfDataset(AnalysisDataset dataset){
+		int index = 0;
+		
+		for(int row = 0; row< treeTable.getRowCount(); row++){
+			String populationName = (String) treeTable.getModel().getValueAt(row, 0);
+			
+			if(dataset.getName().equals(populationName)){
+				index = row;
+			}
+		}
+		return index;
 	}
 	
 	/**
@@ -431,13 +463,13 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		if(!newName.isEmpty() && newName!=null){
 		
 			if(this.populationNames.containsKey(newName)){
-				fireSignalChangeEvent("Log_Name exists, aborting");
+				log("Name exists, aborting");
 			} else {
 				String oldName = collection.getName();
 				collection.setName(newName);
 				this.populationNames.put(newName, collection.getID());
 				this.populationNames.remove(oldName);
-				fireSignalChangeEvent("Log_Collection renamed: "+newName);
+				log("Collection renamed: "+newName);
 				
 				
 				File saveFile = dataset.getSavePath();
@@ -447,8 +479,7 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 				PopulationExporter.saveAnalysisDataset(dataset);
 				update();
 				
-				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-				list.add(dataset);
+				selectDataset(dataset);
 				fireSignalChangeEvent("UpdatePanels");
 			}
 		}
@@ -475,8 +506,9 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 				treeOrderMap.put(dataToMove.getUUID(), newValue ); // move the dataset up
 				treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
 				update();
+				
 			}
-			
+			selectDataset(dataToMove);
 		}
 	}
 	
@@ -502,7 +534,7 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 				treeOrderMap.put(replacedID, oldValue); // move the dataset in place down
 				update();
 			}
-			
+			selectDataset(dataToMove);
 		}
 	}
 	
@@ -548,9 +580,14 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 
 						for(UUID parentID : analysisDatasets.keySet()){
 							AnalysisDataset parent = analysisDatasets.get(parentID);
+							
+							if(parent.isCluster(id)){
+								parent.deleteCluster(id);
+							}
 							if(parent.hasChild(id)){
 								parent.deleteChild(id);
 							}
+							
 						}
 						populationNames.remove(d.getName());
 						analysisDatasets.remove(id);
@@ -582,14 +619,12 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 			TreeSelectionModel lsm = (TreeSelectionModel)e.getSource();
 			
 			List<Integer> selectedIndexes = new ArrayList<Integer>(0);
-
 			if (!lsm.isSelectionEmpty()) {
 				// Find out which indexes are selected.
 				int minIndex = lsm.getMinSelectionRow();
 				int maxIndex = lsm.getMaxSelectionRow();
 				for (int i = minIndex; i <= maxIndex; i++) {
 					if (lsm.isRowSelected(i)) {
-						
 
 						String key = (String) treeTable.getModel().getValueAt(i, 0); // row i, column 0
 						if(!key.equals("No populations")){
@@ -597,84 +632,26 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 							// get uuid from populationNames, then population via uuid from analysisDatasets
 							datasets.add(analysisDatasets.get(populationNames.get(key)));
 							selectedIndexes.add(i);
-							
 						}
 
 					}
 				}
 				String count = datasets.size() == 1 ? "population" : "populations"; // it matters to ME
-//				lblStatusLine.setText(datasets.size()+" "+count+" selected");
+				status(datasets.size()+" "+count+" selected");
 				treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer(selectedIndexes));
 
 				if(datasets.isEmpty()){
-					IJ.log("Error: list is empty");
 					populationPopup.disableAll();
 				} else {
 					
 					if(datasets.size()>1){ // multiple populations
 						populationPopup.disableAll();
 						populationPopup.enableMerge();
-						populationPopup.enableDelete();
+						populationPopup.disableDelete();
 						
 					} else { // single population
 						AnalysisDataset d = datasets.get(0);
-						populationPopup.enableDelete();
-						populationPopup.disableMerge();
-						populationPopup.enableSave();
-						populationPopup.enableExtract();
-						populationPopup.enableExportStats();
-						populationPopup.enableAddTailStain();
-						populationPopup.enableAddNuclearSignal();
-						populationPopup.enableRunShellAnalysis();
-						
-						// check if we can move the dataset
-						if(d.isRoot()){
-
-							if(treeOrderMap.size()>1){
-								populationPopup.enableApplySegmentation();
-
-								// check if the selected dataset is at the top of the list
-								if(treeOrderMap.get(0)==d.getUUID()){
-									populationPopup.disableMenuUp();
-//									populationPopup.disableMenuDown();
-								} else {
-									populationPopup.enableMenuUp();
-//									populationPopup.enableMenuDown();
-								}
-
-								// check if the selected dataset is at the bottom of the list
-								if(treeOrderMap.get(treeOrderMap.size()-1)==d.getUUID()){
-									populationPopup.disableMenuDown();
-//									populationPopup.disableMenuUp();
-								} else {
-//									populationPopup.enableMenuUp();
-									populationPopup.enableMenuDown();
-								}
-
-							} else { // only one or zero datasets in the pogram 
-								populationPopup.disableMenuUp();
-								populationPopup.disableMenuDown();
-							}
-
-							// only root datasets can replace folder mappings
-							populationPopup.enableReplaceFolder();
-
-						} else { // not root
-							
-							if(treeOrderMap.size()>1){
-								populationPopup.enableApplySegmentation();
-							}
-							
-							populationPopup.disableReplaceFolder();
-							populationPopup.disableMenuUp();
-							populationPopup.disableMenuDown();
-						}
-
-						if(!d.hasChildren()){ // cannot split population without children yet
-							populationPopup.disableSplit();
-						} else {
-							populationPopup.enableSplit();
-						}
+						setMenuForSingleDataset(d);
 					}
 					fireSignalChangeEvent("UpdatePanels");
 				}
@@ -682,22 +659,67 @@ public class PopulationsPanel extends JPanel implements SignalChangeListener {
 		}
 	}
 	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-     
-    private synchronized void fireSignalChangeEvent(String message) {
-        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
-        Iterator<Object> iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
-	
+	private void setMenuForSingleDataset(AnalysisDataset d){
+		
+		populationPopup.enableDelete();
+		populationPopup.disableMerge();
+		populationPopup.enableSave();
+		populationPopup.enableExtract();
+		populationPopup.enableExportStats();
+		populationPopup.enableAddTailStain();
+		populationPopup.enableAddNuclearSignal();
+		populationPopup.enableRunShellAnalysis();
+		
+		// check if we can move the dataset
+		if(d.isRoot()){
+
+			if(treeOrderMap.size()>1){
+				populationPopup.enableApplySegmentation();
+
+				// check if the selected dataset is at the top of the list
+				if(treeOrderMap.get(0).equals(d.getUUID())){
+					populationPopup.disableMenuUp();
+//					populationPopup.disableMenuDown();
+				} else {
+					populationPopup.enableMenuUp();
+//					populationPopup.enableMenuDown();
+				}
+
+				// check if the selected dataset is at the bottom of the list
+				if(treeOrderMap.get(treeOrderMap.size()-1).equals(d.getUUID())){
+					populationPopup.disableMenuDown();
+//					populationPopup.disableMenuUp();
+				} else {
+//					populationPopup.enableMenuUp();
+					populationPopup.enableMenuDown();
+				}
+
+			} else { // only one or zero datasets in the pogram 
+				populationPopup.disableMenuUp();
+				populationPopup.disableMenuDown();
+			}
+
+			// only root datasets can replace folder mappings
+			populationPopup.enableReplaceFolder();
+
+		} else { // not root
+			
+			if(treeOrderMap.size()>1){
+				populationPopup.enableApplySegmentation();
+			}
+			
+			populationPopup.disableReplaceFolder();
+			populationPopup.disableMenuUp();
+			populationPopup.disableMenuDown();
+		}
+
+		if(!d.hasChildren()){ // cannot split population without children yet
+			populationPopup.disableSplit();
+		} else {
+			populationPopup.enableSplit();
+		}
+	}
+		
 	/**
 	 * Allows for cell background to be coloured based on poition in a list
 	 *

@@ -1,10 +1,15 @@
 package no.analysis;
 
+import ij.IJ;
 import ij.ImageStack;
 import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.measure.Measurements;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +27,7 @@ import utility.Utils;
 import no.collections.CellCollection;
 import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.components.NuclearSignal;
+import no.components.Profile;
 import no.components.SignalCollection;
 import no.components.XYPoint;
 import no.export.CompositeExporter;
@@ -33,6 +39,11 @@ import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 
 
+/**
+ * Methods for finding a FISH signal in a nucleus.
+ * TODO: For a paint, assume one or two signals per nucleus. 
+ * If more are detected, lower the threshold until the signals merge
+ */
 public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	
 	protected NuclearSignalOptions options = null;
@@ -42,6 +53,8 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	protected int channel;
 	protected int signalGroup;
 	protected String channelName;
+	
+	private boolean debug = false;
 
 	/**
 	 * Empty constructor. Detector will have default values
@@ -97,7 +110,12 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 
 		try{
 			int progress = 0;
+			
+			int originalMinThreshold = options.getSignalThreshold();
 			for(Cell c : dataset.getCollection().getCells()){
+				
+				// reset the  min threshold for each cell
+				options.setThreshold(originalMinThreshold);
 
 				Nucleus n = c.getNucleus();
 				logger.log("Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber(), Logger.DEBUG);
@@ -115,29 +133,23 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 					
 					
 				} catch(Exception e){
-					logger.log("Error detecting signal: "+e.getMessage(), Logger.ERROR);
-					for(StackTraceElement el : e.getStackTrace()){
-						logger.log(el.toString(), Logger.STACK);
-					}
+					logger.error("Error detecting signal", e);
 				}
 				
 				progress++;
 				publish(progress);
 			}
 			
-			// divide population into clusters with and without signals
-			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
-			
-			for(CellCollection collection : signalPopulations){
-				processSubPopulation(collection);
-			}
+//			// divide population into clusters with and without signals
+//			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
+//			
+//			for(CellCollection collection : signalPopulations){
+//				processSubPopulation(collection);
+//			}
 			
 			
 		} catch (Exception e){
-			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in signal detection", e);
 			return false;
 		}
 
@@ -155,93 +167,79 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in signal detection", e);
 		} catch (ExecutionException e) {
-			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in signal detection", e);
 		}
 
 	} 
 	
-	/**
-	 * Create child datasets for signal populations
-	 * and perform basic analyses
-	 * @param collection
-	 */
-	private void processSubPopulation(CellCollection collection){
-
-		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
-		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
-
-		logger.log("Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
-
-		// use the same segmentation from the initial analysis
-		MorphologyAnalysis.reapplyProfiles(collection, dataset.getCollection());
-
-
-//		 measure general nuclear organisation
-//		SignalAnalysis.run(collection);
-
-		// Perform shell analysis with 5 shells by default
-//		if(collection.getNucleusClass() == RoundNucleus.class){
-//			ShellAnalysis.run(subDataset, 5);
+//	/**
+//	 * Create child datasets for signal populations
+//	 * and perform basic analyses
+//	 * @param collection
+//	 */
+//	private void processSubPopulation(CellCollection collection){
+//
+//		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
+//		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
+//
+//		logger.log("Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
+//
+//		// use the same segmentation from the initial analysis
+//		MorphologyAnalysis.reapplyProfiles(collection, dataset.getCollection());
+//
+//		dataset.addChildDataset(subDataset);
+//	}
+//	
+//	/*
+//    Given a complete collection of nuclei, split it into up to 4 populations;
+//      nuclei with red signals, with green signals, without red signals and without green signals
+//    Only include the 'without' populations if there is a 'with' population.
+//	 */
+//	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
+//
+//		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
+//		logger.log("Dividing population by signals...");
+//		try{
+//
+//			List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
+//			if(!list.isEmpty()){
+//				logger.log("Found nuclei with signals in group "+signalGroup);
+//				CellCollection listCollection = new CellCollection(r.getFolder(), 
+//						r.getOutputFolderName(), 
+//						"Signals_in_group_"+signalGroup, 
+//						r.getDebugFile(), 
+//						r.getNucleusClass());
+//
+//				for(Cell c : list){
+//					listCollection.addCell( c );
+//				}
+//				signalPopulations.add(listCollection);
+//
+//				List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
+//				if(!notList.isEmpty()){
+//					logger.log("Found nuclei without signals in group "+signalGroup);
+//					CellCollection notListCollection = new CellCollection(r.getFolder(), 
+//							r.getOutputFolderName(), 
+//							"No_signals_in_group_"+signalGroup, 
+//							r.getDebugFile(), 
+//							r.getNucleusClass());
+//
+//					for(Cell c : notList){
+//						notListCollection.addCell( c );
+//					}
+//					signalPopulations.add(notListCollection);
+//				}
+//
+//			}
+//
+//		} catch(Exception e){
+//			logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
 //		}
-		dataset.addChildDataset(subDataset);
-	}
-	
-	/*
-    Given a complete collection of nuclei, split it into up to 4 populations;
-      nuclei with red signals, with green signals, without red signals and without green signals
-    Only include the 'without' populations if there is a 'with' population.
-	 */
-	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
-
-		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
-		logger.log("Dividing population by signals...");
-		try{
-
-			List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
-			if(!list.isEmpty()){
-				logger.log("Found nuclei with signals in group "+signalGroup);
-				CellCollection listCollection = new CellCollection(r.getFolder(), 
-						r.getOutputFolderName(), 
-						"Signals_in_group_"+signalGroup, 
-						r.getDebugFile(), 
-						r.getNucleusClass());
-
-				for(Cell c : list){
-					listCollection.addCell( c );
-				}
-				signalPopulations.add(listCollection);
-
-				List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
-				if(!notList.isEmpty()){
-					logger.log("Found nuclei without signals in group "+signalGroup);
-					CellCollection notListCollection = new CellCollection(r.getFolder(), 
-							r.getOutputFolderName(), 
-							"No_signals_in_group_"+signalGroup, 
-							r.getDebugFile(), 
-							r.getNucleusClass());
-
-					for(Cell c : notList){
-						notListCollection.addCell( c );
-					}
-					signalPopulations.add(notListCollection);
-				}
-
-			}
-
-		} catch(Exception e){
-			logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
-		}
-
-		return signalPopulations;
-	}
+//
+//		return signalPopulations;
+//	}
 	
 	
 	/**
@@ -252,13 +250,34 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 */
 	private void detectSignal(File sourceFile, ImageStack stack, Nucleus n){
 		
-		if(options==null || !options.isReverseThreshold()){
+		if(options==null || options.getMode()==NuclearSignalOptions.FORWARD){
 			detectForwardThresholdSignal(sourceFile, stack, n);
-		} else {
+		}
+		
+		if(options.getMode()==NuclearSignalOptions.REVERSE){
 			detectReverseThresholdSignal(sourceFile, stack, n);
 		}
 		
-		
+		if(options.getMode()==NuclearSignalOptions.HISTOGRAM){
+			detectHistogramThresholdSignal(sourceFile, stack, n);
+		}
+	}
+	
+	/**
+	 * Given a new threshold value, update the options
+	 * if the value is not below the previously defined
+	 * minimum
+	 * @param newThreshold
+	 */
+	private void updateThreshold(int newThreshold){
+		// only use the calculated threshold if it is larger than
+		// the given minimum
+		if(newThreshold > options.getSignalThreshold()){
+			logger.log("Threshold set at: "+newThreshold);
+			options.setThreshold(newThreshold);
+		} else {
+			logger.log("Threshold kept at minimum: "+options.getSignalThreshold());
+		}
 	}
 	
 	/**
@@ -341,6 +360,8 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 * the nuclear roi. If < maxSignalFraction, get dimmer pixels and
 	 * remeasure. Continue until signal size is met. Works best with 
 	 * maxSignalFraction of ~0.1 for a chromosome paint
+	 * TODO: assumes there is only one signal. Check that the detector picks
+	 * up an object of MIN_SIGNAL_SIZE before setting the threshold.
 	 * @param sourceFile the file the image came from
 	 * @param stack the imagestack
 	 * @param n the nucleus
@@ -400,18 +421,86 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		}
 		
 		
-		// only use the calculated threshold if it is larger than
-		// the given minimum
-		if(threshold > options.getSignalThreshold()){
-			logger.log("Threshold set at: "+threshold);
-			options.setThreshold(threshold);
-		} else {
-			logger.log("Threshold kept at minimum: "+options.getSignalThreshold());
-		}
+		updateThreshold(threshold);
 		
 		// now we have the reverse threshold value, do the thresholding 
 		// and find signal rois
 		detectForwardThresholdSignal(sourceFile, stack, n);
 
+	}
+	
+	
+	
+	/**
+	 * This method uses the histogram of pixel intensities in the signal
+	 * channel within the bounding box of the nucleus. The histogram shows a drop
+	 * at the point where background transitions to real signal. We detect this drop, 
+	 * and set it as the appropriate forward threshold for the nucleus.  
+	 */
+	private void detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
+		logger.log("Beginning histogram detection for nucleus");
+		if(debug){
+			IJ.log("Beginning histogram detection for nucleus "+n.getNameAndNumber());
+		}
+		// choose the right stack number for the channel
+		int stackNumber = Constants.rgbToStack(channel);
+		
+		ImageProcessor ip = stack.getProcessor(stackNumber);
+		double[] positions = n.getPosition();
+		Rectangle boundingBox = new Rectangle( (int) positions[Nucleus.X_BASE],
+				(int) positions[Nucleus.Y_BASE],
+				(int) positions[Nucleus.WIDTH],
+				(int) positions[Nucleus.HEIGHT]);
+		
+		ip.setRoi(boundingBox);
+		ImageStatistics statistics = ImageStatistics.getStatistics(ip, Measurements.AREA, new Calibration());
+		long[] histogram = statistics.getHistogram();
+		
+		double[] d = new double[histogram.length];
+
+		for(int i =0; i<histogram.length; i++){
+			d[i] = histogram[i];
+
+		}
+		
+		/* trim the histogram to the minimum signal intensity.
+		 * No point looking lower, and the black pixels increase the
+		 * total range making it harder to carry out the range based minima
+		 * detection below
+		 */
+		int trimValue = options.getSignalThreshold();
+		Profile histogramProfile = new Profile(d);
+		Profile trimmedHisto = histogramProfile.getSubregion(trimValue, 255);
+		
+		// smooth the arrays,  get the deltas, and double smooth them
+		Profile trimDS = trimmedHisto.smooth(3).calculateDeltas(3).smooth(3).smooth(3);
+		
+		/* find minima and maxima above or below zero, with a total 
+		 * displacement more than 0.1 of the range of values in the delta
+		 * profile
+		 */		
+		Profile minimaD = trimDS.getLocalMinima(3, 0, 0.1);
+
+		/* Set the threshold for this nucleus to the drop-off
+		* This is the highest local minimum detected in the 
+		* delta profile (if no minima were detected, we use the
+		* original signal threshold). 
+		*/ 
+		int maxIndex = trimValue;
+		for(int i =0; i<minimaD.size(); i++){
+			if(minimaD.get(i)==1){
+				maxIndex = i+trimValue;
+			}
+		}
+		/*
+		 * Add a bit more to the new threshold. This is because the minimum
+		 * of the delta profile is in middle of the background drop off;
+		 * we actually want to ignore the remainder of this background and just
+		 * keep the signal. Arbitrary at present. TODO: Find the best point. 
+		 */
+		maxIndex+=10;
+		
+		updateThreshold(maxIndex);
+		detectForwardThresholdSignal(sourceFile, stack, n);
 	}
 }

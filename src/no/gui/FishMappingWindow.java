@@ -98,8 +98,8 @@ public class FishMappingWindow extends JDialog {
 			try {
 //				NucleusCollection collection = dataset.getCollection();
 				
-				this.subCollectionLeft  = MainWindow.makeNewCollection(dataset, "SubCollectionLeft");
-				this.subCollectionRight = MainWindow.makeNewCollection(dataset, "SubCollectionRight");
+				this.subCollectionLeft  = new CellCollection(dataset, "SubCollectionLeft");
+				this.subCollectionRight = new CellCollection(dataset, "SubCollectionRight");
 				
 				createGUI();
 

@@ -78,15 +78,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.log("Error in clustering: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in clustering", e);
 		} catch (ExecutionException e) {
-			logger.log("Error in clustering: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in clustering", e);
 		}
 	}
 	
@@ -149,17 +143,11 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				}
 
 			} catch (Exception e) {
-				logger.log("Error in clustering: "+e.getMessage(), Logger.ERROR);
-				for(StackTraceElement el : e.getStackTrace()){
-					logger.log(el.toString(), Logger.STACK);
-				}
+				logger.error("Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
-			logger.log("Error in assignments: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in assignments", e);
 			return false;
 		}
 		return true;
@@ -174,7 +162,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
 				CellCollection clusterCollection = new CellCollection(collection.getFolder(), 
 						collection.getOutputFolderName(), 
-						collection.getType(), 
+						collection.getName()+"_Cluster_"+i, 
 						collection.getDebugFile(), 
 						collection.getNucleusClass());
 				
@@ -199,16 +187,14 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				 
 			}
 		} catch (Exception e) {
-			logger.log("Error: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error clustering", e);
 		}
 	}
 	
  	private Instances makeAttributesAndInstances(CellCollection collection){
 		// make Attributes on which to cluster
 		//		Attribute id = new Attribute("id", List); 
+ 		
 
 		Attribute area = new Attribute("area"); 
 		Attribute perimeter = new Attribute("perimeter"); 
@@ -229,6 +215,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
+		try{
 
 		ProfileCollection pc = collection.getFrankenCollection();
 		String pointType = collection.getReferencePoint();
@@ -283,6 +270,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			cellToInstanceMap.put(inst, c.getCellId());
 				
 			i++;
+		}
+		} catch(Exception e){
+			logger.error("Error making instances", e);
 		}
 		return instances;
 	}

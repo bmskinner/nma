@@ -11,13 +11,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.table.TableModel;
 
 import utility.Constants;
 import no.analysis.AnalysisDataset;
+import no.gui.VennDetailPanel.VennTableCellRenderer;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 
-public class WilcoxonDetailPanel extends JPanel {
+public class WilcoxonDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -27,7 +30,7 @@ public class WilcoxonDetailPanel extends JPanel {
 	private JTable wilcoxonMinFeretTable;
 	private JTable wilcoxonDifferenceTable;
 
-	public WilcoxonDetailPanel() {
+	public WilcoxonDetailPanel() throws Exception {
 		this.setLayout(new BorderLayout());
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -93,39 +96,53 @@ public class WilcoxonDetailPanel extends JPanel {
 	/**
 	 * Update the wilcoxon panel with data from the given datasets
 	 * @param list the datasets
+	 * @throws Exception 
 	 */
-	public void update(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
+	public void update(final List<AnalysisDataset> list) throws Exception {
 
-		wilcoxonAreaTable.setModel(NucleusTableDatasetCreator.createWilcoxonAreaTable(list));
-		
-		int columns = wilcoxonAreaTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonAreaTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonPerimTable.setModel(NucleusTableDatasetCreator.createWilcoxonPerimeterTable(list));
-		columns = wilcoxonPerimTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonPerimTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonMinFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list));
-		columns = wilcoxonMinFeretTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonMinFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonFeretTable.setModel(NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list));
-		columns = wilcoxonFeretTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonFeretTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-		}
-		
-		wilcoxonDifferenceTable.setModel(NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list));
-		columns = wilcoxonDifferenceTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			wilcoxonDifferenceTable.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				try{
+					// format the numbers and make into a tablemodel
+					TableModel areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(null);
+					TableModel perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null);
+					TableModel feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(null);
+					TableModel minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(null);
+					TableModel differenceModel 	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(null);
+
+					if(!list.isEmpty() && list!=null){
+
+						areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(list);
+						perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(list);
+						feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list);
+						minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list);
+						differenceModel	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list);
+
+					}
+
+					wilcoxonAreaTable.setModel(areaModel);
+					wilcoxonPerimTable.setModel(perimModel);
+					wilcoxonMinFeretTable.setModel(minFeretModel);
+					wilcoxonFeretTable.setModel(feretModel);
+					wilcoxonDifferenceTable.setModel(differenceModel);
+
+					setRenderer(wilcoxonAreaTable);
+					setRenderer(wilcoxonPerimTable);
+					setRenderer(wilcoxonMinFeretTable);
+					setRenderer(wilcoxonFeretTable);
+					setRenderer(wilcoxonDifferenceTable);
+				} catch (Exception e) {
+					error("Error making Wilcoxon table", e);
+				}
+			}});
+	}
+	
+	private void setRenderer(JTable table){
+		int columns = table.getColumnModel().getColumnCount();
+		if(columns>1){
+			for(int i=1;i<columns;i++){
+				table.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
+			}
 		}
 	}
 	

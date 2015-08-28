@@ -21,6 +21,8 @@ public class AnalysisOptions implements Serializable {
 	private boolean normaliseContrast; 
 
 	private int angleProfileWindowSize;
+	
+	private double scale; // hold the length of a pixel in metres
 
 	private Class<?> nucleusClass;
 
@@ -119,6 +121,16 @@ public class AnalysisOptions implements Serializable {
 	public int getYOffset(){
 		return  this.yoffset;
 	}
+
+	public double getScale() {
+		return scale;
+	}
+
+
+	public void setScale(double scale) {
+		this.scale = scale;
+	}
+
 
 	public void setNucleusThreshold(int nucleusThreshold) {
 		this.nucleusThreshold = nucleusThreshold;
@@ -369,22 +381,24 @@ public class AnalysisOptions implements Serializable {
 		public static final double DEFAULT_MAX_SIGNAL_FRACTION 		= 0.1;
 		public static final double DEFAULT_MIN_CIRC 				= 0.0;
 		public static final double DEFAULT_MAX_CIRC 				= 1.0;
+		
+		// modes for detecting signals
+		public static final int FORWARD 	= 0;
+		public static final int REVERSE 	= 1;
+		public static final int HISTOGRAM 	= 2;
 
 		private static final long serialVersionUID = 1L;
-		private int threshold;
-		private double minCirc;
-		private double maxCirc;
+		private int threshold		= DEFAULT_SIGNAL_THRESHOLD;
+		private double minCirc		= DEFAULT_MIN_CIRC;
+		private double maxCirc		= DEFAULT_MAX_CIRC;
 		
-		private double minSize;
-		private double maxFraction;
+		private double minSize 		= DEFAULT_MIN_SIGNAL_SIZE;
+		private double maxFraction	= DEFAULT_MAX_SIGNAL_FRACTION;
 		
-		// do we get everthing above a threshold (forward)
-		// or take the brightest pixels downwards up to the max signal fraction (reverse)
-		// default is false, forward threshold
-		private boolean reverseThreshold; 
+		private int detectionMode = NuclearSignalOptions.FORWARD;
 		
 		public NuclearSignalOptions(){
-			this.reverseThreshold = false;
+//			
 		}
 		
 		public int getSignalThreshold(){
@@ -426,13 +440,13 @@ public class AnalysisOptions implements Serializable {
 		public void setMaxFraction(double maxFraction) {
 			this.maxFraction = maxFraction;
 		}
-
-		public boolean isReverseThreshold() {
-			return reverseThreshold;
+		
+		public int getMode(){
+			return this.detectionMode;
 		}
-
-		public void setReverseThreshold(boolean reverseThreshold) {
-			this.reverseThreshold = reverseThreshold;
+		
+		public void setMode(int mode){
+			this.detectionMode = mode;
 		}
 
 	}

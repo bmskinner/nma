@@ -43,6 +43,18 @@ public class Logger {
 		log(s, Logger.INFO);
 	}
 	
+	/**
+	 * Log an exception message with the corresponding stack trace
+	 * @param message a message describing the error
+	 * @param e the exception that occurred
+	 */
+	public void error(String message, Exception e){
+		log(message+": "+e.getMessage(), Logger.ERROR);
+		for(StackTraceElement e1 : e.getStackTrace()){
+			log(e1.toString(), Logger.STACK);
+		}
+	}
+	
 	public File getLogfile(){
 		return this.file;
 	}

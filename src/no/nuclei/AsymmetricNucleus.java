@@ -18,6 +18,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Constants;
 import no.components.*;
 
 public class AsymmetricNucleus
@@ -30,7 +31,7 @@ public class AsymmetricNucleus
 	private static final long serialVersionUID = 1L;
 private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorderPoint>(0); // holds the points considered to be sperm tails before filtering
 
-  public AsymmetricNucleus(RoundNucleus n){
+  public AsymmetricNucleus(RoundNucleus n) throws Exception{
     super(n);
   }
 
@@ -43,6 +44,16 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
     Get nucleus features
     -----------------------
   */
+  
+  	@Override
+	public String getReferencePoint(){
+		return Constants.Nucleus.ASYMMETRIC.referencePoint();
+	}
+  	
+  	@Override
+	public String getOrientationPoint(){
+		return Constants.Nucleus.ASYMMETRIC.orientationPoint();
+	}
 
   public List<NucleusBorderPoint> getEstimatedTailPoints(){
     return this.tailEstimatePoints;

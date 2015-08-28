@@ -1,8 +1,5 @@
 package no.gui;
 
-import ij.IJ;
-
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -18,31 +15,23 @@ import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
 
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
-import no.components.Profile;
-import no.nuclei.Nucleus;
+import no.components.ProfileCollection;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
-import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
-public class NucleusProfilesPanel extends JPanel implements ActionListener {
+public class NucleusProfilesPanel extends DetailPanel implements ActionListener {
 
 
 	private static final long serialVersionUID = 1L;
 	
-//	private ChartPanel profileChartPanel;
 	private ChartPanel frankenChartPanel;
 	private ChartPanel profilesPanel;
 	private ChartPanel variabilityChartPanel; 
@@ -50,6 +39,9 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 	private JRadioButton rawProfileLeftButton  = new JRadioButton("Left"); // left align raw profiles in rawChartPanel
 	private JRadioButton rawProfileRightButton = new JRadioButton("Right"); // right align raw profiles in rawChartPan
 	private JCheckBox    normCheckBox 	= new JCheckBox("Normalised");	// to toggle raw or normalised segment profiles in segmentsProfileChartPanel
+	
+	private JRadioButton referenceButton  = new JRadioButton("Reference point"); // start drawing from reference
+	private JRadioButton orientationButton = new JRadioButton("Orientation point"); // start drawing from orientation
 	
 	private List<AnalysisDataset> list;
 
@@ -66,7 +58,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		// Create the franken profile chart
 		//---------------
 		JFreeChart frankenChart = MorphologyChartFactory.makeEmptyProfileChart();
-		frankenChartPanel = new ChartPanel(frankenChart);
+		frankenChartPanel  = MorphologyChartFactory.makeProfileChartPanel(frankenChart);
 		frankenChartPanel.setMinimumSize(minimumChartSize);
 		frankenChartPanel.setPreferredSize(preferredChartSize);
 		frankenChartPanel.setMinimumDrawWidth( 0 );
@@ -79,7 +71,8 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		JPanel rawPanel = new JPanel();
 		rawPanel.setLayout(new BorderLayout());
 		JFreeChart rawChart = MorphologyChartFactory.makeEmptyProfileChart();
-		profilesPanel = new ChartPanel(rawChart);
+		profilesPanel = MorphologyChartFactory.makeProfileChartPanel(rawChart);
+		
 		profilesPanel.setMinimumDrawWidth( 0 );
 		profilesPanel.setMinimumDrawHeight( 0 );
 		rawPanel.setMinimumSize(minimumChartSize);
@@ -115,6 +108,27 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		alignPanel.add(normCheckBox);
 		alignPanel.add(rawProfileLeftButton);
 		alignPanel.add(rawProfileRightButton);
+		
+		
+		// Add the radio buttons to choose between reference and orientation drawing
+		referenceButton.setSelected(false);
+		referenceButton.setActionCommand("DrawReferencePoint");
+		referenceButton.addActionListener(this);
+		referenceButton.setEnabled(false);
+		
+		orientationButton.setSelected(true);
+		orientationButton.setActionCommand("DrawOrientationPoint");
+		orientationButton.addActionListener(this);
+		orientationButton.setEnabled(false);
+		
+		final ButtonGroup drawPointGroup = new ButtonGroup();
+		drawPointGroup.add(referenceButton);
+		drawPointGroup.add(orientationButton);
+		
+		alignPanel.add(referenceButton);
+		alignPanel.add(orientationButton);
+		
+		// add the alignments panel to the tab
 		rawPanel.add(alignPanel, BorderLayout.NORTH);
 		
 		//---------------
@@ -142,17 +156,33 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 		
 		this.list = list;
 		
+		
+		
+		
 		if(!list.isEmpty()){
+			
 			normCheckBox.setEnabled(true);
-			if(  normCheckBox.isSelected()){
-				updateProfiles(list, true, false);
-			} else {			
-				if(  rawProfileLeftButton.isSelected()){
-					updateProfiles(list, false, false);
-				} else {
-					updateProfiles(list, false, true);
-				}
-			}
+			referenceButton.setEnabled(true);
+			orientationButton.setEnabled(true);
+			
+			boolean normalised = normCheckBox.isSelected();
+			
+			// only allow right align if not normalised
+			boolean rightAlign = normalised ? false : rawProfileRightButton.isSelected();
+			boolean fromReference = referenceButton.isSelected();
+			
+			updateProfiles(list, normalised, rightAlign, fromReference);
+			
+			
+//			if(  normCheckBox.isSelected()){
+//				updateProfiles(list, true, false);
+//			} else {			
+//				if(  rawProfileLeftButton.isSelected()){
+//					updateProfiles(list, false, false);
+//				} else {
+//					updateProfiles(list, false, true);
+//				}
+//			}
 
 			updateFrankenProfileChart(list);
 			updateVariabilityChart(list);
@@ -161,6 +191,8 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 			normCheckBox.setEnabled(false);
 			rawProfileLeftButton.setEnabled(false);
 			rawProfileRightButton.setEnabled(false);
+			referenceButton.setEnabled(false);
+			orientationButton.setEnabled(false);
 		}
 	}
 			
@@ -170,28 +202,17 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 	 * @param normalised flag for raw or normalised lengths
 	 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 	 */	
-	private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign){
+	private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference){
 
 		try {
 			if(list.size()==1){
 				
-				XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(list.get(0).getCollection(), normalised);
-				
-				int length = (int) list.get(0).getCollection().getMedianArrayLength() ;
-
-				// if we set raw values, get the maximum nucleus length
-				if(!normalised){
-					for(Nucleus n : list.get(0).getCollection().getNuclei()){
-						length = (int) Math.max( n.getLength(), length);
-					}
-				}
-				
-//				int length 	= normalised 
-//							? (int) list.get(0).getCollection().getMedianArrayLength() 
-//							: (int) list.get(0).getCollection().getMedianArrayLength();
-				
+				String point 	= fromReference 
+								? list.get(0).getCollection().getReferencePoint() 
+								: list.get(0).getCollection().getOrientationPoint();
+			
 				// full segment colouring
-				JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, length);
+				JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign, point);
 				profilesPanel.setChart(chart);
 				
 			} else {
@@ -214,7 +235,7 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 			}
 			
 		} catch (Exception e) {
-			IJ.log("Error in plotting profile");
+			error("Error in plotting profile", e);			
 		} 
 	}
 	
@@ -242,10 +263,13 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 			}
 						
 		} catch (Exception e) {
-			IJ.log("Error in plotting frankenprofile: "+e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
+			log("Error in plotting frankenprofile: "+e.getMessage());
+			for(AnalysisDataset d : list){
+				log(d.getName());
+				ProfileCollection f = d.getCollection().getFrankenCollection();
+				log(f.printKeys());
 			}
+			error("Error in plotting fankenprofile", e);
 		} 
 	}
 	
@@ -260,21 +284,29 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 				variabilityChartPanel.setChart(chart);
 			}
 		} catch (Exception e) {
-			IJ.log("Error drawing variability chart: "+e.getMessage());
+			error("Error in plotting variability chart", e);
 		}	
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		boolean normalised = normCheckBox.isSelected();
+		
+		// only allow right align if not normalised
+		boolean rightAlign = normalised ? false : rawProfileRightButton.isSelected();
+		boolean fromReference = referenceButton.isSelected();
+		
+		updateProfiles(list, normalised, rightAlign, fromReference);
 
 		if(e.getActionCommand().equals("LeftAlignRawProfile")){
-			updateProfiles(list, false, false);
+//			updateProfiles(list, false, false);
 //			updateRawProfileImage(list, false);
 		}
 		
 		if(e.getActionCommand().equals("RightAlignRawProfile")){
 //			updateRawProfileImage(list, true);
-			updateProfiles(list, false, true);
+//			updateProfiles(list, false, true);
 		}
 		
 		if(e.getActionCommand().equals("NormalisedProfile")){
@@ -282,15 +314,15 @@ public class NucleusProfilesPanel extends JPanel implements ActionListener {
 			if(  normCheckBox.isSelected()){
 				rawProfileLeftButton.setEnabled(false);
 				rawProfileRightButton.setEnabled(false);
-				updateProfiles(list, true, false);
+//				updateProfiles(list, true, false);
 			} else {
 				rawProfileLeftButton.setEnabled(true);
 				rawProfileRightButton.setEnabled(true);
 				
 				if(  rawProfileLeftButton.isSelected()){
-					updateProfiles(list, false, false);
+//					updateProfiles(list, false, false);
 				} else {
-					updateProfiles(list, false, true);
+//					updateProfiles(list, false, true);
 				}
 			}
 			

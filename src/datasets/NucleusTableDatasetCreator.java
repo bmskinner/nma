@@ -2,6 +2,7 @@ package datasets;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,12 +25,12 @@ import no.nuclei.sperm.RodentSpermNucleus;
 public class NucleusTableDatasetCreator {
 	
 	/**
-	 * Create a table of signal stats for the given list of datasets. This table
-	 * covers size, number of signals
+	 * Create a table of segment stats for the given nucleus.
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
+	 * @throws Exception 
 	 */
-	public static TableModel createSegmentStatsTable(Nucleus nucleus){
+	public static TableModel createSegmentStatsTable(Nucleus nucleus) throws Exception{
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -55,7 +56,7 @@ public class NucleusTableDatasetCreator {
 
 
 			// get the offset segments
-			List<NucleusBorderSegment> segments = nucleus.getSegments(referencePoint);
+			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(referencePoint).getSegments();
 
 			// create the row names
 			fieldNames.add("Colour");
@@ -71,16 +72,65 @@ public class NucleusTableDatasetCreator {
 				List<Object> rowData = new ArrayList<Object>(0);
 				
 				rowData.add("");
-				rowData.add(segment.length(nucleus.getLength()));
+				rowData.add(segment.length());
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
 
-				model.addColumn(segment.getSegmentType(), rowData.toArray(new Object[0])); // separate column per segment
+				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
 			}
 
 			// format the numbers and make into a tablemodel
 //			DecimalFormat df = new DecimalFormat("#0.00"); 
 
+		}
+		return model;	
+	}
+	
+	/**
+	 * Create a table of segment stats for median profile of the given dataset.
+	 * @param dataset the AnalysisDataset to include
+	 * @return a table model
+	 * @throws Exception 
+	 */
+	public static TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset) throws Exception {
+
+		DefaultTableModel model = new DefaultTableModel();
+
+		List<Object> fieldNames = new ArrayList<Object>(0);
+		
+		if(dataset==null){
+			model.addColumn("No data loaded");
+
+		} else {
+			CellCollection collection = dataset.getCollection();
+			// check which reference point to use
+			String point = collection.getOrientationPoint();
+
+
+			// get the offset segments
+			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(point);
+			//.getAngleProfile(referencePoint).getSegments();
+
+			// create the row names
+			fieldNames.add("Colour");
+			fieldNames.add("Length");
+			fieldNames.add("Start index");
+			fieldNames.add("End index");
+
+			model.addColumn("", fieldNames.toArray(new Object[0]));
+
+			for(NucleusBorderSegment segment : segments) {
+
+
+				List<Object> rowData = new ArrayList<Object>(0);
+				
+				rowData.add("");
+				rowData.add(segment.length());
+				rowData.add(segment.getStartIndex());
+				rowData.add(segment.getEndIndex());
+
+				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
+			}
 		}
 		return model;	
 	}
@@ -128,51 +178,68 @@ public class NucleusTableDatasetCreator {
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
 				AnalysisOptions options = dataset.getAnalysisOptions();
+
 				
-				// only display refold mode if nucleus was refolded
-				String refoldMode = options.refoldNucleus() 
-									? options.getRefoldMode()
+				// only display if there are options available
+				// This may not be the case for a merged dataset or its children
+				if(options!=null){ 
+
+					// only display refold mode if nucleus was refolded
+					String refoldMode = options.refoldNucleus() 
+							? options.getRefoldMode()
 									: "N/A";
-									
-				String[] times = collection.getOutputFolderName().split("_");
-				String date = times[0];
-				String time = times[1];
-				
-				CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
-								
-				String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
-				String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
-				String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
-				String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
-				String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
-				String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : "N/A";
-				String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : "N/A";
-				String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
 
-				Object[] collectionData = {
-						options.getAngleProfileWindowSize(),
-						detectionMethod,
-						nucleusThreshold,
-						cannyAutoThreshold,
-						cannyLowThreshold,
-						cannyHighThreshold,
-						cannyKernelRadius,
-						cannyKernelWidth,
-						cannyClosingRadius,
-						options.getMinNucleusSize(),
-						options.getMaxNucleusSize(),
-						df.format(options.getMinNucleusCirc()),
-						df.format(options.getMaxNucleusCirc()),
-						options.refoldNucleus(),
-						refoldMode,
-						dataset.hasShellResult(),
-						date,
-						time,
-						collection.getFolder(),
-						options.getNucleusClass().getSimpleName()				
-				};
+							String[] times = collection.getOutputFolderName().split("_");
+							String date = times[0];
+							String time = times[1];
 
-				model.addColumn(collection.getName(), collectionData);
+							CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
+
+							String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
+							String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
+							String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
+							String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
+							String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
+							String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : "N/A";
+							String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : "N/A";
+							String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
+
+							Object[] collectionData = {
+									options.getAngleProfileWindowSize(),
+									detectionMethod,
+									nucleusThreshold,
+									cannyAutoThreshold,
+									cannyLowThreshold,
+									cannyHighThreshold,
+									cannyKernelRadius,
+									cannyKernelWidth,
+									cannyClosingRadius,
+									options.getMinNucleusSize(),
+									options.getMaxNucleusSize(),
+									df.format(options.getMinNucleusCirc()),
+									df.format(options.getMaxNucleusCirc()),
+									options.refoldNucleus(),
+									refoldMode,
+									dataset.hasShellResult(),
+									date,
+									time,
+									collection.getFolder(),
+									options.getNucleusClass().getSimpleName()				
+							};
+
+							model.addColumn(collection.getName(), collectionData);
+				} else {
+					// there are no options to use; fill blank
+					Object[] collectionData =  new Object[columnData.length];
+					if(dataset.hasMergeSources()){
+						Arrays.fill(collectionData, "N/A - merged");
+
+					} else {
+						Arrays.fill(collectionData, "N/A");
+					}
+					
+					model.addColumn(collection.getName(), collectionData);
+				}
 			}
 		}
 		return model;	
@@ -280,27 +347,39 @@ public class NucleusTableDatasetCreator {
 		return model;
 	}
 				
+	/**
+	 * Create an empty table to display.
+	 * @param list
+	 * @return
+	 */
 	private static DefaultTableModel makeEmptyWilcoxonTable(List<AnalysisDataset> list){
 		DefaultTableModel model = new DefaultTableModel();
 
 		if(list==null){
-			Object[] columnData = {""};
+			Object[] columnData = { "" };
 			model.addColumn("Population", columnData );
 			model.addColumn("", columnData );
-			return model;
-		}
+		} else {
 
-		// set rows
-		Object[] columnData = new Object[list.size()];
-		int row = 0;
-		for(AnalysisDataset dataset : list){
-			columnData[row] = dataset.getName();
-			row++;
+			// set rows
+			Object[] columnData = new Object[list.size()];
+			int row = 0;
+			for(AnalysisDataset dataset : list){
+				columnData[row] = dataset.getName();
+				row++;
+			}
+			model.addColumn("Population", columnData);
 		}
-		model.addColumn("Population", columnData);
 		return  model;
 	}
 	
+	/**
+	 * Run a Wilcoxon test on the given datasets. 
+	 * @param dataset1
+	 * @param dataset2
+	 * @param getPValue
+	 * @return
+	 */
 	private static double runWilcoxonTest(double[] dataset1, double[] dataset2, boolean getPValue){
 
 		double result;
@@ -431,8 +510,9 @@ public class NucleusTableDatasetCreator {
 	 * Carry out pairwise wilcoxon rank-sum test on the variability of the given datasets
 	 * @param list the datasets to test
 	 * @return a tablemodel for display
+	 * @throws Exception 
 	 */
-	public static TableModel createWilcoxonVariabilityTable(List<AnalysisDataset> list){
+	public static TableModel createWilcoxonVariabilityTable(List<AnalysisDataset> list) throws Exception{
 		DefaultTableModel model = makeEmptyWilcoxonTable(list);
 		if(list==null){
 			return model;

@@ -5,15 +5,14 @@ import java.awt.Color;
 import java.util.List;
 
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
-import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 
-public class VennDetailPanel extends JPanel {
+public class VennDetailPanel extends DetailPanel {
 
 
 	private static final long serialVersionUID = 1L;
@@ -24,11 +23,10 @@ public class VennDetailPanel extends JPanel {
 		
 		this.setLayout(new BorderLayout());
 		
-		vennTable = new JTable();
+		vennTable = new JTable(NucleusTableDatasetCreator.createVennTable(null));
 		this.add(vennTable, BorderLayout.CENTER);
 		vennTable.setEnabled(false);
 		this.add(vennTable.getTableHeader(), BorderLayout.NORTH);
-		vennTable.setModel(NucleusTableDatasetCreator.createVennTable(null));
 
 	}
 	
@@ -36,15 +34,27 @@ public class VennDetailPanel extends JPanel {
 	 * Update the venn panel with data from the given datasets
 	 * @param list the datasets
 	 */
-	public void update(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createVennTable(list);
-		vennTable.setModel(model);
-		int columns = vennTable.getColumnModel().getColumnCount();
-		for(int i=1;i<columns;i++){
-			vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
+	public void update(final List<AnalysisDataset> list){
+		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+			
+				// format the numbers and make into a tablemodel
+				TableModel model = NucleusTableDatasetCreator.createVennTable(null);
+				
+				if(!list.isEmpty() && list!=null){
+					model = NucleusTableDatasetCreator.createVennTable(list);
+				}
+				vennTable.setModel(model);
+				
+				int columns = vennTable.getColumnModel().getColumnCount();
 
-		}
+				if(columns>1){
+					for(int i=1;i<columns;i++){
+						vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
+					}
+				}
+		}});
 	}
 	
 	/**

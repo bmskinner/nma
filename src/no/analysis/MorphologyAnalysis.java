@@ -1,19 +1,21 @@
 package no.analysis;
 
-import ij.IJ;
+//import ij.IJ;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
+import javax.swing.SwingWorker;
+
+import utility.Constants;
 import utility.Logger;
+import utility.Utils;
 import no.collections.CellCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
-import no.components.ProfileAggregate;
 import no.components.ProfileCollection;
-import no.components.ProfileFeature;
-import no.export.TableExporter;
+import no.components.SegmentedProfile;
 import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.PigSpermNucleus;
@@ -25,292 +27,249 @@ import no.nuclei.sperm.RodentSpermNucleus;
  * generates the median profiles, segments them, and applies the segments to
  * nuclei.
  */
-public class MorphologyAnalysis {
+public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 	
 	private static Logger logger;
-	
-	public static boolean run(CellCollection collection){
+    public static final int MODE_NEW     = 0;
+    public static final int MODE_COPY    = 1;
+    public static final int MODE_REFRESH = 2;
+    
+    private int totalNuclei = 0;
+    
+    private CellCollection collection; // the collection to work on
+    private CellCollection sourceCollection = null; // a collection to take segments from
+    private int mode = MODE_NEW; 				// the analysis mode
 
-		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
+    
+    /*
+      //////////////////////////////////////////////////
+      Constructors
+      //////////////////////////////////////////////////
+    */
+    
+    public MorphologyAnalysis(CellCollection collection, int mode){
+    	this.collection = collection;
+    	this.mode = mode;
+    }
+    
+    public MorphologyAnalysis(CellCollection collection, CellCollection source){
+    	this.collection = collection;
+    	this.mode = MODE_COPY;
+    	this.sourceCollection = source;
+    }
+    
+    /*
+      //////////////////////////////////////////////////
+      SwingWorker methods
+      //////////////////////////////////////////////////
+     */
+    
+    @Override
+    protected void process( List<Integer> integers ) {
+        int amount = integers.get( integers.size() - 1 );
+        int percent = (int) ( (double) amount / (double) totalNuclei * 100);
+        if(percent >= 0 && percent <=100){
+        	setProgress(percent); // the integer representation of the percent
+        }
+    }
+    
+    @Override
+    protected Boolean doInBackground() throws Exception {
+    	logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
+    	
+    	boolean result = true;
 		try{
+//			IJ.log("Mode: "+mode);
+			// mode selection
+			if(mode == MODE_NEW){
 
-			logger.log("Beginning core morphology analysis");
+				logger.log("Beginning core morphology analysis");
 
-			String pointType = collection.getReferencePoint();
+				// we run the profiler and segmenter on each nucleus - may need to double
+				totalNuclei = collection.getNucleusCount(); 
 
-			// profile the collection from head/tip, then apply to tail
-			runProfiler(collection, pointType);
+				String pointType = collection.getReferencePoint();
 
-			// segment the profiles from head
-			runSegmentation(collection, pointType);
+				// profile the collection from head/tip, then apply to tail
+				runProfiler(collection, pointType);
 
-			logger.log("Core morphology analysis complete");
-			return true;
+				// segment the profiles from head
+				runSegmentation(collection, pointType);
+
+				logger.log("Core morphology analysis complete");
+			}
+			
+			if(mode == MODE_REFRESH){
+
+				logger.log("Refreshing morphology");
+				refresh(collection);
+				logger.log("Refresh complete");
+//				return true;
+			}
+			
+			if(mode == MODE_COPY){
+//				IJ.log("Copying");
+				if(sourceCollection==null){
+					logger.log("Cannot copy: source collection is null");
+					result = false;
+				} else {
+					totalNuclei = collection.getNucleusCount(); 
+					logger.log("Copying segmentation pattern");
+					reapplyProfiles(collection, sourceCollection);
+					logger.log("Copying complete");
+				}
+			}
 			
 		} catch(Exception e){
 			
-			logger.log("Error in morphology analysis: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error in morphology analysis", e);
 			
 			logger.log("Collection keys:", Logger.ERROR);
 			logger.log(collection.getProfileCollection().printKeys(), Logger.ERROR);
 			
 			logger.log("FrankenCollection keys:", Logger.ERROR);
 			logger.log(collection.getFrankenCollection().printKeys(), Logger.ERROR);
-			return false;
+			result = false;
 		}
 
+//		IJ.log("End of method reached; head to done() with result "+result);
+		return result;
 	}
+    
+    @Override
+    public void done() {
+    	
+//    	IJ.log("Completed worker task; firing trigger");
 
+        try {
+            if(this.get()){
+//            	IJ.log("Successful worker task triggering");
+                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
+
+            } else {
+//            	IJ.log("Error worker task triggering");
+                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+            }
+        } catch (InterruptedException e) {
+        	logger.error("Error in morphology application", e);
+        } catch (ExecutionException e) {
+            logger.error("Error in morphology application", e);
+            
+            logger.log("Collection keys:", Logger.ERROR);
+            logger.log(collection.getProfileCollection().printKeys(), Logger.ERROR);
+            
+            logger.log("FrankenCollection keys:", Logger.ERROR);
+            logger.log(collection.getFrankenCollection().printKeys(), Logger.ERROR);
+        }
+
+    } 
+
+    /*
+    //////////////////////////////////////////////////
+    Analysis methods
+    //////////////////////////////////////////////////
+   */
+    	
+	/**
+	 * Calculaate the median profile of the colleciton, and generate the
+	 * best fit offsets of each nucleus to match
+	 * @param collection
+	 * @param pointType
+	 */
 	private static void runProfiler(CellCollection collection, String pointType){
 		
-		// default is to make profile aggregate from reference point
-		createProfileAggregateFromPoint(collection, pointType);
-		
-		// use the median profile of this aggregate to find the tail point
-		findTailIndexInMedianCurve(collection);
-		
-		// carry out iterative offsetting to refine the tail point estimate
-		double score = compareProfilesToMedian(collection, pointType);
-		double prevScore = score+1;
-		while(score < prevScore){
-			createProfileAggregateFromPoint(collection, pointType);
-			
-			// we need to allow each nucleus collection type handle tail finding and offsetting itself
-			findTailIndexInMedianCurve(collection);
-			calculateOffsets(collection); 
-
-			prevScore = score;
-			score = compareProfilesToMedian(collection, pointType);
-			logger.log("Reticulating splines: score: "+(int)score);
-		}
-		
-		// update the median profile with the final offset locations
-		
-		// create a profile aggregate for the orientation point
-		createProfileAggregateFromPoint(collection, collection.getOrientationPoint());
-
-	}
-	
-	
-	  /*
-    
-  */
-
-	/**
-	 * Identify tail in median profile and offset nuclei profiles. For a 
-	 * regular round nucleus, the tail is one of the points of longest
-	 *  diameter, and lowest angle
-	 * @param collection the nucleus collection
-	 * @param nucleusClass the class of nucleus
-	 */
-	public static void findTailIndexInMedianCurve(CellCollection collection){
-
-		if(collection.getNucleusClass() == RoundNucleus.class){
-
+		try{
 			ProfileCollection pc = collection.getProfileCollection();
 
-			Profile medianProfile = pc.getProfile(collection.getReferencePoint());
+			// default is to make profile aggregate from reference point
+			pc.createProfileAggregate(collection);
 
-			int tailIndex = (int) Math.floor(medianProfile.size()/2);
+			// use the median profile of this aggregate to find the orientation point ("tail")
+			TailFinder.findTailIndexInMedianCurve(collection);
 
-			Profile tailProfile = medianProfile.offset(tailIndex);
-			pc.addProfile(collection.getOrientationPoint(), tailProfile);
-			pc.addFeature(collection.getReferencePoint(), new ProfileFeature(collection.getOrientationPoint(), tailIndex));
-		}
+			// carry out iterative offsetting to refine the orientation point estimate
+			double score = compareProfilesToMedian(collection, pointType);
+			double prevScore = score*2;
+			while(score < prevScore){
 
-		if(collection.getNucleusClass() == PigSpermNucleus.class){
-			Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
+				// rebuild the aggregate - needed if the orientation point index has changed in any nuclei
+				pc.createProfileAggregate(collection);
 
-			Profile minima = medianProfile.getLocalMaxima(5); // window size 5
+				// carry out the orientation point detection in the median again
+				TailFinder.findTailIndexInMedianCurve(collection);
 
-			//    double minDiff = medianProfile.size();
-			double minAngle = 180;
-			int tailIndex = 0;
+				// apply offsets to each nucleus in the collection
+				Offsetter.calculateOffsets(collection); 
 
-			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
-			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
+				prevScore = score;
 
-			if(minima.size()==0){
-				IJ.log("    Error: no minima found in median line");
-				tailIndex = 100; // set to roughly the middle of the array for the moment
-
-			} else{
-
-				for(int i = 0; i<minima.size();i++){
-					if(minima.get(i)==1){
-						int index = (int)minima.get(i);
-
-						//          int toEnd = medianProfile.size() - index;
-						//          int diff = Math.abs(index - toEnd);
-
-						double angle = medianProfile.get(index);
-						if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
-							minAngle = angle;
-							tailIndex = index;
-						}
-					}
-				}
+				// get the difference between aligned profiles and the median
+				score = compareProfilesToMedian(collection, pointType);
+				logger.log("Reticulating splines: score: "+(int)score);
 			}
-			// IJ.log("    Tail in median profile is at index "+tailIndex+", angle "+minAngle);
-			Profile tailProfile = medianProfile.offset(tailIndex);
-			collection.getProfileCollection().addProfile("tail", tailProfile);
-			collection.getProfileCollection().addFeature("head", new ProfileFeature("tail", tailIndex));
-		}
-
-		if(collection.getNucleusClass() == RodentSpermNucleus.class){
-			// can't use regular tail detector, because it's based on NucleusBorderPoints
-			// get minima in curve, then find the lowest minima / minima furthest from both ends
-
-			Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
-
-			Profile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
-
-			//		double minDiff = medianProfile.size();
-			double minAngle = 180;
-			int tailIndex = 0;
-
-			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
-			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
-
-			for(int i = 0; i<minima.size();i++){
-				if( (int)minima.get(i)==1){
-					int index = i;
-
-					double angle = medianProfile.get(index);
-					if(angle<minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
-						minAngle = angle;
-						tailIndex = index;
-					}
-				}
-			}
-			Profile tailProfile = medianProfile.offset(tailIndex);
-			collection.getProfileCollection().addProfile(collection.getOrientationPoint(), tailProfile);
-			collection.getProfileCollection().addFeature(collection.getReferencePoint(), new ProfileFeature(collection.getOrientationPoint(), tailIndex)); // set the tail-index in the tip normalised profile
+		} catch(Exception e){
+			logger.error("Error in morphology profiling", e);
 		}
 	}
-	
-	
-	/**
-	 * Offset the position of the tail in each nucleus based on the difference to the median
-	 * @param collection the nuclei
-	 * @param nucleusClass the class of nucleus
-	 */
-	public static void calculateOffsets(CellCollection collection){
-
-		if(collection.getNucleusClass() == RoundNucleus.class){
-
-
-			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
-
-			for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-				Nucleus n = collection.getCell(i).getNucleus();
-
-				// returns the positive offset index of this profile which best matches the median profile
-				int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-				n.addBorderTag(collection.getReferencePoint(), newHeadIndex);
-
-				// check if flipping the profile will help
-
-				double differenceToMedian1 = n.getAngleProfile(collection.getReferencePoint()).differenceToProfile(medianToCompare);
-				n.reverse();
-				double differenceToMedian2 = n.getAngleProfile(collection.getReferencePoint()).differenceToProfile(medianToCompare);
-
-				if(differenceToMedian1<differenceToMedian2){
-					n.reverse(); // put it back if no better
-				}
-
-				// also update the tail position
-				int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
-				n.addBorderTag("tail", tailIndex);
-			}
-		}
 		
-		if(collection.getNucleusClass() == RodentSpermNucleus.class){
-			
-			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getOrientationPoint()); // returns a median profile
-
-		    for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-		      RodentSpermNucleus n = (RodentSpermNucleus)collection.getCell(i).getNucleus();
-
-
-		      // THE NEW WAY
-		      int newTailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-
-		      n.addBorderTag("tail", newTailIndex);
-
-		      // also update the head position
-		      int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newTailIndex) ));
-		      n.addBorderTag("head", headIndex);
-		      n.splitNucleusToHeadAndHump();
-		    }
-			
-		}
-		
-		if(collection.getNucleusClass() == PigSpermNucleus.class){
-			Profile medianToCompare = collection.getProfileCollection().getProfile("head"); // returns a median profile with head at 0
-
-			for(int i= 0; i<collection.getNucleusCount();i++){ // for each roi
-				PigSpermNucleus n = (PigSpermNucleus)collection.getCell(i).getNucleus();
-
-				// returns the positive offset index of this profile which best matches the median profile
-				int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-
-				n.addBorderTag("head", newHeadIndex);
-
-				// also update the head position
-				int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
-				n.addBorderTag("tail", tailIndex);
-			}
-		}
-	}
-
-	
 	/**
 	 * When a population needs to be reanalysed do not offset nuclei or recalculate best fits;
 	 * just get the new median profile 
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
-	public static boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection){
+	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection){
 		
 		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
 		logger.log("Applying existing segmentation profile to population...");
 		
 		try {
 			String referencePoint   = collection.getReferencePoint();
-			String orientationPoint = collection.getOrientationPoint();
+//			String orientationPoint = collection.getOrientationPoint();
 			
 			// use the same array length as the source collection to avoid segment slippage
 			int profileLength = sourceCollection.getProfileCollection().getProfile(referencePoint).size();
-			createProfileAggregateFromPoint(collection, referencePoint, profileLength);
-			createProfileAggregateFromPoint(collection, orientationPoint, profileLength);
 			
+			// get the empty profile collection from the new CellCollection
+			// TODO: if the target collection is not new, ie we are copying onto
+			// an existing segmenation pattern, then this profile collection will have
+			// offsets
 			ProfileCollection pc = collection.getProfileCollection();
+			
+			// make an aggregate from the nuclei. A new median profile must necessarily result.
+			// By default, the aggregates are created from the reference point
+			pc.createProfileAggregate(collection, profileLength);
+			
+			// copy the offset keys from the source collection
+			//TODO:
+			// If this is applied to a collection from an entirely difference source,
+			// rather than a child, then the offsets will be completely wrong. In that
+			// instance, we should probably keep the existing offset positions for head
+			// and tail
 			ProfileCollection sc = sourceCollection.getProfileCollection();
+			
+			for(String offsetKey : sc.getOffsetKeys()){
+				int offset = sc.getOffset(offsetKey);
+				pc.addOffset(offsetKey, offset);
+				logger.log("Setting "+offsetKey+" to "+offset);
+			}
 			
 			
 			// What happens when the array length is greater in the source collection? 
 			// Segments are added that no longer have an index
 			// We need to scale the segments to the array length of the new collection
-			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
-			pc.addSegments(orientationPoint, sc.getSegments(orientationPoint));
+			pc.addSegments(sc.getSegments(referencePoint));
+
 			
-			// At hthis point the collection has only a regular profile collection.
-			// no frankenprofile has been copied.
-			// Create a new frankenprofile
-			// copied from segmentation
+			// At this point the collection has only a regular profile collection.
+			// No Frankenprofile has been copied.
+
 			reviseSegments(collection, referencePoint);	
-			applySegmentsToOtherPointTypes(collection, referencePoint);
+
 
 
 		} catch (Exception e) {
-			logger.log("Error reapplying profiles: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error reapplying profiles", e);
 			return false;
 		}
 		logger.log("Re-profiling complete");
@@ -318,62 +277,85 @@ public class MorphologyAnalysis {
 	}
 	
 	/**
-	 * A temp addition to allow a remapping median to be the same length as the original population median.
-	 * Otherwise the segment remapping will fail
+	 * Refresh the given collection. Create a new profile aggregate, and recalculate
+	 * the FrankenProfiles. Do not refit segments.
 	 * @param collection
-	 * @param pointType
-	 * @param length
+	 * @return
 	 */
-	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType, int length){
-
-		ProfileAggregate profileAggregate = new ProfileAggregate(length);
-		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
-		
-		for(Nucleus n : collection.getNuclei()){
-			profileAggregate.addValues(n.getAngleProfile(pointType));
-		}
-
-		Profile medians = profileAggregate.getMedian();
-		Profile q25     = profileAggregate.getQuartile(25);
-		Profile q75     = profileAggregate.getQuartile(75);
-		collection.getProfileCollection().addProfile(pointType, medians);
-		collection.getProfileCollection().addProfile(pointType+"25", q25);
-		collection.getProfileCollection().addProfile(pointType+"75", q75);
-	}
-
-	private static void createProfileAggregateFromPoint(CellCollection collection, String pointType){
-
-		ProfileAggregate profileAggregate = new ProfileAggregate((int)collection.getMedianArrayLength());
-		collection.getProfileCollection().addAggregate(pointType, profileAggregate);
-
-		for(Nucleus n : collection.getNuclei()){
-			profileAggregate.addValues(n.getAngleProfile(pointType));
-		}
-
-		Profile medians = profileAggregate.getMedian();
-		Profile q25     = profileAggregate.getQuartile(25);
-		Profile q75     = profileAggregate.getQuartile(75);
-		
-		ProfileCollection pc = collection.getProfileCollection();
-		pc.addProfile(pointType, medians);
-		pc.addProfile(pointType+"25", q25);
-		pc.addProfile(pointType+"75", q75);
-
-	}
-
-	private static void createProfileAggregates(CellCollection collection){
+	public boolean refresh(CellCollection collection){
+		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
+		logger.log("Refreshing mophology");
 		try{
-			for( String pointType : collection.getProfileCollection().getProfileKeys() ){
-				createProfileAggregateFromPoint(collection, pointType);   
+			
+			String pointType = collection.getReferencePoint();
+			
+			// get the empty profile collection from the new CellCollection
+			ProfileCollection pc = collection.getProfileCollection();
+
+			// make an aggregate from the nuclei. A new median profile must necessarily result.
+			// By default, the aggregates are created from the reference point
+			pc.createProfileAggregate(collection);
+			
+			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
+
+			// make a new profile collection to hold the frankendata
+			ProfileCollection frankenCollection = new ProfileCollection();
+
+			// add the correct offset keys
+			// These are the same as the profile collection keys, and have
+			// the same positions (since a franken profile is based on the median)
+			// The reference point is at index 0
+			for(String key : pc.getOffsetKeys()){
+				frankenCollection.addOffset(key, pc.getOffset(key));
 			}
-		} catch(Exception e){
-			logger.log("Error creating profile aggregates: "+e.getMessage(), Logger.ERROR);
-			logger.log(collection.getProfileCollection().printKeys());
+
+
+			// copy the segments from the profile collection
+			frankenCollection.addSegments(segments);
+
+			// At this point, the FrankenCollection is identical to the ProfileCollection
+			// We need to add the individual recombined frankenProfiles
+
+
+			// make a segment fitter to do the recombination of profiles
+			SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType), logger.getLogfile());
+			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
+
+			int count = 0;
+			for(Nucleus n : collection.getNuclei()){ 
+				// recombine the segments at the lengths of the median profile segments
+				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
+				frankenProfiles.add(recombinedProfile);
+				count++;
+				publish(count);
+				
+			}
+
+			// add all the nucleus frankenprofiles to the frankencollection
+			frankenCollection.addNucleusProfiles(frankenProfiles);
+
+			// update the profile aggregate
+			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
+			logger.log("FrankenProfile generated");
+
+			// attach the frankencollection to the cellcollection
+			collection.setFrankenCollection(frankenCollection);
+
+		} catch (Exception e) {
+			logger.error("Error reapplying profiles", e);
+			return false;
 		}
+		return true;
 	}
 	
-
-	private static double compareProfilesToMedian(CellCollection collection, String pointType){
+	/**
+	 * Get the total differences to the median for all the nuclei in
+	 * the collection
+	 * @param collection
+	 * @param pointType
+	 * @return
+	 */
+	private static double compareProfilesToMedian(CellCollection collection, String pointType) throws Exception {
 		double[] scores = collection.getDifferencesToMedianFromPoint(pointType);
 		double result = 0;
 		for(double s : scores){
@@ -382,24 +364,31 @@ public class MorphologyAnalysis {
 		return result;
 	}
 	
-	private static void runSegmentation(CellCollection collection, String pointType){
+	/**
+	 * Run the segmentation part of the analysis. 
+	 * @param collection
+	 * @param pointType
+	 */
+	private void runSegmentation(CellCollection collection, String pointType){
 		logger.log("Beginning segmentation...");
 		try{	
-			createSegments(collection, pointType);
-			assignSegments(collection, pointType);
 			
+			// generate segments in the median profile
+			createSegments(collection);
+			
+			// map the segments from the median directly onto the nuclei
+			assignSegments(collection);
+			
+			// adjust the segments to better fit each nucleus
 			reviseSegments(collection, pointType);		
-//			
-			// At this point, the franken collection contains tip/head values only
-			
-			createProfileAggregates(collection);
-			
-			applySegmentsToOtherPointTypes(collection, pointType);
-			
+	
+			// update the aggregate in case any borders have changed
+			collection.getProfileCollection().createProfileAggregate(collection);
+						
 			// At this point, the franken collection still contains tip/head values only
 			
 		} catch(Exception e){
-			logger.log("Error segmenting: "+e.getMessage(), Logger.ERROR);
+			logger.error("Error segmenting",e);
 			collection.getProfileCollection().printKeys();
 		}
 		logger.log("Segmentation complete");
@@ -408,19 +397,26 @@ public class MorphologyAnalysis {
 	/**
 	 * Run the segmenter on the median profile for the given point type
 	 * @param collection
-	 * @param pointType
 	 */
-	private static void createSegments(CellCollection collection, String pointType){
-		// get the segments within the median curve
-		ProfileCollection pc = collection.getProfileCollection();
+	private static void createSegments(CellCollection collection){
 
-		Profile medianToCompare = pc.getProfile(pointType);
+		try{
+			ProfileCollection pc = collection.getProfileCollection();
 
-		ProfileSegmenter segmenter = new ProfileSegmenter(medianToCompare);		  
-		List<NucleusBorderSegment> segments = segmenter.segment();
+			// the reference point is always index 0, so the segments will match
+			// the profile
+			Profile median = pc.getProfile(collection.getReferencePoint());
 
-		logger.log("Found "+segments.size()+" segments in "+pointType+" profile");
-		pc.addSegments(pointType, segments);
+			ProfileSegmenter segmenter = new ProfileSegmenter(median, collection.getDebugFile());		  
+			List<NucleusBorderSegment> segments = segmenter.segment();
+
+			logger.log("Found "+segments.size()+" segments in "+collection.getReferencePoint()+" profile");
+
+			// Add the segments to the collection
+			pc.addSegments(segments);
+		} catch(Exception e){
+			logger.error("Error creating segments", e);
+		}
 	}
 
 	/**
@@ -429,47 +425,82 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void assignSegments(CellCollection collection, String pointType){
+	private static void assignSegments(CellCollection collection){
 
-		logger.log("Assigning segments to nuclei...");
-		
-		ProfileCollection pc = collection.getProfileCollection();
+		try{
+			logger.log("Assigning segments to nuclei...");
 
-		// find the corresponding point in each Nucleus
-		Profile medianToCompare = pc.getProfile(pointType);
-		for(int i= 0; i<collection.getNucleusCount();i++){ 
-			Nucleus n = collection.getCell(i).getNucleus();
+			ProfileCollection pc = collection.getProfileCollection();
+
+			// find the corresponding point in each Nucleus
+			SegmentedProfile median = pc.getSegmentedProfile(collection.getReferencePoint());
+
+			for(Nucleus n : collection.getNuclei()){
+				assignSegmentsToNucleus(n, median);
+			}
+			logger.log("Segments assigned to nuclei");
+		} catch(Exception e){
+			logger.error("Error assigning segments", e);
+		}
+	}
+	
+	/**
+	 * Assign the given segments to the nucleus, finding the best match of the nucleus
+	 * profile to the median profile
+	 * @param n the nucleus to segment
+	 * @param median the segmented median profile
+	 */
+	private static void assignSegmentsToNucleus(Nucleus n, SegmentedProfile median){
+
+		try{
 			
-			// remove any existing segments
-			n.clearSegments();
-
+			// remove any existing segments in the nucleus
+			SegmentedProfile nucleusProfile = n.getAngleProfile();
+			nucleusProfile.clearSegments();
+			
+			List<NucleusBorderSegment> nucleusSegments = new ArrayList<NucleusBorderSegment>();
+			
 			// go through each segment defined for the median curve
-			int j=0;
-			for(NucleusBorderSegment b : pc.getSegments(pointType)){
-				
+			NucleusBorderSegment prevSeg = null;
+
+			for(NucleusBorderSegment segment : median.getSegments()){
+
 				// get the positions the segment begins and ends in the median profile
-				int startIndexInMedian = b.getStartIndex();
-				int endIndexInMedian = b.getEndIndex();
+				int startIndexInMedian 	= segment.getStartIndex();
+				int endIndexInMedian 	= segment.getEndIndex();
 
 				// find the positions these correspond to in the offset profiles
-				
+
 				// get the median profile, indexed to the start or end point
-				Profile startOffsetMedian = medianToCompare.offset(startIndexInMedian);
-				Profile endOffsetMedian = medianToCompare.offset(endIndexInMedian);
+				Profile startOffsetMedian 	= median.offset(startIndexInMedian);
+				Profile endOffsetMedian 	= median.offset(endIndexInMedian);
 
 				// find the index at the point of the best fit
-				int startIndex = n.getAngleProfile().getSlidingWindowOffset(startOffsetMedian);
-				int endIndex = n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
+				int startIndex 	= n.getAngleProfile().getSlidingWindowOffset(startOffsetMedian);
+				int endIndex 	= n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
 
 				// create a segment at these points
-				NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex);
-				seg.setSegmentType("Seg_"+j);
-				n.addSegment(seg);
-				n.addSegmentTag("Seg_"+j, j);
-				j++;
+				// ensure that the segment meets length requirements
+				NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getLength());
+				if(prevSeg != null){
+					seg.setPrevSegment(prevSeg);
+					prevSeg.setNextSegment(seg);
+				}
+
+				seg.setName(segment.getName());
+				nucleusSegments.add(seg);
+
+				prevSeg = seg;
 			}
+
+			NucleusBorderSegment.linkSegments(nucleusSegments);
+			nucleusProfile.setSegments(nucleusSegments);
+			n.setAngleProfile(nucleusProfile);
+		} catch (Exception e) {
+			logger.error("Error assigning segments to nucleus",e);
 		}
-		logger.log("Segments assigned to nuclei");
+
+		
 	}
 
 	/**
@@ -478,120 +509,305 @@ public class MorphologyAnalysis {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void reviseSegments(CellCollection collection, String pointType){
+	private void reviseSegments(CellCollection collection, String pointType){
 		logger.log("Refining segment assignments...");
-		
-		ProfileCollection pc = collection.getProfileCollection();
-		List<NucleusBorderSegment> segments = pc.getSegments(pointType);
-		
-		// make a new profile collection to hold the frankendata
-		ProfileCollection frankenCollection = new ProfileCollection();
+		try{
 
-		// fill the frankenCollection  with the segment information previously calculated
-		frankenCollection.addAggregate( pointType, new ProfileAggregate((int)collection.getMedianArrayLength()));
-		frankenCollection.addSegments(pointType, segments);
+			ProfileCollection pc = collection.getProfileCollection();
+			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
 
-		SegmentFitter fitter = new SegmentFitter(pc.getProfile(pointType), segments);
-		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
+			// make a new profile collection to hold the frankendata
+			ProfileCollection frankenCollection = new ProfileCollection();
 
-		for(Nucleus n : collection.getNuclei()){ 
-			fitter.fit(n);
+			// add the correct offset keys
+			// These are the same as the profile collection keys, and have
+			// the same positions (since a franken profile is based on the median)
+			// The reference point is at index 0
+			for(String key : pc.getOffsetKeys()){
+				frankenCollection.addOffset(key, pc.getOffset(key));
+			}
 
-			// recombine the segments at the lengths of the median profile segments
-			// what does it look like?
-			Profile recombinedProfile = fitter.recombine(n);
-			frankenCollection.getAggregate(pointType).addValues(recombinedProfile);
-			frankenProfiles.add(recombinedProfile);
+
+			// copy the segments from the profile collection
+			frankenCollection.addSegments(segments);
+
+			// At this point, the FrankenCollection is identical to the ProfileCollection
+			// We need to add the individual recombined frankenProfiles
+
+
+			// run the segment fitter on each nucleus
+			SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType), logger.getLogfile());
+			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
+
+			int count = 1;
+			for(Nucleus n : collection.getNuclei()){ 
+				logger.log("Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.size()+")");
+				fitter.fit(n, pc);
+
+				// recombine the segments at the lengths of the median profile segments
+				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
+				frankenProfiles.add(recombinedProfile);
+				count++;
+				publish(count); // publish the progress to gui
+			}
+
+			// add all the nucleus frankenprofiles to the frankencollection
+			frankenCollection.addNucleusProfiles(frankenProfiles);
+
+			// update the profile aggregate
+			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
+			logger.log("FrankenProfile generated");
+
+			// attach the frankencollection to the cellcollection
+			collection.setFrankenCollection(frankenCollection);
+			logger.log("Segment assignments refined");
+		} catch(Exception e){
+			logger.error("Error revising segments", e);
 		}
-		frankenCollection.addNucleusProfiles(pointType, frankenProfiles);
-		// update the profile aggregate
-		frankenCollection.createProfileAggregateFromPoint(    pointType, (int) collection.getMedianArrayLength()    );
-		
-		// Added in for completeness
-		// apply the frankenprofile segments to other point type
-//		Profile referenceProfile = frankenCollection.getProfile(pointType);
-//		Profile orientProfile = frankenCollection.getProfile(collection.getOrientationPoint());
-//		int offset = orientProfile.getSlidingWindowOffset(referenceProfile);
-//		frankenCollection.addSegments(collection.getOrientationPoint(), pointType, offset);
-//		frankenCollection.createProfileAggregateFromPoint(    collection.getOrientationPoint(), (int) collection.getMedianArrayLength()    );
-		
-		
-		collection.setFrankenCollection(frankenCollection);
-		logger.log("Segment assignments refined");
 	}
 	
-	private static void applySegmentsToOtherPointTypes(CellCollection collection, String pointType){
+	
+	public static class TailFinder {
 
-		ProfileCollection pc = collection.getProfileCollection();
-		
-		Profile referenceProfile = pc.getProfile(pointType);
-		Profile orientProfile = pc.getProfile(collection.getOrientationPoint());
-		int offset = orientProfile.getSlidingWindowOffset(referenceProfile);
-		
-		pc.addSegments(collection.getOrientationPoint(), pointType, offset);
+		private static void findTailInRodentSpermMedian(CellCollection collection){
+			try{
+				// can't use regular tail detector, because it's based on NucleusBorderPoints
+				// get minima in curve, then find the lowest minima / minima furthest from both ends
+				collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
+
+				Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
+
+				Profile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
+
+				//		double minDiff = medianProfile.size();
+				double minAngle = 180;
+				int tailIndex = 0;
+
+				int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
+				int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
+
+				for(int i = 0; i<minima.size();i++){
+					if( (int)minima.get(i)==1){
+						int index = i;
+
+						double angle = medianProfile.get(index);
+						if(angle<minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
+							minAngle = angle;
+							tailIndex = index;
+						}
+					}
+				}
+
+				collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
+
+			} catch(Exception e){
+				logger.error("Error finding tail", e);
+			}
+		}
+
+		private static void findTailInPigSpermMedian(CellCollection collection) throws Exception {
+			
+			// define the current offset at the reference point
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
+			
+			// get the profile
+			Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
+
+			// find local maxima in the median profile over 180
+			Profile maxima = medianProfile.getLocalMaxima(5, 180); // window size 5, only values over 180
+
+
+			double minAngle = 180;
+			int tailIndex = 0;
+
+			// do not consider maxima that are too close to the head of the sperm
+			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
+			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
+
+			if(maxima.size()==0){
+				logger.log("Error: no minima found in median line");
+				tailIndex = 100; // set to roughly the middle of the array for the moment
+
+			} else{
+
+				for(int i = 0; i<maxima.size();i++){
+					if(maxima.get(i)==1){
+						int index = (int)maxima.get(i);
+
+						//          int toEnd = medianProfile.size() - index;
+						//          int diff = Math.abs(index - toEnd);
+
+						double angle = medianProfile.get(index);
+						
+						// look for the highest local maximum outside the exclusion range
+						if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
+							minAngle = angle;
+							tailIndex = index;
+						}
+					}
+				}
+			}
+
+			
+			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
+			
+			// head is half way around from the tail
+			int offset = collection.getProfileCollection().getAggregate().length() /2;
+			// now we have the tail point located, update the reference point to be opposite
+			
+			// adjust the index to the offset
+			 int headIndex  = Utils.wrapIndex( tailIndex - offset, collection.getProfileCollection().getAggregate().length());
+			
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), headIndex);
+		}
+
+		private static void findTailInRoundMedian(CellCollection collection) throws Exception {
+			
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
+			ProfileCollection pc = collection.getProfileCollection();
+
+			Profile medianProfile = pc.getProfile(collection.getReferencePoint());
+
+			int tailIndex = (int) Math.floor(medianProfile.size()/2);
+			
+			
+			
+			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
+		}
+
+		/**
+		 * Identify tail in median profile and offset nuclei profiles. For a 
+		 * regular round nucleus, the tail is one of the points of longest
+		 *  diameter, and lowest angle
+		 * @param collection the nucleus collection
+		 * @param nucleusClass the class of nucleus
+		 */
+		public static void findTailIndexInMedianCurve(CellCollection collection){
+
+			try{
+
+				if(collection.getNucleusClass() == RoundNucleus.class){
+					findTailInRoundMedian(collection);
+				}
+
+				if(collection.getNucleusClass() == PigSpermNucleus.class){
+					findTailInPigSpermMedian(collection);
+				}
+
+				if(collection.getNucleusClass() == RodentSpermNucleus.class){
+					findTailInRodentSpermMedian(collection);
+				}
+
+			} catch(Exception e){
+				logger.error("Error finding tail", e);
+			}
+
+		}
 	}
 	
-//	private static void exportSegments(NucleusCollection collection, String pointType){
-//		
-//		logger.log("Exporting segments...");
-//		// export the individual segment files for each nucleus
-//		for(Nucleus n : collection.getNuclei()){
-//			n.exportSegments();
-//		}
-//
-//		// also export the group stats for each segment
-//		TableExporter tableExport = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
-//		tableExport.addColumnHeading("PATH"    );
-//		tableExport.addColumnHeading("POSITION");
-//
-//		
-//		try{
-//			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(pointType);
-//			if(!segments.isEmpty()){
-//
-//				for(NucleusBorderSegment seg : segments){
-//					tableExport.addColumnHeading(seg.getSegmentType());
-//				}
-//
-//				for(Nucleus n : collection.getNuclei()){
-//
-//					tableExport.addRow("PATH", n.getPath());
-//					tableExport.addRow("POSITION", n.getPosition());
-//
-//					for(NucleusBorderSegment seg : segments){
-//						NucleusBorderSegment nucSeg = n.getSegmentTag(seg.getSegmentType());
-//						// export the segment length as a fraction of the total array length
-//						tableExport.addRow(seg.getSegmentType(),   (double)nucSeg.length(n.getLength())/(double)n.getLength()      );
-//					}
-//				}
-//				tableExport.export("log.segments."+collection.getType());
-//				logger.log("Segments exported");
-//			}
-//		}catch(Exception e){
-//			logger.log("Error exporting segments: "+e.getMessage(), Logger.ERROR);
-//		}
-//	}
-	
+	public static class Offsetter {
+		
+		private static void calculateOffsetsInRoundNuclei(CellCollection collection){
+			
+			try{
+				Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
 
-//	private static void exportClusteringScript(NucleusCollection collection){
-//
-//		StringBuilder outLine = new StringBuilder();
-//
-//		String path = collection.getFolder().getAbsolutePath()+File.separator+collection.getOutputFolderName()+File.separator;
-//		path = path.replace("\\", "\\\\");// escape folder separator for R
-//		outLine.append("path = \""+path+"\"\r\n"); 
-//
-//		outLine.append("nuclei = read.csv(paste(path,\"log.segments.analysable.txt\", sep=\"\"),header=T, sep=\"\\t\")\r\n");
-//		outLine.append("d <- dist(as.matrix(nuclei))\r\n");
-//		outLine.append("hc <- hclust(d, method=\"ward.D2\")\r\n");
-//		outLine.append("ct <- cutree(hc, k=5)\r\n");
-//		outLine.append("nuclei <- cbind(ct, nuclei , deparse.level=1)\r\n");
-//		outLine.append("tt <- table(nuclei $ct)\r\n");
-//		outLine.append("for (i in 1:dim(tt)) {\r\n");
-//		outLine.append("\tsub <- subset(nuclei , ct==i)\r\n");
-//		outLine.append("\twrite.table(subset(sub, select=c(PATH, POSITION)), file=paste(path,\"mapping_cluster\",i,\".analysable.txt\", sep=\"\"), sep=\"\\t\", row.names=F, quote=F)\r\n");
-//		outLine.append("}\r\n");
-//
-//		IJ.append(outLine.toString(), path+"clusteringScript.r");
-//	}
+				for(Nucleus n : collection.getNuclei()){
+
+					// returns the positive offset index of this profile which best matches the median profile
+					int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+					n.addBorderTag(collection.getReferencePoint(), newHeadIndex);
+
+					// check if flipping the profile will help
+
+					double differenceToMedian1 = n.getAngleProfile(collection.getReferencePoint()).absoluteSquareDifference(medianToCompare);
+					n.reverse();
+					double differenceToMedian2 = n.getAngleProfile(collection.getReferencePoint()).absoluteSquareDifference(medianToCompare);
+
+					if(differenceToMedian1<differenceToMedian2){
+						n.reverse(); // put it back if no better
+					}
+
+					// also update the tail position
+					int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+					n.addBorderTag(Constants.Nucleus.ROUND.orientationPoint(), tailIndex);
+				}
+			}catch(Exception e){
+				logger.error("Error calculating offsets", e);
+			}
+		}
+
+		
+		private static void calculateOffsetsInRodentSpermNuclei(CellCollection collection){
+			
+			try{
+				// Get the median profile starting from the orientation point
+				Profile median = collection.getProfileCollection().getProfile(collection.getOrientationPoint()); // returns a median profile
+
+				// go through each nucleus
+				for(Nucleus n : collection.getNuclei()){
+
+					// ensure the correct class is chosen
+					RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+
+					// get the offset for the best fit to the median profile
+					int newTailIndex = nucleus.getAngleProfile().getSlidingWindowOffset(median);
+
+					// add the offset of the tail to the nucleus
+					nucleus.addBorderTag(collection.getOrientationPoint(), newTailIndex);
+					
+
+					// also update the head position (same as round reference point)
+					// - the point opposite the tail through the CoM
+					int headIndex = nucleus.getIndex(nucleus.findOppositeBorder( nucleus.getPoint(newTailIndex) ));
+					nucleus.addBorderTag(Constants.Nucleus.ROUND.referencePoint(), headIndex);
+					nucleus.splitNucleusToHeadAndHump();
+				}
+			}catch(Exception e){
+				logger.error("Error calculating offsets", e);
+			}
+		}
+		
+		private static void calculateOffsetsInPigSpermNuclei(CellCollection collection){
+
+			try{
+				Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
+
+				for(Nucleus nucleus : collection.getNuclei()){
+					PigSpermNucleus n = (PigSpermNucleus) nucleus;
+
+					// returns the positive offset index of this profile which best matches the median profile
+					int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+
+					n.addBorderTag(n.getReferencePoint(), newHeadIndex);
+
+					// also update the head position
+					int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+					n.addBorderTag(n.getOrientationPoint(), tailIndex);
+				}
+			}catch(Exception e){
+				logger.error("Error calculating offsets", e);
+			}
+		}
+		
+		/**
+		 * Offset the position of the tail in each nucleus based on the difference to the median
+		 * @param collection the nuclei
+		 * @param nucleusClass the class of nucleus
+		 */
+		public static void calculateOffsets(CellCollection collection){
+
+			if(collection.getNucleusClass() == RoundNucleus.class){
+				calculateOffsetsInRoundNuclei(collection);
+			}
+			
+			if(collection.getNucleusClass() == RodentSpermNucleus.class){
+				calculateOffsetsInRodentSpermNuclei(collection);
+			}
+			
+			if(collection.getNucleusClass() == PigSpermNucleus.class){
+				calculateOffsetsInPigSpermNuclei(collection);
+			}
+		}
+	}
 }

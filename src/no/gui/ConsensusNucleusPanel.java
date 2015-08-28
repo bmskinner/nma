@@ -7,9 +7,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -18,12 +18,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
+import no.components.NucleusBorderPoint;
+import no.components.XYPoint;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -33,42 +38,44 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
+import datasets.ConsensusNucleusChartFactory;
+import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 
-public class ConsensusNucleusPanel extends JPanel {
+public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final String SOURCE_COMPONENT = "ConsensusNucleusPanel"; 
 
-	private ChartPanel consensusChartPanel;
+	private ConsensusNucleusChartPanel consensusChartPanel;
 	private JButton runRefoldingButton;
 	
-	private List<Object> listeners = new ArrayList<Object>();
+	private JPanel offsetsPanel; // store controls for rotating and translating
+	private JPanel mainPanel;	
+	
+	private AnalysisDataset activeDataset;
+
 	
 	public ConsensusNucleusPanel() {
 
-		this.setLayout(new GridBagLayout());
+		this.setLayout(new BorderLayout());
+		mainPanel = new JPanel();
+		mainPanel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridwidth = 1;
 		c.fill = GridBagConstraints.BOTH;      //reset to default
 		c.weightx = 0.0;         
 		
-		JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-				null, null, null);
-		XYPlot consensusPlot = consensusChart.getXYPlot();
-		consensusPlot.setBackgroundPaint(Color.WHITE);
-		consensusPlot.getDomainAxis().setVisible(false);
-		consensusPlot.getRangeAxis().setVisible(false);
+		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 		
-		consensusChartPanel = new ChartPanel(consensusChart);
-
+		consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
+		consensusChartPanel.addSignalChangeListener(this);
+		
 		runRefoldingButton = new JButton("Refold");
 
 		runRefoldingButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				fireSignalChangeEvent("RefoldNucleusFired");
+				fireSignalChangeEvent("RefoldConsensus_"+activeDataset.getUUID().toString());
 				runRefoldingButton.setVisible(false);
 			}
 		});
@@ -78,23 +85,188 @@ public class ConsensusNucleusPanel extends JPanel {
 		consensusChartPanel.setMinimumSize(new Dimension(200, 200));
 		
 		
-		
-		
-//		consensusChartPanel.addComponentListener(new ComponentAdapter() {
-//			@Override
-//			public void componentResized(ComponentEvent e) {
-//				resizePreview(consensusChartPanel, ConsensusNucleusPanel.this);
-//			}
-//		});
-		
 		this.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				resizePreview(consensusChartPanel, ConsensusNucleusPanel.this);
+				resizePreview(consensusChartPanel, mainPanel);
 			}
 		});
 		
-		this.add(consensusChartPanel, c);
+		mainPanel.add(consensusChartPanel, c);
+		this.add(mainPanel, BorderLayout.CENTER);
+		
+		offsetsPanel = createOffsetsPanel();
+		this.add(offsetsPanel, BorderLayout.EAST);
+		offsetsPanel.setVisible(false);
+	}
+	
+	private JPanel createOffsetsPanel(){
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		JPanel rotatePanel = createRotationPanel();
+		panel.add(rotatePanel, BorderLayout.NORTH);
+		
+		JPanel offsetPanel = createTranslatePanel();
+		panel.add(offsetPanel, BorderLayout.SOUTH);
+		
+		return panel;
+	}
+	
+	private JPanel createTranslatePanel(){
+		JPanel panel = new JPanel(new GridBagLayout());
+		
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.gridx = 1;
+		constraints.gridy = 0;
+		constraints.anchor = GridBagConstraints.CENTER;
+		
+		JButton moveUp = new JButton("+y");
+		moveUp.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(activeDataset.getCollection().hasConsensusNucleus()){
+					activeDataset.getCollection().getConsensusNucleus().offset(0, 1);;
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(activeDataset);
+					update(list);
+				}
+			}
+		});
+		panel.add(moveUp, constraints);
+		
+		JButton moveDown = new JButton("-y");
+		moveDown.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(activeDataset.getCollection().hasConsensusNucleus()){
+					activeDataset.getCollection().getConsensusNucleus().offset(0, -1);;
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(activeDataset);
+					update(list);
+				}
+			}
+		});
+		constraints.gridx = 1;
+		constraints.gridy = 2;
+		panel.add(moveDown, constraints);
+		
+		JButton moveLeft = new JButton("-x");
+		moveLeft.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(activeDataset.getCollection().hasConsensusNucleus()){
+					activeDataset.getCollection().getConsensusNucleus().offset(-1, 0);;
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(activeDataset);
+					update(list);
+				}
+			}
+		});
+		constraints.gridx = 0;
+		constraints.gridy = 1;
+		panel.add(moveLeft, constraints);
+		
+		JButton moveright = new JButton("+x");
+		moveright.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(activeDataset.getCollection().hasConsensusNucleus()){
+					activeDataset.getCollection().getConsensusNucleus().offset(1, 0);;
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(activeDataset);
+					update(list);
+				}
+			}
+		});
+		constraints.gridx = 2;
+		constraints.gridy = 1;
+		panel.add(moveright, constraints);
+		
+		JButton moveRst = new JButton("!");
+		moveRst.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(activeDataset.getCollection().hasConsensusNucleus()){
+					double x = 0;
+					double y = 0;
+					XYPoint point = new XYPoint(x, y);
+					
+					activeDataset.getCollection().getConsensusNucleus().moveCentreOfMass(point);;
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(activeDataset);
+					update(list);
+				}
+			}
+		});
+		constraints.gridx = 1;
+		constraints.gridy = 1;
+		panel.add(moveRst, constraints);
+		
+		return panel;
+	}
+	
+	private JPanel createRotationPanel(){
+		JPanel panel = new JPanel(new GridBagLayout());
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridwidth = 1;
+		constraints.gridheight = 1;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.anchor = GridBagConstraints.CENTER;
+		
+		JButton rotateFwd = new JButton("-r");
+		rotateFwd.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(activeDataset.getCollection().hasConsensusNucleus()){
+					activeDataset.getCollection().getConsensusNucleus().rotate(-89);
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(activeDataset);
+					update(list);
+				}
+			}
+		});
+
+		panel.add(rotateFwd, constraints);
+
+		JButton rotateBck = new JButton("+r");
+		rotateBck.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(activeDataset.getCollection().hasConsensusNucleus()){
+					activeDataset.getCollection().getConsensusNucleus().rotate(-91);
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(activeDataset);
+					update(list);
+				}
+			}
+		});
+		constraints.gridx = 2;
+		constraints.gridy = 0;
+		panel.add(rotateBck, constraints);
+
+		JButton rotateRst = new JButton("!");
+		rotateRst.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if(activeDataset.getCollection().hasConsensusNucleus()){
+					NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getOrientationPoint());
+					activeDataset.getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
+					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+					list.add(activeDataset);
+					update(list);
+				}
+			}
+		});
+		constraints.gridx = 1;
+		constraints.gridy = 0;
+		panel.add(rotateRst, constraints);
+
+		return panel;
 	}
 	
 	/**
@@ -103,157 +275,55 @@ public class ConsensusNucleusPanel extends JPanel {
 	 * @param list the datasets
 	 */	
 	public void update(List<AnalysisDataset> list){
+		activeDataset = null;
 		try {
 			if(!list.isEmpty()){
+				
 				CellCollection collection = list.get(0).getCollection();
 
 				if(list.size()==1){
-					if(!collection.hasConsensusNucleus()){
-
-						// add button to run analysis
-						JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-								null, null, null);
-						XYPlot consensusPlot = consensusChart.getXYPlot();
-						consensusPlot.setBackgroundPaint(Color.WHITE);
-						consensusPlot.getDomainAxis().setVisible(false);
-						consensusPlot.getRangeAxis().setVisible(false);
-						consensusChartPanel.setChart(consensusChart);
-
-						runRefoldingButton.setVisible(true);
-
-
-					} else {
+					activeDataset = list.get(0);
+					runRefoldingButton.setVisible(false);
+					
+					JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+					
+					if(collection.hasConsensusNucleus()){
+						consensusChart = ConsensusNucleusChartFactory.makeSegmentedConsensusChart(activeDataset);
+						
+						// hide the refold button
 						runRefoldingButton.setVisible(false);
-						JFreeChart chart = makeConsensusChart(collection);
-						consensusChartPanel.setChart(chart);
-					} 
+						offsetsPanel.setVisible(true);
+					} else {
+						runRefoldingButton.setVisible(true);
+						offsetsPanel.setVisible(false);
+					}
+					consensusChartPanel.setChart(consensusChart);
+					
+					
 				}else {
-					// multiple nuclei
-					XYDataset ds = NucleusDatasetCreator.createMultiNucleusOutline(list);
-					JFreeChart chart = 
-							ChartFactory.createXYLineChart(null,
-									null, null, ds, PlotOrientation.VERTICAL, true, true,
-									false);
-					XYPlot plot = chart.getXYPlot();
-					plot.getDomainAxis().setVisible(false);
-					plot.getRangeAxis().setVisible(false);
-					plot.setBackgroundPaint(Color.WHITE);
-					plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-					plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-
-					int seriesCount = plot.getSeriesCount();
-
-					for (int i = 0; i < seriesCount; i++) {
-						plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-						String name = (String) ds.getSeriesKey(i);
-						plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-
-						int index = getIndexFromLabel(name);
-						AnalysisDataset d = list.get(index);
-
-						Color color = d.getDatasetColour() == null 
-								? ColourSelecter.getSegmentColor(i)
-										: d.getDatasetColour();
-
-								// get the group id from the name, and make colour
-								plot.getRenderer().setSeriesPaint(i, color);
-								if(name.startsWith("Q")){
-									// make the IQR distinct from the median
-									plot.getRenderer().setSeriesPaint(i, color.darker());
-								}
-
-					}
+					
+					JFreeChart chart = ConsensusNucleusChartFactory.makeMultipleConsensusChart(list);
 					consensusChartPanel.setChart(chart);
-					for(Component c : consensusChartPanel.getComponents() ){
-						if(c.getClass()==JButton.class){
-							c.setVisible(false);
-						}
-					}
+					runRefoldingButton.setVisible(false);
+					offsetsPanel.setVisible(false);
 				}
 
 			} else { // no datasets in the list
-				// add button to run analysis
-				JFreeChart consensusChart = ChartFactory.createXYLineChart(null,
-						null, null, null);
-				XYPlot consensusPlot = consensusChart.getXYPlot();
-				consensusPlot.setBackgroundPaint(Color.WHITE);
-				consensusPlot.getDomainAxis().setVisible(false);
-				consensusPlot.getRangeAxis().setVisible(false);
+				
+				JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				consensusChartPanel.setChart(consensusChart);
-
 				runRefoldingButton.setVisible(false);
+				offsetsPanel.setVisible(false);
+				
 			}
 		} catch (Exception e) {
 			IJ.log("Error drawing consensus nucleus: "+e.getMessage());
-			e.printStackTrace();
+			for(StackTraceElement e1 : e.getStackTrace()){
+				IJ.log(e1.toString());
+			}
 		}
 	}
-	
-	/**
-	 * Create a consenusus chart for the given nucleus collection
-	 * @param collection the NucleusCollection to draw the consensus from
-	 * @return the consensus chart
-	 */
-	private JFreeChart makeConsensusChart(CellCollection collection){
-		XYDataset ds = NucleusDatasetCreator.createNucleusOutline(collection);
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, true, true,
-						false);
-		
-
-		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
-		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
-
-		// ensure that the scales for each axis are the same
-		double max = Math.max(maxX, maxY);
-
-		// ensure there is room for expansion of the target nucleus due to IQR
-		max *=  1.25;		
-
-		XYPlot plot = chart.getXYPlot();
-		plot.setDataset(0, ds);
-		plot.getDomainAxis().setRange(-max,max);
-		plot.getRangeAxis().setRange(-max,max);
-
-		plot.getDomainAxis().setVisible(false);
-		plot.getRangeAxis().setVisible(false);
-
-		plot.setBackgroundPaint(Color.WHITE);
-		plot.addRangeMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-		plot.addDomainMarker(new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)));
-
-		int seriesCount = plot.getSeriesCount();
-
-		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-			String name = (String) ds.getSeriesKey(i);
 			
-			if(name.startsWith("Seg_")){
-				int colourIndex = getIndexFromLabel(name);
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
-			} 
-			if(name.startsWith("Q")){
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-			} 
-
-		}	
-		return chart;
-	}
-	
-	/**
-	 * Get a series or dataset index for colour selection when drawing charts. The index
-	 * is set in the DatasetCreator as part of the label. The format is Name_index_other
-	 * @param label the label to extract the index from 
-	 * @return the index found
-	 */
-	private int getIndexFromLabel(String label){
-		String[] names = label.split("_");
-		return Integer.parseInt(names[1]);
-	}
-	
 	/**
 	 * Alter the size of the given panel to keep the aspect ratio constant.
 	 * The minimum of the width or height of the container is used as the
@@ -271,22 +341,122 @@ public class ConsensusNucleusPanel extends JPanel {
         container.revalidate();
     }
 	
-	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
-        listeners.add( l );
-    }
-    
-    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
-        listeners.remove( l );
-    }
-     
-    private synchronized void fireSignalChangeEvent(String message) {
-    	
-        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
-        Iterator iterator = listeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
-        }
-    }
+	@Override
+	public void signalChangeReceived(SignalChangeEvent event) {
+		
+		// pass on log messages back to the main window
+		if(event.sourceName().equals(ConsensusNucleusChartPanel.SOURCE_COMPONENT)){
+			if(event.type().startsWith("Log_")){
+				fireSignalChangeEvent(event.type());
+			}
+			
+			if(event.type().equals("RotateConsensus")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+						
+						SpinnerNumberModel sModel = new SpinnerNumberModel(0, -360, 360, 1.0);
+						JSpinner spinner = new JSpinner(sModel);
+						
+						int option = JOptionPane.showOptionDialog(null, 
+								spinner, 
+								"Choose the amount to rotate", 
+								JOptionPane.OK_CANCEL_OPTION, 
+								JOptionPane.QUESTION_MESSAGE, null, null, null);
+						if (option == JOptionPane.CANCEL_OPTION) {
+						    // user hit cancel
+						} else if (option == JOptionPane.OK_OPTION)	{
+							
+							// offset by 90 because reasons?
+							double angle = (Double) spinner.getModel().getValue();
+							activeDataset.getCollection().getConsensusNucleus().rotate(angle-90);
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							this.update(list);
+						}
+					}
+				} else {
+					log("Cannot rotate: must have one dataset selected");
+				}
+			}
+			
+			if(event.type().equals("RotateReset")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+
+						NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getOrientationPoint());
+						activeDataset.getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+						list.add(activeDataset);
+						this.update(list);
+					}
+				} else {
+					log("Cannot rotate: must have one dataset selected");
+				}
+			}
+			
+			if(event.type().equals("OffsetAction")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+
+						// get the x and y offset
+						SpinnerNumberModel xModel = new SpinnerNumberModel(0, -100, 100, 0.1);
+						SpinnerNumberModel yModel = new SpinnerNumberModel(0, -100, 100, 0.1);
+				        
+						JSpinner xSpinner = new JSpinner(xModel);
+						JSpinner ySpinner = new JSpinner(yModel);
+						
+						JSpinner[] spinners = { xSpinner, ySpinner };
+						
+						int option = JOptionPane.showOptionDialog(null, 
+								spinners, 
+								"Choose the amount to offset x and y", 
+								JOptionPane.OK_CANCEL_OPTION, 
+								JOptionPane.QUESTION_MESSAGE, null, null, null);
+						if (option == JOptionPane.CANCEL_OPTION) {
+						    // user hit cancel
+						} else if (option == JOptionPane.OK_OPTION)	{
+							
+							// offset by 90 because reasons?
+							double x = (Double) xSpinner.getModel().getValue();
+							double y = (Double) ySpinner.getModel().getValue();
+							
+							activeDataset.getCollection().getConsensusNucleus().offset(x, y);;
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							this.update(list);
+						}
+
+					}
+				} else {
+					log("Cannot offset: must have one dataset selected");
+				}
+			}
+			
+			if(event.type().equals("OffsetReset")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+
+						double x = 0;
+						double y = 0;
+						XYPoint point = new XYPoint(x, y);
+						
+						activeDataset.getCollection().getConsensusNucleus().moveCentreOfMass(point);;
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+						list.add(activeDataset);
+						this.update(list);
+					}
+				} else {
+					log("Cannot offset: must have one dataset selected");
+				}
+			}
+
+		}
+		
+	}
     
     
 

@@ -1,12 +1,14 @@
 package no.gui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
@@ -18,7 +20,7 @@ import datasets.NucleusTableDatasetCreator;
  * population
  *
  */
-public class AnalysisDetailPanel extends JPanel {
+public class AnalysisDetailPanel extends DetailPanel {
 
 
 	private static final long serialVersionUID = 1L;
@@ -43,11 +45,22 @@ public class AnalysisDetailPanel extends JPanel {
 
 	}
 	
-	public void update(List<AnalysisDataset> list){
-		updateAnalysisParametersPanel(list);
-		updateStatsPanel(list);
+	/**
+	 * Trigger an update of the panel with the given list of datasets
+	 * to display
+	 * @param list
+	 */
+	public void update(final List<AnalysisDataset> list){
+		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+			
+				updateAnalysisParametersPanel(list);
+				updateStatsPanel(list);
+			
+		}});
 	}
-	
+		
 	
 	/**
 	 * Update the analysis panel with data from the given datasets
@@ -55,8 +68,12 @@ public class AnalysisDetailPanel extends JPanel {
 	 */
 	private void updateAnalysisParametersPanel(List<AnalysisDataset> list){
 		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
+		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);;
+		if(list!=null && !list.isEmpty()){
+			model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
+		}
 		tableAnalysisParamters.setModel(model);
+		tableAnalysisParamters.createDefaultColumnsFromModel();
 	}
 	
 	
@@ -66,8 +83,11 @@ public class AnalysisDetailPanel extends JPanel {
 	 * @param list the datasets
 	 */
 	private void updateStatsPanel(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createStatsTable(list);
+		TableModel model = NucleusTableDatasetCreator.createStatsTable(null);
+		
+		if(list!=null && !list.isEmpty()){
+			model = NucleusTableDatasetCreator.createStatsTable(list);
+		}
 		tablePopulationStats.setModel(model);
 	}
 	
@@ -96,6 +116,7 @@ public class AnalysisDetailPanel extends JPanel {
 		panel.setLayout(new BorderLayout(0, 0));
 
 		tableAnalysisParamters = new JTable();
+		tableAnalysisParamters.setAutoCreateColumnsFromModel(false);
 		tableAnalysisParamters.setModel(NucleusTableDatasetCreator.createAnalysisParametersTable(null));
 		tableAnalysisParamters.setEnabled(false);
 		panel.add(tableAnalysisParamters, BorderLayout.CENTER);
