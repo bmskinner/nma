@@ -637,53 +637,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	        }
 	    }
 	}
-		
-	class ExtractNucleiCollectionAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public ExtractNucleiCollectionAction() {
-	        super("Extract nuclei...");
-	    }
-		
-	    public void actionPerformed(ActionEvent e) {
-	        
-	        final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-
-	        if(datasets.size()==1){
-
-	        	Thread thr = new Thread() {
-	        		public void run() {
-
-	        			AnalysisDataset d = datasets.get(0);
-
-	        			DirectoryChooser openDialog = new DirectoryChooser("Select directory to export images...");
-	        			String folderName = openDialog.getDirectory();
-
-	        			if(folderName==null) return; // user cancelled
-
-	        			File folder =  new File(folderName);
-
-	        			if(!folder.isDirectory() ){
-	        				return;
-	        			}
-	        			if(!folder.exists()){
-	        				return; // check folder is ok
-	        			}
-
-	        			logc("Extracting nuclei from collection...");
-	        			boolean ok = PopulationExporter.extractNucleiToFolder(d, folder);
-	        			if(ok){ 
-	        				log("OK");
-	        			} else {
-	        				log("Error");
-	        			}
-	        		}
-	        	};
-	        	thr.start();
-	        }
-	    }
-	}
-		
+				
 	class ReplaceNucleusFolderAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -1393,10 +1347,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		
 		public NewMorphologyAnalysisAction() {
 			super(null, "Nucleus detection", "Error in analysis");
-									
-			setStatus("New analysis in progress");
-			
-			
+
 			AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow();
 			if( analysisSetup.getOptions()!=null){
 
@@ -1416,6 +1367,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 				logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
 				logger.log("Directory: "+options.getFolder().getName());
+				setStatus("New analysis in progress");
 				
 				detector = new NucleusDetector(this.outputFolderName, MainWindow.this, logger.getLogfile(), options);
 				detector.addPropertyChangeListener(this);
@@ -1559,17 +1511,18 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 					String fileName = saveDialog.getFileName();
 					String folderName = saveDialog.getDirectory();
+					
+					if(fileName!=null && folderName!=null){
+						File saveFile = new File(folderName+File.separator+fileName);
 
-					File saveFile = new File(folderName+File.separator+fileName);
-
-					logc("Saving as "+saveFile.getAbsolutePath()+"...");
-					boolean ok = PopulationExporter.saveAnalysisDataset(selectedDataset, saveFile);
-					if(ok){
-						log("OK");
-					} else {
-						log("Error");
+						logc("Saving as "+saveFile.getAbsolutePath()+"...");
+						boolean ok = PopulationExporter.saveAnalysisDataset(selectedDataset, saveFile);
+						if(ok){
+							log("OK");
+						} else {
+							log("Error");
+						}
 					}
-
 				}
 			};
 
@@ -1578,7 +1531,35 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		}
 		
 		if(event.type().equals("ExtractNucleiAction")){
-			new ExtractNucleiCollectionAction();
+			Thread thr = new Thread() {
+        		public void run() {
+
+        			DirectoryChooser openDialog = new DirectoryChooser("Select directory to export images...");
+        			String folderName = openDialog.getDirectory();
+
+        			if(folderName==null){
+        				return; // user cancelled
+        			}
+
+        			File folder =  new File(folderName);
+
+        			if(!folder.isDirectory() ){
+        				return;
+        			}
+        			if(!folder.exists()){
+        				return; // check folder is ok
+        			}
+
+        			logc("Extracting nuclei from collection...");
+        			boolean ok = PopulationExporter.extractNucleiToFolder(selectedDataset, folder);
+        			if(ok){ 
+        				log("OK");
+        			} else {
+        				log("Error");
+        			}
+        		}
+        	};
+        	thr.start();
 		}
 		
 		if(event.type().equals("ChangeNucleusFolderAction")){
