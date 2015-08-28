@@ -10,6 +10,7 @@ import javax.swing.SwingWorker;
 
 import utility.Constants;
 import utility.Logger;
+import utility.Utils;
 import no.collections.CellCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
@@ -649,6 +650,15 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 			
 			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
+			
+			// head is half way around from the tail
+			int offset = collection.getProfileCollection().getAggregate().length() /2;
+			// now we have the tail point located, update the reference point to be opposite
+			
+			// adjust the index to the offset
+			 int headIndex  = Utils.wrapIndex( tailIndex - offset, collection.getProfileCollection().getAggregate().length());
+			
+			collection.getProfileCollection().addOffset(collection.getReferencePoint(), headIndex);
 		}
 
 		private static void findTailInRoundMedian(CellCollection collection) throws Exception {
