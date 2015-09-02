@@ -3,8 +3,10 @@ package no.gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -479,7 +481,28 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					plot.getRangeAxis().setRange(yMin, yMax);
 					plot.getDomainAxis().setRange(xMin, xMax);				
 				} 
+				
+//				@Override
+//				//override the default zoom to keep aspect ratio
+//				public void zoom(java.awt.geom.Rectangle2D selection){
+//					
+//					Rectangle2D.Double newSelection = null;
+//					if(selection.getWidth()>selection.getHeight()){
+//						newSelection = new Rectangle2D.Double(selection.getX(), 
+//								selection.getY(), 
+//								selection.getWidth(), 
+//								selection.getWidth());					
+//					} else {
+//						newSelection = new Rectangle2D.Double(selection.getX(), 
+//								selection.getY(), 
+//								selection.getHeight(), 
+//								selection.getHeight());		
+//					}
+//					super.zoom(newSelection);
+//				}
 			};
+			
+
 			
 			this.add(panel, BorderLayout.CENTER);
 			

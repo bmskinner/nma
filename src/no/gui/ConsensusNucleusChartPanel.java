@@ -1,6 +1,7 @@
 package no.gui;
 
 import java.awt.event.ActionEvent;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -88,6 +89,25 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		plot.getRangeAxis().setRange(-maxRange, maxRange);
 		plot.getDomainAxis().setRange(-maxRange, maxRange);				
 	} 
+	
+	@Override
+	//override the default zoom to keep aspect ratio
+	public void zoom(java.awt.geom.Rectangle2D selection){
+		
+		Rectangle2D.Double newSelection = null;
+		if(selection.getWidth()>selection.getHeight()){
+			newSelection = new Rectangle2D.Double(selection.getX(), 
+					selection.getY(), 
+					selection.getWidth(), 
+					selection.getWidth());					
+		} else {
+			newSelection = new Rectangle2D.Double(selection.getX(), 
+					selection.getY(), 
+					selection.getHeight(), 
+					selection.getHeight());		
+		}
+		super.zoom(newSelection);
+	}
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
