@@ -40,6 +40,14 @@ public class ClusteringSetupWindow extends JDialog {
 	private JPanel optionsPanel;
 	private JPanel footerPanel;
 	
+	private JSpinner clusterNumberSpinner;
+	
+	private JRadioButton clusterHierarchicalButton;
+	private JRadioButton clusterEMButton;
+	
+	private JRadioButton clusterNumberAutoButton;
+	private JRadioButton clusterManualButton;
+	
 	private boolean readyToRun = false;
 
 	private Map<String, Object> options = new HashMap<String, Object>();
@@ -121,10 +129,10 @@ public class ClusteringSetupWindow extends JDialog {
 		optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
 		
 		//Create the radio buttons.
-	    JRadioButton clusterHierarchicalButton = new JRadioButton("Hierarchical");
+	    clusterHierarchicalButton = new JRadioButton("Hierarchical");
 	    clusterHierarchicalButton.setSelected(true);
 	    
-	    JRadioButton clusterEMButton = new JRadioButton("Expectation maximisation");
+	    clusterEMButton = new JRadioButton("Expectation maximisation");
 
 	    //Group the radio buttons.
 	    ButtonGroup clusterTypeGroup = new ButtonGroup();
@@ -139,6 +147,11 @@ public class ClusteringSetupWindow extends JDialog {
 	    		// Set enabled based on button text (you can use whatever text you prefer)
 	    		if(button.isSelected()){
 	    			options.put("type", NucleusClusterer.HIERARCHICAL);
+	    			clusterNumberSpinner.setEnabled(true);
+	    			options.put("-N", clusterNumberSpinner.getValue());
+	    			
+	    			clusterNumberAutoButton.setEnabled(true);
+	    			clusterManualButton.setEnabled(true);
 	    		} else {
 	    			options.put("type", NucleusClusterer.EM);
 	    		}
@@ -154,6 +167,10 @@ public class ClusteringSetupWindow extends JDialog {
 	    		if(button.isSelected()){
 	    			
 	    			options.put("type", NucleusClusterer.EM);
+	    			clusterNumberSpinner.setEnabled(false);
+	    			options.remove("-N");
+	    			clusterNumberAutoButton.setEnabled(false);
+	    			clusterManualButton.setEnabled(false);
 	    		} else {
 	    			options.put("type", NucleusClusterer.HIERARCHICAL);
 	    		}
@@ -168,28 +185,28 @@ public class ClusteringSetupWindow extends JDialog {
 	    JLabel clusterCountLabel = new JLabel("Desired number of clusters:");
 	    optionsPanel.add(clusterCountLabel);
 	    
-	    JRadioButton clusterAutoButton = new JRadioButton("Automatic");
-	    clusterAutoButton.setSelected(true);
+	    clusterNumberAutoButton = new JRadioButton("Automatic");
+	    clusterNumberAutoButton.setSelected(true);
 	    
-	    JRadioButton clusterManualButton = new JRadioButton("Manual");
+	    clusterManualButton = new JRadioButton("Manual");
 	    
 	    ButtonGroup clusterNumberGroup = new ButtonGroup();
-	    clusterNumberGroup.add(clusterAutoButton);
+	    clusterNumberGroup.add(clusterNumberAutoButton);
 	    clusterNumberGroup.add(clusterManualButton);
 	    
 	    	    
-	    optionsPanel.add(clusterAutoButton);
+	    optionsPanel.add(clusterNumberAutoButton);
 	    optionsPanel.add(clusterManualButton);
 	    	    
 	    SpinnerModel model =
-	            new SpinnerNumberModel(2, //initial value
+	            new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
 	                                   1, //min
 	                                   100, //max
 	                                   1); //step
 	    
-	    final JSpinner spinner = new JSpinner(model);
-	    spinner.setEnabled(false);
-	    optionsPanel.add(spinner);
+	    clusterNumberSpinner = new JSpinner(model);
+	    clusterNumberSpinner.setEnabled(false);
+	    optionsPanel.add(clusterNumberSpinner);
 	    
 	    
 	    clusterManualButton.addActionListener(new ActionListener(){
@@ -199,36 +216,36 @@ public class ClusteringSetupWindow extends JDialog {
 
 	    		// Set enabled based on button text (you can use whatever text you prefer)
 	    		if(button.isSelected()){
-	    			spinner.setEnabled(true);
-	    			options.put("-N", ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER);
+	    			clusterNumberSpinner.setEnabled(true);
+	    			options.put("-N", clusterNumberSpinner.getValue());
 	    		} else {
-	    			spinner.setEnabled(false);
+	    			clusterNumberSpinner.setEnabled(false);
 	    			options.remove("-N");
 	    		}
 	    	}
 	    });
 	    
-	    clusterAutoButton.addActionListener(new ActionListener(){
+	    clusterNumberAutoButton.addActionListener(new ActionListener(){
 	    	public void actionPerformed(ActionEvent e){
 
 	    		JRadioButton button = (JRadioButton) e.getSource();
 
 	    		// Set enabled based on button text (you can use whatever text you prefer)
 	    		if(button.isSelected()){
-	    			spinner.setEnabled(false);
+	    			clusterNumberSpinner.setEnabled(false);
 	    			options.remove("-N");
 	    		} else {
-	    			spinner.setEnabled(true);
-	    			options.put("-N", ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER);
+	    			clusterNumberSpinner.setEnabled(true);
+	    			options.put("-N", clusterNumberSpinner.getValue());
 	    		}
 	    	}
 	    });
 	    
 	    
-	    spinner.addChangeListener(new ChangeListener(){
+	    clusterNumberSpinner.addChangeListener(new ChangeListener(){
 	    	
 	    	public void stateChanged(ChangeEvent e) {
-	            SpinnerModel model = spinner.getModel();
+	            SpinnerModel model = clusterNumberSpinner.getModel();
 	            if (model instanceof SpinnerNumberModel) {
 	                options.put("-N", model.getValue());
 	            }
