@@ -139,15 +139,15 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
     @Override
     public void done() {
     	
-//    	IJ.log("Completed worker task; firing trigger");
+    	logger.log("Completed morphology worker task; firing trigger", Logger.DEBUG);
 
         try {
             if(this.get()){
-//            	IJ.log("Successful worker task triggering");
+            	logger.log("Firing trigger for sucessful task", Logger.DEBUG);
                 firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
 
             } else {
-//            	IJ.log("Error worker task triggering");
+            	logger.log("Firing trigger for error in task", Logger.DEBUG);
                 firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
             }
         } catch (InterruptedException e) {

@@ -756,8 +756,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		
 		private void removeProgressBar(){
 			logPanel.removeProgressBar(this.progressBar);
-			contentPane.revalidate();
-			contentPane.repaint();
+			logPanel.revalidate();
+			logPanel.repaint();
 		}
 		
 		public void cancel(){
@@ -1259,6 +1259,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     	public void finished(){
     		Logger logger = new Logger(dataset.getDebugFile(), "MainWindow");
     		logger.log("Morphology analysis finished");
+    		
+    		// ensure the progress bar gets hidden even if it is not removed
+    		this.progressBar.setVisible(false);
+    		
     		if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
     			logc("Exporting stats...");
     			boolean ok = StatsExporter.run(dataset.getCollection());
@@ -1312,13 +1316,13 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     		// if no list was provided, or no more entries remain,
     		// call the finish
     		if(processList==null){
-    			logger.log("Analysis complete, process list null, cleaning up");
+    			logger.log("Analysis complete, process list null, cleaning up", Logger.DEBUG);
     			super.finished();
     		} else if(processList.isEmpty()){
-    			logger.log("Analysis complete, process list empty, cleaning up");
+    			logger.log("Analysis complete, process list empty, cleaning up", Logger.DEBUG);
     			super.finished();
     		} else {
-    			logger.log("Morphology analysis continuing");
+    			logger.log("Morphology analysis continuing; removing progress bar", Logger.DEBUG);
     			// otherwise analyse the next item in the list
     			cancel();
     			if(mode == MorphologyAnalysis.MODE_COPY){
