@@ -1452,30 +1452,36 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			if(datasets.size()==0 || datasets==null){
 				this.cancel();
 			} else {
+				
+				int flag = ADD_POPULATION;
+				flag |= SAVE_DATASET;
+				new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag);
 				// new style datasets
-				for(AnalysisDataset d : datasets){
-					
-					int flag = ADD_POPULATION;
-					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
-
-					
-					populationsPanel.addDataset(d);				
-					
-					for(AnalysisDataset child : d.getChildDatasets()){
-						populationsPanel.addDataset(child);
-					}
-					PopulationExporter.saveAnalysisDataset(d);
-
-				}
+//				for(AnalysisDataset d : datasets){
+//					
+//					int flag = ADD_POPULATION;
+//					flag |= SAVE_DATASET;
+//					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
+//
+//					
+////					populationsPanel.addDataset(d);				
+////					
+////					for(AnalysisDataset child : d.getChildDatasets()){
+////						populationsPanel.addDataset(child);
+////					}
+////					PopulationExporter.saveAnalysisDataset(d);
+//
+//				}
 				
-				this.dataset = datasets.get(0); // avoid nulls
-								
-				setStatus("Merge complete: "
-								+populationsPanel.getDatasetCount()
-								+" populations ready to view");
-				
-				log("Merge complete");	
-				super.finished();
+//				this.dataset = datasets.get(0); // avoid nulls
+//								
+//				setStatus("Merge complete: "
+//								+populationsPanel.getDatasetCount()
+//								+" populations ready to view");
+//				
+//				log("Merge complete");
+				this.cancel();
+//				super.finished();
 			}
 		}
 	}
