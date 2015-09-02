@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.BoxLayout;
 import javax.swing.JColorChooser;
@@ -28,12 +29,15 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 
 import no.analysis.AnalysisDataset;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.SegmentedProfile;
+import no.gui.CellDetailPanel.CellsListPanel.NodeData;
 import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartPanel;
@@ -240,15 +244,19 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					
 					JTree tree = (JTree) e.getSource();
 					
-					String name = tree.getSelectionPath().getLastPathComponent().toString();
+					NodeData node = (NodeData) tree.getSelectionPath().getLastPathComponent();
+					UUID cellID = node.getID();
+//					String name = tree.getSelectionPath().getLastPathComponent().toString();
 					
-					String[] bits = name.split("-");
+//					String[] bits = name.split("-");
+//					
+//					String pathName = activeDataset.getCollection().getFolder()
+//							+File.separator
+//							+bits[0]
+//							+File.separator
+//							+bits[1];
 					
-					String pathName = activeDataset.getCollection().getFolder()
-							+File.separator
-							+bits[0]
-							+File.separator
-							+bits[1];
+//					UUID cellID = UUID.fromString(name);
 
 					
 					// double click - remove cell
@@ -262,7 +270,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						if(result==JOptionPane.YES_OPTION){
 							
 							// delete the cell
-							Cell cell = activeDataset.getCollection().getCell(pathName);
+							Cell cell = activeDataset.getCollection().getCell(cellID);
 							activeDataset.getCollection().removeCell(cell);
 							try {
 								CellDetailPanel.this.fireSignalChangeEvent("MorphologyRefresh_"+activeDataset.getUUID().toString());
@@ -314,10 +322,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private void createNodes(DefaultMutableTreeNode root, AnalysisDataset dataset){
 		    
 		    for(Cell cell : dataset.getCollection().getCells()){	
+//		    	String name = cell.getCellId().toString();
 		    	String name = cell.getNucleus().getNameAndNumber();
-		    	root.add(new DefaultMutableTreeNode(name));
+		    	UUID id = cell.getCellId();
+//		    	root.add(new DefaultMutableTreeNode(name));
+		    	root.add(new DefaultMutableTreeNode( new NodeData(name, id)));
 		    }
-		    sort(root);
+//		    sort(root);
 
 		}
 		
@@ -343,6 +354,24 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			}
 			return node;
 			
+		}
+		
+		public class NodeData {
+			private String name;
+			private UUID id;
+			public NodeData(String name, UUID id) {
+				this.name = name;
+				this.id = id;
+			}
+			public String getName() {
+				return name;
+			}
+			public UUID getID() {
+				return id;
+			}
+			public String toString() {
+				return name;
+			}
 		}
 	}
 	
@@ -828,20 +857,24 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
 
-		String name = arg0.getPath().getLastPathComponent().toString();
+		NodeData node = (NodeData) arg0.getPath().getLastPathComponent();
+		UUID cellID = node.getID();
 		
-		String[] bits = name.split("-");
+//		String name = arg0.getPath().getLastPathComponent().toString();
 		
-		String pathName = activeDataset.getCollection().getFolder()
-				+File.separator
-				+bits[0]
-				+File.separator
-				+bits[1];
+//		UUID cellID = UUID.fromString(name);
+//		String[] bits = name.split("-");
+//		
+//		String pathName = activeDataset.getCollection().getFolder()
+//				+File.separator
+//				+bits[0]
+//				+File.separator
+//				+bits[1];
 		
 		if(list.size()==1){	
 			try{
 				
-				activeCell = activeDataset.getCollection().getCell(pathName);
+				activeCell = activeDataset.getCollection().getCell(cellID);
 				updateCell(activeCell);
 			} catch (Exception e1){
 				error("Error fetching cell", e1);
