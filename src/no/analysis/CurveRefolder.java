@@ -7,8 +7,6 @@
  */
 package no.analysis;
 
-import ij.IJ;
-
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -113,6 +111,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			}
 
 			collection.addConsensusNucleus(refoldNucleus);
+			logger.log("Curve refolding complete: trigger done()", Logger.DEBUG);
 
 		} catch(Exception e){
 			logger.error("Unable to refold nucleus", e);
@@ -141,8 +140,10 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	public void done() {
 		try {
 			if(this.get()){
+				logger.log("Firing successful worker task", Logger.DEBUG );
 				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
 			} else {
+				logger.log("Firing error in worker task", Logger.DEBUG );
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
