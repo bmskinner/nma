@@ -430,7 +430,7 @@ public class AnalysisDataset implements Serializable {
 		this.clusterResults.add(collection.getID());
 	}
 	
-	public boolean isCluster(UUID id){
+	public boolean hasCluster(UUID id){
 		if(this.clusterResults.contains(id)){
 			return true;
 		} else {
@@ -502,7 +502,7 @@ public class AnalysisDataset implements Serializable {
 	 * @param id
 	 */
 	public void deleteCluster(UUID id){
-		if(isCluster(id)){
+		if(hasCluster(id)){
 			this.deleteChild(id);
 			this.clusterResults.remove(id);
 		}

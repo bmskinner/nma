@@ -581,7 +581,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						for(UUID parentID : analysisDatasets.keySet()){
 							AnalysisDataset parent = analysisDatasets.get(parentID);
 							
-							if(parent.isCluster(id)){
+							if(parent.hasCluster(id)){
 								parent.deleteCluster(id);
 							}
 							if(parent.hasChild(id)){
@@ -621,6 +621,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				// remove any children remaining
 				for(AnalysisDataset d : this.getRootDatasets()){
 					for(UUID id : list){
+						
+						if(d.hasCluster(id)){
+							d.deleteCluster(id);
+						}
 						
 						if(d.hasChild(id)){
 							d.deleteChild(id);
