@@ -762,47 +762,47 @@ public class RoundNucleus
 		This will find the point in a list that is closest to any local maximum
 		in the border profile, wherever that maximum may be
 	*/
-	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception{
-
-		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
-		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
-		double closestDistance = this.getPerimeter();
-
-		for(NucleusBorderPoint p : list){
-			for(int i=0; i<maxima.size();i++){
-				if(maxima.get(i)==1){
-					double distance = p.getLengthTo(getPoint(i));
-					if(distance<closestDistance){
-						closestPoint = p;
-					}
-				}
-			}
-		}
-		return closestPoint;
-	}
+//	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception{
+//
+//		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
+//		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
+//		double closestDistance = this.getPerimeter();
+//
+//		for(NucleusBorderPoint p : list){
+//			for(int i=0; i<maxima.size();i++){
+//				if(maxima.get(i)==1){
+//					double distance = p.getLengthTo(getPoint(i));
+//					if(distance<closestDistance){
+//						closestPoint = p;
+//					}
+//				}
+//			}
+//		}
+//		return closestPoint;
+//	}
 
 		/*
 		This will find the point in a list that is closest to any local minimum
 		in the border profile, wherever that minimum may be
 	*/
-	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception{
-
-		Profile minima = this.getAngleProfile().getLocalMinima(5);
-		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
-		double closestDistance = this.getPerimeter();
-
-		for(NucleusBorderPoint p : list){
-			for(int i=0; i<minima.size();i++){
-				if(minima.get(i)==1){
-					double distance = p.getLengthTo(getPoint(i));
-					if(distance<closestDistance){
-						closestPoint = p;
-					}
-				}
-			}
-		}
-		return closestPoint;
-	}
+//	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception{
+//
+//		Profile minima = this.getAngleProfile().getLocalMinima(5);
+//		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
+//		double closestDistance = this.getPerimeter();
+//
+//		for(NucleusBorderPoint p : list){
+//			for(int i=0; i<minima.size();i++){
+//				if(minima.get(i)==1){
+//					double distance = p.getLengthTo(getPoint(i));
+//					if(distance<closestDistance){
+//						closestPoint = p;
+//					}
+//				}
+//			}
+//		}
+//		return closestPoint;
+//	}
 
 
 	/*
@@ -823,15 +823,16 @@ public class RoundNucleus
 	// Uses the distance profile
 	public NucleusBorderPoint getNarrowestDiameterPoint(){
 
-		double[] distanceArray = this.distanceProfile.asArray();
-		double distance = Stats.max(distanceArray);
-		int index = 0;
-		for(int i = 0; i<this.getLength();i++){
-			if(distanceArray[i] < distance){
-				distance = distanceArray[i];
-				index = i;
-			}
-		}
+		int index = this.distanceProfile.getIndexOfMin();
+//		double[] distanceArray = this.distanceProfile.asArray();
+//		double distance = Stats.max(distanceArray);
+//		int index = 0;
+//		for(int i = 0; i<this.getLength();i++){
+//			if(distanceArray[i] < distance){
+//				distance = distanceArray[i];
+//				index = i;
+//			}
+//		}
 		return new NucleusBorderPoint(this.getPoint(index));
 	}
 	
@@ -902,90 +903,7 @@ public class RoundNucleus
 		signalCollection.exportDistanceMatrix(this.nucleusFolder);
 	}
 
-	/*
-		Print key data to the image log file
-		Overwrites any existing log
-	*/   
-	public void exportAngleProfile() throws Exception{
-		
-		TableExporter logger = new TableExporter(this.getNucleusFolder());
-		logger.addColumnHeading("X_INT");
-		logger.addColumnHeading("Y_INT");
-		logger.addColumnHeading("X_DOUBLE");
-		logger.addColumnHeading("Y_DOUBLE");
-		logger.addColumnHeading("INTERIOR_ANGLE");
-		logger.addColumnHeading("IS_LOCAL_MIN");
-		logger.addColumnHeading("IS_LOCAL_MAX");
-		logger.addColumnHeading("ANGLE_DELTA");
-		logger.addColumnHeading("NORMALISED_PROFILE_X");
-		logger.addColumnHeading("SD_PROFILE");
-		logger.addColumnHeading("IS_SD_MIN");
-		logger.addColumnHeading("DISTANCE_PROFILE");
-		logger.addColumnHeading("SEGMENT");
-		
-		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
-		Profile minima = this.getAngleProfile().getLocalMinima(5);
-		Profile angleDeltas = this.getAngleProfile().calculateDeltas(2);
-		Profile sdMinima = this.getSingleDistanceProfile().getLocalMinima(5);
-
-		for(int i=0;i<this.getLength();i++){
-
-			double normalisedX = ((double)i/(double)this.getLength())*100; // normalise to 100 length
-			
-			logger.addRow("X_INT"               , this.getBorderPoint(i).getXAsInt());
-			logger.addRow("Y_INT"               , this.getPoint(i).getYAsInt());
-			logger.addRow("X_DOUBLE"            , this.getPoint(i).getX());
-			logger.addRow("Y_DOUBLE"            , this.getPoint(i).getY());
-			logger.addRow("INTERIOR_ANGLE"      , this.getAngle(i) );
-			logger.addRow("IS_LOCAL_MIN"        , minima.get(i));
-			logger.addRow("IS_LOCAL_MAX"        , maxima.get(i));
-			logger.addRow("ANGLE_DELTA"         , angleDeltas.get(i));
-			logger.addRow("NORMALISED_PROFILE_X", normalisedX);
-			logger.addRow("SD_PROFILE"          , this.singleDistanceProfile.get(i));
-			logger.addRow("IS_SD_MIN"           , sdMinima.get(i));
-			logger.addRow("DISTANCE_PROFILE"    , this.getDistance(i)	);
-//			logger.addRow("SEGMENT"             , this.getSegmentOfPoint(i));
-			
-		}
-		logger.export(""+this.getNucleusNumber());
-	}
-
 	
-	/**
-	 * Export the individual segments in this nucleus
-	 * @throws Exception 
-	 */
-	public void exportSegments() throws Exception{
-
-		TableExporter logger = new TableExporter(this.getNucleusFolder());
-		logger.addColumnHeading("SEGMENT");
-		logger.addColumnHeading("START_INDEX");
-		logger.addColumnHeading("END_INDEX");
-		logger.addColumnHeading("PERIMETER_LENGTH");
-		logger.addColumnHeading("DISTANCE_END_TO_END");
-
-		for(NucleusBorderSegment seg :this.getAngleProfile().getSegments() ){
-			logger.addRow("SEGMENT" , seg.getName());
-			logger.addRow("PERIMETER_LENGTH" , seg.length());
-			logger.addRow("START_INDEX" , seg.getStartIndex());
-			logger.addRow("END_INDEX" , seg.getEndIndex());
-
-			double distance = this.getBorderPoint(seg.getEndIndex()).getLengthTo(this.getBorderPoint(seg.getStartIndex()));
-			logger.addRow("DISTANCE_END_TO_END" , distance);
-		}
-
-		logger.export(this.getNucleusNumber()+".segments");
-	}
-	
-	/**
-	 * Export an image of the raw profile for this nucleus to
-	 * the nucleus folder 
-//	 */
-//	public void exportProfilePlotImage(){
-//		ProfileSegmenter segmenter = new ProfileSegmenter(this.getAngleProfile(), this.segmentList);
-//		segmenter.draw(this.getNucleusFolder()+File.separator+RoundNucleus.IMAGE_PREFIX+this.nucleusNumber+".segments.tiff");
-//	}
-
 	 /*
 		Get a readout of the state of the nucleus
 		Used only for debugging
@@ -1021,10 +939,17 @@ public class RoundNucleus
 		return new SegmentedProfile(this.angleProfile);
 	}
 
-	// returns a copy
+	/* (non-Javadoc)
+	 * @see no.nuclei.Nucleus#getAngleProfile(java.lang.String)
+	 * Returns a copy
+	 */
 	public SegmentedProfile getAngleProfile(String pointType) throws Exception{
-		int offset = this.borderTags.get(pointType);
-		return new SegmentedProfile(this.angleProfile.offset(offset));
+		
+		// fetch the index of the pointType (the new zero)
+		int pointIndex = this.borderTags.get(pointType);
+		
+		// offset the angle profile to start at the pointIndex
+		return new SegmentedProfile(this.angleProfile.offset(pointIndex));
 	}
 
 	public void setAngleProfile(SegmentedProfile p) throws Exception{
@@ -1038,8 +963,10 @@ public class RoundNucleus
 	 * @throws Exception
 	 */
 	public void setAngleProfile(SegmentedProfile p, String pointType) throws Exception{
-		int offset = this.borderTags.get(pointType);
-		this.angleProfile = new SegmentedProfile(p).offset(-offset);
+		// fetch the index of the pointType (the zero of the input profile)
+		int pointIndex = this.borderTags.get(pointType);
+		// remove the offset from the profile, by setting the profile to start from the pointIndex
+		this.angleProfile = new SegmentedProfile(p).offset(-pointIndex);
 	}
 
 	public double getAngle(int index){
@@ -1218,7 +1145,7 @@ public class RoundNucleus
 		}
 		this.borderList = reversed;
 
-		// replace the tag posiitons also
+		// replace the tag positions also
 		Set<String> keys = borderTags.keySet();
 		for( String s : keys){
 			int index = borderTags.get(s);

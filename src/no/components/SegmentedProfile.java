@@ -97,7 +97,9 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
-	 * Get a copy of the segments in this profile
+	 * Get a copy of the segments in this profile. The order will be the same
+	 * as the original segment list. No point type sepecifiers are available;
+	 * if you need to offset a profile, do it by a profile offset 
 	 * @return
 	 */
 	public List<NucleusBorderSegment> getSegments() throws Exception {
@@ -302,17 +304,32 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * Offset the segment by the given amount. Returns a copy
 	 * of the profile.
 	 */
-	public SegmentedProfile offset(int amount) throws Exception {
+	public SegmentedProfile offset(int newStartIndex) throws Exception {
 	
-		Profile offsetProfile = super.offset(amount);
+		// get the basic profile with the offset applied
+		Profile offsetProfile = super.offset(newStartIndex);
 		
-		// offset the segments
-		List<NucleusBorderSegment> segments = null;
-
-		segments = NucleusBorderSegment.nudge(getSegments(), -amount);
-
-		SegmentedProfile copy = new SegmentedProfile(offsetProfile, segments);
-		return copy;
+		/*
+		The segmented profile starts like this:
+		
+		0     5          15                   35
+		|-----|----------|--------------------|
+		
+		After applying newStartIndex=5, the profile looks like this:
+		
+		0          10                   30    35
+		|----------|--------------------|-----|
+		
+		The new profile starts at index 'newStartIndex' in the original profile
+		This means that we must subtract 'newStartIndex' from the segment positions
+		to make them line up.
+		
+		The nudge function in NucleusBorderSegment moves endpoints by a specified amount
+		
+		*/
+		
+		List<NucleusBorderSegment> segments = NucleusBorderSegment.nudge(getSegments(), -newStartIndex);
+		return new SegmentedProfile(offsetProfile, segments);
 	}
 	
 	/**

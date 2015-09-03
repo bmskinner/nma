@@ -10,6 +10,7 @@ import java.util.Map;
 
 
 
+
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.Profile;
@@ -304,33 +305,33 @@ public class MorphologyChartFactory {
 	 * Create a variabillity chart showing the IQR for a single dataset. Segment colours
 	 * are applied. 
 	 * @param list the dataset
-	 * @param ds the XYDataset
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, XYDataset ds, int xLength) throws Exception {
+	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength) throws Exception {
+		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list);
 		CellCollection n = list.get(0).getCollection();
 		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength);
 		XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
-		List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
-		Profile xpoints = n.getProfileCollection().getProfile(n.getOrientationPoint()).getPositions(xLength);
-		for(Integer i : maxima){
-
-			plot.addDomainMarker(new ValueMarker(xpoints.get(i), Color.BLACK, new BasicStroke(1.0f)));
-		}
+//		List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
+//		Profile xpoints = n.getProfileCollection().getProfile(n.getOrientationPoint()).getPositions(xLength);
+//		for(Integer i : maxima){
+//
+//			plot.addDomainMarker(new ValueMarker(xpoints.get(i), Color.BLACK, new BasicStroke(1.0f)));
+//		}
 		return chart;
 	}
 	
 	/**
 	 * Create a variabillity chart showing the IQR for a multiple datasets.
 	 * @param list the datasets
-	 * @param ds the XYDataset
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, XYDataset ds, int xLength){
+	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, int xLength) throws Exception {
+		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "IQR", ds, PlotOrientation.VERTICAL, true, true,

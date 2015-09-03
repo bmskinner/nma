@@ -1,6 +1,7 @@
 package datasets;
 
 import ij.IJ;
+import ij.process.FloatPolygon;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -480,12 +481,14 @@ public class NucleusDatasetCreator {
 	
 	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list) throws Exception{
 
+		
 		if(list.size()==1){
 			CellCollection collection = list.get(0).getCollection();
-			Profile profile = collection.getProfileCollection().getIQRProfile(collection.getOrientationPoint());
+			String pointType = collection.getOrientationPoint();
+			Profile profile = collection.getProfileCollection().getIQRProfile(pointType);
 			
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(collection.getOrientationPoint());
+			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(pointType);
 			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
 			return ds;
 		} else {
@@ -789,6 +792,21 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
+	
+	/**
+	 * Get the scale of the nucleus; the lowest absolute x or y limit
+	 * @param n
+	 * @return
+	 */
+	private static double getScaleForIQRRange(Nucleus n){
+		// get the maximum values from nuclear diameters
+		// get the limits  for the plot  	
+		double min = Math.min(n.getMinX(), n.getMinY());
+		double max = Math.max(n.getMaxX(), n.getMaxY());
+		double scale = Math.min(Math.abs(min), Math.abs(max));
+		return scale;
+	}
+	
 	/**
 	 * Create an outline of the consensus nucleus, and apply segments as separate series
 	 * @param collection
@@ -801,56 +819,60 @@ public class NucleusDatasetCreator {
 		// get the consensus nucleus for the population
 		ConsensusNucleus n = collection.getConsensusNucleus();
 		
-		// get the quartile profiles
-		Profile q25 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"25").interpolate(n.getLength());
-		Profile q75 = collection.getProfileCollection().getProfile(collection.getOrientationPoint()+"75").interpolate(n.getLength());
+		String pointType = collection.getOrientationPoint();
 		
-
-
-		// get the maximum values from nuclear diameters
+		// get the quartile profiles, beginning from the orientation point
+		Profile q25 = collection.getProfileCollection().getProfile(pointType+"25").interpolate(n.getLength());
+		Profile q75 = collection.getProfileCollection().getProfile(pointType+"75").interpolate(n.getLength());
+		
 		// get the limits  for the plot  	
-		double min = Math.min(n.getMinX(), n.getMinY());
-		double max = Math.max(n.getMaxX(), n.getMaxY());
-		double scale = Math.min(Math.abs(min), Math.abs(max));
+		double scale = getScaleForIQRRange(n);
 		
 		// find the range of the iqr, and scale the values in the iqr profile to 1/10 of the total range of the plot
-		//The scaled IQR is a profile beginning from the reference point
+		//The scaled IQR is a profile beginning from the orientation point
 		Profile iqrRange = q75.subtract(q25);
 		Profile scaledRange = iqrRange.divide(iqrRange.getMax()); // iqr as fraction of total variability
-		scaledRange = scaledRange.multiply(scale/10); // set to 10% min radius
+		scaledRange = scaledRange.multiply(scale/10); // set to 10% min radius of the chart
 
-
-		// rendering order will be first on top
 		
-		int tailIndex = n.getBorderIndex(collection.getOrientationPoint());
+		// Get the angle profile, starting from the tail point
+		SegmentedProfile angleProfile = n.getAngleProfile(pointType);
 		
-		// add the segments
+		// At this point, the angle profile and the iqr profile should be in sync
+		int pointIndex = n.getBorderIndex(pointType);
+		IJ.log("Nucleus tail index: "+n.getBorderIndex(pointType));
 		
-		List<NucleusBorderSegment> segmentList = n.getAngleProfile().getSegments();
-		if(!segmentList.isEmpty()){ // only draw if there are segments
+		if(angleProfile.hasSegments()){ // only draw if there are segments
 			
-			// go through each segment by name
-			for(String name : n.getAngleProfile().getSegmentNames()){
-				
-				// get the segment from the angle profile of the consensus nucleus
-				NucleusBorderSegment seg = n.getAngleProfile().getSegment(name);
-				
+			// go through each segment
+			for(NucleusBorderSegment seg :  angleProfile.getSegments()){
+								
+				IJ.log(seg.toString());
 				// add the segment, taking the indexes from the segment, and drawing the values 
 				// in the scaled IQR profile at these positions
-				addSegmentIQRToConsensus(seg, ds, n, scaledRange, tailIndex);
+				
+				// The segment start and end indexes should be in correspondence with the offsets
+				
+				addSegmentIQRToConsensus(seg, ds, n, scaledRange, pointIndex);
 
 				// draw the segment itself
 				double[] xpoints = new double[seg.length()+1];
 				double[] ypoints = new double[seg.length()+1];
+				
+				// go through each index in the segment.
 				for(int j=0; j<=seg.length();j++){
-					int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getLength());
-					NucleusBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+					
+					// get the corresponding border index. The segments are zeroed at the tail point
+					// so the correct border point needs to be offset
+					int borderIndex = Utils.wrapIndex(seg.getStartIndex()+j+pointIndex, n.getLength());
+					
+					NucleusBorderPoint p = n.getBorderPoint(borderIndex); // get the border points in the segment
 					xpoints[j] = p.getX();
 					ypoints[j] = p.getY();
 				}
 
 				double[][] data = { xpoints, ypoints };
-				ds.addSeries(name, data);
+				ds.addSeries(seg.getName(), data);
 			}
 		}
 
@@ -864,23 +886,27 @@ public class NucleusDatasetCreator {
 	 * @param ds the dataset to add it to
 	 * @param n the consensus nucleus
 	 * @param scaledRange the IQR scale profile
-	 * @param tailIndex the index of the tail point in the nucleus profile
 	 */
-	private static void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, int tailIndex){
-				// add the IQR	
+	private static void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, int pointIndex){
+
 		// what we need to do is match the profile positions to the borderpoints
-		
 		// Add lines to show the IQR of the angle profile at each point
-		double[] innerIQRX = new double[segment.length()];
-		double[] innerIQRY = new double[segment.length()];
-		double[] outerIQRX = new double[segment.length()];
-		double[] outerIQRY = new double[segment.length()];
 		
-		for(int i=0; i<segment.length(); i++){
+		// arrays to hold the positions for the IQR lines
+		int arrayLength = segment.length()+1;
+		
+		double[] innerIQRX = new double[arrayLength];
+		double[] innerIQRY = new double[arrayLength];
+		double[] outerIQRX = new double[arrayLength];
+		double[] outerIQRY = new double[arrayLength];
+		
+		for(int i=0; i<=segment.length(); i++){
 			
-			int index = Utils.wrapIndex(segment.getStartIndex()+i, n.getLength());
+			// get the index of the segment in the nucleus. 
+			// add an offset to account for the tail point
+			int index = Utils.wrapIndex(segment.getStartIndex() + i + pointIndex, n.getLength());
 			
-			
+			// get the border point at this index
 			NucleusBorderPoint p = n.getBorderPoint(index); // get the border points in the segment
 
 			int prevIndex = Utils.wrapIndex(index-3, n.getLength());
@@ -898,9 +924,14 @@ public class NucleusDatasetCreator {
 			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(index)));
 			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(index));
 
-			XYPoint innerPoint = Utils.createPolygon(n).contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
-			XYPoint outerPoint = Utils.createPolygon(n).contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
+			// determine which of the points is inside the nucleus and which is outside
+			
+			FloatPolygon nucleusRoi = Utils.createPolygon(n);
+			XYPoint innerPoint = nucleusRoi.contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
+			XYPoint outerPoint = nucleusRoi.contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
 
+			
+			// assign the points
 			innerIQRX[i] = innerPoint.getX();
 			innerIQRY[i] = innerPoint.getY();
 			outerIQRX[i] = outerPoint.getX();

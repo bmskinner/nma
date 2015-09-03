@@ -1,7 +1,5 @@
 package datasets;
 
-import ij.IJ;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
@@ -84,7 +82,7 @@ public class ConsensusNucleusChartFactory {
 		double max = getconsensusChartRange(dataset);
 
 		XYPlot plot = chart.getXYPlot();
-//		plot.setDataset(0, ds);
+
 		plot.getDomainAxis().setRange(-max,max);
 		plot.getRangeAxis().setRange(-max,max);
 

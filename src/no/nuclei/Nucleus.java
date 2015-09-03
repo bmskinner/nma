@@ -351,13 +351,13 @@ public interface Nucleus {
     This will find the point in a list that is closest to any local maximum
     in the border profile, wherever that maximum may be
 	 */
-	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception;
+//	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception;
 
 	/*
     This will find the point in a list that is closest to any local minimum
     in the border profile, wherever that minimum may be
 	 */
-	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception;
+//	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception;
 
 
 	// find the point with the narrowest diameter through the CoM
@@ -374,23 +374,11 @@ public interface Nucleus {
     -----------------------
 	 */
 
-	//  public void annotateFeatures();
-
 	public double findRotationAngle();
 
 	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p);
 	public void exportSignalDistanceMatrix();
 
-	/*
-    Print key data to the image log file
-    Overwrites any existing log
-	 */   
-	public void exportAngleProfile() throws Exception;
-
-	public void exportSegments() throws Exception;
-
-
-//	public Map<String, Integer> getSegmentMap( );
 	public Profile getSingleDistanceProfile();
 
 	public void dumpInfo(int type);

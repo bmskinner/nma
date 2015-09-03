@@ -22,8 +22,8 @@ public class StatsExporter {
 			exportNuclearStats(collection, "log.stats");
 			exportImagePaths(collection, "log.imagePaths");
 			exportSegmentStats(collection, "log.segmentStats");
-			exportAngleProfiles(collection);
-			exportSegmentProfiles(collection);
+//			exportAngleProfiles(collection);
+//			exportSegmentProfiles(collection);
 			exportMediansOfProfile(collection, "log.medians");
 		} catch (Exception e){
 			logger.error("Error in stats export", e);
@@ -54,26 +54,26 @@ public class StatsExporter {
 		logger.export(filename+"."+collection.getType());
 	}
 	
-	public static void exportAngleProfiles(CellCollection collection){
-		try{
-			for(Nucleus n : collection.getNuclei()){ // for each roi
-				n.exportAngleProfile();
-			}
-		}catch (Exception e){
-			logger.error("Error in angle profile export", e);
-		}
-
-	}
+//	public static void exportAngleProfiles(CellCollection collection){
+//		try{
+//			for(Nucleus n : collection.getNuclei()){ // for each roi
+//				n.exportAngleProfile();
+//			}
+//		}catch (Exception e){
+//			logger.error("Error in angle profile export", e);
+//		}
+//
+//	}
 	
-	public static void exportSegmentProfiles(CellCollection collection){
-		try {
-			for(Nucleus n : collection.getNuclei()){ // for each roi
-				n.exportSegments();
-			}
-		} catch (Exception e){
-			logger.error("Error in segment export", e);
-		}
-	}
+//	public static void exportSegmentProfiles(CellCollection collection){
+//		try {
+//			for(Nucleus n : collection.getNuclei()){ // for each roi
+//				n.exportSegments();
+//			}
+//		} catch (Exception e){
+//			logger.error("Error in segment export", e);
+//		}
+//	}
 	
 	public static void exportSegmentStats(CellCollection collection, String filename){
 		try {

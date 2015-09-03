@@ -275,12 +275,11 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 	
 	public void updateVariabilityChart(List<AnalysisDataset> list){
 		try {
-			XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list);
 			if(list.size()==1){
-				JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, ds, 100);
+				JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100);
 				variabilityChartPanel.setChart(chart);
 			} else { // multiple nuclei
-				JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, ds, 100);
+				JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100);
 				variabilityChartPanel.setChart(chart);
 			}
 		} catch (Exception e) {
