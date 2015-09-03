@@ -152,6 +152,11 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		return true;
 	}
 	
+	/**
+	 * Given a trained clusterer, put each nucleus within the collection into a cluster
+	 * @param clusterer the clusterer to use
+	 * @param collection the collection with nuclei to cluster
+	 */
 	private void assignClusters(Clusterer clusterer, CellCollection collection){
 		try {
 			// construct new collections for each cluster
@@ -190,86 +195,97 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		}
 	}
 	
- 	private Instances makeAttributesAndInstances(CellCollection collection){
-		// make Attributes on which to cluster
-		//		Attribute id = new Attribute("id", List); 
- 		
+ 	/**
+ 	 * Make the attributes on which to cluster, and build the Weka instances used internally
+ 	 * @param collection the collection to cluster
+ 	 * @return a Weka Instances
+ 	 */
+	private Instances makeAttributesAndInstances(CellCollection collection){
+
+		// Values to cluster on: area, circularity, aspect ratio (feret/min diameter)
+		int attributeCount = 3;
 
 		Attribute area = new Attribute("area"); 
-		Attribute perimeter = new Attribute("perimeter"); 
-		Attribute point1 = new Attribute("point1"); 
-		Attribute point2 = new Attribute("point2"); 
-		Attribute point3 = new Attribute("point3"); 
+		//		Attribute perimeter = new Attribute("perimeter"); 
+		//		Attribute point1 = new Attribute("point1"); 
+		//		Attribute point2 = new Attribute("point2"); 
+		//		Attribute point3 = new Attribute("point3"); 
+		Attribute circularity = new Attribute("circularity"); 
+		Attribute aspect = new Attribute("aspect"); 
 
 
 		// hold the attributes in a Vector
-		FastVector attributes = new FastVector(5);
+		FastVector attributes = new FastVector(attributeCount);
 
-		//		attributes.addElement(id);
 		attributes.addElement(area);
-		attributes.addElement(perimeter);
-		attributes.addElement(point1);
-		attributes.addElement(point2);
-		attributes.addElement(point3);
+		//		attributes.addElement(perimeter);
+		//		attributes.addElement(point1);
+		//		attributes.addElement(point2);
+		//		attributes.addElement(point3);
+		attributes.addElement(circularity);
+		attributes.addElement(aspect);
 
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
 		try{
 
-		ProfileCollection pc = collection.getFrankenCollection();
-		String pointType = collection.getReferencePoint();
+			//		ProfileCollection pc = collection.getFrankenCollection();
+			//		String pointType = collection.getReferencePoint();
 
-		// get the nucleus profiles
-		List<Profile> profiles = pc.getNucleusProfiles(pointType);
+			// get the nucleus profiles
+			//		List<Profile> profiles = pc.getNucleusProfiles(pointType);
 
-		// get the regions with the highest variability within the population
-		List<Integer> variableIndexes = pc.findMostVariableRegions(pointType);
+			// get the regions with the highest variability within the population
+			//		List<Integer> variableIndexes = pc.findMostVariableRegions(pointType);
 
-		// these points are indexes in the frankenstein profile. Find the points in each nucleus profile that they
-		// compare to 
-		// interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
+			// these points are indexes in the frankenstein profile. Find the points in each nucleus profile that they
+			// compare to 
+			// interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
 
 
-		// create Instance for each nucleus and add to Instances
-		int i = 0;
-		for(Cell c : collection.getCells()){
+			// create Instance for each nucleus and add to Instances
+			//		int i = 0;
+			for(Cell c : collection.getCells()){
 
-			Nucleus n = c.getNucleus();
-			// instance holds data
-			// Create empty instance with five attribute values
-			Instance inst = new SparseInstance(5);
+				Nucleus n = c.getNucleus();
+				// instance holds data
+				// Create empty instance with five attribute values
+				Instance inst = new SparseInstance(attributeCount);
 
-			// Set instance's values for the attributes
-			//			inst.setValue(id, n.getID().toString());
-			inst.setValue(area, n.getArea());
-			inst.setValue(perimeter, n.getPerimeter());
+				// Set instance's values for the attributes
+				inst.setValue(area, n.getArea());
+				inst.setValue(circularity, n.getCircularity());
+				inst.setValue(aspect, n.getFeret() / n.getNarrowestDiameter());
 
-			// add the mean of the variability window
-			Profile frankenProfile = profiles.get(i);
-			Profile interpolatedProfile = frankenProfile.interpolate(pc.getProfile(pointType).size());
-			
-			int attributeIndex = 2;
-			for(int index : variableIndexes){
-				// get the points in a window centred on the index
-				Profile window = interpolatedProfile.getWindow(index, 10);
 
-				double total = 0;
-				for(int j=0; j<21;j++){ // index plus 10 positions to either side
-					total += window.get(j);
-				}
-				total = total/21;
-				
-				Attribute point = (Attribute) attributes.elementAt(attributeIndex);
-				inst.setValue(point, total);
-				attributeIndex++;
+				//			inst.setValue(perimeter, n.getPerimeter());
+
+				// add the mean of the variability window
+				//			Profile frankenProfile = profiles.get(i);
+				//			Profile interpolatedProfile = frankenProfile.interpolate(pc.getProfile(pointType).size());
+				//			
+				//			int attributeIndex = 2;
+				//			for(int index : variableIndexes){
+				//				// get the points in a window centred on the index
+				//				Profile window = interpolatedProfile.getWindow(index, 10);
+				//
+				//				double total = 0;
+				//				for(int j=0; j<21;j++){ // index plus 10 positions to either side
+				//					total += window.get(j);
+				//				}
+				//				total = total/21;
+				//				
+				//				Attribute point = (Attribute) attributes.elementAt(attributeIndex);
+				//				inst.setValue(point, total);
+				//				attributeIndex++;
+				//			}
+
+
+				instances.add(inst);
+				cellToInstanceMap.put(inst, c.getCellId());
+
+				//			i++;
 			}
-
-
-			instances.add(inst);
-			cellToInstanceMap.put(inst, c.getCellId());
-				
-			i++;
-		}
 		} catch(Exception e){
 			logger.error("Error making instances", e);
 		}
