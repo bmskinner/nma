@@ -8,6 +8,7 @@
 package no.analysis;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
@@ -30,6 +31,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	private ConsensusNucleus refoldNucleus;
 	
 	private CellCollection collection;
+	private CountDownLatch doneSignal;
+	
 	
 	private static Logger logger;
 
@@ -57,9 +60,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	 * @param refoldMode
 	 * @throws Exception
 	 */
-	public CurveRefolder(CellCollection collection, String refoldMode) throws Exception {
-		
-		
+	public CurveRefolder(CellCollection collection, String refoldMode, CountDownLatch doneSignal) throws Exception {
+		this.doneSignal = doneSignal;
 		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
 
 		// make an entirely new nucleus to play with
@@ -112,6 +114,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 			collection.addConsensusNucleus(refoldNucleus);
 			logger.log("Curve refolding complete: trigger done()", Logger.DEBUG);
+			doneSignal.countDown();
 
 		} catch(Exception e){
 			logger.error("Unable to refold nucleus", e);

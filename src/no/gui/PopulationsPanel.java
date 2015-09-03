@@ -365,7 +365,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		if(dataset.isRoot()){ // add to the list of datasets that can be ordered
 			treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add to the end of the list
 		}
-//		update();
+		update();
 	}
 	
 	/**
