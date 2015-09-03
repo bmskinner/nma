@@ -314,6 +314,11 @@ public class RoundNucleus
 	public double getArea(){
 		return this.area;
 	}
+	
+	public double getCircularity(){
+		double perim2 = Math.pow(this.getPerimeter(), 2);
+		return (4 * Math.PI) * (this.getArea() / perim2);
+	}
 
 	public double getFeret(){
 		return this.feret;

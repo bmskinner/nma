@@ -166,6 +166,14 @@ public interface Nucleus {
 	 * @return
 	 */
 	public double getFeret();
+	
+	/**
+	 * Calculate the circularity using the formula:
+	 * circularity = 4pi(area/perimeter^2)
+	 * @return the circularity
+	 */
+	public double getCircularity();
+	
 
 	/**
 	 * Get the narrowest diameter through the centre of mass in pixels
