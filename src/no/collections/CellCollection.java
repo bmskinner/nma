@@ -73,7 +73,7 @@ implements Serializable
 		this.outputFolder = outputFolder;
 		this.debugFile = debugFile;
 		this.collectionType = type;
-		this.name = type+" - "+outputFolder;
+		this.name = outputFolder == null ? type : type+" - "+outputFolder;
 		this.guid = java.util.UUID.randomUUID();
 		this.nucleusClass = nucleusClass;
 		profileCollections.put(CellCollection.REGULAR_PROFILE, new ProfileCollection());

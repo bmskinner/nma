@@ -93,10 +93,10 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	 */
 	private boolean checkNucleusClass(){
 		boolean result = true;
-		Class<?> testClass = datasets.get(0).getAnalysisOptions().getNucleusClass();
+		Class<?> testClass = datasets.get(0).getCollection().getNucleusClass();
 		for(AnalysisDataset d : datasets){
 
-			if(d.getAnalysisOptions().getNucleusClass()!=testClass){
+			if(d.getCollection().getNucleusClass()!=testClass){
 				result =  false;
 			}
 		}
@@ -137,81 +137,90 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 				}
 			}
 
-			// check all collections are of the same type
-			if(! checkNucleusClass()){
-				logger.log("Error: cannot merge collections of different class");
-				return false;
-			}
-			
-			// check if the new dataset should be root
-			boolean newRoot = checkNewRootNeeded();
+			try{
+				logger.log("Finding new names");
 
-			// make a new collection based on the first dataset
-			CellCollection templateCollection = datasets.get(0).getCollection();
-			
-			// Set the names of folders for the new collection
-			
-//			String newDatasetName = "Merge_of_datasets";
-			String newDatasetName = saveFile.getName();
-			File newDatasetFolder = saveFile.getParentFile();
-			File newDatasetFile = saveFile;
-			
-//			File newDatasetFolder = templateCollection.getFolder(); // this is the image folder
-			
-//			File newDatasetFile = new File(newDatasetFolder
-//										+File.separator
-//										+newDatasetName
-//										+Constants.SAVE_FILE_EXTENSION);
-			
-			// ensure the file is valid
-			newDatasetFile = checkName(newDatasetFile);
-			
-			newDatasetName = newDatasetFile.getName().replace(Constants.SAVE_FILE_EXTENSION, "");
-			
-			File mergeDebugFile = new File(newDatasetFolder+File.separator+newDatasetName+Constants.LOG_FILE_EXTENSION);
+				// Set the names of folders for the new collection
 
-			CellCollection newCollection = new CellCollection(newDatasetFolder, 
-					null, 										// do not give an extra output folder name
-					newDatasetName, 
-					mergeDebugFile,
-					templateCollection.getNucleusClass()
-					);
-			
-			
-			// add the cells from each population to the new collection
-			logger.log("Merging datasets",Logger.DEBUG);
-			for(AnalysisDataset d : datasets){
+				String newDatasetName = saveFile.getName();
+				File newDatasetFolder = saveFile.getParentFile();
+				File newDatasetFile = saveFile;
 
-				for(Cell n : d.getCollection().getCells()){
-					if(!newCollection.getCells().contains(n)){
-						newCollection.addCell(n);
+
+				// ensure the file is valid
+				newDatasetFile = checkName(newDatasetFile);
+
+				newDatasetName = newDatasetFile.getName().replace(Constants.SAVE_FILE_EXTENSION, "");
+
+				File mergeDebugFile = new File(newDatasetFolder+File.separator+newDatasetName+Constants.LOG_FILE_EXTENSION);
+
+				logger.log("Handing logging off to merged dataset debug file: "+mergeDebugFile.getAbsolutePath(), Logger.DEBUG);
+
+				logger = new Logger(mergeDebugFile, "DatasetMerger");
+
+				logger.log("Checked new file names", Logger.DEBUG);
+				
+				// check all collections are of the same type
+				if(! checkNucleusClass()){
+					logger.log("Error: cannot merge collections of different class");
+					return false;
+				}
+				logger.log("Checked nucleus classes match", Logger.DEBUG);
+
+				// check if the new dataset should be root
+				boolean newRoot = checkNewRootNeeded();
+				logger.log("Checked root status", Logger.DEBUG);
+
+				// make a new collection based on the first dataset
+				CellCollection templateCollection = datasets.get(0).getCollection();
+
+				CellCollection newCollection = new CellCollection(newDatasetFolder, 
+						null, 
+						newDatasetName, 
+						mergeDebugFile,
+						templateCollection.getNucleusClass()
+						);
+
+				logger.log("Created collection", Logger.DEBUG);
+
+				// add the cells from each population to the new collection
+				logger.log("Merging datasets",Logger.DEBUG);
+				for(AnalysisDataset d : datasets){
+
+					for(Cell n : d.getCollection().getCells()){
+						if(!newCollection.getCells().contains(n)){
+							newCollection.addCell(n);
+						}
 					}
+
 				}
 
+
+				// create the dataset; has no analysis options at present
+				AnalysisDataset newDataset = new AnalysisDataset(newCollection);
+				newDataset.setName(newDatasetName);
+				newDataset.setRoot(newRoot);
+
+				// Add the original datasets as merge sources
+				for(AnalysisDataset d : datasets){
+					newDataset.addMergeSource(d);
+				}
+
+				// a merged dataset should not have analysis options
+				// of its own; it lets each merge source display options
+				// appropriately
+				newDataset.setAnalysisOptions(null);
+
+				resultDatasets.add(newDataset);
+
+
+				spinWheels();
+
+				return true;
+			} catch (Exception e){
+				logger.error("Error in merging", e);
+				return false;
 			}
-			
-
-			// create the dataset; has no analysis options at present
-			AnalysisDataset newDataset = new AnalysisDataset(newCollection);
-			newDataset.setName(newDatasetName);
-			newDataset.setRoot(newRoot);
-			
-			// Add the original datasets as merge sources
-			for(AnalysisDataset d : datasets){
-				newDataset.addMergeSource(d);
-			}
-			
-			// a merged dataset should not have analysis options
-			// of its own; it lets each merge source display options
-			// appropriately
-			newDataset.setAnalysisOptions(null);
-
-			resultDatasets.add(newDataset);
-			
-			
-			spinWheels();
-
-			return true;
 
 		} else {
 			// there is only one datast
