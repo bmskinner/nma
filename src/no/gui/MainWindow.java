@@ -504,7 +504,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						}
 						
 						// update the log file to the same folder as the dataset
-						File logFile = new File(file.getParent()+File.separator+file.getName().replace(".nmd", ".log.txt"));
+						File logFile = new File(file.getParent()+File.separator+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
 						
 						dataset.getCollection().setDebugFile(logFile);
 						
@@ -1447,13 +1447,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	 */
 	class MergeCollectionAction extends ProgressableAction {
 						
-		public MergeCollectionAction(List<AnalysisDataset> datasets) {
+		public MergeCollectionAction(List<AnalysisDataset> datasets, File saveFile) {
 			super(null, "Merging", "Error merging");
-			
-//			List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-			
-			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE);
-
+						
+			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile);
 			worker.addPropertyChangeListener(this);
 			worker.execute();	
 		}
@@ -1518,7 +1515,26 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		}
 		
 		if(event.type().equals("MergeCollectionAction")){
-			new MergeCollectionAction(populationsPanel.getSelectedDatasets());
+			
+			Thread thr = new Thread() {
+				public void run() {
+
+
+					SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", ".nmd");
+
+					String fileName = saveDialog.getFileName();
+					String folderName = saveDialog.getDirectory();
+					
+					if(fileName!=null && folderName!=null){
+						File saveFile = new File(folderName+File.separator+fileName);
+
+						new MergeCollectionAction(populationsPanel.getSelectedDatasets(), saveFile);
+					}
+				}
+			};
+
+			thr.start();
+			
 		}
 		
 		if(event.type().equals("SplitCollectionAction")){

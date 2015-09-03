@@ -1,5 +1,6 @@
 package no.analysis;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -17,6 +18,8 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	private List<AnalysisDataset> datasets;
 	private String function;
 	
+	private File saveFile;
+	
 	private List<AnalysisDataset> resultDatasets = new ArrayList<AnalysisDataset>();
 	
 	public static final String DATASET_MERGE = "merge";
@@ -29,13 +32,15 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	 * Create the merger or splitter for the given datasets. Call the appropriate funciton
 	 * @param datasets
 	 * @param function
+	 * @param saveFile the file to save the new dataset as
 	 */
-	public DatasetMerger(List<AnalysisDataset> datasets, String function){
+	public DatasetMerger(List<AnalysisDataset> datasets, String function, File saveFile){
 		
 		AnalysisDataset firstDataset = datasets.get(0);
 		logger = new Logger(firstDataset.getDebugFile(), "DatasetMerger");
 		this.datasets = datasets;
 		this.function = function;
+		this.saveFile = saveFile;
 	}
 	
 	@Override
@@ -143,13 +148,35 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 
 			// make a new collection based on the first dataset
 			CellCollection templateCollection = datasets.get(0).getCollection();
+			
+			// Set the names of folders for the new collection
+			
+//			String newDatasetName = "Merge_of_datasets";
+			String newDatasetName = saveFile.getName();
+			File newDatasetFolder = saveFile.getParentFile();
+			File newDatasetFile = saveFile;
+			
+//			File newDatasetFolder = templateCollection.getFolder(); // this is the image folder
+			
+//			File newDatasetFile = new File(newDatasetFolder
+//										+File.separator
+//										+newDatasetName
+//										+Constants.SAVE_FILE_EXTENSION);
+			
+			// ensure the file is valid
+			newDatasetFile = checkName(newDatasetFile);
+			
+			newDatasetName = newDatasetFile.getName().replace(Constants.SAVE_FILE_EXTENSION, "");
+			
+			File mergeDebugFile = new File(newDatasetFolder+File.separator+newDatasetName+Constants.LOG_FILE_EXTENSION);
 
-			CellCollection newCollection = new CellCollection(templateCollection.getFolder(), 
-					templateCollection.getOutputFolderName(), 
-					"Merged", 
-					templateCollection.getDebugFile(),
+			CellCollection newCollection = new CellCollection(newDatasetFolder, 
+					null, 										// do not give an extra output folder name
+					newDatasetName, 
+					mergeDebugFile,
 					templateCollection.getNucleusClass()
 					);
+			
 			
 			// add the cells from each population to the new collection
 			logger.log("Merging datasets",Logger.DEBUG);
@@ -166,7 +193,7 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 
 			// create the dataset; has no analysis options at present
 			AnalysisDataset newDataset = new AnalysisDataset(newCollection);
-			newDataset.setName("Merge_of_datasets");
+			newDataset.setName(newDatasetName);
 			newDataset.setRoot(newRoot);
 			
 			// Add the original datasets as merge sources
@@ -193,7 +220,21 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 		}
 	}
 	
-	// Ensure the progress bar does something
+	// check if the new dataset already exists
+	private File checkName(File name){
+		String fileName = name.getName();
+		String datasetName = fileName.replace(Constants.SAVE_FILE_EXTENSION, "");
+		
+		File newFile = new File(name.getParentFile()+File.separator+datasetName+Constants.SAVE_FILE_EXTENSION);
+		if(name.exists()){
+			datasetName += "_1";
+			newFile = new File(name.getParentFile()+File.separator+datasetName+Constants.SAVE_FILE_EXTENSION);
+			newFile = checkName(newFile);
+		}
+		return newFile;
+	}
+	
+	// Ensure the progress bar does something for debugging
 	private void spinWheels(){
 		for(int i=0; i<MAX_PROGRESS; i++){
 			publish(i);

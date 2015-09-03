@@ -13,6 +13,7 @@ public class Constants {
 	
 	// nmd = Nuclear Morphology Dataset
 	public static final String SAVE_FILE_EXTENSION = ".nmd";
+	public static final String LOG_FILE_EXTENSION = ".log";
 	
 
 		// RGB colour channels

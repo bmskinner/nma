@@ -60,16 +60,24 @@ implements Serializable
 	
 	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();	// store all the nuclei analysed
 
-  public CellCollection(File folder, String outputFolder, String type, File debugFile, Class<?> nucleusClass){
-	  this.folder = folder;
-	  this.outputFolder = outputFolder;
-	  this.debugFile = debugFile;
-	  this.collectionType = type;
-	  this.name = type+" - "+outputFolder;
-	  this.guid = java.util.UUID.randomUUID();
-	  this.nucleusClass = nucleusClass;
-	  profileCollections.put(CellCollection.REGULAR_PROFILE, new ProfileCollection());
-  }
+	/**
+	 * Constructor.
+	 * @param folder the folder of images
+	 * @param outputFolder a name for the outputs (usually the analysis date). Can be null
+	 * @param type the type of collection (e.g. analysable)
+	 * @param debugFile the location of the log file 
+	 * @param nucleusClass the class of nucleus to be held
+	 */
+	public CellCollection(File folder, String outputFolder, String type, File debugFile, Class<?> nucleusClass){
+		this.folder = folder;
+		this.outputFolder = outputFolder;
+		this.debugFile = debugFile;
+		this.collectionType = type;
+		this.name = type+" - "+outputFolder;
+		this.guid = java.util.UUID.randomUUID();
+		this.nucleusClass = nucleusClass;
+		profileCollections.put(CellCollection.REGULAR_PROFILE, new ProfileCollection());
+	}
   
   /**
    * Construct from a template dataset
@@ -238,9 +246,21 @@ implements Serializable
     return this.outputFolder;
   }
   
+  
+  /**
+   * Get the output folder (e.g. to save the dataset into).
+   * If an output folder name (such as a date) has been input, it will be included 
+   * @return the folder
+   */
   public File getOutputFolder(){
-	    return new File(this.getFolder()+File.separator+this.getOutputFolderName());
+	  File result = null;
+	  if(this.getOutputFolderName()==null){
+		  result = this.getFolder();
+	  } else {
+		  result = new File(this.getFolder()+File.separator+this.getOutputFolderName());
 	  }
+	  return result;
+  }
   
   
 

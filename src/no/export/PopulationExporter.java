@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
+import utility.Constants;
 import utility.Logger;
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
@@ -25,8 +26,8 @@ public class PopulationExporter {
 
 		try{
 
-			// Since we're creating a save format, go with nmb: Nuclear Morphology Binary
-			File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+".nmb");
+			
+			File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
 			if(saveFile.exists()){
 				saveFile.delete();
 			}
@@ -46,10 +47,7 @@ public class PopulationExporter {
 					logger.log("Save complete");
 
 				} catch(IOException e){
-					logger.log("    Unable to save nuclei: "+e.getMessage(), Logger.ERROR);
-					for(StackTraceElement el : e.getStackTrace()){
-						logger.log(el.toString(), Logger.STACK);
-					}
+					logger.error("Unable to save nuclei", e);
 					throw new Exception("Individual nucleus error: "+e.getMessage());
 
 				} finally{
@@ -59,15 +57,12 @@ public class PopulationExporter {
 				}
 
 			} catch(Exception e){
-				logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
-				for(StackTraceElement el : e.getStackTrace()){
-					logger.log(el.toString(), Logger.STACK);
-				}
+				logger.error("Error saving", e);
 				return false;
 			}
 			
 		} catch(Exception e){
-			logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
+			logger.error("Error saving", e);
 			return false;
 		}
 		return true;
@@ -179,10 +174,7 @@ public class PopulationExporter {
 			}
 
 		}catch(Exception e){
-			logger.log("Error extracting: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("Error extracting", e);
 			return false;
 		}
 		return true;
