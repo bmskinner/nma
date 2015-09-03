@@ -319,6 +319,10 @@ public class RoundNucleus
 		double perim2 = Math.pow(this.getPerimeter(), 2);
 		return (4 * Math.PI) * (this.getArea() / perim2);
 	}
+	
+	public double getAspectRatio(){
+		return this.getFeret() / this.getNarrowestDiameter();
+	}
 
 	public double getFeret(){
 		return this.feret;

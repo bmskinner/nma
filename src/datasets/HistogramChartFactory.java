@@ -125,7 +125,8 @@ public class HistogramChartFactory {
 										? ColourSelecter.getSegmentColor(j)
 										: dataset.getDatasetColour();
 										
-						plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
+						plot.getRenderer().setSeriesPaint(j, colour);
+//						plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
 						
 					}
 				}

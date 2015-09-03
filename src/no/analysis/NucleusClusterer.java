@@ -255,7 +255,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				// Set instance's values for the attributes
 				inst.setValue(area, n.getArea());
 				inst.setValue(circularity, n.getCircularity());
-				inst.setValue(aspect, n.getFeret() / n.getNarrowestDiameter());
+				inst.setValue(aspect, n.getAspectRatio());
 
 
 				//			inst.setValue(perimeter, n.getPerimeter());

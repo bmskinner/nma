@@ -61,121 +61,102 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	protected class BoxplotsPanel extends JPanel {
 
 		private static final long serialVersionUID = 1L;
-		private ChartPanel areaBoxplotChartPanel;
-		private ChartPanel perimBoxplotChartPanel;
-		private ChartPanel maxFeretBoxplotChartPanel;
-		private ChartPanel minFeretBoxplotChartPanel;
-		private ChartPanel differenceBoxplotChartPanel;
+		
+		private JPanel 		mainPanel; // hold the charts
+		private JScrollPane scrollPane; // hold the main panel
+		private List<String> chartTypes = new ArrayList<String>();
+		private Map<String, ChartPanel> chartPanels = new HashMap<String, ChartPanel>();
 
 		public BoxplotsPanel() {
 			
-			this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+			chartTypes.add("Area");
+			chartTypes.add("Perimeter");
+			chartTypes.add("Max feret");
+			chartTypes.add("Min diameter");
+			chartTypes.add("Variability");
+			chartTypes.add("Circularity");
+			chartTypes.add("Aspect");
+//			this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 			
-			JFreeChart areaBoxplot = ChartFactory.createBoxAndWhiskerChart(	null, 
-																			null, 
-																			null, 
-																			new DefaultBoxAndWhiskerCategoryDataset(), 
-																			false);	
-			formatBoxplotChart(areaBoxplot);
+			this.setLayout(new BorderLayout());
 			
-			JFreeChart perimBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			formatBoxplotChart(perimBoxplot);
+			mainPanel = new JPanel();
+			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 			
-			JFreeChart maxFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			formatBoxplotChart(maxFeretBoxplot);
+			Dimension preferredSize = new Dimension(200, 300);
+			for(String chartType : chartTypes){
+				
+				JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(	null, 
+						null, 
+						null, 
+						new DefaultBoxAndWhiskerCategoryDataset(), 
+						false);	
+				formatBoxplotChart(boxplot);
+				
+				ChartPanel panel = new ChartPanel(boxplot);
+				panel.setPreferredSize(preferredSize);
+				chartPanels.put(chartType, panel);
+				mainPanel.add(panel);
+				
+			}
 			
-			JFreeChart minFeretBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	        
-			formatBoxplotChart(minFeretBoxplot);
-			
-			JFreeChart differenceBoxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
-			formatBoxplotChart(differenceBoxplot);
-			
-			areaBoxplotChartPanel = new ChartPanel(areaBoxplot);
-			this.add(areaBoxplotChartPanel);
-			
-			perimBoxplotChartPanel = new ChartPanel(perimBoxplot);
-			this.add(perimBoxplotChartPanel);
-			
-			maxFeretBoxplotChartPanel = new ChartPanel(maxFeretBoxplot);
-			this.add(maxFeretBoxplotChartPanel);
-			
-			minFeretBoxplotChartPanel = new ChartPanel(minFeretBoxplot);
-			this.add(minFeretBoxplotChartPanel);
-			
-			differenceBoxplotChartPanel = new ChartPanel(differenceBoxplot);
-			this.add(differenceBoxplotChartPanel);
+			// add the scroll pane to the tab
+			scrollPane  = new JScrollPane(mainPanel);
+			this.add(scrollPane, BorderLayout.CENTER);
 			
 		}
 		
 		public void update(List<AnalysisDataset> list){
-			
+
 			try {
-				updateAreaBoxplot(list);
-				updatePerimBoxplot(list);
-				updateMaxFeretBoxplot(list);
-				updateMinFeretBoxplot(list);
-				updateDifferenceBoxplot(list);
+				for(String chartType : chartTypes){
+
+					ChartPanel panel = chartPanels.get(chartType);
+					BoxAndWhiskerCategoryDataset ds = null;
+					String yLabel = "Pixels";
+
+					if(chartType.equals("Area")){
+						ds = NucleusDatasetCreator.createAreaBoxplotDataset(list);
+					}
+
+					if(chartType.equals("Perimeter")){
+						ds = NucleusDatasetCreator.createPerimBoxplotDataset(list);
+					}
+
+					if(chartType.equals("Max feret")){
+						ds = NucleusDatasetCreator.createMaxFeretBoxplotDataset(list);
+					}
+
+					if(chartType.equals("Min diameter")){
+						ds = NucleusDatasetCreator.createMinFeretBoxplotDataset(list);
+					}
+
+					if(chartType.equals("Variability")){
+						ds = NucleusDatasetCreator.createDifferenceBoxplotDataset(list);
+						yLabel = "Degrees per perimeter unit";
+					}
+					
+					if(chartType.equals("Circularity")){
+						ds = NucleusDatasetCreator.createCircularityBoxplotDataset(list);
+						yLabel = "Circularity";
+					}
+					
+					if(chartType.equals("Aspect")){
+						ds = NucleusDatasetCreator.createAspectBoxplotDataset(list);
+						yLabel = "Aspect ratio (feret / min diameter)";
+					}
+
+					JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false); 
+					formatBoxplotChart(boxplotChart, list);
+
+					panel.setChart(boxplotChart);
+				}
+
 			} catch (Exception e) {
 				error("Error updating boxplots", e);
 			}
 		}
-		
-		/**
-		 * Update the boxplot panel for areas with a list of NucleusCollections
-		 * @param list
-		 */
-		private void updateAreaBoxplot(List<AnalysisDataset> list){
-			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createAreaBoxplotDataset(list);
-			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Pixels", ds, false); 
-			formatBoxplotChart(boxplotChart, list);
-			areaBoxplotChartPanel.setChart(boxplotChart);
-		}
-		
-		/**
-		 * Update the boxplot panel for perimeters with a list of NucleusCollections
-		 * @param list
-		 */
-		private void updatePerimBoxplot(List<AnalysisDataset> list){
-			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createPerimBoxplotDataset(list);
-			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Pixels", ds, false); 
-			formatBoxplotChart(boxplotChart, list);
-			perimBoxplotChartPanel.setChart(boxplotChart);
-		}
-		
-		/**
-		 * Update the boxplot panel for longest diameter across CoM with a list of NucleusCollections
-		 * @param list
-		 */
-		private void updateMaxFeretBoxplot(List<AnalysisDataset> list){
-			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createMaxFeretBoxplotDataset(list);
-			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Pixels", ds, false); 
-			formatBoxplotChart(boxplotChart, list);
-			maxFeretBoxplotChartPanel.setChart(boxplotChart);
-		}
-
-		/**
-		 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
-		 * @param list
-		 */
-		private void updateMinFeretBoxplot(List<AnalysisDataset> list){
-			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createMinFeretBoxplotDataset(list);
-			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Pixels", ds, false); 
-			formatBoxplotChart(boxplotChart, list);
-			minFeretBoxplotChartPanel.setChart(boxplotChart);
-		}
-		
-		/**
-		 * Update the boxplot panel for shortest diameter across CoM with a list of NucleusCollections
-		 * @param list
-		 * @throws Exception 
-		 */
-		private void updateDifferenceBoxplot(List<AnalysisDataset> list) throws Exception{
-			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createDifferenceBoxplotDataset(list);
-			JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, "Degrees per perimeter unit", ds, false); 
-			formatBoxplotChart(boxplotChart, list);
-			differenceBoxplotChartPanel.setChart(boxplotChart);
-		}
-		
+				
 		/**
 		 * Apply the default formatting to a boxplot with list
 		 * @param boxplot
@@ -233,13 +214,15 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			chartTypes.add("Max feret");
 			chartTypes.add("Min diameter");
 			chartTypes.add("Variability");
+			chartTypes.add("Circularity");
+			chartTypes.add("Aspect");
 			
 			this.setLayout(new BorderLayout());
 						
 			mainPanel = new JPanel();
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			
-			Dimension preferredSize = new Dimension(400, 100);
+			Dimension preferredSize = new Dimension(400, 150);
 			for(String chartType : chartTypes){
 				ChartPanel panel = new ChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, chartType));
 				panel.setPreferredSize(preferredSize);
@@ -279,6 +262,14 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				if(chartType.equals("Variability")){
 					ds = NucleusDatasetCreator.createNuclearVariabilityHistogramDataset(list);
+				}
+				
+				if(chartType.equals("Circularity")){
+					ds = NucleusDatasetCreator.createNuclearCircularityHistogramDataset(list);
+				}
+				
+				if(chartType.equals("Aspect")){
+					ds = NucleusDatasetCreator.createNuclearAspectRatioHistogramDataset(list);
 				}
 
 				JFreeChart chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, chartType);

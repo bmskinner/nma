@@ -174,6 +174,13 @@ public interface Nucleus {
 	 */
 	public double getCircularity();
 	
+	
+	/**
+	 * Get the feret divided by the narrowest diameter through the centre of mass
+	 * @return
+	 */
+	public double getAspectRatio();
+	
 
 	/**
 	 * Get the narrowest diameter through the centre of mass in pixels

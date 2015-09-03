@@ -655,6 +655,42 @@ public class NucleusDatasetCreator {
 		return dataset;
 	}
 	
+	public static BoxAndWhiskerCategoryDataset createCircularityBoxplotDataset(List<AnalysisDataset> collections) throws Exception {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+			CellCollection c = collections.get(i).getCollection();
+
+			List<Double> list = new ArrayList<Double>();
+
+			for (double d : c.getCircularities()) {
+				list.add(new Double(d));
+			}
+			dataset.add(list, c.getType()+"_"+i, "Circularities");
+		}
+
+		return dataset;
+	}
+	
+	public static BoxAndWhiskerCategoryDataset createAspectBoxplotDataset(List<AnalysisDataset> collections) throws Exception {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+			CellCollection c = collections.get(i).getCollection();
+
+			List<Double> list = new ArrayList<Double>();
+
+			for (double d : c.getAspectRatios()) {
+				list.add(new Double(d));
+			}
+			dataset.add(list, c.getType()+"_"+i, "Aspect ratios");
+		}
+
+		return dataset;
+	}
+	
 	/**
 	 * Get the lengths of the given segment in the collections
 	 * @param collections
@@ -1478,6 +1514,54 @@ public class NucleusDatasetCreator {
 			// put bins of width 0.1
 			int bins = ((maxRounded - minRounded) * 10 );
 			ds.addSeries("Variability_"+collection.getName(), values, bins, minRounded, maxRounded);
+		}
+		return ds;
+	}
+	
+	/**
+	 * For the given list of datasets, get the nuclear circularity as a histogram dataset
+	 * @param list
+	 * @return
+	 * @throws Exception  
+	 */
+	public static HistogramDataset createNuclearCircularityHistogramDataset(List<AnalysisDataset> list) throws Exception {
+		HistogramDataset ds = new HistogramDataset();
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			double[] values = collection.getCircularities(); 
+//			double min  = Stats.min(values);
+//			double max = Stats.max(values);
+			
+			int maxRounded = 1;
+			int minRounded = 0;
+			
+			// put bins of width 0.05
+			int bins = ((maxRounded - minRounded) * 20 );
+			ds.addSeries("Circularity_"+collection.getName(), values, bins, minRounded, maxRounded );
+		}
+		return ds;
+	}
+	
+	/**
+	 * For the given list of datasets, get the nuclear circularity as a histogram dataset
+	 * @param list
+	 * @return
+	 * @throws Exception  
+	 */
+	public static HistogramDataset createNuclearAspectRatioHistogramDataset(List<AnalysisDataset> list) throws Exception {
+		HistogramDataset ds = new HistogramDataset();
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			double[] values = collection.getAspectRatios(); 
+			double min  = Stats.min(values);
+			double max = Stats.max(values);
+			
+			int maxRounded = (int) Math.ceil(max);
+			int minRounded = (int) Math.floor(min);
+			
+			// put bins of width 0.05
+			int bins = ((maxRounded - minRounded) * 20 );
+			ds.addSeries("Aspect_"+collection.getName(), values, bins, minRounded, maxRounded );
 		}
 		return ds;
 	}

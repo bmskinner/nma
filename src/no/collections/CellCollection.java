@@ -333,6 +333,36 @@ implements Serializable
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
+  
+  /**
+   * Get the circularities of the nuclei in this collection as
+   * an array
+   * @return
+   */
+  public double[] getCircularities(){
+
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(n.getCircularity());
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+  }
+
+  /**
+   * Get the aspect ratios of the nuclei in this collection as
+   * an array
+   * @return
+   */
+  public double[] getAspectRatios(){
+
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  list.add(n.getAspectRatio());
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+  }
 
   /**
    * Get the ferets of the nuclei in this collection as
