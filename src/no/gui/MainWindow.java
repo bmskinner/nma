@@ -1744,17 +1744,25 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		}
 		
 		if(event.type().startsWith("RefoldConsensus_")){
-			
+
 			String s = event.type().replace("RefoldConsensus_", "");
 			UUID id = UUID.fromString(s);
 			final AnalysisDataset d = populationsPanel.getDataset(id);
 			final CountDownLatch latch = new CountDownLatch(1);
-			SwingUtilities.invokeLater(new Runnable(){
+
+			Thread thr = new Thread(){
+
 				public void run(){
-				
+
 					new RefoldNucleusAction(d, latch);
-				
-			}});
+					try {
+						latch.await();
+					} catch (InterruptedException e) {
+						MainWindow.this.error("Interruption to thread", e);
+					}
+				}
+			};
+			thr.start();
 		}
 		
 		
