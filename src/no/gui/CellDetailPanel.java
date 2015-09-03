@@ -1,5 +1,7 @@
 package no.gui;
 
+import ij.IJ;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -234,7 +236,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.setLayout(new BorderLayout());
 			
 			DefaultMutableTreeNode root =
-					new DefaultMutableTreeNode("Cells");
+					new DefaultMutableTreeNode(new NodeData("Cells", null));
 			TreeModel model = new DefaultTreeModel(root);
 			tree = new JTree(model);
 			tree.addTreeSelectionListener(CellDetailPanel.this);
@@ -244,28 +246,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					
 					JTree tree = (JTree) e.getSource();
 					
-					NodeData node = (NodeData) tree.getSelectionPath().getLastPathComponent();
-					UUID cellID = node.getID();
-//					String name = tree.getSelectionPath().getLastPathComponent().toString();
-					
-//					String[] bits = name.split("-");
-//					
-//					String pathName = activeDataset.getCollection().getFolder()
-//							+File.separator
-//							+bits[0]
-//							+File.separator
-//							+bits[1];
-					
-//					UUID cellID = UUID.fromString(name);
+					DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getSelectionPath().getLastPathComponent();
+					NodeData data = (NodeData) node.getUserObject();
 
-					
+					UUID cellID = data.getID();
+
 					// double click - remove cell
 					
 					if (e.getClickCount() == 2) {
 						
 						int result = JOptionPane.showConfirmDialog(null,
 
-						        "Delete cell?", "Do you want to delete the cell?", JOptionPane.YES_NO_OPTION);
+								"Do you want to delete cell "+data.getName()+"?", "Delete cell?", JOptionPane.YES_NO_OPTION);
 						
 						if(result==JOptionPane.YES_OPTION){
 							
@@ -305,7 +297,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		 */
 		protected void updateDataset(AnalysisDataset dataset){
 			DefaultMutableTreeNode root =
-					new DefaultMutableTreeNode("Cells");
+					new DefaultMutableTreeNode(new NodeData("Cells", null));
 			
 			if(dataset!=null){
 				createNodes(root, dataset);
@@ -328,7 +320,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 //		    	root.add(new DefaultMutableTreeNode(name));
 		    	root.add(new DefaultMutableTreeNode( new NodeData(name, id)));
 		    }
-//		    sort(root);
+		    sort(root);
 
 		}
 		
@@ -857,20 +849,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
 
-		NodeData node = (NodeData) arg0.getPath().getLastPathComponent();
-		UUID cellID = node.getID();
-		
-//		String name = arg0.getPath().getLastPathComponent().toString();
-		
-//		UUID cellID = UUID.fromString(name);
-//		String[] bits = name.split("-");
-//		
-//		String pathName = activeDataset.getCollection().getFolder()
-//				+File.separator
-//				+bits[0]
-//				+File.separator
-//				+bits[1];
-		
+		DefaultMutableTreeNode node = (DefaultMutableTreeNode) arg0.getPath().getLastPathComponent();
+		NodeData data = (NodeData) node.getUserObject();
+
+		UUID cellID = data.getID();
+
 		if(list.size()==1){	
 			try{
 				
