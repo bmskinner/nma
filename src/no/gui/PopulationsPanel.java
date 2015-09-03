@@ -599,8 +599,52 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				}
 				this.update();
 
+			} else {
+				// make a list of the unique UUIDs selected
+				
+				List<UUID> list = new ArrayList<UUID>();
+				for(AnalysisDataset d : datasets){
+					
+					if(!list.contains(d.getUUID())){
+						list.add(d.getUUID());
+					}
+					
+					// add all the children of a dataset
+					for(UUID childID : d.getAllChildUUIDs()){
+						if(!list.contains(childID)){
+							list.add(childID);
+						}
+					}
+				}
+				
+
+				// remove any children remaining
+				for(AnalysisDataset d : this.getRootDatasets()){
+					for(UUID id : list){
+						
+						if(d.hasChild(id)){
+							d.deleteChild(id);
+						}
+						
+					}
+				}
+				
+				// go through the list, removing all the ids to be deleted
+				for(UUID id : list){
+					AnalysisDataset d = this.getDataset(id);
+					
+					populationNames.remove(d.getName());
+					analysisDatasets.remove(id);
+					if(d.isRoot()){
+						treeOrderMap.remove(id);
+					}
+				}
+				
+				this.update();
 			}
+			fireSignalChangeEvent("UpdatePanels");
 		}
+		
 	}
 	
 	
@@ -647,7 +691,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					if(datasets.size()>1){ // multiple populations
 						populationPopup.disableAll();
 						populationPopup.enableMerge();
-						populationPopup.disableDelete();
+						populationPopup.enableDelete();
 						
 					} else { // single population
 						AnalysisDataset d = datasets.get(0);
