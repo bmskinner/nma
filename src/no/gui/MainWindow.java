@@ -1269,6 +1269,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     		// ensure the progress bar gets hidden even if it is not removed
     		this.progressBar.setVisible(false);
 
+    		// The analysis takes place in a new thread to accomodate refolding.
+    		// See specific comment below
     		Thread thr = new Thread(){
 
     			public void run(){
@@ -1308,8 +1310,11 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     					}
     				}
 
-    				//TODO: This runs in parallel with next mophology analysis, and never cleans up the progress
-    				// bar because the thread is blocked
+    				// The new refold action is a progressable action, so must not block
+    				// the EDT. Also, the current action must wait for refolding to complete,
+    				// otherwise the next MorphologyAnalysisAction in the chain will block the
+    				// refold from firing a done signal. Hence, put a latch on the refold to 
+    				// make this thread wait until the refolding is complete.
     				if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
 
     					final CountDownLatch latch = new CountDownLatch(1);
