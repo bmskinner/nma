@@ -1046,6 +1046,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			try{
 
+				this.progressBar.setIndeterminate(true);
 				worker = new CurveRefolder(dataset.getCollection(), 
 						"Fast");
 
@@ -1264,6 +1265,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     		this.progressBar.setVisible(false);
     		
     		if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
+    			logger.log("Running stats export", Logger.DEBUG);
     			logc("Exporting stats...");
     			boolean ok = StatsExporter.run(dataset.getCollection());
     			if(ok){
@@ -1275,6 +1277,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
     		// annotate the nuclei in the population
     		if(  (downFlag & NUCLEUS_ANNOTATE) == NUCLEUS_ANNOTATE){
+    			logger.log("Running annotation", Logger.DEBUG);
     			logc("Annotating nuclei...");
     			boolean ok = NucleusAnnotator.run(dataset.getCollection());
     			if(ok){
@@ -1286,6 +1289,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
     		// make a composite image of all nuclei in the collection
     		if(  (downFlag & EXPORT_COMPOSITE) == EXPORT_COMPOSITE){
+    			logger.log("Running compositor", Logger.DEBUG);
     			logc("Exporting composite...");
     			boolean ok = CompositeExporter.run(dataset.getCollection());
     			if(ok){
@@ -1295,12 +1299,21 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			}
     		}
 
+    		//TODO: This runs in parallel with next mophology analysis, and never cleans up the progress
+    		// bar because the thread is blocked
     		if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
-    			new RefoldNucleusAction(dataset);
+    			logger.log("Running curve refolder", Logger.DEBUG);
+    			SwingUtilities.invokeLater(new Runnable(){
+    				public void run(){
+    				
+    					new RefoldNucleusAction(dataset);
+    				
+    			}});
+//    			new RefoldNucleusAction(dataset);
     		}
 
     		if(  (downFlag & ADD_POPULATION) == ADD_POPULATION){
-    			
+    			logger.log("Adding dataset to panel", Logger.DEBUG);
     			populationsPanel.addDataset(dataset);				
 
     			for(AnalysisDataset child : dataset.getChildDatasets()){
@@ -1309,6 +1322,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     		}
     		
     		if(  (downFlag & SAVE_DATASET) == SAVE_DATASET){
+    			logger.log("Saving dataset", Logger.DEBUG);
     			PopulationExporter.saveAnalysisDataset(dataset);
     		}
 
