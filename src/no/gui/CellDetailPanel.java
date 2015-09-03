@@ -539,8 +539,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset);
 				}
 				panel.setChart(chart);
-				panel.restoreAutoBounds();
-			}catch(Exception e){
+				if(cell!=null){
+					panel.restoreAutoBounds();
+				}
+			} catch(Exception e){
 				error("Error updating outline chart", e);
 			}
 		}
