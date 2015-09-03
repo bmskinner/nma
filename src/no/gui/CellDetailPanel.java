@@ -1,10 +1,10 @@
 package no.gui;
 
-import ij.IJ;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -72,19 +72,37 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 	public CellDetailPanel() {
 
-		this.setLayout(new BorderLayout());
+//		this.setLayout(new BorderLayout());
+		this.setLayout(new GridBagLayout());
 		
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth = 1;
+		constraints.weightx = 0.3;
+		constraints.weighty = 1;
+		constraints.anchor = GridBagConstraints.CENTER;
+
 		cellsListPanel = new CellsListPanel();
-		this.add(cellsListPanel, BorderLayout.WEST);
+		this.add(cellsListPanel, constraints);
 		
 		// make the chart for each nucleus
-		outlinePanel = new OutlinePanel();
-		this.add(outlinePanel, BorderLayout.EAST);
-			
 		JPanel centrePanel = createCentrePanel();
-		this.add(centrePanel, BorderLayout.CENTER);
-		centrePanel.setMinimumSize(new Dimension(200,200));
-		this.revalidate();
+		
+		constraints.gridx = 1;
+		constraints.gridwidth = 2;
+		constraints.weightx = 1;
+		this.add(centrePanel, constraints);
+		
+			
+		outlinePanel = new OutlinePanel();
+		constraints.gridx = 3;
+		this.add(outlinePanel, constraints);
+
+
+		this.validate();;
 		
 	}
 	
@@ -105,6 +123,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		segmentStatsPanel = new SegmentStatsPanel();
 		centrePanel.add(segmentStatsPanel);
+		
+		Dimension minSize = new Dimension(200, 300);
+		centrePanel.setMinimumSize(minSize);
 		return centrePanel;
 	}
 	
