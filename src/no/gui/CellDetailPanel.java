@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
@@ -544,6 +546,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 //				}
 			};
 			
+			panel.addComponentListener(new ComponentAdapter() {
+    			@Override
+    			public void componentResized(ComponentEvent e) {
+    				panel.restoreAutoBounds();
+    			}
+    		});
+			
 
 			
 			this.add(panel, BorderLayout.CENTER);
@@ -842,8 +851,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					}
 				});
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				error("Error in segment stats", e);
 			}
 			table.setEnabled(false);
 						
@@ -859,15 +867,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				try {
 					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					error("Error updating segment stats", e);
 				}
 			} else {
 				try {
 					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					error("Error updating segment stats", e);
 				}
 
 				Enumeration<TableColumn> columns = table.getColumnModel().getColumns();

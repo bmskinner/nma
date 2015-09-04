@@ -61,9 +61,13 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		c.gridwidth = 1;
+		c.gridwidth = 2;
+		c.gridheight = 1;
+		c.gridx = 0;
+		c.gridy = 0;
 		c.fill = GridBagConstraints.BOTH;      //reset to default
-		c.weightx = 0.0;         
+		c.weightx = 1.0;  
+		c.weighty = 1.0; 
 		
 		JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 		
@@ -82,18 +86,24 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		runRefoldingButton.setVisible(false);
 		
 		consensusChartPanel.add(runRefoldingButton);
-		consensusChartPanel.setMinimumSize(new Dimension(200, 200));
 		
 		
 		this.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent e) {
-				resizePreview(consensusChartPanel, mainPanel);
+//				resizePreview(consensusChartPanel, mainPanel);
+				consensusChartPanel.restoreAutoBounds();
 			}
 		});
 		
 		mainPanel.add(consensusChartPanel, c);
 		this.add(mainPanel, BorderLayout.CENTER);
+		
+		
+		c.gridwidth = 1;
+		c.gridheight = 1;
+		c.gridx = 1;
+		c.weightx = 0.3;  
 		
 		offsetsPanel = createOffsetsPanel();
 		this.add(offsetsPanel, BorderLayout.EAST);
@@ -331,15 +341,16 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	 * @param innerPanel the chart to constrain
 	 * @param container the contining panel
 	 */
-	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
-        int w = container.getWidth();
-        int h = container.getHeight();
-        int size =  Math.min(w, h);
-//        innerPanel.setSize(size, size);
-        innerPanel.setPreferredSize(new Dimension(size, size));
-//        innerPanel.setMaximumSize(	new Dimension(size, size));
-        container.revalidate();
-    }
+//	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
+//        int w = container.getWidth();
+//        int h = container.getHeight();
+//        int size =  Math.min(w, h);
+////        innerPanel.setSize(size, size);
+//        innerPanel.setPreferredSize(new Dimension(size, size));
+////        innerPanel.setMaximumSize(	new Dimension(size, size));
+//        container.revalidate();
+//		
+//    }
 	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
