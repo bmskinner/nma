@@ -57,79 +57,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		panelPopulations.setMinimumSize(new Dimension(100, 100));
 
 		panelPopulations.setLayout(new BoxLayout(panelPopulations, BoxLayout.Y_AXIS));
-					
-		// tree table approach
-		List<String> columns = new ArrayList<String>();
-		columns.add("Population");
-		columns.add("Nuclei");
-		columns.add("");
-
-		DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
-		DefaultMutableTreeTableNode  root = new DefaultMutableTreeTableNode ("root node");
-		treeTableModel.setRoot(root);
-		treeTableModel.setColumnIdentifiers(columns);
 		
-		treeTable = new JXTreeTable(treeTableModel);
-		treeTable.setEnabled(true);
-		treeTable.setCellSelectionEnabled(false);
-		treeTable.setColumnSelectionAllowed(false);
-		treeTable.setRowSelectionAllowed(true);
-		treeTable.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
-		treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-		treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
-		
-		populationPopup = new PopulationListPopupMenu();
-		populationPopup.disableAll();
-		
-		// this is the only listener for this menu
-		// pass on signals to the main window
-		populationPopup.addSignalChangeListener(this);
-		
-		treeTable.setComponentPopupMenu(populationPopup);
-		
-		treeTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-				JXTreeTable table = (JXTreeTable) e.getSource();
-				
-				int row		= table.rowAtPoint((e.getPoint()));
-				int column 	= table.columnAtPoint(e.getPoint());
-				String populationName = (String) table.getModel().getValueAt(row, 0);
-				
-				// double click
-				if (e.getClickCount() == 2) {
-					
-					UUID id = PopulationsPanel.this.populationNames.get(populationName);
-					AnalysisDataset dataset = PopulationsPanel.this.analysisDatasets.get(id);
-					
-					if (row >= 0 && column == 0) { // first (names) column						
-						renameCollection(dataset);
-					}
-					
-					if(row >= 0 && column == 2){ // third (colours) column
-						
-						Color oldColour = ColourSelecter.getSegmentColor( row );
-						
-						Color newColor = JColorChooser.showDialog(
-								PopulationsPanel.this,
-			                     "Choose dataset Color",
-			                     oldColour);
-						
-						if(newColor != null){
-							dataset.setDatasetColour(newColor);
-						}
-
-						fireSignalChangeEvent("UpdatePanels");
-						
-					}
-				}
-			}
-		});
-		
-
-		TreeSelectionModel tableSelectionModel = treeTable.getTreeSelectionModel();
-		tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
+		treeTable = createTreeTable();
+							
 		
 		JScrollPane populationScrollPane = new JScrollPane(treeTable);		
 		
@@ -199,6 +129,85 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			category.add(childNode);
 		}
 		return category;
+	}
+	
+	
+	private JXTreeTable createTreeTable(){
+		
+		// tree table approach
+		List<String> columns = new ArrayList<String>();
+		columns.add("Population");
+		columns.add("Nuclei");
+		columns.add("");
+		
+		DefaultTreeTableModel treeTableModel = new DefaultTreeTableModel();
+		DefaultMutableTreeTableNode  root = new DefaultMutableTreeTableNode ("root node");
+		treeTableModel.setRoot(root);
+		treeTableModel.setColumnIdentifiers(columns);
+		
+		JXTreeTable table = new JXTreeTable(treeTableModel);
+		table.setEnabled(true);
+		table.setCellSelectionEnabled(false);
+		table.setColumnSelectionAllowed(false);
+		table.setRowSelectionAllowed(true);
+		table.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
+		table.getColumnModel().getColumn(0).setPreferredWidth(120);
+		table.getColumnModel().getColumn(2).setPreferredWidth(5);
+		
+		populationPopup = new PopulationListPopupMenu();
+		populationPopup.disableAll();
+		
+		// this is the only listener for this menu
+		// pass on signals to the main window
+		populationPopup.addSignalChangeListener(this);
+		
+		table.setComponentPopupMenu(populationPopup);
+		
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				JXTreeTable table = (JXTreeTable) e.getSource();
+				
+				int row		= table.rowAtPoint((e.getPoint()));
+				int column 	= table.columnAtPoint(e.getPoint());
+				String populationName = (String) table.getModel().getValueAt(row, 0);
+				
+				// double click
+				if (e.getClickCount() == 2) {
+					
+					UUID id = PopulationsPanel.this.populationNames.get(populationName);
+					AnalysisDataset dataset = PopulationsPanel.this.analysisDatasets.get(id);
+					
+					if (row >= 0 && column == 0) { // first (names) column						
+						renameCollection(dataset);
+					}
+					
+					if(row >= 0 && column == 2){ // third (colours) column
+						
+						Color oldColour = ColourSelecter.getSegmentColor( row );
+						
+						Color newColor = JColorChooser.showDialog(
+								PopulationsPanel.this,
+			                     "Choose dataset Color",
+			                     oldColour);
+						
+						if(newColor != null){
+							dataset.setDatasetColour(newColor);
+						}
+
+						fireSignalChangeEvent("UpdatePanels");
+						
+					}
+				}
+			}
+		});
+		
+
+		TreeSelectionModel tableSelectionModel = table.getTreeSelectionModel();
+		tableSelectionModel.addTreeSelectionListener(new TreeSelectionHandler());
+		
+		return table;
 	}
 	
 	/**
