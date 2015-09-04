@@ -637,11 +637,23 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							    // user hit cancel
 							} else if (option == JOptionPane.OK_OPTION)	{
 								
-								// offset by 90 because reasons?
-								double scale = (Double) spinner.getModel().getValue();
-								activeCell.getNucleus().setScale(scale);
-								updateCell(activeCell);
+								int applyAllOption = JOptionPane.showConfirmDialog(null,
+
+								        "Apply this scale to all cells in the dataset?", "Apply to all?", JOptionPane.YES_NO_OPTION);
 								
+								
+								double scale = (Double) spinner.getModel().getValue();
+								if(applyAllOption==JOptionPane.YES_OPTION){
+									
+									for(Nucleus n : activeDataset.getCollection().getNuclei()){
+										n.setScale(scale);
+									}
+									
+								} else {
+									activeCell.getNucleus().setScale(scale);
+
+								}
+								updateCell(activeCell);
 							}
 						}
 						
