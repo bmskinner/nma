@@ -22,6 +22,9 @@ public class Equation{
 	* @return An Equation describing the line
 	*/
 	public Equation(double m, double c){
+		if(Double.valueOf(m)==null || Double.valueOf(c)==null){
+			throw new IllegalArgumentException("m or c is null");
+		}
 		this.m = m;
 		this.c = c;
 	}
@@ -35,6 +38,9 @@ public class Equation{
 	*/
 	public Equation (XYPoint a, XYPoint b){
 
+		if(a==null || b==null){
+			throw new IllegalArgumentException("Point a or b is null");
+		}
 		// y=mx+c
 		double deltaX = a.getX() - b.getX();
 		double deltaY = a.getY() - b.getY();

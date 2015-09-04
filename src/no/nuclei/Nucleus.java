@@ -269,7 +269,12 @@ public interface Nucleus {
 	 */
 	public boolean hasSignal();
 
+	/**
+	 * Get a copy of the nucleus border points in the border list
+	 * @return
+	 */
 	public List<NucleusBorderPoint> getBorderList();
+	
 	public List<NucleusBorderPoint> getOriginalBorderList();
 
 	public void calculateFractionalSignalDistancesFromCoM();

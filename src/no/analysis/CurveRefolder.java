@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import utility.Constants;
+import utility.Equation;
 import utility.Logger;
 import utility.Utils;
 import no.nuclei.ConsensusNucleus;
@@ -69,10 +70,10 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(collection.getOrientationPoint());	
 		
 		logger.log("Creating consensus nucleus template", Logger.DEBUG);
-		ConsensusNucleus refoldCandidate = new ConsensusNucleus(n, collection.getNucleusClass());
+		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusClass());
 
 		logger.log("Refolding nucleus of class: "+collection.getNucleusClass().getSimpleName());
-		logger.log("Subject: "+refoldCandidate.getImageName()+"-"+refoldCandidate.getNucleusNumber(), Logger.DEBUG);
+		logger.log("Subject: "+refoldNucleus.getImageName()+"-"+refoldNucleus.getNucleusNumber(), Logger.DEBUG);
 
 		Profile targetProfile 	= collection.getProfileCollection().getProfile("tail");
 		Profile q25 			= collection.getProfileCollection().getProfile("tail25");
@@ -87,7 +88,6 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 
 		this.targetCurve 	= targetProfile;
-		this.refoldNucleus 	= refoldCandidate;
 		this.collection 	= collection;
 		this.setMode(refoldMode);
 	}
@@ -100,6 +100,10 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 			this.refoldCurve();
 			
+			// smooth the refolded nucleus to remove jagged edges
+			this.smoothCurve(0); // smooth with no offset
+			this.smoothCurve(1); // smooth with offset 1 to intercalate
+						
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// orient refolded nucleus to put tail at the bottom
@@ -213,14 +217,76 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 					}
 				}
 			}
+						
 			logger.log("Refolded curve: final score: "+(int)score, Logger.INFO);
 		} catch(Exception e){
-			throw new Exception("Cannot calculate scores: "+e);
+			throw new Exception("Cannot calculate scores: "+e.getMessage());
 		}
 	}
 
 	public void setMode(String s){
 		this.mode = CurveRefolder.MODES.get(s);
+	}
+	
+	/**
+	 * Smooth jagged edges in the refold nucleus 
+	 * @throws Exception 
+	 */
+	private void smoothCurve(int offset) throws Exception{
+
+		/*
+		 * Draw a line between the next and previous point
+		 * Move the point to the centre of the line
+		 * Move ahead two points
+		 * 
+		 */
+		boolean skip = false;
+
+//		int i=offset;
+		for (int i = offset; i<refoldNucleus.getLength(); i++){
+//		for(NucleusBorderPoint p : refoldNucleus.getBorderList() ){
+			
+			if(skip){
+//				i++;
+				continue; // ensure we only carry out the smoothing every other point
+			}
+			skip = !skip;
+			
+			int prevIndex = Utils.wrapIndex(i-1, refoldNucleus.getLength());
+			int nextIndex = Utils.wrapIndex(i+1, refoldNucleus.getLength());
+						
+			NucleusBorderPoint thisPoint = refoldNucleus.getBorderPoint(i);
+			NucleusBorderPoint prevPoint = refoldNucleus.getBorderPoint(prevIndex);
+			NucleusBorderPoint nextPoint = refoldNucleus.getBorderPoint(nextIndex);
+
+			/* get the point o,  half way between the previous point p and next point n:
+			 * 
+			 *     p  o  n
+			 *      \   /
+			 *        x
+			 * 
+			 */
+
+			Equation eq = new Equation(prevPoint, nextPoint);
+			double distance = prevPoint.getLengthTo(nextPoint) / 2;
+			XYPoint newPoint = eq.getPointOnLine(prevPoint, distance);
+						
+			/* get the point r,  half way between o and this point x:
+			 * 
+			 *     p  o  n
+			 *      \ r  /
+			 *        x
+			 * 
+			 * This should smooth the curve without completely blunting corners
+			 */
+			Equation eq2 = new Equation(newPoint, thisPoint);
+			double distance2 = newPoint.getLengthTo(thisPoint) / 2;
+			XYPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
+
+			// update the new position
+			refoldNucleus.updatePoint(i, replacementPoint.getX(), replacementPoint.getY());
+//			i++;
+		}
 	}
 
 

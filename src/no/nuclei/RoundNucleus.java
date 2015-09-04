@@ -151,6 +151,7 @@ public class RoundNucleus
 				
 		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
+		
 	}
 
 	/*
@@ -451,6 +452,17 @@ public class RoundNucleus
 	}
 
 	public void setBorderList(List<NucleusBorderPoint> list){
+		
+		// ensure the new border list is linked properly
+		for(int i=0; i<list.size(); i++){
+			NucleusBorderPoint p = list.get(i);
+			if(i>0){
+				p.setPrevPoint(list.get(i-1));
+				p.prevPoint().setNextPoint(p);
+			}
+		}
+		list.get(list.size()-1).setNextPoint(list.get(0));
+		list.get(0).setNextPoint(list.get(list.size()-1));
 		this.borderList = list;
 	}
 	
