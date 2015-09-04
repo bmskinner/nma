@@ -607,11 +607,15 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 		private static void findTailInPigSpermMedian(CellCollection collection) throws Exception {
 			
-			// define the current offset at the reference point
+			// define the current zero offset at the reference point
+			// It does not matter, it just gives an offset key for the ProfileCollection
 			collection.getProfileCollection().addOffset(collection.getReferencePoint(), 0);
 			
 			// get the profile
+			// This is starting from an arbitrary point?
+			// Starting from the head in test data, so the reference point is correct
 			Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
+//			medianProfile.print();
 
 			// find local maxima in the median profile over 180
 			Profile maxima = medianProfile.getLocalMaxima(5, 180); // window size 5, only values over 180
@@ -629,18 +633,16 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				tailIndex = 100; // set to roughly the middle of the array for the moment
 
 			} else{
-
+				
 				for(int i = 0; i<maxima.size();i++){
-					if(maxima.get(i)==1){
-						int index = (int)maxima.get(i);
+					
+					if(maxima.get(i)==1){ // look at local maxima
+						int index = i;
 
-						//          int toEnd = medianProfile.size() - index;
-						//          int diff = Math.abs(index - toEnd);
-
-						double angle = medianProfile.get(index);
+						double angle = medianProfile.get(index); // get the angle at this maximum
 						
 						// look for the highest local maximum outside the exclusion range
-						if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
+						if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){
 							minAngle = angle;
 							tailIndex = index;
 						}
@@ -648,7 +650,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				}
 			}
 
-			
+			// add this index to be the orientation point
 			collection.getProfileCollection().addOffset(collection.getOrientationPoint(), tailIndex);
 			
 			// head is half way around from the tail
@@ -660,6 +662,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			
 			collection.getProfileCollection().addOffset(collection.getReferencePoint(), headIndex);
 		}
+		
 
 		private static void findTailInRoundMedian(CellCollection collection) throws Exception {
 			
@@ -768,26 +771,25 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			}
 		}
 		
-		private static void calculateOffsetsInPigSpermNuclei(CellCollection collection){
+		private static void calculateOffsetsInPigSpermNuclei(CellCollection collection) throws Exception {
 
-			try{
-				Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
+			// get the median profile zeroed on the orientation point
+			Profile medianToCompare = collection.getProfileCollection().getProfile(collection.getOrientationPoint()); 
 
-				for(Nucleus nucleus : collection.getNuclei()){
-					PigSpermNucleus n = (PigSpermNucleus) nucleus;
+			for(Nucleus nucleus : collection.getNuclei()){
+				PigSpermNucleus n = (PigSpermNucleus) nucleus;
 
-					// returns the positive offset index of this profile which best matches the median profile
-					int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+				// returns the positive offset index of this profile which best matches the median profile
+				int tailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+				
+				n.addBorderTag(n.getOrientationPoint(), tailIndex);
 
-					n.addBorderTag(n.getReferencePoint(), newHeadIndex);
-
-					// also update the head position
-					int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
-					n.addBorderTag(n.getOrientationPoint(), tailIndex);
-				}
-			}catch(Exception e){
-				logger.error("Error calculating offsets", e);
+				
+				// also update the head position
+				int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(tailIndex) ));
+				n.addBorderTag(n.getReferencePoint(), headIndex);
 			}
+
 		}
 		
 		/**
@@ -797,16 +799,21 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 		 */
 		public static void calculateOffsets(CellCollection collection){
 
-			if(collection.getNucleusClass() == RoundNucleus.class){
-				calculateOffsetsInRoundNuclei(collection);
-			}
-			
-			if(collection.getNucleusClass() == RodentSpermNucleus.class){
-				calculateOffsetsInRodentSpermNuclei(collection);
-			}
-			
-			if(collection.getNucleusClass() == PigSpermNucleus.class){
-				calculateOffsetsInPigSpermNuclei(collection);
+			try{
+
+				if(collection.getNucleusClass() == RoundNucleus.class){
+					calculateOffsetsInRoundNuclei(collection);
+				}
+
+				if(collection.getNucleusClass() == RodentSpermNucleus.class){
+					calculateOffsetsInRodentSpermNuclei(collection);
+				}
+
+				if(collection.getNucleusClass() == PigSpermNucleus.class){
+					calculateOffsetsInPigSpermNuclei(collection);
+				}
+			}catch(Exception e){
+				logger.error("Error calculating offsets", e);
 			}
 		}
 	}

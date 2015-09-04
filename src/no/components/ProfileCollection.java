@@ -55,13 +55,14 @@ public class ProfileCollection implements Serializable {
 	
 	/**
 	 * Get the requested profile. Generates it dynamically from the
-	 * appropriate ProfileAggregate each time
-	 * @param s the profile to find
+	 * appropriate ProfileAggregate each time. 
+	 * @param s the pointType of the profile to find
 	 * @return the profile
+	 * @throws Exception
 	 */
 	public Profile getProfile(String s) throws Exception {
 		if(s==null){
-			throw new IllegalArgumentException("The requested profile key is null: "+s);
+			throw new IllegalArgumentException("A profile key is required");
 		}
 		String pointType = s;
 		if(s.endsWith("25")){
@@ -81,9 +82,16 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	
+	/**
+	 * Get the requested segmented profile. Generates it dynamically from the
+	 * appropriate ProfileAggregate. 
+	 * @param s the pointType of the profile to find
+	 * @return the profile
+	 * @throws Exception
+	 */
 	public SegmentedProfile getSegmentedProfile(String s) throws Exception {
 		if(s==null){
-			throw new IllegalArgumentException("The requested profile key is null: "+s);
+			throw new IllegalArgumentException("A profile key is required");
 		}
 		SegmentedProfile result = new SegmentedProfile(getProfile(s), getSegments(s));
 		return result;
@@ -107,6 +115,8 @@ public class ProfileCollection implements Serializable {
 		}
 
 		// this must be negative offset for segments
+		// since we are moving the pointIndex back to the beginning
+		// of the array
 		int offset = -getOffset(s);
 
 		List<NucleusBorderSegment> result = null;

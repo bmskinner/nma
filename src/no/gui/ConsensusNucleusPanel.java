@@ -303,14 +303,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 						// hide the refold button
 						runRefoldingButton.setVisible(false);
 						offsetsPanel.setVisible(true);
+						consensusChartPanel.setChart(consensusChart);
+						consensusChartPanel.restoreAutoBounds();
 					} else {
 						runRefoldingButton.setVisible(true);
 						offsetsPanel.setVisible(false);
+						consensusChartPanel.setChart(consensusChart);
 					}
-					consensusChartPanel.setChart(consensusChart);
-					consensusChartPanel.restoreAutoBounds();
-					
-					
+
 				}else {
 					
 					JFreeChart chart = ConsensusNucleusChartFactory.makeMultipleConsensusChart(list);
