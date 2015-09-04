@@ -839,21 +839,33 @@ public class NucleusDatasetCreator {
 		SegmentedProfile angleProfile = n.getAngleProfile(pointType);
 		
 		// At this point, the angle profile and the iqr profile should be in sync
+		// The following set of checks confirms this.
 		int pointIndex = n.getBorderIndex(pointType);
-		IJ.log("Nucleus tail index: "+n.getBorderIndex(pointType));
+//		n.dumpInfo(Nucleus.ALL_POINTS);
+		
+//		IJ.log("Nucleus tail index: "+n.getBorderIndex(pointType));
+//		IJ.log("");
+//		IJ.log("IQR range");
+//		iqrRange.print();
+//		IJ.log("");
+//		IJ.log("Angle profile");
+//		angleProfile.print();
 		
 		if(angleProfile.hasSegments()){ // only draw if there are segments
 			
 			// go through each segment
 			for(NucleusBorderSegment seg :  angleProfile.getSegments()){
 								
-				IJ.log(seg.toString());
+				// check the indexes that the segment covers
+//				IJ.log(seg.toString());
+				
 				// add the segment, taking the indexes from the segment, and drawing the values 
 				// in the scaled IQR profile at these positions
 				
 				// The segment start and end indexes should be in correspondence with the offsets
+				// That is, the zero index in a segment start / end is the pointType
 				
-				addSegmentIQRToConsensus(seg, ds, n, scaledRange, pointIndex);
+				addSegmentIQRToConsensus(seg, ds, n, scaledRange, pointType);
 
 				// draw the segment itself
 				double[] xpoints = new double[seg.length()+1];
@@ -887,7 +899,7 @@ public class NucleusDatasetCreator {
 	 * @param n the consensus nucleus
 	 * @param scaledRange the IQR scale profile
 	 */
-	private static void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, int pointIndex){
+	private static void addSegmentIQRToConsensus(NucleusBorderSegment segment, DefaultXYDataset ds, Nucleus n, Profile scaledRange, String pointType){
 
 		// what we need to do is match the profile positions to the borderpoints
 		// Add lines to show the IQR of the angle profile at each point
@@ -900,15 +912,25 @@ public class NucleusDatasetCreator {
 		double[] outerIQRX = new double[arrayLength];
 		double[] outerIQRY = new double[arrayLength];
 		
+		// Go through each position in the segment.
+		// The zero index of the segmented profile is the pointType selected previously in createSegmentedNucleusOutline()
+		// Hence a segment start index of zero is at the pointType
+		
 		for(int i=0; i<=segment.length(); i++){
 			
-			// get the index of the segment in the nucleus. 
-			// add an offset to account for the tail point
-			int index = Utils.wrapIndex(segment.getStartIndex() + i + pointIndex, n.getLength());
+			// get the index of this point of the segment in the nucleus border list.
+			// The nucleus border list has an arbitrary zero location, and the 
+			// pointType index is given within this
+			// We need to add the index of the pointType to the values within the segment
+			int segmentIndex = segment.getStartIndex() + i;
+			int index = Utils.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getLength());
 			
 			// get the border point at this index
 			NucleusBorderPoint p = n.getBorderPoint(index); // get the border points in the segment
+			
+//			IJ.log("Selecting border index: "+index+" from "+segment.getName()+" index "+segmentIndex);
 
+			// Find points three indexes ahead and behind to make a triangle from
 			int prevIndex = Utils.wrapIndex(index-3, n.getLength());
 			int nextIndex = Utils.wrapIndex(index+3, n.getLength());
 
@@ -921,8 +943,10 @@ public class NucleusDatasetCreator {
 			// move the line to the index point, and find the orthogonal line
 			Equation perp = eq.translate(p).getPerpendicular(p);
 			
-			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(index)));
-			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(index));
+			// Select the index from the scaledRange corresponding to the position in the segment
+			// The scaledRange is aligned to the segment already
+			XYPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(Utils.wrapIndex(segmentIndex, n.getLength() )   )    )    );
+			XYPoint bPoint = perp.getPointOnLine(p, scaledRange.get(Utils.wrapIndex(segmentIndex, n.getLength() )));
 
 			// determine which of the points is inside the nucleus and which is outside
 			

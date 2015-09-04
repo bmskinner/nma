@@ -1024,7 +1024,10 @@ public Profile calculateDeltas(int windowSize){
 	  return new Profile(result);
   }
 
-  // use for debugging
+  /**
+   * Print the value in the profile at each array index
+   * to the ImageJ log window.
+   */
   public void print(){
 	  for (int i=0; i<array.length; i++) {
 		  IJ.log("Point "+i+": "+array[i]);
