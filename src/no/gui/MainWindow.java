@@ -1748,12 +1748,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			String s = event.type().replace("RefoldConsensus_", "");
 			UUID id = UUID.fromString(s);
 			final AnalysisDataset d = populationsPanel.getDataset(id);
-			final CountDownLatch latch = new CountDownLatch(1);
+			
 
 			Thread thr = new Thread(){
 
 				public void run(){
-
+					final CountDownLatch latch = new CountDownLatch(1);
 					new RefoldNucleusAction(d, latch);
 					try {
 						latch.await();

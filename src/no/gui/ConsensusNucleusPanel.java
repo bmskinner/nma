@@ -308,12 +308,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 						offsetsPanel.setVisible(false);
 					}
 					consensusChartPanel.setChart(consensusChart);
+					consensusChartPanel.restoreAutoBounds();
 					
 					
 				}else {
 					
 					JFreeChart chart = ConsensusNucleusChartFactory.makeMultipleConsensusChart(list);
 					consensusChartPanel.setChart(chart);
+					consensusChartPanel.restoreAutoBounds();
 					runRefoldingButton.setVisible(false);
 					offsetsPanel.setVisible(false);
 				}
@@ -327,31 +329,10 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				
 			}
 		} catch (Exception e) {
-			IJ.log("Error drawing consensus nucleus: "+e.getMessage());
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
-			}
+			error("Error drawing consensus nucleus", e);
 		}
 	}
-			
-	/**
-	 * Alter the size of the given panel to keep the aspect ratio constant.
-	 * The minimum of the width or height of the container is used as the
-	 * preferred size of the chart
-	 * @param innerPanel the chart to constrain
-	 * @param container the contining panel
-	 */
-//	private static void resizePreview(ChartPanel innerPanel, JPanel container) {
-//        int w = container.getWidth();
-//        int h = container.getHeight();
-//        int size =  Math.min(w, h);
-////        innerPanel.setSize(size, size);
-//        innerPanel.setPreferredSize(new Dimension(size, size));
-////        innerPanel.setMaximumSize(	new Dimension(size, size));
-//        container.revalidate();
-//		
-//    }
-	
+				
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
