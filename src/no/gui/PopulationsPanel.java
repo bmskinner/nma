@@ -458,7 +458,13 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	private void renameCollection(AnalysisDataset dataset){
 		CellCollection collection = dataset.getCollection();
-		String newName = JOptionPane.showInputDialog(this, "Rename collection", collection.getName());
+		String newName = (String) JOptionPane.showInputDialog(this, 
+				"Choose a new name", 
+				"Rename collection", 
+				JOptionPane.INFORMATION_MESSAGE, 
+				null, 
+				null,
+				collection.getName());
 		// validate
 		if(!newName.isEmpty() && newName!=null){
 		
