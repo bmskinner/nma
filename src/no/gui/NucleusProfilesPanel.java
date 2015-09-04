@@ -205,11 +205,14 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 	private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference){
 
 		try {
+			
+			String point 	= fromReference 
+					? list.get(0).getCollection().getReferencePoint() 
+					: list.get(0).getCollection().getOrientationPoint();
+					
 			if(list.size()==1){
 				
-				String point 	= fromReference 
-								? list.get(0).getCollection().getReferencePoint() 
-								: list.get(0).getCollection().getOrientationPoint();
+				
 			
 				// full segment colouring
 				JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign, point);
@@ -217,8 +220,8 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 				
 			} else {
 				// many profiles, colour them all the same
-				List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign);				
-				XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign);
+				List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign, point);				
+				XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign, point);
 								
 				// find the maximum profile length - used when rendering raw profiles
 				int length = 100;

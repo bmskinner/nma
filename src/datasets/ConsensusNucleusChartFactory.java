@@ -75,7 +75,7 @@ public class ConsensusNucleusChartFactory {
 	 * @return the consensus chart
 	 */
 	public static JFreeChart makeNucleusOutlineChart(AnalysisDataset dataset){
-		CellCollection collection = dataset.getCollection();
+
 		XYDataset ds = NucleusDatasetCreator.createBareNucleusOutline(dataset);
 		JFreeChart chart = makeConsensusChart(ds);
 
