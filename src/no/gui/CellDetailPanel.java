@@ -1,5 +1,7 @@
 package no.gui;
 
+import ij.IJ;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -278,19 +280,25 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					
 					if (e.getClickCount() == 2) {
 						
-						int result = JOptionPane.showConfirmDialog(null,
+						Object[] options = { "Don't delete cell" , "Delete cell", };
+						int result = JOptionPane.showOptionDialog(null, "Delete this cell?", "Confirm delete",
 
-								"Do you want to delete cell "+data.getName()+"?", "Delete cell?", JOptionPane.YES_NO_OPTION);
-						
-						if(result==JOptionPane.YES_OPTION){
+						        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+
+						        null, options, options[0]);
+
+						if(result==1){ // button at index 1
+
 							
 							// delete the cell
 							Cell cell = activeDataset.getCollection().getCell(cellID);
 							activeDataset.getCollection().removeCell(cell);
+							node.removeFromParent();
+							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
+							model.reload();
+							
 							try {
 								CellDetailPanel.this.fireSignalChangeEvent("MorphologyRefresh_"+activeDataset.getUUID().toString());
-//								CellDetailPanel.this.log("Refreshing dataset");
-//								MorphologyAnalysis.refresh(activeDataset.getCollection());
 
 							} catch (Exception e1) {
 								log("Error deleting cell: "+e1.getMessage());
@@ -637,6 +645,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 0, 100, 0.001);
 							JSpinner spinner = new JSpinner(sModel);
 							
+
 							int option = JOptionPane.showOptionDialog(null, 
 									spinner, 
 									"Choose the new scale", 
@@ -646,13 +655,23 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							    // user hit cancel
 							} else if (option == JOptionPane.OK_OPTION)	{
 								
-								int applyAllOption = JOptionPane.showConfirmDialog(null,
+								Object[] options = { "Apply to all cells" , "Apply to only this cell", };
+								int applyAllOption = JOptionPane.showOptionDialog(null, "Apply this scale to all cells in the dataset?", "Apply to all?",
 
-								        "Apply this scale to all cells in the dataset?", "Apply to all?", JOptionPane.YES_NO_OPTION);
+								        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+
+								        null, options, options[1]);
+
+								
+								
+//								int applyAllOption = JOptionPane.showConfirmDialog(null,
+//
+//								        "Apply this scale to all cells in the dataset?", "Apply to all?", JOptionPane.YES_NO_OPTION);
 								
 								
 								double scale = (Double) spinner.getModel().getValue();
-								if(applyAllOption==JOptionPane.YES_OPTION){
+								if(applyAllOption==0){ // button at index 1
+//								if(applyAllOption==JOptionPane.YES_OPTION){
 									
 									for(Nucleus n : activeDataset.getCollection().getNuclei()){
 										n.setScale(scale);
