@@ -11,6 +11,8 @@ import java.util.Map;
 
 
 
+
+
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.Profile;
@@ -29,6 +31,7 @@ import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
@@ -412,17 +415,30 @@ public class MorphologyChartFactory {
 		
 		formatBoxplot(boxplot);
 		CategoryPlot plot = boxplot.getCategoryPlot();
-		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
 				
 		if(list!=null && !list.isEmpty()){
 						
-			for(int i=0;i<plot.getDataset().getRowCount();i++){
-				Color color = ColourSelecter.getSegmentColor(i);
-				renderer.setSeriesPaint(i, color);
+			for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+			
+				CategoryDataset dataset = plot.getDataset(datasetIndex);
+				BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+				
+				for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+
+					String segName = (String) dataset.getRowKey(series);
+					int segIndex = getIndexFromLabel(segName);
+
+					Color color = ColourSelecter.getSegmentColor(segIndex);
+					renderer.setSeriesPaint(series, color);
+//					renderer.setSeriesFillPaint(series, color);
+					renderer.setSeriesOutlinePaint(series, Color.BLACK);
+				}
+				
+				renderer.setMeanVisible(false);
+				renderer.setItemMargin(0.08);
+				renderer.setMaximumBarWidth(0.10);
+				plot.setRenderer(datasetIndex, renderer);
 			}
-			renderer.setMeanVisible(false);
-			renderer.setItemMargin(0.08);
-			renderer.setMaximumBarWidth(0.10);
 		}
 		
 		ValueMarker zeroMarker =

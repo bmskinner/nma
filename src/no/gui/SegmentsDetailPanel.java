@@ -172,6 +172,8 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 			this.add(chartPanel, BorderLayout.CENTER);
 			
 			buttonsPanel = makeButtonPanel();
+			buttonsPanel.setEnabled(false);
+			buttonsPanel.setVisible(false);
 			this.add(buttonsPanel, BorderLayout.NORTH);
 			
 		}
@@ -287,9 +289,15 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 		public void update(List<AnalysisDataset> list, String segName, boolean normalised, boolean rightAlign){
 			
 			DefaultXYDataset ds = null;
+			
 			try {
 				
-				if(list.size()==1){
+				if(list==null || list.isEmpty()){
+					
+					buttonsPanel.setEnabled(false);
+					buttonsPanel.setVisible(false);
+					
+				} else if(list.size()==1){
 				
 					buttonsPanel.setEnabled(true);
 					buttonsPanel.setVisible(true);
