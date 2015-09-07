@@ -21,7 +21,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
@@ -41,19 +40,10 @@ import no.components.*;
 import no.components.AnalysisOptions.CannyOptions;
 import no.export.CompositeExporter;
 import no.export.ImageExporter;
-import no.export.NucleusAnnotator;
-import no.export.PopulationExporter;
-import no.export.StatsExporter;
 import no.gui.MainWindow;
 import no.imports.ImageImporter;
 
 public class NucleusDetector extends SwingWorker<Boolean, Integer> {
-
-  protected static final String IMAGE_PREFIX = "export.";
-
-  private static final String[] prefixesToIgnore = { IMAGE_PREFIX, "composite", "plot"};
-
-  private static final String[] fileTypes = {".tif", ".tiff", ".jpg"};
   
   private static final String spacerString = "---------";
 
@@ -228,32 +218,6 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		return result;
 	}
 
-  /*
-    -------------------
-    Getters
-    -------------------
-  */
-
-  /**
-  * Get the image filetypes to analyse.
-  *
-  *  @return the array of filetypes
-  */
-  public String[] getFileTypes(){
-    return NucleusDetector.fileTypes;
-  }
-
-  /**
-  * Get the filename prefixes to ignore.
-  * These prevent exports of previously analyses
-  * being included in an analysis
-  *
-  *  @return the array of prefixes
-  */
-  public String[] getPrefixesToIgnore(){
-    return NucleusDetector.prefixesToIgnore;
-  }
-
   /**
   * Add a NucleusCollection to the group, using the source folder
   * name as a key.
@@ -326,13 +290,13 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
       String fileName = file.getName();
 
-      for( String fileType : fileTypes){
+      for( String fileType : Constants.IMPORTABLE_FILE_TYPES){
         if( fileName.endsWith(fileType) ){
           ok = true;
         }
       }
 
-      for( String prefix : prefixesToIgnore){
+      for( String prefix : Constants.PREFIXES_TO_IGNORE){
         if(fileName.startsWith(prefix)){
           ok = false;
         }
@@ -388,25 +352,15 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
     return output;
   }
   
-//  private CellCollection createNewCollection(File folder){
-//
-//	  CellCollection newCollection = null;
-//
-//	  try {
-//
-//		  newCollection = new CellCollection(folder, 
-//				  outputFolder, 
-//				  "analysable", 
-//				  this.debugFile,
-//				  analysisOptions.getNucleusClass());
-//
-//	  } catch (Exception e) {
-//		  logger.error("Error creating collection", e);
-//	  }
-//	  return newCollection;
-//  }
-  
-  private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition){
+  /**
+   * Create a Nucleus from an ROI.
+ * @param roi the ROI
+ * @param path the path to the image
+ * @param nucleusNumber the number of the nucleus in the image
+ * @param originalPosition the bounding box position of the nucleus
+ * @return a new nucleus of the appropriate class
+ */
+private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition){
 
 	  Nucleus n = null;
 	  try {
@@ -579,29 +533,9 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			// using canny detector
 			CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
 
-			// calculation of auto threshold
+//			// calculation of auto threshold
 			if(nucleusCannyOptions.isCannyAutoThreshold()){
-
-				// find the median intensity of the image
-				double medianPixel = getMedianIntensity(image);
-
-				// if the median is >128, this is probably an inverted image.
-				// invert it so the thresholds will work
-				if(medianPixel>128){
-					logger.log("Detected high median ("+medianPixel+"); inverting");
-					image.getProcessor(Constants.COUNTERSTAIN).invert();
-					medianPixel = getMedianIntensity(image);
-				}
-
-				// set the thresholds either side of the median
-				double sigma = 0.33; // default value - TODO: enable change
-				double lower = Math.max(0  , (1.0 - (2.5 * sigma)  ) * medianPixel  ) ;
-				lower = lower < 0.1 ? 0.1 : lower; // hard limit
-				double upper = Math.min(255, (1.0 + (0.6 * sigma)  ) * medianPixel  ) ;
-				upper = upper < 0.3 ? 0.3 : upper; // hard limit
-				nucleusCannyOptions.setLowThreshold(  (float)  lower);
-				nucleusCannyOptions.setHighThreshold( (float)  upper);
-				logger.log("Auto thresholding: low: "+lower+"  high: "+upper, Logger.DEBUG);
+				autoDetectCannyThresholds(nucleusCannyOptions, image);
 			}
 
 			logger.log("Creating edge detector", Logger.DEBUG);
@@ -624,9 +558,6 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			ImagePlus bi= new ImagePlus(null, bp);
 			searchStack = ImageImporter.convert(bi);
 
-
-			//		searchImage.show();
-			//		bi.show();
 			bi.close();
 			searchImage.close();
 
@@ -637,6 +568,44 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		return searchStack;
 	}
 	
+	/**
+	 * Try to detect the optimal settings for the edge detector based on the 
+	 * median image pixel intensity.
+	 * @param nucleusCannyOptions the options
+	 * @param image the image to analyse
+	 */
+	private void autoDetectCannyThresholds(CannyOptions nucleusCannyOptions, ImageStack image){
+		// calculation of auto threshold
+
+		// find the median intensity of the image
+		double medianPixel = getMedianIntensity(image);
+
+		// if the median is >128, this is probably an inverted image.
+		// invert it so the thresholds will work
+		if(medianPixel>128){
+			logger.log("Detected high median ("+medianPixel+"); inverting");
+			image.getProcessor(Constants.COUNTERSTAIN).invert();
+			medianPixel = getMedianIntensity(image);
+		}
+
+		// set the thresholds either side of the median
+		double sigma = 0.33; // default value - TODO: enable change
+		double lower = Math.max(0  , (1.0 - (2.5 * sigma)  ) * medianPixel  ) ;
+		lower = lower < 0.1 ? 0.1 : lower; // hard limit
+		double upper = Math.min(255, (1.0 + (0.6 * sigma)  ) * medianPixel  ) ;
+		upper = upper < 0.3 ? 0.3 : upper; // hard limit
+		nucleusCannyOptions.setLowThreshold(  (float)  lower);
+		nucleusCannyOptions.setHighThreshold( (float)  upper);
+		logger.log("Auto thresholding: low: "+lower+"  high: "+upper, Logger.DEBUG);
+
+	}
+	
+	/**
+	 * Get the median pixel intensity in the image. Used in auto-selection
+	 * of Canny thresholds.
+	 * @param image the image to process
+	 * @return the median pixel intensity
+	 */
 	private double getMedianIntensity(ImageStack image){
 		ImageProcessor median = image.getProcessor(Constants.COUNTERSTAIN);
 		double[] values = new double[ median.getWidth()*median.getHeight() ];

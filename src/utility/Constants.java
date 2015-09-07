@@ -29,6 +29,15 @@ public class Constants {
 		// statistical testing
 		public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
+		
+		// The prefix to use when exporting images
+		public static final String IMAGE_PREFIX = "export.";
+
+		// Images with these prefixes are ignored by the image importer
+		public static final String[] PREFIXES_TO_IGNORE = { IMAGE_PREFIX, "composite", "plot"};
+
+		// The file types that the program will try to open
+		public static final String[] IMPORTABLE_FILE_TYPES = {".tif", ".tiff", ".jpg"};
 				
 				
 		/**
