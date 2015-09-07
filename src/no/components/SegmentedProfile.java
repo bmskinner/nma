@@ -376,6 +376,54 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 	}
 	
+	/**
+	 * Attempt to merge the given segments into one segment. The segments must
+	 * belong to the profile, and be adjacent
+	 * @param segment1
+	 * @param segment2
+	 * @return
+	 */
+	public void mergeSegments(NucleusBorderSegment segment1, NucleusBorderSegment segment2) throws Exception {
+		
+		// Check the segments belong to the profile
+		if(!this.contains(segment1) || !this.contains(segment2)){
+			throw new IllegalArgumentException("An input segment is not part of this profile");
+		}
+		
+		// Check the segments are linked
+		if(!segment1.nextSegment().equals(segment2) && !segment1.prevSegment().equals(segment2)){
+			throw new IllegalArgumentException("Input segments are not linked");
+		}
+		
+		// Ensure we have the segments in the correct order
+		NucleusBorderSegment firstSegment  = segment1.nextSegment().equals(segment2) ? segment1 : segment2;
+		NucleusBorderSegment secondSegment = segment2.nextSegment().equals(segment1) ? segment1 : segment2;
+		
+		// Create the new segment
+		int startIndex = firstSegment.getStartIndex();
+		int endIndex = secondSegment.getEndIndex();
+		NucleusBorderSegment mergedSegment = new NucleusBorderSegment(startIndex, endIndex, this.size());
+		mergedSegment.setName(firstSegment.getName());
+		
+		// Replace the two segments in this profile
+		List<NucleusBorderSegment> oldSegs = this.getSegments();
+		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
+		for(NucleusBorderSegment oldSegment : oldSegs){
+			
+			if(oldSegment.equals(firstSegment)){
+				// add the merge instead
+				newSegs.add(mergedSegment);
+			} else if(oldSegment.equals(secondSegment)){
+				// do nothing
+			} else {
+				// add the original segments
+				newSegs.add(oldSegment);
+			}
+		}
+		NucleusBorderSegment.linkSegments(newSegs);
+		this.setSegments(newSegs);
+	}
+	
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
