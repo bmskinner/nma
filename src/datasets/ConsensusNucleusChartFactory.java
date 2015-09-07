@@ -190,7 +190,7 @@ public class ConsensusNucleusChartFactory {
 				if(showIQR){
 					plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
 //					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-					Color colour = ColourSelecter.getSegmentColor(segIndex);
+					Color colour = ColourSelecter.getOptimisedColor(segIndex);
 					plot.getRenderer().setSeriesPaint(i, colour);
 					
 				} else {

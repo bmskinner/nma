@@ -135,7 +135,7 @@ public class NucleusAnnotator {
 					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 
 					// avoid colour wrapping when segment number is 1 more than the colour list
-					Color color = i==0 && n.getAngleProfile().getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getSegmentColor(i);
+					Color color = i==0 && n.getAngleProfile().getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getOptimisedColor(i);
 
 					ip.setColor(color);
 					ip.setLineWidth(2);

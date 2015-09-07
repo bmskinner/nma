@@ -227,7 +227,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 				int segment = Integer.valueOf(colName.replace("Seg_", ""));
 
-				colour = ColourSelecter.getSegmentColor(segment);
+				colour = ColourSelecter.getOptimisedColor(segment);
 			}
 			
 			//Cells are by default rendered as a JLabel.

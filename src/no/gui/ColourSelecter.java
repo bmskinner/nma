@@ -9,6 +9,8 @@ public class ColourSelecter {
 	
 	public static List<Color> signalColourList = new ArrayList<Color>(0);
 	
+	public static List<Color> optimisedSwatchList = new ArrayList<Color>(0);
+	
 	// these are the colours for segments in the order they will loop
 	static {
 
@@ -24,13 +26,23 @@ public class ColourSelecter {
 		segmentColourList.add( new Color(0,153,0)); // 
 		segmentColourList.add(new Color(135,206,235)); // sky blue
 				
-		
+		// Colours for signals in nuclei
 		signalColourList.add(Color.RED);
 		signalColourList.add(Color.GREEN);
 		signalColourList.add(Color.CYAN);
 		signalColourList.add(Color.MAGENTA);
 		signalColourList.add(Color.YELLOW);
 		signalColourList.add(Color.LIGHT_GRAY);
+		
+//		Color blind friendly swatch
+		// See http://optional.is/required/2011/06/20/accessible-color-swatches/
+		optimisedSwatchList.add(Color.decode("#fff200"));
+		optimisedSwatchList.add(Color.decode("#abd69c"));
+		optimisedSwatchList.add(Color.decode("#f7941e"));
+		optimisedSwatchList.add(Color.decode("#008fd5"));
+		optimisedSwatchList.add(Color.decode("#006f45"));
+		optimisedSwatchList.add(Color.decode("#741472"));
+		
 	}
 	
 	public static int getSegmentListSize(){
@@ -49,6 +61,19 @@ public class ColourSelecter {
 	 */
 	public static Color getSegmentColor(int i){		
 		Color color = ColourSelecter.segmentColourList.get(i % ColourSelecter.segmentColourList.size());
+		return color;
+	}
+	
+	/**
+	 * Get an appropriate colour for the given number.
+	 * Loops through 6 colours that have been chosen to be distinguishable
+	 * in three major types of color blindness, Deutranopia, 
+	 * Protanopia and Tritanopia.
+	 * @param i the number of the colour to return
+	 * @return a colour
+	 */
+	public static Color getOptimisedColor(int i){		
+		Color color = ColourSelecter.optimisedSwatchList.get(i % ColourSelecter.optimisedSwatchList.size());
 		return color;
 	}
 	

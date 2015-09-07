@@ -186,7 +186,7 @@ public class MorphologyChartFactory {
 			if(name.startsWith("Seg_")){
 				int colourIndex = getIndexFromLabel(name);
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
+				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
 			} 
 			
 			// entire nucleus profile
@@ -428,7 +428,7 @@ public class MorphologyChartFactory {
 					String segName = (String) dataset.getRowKey(series);
 					int segIndex = getIndexFromLabel(segName);
 
-					Color color = ColourSelecter.getSegmentColor(segIndex);
+					Color color = ColourSelecter.getOptimisedColor(segIndex);
 					renderer.setSeriesPaint(series, color);
 //					renderer.setSeriesFillPaint(series, color);
 					renderer.setSeriesOutlinePaint(series, Color.BLACK);
@@ -596,7 +596,7 @@ public class MorphologyChartFactory {
 				if(hash.get(key).equals("Nucleus")){
 					String name = (String) plot.getDataset(key).getSeriesKey(i);
 					int colourIndex = getIndexFromLabel(name);
-					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
+					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
 				}
 				
 				

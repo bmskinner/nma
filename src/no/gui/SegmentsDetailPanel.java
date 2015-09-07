@@ -138,7 +138,7 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 
 				int segment = Integer.valueOf(colName.replace("Seg_", ""));
 
-				colour = ColourSelecter.getSegmentColor(segment);
+				colour = ColourSelecter.getOptimisedColor(segment);
 			}
 						
 			//Cells are by default rendered as a JLabel.
