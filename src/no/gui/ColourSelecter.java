@@ -37,10 +37,10 @@ public class ColourSelecter {
 //		Color blind friendly swatch
 		// See http://optional.is/required/2011/06/20/accessible-color-swatches/
 		optimisedSwatchList.add(Color.decode("#fff200"));
-		optimisedSwatchList.add(Color.decode("#abd69c"));
+		optimisedSwatchList.add(Color.decode("#006f45"));
 		optimisedSwatchList.add(Color.decode("#f7941e"));
 		optimisedSwatchList.add(Color.decode("#008fd5"));
-		optimisedSwatchList.add(Color.decode("#006f45"));
+		optimisedSwatchList.add(Color.decode("#abd69c"));
 		optimisedSwatchList.add(Color.decode("#741472"));
 		
 	}
