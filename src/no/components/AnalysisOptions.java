@@ -283,17 +283,17 @@ public class AnalysisOptions implements Serializable {
 		public static final int    DEFAULT_CANNY_KERNEL_WIDTH = 16;
 		public static final int    DEFAULT_CLOSING_OBJECT_RADIUS = 5;
 		public static final int    DEFAULT_TAIL_CLOSING_OBJECT_RADIUS = 3;
-		
-		
-		
+
 		// values for Canny edge deteection
 		private boolean useCanny; 
 		private boolean cannyAutoThreshold;
-		private float lowThreshold;
-		private float highThreshold;
-		private float kernelRadius;
-		private int   kernelWidth;
-		private int   closingObjectRadius; // for morphological closing
+//		private boolean flattenImage; 	// should the white threshold be lowered to hide internal structures?
+//		private float flattenThreshold; // if the white threhold is lower, this is the value
+		private float lowThreshold;		// the canny low threshold
+		private float highThreshold;	// the canny high threshold
+		private float kernelRadius;		// the kernel radius
+		private int   kernelWidth;		// the kernel width
+		private int   closingObjectRadius; // the circle radius for morphological closing
 		
 		public CannyOptions(){
 			
@@ -307,6 +307,23 @@ public class AnalysisOptions implements Serializable {
 		public void setUseCanny(boolean useCanny) {
 			this.useCanny = useCanny;
 		}
+		
+//		public boolean isFlattenImage() {
+//			return flattenImage;
+//		}
+//		
+//		public void setFlattenImage(boolean flattenImage) {
+//			this.flattenImage = flattenImage;
+//		}
+//		
+//		public float getFlattenThreshold() {
+//			return flattenThreshold;
+//		}
+//
+//
+//		public void setFlattenThreshold(float flattenThreshold) {
+//			this.flattenThreshold = flattenThreshold;
+//		}
 
 
 		public int getClosingObjectRadius() {
