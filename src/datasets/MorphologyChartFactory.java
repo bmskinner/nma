@@ -403,10 +403,10 @@ public class MorphologyChartFactory {
 	 * @return
 	 */
 	public static JFreeChart makeSegmentBoxplot(BoxAndWhiskerCategoryDataset ds, List<AnalysisDataset> list){
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Index length difference to median", ds, false);	
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Index length difference\nto segment in median", ds, false);	
 		
 		
-		if(list.size()>1 || ds==null || list==null){
+		if(ds==null || list==null){
 			return makeEmptyBoxplot();
 		}
 		
@@ -421,8 +421,8 @@ public class MorphologyChartFactory {
 				renderer.setSeriesPaint(i, color);
 			}
 			renderer.setMeanVisible(false);
-			renderer.setItemMargin(0.02);
-			renderer.setMaximumBarWidth(0.08);
+			renderer.setItemMargin(0.08);
+			renderer.setMaximumBarWidth(0.10);
 		}
 		
 		ValueMarker zeroMarker =

@@ -760,7 +760,7 @@ public class NucleusDatasetCreator {
 					list.add(differenceToMedian);
 				}
 				
-				dataset.add(list, medianSeg.getName(), medianSeg.getName());
+				dataset.add(list, medianSeg.getName(), collection.getName());
 			}
 		}
 		return dataset;
