@@ -984,12 +984,14 @@ public class NucleusDatasetCreator {
 
 		if(segmented){
 
-			// add the segments
+			/*
+			 * With the ability to merge segments, we cannot be sure that an iterator
+			 * based on numbers will work
+			 */
 			List<NucleusBorderSegment> segmentList = nucleus.getAngleProfile().getSegments();
 			if(!segmentList.isEmpty()){ // only draw if there are segments
-				for(int i=0;i<segmentList.size();i++){
-
-					NucleusBorderSegment seg = nucleus.getAngleProfile().getSegment("Seg_"+i);
+				
+				for(NucleusBorderSegment seg  : segmentList){
 
 					double[] xpoints = new double[seg.length()+1];
 					double[] ypoints = new double[seg.length()+1];
@@ -1001,7 +1003,7 @@ public class NucleusDatasetCreator {
 					}
 
 					double[][] data = { xpoints, ypoints };
-					ds.addSeries("Seg_"+i, data);
+					ds.addSeries(seg.getName(), data);
 				}
 			}
 

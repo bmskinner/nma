@@ -163,37 +163,40 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
-	 * Add a list of segments for the profile
+	 * Add a list of segments for the profile. The segments must
+	 * have the correct offset to be added directly
 	 * @param n the segment list
 	 */
 	public void addSegments(List<NucleusBorderSegment> n){
 		if(n==null || n.isEmpty()){
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
-		segments = n;
+		this.segments = n;
 	}
 	
 	/**
-	 * Add a list of segments for the profile
+	 * Add a list of segments for the profile, where the segments are
+	 * zeroed to the given point type. The indexes will be corrected for
+	 * storage. I previously disabled this - unknown why.
 	 * @param pointType the point with the zero index in the segments
 	 * @param n the segment list
 	 */
-//	public void addSegments(String pointType, List<NucleusBorderSegment> n){
-//		if(n==null || n.isEmpty()){
-//			throw new IllegalArgumentException("String or segment list is null or empty");
-//		}
-//		// this must be negative offset for segments
-//		int offset = getOffset(pointType);
-//
-//		List<NucleusBorderSegment> result = null;
-//		try {
-//			result = NucleusBorderSegment.nudge(segments, offset);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		segments = result;
-//	}
+	public void addSegments(String pointType, List<NucleusBorderSegment> n) throws Exception {
+		if(n==null || n.isEmpty()){
+			throw new IllegalArgumentException("String or segment list is null or empty");
+		}
+		
+		/*
+		 * The segments coming in are zeroed to the given pointType pointIndex
+		 * This means the indexes must be moved forwards appropriately.
+		 * Hence, add a positive offset.
+		 */
+		int offset = getOffset(pointType);
+
+		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(n, offset);
+
+		this.segments = result;
+	}
 		
 	/**
 	 * Add individual nucleus profiles to teh collection.

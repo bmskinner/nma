@@ -146,7 +146,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				CellDetailPanel.this.list = list;
 				
 				if(list.size()==1){
-					
+
 					activeDataset = list.get(0);
 					cellsListPanel.updateDataset(activeDataset);
 				} else {
@@ -881,7 +881,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 		
 		protected void update(Cell cell){
-			
+
 			if(cell==null){
 				try {
 					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));

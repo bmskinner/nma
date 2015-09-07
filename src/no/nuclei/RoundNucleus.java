@@ -222,7 +222,7 @@ public class RoundNucleus
 	public String getAnnotatedImagePath(){
 		String outPath = this.nucleusFolder.getAbsolutePath()+
 											File.separator+
-											RoundNucleus.IMAGE_PREFIX+
+											Constants.IMAGE_PREFIX+
 											this.getNucleusNumber()+
 											".annotated.tiff";
 		return new String(outPath);
@@ -231,7 +231,7 @@ public class RoundNucleus
 	public String getOriginalImagePath(){
 		String outPath = this.nucleusFolder.getAbsolutePath()+
 											File.separator+
-											RoundNucleus.IMAGE_PREFIX+
+											Constants.IMAGE_PREFIX+
 											this.getNucleusNumber()+
 											".original.tiff";
 		return new String(outPath);
@@ -240,7 +240,7 @@ public class RoundNucleus
 	public String getEnlargedImagePath(){
 		String outPath = this.nucleusFolder.getAbsolutePath()+
 											File.separator+
-											RoundNucleus.IMAGE_PREFIX+
+											Constants.IMAGE_PREFIX+
 											this.getImageName()+"-"+
 											this.getNucleusNumber()+
 											".enlarged.tiff";

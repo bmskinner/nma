@@ -1,5 +1,7 @@
 package datasets;
 
+import ij.IJ;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +59,7 @@ public class NucleusTableDatasetCreator {
 
 			// get the offset segments
 			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(referencePoint).getSegments();
+			
 
 			// create the row names
 			fieldNames.add("Colour");
@@ -68,7 +71,6 @@ public class NucleusTableDatasetCreator {
 
 			for(NucleusBorderSegment segment : segments) {
 
-
 				List<Object> rowData = new ArrayList<Object>(0);
 				
 				rowData.add("");
@@ -79,10 +81,8 @@ public class NucleusTableDatasetCreator {
 				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
 			}
 
-			// format the numbers and make into a tablemodel
-//			DecimalFormat df = new DecimalFormat("#0.00"); 
-
 		}
+
 		return model;	
 	}
 	
@@ -116,6 +116,7 @@ public class NucleusTableDatasetCreator {
 			fieldNames.add("Length");
 			fieldNames.add("Start index");
 			fieldNames.add("End index");
+			fieldNames.add(""); // empty for merge buttons
 
 			model.addColumn("", fieldNames.toArray(new Object[0]));
 
@@ -128,6 +129,7 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.length());
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
+				rowData.add(""); // empty for merge buttons
 
 				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
 			}
