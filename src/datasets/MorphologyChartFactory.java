@@ -95,7 +95,7 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, String point) throws Exception {
+	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, String point, boolean showMarkers) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();
 		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
@@ -140,14 +140,16 @@ public class MorphologyChartFactory {
 				indexToDraw += amountToAdd;
 				
 			}
-			
-			if(tag.equals(collection.getOrientationPoint())){
-				colour = Color.BLUE;
+
+			if(showMarkers){
+				if(tag.equals(collection.getOrientationPoint())){
+					colour = Color.BLUE;
+				}
+				if(tag.equals(collection.getReferencePoint())){
+					colour = Color.ORANGE;
+				}
+				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, new BasicStroke(2.0f)));	
 			}
-			if(tag.equals(collection.getReferencePoint())){
-				colour = Color.ORANGE;
-			}
-			plot.addDomainMarker(new ValueMarker(indexToDraw, colour, new BasicStroke(2.0f)));	
 			
 		}
 		return chart;

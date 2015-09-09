@@ -37,12 +37,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 	private ChartPanel profilesPanel;
 	private ChartPanel variabilityChartPanel; 
 	
-	private JRadioButton rawProfileLeftButton  = new JRadioButton("Left"); // left align raw profiles in rawChartPanel
-	private JRadioButton rawProfileRightButton = new JRadioButton("Right"); // right align raw profiles in rawChartPan
-	private JCheckBox    normCheckBox 	= new JCheckBox("Normalised");	// to toggle raw or normalised segment profiles in segmentsProfileChartPanel
-	
-	private JRadioButton referenceButton  = new JRadioButton("Reference point"); // start drawing from reference
-	private JRadioButton orientationButton = new JRadioButton("Orientation point"); // start drawing from orientation
+	private ProflleDisplaySettingsPanel proflleDisplaySettingsPanel;
 	
 	private List<AnalysisDataset> list;
 	
@@ -78,58 +73,18 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 		rawPanel.setMinimumSize(minimumChartSize);
 		rawPanel.setPreferredSize(preferredChartSize);
 		rawPanel.add(profilesPanel, BorderLayout.CENTER);
-		
-		rawProfileLeftButton.setSelected(true);
-		
-		rawProfileLeftButton.setActionCommand("LeftAlignRawProfile");
-		rawProfileRightButton.setActionCommand("RightAlignRawProfile");
-		
-		rawProfileLeftButton.addActionListener(this);
-		rawProfileRightButton.addActionListener(this);
-		
-		rawProfileLeftButton.setEnabled(false);
-		rawProfileRightButton.setEnabled(false);
-		
-		// checkbox to select raw or normalised profiles
-		normCheckBox.setSelected(true);
-		normCheckBox.setEnabled(false);
-		normCheckBox.setActionCommand("NormalisedProfile");
-		normCheckBox.addActionListener(this);
-		
-
-		//Group the radio buttons.
-		final ButtonGroup alignGroup = new ButtonGroup();
-		alignGroup.add(rawProfileLeftButton);
-		alignGroup.add(rawProfileRightButton);
-		
-		JPanel alignPanel = new JPanel();
-		alignPanel.setLayout(new BoxLayout(alignPanel, BoxLayout.X_AXIS));
-
-		alignPanel.add(normCheckBox);
-		alignPanel.add(rawProfileLeftButton);
-		alignPanel.add(rawProfileRightButton);
-		
-		
-		// Add the radio buttons to choose between reference and orientation drawing
-		referenceButton.setSelected(false);
-		referenceButton.setActionCommand("DrawReferencePoint");
-		referenceButton.addActionListener(this);
-		referenceButton.setEnabled(false);
-		
-		orientationButton.setSelected(true);
-		orientationButton.setActionCommand("DrawOrientationPoint");
-		orientationButton.addActionListener(this);
-		orientationButton.setEnabled(false);
-		
-		final ButtonGroup drawPointGroup = new ButtonGroup();
-		drawPointGroup.add(referenceButton);
-		drawPointGroup.add(orientationButton);
-		
-		alignPanel.add(referenceButton);
-		alignPanel.add(orientationButton);
-		
+				
 		// add the alignments panel to the tab
-		rawPanel.add(alignPanel, BorderLayout.NORTH);
+		
+		proflleDisplaySettingsPanel = new ProflleDisplaySettingsPanel();
+		proflleDisplaySettingsPanel.normCheckBox.addActionListener(this);
+		proflleDisplaySettingsPanel.rawProfileLeftButton.addActionListener(this);
+		proflleDisplaySettingsPanel.rawProfileRightButton.addActionListener(this);
+		proflleDisplaySettingsPanel.referenceButton.addActionListener(this);
+		proflleDisplaySettingsPanel.orientationButton.addActionListener(this);
+		proflleDisplaySettingsPanel.showMarkersCheckBox.addActionListener(this);
+		
+		rawPanel.add(proflleDisplaySettingsPanel, BorderLayout.NORTH);
 		
 		//---------------
 		// Create the variability chart
@@ -161,17 +116,19 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 		
 		if(!list.isEmpty()){
 			
-			normCheckBox.setEnabled(true);
-			referenceButton.setEnabled(true);
-			orientationButton.setEnabled(true);
+			proflleDisplaySettingsPanel.normCheckBox.setEnabled(true);
+			proflleDisplaySettingsPanel.referenceButton.setEnabled(true);
+			proflleDisplaySettingsPanel.orientationButton.setEnabled(true);
+			proflleDisplaySettingsPanel.showMarkersCheckBox.setEnabled(true);
 			
-			boolean normalised = normCheckBox.isSelected();
+			boolean normalised = proflleDisplaySettingsPanel.normCheckBox.isSelected();
 			
 			// only allow right align if not normalised
-			boolean rightAlign = normalised ? false : rawProfileRightButton.isSelected();
-			boolean fromReference = referenceButton.isSelected();
+			boolean rightAlign = normalised ? false : proflleDisplaySettingsPanel.rawProfileRightButton.isSelected();
+			boolean fromReference = proflleDisplaySettingsPanel.referenceButton.isSelected();
+			boolean showMarkers = proflleDisplaySettingsPanel.showMarkersCheckBox.isSelected();
 			
-			updateProfiles(list, normalised, rightAlign, fromReference);
+			updateProfiles(list, normalised, rightAlign, fromReference, showMarkers);
 			
 			
 //			if(  normCheckBox.isSelected()){
@@ -188,11 +145,12 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 			updateVariabilityChart(list);
 		} else {
 			// if the list is empty, do not enable controls
-			normCheckBox.setEnabled(false);
-			rawProfileLeftButton.setEnabled(false);
-			rawProfileRightButton.setEnabled(false);
-			referenceButton.setEnabled(false);
-			orientationButton.setEnabled(false);
+			proflleDisplaySettingsPanel.setEnabled(false);
+//			proflleDisplaySettingsPanel.normCheckBox.setEnabled(false);
+//			proflleDisplaySettingsPanel.rawProfileLeftButton.setEnabled(false);
+//			proflleDisplaySettingsPanel.rawProfileRightButton.setEnabled(false);
+//			proflleDisplaySettingsPanel.referenceButton.setEnabled(false);
+//			proflleDisplaySettingsPanel.orientationButton.setEnabled(false);
 		}
 	}
 			
@@ -202,7 +160,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 	 * @param normalised flag for raw or normalised lengths
 	 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 	 */	
-	private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference){
+	private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference, boolean showMarkers){
 
 		try {
 			
@@ -215,7 +173,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 				
 			
 				// full segment colouring
-				JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign, point);
+				JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign, point, showMarkers);
 				profilesPanel.setChart(chart);
 				
 			} else {
@@ -293,13 +251,14 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		boolean normalised = normCheckBox.isSelected();
+		boolean normalised = proflleDisplaySettingsPanel.normCheckBox.isSelected();
 		
 		// only allow right align if not normalised
-		boolean rightAlign = normalised ? false : rawProfileRightButton.isSelected();
-		boolean fromReference = referenceButton.isSelected();
+		boolean rightAlign = normalised ? false : proflleDisplaySettingsPanel.rawProfileRightButton.isSelected();
+		boolean fromReference = proflleDisplaySettingsPanel.referenceButton.isSelected();
+		boolean showMarkers = proflleDisplaySettingsPanel.showMarkersCheckBox.isSelected();
 		
-		updateProfiles(list, normalised, rightAlign, fromReference);
+		updateProfiles(list, normalised, rightAlign, fromReference, showMarkers);
 
 		if(e.getActionCommand().equals("LeftAlignRawProfile")){
 //			updateProfiles(list, false, false);
@@ -313,15 +272,15 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 		
 		if(e.getActionCommand().equals("NormalisedProfile")){
 
-			if(  normCheckBox.isSelected()){
-				rawProfileLeftButton.setEnabled(false);
-				rawProfileRightButton.setEnabled(false);
+			if(  proflleDisplaySettingsPanel.normCheckBox.isSelected()){
+				proflleDisplaySettingsPanel.rawProfileLeftButton.setEnabled(false);
+				proflleDisplaySettingsPanel.rawProfileRightButton.setEnabled(false);
 //				updateProfiles(list, true, false);
 			} else {
-				rawProfileLeftButton.setEnabled(true);
-				rawProfileRightButton.setEnabled(true);
+				proflleDisplaySettingsPanel.rawProfileLeftButton.setEnabled(true);
+				proflleDisplaySettingsPanel.rawProfileRightButton.setEnabled(true);
 				
-				if(  rawProfileLeftButton.isSelected()){
+				if(  proflleDisplaySettingsPanel.rawProfileLeftButton.isSelected()){
 //					updateProfiles(list, false, false);
 				} else {
 //					updateProfiles(list, false, true);
