@@ -313,9 +313,25 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 
 				}else {
 					
-					JFreeChart chart = ConsensusNucleusChartFactory.makeMultipleConsensusChart(list);
-					consensusChartPanel.setChart(chart);
-					consensusChartPanel.restoreAutoBounds();
+					// multiple datasets
+					
+					boolean oneHasConsensus = false;
+					for(AnalysisDataset d : list){
+						if (d.getCollection().hasConsensusNucleus()){
+							oneHasConsensus= true;
+						}
+					}
+					
+					if(oneHasConsensus){
+						JFreeChart chart = ConsensusNucleusChartFactory.makeMultipleConsensusChart(list);
+						consensusChartPanel.setChart(chart);
+						consensusChartPanel.restoreAutoBounds();
+					} else {
+						JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+						consensusChartPanel.setChart(chart);
+					}
+					
+					
 					runRefoldingButton.setVisible(false);
 					offsetsPanel.setVisible(false);
 				}
