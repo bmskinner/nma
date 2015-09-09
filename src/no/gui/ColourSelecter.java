@@ -5,11 +5,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ColourSelecter {
+	
+	public static final int REGULAR_SWATCH 		= 0; // segmentColourList
+	public static final int NO_SWATCH 			= 1; // black
+	public static final int ACCESSIBLE_SWATCH 	= 2; // colour blind optimisedSwatchList
+	
 	public static List<Color> segmentColourList = new ArrayList<Color>(0);
 	
 	public static List<Color> signalColourList = new ArrayList<Color>(0);
 	
 	public static List<Color> optimisedSwatchList = new ArrayList<Color>(0);
+	
+	public static List<Color> blackList = new ArrayList<Color>(0);
 	
 	// these are the colours for segments in the order they will loop
 	static {
@@ -43,6 +50,31 @@ public class ColourSelecter {
 		optimisedSwatchList.add(Color.decode("#abd69c"));
 		optimisedSwatchList.add(Color.decode("#741472"));
 		
+		// no segments shown
+		blackList.add(Color.BLACK);
+
+	}
+	
+	public enum ColourSwatch {
+		REGULAR_SWATCH 	  ("Regular", 	segmentColourList), 
+		NO_SWATCH		  ("No colours"	, blackList),
+		ACCESSIBLE_SWATCH ("Colour blind", optimisedSwatchList);
+		
+	    private final String asString;   
+	    private final List<Color> colours;
+	    
+	    ColourSwatch(String value, List<Color> colours) {
+	        this.asString = value;
+	        this.colours = colours;
+		}
+	    
+	    public String toString(){
+	    	return this.asString;
+	    }
+	    
+	    public Color color(int index){
+	    	return colours.get(index % colours.size());
+	    }
 	}
 	
 	public static int getSegmentListSize(){
@@ -51,6 +83,28 @@ public class ColourSelecter {
 	
 	public static int getSignalListSize(){
 		return ColourSelecter.signalColourList.size();
+	}
+	
+	/**
+	 * Get an colour from the desired swatch for the given index.
+	 * @param swatch the swatch to use
+	 * @param i the number of the colour to return
+	 * @return a colour
+	 */
+	public static Color getSwatchColour(int swatch, int index){
+		
+		Color color = null;
+		switch(swatch){
+			case REGULAR_SWATCH: color = getSegmentColor(index);
+					break;
+			case NO_SWATCH: color = Color.BLACK;
+					break;
+			case ACCESSIBLE_SWATCH: color = getOptimisedColor(index);
+					break;
+			default: color = getSegmentColor(index);
+					break;
+		}
+		return color;
 	}
 	
 	/**

@@ -56,11 +56,9 @@ public class PopulationImporter {
 				fis.close();
 			}
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("File not found: "+inputFile.getAbsolutePath(), e1);
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("File IO error: "+inputFile.getAbsolutePath(), e1);
 		}
 		return collection;
 	}
@@ -98,12 +96,9 @@ public class PopulationImporter {
 				fis.close();
 			}
 		} catch (FileNotFoundException e1) {
-			logger.log("File not found: "+inputFile.getAbsolutePath()+" : "+e1.getMessage(), Logger.ERROR);
+			logger.error("File not found: "+inputFile.getAbsolutePath(), e1);
 		} catch (IOException e1) {
-			logger.log("File IO error: "+e1.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e1.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.error("File IO error: "+inputFile.getAbsolutePath(), e1);
 		}
 		return dataset;
 	}

@@ -7,6 +7,7 @@ import java.util.List;
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.gui.ColourSelecter;
+import no.gui.ColourSelecter.ColourSwatch;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -151,7 +152,7 @@ public class ConsensusNucleusChartFactory {
 		plot.getDomainAxis().setRange(-max,max);
 		plot.getRangeAxis().setRange(-max,max);
 		
-		formatConsensusChartSeries(plot, true);
+		formatConsensusChartSeries(plot, true, dataset.getSwatch());
 		
 		return chart;
 	}
@@ -160,7 +161,7 @@ public class ConsensusNucleusChartFactory {
 	 * Format the series colours for a consensus nucleus
 	 * @param plot
 	 */
-	private static void formatConsensusChartSeries(XYPlot plot, boolean showIQR){
+	private static void formatConsensusChartSeries(XYPlot plot, boolean showIQR, ColourSwatch swatch){
 		
 		XYDataset ds = plot.getDataset();
 		int seriesCount = plot.getSeriesCount();
@@ -190,7 +191,8 @@ public class ConsensusNucleusChartFactory {
 				if(showIQR){
 					plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
 //					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-					Color colour = ColourSelecter.getOptimisedColor(segIndex);
+					Color colour = swatch.color(segIndex);
+//					Color colour = ColourSelecter.getOptimisedColor(segIndex);
 					plot.getRenderer().setSeriesPaint(i, colour);
 					
 				} else {

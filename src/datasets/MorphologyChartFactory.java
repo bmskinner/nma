@@ -13,10 +13,12 @@ import java.util.Map;
 
 
 
+
 import no.analysis.AnalysisDataset;
 import no.collections.CellCollection;
 import no.components.Profile;
 import no.gui.ColourSelecter;
+import no.gui.ColourSelecter.ColourSwatch;
 import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
@@ -65,8 +67,8 @@ public class MorphologyChartFactory {
 	 * @param n
 	 * @return
 	 */
-	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n){
-		JFreeChart chart = makeProfileChart(ds, n.getLength());
+	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n, ColourSwatch swatch){
+		JFreeChart chart = makeProfileChart(ds, n.getLength(), swatch);
 
 		XYPlot plot = chart.getXYPlot();
 
@@ -109,7 +111,7 @@ public class MorphologyChartFactory {
 //				length = (int) Math.max( n.getLength(), length);
 //			}
 		}
-		JFreeChart chart = makeProfileChart(ds, length);
+		JFreeChart chart = makeProfileChart(ds, length, dataset.getSwatch());
 		
 		// mark the reference andorientation points
 		
@@ -157,7 +159,7 @@ public class MorphologyChartFactory {
 	 * @param ds the profile dataset
 	 * @return a chart
 	 */
-	public static JFreeChart makeProfileChart(XYDataset ds, int xLength){
+	public static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch){
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
@@ -186,7 +188,8 @@ public class MorphologyChartFactory {
 			if(name.startsWith("Seg_")){
 				int colourIndex = getIndexFromLabel(name);
 				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
+				plot.getRenderer().setSeriesPaint(i, swatch.color(colourIndex));
+//				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
 			} 
 			
 			// entire nucleus profile
@@ -314,7 +317,7 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength) throws Exception {
 		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list);
 		CellCollection n = list.get(0).getCollection();
-		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength);
+		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength, list.get(0).getSwatch());
 		XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
@@ -427,8 +430,9 @@ public class MorphologyChartFactory {
 
 					String segName = (String) dataset.getRowKey(series);
 					int segIndex = getIndexFromLabel(segName);
-
-					Color color = ColourSelecter.getOptimisedColor(segIndex);
+					
+					Color color = list.get(0).getSwatch().color(segIndex);
+//					Color color = ColourSelecter.getOptimisedColor(segIndex);
 					renderer.setSeriesPaint(series, color);
 //					renderer.setSeriesFillPaint(series, color);
 					renderer.setSeriesOutlinePaint(series, Color.BLACK);
@@ -596,7 +600,9 @@ public class MorphologyChartFactory {
 				if(hash.get(key).equals("Nucleus")){
 					String name = (String) plot.getDataset(key).getSeriesKey(i);
 					int colourIndex = getIndexFromLabel(name);
-					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
+					
+					plot.getRenderer().setSeriesPaint(i, dataset.getSwatch().color(colourIndex));
+//					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
 				}
 				
 				

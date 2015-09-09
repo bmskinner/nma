@@ -16,6 +16,7 @@ import javax.swing.JTabbedPane;
 
 import no.analysis.AnalysisDataset;
 import no.components.ProfileCollection;
+import no.gui.ColourSelecter.ColourSwatch;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -44,8 +45,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 	private JRadioButton orientationButton = new JRadioButton("Orientation point"); // start drawing from orientation
 	
 	private List<AnalysisDataset> list;
-
-
+	
 	public NucleusProfilesPanel() {
 		
 		this.setLayout(new BorderLayout());
@@ -254,7 +254,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 
 				// full segment colouring
 				XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(list.get(0).getCollection());
-				JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, 100);
+				JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, 100, list.get(0).getSwatch());
 				frankenChartPanel.setChart(chart);
 			} else {
 				// many profiles, colour them all the same

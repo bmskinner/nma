@@ -30,6 +30,7 @@ import no.export.CompositeExporter;
 import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
+import no.gui.ColourSelecter.ColourSwatch;
 import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
 
@@ -47,6 +48,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.AbstractAction;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
@@ -89,6 +91,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
 	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
+	
+	private ColourSwatch activeSwatch = ColourSwatch.REGULAR_SWATCH;
 	
 	
 	// Flags to pass to ProgressableActions to determine the analyses
@@ -322,6 +326,37 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			}
 		});
 		panelHeader.add(btnPostanalysisMapping);
+		
+		
+		JButton btnSetSwatch = new JButton("Set swatch");
+		btnSetSwatch.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+									
+					ColourSwatch[] nameArray = ColourSwatch.values();
+					
+					ColourSwatch option = (ColourSwatch) JOptionPane.showInputDialog(null, 
+							"Choose swatch",
+							"Swatch",
+							JOptionPane.QUESTION_MESSAGE, 
+							null, 
+							nameArray, 
+							activeSwatch);
+					
+					if(option!=null){
+						// a choice was made
+						for(AnalysisDataset d : populationsPanel.getAllDatasets()){
+							d.setSwatch(option);
+						}
+						activeSwatch = option;
+						updatePanels(populationsPanel.getSelectedDatasets());
+					}
+				
+				
+				
+			}
+		});
+		panelHeader.add(btnSetSwatch);
 		return panelHeader;
 	}
 	
@@ -508,6 +543,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 						File logFile = new File(file.getParent()+File.separator+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
 						
 						dataset.getCollection().setDebugFile(logFile);
+						
+						dataset.setSwatch(activeSwatch);
 						
 						log("OK");
 //						
@@ -1290,7 +1327,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     				if(  (downFlag & NUCLEUS_ANNOTATE) == NUCLEUS_ANNOTATE){
     					logger.log("Running annotation", Logger.DEBUG);
     					logc("Annotating nuclei...");
-    					boolean ok = NucleusAnnotator.run(dataset.getCollection());
+    					boolean ok = NucleusAnnotator.run(dataset);
     					if(ok){
     						log("OK");
     					} else {

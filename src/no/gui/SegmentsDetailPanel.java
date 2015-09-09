@@ -138,7 +138,8 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 
 				int segment = Integer.valueOf(colName.replace("Seg_", ""));
 
-				colour = ColourSelecter.getOptimisedColor(segment);
+				colour = activeDataset.getSwatch().color(segment);
+//				colour = ColourSelecter.getOptimisedColor(segment);
 			}
 						
 			//Cells are by default rendered as a JLabel.
@@ -310,7 +311,7 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 
 					JFreeChart chart = null;
 					if(normalised){
-						chart = MorphologyChartFactory.makeProfileChart(ds, 100);
+						chart = MorphologyChartFactory.makeProfileChart(ds, 100, list.get(0).getSwatch());
 					} else {
 						int length = 100;
 						for(AnalysisDataset d : list){
@@ -318,7 +319,7 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 								length = (int) d.getCollection().getMedianArrayLength();
 							}
 						}
-						chart = MorphologyChartFactory.makeProfileChart(ds, length);
+						chart = MorphologyChartFactory.makeProfileChart(ds, length, list.get(0).getSwatch());
 					}								
 					chartPanel.setChart(chart);
 				} else {

@@ -13,6 +13,7 @@ import java.util.List;
 import utility.Constants;
 import utility.Logger;
 import utility.Utils;
+import no.analysis.AnalysisDataset;
 import no.analysis.ProfileSegmenter;
 import no.collections.CellCollection;
 import no.components.NuclearSignal;
@@ -20,6 +21,7 @@ import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.SignalCollection;
 import no.gui.ColourSelecter;
+import no.gui.ColourSelecter.ColourSwatch;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 
@@ -27,13 +29,14 @@ public class NucleusAnnotator {
 	
 	private static Logger logger;
 	
-	public static boolean run(CellCollection collection){
+	public static boolean run(AnalysisDataset dataset){
 
+		CellCollection collection = dataset.getCollection();
 		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
 		try{
 			logger.log("Annotating images of nuclei...");
 			for(Nucleus n : collection.getNuclei()){
-				NucleusAnnotator.run(n);
+				NucleusAnnotator.run(n, dataset.getSwatch());
 			}
 			logger.log("Annotation complete");
 
@@ -45,14 +48,14 @@ public class NucleusAnnotator {
 	}
 
 
-	public static void run(Nucleus n){
+	public static void run(Nucleus n, ColourSwatch swatch){
 		
 		// to add in here - division of functions based on class of nucleus
-		annotateFeatures(n);
+		annotateFeatures(n, swatch);
 		
 	}
 	
-	private static void annotateFeatures(Nucleus n){
+	private static void annotateFeatures(Nucleus n, ColourSwatch swatch){
 
 		ImagePlus annotatedImage = new ImagePlus(n.getAnnotatedImagePath());
 		try{
@@ -61,7 +64,7 @@ public class NucleusAnnotator {
 			annotateHead(annotatedImage, n);
 			annotateCoM(annotatedImage, n);
 			annotateMinFeret(annotatedImage, n);
-			annotateSegments(annotatedImage, n);
+			annotateSegments(annotatedImage, n, swatch);
 			annotateSignals(annotatedImage, n);
 
 		}  catch(Exception e){
@@ -113,7 +116,7 @@ public class NucleusAnnotator {
 
 	}
 	
-	private static void annotateSegments(ImagePlus image, Nucleus n){
+	private static void annotateSegments(ImagePlus image, Nucleus n, ColourSwatch swatch){
 		ImageProcessor ip = image.getProcessor();
 
 		try{
@@ -135,7 +138,8 @@ public class NucleusAnnotator {
 					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 
 					// avoid colour wrapping when segment number is 1 more than the colour list
-					Color color = i==0 && n.getAngleProfile().getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getOptimisedColor(i);
+					Color color = swatch.color(i);
+//					Color color = i==0 && n.getAngleProfile().getSegments().size()==9 ? Color.MAGENTA : ColourSelecter.getOptimisedColor(i);
 
 					ip.setColor(color);
 					ip.setLineWidth(2);

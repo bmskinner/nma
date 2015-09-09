@@ -16,6 +16,7 @@ import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.ShellResult;
 import no.gui.ColourSelecter;
+import no.gui.ColourSelecter.ColourSwatch;
 
 
 /**
@@ -54,6 +55,8 @@ public class AnalysisDataset implements Serializable {
 	private File debugFile;
 	
 	private String version;
+	
+	private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
 	
 	private boolean isRoot;
 	
@@ -638,6 +641,22 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public Color getDatasetColour(){
 		return this.datasetColour;
+	}
+
+	/**
+	 * Get the swatch. Transient, not saved to nmd
+	 * @return
+	 */
+	public ColourSwatch getSwatch() {
+		return swatch;
+	}
+
+	/**
+	 * Set the swatch
+	 * @param swatch
+	 */
+	public void setSwatch(ColourSwatch swatch) {
+		this.swatch = swatch;
 	}
 	
 

@@ -226,8 +226,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				String colName = table.getColumnName(column); // will be Seg_x
 
 				int segment = Integer.valueOf(colName.replace("Seg_", ""));
-
-				colour = ColourSelecter.getOptimisedColor(segment);
+				
+				colour = activeDataset.getSwatch().color(segment);
+//				colour = ColourSelecter.getOptimisedColor(segment);
 			}
 			
 			//Cells are by default rendered as a JLabel.
@@ -430,7 +431,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					Nucleus nucleus = cell.getNucleus();
 
 					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
-					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus);
+					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset.getSwatch());
 
 					profileChartPanel.setChart(chart);
 				}
