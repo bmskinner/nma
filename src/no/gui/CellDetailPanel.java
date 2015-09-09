@@ -149,6 +149,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 					activeDataset = list.get(0);
 					cellsListPanel.updateDataset(activeDataset);
+					updateCell(activeCell);
 				} else {
 					
 					cellsListPanel.updateDataset(null);
