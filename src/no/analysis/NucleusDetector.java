@@ -29,6 +29,7 @@ import javax.swing.SwingWorker;
 import cell.Cell;
 import utility.CannyEdgeDetector;
 import utility.Constants;
+import utility.Kuwahara_Filter;
 import utility.Logger;
 import utility.Stats;
 import utility.StatsMap;
@@ -484,6 +485,12 @@ private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] or
 		mw.log("File:  "+path.getName());
 		logger.log("File:  "+path.getName(), Logger.DEBUG);
 		
+		// before passing to either edge detection or just thresholding,
+		// run a Kuwahara filter to enhance edges in the image
+		runKuwaharaFiltering(image);
+		
+		squashChromocentres(image);
+		
 		// here before running the thresholding, do an edge detection, then pass on
 		ImageStack searchStack = null;
 		if( this.analysisOptions.getCannyOptions("nucleus").isUseCanny()) {
@@ -516,6 +523,47 @@ private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] or
 			}
 			nucleusNumber++;
 		} 
+	}
+	
+	/**
+	 * Run a Kuwahara filter to enhance edges in the image
+	 * @param stack
+	 */
+	private void runKuwaharaFiltering(ImageStack stack){
+		int filterSize = 3;
+		logger.log("Applying Kuwahara filter with radius "+filterSize);
+		Kuwahara_Filter kw = new Kuwahara_Filter();
+		ImagePlus img = ImageExporter.convert(stack);
+		kw.setup("", img);
+		
+		kw.filter(stack.getProcessor(Constants.COUNTERSTAIN), filterSize);
+	}
+	
+	/**
+	 * The chromocentre can cause 'skipping' of the edge detection
+	 * from the edge to the interior of the nucleus. Make any pixel
+	 * over 100 equal 100 to remove internal structures
+	 * @param stack the stack to adjust
+	 * @return
+	 */
+	private void squashChromocentres(ImageStack stack){
+		int threshold = 100;
+		
+		logger.log("Compressing internal structures to max intensity of "+threshold);
+		// fetch a copy of the int array
+		ImageProcessor ip = stack.getProcessor(Constants.COUNTERSTAIN);
+		int[][] array = ip.getIntArray();
+		
+		// threshold
+		for(int x = 0; x<ip.getWidth(); x++){
+			for( int y=0; y<ip.getHeight(); y++){
+				if(array[x][y] > threshold ){
+					array[x][y] = threshold;
+				}
+			}
+		}
+		
+		ip.setIntArray(array);
 	}
 	
 	
