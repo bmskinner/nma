@@ -173,6 +173,12 @@ public class SegmentFitter {
 			// get the name of the segment with the tag at the start
 			for(NucleusBorderSegment seg : pc.getSegments(tag)){
 //				IJ.log("Median: "+seg.toString());
+				
+				//TODO
+				// What happens when the tag does not lie on the segment start?
+				// We need to find the segment with the lowest start posiiton instead (correct? what if the point is lower?)
+				// Also, why is the start index not zero?
+				// Surely the positions of tags in the median profile is the basis of segmnetation
 				if(seg.getStartIndex()==0){
 					segName = seg.getName();
 				}
