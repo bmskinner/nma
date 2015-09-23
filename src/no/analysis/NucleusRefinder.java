@@ -196,35 +196,35 @@ public class NucleusRefinder
     Detects nuclei within the image.
     For each nucleus, perform the analysis step
   */
-  @Override
-  protected void processImage(ImageStack image, File path){
-
-    mw.log("File:  "+path.getName());
-    updateFileMap(path); // map from new to old
-    if(!fileMap.containsKey(path)){ return; } // skip images with no nuclei to catch
-
-    List<Roi> roiList = getROIs(image, true);
-    int i = 0;
-
-    if(!offsets.containsKey(path)){
-      alignImages(path, fileMap.get(path));
-    }   
-
-    for(Roi roi : roiList){
-       try{
-
-        boolean ok = checkRoi(roi, path);
-
-        if(ok){
-          analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
-          this.totalNuclei++;
-        }
-      } catch(Exception e){
-        mw.log("  Error acquiring nucleus: "+e);
-      }
-      i++;
-    } 
-  }
+//  @Override
+//  protected void processImage(ImageStack image, File path){
+//
+//    mw.log("File:  "+path.getName());
+//    updateFileMap(path); // map from new to old
+//    if(!fileMap.containsKey(path)){ return; } // skip images with no nuclei to catch
+//
+//    List<Roi> roiList = getROIs(image, true);
+//    int i = 0;
+//
+//    if(!offsets.containsKey(path)){
+//      alignImages(path, fileMap.get(path));
+//    }   
+//
+//    for(Roi roi : roiList){
+//       try{
+//
+//        boolean ok = checkRoi(roi, path);
+//
+//        if(ok){
+//          analyseNucleus(roi, image, i, path); // get the profile data back for the nucleus
+//          this.totalNuclei++;
+//        }
+//      } catch(Exception e){
+//        mw.log("  Error acquiring nucleus: "+e);
+//      }
+//      i++;
+//    } 
+//  }
   
   private boolean checkRoi(Roi roi, File path){
 	  boolean result = false;

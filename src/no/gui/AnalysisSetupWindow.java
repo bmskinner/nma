@@ -113,8 +113,20 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	 * Create the frame.
 	 */
 	public AnalysisSetupWindow() {
-		setModal(true);
+		setModal(true); // ensure nothing happens until this window is closed
 		setDefaultOptions();
+		createAndShowGUI();
+		pack();
+		setVisible(true);
+	}
+	
+	/**
+	 * Create the dialog with an existing set of options
+	 * Allows settings to be reloaded.
+	 */
+	public AnalysisSetupWindow(AnalysisOptions options) {
+		setModal(true); // ensure nothing happens until this window is closed
+		analysisOptions = options;
 		createAndShowGUI();
 		pack();
 		setVisible(true);
@@ -230,6 +242,12 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(getImageDirectory()){
+					
+					// probe the first image
+					// show the results of the current settings
+					
+					
+					// ok, close the window
 					AnalysisSetupWindow.this.setVisible(false);
 				} else {
 					analysisOptions = null;
