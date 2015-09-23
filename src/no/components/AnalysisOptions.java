@@ -273,22 +273,32 @@ public class AnalysisOptions implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 		
-		public static final double DEFAULT_CANNY_LOW_THRESHOLD = 0.5;
-		public static final double DEFAULT_CANNY_HIGH_THRESHOLD = 1.5;
+		public static final double DEFAULT_CANNY_LOW_THRESHOLD 			= 0.5;
+		public static final double DEFAULT_CANNY_HIGH_THRESHOLD 		= 1.5;
 		
-		public static final double DEFAULT_CANNY_TAIL_LOW_THRESHOLD = 0.1;
-		public static final double DEFAULT_CANNY_TAIL_HIGH_THRESHOLD = 0.5;
+		public static final double DEFAULT_CANNY_TAIL_LOW_THRESHOLD 	= 0.1;
+		public static final double DEFAULT_CANNY_TAIL_HIGH_THRESHOLD 	= 0.5;
 		
-		public static final double DEFAULT_CANNY_KERNEL_RADIUS = 3;
-		public static final int    DEFAULT_CANNY_KERNEL_WIDTH = 16;
-		public static final int    DEFAULT_CLOSING_OBJECT_RADIUS = 5;
-		public static final int    DEFAULT_TAIL_CLOSING_OBJECT_RADIUS = 3;
+		public static final double DEFAULT_CANNY_KERNEL_RADIUS 			= 3;
+		public static final int    DEFAULT_CANNY_KERNEL_WIDTH 			= 16;
+		public static final int    DEFAULT_CLOSING_OBJECT_RADIUS 		= 5;
+		public static final int    DEFAULT_TAIL_CLOSING_OBJECT_RADIUS 	= 3;
+		
+		public static final int	   DEFAULT_KUWAHARA_KERNEL_RADIUS 		= 3;
+		public static final boolean DEFAULT_USE_KUWAHARA 				= true;
+		
+		public static final boolean DEFAULT_FLATTEN_CHROMOCENTRES		= true;
+		public static final int		DEFAULT_FLATTEN_THRESHOLD			= 100;
 
 		// values for Canny edge deteection
 		private boolean useCanny; 
 		private boolean cannyAutoThreshold;
-//		private boolean flattenImage; 	// should the white threshold be lowered to hide internal structures?
-//		private float flattenThreshold; // if the white threhold is lower, this is the value
+		
+		private transient boolean flattenChromocentres; 	// should the white threshold be lowered to hide internal structures?
+		private transient int flattenThreshold; // if the white threhold is lower, this is the value
+		private transient boolean useKuwahara;	// perform a Kuwahara filtering to enhance edge detection?
+		private transient int kuwaharaKernel;		// the radius of the Kuwahara kernel - must be an odd number
+		
 		private float lowThreshold;		// the canny low threshold
 		private float highThreshold;	// the canny high threshold
 		private float kernelRadius;		// the kernel radius
@@ -308,23 +318,39 @@ public class AnalysisOptions implements Serializable {
 			this.useCanny = useCanny;
 		}
 		
-//		public boolean isFlattenImage() {
-//			return flattenImage;
-//		}
-//		
-//		public void setFlattenImage(boolean flattenImage) {
-//			this.flattenImage = flattenImage;
-//		}
-//		
-//		public float getFlattenThreshold() {
-//			return flattenThreshold;
-//		}
-//
-//
-//		public void setFlattenThreshold(float flattenThreshold) {
-//			this.flattenThreshold = flattenThreshold;
-//		}
+		public boolean isUseFlattenImage() {
+			return flattenChromocentres;
+		}
+		
+		public void setFlattenImage(boolean flattenImage) {
+			this.flattenChromocentres = flattenImage;
+		}
+		
+		public int getFlattenThreshold() {
+			return flattenThreshold;
+		}
 
+
+		public void setFlattenThreshold(int flattenThreshold) {
+			this.flattenThreshold = flattenThreshold;
+		}
+		
+		
+		public boolean isUseKuwahara() {
+			return useKuwahara;
+		}
+		
+		public void setUseKuwahara(boolean b){
+			this.useKuwahara = b;
+		}
+		
+		public int getKuwaharaKernel(){
+			return kuwaharaKernel;
+		}
+		
+		public void setKuwaharaKernel(int radius){
+			kuwaharaKernel = radius;
+		}
 
 		public int getClosingObjectRadius() {
 			return closingObjectRadius;

@@ -484,16 +484,24 @@ private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] or
 
 		mw.log("File:  "+path.getName());
 		logger.log("File:  "+path.getName(), Logger.DEBUG);
-		
-		// before passing to either edge detection or just thresholding,
-		// run a Kuwahara filter to enhance edges in the image
-		runKuwaharaFiltering(image);
-		
-		squashChromocentres(image);
+				
+		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
 		
 		// here before running the thresholding, do an edge detection, then pass on
 		ImageStack searchStack = null;
-		if( this.analysisOptions.getCannyOptions("nucleus").isUseCanny()) {
+		
+		if( nucleusCannyOptions.isUseCanny()) {
+			
+			// before passing to edge detection
+			// run a Kuwahara filter to enhance edges in the image
+			if(nucleusCannyOptions.isUseKuwahara()){
+				runKuwaharaFiltering(image);
+			}
+			
+			// flatten chromocentres
+			if(nucleusCannyOptions.isUseFlattenImage()){
+				squashChromocentres(image);
+			}
 			searchStack = runEdgeDetector(image);
 		} else {
 			searchStack = image;
@@ -530,7 +538,7 @@ private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] or
 	 * @param stack
 	 */
 	private void runKuwaharaFiltering(ImageStack stack){
-		int filterSize = 3;
+		int filterSize = analysisOptions.getCannyOptions("nucleus").getKuwaharaKernel();
 		logger.log("Applying Kuwahara filter with radius "+filterSize);
 		Kuwahara_Filter kw = new Kuwahara_Filter();
 		ImagePlus img = ImageExporter.convert(stack);
@@ -547,7 +555,7 @@ private Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] or
 	 * @return
 	 */
 	private void squashChromocentres(ImageStack stack){
-		int threshold = 100;
+		int threshold = analysisOptions.getCannyOptions("nucleus").getFlattenThreshold();
 		
 		logger.log("Compressing internal structures to max intensity of "+threshold);
 		// fetch a copy of the int array

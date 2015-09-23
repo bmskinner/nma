@@ -82,6 +82,13 @@ public abstract class SettingsDialog extends JDialog {
 		private JSpinner closingObjectRadiusSpinner;
 		private JCheckBox cannyAutoThresholdCheckBox;
 		
+		private JCheckBox 	useKuwaharaCheckBox;
+		private JSpinner 	kuwaharaRadiusSpinner;
+		
+		private JCheckBox 	flattenImageCheckBox;
+		private JSpinner 	flattenImageThresholdSpinner;
+		
+		
 		private CannyOptions options;
 		
 		public CannyPanel(CannyOptions options){
@@ -101,6 +108,10 @@ public abstract class SettingsDialog extends JDialog {
 			cannyKernelRadius = new JSpinner(new SpinnerNumberModel(options.getKernelRadius(),	0, 20, 0.05));
 			cannyKernelWidth = new JSpinner(new SpinnerNumberModel(options.getKernelWidth(),	1, 50, 1));
 			closingObjectRadiusSpinner = new JSpinner(new SpinnerNumberModel(options.getClosingObjectRadius(), 1,100 , 1));
+			
+			kuwaharaRadiusSpinner = new JSpinner(new SpinnerNumberModel(options.getKuwaharaKernel(), 1,11 , 2));
+			flattenImageThresholdSpinner = new JSpinner(new SpinnerNumberModel(options.getFlattenThreshold(), 0,255 , 1));
+			
 		}
 		
 		
@@ -153,6 +164,50 @@ public abstract class SettingsDialog extends JDialog {
 			closingObjectRadiusSpinner.addChangeListener(this);
 						
 			addLabelTextRows(labels, fields, new GridBagLayout(), this );
+			
+			// add a space
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			// add the Kuwahara checkbox
+			useKuwaharaCheckBox = new JCheckBox("Use Kuwahara filter");
+			useKuwaharaCheckBox.setSelected(options.isUseKuwahara());
+			useKuwaharaCheckBox.setActionCommand("UseKuwahara");
+			useKuwaharaCheckBox.addActionListener(this);
+			this.add(useKuwaharaCheckBox);
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			// add the Kuwahara radius spinner
+			labels = new JLabel[1];
+			fields = new JSpinner[1];
+			
+			labels[0] = new JLabel("Kuwahara kernel");
+			fields[0] = kuwaharaRadiusSpinner;
+			
+			addLabelTextRows(labels, fields, new GridBagLayout(), this );
+			
+			// add a space
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			
+			// add the chromocentre flattening checkbox
+			flattenImageCheckBox = new JCheckBox("Flatten chromocentres");
+			flattenImageCheckBox.setSelected(options.isUseKuwahara());
+			flattenImageCheckBox.setActionCommand("FlattenChromocentres");
+			flattenImageCheckBox.addActionListener(this);
+			this.add(flattenImageCheckBox);
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			// add the flattening threshold spinner
+			labels = new JLabel[1];
+			fields = new JSpinner[1];
+
+			labels[0] = new JLabel("Flattening threshold");
+			fields[0] = flattenImageThresholdSpinner;
+
+			addLabelTextRows(labels, fields, new GridBagLayout(), this );
+			
+			
+			
 		}
 
 
@@ -199,6 +254,26 @@ public abstract class SettingsDialog extends JDialog {
 					j.commitEdit();
 					options.setClosingObjectRadius( (Integer) j.getValue());
 				}
+				
+				if(e.getSource()==kuwaharaRadiusSpinner){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+					Integer value = (Integer) j.getValue();
+					if(value % 2 == 0){ // even
+						value--; // only odd values are allowed
+						j.setValue(value);
+						j.commitEdit();
+						j.repaint();
+					}
+					options.setKuwaharaKernel(value);
+				}
+				
+				if(e.getSource()==flattenImageThresholdSpinner){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+					options.setFlattenThreshold( (Integer) j.getValue());
+				}
+				
 			
 			} catch (ParseException e1) {
 				IJ.log("Parsing error in JSpinner");
@@ -219,6 +294,28 @@ public abstract class SettingsDialog extends JDialog {
 					options.setCannyAutoThreshold(false);
 					cannyLowThreshold.setEnabled(true);
 					cannyHighThreshold.setEnabled(true);
+				}
+			}
+			
+			if(e.getActionCommand().equals("UseKuwahara")){
+
+				if(useKuwaharaCheckBox.isSelected()){
+					options.setUseKuwahara(true);
+					kuwaharaRadiusSpinner.setEnabled(true);
+				} else {
+					options.setUseKuwahara(false);
+					kuwaharaRadiusSpinner.setEnabled(false);
+				}
+			}
+			
+			if(e.getActionCommand().equals("FlattenChromocentres")){
+
+				if(flattenImageCheckBox.isSelected()){
+					options.setFlattenImage(true);
+					flattenImageThresholdSpinner.setEnabled(true);
+				} else {
+					options.setFlattenImage(false);
+					flattenImageThresholdSpinner.setEnabled(false);
 				}
 			}
 			

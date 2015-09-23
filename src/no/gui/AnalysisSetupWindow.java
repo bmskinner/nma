@@ -50,11 +50,6 @@ import no.nuclei.sperm.RodentSpermNucleus;
 public class AnalysisSetupWindow extends SettingsDialog implements ActionListener, ChangeListener {
 
 	private AnalysisOptions analysisOptions = new AnalysisOptions();
-
-	// types of nucleus
-//	private static final String RODENT_SPERM_NUCLEUS 	= "Rodent sperm";
-//	private static final String PIG_SPERM_NUCLEUS 		= "Pig sperm";
-//	private static final String ROUND_NUCLEUS 			= "Round nucleus";
 	
 	private static final int    DEFAULT_MIN_NUCLEUS_SIZE = 2000;
 	private static final int    DEFAULT_MAX_NUCLEUS_SIZE = 10000;
@@ -188,6 +183,12 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		nucleusCannyOptions.setKernelWidth(CannyOptions.DEFAULT_CANNY_KERNEL_WIDTH);
 		nucleusCannyOptions.setClosingObjectRadius(CannyOptions.DEFAULT_CLOSING_OBJECT_RADIUS);
 		
+		nucleusCannyOptions.setUseKuwahara(CannyOptions.DEFAULT_USE_KUWAHARA);
+		nucleusCannyOptions.setKuwaharaKernel(CannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
+		nucleusCannyOptions.setFlattenImage(CannyOptions.DEFAULT_FLATTEN_CHROMOCENTRES);
+		nucleusCannyOptions.setFlattenThreshold(CannyOptions.DEFAULT_FLATTEN_THRESHOLD);
+		
+		
 		CannyOptions tailCannyOptions = analysisOptions.getCannyOptions("tail");
 		
 		tailCannyOptions.setUseCanny(true);
@@ -197,6 +198,11 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		tailCannyOptions.setKernelRadius((float) CannyOptions.DEFAULT_CANNY_KERNEL_RADIUS);
 		tailCannyOptions.setKernelWidth( CannyOptions.DEFAULT_CANNY_KERNEL_WIDTH);
 		tailCannyOptions.setClosingObjectRadius( CannyOptions.DEFAULT_TAIL_CLOSING_OBJECT_RADIUS);
+		
+		tailCannyOptions.setUseKuwahara(false);
+		tailCannyOptions.setKuwaharaKernel(CannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
+		tailCannyOptions.setFlattenImage(false);
+		tailCannyOptions.setFlattenThreshold(CannyOptions.DEFAULT_FLATTEN_THRESHOLD);
 		
 	}
 
