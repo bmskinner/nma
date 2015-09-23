@@ -245,10 +245,16 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 					
 					// probe the first image
 					// show the results of the current settings
+					ImageProber p = new ImageProber(analysisOptions, new File("C:\\src\\log.txt"));
+					if(p.getOK()==false){
 					
+						
+					} else {
+						
+						// ok, close the window
+						AnalysisSetupWindow.this.setVisible(false);
+					}
 					
-					// ok, close the window
-					AnalysisSetupWindow.this.setVisible(false);
 				} else {
 					analysisOptions = null;
 					AnalysisSetupWindow.this.setVisible(false);

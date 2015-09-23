@@ -8,7 +8,13 @@
 */  
 package no.analysis;
 
+import ij.IJ;
 import ij.ImageStack;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.plugin.RoiEnlarger;
+import ij.process.FloatPolygon;
+
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -18,11 +24,14 @@ import javax.swing.SwingWorker;
 import cell.Cell;
 import utility.Constants;
 import utility.Logger;
+import utility.Utils;
 import no.collections.*;
 import no.components.*;
 import no.export.CompositeExporter;
+import no.export.ImageExporter;
 import no.gui.MainWindow;
 import no.imports.ImageImporter;
+import no.nuclei.Nucleus;
 
 public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   
@@ -265,7 +274,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   *  @param file the File to check
   *  @return a true or false of whether the file passed checks
   */
-  protected static boolean checkFile(File file){
+  public static boolean checkFile(File file){
     boolean ok = false;
     if (file.isFile()) {
 
@@ -374,6 +383,25 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 						  folderCollection.addCell(cell);
 						  mw.log("  Added nucleus "+nucleusNumber);
 						  nucleusNumber++;
+						 
+						  // save out the image stacks rather than hold within the nucleus
+						  Nucleus n 			 = cell.getNucleus();
+						  FloatPolygon polygon 	 = Utils.createPolygon(n.getBorderList());
+						  PolygonRoi nucleus 	 = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+						  
+						  double[] position = n.getPosition();
+						  nucleus.setLocation(position[Nucleus.X_BASE],position[Nucleus.Y_BASE]); // translate the roi to the image coordinates
+						  
+						  ImageStack smallRegion = NucleusFinder.getRoiAsStack(nucleus, imageStack);
+						  Roi largeRoi 			 = RoiEnlarger.enlarge(nucleus, 20);
+						  ImageStack largeRegion = NucleusFinder.getRoiAsStack(largeRoi, imageStack);
+						  try{
+							  IJ.saveAsTiff(ImageExporter.convert(smallRegion), n.getOriginalImagePath());
+							  IJ.saveAsTiff(ImageExporter.convert(largeRegion), n.getEnlargedImagePath());
+							  IJ.saveAsTiff(ImageExporter.convert(smallRegion), n.getAnnotatedImagePath());
+						  } catch(Exception e){
+							  logger.error("Error saving original, enlarged or annotated image", e);
+						  }
 					  }
 				  }
 

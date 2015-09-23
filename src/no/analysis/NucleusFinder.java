@@ -51,7 +51,7 @@ public class NucleusFinder {
 	 * @return
 	 */
 	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, File logfile, File sourceFile, String outputFolderName){
-		logger = new Logger(logfile, "NucleusDetector");
+		logger = new Logger(logfile, "NucleusFinder");
 		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
 		return result;
 	}
@@ -94,6 +94,9 @@ public class NucleusFinder {
   */
 	protected static List<Cell> processImage(ImageStack image, File path, AnalysisOptions analysisOptions, String outputFolderName){
 
+		if(analysisOptions==null){
+			throw new IllegalArgumentException("Analysis options are null");
+		}
 		logger.log("File:  "+path.getName(), Logger.DEBUG);
 		List<Cell> result = new ArrayList<Cell>();
 				
@@ -173,9 +176,9 @@ public class NucleusFinder {
 
 		  try{
 		  	// Enlarge the ROI, so we can do nucleus detection on the resulting original images
-			  ImageStack smallRegion = getRoiAsStack(nucleus, image);
-			  Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
-			  ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
+//			  ImageStack smallRegion = getRoiAsStack(nucleus, image);
+//			  Roi enlargedRoi = RoiEnlarger.enlarge(nucleus, 20);
+//			  ImageStack largeRegion = getRoiAsStack(enlargedRoi, image);
 		
 			  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
 			  
@@ -191,14 +194,14 @@ public class NucleusFinder {
 			  currentNucleus.setOutputFolder(outputFolderName);
 			  currentNucleus.intitialiseNucleus(analysisOptions.getAngleProfileWindowSize());
 			  
-			  // save out the image stacks rather than hold within the nucleus
-			  try{
-				  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getOriginalImagePath());
-				  IJ.saveAsTiff(ImageExporter.convert(largeRegion), currentNucleus.getEnlargedImagePath());
-				  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
-			  } catch(Exception e){
-				  logger.error("Error saving original, enlarged or annotated image", e);
-			  }
+//			  // save out the image stacks rather than hold within the nucleus
+//			  try{
+//				  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getOriginalImagePath());
+//				  IJ.saveAsTiff(ImageExporter.convert(largeRegion), currentNucleus.getEnlargedImagePath());
+//				  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
+//			  } catch(Exception e){
+//				  logger.error("Error saving original, enlarged or annotated image", e);
+//			  }
 
 			  
 			  currentNucleus.findPointsAroundBorder();
