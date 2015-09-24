@@ -49,6 +49,8 @@ public class ImageProber extends JDialog {
 	private ImageIcon imageIcon;
 	private JLabel headerLabel;
 	
+	private ImageIcon loadingGif = null;
+	
 	private ImageIcon blankIcon ;
 	private boolean ok = false;
 
@@ -60,6 +62,16 @@ public class ImageProber extends JDialog {
 		this.options = options;
 		this.logger = new Logger(logFile, "ImageProber");
 		this.setTitle("Image Prober");
+		
+		try{
+			loadingGif = new ImageIcon(this.getClass().getResource("/ajax-loader.gif"));
+		} catch (Exception e){
+			IJ.log("Cannot load gif resource: "+e.getMessage());
+		}
+		if(loadingGif==null){
+			IJ.log("Unable to load gif");
+		}
+
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setLayout(new FlowLayout());
@@ -188,7 +200,10 @@ public class ImageProber extends JDialog {
 	private void importAndDisplayImage(File imageFile){
 
 		try {
+		    
 			headerLabel.setText("Probing...");
+			headerLabel.setIcon(loadingGif);
+			
 			imageIcon.getImage().flush();
 			imageIcon = blankIcon;
 			imageLabel.setIcon(imageIcon);
@@ -209,11 +224,6 @@ public class ImageProber extends JDialog {
 					imageFile, 
 					null);
 
-//			if(cells.isEmpty()){
-//				imageIcon = blankIcon;
-////				IJ.log("  No nuclei detected in image");
-			//			} else {
-
 			for(Cell cell : cells){
 
 				Nucleus n = cell.getNucleus();
@@ -233,12 +243,11 @@ public class ImageProber extends JDialog {
 			imageLabel.setIcon(imageIcon);
 			imageLabel.revalidate();
 			imageLabel.repaint();
-			//				imagePane.revalidate();
-			//				imagePane.repaint();
 
 			contentPanel.revalidate();;
 			contentPanel.repaint();
-			headerLabel.setText("Probing "+imageFile.getAbsolutePath());
+			headerLabel.setText("Viewing "+imageFile.getAbsolutePath());
+			headerLabel.setIcon(null);
 			logger.log("New image loaded", Logger.DEBUG);
 //			}
 
