@@ -43,6 +43,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 
 import datasets.HistogramChartFactory;
+import datasets.NuclearHistogramDatasetCreator;
 import datasets.NucleusDatasetCreator;
 
 public class NuclearBoxplotsPanel extends DetailPanel {
@@ -263,31 +264,31 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				HistogramDataset ds = null;
 				
 				if(chartType.equals("Area")){
-					ds = NucleusDatasetCreator.createNuclearAreaHistogramDataset(list);
+					ds = NuclearHistogramDatasetCreator.createNuclearAreaHistogramDataset(list);
 				}
 				
 				if(chartType.equals("Perimeter")){
-					ds = NucleusDatasetCreator.createNuclearPerimeterHistogramDataset(list);
+					ds = NuclearHistogramDatasetCreator.createNuclearPerimeterHistogramDataset(list);
 				}
 				
 				if(chartType.equals("Max feret")){
-					ds = NucleusDatasetCreator.createNuclearMaxFeretHistogramDataset(list);
+					ds = NuclearHistogramDatasetCreator.createNuclearMaxFeretHistogramDataset(list);
 				}
 				
 				if(chartType.equals("Min diameter")){
-					ds = NucleusDatasetCreator.createNuclearMinDiameterHistogramDataset(list);
+					ds = NuclearHistogramDatasetCreator.createNuclearMinDiameterHistogramDataset(list);
 				}
 				
 				if(chartType.equals("Variability")){
-					ds = NucleusDatasetCreator.createNuclearVariabilityHistogramDataset(list);
+					ds = NuclearHistogramDatasetCreator.createNuclearVariabilityHistogramDataset(list);
 				}
 				
 				if(chartType.equals("Circularity")){
-					ds = NucleusDatasetCreator.createNuclearCircularityHistogramDataset(list);
+					ds = NuclearHistogramDatasetCreator.createNuclearCircularityHistogramDataset(list);
 				}
 				
 				if(chartType.equals("Aspect")){
-					ds = NucleusDatasetCreator.createNuclearAspectRatioHistogramDataset(list);
+					ds = NuclearHistogramDatasetCreator.createNuclearAspectRatioHistogramDataset(list);
 				}
 
 				JFreeChart chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, chartType);

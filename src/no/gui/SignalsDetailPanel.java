@@ -67,6 +67,7 @@ import utility.Constants;
 import datasets.ConsensusNucleusChartFactory;
 import datasets.HistogramChartFactory;
 import datasets.MorphologyChartFactory;
+import datasets.NuclearSignalDatasetCreator;
 import datasets.NucleusDatasetCreator;
 
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
@@ -455,7 +456,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     			public void run(){
     			
     		    //Update the model here
-    				TableModel model = NucleusDatasetCreator.createSignalStatsTable(list); 
+    				TableModel model = NuclearSignalDatasetCreator.createSignalStatsTable(list); 
     	    		statsTable.setModel(model);
     	    		
     	    		if(list!=null && !list.isEmpty()){
@@ -496,7 +497,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
     				if(collection.hasConsensusNucleus()){ // if a refold is available
     					
-    					XYDataset signalCoMs = NucleusDatasetCreator.createSignalCoMDataset(activeDataset);
+    					XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(activeDataset);
     					JFreeChart chart = MorphologyChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset, signalCoMs);
     					chartPanel.setChart(chart);
     					chartPanel.restoreAutoBounds();
@@ -553,7 +554,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		
     		JFreeChart chart = HistogramChartFactory.createSignalAngleHistogram(null, activeDataset);
     		try {
-    			HistogramDataset ds = NucleusDatasetCreator.createSignalAngleHistogramDataset(list);
+    			HistogramDataset ds = NuclearSignalDatasetCreator.createSignalAngleHistogramDataset(list);
 
     			if(ds.getSeriesCount()>0){
     				chart = HistogramChartFactory.createSignalAngleHistogram(ds, activeDataset);
@@ -568,7 +569,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	private void updateSignalDistanceHistogram(List<AnalysisDataset> list){
     		JFreeChart chart = HistogramChartFactory.createSignalDistanceHistogram(null, activeDataset);
     		try {
-    			HistogramDataset ds = NucleusDatasetCreator.createSignalDistanceHistogramDataset(list);
+    			HistogramDataset ds = NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(list);
 
     			if(ds.getSeriesCount()>0){
     				chart = HistogramChartFactory.createSignalDistanceHistogram(ds, activeDataset);
@@ -606,10 +607,10 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	 */
     	protected void update(List<AnalysisDataset> list){
     		try{
-    			TableModel model = NucleusDatasetCreator.createSignalDetectionParametersTable(null);
+    			TableModel model = NuclearSignalDatasetCreator.createSignalDetectionParametersTable(null);
     			if(list!=null && !list.isEmpty()){
 
-    				model = NucleusDatasetCreator.createSignalDetectionParametersTable(list);
+    				model = NuclearSignalDatasetCreator.createSignalDetectionParametersTable(list);
     			} 
 
     			table.setModel(model);
@@ -643,7 +644,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	 */
     	protected void update(List<AnalysisDataset> list){
     		if(list.size()==1){
-    			BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSignalAreaBoxplotDataset(list.get(0));
+    			BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.createSignalAreaBoxplotDataset(list.get(0));
     			JFreeChart boxplotChart = MorphologyChartFactory.makeSignalAreaBoxplot(ds, list.get(0));
     			chartPanel.setChart(boxplotChart);
     		} else {
@@ -698,7 +699,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
     			if(dataset.hasShellResult()){ // only if there is something to display
 
-    				CategoryDataset ds = NucleusDatasetCreator.createShellBarChartDataset(list);
+    				CategoryDataset ds = NuclearSignalDatasetCreator.createShellBarChartDataset(list);
     				JFreeChart shellsChart = ChartFactory.createBarChart(null, "Outer <--- Shell ---> Interior", "Percent", ds);
     				shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
     				shellsChart.getCategoryPlot().getRangeAxis().setRange(0,100);

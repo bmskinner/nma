@@ -589,7 +589,7 @@ public class MorphologyChartFactory {
 		plot.setRenderer(1, rend);
 
 		for(int signalGroup : dataset.getCollection().getSignalGroups()){
-			List<Shape> shapes = NucleusDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
+			List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
 
 			int signalCount = shapes.size();
 
