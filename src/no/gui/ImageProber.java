@@ -123,7 +123,7 @@ public class ImageProber extends JDialog {
 					Thread thr = new Thread(){
 						public void run() {
 							openImage = getNextImage();
-							IJ.log("Set open image to "+openImage.getAbsolutePath());
+//							IJ.log("Set open image to "+openImage.getAbsolutePath());
 							importAndDisplayImage(openImage);
 						}
 					};	
@@ -141,7 +141,7 @@ public class ImageProber extends JDialog {
 					Thread thr = new Thread(){
 						public void run() {
 							openImage = getPrevImage();
-							IJ.log("Set open image to "+openImage.getAbsolutePath());
+//							IJ.log("Set open image to "+openImage.getAbsolutePath());
 							importAndDisplayImage(openImage);
 						}
 					};	
