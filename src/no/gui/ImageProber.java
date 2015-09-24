@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.net.URL;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -41,118 +42,157 @@ public class ImageProber extends JDialog {
 	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 
 	private final JPanel contentPanel = new JPanel();
-	private AnalysisOptions options;
-	private File openImage;
-	private Logger logger;
-	private JLabel imageLabel;
-	private JPanel imagePane;
-	private ImageIcon imageIcon;
-	private JLabel headerLabel;
+	private AnalysisOptions options; // the options to detect with
+	private File openImage;			// the image currently open
+	private Logger logger;	
+	private JLabel imageLabel;		// the JLabel to hold the image
+
+	private ImageIcon imageIcon;	// the icon with the image, for display in JLabel
+	private JLabel headerLabel;		// the header text and loading gif
 	
-	private ImageIcon loadingGif = null;
+	private ImageIcon loadingGif = null; // the icon for the loading gif
 	
-	private ImageIcon blankIcon ;
+	private ImageIcon blankIcon ; 		// a black square
 	private boolean ok = false;
 
 	/**
 	 * Create the dialog.
 	 */
 	public ImageProber(AnalysisOptions options, File logFile) {
+		
+		if(options==null){
+			throw new IllegalArgumentException("Options is null");
+		} 
 		this.setModal(true);
 		this.options = options;
 		this.logger = new Logger(logFile, "ImageProber");
 		this.setTitle("Image Prober");
 		
+		setBounds(100, 100, 450, 300);
+		
 		try{
-			loadingGif = new ImageIcon(this.getClass().getResource("/ajax-loader.gif"));
+			String pathToGif = "/ajax-loader.gif";
+			URL urlToGif = this.getClass().getResource(pathToGif);
+	
+			
+			loadingGif = new ImageIcon(urlToGif);
+			
+			if(loadingGif==null){
+				IJ.log("Looking for: "+urlToGif.getFile());
+				IJ.log("Unable to load gif");
+			} else {
+//				IJ.log("Loaded gif");
+			}
+			
+			
 		} catch (Exception e){
 			IJ.log("Cannot load gif resource: "+e.getMessage());
-		}
-		if(loadingGif==null){
-			IJ.log("Unable to load gif");
+			for(StackTraceElement e1 : e.getStackTrace()){
+				IJ.log(e1.toString());
+			}
 		}
 
-		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(new FlowLayout());
+		contentPanel.setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			{
-				JButton okButton = new JButton("Proceed with analysis");
-				okButton.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-						ImageProber.this.ok = true;
-						ImageProber.this.setVisible(false);
-
-					}
-				});
-				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
-			}
-			{
-				JButton cancelButton = new JButton("Revise settings");
-				cancelButton.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-						
-						ImageProber.this.ok = false;
-						ImageProber.this.setVisible(false);
-
-					}
-				});
-				buttonPane.add(cancelButton);
-			}
-			{
-				JButton nextButton = new JButton("Next");
-				nextButton.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-						
-						final File f = getNextImage();
-						
-						Thread thr = new Thread(){
-							 public void run() {
-								 importAndDisplayImage(f);
-							 }
-						 };	
-						 thr.start();
-
-					}
-				});
-				getContentPane().add(nextButton, BorderLayout.EAST);
-			}
-		}
 		
-		imagePane = new JPanel();
-		imagePane.setLayout(new BorderLayout());
 		
-		double w = screenSize.getWidth() * 0.75;
-		double h = 600;
+		JPanel header = this.createHeader();
+		contentPanel.add(header, BorderLayout.NORTH);
 		
-		blankIcon = new ImageIcon(new BufferedImage( (int) w, (int) h,BufferedImage.TYPE_INT_RGB));
-		imageIcon = blankIcon;
-		imageLabel = new JLabel("", imageIcon, JLabel.CENTER);
-		imagePane.add(imageLabel, BorderLayout.CENTER);
+		JPanel footer = this.createFooter();
+		contentPanel.add(footer, BorderLayout.SOUTH);
 		
-		headerLabel = new JLabel("Probing...");
-		
-		imagePane.add(headerLabel, BorderLayout.NORTH);
+		JPanel imagePane = createImagePanel();
 		contentPanel.add(imagePane, BorderLayout.CENTER);
 		
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
-		if(options!=null){
-			importImages(options.getFolder());
-		} else {
-			logger.log("Cannot probe image: options is null", Logger.ERROR);
+		{
+			JButton nextButton = new JButton("Next");
+			nextButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+
+					final File f = getNextImage();
+
+					Thread thr = new Thread(){
+						public void run() {
+							importAndDisplayImage(f);
+						}
+					};	
+					thr.start();
+
+				}
+			});
+			contentPanel.add(nextButton, BorderLayout.EAST);
 		}
-		
+
+		importImages(options.getFolder());
+
 		this.pack(); 
 		this.setVisible(true);
+	}
+	
+	private JPanel createHeader(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+		headerLabel = new JLabel("Probing...");
+		
+		panel.add(headerLabel, BorderLayout.NORTH);
+		
+		return panel;
+	}
+	
+	private JPanel createImagePanel(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		
+        double w = screenSize.getWidth() * 0.75;
+        double h = 650;
+
+        blankIcon = new ImageIcon(new BufferedImage( (int) w, (int) h,BufferedImage.TYPE_INT_RGB));
+
+		imageIcon = blankIcon;
+		imageLabel = new JLabel("", imageIcon, JLabel.CENTER);
+		panel.add(imageLabel, BorderLayout.CENTER);
+				
+		return panel;
+	}
+	
+	
+	private JPanel createFooter(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		
+		JButton okButton = new JButton("Proceed with analysis");
+		okButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				ImageProber.this.ok = true;
+				ImageProber.this.setVisible(false);
+
+			}
+		});
+		panel.add(okButton);
+		
+		getRootPane().setDefaultButton(okButton);
+
+		JButton cancelButton = new JButton("Revise settings");
+		cancelButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+
+				ImageProber.this.ok = false;
+				ImageProber.this.setVisible(false);
+
+			}
+		});
+		panel.add(cancelButton);
+		
+		
+		return panel;
 	}
 		
 	public boolean getOK(){
@@ -203,18 +243,18 @@ public class ImageProber extends JDialog {
 		    
 			headerLabel.setText("Probing...");
 			headerLabel.setIcon(loadingGif);
+			headerLabel.repaint();
 			
-			imageIcon.getImage().flush();
-			imageIcon = blankIcon;
-			imageLabel.setIcon(imageIcon);
+//			imageIcon.getImage().flush();
+//			imageIcon = blankIcon;
+			imageLabel.setIcon(loadingGif);
 			
 			logger.log("Importing file: "+imageFile.getAbsolutePath(), Logger.DEBUG);
 			ImageStack imageStack = ImageImporter.importImage(imageFile, logger.getLogfile());
 			openImage = imageFile;
 			
-			ImagePlus image = ImageExporter.convert(imageStack);
+			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
 
-			ImageProcessor openProcessor = image.getProcessor();
 			openProcessor.setColor(Color.YELLOW);
 
 
@@ -244,12 +284,11 @@ public class ImageProber extends JDialog {
 			imageLabel.revalidate();
 			imageLabel.repaint();
 
-			contentPanel.revalidate();;
-			contentPanel.repaint();
-			headerLabel.setText("Viewing "+imageFile.getAbsolutePath());
+			headerLabel.setText("Showing "+imageFile.getAbsolutePath());
 			headerLabel.setIcon(null);
+			
 			logger.log("New image loaded", Logger.DEBUG);
-//			}
+
 
 		} catch (Exception e) { // end try
 			logger.error("Error in image processing", e);
@@ -262,21 +301,22 @@ public class ImageProber extends JDialog {
 		int originalHeight = ip.getHeight();
 
 		// set the image width to be less than half the screen width
-		int smallWidth = (int) ((double) screenSize.getWidth() * 0.75);
+		int smallWidth = (int) ((double) screenSize.getWidth() * 0.65);
 
 		// keep the image aspect ratio
 		double ratio = (double) originalWidth / (double) originalHeight;
 		int smallHeight = (int) (smallWidth / ratio);
-
-		final ImagePlus smallImage;
+		
+		ImageIcon smallImageIcon;
 
 		if(ip.getWidth()>smallWidth){
-			smallImage = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
+			
+			smallImageIcon = new ImageIcon(ip.resize(smallWidth, smallHeight ).getBufferedImage());
+			
 		} else {
-			smallImage = new ImagePlus("small", ip);
+			
+			smallImageIcon = new ImageIcon( ip.getBufferedImage()  );
 		}
-		
-		ImageIcon smallImageIcon = new ImageIcon(smallImage.getBufferedImage());
 		return smallImageIcon;
 	}
 
