@@ -1,7 +1,6 @@
 package no.gui;
 
 import ij.IJ;
-import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
@@ -13,13 +12,11 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -53,7 +50,6 @@ public class ImageProber extends JDialog {
 	
 	private ImageIcon loadingGif = null; // the icon for the loading gif
 	
-//	private ImageIcon blankIcon ; 		// a black square
 	private boolean ok = false;
 	
 	private List<File> probableFiles;	// the list of image files
@@ -68,6 +64,7 @@ public class ImageProber extends JDialog {
 			throw new IllegalArgumentException("Options is null");
 		} 
 		this.setModal(true);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.options = options;
 		this.logger = new Logger(logFile, "ImageProber");
 		this.setTitle("Image Prober");
@@ -123,7 +120,6 @@ public class ImageProber extends JDialog {
 					Thread thr = new Thread(){
 						public void run() {
 							openImage = getNextImage();
-//							IJ.log("Set open image to "+openImage.getAbsolutePath());
 							importAndDisplayImage(openImage);
 						}
 					};	
@@ -141,7 +137,6 @@ public class ImageProber extends JDialog {
 					Thread thr = new Thread(){
 						public void run() {
 							openImage = getPrevImage();
-//							IJ.log("Set open image to "+openImage.getAbsolutePath());
 							importAndDisplayImage(openImage);
 						}
 					};	
@@ -154,24 +149,33 @@ public class ImageProber extends JDialog {
 
 		createFileList(options.getFolder());
 
-//		this.pack(); 
 		this.setVisible(true);
 	}
 	
+	/**
+	 * Make the header panel with status label
+	 * @return
+	 */
 	private JPanel createHeader(){
 		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		panel.setLayout(new BorderLayout());
 
 		headerLabel = new JLabel("Examining input folders...");
 		headerLabel.setIcon(loadingGif);
+		
+		panel.add(new JLabel("Objects meeting nucleus parameters are outlined in yellow"), BorderLayout.NORTH);
 
-		panel.add(headerLabel, BorderLayout.NORTH);
+		panel.add(headerLabel, BorderLayout.SOUTH);
 
 		return panel;
 	}
 	
 
 
+	/**
+	 * Make the image panel 
+	 * @return
+	 */
 	private JPanel createImagePanel(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -184,6 +188,10 @@ public class ImageProber extends JDialog {
 	}
 
 
+	/**
+	 * Make the footer panel, with ok and cancel buttons
+	 * @return
+	 */
 	private JPanel createFooter(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -228,15 +236,12 @@ public class ImageProber extends JDialog {
 	 */
 	private File getNextImage(){
 
-//		index++;
-//		IJ.log("Increasing index to "+index);
 		if(index >= probableFiles.size()-1){
 			index = probableFiles.size()-1;
 		} else {
 			index++;
 		}
 		File f =  probableFiles.get(index);
-//		IJ.log("Got file "+f.getAbsolutePath());
 		return f;
 
 	}
@@ -252,10 +257,8 @@ public class ImageProber extends JDialog {
 		} else {
 			index--;
 		}
-//		index--;
-//		IJ.log("Decreasing index to "+index);
+
 		File f =  probableFiles.get(index);
-//		IJ.log("Got file "+f.getAbsolutePath());
 		return f;
 	}
 	
@@ -305,6 +308,12 @@ public class ImageProber extends JDialog {
 		return files;
 	}
 	
+	
+	/**
+	 * Import the given file as an image, detect nuclei and
+	 * display the image with annotated nuclear outlines
+	 * @param imageFile
+	 */
 	private void importAndDisplayImage(File imageFile){
 
 		try {
@@ -324,7 +333,7 @@ public class ImageProber extends JDialog {
 			
 			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
 
-			openProcessor.setColor(Color.YELLOW);
+			
 
 
 			List<Cell> cells = NucleusFinder.getCells(imageStack, 
@@ -337,7 +346,14 @@ public class ImageProber extends JDialog {
 
 				Nucleus n = cell.getNucleus();
 				// annotate the image processor with the nucleus outline
-
+				
+				if(checkNucleus(n)){
+					openProcessor.setColor(Color.YELLOW);
+				} else {
+					openProcessor.setColor(Color.RED);
+				}
+				
+				
 				double[] positions = n.getPosition();
 				FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
 				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
@@ -365,6 +381,44 @@ public class ImageProber extends JDialog {
 
 	}
 	
+	/**
+	 * Check the given nucleus size and circ parameters against options
+	 * @param n the nucleus to check
+	 * @return boolean ok
+	 */
+	private boolean checkNucleus(Nucleus n){
+		boolean result = true;
+		
+		if(n.getArea() < options.getMinNucleusSize()){
+			
+			result = false;
+		}
+		
+		if(n.getArea() > options.getMaxNucleusSize()){
+			
+			result = false;
+		}
+		
+		if(n.getCircularity() < options.getMinNucleusCirc()){
+			
+			result = false;
+		}
+		
+		if(n.getCircularity() > options.getMaxNucleusCirc()){
+			
+			result = false;
+		}
+		
+		return result;
+	}
+	
+	
+	/**
+	 * Rezize the given image processor to fit in the screen,
+	 * and make an icon
+	 * @param ip an image processor
+	 * @return an image icon with the resized image
+	 */
 	private ImageIcon createViewableImage(ImageProcessor ip){
 		int originalWidth = ip.getWidth();
 		int originalHeight = ip.getHeight();

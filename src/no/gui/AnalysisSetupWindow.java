@@ -114,6 +114,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	 */
 	public AnalysisSetupWindow() {
 		setModal(true); // ensure nothing happens until this window is closed
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // disable the 'X'; we need to use the footer buttons 
 		setDefaultOptions();
 		createAndShowGUI();
 		pack();
@@ -126,6 +127,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	 */
 	public AnalysisSetupWindow(AnalysisOptions options) {
 		setModal(true); // ensure nothing happens until this window is closed
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		analysisOptions = options;
 		createAndShowGUI();
 		pack();
