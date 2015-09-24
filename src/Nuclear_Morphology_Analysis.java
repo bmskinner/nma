@@ -1,16 +1,21 @@
-/*
-  -------------------------------------------------
-  NUCLEAR MORPHOLOGY IMAGEJ PLUGIN
-  -------------------------------------------------
-  Copyright (C) Ben Skinner 2015
-
-  This plugin allows for automated detection of FISH
-  signals in a mouse sperm nucleus, and measurement of
-  the signal position relative to the nuclear centre of
-  mass (CoM) and sperm tip. Works with both red and green channels.
-  It also generates a profile of the nuclear shape, allowing
-  morphology comparisons
- */
+/*******************************************************************************
+ *  	Copyright (C) 2015 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
