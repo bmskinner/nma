@@ -16,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -47,13 +48,16 @@ public class ImageProber extends JDialog {
 	private Logger logger;	
 	private JLabel imageLabel;		// the JLabel to hold the image
 
-	private ImageIcon imageIcon;	// the icon with the image, for display in JLabel
+	private ImageIcon imageIcon = null;	// the icon with the image, for display in JLabel
 	private JLabel headerLabel;		// the header text and loading gif
 	
 	private ImageIcon loadingGif = null; // the icon for the loading gif
 	
-	private ImageIcon blankIcon ; 		// a black square
+//	private ImageIcon blankIcon ; 		// a black square
 	private boolean ok = false;
+	
+	private List<File> probableFiles;	// the list of image files
+	private int index = 0; 				// the index of the open file
 
 	/**
 	 * Create the dialog.
@@ -68,7 +72,10 @@ public class ImageProber extends JDialog {
 		this.logger = new Logger(logFile, "ImageProber");
 		this.setTitle("Image Prober");
 		
-		setBounds(100, 100, 450, 300);
+		int w = (int) (screenSize.getWidth() * 0.75);
+		int h = (int) (screenSize.getHeight() * 0.75);
+		
+		setBounds(100, 100, w, h);
 		
 		try{
 			String pathToGif = "/ajax-loader.gif";
@@ -81,7 +88,6 @@ public class ImageProber extends JDialog {
 				IJ.log("Looking for: "+urlToGif.getFile());
 				IJ.log("Unable to load gif");
 			} else {
-//				IJ.log("Loaded gif");
 			}
 			
 			
@@ -114,11 +120,11 @@ public class ImageProber extends JDialog {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
 
-					final File f = getNextImage();
-
 					Thread thr = new Thread(){
 						public void run() {
-							importAndDisplayImage(f);
+							openImage = getNextImage();
+							IJ.log("Set open image to "+openImage.getAbsolutePath());
+							importAndDisplayImage(openImage);
 						}
 					};	
 					thr.start();
@@ -126,11 +132,29 @@ public class ImageProber extends JDialog {
 				}
 			});
 			contentPanel.add(nextButton, BorderLayout.EAST);
+			
+			JButton prevButton = new JButton("Prev");
+			prevButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+
+					Thread thr = new Thread(){
+						public void run() {
+							openImage = getPrevImage();
+							IJ.log("Set open image to "+openImage.getAbsolutePath());
+							importAndDisplayImage(openImage);
+						}
+					};	
+					thr.start();
+
+				}
+			});
+			contentPanel.add(prevButton, BorderLayout.WEST);
 		}
 
-		importImages(options.getFolder());
+		createFileList(options.getFolder());
 
-		this.pack(); 
+//		this.pack(); 
 		this.setVisible(true);
 	}
 	
@@ -138,34 +162,32 @@ public class ImageProber extends JDialog {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
-		headerLabel = new JLabel("Probing...");
-		
+		headerLabel = new JLabel("Examining input folders...");
+		headerLabel.setIcon(loadingGif);
+
 		panel.add(headerLabel, BorderLayout.NORTH);
-		
+
 		return panel;
 	}
 	
+
+
 	private JPanel createImagePanel(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
-		
-        double w = screenSize.getWidth() * 0.75;
-        double h = 650;
 
-        blankIcon = new ImageIcon(new BufferedImage( (int) w, (int) h,BufferedImage.TYPE_INT_RGB));
-
-		imageIcon = blankIcon;
+		imageIcon = loadingGif;
 		imageLabel = new JLabel("", imageIcon, JLabel.CENTER);
 		panel.add(imageLabel, BorderLayout.CENTER);
-				
+
 		return panel;
 	}
-	
-	
+
+
 	private JPanel createFooter(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		
+
 		JButton okButton = new JButton("Proceed with analysis");
 		okButton.addMouseListener(new MouseAdapter() {
 			@Override
@@ -176,7 +198,7 @@ public class ImageProber extends JDialog {
 			}
 		});
 		panel.add(okButton);
-		
+
 		getRootPane().setDefaultButton(okButton);
 
 		JButton cancelButton = new JButton("Revise settings");
@@ -190,68 +212,115 @@ public class ImageProber extends JDialog {
 			}
 		});
 		panel.add(cancelButton);
-		
-		
+
+
 		return panel;
 	}
-		
+
+	
 	public boolean getOK(){
 		return this.ok;
 	}
-	
-	private File getNextImage(){
-		
-		boolean use = false;
-		File[] listOfFiles = options.getFolder().listFiles();
-		for (File file : listOfFiles) {
-			if(use){
-				return file;
-			}
-			if(file.equals(openImage)){
-				use = true;
-			}
-		}
-		return openImage;
-	}
-		
-	private void importImages(final File folder){
 
+	/**
+	 * Get the next image in the file list
+	 * @return
+	 */
+	private File getNextImage(){
+
+//		index++;
+//		IJ.log("Increasing index to "+index);
+		if(index >= probableFiles.size()-1){
+			index = probableFiles.size()-1;
+		} else {
+			index++;
+		}
+		File f =  probableFiles.get(index);
+//		IJ.log("Got file "+f.getAbsolutePath());
+		return f;
+
+	}
+	
+	/**
+	 * Get the previous image in the file list
+	 * @return
+	 */
+	private File getPrevImage(){
+		
+		if(index <= 0){
+			index = 0;
+		} else {
+			index--;
+		}
+//		index--;
+//		IJ.log("Decreasing index to "+index);
+		File f =  probableFiles.get(index);
+//		IJ.log("Got file "+f.getAbsolutePath());
+		return f;
+	}
+	
+	
+	/**
+	 * Create a list of image files in the given folder
+	 * @param folder
+	 */
+	private void createFileList(final File folder){
+		
+		probableFiles = new ArrayList<File>();
+		
 		Thread thr = new Thread(){
 			public void run() {
-				File[] listOfFiles = folder.listFiles();
-
-				File firstFile = null;
-				for (File file : listOfFiles) {
-
-					boolean ok = NucleusDetector.checkFile(file); // check file extension
-
-					if(ok){
-						firstFile = file;
-						break;
-
-					}
-				}
-				importAndDisplayImage(firstFile);
+				probableFiles = importImages(folder);
+				openImage = probableFiles.get(index);
+				
+				importAndDisplayImage(openImage);
 			}
 		};	
 		thr.start();
+		
+	}
+		
+	/**
+	 * Check each file in the given folder for suitability
+	 * If the folder contains folders, check recursively
+	 * @param folder the folder to check
+	 * @return a list of image files
+	 */
+	private List<File> importImages(File folder){
+
+		List<File> files = new ArrayList<File>();
+
+		for (File file :  folder.listFiles()) {
+
+			boolean ok = NucleusDetector.checkFile(file); // check file extension
+
+			if(ok){
+				files.add(file);
+			}
+			
+			if(file.isDirectory()){
+				files.addAll(importImages(file));
+			}
+		}
+		return files;
 	}
 	
 	private void importAndDisplayImage(File imageFile){
 
 		try {
-		    
-			headerLabel.setText("Probing...");
+//		    openImage = imageFile;
+//			IJ.log("Displaying index "+index);
+//			IJ.log("Displaying file "+imageFile.getAbsolutePath());
+			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 			headerLabel.setIcon(loadingGif);
 			headerLabel.repaint();
 			
-//			imageIcon.getImage().flush();
-//			imageIcon = blankIcon;
 			imageLabel.setIcon(loadingGif);
+			imageLabel.repaint();
 			
 			logger.log("Importing file: "+imageFile.getAbsolutePath(), Logger.DEBUG);
 			ImageStack imageStack = ImageImporter.importImage(imageFile, logger.getLogfile());
-			openImage = imageFile;
+			
 			
 			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
 
@@ -284,7 +353,7 @@ public class ImageProber extends JDialog {
 			imageLabel.revalidate();
 			imageLabel.repaint();
 
-			headerLabel.setText("Showing "+imageFile.getAbsolutePath());
+			headerLabel.setText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
 			headerLabel.setIcon(null);
 			
 			logger.log("New image loaded", Logger.DEBUG);
