@@ -31,16 +31,16 @@ import javax.swing.table.TableModel;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
-import cell.CellCollection;
+import components.CellCollection;
+import components.nuclear.NucleusBorderSegment;
+import components.nuclei.Nucleus;
+import components.nuclei.RoundNucleus;
+import components.nuclei.sperm.PigSpermNucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
+import analysis.AnalysisDataset;
+import analysis.AnalysisOptions;
+import analysis.AnalysisOptions.CannyOptions;
 import utility.Constants;
-import no.analysis.AnalysisDataset;
-import no.components.AnalysisOptions;
-import no.components.NucleusBorderSegment;
-import no.components.AnalysisOptions.CannyOptions;
-import no.nuclei.Nucleus;
-import no.nuclei.RoundNucleus;
-import no.nuclei.sperm.PigSpermNucleus;
-import no.nuclei.sperm.RodentSpermNucleus;
 
 public class NucleusTableDatasetCreator {
 	

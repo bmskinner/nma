@@ -36,7 +36,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-import no.analysis.AnalysisDataset;
+import analysis.AnalysisDataset;
 
 public class ClusterDetailPanel extends DetailPanel {
 

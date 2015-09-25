@@ -50,9 +50,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import no.analysis.AnalysisDataset;
-import no.components.ShellResult;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -65,7 +62,9 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
-import cell.CellCollection;
+import components.CellCollection;
+import components.nuclear.ShellResult;
+import analysis.AnalysisDataset;
 import utility.Constants;
 import datasets.ConsensusNucleusChartFactory;
 import datasets.HistogramChartFactory;

@@ -61,20 +61,19 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 
-import no.analysis.AnalysisDataset;
-import no.components.NucleusBorderPoint;
-import no.components.NucleusBorderSegment;
-import no.components.SegmentedProfile;
-import no.nuclei.Nucleus;
-
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
+import components.Cell;
+import components.generic.SegmentedProfile;
+import components.nuclear.NucleusBorderPoint;
+import components.nuclear.NucleusBorderSegment;
+import components.nuclei.Nucleus;
+import analysis.AnalysisDataset;
 import utility.Utils;
-import cell.Cell;
 import datasets.CellDatasetCreator;
 import datasets.ConsensusNucleusChartFactory;
 import datasets.MorphologyChartFactory;

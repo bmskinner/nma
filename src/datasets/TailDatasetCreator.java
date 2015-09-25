@@ -19,13 +19,13 @@
 package datasets;
 
 import ij.IJ;
-import no.components.XYPoint;
 
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import components.Cell;
 import components.Flagellum;
-import cell.Cell;
+import components.generic.XYPoint;
 
 public class TailDatasetCreator {
 	

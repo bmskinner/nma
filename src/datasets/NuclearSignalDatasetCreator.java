@@ -9,14 +9,6 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import no.analysis.AnalysisDataset;
-import no.analysis.CurveRefolder;
-import no.components.NuclearSignal;
-import no.components.ShellResult;
-import no.components.XYPoint;
-import no.components.AnalysisOptions.NuclearSignalOptions;
-import no.nuclei.Nucleus;
-
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
@@ -25,7 +17,14 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import cell.CellCollection;
+import components.CellCollection;
+import components.generic.XYPoint;
+import components.nuclear.NuclearSignal;
+import components.nuclear.ShellResult;
+import components.nuclei.Nucleus;
+import analysis.AnalysisDataset;
+import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.nucleus.CurveRefolder;
 import utility.Utils;
 
 public class NuclearSignalDatasetCreator {

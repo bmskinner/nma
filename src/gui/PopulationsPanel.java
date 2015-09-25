@@ -21,6 +21,7 @@ package gui;
 
 import gui.components.ColourSelecter;
 import gui.tabs.DetailPanel;
+import io.PopulationExporter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -46,15 +47,14 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import no.analysis.AnalysisDataset;
-import no.export.PopulationExporter;
-
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
-import cell.CellCollection;
+import components.CellCollection;
+
+import analysis.AnalysisDataset;
 import utility.TreeOrderHashMap;
 
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {

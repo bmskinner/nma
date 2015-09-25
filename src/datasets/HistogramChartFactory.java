@@ -24,8 +24,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
 
-import no.analysis.AnalysisDataset;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -34,6 +32,8 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
+
+import analysis.AnalysisDataset;
 
 
 public class HistogramChartFactory {

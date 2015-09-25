@@ -26,6 +26,8 @@ import ij.gui.Roi;
 import ij.io.DirectoryChooser;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
+import io.ImageExporter;
+import io.ImageImporter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -52,13 +54,11 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputAdapter;
 
-import cell.Cell;
-import cell.CellCollection;
+import components.Cell;
+import components.CellCollection;
+import components.nuclei.Nucleus;
+import analysis.AnalysisDataset;
 import utility.Utils;
-import no.analysis.AnalysisDataset;
-import no.export.ImageExporter;
-import no.imports.ImageImporter;
-import no.nuclei.Nucleus;
 
 public class FishMappingWindow extends JDialog {
 

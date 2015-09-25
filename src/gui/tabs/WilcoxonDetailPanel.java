@@ -34,8 +34,8 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import analysis.AnalysisDataset;
 import utility.Constants;
-import no.analysis.AnalysisDataset;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 

@@ -19,10 +19,11 @@
 package test;
 
 import static org.junit.Assert.*;
-import no.components.Profile;
-import no.components.ProfileAggregate;
 
 import org.junit.Test;
+
+import components.generic.Profile;
+import components.generic.ProfileAggregate;
 
 public class ProfileAggregateTest {
 

@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import no.components.NucleusBorderPoint;
-import no.components.XYPoint;
+import components.generic.XYPoint;
+import components.nuclear.NucleusBorderPoint;
 
 /**
  * There can be many types of flagellum; the type of interest mainly

@@ -19,9 +19,10 @@
 package test.no.components;
 
 import static org.junit.Assert.*;
-import no.components.Profile;
 
 import org.junit.Test;
+
+import components.generic.Profile;
 
 
 public class ProfileTest {

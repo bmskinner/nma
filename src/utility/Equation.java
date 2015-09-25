@@ -24,7 +24,7 @@
 */  
 package utility;
 
-import no.components.XYPoint;
+import components.generic.XYPoint;
 
 
 public class Equation{

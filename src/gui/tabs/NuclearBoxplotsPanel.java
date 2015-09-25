@@ -33,8 +33,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
-import no.analysis.AnalysisDataset;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -44,6 +42,7 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 
+import analysis.AnalysisDataset;
 import datasets.HistogramChartFactory;
 import datasets.NuclearHistogramDatasetCreator;
 import datasets.NucleusDatasetCreator;

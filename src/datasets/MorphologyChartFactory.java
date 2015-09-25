@@ -40,10 +40,9 @@ import java.util.Map;
 
 
 
-import no.analysis.AnalysisDataset;
-import no.components.Profile;
-import no.components.ProfileCollection;
-import no.nuclei.Nucleus;
+
+
+
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -65,9 +64,13 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import components.Cell;
+import components.CellCollection;
+import components.generic.Profile;
+import components.generic.ProfileCollection;
+import components.nuclei.Nucleus;
+import analysis.AnalysisDataset;
 import utility.Utils;
-import cell.Cell;
-import cell.CellCollection;
 
 public class MorphologyChartFactory {
 	

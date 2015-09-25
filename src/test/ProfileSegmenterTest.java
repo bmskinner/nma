@@ -23,12 +23,12 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.util.List;
 
-import no.analysis.ProfileSegmenter;
-import no.components.NucleusBorderSegment;
-import no.components.Profile;
-import no.nuclei.Nucleus;
-
 import org.junit.Test;
+
+import components.generic.Profile;
+import components.nuclear.NucleusBorderSegment;
+import components.nuclei.Nucleus;
+import analysis.nucleus.ProfileSegmenter;
 
 
 public class ProfileSegmenterTest {

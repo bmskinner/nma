@@ -31,6 +31,11 @@ import gui.tabs.WilcoxonDetailPanel;
 import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.io.SaveDialog;
+import io.CompositeExporter;
+import io.NucleusAnnotator;
+import io.PopulationExporter;
+import io.PopulationImporter;
+import io.StatsExporter;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -42,23 +47,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JLabel;
 import javax.swing.JButton;
-
-import no.analysis.AnalysisDataset;
-import no.analysis.CurveRefolder;
-import no.analysis.DatasetMerger;
-import no.analysis.MorphologyAnalysis;
-import no.analysis.NucleusClusterer;
-import no.analysis.NucleusDetector;
-import no.analysis.ShellAnalysis;
-import no.analysis.SignalDetector;
-import no.components.AnalysisOptions;
-import no.components.AnalysisOptions.NuclearSignalOptions;
-import no.export.CompositeExporter;
-import no.export.NucleusAnnotator;
-import no.export.PopulationExporter;
-import no.export.StatsExporter;
-import no.imports.PopulationImporter;
-import no.nuclei.Nucleus;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -90,9 +78,17 @@ import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import cell.Cell;
-import cell.CellCollection;
-import cell.analysis.TubulinTailDetector;
+import analysis.AnalysisDataset;
+import analysis.AnalysisOptions;
+import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.nucleus.CurveRefolder;
+import analysis.nucleus.DatasetMerger;
+import analysis.nucleus.MorphologyAnalysis;
+import analysis.nucleus.NucleusClusterer;
+import analysis.nucleus.NucleusDetector;
+import analysis.nucleus.ShellAnalysis;
+import analysis.nucleus.SignalDetector;
+import analysis.tail.TubulinTailDetector;
 import utility.Constants;
 //import utility.Logger;
 
@@ -108,8 +104,19 @@ import utility.Constants;
 
 
 
+
+
+
+
+
+
+
+
 import javax.swing.JTabbedPane;
 
+import components.Cell;
+import components.CellCollection;
+import components.nuclei.Nucleus;
 import logging.TextAreaHandler;
 
 public class MainWindow extends JFrame implements SignalChangeListener {

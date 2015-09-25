@@ -43,7 +43,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import no.analysis.NucleusClusterer;
+import analysis.nucleus.NucleusClusterer;
 
 public class ClusteringSetupWindow extends JDialog {
 

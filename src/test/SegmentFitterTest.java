@@ -29,17 +29,17 @@ import java.util.List;
 import ij.IJ;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import no.analysis.ProfileSegmenter;
-import no.analysis.SegmentFitter;
-import no.components.NucleusBorderSegment;
-import no.components.Profile;
-import no.components.SegmentedProfile;
-import no.components.XYPoint;
-import no.nuclei.Nucleus;
-import no.nuclei.sperm.RodentSpermNucleus;
 
 import org.junit.Test;
 
+import components.generic.Profile;
+import components.generic.SegmentedProfile;
+import components.generic.XYPoint;
+import components.nuclear.NucleusBorderSegment;
+import components.nuclei.Nucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
+import analysis.nucleus.ProfileSegmenter;
+import analysis.nucleus.SegmentFitter;
 import test.no.components.SegmentedProfileTest;
 import utility.Logger;
 

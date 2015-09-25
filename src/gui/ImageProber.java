@@ -23,6 +23,8 @@ import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
+import io.ImageExporter;
+import io.ImageImporter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -42,15 +44,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import components.Cell;
+import components.nuclei.Nucleus;
+import analysis.AnalysisOptions;
+import analysis.nucleus.NucleusDetector;
+import analysis.nucleus.NucleusFinder;
 import utility.Logger;
 import utility.Utils;
-import cell.Cell;
-import no.analysis.NucleusDetector;
-import no.analysis.NucleusFinder;
-import no.components.AnalysisOptions;
-import no.export.ImageExporter;
-import no.imports.ImageImporter;
-import no.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
 public class ImageProber extends JDialog {

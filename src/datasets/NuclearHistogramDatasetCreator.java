@@ -20,11 +20,11 @@ package datasets;
 
 import java.util.List;
 
-import no.analysis.AnalysisDataset;
-
 import org.jfree.data.statistics.HistogramDataset;
 
-import cell.CellCollection;
+import components.CellCollection;
+
+import analysis.AnalysisDataset;
 import utility.Stats;
 
 public class NuclearHistogramDatasetCreator {

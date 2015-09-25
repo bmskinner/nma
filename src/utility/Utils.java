@@ -29,8 +29,8 @@
 
  import java.util.List;
 
-import no.components.NucleusBorderPoint;
-import no.nuclei.Nucleus;
+import components.nuclear.NucleusBorderPoint;
+import components.nuclei.Nucleus;
 import ij.IJ;
 import ij.process.FloatPolygon;
 

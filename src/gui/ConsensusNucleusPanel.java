@@ -45,10 +45,6 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import no.analysis.AnalysisDataset;
-import no.components.NucleusBorderPoint;
-import no.components.XYPoint;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -57,7 +53,10 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
-import cell.CellCollection;
+import components.CellCollection;
+import components.generic.XYPoint;
+import components.nuclear.NucleusBorderPoint;
+import analysis.AnalysisDataset;
 import datasets.ConsensusNucleusChartFactory;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;

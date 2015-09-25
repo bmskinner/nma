@@ -43,12 +43,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 
-import no.analysis.AnalysisDataset;
-import no.components.NucleusBorderSegment;
-import no.components.SegmentedProfile;
-import no.nuclei.ConsensusNucleus;
-import no.nuclei.Nucleus;
-
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
@@ -56,7 +50,12 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import cell.CellCollection;
+import components.CellCollection;
+import components.generic.SegmentedProfile;
+import components.nuclear.NucleusBorderSegment;
+import components.nuclei.ConsensusNucleus;
+import components.nuclei.Nucleus;
+import analysis.AnalysisDataset;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;

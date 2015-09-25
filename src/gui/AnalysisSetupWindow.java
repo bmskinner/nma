@@ -58,12 +58,12 @@ import java.util.Map;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import components.nuclei.RoundNucleus;
+import components.nuclei.sperm.PigSpermNucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
+import analysis.AnalysisOptions;
+import analysis.AnalysisOptions.CannyOptions;
 import utility.Constants;
-import no.components.AnalysisOptions;
-import no.components.AnalysisOptions.CannyOptions;
-import no.nuclei.RoundNucleus;
-import no.nuclei.sperm.PigSpermNucleus;
-import no.nuclei.sperm.RodentSpermNucleus;
 
 public class AnalysisSetupWindow extends SettingsDialog implements ActionListener, ChangeListener {
 

@@ -22,7 +22,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import cell.CellCollection;
+import components.CellCollection;
+
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 

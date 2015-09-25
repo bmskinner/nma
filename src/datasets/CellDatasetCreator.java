@@ -27,10 +27,10 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import components.Cell;
+import components.nuclear.NuclearSignal;
+import components.nuclei.Nucleus;
 import utility.Utils;
-import cell.Cell;
-import no.components.NuclearSignal;
-import no.nuclei.Nucleus;
 
 public class CellDatasetCreator {
 	

@@ -24,11 +24,12 @@ import java.io.File;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import no.components.XYPoint;
-import no.nuclei.Nucleus;
-import no.nuclei.sperm.RodentSpermNucleus;
 
 import org.junit.Test;
+
+import components.generic.XYPoint;
+import components.nuclei.Nucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
 
 public class NucleusTest {
 

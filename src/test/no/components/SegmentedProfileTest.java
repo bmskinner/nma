@@ -19,13 +19,13 @@
 package test.no.components;
 
 import static org.junit.Assert.*;
-import no.components.NucleusBorderSegment;
-import no.components.Profile;
-import no.components.SegmentedProfile;
-import no.nuclei.Nucleus;
 
 import org.junit.Test;
 
+import components.generic.Profile;
+import components.generic.SegmentedProfile;
+import components.nuclear.NucleusBorderSegment;
+import components.nuclei.Nucleus;
 import test.NucleusTest;
 import test.SegmentFitterTest;
 

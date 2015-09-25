@@ -44,8 +44,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import no.components.AnalysisOptions.CannyOptions;
-import no.components.AnalysisOptions.NuclearSignalOptions;
+import analysis.AnalysisOptions.CannyOptions;
+import analysis.AnalysisOptions.NuclearSignalOptions;
 
 /**
  * Contains methods for laying out panels in settings dialog options

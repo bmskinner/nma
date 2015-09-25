@@ -25,8 +25,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
 
-import no.analysis.AnalysisDataset;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -34,7 +32,9 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
-import cell.CellCollection;
+import components.CellCollection;
+
+import analysis.AnalysisDataset;
 
 /**
  * Methods to make charts with a consensus nucleus

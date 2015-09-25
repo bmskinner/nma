@@ -32,8 +32,8 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import analysis.AnalysisOptions;
 import utility.Constants;
-import no.components.AnalysisOptions;
 
 public class TailDetectionSettingsWindow extends SettingsDialog implements ActionListener {
 

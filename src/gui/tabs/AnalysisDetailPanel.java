@@ -29,7 +29,7 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import no.analysis.AnalysisDataset;
+import analysis.AnalysisDataset;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 

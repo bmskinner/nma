@@ -22,9 +22,9 @@ import static org.junit.Assert.*;
 
 import java.util.List;
 
-import no.components.NucleusBorderSegment;
-
 import org.junit.Test;
+
+import components.nuclear.NucleusBorderSegment;
 
 public class NucleuBordersSegmentTest {
 	
