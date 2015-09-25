@@ -1,4 +1,4 @@
-package utility;
+package analysis;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;

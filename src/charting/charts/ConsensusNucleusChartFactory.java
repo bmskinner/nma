@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package datasets;
+package charting.charts;
 
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
@@ -32,8 +32,8 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
+import charting.datasets.NucleusDatasetCreator;
 import components.CellCollection;
-
 import analysis.AnalysisDataset;
 
 /**

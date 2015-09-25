@@ -50,15 +50,15 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import charting.charts.MorphologyChartFactory;
+import charting.datasets.NucleusDatasetCreator;
+import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
-import datasets.MorphologyChartFactory;
-import datasets.NucleusDatasetCreator;
-import datasets.NucleusTableDatasetCreator;
 
 public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 

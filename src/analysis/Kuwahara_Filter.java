@@ -1,4 +1,4 @@
-package utility;
+package analysis;
 
 import ij.*;
 import ij.process.*;

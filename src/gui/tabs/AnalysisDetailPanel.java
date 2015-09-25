@@ -29,9 +29,9 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import charting.datasets.NucleusDatasetCreator;
+import charting.datasets.NucleusTableDatasetCreator;
 import analysis.AnalysisDataset;
-import datasets.NucleusDatasetCreator;
-import datasets.NucleusTableDatasetCreator;
 
 /**
  * Holds the nuclear detection parameters and basic stats about the

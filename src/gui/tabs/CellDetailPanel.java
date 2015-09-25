@@ -67,6 +67,11 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
+import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.MorphologyChartFactory;
+import charting.datasets.CellDatasetCreator;
+import charting.datasets.NucleusDatasetCreator;
+import charting.datasets.NucleusTableDatasetCreator;
 import components.Cell;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderPoint;
@@ -74,11 +79,6 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 import utility.Utils;
-import datasets.CellDatasetCreator;
-import datasets.ConsensusNucleusChartFactory;
-import datasets.MorphologyChartFactory;
-import datasets.NucleusDatasetCreator;
-import datasets.NucleusTableDatasetCreator;
 
 public class CellDetailPanel extends DetailPanel implements SignalChangeListener, TreeSelectionListener {
 

@@ -42,11 +42,10 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import charting.charts.MorphologyChartFactory;
+import charting.datasets.NucleusDatasetCreator;
 import components.generic.ProfileCollection;
-
 import analysis.AnalysisDataset;
-import datasets.MorphologyChartFactory;
-import datasets.NucleusDatasetCreator;
 
 public class NucleusProfilesPanel extends DetailPanel implements ActionListener {
 

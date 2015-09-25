@@ -29,6 +29,7 @@ import javax.swing.SwingWorker;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
+import analysis.CannyEdgeDetector;
 import analysis.Detector;
 import analysis.AnalysisOptions.CannyOptions;
 import Skeletonize3D_.Skeletonize3D_;
@@ -36,7 +37,6 @@ import skeleton_analysis.AnalyzeSkeleton_;
 import skeleton_analysis.Edge;
 import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
-import utility.CannyEdgeDetector;
 import utility.Constants;
 import utility.Logger;
 import utility.Utils;

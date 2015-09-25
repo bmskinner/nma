@@ -62,15 +62,15 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
+import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.HistogramChartFactory;
+import charting.charts.MorphologyChartFactory;
+import charting.datasets.NuclearSignalDatasetCreator;
+import charting.datasets.NucleusDatasetCreator;
 import components.CellCollection;
 import components.nuclear.ShellResult;
 import analysis.AnalysisDataset;
 import utility.Constants;
-import datasets.ConsensusNucleusChartFactory;
-import datasets.HistogramChartFactory;
-import datasets.MorphologyChartFactory;
-import datasets.NuclearSignalDatasetCreator;
-import datasets.NucleusDatasetCreator;
 
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 

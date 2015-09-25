@@ -42,10 +42,10 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 
+import charting.charts.HistogramChartFactory;
+import charting.datasets.NuclearHistogramDatasetCreator;
+import charting.datasets.NucleusDatasetCreator;
 import analysis.AnalysisDataset;
-import datasets.HistogramChartFactory;
-import datasets.NuclearHistogramDatasetCreator;
-import datasets.NucleusDatasetCreator;
 
 public class NuclearBoxplotsPanel extends DetailPanel {
 	

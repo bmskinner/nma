@@ -1,4 +1,4 @@
-package datasets;
+package charting.datasets;
 
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;

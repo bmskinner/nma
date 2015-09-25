@@ -53,13 +53,13 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
+import charting.charts.ConsensusNucleusChartFactory;
+import charting.charts.MorphologyChartFactory;
+import charting.datasets.NucleusDatasetCreator;
 import components.CellCollection;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
 import analysis.AnalysisDataset;
-import datasets.ConsensusNucleusChartFactory;
-import datasets.MorphologyChartFactory;
-import datasets.NucleusDatasetCreator;
 
 public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener {
 

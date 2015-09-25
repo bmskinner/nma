@@ -34,10 +34,10 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import charting.datasets.NucleusDatasetCreator;
+import charting.datasets.NucleusTableDatasetCreator;
 import analysis.AnalysisDataset;
 import utility.Constants;
-import datasets.NucleusDatasetCreator;
-import datasets.NucleusTableDatasetCreator;
 
 public class WilcoxonDetailPanel extends DetailPanel {
 
