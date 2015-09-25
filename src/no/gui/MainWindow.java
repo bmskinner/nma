@@ -64,6 +64,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComboBox;
@@ -83,9 +85,11 @@ import java.beans.PropertyChangeListener;
 import cell.Cell;
 import cell.analysis.TubulinTailDetector;
 import utility.Constants;
-import utility.Logger;
+//import utility.Logger;
 
 import javax.swing.JTabbedPane;
+
+import logging.TextAreaHandler;
 
 public class MainWindow extends JFrame implements SignalChangeListener {
 				
@@ -121,6 +125,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	private static final int CURVE_REFOLD 		 = 8;
 	private static final int EXPORT_COMPOSITE	 = 16;
 	private static final int SAVE_DATASET		 = 32;
+	
+	private static final Logger programLogger =
+	        Logger.getLogger(MainWindow.class.getName()); // the program logger will report status and errors in the running of the program, not involving datasets 
 			
 	/**
 	 * Create the frame.
@@ -160,6 +167,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			// Create the log panel
 			//---------------
 			logPanel = new LogPanel();
+			programLogger.addHandler(new TextAreaHandler(logPanel));
 			
 			//---------------
 			// Create the split view
@@ -1121,7 +1129,9 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 		
 		@Override
 		public void finished(){
-			Logger logger = new Logger(dataset.getDebugFile(), "MainWindow");
+			
+			utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
+//			logger.log(Level.INFO, "Refolding finished, cleaning up");
     		logger.log("Refolding finished, cleaning up");
 			// ensure the bar is gone, even if the cleanup fails
 			this.progressBar.setVisible(false);
@@ -1318,7 +1328,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
       
     	@Override
     	public void finished() {
-    		final Logger logger = new Logger(dataset.getDebugFile(), "MainWindow");
+    		final utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
+//    		logger.log(Level.INFO, "Morphology analysis finished");
     		logger.log("Morphology analysis finished");
 
     		// ensure the progress bar gets hidden even if it is not removed
@@ -1331,7 +1342,8 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     			public void run(){
 
     				if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
-    					logger.log("Running stats export", Logger.DEBUG);
+//    					logger.log(Level.FINE, "Running stats export");
+    					logger.log("Running stats export", utility.Logger.DEBUG);
     					logc("Exporting stats...");
     					boolean ok = StatsExporter.run(dataset.getCollection());
     					if(ok){
@@ -1343,7 +1355,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
     				// annotate the nuclei in the population
     				if(  (downFlag & NUCLEUS_ANNOTATE) == NUCLEUS_ANNOTATE){
-    					logger.log("Running annotation", Logger.DEBUG);
+    					logger.log("Running annotation", utility.Logger.DEBUG);
     					logc("Annotating nuclei...");
     					boolean ok = NucleusAnnotator.run(dataset);
     					if(ok){
@@ -1355,7 +1367,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
     				// make a composite image of all nuclei in the collection
     				if(  (downFlag & EXPORT_COMPOSITE) == EXPORT_COMPOSITE){
-    					logger.log("Running compositor", Logger.DEBUG);
+    					logger.log("Running compositor", utility.Logger.DEBUG);
     					logc("Exporting composite...");
     					boolean ok = CompositeExporter.run(dataset.getCollection());
     					if(ok){
@@ -1373,7 +1385,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     				if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
 
     					final CountDownLatch latch = new CountDownLatch(1);
-    					logger.log("Running curve refolder", Logger.DEBUG);
+    					logger.log("Running curve refolder", utility.Logger.DEBUG);
 
     					new RefoldNucleusAction(dataset, latch);
     					try {
@@ -1384,12 +1396,12 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     				}
 
     				if(  (downFlag & SAVE_DATASET) == SAVE_DATASET){
-    					logger.log("Saving dataset", Logger.DEBUG);
+    					logger.log("Saving dataset", utility.Logger.DEBUG);
     					PopulationExporter.saveAnalysisDataset(dataset);
     				}
 
     				if(  (downFlag & ADD_POPULATION) == ADD_POPULATION){
-    					logger.log("Adding dataset to panel", Logger.DEBUG);
+    					logger.log("Adding dataset to panel", utility.Logger.DEBUG);
     					populationsPanel.addDataset(dataset);				
 
     					for(AnalysisDataset child : dataset.getChildDatasets()){
@@ -1400,13 +1412,13 @@ public class MainWindow extends JFrame implements SignalChangeListener {
     				// if no list was provided, or no more entries remain,
     				// call the finish
     				if(processList==null){
-    					logger.log("Analysis complete, process list null, cleaning up", Logger.DEBUG);
+    					logger.log("Analysis complete, process list null, cleaning up", utility.Logger.DEBUG);
     					MorphologyAnalysisAction.super.finished();
     				} else if(processList.isEmpty()){
-    					logger.log("Analysis complete, process list empty, cleaning up", Logger.DEBUG);
+    					logger.log("Analysis complete, process list empty, cleaning up", utility.Logger.DEBUG);
     					MorphologyAnalysisAction.super.finished();
     				} else {
-    					logger.log("Morphology analysis continuing; removing progress bar", Logger.DEBUG);
+    					logger.log("Morphology analysis continuing; removing progress bar", utility.Logger.DEBUG);
     					// otherwise analyse the next item in the list
     					cancel();
     					if(mode == MorphologyAnalysis.MODE_COPY){
@@ -1461,7 +1473,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 				if(!analysisFolder.exists()){
 					analysisFolder.mkdir();
 				}
-				Logger logger = new Logger( new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
+				utility.Logger logger = new utility.Logger( new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
 
 				logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
 				logger.log("Directory: "+options.getFolder().getName());

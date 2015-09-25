@@ -28,6 +28,10 @@ public class Nuclear_Morphology_Analysis
 implements PlugIn
 
 {
+	
+
+	
+	
 	/* 
     The first method to be run when the plugin starts.
 	 */
@@ -36,12 +40,15 @@ implements PlugIn
 		try {
 			java.awt.EventQueue.invokeLater(new Runnable() {
 				public void run() {
+										
 					IJ.setBackgroundColor(0, 0, 0);	 // default background is black
 					
 					try {
 						UIManager.setLookAndFeel(
 						        UIManager.getSystemLookAndFeelClassName());
 					} catch (ClassNotFoundException e) {
+						
+						
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InstantiationException e) {
