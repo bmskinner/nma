@@ -18,6 +18,9 @@
  *******************************************************************************/
 package utility;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Constants {
 	
 	/**
@@ -113,14 +116,28 @@ public class Constants {
 		    private final String referencePoint;
 		    private final String orientationPoint;
 		    
+		    private final Map<BorderTag, String> map = new HashMap<BorderTag, String>();
+		    
 		    Nucleus(String string, String referencePoint, String orientationPoint) {
 		        this.asString = string;
 		        this.referencePoint = referencePoint;
 		        this.orientationPoint = orientationPoint;
+		        this.map.put(BorderTag.REFERENCE_POINT, referencePoint);
+		        this.map.put(BorderTag.ORIENTATION_POINT, orientationPoint);
 			}
 		    
 		    public String string(){
 		    	return this.asString;
+		    }
+		    
+		    
+		    /**
+		     * Get the name of the given border tag, if present
+		     * @param point
+		     * @return
+		     */
+		    public String getPoint(BorderTag point){
+		    	return this.map.get(point);
 		    }
 		    
 		    public String orientationPoint(){
@@ -130,6 +147,22 @@ public class Constants {
 		    public String referencePoint(){
 		    	return this.referencePoint;
 		    }
+		}
+		
+		// use in charting
+		public enum BorderTag {
+			ORIENTATION_POINT ("Orientation point"),
+			REFERENCE_POINT ("Reference point");
+			
+			private final String name;
+			
+			BorderTag(String name){
+				this.name = name;
+			}
+			
+			public String toString(){
+				return this.name;
+			}
 		}
 		
 		public enum Cell {

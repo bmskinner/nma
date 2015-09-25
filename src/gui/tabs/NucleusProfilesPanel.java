@@ -42,6 +42,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import utility.Constants.BorderTag;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
 import components.generic.ProfileCollection;
@@ -218,22 +219,26 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference, boolean showMarkers){
 			try {
 				
-				String point 	= fromReference 
-						? list.get(0).getCollection().getReferencePoint() 
-						: list.get(0).getCollection().getOrientationPoint();
+				BorderTag tag = fromReference
+						? BorderTag.REFERENCE_POINT
+						: BorderTag.ORIENTATION_POINT;
+				
+//				String point 	= fromReference 
+//						? list.get(0).getCollection().getReferencePoint() 
+//						: list.get(0).getCollection().getOrientationPoint();
 						
 				if(list.size()==1){
 					
 					
 				
 					// full segment colouring
-					JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign, point, showMarkers);
+					JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign, tag, showMarkers);
 					chartPanel.setChart(chart);
 					
 				} else {
 					// many profiles, colour them all the same
-					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign, point);				
-					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign, point);
+					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign, tag);				
+					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign, tag);
 									
 					// find the maximum profile length - used when rendering raw profiles
 					int length = 100;
@@ -282,20 +287,23 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 		 */	
 		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference, boolean showMarkers){
 
-			String point 	= fromReference 
-					? list.get(0).getCollection().getReferencePoint() 
-					: list.get(0).getCollection().getOrientationPoint();
+			BorderTag tag = fromReference
+					? BorderTag.REFERENCE_POINT
+					: BorderTag.ORIENTATION_POINT;
+//			String point 	= fromReference 
+//					? list.get(0).getCollection().getReferencePoint() 
+//					: list.get(0).getCollection().getOrientationPoint();
 					
 			try {
 				if(list.size()==1){
 					
-					JFreeChart chart = MorphologyChartFactory.makeFrankenProfileChart(list.get(0), normalised, rightAlign, point, showMarkers);
+					JFreeChart chart = MorphologyChartFactory.makeFrankenProfileChart(list.get(0), normalised, rightAlign, tag, showMarkers);
 					chartPanel.setChart(chart);
 				} else {
 
 					// many profiles, colour them all the same
-					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(list, normalised, rightAlign, point);				
-					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileFrankenDataset(	  list, normalised, rightAlign, point);
+					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(list, normalised, rightAlign, tag);				
+					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileFrankenDataset(	  list, normalised, rightAlign, tag);
 									
 					
 					JFreeChart chart = MorphologyChartFactory.makeMultiProfileChart(list, medianProfiles, iqrProfiles, 100);

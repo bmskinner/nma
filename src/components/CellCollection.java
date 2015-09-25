@@ -49,6 +49,7 @@ import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import utility.Constants;
+import utility.Constants.BorderTag;
 import utility.Stats;
 import utility.Utils;
 
@@ -203,32 +204,50 @@ implements Serializable
 	  return this.consensusNucleus;
   }
   
-  public String getReferencePoint(){
-	  	  
+  public String getPoint(BorderTag tag){
 	  if(this.nucleusClass == PigSpermNucleus.class){
-		  return Constants.Nucleus.PIG_SPERM.referencePoint();
+		  return Constants.Nucleus.PIG_SPERM.getPoint(tag);
 	  }
 	  
 	  if(this.nucleusClass == RodentSpermNucleus.class){
-		  return Constants.Nucleus.RODENT_SPERM.referencePoint();
+		  return Constants.Nucleus.RODENT_SPERM.getPoint(tag);
 	  }
 	  
 	  // default if not defined above
-	  return Constants.Nucleus.ROUND.referencePoint();
+	  return Constants.Nucleus.ROUND.getPoint(tag);
+  }
+  
+  public String getReferencePoint(){
+	  	  
+	  return this.getPoint(BorderTag.REFERENCE_POINT);
+	  
+//	  if(this.nucleusClass == PigSpermNucleus.class){
+//		  return Constants.Nucleus.PIG_SPERM.getPoint(BorderTag.REFERENCE_POINT);
+//	  }
+//	  
+//	  if(this.nucleusClass == RodentSpermNucleus.class){
+//		  return Constants.Nucleus.RODENT_SPERM.getPoint(BorderTag.REFERENCE_POINT);
+//	  }
+//	  
+//	  // default if not defined above
+//	  return Constants.Nucleus.ROUND.getPoint(BorderTag.REFERENCE_POINT);
 
   }
   
   public String getOrientationPoint(){
-	  if(this.nucleusClass == PigSpermNucleus.class){
-		  return Constants.Nucleus.PIG_SPERM.orientationPoint();
-	  }
 	  
-	  if(this.nucleusClass == RodentSpermNucleus.class){
-		  return Constants.Nucleus.RODENT_SPERM.orientationPoint();
-	  }
+	  return this.getPoint(BorderTag.ORIENTATION_POINT);
 	  
-	  // default if not defined above
-	  return Constants.Nucleus.ROUND.orientationPoint();
+//	  if(this.nucleusClass == PigSpermNucleus.class){
+//		  return Constants.Nucleus.PIG_SPERM.getPoint(BorderTag.ORIENTATION_POINT);
+//	  }
+//	  
+//	  if(this.nucleusClass == RodentSpermNucleus.class){
+//		  return Constants.Nucleus.RODENT_SPERM.getPoint(BorderTag.ORIENTATION_POINT);
+//	  }
+//	  
+//	  // default if not defined above
+//	  return Constants.Nucleus.ROUND.getPoint(BorderTag.ORIENTATION_POINT);
   }
   
   public ProfileCollection getProfileCollection(String type){

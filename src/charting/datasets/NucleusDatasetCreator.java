@@ -56,6 +56,7 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.nucleus.CurveRefolder;
 import utility.Constants;
+import utility.Constants.BorderTag;
 import utility.Equation;
 import utility.Stats;
 import utility.Utils;
@@ -341,7 +342,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static DefaultXYDataset createMultiProfileDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, String point) throws Exception{
+	public static DefaultXYDataset createMultiProfileDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, BorderTag borderTag) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		double length = getMaximumMedianProfileLength(list);
@@ -349,7 +350,7 @@ public class NucleusDatasetCreator {
 		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
 			AnalysisDataset dataset = list.get(i);
 			CellCollection collection = dataset.getCollection();
-			Profile profile = collection.getProfileCollection().getProfile(point);
+			Profile profile = collection.getProfileCollection().getProfile(collection.getPoint(borderTag));
 			Profile xpoints = null;
 			
 			if(normalised){	
@@ -371,13 +372,13 @@ public class NucleusDatasetCreator {
 	}
 	
 	
-	public static DefaultXYDataset createMultiProfileFrankenDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, String point) throws Exception{
+	public static DefaultXYDataset createMultiProfileFrankenDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, BorderTag borderTag) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 		int i=0;
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
-			Profile profile = collection.getFrankenCollection().getProfile(point);
+			Profile profile = collection.getFrankenCollection().getProfile(collection.getPoint(borderTag));
 			Profile xpoints = profile.getPositions(100);
 
 			double[][] data = { xpoints.asArray(), profile.asArray() };
@@ -446,7 +447,7 @@ public class NucleusDatasetCreator {
 	 * @return a dataset
 	 * @throws Exception 
 	 */
-	public static List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, String point) throws Exception{
+	public static List<XYSeriesCollection> createMultiProfileIQRDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, BorderTag borderTag) throws Exception{
 
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 		
@@ -457,7 +458,7 @@ public class NucleusDatasetCreator {
 			CellCollection collection = dataset.getCollection();
 			
 			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(), 
-										point,
+										collection.getPoint(borderTag),
 										i,
 										length,
 										collection.getMedianArrayLength(),
@@ -475,7 +476,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, String point) throws Exception{
+	public static List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<AnalysisDataset> list, boolean normalised, boolean rightAlign,  BorderTag borderTag) throws Exception{
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 
 		int i=0;
@@ -484,7 +485,7 @@ public class NucleusDatasetCreator {
 			CellCollection collection = dataset.getCollection();
 			
 			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getFrankenCollection(), 
-					point,
+					collection.getPoint(borderTag),
 					i,
 					100,
 					100,

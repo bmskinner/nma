@@ -45,6 +45,7 @@ import java.util.Map;
 
 
 
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -74,6 +75,7 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
+import utility.Constants.BorderTag;
 import utility.Utils;
 
 public class MorphologyChartFactory {
@@ -127,9 +129,10 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, String point, boolean showMarkers) throws Exception {
+	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();
+		String point = collection.getPoint(borderTag);
 		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
 		
 		
@@ -196,9 +199,10 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeFrankenProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, String point, boolean showMarkers) throws Exception {
+	public static JFreeChart makeFrankenProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();
+		String point = collection.getPoint(borderTag);
 		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, rightAlign, point);
 //		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
 		

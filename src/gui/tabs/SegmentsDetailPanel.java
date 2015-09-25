@@ -50,6 +50,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import utility.Constants.BorderTag;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;
@@ -345,10 +346,10 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 					buttonsPanel.setEnabled(false);
 					buttonsPanel.setVisible(false);
 					
-					String point = list.get(0).getCollection().getOrientationPoint();
+//					String point = list.get(0).getCollection().getPoint(BorderTag.ORIENTATION_POINT);
 					// many profiles, colour them all the same
-					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign, point);				
-					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign, point);
+					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign, BorderTag.ORIENTATION_POINT);				
+					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign, BorderTag.ORIENTATION_POINT);
 									
 					// find the maximum profile length - used when rendering raw profiles
 					int length = 100;
