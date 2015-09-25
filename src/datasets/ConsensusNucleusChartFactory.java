@@ -18,14 +18,14 @@
  *******************************************************************************/
 package datasets;
 
+import gui.components.ColourSelecter;
+import gui.components.ColourSelecter.ColourSwatch;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
 
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
-import no.gui.ColourSelecter;
-import no.gui.ColourSelecter.ColourSwatch;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -33,6 +33,8 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
+
+import cell.CellCollection;
 
 /**
  * Methods to make charts with a consensus nucleus

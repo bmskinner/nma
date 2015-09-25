@@ -31,9 +31,9 @@ import javax.swing.table.TableModel;
 
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
+import cell.CellCollection;
 import utility.Constants;
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.NucleusBorderSegment;
 import no.components.AnalysisOptions.CannyOptions;

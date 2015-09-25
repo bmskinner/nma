@@ -16,7 +16,9 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui.tabs;
+
+import gui.tabs.VennDetailPanel.VennTableCellRenderer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,7 +36,6 @@ import javax.swing.table.TableModel;
 
 import utility.Constants;
 import no.analysis.AnalysisDataset;
-import no.gui.VennDetailPanel.VennTableCellRenderer;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;
 

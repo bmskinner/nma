@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import no.collections.CellCollection;
+import cell.CellCollection;
 import no.nuclei.Nucleus;
 import utility.Utils;
 

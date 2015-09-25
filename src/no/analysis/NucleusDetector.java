@@ -26,6 +26,7 @@
 */  
 package no.analysis;
 
+import gui.MainWindow;
 import ij.IJ;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
@@ -40,14 +41,13 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import cell.Cell;
+import cell.CellCollection;
 import utility.Constants;
 import utility.Logger;
 import utility.Utils;
-import no.collections.*;
 import no.components.*;
 import no.export.CompositeExporter;
 import no.export.ImageExporter;
-import no.gui.MainWindow;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 

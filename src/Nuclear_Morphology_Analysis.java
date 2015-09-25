@@ -20,9 +20,9 @@
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import gui.MainWindow;
 import ij.IJ;
 import ij.plugin.PlugIn;
-import no.gui.MainWindow;
 
 public class Nuclear_Morphology_Analysis
 implements PlugIn

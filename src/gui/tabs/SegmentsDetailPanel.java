@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui.tabs;
 
 import ij.IJ;
 
@@ -44,7 +44,6 @@ import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.components.NucleusBorderSegment;
 import no.components.SegmentedProfile;
 import no.nuclei.ConsensusNucleus;
@@ -57,6 +56,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import cell.CellCollection;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;
 import datasets.NucleusTableDatasetCreator;

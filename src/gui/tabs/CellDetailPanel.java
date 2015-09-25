@@ -16,8 +16,12 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui.tabs;
 
+import gui.SignalChangeEvent;
+import gui.SignalChangeListener;
+import gui.components.ColourSelecter;
+import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import ij.IJ;
 
 import java.awt.BorderLayout;
@@ -61,7 +65,6 @@ import no.analysis.AnalysisDataset;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.SegmentedProfile;
-import no.gui.CellDetailPanel.CellsListPanel.NodeData;
 import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartPanel;

@@ -18,10 +18,10 @@
  *******************************************************************************/
 package logging;
 
+import gui.LogPanel;
+
 import java.util.logging.LogRecord;
 import java.util.logging.StreamHandler;
-
-import no.gui.LogPanel;
 
 public class TextAreaHandler  extends StreamHandler{
 

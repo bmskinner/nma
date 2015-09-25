@@ -16,13 +16,13 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.collections.CellCollection;
+import cell.CellCollection;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 

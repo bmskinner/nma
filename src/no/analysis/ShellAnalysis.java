@@ -29,9 +29,9 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import cell.CellCollection;
 import utility.Constants;
 import utility.Logger;
-import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.ShellResult;
 import no.imports.ImageImporter;

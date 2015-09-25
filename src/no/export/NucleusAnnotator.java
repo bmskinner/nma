@@ -18,6 +18,8 @@
  *******************************************************************************/
 package no.export;
 
+import gui.components.ColourSelecter;
+import gui.components.ColourSelecter.ColourSwatch;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
@@ -28,18 +30,16 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 import java.util.List;
 
+import cell.CellCollection;
 import utility.Constants;
 import utility.Logger;
 import utility.Utils;
 import no.analysis.AnalysisDataset;
 import no.analysis.ProfileSegmenter;
-import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
 import no.components.NucleusBorderSegment;
 import no.components.SignalCollection;
-import no.gui.ColourSelecter;
-import no.gui.ColourSelecter.ColourSwatch;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;
 

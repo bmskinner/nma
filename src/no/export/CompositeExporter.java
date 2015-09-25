@@ -31,9 +31,9 @@ import ij.process.ImageProcessor;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
+import cell.CellCollection;
 import utility.Logger;
 import utility.Utils;
-import no.collections.CellCollection;
 import no.nuclei.Nucleus;
 
 public class CompositeExporter {

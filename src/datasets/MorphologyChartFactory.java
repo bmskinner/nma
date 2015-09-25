@@ -18,6 +18,9 @@
  *******************************************************************************/
 package datasets;
 
+import gui.components.ColourSelecter;
+import gui.components.ColourSelecter.ColourSwatch;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Shape;
@@ -34,12 +37,12 @@ import java.util.Map;
 
 
 
+
+
+
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.components.Profile;
 import no.components.ProfileCollection;
-import no.gui.ColourSelecter;
-import no.gui.ColourSelecter.ColourSwatch;
 import no.nuclei.Nucleus;
 
 import org.jfree.chart.ChartFactory;
@@ -64,6 +67,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import utility.Utils;
 import cell.Cell;
+import cell.CellCollection;
 
 public class MorphologyChartFactory {
 	

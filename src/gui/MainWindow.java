@@ -16,8 +16,18 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui;
 
+import gui.components.ColourSelecter.ColourSwatch;
+import gui.tabs.AnalysisDetailPanel;
+import gui.tabs.CellDetailPanel;
+import gui.tabs.ClusterDetailPanel;
+import gui.tabs.NuclearBoxplotsPanel;
+import gui.tabs.NucleusProfilesPanel;
+import gui.tabs.SegmentsDetailPanel;
+import gui.tabs.SignalsDetailPanel;
+import gui.tabs.VennDetailPanel;
+import gui.tabs.WilcoxonDetailPanel;
 import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.io.SaveDialog;
@@ -41,14 +51,12 @@ import no.analysis.NucleusClusterer;
 import no.analysis.NucleusDetector;
 import no.analysis.ShellAnalysis;
 import no.analysis.SignalDetector;
-import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.export.CompositeExporter;
 import no.export.NucleusAnnotator;
 import no.export.PopulationExporter;
 import no.export.StatsExporter;
-import no.gui.ColourSelecter.ColourSwatch;
 import no.imports.PopulationImporter;
 import no.nuclei.Nucleus;
 
@@ -83,9 +91,22 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import cell.Cell;
+import cell.CellCollection;
 import cell.analysis.TubulinTailDetector;
 import utility.Constants;
 //import utility.Logger;
+
+
+
+
+
+
+
+
+
+
+
+
 
 import javax.swing.JTabbedPane;
 

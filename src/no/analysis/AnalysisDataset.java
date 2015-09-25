@@ -18,6 +18,9 @@
  *******************************************************************************/
 package no.analysis;
 
+import gui.components.ColourSelecter;
+import gui.components.ColourSelecter.ColourSwatch;
+
 import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
@@ -29,12 +32,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import cell.CellCollection;
 import utility.Constants;
-import no.collections.CellCollection;
 import no.components.AnalysisOptions;
 import no.components.ShellResult;
-import no.gui.ColourSelecter;
-import no.gui.ColourSelecter.ColourSwatch;
 
 
 /**

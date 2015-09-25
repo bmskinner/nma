@@ -19,8 +19,8 @@
 package no.analysis;
 
 import cell.Cell;
+import cell.CellCollection;
 import utility.Logger;
-import no.collections.CellCollection;
 import no.nuclei.Nucleus;
 
 public class CollectionFilterer {

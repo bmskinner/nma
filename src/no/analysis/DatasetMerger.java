@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import cell.Cell;
-import no.collections.CellCollection;
+import cell.CellCollection;
 import utility.Constants;
 import utility.Logger;
 

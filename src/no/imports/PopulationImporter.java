@@ -18,6 +18,8 @@
  *******************************************************************************/
 package no.imports;
 
+import gui.MainWindow;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,10 +28,9 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import cell.CellCollection;
 import utility.Logger;
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
-import no.gui.MainWindow;
 
 public class PopulationImporter {
 	

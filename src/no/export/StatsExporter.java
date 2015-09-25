@@ -22,8 +22,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import cell.CellCollection;
 import utility.Logger;
-import no.collections.CellCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;

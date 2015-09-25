@@ -26,10 +26,10 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import cell.CellCollection;
 import utility.Constants;
 import utility.Logger;
 import utility.Utils;
-import no.collections.CellCollection;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;
 import no.components.ProfileCollection;

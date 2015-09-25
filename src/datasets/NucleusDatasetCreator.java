@@ -32,7 +32,6 @@ import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
-import no.collections.CellCollection;
 import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderPoint;
@@ -56,6 +55,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import cell.Cell;
+import cell.CellCollection;
 import utility.Constants;
 import utility.Equation;
 import utility.Stats;

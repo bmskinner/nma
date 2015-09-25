@@ -21,10 +21,10 @@ package no.analysis;
 import java.io.File;
 import java.util.List;
 
+import cell.CellCollection;
 import utility.Constants;
 import utility.Logger;
 import no.nuclei.AsymmetricNucleus;
-import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.XYPoint;
 import no.export.TableExporter;

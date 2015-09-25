@@ -18,12 +18,13 @@
  *******************************************************************************/
 package datasets;
 
+import gui.components.ColourSelecter;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
 
 import no.analysis.AnalysisDataset;
-import no.gui.ColourSelecter;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;

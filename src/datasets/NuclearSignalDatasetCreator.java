@@ -11,7 +11,6 @@ import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
 import no.analysis.CurveRefolder;
-import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.ShellResult;
 import no.components.XYPoint;
@@ -26,6 +25,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import cell.CellCollection;
 import utility.Utils;
 
 public class NuclearSignalDatasetCreator {

@@ -16,7 +16,9 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui.tabs;
+
+import gui.components.ColourSelecter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

@@ -16,8 +16,10 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui;
 
+import gui.components.ConsensusNucleusChartPanel;
+import gui.tabs.DetailPanel;
 import ij.IJ;
 
 import java.awt.BasicStroke;
@@ -44,7 +46,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.components.NucleusBorderPoint;
 import no.components.XYPoint;
 
@@ -56,6 +57,7 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
+import cell.CellCollection;
 import datasets.ConsensusNucleusChartFactory;
 import datasets.MorphologyChartFactory;
 import datasets.NucleusDatasetCreator;

@@ -38,11 +38,11 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import cell.Cell;
+import cell.CellCollection;
 import utility.Constants;
 import utility.Logger;
 import utility.StatsMap;
 import utility.Utils;
-import no.collections.CellCollection;
 import no.components.AnalysisOptions.NuclearSignalOptions;
 import no.components.NuclearSignal;
 import no.components.Profile;

@@ -16,8 +16,11 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui;
 
+
+import gui.components.ColourSelecter;
+import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -44,7 +47,6 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.export.PopulationExporter;
 
 import org.jdesktop.swingx.JXTreeTable;
@@ -52,6 +54,7 @@ import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
+import cell.CellCollection;
 import utility.TreeOrderHashMap;
 
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {

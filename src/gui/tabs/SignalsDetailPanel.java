@@ -16,9 +16,12 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui.tabs;
 
 
+import gui.SignalChangeEvent;
+import gui.SignalChangeListener;
+import gui.components.ColourSelecter;
 import ij.IJ;
 
 import java.awt.BasicStroke;
@@ -48,7 +51,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.components.ShellResult;
 
 import org.jfree.chart.ChartFactory;
@@ -63,6 +65,7 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
+import cell.CellCollection;
 import utility.Constants;
 import datasets.ConsensusNucleusChartFactory;
 import datasets.HistogramChartFactory;

@@ -26,6 +26,7 @@
 */  
 package no.analysis;
 
+import gui.MainWindow;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
@@ -39,7 +40,6 @@ import java.util.*;
 import utility.Logger;
 import no.components.AnalysisOptions;
 import no.components.XYPoint;
-import no.gui.MainWindow;
 import no.analysis.ImageAligner;
 
 public class NucleusRefinder

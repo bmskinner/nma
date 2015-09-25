@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -53,9 +53,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputAdapter;
 
 import cell.Cell;
+import cell.CellCollection;
 import utility.Utils;
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.export.ImageExporter;
 import no.imports.ImageImporter;
 import no.nuclei.Nucleus;

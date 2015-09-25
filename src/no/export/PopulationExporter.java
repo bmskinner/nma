@@ -28,10 +28,10 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
+import cell.CellCollection;
 import utility.Constants;
 import utility.Logger;
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.nuclei.Nucleus;
 
 public class PopulationExporter {

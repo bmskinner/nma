@@ -25,7 +25,7 @@
   It enables offsets to be calculated based on the median normalised curves
 */
 
-package no.collections;
+package cell;
 
 import ij.IJ;
 
@@ -38,12 +38,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import cell.Cell;
+import cell.CellCollection;
 import utility.Constants;
 import utility.Stats;
 import utility.Utils;
 import no.analysis.AnalysisDataset;
-import no.collections.CellCollection;
 import no.components.NuclearSignal;
 import no.components.NucleusBorderSegment;
 import no.components.Profile;

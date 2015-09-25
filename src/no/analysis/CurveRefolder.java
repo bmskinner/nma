@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import cell.CellCollection;
 import utility.Constants;
 import utility.Equation;
 import utility.Logger;
@@ -39,7 +40,6 @@ import no.nuclei.ConsensusNucleus;
 import no.nuclei.Nucleus;
 import no.nuclei.RoundNucleus;
 import no.nuclei.sperm.RodentSpermNucleus;
-import no.collections.CellCollection;
 import no.components.*;
 
 

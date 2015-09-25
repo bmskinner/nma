@@ -16,7 +16,10 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package no.gui;
+package gui.tabs;
+
+import gui.components.ProflleDisplaySettingsPanel;
+import gui.components.ColourSelecter.ColourSwatch;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,7 +37,6 @@ import javax.swing.JTabbedPane;
 
 import no.analysis.AnalysisDataset;
 import no.components.ProfileCollection;
-import no.gui.ColourSelecter.ColourSwatch;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
