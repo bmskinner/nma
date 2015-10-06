@@ -104,11 +104,21 @@
   }
 
   public static double max(double[] d){
-    double max = 0;
-    for(int i=0;i<d.length;i++){
-      if( d[i]>max)
-        max = d[i];
-    }
-    return max;
+	  double max = 0;
+	  for(int i=0;i<d.length;i++){
+		  if( d[i]>max)
+			  max = d[i];
+	  }
+	  return max;
   }
+
+  public static int max(int[] d){
+	  int max = 0;
+	  for(int i=0;i<d.length;i++){
+		  if( d[i]>max)
+			  max = d[i];
+	  }
+	  return max;
+  }
+
  }
