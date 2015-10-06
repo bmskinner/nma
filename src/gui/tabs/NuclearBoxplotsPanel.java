@@ -19,6 +19,7 @@
 package gui.tabs;
 
 import gui.components.ColourSelecter;
+import gui.components.SelectableChartPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -42,6 +43,7 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
@@ -225,7 +227,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		private static final long serialVersionUID = 1L;
 		
-		private Map<String, ChartPanel> chartPanels = new HashMap<String, ChartPanel>();
+		private Map<String, SelectableChartPanel> chartPanels = new HashMap<String, SelectableChartPanel>();
 
 		private Map<String, Integer> chartStatTypes = new HashMap<String, Integer>();
 
@@ -264,7 +266,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			
 			Dimension preferredSize = new Dimension(400, 150);
 			for(String chartType : chartStatTypes.keySet()){
-				ChartPanel panel = new ChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, chartType));
+				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, chartType));
 				panel.setPreferredSize(preferredSize);
 				chartPanels.put(chartType, panel);
 				mainPanel.add(panel);
@@ -289,7 +291,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 			for(String chartType : chartTypes){
 				
-				ChartPanel panel = chartPanels.get(chartType);
+				SelectableChartPanel panel = chartPanels.get(chartType);
 				int stat = chartStatTypes.get(chartType);
 				
 				JFreeChart chart = null;
@@ -303,7 +305,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat);
 					chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, chartType);
 				}
-				
+				XYPlot plot = (XYPlot) chart.getPlot();
+		        plot.setDomainPannable(true);
+		        plot.setRangePannable(true);
 
 				panel.setChart(chart);
 			}
