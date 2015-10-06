@@ -18,14 +18,20 @@
  *******************************************************************************/
 package charting.datasets;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
 
 import components.CellCollection;
-
+import components.generic.Profile;
 import analysis.AnalysisDataset;
 import utility.Stats;
+import utility.Utils;
+import weka.estimators.KernelEstimator;
 
 public class NuclearHistogramDatasetCreator {
 		
@@ -330,6 +336,129 @@ public class NuclearHistogramDatasetCreator {
 
 			ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 		}
+		return ds;
+	}
+	
+	public static DefaultXYDataset createNuclearDensityHistogramDataset(List<AnalysisDataset> list, int stat) throws Exception {
+		DefaultXYDataset ds = new DefaultXYDataset();
+
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			
+			KernelEstimator est = new KernelEstimator(0.01);
+			String groupLabel = null;
+			double[] values = null; 
+			int maxRounded = 0;
+			int minRounded = 0;
+			double min = 0;
+			double max = 0;
+			
+			switch(stat){
+			
+				case NUCLEAR_AREA:
+					values = collection.getAreas();
+					min = Stats.min(values);
+					max = Stats.max(values);
+					// use int truncation to round to nearest 100 above max
+					maxRounded = (( (int)max + 99) / 100 ) * 100;
+					
+					// use int truncation to round to nearest 100 above min, then subtract 100
+					minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
+					groupLabel = "Area";
+					break;
+					
+				case NUCLEAR_PERIM: 
+					values = collection.getPerimeters(); 
+					min = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					groupLabel = "Perimeter";
+					break;
+					
+				case NUCLEAR_FERET:
+					values = collection.getFerets(); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					groupLabel = "Max feret";
+					break;
+					
+				case NUCLEAR_MIN_DIAM: 
+					values = collection.getMinFerets(); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					groupLabel = "Min diameter";
+					break;
+					
+				case NUCLEAR_VARIABILITY:
+					values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					groupLabel = "Variability";
+					break;
+					
+				case NUCLEAR_CIRCULARITY:
+					values = collection.getCircularities(); 
+					maxRounded = 1;
+					minRounded = 0;
+					groupLabel = "Circularity";
+					break;
+					
+				case NUCLEAR_ASPECT:
+					values = collection.getAspectRatios(); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					groupLabel = "Aspect";
+					break;
+			}
+	
+			// add the values to a kernel estimator
+			// give each value equal weighting
+			for(double d : values){
+				est.addValue(d, 1);
+			}
+			
+			
+//			List<Double> xValues = new ArrayList<Double>();
+//			List<Double> yValues = new ArrayList<Double>();
+//			
+//			double stepSize = (maxRounded-minRounded) / 200;
+//			for(double i=minRounded; i<maxRounded;i+=stepSize){
+//				xValues.add(i);
+//				yValues.add(est.getProbability(i));
+//			}
+			
+			double[] probabilities = new double[values.length];
+			
+			Arrays.sort(values);
+	
+			// get the probability for each value
+			for (int i=0; i < values.length; i++) {
+				probabilities[i] = est.getProbability(values[i]);
+			}
+			
+			double[][] data = {  values, probabilities };
+	
+//			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
+//					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+			
+			
+			ds.addSeries(groupLabel+"_"+collection.getName(), data);
+		}
+
 		return ds;
 	}
 }

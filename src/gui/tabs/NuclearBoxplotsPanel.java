@@ -23,6 +23,9 @@ import gui.components.ColourSelecter;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -42,6 +46,7 @@ import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.DefaultXYDataset;
 
 import charting.charts.HistogramChartFactory;
 import charting.datasets.NuclearHistogramDatasetCreator;
@@ -216,7 +221,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 	}
 	
-	protected class HistogramsPanel extends JPanel {
+	protected class HistogramsPanel extends JPanel implements ActionListener {
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -225,6 +230,12 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		private Map<String, Integer> chartStatTypes = new HashMap<String, Integer>();
 
 		private JPanel 		mainPanel; // hold the charts
+        private JPanel         headerPanel; // hold buttons
+        private JCheckBox    useDensityBox; 
+        
+        List<AnalysisDataset> list;
+
+
 		
 		private JScrollPane scrollPane; // hold the main panel
 
@@ -243,6 +254,14 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			mainPanel = new JPanel();
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			
+            headerPanel = new JPanel(new FlowLayout());
+            useDensityBox = new JCheckBox("Show probability density");
+            useDensityBox.addActionListener(this);
+            headerPanel.add(useDensityBox);
+    
+            this.add(headerPanel, BorderLayout.NORTH);
+
+			
 			Dimension preferredSize = new Dimension(400, 150);
 			for(String chartType : chartStatTypes.keySet()){
 				ChartPanel panel = new ChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, chartType));
@@ -260,18 +279,48 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		public void update(List<AnalysisDataset> list) throws Exception {
 			
+			this.list = list;
+			
+            boolean useDensity = useDensityBox.isSelected();
+//            String yLabel = useDensity ? "Percent nuclei" : "Nuclei";
+
+			
 			Set<String> chartTypes = chartStatTypes.keySet();
 
 			for(String chartType : chartTypes){
 				
 				ChartPanel panel = chartPanels.get(chartType);
 				int stat = chartStatTypes.get(chartType);
-				HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat);
 				
-				JFreeChart chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, chartType);
+				JFreeChart chart = null;
+				
+				if(useDensity){
+					log("Calculating density: "+chartType);
+					DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat);
+					chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, chartType);
+					
+				} else {
+					HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat);
+					chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, chartType);
+				}
+				
+
 				panel.setChart(chart);
 			}
 		}
+		
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            try {
+                this.update(list);
+            } catch (Exception e1) {
+                error("Error updating histogram panel from action listener", e1);
+            }
+            
+            
+        }
+
 		
 	}
 

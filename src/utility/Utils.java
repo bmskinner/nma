@@ -27,7 +27,9 @@
 
  package utility;
 
- import java.util.List;
+ import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import components.nuclear.NucleusBorderPoint;
 import components.nuclei.Nucleus;
@@ -276,5 +278,22 @@ public class Utils {
 		double microns = pixels * scale;
 		return microns;
 	}
+	
+	/**
+	  * Get the unique values from a double array
+	  * @param d the double array
+	  * @return a double array with unique values only
+	  */
+	 public static double[] getUnique(double[] d){
+//		 double[] results = new double[d.length];
+		 List<Double> results = new ArrayList<Double>();
+		 Arrays.sort(d);
+		 for(int i=1;i<d.length;i++){
+			 if(d[i]!=d[i-1]){
+				 results.add(d[i]);
+			 }
+		 }
+		 return Utils.getdoubleFromDouble(  results.toArray(new Double[0] ));
+	 }
 	
  }

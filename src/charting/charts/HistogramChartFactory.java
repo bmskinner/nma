@@ -32,6 +32,7 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.DefaultXYDataset;
 
 import analysis.AnalysisDataset;
 
@@ -154,6 +155,52 @@ public class HistogramChartFactory {
 		return chart;
 	}
 	
-	
-	
+	/**
+	 * Create a density line chart with nuclear statistics. It is used to replace the histograms
+	 * when the 'Use density' box is ticked in the Nuclear chart histogram panel
+	 * @param ds the histogram dataset
+	 * @param list the analysis datasets used to create the histogrom
+	 * @param xLabel the x axis label
+	 * @return
+	 */
+	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, String xLabel){
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
+				                false);
+		
+		if(ds!=null && list!=null){
+			
+			XYPlot plot = chart.getXYPlot();
+			
+			plot.setBackgroundPaint(Color.WHITE);
+			
+			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
+			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
+			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
+			
+			for(AnalysisDataset dataset : list){
+
+				for (int j = 0; j < ds.getSeriesCount(); j++) {
+										
+					plot.getRenderer().setSeriesVisibleInLegend(j, false);
+					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+					
+					String seriesKey = (String) ds.getSeriesKey(j);
+					String seriesName = seriesKey.replace(xLabel+"_", "");
+					
+					if(seriesName.equals(dataset.getName())){
+						
+						Color colour = dataset.getDatasetColour()==null
+										? ColourSelecter.getSegmentColor(j)
+										: dataset.getDatasetColour();
+										
+						plot.getRenderer().setSeriesPaint(j, colour);						
+					}
+				}
+			}
+		}
+		return chart;
+	}
+
 }
