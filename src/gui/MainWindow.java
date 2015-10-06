@@ -246,6 +246,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			// Create panel for split boxplots
 			//---------------
 			nuclearBoxplotsPanel  = new NuclearBoxplotsPanel();
+			nuclearBoxplotsPanel.addSignalChangeListener(this);
 			tabbedPane.addTab("Nuclear charts", nuclearBoxplotsPanel);
 				
 			
@@ -1756,6 +1757,10 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			this.populationsPanel.update();
 		}
 		
+		if(event.type().equals("RefreshPopulationPanelDatasets")){
+			this.populationsPanel.refreshDatasets();;
+		}
+		
 		if(event.type().startsWith("Log_")){
 			String s = event.type().replace("Log_", "");
 			log(s);
@@ -1771,7 +1776,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			UUID id = UUID.fromString(s);
 			this.populationsPanel.selectDataset(id);
 		}
-		
+				
 		if(event.type().startsWith("ExtractSource_")){
 			log("Recovering source dataset");
 			String name = event.type().replace("ExtractSource_", "");

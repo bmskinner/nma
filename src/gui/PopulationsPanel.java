@@ -94,6 +94,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 *  Root populations are ordered according to position in the treeListOrder map.
 	 */
 	public void update(){
+		
+		int nameColWidth = treeTable.getColumnModel().getColumn(0).getPreferredWidth();
+		int colourColWidth = treeTable.getColumnModel().getColumn(2).getPreferredWidth();
 					
 		List<String> columns = new ArrayList<String>();
 		columns.add("Population");
@@ -121,8 +124,31 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			row++;
 		}
 		
-		treeTable.getColumnModel().getColumn(0).setPreferredWidth(120);
-		treeTable.getColumnModel().getColumn(2).setPreferredWidth(5);
+		treeTable.getColumnModel().getColumn(0).setPreferredWidth(nameColWidth);
+		treeTable.getColumnModel().getColumn(2).setPreferredWidth(colourColWidth);
+	}
+	
+	/**
+	 * Ensure that all child datasets are present within the  
+	 * analysisDatasets Map
+	 */
+	public void refreshDatasets(){
+		
+		if(this.analysisDatasets.size()>0){
+			for(UUID id : treeOrderMap.getIDs()){
+												
+				AnalysisDataset rootDataset = analysisDatasets.get(id);
+				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
+					if(! this.hasDataset(child.getUUID())){
+						child.setName(checkName(child.getName()));
+						this.analysisDatasets.put(child.getUUID(), child);
+						this.populationNames.put(child.getName(), child.getUUID());
+					}
+				}
+				
+			}
+		}
+		
 	}
 	
 	/**

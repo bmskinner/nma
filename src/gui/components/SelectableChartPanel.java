@@ -1,5 +1,7 @@
 package gui.components;
 
+import gui.SignalChangeEvent;
+import gui.SignalChangeListener;
 import ij.IJ;
 
 import java.awt.Color;
@@ -7,6 +9,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -21,18 +26,33 @@ import org.jfree.ui.Layer;
  *
  */
 @SuppressWarnings("serial")
-public class SelectableChartPanel extends ChartPanel {
+public class SelectableChartPanel extends ChartPanel implements SignalChangeListener {
 	
+	private String name = null;
 	MouseMarker mouseMarker = null;
+	public static final String SOURCE_COMPONENT = "SelectableChartPanel"; 
+	private List<Object> listeners = new ArrayList<Object>();
 
-	public SelectableChartPanel(JFreeChart chart){
+	public SelectableChartPanel(JFreeChart chart, String name){
 		super(chart);
-
+		this.name = name;
 		this.setRangeZoomable(false);
 		this.setDomainZoomable(false);
 		mouseMarker = new MouseMarker(this);
+		this.addSignalChangeListener(mouseMarker);
 		this.addMouseListener(mouseMarker);
-
+	}
+	
+	public String getName(){
+		return this.name;
+	}
+	
+	public Double getGateLower(){
+		return mouseMarker.getMarkerStart();
+	}
+	
+	public Double getGateUpper(){
+		return mouseMarker.getMarkerEnd();
 	}
 	
 	@Override
@@ -47,37 +67,51 @@ public class SelectableChartPanel extends ChartPanel {
 		this.removeMouseListener(mouseMarker);
 		mouseMarker = new MouseMarker(this);
 		this.addMouseListener(mouseMarker);
+		mouseMarker.addSignalChangeListener(this);
 	}
 	
-	private final static class MouseMarker extends MouseAdapter{
+	private final static class MouseMarker extends MouseAdapter implements SignalChangeListener{
         private Marker marker;
         private Double markerStart = Double.NaN;
         private Double markerEnd = Double.NaN;
         private final XYPlot plot;
         private final JFreeChart chart;
         private  final ChartPanel panel;
+        
+        public static final String SOURCE_COMPONENT = "MouseMarker"; 
+    	private List<Object> listeners = new ArrayList<Object>();
 
         public MouseMarker(ChartPanel panel) {
             this.panel = panel;
             this.chart = panel.getChart();
             this.plot = (XYPlot) chart.getPlot();
         }
+        
+        public Double getMarkerEnd(){
+        	return markerEnd.doubleValue();
+        }
+        
+        public Double getMarkerStart(){
+        	return markerStart.doubleValue();
+        }
 
         private void updateMarker(){
             if (marker != null){
                 plot.removeDomainMarker(marker,Layer.BACKGROUND);
-//                IJ.log("Marker removed");
             }
             
             
-            if (!( markerStart.isNaN() && markerEnd.isNaN())){
+            if (!  ( markerStart.isNaN() && markerEnd.isNaN())  ){
             	
                 if ( markerEnd > markerStart){
                     marker = new IntervalMarker(markerStart, markerEnd);
                     marker.setPaint(new Color(128, 128, 128, 255));
                     marker.setAlpha(0.5f);
                     plot.addDomainMarker(marker,Layer.BACKGROUND);
-//                    IJ.log("Marker added: "+markerStart+"-"+markerEnd);
+                    
+                    if(!markerEnd.isNaN()){
+                    	fireSignalChangeEvent("MarkerPositionUpdated");
+                    }
                 }
                 
             }
@@ -85,15 +119,10 @@ public class SelectableChartPanel extends ChartPanel {
 
         private Double getPosition(MouseEvent e){
             Point2D p = panel.translateScreenToJava2D( e.getPoint()); // Translates a panel (component) location to a Java2D point.
-            Rectangle2D plotArea = panel.getScreenDataArea(); // get the area covered by the panel
-//            Rectangle2D plotArea =  panel.getChartRenderingInfo().getPlotInfo().getDataArea();
+            Rectangle2D plotArea = panel.getChartRenderingInfo().getPlotInfo().getDataArea();// panel.getScreenDataArea(); // get the area covered by the panel
+            
             XYPlot plot = (XYPlot) chart.getPlot();
             
-//            Converts a coordinate in Java2D space to the corresponding data value, assuming that the axis runs along one edge of the specified dataArea.
-//            Parameters:
-//                java2DValue - the coordinate in Java2D space.
-//                area - the area in which the data is plotted.
-//                edge - the edge along which the axis lies.
             return plot.getDomainAxis().java2DToValue(p.getX(), plotArea, plot.getDomainAxisEdge());
         }
 
@@ -107,8 +136,55 @@ public class SelectableChartPanel extends ChartPanel {
         @Override
         public void mousePressed(MouseEvent e) {
             markerStart = getPosition(e);
-//            IJ.log("Mouse down: marker start "+markerStart);
-//            updateMarker();
+        }
+        
+        private synchronized void fireSignalChangeEvent(String message) {
+//        	IJ.log("Mouse marker has fired a change");
+            SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
+            Iterator<Object> iterator = listeners.iterator();
+            while( iterator.hasNext() ) {
+                ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+            }
+        }
+
+		@Override
+		public void signalChangeReceived(SignalChangeEvent event) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		public synchronized void addSignalChangeListener( SignalChangeListener l ) {
+	        listeners.add( l );
+	    }
+	    
+	    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
+	        listeners.remove( l );
+	    }
+    }
+	
+	@Override
+	public void signalChangeReceived(SignalChangeEvent event) {
+//		IJ.log("Selectable chart panel has heard a change");
+		// pass messages up
+		if(event.type().equals("MarkerPositionUpdated")){
+			fireSignalChangeEvent("MarkerPositionUpdated");
+		}
+		
+	}
+	
+	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
+        listeners.add( l );
+    }
+    
+    public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
+        listeners.remove( l );
+    }
+     
+    private synchronized void fireSignalChangeEvent(String message) {
+        SignalChangeEvent event = new SignalChangeEvent( this, message, SOURCE_COMPONENT );
+        Iterator<Object> iterator = listeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
         }
     }
 
