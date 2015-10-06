@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -220,30 +221,30 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		private static final long serialVersionUID = 1L;
 		
 		private Map<String, ChartPanel> chartPanels = new HashMap<String, ChartPanel>();
-				
-		private List<String> chartTypes = new ArrayList<String>();
+
+		private Map<String, Integer> chartStatTypes = new HashMap<String, Integer>();
 
 		private JPanel 		mainPanel; // hold the charts
 		
 		private JScrollPane scrollPane; // hold the main panel
 
 		public HistogramsPanel(){
-			
-			chartTypes.add("Area");
-			chartTypes.add("Perimeter");
-			chartTypes.add("Max feret");
-			chartTypes.add("Min diameter");
-			chartTypes.add("Variability");
-			chartTypes.add("Circularity");
-			chartTypes.add("Aspect");
-			
+						
+			chartStatTypes.put("Area", 			NuclearHistogramDatasetCreator.NUCLEAR_AREA );
+			chartStatTypes.put("Perimeter", 	NuclearHistogramDatasetCreator.NUCLEAR_PERIM);
+			chartStatTypes.put("Max feret", 	NuclearHistogramDatasetCreator.NUCLEAR_FERET);
+			chartStatTypes.put("Min diameter", 	NuclearHistogramDatasetCreator.NUCLEAR_MIN_DIAM);
+			chartStatTypes.put("Variability", 	NuclearHistogramDatasetCreator.NUCLEAR_VARIABILITY);
+			chartStatTypes.put("Circularity", 	NuclearHistogramDatasetCreator.NUCLEAR_CIRCULARITY);
+			chartStatTypes.put("Aspect", 		NuclearHistogramDatasetCreator.NUCLEAR_ASPECT);
+
 			this.setLayout(new BorderLayout());
 						
 			mainPanel = new JPanel();
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			
 			Dimension preferredSize = new Dimension(400, 150);
-			for(String chartType : chartTypes){
+			for(String chartType : chartStatTypes.keySet()){
 				ChartPanel panel = new ChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, chartType));
 				panel.setPreferredSize(preferredSize);
 				chartPanels.put(chartType, panel);
@@ -259,39 +260,14 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		public void update(List<AnalysisDataset> list) throws Exception {
 			
+			Set<String> chartTypes = chartStatTypes.keySet();
+
 			for(String chartType : chartTypes){
 				
 				ChartPanel panel = chartPanels.get(chartType);
-				HistogramDataset ds = null;
+				int stat = chartStatTypes.get(chartType);
+				HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat);
 				
-				if(chartType.equals("Area")){
-					ds = NuclearHistogramDatasetCreator.createNuclearAreaHistogramDataset(list);
-				}
-				
-				if(chartType.equals("Perimeter")){
-					ds = NuclearHistogramDatasetCreator.createNuclearPerimeterHistogramDataset(list);
-				}
-				
-				if(chartType.equals("Max feret")){
-					ds = NuclearHistogramDatasetCreator.createNuclearMaxFeretHistogramDataset(list);
-				}
-				
-				if(chartType.equals("Min diameter")){
-					ds = NuclearHistogramDatasetCreator.createNuclearMinDiameterHistogramDataset(list);
-				}
-				
-				if(chartType.equals("Variability")){
-					ds = NuclearHistogramDatasetCreator.createNuclearVariabilityHistogramDataset(list);
-				}
-				
-				if(chartType.equals("Circularity")){
-					ds = NuclearHistogramDatasetCreator.createNuclearCircularityHistogramDataset(list);
-				}
-				
-				if(chartType.equals("Aspect")){
-					ds = NuclearHistogramDatasetCreator.createNuclearAspectRatioHistogramDataset(list);
-				}
-
 				JFreeChart chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, chartType);
 				panel.setChart(chart);
 			}

@@ -29,155 +29,188 @@ import utility.Stats;
 
 public class NuclearHistogramDatasetCreator {
 		
-	/**
-	 * For the given list of datasets, get the nuclear areas as a histogram dataset
-	 * @param list
-	 * @return
-	 */
-	public static HistogramDataset createNuclearAreaHistogramDataset(List<AnalysisDataset> list){
-		HistogramDataset ds = new HistogramDataset();
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
-			double[] values = collection.getAreas();
-
-			double min  = Stats.min(values);
-			double max = Stats.max(values);
-			
-			// use int truncation to round to nearest 100 above max
-			int maxRounded = (( (int)max + 99) / 100 ) * 100;
-			
-			// use int truncation to round to nearest 100 above min, then subtract 100
-			int minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
-			
-			// bind of width 50
-			int bins = ((maxRounded - minRounded) / 50);
-
-			ds.addSeries("Area_"+collection.getName(), values, bins, minRounded, maxRounded);
-		}
-		return ds;
-	}
 	
-	/**
-	 * For the given list of datasets, get the nuclear perimeters as a histogram dataset
-	 * @param list
-	 * @return
-	 */
-	public static HistogramDataset createNuclearPerimeterHistogramDataset(List<AnalysisDataset> list){
-		HistogramDataset ds = new HistogramDataset();
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
-			double[] values = collection.getPerimeters(); 
-			
-			double min  = Stats.min(values);
-			double max = Stats.max(values);
-			
-			int maxRounded = (int) Math.ceil(max);
-			int minRounded = (int) Math.floor(min);
-			
-			// put bins of width 1
-			int bins = ((maxRounded - minRounded));
-			
-			ds.addSeries("Perimeter_"+collection.getName(), values, bins, minRounded, maxRounded);
-		}
-		return ds;
-	}
+	public static final int NUCLEAR_AREA = 0;
+	public static final int NUCLEAR_PERIM = 1;
+	public static final int NUCLEAR_FERET = 2;
+	public static final int NUCLEAR_MIN_DIAM = 3;
+	public static final int NUCLEAR_CIRCULARITY = 4;
+	public static final int NUCLEAR_ASPECT = 5;
+	public static final int NUCLEAR_VARIABILITY = 6;
 	
-	/**
-	 * For the given list of datasets, get the nuclear ferets as a histogram dataset
-	 * @param list
-	 * @return
-	 */
-	public static HistogramDataset createNuclearMaxFeretHistogramDataset(List<AnalysisDataset> list){
-		HistogramDataset ds = new HistogramDataset();
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
-			double[] values = collection.getFerets(); 
-			
-			double min  = Stats.min(values);
-			double max = Stats.max(values);
-			
-			int maxRounded = (int) Math.ceil(max);
-			int minRounded = (int) Math.floor(min);
-			
-			// put bins of width 0.5
-			int bins = ((maxRounded - minRounded) * 2 );
-			
-			ds.addSeries("Max feret_"+collection.getName(), values, bins, minRounded, maxRounded);
-		}
-		return ds;
-	}
-	
-	/**
-	 * For the given list of datasets, get the nuclear minimum diametes
-	 * across the centre of mass as a histogram dataset
-	 * @param list
-	 * @return
-	 */
-	public static HistogramDataset createNuclearMinDiameterHistogramDataset(List<AnalysisDataset> list){
-		HistogramDataset ds = new HistogramDataset();
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
-			double[] values = collection.getMinFerets(); 
-			double min  = Stats.min(values);
-			double max = Stats.max(values);
-			
-			int maxRounded = (int) Math.ceil(max);
-			int minRounded = (int) Math.floor(min);
-			
-			// put bins of width 0.5
-			int bins = ((maxRounded - minRounded) * 2 );
-			ds.addSeries("Min diameter_"+collection.getName(), values, bins, minRounded, maxRounded);
-		}
-		return ds;
-	}
-	
-	/**
-	 * For the given list of datasets, get the nuclear normalised variability as a histogram dataset
-	 * @param list
-	 * @return
-	 * @throws Exception  
-	 */
-	public static HistogramDataset createNuclearVariabilityHistogramDataset(List<AnalysisDataset> list) throws Exception {
-		HistogramDataset ds = new HistogramDataset();
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
-			double[] values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
-			double min  = Stats.min(values);
-			double max = Stats.max(values);
-			
-			int maxRounded = (int) Math.ceil(max);
-			int minRounded = (int) Math.floor(min);
-			
-			// put bins of width 0.1
-			int bins = ((maxRounded - minRounded) * 10 );
-			ds.addSeries("Variability_"+collection.getName(), values, bins, minRounded, maxRounded);
-		}
-		return ds;
-	}
-	
-	/**
-	 * For the given list of datasets, get the nuclear circularity as a histogram dataset
-	 * @param list
-	 * @return
-	 * @throws Exception  
-	 */
-	public static HistogramDataset createNuclearCircularityHistogramDataset(List<AnalysisDataset> list) throws Exception {
-		HistogramDataset ds = new HistogramDataset();
-		for(AnalysisDataset dataset : list){
-			CellCollection collection = dataset.getCollection();
-			double[] values = collection.getCircularities(); 
+//	/**
+//	 * For the given list of datasets, get the nuclear areas as a histogram dataset
+//	 * @param list
+//	 * @return
+//	 */
+//	public static HistogramDataset createNuclearAreaHistogramDataset(List<AnalysisDataset> list){
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//			double[] values = collection.getAreas();
+//
 //			double min  = Stats.min(values);
 //			double max = Stats.max(values);
-			
-			int maxRounded = 1;
-			int minRounded = 0;
-			
-			// put bins of width 0.05
-			int bins = ((maxRounded - minRounded) * 20 );
-			ds.addSeries("Circularity_"+collection.getName(), values, bins, minRounded, maxRounded );
-		}
-		return ds;
-	}
+//			
+//			// use int truncation to round to nearest 100 above max
+//			int maxRounded = (( (int)max + 99) / 100 ) * 100;
+//			
+//			// use int truncation to round to nearest 100 above min, then subtract 100
+//			int minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
+//			
+//			// bind of width 50
+//			int bins = ((maxRounded - minRounded) / 50);
+//
+//			ds.addSeries("Area_"+collection.getName(), values, bins, minRounded, maxRounded);
+//		}
+//		return ds;
+//	}
+//	
+//	/**
+//	 * For the given list of datasets, get the nuclear perimeters as a histogram dataset
+//	 * @param list
+//	 * @return
+//	 */
+//	public static HistogramDataset createNuclearPerimeterHistogramDataset(List<AnalysisDataset> list){
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//			double[] values = collection.getPerimeters(); 
+//			
+//			double min  = Stats.min(values);
+//			double max = Stats.max(values);
+//			
+//			int maxRounded = (int) Math.ceil(max);
+//			int minRounded = (int) Math.floor(min);
+//			
+//			// put bins of width 1
+//			int bins = ((maxRounded - minRounded));
+//			
+//			ds.addSeries("Perimeter_"+collection.getName(), values, bins, minRounded, maxRounded);
+//		}
+//		return ds;
+//	}
+//	
+//	/**
+//	 * For the given list of datasets, get the nuclear ferets as a histogram dataset
+//	 * @param list
+//	 * @return
+//	 */
+//	public static HistogramDataset createNuclearMaxFeretHistogramDataset(List<AnalysisDataset> list){
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//			double[] values = collection.getFerets(); 
+//			
+//			double min  = Stats.min(values);
+//			double max = Stats.max(values);
+//			
+//			int maxRounded = (int) Math.ceil(max);
+//			int minRounded = (int) Math.floor(min);
+//			
+//			// put bins of width 0.5
+//			int bins = ((maxRounded - minRounded) * 2 );
+//			
+//			ds.addSeries("Max feret_"+collection.getName(), values, bins, minRounded, maxRounded);
+//		}
+//		return ds;
+//	}
+//	
+//	/**
+//	 * For the given list of datasets, get the nuclear minimum diametes
+//	 * across the centre of mass as a histogram dataset
+//	 * @param list
+//	 * @return
+//	 */
+//	public static HistogramDataset createNuclearMinDiameterHistogramDataset(List<AnalysisDataset> list){
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//			double[] values = collection.getMinFerets(); 
+//			double min  = Stats.min(values);
+//			double max = Stats.max(values);
+//			
+//			int maxRounded = (int) Math.ceil(max);
+//			int minRounded = (int) Math.floor(min);
+//			
+//			// put bins of width 0.5
+//			int bins = ((maxRounded - minRounded) * 2 );
+//			ds.addSeries("Min diameter_"+collection.getName(), values, bins, minRounded, maxRounded);
+//		}
+//		return ds;
+//	}
+//	
+//	/**
+//	 * For the given list of datasets, get the nuclear normalised variability as a histogram dataset
+//	 * @param list
+//	 * @return
+//	 * @throws Exception  
+//	 */
+//	public static HistogramDataset createNuclearVariabilityHistogramDataset(List<AnalysisDataset> list) throws Exception {
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//			double[] values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
+//			double min  = Stats.min(values);
+//			double max = Stats.max(values);
+//			
+//			int maxRounded = (int) Math.ceil(max);
+//			int minRounded = (int) Math.floor(min);
+//			
+//			// put bins of width 0.1
+//			int bins = ((maxRounded - minRounded) * 10 );
+//			ds.addSeries("Variability_"+collection.getName(), values, bins, minRounded, maxRounded);
+//		}
+//		return ds;
+//	}
+//	
+//	/**
+//	 * For the given list of datasets, get the nuclear circularity as a histogram dataset
+//	 * @param list
+//	 * @return
+//	 * @throws Exception  
+//	 */
+//	public static HistogramDataset createNuclearCircularityHistogramDataset(List<AnalysisDataset> list) throws Exception {
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//			double[] values = collection.getCircularities(); 
+////			double min  = Stats.min(values);
+////			double max = Stats.max(values);
+//			
+//			int maxRounded = 1;
+//			int minRounded = 0;
+//			
+//			// put bins of width 0.05
+//			int bins = ((maxRounded - minRounded) * 20 );
+//			ds.addSeries("Circularity_"+collection.getName(), values, bins, minRounded, maxRounded );
+//		}
+//		return ds;
+//	}
+//	
+//	/**
+//	 * For the given list of datasets, get the nuclear circularity as a histogram dataset
+//	 * @param list
+//	 * @return
+//	 * @throws Exception  
+//	 */
+//	public static HistogramDataset createNuclearAspectRatioHistogramDataset(List<AnalysisDataset> list) throws Exception {
+//		HistogramDataset ds = new HistogramDataset();
+//		for(AnalysisDataset dataset : list){
+//			CellCollection collection = dataset.getCollection();
+//			double[] values = collection.getAspectRatios(); 
+//			double min  = Stats.min(values);
+//			double max = Stats.max(values);
+//			
+//			int maxRounded = (int) Math.ceil(max);
+//			int minRounded = (int) Math.floor(min);
+//			
+//			// put bins of width 0.05
+//			int bins = ((maxRounded - minRounded) * 20 );
+//			ds.addSeries("Aspect_"+collection.getName(), values, bins, minRounded, maxRounded );
+//		}
+//		return ds;
+//	}
 	
 	/**
 	 * For the given list of datasets, get the nuclear circularity as a histogram dataset
@@ -185,20 +218,117 @@ public class NuclearHistogramDatasetCreator {
 	 * @return
 	 * @throws Exception  
 	 */
-	public static HistogramDataset createNuclearAspectRatioHistogramDataset(List<AnalysisDataset> list) throws Exception {
+	public static HistogramDataset createNuclearStatsHistogramDataset(List<AnalysisDataset> list, int stat) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
-			double[] values = collection.getAspectRatios(); 
-			double min  = Stats.min(values);
-			double max = Stats.max(values);
 			
-			int maxRounded = (int) Math.ceil(max);
-			int minRounded = (int) Math.floor(min);
+			double[] values = null; 
 			
-			// put bins of width 0.05
-			int bins = ((maxRounded - minRounded) * 20 );
-			ds.addSeries("Aspect_"+collection.getName(), values, bins, minRounded, maxRounded );
+			int maxRounded = 0;
+			int minRounded = 0;
+			int bins = 0;
+			double min = 0;
+			double max = 0;
+			
+			String groupLabel = null;
+			
+			switch(stat){
+			
+				case NUCLEAR_AREA:
+					values = collection.getAreas();
+					min = Stats.min(values);
+					max = Stats.max(values);
+					// use int truncation to round to nearest 100 above max
+					maxRounded = (( (int)max + 99) / 100 ) * 100;
+					
+					// use int truncation to round to nearest 100 above min, then subtract 100
+					minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
+					
+					// bind of width 50
+					bins = ((maxRounded - minRounded) / 50);
+					groupLabel = "Area";
+					break;
+					
+				case NUCLEAR_PERIM: 
+					values = collection.getPerimeters(); 
+					min = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					
+					// put bins of width 0.5
+					bins = ((maxRounded - minRounded) * 2 );
+					groupLabel = "Perimeter";
+					break;
+					
+				case NUCLEAR_FERET:
+					values = collection.getFerets(); 
+					
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					
+					// put bins of width 0.5
+					bins = ((maxRounded - minRounded) * 2 );
+					groupLabel = "Max feret";
+					break;
+					
+				case NUCLEAR_MIN_DIAM: 
+					values = collection.getMinFerets(); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					
+					// put bins of width 0.5
+					bins = ((maxRounded - minRounded) * 2 );
+					groupLabel = "Min diameter";
+					break;
+					
+				case NUCLEAR_VARIABILITY:
+					values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					
+					// put bins of width 0.1
+					bins = ((maxRounded - minRounded) * 10 );
+					groupLabel = "Variability";
+					break;
+					
+				case NUCLEAR_CIRCULARITY:
+					values = collection.getCircularities(); 
+					
+					maxRounded = 1;
+					minRounded = 0;
+					
+					// put bins of width 0.05
+					bins = ((maxRounded - minRounded) * 20 );
+					groupLabel = "Circularity";
+					break;
+					
+				case NUCLEAR_ASPECT:
+					values = collection.getAspectRatios(); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					
+					// put bins of width 0.05
+					bins = ((maxRounded - minRounded) * 20 );
+					groupLabel = "Aspect";
+					break;
+			}
+
+			ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 		}
 		return ds;
 	}
