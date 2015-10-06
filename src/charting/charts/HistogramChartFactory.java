@@ -119,7 +119,7 @@ public class HistogramChartFactory {
 	 * @return
 	 */
 	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, String xLabel){
-		JFreeChart chart = createHistogram(ds, xLabel, "Count");
+		JFreeChart chart = createHistogram(ds, xLabel, "Nuclei");
 		
 		if(ds!=null && list!=null){
 			

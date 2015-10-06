@@ -18,6 +18,8 @@
  *******************************************************************************/
 package charting.datasets;
 
+import ij.IJ;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -345,13 +347,14 @@ public class NuclearHistogramDatasetCreator {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			
-			KernelEstimator est = new KernelEstimator(0.01);
+			KernelEstimator est = new KernelEstimator(0.001);
 			String groupLabel = null;
 			double[] values = null; 
 			int maxRounded = 0;
 			int minRounded = 0;
 			double min = 0;
 			double max = 0;
+			double stepSize = 0.1;
 			
 			switch(stat){
 			
@@ -365,6 +368,7 @@ public class NuclearHistogramDatasetCreator {
 					// use int truncation to round to nearest 100 above min, then subtract 100
 					minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
 					groupLabel = "Area";
+					stepSize = 1;
 					break;
 					
 				case NUCLEAR_PERIM: 
@@ -375,6 +379,7 @@ public class NuclearHistogramDatasetCreator {
 					maxRounded = (int) Math.ceil(max);
 					minRounded = (int) Math.floor(min);
 					groupLabel = "Perimeter";
+					stepSize = 1;
 					break;
 					
 				case NUCLEAR_FERET:
@@ -385,6 +390,7 @@ public class NuclearHistogramDatasetCreator {
 					maxRounded = (int) Math.ceil(max);
 					minRounded = (int) Math.floor(min);
 					groupLabel = "Max feret";
+					stepSize = 0.1;
 					break;
 					
 				case NUCLEAR_MIN_DIAM: 
@@ -395,6 +401,7 @@ public class NuclearHistogramDatasetCreator {
 					maxRounded = (int) Math.ceil(max);
 					minRounded = (int) Math.floor(min);
 					groupLabel = "Min diameter";
+					stepSize = 0.1;
 					break;
 					
 				case NUCLEAR_VARIABILITY:
@@ -405,6 +412,7 @@ public class NuclearHistogramDatasetCreator {
 					maxRounded = (int) Math.ceil(max);
 					minRounded = (int) Math.floor(min);
 					groupLabel = "Variability";
+					stepSize = 0.01;
 					break;
 					
 				case NUCLEAR_CIRCULARITY:
@@ -412,6 +420,7 @@ public class NuclearHistogramDatasetCreator {
 					maxRounded = 1;
 					minRounded = 0;
 					groupLabel = "Circularity";
+					stepSize = 0.005;
 					break;
 					
 				case NUCLEAR_ASPECT:
@@ -422,6 +431,7 @@ public class NuclearHistogramDatasetCreator {
 					maxRounded = (int) Math.ceil(max);
 					minRounded = (int) Math.floor(min);
 					groupLabel = "Aspect";
+					stepSize = 0.01;
 					break;
 			}
 	
@@ -430,30 +440,33 @@ public class NuclearHistogramDatasetCreator {
 			for(double d : values){
 				est.addValue(d, 1);
 			}
-			
-			
-//			List<Double> xValues = new ArrayList<Double>();
-//			List<Double> yValues = new ArrayList<Double>();
+
+//			double[] probabilities = new double[values.length];
 //			
-//			double stepSize = (maxRounded-minRounded) / 200;
-//			for(double i=minRounded; i<maxRounded;i+=stepSize){
-//				xValues.add(i);
-//				yValues.add(est.getProbability(i));
+//			Arrays.sort(values);
+//	
+//			// get the probability for each value
+//			for (int i=0; i < values.length; i++) {
+//				probabilities[i] = est.getProbability(values[i]);
 //			}
+//			
+//			for(double mean : est.getMeans()){
+//				IJ.log(groupLabel+" kernel mean: "+mean);
+//			}
+//			
+//			double[][] data = {  values, probabilities };
 			
-			double[] probabilities = new double[values.length];
+			List<Double> xValues = new ArrayList<Double>();
+			List<Double> yValues = new ArrayList<Double>();
 			
-			Arrays.sort(values);
-	
-			// get the probability for each value
-			for (int i=0; i < values.length; i++) {
-				probabilities[i] = est.getProbability(values[i]);
+			for(double i=minRounded; i<=maxRounded; i+=stepSize){
+				xValues.add(i);
+				yValues.add(est.getProbability(i));
+//				IJ.log(groupLabel+": "+i+" ");
 			}
-			
-			double[][] data = {  values, probabilities };
 	
-//			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
-//					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
+					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
 			
 			
 			ds.addSeries(groupLabel+"_"+collection.getName(), data);
