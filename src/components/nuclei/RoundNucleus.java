@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
+import components.CellularComponent;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
@@ -56,7 +57,7 @@ import utility.Utils;
  *
  */
 public class RoundNucleus 
-	implements components.nuclei.Nucleus, Serializable
+	implements components.nuclei.Nucleus, CellularComponent, Serializable
 {
 
 	/**

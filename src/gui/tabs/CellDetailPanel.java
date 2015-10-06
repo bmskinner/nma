@@ -369,7 +369,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		    for(Cell cell : dataset.getCollection().getCells()){	
 //		    	String name = cell.getCellId().toString();
 		    	String name = cell.getNucleus().getNameAndNumber();
-		    	UUID id = cell.getCellId();
+		    	UUID id = cell.getId();
 //		    	root.add(new DefaultMutableTreeNode(name));
 		    	root.add(new DefaultMutableTreeNode( new NodeData(name, id)));
 		    }

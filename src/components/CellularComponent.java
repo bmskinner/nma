@@ -18,22 +18,24 @@
  *******************************************************************************/
 package components;
 
-import java.io.Serializable;
 import java.util.UUID;
 
-@SuppressWarnings("serial")
-public abstract class CellularComponent implements Serializable {
+public interface CellularComponent {
+		
+	public UUID getID();
 	
-	protected UUID uuid;
 	
-	protected double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
+	/**
+	 * Get the position of the nucleus in the 
+	 * original image. The indexes in the double are
+	 * 0 - X_BASE of the bounding box
+	 * 1 - Y_BASE of the bounding box
+	 * 2 - WIDTH of the bounding box
+	 * 3 - HEIGHT of the bounding box
+	 * @return
+	 */
+	public double[] getPosition();
 	
-	public UUID getID(){
-		return this.uuid;
-	}
-	
-	public double[] getPosition(){
-		return this.orignalPosition;
-	}
+	public double getArea();
 
 }

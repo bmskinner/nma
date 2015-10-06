@@ -145,11 +145,11 @@ implements Serializable
   }
 
   public void addCell(Cell r){
-	  this.mappedCollection.put(r.getCellId(), r);
+	  this.mappedCollection.put(r.getId(), r);
   }
   
   public void removeCell(Cell c){
-	  this.mappedCollection.remove(c.getCellId());
+	  this.mappedCollection.remove(c.getId());
   }
   
   public int size(){

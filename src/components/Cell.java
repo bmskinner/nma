@@ -48,7 +48,7 @@ public class Cell implements Serializable {
 		tails = new ArrayList<Flagellum>(0);
 	}
 	
-	public UUID getCellId() {
+	public UUID getId() {
 		return uuid;
 	}
 

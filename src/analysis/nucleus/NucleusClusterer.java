@@ -300,7 +300,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 
 				instances.add(inst);
-				cellToInstanceMap.put(inst, c.getCellId());
+				cellToInstanceMap.put(inst, c.getId());
 
 				//			i++;
 			}
