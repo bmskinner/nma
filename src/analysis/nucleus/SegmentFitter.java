@@ -206,10 +206,10 @@ public class SegmentFitter {
 				 In these cases, do not try remapping the point; just leave it
 				 
 				 
-				 It can also be the last index of the profile
+				 It can also be the last index of the profile?
 				 * 
 				 */
-				if(seg.getStartIndex()==0 || seg.getStartIndex()==n.getLength()-1 ){
+				if(  seg.getStartIndex()==0 ){
 					segName = seg.getName();
 				}
 			}
@@ -253,17 +253,22 @@ public class SegmentFitter {
 		 * The first segment in the profile should therefore be directly after the reference point,
 		 * and no further offsets are needed.
 		 * 
-		 * TODO: However, the pointType may not lie on a segment endpoint.
-		 * In this case, we need to start -within- the first segment
+		 * The profile segmenter should be forcing a segment end at the reference point
+		 * Using getOrderedSegments() rather than getSegments() to force the zero index segment
+		 * to be first in the list.
+		 * 
+		 * An error arises when no zero index is available
+		 * 
+		 * 
 		 */
-		for(NucleusBorderSegment seg : profile.getSegments()){
+		for(NucleusBorderSegment seg : profile.getOrderedSegments()){
 
 			Profile revisedProfile = interpolateSegment(seg.getName(), profile);
 			finalSegmentProfiles.add(revisedProfile);
 			
-			if(debug){
+//			if(debug){
 				logger.log("Recombining segment: "+seg.toString(), Logger.DEBUG);
-			}
+//			}
 		}
 
 		// The reference point is between segment 0 and 1 in rodent sperm

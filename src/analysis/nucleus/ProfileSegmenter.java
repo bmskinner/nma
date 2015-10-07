@@ -128,13 +128,33 @@ public class ProfileSegmenter {
 			/*
 			 * End of the profile; call a new segment boundary to avoid
 			 * linking across the reference point
+			 * 
+			 * If a boundary is already called at index 0 in the first segment,
+			 * do not create a new segment, as it would have 1 length
+			 * 
+			 * If a boundary is already called at the last index in the profile,
+			 *  do not add a terminal segment, and just allow merging
 			 */
-			NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
-			seg.setName("Seg_"+segCount);
-			segments.add(seg);
-			logger.log("Terminal segment found: "+seg.toString(), Logger.DEBUG);
+			if(  (segments.get(0).getEndIndex()!=0) && segments.get(segments.size()-1).getEndIndex() != profile.size()-1 ) {
+				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
+				seg.setName("Seg_"+segCount);
+				segments.add(seg);
+				logger.log("Terminal segment found: "+seg.toString(), Logger.DEBUG);
+				
+			} else {
+				// the first segment is not larger than the minimum size
+				// We need to merge the first and last segments
+				
+				logger.log("Terminal segment not needed: first segment has index 0 or last has full index", Logger.DEBUG);
+			}
 			
 			NucleusBorderSegment.linkSegments(segments);
+			
+			logger.log("Segments linked", Logger.DEBUG);
+			for(NucleusBorderSegment s : segments){
+				logger.log(s.toString(), Logger.DEBUG);
+			}
+			
 
 		} catch (Exception e){
 			logger.error("Error in segmentation", e);

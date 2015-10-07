@@ -586,15 +586,26 @@ public class NucleusBorderSegment  implements Serializable{
 			prevSeg = segment;
 		}
 		NucleusBorderSegment firstSegment = list.get(0);
+		NucleusBorderSegment lastSegment = list.get(list.size()-1);
 				
-		boolean ok = firstSegment.update(prevSeg.getEndIndex(), firstSegment.getEndIndex());
+		/*
+		 * Ensure the end of the final segment is the same index as the start of the first segment.
+		 */
+//		boolean ok = lastSegment.update(lastSegment.getStartIndex(), firstSegment.getStartIndex());
+		boolean ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
 		if(!ok){
 			throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());
 //			IJ.log("Error fitting final segment: "+firstSegment.getLastFailReason());
 		}
 
-		prevSeg.setNextSegment(firstSegment); // ensure they match up at the end
-		firstSegment.setPrevSegment(prevSeg);
+		lastSegment.setNextSegment(firstSegment); // ensure they match up at the end
+		firstSegment.setPrevSegment(lastSegment);
+		
+		// if the first segment is starting at the last index of the profile, correct
+		// it to start at 0
+		if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
+			firstSegment.update(0, firstSegment.getEndIndex());
+		}
 	}
 	
 	/**

@@ -127,6 +127,49 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
+	 * Get a copy of the segments in this profile, ordered 
+	 * from the zero index of the profile
+	 * @return
+	 */
+	public List<NucleusBorderSegment> getOrderedSegments() throws Exception {
+		
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
+		NucleusBorderSegment firstSeg = null;
+		for(NucleusBorderSegment seg : this.getSegments()){
+			
+			if(seg.getStartIndex()==0){
+				firstSeg = seg;
+			}
+		}
+		
+		result.add(firstSeg);
+		
+		/*
+		 * Test 5 segments
+		 * Input: seg 0 has been added
+		 * i = 4
+		 * Round 1 : seg 1 added; set i to 3
+		 * Round 2 : seg 2 added; set i to 2
+		 * Round 4 : seg 3 added; set i to 1
+		 * Round 5 : seg 4 added; set i to 0 
+		 * Break as i=0; 5 segments added
+		 */
+		
+		int i = segments.size()-1; // the number of segments 
+		while(i>0){
+			
+			if(firstSeg.hasNextSegment()){
+				firstSeg = firstSeg.nextSegment();
+				result.add(firstSeg);
+				i--;
+			} else {
+				throw new Exception(i+": No next segment in "+firstSeg.toString());
+			}
+		}
+		return NucleusBorderSegment.copy(result);
+	}
+	
+	/**
 	 * Get the segment with the given name. Returns null if no segment
 	 * is found. Gets the actual segment, not a copy
 	 * @param name
