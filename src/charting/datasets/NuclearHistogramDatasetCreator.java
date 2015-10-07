@@ -343,6 +343,8 @@ public class NuclearHistogramDatasetCreator {
 	
 	public static DefaultXYDataset createNuclearDensityHistogramDataset(List<AnalysisDataset> list, int stat) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		int[] minMaxRange = calculateMinAndMaxRange(list, stat);
 
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
@@ -459,7 +461,7 @@ public class NuclearHistogramDatasetCreator {
 			List<Double> xValues = new ArrayList<Double>();
 			List<Double> yValues = new ArrayList<Double>();
 			
-			for(double i=minRounded; i<=maxRounded; i+=stepSize){
+			for(double i=minMaxRange[0]; i<=minMaxRange[1]; i+=stepSize){
 				xValues.add(i);
 				yValues.add(est.getProbability(i));
 //				IJ.log(groupLabel+": "+i+" ");
@@ -473,5 +475,99 @@ public class NuclearHistogramDatasetCreator {
 		}
 
 		return ds;
+	}
+	
+	/**
+	 * Calculate the minimum and maximum ranges in a list of datasets
+	 * for the given stat type
+	 * @param list the datasets
+	 * @param stat the statistic to use (NuclearHistogramDatasetCreator.NUCLEAR_x constants)
+	 * @return an array with the min and max of the range
+	 * @throws Exception
+	 */
+	private static int[] calculateMinAndMaxRange(List<AnalysisDataset> list, int stat) throws Exception {
+		
+		int[] result = new int[2];
+		result[0] = 1000000; // holds min
+		result[1] = 0; // holds max
+
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+
+			double[] values = null; 
+			int maxRounded = 0;
+			int minRounded = 0;
+			double min = 0;
+			double max = 0;
+			
+			switch(stat){
+			
+				case NUCLEAR_AREA:
+					values = collection.getAreas();
+					min = Stats.min(values);
+					max = Stats.max(values);
+					// use int truncation to round to nearest 100 above max
+					maxRounded = (( (int)max + 99) / 100 ) * 100;
+					
+					// use int truncation to round to nearest 100 above min, then subtract 100
+					minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
+					break;
+					
+				case NUCLEAR_PERIM: 
+					values = collection.getPerimeters(); 
+					min = Stats.min(values);
+					max = Stats.max(values);
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					break;
+					
+				case NUCLEAR_FERET:
+					values = collection.getFerets(); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					break;
+					
+				case NUCLEAR_MIN_DIAM: 
+					values = collection.getMinFerets(); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					break;
+					
+				case NUCLEAR_VARIABILITY:
+					values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					break;
+					
+				case NUCLEAR_CIRCULARITY:
+					values = collection.getCircularities(); 
+					maxRounded = 1;
+					minRounded = 0;
+					break;
+					
+				case NUCLEAR_ASPECT:
+					values = collection.getAspectRatios(); 
+					min  = Stats.min(values);
+					max = Stats.max(values);
+					
+					maxRounded = (int) Math.ceil(max);
+					minRounded = (int) Math.floor(min);
+					break;
+			}
+			
+			result[0] = result[0] < minRounded ? result[0] : minRounded;
+			result[1] = result[1] > maxRounded ? result[1] : maxRounded;
+		}
+		
+		return result;
 	}
 }
