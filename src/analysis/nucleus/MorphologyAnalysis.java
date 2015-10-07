@@ -541,6 +541,16 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			// These are the same as the profile collection keys, and have
 			// the same positions (since a franken profile is based on the median)
 			// The reference point is at index 0
+			
+			//TODO: An error occurs in here somewhere. A frankenMedian for Testing/Filter on var
+			// has put the frankenMedian reference point at the wrong end of the segment
+			// to the right of the reference point
+			
+			// is the profile reversed?
+			
+			// the profile aggregate is being given values that have the wrong offset;
+			// these values will come from individual frankenProfiles
+			// Therefore, the frankenProfiles have had their reference point wrongly assigned
 			for(String key : pc.getOffsetKeys()){
 				frankenCollection.addOffset(key, pc.getOffset(key));
 			}
@@ -563,6 +573,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				fitter.fit(n, pc);
 
 				// recombine the segments at the lengths of the median profile segments
+				//TODO: When the frankenProfile is created, the reference point may be wrong
 				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
 				frankenProfiles.add(recombinedProfile);
 				count++;

@@ -157,8 +157,11 @@ public class SegmentFitter {
 				throw new IllegalArgumentException("Nucleus has no segments");
 			}
 
+			// Generate a segmented profile from the angle profile of the point type
 			SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(pointType));
-			frankenProfile = recombineSegments(nucleusProfile);
+			
+			// stretch the segments to match the median profile of the collection
+			frankenProfile = recombineSegments(n, nucleusProfile, pointType);
 		} catch(Exception e){
 			logger.error("Error recombining segments", e);
 		}
@@ -177,9 +180,13 @@ public class SegmentFitter {
 			logger.log("No profile collection found, skipping remapping", Logger.DEBUG);
 			return; // this allows the unit tests to skip this section if a profile collection has not been created
 		}
-		// not all the tags will be associated with endpoints;
-		// e.g. the intersection point. The orientation and 
-		// reference points should be updated though
+		
+		/*
+		 * not all the tags will be associated with endpoints;
+		 * e.g. the intersection point. The orientation and 
+		 * reference points should be updated though
+		 */
+		
 		String[] tags = { n.getReferencePoint() , n.getOrientationPoint() };
 		
 		for(String tag : tags){
@@ -197,7 +204,8 @@ public class SegmentFitter {
 				// We need to find the segment with the lowest start posiiton instead (correct? what if the point is lower?)
 				// Also, why is the start index not zero?
 				// Surely the positions of tags in the median profile is the basis of segmnetation
-				if(seg.getStartIndex()==0){
+				// Correction - it can also be the last index of the profile
+				if(seg.getStartIndex()==0 || seg.getStartIndex()==n.getLength()-1 ){
 					segName = seg.getName();
 				}
 			}
@@ -215,33 +223,54 @@ public class SegmentFitter {
 	/**
 	 * Perform the recombination of segments from a nucleus. It takes each segment
 	 * and interpolates it to the length of the corresponding median segment.
-	 * @param testSegs the segments to adjust
-	 * @param testMedian the median profile
-	 * @return a profile constructed from the stretched segments
+	 * @param profile the segmented nucleus profile to adjust
+	 * @return a frankenprofile constructed from the stretched segments
 	 */
-	private Profile recombineSegments(SegmentedProfile profile){
+	private Profile recombineSegments(Nucleus n, SegmentedProfile profile, String pointType) throws Exception {
 		
 		if(profile==null){
 			throw new IllegalArgumentException("Test profile is null in recombiner");
 		}
 		logger.log("Recombining segments to FrankenProfile", Logger.DEBUG);
+		logger.log("The pointType "+pointType+" in this nucleus is at raw index "+n.getBorderIndex(pointType), Logger.DEBUG);
 		
 		
-		// the profiles derived from each segment will be merged to a single 
-		// profile at the end
+		/*
+		 * The profiles derived from each segment will be merged to a single 
+		 * profile at the end. Store them ordered in a list
+		 */
 		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
+		
+		/*
+		 * The incoming nucleus profile has been offset to begin from 
+		 * the pointType (usually the reference point)
+		 * 
+		 * The first segment in the profile should therefore be directly after the reference point,
+		 * and no further offsets are needed
+		 */
+		for(NucleusBorderSegment seg : profile.getSegments()){
+
+			Profile revisedProfile = interpolateSegment(seg.getName(), profile);
+			finalSegmentProfiles.add(revisedProfile);
+			
+			if(debug){
+				logger.log("Recombining segment: "+seg.toString(), Logger.DEBUG);
+			}
+		}
 
 		// The reference point is between segment 0 and 1 in rodent sperm
 		// This may need to change if it does not hold for other cells.
 		// The goal is to start the frankenprofile from the reference point
-		for(int i = 1; i<medianProfile.getSegmentCount();i++){
-			String name = "Seg_"+i;
-			Profile revisedProfile = interpolateSegment(name, profile);
-			finalSegmentProfiles.add(revisedProfile);
-		}
-		String name = "Seg_0";
-		Profile revisedProfile = interpolateSegment(name, profile);
-		finalSegmentProfiles.add(revisedProfile);
+		//TODO: The reference point is not always between seg0 and seg 1
+
+//		for(int i = 1; i<medianProfile.getSegmentCount();i++){
+//			String name = "Seg_"+i;
+//			Profile revisedProfile = interpolateSegment(name, profile);
+//			finalSegmentProfiles.add(revisedProfile);
+//		}
+//		String name = "Seg_0";
+//		Profile revisedProfile = interpolateSegment(name, profile);
+//		finalSegmentProfiles.add(revisedProfile);
 
 		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
 		return mergedProfile;

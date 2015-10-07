@@ -290,9 +290,6 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 			BorderTag tag = fromReference
 					? BorderTag.REFERENCE_POINT
 					: BorderTag.ORIENTATION_POINT;
-//			String point 	= fromReference 
-//					? list.get(0).getCollection().getReferencePoint() 
-//					: list.get(0).getCollection().getOrientationPoint();
 					
 			try {
 				if(list.size()==1){

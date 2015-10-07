@@ -50,6 +50,7 @@ import utility.Constants;
 import utility.Equation;
 import utility.Stats;
 import utility.Utils;
+import utility.Constants.BorderTag;
 
 
 /**
@@ -1054,6 +1055,14 @@ public class RoundNucleus
 		}
 		return result;
 	}
+	
+//	public NucleusBorderPoint getBorderTag(BorderTag tag){
+//		NucleusBorderPoint result = null;
+//		if(this.getBorderIndex(tag.toString())>-1){
+//			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
+//		}
+//		return result;
+//	}
 
 	public Map<String, Integer> getBorderTags(){
 		return this.borderTags;
