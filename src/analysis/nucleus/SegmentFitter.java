@@ -182,7 +182,7 @@ public class SegmentFitter {
 		}
 		
 		/*
-		 * not all the tags will be associated with endpoints;
+		 * Not all the tags will be associated with endpoints;
 		 * e.g. the intersection point. The orientation and 
 		 * reference points should be updated though
 		 */
@@ -197,14 +197,18 @@ public class SegmentFitter {
 			
 			// get the name of the segment with the tag at the start
 			for(NucleusBorderSegment seg : pc.getSegments(tag)){
-//				IJ.log("Median: "+seg.toString());
-				
-				//TODO
-				// What happens when the tag does not lie on the segment start?
-				// We need to find the segment with the lowest start posiiton instead (correct? what if the point is lower?)
-				// Also, why is the start index not zero?
-				// Surely the positions of tags in the median profile is the basis of segmnetation
-				// Correction - it can also be the last index of the profile
+
+				/*
+				 What happens when the tag does not lie on the segment start?
+				 This occurrs in pig sperm, where the reference point (head) is in 
+				 the centre of a segment.
+				 
+				 In these cases, do not try remapping the point; just leave it
+				 
+				 
+				 It can also be the last index of the profile
+				 * 
+				 */
 				if(seg.getStartIndex()==0 || seg.getStartIndex()==n.getLength()-1 ){
 					segName = seg.getName();
 				}
@@ -214,6 +218,7 @@ public class SegmentFitter {
 				// Get the same segment in the nucleus, and update the tag
 				NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(segName);
 				n.addBorderTag(tag, nSeg.getStartIndex());
+				logger.log("Remapped border point "+tag, Logger.DEBUG);
 			} else {
 				logger.log("Unable to remap border point "+tag, Logger.DEBUG);
 			}
@@ -246,7 +251,10 @@ public class SegmentFitter {
 		 * the pointType (usually the reference point)
 		 * 
 		 * The first segment in the profile should therefore be directly after the reference point,
-		 * and no further offsets are needed
+		 * and no further offsets are needed.
+		 * 
+		 * TODO: However, the pointType may not lie on a segment endpoint.
+		 * In this case, we need to start -within- the first segment
 		 */
 		for(NucleusBorderSegment seg : profile.getSegments()){
 

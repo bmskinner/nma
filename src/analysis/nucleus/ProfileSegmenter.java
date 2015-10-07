@@ -90,7 +90,12 @@ public class ProfileSegmenter {
 				
 		try{
 			
-			// iterate through the profile, looking for breakpoints
+			/*
+			 * Iterate through the profile, looking for breakpoints
+			 * A new segment should always be called at the reference point, 
+			 * regardless of minima, since the segments in this region are 
+			 * used in frankenprofiling
+			 */
 			for(int index=0; index<profile.size(); index++){
 				segmentEnd = index;
 				segLength++;
@@ -119,6 +124,15 @@ public class ProfileSegmenter {
 					segCount++;
 				}
 			}
+			
+			/*
+			 * End of the profile; call a new segment boundary to avoid
+			 * linking across the reference point
+			 */
+			NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
+			seg.setName("Seg_"+segCount);
+			segments.add(seg);
+			logger.log("Terminal segment found: "+seg.toString(), Logger.DEBUG);
 			
 			NucleusBorderSegment.linkSegments(segments);
 

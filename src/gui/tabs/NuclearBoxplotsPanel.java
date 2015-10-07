@@ -22,7 +22,6 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
 import gui.components.SelectableChartPanel;
-import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -56,7 +55,6 @@ import org.jfree.data.xy.DefaultXYDataset;
 
 import components.Cell;
 import components.CellCollection;
-import components.generic.Profile;
 import components.nuclei.Nucleus;
 import charting.charts.HistogramChartFactory;
 import charting.datasets.NuclearHistogramDatasetCreator;
@@ -348,12 +346,14 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				// check the boxplot that fired
 				String name = panel.getName();
 				
+				DecimalFormat df = new DecimalFormat("#.##");
+				
 				if( !(lower.isNaN() && upper.isNaN())  ){
 					
 					// create a new sub-collection with the given parameters for each dataset
 					for(AnalysisDataset dataset : list){
 						CellCollection collection = dataset.getCollection();
-						CellCollection subCollection = new CellCollection(dataset, "Filtered_"+name);
+						CellCollection subCollection = new CellCollection(dataset, "Filtered_"+name+"_"+df.format(lower)+"-"+df.format(upper));
 						
 						int stat = chartStatTypes.get(name);
 						
@@ -432,7 +432,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						
 						if(subCollection.getNucleusCount()>0){
 							
-							DecimalFormat df = new DecimalFormat("#.##");
+							
 							log("Filtering on "+name+": "+df.format(lower)+" - "+df.format(upper));
 							log("Filtered "+subCollection.getNucleusCount()+" nuclei");
 							dataset.addChildCollection(subCollection);
@@ -443,7 +443,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						
 					}
 				} else {
-					log("Error: "+name+": "+lower+" - "+upper);
+					log("Error: "+name+": "+df.format(lower)+" - "+df.format(upper));
 				}
 				
 			}
