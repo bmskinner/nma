@@ -867,16 +867,19 @@ implements Serializable
   public double[] getNormalisedDifferencesToMedianFromPoint(String pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
 
-	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+//	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
 	  for(Nucleus n : this.getNuclei()){
-
-		  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-
-		  // use the differences in degrees, rather than square degreees for plotting
-		  double rootDiff = Math.sqrt(diff);
-
-		  // normalise to the number of points in the perimeter (approximately 1 point per pixel)
-		  list.add(rootDiff / n.getPerimeter());
+		  
+		  double var = calculateVariabililtyOfNucleusProfile(n);
+		  list.add(var);
+//
+//		  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
+//
+//		  // use the differences in degrees, rather than square degreees for plotting
+//		  double rootDiff = Math.sqrt(diff);
+//
+//		  // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+//		  list.add(rootDiff / n.getPerimeter());
 	  }
 
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
@@ -951,4 +954,21 @@ implements Serializable
 	  }
 	  return file;
   }
+  
+  /**
+   * Get the perimeter normalised veriabililty of a nucleus angle profile compared to the
+   * median profile of the collection
+   * @param n the nucleus to test
+   * @return the variabililty score of the nucleus
+   * @throws Exception
+   */
+  public double calculateVariabililtyOfNucleusProfile(Nucleus n) throws Exception {
+	  String pointType = n.getReferencePoint();
+	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+	  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
+	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
+	  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+	  return var;
+  }
+
 }

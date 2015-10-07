@@ -442,21 +442,6 @@ public class NuclearHistogramDatasetCreator {
 			for(double d : values){
 				est.addValue(d, 1);
 			}
-
-//			double[] probabilities = new double[values.length];
-//			
-//			Arrays.sort(values);
-//	
-//			// get the probability for each value
-//			for (int i=0; i < values.length; i++) {
-//				probabilities[i] = est.getProbability(values[i]);
-//			}
-//			
-//			for(double mean : est.getMeans()){
-//				IJ.log(groupLabel+" kernel mean: "+mean);
-//			}
-//			
-//			double[][] data = {  values, probabilities };
 			
 			List<Double> xValues = new ArrayList<Double>();
 			List<Double> yValues = new ArrayList<Double>();

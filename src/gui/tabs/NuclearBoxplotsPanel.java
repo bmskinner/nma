@@ -30,6 +30,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 
 import components.Cell;
 import components.CellCollection;
+import components.generic.Profile;
 import components.nuclei.Nucleus;
 import charting.charts.HistogramChartFactory;
 import charting.datasets.NuclearHistogramDatasetCreator;
@@ -393,6 +395,20 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								break;
 								
 							case NuclearHistogramDatasetCreator.NUCLEAR_VARIABILITY:
+								
+								try {
+									for(Cell c : collection.getCells()){
+										Nucleus n = c.getNucleus();
+										
+										double var = collection.calculateVariabililtyOfNucleusProfile(n);
+
+										if(var >= lower && var <= upper){
+											subCollection.addCell(c);
+										}
+									}
+								} catch (Exception e){
+									error("Cannot calculate variabililty", e);
+								}
 								break;
 								
 							case NuclearHistogramDatasetCreator.NUCLEAR_CIRCULARITY:
@@ -412,16 +428,17 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 									}
 								}
 								break;
-								
-								
 						}
 						
 						if(subCollection.getNucleusCount()>0){
-							log("Filtering on "+name+": "+lower+" - "+upper);
+							
+							DecimalFormat df = new DecimalFormat("#.##");
+							log("Filtering on "+name+": "+df.format(lower)+" - "+df.format(upper));
 							log("Filtered "+subCollection.getNucleusCount()+" nuclei");
 							dataset.addChildCollection(subCollection);
 							fireSignalChangeEvent("RefreshPopulationPanelDatasets");
 							fireSignalChangeEvent("MorphologyNew_"+subCollection.getID().toString());
+//							fireSignalChangeEvent("MorphologyCopy_"+subCollection.getID().toString()+"|"+collection.getID().toString());
 						}
 						
 					}
