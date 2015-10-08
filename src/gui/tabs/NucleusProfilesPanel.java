@@ -53,10 +53,11 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 
 	private static final long serialVersionUID = 1L;
 
-	private ChartPanel variabilityChartPanel; 
+//	private ChartPanel variabilityChartPanel; 
 		
 	RegularProfileDisplayPanel profileDisplayPanel; // hold regular profiles
 	FrankenProfileDisplayPanel frankenDisplayPanel; // hold regular profiles
+	VariabililtyDisplayPanel	variabilityChartPanel;
 	
 	private List<AnalysisDataset> list;
 	
@@ -71,13 +72,14 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 		//---------------
 		// Create the variability chart
 		//---------------
-		JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
-				"Position", "IQR", null);
-		XYPlot variabilityPlot = variablityChart.getXYPlot();
-		variabilityPlot.setBackgroundPaint(Color.WHITE);
-		variabilityPlot.getDomainAxis().setRange(0,100);
-		variabilityChartPanel = new ChartPanel(variablityChart);
+//		JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
+//				"Position", "IQR", null);
+//		XYPlot variabilityPlot = variablityChart.getXYPlot();
+//		variabilityPlot.setBackgroundPaint(Color.WHITE);
+//		variabilityPlot.getDomainAxis().setRange(0,100);
+//		variabilityChartPanel = new ChartPanel(variablityChart);
 		
+		variabilityChartPanel = new VariabililtyDisplayPanel();
 		//---------------
 		// Add to the tabbed panel
 		//---------------
@@ -94,29 +96,123 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 		
 		profileDisplayPanel.update(list);
 		frankenDisplayPanel.update(list);
-		
-		if(!list.isEmpty()){
-			updateVariabilityChart(list);
-		} 
+		variabilityChartPanel.update(list);
+//		if(!list.isEmpty()){
+//			updateVariabilityChart(list);
+//		} 
 	}
 				
-	public void updateVariabilityChart(List<AnalysisDataset> list){
-		try {
-			if(list.size()==1){
-				JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100);
-				variabilityChartPanel.setChart(chart);
-			} else { // multiple nuclei
-				JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100);
-				variabilityChartPanel.setChart(chart);
-			}
-		} catch (Exception e) {
-			error("Error in plotting variability chart", e);
-		}	
-	}
+//	public void updateVariabilityChart(List<AnalysisDataset> list){
+//		try {
+//			if(list.size()==1){
+//				JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100);
+//				variabilityChartPanel.setChart(chart);
+//			} else { // multiple nuclei
+//				JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100);
+//				variabilityChartPanel.setChart(chart);
+//			}
+//		} catch (Exception e) {
+//			error("Error in plotting variability chart", e);
+//		}	
+//	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
+	}
+	
+	@SuppressWarnings("serial")
+	private class VariabililtyDisplayPanel extends JPanel implements ActionListener {
+		
+		protected ProflleDisplaySettingsPanel profileDisplaySettingsPanel;
+		protected ChartPanel chartPanel;
+		
+		public VariabililtyDisplayPanel(){
+			this.setLayout(new BorderLayout());
+			JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
+					"Position", "IQR", null);
+			XYPlot variabilityPlot = variablityChart.getXYPlot();
+			variabilityPlot.setBackgroundPaint(Color.WHITE);
+			variabilityPlot.getDomainAxis().setRange(0,100);
+			chartPanel = new ChartPanel(variablityChart);
+			chartPanel.setMinimumDrawWidth( 0 );
+			chartPanel.setMinimumDrawHeight( 0 );
+			this.add(chartPanel, BorderLayout.CENTER);
+			
+			// add the alignments panel to the tab
+			profileDisplaySettingsPanel = new ProflleDisplaySettingsPanel();
+			profileDisplaySettingsPanel.referenceButton.addActionListener(this);
+			profileDisplaySettingsPanel.orientationButton.addActionListener(this);
+			profileDisplaySettingsPanel.showMarkersCheckBox.addActionListener(this);
+			profileDisplaySettingsPanel.referenceButton.setSelected(true);
+			
+			// disable unused settings
+			profileDisplaySettingsPanel.normCheckBox.setEnabled(false);
+			profileDisplaySettingsPanel.rawProfileLeftButton.setEnabled(false);
+			profileDisplaySettingsPanel.rawProfileRightButton.setEnabled(false);
+			
+			this.add(profileDisplaySettingsPanel, BorderLayout.NORTH);
+		}
+
+		public void update(List<AnalysisDataset> list){
+
+			if(!list.isEmpty()){
+
+				profileDisplaySettingsPanel.referenceButton.setEnabled(true);
+				profileDisplaySettingsPanel.orientationButton.setEnabled(true);
+				profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(true);
+
+				if(list.size()>1){
+
+					// Don't allow marker selection for multiple datasets
+					profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(false);
+				}
+
+
+			} else {
+
+				// if the list is empty, do not enable controls
+				profileDisplaySettingsPanel.setEnabled(false);
+			}
+			
+			boolean normalised = profileDisplaySettingsPanel.normCheckBox.isSelected();
+			boolean rightAlign = normalised ? false : profileDisplaySettingsPanel.rawProfileRightButton.isSelected();
+			boolean fromReference = profileDisplaySettingsPanel.referenceButton.isSelected();
+			boolean showMarkers = profileDisplaySettingsPanel.showMarkersCheckBox.isSelected();
+			updateProfiles(list, normalised, rightAlign, fromReference, showMarkers);
+		}
+		
+		/**
+		 * Update the profile panel with data from the given datasets
+		 * @param list the datasets
+		 * @param normalised flag for raw or normalised lengths
+		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
+		 */	
+		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference, boolean showMarkers){
+			
+			BorderTag tag = fromReference
+					? BorderTag.REFERENCE_POINT
+					: BorderTag.ORIENTATION_POINT;
+			try {
+				if(list.size()==1){
+					JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100, tag);
+					chartPanel.setChart(chart);
+				} else { // multiple nuclei
+					JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100, tag);
+					chartPanel.setChart(chart);
+				}
+			} catch (Exception e) {
+				error("Error in plotting variability chart", e);
+			}	
+		}
+
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+
+			update(list);
+
+		}
 	}
 	
 	@SuppressWarnings("serial")

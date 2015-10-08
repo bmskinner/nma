@@ -22,6 +22,7 @@ import ij.IJ;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.jfree.data.statistics.HistogramDataset;
@@ -341,6 +342,58 @@ public class NuclearHistogramDatasetCreator {
 		return ds;
 	}
 	
+	/**
+	 * Given a dataset and a stats parameter, get the values for that stat
+	 * @param dataset the Analysis Dataset
+	 * @param stat the statistic to fetch (use NuclearHistogramDatasetCreator.NUCLEAR_x constants)
+	 * @return the array of values
+	 * @throws Exception
+	 */
+	public static double[] findDatasetValues(AnalysisDataset dataset, int stat) throws Exception {
+
+		CellCollection collection = dataset.getCollection();
+			
+		double[] values = null; 			
+		switch(stat){
+		
+			case NUCLEAR_AREA:
+				values = collection.getAreas();
+				break;
+				
+			case NUCLEAR_PERIM: 
+				values = collection.getPerimeters(); 
+				break;
+				
+			case NUCLEAR_FERET:
+				values = collection.getFerets(); 
+				break;
+				
+			case NUCLEAR_MIN_DIAM: 
+				values = collection.getMinFerets(); 
+				break;
+				
+			case NUCLEAR_VARIABILITY:
+				values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
+				break;
+				
+			case NUCLEAR_CIRCULARITY:
+				values = collection.getCircularities(); 
+				break;
+				
+			case NUCLEAR_ASPECT:
+				values = collection.getAspectRatios(); 
+				break;
+		}
+		return values;
+	}
+	
+	/**
+	 * Make an XY dataset corresponding to the probability density of a given nuclear statistic
+	 * @param list the datasets to draw
+	 * @param stat the statistic to measure
+	 * @return a charting dataset
+	 * @throws Exception
+	 */
 	public static DefaultXYDataset createNuclearDensityHistogramDataset(List<AnalysisDataset> list, int stat) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		

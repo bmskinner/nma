@@ -414,19 +414,13 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength) throws Exception {
-		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list);
+	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag) throws Exception {
+		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag);
 		CellCollection n = list.get(0).getCollection();
 		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength, list.get(0).getSwatch());
 		XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
-//		List<Integer> maxima = n.getProfileCollection().findMostVariableRegions(n.getOrientationPoint());
-//		Profile xpoints = n.getProfileCollection().getProfile(n.getOrientationPoint()).getPositions(xLength);
-//		for(Integer i : maxima){
-//
-//			plot.addDomainMarker(new ValueMarker(xpoints.get(i), Color.BLACK, new BasicStroke(1.0f)));
-//		}
 		return chart;
 	}
 	
@@ -436,8 +430,8 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, int xLength) throws Exception {
-		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list);
+	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag) throws Exception {
+		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "IQR", ds, PlotOrientation.VERTICAL, true, true,

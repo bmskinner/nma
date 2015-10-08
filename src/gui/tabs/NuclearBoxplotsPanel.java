@@ -22,7 +22,9 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
 import gui.components.SelectableChartPanel;
+import ij.IJ;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,10 +45,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
+import jdistlib.disttest.DistributionTest;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.Plot;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
@@ -53,6 +60,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import utility.Constants;
 import components.Cell;
 import components.CellCollection;
 import components.nuclei.Nucleus;
@@ -312,12 +320,52 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat);
 					chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, chartType);
 				}
+				detectModes(chart, list, stat);
 				XYPlot plot = (XYPlot) chart.getPlot();
 		        plot.setDomainPannable(true);
 		        plot.setRangePannable(true);
 
 				panel.setChart(chart);
 			}
+		}
+		
+		private void detectModes(JFreeChart chart, List<AnalysisDataset> list, int stat){
+			
+			XYPlot plot = chart.getXYPlot();
+			
+			
+			for(AnalysisDataset dataset : list){
+				
+				double[] values;
+				try {
+//					values = NuclearHistogramDatasetCreator.findDatasetValues(dataset, stat);
+//					Arrays.sort(values);
+//					double[] result = DistributionTest.diptest_presorted(values);
+//					
+//					/*
+//					 * an array of four elements: 
+//					 * The first is the test statistic, 
+//					 * the second is the p-value, 
+//					 * followed by indices for which there are a dip. 
+//					 * If there is no dip, the indices will be set to -1.
+//					 */
+//					IJ.log(dataset.getName()+": Test: "+result[0]);
+//					IJ.log(dataset.getName()+": p   : "+result[1]);
+//					
+//					if(result[1] < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
+//						
+//						for(int i=2; i<result.length; i++){
+//								int index = (int) result[i];
+//								ValueMarker marker = new ValueMarker(values[index], Color.BLACK, new BasicStroke(2.0f));
+//								plot.addDomainMarker(marker);
+//						}
+//					}
+				} catch (Exception e) {
+					error("Unable to detect modes", e);
+				}
+				
+			}
+			
 		}
 		
         @Override
