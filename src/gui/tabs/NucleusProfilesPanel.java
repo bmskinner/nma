@@ -21,6 +21,7 @@ package gui.tabs;
 import gui.components.ProflleDisplaySettingsPanel;
 import gui.components.ColourSelecter.ColourSwatch;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -38,13 +39,16 @@ import javax.swing.JTabbedPane;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import utility.Constants.BorderTag;
+import utility.DipTester;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
+import components.CellCollection;
 import components.generic.ProfileCollection;
 import analysis.AnalysisDataset;
 
@@ -196,6 +200,25 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 			try {
 				if(list.size()==1){
 					JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100, tag);
+					
+					CellCollection collection = list.get(0).getCollection();
+					// dip test the profiles
+					String pointType = collection.getPoint(tag);
+					boolean[] modes  = DipTester.testCollection(collection, pointType);
+					
+					
+					// add any regions with bimodal distribution to the chart
+					XYPlot plot = chart.getXYPlot();
+					
+					for(int i=0; i<modes.length; i++){
+						
+						double x = (double)i / (double) modes.length;
+						if(modes[i]==true){
+							ValueMarker marker = new ValueMarker(x, Color.black, new BasicStroke(2f));
+							plot.addDomainMarker(marker);
+						}
+					}
+					
 					chartPanel.setChart(chart);
 				} else { // multiple nuclei
 					JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100, tag);

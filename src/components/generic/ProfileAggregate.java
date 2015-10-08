@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import utility.ProfileException;
 import utility.Stats;
@@ -276,28 +277,43 @@ public class ProfileAggregate implements Serializable {
 			x += profileIncrement;
 		}
 	}
-
-//	public void print(){
-//		IJ.log("Printing profile aggregate: length: "+this.length+" inc: "+this.profileIncrement);
-//		for(int i=0;i<length;i++){
-//			double x = xPositions[i];
-//
-//			try{
-//				if(aggregate.containsKey(x)){
-//					Collection<Double> values = aggregate.get(x);
-//					String line = "    "+x+"\t";
-//					for(Double d : values){
-//						line += d+"\t";
-//					}
-//					IJ.log(line);
-//				} else {
-//					IJ.log(x+"\t");
-//				}
-//			} catch(Exception e){
-//				IJ.log("    Error printing x: "+x);
+	
+	/**
+	 * Get the angle values at the given position in the aggragate
+	 * from all nuclei
+	 * @param position the position to search. Must be between 0 and the length of the aggregate.
+	 * @return an unsorted array of the values at the given position
+	 * @throws Exception 
+	 */
+	public double[] getValuesAtPosition(double position) throws Exception{
+		if(position < 0 || position > 100 ){
+			throw new IllegalArgumentException("Desired x-position is out of range: "+position);
+		}
+		
+		// get the available x positions
+		// We need to map the requested position to the closest available bin
+//		Profile xpositions = this.getXPositions();
+//		
+//		double chosenX = 0;
+//		for(double x :xpositions.asArray()){
+//			if(x<position){
+//				continue;
 //			}
+//			chosenX = x;
+//			break;
 //		}
-//		IJ.log("");
-//	}
+		
+		// chosenX is now the x-posiiton directly above the desired position
+		Collection<Double> values = aggregate.get(position);
+		if (values==null){
+			throw new Exception("Cannot find values at position "+position);
+		}
+		return Utils.getdoubleFromDouble(   values.toArray(new Double[0])    );
+	}
+	
+	public Set<Double> getXKeyset(){
+		return aggregate.keySet();
+	}
+
 	
 }
