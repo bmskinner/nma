@@ -37,6 +37,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -81,6 +82,9 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	
 	private JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
 	private JSpinner iterationsSpinner;
+	
+	private JCheckBox useModalityCheckBox;
+	private JSpinner modalityPointsSpinner;
 	
 	private boolean readyToRun = false;
 	
@@ -273,8 +277,11 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	    methodPanel.add(clusterHierarchicalButton);
 	    methodPanel.add(clusterEMButton);
 	    
+	    JPanel modalityPanel = createModalityPanel();
+
 	    optionsPanel.add(methodPanel, BorderLayout.NORTH);
 	    optionsPanel.add(cardPanel, BorderLayout.CENTER);
+	    optionsPanel.add(modalityPanel, BorderLayout.SOUTH);
 	   
 	    
 	    contentPanel.add(optionsPanel, BorderLayout.CENTER);
@@ -283,6 +290,31 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		//---------------
 		this.pack();
 		this.setVisible(true);
+	}
+	
+	private JPanel createModalityPanel(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		useModalityCheckBox = new JCheckBox("Include modality");
+		useModalityCheckBox.setSelected(DEFAULT_USE_MODALITY);
+		useModalityCheckBox.addChangeListener(this);
+		panel.add(useModalityCheckBox);
+		
+		panel.add(new JLabel("Number of modality points:"));
+		
+		SpinnerModel model =
+				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MODALITY_REGIONS, //initial value
+						1, //min
+						20, //max
+						1); //step
+		
+		modalityPointsSpinner = new JSpinner(model);
+		modalityPointsSpinner.addChangeListener(this);
+		modalityPointsSpinner.setEnabled(DEFAULT_USE_MODALITY);
+		panel.add(modalityPointsSpinner);
+		
+		return panel;
 	}
 
 	@Override
@@ -339,6 +371,22 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
 				options.setIterations(  (Integer) j.getValue());
+			} 
+			
+			if(e.getSource()==useModalityCheckBox){
+				options.setIncludeModality(useModalityCheckBox.isSelected());
+				if(useModalityCheckBox.isSelected()){
+					modalityPointsSpinner.setEnabled(true);
+				} else {
+					modalityPointsSpinner.setEnabled(false);
+				}
+				
+			} 
+			
+			if(e.getSource()==modalityPointsSpinner){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				options.setModalityRegions(  (Integer) j.getValue());
 			} 
 		}catch (ParseException e1) {
 			IJ.log("Error in spinners for Clustering options");

@@ -1074,9 +1074,11 @@ public Profile calculateDeltas(int windowSize){
   }
   
   /**
-   * Get the index of value in the profile
-   * after sorting ascending
-   * @return a profile of rank values
+   * Get the indexes of sorted values in the profile.
+   * Example: A 4 element profile has the values { 10, 5, 1, 2 }
+   * This function will return the indexes { 3, 2, 0, 1 },
+   * corresponding to the order of the values after sorting.
+   * @return a profile containing index values
    */
   public Profile getSortedIndexes(){
 	  
