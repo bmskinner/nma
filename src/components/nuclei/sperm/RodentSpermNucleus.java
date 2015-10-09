@@ -31,6 +31,7 @@ import ij.gui.Roi;
 import java.io.File;
 import java.util.*;
 
+import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -209,13 +210,13 @@ extends SpermNucleus
     // distance are both far from each other and far from the centre, and are a more robust estimate
     // of the true ends of the signal
     double tipToCoMDistance = this.getBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint()).getLengthTo(this.getCentreOfMass());
-    Profile array = this.getAngleProfile().getLocalMinima(5);
+    BooleanProfile array = this.getAngleProfile().getLocalMinima(5);
 
     double maxDistance = 0;
     NucleusBorderPoint tail = this.getBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint()); // start at tip, move round
 
     for(int i=0; i<array.size();i++){
-      if(array.get(i)==1){
+      if(array.get(i)==true){
             
         double distanceAcrossCoM = tipToCoMDistance + this.getCentreOfMass().getLengthTo(getPoint(i));
         double distanceBetweenEnds = this.getBorderTag(Constants.Nucleus.RODENT_SPERM.referencePoint()).getLengthTo(getPoint(i));

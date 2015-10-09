@@ -43,6 +43,7 @@ import javax.swing.SwingWorker;
 
 import components.Cell;
 import components.CellCollection;
+import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -499,7 +500,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		 * displacement more than 0.1 of the range of values in the delta
 		 * profile
 		 */		
-		Profile minimaD = trimDS.getLocalMinima(3, 0, 0.1);
+		BooleanProfile minimaD = trimDS.getLocalMinima(3, 0, 0.1);
 
 		/* Set the threshold for this nucleus to the drop-off
 		* This is the highest local minimum detected in the 
@@ -508,7 +509,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		*/ 
 		int maxIndex = trimValue;
 		for(int i =0; i<minimaD.size(); i++){
-			if(minimaD.get(i)==1){
+			if(minimaD.get(i)==true){
 				maxIndex = i+trimValue;
 			}
 		}

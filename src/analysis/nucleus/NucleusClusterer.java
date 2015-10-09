@@ -101,9 +101,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		}
 	}
 	
-	public void setType(int type){
-		
-	}
+//	public void setType(int type){
+//		
+//	}
 	
 	public CellCollection getCluster(int cluster){
 		return this.clusterMap.get(cluster);

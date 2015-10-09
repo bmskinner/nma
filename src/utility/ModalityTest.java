@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import utility.ModalityTest.BinnedData.Bin;
+import components.generic.BooleanProfile;
 import components.generic.Profile;
 
 /**
@@ -203,14 +204,14 @@ public class ModalityTest {
 		
 		public double[] getLocalMaxima(){
 			Profile profile = new Profile(     Utils.getdoubleFromInt( this.toArray()   )  );
-			Profile maxima = profile.smooth(3).smooth(3).getLocalMaxima(3);
+			BooleanProfile maxima = profile.smooth(3).smooth(3).getLocalMaxima(3);
 //			profile.smooth(3).smooth(3).print();
 //			maxima.print();
 			
 			List<Double> result = new ArrayList<Double>();
 			
 			for(int i=0; i<maxima.size(); i++){
-				if(maxima.get(i)==1){
+				if(maxima.get(i)==true){
 					result.add( new Double( this.midpoint(bins.get(i)))  );
 				}
 			}

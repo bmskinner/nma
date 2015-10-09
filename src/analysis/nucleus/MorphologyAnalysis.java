@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import components.CellCollection;
+import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.SegmentedProfile;
@@ -606,7 +607,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 				Profile medianProfile = collection.getProfileCollection().getProfile(collection.getReferencePoint());
 
-				Profile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
+				BooleanProfile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
 
 				//		double minDiff = medianProfile.size();
 				double minAngle = 180;
@@ -616,7 +617,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
 
 				for(int i = 0; i<minima.size();i++){
-					if( (int)minima.get(i)==1){
+					if( minima.get(i)==true){
 						int index = i;
 
 						double angle = medianProfile.get(index);
@@ -647,7 +648,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 //			medianProfile.print();
 
 			// find local maxima in the median profile over 180
-			Profile maxima = medianProfile.getLocalMaxima(5, 180); // window size 5, only values over 180
+			BooleanProfile maxima = medianProfile.getLocalMaxima(5, 180); // window size 5, only values over 180
 
 
 			double minAngle = 180;
@@ -665,7 +666,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				
 				for(int i = 0; i<maxima.size();i++){
 					
-					if(maxima.get(i)==1){ // look at local maxima
+					if(maxima.get(i)==true){ // look at local maxima
 						int index = i;
 
 						double angle = medianProfile.get(index); // get the angle at this maximum

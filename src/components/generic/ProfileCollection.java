@@ -314,7 +314,7 @@ public class ProfileCollection implements Serializable {
 		Profile iqrProfile = getIQRProfile(pointType);
 //		iqrProfile.print();
 //		iqrProfile.smooth(3).print();
-		Profile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
+		BooleanProfile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
 //		maxima.print();
 //		Profile displayMaxima = maxima.multiply(50);
 		
@@ -327,7 +327,7 @@ public class ProfileCollection implements Serializable {
 		values.put(2, minIndex);
 		values.put(3, minIndex);
 		for(int i=0; i<maxima.size();i++ ){
-			if(maxima.get(i)==1){
+			if(maxima.get(i)==true){
 				if(iqrProfile.get(i)>iqrProfile.get(values.get(1))){
 					values.put(3,  values.get(2));
 					values.put(2,  values.get(1));

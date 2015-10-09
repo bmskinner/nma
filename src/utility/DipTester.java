@@ -19,11 +19,17 @@ import jdistlib.disttest.DistributionTest;
  */
 public class DipTester {
 	
-	
-	public static BooleanProfile testCollection(CellCollection collection, BorderTag tag, double significance){
+	/**
+	 * Test the given collection for non-unimodality at each point in the profile,
+	 * using Hartigan's Dip Test. Returns a profile with the dip test p-values
+	 * at each point
+	 * @param collection the collection of nuclei
+	 * @param tag the border tag to offset from
+	 * @return a boolean profile of results
+	 */public static Profile testCollectionGetPValues(CellCollection collection, BorderTag tag){
+		Profile resultProfile = null;
 		
-		BooleanProfile resultProfile = null;
-		boolean[] modes = null;
+		double[] pvals = null;
 		try {
 			
 //			IJ.log("Testing at p<"+significance);
@@ -34,7 +40,7 @@ public class DipTester {
 			List<Double> keys = collection.getProfileCollection().getAggregate().getXKeyset();
 //			Double[] keyArray = keys.toArray(new Double[0]);
 			
-			modes = new boolean[keys.size()];
+			pvals = new double[keys.size()];
 			
 			for(int i=0; i<keys.size(); i++ ){
 				
@@ -45,20 +51,14 @@ public class DipTester {
 
 					double[] result = DistributionTest.diptest_presorted(values);
 					
-//					IJ.log(position+"    "+result[0]+"    "+result[1]);
+					pvals[i] = result[1];
 
-					if(result[1]<significance){
-						modes[i] = true;
-					} else {
-						modes[i] = false;
-					}
 				} catch(Exception e){
-					modes[i] = false;
 					IJ.log("Cannot get values for position "+position);
 				}
 			}
 			
-			resultProfile = new BooleanProfile(modes);
+			resultProfile = new Profile(pvals);
 			resultProfile = resultProfile.offset(offset);
 			
 			
@@ -69,13 +69,89 @@ public class DipTester {
 			}
 		}
 		return resultProfile;
-		
 	}
 	
-	public static double[] dipTest(double[] values){
+	
+	/**
+	 * Test the given collection for non-unimodality at each point in the profile,
+	 * using Hartigan's Dip Test. Returns a boolean profile with the points at which 
+	 * the dip test p-value is less than the given significance level
+	 * @param collection the collection of nuclei
+	 * @param tag the border tag to offset from
+	 * @param significance the p-value threshold
+	 * @return a boolean profile of results
+	 */
+	public static BooleanProfile testCollectionGetIsNotUniModal(CellCollection collection, BorderTag tag, double significance){
+		
+		BooleanProfile resultProfile = null;
+		boolean[] modes = null;
+		try {
+			
+			Profile pvals = testCollectionGetPValues(collection, tag);
+			modes = new boolean[pvals.size()];
+			
+			for(int i=0; i<pvals.size(); i++ ){
 				
-		double[] result = DistributionTest.diptest(values);
-		return result;
+				if(pvals.get(i)<significance){
+					modes[i] = true;
+				} else {
+					modes[i] = false;
+				}
+				
+			}
+			resultProfile = new BooleanProfile(modes);
+		} catch (Exception e) {
+			IJ.log("Error in dip test: "+e.getMessage());
+			for(StackTraceElement e1 : e.getStackTrace()){
+				IJ.log(e1.toString());
+			}
+		}
+		return resultProfile;
 	}
+////			IJ.log("Testing at p<"+significance);
+//			String pointType = collection.getPoint(tag);
+//			int offset = collection.getProfileCollection().getOffset(pointType);
+//			
+//			// ensure the postions are starting from the right place
+//			List<Double> keys = collection.getProfileCollection().getAggregate().getXKeyset();
+////			Double[] keyArray = keys.toArray(new Double[0]);
+//			
+//			modes = new boolean[keys.size()];
+//			
+//			for(int i=0; i<keys.size(); i++ ){
+//				
+//				double position = keys.get(i);
+//				try{ 
+//					double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(position);
+//					Arrays.sort(values);
+//
+//					double[] result = DistributionTest.diptest_presorted(values);
+//					
+////					IJ.log(position+"    "+result[0]+"    "+result[1]);
+//
+//					if(result[1]<significance){
+//						modes[i] = true;
+//					} else {
+//						modes[i] = false;
+//					}
+//				} catch(Exception e){
+//					modes[i] = false;
+//					IJ.log("Cannot get values for position "+position);
+//				}
+//			}
+//			
+//			resultProfile = new BooleanProfile(modes);
+//			resultProfile = resultProfile.offset(offset);
+			
+			
+//		} catch (Exception e) {
+//			IJ.log("Error in dip test: "+e.getMessage());
+//			for(StackTraceElement e1 : e.getStackTrace()){
+//				IJ.log(e1.toString());
+//			}
+//		}
+//		return resultProfile;
+//		
+//	}
 
 }

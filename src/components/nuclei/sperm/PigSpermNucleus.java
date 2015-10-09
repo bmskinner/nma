@@ -27,6 +27,7 @@ import ij.gui.Roi;
 
 import java.io.File;
 
+import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.nuclear.*;
 import components.nuclei.*;
@@ -126,14 +127,14 @@ public class PigSpermNucleus
       // between them lies the tail. Find the two lowest minima,
       // and get the point between them
 
-      Profile minima = this.getAngleProfile().getLocalMinima(5);
+      BooleanProfile minima = this.getAngleProfile().getLocalMinima(5);
 
       // sort minima by interior angle
       int lowestMinima = 0;
       int secondLowestMinima = 0;
 
       for(int i=0; i<minima.size();i++){
-        if(minima.get(i)==1){
+        if(minima.get(i)==true){
           if (this.getAngle(i)<this.getAngle(lowestMinima)){
             secondLowestMinima = lowestMinima;
             lowestMinima = i;
@@ -141,7 +142,7 @@ public class PigSpermNucleus
         }
       }
       for(int i=0; i<minima.size();i++){
-        if(minima.get(i)==1){
+        if(minima.get(i)==true){
           if (this.getAngle(i)<this.getAngle(secondLowestMinima) && 
               this.getAngle(i)>this.getAngle(lowestMinima)){
             secondLowestMinima = i;

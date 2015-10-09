@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderSegment;
 import utility.Logger;
@@ -71,10 +72,10 @@ public class ProfileSegmenter {
 	 * @return a list of segments
 	 */
 	public List<NucleusBorderSegment> segment(){
-		Profile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
-		Profile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
+		BooleanProfile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
+		BooleanProfile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
 		
-		Profile breakpoint = minima.add(maxima);
+		BooleanProfile breakpoint = minima.or(maxima);
 		
 		Profile deltas = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima and maxima should be near 0 
 		Profile dDeltas = deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second differential
@@ -107,7 +108,7 @@ public class ProfileSegmenter {
 				}
 
 				// We want a minima or maxima, and the value must be distinct from its surroundings			
-				if( (   breakpoint.get(index)==1 
+				if( (   breakpoint.get(index)==true 
 						&& Math.abs(dDeltas.get(index)) > minRateOfChange
 						&& segLength >= MIN_SEGMENT_SIZE)){
 					

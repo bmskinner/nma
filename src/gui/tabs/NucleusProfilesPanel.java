@@ -239,7 +239,7 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 						// dip test the profiles
 						
 						double significance = (Double) pvalueSpinner.getValue();
-						BooleanProfile modes  = DipTester.testCollection(collection, tag, significance);
+						BooleanProfile modes  = DipTester.testCollectionGetIsNotUniModal(collection, tag, significance);
 
 
 						// add any regions with bimodal distribution to the chart

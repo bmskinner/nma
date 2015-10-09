@@ -103,5 +103,39 @@ public class BooleanProfile {
 		return new BooleanProfile(newArray);
 	}
 	
+	  /**
+	   * Returns true at each position if either profile is true at that position
+	   * @param adder the profile to compare. Must be the same length as this profile
+	   * @return the new profile
+	   */
+	  public BooleanProfile or(BooleanProfile profile){
+		  if(this.size()!=profile.size()){
+			  throw new IllegalArgumentException("Profile sizes do not match");
+		  }
+		  boolean[] result = new boolean[this.size()];
+
+		  for (int i=0; i<array.length; i++) { 
+			  result[i] = array[i] || profile.get(i);
+		  }
+		  return new BooleanProfile(result);
+	  }
+	  
+	  /**
+	   * Returns true at each position if both profiles are true at that position
+	   * @param adder the profile to compare. Must be the same length as this profile
+	   * @return the new profile
+	   */
+	  public BooleanProfile and(BooleanProfile profile){
+		  if(this.size()!=profile.size()){
+			  throw new IllegalArgumentException("Profile sizes do not match");
+		  }
+		  boolean[] result = new boolean[this.size()];
+
+		  for (int i=0; i<array.length; i++) { 
+			  result[i] = array[i] && profile.get(i);
+		  }
+		  return new BooleanProfile(result);
+	  }
+	
 	
 }

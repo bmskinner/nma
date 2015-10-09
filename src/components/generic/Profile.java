@@ -536,7 +536,7 @@ public class Profile implements Serializable {
     Each should be greater than the value before.
     One exception is allowed, to account for noisy data. Returns the indexes of minima
   */
-  public Profile getLocalMinima(int windowSize){
+  public BooleanProfile getLocalMinima(int windowSize){
     // go through angle array (with tip at start)
     // look at 1-2-3-4-5 points ahead and behind.
     // if all greater, local minimum
@@ -546,7 +546,7 @@ public class Profile implements Serializable {
     // int count = 0;
     // List<Integer> result = new ArrayList<Integer>(0);
 
-    double[] minima = new double[this.size()];
+    boolean[] minima = new boolean[this.size()];
 
     for (int i=0; i<array.length; i++) { // for each position in sperm
 
@@ -584,15 +584,15 @@ public class Profile implements Serializable {
 
       if(ok){
         // count++;
-        minima[i] = 1;
+        minima[i] = true;
       } else {
-        minima[i] = 0;
+        minima[i] = false;
       }
 
       // result.add(i);
 
     }
-    Profile minimaProfile = new Profile(minima);
+    BooleanProfile minimaProfile = new BooleanProfile(minima);
     // this.minimaCalculated = true;
     // this.minimaCount =  count;
     return minimaProfile;
@@ -605,20 +605,20 @@ public class Profile implements Serializable {
    * @param threshold the threshold
    * @return
    */
-  public Profile getLocalMinima(int windowSize, double threshold){
-	  Profile minima = getLocalMinima(windowSize);
+  public BooleanProfile getLocalMinima(int windowSize, double threshold){
+	  BooleanProfile minima = getLocalMinima(windowSize);
 
-	  double[] values = new double[this.size()];
+	  boolean[] values = new boolean[this.size()];
 
 	  for (int i=0; i<array.length; i++) { 
 
-		  if(minima.get(i)==1 && this.get(i)<threshold){
-			  values[i] = 1;
+		  if(minima.get(i)==true && this.get(i)<threshold){
+			  values[i] = true;
 		  } else {
-			  values[i] = 0;
+			  values[i] = false;
 		  } 
 	  }
-	  return new Profile(values);
+	  return new BooleanProfile(values);
   }
   
   /**
@@ -630,22 +630,22 @@ public class Profile implements Serializable {
    * @param fraction the fraction threshold
    * @return
    */
-  public Profile getLocalMinima(int windowSize, double threshold, double fraction){
-	  Profile minima = getLocalMinima(windowSize, threshold);
+  public BooleanProfile getLocalMinima(int windowSize, double threshold, double fraction){
+	  BooleanProfile minima = getLocalMinima(windowSize, threshold);
 
-	  double[] values = new double[this.size()];
+	  boolean[] values = new boolean[this.size()];
 	  
 	  double fractionThreshold = (this.getMax()-this.getMin()) * fraction;
 
 	  for (int i=0; i<array.length; i++) { 
 
-		  if(minima.get(i)==1 && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
-			  values[i] = 1;
+		  if(minima.get(i)==true && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
+			  values[i] = true;
 		  } else {
-			  values[i] = 0;
+			  values[i] = false;
 		  } 
 	  }
-	  return new Profile(values);
+	  return new BooleanProfile(values);
   }
 
   /**
@@ -654,12 +654,12 @@ public class Profile implements Serializable {
    * @param windowSize the window size to use
    * @return
    */
-  public Profile getLocalMaxima(int windowSize){
+  public BooleanProfile getLocalMaxima(int windowSize){
 	  // go through array
 	  // look at points ahead and behind.
 	  // if all lower, local maximum
 
-	  double[] result = new double[this.size()];
+	  boolean[] result = new boolean[this.size()];
 
 	  for (int i=0; i<array.length; i++) { // for each position
 
@@ -686,9 +686,9 @@ public class Profile implements Serializable {
 			  }
 		  }
 
-		  result[i] = isMaximum ? 1 : 0;
+		  result[i] = isMaximum;
 	  }
-	  return new Profile(result);
+	  return new BooleanProfile(result);
   }
   
   /**
@@ -698,20 +698,20 @@ public class Profile implements Serializable {
    * @param threshold the threshold
    * @return
    */
-  public Profile getLocalMaxima(int windowSize, double threshold){
-	  Profile maxima = getLocalMaxima(windowSize);
+  public BooleanProfile getLocalMaxima(int windowSize, double threshold){
+	  BooleanProfile maxima = getLocalMaxima(windowSize);
 
-	  double[] values = new double[this.size()];
+	  boolean[] values = new boolean[this.size()];
 
 	  for (int i=0; i<array.length; i++) { 
 
-		  if(maxima.get(i)==1 && this.get(i)>threshold){
-			  values[i] = 1;
+		  if(maxima.get(i)==true && this.get(i)>threshold){
+			  values[i] = true;
 		  } else {
-			  values[i] = 0;
+			  values[i] = false;
 		  } 
 	  }
-	  return new Profile(values);
+	  return new BooleanProfile(values);
   }
   
   /**
@@ -723,22 +723,22 @@ public class Profile implements Serializable {
    * @param fraction the fraction threshold
    * @return
    */
-  public Profile getLocalMaxima(int windowSize, double threshold, double fraction){
-	  Profile minima = getLocalMaxima(windowSize, threshold);
+  public BooleanProfile getLocalMaxima(int windowSize, double threshold, double fraction){
+	  BooleanProfile minima = getLocalMaxima(windowSize, threshold);
 
-	  double[] values = new double[this.size()];
+	  boolean[] values = new boolean[this.size()];
 	  
 	  double fractionThreshold = this.getMax()-this.getMin() * fraction;
 
 	  for (int i=0; i<array.length; i++) { 
 
-		  if(minima.get(i)==1 && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
-			  values[i] = 1;
+		  if(minima.get(i)==true && ( this.get(i)>fractionThreshold || this.get(i)<-fractionThreshold   )  ){
+			  values[i] = true;
 		  } else {
-			  values[i] = 0;
+			  values[i] = false;
 		  } 
 	  }
-	  return new Profile(values);
+	  return new BooleanProfile(values);
   }
   
   /**
