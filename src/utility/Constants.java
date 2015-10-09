@@ -48,6 +48,7 @@ public class Constants {
 		
 		
 		// statistical testing
+		public static final double TEN_PERCENT_SIGNIFICANCE_LEVEL = 0.1;
 		public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
 		

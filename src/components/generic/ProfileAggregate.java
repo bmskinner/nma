@@ -24,7 +24,9 @@ import ij.IJ;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -311,8 +313,13 @@ public class ProfileAggregate implements Serializable {
 		return Utils.getdoubleFromDouble(   values.toArray(new Double[0])    );
 	}
 	
-	public Set<Double> getXKeyset(){
-		return aggregate.keySet();
+	public List<Double> getXKeyset(){
+		List<Double> result = new ArrayList<Double>();
+		for(Double d : aggregate.keySet()){
+			result.add(d);
+		}
+		Collections.sort(result);
+		return result;
 	}
 
 	

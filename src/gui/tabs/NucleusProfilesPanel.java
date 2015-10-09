@@ -45,10 +45,13 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import utility.Constants.BorderTag;
+import utility.Constants;
 import utility.DipTester;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
 import components.CellCollection;
+import components.generic.BooleanProfile;
+import components.generic.Profile;
 import components.generic.ProfileCollection;
 import analysis.AnalysisDataset;
 
@@ -201,21 +204,26 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 				if(list.size()==1){
 					JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100, tag);
 					
-					CellCollection collection = list.get(0).getCollection();
-					// dip test the profiles
-					String pointType = collection.getPoint(tag);
-					boolean[] modes  = DipTester.testCollection(collection, pointType);
 					
-					
-					// add any regions with bimodal distribution to the chart
-					XYPlot plot = chart.getXYPlot();
-					
-					for(int i=0; i<modes.length; i++){
+					if(showMarkers){ // add the bimodal regions
+						CellCollection collection = list.get(0).getCollection();
 						
-						double x = (double)i / (double) modes.length;
-						if(modes[i]==true){
-							ValueMarker marker = new ValueMarker(x, Color.black, new BasicStroke(2f));
-							plot.addDomainMarker(marker);
+						// dip test the profiles
+						String pointType = collection.getPoint(tag);
+						BooleanProfile modes  = DipTester.testCollection(collection, pointType, Constants.TEN_PERCENT_SIGNIFICANCE_LEVEL);
+
+
+						// add any regions with bimodal distribution to the chart
+						XYPlot plot = chart.getXYPlot();
+
+						Profile xPositions = modes.getPositions(100);
+
+						for(int i=0; i<modes.size(); i++){
+							double x = xPositions.get(i);
+							if(modes.get(i)==true){
+								ValueMarker marker = new ValueMarker(x, Color.black, new BasicStroke(2f));
+								plot.addDomainMarker(marker);
+							}
 						}
 					}
 					
