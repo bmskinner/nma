@@ -8,6 +8,8 @@ public class ClusteringOptions {
 	private int clusterNumber;
 	private HierarchicalClusterMethod hierarchicalMethod;
 	private int iterations;
+	private boolean includeNonUnimodalPoints;
+	private boolean autoClusterNumber;
 	
 	public ClusteringOptions(int type){
 		this.type = type;
@@ -16,6 +18,14 @@ public class ClusteringOptions {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+	
+	public int getType() {
+		return type;
+	}
+	
+	public void setAutoClusterNumber(boolean autoClusterNumber) {
+		this.autoClusterNumber = autoClusterNumber;
 	}
 
 
@@ -31,7 +41,16 @@ public class ClusteringOptions {
 	public void setIterations(int iterations) {
 		this.iterations = iterations;
 	}
+	
 
+	public boolean isIncludeNonUnimodalPoints() {
+		return includeNonUnimodalPoints;
+	}
+
+
+	public void setIncludeNonUnimodalPoints(boolean includeNonUnimodalPoints) {
+		this.includeNonUnimodalPoints = includeNonUnimodalPoints;
+	}
 
 
 	/**
@@ -39,7 +58,7 @@ public class ClusteringOptions {
 	 * for the Weka HierarchicalClusterer
 	 * @return
 	 */
-	private String[] getOptions(){
+	public String[] getOptions(){
 	
 		String[] options = null;
 		
@@ -54,23 +73,36 @@ public class ClusteringOptions {
 			options[0] = "-N";                 // number of clusters
 			options[1] = String.valueOf((Integer)clusterNumber);
 			options[2] = "-L";                 // algorithm
-			options[3] = hierarchicalMethod.toString();
+			options[3] = hierarchicalMethod.code();
 		}
 		
 		return options;
 	}
 	
 	public enum HierarchicalClusterMethod {
-		WARD ("WARD");
+		WARD 			("Ward", "WARD"), 
+		SINGLE			("Single", "SINGLE"), 
+		COMPLETE		("Complete", "COMPLETE"), 
+		AVERAGE			("Average", "AVERAGE"), 
+		MEAN			("Mean", "MEAN"),
+		CENTROID		("Centroid", "CENTROID"),
+		ADJCOMPLETE		("Adjusted complete", "ADJCOMPLETE"),
+		NEIGHBOR_JOINING("Neighbour joining", "NEIGHBOR_JOINING");
 		
 		private final String name;
+		private final String code;
 		
-		HierarchicalClusterMethod(String name){
+		HierarchicalClusterMethod(String name, String code){
 			this.name = name;
+			this.code = code;
 		}
 		
 		public String toString(){
 			return this.name;
+		}
+		
+		public String code(){
+			return this.code;
 		}
 	}
 }

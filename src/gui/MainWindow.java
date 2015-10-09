@@ -81,6 +81,7 @@ import java.beans.PropertyChangeListener;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.ClusteringOptions;
 import analysis.nucleus.CurveRefolder;
 import analysis.nucleus.DatasetMerger;
 import analysis.nucleus.MorphologyAnalysis;
@@ -91,6 +92,7 @@ import analysis.nucleus.SignalDetector;
 import analysis.tail.TubulinTailDetector;
 import utility.Constants;
 //import utility.Logger;
+
 
 
 
@@ -1216,12 +1218,14 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			super(dataset, "Cluster analysis", "Error in cluster analysis");
 			
 			ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
-			Map<String, Object> options = clusterSetup.getOptions();
+			ClusteringOptions options = clusterSetup.getOptions();
+//			Map<String, Object> options = clusterSetup.getOptions();
 
 			if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
-				worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
-				((NucleusClusterer) worker).setClusteringOptions(options);
+//				worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
+				worker = new NucleusClusterer( dataset.getCollection() , options );
+//				((NucleusClusterer) worker).setClusteringOptions(options);
 				
 				worker.addPropertyChangeListener(this);
 				worker.execute();

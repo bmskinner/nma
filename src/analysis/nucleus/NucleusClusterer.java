@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import analysis.ClusteringOptions;
 import components.Cell;
 import components.CellCollection;
 import components.generic.Profile;
@@ -51,18 +52,14 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	private Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 	private Map<Integer, CellCollection> clusterMap = new HashMap<Integer, CellCollection>();
 	
-	private String newickTree;
-	
-	private int type = NucleusClusterer.EM;
-	
-	private Map<String, Object> optionMap;
-	
+	private String newickTree;	
 	private Logger logger;
 		
 	private CellCollection collection;
-	
-	public NucleusClusterer(int type, CellCollection collection){
-		this.type = type;
+	private ClusteringOptions options;
+		
+	public NucleusClusterer(CellCollection collection, ClusteringOptions options){
+		this.options = options;
 		this.collection = collection;
 	}
 	
@@ -100,17 +97,14 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			logger.error("Error in clustering", e);
 		}
 	}
-	
-//	public void setType(int type){
-//		
-//	}
+
 	
 	public CellCollection getCluster(int cluster){
 		return this.clusterMap.get(cluster);
 	}
 	
 	public String getNewickTree(){
-		if(this.type==NucleusClusterer.HIERARCHICAL){
+		if(options.getType()==NucleusClusterer.HIERARCHICAL){
 			return this.newickTree;
 		} else{
 			return null;
@@ -133,28 +127,29 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			Instances instances = makeAttributesAndInstances(collection);
 
 			// create the clusterer to run on the Instances
-			String[] options = makeClusteringOptions();
+//			String[] options = makeClusteringOptions();
+			String[] optionArray = this.options.getOptions();
 
 			try {
 				
 
-				logger.log("Clusterer is type "+type);
-				for(String s : options){
+				logger.log("Clusterer is type "+options.getType());
+				for(String s : optionArray){
 					logger.log("Clusterer options: "+s, Logger.DEBUG);
 				}
 				
 				
-				if(type==NucleusClusterer.HIERARCHICAL){
+				if(options.getType()==NucleusClusterer.HIERARCHICAL){
 					HierarchicalClusterer clusterer = new HierarchicalClusterer();
-					clusterer.setOptions(options);     // set the options
+					clusterer.setOptions(optionArray);     // set the options
 					clusterer.buildClusterer(instances);    // build the clusterer
 					assignClusters(clusterer, collection);		
 					this.newickTree = clusterer.graph();
 				}
 				
-				if(type==NucleusClusterer.EM){
+				if(options.getType()==NucleusClusterer.EM){
 					EM clusterer = new EM();   // new instance of clusterer
-					clusterer.setOptions(options);     // set the options
+					clusterer.setOptions(optionArray);     // set the options
 					clusterer.buildClusterer(instances);    // build the clusterer
 					assignClusters(clusterer, collection);		
 				}
@@ -309,36 +304,5 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		}
 		return instances;
 	}
- 	
- 	public void setClusteringOptions(Map<String, Object> options){
- 		this.optionMap = options;
- 		this.type =  (Integer) options.get("type"); 
-// 		IJ.log("Input type: "+this.type);
- 	}
-	
-	private String[] makeClusteringOptions(){
-		
-		String[] options = null;
-		if(this.type==NucleusClusterer.EM){
-			options = new String[2];
-			options[0] = "-I";                 // max. iterations
-			options[1] = "100";
-			//		options[2] = "-N";
-			//		options[3] = "2";
-		}
-		if(this.type==NucleusClusterer.HIERARCHICAL){
-			
-			Object o = optionMap.get("-N");
-			options = new String[4];
-			options[0] = "-N";                 // number of clusters
-			options[1] = String.valueOf((Integer) optionMap.get("-N"));
-			options[2] = "-L";                 // algorithm
-			options[3] = "WARD";
-		}
-		
-		return options;
-	}
-	
-
 
 }

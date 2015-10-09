@@ -21,17 +21,23 @@ package gui;
 import ij.IJ;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,20 +49,25 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import analysis.ClusteringOptions;
+import analysis.ClusteringOptions.HierarchicalClusterMethod;
 import analysis.nucleus.NucleusClusterer;
 
-public class ClusteringSetupWindow extends JDialog {
+public class ClusteringSetupWindow extends JDialog implements ActionListener, ChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	
 	private static final int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
 	private static final int DEFAULT_CLUSTER_METHOD = NucleusClusterer.HIERARCHICAL;
+	private static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD = HierarchicalClusterMethod.WARD;
+	private static final int DEFAULT_EM_ITERATIONS = 100;
 
 	private final JPanel contentPanel = new JPanel();
 	
 	private JPanel headingPanel;
 	private JPanel optionsPanel;
 	private JPanel footerPanel;
+	private JPanel 		cardPanel;
 	
 	private JSpinner clusterNumberSpinner;
 	
@@ -66,14 +77,20 @@ public class ClusteringSetupWindow extends JDialog {
 	private JRadioButton clusterNumberAutoButton;
 	private JRadioButton clusterManualButton;
 	
+	private JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
+	private JSpinner iterationsSpinner;
+	
 	private boolean readyToRun = false;
 
-	private Map<String, Object> options = new HashMap<String, Object>();
+//	private Map<String, Object> options = new HashMap<String, Object>();
+	
+	private ClusteringOptions options;
 	
 	public ClusteringSetupWindow(MainWindow mw) {
 		
 		// modal dialog
 		super(mw, true);
+		this.setTitle("Clustering options");
 		
 		try {
 //			IJ.log("Creating gui");
@@ -86,17 +103,129 @@ public class ClusteringSetupWindow extends JDialog {
 		
 	}
 	
-	public Map<String, Object> getOptions(){
+	public ClusteringOptions getOptions(){
 		return this.options;
 	}
+	
+//	public Map<String, Object> getOptions(){
+//		return this.options;
+//	}
 	
 	public boolean isReadyToRun(){
 		return this.readyToRun;
 	}
 	
 	private void setDefaults(){
-		options.put("type", ClusteringSetupWindow.DEFAULT_CLUSTER_METHOD);
-		options.put("-N", ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER);
+		options = new ClusteringOptions(ClusteringSetupWindow.DEFAULT_CLUSTER_METHOD);
+		options.setClusterNumber(DEFAULT_MANUAL_CLUSTER_NUMBER);
+		options.setHierarchicalMethod(DEFAULT_HIERARCHICAL_METHOD);
+		options.setIterations(DEFAULT_EM_ITERATIONS);
+
+//		options.put("type", ClusteringSetupWindow.DEFAULT_CLUSTER_METHOD);
+//		options.put("-N", ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER);
+	}
+	
+	private JPanel createHierarchicalPanel(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		panel.add(new JLabel("Hierarchical clustering method:"));
+		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
+		hierarchicalClusterMethodCheckBox.setSelectedItem(DEFAULT_HIERARCHICAL_METHOD);
+		hierarchicalClusterMethodCheckBox.addActionListener(this);
+		panel.add(hierarchicalClusterMethodCheckBox);
+
+		JLabel clusterCountLabel = new JLabel("Desired number of clusters:");
+		panel.add(clusterCountLabel);
+
+		clusterNumberAutoButton = new JRadioButton("Default (2)");
+		clusterNumberAutoButton.setSelected(true);
+
+		clusterManualButton = new JRadioButton("Manual");
+
+		ButtonGroup clusterNumberGroup = new ButtonGroup();
+		clusterNumberGroup.add(clusterNumberAutoButton);
+		clusterNumberGroup.add(clusterManualButton);
+
+
+		panel.add(clusterNumberAutoButton);
+		panel.add(clusterManualButton);
+
+		SpinnerModel model =
+				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
+						1, //min
+						100, //max
+						1); //step
+
+		clusterNumberSpinner = new JSpinner(model);
+		clusterNumberSpinner.setEnabled(false);
+		panel.add(clusterNumberSpinner);
+
+		clusterManualButton.addActionListener(this);
+		clusterNumberSpinner.addChangeListener(this);
+
+		return panel;
+	}
+	
+	private JPanel createEMPanel(){
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		panel.add(new JLabel("Number of iterations:"));
+
+		SpinnerModel model =
+				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_EM_ITERATIONS, //initial value
+						1, //min
+						1000, //max
+						1); //step
+
+		iterationsSpinner = new JSpinner(model);
+		iterationsSpinner.addChangeListener(this);
+		
+		panel.add(iterationsSpinner);
+		
+		Dimension minSize = new Dimension(10, 5);
+		Dimension prefSize = new Dimension(10, 5);
+		Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
+		panel.add(new Box.Filler(minSize, prefSize, maxSize));
+		
+		return panel;
+	}
+	
+	private JPanel createHeader(){
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		JLabel headingLabel = new JLabel("Set clustering options");
+		panel.add(headingLabel);
+		return panel;
+	}
+	
+	private JPanel createFooter(){
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		JButton okButton = new JButton("OK");
+		okButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				ClusteringSetupWindow.this.readyToRun = true;
+				ClusteringSetupWindow.this.setVisible(false);			
+			}
+		});
+
+		panel.add(okButton);
+
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				ClusteringSetupWindow.this.dispose();			
+			}
+		});
+		panel.add(cancelButton);
+		return panel;
 	}
 	
 	private void createGUI(){
@@ -109,42 +238,21 @@ public class ClusteringSetupWindow extends JDialog {
 		//---------------
 		// panel for text labels
 		//---------------
-		headingPanel = new JPanel();
-		headingPanel.setLayout(new BoxLayout(headingPanel, BoxLayout.Y_AXIS));
-		JLabel headingLabel = new JLabel("Set clustering options");
-		headingPanel.add(headingLabel);
+		headingPanel = createHeader();
 		contentPanel.add(headingPanel, BorderLayout.NORTH);
 		//---------------
 		// buttons at bottom
 		//---------------
-		footerPanel = new JPanel();
-		footerPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		JButton okButton = new JButton("OK");
-		okButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				ClusteringSetupWindow.this.readyToRun = true;
-				ClusteringSetupWindow.this.setVisible(false);			
-			}
-		});
-
-		footerPanel.add(okButton);
-
-		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				ClusteringSetupWindow.this.dispose();			
-			}
-		});
-		footerPanel.add(cancelButton);
+		footerPanel = createFooter();
 		contentPanel.add(footerPanel, BorderLayout.SOUTH);
-//		IJ.log("Added buttons");
+
 		//---------------
 		// options in middle
 		//---------------
 		optionsPanel = new JPanel();
-		optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+		optionsPanel.setLayout(new BorderLayout());
+		
+		JPanel methodPanel = new JPanel(new FlowLayout()); 
 		
 		//Create the radio buttons.
 	    clusterHierarchicalButton = new JRadioButton("Hierarchical");
@@ -157,126 +265,90 @@ public class ClusteringSetupWindow extends JDialog {
 	    clusterTypeGroup.add(clusterHierarchicalButton);
 	    clusterTypeGroup.add(clusterEMButton);
 	    	    
-	    clusterHierarchicalButton.addActionListener(new ActionListener(){
-	    	public void actionPerformed(ActionEvent e){
+	    clusterHierarchicalButton.addActionListener(this);
+	    clusterEMButton.addActionListener(this);
+	    
+	    
+	    cardPanel = new JPanel(new CardLayout());
+		cardPanel.add(createHierarchicalPanel(), "HierarchicalPanel");
+		cardPanel.add(createEMPanel(), "EMPanel");
+		CardLayout cl = (CardLayout)(cardPanel.getLayout());
+	    cl.show(cardPanel, "HierarchicalPanel");
 
-	    		JRadioButton button = (JRadioButton) e.getSource();
 
-	    		// Set enabled based on button text (you can use whatever text you prefer)
-	    		if(button.isSelected()){
-	    			options.put("type", NucleusClusterer.HIERARCHICAL);
-	    			clusterNumberSpinner.setEnabled(true);
-	    			options.put("-N", clusterNumberSpinner.getValue());
-	    			
-	    			clusterNumberAutoButton.setEnabled(true);
-	    			clusterManualButton.setEnabled(true);
-	    		} else {
-	    			options.put("type", NucleusClusterer.EM);
-	    		}
-	    	}
-	    });
+	    methodPanel.add(clusterHierarchicalButton);
+	    methodPanel.add(clusterEMButton);
 	    
-	    clusterEMButton.addActionListener(new ActionListener(){
-	    	public void actionPerformed(ActionEvent e){
-
-	    		JRadioButton button = (JRadioButton) e.getSource();
-
-	    		// Set enabled based on button text (you can use whatever text you prefer)
-	    		if(button.isSelected()){
-	    			
-	    			options.put("type", NucleusClusterer.EM);
-	    			clusterNumberSpinner.setEnabled(false);
-	    			options.remove("-N");
-	    			clusterNumberAutoButton.setEnabled(false);
-	    			clusterManualButton.setEnabled(false);
-	    		} else {
-	    			options.put("type", NucleusClusterer.HIERARCHICAL);
-	    		}
-	    	}
-	    });
-	    
-	    
-
-	    optionsPanel.add(clusterHierarchicalButton);
-	    optionsPanel.add(clusterEMButton);
-	    
-	    JLabel clusterCountLabel = new JLabel("Desired number of clusters:");
-	    optionsPanel.add(clusterCountLabel);
-	    
-	    clusterNumberAutoButton = new JRadioButton("Automatic");
-	    clusterNumberAutoButton.setSelected(true);
-	    
-	    clusterManualButton = new JRadioButton("Manual");
-	    
-	    ButtonGroup clusterNumberGroup = new ButtonGroup();
-	    clusterNumberGroup.add(clusterNumberAutoButton);
-	    clusterNumberGroup.add(clusterManualButton);
-	    
-	    	    
-	    optionsPanel.add(clusterNumberAutoButton);
-	    optionsPanel.add(clusterManualButton);
-	    	    
-	    SpinnerModel model =
-	            new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
-	                                   1, //min
-	                                   100, //max
-	                                   1); //step
-	    
-	    clusterNumberSpinner = new JSpinner(model);
-	    clusterNumberSpinner.setEnabled(false);
-	    optionsPanel.add(clusterNumberSpinner);
-	    
-	    
-	    clusterManualButton.addActionListener(new ActionListener(){
-	    	public void actionPerformed(ActionEvent e){
-
-	    		JRadioButton button = (JRadioButton) e.getSource();
-
-	    		// Set enabled based on button text (you can use whatever text you prefer)
-	    		if(button.isSelected()){
-	    			clusterNumberSpinner.setEnabled(true);
-	    			options.put("-N", clusterNumberSpinner.getValue());
-	    		} else {
-	    			clusterNumberSpinner.setEnabled(false);
-	    			options.remove("-N");
-	    		}
-	    	}
-	    });
-	    
-	    clusterNumberAutoButton.addActionListener(new ActionListener(){
-	    	public void actionPerformed(ActionEvent e){
-
-	    		JRadioButton button = (JRadioButton) e.getSource();
-
-	    		// Set enabled based on button text (you can use whatever text you prefer)
-	    		if(button.isSelected()){
-	    			clusterNumberSpinner.setEnabled(false);
-	    			options.remove("-N");
-	    		} else {
-	    			clusterNumberSpinner.setEnabled(true);
-	    			options.put("-N", clusterNumberSpinner.getValue());
-	    		}
-	    	}
-	    });
-	    
-	    
-	    clusterNumberSpinner.addChangeListener(new ChangeListener(){
-	    	
-	    	public void stateChanged(ChangeEvent e) {
-	            SpinnerModel model = clusterNumberSpinner.getModel();
-	            if (model instanceof SpinnerNumberModel) {
-	                options.put("-N", model.getValue());
-	            }
-	        }
-	    	
-	    });
+	    optionsPanel.add(methodPanel, BorderLayout.NORTH);
+	    optionsPanel.add(cardPanel, BorderLayout.CENTER);
+	   
 	    
 	    contentPanel.add(optionsPanel, BorderLayout.CENTER);
-//	    IJ.log("Added content");
 		//---------------
 		// end
 		//---------------
 		this.pack();
 		this.setVisible(true);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		
+		// Set enabled based on button text (you can use whatever text you prefer)
+		if(clusterHierarchicalButton.isSelected()){
+			
+			CardLayout cl = (CardLayout)(cardPanel.getLayout());
+		    cl.show(cardPanel, "HierarchicalPanel");
+		    
+			options.setType(NucleusClusterer.HIERARCHICAL);
+			
+			clusterNumberSpinner.setEnabled(true);
+			options.setClusterNumber( (Integer) clusterNumberSpinner.getValue());
+			options.setHierarchicalMethod((HierarchicalClusterMethod) hierarchicalClusterMethodCheckBox.getSelectedItem());
+			
+//			clusterNumberAutoButton.setEnabled(true);
+//			clusterManualButton.setEnabled(true);
+		} 
+		
+		if(clusterEMButton.isSelected()){
+			
+			CardLayout cl = (CardLayout)(cardPanel.getLayout());
+		    cl.show(cardPanel, "EMPanel");
+			
+			options.setType(NucleusClusterer.EM);
+//			clusterNumberSpinner.setEnabled(false);
+//
+//			clusterNumberAutoButton.setEnabled(false);
+//			clusterManualButton.setEnabled(false);
+		} 
+		
+
+		if(clusterManualButton.isSelected()){
+			clusterNumberSpinner.setEnabled(true);
+		}
+
+		if(clusterNumberAutoButton.isSelected()){
+			clusterNumberSpinner.setEnabled(false);
+		}
+		
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		try {
+			if(e.getSource()==clusterNumberSpinner){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				options.setClusterNumber(  (Integer) j.getValue());
+			} 
+			if(e.getSource()==iterationsSpinner){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				options.setIterations(  (Integer) j.getValue());
+			} 
+		}catch (ParseException e1) {
+			IJ.log("Error in spinners for Clustering options");
+		}	
+		
 	}
 }

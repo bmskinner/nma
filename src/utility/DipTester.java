@@ -26,19 +26,18 @@ public class DipTester {
 	 * @param collection the collection of nuclei
 	 * @param tag the border tag to offset from
 	 * @return a boolean profile of results
-	 */public static Profile testCollectionGetPValues(CellCollection collection, BorderTag tag){
+	 */
+	public static Profile testCollectionGetPValues(CellCollection collection, BorderTag tag){
 		Profile resultProfile = null;
 		
 		double[] pvals = null;
 		try {
-			
-//			IJ.log("Testing at p<"+significance);
 			String pointType = collection.getPoint(tag);
 			int offset = collection.getProfileCollection().getOffset(pointType);
 			
 			// ensure the postions are starting from the right place
 			List<Double> keys = collection.getProfileCollection().getAggregate().getXKeyset();
-//			Double[] keyArray = keys.toArray(new Double[0]);
+
 			
 			pvals = new double[keys.size()];
 			
