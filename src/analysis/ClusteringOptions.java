@@ -8,8 +8,10 @@ public class ClusteringOptions {
 	private int clusterNumber;
 	private HierarchicalClusterMethod hierarchicalMethod;
 	private int iterations;
-	private boolean includeNonUnimodalPoints;
 	private boolean autoClusterNumber;
+	
+	private boolean includeModality;
+	private int modalityRegions;
 	
 	public ClusteringOptions(int type){
 		this.type = type;
@@ -27,6 +29,24 @@ public class ClusteringOptions {
 	public void setAutoClusterNumber(boolean autoClusterNumber) {
 		this.autoClusterNumber = autoClusterNumber;
 	}
+	
+	public boolean isIncludeModality() {
+		return includeModality;
+	}
+
+
+	public void setIncludeModality(boolean includeModality) {
+		this.includeModality = includeModality;
+	}
+
+	public int getModalityRegions() {
+		return modalityRegions;
+	}
+
+
+	public void setModalityRegions(int modalityRegions) {
+		this.modalityRegions = modalityRegions;
+	}
 
 
 	public void setClusterNumber(int clusterNumber) {
@@ -40,16 +60,6 @@ public class ClusteringOptions {
 
 	public void setIterations(int iterations) {
 		this.iterations = iterations;
-	}
-	
-
-	public boolean isIncludeNonUnimodalPoints() {
-		return includeNonUnimodalPoints;
-	}
-
-
-	public void setIncludeNonUnimodalPoints(boolean includeNonUnimodalPoints) {
-		this.includeNonUnimodalPoints = includeNonUnimodalPoints;
 	}
 
 

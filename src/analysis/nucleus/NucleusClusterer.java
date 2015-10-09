@@ -33,6 +33,8 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclei.Nucleus;
 import utility.Constants;
+import utility.Constants.BorderTag;
+import utility.DipTester;
 import utility.Logger;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
@@ -216,48 +218,50 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	private Instances makeAttributesAndInstances(CellCollection collection){
 
 		// Values to cluster on: area, circularity, aspect ratio (feret/min diameter)
-		int attributeCount = 3;
+		int attributeCount;
+		if(options.isIncludeModality()){
+			
+			attributeCount = options.getModalityRegions() + 3;
+			
+		} else {
+			attributeCount = 3;
+		}
+		 
 
 		Attribute area = new Attribute("area"); 
-		//		Attribute perimeter = new Attribute("perimeter"); 
-		//		Attribute point1 = new Attribute("point1"); 
-		//		Attribute point2 = new Attribute("point2"); 
-		//		Attribute point3 = new Attribute("point3"); 
 		Attribute circularity = new Attribute("circularity"); 
 		Attribute aspect = new Attribute("aspect"); 
-
-
+		
 		// hold the attributes in a Vector
 		FastVector attributes = new FastVector(attributeCount);
-
 		attributes.addElement(area);
-		//		attributes.addElement(perimeter);
-		//		attributes.addElement(point1);
-		//		attributes.addElement(point2);
-		//		attributes.addElement(point3);
 		attributes.addElement(circularity);
 		attributes.addElement(aspect);
+		
+		if(options.isIncludeModality()){
+			
+			for(int i=0; i<options.getModalityRegions(); i++){
+				Attribute modality = new Attribute("modality_"+i); // use the point least likely to be unimodal
+				attributes.addElement(modality);
+			}
+			
+		}
 
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
 		try{
 
-			//		ProfileCollection pc = collection.getFrankenCollection();
-			//		String pointType = collection.getReferencePoint();
+			
+			ProfileCollection pc = collection.getProfileCollection();
 
-			// get the nucleus profiles
-			//		List<Profile> profiles = pc.getNucleusProfiles(pointType);
-
-			// get the regions with the highest variability within the population
-			//		List<Integer> variableIndexes = pc.findMostVariableRegions(pointType);
-
-			// these points are indexes in the frankenstein profile. Find the points in each nucleus profile that they
-			// compare to 
-			// interpolate the frankenprofile to the frankenmedian length. Then we can use the index point directly.
-
+			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT);
+			Profile medianProfile = pc.getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
+			Profile indexes = pvals.getSortedIndexes();
+			
+			// find the index of the point in the median profile closest to not being unimodal
+//			int lowestPvalueIndex = pvals.getIndexOfMin();
 
 			// create Instance for each nucleus and add to Instances
-			//		int i = 0;
 			for(Cell c : collection.getCells()){
 
 				Nucleus n = c.getNucleus();
@@ -270,34 +274,30 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				inst.setValue(circularity, n.getCircularity());
 				inst.setValue(aspect, n.getAspectRatio());
 
+				Profile p = n.getAngleProfile(n.getReferencePoint());
+				Profile interpolated = p.interpolate(medianProfile.size());
+				
+				if(options.isIncludeModality()){
+					
 
-				//			inst.setValue(perimeter, n.getPerimeter());
-
-				// add the mean of the variability window
-				//			Profile frankenProfile = profiles.get(i);
-				//			Profile interpolatedProfile = frankenProfile.interpolate(pc.getProfile(pointType).size());
-				//			
-				//			int attributeIndex = 2;
-				//			for(int index : variableIndexes){
-				//				// get the points in a window centred on the index
-				//				Profile window = interpolatedProfile.getWindow(index, 10);
-				//
-				//				double total = 0;
-				//				for(int j=0; j<21;j++){ // index plus 10 positions to either side
-				//					total += window.get(j);
-				//				}
-				//				total = total/21;
-				//				
-				//				Attribute point = (Attribute) attributes.elementAt(attributeIndex);
-				//				inst.setValue(point, total);
-				//				attributeIndex++;
-				//			}
-
+					for(int i=0; i<options.getModalityRegions(); i++){
+						
+						int index = (int) indexes.get(i);
+						
+						Attribute att = (Attribute) attributes.elementAt(i+2);
+						inst.setValue(att, interpolated.get(index));
+					}
+				}
+				
+				/*
+				 * We now have an interpolated profile matching the length of the 
+				 * median profile of the collection. The lowestPvalueIndex should now
+				 * correspond to the correct point in the interpolated profile.
+				 */
 
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());
 
-				//			i++;
 			}
 		} catch(Exception e){
 			logger.error("Error making instances", e);

@@ -1045,6 +1045,64 @@ public Profile calculateDeltas(int windowSize){
   }
 
   /**
+   * Get the rank of each value in the profile
+   * after sorting ascending
+   * @return a profile of rank values
+   */
+  public Profile getRanks(){
+	  
+	  int rank = 0;
+	  
+	  double[] sorted = this.asArray();
+	  Arrays.sort(sorted);
+	  
+	  double[]ranks = new double[this.size()];
+	  
+	  for(double sort :sorted ){
+		  
+		  for(int i=0; i<this.size(); i++){
+			  double value = this.get(i);
+			  if(value==sort){
+				  ranks[i] = rank;
+				  break;
+			  }
+		  }
+		  rank++; 
+	  }
+	  Profile result  = new Profile(ranks);
+	  return result;
+  }
+  
+  /**
+   * Get the index of value in the profile
+   * after sorting ascending
+   * @return a profile of rank values
+   */
+  public Profile getSortedIndexes(){
+	  
+	  
+	  double[] sorted = this.asArray();
+	  Arrays.sort(sorted);
+	  
+	  double[]indexes = new double[this.size()];
+	  
+	  for(int index=0; index<sorted.length; index++){
+		  
+		  for(int i=0; i<this.size(); i++){
+			  double value = this.get(i);
+			  
+			  if(value==sorted[index]){
+				  indexes[index] = i;
+				  break;
+			  }
+		  }
+
+	  }
+	  Profile result  = new Profile(indexes);
+	  return result;
+  }
+
+  /**
    * Print the value in the profile at each array index
    * to the ImageJ log window.
    */

@@ -61,6 +61,8 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	private static final int DEFAULT_CLUSTER_METHOD = NucleusClusterer.HIERARCHICAL;
 	private static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD = HierarchicalClusterMethod.WARD;
 	private static final int DEFAULT_EM_ITERATIONS = 100;
+	private static final int DEFAULT_MODALITY_REGIONS = 2;
+	private static final boolean DEFAULT_USE_MODALITY = true;
 
 	private final JPanel contentPanel = new JPanel();
 	
@@ -81,8 +83,6 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	private JSpinner iterationsSpinner;
 	
 	private boolean readyToRun = false;
-
-//	private Map<String, Object> options = new HashMap<String, Object>();
 	
 	private ClusteringOptions options;
 	
@@ -93,7 +93,6 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		this.setTitle("Clustering options");
 		
 		try {
-//			IJ.log("Creating gui");
 			setDefaults();
 			createGUI();
 
@@ -106,11 +105,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	public ClusteringOptions getOptions(){
 		return this.options;
 	}
-	
-//	public Map<String, Object> getOptions(){
-//		return this.options;
-//	}
-	
+		
 	public boolean isReadyToRun(){
 		return this.readyToRun;
 	}
@@ -120,9 +115,8 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		options.setClusterNumber(DEFAULT_MANUAL_CLUSTER_NUMBER);
 		options.setHierarchicalMethod(DEFAULT_HIERARCHICAL_METHOD);
 		options.setIterations(DEFAULT_EM_ITERATIONS);
-
-//		options.put("type", ClusteringSetupWindow.DEFAULT_CLUSTER_METHOD);
-//		options.put("-N", ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER);
+		options.setIncludeModality(DEFAULT_USE_MODALITY);
+		options.setModalityRegions(DEFAULT_MODALITY_REGIONS);
 	}
 	
 	private JPanel createHierarchicalPanel(){
