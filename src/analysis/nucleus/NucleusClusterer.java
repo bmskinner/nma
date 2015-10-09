@@ -191,18 +191,22 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 			for(Instance inst : cellToInstanceMap.keySet()){
 				
-				UUID id = cellToInstanceMap.get(inst);
+				try{
+					UUID id = cellToInstanceMap.get(inst);
 
-				int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
-//			 IJ.log("instance "+index+" is in cluster "+ clusterNumber)  ; //       #pretty print results
-				 CellCollection cluster = clusterMap.get(clusterNumber);
-				 
-				 // should never be null
-				 if(collection.getCell(id)!=null){
-					 cluster.addCell(collection.getCell(id));
-				 } else {
-					 logger.log("Error: cell with ID "+id+" is not found", Logger.ERROR);
-				 }
+					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
+					//			 IJ.log("instance "+index+" is in cluster "+ clusterNumber)  ; //       #pretty print results
+					CellCollection cluster = clusterMap.get(clusterNumber);
+
+					// should never be null
+					if(collection.getCell(id)!=null){
+						cluster.addCell(collection.getCell(id));
+					} else {
+						logger.log("Error: cell with ID "+id+" is not found", Logger.ERROR);
+					}
+				} catch(Exception e){
+					logger.error("Error assigning instance to cluster", e);
+				}
 				 
 			}
 		} catch (Exception e) {
@@ -274,17 +278,18 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				inst.setValue(circularity, n.getCircularity());
 				inst.setValue(aspect, n.getAspectRatio());
 
-				Profile p = n.getAngleProfile(n.getReferencePoint());
-				Profile interpolated = p.interpolate(medianProfile.size());
+				
 				
 				if(options.isIncludeModality()){
 					
+					Profile p = n.getAngleProfile(n.getReferencePoint());
+					Profile interpolated = p.interpolate(medianProfile.size());
 
 					for(int i=0; i<options.getModalityRegions(); i++){
 						
 						int index = (int) indexes.get(i);
 						
-						Attribute att = (Attribute) attributes.elementAt(i+2);
+						Attribute att = (Attribute) attributes.elementAt(i+3);
 						inst.setValue(att, interpolated.get(index));
 					}
 				}
