@@ -27,22 +27,33 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.TextAnchor;
 
 import utility.Constants.BorderTag;
 import utility.Constants;
@@ -129,10 +140,11 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 	}
 	
 	@SuppressWarnings("serial")
-	private class VariabililtyDisplayPanel extends JPanel implements ActionListener {
+	private class VariabililtyDisplayPanel extends JPanel implements ActionListener, ChangeListener {
 		
 		protected ProflleDisplaySettingsPanel profileDisplaySettingsPanel;
 		protected ChartPanel chartPanel;
+		private JSpinner pvalueSpinner;
 		
 		public VariabililtyDisplayPanel(){
 			this.setLayout(new BorderLayout());
@@ -158,6 +170,20 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 			profileDisplaySettingsPanel.rawProfileLeftButton.setEnabled(false);
 			profileDisplaySettingsPanel.rawProfileRightButton.setEnabled(false);
 			
+			pvalueSpinner = new JSpinner(new SpinnerNumberModel(Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL,	0d, 1d, 0.001d));
+			pvalueSpinner.setEnabled(false);
+			pvalueSpinner.addChangeListener(this);
+			JComponent field = ((JSpinner.DefaultEditor) pvalueSpinner.getEditor());
+		      Dimension prefSize = field.getPreferredSize();
+		      prefSize = new Dimension(50, prefSize.height);
+		      field.setPreferredSize(prefSize);
+		      
+		      
+		    profileDisplaySettingsPanel.add(new JLabel("Dip test p-value:"));
+			profileDisplaySettingsPanel.add(pvalueSpinner);
+			profileDisplaySettingsPanel.revalidate();
+			
+			
 			this.add(profileDisplaySettingsPanel, BorderLayout.NORTH);
 		}
 
@@ -168,11 +194,13 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 				profileDisplaySettingsPanel.referenceButton.setEnabled(true);
 				profileDisplaySettingsPanel.orientationButton.setEnabled(true);
 				profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(true);
+				pvalueSpinner.setEnabled(true);
 
 				if(list.size()>1){
 
 					// Don't allow marker selection for multiple datasets
 					profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(false);
+					pvalueSpinner.setEnabled(false);
 				}
 
 
@@ -209,8 +237,9 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 						CellCollection collection = list.get(0).getCollection();
 						
 						// dip test the profiles
-						String pointType = collection.getPoint(tag);
-						BooleanProfile modes  = DipTester.testCollection(collection, pointType, Constants.TEN_PERCENT_SIGNIFICANCE_LEVEL);
+						
+						double significance = (Double) pvalueSpinner.getValue();
+						BooleanProfile modes  = DipTester.testCollection(collection, tag, significance);
 
 
 						// add any regions with bimodal distribution to the chart
@@ -225,6 +254,12 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 								plot.addDomainMarker(marker);
 							}
 						}
+	
+						double ymax = DatasetUtilities.findMaximumRangeValue(plot.getDataset()).doubleValue();
+						DecimalFormat df = new DecimalFormat("#0.000"); 
+						XYTextAnnotation annotation = new XYTextAnnotation("Markers for non-unimodal positions (p<"+df.format(significance)+")",1, ymax);
+						annotation.setTextAnchor(TextAnchor.TOP_LEFT);
+						plot.addAnnotation(annotation);
 					}
 					
 					chartPanel.setChart(chart);
@@ -243,6 +278,20 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 
 			update(list);
 
+		}
+
+		@Override
+		public void stateChanged(ChangeEvent arg0) {
+			if(arg0.getSource()==pvalueSpinner){
+				JSpinner j = (JSpinner) arg0.getSource();
+				try {
+					j.commitEdit();
+				} catch (ParseException e) {
+					error("Error setting p-value spinner", e);
+				}
+			}
+			update(list);
+			
 		}
 	}
 	

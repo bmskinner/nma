@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import utility.Constants.BorderTag;
 import ij.IJ;
 import components.CellCollection;
 import components.generic.BooleanProfile;
@@ -19,25 +20,23 @@ import jdistlib.disttest.DistributionTest;
 public class DipTester {
 	
 	
-	public static BooleanProfile testCollection(CellCollection collection, String pointType, double significance){
+	public static BooleanProfile testCollection(CellCollection collection, BorderTag tag, double significance){
 		
 		BooleanProfile resultProfile = null;
 		boolean[] modes = null;
 		try {
 			
-			IJ.log("Testing at p<"+significance);
+//			IJ.log("Testing at p<"+significance);
+			String pointType = collection.getPoint(tag);
 			int offset = collection.getProfileCollection().getOffset(pointType);
 			
 			// ensure the postions are starting from the right place
-//			Profile positions = collection.getProfileCollection().getAggregate().getXPositions(); //.offset(offset);
 			List<Double> keys = collection.getProfileCollection().getAggregate().getXKeyset();
 //			Double[] keyArray = keys.toArray(new Double[0]);
 			
 			modes = new boolean[keys.size()];
 			
 			for(int i=0; i<keys.size(); i++ ){
-
-//				double position = positions.get(i);
 				
 				double position = keys.get(i);
 				try{ 
@@ -46,7 +45,7 @@ public class DipTester {
 
 					double[] result = DistributionTest.diptest_presorted(values);
 					
-					IJ.log(position+"    "+result[0]+"    "+result[1]);
+//					IJ.log(position+"    "+result[0]+"    "+result[1]);
 
 					if(result[1]<significance){
 						modes[i] = true;
