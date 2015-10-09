@@ -68,15 +68,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	
 	@Override
 	protected void process(List<Integer> integers){
-//		// get last published value
-//		int amount = integers.get( integers.size() - 1 );
-//		
-//		// total number of nuclei
-//		int total = dataset.getCollection().getNucleusCount();
-//		
-//		// express as percent as int
-//		int progress = (int) (((double) amount / (double) total)*100);
-//		setProgress(progress);
+
 	}
 	
 	@Override
@@ -101,10 +93,20 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	}
 
 	
+	/**
+	 * Fetch the cluster with the given number
+	 * @param cluster
+	 * @return
+	 */
 	public CellCollection getCluster(int cluster){
 		return this.clusterMap.get(cluster);
 	}
 	
+	/**
+	 * If a tree is present (i.e clustering was hierarchical),
+	 * return the string of the tree, otherwise return null
+	 * @return
+	 */
 	public String getNewickTree(){
 		if(options.getType()==NucleusClusterer.HIERARCHICAL){
 			return this.newickTree;
@@ -113,10 +115,19 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		}
 	}
 	
+	/**
+	 * Get the number of cluster found by the clusterer
+	 * @return
+	 */
 	public int getNumberOfClusters(){
 		return clusterMap.size();
 	}
 
+	/**
+	 * Run the clustering on a collection
+	 * @param collection
+	 * @return success or fail
+	 */
 	public boolean cluster(CellCollection collection){
 		
 		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
@@ -129,7 +140,6 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			Instances instances = makeAttributesAndInstances(collection);
 
 			// create the clusterer to run on the Instances
-//			String[] options = makeClusteringOptions();
 			String[] optionArray = this.options.getOptions();
 
 			try {
@@ -262,9 +272,6 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			Profile medianProfile = pc.getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
 			Profile indexes = pvals.getSortedIndexes();
 			
-			// find the index of the point in the median profile closest to not being unimodal
-//			int lowestPvalueIndex = pvals.getIndexOfMin();
-
 			// create Instance for each nucleus and add to Instances
 			for(Cell c : collection.getCells()){
 
