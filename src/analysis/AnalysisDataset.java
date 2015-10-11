@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import components.CellCollection;
+import components.ClusterGroup;
 import components.nuclear.ShellResult;
 import utility.Constants;
 
@@ -63,7 +64,8 @@ public class AnalysisDataset implements Serializable {
 	
 	private Color datasetColour = null; // use for colouring the dataset in comparison with other datasets
 	
-	private List<UUID> clusterResults = new ArrayList<UUID>(0); // hold the ids of clusters
+//	private List<UUID> clusterResults = new ArrayList<UUID>(0); // hold the ids of clusters
+	private List<ClusterGroup> clusterGroups = new ArrayList<ClusterGroup>(0); // hold groups of cluster results
 	
 	//The ids of datasets merged to create this dataset. The IDs must be present in
 	// otherCollections
@@ -436,9 +438,20 @@ public class AnalysisDataset implements Serializable {
 	 * This is a form of child dataset
 	 * @param dataset
 	 */
-	public void addCluster(AnalysisDataset dataset){
-		this.addChildDataset(dataset);
-		this.clusterResults.add(dataset.getUUID());
+//	public void addCluster(AnalysisDataset dataset){
+//		this.addChildDataset(dataset);
+//		this.clusterResults.add(dataset.getUUID());
+//	}
+	
+	/**
+	 * Add the given dataset as a cluster result.
+	 * This is a form of child dataset
+	 * @param dataset
+	 */
+	public void addClusterGroup(ClusterGroup group){
+		this.clusterGroups.add(group);
+//		this.addChildDataset(dataset);
+//		this.clusterResults.add(dataset.getUUID());
 	}
 
 	/**
@@ -446,17 +459,30 @@ public class AnalysisDataset implements Serializable {
 	 * This is a form of child dataset
 	 * @param dataset
 	 */
-	public void addCluster(CellCollection collection){
-		this.addChildCollection(collection);
-		this.clusterResults.add(collection.getID());
+//	public void addCluster(CellCollection collection){
+//		this.addChildCollection(collection);
+//		this.clusterResults.add(collection.getID());
+//	}
+	
+	/**
+	 * Check if the dataset id is in a cluster
+	 * @param id
+	 * @return
+	 */
+	public boolean hasCluster(UUID id){
+		
+		boolean result = false;
+		for(ClusterGroup g : this.clusterGroups){
+			if(g.hasDataset(id)){
+				result = true;
+				break;
+			}
+		}
+		return result;
 	}
 	
-	public boolean hasCluster(UUID id){
-		if(this.clusterResults.contains(id)){
-			return true;
-		} else {
-			return false;
-		}
+	public List<ClusterGroup> getClusterGroups(){
+		return  this.clusterGroups;
 	}
 
 
@@ -464,16 +490,53 @@ public class AnalysisDataset implements Serializable {
 	 * Get the UUIDs of all clusters
 	 * @return
 	 */
+//	public List<UUID> getClusterIDs(){
+//		return this.clusterResults;
+//	}
+	
+	/**
+	 * Get the UUIDs of all datasets in clusters
+	 * @return
+	 */
 	public List<UUID> getClusterIDs(){
-		return this.clusterResults;
+		List<UUID> result = new ArrayList<UUID>();
+		for(ClusterGroup g : this.clusterGroups){
+			result.addAll(g.getUUIDs());
+		}
+		return result;
 	}
 
+//	/**
+//	 * Check if the dataset has clusters
+//	 * @return
+//	 */
+//	public boolean hasClusters(){
+//		if(this.clusterResults.size()>0){
+//			return true;
+//		} else {
+//			return false;
+//		}
+//	}
+	
 	/**
 	 * Check if the dataset has clusters
 	 * @return
 	 */
 	public boolean hasClusters(){
-		if(this.clusterResults.size()>0){
+		if(this.clusterGroups.size()>0){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Test if the given group is present in this dataset
+	 * @param group
+	 * @return
+	 */
+	public boolean hasClusterGroup(ClusterGroup group){
+		if(this.clusterGroups.contains(group)){
 			return true;
 		} else {
 			return false;
@@ -484,13 +547,13 @@ public class AnalysisDataset implements Serializable {
 	 * Set the newick tree describing the clusters
 	 * @param s
 	 */
-	public void setClusterTree(String s){
-		this.newickTree = s;
-	}
+//	public void setClusterTree(String s){
+//		this.newickTree = s;
+//	}
 
-	public String getClusterTree(){
-		return this.newickTree;
-	}
+//	public String getClusterTree(){
+//		return this.newickTree;
+//	}
 
 	/**
 	 * Check if the dataset is root
@@ -518,14 +581,31 @@ public class AnalysisDataset implements Serializable {
 		}
 	}
 	
+//	/**
+//	 * Delete the cluster with the given id
+//	 * @param id
+//	 */
+//	public void deleteCluster(UUID id){
+//		if(hasCluster(id)){
+//			this.deleteChild(id);
+//			this.clusterResults.remove(id);
+//		}
+//	}
+	
 	/**
 	 * Delete the cluster with the given id
 	 * @param id
 	 */
-	public void deleteCluster(UUID id){
-		if(hasCluster(id)){
-			this.deleteChild(id);
-			this.clusterResults.remove(id);
+	public void deleteClusterGroup(ClusterGroup group){
+		
+		if(hasClusterGroup(group)){
+
+			for(UUID id : group.getUUIDs()){
+				if(hasChild(id)){
+					this.deleteChild(id);
+				}
+			}
+			this.clusterGroups.remove(group);
 		}
 	}
 	

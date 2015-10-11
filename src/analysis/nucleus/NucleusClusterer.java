@@ -102,6 +102,10 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		return this.clusterMap.get(cluster);
 	}
 	
+	public ClusteringOptions getOptions(){
+		return this.options;
+	}
+	
 	/**
 	 * If a tree is present (i.e clustering was hierarchical),
 	 * return the string of the tree, otherwise return null

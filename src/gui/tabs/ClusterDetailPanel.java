@@ -37,182 +37,193 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 import analysis.AnalysisDataset;
+import components.ClusterGroup;
 
 public class ClusterDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
-	
-	private JButton 	clusterButton	= new JButton("Cluster population");
-	private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
-	private JPanel		statusPanel		= new JPanel(new BorderLayout());
-	private JTextArea 	tree			= new JTextArea();
-	private JScrollPane treeView;
-	
-	private JTable		mergeSources;
-	private JButton		getSourceButton = new JButton("Recover source");
-	
-	private JPanel		clusterPanel	= new JPanel(new BorderLayout());
-	private JPanel		mergePanel		= new JPanel(new BorderLayout());
+		
+	private ClustersPanel clusterPanel;
+	private MergesPanel mergePanel;
 
 	public ClusterDetailPanel() {
 		
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-		clusterPanel = makeClusterPanel();
-		mergePanel 	 = makeMergeSourcesPanel();
+		clusterPanel = new ClustersPanel();
+		mergePanel = new MergesPanel();
 		this.add(mergePanel);
 		this.add(clusterPanel);
 
 	}
-	
-	/**
-	 * This panel shows the status of the dataset, 
-	 * and holds the clustering button
-	 * @return
-	 */
-	private JPanel makeStatusPanel(){
 		
-		JPanel panel = new JPanel(new BorderLayout());
-		clusterButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				fireSignalChangeEvent("NewClusterAnalysis");
-
-			}
-		});
-		clusterButton.setVisible(false);
-		
-		panel.add(clusterButton, BorderLayout.SOUTH);
-		panel.add(statusLabel, BorderLayout.CENTER);
-				
-		return panel;
-	}
-	
-	private JPanel makeClusterPanel(){
-		JPanel panel = new JPanel(new BorderLayout());
-		
-		treeView = new JScrollPane(tree);
-		panel.add(treeView, BorderLayout.CENTER);
-		treeView.setVisible(false);
-			
-		statusPanel = makeStatusPanel();
-		panel.add(statusPanel, BorderLayout.NORTH);
-		
-		return panel;
-	}
-	
-	private JPanel makeMergeSourcesPanel(){
-		JPanel panel = new JPanel(new BorderLayout());
-		mergeSources = new JTable(makeBlankTable()){
-			@Override
-			public boolean isCellEditable(int rowIndex, int columnIndex) {
-			    return false;
-			}
-		};
-		mergeSources.setEnabled(true);
-		mergeSources.setCellSelectionEnabled(false);
-		mergeSources.setColumnSelectionAllowed(false);
-		mergeSources.setRowSelectionAllowed(true);
-		
-		panel.add(mergeSources, BorderLayout.CENTER);
-		panel.add(mergeSources.getTableHeader(), BorderLayout.NORTH);
-		
-		getSourceButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				// get the dataset name selected
-				String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
-
-				fireSignalChangeEvent("ExtractSource_"+name);
-
-			}
-		});
-		getSourceButton.setVisible(false);
-		panel.add(getSourceButton, BorderLayout.SOUTH);
-		return panel;
-	}
-	
-	private DefaultTableModel makeBlankTable(){
-		DefaultTableModel model = new DefaultTableModel();
-
-		Vector<Object> names 	= new Vector<Object>();
-		Vector<Object> nuclei 	= new Vector<Object>();
-
-		names.add("No merge sources");
-		nuclei.add("");
-
-
-		model.addColumn("Merge source", names);
-		model.addColumn("Nuclei", nuclei);
-		return model;
-	}
-	
 	public void update(List<AnalysisDataset> list){
 		
-		clusterButton.setVisible(false);
-		getSourceButton.setVisible(false);
+		mergePanel.update(list);
+		clusterPanel.update(list);		
+	}
+	
+	private class MergesPanel extends JPanel {
 		
-		if(list.size()==1){
-			AnalysisDataset dataset = list.get(0);
+		private JTable		mergeSources;
+		private JButton		getSourceButton = new JButton("Recover source");
+		
+		public MergesPanel(){
+			this.setLayout(new BorderLayout());
+			mergeSources = new JTable(makeBlankTable()){
+				@Override
+				public boolean isCellEditable(int rowIndex, int columnIndex) {
+				    return false;
+				}
+			};
+			mergeSources.setEnabled(true);
+			mergeSources.setCellSelectionEnabled(false);
+			mergeSources.setColumnSelectionAllowed(false);
+			mergeSources.setRowSelectionAllowed(true);
 			
-			// If no clusters are present, show the button
-			if(!dataset.hasClusters()){
-				
-				statusLabel.setText("Dataset contains no clusters");
-				clusterButton.setVisible(true);
-				tree.setText("");
-				treeView.setVisible(false);
+			this.add(mergeSources, BorderLayout.CENTER);
+			this.add(mergeSources.getTableHeader(), BorderLayout.NORTH);
+			
+			getSourceButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					
+					// get the dataset name selected
+					String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
 
-				
-			} else {
-				 // clusters present, show the tree if available
-				// Show a line indicating clusters are present anyway
-				statusLabel.setText("Dataset contains "+dataset.getClusterIDs().size()+" clusters");
-				
-				String treeString = dataset.getClusterTree();
-				if(treeString!=null){
-					tree.setText(treeString);
-					tree.setLineWrap(true);
-					treeView.revalidate();
-					treeView.setVisible(true);
+					fireSignalChangeEvent("ExtractSource_"+name);
+
 				}
-				
+			});
+			getSourceButton.setVisible(false);
+			this.add(getSourceButton, BorderLayout.SOUTH);
+		}
+		
+		public void update(List<AnalysisDataset> list){
+			getSourceButton.setVisible(false);
+			if(list.size()==1){
+				AnalysisDataset dataset = list.get(0);
 
-			}
-			if(dataset.hasMergeSources()){
-				
-				DefaultTableModel model = new DefaultTableModel();
+				if(dataset.hasMergeSources()){
+					
+					DefaultTableModel model = new DefaultTableModel();
 
-				Vector<Object> names 	= new Vector<Object>();
-				Vector<Object> nuclei 	= new Vector<Object>();
+					Vector<Object> names 	= new Vector<Object>();
+					Vector<Object> nuclei 	= new Vector<Object>();
 
-				for( UUID id : dataset.getMergeSources()){
-					AnalysisDataset mergeSource = dataset.getMergeSource(id);
-					names.add(mergeSource.getName());
-					nuclei.add(mergeSource.getCollection().getNucleusCount());
+					for( UUID id : dataset.getMergeSources()){
+						AnalysisDataset mergeSource = dataset.getMergeSource(id);
+						names.add(mergeSource.getName());
+						nuclei.add(mergeSource.getCollection().getNucleusCount());
+					}
+					model.addColumn("Merge source", names);
+					model.addColumn("Nuclei", nuclei);
+
+					mergeSources.setModel(model);
+					getSourceButton.setVisible(true);
+					
+				} else {
+					try{
+					mergeSources.setModel(makeBlankTable());
+					} catch (Exception e){
+//						TODO: fix error
+					}
 				}
-				model.addColumn("Merge source", names);
-				model.addColumn("Nuclei", nuclei);
-
-				mergeSources.setModel(model);
-				getSourceButton.setVisible(true);
-				
-			} else {
-				try{
+			} else { // more than one dataset selected
 				mergeSources.setModel(makeBlankTable());
-				} catch (Exception e){
-//					TODO: fix error
-				}
 			}
-		} else { // more than one dataset selected
-			statusLabel.setText("Multiple datasets selected");
-			clusterButton.setVisible(false);
-			tree.setText("");
-			treeView.setVisible(false);
-			mergeSources.setModel(makeBlankTable());
 			
 		}
 		
+		private DefaultTableModel makeBlankTable(){
+			DefaultTableModel model = new DefaultTableModel();
+
+			Vector<Object> names 	= new Vector<Object>();
+			Vector<Object> nuclei 	= new Vector<Object>();
+
+			names.add("No merge sources");
+			nuclei.add("");
+
+
+			model.addColumn("Merge source", names);
+			model.addColumn("Nuclei", nuclei);
+			return model;
+		}
+	}
+	
+	private class ClustersPanel extends JPanel {
+		
+		private JButton 	clusterButton	= new JButton("Cluster population");
+		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
+		private JPanel		statusPanel		= new JPanel(new BorderLayout());
+		private JTextArea 	tree			= new JTextArea();
+		private JScrollPane treeView;
+		
+		public ClustersPanel(){
+			this.setLayout(new BorderLayout());
+			treeView = new JScrollPane(tree);
+			this.add(treeView, BorderLayout.CENTER);
+			treeView.setVisible(false);
+				
+			statusPanel = makeStatusPanel();
+			this.add(statusPanel, BorderLayout.NORTH);
+		}
+		
+		/**
+		 * This panel shows the status of the dataset, 
+		 * and holds the clustering button
+		 * @return
+		 */
+		private JPanel makeStatusPanel(){
+			
+			JPanel panel = new JPanel(new BorderLayout());
+			clusterButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					fireSignalChangeEvent("NewClusterAnalysis");
+
+				}
+			});
+			clusterButton.setVisible(false);
+			
+			panel.add(clusterButton, BorderLayout.SOUTH);
+			panel.add(statusLabel, BorderLayout.CENTER);
+					
+			return panel;
+		}
+
+		public void update(List<AnalysisDataset> list){
+			clusterButton.setVisible(true);
+
+			if(list.size()==1){
+				AnalysisDataset dataset = list.get(0);
+
+				// If no clusters are present, show the button
+				if(!dataset.hasClusters()){
+
+					statusLabel.setText("Dataset contains no clusters");
+					//					clusterButton.setVisible(true);
+					tree.setText("");
+					treeView.setVisible(false);
+
+
+				} else {
+					// clusters present, show the tree if available
+					// Show a line indicating clusters are present anyway
+					String text = "Dataset contains "+dataset.getClusterGroups().size()+" cluster groups:\n";
+					for(ClusterGroup g : dataset.getClusterGroups()){
+						text += "\t"+g.getName()+": "+g.size()+" clusters\n";
+					}
+					statusLabel.setText(text);					
+
+				}
+			} else { // more than one dataset selected
+				statusLabel.setText("Multiple datasets selected");
+				clusterButton.setVisible(false);
+				tree.setText("");
+				treeView.setVisible(false);
+			}
+		}
+
 	}
 }

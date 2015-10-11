@@ -53,7 +53,7 @@ import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import components.CellCollection;
-
+import components.ClusterGroup;
 import analysis.AnalysisDataset;
 import utility.TreeOrderHashMap;
 
@@ -643,9 +643,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						for(UUID parentID : analysisDatasets.keySet()){
 							AnalysisDataset parent = analysisDatasets.get(parentID);
 							
-							if(parent.hasCluster(id)){
-								parent.deleteCluster(id);
-							}
+//							if(parent.hasCluster(id)){
+//								parent.deleteCluster(id);
+//							}
 							if(parent.hasChild(id)){
 								parent.deleteChild(id);
 							}
@@ -679,14 +679,13 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					}
 				}
 				
-
 				// remove any children remaining
 				for(AnalysisDataset d : this.getRootDatasets()){
 					for(UUID id : list){
 						
-						if(d.hasCluster(id)){
-							d.deleteCluster(id);
-						}
+//						if(d.hasCluster(id)){
+//							d.deleteCluster(id);
+//						}
 						
 						if(d.hasChild(id)){
 							d.deleteChild(id);
@@ -704,6 +703,24 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					if(d.isRoot()){
 						treeOrderMap.remove(id);
 					}
+				}
+				
+				// remove cluster groups if all clusters have been deleted
+				for(AnalysisDataset d : datasets){
+					
+					for(ClusterGroup g : d.getClusterGroups()){
+						boolean clusterRemains = false;
+						
+						for(UUID childID : g.getUUIDs()){
+							if(d.hasChild(childID)){
+								clusterRemains = true;
+							}
+						}
+						if(!clusterRemains){
+							d.deleteClusterGroup(g);
+						}
+					}
+					
 				}
 				
 				this.update();

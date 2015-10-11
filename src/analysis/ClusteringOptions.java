@@ -1,9 +1,12 @@
 package analysis;
 
+import java.io.Serializable;
+
 import analysis.nucleus.NucleusClusterer;
 
-public class ClusteringOptions {
-	
+public class ClusteringOptions implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	private int type;
 	private int clusterNumber;
 	private HierarchicalClusterMethod hierarchicalMethod;

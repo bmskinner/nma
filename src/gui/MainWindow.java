@@ -118,6 +118,7 @@ import javax.swing.JTabbedPane;
 
 import components.Cell;
 import components.CellCollection;
+import components.ClusterGroup;
 import components.nuclei.Nucleus;
 import logging.TextAreaHandler;
 
@@ -1247,21 +1248,29 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 
 			log("Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
-			dataset.setClusterTree(((NucleusClusterer) worker).getNewickTree());
+			String tree = (((NucleusClusterer) worker).getNewickTree());
 			
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
+			int clusterNumber = dataset.getClusterGroups().size();
+			ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
 
 			for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
+
 				CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
-				
+				group.addDataset(c);
+				c.setName(group.getName()+"_"+c.getName());
+				dataset.addChildCollection(c);
 				// attach the clusters to their parent collection
-				dataset.addCluster(c);
+//				dataset.addCluster(c);
 				
 				log("Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
 				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 				list.add(clusterDataset);
+				
 
 			}
+			dataset.addClusterGroup(group);
 			
 			new MorphologyAnalysisAction(list, dataset, ADD_POPULATION);
 
