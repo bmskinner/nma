@@ -35,8 +35,10 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
+import charting.datasets.NucleusTableDatasetCreator;
 import components.ClusterGroup;
 
 public class ClusterDetailPanel extends DetailPanel {
@@ -159,14 +161,65 @@ public class ClusterDetailPanel extends DetailPanel {
 		private JTextArea 	tree			= new JTextArea();
 		private JScrollPane treeView;
 		
+		private JPanel tablesPanel;
+		private JTable clusterGroupsTable;
+		private JTable clusterDetailsTable; 
+		
 		public ClustersPanel(){
 			this.setLayout(new BorderLayout());
 			treeView = new JScrollPane(tree);
 			this.add(treeView, BorderLayout.CENTER);
 			treeView.setVisible(false);
+			
+			tablesPanel = new JPanel();
+			tablesPanel.setLayout(new BoxLayout(tablesPanel, BoxLayout.Y_AXIS));
+			
+			JPanel clusterGroupPanel = new JPanel(new BorderLayout());
+			clusterGroupsTable = new JTable(makeBlankTable()){
+				@Override
+				public boolean isCellEditable(int rowIndex, int columnIndex) {
+				    return false;
+				}
+			};
+			clusterGroupPanel.add(clusterGroupsTable, BorderLayout.CENTER);
+			clusterGroupPanel.add(clusterGroupsTable.getTableHeader(), BorderLayout.NORTH);
+			
+			tablesPanel.add(clusterGroupPanel);
+			
+			
+			
+			JPanel clusterDetailPanel = new JPanel(new BorderLayout());
+			clusterDetailsTable = new JTable(makeBlankTable()){
+				@Override
+				public boolean isCellEditable(int rowIndex, int columnIndex) {
+				    return false;
+				}
+			};
+			
+			clusterDetailPanel.add(clusterDetailsTable, BorderLayout.CENTER);
+			clusterDetailPanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
+			
+			tablesPanel.add(clusterDetailPanel);
+//			this.add(clusterDetailsTable, BorderLayout.SOUTH);
 				
+			this.add(tablesPanel, BorderLayout.CENTER);
 			statusPanel = makeStatusPanel();
 			this.add(statusPanel, BorderLayout.NORTH);
+		}
+		
+		private DefaultTableModel makeBlankTable(){
+			DefaultTableModel model = new DefaultTableModel();
+
+			Vector<Object> names 	= new Vector<Object>();
+			Vector<Object> nuclei 	= new Vector<Object>();
+
+			names.add("No cluster data");
+			nuclei.add("");
+
+
+			model.addColumn("Cluster group", names);
+			model.addColumn("Clusters", nuclei);
+			return model;
 		}
 		
 		/**
@@ -202,19 +255,22 @@ public class ClusterDetailPanel extends DetailPanel {
 				if(!dataset.hasClusters()){
 
 					statusLabel.setText("Dataset contains no clusters");
-					//					clusterButton.setVisible(true);
 					tree.setText("");
 					treeView.setVisible(false);
-
 
 				} else {
 					// clusters present, show the tree if available
 					// Show a line indicating clusters are present anyway
-					String text = "Dataset contains "+dataset.getClusterGroups().size()+" cluster groups:\n";
-					for(ClusterGroup g : dataset.getClusterGroups()){
-						text += "\t"+g.getName()+": "+g.size()+" clusters\n";
-					}
-					statusLabel.setText(text);					
+//					String text = "Dataset contains "+dataset.getClusterGroups().size()+" cluster groups: ";
+//					for(ClusterGroup g : dataset.getClusterGroups()){
+//						text += "\t"+g.getName()+": "+g.size()+" clusters ";
+//					}
+//					statusLabel.setText(text);		
+					TableModel model = NucleusTableDatasetCreator.createClusterGroupsTable(list);
+					clusterGroupsTable.setModel(model);
+					
+					TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(list);
+					clusterDetailsTable.setModel(optionsModel);
 
 				}
 			} else { // more than one dataset selected
@@ -222,6 +278,12 @@ public class ClusterDetailPanel extends DetailPanel {
 				clusterButton.setVisible(false);
 				tree.setText("");
 				treeView.setVisible(false);
+				
+				TableModel model = makeBlankTable();
+				clusterGroupsTable.setModel(model);
+				
+				TableModel optionsModel = makeBlankTable();
+				clusterDetailsTable.setModel(optionsModel);
 			}
 		}
 

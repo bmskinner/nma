@@ -32,6 +32,7 @@ import javax.swing.table.TableModel;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import components.CellCollection;
+import components.ClusterGroup;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
@@ -40,6 +41,7 @@ import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.ClusteringOptions;
 import utility.Constants;
 
 public class NucleusTableDatasetCreator {
@@ -603,6 +605,84 @@ public class NucleusTableDatasetCreator {
 			model.addColumn(dataset.getName(), popData);
 		}
 		return model;
+	}
+	
+	/**
+	 * Get the cluster groups from a list of datasets as a table
+	 * @param list
+	 * @return
+	 */
+	public static TableModel createClusterGroupsTable(List<AnalysisDataset> list){
+		DefaultTableModel model = new DefaultTableModel();
+
+		Object[] columnData = {
+				"Cluster group", 
+				"Number of clusters"};
+		model.setColumnIdentifiers(columnData);
+		
+		if(list==null){
+			model.addColumn("No data loaded");
+		} else {
+
+			for(AnalysisDataset dataset : list){
+				List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
+				
+				for(ClusterGroup g : clusterGroups ){
+					Object[] rowData = {
+						g.getName(),
+						g.size()
+					};
+					model.addRow(rowData);
+				}
+			}
+		}
+		return model;	
+	}
+	
+	/**
+	 * Get the options used for clustering as a table
+	 * @param list
+	 * @return
+	 */
+	public static TableModel createClusterOptionsTable(List<AnalysisDataset> list){
+		DefaultTableModel model = new DefaultTableModel();
+
+		Object[] columnData = {
+				"Cluster group",
+				"Method", 
+				"Cluster number",
+				"Iterations",
+				"Hi method",
+				"Include modality",
+				"Modality points"};
+		model.setColumnIdentifiers(columnData);
+		
+		if(list==null){
+			model.addColumn("No data loaded");
+		} else {
+
+			// format the numbers and make into a tablemodel
+//			DecimalFormat df = new DecimalFormat("#0.00"); 
+
+			for(AnalysisDataset dataset : list){
+				List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
+				
+				for(ClusterGroup g : clusterGroups ){
+					ClusteringOptions op = g.getOptions();
+					Object[] rowData = {
+						g.getName(),
+						op.getType(),
+						op.getClusterNumber(),
+						op.getIterations(),
+						op.getHierarchicalMethod().toString(),
+						op.isIncludeModality(),
+						op.getModalityRegions()
+					};
+					model.addRow(rowData);
+				}
+			}
+		}
+		return model;	
 	}
 
 }

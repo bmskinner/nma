@@ -64,6 +64,20 @@ public class ClusteringOptions implements Serializable {
 	public void setIterations(int iterations) {
 		this.iterations = iterations;
 	}
+	
+	public int getClusterNumber() {
+		return clusterNumber;
+	}
+
+
+	public HierarchicalClusterMethod getHierarchicalMethod() {
+		return hierarchicalMethod;
+	}
+
+
+	public int getIterations() {
+		return iterations;
+	}
 
 
 	/**
