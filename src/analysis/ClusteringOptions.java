@@ -2,12 +2,10 @@ package analysis;
 
 import java.io.Serializable;
 
-import analysis.nucleus.NucleusClusterer;
-
 public class ClusteringOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	private int type;
+	private ClusteringMethod type;
 	private int clusterNumber;
 	private HierarchicalClusterMethod hierarchicalMethod;
 	private int iterations;
@@ -16,16 +14,16 @@ public class ClusteringOptions implements Serializable {
 	private boolean includeModality;
 	private int modalityRegions;
 	
-	public ClusteringOptions(int type){
+	public ClusteringOptions(ClusteringMethod type){
 		this.type = type;
 	}
 
 
-	public void setType(int type) {
+	public void setType(ClusteringMethod type) {
 		this.type = type;
 	}
 	
-	public int getType() {
+	public ClusteringMethod getType() {
 		return type;
 	}
 	
@@ -89,13 +87,13 @@ public class ClusteringOptions implements Serializable {
 	
 		String[] options = null;
 		
-		if(this.type==NucleusClusterer.EM){
+		if(this.type.equals(ClusteringMethod.EM)){
 			options = new String[2];
 			options[0] = "-I";                 // max. iterations
 			options[1] = String.valueOf((Integer)iterations);
 		}
 		
-		if(this.type==NucleusClusterer.HIERARCHICAL){
+		if(this.type.equals(ClusteringMethod.HIERARCHICAL)){
 			options = new String[4];
 			options[0] = "-N";                 // number of clusters
 			options[1] = String.valueOf((Integer)clusterNumber);
@@ -129,6 +127,28 @@ public class ClusteringOptions implements Serializable {
 		}
 		
 		public String code(){
+			return this.code;
+		}
+	}
+	
+	public enum ClusteringMethod {
+		EM ("Expectation maximisation", 0),
+		HIERARCHICAL( "Hierarchical",1);
+
+
+		private final String name;
+		private final int code;
+
+		ClusteringMethod(String name, int code){
+			this.name = name;
+			this.code = code;
+		}
+
+		public String toString(){
+			return this.name;
+		}
+
+		public int code(){
 			return this.code;
 		}
 	}

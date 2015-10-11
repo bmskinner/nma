@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import analysis.ClusteringOptions;
+import analysis.ClusteringOptions.ClusteringMethod;
 import components.Cell;
 import components.CellCollection;
 import components.generic.Profile;
@@ -112,7 +113,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	 * @return
 	 */
 	public String getNewickTree(){
-		if(options.getType()==NucleusClusterer.HIERARCHICAL){
+		if(options.getType()==ClusteringMethod.HIERARCHICAL){
 			return this.newickTree;
 		} else{
 			return null;
@@ -155,7 +156,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				}
 				
 				
-				if(options.getType()==NucleusClusterer.HIERARCHICAL){
+				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					HierarchicalClusterer clusterer = new HierarchicalClusterer();
 					clusterer.setOptions(optionArray);     // set the options
 					clusterer.buildClusterer(instances);    // build the clusterer
@@ -163,7 +164,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 					this.newickTree = clusterer.graph();
 				}
 				
-				if(options.getType()==NucleusClusterer.EM){
+				if(options.getType().equals(ClusteringMethod.EM)){
 					EM clusterer = new EM();   // new instance of clusterer
 					clusterer.setOptions(optionArray);     // set the options
 					clusterer.buildClusterer(instances);    // build the clusterer

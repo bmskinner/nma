@@ -51,6 +51,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import analysis.ClusteringOptions;
+import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
 import analysis.nucleus.NucleusClusterer;
 
@@ -59,7 +60,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	private static final long serialVersionUID = 1L;
 	
 	private static final int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
-	private static final int DEFAULT_CLUSTER_METHOD = NucleusClusterer.HIERARCHICAL;
+	private static final ClusteringMethod DEFAULT_CLUSTER_METHOD = ClusteringMethod.HIERARCHICAL;
 	private static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD = HierarchicalClusterMethod.WARD;
 	private static final int DEFAULT_EM_ITERATIONS = 100;
 	private static final int DEFAULT_MODALITY_REGIONS = 2;
@@ -326,7 +327,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, "HierarchicalPanel");
 		    
-			options.setType(NucleusClusterer.HIERARCHICAL);
+			options.setType(ClusteringMethod.HIERARCHICAL);
 			
 			clusterNumberSpinner.setEnabled(true);
 			options.setClusterNumber( (Integer) clusterNumberSpinner.getValue());
@@ -341,7 +342,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, "EMPanel");
 			
-			options.setType(NucleusClusterer.EM);
+			options.setType(ClusteringMethod.EM);
 //			clusterNumberSpinner.setEnabled(false);
 //
 //			clusterNumberAutoButton.setEnabled(false);

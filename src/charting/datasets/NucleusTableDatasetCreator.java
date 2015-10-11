@@ -671,7 +671,7 @@ public class NucleusTableDatasetCreator {
 					ClusteringOptions op = g.getOptions();
 					Object[] rowData = {
 						g.getName(),
-						op.getType(),
+						op.getType().toString(),
 						op.getClusterNumber(),
 						op.getIterations(),
 						op.getHierarchicalMethod().toString(),
