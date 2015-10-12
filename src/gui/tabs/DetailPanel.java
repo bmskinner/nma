@@ -43,6 +43,7 @@ public abstract class DetailPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private List<Object> listeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
+	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
 	public DetailPanel(){
 		

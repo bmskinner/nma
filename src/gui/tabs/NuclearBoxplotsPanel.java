@@ -22,6 +22,8 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
+import gui.components.MeasurementUnitSettingsPanel;
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import gui.components.SelectableChartPanel;
 import ij.IJ;
 
@@ -64,6 +66,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import utility.Constants;
 import components.Cell;
 import components.CellCollection;
+import components.CellCollection.NucleusStatistic;
 import components.nuclei.Nucleus;
 import charting.charts.HistogramChartFactory;
 import charting.datasets.NuclearHistogramDatasetCreator;
@@ -93,6 +96,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	}
 
 	public void update(List<AnalysisDataset> list){	
+		this.list = list;
 		try {
 			boxplotPanel.update(list);
 			histogramsPanel.update(list);
@@ -101,25 +105,16 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		}
 	}
 	
-	protected class BoxplotsPanel extends JPanel {
+	protected class BoxplotsPanel extends JPanel implements ActionListener {
 
 		private static final long serialVersionUID = 1L;
 		
 		private JPanel 		mainPanel; // hold the charts
 		private JScrollPane scrollPane; // hold the main panel
-		private List<String> chartTypes = new ArrayList<String>();
-		private Map<String, ChartPanel> chartPanels = new HashMap<String, ChartPanel>();
+		private Map<NucleusStatistic, ChartPanel> chartPanels = new HashMap<NucleusStatistic, ChartPanel>();
+		private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 
 		public BoxplotsPanel() {
-			
-			chartTypes.add("Area");
-			chartTypes.add("Perimeter");
-			chartTypes.add("Max feret");
-			chartTypes.add("Min diameter");
-			chartTypes.add("Variability");
-			chartTypes.add("Circularity");
-			chartTypes.add("Aspect");
-//			this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 			
 			this.setLayout(new BorderLayout());
 			
@@ -127,7 +122,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 			
 			Dimension preferredSize = new Dimension(200, 300);
-			for(String chartType : chartTypes){
+			
+			for(NucleusStatistic stat : NucleusStatistic.values()){
 				
 				JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(	null, 
 						null, 
@@ -138,7 +134,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				ChartPanel panel = new ChartPanel(boxplot);
 				panel.setPreferredSize(preferredSize);
-				chartPanels.put(chartType, panel);
+				chartPanels.put(stat, panel);
 				mainPanel.add(panel);
 				
 			}
@@ -147,47 +143,39 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			scrollPane  = new JScrollPane(mainPanel);
 			this.add(scrollPane, BorderLayout.CENTER);
 			
+			this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
+			measurementUnitSettingsPanel.pixelsButton.addActionListener(this);
+			measurementUnitSettingsPanel.micronsButton.addActionListener(this);
+			
 		}
 		
+		/**
+		 * Update the boxplots with the selected options
+		 * @param list
+		 */
 		public void update(List<AnalysisDataset> list){
 
+			MeasurementScale scale  = measurementUnitSettingsPanel.pixelsButton.isSelected()
+									? MeasurementScale.PIXELS
+									: MeasurementScale.MICRONS;
+			
+			updateWithScale(list, scale);
+			
+		}
+		
+		/**
+		 * Update with the given measurement scale
+		 * @param list
+		 * @param scale
+		 */
+		private void updateWithScale(List<AnalysisDataset> list, MeasurementScale scale){
 			try {
-				for(String chartType : chartTypes){
 
-					ChartPanel panel = chartPanels.get(chartType);
-					BoxAndWhiskerCategoryDataset ds = null;
-					String yLabel = "Pixels";
+				for(NucleusStatistic stat : NucleusStatistic.values()){
 
-					if(chartType.equals("Area")){
-						ds = NucleusDatasetCreator.createAreaBoxplotDataset(list);
-					}
-
-					if(chartType.equals("Perimeter")){
-						ds = NucleusDatasetCreator.createPerimBoxplotDataset(list);
-					}
-
-					if(chartType.equals("Max feret")){
-						ds = NucleusDatasetCreator.createMaxFeretBoxplotDataset(list);
-					}
-
-					if(chartType.equals("Min diameter")){
-						ds = NucleusDatasetCreator.createMinFeretBoxplotDataset(list);
-					}
-
-					if(chartType.equals("Variability")){
-						ds = NucleusDatasetCreator.createDifferenceBoxplotDataset(list);
-						yLabel = "Degrees per perimeter unit";
-					}
-					
-					if(chartType.equals("Circularity")){
-						ds = NucleusDatasetCreator.createCircularityBoxplotDataset(list);
-						yLabel = "Circularity";
-					}
-					
-					if(chartType.equals("Aspect")){
-						ds = NucleusDatasetCreator.createAspectBoxplotDataset(list);
-						yLabel = "Aspect ratio (feret / min diameter)";
-					}
+					ChartPanel panel = chartPanels.get(stat);
+					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createBoxplotDataset(list, stat, scale);
+					String yLabel = scale.yLabel(stat);
 
 					JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false); 
 					formatBoxplotChart(boxplotChart, list);
@@ -235,6 +223,13 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			renderer.setBaseOutlinePaint(Color.BLACK);
 			renderer.setBaseFillPaint(Color.LIGHT_GRAY);
 		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			update(list);
+			
+		}
 		
 	}
 	
@@ -242,30 +237,18 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		private static final long serialVersionUID = 1L;
 		
-		private Map<String, SelectableChartPanel> chartPanels = new HashMap<String, SelectableChartPanel>();
+		private Map<NucleusStatistic, SelectableChartPanel> chartPanels = new HashMap<NucleusStatistic, SelectableChartPanel>();
 
-		private Map<String, Integer> chartStatTypes = new HashMap<String, Integer>();
+//		private Map<String, Integer> chartStatTypes = new HashMap<String, Integer>();
 
 		private JPanel 		mainPanel; // hold the charts
         private JPanel         headerPanel; // hold buttons
         private JCheckBox    useDensityBox; 
-        
-        List<AnalysisDataset> list;
+        private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 
-
-		
 		private JScrollPane scrollPane; // hold the main panel
 
 		public HistogramsPanel(){
-						
-			chartStatTypes.put("Area", 			NuclearHistogramDatasetCreator.NUCLEAR_AREA );
-			chartStatTypes.put("Perimeter", 	NuclearHistogramDatasetCreator.NUCLEAR_PERIM);
-			chartStatTypes.put("Max feret", 	NuclearHistogramDatasetCreator.NUCLEAR_FERET);
-			chartStatTypes.put("Min diameter", 	NuclearHistogramDatasetCreator.NUCLEAR_MIN_DIAM);
-			chartStatTypes.put("Variability", 	NuclearHistogramDatasetCreator.NUCLEAR_VARIABILITY);
-			chartStatTypes.put("Circularity", 	NuclearHistogramDatasetCreator.NUCLEAR_CIRCULARITY);
-			chartStatTypes.put("Aspect", 		NuclearHistogramDatasetCreator.NUCLEAR_ASPECT);
-
 			this.setLayout(new BorderLayout());
 						
 			mainPanel = new JPanel();
@@ -275,16 +258,20 @@ public class NuclearBoxplotsPanel extends DetailPanel {
             useDensityBox = new JCheckBox("Show probability density");
             useDensityBox.addActionListener(this);
             headerPanel.add(useDensityBox);
+            headerPanel.add(measurementUnitSettingsPanel);
+            measurementUnitSettingsPanel.pixelsButton.addActionListener(this);
+			measurementUnitSettingsPanel.micronsButton.addActionListener(this);
     
             this.add(headerPanel, BorderLayout.NORTH);
 
 			
 			Dimension preferredSize = new Dimension(400, 150);
-			for(String chartType : chartStatTypes.keySet()){
-				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, chartType), chartType);
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+//			for(String chartType : chartStatTypes.keySet()){
+				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, stat), stat.toString());
 				panel.setPreferredSize(preferredSize);
 				panel.addSignalChangeListener(this);
-				chartPanels.put(chartType, panel);
+				chartPanels.put(stat, panel);
 				mainPanel.add(panel);
 				
 			}
@@ -296,32 +283,38 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		}
 		
 		public void update(List<AnalysisDataset> list) throws Exception {
-			
-			this.list = list;
-			
+			MeasurementScale scale  = measurementUnitSettingsPanel.pixelsButton.isSelected()
+					? MeasurementScale.PIXELS
+					: MeasurementScale.MICRONS;
+
+			updateWithScale(list, scale);
+		}
+		
+		public void updateWithScale(List<AnalysisDataset> list, MeasurementScale scale) throws Exception {
+						
             boolean useDensity = useDensityBox.isSelected();
-//            String yLabel = useDensity ? "Percent nuclei" : "Nuclei";
 
 			
-			Set<String> chartTypes = chartStatTypes.keySet();
+//			Set<String> chartTypes = chartStatTypes.keySet();
 
-			for(String chartType : chartTypes){
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+//			for(String chartType : chartTypes){
 				
-				SelectableChartPanel panel = chartPanels.get(chartType);
-				int stat = chartStatTypes.get(chartType);
+				SelectableChartPanel panel = chartPanels.get(stat);
+//				int stat = chartStatTypes.get(chartType);
 				
 				JFreeChart chart = null;
 				
 				if(useDensity){
 //					log("Calculating density: "+chartType);
-					DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat);
-					chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, chartType);
+					DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
+					chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat);
 					
 				} else {
-					HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat);
-					chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, chartType);
+					HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat, scale);
+					chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, stat);
 				}
-				detectModes(chart, list, stat);
+//				detectModes(chart, list, stat);
 				XYPlot plot = (XYPlot) chart.getPlot();
 		        plot.setDomainPannable(true);
 		        plot.setRangePannable(true);
@@ -329,7 +322,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				panel.setChart(chart);
 			}
 		}
-		
+				
 		private void detectModes(JFreeChart chart, List<AnalysisDataset> list, int stat){
 			
 			XYPlot plot = chart.getXYPlot();
@@ -394,6 +387,12 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				// check the boxplot that fired
 				String name = panel.getName();
+				NucleusStatistic stat = null;
+				for (NucleusStatistic n : NucleusStatistic.values()){
+					if(n.toString().equals(name)){
+						stat = n;
+					}
+				}
 				
 				DecimalFormat df = new DecimalFormat("#.##");
 				
@@ -404,12 +403,13 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						CellCollection collection = dataset.getCollection();
 						CellCollection subCollection = new CellCollection(dataset, "Filtered_"+name+"_"+df.format(lower)+"-"+df.format(upper));
 						
-						int stat = chartStatTypes.get(name);
+						
+//						int stat = chartStatTypes.get(name);
 						
 						List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
 						
 						switch(stat){
-							case NuclearHistogramDatasetCreator.NUCLEAR_AREA:
+							case AREA:
 								for(Cell c : collection.getCells()){
 									Nucleus n = c.getNucleus();
 									if(n.getArea()>= lower && n.getArea()<= upper){
@@ -418,7 +418,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								}
 								break;
 								
-							case NuclearHistogramDatasetCreator.NUCLEAR_PERIM:
+							case PERIMETER:
 								for(Cell c : collection.getCells()){
 									Nucleus n = c.getNucleus();
 									if(n.getPerimeter() >= lower && n.getPerimeter()<= upper){
@@ -427,7 +427,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								}
 								break;
 								
-							case NuclearHistogramDatasetCreator.NUCLEAR_FERET:
+							case MAX_FERET:
 								for(Cell c : collection.getCells()){
 									Nucleus n = c.getNucleus();
 									if(n.getFeret() >= lower && n.getFeret() <= upper){
@@ -436,7 +436,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								}
 								break;
 								
-							case NuclearHistogramDatasetCreator.NUCLEAR_MIN_DIAM:
+							case MIN_DIAMETER:
 								for(Cell c : collection.getCells()){
 									Nucleus n = c.getNucleus();
 									if(n.getNarrowestDiameter() >= lower && n.getNarrowestDiameter() <= upper){
@@ -445,7 +445,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								}
 								break;
 								
-							case NuclearHistogramDatasetCreator.NUCLEAR_VARIABILITY:
+							case VARIABILITY:
 								
 								try {
 									for(Cell c : collection.getCells()){
@@ -462,7 +462,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								}
 								break;
 								
-							case NuclearHistogramDatasetCreator.NUCLEAR_CIRCULARITY:
+							case CIRCULARITY:
 								for(Cell c : collection.getCells()){
 									Nucleus n = c.getNucleus();
 									if(n.getCircularity() >= lower && n.getCircularity() <= upper){
@@ -471,7 +471,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								}
 								break;
 								
-							case NuclearHistogramDatasetCreator.NUCLEAR_ASPECT:
+							case ASPECT:
 								for(Cell c : collection.getCells()){
 									Nucleus n = c.getNucleus();
 									if(n.getAspectRatio()>= lower && n.getAspectRatio() <= upper){
@@ -488,9 +488,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 							log("Filtered "+subCollection.getNucleusCount()+" nuclei");
 							dataset.addChildCollection(subCollection);
 							newList.add(  dataset.getChildDataset(subCollection.getID() ));
-//							fireSignalChangeEvent("RefreshPopulationPanelDatasets");
-//							fireSignalChangeEvent("MorphologyNew_"+subCollection.getID().toString());
-//							fireSignalChangeEvent("MorphologyCopy_"+subCollection.getID().toString()+"|"+collection.getID().toString());
 						}
 						fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
 						

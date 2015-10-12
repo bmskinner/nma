@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components.nuclei;
 
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -179,7 +181,7 @@ public interface Nucleus {
 	 * @return
 	 */
 	public double getArea();
-
+	
 	/**
 	 * Get the maximum caliper diameter across the nucleus in pixels
 	 * @return

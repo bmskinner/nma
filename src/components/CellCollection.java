@@ -27,6 +27,7 @@
 
 package components;
 
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import ij.IJ;
 
 import java.io.File;
@@ -341,31 +342,56 @@ implements Serializable
   }
 
   /**
-   * Get the perimeters of the nuclei in this collection as
-   * an array
-   * @return
-   */
-  public double[] getPerimeters(){
-
-	  List<Double> list = new ArrayList<Double>();
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  list.add(n.getPerimeter());
-	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-  }
-
-  /**
    * Get the areas of the nuclei in this collection as
    * an array
    * @return
    */
   public double[] getAreas(){
+	  return getAreas(MeasurementScale.PIXELS);
+  }
+  
+  /**
+   * Get the areas of the nuclei in this collection as
+   * an array in microns
+   * @return
+   */
+  public double[] getAreas(MeasurementScale scale){
 
 	  List<Double> list = new ArrayList<Double>();
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(n.getArea());
+		  
+		  double area = n.getArea();
+		  
+		  if(scale.equals(MeasurementScale.MICRONS)){
+			  area = Utils.micronArea(area, n.getScale());
+		  }
+		  list.add(area);
+	  }
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+  }
+  
+  public double[] getPerimeters(){
+	  return this.getPerimeters(MeasurementScale.PIXELS);
+  }
+  
+  /**
+   * Get the perimeters of the nuclei in this collection as
+   * an array
+   * @return
+   */
+  public double[] getPerimeters(MeasurementScale scale){
+
+	  List<Double> list = new ArrayList<Double>();
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  
+		  double value = n.getPerimeter();
+		  
+		  if(scale.equals(MeasurementScale.MICRONS)){
+			  value = Utils.micronLength(value, n.getScale());
+		  }
+		  list.add(value);
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
@@ -401,18 +427,36 @@ implements Serializable
   }
 
   /**
-   * Get the ferets of the nuclei in this collection as
+   * Get the ferets in pixels of the nuclei in this collection as
    * an array
    * @return
    */
   public double[] getFerets(){
+	  return this.getFerets(MeasurementScale.PIXELS);
+  }
+  
+  /**
+   * Get the ferets of the nuclei in this collection as
+   * an array
+   * @return
+   */
+  public double[] getFerets(MeasurementScale scale){
 
 	  List<Double> list = new ArrayList<Double>();
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(n.getFeret());
+		  double value = n.getFeret();
+		  
+		  if(scale.equals(MeasurementScale.MICRONS)){
+			  value = Utils.micronLength(value, n.getScale());
+		  }
+		  list.add(value);
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+  }
+  
+  public double[] getMinFerets(){
+	  return this.getMinFerets(MeasurementScale.PIXELS);
   }
   
   /**
@@ -420,12 +464,17 @@ implements Serializable
    * an array
    * @return
    */
-  public double[] getMinFerets(){
+  public double[] getMinFerets(MeasurementScale scale){
 
 	  List<Double> list = new ArrayList<Double>();
 	  for(Cell cell : getCells() ){ 
 		  Nucleus n = cell.getNucleus();
-		  list.add(n.getNarrowestDiameter());
+		  double value = n.getNarrowestDiameter();
+		  
+		  if(scale.equals(MeasurementScale.MICRONS)){
+			  value = Utils.micronLength(value, n.getScale());
+		  }
+		  list.add(value);
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
@@ -969,6 +1018,74 @@ implements Serializable
 	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 	  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 	  return var;
+  }
+  
+  public double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) throws Exception {
+	  
+	  double[] result = null;
+	  switch (stat) {
+	  
+	  		case AREA: {
+	  			result = this.getAreas(scale);
+	  			break;
+	  		}
+	  		
+	  		case PERIMETER:{
+	  			result = this.getPerimeters(scale);
+	  			break;
+	  		}
+	  		
+	  		case MAX_FERET:{
+	  			result = this.getFerets(scale);
+	  			break;
+	  		}
+	  		
+	  		case MIN_DIAMETER:{
+	  			result = this.getMinFerets(scale);
+	  			break;
+	  		}
+	  		
+	  		case ASPECT:{
+	  			result = this.getAspectRatios();
+	  			break;
+	  		}
+	  		
+	  		case CIRCULARITY:{
+	  			result = this.getCircularities();
+	  			break;
+	  		}
+	  		
+	  		case VARIABILITY:{
+	  			result = this.getNormalisedDifferencesToMedianFromPoint(this.getOrientationPoint());
+	  			break;
+	  		}
+
+	  }
+	  return result;
+  }
+  
+  /**
+   * These are the values that we can make boxplots from
+   *
+   */
+  public enum NucleusStatistic {
+	  AREA ("Area"),
+	  PERIMETER("Perimeter"),
+	  MAX_FERET("Max feret"),
+	  MIN_DIAMETER("Min diameter"),
+	  ASPECT("Aspect"),
+	  CIRCULARITY("Circularity"),
+	  VARIABILITY("Variability");
+
+	  private String name;
+
+	  NucleusStatistic(String name){
+		  this.name = name;
+	  }
+
+	  public String toString(){
+		  return this.name;
+	  }
   }
 
 }

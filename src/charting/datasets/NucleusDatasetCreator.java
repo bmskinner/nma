@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.datasets;
 
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import ij.IJ;
 import ij.process.FloatPolygon;
 
@@ -42,6 +43,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import components.Cell;
 import components.CellCollection;
+import components.CellCollection.NucleusStatistic;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.SegmentedProfile;
@@ -583,10 +585,41 @@ public class NucleusDatasetCreator {
 	}
 
 	
+	/**
+	 * Get a boxplot dataset for the given statistic for each collection
+	 * @param collections
+	 * @param stat
+	 * @param scale
+	 * @return
+	 * @throws Exception
+	 */
+	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(List<AnalysisDataset> collections, NucleusStatistic stat, MeasurementScale scale) throws Exception{
+        
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+			CellCollection c = collections.get(i).getCollection();
+
+			List<Double> list = new ArrayList<Double>();
+			double[] stats = c.getNuclearStatistics(stat, scale);
+
+			for (double d : stats) {
+				list.add(new Double(d));
+			}
+			dataset.add(list, c.getType()+"_"+i, stat.toString());
+		}
+
+		return dataset;
+	}
 	
 	
-	
-	public static BoxAndWhiskerCategoryDataset createAreaBoxplotDataset(List<AnalysisDataset> collections) {
+	/**
+	 * Create boxplots for the given datasets, using the appropriate measurement scale
+	 * @param collections
+	 * @param scale
+	 * @return
+	 */
+	public static BoxAndWhiskerCategoryDataset createAreaBoxplotDataset(List<AnalysisDataset> collections, MeasurementScale scale) {
                 
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
@@ -595,7 +628,7 @@ public class NucleusDatasetCreator {
 
 			List<Double> list = new ArrayList<Double>();
 
-			for (double d : c.getAreas()) {
+			for (double d : c.getAreas(scale)) {
 				list.add(new Double(d));
 			}
 			dataset.add(list, c.getType()+"_"+i, "Area");

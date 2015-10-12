@@ -34,6 +34,8 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import components.CellCollection.NucleusStatistic;
+
 import analysis.AnalysisDataset;
 
 
@@ -118,7 +120,9 @@ public class HistogramChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, String xLabel){
+	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, NucleusStatistic stat){
+		String xLabel = stat.toString();
+		
 		JFreeChart chart = createHistogram(ds, xLabel, "Nuclei");
 		
 		if(ds!=null && list!=null){
@@ -163,7 +167,8 @@ public class HistogramChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, String xLabel){
+	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, NucleusStatistic stat){
+		String xLabel = stat.toString();
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,

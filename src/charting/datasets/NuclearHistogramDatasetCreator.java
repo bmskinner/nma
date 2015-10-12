@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.datasets;
 
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import ij.IJ;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import components.CellCollection;
+import components.CellCollection.NucleusStatistic;
 import components.generic.Profile;
 import analysis.AnalysisDataset;
 import utility.Stats;
@@ -39,13 +41,13 @@ import weka.estimators.KernelEstimator;
 public class NuclearHistogramDatasetCreator {
 		
 	
-	public static final int NUCLEAR_AREA = 0;
-	public static final int NUCLEAR_PERIM = 1;
-	public static final int NUCLEAR_FERET = 2;
-	public static final int NUCLEAR_MIN_DIAM = 3;
-	public static final int NUCLEAR_CIRCULARITY = 4;
-	public static final int NUCLEAR_ASPECT = 5;
-	public static final int NUCLEAR_VARIABILITY = 6;
+//	public static final int NUCLEAR_AREA = 0;
+//	public static final int NUCLEAR_PERIM = 1;
+//	public static final int NUCLEAR_FERET = 2;
+//	public static final int NUCLEAR_MIN_DIAM = 3;
+//	public static final int NUCLEAR_CIRCULARITY = 4;
+//	public static final int NUCLEAR_ASPECT = 5;
+//	public static final int NUCLEAR_VARIABILITY = 6;
 	
 //	/**
 //	 * For the given list of datasets, get the nuclear areas as a histogram dataset
@@ -227,7 +229,7 @@ public class NuclearHistogramDatasetCreator {
 	 * @return
 	 * @throws Exception  
 	 */
-	public static HistogramDataset createNuclearStatsHistogramDataset(List<AnalysisDataset> list, int stat) throws Exception {
+	public static HistogramDataset createNuclearStatsHistogramDataset(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
@@ -244,8 +246,8 @@ public class NuclearHistogramDatasetCreator {
 			
 			switch(stat){
 			
-				case NUCLEAR_AREA:
-					values = collection.getAreas();
+				case AREA:
+					values = collection.getAreas(scale);
 					min = Stats.min(values);
 					max = Stats.max(values);
 					// use int truncation to round to nearest 100 above max
@@ -259,8 +261,8 @@ public class NuclearHistogramDatasetCreator {
 					groupLabel = "Area";
 					break;
 					
-				case NUCLEAR_PERIM: 
-					values = collection.getPerimeters(); 
+				case PERIMETER: 
+					values = collection.getPerimeters(scale); 
 					min = Stats.min(values);
 					max = Stats.max(values);
 					
@@ -272,8 +274,8 @@ public class NuclearHistogramDatasetCreator {
 					groupLabel = "Perimeter";
 					break;
 					
-				case NUCLEAR_FERET:
-					values = collection.getFerets(); 
+				case MAX_FERET:
+					values = collection.getFerets(scale); 
 					
 					min  = Stats.min(values);
 					max = Stats.max(values);
@@ -286,8 +288,8 @@ public class NuclearHistogramDatasetCreator {
 					groupLabel = "Max feret";
 					break;
 					
-				case NUCLEAR_MIN_DIAM: 
-					values = collection.getMinFerets(); 
+				case MIN_DIAMETER: 
+					values = collection.getMinFerets(scale); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
 					
@@ -299,7 +301,7 @@ public class NuclearHistogramDatasetCreator {
 					groupLabel = "Min diameter";
 					break;
 					
-				case NUCLEAR_VARIABILITY:
+				case VARIABILITY:
 					values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
@@ -312,7 +314,7 @@ public class NuclearHistogramDatasetCreator {
 					groupLabel = "Variability";
 					break;
 					
-				case NUCLEAR_CIRCULARITY:
+				case CIRCULARITY:
 					values = collection.getCircularities(); 
 					
 					maxRounded = 1;
@@ -323,7 +325,7 @@ public class NuclearHistogramDatasetCreator {
 					groupLabel = "Circularity";
 					break;
 					
-				case NUCLEAR_ASPECT:
+				case ASPECT:
 					values = collection.getAspectRatios(); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
@@ -349,38 +351,38 @@ public class NuclearHistogramDatasetCreator {
 	 * @return the array of values
 	 * @throws Exception
 	 */
-	public static double[] findDatasetValues(AnalysisDataset dataset, int stat) throws Exception {
+	public static double[] findDatasetValues(AnalysisDataset dataset, NucleusStatistic stat, MeasurementScale scale) throws Exception {
 
 		CellCollection collection = dataset.getCollection();
 			
 		double[] values = null; 			
 		switch(stat){
 		
-			case NUCLEAR_AREA:
-				values = collection.getAreas();
+			case AREA:
+				values = collection.getAreas(scale);
 				break;
 				
-			case NUCLEAR_PERIM: 
-				values = collection.getPerimeters(); 
+			case PERIMETER: 
+				values = collection.getPerimeters(scale); 
 				break;
 				
-			case NUCLEAR_FERET:
-				values = collection.getFerets(); 
+			case MAX_FERET:
+				values = collection.getFerets(scale); 
 				break;
 				
-			case NUCLEAR_MIN_DIAM: 
-				values = collection.getMinFerets(); 
+			case MIN_DIAMETER: 
+				values = collection.getMinFerets(scale); 
 				break;
 				
-			case NUCLEAR_VARIABILITY:
+			case VARIABILITY:
 				values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
 				break;
 				
-			case NUCLEAR_CIRCULARITY:
+			case CIRCULARITY:
 				values = collection.getCircularities(); 
 				break;
 				
-			case NUCLEAR_ASPECT:
+			case ASPECT:
 				values = collection.getAspectRatios(); 
 				break;
 		}
@@ -394,10 +396,10 @@ public class NuclearHistogramDatasetCreator {
 	 * @return a charting dataset
 	 * @throws Exception
 	 */
-	public static DefaultXYDataset createNuclearDensityHistogramDataset(List<AnalysisDataset> list, int stat) throws Exception {
+	public static DefaultXYDataset createNuclearDensityHistogramDataset(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws Exception {
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-		int[] minMaxRange = calculateMinAndMaxRange(list, stat);
+		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
 
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
@@ -413,8 +415,8 @@ public class NuclearHistogramDatasetCreator {
 			
 			switch(stat){
 			
-				case NUCLEAR_AREA:
-					values = collection.getAreas();
+				case AREA:
+					values = collection.getAreas(scale);
 					min = Stats.min(values);
 					max = Stats.max(values);
 					// use int truncation to round to nearest 100 above max
@@ -426,8 +428,8 @@ public class NuclearHistogramDatasetCreator {
 					stepSize = 1;
 					break;
 					
-				case NUCLEAR_PERIM: 
-					values = collection.getPerimeters(); 
+				case PERIMETER: 
+					values = collection.getPerimeters(scale); 
 					min = Stats.min(values);
 					max = Stats.max(values);
 					
@@ -437,8 +439,8 @@ public class NuclearHistogramDatasetCreator {
 					stepSize = 1;
 					break;
 					
-				case NUCLEAR_FERET:
-					values = collection.getFerets(); 
+				case MAX_FERET:
+					values = collection.getFerets(scale); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
 					
@@ -448,8 +450,8 @@ public class NuclearHistogramDatasetCreator {
 					stepSize = 0.1;
 					break;
 					
-				case NUCLEAR_MIN_DIAM: 
-					values = collection.getMinFerets(); 
+				case MIN_DIAMETER: 
+					values = collection.getMinFerets(scale); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
 					
@@ -459,7 +461,7 @@ public class NuclearHistogramDatasetCreator {
 					stepSize = 0.1;
 					break;
 					
-				case NUCLEAR_VARIABILITY:
+				case VARIABILITY:
 					values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
@@ -470,7 +472,7 @@ public class NuclearHistogramDatasetCreator {
 					stepSize = 0.01;
 					break;
 					
-				case NUCLEAR_CIRCULARITY:
+				case CIRCULARITY:
 					values = collection.getCircularities(); 
 					maxRounded = 1;
 					minRounded = 0;
@@ -478,7 +480,7 @@ public class NuclearHistogramDatasetCreator {
 					stepSize = 0.005;
 					break;
 					
-				case NUCLEAR_ASPECT:
+				case ASPECT:
 					values = collection.getAspectRatios(); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
@@ -523,7 +525,7 @@ public class NuclearHistogramDatasetCreator {
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
-	private static int[] calculateMinAndMaxRange(List<AnalysisDataset> list, int stat) throws Exception {
+	private static int[] calculateMinAndMaxRange(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws Exception {
 		
 		int[] result = new int[2];
 		result[0] = 1000000; // holds min
@@ -540,8 +542,8 @@ public class NuclearHistogramDatasetCreator {
 			
 			switch(stat){
 			
-				case NUCLEAR_AREA:
-					values = collection.getAreas();
+				case AREA:
+					values = collection.getAreas(scale);
 					min = Stats.min(values);
 					max = Stats.max(values);
 					// use int truncation to round to nearest 100 above max
@@ -551,16 +553,16 @@ public class NuclearHistogramDatasetCreator {
 					minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
 					break;
 					
-				case NUCLEAR_PERIM: 
-					values = collection.getPerimeters(); 
+				case PERIMETER: 
+					values = collection.getPerimeters(scale); 
 					min = Stats.min(values);
 					max = Stats.max(values);
 					maxRounded = (int) Math.ceil(max);
 					minRounded = (int) Math.floor(min);
 					break;
 					
-				case NUCLEAR_FERET:
-					values = collection.getFerets(); 
+				case MAX_FERET:
+					values = collection.getFerets(scale); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
 					
@@ -568,8 +570,8 @@ public class NuclearHistogramDatasetCreator {
 					minRounded = (int) Math.floor(min);
 					break;
 					
-				case NUCLEAR_MIN_DIAM: 
-					values = collection.getMinFerets(); 
+				case MIN_DIAMETER: 
+					values = collection.getMinFerets(scale); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
 					
@@ -577,7 +579,7 @@ public class NuclearHistogramDatasetCreator {
 					minRounded = (int) Math.floor(min);
 					break;
 					
-				case NUCLEAR_VARIABILITY:
+				case VARIABILITY:
 					values = collection.getNormalisedDifferencesToMedianFromPoint(collection.getReferencePoint()); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
@@ -586,13 +588,13 @@ public class NuclearHistogramDatasetCreator {
 					minRounded = (int) Math.floor(min);
 					break;
 					
-				case NUCLEAR_CIRCULARITY:
+				case CIRCULARITY:
 					values = collection.getCircularities(); 
 					maxRounded = 1;
 					minRounded = 0;
 					break;
 					
-				case NUCLEAR_ASPECT:
+				case ASPECT:
 					values = collection.getAspectRatios(); 
 					min  = Stats.min(values);
 					max = Stats.max(values);
