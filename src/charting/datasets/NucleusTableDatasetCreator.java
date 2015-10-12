@@ -41,6 +41,7 @@ import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions;
 import utility.Constants;
 
@@ -612,32 +613,32 @@ public class NucleusTableDatasetCreator {
 	 * @param list
 	 * @return
 	 */
-	public static TableModel createClusterGroupsTable(List<AnalysisDataset> list){
-		DefaultTableModel model = new DefaultTableModel();
-
-		Object[] columnData = {
-				"Cluster group", 
-				"Number of clusters"};
-		model.setColumnIdentifiers(columnData);
-		
-		if(list==null){
-			model.addColumn("No data loaded");
-		} else {
-
-			for(AnalysisDataset dataset : list){
-				List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
-				
-				for(ClusterGroup g : clusterGroups ){
-					Object[] rowData = {
-						g.getName(),
-						g.size()
-					};
-					model.addRow(rowData);
-				}
-			}
-		}
-		return model;	
-	}
+//	public static TableModel createClusterGroupsTable(List<AnalysisDataset> list){
+//		DefaultTableModel model = new DefaultTableModel();
+//
+//		Object[] columnData = {
+//				"Cluster group", 
+//				"Number of clusters"};
+//		model.setColumnIdentifiers(columnData);
+//		
+//		if(list==null){
+//			model.addColumn("No data loaded");
+//		} else {
+//
+//			for(AnalysisDataset dataset : list){
+//				List<ClusterGroup> clusterGroups = dataset.getClusterGroups();
+//				
+//				for(ClusterGroup g : clusterGroups ){
+//					Object[] rowData = {
+//						g.getName(),
+//						g.size()
+//					};
+//					model.addRow(rowData);
+//				}
+//			}
+//		}
+//		return model;	
+//	}
 	
 	/**
 	 * Get the options used for clustering as a table
@@ -649,13 +650,14 @@ public class NucleusTableDatasetCreator {
 
 		Object[] columnData = {
 				"Cluster group",
+				"Clusters found",
 				"Method", 
-				"Cluster number",
 				"Iterations",
-				"Hi method",
+				"Hierarchical method",
+				"Cluster number",
 				"Include modality",
 				"Modality points"};
-		model.setColumnIdentifiers(columnData);
+		model.addColumn("", columnData);
 		
 		if(list==null){
 			model.addColumn("No data loaded");
@@ -669,16 +671,30 @@ public class NucleusTableDatasetCreator {
 				
 				for(ClusterGroup g : clusterGroups ){
 					ClusteringOptions op = g.getOptions();
-					Object[] rowData = {
+					
+					Object iterationString 	= op.getType().equals(ClusteringMethod.EM) 
+											? op.getIterations()
+											: "N/A";
+											
+					Object hierarchicalMethodString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
+							? op.getHierarchicalMethod().toString()
+							: "N/A";
+							
+					Object hierarchicalClusterString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
+							? op.getClusterNumber()
+							: "N/A";
+											
+					Object[] data = {
 						g.getName(),
+						g.size(),
 						op.getType().toString(),
-						op.getClusterNumber(),
-						op.getIterations(),
-						op.getHierarchicalMethod().toString(),
+						iterationString,
+						hierarchicalMethodString,
+						hierarchicalClusterString,
 						op.isIncludeModality(),
 						op.getModalityRegions()
 					};
-					model.addRow(rowData);
+					model.addColumn(dataset.getName(), data);
 				}
 			}
 		}

@@ -22,6 +22,7 @@ import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
 import gui.tabs.ClusterDetailPanel;
+import gui.tabs.MergesDetailPanel;
 import gui.tabs.NuclearBoxplotsPanel;
 import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
@@ -114,6 +115,7 @@ import utility.Constants;
 
 
 
+
 import javax.swing.JTabbedPane;
 
 import components.Cell;
@@ -144,6 +146,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
 	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
+	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
 	
 	private ColourSwatch activeSwatch = ColourSwatch.REGULAR_SWATCH;
 	
@@ -266,7 +269,14 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			clusterDetailPanel = new ClusterDetailPanel();
 			clusterDetailPanel.addSignalChangeListener(this);
-			tabbedPane.addTab("Clusters and merges", clusterDetailPanel);
+			tabbedPane.addTab("Clusters", clusterDetailPanel);
+			
+			//---------------
+			// Create the merges panel
+			//---------------
+			mergesDetailPanel = new MergesDetailPanel();
+			mergesDetailPanel.addSignalChangeListener(this);
+			tabbedPane.addTab("Merges", mergesDetailPanel);
 			
 			//---------------
 			// Create the Venn panel
@@ -641,6 +651,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 					nuclearBoxplotsPanel.update(list);
 					signalsDetailPanel.update(list);
 					clusterDetailPanel.update(list);
+					mergesDetailPanel.update(list);
 					vennDetailPanel.update(list);
 					wilcoxonDetailPanel.update(list);
 					cellDetailPanel.updateList(list);

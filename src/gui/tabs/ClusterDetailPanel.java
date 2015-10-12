@@ -23,8 +23,6 @@ import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.UUID;
-import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -32,171 +30,63 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
 import charting.datasets.NucleusTableDatasetCreator;
-import components.ClusterGroup;
 
 public class ClusterDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
 		
 	private ClustersPanel clusterPanel;
-	private MergesPanel mergePanel;
 
 	public ClusterDetailPanel() {
 		
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		clusterPanel = new ClustersPanel();
-		mergePanel = new MergesPanel();
-		this.add(mergePanel);
 		this.add(clusterPanel);
 
 	}
 		
 	public void update(List<AnalysisDataset> list){
-		
-		mergePanel.update(list);
 		clusterPanel.update(list);		
 	}
-	
-	private class MergesPanel extends JPanel {
 		
-		private JTable		mergeSources;
-		private JButton		getSourceButton = new JButton("Recover source");
-		
-		public MergesPanel(){
-			this.setLayout(new BorderLayout());
-			mergeSources = new JTable(makeBlankTable()){
-				@Override
-				public boolean isCellEditable(int rowIndex, int columnIndex) {
-				    return false;
-				}
-			};
-			mergeSources.setEnabled(true);
-			mergeSources.setCellSelectionEnabled(false);
-			mergeSources.setColumnSelectionAllowed(false);
-			mergeSources.setRowSelectionAllowed(true);
-			
-			this.add(mergeSources, BorderLayout.CENTER);
-			this.add(mergeSources.getTableHeader(), BorderLayout.NORTH);
-			
-			getSourceButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					
-					// get the dataset name selected
-					String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
-
-					fireSignalChangeEvent("ExtractSource_"+name);
-
-				}
-			});
-			getSourceButton.setVisible(false);
-			this.add(getSourceButton, BorderLayout.SOUTH);
-		}
-		
-		public void update(List<AnalysisDataset> list){
-			getSourceButton.setVisible(false);
-			if(list.size()==1){
-				AnalysisDataset dataset = list.get(0);
-
-				if(dataset.hasMergeSources()){
-					
-					DefaultTableModel model = new DefaultTableModel();
-
-					Vector<Object> names 	= new Vector<Object>();
-					Vector<Object> nuclei 	= new Vector<Object>();
-
-					for( UUID id : dataset.getMergeSources()){
-						AnalysisDataset mergeSource = dataset.getMergeSource(id);
-						names.add(mergeSource.getName());
-						nuclei.add(mergeSource.getCollection().getNucleusCount());
-					}
-					model.addColumn("Merge source", names);
-					model.addColumn("Nuclei", nuclei);
-
-					mergeSources.setModel(model);
-					getSourceButton.setVisible(true);
-					
-				} else {
-					try{
-					mergeSources.setModel(makeBlankTable());
-					} catch (Exception e){
-//						TODO: fix error
-					}
-				}
-			} else { // more than one dataset selected
-				mergeSources.setModel(makeBlankTable());
-			}
-			
-		}
-		
-		private DefaultTableModel makeBlankTable(){
-			DefaultTableModel model = new DefaultTableModel();
-
-			Vector<Object> names 	= new Vector<Object>();
-			Vector<Object> nuclei 	= new Vector<Object>();
-
-			names.add("No merge sources");
-			nuclei.add("");
-
-
-			model.addColumn("Merge source", names);
-			model.addColumn("Nuclei", nuclei);
-			return model;
-		}
-	}
-	
+	@SuppressWarnings("serial")
 	private class ClustersPanel extends JPanel {
 		
 		private JButton 	clusterButton	= new JButton("Cluster population");
 		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
 		private JPanel		statusPanel		= new JPanel(new BorderLayout());
-		private JTextArea 	tree			= new JTextArea();
-		private JScrollPane treeView;
+//		private TreePane 	treeViewer; // from jebl, extends JPanel
 		
 		private JPanel tablesPanel;
-		private JTable clusterGroupsTable;
 		private JTable clusterDetailsTable; 
 		
 		public ClustersPanel(){
 			this.setLayout(new BorderLayout());
-			treeView = new JScrollPane(tree);
-			this.add(treeView, BorderLayout.CENTER);
-			treeView.setVisible(false);
+//			treeView = new JScrollPane(tree);
+//			this.add(treeView, BorderLayout.CENTER);
+//			treeView.setVisible(false);
+			
 			
 			tablesPanel = new JPanel();
 			tablesPanel.setLayout(new BoxLayout(tablesPanel, BoxLayout.Y_AXIS));
-			
-			JPanel clusterGroupPanel = new JPanel(new BorderLayout());
-			clusterGroupsTable = new JTable(makeBlankTable()){
-				@Override
-				public boolean isCellEditable(int rowIndex, int columnIndex) {
-				    return false;
-				}
-			};
-			clusterGroupPanel.add(clusterGroupsTable, BorderLayout.CENTER);
-			clusterGroupPanel.add(clusterGroupsTable.getTableHeader(), BorderLayout.NORTH);
-			
-			tablesPanel.add(clusterGroupPanel);
-			
-			
+					
 			
 			JPanel clusterDetailPanel = new JPanel(new BorderLayout());
-			clusterDetailsTable = new JTable(makeBlankTable()){
+			TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(null);
+			clusterDetailsTable = new JTable(optionsModel){
 				@Override
 				public boolean isCellEditable(int rowIndex, int columnIndex) {
 				    return false;
 				}
 			};
-			
-			clusterDetailPanel.add(clusterDetailsTable, BorderLayout.CENTER);
+			JScrollPane detailScrollPanel = new JScrollPane(clusterDetailsTable);
+			clusterDetailPanel.add(detailScrollPanel, BorderLayout.CENTER);
 			clusterDetailPanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
 			
 			tablesPanel.add(clusterDetailPanel);
@@ -205,23 +95,12 @@ public class ClusterDetailPanel extends DetailPanel {
 			this.add(tablesPanel, BorderLayout.CENTER);
 			statusPanel = makeStatusPanel();
 			this.add(statusPanel, BorderLayout.NORTH);
+			
+//			treeViewer = new TreePane();
+//			this.add(treeViewer, BorderLayout.SOUTH);
+
 		}
-		
-		private DefaultTableModel makeBlankTable(){
-			DefaultTableModel model = new DefaultTableModel();
-
-			Vector<Object> names 	= new Vector<Object>();
-			Vector<Object> nuclei 	= new Vector<Object>();
-
-			names.add("No cluster data");
-			nuclei.add("");
-
-
-			model.addColumn("Cluster group", names);
-			model.addColumn("Clusters", nuclei);
-			return model;
-		}
-		
+				
 		/**
 		 * This panel shows the status of the dataset, 
 		 * and holds the clustering button
@@ -247,43 +126,56 @@ public class ClusterDetailPanel extends DetailPanel {
 
 		public void update(List<AnalysisDataset> list){
 			clusterButton.setVisible(true);
+//			treeViewer.setVisible(false);
+			
+			TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(list);
+			clusterDetailsTable.setModel(optionsModel);
+			
+			if(list.isEmpty() || list==null){
+				statusLabel.setText("No datasets selected");
+			} else {
 
-			if(list.size()==1){
-				AnalysisDataset dataset = list.get(0);
+				if(list.size()==1){
+					AnalysisDataset dataset = list.get(0);
 
-				// If no clusters are present, show the button
-				if(!dataset.hasClusters()){
+					if(!dataset.hasClusters()){
 
-					statusLabel.setText("Dataset contains no clusters");
-					tree.setText("");
-					treeView.setVisible(false);
+						statusLabel.setText("Dataset contains no clusters");
 
-				} else {
-					// clusters present, show the tree if available
-					// Show a line indicating clusters are present anyway
-//					String text = "Dataset contains "+dataset.getClusterGroups().size()+" cluster groups: ";
-//					for(ClusterGroup g : dataset.getClusterGroups()){
-//						text += "\t"+g.getName()+": "+g.size()+" clusters ";
-//					}
-//					statusLabel.setText(text);		
-					TableModel model = NucleusTableDatasetCreator.createClusterGroupsTable(list);
-					clusterGroupsTable.setModel(model);
-					
-					TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(list);
-					clusterDetailsTable.setModel(optionsModel);
-
+					} else {
+						statusLabel.setText("Dataset has "+dataset.getClusterGroups().size()+" cluster groups");
+						
+//						for(ClusterGroup g : dataset.getClusterGroups()){
+//							
+//							String newickTree = g.getTree();
+//
+//							if(newickTree!=null){
+//								treeViewer.setVisible(true);
+//								StringReader reader = new StringReader(newickTree);
+//
+//								boolean readUnquotedLabels = true;
+//								NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
+//
+//								try {
+//									List<Tree> trees =  imp.importTrees();
+//									RootedTree topTree = (RootedTree) trees.get(0);
+//
+//									treeViewer.setTree( topTree, topTree.getNodes());
+//
+//								} catch (IOException e) {
+//									error("Error in reader io", e);
+//								} catch (ImportException e) {
+//									error("Error in tree io", e);
+//								}
+//							}
+//						}
+						
+					}
+				} else { // more than one dataset selected
+					statusLabel.setText("Multiple datasets selected");
+					clusterButton.setVisible(false);
+//					treeViewer.);
 				}
-			} else { // more than one dataset selected
-				statusLabel.setText("Multiple datasets selected");
-				clusterButton.setVisible(false);
-				tree.setText("");
-				treeView.setVisible(false);
-				
-				TableModel model = makeBlankTable();
-				clusterGroupsTable.setModel(model);
-				
-				TableModel optionsModel = makeBlankTable();
-				clusterDetailsTable.setModel(optionsModel);
 			}
 		}
 
