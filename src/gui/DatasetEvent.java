@@ -65,12 +65,13 @@ public class DatasetEvent extends EventObject {
 	
 	public enum DatasetMethod {
 		
-		NEW_MORPHOLOGY ("New morphology"),
-		COPY_MORPHOLOGY("Copy morphology"),
-		REFRESH_MORPHOLOGY("Refresh morphology"),
-		REFOLD_CONSENSUS("Refold consensus"),
-		SELECT_DATASETS("Select datasets"),
-		CLUSTER ("Cluster");
+		NEW_MORPHOLOGY 		("New morphology"),
+		COPY_MORPHOLOGY		("Copy morphology"),
+		REFRESH_MORPHOLOGY	("Refresh morphology"),
+		REFOLD_CONSENSUS	("Refold consensus"),
+		SELECT_DATASETS		("Select datasets"),
+		EXTRACT_SOURCE		("Extract source"),
+		CLUSTER 			("Cluster");
 		
 		private final String name;
 		

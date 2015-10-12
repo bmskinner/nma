@@ -18,9 +18,12 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.DatasetEvent.DatasetMethod;
+
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
@@ -36,6 +39,7 @@ public class MergesDetailPanel extends DetailPanel {
 	
 	private JTable		mergeSources;
 	private JButton		getSourceButton = new JButton("Recover source");
+	private AnalysisDataset activeDataset;
 	
 	public MergesDetailPanel(){
 		this.setLayout(new BorderLayout());
@@ -57,10 +61,19 @@ public class MergesDetailPanel extends DetailPanel {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				
-				// get the dataset name selected
+				// get the dataset selected
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 				String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
-
-				fireSignalChangeEvent("ExtractSource_"+name);
+				
+				// get the dataset with the selected name
+				for( UUID id : activeDataset.getMergeSources()){
+					AnalysisDataset mergeSource = activeDataset.getMergeSource(id);
+					if(mergeSource.getName().equals(name)){
+						list.add(mergeSource);
+					}
+				}
+				fireDatasetEvent(DatasetMethod.EXTRACT_SOURCE, list);
+//				fireSignalChangeEvent("ExtractSource_"+name);
 
 			}
 		});
@@ -72,6 +85,7 @@ public class MergesDetailPanel extends DetailPanel {
 		getSourceButton.setVisible(false);
 		if(list.size()==1){
 			AnalysisDataset dataset = list.get(0);
+			activeDataset = dataset;
 
 			if(dataset.hasMergeSources()){
 				

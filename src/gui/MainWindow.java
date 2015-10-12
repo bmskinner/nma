@@ -1803,24 +1803,24 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			setStatus(s);
 		}
 				
-		if(event.type().startsWith("ExtractSource_")){
-			log("Recovering source dataset");
-			String name = event.type().replace("ExtractSource_", "");
-			// get the uuid of the dataset from the currently selected dataset
-			AnalysisDataset parent = selectedDataset;
-			for(UUID id : parent.getMergeSources()){
-				
-				AnalysisDataset child = parent.getMergeSource(id);
-				
-				// add the dataset to the populations panel
-				if(child.getName().equals(name)){
-					child.setRoot(true);
-					populationsPanel.addDataset(child);
-					populationsPanel.update();
-				}
-			}
-
-		}
+//		if(event.type().startsWith("ExtractSource_")){
+//			log("Recovering source dataset");
+//			String name = event.type().replace("ExtractSource_", "");
+//			// get the uuid of the dataset from the currently selected dataset
+//			AnalysisDataset parent = selectedDataset;
+//			for(UUID id : parent.getMergeSources()){
+//				
+//				AnalysisDataset child = parent.getMergeSource(id);
+//				
+//				// add the dataset to the populations panel
+//				if(child.getName().equals(name)){
+//					child.setRoot(true);
+//					populationsPanel.addDataset(child);
+//					populationsPanel.update();
+//				}
+//			}
+//
+//		}
 	}
 
 	@Override
@@ -1862,8 +1862,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						new MorphologyAnalysisAction(target, source, null);
 					
 				}});
-				
-				
+
 			}
 			
 						
@@ -1891,6 +1890,16 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 			if(event.method().equals(DatasetMethod.SELECT_DATASETS)){
 				this.populationsPanel.selectDataset(list.get(0));
+			}
+			
+			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
+				log("Recovering source dataset");
+				for(AnalysisDataset d : list){
+					d.setRoot(true);
+					populationsPanel.addDataset(d);
+					populationsPanel.update();
+				}
+
 			}
 			
 			

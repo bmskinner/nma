@@ -34,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
@@ -56,9 +57,15 @@ public class ClusterDetailPanel extends DetailPanel {
 
 	}
 		
-	public void update(List<AnalysisDataset> list){
+	public void update(final List<AnalysisDataset> list){
+		
 		this.list = list;
-		clusterPanel.update(list);		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				clusterPanel.update(list);		
+			}
+		});
+		
 	}
 		
 	@SuppressWarnings("serial")
