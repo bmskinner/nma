@@ -255,7 +255,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			
             headerPanel = new JPanel(new FlowLayout());
-            useDensityBox = new JCheckBox("Show probability density");
+            useDensityBox = new JCheckBox("Probability density function");
             useDensityBox.addActionListener(this);
             headerPanel.add(useDensityBox);
             headerPanel.add(measurementUnitSettingsPanel);
