@@ -33,16 +33,23 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.ListModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -66,16 +73,17 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import analysis.AnalysisDataset;
 
-public class NucleusProfilesPanel extends DetailPanel implements ActionListener {
+public class NucleusProfilesPanel extends DetailPanel {
 
 
 	private static final long serialVersionUID = 1L;
 
 //	private ChartPanel variabilityChartPanel; 
 		
-	RegularProfileDisplayPanel profileDisplayPanel; // hold regular profiles
-	FrankenProfileDisplayPanel frankenDisplayPanel; // hold regular profiles
+	RegularProfileDisplayPanel 	profileDisplayPanel; // hold regular profiles
+	FrankenProfileDisplayPanel 	frankenDisplayPanel; // hold regular profiles
 	VariabililtyDisplayPanel	variabilityChartPanel;
+	ModalityDisplayPanel 		modalityDisplayPanel;
 	
 	private List<AnalysisDataset> list;
 	
@@ -115,28 +123,59 @@ public class NucleusProfilesPanel extends DetailPanel implements ActionListener 
 		profileDisplayPanel.update(list);
 		frankenDisplayPanel.update(list);
 		variabilityChartPanel.update(list);
-//		if(!list.isEmpty()){
-//			updateVariabilityChart(list);
-//		} 
+		modalityDisplayPanel.update(list);
 	}
+	
+	private class ModalityDisplayPanel extends JPanel {
+		
+		private JList<Double> pointList;
+		private ChartPanel chartPanel;
+		
+		public ModalityDisplayPanel(){
+			this.setLayout(new BorderLayout());
+			JFreeChart chart = ChartFactory.createXYLineChart(null,
+					"Probability", "Angle", null);
+			XYPlot variabilityPlot = chart.getXYPlot();
+			variabilityPlot.setBackgroundPaint(Color.WHITE);
+			variabilityPlot.getDomainAxis().setRange(0,360);
+			chartPanel = new ChartPanel(chart);
+			chartPanel.setMinimumDrawWidth( 0 );
+			chartPanel.setMinimumDrawHeight( 0 );
+			this.add(chartPanel, BorderLayout.CENTER);
+			
+			
+			pointList = new JList<Double>();
+			JScrollPane listPanel = new JScrollPane(pointList);
+			this.add(listPanel, BorderLayout.WEST);
+			pointList.addListSelectionListener(new ModalitySelectionListener());
+			
+		}
+		
+		public void update(List<AnalysisDataset> list){
+
+			if(!list.isEmpty()){
 				
-//	public void updateVariabilityChart(List<AnalysisDataset> list){
-//		try {
-//			if(list.size()==1){
-//				JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100);
-//				variabilityChartPanel.setChart(chart);
-//			} else { // multiple nuclei
-//				JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100);
-//				variabilityChartPanel.setChart(chart);
-//			}
-//		} catch (Exception e) {
-//			error("Error in plotting variability chart", e);
-//		}	
-//	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
+				List<Double> xvalues = list.get(0).getCollection().getProfileCollection().getAggregate().getXKeyset();
+				DefaultListModel<Double> model = new DefaultListModel<Double>();
+				for(Double d: xvalues){
+					model.addElement(d);
+				}
+				pointList.setModel(model);
+				
+				JFreeChart chart = MorphologyChartFactory.createModalityChart(xvalues.get(0), list.get(0));
+				chartPanel.setChart(chart);
+				
+			}
+		}
+		
+		private class ModalitySelectionListener implements ListSelectionListener{
+			public void valueChanged(ListSelectionEvent e) {
+				int row = e.getFirstIndex();
+				double xvalue = pointList.getModel().getElementAt(row);
+				JFreeChart chart = MorphologyChartFactory.createModalityChart(xvalue, list.get(0));
+				chartPanel.setChart(chart);
+			}
+		}
 	}
 	
 	@SuppressWarnings("serial")

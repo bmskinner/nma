@@ -737,5 +737,20 @@ public class MorphologyChartFactory {
 		}
 		return chart;
 	}
+	
+	public static JFreeChart createModalityChart(Double position, AnalysisDataset dataset){
+		
+		XYDataset ds = NucleusDatasetCreator.createModalityDataset(position, dataset);
+		
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						"Angle", "Probability", ds, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		return chart;
+	}
 
 }

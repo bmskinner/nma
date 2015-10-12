@@ -59,6 +59,7 @@ import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.nucleus.CurveRefolder;
 import utility.Constants;
 import utility.Constants.BorderTag;
+import weka.estimators.KernelEstimator;
 import utility.Equation;
 import utility.Stats;
 import utility.Utils;
@@ -1169,6 +1170,47 @@ public class NucleusDatasetCreator {
 			i++;
 
 		}
+		return ds;
+	}
+	
+	/**
+	 * Given a list of analysis datasets, get the outlines of the consensus
+	 * nuclei they contain
+	 * @param list the analysis datasets
+	 * @return a chartable dataset
+	 */
+	public static XYDataset createModalityDataset(Double xposition, AnalysisDataset dataset){
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+
+
+		CellCollection collection = dataset.getCollection();
+		KernelEstimator est = new KernelEstimator(0.001);
+		double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(xposition);
+		// add the values to a kernel estimator
+		// give each value equal weighting
+		for(double d : values){
+			est.addValue(d, 1);
+		}
+			
+		double min = Stats.min(values)-5;
+		double max = Stats.max(values)+5;
+		
+		List<Double> xValues = new ArrayList<Double>();
+		List<Double> yValues = new ArrayList<Double>();
+		
+		for(double i=min; i<=max; i+=0.1){
+			xValues.add(i);
+			yValues.add(est.getProbability(i));
+		}
+
+		double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
+				Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+		
+		
+		ds.addSeries(collection.getName(), data);
+			
+
 		return ds;
 	}
 	
