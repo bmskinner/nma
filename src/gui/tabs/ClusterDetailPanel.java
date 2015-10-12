@@ -19,9 +19,12 @@
 package gui.tabs;
 
 
+import gui.DatasetEvent.DatasetMethod;
+
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -39,6 +42,8 @@ import charting.datasets.NucleusTableDatasetCreator;
 public class ClusterDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
+	
+	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		
 	private ClustersPanel clusterPanel;
 
@@ -52,6 +57,7 @@ public class ClusterDetailPanel extends DetailPanel {
 	}
 		
 	public void update(List<AnalysisDataset> list){
+		this.list = list;
 		clusterPanel.update(list);		
 	}
 		
@@ -112,7 +118,9 @@ public class ClusterDetailPanel extends DetailPanel {
 			clusterButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					fireSignalChangeEvent("NewClusterAnalysis");
+//					fireSignalChangeEvent("NewClusterAnalysis");
+					fireDatasetEvent(DatasetMethod.CLUSTER, list);
+					
 
 				}
 			});

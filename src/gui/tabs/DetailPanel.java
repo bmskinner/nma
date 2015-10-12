@@ -18,6 +18,9 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.DatasetEvent;
+import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 
@@ -26,6 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JPanel;
+
+import analysis.AnalysisDataset;
 
 /**
  * Add the listener and signal change settings to save each panel
@@ -37,6 +42,7 @@ public abstract class DetailPanel extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
 	private List<Object> listeners = new ArrayList<Object>();
+	private List<Object> datasetListeners = new ArrayList<Object>();
 	
 	public DetailPanel(){
 		
@@ -48,6 +54,14 @@ public abstract class DetailPanel extends JPanel {
     
     public synchronized void removeSignalChangeListener( SignalChangeListener l ) {
         listeners.remove( l );
+    }
+    
+    public synchronized void addDatasetEventListener( DatasetEventListener l ) {
+    	datasetListeners.add( l );
+    }
+    
+    public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
+    	datasetListeners.remove( l );
     }
     
     /**
@@ -85,6 +99,15 @@ public abstract class DetailPanel extends JPanel {
         Iterator<Object> iterator = listeners.iterator();
         while( iterator.hasNext() ) {
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+        }
+    }
+    
+    protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
+    	
+        DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
+        Iterator<Object> iterator = datasetListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
         }
     }
 

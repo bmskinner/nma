@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui;
 
+import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
@@ -116,6 +117,7 @@ import utility.Constants;
 
 
 
+
 import javax.swing.JTabbedPane;
 
 import components.Cell;
@@ -124,7 +126,7 @@ import components.ClusterGroup;
 import components.nuclei.Nucleus;
 import logging.TextAreaHandler;
 
-public class MainWindow extends JFrame implements SignalChangeListener {
+public class MainWindow extends JFrame implements SignalChangeListener, DatasetEventListener {
 				
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -193,9 +195,11 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			populationsPanel = new PopulationsPanel();
 			populationsPanel.addSignalChangeListener(this);
+			populationsPanel.addDatasetEventListener(this);
 			
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			consensusNucleusPanel.addSignalChangeListener(this);
+			consensusNucleusPanel.addDatasetEventListener(this);
 			
 			//---------------
 			// Create the log panel
@@ -253,6 +257,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			nuclearBoxplotsPanel  = new NuclearBoxplotsPanel();
 			nuclearBoxplotsPanel.addSignalChangeListener(this);
+			nuclearBoxplotsPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Nuclear charts", nuclearBoxplotsPanel);
 				
 			
@@ -261,6 +266,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			signalsDetailPanel  = new SignalsDetailPanel();
 			signalsDetailPanel.addSignalChangeListener(this);
+			signalsDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Signals", signalsDetailPanel);
 			
 
@@ -269,6 +275,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			clusterDetailPanel = new ClusterDetailPanel();
 			clusterDetailPanel.addSignalChangeListener(this);
+			clusterDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Clusters", clusterDetailPanel);
 			
 			//---------------
@@ -276,12 +283,14 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			//---------------
 			mergesDetailPanel = new MergesDetailPanel();
 			mergesDetailPanel.addSignalChangeListener(this);
+			mergesDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Merges", mergesDetailPanel);
 			
 			//---------------
 			// Create the Venn panel
 			//---------------
 			vennDetailPanel = new VennDetailPanel();
+			vennDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Venn", null, vennDetailPanel, null);
 			
 			
@@ -289,18 +298,21 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			// Create the Wilcoxon test panel
 			//---------------
 			wilcoxonDetailPanel = new WilcoxonDetailPanel();
+			wilcoxonDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Wilcoxon", null, wilcoxonDetailPanel, null);
 			
 			//---------------
 			// Create the segments boxplot panel
 			//---------------
 			segmentsDetailPanel = new SegmentsDetailPanel();
+			segmentsDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Segments", null, segmentsDetailPanel, null);
 
 			//---------------
 			// Create the cells panel
 			//---------------
 			cellDetailPanel = new CellDetailPanel();
+			cellDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
 			cellDetailPanel.addSignalChangeListener(this);
 			
@@ -1629,11 +1641,7 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			log("Shell analysis selected");
 			new ShellAnalysisAction(selectedDataset);
 		}
-		
-		if(event.type().equals("NewClusterAnalysis")){
-			new ClusterAnalysisAction(selectedDataset);
-		}
-		
+
 		if(event.type().equals("MergeCollectionAction")){
 			
 			Thread thr = new Thread() {
@@ -1794,12 +1802,6 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			String s = event.type().replace("Status_", "");
 			setStatus(s);
 		}
-		
-		if(event.type().startsWith("SelectDataset_")){
-			String s = event.type().replace("SelectDataset_", "");
-			UUID id = UUID.fromString(s);
-			this.populationsPanel.selectDataset(id);
-		}
 				
 		if(event.type().startsWith("ExtractSource_")){
 			log("Recovering source dataset");
@@ -1819,77 +1821,81 @@ public class MainWindow extends JFrame implements SignalChangeListener {
 			}
 
 		}
-		
-		if(event.type().startsWith("MorphologyRefresh_")){
-			String s = event.type().replace("MorphologyRefresh_", "");
-			UUID id = UUID.fromString(s);
-			final AnalysisDataset d = populationsPanel.getDataset(id);
-			
-			SwingUtilities.invokeLater(new Runnable(){
-				public void run(){
-				
-					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_REFRESH, 0);
-				
-			}});
+	}
 
-		}
-		
-		if(event.type().startsWith("MorphologyCopy_")){
-			String s = event.type().replace("MorphologyCopy_", "");
-			String[] array = s.split("|");
-			UUID targetID = UUID.fromString(array[0]);
-			UUID sourceID = UUID.fromString(array[1]);
+	@Override
+	public void datasetEventReceived(DatasetEvent event) {
+		final List<AnalysisDataset> list = event.getDatasets();
+		if(!list.isEmpty()){
 			
-			final AnalysisDataset target = populationsPanel.getDataset(targetID);
-			final AnalysisDataset source = populationsPanel.getDataset(sourceID);
-			
-			SwingUtilities.invokeLater(new Runnable(){
-				public void run(){
-				
-					new MorphologyAnalysisAction(target, source, null);
-				
-			}});
-			
-			
-		}
-		
-		if(event.type().startsWith("MorphologyNew_")){
-			String s = event.type().replace("MorphologyNew_", "");
-			UUID id = UUID.fromString(s);
-			final AnalysisDataset d = populationsPanel.getDataset(id);
-			final int flag = ADD_POPULATION;
-			SwingUtilities.invokeLater(new Runnable(){
-				public void run(){
-				
-					new MorphologyAnalysisAction(d, MorphologyAnalysis.MODE_NEW, flag);
-				
-			}});
-			
-		}
-		
-		if(event.type().startsWith("RefoldConsensus_")){
+			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
+				log("Running new morphology analysis");
+				final int flag = ADD_POPULATION;
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+					
+						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag);
 
-			String s = event.type().replace("RefoldConsensus_", "");
-			UUID id = UUID.fromString(s);
-			final AnalysisDataset d = populationsPanel.getDataset(id);
+				}});
+			}
 			
+			if(event.method().equals(DatasetMethod.REFRESH_MORPHOLOGY)){
+				
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+					
+						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_REFRESH, 0);
+					
+				}});
 
-			Thread thr = new Thread(){
+			}
+			
+			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
+				
+				
+				final AnalysisDataset target = list.get(0);
+				final AnalysisDataset source = event.secondaryDataset();
+				
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+					
+						new MorphologyAnalysisAction(target, source, null);
+					
+				}});
+				
+				
+			}
+			
+						
+			if(event.method().equals(DatasetMethod.CLUSTER)){
+				log("Clustering dataset");
+				new ClusterAnalysisAction(list.get(0));
+			}
+			
+			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
 
-				public void run(){
-					final CountDownLatch latch = new CountDownLatch(1);
-					new RefoldNucleusAction(d, latch);
-					try {
-						latch.await();
-					} catch (InterruptedException e) {
-						MainWindow.this.error("Interruption to thread", e);
+				Thread thr = new Thread(){
+
+					public void run(){
+						final CountDownLatch latch = new CountDownLatch(1);
+						new RefoldNucleusAction(list.get(0), latch);
+						try {
+							latch.await();
+						} catch (InterruptedException e) {
+							MainWindow.this.error("Interruption to thread", e);
+						}
 					}
-				}
-			};
-			thr.start();
+				};
+				thr.start();
+			}
+			
+			if(event.method().equals(DatasetMethod.SELECT_DATASETS)){
+				this.populationsPanel.selectDataset(list.get(0));
+			}
+			
+			
+			
 		}
-		
-		
 		
 	}	
 }

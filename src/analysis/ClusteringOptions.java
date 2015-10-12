@@ -14,11 +14,20 @@ public class ClusteringOptions implements Serializable {
 	private boolean includeModality;
 	private int modalityRegions;
 	
+	/**
+	 * Create a new set of options based on the given
+	 * method.
+	 * @param type
+	 */
 	public ClusteringOptions(ClusteringMethod type){
 		this.type = type;
 	}
 
 
+	/**
+	 * Set the clustering method
+	 * @param type
+	 */
 	public void setType(ClusteringMethod type) {
 		this.type = type;
 	}
@@ -27,6 +36,10 @@ public class ClusteringOptions implements Serializable {
 		return type;
 	}
 	
+	/**
+	 * Set the number of clusters to find automatically
+	 * @param autoClusterNumber
+	 */
 	public void setAutoClusterNumber(boolean autoClusterNumber) {
 		this.autoClusterNumber = autoClusterNumber;
 	}
@@ -36,6 +49,11 @@ public class ClusteringOptions implements Serializable {
 	}
 
 
+	/**
+	 * Should bimodal regions of the population profile be included
+	 * in clustering 
+	 * @param includeModality
+	 */
 	public void setIncludeModality(boolean includeModality) {
 		this.includeModality = includeModality;
 	}
@@ -45,11 +63,21 @@ public class ClusteringOptions implements Serializable {
 	}
 
 
+	/**
+	 * Set the number of potentially bimodal
+	 * regions of the profile to include in the clustering
+	 * @param modalityRegions
+	 */
 	public void setModalityRegions(int modalityRegions) {
 		this.modalityRegions = modalityRegions;
 	}
 
 
+	/**
+	 * Set the number of hierarchical clusters to return.
+	 * Has no effect if clustering type is EM
+	 * @param clusterNumber
+	 */
 	public void setClusterNumber(int clusterNumber) {
 		this.clusterNumber = clusterNumber;
 	}
@@ -59,15 +87,28 @@ public class ClusteringOptions implements Serializable {
 		this.hierarchicalMethod = hierarchicalMethod;
 	}
 
+	/**
+	 * Set the number of iterations to run an EM clusterer.
+	 * Has no effect if type is hierarchical
+	 * @param iterations
+	 */
 	public void setIterations(int iterations) {
 		this.iterations = iterations;
 	}
 	
+	/**
+	 * Get the desired number of hierarchical clusters
+	 * @return
+	 */
 	public int getClusterNumber() {
 		return clusterNumber;
 	}
 
 
+	/**
+	 * Get the chosen hierarchical method of clustering
+	 * @return
+	 */
 	public HierarchicalClusterMethod getHierarchicalMethod() {
 		return hierarchicalMethod;
 	}
@@ -104,6 +145,11 @@ public class ClusteringOptions implements Serializable {
 		return options;
 	}
 	
+	
+	/**
+	 * The available types of hierarchical clustering
+	 * for the Weka clusterer
+	 */
 	public enum HierarchicalClusterMethod {
 		WARD 			("Ward", "WARD"), 
 		SINGLE			("Single", "SINGLE"), 
@@ -131,6 +177,10 @@ public class ClusteringOptions implements Serializable {
 		}
 	}
 	
+	/**
+	 * The available types of clustering
+	 * for the Weka clusterer
+	 */
 	public enum ClusteringMethod {
 		EM ("Expectation maximisation", 0),
 		HIERARCHICAL( "Hierarchical",1);

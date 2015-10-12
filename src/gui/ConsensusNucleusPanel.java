@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui;
 
+import gui.DatasetEvent.DatasetMethod;
 import gui.components.ConsensusNucleusChartPanel;
 import gui.tabs.DetailPanel;
 import ij.IJ;
@@ -98,7 +99,10 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		runRefoldingButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				fireSignalChangeEvent("RefoldConsensus_"+activeDataset.getUUID().toString());
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				list.add(activeDataset);
+				fireDatasetEvent(DatasetMethod.REFOLD_CONSENSUS, list);
+//				fireSignalChangeEvent("RefoldConsensus_"+activeDataset.getUUID().toString());
 				runRefoldingButton.setVisible(false);
 			}
 		});

@@ -20,6 +20,7 @@ package gui.tabs;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import ij.IJ;
@@ -319,19 +320,24 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 							model.reload();
 							
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							
 							try {
-								CellDetailPanel.this.fireSignalChangeEvent("MorphologyRefresh_"+activeDataset.getUUID().toString());
+								CellDetailPanel.this.fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
+//								CellDetailPanel.this.fireSignalChangeEvent("MorphologyRefresh_"+activeDataset.getUUID().toString());
 
 							} catch (Exception e1) {
 								log("Error deleting cell: "+e1.getMessage());
 							}
 							
-							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-							list.add(activeDataset);
+//							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+//							list.add(activeDataset);
 							CellDetailPanel.this.updateList(list);
 							CellDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
 							CellDetailPanel.this.fireSignalChangeEvent("UpdatePopulationPanel");
-							CellDetailPanel.this.fireSignalChangeEvent("SelectDataset_"+activeDataset.getUUID().toString());
+							CellDetailPanel.this.fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
+//							CellDetailPanel.this.fireSignalChangeEvent("SelectDataset_"+activeDataset.getUUID().toString());
 							
 						}
 						

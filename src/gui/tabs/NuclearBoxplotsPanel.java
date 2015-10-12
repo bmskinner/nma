@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
@@ -405,6 +406,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						
 						int stat = chartStatTypes.get(name);
 						
+						List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+						
 						switch(stat){
 							case NuclearHistogramDatasetCreator.NUCLEAR_AREA:
 								for(Cell c : collection.getCells()){
@@ -484,10 +487,12 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 							log("Filtering on "+name+": "+df.format(lower)+" - "+df.format(upper));
 							log("Filtered "+subCollection.getNucleusCount()+" nuclei");
 							dataset.addChildCollection(subCollection);
-							fireSignalChangeEvent("RefreshPopulationPanelDatasets");
-							fireSignalChangeEvent("MorphologyNew_"+subCollection.getID().toString());
+							newList.add(  dataset.getChildDataset(subCollection.getID() ));
+//							fireSignalChangeEvent("RefreshPopulationPanelDatasets");
+//							fireSignalChangeEvent("MorphologyNew_"+subCollection.getID().toString());
 //							fireSignalChangeEvent("MorphologyCopy_"+subCollection.getID().toString()+"|"+collection.getID().toString());
 						}
+						fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
 						
 					}
 				} else {

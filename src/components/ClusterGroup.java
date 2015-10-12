@@ -46,10 +46,18 @@ public class ClusterGroup implements Serializable {
 		this.newickTree = tree;
 	}
 	
+	/**
+	 * Get the public name of the cluster groups
+	 * @return
+	 */
 	public String getName(){
 		return this.name;
 	}
 	
+	/**
+	 * Get the number of datasets in the group
+	 * @return
+	 */
 	public int size(){
 		return this.ids.size();
 	}
@@ -62,18 +70,34 @@ public class ClusterGroup implements Serializable {
 		return this.newickTree;
 	}
 	
+	/**
+	 * Get the IDs of the datasets in the group
+	 * @return
+	 */
 	public List<UUID> getUUIDs(){
 		return this.ids;
 	}
 	
+	/**
+	 * Add a dataset as a cluster in the group
+	 * @param dataset
+	 */
 	public void addDataset(AnalysisDataset dataset){
 		this.ids.add(dataset.getUUID());
 	}
 	
+	/**
+	 * Add a cell collection as a cluster in the group
+	 * @param collection
+	 */
 	public void addDataset(CellCollection collection){
 		this.ids.add(collection.getID());
 	}
 	
+	/**
+	 * Get the options used to make this cluster group
+	 * @return
+	 */
 	public ClusteringOptions getOptions(){
 		return this.options;
 	}
@@ -89,6 +113,18 @@ public class ClusterGroup implements Serializable {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	/**
+	 * Check if there is a tree in this cluster group
+	 * @return
+	 */
+	public boolean hasTree(){
+		if(this.newickTree==null){
+			return false;
+		} else {
+			return true;
 		}
 	}
 
