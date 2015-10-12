@@ -62,16 +62,16 @@ public class CellDatasetCreator {
 			rowData.add(n.getPathAndNumber());
 			
 			fieldNames.add("Area");
-			rowData.add(df.format(n.getArea()));
+			rowData.add(df.format(n.getArea()) +"("+ df.format(Utils.micronArea(n.getArea(), n.getScale()))+" microns)");
 			
 			fieldNames.add("Perimeter");
-			rowData.add(df.format(n.getPerimeter()));
+			rowData.add(df.format(n.getPerimeter())+"("+ df.format(Utils.micronLength(n.getPerimeter(), n.getScale()))+" microns)");
 			
 			fieldNames.add("Max feret");
-			rowData.add(df.format(n.getFeret()));
+			rowData.add(df.format(n.getFeret())+"("+ df.format(Utils.micronLength(n.getFeret(), n.getScale()))+" microns)");
 			
 			fieldNames.add("Min feret");
-			rowData.add(df.format(n.getNarrowestDiameter()));
+			rowData.add(df.format(n.getNarrowestDiameter())+"("+ df.format(Utils.micronLength(n.getNarrowestDiameter(), n.getScale()))+" microns)");
 			
 			fieldNames.add("Nucleus CoM");
 			rowData.add(n.getCentreOfMass().toString());
@@ -107,7 +107,7 @@ public class CellDatasetCreator {
 				for(NuclearSignal s : n.getSignals(signalGroup)){
 					
 					fieldNames.add("Signal area");
-					rowData.add(s.getArea());
+					rowData.add(s.getArea()+"("+ df.format(Utils.micronArea(s.getArea(), n.getScale()))+" microns)");
 					
 					fieldNames.add("Signal CoM");
 					
