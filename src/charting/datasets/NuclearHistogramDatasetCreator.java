@@ -419,13 +419,25 @@ public class NuclearHistogramDatasetCreator {
 					values = collection.getAreas(scale);
 					min = Stats.min(values);
 					max = Stats.max(values);
+					
+					int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+					int binLog = log-2;
+					stepSize = Math.pow(10, binLog);
+					
+					int roundLog = log-1;
+					int roundAbs = Math.pow(10, roundLog);
+					
 					// use int truncation to round to nearest 100 above max
-					maxRounded = (( (int)max + 99) / 100 ) * 100;
+					maxRounded = (( (int)max + (roundAbs-1) ) / roundAbs ) * roundAbs;
+					minRounded = ((( (int)min + (roundAbs-1) ) / roundAbs ) * roundAbs  ) - roundAbs;
+					
+					// use int truncation to round to nearest 100 above max
+//					maxRounded = (( (int)max + 99) / 100 ) * 100;
 					
 					// use int truncation to round to nearest 100 above min, then subtract 100
-					minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
+//					minRounded = ((( (int)min + 99) / 100 ) * 100  ) - 100;
 					groupLabel = "Area";
-					stepSize = 1;
+//					stepSize = 1;
 					break;
 					
 				case PERIMETER: 
