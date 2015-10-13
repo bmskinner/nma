@@ -46,6 +46,7 @@ import java.util.Map;
 
 
 
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -71,6 +72,7 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
 import components.Cell;
 import components.CellCollection;
+import components.CellCollection.ProfileCollectionType;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclei.Nucleus;
@@ -152,26 +154,26 @@ public class MorphologyChartFactory {
 		
 		XYPlot plot = chart.getXYPlot();
 
-		for (String tag : collection.getProfileCollection().getOffsetKeys()){
+		for (String tag : collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffsetKeys()){
 			Color colour = Color.BLACK;
 			
 			// get the index of the tag
-			int index = collection.getProfileCollection().getOffset(tag);
+			int index = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(tag);
 			
 			// get the offset from to the current draw point
-			int offset = collection.getProfileCollection().getOffset(point);
+			int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(point);
 			
 			// adjust the index to the offset
-			index = Utils.wrapIndex( index - offset, collection.getProfileCollection().getAggregate().length());
+			index = Utils.wrapIndex( index - offset, collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length());
 			
 			double indexToDraw = index; // convert to a double to allow normalised positioning
 			
 			if(normalised){ // set to the proportion of the point along the profile
-				indexToDraw =  (( indexToDraw / collection.getProfileCollection().getAggregate().length() ) * 100);
+				indexToDraw =  (( indexToDraw / collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length() ) * 100);
 			}
 			if(rightAlign && !normalised){
 				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
-				int amountToAdd = maxX - collection.getProfileCollection().getAggregate().length();
+				int amountToAdd = maxX - collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length();
 				indexToDraw += amountToAdd;
 				
 			}
@@ -206,7 +208,7 @@ public class MorphologyChartFactory {
 		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, rightAlign, point);
 //		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
 		
-		ProfileCollection pc = collection.getFrankenCollection();
+		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
 		
 		int length = 100 ; // default if normalised - for a franken collection, it makes no difference
 

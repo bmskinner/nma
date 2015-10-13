@@ -27,7 +27,7 @@ import javax.swing.SwingWorker;
 
 import components.Cell;
 import components.CellCollection;
-
+import components.CellCollection.NucleusType;
 import analysis.AnalysisDataset;
 import utility.Constants;
 import utility.Logger;
@@ -113,10 +113,10 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	 */
 	private boolean checkNucleusClass(){
 		boolean result = true;
-		Class<?> testClass = datasets.get(0).getCollection().getNucleusClass();
+		NucleusType testClass = datasets.get(0).getCollection().getNucleusType();
 		for(AnalysisDataset d : datasets){
 
-			if(d.getCollection().getNucleusClass()!=testClass){
+			if(!d.getCollection().getNucleusType().equals(testClass)){
 				result =  false;
 			}
 		}
@@ -198,7 +198,7 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 						null, 
 						newDatasetName, 
 						mergeDebugFile,
-						templateCollection.getNucleusClass()
+						templateCollection.getNucleusType()
 						);
 
 				logger.log("Created collection", Logger.DEBUG);

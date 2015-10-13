@@ -99,56 +99,7 @@ public class Constants {
 		    }
 		}
 		
-		/**
-		 * The types of nuclei we are able to analyse,
-		 * with the reference and orientation points to be used.
-		 * The reference point is the best identifiable point on the
-		 * nucleus when aligning profiles. The orientation point is the point
-		 * placed at the bottom when rotating a consensus nucleus.
-		 *
-		 */
-		public enum Nucleus {
-			ROUND 		 ("Round nucleus"		 , "head", "tail"), 
-			ASYMMETRIC 	 ("Asymmetric nucleus"	 , "head", "tail"),
-			RODENT_SPERM ("Rodent sperm nucleus" , "tip" , "tail"), 
-			PIG_SPERM 	 ("Pig sperm nucleus"	 , "head", "tail");
-			
-		    private final String asString;   
-		    private final String referencePoint;
-		    private final String orientationPoint;
-		    
-		    private final Map<BorderTag, String> map = new HashMap<BorderTag, String>();
-		    
-		    Nucleus(String string, String referencePoint, String orientationPoint) {
-		        this.asString = string;
-		        this.referencePoint = referencePoint;
-		        this.orientationPoint = orientationPoint;
-		        this.map.put(BorderTag.REFERENCE_POINT, referencePoint);
-		        this.map.put(BorderTag.ORIENTATION_POINT, orientationPoint);
-			}
-		    
-		    public String string(){
-		    	return this.asString;
-		    }
-		    
-		    
-		    /**
-		     * Get the name of the given border tag, if present
-		     * @param point
-		     * @return
-		     */
-		    public String getPoint(BorderTag point){
-		    	return this.map.get(point);
-		    }
-		    
-		    public String orientationPoint(){
-		    	return this.orientationPoint;
-		    }
-		    
-		    public String referencePoint(){
-		    	return this.referencePoint;
-		    }
-		}
+		
 		
 		// use in charting
 		public enum BorderTag {

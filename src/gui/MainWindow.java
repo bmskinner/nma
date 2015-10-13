@@ -1120,7 +1120,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 							r.getOutputFolderName(), 
 							"Signals_in_group_"+signalGroup, 
 							r.getDebugFile(), 
-							r.getNucleusClass());
+							r.getNucleusType());
 
 					for(Cell c : list){
 						listCollection.addCell( c );
@@ -1134,7 +1134,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 								r.getOutputFolderName(), 
 								"No_signals_in_group_"+signalGroup, 
 								r.getDebugFile(), 
-								r.getNucleusClass());
+								r.getNucleusType());
 
 						for(Cell c : notList){
 							notListCollection.addCell( c );

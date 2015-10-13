@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import components.CellCollection;
+import components.CellCollection.ProfileCollectionType;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclear.NucleusBorderSegment;
@@ -97,7 +98,7 @@ public class StatsExporter {
 		try {
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 
-			ProfileCollection pc = collection.getProfileCollection();
+			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 			List<NucleusBorderSegment> segs = pc.getSegments(collection.getOrientationPoint());
 			for(NucleusBorderSegment segment : segs){
 				String s = segment.getName();
@@ -122,7 +123,7 @@ public class StatsExporter {
 		
 		try {
 
-			Profile normalisedMedian = collection.getProfileCollection().getProfile("tail");
+			Profile normalisedMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile("tail");
 			Profile interpolatedMedian = normalisedMedian.interpolate((int)collection.getMedianNuclearPerimeter());
 
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());

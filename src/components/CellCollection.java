@@ -44,8 +44,10 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
+import components.nuclei.AsymmetricNucleus;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
+import components.nuclei.RoundNucleus;
 import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
@@ -70,10 +72,11 @@ implements Serializable
 	private String 	name;			// the name of the collection
 	private UUID 	guid;			// the collection id
 	
-	private Class<?> nucleusClass;	// the class of the nuclei this collection contains
+//	private Class<?> nucleusClass;	// the class of the nuclei this collection contains
+	private NucleusType nucleusType; // the type of nuclei this collection contains
 		
 	//this holds the mapping of tail indexes etc in the median profile arrays
-	protected Map<String, ProfileCollection> profileCollections = new HashMap<String, ProfileCollection>();
+	protected Map<ProfileCollectionType, ProfileCollection> profileCollections = new HashMap<ProfileCollectionType, ProfileCollection>();
 		
 	private ConsensusNucleus consensusNucleus; 	// the refolded consensus nucleus
 	
@@ -87,15 +90,15 @@ implements Serializable
 	 * @param debugFile the location of the log file 
 	 * @param nucleusClass the class of nucleus to be held
 	 */
-	public CellCollection(File folder, String outputFolder, String type, File debugFile, Class<?> nucleusClass){
+	public CellCollection(File folder, String outputFolder, String type, File debugFile, NucleusType nucleusType){
 		this.folder = folder;
 		this.outputFolder = outputFolder;
 		this.debugFile = debugFile;
 		this.collectionType = type;
 		this.name = outputFolder == null ? type : type+" - "+outputFolder;
 		this.guid = java.util.UUID.randomUUID();
-		this.nucleusClass = nucleusClass;
-		profileCollections.put(CellCollection.REGULAR_PROFILE, new ProfileCollection());
+		this.nucleusType = nucleusType;
+		profileCollections.put(ProfileCollectionType.REGULAR, new ProfileCollection());
 	}
   
   /**
@@ -109,7 +112,7 @@ implements Serializable
 			  template.getCollection().getOutputFolderName(), 
 			  name, 
 			  template.getCollection().getDebugFile(),
-			  template.getCollection().getNucleusClass()
+			  template.getCollection().getNucleusType()
 			  );
   }
 
@@ -181,9 +184,13 @@ implements Serializable
   }
   
   
-  public Class<?> getNucleusClass(){
-	  return this.nucleusClass;
+  public NucleusType getNucleusType(){
+	  return this.nucleusType;
   }
+  
+//  public Class<?> getNucleusType(){
+//	  return this.nucleusClass;
+//  }
   
   /**
    * Get the cell with the given path
@@ -206,75 +213,37 @@ implements Serializable
   }
   
   public String getPoint(BorderTag tag){
-	  if(this.nucleusClass == PigSpermNucleus.class){
-		  return Constants.Nucleus.PIG_SPERM.getPoint(tag);
-	  }
 	  
-	  if(this.nucleusClass == RodentSpermNucleus.class){
-		  return Constants.Nucleus.RODENT_SPERM.getPoint(tag);
-	  }
-	  
-	  // default if not defined above
-	  return Constants.Nucleus.ROUND.getPoint(tag);
+	  return this.nucleusType.getPoint(tag);
   }
   
   public String getReferencePoint(){
 	  	  
 	  return this.getPoint(BorderTag.REFERENCE_POINT);
-	  
-//	  if(this.nucleusClass == PigSpermNucleus.class){
-//		  return Constants.Nucleus.PIG_SPERM.getPoint(BorderTag.REFERENCE_POINT);
-//	  }
-//	  
-//	  if(this.nucleusClass == RodentSpermNucleus.class){
-//		  return Constants.Nucleus.RODENT_SPERM.getPoint(BorderTag.REFERENCE_POINT);
-//	  }
-//	  
-//	  // default if not defined above
-//	  return Constants.Nucleus.ROUND.getPoint(BorderTag.REFERENCE_POINT);
-
   }
   
   public String getOrientationPoint(){
 	  
 	  return this.getPoint(BorderTag.ORIENTATION_POINT);
-	  
-//	  if(this.nucleusClass == PigSpermNucleus.class){
-//		  return Constants.Nucleus.PIG_SPERM.getPoint(BorderTag.ORIENTATION_POINT);
-//	  }
-//	  
-//	  if(this.nucleusClass == RodentSpermNucleus.class){
-//		  return Constants.Nucleus.RODENT_SPERM.getPoint(BorderTag.ORIENTATION_POINT);
-//	  }
-//	  
-//	  // default if not defined above
-//	  return Constants.Nucleus.ROUND.getPoint(BorderTag.ORIENTATION_POINT);
   }
   
-  public ProfileCollection getProfileCollection(String type){
+  /**
+   * Get the profile collection of the given type
+   * @param type
+   * @return
+   */
+  public ProfileCollection getProfileCollection(ProfileCollectionType type){
 	  if(this.profileCollections.containsKey(type)){
 		  return this.profileCollections.get(type);
 	  } else {
-		  throw new IllegalArgumentException("ProfileCollection key "+type+" not present");
+		  throw new IllegalArgumentException("ProfileCollection key "+type.toString()+" not present");
 	  }
   }
-  
-  public void setProfileCollection(String type, ProfileCollection p){
+
+  public void setProfileCollection(ProfileCollectionType type, ProfileCollection p){
 	  this.profileCollections.put(type, p);
   }
   
-  public ProfileCollection getProfileCollection(){
-	  return getProfileCollection(CellCollection.REGULAR_PROFILE);
-  }
-  
-  public ProfileCollection getFrankenCollection(){
-	  return getProfileCollection(CellCollection.FRANKEN_PROFILE);
-  }
-  
-  public void setFrankenCollection (ProfileCollection frankenCollection){
-	  this.setProfileCollection(CellCollection.FRANKEN_PROFILE, frankenCollection);
-  }
-
   public File getFolder(){
     return this.folder;
   }
@@ -885,7 +854,7 @@ implements Serializable
   public List<String> getSegmentNames(){
 
 	  List<String> result = new ArrayList<String>(0);
-	  ProfileCollection pc = this.getProfileCollection();
+	  ProfileCollection pc = this.getProfileCollection(ProfileCollectionType.REGULAR);
 	  List<NucleusBorderSegment> segs = pc.getSegments(this.getOrientationPoint());
 	  for(NucleusBorderSegment segment : segs){
 		  result.add(segment.getName());
@@ -900,7 +869,7 @@ implements Serializable
    */
   public double[] getDifferencesToMedianFromPoint(String pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
-	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType);
 	  for(Nucleus n : this.getNuclei()){
 		  list.add(n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
 	  }
@@ -975,7 +944,7 @@ implements Serializable
    */
   public Nucleus getNucleusMostSimilarToMedian(String pointType) throws Exception {
 
-	  Profile medianProfile = this.getProfileCollection().getProfile(pointType); // the profile we compare the nucleus to
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType); // the profile we compare the nucleus to
 	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
 
 	  double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
@@ -1013,7 +982,7 @@ implements Serializable
    */
   public double calculateVariabililtyOfNucleusProfile(Nucleus n) throws Exception {
 	  String pointType = n.getReferencePoint();
-	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType);
 	  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
 	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 	  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
@@ -1087,5 +1056,77 @@ implements Serializable
 		  return this.name;
 	  }
   }
+  
+  public enum ProfileCollectionType { 
+	  REGULAR ("regular"), 
+	  FRANKEN ("franken");
+	  
+	  private String name;
+	  	  
+	  ProfileCollectionType(String name){
+		  this.name = name;
+	  }
+	  
+	  public String toString(){
+		  return this.name;
+	  }
+  }
+  
+  /**
+	 * The types of nuclei we are able to analyse,
+	 * with the reference and orientation points to be used.
+	 * The reference point is the best identifiable point on the
+	 * nucleus when aligning profiles. The orientation point is the point
+	 * placed at the bottom when rotating a consensus nucleus.
+	 *
+	 */
+	public enum NucleusType {
+		ROUND 		 ("Round nucleus"		 , "head", "tail", RoundNucleus.class), 
+		ASYMMETRIC 	 ("Asymmetric nucleus"	 , "head", "tail", AsymmetricNucleus.class),
+		RODENT_SPERM ("Rodent sperm nucleus" , "tip" , "tail", RodentSpermNucleus.class), 
+		PIG_SPERM 	 ("Pig sperm nucleus"	 , "head", "tail", PigSpermNucleus.class);
+		
+	    private final String asString;   
+	    private final String referencePoint;
+	    private final String orientationPoint;
+	    private final Class<?> nucleusClass;
+	    
+	    private final Map<BorderTag, String> map = new HashMap<BorderTag, String>();
+	    
+	    NucleusType(String string, String referencePoint, String orientationPoint, Class<?> nucleusClass) {
+	        this.asString = string;
+	        this.referencePoint = referencePoint;
+	        this.orientationPoint = orientationPoint;
+	        this.nucleusClass = nucleusClass;
+	        this.map.put(BorderTag.REFERENCE_POINT, referencePoint);
+	        this.map.put(BorderTag.ORIENTATION_POINT, orientationPoint);
+		}
+	    
+	    public String string(){
+	    	return this.asString;
+	    }
+	    
+	    
+	    /**
+	     * Get the name of the given border tag, if present
+	     * @param point
+	     * @return
+	     */
+	    public String getPoint(BorderTag point){
+	    	return this.map.get(point);
+	    }
+	    
+	    public String orientationPoint(){
+	    	return this.orientationPoint;
+	    }
+	    
+	    public String referencePoint(){
+	    	return this.referencePoint;
+	    }
+	    
+	    public Class<?> getNucleusClass(){
+	    	return this.nucleusClass;
+	    }
+	}
 
 }

@@ -38,6 +38,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
+import components.CellCollection.NucleusType;
 import components.CellularComponent;
 import components.CellCollection.NucleusStatistic;
 import components.generic.Profile;
@@ -187,8 +188,8 @@ public class RoundNucleus
 
 		int tailIndex = this.getDistanceProfile().getIndexOfMax();
 		NucleusBorderPoint tailPoint = this.getPoint(tailIndex);
-		addBorderTag(Constants.Nucleus.ROUND.orientationPoint(), tailIndex);
-    	addBorderTag(Constants.Nucleus.ROUND.referencePoint(), this.getIndex(this.findOppositeBorder(tailPoint)));
+		addBorderTag(NucleusType.ROUND.orientationPoint(), tailIndex);
+    	addBorderTag(NucleusType.ROUND.referencePoint(), this.getIndex(this.findOppositeBorder(tailPoint)));
 	}
 
 	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception {
@@ -327,11 +328,11 @@ public class RoundNucleus
 	}
 	
 	public String getReferencePoint(){
-		return Constants.Nucleus.ROUND.referencePoint();
+		return NucleusType.ROUND.referencePoint();
 	}
 	
 	public String getOrientationPoint(){
-		return Constants.Nucleus.ROUND.orientationPoint();
+		return NucleusType.ROUND.orientationPoint();
 	}
 	
 	public double getStatistic(NucleusStatistic stat, MeasurementScale scale){

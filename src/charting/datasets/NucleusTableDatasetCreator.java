@@ -32,7 +32,9 @@ import javax.swing.table.TableModel;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import components.CellCollection;
+import components.CellCollection.NucleusType;
 import components.ClusterGroup;
+import components.CellCollection.ProfileCollectionType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
@@ -65,16 +67,17 @@ public class NucleusTableDatasetCreator {
 		} else {
 			// check which reference point to use
 			String referencePoint = null;
+			
 			if(nucleus.getClass()==RodentSpermNucleus.class){
-				referencePoint = Constants.Nucleus.RODENT_SPERM.referencePoint();
+				referencePoint = NucleusType.RODENT_SPERM.referencePoint();
 			}
 
 			if(nucleus.getClass()==PigSpermNucleus.class){
-				referencePoint = Constants.Nucleus.PIG_SPERM.referencePoint();
+				referencePoint = NucleusType.PIG_SPERM.referencePoint();
 			}
 
 			if(nucleus.getClass()==RoundNucleus.class){
-				referencePoint = Constants.Nucleus.ROUND.referencePoint();
+				referencePoint = NucleusType.ROUND.referencePoint();
 			}
 
 
@@ -129,7 +132,7 @@ public class NucleusTableDatasetCreator {
 
 
 			// get the offset segments
-			List<NucleusBorderSegment> segments = collection.getProfileCollection().getSegments(point);
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 			//.getAngleProfile(referencePoint).getSegments();
 
 			// create the row names
@@ -247,7 +250,7 @@ public class NucleusTableDatasetCreator {
 									date,
 									time,
 									collection.getFolder(),
-									options.getNucleusClass().getSimpleName()				
+									options.getNucleusType().toString()				
 							};
 
 							model.addColumn(collection.getName(), collectionData);

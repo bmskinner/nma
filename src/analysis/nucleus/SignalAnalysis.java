@@ -56,7 +56,7 @@ public class SignalAnalysis {
 				n.exportSignalDistanceMatrix();
 				
 				// if asymmetric, calculate the angle from the tail
-				if(AsymmetricNucleus.class.isAssignableFrom(collection.getNucleusClass())){
+				if(AsymmetricNucleus.class.isAssignableFrom(collection.getNucleusType().getNucleusClass())){
 					n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
 				}
 			}

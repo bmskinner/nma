@@ -36,6 +36,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.CellCollection.NucleusType;
 import components.generic.XYPoint;
 import components.nuclear.*;
 import utility.Constants;
@@ -66,12 +67,12 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
   
   	@Override
 	public String getReferencePoint(){
-		return Constants.Nucleus.ASYMMETRIC.referencePoint();
+		return NucleusType.ASYMMETRIC.referencePoint();
 	}
   	
   	@Override
 	public String getOrientationPoint(){
-		return Constants.Nucleus.ASYMMETRIC.orientationPoint();
+		return NucleusType.ASYMMETRIC.orientationPoint();
 	}
 
   public List<NucleusBorderPoint> getEstimatedTailPoints(){

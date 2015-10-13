@@ -7,6 +7,7 @@ import java.util.Set;
 import utility.Constants.BorderTag;
 import ij.IJ;
 import components.CellCollection;
+import components.CellCollection.ProfileCollectionType;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import jdistlib.disttest.DistributionTest;
@@ -33,10 +34,10 @@ public class DipTester {
 		double[] pvals = null;
 		try {
 			String pointType = collection.getPoint(tag);
-			int offset = collection.getProfileCollection().getOffset(pointType);
+			int offset = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getOffset(pointType);
 			
 			// ensure the postions are starting from the right place
-			List<Double> keys = collection.getProfileCollection().getAggregate().getXKeyset();
+			List<Double> keys = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getXKeyset();
 
 			
 			pvals = new double[keys.size()];
@@ -45,7 +46,7 @@ public class DipTester {
 				
 				double position = keys.get(i);
 				try{ 
-					double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(position);
+					double[] values = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getValuesAtPosition(position);
 
 					double pval =  getDipTestPValue(values);
 					pvals[i] = pval;
@@ -77,7 +78,7 @@ public class DipTester {
 	 */
 	public static double getPValueForPositon(CellCollection collection, double xPosition) throws Exception {
 		
-		double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(xPosition);
+		double[] values = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getValuesAtPosition(xPosition);
 		return getDipTestPValue(values);
 	}
 	

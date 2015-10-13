@@ -23,6 +23,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import components.CellCollection.NucleusType;
+
 public class AnalysisOptions implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -42,7 +44,7 @@ public class AnalysisOptions implements Serializable {
 	
 	private double scale; // hold the length of a pixel in metres
 
-	private Class<?> nucleusClass;
+	private NucleusType nucleusType;
 
 
 	/**
@@ -112,8 +114,8 @@ public class AnalysisOptions implements Serializable {
 		return this.angleProfileWindowSize;
 	}
 
-	public Class<?> getNucleusClass(){
-		return this.nucleusClass;
+	public NucleusType getNucleusType(){
+		return this.nucleusType;
 	}
 
 	public String getRefoldMode(){
@@ -179,8 +181,8 @@ public class AnalysisOptions implements Serializable {
 	}
 
 
-	public void setNucleusClass(Class<?> nucleusClass) {
-		this.nucleusClass = nucleusClass;
+	public void setNucleusType(NucleusType nucleusType) {
+		this.nucleusType = nucleusType;
 	}
 
 

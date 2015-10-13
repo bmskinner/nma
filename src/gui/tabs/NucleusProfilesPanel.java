@@ -73,6 +73,7 @@ import utility.DipTester;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
 import components.CellCollection;
+import components.CellCollection.ProfileCollectionType;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -164,7 +165,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			if(!list.isEmpty()){
 				
 				if(list.size()==1){ // use the actual x-positions
-					List<Double> xvalues = list.get(0).getCollection().getProfileCollection().getAggregate().getXKeyset();
+					List<Double> xvalues = list.get(0).getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getXKeyset();
 					DefaultListModel<Double> model = new DefaultListModel<Double>();
 					for(Double d: xvalues){
 						model.addElement(d);
@@ -502,14 +503,9 @@ public class NucleusProfilesPanel extends DetailPanel {
 						? BorderTag.REFERENCE_POINT
 						: BorderTag.ORIENTATION_POINT;
 				
-//				String point 	= fromReference 
-//						? list.get(0).getCollection().getReferencePoint() 
-//						: list.get(0).getCollection().getOrientationPoint();
 						
 				if(list.size()==1){
-					
-					
-				
+
 					// full segment colouring
 					JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign, tag, showMarkers);
 					chartPanel.setChart(chart);
@@ -590,7 +586,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 				log("Error in plotting frankenprofile: "+e.getMessage());
 				for(AnalysisDataset d : list){
 					log(d.getName());
-					ProfileCollection f = d.getCollection().getFrankenCollection();
+					ProfileCollection f = d.getCollection().getProfileCollection(ProfileCollectionType.FRANKEN);
 					log(f.printKeys());
 				}
 				error("Error in plotting fankenprofile", e);

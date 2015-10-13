@@ -32,6 +32,8 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import components.CellCollection;
+import components.CellCollection.NucleusType;
+import components.CellCollection.ProfileCollectionType;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
@@ -91,14 +93,14 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(collection.getOrientationPoint());	
 		
 		logger.log("Creating consensus nucleus template", Logger.DEBUG);
-		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusClass());
+		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
 
-		logger.log("Refolding nucleus of class: "+collection.getNucleusClass().getSimpleName());
+		logger.log("Refolding nucleus of class: "+collection.getNucleusType().toString());
 		logger.log("Subject: "+refoldNucleus.getImageName()+"-"+refoldNucleus.getNucleusNumber(), Logger.DEBUG);
 
-		Profile targetProfile 	= collection.getProfileCollection().getProfile("tail");
-		Profile q25 			= collection.getProfileCollection().getProfile("tail25");
-		Profile q75 			= collection.getProfileCollection().getProfile("tail75");
+		Profile targetProfile 	= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile("tail");
+		Profile q25 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile("tail25");
+		Profile q75 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile("tail75");
 
 		if(targetProfile==null){
 			throw new Exception("Null reference to target profile");
@@ -131,7 +133,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(collection.getOrientationPoint()));
 
 			// if rodent sperm, put tip on left if needed
-			if(collection.getNucleusClass().equals(RodentSpermNucleus.class)){
+			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
 				if(refoldNucleus.getBorderTag(collection.getReferencePoint()).getX()>0){
 					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
 				}

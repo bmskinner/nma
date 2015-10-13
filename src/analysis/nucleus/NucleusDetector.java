@@ -190,7 +190,11 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			try{
 
 				nucleusCounts.put("input", r.getNucleusCount());
-				CellCollection failedNuclei = new CellCollection(folder, r.getOutputFolderName(), "failed", logger.getLogfile(), analysisOptions.getNucleusClass());
+				CellCollection failedNuclei = new CellCollection(folder, 
+						r.getOutputFolderName(), 
+						"failed", 
+						logger.getLogfile(), 
+						analysisOptions.getNucleusType());
 
 //				boolean ok;
 				mw.logc("Filtering collection...");
@@ -376,7 +380,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			  outputFolder, 
 			  folder.getName(), 
 			  this.debugFile,
-			  analysisOptions.getNucleusClass());
+			  analysisOptions.getNucleusType());
 	  
 	  this.collectionGroup.put(folder, folderCollection);
 

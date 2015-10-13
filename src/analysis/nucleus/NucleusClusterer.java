@@ -30,6 +30,7 @@ import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import components.Cell;
 import components.CellCollection;
+import components.CellCollection.ProfileCollectionType;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclei.Nucleus;
@@ -198,7 +199,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 						collection.getOutputFolderName(), 
 						collection.getName()+"_Cluster_"+i, 
 						collection.getDebugFile(), 
-						collection.getNucleusClass());
+						collection.getNucleusType());
 				
 				clusterCollection.setName(collection.getName()+"_Cluster_"+i);
 				clusterMap.put(i, clusterCollection);
@@ -271,7 +272,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		try{
 
 			
-			ProfileCollection pc = collection.getProfileCollection();
+			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
 			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT);
 			Profile medianProfile = pc.getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));

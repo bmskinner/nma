@@ -55,6 +55,7 @@ import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
+import components.CellCollection.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;
@@ -220,7 +221,7 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 					CellCollection collection = activeDataset.getCollection();
 
 					try {
-						SegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(collection.getOrientationPoint());
+						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
 						List<String> names = new ArrayList<String>();
 						
 						// Put the names of the mergable segments into a list
@@ -267,7 +268,7 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 			
 			CellCollection collection = activeDataset.getCollection();
 			
-			SegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(collection.getOrientationPoint());
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
 			
 			// Get the segments to merge
 			NucleusBorderSegment seg1 = medianProfile.getSegment(segName1);
@@ -277,7 +278,7 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 			medianProfile.mergeSegments(seg1, seg2);
 			
 			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection().addSegments( collection.getOrientationPoint(),  medianProfile.getSegments());
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( collection.getOrientationPoint(),  medianProfile.getSegments());
 
 			/*
 			 * With the median profile segments merged, also merge the segments
@@ -447,7 +448,7 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 							if(columnName.startsWith("Seg_")){
 								
 								try {
-									SegmentedProfile profile = collection.getProfileCollection().getSegmentedProfile(collection.getReferencePoint());
+									SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getReferencePoint());
 									NucleusBorderSegment seg = profile.getSegment(columnName);
 									
 //									if(rowName.equals("Start index")){

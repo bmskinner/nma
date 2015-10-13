@@ -20,6 +20,7 @@ package components.nuclei;
 
 import java.io.Serializable;
 
+import components.CellCollection.NucleusType;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
 import utility.Utils;
@@ -32,16 +33,16 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private Class<?> type;
+	private NucleusType type;
 	
 	
-	public ConsensusNucleus(Nucleus n, Class<?> type) throws Exception{
+	public ConsensusNucleus(Nucleus n, NucleusType type) throws Exception{
 		
 		super(  (RoundNucleus) n);
 		this.type = type;
 	}
 	
-	public Class<?> getType(){
+	public NucleusType getType(){
 		return this.type;
 	}
 		

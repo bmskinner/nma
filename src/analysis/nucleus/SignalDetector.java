@@ -43,6 +43,7 @@ import javax.swing.SwingWorker;
 
 import components.Cell;
 import components.CellCollection;
+import components.CellCollection.NucleusType;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.generic.XYPoint;
@@ -367,9 +368,9 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		n.calculateFractionalSignalDistancesFromCoM();
 
 		if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-			if(n.getBorderTag(Constants.Nucleus.ASYMMETRIC.orientationPoint())!=null){
+			if(n.getBorderTag(NucleusType.ASYMMETRIC.orientationPoint())!=null){
 
-				n.calculateSignalAnglesFromPoint(n.getBorderTag(Constants.Nucleus.ASYMMETRIC.orientationPoint()));
+				n.calculateSignalAnglesFromPoint(n.getBorderTag(NucleusType.ASYMMETRIC.orientationPoint()));
 			}
 		}
 

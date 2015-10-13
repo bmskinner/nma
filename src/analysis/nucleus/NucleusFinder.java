@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import components.Cell;
+import components.CellCollection.NucleusType;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 import analysis.AnalysisOptions;
@@ -201,7 +202,7 @@ public class NucleusFinder {
 			  nucleus.setLocation(0,0); // translate the roi to the new image coordinates
 			  
 			  // turn roi into Nucleus for manipulation
-			  Nucleus currentNucleus = createNucleus(nucleus, path, nucleusNumber, originalPosition, analysisOptions.getNucleusClass());
+			  Nucleus currentNucleus = createNucleus(nucleus, path, nucleusNumber, originalPosition, analysisOptions.getNucleusType());
 			  		
 			  currentNucleus.setCentreOfMass(new XYPoint(values.get("XM")-xbase, values.get("YM")-ybase)); // need to offset
 			  currentNucleus.setArea(values.get("Area")); 
@@ -242,19 +243,19 @@ public class NucleusFinder {
 	 * @param originalPosition the bounding box position of the nucleus
 	 * @return a new nucleus of the appropriate class
 	 */
-	private static Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition, Class<?> nucleusClass){
+	private static Nucleus createNucleus(Roi roi, File path, int nucleusNumber, double[] originalPosition, NucleusType nucleusType){
 
 		  Nucleus n = null;
 		  try {
 			  
 			  Constructor<?> nucleusConstructor = null;
 			  
-			  Constructor<?>[]  list = nucleusClass.getConstructors();
+			  Constructor<?>[]  list = nucleusType.getNucleusClass().getConstructors();
 			  for(Constructor<?> c : list){
 				  Class<?>[] classes = c.getParameterTypes();
 
 				  if(classes.length==4){
-					  nucleusConstructor = nucleusClass
+					  nucleusConstructor = nucleusType.getNucleusClass()
 					  .getConstructor(classes);
 				  }
 			  }

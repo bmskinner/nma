@@ -27,6 +27,7 @@ import ij.gui.Roi;
 
 import java.io.File;
 
+import components.CellCollection.NucleusType;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.nuclear.*;
@@ -99,12 +100,12 @@ public class PigSpermNucleus
     
   	@Override
 	public String getReferencePoint(){
-		return Constants.Nucleus.PIG_SPERM.referencePoint();
+		return NucleusType.PIG_SPERM.referencePoint();
 	}
   	
   	@Override
 	public String getOrientationPoint(){
-		return Constants.Nucleus.PIG_SPERM.orientationPoint();
+		return NucleusType.PIG_SPERM.orientationPoint();
 	}
 
     /*
