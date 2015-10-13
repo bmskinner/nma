@@ -144,8 +144,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			this.add(scrollPane, BorderLayout.CENTER);
 			
 			this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
-			measurementUnitSettingsPanel.pixelsButton.addActionListener(this);
-			measurementUnitSettingsPanel.micronsButton.addActionListener(this);
+			this.measurementUnitSettingsPanel.pixelsButton.addActionListener(this);
+			this.measurementUnitSettingsPanel.micronsButton.addActionListener(this);
 			
 		}
 		
@@ -155,7 +155,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		 */
 		public void update(List<AnalysisDataset> list){
 
-			MeasurementScale scale  = measurementUnitSettingsPanel.pixelsButton.isSelected()
+			MeasurementScale scale  = this.measurementUnitSettingsPanel.pixelsButton.isSelected()
 									? MeasurementScale.PIXELS
 									: MeasurementScale.MICRONS;
 			
@@ -259,8 +259,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
             useDensityBox.addActionListener(this);
             headerPanel.add(useDensityBox);
             headerPanel.add(measurementUnitSettingsPanel);
-            measurementUnitSettingsPanel.pixelsButton.addActionListener(this);
-			measurementUnitSettingsPanel.micronsButton.addActionListener(this);
+            this.measurementUnitSettingsPanel.pixelsButton.addActionListener(this);
+            this.measurementUnitSettingsPanel.micronsButton.addActionListener(this);
     
             this.add(headerPanel, BorderLayout.NORTH);
 
@@ -294,19 +294,14 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						
             boolean useDensity = useDensityBox.isSelected();
 
-			
-//			Set<String> chartTypes = chartStatTypes.keySet();
 
 			for(NucleusStatistic stat : NucleusStatistic.values()){
-//			for(String chartType : chartTypes){
 				
 				SelectableChartPanel panel = chartPanels.get(stat);
-//				int stat = chartStatTypes.get(chartType);
 				
 				JFreeChart chart = null;
 				
 				if(useDensity){
-//					log("Calculating density: "+chartType);
 					DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
 					chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat);
 					
@@ -330,30 +325,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			
 			for(AnalysisDataset dataset : list){
 				
-				double[] values;
+//				double[] values;
 				try {
-//					values = NuclearHistogramDatasetCreator.findDatasetValues(dataset, stat);
-//					Arrays.sort(values);
-//					double[] result = DistributionTest.diptest_presorted(values);
 //					
-//					/*
-//					 * an array of four elements: 
-//					 * The first is the test statistic, 
-//					 * the second is the p-value, 
-//					 * followed by indices for which there are a dip. 
-//					 * If there is no dip, the indices will be set to -1.
-//					 */
-//					IJ.log(dataset.getName()+": Test: "+result[0]);
-//					IJ.log(dataset.getName()+": p   : "+result[1]);
-//					
-//					if(result[1] < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
-//						
-//						for(int i=2; i<result.length; i++){
-//								int index = (int) result[i];
-//								ValueMarker marker = new ValueMarker(values[index], Color.BLACK, new BasicStroke(2.0f));
-//								plot.addDomainMarker(marker);
-//						}
-//					}
 				} catch (Exception e) {
 					error("Unable to detect modes", e);
 				}
@@ -378,7 +352,11 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		public void signalChangeReceived(SignalChangeEvent event) {
 
 			if(event.type().equals("MarkerPositionUpdated")){
-//				IJ.log("Histo panel has heard a change");
+//				
+				// check the scale to use for selection
+				MeasurementScale scale  = this.measurementUnitSettingsPanel.pixelsButton.isSelected()
+						? MeasurementScale.PIXELS
+						: MeasurementScale.MICRONS;
 				
 				// get the parameters to filter on
 				SelectableChartPanel panel = (SelectableChartPanel) event.getSource();
@@ -404,83 +382,26 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						CellCollection subCollection = new CellCollection(dataset, "Filtered_"+name+"_"+df.format(lower)+"-"+df.format(upper));
 						
 						
-//						int stat = chartStatTypes.get(name);
-						
-						List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
-						
-						switch(stat){
-							case AREA:
-								for(Cell c : collection.getCells()){
-									Nucleus n = c.getNucleus();
-									if(n.getArea()>= lower && n.getArea()<= upper){
-										subCollection.addCell(c);
-									}
-								}
-								break;
-								
-							case PERIMETER:
-								for(Cell c : collection.getCells()){
-									Nucleus n = c.getNucleus();
-									if(n.getPerimeter() >= lower && n.getPerimeter()<= upper){
-										subCollection.addCell(c);
-									}
-								}
-								break;
-								
-							case MAX_FERET:
-								for(Cell c : collection.getCells()){
-									Nucleus n = c.getNucleus();
-									if(n.getFeret() >= lower && n.getFeret() <= upper){
-										subCollection.addCell(c);
-									}
-								}
-								break;
-								
-							case MIN_DIAMETER:
-								for(Cell c : collection.getCells()){
-									Nucleus n = c.getNucleus();
-									if(n.getNarrowestDiameter() >= lower && n.getNarrowestDiameter() <= upper){
-										subCollection.addCell(c);
-									}
-								}
-								break;
-								
-							case VARIABILITY:
-								
-								try {
-									for(Cell c : collection.getCells()){
-										Nucleus n = c.getNucleus();
-										
-										double var = collection.calculateVariabililtyOfNucleusProfile(n);
-
-										if(var >= lower && var <= upper){
-											subCollection.addCell(c);
-										}
-									}
+						for(Cell c : collection.getCells()){
+							Nucleus n = c.getNucleus();
+							double value = n.getStatistic(stat, scale);
+							
+							// variability must be calculated from the collection, not the nucleus
+							if(stat.equals(NucleusStatistic.VARIABILITY)){
+								try{ 
+									value = collection.calculateVariabililtyOfNucleusProfile(n);
 								} catch (Exception e){
 									error("Cannot calculate variabililty", e);
 								}
-								break;
-								
-							case CIRCULARITY:
-								for(Cell c : collection.getCells()){
-									Nucleus n = c.getNucleus();
-									if(n.getCircularity() >= lower && n.getCircularity() <= upper){
-										subCollection.addCell(c);
-									}
-								}
-								break;
-								
-							case ASPECT:
-								for(Cell c : collection.getCells()){
-									Nucleus n = c.getNucleus();
-									if(n.getAspectRatio()>= lower && n.getAspectRatio() <= upper){
-										subCollection.addCell(c);
-									}
-								}
-								break;
+							}
+							
+							if(value>= lower && value<= upper){
+								subCollection.addCell(c);
+							}
 						}
 						
+						List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+												
 						if(subCollection.getNucleusCount()>0){
 							
 							

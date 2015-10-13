@@ -46,11 +46,9 @@ public class DipTester {
 				double position = keys.get(i);
 				try{ 
 					double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(position);
-					Arrays.sort(values);
 
-					double[] result = DistributionTest.diptest_presorted(values);
-					
-					pvals[i] = result[1];
+					double pval =  getDipTestPValue(values);
+					pvals[i] = pval;
 
 				} catch(Exception e){
 					IJ.log("Cannot get values for position "+position);
@@ -80,9 +78,7 @@ public class DipTester {
 	public static double getPValueForPositon(CellCollection collection, double xPosition) throws Exception {
 		
 		double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(xPosition);
-		Arrays.sort(values);
-		double[] result = DistributionTest.diptest_presorted(values);
-		return result[1];
+		return getDipTestPValue(values);
 	}
 	
 	
@@ -122,50 +118,27 @@ public class DipTester {
 		}
 		return resultProfile;
 	}
-////			IJ.log("Testing at p<"+significance);
-//			String pointType = collection.getPoint(tag);
-//			int offset = collection.getProfileCollection().getOffset(pointType);
-//			
-//			// ensure the postions are starting from the right place
-//			List<Double> keys = collection.getProfileCollection().getAggregate().getXKeyset();
-////			Double[] keyArray = keys.toArray(new Double[0]);
-//			
-//			modes = new boolean[keys.size()];
-//			
-//			for(int i=0; i<keys.size(); i++ ){
-//				
-//				double position = keys.get(i);
-//				try{ 
-//					double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(position);
-//					Arrays.sort(values);
-//
-//					double[] result = DistributionTest.diptest_presorted(values);
-//					
-////					IJ.log(position+"    "+result[0]+"    "+result[1]);
-//
-//					if(result[1]<significance){
-//						modes[i] = true;
-//					} else {
-//						modes[i] = false;
-//					}
-//				} catch(Exception e){
-//					modes[i] = false;
-//					IJ.log("Cannot get values for position "+position);
-//				}
-//			}
-//			
-//			resultProfile = new BooleanProfile(modes);
-//			resultProfile = resultProfile.offset(offset);
-			
-			
-//		} catch (Exception e) {
-//			IJ.log("Error in dip test: "+e.getMessage());
-//			for(StackTraceElement e1 : e.getStackTrace()){
-//				IJ.log(e1.toString());
-//			}
-//		}
-//		return resultProfile;
-//		
-//	}
+
+	/**
+	 * Given an array of values, perform a dip test and return the p-value
+	 * @param values
+	 * @return
+	 */
+	public static double getDipTestPValue(double[] values){
+		Arrays.sort(values);
+		double[] result = DistributionTest.diptest_presorted(values);
+		return result[1];
+	}
+	
+	/**
+	 * Given an array of values, perform a dip test and return the test statistic
+	 * @param values
+	 * @return
+	 */
+	public static double getDipTestTestStatistic(double[] values){
+		Arrays.sort(values);
+		double[] result = DistributionTest.diptest_presorted(values);
+		return result[0];
+	}
 
 }

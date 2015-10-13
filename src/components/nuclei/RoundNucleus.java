@@ -26,6 +26,7 @@
 */  
 package components.nuclei;
 
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import ij.IJ;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -38,6 +39,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import components.CellularComponent;
+import components.CellCollection.NucleusStatistic;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
@@ -331,6 +333,52 @@ public class RoundNucleus
 	public String getOrientationPoint(){
 		return Constants.Nucleus.ROUND.orientationPoint();
 	}
+	
+	public double getStatistic(NucleusStatistic stat, MeasurementScale scale){
+		double result = 0;
+		
+		switch(stat){
+			
+			case AREA:
+				result = this.getArea();
+				if(scale.equals(MeasurementScale.MICRONS)){
+					result = Utils.micronArea(result, this.getScale());
+				}
+				break;
+			case ASPECT:
+				result = this.getAspectRatio();
+				break;
+			case CIRCULARITY:
+				result = this.getCircularity();
+				break;
+			case MAX_FERET:
+				result = this.getFeret();
+				if(scale.equals(MeasurementScale.MICRONS)){
+					result = Utils.micronLength(result, this.getScale());
+				}
+				break;
+			case MIN_DIAMETER:
+				result = this.getNarrowestDiameter();
+				if(scale.equals(MeasurementScale.MICRONS)){
+					result = Utils.micronLength(result, this.getScale());
+				}
+				break;
+			case PERIMETER:
+				result = this.getPerimeter();
+				if(scale.equals(MeasurementScale.MICRONS)){
+					result = Utils.micronLength(result, this.getScale());
+				}
+				break;
+			case VARIABILITY:
+				break;
+			default:
+				break;
+		
+		}
+		return result;
+		
+	}
+	
 	
 	public double getArea(){
 		return this.area;

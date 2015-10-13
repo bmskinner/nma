@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import utility.Constants.BorderTag;
+import components.CellCollection.NucleusStatistic;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
@@ -176,6 +177,16 @@ public interface Nucleus {
 	public NucleusBorderPoint getPoint(int i);
 
 
+	/**
+	 * Get the value of the given statistic for this nucleus.
+	 * Note that NucleusStatistic.VARIABILILTY returns zero, 
+	 * as this must be calculated at the collection level
+	 * @param stat the statistic to fetch
+	 * @param scale the units to return values in
+	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)
+	 */
+	public double getStatistic(NucleusStatistic stat, MeasurementScale scale);
+	
 	/**
 	 * Get the area of the nucleus in pixels
 	 * @return

@@ -54,16 +54,10 @@ public class NuclearHistogramDatasetCreator {
 			double min = Stats.min(values);
 			double max = Stats.max(values);
 			
-//			IJ.log("   min x: "+min);
-//			IJ.log("   max x: "+max);
-			
 			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 						
 			int roundLog = log-1 == 0 ? log-2 : log-1;
 			double roundAbs = Math.pow(10, roundLog);
-			
-//			IJ.log("   roundLog: "+roundLog);
-//			IJ.log("   round to nearest: "+roundAbs);
 			
 			// use int truncation to round to nearest 100 above max
 			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
@@ -72,14 +66,7 @@ public class NuclearHistogramDatasetCreator {
 			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
 			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
 			
-//			IJ.log("   maxRounded x: "+maxRounded);
-//			IJ.log("   minRounded x: "+minRounded);
-			
-//			int binLog = log-2;
-//			int bins = ((maxRounded - minRounded) * 20 );
 			int bins = 100;
-			
-//			IJ.log("   Bins: "+bins);
 
 			ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 		}
