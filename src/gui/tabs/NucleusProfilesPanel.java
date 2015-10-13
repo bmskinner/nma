@@ -18,8 +18,10 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.components.ColourSelecter;
 import gui.components.ProflleDisplaySettingsPanel;
 import gui.components.ColourSelecter.ColourSwatch;
+import ij.IJ;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -115,10 +117,10 @@ public class NucleusProfilesPanel extends DetailPanel {
 		this.list = list;
 		
 		try {
-		profileDisplayPanel.update(list);
-		frankenDisplayPanel.update(list);
-		variabilityChartPanel.update(list);
-		modalityDisplayPanel.update(list);
+			profileDisplayPanel.update(list);
+			frankenDisplayPanel.update(list);
+			variabilityChartPanel.update(list);
+			modalityDisplayPanel.update(list);
 		} catch  (Exception e){
 			error("Error updating profile panels", e);
 		}
@@ -134,9 +136,11 @@ public class NucleusProfilesPanel extends DetailPanel {
 			this.setLayout(new BorderLayout());
 			JFreeChart chart = ChartFactory.createXYLineChart(null,
 					"Probability", "Angle", null);
-			XYPlot variabilityPlot = chart.getXYPlot();
-			variabilityPlot.setBackgroundPaint(Color.WHITE);
-			variabilityPlot.getDomainAxis().setRange(0,360);
+			XYPlot plot = chart.getXYPlot();
+			plot.setBackgroundPaint(Color.WHITE);
+			plot.getDomainAxis().setRange(0,360);
+			plot.addDomainMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2f)));
+			
 			chartPanel = new ChartPanel(chart);
 			chartPanel.setMinimumDrawWidth( 0 );
 			chartPanel.setMinimumDrawHeight( 0 );
@@ -144,6 +148,11 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 			
 			pointList = new JList<Double>();
+			DefaultListModel<Double> model = new DefaultListModel<Double>();
+			for(Double d=0.0; d<=100; d+=0.5){
+				model.addElement(d);
+			}
+			pointList.setModel(model);
 			JScrollPane listPanel = new JScrollPane(pointList);
 			this.add(listPanel, BorderLayout.WEST);
 			pointList.addListSelectionListener(new ModalitySelectionListener());
@@ -154,16 +163,72 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 			if(!list.isEmpty()){
 				
-				List<Double> xvalues = list.get(0).getCollection().getProfileCollection().getAggregate().getXKeyset();
-				DefaultListModel<Double> model = new DefaultListModel<Double>();
-				for(Double d: xvalues){
-					model.addElement(d);
+				if(list.size()==1){ // use the actual x-positions
+					List<Double> xvalues = list.get(0).getCollection().getProfileCollection().getAggregate().getXKeyset();
+					DefaultListModel<Double> model = new DefaultListModel<Double>();
+					for(Double d: xvalues){
+						model.addElement(d);
+					}
+					pointList.setModel(model);
+				} else {
+					// use a standard 0.5 spacing
+					DefaultListModel<Double> model = new DefaultListModel<Double>();
+					for(Double d=0.0; d<=100; d+=0.5){
+						model.addElement(d);
+					}
+					pointList.setModel(model);
 				}
-				pointList.setModel(model);
 				
-				JFreeChart chart = MorphologyChartFactory.createModalityChart(xvalues.get(0), list.get(0));
+				updateChart(pointList.getModel().getElementAt(0));				
+			}
+		}
+		
+		public void updateChart(double xvalue){
+			JFreeChart chart = null;
+			try {
+
+				chart = MorphologyChartFactory.createModalityChart(xvalue, list);
+				XYPlot plot = chart.getXYPlot();
+
+				double yMax = 0;
+				DecimalFormat df = new DecimalFormat("#0.000");
+								
+				for(int i = 0; i<plot.getDatasetCount(); i++){
+
+					// Ensure annotation is placed in the right y position
+					double y = DatasetUtilities.findMaximumRangeValue(plot.getDataset(i)).doubleValue();
+					yMax = y > yMax ? y : yMax;
+
+				}
+				
+				int index = 0;
+				for(AnalysisDataset dataset : list){
+					
+					// Do the stats testing
+					double pvalue = DipTester.getPValueForPositon(dataset.getCollection(), xvalue); 
+					
+					// Add the annotation
+					double yPos = yMax - ( index * (yMax / 20));
+					String statisticalTesting = "p(unimodal) = "+df.format(pvalue);
+					if(pvalue<Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
+						statisticalTesting = "* " + statisticalTesting;
+					}
+					XYTextAnnotation annotation = new XYTextAnnotation(statisticalTesting,355, yPos);
+
+					// Set the text colour
+					Color colour = dataset.getDatasetColour() == null 
+							? ColourSelecter.getSegmentColor(index)
+									: dataset.getDatasetColour();
+					annotation.setPaint(colour);
+					annotation.setTextAnchor(TextAnchor.TOP_RIGHT);
+					plot.addAnnotation(annotation);
+					index++;
+				}
+				
+
 				chartPanel.setChart(chart);
-				
+			} catch (Exception e1) {
+				error("Error updating modality panel", e1);
 			}
 		}
 		
@@ -171,27 +236,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			public void valueChanged(ListSelectionEvent e) {
 				int row = e.getFirstIndex();
 				double xvalue = pointList.getModel().getElementAt(row);
-				JFreeChart chart = null;
-				try {
-					chart = MorphologyChartFactory.createModalityChart(xvalue, list.get(0));
-					
-					CellCollection collection = list.get(0).getCollection();
-					double pvalue = DipTester.getPValueForPositon(collection, xvalue); 
-
-					XYPlot plot = chart.getXYPlot();
-
-					double ymax = DatasetUtilities.findMaximumRangeValue(plot.getDataset()).doubleValue();
-					DecimalFormat df = new DecimalFormat("#0.000"); 
-					XYTextAnnotation annotation = new XYTextAnnotation("p(unimodal) = "+df.format(pvalue)+")",355, ymax);
-					annotation.setTextAnchor(TextAnchor.TOP_RIGHT);
-					plot.addAnnotation(annotation);
-					
-					
-					
-					chartPanel.setChart(chart);
-				} catch (Exception e1) {
-					error("Error updating modality panel", e1);
-				}
+				updateChart(xvalue);
 				
 			}
 		}

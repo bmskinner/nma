@@ -1174,10 +1174,12 @@ public class NucleusDatasetCreator {
 	}
 	
 	/**
-	 * Given a list of analysis datasets, get the outlines of the consensus
-	 * nuclei they contain
-	 * @param list the analysis datasets
-	 * @return a chartable dataset
+	 * Create a charting dataset for the angles within the AnalysisDataset at the given normalised position.
+	 * This dataset has the probability density function from angles 0-360 at 0.1 degree intervals.
+	 * @param xposition
+	 * @param dataset
+	 * @return
+	 * @throws Exception
 	 */
 	public static XYDataset createModalityProbabililtyDataset(Double xposition, AnalysisDataset dataset) throws Exception {
 
@@ -1205,6 +1207,14 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
+	/**
+	 * Create a charting dataset for the angles within the AnalysisDataset at the given normalised position.
+	 * This dataset has the individual angle values for each nucleus profile 
+	 * @param xposition
+	 * @param dataset
+	 * @return
+	 * @throws Exception
+	 */
 	public static XYDataset createModalityValuesDataset(Double xposition, AnalysisDataset dataset) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();

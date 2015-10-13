@@ -23,6 +23,7 @@ import ij.IJ;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -292,20 +293,42 @@ public class ProfileAggregate implements Serializable {
 			throw new IllegalArgumentException("Desired x-position is out of range: "+position);
 		}
 		
-		// get the available x positions
-		// We need to map the requested position to the closest available bin
-//		Profile xpositions = this.getXPositions();
-//		
-//		double chosenX = 0;
-//		for(double x :xpositions.asArray()){
-//			if(x<position){
-//				continue;
-//			}
-//			chosenX = x;
-//			break;
-//		}
+		/* if the given value is not an existing key,
+		 * we need to find the closest key to use instead 
+		 */
+		if(!aggregate.containsKey(position)){
+
+			Set<Double> keys  = aggregate.keySet();
+			
+			Double[] array = keys.toArray(new Double[0]);
+			Arrays.sort(array);
+			
+			int upper = 0;
+			int lower = 0;
+			
+			for(int i=0; i<array.length; i++){
+				double key = array[i];
+				if(key < position){
+					lower = i; // lower ends as the last key below position
+					upper = i+1;
+				}
+				if(key>position){
+					break;
+				}
+				
+			}
+						
+			double diffL = Math.abs(array[lower] - position);
+			double diffU = Math.abs(array[upper] - position);
+			position = diffL < diffU ? array[lower] : array[upper]; // choose the key closest to the requested position
+//			IJ.log("Set lower: "+array[lower]);
+//			IJ.log("Set upper: "+array[upper]);
+
+		}
 		
-		// chosenX is now the x-posiiton directly above the desired position
+//		IJ.log("Selected position "+position);
+
+		// the desired position is chosen
 		Collection<Double> values = aggregate.get(position);
 		if (values==null){
 			throw new Exception("Cannot find values at position "+position);

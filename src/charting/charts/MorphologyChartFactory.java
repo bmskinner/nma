@@ -738,46 +738,71 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	public static JFreeChart createModalityChart(Double position, AnalysisDataset dataset) throws Exception {
-		
-		XYDataset ds 	 = NucleusDatasetCreator.createModalityProbabililtyDataset(position, dataset);
-		XYDataset values = NucleusDatasetCreator.createModalityValuesDataset(position, dataset);
+	/**
+	 * Create a chart showing the angle values at the given normalised profile position within the
+	 * AnalysisDataset. The chart holds two chart datasets: 0 is the probabililty density function.
+	 * 1 is the actual values as dots on the x-axis
+	 * @param position
+	 * @param dataset
+	 * @return
+	 * @throws Exception
+	 */
+	public static JFreeChart createModalityChart(Double position, List<AnalysisDataset> list) throws Exception {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						"Angle", "Probability", null, PlotOrientation.VERTICAL, true, true,
 						false);
-
+		
 		XYPlot plot = chart.getXYPlot();
-		
-		plot.setDataset(0, ds);
-		plot.setDataset(1, values);
-		
 		
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getDomainAxis().setRange(0, 360);
-		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2f)));
+		BasicStroke stroke = new BasicStroke(2f);
+		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, stroke));
 		
-		XYLineAndShapeRenderer lineRenderer =  new XYLineAndShapeRenderer(true, false);
-		plot.setRenderer(0,lineRenderer);
-		int seriesCount = plot.getDataset(1).getSeriesCount();
-		for(int i=0; i<seriesCount;i++){
-			plot.getRenderer(0).setSeriesPaint(i, Color.BLACK);
-			plot.getRenderer(0).setSeriesVisibleInLegend(i, Boolean.FALSE);
+		int datasetCount = 0;
+		int iteration = 0;
+		for(AnalysisDataset dataset : list){
+			
+			XYDataset ds 	 = NucleusDatasetCreator.createModalityProbabililtyDataset(position, dataset);
+			XYDataset values = NucleusDatasetCreator.createModalityValuesDataset(position, dataset);
+			
+			Color colour = dataset.getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(iteration)
+					: dataset.getDatasetColour();
+
+			plot.setDataset(datasetCount, ds);
+			
+			XYLineAndShapeRenderer lineRenderer =  new XYLineAndShapeRenderer(true, false);
+			plot.setRenderer(datasetCount,lineRenderer);
+			int seriesCount = plot.getDataset(datasetCount).getSeriesCount();
+			for(int i=0; i<seriesCount;i++){
+				
+				lineRenderer.setSeriesPaint(i, colour);
+				lineRenderer.setSeriesStroke(i, stroke);
+				lineRenderer.setSeriesVisibleInLegend(i, false);
+			}
+			
+			datasetCount++;
+			
+			plot.setDataset(datasetCount, values);
+
+			// draw the individual points
+			XYLineAndShapeRenderer shapeRenderer =  new XYLineAndShapeRenderer(false, true);
+			
+			plot.setRenderer(datasetCount,shapeRenderer);
+			seriesCount = plot.getDataset(datasetCount).getSeriesCount();
+			for(int i=0; i<seriesCount;i++){
+				shapeRenderer.setSeriesPaint(i, colour);
+				shapeRenderer.setSeriesStroke(i, stroke);
+				shapeRenderer.setSeriesVisibleInLegend(i, false);
+			}
+			datasetCount++;
+			iteration++;
+			
 		}
-		
-		// draw the individual points
-		XYLineAndShapeRenderer shapeRenderer =  new XYLineAndShapeRenderer(false, true);
-		
-		plot.setRenderer(1,shapeRenderer);
-		seriesCount = plot.getDataset(1).getSeriesCount();
-		for(int i=0; i<seriesCount;i++){
-			plot.getRenderer(1).setSeriesPaint(i, Color.BLUE);
-			plot.getRenderer(1).setSeriesVisibleInLegend(i, Boolean.FALSE);
-		}
-		
-		
-		
+
 		return chart;
 	}
 
