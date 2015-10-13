@@ -738,17 +738,45 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	public static JFreeChart createModalityChart(Double position, AnalysisDataset dataset){
+	public static JFreeChart createModalityChart(Double position, AnalysisDataset dataset) throws Exception {
 		
-		XYDataset ds = NucleusDatasetCreator.createModalityDataset(position, dataset);
+		XYDataset ds 	 = NucleusDatasetCreator.createModalityProbabililtyDataset(position, dataset);
+		XYDataset values = NucleusDatasetCreator.createModalityValuesDataset(position, dataset);
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-						"Angle", "Probability", ds, PlotOrientation.VERTICAL, true, true,
+						"Angle", "Probability", null, PlotOrientation.VERTICAL, true, true,
 						false);
 
 		XYPlot plot = chart.getXYPlot();
+		
+		plot.setDataset(0, ds);
+		plot.setDataset(1, values);
+		
+		
 		plot.setBackgroundPaint(Color.WHITE);
+		plot.getDomainAxis().setRange(0, 360);
+		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2f)));
+		
+		XYLineAndShapeRenderer lineRenderer =  new XYLineAndShapeRenderer(true, false);
+		plot.setRenderer(0,lineRenderer);
+		int seriesCount = plot.getDataset(1).getSeriesCount();
+		for(int i=0; i<seriesCount;i++){
+			plot.getRenderer(0).setSeriesPaint(i, Color.BLACK);
+			plot.getRenderer(0).setSeriesVisibleInLegend(i, Boolean.FALSE);
+		}
+		
+		// draw the individual points
+		XYLineAndShapeRenderer shapeRenderer =  new XYLineAndShapeRenderer(false, true);
+		
+		plot.setRenderer(1,shapeRenderer);
+		seriesCount = plot.getDataset(1).getSeriesCount();
+		for(int i=0; i<seriesCount;i++){
+			plot.getRenderer(1).setSeriesPaint(i, Color.BLUE);
+			plot.getRenderer(1).setSeriesVisibleInLegend(i, Boolean.FALSE);
+		}
+		
+		
 		
 		return chart;
 	}

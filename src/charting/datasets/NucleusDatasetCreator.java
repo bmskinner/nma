@@ -1179,27 +1179,18 @@ public class NucleusDatasetCreator {
 	 * @param list the analysis datasets
 	 * @return a chartable dataset
 	 */
-	public static XYDataset createModalityDataset(Double xposition, AnalysisDataset dataset){
+	public static XYDataset createModalityProbabililtyDataset(Double xposition, AnalysisDataset dataset) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 
 		CellCollection collection = dataset.getCollection();
-		KernelEstimator est = new KernelEstimator(0.001);
-		double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(xposition);
-		// add the values to a kernel estimator
-		// give each value equal weighting
-		for(double d : values){
-			est.addValue(d, 1);
-		}
-			
-		double min = Stats.min(values)-5;
-		double max = Stats.max(values)+5;
+		KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset);
 		
 		List<Double> xValues = new ArrayList<Double>();
 		List<Double> yValues = new ArrayList<Double>();
-		
-		for(double i=min; i<=max; i+=0.1){
+
+		for(double i=0; i<=360; i+=0.1){
 			xValues.add(i);
 			yValues.add(est.getProbability(i));
 		}
@@ -1212,6 +1203,59 @@ public class NucleusDatasetCreator {
 			
 
 		return ds;
+	}
+	
+	public static XYDataset createModalityValuesDataset(Double xposition, AnalysisDataset dataset) throws Exception {
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		CellCollection collection = dataset.getCollection();
+
+		double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(xposition);
+		double[] xvalues = new double[values.length];
+		for(int i=0; i<values.length; i++){
+			xvalues[i] = 0;
+		}
+		
+		double[][] data = { values, xvalues };
+		ds.addSeries(collection.getName(), data);
+		return ds;
+	}
+	
+	/**
+	 * Create a probability kernel estimator for the profile angle values in the dataset
+	 * @param xposition the profile position
+	 * @param dataset
+	 * @return
+	 * @throws Exception
+	 */
+	public static KernelEstimator createProfileProbabililtyKernel(Double xposition, AnalysisDataset dataset) throws Exception {
+		CellCollection collection = dataset.getCollection();
+		KernelEstimator est = new KernelEstimator(0.001);
+		double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(xposition);
+		// add the values to a kernel estimator
+		// give each value equal weighting
+		for(double d : values){
+			est.addValue(d, 1);
+		}
+		return est;
+	}
+	
+	/**
+	 * Create a probability kernel estimator for the profile angle values in the dataset
+	 * @param xposition the profile position
+	 * @param dataset
+	 * @return
+	 * @throws Exception
+	 */
+	public static KernelEstimator createProbabililtyKernel(double[] values) throws Exception {
+		KernelEstimator est = new KernelEstimator(0.001);
+		// add the values to a kernel estimator
+		// give each value equal weighting
+		for(double d : values){
+			est.addValue(d, 1);
+		}
+		return est;
 	}
 	
 }

@@ -29,6 +29,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -50,6 +51,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
+
+import jdistlib.disttest.DistributionTest;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -94,17 +97,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		profileDisplayPanel = new RegularProfileDisplayPanel();
 		frankenDisplayPanel = new FrankenProfileDisplayPanel();
-				
-		//---------------
-		// Create the variability chart
-		//---------------
-//		JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
-//				"Position", "IQR", null);
-//		XYPlot variabilityPlot = variablityChart.getXYPlot();
-//		variabilityPlot.setBackgroundPaint(Color.WHITE);
-//		variabilityPlot.getDomainAxis().setRange(0,100);
-//		variabilityChartPanel = new ChartPanel(variablityChart);
-		
+		modalityDisplayPanel = new ModalityDisplayPanel();		
 		variabilityChartPanel = new VariabililtyDisplayPanel();
 		//---------------
 		// Add to the tabbed panel
@@ -112,6 +105,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		profilesTabPanel.addTab("Profile", null, profileDisplayPanel, null);
 		profilesTabPanel.addTab("FrankenProfile", null, frankenDisplayPanel, null);
 		profilesTabPanel.addTab("Variability", null, variabilityChartPanel, null);
+		profilesTabPanel.addTab("Modality", null, modalityDisplayPanel, null);
 		this.add(profilesTabPanel, BorderLayout.CENTER);
 
 	}
@@ -120,12 +114,17 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		this.list = list;
 		
+		try {
 		profileDisplayPanel.update(list);
 		frankenDisplayPanel.update(list);
 		variabilityChartPanel.update(list);
 		modalityDisplayPanel.update(list);
+		} catch  (Exception e){
+			error("Error updating profile panels", e);
+		}
 	}
 	
+	@SuppressWarnings("serial")
 	private class ModalityDisplayPanel extends JPanel {
 		
 		private JList<Double> pointList;
@@ -151,7 +150,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 		}
 		
-		public void update(List<AnalysisDataset> list){
+		public void update(List<AnalysisDataset> list) throws Exception {
 
 			if(!list.isEmpty()){
 				
@@ -168,12 +167,32 @@ public class NucleusProfilesPanel extends DetailPanel {
 			}
 		}
 		
-		private class ModalitySelectionListener implements ListSelectionListener{
+		private class ModalitySelectionListener implements ListSelectionListener {
 			public void valueChanged(ListSelectionEvent e) {
 				int row = e.getFirstIndex();
 				double xvalue = pointList.getModel().getElementAt(row);
-				JFreeChart chart = MorphologyChartFactory.createModalityChart(xvalue, list.get(0));
-				chartPanel.setChart(chart);
+				JFreeChart chart = null;
+				try {
+					chart = MorphologyChartFactory.createModalityChart(xvalue, list.get(0));
+					
+					CellCollection collection = list.get(0).getCollection();
+					double pvalue = DipTester.getPValueForPositon(collection, xvalue); 
+
+					XYPlot plot = chart.getXYPlot();
+
+					double ymax = DatasetUtilities.findMaximumRangeValue(plot.getDataset()).doubleValue();
+					DecimalFormat df = new DecimalFormat("#0.000"); 
+					XYTextAnnotation annotation = new XYTextAnnotation("p(unimodal) = "+df.format(pvalue)+")",355, ymax);
+					annotation.setTextAnchor(TextAnchor.TOP_RIGHT);
+					plot.addAnnotation(annotation);
+					
+					
+					
+					chartPanel.setChart(chart);
+				} catch (Exception e1) {
+					error("Error updating modality panel", e1);
+				}
+				
 			}
 		}
 	}

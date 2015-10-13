@@ -70,6 +70,21 @@ public class DipTester {
 		return resultProfile;
 	}
 	
+	/**
+	 * Get the p-value for a Dip Test at the given x position in the angle profile
+	 * @param collection
+	 * @param xPosition
+	 * @return
+	 * @throws Exception
+	 */
+	public static double getPValueForPositon(CellCollection collection, double xPosition) throws Exception {
+		
+		double[] values = collection.getProfileCollection().getAggregate().getValuesAtPosition(xPosition);
+		Arrays.sort(values);
+		double[] result = DistributionTest.diptest_presorted(values);
+		return result[1];
+	}
+	
 	
 	/**
 	 * Test the given collection for non-unimodality at each point in the profile,
