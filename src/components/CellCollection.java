@@ -187,11 +187,7 @@ implements Serializable
   public NucleusType getNucleusType(){
 	  return this.nucleusType;
   }
-  
-//  public Class<?> getNucleusType(){
-//	  return this.nucleusClass;
-//  }
-  
+    
   /**
    * Get the cell with the given path
    * @param path the path to the cell (uses the path-and-number format)
@@ -1102,10 +1098,10 @@ implements Serializable
 	        this.map.put(BorderTag.ORIENTATION_POINT, orientationPoint);
 		}
 	    
-	    public String string(){
+	    public String toString(){
 	    	return this.asString;
 	    }
-	    
+	        
 	    
 	    /**
 	     * Get the name of the given border tag, if present

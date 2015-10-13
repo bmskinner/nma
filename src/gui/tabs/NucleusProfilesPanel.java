@@ -130,8 +130,9 @@ public class NucleusProfilesPanel extends DetailPanel {
 	@SuppressWarnings("serial")
 	private class ModalityDisplayPanel extends JPanel {
 		
-		private JList<Double> pointList;
+		private JList<String> pointList;
 		private ChartPanel chartPanel;
+//		private JPanel 
 		
 		public ModalityDisplayPanel(){
 			this.setLayout(new BorderLayout());
@@ -147,11 +148,11 @@ public class NucleusProfilesPanel extends DetailPanel {
 			chartPanel.setMinimumDrawHeight( 0 );
 			this.add(chartPanel, BorderLayout.CENTER);
 			
-			
-			pointList = new JList<Double>();
-			DefaultListModel<Double> model = new DefaultListModel<Double>();
+			DecimalFormat df = new DecimalFormat("#0.00");
+			pointList = new JList<String>();
+			DefaultListModel<String> model = new DefaultListModel<String>();
 			for(Double d=0.0; d<=100; d+=0.5){
-				model.addElement(d);
+				model.addElement(df.format(d));
 			}
 			pointList.setModel(model);
 			JScrollPane listPanel = new JScrollPane(pointList);
@@ -164,23 +165,28 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 			if(!list.isEmpty()){
 				
+				DecimalFormat df = new DecimalFormat("#0.00");
 				if(list.size()==1){ // use the actual x-positions
 					List<Double> xvalues = list.get(0).getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getXKeyset();
-					DefaultListModel<Double> model = new DefaultListModel<Double>();
+					DefaultListModel<String> model = new DefaultListModel<String>();
+					
 					for(Double d: xvalues){
-						model.addElement(d);
+						model.addElement(df.format(d));
 					}
 					pointList.setModel(model);
 				} else {
 					// use a standard 0.5 spacing
-					DefaultListModel<Double> model = new DefaultListModel<Double>();
+					DefaultListModel<String> model = new DefaultListModel<String>();
 					for(Double d=0.0; d<=100; d+=0.5){
-						model.addElement(d);
+						model.addElement(df.format(d));
 					}
 					pointList.setModel(model);
 				}
 				
-				updateChart(pointList.getModel().getElementAt(0));				
+				String xString = pointList.getModel().getElementAt(0);
+				double xvalue = Double.valueOf(xString);
+				
+				updateChart(xvalue);				
 			}
 		}
 		
@@ -225,7 +231,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 					plot.addAnnotation(annotation);
 					index++;
 				}
-				
 
 				chartPanel.setChart(chart);
 			} catch (Exception e1) {
@@ -236,7 +241,9 @@ public class NucleusProfilesPanel extends DetailPanel {
 		private class ModalitySelectionListener implements ListSelectionListener {
 			public void valueChanged(ListSelectionEvent e) {
 				int row = e.getFirstIndex();
-				double xvalue = pointList.getModel().getElementAt(row);
+				String xString = pointList.getModel().getElementAt(row);
+				double xvalue = Double.valueOf(xString);
+//				double xvalue = pointList.getModel().getElementAt(row);
 				updateChart(xvalue);
 				
 			}

@@ -82,16 +82,6 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	
 	private static final String DEFAULT_REFOLD_MODE = "Fast";
 	
-	private static Map<String, NucleusType>  nucleusClassTypes;
-
-//	static
-//	{
-//		nucleusClassTypes = new HashMap<String, NucleusType>();
-//		nucleusClassTypes.put(Constants.Nucleus.RODENT_SPERM.string(), RodentSpermNucleus.class);
-//		nucleusClassTypes.put(Constants.Nucleus.PIG_SPERM.string()	, PigSpermNucleus.class);
-//		nucleusClassTypes.put(Constants.Nucleus.ROUND.string()		, RoundNucleus.class);
-//	}
-
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	
@@ -247,7 +237,8 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		panel.add(new JLabel("Nucleus type"));
 
 		nucleusSelectionBox = new JComboBox<NucleusType>(NucleusType.values());
-		nucleusSelectionBox.setSelectedIndex(1);
+		nucleusSelectionBox.setSelectedItem(NucleusType.RODENT_SPERM);
+//		nucleusSelectionBox.setSelectedIndex(1);
 		nucleusSelectionBox.setActionCommand("Nucleus type");
 		nucleusSelectionBox.addActionListener(this);
 		panel.add(nucleusSelectionBox);
@@ -515,7 +506,15 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 		if(e.getActionCommand().equals("Nucleus type")){
 			NucleusType type = (NucleusType) nucleusSelectionBox.getSelectedItem();
 			this.analysisOptions.setNucleusType(type);
-//			this.analysisOptions.setCollectionClass(collectionClassTypes.get(type));
+			
+			if(type.equals(NucleusType.ASYMMETRIC)){
+				this.analysisOptions.setNucleusType(NucleusType.ROUND); // not set up for this yet
+				this.analysisOptions.setMinNucleusCirc(  0.0 );
+				this.analysisOptions.setMaxNucleusCirc(  1.0 );
+				minNuclearCircSpinner.setValue(0.0);
+				maxNuclearCircSpinner.setValue(1.0);
+			}
+
 			
 			if(type.equals(NucleusType.ROUND)){
 				this.analysisOptions.setMinNucleusCirc(  0.0 );
