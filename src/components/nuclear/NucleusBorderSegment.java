@@ -144,7 +144,8 @@ public class NucleusBorderSegment  implements Serializable{
 		if(this.name==null){
 			IJ.log("Name is null on segment getName()");
 		}
-		return this.name;
+//		return this.name;
+		return "Seg_"+this.positionInProfile;
 	}
 
 	// when using this, use wrapIndex()!
@@ -579,6 +580,23 @@ public class NucleusBorderSegment  implements Serializable{
 		this.name = s;
 	}
 	
+	/**
+	 * Set the position in the segmented profile.
+	 * Should be clockwise from the reference point.
+	 * @param i
+	 */
+	public void setPosition(int i){
+		this.positionInProfile = i;
+	}
+	
+	/**
+	 * Get the position in the segmented profile.
+	 * Should be clockwise from the reference point.
+	 */
+	public int getPosition(){
+		return this.positionInProfile;
+	}
+	
 	public void print(){
 		IJ.log("    Segment "
 				+this.getName()
@@ -610,14 +628,17 @@ public class NucleusBorderSegment  implements Serializable{
 		
 		NucleusBorderSegment prevSeg = null;
 
+		int position = 0;
 		for(NucleusBorderSegment segment : list){
 
 			if(prevSeg != null){
 				segment.setPrevSegment(prevSeg);
 				prevSeg.setNextSegment(segment);
 			}
+			segment.setPosition(position);
 
 			prevSeg = segment;
+			position++;
 		}
 		NucleusBorderSegment firstSegment = list.get(0);
 		NucleusBorderSegment lastSegment = list.get(list.size()-1);
@@ -661,7 +682,7 @@ public class NucleusBorderSegment  implements Serializable{
 			newSeg.setName(segment.getName());
 			
 			
-			// adjust merge sources also and readd
+			// adjust merge sources also and read
 			if(segment.hasMergeSources()){
 				
 //				IJ.log("Nudging merge sources for "+segment.getName());
@@ -669,17 +690,7 @@ public class NucleusBorderSegment  implements Serializable{
 				List<NucleusBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
 				for(NucleusBorderSegment newMergeSource : adjustedMergeSources){
 					newSeg.addMergeSource(newMergeSource);
-				}
-				
-//				for(NucleusBorderSegment oldMergeSource : segment.getMergeSources()){
-//					NucleusBorderSegment newMergeSource = new NucleusBorderSegment(Utils.wrapIndex(oldMergeSource.getStartIndex()+value, oldMergeSource.getTotalLength()), 
-//							Utils.wrapIndex(oldMergeSource.getEndIndex()+value, oldMergeSource.getTotalLength()), 
-//							oldMergeSource.getTotalLength() );
-//					
-//					newMergeSource.setName(oldMergeSource.getName());
-//					newSeg.addMergeSource(newMergeSource);
-//				}
-				
+				}				
 			}
 			
 			result.add( newSeg );

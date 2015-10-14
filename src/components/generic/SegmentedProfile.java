@@ -474,17 +474,22 @@ public class SegmentedProfile extends Profile implements Serializable {
 		// Replace the two segments in this profile
 		List<NucleusBorderSegment> oldSegs = this.getSegments();
 		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
+		
+		int position = 0;
 		for(NucleusBorderSegment oldSegment : oldSegs){
 			
 			if(oldSegment.equals(firstSegment)){
 				// add the merge instead
+				mergedSegment.setPosition(position);
 				newSegs.add(mergedSegment);
 			} else if(oldSegment.equals(secondSegment)){
 				// do nothing
 			} else {
 				// add the original segments
+				oldSegment.setPosition(position);
 				newSegs.add(oldSegment);
 			}
+			position++;
 		}
 
 		NucleusBorderSegment.linkSegments(newSegs);
@@ -509,20 +514,26 @@ public class SegmentedProfile extends Profile implements Serializable {
 		// Replace the two segments in this profile
 		List<NucleusBorderSegment> oldSegs = this.getSegments();
 		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
+		
+		int position = 0;
 		for(NucleusBorderSegment oldSegment : oldSegs){
 
 			if(oldSegment.equals(segment)){
 				
 				// add each of the old segments
 				for(NucleusBorderSegment mergedSegment : segment.getMergeSources()){
+					mergedSegment.setPosition(position);
 					newSegs.add(mergedSegment);
+					position++;
 				}
 				
 			} else {
 				
 				// add the original segments
+				oldSegment.setPosition(position);
 				newSegs.add(oldSegment);
 			}
+			position++;
 		}
 		NucleusBorderSegment.linkSegments(newSegs);
 		this.setSegments(newSegs);
