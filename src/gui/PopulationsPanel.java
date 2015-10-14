@@ -152,6 +152,20 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 	}
 	
+	public void refreshClusters(){
+		if(this.analysisDatasets.size()>0){
+			for(UUID id : treeOrderMap.getIDs()){
+												
+				AnalysisDataset rootDataset = analysisDatasets.get(id);
+				rootDataset.refreshClusterGroups();
+				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
+					child.refreshClusterGroups();
+				}
+				
+			}
+		}
+	}
+	
 	/**
 	 * Create a node in the tree table, recursively adding all
 	 * the children of the given dataset id. If the child of a
@@ -680,8 +694,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				deleteDataset(d);
 
 			}
-
+			refreshClusters();
 			this.update();
+			
 		}
 		fireSignalChangeEvent("UpdatePanels");
 	}

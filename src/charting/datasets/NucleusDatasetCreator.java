@@ -653,7 +653,7 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, String segName) throws Exception {
+	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, String segName, MeasurementScale scale) throws Exception {
 
 		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
 
@@ -662,11 +662,15 @@ public class NucleusDatasetCreator {
 			CellCollection collection = collections.get(i).getCollection();
 
 
-			List<Integer> list = new ArrayList<Integer>(0);
+			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
 				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
-				list.add(seg.length());
+				
+				int indexLength = seg.length();
+				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+				double length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+				list.add(length);
 			}
 
 			dataset.add(list, segName+"_"+i, segName);

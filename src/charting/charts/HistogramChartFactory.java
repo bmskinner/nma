@@ -19,6 +19,7 @@
 package charting.charts;
 
 import gui.components.ColourSelecter;
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -120,8 +121,8 @@ public class HistogramChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, NucleusStatistic stat){
-		String xLabel = stat.toString();
+	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
+		String xLabel = stat.toString()+" ("+scale.toString()+")";
 		
 		JFreeChart chart = createHistogram(ds, xLabel, "Nuclei");
 		
@@ -167,8 +168,8 @@ public class HistogramChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, NucleusStatistic stat){
-		String xLabel = stat.toString();
+	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
+		String xLabel = stat.toString()+" ("+scale.toString()+")";
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,

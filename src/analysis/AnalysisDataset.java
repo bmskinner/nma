@@ -433,16 +433,6 @@ public class AnalysisDataset implements Serializable {
 	public void setAnalysisOptions(AnalysisOptions analysisOptions) {
 		this.analysisOptions = analysisOptions;
 	}
-
-	/**
-	 * Add the given dataset as a cluster result.
-	 * This is a form of child dataset
-	 * @param dataset
-	 */
-//	public void addCluster(AnalysisDataset dataset){
-//		this.addChildDataset(dataset);
-//		this.clusterResults.add(dataset.getUUID());
-//	}
 	
 	/**
 	 * Add the given dataset as a cluster result.
@@ -455,15 +445,7 @@ public class AnalysisDataset implements Serializable {
 //		this.clusterResults.add(dataset.getUUID());
 	}
 
-	/**
-	 * Add the given collection as a cluster result.
-	 * This is a form of child dataset
-	 * @param dataset
-	 */
-//	public void addCluster(CellCollection collection){
-//		this.addChildCollection(collection);
-//		this.clusterResults.add(collection.getID());
-//	}
+
 	
 	/**
 	 * Check if the dataset id is in a cluster
@@ -485,15 +467,6 @@ public class AnalysisDataset implements Serializable {
 	public List<ClusterGroup> getClusterGroups(){
 		return  this.clusterGroups;
 	}
-
-
-	/**
-	 * Get the UUIDs of all clusters
-	 * @return
-	 */
-//	public List<UUID> getClusterIDs(){
-//		return this.clusterResults;
-//	}
 	
 	/**
 	 * Get the UUIDs of all datasets in clusters
@@ -506,18 +479,6 @@ public class AnalysisDataset implements Serializable {
 		}
 		return result;
 	}
-
-//	/**
-//	 * Check if the dataset has clusters
-//	 * @return
-//	 */
-//	public boolean hasClusters(){
-//		if(this.clusterResults.size()>0){
-//			return true;
-//		} else {
-//			return false;
-//		}
-//	}
 	
 	/**
 	 * Check if the dataset has clusters
@@ -541,6 +502,26 @@ public class AnalysisDataset implements Serializable {
 			return true;
 		} else {
 			return false;
+		}
+	}
+	
+	/**
+	 * Check that all cluster groups have child members present;
+	 * if cluster groups do not have children, remove the group
+	 */
+	public void refreshClusterGroups(){
+
+		for(ClusterGroup g : this.getClusterGroups()){
+			boolean clusterRemains = false;
+
+			for(UUID childID : g.getUUIDs()){
+				if(this.hasChild(childID)){
+					clusterRemains = true;
+				}
+			}
+			if(!clusterRemains){
+				this.deleteClusterGroup(g);
+			}
 		}
 	}
 

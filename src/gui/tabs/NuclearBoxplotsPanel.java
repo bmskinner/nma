@@ -142,9 +142,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			scrollPane  = new JScrollPane(mainPanel);
 			this.add(scrollPane, BorderLayout.CENTER);
 			
+			measurementUnitSettingsPanel.addActionListener(this);
 			this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
-			this.measurementUnitSettingsPanel.pixelsButton.addActionListener(this);
-			this.measurementUnitSettingsPanel.micronsButton.addActionListener(this);
 			
 		}
 		
@@ -154,9 +153,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		 */
 		public void update(List<AnalysisDataset> list){
 
-			MeasurementScale scale  = this.measurementUnitSettingsPanel.pixelsButton.isSelected()
-									? MeasurementScale.PIXELS
-									: MeasurementScale.MICRONS;
+			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 			
 			updateWithScale(list, scale);
 			
@@ -258,16 +255,16 @@ public class NuclearBoxplotsPanel extends DetailPanel {
             useDensityBox.addActionListener(this);
             headerPanel.add(useDensityBox);
             headerPanel.add(measurementUnitSettingsPanel);
-            this.measurementUnitSettingsPanel.pixelsButton.addActionListener(this);
-            this.measurementUnitSettingsPanel.micronsButton.addActionListener(this);
+            measurementUnitSettingsPanel.addActionListener(this);
+            
     
             this.add(headerPanel, BorderLayout.NORTH);
 
-			
+            MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 			Dimension preferredSize = new Dimension(400, 150);
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 //			for(String chartType : chartStatTypes.keySet()){
-				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, stat), stat.toString());
+				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, stat, scale), stat.toString());
 				panel.setPreferredSize(preferredSize);
 				panel.addSignalChangeListener(this);
 				chartPanels.put(stat, panel);
@@ -282,10 +279,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		}
 		
 		public void update(List<AnalysisDataset> list) throws Exception {
-			MeasurementScale scale  = measurementUnitSettingsPanel.pixelsButton.isSelected()
-					? MeasurementScale.PIXELS
-					: MeasurementScale.MICRONS;
-
+			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 			updateWithScale(list, scale);
 		}
 		
@@ -302,11 +296,11 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				if(useDensity){
 					DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
-					chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat);
+					chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat, scale);
 					
 				} else {
 					HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat, scale);
-					chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, stat);
+					chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, stat, scale);
 				}
 //				detectModes(chart, list, stat);
 				XYPlot plot = (XYPlot) chart.getPlot();
@@ -353,9 +347,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			if(event.type().equals("MarkerPositionUpdated")){
 //				
 				// check the scale to use for selection
-				MeasurementScale scale  = this.measurementUnitSettingsPanel.pixelsButton.isSelected()
-						? MeasurementScale.PIXELS
-						: MeasurementScale.MICRONS;
+				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 				
 				// get the parameters to filter on
 				SelectableChartPanel panel = (SelectableChartPanel) event.getSource();

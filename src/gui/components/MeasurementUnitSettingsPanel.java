@@ -19,6 +19,12 @@
 package gui.components;
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
@@ -27,26 +33,53 @@ import javax.swing.JRadioButton;
 import components.CellCollection.NucleusStatistic;
 
 @SuppressWarnings("serial")
-public class MeasurementUnitSettingsPanel extends JPanel {
+public class MeasurementUnitSettingsPanel extends JPanel implements ActionListener {
 	
-	public JRadioButton pixelsButton  = new JRadioButton("Pixels"); 
-	public JRadioButton micronsButton = new JRadioButton("Microns");
+	private Map<MeasurementScale, JRadioButton> map  = new  HashMap<MeasurementScale, JRadioButton>();
+//	public JRadioButton pixelsButton  = new JRadioButton("Pixels"); 
+//	public JRadioButton micronsButton = new JRadioButton("Microns");
+	private List<ActionListener> listeners = new ArrayList<ActionListener>();
 	
 	public MeasurementUnitSettingsPanel(){
 		this.setLayout(new FlowLayout());
 		
-		final ButtonGroup alignGroup = new ButtonGroup();
-		alignGroup.add(pixelsButton);
-		alignGroup.add(micronsButton);
+//		final ButtonGroup alignGroup = new ButtonGroup();
 		
-		pixelsButton.setSelected(true);
-		pixelsButton.setActionCommand("DisplayMeasurementsPixel");
-		micronsButton.setActionCommand("DisplayMeasurementsMicron");
+		final ButtonGroup group = new ButtonGroup();
 
-		this.add(pixelsButton);
-		this.add(micronsButton);
-
-		
+		for(MeasurementScale type : MeasurementScale.values()){
+			JRadioButton button = new JRadioButton(type.toString());
+			button.setActionCommand(type.toString());
+			button.addActionListener(this);
+			this.add(button);
+			group.add(button);
+			map.put(type, button);
+		}
+		// Set the default
+		map.get(MeasurementScale.PIXELS).setSelected(true);		
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		for(ActionListener a: listeners) {
+			a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, e.getActionCommand()) {
+			});
+		}
+	}
+	
+	public void addActionListener(ActionListener a){
+		this.listeners.add(a);
+	}
+	
+	public MeasurementScale getSelected(){
+		for(MeasurementScale type : MeasurementScale.values()){
+			JRadioButton button = map.get(type);
+			if(button.isSelected()){
+				return type;
+			}
+		}
+		return null;
 	}
 	
 	public enum MeasurementScale {

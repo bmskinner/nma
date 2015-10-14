@@ -19,6 +19,9 @@
 package gui.tabs;
 
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.components.MeasurementUnitSettingsPanel;
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
+import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -120,7 +123,6 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 	public void update(List<AnalysisDataset> list){
 		this.list = list;
-		
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				if(SegmentsDetailPanel.this.list!=null && !SegmentsDetailPanel.this.list.isEmpty()){
@@ -446,13 +448,14 @@ public class SegmentsDetailPanel extends DetailPanel {
 	}
 	
 	@SuppressWarnings("serial")
-	protected class SegmentBoxplotsPanel extends JPanel {
+	protected class SegmentBoxplotsPanel extends JPanel implements ActionListener {
 //		private ChartPanel chartPanel; // for displaying the legnth of a given segment
 		private JPanel 		mainPanel; // hold the charts
 		private Dimension preferredSize = new Dimension(200, 300);
-		JScrollPane scrollPane;
+		private JScrollPane scrollPane;
+		private JPanel 		buttonPanel;
 		
-//		private Map<String, ChartPanel> chartPanels = new HashMap<String, ChartPanel>();
+		private MeasurementUnitSettingsPanel measurementUnitSettingsPanel;
 		
 		protected SegmentBoxplotsPanel(){
 			
@@ -472,6 +475,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			this.add(scrollPane, BorderLayout.CENTER);
 			
+			buttonPanel = new JPanel(new FlowLayout());
+			measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
+			measurementUnitSettingsPanel.addActionListener(this);
+			buttonPanel.add(measurementUnitSettingsPanel);
+			
+			this.add(buttonPanel, BorderLayout.NORTH);
+			
 		}
 		
 		
@@ -480,6 +490,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 				
 				mainPanel = new JPanel();
 				mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+				
+				MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
 				
 				if(!list.isEmpty()){
 //					IJ.log("Making boxplots");
@@ -509,7 +521,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						// Get each segment as a boxplot
 						for( int i=0; i<prevCount; i++){
 							String segName = "Seg_"+i;
-							JFreeChart boxplot = MorphologyChartFactory.makeSegmentBoxplot(segName, list);
+							JFreeChart boxplot = MorphologyChartFactory.makeSegmentBoxplot(segName, list, scale);
 							ChartPanel chartPanel = new ChartPanel(boxplot);
 							chartPanel.setPreferredSize(preferredSize);
 							mainPanel.add(chartPanel);
@@ -553,6 +565,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 //				chartPanel.setChart(boxplotChart);
 				
 			}
+		}
+
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			update(list);
+			
 		}
 	}
 	
@@ -679,16 +698,18 @@ public class SegmentsDetailPanel extends DetailPanel {
 		}
 
 		protected void update(List<AnalysisDataset> list){
+//			IJ.log("Updating tables");
 			try {
 				if(list!=null){
 
 					if(list.isEmpty()){
-
+//						IJ.log("No datasets selected");
 						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null));
 
 					} else {
 
 						if(list.size()==1){
+//							IJ.log("Drawing table");
 
 							activeDataset = list.get(0);
 
@@ -699,17 +720,24 @@ public class SegmentsDetailPanel extends DetailPanel {
 								TableColumn column = columns.nextElement();
 								column.setCellRenderer(new SegmentTableCellRenderer());
 							}
+							// TODO: on manetheren, table is not displayed; code runs to this point
+							// table remains on null model
+//							scrollPane.revalidate();
+//							scrollPane.repaint();
 						} else {
+//							IJ.log("Multi datasets selected");
 							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null));
 						}
 
 					}
+				} else {
+//					IJ.log("List  is null");
 				}
 			} catch (Exception e) {
 				error("Error updating segment stats panel", e);
 			}
 			
-			this.repaint();
+//			this.repaint();
 		}
 	}
 }

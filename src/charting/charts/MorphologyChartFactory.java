@@ -20,6 +20,7 @@ package charting.charts;
 
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -596,14 +597,14 @@ public class MorphologyChartFactory {
 	 * @param ds the dataset
 	 * @return
 	 */
-	public static JFreeChart makeSegmentBoxplot(String segName, List<AnalysisDataset> list) throws Exception {
+	public static JFreeChart makeSegmentBoxplot(String segName, List<AnalysisDataset> list, MeasurementScale scale) throws Exception {
 
 		if(list==null){
 			return makeEmptyBoxplot();
 		}
 		
-		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName);
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Segment length", ds, false);	
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName, scale);
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Segment length ("+scale.toString()+")", ds, false);	
 		
 		formatBoxplot(boxplot);
 		CategoryPlot plot = boxplot.getCategoryPlot();
