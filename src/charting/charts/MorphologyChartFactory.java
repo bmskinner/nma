@@ -617,12 +617,14 @@ public class MorphologyChartFactory {
 				
 				for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
 
-//					String segName = (String) dataset.getRowKey(series);
 					int segIndex = getIndexFromLabel(segName);
 					
-					ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
+//					ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
 					
-					Color color = swatch.color(segIndex);
+//					Color color = swatch.color(segIndex);
+					Color color = list.get(series).getDatasetColour() == null 
+							? ColourSelecter.getSegmentColor(series)
+							: list.get(series).getDatasetColour();
 
 					renderer.setSeriesPaint(series, color);
 					renderer.setSeriesOutlinePaint(series, Color.BLACK);

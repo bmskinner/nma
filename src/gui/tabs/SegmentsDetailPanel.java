@@ -173,6 +173,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 		private ChartPanel chartPanel; // for displaying the legnth of a given segment
 		private JPanel buttonsPanel;
+		private JButton mergeButton;
+		private JButton unmergeButton;
 		
 		protected SegmentProfilePanel(){
 			
@@ -205,7 +207,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					}
 				}
 			};
-			JButton mergeButton = new JButton("Merge segments");
+			mergeButton = new JButton("Merge segments");
 			
 			mergeButton.addActionListener( new ActionListener(){
 
@@ -256,7 +258,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			panel.add(mergeButton);
 			
-			JButton unmergeButton = new JButton("Unmerge segments");
+			unmergeButton = new JButton("Unmerge segments");
 			
 			unmergeButton.addActionListener( new ActionListener(){
 				@Override
@@ -407,8 +409,32 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 					if(list.size()>1){
 						buttonsPanel.setEnabled(false);
-					} else {
+					} else { // single collection
 						buttonsPanel.setEnabled(true);
+						CellCollection collection = list.get(0).getCollection();
+						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
+						
+						// Don't allow merging below 2 segments (causes errors)
+						if(medianProfile.getSegmentCount()<=2){
+							mergeButton.setEnabled(false);
+						} else {
+							mergeButton.setEnabled(true);
+						}
+						
+						// Check if there are any merged segments
+						boolean hasMerges = false;
+						for(NucleusBorderSegment seg : medianProfile.getSegments()){
+							if(seg.hasMergeSources()){
+								hasMerges = true;
+							}
+						}
+						
+						// If there are no merged segments, don't allow unmerging 
+						if(hasMerges){
+							unmergeButton.setEnabled(true);
+						} else {
+							unmergeButton.setEnabled(false);
+						}
 					}
 				} 
 				
