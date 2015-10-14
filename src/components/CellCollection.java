@@ -1054,8 +1054,8 @@ implements Serializable
   }
   
   public enum ProfileCollectionType { 
-	  REGULAR ("regular"), 
-	  FRANKEN ("franken");
+	  REGULAR ("Regular profile"), 
+	  FRANKEN ("Franken profile");
 	  
 	  private String name;
 	  	  

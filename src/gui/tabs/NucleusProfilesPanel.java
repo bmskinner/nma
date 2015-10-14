@@ -19,6 +19,7 @@
 package gui.tabs;
 
 import gui.components.ColourSelecter;
+import gui.components.ProfileCollectionTypeSettingsPanel;
 import gui.components.ProflleDisplaySettingsPanel;
 import gui.components.ColourSelecter.ColourSwatch;
 import ij.IJ;
@@ -128,14 +129,19 @@ public class NucleusProfilesPanel extends DetailPanel {
 	}
 	
 	@SuppressWarnings("serial")
-	private class ModalityDisplayPanel extends JPanel {
+	private class ModalityDisplayPanel extends JPanel implements ActionListener {
 		
 		private JList<String> pointList;
 		private ChartPanel chartPanel;
-//		private JPanel 
+		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel;
 		
 		public ModalityDisplayPanel(){
 			this.setLayout(new BorderLayout());
+			
+			profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
+			profileCollectionTypeSettingsPanel.addActionListener(this);
+			this.add(profileCollectionTypeSettingsPanel, BorderLayout.NORTH);
+			
 			JFreeChart chart = ChartFactory.createXYLineChart(null,
 					"Probability", "Angle", null);
 			XYPlot plot = chart.getXYPlot();
@@ -165,9 +171,11 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 			if(!list.isEmpty()){
 				
+				ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+				
 				DecimalFormat df = new DecimalFormat("#0.00");
 				if(list.size()==1){ // use the actual x-positions
-					List<Double> xvalues = list.get(0).getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getXKeyset();
+					List<Double> xvalues = list.get(0).getCollection().getProfileCollection(type).getAggregate().getXKeyset();
 					DefaultListModel<String> model = new DefaultListModel<String>();
 					
 					for(Double d: xvalues){
@@ -191,10 +199,13 @@ public class NucleusProfilesPanel extends DetailPanel {
 		}
 		
 		public void updateChart(double xvalue){
+			
+			ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+			
 			JFreeChart chart = null;
 			try {
 
-				chart = MorphologyChartFactory.createModalityChart(xvalue, list);
+				chart = MorphologyChartFactory.createModalityChart(xvalue, list, type);
 				XYPlot plot = chart.getXYPlot();
 
 				double yMax = 0;
@@ -212,7 +223,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 				for(AnalysisDataset dataset : list){
 					
 					// Do the stats testing
-					double pvalue = DipTester.getPValueForPositon(dataset.getCollection(), xvalue); 
+					double pvalue = DipTester.getPValueForPositon(dataset.getCollection(), xvalue, type); 
 					
 					// Add the annotation
 					double yPos = yMax - ( index * (yMax / 20));
@@ -243,10 +254,17 @@ public class NucleusProfilesPanel extends DetailPanel {
 				int row = e.getFirstIndex();
 				String xString = pointList.getModel().getElementAt(row);
 				double xvalue = Double.valueOf(xString);
-//				double xvalue = pointList.getModel().getElementAt(row);
 				updateChart(xvalue);
 				
 			}
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			int row = pointList.getSelectedIndex();
+			String xString = pointList.getModel().getElementAt(row);
+			double xvalue = Double.valueOf(xString);
+			updateChart(xvalue);
 		}
 	}
 	
@@ -256,9 +274,14 @@ public class NucleusProfilesPanel extends DetailPanel {
 		protected ProflleDisplaySettingsPanel profileDisplaySettingsPanel;
 		protected ChartPanel chartPanel;
 		private JSpinner pvalueSpinner;
+		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel;
 		
 		public VariabililtyDisplayPanel(){
 			this.setLayout(new BorderLayout());
+			
+			
+			
+			
 			JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
 					"Position", "IQR", null);
 			XYPlot variabilityPlot = variablityChart.getXYPlot();
@@ -289,11 +312,15 @@ public class NucleusProfilesPanel extends DetailPanel {
 		      prefSize = new Dimension(50, prefSize.height);
 		      field.setPreferredSize(prefSize);
 		      
-		      
+		     // add extra fields to the header panel
 		    profileDisplaySettingsPanel.add(new JLabel("Dip test p-value:"));
 			profileDisplaySettingsPanel.add(pvalueSpinner);
-			profileDisplaySettingsPanel.revalidate();
+
+			profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
+			profileCollectionTypeSettingsPanel.addActionListener(this);
+			profileDisplaySettingsPanel.add(profileCollectionTypeSettingsPanel);
 			
+			profileDisplaySettingsPanel.revalidate();
 			
 			this.add(profileDisplaySettingsPanel, BorderLayout.NORTH);
 		}
@@ -339,6 +366,9 @@ public class NucleusProfilesPanel extends DetailPanel {
 			BorderTag tag = fromReference
 					? BorderTag.REFERENCE_POINT
 					: BorderTag.ORIENTATION_POINT;
+			
+			ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+			
 			try {
 				if(list.size()==1){
 					JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100, tag);
@@ -350,7 +380,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 						// dip test the profiles
 						
 						double significance = (Double) pvalueSpinner.getValue();
-						BooleanProfile modes  = DipTester.testCollectionGetIsNotUniModal(collection, tag, significance);
+						BooleanProfile modes  = DipTester.testCollectionIsUniModal(collection, tag, significance, type);
 
 
 						// add any regions with bimodal distribution to the chart

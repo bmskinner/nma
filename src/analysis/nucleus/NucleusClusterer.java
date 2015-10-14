@@ -272,9 +272,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		try{
 
 			
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
 
-			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT);
+			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT, ProfileCollectionType.FRANKEN);
 			Profile medianProfile = pc.getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
 			Profile indexes = pvals.getSortedIndexes();
 			

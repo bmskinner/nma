@@ -1182,13 +1182,13 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityProbabililtyDataset(Double xposition, AnalysisDataset dataset) throws Exception {
+	public static XYDataset createModalityProbabililtyDataset(Double xposition, AnalysisDataset dataset, ProfileCollectionType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
 
 		CellCollection collection = dataset.getCollection();
-		KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset);
+		KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset, type);
 		
 		List<Double> xValues = new ArrayList<Double>();
 		List<Double> yValues = new ArrayList<Double>();
@@ -1216,13 +1216,13 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static XYDataset createModalityValuesDataset(Double xposition, AnalysisDataset dataset) throws Exception {
+	public static XYDataset createModalityValuesDataset(Double xposition, AnalysisDataset dataset, ProfileCollectionType type) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		CellCollection collection = dataset.getCollection();
 
-		double[] values = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getValuesAtPosition(xposition);
+		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);
 		double[] xvalues = new double[values.length];
 		for(int i=0; i<values.length; i++){
 			xvalues[i] = 0;
@@ -1240,10 +1240,10 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static KernelEstimator createProfileProbabililtyKernel(Double xposition, AnalysisDataset dataset) throws Exception {
+	public static KernelEstimator createProfileProbabililtyKernel(Double xposition, AnalysisDataset dataset, ProfileCollectionType type) throws Exception {
 		CellCollection collection = dataset.getCollection();
 		KernelEstimator est = new KernelEstimator(0.001);
-		double[] values = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getValuesAtPosition(xposition);
+		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xposition);
 		// add the values to a kernel estimator
 		// give each value equal weighting
 		for(double d : values){

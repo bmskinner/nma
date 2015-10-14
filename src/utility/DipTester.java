@@ -28,16 +28,16 @@ public class DipTester {
 	 * @param tag the border tag to offset from
 	 * @return a boolean profile of results
 	 */
-	public static Profile testCollectionGetPValues(CellCollection collection, BorderTag tag){
+	public static Profile testCollectionGetPValues(CellCollection collection, BorderTag tag, ProfileCollectionType type){
 		Profile resultProfile = null;
 		
 		double[] pvals = null;
 		try {
 			String pointType = collection.getPoint(tag);
-			int offset = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getOffset(pointType);
+			int offset = collection.getProfileCollection(type).getOffset(pointType);
 			
 			// ensure the postions are starting from the right place
-			List<Double> keys = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getXKeyset();
+			List<Double> keys = collection.getProfileCollection(type).getAggregate().getXKeyset();
 
 			
 			pvals = new double[keys.size()];
@@ -46,7 +46,7 @@ public class DipTester {
 				
 				double position = keys.get(i);
 				try{ 
-					double[] values = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getValuesAtPosition(position);
+					double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(position);
 
 					double pval =  getDipTestPValue(values);
 					pvals[i] = pval;
@@ -76,9 +76,9 @@ public class DipTester {
 	 * @return
 	 * @throws Exception
 	 */
-	public static double getPValueForPositon(CellCollection collection, double xPosition) throws Exception {
+	public static double getPValueForPositon(CellCollection collection, double xPosition, ProfileCollectionType type) throws Exception {
 		
-		double[] values = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getAggregate().getValuesAtPosition(xPosition);
+		double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(xPosition);
 		return getDipTestPValue(values);
 	}
 	
@@ -92,13 +92,13 @@ public class DipTester {
 	 * @param significance the p-value threshold
 	 * @return a boolean profile of results
 	 */
-	public static BooleanProfile testCollectionGetIsNotUniModal(CellCollection collection, BorderTag tag, double significance){
+	public static BooleanProfile testCollectionIsUniModal(CellCollection collection, BorderTag tag, double significance, ProfileCollectionType type){
 		
 		BooleanProfile resultProfile = null;
 		boolean[] modes = null;
 		try {
 			
-			Profile pvals = testCollectionGetPValues(collection, tag);
+			Profile pvals = testCollectionGetPValues(collection, tag, type);
 			modes = new boolean[pvals.size()];
 			
 			for(int i=0; i<pvals.size(); i++ ){

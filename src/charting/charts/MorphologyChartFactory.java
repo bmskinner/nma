@@ -749,7 +749,7 @@ public class MorphologyChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createModalityChart(Double position, List<AnalysisDataset> list) throws Exception {
+	public static JFreeChart createModalityChart(Double position, List<AnalysisDataset> list, ProfileCollectionType type) throws Exception {
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -767,8 +767,8 @@ public class MorphologyChartFactory {
 		int iteration = 0;
 		for(AnalysisDataset dataset : list){
 			
-			XYDataset ds 	 = NucleusDatasetCreator.createModalityProbabililtyDataset(position, dataset);
-			XYDataset values = NucleusDatasetCreator.createModalityValuesDataset(position, dataset);
+			XYDataset ds 	 = NucleusDatasetCreator.createModalityProbabililtyDataset(position, dataset, type);
+			XYDataset values = NucleusDatasetCreator.createModalityValuesDataset(position, dataset, type);
 			
 			Color colour = dataset.getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(iteration)
