@@ -601,139 +601,91 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 	}
 	
+	private void deleteDataset(AnalysisDataset d){
+
+		UUID id = d.getUUID();
+
+		// remove all children of the collection
+		for(UUID u : d.getAllChildUUIDs()){
+			String name = this.getDataset(u).getName();
+
+			if(analysisDatasets.containsKey(u)){
+				analysisDatasets.remove(u);
+			}
+
+			if(populationNames.containsValue(u)){
+				populationNames.remove(name);
+			}						
+
+			d.deleteChild(u);
+
+		}
+
+		for(UUID parentID : analysisDatasets.keySet()){
+			AnalysisDataset parent = analysisDatasets.get(parentID);
+
+			if(parent.hasChild(id)){
+				parent.deleteChild(id);
+			}
+
+		}
+
+		// remove cluster groups
+		for(ClusterGroup g : d.getClusterGroups()){
+			boolean clusterRemains = false;
+
+			for(UUID childID : g.getUUIDs()){
+				if(d.hasChild(childID)){
+					clusterRemains = true;
+				}
+			}
+			if(!clusterRemains){
+				d.deleteClusterGroup(g);
+			}
+		}
+		
+		populationNames.remove(d.getName());
+		analysisDatasets.remove(id);
+
+		if(d.isRoot()){
+			treeOrderMap.remove(id);
+		}
+	}
+	
 	private void deleteDataset(){
 		List<AnalysisDataset> datasets = getSelectedDatasets();
 
 		if(!datasets.isEmpty()){
+			// make a list of the unique UUIDs selected
 
-			// only delete single collections for now
-			if(datasets.size()==1){
+			List<UUID> list = new ArrayList<UUID>();
+			for(AnalysisDataset d : datasets){
 
-				//TODO: this still has problems with multiple datasets
-
-				// get the ids as a list, so we don't iterate over datasets
-				// when we could delete a child of the list in progress
-				List<UUID> list = new ArrayList<UUID>(0);
-				for(AnalysisDataset d : datasets){
+				if(!list.contains(d.getUUID())){
 					list.add(d.getUUID());
 				}
 
-				for(UUID id : list){
-					// check dataset still exists
-					if(this.hasDataset(id)){
-
-						AnalysisDataset d = this.getDataset(id);
-
-
-						// remove all children of the collection
-						for(UUID u : d.getAllChildUUIDs()){
-							String name = this.getDataset(u).getName();
-
-							if(analysisDatasets.containsKey(u)){
-								analysisDatasets.remove(u);
-							}
-
-							if(populationNames.containsValue(u)){
-								populationNames.remove(name);
-							}						
-
-							d.deleteChild(u);
-
-						}
-
-						for(UUID parentID : analysisDatasets.keySet()){
-							AnalysisDataset parent = analysisDatasets.get(parentID);
-							
-//							if(parent.hasCluster(id)){
-//								parent.deleteCluster(id);
-//							}
-							if(parent.hasChild(id)){
-								parent.deleteChild(id);
-							}
-							
-						}
-						populationNames.remove(d.getName());
-						analysisDatasets.remove(id);
-
-						if(d.isRoot()){
-							treeOrderMap.remove(id);
-						}
+				// add all the children of a dataset
+				for(UUID childID : d.getAllChildUUIDs()){
+					if(!list.contains(childID)){
+						list.add(childID);
 					}
 				}
-				this.update();
-
-			} else {
-				// make a list of the unique UUIDs selected
-				
-				List<UUID> list = new ArrayList<UUID>();
-				for(AnalysisDataset d : datasets){
-					
-					if(!list.contains(d.getUUID())){
-						list.add(d.getUUID());
-					}
-					
-					// add all the children of a dataset
-					for(UUID childID : d.getAllChildUUIDs()){
-						if(!list.contains(childID)){
-							list.add(childID);
-						}
-					}
-				}
-				
-				// remove any children remaining
-				for(AnalysisDataset d : this.getRootDatasets()){
-					for(UUID id : list){
-						
-//						if(d.hasCluster(id)){
-//							d.deleteCluster(id);
-//						}
-						
-						if(d.hasChild(id)){
-							d.deleteChild(id);
-						}
-						
-					}
-				}
-				
-				// go through the list, removing all the ids to be deleted
-				for(UUID id : list){
-					AnalysisDataset d = this.getDataset(id);
-					
-					populationNames.remove(d.getName());
-					analysisDatasets.remove(id);
-					if(d.isRoot()){
-						treeOrderMap.remove(id);
-					}
-				}
-				
-				// remove cluster groups if all clusters have been deleted
-				for(AnalysisDataset d : datasets){
-					
-					for(ClusterGroup g : d.getClusterGroups()){
-						boolean clusterRemains = false;
-						
-						for(UUID childID : g.getUUIDs()){
-							if(d.hasChild(childID)){
-								clusterRemains = true;
-							}
-						}
-						if(!clusterRemains){
-							d.deleteClusterGroup(g);
-						}
-					}
-					
-				}
-				
-				this.update();
 			}
-			fireSignalChangeEvent("UpdatePanels");
+
+			// go through the list, removing all the ids to be deleted
+			for(UUID id : list){
+				AnalysisDataset d = this.getDataset(id);
+				
+				deleteDataset(d);
+
+			}
+
+			this.update();
 		}
-		
+		fireSignalChangeEvent("UpdatePanels");
 	}
-	
-	
-	
-	
+
 	/**
 	 * Establish the rows in the population tree that are currently selected.
 	 * Set the possible menu options accordingly, and call the panel updates
