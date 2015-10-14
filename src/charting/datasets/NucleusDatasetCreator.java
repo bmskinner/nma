@@ -256,6 +256,51 @@ public class NucleusDatasetCreator {
 	
 	/**
 	 * Make a dataset from the given collection, with each segment profile as a separate series
+	 * @param dataset 
+	 * @param normalised normalise profile length to 100, or show raw
+	 * @return a dataset
+	 * @throws Exception 
+	 */
+	public static XYDataset createSegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, boolean rightAlign, String point) throws Exception{
+		
+		CellCollection collection = dataset.getCollection();
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+//		String point = collection.getOrientationPoint();
+		
+		int maxLength = (int) getMaximumNucleusProfileLength(collection);
+		int medianProfileLength = (int) collection.getMedianArrayLength();
+		double offset = 0;
+				
+		Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point);
+		Profile xpoints = null;
+		if(normalised){
+			xpoints = profile.getPositions(100);
+		} else {
+			xpoints = profile.getPositions( medianProfileLength );
+			
+			if(rightAlign){
+				double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
+				offset = differenceToMaxLength;
+				xpoints = xpoints.add(differenceToMaxLength);
+			}
+		}
+
+		// rendering order will be first on top
+		
+		// add the segments
+		List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+		if(normalised){
+			addSegmentsFromProfile(segments, profile, ds, 100, 0);
+		} else {
+			addSegmentsFromProfile(segments, profile, ds, (int) collection.getMedianArrayLength(), offset);
+		}
+
+		return ds;
+	}
+	
+	/**
+	 * Make a dataset from the given collection, with each segment profile as a separate series
 	 * @param collection the NucleusCollection
 	 * @param normalised normalise profile length to 100, or show raw
 	 * @return a dataset
@@ -613,141 +658,7 @@ public class NucleusDatasetCreator {
 
 		return dataset;
 	}
-	
-	
-	/**
-	 * Create boxplots for the given datasets, using the appropriate measurement scale
-	 * @param collections
-	 * @param scale
-	 * @return
-	 */
-	public static BoxAndWhiskerCategoryDataset createAreaBoxplotDataset(List<AnalysisDataset> collections, MeasurementScale scale) {
-                
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-
-		for (int i=0; i < collections.size(); i++) {
-			CellCollection c = collections.get(i).getCollection();
-
-			List<Double> list = new ArrayList<Double>();
-
-			for (double d : c.getAreas(scale)) {
-				list.add(new Double(d));
-			}
-			dataset.add(list, c.getType()+"_"+i, "Area");
-		}
-
-		return dataset;
-	}
-	
-	public static BoxAndWhiskerCategoryDataset createPerimBoxplotDataset(List<AnalysisDataset> collections) {
-
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-
-		for (int i=0; i < collections.size(); i++) {
-			CellCollection c = collections.get(i).getCollection();
-
-			List<Double> list = new ArrayList<Double>();
-
-			
-			for (double d : c.getPerimeters()) {
-				list.add(new Double(d));
-			}
-			dataset.add(list, c.getType()+"_"+i, "Perimeter");
-		}
-
-		return dataset;
-	}
-	
-	public static BoxAndWhiskerCategoryDataset createMinFeretBoxplotDataset(List<AnalysisDataset> collections) {
-
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-
-		for (int i=0; i < collections.size(); i++) {
-			CellCollection c = collections.get(i).getCollection();
-
-			List<Double> list = new ArrayList<Double>();
-
-			for (double d : c.getMinFerets()) {
-				list.add(new Double(d));
-			}
-			dataset.add(list, c.getType()+"_"+i, "Min feret");
-		}
-
-		return dataset;
-	}
-	
-	public static BoxAndWhiskerCategoryDataset createMaxFeretBoxplotDataset(List<AnalysisDataset> collections) {
-
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-
-		for (int i=0; i < collections.size(); i++) {
-			CellCollection c = collections.get(i).getCollection();
-
-			List<Double> list = new ArrayList<Double>();
-
-			for (double d : c.getFerets()) {
-				list.add(new Double(d));
-			}
-			dataset.add(list, c.getType()+"_"+i, "Max feret");
-		}
-
-		return dataset;
-	}
-
-	public static BoxAndWhiskerCategoryDataset createDifferenceBoxplotDataset(List<AnalysisDataset> collections) throws Exception {
-
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-
-		for (int i=0; i < collections.size(); i++) {
-			CellCollection c = collections.get(i).getCollection();
-
-			List<Double> list = new ArrayList<Double>();
-
-			for (double d : c.getNormalisedDifferencesToMedianFromPoint(c.getOrientationPoint())) {
-				list.add(new Double(d));
-			}
-			dataset.add(list, c.getType()+"_"+i, "Perimeter-normalised difference to median");
-		}
-
-		return dataset;
-	}
-	
-	public static BoxAndWhiskerCategoryDataset createCircularityBoxplotDataset(List<AnalysisDataset> collections) throws Exception {
-
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-
-		for (int i=0; i < collections.size(); i++) {
-			CellCollection c = collections.get(i).getCollection();
-
-			List<Double> list = new ArrayList<Double>();
-
-			for (double d : c.getCircularities()) {
-				list.add(new Double(d));
-			}
-			dataset.add(list, c.getType()+"_"+i, "Circularities");
-		}
-
-		return dataset;
-	}
-	
-	public static BoxAndWhiskerCategoryDataset createAspectBoxplotDataset(List<AnalysisDataset> collections) throws Exception {
-
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
-
-		for (int i=0; i < collections.size(); i++) {
-			CellCollection c = collections.get(i).getCollection();
-
-			List<Double> list = new ArrayList<Double>();
-
-			for (double d : c.getAspectRatios()) {
-				list.add(new Double(d));
-			}
-			dataset.add(list, c.getType()+"_"+i, "Aspect ratios");
-		}
-
-		return dataset;
-	}
-	
+		
 	/**
 	 * Get the lengths of the given segment in the collections
 	 * @param collections
@@ -771,7 +682,7 @@ public class NucleusDatasetCreator {
 				list.add(seg.length());
 			}
 
-			dataset.add(list, segName+"_"+i, "Segment length: "+segName);
+			dataset.add(list, segName+"_"+i, segName);
 		}
 		return dataset;
 	}

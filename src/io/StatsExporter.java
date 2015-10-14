@@ -18,6 +18,8 @@
  *******************************************************************************/
 package io;
 
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,12 +56,12 @@ public class StatsExporter {
 	public static void exportNuclearStats(CellCollection collection, String filename) throws Exception {
 
 		TableExporter nuclearStats = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
-		nuclearStats.addColumn("AREA",                       collection.getAreas());
-		nuclearStats.addColumn("PERIMETER",                  collection.getPerimeters());
-		nuclearStats.addColumn("FERET",                      collection.getFerets());
+		nuclearStats.addColumn("AREA",                       collection.getAreas(MeasurementScale.PIXELS));
+		nuclearStats.addColumn("PERIMETER",                  collection.getPerimeters(MeasurementScale.PIXELS));
+		nuclearStats.addColumn("FERET",                      collection.getFerets(MeasurementScale.PIXELS));
 		nuclearStats.addColumn("PATH_LENGTH",                collection.getPathLengths());
 		nuclearStats.addColumn("MEDIAN_DIST_BETWEEN_POINTS", collection.getMedianDistanceBetweenPoints());
-		nuclearStats.addColumn("MIN_FERET",                  collection.getMinFerets());
+		nuclearStats.addColumn("MIN_FERET",                  collection.getMinFerets(MeasurementScale.PIXELS));
 		nuclearStats.addColumn("NORM_TAIL_INDEX",            collection.getPointIndexes("tail"));
 		nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       collection.getDifferencesToMedianFromPoint("tail"));
 		nuclearStats.addColumn("PATH",                       collection.getNucleusImagePaths());

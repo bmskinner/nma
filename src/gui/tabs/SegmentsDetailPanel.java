@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.components.ColourSelecter.ColourSwatch;
 import ij.IJ;
 
 import java.awt.BorderLayout;
@@ -33,14 +34,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 
 import org.jfree.chart.ChartPanel;
@@ -55,6 +60,7 @@ import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
+import components.CellCollection.NucleusStatistic;
 import components.CellCollection.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
@@ -62,11 +68,10 @@ import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 
-public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
+public class SegmentsDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
 
-//	private List<AnalysisDataset> list;
 	protected AnalysisDataset activeDataset;
 		
 	private SegmentStatsPanel 		segmentStatsPanel;		// Hold the start and end points of each segment
@@ -122,19 +127,19 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 	}
 		
 	public void update(List<AnalysisDataset> list){
+		this.list = list;
 		
-		if(list!=null && !list.isEmpty()){
-			segmentBoxplotsPanel.update(list); // get segname from panel
-			segmentProfilePanel.update(list, null, false, false); // get segname from panel
-			segmentStatsPanel.update(list);
-		}
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				if(SegmentsDetailPanel.this.list!=null && !SegmentsDetailPanel.this.list.isEmpty()){
+					segmentBoxplotsPanel.update(SegmentsDetailPanel.this.list); // get segname from panel
+					segmentProfilePanel.update(SegmentsDetailPanel.this.list); // get segname from panel
+					segmentStatsPanel.update(SegmentsDetailPanel.this.list);
+				}
+			}
+		});
 	}
-		
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		
-	}
-	
+			
 	/**
 	 * Allows for cell background to be coloured based on position in a list. Used to colour
 	 * the segment stats list
@@ -157,8 +162,9 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 
 				int segment = Integer.valueOf(colName.replace("Seg_", ""));
 
-				colour = activeDataset.getSwatch().color(segment);
-//				colour = ColourSelecter.getOptimisedColor(segment);
+				ColourSwatch swatch = activeDataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : activeDataset.getSwatch();
+				colour = swatch.color(segment);
+
 			}
 						
 			//Cells are by default rendered as a JLabel.
@@ -192,8 +198,6 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 			this.add(chartPanel, BorderLayout.CENTER);
 			
 			buttonsPanel = makeButtonPanel();
-			buttonsPanel.setEnabled(false);
-			buttonsPanel.setVisible(false);
 			this.add(buttonsPanel, BorderLayout.NORTH);
 			
 		}
@@ -396,67 +400,27 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 			
 		}
 		
-		public void update(List<AnalysisDataset> list, String segName, boolean normalised, boolean rightAlign){
-			
-			DefaultXYDataset ds = null;
+		public void update(List<AnalysisDataset> list){
 			
 			try {
-				
+				JFreeChart chart = null;
 				if(list==null || list.isEmpty()){
 					
-					buttonsPanel.setEnabled(false);
-					buttonsPanel.setVisible(false);
+					chart = MorphologyChartFactory.makeEmptyProfileChart();
 					
-				} else if(list.size()==1){
+					
+				} else {				
+					
+					chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(list, true, false, BorderTag.REFERENCE_POINT, false);
+
+					if(list.size()>1){
+						buttonsPanel.setEnabled(false);
+					} else {
+						buttonsPanel.setEnabled(true);
+					}
+				} 
 				
-					buttonsPanel.setEnabled(true);
-					buttonsPanel.setVisible(true);
-
-					if(normalised){
-						ds = NucleusDatasetCreator.createMultiProfileSegmentDataset(list, segName);
-					} else {
-						ds = NucleusDatasetCreator.createRawMultiProfileSegmentDataset(list, segName, rightAlign);
-					}
-
-					JFreeChart chart = null;
-					if(normalised){
-						chart = MorphologyChartFactory.makeProfileChart(ds, 100, list.get(0).getSwatch());
-					} else {
-						int length = 100;
-						for(AnalysisDataset d : list){
-							if(   (int) d.getCollection().getMedianArrayLength()>length){
-								length = (int) d.getCollection().getMedianArrayLength();
-							}
-						}
-						chart = MorphologyChartFactory.makeProfileChart(ds, length, list.get(0).getSwatch());
-					}								
-					chartPanel.setChart(chart);
-				} else {
-					
-					// Multiple datasets
-					buttonsPanel.setEnabled(false);
-					buttonsPanel.setVisible(false);
-					
-//					String point = list.get(0).getCollection().getPoint(BorderTag.ORIENTATION_POINT);
-					// many profiles, colour them all the same
-					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign, BorderTag.ORIENTATION_POINT);				
-					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign, BorderTag.ORIENTATION_POINT);
-									
-					// find the maximum profile length - used when rendering raw profiles
-					int length = 100;
-
-					if(!normalised){
-						for(AnalysisDataset d : list){
-							length = (int) Math.max( d.getCollection().getMedianArrayLength(), length);
-						}
-					}
-					
-					JFreeChart chart = MorphologyChartFactory.makeMultiProfileChart(list, medianProfiles, iqrProfiles, length);
-								
-					chartPanel.setChart(chart);
-				}
-
-
+				chartPanel.setChart(chart);
 			} catch (Exception e) {
 				error("Error in plotting segment profile", e);
 			} 
@@ -465,41 +429,110 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 	
 	@SuppressWarnings("serial")
 	protected class SegmentBoxplotsPanel extends JPanel {
-		private ChartPanel chartPanel; // for displaying the legnth of a given segment
+//		private ChartPanel chartPanel; // for displaying the legnth of a given segment
+		private JPanel 		mainPanel; // hold the charts
+		private Dimension preferredSize = new Dimension(200, 300);
+		JScrollPane scrollPane;
+		
+		private Map<String, ChartPanel> chartPanels = new HashMap<String, ChartPanel>();
 		
 		protected SegmentBoxplotsPanel(){
 			
 			this.setLayout(new BorderLayout());
 			
 			JFreeChart boxplot = MorphologyChartFactory.makeEmptyBoxplot();
+			
 
-			chartPanel = new ChartPanel(boxplot);
-			this.add(chartPanel, BorderLayout.CENTER);
+			ChartPanel chartPanel = new ChartPanel(boxplot);
+			chartPanel.setPreferredSize(preferredSize);
+			
+			mainPanel = new JPanel();
+			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+			mainPanel.add(chartPanel);
+			
+			scrollPane = new JScrollPane(mainPanel);
+			
+			this.add(scrollPane, BorderLayout.CENTER);
 			
 		}
 		
 		
 		public void update(List<AnalysisDataset> list){
 			try{
-
-				if(list.size()==1){
-
-					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
-					JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
-					chartPanel.setChart(boxplotChart);
-
-				} else {
+				
+				mainPanel = new JPanel();
+				mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+				
+				if(!list.isEmpty()){
+//					IJ.log("Making boxplots");
 					
-
-					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
-					JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
-					chartPanel.setChart(boxplotChart);
-
+					int prevCount = 0;
+					boolean ok = true;
+					
+					// check that the datasets have the same number of segments
+					for( AnalysisDataset dataset  : list){
+						CellCollection collection = dataset.getCollection();
+						int count = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+							.getSegmentedProfile(collection.getReferencePoint())
+							.getSegmentCount();
+						
+						if(prevCount > 0 ){
+							if(prevCount!=count){
+								ok = false;
+							}
+						}
+						prevCount = count;
+					}
+					
+					
+					if(ok){ // make a boxplot for each segment
+//						IJ.log("Found "+prevCount+" segments consistent in "+list.size()+" datasets");
+						
+						// Get each segment as a boxplot
+						for( int i=0; i<prevCount; i++){
+							String segName = "Seg_"+i;
+							JFreeChart boxplot = MorphologyChartFactory.makeSegmentBoxplot(segName, list);
+							ChartPanel chartPanel = new ChartPanel(boxplot);
+							chartPanel.setPreferredSize(preferredSize);
+							mainPanel.add(chartPanel);
+//							IJ.log("Added chart for "+segName);
+							
+						}
+						
+						
+						
+					} else { // different number of segments, blank chart
+//						IJ.log("Found inconsistent segments");
+//						JFreeChart boxplot = MorphologyChartFactory.makeEmptyBoxplot();
+//						ChartPanel chartPanel = new ChartPanel(boxplot);
+//						chartPanel.setPreferredSize(preferredSize);
+//						mainPanel.add(chartPanel);
+						mainPanel.add(new JLabel("Segment number is not consistent across datasets"));
+					}
+					mainPanel.revalidate();
+					mainPanel.repaint();
+					scrollPane.setViewportView(mainPanel);
+					
 				}
+
+//				if(list.size()==1){
+//
+//					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
+//					JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
+//					chartPanel.setChart(boxplotChart);
+//
+//				} else {
+//					
+//
+//					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
+//					JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
+//					chartPanel.setChart(boxplotChart);
+//
+//				}
 			} catch (Exception e){
 				error("Error updating segments boxplot", e);
-				JFreeChart boxplotChart = MorphologyChartFactory.makeEmptyBoxplot();
-				chartPanel.setChart(boxplotChart);
+//				JFreeChart boxplotChart = MorphologyChartFactory.makeEmptyBoxplot();
+//				chartPanel.setChart(boxplotChart);
 				
 			}
 		}
@@ -626,41 +659,39 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 			
 			this.add(scrollPane, BorderLayout.CENTER);
 		}
-		
+
 		protected void update(List<AnalysisDataset> list){
-			
-			if(list!=null){
+			try {
+				if(list!=null){
 
-				if(list.isEmpty()){
+					if(list.isEmpty()){
 
-					try {
 						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null));
-					} catch (Exception e) {
-						error("Error updating segment stats panel", e);
-					}
-				} else {
-					
-					if(list.size()==1){
-						this.setVisible(true);
-						activeDataset = list.get(0);
-						try {
-							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset));
-						} catch (Exception e) {
-							error("Error updating segment stats panel", e);
-						}
 
-						Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
-
-						while(columns.hasMoreElements()){
-							TableColumn column = columns.nextElement();
-							column.setCellRenderer(new SegmentTableCellRenderer());
-						}
 					} else {
-						this.setVisible(false);
+
+						if(list.size()==1){
+
+							activeDataset = list.get(0);
+
+							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset));
+							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+
+							while(columns.hasMoreElements()){
+								TableColumn column = columns.nextElement();
+								column.setCellRenderer(new SegmentTableCellRenderer());
+							}
+						} else {
+							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null));
+						}
+
 					}
-					
 				}
+			} catch (Exception e) {
+				error("Error updating segment stats panel", e);
 			}
+			
+			this.repaint();
 		}
 	}
 }

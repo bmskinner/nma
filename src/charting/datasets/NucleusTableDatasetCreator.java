@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.datasets;
 
+import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import ij.IJ;
 
 import java.text.DecimalFormat;
@@ -29,6 +30,7 @@ import java.util.UUID;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import components.CellCollection;
@@ -46,6 +48,7 @@ import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions;
 import utility.Constants;
+import utility.Stats;
 
 public class NucleusTableDatasetCreator {
 	
@@ -133,16 +136,19 @@ public class NucleusTableDatasetCreator {
 
 			// get the offset segments
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-			//.getAngleProfile(referencePoint).getSegments();
+
 
 			// create the row names
 			fieldNames.add("Colour");
 			fieldNames.add("Length");
 			fieldNames.add("Start index");
 			fieldNames.add("End index");
-			fieldNames.add(""); // empty for merge buttons
+			fieldNames.add("Mean length");
+			fieldNames.add("Length std err.");
 
 			model.addColumn("", fieldNames.toArray(new Object[0]));
+			
+			DecimalFormat df = new DecimalFormat("#.##");
 
 			for(NucleusBorderSegment segment : segments) {
 
@@ -153,7 +159,16 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.length());
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
-				rowData.add(""); // empty for merge buttons
+				
+				double[] meanLengths = collection.getSegmentLengths(segment.getName());
+				DescriptiveStatistics stat = new DescriptiveStatistics(meanLengths);
+				
+				rowData.add(  df.format(stat.getMean() ) );
+				double sem = stat.getStandardDeviation() / Math.sqrt(meanLengths.length);
+				rowData.add(  df.format(sem)  );
+				
+				
+				
 
 				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
 			}
@@ -447,8 +462,8 @@ public class NucleusTableDatasetCreator {
 					getPValue = true;
 				} else {
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getPerimeters(), 
-							dataset2.getCollection().getPerimeters(), 
+							dataset.getCollection().getPerimeters(MeasurementScale.PIXELS), 
+							dataset2.getCollection().getPerimeters(MeasurementScale.PIXELS), 
 							getPValue) );
 				}
 				i++;
@@ -484,8 +499,8 @@ public class NucleusTableDatasetCreator {
 					getPValue = true;
 				} else {
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getMinFerets(), 
-							dataset2.getCollection().getMinFerets(), 
+							dataset.getCollection().getMinFerets(MeasurementScale.PIXELS), 
+							dataset2.getCollection().getMinFerets(MeasurementScale.PIXELS), 
 							getPValue) );
 				}
 				i++;
@@ -521,8 +536,8 @@ public class NucleusTableDatasetCreator {
 					getPValue = true;
 				} else {
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getFerets(), 
-							dataset2.getCollection().getFerets(), 
+							dataset.getCollection().getFerets(MeasurementScale.PIXELS), 
+							dataset2.getCollection().getFerets(MeasurementScale.PIXELS), 
 							getPValue) );
 				}
 				i++;
@@ -600,8 +615,8 @@ public class NucleusTableDatasetCreator {
 					getPValue = true;
 				} else {
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getAreas(), 
-							dataset2.getCollection().getAreas(), 
+							dataset.getCollection().getAreas(MeasurementScale.PIXELS), 
+							dataset2.getCollection().getAreas(MeasurementScale.PIXELS), 
 							getPValue) );
 				}
 				i++;

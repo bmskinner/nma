@@ -51,17 +51,11 @@ import components.nuclei.RoundNucleus;
 import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
-import utility.Constants;
 import utility.Constants.BorderTag;
 import utility.Stats;
 import utility.Utils;
 
-public class CellCollection
-implements Serializable 
-{
-
-	public static final String REGULAR_PROFILE = "regular";
-	public static final String FRANKEN_PROFILE = "franken";
+public class CellCollection implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -72,7 +66,6 @@ implements Serializable
 	private String 	name;			// the name of the collection
 	private UUID 	guid;			// the collection id
 	
-//	private Class<?> nucleusClass;	// the class of the nuclei this collection contains
 	private NucleusType nucleusType; // the type of nuclei this collection contains
 		
 	//this holds the mapping of tail indexes etc in the median profile arrays
@@ -305,19 +298,10 @@ implements Serializable
 	  }
 	  return result;
   }
-
-  /**
-   * Get the areas of the nuclei in this collection as
-   * an array
-   * @return
-   */
-  public double[] getAreas(){
-	  return getAreas(MeasurementScale.PIXELS);
-  }
   
   /**
    * Get the areas of the nuclei in this collection as
-   * an array in microns
+   * an array at the appropriate scale
    * @return
    */
   public double[] getAreas(MeasurementScale scale){
@@ -335,11 +319,7 @@ implements Serializable
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
-  
-  public double[] getPerimeters(){
-	  return this.getPerimeters(MeasurementScale.PIXELS);
-  }
-  
+    
   /**
    * Get the perimeters of the nuclei in this collection as
    * an array
@@ -390,15 +370,6 @@ implements Serializable
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
-
-  /**
-   * Get the ferets in pixels of the nuclei in this collection as
-   * an array
-   * @return
-   */
-  public double[] getFerets(){
-	  return this.getFerets(MeasurementScale.PIXELS);
-  }
   
   /**
    * Get the ferets of the nuclei in this collection as
@@ -419,11 +390,7 @@ implements Serializable
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
-  
-  public double[] getMinFerets(){
-	  return this.getMinFerets(MeasurementScale.PIXELS);
-  }
-  
+    
   /**
    * Get the minimum diameters of the nuclei in this collection as
    * an array
@@ -708,13 +675,13 @@ implements Serializable
   
   // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
   public double getMedianNuclearArea(){
-    double[] areas = this.getAreas();
+    double[] areas = this.getAreas(MeasurementScale.PIXELS);
     double median = Stats.quartile(areas, 50);
     return median;
   }
 
   public double getMedianNuclearPerimeter(){
-    double[] p = this.getPerimeters();
+    double[] p = this.getPerimeters(MeasurementScale.PIXELS);
     double median = Stats.quartile(p, 50);
     return median;
   }
@@ -732,7 +699,7 @@ implements Serializable
   }
 
   public double getMedianFeretLength(){
-    double[] p = this.getFerets();
+    double[] p = this.getFerets(MeasurementScale.PIXELS);
     double median = Stats.quartile(p, 50);
     return median;
   }
@@ -1027,6 +994,16 @@ implements Serializable
 
 	  }
 	  return result;
+  }
+  
+  public double[] getSegmentLengths(String segName) throws Exception{
+	  List<Double> list = new ArrayList<Double>();
+
+	  for(Nucleus n : this.getNuclei()){
+		  NucleusBorderSegment segment = n.getAngleProfile(this.getReferencePoint()).getSegment(segName);
+		  list.add(new Double(segment.length()));
+	  }
+	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
   }
   
   /**

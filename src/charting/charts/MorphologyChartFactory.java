@@ -20,6 +20,7 @@ package charting.charts;
 
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
+import ij.IJ;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -28,6 +29,9 @@ import java.awt.geom.Ellipse2D;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
+
 
 
 
@@ -56,8 +60,10 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
@@ -82,6 +88,12 @@ import utility.Utils;
 
 public class MorphologyChartFactory {
 	
+	private static final BasicStroke SEGMENT_STROKE = new BasicStroke(3);
+	private static final BasicStroke MARKER_STROKE = new BasicStroke(2);
+	private static final BasicStroke PROFILE_STROKE = new BasicStroke(1);
+	private static final BasicStroke QUARTILE_STROKE = new BasicStroke(1);
+	
+	private static final ValueMarker DEGREE_LINE_180 = new ValueMarker(180, Color.BLACK, MARKER_STROKE);
 	/**
 	 * Create an empty chart to display when no datasets are selected
 	 * @return a chart
@@ -118,7 +130,7 @@ public class MorphologyChartFactory {
 			if(tag.equals(n.getReferencePoint())){
 				colour = Color.ORANGE;
 			}
-			plot.addDomainMarker(new ValueMarker(index, colour, new BasicStroke(2.0f)));	
+			plot.addDomainMarker(new ValueMarker(index, colour, MARKER_STROKE));	
 		}
 		return chart;
 	}
@@ -144,13 +156,10 @@ public class MorphologyChartFactory {
 		// if we set raw values, get the maximum nucleus length
 		if(!normalised){
 			length = (int) collection.getMaxProfileLength();
-//			for(Nucleus n : dataset.getCollection().getNuclei()){
-//				length = (int) Math.max( n.getLength(), length);
-//			}
 		}
 		JFreeChart chart = makeProfileChart(ds, length, dataset.getSwatch());
 		
-		// mark the reference andorientation points
+		// mark the reference and orientation points
 		
 		XYPlot plot = chart.getXYPlot();
 
@@ -185,9 +194,65 @@ public class MorphologyChartFactory {
 				if(tag.equals(collection.getReferencePoint())){
 					colour = Color.ORANGE;
 				}
-				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, new BasicStroke(2.0f)));	
+				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, MARKER_STROKE));	
 			}
 			
+		}
+		return chart;
+	}
+	
+	public static JFreeChart makeMultiSegmentedProfileChart(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, BorderTag borderTag, boolean showMarkers) throws Exception {
+		
+		int length = 100 ; // default if normalised
+		JFreeChart chart = ChartFactory.createXYLineChart(null,
+				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
+				                false);
+//		JFreeChart chart = makeProfileChart(null, length, list.get(0).getSwatch());
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		// the default is to use an x range of 100, for a normalised chart
+		plot.getDomainAxis().setRange(0,length);
+
+		// always set the y range to 360 degrees
+		plot.getRangeAxis().setRange(0,360);
+		plot.setBackgroundPaint(Color.WHITE);
+
+		// the 180 degree line
+		plot.addRangeMarker(DEGREE_LINE_180);
+		
+		int datasetIndex = 0;
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			String point = collection.getPoint(borderTag);
+			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, normalised, rightAlign, point);
+
+			plot.setDataset(datasetIndex, ds);
+//			IJ.log("Set dataset "+datasetIndex + " for "+dataset.getName());
+			
+			DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
+			renderer.setBaseShapesVisible(false);
+			plot.setRenderer(datasetIndex, renderer);
+
+			int seriesCount = plot.getDataset(datasetIndex).getSeriesCount();
+
+			for (int i = 0; i < seriesCount; i++) {
+				
+				renderer.setSeriesVisibleInLegend(i, false);
+				
+				String name = (String) ds.getSeriesKey(i);
+//				IJ.log("    Series "+i + ": "+name);
+				
+				// segments along the median profile
+				if(name.startsWith("Seg_")){
+					int colourIndex = getIndexFromLabel(name);
+					renderer.setSeriesStroke(i, MARKER_STROKE);
+					ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
+					renderer.setSeriesPaint(i, swatch.color(colourIndex));
+				} 
+			}	
+
+			datasetIndex++;
 		}
 		return chart;
 	}
@@ -278,37 +343,37 @@ public class MorphologyChartFactory {
 		plot.setBackgroundPaint(Color.WHITE);
 		
 		// the 180 degree line
-		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+		plot.addRangeMarker(DEGREE_LINE_180);
 
 		int seriesCount = plot.getSeriesCount();
 
 		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+			plot.getRenderer().setSeriesVisibleInLegend(i, false);
 			String name = (String) ds.getSeriesKey(i);
 			
 			// segments along the median profile
 			if(name.startsWith("Seg_")){
 				int colourIndex = getIndexFromLabel(name);
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+				plot.getRenderer().setSeriesStroke(i, SEGMENT_STROKE);
 				plot.getRenderer().setSeriesPaint(i, swatch.color(colourIndex));
 //				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
 			} 
 			
 			// entire nucleus profile
 			if(name.startsWith("Nucleus_")){
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+				plot.getRenderer().setSeriesStroke(i, PROFILE_STROKE);
 				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
 			} 
 			
 			// quartile profiles
 			if(name.startsWith("Q")){
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+				plot.getRenderer().setSeriesStroke(i, QUARTILE_STROKE);
 				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
 			} 
 			
 			// simple profiles
 			if(name.startsWith("Profile_")){
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
+				plot.getRenderer().setSeriesStroke(i, PROFILE_STROKE);
 				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
 			} 
 			
@@ -348,7 +413,7 @@ public class MorphologyChartFactory {
 		plot.setBackgroundPaint(Color.WHITE);
 
 		// add 180 degree horizontal line
-		plot.addRangeMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2.0f)));
+		plot.addRangeMarker(DEGREE_LINE_180);
 
 		int lastSeries = 0;
 
@@ -445,8 +510,8 @@ public class MorphologyChartFactory {
 		plot.setBackgroundPaint(Color.WHITE);
 
 		for (int j = 0; j < ds.getSeriesCount(); j++) {
-			plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
-			plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+			plot.getRenderer().setSeriesVisibleInLegend(j, false);
+			plot.getRenderer().setSeriesStroke(j, QUARTILE_STROKE);
 			int index = MorphologyChartFactory.getIndexFromLabel( (String) ds.getSeriesKey(j));
 			Color profileColour = list.get(index).getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(index)
@@ -542,10 +607,54 @@ public class MorphologyChartFactory {
 		}
 		
 		ValueMarker zeroMarker =
-	              new ValueMarker(0.00, Color.black, new BasicStroke(1.0f));
+	              new ValueMarker(0.00, Color.black, PROFILE_STROKE);
 
 	      plot.addRangeMarker(zeroMarker);
 		
+		return boxplot;
+	}
+	
+	/**
+	 * Create a segment length boxplot for the given segment name
+	 * @param ds the dataset
+	 * @return
+	 */
+	public static JFreeChart makeSegmentBoxplot(String segName, List<AnalysisDataset> list) throws Exception {
+
+		if(list==null){
+			return makeEmptyBoxplot();
+		}
+		
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName);
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Segment length", ds, false);	
+		
+		formatBoxplot(boxplot);
+		CategoryPlot plot = boxplot.getCategoryPlot();
+				
+		if(list!=null && !list.isEmpty()){
+						
+			for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+			
+				CategoryDataset dataset = plot.getDataset(datasetIndex);
+				BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+				
+				for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+
+//					String segName = (String) dataset.getRowKey(series);
+					int segIndex = getIndexFromLabel(segName);
+					
+					ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
+					
+					Color color = swatch.color(segIndex);
+
+					renderer.setSeriesPaint(series, color);
+					renderer.setSeriesOutlinePaint(series, Color.BLACK);
+				}
+				
+				renderer.setMeanVisible(false);
+				plot.setRenderer(datasetIndex, renderer);
+			}
+		}		
 		return boxplot;
 	}
 	
@@ -760,8 +869,8 @@ public class MorphologyChartFactory {
 		
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getDomainAxis().setRange(0, 360);
-		BasicStroke stroke = new BasicStroke(2f);
-		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, stroke));
+
+		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, MARKER_STROKE));
 		
 		int datasetCount = 0;
 		int iteration = 0;
@@ -782,7 +891,7 @@ public class MorphologyChartFactory {
 			for(int i=0; i<seriesCount;i++){
 				
 				lineRenderer.setSeriesPaint(i, colour);
-				lineRenderer.setSeriesStroke(i, stroke);
+				lineRenderer.setSeriesStroke(i, MARKER_STROKE);
 				lineRenderer.setSeriesVisibleInLegend(i, false);
 			}
 			
@@ -797,7 +906,7 @@ public class MorphologyChartFactory {
 			seriesCount = plot.getDataset(datasetCount).getSeriesCount();
 			for(int i=0; i<seriesCount;i++){
 				shapeRenderer.setSeriesPaint(i, colour);
-				shapeRenderer.setSeriesStroke(i, stroke);
+				shapeRenderer.setSeriesStroke(i, MARKER_STROKE);
 				shapeRenderer.setSeriesVisibleInLegend(i, false);
 			}
 			datasetCount++;
