@@ -31,7 +31,8 @@ import ij.gui.Roi;
 
 import java.io.File;
 
-import components.nuclei.*;
+import components.nuclei.AsymmetricNucleus;
+import components.nuclei.RoundNucleus;
 
 public class SpermNucleus
 	extends AsymmetricNucleus

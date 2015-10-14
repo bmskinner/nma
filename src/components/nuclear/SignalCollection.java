@@ -19,7 +19,6 @@
 package components.nuclear;
 
 import ij.IJ;
-import io.ImageImporter;
 
 import java.io.File;
 import java.io.Serializable;
@@ -31,8 +30,6 @@ import java.util.Map;
 import java.util.Set;
 
 import components.generic.XYPoint;
-
-import utility.Constants;
 
 /**
  * This holds all the signals within a nucleus, within a hash.

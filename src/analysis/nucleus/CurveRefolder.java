@@ -25,11 +25,18 @@
  */
 package analysis.nucleus;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
+
+import utility.Constants;
+import utility.Equation;
+import utility.Logger;
+import utility.Utils;
 
 import components.CellCollection;
 import components.CellCollection.NucleusType;
@@ -37,15 +44,10 @@ import components.CellCollection.ProfileCollectionType;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
-import components.nuclear.*;
+import components.nuclear.NucleusBorderPoint;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
-import utility.Constants;
-import utility.Equation;
-import utility.Logger;
-import utility.Utils;
 
 
 public class CurveRefolder extends SwingWorker<Boolean, Integer>{

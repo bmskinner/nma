@@ -19,16 +19,15 @@
 package analysis.nucleus;
 
 
-import ij.IJ;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Logger;
+
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderSegment;
-import utility.Logger;
 
 /**
  * Divide a profile into segments of interest based on

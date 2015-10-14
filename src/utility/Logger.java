@@ -18,11 +18,11 @@
  *******************************************************************************/
 package utility;
 
+import ij.IJ;
+
 import java.io.File;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
-
-import ij.IJ;
 
 public class Logger {
 

@@ -38,8 +38,7 @@ import java.util.List;
 
 import components.CellCollection.NucleusType;
 import components.generic.XYPoint;
-import components.nuclear.*;
-import utility.Constants;
+import components.nuclear.NucleusBorderPoint;
 
 public class AsymmetricNucleus
   extends RoundNucleus

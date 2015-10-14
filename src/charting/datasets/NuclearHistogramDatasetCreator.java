@@ -19,24 +19,20 @@
 package charting.datasets;
 
 import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
-import ij.IJ;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
 
-import components.CellCollection;
-import components.CellCollection.NucleusStatistic;
-import components.generic.Profile;
-import analysis.AnalysisDataset;
 import utility.Stats;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
+import analysis.AnalysisDataset;
+
+import components.CellCollection;
+import components.CellCollection.NucleusStatistic;
 
 public class NuclearHistogramDatasetCreator {
 	

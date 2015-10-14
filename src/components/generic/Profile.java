@@ -18,15 +18,16 @@
  *******************************************************************************/
 package components.generic;
 
+import ij.IJ;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import components.nuclear.NucleusBorderSegment;
-
 import utility.Utils;
-import ij.IJ;
+
+import components.nuclear.NucleusBorderSegment;
 
 /**
  * Holds arrays of values with wrapping and provides

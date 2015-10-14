@@ -27,14 +27,15 @@
 
  package utility;
 
- import java.util.ArrayList;
+ import ij.IJ;
+import ij.process.FloatPolygon;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import components.nuclear.NucleusBorderPoint;
 import components.nuclei.Nucleus;
-import ij.IJ;
-import ij.process.FloatPolygon;
 
  /**
  * @author bms41

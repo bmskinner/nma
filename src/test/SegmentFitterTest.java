@@ -18,30 +18,25 @@
  *******************************************************************************/
 package test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import ij.IJ;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-
 import org.junit.Test;
+
+import test.no.components.SegmentedProfileTest;
+import analysis.nucleus.ProfileSegmenter;
+import analysis.nucleus.SegmentFitter;
 
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
-import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
-import analysis.nucleus.ProfileSegmenter;
-import analysis.nucleus.SegmentFitter;
-import test.no.components.SegmentedProfileTest;
-import utility.Logger;
 
 public class SegmentFitterTest {
 	

@@ -20,7 +20,6 @@ package gui.components;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import ij.IJ;
 
 import java.awt.Color;
 import java.awt.event.MouseAdapter;

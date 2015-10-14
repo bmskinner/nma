@@ -39,7 +39,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import components.CellCollection;
+import utility.Constants.BorderTag;
+import utility.Stats;
+import utility.Utils;
+import analysis.AnalysisDataset;
+
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclear.NuclearSignal;
@@ -50,10 +54,6 @@ import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
-import analysis.AnalysisDataset;
-import utility.Constants.BorderTag;
-import utility.Stats;
-import utility.Utils;
 
 public class CellCollection implements Serializable {
 	

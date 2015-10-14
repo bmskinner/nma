@@ -24,19 +24,21 @@
   nuclei and signals
 */  
 package analysis;
-import java.util.*;
-
-import utility.StatsMap;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
-import ij.plugin.frame.RoiManager;
-import ij.process.ImageProcessor;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
+import ij.plugin.frame.RoiManager;
+import ij.process.ImageProcessor;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import utility.StatsMap;
 
 
 public class Detector{

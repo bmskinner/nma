@@ -18,7 +18,6 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import ij.IJ;
 import ij.ImageStack;
 import io.ImageImporter;
 
@@ -30,13 +29,14 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import utility.Constants;
+import utility.Logger;
+import analysis.AnalysisDataset;
+
 import components.CellCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
-import utility.Constants;
-import utility.Logger;
 
 public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 	

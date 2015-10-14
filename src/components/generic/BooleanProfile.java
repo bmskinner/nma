@@ -18,8 +18,8 @@
  *******************************************************************************/
 package components.generic;
 
-import utility.Utils;
 import ij.IJ;
+import utility.Utils;
 
 /**
  * Use to hold boolean results from a Profile

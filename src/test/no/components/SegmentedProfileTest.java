@@ -18,16 +18,16 @@
  *******************************************************************************/
 package test.no.components;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import components.generic.Profile;
+import test.NucleusTest;
+import test.SegmentFitterTest;
+
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import test.NucleusTest;
-import test.SegmentFitterTest;
 
 public class SegmentedProfileTest {
 

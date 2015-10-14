@@ -23,7 +23,6 @@ import java.awt.Font;
 import java.awt.SystemColor;
 
 import javax.swing.BoxLayout;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;

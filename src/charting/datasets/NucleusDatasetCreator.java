@@ -22,24 +22,21 @@ import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import ij.IJ;
 import ij.process.FloatPolygon;
 
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-
-import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
-import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+
+import utility.Constants.BorderTag;
+import utility.Equation;
+import utility.Utils;
+import weka.estimators.KernelEstimator;
+import analysis.AnalysisDataset;
 
 import components.Cell;
 import components.CellCollection;
@@ -52,18 +49,8 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.ShellResult;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
-import analysis.AnalysisOptions.NuclearSignalOptions;
-import analysis.nucleus.CurveRefolder;
-import utility.Constants;
-import utility.Constants.BorderTag;
-import weka.estimators.KernelEstimator;
-import utility.Equation;
-import utility.Stats;
-import utility.Utils;
 
 public class NucleusDatasetCreator {
 	

@@ -31,16 +31,24 @@ import ij.IJ;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
-import io.ImageImporter;
-import io.TableExporter;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
+import utility.Constants;
+import utility.Equation;
+import utility.Stats;
+import utility.Utils;
+
+import components.CellCollection.NucleusStatistic;
 import components.CellCollection.NucleusType;
 import components.CellularComponent;
-import components.CellCollection.NucleusStatistic;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
@@ -48,12 +56,6 @@ import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.SignalCollection;
-import analysis.nucleus.ProfileSegmenter;
-import utility.Constants;
-import utility.Equation;
-import utility.Stats;
-import utility.Utils;
-import utility.Constants.BorderTag;
 
 
 /**

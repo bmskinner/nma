@@ -18,8 +18,6 @@
  *******************************************************************************/
 package charting.datasets;
 
-import ij.IJ;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +25,11 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import utility.Utils;
+
 import components.Cell;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
-import utility.Utils;
 
 public class CellDatasetCreator {
 	

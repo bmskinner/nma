@@ -28,12 +28,11 @@ import java.awt.event.MouseEvent;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import analysis.AnalysisOptions;
 import utility.Constants;
+import analysis.AnalysisOptions;
 
 public class TailDetectionSettingsWindow extends SettingsDialog implements ActionListener {
 

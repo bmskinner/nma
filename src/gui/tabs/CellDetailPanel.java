@@ -18,25 +18,21 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
-import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -58,9 +54,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -68,18 +62,19 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
+import utility.Utils;
+import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;
+
 import components.Cell;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
-import utility.Utils;
 
 public class CellDetailPanel extends DetailPanel implements SignalChangeListener, TreeSelectionListener {
 

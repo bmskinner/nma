@@ -26,14 +26,6 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
-import analysis.ClusteringOptions;
-import analysis.ClusteringOptions.ClusteringMethod;
-import components.Cell;
-import components.CellCollection;
-import components.CellCollection.ProfileCollectionType;
-import components.generic.Profile;
-import components.generic.ProfileCollection;
-import components.nuclei.Nucleus;
 import utility.Constants;
 import utility.Constants.BorderTag;
 import utility.DipTester;
@@ -46,6 +38,15 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
+import analysis.ClusteringOptions;
+import analysis.ClusteringOptions.ClusteringMethod;
+
+import components.Cell;
+import components.CellCollection;
+import components.CellCollection.ProfileCollectionType;
+import components.generic.Profile;
+import components.generic.ProfileCollection;
+import components.nuclei.Nucleus;
 
 
 public class NucleusClusterer extends SwingWorker<Boolean, Integer> {

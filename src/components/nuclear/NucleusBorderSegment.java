@@ -28,12 +28,13 @@
 */  
 package components.nuclear;
 
+import ij.IJ;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import utility.Utils;
-import ij.IJ;
 
 public class NucleusBorderSegment  implements Serializable{
 

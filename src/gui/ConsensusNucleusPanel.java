@@ -21,46 +21,31 @@ package gui;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ConsensusNucleusChartPanel;
 import gui.tabs.DetailPanel;
-import ij.IJ;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.xy.XYDataset;
 
+import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
-import charting.charts.MorphologyChartFactory;
-import charting.datasets.NucleusDatasetCreator;
+
 import components.CellCollection;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
-import analysis.AnalysisDataset;
 
 public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener {
 

@@ -18,17 +18,18 @@
  *******************************************************************************/
 package utility;
 
+import ij.IJ;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
+import jdistlib.disttest.DistributionTest;
 import utility.Constants.BorderTag;
-import ij.IJ;
+
 import components.CellCollection;
 import components.CellCollection.ProfileCollectionType;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
-import jdistlib.disttest.DistributionTest;
 
 /**
  * The purpose is to test the difference at a particular point of a

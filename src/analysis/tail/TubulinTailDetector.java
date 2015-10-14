@@ -18,30 +18,6 @@
  *******************************************************************************/
 package analysis.tail;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import javax.swing.SwingWorker;
-
-import analysis.AnalysisDataset;
-import analysis.AnalysisOptions;
-import analysis.CannyEdgeDetector;
-import analysis.Detector;
-import analysis.AnalysisOptions.CannyOptions;
-import Skeletonize3D_.Skeletonize3D_;
-import skeleton_analysis.AnalyzeSkeleton_;
-import skeleton_analysis.Edge;
-import skeleton_analysis.Graph;
-import skeleton_analysis.SkeletonResult;
-import utility.Constants;
-import utility.Logger;
-import utility.Utils;
-import mmorpho.MorphoProcessor;
-import mmorpho.StructureElement;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -53,6 +29,32 @@ import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import io.ImageImporter;
+
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
+import javax.swing.SwingWorker;
+
+import mmorpho.MorphoProcessor;
+import mmorpho.StructureElement;
+import skeleton_analysis.AnalyzeSkeleton_;
+import skeleton_analysis.Edge;
+import skeleton_analysis.Graph;
+import skeleton_analysis.SkeletonResult;
+import utility.Constants;
+import utility.Logger;
+import utility.Utils;
+import Skeletonize3D_.Skeletonize3D_;
+import analysis.AnalysisDataset;
+import analysis.AnalysisOptions;
+import analysis.AnalysisOptions.CannyOptions;
+import analysis.CannyEdgeDetector;
+import analysis.Detector;
+
 import components.Cell;
 import components.SpermTail;
 import components.generic.XYPoint;

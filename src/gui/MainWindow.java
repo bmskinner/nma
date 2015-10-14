@@ -40,46 +40,44 @@ import io.PopulationImporter;
 import io.StatsExporter;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
-import javax.swing.JComboBox;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
-import java.awt.Dimension;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
+import logging.TextAreaHandler;
+import utility.Constants;
+//import utility.Logger;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
@@ -92,39 +90,11 @@ import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.ShellAnalysis;
 import analysis.nucleus.SignalDetector;
 import analysis.tail.TubulinTailDetector;
-import utility.Constants;
-//import utility.Logger;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import javax.swing.JTabbedPane;
 
 import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
 import components.nuclei.Nucleus;
-import logging.TextAreaHandler;
 
 public class MainWindow extends JFrame implements SignalChangeListener, DatasetEventListener {
 				

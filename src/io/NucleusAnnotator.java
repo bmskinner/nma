@@ -18,7 +18,6 @@
  *******************************************************************************/
 package io;
 
-import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import ij.IJ;
 import ij.ImagePlus;
@@ -30,17 +29,17 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 import java.util.List;
 
+import utility.Constants;
+import utility.Logger;
+import utility.Utils;
+import analysis.AnalysisDataset;
+
 import components.CellCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
-import analysis.nucleus.ProfileSegmenter;
-import utility.Constants;
-import utility.Logger;
-import utility.Utils;
 
 public class NucleusAnnotator {
 	

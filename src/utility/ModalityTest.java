@@ -18,11 +18,12 @@
  *******************************************************************************/
 package utility;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
 
 import utility.ModalityTest.BinnedData.Bin;
+
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 

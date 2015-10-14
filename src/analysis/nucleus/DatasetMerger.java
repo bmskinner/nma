@@ -25,12 +25,13 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import utility.Constants;
+import utility.Logger;
+import analysis.AnalysisDataset;
+
 import components.Cell;
 import components.CellCollection;
 import components.CellCollection.NucleusType;
-import analysis.AnalysisDataset;
-import utility.Constants;
-import utility.Logger;
 
 public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	

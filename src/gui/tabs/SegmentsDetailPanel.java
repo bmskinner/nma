@@ -19,7 +19,6 @@
 package gui.tabs;
 
 import gui.components.ColourSelecter.ColourSwatch;
-import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,9 +33,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -50,23 +47,18 @@ import javax.swing.table.TableColumn;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeriesCollection;
 
 import utility.Constants.BorderTag;
+import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
-import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;
+
 import components.CellCollection;
-import components.CellCollection.NucleusStatistic;
 import components.CellCollection.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
 
 public class SegmentsDetailPanel extends DetailPanel {
 
@@ -434,7 +426,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		private Dimension preferredSize = new Dimension(200, 300);
 		JScrollPane scrollPane;
 		
-		private Map<String, ChartPanel> chartPanels = new HashMap<String, ChartPanel>();
+//		private Map<String, ChartPanel> chartPanels = new HashMap<String, ChartPanel>();
 		
 		protected SegmentBoxplotsPanel(){
 			

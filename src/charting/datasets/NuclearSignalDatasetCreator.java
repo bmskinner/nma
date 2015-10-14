@@ -35,15 +35,16 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import utility.Utils;
+import analysis.AnalysisDataset;
+import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.nucleus.CurveRefolder;
+
 import components.CellCollection;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
-import analysis.AnalysisOptions.NuclearSignalOptions;
-import analysis.nucleus.CurveRefolder;
-import utility.Utils;
 
 public class NuclearSignalDatasetCreator {
 

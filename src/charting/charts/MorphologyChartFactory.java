@@ -20,7 +20,6 @@ package charting.charts;
 
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
-import ij.IJ;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -29,27 +28,6 @@ import java.awt.geom.Ellipse2D;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -63,7 +41,6 @@ import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
 import org.jfree.chart.renderer.xy.XYDifferenceRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
@@ -73,18 +50,18 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import utility.Constants.BorderTag;
+import utility.Utils;
+import analysis.AnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
+
 import components.Cell;
 import components.CellCollection;
 import components.CellCollection.ProfileCollectionType;
-import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
-import utility.Constants.BorderTag;
-import utility.Utils;
 
 public class MorphologyChartFactory {
 	

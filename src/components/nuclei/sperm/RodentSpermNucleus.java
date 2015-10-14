@@ -29,7 +29,11 @@ package components.nuclei.sperm;
 import ij.gui.Roi;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import utility.Equation;
+import utility.Utils;
 
 import components.CellCollection.NucleusType;
 import components.generic.BooleanProfile;
@@ -38,9 +42,6 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclei.RoundNucleus;
-import utility.Constants;
-import utility.Equation;
-import utility.Utils;
 
 public class RodentSpermNucleus
 extends SpermNucleus

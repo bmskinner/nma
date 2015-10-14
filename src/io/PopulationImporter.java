@@ -28,10 +28,10 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.CellCollection;
-
-import analysis.AnalysisDataset;
 import utility.Logger;
+import analysis.AnalysisDataset;
+
+import components.CellCollection;
 
 public class PopulationImporter {
 	

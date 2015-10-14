@@ -42,9 +42,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import utility.Constants;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
-import utility.Constants;
 
 public class SignalDetectionSettingsWindow extends SettingsDialog implements ChangeListener {
 

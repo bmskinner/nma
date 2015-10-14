@@ -18,8 +18,6 @@
  *******************************************************************************/
 package gui.tabs;
 
-import gui.tabs.VennDetailPanel.VennTableCellRenderer;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -34,10 +32,9 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import charting.datasets.NucleusDatasetCreator;
-import charting.datasets.NucleusTableDatasetCreator;
-import analysis.AnalysisDataset;
 import utility.Constants;
+import analysis.AnalysisDataset;
+import charting.datasets.NucleusTableDatasetCreator;
 
 public class WilcoxonDetailPanel extends DetailPanel {
 

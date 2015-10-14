@@ -56,14 +56,15 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import analysis.AnalysisDataset;
+import charting.charts.HistogramChartFactory;
+import charting.datasets.NuclearHistogramDatasetCreator;
+import charting.datasets.NucleusDatasetCreator;
+
 import components.Cell;
 import components.CellCollection;
 import components.CellCollection.NucleusStatistic;
 import components.nuclei.Nucleus;
-import charting.charts.HistogramChartFactory;
-import charting.datasets.NuclearHistogramDatasetCreator;
-import charting.datasets.NucleusDatasetCreator;
-import analysis.AnalysisDataset;
 
 public class NuclearBoxplotsPanel extends DetailPanel {
 	

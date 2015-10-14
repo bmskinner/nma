@@ -18,10 +18,11 @@
  *******************************************************************************/
 package analysis.nucleus;
 
+import utility.Logger;
+
 import components.Cell;
 import components.CellCollection;
 import components.nuclei.Nucleus;
-import utility.Logger;
 
 public class CollectionFilterer {
 

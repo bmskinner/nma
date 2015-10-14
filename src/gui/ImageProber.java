@@ -44,13 +44,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import components.Cell;
-import components.nuclei.Nucleus;
+import utility.Logger;
+import utility.Utils;
 import analysis.AnalysisOptions;
 import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.NucleusFinder;
-import utility.Logger;
-import utility.Utils;
+
+import components.Cell;
+import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
 public class ImageProber extends JDialog {

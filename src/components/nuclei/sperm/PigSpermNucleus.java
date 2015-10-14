@@ -30,9 +30,8 @@ import java.io.File;
 import components.CellCollection.NucleusType;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
-import components.nuclear.*;
-import components.nuclei.*;
-import utility.Constants;
+import components.nuclear.NucleusBorderPoint;
+import components.nuclei.RoundNucleus;
 
 public class PigSpermNucleus 
     extends SpermNucleus 

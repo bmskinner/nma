@@ -54,11 +54,12 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.MouseInputAdapter;
 
+import utility.Utils;
+import analysis.AnalysisDataset;
+
 import components.Cell;
 import components.CellCollection;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
-import utility.Utils;
 
 public class FishMappingWindow extends JDialog {
 
@@ -530,6 +531,7 @@ public class FishMappingWindow extends JDialog {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	private class DrawableImageArea extends JLabel {
 		Rectangle currentRect = null;
 

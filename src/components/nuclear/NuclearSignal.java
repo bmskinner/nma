@@ -18,14 +18,14 @@
  *******************************************************************************/
 package components.nuclear;
 
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import components.generic.XYPoint;
-
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
 
 /*
   -----------------------

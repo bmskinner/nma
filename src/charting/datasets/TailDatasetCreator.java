@@ -18,8 +18,6 @@
  *******************************************************************************/
 package charting.datasets;
 
-import ij.IJ;
-
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 

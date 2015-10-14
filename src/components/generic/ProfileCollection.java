@@ -18,8 +18,6 @@
  *******************************************************************************/
 package components.generic;
 
-import ij.IJ;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +27,6 @@ import java.util.Map;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import utility.Utils;
 
 public class ProfileCollection implements Serializable {
 		

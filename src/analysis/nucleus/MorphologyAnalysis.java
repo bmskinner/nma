@@ -26,6 +26,10 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import utility.Constants;
+import utility.Logger;
+import utility.Utils;
+
 import components.CellCollection;
 import components.CellCollection.NucleusType;
 import components.CellCollection.ProfileCollectionType;
@@ -35,12 +39,8 @@ import components.generic.ProfileCollection;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
 import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
-import utility.Constants;
-import utility.Logger;
-import utility.Utils;
 
 /**
  * This is the core of the morphology analysis pipeline.

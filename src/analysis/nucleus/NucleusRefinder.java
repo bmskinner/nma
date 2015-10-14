@@ -28,20 +28,22 @@ package analysis.nucleus;
 
 import gui.MainWindow;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+
+import utility.Logger;
+import analysis.AnalysisOptions;
 
 import components.generic.XYPoint;
-
-import analysis.AnalysisOptions;
-import analysis.nucleus.ImageAligner;
-import utility.Logger;
 
 public class NucleusRefinder
   extends analysis.nucleus.NucleusDetector

@@ -19,7 +19,6 @@
 package gui.tabs;
 
 import java.awt.BorderLayout;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
@@ -29,9 +28,8 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import charting.datasets.NucleusDatasetCreator;
-import charting.datasets.NucleusTableDatasetCreator;
 import analysis.AnalysisDataset;
+import charting.datasets.NucleusTableDatasetCreator;
 
 /**
  * Holds the nuclear detection parameters and basic stats about the

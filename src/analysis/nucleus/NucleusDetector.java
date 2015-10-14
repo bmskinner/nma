@@ -38,20 +38,26 @@ import io.ImageExporter;
 import io.ImageImporter;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
-import components.Cell;
-import components.CellCollection;
-import components.nuclear.*;
-import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
-import analysis.AnalysisOptions;
 import utility.Constants;
 import utility.Logger;
 import utility.Utils;
+import analysis.AnalysisDataset;
+import analysis.AnalysisOptions;
+
+import components.Cell;
+import components.CellCollection;
+import components.nuclei.Nucleus;
 
 public class NucleusDetector extends SwingWorker<Boolean, Integer> {
   

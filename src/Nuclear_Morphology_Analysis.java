@@ -17,12 +17,12 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-
 import gui.MainWindow;
 import ij.IJ;
 import ij.plugin.PlugIn;
+
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 public class Nuclear_Morphology_Analysis
 implements PlugIn

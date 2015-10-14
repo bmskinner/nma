@@ -52,10 +52,11 @@ import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
+import utility.TreeOrderHashMap;
+import analysis.AnalysisDataset;
+
 import components.CellCollection;
 import components.ClusterGroup;
-import analysis.AnalysisDataset;
-import utility.TreeOrderHashMap;
 
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
 

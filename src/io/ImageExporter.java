@@ -18,11 +18,11 @@
  *******************************************************************************/
 package io;
 
-import utility.Constants;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
 import ij.process.ByteProcessor;
+import utility.Constants;
 
 /**
  * This class handles the flattening of the image stacks used

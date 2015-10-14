@@ -31,10 +31,11 @@ import ij.process.ImageProcessor;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-import components.CellCollection;
-import components.nuclei.Nucleus;
 import utility.Logger;
 import utility.Utils;
+
+import components.CellCollection;
+import components.nuclei.Nucleus;
 
 public class CompositeExporter {
 

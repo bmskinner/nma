@@ -18,12 +18,11 @@
  *******************************************************************************/
 package test;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-
+import static org.junit.Assert.assertEquals;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+
+import java.io.File;
 
 import org.junit.Test;
 

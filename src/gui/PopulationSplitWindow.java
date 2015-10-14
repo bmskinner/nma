@@ -18,14 +18,14 @@
  *******************************************************************************/
 package gui;
 
+import ij.gui.GenericDialog;
+import ij.io.OpenDialog;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import components.CellCollection;
-
-import ij.gui.GenericDialog;
-import ij.io.OpenDialog;
 
 /**
  * This is a placeholder class to put at the end of the analysis

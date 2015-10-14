@@ -22,7 +22,6 @@ package gui.tabs;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
-import ij.IJ;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -62,15 +61,15 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
+import utility.Constants;
+import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
-import charting.datasets.NucleusDatasetCreator;
+
 import components.CellCollection;
 import components.nuclear.ShellResult;
-import analysis.AnalysisDataset;
-import utility.Constants;
 
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 

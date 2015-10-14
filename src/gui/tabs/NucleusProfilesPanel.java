@@ -21,8 +21,6 @@ package gui.tabs;
 import gui.components.ColourSelecter;
 import gui.components.ProfileCollectionTypeSettingsPanel;
 import gui.components.ProflleDisplaySettingsPanel;
-import gui.components.ColourSelecter.ColourSwatch;
-import ij.IJ;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -32,31 +30,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
-import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
-import javax.swing.ListModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
-
-import jdistlib.disttest.DistributionTest;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -69,17 +58,18 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 
-import utility.Constants.BorderTag;
 import utility.Constants;
+import utility.Constants.BorderTag;
 import utility.DipTester;
+import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
+
 import components.CellCollection;
 import components.CellCollection.ProfileCollectionType;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
-import analysis.AnalysisDataset;
 
 public class NucleusProfilesPanel extends DetailPanel {
 

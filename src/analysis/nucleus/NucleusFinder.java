@@ -18,11 +18,9 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
-import ij.plugin.RoiEnlarger;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import io.ImageExporter;
@@ -35,21 +33,22 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.Cell;
-import components.CellCollection.NucleusType;
-import components.generic.XYPoint;
-import components.nuclei.Nucleus;
-import analysis.AnalysisOptions;
-import analysis.CannyEdgeDetector;
-import analysis.Detector;
-import analysis.Kuwahara_Filter;
-import analysis.AnalysisOptions.CannyOptions;
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import utility.Constants;
 import utility.Logger;
 import utility.Stats;
 import utility.StatsMap;
+import analysis.AnalysisOptions;
+import analysis.AnalysisOptions.CannyOptions;
+import analysis.CannyEdgeDetector;
+import analysis.Detector;
+import analysis.Kuwahara_Filter;
+
+import components.Cell;
+import components.CellCollection.NucleusType;
+import components.generic.XYPoint;
+import components.nuclei.Nucleus;
 
 
 /**

@@ -34,9 +34,9 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
-import components.CellCollection.NucleusStatistic;
-
 import analysis.AnalysisDataset;
+
+import components.CellCollection.NucleusStatistic;
 
 
 public class HistogramChartFactory {

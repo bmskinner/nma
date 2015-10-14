@@ -19,7 +19,6 @@
 package charting.datasets;
 
 import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
-import ij.IJ;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -33,22 +32,21 @@ import javax.swing.table.TableModel;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
+import analysis.AnalysisDataset;
+import analysis.AnalysisOptions;
+import analysis.AnalysisOptions.CannyOptions;
+import analysis.ClusteringOptions;
+import analysis.ClusteringOptions.ClusteringMethod;
+
 import components.CellCollection;
 import components.CellCollection.NucleusType;
-import components.ClusterGroup;
 import components.CellCollection.ProfileCollectionType;
+import components.ClusterGroup;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
-import analysis.AnalysisDataset;
-import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.CannyOptions;
-import analysis.ClusteringOptions.ClusteringMethod;
-import analysis.ClusteringOptions;
-import utility.Constants;
-import utility.Stats;
 
 public class NucleusTableDatasetCreator {
 	

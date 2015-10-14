@@ -32,9 +32,10 @@ import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
-import charting.datasets.NucleusDatasetCreator;
-import components.CellCollection;
 import analysis.AnalysisDataset;
+import charting.datasets.NucleusDatasetCreator;
+
+import components.CellCollection;
 
 /**
  * Methods to make charts with a consensus nucleus

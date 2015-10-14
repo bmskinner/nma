@@ -26,10 +26,7 @@ import ij.measure.Measurements;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
-import io.CompositeExporter;
 import io.ImageImporter;
-import io.NucleusAnnotator;
-import io.StatsExporter;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -41,8 +38,15 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import utility.Constants;
+import utility.Logger;
+import utility.StatsMap;
+import utility.Utils;
+import analysis.AnalysisDataset;
+import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.Detector;
+
 import components.Cell;
-import components.CellCollection;
 import components.CellCollection.NucleusType;
 import components.generic.BooleanProfile;
 import components.generic.Profile;
@@ -51,14 +55,6 @@ import components.nuclear.NuclearSignal;
 import components.nuclear.SignalCollection;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
-import analysis.AnalysisDataset;
-import analysis.Detector;
-import analysis.AnalysisOptions.NuclearSignalOptions;
-import utility.Constants;
-import utility.Logger;
-import utility.StatsMap;
-import utility.Utils;
 
 
 /**

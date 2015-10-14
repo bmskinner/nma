@@ -22,49 +22,37 @@ import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.FlowLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JSpinner;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JRadioButton;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.SpinnerNumberModel;
-
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.BorderLayout;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-
-import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import java.io.File;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import components.CellCollection.NucleusType;
-import components.nuclei.RoundNucleus;
-import components.nuclei.sperm.PigSpermNucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
-import utility.Constants;
+
+import components.CellCollection.NucleusType;
 
 public class AnalysisSetupWindow extends SettingsDialog implements ActionListener, ChangeListener {
 

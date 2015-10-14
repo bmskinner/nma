@@ -18,14 +18,15 @@
  *******************************************************************************/
 package io;
 
-import java.io.File;
-
-import utility.Constants;
-import utility.Logger;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
 import ij.process.ImageConverter;
+
+import java.io.File;
+
+import utility.Constants;
+import utility.Logger;
 
 /**
  * This class takes any given input image, and will convert it

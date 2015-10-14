@@ -18,19 +18,17 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import ij.IJ;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import utility.Logger;
 
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import utility.Logger;
-import utility.Utils;
 
 /**
  * This takes a median profile plus segments, and a real profile plus segments from

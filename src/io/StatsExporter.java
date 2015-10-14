@@ -24,13 +24,14 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Logger;
+
 import components.CellCollection;
 import components.CellCollection.ProfileCollectionType;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import utility.Logger;
 
 public class StatsExporter {
 	
