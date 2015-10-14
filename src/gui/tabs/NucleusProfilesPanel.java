@@ -49,6 +49,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.ListModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -117,17 +118,21 @@ public class NucleusProfilesPanel extends DetailPanel {
 	public void update(List<AnalysisDataset> list){
 		
 		this.list = list;
-		
-		try {
-			profileDisplayPanel.update(list);
-			frankenDisplayPanel.update(list);
-			variabilityChartPanel.update(list);
-			modalityDisplayPanel.update(list);
-		} catch  (Exception e){
-			error("Error updating profile panels", e);
-		}
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+
+				try {
+					profileDisplayPanel.update(NucleusProfilesPanel.this.list);
+					frankenDisplayPanel.update(NucleusProfilesPanel.this.list);
+					variabilityChartPanel.update(NucleusProfilesPanel.this.list);
+					modalityDisplayPanel.update(NucleusProfilesPanel.this.list);
+				} catch  (Exception e){
+					error("Error updating profile panels", e);
+				}
+			}
+		});
 	}
-	
+
 	@SuppressWarnings("serial")
 	private class ModalityDisplayPanel extends JPanel implements ActionListener {
 		

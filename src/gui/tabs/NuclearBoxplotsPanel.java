@@ -43,6 +43,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -88,12 +89,18 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 	public void update(List<AnalysisDataset> list){	
 		this.list = list;
-		try {
-			boxplotPanel.update(list);
-			histogramsPanel.update(list);
-		} catch (Exception e) {
-			error("Error updating nuclear charts", e);
-		}
+		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				try {
+					boxplotPanel.update(NuclearBoxplotsPanel.this.list);
+					histogramsPanel.update(NuclearBoxplotsPanel.this.list);
+				} catch (Exception e) {
+					error("Error updating nuclear charts", e);
+				}
+			}
+		});
+
 	}
 	
 	protected class BoxplotsPanel extends JPanel implements ActionListener {
