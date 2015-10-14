@@ -468,6 +468,9 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment mergedSegment = new NucleusBorderSegment(startIndex, endIndex, this.size());
 		mergedSegment.setName(firstSegment.getName());
 		
+		mergedSegment.addMergeSource(firstSegment);
+		mergedSegment.addMergeSource(secondSegment);
+		
 		// Replace the two segments in this profile
 		List<NucleusBorderSegment> oldSegs = this.getSegments();
 		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
@@ -483,8 +486,47 @@ public class SegmentedProfile extends Profile implements Serializable {
 				newSegs.add(oldSegment);
 			}
 		}
+
+		NucleusBorderSegment.linkSegments(newSegs);
+
+		this.setSegments(newSegs);
+	}
+	
+	/**
+	 * Reverse a merge operation on a segment
+	 * @param segment
+	 */
+	public void unmergeSegment(NucleusBorderSegment segment) throws Exception {
+		// Check the segments belong to the profile
+		if(!this.contains(segment) ){
+			throw new IllegalArgumentException("Input segment is not part of this profile");
+		}
+		
+		if(!segment.hasMergeSources()){
+			throw new IllegalArgumentException("Segment does not have merge sources");
+		}
+		
+		// Replace the two segments in this profile
+		List<NucleusBorderSegment> oldSegs = this.getSegments();
+		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
+		for(NucleusBorderSegment oldSegment : oldSegs){
+
+			if(oldSegment.equals(segment)){
+				
+				// add each of the old segments
+				for(NucleusBorderSegment mergedSegment : segment.getMergeSources()){
+					newSegs.add(mergedSegment);
+				}
+				
+			} else {
+				
+				// add the original segments
+				newSegs.add(oldSegment);
+			}
+		}
 		NucleusBorderSegment.linkSegments(newSegs);
 		this.setSegments(newSegs);
+
 	}
 	
 

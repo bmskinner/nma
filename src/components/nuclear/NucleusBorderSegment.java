@@ -54,6 +54,10 @@ public class NucleusBorderSegment  implements Serializable{
 	private NucleusBorderSegment nextSegment = null; // track the next segment in the profile
 	
 	private String lastFailReason = "No fail";
+	
+	private List<NucleusBorderSegment> mergeSources = new ArrayList<NucleusBorderSegment>();
+	
+	private int positionInProfile; // for future refactor
 
 	public NucleusBorderSegment(int startIndex, int endIndex, int total){
 		
@@ -73,6 +77,7 @@ public class NucleusBorderSegment  implements Serializable{
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
 		this.totalLength = total;
+		this.mergeSources = new ArrayList<NucleusBorderSegment>();
 	}
 
 	public NucleusBorderSegment(NucleusBorderSegment n){
@@ -82,6 +87,7 @@ public class NucleusBorderSegment  implements Serializable{
 		this.totalLength = n.getTotalLength();
 		this.nextSegment = n.nextSegment();
 		this.prevSegment = n.prevSegment();
+		this.mergeSources = n.getMergeSources();
 	}
 
 	/*
@@ -89,6 +95,34 @@ public class NucleusBorderSegment  implements Serializable{
 		Getters
 		----------------
 	*/
+	
+	/**
+	 * Get a copy of the merge source segments
+	 * @return
+	 */
+	public List<NucleusBorderSegment> getMergeSources(){
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
+		for(NucleusBorderSegment seg : this.mergeSources){
+			result.add( new NucleusBorderSegment(seg));
+		}
+		return result;
+	}
+	
+	public void addMergeSource(NucleusBorderSegment seg){
+		this.mergeSources.add(seg);
+	}
+	
+	/**
+	 * Test if this segment is a merge of other segments
+	 * @return
+	 */
+	public boolean hasMergeSources(){
+		if(this.mergeSources.isEmpty()){
+			return false;
+		} else {
+			return true;
+		}
+	}
 	
 	public String getLastFailReason(){
 		return this.lastFailReason;
@@ -626,11 +660,78 @@ public class NucleusBorderSegment  implements Serializable{
 			
 			newSeg.setName(segment.getName());
 			
+			
+			// adjust merge sources also and readd
+			if(segment.hasMergeSources()){
+				
+//				IJ.log("Nudging merge sources for "+segment.getName());
+//				
+				List<NucleusBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
+				for(NucleusBorderSegment newMergeSource : adjustedMergeSources){
+					newSeg.addMergeSource(newMergeSource);
+				}
+				
+//				for(NucleusBorderSegment oldMergeSource : segment.getMergeSources()){
+//					NucleusBorderSegment newMergeSource = new NucleusBorderSegment(Utils.wrapIndex(oldMergeSource.getStartIndex()+value, oldMergeSource.getTotalLength()), 
+//							Utils.wrapIndex(oldMergeSource.getEndIndex()+value, oldMergeSource.getTotalLength()), 
+//							oldMergeSource.getTotalLength() );
+//					
+//					newMergeSource.setName(oldMergeSource.getName());
+//					newSeg.addMergeSource(newMergeSource);
+//				}
+				
+			}
+			
 			result.add( newSeg );
 		}
 		
 		linkSegments(result);
 		
+		return result;
+	}
+	
+	/**
+	 * Nudge segments that are not linked together into a complete profile. Used in merging and unmerging
+	 * segments recursively.
+	 * @param list
+	 * @param value
+	 * @return
+	 * @throws Exception
+	 */
+	private static List<NucleusBorderSegment> nudgeUnlinked(List<NucleusBorderSegment> list, int value) throws Exception{
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
+		
+		for(NucleusBorderSegment segment : list){
+			
+			NucleusBorderSegment newSeg = new NucleusBorderSegment(Utils.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
+					Utils.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
+					segment.getTotalLength() );
+			
+			newSeg.setName(segment.getName());
+			
+			
+			// adjust merge sources also and readd
+			if(segment.hasMergeSources()){
+				
+//				IJ.log("Nudging merge sources for "+segment.getName());
+//				
+				List<NucleusBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
+				for(NucleusBorderSegment newMergeSource : adjustedMergeSources){
+					newSeg.addMergeSource(newMergeSource);
+				}
+				
+//				for(NucleusBorderSegment oldMergeSource : segment.getMergeSources()){
+//					NucleusBorderSegment newMergeSource = new NucleusBorderSegment(Utils.wrapIndex(oldMergeSource.getStartIndex()+value, oldMergeSource.getTotalLength()), 
+//							Utils.wrapIndex(oldMergeSource.getEndIndex()+value, oldMergeSource.getTotalLength()), 
+//							oldMergeSource.getTotalLength() );
+//					
+//					newMergeSource.setName(oldMergeSource.getName());
+//					newSeg.addMergeSource(newMergeSource);
+//				}
+			}
+			
+			result.add( newSeg );
+		}
 		return result;
 	}
 	
@@ -643,12 +744,15 @@ public class NucleusBorderSegment  implements Serializable{
 	public static List<NucleusBorderSegment> copy(List<NucleusBorderSegment> list) throws Exception{
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		
+		
+//		IJ.log("Before copy linking:");
 		for(NucleusBorderSegment segment : list){
-			
+//			IJ.log(segment.getName()+" merges: "+segment.hasMergeSources());
 			result.add( new NucleusBorderSegment(segment));
 		}
 		
 		linkSegments(result);
+
 		
 		return result;
 	}

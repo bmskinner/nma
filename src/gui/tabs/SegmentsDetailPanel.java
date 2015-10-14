@@ -259,6 +259,57 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 			});
 			
 			panel.add(mergeButton);
+			
+			JButton unmergeButton = new JButton("Unmerge segments");
+			
+			unmergeButton.addActionListener( new ActionListener(){
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					
+					// show a list of segments that can be unmerged, and merge the selected option
+
+					CellCollection collection = activeDataset.getCollection();
+
+					try {
+						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
+						List<String> names = new ArrayList<String>();
+						
+						// Put the names of the mergable segments into a list
+						for(NucleusBorderSegment seg : medianProfile.getSegments()){
+							if(seg.hasMergeSources()){
+								names.add(seg.getName());
+							}							
+						}
+						String[] nameArray = names.toArray(new String[0]);
+						
+						String mergeOption = (String) JOptionPane.showInputDialog(null, 
+								"Choose segments to unmerge",
+								"Unmerge",
+								JOptionPane.QUESTION_MESSAGE, 
+								null, 
+								nameArray, 
+								nameArray[0]);
+						
+						if(mergeOption!=null){
+							// a choice was made
+							
+							
+							unmergeSegments(mergeOption);
+							
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							SegmentsDetailPanel.this.update(list);
+							SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
+						}
+						
+					} catch (Exception e1) {
+						error("Error unmerging segments", e1);
+					}
+					
+				}
+			});
+			
+			panel.add(unmergeButton);
 			return panel;
 			
 			
@@ -304,6 +355,45 @@ public class SegmentsDetailPanel extends DetailPanel implements ActionListener {
 				profile.mergeSegments(nSeg1, nSeg2);
 				n.setAngleProfile(profile, n.getOrientationPoint());
 			}
+		}
+		
+		private void unmergeSegments(String segName) throws Exception {
+			CellCollection collection = activeDataset.getCollection();
+			
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
+			
+			// Get the segments to merge
+			NucleusBorderSegment seg = medianProfile.getSegment(segName);
+			
+			// merge the two segments in the median - this is only a copy of the profile collection
+			medianProfile.unmergeSegment(seg);
+			
+			// put the new segment pattern back with the appropriate offset
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( collection.getOrientationPoint(),  medianProfile.getSegments());
+
+			/*
+			 * With the median profile segments unmerged, also unmerge the segments
+			 * in the individual nuclei
+			 */
+			for(Nucleus n : collection.getNuclei()){
+
+				SegmentedProfile profile = n.getAngleProfile(n.getOrientationPoint());
+				NucleusBorderSegment nSeg = profile.getSegment(segName);
+				profile.unmergeSegment(nSeg);
+				n.setAngleProfile(profile, n.getOrientationPoint());
+			}
+			
+			/*
+			 * Update the consensus if present
+			 */
+			if(collection.hasConsensusNucleus()){
+				ConsensusNucleus n = collection.getConsensusNucleus();
+				SegmentedProfile profile = n.getAngleProfile(collection.getOrientationPoint());
+				NucleusBorderSegment nSeg1 = profile.getSegment(segName);
+				profile.unmergeSegment(nSeg1);
+				n.setAngleProfile(profile, n.getOrientationPoint());
+			}
+			
 		}
 		
 		public void update(List<AnalysisDataset> list, String segName, boolean normalised, boolean rightAlign){

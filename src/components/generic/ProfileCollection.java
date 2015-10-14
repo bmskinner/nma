@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components.generic;
 
+import ij.IJ;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,6 +114,7 @@ public class ProfileCollection implements Serializable {
 		if(s==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
+
 		SegmentedProfile result = new SegmentedProfile(getProfile(s), getSegments(s));
 		return result;
 	}
