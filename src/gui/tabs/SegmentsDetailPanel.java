@@ -21,6 +21,7 @@ package gui.tabs;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
+import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 
 import java.awt.BorderLayout;
@@ -56,7 +57,6 @@ import utility.Constants.BorderTag.BorderTagType;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
-
 import components.CellCollection;
 import components.CellCollection.ProfileCollectionType;
 import components.generic.SegmentedProfile;
@@ -172,7 +172,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	}
 	
 	@SuppressWarnings("serial")
-	protected class SegmentProfilePanel extends JPanel {
+	protected class SegmentProfilePanel extends JPanel implements ActionListener {
 		
 		private ChartPanel chartPanel; // for displaying the legnth of a given segment
 		private JPanel buttonsPanel;
@@ -211,101 +211,18 @@ public class SegmentsDetailPanel extends DetailPanel {
 				}
 			};
 			mergeButton = new JButton("Merge segments");
-			
-			mergeButton.addActionListener( new ActionListener(){
-
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					
-					// Goal: show a list of segments that can be merged, and merge the selected option
-//					IJ.log("Merge clicked");
-					CellCollection collection = activeDataset.getCollection();
-
-					try {
-						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
-						List<String> names = new ArrayList<String>();
-						
-						// Put the names of the mergable segments into a list
-						for(NucleusBorderSegment seg : medianProfile.getSegments()){
-							String mergeName = seg.getName()+" - "+seg.nextSegment().getName();
-							names.add(mergeName);
-						}
-						String[] nameArray = names.toArray(new String[0]);
-						
-						String mergeOption = (String) JOptionPane.showInputDialog(null, 
-								"Choose segments to merge",
-								"Merge",
-								JOptionPane.QUESTION_MESSAGE, 
-								null, 
-								nameArray, 
-								nameArray[0]);
-						
-						if(mergeOption!=null){
-							// a choice was made
-							String[] segs = mergeOption.split(" - "); // split back up to seg names
-							
-							mergeSegments(segs[0], segs[1]);
-							
-							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-							list.add(activeDataset);
-							SegmentsDetailPanel.this.update(list);
-							SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
-						}
-						
-					} catch (Exception e1) {
-						error("Error merging segments", e1);
-					}
-					
-				}
-			});
+			mergeButton.addActionListener(this);
 			
 			panel.add(mergeButton);
 			
 			unmergeButton = new JButton("Unmerge segments");
+			unmergeButton.addActionListener(this);
 			
 			unmergeButton.addActionListener( new ActionListener(){
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					
-					// show a list of segments that can be unmerged, and merge the selected option
-
-					CellCollection collection = activeDataset.getCollection();
-
-					try {
-						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
-						List<String> names = new ArrayList<String>();
-						
-						// Put the names of the mergable segments into a list
-						for(NucleusBorderSegment seg : medianProfile.getSegments()){
-							if(seg.hasMergeSources()){
-								names.add(seg.getName());
-							}							
-						}
-						String[] nameArray = names.toArray(new String[0]);
-						
-						String mergeOption = (String) JOptionPane.showInputDialog(null, 
-								"Choose segments to unmerge",
-								"Unmerge",
-								JOptionPane.QUESTION_MESSAGE, 
-								null, 
-								nameArray, 
-								nameArray[0]);
-						
-						if(mergeOption!=null){
-							// a choice was made
-							
-							
-							unmergeSegments(mergeOption);
-							
-							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-							list.add(activeDataset);
-							SegmentsDetailPanel.this.update(list);
-							SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
-						}
-						
-					} catch (Exception e1) {
-						error("Error unmerging segments", e1);
-					}
+					
 					
 				}
 			});
@@ -414,7 +331,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					
 				} else {				
 					
-					chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(list, true, false, BorderTag.REFERENCE_POINT, false);
+					chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false);
 
 					if(list.size()>1){
 						buttonsPanel.setEnabled(false);
@@ -452,6 +369,83 @@ public class SegmentsDetailPanel extends DetailPanel {
 			} catch (Exception e) {
 				error("Error in plotting segment profile", e);
 			} 
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				CellCollection collection = activeDataset.getCollection();
+				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
+				List<String> names = new ArrayList<String>();
+
+				if(e.getSource().equals(mergeButton)){
+
+					// Put the names of the mergable segments into a list
+					for(NucleusBorderSegment seg : medianProfile.getSegments()){
+						String mergeName = seg.getName()+" - "+seg.nextSegment().getName();
+						names.add(mergeName);
+					}
+					String[] nameArray = names.toArray(new String[0]);
+
+					String mergeOption = (String) JOptionPane.showInputDialog(null, 
+							"Choose segments to merge",
+							"Merge",
+							JOptionPane.QUESTION_MESSAGE, 
+							null, 
+							nameArray, 
+							nameArray[0]);
+
+					if(mergeOption!=null){
+						// a choice was made
+						String[] segs = mergeOption.split(" - "); // split back up to seg names
+
+						mergeSegments(segs[0], segs[1]);
+
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+						list.add(activeDataset);
+						SegmentsDetailPanel.this.update(list);
+						SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
+					}
+
+
+				}
+
+				if(e.getSource().equals(unmergeButton)){
+					// show a list of segments that can be unmerged, and merge the selected option
+
+					// Put the names of the mergable segments into a list
+					for(NucleusBorderSegment seg : medianProfile.getSegments()){
+						if(seg.hasMergeSources()){
+							names.add(seg.getName());
+						}							
+					}
+					String[] nameArray = names.toArray(new String[0]);
+
+					String mergeOption = (String) JOptionPane.showInputDialog(null, 
+							"Choose segments to unmerge",
+							"Unmerge",
+							JOptionPane.QUESTION_MESSAGE, 
+							null, 
+							nameArray, 
+							nameArray[0]);
+
+					if(mergeOption!=null){
+						// a choice was made
+
+
+						unmergeSegments(mergeOption);
+
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+						list.add(activeDataset);
+						SegmentsDetailPanel.this.update(list);
+						SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
+					}
+
+					
+				}
+			} catch (Exception e1) {
+				error("Error merging segments", e1);
+			}
 		}
 	}
 	

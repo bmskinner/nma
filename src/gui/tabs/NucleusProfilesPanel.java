@@ -18,14 +18,19 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.components.BorderTagOptionsPanel;
 import gui.components.ColourSelecter;
+import gui.components.ProfileAlignmentOptionsPanel;
+import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.components.ProfileCollectionTypeSettingsPanel;
+import gui.components.ProfileMarkersOptionsPanel;
 import gui.components.ProflleDisplaySettingsPanel;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
@@ -64,7 +69,6 @@ import utility.DipTester;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
-
 import components.CellCollection;
 import components.CellCollection.ProfileCollectionType;
 import components.generic.BooleanProfile;
@@ -75,11 +79,9 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 
 	private static final long serialVersionUID = 1L;
-
-//	private ChartPanel variabilityChartPanel; 
 		
 	RegularProfileDisplayPanel 	profileDisplayPanel; // hold regular profiles
-	FrankenProfileDisplayPanel 	frankenDisplayPanel; // hold regular profiles
+	FrankenProfileDisplayPanel 	frankenDisplayPanel; // hold franken profiles
 	VariabililtyDisplayPanel	variabilityChartPanel;
 	ModalityDisplayPanel 		modalityDisplayPanel;
 	
@@ -128,14 +130,15 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		private JList<String> pointList;
 		private ChartPanel chartPanel;
-		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel;
+		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
+		private JPanel buttonPanel = new JPanel(new FlowLayout());
 		
 		public ModalityDisplayPanel(){
 			this.setLayout(new BorderLayout());
 			
-			profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 			profileCollectionTypeSettingsPanel.addActionListener(this);
-			this.add(profileCollectionTypeSettingsPanel, BorderLayout.NORTH);
+			buttonPanel.add(profileCollectionTypeSettingsPanel);
+			this.add(buttonPanel, BorderLayout.NORTH);
 			
 			JFreeChart chart = ChartFactory.createXYLineChart(null,
 					"Probability", "Angle", null);
@@ -266,16 +269,18 @@ public class NucleusProfilesPanel extends DetailPanel {
 	@SuppressWarnings("serial")
 	private class VariabililtyDisplayPanel extends JPanel implements ActionListener, ChangeListener {
 		
-		protected ProflleDisplaySettingsPanel profileDisplaySettingsPanel;
+//		
+		private JPanel buttonPanel = new JPanel(new FlowLayout());
 		protected ChartPanel chartPanel;
 		private JSpinner pvalueSpinner;
-		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel;
+//		
+		private BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
+		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
+		private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
+		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
 		
 		public VariabililtyDisplayPanel(){
 			this.setLayout(new BorderLayout());
-			
-			
-			
 			
 			JFreeChart variablityChart = ChartFactory.createXYLineChart(null,
 					"Position", "IQR", null);
@@ -288,16 +293,13 @@ public class NucleusProfilesPanel extends DetailPanel {
 			this.add(chartPanel, BorderLayout.CENTER);
 			
 			// add the alignments panel to the tab
-			profileDisplaySettingsPanel = new ProflleDisplaySettingsPanel();
-			profileDisplaySettingsPanel.referenceButton.addActionListener(this);
-			profileDisplaySettingsPanel.orientationButton.addActionListener(this);
-			profileDisplaySettingsPanel.showMarkersCheckBox.addActionListener(this);
-			profileDisplaySettingsPanel.referenceButton.setSelected(true);
 			
-			// disable unused settings
-			profileDisplaySettingsPanel.normCheckBox.setEnabled(false);
-			profileDisplaySettingsPanel.rawProfileLeftButton.setEnabled(false);
-			profileDisplaySettingsPanel.rawProfileRightButton.setEnabled(false);
+			buttonPanel.add(profileAlignmentOptionsPanel);
+			profileAlignmentOptionsPanel.addActionListener(this);
+			
+			buttonPanel.add(borderTagOptionsPanel);
+			borderTagOptionsPanel.addActionListener(this);
+
 			
 			pvalueSpinner = new JSpinner(new SpinnerNumberModel(Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL,	0d, 1d, 0.001d));
 			pvalueSpinner.setEnabled(false);
@@ -308,31 +310,31 @@ public class NucleusProfilesPanel extends DetailPanel {
 		      field.setPreferredSize(prefSize);
 		      
 		     // add extra fields to the header panel
-		    profileDisplaySettingsPanel.add(new JLabel("Dip test p-value:"));
-			profileDisplaySettingsPanel.add(pvalueSpinner);
+		      buttonPanel.add(new JLabel("Dip test p-value:"));
+		      buttonPanel.add(pvalueSpinner);
 
-			profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
+
 			profileCollectionTypeSettingsPanel.addActionListener(this);
-			profileDisplaySettingsPanel.add(profileCollectionTypeSettingsPanel);
+			buttonPanel.add(profileCollectionTypeSettingsPanel);
 			
-			profileDisplaySettingsPanel.revalidate();
+			buttonPanel.revalidate();
 			
-			this.add(profileDisplaySettingsPanel, BorderLayout.NORTH);
+			this.add(buttonPanel, BorderLayout.NORTH);
 		}
 
 		public void update(List<AnalysisDataset> list){
 
 			if(!list.isEmpty()){
 
-				profileDisplaySettingsPanel.referenceButton.setEnabled(true);
-				profileDisplaySettingsPanel.orientationButton.setEnabled(true);
-				profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(true);
+//				profileDisplaySettingsPanel.referenceButton.setEnabled(true);
+//				profileDisplaySettingsPanel.orientationButton.setEnabled(true);
+//				profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(true);
 				pvalueSpinner.setEnabled(true);
 
 				if(list.size()>1){
 
 					// Don't allow marker selection for multiple datasets
-					profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(false);
+//					profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(false);
 					pvalueSpinner.setEnabled(false);
 				}
 
@@ -340,14 +342,14 @@ public class NucleusProfilesPanel extends DetailPanel {
 			} else {
 
 				// if the list is empty, do not enable controls
-				profileDisplaySettingsPanel.setEnabled(false);
+//				profileDisplaySettingsPanel.setEnabled(false);
 			}
 			
-			boolean normalised = profileDisplaySettingsPanel.normCheckBox.isSelected();
-			boolean rightAlign = normalised ? false : profileDisplaySettingsPanel.rawProfileRightButton.isSelected();
-			boolean fromReference = profileDisplaySettingsPanel.referenceButton.isSelected();
-			boolean showMarkers = profileDisplaySettingsPanel.showMarkersCheckBox.isSelected();
-			updateProfiles(list, normalised, rightAlign, fromReference, showMarkers);
+			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
+			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
+			BorderTag tag = borderTagOptionsPanel.getSelected();
+			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
+			updateProfiles(list, normalised, alignment, tag, showMarkers);
 		}
 		
 		/**
@@ -356,11 +358,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		 * @param normalised flag for raw or normalised lengths
 		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 		 */	
-		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference, boolean showMarkers){
-			
-			BorderTag tag = fromReference
-					? BorderTag.REFERENCE_POINT
-					: BorderTag.ORIENTATION_POINT;
+		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag tag, boolean showMarkers){
 			
 			ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
 			
@@ -436,8 +434,13 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		Dimension minimumChartSize = new Dimension(50, 100);
 		Dimension preferredChartSize = new Dimension(400, 300);
-		protected ProflleDisplaySettingsPanel profileDisplaySettingsPanel;
+
+		protected JPanel buttonPanel = new JPanel(new FlowLayout());
 		protected ChartPanel chartPanel;
+		
+		protected BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
+		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
+		protected ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 		
 		public ProfileDisplayPanel(){
 			this.setLayout(new BorderLayout());
@@ -452,37 +455,39 @@ public class NucleusProfilesPanel extends DetailPanel {
 					
 			// add the alignments panel to the tab
 			
-			profileDisplaySettingsPanel = new ProflleDisplaySettingsPanel();
-			profileDisplaySettingsPanel.normCheckBox.addActionListener(this);
-			profileDisplaySettingsPanel.rawProfileLeftButton.addActionListener(this);
-			profileDisplaySettingsPanel.rawProfileRightButton.addActionListener(this);
-			profileDisplaySettingsPanel.referenceButton.addActionListener(this);
-			profileDisplaySettingsPanel.orientationButton.addActionListener(this);
-			profileDisplaySettingsPanel.showMarkersCheckBox.addActionListener(this);
+			buttonPanel.add(profileAlignmentOptionsPanel);
+			profileAlignmentOptionsPanel.addActionListener(this);
 			
-			this.add(profileDisplaySettingsPanel, BorderLayout.NORTH);
+			buttonPanel.add(borderTagOptionsPanel);
+			borderTagOptionsPanel.addActionListener(this);
+			
+			buttonPanel.add(profileMarkersOptionsPanel);
+			profileMarkersOptionsPanel.addActionListener(this);
+						
+			this.add(buttonPanel, BorderLayout.NORTH);
 		}
 		
 		public void update(List<AnalysisDataset> list){
 			
 			if(!list.isEmpty()){
 				
-				profileDisplaySettingsPanel.normCheckBox.setEnabled(true);
-				profileDisplaySettingsPanel.referenceButton.setEnabled(true);
-				profileDisplaySettingsPanel.orientationButton.setEnabled(true);
-				profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(true);
+				profileAlignmentOptionsPanel.setEnabled(true);
+				borderTagOptionsPanel.setEnabled(true);
+				profileMarkersOptionsPanel.setEnabled(true);
+
 				
 				if(list.size()>1){
 					
 					// Don't allow marker selection for multiple datasets
-					profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(false);
+					profileMarkersOptionsPanel.setEnabled(false);
 				}
 				
 				
 			} else {
+				profileAlignmentOptionsPanel.setEnabled(false);
+				borderTagOptionsPanel.setEnabled(false);
+				profileMarkersOptionsPanel.setEnabled(false);
 				
-				// if the list is empty, do not enable controls
-				profileDisplaySettingsPanel.setEnabled(false);
 			}
 		}
 
@@ -490,18 +495,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 		public void actionPerformed(ActionEvent e) {
 			
 			update(list);
-			
-			if(e.getActionCommand().equals("NormalisedProfile")){
-
-				if(  profileDisplaySettingsPanel.normCheckBox.isSelected()){
-					profileDisplaySettingsPanel.rawProfileLeftButton.setEnabled(false);
-					profileDisplaySettingsPanel.rawProfileRightButton.setEnabled(false);
-
-				} else {
-					profileDisplaySettingsPanel.rawProfileLeftButton.setEnabled(true);
-					profileDisplaySettingsPanel.rawProfileRightButton.setEnabled(true);
-				}
-			}
 		}
 	}
 	
@@ -515,11 +508,12 @@ public class NucleusProfilesPanel extends DetailPanel {
 		public void update(List<AnalysisDataset> list){
 			super.update(list);
 			
-			boolean normalised = profileDisplaySettingsPanel.normCheckBox.isSelected();
-			boolean rightAlign = normalised ? false : profileDisplaySettingsPanel.rawProfileRightButton.isSelected();
-			boolean fromReference = profileDisplaySettingsPanel.referenceButton.isSelected();
-			boolean showMarkers = profileDisplaySettingsPanel.showMarkersCheckBox.isSelected();
-			updateProfiles(list, normalised, rightAlign, fromReference, showMarkers);
+			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
+			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
+			BorderTag tag = borderTagOptionsPanel.getSelected();
+			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
+			
+			updateProfiles(list, normalised, alignment, tag, showMarkers);
 		}
 		
 		/**
@@ -528,24 +522,19 @@ public class NucleusProfilesPanel extends DetailPanel {
 		 * @param normalised flag for raw or normalised lengths
 		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 		 */	
-		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference, boolean showMarkers){
-			try {
-				
-				BorderTag tag = fromReference
-						? BorderTag.REFERENCE_POINT
-						: BorderTag.ORIENTATION_POINT;
-				
+		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag tag, boolean showMarkers){
+			try {	
 						
 				if(list.size()==1){
 
 					// full segment colouring
-					JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, rightAlign, tag, showMarkers);
+					JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, alignment, tag, showMarkers);
 					chartPanel.setChart(chart);
 					
 				} else {
 					// many profiles, colour them all the same
-					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, rightAlign, tag);				
-					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, rightAlign, tag);
+					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, alignment, tag);				
+					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, alignment, tag);
 									
 					// find the maximum profile length - used when rendering raw profiles
 					int length = 100;
@@ -579,11 +568,12 @@ public class NucleusProfilesPanel extends DetailPanel {
 		public void update(List<AnalysisDataset> list){
 			super.update(list);
 			
-			boolean normalised = profileDisplaySettingsPanel.normCheckBox.isSelected();
-			boolean rightAlign = normalised ? false : profileDisplaySettingsPanel.rawProfileRightButton.isSelected();
-			boolean fromReference = profileDisplaySettingsPanel.referenceButton.isSelected();
-			boolean showMarkers = profileDisplaySettingsPanel.showMarkersCheckBox.isSelected();
-			updateProfiles(list, normalised, rightAlign, fromReference, showMarkers);
+			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
+			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
+			BorderTag tag = borderTagOptionsPanel.getSelected();
+			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
+			
+			updateProfiles(list, normalised, alignment, tag, showMarkers);
 		}
 		
 		/**
@@ -592,22 +582,18 @@ public class NucleusProfilesPanel extends DetailPanel {
 		 * @param normalised flag for raw or normalised lengths
 		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 		 */	
-		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, boolean fromReference, boolean showMarkers){
-
-			BorderTag tag = fromReference
-					? BorderTag.REFERENCE_POINT
-					: BorderTag.ORIENTATION_POINT;
+		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag tag, boolean showMarkers){
 					
 			try {
 				if(list.size()==1){
 					
-					JFreeChart chart = MorphologyChartFactory.makeFrankenProfileChart(list.get(0), normalised, rightAlign, tag, showMarkers);
+					JFreeChart chart = MorphologyChartFactory.makeFrankenProfileChart(list.get(0), normalised, alignment, tag, showMarkers);
 					chartPanel.setChart(chart);
 				} else {
 
 					// many profiles, colour them all the same
-					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(list, normalised, rightAlign, tag);				
-					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileFrankenDataset(	  list, normalised, rightAlign, tag);
+					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(list, normalised, alignment, tag);				
+					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileFrankenDataset(	  list, normalised, alignment, tag);
 									
 					
 					JFreeChart chart = MorphologyChartFactory.makeMultiProfileChart(list, medianProfiles, iqrProfiles, 100);

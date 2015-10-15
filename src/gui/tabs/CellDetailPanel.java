@@ -711,11 +711,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						
 						// Adjust the point position of tags
 						Nucleus n = activeCell.getNucleus();
-						if(n.hasBorderTag(rowName)){
+						BorderTag tag = activeDataset.getCollection().getNucleusType().getTagFromName(rowName);
+						if(n.hasBorderTag(tag)){
 							
 							String pointType = rowName;
 							
-							int index = Utils.wrapIndex(n.getBorderIndex(pointType)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
+							
+							int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
 							
 							SpinnerNumberModel sModel 
 								= new SpinnerNumberModel(index, 0, n.getLength(), 1);
@@ -734,11 +736,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								int chosenIndex = (Integer) spinner.getModel().getValue();
 								
 								// adjust to the actual point index
-								int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(n.getReferencePoint()), n.getLength());
+								int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
 								
-								n.setBorderTag(pointType, pointIndex);
+								n.setBorderTag(tag, pointIndex);
 								
-								if(pointType.equals(n.getOrientationPoint())){
+								if(tag.equals(BorderTag.ORIENTATION_POINT)){
 									if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
 										// only rodent sperm use the intersection point, which is equivalent to the head.
 										NucleusBorderPoint newPoint = n.findOppositeBorder(n.getPoint(BorderTag.ORIENTATION_POINT));

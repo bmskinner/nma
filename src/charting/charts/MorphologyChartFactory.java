@@ -21,6 +21,7 @@ package charting.charts;
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
+import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -57,7 +58,6 @@ import analysis.AnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
-
 import components.Cell;
 import components.CellCollection;
 import components.CellCollection.ProfileCollectionType;
@@ -121,10 +121,10 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, BorderTag borderTag, boolean showMarkers) throws Exception {
+	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();
-		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, borderTag);
+		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, alignment, borderTag);
 		
 		
 		int length = 100 ; // default if normalised
@@ -157,7 +157,7 @@ public class MorphologyChartFactory {
 			if(normalised){ // set to the proportion of the point along the profile
 				indexToDraw =  (( indexToDraw / collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length() ) * 100);
 			}
-			if(rightAlign && !normalised){
+			if(alignment.equals(ProfileAlignment.RIGHT) && !normalised){
 				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
 				int amountToAdd = maxX - collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length();
 				indexToDraw += amountToAdd;
@@ -178,7 +178,7 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	public static JFreeChart makeMultiSegmentedProfileChart(List<AnalysisDataset> list, boolean normalised, boolean rightAlign, BorderTag borderTag, boolean showMarkers) throws Exception {
+	public static JFreeChart makeMultiSegmentedProfileChart(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
 		int length = 100 ; // default if normalised
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
@@ -202,7 +202,7 @@ public class MorphologyChartFactory {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			String point = collection.getPoint(borderTag);
-			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, normalised, rightAlign, borderTag);
+			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, normalised, alignment, borderTag);
 
 			plot.setDataset(datasetIndex, ds);
 //			IJ.log("Set dataset "+datasetIndex + " for "+dataset.getName());
@@ -243,11 +243,11 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeFrankenProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, BorderTag borderTag, boolean showMarkers) throws Exception {
+	public static JFreeChart makeFrankenProfileChart(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();
 		String point = collection.getPoint(borderTag);
-		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, rightAlign, borderTag);
+		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, alignment, borderTag);
 //		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
 		
 		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
@@ -277,7 +277,7 @@ public class MorphologyChartFactory {
 //			if(normalised){ // set to the proportion of the point along the profile
 				indexToDraw =  (( indexToDraw / pc.getAggregate().length() ) * 100);
 //			}
-			if(rightAlign && !normalised){
+			if(alignment.equals(ProfileAlignment.RIGHT) && !normalised){
 				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
 				int amountToAdd = maxX - pc.getAggregate().length();
 				indexToDraw += amountToAdd;

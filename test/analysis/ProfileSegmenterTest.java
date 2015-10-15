@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package test;
+package analysis;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -27,7 +27,7 @@ import java.util.List;
 import org.junit.Test;
 
 import analysis.nucleus.ProfileSegmenter;
-
+import components.NucleusTest;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;

@@ -40,10 +40,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import utility.Constants.BorderTag;
+import utility.Constants.BorderTag.BorderTagType;
 import utility.Stats;
 import utility.Utils;
 import analysis.AnalysisDataset;
-
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.nuclear.NuclearSignal;
@@ -1074,6 +1074,33 @@ public class CellCollection implements Serializable {
 	    
 	    public Class<?> getNucleusClass(){
 	    	return this.nucleusClass;
+	    }
+	    
+	    /**
+	     * Get the simple names of the border tags in the nucleus
+	     * @return
+	     */
+	    public String[] pointNames(){
+	    	List<String> list = new ArrayList<String>();
+	    	for(BorderTag tag : map.keySet()){
+	    		list.add(map.get(tag));
+	    	}
+	    	return list.toArray(new String[0]);
+	    }
+	    
+	    /**
+	     * Get the border tag with the given name, 
+	     * or null if the name is not found
+	     * @param name
+	     * @return
+	     */
+	    public BorderTag getTagFromName(String name){
+	    	for(BorderTag tag : map.keySet()){
+	    		if(map.get(tag).equals(name)){
+	    			return tag;
+	    		}
+	    	}
+	    	return null;
 	    }
 	    
 	    /**
