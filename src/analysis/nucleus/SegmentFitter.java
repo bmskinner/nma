@@ -162,7 +162,7 @@ public class SegmentFitter {
 			 * The zero index of the profile is the border tag.
 			 */
 			SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(tag));
-			logger.log("Angle at nucleus profile index 0 ("+tag+") is "+nucleusProfile.get(0));
+//			logger.log("Angle at nucleus profile index 0 ("+tag+") is "+nucleusProfile.get(0));
 			
 			// stretch or squeeze the segments to match the length of the median profile of the collection
 			frankenProfile = recombineSegments(n, nucleusProfile, tag);
@@ -244,8 +244,8 @@ public class SegmentFitter {
 		}
 		logger.log("Recombining segments to FrankenProfile", Logger.DEBUG);
 		logger.log("    Segmentation beginning from "+tag, Logger.DEBUG);
-		logger.log("    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag), Logger.DEBUG);
-		logger.log("    Angle at incoming segmented profile index 0 ("+tag+") is "+profile.get(0));
+//		logger.log("    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag), Logger.DEBUG);
+//		logger.log("    Angle at incoming segmented profile index 0 ("+tag+") is "+profile.get(0));
 		
 		
 		/*
@@ -274,16 +274,13 @@ public class SegmentFitter {
 			finalSegmentProfiles.add(revisedProfile);
 			
 			logger.log("    Recombining segment: "+seg.toString(), Logger.DEBUG);
-			logger.log("    Segment starting angle: "+revisedProfile.get(0), Logger.DEBUG);
+//			logger.log("    Segment starting angle: "+revisedProfile.get(0), Logger.DEBUG);
 
 		}
 
 		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
 		
-		/*
-		 * Problem occurs before this point
-		 */
-		logger.log("Angle at franken profile index 0 ("+tag+") is "+mergedProfile.get(0));
+//		logger.log("Angle at franken profile index 0 ("+tag+") is "+mergedProfile.get(0));
 		return mergedProfile;
 	}
 	
