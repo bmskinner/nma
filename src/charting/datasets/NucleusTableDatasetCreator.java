@@ -40,14 +40,10 @@ import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 
 import components.CellCollection;
-import components.CellCollection.NucleusType;
 import components.CellCollection.ProfileCollectionType;
 import components.ClusterGroup;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
-import components.nuclei.sperm.PigSpermNucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 
 public class NucleusTableDatasetCreator {
 	
@@ -67,21 +63,6 @@ public class NucleusTableDatasetCreator {
 			model.addColumn("No data loaded");
 
 		} else {
-			// check which reference point to use
-//			String referencePoint = null;
-//			
-//			if(nucleus.getClass()==RodentSpermNucleus.class){
-//				referencePoint = NucleusType.RODENT_SPERM.getPoint(BorderTag.REFERENCE_POINT);
-//			}
-//
-//			if(nucleus.getClass()==PigSpermNucleus.class){
-//				referencePoint = NucleusType.PIG_SPERM.getPoint(BorderTag.REFERENCE_POINT);
-//			}
-//
-//			if(nucleus.getClass()==RoundNucleus.class){
-//				referencePoint = NucleusType.ROUND.getPoint(BorderTag.REFERENCE_POINT);
-//			}
-
 
 			// get the offset segments
 			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).getSegments();
@@ -118,7 +99,7 @@ public class NucleusTableDatasetCreator {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public static TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset) throws Exception {
+	public static TableModel createMedianProfileSegmentStatsTable(AnalysisDataset dataset, MeasurementScale scale) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -142,8 +123,8 @@ public class NucleusTableDatasetCreator {
 			fieldNames.add("Length");
 			fieldNames.add("Start index");
 			fieldNames.add("End index");
-			fieldNames.add("Mean length");
-			fieldNames.add("Length std err.");
+			fieldNames.add("Mean length ("+ scale+")");
+			fieldNames.add("Length std err. ("+ scale+")");
 
 			model.addColumn("", fieldNames.toArray(new Object[0]));
 			
@@ -159,12 +140,12 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
 				
-				double[] meanLengths = collection.getSegmentLengths(segment.getName());
+				double[] meanLengths = collection.getSegmentLengths(segment.getName(), scale);
 				DescriptiveStatistics stat = new DescriptiveStatistics(meanLengths);
 				
 				rowData.add(  df.format(stat.getMean() ) );
 				double sem = stat.getStandardDeviation() / Math.sqrt(meanLengths.length);
-				rowData.add(  df.format(sem)  );
+				rowData.add(  df.format(sem) );
 				
 				
 				

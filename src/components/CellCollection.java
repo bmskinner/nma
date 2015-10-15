@@ -983,12 +983,17 @@ public class CellCollection implements Serializable {
 	  return result;
   }
   
-  public double[] getSegmentLengths(String segName) throws Exception{
+  public double[] getSegmentLengths(String segName, MeasurementScale scale) throws Exception{
 	  List<Double> list = new ArrayList<Double>();
 
 	  for(Nucleus n : this.getNuclei()){
 		  NucleusBorderSegment segment = n.getAngleProfile(BorderTag.REFERENCE_POINT).getSegment(segName);
-		  list.add(new Double(segment.length()));
+		  
+		  int indexLength = segment.length();
+		  double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+		  double perimeterLength = fractionOfPerimeter * n.getStatistic(NucleusStatistic.PERIMETER, scale);
+		  
+		  list.add(perimeterLength);
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
   }

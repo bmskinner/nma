@@ -74,6 +74,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 	private SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
 	private SegmentBoxplotsPanel 	segmentBoxplotsPanel;	// draw boxplots of segment lengths
 	
+	private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel() ;
+	
 	
 	public SegmentsDetailPanel() {
 			
@@ -456,9 +458,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		private Dimension preferredSize = new Dimension(200, 300);
 		private JScrollPane scrollPane;
 		private JPanel 		buttonPanel;
-		
-		private MeasurementUnitSettingsPanel measurementUnitSettingsPanel;
-		
+				
 		protected SegmentBoxplotsPanel(){
 			
 			this.setLayout(new BorderLayout());
@@ -478,7 +478,6 @@ public class SegmentsDetailPanel extends DetailPanel {
 			this.add(scrollPane, BorderLayout.CENTER);
 			
 			buttonPanel = new JPanel(new FlowLayout());
-			measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 			measurementUnitSettingsPanel.addActionListener(this);
 			buttonPanel.add(measurementUnitSettingsPanel);
 			
@@ -577,7 +576,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		}
 	}
 	
-	protected class SegmentStatsPanel extends JPanel {
+	protected class SegmentStatsPanel extends JPanel implements ActionListener {
 		
 		private static final long serialVersionUID = 1L;
 		private JTable table; // individual cell stats
@@ -587,11 +586,11 @@ public class SegmentsDetailPanel extends DetailPanel {
 		protected SegmentStatsPanel(){
 			
 			this.setLayout(new BorderLayout());
-			
+			measurementUnitSettingsPanel.addActionListener(this);
 			scrollPane = new JScrollPane();
 						
 			try {
-				table = new JTable(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null));
+				table = new JTable(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, MeasurementScale.PIXELS));
 				table.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
@@ -701,12 +700,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 		protected void update(List<AnalysisDataset> list){
 
+			MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
 			try {
 				if(list!=null){
 
 					if(list.isEmpty()){
 //						IJ.log("No datasets selected");
-						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null));
+						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 
 					} else {
 
@@ -715,7 +715,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 							activeDataset = list.get(0);
 
-							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset));
+							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset, scale));
 							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
 
 							while(columns.hasMoreElements()){
@@ -728,7 +728,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 						} else {
 //							IJ.log("Multi datasets selected");
-							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null));
+							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 						}
 
 					}
@@ -740,6 +740,12 @@ public class SegmentsDetailPanel extends DetailPanel {
 			}
 			
 
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			update(list);
+			
 		}
 	}
 }
