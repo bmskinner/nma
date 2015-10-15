@@ -379,7 +379,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 			try {
 				if(list.size()==1){
-					JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100, tag);
+					JFreeChart chart = MorphologyChartFactory.makeSingleVariabilityChart(list, 100, tag, type);
 					
 					
 					if(showMarkers){ // add the bimodal regions
@@ -413,7 +413,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 					
 					chartPanel.setChart(chart);
 				} else { // multiple nuclei
-					JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100, tag);
+					JFreeChart chart = MorphologyChartFactory.makeMultiVariabilityChart(list, 100, tag, type);
 					chartPanel.setChart(chart);
 				}
 			} catch (Exception e) {

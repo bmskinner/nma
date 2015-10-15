@@ -22,6 +22,7 @@ import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import ij.IJ;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -54,6 +55,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import utility.Constants.BorderTag;
 import utility.Utils;
+import weka.core.logging.Logger;
 import analysis.AnalysisDataset;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
@@ -134,7 +136,9 @@ public class MorphologyChartFactory {
 		if(!normalised){
 			length = (int) collection.getMaxProfileLength();
 		}
-		JFreeChart chart = makeProfileChart(ds, length, dataset.getSwatch());
+		
+		ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
+		JFreeChart chart = makeProfileChart(ds, length, swatch);
 		
 		// mark the reference and orientation points
 		
@@ -252,7 +256,8 @@ public class MorphologyChartFactory {
 		
 		int length = 100 ; // default if normalised - for a franken collection, it makes no difference
 
-		JFreeChart chart = makeProfileChart(ds, length, dataset.getSwatch());
+		ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
+		JFreeChart chart = makeProfileChart(ds, length, swatch);
 		
 		// mark the reference andorientation points
 		
@@ -306,6 +311,7 @@ public class MorphologyChartFactory {
 				ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
 				                false);
+		try {
 		
 		
 		XYPlot plot = chart.getXYPlot();
@@ -331,7 +337,7 @@ public class MorphologyChartFactory {
 				int colourIndex = getIndexFromLabel(name);
 				plot.getRenderer().setSeriesStroke(i, SEGMENT_STROKE);
 				plot.getRenderer().setSeriesPaint(i, swatch.color(colourIndex));
-//				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
+
 			} 
 			
 			// entire nucleus profile
@@ -353,6 +359,12 @@ public class MorphologyChartFactory {
 			} 
 			
 		}	
+		} catch (Exception e){
+			IJ.log("Error creating profile chart:"+e.getMessage() );
+			for(StackTraceElement e1 : e.getStackTrace()){
+				IJ.log(e1.toString());
+			}
+		}
 		return chart;
 	}
 	
@@ -456,10 +468,11 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag) throws Exception {
-		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag);
+	public static JFreeChart makeSingleVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag, ProfileCollectionType type) throws Exception {
+		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag, type);
 		CellCollection n = list.get(0).getCollection();
-		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength, list.get(0).getSwatch());
+		ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
+		JFreeChart chart = MorphologyChartFactory.makeProfileChart(ds, xLength, swatch);
 		XYPlot plot = chart.getXYPlot();
 		plot.getRangeAxis().setLabel("IQR");
 		plot.getRangeAxis().setAutoRange(true);
@@ -472,8 +485,8 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the plot
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag) throws Exception {
-		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag);
+	public static JFreeChart makeMultiVariabilityChart(List<AnalysisDataset> list, int xLength, BorderTag tag, ProfileCollectionType type) throws Exception {
+		XYDataset ds = NucleusDatasetCreator.createIQRVariabilityDataset(list, tag, type);
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "IQR", ds, PlotOrientation.VERTICAL, true, true,

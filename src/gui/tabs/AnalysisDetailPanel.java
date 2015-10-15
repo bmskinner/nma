@@ -99,28 +99,38 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 */
 	private void updateStatsPanel(List<AnalysisDataset> list){
-		TableModel model = NucleusTableDatasetCreator.createStatsTable(null);
-		
-		if(list!=null && !list.isEmpty()){
-			model = NucleusTableDatasetCreator.createStatsTable(list);
+		try{
+			TableModel model = NucleusTableDatasetCreator.createStatsTable(null);
+
+			if(list!=null && !list.isEmpty()){
+				model = NucleusTableDatasetCreator.createStatsTable(list);
+			}
+			tablePopulationStats.setModel(model);
+		} catch(Exception e){
+			error("Error updating stats panel", e);
 		}
-		tablePopulationStats.setModel(model);
 	}
 	
 	private JScrollPane createStatsPanel(){
-		
 		JScrollPane scrollPane = new JScrollPane();
-		JPanel panelGeneralStats = new JPanel();
-		
-		panelGeneralStats.setLayout(new BorderLayout(0, 0));
+		try {
 
-		tablePopulationStats = new JTable();
-		panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
-		tablePopulationStats.setEnabled(false);
+			
+			JPanel panelGeneralStats = new JPanel();
 
-		scrollPane.setViewportView(panelGeneralStats);
-		scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
-		tablePopulationStats.setModel(NucleusTableDatasetCreator.createStatsTable(null));
+			panelGeneralStats.setLayout(new BorderLayout(0, 0));
+
+			tablePopulationStats = new JTable();
+			panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
+			tablePopulationStats.setEnabled(false);
+
+			scrollPane.setViewportView(panelGeneralStats);
+			scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
+			tablePopulationStats.setModel(NucleusTableDatasetCreator.createStatsTable(null));
+			
+		}catch(Exception e){
+			error("Error creating stats panel", e);
+		}
 		return scrollPane;
 	}
 	

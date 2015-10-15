@@ -20,6 +20,7 @@ package charting.datasets;
 
 import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import utility.Constants.BorderTag;
+import utility.DipTester;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
-
 import components.CellCollection;
+import components.CellCollection.NucleusStatistic;
 import components.CellCollection.ProfileCollectionType;
 import components.ClusterGroup;
 import components.nuclear.NucleusBorderSegment;
@@ -125,10 +126,12 @@ public class NucleusTableDatasetCreator {
 			fieldNames.add("End index");
 			fieldNames.add("Mean length ("+ scale+")");
 			fieldNames.add("Length std err. ("+ scale+")");
+			fieldNames.add("Length p(unimodal)");
 
 			model.addColumn("", fieldNames.toArray(new Object[0]));
 			
 			DecimalFormat df = new DecimalFormat("#.##");
+			DecimalFormat pf = new DecimalFormat("#.###");
 
 			for(NucleusBorderSegment segment : segments) {
 
@@ -147,7 +150,8 @@ public class NucleusTableDatasetCreator {
 				double sem = stat.getStandardDeviation() / Math.sqrt(meanLengths.length);
 				rowData.add(  df.format(sem) );
 				
-				
+				double pval = DipTester.getDipTestPValue(meanLengths);
+				rowData.add( pf.format(pval) );
 				
 
 				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
@@ -272,15 +276,18 @@ public class NucleusTableDatasetCreator {
 	 * @param collection
 	 * @return
 	 */
-	public static TableModel createStatsTable(List<AnalysisDataset> list){
+	public static TableModel createStatsTable(List<AnalysisDataset> list) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
 
 		Object[] columnData = {
 				"Nuclei", 
 				"Median area",
+				"Area p(unimodal)",
 				"Median perimeter",
+				"Perimeter p(unimodal)",
 				"Median feret",
+				"Feret p(unimodal)",
 				"Signal channels",
 				"Number of signals",
 				"Signals per nucleus"};
@@ -292,6 +299,7 @@ public class NucleusTableDatasetCreator {
 
 			// format the numbers and make into a tablemodel
 			DecimalFormat df = new DecimalFormat("#0.00"); 
+			DecimalFormat pf = new DecimalFormat("#0.000"); 
 
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
@@ -301,8 +309,14 @@ public class NucleusTableDatasetCreator {
 				Object[] collectionData = {
 						collection.getNucleusCount(),
 						df.format(collection.getMedianNuclearArea()),
+						pf.format(DipTester.getDipTestPValue(collection.getNuclearStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS))),
+						
 						df.format(collection.getMedianNuclearPerimeter()),
+						pf.format(DipTester.getDipTestPValue(collection.getNuclearStatistics(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS))),
+						
 						df.format(collection.getMedianFeretLength()),
+						pf.format(DipTester.getDipTestPValue(collection.getNuclearStatistics(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS))),
+
 						collection.getSignalGroups().size(),
 						collection.getSignalCount(),
 						df.format(signalPerNucleus)

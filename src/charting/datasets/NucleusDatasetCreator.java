@@ -533,16 +533,16 @@ public class NucleusDatasetCreator {
 		return result;
 	}
 	
-	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list, BorderTag borderTag) throws Exception{
+	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list, BorderTag borderTag, ProfileCollectionType type) throws Exception{
 
 		
 		if(list.size()==1){
 			CellCollection collection = list.get(0).getCollection();
 
-			Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getIQRProfile(borderTag);
+			Profile profile = collection.getProfileCollection(type).getIQRProfile(borderTag);
 			
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(borderTag);
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(type).getSegments(borderTag);
 			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
 			return ds;
 		} else {
@@ -551,7 +551,7 @@ public class NucleusDatasetCreator {
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
 
-				Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getIQRProfile(borderTag);
+				Profile profile = collection.getProfileCollection(type).getIQRProfile(borderTag);
 				Profile xpoints = profile.getPositions(100);
 				double[][] data = { xpoints.asArray(), profile.asArray() };
 				ds.addSeries("Profile_"+i+"_"+collection.getName(), data);
