@@ -22,6 +22,7 @@ import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
+import utility.Constants;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -47,6 +48,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -148,6 +150,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
+			//Cells are by default rendered as a JLabel.
+			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			// default cell colour is white
 			Color colour = Color.WHITE;
 			
@@ -163,9 +167,22 @@ public class SegmentsDetailPanel extends DetailPanel {
 				colour = swatch.color(segment);
 
 			}
+			
+			String rowName = (String) table.getModel().getValueAt(row, 0);
+			if(rowName.equals("Length p(unimodal)") && column > 0){
+
+				String cellContents = l.getText();
+				Double pval = Double.valueOf(  cellContents );
+				if(  pval < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
+					colour = Color.YELLOW;
+				}
+				if(  pval < Constants.ONE_PERCENT_SIGNIFICANCE_LEVEL){
+					colour = Color.GREEN;
+				}
+				
+			}
 						
-			//Cells are by default rendered as a JLabel.
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			
 			l.setBackground(colour);
 
 			//Return the JLabel which renders the cell.
@@ -602,7 +619,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	protected class SegmentStatsPanel extends JPanel implements ActionListener {
 		
 		private static final long serialVersionUID = 1L;
-		private JTable table; // individual cell stats
+		private JTable table; // individual segment stats
 		
 		private JScrollPane scrollPane;
 				
@@ -613,7 +630,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 			scrollPane = new JScrollPane();
 						
 			try {
-				table = new JTable(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, MeasurementScale.PIXELS));
+				TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, MeasurementScale.PIXELS);
+				table = new JTable(model);
 				table.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
@@ -728,29 +746,23 @@ public class SegmentsDetailPanel extends DetailPanel {
 				if(list!=null){
 
 					if(list.isEmpty()){
-//						IJ.log("No datasets selected");
 						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 
 					} else {
 
 						if(list.size()==1){
-//							IJ.log("Drawing table");
 
 							activeDataset = list.get(0);
-
-							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset, scale));
+							TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset, scale);
+							table.setModel(model);
 							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
 
 							while(columns.hasMoreElements()){
 								TableColumn column = columns.nextElement();
 								column.setCellRenderer(new SegmentTableCellRenderer());
 							}
-							// TODO: on manetheren, table is not displayed; code runs to this point
-							// table remains on null model
-							// Running fine on work pc
 
 						} else {
-//							IJ.log("Multi datasets selected");
 							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 						}
 

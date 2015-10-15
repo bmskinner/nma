@@ -417,7 +417,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public String getVersion(){
 		return Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
-	
+
 	/**
 	 * Check a version string to see if the program will be able to open a 
 	 * dataset. The major version must be the same, while the revision of the

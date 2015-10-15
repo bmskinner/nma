@@ -45,6 +45,7 @@ import components.generic.ProfileCollectionType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusStatistic;
 import components.nuclei.Nucleus;
+import ij.IJ;
 
 public class NucleusTableDatasetCreator {
 	
@@ -105,7 +106,6 @@ public class NucleusTableDatasetCreator {
 		DefaultTableModel model = new DefaultTableModel();
 
 		List<Object> fieldNames = new ArrayList<Object>(0);
-		
 		if(dataset==null){
 			model.addColumn("No data loaded");
 
@@ -114,10 +114,8 @@ public class NucleusTableDatasetCreator {
 			// check which reference point to use
 			BorderTag point = BorderTag.ORIENTATION_POINT;
 
-
 			// get the offset segments
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
-
 
 			// create the row names
 			fieldNames.add("Colour");
@@ -129,12 +127,11 @@ public class NucleusTableDatasetCreator {
 			fieldNames.add("Length p(unimodal)");
 
 			model.addColumn("", fieldNames.toArray(new Object[0]));
-			
+						
 			DecimalFormat df = new DecimalFormat("#.##");
 			DecimalFormat pf = new DecimalFormat("#.###");
 
 			for(NucleusBorderSegment segment : segments) {
-
 
 				List<Object> rowData = new ArrayList<Object>(0);
 				
@@ -142,7 +139,7 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.length());
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
-				
+								
 				double[] meanLengths = collection.getSegmentLengths(segment.getName(), scale);
 				DescriptiveStatistics stat = new DescriptiveStatistics(meanLengths);
 				
@@ -152,7 +149,6 @@ public class NucleusTableDatasetCreator {
 				
 				double pval = DipTester.getDipTestPValue(meanLengths);
 				rowData.add( pf.format(pval) );
-				
 
 				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
 			}
