@@ -247,39 +247,63 @@ public class SegmentsDetailPanel extends DetailPanel {
 			NucleusBorderSegment seg2 = medianProfile.getSegment(segName2);
 			
 			// check the boundaries of the segment - we do not want to merge across the BorderTags
+			boolean ok = true;
 			for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
+				
 //				//TODO
+				/*
+				 * Find the position of the border tag in the median profile
+				 * 
+				 */
+				int offsetForOp = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(BorderTag.ORIENTATION_POINT);
+				
+				int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(tag);
+				
+				// this should be zero for the orientation point and  totalLength+difference for the reference point
+				int difference = offset - offsetForOp;
+
+				if(seg2.getStartIndex()==seg2.getTotalLength()+difference || seg2.getStartIndex()==difference){
+					ok=false;
+//					IJ.log("Fail on "+tag+": OP: "+offsetForOp+" ; "+offset+" ;  difference "+difference+" ; seg2 start"+seg2.getStartIndex()); 
+				}
+
+
 			}
 			
-			// merge the two segments in the median - this is only a copy of the profile collection
-			medianProfile.mergeSegments(seg1, seg2);
-			
-			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
+			if(ok){
 
-			/*
-			 * With the median profile segments merged, also merge the segments
-			 * in the individual nuclei
-			 */
-			for(Nucleus n : collection.getNuclei()){
+				// merge the two segments in the median - this is only a copy of the profile collection
+				medianProfile.mergeSegments(seg1, seg2);
 
-				SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
-				NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
-				NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
-				profile.mergeSegments(nSeg1, nSeg2);
-				n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
-			}
-			
-			/*
-			 * Update the consensus if present
-			 */
-			if(collection.hasConsensusNucleus()){
-				ConsensusNucleus n = collection.getConsensusNucleus();
-				SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
-				NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
-				NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
-				profile.mergeSegments(nSeg1, nSeg2);
-				n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+				// put the new segment pattern back with the appropriate offset
+				collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
+
+				/*
+				 * With the median profile segments merged, also merge the segments
+				 * in the individual nuclei
+				 */
+				for(Nucleus n : collection.getNuclei()){
+
+					SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+					NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
+					NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
+					profile.mergeSegments(nSeg1, nSeg2);
+					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+				}
+
+				/*
+				 * Update the consensus if present
+				 */
+				if(collection.hasConsensusNucleus()){
+					ConsensusNucleus n = collection.getConsensusNucleus();
+					SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+					NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
+					NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
+					profile.mergeSegments(nSeg1, nSeg2);
+					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+				}
+			} else {
+				JOptionPane.showMessageDialog(this, "Cannot merge segments across core border tags");
 			}
 		}
 		
