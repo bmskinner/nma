@@ -27,6 +27,7 @@ import java.util.Map;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import utility.Constants.BorderTag;
 
 public class ProfileCollection implements Serializable {
 		
@@ -34,7 +35,7 @@ public class ProfileCollection implements Serializable {
 	
 	private ProfileAggregate 	aggregate;
 	
-	private Map<String, Integer> offsets 		= new HashMap<String, Integer>();
+	private Map<BorderTag, Integer> offsets 		= new HashMap<BorderTag, Integer>();
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 	private List<Profile> nucleusProfileList    = new ArrayList<Profile>();
 	
@@ -48,7 +49,7 @@ public class ProfileCollection implements Serializable {
 	 * @param pointType
 	 * @return
 	 */
-	public int getOffset(String pointType){
+	public int getOffset(BorderTag pointType){
 		if(pointType==null){
 			throw new IllegalArgumentException("The requested offset key is null: "+pointType);
 		}
@@ -63,9 +64,9 @@ public class ProfileCollection implements Serializable {
 	 * Get all the offset keys attached to this profile collection
 	 * @return
 	 */
-	public List<String> getOffsetKeys(){
-		List<String> result = new ArrayList<String>();
-		for(String s: offsets.keySet()){
+	public List<BorderTag> getOffsetKeys(){
+		List<BorderTag> result = new ArrayList<BorderTag>();
+		for(BorderTag s: offsets.keySet()){
 			result.add(s);
 		}
 		return result;
@@ -78,25 +79,25 @@ public class ProfileCollection implements Serializable {
 	 * @return the profile
 	 * @throws Exception
 	 */
-	public Profile getProfile(String s) throws Exception {
-		if(s==null){
+	public Profile getProfile(BorderTag tag, double quartile) throws Exception {
+		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
-		String pointType = s;
-		if(s.endsWith("25")){
-			pointType = s.replace("25", "");
-			int indexOffset = offsets.get(pointType);
-			return getAggregate().getQuartile(25).offset(indexOffset);
-		}
+//		String pointType = s;
+//		if(s.endsWith("25")){
+//			pointType = s.replace("25", "");
+//			int indexOffset = offsets.get(pointType);
+//			return getAggregate().getQuartile(25).offset(indexOffset);
+//		}
+//		
+//		if( s.endsWith("75")){
+//			pointType = s.replace("75", "");
+//			int indexOffset = offsets.get(pointType);
+//			return getAggregate().getQuartile(75).offset(indexOffset);
+//		}
 		
-		if( s.endsWith("75")){
-			pointType = s.replace("75", "");
-			int indexOffset = offsets.get(pointType);
-			return getAggregate().getQuartile(75).offset(indexOffset);
-		}
-		
-		int indexOffset = offsets.get(pointType);
-		return getAggregate().getMedian().offset(indexOffset);
+		int indexOffset = offsets.get(tag);
+		return getAggregate().getQuartile(quartile).offset(indexOffset);
 	}
 	
 	
@@ -107,12 +108,12 @@ public class ProfileCollection implements Serializable {
 	 * @return the profile
 	 * @throws Exception
 	 */
-	public SegmentedProfile getSegmentedProfile(String s) throws Exception {
-		if(s==null){
+	public SegmentedProfile getSegmentedProfile(BorderTag tag) throws Exception {
+		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
 
-		SegmentedProfile result = new SegmentedProfile(getProfile(s), getSegments(s));
+		SegmentedProfile result = new SegmentedProfile(getProfile(tag, 50), getSegments(tag));
 		return result;
 	}
 
@@ -128,15 +129,15 @@ public class ProfileCollection implements Serializable {
 	 * Create a list of segments based on an offset of existing segments
 	 * @param s the name of the point type
 	 */
-	public List<NucleusBorderSegment> getSegments(String s){
-		if(s==null){
-			throw new IllegalArgumentException("The requested segment key is null: "+s);
+	public List<NucleusBorderSegment> getSegments(BorderTag tag){
+		if(tag==null){
+			throw new IllegalArgumentException("The requested segment key is null: "+tag);
 		}
 
 		// this must be negative offset for segments
 		// since we are moving the pointIndex back to the beginning
 		// of the array
-		int offset = -getOffset(s);
+		int offset = -getOffset(tag);
 
 		List<NucleusBorderSegment> result = null;
 		try {
@@ -157,13 +158,13 @@ public class ProfileCollection implements Serializable {
 	 * @param s the key to offset to 
 	 * @return a list of profiles offset to the given key
 	 */
-	public List<Profile> getNucleusProfiles(String s) throws Exception {
-		if(s==null){
-			throw new IllegalArgumentException("The requested profile list key is null: "+s);
+	public List<Profile> getNucleusProfiles(BorderTag tag) throws Exception {
+		if(tag==null){
+			throw new IllegalArgumentException("The requested profile list key is null: "+tag);
 		}
 		List<Profile> result = new ArrayList<Profile>();
 		for(Profile p : nucleusProfileList){
-			result.add(new Profile(p.offset(this.getOffset(s))));
+			result.add(new Profile(p.offset(this.getOffset(tag))));
 		}
 		return result;
 	}
@@ -174,11 +175,11 @@ public class ProfileCollection implements Serializable {
 	 * @param pointType the point
 	 * @param offset the position of the point in the profile
 	 */
-	public void addOffset(String pointType, int offset){
-		if(pointType==null){
+	public void addOffset(BorderTag tag, int offset){
+		if(tag==null){
 			throw new IllegalArgumentException("String is null");
 		}
-		offsets.put(pointType, offset);
+		offsets.put(tag, offset);
 	}
 	
 	/**
@@ -200,7 +201,7 @@ public class ProfileCollection implements Serializable {
 	 * @param pointType the point with the zero index in the segments
 	 * @param n the segment list
 	 */
-	public void addSegments(String pointType, List<NucleusBorderSegment> n) throws Exception {
+	public void addSegments(BorderTag tag, List<NucleusBorderSegment> n) throws Exception {
 		if(n==null || n.isEmpty()){
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
@@ -210,7 +211,7 @@ public class ProfileCollection implements Serializable {
 		 * This means the indexes must be moved forwards appropriately.
 		 * Hence, add a positive offset.
 		 */
-		int offset = getOffset(pointType);
+		int offset = getOffset(tag);
 
 		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(n, offset);
 
@@ -242,7 +243,7 @@ public class ProfileCollection implements Serializable {
 
 		aggregate = new ProfileAggregate(length);
 		for(Nucleus n : collection.getNuclei()){
-			aggregate.addValues(n.getAngleProfile(collection.getReferencePoint()));
+			aggregate.addValues(n.getAngleProfile(collection.getPoint(BorderTag.REFERENCE_POINT)));
 		}
 	}
 	
@@ -286,8 +287,8 @@ public class ProfileCollection implements Serializable {
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("    Point types:\t");
-		for(String s : this.offsets.keySet()){
-			builder.append("     "+s+"\t");
+		for(BorderTag tag : this.offsets.keySet()){
+			builder.append("     "+tag+"\t");
 		}
 		return builder.toString();
 	}
@@ -297,9 +298,9 @@ public class ProfileCollection implements Serializable {
 	 * @param pointType the profile type to use
 	 * @return the profile
 	 */
-	public Profile getIQRProfile(String pointType) throws Exception {
+	public Profile getIQRProfile(BorderTag tag) throws Exception {
 		
-		int offset = getOffset(pointType);
+		int offset = getOffset(tag);
 		Profile q25 = getAggregate().getQuartile(25).offset(offset);
 		Profile q75 = getAggregate().getQuartile(75).offset(offset);
 		return q75.subtract(q25);
@@ -308,10 +309,10 @@ public class ProfileCollection implements Serializable {
 	/**
 	 * Find the points in the profile that are most variable
 	 */
-	public List<Integer> findMostVariableRegions(String pointType) throws Exception {
+	public List<Integer> findMostVariableRegions(BorderTag tag) throws Exception {
 		
 		// get the IQR and maxima
-		Profile iqrProfile = getIQRProfile(pointType);
+		Profile iqrProfile = getIQRProfile(tag);
 //		iqrProfile.print();
 //		iqrProfile.smooth(3).print();
 		BooleanProfile maxima = iqrProfile.smooth(3).getLocalMaxima(3);

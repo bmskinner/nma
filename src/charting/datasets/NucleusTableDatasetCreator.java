@@ -19,6 +19,7 @@
 package charting.datasets;
 
 import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
+import utility.Constants.BorderTag;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -70,15 +71,15 @@ public class NucleusTableDatasetCreator {
 			String referencePoint = null;
 			
 			if(nucleus.getClass()==RodentSpermNucleus.class){
-				referencePoint = NucleusType.RODENT_SPERM.referencePoint();
+				referencePoint = NucleusType.RODENT_SPERM.getPoint(BorderTag.REFERENCE_POINT);
 			}
 
 			if(nucleus.getClass()==PigSpermNucleus.class){
-				referencePoint = NucleusType.PIG_SPERM.referencePoint();
+				referencePoint = NucleusType.PIG_SPERM.getPoint(BorderTag.REFERENCE_POINT);
 			}
 
 			if(nucleus.getClass()==RoundNucleus.class){
-				referencePoint = NucleusType.ROUND.referencePoint();
+				referencePoint = NucleusType.ROUND.getPoint(BorderTag.REFERENCE_POINT);
 			}
 
 
@@ -129,7 +130,7 @@ public class NucleusTableDatasetCreator {
 		} else {
 			CellCollection collection = dataset.getCollection();
 			// check which reference point to use
-			String point = collection.getOrientationPoint();
+			String point = collection.getPoint(BorderTag.ORIENTATION_POINT);
 
 
 			// get the offset segments
@@ -574,10 +575,10 @@ public class NucleusTableDatasetCreator {
 					popData[i] = df.format( runWilcoxonTest( 
 							dataset.getCollection()
 							.getDifferencesToMedianFromPoint(dataset.getCollection()
-									.getOrientationPoint()  ), 
+									.getPoint(BorderTag.ORIENTATION_POINT)  ), 
 									dataset2.getCollection()
 									.getDifferencesToMedianFromPoint(dataset2.getCollection()
-											.getOrientationPoint() ), 
+											.getPoint(BorderTag.ORIENTATION_POINT) ), 
 											getPValue) );
 				}
 				i++;

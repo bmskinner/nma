@@ -24,6 +24,7 @@
 package components.nuclei.sperm;
 
 import ij.gui.Roi;
+import utility.Constants.BorderTag;
 
 import java.io.File;
 
@@ -99,12 +100,12 @@ public class PigSpermNucleus
     
   	@Override
 	public String getReferencePoint(){
-		return NucleusType.PIG_SPERM.referencePoint();
+		return NucleusType.PIG_SPERM.getPoint(BorderTag.REFERENCE_POINT);
 	}
   	
   	@Override
 	public String getOrientationPoint(){
-		return NucleusType.PIG_SPERM.orientationPoint();
+		return NucleusType.PIG_SPERM.getPoint(BorderTag.ORIENTATION_POINT);
 	}
 
     /*

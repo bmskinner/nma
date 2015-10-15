@@ -144,12 +144,12 @@ public class NucleusDatasetCreator {
 
             CellCollection collection = list.get(i).getCollection();
             
-            Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getOrientationPoint());
+            Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
             Profile xpoints = profile.getPositions(100);
             double[][] data = { xpoints.asArray(), profile.asArray() };
             ds.addSeries("Profile_"+i, data);
             
-            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(collection.getOrientationPoint());
+            List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(collection.getPoint(BorderTag.ORIENTATION_POINT));
             List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
             
             // add only the segment of interest
@@ -213,7 +213,7 @@ public class NucleusDatasetCreator {
 		for (int i=0; i < list.size(); i++) {
 			CellCollection collection = list.get(i).getCollection();
 
-			Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getOrientationPoint());
+			Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
 			Profile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
 			
 			double offset = 0;
@@ -225,7 +225,7 @@ public class NucleusDatasetCreator {
 			double[][] data = { xpoints.asArray(), profile.asArray() };
 			ds.addSeries("Profile_"+i, data);
 			
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(collection.getOrientationPoint());
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(collection.getPoint(BorderTag.ORIENTATION_POINT));
 			List<NucleusBorderSegment> segmentsToAdd = new ArrayList<NucleusBorderSegment>(0);
 			
 			// add only the segment of interest
@@ -696,7 +696,7 @@ public class NucleusDatasetCreator {
 
 			CellCollection collection = datasets.get(i).getCollection();
 
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(collection.getOrientationPoint());
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(collection.getPoint(BorderTag.ORIENTATION_POINT));
 			
 			for(NucleusBorderSegment medianSeg : segments){
 				
@@ -775,7 +775,7 @@ public class NucleusDatasetCreator {
 		// get the consensus nucleus for the population
 		ConsensusNucleus n = collection.getConsensusNucleus();
 		
-		String pointType = collection.getOrientationPoint();
+		String pointType = collection.getPoint(BorderTag.ORIENTATION_POINT);
 		
 		// get the quartile profiles, beginning from the orientation point
 		Profile q25 = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType+"25").interpolate(n.getLength());

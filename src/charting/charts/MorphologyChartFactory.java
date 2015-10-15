@@ -166,10 +166,10 @@ public class MorphologyChartFactory {
 			}
 
 			if(showMarkers){
-				if(tag.equals(collection.getOrientationPoint())){
+				if(tag.equals(collection.getPoint(BorderTag.ORIENTATION_POINT))){
 					colour = Color.BLUE;
 				}
-				if(tag.equals(collection.getReferencePoint())){
+				if(tag.equals(collection.getPoint(BorderTag.REFERENCE_POINT))){
 					colour = Color.ORANGE;
 				}
 				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, MARKER_STROKE));	
@@ -286,13 +286,13 @@ public class MorphologyChartFactory {
 			}
 
 			if(showMarkers){
-				if(tag.equals(collection.getOrientationPoint())){
+				if(tag.equals(collection.getPoint(BorderTag.ORIENTATION_POINT))){
 					colour = Color.BLUE;
 				}
-				if(tag.equals(collection.getReferencePoint())){
+				if(tag.equals(collection.getPoint(BorderTag.REFERENCE_POINT))){
 					colour = Color.ORANGE;
 				}
-				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, new BasicStroke(2.0f)));	
+				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, MARKER_STROKE));	
 			}
 			
 		}

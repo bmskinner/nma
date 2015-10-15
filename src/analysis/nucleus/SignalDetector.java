@@ -42,6 +42,7 @@ import utility.Constants;
 import utility.Logger;
 import utility.StatsMap;
 import utility.Utils;
+import utility.Constants.BorderTag;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.Detector;
@@ -364,9 +365,9 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		n.calculateFractionalSignalDistancesFromCoM();
 
 		if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-			if(n.getBorderTag(NucleusType.ASYMMETRIC.orientationPoint())!=null){
+			if(n.getBorderTag(NucleusType.ASYMMETRIC.getPoint(BorderTag.ORIENTATION_POINT))!=null){
 
-				n.calculateSignalAnglesFromPoint(n.getBorderTag(NucleusType.ASYMMETRIC.orientationPoint()));
+				n.calculateSignalAnglesFromPoint(n.getBorderTag(NucleusType.ASYMMETRIC.getPoint(BorderTag.ORIENTATION_POINT)));
 			}
 		}
 

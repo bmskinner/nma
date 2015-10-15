@@ -21,6 +21,7 @@ package gui;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ConsensusNucleusChartPanel;
 import gui.tabs.DetailPanel;
+import utility.Constants.BorderTag;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -272,7 +273,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset.getCollection().hasConsensusNucleus()){
-					NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getOrientationPoint());
+					NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getPoint(BorderTag.ORIENTATION_POINT));
 					activeDataset.getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
 					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(activeDataset);
@@ -401,7 +402,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 
 					if(activeDataset.getCollection().hasConsensusNucleus()){
 
-						NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getOrientationPoint());
+						NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getPoint(BorderTag.ORIENTATION_POINT));
 						activeDataset.getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
 						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 						list.add(activeDataset);

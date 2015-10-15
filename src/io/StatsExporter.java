@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utility.Logger;
-
+import utility.Constants.BorderTag;
 import components.CellCollection;
 import components.CellCollection.ProfileCollectionType;
 import components.generic.Profile;
@@ -102,7 +102,7 @@ public class StatsExporter {
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
-			List<NucleusBorderSegment> segs = pc.getSegments(collection.getOrientationPoint());
+			List<NucleusBorderSegment> segs = pc.getSegments(collection.getPoint(BorderTag.ORIENTATION_POINT));
 			for(NucleusBorderSegment segment : segs){
 				String s = segment.getName();
 

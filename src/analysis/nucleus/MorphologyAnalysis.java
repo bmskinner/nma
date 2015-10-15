@@ -29,7 +29,7 @@ import javax.swing.SwingWorker;
 import utility.Constants;
 import utility.Logger;
 import utility.Utils;
-
+import utility.Constants.BorderTag;
 import components.CellCollection;
 import components.CellCollection.NucleusType;
 import components.CellCollection.ProfileCollectionType;
@@ -109,7 +109,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				// we run the profiler and segmenter on each nucleus - may need to double
 				totalNuclei = collection.getNucleusCount(); 
 
-				String pointType = collection.getReferencePoint();
+				String pointType = collection.getPoint(BorderTag.REFERENCE_POINT);
 
 				// profile the collection from head/tip, then apply to tail
 				runProfiler(collection, pointType);
@@ -245,7 +245,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 		logger.log("Applying existing segmentation profile to population...");
 		
 		try {
-			String referencePoint   = collection.getReferencePoint();
+			String referencePoint   = collection.getPoint(BorderTag.REFERENCE_POINT);
 //			String orientationPoint = collection.getOrientationPoint();
 			
 			// use the same array length as the source collection to avoid segment slippage
@@ -308,7 +308,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 		logger.log("Refreshing mophology");
 		try{
 			
-			String pointType = collection.getReferencePoint();
+			String pointType = collection.getPoint(BorderTag.REFERENCE_POINT);
 			
 			// get the empty profile collection from the new CellCollection
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
@@ -345,7 +345,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			int count = 0;
 			for(Nucleus n : collection.getNuclei()){ 
 				// recombine the segments at the lengths of the median profile segments
-				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
+				Profile recombinedProfile = fitter.recombine(n, collection.getPoint(BorderTag.REFERENCE_POINT));
 				frankenProfiles.add(recombinedProfile);
 				count++;
 				publish(count);
@@ -426,12 +426,12 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 			// the reference point is always index 0, so the segments will match
 			// the profile
-			Profile median = pc.getProfile(collection.getReferencePoint());
+			Profile median = pc.getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
 
 			ProfileSegmenter segmenter = new ProfileSegmenter(median, collection.getDebugFile());		  
 			List<NucleusBorderSegment> segments = segmenter.segment();
 
-			logger.log("Found "+segments.size()+" segments in "+collection.getReferencePoint()+" profile");
+			logger.log("Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
 
 			// Add the segments to the collection
 			pc.addSegments(segments);
@@ -454,7 +454,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
 			// find the corresponding point in each Nucleus
-			SegmentedProfile median = pc.getSegmentedProfile(collection.getReferencePoint());
+			SegmentedProfile median = pc.getSegmentedProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
 
 			for(Nucleus n : collection.getNuclei()){
 				assignSegmentsToNucleus(n, median);
@@ -577,7 +577,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 				// recombine the segments at the lengths of the median profile segments
 				//TODO: When the frankenProfile is created, the reference point may be wrong
-				Profile recombinedProfile = fitter.recombine(n, collection.getReferencePoint());
+				Profile recombinedProfile = fitter.recombine(n, collection.getPoint(BorderTag.REFERENCE_POINT));
 				frankenProfiles.add(recombinedProfile);
 				count++;
 				publish(count); // publish the progress to gui
@@ -605,9 +605,9 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			try{
 				// can't use regular tail detector, because it's based on NucleusBorderPoints
 				// get minima in curve, then find the lowest minima / minima furthest from both ends
-				collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getReferencePoint(), 0);
+				collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getPoint(BorderTag.REFERENCE_POINT), 0);
 
-				Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getReferencePoint());
+				Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
 
 				BooleanProfile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
 
@@ -630,7 +630,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 					}
 				}
 
-				collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getOrientationPoint(), tailIndex);
+				collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getPoint(BorderTag.ORIENTATION_POINT), tailIndex);
 
 			} catch(Exception e){
 				logger.error("Error finding tail", e);
@@ -641,12 +641,12 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			
 			// define the current zero offset at the reference point
 			// It does not matter, it just gives an offset key for the ProfileCollection
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getReferencePoint(), 0);
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getPoint(BorderTag.REFERENCE_POINT), 0);
 			
 			// get the profile
 			// This is starting from an arbitrary point?
 			// Starting from the head in test data, so the reference point is correct
-			Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getReferencePoint());
+			Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
 //			medianProfile.print();
 
 			// find local maxima in the median profile over 180
@@ -683,7 +683,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			}
 
 			// add this index to be the orientation point
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getOrientationPoint(), tailIndex);
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getPoint(BorderTag.ORIENTATION_POINT), tailIndex);
 			
 			// head is half way around from the tail
 			int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length() /2;
@@ -692,22 +692,22 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			// adjust the index to the offset
 			 int headIndex  = Utils.wrapIndex( tailIndex - offset, collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length());
 			
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getReferencePoint(), headIndex);
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getPoint(BorderTag.REFERENCE_POINT), headIndex);
 		}
 		
 
 		private static void findTailInRoundMedian(CellCollection collection) throws Exception {
 			
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getReferencePoint(), 0);
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getPoint(BorderTag.REFERENCE_POINT), 0);
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
-			Profile medianProfile = pc.getProfile(collection.getReferencePoint());
+			Profile medianProfile = pc.getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
 
 			int tailIndex = (int) Math.floor(medianProfile.size()/2);
 			
 			
 			
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getOrientationPoint(), tailIndex);
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(collection.getPoint(BorderTag.ORIENTATION_POINT), tailIndex);
 		}
 
 		/**
@@ -745,19 +745,19 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 		private static void calculateOffsetsInRoundNuclei(CellCollection collection){
 			
 			try{
-				Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getReferencePoint()); // returns a median profile with head at 0
+				Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getPoint(BorderTag.REFERENCE_POINT)); // returns a median profile with head at 0
 
 				for(Nucleus n : collection.getNuclei()){
 
 					// returns the positive offset index of this profile which best matches the median profile
 					int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-					n.addBorderTag(collection.getReferencePoint(), newHeadIndex);
+					n.addBorderTag(collection.getPoint(BorderTag.REFERENCE_POINT), newHeadIndex);
 
 					// check if flipping the profile will help
 
-					double differenceToMedian1 = n.getAngleProfile(collection.getReferencePoint()).absoluteSquareDifference(medianToCompare);
+					double differenceToMedian1 = n.getAngleProfile(collection.getPoint(BorderTag.REFERENCE_POINT)).absoluteSquareDifference(medianToCompare);
 					n.reverse();
-					double differenceToMedian2 = n.getAngleProfile(collection.getReferencePoint()).absoluteSquareDifference(medianToCompare);
+					double differenceToMedian2 = n.getAngleProfile(collection.getPoint(BorderTag.REFERENCE_POINT)).absoluteSquareDifference(medianToCompare);
 
 					if(differenceToMedian1<differenceToMedian2){
 						n.reverse(); // put it back if no better
@@ -765,7 +765,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 					// also update the tail position
 					int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
-					n.addBorderTag(NucleusType.ROUND.orientationPoint(), tailIndex);
+					n.addBorderTag(NucleusType.ROUND.getPoint(BorderTag.ORIENTATION_POINT), tailIndex);
 				}
 			}catch(Exception e){
 				logger.error("Error calculating offsets", e);
@@ -777,7 +777,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			
 			try{
 				// Get the median profile starting from the orientation point
-				Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getOrientationPoint()); // returns a median profile
+				Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getPoint(BorderTag.ORIENTATION_POINT)); // returns a median profile
 
 				// go through each nucleus
 				for(Nucleus n : collection.getNuclei()){
@@ -789,13 +789,13 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 					int newTailIndex = nucleus.getAngleProfile().getSlidingWindowOffset(median);
 
 					// add the offset of the tail to the nucleus
-					nucleus.addBorderTag(collection.getOrientationPoint(), newTailIndex);
+					nucleus.addBorderTag(collection.getPoint(BorderTag.ORIENTATION_POINT), newTailIndex);
 					
 
 					// also update the head position (same as round reference point)
 					// - the point opposite the tail through the CoM
 					int headIndex = nucleus.getIndex(nucleus.findOppositeBorder( nucleus.getPoint(newTailIndex) ));
-					nucleus.addBorderTag(NucleusType.ROUND.referencePoint(), headIndex);
+					nucleus.addBorderTag(NucleusType.ROUND.getPoint(BorderTag.REFERENCE_POINT), headIndex);
 					nucleus.splitNucleusToHeadAndHump();
 				}
 			}catch(Exception e){
@@ -806,7 +806,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 		private static void calculateOffsetsInPigSpermNuclei(CellCollection collection) throws Exception {
 
 			// get the median profile zeroed on the orientation point
-			Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getOrientationPoint()); 
+			Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(collection.getPoint(BorderTag.ORIENTATION_POINT)); 
 
 			for(Nucleus nucleus : collection.getNuclei()){
 				PigSpermNucleus n = (PigSpermNucleus) nucleus;

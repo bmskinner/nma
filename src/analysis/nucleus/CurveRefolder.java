@@ -37,7 +37,7 @@ import utility.Constants;
 import utility.Equation;
 import utility.Logger;
 import utility.Utils;
-
+import utility.Constants.BorderTag;
 import components.CellCollection;
 import components.CellCollection.NucleusType;
 import components.CellCollection.ProfileCollectionType;
@@ -92,7 +92,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 		// make an entirely new nucleus to play with
 		logger.log("Fetching best refold candiate", Logger.DEBUG);
-		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(collection.getOrientationPoint());	
+		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(collection.getPoint(BorderTag.ORIENTATION_POINT));	
 		
 		logger.log("Creating consensus nucleus template", Logger.DEBUG);
 		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
@@ -132,11 +132,11 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// orient refolded nucleus to put tail at the bottom
-			refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(collection.getOrientationPoint()));
+			refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(collection.getPoint(BorderTag.ORIENTATION_POINT)));
 
 			// if rodent sperm, put tip on left if needed
 			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
-				if(refoldNucleus.getBorderTag(collection.getReferencePoint()).getX()>0){
+				if(refoldNucleus.getBorderTag(collection.getPoint(BorderTag.REFERENCE_POINT)).getX()>0){
 					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
 				}
 			}

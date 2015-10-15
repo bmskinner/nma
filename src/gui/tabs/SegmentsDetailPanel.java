@@ -52,6 +52,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import utility.Constants.BorderTag;
+import utility.Constants.BorderTag.TagType;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
@@ -221,7 +222,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					CellCollection collection = activeDataset.getCollection();
 
 					try {
-						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
+						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
 						List<String> names = new ArrayList<String>();
 						
 						// Put the names of the mergable segments into a list
@@ -271,7 +272,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					CellCollection collection = activeDataset.getCollection();
 
 					try {
-						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
+						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
 						List<String> names = new ArrayList<String>();
 						
 						// Put the names of the mergable segments into a list
@@ -319,17 +320,23 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			CellCollection collection = activeDataset.getCollection();
 			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getSegmentedProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
 			
 			// Get the segments to merge
 			NucleusBorderSegment seg1 = medianProfile.getSegment(segName1);
 			NucleusBorderSegment seg2 = medianProfile.getSegment(segName2);
 			
+			// check the boundaries of the segment - we do not want to merge across the BorderTags
+			for(BorderTag tag : BorderTag.values(TagType.CORE)){
+//				//TODO
+			}
+			
 			// merge the two segments in the median - this is only a copy of the profile collection
 			medianProfile.mergeSegments(seg1, seg2);
 			
 			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( collection.getOrientationPoint(),  medianProfile.getSegments());
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( collection.getPoint(BorderTag.ORIENTATION_POINT),  medianProfile.getSegments());
 
 			/*
 			 * With the median profile segments merged, also merge the segments
@@ -349,7 +356,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			 */
 			if(collection.hasConsensusNucleus()){
 				ConsensusNucleus n = collection.getConsensusNucleus();
-				SegmentedProfile profile = n.getAngleProfile(collection.getOrientationPoint());
+				SegmentedProfile profile = n.getAngleProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
 				NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
 				NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
 				profile.mergeSegments(nSeg1, nSeg2);
@@ -360,7 +367,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		private void unmergeSegments(String segName) throws Exception {
 			CellCollection collection = activeDataset.getCollection();
 			
-			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
 			
 			// Get the segments to merge
 			NucleusBorderSegment seg = medianProfile.getSegment(segName);
@@ -369,7 +376,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			medianProfile.unmergeSegment(seg);
 			
 			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( collection.getOrientationPoint(),  medianProfile.getSegments());
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( collection.getPoint(BorderTag.ORIENTATION_POINT),  medianProfile.getSegments());
 
 			/*
 			 * With the median profile segments unmerged, also unmerge the segments
@@ -388,7 +395,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			 */
 			if(collection.hasConsensusNucleus()){
 				ConsensusNucleus n = collection.getConsensusNucleus();
-				SegmentedProfile profile = n.getAngleProfile(collection.getOrientationPoint());
+				SegmentedProfile profile = n.getAngleProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
 				NucleusBorderSegment nSeg1 = profile.getSegment(segName);
 				profile.unmergeSegment(nSeg1);
 				n.setAngleProfile(profile, n.getOrientationPoint());
@@ -414,7 +421,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 					} else { // single collection
 						buttonsPanel.setEnabled(true);
 						CellCollection collection = list.get(0).getCollection();
-						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getOrientationPoint());
+						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+								.getSegmentedProfile(collection.getPoint(BorderTag.ORIENTATION_POINT));
 						
 						// Don't allow merging below 2 segments (causes errors)
 						if(medianProfile.getSegmentCount()<=2){
@@ -503,7 +511,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					for( AnalysisDataset dataset  : list){
 						CellCollection collection = dataset.getCollection();
 						int count = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-							.getSegmentedProfile(collection.getReferencePoint())
+							.getSegmentedProfile(collection.getPoint(BorderTag.REFERENCE_POINT))
 							.getSegmentCount();
 						
 						if(prevCount > 0 ){
@@ -608,7 +616,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 							if(columnName.startsWith("Seg_")){
 								
 								try {
-									SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getReferencePoint());
+									SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
 									NucleusBorderSegment seg = profile.getSegment(columnName);
 									
 //									if(rowName.equals("Start index")){

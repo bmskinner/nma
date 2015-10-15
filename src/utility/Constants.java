@@ -18,6 +18,8 @@
  *******************************************************************************/
 package utility;
 
+import java.util.ArrayList;
+import java.util.List;
 
 public class Constants {
 	
@@ -92,27 +94,47 @@ public class Constants {
 		        this.asString = value;
 			}
 		    
-		    public String string(){
+		    public String toString(){
 		    	return this.asString;
 		    }
 		}
-		
-		
-		
+				
 		// use in charting
 		public enum BorderTag {
-			ORIENTATION_POINT ("Orientation point"),
-			REFERENCE_POINT ("Reference point");
+			ORIENTATION_POINT ("Orientation point", TagType.CORE ),
+			REFERENCE_POINT   ("Reference point",   TagType.CORE ),
+			INTERSECTION_POINT ("Intersection point", TagType.EXTENDED);
 			
 			private final String name;
+			private TagType type;
 			
-			BorderTag(String name){
+			BorderTag(String name, TagType type){
 				this.name = name;
+				this.type = type;
 			}
 			
 			public String toString(){
 				return this.name;
 			}
+			
+			public TagType type(){
+				return type;
+			}
+			
+			
+			public static BorderTag[] values(TagType type){
+				
+				List<BorderTag> list = new ArrayList<BorderTag>();
+				for(BorderTag tag : BorderTag.values()){
+					if(tag.type.equals(type)){
+						list.add(tag);
+					}
+				}
+				return list.toArray( new BorderTag[0]);
+			}
+			
+			// core tags are used in gui; extended are for internal mappings
+			public enum TagType { CORE, EXTENDED};
 		}
 		
 		public enum Cell {
@@ -126,7 +148,7 @@ public class Constants {
 		        this.asString = string;
 			}
 		    
-		    public String string(){
+		    public String toString(){
 		    	return this.asString;
 		    }
 		}

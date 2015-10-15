@@ -45,7 +45,7 @@ import utility.Constants;
 import utility.Equation;
 import utility.Stats;
 import utility.Utils;
-
+import utility.Constants.BorderTag;
 import components.CellCollection.NucleusStatistic;
 import components.CellCollection.NucleusType;
 import components.CellularComponent;
@@ -104,7 +104,8 @@ public class RoundNucleus
 	protected Profile singleDistanceProfile; // holds distances from CoM, not through CoM
 	protected List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
 	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
-	protected Map<String, Integer> borderTags  = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+//	protected Map<String, Integer> borderTags  = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
+	protected Map<BorderTag, Integer> borderTags  = new HashMap<BorderTag, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
 	protected Map<String, Integer> segmentTags = new HashMap<String, Integer>(0);
 
 	protected XYPoint centreOfMass;
@@ -190,8 +191,8 @@ public class RoundNucleus
 
 		int tailIndex = this.getDistanceProfile().getIndexOfMax();
 		NucleusBorderPoint tailPoint = this.getPoint(tailIndex);
-		addBorderTag(NucleusType.ROUND.orientationPoint(), tailIndex);
-    	addBorderTag(NucleusType.ROUND.referencePoint(), this.getIndex(this.findOppositeBorder(tailPoint)));
+		setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
+    	setBorderTag(BorderTag.REFERENCE_POINT, this.getIndex(this.findOppositeBorder(tailPoint)));
 	}
 
 	public void intitialiseNucleus(int angleProfileWindowSize) throws Exception {
@@ -329,12 +330,17 @@ public class RoundNucleus
 		return new NucleusBorderPoint(this.borderList.get(i));
 	}
 	
+	public NucleusBorderPoint getPoint(BorderTag tag){
+		int index = this.getBorderIndex(tag);
+		return new NucleusBorderPoint(this.borderList.get(index));
+	}
+	
 	public String getReferencePoint(){
-		return NucleusType.ROUND.referencePoint();
+		return NucleusType.ROUND.getPoint(BorderTag.REFERENCE_POINT);
 	}
 	
 	public String getOrientationPoint(){
-		return NucleusType.ROUND.orientationPoint();
+		return NucleusType.ROUND.getPoint(BorderTag.ORIENTATION_POINT);
 	}
 	
 	public double getStatistic(NucleusStatistic stat, MeasurementScale scale){
@@ -842,53 +848,6 @@ public class RoundNucleus
 	}
 	
 	/*
-		This will find the point in a list that is closest to any local maximum
-		in the border profile, wherever that maximum may be
-	*/
-//	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception{
-//
-//		Profile maxima = this.getAngleProfile().getLocalMaxima(5);
-//		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
-//		double closestDistance = this.getPerimeter();
-//
-//		for(NucleusBorderPoint p : list){
-//			for(int i=0; i<maxima.size();i++){
-//				if(maxima.get(i)==1){
-//					double distance = p.getLengthTo(getPoint(i));
-//					if(distance<closestDistance){
-//						closestPoint = p;
-//					}
-//				}
-//			}
-//		}
-//		return closestPoint;
-//	}
-
-		/*
-		This will find the point in a list that is closest to any local minimum
-		in the border profile, wherever that minimum may be
-	*/
-//	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception{
-//
-//		Profile minima = this.getAngleProfile().getLocalMinima(5);
-//		NucleusBorderPoint closestPoint = new NucleusBorderPoint(0,0);
-//		double closestDistance = this.getPerimeter();
-//
-//		for(NucleusBorderPoint p : list){
-//			for(int i=0; i<minima.size();i++){
-//				if(minima.get(i)==1){
-//					double distance = p.getLengthTo(getPoint(i));
-//					if(distance<closestDistance){
-//						closestPoint = p;
-//					}
-//				}
-//			}
-//		}
-//		return closestPoint;
-//	}
-
-
-	/*
 		Given three XYPoints, measure the angle a-b-c
 			a   c
 			 \ /
@@ -955,11 +914,11 @@ public class RoundNucleus
 	*/
 	
 	public double findRotationAngle(){
-		XYPoint end = new XYPoint(this.getBorderTag("tail").getXAsInt(),this.getBorderTag("tail").getYAsInt()-50);
+		XYPoint end = new XYPoint(this.getBorderTag(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getBorderTag(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
 
-	    double angle = findAngleBetweenXYPoints(end, this.getBorderTag("tail"), this.getCentreOfMass());
+	    double angle = findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
 
-	    if(this.getCentreOfMass().getX() < this.getBorderTag("tail").getX()){
+	    if(this.getCentreOfMass().getX() < this.getBorderTag(BorderTag.ORIENTATION_POINT).getX()){
 	      return angle;
 	    } else {
 	      return 0-angle;
@@ -1003,9 +962,9 @@ public class RoundNucleus
 		}
 		if(type==ALL_POINTS || type==BORDER_TAGS){
 			IJ.log("    Points of interest:");
-			Map<String, Integer> pointHash = this.getBorderTags();
-			Set<String> keys = pointHash.keySet();
-			for(String s : keys){
+			Map<BorderTag, Integer> pointHash = this.getBorderTags();
+
+			for(BorderTag s : pointHash.keySet()){
 			 NucleusBorderPoint p = getPoint(pointHash.get(s));
 			 IJ.log("    "+s+": "+p.getX()+"    "+p.getY()+" at index "+pointHash.get(s));
 			}
@@ -1097,49 +1056,83 @@ public class RoundNucleus
 	/* (non-Javadoc)
 	 * @see no.nuclei.Nucleus#getBorderTag(java.lang.String)
 	 */
-	public NucleusBorderPoint getBorderTag(String s){
+//	public NucleusBorderPoint getBorderTag(String s){
+//		NucleusBorderPoint result = new NucleusBorderPoint(0,0);
+//		if(this.getBorderIndex(s)>-1){
+//			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
+//		} else {
+//			return null;
+//		}
+//		return result;
+//	}
+	
+	public NucleusBorderPoint getBorderTag(BorderTag tag){
 		NucleusBorderPoint result = new NucleusBorderPoint(0,0);
-		if(this.getBorderIndex(s)>-1){
-			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
+		if(this.getBorderIndex(tag)>-1){
+			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(tag)));
 		} else {
 			return null;
 		}
 		return result;
 	}
 	
-//	public NucleusBorderPoint getBorderTag(BorderTag tag){
-//		NucleusBorderPoint result = null;
-//		if(this.getBorderIndex(tag.toString())>-1){
-//			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
-//		}
-//		return result;
+//	public Map<String, Integer> getBorderTags(){
+//		return this.borderTags;
 //	}
-
-	public Map<String, Integer> getBorderTags(){
+	
+	public Map<BorderTag, Integer> getBorderTags(){
 		return this.borderTags;
 	}
-
-	public void setBorderTags(Map<String, Integer> m){
+	
+	public void setBorderTags(Map<BorderTag, Integer> m){
 		this.borderTags = m;
 	}
 
-	public int getBorderIndex(String s){
+//	public void setBorderTags(Map<String, Integer> m){
+//		this.borderTags = m;
+//	}
+
+//	public int getBorderIndex(String s){
+//		int result = -1;
+//		if(this.borderTags.containsKey(s)){
+//			result = this.borderTags.get(s);
+//		}
+//		return result;
+//	}
+	
+	public int getBorderIndex(BorderTag tag){
 		int result = -1;
-		if(this.borderTags.containsKey(s)){
-			result = this.borderTags.get(s);
+		if(this.borderTags.containsKey(tag)){
+			result = this.borderTags.get(tag);
 		}
 		return result;
 	}
-
-	public Set<String> getTags(){
+	
+	public Set<BorderTag> getTags(){
 		return this.borderTags.keySet();
 	}
 
-	public void addBorderTag(String name, int i){
-		this.borderTags.put(name, i);
+//	public Set<String> getTags(){
+//		return this.borderTags.keySet();
+//	}
+
+//	public void addBorderTag(String name, int i){
+//		this.borderTags.put(name, i);
+//	}
+	
+	public void setBorderTag(BorderTag tag, int i){
+		this.borderTags.put(tag, i);
 	}
 	
-	public boolean hasBorderTag(String tag){
+//	public boolean hasBorderTag(String tag){
+//		if(this.borderTags.containsKey(tag)){
+//			return true;
+//		} else {
+//			return false;
+//		}
+//	}
+	
+	public boolean hasBorderTag(BorderTag tag){
 		if(this.borderTags.containsKey(tag)){
 			return true;
 		} else {
@@ -1237,11 +1230,11 @@ public class RoundNucleus
 		this.borderList = reversed;
 
 		// replace the tag positions also
-		Set<String> keys = borderTags.keySet();
-		for( String s : keys){
+		Set<BorderTag> keys = borderTags.keySet();
+		for( BorderTag s : keys){
 			int index = borderTags.get(s);
 			int newIndex = this.getLength() - index - 1; // if was 0, will now be <length-1>; if was length-1, will be 0
-			addBorderTag(s, newIndex);
+			setBorderTag(s, newIndex);
 		}
 	}
 	

@@ -19,6 +19,7 @@
 package components.nuclei;
 
 import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
+import utility.Constants.BorderTag;
 
 import java.io.File;
 import java.util.List;
@@ -171,6 +172,14 @@ public interface Nucleus {
 	public String getOrientationPoint();
 	
 	public String getReferencePoint();
+	
+	
+	/**
+	 * Get the border point mapped to the given tag
+	 * @param tag
+	 * @return
+	 */
+	public NucleusBorderPoint getPoint(BorderTag tag); 
 
 	public NucleusBorderPoint getPoint(int i);
 
@@ -432,7 +441,7 @@ public interface Nucleus {
 	 * @param s the tag name
 	 * @return the border point with this tag
 	 */
-	public NucleusBorderPoint getBorderTag(String s);
+//	public NucleusBorderPoint getBorderTag(String s);
 	
 	/**
 	 * Fetch the NucleusBorderPoint associated with the given
@@ -448,7 +457,9 @@ public interface Nucleus {
 	 * @param s the tag name
 	 * @return the index of the border in borderList
 	 */
-	public int getBorderIndex(String s);
+//	public int getBorderIndex(String s);
+	
+	public int getBorderIndex(BorderTag tag);
 	
 	/**
 	 * Get the index of the border point with the given tag.
@@ -462,40 +473,30 @@ public interface Nucleus {
 	 * Get a set of all the tags present within this nucleus
 	 * @return
 	 */
-	public Set<String> getTags();
+	public Set<BorderTag> getTags();
 	
 	/**
 	 * Check if the nucleus has the given border tag
 	 * @param tag
 	 * @return
 	 */
-	public boolean hasBorderTag(String tag);
+	public boolean hasBorderTag(BorderTag tag);
 
 	/**
 	 * Set the name of the given NucleusBorderPoint
 	 * @param name the new name
 	 * @param i the index of the border point
 	 */
-	public void addBorderTag(String name, int i);
+//	public void addBorderTag(BorderTag name, int i);
 	
 	/**
 	 * Set the name of the given NucleusBorderPoint
 	 * @param tag the new tag to use as a name
 	 * @param i the index of the border point
 	 */
-//	public void addBorderTag(BorderTag tag, int i);
+	
+	public void setBorderTag(BorderTag tag, int i);
 
-//	/**
-//	 * Add a name to the given segment
-//	 * @param name the new name
-//	 * @param i the segment number
-//	 */
-//	public void addSegmentTag(String name, int i);
-//
-//	/**
-//	 * Remove all segments from this nucleus
-//	 */
-//	public void clearSegments();
 
 	/**
 	 * Calculate a new angle profile with the given window size. It
@@ -548,7 +549,7 @@ public interface Nucleus {
 	 */
 	public Set<Integer> getSignalGroups();
 	
-	public Map<String, Integer> getBorderTags();
+	public Map<BorderTag, Integer> getBorderTags();
 	
 //	public void addSegment(NucleusBorderSegment n);
 	public void reverse() throws Exception;

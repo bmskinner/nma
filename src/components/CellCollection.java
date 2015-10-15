@@ -206,15 +206,10 @@ public class CellCollection implements Serializable {
 	  return this.nucleusType.getPoint(tag);
   }
   
-  public String getReferencePoint(){
-	  	  
-	  return this.getPoint(BorderTag.REFERENCE_POINT);
-  }
-  
-  public String getOrientationPoint(){
-	  
-	  return this.getPoint(BorderTag.ORIENTATION_POINT);
-  }
+//  public String getReferencePoint(){
+//	  	  
+//	  return this.getPoint(BorderTag.REFERENCE_POINT);
+//  }
   
   /**
    * Get the profile collection of the given type
@@ -818,7 +813,7 @@ public class CellCollection implements Serializable {
 
 	  List<String> result = new ArrayList<String>(0);
 	  ProfileCollection pc = this.getProfileCollection(ProfileCollectionType.REGULAR);
-	  List<NucleusBorderSegment> segs = pc.getSegments(this.getOrientationPoint());
+	  List<NucleusBorderSegment> segs = pc.getSegments(this.getPoint(BorderTag.ORIENTATION_POINT));
 	  for(NucleusBorderSegment segment : segs){
 		  result.add(segment.getName());
 	  }
@@ -830,7 +825,7 @@ public class CellCollection implements Serializable {
    * @param pointType the point to fetch profiles from
    * @return an array of differences
    */
-  public double[] getDifferencesToMedianFromPoint(String pointType) throws Exception {
+  public double[] getDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
 	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType);
 	  for(Nucleus n : this.getNuclei()){
@@ -845,7 +840,7 @@ public class CellCollection implements Serializable {
    * @param pointType the point to fetch profiles from
    * @return an array of normalised differences
    */
-  public double[] getNormalisedDifferencesToMedianFromPoint(String pointType) throws Exception {
+  public double[] getNormalisedDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
 
 //	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
@@ -853,20 +848,12 @@ public class CellCollection implements Serializable {
 		  
 		  double var = calculateVariabililtyOfNucleusProfile(n);
 		  list.add(var);
-//
-//		  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);
-//
-//		  // use the differences in degrees, rather than square degreees for plotting
-//		  double rootDiff = Math.sqrt(diff);
-//
-//		  // normalise to the number of points in the perimeter (approximately 1 point per pixel)
-//		  list.add(rootDiff / n.getPerimeter());
 	  }
 
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
 
-  public double compareProfilesToMedian(String pointType) throws Exception{
+  public double compareProfilesToMedian(BorderTag pointType) throws Exception{
 	  double[] scores = this.getDifferencesToMedianFromPoint(pointType);
 	  double result = 0;
 	  for(double s : scores){
@@ -876,7 +863,7 @@ public class CellCollection implements Serializable {
   }
 
 
-  public int[] getPointIndexes(String pointType){
+  public int[] getPointIndexes(BorderTag pointType){
 	  List<Integer> list = new ArrayList<Integer>();
 
 	  for(Nucleus n : this.getNuclei()){
@@ -891,10 +878,10 @@ public class CellCollection implements Serializable {
    * @param pointTypeB
    * @return
    */
-  public double[] getPointToPointDistances(String pointTypeA, String pointTypeB){
+  public double[] getPointToPointDistances(BorderTag pointTypeA, BorderTag pointTypeB){
 	  List<Double> list = new ArrayList<Double>();
 	  for(Nucleus n : this.getNuclei()){
-		  list.add(n.getBorderTag(pointTypeA).getLengthTo(n.getBorderTag(pointTypeB)));
+		  list.add(n.getPoint(pointTypeA).getLengthTo(n.getPoint(pointTypeB)));
 	  }
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
   }
@@ -905,7 +892,7 @@ public class CellCollection implements Serializable {
    * @return the best nucleus
    * @throws Exception
    */
-  public Nucleus getNucleusMostSimilarToMedian(String pointType) throws Exception {
+  public Nucleus getNucleusMostSimilarToMedian(BorderTag pointType) throws Exception {
 
 	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType); // the profile we compare the nucleus to
 	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
@@ -944,7 +931,7 @@ public class CellCollection implements Serializable {
    * @throws Exception
    */
   public double calculateVariabililtyOfNucleusProfile(Nucleus n) throws Exception {
-	  String pointType = n.getReferencePoint();
+	  BorderTag pointType = BorderTag.REFERENCE_POINT;
 	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType);
 	  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
 	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
@@ -988,7 +975,7 @@ public class CellCollection implements Serializable {
 	  		}
 	  		
 	  		case VARIABILITY:{
-	  			result = this.getNormalisedDifferencesToMedianFromPoint(this.getOrientationPoint());
+	  			result = this.getNormalisedDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT);
 	  			break;
 	  		}
 
@@ -1000,7 +987,7 @@ public class CellCollection implements Serializable {
 	  List<Double> list = new ArrayList<Double>();
 
 	  for(Nucleus n : this.getNuclei()){
-		  NucleusBorderSegment segment = n.getAngleProfile(this.getReferencePoint()).getSegment(segName);
+		  NucleusBorderSegment segment = n.getAngleProfile(this.getPoint(BorderTag.REFERENCE_POINT)).getSegment(segName);
 		  list.add(new Double(segment.length()));
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
@@ -1059,24 +1046,20 @@ public class CellCollection implements Serializable {
 		RODENT_SPERM ("Rodent sperm nucleus" , "tip" , "tail", RodentSpermNucleus.class), 
 		PIG_SPERM 	 ("Pig sperm nucleus"	 , "head", "tail", PigSpermNucleus.class);
 		
-	    private final String asString;   
-	    private final String referencePoint;
-	    private final String orientationPoint;
+	    private final String name;   
 	    private final Class<?> nucleusClass;
 	    
 	    private final Map<BorderTag, String> map = new HashMap<BorderTag, String>();
 	    
-	    NucleusType(String string, String referencePoint, String orientationPoint, Class<?> nucleusClass) {
-	        this.asString = string;
-	        this.referencePoint = referencePoint;
-	        this.orientationPoint = orientationPoint;
+	    NucleusType(String name, String referencePoint, String orientationPoint, Class<?> nucleusClass) {
+	        this.name = name;
 	        this.nucleusClass = nucleusClass;
 	        this.map.put(BorderTag.REFERENCE_POINT, referencePoint);
 	        this.map.put(BorderTag.ORIENTATION_POINT, orientationPoint);
 		}
 	    
 	    public String toString(){
-	    	return this.asString;
+	    	return this.name;
 	    }
 	        
 	    
@@ -1087,14 +1070,6 @@ public class CellCollection implements Serializable {
 	     */
 	    public String getPoint(BorderTag point){
 	    	return this.map.get(point);
-	    }
-	    
-	    public String orientationPoint(){
-	    	return this.orientationPoint;
-	    }
-	    
-	    public String referencePoint(){
-	    	return this.referencePoint;
 	    }
 	    
 	    public Class<?> getNucleusClass(){
