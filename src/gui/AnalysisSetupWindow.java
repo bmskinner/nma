@@ -33,6 +33,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.ParseException;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -103,14 +104,17 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	private ButtonGroup refoldModeGroup;
 	
 	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	0, 100, 0.001));
+	
+	private Logger logger;
 
 
 	/**
 	 * Create the frame.
 	 */
-	public AnalysisSetupWindow() {
+	public AnalysisSetupWindow(Logger logger) {
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // disable the 'X'; we need to use the footer buttons 
+		this.logger = logger;
 		setDefaultOptions();
 		createAndShowGUI();
 		pack();
@@ -244,7 +248,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 					
 					// probe the first image
 					// show the results of the current settings
-					ImageProber p = new ImageProber(analysisOptions, new File("C:\\log.txt"));
+					ImageProber p = new ImageProber(analysisOptions, logger);
 					if(p.getOK()==false){
 					
 						

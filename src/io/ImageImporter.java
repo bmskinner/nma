@@ -24,6 +24,7 @@ import ij.plugin.ChannelSplitter;
 import ij.process.ImageConverter;
 
 import java.io.File;
+import java.util.logging.Level;
 
 import utility.Constants;
 import utility.Logger;
@@ -36,7 +37,8 @@ import utility.Logger;
  */
 public class ImageImporter {
 
-	private static Logger logger;
+	private static Logger logger = null;
+	private static java.util.logging.Logger programLogger;
 	
 	private static int[] imageTypesProcessed = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 	
@@ -62,6 +64,24 @@ public class ImageImporter {
 		}
 		return stack;
 	}
+	
+	public static ImageStack importImage(File f, java.util.logging.Logger logger){
+		programLogger = logger;
+		ImageStack stack = null;
+		try{
+			if(f.isFile()){
+				programLogger.log(Level.INFO, "Importing image: "+f.getAbsolutePath());
+				ImagePlus image = new ImagePlus(f.getAbsolutePath());
+				stack = convert(image);
+			} else {
+				programLogger.log(Level.WARNING, "Not a file: "+f.getAbsolutePath());
+			}
+		} catch (Exception e){
+			programLogger.log(Level.SEVERE, "Error importing image: "+e.getMessage());
+		}
+		return stack;
+	}
+	
 	/**
 	 * Create an ImageStack from the input image
 	 * @param image the image to be converted to a stack
@@ -69,7 +89,11 @@ public class ImageImporter {
 	 */
 	public static ImageStack convert(ImagePlus image){
 		if(image==null){
-			logger.log("Input image is null", Logger.ERROR);
+			if(logger==null){
+				programLogger.log(Level.WARNING, "Input image is null");
+			} else {
+				logger.log("Input image is null", Logger.ERROR);
+			}
 			throw new IllegalArgumentException("Input image is null");
 		}
 		
@@ -81,25 +105,49 @@ public class ImageImporter {
 			}
 		}
 		if(!ok ){
-			logger.log("Cannot handle image type: "+image.getType(), Logger.ERROR);
+			if(logger==null){
+				programLogger.log(Level.WARNING, "Cannot handle image type: "+image.getType());
+			} else {
+				logger.log("Cannot handle image type: "+image.getType(), Logger.ERROR);
+			}
+			
 			throw new IllegalArgumentException("Cannot handle image type: "+image.getType());
 		}
-						
-		logger.log("Image is type: "+image.getType());
+		if(logger==null){
+			programLogger.log(Level.INFO, "Image is type: "+image.getType());
+		} else {
+			logger.log("Image is type: "+image.getType());
+		}				
+		
 		// do the conversions
 		ImageStack result = null;
 		if(image.getType()==ImagePlus.GRAY8){
-			logger.log("Converting 8 bit greyscale to stack",Logger.DEBUG);
+			if(logger==null){
+				programLogger.log(Level.INFO, "Converting 8 bit greyscale to stack");
+			} else {
+				logger.log("Converting 8 bit greyscale to stack",Logger.DEBUG);
+			}
+			
 			result = convertGreyscale(image);
 		}
 		
 		if(image.getType()==ImagePlus.COLOR_RGB){
-			logger.log("Converting RGB to stack",Logger.DEBUG);
+			if(logger==null){
+				
+			} else {
+				logger.log("Converting RGB to stack",Logger.DEBUG);
+			}
+			
 			result = convertRGB(image);
 		}
 		
 		if(image.getType()==ImagePlus.GRAY16){
-			logger.log("Converting 16 bit greyscale to 8 bit stack",Logger.DEBUG);
+			if(logger==null){
+				
+			} else {
+				logger.log("Converting 16 bit greyscale to 8 bit stack",Logger.DEBUG);
+			}
+			
 			result = convert16bitGrey(image);
 		}
 		
@@ -135,7 +183,9 @@ public class ImageImporter {
 	    result.addSlice(channels[Constants.RGB_RED].getProcessor());
 	    result.addSlice(channels[Constants.RGB_GREEN].getProcessor());
 	    result.deleteSlice(1); // remove the blank first slice
-	    logger.log("New stack has "+result.getSize()+" slices",Logger.DEBUG);
+	    if(logger!=null){
+	    	logger.log("New stack has "+result.getSize()+" slices",Logger.DEBUG);
+	    }
 //	    ImagePlus demo = new ImagePlus(null, result);
 //	    
 //	    demo.show();

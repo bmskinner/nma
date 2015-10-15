@@ -36,6 +36,8 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -61,7 +63,8 @@ public class ImageProber extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private AnalysisOptions options; // the options to detect with
 	private File openImage;			// the image currently open
-	private Logger logger;	
+//	private Logger logger;
+	private java.util.logging.Logger programLogger;
 	private JLabel imageLabel;		// the JLabel to hold the image
 
 	private ImageIcon imageIcon = null;	// the icon with the image, for display in JLabel
@@ -77,7 +80,7 @@ public class ImageProber extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public ImageProber(AnalysisOptions options, File logFile) {
+	public ImageProber(AnalysisOptions options, java.util.logging.Logger logger) {
 		
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");
@@ -85,7 +88,8 @@ public class ImageProber extends JDialog {
 		this.setModal(true);
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		this.options = options;
-		this.logger = new Logger(logFile, "ImageProber");
+		this.programLogger = logger;
+//		this.logger = new Logger(logFile, "ImageProber");
 		this.setTitle("Image Prober");
 		
 		int w = (int) (screenSize.getWidth() * 0.75);
@@ -94,24 +98,28 @@ public class ImageProber extends JDialog {
 		setBounds(100, 100, w, h);
 		
 		try{
-			String pathToGif = "/ajax-loader.gif";
+			String pathToGif = "res/ajax-loader.gif";	
 			URL urlToGif = this.getClass().getResource(pathToGif);
-	
 			
-			loadingGif = new ImageIcon(urlToGif);
-			
-			if(loadingGif==null){
-				IJ.log("Looking for: "+urlToGif.getFile());
-				IJ.log("Unable to load gif");
-			} else {
+			if(urlToGif!=null){
+				loadingGif = new ImageIcon(urlToGif);
+
+				if(loadingGif==null){
+//					logger.log(new LogRecord(Level.INFO, "Looking for: "+urlToGif.getFile()));
+					logger.log(new LogRecord(Level.WARNING, "Unable to load gif"));
+					//				IJ.log("Looking for: "+urlToGif.getFile());
+					//				IJ.log("Unable to load gif");
+				} else {
+				}
+
 			}
-			
 			
 		} catch (Exception e){
-			IJ.log("Cannot load gif resource: "+e.getMessage());
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
-			}
+			logger.log(new LogRecord(Level.WARNING, "Cannot load gif resource: "+e.getMessage()));
+//			IJ.log("Cannot load gif resource: "+e.getMessage());
+//			for(StackTraceElement e1 : e.getStackTrace()){
+//				IJ.log(e1.toString());
+//			}
 		}
 
 		getContentPane().setLayout(new BorderLayout());
@@ -340,27 +348,29 @@ public class ImageProber extends JDialog {
 //			IJ.log("Displaying index "+index);
 //			IJ.log("Displaying file "+imageFile.getAbsolutePath());
 			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
-			headerLabel.setIcon(loadingGif);
-			headerLabel.repaint();
+			if(loadingGif!=null){
+				headerLabel.setIcon(loadingGif);
+				headerLabel.repaint();
+
+				imageLabel.setIcon(loadingGif);
+				imageLabel.repaint();
+			}
 			
-			imageLabel.setIcon(loadingGif);
-			imageLabel.repaint();
-			
-			logger.log("Importing file: "+imageFile.getAbsolutePath(), Logger.DEBUG);
-			ImageStack imageStack = ImageImporter.importImage(imageFile, logger.getLogfile());
+//			logger.log("Importing file: "+imageFile.getAbsolutePath(), Logger.DEBUG);
+			ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
 			
 			
 			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
 
 			
-
+//			programLogger.log(Level.INFO, "Searching image...");
 
 			List<Cell> cells = NucleusFinder.getCells(imageStack, 
 					options, 
-					logger.getLogfile(), 
+					programLogger, 
 					imageFile, 
 					null);
-
+		
 			for(Cell cell : cells){
 
 				Nucleus n = cell.getNucleus();
@@ -380,22 +390,29 @@ public class ImageProber extends JDialog {
 				openProcessor.setLineWidth(2);
 				openProcessor.draw(roi);
 			}
+			
+			programLogger.log(Level.INFO, "Displaying nuclei");
 
-			imageIcon.getImage().flush();
+			if(imageIcon!=null){
+				imageIcon.getImage().flush();
+			}
 			imageIcon = createViewableImage(openProcessor);
 
+//			programLogger.log(Level.INFO, "Created icon");
 			imageLabel.setIcon(imageIcon);
 			imageLabel.revalidate();
 			imageLabel.repaint();
+//			programLogger.log(Level.INFO, "Repainted label");
 
 			headerLabel.setText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
 			headerLabel.setIcon(null);
 			
-			logger.log("New image loaded", Logger.DEBUG);
+//			logger.log("New image loaded", Logger.DEBUG);
+//			logger.log(new LogRecord(Level.INFO, "Looking for: "+urlToGif.getFile()));
 
 
 		} catch (Exception e) { // end try
-			logger.error("Error in image processing", e);
+			programLogger.log(new LogRecord(Level.SEVERE, "Error in image processing"));
 		} // end catch
 
 	}

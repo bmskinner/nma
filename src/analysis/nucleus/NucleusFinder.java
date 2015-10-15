@@ -32,11 +32,13 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import utility.Constants;
 import utility.Logger;
+//import utility.Logger;
 import utility.Stats;
 import utility.StatsMap;
 import analysis.AnalysisOptions;
@@ -58,7 +60,8 @@ import components.nuclei.Nucleus;
  */
 public class NucleusFinder {
 	
-	private static Logger logger;
+	private static Logger logger = null;
+	private static java.util.logging.Logger programLogger;
 	
 	/**
 	 * Get a list of cells found in this image
@@ -70,6 +73,12 @@ public class NucleusFinder {
 	 */
 	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, File logfile, File sourceFile, String outputFolderName){
 		logger = new Logger(logfile, "NucleusFinder");
+		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
+		return result;
+	}
+	
+	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, java.util.logging.Logger logger, File sourceFile, String outputFolderName){
+		programLogger = logger;
 		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
 		return result;
 	}
@@ -98,7 +107,11 @@ public class NucleusFinder {
 		try{
 			detector.run(image);
 		} catch(Exception e){
-			logger.error("Error in nucleus detection", e);
+			if(logger==null){
+				programLogger.log(Level.SEVERE, "Error in nucleus detection");
+			} else {
+				logger.error("Error in nucleus detection", e);
+			}
 		}
 		return detector.getRoiList();
 	}
@@ -115,7 +128,9 @@ public class NucleusFinder {
 		if(analysisOptions==null){
 			throw new IllegalArgumentException("Analysis options are null");
 		}
-		logger.log("File:  "+path.getName(), Logger.DEBUG);
+		if(logger!=null){
+			logger.log("File:  "+path.getName(), Logger.DEBUG);
+		}
 		List<Cell> result = new ArrayList<Cell>();
 				
 		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
@@ -147,19 +162,27 @@ public class NucleusFinder {
 		List<Roi> roiList = getROIs(searchStack, analysisOptions, true);
 						
 		if(roiList.isEmpty()){
-			logger.log("No usable nuclei in image", Logger.DEBUG);
+			if(logger!=null){
+				logger.log("No usable nuclei in image", Logger.DEBUG);
+			}
+			
 		}
 
 		int nucleusNumber = 0;
 
 		for(Roi roi : roiList){
-
-			logger.log("Acquiring nucleus "+nucleusNumber, Logger.DEBUG);
+			if(logger!=null){
+				logger.log("Acquiring nucleus "+nucleusNumber, Logger.DEBUG);
+			}
+			
 			try{
 				Cell cell = makeCell(roi, image, nucleusNumber, path, analysisOptions, outputFolderName); // get the profile data back for the nucleus
 				result.add(cell);
 			} catch(Exception e){
-				logger.error("Error acquiring nucleus", e);
+				if(logger!=null){
+					logger.error("Error acquiring nucleus", e);
+				}
+				
 			}
 			nucleusNumber++;
 		} 
@@ -229,7 +252,10 @@ public class NucleusFinder {
 			  result.setNucleus(currentNucleus);		  
 			  
 		  }catch(Exception e){
-			  logger.error(" Error in nucleus assignment", e);
+			  if(logger!=null){
+				  logger.error(" Error in nucleus assignment", e);
+			  }
+			  
 		  }
 		  return result;
 	  }
@@ -265,8 +291,9 @@ public class NucleusFinder {
 					  originalPosition);
 			  
 		  } catch(Exception e){
-			  logger.error("Error creating nucleus", e);
-
+			  if(logger!=null){
+				  logger.error("Error creating nucleus", e);
+			  }
 		  }
 		  return n;
 	  }
@@ -325,7 +352,10 @@ public class NucleusFinder {
 	 * @param filterSize the radius of the kernel
 	 */
 	private static void runKuwaharaFiltering(ImageStack stack, int filterSize){
-		logger.log("Applying Kuwahara filter with radius "+filterSize);
+		if(logger!=null){
+			logger.log("Applying Kuwahara filter with radius "+filterSize);
+		  }
+		
 		Kuwahara_Filter kw = new Kuwahara_Filter();
 		ImagePlus img = ImageExporter.convert(stack);
 		kw.setup("", img);
@@ -340,8 +370,11 @@ public class NucleusFinder {
 	 * @param stack the stack to adjust
 	 * @return
 	 */
-	private static void squashChromocentres(ImageStack stack, int threshold){		
-		logger.log("Compressing internal structures to max intensity of "+threshold);
+	private static void squashChromocentres(ImageStack stack, int threshold){	
+		if(logger!=null){
+			logger.log("Compressing internal structures to max intensity of "+threshold);
+		}
+		
 		// fetch a copy of the int array
 		ImageProcessor ip = stack.getProcessor(Constants.COUNTERSTAIN);
 		int[][] array = ip.getIntArray();
@@ -378,7 +411,10 @@ public class NucleusFinder {
 				autoDetectCannyThresholds(nucleusCannyOptions, image);
 			}
 
-			logger.log("Creating edge detector", Logger.DEBUG);
+			if(logger!=null){
+				logger.log("Creating edge detector", Logger.DEBUG);
+			}
+			
 			CannyEdgeDetector canny = new CannyEdgeDetector();
 			canny.setSourceImage(image.getProcessor(Constants.COUNTERSTAIN).getBufferedImage());
 			canny.setLowThreshold( nucleusCannyOptions.getLowThreshold() );
@@ -401,9 +437,15 @@ public class NucleusFinder {
 			bi.close();
 			searchImage.close();
 
-			logger.log("Edge detection complete", Logger.DEBUG);
+			if(logger!=null){
+				logger.log("Edge detection complete", Logger.DEBUG);
+			}
+			
 		} catch (Exception e) {
-			logger.error("Error in edge detection", e);
+			if(logger!=null){
+				logger.error("Error in edge detection", e);
+			}
+			
 		}
 		return searchStack;
 	}
@@ -423,7 +465,10 @@ public class NucleusFinder {
 		// if the median is >128, this is probably an inverted image.
 		// invert it so the thresholds will work
 		if(medianPixel>128){
-			logger.log("Detected high median ("+medianPixel+"); inverting");
+			if(logger!=null){
+				logger.log("Detected high median ("+medianPixel+"); inverting");
+			}
+			
 			image.getProcessor(Constants.COUNTERSTAIN).invert();
 			medianPixel = getMedianIntensity(image);
 		}
@@ -459,7 +504,10 @@ public class NucleusFinder {
 				}
 			}
 		} catch (Exception e) {
-			logger.error("Error getting median image intensity", e);
+			if(logger!=null){
+				logger.error("Error getting median image intensity", e);
+			}
+			
 		}
 		return Stats.quartile(values, 50);
 	}
@@ -483,10 +531,16 @@ public class NucleusFinder {
 			MorphoProcessor mp = new MorphoProcessor(se);
 //			IJ.log("Made mp");
 			mp.fclose(ip);
-			logger.log("Objects closed", Logger.DEBUG);
+			if(logger!=null){
+				logger.log("Objects closed", Logger.DEBUG);
+			}
+			
 //			IJ.log("Closed");
 		} catch (Exception e) {
-			logger.error("Error in morphology closing", e);
+			if(logger!=null){
+				logger.error("Error in morphology closing", e);
+			}
+			
 		}
 		
 	}

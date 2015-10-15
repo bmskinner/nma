@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Formatter;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
@@ -75,6 +76,7 @@ import javax.swing.SwingWorker;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
 //import utility.Logger;
@@ -175,7 +177,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the log panel
 			//---------------
 			logPanel = new LogPanel();
-			programLogger.addHandler(new TextAreaHandler(logPanel));
+			TextAreaHandler textHandler = new TextAreaHandler(logPanel);
+			textHandler.setFormatter(new LogPanelFormatter());
+			programLogger.addHandler(textHandler);
 			
 			//---------------
 			// Create the split view
@@ -1493,7 +1497,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		public NewMorphologyAnalysisAction() {
 			super(null, "Nucleus detection", "Error in analysis");
 
-			AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow();
+			AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow(programLogger);
 			if( analysisSetup.getOptions()!=null){
 
 				options = analysisSetup.getOptions();
