@@ -62,6 +62,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
+import utility.Constants.BorderTag;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
@@ -735,14 +736,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								// adjust to the actual point index
 								int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(n.getReferencePoint()), n.getLength());
 								
-								n.addBorderTag(pointType, pointIndex);
+								n.setBorderTag(pointType, pointIndex);
 								
 								if(pointType.equals(n.getOrientationPoint())){
-									if(n.hasBorderTag("intersectionPoint")){
+									if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
 										// only rodent sperm use the intersection point, which is equivalent to the head.
-										NucleusBorderPoint newPoint = n.findOppositeBorder(n.getBorderTag(n.getOrientationPoint()));
-										n.addBorderTag("intersectionPoint", n.getIndex(newPoint));
-										n.addBorderTag("head", n.getIndex(newPoint));
+										NucleusBorderPoint newPoint = n.findOppositeBorder(n.getPoint(BorderTag.ORIENTATION_POINT));
+										n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getIndex(newPoint));
+//										n.addBorderTag("head", n.getIndex(newPoint));
 									}
 								}
 								
@@ -808,7 +809,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							if(columnName.startsWith("Seg_")){
 								
 								try {
-									SegmentedProfile profile = n.getAngleProfile(n.getReferencePoint());
+									SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
 									NucleusBorderSegment seg = profile.getSegment(columnName);
 									
 									if(rowName.equals("Start index")){
@@ -836,7 +837,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 											int index = (Integer) spinner.getModel().getValue();
 											if(profile.update(seg, index, seg.getEndIndex())){
 //											if(seg.update(index, seg.getEndIndex())){
-												n.setAngleProfile(profile, n.getReferencePoint());
+												n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
 												updateCell(activeCell);
 											} else {
 												log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
@@ -873,7 +874,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 											int index = (Integer) spinner.getModel().getValue();
 											if(profile.update(seg, seg.getStartIndex(), index)){
 //											if(seg.update(seg.getStartIndex(), index)){
-												n.setAngleProfile(profile, n.getReferencePoint());
+												n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
 												updateCell(activeCell);
 											} else {
 												log("Updating "+seg.getEndIndex()+" to index "+index+" failed: "+seg.getLastFailReason());

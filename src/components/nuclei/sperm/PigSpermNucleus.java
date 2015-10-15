@@ -92,10 +92,10 @@ public class PigSpermNucleus
       int consensusTailIndex = this.getIndex(tailPoint2);
       NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
 
-      addBorderTag("tail", consensusTailIndex);
+      setBorderTag(BorderTag.ORIENTATION_POINT, consensusTailIndex);
 
       int headIndex = getIndex(this.findOppositeBorder(consensusTail));
-      addBorderTag("head", headIndex);
+      setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
     }
     
   	@Override

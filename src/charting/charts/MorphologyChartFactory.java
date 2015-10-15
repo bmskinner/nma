@@ -98,14 +98,14 @@ public class MorphologyChartFactory {
 
 		XYPlot plot = chart.getXYPlot();
 
-		for(String tag : n.getBorderTags().keySet()){
+		for(BorderTag tag : n.getBorderTags().keySet()){
 			Color colour = Color.BLACK;
-			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
+			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
 
-			if(tag.equals(n.getOrientationPoint())){
+			if(tag.equals(BorderTag.ORIENTATION_POINT)){
 				colour = Color.BLUE;
 			}
-			if(tag.equals(n.getReferencePoint())){
+			if(tag.equals(BorderTag.REFERENCE_POINT)){
 				colour = Color.ORANGE;
 			}
 			plot.addDomainMarker(new ValueMarker(index, colour, MARKER_STROKE));	
@@ -124,8 +124,7 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, boolean rightAlign, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();
-		String point = collection.getPoint(borderTag);
-		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
+		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, borderTag);
 		
 		
 		int length = 100 ; // default if normalised
@@ -141,14 +140,14 @@ public class MorphologyChartFactory {
 		
 		XYPlot plot = chart.getXYPlot();
 
-		for (String tag : collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffsetKeys()){
+		for (BorderTag tag : collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffsetKeys()){
 			Color colour = Color.BLACK;
 			
 			// get the index of the tag
 			int index = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(tag);
 			
 			// get the offset from to the current draw point
-			int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(point);
+			int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(borderTag);
 			
 			// adjust the index to the offset
 			index = Utils.wrapIndex( index - offset, collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length());
@@ -203,7 +202,7 @@ public class MorphologyChartFactory {
 		for(AnalysisDataset dataset : list){
 			CellCollection collection = dataset.getCollection();
 			String point = collection.getPoint(borderTag);
-			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, normalised, rightAlign, point);
+			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, normalised, rightAlign, borderTag);
 
 			plot.setDataset(datasetIndex, ds);
 //			IJ.log("Set dataset "+datasetIndex + " for "+dataset.getName());
@@ -248,7 +247,7 @@ public class MorphologyChartFactory {
 		
 		CellCollection collection = dataset.getCollection();
 		String point = collection.getPoint(borderTag);
-		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, rightAlign, point);
+		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, rightAlign, borderTag);
 //		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
 		
 		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
@@ -261,14 +260,14 @@ public class MorphologyChartFactory {
 		
 		XYPlot plot = chart.getXYPlot();
 
-		for (String tag : pc.getOffsetKeys()){
+		for (BorderTag tag : pc.getOffsetKeys()){
 			Color colour = Color.BLACK;
 			
 			// get the index of the tag
 			int index = pc.getOffset(tag);
 			
 			// get the offset from to the current draw point
-			int offset = pc.getOffset(point);
+			int offset = pc.getOffset(borderTag);
 			
 			// adjust the index to the offset
 			index = Utils.wrapIndex( index - offset, pc.getAggregate().length());
@@ -286,10 +285,10 @@ public class MorphologyChartFactory {
 			}
 
 			if(showMarkers){
-				if(tag.equals(collection.getPoint(BorderTag.ORIENTATION_POINT))){
+				if(tag.equals(BorderTag.ORIENTATION_POINT)){
 					colour = Color.BLUE;
 				}
-				if(tag.equals(collection.getPoint(BorderTag.REFERENCE_POINT))){
+				if(tag.equals(BorderTag.REFERENCE_POINT)){
 					colour = Color.ORANGE;
 				}
 				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, MARKER_STROKE));	

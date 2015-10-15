@@ -52,8 +52,7 @@ public class DipTester {
 		
 		double[] pvals = null;
 		try {
-			String pointType = collection.getPoint(tag);
-			int offset = collection.getProfileCollection(type).getOffset(pointType);
+			int offset = collection.getProfileCollection(type).getOffset(tag);
 			
 			// ensure the postions are starting from the right place
 			List<Double> keys = collection.getProfileCollection(type).getAggregate().getXKeyset();

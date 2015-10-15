@@ -813,7 +813,7 @@ public class CellCollection implements Serializable {
 
 	  List<String> result = new ArrayList<String>(0);
 	  ProfileCollection pc = this.getProfileCollection(ProfileCollectionType.REGULAR);
-	  List<NucleusBorderSegment> segs = pc.getSegments(this.getPoint(BorderTag.ORIENTATION_POINT));
+	  List<NucleusBorderSegment> segs = pc.getSegments(BorderTag.ORIENTATION_POINT);
 	  for(NucleusBorderSegment segment : segs){
 		  result.add(segment.getName());
 	  }
@@ -827,7 +827,7 @@ public class CellCollection implements Serializable {
    */
   public double[] getDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType);
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, 50);
 	  for(Nucleus n : this.getNuclei()){
 		  list.add(n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
 	  }
@@ -894,7 +894,7 @@ public class CellCollection implements Serializable {
    */
   public Nucleus getNucleusMostSimilarToMedian(BorderTag pointType) throws Exception {
 
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType); // the profile we compare the nucleus to
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, 50); // the profile we compare the nucleus to
 	  Nucleus n = this.getNuclei().get(0); // default to the first nucleus
 
 	  double difference = Stats.max(getDifferencesToMedianFromPoint(pointType));
@@ -932,7 +932,7 @@ public class CellCollection implements Serializable {
    */
   public double calculateVariabililtyOfNucleusProfile(Nucleus n) throws Exception {
 	  BorderTag pointType = BorderTag.REFERENCE_POINT;
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType);
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType,50);
 	  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
 	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 	  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
@@ -987,7 +987,7 @@ public class CellCollection implements Serializable {
 	  List<Double> list = new ArrayList<Double>();
 
 	  for(Nucleus n : this.getNuclei()){
-		  NucleusBorderSegment segment = n.getAngleProfile(this.getPoint(BorderTag.REFERENCE_POINT)).getSegment(segName);
+		  NucleusBorderSegment segment = n.getAngleProfile(BorderTag.REFERENCE_POINT).getSegment(segName);
 		  list.add(new Double(segment.length()));
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
@@ -1075,6 +1075,20 @@ public class CellCollection implements Serializable {
 	    public Class<?> getNucleusClass(){
 	    	return this.nucleusClass;
 	    }
+	    
+	    /**
+		 * Test if a given name is a tag name
+		 * @param s
+		 * @return
+		 */
+		public static boolean isBorderTag(String s){
+			for(BorderTag tag : BorderTag.values()){
+				if(tag.toString().equals(s)){
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 }

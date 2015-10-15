@@ -25,6 +25,7 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import utility.Constants.BorderTag;
 import utility.Utils;
 
 import components.Cell;
@@ -82,9 +83,9 @@ public class CellDatasetCreator {
 			rowData.add(n.getScale());
 			
 
-			for(String tag : n.getBorderTags().keySet()){
+			for(BorderTag tag : n.getBorderTags().keySet()){
 				fieldNames.add(tag);
-				int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(n.getReferencePoint()), n.getLength());
+				int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
 				rowData.add(index);
 			}
 

@@ -101,14 +101,14 @@ public class Constants {
 				
 		// use in charting
 		public enum BorderTag {
-			ORIENTATION_POINT ("Orientation point", TagType.CORE ),
-			REFERENCE_POINT   ("Reference point",   TagType.CORE ),
-			INTERSECTION_POINT ("Intersection point", TagType.EXTENDED);
+			ORIENTATION_POINT ("Orientation point", BorderTagType.CORE ),
+			REFERENCE_POINT   ("Reference point",   BorderTagType.CORE ),
+			INTERSECTION_POINT ("Intersection point", BorderTagType.EXTENDED);
 			
 			private final String name;
-			private TagType type;
+			private BorderTagType type;
 			
-			BorderTag(String name, TagType type){
+			BorderTag(String name, BorderTagType type){
 				this.name = name;
 				this.type = type;
 			}
@@ -117,12 +117,12 @@ public class Constants {
 				return this.name;
 			}
 			
-			public TagType type(){
+			public BorderTagType type(){
 				return type;
 			}
+				
 			
-			
-			public static BorderTag[] values(TagType type){
+			public static BorderTag[] values(BorderTagType type){
 				
 				List<BorderTag> list = new ArrayList<BorderTag>();
 				for(BorderTag tag : BorderTag.values()){
@@ -134,7 +134,7 @@ public class Constants {
 			}
 			
 			// core tags are used in gui; extended are for internal mappings
-			public enum TagType { CORE, EXTENDED};
+			public enum BorderTagType { CORE, EXTENDED};
 		}
 		
 		public enum Cell {

@@ -243,7 +243,7 @@ public class ProfileCollection implements Serializable {
 
 		aggregate = new ProfileAggregate(length);
 		for(Nucleus n : collection.getNuclei()){
-			aggregate.addValues(n.getAngleProfile(collection.getPoint(BorderTag.REFERENCE_POINT)));
+			aggregate.addValues(n.getAngleProfile(BorderTag.REFERENCE_POINT));
 		}
 	}
 	

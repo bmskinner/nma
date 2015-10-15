@@ -25,7 +25,7 @@ import java.util.List;
 
 import utility.Constants;
 import utility.Logger;
-
+import utility.Constants.BorderTag;
 import components.CellCollection;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -58,7 +58,7 @@ public class SignalAnalysis {
 				
 				// if asymmetric, calculate the angle from the tail
 				if(AsymmetricNucleus.class.isAssignableFrom(collection.getNucleusType().getNucleusClass())){
-					n.calculateSignalAnglesFromPoint(n.getBorderTag("tail"));
+					n.calculateSignalAnglesFromPoint(n.getPoint(BorderTag.ORIENTATION_POINT));
 				}
 			}
 			logger.log("Distance matrix exported");

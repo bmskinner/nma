@@ -30,6 +30,7 @@ import java.awt.Color;
 import java.util.List;
 
 import utility.Constants;
+import utility.Constants.BorderTag;
 import utility.Logger;
 import utility.Utils;
 import analysis.AnalysisDataset;
@@ -97,8 +98,8 @@ public class NucleusAnnotator {
 		
 		ip.setColor(Color.CYAN);
 		ip.setLineWidth(3);
-		ip.drawDot( n.getBorderTag("tail").getXAsInt(), 
-				n.getBorderTag("tail").getYAsInt());
+		ip.drawDot( n.getPoint(BorderTag.ORIENTATION_POINT).getXAsInt(), 
+				n.getPoint(BorderTag.ORIENTATION_POINT).getYAsInt());
 	}
 
 	private static void annotateHead(ImagePlus image, Nucleus n){
@@ -106,8 +107,8 @@ public class NucleusAnnotator {
 		
 		ip.setColor(Color.YELLOW);
 		ip.setLineWidth(3);
-		ip.drawDot( n.getBorderTag("head").getXAsInt(), 
-				n.getBorderTag("head").getYAsInt());
+		ip.drawDot( n.getPoint(BorderTag.REFERENCE_POINT).getXAsInt(), 
+				n.getPoint(BorderTag.REFERENCE_POINT).getYAsInt());
 	}
 	
 	private static void annotateCoM(ImagePlus image, Nucleus n){

@@ -68,23 +68,23 @@ public class NucleusTableDatasetCreator {
 
 		} else {
 			// check which reference point to use
-			String referencePoint = null;
-			
-			if(nucleus.getClass()==RodentSpermNucleus.class){
-				referencePoint = NucleusType.RODENT_SPERM.getPoint(BorderTag.REFERENCE_POINT);
-			}
-
-			if(nucleus.getClass()==PigSpermNucleus.class){
-				referencePoint = NucleusType.PIG_SPERM.getPoint(BorderTag.REFERENCE_POINT);
-			}
-
-			if(nucleus.getClass()==RoundNucleus.class){
-				referencePoint = NucleusType.ROUND.getPoint(BorderTag.REFERENCE_POINT);
-			}
+//			String referencePoint = null;
+//			
+//			if(nucleus.getClass()==RodentSpermNucleus.class){
+//				referencePoint = NucleusType.RODENT_SPERM.getPoint(BorderTag.REFERENCE_POINT);
+//			}
+//
+//			if(nucleus.getClass()==PigSpermNucleus.class){
+//				referencePoint = NucleusType.PIG_SPERM.getPoint(BorderTag.REFERENCE_POINT);
+//			}
+//
+//			if(nucleus.getClass()==RoundNucleus.class){
+//				referencePoint = NucleusType.ROUND.getPoint(BorderTag.REFERENCE_POINT);
+//			}
 
 
 			// get the offset segments
-			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(referencePoint).getSegments();
+			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).getSegments();
 			
 
 			// create the row names
@@ -130,7 +130,7 @@ public class NucleusTableDatasetCreator {
 		} else {
 			CellCollection collection = dataset.getCollection();
 			// check which reference point to use
-			String point = collection.getPoint(BorderTag.ORIENTATION_POINT);
+			BorderTag point = BorderTag.ORIENTATION_POINT;
 
 
 			// get the offset segments
@@ -574,11 +574,9 @@ public class NucleusTableDatasetCreator {
 				} else {
 					popData[i] = df.format( runWilcoxonTest( 
 							dataset.getCollection()
-							.getDifferencesToMedianFromPoint(dataset.getCollection()
-									.getPoint(BorderTag.ORIENTATION_POINT)  ), 
+							.getDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT  ), 
 									dataset2.getCollection()
-									.getDifferencesToMedianFromPoint(dataset2.getCollection()
-											.getPoint(BorderTag.ORIENTATION_POINT) ), 
+									.getDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT ), 
 											getPValue) );
 				}
 				i++;

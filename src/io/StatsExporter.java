@@ -63,8 +63,8 @@ public class StatsExporter {
 		nuclearStats.addColumn("PATH_LENGTH",                collection.getPathLengths());
 		nuclearStats.addColumn("MEDIAN_DIST_BETWEEN_POINTS", collection.getMedianDistanceBetweenPoints());
 		nuclearStats.addColumn("MIN_FERET",                  collection.getMinFerets(MeasurementScale.PIXELS));
-		nuclearStats.addColumn("NORM_TAIL_INDEX",            collection.getPointIndexes("tail"));
-		nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       collection.getDifferencesToMedianFromPoint("tail"));
+//		nuclearStats.addColumn("NORM_TAIL_INDEX",            collection.getBorderIndex(BorderTag.ORIENTATION_POINT));
+		nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       collection.getDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT));
 		nuclearStats.addColumn("PATH",                       collection.getNucleusImagePaths());
 		nuclearStats.export(filename+"."+collection.getType());
 	}
@@ -102,7 +102,7 @@ public class StatsExporter {
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
-			List<NucleusBorderSegment> segs = pc.getSegments(collection.getPoint(BorderTag.ORIENTATION_POINT));
+			List<NucleusBorderSegment> segs = pc.getSegments(BorderTag.ORIENTATION_POINT);
 			for(NucleusBorderSegment segment : segs){
 				String s = segment.getName();
 
@@ -126,7 +126,7 @@ public class StatsExporter {
 		
 		try {
 
-			Profile normalisedMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile("tail");
+			Profile normalisedMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
 			Profile interpolatedMedian = normalisedMedian.interpolate((int)collection.getMedianNuclearPerimeter());
 
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());

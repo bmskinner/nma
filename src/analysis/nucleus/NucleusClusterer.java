@@ -276,7 +276,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
 
 			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT, ProfileCollectionType.FRANKEN);
-			Profile medianProfile = pc.getProfile(collection.getPoint(BorderTag.REFERENCE_POINT));
+			Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 			Profile indexes = pvals.getSortedIndexes();
 			
 			// create Instance for each nucleus and add to Instances
@@ -296,7 +296,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				
 				if(options.isIncludeModality()){
 					
-					Profile p = n.getAngleProfile(n.getReferencePoint());
+					Profile p = n.getAngleProfile(BorderTag.REFERENCE_POINT);
 					Profile interpolated = p.interpolate(medianProfile.size());
 
 					for(int i=0; i<options.getModalityRegions(); i++){

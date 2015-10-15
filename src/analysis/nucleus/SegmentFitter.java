@@ -22,6 +22,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import utility.Constants.BorderTag;
+import utility.Constants.BorderTag.BorderTagType;
 import utility.Logger;
 
 import components.generic.Profile;
@@ -143,7 +145,7 @@ public class SegmentFitter {
 	 * @param n the nucleus to recombine
 	 * @return a profile
 	 */
-	public Profile recombine(Nucleus n, String pointType){
+	public Profile recombine(Nucleus n, BorderTag tag){
 		if(n==null){
 			logger.log("Recombined nucleus is null", Logger.ERROR);
 			throw new IllegalArgumentException("Test nucleus is null");
@@ -156,10 +158,10 @@ public class SegmentFitter {
 			}
 
 			// Generate a segmented profile from the angle profile of the point type
-			SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(pointType));
+			SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(tag));
 			
 			// stretch the segments to match the median profile of the collection
-			frankenProfile = recombineSegments(n, nucleusProfile, pointType);
+			frankenProfile = recombineSegments(n, nucleusProfile, tag);
 		} catch(Exception e){
 			logger.error("Error recombining segments", e);
 		}
@@ -185,9 +187,9 @@ public class SegmentFitter {
 		 * reference points should be updated though
 		 */
 		
-		String[] tags = { n.getReferencePoint() , n.getOrientationPoint() };
+//		String[] tags = { n.getReferencePoint() , n.getOrientationPoint() };
 		
-		for(String tag : tags){
+		for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
 			
 			// get the segments the point should lie between
 			// from the median profile
@@ -215,7 +217,7 @@ public class SegmentFitter {
 			if(segName!=null){
 				// Get the same segment in the nucleus, and update the tag
 				NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(segName);
-				n.addBorderTag(tag, nSeg.getStartIndex());
+				n.setBorderTag(tag, nSeg.getStartIndex());
 				logger.log("Remapped border point "+tag, Logger.DEBUG);
 			} else {
 				logger.log("Unable to remap border point "+tag, Logger.DEBUG);
@@ -229,13 +231,13 @@ public class SegmentFitter {
 	 * @param profile the segmented nucleus profile to adjust
 	 * @return a frankenprofile constructed from the stretched segments
 	 */
-	private Profile recombineSegments(Nucleus n, SegmentedProfile profile, String pointType) throws Exception {
+	private Profile recombineSegments(Nucleus n, SegmentedProfile profile, BorderTag tag) throws Exception {
 		
 		if(profile==null){
 			throw new IllegalArgumentException("Test profile is null in recombiner");
 		}
 		logger.log("Recombining segments to FrankenProfile", Logger.DEBUG);
-		logger.log("The pointType "+pointType+" in this nucleus is at raw index "+n.getBorderIndex(pointType), Logger.DEBUG);
+		logger.log("The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag), Logger.DEBUG);
 		
 		
 		/*

@@ -273,7 +273,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				if(activeDataset.getCollection().hasConsensusNucleus()){
-					NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getPoint(BorderTag.ORIENTATION_POINT));
+					NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(BorderTag.ORIENTATION_POINT);
 					activeDataset.getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
 					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(activeDataset);
@@ -402,7 +402,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 
 					if(activeDataset.getCollection().hasConsensusNucleus()){
 
-						NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(activeDataset.getCollection().getPoint(BorderTag.ORIENTATION_POINT));
+						NucleusBorderPoint orientationPoint = activeDataset.getCollection().getConsensusNucleus().getBorderTag(BorderTag.ORIENTATION_POINT);
 						activeDataset.getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
 						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 						list.add(activeDataset);

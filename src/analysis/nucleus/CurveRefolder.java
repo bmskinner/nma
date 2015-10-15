@@ -92,7 +92,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 		// make an entirely new nucleus to play with
 		logger.log("Fetching best refold candiate", Logger.DEBUG);
-		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(collection.getPoint(BorderTag.ORIENTATION_POINT));	
+		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(BorderTag.ORIENTATION_POINT);	
 		
 		logger.log("Creating consensus nucleus template", Logger.DEBUG);
 		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
@@ -100,9 +100,9 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		logger.log("Refolding nucleus of class: "+collection.getNucleusType().toString());
 		logger.log("Subject: "+refoldNucleus.getImageName()+"-"+refoldNucleus.getNucleusNumber(), Logger.DEBUG);
 
-		Profile targetProfile 	= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile("tail");
-		Profile q25 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile("tail25");
-		Profile q75 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile("tail75");
+		Profile targetProfile 	= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
+		Profile q25 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 25);
+		Profile q75 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 75);
 
 		if(targetProfile==null){
 			throw new Exception("Null reference to target profile");
@@ -132,11 +132,11 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// orient refolded nucleus to put tail at the bottom
-			refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(collection.getPoint(BorderTag.ORIENTATION_POINT)));
+			refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
 
 			// if rodent sperm, put tip on left if needed
 			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
-				if(refoldNucleus.getBorderTag(collection.getPoint(BorderTag.REFERENCE_POINT)).getX()>0){
+				if(refoldNucleus.getBorderTag(BorderTag.REFERENCE_POINT).getX()>0){
 					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
 				}
 			}
@@ -199,7 +199,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		}
 
 		try{
-			double score = refoldNucleus.getAngleProfile("tail").absoluteSquareDifference(targetCurve);
+			double score = refoldNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 			
 			logger.log("Refolding curve: initial score: "+(int)score, Logger.INFO);
 
@@ -325,7 +325,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	*/
 	private double iterateOverNucleus() throws Exception{
 
-		SegmentedProfile refoldProfile = refoldNucleus.getAngleProfile("tail");
+		SegmentedProfile refoldProfile = refoldNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT);
 
 		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);
 
@@ -341,7 +341,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 			RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
 
-			double score = testNucleus.getAngleProfile("tail").absoluteSquareDifference(targetCurve);
+			double score = testNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 			// IJ.log("    Internal score: "+(int)score);
 
 			NucleusBorderPoint p = testNucleus.getPoint(i);
@@ -371,7 +371,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 				throw new Exception("Cannot calculate angle profile: "+e);
 			}
 
-			score = testNucleus.getAngleProfile("tail").absoluteSquareDifference(targetCurve);
+			score = testNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 			// IJ.log("    Internal score: "+(int)score);
 
 			// do not apply change  if the distance from teh surrounding points changes too much

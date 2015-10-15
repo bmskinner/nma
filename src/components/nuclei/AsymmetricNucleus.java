@@ -96,11 +96,11 @@ private List<NucleusBorderPoint> tailEstimatePoints = new ArrayList<NucleusBorde
   */
   @Override
   public double findRotationAngle(){
-    XYPoint end = new XYPoint(this.getBorderTag("tail").getXAsInt(),this.getBorderTag("tail").getYAsInt()-50);
+    XYPoint end = new XYPoint(this.getPoint(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getPoint(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
 
-    double angle = findAngleBetweenXYPoints(end, this.getBorderTag("tail"), this.getCentreOfMass());
+    double angle = findAngleBetweenXYPoints(end, this.getPoint(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
 
-    if(this.getCentreOfMass().getX() < this.getBorderTag("tail").getX()){
+    if(this.getCentreOfMass().getX() < this.getPoint(BorderTag.ORIENTATION_POINT).getX()){
       return angle;
     } else {
       return 0-angle;

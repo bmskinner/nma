@@ -181,6 +181,12 @@ public interface Nucleus {
 	 */
 	public NucleusBorderPoint getPoint(BorderTag tag); 
 
+	
+	/**
+	 * Get the border point at the given index
+	 * @param i
+	 * @return
+	 */
 	public NucleusBorderPoint getPoint(int i);
 
 
@@ -251,7 +257,7 @@ public interface Nucleus {
 	 * @return a copy of the segmented profile
 	 * @throws Exception 
 	 */
-	public SegmentedProfile getAngleProfile(String pointType) throws Exception;
+	public SegmentedProfile getAngleProfile(BorderTag tag) throws Exception;
 
 	
 	/**
@@ -268,7 +274,7 @@ public interface Nucleus {
 	 * @param pointType the border tag the profile begins from
 	 * @throws Exception
 	 */
-	public void setAngleProfile(SegmentedProfile p, String pointType) throws Exception;
+	public void setAngleProfile(SegmentedProfile p, BorderTag tag) throws Exception;
 	
 	
 

@@ -985,10 +985,10 @@ public class RoundNucleus
 	 * @see no.nuclei.Nucleus#getAngleProfile(java.lang.String)
 	 * Returns a copy
 	 */
-	public SegmentedProfile getAngleProfile(String pointType) throws Exception{
+	public SegmentedProfile getAngleProfile(BorderTag tag) throws Exception{
 		
 		// fetch the index of the pointType (the new zero)
-		int pointIndex = this.borderTags.get(pointType);
+		int pointIndex = this.borderTags.get(tag);
 		
 		// offset the angle profile to start at the pointIndex
 		return new SegmentedProfile(this.angleProfile.offset(pointIndex));
@@ -1004,9 +1004,9 @@ public class RoundNucleus
 	 * @param pointType
 	 * @throws Exception
 	 */
-	public void setAngleProfile(SegmentedProfile p, String pointType) throws Exception{
+	public void setAngleProfile(SegmentedProfile p, BorderTag tag) throws Exception{
 		// fetch the index of the pointType (the zero of the input profile)
-		int pointIndex = this.borderTags.get(pointType);
+		int pointIndex = this.borderTags.get(tag);
 		// remove the offset from the profile, by setting the profile to start from the pointIndex
 		this.angleProfile = new SegmentedProfile(p).offset(-pointIndex);
 	}
