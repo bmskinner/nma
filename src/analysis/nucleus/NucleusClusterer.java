@@ -27,7 +27,6 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.SwingWorker;
 
 import utility.Constants;
-import utility.Constants.BorderTag;
 import utility.DipTester;
 import utility.Logger;
 import weka.clusterers.Clusterer;
@@ -43,9 +42,10 @@ import analysis.ClusteringOptions.ClusteringMethod;
 
 import components.Cell;
 import components.CellCollection;
-import components.CellCollection.ProfileCollectionType;
+import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
+import components.generic.ProfileCollectionType;
 import components.nuclei.Nucleus;
 
 

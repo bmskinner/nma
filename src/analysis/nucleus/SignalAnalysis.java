@@ -25,8 +25,8 @@ import java.util.List;
 
 import utility.Constants;
 import utility.Logger;
-import utility.Constants.BorderTag;
 import components.CellCollection;
+import components.generic.BorderTag;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclei.AsymmetricNucleus;

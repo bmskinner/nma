@@ -24,14 +24,14 @@
 package components.nuclei.sperm;
 
 import ij.gui.Roi;
-import utility.Constants.BorderTag;
 
 import java.io.File;
 
-import components.CellCollection.NucleusType;
 import components.generic.BooleanProfile;
+import components.generic.BorderTag;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderPoint;
+import components.nuclear.NucleusType;
 import components.nuclei.RoundNucleus;
 
 public class PigSpermNucleus 

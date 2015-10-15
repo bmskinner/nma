@@ -30,12 +30,12 @@ import java.awt.Color;
 import java.util.List;
 
 import utility.Constants;
-import utility.Constants.BorderTag;
 import utility.Logger;
 import utility.Utils;
 import analysis.AnalysisDataset;
 
 import components.CellCollection;
+import components.generic.BorderTag;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;

@@ -27,7 +27,6 @@
 
 package components;
 
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import ij.IJ;
 
 import java.io.File;
@@ -39,21 +38,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import utility.Constants.BorderTag;
-import utility.Constants.BorderTag.BorderTagType;
 import utility.Stats;
 import utility.Utils;
 import analysis.AnalysisDataset;
+import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
+import components.generic.ProfileCollectionType;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclei.AsymmetricNucleus;
+import components.nuclear.NucleusStatistic;
+import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
-import components.nuclei.sperm.PigSpermNucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 
 public class CellCollection implements Serializable {
 	
@@ -997,145 +995,5 @@ public class CellCollection implements Serializable {
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
   }
-  
-  /**
-   * These are the values that we can make boxplots from
-   *
-   */
-  public enum NucleusStatistic {
-	  AREA ("Area"),
-	  PERIMETER("Perimeter"),
-	  MAX_FERET("Max feret"),
-	  MIN_DIAMETER("Min diameter"),
-	  ASPECT("Aspect"),
-	  CIRCULARITY("Circularity"),
-	  VARIABILITY("Variability");
-
-	  private String name;
-
-	  NucleusStatistic(String name){
-		  this.name = name;
-	  }
-
-	  public String toString(){
-		  return this.name;
-	  }
-  }
-  
-  public enum ProfileCollectionType { 
-	  REGULAR ("Regular profile"), 
-	  FRANKEN ("Franken profile");
-	  
-	  private String name;
-	  	  
-	  ProfileCollectionType(String name){
-		  this.name = name;
-	  }
-	  
-	  public String toString(){
-		  return this.name;
-	  }
-  }
-  
-  /**
-	 * The types of nuclei we are able to analyse,
-	 * with the reference and orientation points to be used.
-	 * The reference point is the best identifiable point on the
-	 * nucleus when aligning profiles. The orientation point is the point
-	 * placed at the bottom when rotating a consensus nucleus.
-	 *
-	 */
-	public enum NucleusType {
-		ROUND 		 ("Round nucleus"		 , "Head", "Tail", RoundNucleus.class), 
-		ASYMMETRIC 	 ("Asymmetric nucleus"	 , "Head", "Tail", AsymmetricNucleus.class),
-		RODENT_SPERM ("Rodent sperm nucleus" , "Tip" , "Tail", RodentSpermNucleus.class), 
-		PIG_SPERM 	 ("Pig sperm nucleus"	 , "Head", "Tail", PigSpermNucleus.class);
-		
-	    private final String name;   
-	    private final Class<?> nucleusClass;
-	    
-	    private final Map<BorderTag, String> map = new HashMap<BorderTag, String>();
-	    
-	    NucleusType(String name, String referencePoint, String orientationPoint, Class<?> nucleusClass) {
-	        this.name = name;
-	        this.nucleusClass = nucleusClass;
-	        this.map.put(BorderTag.REFERENCE_POINT, referencePoint);
-	        this.map.put(BorderTag.ORIENTATION_POINT, orientationPoint);
-		}
-	    
-	    public String toString(){
-	    	return this.name;
-	    }
-	        
-	    
-	    /**
-	     * Get the name of the given border tag, if present
-	     * @param point
-	     * @return
-	     */
-	    public String getPoint(BorderTag point){
-	    	return this.map.get(point);
-	    }
-	    
-	    public Class<?> getNucleusClass(){
-	    	return this.nucleusClass;
-	    }
-	    
-	    /**
-	     * Get the simple names of the border tags in the nucleus
-	     * @return
-	     */
-	    public String[] pointNames(){
-	    	List<String> list = new ArrayList<String>();
-	    	for(BorderTag tag : map.keySet()){
-	    		list.add(map.get(tag));
-	    	}
-	    	return list.toArray(new String[0]);
-	    }
-	    
-	    /**
-	     * Get the border tag with the given name, 
-	     * or null if the name is not found
-	     * @param name
-	     * @return
-	     */
-	    public BorderTag getTagFromName(String name){
-	    	for(BorderTag tag : map.keySet()){
-	    		if(map.get(tag).equals(name)){
-	    			return tag;
-	    		}
-	    	}
-	    	return null;
-	    }
-	    
-	    /**
-	     * Given a nucleus, find the appropriate NucleusType
-	     * @param n
-	     * @return
-	     */
-	    public static NucleusType getNucleusType(Nucleus n){
-	    	Class<?> nucleusClass = n.getClass();
-	    	for(NucleusType type : NucleusType.values()){
-	    		if(type.getNucleusClass().equals(nucleusClass)){
-	    			return type;
-	    		}
-	    	}
-	    	return null;
-	    }
-	    
-	    /**
-		 * Test if a given name is a tag name
-		 * @param s
-		 * @return
-		 */
-		public static boolean isBorderTag(String s){
-			for(BorderTag tag : BorderTag.values()){
-				if(tag.toString().equals(s)){
-					return true;
-				}
-			}
-			return false;
-		}
-	}
 
 }

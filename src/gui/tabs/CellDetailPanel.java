@@ -63,7 +63,6 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
-import utility.Constants.BorderTag;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
@@ -72,6 +71,7 @@ import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;
 import components.Cell;
+import components.generic.BorderTag;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;

@@ -21,7 +21,6 @@ package gui;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ConsensusNucleusChartPanel;
 import gui.tabs.DetailPanel;
-import utility.Constants.BorderTag;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -45,6 +44,7 @@ import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
 
 import components.CellCollection;
+import components.generic.BorderTag;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
 

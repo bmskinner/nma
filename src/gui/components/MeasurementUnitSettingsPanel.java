@@ -25,7 +25,7 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import components.CellCollection.NucleusStatistic;
+import components.generic.MeasurementScale;
 
 @SuppressWarnings("serial")
 public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
@@ -64,59 +64,5 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 		for(MeasurementScale type : MeasurementScale.values()){
 			map.get(type).setEnabled(b);
 		}
-	}
-	
-	public enum MeasurementScale {
-		
-		PIXELS ("Pixels"),
-		MICRONS ("Microns");
-		
-		private String name;
-		
-		MeasurementScale(String name){
-			this.name = name;
-		}
-		
-		public String toString(){
-			return this.name;
-		}
-
-		/**
-		 * Get the appropriate chart y-label for the
-		 * given statistic 
-		 * @param stat
-		 * @return
-		 */
-		public String yLabel(NucleusStatistic stat){
-			String result = null;
-
-			switch(stat){
-
-			case AREA: 
-				result = "Square "+name;
-				break;
-			case PERIMETER: 
-				result = name;
-				break;
-			case MAX_FERET: 
-				result = name;
-				break;
-			case MIN_DIAMETER: 
-				result = name;
-				break;
-			case ASPECT: 
-				result = "Aspect ratio (feret / min diameter)";
-				break;
-			case CIRCULARITY: 
-				result = "Circularity";
-				break;
-			case VARIABILITY: 
-				result = "Degrees per perimeter unit";
-				break;
-			}
-
-			return result;
-		}
-
 	}
 }

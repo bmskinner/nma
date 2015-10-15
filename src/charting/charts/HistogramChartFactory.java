@@ -19,7 +19,6 @@
 package charting.charts;
 
 import gui.components.ColourSelecter;
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -36,8 +35,8 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import analysis.AnalysisDataset;
-
-import components.CellCollection.NucleusStatistic;
+import components.generic.MeasurementScale;
+import components.nuclear.NucleusStatistic;
 
 
 public class HistogramChartFactory {

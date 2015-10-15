@@ -6,8 +6,8 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import utility.Constants.BorderTag;
-import utility.Constants.BorderTag.BorderTagType;
+import components.generic.BorderTag;
+import components.generic.BorderTag.BorderTagType;
 
 @SuppressWarnings("serial")
 public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {

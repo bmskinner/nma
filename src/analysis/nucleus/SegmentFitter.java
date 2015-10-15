@@ -22,10 +22,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import utility.Constants.BorderTag;
-import utility.Constants.BorderTag.BorderTagType;
 import utility.Logger;
-
+import components.generic.BorderTag;
+import components.generic.BorderTag.BorderTagType;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.SegmentedProfile;

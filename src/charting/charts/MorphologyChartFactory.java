@@ -20,7 +20,6 @@ package charting.charts;
 
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 
@@ -53,7 +52,6 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import utility.Constants.BorderTag;
 import utility.Utils;
 import weka.core.logging.Logger;
 import analysis.AnalysisDataset;
@@ -62,8 +60,10 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
 import components.Cell;
 import components.CellCollection;
-import components.CellCollection.ProfileCollectionType;
+import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.ProfileCollection;
+import components.generic.ProfileCollectionType;
 import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory {

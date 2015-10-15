@@ -18,21 +18,20 @@
  *******************************************************************************/
 package components.nuclei;
 
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
-import utility.Constants.BorderTag;
-
 import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import components.CellCollection.NucleusStatistic;
+import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
+import components.nuclear.NucleusStatistic;
 import components.nuclear.SignalCollection;
 
 public interface Nucleus {

@@ -51,8 +51,7 @@ import javax.swing.event.ChangeListener;
 
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
-
-import components.CellCollection.NucleusType;
+import components.nuclear.NucleusType;
 
 public class AnalysisSetupWindow extends SettingsDialog implements ActionListener, ChangeListener {
 

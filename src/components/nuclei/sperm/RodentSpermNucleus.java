@@ -32,16 +32,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import utility.Constants.BorderTag;
 import utility.Equation;
 import utility.Utils;
-
-import components.CellCollection.NucleusType;
 import components.generic.BooleanProfile;
+import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
+import components.nuclear.NucleusType;
 import components.nuclei.RoundNucleus;
 
 public class RodentSpermNucleus

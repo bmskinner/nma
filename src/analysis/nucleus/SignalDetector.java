@@ -42,14 +42,13 @@ import utility.Constants;
 import utility.Logger;
 import utility.StatsMap;
 import utility.Utils;
-import utility.Constants.BorderTag;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.Detector;
 
 import components.Cell;
-import components.CellCollection.NucleusType;
 import components.generic.BooleanProfile;
+import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;

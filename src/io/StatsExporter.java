@@ -18,18 +18,17 @@
  *******************************************************************************/
 package io;
 
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import utility.Logger;
-import utility.Constants.BorderTag;
 import components.CellCollection;
-import components.CellCollection.ProfileCollectionType;
+import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
+import components.generic.ProfileCollectionType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 

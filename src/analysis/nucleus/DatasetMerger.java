@@ -31,7 +31,7 @@ import analysis.AnalysisDataset;
 
 import components.Cell;
 import components.CellCollection;
-import components.CellCollection.NucleusType;
+import components.nuclear.NucleusType;
 
 public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	

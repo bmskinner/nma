@@ -24,12 +24,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import jdistlib.disttest.DistributionTest;
-import utility.Constants.BorderTag;
-
 import components.CellCollection;
-import components.CellCollection.ProfileCollectionType;
 import components.generic.BooleanProfile;
+import components.generic.BorderTag;
 import components.generic.Profile;
+import components.generic.ProfileCollectionType;
 
 /**
  * The purpose is to test the difference at a particular point of a

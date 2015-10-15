@@ -64,16 +64,16 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 
 import utility.Constants;
-import utility.Constants.BorderTag;
 import utility.DipTester;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusDatasetCreator;
 import components.CellCollection;
-import components.CellCollection.ProfileCollectionType;
 import components.generic.BooleanProfile;
+import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
+import components.generic.ProfileCollectionType;
 
 public class NucleusProfilesPanel extends DetailPanel {
 

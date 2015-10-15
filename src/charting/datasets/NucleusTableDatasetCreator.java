@@ -18,8 +18,6 @@
  *******************************************************************************/
 package charting.datasets;
 
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
-import utility.Constants.BorderTag;
 import utility.DipTester;
 
 import java.text.DecimalFormat;
@@ -40,10 +38,12 @@ import analysis.AnalysisOptions.CannyOptions;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import components.CellCollection;
-import components.CellCollection.NucleusStatistic;
-import components.CellCollection.ProfileCollectionType;
 import components.ClusterGroup;
+import components.generic.BorderTag;
+import components.generic.MeasurementScale;
+import components.generic.ProfileCollectionType;
 import components.nuclear.NucleusBorderSegment;
+import components.nuclear.NucleusStatistic;
 import components.nuclei.Nucleus;
 
 public class NucleusTableDatasetCreator {

@@ -27,12 +27,12 @@ import java.util.List;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import utility.Constants.BorderTag;
-import utility.Constants.BorderTag.BorderTagType;
 import utility.Utils;
 import components.Cell;
-import components.CellCollection.NucleusType;
+import components.generic.BorderTag;
+import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NuclearSignal;
+import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
 public class CellDatasetCreator {

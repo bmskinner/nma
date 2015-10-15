@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import components.CellCollection.ProfileCollectionType;
+import components.generic.ProfileCollectionType;
 
 @SuppressWarnings("serial")
 public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {

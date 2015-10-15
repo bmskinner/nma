@@ -26,7 +26,6 @@
 */  
 package components.nuclei;
 
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import ij.IJ;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -45,16 +44,17 @@ import utility.Constants;
 import utility.Equation;
 import utility.Stats;
 import utility.Utils;
-import utility.Constants.BorderTag;
-import components.CellCollection.NucleusStatistic;
-import components.CellCollection.NucleusType;
 import components.CellularComponent;
+import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
+import components.nuclear.NucleusStatistic;
+import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;
 
 

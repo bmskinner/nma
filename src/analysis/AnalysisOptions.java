@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import components.CellCollection.NucleusType;
+import components.nuclear.NucleusType;
 
 public class AnalysisOptions implements Serializable {
 

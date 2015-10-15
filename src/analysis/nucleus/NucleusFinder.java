@@ -46,8 +46,8 @@ import analysis.Detector;
 import analysis.Kuwahara_Filter;
 
 import components.Cell;
-import components.CellCollection.NucleusType;
 import components.generic.XYPoint;
+import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
 

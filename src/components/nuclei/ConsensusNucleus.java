@@ -21,10 +21,9 @@ package components.nuclei;
 import java.io.Serializable;
 
 import utility.Utils;
-
-import components.CellCollection.NucleusType;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
+import components.nuclear.NucleusType;
 
 /**
  * This holds methods for manipulatiing a refolded consensus nucleus

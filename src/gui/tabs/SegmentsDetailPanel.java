@@ -20,7 +20,6 @@ package gui.tabs;
 
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.MeasurementUnitSettingsPanel;
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 
@@ -52,13 +51,14 @@ import javax.swing.table.TableColumn;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
-import utility.Constants.BorderTag;
-import utility.Constants.BorderTag.BorderTagType;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
-import components.CellCollection.ProfileCollectionType;
+import components.generic.BorderTag;
+import components.generic.BorderTag.BorderTagType;
+import components.generic.MeasurementScale;
+import components.generic.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;

@@ -18,9 +18,6 @@
  *******************************************************************************/
 package utility;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Constants {
 	
 	/**
@@ -51,6 +48,10 @@ public class Constants {
 		public static final double TEN_PERCENT_SIGNIFICANCE_LEVEL = 0.1;
 		public static final double FIVE_PERCENT_SIGNIFICANCE_LEVEL = 0.05;
 		public static final double ONE_PERCENT_SIGNIFICANCE_LEVEL = 0.01;
+		
+		public static final double MEDIAN = 50;
+		public static final double LOWER_QUARTILE = 25;
+		public static final double UPPER_QUARTILE = 75;
 		
 		// The prefix to use when exporting images
 		public static final String IMAGE_PREFIX = "export.";
@@ -99,44 +100,6 @@ public class Constants {
 		    }
 		}
 				
-		// use in charting
-		public enum BorderTag {
-			ORIENTATION_POINT ("Orientation point", BorderTagType.CORE ),
-			REFERENCE_POINT   ("Reference point",   BorderTagType.CORE ),
-			INTERSECTION_POINT ("Intersection point", BorderTagType.EXTENDED);
-			
-			private final String name;
-			private BorderTagType type;
-			
-			BorderTag(String name, BorderTagType type){
-				this.name = name;
-				this.type = type;
-			}
-			
-			public String toString(){
-				return this.name;
-			}
-			
-			public BorderTagType type(){
-				return type;
-			}
-				
-			
-			public static BorderTag[] values(BorderTagType type){
-				
-				List<BorderTag> list = new ArrayList<BorderTag>();
-				for(BorderTag tag : BorderTag.values()){
-					if(tag.type.equals(type)){
-						list.add(tag);
-					}
-				}
-				return list.toArray( new BorderTag[0]);
-			}
-			
-			// core tags are used in gui; extended are for internal mappings
-			public enum BorderTagType { CORE, EXTENDED};
-		}
-		
 		public enum Cell {
 			GENERIC ("Cell"), 
 			ROUND 	("Round cell"),

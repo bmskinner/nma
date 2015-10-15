@@ -31,15 +31,15 @@ package components.nuclei;
 
 
 import ij.gui.Roi;
-import utility.Constants.BorderTag;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.CellCollection.NucleusType;
+import components.generic.BorderTag;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
+import components.nuclear.NucleusType;
 
 public class AsymmetricNucleus
   extends RoundNucleus

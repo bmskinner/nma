@@ -18,8 +18,6 @@
  *******************************************************************************/
 package charting.datasets;
 
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +30,8 @@ import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 
 import components.CellCollection;
-import components.CellCollection.NucleusStatistic;
+import components.generic.MeasurementScale;
+import components.nuclear.NucleusStatistic;
 
 public class NuclearHistogramDatasetCreator {
 	

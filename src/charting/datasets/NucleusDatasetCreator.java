@@ -18,7 +18,6 @@
  *******************************************************************************/
 package charting.datasets;
 
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 import ij.process.FloatPolygon;
@@ -33,22 +32,23 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import utility.Constants.BorderTag;
 import utility.Equation;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.Cell;
 import components.CellCollection;
-import components.CellCollection.NucleusStatistic;
-import components.CellCollection.ProfileCollectionType;
+import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
+import components.generic.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
+import components.nuclear.NucleusStatistic;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 

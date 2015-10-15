@@ -23,7 +23,6 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
 import gui.components.MeasurementUnitSettingsPanel;
-import gui.components.MeasurementUnitSettingsPanel.MeasurementScale;
 import gui.components.SelectableChartPanel;
 
 import java.awt.BorderLayout;
@@ -63,7 +62,8 @@ import charting.datasets.NucleusDatasetCreator;
 
 import components.Cell;
 import components.CellCollection;
-import components.CellCollection.NucleusStatistic;
+import components.generic.MeasurementScale;
+import components.nuclear.NucleusStatistic;
 import components.nuclei.Nucleus;
 
 public class NuclearBoxplotsPanel extends DetailPanel {

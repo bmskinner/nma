@@ -27,7 +27,7 @@ import java.util.Map;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
-import utility.Constants.BorderTag;
+import utility.Constants;
 
 public class ProfileCollection implements Serializable {
 		
@@ -113,7 +113,7 @@ public class ProfileCollection implements Serializable {
 			throw new IllegalArgumentException("A profile key is required");
 		}
 
-		SegmentedProfile result = new SegmentedProfile(getProfile(tag, 50), getSegments(tag));
+		SegmentedProfile result = new SegmentedProfile(getProfile(tag, Constants.MEDIAN), getSegments(tag));
 		return result;
 	}
 
@@ -301,8 +301,8 @@ public class ProfileCollection implements Serializable {
 	public Profile getIQRProfile(BorderTag tag) throws Exception {
 		
 		int offset = getOffset(tag);
-		Profile q25 = getAggregate().getQuartile(25).offset(offset);
-		Profile q75 = getAggregate().getQuartile(75).offset(offset);
+		Profile q25 = getAggregate().getQuartile(Constants.LOWER_QUARTILE).offset(offset);
+		Profile q75 = getAggregate().getQuartile(Constants.UPPER_QUARTILE).offset(offset);
 		return q75.subtract(q25);
 	}
 	
