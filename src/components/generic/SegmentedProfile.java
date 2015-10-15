@@ -133,6 +133,11 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		NucleusBorderSegment firstSeg = null;
+		
+		/*
+		 * Choose the first segment of the profile to be the segment
+		 * starting at the zero index
+		 */
 		for(NucleusBorderSegment seg : this.getSegments()){
 			
 			if(seg.getStartIndex()==0){

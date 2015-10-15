@@ -447,7 +447,6 @@ public interface Nucleus {
 	 * @param s the tag name
 	 * @return the border point with this tag
 	 */
-//	public NucleusBorderPoint getBorderTag(String s);
 	
 	/**
 	 * Fetch the NucleusBorderPoint associated with the given
@@ -455,16 +454,13 @@ public interface Nucleus {
 	 * @param tag the tag
 	 * @return the border point with this tag
 	 */
-//	public NucleusBorderPoint getBorderTag(BorderTag tag);
 
 	/**
 	 * Get the index of the border point with the given tag.
 	 * If the point does not exist, returns -1
-	 * @param s the tag name
+	 * @param s the tag
 	 * @return the index of the border in borderList
 	 */
-//	public int getBorderIndex(String s);
-	
 	public int getBorderIndex(BorderTag tag);
 	
 	/**
@@ -473,13 +469,7 @@ public interface Nucleus {
 	 * @param tag the tag
 	 * @return the index of the border in borderList
 	 */
-//	public int getBorderIndex(BorderTag tag);
 
-	/**
-	 * Get a set of all the tags present within this nucleus
-	 * @return
-	 */
-	public Set<BorderTag> getTags();
 	
 	/**
 	 * Check if the nucleus has the given border tag
@@ -487,13 +477,6 @@ public interface Nucleus {
 	 * @return
 	 */
 	public boolean hasBorderTag(BorderTag tag);
-
-	/**
-	 * Set the name of the given NucleusBorderPoint
-	 * @param name the new name
-	 * @param i the index of the border point
-	 */
-//	public void addBorderTag(BorderTag name, int i);
 	
 	/**
 	 * Set the name of the given NucleusBorderPoint
@@ -513,13 +496,6 @@ public interface Nucleus {
 	 * @throws Exception 
 	 */
 	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception;
-
-
-	/**
-	 * Set the segmention of the nucleus to the given list
-	 * @param newList the list of segments
-	 */
-//	public void setSegments(List<NucleusBorderSegment> newList);
 	
 	
 	public SignalCollection getSignalCollection();

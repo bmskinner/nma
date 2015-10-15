@@ -1041,10 +1041,10 @@ public class CellCollection implements Serializable {
 	 *
 	 */
 	public enum NucleusType {
-		ROUND 		 ("Round nucleus"		 , "head", "tail", RoundNucleus.class), 
-		ASYMMETRIC 	 ("Asymmetric nucleus"	 , "head", "tail", AsymmetricNucleus.class),
-		RODENT_SPERM ("Rodent sperm nucleus" , "tip" , "tail", RodentSpermNucleus.class), 
-		PIG_SPERM 	 ("Pig sperm nucleus"	 , "head", "tail", PigSpermNucleus.class);
+		ROUND 		 ("Round nucleus"		 , "Head", "Tail", RoundNucleus.class), 
+		ASYMMETRIC 	 ("Asymmetric nucleus"	 , "Head", "Tail", AsymmetricNucleus.class),
+		RODENT_SPERM ("Rodent sperm nucleus" , "Tip" , "Tail", RodentSpermNucleus.class), 
+		PIG_SPERM 	 ("Pig sperm nucleus"	 , "Head", "Tail", PigSpermNucleus.class);
 		
 	    private final String name;   
 	    private final Class<?> nucleusClass;
@@ -1098,6 +1098,21 @@ public class CellCollection implements Serializable {
 	    	for(BorderTag tag : map.keySet()){
 	    		if(map.get(tag).equals(name)){
 	    			return tag;
+	    		}
+	    	}
+	    	return null;
+	    }
+	    
+	    /**
+	     * Given a nucleus, find the appropriate NucleusType
+	     * @param n
+	     * @return
+	     */
+	    public static NucleusType getNucleusType(Nucleus n){
+	    	Class<?> nucleusClass = n.getClass();
+	    	for(NucleusType type : NucleusType.values()){
+	    		if(type.getNucleusClass().equals(nucleusClass)){
+	    			return type;
 	    		}
 	    	}
 	    	return null;

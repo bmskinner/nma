@@ -1051,20 +1051,6 @@ public class RoundNucleus
 		this.borderList.get(i).setX(x);
 		this.borderList.get(i).setY(y);
 	}
-
-	// Ensure only copies of border points get returned
-	/* (non-Javadoc)
-	 * @see no.nuclei.Nucleus#getBorderTag(java.lang.String)
-	 */
-//	public NucleusBorderPoint getBorderTag(String s){
-//		NucleusBorderPoint result = new NucleusBorderPoint(0,0);
-//		if(this.getBorderIndex(s)>-1){
-//			result = new NucleusBorderPoint(this.borderList.get(this.getBorderIndex(s)));
-//		} else {
-//			return null;
-//		}
-//		return result;
-//	}
 	
 	public NucleusBorderPoint getBorderTag(BorderTag tag){
 		NucleusBorderPoint result = new NucleusBorderPoint(0,0);
@@ -1075,11 +1061,7 @@ public class RoundNucleus
 		}
 		return result;
 	}
-	
-//	public Map<String, Integer> getBorderTags(){
-//		return this.borderTags;
-//	}
-	
+		
 	public Map<BorderTag, Integer> getBorderTags(){
 		return this.borderTags;
 	}
@@ -1087,18 +1069,6 @@ public class RoundNucleus
 	public void setBorderTags(Map<BorderTag, Integer> m){
 		this.borderTags = m;
 	}
-
-//	public void setBorderTags(Map<String, Integer> m){
-//		this.borderTags = m;
-//	}
-
-//	public int getBorderIndex(String s){
-//		int result = -1;
-//		if(this.borderTags.containsKey(s)){
-//			result = this.borderTags.get(s);
-//		}
-//		return result;
-//	}
 	
 	public int getBorderIndex(BorderTag tag){
 		int result = -1;
@@ -1108,30 +1078,11 @@ public class RoundNucleus
 		return result;
 	}
 	
-	public Set<BorderTag> getTags(){
-		return this.borderTags.keySet();
-	}
-
-//	public Set<String> getTags(){
-//		return this.borderTags.keySet();
-//	}
-
-//	public void addBorderTag(String name, int i){
-//		this.borderTags.put(name, i);
-//	}
 	
 	public void setBorderTag(BorderTag tag, int i){
 		this.borderTags.put(tag, i);
 	}
-	
-//	public boolean hasBorderTag(String tag){
-//		if(this.borderTags.containsKey(tag)){
-//			return true;
-//		} else {
-//			return false;
-//		}
-//	}
-	
+		
 	public boolean hasBorderTag(BorderTag tag){
 		if(this.borderTags.containsKey(tag)){
 			return true;

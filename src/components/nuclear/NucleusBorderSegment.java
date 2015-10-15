@@ -84,7 +84,7 @@ public class NucleusBorderSegment  implements Serializable{
 	public NucleusBorderSegment(NucleusBorderSegment n){
 		this.startIndex  = n.getStartIndex();
 		this.endIndex 	 = n.getEndIndex();
-		this.name 		 = n.getName();
+		this.name 		 = n.getOldName();
 		this.totalLength = n.getTotalLength();
 		this.nextSegment = n.nextSegment();
 		this.prevSegment = n.prevSegment();
@@ -139,6 +139,14 @@ public class NucleusBorderSegment  implements Serializable{
 
 	public int getEndIndex(){
 		return this.endIndex;
+	}
+	
+	public String getOldName(){
+		if(this.name==null){
+			IJ.log("Name is null on segment getName()");
+			return null;
+		}
+		return this.name;
 	}
 
 	public String getName(){

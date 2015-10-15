@@ -100,7 +100,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
     	
     	boolean result = true;
 		try{
-//			IJ.log("Mode: "+mode);
+
 			// mode selection
 			if(mode == MODE_NEW){
 
@@ -539,20 +539,23 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			// make a new profile collection to hold the frankendata
 			ProfileCollection frankenCollection = new ProfileCollection();
 
-			// add the correct offset keys
-			// These are the same as the profile collection keys, and have
-			// the same positions (since a franken profile is based on the median)
-			// The reference point is at index 0
-			
-			//TODO: An error occurs in here somewhere. A frankenMedian for Testing/Filter on var
-			// has put the frankenMedian reference point at the wrong end of the segment
-			// to the right of the reference point
-			
-			// is the profile reversed?
-			
-			// the profile aggregate is being given values that have the wrong offset;
-			// these values will come from individual frankenProfiles
-			// Therefore, the frankenProfiles have had their reference point wrongly assigned
+			/*
+			 The border tags for the frankenCollection are the same as the profile 
+			 collection keys, and have the same positions (since a franken profile
+			  is based on the median). The reference point is at index 0.
+
+			TODO: An error occurs in here somewhere. A frankenMedian for Testing
+			 has put the frankenMedian reference point at the segment 5-0 boundary.
+			 This is to the right of the orientation point.
+			 
+			 Analysis of the error: test the incoming profiles.
+
+
+			 The profile aggregate is being given values that have the wrong offset;
+			 these values will come from individual frankenProfiles
+			 Therefore, the frankenProfiles have had their reference point wrongly assigned
+ 
+			 */
 			for(BorderTag key : pc.getOffsetKeys()){
 				frankenCollection.addOffset(key, pc.getOffset(key));
 			}
@@ -587,8 +590,9 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 			// update the profile aggregate
 			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
-			logger.log("FrankenProfile generated");
-
+//			logger.log("FrankenProfile generated");
+			double firstPoint = frankenCollection.getSegmentedProfile(BorderTag.REFERENCE_POINT).get(0);
+			logger.log("FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
 			logger.log("Segment assignments refined");

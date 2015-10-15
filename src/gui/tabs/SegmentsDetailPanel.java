@@ -700,7 +700,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		}
 
 		protected void update(List<AnalysisDataset> list){
-//			IJ.log("Updating tables");
+
 			try {
 				if(list!=null){
 
@@ -724,8 +724,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 							}
 							// TODO: on manetheren, table is not displayed; code runs to this point
 							// table remains on null model
-//							scrollPane.revalidate();
-//							scrollPane.repaint();
+							// Running fine on work pc
+
 						} else {
 //							IJ.log("Multi datasets selected");
 							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null));
@@ -733,13 +733,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 					}
 				} else {
-//					IJ.log("List  is null");
+
 				}
 			} catch (Exception e) {
 				error("Error updating segment stats panel", e);
 			}
 			
-//			this.repaint();
+
 		}
 	}
 }

@@ -23,6 +23,7 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
+import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -70,7 +71,6 @@ import charting.charts.MorphologyChartFactory;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;
-
 import components.Cell;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderPoint;
@@ -748,6 +748,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 //										n.addBorderTag("head", n.getIndex(newPoint));
 									}
 								}
+								
+								// TODO: update segment boundaries 
 								
 								
 								updateCell(activeCell);

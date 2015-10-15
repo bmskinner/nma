@@ -18,6 +18,8 @@
  *******************************************************************************/
 package charting.datasets;
 
+import ij.IJ;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,9 +28,10 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import utility.Constants.BorderTag;
+import utility.Constants.BorderTag.BorderTagType;
 import utility.Utils;
-
 import components.Cell;
+import components.CellCollection.NucleusType;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 
@@ -82,11 +85,15 @@ public class CellDatasetCreator {
 			fieldNames.add("Scale (um/pixel)");
 			rowData.add(n.getScale());
 			
-
-			for(BorderTag tag : n.getBorderTags().keySet()){
-				fieldNames.add(tag);
-				int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
-				rowData.add(index);
+			NucleusType type = NucleusType.getNucleusType(n);
+			
+			if(type!=null){
+				for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
+					fieldNames.add(type.getPoint(tag));
+					int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
+					rowData.add(index);
+				}
+			} else {
 			}
 
 			// add info for signals
