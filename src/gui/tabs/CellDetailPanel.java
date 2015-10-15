@@ -735,9 +735,29 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								// the value chosen by the user
 								int chosenIndex = (Integer) spinner.getModel().getValue();
 								
+								int existingIndex = n.getBorderIndex(tag);
+								
 								// adjust to the actual point index
 								int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
 								
+								// find the amount the index is changing by
+								int difference = pointIndex - existingIndex;
+								
+								// TODO: update segment boundaries 
+								try {
+									
+									SegmentedProfile profile = n.getAngleProfile(tag);
+									NucleusBorderSegment seg = profile.getSegment("Seg_0");
+									// this updates the correct direction, but the wrong end of the segment
+									seg.lengthenStart(-difference);
+									
+									n.setAngleProfile(profile, tag);
+									
+								} catch(Exception e1){
+									error("Error updating cell profile", e1);
+								}
+								
+								// Update the border tag index
 								n.setBorderTag(tag, pointIndex);
 								
 								if(tag.equals(BorderTag.ORIENTATION_POINT)){
@@ -745,11 +765,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 										// only rodent sperm use the intersection point, which is equivalent to the head.
 										NucleusBorderPoint newPoint = n.findOppositeBorder(n.getPoint(BorderTag.ORIENTATION_POINT));
 										n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getIndex(newPoint));
-//										n.addBorderTag("head", n.getIndex(newPoint));
 									}
 								}
-								
-								// TODO: update segment boundaries 
 								
 								
 								updateCell(activeCell);

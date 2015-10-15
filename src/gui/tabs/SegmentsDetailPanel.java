@@ -250,7 +250,6 @@ public class SegmentsDetailPanel extends DetailPanel {
 			boolean ok = true;
 			for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
 				
-//				//TODO
 				/*
 				 * Find the position of the border tag in the median profile
 				 * 
