@@ -2,7 +2,6 @@ package gui.components;
 
 import javax.swing.JCheckBox;
 
-
 @SuppressWarnings("serial")
 public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
 	
@@ -20,6 +19,11 @@ public class ProfileMarkersOptionsPanel extends EnumeratedOptionsPanel {
 	
 	public boolean showMarkers(){
 		return this.checkBox.isSelected();
+	}
+	
+	public void setEnabled(boolean b){
+
+		this.checkBox.setEnabled(b);
 	}
 
 }

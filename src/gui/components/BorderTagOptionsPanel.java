@@ -32,6 +32,12 @@ public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
 		
 	}
 	
+	public void setEnabled(boolean b){
+		for(BorderTag type : BorderTag.values(BorderTagType.CORE)){
+			map.get(type).setEnabled(b);
+		}
+	}
+
 	/**
 	 * Get the selected profile type, or null
 	 * @return

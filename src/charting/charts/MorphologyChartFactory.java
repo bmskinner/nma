@@ -165,10 +165,10 @@ public class MorphologyChartFactory {
 			}
 
 			if(showMarkers){
-				if(tag.equals(collection.getPoint(BorderTag.ORIENTATION_POINT))){
+				if(tag.equals(BorderTag.ORIENTATION_POINT)){
 					colour = Color.BLUE;
 				}
-				if(tag.equals(collection.getPoint(BorderTag.REFERENCE_POINT))){
+				if(tag.equals(BorderTag.REFERENCE_POINT)){
 					colour = Color.ORANGE;
 				}
 				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, MARKER_STROKE));	
@@ -246,10 +246,8 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeFrankenProfileChart(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
 		CellCollection collection = dataset.getCollection();
-		String point = collection.getPoint(borderTag);
 		XYDataset ds = NucleusDatasetCreator.createFrankenSegmentDataset(dataset.getCollection(), normalised, alignment, borderTag);
-//		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, rightAlign, point);
-		
+
 		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
 		
 		int length = 100 ; // default if normalised - for a franken collection, it makes no difference
@@ -794,10 +792,10 @@ public class MorphologyChartFactory {
 					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
 					String name = plot.getDataset(key).getSeriesKey(i).toString().replace("Tag_", "");
 					
-					if(name.equals(cell.getNucleus().getOrientationPoint())){
+					if(name.equals(BorderTag.ORIENTATION_POINT.toString())){
 						plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
 					}
-					if(name.equals(cell.getNucleus().getReferencePoint())){
+					if(name.equals(BorderTag.REFERENCE_POINT.toString())){
 						plot.getRenderer(key).setSeriesPaint(i, Color.ORANGE);
 					}
 						

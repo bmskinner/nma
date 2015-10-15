@@ -41,6 +41,7 @@ public class Cell implements Serializable {
 	protected Nucleus nucleus;
 	protected List<Mitochondrion> mitochondria; // unknown staining patterns so far
 	protected List<Flagellum> tails;	
+	protected List<Acrosome> acrosomes;
 	
 	public Cell(){
 		this.uuid = java.util.UUID.randomUUID();
@@ -82,6 +83,14 @@ public class Cell implements Serializable {
 
 	public void addTail(Flagellum tail) {
 		this.tails.add(tail);
+	}
+	
+	public List<Acrosome> getAcrosomes(){
+		return this.acrosomes;
+	}
+	
+	public void addAcrosome(Acrosome acrosome){
+		this.acrosomes.add(acrosome);
 	}
 	
 	public boolean hasNucleus(){

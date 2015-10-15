@@ -30,6 +30,7 @@ public class ProfileAlignmentOptionsPanel extends EnumeratedOptionsPanel {
 			JRadioButton button = new JRadioButton(type.toString());
 			button.setActionCommand(type.toString());
 			button.addActionListener(this);
+			button.setEnabled(false);
 			this.add(button);
 			group.add(button);
 			map.put(type, button);
@@ -50,6 +51,27 @@ public class ProfileAlignmentOptionsPanel extends EnumeratedOptionsPanel {
 	
 	public boolean isNormalised(){
 		return this.normCheckBox.isSelected();
+	}
+	
+	public void setEnabled(boolean b){
+		
+		normCheckBox.setEnabled(b);
+		if(b==false){
+			for(ProfileAlignment type : ProfileAlignment.values()){
+				map.get(type).setEnabled(b);
+			}
+		}
+		if(b==true){
+			if(normCheckBox.isSelected()){
+				for(ProfileAlignment type : ProfileAlignment.values()){
+					map.get(type).setEnabled(false);
+				}
+			} else {
+				for(ProfileAlignment type : ProfileAlignment.values()){
+					map.get(type).setEnabled(true);
+				}
+			}
+		}
 	}
 	
 	@Override

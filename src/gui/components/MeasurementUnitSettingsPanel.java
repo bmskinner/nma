@@ -59,6 +59,13 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 		return null;
 	}
 	
+	public void setEnabled(boolean b){
+
+		for(MeasurementScale type : MeasurementScale.values()){
+			map.get(type).setEnabled(b);
+		}
+	}
+	
 	public enum MeasurementScale {
 		
 		PIXELS ("Pixels"),

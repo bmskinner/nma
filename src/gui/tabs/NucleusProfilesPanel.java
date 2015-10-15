@@ -137,6 +137,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			this.setLayout(new BorderLayout());
 			
 			profileCollectionTypeSettingsPanel.addActionListener(this);
+			profileCollectionTypeSettingsPanel.setEnabled(false);;
 			buttonPanel.add(profileCollectionTypeSettingsPanel);
 			this.add(buttonPanel, BorderLayout.NORTH);
 			
@@ -169,6 +170,8 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 			if(!list.isEmpty()){
 				
+				profileCollectionTypeSettingsPanel.setEnabled(true);;
+				
 				ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
 				
 				DecimalFormat df = new DecimalFormat("#0.00");
@@ -193,6 +196,8 @@ public class NucleusProfilesPanel extends DetailPanel {
 				double xvalue = Double.valueOf(xString);
 				
 				updateChart(xvalue);				
+			} else {
+				profileCollectionTypeSettingsPanel.setEnabled(false);;
 			}
 		}
 		
@@ -277,7 +282,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		private BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
 		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 		private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
-		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
+//		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
 		
 		public VariabililtyDisplayPanel(){
 			this.setLayout(new BorderLayout());
@@ -294,11 +299,13 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 			// add the alignments panel to the tab
 			
-			buttonPanel.add(profileAlignmentOptionsPanel);
-			profileAlignmentOptionsPanel.addActionListener(this);
+//			buttonPanel.add(profileAlignmentOptionsPanel);
+//			profileAlignmentOptionsPanel.addActionListener(this);
+//			profileAlignmentOptionsPanel.setEnabled(false);
 			
 			buttonPanel.add(borderTagOptionsPanel);
 			borderTagOptionsPanel.addActionListener(this);
+			borderTagOptionsPanel.setEnabled(false);
 
 			
 			pvalueSpinner = new JSpinner(new SpinnerNumberModel(Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL,	0d, 1d, 0.001d));
@@ -315,6 +322,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 
 			profileCollectionTypeSettingsPanel.addActionListener(this);
+			profileCollectionTypeSettingsPanel.setEnabled(false);
 			buttonPanel.add(profileCollectionTypeSettingsPanel);
 			
 			buttonPanel.revalidate();
@@ -326,15 +334,18 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 			if(!list.isEmpty()){
 
-//				profileDisplaySettingsPanel.referenceButton.setEnabled(true);
-//				profileDisplaySettingsPanel.orientationButton.setEnabled(true);
-//				profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(true);
+				borderTagOptionsPanel.setEnabled(true);
+//				profileAlignmentOptionsPanel.setEnabled(true);
+				profileCollectionTypeSettingsPanel.setEnabled(true);
+				profileMarkersOptionsPanel.setEnabled(true);
+				
 				pvalueSpinner.setEnabled(true);
 
 				if(list.size()>1){
 
 					// Don't allow marker selection for multiple datasets
-//					profileDisplaySettingsPanel.showMarkersCheckBox.setEnabled(false);
+					profileMarkersOptionsPanel.setEnabled(false);
+//					
 					pvalueSpinner.setEnabled(false);
 				}
 
@@ -342,14 +353,18 @@ public class NucleusProfilesPanel extends DetailPanel {
 			} else {
 
 				// if the list is empty, do not enable controls
-//				profileDisplaySettingsPanel.setEnabled(false);
+				borderTagOptionsPanel.setEnabled(false);
+//				profileAlignmentOptionsPanel.setEnabled(false);
+				profileCollectionTypeSettingsPanel.setEnabled(false);
+				profileMarkersOptionsPanel.setEnabled(false);
+//				
 			}
 			
-			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
-			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
+//			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
+//			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
-			updateProfiles(list, normalised, alignment, tag, showMarkers);
+			updateProfiles(list, true, ProfileAlignment.LEFT, tag, showMarkers);
 		}
 		
 		/**
@@ -457,12 +472,15 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 			buttonPanel.add(profileAlignmentOptionsPanel);
 			profileAlignmentOptionsPanel.addActionListener(this);
+			profileAlignmentOptionsPanel.setEnabled(false);
 			
 			buttonPanel.add(borderTagOptionsPanel);
 			borderTagOptionsPanel.addActionListener(this);
+			borderTagOptionsPanel.setEnabled(false);
 			
 			buttonPanel.add(profileMarkersOptionsPanel);
 			profileMarkersOptionsPanel.addActionListener(this);
+			profileMarkersOptionsPanel.setEnabled(false);
 						
 			this.add(buttonPanel, BorderLayout.NORTH);
 		}
@@ -510,6 +528,11 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
 			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
+			
+			if(normalised){
+				alignment = ProfileAlignment.LEFT;
+			}
+			
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			
@@ -563,13 +586,15 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		public FrankenProfileDisplayPanel(){
 			super();
+			profileAlignmentOptionsPanel.setEnabled(false);
 		}
 		
 		public void update(List<AnalysisDataset> list){
 			super.update(list);
+			profileAlignmentOptionsPanel.setEnabled(false);
 			
-			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
-			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
+			boolean normalised = true;
+			ProfileAlignment alignment = ProfileAlignment.LEFT;
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			

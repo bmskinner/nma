@@ -49,6 +49,13 @@ public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
 		
 	}
 	
+	public void setEnabled(boolean b){
+
+		for(ProfileCollectionType type : ProfileCollectionType.values()){
+			map.get(type).setEnabled(b);
+		}
+	}
+	
 	/**
 	 * Get the selected profile type, or null
 	 * @return
