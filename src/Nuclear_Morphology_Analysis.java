@@ -21,6 +21,8 @@ import gui.MainWindow;
 import ij.IJ;
 import ij.plugin.PlugIn;
 
+import java.io.File;
+
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -29,7 +31,17 @@ implements PlugIn
 
 {
 	
-
+	String[] requiredFiles = {
+			"commons-math3",
+			"jcommon",
+			"jdistlib",
+			"jfreechart",
+			"swingx-all",
+			"weka",
+			"AnalyzeSkeleton",
+			"Gray_Morphology",
+			"Skeletonize3D"
+	};
 	
 	
 	/* 
@@ -38,38 +50,92 @@ implements PlugIn
 	public void run(String paramString)  {
 
 		try {
-			java.awt.EventQueue.invokeLater(new Runnable() {
-				public void run() {
-										
-					IJ.setBackgroundColor(0, 0, 0);	 // default background is black
-					
-					try {
-						UIManager.setLookAndFeel(
-						        UIManager.getSystemLookAndFeelClassName());
-					} catch (ClassNotFoundException e) {
-						
-						
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (UnsupportedLookAndFeelException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					MainWindow frame = new MainWindow();
-					frame.setVisible(true);
-				}
-			});
 
+			if(checkPlugins()){
+
+				java.awt.EventQueue.invokeLater(new Runnable() {
+					public void run() {
+
+						IJ.setBackgroundColor(0, 0, 0);	 // default background is black
+
+						try {
+							UIManager.setLookAndFeel(
+									UIManager.getSystemLookAndFeelClassName());
+						} catch (ClassNotFoundException e) {
+
+
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (InstantiationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IllegalAccessException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (UnsupportedLookAndFeelException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+						MainWindow frame = new MainWindow();
+						frame.setVisible(true);
+					}
+				});
+
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private boolean checkPlugins(){
+		boolean result = true;
+		String pluginDirName = IJ.getDirectory("plugins");
+		File pluginDir = new File(pluginDirName);
+		
+		File jarDir = new File(pluginDirName+File.separator+"jars");
+		
+		boolean[] oklist = new boolean[requiredFiles.length];
+		for(boolean ok : oklist){
+			ok = false;
+		}
+
+		// check the plugins directory and the plugins/jars directory
+		for(int i=0; i<requiredFiles.length; i++){
+			String fileName = requiredFiles[i];
+			for(File file : pluginDir.listFiles()){
+				
+				if(file.getName().startsWith(fileName)){
+					oklist[i] = true;
+				}
+				
+			}
+			
+			for(File file : jarDir.listFiles()){
+				
+				if(file.getName().startsWith(fileName)){
+					oklist[i] = true;
+				}
+				
+			}
+		}
+		
+		// report missing jars
+		for(int i=0; i<requiredFiles.length; i++){
+			if(oklist[i]==false){
+				IJ.log("Cannot find required plugin: "+requiredFiles[i]);
+				result = false;
+			}
+		}
+		
+		if(result==false){
+			IJ.log("Unable to launch Nuclear Morphology Analysis");
+			IJ.log("Check the wiki for download links for missing plugins:");
+			IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
+			
+		}
+		
+		return result;
 	}
 }
 
