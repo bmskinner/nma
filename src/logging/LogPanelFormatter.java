@@ -7,7 +7,7 @@ public class LogPanelFormatter extends Formatter {
 	
 	 @Override
 	    public String format(LogRecord record) {
-	        return record.getLevel() + ":" + record.getMessage();
+	        return record.getLevel() + ": " + record.getMessage();
 	    }
 
 }

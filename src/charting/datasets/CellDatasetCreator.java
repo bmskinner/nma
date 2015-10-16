@@ -30,8 +30,10 @@ import javax.swing.table.TableModel;
 import utility.Utils;
 import components.Cell;
 import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NuclearSignal;
+import components.nuclear.NucleusStatistic;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
@@ -64,26 +66,35 @@ public class CellDatasetCreator {
 			fieldNames.add("Image");
 			rowData.add(n.getPathAndNumber());
 			
-			fieldNames.add("Area");
-			rowData.add(df.format(n.getArea()) +" ("+ df.format(Utils.micronArea(n.getArea(), n.getScale()))+" microns)");
+			fieldNames.add("Scale (um/pixel)");
+			rowData.add(n.getScale());
 			
-			fieldNames.add("Perimeter");
-			rowData.add(df.format(n.getPerimeter())+" ("+ df.format(Utils.micronLength(n.getPerimeter(), n.getScale()))+" microns)");
-			
-			fieldNames.add("Max feret");
-			rowData.add(df.format(n.getFeret())+" ("+ df.format(Utils.micronLength(n.getFeret(), n.getScale()))+" microns)");
-			
-			fieldNames.add("Min feret");
-			rowData.add(df.format(n.getNarrowestDiameter())+"("+ df.format(Utils.micronLength(n.getNarrowestDiameter(), n.getScale()))+" microns)");
-			
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+				
+				if(!stat.equals(NucleusStatistic.VARIABILITY)){
+					
+					fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+
+					double pixel = n.getStatistic(stat, MeasurementScale.PIXELS);
+					
+					if(stat.isDimensionless()){
+						rowData.add(df.format(pixel) );
+					} else {
+						double micron = n.getStatistic(stat, MeasurementScale.MICRONS);
+						rowData.add(df.format(pixel) +" ("+ df.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+					}
+					
+				}
+				
+			}
+
 			fieldNames.add("Nucleus CoM");
 			rowData.add(n.getCentreOfMass().toString());
 			
 			fieldNames.add("Nucleus position");
 			rowData.add(n.getPosition()[0]+"-"+n.getPosition()[1]);
 			
-			fieldNames.add("Scale (um/pixel)");
-			rowData.add(n.getScale());
+			
 			
 			NucleusType type = NucleusType.getNucleusType(n);
 			

@@ -121,7 +121,8 @@ public class HistogramChartFactory {
 	 * @return
 	 */
 	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
-		String xLabel = stat.toString()+" ("+scale.toString()+")";
+		
+		String xLabel = stat.label(scale);
 		
 		JFreeChart chart = createHistogram(ds, xLabel, "Nuclei");
 		
