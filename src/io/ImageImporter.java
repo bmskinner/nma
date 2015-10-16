@@ -114,7 +114,7 @@ public class ImageImporter {
 			throw new IllegalArgumentException("Cannot handle image type: "+image.getType());
 		}
 		if(logger==null){
-			programLogger.log(Level.INFO, "Image is type: "+image.getType());
+//			programLogger.log(Level.INFO, "Image is type: "+image.getType());
 		} else {
 			logger.log("Image is type: "+image.getType());
 		}				

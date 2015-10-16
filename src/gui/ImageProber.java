@@ -18,7 +18,6 @@
  *******************************************************************************/
 package gui;
 
-import ij.IJ;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
@@ -38,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -46,12 +46,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import utility.Logger;
 import utility.Utils;
 import analysis.AnalysisOptions;
 import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.NucleusFinder;
-
 import components.Cell;
 import components.nuclei.Nucleus;
 
@@ -64,7 +62,7 @@ public class ImageProber extends JDialog {
 	private AnalysisOptions options; // the options to detect with
 	private File openImage;			// the image currently open
 //	private Logger logger;
-	private java.util.logging.Logger programLogger;
+	private Logger programLogger;
 	private JLabel imageLabel;		// the JLabel to hold the image
 
 	private ImageIcon imageIcon = null;	// the icon with the image, for display in JLabel
@@ -76,11 +74,41 @@ public class ImageProber extends JDialog {
 	
 	private List<File> probableFiles;	// the list of image files
 	private int index = 0; 				// the index of the open file
-
+	
+	private static final String[] logTestMessages = {
+		"Constructing additional pylons",
+		"Detecting strategic launch",
+		"Staying a while, and listening",
+		"Bullseyeing womp rats",
+		"Avoiding a land war in Asia",
+		"Baking a delicious cake",
+		"Deciding who you're gonna call",
+		"Loving it when a plan comes together",
+		"Wondering why it has to be snakes",
+		"Generating 1.21 gigawatts",
+		"Not simply walking into Mordor",
+		"Taking the hobbits to Isengard",
+		"Searching out there for the truth",
+		"Feeding them after midnight",
+		"Learning the princess is in another castle",
+		"Getting your ass to Mars",
+		"Changing the laws of physics",
+		"Likely to be eaten by a grue",
+		"Never giving up, never surrendering",
+		"Making everything shiny",
+		"Crossing the streams",
+		"Reversing the polarity of the neutron flow",
+		"Phoning home",
+		"Requiring a bigger boat",
+		"Shaking, not stirring",
+		"Reaching 88 miles per hour",
+		"Considering it only a flesh wound" 
+	};
+ 
 	/**
 	 * Create the dialog.
 	 */
-	public ImageProber(AnalysisOptions options, java.util.logging.Logger logger) {
+	public ImageProber(AnalysisOptions options, Logger logger) {
 		
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");
@@ -96,34 +124,17 @@ public class ImageProber extends JDialog {
 		int h = (int) (screenSize.getHeight() * 0.75);
 		
 		setBounds(100, 100, w, h);
+		this.setLocationRelativeTo(null); // centre on screen
 		
-		try{
-			String pathToGif = "res/ajax-loader.gif";	
-			
-			// Get current classloader
-			ClassLoader cl = this.getClass().getClassLoader();
-			URL urlToGif = cl.getResource(pathToGif);
-//			URL urlToGif = this.getClass().getResource(pathToGif);
-			
-			if(urlToGif!=null){
-				loadingGif = new ImageIcon(urlToGif);
-
-				if(loadingGif==null){
-//					logger.log(new LogRecord(Level.INFO, "Looking for: "+urlToGif.getFile()));
-					logger.log(new LogRecord(Level.WARNING, "Unable to load gif"));
-					//				IJ.log("Looking for: "+urlToGif.getFile());
-					//				IJ.log("Unable to load gif");
-				} else {
-				}
-
-			}
-			
-		} catch (Exception e){
-			logger.log(new LogRecord(Level.WARNING, "Cannot load gif resource: "+e.getMessage()));
-//			IJ.log("Cannot load gif resource: "+e.getMessage());
-//			for(StackTraceElement e1 : e.getStackTrace()){
-//				IJ.log(e1.toString());
-//			}
+		// Load the gif (may be in a res folder depending on Eclipse version)
+		String pathToGif = "res/ajax-loader.gif";	
+		boolean ok = loadResources(pathToGif);
+		if(!ok){
+			pathToGif = "ajax-loader.gif";	
+			ok = loadResources(pathToGif);
+		}
+		if(!ok){
+			programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
 		}
 
 		getContentPane().setLayout(new BorderLayout());
@@ -181,6 +192,36 @@ public class ImageProber extends JDialog {
 		createFileList(options.getFolder());
 
 		this.setVisible(true);
+	}
+	
+	/**
+	 * Fetch the gif loading resources
+	 * 
+	 */
+	private boolean loadResources(String pathToGif){
+		boolean ok = false;
+		try{
+			
+			// Get current classloader
+			ClassLoader cl = this.getClass().getClassLoader();
+			URL urlToGif = cl.getResource(pathToGif);
+			
+			if(urlToGif!=null){
+				loadingGif = new ImageIcon(urlToGif);
+
+				if(loadingGif==null){
+					programLogger.log(new LogRecord(Level.WARNING, "Unable to load gif"));
+
+				} else {
+					ok = true;
+				}
+
+			} 
+			
+		} catch (Exception e){
+			programLogger.log(new LogRecord(Level.WARNING, "Cannot load gif resource: "+e.getMessage()));
+		}
+		return ok;
 	}
 	
 	/**
@@ -368,7 +409,7 @@ public class ImageProber extends JDialog {
 
 			
 //			programLogger.log(Level.INFO, "Searching image...");
-
+			testLog();
 			List<Cell> cells = NucleusFinder.getCells(imageStack, 
 					options, 
 					programLogger, 
@@ -395,6 +436,7 @@ public class ImageProber extends JDialog {
 				openProcessor.draw(roi);
 			}
 			
+			
 			programLogger.log(Level.INFO, "Displaying nuclei");
 
 			if(imageIcon!=null){
@@ -410,15 +452,18 @@ public class ImageProber extends JDialog {
 
 			headerLabel.setText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
 			headerLabel.setIcon(null);
-			
-//			logger.log("New image loaded", Logger.DEBUG);
-//			logger.log(new LogRecord(Level.INFO, "Looking for: "+urlToGif.getFile()));
-
+			headerLabel.repaint();
 
 		} catch (Exception e) { // end try
 			programLogger.log(new LogRecord(Level.SEVERE, "Error in image processing"));
 		} // end catch
 
+	}
+	
+	private void testLog(){
+		double rnd = Math.random() * logTestMessages.length;
+		int index = (int) Math.floor(rnd);
+		programLogger.log(Level.INFO, logTestMessages[index]+"...");
 	}
 	
 	/**

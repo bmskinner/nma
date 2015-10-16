@@ -144,7 +144,8 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 
 	public void createAndShowGUI(){
 		setTitle("Create new analysis");
-		setBounds(100, 100, 450, 626);
+		setBounds(200, 100, 450, 626);
+		this.setLocationRelativeTo(null);
 		contentPane = new JPanel();
 		contentPane.setLayout(new BorderLayout());
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
