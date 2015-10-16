@@ -99,7 +99,11 @@ public class ImageProber extends JDialog {
 		
 		try{
 			String pathToGif = "res/ajax-loader.gif";	
-			URL urlToGif = this.getClass().getResource(pathToGif);
+			
+			// Get current classloader
+			ClassLoader cl = this.getClass().getClassLoader();
+			URL urlToGif = cl.getResource(pathToGif);
+//			URL urlToGif = this.getClass().getResource(pathToGif);
 			
 			if(urlToGif!=null){
 				loadingGif = new ImageIcon(urlToGif);
