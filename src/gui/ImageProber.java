@@ -102,7 +102,10 @@ public class ImageProber extends JDialog {
 		"Requiring a bigger boat",
 		"Shaking, not stirring",
 		"Reaching 88 miles per hour",
-		"Considering it only a flesh wound" 
+		"Considering it only a flesh wound",
+		"Activating the machine that goes ping",
+		"Weighing the same as a duck",
+		"Noting that winter is coming"
 	};
  
 	/**
