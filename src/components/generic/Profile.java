@@ -25,6 +25,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.transform.DftNormalization;
+import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
+
 import utility.Utils;
 
 import components.nuclear.NucleusBorderSegment;
@@ -856,26 +861,32 @@ public Profile calculateDeltas(int windowSize){
     Profile result = new Profile(deltas);
     return result;
   }
-  
-  public Profile differentiate(){
 
-	  double[] deltas = new double[this.size()];
-
-	  for (int i=0; i<array.length; i++) { // for each position in sperm
-
-		  int prev_i = Utils.wrapIndex( i-1  , this.size() ); // the index before
-		  int next_i = Utils.wrapIndex( i+1  , this.size() ); // the index after
-
-
-		  double delta = 	array[i]	-  array[prev_i] +
-				  array[next_i]- array[i];
-
-
-		  deltas[i] = delta;
-	  }
-	  Profile result = new Profile(deltas);
-	  return result;
-  }
+	/**
+	 * Calculate the difference between each value and the previous value, 
+	 * and the difference between each value and the next value, and returns the sums
+	 * as a newP rofile 
+	 * @return
+	 */
+	public Profile differentiate(){
+	
+		double[] deltas = new double[this.size()];
+	
+		for (int i=0; i<array.length; i++) { // for each position in sperm
+	
+			int prev_i = Utils.wrapIndex( i-1  , this.size() ); // the index before
+			int next_i = Utils.wrapIndex( i+1  , this.size() ); // the index after
+	
+	
+			double delta = 	array[i]	-  array[prev_i] +
+					array[next_i]- array[i];
+	
+	
+			deltas[i] = delta;
+		}
+		Profile result = new Profile(deltas);
+		return result;
+	}
   
   /**
    * Log transform the profile to the given base
@@ -1113,6 +1124,43 @@ public Profile calculateDeltas(int windowSize){
 	  for (int i=0; i<array.length; i++) {
 		  IJ.log("Point "+i+": "+array[i]);
 	  }
+  }
+  
+  private boolean isPowerOfTwo(int x){
+	  return (x & (x - 1)) == 0;
+  }
+  
+  private List<Double> padListWithZeros(List<Double> list){
+	  
+	// Check length is power of 2
+	  int size = list.size();
+//	  IJ.log("Length: "+size);
+	  if( isPowerOfTwo(size) ){
+//		  IJ.log("    OK");
+	  } else {
+//		  IJ.log("    Padding");
+		  list.add(0d);
+		  list = padListWithZeros(list);
+	  }
+	  return list;
+  }
+  
+  public void fastFourierTransform(){
+	  FastFourierTransformer f = new FastFourierTransformer(DftNormalization.STANDARD);
+	  
+	  List<Double> list = new ArrayList<Double>();
+	  for(double d : array){
+		  list.add(d);
+	  }
+	  list = padListWithZeros(list);
+	  	  
+	  double[] listArray = Utils.getdoubleFromDouble( list.toArray(new Double[0]) );
+	  Complex[] transformed = f.transform(listArray, TransformType.FORWARD);
+	  
+	  for(Complex c : transformed){
+		  IJ.log(c.toString());
+	  }
+	  
   }
 
 

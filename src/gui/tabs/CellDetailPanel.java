@@ -457,6 +457,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset.getSwatch());
 
 					profileChartPanel.setChart(chart);
+					
+//					nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).fastFourierTransform();
 				}
 
 			} catch(Exception e){
