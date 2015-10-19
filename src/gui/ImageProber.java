@@ -412,7 +412,7 @@ public class ImageProber extends JDialog {
 
 			
 //			programLogger.log(Level.INFO, "Searching image...");
-			testLog();
+//			testLog();
 			List<Cell> cells = NucleusFinder.getCells(imageStack, 
 					options, 
 					programLogger, 
