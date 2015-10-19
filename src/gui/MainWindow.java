@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Formatter;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
@@ -92,7 +93,6 @@ import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.ShellAnalysis;
 import analysis.nucleus.SignalDetector;
 import analysis.tail.TubulinTailDetector;
-
 import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
@@ -123,8 +123,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
 	
 	private ColourSwatch activeSwatch = ColourSwatch.REGULAR_SWATCH;
-	
-	
+		
 	// Flags to pass to ProgressableActions to determine the analyses
 	// to carry out in subsequently
 	private static final int ADD_POPULATION		 = 1;
@@ -180,6 +179,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			TextAreaHandler textHandler = new TextAreaHandler(logPanel);
 			textHandler.setFormatter(new LogPanelFormatter());
 			programLogger.addHandler(textHandler);
+			programLogger.setLevel(Level.INFO); // by default do not log everything 
 			
 			//---------------
 			// Create the split view
@@ -357,7 +357,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				log("Saving root populations...");
 				for(AnalysisDataset d : populationsPanel.getRootDatasets()){
 					if(d.isRoot()){
-						logc("Saving dataset "+d.getCollection().getName()+"...");
+						programLogger.log(Level.INFO, "Saving dataset "+d.getCollection().getName()+"...");
 						PopulationExporter.saveAnalysisDataset(d);
 //						d.save();
 						log("OK");
@@ -411,6 +411,31 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 		});
 		panelHeader.add(btnSetSwatch);
+		
+		
+		JButton btnSetLogLevel = new JButton("Set logging level");
+		btnSetLogLevel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+
+				Level[] nameArray = { Level.INFO, Level.FINE, Level.FINEST };
+				Level option = (Level) JOptionPane.showInputDialog(null, 
+						"Choose swatch",
+						"Swatch",
+						JOptionPane.QUESTION_MESSAGE, 
+						null, 
+						nameArray, 
+						programLogger.getLevel());
+
+				if(option!=null){
+					// a choice was made
+					programLogger.setLevel(option);
+					programLogger.log(Level.SEVERE, "Set the logging level to "+option.toString());
+
+				}
+			}
+		});		
+		panelHeader.add(btnSetLogLevel);
 		return panelHeader;
 	}
 	
@@ -469,7 +494,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public void log(String s){
 		logPanel.log(s);
 	}
-	
+		
 	/**
 	 * Continuous log - do not append a newline
 	 * @param s the string to log
@@ -644,7 +669,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					segmentsDetailPanel.update(list);
 
 				} catch (Exception e) {
-					error("Error updating panels", e);
+					programLogger.log(Level.SEVERE,"Error updating panels", e);
 				}
 			}
 		};
@@ -704,7 +729,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	        			
 	        			if(newCollection.getNucleusCount()>0){
 
-	        				logc("Reapplying morphology...");
+	        				programLogger.log(Level.INFO,"Reapplying morphology...");
+//	        				logc("Reapplying morphology...");
 	        				
 	        				AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
 	        				new MorphologyAnalysisAction(newDataset, dataset, null);
@@ -717,16 +743,16 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	        			populationsPanel.update();
 	        			
 	        		} else {
-	        			log("Cannot split; no children in dataset");
+	        			programLogger.log(Level.INFO,"Cannot split; no children in dataset");
 	        		}
 
 
 				} catch (Exception e1) {
-					error("Error splitting collection", e1);
+					programLogger.log(Level.SEVERE,"Error splitting collection", e1);
 				} 
 				
 	        }   else {
-	        	log("Cannot split multiple collections");
+	        	programLogger.log(Level.INFO,"Cannot split multiple collections");
 	        }
 	    }
 	}
@@ -882,15 +908,17 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 
 			if(evt.getPropertyName().equals("Finished")){
-//				IJ.log("Worker finished by trigger");
+				programLogger.log(Level.FINEST,"Worker signaled finished");
 				finished();
 			}
 
 			if(evt.getPropertyName().equals("Error")){
+				programLogger.log(Level.FINEST,"Worker signaled error");
 				error();
 			}
 			
 			if(evt.getPropertyName().equals("Cooldown")){
+				programLogger.log(Level.FINEST,"Worker signaled cooldown");
 				cooldown();
 			}
 			
@@ -918,7 +946,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		 * Runs when an error was encountered in the analysis
 		 */
 		public void error(){
-			log(this.errorMessage);
+			programLogger.log(Level.SEVERE, this.errorMessage);
+//			log(this.errorMessage);
 			removeProgressBar();
 		}
 		
@@ -1134,7 +1163,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		/**
 		 * Refold the given selected dataset
 		 */
-//		private CountDownLatch doneSignal;
 		
 		public RefoldNucleusAction(AnalysisDataset dataset, CountDownLatch doneSignal) {
 			super(dataset, "Refolding", "Error refolding nucleus");
@@ -1144,7 +1172,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				this.progressBar.setIndeterminate(true);
 				worker = new CurveRefolder(dataset.getCollection(), 
 						"Fast", 
-						doneSignal);
+						doneSignal, 
+						programLogger);
 
 				worker.addPropertyChangeListener(this);
 				this.setProgressMessage("Refolding: "+dataset.getName());
@@ -1152,7 +1181,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 			} catch(Exception e1){
 				this.cancel();
-				MainWindow.this.error("Error refolding nucleus", e1);
+				programLogger.log(Level.SEVERE, "Error refolding nucleus", e1);
 			}
 		}
 		
@@ -1160,8 +1189,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		public void finished(){
 			
 			utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
-//			logger.log(Level.INFO, "Refolding finished, cleaning up");
-    		logger.log("Refolding finished, cleaning up");
+    		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
+			logger.log("Refolding finished, cleaning up");
+			
 			// ensure the bar is gone, even if the cleanup fails
 			this.progressBar.setVisible(false);
 			dataset.getAnalysisOptions().setRefoldNucleus(true);
@@ -1841,12 +1871,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 						
 			if(event.method().equals(DatasetMethod.CLUSTER)){
-				log("Clustering dataset");
+				programLogger.log(Level.INFO, "Clustering dataset");
 				new ClusterAnalysisAction(list.get(0));
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
-
+				programLogger.log(Level.INFO, "Refolding consensus");
 				Thread thr = new Thread(){
 
 					public void run(){
@@ -1855,7 +1885,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						try {
 							latch.await();
 						} catch (InterruptedException e) {
-							MainWindow.this.error("Interruption to thread", e);
+							programLogger.log(Level.SEVERE, "Interruption to thread", e);
 						}
 					}
 				};

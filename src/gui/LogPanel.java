@@ -81,6 +81,10 @@ public class LogPanel extends JPanel {
 		logc(s+"\n");
 	}
 	
+	public void print(String s){
+		textArea.append(s);
+	}
+	
 	/**
 	 * Continuous log - do not append a newline
 	 * @param s the string to log

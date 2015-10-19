@@ -61,7 +61,7 @@ public class ImageProber extends JDialog {
 	private final JPanel contentPanel = new JPanel();
 	private AnalysisOptions options; // the options to detect with
 	private File openImage;			// the image currently open
-//	private Logger logger;
+
 	private Logger programLogger;
 	private JLabel imageLabel;		// the JLabel to hold the image
 

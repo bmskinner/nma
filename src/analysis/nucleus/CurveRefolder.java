@@ -25,17 +25,23 @@
  */
 package analysis.nucleus;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
+import logging.DebugFileFormatter;
+import logging.DebugFileHandler;
 import utility.Constants;
 import utility.Equation;
-import utility.Logger;
+//import utility.Logger;
 import utility.Utils;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -60,7 +66,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	private CountDownLatch doneSignal;
 	
 	
-	private static Logger logger;
+	private static Logger logger; // the program logger
+	private static Logger fileLogger; // the debug file logger
 
 
 	public static final int FAST_MODE 		= 0; // default; iterate until convergence
@@ -86,23 +93,36 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	 * @param refoldMode
 	 * @throws Exception
 	 */
-	public CurveRefolder(CellCollection collection, String refoldMode, CountDownLatch doneSignal) throws Exception {
+	public CurveRefolder(CellCollection collection, String refoldMode, CountDownLatch doneSignal, Logger logger) throws Exception {
 		this.doneSignal = doneSignal;
-		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
+		this.logger = logger;
+
+		
+		fileLogger = Logger.getLogger(CurveRefolder.class.getName());
+		fileLogger.setLevel(Level.ALL);
+		
+		fileLogger.log(Level.INFO, "Creating refolder");
+		logger.log(Level.FINEST, "Creating refolder");
 
 		// make an entirely new nucleus to play with
-		logger.log("Fetching best refold candiate", Logger.DEBUG);
+		fileLogger.log(Level.INFO, "Fetching best refold candiate");
+		logger.log(Level.FINEST, "Fetching best refold candiate");
+
 		Nucleus n = (Nucleus)collection.getNucleusMostSimilarToMedian(BorderTag.ORIENTATION_POINT);	
 		
-		logger.log("Creating consensus nucleus template", Logger.DEBUG);
+		fileLogger.log(Level.INFO, "Creating consensus nucleus template");
+		logger.log(Level.FINEST, "Creating consensus nucleus template");
 		refoldNucleus = new ConsensusNucleus(n, collection.getNucleusType());
 
-		logger.log("Refolding nucleus of class: "+collection.getNucleusType().toString());
-		logger.log("Subject: "+refoldNucleus.getImageName()+"-"+refoldNucleus.getNucleusNumber(), Logger.DEBUG);
+		fileLogger.log(Level.INFO, "Refolding nucleus of class: "+collection.getNucleusType().toString());
+		fileLogger.log(Level.INFO, "Subject: "+refoldNucleus.getImageName()+"-"+refoldNucleus.getNucleusNumber());
+		
+		logger.log(Level.FINEST, "Refolding nucleus of class: "+collection.getNucleusType().toString());
+		logger.log(Level.FINEST, "Subject: "+refoldNucleus.getImageName()+"-"+refoldNucleus.getNucleusNumber());
 
-		Profile targetProfile 	= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
-		Profile q25 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 25);
-		Profile q75 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 75);
+		Profile targetProfile 	= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN);
+		Profile q25 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.LOWER_QUARTILE);
+		Profile q75 			= collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.UPPER_QUARTILE);
 
 		if(targetProfile==null){
 			throw new Exception("Null reference to target profile");
@@ -120,9 +140,19 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	@Override
 	protected Boolean doInBackground() {
 		
-		logger = new Logger(collection.getDebugFile(), "CurveRefolder");
-		try{ 
+		DebugFileHandler handler = null;
+		try {
+			handler = new DebugFileHandler(collection.getDebugFile());
+			handler.setFormatter(new DebugFileFormatter());
+			fileLogger.addHandler(handler);
+		} catch (SecurityException e1) {
+			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
+		} catch (IOException e1) {
+			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
+		}
 
+		try{ 
+			
 			this.refoldCurve();
 			
 			// smooth the refolded nucleus to remove jagged edges
@@ -142,13 +172,19 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			}
 
 			collection.addConsensusNucleus(refoldNucleus);
-			logger.log("Curve refolding complete: trigger done()", Logger.DEBUG);
+			fileLogger.log(Level.INFO,"Curve refolding complete: trigger done()");
+			logger.log(Level.FINEST,"Curve refolding complete: trigger done()");
 			doneSignal.countDown();
 
 		} catch(Exception e){
-			logger.error("Unable to refold nucleus", e);
+			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
+			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
 			return false;
-		} 
+		} finally {
+			logger.log(Level.FINEST,"Closing log file handler");
+			handler.close();
+			
+		}
 		return true;
 	}
 	
@@ -170,18 +206,27 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	
 	@Override
 	public void done() {
+
 		try {
 			if(this.get()){
-				logger.log("Firing successful worker task", Logger.DEBUG );
+				fileLogger.log(Level.FINEST, "Firing successful worker task");
+				logger.log(Level.FINEST, "Firing successful worker task");
+
 				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
 			} else {
-				logger.log("Firing error in worker task", Logger.DEBUG );
+				fileLogger.log(Level.FINEST, "Firing error in worker task");
+				logger.log(Level.FINEST, "Firing error in worker task");
+
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.error("Unable to refold nucleus", e);
+			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
+			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
+
 		} catch (ExecutionException e) {
-			logger.error("Unable to refold nucleus", e);
+			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
+			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
+
 		}
 		
 	} 
@@ -201,7 +246,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		try{
 			double score = refoldNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 			
-			logger.log("Refolding curve: initial score: "+(int)score, Logger.INFO);
+			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
+			logger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
 
 			double originalScore = score;
 			double prevScore = score*2;
@@ -213,7 +259,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 					score = this.iterateOverNucleus();
 					i++;
 					publish(i);
-					logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
+					fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+					logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
 				}
 			}
 
@@ -225,7 +272,9 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 					i++;
 					publish(i);
 					if(i%50==0){
-						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
+						fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+						logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+//						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
 					}
 				}
 			}
@@ -238,12 +287,14 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 					i++;
 					publish(i);
 					if(i%50==0){
-						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
+						fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+						logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
 					}
 				}
 			}
-						
-			logger.log("Refolded curve: final score: "+(int)score, Logger.INFO);
+			fileLogger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
+			logger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
+
 		} catch(Exception e){
 			throw new Exception("Cannot calculate scores: "+e.getMessage());
 		}
