@@ -26,7 +26,6 @@
 */  
 package analysis.nucleus;
 
-import gui.MainWindow;
 import ij.ImagePlus;
 import ij.gui.Roi;
 import ij.process.ByteProcessor;
@@ -39,10 +38,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import utility.Logger;
+
+//import utility.Logger;
 import analysis.AnalysisOptions;
-
 import components.generic.XYPoint;
 
 public class NucleusRefinder
@@ -67,16 +68,16 @@ public class NucleusRefinder
   /*
     Constructors
   */
-  public NucleusRefinder(String outputFolder, File pathList, MainWindow mw, File debugFile, AnalysisOptions options){
-	  super( outputFolder, mw, debugFile, options);
+  public NucleusRefinder(String outputFolder, File pathList, Logger programLogger, File debugFile, AnalysisOptions options){
+	  super( outputFolder, programLogger, debugFile, options);
 	  this.pathList = pathList;
-	  this.logger = new Logger(debugFile, "NucleusRefinder");
+	  this.fileLogger = Logger.getLogger(NucleusRefinder.class.getName());
 
 	  // get the image names and coordinates from the pathList
 	  try{
 		  parsePathList(this.pathList);
 	  } catch(IOException e){
-		  logger.log("Error parsing path list: "+e.getMessage(), Logger.ERROR);
+		  fileLogger.log(Level.SEVERE, "Error parsing path list: "+e.getMessage(), e);
 	  }
   }
 
@@ -264,7 +265,7 @@ public class NucleusRefinder
 
 				  if(roi.getBounds().contains( xToFind, yToFind )){
 					  result = true;
-					  mw.log("  Acquiring nucleus at: "+xToFind+","+yToFind);
+					  programLogger.log(Level.INFO, "  Acquiring nucleus at: "+xToFind+","+yToFind);
 				  }
 			  }
 

@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,7 +79,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
-//import utility.Logger;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
@@ -354,16 +352,16 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		btnSavePopulation.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				log("Saving root populations...");
+				programLogger.log(Level.INFO, "Saving root populations...");
 				for(AnalysisDataset d : populationsPanel.getRootDatasets()){
 					if(d.isRoot()){
 						programLogger.log(Level.INFO, "Saving dataset "+d.getCollection().getName()+"...");
 						PopulationExporter.saveAnalysisDataset(d);
 //						d.save();
-						log("OK");
+						programLogger.log(Level.INFO, "OK");
 					}
 				}
-				log("All root datasets saved");
+				programLogger.log(Level.INFO, "All root datasets saved");
 			}
 		});
 		panelHeader.add(btnSavePopulation);
@@ -459,7 +457,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		boolean ok = true;
 		
 		if(version==null){ // allow for debugging, but warn
-			log("No version info found: functions may not work as expected");
+			programLogger.log(Level.SEVERE, "No version info found: functions may not work as expected");
 			return true;
 		}
 		
@@ -471,8 +469,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		// dataset revision should be equal or greater to program
 		if(Integer.valueOf(parts[1])<Constants.VERSION_REVISION){
-			log("Dataset was created with an older version of the program");
-			log("Some functionality may not work as expected");
+			programLogger.log(Level.SEVERE, "Dataset was created with an older version of the program");
+			programLogger.log(Level.SEVERE, "Some functionality may not work as expected");
 		}
 		return ok;
 	}
@@ -491,17 +489,17 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 * Standard log - append a newline
 	 * @param s the string to log
 	 */
-	public void log(String s){
-		logPanel.log(s);
-	}
+//	public void log(String s){
+//		logPanel.log(s);
+//	}
 		
 	/**
 	 * Continuous log - do not append a newline
 	 * @param s the string to log
 	 */
-	public void logc(String s){
-		logPanel.logc(s);
-	}
+//	public void logc(String s){
+//		logPanel.logc(s);
+//	}
 	
 	/**
 	 * Write an error message to the log panel,
@@ -509,12 +507,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 * @param message the message
 	 * @param e the exception
 	 */
-	public void error(String message, Exception e){
-		log(message+": "+e.getMessage());
-		for(StackTraceElement el : e.getStackTrace()){
-			log(el.toString());
-		}
-	}
+//	public void error(String message, Exception e){
+//		log(message+": "+e.getMessage());
+//		for(StackTraceElement el : e.getStackTrace()){
+//			log(el.toString());
+//		}
+//	}
 	
 	public void setStatus(String message){
 		lblStatusLine.setText(message);
@@ -557,7 +555,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 			Thread thr = new Thread(){
 				public void run(){
-					logc("Reapplying morphology...");
+					programLogger.log(Level.INFO, "Reapplying morphology...");
 					new MorphologyAnalysisAction(list, dataset, ADD_POPULATION);
 				}
 			};
@@ -570,7 +568,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 //			populationsPanel.update();	
 
 		} catch(Exception e){
-			log("Error in FISH remapping: "+e.getMessage());
+			programLogger.log(Level.SEVERE, "Error in FISH remapping: "+e.getMessage(), e);
 		}
 	}
 	
@@ -603,10 +601,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						return;
 					}
 					
-					logc("Opening dataset...");
+					programLogger.log(Level.INFO, "Opening dataset...");
 					
 					// read the dataset
-					AnalysisDataset dataset = PopulationImporter.readDataset(file);
+					AnalysisDataset dataset = PopulationImporter.readDataset(file, programLogger);
 					
 					if(checkVersion( dataset.getVersion() )){
 
@@ -625,7 +623,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						
 						dataset.setSwatch(activeSwatch);
 						
-						log("OK");
+						programLogger.log(Level.INFO, "OK");
 //						
 	
 						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
@@ -635,10 +633,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						populationsPanel.update();
 						
 					} else {
-						log("Unable to open dataset version: "+ dataset.getVersion());
+						programLogger.log(Level.SEVERE, "Unable to open dataset version: "+ dataset.getVersion());
 					}
 				} catch (Exception e) {
-					error("Error opening dataset", e);
+					programLogger.log(Level.SEVERE, "Error opening dataset", e);
 				}
 			}
 		};
@@ -693,7 +691,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	        		AnalysisDataset dataset = datasets.get(0);
 
 	        		if(dataset.hasChildren()){
-	        			log("Splitting collection...");
+	        			programLogger.log(Level.INFO, "Splitting collection...");
 
 	        			// create a JDialog of options
 	        			// get the names of subpopulations
@@ -778,17 +776,17 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
 
 				if(datasets.size()==1){
-					log("Updating folder to "+folderName );
+					programLogger.log(Level.INFO, "Updating folder to "+folderName );
 
 					AnalysisDataset d = datasets.get(0);
 					for(Nucleus n : d.getCollection().getNuclei()){
 						try{
 							n.updateSourceFolder(newFolder);
 						} catch(Exception e1){
-							log("Error renaming nucleus: "+e1.getMessage());
+							programLogger.log(Level.SEVERE, "Error renaming nucleus: "+e1.getMessage(), e);
 						}
 					}
-					log("Folder updated");
+					programLogger.log(Level.INFO, "Folder updated");
 				}
 				
 			}
@@ -815,15 +813,15 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						AnalysisDataset d = datasets.get(0);
 						try{
 
-							logc("Exporting stats...");
+							programLogger.log(Level.INFO, "Exporting stats...");
 							boolean ok = StatsExporter.run(d.getCollection());
 							if(ok){
-								log("OK");
+								programLogger.log(Level.INFO, "OK");
 							} else {
-								log("Error");
+								programLogger.log(Level.INFO, "Error");
 							}
 						} catch(Exception e1){
-							error("Error in stats export", e1);
+							programLogger.log(Level.SEVERE, "Error in stats export", e1);
 						}
 					}
 				};
@@ -1005,7 +1003,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				worker.execute();
 			} catch(Exception e){
 				this.cancel();
-				MainWindow.this.error("Error in tail analysis", e);
+				programLogger.log(Level.SEVERE, "Error in tail analysis", e);
 
 			}
 		}
@@ -1068,7 +1066,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				
 			} catch (Exception e){
 				this.cancel();
-				MainWindow.this.error("Error in signal analysis", e);
+				programLogger.log(Level.SEVERE, "Error in signal analysis", e);
 			}
 			
 		}	
@@ -1100,7 +1098,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
 			subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
 
-			log("Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
+			programLogger.log(Level.INFO, "Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
 
 			dataset.addChildDataset(subDataset);
 		}
@@ -1113,12 +1111,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
 
 			List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
-			log("Dividing population by signals...");
+			programLogger.log(Level.INFO, "Dividing population by signals...");
 			try{
 
 				List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
 				if(!list.isEmpty()){
-					log("Found nuclei with signals in group "+signalGroup);
+					programLogger.log(Level.INFO, "Found nuclei with signals in group "+signalGroup);
 					CellCollection listCollection = new CellCollection(r.getFolder(), 
 							r.getOutputFolderName(), 
 							"Signals_in_group_"+signalGroup, 
@@ -1132,7 +1130,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 					List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
 					if(!notList.isEmpty()){
-						log("Found nuclei without signals in group "+signalGroup);
+						programLogger.log(Level.INFO, "Found nuclei without signals in group "+signalGroup);
 						CellCollection notListCollection = new CellCollection(r.getFolder(), 
 								r.getOutputFolderName(), 
 								"No_signals_in_group_"+signalGroup, 
@@ -1148,7 +1146,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				}
 
 			} catch(Exception e){
-				MainWindow.this.error("Cannot create collection", e);
+				programLogger.log(Level.SEVERE, "Cannot create collection", e);
 			}
 
 			return signalPopulations;
@@ -1273,7 +1271,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		@Override
 		public void finished() {
 
-			log("Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
+			programLogger.log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
 			String tree = (((NucleusClusterer) worker).getNewickTree());
 			
@@ -1291,7 +1289,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				// attach the clusters to their parent collection
 //				dataset.addCluster(c);
 				
-				log("Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
+				programLogger.log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
 				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
 				list.add(clusterDataset);
 				
@@ -1413,36 +1411,36 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     				if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
 //    					logger.log(Level.FINE, "Running stats export");
     					logger.log("Running stats export", utility.Logger.DEBUG);
-    					logc("Exporting stats...");
+    					programLogger.log(Level.INFO, "Exporting stats...");
     					boolean ok = StatsExporter.run(dataset.getCollection());
     					if(ok){
-    						log("OK");
+    						programLogger.log(Level.INFO, "OK");
     					} else {
-    						log("Error");
+    						programLogger.log(Level.INFO, "Error");
     					}
     				}
 
     				// annotate the nuclei in the population
     				if(  (downFlag & NUCLEUS_ANNOTATE) == NUCLEUS_ANNOTATE){
     					logger.log("Running annotation", utility.Logger.DEBUG);
-    					logc("Annotating nuclei...");
+    					programLogger.log(Level.INFO, "Annotating nuclei...");
     					boolean ok = NucleusAnnotator.run(dataset);
     					if(ok){
-    						log("OK");
+    						programLogger.log(Level.INFO, "OK");
     					} else {
-    						log("Error");
+    						programLogger.log(Level.INFO, "Error");
     					}
     				}
 
     				// make a composite image of all nuclei in the collection
     				if(  (downFlag & EXPORT_COMPOSITE) == EXPORT_COMPOSITE){
     					logger.log("Running compositor", utility.Logger.DEBUG);
-    					logc("Exporting composite...");
+    					programLogger.log(Level.INFO, "Exporting composite...");
     					boolean ok = CompositeExporter.run(dataset.getCollection());
     					if(ok){
-    						log("OK");
+    						programLogger.log(Level.INFO, "OK");
     					} else {
-    						log("Error");
+    						programLogger.log(Level.INFO, "Error");
     					}
     				}
 
@@ -1460,7 +1458,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     					try {
     						latch.await();
     					} catch (InterruptedException e) {
-    						MainWindow.this.error("Interruption to thread", e);
+    						programLogger.log(Level.SEVERE, "Interruption to thread", e);
     					}
     				}
 
@@ -1532,7 +1530,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 				options = analysisSetup.getOptions();
 
-				log("Directory: "+options.getFolder().getName());
+				programLogger.log(Level.INFO, "Directory: "+options.getFolder().getName());
 
 				this.startTime = Calendar.getInstance().getTime();
 				this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
@@ -1548,7 +1546,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				logger.log("Directory: "+options.getFolder().getName());
 				setStatus("New analysis in progress");
 				
-				detector = new NucleusDetector(this.outputFolderName, MainWindow.this, logger.getLogfile(), options);
+				detector = new NucleusDetector(this.outputFolderName, programLogger, logger.getLogfile(), options);
 				detector.addPropertyChangeListener(this);
 				detector.execute();
 				analysisSetup.dispose();
@@ -1568,7 +1566,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			final List<AnalysisDataset> datasets = detector.getDatasets();
 			
 			if(datasets.size()==0 || datasets==null){
-				log("No datasets returned");
+				programLogger.log(Level.INFO, "No datasets returned");
 				this.cancel();
 			} else {
 
@@ -1642,7 +1640,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().get(0);
 		
 		if(event.type().equals("RunShellAnalysis")){
-			log("Shell analysis selected");
+			programLogger.log(Level.INFO, "Shell analysis selected");
 			new ShellAnalysisAction(selectedDataset);
 		}
 
@@ -1687,12 +1685,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					if(fileName!=null && folderName!=null){
 						File saveFile = new File(folderName+File.separator+fileName);
 
-						logc("Saving as "+saveFile.getAbsolutePath()+"...");
+						programLogger.log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
 						boolean ok = PopulationExporter.saveAnalysisDataset(selectedDataset, saveFile);
 						if(ok){
-							log("OK");
+							programLogger.log(Level.INFO, "OK");
 						} else {
-							log("Error");
+							programLogger.log(Level.INFO, "Error");
 						}
 					}
 				}
@@ -1722,12 +1720,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
         				return; // check folder is ok
         			}
 
-        			logc("Extracting nuclei from collection...");
+        			programLogger.log(Level.INFO, "Extracting nuclei from collection...");
         			boolean ok = PopulationExporter.extractNucleiToFolder(selectedDataset, folder);
         			if(ok){ 
-        				log("OK");
+        				programLogger.log(Level.INFO, "OK");
         			} else {
-        				log("Error");
+        				programLogger.log(Level.INFO, "Error");
         			}
         		}
         	};
@@ -1767,7 +1765,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 							new MorphologyAnalysisAction(selectedDataset, source, null);
 						}
 					} catch(Exception e1){
-						error("Error applying morphology", e1);
+						programLogger.log(Level.SEVERE, "Error applying morphology", e1);
 					}
 				
 			}});
@@ -1799,7 +1797,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 		if(event.type().startsWith("Log_")){
 			String s = event.type().replace("Log_", "");
-			log(s);
+			programLogger.log(Level.INFO, s);
 		}
 		
 		if(event.type().startsWith("Status_")){
@@ -1807,24 +1805,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			setStatus(s);
 		}
 				
-//		if(event.type().startsWith("ExtractSource_")){
-//			log("Recovering source dataset");
-//			String name = event.type().replace("ExtractSource_", "");
-//			// get the uuid of the dataset from the currently selected dataset
-//			AnalysisDataset parent = selectedDataset;
-//			for(UUID id : parent.getMergeSources()){
-//				
-//				AnalysisDataset child = parent.getMergeSource(id);
-//				
-//				// add the dataset to the populations panel
-//				if(child.getName().equals(name)){
-//					child.setRoot(true);
-//					populationsPanel.addDataset(child);
-//					populationsPanel.update();
-//				}
-//			}
-//
-//		}
 	}
 
 	@Override
@@ -1833,7 +1813,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		if(!list.isEmpty()){
 			
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
-				log("Running new morphology analysis");
+				programLogger.log(Level.INFO, "Running new morphology analysis");
 				final int flag = ADD_POPULATION;
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
@@ -1897,7 +1877,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
-				log("Recovering source dataset");
+				programLogger.log(Level.INFO, "Recovering source dataset");
 				for(AnalysisDataset d : list){
 					d.setRoot(true);
 					populationsPanel.addDataset(d);

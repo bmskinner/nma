@@ -18,7 +18,8 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import utility.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import components.Cell;
 import components.CellCollection;
@@ -40,19 +41,33 @@ public class CollectionFilterer {
 	private static double maxWibblinessFromMedian = 1.4; // filter for the irregular borders more stringently
 
 
-	public static boolean run(CellCollection collection, CellCollection failCollection){
+	public static boolean run(CellCollection collection, CellCollection failCollection, Logger fileLogger){
 
-		logger = new Logger(collection.getDebugFile(), "CollectionFilterer");
+		logger = fileLogger;
+//		logger = Logger.getLogger(CollectionFilterer.class.getName());  // (collection.getDebugFile(), "CollectionFilterer");
+//		DebugFileHandler handler = null;
+//		try {
+//			handler = new DebugFileHandler(collection.getDebugFile());
+//			handler.setFormatter(new DebugFileFormatter());
+//			logger.addHandler(handler);
+//		} catch (SecurityException e1) {
+////			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
+//		} catch (IOException e1) {
+////			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
+//		}
+		
 		try{
 
-			logger.log("Filtering collection...");
+			logger.log(Level.FINE, "Filtering collection...");
 			refilterNuclei(collection, failCollection);
+			logger.log(Level.FINE, "Filtering complete");
 		} catch(Exception e){
 
-			logger.error("Error filtering", e);
+			logger.log(Level.SEVERE, "Error filtering", e);
 			return false;
-		} 
-		logger.log("Filtering complete");
+		}  finally {
+//			handler.close();
+		}
 		return true;
 	}
 	
@@ -79,9 +94,9 @@ public class CollectionFilterer {
 	    int arraylength = 0;
 	    int feretlength = 0;
 
-	    logger.log("Prefiltered values found");
+	    logger.log(Level.FINE, "Prefiltered values found");
 //	    IJ.append("Prefiltered:\r\n", this.getDebugFile().getAbsolutePath());
-	    exportFilterStats(collection);
+//	    exportFilterStats(collection);
 
 	    for(Cell c : collection.getCells()){
 //	    for(int i=0;i<collection.getNucleusCount();i++){
@@ -128,19 +143,19 @@ public class CollectionFilterer {
 	    int afterSize = collection.getNucleusCount();
 	    int removed = beforeSize - afterSize;
 
-	    logger.log("Postfiltered values found");
-	    exportFilterStats(collection);
-	    logger.log("Removed due to size or length issues: "+removed+" nuclei");
-	    logger.log("Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei");
-	    logger.log("Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei");
-	    logger.log("Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei");
-	    logger.log("Due to array length: "+arraylength+" nuclei");
-	    logger.log("Due to feret length: "+feretlength+" nuclei");
-	    logger.log("Remaining: "+collection.getNucleusCount()+" nuclei");
+//	    logger.log("Postfiltered values found");
+//	    exportFilterStats(collection);
+//	    logger.log("Removed due to size or length issues: "+removed+" nuclei");
+//	    logger.log("Due to area outside bounds "+(int)minArea+"-"+(int)maxArea+": "+area+" nuclei");
+//	    logger.log("Due to perimeter outside bounds "+(int)minPerim+"-"+(int)maxPerim+": "+perim+" nuclei");
+//	    logger.log("Due to wibbliness >"+(int)maxPathLength+" : "+(int)pathlength+" nuclei");
+//	    logger.log("Due to array length: "+arraylength+" nuclei");
+//	    logger.log("Due to feret length: "+feretlength+" nuclei");
+	    logger.log(Level.INFO, "Remaining: "+collection.getNucleusCount()+" nuclei");
 	    
 	  }
 	
-	public static void exportFilterStats(CellCollection collection){
+	private static void exportFilterStats(CellCollection collection){
 
 	    double medianArea = collection.getMedianNuclearArea();
 	    double medianPerimeter = collection.getMedianNuclearPerimeter();
@@ -148,11 +163,11 @@ public class CollectionFilterer {
 	    double medianArrayLength = collection.getMedianArrayLength();
 	    double medianFeretLength = collection.getMedianFeretLength();
 
-	    logger.log("Area: "        +(int)medianArea);
-	    logger.log("Perimeter: "   +(int)medianPerimeter);
-	    logger.log("Path length: " +(int)medianPathLength);
-	    logger.log("Array length: "+(int)medianArrayLength);
-	    logger.log("Feret length: "+(int)medianFeretLength);
+//	    logger.log("Area: "        +(int)medianArea);
+//	    logger.log("Perimeter: "   +(int)medianPerimeter);
+//	    logger.log("Path length: " +(int)medianPathLength);
+//	    logger.log("Array length: "+(int)medianArrayLength);
+//	    logger.log("Feret length: "+(int)medianFeretLength);
 	    
 	  }
 }

@@ -31,9 +31,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
 
+import logging.DebugFileHandler;
 import utility.Constants;
-
 import components.CellCollection;
 import components.ClusterGroup;
 import components.nuclear.ShellResult;
@@ -74,6 +76,7 @@ public class AnalysisDataset implements Serializable {
 	private String newickTree = null;
 	
 	private File debugFile;
+	private transient DebugFileHandler fileHandler;// = new DebugFileHandler(debugFile);
 	
 	private String version;
 	
@@ -107,6 +110,10 @@ public class AnalysisDataset implements Serializable {
 		this.savePath = saveFile;
 		this.isRoot = false;
 		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
+	}
+	
+	public Handler getLogHandler(){
+		return this.fileHandler;
 	}
 	
 	/**

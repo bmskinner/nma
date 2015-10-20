@@ -18,8 +18,6 @@
  *******************************************************************************/
 package io;
 
-import gui.MainWindow;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,25 +25,25 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import utility.Logger;
+//import utility.Logger;
 import analysis.AnalysisDataset;
-
 import components.CellCollection;
 
 public class PopulationImporter {
 	
-	private static Logger logger;
+//	private static Logger programLogger;
+//	private static Logger fileLogger;
 
 
-	public static CellCollection readPopulation(File inputFile, MainWindow mw){
+	public static CellCollection readPopulation(File inputFile, Logger programLogger){
 		
 		if(!inputFile.exists()){
-			mw.log("Requested file does not exist");
+			programLogger.log(Level.INFO, "Requested file does not exist");
 			throw new IllegalArgumentException("Requested file does not exist");
 		}
-		
-		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
 
 		CellCollection collection = null;
 
@@ -55,7 +53,7 @@ public class PopulationImporter {
 
 			ObjectInputStream ois = new ObjectInputStream(fis);
 
-			mw.logc("Reading file...");
+			programLogger.log(Level.INFO, "Reading file...");
 			List<Object> inputList = new ArrayList<Object>(0);
 
 			try{
@@ -66,30 +64,30 @@ public class PopulationImporter {
 				}
 			} catch (Exception e) { // exception occurs on reaching EOF
 
-				mw.log("OK");
+				programLogger.log(Level.INFO, "OK");
 				collection = (CellCollection) inputList.get(0);
 
-				mw.log("File imported");
+				programLogger.log(Level.INFO, "File imported");
 
 			} finally {
 				ois.close();
 				fis.close();
 			}
 		} catch (FileNotFoundException e1) {
-			logger.error("File not found: "+inputFile.getAbsolutePath(), e1);
+			programLogger.log(Level.SEVERE, "File not found: "+inputFile.getAbsolutePath(), e1);
 		} catch (IOException e1) {
-			logger.error("File IO error: "+inputFile.getAbsolutePath(), e1);
+			programLogger.log(Level.SEVERE, "File IO error: "+inputFile.getAbsolutePath(), e1);
 		}
 		return collection;
 	}
 	
-	public static AnalysisDataset readDataset(File inputFile){
+	public static AnalysisDataset readDataset(File inputFile, Logger programLogger){
 
 		if(!inputFile.exists()){
 			throw new IllegalArgumentException("Requested file does not exist");
 		}
 
-		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
+//		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
 
 		AnalysisDataset dataset = null;
 
@@ -116,9 +114,9 @@ public class PopulationImporter {
 				fis.close();
 			}
 		} catch (FileNotFoundException e1) {
-			logger.error("File not found: "+inputFile.getAbsolutePath(), e1);
+			programLogger.log(Level.SEVERE, "File not found: "+inputFile.getAbsolutePath(), e1);
 		} catch (IOException e1) {
-			logger.error("File IO error: "+inputFile.getAbsolutePath(), e1);
+			programLogger.log(Level.SEVERE, "File IO error: "+inputFile.getAbsolutePath(), e1);
 		}
 		return dataset;
 	}
