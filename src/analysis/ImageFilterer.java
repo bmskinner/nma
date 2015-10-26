@@ -12,7 +12,6 @@ import ij.process.ImageProcessor;
 import io.ImageExporter;
 import io.ImageImporter;
 import utility.Constants;
-import utility.Logger;
 import utility.Stats;
 
 public class ImageFilterer {

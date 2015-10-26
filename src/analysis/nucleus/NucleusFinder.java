@@ -21,32 +21,25 @@ package analysis.nucleus;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
-import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
-import io.ImageImporter;
 
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import mmorpho.MorphoProcessor;
-import mmorpho.StructureElement;
 import utility.Constants;
-import utility.Logger;
 //import utility.Logger;
-import utility.Stats;
+
+
 import utility.StatsMap;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
-import analysis.CannyEdgeDetector;
 import analysis.Detector;
 import analysis.ImageFilterer;
-import analysis.Kuwahara_Filter;
 import components.Cell;
 import components.generic.XYPoint;
 import components.nuclear.NucleusType;
@@ -60,8 +53,8 @@ import components.nuclei.Nucleus;
  */
 public class NucleusFinder {
 	
-	private static Logger logger = null;
-	private static java.util.logging.Logger programLogger;
+	private static Logger fileLogger;
+	private static Logger programLogger;
 	
 	/**
 	 * Get a list of cells found in this image
@@ -71,14 +64,16 @@ public class NucleusFinder {
 	 * @param sourceFile the file the nuclei were found in
 	 * @return
 	 */
-	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, File logfile, File sourceFile, String outputFolderName){
-		logger = new Logger(logfile, "NucleusFinder");
+	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, File sourceFile, String outputFolderName){
+//		logger = new Logger(logfile, "NucleusFinder");
+		NucleusFinder.programLogger = programLogger;
 		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
 		return result;
 	}
 	
-	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, java.util.logging.Logger logger, File sourceFile, String outputFolderName){
-		programLogger = logger;
+	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, Logger fileLogger, File sourceFile, String outputFolderName){
+		NucleusFinder.programLogger = programLogger;
+		NucleusFinder.fileLogger = fileLogger;
 		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
 		return result;
 	}
@@ -107,11 +102,8 @@ public class NucleusFinder {
 		try{
 			detector.run(image);
 		} catch(Exception e){
-			if(logger==null){
-				programLogger.log(Level.SEVERE, "Error in nucleus detection");
-			} else {
-				logger.error("Error in nucleus detection", e);
-			}
+			programLogger.log(Level.SEVERE, "Error in nucleus detection");
+			fileLogger.log(Level.SEVERE, "Error in nucleus detection");
 		}
 		return detector.getRoiList();
 	}
@@ -128,9 +120,9 @@ public class NucleusFinder {
 		if(analysisOptions==null){
 			throw new IllegalArgumentException("Analysis options are null");
 		}
-		if(logger!=null){
-			logger.log("File:  "+path.getName(), Logger.DEBUG);
-		}
+
+		fileLogger.log(Level.FINE, "File:  "+path.getName());
+
 		List<Cell> result = new ArrayList<Cell>();
 				
 		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
@@ -166,26 +158,24 @@ public class NucleusFinder {
 		List<Roi> roiList = getROIs(searchStack, analysisOptions, true);
 						
 		if(roiList.isEmpty()){
-			if(logger!=null){
-				logger.log("No usable nuclei in image", Logger.DEBUG);
-			}
+
+			fileLogger.log(Level.FINE, "No usable nuclei in image");
+
 			
 		}
 
 		int nucleusNumber = 0;
 
 		for(Roi roi : roiList){
-			if(logger!=null){
-				logger.log("Acquiring nucleus "+nucleusNumber, Logger.DEBUG);
-			}
+			fileLogger.log(Level.FINE, "Acquiring nucleus "+nucleusNumber);
+
 			
 			try{
 				Cell cell = makeCell(roi, image, nucleusNumber, path, analysisOptions, outputFolderName); // get the profile data back for the nucleus
 				result.add(cell);
 			} catch(Exception e){
-				if(logger!=null){
-					logger.error("Error acquiring nucleus", e);
-				}
+				
+				fileLogger.log(Level.SEVERE, "Error acquiring nucleus", e);
 				
 			}
 			nucleusNumber++;
@@ -246,10 +236,9 @@ public class NucleusFinder {
 			  result.setNucleus(currentNucleus);		  
 			  
 		  }catch(Exception e){
-			  if(logger!=null){
-				  logger.error(" Error in nucleus assignment", e);
-			  }
-			  
+
+			  fileLogger.log(Level.SEVERE, " Error in nucleus assignment", e);
+ 
 		  }
 		  return result;
 	  }
@@ -285,9 +274,9 @@ public class NucleusFinder {
 					  originalPosition);
 			  
 		  } catch(Exception e){
-			  if(logger!=null){
-				  logger.error("Error creating nucleus", e);
-			  }
+
+			  fileLogger.log(Level.SEVERE, "Error creating nucleus", e);
+
 		  }
 		  return n;
 	  }

@@ -26,7 +26,6 @@
 */  
 package analysis.nucleus;
 
-import gui.MainWindow;
 import ij.IJ;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
@@ -417,7 +416,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				  makeFolder(folder);
 				  
 				  programLogger.log(Level.INFO, "File:  "+file.getName());
-				  List<Cell> cells = NucleusFinder.getCells(imageStack, analysisOptions, debugFile, file, outputFolder);
+				  List<Cell> cells = NucleusFinder.getCells(imageStack, analysisOptions, programLogger, file, outputFolder);
 				  
 				  if(cells.isEmpty()){
 					  programLogger.log(Level.INFO, "  No nuclei detected in image");
