@@ -113,9 +113,9 @@ public class SegmentFitterTest {
 			
 			System.out.println("Running fitter");
 			long startTime = System.currentTimeMillis();
-			SegmentFitter fitter = new SegmentFitter(median, log);
+//			SegmentFitter fitter = new SegmentFitter(median, log);
 			
-			fitter.fit(n, null);
+//			fitter.fit(n, null);
 			
 			long endTime = System.currentTimeMillis();
 			long time = endTime - startTime;

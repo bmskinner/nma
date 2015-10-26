@@ -521,7 +521,6 @@ public class NucleusFinder {
 		try {
 			
 			int shift=1;
-//			int radius = analysisOptions.getCannyOptions("nucleus").getClosingObjectRadius();
 			int[] offset = {0,0};
 			int eltype = 0; //circle
 			logger.log("Closing objects with circle of radius "+closingRadius, Logger.DEBUG);

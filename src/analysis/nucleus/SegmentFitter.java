@@ -21,8 +21,11 @@ package analysis.nucleus;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import utility.Logger;
+
+//import utility.fileLogger;
 import components.generic.BorderTag;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Profile;
@@ -40,7 +43,7 @@ import components.nuclei.Nucleus;
  */
 public class SegmentFitter {
 	
-	private static Logger logger;
+	private Logger fileLogger;
 
 	/**
 	 * The multiplier to add to best-fit scores when shrinking a segment below the 
@@ -73,18 +76,18 @@ public class SegmentFitter {
 	 * @param medianProfile the profile
 	 * @param logFile the file for logging status
 	 */
-	public SegmentFitter(SegmentedProfile medianProfile, File logFile){
+	public SegmentFitter(SegmentedProfile medianProfile, Logger fileLogger){
 		if(medianProfile==null){
-			logger.log("Segmented profile is null", Logger.ERROR);
+			fileLogger.log(Level.SEVERE, "Segmented profile is null");
 			throw new IllegalArgumentException("Median profile is null");
 		}
 		
-		logger = new Logger(logFile, "SegmentFitter");
+		this.fileLogger = fileLogger;
 		this.medianProfile = null;
 		try {
 			this.medianProfile  = new SegmentedProfile(medianProfile);
 		} catch (Exception e) {
-			logger.error("Error initialising fitter", e);
+			fileLogger.log(Level.SEVERE, "Error initialising fitter", e);
 		}
 		
 		
@@ -101,17 +104,17 @@ public class SegmentFitter {
 		
 		// Input checks
 		if(n==null){
-			logger.log("Test nucleus is null", Logger.ERROR);
+			fileLogger.log(Level.SEVERE, "Test nucleus is null");
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
 		
 		try {
 			if(n.getAngleProfile().getSegments()==null || n.getAngleProfile().getSegments().isEmpty()){
-				logger.log("Nucleus has no segments", Logger.ERROR);
+				fileLogger.log(Level.SEVERE, "Nucleus has no segments");
 				throw new IllegalArgumentException("Nucleus has no segments");
 			}
 		} catch (Exception e1) {
-			logger.error("Error getting segments", e1);
+			fileLogger.log(Level.SEVERE, "Error getting segments", e1);
 		}
 		
 		long startTime = System.currentTimeMillis();
@@ -126,16 +129,16 @@ public class SegmentFitter {
 			// modify tail and head/tip point to nearest segment end
 			remapBorderPoints(n, pc);
 			
-			logger.log("Fitted nucleus "+n.getPathAndNumber(), Logger.INFO);
+			fileLogger.log(Level.INFO, "Fitted nucleus "+n.getPathAndNumber());
 			
 			if(debug){
 				long endTime = System.currentTimeMillis();
 				long time = endTime - startTime;
-				logger.log("Fitting took "+time+" milliseconds", Logger.DEBUG);
+				fileLogger.log(Level.FINEST, "Fitting took "+time+" milliseconds");
 			}
 			
 		} catch(Exception e){
-			logger.error("Error refitting segments", e);
+			fileLogger.log(Level.SEVERE, "Error refitting segments", e);
 		}
 	}
 		
@@ -146,13 +149,13 @@ public class SegmentFitter {
 	 */
 	public Profile recombine(Nucleus n, BorderTag tag){
 		if(n==null){
-			logger.log("Recombined nucleus is null", Logger.ERROR);
+			fileLogger.log(Level.SEVERE, "Recombined nucleus is null");
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
 		Profile frankenProfile = null;
 		try {
 			if(n.getAngleProfile().getSegments()==null){
-				logger.log("Nucleus has no segments", Logger.ERROR);
+				fileLogger.log(Level.SEVERE, "Nucleus has no segments");
 				throw new IllegalArgumentException("Nucleus has no segments");
 			}
 
@@ -161,12 +164,12 @@ public class SegmentFitter {
 			 * The zero index of the profile is the border tag.
 			 */
 			SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(tag));
-//			logger.log("Angle at nucleus profile index 0 ("+tag+") is "+nucleusProfile.get(0));
+//			fileLogger.log("Angle at nucleus profile index 0 ("+tag+") is "+nucleusProfile.get(0));
 			
 			// stretch or squeeze the segments to match the length of the median profile of the collection
 			frankenProfile = recombineSegments(n, nucleusProfile, tag);
 		} catch(Exception e){
-			logger.error("Error recombining segments", e);
+			fileLogger.log(Level.SEVERE, "Error recombining segments", e);
 		}
 		
 		return frankenProfile;
@@ -180,7 +183,7 @@ public class SegmentFitter {
 	private void remapBorderPoints(Nucleus n, ProfileCollection pc) throws Exception {
 		
 		if(pc==null){
-			logger.log("No profile collection found, skipping remapping", Logger.DEBUG);
+			fileLogger.log(Level.INFO, "No profile collection found, skipping remapping");
 			return; // this allows the unit tests to skip this section if a profile collection has not been created
 		}
 		
@@ -221,9 +224,9 @@ public class SegmentFitter {
 				// Get the same segment in the nucleus, and update the tag
 				NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(segName);
 				n.setBorderTag(tag, nSeg.getStartIndex());
-				logger.log("Remapped border point "+tag, Logger.DEBUG);
+				fileLogger.log(Level.FINE, "Remapped border point "+tag);
 			} else {
-				logger.log("Unable to remap border point "+tag, Logger.DEBUG);
+				fileLogger.log(Level.FINE, "Unable to remap border point "+tag);
 			}
 		}
 	}
@@ -241,10 +244,10 @@ public class SegmentFitter {
 		if(profile==null){
 			throw new IllegalArgumentException("Test profile is null in recombiner");
 		}
-		logger.log("Recombining segments to FrankenProfile", Logger.DEBUG);
-		logger.log("    Segmentation beginning from "+tag, Logger.DEBUG);
-//		logger.log("    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag), Logger.DEBUG);
-//		logger.log("    Angle at incoming segmented profile index 0 ("+tag+") is "+profile.get(0));
+		fileLogger.log(Level.FINE, "Recombining segments to FrankenProfile");
+		fileLogger.log(Level.FINE, "    Segmentation beginning from "+tag);
+//		fileLogger.log("    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag), fileLogger.DEBUG);
+//		fileLogger.log("    Angle at incoming segmented profile index 0 ("+tag+") is "+profile.get(0));
 		
 		
 		/*
@@ -272,14 +275,14 @@ public class SegmentFitter {
 			Profile revisedProfile = interpolateSegment(seg.getOldName(), profile);
 			finalSegmentProfiles.add(revisedProfile);
 			
-			logger.log("    Recombining segment: "+seg.toString(), Logger.DEBUG);
-//			logger.log("    Segment starting angle: "+revisedProfile.get(0), Logger.DEBUG);
+			fileLogger.log(Level.FINE, "    Recombining segment: "+seg.toString());
+//			fileLogger.log("    Segment starting angle: "+revisedProfile.get(0), fileLogger.DEBUG);
 
 		}
 
 		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
 		
-//		logger.log("Angle at franken profile index 0 ("+tag+") is "+mergedProfile.get(0));
+//		fileLogger.log("Angle at franken profile index 0 ("+tag+") is "+mergedProfile.get(0));
 		return mergedProfile;
 	}
 	
@@ -303,7 +306,7 @@ public class SegmentFitter {
 		Profile revisedProfile = testSegProfile.interpolate(medianSegment.length());
 
 		if(debug){
-			logger.log("\tAdjusted segment "+name+":\t"+testSeg.getStartIndex()+"-"+testSeg.getEndIndex()+"\t"+testSeg.length()+" -> "+medianSegment.length(), Logger.DEBUG);
+			fileLogger.log(Level.FINE, "\tAdjusted segment "+name+":\t"+testSeg.getStartIndex()+"-"+testSeg.getEndIndex()+"\t"+testSeg.length()+" -> "+medianSegment.length());
 		}
 		return revisedProfile;
 	}
@@ -317,13 +320,13 @@ public class SegmentFitter {
 	private SegmentedProfile runFitter(SegmentedProfile profile) throws Exception {
 		// Input check
 		if(profile==null){
-			logger.log("Profile is null", Logger.ERROR);
+			fileLogger.log(Level.SEVERE, "Profile is null");
 			throw new IllegalArgumentException("Profile is null in runFitter()");
 		}
 		
 		testedProfiles = new ArrayList<SegmentedProfile>();
 
-		logger.log("Fitting segments", Logger.INFO);
+		fileLogger.log(Level.INFO, "Fitting segments");
 		
 		// By default, return the input profile
 		SegmentedProfile result 	 = new SegmentedProfile(profile);
@@ -340,11 +343,11 @@ public class SegmentFitter {
 			// get the initial score for the segment and log it
 			if(debug){
 				double score = compareSegmentationPatterns(medianProfile, tempProfile);
-				logger.log("Segment\t"+segment.getName()
+				fileLogger.log(Level.FINE, "Segment\t"+segment.getName()
 						+"\tLength "+segment.length()
 						+"\t"+segment.getStartIndex()
-						+"-"+segment.getEndIndex(), Logger.DEBUG );
-				logger.log("\tInitial score: "+score, Logger.DEBUG);
+						+"-"+segment.getEndIndex() );
+				fileLogger.log(Level.FINE, "\tInitial score: "+score);
 			}
 			
 			// find the best length and offset change
@@ -357,7 +360,7 @@ public class SegmentFitter {
 		
 		if(debug){
 			for(String name : result.getSegmentNames()){
-				logger.log("Fitted segment: "+result.getSegment(name).toString(), Logger.DEBUG);
+				fileLogger.log(Level.FINE, "Fitted segment: "+result.getSegment(name).toString());
 			}
 		}
 		
@@ -394,7 +397,7 @@ public class SegmentFitter {
 		// how far from current end to next segment end?
 		int maximumChange = segment.testLength(segment.getEndIndex(), segment.nextSegment().getEndIndex());	
 		if(debug){
-			logger.log("\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
+			fileLogger.log(Level.FINE, "\tMin change\t"+minimumChange+"\tMax change "+maximumChange );
 		}
 		
 		/* Trying all possible lengths takes a long time. Try adjusting lengths in a window of 
@@ -409,7 +412,7 @@ public class SegmentFitter {
 			// apply all changes to a fresh copy of the profile
 			SegmentedProfile testProfile = new SegmentedProfile(profile);
 			if(debug){
-				logger.log("\tTesting length change "+changeWindow);
+				fileLogger.log(Level.FINE, "\tTesting length change "+changeWindow);
 			}
 			testProfile = testChange(profile, name, changeWindow);
 			double score = compareSegmentationPatterns(medianProfile, testProfile);
@@ -419,7 +422,7 @@ public class SegmentFitter {
 		}
 		
 		if(debug){
-			logger.log("\tBest fit window is length "+bestChangeWindow );
+			fileLogger.log(Level.FINE, "\tBest fit window is length "+bestChangeWindow );
 		}
 		
 		int halfWindow = changeWindowSize / 2;
@@ -427,7 +430,7 @@ public class SegmentFitter {
 		for(int changeValue = bestChangeWindow - halfWindow; changeValue < bestChangeWindow+halfWindow; changeValue++){
 			SegmentedProfile testProfile = new SegmentedProfile(profile);
 			if(debug){
-				logger.log("\tTesting length change "+changeValue);
+				fileLogger.log(Level.FINE, "\tTesting length change "+changeValue);
 			}
 			testProfile = testChange(profile, name, changeValue);
 			double score = compareSegmentationPatterns(medianProfile, testProfile);
@@ -448,7 +451,7 @@ public class SegmentFitter {
 		SegmentedProfile testProfile = new SegmentedProfile(profile);
 		NucleusBorderSegment segment = profile.getSegment(name);
 		if(debug){
-			logger.log("\tTesting length change "+changeValue);
+			fileLogger.log(Level.FINE, "\tTesting length change "+changeValue);
 		}
 		
 		// not permitted if it violates length constraint
@@ -461,7 +464,7 @@ public class SegmentFitter {
 //			if(optimise){
 //				if(hasBeenTested(compareProfile)){
 //					if(debug){
-//						logger.log("\tProfile has been tested");
+//						fileLogger.log("\tProfile has been tested");
 //					}
 //					continue;
 //				}
@@ -471,19 +474,19 @@ public class SegmentFitter {
 			try{
 				double score = compareSegmentationPatterns(medianProfile, testProfile);
 				if(debug){
-					logger.log("\tLengthen "+changeValue+":\tScore:\t"+score, Logger.DEBUG);
+					fileLogger.log(Level.FINE, "\tLengthen "+changeValue+":\tScore:\t"+score);
 				}
 				
 				if(score < bestScore){
 					bestScore 	= score;
 					result = new SegmentedProfile(testProfile);
 					if(debug){
-						logger.log("\tNew best score:\t"+score+"\tLengthen:\t"+changeValue, Logger.DEBUG);
+						fileLogger.log(Level.FINE, "\tNew best score:\t"+score+"\tLengthen:\t"+changeValue);
 					}
 				}
 			}catch(IllegalArgumentException e){
 				// throw a new edxception rather than trying a nudge a problem profile
-				logger.log(e.getMessage(), Logger.ERROR);
+				fileLogger.log(Level.SEVERE, e.getMessage());
 				throw new Exception("Error getting segmentation pattern: "+e.getMessage());
 			}
 			
@@ -497,7 +500,7 @@ public class SegmentFitter {
 				bestScore = score;
 				result = new SegmentedProfile(testProfile);
 				if(debug){
-					logger.log("\tNew best score:\t"+score+"\tNudge:\t"+nudge, Logger.DEBUG);
+					fileLogger.log(Level.FINE, "\tNew best score:\t"+score+"\tNudge:\t"+nudge);
 				}
 			}
 			if(optimise){
@@ -507,10 +510,10 @@ public class SegmentFitter {
 									
 		} else {
 			if(debug){
-				logger.log("\tLengthen "+changeValue
+				fileLogger.log(Level.FINE, "\tLengthen "+changeValue
 					+":\tInvalid length change:\t"
 					+testProfile.getSegment(name).getLastFailReason()
-					+"\t"+segment.toString(), Logger.DEBUG);
+					+"\t"+segment.toString());
 			}
 		}
 		return result;
@@ -556,10 +559,10 @@ public class SegmentFitter {
 			
 			try{
 				score = compareSegmentationPatterns(medianProfile, newProfile);
-//				logger.log("\tNudge "+nudge+":\tScore:\t"+score, Logger.DEBUG);
+//				fileLogger.log("\tNudge "+nudge+":\tScore:\t"+score, fileLogger.DEBUG);
 				
 			}catch(IllegalArgumentException e){
-				logger.error("Nudge error getting segmentation pattern: ", e);
+				fileLogger.log(Level.SEVERE, "Nudge error getting segmentation pattern: ", e);
 				throw new Exception("Nudge error getting segmentation pattern");
 			}
 			

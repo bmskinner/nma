@@ -1356,7 +1356,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     		this.setProgressMessage(message);
     		this.cooldown();
 
-    		worker = new MorphologyAnalysis(this.dataset.getCollection(), mode);
+    		worker = new MorphologyAnalysis(this.dataset.getCollection(), mode, programLogger);
     		worker.addPropertyChangeListener(this);
     		worker.execute();
     	}
@@ -1377,7 +1377,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     		}
     		
     		// always copy when a source is given
-    		worker = new MorphologyAnalysis(dataset.getCollection(), source.getCollection());
+    		worker = new MorphologyAnalysis(dataset.getCollection(), source.getCollection(), programLogger);
     		worker.addPropertyChangeListener(this);
     		worker.execute();
     	}
