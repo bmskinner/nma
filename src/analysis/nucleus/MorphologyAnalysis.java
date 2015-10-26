@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
+import analysis.AnalysisDataset;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import utility.Constants;
@@ -77,19 +78,21 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
       //////////////////////////////////////////////////
     */
     
-    public MorphologyAnalysis(CellCollection collection, int mode, Logger programLogger){
-    	this.collection = collection;
+    public MorphologyAnalysis(AnalysisDataset dataset, int mode, Logger programLogger){
+    	this.collection = dataset.getCollection();
     	this.mode = mode;
-    	this.programLogger = programLogger;
-    	this.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
+    	MorphologyAnalysis.programLogger = programLogger;
+    	MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
+    	fileLogger.addHandler(dataset.getLogHandler());
     }
     
-    public MorphologyAnalysis(CellCollection collection, CellCollection source, Logger programLogger){
-    	this.collection = collection;
+    public MorphologyAnalysis(AnalysisDataset dataset, CellCollection source, Logger programLogger){
+    	this.collection = dataset.getCollection();
     	this.mode = MODE_COPY;
     	this.sourceCollection = source;
-    	this.programLogger = programLogger;
-    	this.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
+    	MorphologyAnalysis.programLogger = programLogger;
+    	MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
+    	fileLogger.addHandler(dataset.getLogHandler());
     }
     
     /*
@@ -110,16 +113,16 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
     @Override
     protected Boolean doInBackground() throws Exception {
 //    	logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
-    	DebugFileHandler handler = null;
-		try {
-			handler = new DebugFileHandler(collection.getDebugFile());
-			handler.setFormatter(new DebugFileFormatter());
-			fileLogger.addHandler(handler);
-		} catch (SecurityException e1) {
-			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
-		} catch (IOException e1) {
-			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
-		}
+//    	DebugFileHandler handler = null;
+//		try {
+//			handler = new DebugFileHandler(collection.getDebugFile());
+//			handler.setFormatter(new DebugFileFormatter());
+//			fileLogger.addHandler(handler);
+//		} catch (SecurityException e1) {
+//			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
+//		} catch (IOException e1) {
+//			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
+//		}
     	
     	boolean result = true;
 		try{
@@ -205,11 +208,12 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
             
         	fileLogger.log(Level.SEVERE, "FrankenCollection keys:");
         	fileLogger.log(Level.SEVERE, collection.getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
-        } finally{
-			for(Handler h : fileLogger.getHandlers()){
-				h.close();
-			}
-		}
+       }
+//        	} finally{
+//			for(Handler h : fileLogger.getHandlers()){
+//				h.close();
+//			}
+//		}
 
     } 
 
@@ -439,7 +443,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			fileLogger.log(Level.SEVERE, "Error segmenting",e);
 			collection.getProfileCollection(ProfileCollectionType.REGULAR).printKeys();
 		}
-		fileLogger.log(Level.SEVERE, "Segmentation complete");
+		fileLogger.log(Level.INFO, "Segmentation complete");
 	}
 	
 	/**
@@ -455,7 +459,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			// the profile
 			Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 
-			ProfileSegmenter segmenter = new ProfileSegmenter(median, collection.getDebugFile());		  
+			ProfileSegmenter segmenter = new ProfileSegmenter(median, fileLogger);		  
 			List<NucleusBorderSegment> segments = segmenter.segment();
 
 			fileLogger.log(Level.INFO, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");

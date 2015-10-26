@@ -39,61 +39,61 @@ public class ProfileSegmenterTest {
 	 * Test the segmentation of a simulated rodent sperm nucleus
 	 * median profile (values taken from actual exported median)
 	 */
-	@Test
-	public void segmentMedianProfile() {
-		System.out.println("Beginning median segmentation");
-		Profile median = SegmentFitterTest.createRodentSpermMedianProfile();	
-		File log = SegmentFitterTest.makeLogFile();
-		ProfileSegmenter segmenter = new ProfileSegmenter(median, log);
-		
-		List<NucleusBorderSegment> list  = segmenter.segment();
-				
-		int length = 0;
-		for(NucleusBorderSegment seg : list){
-			assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
-			assertTrue(seg.hasNextSegment());
-			assertTrue(seg.hasPrevSegment());
-			
-			length += seg.length();
-			seg.print();
-		}
-		
-		assertEquals("Lengths should match", median.size(), length);
-		
-	}
+//	@Test
+//	public void segmentMedianProfile() {
+//		System.out.println("Beginning median segmentation");
+//		Profile median = SegmentFitterTest.createRodentSpermMedianProfile();	
+//		File log = SegmentFitterTest.makeLogFile();
+//		ProfileSegmenter segmenter = new ProfileSegmenter(median, log);
+//		
+//		List<NucleusBorderSegment> list  = segmenter.segment();
+//				
+//		int length = 0;
+//		for(NucleusBorderSegment seg : list){
+//			assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
+//			assertTrue(seg.hasNextSegment());
+//			assertTrue(seg.hasPrevSegment());
+//			
+//			length += seg.length();
+//			seg.print();
+//		}
+//		
+//		assertEquals("Lengths should match", median.size(), length);
+//		
+//	}
 	
 	/**
 	 * Test the segmentation of a simulated rodent sperm nucleus
 	 * angle profile (values taken from actual nucleus)
 	 */
-	@Test
-	public void segmentNucleusProfile(){
-		
-		try{
-		System.out.println("Beginning nucleus segmentation");
-		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
-		File log = SegmentFitterTest.makeLogFile();
-		ProfileSegmenter segmenter = new ProfileSegmenter(n.getAngleProfile(), log);
-				
-		List<NucleusBorderSegment> list  = segmenter.segment();
-		
-		
-			
-		int length = 0;
-		for(NucleusBorderSegment seg : list){
-			assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
-			assertTrue(seg.hasNextSegment());
-			assertTrue(seg.hasPrevSegment());
-			
-			length += seg.length();
-			seg.print();
-		}
-		
-		assertEquals("Lengths should match", n.getAngleProfile().size(), length);
-		}  catch(Exception e){
-			System.out.println("Error");
-		}
-	}
+//	@Test
+//	public void segmentNucleusProfile(){
+//		
+//		try{
+//		System.out.println("Beginning nucleus segmentation");
+//		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
+//		File log = SegmentFitterTest.makeLogFile();
+//		ProfileSegmenter segmenter = new ProfileSegmenter(n.getAngleProfile(), log);
+//				
+//		List<NucleusBorderSegment> list  = segmenter.segment();
+//		
+//		
+//			
+//		int length = 0;
+//		for(NucleusBorderSegment seg : list){
+//			assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
+//			assertTrue(seg.hasNextSegment());
+//			assertTrue(seg.hasPrevSegment());
+//			
+//			length += seg.length();
+//			seg.print();
+//		}
+//		
+//		assertEquals("Lengths should match", n.getAngleProfile().size(), length);
+//		}  catch(Exception e){
+//			System.out.println("Error");
+//		}
+//	}
 	
 
 

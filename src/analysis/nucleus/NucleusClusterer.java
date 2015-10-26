@@ -23,12 +23,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
 import utility.Constants;
 import utility.DipTester;
-import utility.Logger;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
 import weka.clusterers.HierarchicalClusterer;
@@ -37,9 +38,9 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
+import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
-
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -63,9 +64,11 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	private CellCollection collection;
 	private ClusteringOptions options;
 		
-	public NucleusClusterer(CellCollection collection, ClusteringOptions options){
+	public NucleusClusterer(AnalysisDataset dataset, ClusteringOptions options){
 		this.options = options;
-		this.collection = collection;
+		this.collection = dataset.getCollection();
+		this.logger = Logger.getLogger(NucleusClusterer.class.getName());
+		logger.addHandler(dataset.getLogHandler());
 	}
 	
 	
@@ -89,9 +92,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.error("Error in clustering", e);
+			logger.log(Level.SEVERE, "Error in clustering", e);
 		} catch (ExecutionException e) {
-			logger.error("Error in clustering", e);
+			logger.log(Level.SEVERE, "Error in clustering", e);
 		}
 	}
 
@@ -137,9 +140,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	 */
 	public boolean cluster(CellCollection collection){
 		
-		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
+//		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
 		
-		logger.log("Beginning clustering of population");
+		logger.log(Level.INFO, "Beginning clustering of population");
 				
 		try {
 						
@@ -152,9 +155,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			try {
 				
 
-				logger.log("Clusterer is type "+options.getType());
+				logger.log(Level.INFO, "Clusterer is type "+options.getType());
 				for(String s : optionArray){
-					logger.log("Clusterer options: "+s, Logger.DEBUG);
+					logger.log(Level.FINE, "Clusterer options: "+s);
 				}
 				
 				
@@ -174,11 +177,11 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				}
 
 			} catch (Exception e) {
-				logger.error("Error in clustering", e);
+				logger.log(Level.SEVERE, "Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
-			logger.error("Error in assignments", e);
+			logger.log(Level.SEVERE, "Error in assignments", e);
 			return false;
 		}
 		return true;
@@ -193,7 +196,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		try {
 			// construct new collections for each cluster
 
-			logger.log("Clusters : "+clusterer.numberOfClusters(), Logger.DEBUG);
+			logger.log(Level.FINE, "Clusters : "+clusterer.numberOfClusters());
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
 				CellCollection clusterCollection = new CellCollection(collection.getFolder(), 
@@ -219,15 +222,15 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 					if(collection.getCell(id)!=null){
 						cluster.addCell(collection.getCell(id));
 					} else {
-						logger.log("Error: cell with ID "+id+" is not found", Logger.ERROR);
+						logger.log(Level.SEVERE, "Error: cell with ID "+id+" is not found");
 					}
 				} catch(Exception e){
-					logger.error("Error assigning instance to cluster", e);
+					logger.log(Level.SEVERE, "Error assigning instance to cluster", e);
 				}
 				 
 			}
 		} catch (Exception e) {
-			logger.error("Error clustering", e);
+			logger.log(Level.SEVERE, "Error clustering", e);
 		}
 	}
 	
@@ -319,7 +322,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 			}
 		} catch(Exception e){
-			logger.error("Error making instances", e);
+			logger.log(Level.SEVERE, "Error making instances", e);
 		}
 		return instances;
 	}

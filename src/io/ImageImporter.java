@@ -25,9 +25,10 @@ import ij.process.ImageConverter;
 
 import java.io.File;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import logging.DebugFileHandler;
 import utility.Constants;
-import utility.Logger;
 
 /**
  * This class takes any given input image, and will convert it
@@ -46,26 +47,29 @@ public class ImageImporter {
 	/**
 	 * Import and convert the image in the given file to an ImageStack
 	 * @param f the file to import
+	 * @param handler the debug file handler to write to
 	 * @return the ImageStack
 	 */
-	public static ImageStack importImage(File f, File log){
-		logger = new Logger(log, "ImageImporter");
+	public static ImageStack importImage(File f, DebugFileHandler handler){
+		logger = Logger.getLogger(ImageImporter.class.getName());
+		logger.addHandler(handler);
+//		logger = new Logger(log, "ImageImporter");
 		ImageStack stack = null;
 		try{
 			if(f.isFile()){
-				logger.log("Importing image: "+f.getAbsolutePath(), Logger.DEBUG);
+				logger.log(Level.FINE, "Importing image: "+f.getAbsolutePath());
 				ImagePlus image = new ImagePlus(f.getAbsolutePath());
 				stack = convert(image);
 			} else {
-				logger.log("Not a file: "+f.getAbsolutePath(), Logger.DEBUG);
+				logger.log(Level.FINE, "Not a file: "+f.getAbsolutePath());
 			}
 		} catch (Exception e){
-			logger.log("Error importing image: "+e.getMessage(), Logger.ERROR);
+			logger.log(Level.SEVERE, "Error importing image", e);
 		}
 		return stack;
 	}
 	
-	public static ImageStack importImage(File f, java.util.logging.Logger logger){
+	public static ImageStack importImage(File f, Logger logger){
 		programLogger = logger;
 		ImageStack stack = null;
 		try{
@@ -92,7 +96,7 @@ public class ImageImporter {
 			if(logger==null){
 				programLogger.log(Level.WARNING, "Input image is null");
 			} else {
-				logger.log("Input image is null", Logger.ERROR);
+				logger.log(Level.SEVERE, "Input image is null");
 			}
 			throw new IllegalArgumentException("Input image is null");
 		}
@@ -108,7 +112,7 @@ public class ImageImporter {
 			if(logger==null){
 				programLogger.log(Level.WARNING, "Cannot handle image type: "+image.getType());
 			} else {
-				logger.log("Cannot handle image type: "+image.getType(), Logger.ERROR);
+				logger.log(Level.SEVERE, "Cannot handle image type: "+image.getType());
 			}
 			
 			throw new IllegalArgumentException("Cannot handle image type: "+image.getType());
@@ -116,7 +120,7 @@ public class ImageImporter {
 		if(logger==null){
 //			programLogger.log(Level.INFO, "Image is type: "+image.getType());
 		} else {
-			logger.log("Image is type: "+image.getType());
+			logger.log(Level.INFO, "Image is type: "+image.getType());
 		}				
 		
 		// do the conversions
@@ -125,7 +129,7 @@ public class ImageImporter {
 			if(logger==null){
 				programLogger.log(Level.INFO, "Converting 8 bit greyscale to stack");
 			} else {
-				logger.log("Converting 8 bit greyscale to stack",Logger.DEBUG);
+				logger.log(Level.FINE, "Converting 8 bit greyscale to stack");
 			}
 			
 			result = convertGreyscale(image);
@@ -135,7 +139,7 @@ public class ImageImporter {
 			if(logger==null){
 				
 			} else {
-				logger.log("Converting RGB to stack",Logger.DEBUG);
+				logger.log(Level.FINE, "Converting RGB to stack");
 			}
 			
 			result = convertRGB(image);
@@ -145,7 +149,7 @@ public class ImageImporter {
 			if(logger==null){
 				
 			} else {
-				logger.log("Converting 16 bit greyscale to 8 bit stack",Logger.DEBUG);
+				logger.log(Level.FINE, "Converting 16 bit greyscale to 8 bit stack");
 			}
 			
 			result = convert16bitGrey(image);
@@ -184,7 +188,7 @@ public class ImageImporter {
 	    result.addSlice(channels[Constants.RGB_GREEN].getProcessor());
 	    result.deleteSlice(1); // remove the blank first slice
 	    if(logger!=null){
-	    	logger.log("New stack has "+result.getSize()+" slices",Logger.DEBUG);
+	    	logger.log(Level.FINE, "New stack has "+result.getSize()+" slices");
 	    }
 //	    ImagePlus demo = new ImagePlus(null, result);
 //	    

@@ -22,8 +22,8 @@ package analysis.nucleus;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import utility.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import components.generic.BooleanProfile;
 import components.generic.Profile;
@@ -58,12 +58,13 @@ public class ProfileSegmenter {
 	 * Constructed from a profile
 	 * @param p
 	 */
-	public ProfileSegmenter(Profile p, File debugFile){
+	public ProfileSegmenter(Profile p, Logger logger){
 		if(p==null){
 			throw new IllegalArgumentException("Profile is null");
 		}
 		this.profile = p;
-		logger = new Logger(debugFile, "ProfileSegmenter");
+//		logger = new Logger(debugFile, "ProfileSegmenter");
+		this.logger = logger;
 	}
 	
 	/**
@@ -117,7 +118,7 @@ public class ProfileSegmenter {
 
 					segments.add(seg);
 					
-					logger.log("New segment found: "+seg.toString(), Logger.DEBUG);
+					logger.log(Level.FINE, "New segment found: "+seg.toString());
 
 					segmentStart = index; // start the next segment at this position
 					segLength=0;
@@ -139,25 +140,25 @@ public class ProfileSegmenter {
 				NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
 				seg.setName("Seg_"+segCount);
 				segments.add(seg);
-				logger.log("Terminal segment found: "+seg.toString(), Logger.DEBUG);
+				logger.log(Level.FINE, "Terminal segment found: "+seg.toString());
 				
 			} else {
 				// the first segment is not larger than the minimum size
 				// We need to merge the first and last segments
 				
-				logger.log("Terminal segment not needed: first segment has index 0 or last has full index", Logger.DEBUG);
+				logger.log(Level.FINE, "Terminal segment not needed: first segment has index 0 or last has full index");
 			}
 			
 			NucleusBorderSegment.linkSegments(segments);
 			
-			logger.log("Segments linked", Logger.DEBUG);
+			logger.log(Level.FINE, "Segments linked");
 			for(NucleusBorderSegment s : segments){
-				logger.log(s.toString(), Logger.DEBUG);
+				logger.log(Level.FINE, s.toString());
 			}
 			
 
 		} catch (Exception e){
-			logger.error("Error in segmentation", e);
+			logger.log(Level.SEVERE, "Error in segmentation", e);
 		}
 		
 		return segments;

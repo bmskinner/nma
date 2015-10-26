@@ -60,100 +60,100 @@ public class SegmentFitterTest {
 	 * Get a list of segments within the median profile
 	 * @return
 	 */
-	public static List<NucleusBorderSegment> getMedianRodentSpermSegments(){
-		Profile median = createRodentSpermMedianProfile();
-		File log = makeLogFile();
-		ProfileSegmenter segmenter = new ProfileSegmenter(median, log);
-		List<NucleusBorderSegment> segments = segmenter.segment(); 
-		return segments;
-	}
+//	public static List<NucleusBorderSegment> getMedianRodentSpermSegments(){
+//		Profile median = createRodentSpermMedianProfile();
+//		File log = makeLogFile();
+//		ProfileSegmenter segmenter = new ProfileSegmenter(median, log);
+//		List<NucleusBorderSegment> segments = segmenter.segment(); 
+//		return segments;
+//	}
 
-	@Test
-	public void assignMedianToNucleus() {
-		
-		try {
-			Nucleus n = NucleusTest.createTestRodentSpermNucleus();
-
-			SegmentedProfile median = SegmentedProfileTest.createMedianProfile();
-
-			File log = makeLogFile();
-			if(log.exists()){
-				log.delete();
-			}
-
-
-			System.out.println("Beginning test");
-			System.out.println("Median profile length: "+median.size());
-
-			// get the method and make it accessible
-			Class<?>[] partypes = new Class[2];
-			partypes[0] = Nucleus.class;
-			partypes[1] = SegmentedProfile.class;
-			
-			
-			Class<?> cls = Class.forName("no.analysis.MorphologyAnalysis");
-			Method method = cls.getDeclaredMethod("assignSegmentsToNucleus", partypes);
-			method.setAccessible(true);
-
-			// Try assigning segments to the nucleus
-			method.invoke(null, n, median);
-			
-			System.out.println("Assigned segments:");
-			int length = 0;
-			for(NucleusBorderSegment seg : n.getAngleProfile().getSegments()){
-				seg.print();
-				assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
-				assertTrue(seg.hasNextSegment());
-				assertTrue(seg.hasPrevSegment());
-				
-				length += seg.length();
-				
-			}
-			assertEquals("Lengths should match", n.getLength(), length);
-			
-			System.out.println("Running fitter");
-			long startTime = System.currentTimeMillis();
-//			SegmentFitter fitter = new SegmentFitter(median, log);
-			
-//			fitter.fit(n, null);
-			
-			long endTime = System.currentTimeMillis();
-			long time = endTime - startTime;
-			System.out.println("Fitting took "+time+" milliseconds");
-			length = 0;
-			for(NucleusBorderSegment seg : n.getAngleProfile().getSegments()){
-				seg.print();
-				assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
-				assertTrue(seg.hasNextSegment());
-				assertTrue(seg.hasPrevSegment());
-				
-				length += seg.length();
-			}
-			assertEquals("Lengths should match", n.getLength(), length);
-
-		} catch (ClassNotFoundException e) {
-			fail("Class error");
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			fail("Security error");
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			fail("Access error");
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			fail("Argument error");
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-			fail("Invocation error");
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-			fail("Method error");
-		} catch (Exception e){
-			e.printStackTrace();
-			fail("Other error");
-		}
-
-	}
+//	@Test
+//	public void assignMedianToNucleus() {
+//		
+//		try {
+//			Nucleus n = NucleusTest.createTestRodentSpermNucleus();
+//
+//			SegmentedProfile median = SegmentedProfileTest.createMedianProfile();
+//
+//			File log = makeLogFile();
+//			if(log.exists()){
+//				log.delete();
+//			}
+//
+//
+//			System.out.println("Beginning test");
+//			System.out.println("Median profile length: "+median.size());
+//
+//			// get the method and make it accessible
+//			Class<?>[] partypes = new Class[2];
+//			partypes[0] = Nucleus.class;
+//			partypes[1] = SegmentedProfile.class;
+//			
+//			
+//			Class<?> cls = Class.forName("no.analysis.MorphologyAnalysis");
+//			Method method = cls.getDeclaredMethod("assignSegmentsToNucleus", partypes);
+//			method.setAccessible(true);
+//
+//			// Try assigning segments to the nucleus
+//			method.invoke(null, n, median);
+//			
+//			System.out.println("Assigned segments:");
+//			int length = 0;
+//			for(NucleusBorderSegment seg : n.getAngleProfile().getSegments()){
+//				seg.print();
+//				assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
+//				assertTrue(seg.hasNextSegment());
+//				assertTrue(seg.hasPrevSegment());
+//				
+//				length += seg.length();
+//				
+//			}
+//			assertEquals("Lengths should match", n.getLength(), length);
+//			
+//			System.out.println("Running fitter");
+//			long startTime = System.currentTimeMillis();
+////			SegmentFitter fitter = new SegmentFitter(median, log);
+//			
+////			fitter.fit(n, null);
+//			
+//			long endTime = System.currentTimeMillis();
+//			long time = endTime - startTime;
+//			System.out.println("Fitting took "+time+" milliseconds");
+//			length = 0;
+//			for(NucleusBorderSegment seg : n.getAngleProfile().getSegments()){
+//				seg.print();
+//				assertEquals("Endpoints should be linked", seg.getEndIndex(), seg.nextSegment().getStartIndex());
+//				assertTrue(seg.hasNextSegment());
+//				assertTrue(seg.hasPrevSegment());
+//				
+//				length += seg.length();
+//			}
+//			assertEquals("Lengths should match", n.getLength(), length);
+//
+//		} catch (ClassNotFoundException e) {
+//			fail("Class error");
+//			e.printStackTrace();
+//		} catch (SecurityException e) {
+//			fail("Security error");
+//			e.printStackTrace();
+//		} catch (IllegalAccessException e) {
+//			fail("Access error");
+//			e.printStackTrace();
+//		} catch (IllegalArgumentException e) {
+//			e.printStackTrace();
+//			fail("Argument error");
+//		} catch (InvocationTargetException e) {
+//			e.printStackTrace();
+//			fail("Invocation error");
+//		} catch (NoSuchMethodException e) {
+//			e.printStackTrace();
+//			fail("Method error");
+//		} catch (Exception e){
+//			e.printStackTrace();
+//			fail("Other error");
+//		}
+//
+//	}
 
 }

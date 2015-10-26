@@ -40,13 +40,13 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import utility.Constants;
-import utility.Logger;
 import utility.StatsMap;
 import utility.Utils;
 import analysis.Detector;
-
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
@@ -73,13 +73,14 @@ public class ShellCreator {
 	*
 	* @param nucleus the nucleus to analyse
 	*/
-	public ShellCreator(Nucleus n, File log){
+	public ShellCreator(Nucleus n, Logger logger){
 
-		this.logger = new Logger(log, "ShellCreator");
+		this.logger = logger;
+//		this.logger = new Logger(log, "ShellCreator");
 		this.nucleus = n;
 		
 		nucleusRoi = new PolygonRoi(Utils.createOriginalPolygon(n), Roi.POLYGON);
-		this.nucleusStack = ImageImporter.importImage(n.getSourceFile(), logger.getLogfile());
+		this.nucleusStack = ImageImporter.importImage(n.getSourceFile(), logger);
 		
 	}
 
@@ -135,7 +136,7 @@ public class ShellCreator {
 	*/
 	public void createShells(){
 
-		logger.log("Creating shells", Logger.DEBUG);
+		logger.log(Level.FINE, "Creating shells");
 		ImagePlus searchImage = new ImagePlus(null, nucleusStack.getProcessor(Constants.COUNTERSTAIN).duplicate()); // blue channel
 		ImageProcessor ip = searchImage.getProcessor();
 		
@@ -231,7 +232,7 @@ public class ShellCreator {
 			result = normalise(this.signalProportions, this.dapiDensities);
 
 			if(new Double(result[0]).isNaN()){
-				logger.log("Result is not a number", Logger.ERROR);
+				logger.log(Level.SEVERE, "Result is not a number");
 				throw new Exception("Result is not a number");
 			}
 		} else {
@@ -306,11 +307,11 @@ public class ShellCreator {
 		
 		if(result.isEmpty()){
 //			IJ.log("    Roi has no pixels");
-			logger.log("No points found in roi", Logger.ERROR);
-			logger.log("X base: "+minX
+			logger.log(Level.SEVERE, "No points found in roi");
+			logger.log(Level.FINE, "X base: "+minX
 					+"  Y base: "+minY
 					+"  X max: "+maxX
-					+"  Y max: "+maxY, Logger.DEBUG);
+					+"  Y max: "+maxY);
 		} else {
 //			IJ.log("    Roi of area "+result.size());
 		}
@@ -370,10 +371,7 @@ public class ShellCreator {
 //				IJ.log("    Density in shell "+i+": "+density);
 			}
 		} catch (Exception e) {
-			logger.log("Error getting signal densities: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement e1 : e.getStackTrace()){
-				logger.log(e1.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error getting signal densities", e);
 			
 			// zero result
 			for(int i=0;i<shellCount;i++){
@@ -393,7 +391,7 @@ public class ShellCreator {
 	*/
 	private double[] getProportions(double[] counts){
 		if(new Double(counts[0]).isNaN()){
-			logger.log("Not a number within ShellAnalyser.getProportions", Logger.ERROR);
+			logger.log(Level.SEVERE, "Not a number within ShellAnalyser.getProportions");
 			throw new IllegalArgumentException("Not a number within ShellAnalyser.getProportions");
 		}
 		
@@ -406,7 +404,7 @@ public class ShellCreator {
 			}
 			
 			if(total==0){
-				logger.log("No pixels found when getting proportions", Logger.DEBUG);
+				logger.log(Level.FINE, "No pixels found when getting proportions");
 			}
 
 			// subtract inner from outer shells
@@ -422,10 +420,7 @@ public class ShellCreator {
 //				IJ.log("    Proportion in shell "+i+": "+result[i]);
 			}
 		} catch (Exception e) {
-			logger.log("Error getting signal proportions: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement e1 : e.getStackTrace()){
-				logger.log(e1.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error getting signal proportions", e);
 			
 			// zero result
 			for(int i=0;i<shellCount;i++){

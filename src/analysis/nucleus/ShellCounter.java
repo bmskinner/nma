@@ -28,10 +28,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
-import utility.Logger;
 import utility.Stats;
 
 public class ShellCounter {
@@ -41,9 +42,10 @@ public class ShellCounter {
 	
 	Logger logger;
 	
-	public ShellCounter(int numberOfShells, File log){
+	public ShellCounter(int numberOfShells, Logger logger){
 		
-		this.logger = new Logger(log, "ShellCounter");
+		this.logger = logger;
+//		this.logger = new Logger(log, "ShellCounter");
 		
 		this.numberOfShells = numberOfShells;
 		for(int i=0;i<numberOfShells;i++){
@@ -172,10 +174,7 @@ public class ShellCounter {
 			ChiSquareTest test = new ChiSquareTest();
 			chi = test.chiSquare(expected, observed);
 			} catch(Exception e){
-				logger.log("Error getting chi square values: "+e.getMessage(), Logger.ERROR);
-				for(StackTraceElement e1 : e.getStackTrace()){
-					logger.log(e1.toString(), Logger.STACK);
-				}
+				logger.log(Level.SEVERE, "Error getting chi square values", e);
 				this.print();
 		}
 		return chi;
@@ -200,10 +199,7 @@ public class ShellCounter {
 								: values.get(i);
 			}
 		} catch(Exception e){
-			logger.log("Error getting shell values: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement e1 : e.getStackTrace()){
-				logger.log(e1.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error getting shell values", e);
 			this.print();
 		}
 		return array;

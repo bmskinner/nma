@@ -21,8 +21,10 @@ package io;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import utility.Logger;
+import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.MeasurementScale;
@@ -36,9 +38,13 @@ public class StatsExporter {
 	
 	private static Logger logger;
 
-	public static boolean run(CellCollection collection){
+	public static boolean run(AnalysisDataset dataset){
 
-		logger = new Logger(collection.getDebugFile(), "StatsExporter");
+		CellCollection collection = dataset.getCollection();
+		logger = Logger.getLogger(StatsExporter.class.getName());
+		logger.addHandler(dataset.getLogHandler());
+		
+//		logger = new Logger(collection.getDebugFile(), "StatsExporter");
 		try{
 			exportNuclearStats(collection, "log.stats");
 			exportImagePaths(collection, "log.imagePaths");
@@ -47,7 +53,7 @@ public class StatsExporter {
 //			exportSegmentProfiles(collection);
 			exportMediansOfProfile(collection, "log.medians");
 		} catch (Exception e){
-			logger.error("Error in stats export", e);
+			logger.log(Level.SEVERE, "Error in stats export", e);
 			return false;
 		}
 		return true;
@@ -117,7 +123,7 @@ public class StatsExporter {
 			logger.export(filename+"."+collection.getType());
 
 		} catch (Exception e){
-			logger.error("Error in segment stats export", e);
+			logger.log(Level.SEVERE, "Error in segment stats export", e);
 		}
 	}
 
@@ -133,7 +139,7 @@ public class StatsExporter {
 			logger.addColumn("ANGLE_MEDIAN", interpolatedMedian.asArray());
 			logger.export(filename+"."+collection.getType());
 		}catch (Exception e){
-			logger.error("Error in median stats export", e);
+			logger.log(Level.SEVERE, "Error in median stats export", e);
 		}
 	}
 

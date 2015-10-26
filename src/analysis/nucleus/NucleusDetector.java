@@ -79,7 +79,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
   protected AnalysisOptions analysisOptions;
 
-  protected Logger fileLogger;
+  protected Logger fileLogger = null;
   protected Logger programLogger; // the debug file logger
   protected Level debugLevel = Level.ALL;
 
@@ -160,6 +160,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		} catch(Exception e){
 			result = false;
 			fileLogger.log(Level.SEVERE, "Error in processing folder", e);
+//		}
 		} finally {
 			handler.close();
 		}
@@ -228,7 +229,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
 				if(failedNuclei.getNucleusCount()>0){
 					programLogger.log(Level.INFO, "Exporting failed nuclei...");
-					ok = CompositeExporter.run(failedNuclei);
+					ok = CompositeExporter.run(failedNuclei, fileLogger);
 					if(ok){
 						programLogger.log(Level.INFO, "OK");
 					} else {
@@ -410,7 +411,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 		  if(ok){
 			  try {
 
-				  ImageStack imageStack = ImageImporter.importImage(file, debugFile);
+				  ImageStack imageStack = ImageImporter.importImage(file, fileLogger);
 
 				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
 				  makeFolder(folder);

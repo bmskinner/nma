@@ -18,7 +18,6 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import ij.IJ;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.measure.Calibration;
@@ -35,17 +34,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
+import logging.DebugFileHandler;
 import utility.Constants;
-import utility.Logger;
 import utility.StatsMap;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.Detector;
-
 import components.Cell;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -91,7 +91,9 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 */
 	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName){
 		this.options	 = options;
-		this.logger		 = new Logger(d.getDebugFile(), "SignalDetector");
+		this.logger		 = Logger.getLogger(SignalDetector.class.getName()); //new Logger(d.getDebugFile(), "SignalDetector");
+		logger.addHandler(d.getLogHandler());
+		
 		this.folder		 = folder;
 		this.channel	 = channel;
 		this.signalGroup = group;
@@ -106,11 +108,11 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 * @param options the analysis options
 	 * @param debugFile the log file
 	 */
-	public SignalDetector(NuclearSignalOptions options, File debugFile){
-		this.options = options;
-		this.logger = new Logger(debugFile, "SignalDetector");
-		logger.log("Created signal detector", Logger.DEBUG);
-	}
+//	public SignalDetector(NuclearSignalOptions options, File debugFile){
+//		this.options = options;
+//		this.logger = new Logger(debugFile, "SignalDetector");
+//		logger.log("Created signal detector", Logger.DEBUG);
+//	}
 	
 	@Override
 	protected void process( List<Integer> integers ) {
@@ -124,7 +126,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	@Override
 	protected Boolean doInBackground() throws Exception {
 		boolean result = true;
-		logger.log("Beginning signal detection in channel "+channel, Logger.INFO);
+		logger.log(Level.INFO, "Beginning signal detection in channel "+channel);
 
 		try{
 			int progress = 0;
@@ -136,22 +138,22 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 				options.setThreshold(originalMinThreshold);
 
 				Nucleus n = c.getNucleus();
-				logger.log("Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber(), Logger.DEBUG);
+				logger.log(Level.INFO, "Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getImageName());
-				logger.log("Source file: "+imageFile.getAbsolutePath(), Logger.DEBUG);
+				logger.log(Level.FINE, "Source file: "+imageFile.getAbsolutePath());
 
 				try{
 					
-					ImageStack stack = ImageImporter.importImage(imageFile, logger.getLogfile());
+					ImageStack stack = ImageImporter.importImage(imageFile, (DebugFileHandler) dataset.getLogHandler());
 					
 					detectSignal(imageFile, stack, n);
 					
 					
 				} catch(Exception e){
-					logger.error("Error detecting signal", e);
+					logger.log(Level.SEVERE, "Error detecting signal", e);
 				}
 				
 				progress++;
@@ -167,7 +169,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 			
 			
 		} catch (Exception e){
-			logger.error("Error in signal detection", e);
+			logger.log(Level.SEVERE, "Error in signal detection", e);
 			return false;
 		}
 
@@ -185,79 +187,12 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.error("Error in signal detection", e);
+			logger.log(Level.SEVERE, "Error in signal detection", e);
 		} catch (ExecutionException e) {
-			logger.error("Error in signal detection", e);
+			logger.log(Level.SEVERE, "Error in signal detection", e);
 		}
 
 	} 
-	
-//	/**
-//	 * Create child datasets for signal populations
-//	 * and perform basic analyses
-//	 * @param collection
-//	 */
-//	private void processSubPopulation(CellCollection collection){
-//
-//		AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
-//		subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
-//
-//		logger.log("Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
-//
-//		// use the same segmentation from the initial analysis
-//		MorphologyAnalysis.reapplyProfiles(collection, dataset.getCollection());
-//
-//		dataset.addChildDataset(subDataset);
-//	}
-//	
-//	/*
-//    Given a complete collection of nuclei, split it into up to 4 populations;
-//      nuclei with red signals, with green signals, without red signals and without green signals
-//    Only include the 'without' populations if there is a 'with' population.
-//	 */
-//	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
-//
-//		List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
-//		logger.log("Dividing population by signals...");
-//		try{
-//
-//			List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
-//			if(!list.isEmpty()){
-//				logger.log("Found nuclei with signals in group "+signalGroup);
-//				CellCollection listCollection = new CellCollection(r.getFolder(), 
-//						r.getOutputFolderName(), 
-//						"Signals_in_group_"+signalGroup, 
-//						r.getDebugFile(), 
-//						r.getNucleusClass());
-//
-//				for(Cell c : list){
-//					listCollection.addCell( c );
-//				}
-//				signalPopulations.add(listCollection);
-//
-//				List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
-//				if(!notList.isEmpty()){
-//					logger.log("Found nuclei without signals in group "+signalGroup);
-//					CellCollection notListCollection = new CellCollection(r.getFolder(), 
-//							r.getOutputFolderName(), 
-//							"No_signals_in_group_"+signalGroup, 
-//							r.getDebugFile(), 
-//							r.getNucleusClass());
-//
-//					for(Cell c : notList){
-//						notListCollection.addCell( c );
-//					}
-//					signalPopulations.add(notListCollection);
-//				}
-//
-//			}
-//
-//		} catch(Exception e){
-//			logger.log("Cannot create collection: "+e.getMessage(), Logger.ERROR);
-//		}
-//
-//		return signalPopulations;
-//	}
 	
 	
 	/**
@@ -291,10 +226,10 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		// only use the calculated threshold if it is larger than
 		// the given minimum
 		if(newThreshold > options.getSignalThreshold()){
-			logger.log("Threshold set at: "+newThreshold);
+			logger.log(Level.INFO, "Threshold set at: "+newThreshold);
 			options.setThreshold(newThreshold);
 		} else {
-			logger.log("Threshold kept at minimum: "+options.getSignalThreshold());
+			logger.log(Level.INFO, "Threshold kept at minimum: "+options.getSignalThreshold());
 		}
 	}
 	
@@ -322,10 +257,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		try{
 			detector.run(stack);
 		} catch(Exception e){
-			logger.log("Error in signal detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error in signal detection", e);
 		}
 		List<Roi> roiList = detector.getRoiList();
 
@@ -333,7 +265,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 
 		if(!roiList.isEmpty()){
 			
-			logger.log(roiList.size()+" signals in stack "+stackNumber, Logger.DEBUG);
+			logger.log(Level.FINE, roiList.size()+" signals in stack "+stackNumber);
 
 			for( Roi r : roiList){
 				
@@ -354,7 +286,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 				
 			}
 		} else {
-			logger.log("No signal in stack "+stackNumber, Logger.DEBUG);
+			logger.log(Level.FINE, "No signal in stack "+stackNumber);
 		}
 		
 
@@ -387,7 +319,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	private void detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
 		
 //		SignalCollection signalCollection = n.getSignalCollection();
-		logger.log("Beginning reverse detection for nucleus");
+		logger.log(Level.INFO, "Beginning reverse detection for nucleus");
 		// choose the right stack number for the channel
 		int stackNumber = Constants.rgbToStack(channel);
 		
@@ -456,10 +388,10 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 * and set it as the appropriate forward threshold for the nucleus.  
 	 */
 	private void detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
-		logger.log("Beginning histogram detection for nucleus");
-		if(debug){
-			IJ.log("Beginning histogram detection for nucleus "+n.getNameAndNumber());
-		}
+		logger.log(Level.INFO, "Beginning histogram detection for nucleus");
+//		if(debug){
+//			IJ.log("Beginning histogram detection for nucleus "+n.getNameAndNumber());
+//		}
 		// choose the right stack number for the channel
 		int stackNumber = Constants.rgbToStack(channel);
 		

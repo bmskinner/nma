@@ -26,13 +26,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
+import logging.DebugFileHandler;
 import utility.Constants;
-import utility.Logger;
 import analysis.AnalysisDataset;
-
 import components.CellCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclear.ShellResult;
@@ -50,6 +51,9 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 	public ShellAnalysis(AnalysisDataset dataset, int shells){
 		this.dataset = dataset;
 		this.shells = shells;
+		logger = Logger.getLogger(ShellAnalysis.class.getName());
+		logger.addHandler(dataset.getLogHandler());
+		
 		
 	}
 	
@@ -71,20 +75,20 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 		
 		CellCollection collection = dataset.getCollection();
 		
-		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
+//		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
 		
 		if(collection.getSignalCount()==0){
-			logger.log("No signals in population",Logger.DEBUG);
+			logger.log(Level.FINE, "No signals in population");
 			return true; // only bother if there are signals
 		}
 		
-		logger.log("Performing shell analysis with "+shells+" shells...");
+		logger.log(Level.INFO, "Performing shell analysis with "+shells+" shells...");
 		
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
 			for(int signalGroup : collection.getSignalGroups()){
-				counters.put(signalGroup, new ShellCounter(shells, logger.getLogfile()));
+				counters.put(signalGroup, new ShellCounter(shells, logger));
 			}
 
 			// make the shells and measure the values
@@ -94,7 +98,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 
 //				IJ.log("Nucleus "+n.getPathAndNumber());
 				
-				ShellCreator shellAnalyser = new ShellCreator(n, logger.getLogfile());
+				ShellCreator shellAnalyser = new ShellCreator(n, logger);
 //				IJ.log("Making shells");
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
@@ -104,7 +108,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 						List<NuclearSignal> signals = n.getSignals(signalGroup); 
 						
 						File imageFile = n.getSignalCollection().getSourceFile(signalGroup);
-						ImageStack signalStack = ImageImporter.importImage(imageFile, logger.getLogfile());
+						ImageStack signalStack = ImageImporter.importImage(imageFile, (DebugFileHandler) dataset.getLogHandler());
 						
 						
 //						IJ.log("Signal group "+signalGroup);
@@ -120,11 +124,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 								double[] signalPerShell = shellAnalyser.findShell(s, channel, signalStack);
 								counter.addValues(signalPerShell);
 							} catch (Exception e) {
-//								IJ.log("Error: "+e.getMessage());
-								logger.log("Error in signal in shell analysis: "+e.getMessage(), Logger.ERROR);
-								for(StackTraceElement el : e.getStackTrace()){
-									logger.log(el.toString(), Logger.STACK);
-								}
+								logger.log(Level.SEVERE, "Error in signal in shell analysis", e);
 							}
 						} // end for signals
 					} // end if signals
@@ -143,13 +143,9 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 				}
 			}
 			
-			logger.log("Shell analysis complete");
+			logger.log(Level.INFO, "Shell analysis complete");
 		} catch (Exception e) {
-			logger.log("Error in shell analysis: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
-			
+			logger.log(Level.SEVERE, "Error in shell analysis", e);			
 			return false;
 		}
 		return true;
@@ -164,15 +160,9 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.log("Error in shell analysis: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Interruption error in shell analysis", e);			
 		} catch (ExecutionException e) {
-			logger.log("Error in shell analysis: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Execution error in shell analysis", e);			
 		}
 		
 	}
@@ -186,27 +176,27 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 		
 		CellCollection collection = dataset.getCollection();
 		
-		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
+//		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
 		
 		if(collection.getSignalCount()==0){
-			logger.log("No signals in population",Logger.DEBUG);
+			logger.log(Level.FINE, "No signals in population");
 			return true; // only bother if there are signals
 		}
 		
-		logger.log("Performing shell analysis with "+shells+" shells...");
+		logger.log(Level.INFO, "Performing shell analysis with "+shells+" shells...");
 		
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
 
 			for(int channel : collection.getSignalGroups()){
-				counters.put(channel, new ShellCounter(shells, logger.getLogfile()));
+				counters.put(channel, new ShellCounter(shells, logger));
 			}
 
 			// make the shells and measure the values
 			
 			for(Nucleus n : collection.getNuclei()){
 
-				ShellCreator shellAnalyser = new ShellCreator(n, logger.getLogfile());
+				ShellCreator shellAnalyser = new ShellCreator(n, logger);
 				shellAnalyser.createShells();
 				shellAnalyser.exportImage();
 
@@ -215,7 +205,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 						List<NuclearSignal> signalGroup = n.getSignals(channel); 
 						
 						File imageFile = n.getSignalCollection().getSourceFile(channel);
-						ImageStack signalStack = ImageImporter.importImage(imageFile, logger.getLogfile());
+						ImageStack signalStack = ImageImporter.importImage(imageFile, (DebugFileHandler) dataset.getLogHandler());
 
 						ShellCounter counter = counters.get(channel);
 
@@ -224,7 +214,7 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 								double[] signalPerShell = shellAnalyser.findShell(s, channel, signalStack);
 								counter.addValues(signalPerShell);
 							} catch (Exception e) {
-								logger.log("Error in signal in shell analysis: "+e.getMessage(), Logger.ERROR);
+								logger.log(Level.SEVERE, "Error in signal in shell analysis", e);			
 							}
 						} // end for signals
 					} // end if signals
@@ -240,12 +230,9 @@ public class ShellAnalysis extends SwingWorker<Boolean, Integer> {
 				}
 			}
 			
-			logger.log("Shell analysis complete");
+			logger.log(Level.INFO, "Shell analysis complete");
 		} catch (Exception e) {
-			logger.log("Error in shell analysis: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error in shell analysis", e);
 			return false;
 		}
 		return true;

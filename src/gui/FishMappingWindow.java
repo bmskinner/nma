@@ -43,6 +43,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -56,7 +57,6 @@ import javax.swing.event.MouseInputAdapter;
 
 import utility.Utils;
 import analysis.AnalysisDataset;
-
 import components.Cell;
 import components.CellCollection;
 import components.nuclei.Nucleus;
@@ -99,12 +99,15 @@ public class FishMappingWindow extends JDialog {
 	private int smallWidth; 
 	private int smallHeight;
 	
+	private Logger programLogger;
+	
 	/**
 	 * Create the dialog.
 	 */
-	public FishMappingWindow(MainWindow mw, AnalysisDataset dataset) {
+	public FishMappingWindow(MainWindow mw, AnalysisDataset dataset, Logger programLogger) {
 		
 		super(mw, true);
+		this.programLogger = programLogger;
 		
 //		 IJ.log("Preparing setup");
 
@@ -288,7 +291,7 @@ public class FishMappingWindow extends JDialog {
 				
 		openFile = preFile;
 				
-		ImageStack preStack = ImageImporter.importImage(preFile, this.preFISHDataset.getDebugFile());
+		ImageStack preStack = ImageImporter.importImage(preFile, programLogger);
 		ImagePlus preImage = ImageExporter.convert(preStack);
 
 		openProcessor = preImage.getProcessor();

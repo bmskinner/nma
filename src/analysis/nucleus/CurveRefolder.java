@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
+import analysis.AnalysisDataset;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import utility.Constants;
@@ -93,13 +94,15 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	 * @param refoldMode
 	 * @throws Exception
 	 */
-	public CurveRefolder(CellCollection collection, String refoldMode, CountDownLatch doneSignal, Logger logger) throws Exception {
+	public CurveRefolder(AnalysisDataset dataset, String refoldMode, CountDownLatch doneSignal, Logger logger) throws Exception {
 		this.doneSignal = doneSignal;
 		this.logger = logger;
 
+		collection = dataset.getCollection();
 		
 		fileLogger = Logger.getLogger(CurveRefolder.class.getName());
 		fileLogger.setLevel(Level.ALL);
+		fileLogger.addHandler(dataset.getLogHandler());
 		
 		fileLogger.log(Level.INFO, "Creating refolder");
 		logger.log(Level.FINEST, "Creating refolder");
@@ -133,23 +136,23 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 
 		this.targetCurve 	= targetProfile;
-		this.collection 	= collection;
+//		this.collection 	= collection;
 		this.setMode(refoldMode);
 	}
 	
 	@Override
 	protected Boolean doInBackground() {
 		
-		DebugFileHandler handler = null;
-		try {
-			handler = new DebugFileHandler(collection.getDebugFile());
-			handler.setFormatter(new DebugFileFormatter());
-			fileLogger.addHandler(handler);
-		} catch (SecurityException e1) {
-			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
-		} catch (IOException e1) {
-			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
-		}
+//		DebugFileHandler handler = null;
+//		try {
+//			handler = new DebugFileHandler(collection.getDebugFile());
+//			handler.setFormatter(new DebugFileFormatter());
+//			fileLogger.addHandler(handler);
+//		} catch (SecurityException e1) {
+//			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
+//		} catch (IOException e1) {
+//			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
+//		}
 
 		try{ 
 			
@@ -180,11 +183,12 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
 			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
 			return false;
-		} finally {
-			logger.log(Level.FINEST,"Closing log file handler");
-			handler.close();
-			
 		}
+//		} finally {
+//			logger.log(Level.FINEST,"Closing log file handler");
+//			handler.close();
+//			
+//		}
 		return true;
 	}
 	

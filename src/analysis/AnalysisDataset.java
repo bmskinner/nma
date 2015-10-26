@@ -23,6 +23,7 @@ import gui.components.ColourSelecter.ColourSwatch;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,8 +83,7 @@ public class AnalysisDataset implements Serializable {
 	
 	private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
 	
-	private boolean isRoot;
-	
+	private boolean isRoot;	
 	
 	/**
 	 * Create a dataset from a cell collection. The save file is
@@ -112,7 +112,22 @@ public class AnalysisDataset implements Serializable {
 		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
 	
+	/**
+	 * Get the file handler for this dataset
+	 * @return
+	 */
 	public Handler getLogHandler(){
+		if(fileHandler == null){
+			try {
+				fileHandler = new DebugFileHandler(debugFile);
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		return this.fileHandler;
 	}
 	

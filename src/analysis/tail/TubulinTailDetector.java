@@ -36,6 +36,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
@@ -46,7 +48,6 @@ import skeleton_analysis.Edge;
 import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
 import utility.Constants;
-import utility.Logger;
 import utility.Utils;
 import Skeletonize3D_.Skeletonize3D_;
 import analysis.AnalysisDataset;
@@ -54,7 +55,6 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.CannyEdgeDetector;
 import analysis.Detector;
-
 import components.Cell;
 import components.SpermTail;
 import components.generic.XYPoint;
@@ -83,6 +83,9 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		this.dataset = dataset;
 		this.folder = folder;
 		this.channel = channel;
+		
+		logger = Logger.getLogger(TubulinTailDetector.class.getName());
+		logger.addHandler(dataset.getLogHandler());
 	}
 	
 	@Override
@@ -97,46 +100,42 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	@Override
 	protected  Boolean doInBackground() {
 		boolean result = true;
-		logger = new Logger(dataset.getDebugFile(), "TubulinTailDetector");
-		logger.log("Beginning tail detection", Logger.INFO);
+		
+		
+//		logger = new Logger(dataset.getDebugFile(), "TubulinTailDetector");
+		logger.log(Level.INFO, "Beginning tail detection");
 
 		try{
 			int progress = 0;
 			for(Cell c : dataset.getCollection().getCells()){
 
 				Nucleus n = c.getNucleus();
-				logger.log("Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber(), Logger.DEBUG);
+				logger.log(Level.INFO, "Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getImageName());
-				logger.log("Tail in: "+imageFile.getAbsolutePath(), Logger.DEBUG);
+				logger.log(Level.FINE, "Tail in: "+imageFile.getAbsolutePath());
 //				SpermTail tail = null;
 				
 				
 				// attempt to detect the tails in the image
 				try{
-					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions(), logger.getLogfile());
+					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions());
 					
 					for(SpermTail tail : tails){
 						c.addTail(tail);
 					}
 					
 				} catch(Exception e){
-					logger.log("Error detecting tail: "+e.getMessage(), Logger.ERROR);
-					for(StackTraceElement el : e.getStackTrace()){
-						logger.log(el.toString(), Logger.STACK);
-					}
+					logger.log(Level.SEVERE, "Error detecting tail", e);
 				}
 				
 				progress++;
 				publish(progress);
 			}
 		} catch (Exception e){
-			logger.log("Error in tubulin tail detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
 			return false;
 		}
 
@@ -153,15 +152,9 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.log("Error in tubulin tail detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
 		} catch (ExecutionException e) {
-			logger.log("Error in tubulin tail detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
 		}
 
 	} 
@@ -177,49 +170,40 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	public static boolean run(AnalysisDataset dataset, File folder, int channel){
 
 		boolean result = true;
-		logger = new Logger(dataset.getDebugFile(), "TubulinTailDetector");
-		logger.log("Beginning tail detection", Logger.INFO);
+		logger = Logger.getLogger(TubulinTailDetector.class.getName());
+		logger.addHandler(dataset.getLogHandler());
+//		logger = new Logger(dataset.getDebugFile(), "TubulinTailDetector");
+		logger.log(Level.INFO, "Beginning tail detection");
 
 		try{
 
 			for(Cell c : dataset.getCollection().getCells()){
 
 				Nucleus n = c.getNucleus();
-				logger.log("Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber(), Logger.DEBUG);
+				logger.log(Level.INFO, "Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getImageName());
-				logger.log("Tail in: "+imageFile.getAbsolutePath(), Logger.DEBUG);
+				logger.log(Level.FINE, "Tail in: "+imageFile.getAbsolutePath());
 //				SpermTail tail = null;
 				
 				
 				// attempt to detect the tails in the image
 				try{
-					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions(), logger.getLogfile());
+					List<SpermTail> tails = detectTail(imageFile, channel, n, dataset.getAnalysisOptions());
 					
 					for(SpermTail tail : tails){
 						c.addTail(tail);
 					}
 					
 				} catch(Exception e){
-					logger.log("Error detecting tail: "
-								+e.getMessage()+": "
-								+e.getCause().getMessage(), Logger.ERROR);
-					for(StackTraceElement el : e.getStackTrace()){
-						logger.log(el.toString(), Logger.STACK);
-					}
+					logger.log(Level.SEVERE, "Error detecting tail", e);
 				}
 				
 			}
 		} catch (Exception e){
-			logger.log("Error in tubulin tail detection: "
-					+e.getMessage()+": "
-					+e.getCause().getMessage(), Logger.ERROR);
-			
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
 			return false;
 		}
 
@@ -236,22 +220,19 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	 * @param n the nucleus to which the tail should attach
 	 * @return a SpermTail object
 	 */
-	public static List<SpermTail> detectTail(File tubulinFile, int channel, Nucleus n, AnalysisOptions options, File log){
+	public static List<SpermTail> detectTail(File tubulinFile, int channel, Nucleus n, AnalysisOptions options){
 		
-		logger = new Logger(log, "TubulinTailDetector");
+//		logger = Logger.
+//		logger = new Logger(log, "TubulinTailDetector");
 		List<SpermTail> tails = new ArrayList<SpermTail>(0);
-		logger.log("Running on image: "+tubulinFile.getAbsolutePath());
+		logger.log(Level.INFO, "Running on image: "+tubulinFile.getAbsolutePath());
 		// import image with tubulin in  channel
 		ImageStack stack = null;
 		try{
-			stack = ImageImporter.importImage(tubulinFile, logger.getLogfile());
+			stack = ImageImporter.importImage(tubulinFile, logger);
 		} catch (Exception e){
-			logger.log("Error importing image as stack: "
-					+e.getMessage(), Logger.ERROR);
-
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			
+			logger.log(Level.SEVERE, "Error importing image as stack", e);
 			return tails; // return the empty list
 		}
 		
@@ -271,7 +252,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 			
 			// get objects found by edge detector
 			List<Roi> borderRois = getROIs(edges, true, 1);
-			logger.log("Found "+borderRois.size()+" potential tails in image", Logger.INFO);
+			logger.log(Level.INFO, "Found "+borderRois.size()+" potential tails in image");
 			
 			// create the skeletons of the detected objects
 			ImageStack skeletonStack = skeletoniseStack(edges, borderRois);
@@ -289,7 +270,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //			List<Roi> usableSkeletons = filterSkeletons(skeletons, 1000);
 			
 			// print the roi details to the log
-			logger.log("Found "+skeletons.size()+" potential tails in image", Logger.INFO);
+			logger.log(Level.INFO, "Found "+skeletons.size()+" potential tails in image");
 			
 			
 			// get the complete tails matching border to skeleton
@@ -301,7 +282,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 			
 			
 		} else {
-			logger.log("Dimensions of image do not match", Logger.ERROR);
+			logger.log(Level.SEVERE, "Dimensions of image do not match");
 		}
 
 		return tails;
@@ -320,7 +301,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		ByteProcessor bp = (ByteProcessor) stack.getProcessor(1);
 		bp.setColor(Color.WHITE);
 		for(Roi r : objects){
-			logger.log("Filling roi", Logger.DEBUG);
+			logger.log(Level.FINE, "Filling roi");
 			bp.fill(r);
 		}
 
@@ -355,7 +336,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		skelly.setup("", binaryImage);
 		skelly.run(skeletonisableProcessor);
 
-		logger.log("Skeletonized the image", Logger.DEBUG);
+		logger.log(Level.FINE, "Skeletonized the image");
 
 		// make a new imageStack from the skeletonised images
 		ImageStack skeletonStack = ImageStack.create(binaryProcessor.getWidth(), binaryProcessor.getHeight(), 0, 8);
@@ -402,7 +383,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		Graph[] graphs = result.getGraph();
 		List<Graph> potentialTails = new ArrayList<Graph>(0);
 		
-		logger.log("Image has "+graphs.length+" graphs", Logger.DEBUG);
+		logger.log(Level.FINE, "Image has "+graphs.length+" graphs");
 		
 		for (Graph g : graphs){
 						
@@ -413,9 +394,9 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		}
 		
 		for(Graph g : potentialTails){
-			logger.log("Potential tail graph found");
+			logger.log(Level.FINE, "Potential tail graph found");
 			for(Edge e : g.getEdges()){
-				logger.log("\tEdge length: "+e.getLength());
+				logger.log(Level.FINE, "\tEdge length: "+e.getLength());
 
 			}
 
@@ -434,14 +415,14 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //		double maxLength = 0;
 //		Edge longestEdge = null;
 //		Vertex longestEnd = null;
-////		logger.log("\tBeginning traversal", Logger.DEBUG);
+////		logger.log("\tBeginning traversal");
 //		
 //		if(v==null){ // stop when no more unvisited vertices are added
-////			logger.log("\tEndpoint reached", Logger.DEBUG);
+////			logger.log("\tEndpoint reached");
 //			return list;
 //		}
 //		
-////		logger.log("\tVertex has "+v.getBranches().size()+" branches", Logger.DEBUG);
+////		logger.log("\tVertex has "+v.getBranches().size()+" branches");
 //
 //		for(Edge e : v.getBranches()){
 //			
@@ -450,7 +431,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //			// only consider the branch if the far end leads somewhere new
 //			if(!end.isVisited()){
 //				
-////				logger.log("\t\tEdge length: "+e.getLength(), Logger.DEBUG);
+////				logger.log("\t\tEdge length: "+e.getLength());
 //							
 //				maxLength 	= e.getLength() > maxLength
 //							? e.getLength()
@@ -519,7 +500,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	 */
 	private static ImageStack pruneStack(ImageStack stack){
 		
-		logger.log("Pruning skeletons to new stack");
+		logger.log(Level.INFO, "Pruning skeletons to new stack");
 		AnalyzeSkeleton_ an = new AnalyzeSkeleton_();
 		
 //		public SkeletonResult run(
@@ -625,7 +606,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 			for(XYPoint p : skeleton){
 				if(nucleusOutline.contains( (float) p.getX(), (float) p.getY())){
 					result.add(tail);
-					logger.log("Found tail matching nucleus", Logger.DEBUG);
+					logger.log(Level.FINE, "Found tail matching nucleus");
 				}
 			}
 		}
@@ -635,7 +616,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //
 //				boolean tailOverlap = false;
 //
-//				logger.log("Assessing skeleton: Length : "+skeleton.getLength(), Logger.DEBUG);
+//				logger.log("Assessing skeleton: Length : "+skeleton.getLength());
 //
 //				float[] xpoints = skeleton.getFloatPolygon().xpoints;
 //				float[] ypoints = skeleton.getFloatPolygon().ypoints;
@@ -663,7 +644,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //					if(tailBorder!=null){
 //
 //						tail = new SpermTail(tubulinFile, channel, skeleton, tailBorder);
-//						logger.log("Found matching tail", Logger.DEBUG);
+//						logger.log("Found matching tail");
 //					}
 //				}
 //			}
@@ -686,7 +667,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		
 		for(Roi skeleton : usableSkeletons){
 
-			logger.log("Assessing skeleton: Length : "+skeleton.getLength(), Logger.DEBUG);
+			logger.log(Level.FINE, "Assessing skeleton: Length : "+skeleton.getLength());
 			
 			//only process skeletons with lenght
 			if(skeleton.getLength()>0){
@@ -711,7 +692,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 				if(tailBorder!=null){
 
 					tails.add( new SpermTail(tubulinFile, channel, skeleton, tailBorder)  );
-					logger.log("Found outline matching skeleton", Logger.DEBUG);
+					logger.log(Level.FINE, "Found outline matching skeleton");
 				}
 			}
 		}
@@ -783,7 +764,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //	private static PolygonRoi buildPolyLine(XYPoint startPoint, ImageStack skeletonStack, int stackNumber){
 //		
 //		PolygonRoi result = null;
-//		logger.log("Building polyline", Logger.DEBUG);
+//		logger.log("Building polyline");
 //		
 //		// the lists from which to make the line
 //		List<Integer> xpoints = new ArrayList<Integer>(0);
@@ -829,7 +810,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //			}
 //		}
 //		
-//		logger.log("\tLine created of length: "+xpoints.size(), Logger.DEBUG);
+//		logger.log("\tLine created of length: "+xpoints.size());
 //
 //		// convert the list to float for the polygon roi constructor
 //		result = new PolygonRoi(Utils.getFloatArrayFromIntegerList(xpoints), 
@@ -854,7 +835,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //			
 //			for(int j=y-1; j<=y+1; j++){
 //				
-////				logger.log("\t"+i+","+j+" : "+processor.getPixel(i, j), Logger.DEBUG);
+////				logger.log("\t"+i+","+j+" : "+processor.getPixel(i, j));
 //				
 //				XYPoint p = new XYPoint(i,j);
 //				
@@ -876,16 +857,16 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 	private static boolean checkDimensions(ImageStack stack, Nucleus n ){
 		
 		File baseFile = n.getSourceFile();
-		logger.log("Nucleus in "+baseFile.getAbsolutePath(), Logger.DEBUG);
-		ImageStack baseStack = ImageImporter.importImage(baseFile, logger.getLogfile());
+		logger.log(Level.FINE, "Nucleus in "+baseFile.getAbsolutePath());
+		ImageStack baseStack = ImageImporter.importImage(baseFile, logger);
 		
 		boolean ok = true;
 		if(stack.getHeight() != baseStack.getHeight()){
 			ok = false;
-			logger.log("Fail on height check", Logger.DEBUG);
+			logger.log(Level.FINE, "Fail on height check");
 		}
 		if(stack.getWidth() != baseStack.getWidth()){
-			logger.log("Fail on width check", Logger.DEBUG);
+			logger.log(Level.FINE, "Fail on width check");
 			ok = false;
 		}
 		return ok;
@@ -905,7 +886,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 			// using canny detector
 			CannyOptions tailCannyOptions = options.getCannyOptions("tail");
 
-			logger.log("Creating edge detector", Logger.DEBUG);
+			logger.log(Level.FINE, "Creating edge detector");
 			CannyEdgeDetector canny = new CannyEdgeDetector();
 			canny.setSourceImage(image.getProcessor(stackNumber).getBufferedImage());
 			canny.setLowThreshold( tailCannyOptions.getLowThreshold() );
@@ -929,12 +910,9 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 //			searchImage.show();
 			searchImage.close();
 
-			logger.log("Edge detection complete", Logger.DEBUG);
+			logger.log(Level.FINE, "Edge detection complete");
 		} catch (Exception e) {
-			logger.log("Error in edge detection: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error in edge detection", e);
 		}
 		return searchStack;
 	}
@@ -952,14 +930,14 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 			int radius = options.getClosingObjectRadius();
 			int[] offset = {0,0};
 			int eltype = 0; //circle
-			logger.log("Closing objects with circle of radius "+radius, Logger.DEBUG);
+			logger.log(Level.FINE, "Closing objects with circle of radius "+radius);
 			
 			StructureElement se = new StructureElement(eltype,  shift,  radius, offset);
 //			IJ.log("Made se");
 			MorphoProcessor mp = new MorphoProcessor(se);
 //			IJ.log("Made mp");
 			mp.fclose(ip);
-			logger.log("Objects closed", Logger.DEBUG);
+			logger.log(Level.FINE, "Objects closed");
 //			IJ.log("Closed");
 		} catch (Exception e) {
 			IJ.log("Error in closing: "+e.getMessage());
@@ -994,7 +972,7 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		try{
 			detector.run(image);
 		} catch(Exception e){
-			logger.log("Error in tail detection: "+e.getMessage(), Logger.ERROR);
+			logger.log(Level.SEVERE, "Error in tail detection", e);
 		}
 		return detector.getRoiList();
 	}

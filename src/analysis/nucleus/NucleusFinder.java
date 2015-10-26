@@ -67,6 +67,7 @@ public class NucleusFinder {
 	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, File sourceFile, String outputFolderName){
 //		logger = new Logger(logfile, "NucleusFinder");
 		NucleusFinder.programLogger = programLogger;
+		NucleusFinder.fileLogger = null;
 		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
 		return result;
 	}
@@ -121,8 +122,9 @@ public class NucleusFinder {
 			throw new IllegalArgumentException("Analysis options are null");
 		}
 
-		fileLogger.log(Level.FINE, "File:  "+path.getName());
-
+		if(fileLogger!=null){
+			fileLogger.log(Level.FINE, "File:  "+path.getName());
+		}
 		List<Cell> result = new ArrayList<Cell>();
 				
 		CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
@@ -158,25 +160,26 @@ public class NucleusFinder {
 		List<Roi> roiList = getROIs(searchStack, analysisOptions, true);
 						
 		if(roiList.isEmpty()){
-
-			fileLogger.log(Level.FINE, "No usable nuclei in image");
-
+			if(fileLogger!=null){
+				fileLogger.log(Level.FINE, "No usable nuclei in image");
+			}
 			
 		}
 
 		int nucleusNumber = 0;
 
 		for(Roi roi : roiList){
-			fileLogger.log(Level.FINE, "Acquiring nucleus "+nucleusNumber);
-
+			if(fileLogger!=null){
+				fileLogger.log(Level.FINE, "Acquiring nucleus "+nucleusNumber);
+			}
 			
 			try{
 				Cell cell = makeCell(roi, image, nucleusNumber, path, analysisOptions, outputFolderName); // get the profile data back for the nucleus
 				result.add(cell);
 			} catch(Exception e){
-				
-				fileLogger.log(Level.SEVERE, "Error acquiring nucleus", e);
-				
+				if(fileLogger!=null){
+					fileLogger.log(Level.SEVERE, "Error acquiring nucleus", e);
+				}
 			}
 			nucleusNumber++;
 		} 
@@ -236,9 +239,9 @@ public class NucleusFinder {
 			  result.setNucleus(currentNucleus);		  
 			  
 		  }catch(Exception e){
-
-			  fileLogger.log(Level.SEVERE, " Error in nucleus assignment", e);
- 
+			  if(fileLogger!=null){
+				  fileLogger.log(Level.SEVERE, " Error in nucleus assignment", e);
+			  }
 		  }
 		  return result;
 	  }
@@ -274,9 +277,9 @@ public class NucleusFinder {
 					  originalPosition);
 			  
 		  } catch(Exception e){
-
-			  fileLogger.log(Level.SEVERE, "Error creating nucleus", e);
-
+			  if(fileLogger!=null){
+				  fileLogger.log(Level.SEVERE, "Error creating nucleus", e);
+			  }
 		  }
 		  return n;
 	  }

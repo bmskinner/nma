@@ -28,12 +28,12 @@ import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import utility.Constants;
-import utility.Logger;
 import utility.Utils;
 import analysis.AnalysisDataset;
-
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.nuclear.NuclearSignal;
@@ -49,16 +49,18 @@ public class NucleusAnnotator {
 	public static boolean run(AnalysisDataset dataset){
 
 		CellCollection collection = dataset.getCollection();
-		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
+		logger = Logger.getLogger(NucleusAnnotator.class.getName());
+		logger.addHandler(dataset.getLogHandler());
+//		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
 		try{
-			logger.log("Annotating images of nuclei...");
+			logger.log(Level.INFO, "Annotating images of nuclei...");
 			for(Nucleus n : collection.getNuclei()){
 				NucleusAnnotator.run(n, dataset.getSwatch());
 			}
-			logger.log("Annotation complete");
+			logger.log(Level.INFO, "Annotation complete");
 
 		}catch(Exception e){
-			logger.error("Error in annotation", e);
+			logger.log(Level.SEVERE, "Error in annotation", e);
 			return false;
 		}
 		return true;
@@ -85,7 +87,7 @@ public class NucleusAnnotator {
 			annotateSignals(annotatedImage, n);
 
 		}  catch(Exception e){
-			logger.log("Error annotating nucleus: "+e, Logger.ERROR);
+			logger.log(Level.SEVERE, "Error annotating nucleus", e);
 
 		} finally {
 			IJ.saveAsTiff(annotatedImage, n.getAnnotatedImagePath());
@@ -164,7 +166,7 @@ public class NucleusAnnotator {
 				}
 			}
 		} catch(Exception e){
-			logger.error("Error annotating segments", e);
+			logger.log(Level.SEVERE, "Error annotating segments", e);
 		}
 	}
 	

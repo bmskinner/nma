@@ -30,29 +30,40 @@ import ij.process.ImageProcessor;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import utility.Logger;
+import analysis.AnalysisDataset;
 import utility.Utils;
-
 import components.CellCollection;
 import components.nuclei.Nucleus;
 
 public class CompositeExporter {
 
 	private static Logger logger;
+	
+	public static boolean run(AnalysisDataset dataset){
+		logger = Logger.getLogger(CompositeExporter.class.getName());
+		logger.addHandler(dataset.getLogHandler());
+		CellCollection collection = dataset.getCollection();
+		boolean ok = run(collection, logger);
+		return ok;
+	}
 
-	public static boolean run(CellCollection collection){
-
-		logger = new Logger(collection.getDebugFile(), "CompositeExporter");
+	public static boolean run(CellCollection collection, Logger logger){
+//		CellCollection collection = dataset.getCollection();
+		CompositeExporter.logger = logger;
+		
+//		logger = new Logger(collection.getDebugFile(), "CompositeExporter");
 
 		if(collection.getNucleusCount()==0){
-			logger.log("No nuclei in collection", Logger.DEBUG);
+			logger.log(Level.FINE, "No nuclei in collection");
 			return false;
 		}
 
 		try{
 
-			logger.log("Creating composite image...");
+			logger.log(Level.INFO, "Creating composite image...");
 
 			int totalWidth = 0;
 			int totalHeight = 0;
@@ -102,14 +113,12 @@ public class CompositeExporter {
 					Overlay overlay = new Overlay(label);
 					finalProcessor.drawOverlay(overlay);  
 				} catch(Exception e){
-					logger.log("Error adding image to composite:", Logger.ERROR);
-					logger.log(collection.getType(), Logger.ERROR);
-					logger.log(path, Logger.ERROR);
+					logger.log(Level.SEVERE, "Error adding image to composite", e);
 				}     
 			}
 			IJ.saveAsTiff(finalImage, collection.getFolder()+File.separator+collection.getOutputFolderName()+File.separator+"composite"+"."+collection.getType()+".tiff");
 		} catch(Exception e){
-			logger.log("Error creating composite image: "+e.getMessage(), Logger.ERROR);
+			logger.log(Level.SEVERE, "Error creating composite image", e);
 			return false;
 		}
 		return true;

@@ -22,13 +22,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
 import utility.Constants;
-import utility.Logger;
 import analysis.AnalysisDataset;
-
 import components.Cell;
 import components.CellCollection;
 import components.nuclear.NucleusType;
@@ -36,6 +36,7 @@ import components.nuclear.NucleusType;
 public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	
 	private Logger logger;
+	private Logger programLogger;
 	private List<AnalysisDataset> datasets;
 	private String function;
 	
@@ -55,13 +56,17 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	 * @param function
 	 * @param saveFile the file to save the new dataset as
 	 */
-	public DatasetMerger(List<AnalysisDataset> datasets, String function, File saveFile){
+	public DatasetMerger(List<AnalysisDataset> datasets, String function, File saveFile, Logger programLogger){
 		
 		AnalysisDataset firstDataset = datasets.get(0);
-		logger = new Logger(firstDataset.getDebugFile(), "DatasetMerger");
+		logger = Logger.getLogger(DatasetMerger.class.getName());
+		logger.addHandler(firstDataset.getLogHandler());
+		logger.setLevel(Level.INFO);
+//		logger = new Logger(firstDataset.getDebugFile(), "DatasetMerger");
 		this.datasets = datasets;
 		this.function = function;
 		this.saveFile = saveFile;
+		this.programLogger = programLogger;
 	}
 	
 	@Override
@@ -96,9 +101,11 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			logger.error("Unable to "+function+" datasets", e);
+			logger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
+			programLogger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
 		} catch (ExecutionException e) {
-			logger.error("Unable to "+function+" datasets", e);
+			logger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
+			programLogger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
 		}
 	} 
 	
@@ -148,18 +155,18 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	private boolean merge(){
 				
 		if(datasets.size()>1){
-			logger.log("Prepare to merge");
+			logger.log(Level.INFO, "Prepare to merge");
 
 			// check we are not merging a parent and child (would just get parent)
 			if(datasets.size()==2){ 
 				if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
-					logger.log("Merging parent and child would be silly.");
+					logger.log(Level.INFO, "Merging parent and child would be silly.");
 					return false;
 				}
 			}
 
 			try{
-				logger.log("Finding new names");
+				logger.log(Level.INFO, "Finding new names");
 
 				// Set the names of folders for the new collection
 
@@ -175,22 +182,22 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 
 				File mergeDebugFile = new File(newDatasetFolder+File.separator+newDatasetName+Constants.LOG_FILE_EXTENSION);
 
-				logger.log("Handing logging off to merged dataset debug file: "+mergeDebugFile.getAbsolutePath(), Logger.DEBUG);
+//				logger.log("Handing logging off to merged dataset debug file: "+mergeDebugFile.getAbsolutePath(), Logger.DEBUG);
 
-				logger = new Logger(mergeDebugFile, "DatasetMerger");
+//				logger = new Logger(mergeDebugFile, "DatasetMerger");
 
-				logger.log("Checked new file names", Logger.DEBUG);
+				logger.log(Level.FINE, "Checked new file names");
 				
 				// check all collections are of the same type
 				if(! checkNucleusClass()){
-					logger.log("Error: cannot merge collections of different class");
+					logger.log(Level.SEVERE, "Error: cannot merge collections of different class");
 					return false;
 				}
-				logger.log("Checked nucleus classes match", Logger.DEBUG);
+				logger.log(Level.FINE, "Checked nucleus classes match");
 
 				// check if the new dataset should be root
 				boolean newRoot = checkNewRootNeeded();
-				logger.log("Checked root status", Logger.DEBUG);
+				logger.log(Level.FINE, "Checked root status");
 
 				// make a new collection based on the first dataset
 				CellCollection templateCollection = datasets.get(0).getCollection();
@@ -202,10 +209,10 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 						templateCollection.getNucleusType()
 						);
 
-				logger.log("Created collection", Logger.DEBUG);
+				logger.log(Level.FINE, "Created collection");
 
 				// add the cells from each population to the new collection
-				logger.log("Merging datasets",Logger.DEBUG);
+				logger.log(Level.FINE, "Merging datasets");
 				for(AnalysisDataset d : datasets){
 
 					for(Cell n : d.getCollection().getCells()){
@@ -239,13 +246,13 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 
 				return true;
 			} catch (Exception e){
-				logger.error("Error in merging", e);
+				logger.log(Level.SEVERE, "Error in merging", e);
 				return false;
 			}
 
 		} else {
 			// there is only one datast
-			logger.log("Cannot merge single dataset");
+			logger.log(Level.INFO, "Cannot merge single dataset");
 			return false;
 		}
 	}

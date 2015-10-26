@@ -538,7 +538,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 			final AnalysisDataset dataset = populationsPanel.getDataset(id);
 
-			FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset);
+			FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset, programLogger);
 
 			List<CellCollection> subs = fishMapper.getSubCollections();
 			final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
@@ -814,7 +814,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						try{
 
 							programLogger.log(Level.INFO, "Exporting stats...");
-							boolean ok = StatsExporter.run(d.getCollection());
+							boolean ok = StatsExporter.run(d);
 							if(ok){
 								programLogger.log(Level.INFO, "OK");
 							} else {
@@ -1168,7 +1168,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			try{
 
 				this.progressBar.setIndeterminate(true);
-				worker = new CurveRefolder(dataset.getCollection(), 
+				worker = new CurveRefolder(dataset, 
 						"Fast", 
 						doneSignal, 
 						programLogger);
@@ -1186,9 +1186,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		@Override
 		public void finished(){
 			
-			utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
+//			utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
     		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
-			logger.log("Refolding finished, cleaning up");
+//			logger.log("Refolding finished, cleaning up");
 			
 			// ensure the bar is gone, even if the cleanup fails
 			this.progressBar.setVisible(false);
@@ -1250,7 +1250,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
 //				worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
-				worker = new NucleusClusterer( dataset.getCollection() , options );
+				worker = new NucleusClusterer( dataset , options );
 //				((NucleusClusterer) worker).setClusteringOptions(options);
 				
 				worker.addPropertyChangeListener(this);
@@ -1356,7 +1356,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     		this.setProgressMessage(message);
     		this.cooldown();
 
-    		worker = new MorphologyAnalysis(this.dataset.getCollection(), mode, programLogger);
+    		worker = new MorphologyAnalysis(this.dataset, mode, programLogger);
     		worker.addPropertyChangeListener(this);
     		worker.execute();
     	}
@@ -1377,7 +1377,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     		}
     		
     		// always copy when a source is given
-    		worker = new MorphologyAnalysis(dataset.getCollection(), source.getCollection(), programLogger);
+    		worker = new MorphologyAnalysis(dataset, source.getCollection(), programLogger);
     		worker.addPropertyChangeListener(this);
     		worker.execute();
     	}
@@ -1395,9 +1395,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
       
     	@Override
     	public void finished() {
-    		final utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
+//    		final utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
 //    		logger.log(Level.INFO, "Morphology analysis finished");
-    		logger.log("Morphology analysis finished");
+//    		logger.log("Morphology analysis finished");
 
     		// ensure the progress bar gets hidden even if it is not removed
     		this.progressBar.setVisible(false);
@@ -1410,9 +1410,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
     				if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
 //    					logger.log(Level.FINE, "Running stats export");
-    					logger.log("Running stats export", utility.Logger.DEBUG);
+//    					logger.log("Running stats export", utility.Logger.DEBUG);
     					programLogger.log(Level.INFO, "Exporting stats...");
-    					boolean ok = StatsExporter.run(dataset.getCollection());
+    					boolean ok = StatsExporter.run(dataset);
     					if(ok){
     						programLogger.log(Level.INFO, "OK");
     					} else {
@@ -1422,7 +1422,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
     				// annotate the nuclei in the population
     				if(  (downFlag & NUCLEUS_ANNOTATE) == NUCLEUS_ANNOTATE){
-    					logger.log("Running annotation", utility.Logger.DEBUG);
+//    					logger.log("Running annotation", utility.Logger.DEBUG);
     					programLogger.log(Level.INFO, "Annotating nuclei...");
     					boolean ok = NucleusAnnotator.run(dataset);
     					if(ok){
@@ -1434,9 +1434,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
     				// make a composite image of all nuclei in the collection
     				if(  (downFlag & EXPORT_COMPOSITE) == EXPORT_COMPOSITE){
-    					logger.log("Running compositor", utility.Logger.DEBUG);
+//    					logger.log("Running compositor", utility.Logger.DEBUG);
     					programLogger.log(Level.INFO, "Exporting composite...");
-    					boolean ok = CompositeExporter.run(dataset.getCollection());
+    					boolean ok = CompositeExporter.run(dataset);
     					if(ok){
     						programLogger.log(Level.INFO, "OK");
     					} else {
@@ -1452,7 +1452,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     				if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
 
     					final CountDownLatch latch = new CountDownLatch(1);
-    					logger.log("Running curve refolder", utility.Logger.DEBUG);
+//    					logger.log("Running curve refolder", utility.Logger.DEBUG);
 
     					new RefoldNucleusAction(dataset, latch);
     					try {
@@ -1463,12 +1463,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     				}
 
     				if(  (downFlag & SAVE_DATASET) == SAVE_DATASET){
-    					logger.log("Saving dataset", utility.Logger.DEBUG);
+//    					logger.log("Saving dataset", utility.Logger.DEBUG);
     					PopulationExporter.saveAnalysisDataset(dataset);
     				}
 
     				if(  (downFlag & ADD_POPULATION) == ADD_POPULATION){
-    					logger.log("Adding dataset to panel", utility.Logger.DEBUG);
+//    					logger.log("Adding dataset to panel", utility.Logger.DEBUG);
     					populationsPanel.addDataset(dataset);				
 
     					for(AnalysisDataset child : dataset.getChildDatasets()){
@@ -1479,13 +1479,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     				// if no list was provided, or no more entries remain,
     				// call the finish
     				if(processList==null){
-    					logger.log("Analysis complete, process list null, cleaning up", utility.Logger.DEBUG);
+//    					logger.log("Analysis complete, process list null, cleaning up", utility.Logger.DEBUG);
     					MorphologyAnalysisAction.super.finished();
     				} else if(processList.isEmpty()){
-    					logger.log("Analysis complete, process list empty, cleaning up", utility.Logger.DEBUG);
+//    					logger.log("Analysis complete, process list empty, cleaning up", utility.Logger.DEBUG);
     					MorphologyAnalysisAction.super.finished();
     				} else {
-    					logger.log("Morphology analysis continuing; removing progress bar", utility.Logger.DEBUG);
+//    					logger.log("Morphology analysis continuing; removing progress bar", utility.Logger.DEBUG);
     					// otherwise analyse the next item in the list
     					cancel();
     					if(mode == MorphologyAnalysis.MODE_COPY){
@@ -1540,13 +1540,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				if(!analysisFolder.exists()){
 					analysisFolder.mkdir();
 				}
-				utility.Logger logger = new utility.Logger( new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
-
-				logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
-				logger.log("Directory: "+options.getFolder().getName());
+//				utility.Logger logger = new utility.Logger( new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
+				File logFile = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt");
+//				logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
+//				logger.log("Directory: "+options.getFolder().getName());
 				setStatus("New analysis in progress");
 				
-				detector = new NucleusDetector(this.outputFolderName, programLogger, logger.getLogfile(), options);
+				detector = new NucleusDetector(this.outputFolderName, programLogger, logFile, options);
 				detector.addPropertyChangeListener(this);
 				detector.execute();
 				analysisSetup.dispose();
@@ -1609,7 +1609,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		public MergeCollectionAction(List<AnalysisDataset> datasets, File saveFile) {
 			super(null, "Merging", "Error merging");
 						
-			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile);
+			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile, programLogger);
 			worker.addPropertyChangeListener(this);
 			worker.execute();	
 		}

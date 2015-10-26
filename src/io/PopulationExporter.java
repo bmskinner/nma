@@ -27,11 +27,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import utility.Constants;
-import utility.Logger;
 import analysis.AnalysisDataset;
-
 import components.CellCollection;
 import components.nuclei.Nucleus;
 
@@ -39,52 +39,58 @@ public class PopulationExporter {
 	
 	private static Logger logger;
 
-	public static boolean savePopulation(CellCollection collection){
+	public static boolean savePopulation(AnalysisDataset dataset){
 
-		logger = new Logger(collection.getDebugFile(), "PopulationExporter");
+		CellCollection collection = dataset.getCollection();
+		logger = Logger.getLogger(PopulationExporter.class.getName());
+		logger.addHandler(dataset.getLogHandler());
+//		logger = new Logger(collection.getDebugFile(), "PopulationExporter");
 
-		try{
+//		try{
 
 			
-			File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
-			if(saveFile.exists()){
-				saveFile.delete();
-			}
-			logger.log("Saving to "+saveFile.getAbsolutePath());
-
-			try{
-				//use buffering
-				OutputStream file = new FileOutputStream(saveFile);
-				OutputStream buffer = new BufferedOutputStream(file);
-				ObjectOutputStream output = new ObjectOutputStream(buffer);
-
-				try{
-
-					output.writeObject(collection);
-			
-
-					logger.log("Save complete");
-
-				} catch(IOException e){
-					logger.error("Unable to save nuclei", e);
-					throw new Exception("Individual nucleus error: "+e.getMessage());
-
-				} finally{
-					output.close();
-					buffer.close();
-					file.close();
-				}
-
-			} catch(Exception e){
-				logger.error("Error saving", e);
-				return false;
-			}
-			
-		} catch(Exception e){
-			logger.error("Error saving", e);
-			return false;
+		File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
+		if(saveFile.exists()){
+			saveFile.delete();
 		}
-		return true;
+		logger.log(Level.INFO, "Saving to "+saveFile.getAbsolutePath());
+
+		boolean result = saveAnalysisDataset(dataset, saveFile);
+
+//			try{
+//				//use buffering
+//				OutputStream file = new FileOutputStream(saveFile);
+//				OutputStream buffer = new BufferedOutputStream(file);
+//				ObjectOutputStream output = new ObjectOutputStream(buffer);
+//
+//				try{
+//
+//					output.writeObject(collection);
+//			
+//
+//					logger.log(Level.INFO, "Save complete");
+//
+//				} catch(IOException e){
+//					logger.error("Unable to save nuclei", e);
+//					throw new Exception("Individual nucleus error: "+e.getMessage());
+//
+//				} finally{
+//					output.close();
+//					buffer.close();
+//					file.close();
+//				}
+//
+//			} catch(Exception e){
+//				logger.error("Error saving", e);
+//				return false;
+//			}
+			return result;
+			
+//		} catch(Exception e){
+//			logger.error("Error saving", e);
+//			return false;
+//		}
+//		return true;
 	}
 	
 	/**
@@ -94,11 +100,14 @@ public class PopulationExporter {
 	 * @return
 	 */
 	public static boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
-		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
+//		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
+		CellCollection collection = dataset.getCollection();
+		logger = Logger.getLogger(PopulationExporter.class.getName());
+		logger.addHandler(dataset.getLogHandler());
 
 		try{
 			// Since we're creating a save format, go with nmd: Nuclear Morphology Dataset
-			logger.log("Saving dataset to "+saveFile.getAbsolutePath());
+			logger.log(Level.INFO, "Saving dataset to "+saveFile.getAbsolutePath());
 
 			try{
 				//use buffering
@@ -109,13 +118,10 @@ public class PopulationExporter {
 				try{
 
 					output.writeObject(dataset);
-					logger.log("Save complete");
+					logger.log(Level.INFO, "Save complete");
 
 				} catch(IOException e){
-					logger.log("Unable to save dataset: "+e.getMessage(), Logger.ERROR);
-					for(StackTraceElement el : e.getStackTrace()){
-						logger.log(el.toString(), Logger.STACK);
-					}
+					logger.log(Level.SEVERE, "Unable to save dataset", e);
 
 				} finally{
 					output.close();
@@ -124,18 +130,12 @@ public class PopulationExporter {
 				}
 
 			} catch(Exception e){
-				logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
-				for(StackTraceElement el : e.getStackTrace()){
-					logger.log(el.toString(), Logger.STACK);
-				}
+				logger.log(Level.SEVERE, "Error saving", e);
 				return false;
 			}
 			
 		} catch(Exception e){
-			logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
-			for(StackTraceElement el : e.getStackTrace()){
-				logger.log(el.toString(), Logger.STACK);
-			}
+			logger.log(Level.SEVERE, "Error saving", e);
 			return false;
 		}
 		return true;
@@ -148,7 +148,9 @@ public class PopulationExporter {
 	 */
 	public static boolean saveAnalysisDataset(AnalysisDataset dataset){
 
-		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
+//		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
+		logger = Logger.getLogger(PopulationExporter.class.getName());
+		logger.addHandler(dataset.getLogHandler());
 
 		try{
 
@@ -159,18 +161,20 @@ public class PopulationExporter {
 			saveAnalysisDataset(dataset, saveFile);
 						
 		} catch(Exception e){
-			logger.log("Error saving: "+e.getMessage(), Logger.ERROR);
+			logger.log(Level.SEVERE, "Error saving", e);
 			return false;
 		}
 		return true;
 	}
 	
 	public static boolean extractNucleiToFolder(AnalysisDataset dataset, File exportFolder){
-		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
+//		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
+		logger = Logger.getLogger(PopulationExporter.class.getName());
+		logger.addHandler(dataset.getLogHandler());
 
 		try{
 
-			logger.log("Extracting nuclei to "+exportFolder.getAbsolutePath());
+			logger.log(Level.INFO, "Extracting nuclei to "+exportFolder.getAbsolutePath());
 
 			for(Nucleus n : dataset.getCollection().getNuclei()){
 
@@ -193,7 +197,7 @@ public class PopulationExporter {
 			}
 
 		}catch(Exception e){
-			logger.error("Error extracting", e);
+			logger.log(Level.SEVERE, "Error extracting", e);
 			return false;
 		}
 		return true;
