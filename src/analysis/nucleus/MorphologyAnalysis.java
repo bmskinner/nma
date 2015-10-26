@@ -79,20 +79,34 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
     */
     
     public MorphologyAnalysis(AnalysisDataset dataset, int mode, Logger programLogger){
-    	this.collection = dataset.getCollection();
-    	this.mode = mode;
     	MorphologyAnalysis.programLogger = programLogger;
-    	MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
-    	fileLogger.addHandler(dataset.getLogHandler());
+    	try{
+    		this.collection = dataset.getCollection();
+    		this.mode = mode;
+    		
+    		MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
+    		fileLogger.setLevel(Level.FINE);
+    		fileLogger.addHandler(dataset.getLogHandler());
+    		fileLogger.log(Level.FINE, "Created MorphologyAnalysis");
+    	} catch (Exception e){
+    		programLogger.log(Level.SEVERE, "Error creating analysis", e);
+    	}
     }
     
     public MorphologyAnalysis(AnalysisDataset dataset, CellCollection source, Logger programLogger){
-    	this.collection = dataset.getCollection();
-    	this.mode = MODE_COPY;
-    	this.sourceCollection = source;
     	MorphologyAnalysis.programLogger = programLogger;
-    	MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
-    	fileLogger.addHandler(dataset.getLogHandler());
+    	try{
+    		this.collection = dataset.getCollection();
+    		this.mode = MODE_COPY;
+    		this.sourceCollection = source;
+
+    		MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
+    		fileLogger.setLevel(Level.FINE);
+    		fileLogger.addHandler(dataset.getLogHandler());
+    		fileLogger.log(Level.FINE, "Created MorphologyAnalysis");
+    	} catch (Exception e){
+    		programLogger.log(Level.SEVERE, "Error creating analysis", e);
+    	}
     }
     
     /*
@@ -129,7 +143,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 			// mode selection
 			if(mode == MODE_NEW){
-
+				programLogger.log(Level.FINE, "Beginning core morphology analysis");
 				fileLogger.log(Level.INFO, "Beginning core morphology analysis");
 
 				// we run the profiler and segmenter on each nucleus - may need to double

@@ -129,6 +129,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			handler = new DebugFileHandler(debugFile);
 			handler.setFormatter(new DebugFileFormatter());
 			fileLogger.addHandler(handler);
+			fileLogger.setLevel(Level.ALL);
 		} catch (SecurityException e1) {
 			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
 		} catch (IOException e1) {
@@ -155,7 +156,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			datasets = analysePopulations(folderCollection);		
 
 			result = true;
-
+			fileLogger.log(Level.FINE, "Analysis complete; return collections");
 
 		} catch(Exception e){
 			result = false;
@@ -178,10 +179,10 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
 			}
 		} catch (InterruptedException e) {
-			fileLogger.log(Level.SEVERE, "Error in nucleus detection", e);
+			programLogger.log(Level.SEVERE, "Error in nucleus detection", e);
 
 		} catch (ExecutionException e) {
-			fileLogger.log(Level.SEVERE, "Error in nucleus detection", e);
+			programLogger.log(Level.SEVERE, "Error in nucleus detection", e);
 		}
 
 	} 

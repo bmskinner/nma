@@ -35,7 +35,9 @@ import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
+import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
+import logging.LogPanelFormatter;
 import utility.Constants;
 import components.CellCollection;
 import components.ClusterGroup;
@@ -113,13 +115,15 @@ public class AnalysisDataset implements Serializable {
 	}
 	
 	/**
-	 * Get the file handler for this dataset
+	 * Get the file handler for this dataset. Create a handler
+	 * if needed.
 	 * @return
 	 */
 	public Handler getLogHandler(){
 		if(fileHandler == null){
 			try {
-				fileHandler = new DebugFileHandler(debugFile);
+				fileHandler = new DebugFileHandler(this.getDebugFile());
+				fileHandler.setFormatter(new DebugFileFormatter());
 			} catch (SecurityException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

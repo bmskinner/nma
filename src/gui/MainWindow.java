@@ -1320,6 +1320,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     	 */
     	public MorphologyAnalysisAction(AnalysisDataset dataset, int mode, int downFlag){
     		super(dataset, "Morphology analysis", "Error in analysis", downFlag);
+    		programLogger.log(Level.FINE, "Creating morphology analysis");
     		this.mode = mode;
     		runNewAnalysis();
     	}
@@ -1332,6 +1333,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     	 */
     	public MorphologyAnalysisAction(List<AnalysisDataset> list, int mode, int downFlag){
     		super(list.get(0), "Morphology analysis", "Error in analysis", downFlag);
+    		programLogger.log(Level.FINE, "Creating morphology analysis");
     		this.mode = mode;
     		this.processList = list;
     		processList.remove(0); // remove the first entry
@@ -1340,27 +1342,33 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
     	}
     	
     	private void runNewAnalysis(){
-    		
-    		String message = null;
-    		switch (this.mode) {
-    		case MorphologyAnalysis.MODE_COPY:  message = "Copying morphology";
-    		break;
 
-    		case MorphologyAnalysis.MODE_REFRESH: message = "Refreshing morphology";
-    		break;
+    		try{
+    			String message = null;
+    			switch (this.mode) {
+    			case MorphologyAnalysis.MODE_COPY:  message = "Copying morphology";
+    			break;
 
-    		default: message = "Morphology analysis: "+dataset.getName();
-    		break;  
+    			case MorphologyAnalysis.MODE_REFRESH: message = "Refreshing morphology";
+    			break;
+
+    			default: message = "Morphology analysis: "+dataset.getName();
+    			break;  
+    			}
+
+    			this.setProgressMessage(message);
+    			this.cooldown();
+
+    			worker = new MorphologyAnalysis(this.dataset, mode, programLogger);
+    			worker.addPropertyChangeListener(this);
+    			programLogger.log(Level.FINE, "Running morphology analysis");
+    			worker.execute();
+    		} catch(Exception e){
+    			this.cancel();
+    			programLogger.log(Level.SEVERE, "Error in morphology analysis", e);
     		}
-
-    		this.setProgressMessage(message);
-    		this.cooldown();
-
-    		worker = new MorphologyAnalysis(this.dataset, mode, programLogger);
-    		worker.addPropertyChangeListener(this);
-    		worker.execute();
     	}
-      
+
 
     	/**
     	 * Copy the morphology information from the source dataset to the dataset
