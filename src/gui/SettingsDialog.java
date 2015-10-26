@@ -221,6 +221,8 @@ public abstract class SettingsDialog extends JDialog {
 
 			labels[0] = new JLabel("Flattening threshold");
 			fields[0] = flattenImageThresholdSpinner;
+			
+			flattenImageThresholdSpinner.addChangeListener(this);
 
 			addLabelTextRows(labels, fields, new GridBagLayout(), this );
 			
@@ -462,6 +464,7 @@ public abstract class SettingsDialog extends JDialog {
 						j.setValue( minCircSpinner.getValue() );
 					}
 				}
+
 
 			} catch(Exception e1){
 				IJ.log("Error getting signal values: "+e1.getMessage());

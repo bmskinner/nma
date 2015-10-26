@@ -45,8 +45,8 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import analysis.CannyEdgeDetector;
 import analysis.Detector;
+import analysis.ImageFilterer;
 import analysis.Kuwahara_Filter;
-
 import components.Cell;
 import components.generic.XYPoint;
 import components.nuclear.NucleusType;
@@ -144,15 +144,19 @@ public class NucleusFinder {
 			// run a Kuwahara filter to enhance edges in the image
 			if(nucleusCannyOptions.isUseKuwahara()){
 				int kernel = nucleusCannyOptions.getKuwaharaKernel();
-				runKuwaharaFiltering(image, kernel);
+				ImageProcessor ip = ImageFilterer.runKuwaharaFiltering(image, Constants.COUNTERSTAIN, kernel);
+				image.setProcessor(ip, Constants.COUNTERSTAIN);
+//				runKuwaharaFiltering(image, kernel);
 			}
 			
 			// flatten chromocentres
 			if(nucleusCannyOptions.isUseFlattenImage()){
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
-				squashChromocentres(image, threshold);
+				ImageProcessor ip = ImageFilterer.squashChromocentres(image, Constants.COUNTERSTAIN, threshold);
+				image.setProcessor(ip, Constants.COUNTERSTAIN);
+//				squashChromocentres(image, threshold);
 			}
-			searchStack = runEdgeDetector(image, nucleusCannyOptions);
+			searchStack = ImageFilterer.runEdgeDetector(image, Constants.COUNTERSTAIN, nucleusCannyOptions);
 		} else {
 			searchStack = image;
 		}
@@ -234,16 +238,6 @@ public class NucleusFinder {
 		
 			  currentNucleus.setOutputFolder(outputFolderName);
 			  currentNucleus.intitialiseNucleus(analysisOptions.getAngleProfileWindowSize());
-			  
-//			  // save out the image stacks rather than hold within the nucleus
-//			  try{
-//				  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getOriginalImagePath());
-//				  IJ.saveAsTiff(ImageExporter.convert(largeRegion), currentNucleus.getEnlargedImagePath());
-//				  IJ.saveAsTiff(ImageExporter.convert(smallRegion), currentNucleus.getAnnotatedImagePath());
-//			  } catch(Exception e){
-//				  logger.error("Error saving original, enlarged or annotated image", e);
-//			  }
-
 			  
 			  currentNucleus.findPointsAroundBorder();
 		
@@ -345,203 +339,4 @@ public class NucleusFinder {
 		  }
 		  return result;
 	  }
-	
-	/**
-	 * Run a Kuwahara filter to enhance edges in the image
-	 * @param stack the image
-	 * @param filterSize the radius of the kernel
-	 */
-	private static void runKuwaharaFiltering(ImageStack stack, int filterSize){
-		if(logger!=null){
-			logger.log("Applying Kuwahara filter with radius "+filterSize);
-		  }
-		
-		Kuwahara_Filter kw = new Kuwahara_Filter();
-		ImagePlus img = ImageExporter.convert(stack);
-		kw.setup("", img);
-		
-		kw.filter(stack.getProcessor(Constants.COUNTERSTAIN), filterSize);
-	}
-	
-	/**
-	 * The chromocentre can cause 'skipping' of the edge detection
-	 * from the edge to the interior of the nucleus. Make any pixel
-	 * over threshold equal threshold to remove internal structures
-	 * @param stack the stack to adjust
-	 * @return
-	 */
-	private static void squashChromocentres(ImageStack stack, int threshold){	
-		if(logger!=null){
-			logger.log("Compressing internal structures to max intensity of "+threshold);
-		}
-		
-		// fetch a copy of the int array
-		ImageProcessor ip = stack.getProcessor(Constants.COUNTERSTAIN);
-		int[][] array = ip.getIntArray();
-		
-		// threshold
-		for(int x = 0; x<ip.getWidth(); x++){
-			for( int y=0; y<ip.getHeight(); y++){
-				if(array[x][y] > threshold ){
-					array[x][y] = threshold;
-				}
-			}
-		}
-		
-		ip.setIntArray(array);
-	}
-	
-	
-	/**
-	 * Use Canny edge detection to produce an image with potential edges highlighted
-	 * for the detector
-	 * @param image the stack to process
-	 * @return a stack with edges highlighted
-	 */
-	private static ImageStack runEdgeDetector(ImageStack image, CannyOptions nucleusCannyOptions){
-
-		//		bi.show();
-		ImageStack searchStack = null;
-		try {
-			// using canny detector
-//			CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
-
-//			// calculation of auto threshold
-			if(nucleusCannyOptions.isCannyAutoThreshold()){
-				autoDetectCannyThresholds(nucleusCannyOptions, image);
-			}
-
-			if(logger!=null){
-				logger.log("Creating edge detector", Logger.DEBUG);
-			}
-			
-			CannyEdgeDetector canny = new CannyEdgeDetector();
-			canny.setSourceImage(image.getProcessor(Constants.COUNTERSTAIN).getBufferedImage());
-			canny.setLowThreshold( nucleusCannyOptions.getLowThreshold() );
-			canny.setHighThreshold( nucleusCannyOptions.getHighThreshold());
-			canny.setGaussianKernelRadius(nucleusCannyOptions.getKernelRadius());
-			canny.setGaussianKernelWidth(nucleusCannyOptions.getKernelWidth());
-
-			canny.process();
-			BufferedImage edges = canny.getEdgesImage();
-			ImagePlus searchImage = new ImagePlus(null, edges);
-
-
-			// add morphological closing
-			ByteProcessor bp = searchImage.getProcessor().convertToByteProcessor();
-
-			morphologyClose( bp  , nucleusCannyOptions.getClosingObjectRadius()) ;
-			ImagePlus bi= new ImagePlus(null, bp);
-			searchStack = ImageImporter.convert(bi);
-
-			bi.close();
-			searchImage.close();
-
-			if(logger!=null){
-				logger.log("Edge detection complete", Logger.DEBUG);
-			}
-			
-		} catch (Exception e) {
-			if(logger!=null){
-				logger.error("Error in edge detection", e);
-			}
-			
-		}
-		return searchStack;
-	}
-	
-	/**
-	 * Try to detect the optimal settings for the edge detector based on the 
-	 * median image pixel intensity.
-	 * @param nucleusCannyOptions the options
-	 * @param image the image to analyse
-	 */
-	private static void autoDetectCannyThresholds(CannyOptions nucleusCannyOptions, ImageStack image){
-		// calculation of auto threshold
-
-		// find the median intensity of the image
-		double medianPixel = getMedianIntensity(image);
-
-		// if the median is >128, this is probably an inverted image.
-		// invert it so the thresholds will work
-		if(medianPixel>128){
-			if(logger!=null){
-				logger.log("Detected high median ("+medianPixel+"); inverting");
-			}
-			
-			image.getProcessor(Constants.COUNTERSTAIN).invert();
-			medianPixel = getMedianIntensity(image);
-		}
-
-		// set the thresholds either side of the median
-		double sigma = 0.33; // default value - TODO: enable change
-		double lower = Math.max(0  , (1.0 - (2.5 * sigma)  ) * medianPixel  ) ;
-		lower = lower < 0.1 ? 0.1 : lower; // hard limit
-		double upper = Math.min(255, (1.0 + (0.6 * sigma)  ) * medianPixel  ) ;
-		upper = upper < 0.3 ? 0.3 : upper; // hard limit
-		nucleusCannyOptions.setLowThreshold(  (float)  lower);
-		nucleusCannyOptions.setHighThreshold( (float)  upper);
-		logger.log("Auto thresholding: low: "+lower+"  high: "+upper, Logger.DEBUG);
-
-	}
-	
-	/**
-	 * Get the median pixel intensity in the image. Used in auto-selection
-	 * of Canny thresholds.
-	 * @param image the image to process
-	 * @return the median pixel intensity
-	 */
-	private static double getMedianIntensity(ImageStack image){
-		ImageProcessor median = image.getProcessor(Constants.COUNTERSTAIN);
-		double[] values = new double[ median.getWidth()*median.getHeight() ];
-		try {
-			int i=0;
-			for(int w = 0; w<median.getWidth();w++){
-				for(int h = 0; h<median.getHeight();h++){
-					values[i] = (double) median.get(w, h);
-
-					i++;
-				}
-			}
-		} catch (Exception e) {
-			if(logger!=null){
-				logger.error("Error getting median image intensity", e);
-			}
-			
-		}
-		return Stats.quartile(values, 50);
-	}
-	
-	/**
-	 * Close holes in the nuclear borders
-	 * @param ip the image processor
-	 * @param closingRadius the radius of the circle
-	 */
-	private static void morphologyClose(ImageProcessor ip, int closingRadius){
-		try {
-			
-			int shift=1;
-			int[] offset = {0,0};
-			int eltype = 0; //circle
-			logger.log("Closing objects with circle of radius "+closingRadius, Logger.DEBUG);
-			
-			StructureElement se = new StructureElement(eltype,  shift,  closingRadius, offset);
-//			IJ.log("Made se");
-			MorphoProcessor mp = new MorphoProcessor(se);
-//			IJ.log("Made mp");
-			mp.fclose(ip);
-			if(logger!=null){
-				logger.log("Objects closed", Logger.DEBUG);
-			}
-			
-//			IJ.log("Closed");
-		} catch (Exception e) {
-			if(logger!=null){
-				logger.error("Error in morphology closing", e);
-			}
-			
-		}
-		
-	}
-
 }

@@ -27,14 +27,18 @@ import io.ImageImporter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -43,11 +47,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisOptions;
+import analysis.ImageFilterer;
 import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.NucleusFinder;
 import components.Cell;
@@ -57,18 +64,23 @@ import components.nuclei.Nucleus;
 public class ImageProber extends JDialog {
 	
 	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+	
+	private static double IMAGE_SCREEN_PROPORTION = 0.25;
 
 	private final JPanel contentPanel = new JPanel();
 	private AnalysisOptions options; // the options to detect with
 	private File openImage;			// the image currently open
 
 	private Logger programLogger;
-	private JLabel imageLabel;		// the JLabel to hold the image
+//	private JLabel imageLabel;		// the JLabel to hold the image
 
-	private ImageIcon imageIcon = null;	// the icon with the image, for display in JLabel
+//	private ImageIcon imageIcon = null;	// the icon with the image, for display in JLabel
 	private JLabel headerLabel;		// the header text and loading gif
 	
 	private ImageIcon loadingGif = null; // the icon for the loading gif
+	
+	private Map<String, JLabel> iconMap = new HashMap<String, JLabel>(); // allow multiple images 
+	private Map<String, ImageProcessor> procMap = new HashMap<String, ImageProcessor>(); // allow multiple images 
 	
 	private boolean ok = false;
 	
@@ -108,95 +120,114 @@ public class ImageProber extends JDialog {
 		"Noting that winter is coming"
 	};
  
+	
+	private static final String[] imageTypes = {
+		"Kuwahara",
+		"Chromocentre",
+		"Edges",
+		"Morphology closed",
+		"Detected"
+	};
+	
 	/**
 	 * Create the dialog.
 	 */
 	public ImageProber(AnalysisOptions options, Logger logger) {
-		
+
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");
 		} 
-		this.setModal(true);
-		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		this.options = options;
-		this.programLogger = logger;
-//		this.logger = new Logger(logFile, "ImageProber");
-		this.setTitle("Image Prober");
-		
-		int w = (int) (screenSize.getWidth() * 0.75);
-		int h = (int) (screenSize.getHeight() * 0.75);
-		
-		setBounds(100, 100, w, h);
-		this.setLocationRelativeTo(null); // centre on screen
-		
-		// Load the gif (may be in a res folder depending on Eclipse version)
-		String pathToGif = "res/ajax-loader.gif";	
-		boolean ok = loadResources(pathToGif);
-		if(!ok){
-			pathToGif = "ajax-loader.gif";	
-			ok = loadResources(pathToGif);
+
+		try{
+			this.setModal(true);
+			this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+			this.options = options;
+			this.programLogger = logger;
+			//		this.logger = new Logger(logFile, "ImageProber");
+			this.setTitle("Image Prober");
+
+			int w = (int) (screenSize.getWidth() * 0.75);
+			int h = (int) (screenSize.getHeight() * 0.75);
+
+			setBounds(100, 100, w, h);
+			this.setLocationRelativeTo(null); // centre on screen
+
+			// Load the gif (may be in a res folder depending on Eclipse version)
+			String pathToGif = "res/ajax-loader.gif";	
+			boolean ok = loadResources(pathToGif);
+			if(!ok){
+				pathToGif = "ajax-loader.gif";	
+				ok = loadResources(pathToGif);
+			}
+			if(!ok){
+				programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
+			}
+
+			getContentPane().setLayout(new BorderLayout());
+			contentPanel.setLayout(new BorderLayout());
+			contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+			for(String key : imageTypes){
+				iconMap.put(key, null);
+				procMap.put(key, null);
+			}
+
+
+			JPanel header = this.createHeader();
+			contentPanel.add(header, BorderLayout.NORTH);
+
+			JPanel footer = this.createFooter();
+			contentPanel.add(footer, BorderLayout.SOUTH);
+
+			JPanel imagePane = createImagePanel();
+			contentPanel.add(imagePane, BorderLayout.CENTER);
+
+			getContentPane().add(contentPanel, BorderLayout.CENTER);
+
+			{
+				JButton nextButton = new JButton("Next");
+				nextButton.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+
+						Thread thr = new Thread(){
+							public void run() {
+								openImage = getNextImage();
+								importAndDisplayImage(openImage);
+							}
+						};	
+						thr.start();
+
+					}
+				});
+				contentPanel.add(nextButton, BorderLayout.EAST);
+
+				JButton prevButton = new JButton("Prev");
+				prevButton.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+
+						Thread thr = new Thread(){
+							public void run() {
+								openImage = getPrevImage();
+								importAndDisplayImage(openImage);
+							}
+						};	
+						thr.start();
+
+					}
+				});
+				contentPanel.add(prevButton, BorderLayout.WEST);
+			}
+
+			createFileList(options.getFolder());
+
+			this.setVisible(true);
+		} catch(Exception e){
+			logger.log(Level.SEVERE, "Error creating prober", e);
 		}
-		if(!ok){
-			programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
-		}
-
-		getContentPane().setLayout(new BorderLayout());
-		contentPanel.setLayout(new BorderLayout());
-		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
-		
-		JPanel header = this.createHeader();
-		contentPanel.add(header, BorderLayout.NORTH);
-		
-		JPanel footer = this.createFooter();
-		contentPanel.add(footer, BorderLayout.SOUTH);
-		
-		JPanel imagePane = createImagePanel();
-		contentPanel.add(imagePane, BorderLayout.CENTER);
-		
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		
-		{
-			JButton nextButton = new JButton("Next");
-			nextButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-
-					Thread thr = new Thread(){
-						public void run() {
-							openImage = getNextImage();
-							importAndDisplayImage(openImage);
-						}
-					};	
-					thr.start();
-
-				}
-			});
-			contentPanel.add(nextButton, BorderLayout.EAST);
-			
-			JButton prevButton = new JButton("Prev");
-			prevButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-
-					Thread thr = new Thread(){
-						public void run() {
-							openImage = getPrevImage();
-							importAndDisplayImage(openImage);
-						}
-					};	
-					thr.start();
-
-				}
-			});
-			contentPanel.add(prevButton, BorderLayout.WEST);
-		}
-
-		createFileList(options.getFolder());
-
-		this.setVisible(true);
 	}
-	
+
 	/**
 	 * Fetch the gif loading resources
 	 * 
@@ -238,7 +269,7 @@ public class ImageProber extends JDialog {
 		headerLabel = new JLabel("Examining input folders...");
 		headerLabel.setIcon(loadingGif);
 		
-		panel.add(new JLabel("Objects meeting nucleus parameters are outlined in yellow"), BorderLayout.NORTH);
+		panel.add(new JLabel("Objects meeting nucleus parameters are outlined in yellow. Click an image to view larger version."), BorderLayout.NORTH);
 
 		panel.add(headerLabel, BorderLayout.SOUTH);
 
@@ -253,11 +284,33 @@ public class ImageProber extends JDialog {
 	 */
 	private JPanel createImagePanel(){
 		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
+//		panel.setLayout(new BorderLayout());
+		panel.setLayout(new GridLayout(3, 2));
 
-		imageIcon = loadingGif;
-		imageLabel = new JLabel("", imageIcon, JLabel.CENTER);
-		panel.add(imageLabel, BorderLayout.CENTER);
+		for(final String key : imageTypes){
+
+			JLabel label = new JLabel("", loadingGif, JLabel.CENTER);
+			label.setText(key);
+			label.setHorizontalTextPosition(JLabel.CENTER);
+			label.setVerticalTextPosition(JLabel.TOP);
+			panel.add(label);
+			iconMap.put(key, label);
+			
+			label.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+
+					Thread thr = new Thread(){
+						public void run() {
+							showLargeImage(key);
+						}
+					};	
+					thr.start();
+
+				}
+			});
+		}
+
 
 		return panel;
 	}
@@ -384,6 +437,25 @@ public class ImageProber extends JDialog {
 	}
 	
 	
+	private void showLargeImage(String key){
+		final ImageIcon icon = createViewableImage(procMap.get(key), true);
+		JOptionPane pane = new JOptionPane(null, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_OPTION, icon);
+				
+//				JOptionPane.showMessageDialog(null, null, key, JOptionPane.INFORMATION_MESSAGE, icon);
+        
+        Dialog dialog = pane.createDialog(this, key);
+        // the line below is added to the example from the docs
+        dialog.setModal(false); // this says not to block background components
+        dialog.setVisible(true);
+//        dialog.show();
+        
+//        JDialog dialog = new JDialog(){
+//        	
+//        	
+//        	
+//        };
+	}
+	
 	/**
 	 * Import the given file as an image, detect nuclei and
 	 * display the image with annotated nuclear outlines
@@ -400,16 +472,45 @@ public class ImageProber extends JDialog {
 				headerLabel.setIcon(loadingGif);
 				headerLabel.repaint();
 
-				imageLabel.setIcon(loadingGif);
-				imageLabel.repaint();
+//				imageLabel.setIcon(loadingGif);
+//				imageLabel.repaint();
+				for(String key : iconMap.keySet()){
+					
+					JLabel label = iconMap.get(key);
+					label.setIcon(loadingGif);
+				}
 			}
 			
 //			logger.log("Importing file: "+imageFile.getAbsolutePath(), Logger.DEBUG);
 			ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
 			
 			
+			/*
+			 * TODO
+			 * Insert steps to show each applied filter in the same order as from analysis
+			 * Kuwahara filtering
+			 * Chromocentre flattening
+			 * Edge detector
+			 *    Morphology closing
+			 * Final image
+			 * 
+			 * Make an icon from each
+			 */
+			
+			ImageProcessor kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(imageStack, Constants.COUNTERSTAIN, options.getCannyOptions("nucleus").getKuwaharaKernel());
+			procMap.put("Kuwahara", kuwaharaProcessor);
+			
+			ImageProcessor flattenProcessor = ImageFilterer.squashChromocentres(imageStack, Constants.COUNTERSTAIN, options.getCannyOptions("nucleus").getFlattenThreshold());
+			procMap.put("Chromocentre", flattenProcessor);
+			
 			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
-
+			procMap.put("Detected", openProcessor);
+			
+			ImageProcessor edgesProcessor = ImageFilterer.runEdgeDetector(flattenProcessor, options.getCannyOptions("nucleus"));
+			procMap.put("Edges", edgesProcessor);
+			
+			ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, options.getCannyOptions("nucleus").getClosingObjectRadius());
+			procMap.put("Morphology closed", closedProcessor);
 			
 //			programLogger.log(Level.INFO, "Searching image...");
 //			testLog();
@@ -421,36 +522,37 @@ public class ImageProber extends JDialog {
 		
 			for(Cell cell : cells){
 
-				Nucleus n = cell.getNucleus();
-				// annotate the image processor with the nucleus outline
-				
-				if(checkNucleus(n)){
-					openProcessor.setColor(Color.YELLOW);
-				} else {
-					openProcessor.setColor(Color.RED);
-				}
-				
-				
-				double[] positions = n.getPosition();
-				FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-				roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-				openProcessor.setLineWidth(2);
-				openProcessor.draw(roi);
+				drawNucleus(cell, openProcessor);
 			}
 			
 			
 			programLogger.log(Level.INFO, "Displaying nuclei");
-
-			if(imageIcon!=null){
-				imageIcon.getImage().flush();
+			
+			// update the map of icons
+			for(String key : iconMap.keySet()){
+				
+				JLabel label = iconMap.get(key);
+				ImageIcon icon = null;
+				if(label.getIcon()!=null){
+					icon = (ImageIcon) label.getIcon();
+					icon.getImage().flush();
+				}
+				icon = createViewableImage(procMap.get(key), false);
+				label.setIcon(icon);
+				label.revalidate();
+				label.repaint();
 			}
-			imageIcon = createViewableImage(openProcessor);
+
+//			if(imageIcon!=null){
+//				imageIcon.getImage().flush();
+//			}
+			
+//			imageIcon = createViewableImage(openProcessor);
 
 //			programLogger.log(Level.INFO, "Created icon");
-			imageLabel.setIcon(imageIcon);
-			imageLabel.revalidate();
-			imageLabel.repaint();
+//			imageLabel.setIcon(imageIcon);
+//			imageLabel.revalidate();
+//			imageLabel.repaint();
 //			programLogger.log(Level.INFO, "Repainted label");
 
 			headerLabel.setText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
@@ -458,9 +560,33 @@ public class ImageProber extends JDialog {
 			headerLabel.repaint();
 
 		} catch (Exception e) { // end try
-			programLogger.log(new LogRecord(Level.SEVERE, "Error in image processing"));
+			programLogger.log(Level.SEVERE, "Error in image processing", e);
 		} // end catch
 
+	}
+	
+	/**
+	 * Draw the outline of a nucleus on the given processor
+	 * @param cell
+	 * @param ip
+	 */
+	private void drawNucleus(Cell cell, ImageProcessor ip){
+		Nucleus n = cell.getNucleus();
+		// annotate the image processor with the nucleus outline
+		
+		if(checkNucleus(n)){
+			ip.setColor(Color.YELLOW);
+		} else {
+			ip.setColor(Color.RED);
+		}
+		
+		
+		double[] positions = n.getPosition();
+		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+		ip.setLineWidth(2);
+		ip.draw(roi);
 	}
 	
 	private void testLog(){
@@ -507,12 +633,17 @@ public class ImageProber extends JDialog {
 	 * @param ip an image processor
 	 * @return an image icon with the resized image
 	 */
-	private ImageIcon createViewableImage(ImageProcessor ip){
+	private ImageIcon createViewableImage(ImageProcessor ip, boolean fullSize){
 		int originalWidth = ip.getWidth();
 		int originalHeight = ip.getHeight();
 
 		// set the image width to be less than half the screen width
-		int smallWidth = (int) ((double) screenSize.getWidth() * 0.65);
+		int smallWidth = 0;
+		if(fullSize){
+			smallWidth = (int) ((double) screenSize.getWidth() * 0.75);
+		} else {
+			smallWidth = (int) ((double) screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
+		}
 
 		// keep the image aspect ratio
 		double ratio = (double) originalWidth / (double) originalHeight;
