@@ -27,9 +27,15 @@ public class DebugFileFormatter extends Formatter {
 		 		
 		 		if(record.getThrown()!=null){
 		 			Throwable t = record.getThrown();
+		 			log += date 
+	 						+ "\t" 
+	 						+"STACK" 
+	 						+ "\t"
+	 						+ t.getMessage() 
+	 						+ "\r\n";
+		 			
 		 			for(StackTraceElement el : t.getStackTrace()){
-		 				log += "\r\n"
-		 						+ date 
+		 				log +=  date 
 		 						+ "\t" 
 		 						+"STACK" 
 		 						+ "\t" 

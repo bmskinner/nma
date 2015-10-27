@@ -103,8 +103,8 @@ public class NucleusFinder {
 		try{
 			detector.run(image);
 		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error in nucleus detection");
-			fileLogger.log(Level.SEVERE, "Error in nucleus detection");
+			programLogger.log(Level.SEVERE, "Error in nucleus detection", e);
+			fileLogger.log(Level.SEVERE, "Error in nucleus detection", e);
 		}
 		return detector.getRoiList();
 	}
@@ -162,6 +162,8 @@ public class NucleusFinder {
 		if(roiList.isEmpty()){
 			if(fileLogger!=null){
 				fileLogger.log(Level.FINE, "No usable nuclei in image");
+			} else {
+				programLogger.log(Level.FINE, "No usable nuclei in image");
 			}
 			
 		}
@@ -171,6 +173,8 @@ public class NucleusFinder {
 		for(Roi roi : roiList){
 			if(fileLogger!=null){
 				fileLogger.log(Level.FINE, "Acquiring nucleus "+nucleusNumber);
+			} else {
+				programLogger.log(Level.FINEST, "Acquiring nucleus "+nucleusNumber);
 			}
 			
 			try{
@@ -179,6 +183,8 @@ public class NucleusFinder {
 			} catch(Exception e){
 				if(fileLogger!=null){
 					fileLogger.log(Level.SEVERE, "Error acquiring nucleus", e);
+				} else {
+					programLogger.log(Level.SEVERE, "Error acquiring nucleus", e);
 				}
 			}
 			nucleusNumber++;
@@ -241,6 +247,8 @@ public class NucleusFinder {
 		  }catch(Exception e){
 			  if(fileLogger!=null){
 				  fileLogger.log(Level.SEVERE, " Error in nucleus assignment", e);
+			  } else {
+				  programLogger.log(Level.SEVERE, " Error in nucleus assignment", e);
 			  }
 		  }
 		  return result;
@@ -279,6 +287,8 @@ public class NucleusFinder {
 		  } catch(Exception e){
 			  if(fileLogger!=null){
 				  fileLogger.log(Level.SEVERE, "Error creating nucleus", e);
+			  } else {
+				  programLogger.log(Level.SEVERE, " Error creating nucleus", e);
 			  }
 		  }
 		  return n;

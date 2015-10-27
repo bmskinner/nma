@@ -55,6 +55,7 @@ import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisOptions;
 import analysis.ImageFilterer;
+import analysis.AnalysisOptions.CannyOptions;
 import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.NucleusFinder;
 import components.Cell;
@@ -125,8 +126,7 @@ public class ImageProber extends JDialog {
 		FLATTENED ("Flattened"),
 		EDGE_DETECTION ("Edges"),
 		MORPHOLOGY_CLOSED ("Closed"),
-		DETECTED_OBJECTS ("Detected"),
-		REJECTED_OBJECTS ("Rejected");
+		DETECTED_OBJECTS ("Detected");
 		
 		private String name;
 		
@@ -278,7 +278,7 @@ public class ImageProber extends JDialog {
 		headerLabel = new JLabel("Examining input folders...");
 		headerLabel.setIcon(loadingGif);
 		
-		panel.add(new JLabel("Objects meeting nucleus parameters are outlined in yellow. Click an image to view larger version."), BorderLayout.NORTH);
+		panel.add(new JLabel("Objects meeting nucleus parameters are outlined in yellow; other objects are red. Click an image to view larger version."), BorderLayout.NORTH);
 
 		panel.add(headerLabel, BorderLayout.SOUTH);
 
@@ -490,12 +490,10 @@ public class ImageProber extends JDialog {
 				}
 			}
 			
-//			logger.log("Importing file: "+imageFile.getAbsolutePath(), Logger.DEBUG);
 			ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
 			
 			
 			/*
-			 * TODO
 			 * Insert steps to show each applied filter in the same order as from analysis
 			 * Kuwahara filtering
 			 * Chromocentre flattening
@@ -505,36 +503,98 @@ public class ImageProber extends JDialog {
 			 * 
 			 * Make an icon from each
 			 */
+			programLogger.log(Level.FINEST, "Creating processed images");
 			
-			ImageProcessor kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(imageStack, Constants.COUNTERSTAIN, options.getCannyOptions("nucleus").getKuwaharaKernel());
-			procMap.put(ImageType.KUWAHARA, kuwaharaProcessor);
-			
-			ImageProcessor flattenProcessor = ImageFilterer.squashChromocentres(imageStack, Constants.COUNTERSTAIN, options.getCannyOptions("nucleus").getFlattenThreshold());
-			procMap.put(ImageType.FLATTENED, flattenProcessor);
-			
+			CannyOptions cannyOptions = options.getCannyOptions("nucleus");
 			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
-			procMap.put(ImageType.DETECTED_OBJECTS, openProcessor);
+						
+			if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error
+				
+				// Make a copy of the counterstain to use at each processing step
+				ImageProcessor processedImage = imageStack.getProcessor(Constants.COUNTERSTAIN).duplicate();
+				
+				// before passing to edge detection
+				// run a Kuwahara filter to enhance edges in the image
+				//TODO: Turning off Kuwahara causes error
+				if(cannyOptions.isUseKuwahara()){
+					programLogger.log(Level.FINEST, "Applying Kuwahara filter");
+					ImageProcessor kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(imageStack, Constants.COUNTERSTAIN, cannyOptions.getKuwaharaKernel());
+					processedImage = kuwaharaProcessor.duplicate(); 
+					procMap.put(ImageType.KUWAHARA, kuwaharaProcessor);
+					iconMap.get(ImageType.KUWAHARA).setText(ImageType.KUWAHARA.toString());
+				} else {
+					procMap.put(ImageType.KUWAHARA, processedImage.duplicate());
+					iconMap.get(ImageType.KUWAHARA).setText(ImageType.KUWAHARA.toString()+" (disabled)");
+				}
+				
+				if(cannyOptions.isUseFlattenImage()){
+					programLogger.log(Level.FINEST, "Applying flattening filter");
+					ImageProcessor flattenProcessor = ImageFilterer.squashChromocentres(processedImage, cannyOptions.getFlattenThreshold());
+					processedImage = flattenProcessor.duplicate(); 
+					procMap.put(ImageType.FLATTENED, flattenProcessor);
+					iconMap.get(ImageType.FLATTENED).setText(ImageType.FLATTENED.toString());
+				} else {
+					procMap.put(ImageType.FLATTENED, processedImage.duplicate());
+					iconMap.get(ImageType.FLATTENED).setText(ImageType.FLATTENED.toString()+" (disabled)");
+				}
+				
+				programLogger.log(Level.FINEST, "Detecting edges");
+				ImageProcessor edgesProcessor = ImageFilterer.runEdgeDetector(processedImage, cannyOptions);
+				procMap.put(ImageType.EDGE_DETECTION, edgesProcessor);
+				
+				ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, cannyOptions.getClosingObjectRadius());
+				procMap.put(ImageType.MORPHOLOGY_CLOSED, closedProcessor);
+				
+				procMap.put(ImageType.DETECTED_OBJECTS, openProcessor);
 			
-			ImageProcessor edgesProcessor = ImageFilterer.runEdgeDetector(flattenProcessor, options.getCannyOptions("nucleus"));
-			procMap.put(ImageType.EDGE_DETECTION, edgesProcessor);
+			} else {
+				// Threshold option selected - do not run edge detection
+				for(ImageType key : ImageType.values()){
+					procMap.put(key, openProcessor);
+				}
+			}
+
+			programLogger.log(Level.FINEST, "Processed images created");
+						
+			/*
+			 * Store the size and circularity options, and set them to allow all
+			 * Get the objects in the image
+			 * Restore size and circ options
+			 * Outline the objects that fail 
+			 */
 			
-			ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, options.getCannyOptions("nucleus").getClosingObjectRadius());
-			procMap.put(ImageType.MORPHOLOGY_CLOSED, closedProcessor);
+			double minSize = options.getMinNucleusSize();
+			double maxSize = options.getMaxNucleusSize();
+			double minCirc = options.getMinNucleusCirc();
+			double maxCirc = options.getMaxNucleusCirc();
 			
-//			programLogger.log(Level.INFO, "Searching image...");
-//			testLog();
+			programLogger.log(Level.FINEST, "Widening detection parameters");
+
+			options.setMinNucleusSize(50);
+			options.setMaxNucleusSize(imageStack.getWidth()*imageStack.getHeight());
+			options.setMinNucleusCirc(0);
+			options.setMaxNucleusCirc(1);
+			
+			programLogger.log(Level.FINEST, "Finding cells");
+			
 			List<Cell> cells = NucleusFinder.getCells(imageStack, 
 					options, 
 					programLogger, 
 					imageFile, 
 					null);
+			
+			programLogger.log(Level.FINEST, "Resetting detetion parameters");
+			
+			options.setMinNucleusSize(minSize);
+			options.setMaxNucleusSize(maxSize);
+			options.setMinNucleusCirc(minCirc);
+			options.setMaxNucleusCirc(maxCirc);
 		
 			for(Cell cell : cells){
 
 				drawNucleus(cell, openProcessor);
 			}
-			
-			
+
 			programLogger.log(Level.INFO, "Displaying nuclei");
 			
 			// update the map of icons
@@ -552,18 +612,6 @@ public class ImageProber extends JDialog {
 				label.repaint();
 			}
 
-//			if(imageIcon!=null){
-//				imageIcon.getImage().flush();
-//			}
-			
-//			imageIcon = createViewableImage(openProcessor);
-
-//			programLogger.log(Level.INFO, "Created icon");
-//			imageLabel.setIcon(imageIcon);
-//			imageLabel.revalidate();
-//			imageLabel.repaint();
-//			programLogger.log(Level.INFO, "Repainted label");
-
 			headerLabel.setText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
 			headerLabel.setIcon(null);
 			headerLabel.repaint();
@@ -579,7 +627,11 @@ public class ImageProber extends JDialog {
 	 * @param cell
 	 * @param ip
 	 */
-	private void drawNucleus(Cell cell, ImageProcessor ip){
+	private void drawNucleus(Cell cell, ImageProcessor ip) throws Exception {
+		if(cell==null){
+			throw new IllegalArgumentException("Input cell is null");
+		}
+		
 		Nucleus n = cell.getNucleus();
 		// annotate the image processor with the nucleus outline
 		

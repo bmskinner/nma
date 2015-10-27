@@ -45,9 +45,23 @@ public class ImageFilterer {
 	public static ImageProcessor squashChromocentres(ImageStack stack, int stackNumber, int threshold){	
 		
 		// fetch a copy of the int array
-		ImageProcessor ip = stack.getProcessor(stackNumber).duplicate();
-		
-		int[][] array = ip.getIntArray();
+		ImageProcessor ip = stack.getProcessor(stackNumber);
+		ImageProcessor result = squashChromocentres(ip, threshold);
+		return result;
+	}
+	
+	/**
+	 * The chromocentre can cause 'skipping' of the edge detection
+	 * from the edge to the interior of the nucleus. Make any pixel
+	 * over threshold equal threshold to remove internal structures
+	 * @param ip the image processor to flatten
+	 * @param threshold the maximum intensity to allow
+	 * @return a copy of the image processor, with flattening applied
+	 */
+	public static ImageProcessor squashChromocentres(ImageProcessor ip, int threshold){	
+				
+		ImageProcessor result = ip.duplicate();
+		int[][] array = result.getIntArray();
 		
 		// threshold
 		for(int x = 0; x<ip.getWidth(); x++){
@@ -58,8 +72,8 @@ public class ImageFilterer {
 			}
 		}
 		
-		ip.setIntArray(array);
-		return ip;
+		result.setIntArray(array);
+		return result;
 	}
 	
 	/**
