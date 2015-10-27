@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JColorChooser;
@@ -84,6 +86,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	private 	List<AnalysisDataset> list;
 	protected AnalysisDataset activeDataset;	
 	private Cell activeCell;
+	private Logger programLogger;
 	
 	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
 	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
@@ -91,9 +94,9 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected CellStatsPanel 	cellStatsPanel;		// the stats table
 	protected SegmentStatsPanel segmentStatsPanel;	// details of the individual segments
 		
-	public CellDetailPanel() {
+	public CellDetailPanel(Logger programLogger) {
 
-//		this.setLayout(new BorderLayout());
+		this.programLogger = programLogger;
 		this.setLayout(new GridBagLayout());
 		
 		GridBagConstraints constraints = new GridBagConstraints();
@@ -159,18 +162,23 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-			
+				programLogger.log(Level.FINEST, "Updating cell detail panel");
 				CellDetailPanel.this.list = list;
 				
 				if(list.size()==1){
 
 					activeDataset = list.get(0);
+					
 					cellsListPanel.updateDataset(activeDataset);
+					programLogger.log(Level.FINEST, "Updated cell list panel");
 					updateCell(activeCell);
+					programLogger.log(Level.FINEST, "Updated active cell panel");
 				} else {
 					
 					cellsListPanel.updateDataset(null);
+					programLogger.log(Level.FINEST, "Updated cell list panel");
 					updateCell(null);
+					
 				}
 			
 		}});

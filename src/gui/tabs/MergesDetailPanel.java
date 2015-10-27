@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JTable;
@@ -40,8 +42,10 @@ public class MergesDetailPanel extends DetailPanel {
 	private JTable		mergeSources;
 	private JButton		getSourceButton = new JButton("Recover source");
 	private AnalysisDataset activeDataset;
+	private Logger programLogger;
 	
-	public MergesDetailPanel(){
+	public MergesDetailPanel(Logger programLogger){
+		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
 		mergeSources = new JTable(makeBlankTable()){
 			@Override
@@ -82,6 +86,7 @@ public class MergesDetailPanel extends DetailPanel {
 	}
 	
 	public void update(List<AnalysisDataset> list){
+		programLogger.log(Level.FINEST, "Updating merges panel");
 		getSourceButton.setVisible(false);
 		if(list.size()==1){
 			AnalysisDataset dataset = list.get(0);
@@ -115,6 +120,7 @@ public class MergesDetailPanel extends DetailPanel {
 		} else { // more than one dataset selected
 			mergeSources.setModel(makeBlankTable());
 		}
+		programLogger.log(Level.FINEST, "Updated merges panel");
 		
 	}
 	

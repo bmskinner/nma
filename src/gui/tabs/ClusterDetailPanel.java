@@ -26,6 +26,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -47,9 +49,10 @@ public class ClusterDetailPanel extends DetailPanel {
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		
 	private ClustersPanel clusterPanel;
+	private Logger programLogger;
 
-	public ClusterDetailPanel() {
-		
+	public ClusterDetailPanel(Logger programLogger) {
+		this.programLogger = programLogger;
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		clusterPanel = new ClustersPanel();
@@ -62,7 +65,9 @@ public class ClusterDetailPanel extends DetailPanel {
 		this.list = list;
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
+				programLogger.log(Level.FINEST, "Updating cluster panel");
 				clusterPanel.update(list);		
+				programLogger.log(Level.FINEST, "Updated cluster panel");
 			}
 		});
 		

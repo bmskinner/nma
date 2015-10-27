@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui;
 
+import ij.IJ;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;
@@ -27,6 +28,7 @@ import io.ImageImporter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -45,6 +47,7 @@ import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -472,6 +475,12 @@ public class ImageProber extends JDialog {
 		JOptionPane pane = new JOptionPane(null, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_OPTION, icon);
         
         Dialog dialog = pane.createDialog(this, key.toString());
+//        for(Component c : dialog.getComponents()){
+//        	IJ.log(c.getName());
+//        	if(c instanceof JButton){
+//        		dialog.remove(c);
+//        	}
+//        }
 
         dialog.setModal(false);
         dialog.setVisible(true);

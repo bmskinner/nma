@@ -20,6 +20,8 @@ package gui.tabs;
 
 import java.awt.BorderLayout;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -44,9 +46,12 @@ public class AnalysisDetailPanel extends DetailPanel {
 	private JTable tablePopulationStats;
 	private JTable tableAnalysisParamters;
 	private JTabbedPane tabPane;
+	private Logger programLogger;
 
 
-	public AnalysisDetailPanel() {
+	public AnalysisDetailPanel(Logger programLogger) {
+		
+		this.programLogger = programLogger;
 		
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane();
@@ -70,9 +75,11 @@ public class AnalysisDetailPanel extends DetailPanel {
 		
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-			
+				programLogger.log(Level.FINEST, "Updating analysis panel");
 				updateAnalysisParametersPanel(list);
+				programLogger.log(Level.FINEST, "Updated analysis parameter panel");
 				updateStatsPanel(list);
+				programLogger.log(Level.FINEST, "Updated analysis stats panel");
 			
 		}});
 	}

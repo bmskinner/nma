@@ -221,7 +221,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the general stats page
 			//---------------
-			analysisDetailPanel = new AnalysisDetailPanel();
+			analysisDetailPanel = new AnalysisDetailPanel(programLogger);
 			tabbedPane.addTab("Analysis info", analysisDetailPanel);
 
 			//---------------
@@ -245,7 +245,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the clusters panel
 			//---------------
-			clusterDetailPanel = new ClusterDetailPanel();
+			clusterDetailPanel = new ClusterDetailPanel(programLogger);
 			clusterDetailPanel.addSignalChangeListener(this);
 			clusterDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Clusters", clusterDetailPanel);
@@ -253,7 +253,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the merges panel
 			//---------------
-			mergesDetailPanel = new MergesDetailPanel();
+			mergesDetailPanel = new MergesDetailPanel(programLogger);
 			mergesDetailPanel.addSignalChangeListener(this);
 			mergesDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Merges", mergesDetailPanel);
@@ -283,7 +283,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the cells panel
 			//---------------
-			cellDetailPanel = new CellDetailPanel();
+			cellDetailPanel = new CellDetailPanel(programLogger);
 			cellDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
 			cellDetailPanel.addSignalChangeListener(this);
