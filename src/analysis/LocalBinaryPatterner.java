@@ -6,16 +6,23 @@ import ij.process.ImageProcessor;
 
 public class LocalBinaryPatterner {
 	
-	public ImagePlus run(ImagePlus image){
+	public ImageProcessor run(ImagePlus image){
 		
-		ImageProcessor ip = image.getProcessor();
+		ImageProcessor ip = image.getProcessor().duplicate();
 		
-		ImagePlus result = getLBP(ip);
+		ImageProcessor result = getLBP(ip);
 		return result;
-		
 	}
 	
-	private ImagePlus getLBP(ImageProcessor ip){
+	public ImageProcessor run(ImageProcessor image){
+		
+		ImageProcessor ip = image.duplicate();
+		
+		ImageProcessor result = getLBP(ip);
+		return result;
+	}
+	
+	private ImageProcessor getLBP(ImageProcessor ip){
 		
 		int[][] input = ip.getIntArray();
 		byte[] array = new byte[ip.getWidth()*ip.getHeight()];
@@ -31,7 +38,7 @@ public class LocalBinaryPatterner {
 			}
 		}
 		ByteProcessor bp = new ByteProcessor(ip.getWidth(), ip.getHeight(), array);
-		return new ImagePlus(null, bp);
+		return bp;
 	}
 	
 	private Byte getPixelLBP(int x, int y, int[][] input){
