@@ -1,47 +1,63 @@
 package analysis;
 
 import ij.ImagePlus;
-import ij.process.ByteProcessor;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 public class LocalBinaryPatterner {
 	
-	public ImageProcessor run(ImagePlus image){
-		
-		ImageProcessor ip = image.getProcessor().duplicate();
-		
-		ImageProcessor result = getLBP(ip);
-		return result;
+	/**
+	 * Run the LBP on a copy the given image, and return 
+	 * the image processor
+	 * @param image
+	 * @return
+	 */
+	public static ImageProcessor run(ImagePlus image){		
+		return getLBP(image.getProcessor());
 	}
 	
-	public ImageProcessor run(ImageProcessor image){
-		
-		ImageProcessor ip = image.duplicate();
-		
-		ImageProcessor result = getLBP(ip);
-		return result;
+	/**
+	 * Run the LBP on a copy of the given processor, and return 
+	 * the image processor
+	 * @param image
+	 * @return
+	 */
+	public static ImageProcessor run(ImageProcessor image){
+		return getLBP(image);
 	}
 	
-	private ImageProcessor getLBP(ImageProcessor ip){
+	private static ImageProcessor getLBP(ImageProcessor ip){
 		
 		int[][] input = ip.getIntArray();
-		byte[] array = new byte[ip.getWidth()*ip.getHeight()];
+		int[][] array = new int[ip.getWidth()][ip.getHeight()];
 		
-		int count = 0;
+//		// zero the array
+		for(int x=1; x< ip.getWidth()-1; x++){
+			
+			for(int y=1; y< ip.getHeight()-1; y++){
+				
+				array[x][y] = 0;
+
+			}
+		}
 		
 		// Start from index 1, to avoid image edges
 		for(int x=1; x< ip.getWidth()-1; x++){
+			
 			for(int y=1; y< ip.getHeight()-1; y++){
-				Byte b = getPixelLBP(x, y, input);
-				array[count] = b.byteValue();
-				count++;
+				
+				int b = getPixelLBP(x, y, input);
+				array[x][y] = b;
+
 			}
 		}
-		ByteProcessor bp = new ByteProcessor(ip.getWidth(), ip.getHeight(), array);
+		FloatProcessor bp = new FloatProcessor( array );
+		ImagePlus img = new ImagePlus("", bp);
+		img.show();
 		return bp;
 	}
 	
-	private Byte getPixelLBP(int x, int y, int[][] input){
+	private static Integer getPixelLBP(int x, int y, int[][] input){
 		
 		String byteString = "";
 		int pixel = input[x][y];
@@ -73,11 +89,12 @@ public class LocalBinaryPatterner {
 		i = x-1;
 		j = y;
 		byteString += testValue(i, j, input, pixel);
-
-		return new Byte(byteString);
+		
+		int value = Integer.parseInt(byteString, 2); // radix 2 for binary
+		return value;
 	}
 	
-	private int testValue(int i, int j, int[][] array, int pixel){
+	private static int testValue(int i, int j, int[][] array, int pixel){
 		int test = array[i][j];
 		if(test >= pixel){
 			return 1;

@@ -81,7 +81,7 @@ public class ImageImporter {
 				programLogger.log(Level.WARNING, "Not a file: "+f.getAbsolutePath());
 			}
 		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error importing image: "+e.getMessage());
+			programLogger.log(Level.SEVERE, "Error importing image", e);
 		}
 		return stack;
 	}
@@ -120,14 +120,14 @@ public class ImageImporter {
 		if(logger==null){
 //			programLogger.log(Level.INFO, "Image is type: "+image.getType());
 		} else {
-			logger.log(Level.INFO, "Image is type: "+image.getType());
+			logger.log(Level.FINE, "Image is type: "+image.getType());
 		}				
 		
 		// do the conversions
 		ImageStack result = null;
 		if(image.getType()==ImagePlus.GRAY8){
 			if(logger==null){
-				programLogger.log(Level.INFO, "Converting 8 bit greyscale to stack");
+				programLogger.log(Level.FINE, "Converting 8 bit greyscale to stack");
 			} else {
 				logger.log(Level.FINE, "Converting 8 bit greyscale to stack");
 			}
@@ -137,7 +137,7 @@ public class ImageImporter {
 		
 		if(image.getType()==ImagePlus.COLOR_RGB){
 			if(logger==null){
-				
+				programLogger.log(Level.FINE, "Converting RGB to stack");
 			} else {
 				logger.log(Level.FINE, "Converting RGB to stack");
 			}
@@ -147,7 +147,7 @@ public class ImageImporter {
 		
 		if(image.getType()==ImagePlus.GRAY16){
 			if(logger==null){
-				
+				programLogger.log(Level.FINE, "Converting 16 bit greyscale to 8 bit stack");
 			} else {
 				logger.log(Level.FINE, "Converting 16 bit greyscale to 8 bit stack");
 			}
@@ -189,6 +189,8 @@ public class ImageImporter {
 	    result.deleteSlice(1); // remove the blank first slice
 	    if(logger!=null){
 	    	logger.log(Level.FINE, "New stack has "+result.getSize()+" slices");
+	    } else {
+	    	programLogger.log(Level.FINEST, "New stack has "+result.getSize()+" slices");
 	    }
 //	    ImagePlus demo = new ImagePlus(null, result);
 //	    

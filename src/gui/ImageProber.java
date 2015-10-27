@@ -56,6 +56,7 @@ import utility.Utils;
 import analysis.AnalysisOptions;
 import analysis.ImageFilterer;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.LocalBinaryPatterner;
 import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.NucleusFinder;
 import components.Cell;
@@ -65,6 +66,9 @@ import components.nuclei.Nucleus;
 public class ImageProber extends JDialog {
 	
 	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+	
+	private double windowWidth;
+	private double windowHeight;
 	
 	private static double IMAGE_SCREEN_PROPORTION = 0.25;
 
@@ -122,11 +126,11 @@ public class ImageProber extends JDialog {
 	};
  
 	private enum ImageType {
-		KUWAHARA ("Kuwahara"),
+		KUWAHARA ("Kuwahara filtered"),
 		FLATTENED ("Flattened"),
-		EDGE_DETECTION ("Edges"),
-		MORPHOLOGY_CLOSED ("Closed"),
-		DETECTED_OBJECTS ("Detected");
+		EDGE_DETECTION ("Edge detection"),
+		MORPHOLOGY_CLOSED ("Morphology closed"),
+		DETECTED_OBJECTS ("Detected objects");
 		
 		private String name;
 		
@@ -156,7 +160,9 @@ public class ImageProber extends JDialog {
 			this.setTitle("Image Prober");
 
 			int w = (int) (screenSize.getWidth() * 0.75);
+			windowWidth = w;
 			int h = (int) (screenSize.getHeight() * 0.75);
+			windowHeight = h;
 
 			setBounds(100, 100, w, h);
 			this.setLocationRelativeTo(null); // centre on screen
@@ -201,7 +207,10 @@ public class ImageProber extends JDialog {
 
 						Thread thr = new Thread(){
 							public void run() {
+								programLogger.log(Level.FINEST, "Selecting next image");
 								openImage = getNextImage();
+//								setStatusLoading();
+								programLogger.log(Level.FINEST, "Opening image");
 								importAndDisplayImage(openImage);
 							}
 						};	
@@ -218,7 +227,10 @@ public class ImageProber extends JDialog {
 
 						Thread thr = new Thread(){
 							public void run() {
+								programLogger.log(Level.FINEST, "Selecting previous image");
 								openImage = getPrevImage();
+//								setStatusLoading();
+								programLogger.log(Level.FINEST, "Opening image");
 								importAndDisplayImage(openImage);
 							}
 						};	
@@ -253,7 +265,7 @@ public class ImageProber extends JDialog {
 				loadingGif = new ImageIcon(urlToGif);
 
 				if(loadingGif==null){
-					programLogger.log(new LogRecord(Level.WARNING, "Unable to load gif"));
+					programLogger.log(Level.WARNING, "Unable to load gif");
 
 				} else {
 					ok = true;
@@ -262,7 +274,7 @@ public class ImageProber extends JDialog {
 			} 
 			
 		} catch (Exception e){
-			programLogger.log(new LogRecord(Level.WARNING, "Cannot load gif resource: "+e.getMessage()));
+			programLogger.log(Level.SEVERE, "Cannot load gif resource", e);
 		}
 		return ok;
 	}
@@ -302,7 +314,12 @@ public class ImageProber extends JDialog {
 			label.setText(key.toString());
 			label.setHorizontalTextPosition(JLabel.CENTER);
 			label.setVerticalTextPosition(JLabel.TOP);
+			ImageIcon icon = (ImageIcon) label.getIcon();
+			icon.getImage().flush();
+			label.setIcon(loadingGif);
+			
 			panel.add(label);
+			label.repaint();
 			iconMap.put(key, label);
 			
 			label.addMouseListener(new MouseAdapter() {
@@ -412,7 +429,7 @@ public class ImageProber extends JDialog {
 			public void run() {
 				probableFiles = importImages(folder);
 				openImage = probableFiles.get(index);
-				
+				setStatusLoading();
 				importAndDisplayImage(openImage);
 			}
 		};	
@@ -446,23 +463,40 @@ public class ImageProber extends JDialog {
 	}
 	
 	
+	/**
+	 * Display the image for the given key in a new non-modal window
+	 * @param key
+	 */
 	private void showLargeImage(ImageType key){
 		final ImageIcon icon = createViewableImage(procMap.get(key), true);
 		JOptionPane pane = new JOptionPane(null, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_OPTION, icon);
-				
-//				JOptionPane.showMessageDialog(null, null, key, JOptionPane.INFORMATION_MESSAGE, icon);
         
         Dialog dialog = pane.createDialog(this, key.toString());
-        // the line below is added to the example from the docs
-        dialog.setModal(false); // this says not to block background components
+
+        dialog.setModal(false);
         dialog.setVisible(true);
-//        dialog.show();
-        
-//        JDialog dialog = new JDialog(){
-//        	
-//        	
-//        	
-//        };
+	}
+	
+	
+	/**
+	 * Set the header label and the image icons to display
+	 * the loading gif
+	 */
+	private void setStatusLoading(){
+		if(loadingGif!=null){
+			ImageIcon hicon = (ImageIcon) headerLabel.getIcon();
+			hicon.getImage().flush();
+			headerLabel.setIcon(loadingGif);
+			headerLabel.repaint();
+
+			for(ImageType key : ImageType.values()){
+				
+				JLabel label = iconMap.get(key);
+				ImageIcon icon = (ImageIcon) label.getIcon();
+				icon.getImage().flush();
+				label.setIcon(loadingGif);
+			}
+		}
 	}
 	
 	/**
@@ -473,25 +507,10 @@ public class ImageProber extends JDialog {
 	private void importAndDisplayImage(File imageFile){
 
 		try {
-//		    openImage = imageFile;
-//			IJ.log("Displaying index "+index);
-//			IJ.log("Displaying file "+imageFile.getAbsolutePath());
 			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
-			if(loadingGif!=null){
-				headerLabel.setIcon(loadingGif);
-				headerLabel.repaint();
-
-//				imageLabel.setIcon(loadingGif);
-//				imageLabel.repaint();
-				for(ImageType key : ImageType.values()){
-					
-					JLabel label = iconMap.get(key);
-					label.setIcon(loadingGif);
-				}
-			}
 			
 			ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
-			
+			programLogger.log(Level.FINEST, "Imported image as stack");
 			
 			/*
 			 * Insert steps to show each applied filter in the same order as from analysis
@@ -546,7 +565,7 @@ public class ImageProber extends JDialog {
 				procMap.put(ImageType.MORPHOLOGY_CLOSED, closedProcessor);
 				
 				procMap.put(ImageType.DETECTED_OBJECTS, openProcessor);
-			
+							
 			} else {
 				// Threshold option selected - do not run edge detection
 				for(ImageType key : ImageType.values()){
@@ -562,33 +581,7 @@ public class ImageProber extends JDialog {
 			 * Restore size and circ options
 			 * Outline the objects that fail 
 			 */
-			
-			double minSize = options.getMinNucleusSize();
-			double maxSize = options.getMaxNucleusSize();
-			double minCirc = options.getMinNucleusCirc();
-			double maxCirc = options.getMaxNucleusCirc();
-			
-			programLogger.log(Level.FINEST, "Widening detection parameters");
-
-			options.setMinNucleusSize(50);
-			options.setMaxNucleusSize(imageStack.getWidth()*imageStack.getHeight());
-			options.setMinNucleusCirc(0);
-			options.setMaxNucleusCirc(1);
-			
-			programLogger.log(Level.FINEST, "Finding cells");
-			
-			List<Cell> cells = NucleusFinder.getCells(imageStack, 
-					options, 
-					programLogger, 
-					imageFile, 
-					null);
-			
-			programLogger.log(Level.FINEST, "Resetting detetion parameters");
-			
-			options.setMinNucleusSize(minSize);
-			options.setMaxNucleusSize(maxSize);
-			options.setMinNucleusCirc(minCirc);
-			options.setMaxNucleusCirc(maxCirc);
+			List<Cell> cells = getCells(imageStack, imageFile);
 		
 			for(Cell cell : cells){
 
@@ -598,19 +591,7 @@ public class ImageProber extends JDialog {
 			programLogger.log(Level.INFO, "Displaying nuclei");
 			
 			// update the map of icons
-			for(ImageType key : ImageType.values()){
-				
-				JLabel label = iconMap.get(key);
-				ImageIcon icon = null;
-				if(label.getIcon()!=null){
-					icon = (ImageIcon) label.getIcon();
-					icon.getImage().flush();
-				}
-				icon = createViewableImage(procMap.get(key), false);
-				label.setIcon(icon);
-				label.revalidate();
-				label.repaint();
-			}
+			updateImageThumbnails();
 
 			headerLabel.setText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
 			headerLabel.setIcon(null);
@@ -620,6 +601,60 @@ public class ImageProber extends JDialog {
 			programLogger.log(Level.SEVERE, "Error in image processing", e);
 		} // end catch
 
+	}
+	
+	private void updateImageThumbnails(){
+		// update the map of icons
+		for(ImageType key : ImageType.values()){
+
+			JLabel label = iconMap.get(key);
+			ImageIcon icon = null;
+			if(label.getIcon()!=null){
+				icon = (ImageIcon) label.getIcon();
+				icon.getImage().flush();
+			}
+			icon = createViewableImage(procMap.get(key), false);
+			label.setIcon(icon);
+			label.revalidate();
+			label.repaint();
+		}
+	}
+	
+	/**
+	 * Get the cells in the given stack without the 
+	 * size and circularity parameters
+	 * @param imageStack
+	 * @param imageFile
+	 * @return
+	 */
+	private List<Cell> getCells(ImageStack imageStack, File imageFile){
+		double minSize = options.getMinNucleusSize();
+		double maxSize = options.getMaxNucleusSize();
+		double minCirc = options.getMinNucleusCirc();
+		double maxCirc = options.getMaxNucleusCirc();
+		
+		programLogger.log(Level.FINEST, "Widening detection parameters");
+
+		options.setMinNucleusSize(50);
+		options.setMaxNucleusSize(imageStack.getWidth()*imageStack.getHeight());
+		options.setMinNucleusCirc(0);
+		options.setMaxNucleusCirc(1);
+		
+		programLogger.log(Level.FINEST, "Finding cells");
+		
+		List<Cell> cells = NucleusFinder.getCells(imageStack, 
+				options, 
+				programLogger, 
+				imageFile, 
+				null);
+		
+		programLogger.log(Level.FINEST, "Resetting detetion parameters");
+		
+		options.setMinNucleusSize(minSize);
+		options.setMaxNucleusSize(maxSize);
+		options.setMinNucleusCirc(minCirc);
+		options.setMaxNucleusCirc(maxCirc);
+		return cells;
 	}
 	
 	/**
@@ -703,16 +738,23 @@ public class ImageProber extends JDialog {
 		if(fullSize){
 			smallWidth = (int) ((double) screenSize.getWidth() * 0.75);
 		} else {
-			smallWidth = (int) ((double) screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
+			smallWidth = (int) ((double) windowWidth * 0.45);
 		}
-
+		
 		// keep the image aspect ratio
 		double ratio = (double) originalWidth / (double) originalHeight;
 		int smallHeight = (int) (smallWidth / ratio);
 		
+		if(smallHeight > windowHeight / 4 && !fullSize ){ // image is too high, adjust to scale on height
+			smallHeight = (int) (windowHeight / 4);
+			smallWidth = (int) (smallHeight * ratio);
+		}
+		
+		// Create the image
+		
 		ImageIcon smallImageIcon;
 
-		if(ip.getWidth()>smallWidth){
+		if(ip.getWidth()>smallWidth || ip.getHeight() > smallHeight){
 			
 			smallImageIcon = new ImageIcon(ip.resize(smallWidth, smallHeight ).getBufferedImage());
 			
