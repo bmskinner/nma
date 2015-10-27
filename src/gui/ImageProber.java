@@ -79,8 +79,8 @@ public class ImageProber extends JDialog {
 	
 	private ImageIcon loadingGif = null; // the icon for the loading gif
 	
-	private Map<String, JLabel> iconMap = new HashMap<String, JLabel>(); // allow multiple images 
-	private Map<String, ImageProcessor> procMap = new HashMap<String, ImageProcessor>(); // allow multiple images 
+	private Map<ImageType, JLabel> iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
+	private Map<ImageType, ImageProcessor> procMap = new HashMap<ImageType, ImageProcessor>(); // allow multiple images 
 	
 	private boolean ok = false;
 	
@@ -120,14 +120,23 @@ public class ImageProber extends JDialog {
 		"Noting that winter is coming"
 	};
  
-	
-	private static final String[] imageTypes = {
-		"Kuwahara",
-		"Chromocentre",
-		"Edges",
-		"Morphology closed",
-		"Detected"
-	};
+	private enum ImageType {
+		KUWAHARA ("Kuwahara"),
+		FLATTENED ("Flattened"),
+		EDGE_DETECTION ("Edges"),
+		MORPHOLOGY_CLOSED ("Closed"),
+		DETECTED_OBJECTS ("Detected"),
+		REJECTED_OBJECTS ("Rejected");
+		
+		private String name;
+		
+		ImageType(String name){
+			this.name = name;
+		}
+		public String toString(){
+			return this.name;
+		}
+	}
 	
 	/**
 	 * Create the dialog.
@@ -167,7 +176,7 @@ public class ImageProber extends JDialog {
 			contentPanel.setLayout(new BorderLayout());
 			contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-			for(String key : imageTypes){
+			for(ImageType key : ImageType.values()){
 				iconMap.put(key, null);
 				procMap.put(key, null);
 			}
@@ -287,10 +296,10 @@ public class ImageProber extends JDialog {
 //		panel.setLayout(new BorderLayout());
 		panel.setLayout(new GridLayout(3, 2));
 
-		for(final String key : imageTypes){
+		for(final ImageType key : ImageType.values()){
 
 			JLabel label = new JLabel("", loadingGif, JLabel.CENTER);
-			label.setText(key);
+			label.setText(key.toString());
 			label.setHorizontalTextPosition(JLabel.CENTER);
 			label.setVerticalTextPosition(JLabel.TOP);
 			panel.add(label);
@@ -437,13 +446,13 @@ public class ImageProber extends JDialog {
 	}
 	
 	
-	private void showLargeImage(String key){
+	private void showLargeImage(ImageType key){
 		final ImageIcon icon = createViewableImage(procMap.get(key), true);
 		JOptionPane pane = new JOptionPane(null, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_OPTION, icon);
 				
 //				JOptionPane.showMessageDialog(null, null, key, JOptionPane.INFORMATION_MESSAGE, icon);
         
-        Dialog dialog = pane.createDialog(this, key);
+        Dialog dialog = pane.createDialog(this, key.toString());
         // the line below is added to the example from the docs
         dialog.setModal(false); // this says not to block background components
         dialog.setVisible(true);
@@ -474,7 +483,7 @@ public class ImageProber extends JDialog {
 
 //				imageLabel.setIcon(loadingGif);
 //				imageLabel.repaint();
-				for(String key : iconMap.keySet()){
+				for(ImageType key : ImageType.values()){
 					
 					JLabel label = iconMap.get(key);
 					label.setIcon(loadingGif);
@@ -498,19 +507,19 @@ public class ImageProber extends JDialog {
 			 */
 			
 			ImageProcessor kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(imageStack, Constants.COUNTERSTAIN, options.getCannyOptions("nucleus").getKuwaharaKernel());
-			procMap.put("Kuwahara", kuwaharaProcessor);
+			procMap.put(ImageType.KUWAHARA, kuwaharaProcessor);
 			
 			ImageProcessor flattenProcessor = ImageFilterer.squashChromocentres(imageStack, Constants.COUNTERSTAIN, options.getCannyOptions("nucleus").getFlattenThreshold());
-			procMap.put("Chromocentre", flattenProcessor);
+			procMap.put(ImageType.FLATTENED, flattenProcessor);
 			
 			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
-			procMap.put("Detected", openProcessor);
+			procMap.put(ImageType.DETECTED_OBJECTS, openProcessor);
 			
 			ImageProcessor edgesProcessor = ImageFilterer.runEdgeDetector(flattenProcessor, options.getCannyOptions("nucleus"));
-			procMap.put("Edges", edgesProcessor);
+			procMap.put(ImageType.EDGE_DETECTION, edgesProcessor);
 			
 			ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, options.getCannyOptions("nucleus").getClosingObjectRadius());
-			procMap.put("Morphology closed", closedProcessor);
+			procMap.put(ImageType.MORPHOLOGY_CLOSED, closedProcessor);
 			
 //			programLogger.log(Level.INFO, "Searching image...");
 //			testLog();
@@ -529,7 +538,7 @@ public class ImageProber extends JDialog {
 			programLogger.log(Level.INFO, "Displaying nuclei");
 			
 			// update the map of icons
-			for(String key : iconMap.keySet()){
+			for(ImageType key : ImageType.values()){
 				
 				JLabel label = iconMap.get(key);
 				ImageIcon icon = null;
