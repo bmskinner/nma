@@ -199,6 +199,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			logger.log(Level.FINE, "Clusters : "+clusterer.numberOfClusters());
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
+				logger.log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
 				CellCollection clusterCollection = new CellCollection(collection.getFolder(), 
 						collection.getOutputFolderName(), 
 						collection.getName()+"_Cluster_"+i, 

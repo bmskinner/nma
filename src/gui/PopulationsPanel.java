@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -145,7 +146,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				AnalysisDataset rootDataset = analysisDatasets.get(id);
 				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
 					if(! this.hasDataset(child.getUUID())){
-						child.setName(checkName(child.getName()));
+						child.setName(checkName(child.getName(), child.getUUID()));
 						this.analysisDatasets.put(child.getUUID(), child);
 						this.populationNames.put(child.getName(), child.getUUID());
 					}
@@ -433,7 +434,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param dataset the dataset to add
 	 */
 	public void addDataset(AnalysisDataset dataset){
-		dataset.setName(checkName(dataset.getName()));
+		programLogger.log(Level.FINEST, "Checking dataset name is suitable");
+		dataset.setName(checkName(dataset.getName(), dataset.getUUID()));
+		programLogger.log(Level.FINEST, "Set name as "+dataset.getName());
 		this.analysisDatasets.put(dataset.getUUID(), dataset);
 		this.populationNames.put(dataset.getName(), dataset.getUUID());
 		
@@ -486,43 +489,50 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * @param name the suggested name
 	 * @return a valid name
 	 */
-	private String checkName(String name){
+	private String checkName(String name, UUID id){
+
 		String result = name;
-		System.out.println("Testing "+name);
+		programLogger.log(Level.FINEST, "Testing name: "+name);
 
 		if(this.populationNames.containsKey(name)){
 			
-			System.out.println("Found existing "+name);
-			
-			Pattern pattern = Pattern.compile("_(\\d+)$");
-			Matcher matcher = pattern.matcher(name);
-			
-			int digit = 0;
-			
-			while (matcher.find()) {
-			
-				System.out.println("Matched regex: "+matcher.toString());
-				System.out.println("Matched on "+matcher.group(1));
-				
-				digit = Integer.valueOf(matcher.group(1));
-				System.out.println("Found "+name+": changing to "+digit);
-					
-				if(digit>0){
-					digit++;
-					System.out.println("Found "+name+": changing to "+digit);
-//					IJ.log("Found "+name+": changing to "+digit);
-					name = matcher.replaceFirst("_"+digit);
+			// Check that the dataset with the same name is not the dataset in question
+			if(!this.populationNames.get(name).equals(id)){
+
+				programLogger.log(Level.FINEST, "Found existing dataset with different UUID: "+name);
+
+				Pattern pattern = Pattern.compile("_(\\d+)$");
+				Matcher matcher = pattern.matcher(name);
+
+				int digit = 0;
+
+				while (matcher.find()) {
+
+					programLogger.log(Level.FINEST, "Matched regex: "+matcher.toString());
+					programLogger.log(Level.FINEST, "Matched on "+matcher.group(1));
+
+					digit = Integer.valueOf(matcher.group(1));
+					programLogger.log(Level.FINEST, "Found "+name+": changing to "+digit);
+
+					if(digit>0){
+						digit++;
+						programLogger.log(Level.FINEST, "Found "+name+": changing to "+digit);
+						name = matcher.replaceFirst("_"+digit);
+					}
+
 				}
-				
+
+				if(digit == 0) {
+					name = name+"_1";
+					programLogger.log(Level.FINEST, "No matches - appending _1 to name");
+				}
+				programLogger.log(Level.FINEST, "Rechacking name");
+				result = checkName(name, id);
+			} else {
+				programLogger.log(Level.FINEST, "No other datasets with name: "+name);
 			}
-			
-			if(digit == 0) {
-				name = name+"_1";
-				System.out.println("No matches - appending _1");
-			}
-			result = checkName(name);
 		} else {
-			System.out.println("No matches to "+name+": returning");
+			programLogger.log(Level.FINEST, "No matches to "+name+": returning");
 		}
 		return result;
 	}

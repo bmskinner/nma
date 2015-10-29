@@ -1283,8 +1283,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 
 				CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
+				programLogger.log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
 				group.addDataset(c);
 				c.setName(group.getName()+"_"+c.getName());
+				programLogger.log(Level.FINEST, "Renamed cluster: "+c.getName());
 				dataset.addChildCollection(c);
 				// attach the clusters to their parent collection
 //				dataset.addCluster(c);
@@ -1296,7 +1298,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 			}
 			dataset.addClusterGroup(group);
-			
+			programLogger.log(Level.FINEST, "Running new morphology analysis on cluster group");
 			new MorphologyAnalysisAction(list, dataset, ADD_POPULATION);
 
 			cancel();
