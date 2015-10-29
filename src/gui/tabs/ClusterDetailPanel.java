@@ -52,7 +52,7 @@ public class ClusterDetailPanel extends DetailPanel {
 	private Logger programLogger;
 
 	public ClusterDetailPanel(Logger programLogger) {
-		this.programLogger = programLogger;
+		super(programLogger);
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
 		clusterPanel = new ClustersPanel();

@@ -31,6 +31,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -61,8 +63,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	private AnalysisDataset activeDataset;
 
 	
-	public ConsensusNucleusPanel() {
-
+	public ConsensusNucleusPanel(Logger programLogger) {
+		super(programLogger);
 		this.setLayout(new BorderLayout());
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
@@ -296,6 +298,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 	public void update(List<AnalysisDataset> list){
 		activeDataset = null;
 		try {
+			programLogger.log(Level.FINEST, "Updating consensus panel");
 			if(!list.isEmpty()){
 				
 				CellCollection collection = list.get(0).getCollection();
@@ -353,6 +356,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				offsetsPanel.setVisible(false);
 				
 			}
+			programLogger.log(Level.FINEST, "Updated consensus panel");
 		} catch (Exception e) {
 			error("Error drawing consensus nucleus", e);
 		}

@@ -38,6 +38,8 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -79,8 +81,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 	private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel() ;
 	
 	
-	public SegmentsDetailPanel() {
-			
+	public SegmentsDetailPanel(Logger programLogger) {
+		super(programLogger);
 		this.setLayout(new BorderLayout());
 		
 		JPanel panel = new JPanel(new GridBagLayout());
@@ -131,9 +133,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				if(SegmentsDetailPanel.this.list!=null && !SegmentsDetailPanel.this.list.isEmpty()){
+					programLogger.log(Level.FINEST, "Updating segmennts detail panel");
 					segmentBoxplotsPanel.update(SegmentsDetailPanel.this.list); // get segname from panel
+					programLogger.log(Level.FINEST, "Updated segments boxplot panel");
 					segmentProfilePanel.update(SegmentsDetailPanel.this.list); // get segname from panel
+					programLogger.log(Level.FINEST, "Updated segments profile panel");
 					segmentStatsPanel.update(SegmentsDetailPanel.this.list);
+					programLogger.log(Level.FINEST, "Updated segments stats panel");
 				}
 			}
 		});

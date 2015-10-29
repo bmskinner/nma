@@ -36,6 +36,8 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
@@ -87,8 +89,8 @@ public class NucleusProfilesPanel extends DetailPanel {
 	
 	private List<AnalysisDataset> list;
 	
-	public NucleusProfilesPanel() {
-		
+	public NucleusProfilesPanel(Logger programLogger) {
+		super(programLogger);
 		this.setLayout(new BorderLayout());
 		JTabbedPane profilesTabPanel = new JTabbedPane(JTabbedPane.TOP);
 		
@@ -114,10 +116,15 @@ public class NucleusProfilesPanel extends DetailPanel {
 			public void run(){
 
 				try {
+					programLogger.log(Level.FINEST, "Updating profiles panel");
 					profileDisplayPanel.update(NucleusProfilesPanel.this.list);
+					programLogger.log(Level.FINEST, "Updated nuclear profiles panel");
 					frankenDisplayPanel.update(NucleusProfilesPanel.this.list);
+					programLogger.log(Level.FINEST, "Updated franken profiles panel");
 					variabilityChartPanel.update(NucleusProfilesPanel.this.list);
+					programLogger.log(Level.FINEST, "Updated variabililty panel");
 					modalityDisplayPanel.update(NucleusProfilesPanel.this.list);
+					programLogger.log(Level.FINEST, "Updated modality panel");
 				} catch  (Exception e){
 					error("Error updating profile panels", e);
 				}

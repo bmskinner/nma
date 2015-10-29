@@ -96,7 +96,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 	public CellDetailPanel(Logger programLogger) {
 
-		this.programLogger = programLogger;
+		super(programLogger);
 		this.setLayout(new GridBagLayout());
 		
 		GridBagConstraints constraints = new GridBagConstraints();

@@ -21,6 +21,8 @@ package gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -37,8 +39,8 @@ public class VennDetailPanel extends DetailPanel {
 	
 	private JTable vennTable;
 
-	public VennDetailPanel() {
-		
+	public VennDetailPanel(Logger programLogger) {
+		super(programLogger);
 		this.setLayout(new BorderLayout());
 		
 		vennTable = new JTable(NucleusTableDatasetCreator.createVennTable(null));
@@ -57,6 +59,7 @@ public class VennDetailPanel extends DetailPanel {
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 			
+				programLogger.log(Level.FINEST, "Updating venn panel");
 				// format the numbers and make into a tablemodel
 				TableModel model = NucleusTableDatasetCreator.createVennTable(null);
 				
@@ -72,6 +75,7 @@ public class VennDetailPanel extends DetailPanel {
 						vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
 					}
 				}
+				programLogger.log(Level.FINEST, "Updated venn panel");
 		}});
 	}
 	

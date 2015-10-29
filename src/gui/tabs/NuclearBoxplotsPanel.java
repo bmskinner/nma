@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
@@ -75,7 +77,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	
 	private JTabbedPane 	tabPane;
 
-	public NuclearBoxplotsPanel() {
+	public NuclearBoxplotsPanel(Logger programLogger) {
+		super(programLogger);
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(JTabbedPane.TOP);
 		
@@ -94,8 +97,11 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				try {
+					programLogger.log(Level.FINEST, "Updating nuclear boxplots panel");
 					boxplotPanel.update(NuclearBoxplotsPanel.this.list);
+					programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
 					histogramsPanel.update(NuclearBoxplotsPanel.this.list);
+					programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
 				} catch (Exception e) {
 					error("Error updating nuclear charts", e);
 				}

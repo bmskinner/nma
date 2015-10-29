@@ -45,7 +45,7 @@ public class MergesDetailPanel extends DetailPanel {
 	private Logger programLogger;
 	
 	public MergesDetailPanel(Logger programLogger){
-		this.programLogger = programLogger;
+		super(programLogger);
 		this.setLayout(new BorderLayout());
 		mergeSources = new JTable(makeBlankTable()){
 			@Override

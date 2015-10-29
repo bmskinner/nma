@@ -46,12 +46,10 @@ public class AnalysisDetailPanel extends DetailPanel {
 	private JTable tablePopulationStats;
 	private JTable tableAnalysisParamters;
 	private JTabbedPane tabPane;
-	private Logger programLogger;
-
 
 	public AnalysisDetailPanel(Logger programLogger) {
 		
-		this.programLogger = programLogger;
+		super(programLogger);
 		
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane();

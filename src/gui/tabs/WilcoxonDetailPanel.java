@@ -22,6 +22,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -46,7 +48,8 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	private JTable wilcoxonMinFeretTable;
 	private JTable wilcoxonDifferenceTable;
 
-	public WilcoxonDetailPanel() throws Exception {
+	public WilcoxonDetailPanel(Logger programLogger) throws Exception {
+		super(programLogger);
 		this.setLayout(new BorderLayout());
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -119,6 +122,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				try{
+					programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
 					// format the numbers and make into a tablemodel
 					TableModel areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(null);
 					TableModel perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null);
@@ -147,6 +151,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 					setRenderer(wilcoxonMinFeretTable);
 					setRenderer(wilcoxonFeretTable);
 					setRenderer(wilcoxonDifferenceTable);
+					programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
 				} catch (Exception e) {
 					error("Error making Wilcoxon table", e);
 				}

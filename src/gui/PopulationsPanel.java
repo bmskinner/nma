@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,8 +73,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	
 	private TreeOrderHashMap treeOrderMap = new TreeOrderHashMap(); // order the root datasets
 	
-	public PopulationsPanel() {
-		
+	public PopulationsPanel(Logger programLogger) {
+		super(programLogger);
 		this.setLayout(new BorderLayout());
 		
 		panelPopulations.setMinimumSize(new Dimension(100, 100));

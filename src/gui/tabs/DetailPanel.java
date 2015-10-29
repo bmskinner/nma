@@ -27,6 +27,8 @@ import gui.SignalChangeListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
@@ -45,8 +47,10 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
-	public DetailPanel(){
-		
+	protected Logger programLogger;
+	
+	public DetailPanel(Logger programLogger){
+		this.programLogger = programLogger;
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
@@ -70,7 +74,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
      * @param message
      */
     public void log(String message){
-    	fireSignalChangeEvent("Log_"+message);
+//    	fireSignalChangeEvent("Log_"+message);
+    	programLogger.log(Level.INFO, message);
     }
     
     
@@ -87,11 +92,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
      * @param message
      * @param e
      */
-    public void error(String message, Exception e){
-    	log(message+": "+e.getMessage());
-		for(StackTraceElement e1 : e.getStackTrace()){
-			log(e1.toString());
-		}
+    public void error(String message, Throwable e){
+    	programLogger.log(Level.SEVERE, message, e);
+//    	log(message+": "+e.getMessage());
+//		for(StackTraceElement e1 : e.getStackTrace()){
+//			log(e1.toString());
+//		}
     }
 	
     protected synchronized void fireSignalChangeEvent(String message) {

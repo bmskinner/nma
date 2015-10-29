@@ -34,6 +34,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -89,8 +91,8 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	/**
 	 * Create the panel.
 	 */
-	public SignalsDetailPanel() {
-		
+	public SignalsDetailPanel(Logger programLogger) {
+		super(programLogger);
 		try{
 
 			this.setLayout(new BorderLayout());
@@ -138,11 +140,17 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 				if(list.size()==1){
 					activeDataset = list.get(0);
 				}
+				programLogger.log(Level.FINEST, "Updating signals detail panel");
 				shellsPanel.update(list);
+				programLogger.log(Level.FINEST, "Updated shells panel");
 				overviewPanel.update(list);
+				programLogger.log(Level.FINEST, "Updated signals overview panel");
 				histogramPanel.update(list);
+				programLogger.log(Level.FINEST, "Updated signals histogram panel");
 				analysisPanel.update(list);
+				programLogger.log(Level.FINEST, "Updated signals analysis panel");
 				boxplotPanel.update(list);
+				programLogger.log(Level.FINEST, "Updated signals boxplot panel");
 			
 		}});
 
