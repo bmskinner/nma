@@ -19,6 +19,7 @@
 package charting.charts;
 
 import gui.components.ColourSelecter;
+import ij.IJ;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -134,28 +135,34 @@ public class HistogramChartFactory {
 			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
 			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
 			
-			for(AnalysisDataset dataset : list){
+			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
-				for (int j = 0; j < ds.getSeriesCount(); j++) {
-										
-					plot.getRenderer().setSeriesVisibleInLegend(j, false);
-					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+
+				String seriesKey = (String) ds.getSeriesKey(j);
+				String seriesName = seriesKey.replace(stat.toString()+"_", "");
+//				IJ.log("Replacing  :  "+stat.toString());
+//				IJ.log(seriesKey+ "  :  "+seriesName);
+				
+				for(AnalysisDataset dataset : list){
 					
-					String seriesKey = (String) ds.getSeriesKey(j);
-					String seriesName = seriesKey.replace(xLabel+"_", "");
-					
+//					IJ.log("     "+dataset.getName());
+
 					if(seriesName.equals(dataset.getName())){
-						
-						Color colour = dataset.getDatasetColour()==null
-										? ColourSelecter.getSegmentColor(j)
-										: dataset.getDatasetColour();
-										
+//						IJ.log("      Match");
+						Color colour = dataset.hasDatasetColour()
+								? dataset.getDatasetColour()
+										: ColourSelecter.getSegmentColor(j);
+
+
 						plot.getRenderer().setSeriesPaint(j, colour);
-//						plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
-						
+
 					}
 				}
+				
 			}
+//			IJ.log("     ");
 		}
 		return chart;
 	}
@@ -169,7 +176,9 @@ public class HistogramChartFactory {
 	 * @return
 	 */
 	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
-		String xLabel = stat.toString()+" ("+scale.toString()+")";
+		
+		String xLabel = stat.label(scale);
+//		String xLabel = stat.toString()+" ("+scale.toString()+")";
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
@@ -185,26 +194,32 @@ public class HistogramChartFactory {
 			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
 			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
 			
-			for(AnalysisDataset dataset : list){
+			
+			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
-				for (int j = 0; j < ds.getSeriesCount(); j++) {
-										
-					plot.getRenderer().setSeriesVisibleInLegend(j, false);
-					plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-					
-					String seriesKey = (String) ds.getSeriesKey(j);
-					String seriesName = seriesKey.replace(xLabel+"_", "");
-					
+				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+
+				String seriesKey = (String) ds.getSeriesKey(j);
+				String seriesName = seriesKey.replace(stat.toString()+"_", "");
+
+
+				for(AnalysisDataset dataset : list){
+
 					if(seriesName.equals(dataset.getName())){
-						
-						Color colour = dataset.getDatasetColour()==null
-										? ColourSelecter.getSegmentColor(j)
-										: dataset.getDatasetColour();
-										
-						plot.getRenderer().setSeriesPaint(j, colour);						
+
+						Color colour = dataset.hasDatasetColour()
+								? dataset.getDatasetColour()
+								: ColourSelecter.getSegmentColor(j);
+
+
+								plot.getRenderer().setSeriesPaint(j, colour);
+
 					}
 				}
+
 			}
+
 		}
 		return chart;
 	}

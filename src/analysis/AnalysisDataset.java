@@ -748,6 +748,19 @@ public class AnalysisDataset implements Serializable {
 	public Color getDatasetColour(){
 		return this.datasetColour;
 	}
+	
+	
+	/**
+	 * Test if the dataset colour is set or null
+	 * @return
+	 */
+	public boolean hasDatasetColour(){
+		if(this.getDatasetColour()==null){
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	/**
 	 * Get the swatch. Transient, not saved to nmd
