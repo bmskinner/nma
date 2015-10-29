@@ -42,7 +42,6 @@ public class MergesDetailPanel extends DetailPanel {
 	private JTable		mergeSources;
 	private JButton		getSourceButton = new JButton("Recover source");
 	private AnalysisDataset activeDataset;
-	private Logger programLogger;
 	
 	public MergesDetailPanel(Logger programLogger){
 		super(programLogger);
@@ -86,42 +85,45 @@ public class MergesDetailPanel extends DetailPanel {
 	}
 	
 	public void update(List<AnalysisDataset> list){
-		programLogger.log(Level.FINEST, "Updating merges panel");
-		getSourceButton.setVisible(false);
-		if(list.size()==1){
-			AnalysisDataset dataset = list.get(0);
-			activeDataset = dataset;
+		try {
+			programLogger.log(Level.FINEST, "Updating merges panel");
+			getSourceButton.setVisible(false);
+			if(list.size()==1){
+				AnalysisDataset dataset = list.get(0);
+				activeDataset = dataset;
 
-			if(dataset.hasMergeSources()){
-				
-				DefaultTableModel model = new DefaultTableModel();
+				if(dataset.hasMergeSources()){
 
-				Vector<Object> names 	= new Vector<Object>();
-				Vector<Object> nuclei 	= new Vector<Object>();
+					DefaultTableModel model = new DefaultTableModel();
 
-				for( UUID id : dataset.getMergeSources()){
-					AnalysisDataset mergeSource = dataset.getMergeSource(id);
-					names.add(mergeSource.getName());
-					nuclei.add(mergeSource.getCollection().getNucleusCount());
+					Vector<Object> names 	= new Vector<Object>();
+					Vector<Object> nuclei 	= new Vector<Object>();
+
+					for( UUID id : dataset.getMergeSources()){
+						AnalysisDataset mergeSource = dataset.getMergeSource(id);
+						names.add(mergeSource.getName());
+						nuclei.add(mergeSource.getCollection().getNucleusCount());
+					}
+					model.addColumn("Merge source", names);
+					model.addColumn("Nuclei", nuclei);
+
+					mergeSources.setModel(model);
+					getSourceButton.setVisible(true);
+
+				} else {
+					try{
+						mergeSources.setModel(makeBlankTable());
+					} catch (Exception e){
+						//					TODO: fix error
+					}
 				}
-				model.addColumn("Merge source", names);
-				model.addColumn("Nuclei", nuclei);
-
-				mergeSources.setModel(model);
-				getSourceButton.setVisible(true);
-				
-			} else {
-				try{
+			} else { // more than one dataset selected
 				mergeSources.setModel(makeBlankTable());
-				} catch (Exception e){
-//					TODO: fix error
-				}
 			}
-		} else { // more than one dataset selected
-			mergeSources.setModel(makeBlankTable());
+			programLogger.log(Level.FINEST, "Updated merges panel");
+		} catch (Exception e){
+			error("Error updating merges panel", e);
 		}
-		programLogger.log(Level.FINEST, "Updated merges panel");
-		
 	}
 	
 	private DefaultTableModel makeBlankTable(){

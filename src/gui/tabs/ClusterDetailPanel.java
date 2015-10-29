@@ -49,7 +49,6 @@ public class ClusterDetailPanel extends DetailPanel {
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		
 	private ClustersPanel clusterPanel;
-	private Logger programLogger;
 
 	public ClusterDetailPanel(Logger programLogger) {
 		super(programLogger);
