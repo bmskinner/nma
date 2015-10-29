@@ -38,7 +38,7 @@ import analysis.AnalysisDataset;
  * @author bms41
  *
  */
-public abstract class DetailPanel extends JPanel {
+public abstract class DetailPanel extends JPanel implements TabPanel{
 	
 	private static final long serialVersionUID = 1L;
 	private List<Object> listeners = new ArrayList<Object>();

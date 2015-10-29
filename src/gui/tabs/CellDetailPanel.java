@@ -153,6 +153,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		return centrePanel;
 	}
 	
+	
+	public void update(List<AnalysisDataset> list){
+		updateList(list);
+	}
 	/**
 	 * Update the panel with a list of AnalysisDatasets. Data
 	 * will only be displayed if the list contains one dataset.

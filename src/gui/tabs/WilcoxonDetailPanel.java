@@ -108,13 +108,13 @@ public class WilcoxonDetailPanel extends DetailPanel {
 		panel.add(table);
 		table.setEnabled(false);
 	}
-	
+		
 	/**
 	 * Update the wilcoxon panel with data from the given datasets
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
-	public void update(final List<AnalysisDataset> list) throws Exception {
+	public void update(final List<AnalysisDataset> list) {
 
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){

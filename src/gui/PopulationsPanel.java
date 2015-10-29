@@ -89,6 +89,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		this.add(panelPopulations, BorderLayout.CENTER);
 
 	}
+	public void update(List<AnalysisDataset> list){
+		
+	}
 	
 	/**
 	 *  Find the populations in memory, and display them in the population chooser. 
