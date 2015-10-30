@@ -23,6 +23,7 @@ import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
 import gui.tabs.ClusterDetailPanel;
+import gui.tabs.DetailPanel;
 import gui.tabs.MergesDetailPanel;
 import gui.tabs.NuclearBoxplotsPanel;
 import gui.tabs.NucleusProfilesPanel;
@@ -120,6 +121,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
 	
+	private List<DetailPanel> detailPanels = new ArrayList<DetailPanel>(); // store panels for iterating messsages
+	
 	private ColourSwatch activeSwatch = ColourSwatch.REGULAR_SWATCH;
 		
 	// Flags to pass to ProgressableActions to determine the analyses
@@ -163,10 +166,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the consensus chart
 			//---------------
 			populationsPanel = new PopulationsPanel(programLogger);
+			detailPanels.add(populationsPanel);
 			populationsPanel.addSignalChangeListener(this);
 			populationsPanel.addDatasetEventListener(this);
 			
 			consensusNucleusPanel = new ConsensusNucleusPanel(programLogger);
+			detailPanels.add(consensusNucleusPanel);
 			consensusNucleusPanel.addSignalChangeListener(this);
 			consensusNucleusPanel.addDatasetEventListener(this);
 			
@@ -216,18 +221,21 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the profiles
 			//---------------
 			nucleusProfilesPanel = new NucleusProfilesPanel(programLogger);
+			detailPanels.add(nucleusProfilesPanel);
 			tabbedPane.addTab("Profiles", null, nucleusProfilesPanel, null);
 
 			//---------------
 			// Create the general stats page
 			//---------------
 			analysisDetailPanel = new AnalysisDetailPanel(programLogger);
+			detailPanels.add(analysisDetailPanel);
 			tabbedPane.addTab("Analysis info", analysisDetailPanel);
 
 			//---------------
 			// Create panel for split boxplots
 			//---------------
 			nuclearBoxplotsPanel  = new NuclearBoxplotsPanel(programLogger);
+			detailPanels.add(nuclearBoxplotsPanel);
 			nuclearBoxplotsPanel.addSignalChangeListener(this);
 			nuclearBoxplotsPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Nuclear charts", nuclearBoxplotsPanel);
@@ -237,6 +245,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the signals tab panel
 			//---------------
 			signalsDetailPanel  = new SignalsDetailPanel(programLogger);
+			detailPanels.add(signalsDetailPanel);
 			signalsDetailPanel.addSignalChangeListener(this);
 			signalsDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Signals", signalsDetailPanel);
@@ -246,6 +255,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the clusters panel
 			//---------------
 			clusterDetailPanel = new ClusterDetailPanel(programLogger);
+			detailPanels.add(clusterDetailPanel);
 			clusterDetailPanel.addSignalChangeListener(this);
 			clusterDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Clusters", clusterDetailPanel);
@@ -254,6 +264,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the merges panel
 			//---------------
 			mergesDetailPanel = new MergesDetailPanel(programLogger);
+			detailPanels.add(mergesDetailPanel);
 			mergesDetailPanel.addSignalChangeListener(this);
 			mergesDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Merges", mergesDetailPanel);
@@ -262,6 +273,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the Venn panel
 			//---------------
 			vennDetailPanel = new VennDetailPanel(programLogger);
+			detailPanels.add(vennDetailPanel);
 			vennDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Venn", null, vennDetailPanel, null);
 			
@@ -270,6 +282,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the Wilcoxon test panel
 			//---------------
 			wilcoxonDetailPanel = new WilcoxonDetailPanel(programLogger);
+			detailPanels.add(wilcoxonDetailPanel);
 			wilcoxonDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Wilcoxon", null, wilcoxonDetailPanel, null);
 			
@@ -277,6 +290,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the segments boxplot panel
 			//---------------
 			segmentsDetailPanel = new SegmentsDetailPanel(programLogger);
+			detailPanels.add(segmentsDetailPanel);
 			segmentsDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Segments", null, segmentsDetailPanel, null);
 
@@ -284,6 +298,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the cells panel
 			//---------------
 			cellDetailPanel = new CellDetailPanel(programLogger);
+			detailPanels.add(cellDetailPanel);
 			cellDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
 			cellDetailPanel.addSignalChangeListener(this);
@@ -1896,6 +1911,11 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 			}
 			
+			if(event.method().equals(DatasetMethod.RECALCULATE_CACHE)){
+				for(DetailPanel panel : detailPanels){
+					panel.refreshChartCache(list);
+				}
+			}
 			
 			
 		}

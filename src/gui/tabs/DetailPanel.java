@@ -61,6 +61,16 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 		return this.cache;
 	}
 	
+	/**
+	 * Remove all charts from the cache containing datasets in
+	 * the given list, so they will be recalculated
+	 * @param list
+	 */
+	public void refreshChartCache(List<AnalysisDataset> list){
+		programLogger.log(Level.FINEST, "Refreshing chart cache");
+		this.getChartCache().refresh(list);
+	}
+	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
         listeners.add( l );
     }

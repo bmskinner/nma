@@ -19,6 +19,7 @@
 package gui;
 
 
+import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.tabs.DetailPanel;
 import io.PopulationExporter;
@@ -56,7 +57,6 @@ import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import utility.TreeOrderHashMap;
 import analysis.AnalysisDataset;
-
 import components.CellCollection;
 import components.ClusterGroup;
 
@@ -261,6 +261,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						
 						if(newColor != null){
 							dataset.setDatasetColour(newColor);
+							
+							// Force the chart caches to clear
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(dataset);
+							fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
 						}
 
 						fireSignalChangeEvent("UpdatePanels");

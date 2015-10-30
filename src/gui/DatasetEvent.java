@@ -89,7 +89,8 @@ public class DatasetEvent extends EventObject {
 		REFOLD_CONSENSUS	("Refold consensus"),
 		SELECT_DATASETS		("Select datasets"),
 		EXTRACT_SOURCE		("Extract source"),
-		CLUSTER 			("Cluster");
+		CLUSTER 			("Cluster"),
+		RECALCULATE_CACHE	("Recalculate caches");
 		
 		private final String name;
 		
