@@ -31,6 +31,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
+import charting.DefaultTableOptions;
+import charting.DefaultTableOptions.TableType;
+import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 
 /**
@@ -88,11 +91,23 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 */
 	private void updateAnalysisParametersPanel(List<AnalysisDataset> list){
-		// format the numbers and make into a tablemodel
+		
 		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);;
 		if(list!=null && !list.isEmpty()){
-			model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
+
+			TableOptions options = new DefaultTableOptions(list, TableType.ANALYSIS_PARAMETERS);
+
+			if(getTableCache().hasTable(options)){
+				model = getTableCache().getTable(options);
+				programLogger.log(Level.FINEST, "Fetched cached analysis parameters table");
+			} else {
+				model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
+				getTableCache().addTable(options, model);
+				programLogger.log(Level.FINEST, "Added cached analysis parameters table");
+			}
 		}
+		
+		
 		tableAnalysisParamters.setModel(model);
 		tableAnalysisParamters.createDefaultColumnsFromModel();
 	}
@@ -108,7 +123,18 @@ public class AnalysisDetailPanel extends DetailPanel {
 			TableModel model = NucleusTableDatasetCreator.createStatsTable(null);
 
 			if(list!=null && !list.isEmpty()){
-				model = NucleusTableDatasetCreator.createStatsTable(list);
+				
+				TableOptions options = new DefaultTableOptions(list, TableType.ANALYSIS_STATS);
+
+				if(getTableCache().hasTable(options)){
+					model = getTableCache().getTable(options);
+					programLogger.log(Level.FINEST, "Fetched cached analysis stats table");
+				} else {
+					model = NucleusTableDatasetCreator.createStatsTable(list);
+					getTableCache().addTable(options, model);
+					programLogger.log(Level.FINEST, "Added cached analysis stats table");
+				}
+				
 			}
 			tablePopulationStats.setModel(model);
 		} catch(Exception e){

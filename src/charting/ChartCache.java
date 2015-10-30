@@ -1,4 +1,4 @@
-package charting.charts;
+package charting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import org.jfree.chart.JFreeChart;
 
+import charting.charts.ChartOptions;
 import analysis.AnalysisDataset;
 
 /*

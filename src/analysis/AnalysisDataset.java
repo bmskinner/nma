@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.ChartCache;
+import charting.ChartCache;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import logging.LogPanelFormatter;

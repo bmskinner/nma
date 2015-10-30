@@ -32,7 +32,8 @@ import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
-import charting.charts.ChartCache;
+import charting.ChartCache;
+import charting.TableCache;
 import analysis.AnalysisDataset;
 
 /**
@@ -49,7 +50,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
 	// The chart cache holds rendered charts for all selected options, until a change is made to a dataset
-	protected ChartCache cache = new ChartCache();
+	// The table cache does the same for table models
+	protected ChartCache chartCache = new ChartCache();
+	protected TableCache tableCache = new TableCache();
 	
 	protected Logger programLogger;
 	
@@ -58,7 +61,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	}
 	
 	public ChartCache getChartCache(){
-		return this.cache;
+		return this.chartCache;
 	}
 	
 	/**
@@ -69,6 +72,20 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	public void refreshChartCache(List<AnalysisDataset> list){
 		programLogger.log(Level.FINEST, "Refreshing chart cache");
 		this.getChartCache().refresh(list);
+	}
+	
+	public TableCache getTableCache(){
+		return this.tableCache;
+	}
+	
+	/**
+	 * Remove all tables from the cache containing datasets in
+	 * the given list, so they will be recalculated
+	 * @param list
+	 */
+	public void refreshTableCache(List<AnalysisDataset> list){
+		programLogger.log(Level.FINEST, "Refreshing chart cache");
+		this.getTableCache().refresh(list);
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
