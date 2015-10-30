@@ -69,6 +69,7 @@ import utility.Constants;
 import utility.DipTester;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.ProfileChartOptions;
 import charting.datasets.NucleusDatasetCreator;
 import components.CellCollection;
 import components.generic.BooleanProfile;
@@ -543,7 +544,9 @@ public class NucleusProfilesPanel extends DetailPanel {
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			
-			updateProfiles(list, normalised, alignment, tag, showMarkers);
+			ProfileChartOptions options = new ProfileChartOptions(list, normalised, alignment, tag, showMarkers, ProfileCollectionType.REGULAR);
+			
+			updateProfiles(options);
 		}
 		
 		/**
@@ -552,33 +555,34 @@ public class NucleusProfilesPanel extends DetailPanel {
 		 * @param normalised flag for raw or normalised lengths
 		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 		 */	
-		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag tag, boolean showMarkers){
+		private void updateProfiles(ProfileChartOptions options){
 			try {	
+				JFreeChart chart = null;
+
+				// Check for a cached chart
+				if(getChartCache().hasChart(options)){
+					
+					programLogger.log(Level.FINEST, "Using cached profile chart");
+					chart = getChartCache().getChart(options);
+
+				} else { // No cache
+
+					if(list.size()==1){
+
+						// full segment colouring
+						chart = MorphologyChartFactory.makeSingleProfileChart( options );
+						chartPanel.setChart(chart);
+
+					} else {
+
+						chart = MorphologyChartFactory.makeMultiProfileChart( options );
+
 						
-				if(list.size()==1){
-
-					// full segment colouring
-					JFreeChart chart = MorphologyChartFactory.makeSingleProfileChart(list.get(0), normalised, alignment, tag, showMarkers);
-					chartPanel.setChart(chart);
-					
-				} else {
-					// many profiles, colour them all the same
-					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRDataset(list, normalised, alignment, tag);				
-					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileDataset(	  list, normalised, alignment, tag);
-									
-					// find the maximum profile length - used when rendering raw profiles
-					int length = 100;
-
-					if(!normalised){
-						for(AnalysisDataset d : list){
-							length = (int) Math.max( d.getCollection().getMedianArrayLength(), length);
-						}
 					}
-					
-					JFreeChart chart = MorphologyChartFactory.makeMultiProfileChart(list, medianProfiles, iqrProfiles, length);
-								
-					chartPanel.setChart(chart);
+					getChartCache().addChart(options, chart);
+					programLogger.log(Level.FINEST, "Added cached profile chart");
 				}
+				chartPanel.setChart(chart);
 				
 			} catch (Exception e) {
 				error("Error in plotting profile", e);			
@@ -605,7 +609,10 @@ public class NucleusProfilesPanel extends DetailPanel {
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			
-			updateProfiles(list, normalised, alignment, tag, showMarkers);
+			ProfileChartOptions options = new ProfileChartOptions(list, normalised, alignment, tag, showMarkers, ProfileCollectionType.FRANKEN);
+			
+			
+			updateProfiles(options);
 		}
 		
 		/**
@@ -614,32 +621,41 @@ public class NucleusProfilesPanel extends DetailPanel {
 		 * @param normalised flag for raw or normalised lengths
 		 * @param rightAlign flag for left or right alignment (no effect if normalised is true)
 		 */	
-		private void updateProfiles(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag tag, boolean showMarkers){
+		private void updateProfiles(ProfileChartOptions options){
 					
 			try {
-				if(list.size()==1){
-					
-					JFreeChart chart = MorphologyChartFactory.makeFrankenProfileChart(list.get(0), normalised, alignment, tag, showMarkers);
-					chartPanel.setChart(chart);
-				} else {
+				JFreeChart chart = null;
+			
+				
+				if(getChartCache().hasChart(options)){
 
-					// many profiles, colour them all the same
-					List<XYSeriesCollection> iqrProfiles = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(list, normalised, alignment, tag);				
-					XYDataset medianProfiles			 = NucleusDatasetCreator.createMultiProfileFrankenDataset(	  list, normalised, alignment, tag);
-									
-					
-					JFreeChart chart = MorphologyChartFactory.makeMultiProfileChart(list, medianProfiles, iqrProfiles, 100);
-					chartPanel.setChart(chart);
+					programLogger.log(Level.FINEST, "Using cached frankenprofile chart");
+					chart = getChartCache().getChart(options);
+
+				} else { // No cache
+
+
+					if(list.size()==1){
+
+						chart = MorphologyChartFactory.makeFrankenProfileChart(options);
+
+					} else {
+
+						chart = MorphologyChartFactory.makeMultiProfileChart(options);
+					}
+					getChartCache().addChart(options, chart);
+					programLogger.log(Level.FINEST, "Added cached frankenprofile chart");
 				}
+				chartPanel.setChart(chart);
 
 			} catch (Exception e) {
-				log("Error in plotting frankenprofile: "+e.getMessage());
-				for(AnalysisDataset d : list){
-					log(d.getName());
-					ProfileCollection f = d.getCollection().getProfileCollection(ProfileCollectionType.FRANKEN);
-					log(f.printKeys());
-				}
-				error("Error in plotting fankenprofile", e);
+//				log("Error in plotting frankenprofile: "+e.getMessage());
+//				for(AnalysisDataset d : list){
+//					log(d.getName());
+//					ProfileCollection f = d.getCollection().getProfileCollection(ProfileCollectionType.FRANKEN);
+//					log(f.printKeys());
+//				}
+				error("Error in plotting frankenprofile", e);
 			} 
 		}
 

@@ -65,11 +65,11 @@ import org.jfree.data.xy.XYDataset;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
+import charting.charts.BoxplotChartFactory;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
-
 import components.CellCollection;
 import components.nuclear.ShellResult;
 
@@ -642,7 +642,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
     		this.setLayout(new BorderLayout());
     		
-    		JFreeChart areaBoxplot = MorphologyChartFactory.makeEmptyBoxplot();
+    		JFreeChart areaBoxplot = BoxplotChartFactory.makeEmptyBoxplot();
 			chartPanel = new ChartPanel(areaBoxplot);
 			this.add(chartPanel);
     	}
@@ -654,10 +654,10 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	protected void update(List<AnalysisDataset> list){
     		if(list.size()==1){
     			BoxAndWhiskerCategoryDataset ds = NuclearSignalDatasetCreator.createSignalAreaBoxplotDataset(list.get(0));
-    			JFreeChart boxplotChart = MorphologyChartFactory.makeSignalAreaBoxplot(ds, list.get(0));
+    			JFreeChart boxplotChart = BoxplotChartFactory.makeSignalAreaBoxplot(ds, list.get(0));
     			chartPanel.setChart(boxplotChart);
     		} else {
-    			JFreeChart areaBoxplot = MorphologyChartFactory.makeEmptyBoxplot();
+    			JFreeChart areaBoxplot = BoxplotChartFactory.makeEmptyBoxplot();
     			chartPanel.setChart(areaBoxplot);
     		}
     	}

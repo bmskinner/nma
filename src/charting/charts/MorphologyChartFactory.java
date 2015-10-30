@@ -68,12 +68,12 @@ import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory {
 	
-	private static final BasicStroke SEGMENT_STROKE = new BasicStroke(3);
-	private static final BasicStroke MARKER_STROKE = new BasicStroke(2);
-	private static final BasicStroke PROFILE_STROKE = new BasicStroke(1);
-	private static final BasicStroke QUARTILE_STROKE = new BasicStroke(1);
+	static final BasicStroke SEGMENT_STROKE = new BasicStroke(3);
+	static final BasicStroke MARKER_STROKE = new BasicStroke(2);
+	static final BasicStroke PROFILE_STROKE = new BasicStroke(1);
+	static final BasicStroke QUARTILE_STROKE = new BasicStroke(1);
 	
-	private static final ValueMarker DEGREE_LINE_180 = new ValueMarker(180, Color.BLACK, MARKER_STROKE);
+	static final ValueMarker DEGREE_LINE_180 = new ValueMarker(180, Color.BLACK, MARKER_STROKE);
 	/**
 	 * Create an empty chart to display when no datasets are selected
 	 * @return a chart
@@ -113,6 +113,15 @@ public class MorphologyChartFactory {
 			plot.addDomainMarker(new ValueMarker(index, colour, MARKER_STROKE));	
 		}
 		return chart;
+	}
+	
+	public static JFreeChart makeSingleProfileChart(ProfileChartOptions options) throws Exception {
+		return makeSingleProfileChart(
+				options.getDatasets().get(0),
+				options.isNormalised(),
+				options.getAlignment(),
+				options.getTag(),
+				options.isShowMarkers());
 	}
 	
 	/**
@@ -238,6 +247,15 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
+	
+	public static JFreeChart makeFrankenProfileChart(ProfileChartOptions options) throws Exception {
+		return makeFrankenProfileChart(
+				options.getDatasets().get(0),
+				options.isNormalised(),
+				options.getAlignment(),
+				options.getTag(),
+				options.isShowMarkers());
+	}
 	
 	/**
 	 * Create a segmented profile chart from a given XYDataset. Set the series 
@@ -388,14 +406,39 @@ public class MorphologyChartFactory {
 	 * @param xLength the length of the x axis
 	 * @return a chart
 	 */
-	public static JFreeChart makeMultiProfileChart(List<AnalysisDataset> list, XYDataset medianProfiles, List<XYSeriesCollection> iqrProfiles, int xLength)  throws Exception{
+	public static JFreeChart makeMultiProfileChart(ProfileChartOptions options)  throws Exception{
+		
+		List<XYSeriesCollection> iqrProfiles = null;
+		XYDataset medianProfiles			 = null;
+		if(options.getType().equals(ProfileCollectionType.REGULAR)){
+			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRDataset( options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
+			medianProfiles	= NucleusDatasetCreator.createMultiProfileDataset(	  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());
+		}
+		
+		if(options.getType().equals(ProfileCollectionType.FRANKEN)){
+			iqrProfiles     = NucleusDatasetCreator.createMultiProfileIQRFrankenDataset(  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
+			medianProfiles	= NucleusDatasetCreator.createMultiProfileFrankenDataset(	  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());
+		}
+		
+		
+		// find the maximum profile length - used when rendering raw profiles
+		int length = 100;
+
+		if(!options.isNormalised()){
+			for(AnalysisDataset d : options.getDatasets()){
+				length = (int) Math.max( d.getCollection().getMedianArrayLength(), length);
+			}
+		}
+		
+		
+		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
 				                false);
 		
 		XYPlot plot = chart.getXYPlot();
-		plot.getDomainAxis().setRange(0,xLength);
+		plot.getDomainAxis().setRange(0,length);
 		plot.getRangeAxis().setRange(0,360);
 		plot.setBackgroundPaint(Color.WHITE);
 
@@ -419,9 +462,9 @@ public class MorphologyChartFactory {
 			int index = MorphologyChartFactory.getIndexFromLabel(name); 
 
 			// make a transparent color based on teh profile segmenter system
-			Color profileColour = list.get(index).getDatasetColour() == null 
+			Color profileColour = options.getDatasets().get(index).getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(i)
-					: list.get(index).getDatasetColour();
+					: options.getDatasets().get(index).getDatasetColour();
 
 					Color iqrColour		= ColourSelecter.getTransparentColour(profileColour, true, 128);
 
@@ -449,9 +492,9 @@ public class MorphologyChartFactory {
 			String name = (String) medianProfiles.getSeriesKey(j);
 			int index = MorphologyChartFactory.getIndexFromLabel(name); 
 			
-			Color profileColour = list.get(index).getDatasetColour() == null 
+			Color profileColour = options.getDatasets().get(index).getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(j)
-					: list.get(index).getDatasetColour();
+					: options.getDatasets().get(index).getDatasetColour();
 					
 			medianRenderer.setSeriesPaint(j, profileColour.darker());
 		}
@@ -528,144 +571,6 @@ public class MorphologyChartFactory {
 			} 
 		};
 		return panel;
-	}
-	
-	/**
-	 * Create an empty boxplot
-	 * @return
-	 */
-	public static JFreeChart makeEmptyBoxplot(){
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, new DefaultBoxAndWhiskerCategoryDataset(), false);	
-		formatBoxplot(boxplot);
-		return boxplot;
-	}
-	
-	private static void formatBoxplot(JFreeChart boxplot){
-		boxplot.getPlot().setBackgroundPaint(Color.WHITE);
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		plot.setBackgroundPaint(Color.WHITE);
-		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-		plot.setRenderer(renderer);
-		renderer.setUseOutlinePaintForWhiskers(true);   
-		renderer.setBaseOutlinePaint(Color.BLACK);
-		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-		renderer.setMeanVisible(false);
-	}
-	
-	/**
-	 * Create and format a boxplot based on a dataset
-	 * @param ds the dataset
-	 * @return
-	 */
-	public static JFreeChart makeSegmentBoxplot(BoxAndWhiskerCategoryDataset ds, List<AnalysisDataset> list){
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Index length difference\nto segment in median", ds, false);	
-		
-		
-		if(ds==null || list==null){
-			return makeEmptyBoxplot();
-		}
-		
-		formatBoxplot(boxplot);
-		CategoryPlot plot = boxplot.getCategoryPlot();
-				
-		if(list!=null && !list.isEmpty()){
-						
-			for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
-			
-				CategoryDataset dataset = plot.getDataset(datasetIndex);
-				BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-				
-				for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
-
-					String segName = (String) dataset.getRowKey(series);
-					int segIndex = getIndexFromLabel(segName);
-					
-					Color color = list.get(0).getSwatch().color(segIndex);
-//					Color color = ColourSelecter.getOptimisedColor(segIndex);
-					renderer.setSeriesPaint(series, color);
-//					renderer.setSeriesFillPaint(series, color);
-					renderer.setSeriesOutlinePaint(series, Color.BLACK);
-				}
-				
-				renderer.setMeanVisible(false);
-				renderer.setItemMargin(0.08);
-				renderer.setMaximumBarWidth(0.10);
-				plot.setRenderer(datasetIndex, renderer);
-			}
-		}
-		
-		ValueMarker zeroMarker =
-	              new ValueMarker(0.00, Color.black, PROFILE_STROKE);
-
-	      plot.addRangeMarker(zeroMarker);
-		
-		return boxplot;
-	}
-	
-	/**
-	 * Create a segment length boxplot for the given segment name
-	 * @param ds the dataset
-	 * @return
-	 */
-	public static JFreeChart makeSegmentBoxplot(String segName, List<AnalysisDataset> list, MeasurementScale scale) throws Exception {
-
-		if(list==null){
-			return makeEmptyBoxplot();
-		}
-		
-		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName, scale);
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Segment length ("+scale.toString()+")", ds, false);	
-		
-		formatBoxplot(boxplot);
-		CategoryPlot plot = boxplot.getCategoryPlot();
-				
-		if(list!=null && !list.isEmpty()){
-						
-			for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
-			
-				CategoryDataset dataset = plot.getDataset(datasetIndex);
-				BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-				
-				for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
-
-					int segIndex = getIndexFromLabel(segName);
-					
-//					ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
-					
-//					Color color = swatch.color(segIndex);
-					Color color = list.get(series).getDatasetColour() == null 
-							? ColourSelecter.getSegmentColor(series)
-							: list.get(series).getDatasetColour();
-
-					renderer.setSeriesPaint(series, color);
-					renderer.setSeriesOutlinePaint(series, Color.BLACK);
-				}
-				
-				renderer.setMeanVisible(false);
-				plot.setRenderer(datasetIndex, renderer);
-			}
-		}		
-		return boxplot;
-	}
-	
-	public static JFreeChart makeSignalAreaBoxplot(BoxAndWhiskerCategoryDataset ds, AnalysisDataset dataset){
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null, ds, false);
-		formatBoxplot(boxplot);
-		
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
-
-		for(int series=0;series<ds.getRowCount();series++){
-			String name = (String) ds.getRowKey(series);
-			int seriesGroup = getIndexFromLabel(name);
-
-			Color color = dataset.getSignalGroupColour(seriesGroup) == null 
-					? ColourSelecter.getSegmentColor(series)
-							: dataset.getSignalGroupColour(seriesGroup);
-
-					renderer.setSeriesPaint(series, color);
-		}		
-		return boxplot;
 	}
 	
 	

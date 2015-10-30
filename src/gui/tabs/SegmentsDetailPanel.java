@@ -56,6 +56,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
+import charting.charts.BoxplotChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
@@ -509,7 +510,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			this.setLayout(new BorderLayout());
 			
-			JFreeChart boxplot = MorphologyChartFactory.makeEmptyBoxplot();
+			JFreeChart boxplot = BoxplotChartFactory.makeEmptyBoxplot();
 			
 
 			ChartPanel chartPanel = new ChartPanel(boxplot);
@@ -568,7 +569,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						// Get each segment as a boxplot
 						for( int i=0; i<prevCount; i++){
 							String segName = "Seg_"+i;
-							JFreeChart boxplot = MorphologyChartFactory.makeSegmentBoxplot(segName, list, scale);
+							JFreeChart boxplot = BoxplotChartFactory.makeSegmentBoxplot(segName, list, scale);
 							ChartPanel chartPanel = new ChartPanel(boxplot);
 							chartPanel.setPreferredSize(preferredSize);
 							mainPanel.add(chartPanel);

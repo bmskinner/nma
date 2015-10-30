@@ -58,6 +58,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import analysis.AnalysisDataset;
+import charting.charts.BoxplotChartFactory;
 import charting.charts.BoxplotChartOptions;
 import charting.charts.HistogramChartFactory;
 import charting.charts.HistogramChartOptions;
@@ -131,14 +132,15 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 				
-				JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(	null, 
-						null, 
-						null, 
-						new DefaultBoxAndWhiskerCategoryDataset(), 
-						false);	
-				formatBoxplotChart(boxplot);
+				BoxplotChartOptions options = new BoxplotChartOptions(list, stat, MeasurementScale.PIXELS);
+				JFreeChart chart = null;
+				try {
+					chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
+				} catch (Exception e) {
+					error("Error creating boxplots panel", e);
+				}
 				
-				ChartPanel panel = new ChartPanel(boxplot);
+				ChartPanel panel = new ChartPanel(chart);
 				panel.setPreferredSize(preferredSize);
 				chartPanels.put(stat, panel);
 				mainPanel.add(panel);
@@ -160,82 +162,37 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		 */
 		public void update(List<AnalysisDataset> list){
 
-			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
-			
-			updateWithScale(list, scale);
-			
-		}
-		
-		/**
-		 * Update with the given measurement scale
-		 * @param list
-		 * @param scale
-		 */
-		private void updateWithScale(List<AnalysisDataset> list, MeasurementScale scale){
 			try {
+				
+				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 
 				for(NucleusStatistic stat : NucleusStatistic.values()){
 
 					ChartPanel panel = chartPanels.get(stat);
-					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createBoxplotDataset(list, stat, scale);
-					String yLabel = scale.yLabel(stat);
 
-					JFreeChart boxplotChart = null;
+					JFreeChart chart = null;
 					BoxplotChartOptions options = new BoxplotChartOptions(list, stat, scale);
+					
 					if(getChartCache().hasChart(options)){
 						programLogger.log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
-						boxplotChart = getChartCache().getChart(options);
+						chart = getChartCache().getChart(options);
 
 					} else { // No cache
 
-						boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false); 
-						formatBoxplotChart(boxplotChart, list);
+						chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
+						getChartCache().addChart(options, chart);
+						programLogger.log(Level.FINEST, "Added cached chart: "+stat.toString());
 					}
 
-					panel.setChart(boxplotChart);
+					panel.setChart(chart);
 				}
 
 			} catch (Exception e) {
 				error("Error updating boxplots", e);
 			}
-		}
-				
-		/**
-		 * Apply the default formatting to a boxplot with list
-		 * @param boxplot
-		 */
-		private void formatBoxplotChart(JFreeChart boxplot, List<AnalysisDataset> list){
-			formatBoxplotChart(boxplot);
-			CategoryPlot plot = boxplot.getCategoryPlot();
-			BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
 			
-			for(int i=0;i<plot.getDataset().getRowCount();i++){
-				
-				AnalysisDataset d = list.get(i);
-
-				Color color = d.getDatasetColour() == null 
-							? ColourSelecter.getSegmentColor(i)
-							: d.getDatasetColour();
-							
-							renderer.setSeriesPaint(i, color);
-			}
-			renderer.setMeanVisible(false);
 		}
-		
-		/**
-		 * Apply basic formatting to the charts, without any series added
-		 * @param boxplot
-		 */
-		private void formatBoxplotChart(JFreeChart boxplot){
-			CategoryPlot plot = boxplot.getCategoryPlot();
-			plot.setBackgroundPaint(Color.WHITE);
-			BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-			plot.setRenderer(renderer);
-			renderer.setUseOutlinePaintForWhiskers(true);   
-			renderer.setBaseOutlinePaint(Color.BLACK);
-			renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-		}
-
+						
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
