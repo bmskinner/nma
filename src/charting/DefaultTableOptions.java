@@ -28,7 +28,9 @@ public class DefaultTableOptions extends TableOptions {
 	
 	public enum TableType {
 		ANALYSIS_PARAMETERS,
-		ANALYSIS_STATS
+		ANALYSIS_STATS,
+		VENN, 
+		WILCOXON
 	}
 	
 	@Override

@@ -426,6 +426,44 @@ public class NucleusTableDatasetCreator {
 	}
 	
 	/**
+	 * Carry out pairwise wilcoxon rank-sum test on the given stat of the given datasets
+	 * @param list the datasets to test
+	 * @param stat the statistic to measure
+	 * @return a tablemodel for display
+	 */	
+	public static TableModel createWilcoxonNuclearStatTable(List<AnalysisDataset> list, NucleusStatistic stat) throws Exception {
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
+		if(list==null){
+			return model;
+		}
+
+		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
+		for(AnalysisDataset dataset : list){
+
+			Object[] popData = new Object[list.size()];
+
+			int i = 0;
+			boolean getPValue = false;
+			for(AnalysisDataset dataset2 : list){
+
+				if(dataset2.getUUID().equals(dataset.getUUID())){
+					popData[i] = "";
+					getPValue = true;
+				} else {
+					popData[i] = df.format( runWilcoxonTest( 
+							dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS), 
+							dataset2.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS), 
+							getPValue) );
+				}
+				i++;
+			}
+			model.addColumn(dataset.getName(), popData);
+		}
+		return model;
+	}
+
+	/**
 	 * Carry out pairwise wilcoxon rank-sum test on the perimeters of the given datasets
 	 * @param list the datasets to test
 	 * @return a tablemodel for display

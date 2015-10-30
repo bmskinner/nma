@@ -58,6 +58,7 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.MorphologyChartFactory;
+import charting.charts.ProfileChartOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -131,7 +132,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 	public void update(List<AnalysisDataset> list){
 		this.list = list;
-		programLogger.log(Level.FINE, "Updating segmennts detail panel");
+		programLogger.log(Level.FINE, "Updating segments detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				if(SegmentsDetailPanel.this.list!=null && !SegmentsDetailPanel.this.list.isEmpty()){
@@ -378,10 +379,18 @@ public class SegmentsDetailPanel extends DetailPanel {
 					chart = MorphologyChartFactory.makeEmptyProfileChart();
 					
 					
-				} else {				
+				} else {
+					ProfileChartOptions options = new ProfileChartOptions(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileCollectionType.REGULAR);
 					
-					chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false);
+					if(getChartCache().hasChart(options)){
+						chart = getChartCache().getChart(options);
+					} else {
+						chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false);
+						getChartCache().addChart(options, chart);
+					}
+					
 
+					// Set the button configuration
 					if(list.size()>1){
 						buttonsPanel.setEnabled(false);
 					} else { // single collection

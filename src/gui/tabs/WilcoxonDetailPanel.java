@@ -21,7 +21,9 @@ package gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,19 +36,18 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import components.nuclear.NucleusStatistic;
 import utility.Constants;
 import analysis.AnalysisDataset;
+import charting.NucleusStatsTableOptions;
+import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 
 public class WilcoxonDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
-	
-	private JTable wilcoxonAreaTable;
-	private JTable wilcoxonPerimTable;
-	private JTable wilcoxonFeretTable;
-	private JTable wilcoxonMinFeretTable;
-	private JTable wilcoxonDifferenceTable;
+		
+	private Map<NucleusStatistic, JTable> tables = new HashMap<NucleusStatistic, JTable>();
 
 	public WilcoxonDetailPanel(Logger programLogger) throws Exception {
 		super(programLogger);
@@ -56,7 +57,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 		JPanel panel = new JPanel();
 		scrollPane.setViewportView(panel);
 		
-//		JPanel wilcoxonPartsPanel = new JPanel();
+
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
 		Dimension minSize = new Dimension(10, 10);
@@ -71,26 +72,15 @@ public class WilcoxonDetailPanel extends DetailPanel {
 		infoPanel.add(new JLabel("Below the diagonal: p-values"));
 		infoPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
 		
-		wilcoxonAreaTable = new JTable(NucleusTableDatasetCreator.createWilcoxonAreaTable(null));
-		addWilconxonTable(panel, wilcoxonAreaTable, "Areas");
-		scrollPane.setColumnHeaderView(wilcoxonAreaTable.getTableHeader());
+		
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+			JTable table = new JTable(NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(null, stat));
+			tables.put(stat, table);
+			addWilconxonTable(panel, table, stat.toString());
+		}
+		
+		scrollPane.setColumnHeaderView(tables.get(NucleusStatistic.AREA).getTableHeader());
 
-		
-		wilcoxonPerimTable = new JTable(NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null));
-		addWilconxonTable(panel, wilcoxonPerimTable, "Perimeters");
-		
-		wilcoxonMinFeretTable = new JTable(NucleusTableDatasetCreator.createWilcoxonMinFeretTable(null));
-		addWilconxonTable(panel, wilcoxonMinFeretTable, "Min feret");
-
-		
-		wilcoxonFeretTable = new JTable(NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(null));
-		addWilconxonTable(panel, wilcoxonFeretTable, "Feret");
-		
-		
-		wilcoxonDifferenceTable = new JTable(NucleusTableDatasetCreator.createWilcoxonVariabilityTable(null));
-		addWilconxonTable(panel, wilcoxonDifferenceTable, "Differences to median");
-		
-//		panel.add(wilcoxonPartsPanel, BorderLayout.CENTER);
 		
 		this.add(infoPanel, BorderLayout.NORTH);
 		this.add(scrollPane, BorderLayout.CENTER);
@@ -123,34 +113,34 @@ public class WilcoxonDetailPanel extends DetailPanel {
 			public void run(){
 				try{
 					
-					// format the numbers and make into a tablemodel
-					TableModel areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(null);
-					TableModel perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null);
-					TableModel feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(null);
-					TableModel minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(null);
-					TableModel differenceModel 	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(null);
-
 					if(!list.isEmpty() && list!=null){
+						
+						for(NucleusStatistic stat : NucleusStatistic.values()){
+							
+							TableModel model;
+							
+							TableOptions options = new NucleusStatsTableOptions(list, stat);
+							if(getTableCache().hasTable(options)){
+								programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
+								model = getTableCache().getTable(options);
+							} else {
+								model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(list, stat);
+								programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
+							}
+							
+							tables.get(stat).setModel(model);
+							setRenderer(tables.get(stat));
 
-						areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(list);
-						perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(list);
-						feretModel 		= NucleusTableDatasetCreator.createWilcoxonMaxFeretTable(list);
-						minFeretModel 	= NucleusTableDatasetCreator.createWilcoxonMinFeretTable(list);
-						differenceModel	= NucleusTableDatasetCreator.createWilcoxonVariabilityTable(list);
+						}
 
+					} else {
+						for(NucleusStatistic stat : NucleusStatistic.values()){
+							TableModel model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(null, stat);
+							tables.get(stat).setModel(model);
+							setRenderer(tables.get(stat));
+
+						}
 					}
-
-					wilcoxonAreaTable.setModel(areaModel);
-					wilcoxonPerimTable.setModel(perimModel);
-					wilcoxonMinFeretTable.setModel(minFeretModel);
-					wilcoxonFeretTable.setModel(feretModel);
-					wilcoxonDifferenceTable.setModel(differenceModel);
-
-					setRenderer(wilcoxonAreaTable);
-					setRenderer(wilcoxonPerimTable);
-					setRenderer(wilcoxonMinFeretTable);
-					setRenderer(wilcoxonFeretTable);
-					setRenderer(wilcoxonDifferenceTable);
 					programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
 				} catch (Exception e) {
 					error("Error making Wilcoxon table", e);

@@ -30,6 +30,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
+import charting.DefaultTableOptions;
+import charting.DefaultTableOptions.TableType;
+import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 
 public class VennDetailPanel extends DetailPanel {
@@ -64,7 +67,15 @@ public class VennDetailPanel extends DetailPanel {
 				TableModel model = NucleusTableDatasetCreator.createVennTable(null);
 				
 				if(!list.isEmpty() && list!=null){
-					model = NucleusTableDatasetCreator.createVennTable(list);
+					
+					TableOptions options = new DefaultTableOptions(list, TableType.VENN);
+					if(getTableCache().hasTable(options)){
+						model = getTableCache().getTable(options);
+					} else {
+						model = NucleusTableDatasetCreator.createVennTable(list);
+						getTableCache().addTable(options, model);
+					}
+
 				}
 				vennTable.setModel(model);
 				
