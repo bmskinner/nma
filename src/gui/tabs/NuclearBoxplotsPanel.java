@@ -58,10 +58,11 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import analysis.AnalysisDataset;
+import charting.charts.BoxplotChartOptions;
 import charting.charts.HistogramChartFactory;
+import charting.charts.HistogramChartOptions;
 import charting.datasets.NuclearHistogramDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
-
 import components.Cell;
 import components.CellCollection;
 import components.generic.MeasurementScale;
@@ -93,11 +94,11 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 	public void update(List<AnalysisDataset> list){	
 		this.list = list;
-		
+		programLogger.log(Level.FINE, "Updating nuclear boxplots panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				try {
-					programLogger.log(Level.FINEST, "Updating nuclear boxplots panel");
+					
 					boxplotPanel.update(NuclearBoxplotsPanel.this.list);
 					programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
 					histogramsPanel.update(NuclearBoxplotsPanel.this.list);
@@ -179,8 +180,17 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createBoxplotDataset(list, stat, scale);
 					String yLabel = scale.yLabel(stat);
 
-					JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false); 
-					formatBoxplotChart(boxplotChart, list);
+					JFreeChart boxplotChart = null;
+					BoxplotChartOptions options = new BoxplotChartOptions(list, stat, scale);
+					if(getChartCache().hasChart(options)){
+						programLogger.log(Level.FINEST, "Using cached boxplot chart: "+stat.toString());
+						boxplotChart = getChartCache().getChart(options);
+
+					} else { // No cache
+
+						boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false); 
+						formatBoxplotChart(boxplotChart, list);
+					}
 
 					panel.setChart(boxplotChart);
 				}
@@ -295,18 +305,30 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 
 			for(NucleusStatistic stat : NucleusStatistic.values()){
-				
 				SelectableChartPanel panel = chartPanels.get(stat);
 				
 				JFreeChart chart = null;
+				HistogramChartOptions options = new HistogramChartOptions(list, stat, scale, useDensity);
 				
-				if(useDensity){
-					DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
-					chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat, scale);
-					
-				} else {
-					HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat, scale);
-					chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, stat, scale);
+				if(getChartCache().hasChart(options)){
+					programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
+					chart = getChartCache().getChart(options);
+									
+				} else { // No cache
+				
+			
+					if(useDensity){
+						DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
+						chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat, scale);
+						getChartCache().addChart(options, chart);
+						programLogger.log(Level.FINEST, "Added cached chart");
+
+					} else {
+						HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat, scale);
+						chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, stat, scale);
+						getChartCache().addChart(options, chart);
+						programLogger.log(Level.FINEST, "Added cached chart");
+					}
 				}
 //				detectModes(chart, list, stat);
 				XYPlot plot = (XYPlot) chart.getPlot();

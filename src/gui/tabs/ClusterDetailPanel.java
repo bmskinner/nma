@@ -60,11 +60,11 @@ public class ClusterDetailPanel extends DetailPanel {
 	}
 		
 	public void update(final List<AnalysisDataset> list){
-		
+		programLogger.log(Level.FINE, "Updating cluster panel");
 		this.list = list;
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				programLogger.log(Level.FINEST, "Updating cluster panel");
+				
 				clusterPanel.update(list);		
 				programLogger.log(Level.FINEST, "Updated cluster panel");
 			}

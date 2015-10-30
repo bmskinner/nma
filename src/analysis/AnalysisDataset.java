@@ -35,6 +35,9 @@ import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
+import org.jfree.chart.JFreeChart;
+
+import charting.charts.ChartCache;
 import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import logging.LogPanelFormatter;
@@ -87,6 +90,12 @@ public class AnalysisDataset implements Serializable {
 	
 	private boolean isRoot;	
 	
+	/*
+	 * Store rendered charts in a cache, to avoid slowdowns when reselecting datasets
+	 */
+
+//	private transient Map<ChartCache, JFreeChart> chartCache = new HashMap<ChartCache, JFreeChart>(1);
+	
 	/**
 	 * Create a dataset from a cell collection. The save file is
 	 * set as the output folder of the collection
@@ -113,6 +122,41 @@ public class AnalysisDataset implements Serializable {
 		this.isRoot = false;
 		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
+	
+	/**
+	 * Fetch the chart of the given cache type, or null
+	 * @param type
+	 * @return
+	 */
+//	public JFreeChart getCachedChart(ChartCache type){
+//		// check if the field has been initialised
+//		if(this.chartCache==null){
+//			chartCache = new HashMap<ChartCache, JFreeChart>(1);
+//			return null;
+//		}
+//		if(this.chartCache.containsKey(type)){
+//			return this.chartCache.get(type);
+//		} else {
+//			return null;
+//		}
+//		
+//	}
+//	
+//	public boolean hasCachedChart(ChartCache type){
+//		if(this.chartCache==null){
+//			chartCache = new HashMap<ChartCache, JFreeChart>(1);
+//			return false;
+//		}
+//		if(this.chartCache.containsKey(type)){
+//			return true;
+//		} else {
+//			return false;
+//		}
+//	}
+//	
+//	public void setCachedChart(ChartCache type, JFreeChart chart){
+//		this.chartCache.put(type, chart);
+//	}
 	
 	/**
 	 * Get the file handler for this dataset. Create a handler

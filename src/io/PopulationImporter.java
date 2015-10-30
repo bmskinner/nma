@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
 //import utility.Logger;
 import analysis.AnalysisDataset;
 import components.CellCollection;
@@ -81,7 +82,7 @@ public class PopulationImporter {
 		return collection;
 	}
 	
-	public static AnalysisDataset readDataset(File inputFile, Logger programLogger){
+	public static AnalysisDataset readDataset(File inputFile, Logger programLogger) throws Exception {
 
 		if(!inputFile.exists()){
 			throw new IllegalArgumentException("Requested file does not exist");
@@ -91,32 +92,42 @@ public class PopulationImporter {
 
 		AnalysisDataset dataset = null;
 
-		FileInputStream fis;
+		FileInputStream fis = null;
+		ObjectInputStream ois = null;
+				
 		try {
 			fis = new FileInputStream(inputFile.getAbsolutePath());
 
-			ObjectInputStream ois = new ObjectInputStream(fis);
+			ois = new ObjectInputStream(fis);
+			
+			dataset = (AnalysisDataset) ois.readObject();
+//		     recordList.add(readCase);
 
-			List<Object> inputList = new ArrayList<Object>(0);
+//			List<Object> inputList = new ArrayList<Object>(0);
 
-			try{
-				Object inputObject = ois.readObject();
-				while (inputObject != null){
-					inputList.add(inputObject);
-					inputObject = ois.readObject();
-				}
-			} catch (Exception e) { // exception occurs on reaching EOF
-
-				dataset = (AnalysisDataset) inputList.get(0);
-
-			} finally {
-				ois.close();
-				fis.close();
-			}
+//			try{
+//				Object inputObject = ois.readObject();
+//				while (inputObject != null){
+//					inputList.add(inputObject);
+//					inputObject = ois.readObject();
+//				}
+//			} catch (Exception e) { // exception occurs on reaching EOF
+//
+//				dataset = (AnalysisDataset) inputList.get(0);
+//
+//			} finally {
+//				ois.close();
+//				fis.close();
+//			}
 		} catch (FileNotFoundException e1) {
 			programLogger.log(Level.SEVERE, "File not found: "+inputFile.getAbsolutePath(), e1);
 		} catch (IOException e1) {
 			programLogger.log(Level.SEVERE, "File IO error: "+inputFile.getAbsolutePath(), e1);
+		} catch (ClassNotFoundException e1) {
+			programLogger.log(Level.SEVERE, "Class not found error: "+inputFile.getAbsolutePath(), e1);
+		} finally {
+			ois.close();
+			fis.close();
 		}
 		return dataset;
 	}

@@ -130,10 +130,10 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 	public void update(List<AnalysisDataset> list){
 		this.list = list;
+		programLogger.log(Level.FINE, "Updating segmennts detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				if(SegmentsDetailPanel.this.list!=null && !SegmentsDetailPanel.this.list.isEmpty()){
-					programLogger.log(Level.FINEST, "Updating segmennts detail panel");
 					segmentBoxplotsPanel.update(SegmentsDetailPanel.this.list); // get segname from panel
 					programLogger.log(Level.FINEST, "Updated segments boxplot panel");
 					segmentProfilePanel.update(SegmentsDetailPanel.this.list); // get segname from panel

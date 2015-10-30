@@ -155,6 +155,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	
 	public void update(List<AnalysisDataset> list){
+		programLogger.log(Level.FINE, "Updating cell detail panel");
 		updateList(list);
 	}
 	/**
@@ -166,7 +167,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				programLogger.log(Level.FINEST, "Updating cell detail panel");
+				
 				CellDetailPanel.this.list = list;
 				
 				if(list.size()==1){

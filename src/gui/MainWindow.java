@@ -648,7 +648,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 * @param list the datasets to display
 	 */
 	public void updatePanels(final List<AnalysisDataset> list){
-
+		programLogger.log(Level.FINE, "Updating tab panels");
 		Thread thr = new Thread() {
 			public void run() {
 				try {
@@ -665,7 +665,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					wilcoxonDetailPanel.update(list);
 					cellDetailPanel.updateList(list);
 					segmentsDetailPanel.update(list);
-
+					programLogger.log(Level.FINE, "Updated tab panels");
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE,"Error updating panels", e);
 				}

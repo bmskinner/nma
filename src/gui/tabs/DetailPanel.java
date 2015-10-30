@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 
+import charting.charts.ChartCache;
 import analysis.AnalysisDataset;
 
 /**
@@ -47,10 +48,17 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
+	// The chart cache holds rendered charts for all selected options, until a change is made to a dataset
+	protected ChartCache cache = new ChartCache();
+	
 	protected Logger programLogger;
 	
 	public DetailPanel(Logger programLogger){
 		this.programLogger = programLogger;
+	}
+	
+	public ChartCache getChartCache(){
+		return this.cache;
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {

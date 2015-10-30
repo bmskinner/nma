@@ -132,7 +132,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
 	
 	public void update(final List<AnalysisDataset> list){
-		
+		programLogger.log(Level.FINE, "Updating signals detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 			
@@ -140,7 +140,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 				if(list.size()==1){
 					activeDataset = list.get(0);
 				}
-				programLogger.log(Level.FINEST, "Updating signals detail panel");
+				
 				shellsPanel.update(list);
 				programLogger.log(Level.FINEST, "Updated shells panel");
 				overviewPanel.update(list);

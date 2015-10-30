@@ -55,11 +55,11 @@ public class VennDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 */
 	public void update(final List<AnalysisDataset> list){
-		
+		programLogger.log(Level.FINE, "Updating venn panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 			
-				programLogger.log(Level.FINEST, "Updating venn panel");
+				
 				// format the numbers and make into a tablemodel
 				TableModel model = NucleusTableDatasetCreator.createVennTable(null);
 				

@@ -110,13 +110,13 @@ public class NucleusProfilesPanel extends DetailPanel {
 	}
 	
 	public void update(List<AnalysisDataset> list){
-		
+		programLogger.log(Level.FINE, "Updating profiles panel");
 		this.list = list;
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 
 				try {
-					programLogger.log(Level.FINEST, "Updating profiles panel");
+					
 					profileDisplayPanel.update(NucleusProfilesPanel.this.list);
 					programLogger.log(Level.FINEST, "Updated nuclear profiles panel");
 					frankenDisplayPanel.update(NucleusProfilesPanel.this.list);

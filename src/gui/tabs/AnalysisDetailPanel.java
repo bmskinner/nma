@@ -70,10 +70,10 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 * @param list
 	 */
 	public void update(final List<AnalysisDataset> list){
-		
+		programLogger.log(Level.FINE, "Updating analysis panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				programLogger.log(Level.FINEST, "Updating analysis panel");
+				
 				updateAnalysisParametersPanel(list);
 				programLogger.log(Level.FINEST, "Updated analysis parameter panel");
 				updateStatsPanel(list);

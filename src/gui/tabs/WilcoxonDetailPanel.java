@@ -118,11 +118,11 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	 * @throws Exception 
 	 */
 	public void update(final List<AnalysisDataset> list) {
-
+		programLogger.log(Level.FINE, "Updating Wilcoxon panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				try{
-					programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
+					
 					// format the numbers and make into a tablemodel
 					TableModel areaModel 		= NucleusTableDatasetCreator.createWilcoxonAreaTable(null);
 					TableModel perimModel 		= NucleusTableDatasetCreator.createWilcoxonPerimeterTable(null);
