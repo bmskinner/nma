@@ -83,7 +83,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 	private static final long serialVersionUID = 1L;
 	
-	private 	List<AnalysisDataset> list;
 	protected AnalysisDataset activeDataset;	
 	private Cell activeCell;
 	private Logger programLogger;
@@ -333,21 +332,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 							list.add(activeDataset);
 							
 							try {
+								CellDetailPanel.this.fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
 								CellDetailPanel.this.fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
-//								CellDetailPanel.this.fireSignalChangeEvent("MorphologyRefresh_"+activeDataset.getUUID().toString());
 
 							} catch (Exception e1) {
-								log("Error deleting cell: "+e1.getMessage());
+								error("Error deleting cell", e1);
 							}
 							
-//							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-//							list.add(activeDataset);
 							CellDetailPanel.this.updateList(list);
 							CellDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
 							CellDetailPanel.this.fireSignalChangeEvent("UpdatePopulationPanel");
 							CellDetailPanel.this.fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
-//							CellDetailPanel.this.fireSignalChangeEvent("SelectDataset_"+activeDataset.getUUID().toString());
-							
+
 						}
 						
 					}
