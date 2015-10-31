@@ -23,10 +23,39 @@ import utility.Utils;
 
 @SuppressWarnings("serial")
 public class NucleusDetectionImageProber extends ImageProber {
+	
+	public NucleusDetectionImageProber(AnalysisOptions options, Logger logger, File folder) {
+		super(options, logger, NucleusImageType.DETECTED_OBJECTS, folder);
 
-	public NucleusDetectionImageProber(AnalysisOptions options, Logger logger) {
-		super(options, logger);
-
+	}
+	
+	/**
+	 * Hold the stages of the detection pipeline to display 
+	 */
+	private enum NucleusImageType implements ImageType {
+		KUWAHARA ("Kuwahara filtered"),
+		FLATTENED ("Flattened"),
+		EDGE_DETECTION ("Edge detection"),
+		MORPHOLOGY_CLOSED ("Morphology closed"),
+		DETECTED_OBJECTS ("Detected objects");
+		
+		private String name;
+		
+		NucleusImageType(String name){
+			this.name = name;
+		}
+		public String toString(){
+			return this.name;
+		}
+		
+		public ImageType[] getValues(){
+			NucleusImageType[] a = NucleusImageType.values();
+			ImageType[] r = new ImageType[a.length];
+			for(int i=0; i<a.length; i++){
+				r[i] = a[i];
+			}
+			return r;
+		}
 	}
 	
 	/**
@@ -70,36 +99,36 @@ public class NucleusDetectionImageProber extends ImageProber {
 					programLogger.log(Level.FINEST, "Applying Kuwahara filter");
 					ImageProcessor kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(imageStack, Constants.COUNTERSTAIN, cannyOptions.getKuwaharaKernel());
 					processedImage = kuwaharaProcessor.duplicate(); 
-					procMap.put(ImageType.KUWAHARA, kuwaharaProcessor);
-					iconMap.get(ImageType.KUWAHARA).setText(ImageType.KUWAHARA.toString());
+					procMap.put(NucleusImageType.KUWAHARA, kuwaharaProcessor);
+					iconMap.get(NucleusImageType.KUWAHARA).setText(NucleusImageType.KUWAHARA.toString());
 				} else {
-					procMap.put(ImageType.KUWAHARA, processedImage.duplicate());
-					iconMap.get(ImageType.KUWAHARA).setText(ImageType.KUWAHARA.toString()+" (disabled)");
+					procMap.put(NucleusImageType.KUWAHARA, processedImage.duplicate());
+					iconMap.get(NucleusImageType.KUWAHARA).setText(NucleusImageType.KUWAHARA.toString()+" (disabled)");
 				}
 				
 				if(cannyOptions.isUseFlattenImage()){
 					programLogger.log(Level.FINEST, "Applying flattening filter");
 					ImageProcessor flattenProcessor = ImageFilterer.squashChromocentres(processedImage, cannyOptions.getFlattenThreshold());
 					processedImage = flattenProcessor.duplicate(); 
-					procMap.put(ImageType.FLATTENED, flattenProcessor);
-					iconMap.get(ImageType.FLATTENED).setText(ImageType.FLATTENED.toString());
+					procMap.put(NucleusImageType.FLATTENED, flattenProcessor);
+					iconMap.get(NucleusImageType.FLATTENED).setText(NucleusImageType.FLATTENED.toString());
 				} else {
-					procMap.put(ImageType.FLATTENED, processedImage.duplicate());
-					iconMap.get(ImageType.FLATTENED).setText(ImageType.FLATTENED.toString()+" (disabled)");
+					procMap.put(NucleusImageType.FLATTENED, processedImage.duplicate());
+					iconMap.get(NucleusImageType.FLATTENED).setText(NucleusImageType.FLATTENED.toString()+" (disabled)");
 				}
 				
 				programLogger.log(Level.FINEST, "Detecting edges");
 				ImageProcessor edgesProcessor = ImageFilterer.runEdgeDetector(processedImage, cannyOptions);
-				procMap.put(ImageType.EDGE_DETECTION, edgesProcessor);
+				procMap.put(NucleusImageType.EDGE_DETECTION, edgesProcessor);
 				
 				ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, cannyOptions.getClosingObjectRadius());
-				procMap.put(ImageType.MORPHOLOGY_CLOSED, closedProcessor);
+				procMap.put(NucleusImageType.MORPHOLOGY_CLOSED, closedProcessor);
 				
-				procMap.put(ImageType.DETECTED_OBJECTS, openProcessor);
+				procMap.put(NucleusImageType.DETECTED_OBJECTS, openProcessor);
 							
 			} else {
 				// Threshold option selected - do not run edge detection
-				for(ImageType key : ImageType.values()){
+				for(ImageType key : NucleusImageType.values()){
 					procMap.put(key, openProcessor);
 				}
 			}

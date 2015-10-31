@@ -55,7 +55,7 @@ public abstract class ImageProber extends JDialog {
 	private double windowWidth;
 	private double windowHeight;
 	
-//	private static double IMAGE_SCREEN_PROPORTION = 0.25;
+	private static double IMAGE_SCREEN_PROPORTION = 0.75;
 
 	private final JPanel contentPanel = new JPanel();
 	protected AnalysisOptions options; // the options to detect with
@@ -69,6 +69,12 @@ public abstract class ImageProber extends JDialog {
 	
 	protected Map<ImageType, JLabel> iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
 	protected Map<ImageType, ImageProcessor> procMap = new HashMap<ImageType, ImageProcessor>(); // allow multiple images 
+	
+	private ImageType imageType;
+	
+	private int rows = 0;
+	private int cols = 0;
+	
 	
 	private boolean ok = false;
 	
@@ -107,28 +113,11 @@ public abstract class ImageProber extends JDialog {
 		"Weighing the same as a duck",
 		"Noting that winter is coming"
 	};
- 
-	protected enum ImageType {
-		KUWAHARA ("Kuwahara filtered"),
-		FLATTENED ("Flattened"),
-		EDGE_DETECTION ("Edge detection"),
-		MORPHOLOGY_CLOSED ("Morphology closed"),
-		DETECTED_OBJECTS ("Detected objects");
-		
-		private String name;
-		
-		ImageType(String name){
-			this.name = name;
-		}
-		public String toString(){
-			return this.name;
-		}
-	}
-	
+ 	
 	/**
 	 * Create the dialog.
 	 */
-	public ImageProber(AnalysisOptions options, Logger logger) {
+	public ImageProber(AnalysisOptions options, Logger logger, ImageType type, File folder) {
 
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");
@@ -139,12 +128,11 @@ public abstract class ImageProber extends JDialog {
 			this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 			this.options = options;
 			this.programLogger = logger;
-			//		this.logger = new Logger(logFile, "ImageProber");
 			this.setTitle("Image Prober");
 
-			int w = (int) (screenSize.getWidth() * 0.75);
+			int w = (int) (screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
 			windowWidth = w;
-			int h = (int) (screenSize.getHeight() * 0.75);
+			int h = (int) (screenSize.getHeight() * IMAGE_SCREEN_PROPORTION);
 			windowHeight = h;
 
 			setBounds(100, 100, w, h);
@@ -160,16 +148,15 @@ public abstract class ImageProber extends JDialog {
 			if(!ok){
 				programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
 			}
-
-			getContentPane().setLayout(new BorderLayout());
-			contentPanel.setLayout(new BorderLayout());
-			contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-
-			for(ImageType key : ImageType.values()){
+			
+			for(ImageType key : imageType.getValues()){
 				iconMap.put(key, null);
 				procMap.put(key, null);
 			}
 
+			getContentPane().setLayout(new BorderLayout());
+			contentPanel.setLayout(new BorderLayout());
+			contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 			JPanel header = this.createHeader();
 			contentPanel.add(header, BorderLayout.NORTH);
@@ -224,7 +211,7 @@ public abstract class ImageProber extends JDialog {
 				contentPanel.add(prevButton, BorderLayout.WEST);
 			}
 
-			createFileList(options.getFolder());
+			createFileList(folder);
 
 			this.setVisible(true);
 		} catch(Exception e){
@@ -288,10 +275,13 @@ public abstract class ImageProber extends JDialog {
 	 */
 	private JPanel createImagePanel(){
 		JPanel panel = new JPanel();
+		
+		rows = (int) Math.ceil( imageType.getValues().length );
+		cols = 2;
 //		panel.setLayout(new BorderLayout());
-		panel.setLayout(new GridLayout(3, 2));
+		panel.setLayout(new GridLayout(rows, cols));
 
-		for(final ImageType key : ImageType.values()){
+		for(final ImageType key : imageType.getValues()){
 
 			JLabel label = new JLabel("", loadingGif, JLabel.CENTER);
 			label.setText(key.toString());
@@ -478,7 +468,7 @@ public abstract class ImageProber extends JDialog {
 			headerLabel.setIcon(loadingGif);
 			headerLabel.repaint();
 
-			for(ImageType key : ImageType.values()){
+			for(ImageType key : imageType.getValues()){
 				
 				JLabel label = iconMap.get(key);
 				ImageIcon icon = (ImageIcon) label.getIcon();
@@ -499,7 +489,7 @@ public abstract class ImageProber extends JDialog {
 	
 	protected void updateImageThumbnails(){
 		// update the map of icons
-		for(ImageType key : ImageType.values()){
+		for(ImageType key : imageType.getValues()){
 
 			JLabel label = iconMap.get(key);
 			ImageIcon icon = null;
@@ -543,8 +533,8 @@ public abstract class ImageProber extends JDialog {
 		double ratio = (double) originalWidth / (double) originalHeight;
 		int smallHeight = (int) (smallWidth / ratio);
 		
-		if(smallHeight > windowHeight / 4 && !fullSize ){ // image is too high, adjust to scale on height
-			smallHeight = (int) (windowHeight / 4);
+		if(smallHeight > windowHeight / (rows+1) && !fullSize ){ // image is too high, adjust to scale on height
+			smallHeight = (int) (windowHeight / (rows+1));
 			smallWidth = (int) (smallHeight * ratio);
 		}
 		

@@ -195,7 +195,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 
 					
 					// Run the image prober TODO
-					ImageProber ip = new SignalDetectionImageProber(options, programLogger);
+					ImageProber ip = new SignalDetectionImageProber(options, programLogger, folder);
 					if(ip.getOK()){
 						// Image prober returns ok, validate signal group and assign
 //						int channel = getChannel();
