@@ -18,17 +18,9 @@
  *******************************************************************************/
 package gui;
 
-import ij.IJ;
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
-import io.ImageExporter;
-import io.ImageImporter;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -42,58 +34,48 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import utility.Constants;
-import utility.Utils;
 import analysis.AnalysisOptions;
-import analysis.ImageFilterer;
-import analysis.AnalysisOptions.CannyOptions;
-import analysis.LocalBinaryPatterner;
 import analysis.nucleus.NucleusDetector;
-import analysis.nucleus.NucleusFinder;
-import components.Cell;
-import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
-public class ImageProber extends JDialog {
+public abstract class ImageProber extends JDialog {
 	
 	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	
 	private double windowWidth;
 	private double windowHeight;
 	
-	private static double IMAGE_SCREEN_PROPORTION = 0.25;
+//	private static double IMAGE_SCREEN_PROPORTION = 0.25;
 
 	private final JPanel contentPanel = new JPanel();
-	private AnalysisOptions options; // the options to detect with
-	private File openImage;			// the image currently open
+	protected AnalysisOptions options; // the options to detect with
+	protected File openImage;			// the image currently open
 
-	private Logger programLogger;
+	protected Logger programLogger;
 //	private JLabel imageLabel;		// the JLabel to hold the image
 
 //	private ImageIcon imageIcon = null;	// the icon with the image, for display in JLabel
-	private JLabel headerLabel;		// the header text and loading gif
+	protected JLabel headerLabel;		// the header text and loading gif
 	
-	private ImageIcon loadingGif = null; // the icon for the loading gif
+	protected ImageIcon loadingGif = null; // the icon for the loading gif
 	
-	private Map<ImageType, JLabel> iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
-	private Map<ImageType, ImageProcessor> procMap = new HashMap<ImageType, ImageProcessor>(); // allow multiple images 
+	protected Map<ImageType, JLabel> iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
+	protected Map<ImageType, ImageProcessor> procMap = new HashMap<ImageType, ImageProcessor>(); // allow multiple images 
 	
 	private boolean ok = false;
 	
-	private List<File> probableFiles;	// the list of image files
-	private int index = 0; 				// the index of the open file
+	protected List<File> probableFiles;	// the list of image files
+	protected int index = 0; 				// the index of the open file
 	
 	private static final String[] logTestMessages = {
 		"Constructing additional pylons",
@@ -128,7 +110,7 @@ public class ImageProber extends JDialog {
 		"Noting that winter is coming"
 	};
  
-	private enum ImageType {
+	protected enum ImageType {
 		KUWAHARA ("Kuwahara filtered"),
 		FLATTENED ("Flattened"),
 		EDGE_DETECTION ("Edge detection"),
@@ -293,7 +275,7 @@ public class ImageProber extends JDialog {
 		headerLabel = new JLabel("Examining input folders...");
 		headerLabel.setIcon(loadingGif);
 		
-		panel.add(new JLabel("Objects meeting nucleus parameters are outlined in yellow; other objects are red. Click an image to view larger version."), BorderLayout.NORTH);
+		panel.add(new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version."), BorderLayout.NORTH);
 
 		panel.add(headerLabel, BorderLayout.SOUTH);
 
@@ -513,106 +495,11 @@ public class ImageProber extends JDialog {
 	 * display the image with annotated nuclear outlines
 	 * @param imageFile
 	 */
-	private void importAndDisplayImage(File imageFile){
-
-		try {
-			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
-			
-			ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
-			programLogger.log(Level.FINEST, "Imported image as stack");
-			
-			/*
-			 * Insert steps to show each applied filter in the same order as from analysis
-			 * Kuwahara filtering
-			 * Chromocentre flattening
-			 * Edge detector
-			 *    Morphology closing
-			 * Final image
-			 * 
-			 * Make an icon from each
-			 */
-			programLogger.log(Level.FINEST, "Creating processed images");
-			
-			CannyOptions cannyOptions = options.getCannyOptions("nucleus");
-			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
-						
-			if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error
-				
-				// Make a copy of the counterstain to use at each processing step
-				ImageProcessor processedImage = imageStack.getProcessor(Constants.COUNTERSTAIN).duplicate();
-				
-				// before passing to edge detection
-				// run a Kuwahara filter to enhance edges in the image
-				//TODO: Turning off Kuwahara causes error
-				if(cannyOptions.isUseKuwahara()){
-					programLogger.log(Level.FINEST, "Applying Kuwahara filter");
-					ImageProcessor kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(imageStack, Constants.COUNTERSTAIN, cannyOptions.getKuwaharaKernel());
-					processedImage = kuwaharaProcessor.duplicate(); 
-					procMap.put(ImageType.KUWAHARA, kuwaharaProcessor);
-					iconMap.get(ImageType.KUWAHARA).setText(ImageType.KUWAHARA.toString());
-				} else {
-					procMap.put(ImageType.KUWAHARA, processedImage.duplicate());
-					iconMap.get(ImageType.KUWAHARA).setText(ImageType.KUWAHARA.toString()+" (disabled)");
-				}
-				
-				if(cannyOptions.isUseFlattenImage()){
-					programLogger.log(Level.FINEST, "Applying flattening filter");
-					ImageProcessor flattenProcessor = ImageFilterer.squashChromocentres(processedImage, cannyOptions.getFlattenThreshold());
-					processedImage = flattenProcessor.duplicate(); 
-					procMap.put(ImageType.FLATTENED, flattenProcessor);
-					iconMap.get(ImageType.FLATTENED).setText(ImageType.FLATTENED.toString());
-				} else {
-					procMap.put(ImageType.FLATTENED, processedImage.duplicate());
-					iconMap.get(ImageType.FLATTENED).setText(ImageType.FLATTENED.toString()+" (disabled)");
-				}
-				
-				programLogger.log(Level.FINEST, "Detecting edges");
-				ImageProcessor edgesProcessor = ImageFilterer.runEdgeDetector(processedImage, cannyOptions);
-				procMap.put(ImageType.EDGE_DETECTION, edgesProcessor);
-				
-				ImageProcessor closedProcessor = ImageFilterer.morphologyClose(edgesProcessor, cannyOptions.getClosingObjectRadius());
-				procMap.put(ImageType.MORPHOLOGY_CLOSED, closedProcessor);
-				
-				procMap.put(ImageType.DETECTED_OBJECTS, openProcessor);
-							
-			} else {
-				// Threshold option selected - do not run edge detection
-				for(ImageType key : ImageType.values()){
-					procMap.put(key, openProcessor);
-				}
-			}
-
-			programLogger.log(Level.FINEST, "Processed images created");
-						
-			/*
-			 * Store the size and circularity options, and set them to allow all
-			 * Get the objects in the image
-			 * Restore size and circ options
-			 * Outline the objects that fail 
-			 */
-			List<Cell> cells = getCells(imageStack, imageFile);
-		
-			for(Cell cell : cells){
-
-				drawNucleus(cell, openProcessor);
-			}
-
-			programLogger.log(Level.INFO, "Displaying nuclei");
-			
-			// update the map of icons
-			updateImageThumbnails();
-
-			headerLabel.setText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
-			headerLabel.setIcon(null);
-			headerLabel.repaint();
-
-		} catch (Exception e) { // end try
-			programLogger.log(Level.SEVERE, "Error in image processing", e);
-		} // end catch
+	protected void importAndDisplayImage(File imageFile){
 
 	}
 	
-	private void updateImageThumbnails(){
+	protected void updateImageThumbnails(){
 		// update the map of icons
 		for(ImageType key : ImageType.values()){
 
@@ -628,107 +515,11 @@ public class ImageProber extends JDialog {
 			label.repaint();
 		}
 	}
-	
-	/**
-	 * Get the cells in the given stack without the 
-	 * size and circularity parameters
-	 * @param imageStack
-	 * @param imageFile
-	 * @return
-	 */
-	private List<Cell> getCells(ImageStack imageStack, File imageFile){
-		double minSize = options.getMinNucleusSize();
-		double maxSize = options.getMaxNucleusSize();
-		double minCirc = options.getMinNucleusCirc();
-		double maxCirc = options.getMaxNucleusCirc();
-		
-		programLogger.log(Level.FINEST, "Widening detection parameters");
 
-		options.setMinNucleusSize(50);
-		options.setMaxNucleusSize(imageStack.getWidth()*imageStack.getHeight());
-		options.setMinNucleusCirc(0);
-		options.setMaxNucleusCirc(1);
-		
-		programLogger.log(Level.FINEST, "Finding cells");
-		
-		List<Cell> cells = NucleusFinder.getCells(imageStack, 
-				options, 
-				programLogger, 
-				imageFile, 
-				null);
-		
-		programLogger.log(Level.FINEST, "Resetting detetion parameters");
-		
-		options.setMinNucleusSize(minSize);
-		options.setMaxNucleusSize(maxSize);
-		options.setMinNucleusCirc(minCirc);
-		options.setMaxNucleusCirc(maxCirc);
-		return cells;
-	}
-	
-	/**
-	 * Draw the outline of a nucleus on the given processor
-	 * @param cell
-	 * @param ip
-	 */
-	private void drawNucleus(Cell cell, ImageProcessor ip) throws Exception {
-		if(cell==null){
-			throw new IllegalArgumentException("Input cell is null");
-		}
-		
-		Nucleus n = cell.getNucleus();
-		// annotate the image processor with the nucleus outline
-		
-		if(checkNucleus(n)){
-			ip.setColor(Color.YELLOW);
-		} else {
-			ip.setColor(Color.RED);
-		}
-		
-		
-		double[] positions = n.getPosition();
-		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-		ip.setLineWidth(2);
-		ip.draw(roi);
-	}
-	
-	private void testLog(){
+	protected void testLog(){
 		double rnd = Math.random() * logTestMessages.length;
 		int index = (int) Math.floor(rnd);
 		programLogger.log(Level.INFO, logTestMessages[index]+"...");
-	}
-	
-	/**
-	 * Check the given nucleus size and circ parameters against options
-	 * @param n the nucleus to check
-	 * @return boolean ok
-	 */
-	private boolean checkNucleus(Nucleus n){
-		boolean result = true;
-		
-		if(n.getArea() < options.getMinNucleusSize()){
-			
-			result = false;
-		}
-		
-		if(n.getArea() > options.getMaxNucleusSize()){
-			
-			result = false;
-		}
-		
-		if(n.getCircularity() < options.getMinNucleusCirc()){
-			
-			result = false;
-		}
-		
-		if(n.getCircularity() > options.getMaxNucleusCirc()){
-			
-			result = false;
-		}
-		
-		return result;
 	}
 	
 	
@@ -738,7 +529,7 @@ public class ImageProber extends JDialog {
 	 * @param ip an image processor
 	 * @return an image icon with the resized image
 	 */
-	private ImageIcon createViewableImage(ImageProcessor ip, boolean fullSize){
+	protected ImageIcon createViewableImage(ImageProcessor ip, boolean fullSize){
 		int originalWidth = ip.getWidth();
 		int originalHeight = ip.getHeight();
 

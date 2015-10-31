@@ -249,7 +249,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 					
 					// probe the first image
 					// show the results of the current settings
-					ImageProber p = new ImageProber(analysisOptions, logger);
+					ImageProber p = new NucleusDetectionImageProber(analysisOptions, logger);
 					if(p.getOK()==false){
 					
 						
