@@ -24,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -51,8 +52,8 @@ public class TailDetectionSettingsWindow extends SettingsDialog implements Actio
 	/**
 	 * Create the dialog.
 	 */
-	public TailDetectionSettingsWindow(AnalysisOptions a) {
-		
+	public TailDetectionSettingsWindow(AnalysisOptions a, Logger logger) {
+		super(logger);
 		setModal(true);
 		this.options = a;
 		createGUI();

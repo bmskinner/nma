@@ -30,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.JCheckBox;
@@ -53,6 +54,13 @@ import analysis.AnalysisOptions.NuclearSignalOptions;
 public abstract class SettingsDialog extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
+	protected boolean ok = false;
+	
+	protected Logger programLogger;
+	
+	public SettingsDialog(Logger programLogger){
+		this.programLogger = programLogger;
+	}
 	
 	String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
 
@@ -83,6 +91,10 @@ public abstract class SettingsDialog extends JDialog {
 			c.weightx = 1.0;
 			container.add(fields[i], c);
 		}
+	}
+	
+	public boolean isOK(){
+		return this.ok;
 	}
 	
 	/**

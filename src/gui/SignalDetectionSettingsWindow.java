@@ -19,6 +19,8 @@
 package gui;
 
 import ij.IJ;
+import ij.io.DirectoryChooser;
+import ij.io.OpenDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -27,6 +29,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -43,6 +47,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import utility.Constants;
+import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 
@@ -56,8 +61,8 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 	private static final double DEFAULT_MIN_CIRC = 0.0;
 	private static final double DEFAULT_MAX_CIRC = 1.0;
 			
-//	private NuclearSignalOptions options;
 	private AnalysisOptions options;
+	private AnalysisDataset dataset;
 	
 	private JComboBox<String> channelSelection;
 	private JTextField groupName;
@@ -76,14 +81,18 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 	private JRadioButton reverseThresholding = new JRadioButton("Reverse");
 	private JRadioButton histogramThresholding = new JRadioButton("Adaptive");
 	private ButtonGroup thresholdModeGroup;
+	
+	private int signalGroup;
+	private File folder;
 
 	/**
 	 * Create the dialog.
 	 */
-	public SignalDetectionSettingsWindow(AnalysisOptions a) {
-		
+	public SignalDetectionSettingsWindow(AnalysisDataset d, Logger programLogger) {
+		super(programLogger);
+		this.dataset = d;
+		this.options = d.getAnalysisOptions();
 		setModal(true);
-		this.options = a;
 		createGUI();
 		
 		pack();
@@ -173,21 +182,53 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 
 		JButton btnOk = new JButton("OK");
 		btnOk.addMouseListener(new MouseAdapter() {
+			
+
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				
-				// check the selected name is valid - is the key for the options
+				// check the selected name is valid - is the key for the options map
 				finalGroupName = checkGroupName(groupName.getText());
 
-				// create the options object with the given name
-				options.addNuclearSignalOptions(finalGroupName);
+				// folder selection
+				if(getImageDirectory()){
+
+					
+					// Run the image prober TODO
+					ImageProber ip = new SignalDetectionImageProber(options, programLogger);
+					if(ip.getOK()){
+						// Image prober returns ok, validate signal group and assign
+//						int channel = getChannel();
+						String signalGroupName = getSignalGroupName();
+
+
+//						NuclearSignalOptions options = dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
+
+						// the new signal group is one more than the highest in the collection
+						int newSignalGroup = dataset.getHighestSignalGroup()+1;
+
+						// create the options object with the given name
+						options.addNuclearSignalOptions(finalGroupName);
+						
+						// assign the options
+						NuclearSignalOptions ns = options.getNuclearSignalOptions(finalGroupName);
+						assignSettings(ns);
+
+						signalGroup = newSignalGroup;
+						dataset.setSignalGroupName(newSignalGroup, signalGroupName);
+						ok = true;
+						SignalDetectionSettingsWindow.this.setVisible(false);
+					} else {
+						
+						// No action - revise settings
+					}
+
+				} else {
+					ok = false;
+					SignalDetectionSettingsWindow.this.setVisible(false);
+				}
+
 				
-				// assign the options
-				NuclearSignalOptions ns = options.getNuclearSignalOptions(finalGroupName);
-				assignSettings(ns);
-				
-				
-				SignalDetectionSettingsWindow.this.setVisible(false);
 			}
 		});
 
@@ -202,6 +243,18 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		});
 		panel.add(btnCancel);
 		return panel;
+	}
+	
+	public int getSignalGroup(){
+		return this.signalGroup;
+	}
+	
+	public File getFolder(){
+		return this.folder;
+	}
+	
+	public boolean isOK(){
+		return this.ok;
 	}
 	
 	/**
@@ -308,5 +361,27 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 			}
 		}
 	}
+	
+	
+	private boolean getImageDirectory(){
+		// get the folder of images
+		boolean ok = true;
+		DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
+		String folderName = openDialog.getDirectory();
 
+		if(folderName==null){
+			ok = false;
+		}
+
+		File folder =  new File(folderName);
+
+		if(!folder.isDirectory() ){
+			ok = false;
+		}
+		if(!folder.exists()){
+			ok = false;
+		}
+		this.folder = folder;
+		return ok;
+	}
 }

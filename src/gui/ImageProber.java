@@ -62,9 +62,7 @@ public abstract class ImageProber extends JDialog {
 	protected File openImage;			// the image currently open
 
 	protected Logger programLogger;
-//	private JLabel imageLabel;		// the JLabel to hold the image
 
-//	private ImageIcon imageIcon = null;	// the icon with the image, for display in JLabel
 	protected JLabel headerLabel;		// the header text and loading gif
 	
 	protected ImageIcon loadingGif = null; // the icon for the loading gif

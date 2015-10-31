@@ -989,7 +989,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			super(dataset, "Tail detection", "Error in tail detection");
 			try{
 				
-				TailDetectionSettingsWindow analysisSetup = new TailDetectionSettingsWindow(dataset.getAnalysisOptions());
+				TailDetectionSettingsWindow analysisSetup = new TailDetectionSettingsWindow(dataset.getAnalysisOptions(), programLogger);
 				
 				final int channel = analysisSetup.getChannel();
 				
@@ -1037,47 +1037,24 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 			try{
 				// add dialog for non-default detection options
-				SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(dataset.getAnalysisOptions());
-				
-				final int channel = analysisSetup.getChannel();
-				final String signalGroupName = analysisSetup.getSignalGroupName();
+				SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(dataset, programLogger);
+
+				if(analysisSetup.isOK()){
+
+					this.signalGroup = analysisSetup.getSignalGroup();
+					//				this.signalGroup = newSignalGroup;
+					String signalGroupName = dataset.getSignalGroupName(signalGroup);
 
 
-				NuclearSignalOptions options = dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
-
-				// the new signal group is one more than the highest in the collection
-				int newSignalGroup = dataset.getHighestSignalGroup()+1;
-				
-				// get the folder of images
-				DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
-				String folderName = openDialog.getDirectory();
-
-				if(folderName==null){
-					this.cancel();
-					return; // user cancelled
-				}
-
-				final File folder =  new File(folderName);
-
-				if(!folder.isDirectory() ){
+					worker = new SignalDetector(dataset, analysisSetup.getFolder(), analysisSetup.getChannel(), dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName), signalGroup, signalGroupName);
+					this.setProgressMessage("Signal detection: "+signalGroupName);
+					worker.addPropertyChangeListener(this);
+					worker.execute();
+				} else {
 					this.cancel();
 					return;
 				}
-				if(!folder.exists()){
-					this.cancel();
-					return; // check folder is ok
-				}
-				
-				dataset.setSignalGroupName(newSignalGroup, signalGroupName);
-				this.signalGroup = newSignalGroup;
-				
 
-				worker = new SignalDetector(dataset, folder, channel, options, newSignalGroup, signalGroupName);
-				this.setProgressMessage("Signal detection: "+signalGroupName);
-				worker.addPropertyChangeListener(this);
-				worker.execute();
-				
-				
 				
 			} catch (Exception e){
 				this.cancel();

@@ -104,17 +104,15 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	private ButtonGroup refoldModeGroup;
 	
 	private JSpinner scaleSpinner = new JSpinner(new SpinnerNumberModel(DEFAULT_SCALE,	0, 100, 0.001));
-	
-	private Logger logger;
 
 
 	/**
 	 * Create the frame.
 	 */
 	public AnalysisSetupWindow(Logger logger) {
+		super(logger);
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // disable the 'X'; we need to use the footer buttons 
-		this.logger = logger;
 		setDefaultOptions();
 		createAndShowGUI();
 		pack();
@@ -125,7 +123,8 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	 * Create the dialog with an existing set of options
 	 * Allows settings to be reloaded.
 	 */
-	public AnalysisSetupWindow(AnalysisOptions options) {
+	public AnalysisSetupWindow(AnalysisOptions options, Logger logger) {
+		super(logger);
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		analysisOptions = options;
@@ -249,7 +248,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 					
 					// probe the first image
 					// show the results of the current settings
-					ImageProber p = new NucleusDetectionImageProber(analysisOptions, logger);
+					ImageProber p = new NucleusDetectionImageProber(analysisOptions, programLogger);
 					if(p.getOK()==false){
 					
 						
