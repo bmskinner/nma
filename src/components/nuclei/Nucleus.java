@@ -54,6 +54,11 @@ public interface Nucleus {
 	public UUID getID();
 
 	public String getPath();
+	
+	/**
+	 * @return a copy of the data in this nucleus or null on Exception
+	 */
+	public Nucleus duplicate();
 
 	/**
 	 * Get the position of the nucleus in the 
@@ -497,10 +502,25 @@ public interface Nucleus {
 	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception;
 	
 	
+	/**
+	 * Get the signals in this nucleus
+	 * @return
+	 */
 	public SignalCollection getSignalCollection();
 	
 	
+	/**
+	 * Get the number of signals in the nucleus
+	 * @return
+	 */
 	public int getSignalCount();
+	
+	
+	/**
+	 * Get the number of signals in the given signal group
+	 * @param signalGroup
+	 * @return
+	 */
 	public int getSignalCount(int signalGroup);
 	
 	

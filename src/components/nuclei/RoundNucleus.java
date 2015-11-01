@@ -104,7 +104,6 @@ public class RoundNucleus
 	protected Profile singleDistanceProfile; // holds distances from CoM, not through CoM
 	protected List<NucleusBorderPoint> borderList = new ArrayList<NucleusBorderPoint>(0); // eventually to replace angleProfile
 	protected List<NucleusBorderSegment> segmentList = new ArrayList<NucleusBorderSegment>(0); // expansion for e.g acrosome
-//	protected Map<String, Integer> borderTags  = new HashMap<String, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
 	protected Map<BorderTag, Integer> borderTags  = new HashMap<BorderTag, Integer>(0); // to replace borderPointsOfInterest; <tag, index>
 	protected Map<String, Integer> segmentTags = new HashMap<String, Integer>(0);
 
@@ -167,7 +166,7 @@ public class RoundNucleus
 		this.setAngleProfile(n.getAngleProfile());
 		this.setCentreOfMass(n.getCentreOfMass());
 		
-		this.setSignals(n.getSignalCollection());
+		this.setSignals( new SignalCollection(n.getSignalCollection()));
 
 		this.setDistanceProfile(n.getDistanceProfile());
 		this.setAngleProfile(n.getAngleProfile());
@@ -178,6 +177,14 @@ public class RoundNucleus
 		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
 		
+	}
+	
+	public Nucleus duplicate(){
+		try {
+			return new RoundNucleus(this);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 	/*

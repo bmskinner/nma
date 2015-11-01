@@ -62,7 +62,23 @@ public class SignalCollection implements Serializable {
 		
 	}
 	
+	/**
+	 * Duplicate a signal collection
+	 * @param s
+	 */
 	public SignalCollection(SignalCollection s){
+		for(int group : s.getSignalGroups() ){
+			String groupName = s.getSignalGroupName(group);
+			int channel = s.getSignalChannel(group);
+			File f = new File(s.getSourceFile(group).getAbsolutePath());
+			
+			ArrayList<NuclearSignal> list = new ArrayList<NuclearSignal>();
+			for(NuclearSignal signal : getSignals(group)){
+				list.add(  new NuclearSignal(signal) );
+			}
+			
+			this.addSignalGroup(list, group, f, channel);
+		}
 		
 	}
 	

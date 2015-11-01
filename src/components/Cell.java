@@ -47,6 +47,19 @@ public class Cell implements Serializable {
 		this.uuid = java.util.UUID.randomUUID();
 		mitochondria = new ArrayList<Mitochondrion>(0);
 		tails = new ArrayList<Flagellum>(0);
+		acrosomes = new ArrayList<Acrosome>(0);
+	}
+	
+	/**
+	 * Duplicate a cell TODO make defensive
+	 * @param c
+	 */
+	public Cell(Cell c){
+		this.uuid = UUID.randomUUID();
+		nucleus = c.getNucleus().duplicate();
+		mitochondria = c.getMitochondria();
+		tails = c.getTails();
+		acrosomes = c.getAcrosomes();
 	}
 	
 	public UUID getId() {

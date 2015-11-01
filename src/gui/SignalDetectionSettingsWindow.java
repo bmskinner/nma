@@ -30,6 +30,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
@@ -186,49 +187,55 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				
+
 				// check the selected name is valid - is the key for the options map
 				finalGroupName = checkGroupName(groupName.getText());
 
-				// folder selection
-				if(getImageDirectory()){
+				try{
+					// folder selection
+					if(getImageDirectory()){
 
-					
-					// Run the image prober TODO
-					ImageProber ip = new SignalDetectionImageProber(options, programLogger, folder);
-					if(ip.getOK()){
-						// Image prober returns ok, validate signal group and assign
-//						int channel = getChannel();
-						String signalGroupName = getSignalGroupName();
+						// Use the default options to store settings without creating a new signal group yet
+						NuclearSignalOptions testOptions = options.getNuclearSignalOptions("default");
+						assignSettings(testOptions);
+
+						// Run the image prober TODO
+						ImageProber ip = new SignalDetectionImageProber(options, programLogger, folder, dataset, channel, testOptions);
+						if(ip.getOK()){
+							// Image prober returns ok, validate signal group and assign
+							//						int channel = getChannel();
+							String signalGroupName = getSignalGroupName();
 
 
-//						NuclearSignalOptions options = dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
+							//						NuclearSignalOptions options = dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName);
 
-						// the new signal group is one more than the highest in the collection
-						int newSignalGroup = dataset.getHighestSignalGroup()+1;
+							// the new signal group is one more than the highest in the collection
+							int newSignalGroup = dataset.getHighestSignalGroup()+1;
 
-						// create the options object with the given name
-						options.addNuclearSignalOptions(finalGroupName);
-						
-						// assign the options
-						NuclearSignalOptions ns = options.getNuclearSignalOptions(finalGroupName);
-						assignSettings(ns);
+							// create the options object with the given name
+							options.addNuclearSignalOptions(finalGroupName);
 
-						signalGroup = newSignalGroup;
-						dataset.setSignalGroupName(newSignalGroup, signalGroupName);
-						ok = true;
-						SignalDetectionSettingsWindow.this.setVisible(false);
+							// assign the options
+							NuclearSignalOptions ns = options.getNuclearSignalOptions(finalGroupName);
+							assignSettings(ns);
+
+							signalGroup = newSignalGroup;
+							dataset.setSignalGroupName(newSignalGroup, signalGroupName);
+							ok = true;
+							SignalDetectionSettingsWindow.this.setVisible(false);
+						} else {
+
+							// No action - revise settings
+						}
+
 					} else {
-						
-						// No action - revise settings
+						ok = false;
+						SignalDetectionSettingsWindow.this.setVisible(false);
 					}
-
-				} else {
-					ok = false;
-					SignalDetectionSettingsWindow.this.setVisible(false);
+				} catch(Exception e){
+					programLogger.log(Level.SEVERE, "Error in signal detection", e);
 				}
 
-				
 			}
 		});
 
@@ -278,7 +285,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 	 * @param ns the options to assign to 
 	 */
 	private void assignSettings(NuclearSignalOptions ns){
-		
+
 		ns.setThreshold(  (Integer) thresholdSpinner.getValue());
 		ns.setMinSize(  (Integer) minSizeSpinner.getValue());
 		ns.setMaxFraction(  (Double) maxFractSpinner.getValue());
@@ -302,6 +309,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 						: channelSelection.getSelectedItem().equals("Green") 
 						? Constants.RGB_GREEN
 								: Constants.RGB_BLUE;
+		
 	}
 	
 	public String getSignalGroupName(){

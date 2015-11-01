@@ -32,6 +32,7 @@ import ij.gui.Roi;
 import java.io.File;
 
 import components.nuclei.AsymmetricNucleus;
+import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
 public class SpermNucleus
@@ -58,6 +59,15 @@ public class SpermNucleus
   public SpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi, file, number, position);
 	}
+  
+  @Override
+  public Nucleus duplicate(){
+	  try {
+		  return new SpermNucleus(this);
+	  } catch (Exception e) {
+		  return null;
+	  }
+  }
 
 
 }

@@ -41,6 +41,7 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusType;
+import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
 public class RodentSpermNucleus
@@ -62,6 +63,14 @@ extends SpermNucleus
 	
 	public RodentSpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi, file, number, position);
+	}
+	
+	public Nucleus duplicate(){
+		try {
+			return new RodentSpermNucleus(this);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 	
   	@Override

@@ -32,6 +32,7 @@ import components.generic.BorderTag;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusType;
+import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
 public class PigSpermNucleus 
@@ -61,6 +62,14 @@ public class PigSpermNucleus
     
     public PigSpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi, file, number, position);
+	}
+    
+    public Nucleus duplicate(){
+		try {
+			return new PigSpermNucleus(this);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
   /**

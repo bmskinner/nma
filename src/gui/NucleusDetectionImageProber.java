@@ -26,7 +26,13 @@ public class NucleusDetectionImageProber extends ImageProber {
 	
 	public NucleusDetectionImageProber(AnalysisOptions options, Logger logger, File folder) {
 		super(options, logger, NucleusImageType.DETECTED_OBJECTS, folder);
-
+		Thread thr = new Thread(){
+			public void run() {
+				importAndDisplayImage(openImage);
+			}
+		};
+		thr.start();
+//		importAndDisplayImage(openImage);
 	}
 	
 	/**
@@ -49,12 +55,12 @@ public class NucleusDetectionImageProber extends ImageProber {
 		}
 		
 		public ImageType[] getValues(){
-			NucleusImageType[] a = NucleusImageType.values();
-			ImageType[] r = new ImageType[a.length];
-			for(int i=0; i<a.length; i++){
-				r[i] = a[i];
-			}
-			return r;
+//			NucleusImageType[] a = NucleusImageType.values();
+//			ImageType[] r = new ImageType[a.length];
+//			for(int i=0; i<a.length; i++){
+//				r[i] = a[i];
+//			}
+			return NucleusImageType.values();
 		}
 	}
 	

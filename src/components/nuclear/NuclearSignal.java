@@ -62,6 +62,10 @@ public class NuclearSignal implements Serializable {
 		this.origin = origin;
 	}
 
+	/**
+	 * Create a copy of the given signal
+	 * @param n
+	 */
 	public NuclearSignal(NuclearSignal n){
 		this.borderList = n.getBorder();
 		this.area = n.getArea();

@@ -124,10 +124,14 @@ public abstract class ImageProber extends JDialog {
 		} 
 
 		try{
-			this.setModal(true);
-			this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 			this.options = options;
 			this.programLogger = logger;
+			this.imageType = type;
+			
+			createFileList(folder);
+			
+			this.setModal(true);
+			this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 			this.setTitle("Image Prober");
 
 			int w = (int) (screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
@@ -210,10 +214,8 @@ public abstract class ImageProber extends JDialog {
 				});
 				contentPanel.add(prevButton, BorderLayout.WEST);
 			}
-
-			createFileList(folder);
-
 			this.setVisible(true);
+			
 		} catch(Exception e){
 			logger.log(Level.SEVERE, "Error creating prober", e);
 		}
@@ -276,7 +278,7 @@ public abstract class ImageProber extends JDialog {
 	private JPanel createImagePanel(){
 		JPanel panel = new JPanel();
 		
-		rows = (int) Math.ceil( imageType.getValues().length );
+		rows = (int) Math.ceil( imageType.getValues().length / 2 );
 		cols = 2;
 //		panel.setLayout(new BorderLayout());
 		panel.setLayout(new GridLayout(rows, cols));
@@ -396,18 +398,21 @@ public abstract class ImageProber extends JDialog {
 	 */
 	private void createFileList(final File folder){
 		
-		probableFiles = new ArrayList<File>();
+		programLogger.log(Level.FINEST, "Generating file list");
+//		setStatusLoading();
 		
 		Thread thr = new Thread(){
 			public void run() {
+//				setStatusLoading();
+				
+				probableFiles = new ArrayList<File>();
 				probableFiles = importImages(folder);
 				openImage = probableFiles.get(index);
-				setStatusLoading();
-				importAndDisplayImage(openImage);
+				//				importAndDisplayImage(openImage);
 			}
 		};	
 		thr.start();
-		
+
 	}
 		
 	/**
@@ -461,7 +466,7 @@ public abstract class ImageProber extends JDialog {
 	 * Set the header label and the image icons to display
 	 * the loading gif
 	 */
-	private void setStatusLoading(){
+	protected void setStatusLoading(){
 		if(loadingGif!=null){
 			ImageIcon hicon = (ImageIcon) headerLabel.getIcon();
 			hicon.getImage().flush();
@@ -479,12 +484,12 @@ public abstract class ImageProber extends JDialog {
 	}
 	
 	/**
-	 * Import the given file as an image, detect nuclei and
-	 * display the image with annotated nuclear outlines
+	 * Import the given file as an image, detect objects and
+	 * display the image with annotated  outlines
 	 * @param imageFile
 	 */
 	protected void importAndDisplayImage(File imageFile){
-
+		programLogger.log(Level.FINEST, "Calling abstract class import method");
 	}
 	
 	protected void updateImageThumbnails(){

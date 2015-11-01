@@ -122,42 +122,7 @@ public class AnalysisDataset implements Serializable {
 		this.isRoot = false;
 		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
-	
-	/**
-	 * Fetch the chart of the given cache type, or null
-	 * @param type
-	 * @return
-	 */
-//	public JFreeChart getCachedChart(ChartCache type){
-//		// check if the field has been initialised
-//		if(this.chartCache==null){
-//			chartCache = new HashMap<ChartCache, JFreeChart>(1);
-//			return null;
-//		}
-//		if(this.chartCache.containsKey(type)){
-//			return this.chartCache.get(type);
-//		} else {
-//			return null;
-//		}
-//		
-//	}
-//	
-//	public boolean hasCachedChart(ChartCache type){
-//		if(this.chartCache==null){
-//			chartCache = new HashMap<ChartCache, JFreeChart>(1);
-//			return false;
-//		}
-//		if(this.chartCache.containsKey(type)){
-//			return true;
-//		} else {
-//			return false;
-//		}
-//	}
-//	
-//	public void setCachedChart(ChartCache type, JFreeChart chart){
-//		this.chartCache.put(type, chart);
-//	}
-	
+		
 	/**
 	 * Get the file handler for this dataset. Create a handler
 	 * if needed.

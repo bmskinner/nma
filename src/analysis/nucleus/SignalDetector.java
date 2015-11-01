@@ -102,18 +102,6 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	}
 	
 	
-
-	/**
-	 * Constructor for use in AnalysisCreator.
-	 * @param options the analysis options
-	 * @param debugFile the log file
-	 */
-//	public SignalDetector(NuclearSignalOptions options, File debugFile){
-//		this.options = options;
-//		this.logger = new Logger(debugFile, "SignalDetector");
-//		logger.log("Created signal detector", Logger.DEBUG);
-//	}
-	
 	@Override
 	protected void process( List<Integer> integers ) {
 		//update the number of entries added
@@ -132,6 +120,9 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 			int progress = 0;
 			
 			int originalMinThreshold = options.getSignalThreshold();
+			
+			SignalFinder finder = new SignalFinder(options, logger, channel);
+			
 			for(Cell c : dataset.getCollection().getCells()){
 				
 				// reset the  min threshold for each cell
@@ -149,7 +140,21 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 					
 					ImageStack stack = ImageImporter.importImage(imageFile, (DebugFileHandler) dataset.getLogHandler());
 					
-					detectSignal(imageFile, stack, n);
+					ArrayList<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
+					
+					
+					SignalCollection signalCollection = n.getSignalCollection();
+					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
+					signalCollection.setSignalGroupName(signalGroup, channelName);
+					n.calculateSignalDistancesFromCoM();
+					n.calculateFractionalSignalDistancesFromCoM();
+
+					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
+						if(n.getPoint(BorderTag.ORIENTATION_POINT)!=null){
+
+							n.calculateSignalAnglesFromPoint(n.getPoint(BorderTag.ORIENTATION_POINT));
+						}
+					}
 					
 					
 				} catch(Exception e){
@@ -158,15 +163,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 				
 				progress++;
 				publish(progress);
-			}
-			
-//			// divide population into clusters with and without signals
-//			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
-//			
-//			for(CellCollection collection : signalPopulations){
-//				processSubPopulation(collection);
-//			}
-			
+			}		
 			
 		} catch (Exception e){
 			logger.log(Level.SEVERE, "Error in signal detection", e);
@@ -193,264 +190,4 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 		}
 
 	} 
-	
-	
-	/**
-	 * Call the appropriate signal detection method based on the analysis options
-	 * @param sourceFile the file the image came from
-	 * @param stack the imagestack
-	 * @param n the nucleus
-	 */
-	private void detectSignal(File sourceFile, ImageStack stack, Nucleus n){
-		
-		if(options==null || options.getMode()==NuclearSignalOptions.FORWARD){
-			detectForwardThresholdSignal(sourceFile, stack, n);
-		}
-		
-		if(options.getMode()==NuclearSignalOptions.REVERSE){
-			detectReverseThresholdSignal(sourceFile, stack, n);
-		}
-		
-		if(options.getMode()==NuclearSignalOptions.HISTOGRAM){
-			detectHistogramThresholdSignal(sourceFile, stack, n);
-		}
-	}
-	
-	/**
-	 * Given a new threshold value, update the options
-	 * if the value is not below the previously defined
-	 * minimum
-	 * @param newThreshold
-	 */
-	private void updateThreshold(int newThreshold){
-		// only use the calculated threshold if it is larger than
-		// the given minimum
-		if(newThreshold > options.getSignalThreshold()){
-			logger.log(Level.INFO, "Threshold set at: "+newThreshold);
-			options.setThreshold(newThreshold);
-		} else {
-			logger.log(Level.INFO, "Threshold kept at minimum: "+options.getSignalThreshold());
-		}
-	}
-	
-	/**
-	 * Detect a signal in a given stack by standard forward thresholding
-	 * and add to the given nucleus
-	 * @param sourceFile the file the image came from
-	 * @param stack the imagestack
-	 * @param n the nucleus
-	 */
-	private void detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
-		SignalCollection signalCollection = n.getSignalCollection();
-		
-		// choose the right stack number for the channel
-		int stackNumber = Constants.rgbToStack(channel);
-		
-		// create a new detector
-		Detector detector = new Detector();
-		detector.setMaxSize(n.getArea() * options.getMaxFraction());
-		detector.setMinSize(options.getMinSize());
-		detector.setMinCirc(options.getMinCirc());
-		detector.setMaxCirc(options.getMaxCirc());
-		detector.setThreshold(options.getSignalThreshold());
-		detector.setStackNumber(stackNumber);
-		try{
-			detector.run(stack);
-		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error in signal detection", e);
-		}
-		List<Roi> roiList = detector.getRoiList();
-
-		ArrayList<NuclearSignal> signals = new ArrayList<NuclearSignal>(0);
-
-		if(!roiList.isEmpty()){
-			
-			logger.log(Level.FINE, roiList.size()+" signals in stack "+stackNumber);
-
-			for( Roi r : roiList){
-				
-				StatsMap values = detector.measure(r, stack);
-				NuclearSignal s = new NuclearSignal( r, 
-						values.get("Area"), 
-						values.get("Feret"), 
-						values.get("Perim"), 
-						new XYPoint(values.get("XM")-n.getPosition()[Nucleus.X_BASE], 
-									values.get("YM")-n.getPosition()[Nucleus.Y_BASE]),
-						n.getImageName()+"-"+n.getNucleusNumber());
-
-				// only keep the signal if it is within the nucleus
-				if(Utils.createPolygon(n).contains(	(float) s.getCentreOfMass().getX(), 
-													(float) s.getCentreOfMass().getY())){
-					signals.add(s);
-				}
-				
-			}
-		} else {
-			logger.log(Level.FINE, "No signal in stack "+stackNumber);
-		}
-		
-
-		signalCollection.addSignalGroup(signals, signalGroup, sourceFile, channel);
-		signalCollection.setSignalGroupName(signalGroup, channelName);
-		n.calculateSignalDistancesFromCoM();
-		n.calculateFractionalSignalDistancesFromCoM();
-
-		if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-			if(n.getPoint(BorderTag.ORIENTATION_POINT)!=null){
-
-				n.calculateSignalAnglesFromPoint(n.getPoint(BorderTag.ORIENTATION_POINT));
-			}
-		}
-
-	}
-	
-	/**
-	 * Detect a signal in a given stack by reverse thresholding
-	 * and add to the given nucleus. Find the brightest pixels in
-	 * the nuclear roi. If < maxSignalFraction, get dimmer pixels and
-	 * remeasure. Continue until signal size is met. Works best with 
-	 * maxSignalFraction of ~0.1 for a chromosome paint
-	 * TODO: assumes there is only one signal. Check that the detector picks
-	 * up an object of MIN_SIGNAL_SIZE before setting the threshold.
-	 * @param sourceFile the file the image came from
-	 * @param stack the imagestack
-	 * @param n the nucleus
-	 */
-	private void detectReverseThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
-		
-//		SignalCollection signalCollection = n.getSignalCollection();
-		logger.log(Level.INFO, "Beginning reverse detection for nucleus");
-		// choose the right stack number for the channel
-		int stackNumber = Constants.rgbToStack(channel);
-		
-		ImageProcessor ip = stack.getProcessor(stackNumber);
-		FloatPolygon polygon = Utils.createOriginalPolygon(n);
-		
-		// map brightness to count
-		Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0);
-		for(int i=0;i<256;i++){
-			counts.put(i, 0);
-		}
-		
-		
-//		get the region bounded by the nuclear roi
-//		for max intensity (255) , downwards, count pixels with that intensity
-//		if count / area < fraction, continue
-		
-		//sort the pixels in the roi to bins
-		for(int width = 0; width<ip.getWidth();width++){
-			for(int height = 0; height<ip.getHeight();height++){
-				
-				if(polygon.contains( (float) width, (float) height)){
-					int brightness = ip.getPixel(width, height);
-					int oldCount = counts.get(brightness);
-					counts.put(brightness, oldCount+1);
-				}
-				
-			}
-		}
-		
-//		logger.log("Counts created", Logger.DEBUG);
-//		for(int i=0;i<256;i++){
-//			logger.log("Level "+i+": "+counts.get(i), Logger.DEBUG);
-//		}
-		
-		// find the threshold from the bins
-		int area = (int) ( n.getArea() * options.getMaxFraction());
-		int total = 0;
-		int threshold = 0; // the value to threshold at
-		
-		for(int brightness = 255; brightness>0; brightness--){
-			
-			total += counts.get(brightness); 
-			
-			if(total>area){
-				threshold = brightness+1;
-				break;
-			}
-		}
-		
-		
-		updateThreshold(threshold);
-		
-		// now we have the reverse threshold value, do the thresholding 
-		// and find signal rois
-		detectForwardThresholdSignal(sourceFile, stack, n);
-
-	}
-	
-	
-	
-	/**
-	 * This method uses the histogram of pixel intensities in the signal
-	 * channel within the bounding box of the nucleus. The histogram shows a drop
-	 * at the point where background transitions to real signal. We detect this drop, 
-	 * and set it as the appropriate forward threshold for the nucleus.  
-	 */
-	private void detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
-		logger.log(Level.INFO, "Beginning histogram detection for nucleus");
-//		if(debug){
-//			IJ.log("Beginning histogram detection for nucleus "+n.getNameAndNumber());
-//		}
-		// choose the right stack number for the channel
-		int stackNumber = Constants.rgbToStack(channel);
-		
-		ImageProcessor ip = stack.getProcessor(stackNumber);
-		double[] positions = n.getPosition();
-		Rectangle boundingBox = new Rectangle( (int) positions[Nucleus.X_BASE],
-				(int) positions[Nucleus.Y_BASE],
-				(int) positions[Nucleus.WIDTH],
-				(int) positions[Nucleus.HEIGHT]);
-		
-		ip.setRoi(boundingBox);
-		ImageStatistics statistics = ImageStatistics.getStatistics(ip, Measurements.AREA, new Calibration());
-		long[] histogram = statistics.getHistogram();
-		
-		double[] d = new double[histogram.length];
-
-		for(int i =0; i<histogram.length; i++){
-			d[i] = histogram[i];
-
-		}
-		
-		/* trim the histogram to the minimum signal intensity.
-		 * No point looking lower, and the black pixels increase the
-		 * total range making it harder to carry out the range based minima
-		 * detection below
-		 */
-		int trimValue = options.getSignalThreshold();
-		Profile histogramProfile = new Profile(d);
-		Profile trimmedHisto = histogramProfile.getSubregion(trimValue, 255);
-		
-		// smooth the arrays,  get the deltas, and double smooth them
-		Profile trimDS = trimmedHisto.smooth(3).calculateDeltas(3).smooth(3).smooth(3);
-		
-		/* find minima and maxima above or below zero, with a total 
-		 * displacement more than 0.1 of the range of values in the delta
-		 * profile
-		 */		
-		BooleanProfile minimaD = trimDS.getLocalMinima(3, 0, 0.1);
-
-		/* Set the threshold for this nucleus to the drop-off
-		* This is the highest local minimum detected in the 
-		* delta profile (if no minima were detected, we use the
-		* original signal threshold). 
-		*/ 
-		int maxIndex = trimValue;
-		for(int i =0; i<minimaD.size(); i++){
-			if(minimaD.get(i)==true){
-				maxIndex = i+trimValue;
-			}
-		}
-		/*
-		 * Add a bit more to the new threshold. This is because the minimum
-		 * of the delta profile is in middle of the background drop off;
-		 * we actually want to ignore the remainder of this background and just
-		 * keep the signal. Arbitrary at present. TODO: Find the best point. 
-		 */
-		maxIndex+=10;
-		
-		updateThreshold(maxIndex);
-		detectForwardThresholdSignal(sourceFile, stack, n);
-	}
 }
