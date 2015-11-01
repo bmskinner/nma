@@ -63,7 +63,7 @@ public abstract class ImageProber extends JDialog {
 
 	protected Logger programLogger;
 
-	protected JLabel headerLabel;		// the header text and loading gif
+	protected JLabel headerLabel = new JLabel("Examining input folders...");	// the header text and loading gif
 	
 	protected ImageIcon loadingGif = null; // the icon for the loading gif
 	
@@ -128,96 +128,98 @@ public abstract class ImageProber extends JDialog {
 			this.programLogger = logger;
 			this.imageType = type;
 			
-			createFileList(folder);
-			
-			this.setModal(true);
-			this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-			this.setTitle("Image Prober");
-
-			int w = (int) (screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
-			windowWidth = w;
-			int h = (int) (screenSize.getHeight() * IMAGE_SCREEN_PROPORTION);
-			windowHeight = h;
-
-			setBounds(100, 100, w, h);
-			this.setLocationRelativeTo(null); // centre on screen
-
-			// Load the gif (may be in a res folder depending on Eclipse version)
-			String pathToGif = "res/ajax-loader.gif";	
-			boolean ok = loadResources(pathToGif);
-			if(!ok){
-				pathToGif = "ajax-loader.gif";	
-				ok = loadResources(pathToGif);
-			}
-			if(!ok){
-				programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
-			}
-			
 			for(ImageType key : imageType.getValues()){
 				iconMap.put(key, null);
 				procMap.put(key, null);
 			}
-
-			getContentPane().setLayout(new BorderLayout());
-			contentPanel.setLayout(new BorderLayout());
-			contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-
-			JPanel header = this.createHeader();
-			contentPanel.add(header, BorderLayout.NORTH);
-
-			JPanel footer = this.createFooter();
-			contentPanel.add(footer, BorderLayout.SOUTH);
-
-			JPanel imagePane = createImagePanel();
-			contentPanel.add(imagePane, BorderLayout.CENTER);
-
-			getContentPane().add(contentPanel, BorderLayout.CENTER);
-
-			{
-				JButton nextButton = new JButton("Next");
-				nextButton.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-
-						Thread thr = new Thread(){
-							public void run() {
-								programLogger.log(Level.FINEST, "Selecting next image");
-								openImage = getNextImage();
-//								setStatusLoading();
-								programLogger.log(Level.FINEST, "Opening image");
-								importAndDisplayImage(openImage);
-							}
-						};	
-						thr.start();
-
-					}
-				});
-				contentPanel.add(nextButton, BorderLayout.EAST);
-
-				JButton prevButton = new JButton("Prev");
-				prevButton.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-
-						Thread thr = new Thread(){
-							public void run() {
-								programLogger.log(Level.FINEST, "Selecting previous image");
-								openImage = getPrevImage();
-//								setStatusLoading();
-								programLogger.log(Level.FINEST, "Opening image");
-								importAndDisplayImage(openImage);
-							}
-						};	
-						thr.start();
-
-					}
-				});
-				contentPanel.add(prevButton, BorderLayout.WEST);
-			}
-			this.setVisible(true);
 			
+			createGUI();
+
 		} catch(Exception e){
 			logger.log(Level.SEVERE, "Error creating prober", e);
+		}
+	}
+	
+	private void createGUI(){
+		this.setModal(true);
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		this.setTitle("Image Prober");
+
+		int w = (int) (screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
+		windowWidth = w;
+		int h = (int) (screenSize.getHeight() * IMAGE_SCREEN_PROPORTION);
+		windowHeight = h;
+
+		setBounds(100, 100, w, h);
+		this.setLocationRelativeTo(null); // centre on screen
+
+		// Load the gif (may be in a res folder depending on Eclipse version)
+		String pathToGif = "res/ajax-loader.gif";	
+		boolean ok = loadResources(pathToGif);
+		if(!ok){
+			pathToGif = "ajax-loader.gif";	
+			ok = loadResources(pathToGif);
+		}
+		if(!ok){
+			programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
+		}
+		
+
+		getContentPane().setLayout(new BorderLayout());
+		contentPanel.setLayout(new BorderLayout());
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		JPanel header = this.createHeader();
+		contentPanel.add(header, BorderLayout.NORTH);
+
+		JPanel footer = this.createFooter();
+		contentPanel.add(footer, BorderLayout.SOUTH);
+
+		JPanel imagePane = createImagePanel();
+		contentPanel.add(imagePane, BorderLayout.CENTER);
+
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+
+		{
+			JButton nextButton = new JButton("Next");
+			nextButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+
+					Thread thr = new Thread(){
+						public void run() {
+							programLogger.log(Level.FINEST, "Selecting next image");
+							openImage = getNextImage();
+
+							programLogger.log(Level.FINEST, "Opening image");
+							importAndDisplayImage(openImage);
+						}
+					};	
+					thr.start();
+
+				}
+			});
+			contentPanel.add(nextButton, BorderLayout.EAST);
+
+			JButton prevButton = new JButton("Prev");
+			prevButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+
+					Thread thr = new Thread(){
+						public void run() {
+							programLogger.log(Level.FINEST, "Selecting previous image");
+							openImage = getPrevImage();
+//							setStatusLoading();
+							programLogger.log(Level.FINEST, "Opening image");
+							importAndDisplayImage(openImage);
+						}
+					};	
+					thr.start();
+
+				}
+			});
+			contentPanel.add(prevButton, BorderLayout.WEST);
 		}
 	}
 
@@ -259,7 +261,7 @@ public abstract class ImageProber extends JDialog {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
 
-		headerLabel = new JLabel("Examining input folders...");
+//		headerLabel = new JLabel("Examining input folders...");
 		headerLabel.setIcon(loadingGif);
 		
 		panel.add(new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version."), BorderLayout.NORTH);
@@ -396,19 +398,18 @@ public abstract class ImageProber extends JDialog {
 	 * Create a list of image files in the given folder
 	 * @param folder
 	 */
-	private void createFileList(final File folder){
+	protected void createFileList(final File folder){
 		
 		programLogger.log(Level.FINEST, "Generating file list");
 //		setStatusLoading();
 		
 		Thread thr = new Thread(){
 			public void run() {
-//				setStatusLoading();
 				
 				probableFiles = new ArrayList<File>();
 				probableFiles = importImages(folder);
 				openImage = probableFiles.get(index);
-				//				importAndDisplayImage(openImage);
+				importAndDisplayImage(openImage);
 			}
 		};	
 		thr.start();
@@ -469,7 +470,9 @@ public abstract class ImageProber extends JDialog {
 	protected void setStatusLoading(){
 		if(loadingGif!=null){
 			ImageIcon hicon = (ImageIcon) headerLabel.getIcon();
-			hicon.getImage().flush();
+			if(hicon!=null){
+				hicon.getImage().flush();
+			}
 			headerLabel.setIcon(loadingGif);
 			headerLabel.repaint();
 

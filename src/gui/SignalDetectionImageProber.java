@@ -12,8 +12,6 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.nucleus.SignalFinder;
-import components.Cell;
-import components.CellCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 
@@ -53,6 +51,8 @@ public class SignalDetectionImageProber extends ImageProber {
 	public SignalDetectionImageProber(AnalysisOptions options, Logger logger, File folder, AnalysisDataset dataset, int channel, NuclearSignalOptions testOptions) {
 		super(options, logger, SignalImageType.DETECTED_OBJECTS, folder);
 		
+		
+		
 		if(dataset==null){
 			throw new IllegalArgumentException("Dataset cannot be null");
 		}
@@ -60,18 +60,15 @@ public class SignalDetectionImageProber extends ImageProber {
 		this.dataset = dataset;
 		this.channel = channel;
 		this.testOptions = testOptions;
-		Thread thr = new Thread(){
-			public void run() {
-				importAndDisplayImage(openImage);
-			}
-		};
-		thr.start();
+		createFileList(folder);
+		this.setVisible(true);
 	}
 	
 	@Override
 	protected void importAndDisplayImage(File imageFile){
 
 		try{
+			setStatusLoading();
 			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 
 			programLogger.log(Level.FINEST, "Importing image "+imageFile.getAbsolutePath());
@@ -84,6 +81,13 @@ public class SignalDetectionImageProber extends ImageProber {
 			ImageProcessor openProcessor = ImageExporter.convert(stack).getProcessor();
 			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
 
+			// Store the options
+			double minSize = testOptions.getMinSize();
+			double maxFract = testOptions.getMaxFraction();
+			
+			testOptions.setMinSize(5);
+			testOptions.setMaxFraction(1);
+			
 			// Create the finder
 			SignalFinder finder = new SignalFinder(testOptions, programLogger, channel);
 
@@ -91,19 +95,20 @@ public class SignalDetectionImageProber extends ImageProber {
 
 			// Get the cells matching the desred imageFile, and find signals
 			programLogger.log(Level.FINEST, "Detecting signals in image");
-//			CellCollection collection = dataset.getCollection();
-//			programLogger.log(Level.FINEST, "Collection has "+collection.getNucleusCount()+" cells");
-//			List<Nucleus> nuclei = collection.getNuclei();
-//			programLogger.log(Level.FINEST, "Fetched dataset nuclei");
+
 			for(Nucleus n : dataset.getCollection().getNuclei()){
-				programLogger.log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
+//				programLogger.log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
 				if(n.getImageName().equals(imageName)){
-					programLogger.log(Level.FINEST, "  Nucleus is in image; finding signals");
+//					programLogger.log(Level.FINEST, "  Nucleus is in image; finding signals");
 					List<NuclearSignal> list = finder.detectSignal(imageFile, stack, n);
 					programLogger.log(Level.FINEST, "  Detected "+list.size()+" signals");
 					map.put(n, list);
 				}
 			}
+			
+			// Reset the test options
+			testOptions.setMinSize(minSize);
+			testOptions.setMaxFraction(maxFract);
 
 			programLogger.log(Level.FINEST, "Drawing signals");
 			// annotate detected signals onto the imagefile
@@ -123,9 +128,10 @@ public class SignalDetectionImageProber extends ImageProber {
 		if(map==null){
 			throw new IllegalArgumentException("Input cell is null");
 		}
-			
+		
+		ip.setLineWidth(2);
 		for(Nucleus n : map.keySet()){
-			
+			double[] positions = n.getPosition();
 			List<NuclearSignal> list = map.get(n);
 		
 			for(NuclearSignal s : list){
@@ -135,12 +141,14 @@ public class SignalDetectionImageProber extends ImageProber {
 					ip.setColor(Color.RED);
 				}
 
-
-				double[] positions = n.getPosition();
 				FloatPolygon polygon = Utils.createPolygon(s.getBorder());
 				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-				roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-				ip.setLineWidth(2);
+				
+				// Offset the roi to the nucleus bouding box
+				double x = positions[Nucleus.X_BASE]+s.getCentreOfMass().getX() - ( roi.getBounds().getWidth() /2);
+				double y = positions[Nucleus.Y_BASE]+s.getCentreOfMass().getY()- ( roi.getBounds().getHeight() /2);
+				
+				roi.setLocation( x,y );
 				ip.draw(roi);
 			}
 		}

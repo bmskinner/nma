@@ -26,13 +26,8 @@ public class NucleusDetectionImageProber extends ImageProber {
 	
 	public NucleusDetectionImageProber(AnalysisOptions options, Logger logger, File folder) {
 		super(options, logger, NucleusImageType.DETECTED_OBJECTS, folder);
-		Thread thr = new Thread(){
-			public void run() {
-				importAndDisplayImage(openImage);
-			}
-		};
-		thr.start();
-//		importAndDisplayImage(openImage);
+		createFileList(folder);
+		this.setVisible(true);
 	}
 	
 	/**
@@ -73,6 +68,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 	protected void importAndDisplayImage(File imageFile){
 
 		try {
+			setStatusLoading();
 			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 			
 			ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
