@@ -150,7 +150,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 				drawNucleus(cell, openProcessor);
 			}
 
-			programLogger.log(Level.INFO, "Displaying nuclei");
+			programLogger.log(Level.FINE, "Displaying nuclei");
 			
 			// update the map of icons
 			updateImageThumbnails();

@@ -283,7 +283,7 @@ public abstract class ImageProber extends JDialog {
 		rows = (int) Math.ceil( imageType.getValues().length / 2 );
 		cols = 2;
 //		panel.setLayout(new BorderLayout());
-		panel.setLayout(new GridLayout(rows, cols));
+		panel.setLayout(new GridLayout(cols, rows ));
 
 		for(final ImageType key : imageType.getValues()){
 
@@ -534,7 +534,7 @@ public abstract class ImageProber extends JDialog {
 		if(fullSize){
 			smallWidth = (int) ((double) screenSize.getWidth() * 0.75);
 		} else {
-			smallWidth = (int) ((double) windowWidth * 0.45);
+			smallWidth = (int) ((double) windowWidth * 0.40);
 		}
 		
 		// keep the image aspect ratio

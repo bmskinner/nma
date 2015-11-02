@@ -94,6 +94,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		this.dataset = d;
 		this.options = d.getAnalysisOptions();
 		setModal(true);
+		
 		createGUI();
 		
 		pack();
@@ -104,7 +105,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 	private void createGUI(){
 		setTitle("Signal detection");
 		setBounds(100, 100, 450, 300);
-		
+		this.setLocationRelativeTo(null); // centre on screen
 		getContentPane().setLayout(new BorderLayout());
 		
 		contentPanel = new JPanel();

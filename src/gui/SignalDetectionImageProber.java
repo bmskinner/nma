@@ -71,7 +71,6 @@ public class SignalDetectionImageProber extends ImageProber {
 			setStatusLoading();
 			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 
-			programLogger.log(Level.FINEST, "Importing image "+imageFile.getAbsolutePath());
 			ImageStack stack = ImageImporter.importImage(imageFile, programLogger);
 
 			// Import the image as a stack
@@ -133,6 +132,15 @@ public class SignalDetectionImageProber extends ImageProber {
 		for(Nucleus n : map.keySet()){
 			double[] positions = n.getPosition();
 			List<NuclearSignal> list = map.get(n);
+			
+			// Draw the nucleus
+			ip.setColor(Color.WHITE);
+			FloatPolygon npolygon = Utils.createPolygon(n.getBorderList());
+			PolygonRoi nroi = new PolygonRoi(npolygon, PolygonRoi.POLYGON);
+			nroi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+			ip.draw(nroi);
+			
+			
 		
 			for(NuclearSignal s : list){
 				if(checkSignal(s, n)){
