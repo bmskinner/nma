@@ -25,21 +25,17 @@
  */
 package analysis.nucleus;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
 import analysis.AnalysisDataset;
-import logging.DebugFileFormatter;
-import logging.DebugFileHandler;
 import utility.Constants;
 import utility.Equation;
 //import utility.Logger;
@@ -177,18 +173,20 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			collection.addConsensusNucleus(refoldNucleus);
 			fileLogger.log(Level.INFO,"Curve refolding complete: trigger done()");
 			logger.log(Level.FINEST,"Curve refolding complete: trigger done()");
-			doneSignal.countDown();
+			
 
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
 			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
 			return false;
-		}
-//		} finally {
+//		}
+		} finally {
 //			logger.log(Level.FINEST,"Closing log file handler");
 //			handler.close();
-//			
-//		}
+			doneSignal.countDown();
+			logger.log(Level.FINEST, "Curve refolder thinks latch is "+doneSignal.getCount());
+			
+		}
 		return true;
 	}
 	

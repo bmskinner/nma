@@ -63,8 +63,9 @@ public class NucleusFinder {
 	 * @param logfile the debug file
 	 * @param sourceFile the file the nuclei were found in
 	 * @return
+	 * @throws Exception 
 	 */
-	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, File sourceFile, String outputFolderName){
+	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, File sourceFile, String outputFolderName) throws Exception{
 //		logger = new Logger(logfile, "NucleusFinder");
 		NucleusFinder.programLogger = programLogger;
 		NucleusFinder.fileLogger = null;
@@ -72,7 +73,7 @@ public class NucleusFinder {
 		return result;
 	}
 	
-	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, Logger fileLogger, File sourceFile, String outputFolderName){
+	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, Logger fileLogger, File sourceFile, String outputFolderName) throws Exception{
 		NucleusFinder.programLogger = programLogger;
 		NucleusFinder.fileLogger = fileLogger;
 		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
@@ -115,8 +116,9 @@ public class NucleusFinder {
   *
   * @param image the ImagePlus to be analysed
   * @param path the full path of the image
+ * @throws Exception 
   */
-	protected static List<Cell> processImage(ImageStack image, File path, AnalysisOptions analysisOptions, String outputFolderName){
+	protected static List<Cell> processImage(ImageStack image, File path, AnalysisOptions analysisOptions, String outputFolderName) throws Exception{
 
 		if(analysisOptions==null){
 			throw new IllegalArgumentException("Analysis options are null");

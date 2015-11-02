@@ -146,6 +146,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		try {
 			setTitle("Nuclear Morphology Analysis v"+getVersion());
 			setBounds(100, 100, 1012, 604);
+			this.setLocationRelativeTo(null); // centre on screen
 			contentPane = new JPanel();
 			contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 			contentPane.setLayout(new BorderLayout(0, 0));
@@ -1156,7 +1157,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 		public RefoldNucleusAction(AnalysisDataset dataset, CountDownLatch doneSignal) {
 			super(dataset, "Refolding", "Error refolding nucleus");
-			
+			programLogger.log(Level.FINEST, "Created RefoldNucleusAction");
 			try{
 
 				this.progressBar.setIndeterminate(true);
@@ -1168,6 +1169,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				worker.addPropertyChangeListener(this);
 				this.setProgressMessage("Refolding: "+dataset.getName());
 				worker.execute();
+				programLogger.log(Level.FINEST, "Executed CurveRefolder");
 
 			} catch(Exception e1){
 				this.cancel();
@@ -1177,10 +1179,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 		@Override
 		public void finished(){
-			
-//			utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
+
     		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
-//			logger.log("Refolding finished, cleaning up");
 			
 			// ensure the bar is gone, even if the cleanup fails
 			this.progressBar.setVisible(false);
@@ -1863,9 +1863,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 					public void run(){
 						final CountDownLatch latch = new CountDownLatch(1);
+						programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
 						new RefoldNucleusAction(list.get(0), latch);
+						programLogger.log(Level.FINEST, "Running refolding");
 						try {
 							latch.await();
+							programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
 						} catch (InterruptedException e) {
 							programLogger.log(Level.SEVERE, "Interruption to thread", e);
 						}

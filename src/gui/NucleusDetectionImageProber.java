@@ -171,8 +171,9 @@ public class NucleusDetectionImageProber extends ImageProber {
 	 * @param imageStack
 	 * @param imageFile
 	 * @return
+	 * @throws Exception 
 	 */
-	private List<Cell> getCells(ImageStack imageStack, File imageFile){
+	private List<Cell> getCells(ImageStack imageStack, File imageFile) throws Exception{
 		double minSize = options.getMinNucleusSize();
 		double maxSize = options.getMaxNucleusSize();
 		double minCirc = options.getMinNucleusCirc();

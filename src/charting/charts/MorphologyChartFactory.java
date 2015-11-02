@@ -55,6 +55,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import utility.Utils;
 import weka.core.logging.Logger;
 import analysis.AnalysisDataset;
+import charting.ChartComponents;
 import charting.datasets.NuclearSignalDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.TailDatasetCreator;
@@ -68,12 +69,7 @@ import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory {
 	
-	static final BasicStroke SEGMENT_STROKE = new BasicStroke(3);
-	static final BasicStroke MARKER_STROKE = new BasicStroke(2);
-	static final BasicStroke PROFILE_STROKE = new BasicStroke(1);
-	static final BasicStroke QUARTILE_STROKE = new BasicStroke(1);
 	
-	static final ValueMarker DEGREE_LINE_180 = new ValueMarker(180, Color.BLACK, MARKER_STROKE);
 	/**
 	 * Create an empty chart to display when no datasets are selected
 	 * @return a chart
@@ -110,7 +106,7 @@ public class MorphologyChartFactory {
 			if(tag.equals(BorderTag.REFERENCE_POINT)){
 				colour = Color.ORANGE;
 			}
-			plot.addDomainMarker(new ValueMarker(index, colour, MARKER_STROKE));	
+			plot.addDomainMarker(new ValueMarker(index, colour, ChartComponents.MARKER_STROKE));	
 		}
 		return chart;
 	}
@@ -184,7 +180,7 @@ public class MorphologyChartFactory {
 				if(tag.equals(BorderTag.REFERENCE_POINT)){
 					colour = Color.ORANGE;
 				}
-				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, MARKER_STROKE));	
+				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, ChartComponents.MARKER_STROKE));	
 			}
 			
 		}
@@ -209,7 +205,7 @@ public class MorphologyChartFactory {
 		plot.setBackgroundPaint(Color.WHITE);
 
 		// the 180 degree line
-		plot.addRangeMarker(DEGREE_LINE_180);
+		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 		
 		int datasetIndex = 0;
 		for(AnalysisDataset dataset : list){
@@ -236,7 +232,7 @@ public class MorphologyChartFactory {
 				// segments along the median profile
 				if(name.startsWith("Seg_")){
 					int colourIndex = getIndexFromLabel(name);
-					renderer.setSeriesStroke(i, MARKER_STROKE);
+					renderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 					ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
 					renderer.setSeriesPaint(i, swatch.color(colourIndex));
 				} 
@@ -312,7 +308,7 @@ public class MorphologyChartFactory {
 				if(tag.equals(BorderTag.REFERENCE_POINT)){
 					colour = Color.ORANGE;
 				}
-				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, MARKER_STROKE));	
+				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, ChartComponents.MARKER_STROKE));	
 			}
 			
 		}
@@ -342,7 +338,7 @@ public class MorphologyChartFactory {
 		plot.setBackgroundPaint(Color.WHITE);
 		
 		// the 180 degree line
-		plot.addRangeMarker(DEGREE_LINE_180);
+		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 
 		int seriesCount = plot.getSeriesCount();
 
@@ -353,26 +349,26 @@ public class MorphologyChartFactory {
 			// segments along the median profile
 			if(name.startsWith("Seg_")){
 				int colourIndex = getIndexFromLabel(name);
-				plot.getRenderer().setSeriesStroke(i, SEGMENT_STROKE);
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
 				plot.getRenderer().setSeriesPaint(i, swatch.color(colourIndex));
 
 			} 
 			
 			// entire nucleus profile
 			if(name.startsWith("Nucleus_")){
-				plot.getRenderer().setSeriesStroke(i, PROFILE_STROKE);
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
 				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
 			} 
 			
 			// quartile profiles
 			if(name.startsWith("Q")){
-				plot.getRenderer().setSeriesStroke(i, QUARTILE_STROKE);
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.QUARTILE_STROKE);
 				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
 			} 
 			
 			// simple profiles
 			if(name.startsWith("Profile_")){
-				plot.getRenderer().setSeriesStroke(i, PROFILE_STROKE);
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
 				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
 			} 
 			
@@ -443,7 +439,7 @@ public class MorphologyChartFactory {
 		plot.setBackgroundPaint(Color.WHITE);
 
 		// add 180 degree horizontal line
-		plot.addRangeMarker(DEGREE_LINE_180);
+		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 
 		int lastSeries = 0;
 
@@ -542,7 +538,7 @@ public class MorphologyChartFactory {
 
 		for (int j = 0; j < ds.getSeriesCount(); j++) {
 			plot.getRenderer().setSeriesVisibleInLegend(j, false);
-			plot.getRenderer().setSeriesStroke(j, QUARTILE_STROKE);
+			plot.getRenderer().setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
 			int index = MorphologyChartFactory.getIndexFromLabel( (String) ds.getSeriesKey(j));
 			Color profileColour = list.get(index).getDatasetColour() == null 
 					? ColourSelecter.getSegmentColor(index)
@@ -765,7 +761,7 @@ public class MorphologyChartFactory {
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getDomainAxis().setRange(0, 360);
 
-		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, MARKER_STROKE));
+		plot.addDomainMarker(new ValueMarker(180, Color.BLACK, ChartComponents.MARKER_STROKE));
 		
 		int datasetCount = 0;
 		int iteration = 0;
@@ -786,7 +782,7 @@ public class MorphologyChartFactory {
 			for(int i=0; i<seriesCount;i++){
 				
 				lineRenderer.setSeriesPaint(i, colour);
-				lineRenderer.setSeriesStroke(i, MARKER_STROKE);
+				lineRenderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 				lineRenderer.setSeriesVisibleInLegend(i, false);
 			}
 			
@@ -801,7 +797,7 @@ public class MorphologyChartFactory {
 			seriesCount = plot.getDataset(datasetCount).getSeriesCount();
 			for(int i=0; i<seriesCount;i++){
 				shapeRenderer.setSeriesPaint(i, colour);
-				shapeRenderer.setSeriesStroke(i, MARKER_STROKE);
+				shapeRenderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 				shapeRenderer.setSeriesVisibleInLegend(i, false);
 			}
 			datasetCount++;

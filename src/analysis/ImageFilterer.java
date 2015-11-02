@@ -78,37 +78,25 @@ public class ImageFilterer {
 	
 	/**
 	 * Close holes in the nuclear borders
-	 * @param ip the image processor
+	 * @param ip the image processor. It must be convertible to a ByteProcessor
 	 * @param closingRadius the radius of the circle
+	 * @return a new ByteProcessor containing the closed image
 	 */
-	public static ImageProcessor morphologyClose(ImageProcessor ip, int closingRadius){
-//		ImageProcessor result = ip.duplicate();
+	public static ImageProcessor morphologyClose(ImageProcessor ip, int closingRadius) throws Exception {
+
 		ByteProcessor result = ip.convertToByteProcessor();
-		try {
-			
-			int shift=1;
-			int[] offset = {0,0};
-			int elType = StructureElement.CIRCLE; //circle
-//			logger.log("Closing objects with circle of radius "+closingRadius, Logger.DEBUG);
-//			
-			StructureElement se = new StructureElement(elType,  shift,  closingRadius, offset);
-//			IJ.log("Made se");
-			MorphoProcessor mp = new MorphoProcessor(se);
-//			IJ.log("Made mp");
-			mp.fclose(result);
-//			if(logger!=null){
-//				logger.log("Objects closed", Logger.DEBUG);
-//			}
-			
-//			IJ.log("Closed");
-		} catch (Exception e) {
-//			if(logger!=null){
-//				logger.error("Error in morphology closing", e);
-//			}
-			
-		}
-		return result;
+
+		int shift=1;
+		int[] offset = {0,0};
+		int elType = StructureElement.CIRCLE; //circle
 		
+		StructureElement se = new StructureElement(elType,  shift,  closingRadius, offset);
+		MorphoProcessor mp = new MorphoProcessor(se);
+
+		mp.fclose(result);
+
+		return result;
+
 	}
 	
 	/**
@@ -116,56 +104,40 @@ public class ImageFilterer {
 	 * for the detector
 	 * @param image the stack to process
 	 * @return a stack with edges highlighted
+	 * @throws Exception 
 	 */
-	public static ImageStack runEdgeDetector(ImageStack image, int stackNumber, CannyOptions options){
+	public static ImageStack runEdgeDetector(ImageStack image, int stackNumber, CannyOptions options) throws Exception{
 
-		//		bi.show();
 		ImageStack searchStack = null;
-		try {
-			// using canny detector
-//			CannyOptions nucleusCannyOptions = analysisOptions.getCannyOptions("nucleus");
 
-//			// calculation of auto threshold
-			if(options.isCannyAutoThreshold()){
-				autoDetectCannyThresholds(options, image, stackNumber);
-			}
-
-//			if(logger!=null){
-//				logger.log("Creating edge detector", Logger.DEBUG);
-//			}
-			
-			CannyEdgeDetector canny = new CannyEdgeDetector();
-			canny.setSourceImage(image.getProcessor(stackNumber).getBufferedImage());
-			canny.setLowThreshold( options.getLowThreshold() );
-			canny.setHighThreshold( options.getHighThreshold());
-			canny.setGaussianKernelRadius(options.getKernelRadius());
-			canny.setGaussianKernelWidth(options.getKernelWidth());
-
-			canny.process();
-			BufferedImage edges = canny.getEdgesImage();
-			ImagePlus searchImage = new ImagePlus(null, edges);
-
-			ImageProcessor closed = ImageFilterer.morphologyClose( searchImage.getProcessor()  , options.getClosingObjectRadius()) ;
-			// add morphological closing
-			ByteProcessor bp = closed.convertToByteProcessor();
-
-//			bp = ImageFilterer.morphologyClose( bp  , nucleusCannyOptions.getClosingObjectRadius()) ;
-			ImagePlus bi= new ImagePlus(null, bp);
-			searchStack = ImageImporter.convert(bi);
-
-			bi.close();
-			searchImage.close();
-
-//			if(logger!=null){
-//				logger.log("Edge detection complete", Logger.DEBUG);
-//			}
-			
-		} catch (Exception e) {
-//			if(logger!=null){
-//				logger.error("Error in edge detection", e);
-//			}
-			
+		//			// calculation of auto threshold
+		if(options.isCannyAutoThreshold()){
+			autoDetectCannyThresholds(options, image, stackNumber);
 		}
+
+
+		CannyEdgeDetector canny = new CannyEdgeDetector();
+		canny.setSourceImage(image.getProcessor(stackNumber).getBufferedImage());
+		canny.setLowThreshold( options.getLowThreshold() );
+		canny.setHighThreshold( options.getHighThreshold());
+		canny.setGaussianKernelRadius(options.getKernelRadius());
+		canny.setGaussianKernelWidth(options.getKernelWidth());
+
+		canny.process();
+		BufferedImage edges = canny.getEdgesImage();
+		ImagePlus searchImage = new ImagePlus(null, edges);
+
+		ImageProcessor closed = ImageFilterer.morphologyClose( searchImage.getProcessor()  , options.getClosingObjectRadius()) ;
+		// add morphological closing
+		ByteProcessor bp = closed.convertToByteProcessor();
+
+		ImagePlus bi= new ImagePlus(null, bp);
+		searchStack = ImageImporter.convert(bi);
+
+		bi.close();
+		searchImage.close();
+
+
 		return searchStack;
 	}
 	
@@ -175,49 +147,20 @@ public class ImageFilterer {
 	 * @param options
 	 * @return
 	 */
-	public static ImageProcessor runEdgeDetector(ImageProcessor ip, CannyOptions options){ 
+	public static ImageProcessor runEdgeDetector(ImageProcessor ip, CannyOptions options) throws Exception { 
 		ImageProcessor result = null;
-		try {
 
-//			// calculation of auto threshold
-//			if(options.isCannyAutoThreshold()){
-//				autoDetectCannyThresholds(options, image, stackNumber);
-//			}
+		CannyEdgeDetector canny = new CannyEdgeDetector();
+		canny.setSourceImage(ip.duplicate().getBufferedImage());
+		canny.setLowThreshold( options.getLowThreshold() );
+		canny.setHighThreshold( options.getHighThreshold());
+		canny.setGaussianKernelRadius(options.getKernelRadius());
+		canny.setGaussianKernelWidth(options.getKernelWidth());
 
-			
-			CannyEdgeDetector canny = new CannyEdgeDetector();
-			canny.setSourceImage(ip.duplicate().getBufferedImage());
-			canny.setLowThreshold( options.getLowThreshold() );
-			canny.setHighThreshold( options.getHighThreshold());
-			canny.setGaussianKernelRadius(options.getKernelRadius());
-			canny.setGaussianKernelWidth(options.getKernelWidth());
-
-			canny.process();
-			BufferedImage edges = canny.getEdgesImage();
-			ImagePlus searchImage = new ImagePlus(null, edges);
-			result = searchImage.getProcessor();
-//
-//			ImageProcessor closed = ImageFilterer.morphologyClose( searchImage.getProcessor()  , options.getClosingObjectRadius()) ;
-//			// add morphological closing
-//			ByteProcessor bp = closed.convertToByteProcessor();
-//
-////			bp = ImageFilterer.morphologyClose( bp  , nucleusCannyOptions.getClosingObjectRadius()) ;
-//			ImagePlus bi= new ImagePlus(null, bp);
-//			searchStack = ImageImporter.convert(bi);
-//
-//			bi.close();
-//			searchImage.close();
-
-//			if(logger!=null){
-//				logger.log("Edge detection complete", Logger.DEBUG);
-//			}
-			
-		} catch (Exception e) {
-//			if(logger!=null){
-//				logger.error("Error in edge detection", e);
-//			}
-			
-		}
+		canny.process();
+		BufferedImage edges = canny.getEdgesImage();
+		ImagePlus searchImage = new ImagePlus(null, edges);
+		result = searchImage.getProcessor();
 		return result;
 	}
 	
@@ -236,9 +179,6 @@ public class ImageFilterer {
 		// if the median is >128, this is probably an inverted image.
 		// invert it so the thresholds will work
 		if(medianPixel>128){
-//			if(logger!=null){
-//				logger.log("Detected high median ("+medianPixel+"); inverting");
-//			}
 			
 			image.getProcessor(Constants.COUNTERSTAIN).invert();
 			medianPixel = getMedianIntensity(image, stackNumber);

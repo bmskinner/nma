@@ -772,7 +772,8 @@ public class AnalysisDataset implements Serializable {
 	}
 
 	/**
-	 * Get the swatch. Transient, not saved to nmd
+	 * Get the swatch, or null if the swatch is not set. 
+	 * Transient, not saved to nmd
 	 * @return
 	 */
 	public ColourSwatch getSwatch() {

@@ -33,8 +33,8 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
 import analysis.AnalysisDataset;
+import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
-
 import components.CellCollection;
 
 /**
@@ -173,7 +173,11 @@ public class ConsensusNucleusChartFactory {
 		plot.getDomainAxis().setRange(-max,max);
 		plot.getRangeAxis().setRange(-max,max);
 		
-		formatConsensusChartSeries(plot, true, dataset.getSwatch());
+		ColourSwatch swatch = dataset.getSwatch() == null 
+				? ColourSwatch.REGULAR_SWATCH
+				: dataset.getSwatch();
+		
+		formatConsensusChartSeries(plot, true, swatch);
 		
 		return chart;
 	}
@@ -188,15 +192,14 @@ public class ConsensusNucleusChartFactory {
 		int seriesCount = plot.getSeriesCount();
 
 		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+			plot.getRenderer().setSeriesVisibleInLegend(i, false);
 			String name = (String) ds.getSeriesKey(i);
 			
 			// colour the segments
 			if(name.startsWith("Seg_")){
-//				int colourIndex = MorphologyChartFactory.getIndexFromLabel(name);
-				plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 				plot.getRenderer().setSeriesPaint(i, Color.BLACK);
-//				plot.getRenderer().setSeriesPaint(i, ColourSelecter.getSegmentColor(colourIndex));
 			} 
 			
 			// colour the quartiles
@@ -210,10 +213,8 @@ public class ConsensusNucleusChartFactory {
 //				IJ.log("Drawing IQR for seg "+segmentName + " in "+name);
 				
 				if(showIQR){
-					plot.getRenderer().setSeriesStroke(i, new BasicStroke(1));
-//					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+					plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
 					Color colour = swatch.color(segIndex);
-//					Color colour = ColourSelecter.getOptimisedColor(segIndex);
 					plot.getRenderer().setSeriesPaint(i, colour);
 					
 				} else {
