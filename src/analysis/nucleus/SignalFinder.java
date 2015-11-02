@@ -32,6 +32,7 @@ public class SignalFinder {
 	private NuclearSignalOptions options;
 	private Logger programLogger;
 	private  int channel;
+	private int minThreshold;
 	
 	/**
 	 * Create a finder with the desired options
@@ -45,6 +46,7 @@ public class SignalFinder {
 		this.options = options;
 		this.programLogger = programLogger;
 		this.channel = channel;
+		this.minThreshold = options.getSignalThreshold();
 	}
 	
 	/**
@@ -54,6 +56,8 @@ public class SignalFinder {
 	 * @param n the nucleus
 	 */
 	public ArrayList<NuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n){
+		
+		options.setThreshold(minThreshold); // reset to default;
 		
 		if(options==null || options.getMode()==NuclearSignalOptions.FORWARD){
 			programLogger.log(Level.FINEST, "Running forward detection");
@@ -82,11 +86,12 @@ public class SignalFinder {
 	private void updateThreshold(int newThreshold){
 		// only use the calculated threshold if it is larger than
 		// the given minimum
-		if(newThreshold > options.getSignalThreshold()){
-			programLogger.log(Level.INFO, "Threshold set at: "+newThreshold);
+		if(newThreshold > minThreshold){
+			programLogger.log(Level.FINE, "Threshold set at: "+newThreshold);
 			options.setThreshold(newThreshold);
 		} else {
-			programLogger.log(Level.INFO, "Threshold kept at minimum: "+options.getSignalThreshold());
+			programLogger.log(Level.FINE, "Threshold kept at minimum: "+minThreshold);
+			options.setThreshold(minThreshold);
 		}
 	}
 	
@@ -232,7 +237,7 @@ public class SignalFinder {
 	 * and set it as the appropriate forward threshold for the nucleus.  
 	 */
 	private ArrayList<NuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n){
-		programLogger.log(Level.INFO, "Beginning histogram detection for nucleus");
+		programLogger.log(Level.FINE, "Beginning histogram detection for nucleus");
 
 		// choose the right stack number for the channel
 		int stackNumber = Constants.rgbToStack(channel);
@@ -260,9 +265,10 @@ public class SignalFinder {
 		 * total range making it harder to carry out the range based minima
 		 * detection below
 		 */
-		int trimValue = options.getSignalThreshold();
+		programLogger.log(Level.FINEST, "Initial histo threshold: "+minThreshold);
+//		int trimValue = minThreshold;
 		Profile histogramProfile = new Profile(d);
-		Profile trimmedHisto = histogramProfile.getSubregion(trimValue, 255);
+		Profile trimmedHisto = histogramProfile.getSubregion(minThreshold, 255);
 		
 		// smooth the arrays,  get the deltas, and double smooth them
 		Profile trimDS = trimmedHisto.smooth(3).calculateDeltas(3).smooth(3).smooth(3);
@@ -278,10 +284,10 @@ public class SignalFinder {
 		* delta profile (if no minima were detected, we use the
 		* original signal threshold). 
 		*/ 
-		int maxIndex = trimValue;
+		int maxIndex = minThreshold;
 		for(int i =0; i<minimaD.size(); i++){
 			if(minimaD.get(i)==true){
-				maxIndex = i+trimValue;
+				maxIndex = i+minThreshold;
 			}
 		}
 		/*

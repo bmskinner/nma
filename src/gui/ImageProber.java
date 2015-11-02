@@ -73,7 +73,7 @@ public abstract class ImageProber extends JDialog {
 	private ImageType imageType;
 	
 	private int rows = 0;
-	private int cols = 0;
+	private int cols = 2;
 	
 	
 	private boolean ok = false;
@@ -280,10 +280,16 @@ public abstract class ImageProber extends JDialog {
 	private JPanel createImagePanel(){
 		JPanel panel = new JPanel();
 		
-		rows = (int) Math.ceil( imageType.getValues().length / 2 );
-		cols = 2;
-//		panel.setLayout(new BorderLayout());
-		panel.setLayout(new GridLayout(cols, rows ));
+		if(imageType.getValues().length == 1){
+			rows = 1;
+			cols = 1;
+		} else {
+			rows = (int) Math.ceil(  ( (double) imageType.getValues().length / 2d)  );
+			cols = 2;
+		}
+
+		programLogger.log(Level.FINEST, "Creating image panel size "+rows+" by "+cols);
+		panel.setLayout(new GridLayout(rows, cols ));
 
 		for(final ImageType key : imageType.getValues()){
 
@@ -528,23 +534,37 @@ public abstract class ImageProber extends JDialog {
 	protected ImageIcon createViewableImage(ImageProcessor ip, boolean fullSize){
 		int originalWidth = ip.getWidth();
 		int originalHeight = ip.getHeight();
-
+		
+		
+		programLogger.log(Level.FINEST, "Display has "+rows+" rows");
+		programLogger.log(Level.FINEST, "Display has "+cols+" columns");
+		
+		
 		// set the image width to be less than half the screen width
 		int smallWidth = 0;
 		if(fullSize){
-			smallWidth = (int) ((double) screenSize.getWidth() * 0.75);
+			smallWidth = (int) ((double) screenSize.getWidth() * IMAGE_SCREEN_PROPORTION);
 		} else {
-			smallWidth = (int) ((double) windowWidth * 0.40);
+			smallWidth = (int) ((double) windowWidth / (cols+1));
 		}
 		
 		// keep the image aspect ratio
 		double ratio = (double) originalWidth / (double) originalHeight;
 		int smallHeight = (int) (smallWidth / ratio);
 		
-		if(smallHeight > windowHeight / (rows+1) && !fullSize ){ // image is too high, adjust to scale on height
-			smallHeight = (int) (windowHeight / (rows+1));
-			smallWidth = (int) (smallHeight * ratio);
+		if(!fullSize){
+			if(smallHeight > windowHeight / (rows+1) ){ // image is too high, adjust to scale on height
+				smallHeight = (int) (windowHeight / (rows+1));
+				smallWidth = (int) (smallHeight * ratio);
+			}
+		} else { // full size image must still be scaled to fit
+			if(smallHeight > screenSize.getHeight() * IMAGE_SCREEN_PROPORTION){ // image is too high, adjust to scale on height
+				smallHeight = (int) (windowHeight * IMAGE_SCREEN_PROPORTION);
+				smallWidth = (int) (smallHeight * ratio);
+			}
 		}
+		
+		
 		
 		// Create the image
 		

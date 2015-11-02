@@ -83,9 +83,10 @@ public class SignalDetectionImageProber extends ImageProber {
 			// Store the options
 			double minSize = testOptions.getMinSize();
 			double maxFract = testOptions.getMaxFraction();
+			int threshold = testOptions.getSignalThreshold();
 			
 			testOptions.setMinSize(5);
-			testOptions.setMaxFraction(1);
+			testOptions.setMaxFraction(1d);
 			
 			// Create the finder
 			SignalFinder finder = new SignalFinder(testOptions, programLogger, channel);
@@ -108,6 +109,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			// Reset the test options
 			testOptions.setMinSize(minSize);
 			testOptions.setMaxFraction(maxFract);
+			testOptions.setThreshold(threshold);
 
 			programLogger.log(Level.FINEST, "Drawing signals");
 			// annotate detected signals onto the imagefile
