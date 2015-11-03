@@ -841,10 +841,15 @@ public class CellCollection implements Serializable {
   public double[] getNormalisedDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
 
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType,50);
 //	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
 	  for(Nucleus n : this.getNuclei()){
 		  
-		  double var = calculateVariabililtyOfNucleusProfile(n);
+//		  double var = calculateVariabililtyOfNucleusProfile(n);
+		  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
+		  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
+		  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+		  
 		  list.add(var);
 	  }
 

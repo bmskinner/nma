@@ -278,14 +278,14 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
 						chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat, scale);
 						getChartCache().addChart(options, chart);
-						programLogger.log(Level.FINEST, "Added cached chart");
 
 					} else {
 						HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat, scale);
 						chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, stat, scale);
 						getChartCache().addChart(options, chart);
-						programLogger.log(Level.FINEST, "Added cached chart");
+						
 					}
+					programLogger.log(Level.FINEST, "Added cached chart: "+stat);
 				}
 //				detectModes(chart, list, stat);
 				XYPlot plot = (XYPlot) chart.getPlot();
