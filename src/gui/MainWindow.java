@@ -83,7 +83,6 @@ import logging.TextAreaHandler;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
-import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.ClusteringOptions;
 import analysis.nucleus.CurveRefolder;
 import analysis.nucleus.DatasetMerger;
@@ -825,6 +824,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 * is triggered as a SwingWorker. Subclassed for each action type.
 	 *
 	 */
+	// TODO: refactor this class and subclasses into gui.actions
 	abstract class ProgressableAction implements PropertyChangeListener{
 
 		protected AnalysisDataset dataset = null; // the dataset being worked on
