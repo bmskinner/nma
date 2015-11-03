@@ -358,7 +358,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 			}
 			programLogger.log(Level.FINEST, "Updated consensus panel");
 		} catch (Exception e) {
-			error("Error drawing consensus nucleus", e);
+			programLogger.log(Level.SEVERE, "Error drawing consensus nucleus", e);
 		}
 	}
 				
@@ -397,7 +397,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 						}
 					}
 				} else {
-					log("Cannot rotate: must have one dataset selected");
+					programLogger.log(Level.WARNING, "Cannot rotate: must have one dataset selected");
 				}
 			}
 			
@@ -413,7 +413,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 						this.update(list);
 					}
 				} else {
-					log("Cannot rotate: must have one dataset selected");
+					programLogger.log(Level.WARNING, "Cannot rotate: must have one dataset selected");
 				}
 			}
 			
@@ -452,7 +452,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 
 					}
 				} else {
-					log("Cannot offset: must have one dataset selected");
+					programLogger.log(Level.WARNING, "Cannot offset: must have one dataset selected");
 				}
 			}
 			
@@ -471,7 +471,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 						this.update(list);
 					}
 				} else {
-					log("Cannot offset: must have one dataset selected");
+					programLogger.log(Level.WARNING, "Cannot offset: must have one dataset selected");
 				}
 			}
 

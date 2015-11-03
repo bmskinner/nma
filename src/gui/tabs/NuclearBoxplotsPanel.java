@@ -105,7 +105,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					histogramsPanel.update(NuclearBoxplotsPanel.this.list);
 					programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
 				} catch (Exception e) {
-					error("Error updating nuclear charts", e);
+					programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
 				}
 			}
 		});
@@ -137,7 +137,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				try {
 					chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
 				} catch (Exception e) {
-					error("Error creating boxplots panel", e);
+					programLogger.log(Level.SEVERE, "Error creating boxplots panel", e);
 				}
 				
 				ChartPanel panel = new ChartPanel(chart);
@@ -188,7 +188,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				}
 
 			} catch (Exception e) {
-				error("Error updating boxplots", e);
+				programLogger.log(Level.SEVERE, "Error updating boxplots", e);
 			}
 			
 		}
@@ -307,7 +307,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				try {
 //					
 				} catch (Exception e) {
-					error("Unable to detect modes", e);
+					programLogger.log(Level.SEVERE, "Unable to detect modes", e);
 				}
 				
 			}
@@ -320,7 +320,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
             try {
                 this.update(list);
             } catch (Exception e1) {
-                error("Error updating histogram panel from action listener", e1);
+            	programLogger.log(Level.SEVERE, "Error updating histogram panel from action listener", e1);
             }
             
             
@@ -367,7 +367,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								try{ 
 									value = collection.calculateVariabililtyOfNucleusProfile(n);
 								} catch (Exception e){
-									error("Cannot calculate variabililty", e);
+									programLogger.log(Level.SEVERE, "Cannot calculate variabililty", e);
 								}
 							}
 							
@@ -380,9 +380,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 												
 						if(subCollection.getNucleusCount()>0){
 							
-							
-							log("Filtering on "+name+": "+df.format(lower)+" - "+df.format(upper));
-							log("Filtered "+subCollection.getNucleusCount()+" nuclei");
+							programLogger.log(Level.INFO, "Filtering on "+name+": "+df.format(lower)+" - "+df.format(upper));
+							programLogger.log(Level.INFO, "Filtered "+subCollection.getNucleusCount()+" nuclei");
 							dataset.addChildCollection(subCollection);
 							newList.add(  dataset.getChildDataset(subCollection.getID() ));
 						}
@@ -390,7 +389,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 						
 					}
 				} else {
-					log("Error: "+name+": "+df.format(lower)+" - "+df.format(upper));
+					programLogger.log(Level.SEVERE, "Error: "+name+": "+df.format(lower)+" - "+df.format(upper));
 				}
 				
 			}

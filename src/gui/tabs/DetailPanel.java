@@ -103,16 +103,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
     public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
     	datasetListeners.remove( l );
     }
-    
-    /**
-     * A message to log in the main window log panel
-     * @param message
-     */
-    public void log(String message){
-//    	fireSignalChangeEvent("Log_"+message);
-    	programLogger.log(Level.INFO, message);
-    }
-    
+        
     
     /**
      * A message to write in the main window status line
@@ -127,13 +118,13 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
      * @param message
      * @param e
      */
-    public void error(String message, Throwable e){
-    	programLogger.log(Level.SEVERE, message, e);
-//    	log(message+": "+e.getMessage());
-//		for(StackTraceElement e1 : e.getStackTrace()){
-//			log(e1.toString());
-//		}
-    }
+//    public void error(String message, Throwable e){
+//    	programLogger.log(Level.SEVERE, message, e);
+////    	log(message+": "+e.getMessage());
+////		for(StackTraceElement e1 : e.getStackTrace()){
+////			log(e1.toString());
+////		}
+//    }
 	
     protected synchronized void fireSignalChangeEvent(String message) {
     	

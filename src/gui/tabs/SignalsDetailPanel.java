@@ -117,7 +117,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			
 		} catch (Exception e){
-			error("Error making signal panel", e);
+			programLogger.log(Level.SEVERE, "Error making signal panel", e);
 		}
 	}
 
@@ -443,7 +443,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     				}
 
     			} catch(Exception e){
-    				error("Error creating signal checkboxes", e);
+    				programLogger.log(Level.SEVERE, "Error creating signal checkboxes", e);
     			}
     		}
     		return panel;
@@ -524,7 +524,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 //    				consensusAndCheckboxPanel.setVisible(false);
     			}
     		} catch(Exception e){
-    			error("Error updating signals", e);
+    			programLogger.log(Level.SEVERE, "Error updating signals", e);
     		}
     	}
     }
@@ -555,7 +555,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     			updateSignalAngleHistogram(list);
     			updateSignalDistanceHistogram(list);
     		} catch (Exception e) {
-    			error("Error updating signal histograms", e);
+    			programLogger.log(Level.SEVERE, "Error updating signal histograms", e);
     		}
     	}
     	
@@ -570,7 +570,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     			}
 
     		} catch (Exception e) {
-    			error("Error updating angle histograms", e);
+    			programLogger.log(Level.SEVERE, "Error updating angle histograms", e);
     		}
     		angleChartPanel.setChart(chart);
     	}
@@ -585,7 +585,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     			}
 
     		} catch (Exception e) {
-    			error("Error updating distance histograms", e);
+    			programLogger.log(Level.SEVERE, "Error updating distance histograms", e);
     		}
     		distanceChartPanel.setChart(chart);
     	}
@@ -625,7 +625,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     			table.setModel(model);
     			table.createDefaultColumnsFromModel();
     		} catch (Exception e){
-    			error("Error updating signal analysis", e);
+    			programLogger.log(Level.SEVERE, "Error updating signal analysis", e);
     		}
     	}
 

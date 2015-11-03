@@ -143,7 +143,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 					}
 					programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
 				} catch (Exception e) {
-					error("Error making Wilcoxon table", e);
+					programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
 				}
 			}});
 	}

@@ -559,13 +559,13 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		if(!newName.isEmpty() && newName!=null){
 		
 			if(this.populationNames.containsKey(newName)){
-				log("Name exists, aborting");
+				programLogger.log(Level.SEVERE, "Name exists, aborting");
 			} else {
 				String oldName = collection.getName();
 				collection.setName(newName);
 				this.populationNames.put(newName, collection.getID());
 				this.populationNames.remove(oldName);
-				log("Collection renamed: "+newName);
+				programLogger.log(Level.INFO, "Collection renamed: "+newName);
 				
 				
 				File saveFile = dataset.getSavePath();

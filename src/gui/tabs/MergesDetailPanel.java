@@ -122,7 +122,7 @@ public class MergesDetailPanel extends DetailPanel {
 			}
 			programLogger.log(Level.FINEST, "Updated merges panel");
 		} catch (Exception e){
-			error("Error updating merges panel", e);
+			programLogger.log(Level.SEVERE, "Error updating merges panel", e);
 		}
 	}
 	

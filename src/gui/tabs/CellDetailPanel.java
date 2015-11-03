@@ -336,7 +336,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								CellDetailPanel.this.fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, list);
 
 							} catch (Exception e1) {
-								error("Error deleting cell", e1);
+								programLogger.log(Level.SEVERE, "Error deleting cell", e1);
 							}
 							
 							CellDetailPanel.this.updateList(list);
@@ -471,7 +471,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 
 			} catch(Exception e){
-				error("Error updating cell panel", e);
+				programLogger.log(Level.SEVERE, "Error updating cell panel", e);
 			}
 
 		}
@@ -616,7 +616,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					panel.restoreAutoBounds();
 				}
 			} catch(Exception e){
-				error("Error updating outline chart", e);
+				programLogger.log(Level.SEVERE, "Error updating outline chart", e);
 			}
 		}
 
@@ -765,7 +765,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 									n.setAngleProfile(profile, tag);
 									
 								} catch(Exception e1){
-									error("Error updating cell profile", e1);
+									programLogger.log(Level.SEVERE, "Error updating cell profile", e1);
 								}
 								
 								// Update the border tag index
@@ -872,7 +872,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 												n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
 												updateCell(activeCell);
 											} else {
-												log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+												programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 											}
 											
 
@@ -909,7 +909,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 												n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
 												updateCell(activeCell);
 											} else {
-												log("Updating "+seg.getEndIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+												programLogger.log(Level.INFO, "Updating "+seg.getEndIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 											}
 											
 
@@ -919,14 +919,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 									
 									
 								} catch (Exception e1) {
-									error("Error getting segment", e1);
+									programLogger.log(Level.SEVERE, "Error getting segment", e1);
 								}
 							}
 						}
 					}
 				});
 			} catch (Exception e) {
-				error("Error in segment stats", e);
+				programLogger.log(Level.SEVERE, "Error in segment stats", e);
 			}
 			table.setEnabled(false);
 						
@@ -942,13 +942,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				try {
 					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
 				} catch (Exception e) {
-					error("Error updating segment stats", e);
+					programLogger.log(Level.SEVERE, "Error updating segment stats", e);
 				}
 			} else {
 				try {
 					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
 				} catch (Exception e) {
-					error("Error updating segment stats", e);
+					programLogger.log(Level.SEVERE, "Error updating segment stats", e);
 				}
 
 				Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
@@ -976,7 +976,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				activeCell = activeDataset.getCollection().getCell(cellID);
 				updateCell(activeCell);
 			} catch (Exception e1){
-				error("Error fetching cell", e1);
+				programLogger.log(Level.SEVERE, "Error fetching cell", e1);
 			}
 		}
 		

@@ -138,7 +138,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 			}
 			tablePopulationStats.setModel(model);
 		} catch(Exception e){
-			error("Error updating stats panel", e);
+			programLogger.log(Level.SEVERE, "Error updating stats panel", e);
 		}
 	}
 	
@@ -160,7 +160,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 			tablePopulationStats.setModel(NucleusTableDatasetCreator.createStatsTable(null));
 			
 		}catch(Exception e){
-			error("Error creating stats panel", e);
+			programLogger.log(Level.SEVERE, "Error creating stats panel", e);
 		}
 		return scrollPane;
 	}

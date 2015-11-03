@@ -425,7 +425,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				
 				chartPanel.setChart(chart);
 			} catch (Exception e) {
-				error("Error in plotting segment profile", e);
+				programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
 			} 
 		}
 
@@ -502,7 +502,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					
 				}
 			} catch (Exception e1) {
-				error("Error merging segments", e1);
+				programLogger.log(Level.SEVERE, "Error merging segments", e1);
 			}
 		}
 	}
@@ -617,7 +617,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 //
 //				}
 			} catch (Exception e){
-				error("Error updating segments boxplot", e);
+				programLogger.log(Level.SEVERE, "Error updating segments boxplot", e);
 //				JFreeChart boxplotChart = MorphologyChartFactory.makeEmptyBoxplot();
 //				chartPanel.setChart(boxplotChart);
 				
@@ -738,14 +738,14 @@ public class SegmentsDetailPanel extends DetailPanel {
 									
 									
 								} catch (Exception e1) {
-									error("Error getting segment", e1);
+									programLogger.log(Level.SEVERE, "Error getting segment", e1);
 								}
 							}
 						}
 					}
 				});
 			} catch (Exception e) {
-				error("Error in segment table", e);
+				programLogger.log(Level.SEVERE, "Error in segment table", e);
 			}
 			table.setEnabled(false);
 						
@@ -784,7 +784,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				}
 
 			} catch (Exception e) {
-				error("Error updating segment stats panel", e);
+				programLogger.log(Level.SEVERE, "Error updating segment stats panel", e);
 			}
 			
 

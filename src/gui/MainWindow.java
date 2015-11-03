@@ -1906,24 +1906,32 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	
 	@Override
 	public void interfaceEventReceived(InterfaceEvent event) {
-		if(event.method().equals(InterfaceMethod.UPDATE_PANELS)){
-			this.updatePanels(populationsPanel.getSelectedDatasets());
-		}
 		
-		if(event.method().equals(InterfaceMethod.UPDATE_POPULATIONS)){
-			this.populationsPanel.update();
-		}
+		InterfaceMethod method = event.method();
 		
-		if(event.method().equals(InterfaceMethod.REFRESH_POPULATIONS)){
-			this.populationsPanel.refreshDatasets();;
-		}
+		switch(method){
 		
-		if(event.method().equals(InterfaceMethod.SAVE_ROOT)){
+		case REFRESH_POPULATIONS:
+			this.populationsPanel.refreshDatasets();
+			break;
 			
+		case SAVE_ROOT:
 			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
 				PopulationExporter.saveAnalysisDataset(root);
 			}
-		}
-		
+			break;
+			
+		case UPDATE_PANELS:
+			this.updatePanels(populationsPanel.getSelectedDatasets());
+			break;
+			
+		case UPDATE_POPULATIONS:
+			this.populationsPanel.update();
+			break;
+			
+		default:
+			break;
+
+		}		
 	}	
 }

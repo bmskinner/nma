@@ -127,7 +127,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 					modalityDisplayPanel.update(NucleusProfilesPanel.this.list);
 					programLogger.log(Level.FINEST, "Updated modality panel");
 				} catch  (Exception e){
-					error("Error updating profile panels", e);
+					programLogger.log(Level.SEVERE, "Error updating profile panels", e);
 				}
 			}
 		});
@@ -256,7 +256,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 				chartPanel.setChart(chart);
 			} catch (Exception e1) {
-				error("Error updating modality panel", e1);
+				programLogger.log(Level.SEVERE, "Error updating modality panel", e1);
 			}
 		}
 		
@@ -425,7 +425,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 					chartPanel.setChart(chart);
 				}
 			} catch (Exception e) {
-				error("Error in plotting variability chart", e);
+				programLogger.log(Level.SEVERE, "Error in plotting variability chart", e);
 			}	
 		}
 
@@ -444,7 +444,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 				try {
 					j.commitEdit();
 				} catch (ParseException e) {
-					error("Error setting p-value spinner", e);
+					programLogger.log(Level.SEVERE, "Error setting p-value spinner", e);
 				}
 			}
 			update(list);
@@ -585,7 +585,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 				chartPanel.setChart(chart);
 				
 			} catch (Exception e) {
-				error("Error in plotting profile", e);			
+				programLogger.log(Level.SEVERE, "Error in plotting profile", e);			
 			} 
 		}
 		
@@ -655,7 +655,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 //					ProfileCollection f = d.getCollection().getProfileCollection(ProfileCollectionType.FRANKEN);
 //					log(f.printKeys());
 //				}
-				error("Error in plotting frankenprofile", e);
+				programLogger.log(Level.SEVERE, "Error in plotting frankenprofile", e);
 			} 
 		}
 
