@@ -788,5 +788,10 @@ public class AnalysisDataset implements Serializable {
 		this.swatch = swatch;
 	}
 	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		    in.defaultReadObject();
+		    this.swatch = ColourSwatch.REGULAR_SWATCH;
+		}
+	
 
 }

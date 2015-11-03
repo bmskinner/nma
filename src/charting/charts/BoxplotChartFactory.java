@@ -16,6 +16,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import components.generic.MeasurementScale;
 import analysis.AnalysisDataset;
+import charting.ChartComponents;
 import charting.datasets.NucleusDatasetCreator;
 
 public class BoxplotChartFactory {
@@ -135,7 +136,7 @@ public class BoxplotChartFactory {
 		}
 		
 		ValueMarker zeroMarker =
-	              new ValueMarker(0.00, Color.black, MorphologyChartFactory.PROFILE_STROKE);
+	              new ValueMarker(0.00, Color.black, ChartComponents.PROFILE_STROKE);
 
 	      plot.addRangeMarker(zeroMarker);
 		
