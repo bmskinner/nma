@@ -759,33 +759,30 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 			MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
 			try {
-				if(list!=null){
 
-					if(list.isEmpty()){
-						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
+				if(list.isEmpty()){
+					table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 
-					} else {
-
-						if(list.size()==1){
-
-							activeDataset = list.get(0);
-							TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset, scale);
-							table.setModel(model);
-							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
-
-							while(columns.hasMoreElements()){
-								TableColumn column = columns.nextElement();
-								column.setCellRenderer(new SegmentTableCellRenderer());
-							}
-
-						} else {
-							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
-						}
-
-					}
 				} else {
 
+					if(list.size()==1){
+
+						activeDataset = list.get(0);
+						TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset, scale);
+						table.setModel(model);
+						Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+
+						while(columns.hasMoreElements()){
+							TableColumn column = columns.nextElement();
+							column.setCellRenderer(new SegmentTableCellRenderer());
+						}
+
+					} else {
+						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
+					}
+
 				}
+
 			} catch (Exception e) {
 				error("Error updating segment stats panel", e);
 			}

@@ -19,6 +19,7 @@
 package gui;
 
 import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
@@ -98,7 +99,7 @@ import components.CellCollection;
 import components.ClusterGroup;
 import components.nuclei.Nucleus;
 
-public class MainWindow extends JFrame implements SignalChangeListener, DatasetEventListener {
+public class MainWindow extends JFrame implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 				
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
@@ -501,36 +502,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		panel.add(lblStatusLine);
 		return panel;
 	}
-	
-	/**
-	 * Standard log - append a newline
-	 * @param s the string to log
-	 */
-//	public void log(String s){
-//		logPanel.log(s);
-//	}
 		
-	/**
-	 * Continuous log - do not append a newline
-	 * @param s the string to log
-	 */
-//	public void logc(String s){
-//		logPanel.logc(s);
-//	}
-	
-	/**
-	 * Write an error message to the log panel,
-	 * together with the stack trace of the exception
-	 * @param message the message
-	 * @param e the exception
-	 */
-//	public void error(String message, Exception e){
-//		log(message+": "+e.getMessage());
-//		for(StackTraceElement el : e.getStackTrace()){
-//			log(el.toString());
-//		}
-//	}
-	
 	public void setStatus(String message){
 		lblStatusLine.setText(message);
 	}
@@ -1826,6 +1798,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public void datasetEventReceived(DatasetEvent event) {
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
+				
 			
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
 				programLogger.log(Level.INFO, "Running new morphology analysis");
@@ -1926,6 +1899,30 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			
+		}
+		
+	}
+
+	
+	@Override
+	public void interfaceEventReceived(InterfaceEvent event) {
+		if(event.method().equals(InterfaceMethod.UPDATE_PANELS)){
+			this.updatePanels(populationsPanel.getSelectedDatasets());
+		}
+		
+		if(event.method().equals(InterfaceMethod.UPDATE_POPULATIONS)){
+			this.populationsPanel.update();
+		}
+		
+		if(event.method().equals(InterfaceMethod.REFRESH_POPULATIONS)){
+			this.populationsPanel.refreshDatasets();;
+		}
+		
+		if(event.method().equals(InterfaceMethod.SAVE_ROOT)){
+			
+			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+				PopulationExporter.saveAnalysisDataset(root);
+			}
 		}
 		
 	}	

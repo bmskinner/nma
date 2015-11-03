@@ -654,6 +654,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 		}
 
+		// remove the dataset from its parents
 		for(UUID parentID : analysisDatasets.keySet()){
 			AnalysisDataset parent = analysisDatasets.get(parentID);
 

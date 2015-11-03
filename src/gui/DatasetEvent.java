@@ -90,7 +90,8 @@ public class DatasetEvent extends EventObject {
 		SELECT_DATASETS		("Select datasets"),
 		EXTRACT_SOURCE		("Extract source"),
 		CLUSTER 			("Cluster"),
-		RECALCULATE_CACHE	("Recalculate caches");
+		RECALCULATE_CACHE	("Recalculate caches"),
+		SAVE				("Save selected");
 		
 		private final String name;
 		
