@@ -91,6 +91,7 @@ import analysis.nucleus.NucleusClusterer;
 import analysis.nucleus.NucleusDetector;
 import analysis.nucleus.ShellAnalysis;
 import analysis.nucleus.SignalDetector;
+import analysis.nucleus.CurveRefolder.CurveRefoldingMode;
 import analysis.tail.TubulinTailDetector;
 import components.Cell;
 import components.CellCollection;
@@ -1162,12 +1163,21 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 				this.progressBar.setIndeterminate(true);
 				worker = new CurveRefolder(dataset, 
-						"Fast", 
+						CurveRefoldingMode.FAST, 
 						doneSignal, 
 						programLogger);
 
 				worker.addPropertyChangeListener(this);
 				this.setProgressMessage("Refolding: "+dataset.getName());
+				
+				/*
+				 * The SwingWorker doInBackground is off the EDT. At this point, the EDT should be free
+				 * 
+				 * 
+				 * What thread is waiting for a signal from the worker?
+				 */
+				programLogger.log(Level.FINEST, "RefoldNucleusAction init is EDT: "+SwingUtilities.isEventDispatchThread());
+				
 				worker.execute();
 				programLogger.log(Level.FINEST, "Executed CurveRefolder");
 
@@ -1181,6 +1191,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		public void finished(){
 
     		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
+    		programLogger.log(Level.FINEST, "RefoldNucleusAction.finished() is EDT: "+SwingUtilities.isEventDispatchThread());
+			
 			
 			// ensure the bar is gone, even if the cleanup fails
 			this.progressBar.setVisible(false);
@@ -1455,7 +1467,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
     					final CountDownLatch latch = new CountDownLatch(1);
 //    					logger.log("Running curve refolder", utility.Logger.DEBUG);
-
+    					programLogger.log(Level.FINEST, "Morphology finished() process thread is EDT: "+SwingUtilities.isEventDispatchThread());
+    					
     					new RefoldNucleusAction(dataset, latch);
     					try {
     						latch.await();
@@ -1859,9 +1872,22 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
 				programLogger.log(Level.INFO, "Refolding consensus");
+				programLogger.log(Level.FINEST, "Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
+				
 				Thread thr = new Thread(){
 
 					public void run(){
+						
+						/*
+						 * The refold action needs to be able to hold up a series
+						 * of following actions, when it is being used in a New Analysis.
+						 * The countdown latch does nothing here, but must be retained for
+						 * compatibility.
+						 */
+						
+						programLogger.log(Level.FINEST, "Refold consensus dataset method new thread is EDT: "+SwingUtilities.isEventDispatchThread());
+						
+						
 						final CountDownLatch latch = new CountDownLatch(1);
 						programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
 						new RefoldNucleusAction(list.get(0), latch);
@@ -1869,6 +1895,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						try {
 							latch.await();
 							programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
+							programLogger.log(Level.FINEST, "Latch counted on EDT: "+SwingUtilities.isEventDispatchThread());
+							
 						} catch (InterruptedException e) {
 							programLogger.log(Level.SEVERE, "Interruption to thread", e);
 						}

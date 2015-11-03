@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import analysis.AnalysisDataset;
@@ -67,22 +68,45 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	private static Logger fileLogger; // the debug file logger
 
 
-	public static final int FAST_MODE 		= 0; // default; iterate until convergence
-	public static final int INTENSIVE_MODE 	= 1; // iterate until value
-	public static final int BRUTAL_MODE 	= 2; // iterate until value
-	private int mode = FAST_MODE; 				 // the dafault mode
+//	public static final int FAST_MODE 		= 0; // default; iterate until convergence
+//	public static final int INTENSIVE_MODE 	= 1; // iterate until value
+//	public static final int BRUTAL_MODE 	= 2; // iterate until value
+	private CurveRefoldingMode mode = CurveRefoldingMode.FAST; 				 // the dafault mode
 	
-	public static final int MAX_ITERATIONS_FAST 		= 50;
-	public static final int MAX_ITERATIONS_INTENSIVE 	= 1000;
-	public static final int MAX_ITERATIONS_BRUTAL 		= 10000;
-
-	public static Map<String, Integer> MODES = new LinkedHashMap<String, Integer>();
-
-	static {
-		MODES.put("Fast", FAST_MODE);
-		MODES.put("Intensive", INTENSIVE_MODE);
-		MODES.put("Brutal", BRUTAL_MODE);
+	public enum CurveRefoldingMode {
+		
+		FAST ("Fast", 50),
+		INTENSIVE("Intensive", 1000),
+		BRUTAL ("Brutal", 10000);
+		
+		private int iterations;
+		private String name;
+		
+		CurveRefoldingMode(String name, int iterations){
+			this.name = name;
+			this.iterations = iterations;
+		}
+		
+		public String toString(){
+			return this.name;
+		}
+		
+		public int maxIterations(){
+			return this.iterations;
+		}
 	}
+	
+//	public static final int MAX_ITERATIONS_FAST 		= 50;
+//	public static final int MAX_ITERATIONS_INTENSIVE 	= 1000;
+//	public static final int MAX_ITERATIONS_BRUTAL 		= 10000;
+//
+//	public static Map<String, Integer> MODES = new LinkedHashMap<String, Integer>();
+//
+//	static {
+//		MODES.put("Fast", FAST_MODE);
+//		MODES.put("Intensive", INTENSIVE_MODE);
+//		MODES.put("Brutal", BRUTAL_MODE);
+//	}
 			
 	/**
 	 * construct from a collection of cells and the mode of refolding
@@ -90,7 +114,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	 * @param refoldMode
 	 * @throws Exception
 	 */
-	public CurveRefolder(AnalysisDataset dataset, String refoldMode, CountDownLatch doneSignal, Logger logger) throws Exception {
+	public CurveRefolder(AnalysisDataset dataset, CurveRefoldingMode refoldMode, CountDownLatch doneSignal, Logger logger) throws Exception {
 		this.doneSignal = doneSignal;
 		this.logger = logger;
 
@@ -139,16 +163,6 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	@Override
 	protected Boolean doInBackground() {
 		
-//		DebugFileHandler handler = null;
-//		try {
-//			handler = new DebugFileHandler(collection.getDebugFile());
-//			handler.setFormatter(new DebugFileFormatter());
-//			fileLogger.addHandler(handler);
-//		} catch (SecurityException e1) {
-//			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
-//		} catch (IOException e1) {
-//			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
-//		}
 
 		try{ 
 			
@@ -173,7 +187,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			collection.addConsensusNucleus(refoldNucleus);
 			fileLogger.log(Level.INFO,"Curve refolding complete: trigger done()");
 			logger.log(Level.FINEST,"Curve refolding complete: trigger done()");
-			
+			// done() is scheduled to be executed on the EDT
 
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
@@ -183,6 +197,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		} finally {
 //			logger.log(Level.FINEST,"Closing log file handler");
 //			handler.close();
+			logger.log(Level.FINEST, "Curve refolder doInBackground is EDT: "+SwingUtilities.isEventDispatchThread());
+			fileLogger.log(Level.FINEST, "Curve refolder doInBackground is EDT: "+SwingUtilities.isEventDispatchThread());
 			doneSignal.countDown();
 			logger.log(Level.FINEST, "Curve refolder thinks latch is "+doneSignal.getCount());
 			
@@ -193,22 +209,48 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	@Override
 	protected void process( List<Integer> integers ) {
 		//update the number of entries added
+		logger.log(Level.FINEST, "Processing integer list from publish()");
+		logger.log(Level.FINEST, "Curve refolder process() is EDT: "+SwingUtilities.isEventDispatchThread());
+		
 		int lastCycle = integers.get(integers.size()-1);
 		
-		int maxCycles = this.mode == FAST_MODE
-						? MAX_ITERATIONS_FAST
-						: this.mode == FAST_MODE
-							? MAX_ITERATIONS_INTENSIVE
-							: MAX_ITERATIONS_BRUTAL;
+//		int maxCycles = this.mode == FAST_MODE
+//						? MAX_ITERATIONS_FAST
+//						: this.mode == FAST_MODE
+//							? MAX_ITERATIONS_INTENSIVE
+//							: MAX_ITERATIONS_BRUTAL;
+		int maxCycles = this.mode.maxIterations();
 
 		int percent = (int) ( (double) lastCycle / (double) maxCycles * 100);
+		
+		/*
+		 * What happens when the iteration continues past 50 cycles for some reason?
+		 * 
+		 * 
+		 */
 
+		if(lastCycle > maxCycles){
+			logger.log(Level.INFO, "Last cycle ("+lastCycle+") is above max cycles for mode ("+maxCycles+")");
+			fileLogger.log(Level.SEVERE, "Last cycle is above max cycles for mode");
+			percent = 100;
+			
+		}
 		setProgress(percent); // the integer representation of the percent
 	}
 	
 	@Override
 	public void done() {
-
+		
+		/*
+	     * Scheduled to be executed in event dispatching thread once called.
+	     */
+		logger.log(Level.FINEST, "SwingWorker task called done()");
+		fileLogger.log(Level.FINEST, "SwingWorker task called done()");
+		
+		logger.log(Level.FINEST, "Curve refolder done() is EDT: "+SwingUtilities.isEventDispatchThread());
+		fileLogger.log(Level.FINEST, "Curve refolder done() is EDT: "+SwingUtilities.isEventDispatchThread());
+		
+		
 		try {
 			if(this.get()){
 				fileLogger.log(Level.FINEST, "Firing successful worker task");
@@ -251,12 +293,14 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
 			logger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
 
-			double originalScore = score;
+//			double originalScore = score;
 			double prevScore = score*2;
 			int i=0;
 			
-			if(this.mode==FAST_MODE){
-				while( (prevScore - score)/prevScore > 0.001 || i<MAX_ITERATIONS_FAST){ // iterate until converging
+//			(prevScore - score)/prevScore > 0.001 ||
+			
+//			if(this.mode.equals(CurveRefoldingMode.FAST)){
+				while(  i<mode.maxIterations()){ // iterate until converging
 					prevScore = score;
 					score = this.iterateOverNucleus();
 					i++;
@@ -264,36 +308,36 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 					fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
 					logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
 				}
-			}
+//			}
 
-			if(this.mode==INTENSIVE_MODE){
-
-				while(score > (originalScore*0.1) && i<MAX_ITERATIONS_INTENSIVE){ // iterate until 0.6 original score, or 1000 iterations
-					prevScore = score;
-					score = this.iterateOverNucleus();
-					i++;
-					publish(i);
-					if(i%50==0){
-						fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
-						logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
-//						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
-					}
-				}
-			}
-
-			if(this.mode==BRUTAL_MODE){
-
-				while(score > (originalScore*0.1) && i<MAX_ITERATIONS_BRUTAL){ // iterate until 0.1 original score, or 10000 iterations
-					prevScore = score;
-					score = this.iterateOverNucleus();
-					i++;
-					publish(i);
-					if(i%50==0){
-						fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
-						logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
-					}
-				}
-			}
+//			if(this.mode==INTENSIVE_MODE){
+//
+//				while(score > (originalScore*0.1) && i<MAX_ITERATIONS_INTENSIVE){ // iterate until 0.6 original score, or 1000 iterations
+//					prevScore = score;
+//					score = this.iterateOverNucleus();
+//					i++;
+//					publish(i);
+//					if(i%50==0){
+//						fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+//						logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+////						logger.log("Iteration "+i+": "+(int)score, Logger.DEBUG);
+//					}
+//				}
+//			}
+//
+//			if(this.mode==BRUTAL_MODE){
+//
+//				while(score > (originalScore*0.1) && i<MAX_ITERATIONS_BRUTAL){ // iterate until 0.1 original score, or 10000 iterations
+//					prevScore = score;
+//					score = this.iterateOverNucleus();
+//					i++;
+//					publish(i);
+//					if(i%50==0){
+//						fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+//						logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+//					}
+//				}
+//			}
 			fileLogger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
 			logger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
 
@@ -302,8 +346,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		}
 	}
 
-	public void setMode(String s){
-		this.mode = CurveRefolder.MODES.get(s);
+	public void setMode(CurveRefoldingMode s){
+		this.mode = s;
 	}
 	
 	/**
