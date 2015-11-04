@@ -64,6 +64,11 @@ import components.ClusterGroup;
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final int COLUMN_NAME = 0;
+	private static final int COLUMN_CELL_COUNT = 1;
+	private static final int COLUMN_COLOUR = 2;
+	
 		
 	private final JPanel panelPopulations = new JPanel(); // holds list of active populations
 
@@ -93,7 +98,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 	}
 	public void update(List<AnalysisDataset> list){
-		
+		this.update();
 	}
 	
 	/**
@@ -102,8 +107,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	public void update(){
 		
-		int nameColWidth = treeTable.getColumnModel().getColumn(0).getPreferredWidth();
-		int colourColWidth = treeTable.getColumnModel().getColumn(2).getPreferredWidth();
+		int nameColWidth = treeTable.getColumnModel().getColumn(COLUMN_NAME).getWidth();
+		int colourColWidth = treeTable.getColumnModel().getColumn(COLUMN_COLOUR).getWidth();
+//		int nameColWidth = treeTable.getColumnModel().getColumn(0).getPreferredWidth();
+//		int colourColWidth = treeTable.getColumnModel().getColumn(2).getPreferredWidth();
 					
 		List<String> columns = new ArrayList<String>();
 		columns.add("Population");
@@ -131,8 +138,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			row++;
 		}
 		
-		treeTable.getColumnModel().getColumn(0).setPreferredWidth(nameColWidth);
-		treeTable.getColumnModel().getColumn(2).setPreferredWidth(colourColWidth);
+		treeTable.getColumnModel().getColumn(COLUMN_NAME).setPreferredWidth(nameColWidth);
+		treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setPreferredWidth(colourColWidth);
 	}
 	
 	/**
@@ -158,6 +165,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 	}
 	
+	/**
+	 * Update the cluster groups for each root dataset and its children.
+	 * This will remove any cluster groups with no member datasets. 
+	 */
 	public void refreshClusters(){
 		try {
 		programLogger.log(Level.FINEST, "Refreshing clusters...");
@@ -225,9 +236,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		table.setCellSelectionEnabled(false);
 		table.setColumnSelectionAllowed(false);
 		table.setRowSelectionAllowed(true);
-		table.getColumnModel().getColumn(2).setCellRenderer(new PopulationTableCellRenderer());
-		table.getColumnModel().getColumn(0).setPreferredWidth(120);
-		table.getColumnModel().getColumn(2).setPreferredWidth(5);
+		table.getColumnModel().getColumn(COLUMN_COLOUR).setCellRenderer(new PopulationTableCellRenderer());
+		table.getColumnModel().getColumn(COLUMN_NAME).setPreferredWidth(120);
+		table.getColumnModel().getColumn(COLUMN_COLOUR).setPreferredWidth(5);
 		
 		populationPopup = new PopulationListPopupMenu();
 		populationPopup.disableAll();
@@ -752,7 +763,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 							for(UUID childID : d.getAllChildUUIDs()){
 								programLogger.log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
 								if(!list.contains(childID)){
-//									list.add(childID);
 									list.add(UUID.fromString((childID.toString())));
 								}
 							}
@@ -951,6 +961,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	}
 
 		
+	
 	
 	class PopulationTreeTableNode extends AbstractMutableTreeTableNode {
 		
