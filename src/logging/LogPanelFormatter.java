@@ -17,8 +17,8 @@ public class LogPanelFormatter extends Formatter {
 		 		
 		 		if(record.getThrown()!=null){
 		 			Throwable t = record.getThrown();
-		 			
-		 			log += t.getMessage() + "\r\n";
+
+		 			log += t.getClass().getSimpleName() + ": " + t.getMessage() + "\r\n";
 		 			
 		 			for(StackTraceElement el : t.getStackTrace()){
 		 				log += el.toString() + "\r\n";

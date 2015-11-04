@@ -163,6 +163,7 @@ public class AnalysisDataset implements Serializable {
 		}
 		UUID id = collection.getID();
 		AnalysisDataset childDataset = new AnalysisDataset(collection, this.savePath);
+		childDataset.setRoot(false);
 		childDataset.setAnalysisOptions(this.getAnalysisOptions());
 		this.childCollections.put(id, childDataset);
 
@@ -176,6 +177,7 @@ public class AnalysisDataset implements Serializable {
 		if(dataset==null){
 			throw new IllegalArgumentException("Nucleus collection is null");
 		}
+		dataset.setRoot(false);
 		UUID id = dataset.getUUID();
 		this.childCollections.put(id, dataset);
 	}
@@ -520,7 +522,7 @@ public class AnalysisDataset implements Serializable {
 	 * @return
 	 */
 	public boolean hasClusters(){
-		if(this.clusterGroups.size()>0){
+		if(this.clusterGroups != null && this.clusterGroups.size()>0){
 			return true;
 		} else {
 			return false;
@@ -546,17 +548,28 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public void refreshClusterGroups(){
 
-		for(ClusterGroup g : this.getClusterGroups()){
-			boolean clusterRemains = false;
+		if(this.hasClusters()){
+			// Find the groups that need removing
+			List<ClusterGroup> groupsToDelete = new ArrayList<ClusterGroup>();
+			for(ClusterGroup g : this.getClusterGroups()){
+				boolean clusterRemains = false;
 
-			for(UUID childID : g.getUUIDs()){
-				if(this.hasChild(childID)){
-					clusterRemains = true;
+				for(UUID childID : g.getUUIDs()){
+					if(this.hasChild(childID)){
+						clusterRemains = true;
+					}
+				}
+				if(!clusterRemains){
+					groupsToDelete.add(g);
 				}
 			}
-			if(!clusterRemains){
+			
+			// Remove the groups
+			for(ClusterGroup g : groupsToDelete){
 				this.deleteClusterGroup(g);
 			}
+			
+			
 		}
 	}
 

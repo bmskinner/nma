@@ -1269,6 +1269,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				
 				programLogger.log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
 				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+				clusterDataset.setRoot(false);
 				list.add(clusterDataset);
 				
 

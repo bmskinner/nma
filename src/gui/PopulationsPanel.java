@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -158,16 +159,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	}
 	
 	public void refreshClusters(){
+		try {
+		programLogger.log(Level.FINEST, "Refreshing clusters...");
 		if(this.analysisDatasets.size()>0){
 			for(UUID id : treeOrderMap.getIDs()){
 												
 				AnalysisDataset rootDataset = analysisDatasets.get(id);
+				programLogger.log(Level.FINEST, "  Root dataset "+rootDataset.getName());
 				rootDataset.refreshClusterGroups();
 				for(AnalysisDataset child : rootDataset.getAllChildDatasets()){
+					programLogger.log(Level.FINEST, "    Child dataset "+child.getName());
 					child.refreshClusterGroups();
 				}
 				
 			}
+		}
+		} catch (Exception e){
+			programLogger.log(Level.SEVERE, "Error refreshing clusters", e);
 		}
 	}
 	
@@ -635,90 +643,151 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	}
 	
 	private void deleteDataset(AnalysisDataset d){
+		
+		try{
 
-		UUID id = d.getUUID();
+			programLogger.log(Level.FINEST, "Deleting dataset: "+d.getName());
+			UUID id = d.getUUID();
 
-		// remove all children of the collection
-		for(UUID u : d.getAllChildUUIDs()){
-			String name = this.getDataset(u).getName();
+			Map<UUID, String> map = new HashMap<UUID, String>();
 
-			if(analysisDatasets.containsKey(u)){
-				analysisDatasets.remove(u);
-			}
 
-			if(populationNames.containsValue(u)){
-				populationNames.remove(name);
-			}						
+			// select all children of the collection
+			for(UUID u : d.getAllChildUUIDs()){
+				String name = this.getDataset(u).getName();
 
-			d.deleteChild(u);
+				programLogger.log(Level.FINEST, "  Removing child dataset: "+name);
 
-		}
-
-		// remove the dataset from its parents
-		for(UUID parentID : analysisDatasets.keySet()){
-			AnalysisDataset parent = analysisDatasets.get(parentID);
-
-			if(parent.hasChild(id)){
-				parent.deleteChild(id);
-			}
-
-		}
-
-		// remove cluster groups
-		for(ClusterGroup g : d.getClusterGroups()){
-			boolean clusterRemains = false;
-
-			for(UUID childID : g.getUUIDs()){
-				if(d.hasChild(childID)){
-					clusterRemains = true;
+				if(analysisDatasets.containsKey(u) || populationNames.containsValue(u) ){
+					map.put(u, name);
 				}
 			}
-			if(!clusterRemains){
-				d.deleteClusterGroup(g);
-			}
-		}
-		
-		populationNames.remove(d.getName());
-		analysisDatasets.remove(id);
 
-		if(d.isRoot()){
-			treeOrderMap.remove(id);
+			// remove selected children
+			for(UUID u : map.keySet()){
+				String name = map.get(u);
+				analysisDatasets.remove(u);
+				programLogger.log(Level.FINEST, "  Removed child "+name+" from analysisDatasets");
+
+				populationNames.remove(name);
+				programLogger.log(Level.FINEST, "  Removed child "+name+" from populationNames");
+
+			}
+
+
+			// remove the dataset from its parents
+			programLogger.log(Level.FINEST, "Removing dataset from its parents");
+			for(UUID parentID : analysisDatasets.keySet()){
+				AnalysisDataset parent = analysisDatasets.get(parentID);
+
+				programLogger.log(Level.FINEST, "Parent dataset "+parent.getName());
+
+				if(parent.hasChild(id)){
+					programLogger.log(Level.FINEST, "    Parent contains dataset; deleting");
+					parent.deleteChild(id);
+				}
+
+			}
+
+			// remove cluster groups
+			programLogger.log(Level.FINEST, "Removing cluster groups");
+			for(ClusterGroup g : d.getClusterGroups()){
+				boolean clusterRemains = false;
+
+				for(UUID childID : g.getUUIDs()){
+					if(d.hasChild(childID)){
+						clusterRemains = true;
+					}
+				}
+				if(!clusterRemains){
+					programLogger.log(Level.FINEST, "  Removing cluster group "+g.getName());
+					d.deleteClusterGroup(g);
+				}
+			}
+
+
+			programLogger.log(Level.FINEST, "Removing dataset from analysisDatasets");
+			if(analysisDatasets.containsKey(id)){
+				analysisDatasets.remove(id);
+				programLogger.log(Level.FINEST, "Removed from analysisDatasets");
+			}
+
+			programLogger.log(Level.FINEST, "Removing dataset from populationNames");
+			if(populationNames.containsValue(id)){
+				populationNames.remove(d.getName());
+				programLogger.log(Level.FINEST, "Removed from populationNames");
+			}			
+
+			if(d.isRoot()){
+				programLogger.log(Level.FINEST, "Removing dataset from treeOrderMap");
+				treeOrderMap.remove(id);
+			}
+			programLogger.log(Level.FINEST, "Deleted dataset "+d.getName());
+		} catch (Exception e){
+			programLogger.log(Level.SEVERE, "Error deleting dataset "+d.getName(), e);
 		}
 	}
 	
 	private void deleteDataset(){
-		List<AnalysisDataset> datasets = getSelectedDatasets();
+		final List<AnalysisDataset> datasets = getSelectedDatasets();
 
-		if(!datasets.isEmpty()){
-			// make a list of the unique UUIDs selected
+		try {
 
-			List<UUID> list = new ArrayList<UUID>();
-			for(AnalysisDataset d : datasets){
+			programLogger.log(Level.FINEST, "Deleting selected datasets");
+			Thread thr = new Thread(){
+				public void run(){
 
-				if(!list.contains(d.getUUID())){
-					list.add(d.getUUID());
-				}
+					if(!datasets.isEmpty()){
+						// make a list of the unique UUIDs selected
 
-				// add all the children of a dataset
-				for(UUID childID : d.getAllChildUUIDs()){
-					if(!list.contains(childID)){
-						list.add(childID);
+						List<UUID> list = new ArrayList<UUID>();
+						for(AnalysisDataset d : datasets){
+							programLogger.log(Level.FINEST, "Selected dataset for deletion: "+d.getName());
+
+							if(!list.contains(d.getUUID())){
+								list.add(UUID.fromString((d.getUUID().toString())));
+							}
+
+							// add all the children of a dataset
+							for(UUID childID : d.getAllChildUUIDs()){
+								programLogger.log(Level.FINEST, "Adding child dataset to deletion list: "+childID.toString());
+								if(!list.contains(childID)){
+//									list.add(childID);
+									list.add(UUID.fromString((childID.toString())));
+								}
+							}
+						}
+
+						// go through the list, removing all the ids to be deleted
+						for(UUID id : list){
+							if(analysisDatasets.containsKey(id)){
+								AnalysisDataset d = getDataset(id);
+								programLogger.log(Level.FINEST, "Preparing to delete dataset: "+d.getName());
+								deleteDataset(d);
+								programLogger.log(Level.FINEST, "Dataset removed: "+d.getName());
+							} else {
+								programLogger.log(Level.FINEST, "Dataset already removed");
+							}
+
+						}
+
+						refreshClusters();
+						programLogger.log(Level.FINEST, "Updating panels");
+						update();
+
+					} else {
+						programLogger.log(Level.FINEST, "No datasets selected");
 					}
+					programLogger.log(Level.FINEST, "Deletion complete");
+					fireSignalChangeEvent("UpdatePanels");
+
 				}
-			}
+			};
+			thr.start();
 
-			// go through the list, removing all the ids to be deleted
-			for(UUID id : list){
-				AnalysisDataset d = this.getDataset(id);
-				
-				deleteDataset(d);
-
-			}
-			refreshClusters();
-			this.update();
-			
+		} catch (Exception e){
+			programLogger.log(Level.SEVERE, "Error deleting datasets", e);
 		}
-		fireSignalChangeEvent("UpdatePanels");
 	}
 
 	/**
@@ -934,6 +1003,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 		
 		if(event.type().equals("DeleteCollectionAction")){
+			programLogger.log(Level.FINEST, "Deleting dataset action received");
 			deleteDataset();
 		}
 		
