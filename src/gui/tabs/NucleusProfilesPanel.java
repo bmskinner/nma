@@ -136,8 +136,10 @@ public class NucleusProfilesPanel extends DetailPanel {
 	@SuppressWarnings("serial")
 	private class ModalityDisplayPanel extends JPanel implements ActionListener {
 		
+		private JPanel mainPanel = new JPanel(new BorderLayout());
 		private JList<String> pointList;
 		private ChartPanel chartPanel;
+		private ChartPanel modalityProfileChartPanel; // hold a chart showing p-values across the profile
 		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 		private JPanel buttonPanel = new JPanel(new FlowLayout());
 		
@@ -149,17 +151,13 @@ public class NucleusProfilesPanel extends DetailPanel {
 			buttonPanel.add(profileCollectionTypeSettingsPanel);
 			this.add(buttonPanel, BorderLayout.NORTH);
 			
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
-					"Probability", "Angle", null);
-			XYPlot plot = chart.getXYPlot();
-			plot.setBackgroundPaint(Color.WHITE);
-			plot.getDomainAxis().setRange(0,360);
-			plot.addDomainMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2f)));
+			chartPanel = createPositionChartPanel();
+			modalityProfileChartPanel = createModalityProfileChartPanel();
 			
-			chartPanel = new ChartPanel(chart);
-			chartPanel.setMinimumDrawWidth( 0 );
-			chartPanel.setMinimumDrawHeight( 0 );
-			this.add(chartPanel, BorderLayout.CENTER);
+			mainPanel.add(chartPanel, BorderLayout.WEST);
+			mainPanel.add(modalityProfileChartPanel, BorderLayout.CENTER);
+			
+			this.add(mainPanel, BorderLayout.CENTER);
 			
 			DecimalFormat df = new DecimalFormat("#0.00");
 			pointList = new JList<String>();
@@ -174,6 +172,34 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 		}
 		
+		private ChartPanel createPositionChartPanel(){
+			JFreeChart chart = ChartFactory.createXYLineChart(null,
+					"Probability", "Angle", null);
+			XYPlot plot = chart.getXYPlot();
+			plot.setBackgroundPaint(Color.WHITE);
+			plot.getDomainAxis().setRange(0,360);
+			plot.addDomainMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2f)));
+			
+			ChartPanel chartPanel = new ChartPanel(chart);
+			chartPanel.setMinimumDrawWidth( 0 );
+			chartPanel.setMinimumDrawHeight( 0 );
+			return chartPanel;
+		}
+		
+		private ChartPanel createModalityProfileChartPanel(){
+			JFreeChart chart = ChartFactory.createXYLineChart(null,
+					"Position", "Probability", null);
+			XYPlot plot = chart.getXYPlot();
+			plot.setBackgroundPaint(Color.WHITE);
+			plot.getDomainAxis().setRange(0,100);
+			plot.getRangeAxis().setRange(0,1);
+			
+			ChartPanel chartPanel = new ChartPanel(chart);
+			chartPanel.setMinimumDrawWidth( 0 );
+			chartPanel.setMinimumDrawHeight( 0 );
+			return chartPanel;
+		}
+		
 		public void update(List<AnalysisDataset> list) throws Exception {
 
 			if(!list.isEmpty()){
@@ -183,29 +209,50 @@ public class NucleusProfilesPanel extends DetailPanel {
 				ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
 				
 				DecimalFormat df = new DecimalFormat("#0.00");
+				DefaultListModel<String> model = new DefaultListModel<String>();
 				if(list.size()==1){ // use the actual x-positions
 					List<Double> xvalues = list.get(0).getCollection().getProfileCollection(type).getAggregate().getXKeyset();
-					DefaultListModel<String> model = new DefaultListModel<String>();
 					
 					for(Double d: xvalues){
 						model.addElement(df.format(d));
 					}
-					pointList.setModel(model);
+					
+					
 				} else {
 					// use a standard 0.5 spacing
-					DefaultListModel<String> model = new DefaultListModel<String>();
 					for(Double d=0.0; d<=100; d+=0.5){
 						model.addElement(df.format(d));
 					}
-					pointList.setModel(model);
+					
 				}
+				pointList.setModel(model);
 				
 				String xString = pointList.getModel().getElementAt(0);
 				double xvalue = Double.valueOf(xString);
 				
-				updateChart(xvalue);				
+				updateChart(xvalue);	
+				updateModalityProfileChart(list);
 			} else {
 				profileCollectionTypeSettingsPanel.setEnabled(false);;
+			}
+		}
+		
+		public void updateModalityProfileChart(List<AnalysisDataset> list){
+			
+			ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+			ProfileChartOptions options = new ProfileChartOptions(list, 
+					true, 
+					ProfileAlignment.LEFT, 
+					BorderTag.REFERENCE_POINT, 
+					false,
+					type);
+			
+			JFreeChart chart = null;
+			try {
+				chart = MorphologyChartFactory.createModalityProfileChart(options);
+				modalityProfileChartPanel.setChart(chart);
+			} catch (Exception e){
+				programLogger.log(Level.SEVERE, "Error updating modality profiles panel", e);
 			}
 		}
 		
@@ -235,6 +282,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 					
 					// Do the stats testing
 					double pvalue = DipTester.getPValueForPositon(dataset.getCollection(), xvalue, type); 
+//					Profile allValues = DipTester.testCollectionGetPValues(dataset.getCollection(), BorderTag.REFERENCE_POINT, type);
 					
 					// Add the annotation
 					double yPos = yMax - ( index * (yMax / 20));
@@ -262,19 +310,29 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		private class ModalitySelectionListener implements ListSelectionListener {
 			public void valueChanged(ListSelectionEvent e) {
-				int row = e.getFirstIndex();
-				String xString = pointList.getModel().getElementAt(row);
-				double xvalue = Double.valueOf(xString);
-				updateChart(xvalue);
+				updatePointSelection();
 				
 			}
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
+			updatePointSelection();
+			updateModalityProfileChart(list);
+		}
+		
+		private void updatePointSelection(){
 			int row = pointList.getSelectedIndex();
 			String xString = pointList.getModel().getElementAt(row);
 			double xvalue = Double.valueOf(xString);
+			
+			int lastRow = pointList.getModel().getSize()-1;
+			
+			if(xvalue==100 || row==lastRow){
+				xvalue=0; // wrap arrays
+			}
+			
+			programLogger.log(Level.FINEST, "Selecting profile position "+xvalue +" at index "+row);
 			updateChart(xvalue);
 		}
 	}

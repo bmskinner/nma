@@ -33,6 +33,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import charting.charts.ProfileChartOptions;
 import utility.DipTester;
 import utility.Equation;
 import utility.Utils;
@@ -1108,6 +1109,33 @@ public class NucleusDatasetCreator {
 		
 		ds.addSeries(collection.getName(), data);
 			
+
+		return ds;
+	}
+	
+	/**
+	 * Generate a chart dataset showing the p-values along each profile position
+	 * for all datasets
+	 * @param options the charting options
+	 * @return
+	 * @throws Exception
+	 */
+	public static XYDataset createModalityProfileDataset(ProfileChartOptions options) throws Exception {
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+	
+		for(AnalysisDataset dataset : options.getDatasets()){
+			
+			CellCollection collection = dataset.getCollection();
+			
+			Profile pvalues = DipTester.testCollectionGetPValues(collection, options.getTag(), options.getType());
+			
+			double[] yvalues = pvalues.asArray();
+			double[] xvalues = pvalues.getPositions(100).asArray();
+			
+			double[][] data = { xvalues, yvalues };
+			ds.addSeries(collection.getName(), data);
+		}
 
 		return ds;
 	}

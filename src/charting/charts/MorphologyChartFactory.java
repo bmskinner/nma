@@ -808,6 +808,38 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
+	public static JFreeChart createModalityProfileChart(ProfileChartOptions options) throws Exception {
+		
+		XYDataset ds = NucleusDatasetCreator.createModalityProfileDataset(options);
+		
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						"Position", "Probability", ds, PlotOrientation.VERTICAL, true, true,
+						false);
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.getDomainAxis().setRange(0, 100);
+		plot.getRangeAxis().setRange(0, 1);
+		
+		for(int i=0; i<options.getDatasets().size(); i++){
+			
+			AnalysisDataset dataset = options.getDatasets().get(i);
+			
+			Color colour = dataset.getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(i)
+							: dataset.getDatasetColour();
+
+			plot.getRenderer().setSeriesPaint(i, colour);
+			plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+			plot.getRenderer().setSeriesVisibleInLegend(i, false);
+		}
+		return chart;
+	}
+		
+	
+	
 	/**
 	 * Create a QQ plot for the given datasets, at the given positon along a profile
 	 * @param position

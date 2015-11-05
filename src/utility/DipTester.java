@@ -145,8 +145,8 @@ public class DipTester {
 	 * @return
 	 */
 	public static double getDipTestPValue(double[] values){
-		Arrays.sort(values);
-		double[] result = DistributionTest.diptest_presorted(values);
+//		Arrays.sort(values);
+		double[] result = DistributionTest.diptest(values);
 		return result[1];
 	}
 	
@@ -156,8 +156,8 @@ public class DipTester {
 	 * @return
 	 */
 	public static double getDipTestTestStatistic(double[] values){
-		Arrays.sort(values);
-		double[] result = DistributionTest.diptest_presorted(values);
+//		Arrays.sort(values);
+		double[] result = DistributionTest.diptest(values);
 		return result[0];
 		
 		
