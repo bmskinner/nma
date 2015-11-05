@@ -37,7 +37,6 @@ import javax.swing.SwingWorker;
 import analysis.AnalysisDataset;
 import utility.Constants;
 import utility.Equation;
-//import utility.Logger;
 import utility.Utils;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -165,10 +164,13 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		try{ 
 			
 			this.refoldCurve();
+//			refoldNucleus.dumpInfo(Nucleus.ALL_POINTS);
 			
 			// smooth the refolded nucleus to remove jagged edges
 			this.smoothCurve(0); // smooth with no offset
+//			refoldNucleus.dumpInfo(Nucleus.ALL_POINTS);
 			this.smoothCurve(1); // smooth with offset 1 to intercalate
+//			refoldNucleus.dumpInfo(Nucleus.ALL_POINTS);
 						
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
@@ -345,6 +347,13 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	 */
 	private void smoothCurve(int offset) throws Exception{
 
+		
+		// Get the median distance between each border point in the refold candidate nucleus.
+		// Use this to establish the max and min distances a point can migrate from its neighbours
+		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
+		double minDistance = medianDistanceBetweenPoints * 0.5;
+		double maxDistance = medianDistanceBetweenPoints * 1.2;
+				
 		/*
 		 * Draw a line between the next and previous point
 		 * Move the point to the centre of the line
@@ -393,10 +402,13 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			Equation eq2 = new Equation(newPoint, thisPoint);
 			double distance2 = newPoint.getLengthTo(thisPoint) / 2;
 			XYPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
+			
+			boolean ok = checkPositionIsOK(newPoint, refoldNucleus, i, minDistance, maxDistance);
 
-			// update the new position
-			refoldNucleus.updatePoint(i, replacementPoint.getX(), replacementPoint.getY());
-//			i++;
+			if(ok){
+				// update the new position
+				refoldNucleus.updatePoint(i, replacementPoint.getX(), replacementPoint.getY());
+			}
 		}
 	}
 
