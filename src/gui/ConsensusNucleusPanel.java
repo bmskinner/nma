@@ -44,11 +44,11 @@ import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
-
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
+import components.nuclei.Nucleus;
 
 public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener {
 
@@ -311,6 +311,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 					
 					if(collection.hasConsensusNucleus()){
 						consensusChart = ConsensusNucleusChartFactory.makeSegmentedConsensusChart(activeDataset);
+						
+//						activeDataset.getCollection().getConsensusNucleus().dumpInfo(Nucleus.ALL_POINTS);
 						
 						// hide the refold button
 						runRefoldingButton.setVisible(false);

@@ -25,9 +25,7 @@
  */
 package analysis.nucleus;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
@@ -209,16 +207,10 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	@Override
 	protected void process( List<Integer> integers ) {
 		//update the number of entries added
-		logger.log(Level.FINEST, "Processing integer list from publish()");
-		logger.log(Level.FINEST, "Curve refolder process() is EDT: "+SwingUtilities.isEventDispatchThread());
+//		logger.log(Level.FINEST, "Processing integer list from publish()");
 		
 		int lastCycle = integers.get(integers.size()-1);
 		
-//		int maxCycles = this.mode == FAST_MODE
-//						? MAX_ITERATIONS_FAST
-//						: this.mode == FAST_MODE
-//							? MAX_ITERATIONS_INTENSIVE
-//							: MAX_ITERATIONS_BRUTAL;
 		int maxCycles = this.mode.maxIterations();
 
 		int percent = (int) ( (double) lastCycle / (double) maxCycles * 100);
@@ -246,9 +238,6 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	     */
 		logger.log(Level.FINEST, "SwingWorker task called done()");
 		fileLogger.log(Level.FINEST, "SwingWorker task called done()");
-		
-		logger.log(Level.FINEST, "Curve refolder done() is EDT: "+SwingUtilities.isEventDispatchThread());
-		fileLogger.log(Level.FINEST, "Curve refolder done() is EDT: "+SwingUtilities.isEventDispatchThread());
 		
 		
 		try {
@@ -291,7 +280,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			double score = refoldNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 			
 			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
-			logger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
+			logger.log(Level.FINE, "Refolding curve: initial score: "+(int)score);
 
 //			double originalScore = score;
 			double prevScore = score*2;
@@ -339,7 +328,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 //				}
 //			}
 			fileLogger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
-			logger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
+			logger.log(Level.FINE, "Refolded curve: final score: "+(int)score);
 
 		} catch(Exception e){
 			throw new Exception("Cannot calculate scores: "+e.getMessage());
@@ -420,79 +409,112 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			Random mutation to the X and Y position. Must remain
 			within a certain range of neighbours
 	*/
-	private double iterateOverNucleus() throws Exception{
+	private double iterateOverNucleus() throws Exception {
 
 		SegmentedProfile refoldProfile = refoldNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT);
 
+		// Get the difference between the candidate nucleus profile and the median profile
 		double similarityScore = refoldProfile.absoluteSquareDifference(targetCurve);
 
+		// Get the median distance between each border point in the refold candidate nucleus.
+		// Use this to establish the max and min distances a point can migrate from its neighbours
 		double medianDistanceBetweenPoints = refoldNucleus.getMedianDistanceBetweenPoints();
 		double minDistance = medianDistanceBetweenPoints * 0.5;
 		double maxDistance = medianDistanceBetweenPoints * 1.2;
 
-		// make all changes to a fresh nucleus before buggering up the real one
-//		testNucleus = new Nucleus( (Nucleus)refoldNucleus);
-
-		
 		for(int i=0; i<refoldNucleus.getLength(); i++){
-
+			
+			// make all changes to a fresh nucleus before buggering up the real one
 			RoundNucleus testNucleus = new RoundNucleus( (RoundNucleus)refoldNucleus);
 
 			double score = testNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
-			// IJ.log("    Internal score: "+(int)score);
 
+			// Get a copy of the point at this index
 			NucleusBorderPoint p = testNucleus.getPoint(i);
 
-
+			// Save the old position
 			double oldX = p.getX();
 			double oldY = p.getY();
 
+			// Make a random adjustment to the x and y positions. Move them more extensively when the score is high
 			double xDelta =  0.5 - Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
 			double yDelta =  0.5 - Math.min( Math.random() * (similarityScore/1000), 1); // when score is 1000, change by up to 1. When score is 300, change byup to 0.33
 
-
+			// Apply the calculated deltas to the x and y positions
 			double newX = oldX + xDelta;
 			double newY = oldY + yDelta;
 
-			try{
-				testNucleus.updatePoint(i, newX, newY);
-			} catch(Exception e){
-				throw new Exception("Cannot update point "+i+" to "+newX+", "+newY+": "+e);
-			}
+			
+			// Check the new point is valid
+			XYPoint newPoint = new XYPoint(newX, newY);
+			
+			boolean ok = checkPositionIsOK(newPoint, testNucleus, i, minDistance, maxDistance);
 
+			if(	ok ){
+				
+				// Update the test nucleus
+				testNucleus.updatePoint(i, newPoint);
 
-			// measure the new profile & compare
-			try{
+				// Measure the new profile & compare
 				testNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
-			} catch(Exception e){
-				throw new Exception("Cannot calculate angle profile: "+e);
-			}
 
-			score = testNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
-			// IJ.log("    Internal score: "+(int)score);
+				// Get the new score
+				score = testNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 
-			// do not apply change  if the distance from teh surrounding points changes too much
-			double distanceToPrev = p.getLengthTo( testNucleus.getPoint( Utils.wrapIndex(i-1, testNucleus.getLength()) ) );
-			double distanceToNext = p.getLengthTo( testNucleus.getPoint( Utils.wrapIndex(i+1, testNucleus.getLength()) ) );
-
-			// apply the change if better fit
-			if(score < 	similarityScore && 
-									distanceToNext < maxDistance && distanceToNext > minDistance &&
-									distanceToPrev < maxDistance && distanceToPrev > minDistance) {
-				refoldNucleus.updatePoint(i, newX, newY);
-				refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
-				similarityScore = score;
+				// Apply the change if better fit
+				if(score < similarityScore) {
+					refoldNucleus.updatePoint(i, newPoint);
+					refoldNucleus.calculateAngleProfile(refoldNucleus.getAngleProfileWindowSize());
+					similarityScore = score;
+				}
 			}
 		}
 		return similarityScore;
 	}
+	
+	/**
+	 * // Do not apply a change if the distance from the surrounding points changes too much
+	 * @param point the new point to test
+	 * @param n the nucleus
+	 * @param index the point position in the nucleus
+	 * @param min the min acceptable distance between points
+	 * @param max the max acceptable distance between points
+	 * @return
+	 */
+	private boolean checkPositionIsOK(XYPoint point,  Nucleus n, int index, double min, double max){
+		double distanceToPrev = point.getLengthTo( n.getPoint( Utils.wrapIndex(index-1, n.getLength()) ) );
+		double distanceToNext = point.getLengthTo( n.getPoint( Utils.wrapIndex(index+1, n.getLength()) ) );
 
+		boolean ok = true;
+		if(	distanceToNext > max ){
+			ok = false;
+			
+		}
+		
+		if(distanceToNext < min){
+			ok = false;
+		}
+		
+		if(distanceToPrev > max){
+			ok = false;
+		}
+			
+		if(distanceToPrev < min){
+			ok = false; 
+		}
+		return ok;
+	}
+
+	
+	/**
+	 * Go through the nucleus outline. Measure the angle to the tail 
+	 * and the distance to the CoM. If closest to target angle, return distance.
+	 * @param angle the target angle
+	 * @param n the nucleus to measure
+	 * @return
+	 */
 	public static double getDistanceFromAngle(double angle, Nucleus n){
 
-		// go through the nucleus outline
-		// measure the angle to the tail and the distance to the CoM
-		// if closest to target angle, return distance
-//		double bestAngle = 180;
 		double bestDiff = 180;
 		double bestDistance = 180;
 
@@ -505,7 +527,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			}
 
 			if(Math.abs(angle-pAngle) < bestDiff){
-//				bestAngle = pAngle;
+
 				bestDiff = Math.abs(angle-pAngle);
 				bestDistance = distance;
 			}

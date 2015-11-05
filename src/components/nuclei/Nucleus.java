@@ -179,7 +179,7 @@ public interface Nucleus {
 	
 	
 	/**
-	 * Get the border point mapped to the given tag
+	 * Get a copy of the border point mapped to the given tag
 	 * @param tag
 	 * @return
 	 */
@@ -187,7 +187,7 @@ public interface Nucleus {
 
 	
 	/**
-	 * Get the border point at the given index
+	 * Get a copy of the border point at the given index
 	 * @param i
 	 * @return
 	 */
@@ -200,7 +200,7 @@ public interface Nucleus {
 	 * as this must be calculated at the collection level
 	 * @param stat the statistic to fetch
 	 * @param scale the units to return values in
-	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)
+	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
 	 */
 	public double getStatistic(NucleusStatistic stat, MeasurementScale scale);
 	
@@ -443,21 +443,23 @@ public interface Nucleus {
 
 	public double getDistance(int index);
 
-	public void updatePoint(int i, double x, double y);
-
 	/**
-	 * Fetch the NucleusBorderPoint associated with the given
-	 * tag name. If the tag does not exist, returns null
-	 * @param s the tag name
-	 * @return the border point with this tag
+	 * Update the border point at the given index to the 
+	 * given x y coordinates
+	 * @param i
+	 * @param x
+	 * @param y
 	 */
+	public void updatePoint(int i, double x, double y);
 	
 	/**
-	 * Fetch the NucleusBorderPoint associated with the given
-	 * tag. If the tag does not exist, returns null
-	 * @param tag the tag
-	 * @return the border point with this tag
+	 * Update the border point at the given index to the 
+	 * given x y coordinates
+	 * @param i the index
+	 * @param p the new postion
 	 */
+	public void updatePoint(int i, XYPoint p);
+
 
 	/**
 	 * Get the index of the border point with the given tag.

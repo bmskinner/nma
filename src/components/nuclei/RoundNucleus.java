@@ -1059,6 +1059,10 @@ public class RoundNucleus
 		this.borderList.get(i).setY(y);
 	}
 	
+	public void updatePoint(int i, XYPoint p){
+		this.updatePoint(i, p.getX(), p.getY());
+	}
+	
 	public NucleusBorderPoint getBorderTag(BorderTag tag){
 		NucleusBorderPoint result = new NucleusBorderPoint(0,0);
 		if(this.getBorderIndex(tag)>-1){
