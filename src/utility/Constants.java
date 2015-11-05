@@ -27,7 +27,7 @@ public class Constants {
 	 */
 	public static final int VERSION_MAJOR    = 1;
 	public static final int VERSION_REVISION = 11;
-	public static final int VERSION_BUGFIX   = 2;
+	public static final int VERSION_BUGFIX   = 3;
 	
 	// nmd = Nuclear Morphology Dataset
 	public static final String SAVE_FILE_EXTENSION = ".nmd";
