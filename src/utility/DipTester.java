@@ -23,7 +23,9 @@ import ij.IJ;
 import java.util.Arrays;
 import java.util.List;
 
+import jdistlib.InvNormal;
 import jdistlib.disttest.DistributionTest;
+import jdistlib.disttest.NormalityTest;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
@@ -157,6 +159,22 @@ public class DipTester {
 		Arrays.sort(values);
 		double[] result = DistributionTest.diptest_presorted(values);
 		return result[0];
+		
+		
+		
+	}
+	
+	public static double getShapiroWilkStatistic(double[] values){
+		return NormalityTest.shapiro_wilk_statistic(values);
+	}
+	
+	public static double getShapiroWilkPValue(double[] values){
+		return NormalityTest.shapiro_wilk_pvalue(NormalityTest.shapiro_wilk_statistic(values), values.length) ;
+	}
+ 	
+	public static double getInvNormProbabililty(double p){
+		InvNormal dist = new InvNormal(0, 1);
+		return dist.cumulative(p);
 	}
 
 }

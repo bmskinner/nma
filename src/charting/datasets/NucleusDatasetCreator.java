@@ -23,6 +23,7 @@ import ij.IJ;
 import ij.process.FloatPolygon;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
@@ -32,6 +33,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import utility.DipTester;
 import utility.Equation;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
@@ -1169,6 +1171,32 @@ public class NucleusDatasetCreator {
 			est.addValue(d, 1);
 		}
 		return est;
+	}
+	
+	
+	/**
+	 * Create a dataset suitable for making a QQ plot
+	 * @param values the array of values to use
+	 * @return a dataset for charting
+	 */
+	public static XYDataset createQQDataset(double[] values){
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		Arrays.sort(values);
+//		double[] percentiles = new double[values.length];
+		double[] zscores = new double[values.length];
+		
+		for(int i=0; i<values.length; i++){
+			
+			int rank = i+1;
+			double percentile = (double) (rank-0.5)/ (double) values.length;
+			zscores[i] = DipTester.getInvNormProbabililty(percentile);
+			
+		}
+		double[][] data = { values, zscores };
+		ds.addSeries("Q-Q", data);
+		return ds;
+		
 	}
 	
 }

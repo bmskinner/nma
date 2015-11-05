@@ -807,5 +807,56 @@ public class MorphologyChartFactory {
 
 		return chart;
 	}
+	
+	/**
+	 * Create a QQ plot for the given datasets, at the given positon along a profile
+	 * @param position
+	 * @param list
+	 * @param type
+	 * @return
+	 * @throws Exception
+	 */
+	public static JFreeChart createQQChart(Double position, List<AnalysisDataset> list, ProfileCollectionType type) throws Exception {
+
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						"Angle", "Probability", null, PlotOrientation.VERTICAL, true, true,
+						false);
+
+		XYPlot plot = chart.getXYPlot();
+		
+		int datasetCount = 0;
+		int iteration = 0;
+		for(AnalysisDataset dataset : list){
+			
+//			XYDataset ds 	 = NucleusDatasetCreator.createModalityProbabililtyDataset(position, dataset, type);
+//			XYDataset values = NucleusDatasetCreator.createModalityValuesDataset(position, dataset, type);
+			CellCollection collection = dataset.getCollection();
+
+			double[] values = collection.getProfileCollection(type).getAggregate().getValuesAtPosition(position);
+			XYDataset ds = NucleusDatasetCreator.createQQDataset(values);
+			
+			Color colour = dataset.getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(iteration)
+					: dataset.getDatasetColour();
+
+			plot.setDataset(datasetCount, ds);
+			
+			XYLineAndShapeRenderer lineRenderer =  new XYLineAndShapeRenderer(false, true);
+			plot.setRenderer(datasetCount,lineRenderer);
+			int seriesCount = plot.getDataset(datasetCount).getSeriesCount();
+			for(int i=0; i<seriesCount;i++){
+				
+				lineRenderer.setSeriesPaint(i, colour);
+				lineRenderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+				lineRenderer.setSeriesVisibleInLegend(i, false);
+			}
+			
+			datasetCount++;
+			iteration++;
+			
+		}
+		return chart;
+	}
 
 }
