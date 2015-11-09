@@ -18,6 +18,8 @@
  *******************************************************************************/
 package analysis.nucleus;
 
+import ij.IJ;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,13 +70,18 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		this.options = options;
 		this.collection = dataset.getCollection();
 		this.logger = Logger.getLogger(NucleusClusterer.class.getName());
+		logger.setLevel(Level.ALL);
 		logger.addHandler(dataset.getLogHandler());
 	}
 	
 	
 	@Override
 	protected void process(List<Integer> integers){
-
+		int totalCells = collection.size() *2;
+		int lastValue = integers.get(integers.size()-1);
+		
+		int percent = (int) ( ( (double) lastValue / (double) totalCells) *100 )  ;
+		setProgress(percent);
 	}
 	
 	@Override
@@ -147,7 +154,8 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		try {
 						
 			// create Instances to hold Instance
-			Instances instances = makeAttributesAndInstances(collection);
+//			Instances instances = makeAttributesAndInstances(collection);
+			Instances instances = makeMatrixInstances(collection);
 
 			// create the clusterer to run on the Instances
 			String[] optionArray = this.options.getOptions();
@@ -195,7 +203,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	private void assignClusters(Clusterer clusterer, CellCollection collection){
 		try {
 			// construct new collections for each cluster
-
+			logger.log(Level.FINE, "Assigning nuclei to clusters");
 			logger.log(Level.FINE, "Clusters : "+clusterer.numberOfClusters());
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
@@ -210,6 +218,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				clusterMap.put(i, clusterCollection);
 			}
 
+			int i = collection.size();
 			for(Instance inst : cellToInstanceMap.keySet()){
 				
 				try{
@@ -225,6 +234,8 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 					} else {
 						logger.log(Level.SEVERE, "Error: cell with ID "+id+" is not found");
 					}
+					publish(i);
+					i++;
 				} catch(Exception e){
 					logger.log(Level.SEVERE, "Error assigning instance to cluster", e);
 				}
@@ -325,6 +336,73 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		} catch(Exception e){
 			logger.log(Level.SEVERE, "Error making instances", e);
 		}
+		return instances;
+	}
+	
+	private double[][] makeSimilarityMatrix(CellCollection collection) throws Exception{
+		
+		double[][] matrix = new double[collection.size()][collection.size()];
+		
+		int i = 0;
+		for(Nucleus n1 : collection.getNuclei()){
+			
+			int j = 0;
+			for(Nucleus n2 : collection.getNuclei()){
+				
+				double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
+				matrix[i][j] = score;
+				
+				j++;
+			}
+			i++;
+		}
+		
+		return matrix;
+	}
+
+	private Instances makeMatrixInstances(CellCollection collection){
+		
+		int attributeCount = collection.size();
+
+		logger.log(Level.FINE, "Building instance matrix");
+		
+		FastVector attributes = new FastVector(attributeCount);
+		for(int i=0; i<attributeCount; i++){
+			Attribute a = new Attribute("att_"+i); 
+			attributes.addElement(a);
+		}
+
+		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
+
+		try{
+
+			int i=0;
+			for(Cell c : collection.getCells()){
+				Nucleus n1 = c.getNucleus();
+				Instance inst = new SparseInstance(attributeCount);
+
+				
+				int j=0;
+				for(Nucleus n2 : collection.getNuclei()){
+					
+					Attribute att = (Attribute) attributes.elementAt(j);
+					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
+					score /= n1.getPerimeter();
+					inst.setValue(att, score);
+//					logger.log(Level.FINEST, n1.getNameAndNumber()+"\t"+n2.getNameAndNumber()+"\t"+score);
+					j++;
+				}
+//				IJ.log("    ");
+				instances.add(inst);
+				cellToInstanceMap.put(inst, c.getId());
+				publish(i);
+				i++;
+			}
+
+		} catch(Exception e){
+			logger.log(Level.SEVERE, "Error making instances", e);
+		}
+		logger.log(Level.FINE, "Instance matrix: "+instances.toSummaryString());
 		return instances;
 	}
 
