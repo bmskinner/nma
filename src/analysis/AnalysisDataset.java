@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jfree.chart.JFreeChart;
 
@@ -478,8 +480,34 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public void addClusterGroup(ClusterGroup group){
 		this.clusterGroups.add(group);
-//		this.addChildDataset(dataset);
-//		this.clusterResults.add(dataset.getUUID());
+	}
+	
+	/**
+	 * Check the list of cluster groups, and return the highest
+	 * cluster group number present
+	 * @return
+	 */
+	public int getMaxClusterGroupNumber(){
+		int number = 0;
+		
+		if(this.hasClusters()){
+
+			for (ClusterGroup g :  this.getClusterGroups()){
+
+				String name = g.getName();
+//				"ClusterGroup_"+clusterNumber
+				Pattern p = Pattern.compile("ClusterGroup_(\\d+)_.*");
+				Matcher m = p.matcher(name);
+				while(m.find()){
+					String s = m.group();
+					int n = Integer.valueOf(s);
+					if(n>number){
+						number=n;
+					}
+				}
+			}
+		}
+		return number;
 	}
 
 
@@ -574,18 +602,6 @@ public class AnalysisDataset implements Serializable {
 	}
 
 	/**
-	 * Set the newick tree describing the clusters
-	 * @param s
-	 */
-//	public void setClusterTree(String s){
-//		this.newickTree = s;
-//	}
-
-//	public String getClusterTree(){
-//		return this.newickTree;
-//	}
-
-	/**
 	 * Check if the dataset is root
 	 * @return
 	 */
@@ -610,18 +626,7 @@ public class AnalysisDataset implements Serializable {
 			this.removeChildCollection(id);
 		}
 	}
-	
-//	/**
-//	 * Delete the cluster with the given id
-//	 * @param id
-//	 */
-//	public void deleteCluster(UUID id){
-//		if(hasCluster(id)){
-//			this.deleteChild(id);
-//			this.clusterResults.remove(id);
-//		}
-//	}
-	
+		
 	/**
 	 * Delete the cluster with the given id
 	 * @param id

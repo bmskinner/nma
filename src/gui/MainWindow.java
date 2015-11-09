@@ -1253,7 +1253,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 			ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
-			int clusterNumber = dataset.getClusterGroups().size();
+//			int clusterNumber = dataset.getClusterGroups().size();
+			int clusterNumber = dataset.getMaxClusterGroupNumber();
 			ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
 
 			for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
