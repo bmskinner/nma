@@ -33,6 +33,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import charting.charts.BoxplotChartOptions;
 import charting.charts.ProfileChartOptions;
 import utility.DipTester;
 import utility.Equation;
@@ -624,18 +625,18 @@ public class NucleusDatasetCreator {
 	
 	/**
 	 * Get a boxplot dataset for the given statistic for each collection
-	 * @param collections
-	 * @param stat
-	 * @param scale
+	 * @param options the charting options
 	 * @return
 	 * @throws Exception
 	 */
-	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(List<AnalysisDataset> collections, NucleusStatistic stat, MeasurementScale scale) throws Exception{
-        
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+	public static BoxAndWhiskerCategoryDataset createBoxplotDataset(BoxplotChartOptions options) throws Exception{
+		List<AnalysisDataset> datasets = options.getDatasets();
+		NucleusStatistic stat = options.getStat();
+		MeasurementScale scale = options.getScale();
+		DefaultBoxAndWhiskerCategoryDataset ds = new DefaultBoxAndWhiskerCategoryDataset();
 
-		for (int i=0; i < collections.size(); i++) {
-			CellCollection c = collections.get(i).getCollection();
+		for (int i=0; i < datasets.size(); i++) {
+			CellCollection c = datasets.get(i).getCollection();
 
 			List<Double> list = new ArrayList<Double>();
 			double[] stats = c.getNuclearStatistics(stat, scale);
@@ -643,10 +644,10 @@ public class NucleusDatasetCreator {
 			for (double d : stats) {
 				list.add(new Double(d));
 			}
-			dataset.add(list, c.getType()+"_"+i, stat.toString());
+			ds.add(list, c.getType()+"_"+i, stat.toString());
 		}
 
-		return dataset;
+		return ds;
 	}
 		
 	/**

@@ -32,11 +32,12 @@ public class BoxplotChartFactory {
 		return boxplot;
 	}
 	
+	
 	public static JFreeChart createNucleusStatisticBoxplot(BoxplotChartOptions options) throws Exception{
 		
 		BoxAndWhiskerCategoryDataset ds = null;
 		if(options.getDatasets()!=null){
-			 ds = NucleusDatasetCreator.createBoxplotDataset(options.getDatasets(), options.getStat(), options.getScale());
+			 ds = NucleusDatasetCreator.createBoxplotDataset(options);
 		}
 		
 		String yLabel = options.getScale().yLabel(options.getStat());
@@ -46,6 +47,7 @@ public class BoxplotChartFactory {
 		return boxplotChart;
 		
 	}
+	
 	
 	/**
 	 * Create a segment length boxplot for the given segment name

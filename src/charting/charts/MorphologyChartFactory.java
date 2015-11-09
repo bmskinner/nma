@@ -110,16 +110,7 @@ public class MorphologyChartFactory {
 		}
 		return chart;
 	}
-	
-	public static JFreeChart makeSingleProfileChart(ProfileChartOptions options) throws Exception {
-		return makeSingleProfileChart(
-				options.getDatasets().get(0),
-				options.isNormalised(),
-				options.getAlignment(),
-				options.getTag(),
-				options.isShowMarkers());
-	}
-	
+		
 	/**
 	 * Create a segmented profile chart from a given XYDataset. Set the series 
 	 * colours for each component. Draw lines on the offset indexes
@@ -128,17 +119,19 @@ public class MorphologyChartFactory {
 	 * @param rightAligm should the chart be aligned to the right
 	 * @return a chart
 	 */
-	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
-		
+	public static JFreeChart makeSingleProfileChart(ProfileChartOptions options) throws Exception {
+//	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
+		AnalysisDataset dataset = options.getDatasets().get(0);
 		CellCollection collection = dataset.getCollection();
-		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, normalised, alignment, borderTag);
+//		CellCollection collection = dataset.getCollection();
+		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, options.isNormalised(), options.getAlignment(), options.getTag());
 		
 		
 		int length = 100 ; // default if normalised
 
 		
 		// if we set raw values, get the maximum nucleus length
-		if(!normalised){
+		if(!options.isNormalised()){
 			length = (int) collection.getMaxProfileLength();
 		}
 		
@@ -156,24 +149,24 @@ public class MorphologyChartFactory {
 			int index = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(tag);
 			
 			// get the offset from to the current draw point
-			int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(borderTag);
+			int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(options.getTag());
 			
 			// adjust the index to the offset
 			index = Utils.wrapIndex( index - offset, collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length());
 			
 			double indexToDraw = index; // convert to a double to allow normalised positioning
 			
-			if(normalised){ // set to the proportion of the point along the profile
+			if(options.isNormalised()){ // set to the proportion of the point along the profile
 				indexToDraw =  (( indexToDraw / collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length() ) * 100);
 			}
-			if(alignment.equals(ProfileAlignment.RIGHT) && !normalised){
+			if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
 				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
 				int amountToAdd = maxX - collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length();
 				indexToDraw += amountToAdd;
 				
 			}
 
-			if(showMarkers){
+			if(options.isShowMarkers()){
 				if(tag.equals(BorderTag.ORIENTATION_POINT)){
 					colour = Color.BLUE;
 				}
@@ -270,7 +263,7 @@ public class MorphologyChartFactory {
 		
 		int length = 100 ; // default if normalised - for a franken collection, it makes no difference
 
-		ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
+		ColourSwatch swatch = dataset.getSwatch();// == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
 		JFreeChart chart = makeProfileChart(ds, length, swatch);
 		
 		// mark the reference andorientation points

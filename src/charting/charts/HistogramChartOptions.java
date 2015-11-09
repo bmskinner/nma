@@ -44,6 +44,10 @@ public class HistogramChartOptions extends BoxplotChartOptions {
 			return false;
 		}
 		
+		if(!this.getSwatch().equals(b.getSwatch())){
+			return false;
+		}
+		
 		return true;
 	}
 }

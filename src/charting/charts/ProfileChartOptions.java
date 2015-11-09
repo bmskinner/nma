@@ -3,6 +3,7 @@ package charting.charts;
 import java.util.List;
 
 import analysis.AnalysisDataset;
+import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import components.generic.BorderTag;
 import components.generic.ProfileCollectionType;
@@ -80,6 +81,10 @@ public class ProfileChartOptions extends ChartOptions {
 		}
 		
 		if(this.isShowMarkers()!=(b.isShowMarkers())){
+			return false;
+		}
+		
+		if(!this.getSwatch().equals(b.getSwatch())){
 			return false;
 		}
 		

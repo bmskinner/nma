@@ -45,6 +45,11 @@ public class BoxplotChartOptions extends ChartOptions {
 		if(!this.getScale().equals(b.getScale())){
 			return false;
 		}
+		
+		if(!this.getSwatch().equals(b.getSwatch())){
+			return false;
+		}
+		
 		return true;
 	}
 
