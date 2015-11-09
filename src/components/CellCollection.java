@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import utility.Constants;
 import utility.Stats;
 import utility.Utils;
 import analysis.AnalysisDataset;
@@ -825,7 +826,7 @@ public class CellCollection implements Serializable {
    */
   public double[] getDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, 50);
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, Constants.MEDIAN);
 	  for(Nucleus n : this.getNuclei()){
 		  list.add(n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile));
 	  }
@@ -834,19 +835,20 @@ public class CellCollection implements Serializable {
   
   /**
    * Get the differences to the median profile for each nucleus, normalised to the
-   * perimeter of the nucleus
+   * perimeter of the nucleus. This is the sum-of-squares difference, rooted and divided by
+   * the nuclear perimeter
    * @param pointType the point to fetch profiles from
    * @return an array of normalised differences
    */
   public double[] getNormalisedDifferencesToMedianFromPoint(BorderTag pointType) throws Exception {
 	  List<Double> list = new ArrayList<Double>();
 
-	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType,50);
+	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, Constants.MEDIAN);
 //	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
 	  for(Nucleus n : this.getNuclei()){
 		  
-//		  double var = calculateVariabililtyOfNucleusProfile(n);
-		  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
+		  double diff = n.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);										 
+//		  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
 		  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 		  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 		  
