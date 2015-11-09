@@ -351,7 +351,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				}
 
 				// Make a dialog to ask if a filter should be performed
-				if( !(lower.isNaN() && upper.isNaN())  ){
+				if(    !lower.isNaN() && !upper.isNaN()     ){
 
 
 
@@ -404,9 +404,11 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 						}
 					}
-				} else {
-					programLogger.log(Level.SEVERE, "Error: "+name+": "+df.format(lower)+" - "+df.format(upper));
-				}
+				} 
+				
+//				else {
+//					programLogger.log(Level.SEVERE, "Error: "+name+": "+df.format(lower)+" - "+df.format(upper));
+//				}
 
 			}
 

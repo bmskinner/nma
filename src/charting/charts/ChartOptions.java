@@ -22,7 +22,14 @@ public abstract class ChartOptions {
 	
 	public ChartOptions(List<AnalysisDataset> list){
 		this.list = list;
-		this.swatch = list.get(0).getSwatch();
+		if(list!=null && !list.isEmpty()){
+			if(list.get(0).getSwatch()!=null){
+				this.swatch = list.get(0).getSwatch();
+			} else {
+				this.swatch = ColourSwatch.REGULAR_SWATCH;
+			}
+		}
+		
 	}
 	
 	
