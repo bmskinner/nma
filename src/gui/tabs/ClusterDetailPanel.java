@@ -35,10 +35,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import components.ClusterGroup;
 import analysis.AnalysisDataset;
 import charting.datasets.NucleusTableDatasetCreator;
 
@@ -79,6 +81,7 @@ public class ClusterDetailPanel extends DetailPanel {
 		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
 		private JPanel		statusPanel		= new JPanel(new BorderLayout());
 //		private TreePane 	treeViewer; // from jebl, extends JPanel
+		private JTextArea		treeLabel 	= new JTextArea("");
 		
 		private JPanel tablesPanel;
 		private JTable clusterDetailsTable; 
@@ -114,7 +117,8 @@ public class ClusterDetailPanel extends DetailPanel {
 			this.add(statusPanel, BorderLayout.NORTH);
 			
 //			treeViewer = new TreePane();
-//			this.add(treeViewer, BorderLayout.SOUTH);
+			treeLabel.setEditable(true);
+			this.add(treeLabel, BorderLayout.SOUTH);
 
 		}
 				
@@ -164,11 +168,13 @@ public class ClusterDetailPanel extends DetailPanel {
 					} else {
 						statusLabel.setText("Dataset has "+dataset.getClusterGroups().size()+" cluster groups");
 						
-//						for(ClusterGroup g : dataset.getClusterGroups()){
-//							
-//							String newickTree = g.getTree();
-//
-//							if(newickTree!=null){
+						for(ClusterGroup g : dataset.getClusterGroups()){
+							
+							String newickTree = g.getTree();
+
+							if(newickTree!=null){
+								
+								treeLabel.setText(newickTree);
 //								treeViewer.setVisible(true);
 //								StringReader reader = new StringReader(newickTree);
 //
@@ -186,13 +192,16 @@ public class ClusterDetailPanel extends DetailPanel {
 //								} catch (ImportException e) {
 //									error("Error in tree io", e);
 //								}
-//							}
-//						}
+							} else {
+								treeLabel.setText("");
+							}
+						}
 						
 					}
 				} else { // more than one dataset selected
 					statusLabel.setText("Multiple datasets selected");
 					clusterButton.setVisible(false);
+					treeLabel.setText("");
 //					treeViewer.);
 				}
 			}
