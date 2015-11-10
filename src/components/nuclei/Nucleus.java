@@ -436,6 +436,7 @@ public interface Nucleus {
 	public double findRotationAngle();
 
 	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p);
+	
 	public void exportSignalDistanceMatrix();
 
 	public Profile getSingleDistanceProfile();

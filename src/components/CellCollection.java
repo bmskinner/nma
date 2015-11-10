@@ -55,6 +55,10 @@ import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
+/**
+ * @author bms41
+ *
+ */
 public class CellCollection implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -945,6 +949,13 @@ public class CellCollection implements Serializable {
 	  return var;
   }
   
+  /**
+   * Get a list of the given statistic values for each nucleus in the collection
+   * @param stat the statistic to use
+   * @param scale the measurement scale
+   * @return a list of values
+   * @throws Exception
+   */
   public double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) throws Exception {
 	  
 	  double[] result = null;
@@ -1025,16 +1036,25 @@ public class CellCollection implements Serializable {
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
   }
 
+
+  /**
+   * Calculate the length of the segment with the given name in each nucleus
+   * of the collection
+   * @param segName the segment name
+   * @param scale the scale to use
+   * @return a list of segment lengths
+   * @throws Exception
+   */
   public double[] getSegmentLengths(String segName, MeasurementScale scale) throws Exception{
 	  List<Double> list = new ArrayList<Double>();
 
 	  for(Nucleus n : this.getNuclei()){
 		  NucleusBorderSegment segment = n.getAngleProfile(BorderTag.REFERENCE_POINT).getSegment(segName);
-		  
+
 		  int indexLength = segment.length();
 		  double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
 		  double perimeterLength = fractionOfPerimeter * n.getStatistic(NucleusStatistic.PERIMETER, scale);
-		  
+
 		  list.add(perimeterLength);
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
