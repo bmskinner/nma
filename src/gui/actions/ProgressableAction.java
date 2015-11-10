@@ -7,6 +7,7 @@ import gui.InterfaceEvent.InterfaceMethod;
 import gui.InterfaceEventListener;
 import gui.LogPanel;
 import gui.DatasetEvent.DatasetMethod;
+import gui.MainWindow;
 import io.PopulationExporter;
 
 import java.beans.PropertyChangeEvent;
@@ -36,30 +37,36 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
 	protected LogPanel logPanel;
 	protected Logger programLogger;
+	protected MainWindow mw;
 	
 	private List<Object> interfaceListeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	
-	public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, LogPanel logPanel, Logger programLogger){
+	public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, MainWindow mw){
 		
 		this.errorMessage 	= errorMessage;
 		this.dataset 		= dataset;
 		this.progressBar 	= new JProgressBar(0, 100);
 		this.progressBar.setString(barMessage);
 		this.progressBar.setStringPainted(true);
-		this.logPanel = logPanel;
-		this.programLogger = programLogger;
+//		this.logPanel = logPanel;
+//		this.programLogger = programLogger;
+		this.mw 			= mw;
+		this.logPanel 		= mw.getLogPanel();
+		this.programLogger 	= mw.getProgramLogger();
 		
 		logPanel.addProgressBar(this.progressBar);
 		logPanel.revalidate();
 		logPanel.repaint();
 //		contentPane.revalidate();
 //		contentPane.repaint();
+		this.addInterfaceEventListener(mw);
+		this.addDatasetEventListener(mw);
 
 	}
 	
-	public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, LogPanel logPanel, Logger programLogger, int flag){
-		this(dataset, barMessage, errorMessage, logPanel, programLogger);
+	public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, MainWindow mw, int flag){
+		this(dataset, barMessage, errorMessage, mw);
 		this.downFlag = flag;
 	}
 	
@@ -137,13 +144,18 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
 		
 		
-//		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-//		list.add(dataset);
+		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+		list.add(dataset);
 //		
 //		
 //		populationsPanel.selectDataset(dataset);
 //		updatePanels(list); // update with the current population
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+		
+		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
+		
+		this.removeInterfaceEventListener(mw);
+		this.removeDatasetEventListener(mw);
 	}
 	
 	/**
@@ -176,4 +188,29 @@ abstract class ProgressableAction implements PropertyChangeListener {
             ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
         }
     }	
+	
+	protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
+    	
+        DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
+        Iterator<Object> iterator = datasetListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
+        }
+    }
+	
+	public synchronized void addDatasetEventListener( DatasetEventListener l ) {
+		datasetListeners.add( l );
+	}
+
+	public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
+		datasetListeners.remove( l );
+	}
+	
+	public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
+		interfaceListeners.add( l );
+	}
+
+	public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
+		interfaceListeners.remove( l );
+	}
 }

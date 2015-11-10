@@ -20,6 +20,9 @@ package gui;
 
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.actions.MorphologyAnalysisAction;
+import gui.actions.RefoldNucleusAction;
+import gui.actions.NewAnalysisAction;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
@@ -128,12 +131,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 	// Flags to pass to ProgressableActions to determine the analyses
 	// to carry out in subsequently
-	private static final int ADD_POPULATION		 = 1;
-	private static final int STATS_EXPORT 		 = 2;
-	private static final int NUCLEUS_ANNOTATE	 = 4;
-	private static final int CURVE_REFOLD 		 = 8;
-	private static final int EXPORT_COMPOSITE	 = 16;
-	private static final int SAVE_DATASET		 = 32;
+	public static final int ADD_POPULATION		 = 1;
+	public static final int STATS_EXPORT 		 = 2;
+	public static final int NUCLEUS_ANNOTATE	 = 4;
+	public static final int CURVE_REFOLD 		 = 8;
+	public static final int EXPORT_COMPOSITE	 = 16;
+	public static final int SAVE_DATASET		 = 32;
 	
 	private static final Logger programLogger =
 	        Logger.getLogger(MainWindow.class.getName()); // the program logger will report status and errors in the running of the program, not involving datasets 
@@ -328,6 +331,14 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		
 	}
+	
+	public Logger getProgramLogger(){
+		return MainWindow.programLogger;
+	}
+	
+	public LogPanel getLogPanel(){
+		return this.logPanel;
+	}
 		
 	/**
 	 * Create the panel of primary buttons
@@ -342,7 +353,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				
-				new NewMorphologyAnalysisAction();
+				new NewAnalysisAction(MainWindow.this);
+//				new NewMorphologyAnalysisAction();
 //				newAnalysis();
 			}
 		});
@@ -544,7 +556,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			Thread thr = new Thread(){
 				public void run(){
 					programLogger.log(Level.INFO, "Reapplying morphology...");
-					new MorphologyAnalysisAction(list, dataset, ADD_POPULATION);
+					new MorphologyAnalysisAction(list, dataset, ADD_POPULATION, MainWindow.this);
 				}
 			};
 			thr.start();
@@ -719,7 +731,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 //	        				logc("Reapplying morphology...");
 	        				
 	        				AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
-	        				new MorphologyAnalysisAction(newDataset, dataset, null);
+	        				new MorphologyAnalysisAction(newDataset, dataset, null, MainWindow.this);
 	        			}
 
 
@@ -1050,7 +1062,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			// we have morphology analysis to carry out, so don't use the super finished
 			// use the same segmentation from the initial analysis
-			new MorphologyAnalysisAction(list, dataset, null);
+			new MorphologyAnalysisAction(list, dataset, null, MainWindow.this);
 			cancel();
 		}
 
@@ -1119,62 +1131,62 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 	}
 	
-	/**
-	 * Refold the consensus nucleus for the selected dataset using default parameters
-	 */
-	public class RefoldNucleusAction extends ProgressableAction {
-
-		/**
-		 * Refold the given selected dataset
-		 */
-		
-		public RefoldNucleusAction(AnalysisDataset dataset, CountDownLatch doneSignal) {
-			super(dataset, "Refolding", "Error refolding nucleus");
-			programLogger.log(Level.FINEST, "Created RefoldNucleusAction");
-			try{
-
-				this.progressBar.setIndeterminate(true);
-				worker = new CurveRefolder(dataset, 
-						CurveRefoldingMode.FAST, 
-						doneSignal, 
-						programLogger);
-
-				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Refolding: "+dataset.getName());
-				
-				/*
-				 * The SwingWorker doInBackground is off the EDT. At this point, the EDT should be free
-				 * 
-				 * 
-				 * What thread is waiting for a signal from the worker?
-				 */
-				programLogger.log(Level.FINEST, "RefoldNucleusAction init is EDT: "+SwingUtilities.isEventDispatchThread());
-				
-				worker.execute();
-				programLogger.log(Level.FINEST, "Executed CurveRefolder");
-
-			} catch(Exception e1){
-				this.cancel();
-				programLogger.log(Level.SEVERE, "Error refolding nucleus", e1);
-			}
-		}
-		
-		@Override
-		public void finished(){
-
-    		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
-    		programLogger.log(Level.FINEST, "RefoldNucleusAction.finished() is EDT: "+SwingUtilities.isEventDispatchThread());
-			
-			
-			// ensure the bar is gone, even if the cleanup fails
-			this.progressBar.setVisible(false);
-			dataset.getAnalysisOptions().setRefoldNucleus(true);
-			dataset.getAnalysisOptions().setRefoldMode("Fast");
-			super.finished();
-			
-		}
-
-	}
+//	/**
+//	 * Refold the consensus nucleus for the selected dataset using default parameters
+//	 */
+//	public class RefoldNucleusAction extends ProgressableAction {
+//
+//		/**
+//		 * Refold the given selected dataset
+//		 */
+//		
+//		public RefoldNucleusAction(AnalysisDataset dataset, CountDownLatch doneSignal) {
+//			super(dataset, "Refolding", "Error refolding nucleus");
+//			programLogger.log(Level.FINEST, "Created RefoldNucleusAction");
+//			try{
+//
+//				this.progressBar.setIndeterminate(true);
+//				worker = new CurveRefolder(dataset, 
+//						CurveRefoldingMode.FAST, 
+//						doneSignal, 
+//						programLogger);
+//
+//				worker.addPropertyChangeListener(this);
+//				this.setProgressMessage("Refolding: "+dataset.getName());
+//				
+//				/*
+//				 * The SwingWorker doInBackground is off the EDT. At this point, the EDT should be free
+//				 * 
+//				 * 
+//				 * What thread is waiting for a signal from the worker?
+//				 */
+//				programLogger.log(Level.FINEST, "RefoldNucleusAction init is EDT: "+SwingUtilities.isEventDispatchThread());
+//				
+//				worker.execute();
+//				programLogger.log(Level.FINEST, "Executed CurveRefolder");
+//
+//			} catch(Exception e1){
+//				this.cancel();
+//				programLogger.log(Level.SEVERE, "Error refolding nucleus", e1);
+//			}
+//		}
+//		
+//		@Override
+//		public void finished(){
+//
+//    		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
+//    		programLogger.log(Level.FINEST, "RefoldNucleusAction.finished() is EDT: "+SwingUtilities.isEventDispatchThread());
+//			
+//			
+//			// ensure the bar is gone, even if the cleanup fails
+//			this.progressBar.setVisible(false);
+//			dataset.getAnalysisOptions().setRefoldNucleus(true);
+//			dataset.getAnalysisOptions().setRefoldMode("Fast");
+//			super.finished();
+//			
+//		}
+//
+//	}
 		
 	
 	/**
@@ -1280,7 +1292,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			dataset.addClusterGroup(group);
 			programLogger.log(Level.FINEST, "Running new morphology analysis on cluster group");
-			new MorphologyAnalysisAction(list, dataset, ADD_POPULATION);
+			new MorphologyAnalysisAction(list, dataset, ADD_POPULATION, MainWindow.this);
 
 			cancel();
 
@@ -1288,309 +1300,309 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	}
 	
 	
-    public class MorphologyAnalysisAction extends ProgressableAction {
-
-    	private int mode = MorphologyAnalysis.MODE_NEW;
-    	private List<AnalysisDataset> processList = null;
-    	private AnalysisDataset source 			= null;
-    	
-                    
-    	/**
-    	 * Carry out a morphology analysis on a dataset, giving the mode
-    	 * @param dataset the dataset to work on 
-    	 * @param mode the type of morphology analysis to carry out
-    	 * @param downFlag the next analyses to perform
-    	 */
-    	public MorphologyAnalysisAction(AnalysisDataset dataset, int mode, int downFlag){
-    		super(dataset, "Morphology analysis", "Error in analysis", downFlag);
-    		programLogger.log(Level.FINE, "Creating morphology analysis");
-    		this.mode = mode;
-    		runNewAnalysis();
-    	}
-    	
-    	/**
-    	 * Carry out a morphology analysis on a dataset, giving the mode
-    	 * @param list the datasets to work on 
-    	 * @param mode the type of morphology analysis to carry out
-    	 * @param downFlag the next analyses to perform
-    	 */
-    	public MorphologyAnalysisAction(List<AnalysisDataset> list, int mode, int downFlag){
-    		super(list.get(0), "Morphology analysis", "Error in analysis", downFlag);
-    		programLogger.log(Level.FINE, "Creating morphology analysis");
-    		this.mode = mode;
-    		this.processList = list;
-    		processList.remove(0); // remove the first entry
-    		
-    		runNewAnalysis();
-    	}
-    	
-    	private void runNewAnalysis(){
-
-    		try{
-    			String message = null;
-    			switch (this.mode) {
-    			case MorphologyAnalysis.MODE_COPY:  message = "Copying morphology";
-    			break;
-
-    			case MorphologyAnalysis.MODE_REFRESH: message = "Refreshing morphology";
-    			break;
-
-    			default: message = "Morphology analysis: "+dataset.getName();
-    			break;  
-    			}
-
-    			this.setProgressMessage(message);
-    			this.cooldown();
-
-    			worker = new MorphologyAnalysis(this.dataset, mode, programLogger);
-    			worker.addPropertyChangeListener(this);
-    			programLogger.log(Level.FINE, "Running morphology analysis");
-    			worker.execute();
-    		} catch(Exception e){
-    			this.cancel();
-    			programLogger.log(Level.SEVERE, "Error in morphology analysis", e);
-    		}
-    	}
-
-
-    	/**
-    	 * Copy the morphology information from the source dataset to the dataset
-    	 * @param dataset the target
-    	 * @param source the source
-    	 */
-    	public MorphologyAnalysisAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag){
-    		super(dataset, "Copying morphology to "+dataset.getName(), "Error in analysis");
-
-    		this.mode = MorphologyAnalysis.MODE_COPY;
-    		this.source = source;
-    		if(downFlag!=null){
-    			this.downFlag = downFlag;
-    		}
-    		
-    		// always copy when a source is given
-    		worker = new MorphologyAnalysis(dataset, source.getCollection(), programLogger);
-    		worker.addPropertyChangeListener(this);
-    		worker.execute();
-    	}
-    	
-    	/**
-    	 * Copy the morphology information from the source dataset to each dataset in a list
-    	 * @param list
-    	 * @param source
-    	 */
-    	public MorphologyAnalysisAction(List<AnalysisDataset> list, AnalysisDataset source, Integer downFlag){
-    		this(list.get(0), source, downFlag); // take the first entry
-    		this.processList = list;
-    		processList.remove(0); // remove the first entry
-    	}
-      
-    	@Override
-    	public void finished() {
-//    		final utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
-//    		logger.log(Level.INFO, "Morphology analysis finished");
-//    		logger.log("Morphology analysis finished");
-
-    		// ensure the progress bar gets hidden even if it is not removed
-    		this.progressBar.setVisible(false);
-
-    		// The analysis takes place in a new thread to accomodate refolding.
-    		// See specific comment below
-    		Thread thr = new Thread(){
-
-    			public void run(){
-
-    				if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
-//    					logger.log(Level.FINE, "Running stats export");
-//    					logger.log("Running stats export", utility.Logger.DEBUG);
-    					programLogger.log(Level.INFO, "Exporting stats...");
-    					boolean ok = StatsExporter.run(dataset);
-    					if(ok){
-    						programLogger.log(Level.INFO, "OK");
-    					} else {
-    						programLogger.log(Level.INFO, "Error");
-    					}
-    				}
-
-    				// annotate the nuclei in the population
-    				if(  (downFlag & NUCLEUS_ANNOTATE) == NUCLEUS_ANNOTATE){
-//    					logger.log("Running annotation", utility.Logger.DEBUG);
-    					programLogger.log(Level.INFO, "Annotating nuclei...");
-    					boolean ok = NucleusAnnotator.run(dataset);
-    					if(ok){
-    						programLogger.log(Level.INFO, "OK");
-    					} else {
-    						programLogger.log(Level.INFO, "Error");
-    					}
-    				}
-
-    				// make a composite image of all nuclei in the collection
-    				if(  (downFlag & EXPORT_COMPOSITE) == EXPORT_COMPOSITE){
-//    					logger.log("Running compositor", utility.Logger.DEBUG);
-    					programLogger.log(Level.INFO, "Exporting composite...");
-    					boolean ok = CompositeExporter.run(dataset);
-    					if(ok){
-    						programLogger.log(Level.INFO, "OK");
-    					} else {
-    						programLogger.log(Level.INFO, "Error");
-    					}
-    				}
-
-    				// The new refold action is a progressable action, so must not block
-    				// the EDT. Also, the current action must wait for refolding to complete,
-    				// otherwise the next MorphologyAnalysisAction in the chain will block the
-    				// refold from firing a done signal. Hence, put a latch on the refold to 
-    				// make this thread wait until the refolding is complete.
-    				if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
-
-    					final CountDownLatch latch = new CountDownLatch(1);
-//    					logger.log("Running curve refolder", utility.Logger.DEBUG);
-    					programLogger.log(Level.FINEST, "Morphology finished() process thread is EDT: "+SwingUtilities.isEventDispatchThread());
-    					
-    					new RefoldNucleusAction(dataset, latch);
-    					try {
-    						latch.await();
-    					} catch (InterruptedException e) {
-    						programLogger.log(Level.SEVERE, "Interruption to thread", e);
-    					}
-    				}
-
-    				if(  (downFlag & SAVE_DATASET) == SAVE_DATASET){
-//    					logger.log("Saving dataset", utility.Logger.DEBUG);
-    					PopulationExporter.saveAnalysisDataset(dataset);
-    				}
-
-    				if(  (downFlag & ADD_POPULATION) == ADD_POPULATION){
-//    					logger.log("Adding dataset to panel", utility.Logger.DEBUG);
-    					populationsPanel.addDataset(dataset);				
-
-    					for(AnalysisDataset child : dataset.getChildDatasets()){
-    						populationsPanel.addDataset(child);
-    					}
-    				}
-
-    				// if no list was provided, or no more entries remain,
-    				// call the finish
-    				if(processList==null){
-//    					logger.log("Analysis complete, process list null, cleaning up", utility.Logger.DEBUG);
-    					MorphologyAnalysisAction.super.finished();
-    				} else if(processList.isEmpty()){
-//    					logger.log("Analysis complete, process list empty, cleaning up", utility.Logger.DEBUG);
-    					MorphologyAnalysisAction.super.finished();
-    				} else {
-//    					logger.log("Morphology analysis continuing; removing progress bar", utility.Logger.DEBUG);
-    					// otherwise analyse the next item in the list
-    					cancel();
-    					if(mode == MorphologyAnalysis.MODE_COPY){
-
-    						SwingUtilities.invokeLater(new Runnable(){
-    							public void run(){
-    								new MorphologyAnalysisAction(processList, source, downFlag);
-    							}});
-    					} else {
-    						SwingUtilities.invokeLater(new Runnable(){
-    							public void run(){
-    								new MorphologyAnalysisAction(processList, mode, downFlag);
-    							}});
-    					}
-    				}
-    			}
-    		};
-    		thr.start();
-
-    	}
-    }
+//    public class MorphologyAnalysisAction extends ProgressableAction {
+//
+//    	private int mode = MorphologyAnalysis.MODE_NEW;
+//    	private List<AnalysisDataset> processList = null;
+//    	private AnalysisDataset source 			= null;
+//    	
+//                    
+//    	/**
+//    	 * Carry out a morphology analysis on a dataset, giving the mode
+//    	 * @param dataset the dataset to work on 
+//    	 * @param mode the type of morphology analysis to carry out
+//    	 * @param downFlag the next analyses to perform
+//    	 */
+//    	public MorphologyAnalysisAction(AnalysisDataset dataset, int mode, int downFlag){
+//    		super(dataset, "Morphology analysis", "Error in analysis", downFlag);
+//    		programLogger.log(Level.FINE, "Creating morphology analysis");
+//    		this.mode = mode;
+//    		runNewAnalysis();
+//    	}
+//    	
+//    	/**
+//    	 * Carry out a morphology analysis on a dataset, giving the mode
+//    	 * @param list the datasets to work on 
+//    	 * @param mode the type of morphology analysis to carry out
+//    	 * @param downFlag the next analyses to perform
+//    	 */
+//    	public MorphologyAnalysisAction(List<AnalysisDataset> list, int mode, int downFlag){
+//    		super(list.get(0), "Morphology analysis", "Error in analysis", downFlag);
+//    		programLogger.log(Level.FINE, "Creating morphology analysis");
+//    		this.mode = mode;
+//    		this.processList = list;
+//    		processList.remove(0); // remove the first entry
+//    		
+//    		runNewAnalysis();
+//    	}
+//    	
+//    	private void runNewAnalysis(){
+//
+//    		try{
+//    			String message = null;
+//    			switch (this.mode) {
+//    			case MorphologyAnalysis.MODE_COPY:  message = "Copying morphology";
+//    			break;
+//
+//    			case MorphologyAnalysis.MODE_REFRESH: message = "Refreshing morphology";
+//    			break;
+//
+//    			default: message = "Morphology analysis: "+dataset.getName();
+//    			break;  
+//    			}
+//
+//    			this.setProgressMessage(message);
+//    			this.cooldown();
+//
+//    			worker = new MorphologyAnalysis(this.dataset, mode, programLogger);
+//    			worker.addPropertyChangeListener(this);
+//    			programLogger.log(Level.FINE, "Running morphology analysis");
+//    			worker.execute();
+//    		} catch(Exception e){
+//    			this.cancel();
+//    			programLogger.log(Level.SEVERE, "Error in morphology analysis", e);
+//    		}
+//    	}
+//
+//
+//    	/**
+//    	 * Copy the morphology information from the source dataset to the dataset
+//    	 * @param dataset the target
+//    	 * @param source the source
+//    	 */
+//    	public MorphologyAnalysisAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag){
+//    		super(dataset, "Copying morphology to "+dataset.getName(), "Error in analysis");
+//
+//    		this.mode = MorphologyAnalysis.MODE_COPY;
+//    		this.source = source;
+//    		if(downFlag!=null){
+//    			this.downFlag = downFlag;
+//    		}
+//    		
+//    		// always copy when a source is given
+//    		worker = new MorphologyAnalysis(dataset, source.getCollection(), programLogger);
+//    		worker.addPropertyChangeListener(this);
+//    		worker.execute();
+//    	}
+//    	
+//    	/**
+//    	 * Copy the morphology information from the source dataset to each dataset in a list
+//    	 * @param list
+//    	 * @param source
+//    	 */
+//    	public MorphologyAnalysisAction(List<AnalysisDataset> list, AnalysisDataset source, Integer downFlag){
+//    		this(list.get(0), source, downFlag); // take the first entry
+//    		this.processList = list;
+//    		processList.remove(0); // remove the first entry
+//    	}
+//      
+//    	@Override
+//    	public void finished() {
+////    		final utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
+////    		logger.log(Level.INFO, "Morphology analysis finished");
+////    		logger.log("Morphology analysis finished");
+//
+//    		// ensure the progress bar gets hidden even if it is not removed
+//    		this.progressBar.setVisible(false);
+//
+//    		// The analysis takes place in a new thread to accomodate refolding.
+//    		// See specific comment below
+//    		Thread thr = new Thread(){
+//
+//    			public void run(){
+//
+//    				if(  (downFlag & STATS_EXPORT) == STATS_EXPORT){
+////    					logger.log(Level.FINE, "Running stats export");
+////    					logger.log("Running stats export", utility.Logger.DEBUG);
+//    					programLogger.log(Level.INFO, "Exporting stats...");
+//    					boolean ok = StatsExporter.run(dataset);
+//    					if(ok){
+//    						programLogger.log(Level.INFO, "OK");
+//    					} else {
+//    						programLogger.log(Level.INFO, "Error");
+//    					}
+//    				}
+//
+//    				// annotate the nuclei in the population
+//    				if(  (downFlag & NUCLEUS_ANNOTATE) == NUCLEUS_ANNOTATE){
+////    					logger.log("Running annotation", utility.Logger.DEBUG);
+//    					programLogger.log(Level.INFO, "Annotating nuclei...");
+//    					boolean ok = NucleusAnnotator.run(dataset);
+//    					if(ok){
+//    						programLogger.log(Level.INFO, "OK");
+//    					} else {
+//    						programLogger.log(Level.INFO, "Error");
+//    					}
+//    				}
+//
+//    				// make a composite image of all nuclei in the collection
+//    				if(  (downFlag & EXPORT_COMPOSITE) == EXPORT_COMPOSITE){
+////    					logger.log("Running compositor", utility.Logger.DEBUG);
+//    					programLogger.log(Level.INFO, "Exporting composite...");
+//    					boolean ok = CompositeExporter.run(dataset);
+//    					if(ok){
+//    						programLogger.log(Level.INFO, "OK");
+//    					} else {
+//    						programLogger.log(Level.INFO, "Error");
+//    					}
+//    				}
+//
+//    				// The new refold action is a progressable action, so must not block
+//    				// the EDT. Also, the current action must wait for refolding to complete,
+//    				// otherwise the next MorphologyAnalysisAction in the chain will block the
+//    				// refold from firing a done signal. Hence, put a latch on the refold to 
+//    				// make this thread wait until the refolding is complete.
+//    				if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
+//
+//    					final CountDownLatch latch = new CountDownLatch(1);
+////    					logger.log("Running curve refolder", utility.Logger.DEBUG);
+//    					programLogger.log(Level.FINEST, "Morphology finished() process thread is EDT: "+SwingUtilities.isEventDispatchThread());
+//    					
+//    					new RefoldNucleusAction(dataset, MainWindow.this, latch);
+//    					try {
+//    						latch.await();
+//    					} catch (InterruptedException e) {
+//    						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+//    					}
+//    				}
+//
+//    				if(  (downFlag & SAVE_DATASET) == SAVE_DATASET){
+////    					logger.log("Saving dataset", utility.Logger.DEBUG);
+//    					PopulationExporter.saveAnalysisDataset(dataset);
+//    				}
+//
+//    				if(  (downFlag & ADD_POPULATION) == ADD_POPULATION){
+////    					logger.log("Adding dataset to panel", utility.Logger.DEBUG);
+//    					populationsPanel.addDataset(dataset);				
+//
+//    					for(AnalysisDataset child : dataset.getChildDatasets()){
+//    						populationsPanel.addDataset(child);
+//    					}
+//    				}
+//
+//    				// if no list was provided, or no more entries remain,
+//    				// call the finish
+//    				if(processList==null){
+////    					logger.log("Analysis complete, process list null, cleaning up", utility.Logger.DEBUG);
+//    					MorphologyAnalysisAction.super.finished();
+//    				} else if(processList.isEmpty()){
+////    					logger.log("Analysis complete, process list empty, cleaning up", utility.Logger.DEBUG);
+//    					MorphologyAnalysisAction.super.finished();
+//    				} else {
+////    					logger.log("Morphology analysis continuing; removing progress bar", utility.Logger.DEBUG);
+//    					// otherwise analyse the next item in the list
+//    					cancel();
+//    					if(mode == MorphologyAnalysis.MODE_COPY){
+//
+//    						SwingUtilities.invokeLater(new Runnable(){
+//    							public void run(){
+//    								new MorphologyAnalysisAction(processList, source, downFlag);
+//    							}});
+//    					} else {
+//    						SwingUtilities.invokeLater(new Runnable(){
+//    							public void run(){
+//    								new MorphologyAnalysisAction(processList, mode, downFlag);
+//    							}});
+//    					}
+//    				}
+//    			}
+//    		};
+//    		thr.start();
+//
+//    	}
+//    }
 
 	
 	
-	/**
-	 * Run a new analysis
-	 */
-	class NewMorphologyAnalysisAction extends ProgressableAction {
-				
-		private AnalysisOptions options;
-		private NucleusDetector detector;
-		private Date startTime;
-		private String outputFolderName;
-		
-		public static final int NEW_ANALYSIS = 0;
-		
-		public NewMorphologyAnalysisAction() {
-			super(null, "Nucleus detection", "Error in analysis");
-
-			AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow(programLogger);
-			if( analysisSetup.getOptions()!=null){
-
-				options = analysisSetup.getOptions();
-
-				programLogger.log(Level.INFO, "Directory: "+options.getFolder().getName());
-
-				this.startTime = Calendar.getInstance().getTime();
-				this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
-
-				// craete the analysis folder early. Did not before in case folder had no images
-				File analysisFolder = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName);
-				if(!analysisFolder.exists()){
-					analysisFolder.mkdir();
-				}
-//				utility.Logger logger = new utility.Logger( new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
-				File logFile = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt");
-//				logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
-//				logger.log("Directory: "+options.getFolder().getName());
-				setStatus("New analysis in progress");
-				
-				detector = new NucleusDetector(this.outputFolderName, programLogger, logFile, options);
-				detector.addPropertyChangeListener(this);
-				detector.execute();
-				analysisSetup.dispose();
-				
-			} else {
-								
-				analysisSetup.dispose();
-				this.cancel();
-			}
-			
-			
-		}
-		
-		@Override
-		public void finished(){
-			
-			final List<AnalysisDataset> datasets = detector.getDatasets();
-			
-			if(datasets.size()==0 || datasets==null){
-				programLogger.log(Level.INFO, "No datasets returned");
-				this.cancel();
-			} else {
-
-				// run next analysis on a new thread to avoid blocking the EDT
-				Thread thr = new Thread(){
-					
-					public void run(){
-						
-						int flag = 0; // set the downstream analyses to run
-						flag |= ADD_POPULATION;
-						flag |= STATS_EXPORT;
-						flag |= NUCLEUS_ANNOTATE;
-						flag |= EXPORT_COMPOSITE;
-						flag |= SAVE_DATASET;
-						
-						if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
-							flag |= CURVE_REFOLD;
-						}
-						// begin a recursive morphology analysis
-						new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag);
-					}
-					
-				};
-				thr.start();
-
-				// do not call super finished, because there is no dataset for this action
-				// allow the morphology action to update the panels
-				cancel();
-			}
-		}
-		
-	}
+//	/**
+//	 * Run a new analysis
+//	 */
+//	class NewMorphologyAnalysisAction extends ProgressableAction {
+//				
+//		private AnalysisOptions options;
+//		private NucleusDetector detector;
+//		private Date startTime;
+//		private String outputFolderName;
+//		
+//		public static final int NEW_ANALYSIS = 0;
+//		
+//		public NewMorphologyAnalysisAction() {
+//			super(null, "Nucleus detection", "Error in analysis");
+//
+//			AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow(programLogger);
+//			if( analysisSetup.getOptions()!=null){
+//
+//				options = analysisSetup.getOptions();
+//
+//				programLogger.log(Level.INFO, "Directory: "+options.getFolder().getName());
+//
+//				this.startTime = Calendar.getInstance().getTime();
+//				this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+//
+//				// craete the analysis folder early. Did not before in case folder had no images
+//				File analysisFolder = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName);
+//				if(!analysisFolder.exists()){
+//					analysisFolder.mkdir();
+//				}
+////				utility.Logger logger = new utility.Logger( new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
+//				File logFile = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt");
+////				logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
+////				logger.log("Directory: "+options.getFolder().getName());
+//				setStatus("New analysis in progress");
+//				
+//				detector = new NucleusDetector(this.outputFolderName, programLogger, logFile, options);
+//				detector.addPropertyChangeListener(this);
+//				detector.execute();
+//				analysisSetup.dispose();
+//				
+//			} else {
+//								
+//				analysisSetup.dispose();
+//				this.cancel();
+//			}
+//			
+//			
+//		}
+//		
+//		@Override
+//		public void finished(){
+//			
+//			final List<AnalysisDataset> datasets = detector.getDatasets();
+//			
+//			if(datasets.size()==0 || datasets==null){
+//				programLogger.log(Level.INFO, "No datasets returned");
+//				this.cancel();
+//			} else {
+//
+//				// run next analysis on a new thread to avoid blocking the EDT
+//				Thread thr = new Thread(){
+//					
+//					public void run(){
+//						
+//						int flag = 0; // set the downstream analyses to run
+//						flag |= ADD_POPULATION;
+//						flag |= STATS_EXPORT;
+//						flag |= NUCLEUS_ANNOTATE;
+//						flag |= EXPORT_COMPOSITE;
+//						flag |= SAVE_DATASET;
+//						
+//						if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
+//							flag |= CURVE_REFOLD;
+//						}
+//						// begin a recursive morphology analysis
+//						new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag);
+//					}
+//					
+//				};
+//				thr.start();
+//
+//				// do not call super finished, because there is no dataset for this action
+//				// allow the morphology action to update the panels
+//				cancel();
+//			}
+//		}
+//		
+//	}
 	
 	
 	/**
@@ -1617,7 +1629,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				
 				int flag = ADD_POPULATION;
 				flag |= SAVE_DATASET;
-				new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag);
+				new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
 				this.cancel();
 			}
 		}
@@ -1754,7 +1766,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 							AnalysisDataset source = populationsPanel.getDataset(selectedValue);
 
-							new MorphologyAnalysisAction(selectedDataset, source, null);
+							new MorphologyAnalysisAction(selectedDataset, source, null, MainWindow.this);
 						}
 					} catch(Exception e1){
 						programLogger.log(Level.SEVERE, "Error applying morphology", e1);
@@ -1811,7 +1823,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag);
+						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
 
 				}});
 			}
@@ -1821,7 +1833,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_REFRESH, 0);
+						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_REFRESH, 0, MainWindow.this);
 					
 				}});
 
@@ -1836,7 +1848,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(target, source, null);
+						new MorphologyAnalysisAction(target, source, null, MainWindow.this);
 					
 				}});
 
@@ -1868,7 +1880,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						
 						final CountDownLatch latch = new CountDownLatch(1);
 						programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
-						new RefoldNucleusAction(list.get(0), latch);
+						new RefoldNucleusAction(list.get(0), MainWindow.this, latch);
+//						new RefoldNucleusAction(list.get(0), latch);
 						programLogger.log(Level.FINEST, "Running refolding");
 						try {
 							latch.await();
@@ -1903,6 +1916,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				}
 			}
 			
+			if(event.method().equals(DatasetMethod.ADD_DATASET)){
+				populationsPanel.addDataset(event.getDatasets().get(0));
+			}
 			
 		}
 		
