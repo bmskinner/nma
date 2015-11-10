@@ -286,7 +286,23 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 		constraints.gridx = 1;
 		constraints.gridy = 0;
 		panel.add(rotateRst, constraints);
-
+		
+		JButton refoldBtn = new JButton("Re-Refold");
+		refoldBtn.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				list.add(activeDataset);
+				fireDatasetEvent(DatasetMethod.REFOLD_CONSENSUS, list);
+			}
+		});
+		
+		constraints.gridwidth = 3;
+		constraints.gridheight = 1;
+		constraints.gridx = 0;
+		constraints.gridy = 2;
+		panel.add(refoldBtn, constraints);
+		
 		return panel;
 	}
 	
