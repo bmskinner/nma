@@ -700,7 +700,8 @@ public class NucleusTableDatasetCreator {
 				"Hierarchical method",
 				"Cluster number",
 				"Include modality",
-				"Modality points"};
+				"Modality points",
+				"Tree"};
 		model.addColumn("", columnData);
 		
 		if(list==null){
@@ -727,6 +728,8 @@ public class NucleusTableDatasetCreator {
 					Object hierarchicalClusterString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
 							? op.getClusterNumber()
 							: "N/A";
+							
+					String tree = g.hasTree() ? g.getTree() : "N/A";
 											
 					Object[] data = {
 						g.getName(),
@@ -736,7 +739,8 @@ public class NucleusTableDatasetCreator {
 						hierarchicalMethodString,
 						hierarchicalClusterString,
 						op.isIncludeModality(),
-						op.getModalityRegions()
+						op.getModalityRegions(),
+						tree
 					};
 					model.addColumn(dataset.getName(), data);
 				}

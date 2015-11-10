@@ -81,7 +81,7 @@ public class ClusterDetailPanel extends DetailPanel {
 		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
 		private JPanel		statusPanel		= new JPanel(new BorderLayout());
 //		private TreePane 	treeViewer; // from jebl, extends JPanel
-		private JTextArea		treeLabel 	= new JTextArea("");
+//		private JTextArea		treeLabel 	= new JTextArea("");
 		
 		private JPanel tablesPanel;
 		private JTable clusterDetailsTable; 
@@ -117,8 +117,8 @@ public class ClusterDetailPanel extends DetailPanel {
 			this.add(statusPanel, BorderLayout.NORTH);
 			
 //			treeViewer = new TreePane();
-			treeLabel.setEditable(true);
-			this.add(treeLabel, BorderLayout.SOUTH);
+//			treeLabel.setEditable(true);
+//			this.add(treeLabel, BorderLayout.SOUTH);
 
 		}
 				
@@ -168,40 +168,40 @@ public class ClusterDetailPanel extends DetailPanel {
 					} else {
 						statusLabel.setText("Dataset has "+dataset.getClusterGroups().size()+" cluster groups");
 						
-						for(ClusterGroup g : dataset.getClusterGroups()){
-							
-							String newickTree = g.getTree();
-
-							if(newickTree!=null){
-								
-								treeLabel.setText(newickTree);
-//								treeViewer.setVisible(true);
-//								StringReader reader = new StringReader(newickTree);
+//						for(ClusterGroup g : dataset.getClusterGroups()){
+//							
+//							String newickTree = g.getTree();
 //
-//								boolean readUnquotedLabels = true;
-//								NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
-//
-//								try {
-//									List<Tree> trees =  imp.importTrees();
-//									RootedTree topTree = (RootedTree) trees.get(0);
-//
-//									treeViewer.setTree( topTree, topTree.getNodes());
-//
-//								} catch (IOException e) {
-//									error("Error in reader io", e);
-//								} catch (ImportException e) {
-//									error("Error in tree io", e);
-//								}
-							} else {
-								treeLabel.setText("");
-							}
-						}
+//							if(newickTree!=null){
+//								
+//								treeLabel.setText(newickTree);
+////								treeViewer.setVisible(true);
+////								StringReader reader = new StringReader(newickTree);
+////
+////								boolean readUnquotedLabels = true;
+////								NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
+////
+////								try {
+////									List<Tree> trees =  imp.importTrees();
+////									RootedTree topTree = (RootedTree) trees.get(0);
+////
+////									treeViewer.setTree( topTree, topTree.getNodes());
+////
+////								} catch (IOException e) {
+////									error("Error in reader io", e);
+////								} catch (ImportException e) {
+////									error("Error in tree io", e);
+////								}
+//							} else {
+//								treeLabel.setText("");
+//							}
+//						}
 						
 					}
 				} else { // more than one dataset selected
 					statusLabel.setText("Multiple datasets selected");
 					clusterButton.setVisible(false);
-					treeLabel.setText("");
+//					treeLabel.setText("");
 //					treeViewer.);
 				}
 			}
