@@ -32,8 +32,10 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,8 +111,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		int nameColWidth = treeTable.getColumnModel().getColumn(COLUMN_NAME).getWidth();
 		int colourColWidth = treeTable.getColumnModel().getColumn(COLUMN_COLOUR).getWidth();
-//		int nameColWidth = treeTable.getColumnModel().getColumn(0).getPreferredWidth();
-//		int colourColWidth = treeTable.getColumnModel().getColumn(2).getPreferredWidth();
 					
 		List<String> columns = new ArrayList<String>();
 		columns.add("Population");
@@ -122,11 +122,12 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		treeTableModel.setRoot(root);
 		treeTableModel.setColumnIdentifiers(columns);
 				
-		if(this.analysisDatasets.size()>0){
+		if(this.analysisDatasets.size()>0){ // if there are datasets to display
 			for(UUID id : treeOrderMap.getIDs()){
 												
 				AnalysisDataset rootDataset = analysisDatasets.get(id);
 				root.add( addTreeTableChildNodes(    rootDataset    )     );
+				
 			}
 		}
 		
@@ -138,8 +139,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			row++;
 		}
 		
-		treeTable.getColumnModel().getColumn(COLUMN_NAME).setPreferredWidth(nameColWidth);
-		treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setPreferredWidth(colourColWidth);
+		treeTable.getColumnModel().getColumn(COLUMN_NAME).setWidth(nameColWidth);
+		treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setWidth(colourColWidth);
 	}
 	
 	/**
@@ -214,6 +215,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			PopulationTreeTableNode childNode = addTreeTableChildNodes(childDataset);
 			category.add(childNode);
 		}
+		
+		category.sortNode(COLUMN_NAME, true, false);
 		return category;
 	}
 	
@@ -988,7 +991,46 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		public void setValueAt(Object aValue, int column){
 			columnData[column] = aValue;
 		}
+		
+		/**
+		 * This method recursively (or not) sorts the nodes, ascending, or descending by the specified column.
+		 * @param sortColumn Column to do the sorting by.
+		 * @param sortAscending Boolean value of weather the sorting to be done ascending or not (descending).
+		 * @param recursive Boolean value of weather or not the sorting should be recursively applied to children nodes.
+		 * @author Alex Burdu Burdusel
+		 */
+		public void sortNode(int sortColumn, boolean sortAscending, boolean recursive) {
+			boolean mLastSortAscending = sortAscending;
+		    int mLastSortedColumn = sortColumn;
+		    boolean mLastSortRecursive = recursive;
+
+		    int childCount = this.getChildCount();
+		    TreeMap<Object, PopulationTreeTableNode> nodeData = new TreeMap(String.CASE_INSENSITIVE_ORDER);
+
+		    for (int i = 0; i < childCount; i++) {
+		    	PopulationTreeTableNode child = (PopulationTreeTableNode) this.getChildAt(i);
+		        if (child.getChildCount() > 0 & recursive) {
+		            child.sortNode(sortColumn, sortAscending, recursive);
+		        }
+		        Object key = child.getValueAt(sortColumn);
+		        nodeData.put(key, child);
+		    }
+
+		    Iterator<Map.Entry<Object, PopulationTreeTableNode>> nodesIterator;
+		    if (sortAscending) {
+		        nodesIterator = nodeData.entrySet().iterator();
+		    } else {
+		        nodesIterator = nodeData.descendingMap().entrySet().iterator();
+		    }
+
+		    while (nodesIterator.hasNext()) {
+		        Map.Entry<Object, PopulationTreeTableNode> nodeEntry = nodesIterator.next();
+		        this.add(nodeEntry.getValue());
+		    }
+		}
 	}
+	
+	
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
