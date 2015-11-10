@@ -154,16 +154,16 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	
 	
 	public void update(List<AnalysisDataset> list){
-		programLogger.log(Level.FINE, "Updating cell detail panel");
 		updateList(list);
 	}
+	
 	/**
 	 * Update the panel with a list of AnalysisDatasets. Data
 	 * will only be displayed if the list contains one dataset.
 	 * @param list the datsets
 	 */
 	public void updateList(final List<AnalysisDataset> list){
-		
+		programLogger.log(Level.FINE, "Updating cell detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				
