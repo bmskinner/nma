@@ -20,6 +20,7 @@ package analysis;
 
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
+import ij.IJ;
 
 import java.awt.Color;
 import java.io.File;
@@ -496,10 +497,12 @@ public class AnalysisDataset implements Serializable {
 
 				String name = g.getName();
 //				"ClusterGroup_"+clusterNumber
-				Pattern p = Pattern.compile("ClusterGroup_(\\d+)_.*");
+				Pattern p = Pattern.compile("^ClusterGroup_(\\d+)$");
+//				IJ.log("Matching "+p.pattern()+" againt "+name);
 				Matcher m = p.matcher(name);
-				while(m.find()){
-					String s = m.group();
+				if(m.find()){
+					String s = m.group(1);
+//					IJ.log("  Match found: "+s);
 					int n = Integer.valueOf(s);
 					if(n>number){
 						number=n;

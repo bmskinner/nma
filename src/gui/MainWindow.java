@@ -1254,6 +1254,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 			ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
 //			int clusterNumber = dataset.getClusterGroups().size();
+			programLogger.log(Level.FINEST, "Getting group number");
 			int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 			programLogger.log(Level.FINEST, "Cluster group number chosen: "+clusterNumber);
 
