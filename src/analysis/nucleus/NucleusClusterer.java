@@ -154,8 +154,8 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		try {
 						
 			// create Instances to hold Instance
-//			Instances instances = makeAttributesAndInstances(collection);
-			Instances instances = makeMatrixInstances(collection);
+			Instances instances = makeAttributesAndInstances(collection);
+//			Instances instances = makeMatrixInstances(collection);
 
 			// create the clusterer to run on the Instances
 			String[] optionArray = this.options.getOptions();
@@ -295,6 +295,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			Profile indexes = pvals.getSortedIndexes();
 			
 			// create Instance for each nucleus and add to Instances
+			int j=0;
 			for(Cell c : collection.getCells()){
 
 				Nucleus n = c.getNucleus();
@@ -331,6 +332,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());
+				publish(j++);
 
 			}
 		} catch(Exception e){
@@ -395,8 +397,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 //				IJ.log("    ");
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());
-				publish(i);
-				i++;
+				publish(i++);
 			}
 
 		} catch(Exception e){
