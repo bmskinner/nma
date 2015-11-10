@@ -162,15 +162,16 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 		
 
 		try{ 
+			// smooth the candidate nucleus to remove jagged edges
+			this.smoothCurve(0); // smooth with no offset
+			this.smoothCurve(1); // smooth with intercalated offset
 			
+			// carry out the refolding
 			this.refoldCurve();
-//			refoldNucleus.dumpInfo(Nucleus.ALL_POINTS);
-			
+
 			// smooth the refolded nucleus to remove jagged edges
 			this.smoothCurve(0); // smooth with no offset
-//			refoldNucleus.dumpInfo(Nucleus.ALL_POINTS);
 			this.smoothCurve(1); // smooth with offset 1 to intercalate
-//			refoldNucleus.dumpInfo(Nucleus.ALL_POINTS);
 						
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
