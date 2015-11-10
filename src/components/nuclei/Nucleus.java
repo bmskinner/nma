@@ -428,6 +428,11 @@ public interface Nucleus {
     -----------------------
 	 */
 
+	/**
+	 * Calculate the angle that the nucleus must be rotated by to place
+	 * the orientation point directly below the centre of mass
+	 * @return
+	 */
 	public double findRotationAngle();
 
 	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p);

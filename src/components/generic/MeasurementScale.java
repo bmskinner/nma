@@ -49,6 +49,15 @@ public enum MeasurementScale {
 		case VARIABILITY: 
 			result = "Degrees per perimeter unit";
 			break;
+		case BOUNDING_HEIGHT:
+			result = name;
+			break;
+		case BOUNDING_WIDTH:
+			result = name;
+			break;
+		default:
+			result = name;
+			break;
 		}
 
 		return result;

@@ -13,7 +13,9 @@ import components.generic.MeasurementScale;
 	  MIN_DIAMETER("Min diameter", StatisticDimension.LENGTH),
 	  ASPECT("Aspect", StatisticDimension.DIMENSIONLESS),
 	  CIRCULARITY("Circularity", StatisticDimension.DIMENSIONLESS),
-	  VARIABILITY("Variability", StatisticDimension.DIMENSIONLESS);
+	  VARIABILITY("Variability", StatisticDimension.DIMENSIONLESS), 
+	  BOUNDING_HEIGHT ("Bounding height", StatisticDimension.LENGTH), 
+	  BOUNDING_WIDTH ("Bounding width", StatisticDimension.LENGTH);
 
 	  private String name;
 	  private StatisticDimension dimension;

@@ -28,6 +28,7 @@
 package components;
 
 import ij.IJ;
+import ij.process.FloatPolygon;
 
 import java.io.File;
 import java.io.IOException;
@@ -983,11 +984,47 @@ public class CellCollection implements Serializable {
 	  			result = this.getNormalisedDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT);
 	  			break;
 	  		}
+	  		
+	  		case BOUNDING_HEIGHT:{
+	  			result = this.getBoundingRectangleDimension(false);
+	  			break;
+	  		}
+	  		
+	  		case BOUNDING_WIDTH:{
+	  			result = this.getBoundingRectangleDimension(true);
+	  			break;
+	  		}
 
 	  }
 	  return result;
   }
-  
+
+  /**
+   * Calculate the widths of the bounding rectangles for each nucleus
+   * after rotating the tail to lie underneath the centre of mass
+   * @param width true for width, false for height
+   * @return a list of dimensions
+   * @throws Exception
+   */
+  public double[] getBoundingRectangleDimension(boolean width) throws Exception{
+	  List<Double> list = new ArrayList<Double>();
+
+	  for(Nucleus n : this.getNuclei()){
+
+		  ConsensusNucleus test = new ConsensusNucleus( n, this.getNucleusType());
+		  test.rotatePointToBottom(test.getBorderTag(BorderTag.ORIENTATION_POINT));
+
+		  FloatPolygon p = Utils.createPolygon(test);
+		  if(width){
+			  list.add( p.getBounds().getWidth() );
+		  } else {
+			  list.add( p.getBounds().getHeight() );
+		  }
+
+	  }
+	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
+  }
+
   public double[] getSegmentLengths(String segName, MeasurementScale scale) throws Exception{
 	  List<Double> list = new ArrayList<Double>();
 
