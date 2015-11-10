@@ -86,6 +86,8 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	
 	public void cancel(){
 		removeProgressBar();
+		removeDatasetEventListener(mw);
+		removeInterfaceEventListener(mw);
 	}
 	
 	/**

@@ -225,8 +225,8 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 							}});
 					}
 				}
-				removeDatasetEventListener(mw);
-				removeInterfaceEventListener(mw);
+//				removeDatasetEventListener(mw);
+//				removeInterfaceEventListener(mw);
 			
 			}
 		};

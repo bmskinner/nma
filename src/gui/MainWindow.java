@@ -20,9 +20,14 @@ package gui;
 
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.actions.AddNuclearSignalAction;
+import gui.actions.AddTailStainAction;
+import gui.actions.ClusterAnalysisAction;
+import gui.actions.MergeCollectionAction;
 import gui.actions.MorphologyAnalysisAction;
 import gui.actions.RefoldNucleusAction;
 import gui.actions.NewAnalysisAction;
+import gui.actions.ShellAnalysisAction;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
@@ -653,18 +658,22 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			public void run() {
 				try {
 					
-					consensusNucleusPanel.update(list);
-
-					nucleusProfilesPanel.update(list);
-					analysisDetailPanel.update(list);
-					nuclearBoxplotsPanel.update(list);
-					signalsDetailPanel.update(list);
-					clusterDetailPanel.update(list);
-					mergesDetailPanel.update(list);
-					vennDetailPanel.update(list);
-					wilcoxonDetailPanel.update(list);
-					cellDetailPanel.updateList(list);
-					segmentsDetailPanel.update(list);
+					
+					for(DetailPanel panel : MainWindow.this.detailPanels){
+						panel.update(list);
+					}
+//					consensusNucleusPanel.update(list);
+//
+//					nucleusProfilesPanel.update(list);
+//					analysisDetailPanel.update(list);
+//					nuclearBoxplotsPanel.update(list);
+//					signalsDetailPanel.update(list);
+//					clusterDetailPanel.update(list);
+//					mergesDetailPanel.update(list);
+//					vennDetailPanel.update(list);
+//					wilcoxonDetailPanel.update(list);
+//					cellDetailPanel.updateList(list);
+//					segmentsDetailPanel.update(list);
 					programLogger.log(Level.FINE, "Updated tab panels");
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE,"Error updating panels", e);
@@ -837,131 +846,131 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 *
 	 */
 	// TODO: refactor this class and subclasses into gui.actions
-	abstract class ProgressableAction implements PropertyChangeListener{
-
-		protected AnalysisDataset dataset = null; // the dataset being worked on
-		protected JProgressBar progressBar = null;
-		protected String errorMessage = null;
-		protected SwingWorker<Boolean, Integer> worker;
-		protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
-		
-		public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage){
-			
-			this.errorMessage 	= errorMessage;
-			this.dataset 		= dataset;
-			this.progressBar 	= new JProgressBar(0, 100);
-			this.progressBar.setString(barMessage);
-			this.progressBar.setStringPainted(true);
-			
-			logPanel.addProgressBar(this.progressBar);
-			contentPane.revalidate();
-			contentPane.repaint();
-
-		}
-		
-		public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, int flag){
-			this(dataset, barMessage, errorMessage);
-			this.downFlag = flag;
-		}
-		
-		/**
-		 * Change the progress message from the default in the constructor
-		 * @param messsage the string to display
-		 */
-		public void setProgressMessage(String messsage){
-			this.progressBar.setString(messsage);
-		}
-		
-		private void removeProgressBar(){
-			logPanel.removeProgressBar(this.progressBar);
-			logPanel.revalidate();
-			logPanel.repaint();
-		}
-		
-		public void cancel(){
-			removeProgressBar();
-		}
-		
-		/**
-		 * Use to manually remove the progress bar after an action is complete
-		 */
-		public void cleanup(){
-			if (this.worker.isDone() || this.worker.isCancelled()){
-				this.removeProgressBar();
-			}
-		}
-		
-		
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-
-			int value = (Integer) evt.getNewValue(); // should be percent
-//			IJ.log("Property change: "+value);
-			
-			if(value >=0 && value <=100){
-				
-				if(this.progressBar.isIndeterminate()){
-					this.progressBar.setIndeterminate(false);
-				}
-				this.progressBar.setValue(value);
-			}
-
-			if(evt.getPropertyName().equals("Finished")){
-				programLogger.log(Level.FINEST,"Worker signaled finished");
-				finished();
-			}
-
-			if(evt.getPropertyName().equals("Error")){
-				programLogger.log(Level.FINEST,"Worker signaled error");
-				error();
-			}
-			
-			if(evt.getPropertyName().equals("Cooldown")){
-				programLogger.log(Level.FINEST,"Worker signaled cooldown");
-				cooldown();
-			}
-			
-		}
-		
-		/**
-		 * The method run when the analysis has completed
-		 */
-		public void finished(){
-			removeProgressBar();
-
-			populationsPanel.update(); // get any new populations
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-			list.add(dataset);
-			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-				PopulationExporter.saveAnalysisDataset(root);
-			}
-			
-			populationsPanel.selectDataset(dataset);
-			updatePanels(list); // update with the current population
-			
-		}
-		
-		/**
-		 * Runs when an error was encountered in the analysis
-		 */
-		public void error(){
-			programLogger.log(Level.SEVERE, this.errorMessage);
-//			log(this.errorMessage);
-			removeProgressBar();
-		}
-		
-		/**
-		 * Runs if a cooldown signal is received. Use to set progress bars
-		 * to an indeterminate state when no reliable progress metric is 
-		 * available
-		 */
-		public void cooldown(){
-			this.progressBar.setIndeterminate(true);
-			contentPane.revalidate();
-			contentPane.repaint();
-		}
-		
-	}
+//	abstract class ProgressableAction implements PropertyChangeListener{
+//
+//		protected AnalysisDataset dataset = null; // the dataset being worked on
+//		protected JProgressBar progressBar = null;
+//		protected String errorMessage = null;
+//		protected SwingWorker<Boolean, Integer> worker;
+//		protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
+//		
+//		public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage){
+//			
+//			this.errorMessage 	= errorMessage;
+//			this.dataset 		= dataset;
+//			this.progressBar 	= new JProgressBar(0, 100);
+//			this.progressBar.setString(barMessage);
+//			this.progressBar.setStringPainted(true);
+//			
+//			logPanel.addProgressBar(this.progressBar);
+//			contentPane.revalidate();
+//			contentPane.repaint();
+//
+//		}
+//		
+//		public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, int flag){
+//			this(dataset, barMessage, errorMessage);
+//			this.downFlag = flag;
+//		}
+//		
+//		/**
+//		 * Change the progress message from the default in the constructor
+//		 * @param messsage the string to display
+//		 */
+//		public void setProgressMessage(String messsage){
+//			this.progressBar.setString(messsage);
+//		}
+//		
+//		private void removeProgressBar(){
+//			logPanel.removeProgressBar(this.progressBar);
+//			logPanel.revalidate();
+//			logPanel.repaint();
+//		}
+//		
+//		public void cancel(){
+//			removeProgressBar();
+//		}
+//		
+//		/**
+//		 * Use to manually remove the progress bar after an action is complete
+//		 */
+//		public void cleanup(){
+//			if (this.worker.isDone() || this.worker.isCancelled()){
+//				this.removeProgressBar();
+//			}
+//		}
+//		
+//		
+//		@Override
+//		public void propertyChange(PropertyChangeEvent evt) {
+//
+//			int value = (Integer) evt.getNewValue(); // should be percent
+////			IJ.log("Property change: "+value);
+//			
+//			if(value >=0 && value <=100){
+//				
+//				if(this.progressBar.isIndeterminate()){
+//					this.progressBar.setIndeterminate(false);
+//				}
+//				this.progressBar.setValue(value);
+//			}
+//
+//			if(evt.getPropertyName().equals("Finished")){
+//				programLogger.log(Level.FINEST,"Worker signaled finished");
+//				finished();
+//			}
+//
+//			if(evt.getPropertyName().equals("Error")){
+//				programLogger.log(Level.FINEST,"Worker signaled error");
+//				error();
+//			}
+//			
+//			if(evt.getPropertyName().equals("Cooldown")){
+//				programLogger.log(Level.FINEST,"Worker signaled cooldown");
+//				cooldown();
+//			}
+//			
+//		}
+//		
+//		/**
+//		 * The method run when the analysis has completed
+//		 */
+//		public void finished(){
+//			removeProgressBar();
+//
+//			populationsPanel.update(); // get any new populations
+//			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+//			list.add(dataset);
+//			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+//				PopulationExporter.saveAnalysisDataset(root);
+//			}
+//			
+//			populationsPanel.selectDataset(dataset);
+//			updatePanels(list); // update with the current population
+//			
+//		}
+//		
+//		/**
+//		 * Runs when an error was encountered in the analysis
+//		 */
+//		public void error(){
+//			programLogger.log(Level.SEVERE, this.errorMessage);
+////			log(this.errorMessage);
+//			removeProgressBar();
+//		}
+//		
+//		/**
+//		 * Runs if a cooldown signal is received. Use to set progress bars
+//		 * to an indeterminate state when no reliable progress metric is 
+//		 * available
+//		 */
+//		public void cooldown(){
+//			this.progressBar.setIndeterminate(true);
+//			contentPane.revalidate();
+//			contentPane.repaint();
+//		}
+//		
+//	}
 	
 	
 	/**
@@ -969,167 +978,167 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 * @author bms41
 	 *
 	 */
-	class AddTailStainAction extends ProgressableAction {
-
-		public AddTailStainAction(AnalysisDataset dataset) {
-			super(dataset, "Tail detection", "Error in tail detection");
-			try{
-				
-				TailDetectionSettingsWindow analysisSetup = new TailDetectionSettingsWindow(dataset.getAnalysisOptions(), programLogger);
-				
-				final int channel = analysisSetup.getChannel();
-				
-				DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
-				String folderName = openDialog.getDirectory();
-
-				if(folderName==null){
-					this.cancel();
-					return; // user cancelled
-				}
-
-				final File folder =  new File(folderName);
-
-				if(!folder.isDirectory() ){
-					this.cancel();
-					return;
-				}
-				if(!folder.exists()){
-					this.cancel();
-					return; // check folder is ok
-				}
-
-				worker = new TubulinTailDetector(dataset, folder, channel);
-				worker.addPropertyChangeListener(this);
-				this.setProgressMessage("Tail detection:"+dataset.getName());
-				worker.execute();
-			} catch(Exception e){
-				this.cancel();
-				programLogger.log(Level.SEVERE, "Error in tail analysis", e);
-
-			}
-		}
-	}
+//	class AddTailStainAction extends ProgressableAction {
+//
+//		public AddTailStainAction(AnalysisDataset dataset) {
+//			super(dataset, "Tail detection", "Error in tail detection");
+//			try{
+//				
+//				TailDetectionSettingsWindow analysisSetup = new TailDetectionSettingsWindow(dataset.getAnalysisOptions(), programLogger);
+//				
+//				final int channel = analysisSetup.getChannel();
+//				
+//				DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
+//				String folderName = openDialog.getDirectory();
+//
+//				if(folderName==null){
+//					this.cancel();
+//					return; // user cancelled
+//				}
+//
+//				final File folder =  new File(folderName);
+//
+//				if(!folder.isDirectory() ){
+//					this.cancel();
+//					return;
+//				}
+//				if(!folder.exists()){
+//					this.cancel();
+//					return; // check folder is ok
+//				}
+//
+//				worker = new TubulinTailDetector(dataset, folder, channel);
+//				worker.addPropertyChangeListener(this);
+//				this.setProgressMessage("Tail detection:"+dataset.getName());
+//				worker.execute();
+//			} catch(Exception e){
+//				this.cancel();
+//				programLogger.log(Level.SEVERE, "Error in tail analysis", e);
+//
+//			}
+//		}
+//	}
 	
 	/**
 	 * Add images containing nuclear signals
 	 *
 	 */
-	class AddNuclearSignalAction extends ProgressableAction {
-		
-		private int signalGroup = 0;
-		
-		public AddNuclearSignalAction(AnalysisDataset dataset) {
-			super(dataset, "Signal detection", "Error in signal detection");
-
-			try{
-				// add dialog for non-default detection options
-				SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(dataset, programLogger);
-
-				if(analysisSetup.isOK()){
-
-					this.signalGroup = analysisSetup.getSignalGroup();
-					//				this.signalGroup = newSignalGroup;
-					String signalGroupName = dataset.getSignalGroupName(signalGroup);
-
-
-					worker = new SignalDetector(dataset, analysisSetup.getFolder(), analysisSetup.getChannel(), dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName), signalGroup, signalGroupName);
-					this.setProgressMessage("Signal detection: "+signalGroupName);
-					worker.addPropertyChangeListener(this);
-					worker.execute();
-				} else {
-					this.cancel();
-					return;
-				}
-
-				
-			} catch (Exception e){
-				this.cancel();
-				programLogger.log(Level.SEVERE, "Error in signal analysis", e);
-			}
-			
-		}	
-		
-		@Override
-		public void finished(){
-			// divide population into clusters with and without signals
-			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
-
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-			for(CellCollection collection : signalPopulations){
-				
-				processSubPopulation(collection);
-				list.add(dataset.getChildDataset(collection.getID()));
-			}
-			// we have morphology analysis to carry out, so don't use the super finished
-			// use the same segmentation from the initial analysis
-			new MorphologyAnalysisAction(list, dataset, null, MainWindow.this);
-			cancel();
-		}
-
-		/**
-		 * Create child datasets for signal populations
-		 * and perform basic analyses
-		 * @param collection
-		 */
-		private void processSubPopulation(CellCollection collection){
-
-			AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
-			subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
-
-			programLogger.log(Level.INFO, "Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
-
-			dataset.addChildDataset(subDataset);
-		}
-
-		/*
-	    Given a complete collection of nuclei, split it into up to 4 populations;
-	      nuclei with red signals, with green signals, without red signals and without green signals
-	    Only include the 'without' populations if there is a 'with' population.
-		 */
-		private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
-
-			List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
-			programLogger.log(Level.INFO, "Dividing population by signals...");
-			try{
-
-				List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
-				if(!list.isEmpty()){
-					programLogger.log(Level.INFO, "Found nuclei with signals in group "+signalGroup);
-					CellCollection listCollection = new CellCollection(r.getFolder(), 
-							r.getOutputFolderName(), 
-							"Signals_in_group_"+signalGroup, 
-							r.getDebugFile(), 
-							r.getNucleusType());
-
-					for(Cell c : list){
-						listCollection.addCell( c );
-					}
-					signalPopulations.add(listCollection);
-
-					List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
-					if(!notList.isEmpty()){
-						programLogger.log(Level.INFO, "Found nuclei without signals in group "+signalGroup);
-						CellCollection notListCollection = new CellCollection(r.getFolder(), 
-								r.getOutputFolderName(), 
-								"No_signals_in_group_"+signalGroup, 
-								r.getDebugFile(), 
-								r.getNucleusType());
-
-						for(Cell c : notList){
-							notListCollection.addCell( c );
-						}
-						signalPopulations.add(notListCollection);
-					}
-
-				}
-
-			} catch(Exception e){
-				programLogger.log(Level.SEVERE, "Cannot create collection", e);
-			}
-
-			return signalPopulations;
-		}
-	}
+//	class AddNuclearSignalAction extends ProgressableAction {
+//		
+//		private int signalGroup = 0;
+//		
+//		public AddNuclearSignalAction(AnalysisDataset dataset) {
+//			super(dataset, "Signal detection", "Error in signal detection");
+//
+//			try{
+//				// add dialog for non-default detection options
+//				SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(dataset, programLogger);
+//
+//				if(analysisSetup.isOK()){
+//
+//					this.signalGroup = analysisSetup.getSignalGroup();
+//					//				this.signalGroup = newSignalGroup;
+//					String signalGroupName = dataset.getSignalGroupName(signalGroup);
+//
+//
+//					worker = new SignalDetector(dataset, analysisSetup.getFolder(), analysisSetup.getChannel(), dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName), signalGroup, signalGroupName);
+//					this.setProgressMessage("Signal detection: "+signalGroupName);
+//					worker.addPropertyChangeListener(this);
+//					worker.execute();
+//				} else {
+//					this.cancel();
+//					return;
+//				}
+//
+//				
+//			} catch (Exception e){
+//				this.cancel();
+//				programLogger.log(Level.SEVERE, "Error in signal analysis", e);
+//			}
+//			
+//		}	
+//		
+//		@Override
+//		public void finished(){
+//			// divide population into clusters with and without signals
+//			List<CellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
+//
+//			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+//			for(CellCollection collection : signalPopulations){
+//				
+//				processSubPopulation(collection);
+//				list.add(dataset.getChildDataset(collection.getID()));
+//			}
+//			// we have morphology analysis to carry out, so don't use the super finished
+//			// use the same segmentation from the initial analysis
+//			new MorphologyAnalysisAction(list, dataset, null, MainWindow.this);
+//			cancel();
+//		}
+//
+//		/**
+//		 * Create child datasets for signal populations
+//		 * and perform basic analyses
+//		 * @param collection
+//		 */
+//		private void processSubPopulation(CellCollection collection){
+//
+//			AnalysisDataset subDataset = new AnalysisDataset(collection, dataset.getSavePath());
+//			subDataset.setAnalysisOptions(dataset.getAnalysisOptions());
+//
+//			programLogger.log(Level.INFO, "Sub-population: "+collection.getType()+" : "+collection.getNucleusCount()+" nuclei");
+//
+//			dataset.addChildDataset(subDataset);
+//		}
+//
+//		/*
+//	    Given a complete collection of nuclei, split it into up to 4 populations;
+//	      nuclei with red signals, with green signals, without red signals and without green signals
+//	    Only include the 'without' populations if there is a 'with' population.
+//		 */
+//		private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
+//
+//			List<CellCollection> signalPopulations = new ArrayList<CellCollection>(0);
+//			programLogger.log(Level.INFO, "Dividing population by signals...");
+//			try{
+//
+//				List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
+//				if(!list.isEmpty()){
+//					programLogger.log(Level.INFO, "Found nuclei with signals in group "+signalGroup);
+//					CellCollection listCollection = new CellCollection(r.getFolder(), 
+//							r.getOutputFolderName(), 
+//							"Signals_in_group_"+signalGroup, 
+//							r.getDebugFile(), 
+//							r.getNucleusType());
+//
+//					for(Cell c : list){
+//						listCollection.addCell( c );
+//					}
+//					signalPopulations.add(listCollection);
+//
+//					List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
+//					if(!notList.isEmpty()){
+//						programLogger.log(Level.INFO, "Found nuclei without signals in group "+signalGroup);
+//						CellCollection notListCollection = new CellCollection(r.getFolder(), 
+//								r.getOutputFolderName(), 
+//								"No_signals_in_group_"+signalGroup, 
+//								r.getDebugFile(), 
+//								r.getNucleusType());
+//
+//						for(Cell c : notList){
+//							notListCollection.addCell( c );
+//						}
+//						signalPopulations.add(notListCollection);
+//					}
+//
+//				}
+//
+//			} catch(Exception e){
+//				programLogger.log(Level.SEVERE, "Cannot create collection", e);
+//			}
+//
+//			return signalPopulations;
+//		}
+//	}
 	
 //	/**
 //	 * Refold the consensus nucleus for the selected dataset using default parameters
@@ -1192,112 +1201,112 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	/**
 	 * Run a new shell analysis on the selected dataset
 	 */
-	class ShellAnalysisAction extends ProgressableAction {
-				
-		public ShellAnalysisAction(AnalysisDataset dataset) {
-			super(dataset, "Shell analysis", "Error in shell analysis");
-			
-			SpinnerNumberModel sModel = new SpinnerNumberModel(5, 2, 10, 1);
-			JSpinner spinner = new JSpinner(sModel);
-			
-			int option = JOptionPane.showOptionDialog(null, 
-					spinner, 
-					"Select number of shells", 
-					JOptionPane.OK_CANCEL_OPTION, 
-					JOptionPane.QUESTION_MESSAGE, null, null, null);
-			if (option == JOptionPane.CANCEL_OPTION) {
-			    // user hit cancel
-				this.cancel();
-				return;
-				
-			} else if (option == JOptionPane.OK_OPTION)	{
-				
-				int shellCount = (Integer) spinner.getModel().getValue();
-				worker = new ShellAnalysis(dataset,shellCount);
-
-				worker.addPropertyChangeListener(this);
-				worker.execute();	
-			}
-		}
-	}
+//	class ShellAnalysisAction extends ProgressableAction {
+//				
+//		public ShellAnalysisAction(AnalysisDataset dataset) {
+//			super(dataset, "Shell analysis", "Error in shell analysis");
+//			
+//			SpinnerNumberModel sModel = new SpinnerNumberModel(5, 2, 10, 1);
+//			JSpinner spinner = new JSpinner(sModel);
+//			
+//			int option = JOptionPane.showOptionDialog(null, 
+//					spinner, 
+//					"Select number of shells", 
+//					JOptionPane.OK_CANCEL_OPTION, 
+//					JOptionPane.QUESTION_MESSAGE, null, null, null);
+//			if (option == JOptionPane.CANCEL_OPTION) {
+//			    // user hit cancel
+//				this.cancel();
+//				return;
+//				
+//			} else if (option == JOptionPane.OK_OPTION)	{
+//				
+//				int shellCount = (Integer) spinner.getModel().getValue();
+//				worker = new ShellAnalysis(dataset,shellCount);
+//
+//				worker.addPropertyChangeListener(this);
+//				worker.execute();	
+//			}
+//		}
+//	}
 
 	/**
 	 * Run a new clustering on the selected dataset
 	 * @author bms41
 	 *
 	 */
-	class ClusterAnalysisAction extends ProgressableAction {
-				
-		public ClusterAnalysisAction(AnalysisDataset dataset) {
-			super(dataset, "Cluster analysis", "Error in cluster analysis");
-			
-			ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
-			ClusteringOptions options = clusterSetup.getOptions();
-//			Map<String, Object> options = clusterSetup.getOptions();
-
-			if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-
-//				worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
-				worker = new NucleusClusterer( dataset , options );
-//				((NucleusClusterer) worker).setClusteringOptions(options);
-				
-				worker.addPropertyChangeListener(this);
-				worker.execute();
-
-			} else {
-				this.cancel();
-			}
-			clusterSetup.dispose();
-		}
-		
-		
-		/* (non-Javadoc)
-		 * Overrides because we need to carry out the morphology reprofiling
-		 * on each cluster
-		 * @see no.gui.MainWindow.ProgressableAction#finished()
-		 */
-		@Override
-		public void finished() {
-
-			programLogger.log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
-
-			String tree = (((NucleusClusterer) worker).getNewickTree());
-			
-			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-			ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
-//			int clusterNumber = dataset.getClusterGroups().size();
-			programLogger.log(Level.FINEST, "Getting group number");
-			int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-			programLogger.log(Level.FINEST, "Cluster group number chosen: "+clusterNumber);
-
-			ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
-
-			for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
-
-				CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
-				programLogger.log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
-				group.addDataset(c);
-				c.setName(group.getName()+"_"+c.getName());
-				programLogger.log(Level.FINEST, "Renamed cluster: "+c.getName());
-				dataset.addChildCollection(c);
-				// attach the clusters to their parent collection
-//				dataset.addCluster(c);
-				
-				programLogger.log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
-				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-				clusterDataset.setRoot(false);
-				list.add(clusterDataset);
-				
-
-			}
-			dataset.addClusterGroup(group);
-			programLogger.log(Level.FINEST, "Running new morphology analysis on cluster group");
-			new MorphologyAnalysisAction(list, dataset, ADD_POPULATION, MainWindow.this);
-
-			cancel();
-
-		}
-	}
+//	class ClusterAnalysisAction extends ProgressableAction {
+//				
+//		public ClusterAnalysisAction(AnalysisDataset dataset) {
+//			super(dataset, "Cluster analysis", "Error in cluster analysis");
+//			
+//			ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(MainWindow.this);
+//			ClusteringOptions options = clusterSetup.getOptions();
+////			Map<String, Object> options = clusterSetup.getOptions();
+//
+//			if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
+//
+////				worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
+//				worker = new NucleusClusterer( dataset , options );
+////				((NucleusClusterer) worker).setClusteringOptions(options);
+//				
+//				worker.addPropertyChangeListener(this);
+//				worker.execute();
+//
+//			} else {
+//				this.cancel();
+//			}
+//			clusterSetup.dispose();
+//		}
+//		
+//		
+//		/* (non-Javadoc)
+//		 * Overrides because we need to carry out the morphology reprofiling
+//		 * on each cluster
+//		 * @see no.gui.MainWindow.ProgressableAction#finished()
+//		 */
+//		@Override
+//		public void finished() {
+//
+//			programLogger.log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
+//
+//			String tree = (((NucleusClusterer) worker).getNewickTree());
+//			
+//			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+//			ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
+////			int clusterNumber = dataset.getClusterGroups().size();
+//			programLogger.log(Level.FINEST, "Getting group number");
+//			int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+//			programLogger.log(Level.FINEST, "Cluster group number chosen: "+clusterNumber);
+//
+//			ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
+//
+//			for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
+//
+//				CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
+//				programLogger.log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
+//				group.addDataset(c);
+//				c.setName(group.getName()+"_"+c.getName());
+//				programLogger.log(Level.FINEST, "Renamed cluster: "+c.getName());
+//				dataset.addChildCollection(c);
+//				// attach the clusters to their parent collection
+////				dataset.addCluster(c);
+//				
+//				programLogger.log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
+//				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+//				clusterDataset.setRoot(false);
+//				list.add(clusterDataset);
+//				
+//
+//			}
+//			dataset.addClusterGroup(group);
+//			programLogger.log(Level.FINEST, "Running new morphology analysis on cluster group");
+//			new MorphologyAnalysisAction(list, dataset, ADD_POPULATION, MainWindow.this);
+//
+//			cancel();
+//
+//		}
+//	}
 	
 	
 //    public class MorphologyAnalysisAction extends ProgressableAction {
@@ -1608,32 +1617,32 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	/**
 	 * Merge the selected datasets
 	 */
-	class MergeCollectionAction extends ProgressableAction {
-						
-		public MergeCollectionAction(List<AnalysisDataset> datasets, File saveFile) {
-			super(null, "Merging", "Error merging");
-						
-			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile, programLogger);
-			worker.addPropertyChangeListener(this);
-			worker.execute();	
-		}
-		
-		@Override
-		public void finished(){
-			
-			List<AnalysisDataset> datasets = ((DatasetMerger) worker).getResults();
-			
-			if(datasets.size()==0 || datasets==null){
-				this.cancel();
-			} else {
-				
-				int flag = ADD_POPULATION;
-				flag |= SAVE_DATASET;
-				new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
-				this.cancel();
-			}
-		}
-	}
+//	class MergeCollectionAction extends ProgressableAction {
+//						
+//		public MergeCollectionAction(List<AnalysisDataset> datasets, File saveFile) {
+//			super(null, "Merging", "Error merging");
+//						
+//			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile, programLogger);
+//			worker.addPropertyChangeListener(this);
+//			worker.execute();	
+//		}
+//		
+//		@Override
+//		public void finished(){
+//			
+//			List<AnalysisDataset> datasets = ((DatasetMerger) worker).getResults();
+//			
+//			if(datasets.size()==0 || datasets==null){
+//				this.cancel();
+//			} else {
+//				
+//				int flag = ADD_POPULATION;
+//				flag |= SAVE_DATASET;
+//				new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
+//				this.cancel();
+//			}
+//		}
+//	}
 	
 
 
@@ -1645,7 +1654,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 		if(event.type().equals("RunShellAnalysis")){
 			programLogger.log(Level.INFO, "Shell analysis selected");
-			new ShellAnalysisAction(selectedDataset);
+			new ShellAnalysisAction(selectedDataset, this);
 		}
 
 		if(event.type().equals("MergeCollectionAction")){
@@ -1662,7 +1671,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					if(fileName!=null && folderName!=null){
 						File saveFile = new File(folderName+File.separator+fileName);
 
-						new MergeCollectionAction(populationsPanel.getSelectedDatasets(), saveFile);
+						new MergeCollectionAction(populationsPanel.getSelectedDatasets(), saveFile, MainWindow.this);
 					}
 				}
 			};
@@ -1776,15 +1785,15 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		
 		if(event.type().equals("AddTailStainAction")){
-			new AddTailStainAction(selectedDataset);
+			new AddTailStainAction(selectedDataset, this);
 		}
 		
 		if(event.type().equals("AddNuclearSignalAction")){
-			new AddNuclearSignalAction(selectedDataset);
+			new AddNuclearSignalAction(selectedDataset, this);
 		}
 		
 		if(event.type().equals("NewShellAnalysisAction")){
-			new ShellAnalysisAction(selectedDataset);
+			new ShellAnalysisAction(selectedDataset, this);
 		}
 		
 		if(event.type().equals("UpdatePanels")){
@@ -1857,7 +1866,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						
 			if(event.method().equals(DatasetMethod.CLUSTER)){
 				programLogger.log(Level.INFO, "Clustering dataset");
-				new ClusterAnalysisAction(list.get(0));
+				new ClusterAnalysisAction(list.get(0), this);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
