@@ -997,12 +997,12 @@ public class CellCollection implements Serializable {
 	  		}
 	  		
 	  		case BOUNDING_HEIGHT:{
-	  			result = this.getBoundingRectangleDimension(false);
+	  			result = this.getBoundingRectangleDimension(false, scale);
 	  			break;
 	  		}
 	  		
 	  		case BOUNDING_WIDTH:{
-	  			result = this.getBoundingRectangleDimension(true);
+	  			result = this.getBoundingRectangleDimension(true, scale);
 	  			break;
 	  		}
 
@@ -1017,20 +1017,25 @@ public class CellCollection implements Serializable {
    * @return a list of dimensions
    * @throws Exception
    */
-  public double[] getBoundingRectangleDimension(boolean width) throws Exception{
+  public double[] getBoundingRectangleDimension(boolean width, MeasurementScale scale) throws Exception{
 	  List<Double> list = new ArrayList<Double>();
 
 	  for(Nucleus n : this.getNuclei()){
 
-		  ConsensusNucleus test = new ConsensusNucleus( n, this.getNucleusType());
-		  test.rotatePointToBottom(test.getBorderTag(BorderTag.ORIENTATION_POINT));
-
-		  FloatPolygon p = Utils.createPolygon(test);
 		  if(width){
-			  list.add( p.getBounds().getWidth() );
+			  list.add(n.getStatistic(NucleusStatistic.BOUNDING_WIDTH, scale));
 		  } else {
-			  list.add( p.getBounds().getHeight() );
+			  list.add(n.getStatistic(NucleusStatistic.BOUNDING_HEIGHT, scale));
 		  }
+//		  ConsensusNucleus test = new ConsensusNucleus( n, this.getNucleusType());
+//		  test.rotatePointToBottom(test.getBorderTag(BorderTag.ORIENTATION_POINT));
+//
+//		  FloatPolygon p = Utils.createPolygon(test);
+//		  if(width){
+//			  list.add( p.getBounds().getWidth() );
+//		  } else {
+//			  list.add( p.getBounds().getHeight() );
+//		  }
 
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));

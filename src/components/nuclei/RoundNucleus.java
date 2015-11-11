@@ -350,7 +350,7 @@ public class RoundNucleus
 		return NucleusType.ROUND.getPoint(BorderTag.ORIENTATION_POINT);
 	}
 	
-	public double getStatistic(NucleusStatistic stat, MeasurementScale scale){
+	public double getStatistic(NucleusStatistic stat, MeasurementScale scale) throws Exception{
 		double result = 0;
 		
 		switch(stat){
@@ -386,6 +386,25 @@ public class RoundNucleus
 				}
 				break;
 			case VARIABILITY:
+				break;
+				
+			case BOUNDING_HEIGHT:
+				ConsensusNucleus testh = new ConsensusNucleus( this, NucleusType.ROUND);
+				testh.rotatePointToBottom(testh.getBorderTag(BorderTag.ORIENTATION_POINT));
+				FloatPolygon ph = Utils.createPolygon(testh);
+				result = ph.getBounds().getHeight();
+				if(scale.equals(MeasurementScale.MICRONS)){
+					result = Utils.micronLength(result, this.getScale());
+				}
+				break;
+			case BOUNDING_WIDTH:
+				ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
+				testw.rotatePointToBottom(testw.getBorderTag(BorderTag.ORIENTATION_POINT));
+				FloatPolygon pw = Utils.createPolygon(testw);
+				result = pw.getBounds().getWidth();
+				if(scale.equals(MeasurementScale.MICRONS)){
+					result = Utils.micronLength(result, this.getScale());
+				}
 				break;
 			default:
 				break;

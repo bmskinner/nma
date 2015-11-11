@@ -201,8 +201,9 @@ public interface Nucleus {
 	 * @param stat the statistic to fetch
 	 * @param scale the units to return values in
 	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
+	 * @throws Exception 
 	 */
-	public double getStatistic(NucleusStatistic stat, MeasurementScale scale);
+	public double getStatistic(NucleusStatistic stat, MeasurementScale scale) throws Exception;
 	
 	/**
 	 * Get the area of the nucleus in pixels
