@@ -35,6 +35,7 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import charting.datasets.NuclearHistogramDatasetCreator;
 import analysis.AnalysisDataset;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusStatistic;
@@ -121,13 +122,21 @@ public class HistogramChartFactory {
 	 * @param xLabel the x axis label
 	 * @return
 	 */
-	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
+	public static JFreeChart createNuclearStatsHistogram(HistogramChartOptions options) throws Exception{
+//	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
 		
-		String xLabel = stat.label(scale);
+		HistogramDataset ds = null;
+				
+		if (options.hasDatasets()){
+			ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(options.getDatasets(), options.getStat(), options.getScale());
+		}
+		
+		
+		String xLabel = options.getStat().label(options.getScale());
 		
 		JFreeChart chart = createHistogram(ds, xLabel, "Nuclei");
 		
-		if(ds!=null && list!=null){
+		if(ds!=null && options.getDatasets()!=null){
 			
 			XYPlot plot = chart.getXYPlot();
 			
@@ -141,16 +150,11 @@ public class HistogramChartFactory {
 				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 
 				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replace(stat.toString()+"_", "");
-//				IJ.log("Replacing  :  "+stat.toString());
-//				IJ.log(seriesKey+ "  :  "+seriesName);
+				String seriesName = seriesKey.replace(options.getStat().toString()+"_", "");
 				
-				for(AnalysisDataset dataset : list){
+				for(AnalysisDataset dataset : options.getDatasets()){
 					
-//					IJ.log("     "+dataset.getName());
-
 					if(seriesName.equals(dataset.getName())){
-//						IJ.log("      Match");
 						Color colour = dataset.hasDatasetColour()
 								? dataset.getDatasetColour()
 										: ColourSelecter.getSegmentColor(j);
@@ -162,7 +166,6 @@ public class HistogramChartFactory {
 				}
 				
 			}
-//			IJ.log("     ");
 		}
 		return chart;
 	}
@@ -174,17 +177,26 @@ public class HistogramChartFactory {
 	 * @param list the analysis datasets used to create the histogrom
 	 * @param xLabel the x axis label
 	 * @return
+	 * @throws Exception 
 	 */
-	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
+	public static JFreeChart createNuclearDensityStatsChart(HistogramChartOptions options) throws Exception{
 		
-		String xLabel = stat.label(scale);
+//	public static JFreeChart createNuclearDensityStatsChart(DefaultXYDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
+		
+		DefaultXYDataset ds = null;
+		
+		if (options.hasDatasets()){
+			ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(options.getDatasets(), options.getStat(), options.getScale());
+		}
+
+		String xLabel = options.getStat().label(options.getScale());
 //		String xLabel = stat.toString()+" ("+scale.toString()+")";
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
 				                false);
 		
-		if(ds!=null && list!=null){
+		if(ds!=null && options.getDatasets()!=null){
 			
 			XYPlot plot = chart.getXYPlot();
 			
@@ -201,10 +213,10 @@ public class HistogramChartFactory {
 				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
 
 				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replace(stat.toString()+"_", "");
+				String seriesName = seriesKey.replace(options.getStat().toString()+"_", "");
 
 
-				for(AnalysisDataset dataset : list){
+				for(AnalysisDataset dataset : options.getDatasets()){
 
 					if(seriesName.equals(dataset.getName())){
 

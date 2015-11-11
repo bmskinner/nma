@@ -221,6 +221,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		public HistogramsPanel(){
 			this.setLayout(new BorderLayout());
 						
+			try {
 			mainPanel = new JPanel();
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			
@@ -237,8 +238,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
             MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 			Dimension preferredSize = new Dimension(400, 150);
 			for(NucleusStatistic stat : NucleusStatistic.values()){
-//			for(String chartType : chartStatTypes.keySet()){
-				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(null, null, stat, scale), stat.toString());
+
+				HistogramChartOptions options = new HistogramChartOptions(null, stat, scale, false);
+				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(options), stat.toString());
 				panel.setPreferredSize(preferredSize);
 				panel.addSignalChangeListener(this);
 				chartPanels.put(stat, panel);
@@ -249,6 +251,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			// add the scroll pane to the tab
 			scrollPane  = new JScrollPane(mainPanel);
 			this.add(scrollPane, BorderLayout.CENTER);
+			} catch(Exception e){
+				programLogger.log(Level.SEVERE, "Error creating histogram panel", e);
+			}
 			
 		}
 		
@@ -276,13 +281,14 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 			
 					if(useDensity){
-						DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
-						chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat, scale);
+//						DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
+//						chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat, scale);
+						chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
 						getChartCache().addChart(options, chart);
 
 					} else {
-						HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat, scale);
-						chart = HistogramChartFactory.createNuclearStatsHistogram(ds, list, stat, scale);
+//						HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat, scale);
+						chart = HistogramChartFactory.createNuclearStatsHistogram(options);
 						getChartCache().addChart(options, chart);
 						
 					}

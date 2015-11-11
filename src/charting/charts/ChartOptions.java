@@ -33,12 +33,40 @@ public abstract class ChartOptions {
 	}
 	
 	
+	/**
+	 * Fetch all the datasets
+	 * @return
+	 */
 	public List<AnalysisDataset> getDatasets(){
 		return this.list;
 	}
 	
+	/**
+	 * Get the segmentation colour swatch
+	 * @return
+	 */
 	public ColourSwatch getSwatch(){
 		return this.swatch;
+	}
+	
+	/**
+	 * Fetch the first dataset in the list
+	 * @return
+	 */
+	public AnalysisDataset firstDataset(){
+		return this.list.get(0);
+	}
+	
+	/**
+	 * Check if the dataset list contains datasets
+	 * @return
+	 */
+	public boolean hasDatasets(){
+		if(list==null || list.isEmpty()){
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 	
