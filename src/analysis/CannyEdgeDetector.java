@@ -1,4 +1,3 @@
-
 package analysis;
 
 import java.awt.image.BufferedImage;
