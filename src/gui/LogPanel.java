@@ -97,6 +97,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		this.getActionMap().put("ShowConsole",
 				new ShowConsoleAction());
 		
+		console.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		panel.add(console, BorderLayout.SOUTH);
 		console.setVisible(false);
 		console.addActionListener(this);
@@ -144,8 +145,11 @@ public class LogPanel extends DetailPanel implements ActionListener {
 			if(console.isVisible()){
 				console.setVisible(false);
 			} else {
-				console.setText("");
+				console.setText(null);
 				console.setVisible(true);
+				console.grabFocus();
+				console.requestFocus();
+				console.requestFocusInWindow();
 			}
 			revalidate();
 			repaint();
@@ -161,7 +165,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 //		programLogger.log(Level.FINEST, "Log panel detected action: "+e.getSource().toString());
 		if(e.getSource().equals(console)){
 //			programLogger.log(Level.FINEST, "Entering text at console");
-			this.log(console.getText());
+			programLogger.log(Level.INFO, console.getText());
 			runCommand(console.getText());
 			console.setText("");
 		}
