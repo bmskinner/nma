@@ -559,9 +559,18 @@ public interface Nucleus {
 	 */
 	public Set<Integer> getSignalGroups();
 	
+	/**
+	 * Get a copy of the mapping of border tags to index positions within 
+	 * the border list of the nucleus
+	 * @return
+	 */
 	public Map<BorderTag, Integer> getBorderTags();
 	
-//	public void addSegment(NucleusBorderSegment n);
+
+	/**
+	 * Reverse the angle profile of the nucleus
+	 * @throws Exception
+	 */
 	public void reverse() throws Exception;
 	public String getOutputFolderName();
 	public void updateSourceFolder(File newFolder);

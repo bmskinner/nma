@@ -80,12 +80,22 @@ public class SpermTail  implements Serializable, CellularComponent, Flagellum {
 			for(int i=0; i<borderPolygon.npoints; i++){
 				borderPoints.add(new XYPoint( borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
 			}
-			
-			 
-			
+						
 			this.length = skeleton.getLength();
 			
+		}
+		
+		public SpermTail(SpermTail t){
+			this.uuid = java.util.UUID.randomUUID();
+			this.sourceFile = t.getSourceFile();
+			this.sourceChannel = t.getSourceChannel();
 			
+			this.orignalPosition = t.getPosition();
+			
+			this.borderPoints = t.getBorder();
+			this.skeletonPoints = t.getSkeleton();
+									
+			this.length = t.getLength();
 		}
 		
 		public UUID getID(){

@@ -30,6 +30,11 @@ public class Mitochondrion implements Serializable, CellularComponent {
 	public Mitochondrion(){
 		this.uuid = java.util.UUID.randomUUID();
 	}
+	
+	public Mitochondrion(Mitochondrion m){
+		this.uuid = java.util.UUID.randomUUID();
+		this.orignalPosition = m.getPosition();
+	} 
 
 	public UUID getID() {	
 		return this.uuid;

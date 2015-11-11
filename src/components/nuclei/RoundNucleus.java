@@ -163,7 +163,7 @@ public class RoundNucleus
 		this.setPerimeter(n.getPerimeter());
 		this.setFeret(n.getFeret());
 		this.setArea(n.getArea());
-		this.setAngleProfile(n.getAngleProfile());
+//		this.setAngleProfile(n.getAngleProfile());
 		this.setCentreOfMass(n.getCentreOfMass());
 		
 		this.setSignals( new SignalCollection(n.getSignalCollection()));
@@ -1093,7 +1093,11 @@ public class RoundNucleus
 	}
 		
 	public Map<BorderTag, Integer> getBorderTags(){
-		return this.borderTags;
+		Map<BorderTag, Integer> result = new HashMap<BorderTag, Integer>();
+		for(BorderTag b : borderTags.keySet()){
+			result.put(b,  borderTags.get(b));
+		}
+		return result;
 	}
 	
 	public void setBorderTags(Map<BorderTag, Integer> m){

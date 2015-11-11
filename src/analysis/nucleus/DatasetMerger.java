@@ -217,7 +217,7 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 
 					for(Cell n : d.getCollection().getCells()){
 						if(!newCollection.getCells().contains(n)){
-							newCollection.addCell(n);
+							newCollection.addCell(new Cell(n)); // make a copy of the cell so segments can be merged
 						}
 					}
 

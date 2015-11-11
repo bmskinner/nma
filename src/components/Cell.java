@@ -52,13 +52,24 @@ public class Cell implements Serializable {
 	
 	/**
 	 * Duplicate a cell TODO make defensive
-	 * @param c
+	 * @param c the cell to duplicate
 	 */
 	public Cell(Cell c){
-		this.uuid = UUID.randomUUID();
+//		this.uuid = UUID.randomUUID();
+		this.uuid = c.getId();
 		nucleus = c.getNucleus().duplicate();
-		mitochondria = c.getMitochondria();
-		tails = c.getTails();
+		
+		mitochondria = new ArrayList<Mitochondrion>(0);
+		for(Mitochondrion m : c.getMitochondria()){
+			mitochondria.add(new Mitochondrion(m));
+		}
+		
+		tails = new ArrayList<Flagellum>(0);
+		for(Flagellum f : c.getTails()){
+			tails.add(new SpermTail((SpermTail) f));
+		}
+		
+//		tails = c.getTails();
 		acrosomes = c.getAcrosomes();
 	}
 	
