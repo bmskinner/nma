@@ -166,7 +166,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the log panel
 			//---------------
-			logPanel = new LogPanel();
+			logPanel = new LogPanel(programLogger);
+			logPanel.addDatasetEventListener(this);
+			logPanel.addInterfaceEventListener(this);
 			TextAreaHandler textHandler = new TextAreaHandler(logPanel);
 			textHandler.setFormatter(new LogPanelFormatter());
 			programLogger.addHandler(textHandler);
@@ -997,8 +999,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		programLogger.log(Level.FINEST, "Heard dataset event: "+event.method().toString());
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
-				
-			
+						
 			if(event.method().equals(DatasetMethod.NEW_MORPHOLOGY)){
 				programLogger.log(Level.INFO, "Running new morphology analysis");
 				final int flag = ADD_POPULATION;
@@ -1056,9 +1057,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						 * The countdown latch does nothing here, but must be retained for
 						 * compatibility.
 						 */
-						
-						programLogger.log(Level.FINEST, "Refold consensus dataset method new thread is EDT: "+SwingUtilities.isEventDispatchThread());
-						
 						
 						final CountDownLatch latch = new CountDownLatch(1);
 						programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
@@ -1141,6 +1139,32 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			this.updatePanels(populationsPanel.getSelectedDatasets());
 			break;
+		case LIST_DATASETS:
+			int i=0;
+			for(AnalysisDataset d : populationsPanel.getAllDatasets()){
+				programLogger.log(Level.INFO, i+"\t"+d.getName());
+				i++;
+			}
+			break;
+		case RESEGMENT_SELECTED_DATASET:
+				programLogger.log(Level.INFO, "Resegmenting selected datasets");
+				final int flag = 0;
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+						List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
+						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
+
+				}});
+				break;
+				
+		case LIST_SELECTED_DATASETS:
+			int count=0;
+			for(AnalysisDataset d : populationsPanel.getSelectedDatasets()){
+				programLogger.log(Level.INFO, count+"\t"+d.getName());
+				count++;
+			}
+			break;
+			
 		default:
 			break;
 
