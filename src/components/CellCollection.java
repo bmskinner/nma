@@ -1027,15 +1027,6 @@ public class CellCollection implements Serializable {
 		  } else {
 			  list.add(n.getStatistic(NucleusStatistic.BOUNDING_HEIGHT, scale));
 		  }
-//		  ConsensusNucleus test = new ConsensusNucleus( n, this.getNucleusType());
-//		  test.rotatePointToBottom(test.getBorderTag(BorderTag.ORIENTATION_POINT));
-//
-//		  FloatPolygon p = Utils.createPolygon(test);
-//		  if(width){
-//			  list.add( p.getBounds().getWidth() );
-//		  } else {
-//			  list.add( p.getBounds().getHeight() );
-//		  }
 
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));

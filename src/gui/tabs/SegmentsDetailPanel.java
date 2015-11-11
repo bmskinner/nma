@@ -170,11 +170,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 			// only apply to first row, after the first column
 			if(column>0 && row==0){
 //				String colName = table.getColumnName(column); // will be Seg_x
+				
 
 				int segment = Integer.valueOf(colName.replace("Seg_", ""));
 
 				ColourSwatch swatch = activeDataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : activeDataset.getSwatch();
 				colour = swatch.color(segment);
+				programLogger.log(Level.FINEST, "SegmentTableCellRenderer for segment "+segment+" uses color "+colour);
 
 			}
 			
@@ -547,6 +549,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 		
 		public void update(List<AnalysisDataset> list){
+			
 			try{
 				
 				mainPanel = new JPanel();
@@ -555,49 +558,29 @@ public class SegmentsDetailPanel extends DetailPanel {
 				MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
 				
 				if(!list.isEmpty()){
-//					IJ.log("Making boxplots");
 					
-					int prevCount = 0;
-					boolean ok = true;
-					
-					// check that the datasets have the same number of segments
-					for( AnalysisDataset dataset  : list){
-						CellCollection collection = dataset.getCollection();
-						int count = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-							.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-							.getSegmentCount();
+					programLogger.log(Level.FINEST, "Dataset list is not empty");
+			
+					// Check that all the datasets have the same number of segments
+					if(checkSegmentCountsMatch(list)){ // make a boxplot for each segment
 						
-						if(prevCount > 0 ){
-							if(prevCount!=count){
-								ok = false;
-							}
-						}
-						prevCount = count;
-					}
-					
-					
-					if(ok){ // make a boxplot for each segment
-//						IJ.log("Found "+prevCount+" segments consistent in "+list.size()+" datasets");
+						CellCollection collection = list.get(0).getCollection();
+						int segmentCount = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+								.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+								.getSegmentCount();
 						
 						// Get each segment as a boxplot
-						for( int i=0; i<prevCount; i++){
+						for( int i=0; i<segmentCount; i++){
 							String segName = "Seg_"+i;
 							JFreeChart boxplot = BoxplotChartFactory.makeSegmentBoxplot(segName, list, scale);
 							ChartPanel chartPanel = new ChartPanel(boxplot);
 							chartPanel.setPreferredSize(preferredSize);
-							mainPanel.add(chartPanel);
-//							IJ.log("Added chart for "+segName);
-							
+							mainPanel.add(chartPanel);							
 						}
 						
 						
 						
 					} else { // different number of segments, blank chart
-//						IJ.log("Found inconsistent segments");
-//						JFreeChart boxplot = MorphologyChartFactory.makeEmptyBoxplot();
-//						ChartPanel chartPanel = new ChartPanel(boxplot);
-//						chartPanel.setPreferredSize(preferredSize);
-//						mainPanel.add(chartPanel);
 						mainPanel.add(new JLabel("Segment number is not consistent across datasets"));
 					}
 					mainPanel.revalidate();
@@ -606,26 +589,40 @@ public class SegmentsDetailPanel extends DetailPanel {
 					
 				}
 
-//				if(list.size()==1){
-//
-//					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
-//					JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
-//					chartPanel.setChart(boxplotChart);
-//
-//				} else {
-//					
-//
-//					BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentVariabillityDataset(list);
-//					JFreeChart boxplotChart = MorphologyChartFactory.makeSegmentBoxplot(ds, list);
-//					chartPanel.setChart(boxplotChart);
-//
-//				}
 			} catch (Exception e){
-				programLogger.log(Level.SEVERE, "Error updating segments boxplot", e);
-//				JFreeChart boxplotChart = MorphologyChartFactory.makeEmptyBoxplot();
-//				chartPanel.setChart(boxplotChart);
-				
+				programLogger.log(Level.SEVERE, "Error updating segments boxplot", e);				
 			}
+		}
+		
+		/**
+		 * Given a list of datasets, count the segments in the median profile of each, 
+		 * and test if all datasets have the same number of segments.
+		 * @param list
+		 * @return
+		 * @throws Exception
+		 */
+		private boolean checkSegmentCountsMatch(List<AnalysisDataset> list) throws Exception{
+			int prevCount = 0;
+			
+			programLogger.log(Level.FINEST, "Counting segments in each dataset");
+			// check that the datasets have the same number of segments
+			for( AnalysisDataset dataset  : list){
+				CellCollection collection = dataset.getCollection();
+				int count = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+					.getSegmentCount();
+				
+				programLogger.log(Level.FINEST, "\t"+dataset.getName()+": "+count+" segments");
+				
+				if(prevCount > 0 ){
+					if(prevCount!=count){
+						programLogger.log(Level.FINEST, "Segment count does not match");
+						return false;
+					}
+				}
+				prevCount = count;
+			}
+			return true;
 		}
 
 
@@ -765,12 +762,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 			try {
 
 				if(list.isEmpty()){
+					programLogger.log(Level.FINEST, "Dataset list is empty: making null table");
 					table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 
 				} else {
 
 					if(list.size()==1){
-
+						programLogger.log(Level.FINEST, "Single dataset selected");
 						activeDataset = list.get(0);
 						TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset, scale);
 						table.setModel(model);
@@ -782,6 +780,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						}
 
 					} else {
+						programLogger.log(Level.FINEST, "Multiple datasets selected: making null table");
 						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 					}
 
@@ -789,6 +788,12 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 			} catch (Exception e) {
 				programLogger.log(Level.SEVERE, "Error updating segment stats panel", e);
+				programLogger.log(Level.FINEST, "Error detected: making null table");
+				try {
+					table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
+				} catch (Exception e1) {
+					programLogger.log(Level.SEVERE, "Error recovering from error in segment stats panel", e);
+				}
 			}
 			
 
