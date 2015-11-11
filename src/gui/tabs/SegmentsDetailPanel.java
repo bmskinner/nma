@@ -18,6 +18,8 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -245,14 +247,14 @@ public class SegmentsDetailPanel extends DetailPanel {
 			unmergeButton = new JButton("Unmerge segments");
 			unmergeButton.addActionListener(this);
 			
-			unmergeButton.addActionListener( new ActionListener(){
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					
-					
-					
-				}
-			});
+//			unmergeButton.addActionListener( new ActionListener(){
+//				@Override
+//				public void actionPerformed(ActionEvent e) {
+//					
+//					
+//					
+//				}
+//			});
 			
 			panel.add(unmergeButton);
 			return panel;
@@ -326,6 +328,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 					profile.mergeSegments(nSeg1, nSeg2);
 					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
 				}
+				
+				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
 			} else {
 				JOptionPane.showMessageDialog(this, "Cannot merge segments across core border tags");
 			}
@@ -367,7 +371,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				profile.unmergeSegment(nSeg1);
 				n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
 			}
-			
+			fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
 		}
 		
 		public void update(List<AnalysisDataset> list){

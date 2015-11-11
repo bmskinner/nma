@@ -48,7 +48,8 @@ public class InterfaceEvent extends EventObject {
 		UPDATE_POPULATIONS 	("Update populations"),
 		UPDATE_PANELS		("Update panels"),
 		REFRESH_POPULATIONS ("Refresh population panel datasets"),
-		SAVE_ROOT			("Save root datasets");
+		SAVE_ROOT			("Save root datasets"),
+		RECACHE_CHARTS		("Recache charts");
 		
 		private final String name;
 		

@@ -21,6 +21,9 @@ package gui.tabs;
 import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
+import gui.InterfaceEvent;
+import gui.InterfaceEvent.InterfaceMethod;
+import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 
@@ -47,6 +50,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	private static final long serialVersionUID = 1L;
 	private List<Object> listeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
+	private List<Object> interfaceListeners = new ArrayList<Object>();
 	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
 	// The chart cache holds rendered charts for all selected options, until a change is made to a dataset
@@ -65,6 +69,15 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	}
 	
 	/**
+	 * Remove all charts from the cache so they will be recalculated
+	 * @param list
+	 */
+	public void refreshChartCache(){
+		programLogger.log(Level.FINEST, "Refreshing chart cache");
+		this.getChartCache().refresh();
+	}
+	
+	/**
 	 * Remove all charts from the cache containing datasets in
 	 * the given list, so they will be recalculated
 	 * @param list
@@ -76,6 +89,15 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	
 	public TableCache getTableCache(){
 		return this.tableCache;
+	}
+	
+	/**
+	 * Remove all charts from the cache so they will be recalculated
+	 * @param list
+	 */
+	public void refreshTableCache(){
+		programLogger.log(Level.FINEST, "Refreshing table cache");
+		this.getTableCache().refresh();
 	}
 	
 	/**
@@ -102,6 +124,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
     
     public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
     	datasetListeners.remove( l );
+    }
+    
+    public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
+    	interfaceListeners.add( l );
+    }
+    
+    public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
+    	interfaceListeners.remove( l );
     }
         
     
@@ -141,6 +171,15 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
         Iterator<Object> iterator = datasetListeners.iterator();
         while( iterator.hasNext() ) {
             ( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
+        }
+    }
+    
+    protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
+    	
+    	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
+        Iterator<Object> iterator = interfaceListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
         }
     }
 

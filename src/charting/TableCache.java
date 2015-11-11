@@ -53,6 +53,13 @@ public class TableCache {
 	}
 	
 	/**
+	 * Remove all cached charts
+	 */
+	public void refresh(){
+		this.purge();
+	}
+	
+	/**
 	 * Remove caches containing any of the given datasets.
 	 * These will be recalculated at next call
 	 * @param list

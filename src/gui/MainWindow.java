@@ -280,6 +280,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			segmentsDetailPanel = new SegmentsDetailPanel(programLogger);
 			detailPanels.add(segmentsDetailPanel);
 			segmentsDetailPanel.addDatasetEventListener(this);
+			segmentsDetailPanel.addInterfaceEventListener(this);
 			tabbedPane.addTab("Segments", null, segmentsDetailPanel, null);
 
 			//---------------
@@ -1800,6 +1801,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 	@Override
 	public void datasetEventReceived(DatasetEvent event) {
+		programLogger.log(Level.FINEST, "Heard dataset event: "+event.method().toString());
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
 				
@@ -1901,6 +1903,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				for(DetailPanel panel : detailPanels){
 					panel.refreshChartCache(list);
 				}
+				this.updatePanels(list);
 			}
 			
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
@@ -1916,6 +1919,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public void interfaceEventReceived(InterfaceEvent event) {
 		
 		InterfaceMethod method = event.method();
+		programLogger.log(Level.FINEST, "Heard interface event: "+event.method().toString());
 		
 		switch(method){
 		
@@ -1937,6 +1941,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			this.populationsPanel.update();
 			break;
 			
+		case RECACHE_CHARTS:
+			for(DetailPanel panel : this.detailPanels){
+				panel.refreshChartCache();
+				panel.refreshTableCache();
+			}
+			this.updatePanels(populationsPanel.getSelectedDatasets());
+			break;
 		default:
 			break;
 

@@ -58,6 +58,10 @@ public class ChartCache {
 		optionsMap = new HashMap<ChartOptions, UUID>();
 	}
 	
+	public void refresh(){
+		this.purge();
+	}
+	
 	/**
 	 * Remove caches containing any of the given datasets.
 	 * These will be recalculated at next call
