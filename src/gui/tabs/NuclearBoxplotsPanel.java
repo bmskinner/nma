@@ -375,7 +375,12 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 							for(Cell c : collection.getCells()){
 								Nucleus n = c.getNucleus();
-								double value = n.getStatistic(stat, scale);
+								double value = 0;
+								try {
+									value = n.getStatistic(stat, scale);
+								} catch (Exception e1) {
+									programLogger.log(Level.SEVERE, "Cannot calculate statistic", e1);
+								}
 
 								// variability must be calculated from the collection, not the nucleus
 								if(stat.equals(NucleusStatistic.VARIABILITY)){

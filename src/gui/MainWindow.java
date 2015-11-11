@@ -154,7 +154,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			// Create the consensus chart
 			//---------------
 			populationsPanel = new PopulationsPanel(programLogger);
-			detailPanels.add(populationsPanel);
+//			detailPanels.add(populationsPanel);
 			populationsPanel.addSignalChangeListener(this);
 			populationsPanel.addDatasetEventListener(this);
 			

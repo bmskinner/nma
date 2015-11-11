@@ -43,8 +43,9 @@ public class CellDatasetCreator {
 	 * Create a table of stats for the given cell.
 	 * @param cell the cell
 	 * @return a table model
+	 * @throws Exception 
 	 */
-	public static TableModel createCellInfoTable(Cell cell){
+	public static TableModel createCellInfoTable(Cell cell) throws Exception{
 
 		DefaultTableModel model = new DefaultTableModel();
 		

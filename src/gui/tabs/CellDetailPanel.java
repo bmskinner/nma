@@ -92,48 +92,54 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected OutlinePanel 	 	outlinePanel; 		// the outline of the cell and detected objects
 	protected CellStatsPanel 	cellStatsPanel;		// the stats table
 	protected SegmentStatsPanel segmentStatsPanel;	// details of the individual segments
-		
+
 	public CellDetailPanel(Logger programLogger) {
 
 		super(programLogger);
-		this.setLayout(new GridBagLayout());
-		
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill = GridBagConstraints.BOTH;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.gridheight = 1;
-		constraints.gridwidth = 1;
-		constraints.weightx = 0.3;
-		constraints.weighty = 1;
-		constraints.anchor = GridBagConstraints.CENTER;
 
-		cellsListPanel = new CellsListPanel();
-		this.add(cellsListPanel, constraints);
-		
-		// make the chart for each nucleus
-		JPanel centrePanel = createCentrePanel();
-		
-		constraints.gridx = 1;
-		constraints.gridwidth = 2;
-		constraints.weightx = 1;
-		this.add(centrePanel, constraints);
-		
-			
-		outlinePanel = new OutlinePanel();
-		constraints.gridx = 3;
-		this.add(outlinePanel, constraints);
+		try{
+			this.setLayout(new GridBagLayout());
+
+			GridBagConstraints constraints = new GridBagConstraints();
+			constraints.fill = GridBagConstraints.BOTH;
+			constraints.gridx = 0;
+			constraints.gridy = 0;
+			constraints.gridheight = 1;
+			constraints.gridwidth = 1;
+			constraints.weightx = 0.3;
+			constraints.weighty = 1;
+			constraints.anchor = GridBagConstraints.CENTER;
+
+			cellsListPanel = new CellsListPanel();
+			this.add(cellsListPanel, constraints);
+
+			// make the chart for each nucleus
+			JPanel centrePanel = createCentrePanel();
+
+			constraints.gridx = 1;
+			constraints.gridwidth = 2;
+			constraints.weightx = 1;
+			this.add(centrePanel, constraints);
 
 
-		this.validate();;
-		
+			outlinePanel = new OutlinePanel();
+			constraints.gridx = 3;
+			this.add(outlinePanel, constraints);
+
+
+			this.validate();
+		} catch(Exception e){
+			programLogger.log(Level.SEVERE, "Error creating cell detail panel", e);
+		}
+
 	}
-	
+
 	/**
 	 * Create the central column panel
 	 * @return
+	 * @throws Exception 
 	 */
-	private JPanel createCentrePanel(){
+	private JPanel createCentrePanel() throws Exception{
 		JPanel centrePanel = new JPanel();
 		centrePanel.setLayout(new BoxLayout(centrePanel, BoxLayout.Y_AXIS));
 		
@@ -163,7 +169,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 * @param list the datsets
 	 */
 	public void updateList(final List<AnalysisDataset> list){
-		programLogger.log(Level.FINE, "Updating cell detail panel");
+//		programLogger.log(Level.FINE, "Updating cell detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				
@@ -629,7 +635,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		private JScrollPane scrollPane;
 		
-		protected CellStatsPanel(){
+		protected CellStatsPanel() throws Exception{
 			
 			this.setLayout(new BorderLayout());
 			
@@ -798,11 +804,16 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 		protected void update(Cell cell){
 			
-			if(cell==null){
-				table.setModel(CellDatasetCreator.createCellInfoTable(null));
-			} else {
-				table.setModel(CellDatasetCreator.createCellInfoTable(cell));
-				table.getColumnModel().getColumn(1).setCellRenderer(new StatsTableCellRenderer());
+			try{
+
+				if(cell==null){
+					table.setModel(CellDatasetCreator.createCellInfoTable(null));
+				} else {
+					table.setModel(CellDatasetCreator.createCellInfoTable(cell));
+					table.getColumnModel().getColumn(1).setCellRenderer(new StatsTableCellRenderer());
+				}
+			} catch(Exception e){
+				programLogger.log(Level.SEVERE, "Error updating cell", e);
 			}
 		}
 	}
