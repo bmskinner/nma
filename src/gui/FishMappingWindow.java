@@ -483,10 +483,10 @@ public class FishMappingWindow extends JDialog {
 				} else { // end of analysis; make a collection from all the nuclei selected
 					for(Cell n : FishMappingWindow.this.preFISHDataset.getCollection().getCells()){
 						if (FishMappingWindow.this.selectedNucleiLeft.contains(n.getId())){
-							FishMappingWindow.this.subCollectionLeft.addCell(n);
+							FishMappingWindow.this.subCollectionLeft.addCell(new Cell(n));
 						}
 						if (FishMappingWindow.this.selectedNucleiRight.contains(n.getId())){
-							FishMappingWindow.this.subCollectionRight.addCell(n);
+							FishMappingWindow.this.subCollectionRight.addCell( new Cell (n));
 						}
 
 					}

@@ -101,7 +101,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 						r.getNucleusType());
 
 				for(Cell c : list){
-					listCollection.addCell( c );
+					listCollection.addCell( new Cell(c) );
 				}
 				signalPopulations.add(listCollection);
 
@@ -115,7 +115,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 							r.getNucleusType());
 
 					for(Cell c : notList){
-						notListCollection.addCell( c );
+						notListCollection.addCell( new Cell(c) );
 					}
 					signalPopulations.add(notListCollection);
 				}

@@ -398,7 +398,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 								}
 
 								if(value>= lower && value<= upper){
-									subCollection.addCell(c);
+									subCollection.addCell(new Cell(c));
 								}
 							}
 
