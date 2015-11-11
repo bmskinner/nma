@@ -230,7 +230,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 					// should never be null
 					if(collection.getCell(id)!=null){
-						cluster.addCell(collection.getCell(id));
+						cluster.addCell(new Cell (collection.getCell(id)));
 					} else {
 						logger.log(Level.SEVERE, "Error: cell with ID "+id+" is not found");
 					}
