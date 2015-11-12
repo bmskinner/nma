@@ -25,7 +25,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,6 +60,15 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	
 	private JTextField				console = new JTextField();
 	
+	private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
+	
+	{
+		commandMap.put("list datasets", InterfaceMethod.LIST_DATASETS);
+		commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
+		commandMap.put("unfuck", InterfaceMethod.RESEGMENT_SELECTED_DATASET);
+		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
+	}
+	
 //	private Logger programLogger;
 
 	public LogPanel(Logger programLogger) {
@@ -83,7 +94,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		textArea.setBackground(SystemColor.menu);
 		textArea.setEditable(false);
 		textArea.setRows(9);
-		textArea.setColumns(40);
+		textArea.setColumns(30);
 		
 		
 		panel.add(scrollPane, BorderLayout.CENTER);
@@ -174,18 +185,11 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	
 	private void runCommand(String command){
 		
-		if(command.equals("list datasets")){
-			fireInterfaceEvent(InterfaceMethod.LIST_DATASETS);
-		}
-		
-		if(command.equals("list selected")){
-			fireInterfaceEvent(InterfaceMethod.LIST_SELECTED_DATASETS);
-		}
-		
-		if(command.equals("unfuck")){
-			fireInterfaceEvent(InterfaceMethod.RESEGMENT_SELECTED_DATASET);
-		}
-		
+		if(commandMap.containsKey(command)){
+			fireInterfaceEvent(commandMap.get(command));
+		} else {
+			programLogger.log(Level.INFO, "Command not recognised");
+		}		
 	}
 
 	@Override

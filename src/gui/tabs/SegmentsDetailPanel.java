@@ -75,8 +75,6 @@ import components.nuclei.Nucleus;
 public class SegmentsDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
-
-	protected AnalysisDataset activeDataset;
 		
 	private SegmentStatsPanel 		segmentStatsPanel;		// Hold the start and end points of each segment
 	private SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
@@ -174,7 +172,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 				int segment = Integer.valueOf(colName.replace("Seg_", ""));
 
-				ColourSwatch swatch = activeDataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : activeDataset.getSwatch();
+				ColourSwatch swatch = activeDataset().getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : activeDataset().getSwatch();
 				colour = swatch.color(segment);
 				programLogger.log(Level.FINEST, "SegmentTableCellRenderer for segment "+segment+" uses color "+colour);
 
@@ -266,7 +264,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 		private void mergeSegments(String segName1, String segName2) throws Exception {
 			
-			CellCollection collection = activeDataset.getCollection();
+			CellCollection collection = activeDataset().getCollection();
 			
 			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
 					.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
@@ -338,7 +336,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		}
 		
 		private void unmergeSegments(String segName) throws Exception {
-			CellCollection collection = activeDataset.getCollection();
+			CellCollection collection = activeDataset().getCollection();
 			
 			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 			
@@ -438,7 +436,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			try {
-				CellCollection collection = activeDataset.getCollection();
+				CellCollection collection = activeDataset().getCollection();
 				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 				List<String> names = new ArrayList<String>();
 
@@ -466,7 +464,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						mergeSegments(segs[0], segs[1]);
 
 						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-						list.add(activeDataset);
+						list.add(activeDataset());
 						SegmentsDetailPanel.this.update(list);
 						SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
 					}
@@ -500,7 +498,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						unmergeSegments(mergeOption);
 
 						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-						list.add(activeDataset);
+						list.add(activeDataset());
 						SegmentsDetailPanel.this.update(list);
 						SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
 					}
@@ -663,7 +661,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						// double click
 						if (e.getClickCount() == 2) {
 							
-							CellCollection collection = activeDataset.getCollection();
+							CellCollection collection = activeDataset().getCollection();
 							if(columnName.startsWith("Seg_")){
 								
 								try {
@@ -769,8 +767,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 					if(list.size()==1){
 						programLogger.log(Level.FINEST, "Single dataset selected");
-						activeDataset = list.get(0);
-						TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset, scale);
+						TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset(), scale);
 						table.setModel(model);
 						Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
 

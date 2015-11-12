@@ -109,6 +109,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	 */
 	public void update(final List<AnalysisDataset> list) {
 		programLogger.log(Level.FINE, "Updating Wilcoxon panel");
+//		Thread thr = new Thread(){
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				try{
@@ -146,6 +147,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 					programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
 				}
 			}});
+//			thr.start();
 	}
 	
 	private void setRenderer(JTable table){

@@ -24,7 +24,6 @@ import gui.DatasetEvent.DatasetMethod;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,21 +34,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import components.ClusterGroup;
 import analysis.AnalysisDataset;
 import charting.datasets.NucleusTableDatasetCreator;
 
+@SuppressWarnings("serial")
 public class ClusterDetailPanel extends DetailPanel {
-
-	private static final long serialVersionUID = 1L;
-	
-	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-		
+			
 	private ClustersPanel clusterPanel;
 
 	public ClusterDetailPanel(Logger programLogger) {
@@ -74,24 +68,19 @@ public class ClusterDetailPanel extends DetailPanel {
 		
 	}
 		
-	@SuppressWarnings("serial")
 	private class ClustersPanel extends JPanel {
 		
 		private JButton 	clusterButton	= new JButton("Cluster population");
 		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
 		private JPanel		statusPanel		= new JPanel(new BorderLayout());
-//		private TreePane 	treeViewer; // from jebl, extends JPanel
-//		private JTextArea		treeLabel 	= new JTextArea("");
+
 		
 		private JPanel tablesPanel;
 		private JTable clusterDetailsTable; 
 		
 		public ClustersPanel(){
 			this.setLayout(new BorderLayout());
-//			treeView = new JScrollPane(tree);
-//			this.add(treeView, BorderLayout.CENTER);
-//			treeView.setVisible(false);
-			
+		
 			
 			tablesPanel = new JPanel();
 			tablesPanel.setLayout(new BoxLayout(tablesPanel, BoxLayout.Y_AXIS));
@@ -110,15 +99,11 @@ public class ClusterDetailPanel extends DetailPanel {
 			clusterDetailPanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
 			
 			tablesPanel.add(clusterDetailPanel);
-//			this.add(clusterDetailsTable, BorderLayout.SOUTH);
 				
 			this.add(tablesPanel, BorderLayout.CENTER);
 			statusPanel = makeStatusPanel();
 			this.add(statusPanel, BorderLayout.NORTH);
-			
-//			treeViewer = new TreePane();
-//			treeLabel.setEditable(true);
-//			this.add(treeLabel, BorderLayout.SOUTH);
+
 
 		}
 				

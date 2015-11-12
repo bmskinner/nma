@@ -995,7 +995,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	}
 
 	@Override
-	public void datasetEventReceived(DatasetEvent event) {
+	public void datasetEventReceived(final DatasetEvent event) {
 		programLogger.log(Level.FINEST, "Heard dataset event: "+event.method().toString());
 		final List<AnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
@@ -1025,7 +1025,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
 				
 				
-				final AnalysisDataset target = list.get(0);
+				final AnalysisDataset target = event.firstDataset();
 				final AnalysisDataset source = event.secondaryDataset();
 				
 				SwingUtilities.invokeLater(new Runnable(){
@@ -1040,7 +1040,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						
 			if(event.method().equals(DatasetMethod.CLUSTER)){
 				programLogger.log(Level.INFO, "Clustering dataset");
-				new ClusterAnalysisAction(list.get(0), this);
+				new ClusterAnalysisAction(event.firstDataset(), this);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
@@ -1060,14 +1060,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						
 						final CountDownLatch latch = new CountDownLatch(1);
 						programLogger.log(Level.FINEST, "Created latch: "+latch.getCount());
-						new RefoldNucleusAction(list.get(0), MainWindow.this, latch);
-//						new RefoldNucleusAction(list.get(0), latch);
+						new RefoldNucleusAction(event.firstDataset(), MainWindow.this, latch);
+
 						programLogger.log(Level.FINEST, "Running refolding");
 						try {
 							latch.await();
 							programLogger.log(Level.FINEST, "Latch counted down: "+latch.getCount());
-							programLogger.log(Level.FINEST, "Latch counted on EDT: "+SwingUtilities.isEventDispatchThread());
-							
 						} catch (InterruptedException e) {
 							programLogger.log(Level.SEVERE, "Interruption to thread", e);
 						}
@@ -1077,7 +1075,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			if(event.method().equals(DatasetMethod.SELECT_DATASETS)){
-				this.populationsPanel.selectDataset(list.get(0));
+				this.populationsPanel.selectDataset(event.firstDataset());
 			}
 			
 			if(event.method().equals(DatasetMethod.EXTRACT_SOURCE)){
@@ -1098,7 +1096,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
-				populationsPanel.addDataset(event.getDatasets().get(0));
+				populationsPanel.addDataset(event.firstDataset());
 			}
 			
 		}
@@ -1148,9 +1146,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			break;
 		case RESEGMENT_SELECTED_DATASET:
 				programLogger.log(Level.INFO, "Resegmenting selected datasets");
-				final int flag = 0;
+				final int flag = CURVE_REFOLD; // ensure consensus is replaced
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
+						for(DetailPanel panel : detailPanels){
+							panel.refreshChartCache();
+							panel.refreshTableCache();
+						}
 						List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
 						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
 

@@ -45,7 +45,7 @@ import analysis.AnalysisDataset;
  * @author bms41
  *
  */
-public abstract class DetailPanel extends JPanel implements TabPanel{
+public abstract class DetailPanel extends JPanel implements TabPanel {
 	
 	private static final long serialVersionUID = 1L;
 	private List<Object> listeners = new ArrayList<Object>();
@@ -62,6 +62,16 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
 	
 	public DetailPanel(Logger programLogger){
 		this.programLogger = programLogger;
+	}
+	
+	/**
+	 * Fetch the currently active dataset for the panel.
+	 * Use when only one dataset is expected to be visible;
+	 * this simply accesses the first dataset in the list provided
+	 * @return
+	 */
+	public AnalysisDataset activeDataset(){
+		return list.get(0);
 	}
 	
 	public ChartCache getChartCache(){
@@ -142,20 +152,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel{
     public void status(String message){
     	fireSignalChangeEvent("Status_"+message);
     }
-    
-    /**
-     * Log an error to the main window
-     * @param message
-     * @param e
-     */
-//    public void error(String message, Throwable e){
-//    	programLogger.log(Level.SEVERE, message, e);
-////    	log(message+": "+e.getMessage());
-////		for(StackTraceElement e1 : e.getStackTrace()){
-////			log(e1.toString());
-////		}
-//    }
-	
+    	
     protected synchronized void fireSignalChangeEvent(String message) {
     	
         SignalChangeEvent event = new SignalChangeEvent( this, message, this.getClass().getSimpleName());

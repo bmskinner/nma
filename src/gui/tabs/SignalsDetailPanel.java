@@ -84,9 +84,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	private ShellsPanel		shellsPanel;
 
 	private JTabbedPane signalsTabPane;
-	
-	private List<AnalysisDataset> list;
-	private AnalysisDataset activeDataset;
 
 	/**
 	 * Create the panel.
@@ -132,14 +129,10 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
 	
 	public void update(final List<AnalysisDataset> list){
+		this.list = list;
 		programLogger.log(Level.FINE, "Updating signals detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-			
-				SignalsDetailPanel.this.list = list;
-				if(list.size()==1){
-					activeDataset = list.get(0);
-				}
 				
 				shellsPanel.update(list);
 				programLogger.log(Level.FINEST, "Updated shells panel");
@@ -205,7 +198,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 					// we want to colour this cell preemptively
 					// get the signal group from the table
 					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					colour = activeDataset.getSignalGroupColour(Integer.valueOf(groupString));
+					colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
 //					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
 				}
 			}
@@ -279,7 +272,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     			                     oldColour);
     						
     						if(newColor != null){
-    							activeDataset.setSignalGroupColour(signalGroup, newColor);
+    							activeDataset().setSignalGroupColour(signalGroup, newColor);
     							SignalsDetailPanel.this.update(list);
     							fireSignalChangeEvent("SignalColourUpdate");
     						}
@@ -486,7 +479,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 								
 				// make a new panel for the active dataset
 				consensusAndCheckboxPanel.remove(checkboxPanel);
-				checkboxPanel = createSignalCheckboxPanel(activeDataset);
+				checkboxPanel = createSignalCheckboxPanel(activeDataset());
 	
 				// add this new panel
 				consensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
@@ -502,12 +495,12 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
     			if(list.size()==1){
     								
-    				CellCollection collection = activeDataset.getCollection();
+    				CellCollection collection = activeDataset().getCollection();
 
     				if(collection.hasConsensusNucleus()){ // if a refold is available
     					
-    					XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(activeDataset);
-    					JFreeChart chart = MorphologyChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset, signalCoMs);
+    					XYDataset signalCoMs = NuclearSignalDatasetCreator.createSignalCoMDataset(activeDataset());
+    					JFreeChart chart = MorphologyChartFactory.makeSignalCoMNucleusOutlineChart(activeDataset(), signalCoMs);
     					chartPanel.setChart(chart);
     					chartPanel.restoreAutoBounds();
     				} else { // no consensus to display
@@ -561,12 +554,12 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	
     	private void updateSignalAngleHistogram(List<AnalysisDataset> list){
     		
-    		JFreeChart chart = HistogramChartFactory.createSignalAngleHistogram(null, activeDataset);
+    		JFreeChart chart = HistogramChartFactory.createSignalAngleHistogram(null, activeDataset());
     		try {
     			HistogramDataset ds = NuclearSignalDatasetCreator.createSignalAngleHistogramDataset(list);
 
     			if(ds.getSeriesCount()>0){
-    				chart = HistogramChartFactory.createSignalAngleHistogram(ds, activeDataset);
+    				chart = HistogramChartFactory.createSignalAngleHistogram(ds, activeDataset());
     			}
 
     		} catch (Exception e) {
@@ -576,12 +569,12 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	}
 
     	private void updateSignalDistanceHistogram(List<AnalysisDataset> list){
-    		JFreeChart chart = HistogramChartFactory.createSignalDistanceHistogram(null, activeDataset);
+    		JFreeChart chart = HistogramChartFactory.createSignalDistanceHistogram(null, activeDataset());
     		try {
     			HistogramDataset ds = NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(list);
 
     			if(ds.getSeriesCount()>0){
-    				chart = HistogramChartFactory.createSignalDistanceHistogram(ds, activeDataset);
+    				chart = HistogramChartFactory.createSignalDistanceHistogram(ds, activeDataset());
     			}
 
     		} catch (Exception e) {

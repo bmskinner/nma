@@ -65,8 +65,32 @@ public class DatasetEvent extends EventObject {
 		return method;
 	}
 	
+	/**
+	 * Get the datasets in the event
+	 * @return
+	 */
 	public List<AnalysisDataset> getDatasets(){
 		return list;
+	}
+	
+	/**
+	 * Get the first dataset in the list. Use if only
+	 * one dataset is present.
+	 * @return
+	 */
+	public AnalysisDataset firstDataset(){
+		return list.get(0);
+	}
+	
+	/**
+	 * Check if any datasets are present
+	 * @return
+	 */
+	public boolean hasDatasets(){
+		if(list==null || list.isEmpty()){
+			return false;
+		}
+		return true;
 	}
 	
 	/**

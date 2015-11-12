@@ -41,7 +41,6 @@ public class MergesDetailPanel extends DetailPanel {
 	
 	private JTable		mergeSources;
 	private JButton		getSourceButton = new JButton("Recover source");
-	private AnalysisDataset activeDataset;
 	
 	public MergesDetailPanel(Logger programLogger){
 		super(programLogger);
@@ -69,8 +68,8 @@ public class MergesDetailPanel extends DetailPanel {
 				String name = (String) mergeSources.getModel().getValueAt(mergeSources.getSelectedRow(), 0);
 				
 				// get the dataset with the selected name
-				for( UUID id : activeDataset.getMergeSources()){
-					AnalysisDataset mergeSource = activeDataset.getMergeSource(id);
+				for( UUID id : activeDataset().getMergeSources()){
+					AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
 					if(mergeSource.getName().equals(name)){
 						list.add(mergeSource);
 					}
@@ -85,22 +84,21 @@ public class MergesDetailPanel extends DetailPanel {
 	}
 	
 	public void update(List<AnalysisDataset> list){
+		this.list = list;
 		try {
 			programLogger.log(Level.FINEST, "Updating merges panel");
 			getSourceButton.setVisible(false);
 			if(list.size()==1){
-				AnalysisDataset dataset = list.get(0);
-				activeDataset = dataset;
 
-				if(dataset.hasMergeSources()){
+				if(activeDataset().hasMergeSources()){
 
 					DefaultTableModel model = new DefaultTableModel();
 
 					Vector<Object> names 	= new Vector<Object>();
 					Vector<Object> nuclei 	= new Vector<Object>();
 
-					for( UUID id : dataset.getMergeSources()){
-						AnalysisDataset mergeSource = dataset.getMergeSource(id);
+					for( UUID id : activeDataset().getMergeSources()){
+						AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
 						names.add(mergeSource.getName());
 						nuclei.add(mergeSource.getCollection().getNucleusCount());
 					}
@@ -114,7 +112,7 @@ public class MergesDetailPanel extends DetailPanel {
 					try{
 						mergeSources.setModel(makeBlankTable());
 					} catch (Exception e){
-						//					TODO: fix error
+						programLogger.log(Level.SEVERE, "Error updating merges panel", e);
 					}
 				}
 			} else { // more than one dataset selected

@@ -83,9 +83,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 	private static final long serialVersionUID = 1L;
 	
-	protected AnalysisDataset activeDataset;	
 	private Cell activeCell;
-	private Logger programLogger;
 	
 	protected CellsListPanel	cellsListPanel;		// the list of cells in the active dataset
 	protected ProfilePanel	 	profilePanel; 		// the nucleus angle profile
@@ -176,10 +174,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				CellDetailPanel.this.list = list;
 				
 				if(list.size()==1){
-
-					activeDataset = list.get(0);
 					
-					cellsListPanel.updateDataset(activeDataset);
+					cellsListPanel.updateDataset( activeDataset()  );
 					programLogger.log(Level.FINEST, "Updated cell list panel");
 					updateCell(activeCell);
 					programLogger.log(Level.FINEST, "Updated active cell panel");
@@ -230,7 +226,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					// we want to colour this cell preemptively
 					// get the signal group from the table
 					String groupString = table.getModel().getValueAt(row+1, 1).toString();
-					colour = activeDataset.getSignalGroupColour(Integer.valueOf(groupString));
+					colour = activeDataset().getSignalGroupColour(Integer.valueOf(groupString));
 //					colour = ColourSelecter.getSignalColour(  Integer.valueOf(groupString)-1   ); 
 				}
 			}
@@ -263,7 +259,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 				int segment = Integer.valueOf(colName.replace("Seg_", ""));
 				
-				colour = activeDataset.getSwatch().color(segment);
+				colour = activeDataset().getSwatch().color(segment);
 //				colour = ColourSelecter.getOptimisedColor(segment);
 			}
 			
@@ -328,14 +324,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 							
 							// delete the cell
-							Cell cell = activeDataset.getCollection().getCell(cellID);
-							activeDataset.getCollection().removeCell(cell);
+							Cell cell = activeDataset().getCollection().getCell(cellID);
+							activeDataset().getCollection().removeCell(cell);
 							node.removeFromParent();
 							DefaultTreeModel model = (DefaultTreeModel) tree.getModel();
 							model.reload();
 							
 							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-							list.add(activeDataset);
+							list.add(activeDataset());
 							
 							try {
 								CellDetailPanel.this.fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
@@ -469,7 +465,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					Nucleus nucleus = cell.getNucleus();
 
 					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
-					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset.getSwatch());
+					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset().getSwatch());
 
 					profileChartPanel.setChart(chart);
 					
@@ -615,7 +611,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				if(cell==null){
 					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				} else {
-					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset);
+					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset());
 				}
 				panel.setChart(chart);
 				if(cell!=null){
@@ -672,7 +668,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					                     oldColour);
 								
 								if(newColor != null){
-									activeDataset.setSignalGroupColour(signalGroup, newColor);
+									activeDataset().setSignalGroupColour(signalGroup, newColor);
 									updateCell(activeCell);
 									fireSignalChangeEvent("SignalColourUpdate");
 								}
@@ -714,7 +710,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 								if(applyAllOption==0){ // button at index 1
 //								if(applyAllOption==JOptionPane.YES_OPTION){
 									
-									for(Nucleus n : activeDataset.getCollection().getNuclei()){
+									for(Nucleus n : activeDataset().getCollection().getNuclei()){
 										n.setScale(scale);
 									}
 									
@@ -728,7 +724,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						
 						// Adjust the point position of tags
 						Nucleus n = activeCell.getNucleus();
-						BorderTag tag = activeDataset.getCollection().getNucleusType().getTagFromName(rowName);
+						BorderTag tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
 						if(n.hasBorderTag(tag)){
 							
 							String pointType = rowName;
@@ -847,92 +843,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						// double click
 						if (e.getClickCount() == 2) {
 							
-							Nucleus n = activeCell.getNucleus();
-							
-							if(columnName.startsWith("Seg_")){
-								
-								try {
-									SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
-									NucleusBorderSegment seg = profile.getSegment(columnName);
-									
-									if(rowName.equals("Start index")){
-//										SpinnerNumberModel sModel 
-//										= new SpinnerNumberModel(seg.getStartIndex(), 
-//												seg.prevSegment().getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
-//												seg.getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
-//												1);
-										SpinnerNumberModel sModel 
-										= new SpinnerNumberModel(seg.getStartIndex(), 
-												0, 
-												n.getLength(),
-												1);
-										JSpinner spinner = new JSpinner(sModel);
-
-										int option = JOptionPane.showOptionDialog(null, 
-												spinner, 
-												"Choose the new segment start index", 
-												JOptionPane.OK_CANCEL_OPTION, 
-												JOptionPane.QUESTION_MESSAGE, null, null, null);
-										if (option == JOptionPane.CANCEL_OPTION) {
-											// user hit cancel
-										} else if (option == JOptionPane.OK_OPTION)	{
-											
-											int index = (Integer) spinner.getModel().getValue();
-											if(profile.update(seg, index, seg.getEndIndex())){
-//											if(seg.update(index, seg.getEndIndex())){
-												n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
-												updateCell(activeCell);
-											} else {
-												programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-											}
-											
-
-										}
-									}
-									
-									if(rowName.equals("End index")){
-//										SpinnerNumberModel sModel 
-//										= new SpinnerNumberModel(seg.getEndIndex(), 
-//												seg.getStartIndex()+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH, 
-//												seg.nextSegment().getEndIndex()-NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH,
-//												1);
-										SpinnerNumberModel sModel 
-										= new SpinnerNumberModel(seg.getEndIndex(), 
-												0, 
-												n.getLength(),
-												1);
-										JSpinner spinner = new JSpinner(sModel);
-
-										int option = JOptionPane.showOptionDialog(null, 
-												spinner, 
-												"Choose the new segment end index", 
-												JOptionPane.OK_CANCEL_OPTION, 
-												JOptionPane.QUESTION_MESSAGE, null, null, null);
-										if (option == JOptionPane.CANCEL_OPTION) {
-											// user hit cancel
-										} else if (option == JOptionPane.OK_OPTION)	{
-											
-											
-											
-											int index = (Integer) spinner.getModel().getValue();
-											if(profile.update(seg, seg.getStartIndex(), index)){
-//											if(seg.update(seg.getStartIndex(), index)){
-												n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
-												updateCell(activeCell);
-											} else {
-												programLogger.log(Level.INFO, "Updating "+seg.getEndIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-											}
-											
-
-										}
-									}
-									
-									
-									
-								} catch (Exception e1) {
-									programLogger.log(Level.SEVERE, "Error getting segment", e1);
-								}
-							}
+//							// Change segment start and endpoint
+							updateSegment(rowName, columnName);
 						}
 					}
 				});
@@ -945,6 +857,86 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			scrollPane.setColumnHeaderView(table.getTableHeader());
 			
 			this.add(scrollPane, BorderLayout.CENTER);
+		}
+		
+		/**
+		 * Call the appropriate update options for the value at the row and column
+		 * @param rowName the field name
+		 * @param columnName the segment name
+		 */
+		private void updateSegment(String rowName, String columnName){
+			// Change segment start and endpoint
+			Nucleus n = activeCell.getNucleus();
+			
+			if(columnName.startsWith("Seg_")){
+				
+				try {
+					
+					if(rowName.equals("Start index")){
+						
+						int option = getSegmentUpdateOptions(true, columnName, n);
+						programLogger.log(Level.INFO, "Segment start index update: "+option);
+					}
+					
+					if(rowName.equals("End index")){
+						int option = getSegmentUpdateOptions(false, columnName, n);
+						programLogger.log(Level.INFO, "Segment end index update: "+option);
+					}
+					
+					
+				} catch (Exception e1) {
+					programLogger.log(Level.SEVERE, "Error getting segment", e1);
+				}
+			}
+		}
+		
+		/**
+		 * Update the start and end of a segment via a JOptionPane
+		 * @param start is this the start or end of a segment
+		 * @param columnName the column (segment) name
+		 * @param n the nucleus to update
+		 * @return the result of the option pane
+		 * @throws Exception
+		 */
+		private int getSegmentUpdateOptions(boolean start, String columnName, Nucleus n) throws Exception{
+
+			SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+			NucleusBorderSegment seg = profile.getSegment(columnName);
+			int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
+			SpinnerNumberModel sModel = new SpinnerNumberModel(startPos, 
+					0, 
+					n.getLength(),
+					1);
+			JSpinner spinner = new JSpinner(sModel);
+
+			String type = start ? "start" : "end";
+			int option = JOptionPane.showOptionDialog(null, 
+					spinner, 
+					"Choose the new segment "+type+" index", 
+					JOptionPane.OK_CANCEL_OPTION, 
+					JOptionPane.QUESTION_MESSAGE, null, null, null);
+			
+			// Carry out the update if selected
+			if (option == JOptionPane.CANCEL_OPTION) {
+				// user hit cancel
+			} else if (option == JOptionPane.OK_OPTION)	{
+				
+				int index = (Integer) spinner.getModel().getValue();
+				
+				int newStart = start ? index : seg.getStartIndex();
+				int newEnd = start ? seg.getEndIndex() : index;
+				
+				
+				if(profile.update(seg, newStart, newEnd)){
+					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
+					updateCell(activeCell);
+				} else {
+					programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+				}
+			}
+			
+			
+			return option;
 		}
 		
 		protected void update(Cell cell){
@@ -984,7 +976,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		if(list.size()==1){	
 			try{
 				
-				activeCell = activeDataset.getCollection().getCell(cellID);
+				activeCell = activeDataset().getCollection().getCell(cellID);
 				updateCell(activeCell);
 			} catch (Exception e1){
 				programLogger.log(Level.SEVERE, "Error fetching cell", e1);

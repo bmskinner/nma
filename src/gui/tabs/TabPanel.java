@@ -25,6 +25,19 @@ import analysis.AnalysisDataset;
 
 public interface TabPanel {
 	
+	/**
+	 * Instruct the panel to update its display based on the
+	 * given datasets
+	 * @param list
+	 */
 	public void update(List<AnalysisDataset> list);
+	
+	/**
+	 * Fetch the currently active dataset for the panel.
+	 * Use when only one dataset is expected to be visible;
+	 * this simply accesses the first dataset in the list provided
+	 * @return
+	 */
+	public AnalysisDataset activeDataset();
 
 }
