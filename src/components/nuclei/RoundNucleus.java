@@ -115,7 +115,7 @@ public class RoundNucleus
 	protected File nucleusFolder; // the folder to store nucleus information
 	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date
 	
-	protected double scale; // allow conversion between pixels and SI units. The length of a pixel in metres
+	protected double scale = 1; // allow conversion between pixels and SI units. The length of a pixel in microns
 	
 	protected SignalCollection signalCollection = new SignalCollection();
 	
@@ -180,6 +180,8 @@ public class RoundNucleus
 				
 		this.setAngleProfileWindowSize(n.getAngleProfileWindowSize());
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
+		
+		this.setScale(n.getScale());
 		
 	}
 	
@@ -361,9 +363,6 @@ public class RoundNucleus
 			
 			case AREA:
 				result = this.getArea();
-				if(scale.equals(MeasurementScale.MICRONS)){
-					result = Utils.micronArea(result, this.getScale());
-				}
 				break;
 			case ASPECT:
 				result = this.getAspectRatio();
@@ -373,58 +372,35 @@ public class RoundNucleus
 				break;
 			case MAX_FERET:
 				result = this.getFeret();
-				if(scale.equals(MeasurementScale.MICRONS)){
-					result = Utils.micronLength(result, this.getScale());
-				}
 				break;
 			case MIN_DIAMETER:
 				result = this.getNarrowestDiameter();
-				if(scale.equals(MeasurementScale.MICRONS)){
-					result = Utils.micronLength(result, this.getScale());
-				}
 				break;
 			case PERIMETER:
 				result = this.getPerimeter();
-				if(scale.equals(MeasurementScale.MICRONS)){
-					result = Utils.micronLength(result, this.getScale());
-				}
 				break;
 			case VARIABILITY:
 				break;
-				
 			case BOUNDING_HEIGHT:
 				result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getHeight();
-				if(scale.equals(MeasurementScale.MICRONS)){
-					result = Utils.micronLength(result, this.getScale());
-				}
 				break;
-//				
-//				ConsensusNucleus testh = new ConsensusNucleus( this, NucleusType.ROUND);
-//				testh.rotatePointToBottom(testh.getBorderTag(BorderTag.ORIENTATION_POINT));
-//				FloatPolygon ph = Utils.createPolygon(testh);
-//				result = ph.getBounds().getHeight();
-//				if(scale.equals(MeasurementScale.MICRONS)){
-//					result = Utils.micronLength(result, this.getScale());
-//				}
-//				break;
 			case BOUNDING_WIDTH:
 				result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
-				if(scale.equals(MeasurementScale.MICRONS)){
-					result = Utils.micronLength(result, this.getScale());
-				}
 				break;
-//				ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
-//				testw.rotatePointToBottom(testw.getBorderTag(BorderTag.ORIENTATION_POINT));
-//				FloatPolygon pw = Utils.createPolygon(testw);
-//				result = pw.getBounds().getWidth();
-//				if(scale.equals(MeasurementScale.MICRONS)){
-//					result = Utils.micronLength(result, this.getScale());
-//				}
-//				break;
 			default:
 				break;
 		
 		}
+		
+//		if(stat.isDimensionless()){
+//			return result;
+//		} else {
+			result = stat.convert(result, this.getScale(), scale);
+			
+//			if(scale.equals(MeasurementScale.MICRONS)){
+//				result = Utils.micronLength(result, this.getScale());
+//			}
+//		}
 		return result;
 		
 	}

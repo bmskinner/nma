@@ -20,15 +20,16 @@ package charting.datasets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import charting.charts.HistogramChartOptions;
 import utility.Stats;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
-
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusStatistic;
@@ -36,18 +37,31 @@ import components.nuclear.NucleusStatistic;
 public class NuclearHistogramDatasetCreator {
 	
 	
-	public static HistogramDataset createNuclearStatsHistogramDataset(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws Exception {
+	public static HistogramDataset createNuclearStatsHistogramDataset(HistogramChartOptions options) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
-		for(AnalysisDataset dataset : list){
+		
+		if(options.hasLogger()){
+			options.getLogger().log(Level.FINEST, "Creating histogram dataset: "+options.getStat());
+		}
+		
+		for(AnalysisDataset dataset : options.getDatasets()){
+			
+			if(options.hasLogger()){
+				options.getLogger().log(Level.FINEST, "  Dataset: "+dataset.getName());
+			}
 			
 			CellCollection collection = dataset.getCollection();
 			
-			double[] values = findDatasetValues(dataset, stat, scale); 
+			double[] values = findDatasetValues(dataset, options.getStat(), options.getScale()); 
 						
-			String groupLabel = stat.toString();
+			String groupLabel = options.getStat().toString();
 						
 			double min = Stats.min(values);
 			double max = Stats.max(values);
+			
+			if(options.hasLogger()){
+				options.getLogger().log(Level.FINEST, "  Min: "+min+"; max: "+max);
+			}
 			
 			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
 						
@@ -61,9 +75,16 @@ public class NuclearHistogramDatasetCreator {
 			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
 			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
 			
+			if(options.hasLogger()){
+				options.getLogger().log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
+			}
+			
 			int bins = 100;
 
 			ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
+		}
+		if(options.hasLogger()){
+			options.getLogger().log(Level.FINEST, "Completed histogram dataset");
 		}
 		return ds;
 	}

@@ -68,6 +68,7 @@ import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.HistogramChartFactory;
+import charting.charts.HistogramChartOptions;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
 import components.CellCollection;
@@ -532,8 +533,9 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	protected HistogramPanel(){
     		
     		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-    		JFreeChart signalAngleChart 	= HistogramChartFactory.createSignalAngleHistogram(null, null);
-    		JFreeChart signalDistanceChart 	= HistogramChartFactory.createSignalDistanceHistogram(null, null);
+    		HistogramChartOptions options = new HistogramChartOptions(null, null, null, false);
+    		JFreeChart signalAngleChart 	= HistogramChartFactory.createSignalAngleHistogram(options);
+    		JFreeChart signalDistanceChart 	= HistogramChartFactory.createSignalDistanceHistogram(options);
     		    		
     		angleChartPanel 	= new ChartPanel(signalAngleChart);
     		distanceChartPanel 	= new ChartPanel(signalDistanceChart);
@@ -554,32 +556,24 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	
     	private void updateSignalAngleHistogram(List<AnalysisDataset> list){
     		
-    		JFreeChart chart = HistogramChartFactory.createSignalAngleHistogram(null, activeDataset());
-    		try {
-    			HistogramDataset ds = NuclearSignalDatasetCreator.createSignalAngleHistogramDataset(list);
-
-    			if(ds.getSeriesCount()>0){
-    				chart = HistogramChartFactory.createSignalAngleHistogram(ds, activeDataset());
-    			}
-
-    		} catch (Exception e) {
-    			programLogger.log(Level.SEVERE, "Error updating angle histograms", e);
-    		}
+    		HistogramChartOptions options = new HistogramChartOptions(list, null, null, false);
+    		JFreeChart chart = HistogramChartFactory.createSignalAngleHistogram(options);
     		angleChartPanel.setChart(chart);
     	}
 
     	private void updateSignalDistanceHistogram(List<AnalysisDataset> list){
-    		JFreeChart chart = HistogramChartFactory.createSignalDistanceHistogram(null, activeDataset());
-    		try {
-    			HistogramDataset ds = NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(list);
-
-    			if(ds.getSeriesCount()>0){
-    				chart = HistogramChartFactory.createSignalDistanceHistogram(ds, activeDataset());
-    			}
-
-    		} catch (Exception e) {
-    			programLogger.log(Level.SEVERE, "Error updating distance histograms", e);
-    		}
+    		HistogramChartOptions options = new HistogramChartOptions(list, null, null, false);
+    		JFreeChart chart = HistogramChartFactory.createSignalDistanceHistogram(options);
+//    		try {
+//    			HistogramDataset ds = NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(list);
+//
+//    			if(ds.getSeriesCount()>0){
+//    				chart = HistogramChartFactory.createSignalDistanceHistogram(ds, activeDataset());
+//    			}
+//
+//    		} catch (Exception e) {
+//    			programLogger.log(Level.SEVERE, "Error updating distance histograms", e);
+//    		}
     		distanceChartPanel.setChart(chart);
     	}
     }

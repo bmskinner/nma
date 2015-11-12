@@ -678,48 +678,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						// Adjust the scale
 						if(rowName.equals("Scale (um/pixel)")){
 							
-							SpinnerNumberModel sModel 
-								= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 0, 100, 0.001);
-							JSpinner spinner = new JSpinner(sModel);
-							
-
-							int option = JOptionPane.showOptionDialog(null, 
-									spinner, 
-									"Choose the new scale", 
-									JOptionPane.OK_CANCEL_OPTION, 
-									JOptionPane.QUESTION_MESSAGE, null, null, null);
-							if (option == JOptionPane.CANCEL_OPTION) {
-							    // user hit cancel
-							} else if (option == JOptionPane.OK_OPTION)	{
-								
-								Object[] options = { "Apply to all cells" , "Apply to only this cell", };
-								int applyAllOption = JOptionPane.showOptionDialog(null, "Apply this scale to all cells in the dataset?", "Apply to all?",
-
-								        JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-								        null, options, options[1]);
-
-								
-								
-//								int applyAllOption = JOptionPane.showConfirmDialog(null,
-//
-//								        "Apply this scale to all cells in the dataset?", "Apply to all?", JOptionPane.YES_NO_OPTION);
-								
-								
-								double scale = (Double) spinner.getModel().getValue();
-								if(applyAllOption==0){ // button at index 1
-//								if(applyAllOption==JOptionPane.YES_OPTION){
-									
-									for(Nucleus n : activeDataset().getCollection().getNuclei()){
-										n.setScale(scale);
-									}
-									
-								} else {
-									activeCell.getNucleus().setScale(scale);
-
-								}
-								updateCell(activeCell);
-							}
+							updateScale();
 						}
 						
 						// Adjust the point position of tags
@@ -796,6 +755,49 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			scrollPane.setColumnHeaderView(table.getTableHeader());
 			
 			this.add(scrollPane, BorderLayout.CENTER);
+		}
+		
+		private void updateScale(){
+			SpinnerNumberModel sModel 
+			= new SpinnerNumberModel(activeCell.getNucleus().getScale(), 0, 100, 0.001);
+			JSpinner spinner = new JSpinner(sModel);
+
+
+			int option = JOptionPane.showOptionDialog(null, 
+					spinner, 
+					"Choose the new scale", 
+					JOptionPane.OK_CANCEL_OPTION, 
+					JOptionPane.QUESTION_MESSAGE, null, null, null);
+			if (option == JOptionPane.CANCEL_OPTION) {
+				// user hit cancel
+			} else if (option == JOptionPane.OK_OPTION)	{
+
+				Object[] options = { "Apply to all cells" , "Apply to only this cell", };
+				int applyAllOption = JOptionPane.showOptionDialog(null, "Apply this scale to all cells in the dataset?", "Apply to all?",
+
+						JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+
+						null, options, options[1]);
+
+				double scale = (Double) spinner.getModel().getValue();
+
+				if(scale>0){ // don't allow a scale to cause divide by zero errors
+					if(applyAllOption==0){ // button at index 1
+						//								if(applyAllOption==JOptionPane.YES_OPTION){
+
+						for(Nucleus n : activeDataset().getCollection().getNuclei()){
+							n.setScale(scale);
+						}
+
+					} else {
+						activeCell.getNucleus().setScale(scale);
+
+					}
+					updateCell(activeCell);
+				} else {
+					programLogger.log(Level.WARNING, "Cannot set a scale to zero");
+				}
+			}
 		}
 		
 		protected void update(Cell cell){

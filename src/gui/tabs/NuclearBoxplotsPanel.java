@@ -272,6 +272,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 				JFreeChart chart = null;
 				HistogramChartOptions options = new HistogramChartOptions(list, stat, scale, useDensity);
+				options.setLogger(programLogger);
 				
 				if(getChartCache().hasChart(options)){
 					programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());

@@ -360,12 +360,29 @@ public interface Nucleus {
     Get aggregate values
     -----------------------
 	 */
+	
+	/**
+	 * Get the maximum x value from the positions of border points
+	 * @return
+	 */
 	public double getMaxX();
 
+	/**
+	 * Get the minimum x value from the positions of border points
+	 * @return
+	 */
 	public double getMinX();
 
+	/**
+	 * Get the maximum y value from the positions of border points
+	 * @return
+	 */
 	public double getMaxY();
 
+	/**
+	 * Get the minimum y value from the positions of border points
+	 * @return
+	 */
 	public double getMinY();
 
 	/*

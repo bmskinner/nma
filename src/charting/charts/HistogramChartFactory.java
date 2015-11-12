@@ -24,6 +24,8 @@ import ij.IJ;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -35,15 +37,16 @@ import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import charting.ChartComponents;
 import charting.datasets.NuclearHistogramDatasetCreator;
+import charting.datasets.NuclearSignalDatasetCreator;
 import analysis.AnalysisDataset;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusStatistic;
 
 
 public class HistogramChartFactory {
-
-	
+		
 	/**
 	 * Create a histogram from a histogram dataset and
 	 * apply basic formatting
@@ -71,24 +74,29 @@ public class HistogramChartFactory {
 	}
 	
 	/**
-	 * Create a signal angle histogram
-	 * @param ds the histogram dataset
-	 * @param dataset the analysis dataset
+	 * Create a signal angle histogram for a dataset
+	 * @param options the ChartOptions
 	 * @return
 	 */
-	public static JFreeChart createSignalAngleHistogram(HistogramDataset ds, AnalysisDataset dataset){
+	public static JFreeChart createSignalAngleHistogram(HistogramChartOptions options){
+		
+		HistogramDataset ds = options.hasDatasets() 
+							? NuclearSignalDatasetCreator.createSignalAngleHistogramDataset(options.getDatasets())
+							: null;
+				
 		JFreeChart chart = createHistogram(ds, "Angle", "Count");
-		if(ds!=null && dataset!=null){
+		if(ds!=null && options.hasDatasets()){
 			XYPlot plot = chart.getXYPlot();
 			plot.getDomainAxis().setRange(0,360);
-			for (int j = 0; j < ds.getSeriesCount(); j++) {
-				String name = (String) ds.getSeriesKey(j);
-				int seriesGroup = MorphologyChartFactory.getIndexFromLabel(name);
-				plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
-				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-				Color colour = dataset.getSignalGroupColour(seriesGroup);
-				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
-			}	
+			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());
+//			for (int j = 0; j < ds.getSeriesCount(); j++) {
+//				String name = (String) ds.getSeriesKey(j);
+//				int seriesGroup = MorphologyChartFactory.getIndexFromLabel(name);
+//				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+//				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+//				Color colour = options.firstDataset().getSignalGroupColour(seriesGroup);
+//				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
+//			}	
 		}
 		return chart;
 	}
@@ -99,20 +107,40 @@ public class HistogramChartFactory {
 	 * @param dataset the analysis dataset
 	 * @return
 	 */
-	public static JFreeChart createSignalDistanceHistogram(HistogramDataset ds, AnalysisDataset dataset){
+	public static JFreeChart createSignalDistanceHistogram(HistogramChartOptions options){
+		
+		HistogramDataset ds = options.hasDatasets() 
+							? NuclearSignalDatasetCreator.createSignalDistanceHistogramDataset(options.getDatasets())
+							: null;
+		
 		JFreeChart chart = createHistogram(ds, "Distance", "Count");
-		if(ds!=null && dataset!=null){
+		if(ds!=null && options.hasDatasets()){
 			XYPlot plot = chart.getXYPlot();
 			plot.getDomainAxis().setRange(0,1);
-			for (int j = 0; j < ds.getSeriesCount(); j++) {
-				plot.getRenderer().setSeriesVisibleInLegend(j, Boolean.FALSE);
-				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
-				int index = MorphologyChartFactory.getIndexFromLabel( (String) ds.getSeriesKey(j));
-				Color colour = dataset.getSignalGroupColour(index);
-				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
-			}	
+			
+			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());
+//			for (int j = 0; j < ds.getSeriesCount(); j++) {
+//				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+//				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+//				int index = MorphologyChartFactory.getIndexFromLabel( (String) ds.getSeriesKey(j));
+//				Color colour = options.firstDataset().getSignalGroupColour(index);
+//				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
+//			}	
 		}
 		return chart;
+	}
+	
+	private static void setSeriesPropertiesForSignalHistogram(JFreeChart chart, AnalysisDataset dataset){
+		
+		XYPlot plot = chart.getXYPlot();
+		for (int j = 0; j < dataset.getCollection().getSignalGroups().size(); j++) {
+			String name = (String) plot.getDataset().getSeriesKey(j);
+			int seriesGroup = MorphologyChartFactory.getIndexFromLabel(name);
+			plot.getRenderer().setSeriesVisibleInLegend(j, false);
+			plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+			Color colour = dataset.getSignalGroupColour(seriesGroup);
+			plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
+		}	
 	}
 	
 	/**
@@ -128,7 +156,11 @@ public class HistogramChartFactory {
 		HistogramDataset ds = null;
 				
 		if (options.hasDatasets()){
-			ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(options.getDatasets(), options.getStat(), options.getScale());
+			ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(options);
+		}
+		
+		if(options.hasLogger()){
+			options.getLogger().log(Level.FINER, "Creating histogram for "+options.getStat());
 		}
 		
 		
