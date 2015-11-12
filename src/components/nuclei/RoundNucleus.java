@@ -31,7 +31,9 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
+import java.awt.Rectangle;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -116,6 +118,8 @@ public class RoundNucleus
 	protected double scale; // allow conversion between pixels and SI units. The length of a pixel in metres
 	
 	protected SignalCollection signalCollection = new SignalCollection();
+	
+	private transient Map<BorderTag, Rectangle> boundingRectangles = new HashMap<BorderTag, Rectangle>(); // cache the bounding rectange to save time
 
 	public RoundNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 
@@ -389,29 +393,73 @@ public class RoundNucleus
 				break;
 				
 			case BOUNDING_HEIGHT:
-				ConsensusNucleus testh = new ConsensusNucleus( this, NucleusType.ROUND);
-				testh.rotatePointToBottom(testh.getBorderTag(BorderTag.ORIENTATION_POINT));
-				FloatPolygon ph = Utils.createPolygon(testh);
-				result = ph.getBounds().getHeight();
+				result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getHeight();
 				if(scale.equals(MeasurementScale.MICRONS)){
 					result = Utils.micronLength(result, this.getScale());
 				}
 				break;
+//				
+//				ConsensusNucleus testh = new ConsensusNucleus( this, NucleusType.ROUND);
+//				testh.rotatePointToBottom(testh.getBorderTag(BorderTag.ORIENTATION_POINT));
+//				FloatPolygon ph = Utils.createPolygon(testh);
+//				result = ph.getBounds().getHeight();
+//				if(scale.equals(MeasurementScale.MICRONS)){
+//					result = Utils.micronLength(result, this.getScale());
+//				}
+//				break;
 			case BOUNDING_WIDTH:
-				ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
-				testw.rotatePointToBottom(testw.getBorderTag(BorderTag.ORIENTATION_POINT));
-				FloatPolygon pw = Utils.createPolygon(testw);
-				result = pw.getBounds().getWidth();
+				result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
 				if(scale.equals(MeasurementScale.MICRONS)){
 					result = Utils.micronLength(result, this.getScale());
 				}
 				break;
+//				ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
+//				testw.rotatePointToBottom(testw.getBorderTag(BorderTag.ORIENTATION_POINT));
+//				FloatPolygon pw = Utils.createPolygon(testw);
+//				result = pw.getBounds().getWidth();
+//				if(scale.equals(MeasurementScale.MICRONS)){
+//					result = Utils.micronLength(result, this.getScale());
+//				}
+//				break;
 			default:
 				break;
 		
 		}
 		return result;
 		
+	}
+	
+	/**
+	 * Get the cached bounding rectangle for the nucleus. If not present,
+	 * the rectangle is calculated and stored
+	 * @param point the border point to place at the bottom
+	 * @return
+	 * @throws Exception
+	 */
+	public Rectangle getBoundingRectangle(BorderTag point) throws Exception{
+		
+		if(this.boundingRectangles == null){
+			boundingRectangles = new HashMap<BorderTag, Rectangle>();
+			boundingRectangles.put(point, calculateBoundingRectangle(point));
+		}
+		if(! this.boundingRectangles.containsKey(point)){
+			boundingRectangles.put(point, calculateBoundingRectangle(point));
+		}
+		
+		return boundingRectangles.get(point);
+	}
+	
+	/**
+	 * Find the bounding rectangle of the Nucleus from the given orientation
+	 * @param point
+	 * @return
+	 * @throws Exception
+	 */
+	protected Rectangle calculateBoundingRectangle(BorderTag point) throws Exception{
+		ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
+		testw.rotatePointToBottom(testw.getBorderTag(point));
+		FloatPolygon pw = Utils.createPolygon(testw);
+		return pw.getBounds();
 	}
 	
 	
@@ -1234,5 +1282,10 @@ public class RoundNucleus
 			throw new IllegalArgumentException("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
 		}
 		
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	    in.defaultReadObject();
+	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();
 	}
 }

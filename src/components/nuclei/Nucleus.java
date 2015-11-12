@@ -18,6 +18,7 @@
  *******************************************************************************/
 package components.nuclei;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +178,14 @@ public interface Nucleus {
 	
 	public String getReferencePoint();
 	
+	/**
+	 * Get the cached bounding rectangle for the nucleus. If not present,
+	 * the rectangle is calculated and stored
+	 * @param point the border point to place at the bottom
+	 * @return
+	 * @throws Exception
+	 */
+	public Rectangle getBoundingRectangle(BorderTag point) throws Exception;
 	
 	/**
 	 * Get a copy of the border point mapped to the given tag
