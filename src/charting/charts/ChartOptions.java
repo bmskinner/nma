@@ -46,6 +46,8 @@ public abstract class ChartOptions {
 			} else {
 				this.swatch = ColourSwatch.REGULAR_SWATCH;
 			}
+		} else {
+			this.swatch = ColourSwatch.REGULAR_SWATCH;
 		}
 		
 	}
