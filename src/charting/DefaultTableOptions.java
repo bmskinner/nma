@@ -48,6 +48,7 @@ public class DefaultTableOptions extends TableOptions {
 		ANALYSIS_PARAMETERS,
 		ANALYSIS_STATS,
 		VENN, 
+		PAIRWISE_VENN,
 		WILCOXON
 	}
 	

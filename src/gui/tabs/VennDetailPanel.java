@@ -20,11 +20,15 @@ package gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BoxLayout;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
@@ -40,17 +44,40 @@ public class VennDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
 	
+	private JPanel mainPanel = new JPanel();
+	
 	private JTable vennTable;
+	private JTable pairwiseVennTable;
 
 	public VennDetailPanel(Logger programLogger) {
 		super(programLogger);
 		this.setLayout(new BorderLayout());
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		
+		JPanel vennPanel = new JPanel(new BorderLayout());
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportView(mainPanel);
+		
+		this.add(scrollPane, BorderLayout.CENTER);
 		
 		vennTable = new JTable(NucleusTableDatasetCreator.createVennTable(null));
-		this.add(vennTable, BorderLayout.CENTER);
+		vennPanel.add(vennTable, BorderLayout.CENTER);
+		vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
+		mainPanel.add(vennPanel);
 		vennTable.setEnabled(false);
-		this.add(vennTable.getTableHeader(), BorderLayout.NORTH);
-
+		
+		
+		
+		JPanel pairwisePanel = new JPanel(new BorderLayout());
+		
+		pairwiseVennTable = new JTable(NucleusTableDatasetCreator.createPairwiseVennTable(null));
+		
+		pairwisePanel.add(pairwiseVennTable, BorderLayout.CENTER);
+		pairwisePanel.add(pairwiseVennTable.getTableHeader(), BorderLayout.NORTH);
+		mainPanel.add(pairwisePanel);
+		pairwiseVennTable.setEnabled(false);
+		
 	}
 	
 	/**
@@ -58,9 +85,20 @@ public class VennDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 */
 	public void update(final List<AnalysisDataset> list){
-		programLogger.log(Level.FINE, "Updating venn panel");
+		this.list = list;
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
+				updateVennTable();
+				updatePairwiseVennTable();
+			}});
+	}
+	
+	private void updateVennTable(){
+		programLogger.log(Level.FINE, "Updating venn panel");
+		
+//		Thread thr = new Thread(){
+//		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
 			
 				
 				// format the numbers and make into a tablemodel
@@ -87,7 +125,44 @@ public class VennDetailPanel extends DetailPanel {
 					}
 				}
 				programLogger.log(Level.FINEST, "Updated venn panel");
-		}});
+//		}};//);
+//		thr.start();
+	}
+	
+	private void updatePairwiseVennTable(){
+		programLogger.log(Level.FINE, "Updating pairwise venn table");
+		
+//		Thread thr = new Thread(){
+////		SwingUtilities.invokeLater(new Runnable(){
+//			public void run(){
+			
+				
+				// format the numbers and make into a tablemodel
+				TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
+				
+				if(!list.isEmpty() && list!=null){
+					
+					TableOptions options = new DefaultTableOptions(list, TableType.PAIRWISE_VENN);
+					if(getTableCache().hasTable(options)){
+						model = getTableCache().getTable(options);
+					} else {
+						model = NucleusTableDatasetCreator.createPairwiseVennTable(list);
+						getTableCache().addTable(options, model);
+					}
+
+				}
+				pairwiseVennTable.setModel(model);
+				
+//				int columns = vennTable.getColumnModel().getColumnCount();
+//
+//				if(columns>1){
+//					for(int i=1;i<columns;i++){
+//						vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
+//					}
+//				}
+				programLogger.log(Level.FINEST, "Updated pairwise venn panel");
+//		}};//);
+//		thr.start();
 	}
 	
 	/**
