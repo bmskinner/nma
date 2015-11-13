@@ -32,6 +32,7 @@ import components.generic.BorderTag;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusType;
+import components.nuclear.SignalCollection;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
@@ -59,14 +60,47 @@ public class PigSpermNucleus
     public PigSpermNucleus(RoundNucleus n) throws Exception{
       super(n);
     }
-    
+
+    public PigSpermNucleus() {
+    	super();
+    }
+
     public PigSpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi, file, number, position);
 	}
     
     public Nucleus duplicate(){
 		try {
-			return new PigSpermNucleus(this);
+			PigSpermNucleus duplicate = new PigSpermNucleus();
+
+			duplicate.setID(this.getID());
+			duplicate.setPosition(this.getPosition());
+
+			duplicate.setSourceFile(this.getSourceFile());
+			duplicate.setOutputFolder(this.getOutputFolderName());
+
+			duplicate.setNucleusNumber(this.getNucleusNumber());
+			duplicate.setNucleusFolder(this.getNucleusFolder());
+
+			duplicate.setPerimeter(this.getPerimeter());
+			duplicate.setFeret(this.getFeret());
+			duplicate.setArea(this.getArea());
+
+			duplicate.setCentreOfMass(this.getCentreOfMass());
+
+			duplicate.setSignals( new SignalCollection(this.getSignalCollection()));
+
+			duplicate.setDistanceProfile(this.getDistanceProfile());
+			duplicate.setAngleProfile(this.getAngleProfile());
+
+			duplicate.setBorderTags(this.getBorderTags());
+			duplicate.setBorderList(this.getBorderList());
+
+			duplicate.setAngleProfileWindowSize(this.getAngleProfileWindowSize());
+			duplicate.setSingleDistanceProfile(this.getSingleDistanceProfile());
+
+			duplicate.setScale(this.getScale());
+			return duplicate;
 		} catch (Exception e) {
 			return null;
 		}
