@@ -153,7 +153,7 @@ public class RoundNucleus
 		// for subclasses to access
 	}
 
-	public RoundNucleus(RoundNucleus n) throws Exception {
+	public RoundNucleus(Nucleus n) throws Exception {
 
 		this.setID(n.getID());
 		this.setPosition(n.getPosition());
@@ -167,7 +167,7 @@ public class RoundNucleus
 		this.setPerimeter(n.getPerimeter());
 		this.setFeret(n.getFeret());
 		this.setArea(n.getArea());
-//		this.setAngleProfile(n.getAngleProfile());
+
 		this.setCentreOfMass(n.getCentreOfMass());
 		
 		this.setSignals( new SignalCollection(n.getSignalCollection()));
@@ -182,7 +182,7 @@ public class RoundNucleus
 		this.setSingleDistanceProfile(n.getSingleDistanceProfile());
 		
 		this.setScale(n.getScale());
-		
+
 	}
 	
 	public Nucleus duplicate(){

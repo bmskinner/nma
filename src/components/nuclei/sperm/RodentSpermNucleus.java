@@ -59,12 +59,17 @@ extends SpermNucleus
 		super(n);
 		// this.findPointsAroundBorder();
 	}
-
+	
+	public RodentSpermNucleus(Nucleus n) throws Exception{
+		super(n);
+		// this.findPointsAroundBorder();
+	}
 	
 	public RodentSpermNucleus (Roi roi, File file, int number, double[] position) { // construct from an roi
 		super(roi, file, number, position);
 	}
 	
+	@Override
 	public Nucleus duplicate(){
 		try {
 			return new RodentSpermNucleus(this);

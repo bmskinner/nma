@@ -490,11 +490,16 @@ public class SignalCollection implements Serializable {
 	 * @return the angles
 	 */
 	public List<Double> getAngles(int signalGroup){
-		List<NuclearSignal> list = getSignals(signalGroup);
+//		List<NuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
-		for(int i=0;i<list.size();i++){
-			result.add(list.get(i).getAngle());
+		
+		for(NuclearSignal n : this.getSignals(signalGroup)){
+			result.add(n.getAngle());
 		}
+		
+//		for(int i=0;i<list.size();i++){
+//			result.add(list.get(i).getAngle());
+//		}
 		return result;
 	}
 	
