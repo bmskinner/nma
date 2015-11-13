@@ -65,12 +65,15 @@ import org.jfree.data.xy.XYDataset;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
+import charting.DefaultTableOptions;
+import charting.DefaultTableOptions.TableType;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.HistogramChartFactory;
 import charting.charts.HistogramChartOptions;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
+import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
 import components.nuclear.ShellResult;
 
@@ -262,21 +265,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
     					String value = table.getModel().getValueAt(row+1, 0).toString();
     					if(value.equals("Signal group")){
-    						String groupString = table.getModel().getValueAt(row+1, 1).toString();
-    						int signalGroup = Integer.valueOf(groupString);
-    						
-    						Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
-    						
-    						Color newColor = JColorChooser.showDialog(
-    			                     SignalsDetailPanel.this,
-    			                     "Choose signal Color",
-    			                     oldColour);
-    						
-    						if(newColor != null){
-    							activeDataset().setSignalGroupColour(signalGroup, newColor);
-    							SignalsDetailPanel.this.update(list);
-    							fireSignalChangeEvent("SignalColourUpdate");
-    						}
+    						updateSignalColour(row);
     					}
     						
     				}
@@ -286,6 +275,28 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		
     		JScrollPane scrollPane = new JScrollPane(statsTable);
     		return scrollPane;
+    	}
+    	
+    	/**
+    	 * Update the colour of the clicked signal group
+    	 * @param row the row selected (the colour bar, one above the group name)
+    	 */
+    	private void updateSignalColour(int row){
+    		String groupString = statsTable.getModel().getValueAt(row+1, 1).toString();
+			int signalGroup = Integer.valueOf(groupString);
+			
+			Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+			
+			Color newColor = JColorChooser.showDialog(
+                     SignalsDetailPanel.this,
+                     "Choose signal Color",
+                     oldColour);
+			
+			if(newColor != null){
+				activeDataset().setSignalGroupColour(signalGroup, newColor);
+				SignalsDetailPanel.this.update(list);
+				fireSignalChangeEvent("SignalColourUpdate");
+			}
     	}
     	
     	private JPanel createConsensusPanel(){
@@ -453,25 +464,32 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	 * Update the signal stats with the given datasets
     	 * @param list the datasets
     	 */
-    	private void updateSignalStatsPanel(final List<AnalysisDataset> list){
+    	private void updateSignalStatsPanel(List<AnalysisDataset> list){
     		
-    		SwingUtilities.invokeLater(new Runnable(){
-    			public void run(){
+    		TableModel model = NuclearSignalDatasetCreator.createSignalStatsTable(null);
+    		
+    		DefaultTableOptions options = new DefaultTableOptions(list, TableType.SIGNAL_STATS_TABLE, programLogger);
+    		
+    		if(getTableCache().hasTable(options)){
+    			model = getTableCache().getTable(options);
+    			programLogger.log(Level.FINEST, "Fetched cached signal stats table");
+    		} else {
+    			model = NuclearSignalDatasetCreator.createSignalStatsTable(options); 
+    			getTableCache().addTable(options, model);
+    			programLogger.log(Level.FINEST, "Added cached signal stats table");
+    		}
+    		statsTable.setModel(model);
+
+    		// Add the signal group colours
+    		if(list!=null && !list.isEmpty()){
+    			int columns = statsTable.getColumnModel().getColumnCount();
+    			if(columns>1){
+    				for(int i=1;i<columns;i++){
+    					statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
+    				}
+    			}
+    		}
     			
-    		    //Update the model here
-    				TableModel model = NuclearSignalDatasetCreator.createSignalStatsTable(list); 
-    	    		statsTable.setModel(model);
-    	    		
-    	    		if(list!=null && !list.isEmpty()){
-    	    			int columns = statsTable.getColumnModel().getColumnCount();
-    	    			if(columns>1){
-    	    				for(int i=1;i<columns;i++){
-    	    					statsTable.getColumnModel().getColumn(i).setCellRenderer(new StatsTableCellRenderer());
-    	    				}
-    	    			}
-    	    		}
-    			
-    		}});
     		
     	}
     	

@@ -20,6 +20,8 @@ package charting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+
 import analysis.AnalysisDataset;
 
 /*
@@ -29,14 +31,52 @@ public abstract class TableOptions {
 
 
 	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	protected Logger programLogger = null;
 
 	public TableOptions(List<AnalysisDataset> list){
 		this.list = list;
+	}
+	
+	public TableOptions(List<AnalysisDataset> list, Logger programLogger){
+		this(list);
+		this.programLogger = programLogger;
 	}
 
 
 	public List<AnalysisDataset> getDatasets(){
 		return this.list;
+	}
+	
+	public boolean hasDatasets(){
+		if(list==null || list.isEmpty()){
+			return false;
+		} else{
+			return true;
+		}
+	}
+	
+	public void setLogger(Logger l){
+		this.programLogger = l;
+	}
+	
+	public Logger getLogger(){
+		return this.programLogger;
+	}
+	
+	public boolean hasLogger(){
+		if(this.programLogger==null){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	/**
+	 * Fetch the first dataset in the list
+	 * @return
+	 */
+	public AnalysisDataset firstDataset(){
+		return this.list.get(0);
 	}
 
 

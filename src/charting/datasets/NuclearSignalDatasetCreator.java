@@ -23,6 +23,7 @@ import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -35,11 +36,11 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import charting.TableOptions;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 import analysis.nucleus.CurveRefolder;
-
 import components.CellCollection;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
@@ -307,30 +308,37 @@ public class NuclearSignalDatasetCreator {
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 */
-	public static TableModel createSignalStatsTable(List<AnalysisDataset> list){
+	public static TableModel createSignalStatsTable(TableOptions options){
 
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<Object> fieldNames = new ArrayList<Object>(0);
+		
+		if(options==null){
+			model.addColumn("No data loaded");
+			return model;
+		}
 				
-		// find the collection with the most channels
+		// find the collection with the most signal groups
 		// this defines  the number of rows
 
-		if(list==null){
-			model.addColumn("No data loaded");
-			
-		} else {
-			
-			int maxChannels = 0;
-			for(AnalysisDataset dataset : list){
+		if(options.hasDatasets()){			
+			int maxSignalGroup = 0;
+			for(AnalysisDataset dataset : options.getDatasets()){
 				CellCollection collection = dataset.getCollection();
-				maxChannels = Math.max(collection.getHighestSignalGroup(), maxChannels);
+				if(collection.hasSignals()){
+					maxSignalGroup = Math.max(collection.getHighestSignalGroup(), maxSignalGroup);
+				}
 			}
-			if(maxChannels>0){
+			
+			if(options.hasLogger()){
+				options.getLogger().log(Level.FINEST, "Selected collections have "+maxSignalGroup+" signal groups");
+			}
+			if(maxSignalGroup>0){
 				// create the row names
 				fieldNames.add("Number of signal groups");
 				
-				for(int i=0;i<maxChannels;i++){
+				for(int i=0;i<maxSignalGroup;i++){
 					fieldNames.add("");
 					fieldNames.add("Signal group");
 					fieldNames.add("Group name");
@@ -344,23 +352,20 @@ public class NuclearSignalDatasetCreator {
 					fieldNames.add("Median distance from CoM");
 				}
 				
-				int numberOfRowsPerSignalGroup = fieldNames.size()/(maxChannels+1);
+				int numberOfRowsPerSignalGroup = fieldNames.size()/(maxSignalGroup+1);
 				model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
-				
-	//			IJ.log("Added headers");
 					
 				// format the numbers and make into a tablemodel
 				DecimalFormat df = new DecimalFormat("#0.00"); 
 	
 				// make a new column for each collection
-				for(AnalysisDataset dataset : list){
+				for(AnalysisDataset dataset : options.getDatasets()){
 					CellCollection collection = dataset.getCollection();
 					
-	//				IJ.log("Adding collection");
 					List<Object> rowData = new ArrayList<Object>(0);
 					rowData.add(collection.getSignalGroups().size());
 	
-					for(int signalGroup : collection.getSignalGroups()){
+					for(int signalGroup = 1; signalGroup<=maxSignalGroup; signalGroup++){// : collection.getSignalGroups()){
 						if(collection.hasSignals(signalGroup)){
 							rowData.add("");
 							rowData.add(signalGroup);
@@ -384,10 +389,17 @@ public class NuclearSignalDatasetCreator {
 					model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
 				}
 			} else {
+				if(options.hasLogger()){
+					options.getLogger().log(Level.FINEST, "No signal groups to show");
+				}
 				model.addColumn("No data loaded");
 			}
+		} else {
+			if(options.hasLogger()){
+				options.getLogger().log(Level.FINEST, "No datasets");
+			}
+			model.addColumn("No data loaded");
 		}
-//		IJ.log("Created model");
 		return model;	
 	}
 	

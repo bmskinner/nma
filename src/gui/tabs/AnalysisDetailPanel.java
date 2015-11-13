@@ -92,7 +92,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 */
 	private void updateAnalysisParametersPanel(List<AnalysisDataset> list){
 		
-		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);;
+		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);
 		if(list!=null && !list.isEmpty()){
 
 			TableOptions options = new DefaultTableOptions(list, TableType.ANALYSIS_PARAMETERS);

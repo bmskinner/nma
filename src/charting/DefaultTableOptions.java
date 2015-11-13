@@ -19,6 +19,7 @@
 package charting;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import charting.charts.HistogramChartOptions;
 import analysis.AnalysisDataset;
@@ -39,6 +40,11 @@ public class DefaultTableOptions extends TableOptions {
 		this.type = type;
 	}
 	
+	public DefaultTableOptions(List<AnalysisDataset> list, TableType type, Logger programLogger) {
+		super(list, programLogger);
+		this.type = type;
+	}
+	
 	public TableType getType(){
 		return this.type;
 	}
@@ -49,7 +55,8 @@ public class DefaultTableOptions extends TableOptions {
 		ANALYSIS_STATS,
 		VENN, 
 		PAIRWISE_VENN,
-		WILCOXON
+		WILCOXON,
+		SIGNAL_STATS_TABLE
 	}
 	
 	@Override

@@ -777,12 +777,10 @@ public class CellCollection implements Serializable {
   }
 
   /** 
-   * Return the nuclei that have signals in the given channel. If 
-   * prepended with '-' , this will give the nuclei
-   * that do NOT have signals in the given channel.
-   * @param channel the channel 
-   * @param with return cells with a signal?
-   * @return a list of nuclei
+   * Return the nuclei with or without signals in the given group.
+   * @param signalGroup the group number 
+   * @param withSignal
+   * @return a list of cells
    */
   public List<Cell> getCellsWithNuclearSignals(int signalGroup, boolean withSignal){
 	  List<Cell> result = new ArrayList<Cell>(0);

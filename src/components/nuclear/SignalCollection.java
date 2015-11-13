@@ -67,19 +67,27 @@ public class SignalCollection implements Serializable {
 	 * @param s
 	 */
 	public SignalCollection(SignalCollection s){
+		
+//		IJ.log("Duplicating signal collection");
+//		IJ.log(s.toString());
+		
 		for(int group : s.getSignalGroups() ){
+//			IJ.log("  Group "+group);
 			String groupName = s.getSignalGroupName(group);
 			int channel = s.getSignalChannel(group);
 			File f = new File(s.getSourceFile(group).getAbsolutePath());
 			
 			ArrayList<NuclearSignal> list = new ArrayList<NuclearSignal>();
-			for(NuclearSignal signal : getSignals(group)){
+			for(NuclearSignal signal : s.getSignals(group)){
 				list.add(  new NuclearSignal(signal) );
+//				IJ.log("  Copying signal");
 			}
-			
+						
 			this.addSignalGroup(list, group, f, channel);
+			this.setSignalGroupName(group, groupName);
 		}
-		
+//		IJ.log("  New collection has "+this.numberOfSignals()+" signals");
+//		IJ.log(this.toString());
 	}
 	
 	/**
@@ -150,14 +158,14 @@ public class SignalCollection implements Serializable {
 	}
 	
 	/**
-	 * Get the signals in the given channel
-	 * @param channel the channel number
+	 * Get the signals in the given group
+	 * @param signalGroup the signal group
 	 * @return a list of signals
 	 */
-	public List<NuclearSignal> getSignals(int channel){
-		checkSignalGroup(channel);
-		if(this.hasSignal(channel)){
-			return this.collection.get(channel);
+	public List<NuclearSignal> getSignals(int signalGroup){
+		checkSignalGroup(signalGroup);
+		if(this.hasSignal(signalGroup)){
+			return this.collection.get(signalGroup);
 		} else {
 			return new ArrayList<NuclearSignal>(0);
 		}
@@ -281,9 +289,8 @@ public class SignalCollection implements Serializable {
 		}
 		if(collection.get(signalGroup).isEmpty()){
 			return false;
-		} else {
-			return true;
-		}
+		} 
+		return true;
 	}
 	
 	/**
@@ -438,8 +445,8 @@ public class SignalCollection implements Serializable {
 	}
 	
 	/**
-	 * Given the id of a channel, make sure it is suitable to use
-	 * @param channel the channel to check
+	 * Given the id of a signal group, make sure it is suitable to use
+	 * @param signalGroup the group to check
 	 */
 	private void checkSignalGroup(int signalGroup){
 		if(Integer.valueOf(signalGroup)==null){
@@ -517,5 +524,21 @@ public class SignalCollection implements Serializable {
 			result.add(list.get(i).getFractionalDistanceFromCoM());
 		}
 		return result;
+	}
+	
+	public String toString(){
+		String s = "";
+		s += "Signal groups: "+this.numberOfSignalGroups()+"\n";
+		for(int group : collection.keySet()){
+			s += "  "+group+": "
+					+names.get(group)
+					+" : Channel "
+					+sourceChannels.get(group)
+					+" : "+sourceFiles.get(group)
+					+" : "+collection.get(group).size()
+					+" signals "
+					+"\n";
+		}
+		return s;
 	}
 }

@@ -98,10 +98,13 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		dataset.addChildDataset(subDataset);
 	}
 
-	/*
-    Given a complete collection of nuclei, split it into up to 4 populations;
-      nuclei with red signals, with green signals, without red signals and without green signals
-    Only include the 'without' populations if there is a 'with' population.
+
+	/**
+	 * Create two child populations for the given dataset: one with signals in the 
+	 * given group, and one without signals 
+	 * @param r the collection to split
+	 * @param signalGroup the signal group to split on
+	 * @return a list of new collections
 	 */
 	private List<CellCollection> dividePopulationBySignals(CellCollection r, int signalGroup){
 
@@ -109,26 +112,31 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		programLogger.log(Level.INFO, "Dividing population by signals...");
 		try{
 
+			
 			List<Cell> list = r.getCellsWithNuclearSignals(signalGroup, true);
 			if(!list.isEmpty()){
-				programLogger.log(Level.INFO, "Found nuclei with signals in group "+signalGroup);
+				programLogger.log(Level.INFO, "Signal group "+signalGroup+": found nuclei with signals");
 				CellCollection listCollection = new CellCollection(r.getFolder(), 
 						r.getOutputFolderName(), 
-						"Signals_in_group_"+signalGroup, 
+						"SignalGroup_"+signalGroup+"_with_signals", 
 						r.getDebugFile(), 
 						r.getNucleusType());
 
 				for(Cell c : list){
-					listCollection.addCell( new Cell(c) );
+					programLogger.log(Level.FINEST, "  Added cell: "+c.getNucleus().getNameAndNumber());
+					programLogger.log(Level.FINEST, "  Cell has: "+c.getNucleus().getSignalCount()+" signals");
+					Cell newCell = new Cell(c);
+					programLogger.log(Level.FINEST, "  New cell has: "+newCell.getNucleus().getSignalCount()+" signals");
+					listCollection.addCell( newCell );
 				}
 				signalPopulations.add(listCollection);
 
 				List<Cell> notList = r.getCellsWithNuclearSignals(signalGroup, false);
 				if(!notList.isEmpty()){
-					programLogger.log(Level.INFO, "Found nuclei without signals in group "+signalGroup);
+					programLogger.log(Level.INFO, "Signal group "+signalGroup+": found nuclei without signals");
 					CellCollection notListCollection = new CellCollection(r.getFolder(), 
 							r.getOutputFolderName(), 
-							"No_signals_in_group_"+signalGroup, 
+							"SignalGroup_"+signalGroup+"_without_signals", 
 							r.getDebugFile(), 
 							r.getNucleusType());
 

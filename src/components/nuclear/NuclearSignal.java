@@ -85,8 +85,16 @@ public class NuclearSignal implements Serializable {
     -----------------------
 	 */
 
+	/**
+	 * Get a copy of the border points defining this signal
+	 * @return
+	 */
 	public List<NucleusBorderPoint> getBorder(){
-		return this.borderList;
+		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>();
+		for(NucleusBorderPoint p : borderList){
+			result.add(new NucleusBorderPoint(p));
+		}
+		return result;
 	}
 
 	public double getArea(){
