@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.actions;
 
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
 import gui.SignalDetectionSettingsWindow;
 
@@ -80,6 +81,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		// we have morphology analysis to carry out, so don't use the super finished
 		// use the same segmentation from the initial analysis
 		new MorphologyAnalysisAction(list, dataset, null, mw);
+
 		cancel();
 	}
 

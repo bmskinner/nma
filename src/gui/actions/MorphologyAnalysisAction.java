@@ -207,12 +207,6 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 				}
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
-////					logger.log("Adding dataset to panel", utility.Logger.DEBUG);
-//					populationsPanel.addDataset(dataset);				
-//
-//					for(AnalysisDataset child : dataset.getChildDatasets()){
-//						populationsPanel.addDataset(child);
-//					}
 					List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 					list.add(dataset);
 					fireDatasetEvent(DatasetMethod.ADD_DATASET, list);

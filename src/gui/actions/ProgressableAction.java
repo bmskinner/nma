@@ -156,23 +156,16 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		removeProgressBar();
 
 		fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
-//		populationsPanel.update(); // get any new populations
-		
-//		for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-//			PopulationExporter.saveAnalysisDataset(root);
-//		}
 		fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
 		
 		
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 		list.add(dataset);
-//		
-//		
-//		populationsPanel.selectDataset(dataset);
-//		updatePanels(list); // update with the current population
+
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 		
 		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
+		fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
 		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);

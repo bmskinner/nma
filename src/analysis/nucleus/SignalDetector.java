@@ -142,6 +142,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 					
 					ArrayList<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					
+					logger.log(Level.FINER, "Creating signal collection");
 					
 					SignalCollection signalCollection = n.getSignalCollection();
 					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
@@ -149,11 +150,18 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 					n.calculateSignalDistancesFromCoM();
 					n.calculateFractionalSignalDistancesFromCoM();
 
+					logger.log(Level.FINE, "Calculating signal angles");
 					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-						if(n.getPoint(BorderTag.ORIENTATION_POINT)!=null){
-
+						logger.log(Level.FINER, "Nucleus type is asymmetric: "+n.getClass().getSimpleName());
+						
+						if(n.hasBorderTag(BorderTag.ORIENTATION_POINT)){
+							logger.log(Level.FINEST, "Calculating angle from orientation point");
 							n.calculateSignalAnglesFromPoint(n.getPoint(BorderTag.ORIENTATION_POINT));
+						} else {
+							logger.log(Level.FINEST, "No orientation point in nucleus");
 						}
+					} else {
+						logger.log(Level.FINER, "Nucleus type is round: "+n.getClass().getSimpleName());
 					}
 					
 					
