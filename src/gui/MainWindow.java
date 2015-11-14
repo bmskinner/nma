@@ -82,6 +82,7 @@ import analysis.AnalysisDataset;
 import analysis.nucleus.MorphologyAnalysis;
 import components.Cell;
 import components.CellCollection;
+import components.generic.BorderTag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
@@ -1147,22 +1148,44 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			break;
 		case RESEGMENT_SELECTED_DATASET:
-				programLogger.log(Level.INFO, "Resegmenting selected datasets");
+//				programLogger.log(Level.INFO, "Resegmenting selected datasets");
 				final int flag = CURVE_REFOLD; // ensure consensus is replaced
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
+												
+						// Recalculate the head and hump positions for rodent sperm
+						if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+
+							try{
+								programLogger.log(Level.INFO, "Replacing nucleus roi patterns");
+								for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
+									IJ.log(n.getNameAndNumber());
+									RodentSpermNucleus r = (RodentSpermNucleus) n;  
+									IJ.log("Splitting nuclcus");
+									r.splitNucleusToHeadAndHump();
+									try {
+										IJ.log("Calculating angles");
+										r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
+									} catch (Exception e) {
+										programLogger.log(Level.SEVERE, "Error restoring signal angles", e);
+									}
+									IJ.log("Finished calculating angles");
+								}
+								programLogger.log(Level.INFO, "Replaced nucleus roi patterns");
+							}catch(Exception e){
+								programLogger.log(Level.SEVERE, "Error recalculating angles", e);
+							} finally{
+								programLogger.log(Level.INFO, "All nuclei recalculated");
+							}
+						}
+						
+						programLogger.log(Level.INFO, "Regenerating charts");
 						for(DetailPanel panel : detailPanels){
 							panel.refreshChartCache();
 							panel.refreshTableCache();
 						}
 						
-						// Recalculate the head and hump positions for rodent sperm
-						if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-							for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
-								RodentSpermNucleus r = (RodentSpermNucleus) n;  
-								r.splitNucleusToHeadAndHump();
-							}
-						}
+						programLogger.log(Level.INFO, "Resegmenting datasets");
 						List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
 						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
 
