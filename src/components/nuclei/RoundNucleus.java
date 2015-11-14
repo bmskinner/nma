@@ -1032,25 +1032,27 @@ public class RoundNucleus
 		Get a readout of the state of the nucleus
 		Used only for debugging
 	*/
-	public void dumpInfo(int type){
-		IJ.log("Dumping nucleus info:");
-		IJ.log("    CoM: "+this.getCentreOfMass().getX()+", "+this.getCentreOfMass().getY());
+	public String dumpInfo(int type){
+		String result = "";
+		result += "Dumping nucleus info: "+this.getNameAndNumber()+"\n";
+		result += "    CoM: "+this.getCentreOfMass().toString()+"\n";
 		if(type==ALL_POINTS || type==BORDER_POINTS){
-			IJ.log("    Border:");
+			result += "    Border:\n";
 			for(int i=0; i<this.getLength(); i++){
 				NucleusBorderPoint p = this.getBorderPoint(i);
-				IJ.log("      Index "+i+": "+p.getX()+"    "+p.getY());
+				result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
 			}
 		}
 		if(type==ALL_POINTS || type==BORDER_TAGS){
-			IJ.log("    Points of interest:");
+			result += "    Points of interest:\n";
 			Map<BorderTag, Integer> pointHash = this.getBorderTags();
 
 			for(BorderTag s : pointHash.keySet()){
 			 NucleusBorderPoint p = getPoint(pointHash.get(s));
-			 IJ.log("    "+s+": "+p.getX()+"    "+p.getY()+" at index "+pointHash.get(s));
+			 result += "    "+s+": "+p.getX()+"    "+p.getY()+" at index "+pointHash.get(s)+"\n";
 			}
 		}
+		return result;
 	}
 
 	/*

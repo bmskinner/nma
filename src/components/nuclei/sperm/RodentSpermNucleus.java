@@ -478,13 +478,13 @@ extends SpermNucleus
     this.humpRoi = roi1;
 
 //    check if we need to swap
-    for(int i=0;i<roi1.size();i++){
-      if(roi1.get(i).overlaps(this.getBorderTag(BorderTag.REFERENCE_POINT))){
+//    for(int i=0;i<roi1.size();i++){
+      if(roi1.contains(this.getBorderTag(BorderTag.REFERENCE_POINT))){ //).overlaps(this.getBorderTag(BorderTag.REFERENCE_POINT))){
     	  this.hookRoi = roi1;
           this.humpRoi = roi2;
-        break;
+//        break;
       }
-    }
+//    }
 
   }
 
@@ -505,24 +505,48 @@ extends SpermNucleus
 		  List<NuclearSignal> signals = signalCollection.getSignals(i);
 
 		  if(!signals.isEmpty()){
+			  
+//			  IJ.log(this.getNameAndNumber()+": "+this.getCentreOfMass().toString());
 
 			  for(NuclearSignal n : signals){
 
 				  /*
 				   * Angle begins from the orientation point 
 				   */
-				  IJ.log("Signal CoM: "+n.getCentreOfMass().toString());
+//				  IJ.log("  Signal CoM: "+n.getCentreOfMass().toString());
 				  
 				  double angle = n.getAngle();
 				  if( this.isHookSide(n.getCentreOfMass()) ){ 
-					  IJ.log(this.getNameAndNumber()+": Hook side: "+n.getAngle());
 					  angle = 360 - angle;
+//					  IJ.log("  Hook side: "+n.getAngle()+" -> "+angle);
 				  } else {
-					  IJ.log(this.getNameAndNumber()+": Hump side: "+n.getAngle());
+//					  IJ.log("  Hump side: "+n.getAngle());
 				  }
 				  n.setAngle(angle);
 			  }
 		  }
+		  
+//		  IJ.log(this.dumpInfo(Nucleus.BORDER_TAGS));
 	  }
+  }
+  
+  @Override
+  public String dumpInfo(int type){
+	  String result = super.dumpInfo(type);
+	  
+	  result += "  Hook roi:\n";
+	  for(int i=0; i<hookRoi.size(); i++){
+		  NucleusBorderPoint p = hookRoi.get(i);
+		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
+	  }
+	  
+	  result += "  Hump roi:\n";
+	  for(int i=0; i<humpRoi.size(); i++){
+		  NucleusBorderPoint p = humpRoi.get(i);
+		  result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
+	  }
+	  
+	  return result;
+	  
   }
 }

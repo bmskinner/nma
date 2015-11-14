@@ -28,6 +28,8 @@ package components.generic;
 
 import java.io.Serializable;
 
+import components.nuclear.NucleusBorderPoint;
+
 public class XYPoint  implements Serializable{
   /**
 	 * 
@@ -156,6 +158,14 @@ private double x;
   */
   public String toString(){
     return this.getXAsInt()+","+this.getYAsInt();
+  }
+
+  public boolean equals(XYPoint p) {
+	  if(this.getX()==p.getX()  && this.getY()==p.getY()){
+		  return true;
+	  } else {
+		  return false;
+	  }
   }
 
 }

@@ -474,7 +474,7 @@ public interface Nucleus {
 
 	public Profile getSingleDistanceProfile();
 
-	public void dumpInfo(int type);
+	public String dumpInfo(int type);
 
 	public double getAngle(int index);
 

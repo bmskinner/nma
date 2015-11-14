@@ -82,7 +82,9 @@ import analysis.AnalysisDataset;
 import analysis.nucleus.MorphologyAnalysis;
 import components.Cell;
 import components.CellCollection;
+import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
 
 public class MainWindow extends JFrame implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 				
@@ -1152,6 +1154,14 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						for(DetailPanel panel : detailPanels){
 							panel.refreshChartCache();
 							panel.refreshTableCache();
+						}
+						
+						// Recalculate the head and hump positions for rodent sperm
+						if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+							for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
+								RodentSpermNucleus r = (RodentSpermNucleus) n;  
+								r.splitNucleusToHeadAndHump();
+							}
 						}
 						List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
 						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
