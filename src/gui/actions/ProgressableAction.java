@@ -165,7 +165,8 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 		
 		fireDatasetEvent(DatasetMethod.SELECT_DATASETS, list);
-		fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
+		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//		fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
 		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);

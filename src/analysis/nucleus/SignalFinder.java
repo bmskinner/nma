@@ -150,6 +150,8 @@ public class SignalFinder {
 			for( Roi r : roiList){
 				
 				StatsMap values = detector.measure(r, stack);
+				
+				// Offset the centre of mass of the signal to match the nucleus offset
 				NuclearSignal s = new NuclearSignal( r, 
 						values.get("Area"), 
 						values.get("Feret"), 

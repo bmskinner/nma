@@ -133,6 +133,9 @@ public class CellDatasetCreator {
 					int comX = s.getCentreOfMass().getXAsInt()+ (int) n.getPosition()[Nucleus.X_BASE];
 					int comY = s.getCentreOfMass().getYAsInt()+ (int) n.getPosition()[Nucleus.Y_BASE];
 					rowData.add(comX+", "+comY);
+					
+					fieldNames.add("Signal angle");
+					rowData.add(s.getAngle());
 				}			
 				
 			}

@@ -211,7 +211,9 @@ public class Utils {
 	 
 
 	 /**
-	  * Turn the border points in a nucleus into a polygon
+	  * Turn the border points in a nucleus into a polygon. The positions in the polygon
+	 * are offset (that is, the min x and y values are zero). To get the absolute positions
+	 * of the points in the source image, use createOriginalPolygon(Nucleus n)
 	  * @param n the nucleus
 	  * @return
 	  */
@@ -230,7 +232,7 @@ public class Utils {
 	 }
 
 	 /**
-	 * Turn the border points in a nucleus into a polygon
+	 * Turn a list of border points into a polygon. 
 	 * @param list the list of border points
 	 * @return
 	 */
@@ -247,9 +249,30 @@ public class Utils {
 		 return new FloatPolygon(xpoints, ypoints, list.size());
 	 }
 	
+	 /**
+		 * Turn a list of border points into a polygon. Offset the points to the original
+		 * position in a source image. Uses the Nucleus.originalPosition format
+		 * @param list the list of border points
+		 * @param originalPosition an array giving the original positions
+		 * @see Nucleus.getPosition
+		 * @return
+		 */
+		public static FloatPolygon createOriginalPolygon(List<NucleusBorderPoint> list, double[] originalPosition){
+			 float[] xpoints = new float[list.size()];
+			 float[] ypoints = new float[list.size()];
+
+			 for(int i=0;i<list.size();i++){
+				 NucleusBorderPoint p = list.get(i);
+				 xpoints[i] = (float) p.getX() + (float) originalPosition[Nucleus.X_BASE];
+				 ypoints[i] = (float) p.getY() + (float) originalPosition[Nucleus.Y_BASE];
+			 }
+
+			 return new FloatPolygon(xpoints, ypoints, list.size());
+		 }
+	
 	/**
 	 * Turn the border points in a nucleus into a polygon, offset
-	 * to the original positions of the ROI in the source image
+	 * to the original positions of the ROI in the source image.
 	 * @param n the nucleus
 	 * @return a polygon
 	 */
@@ -259,8 +282,8 @@ public class Utils {
 
 		 for(int i=0;i<n.getLength();i++){
 			 NucleusBorderPoint p = n.getBorderPoint(i);
-			 xpoints[i] = (float) p.getX() + (float) n.getPosition()[0];
-			 ypoints[i] = (float) p.getY() + (float) n.getPosition()[1];
+			 xpoints[i] = (float) p.getX() + (float) n.getPosition()[Nucleus.X_BASE];
+			 ypoints[i] = (float) p.getY() + (float) n.getPosition()[Nucleus.Y_BASE];
 		 }
 
 		 return new FloatPolygon(xpoints, ypoints, n.getLength());

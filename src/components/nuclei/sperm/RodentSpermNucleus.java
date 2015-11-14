@@ -26,6 +26,7 @@
 */  
 package components.nuclei.sperm;
 
+import ij.IJ;
 import ij.gui.Roi;
 
 import java.io.File;
@@ -42,7 +43,6 @@ import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;
-import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
@@ -59,12 +59,12 @@ extends SpermNucleus
 	// Requires a sperm nucleus object to construct from
 	public RodentSpermNucleus(RoundNucleus n) throws Exception{
 		super(n);
-		// this.findPointsAroundBorder();
+//		this.splitNucleusToHeadAndHump();
 	}
 	
 	public RodentSpermNucleus(Nucleus n) throws Exception{
 		super(n);
-		// this.findPointsAroundBorder();
+//		this.splitNucleusToHeadAndHump();
 	}
 	
 	protected RodentSpermNucleus(){
@@ -107,11 +107,46 @@ extends SpermNucleus
 			duplicate.setSingleDistanceProfile(this.getSingleDistanceProfile());
 
 			duplicate.setScale(this.getScale());
+			
+			duplicate.setHookRoi(this.getHookRoi());
+			duplicate.setHumpRoi(this.getHumpRoi());
 
 			return duplicate;
 		} catch (Exception e) {
 			return null;
 		}
+	}
+	
+	/**
+	 * Get a copy of the points in the hook roi
+	 * @return
+	 */
+	protected List<NucleusBorderPoint> getHookRoi(){
+		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
+		for(NucleusBorderPoint n : hookRoi){
+			result.add(new NucleusBorderPoint(n));
+		}
+		return result;
+	}
+	
+	/**
+	 * Get a copy of the points in the hook roi
+	 * @return
+	 */
+	protected List<NucleusBorderPoint> getHumpRoi(){
+		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
+		for(NucleusBorderPoint n : humpRoi){
+			result.add(new NucleusBorderPoint(n));
+		}
+		return result;
+	}
+	
+	protected void setHookRoi(List<NucleusBorderPoint> list){
+		this.hookRoi = list;
+	}
+	
+	protected void setHumpRoi(List<NucleusBorderPoint> list){
+		this.humpRoi = list;
 	}
 	
   	@Override
@@ -190,60 +225,86 @@ extends SpermNucleus
     setBorderTag(BorderTag.INTERSECTION_POINT, this.getIndex(this.findOppositeBorder(consensusTail)));
   }
 
-  /*
-    -----------------------
-    Qualities of a sperm head
-    -----------------------
-  */
+ 
+	/**
+	 * Check if a given point lies within the nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean checkNucleusContainsPoint(XYPoint p){
+		if(Utils.createPolygon(this.getBorderList()).contains( (float)p.getX(), (float)p.getY() ) ){
+			return true;
+		} else { 
+			return false;
+		}
+	}
 
-  public boolean isHookSide(XYPoint p){
-    if(Utils.createPolygon(hookRoi).contains( (float)p.getX(), (float)p.getY() ) ){
-      return true;
-    } else { 
-      return false;
-    }
-  }
+	/**
+	 * Check if the given point is in the hook side of the nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean isHookSide(XYPoint p){
+		if(checkNucleusContainsPoint(p)){
+			if(Utils.createOriginalPolygon(hookRoi, this.getPosition()).contains( (float)p.getX(), (float)p.getY() ) ){
+				return true;
+			} else { 
+				return false;
+			}
+		} else {
+			throw new IllegalArgumentException("Selected point is not in the nucleus");
+		}
+	}
 
 
-  public boolean isHumpSide(XYPoint p){
-    if(Utils.createPolygon(humpRoi).contains( (float)p.getX(), (float)p.getY() ) ){
-      return true;
-    } else { 
-      return false;
-    }
-  }    
-  
-  /*
-    Checks if the smoothed array nuclear shape profile has the acrosome to the rear of the array
-    If acrosome is at the beginning:
-      returns true
-    else returns false
-    counts the number of points above 180 degrees in each half of the array
-  */
-  public boolean isProfileOrientationOK() throws Exception{
+	/**
+	 * Check if the given point is in the hump side of the nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean isHumpSide(XYPoint p){
+		if(checkNucleusContainsPoint(p)){
+			if(Utils.createOriginalPolygon(humpRoi, this.getPosition()).contains( (float)p.getX(), (float)p.getY() ) ){
+				return true;
+			} else { 
+				return false;
+			}
+		} else {
+			throw new IllegalArgumentException("Selected point is not in the nucleus");
+		}
+	}    
 
-    int frontPoints = 0;
-    int rearPoints = 0;
+	/**
+	 * Checks if the smoothed array nuclear shape profile has the 
+	 * acrosome to the rear of the array. 
+	 * Counts the number of points above 180 degrees in each half of the array.
+	 * @return true if acrosome is at the beginning of the profile
+	 * @throws Exception
+	 */
+	public boolean isProfileOrientationOK() throws Exception{
 
-    Profile profile = this.getAngleProfile(BorderTag.REFERENCE_POINT);
+		int frontPoints = 0;
+		int rearPoints = 0;
 
-    int midPoint = (int) (this.getLength()/2) ;
-    for(int i=0; i<this.getLength();i++){ // integrate points over 180
+		Profile profile = this.getAngleProfile(BorderTag.REFERENCE_POINT);
 
-        if(i<midPoint){
-          frontPoints += profile.get(i);
-        }
-        if(i>midPoint){
-          rearPoints  += profile.get(i);
-        }
-    }
+		int midPoint = (int) (this.getLength()/2) ;
+		for(int i=0; i<this.getLength();i++){ // integrate points over 180
 
-    if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
-      return true;
-    } else{ 
-      return false;
-    }
-  }
+			if(i<midPoint){
+				frontPoints += profile.get(i);
+			}
+			if(i>midPoint){
+				rearPoints  += profile.get(i);
+			}
+		}
+
+		if(frontPoints > rearPoints){ // if the maxIndex is closer to the end than the beginning
+			return true;
+		} else{ 
+			return false;
+		}
+	}
 
   /*
     -----------------------
@@ -429,27 +490,33 @@ extends SpermNucleus
 
   // needs to override AsymmetricNucleus version because hook/hump
   @Override
-  public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
+  public void calculateSignalAnglesFromPoint(NucleusBorderPoint p) throws Exception {
 
-    super.calculateSignalAnglesFromPoint(p);
+	  super.calculateSignalAnglesFromPoint(p);
 
-    // update signal angles with hook or hump side
+	  // update signal angles with hook or hump side
+	  for( int i : signalCollection.getSignalGroups()){
+		  List<NuclearSignal> signals = signalCollection.getSignals(i);
 
-    for( int i : signalCollection.getSignalGroups()){
-    	List<NuclearSignal> signals = signalCollection.getSignals(i);
+		  if(!signals.isEmpty()){
 
-    	if(!signals.isEmpty()){
+			  for(NuclearSignal n : signals){
 
-    		for(NuclearSignal n : signals){
-
-    			// hook or hump?
-    			double angle = n.getAngle();
-    			if( this.isHookSide(n.getCentreOfMass()) ){ 
-    				angle = 360 - angle;
-    			}
-    			n.setAngle(angle);
-    		}
-    	}
-    }
+				  // hook or hump?
+				  
+				  /*
+				   * Angle begins from the orientation point 
+				   */
+				  IJ.log("Signal CoM: "+n.getCentreOfMass().toString());
+				  
+				  double angle = n.getAngle();
+				  if( this.isHookSide(n.getCentreOfMass()) ){ 
+					  IJ.log(this.getNameAndNumber()+": Hook side: "+n.getAngle());
+					  angle = 360 - angle;
+				  }
+				  n.setAngle(angle);
+			  }
+		  }
+	  }
   }
 }

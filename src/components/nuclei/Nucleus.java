@@ -462,7 +462,13 @@ public interface Nucleus {
 	 */
 	public double findRotationAngle();
 
-	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p);
+	/**
+	 * Calculate the angle signal centres of mass make with the nucleus centre of mass
+	 * and the given border point
+	 * @param p the border point to orient from (the zero angle)
+	 * @throws Exception
+	 */
+	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p) throws Exception;
 	
 	public void exportSignalDistanceMatrix();
 

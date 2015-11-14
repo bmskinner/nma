@@ -69,6 +69,8 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
 	}
 	
+	private Map<Integer, AnalysisDataset> datasetMap = new HashMap<Integer, AnalysisDataset>();
+	
 //	private Logger programLogger;
 
 	public LogPanel(Logger programLogger) {
@@ -188,7 +190,17 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		if(commandMap.containsKey(command)){
 			fireInterfaceEvent(commandMap.get(command));
 		} else {
-			programLogger.log(Level.INFO, "Command not recognised");
+						
+			if(command.equals("help")){
+				programLogger.log(Level.INFO, "Available commands: ");
+				for(String key : commandMap.keySet()){
+					programLogger.log(Level.INFO, " "+key);
+				}
+				
+			} else {
+
+				programLogger.log(Level.INFO, "Command not recognised");
+			}
 		}		
 	}
 

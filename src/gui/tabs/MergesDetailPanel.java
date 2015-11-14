@@ -32,6 +32,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import analysis.AnalysisDataset;
@@ -85,43 +86,48 @@ public class MergesDetailPanel extends DetailPanel {
 	
 	public void update(List<AnalysisDataset> list){
 		this.list = list;
-		try {
-			programLogger.log(Level.FINEST, "Updating merges panel");
-			getSourceButton.setVisible(false);
-			if(list.size()==1){
+		
+		SwingUtilities.invokeLater( new Runnable(){
 
-				if(activeDataset().hasMergeSources()){
+			public void run(){
+				try {
+					programLogger.log(Level.FINEST, "Updating merges panel");
+					getSourceButton.setVisible(false);
+					if(MergesDetailPanel.this.list.size()==1){
 
-					DefaultTableModel model = new DefaultTableModel();
+						if(activeDataset().hasMergeSources()){
 
-					Vector<Object> names 	= new Vector<Object>();
-					Vector<Object> nuclei 	= new Vector<Object>();
+							DefaultTableModel model = new DefaultTableModel();
 
-					for( UUID id : activeDataset().getMergeSources()){
-						AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
-						names.add(mergeSource.getName());
-						nuclei.add(mergeSource.getCollection().getNucleusCount());
-					}
-					model.addColumn("Merge source", names);
-					model.addColumn("Nuclei", nuclei);
+							Vector<Object> names 	= new Vector<Object>();
+							Vector<Object> nuclei 	= new Vector<Object>();
 
-					mergeSources.setModel(model);
-					getSourceButton.setVisible(true);
+							for( UUID id : activeDataset().getMergeSources()){
+								AnalysisDataset mergeSource = activeDataset().getMergeSource(id);
+								names.add(mergeSource.getName());
+								nuclei.add(mergeSource.getCollection().getNucleusCount());
+							}
+							model.addColumn("Merge source", names);
+							model.addColumn("Nuclei", nuclei);
 
-				} else {
-					try{
+							mergeSources.setModel(model);
+							getSourceButton.setVisible(true);
+
+						} else {
+							try{
+								mergeSources.setModel(makeBlankTable());
+							} catch (Exception e){
+								programLogger.log(Level.SEVERE, "Error updating merges panel", e);
+							}
+						}
+					} else { // more than one dataset selected
 						mergeSources.setModel(makeBlankTable());
-					} catch (Exception e){
-						programLogger.log(Level.SEVERE, "Error updating merges panel", e);
 					}
+					programLogger.log(Level.FINEST, "Updated merges panel");
+				} catch (Exception e){
+					programLogger.log(Level.SEVERE, "Error updating merges panel", e);
 				}
-			} else { // more than one dataset selected
-				mergeSources.setModel(makeBlankTable());
-			}
-			programLogger.log(Level.FINEST, "Updated merges panel");
-		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Error updating merges panel", e);
-		}
+			}} );
 	}
 	
 	private DefaultTableModel makeBlankTable(){

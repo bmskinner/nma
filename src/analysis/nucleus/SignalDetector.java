@@ -72,8 +72,6 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	protected int signalGroup;
 	protected String channelName;
 	
-	private boolean debug = false;
-
 	/**
 	 * Empty constructor. Detector will have default values
 	 */
@@ -91,8 +89,9 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 */
 	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName){
 		this.options	 = options;
-		this.logger		 = Logger.getLogger(SignalDetector.class.getName()); //new Logger(d.getDebugFile(), "SignalDetector");
+		this.logger		 = Logger.getLogger(SignalDetector.class.getName());
 		logger.addHandler(d.getLogHandler());
+		logger.setLevel(Level.ALL);
 		
 		this.folder		 = folder;
 		this.channel	 = channel;
@@ -195,6 +194,7 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 			logger.log(Level.SEVERE, "Error in signal detection", e);
 		} catch (ExecutionException e) {
 			logger.log(Level.SEVERE, "Error in signal detection", e);
+		} finally {
 		}
 
 	} 

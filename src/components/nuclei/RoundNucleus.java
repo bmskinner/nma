@@ -1008,7 +1008,7 @@ public class RoundNucleus
 	}
 
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
-	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p){
+	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p) throws Exception {
 
 		for( int signalGroup : signalCollection.getSignalGroups()){
 			List<NuclearSignal> signals = signalCollection.getSignals(signalGroup);
