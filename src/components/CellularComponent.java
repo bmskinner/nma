@@ -26,7 +26,7 @@ public interface CellularComponent {
 	
 	
 	/**
-	 * Get the position of the nucleus in the 
+	 * Get the position of the object in the 
 	 * original image. The indexes in the double are
 	 * 0 - X_BASE of the bounding box
 	 * 1 - Y_BASE of the bounding box

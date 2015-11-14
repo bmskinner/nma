@@ -28,6 +28,7 @@ package components.nuclei.sperm;
 
 import ij.IJ;
 import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -246,10 +247,13 @@ extends SpermNucleus
 	 */
 	public boolean isHookSide(XYPoint p){
 		if(checkNucleusContainsPoint(p)){
-			if(Utils.createOriginalPolygon(hookRoi, this.getPosition()).contains( (float)p.getX(), (float)p.getY() ) ){
+						
+			if(Utils.createPolygon(hookRoi).contains( (float)p.getX(), (float)p.getY() ) ){
 				return true;
-			} else { 
+			} else if(isHumpSide(p)) {
 				return false;
+			} else {
+				throw new IllegalArgumentException("Selected point is not in hook or hump rois");
 			}
 		} else {
 			throw new IllegalArgumentException("Selected point is not in the nucleus");
@@ -264,10 +268,12 @@ extends SpermNucleus
 	 */
 	public boolean isHumpSide(XYPoint p){
 		if(checkNucleusContainsPoint(p)){
-			if(Utils.createOriginalPolygon(humpRoi, this.getPosition()).contains( (float)p.getX(), (float)p.getY() ) ){
+			if(Utils.createPolygon(humpRoi).contains( (float)p.getX(), (float)p.getY() ) ){
 				return true;
-			} else { 
+			} else if(isHookSide(p)) {
 				return false;
+			} else {
+				throw new IllegalArgumentException("Selected point is not in hook or hump rois");
 			}
 		} else {
 			throw new IllegalArgumentException("Selected point is not in the nucleus");
@@ -502,8 +508,6 @@ extends SpermNucleus
 
 			  for(NuclearSignal n : signals){
 
-				  // hook or hump?
-				  
 				  /*
 				   * Angle begins from the orientation point 
 				   */
@@ -513,6 +517,8 @@ extends SpermNucleus
 				  if( this.isHookSide(n.getCentreOfMass()) ){ 
 					  IJ.log(this.getNameAndNumber()+": Hook side: "+n.getAngle());
 					  angle = 360 - angle;
+				  } else {
+					  IJ.log(this.getNameAndNumber()+": Hump side: "+n.getAngle());
 				  }
 				  n.setAngle(angle);
 			  }

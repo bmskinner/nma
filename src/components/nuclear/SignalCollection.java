@@ -146,7 +146,8 @@ public class SignalCollection implements Serializable {
 	
 	
 	/**
-	 * Get all the signals in all signal groups, as a list of lists
+	 * Get all the signals in all signal groups, as a list of lists.
+	 * Fetches the actual signals, not a copy
 	 * @return the list of signal lists
 	 */
 	public ArrayList<List<NuclearSignal>> getSignals(){
@@ -158,7 +159,8 @@ public class SignalCollection implements Serializable {
 	}
 	
 	/**
-	 * Get the signals in the given group
+	 * Get the signals in the given group. Fetches the actual signals, 
+	 * not a copy
 	 * @param signalGroup the signal group
 	 * @return a list of signals
 	 */
@@ -248,8 +250,8 @@ public class SignalCollection implements Serializable {
 	}
 	
 	/**
-	 * Get the channel codes
-	 * @return the set of names
+	 * Get the set of signal groups in this collection
+	 * @return the set of integer group numbers
 	 */
 	public Set<Integer> getSignalGroups(){
 		return names.keySet();
