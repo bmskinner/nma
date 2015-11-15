@@ -134,7 +134,8 @@ public class HistogramChartFactory {
 		
 		if(dataset.getCollection().hasSignals()){
 			XYPlot plot = chart.getXYPlot();
-			for (int j = 0; j < dataset.getCollection().getSignalGroups().size(); j++) {
+			int seriesCount = plot.getDataset().getSeriesCount();
+			for (int j = 0; j < seriesCount; j++) {
 				String name = (String) plot.getDataset().getSeriesKey(j);
 				int seriesGroup = MorphologyChartFactory.getIndexFromLabel(name);
 				plot.getRenderer().setSeriesVisibleInLegend(j, false);
