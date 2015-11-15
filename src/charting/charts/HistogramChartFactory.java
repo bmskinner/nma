@@ -57,12 +57,8 @@ public class HistogramChartFactory {
 	 */
 	public static JFreeChart createHistogram(HistogramDataset ds, String xLabel, String yLabel){
 		
-		JFreeChart chart = null;
-		if(ds==null){
-			chart = ChartFactory.createHistogram(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, true, true, true);
-		} else {
-			chart = ChartFactory.createHistogram(null, xLabel, yLabel, ds,   PlotOrientation.VERTICAL, true, true, true);
-		}
+		JFreeChart chart = ChartFactory.createHistogram(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, true, true, true);
+		
 		
 		XYPlot plot = chart.getXYPlot();
 		plot.setBackgroundPaint(Color.white);
@@ -88,15 +84,7 @@ public class HistogramChartFactory {
 		if(ds!=null && options.hasDatasets()){
 			XYPlot plot = chart.getXYPlot();
 			plot.getDomainAxis().setRange(0,360);
-			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());
-//			for (int j = 0; j < ds.getSeriesCount(); j++) {
-//				String name = (String) ds.getSeriesKey(j);
-//				int seriesGroup = MorphologyChartFactory.getIndexFromLabel(name);
-//				plot.getRenderer().setSeriesVisibleInLegend(j, false);
-//				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-//				Color colour = options.firstDataset().getSignalGroupColour(seriesGroup);
-//				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
-//			}	
+			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());	
 		}
 		return chart;
 	}
@@ -117,15 +105,7 @@ public class HistogramChartFactory {
 		if(ds!=null && options.hasDatasets()){
 			XYPlot plot = chart.getXYPlot();
 			plot.getDomainAxis().setRange(0,1);
-			
 			setSeriesPropertiesForSignalHistogram(chart, options.firstDataset());
-//			for (int j = 0; j < ds.getSeriesCount(); j++) {
-//				plot.getRenderer().setSeriesVisibleInLegend(j, false);
-//				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-//				int index = MorphologyChartFactory.getIndexFromLabel( (String) ds.getSeriesKey(j));
-//				Color colour = options.firstDataset().getSignalGroupColour(index);
-//				plot.getRenderer().setSeriesPaint(j, ColourSelecter.getTransparentColour(colour, true, 128));
-//			}	
 		}
 		return chart;
 	}
