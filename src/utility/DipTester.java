@@ -140,14 +140,19 @@ public class DipTester {
 	}
 
 	/**
-	 * Given an array of values, perform a dip test and return the p-value
+	 * Given an array of values, perform a dip test and return the p-value.
+	 * If the array size is <10, returns 1.
 	 * @param values
 	 * @return
 	 */
 	public static double getDipTestPValue(double[] values){
-//		Arrays.sort(values);
-		double[] result = DistributionTest.diptest(values);
-		return result[1];
+		
+		if(values.length<10){
+			return 1;
+		} else {
+			double[] result = DistributionTest.diptest(values);
+			return result[1];
+		}
 	}
 	
 	/**
@@ -156,11 +161,12 @@ public class DipTester {
 	 * @return
 	 */
 	public static double getDipTestTestStatistic(double[] values){
-//		Arrays.sort(values);
-		double[] result = DistributionTest.diptest(values);
-		return result[0];
-		
-		
+		if(values.length<10){
+			return 1;
+		} else {
+			double[] result = DistributionTest.diptest(values);
+			return result[0];
+		}
 		
 	}
 	
