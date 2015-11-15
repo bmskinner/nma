@@ -1014,10 +1014,12 @@ public class RoundNucleus
 			List<NuclearSignal> signals = signalCollection.getSignals(signalGroup);
 
 			if(!signals.isEmpty()){
-
+//				IJ.log(this.getNameAndNumber()+": Signals present in nucleus");
 				for(NuclearSignal s : signals){
+//					IJ.log(this.getNameAndNumber()+": Calculating angle");
 					double angle = findAngleBetweenXYPoints(p, this.getCentreOfMass(), s.getCentreOfMass());
 					s.setAngle(angle);
+//					IJ.log(this.getNameAndNumber()+": Initial angle calculated");
 				}
 			}
 		}

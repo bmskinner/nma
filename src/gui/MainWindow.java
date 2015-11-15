@@ -1159,23 +1159,21 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 							try{
 								programLogger.log(Level.INFO, "Replacing nucleus roi patterns");
 								for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
-									IJ.log(n.getNameAndNumber());
+//									IJ.log(n.getNameAndNumber());
 									RodentSpermNucleus r = (RodentSpermNucleus) n;  
-									IJ.log("Splitting nuclcus");
+//									IJ.log("Splitting nuclcus");
 									r.splitNucleusToHeadAndHump();
 									try {
-										IJ.log("Calculating angles");
+//										IJ.log("Calculating angles");
 										r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
 									} catch (Exception e) {
 										programLogger.log(Level.SEVERE, "Error restoring signal angles", e);
 									}
-									IJ.log("Finished calculating angles");
+//									IJ.log("Finished calculating angles");
 								}
-								programLogger.log(Level.INFO, "Replaced nucleus roi patterns");
+//								programLogger.log(Level.INFO, "Replaced nucleus roi patterns");
 							}catch(Exception e){
 								programLogger.log(Level.SEVERE, "Error recalculating angles", e);
-							} finally{
-								programLogger.log(Level.INFO, "All nuclei recalculated");
 							}
 						}
 						

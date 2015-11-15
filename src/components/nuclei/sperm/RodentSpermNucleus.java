@@ -250,13 +250,13 @@ extends SpermNucleus
 						
 			if(Utils.createPolygon(hookRoi).contains( (float)p.getX(), (float)p.getY() ) ){
 				return true;
-			} else if(isHumpSide(p)) {
-				return false;
 			} else {
-				throw new IllegalArgumentException("Selected point is not in hook or hump rois");
+				return false;
+//				throw new IllegalArgumentException("Selected point is not in hook or hump rois");
 			}
 		} else {
-			throw new IllegalArgumentException("Selected point is not in the nucleus");
+			return false;
+//			throw new IllegalArgumentException("Selected point is not in the nucleus");
 		}
 	}
 
@@ -270,13 +270,12 @@ extends SpermNucleus
 		if(checkNucleusContainsPoint(p)){
 			if(Utils.createPolygon(humpRoi).contains( (float)p.getX(), (float)p.getY() ) ){
 				return true;
-			} else if(isHookSide(p)) {
-				return false;
 			} else {
-				throw new IllegalArgumentException("Selected point is not in hook or hump rois");
+				return false;
 			}
 		} else {
-			throw new IllegalArgumentException("Selected point is not in the nucleus");
+			return false;
+			
 		}
 	}    
 
@@ -439,7 +438,6 @@ extends SpermNucleus
 
   public void splitNucleusToHeadAndHump(){
 	  
-	  IJ.log("Splitting roi");
 
     int intersectionPointIndex = findIntersectionPointForNuclearSplit();
     // this.intersectionPoint = this.getBorderPoint( intersectionPointIndex );
@@ -484,7 +482,6 @@ extends SpermNucleus
     	this.hookRoi = roi1;
     	this.humpRoi = roi2;
     }
-    IJ.log("Finished splitting roi");
 
   }
 
@@ -498,59 +495,61 @@ extends SpermNucleus
   @Override
   public void calculateSignalAnglesFromPoint(NucleusBorderPoint p) throws Exception {
 
-	  IJ.log(this.getNameAndNumber()+": Calculating signal angles");
+//	  IJ.log(this.getNameAndNumber()+": Calculating signal angles");
 	  try {
-	  super.calculateSignalAnglesFromPoint(p);
+		  super.calculateSignalAnglesFromPoint(p);
+//
+//		  if(this.hasSignal()){
+//			  IJ.log(this.getNameAndNumber()+": Signals present in nucleus");
+//		  }
+		  // update signal angles with hook or hump side
+		  for( int i : signalCollection.getSignalGroups()){
+//			  IJ.log(this.getNameAndNumber()+": Signal group "+i);
+			  if(signalCollection.hasSignal(i)){
+				  List<NuclearSignal> signals = signalCollection.getSignals(i);
+				  //		  if(!signals.isEmpty()){
 
-	  
-	  // update signal angles with hook or hump side
-	  for( int i : signalCollection.getSignalGroups()){
-		  List<NuclearSignal> signals = signalCollection.getSignals(i);
+//				  IJ.log(this.getNameAndNumber()+": Signals group is not empty");
 
-		  if(!signals.isEmpty()){
-			  
-			  IJ.log(this.getNameAndNumber()+": Signals present");
+				  for(NuclearSignal n : signals){
 
-			  for(NuclearSignal n : signals){
+					  /*
+					   * Angle begins from the orientation point 
+					   */
+//					  IJ.log(this.getNameAndNumber()+": Signal at "+n.getCentreOfMass().toString());
 
-				  /*
-				   * Angle begins from the orientation point 
-				   */
-//				  IJ.log("  Signal CoM: "+n.getCentreOfMass().toString());
-				  
-				  double angle = n.getAngle();
-				  IJ.log(this.getNameAndNumber()+": Checking signal roi");
+					  double angle = n.getAngle();
+//					  IJ.log(this.getNameAndNumber()+": Checking signal roi");
 
-				  try{
+					  try{
 
-					  if( this.isHookSide(n.getCentreOfMass()) ){ 
-						  angle = 360 - angle;
-						  //					  IJ.log("  Hook side: "+n.getAngle()+" -> "+angle);
-					  } else {
-						  //					  IJ.log("  Hump side: "+n.getAngle());
-					  }
-				  } catch(Exception e){
-					  IJ.log("Error detected: falling back on default angle: "+e.getMessage());
-				  } finally {
-
-					  try {
-					  IJ.log(this.getNameAndNumber()+": Setting angle");
-					  n.setAngle(angle);
+						  if( this.isHookSide(n.getCentreOfMass()) ){ 
+							  angle = 360 - angle;
+//							  IJ.log(this.getNameAndNumber()+": Hook side: "+n.getAngle()+" -> "+angle);
+						  } else {
+//							  IJ.log(this.getNameAndNumber()+": Hump side: "+n.getAngle());
+						  }
 					  } catch(Exception e){
-						  IJ.log("Error");
+//						  IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
+					  } finally {
+
+						  
+//							  IJ.log(this.getNameAndNumber()+": Setting angle to "+angle );
+							  n.setAngle(angle);
+//							  IJ.log(this.getNameAndNumber()+": Angle set");
+//						  } catch(Exception e){
+//							  IJ.log(this.getNameAndNumber()+": Error setting angle");
+//						  }
 					  }
+//					  IJ.log(this.getNameAndNumber()+": Signal updated");
 				  }
-				  IJ.log("Signal updated");
+//				  IJ.log(this.getNameAndNumber()+": All signals in group processed");
 			  }
-			  IJ.log(this.getNameAndNumber()+": All signals in group processed");
+//			  IJ.log(this.getNameAndNumber()+": All signal groups processed");
+			  //		  IJ.log(this.dumpInfo(Nucleus.BORDER_TAGS));
 		  }
-		  IJ.log(this.getNameAndNumber()+": All signal groups processed");
-//		  IJ.log(this.dumpInfo(Nucleus.BORDER_TAGS));
-	  }
 	  } catch(Exception e){
-		  IJ.log("Error updating signal angles");
-	  } finally {
-		  IJ.log(this.getNameAndNumber()+": Finished calculating signal angles");
+//		  IJ.log("Error updating signal angles");
 	  }
   }
   
