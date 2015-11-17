@@ -182,7 +182,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 						chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
 						getChartCache().addChart(options, chart);
-						programLogger.log(Level.FINEST, "Added cached chart: "+stat.toString());
+						programLogger.log(Level.FINEST, "Added cached boxplot chart: "+stat.toString());
 					}
 
 					panel.setChart(chart);
@@ -258,12 +258,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		}
 		
 		public void update(List<AnalysisDataset> list) throws Exception {
+									
 			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
-			updateWithScale(list, scale);
-		}
-		
-		public void updateWithScale(List<AnalysisDataset> list, MeasurementScale scale) throws Exception {
-						
             boolean useDensity = useDensityBox.isSelected();
 
 
@@ -282,18 +278,15 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				
 			
 					if(useDensity){
-//						DefaultXYDataset ds = NuclearHistogramDatasetCreator.createNuclearDensityHistogramDataset(list, stat, scale);
-//						chart = HistogramChartFactory.createNuclearDensityStatsChart(ds, list, stat, scale);
 						chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
 						getChartCache().addChart(options, chart);
 
 					} else {
-//						HistogramDataset ds = NuclearHistogramDatasetCreator.createNuclearStatsHistogramDataset(list, stat, scale);
 						chart = HistogramChartFactory.createNuclearStatsHistogram(options);
 						getChartCache().addChart(options, chart);
 						
 					}
-					programLogger.log(Level.FINEST, "Added cached chart: "+stat);
+					programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
 				}
 //				detectModes(chart, list, stat);
 				XYPlot plot = (XYPlot) chart.getPlot();

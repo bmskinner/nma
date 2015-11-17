@@ -44,44 +44,50 @@ public class NuclearHistogramDatasetCreator {
 			options.getLogger().log(Level.FINEST, "Creating histogram dataset: "+options.getStat());
 		}
 		
-		for(AnalysisDataset dataset : options.getDatasets()){
-			
-			if(options.hasLogger()){
-				options.getLogger().log(Level.FINEST, "  Dataset: "+dataset.getName());
-			}
-			
-			CellCollection collection = dataset.getCollection();
-			
-			double[] values = findDatasetValues(dataset, options.getStat(), options.getScale()); 
-						
-			String groupLabel = options.getStat().toString();
-						
-			double min = Stats.min(values);
-			double max = Stats.max(values);
-			
-			if(options.hasLogger()){
-				options.getLogger().log(Level.FINEST, "  Min: "+min+"; max: "+max);
-			}
-			
-			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
-						
-			int roundLog = log-1 == 0 ? log-2 : log-1;
-			double roundAbs = Math.pow(10, roundLog);
-			
-			// use int truncation to round to nearest 100 above max
-			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
-			maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
-			int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
-			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
-			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
-			
-			if(options.hasLogger()){
-				options.getLogger().log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
-			}
-			
-			int bins = 100;
+		if(options.hasDatasets()){
 
-			ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
+			for(AnalysisDataset dataset : options.getDatasets()){
+
+				if(options.hasLogger()){
+					options.getLogger().log(Level.FINEST, "  Dataset: "+dataset.getName());
+				}
+
+				CellCollection collection = dataset.getCollection();
+
+				if(options.hasLogger()){
+					options.getLogger().log(Level.FINEST, "  Stat: "+options.getStat().toString()+"; Scale: "+options.getScale().toString());
+				}
+				double[] values = findDatasetValues(dataset, options.getStat(), options.getScale()); 
+
+				String groupLabel = options.getStat().toString();
+
+				double min = Stats.min(values);
+				double max = Stats.max(values);
+
+				if(options.hasLogger()){
+					options.getLogger().log(Level.FINEST, "  Min: "+min+"; max: "+max);
+				}
+
+				int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+
+				int roundLog = log-1 == 0 ? log-2 : log-1;
+				double roundAbs = Math.pow(10, roundLog);
+
+				// use int truncation to round to nearest 100 above max
+				int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
+				maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
+				int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
+				minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
+				minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
+
+				if(options.hasLogger()){
+					options.getLogger().log(Level.FINEST, "  Rounded min: "+minRounded+"; max: "+maxRounded);
+				}
+
+				int bins = 100;
+
+				ds.addSeries(groupLabel+"_"+collection.getName(), values, bins, minRounded, maxRounded );
+			}
 		}
 		if(options.hasLogger()){
 			options.getLogger().log(Level.FINEST, "Completed histogram dataset");
@@ -92,12 +98,13 @@ public class NuclearHistogramDatasetCreator {
 	/**
 	 * Given a dataset and a stats parameter, get the values for that stat
 	 * @param dataset the Analysis Dataset
-	 * @param stat the statistic to fetch (use NuclearHistogramDatasetCreator.NUCLEAR_x constants)
+	 * @param stat the statistic to fetch
+	 * @param scale the scale to display at
 	 * @return the array of values
 	 * @throws Exception
 	 */
 	public static double[] findDatasetValues(AnalysisDataset dataset, NucleusStatistic stat, MeasurementScale scale) throws Exception {
-
+		
 		CellCollection collection = dataset.getCollection();			
 		double[] values = collection.getNuclearStatistics(stat, scale); 			
 		return values;
