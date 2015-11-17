@@ -95,7 +95,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			String imageName = imageFile.getName();
 
 			programLogger.log(Level.FINEST, "Converting image");
-			ImageProcessor openProcessor = ImageExporter.convert(stack).getProcessor();
+			ImageProcessor openProcessor = ImageExporter.convertToRGB(stack).getProcessor();
 			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
 
 			// Store the options

@@ -441,9 +441,9 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 						  Roi largeRoi 			 = RoiEnlarger.enlarge(nucleus, 20);
 						  ImageStack largeRegion = NucleusFinder.getRoiAsStack(largeRoi, imageStack);
 						  try{
-							  IJ.saveAsTiff(ImageExporter.convert(smallRegion), n.getOriginalImagePath());
-							  IJ.saveAsTiff(ImageExporter.convert(largeRegion), n.getEnlargedImagePath());
-							  IJ.saveAsTiff(ImageExporter.convert(smallRegion), n.getAnnotatedImagePath());
+							  IJ.saveAsTiff(ImageExporter.convertToRGB(smallRegion), n.getOriginalImagePath());
+							  IJ.saveAsTiff(ImageExporter.convertToRGB(largeRegion), n.getEnlargedImagePath());
+							  IJ.saveAsTiff(ImageExporter.convertToRGB(smallRegion), n.getAnnotatedImagePath());
 						  } catch(Exception e){
 							  fileLogger.log(Level.SEVERE, "Error saving original, enlarged or annotated image", e);
 						  }

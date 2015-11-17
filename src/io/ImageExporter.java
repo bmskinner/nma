@@ -38,7 +38,7 @@ public class ImageExporter {
 	 * @param stack the stack to convert
 	 * @return an image
 	 */
-	public static ImagePlus convert(ImageStack stack){
+	public static ImagePlus convertToRGB(ImageStack stack){
 		
 		if(stack==null){
 			throw new IllegalArgumentException("Stack is null");
@@ -53,6 +53,11 @@ public class ImageExporter {
 		
 		return result;
 	}
+	
+	//TODO
+//	public static ImagePlus convertToGreyscaleOnWhite(ImageStack stack){
+//		
+//	}
 	
 	/**
 	 * Convert a single-plane stack to RGB.

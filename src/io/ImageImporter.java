@@ -91,7 +91,7 @@ public class ImageImporter {
 	 * @param image the image to be converted to a stack
 	 * @return the stack with countertain in index 0
 	 */
-	public static ImageStack convert(ImagePlus image){
+	public static ImageStack convert(ImagePlus image) throws Exception {
 		if(image==null){
 			if(logger==null){
 				programLogger.log(Level.WARNING, "Input image is null");
@@ -117,9 +117,7 @@ public class ImageImporter {
 			
 			throw new IllegalArgumentException("Cannot handle image type: "+image.getType());
 		}
-		if(logger==null){
-//			programLogger.log(Level.INFO, "Image is type: "+image.getType());
-		} else {
+		if(logger!=null){
 			logger.log(Level.FINE, "Image is type: "+image.getType());
 		}				
 		
@@ -204,7 +202,12 @@ public class ImageImporter {
 	 * @param image the 16 bit image to convert
 	 * @return the stack
 	 */
-	private static ImageStack convert16bitGrey(ImagePlus image){
+	private static ImageStack convert16bitGrey(ImagePlus image) throws Exception {
+		if(logger!=null){
+	    	logger.log(Level.FINE, "Converting image from 16 bit");
+	    } else {
+	    	programLogger.log(Level.FINEST, "Converting image from 16 bit");
+	    }
 		ImageConverter converter = new ImageConverter(image);
 		converter.convertToGray8();
 		return convertGreyscale(image);

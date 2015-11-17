@@ -292,7 +292,7 @@ public class FishMappingWindow extends JDialog {
 		openFile = preFile;
 				
 		ImageStack preStack = ImageImporter.importImage(preFile, programLogger);
-		ImagePlus preImage = ImageExporter.convert(preStack);
+		ImagePlus preImage = ImageExporter.convertToRGB(preStack);
 
 		openProcessor = preImage.getProcessor();
 		List<Nucleus> imageNuclei = this.preFISHDataset.getCollection().getNuclei(openFile);

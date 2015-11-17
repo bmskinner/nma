@@ -105,7 +105,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 			programLogger.log(Level.FINEST, "Creating processed images");
 			
 			CannyOptions cannyOptions = options.getCannyOptions("nucleus");
-			ImageProcessor openProcessor = ImageExporter.convert(imageStack).getProcessor();
+			ImageProcessor openProcessor = ImageExporter.convertToRGB(imageStack).getProcessor();
 						
 			if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error
 				

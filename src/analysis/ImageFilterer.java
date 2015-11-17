@@ -42,7 +42,7 @@ public class ImageFilterer {
 	public static ImageProcessor runKuwaharaFiltering(ImageStack stack, int stackNumber, int filterSize){
 		
 		Kuwahara_Filter kw = new Kuwahara_Filter();
-		ImagePlus img = ImageExporter.convert(stack);
+		ImagePlus img = ImageExporter.convertToRGB(stack);
 		kw.setup("", img);
 		
 		ImageProcessor result = stack.getProcessor(stackNumber).duplicate();
