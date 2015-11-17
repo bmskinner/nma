@@ -246,15 +246,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			unmergeButton = new JButton("Unmerge segments");
 			unmergeButton.addActionListener(this);
-			
-//			unmergeButton.addActionListener( new ActionListener(){
-//				@Override
-//				public void actionPerformed(ActionEvent e) {
-//					
-//					
-//					
-//				}
-//			});
+
 			
 			panel.add(unmergeButton);
 			return panel;
@@ -430,6 +422,9 @@ public class SegmentsDetailPanel extends DetailPanel {
 				chartPanel.setChart(chart);
 			} catch (Exception e) {
 				programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
+				chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+				unmergeButton.setEnabled(false);
+				mergeButton.setEnabled(false);
 			} 
 		}
 
@@ -588,7 +583,11 @@ public class SegmentsDetailPanel extends DetailPanel {
 				}
 
 			} catch (Exception e){
-				programLogger.log(Level.SEVERE, "Error updating segments boxplot", e);				
+				programLogger.log(Level.SEVERE, "Error updating segments boxplot", e);		
+				mainPanel = new JPanel();
+				mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+				mainPanel.add(new JLabel("Unable to display segment boxplots"));
+				scrollPane.setViewportView(mainPanel);
 			}
 		}
 		
