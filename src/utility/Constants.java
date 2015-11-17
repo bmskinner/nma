@@ -57,7 +57,7 @@ public class Constants {
 		public static final String IMAGE_PREFIX = "export.";
 
 		// Images with these prefixes are ignored by the image importer
-		public static final String[] PREFIXES_TO_IGNORE = { IMAGE_PREFIX, "composite", "plot"};
+		public static final String[] PREFIXES_TO_IGNORE = { IMAGE_PREFIX, "composite", "plot", "._"};
 
 		// The file types that the program will try to open
 		public static final String[] IMPORTABLE_FILE_TYPES = {".tif", ".tiff", ".jpg"};
