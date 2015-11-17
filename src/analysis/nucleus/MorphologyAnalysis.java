@@ -699,7 +699,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 //			medianProfile.print();
 
 			// find local maxima in the median profile over 180
-			BooleanProfile maxima = medianProfile.getLocalMaxima(5, 180); // window size 5, only values over 180
+			BooleanProfile maxima = medianProfile.smooth(2).getLocalMaxima(5, 180); // window size 5, only values over 180
 
 
 			double minAngle = 180;

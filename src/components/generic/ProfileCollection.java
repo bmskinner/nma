@@ -293,6 +293,17 @@ public class ProfileCollection implements Serializable {
 		return builder.toString();
 	}
 	
+	public String toString(){
+		StringBuilder builder = new StringBuilder();
+		builder.append(this.printKeys());
+		builder.append("\n");
+		for(NucleusBorderSegment s :segments){
+			builder.append(s.toString()+"\n");
+		}
+		return builder.toString();
+		
+	}
+	
 	/**
 	 * Turn the IQR (difference between Q25, Q75) of the median into a profile.
 	 * @param pointType the profile type to use

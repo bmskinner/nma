@@ -190,10 +190,9 @@ public class SegmentFitter {
 		/*
 		 * Not all the tags will be associated with endpoints;
 		 * e.g. the intersection point. The orientation and 
-		 * reference points should be updated though
+		 * reference points should be updated though - members of
+		 * the core border tag population
 		 */
-		
-//		String[] tags = { n.getReferencePoint() , n.getOrientationPoint() };
 		
 		for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
 			
@@ -226,7 +225,8 @@ public class SegmentFitter {
 				n.setBorderTag(tag, nSeg.getStartIndex());
 				fileLogger.log(Level.FINE, "Remapped border point "+tag);
 			} else {
-				fileLogger.log(Level.FINE, "Unable to remap border point "+tag);
+				fileLogger.log(Level.WARNING, "Cannot find border tag '"+tag+"' in median profile");
+				fileLogger.log(Level.WARNING, pc.toString());
 			}
 		}
 	}
