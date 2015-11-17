@@ -172,6 +172,9 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		contentPanel.add(reverseThresholding, columnConstraints);
 		contentPanel.add(histogramThresholding, columnConstraints);
 		
+		forwardThresholding.setToolTipText(Labels.FORWARD_THRESHOLDING_RADIO_LABEL);
+		reverseThresholding.setToolTipText(Labels.REVERSE_THRESHOLDING_RADIO_LABEL);
+		histogramThresholding.setToolTipText(Labels.ADAPTIVE_THRESHOLDING_RADIO_LABEL);
 	}
 	
 	/**
