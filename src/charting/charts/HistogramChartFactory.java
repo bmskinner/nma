@@ -57,7 +57,7 @@ public class HistogramChartFactory {
 	 */
 	public static JFreeChart createHistogram(HistogramDataset ds, String xLabel, String yLabel){
 		
-		JFreeChart chart = ChartFactory.createHistogram(null, xLabel, yLabel, null, PlotOrientation.VERTICAL, true, true, true);
+		JFreeChart chart = ChartFactory.createHistogram(null, xLabel, yLabel, ds, PlotOrientation.VERTICAL, true, true, true);
 		
 		
 		XYPlot plot = chart.getXYPlot();
@@ -134,8 +134,7 @@ public class HistogramChartFactory {
 	 * @return
 	 */
 	public static JFreeChart createNuclearStatsHistogram(HistogramChartOptions options) throws Exception{
-//	public static JFreeChart createNuclearStatsHistogram(HistogramDataset ds, List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale){
-		
+
 		HistogramDataset ds = null;
 				
 		if (options.hasDatasets()){
@@ -151,8 +150,8 @@ public class HistogramChartFactory {
 		
 		JFreeChart chart = createHistogram(ds, xLabel, "Nuclei");
 		
-		if(ds!=null && options.getDatasets()!=null){
-			
+		if(ds!=null && options.hasDatasets()){
+						
 			XYPlot plot = chart.getXYPlot();
 			
 			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
@@ -162,7 +161,7 @@ public class HistogramChartFactory {
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
 				plot.getRenderer().setSeriesVisibleInLegend(j, false);
-				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
 				String seriesKey = (String) ds.getSeriesKey(j);
 				String seriesName = seriesKey.replace(options.getStat().toString()+"_", "");
@@ -175,6 +174,9 @@ public class HistogramChartFactory {
 										: ColourSelecter.getSegmentColor(j);
 
 
+								if(options.hasLogger()){
+									options.getLogger().log(Level.FINEST, "Setting histogram series colour: "+colour.toString());
+								}
 						plot.getRenderer().setSeriesPaint(j, colour);
 
 					}
@@ -205,13 +207,12 @@ public class HistogramChartFactory {
 		}
 
 		String xLabel = options.getStat().label(options.getScale());
-//		String xLabel = stat.toString()+" ("+scale.toString()+")";
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
 				                false);
 		
-		if(ds!=null && options.getDatasets()!=null){
+		if(ds!=null && options.hasDatasets()){
 			
 			XYPlot plot = chart.getXYPlot();
 			
