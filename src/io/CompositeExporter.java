@@ -41,6 +41,7 @@ import components.nuclei.Nucleus;
 public class CompositeExporter {
 
 	private static Logger logger;
+	public static final int MAX_COMPOSITABLE_NUCLEI = 600;
 	
 	public static boolean run(AnalysisDataset dataset){
 		logger = Logger.getLogger(CompositeExporter.class.getName());

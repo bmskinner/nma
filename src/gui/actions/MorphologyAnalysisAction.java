@@ -172,13 +172,14 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 
 				// make a composite image of all nuclei in the collection
 				if(  (downFlag & MainWindow.EXPORT_COMPOSITE) == MainWindow.EXPORT_COMPOSITE){
-//					logger.log("Running compositor", utility.Logger.DEBUG);
-					programLogger.log(Level.INFO, "Exporting composite...");
-					boolean ok = CompositeExporter.run(dataset);
-					if(ok){
-						programLogger.log(Level.INFO, "OK");
-					} else {
-						programLogger.log(Level.INFO, "Error");
+					if(dataset.getCollection().getNucleusCount()<CompositeExporter.MAX_COMPOSITABLE_NUCLEI){
+						programLogger.log(Level.INFO, "Exporting composite...");
+						boolean ok = CompositeExporter.run(dataset);
+						if(ok){
+							programLogger.log(Level.INFO, "OK");
+						} else {
+							programLogger.log(Level.INFO, "Error");
+						}
 					}
 				}
 
