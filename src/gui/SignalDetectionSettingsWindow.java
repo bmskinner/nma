@@ -146,6 +146,9 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		fields[4] = minCircSpinner;
 		fields[5] = maxCircSpinner;
 		fields[6] = groupName;
+		
+		minSizeSpinner.setToolTipText(Labels.MINIMUM_SIGNAL_AREA);
+		maxFractSpinner.setToolTipText(Labels.MAXIMUM_SIGNAL_FRACTION);
 
 		thresholdSpinner.addChangeListener(this);
 		minSizeSpinner.addChangeListener(this);

@@ -17,4 +17,7 @@ public class Labels {
 			+ "a (currently) fixed offset is added to the index to remove remaining background. "
 			+ "This index is used as the new threshold for the detector. "
 			+ "If a suitable position is not found, we fall back to the minimum signal threshold defined in the options.";
+	
+	public static final String MINIMUM_SIGNAL_AREA = "The smallest number of pixels a signal can contain";
+	public static final String MAXIMUM_SIGNAL_FRACTION = "The largest size of a signal, as a fraction of the nuclear area (0-1)";
 }
