@@ -246,6 +246,8 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 	private static void runProfiler(CellCollection collection, BorderTag pointType){
 		
 		try{
+			
+			// A cell collection starts with an empty Regular ProfileCollection
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
 			// default is to make profile aggregate from reference point
@@ -274,6 +276,9 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				score = compareProfilesToMedian(collection, pointType);
 				fileLogger.log(Level.INFO, "Reticulating splines: score: "+(int)score);
 			}
+			
+			fileLogger.log(Level.INFO, "Finished profiling collection: "+(int)score);
+			fileLogger.log(Level.FINE, collection.getProfileCollection(ProfileCollectionType.REGULAR).toString());
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE, "Error in morphology profiling", e);
 		}
@@ -469,17 +474,24 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 		try{
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
+			fileLogger.log(Level.FINE, "Using regular profile collection for segmentation");
+			fileLogger.log(Level.FINE, pc.toString());
+			
 			// the reference point is always index 0, so the segments will match
 			// the profile
 			Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 
-			ProfileSegmenter segmenter = new ProfileSegmenter(median, fileLogger);		  
-			List<NucleusBorderSegment> segments = segmenter.segment();
+			ProfileSegmenter segmenter = new ProfileSegmenter(median, fileLogger);		
+			
+			int orientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
+			List<NucleusBorderSegment> segments = segmenter.segment(orientationIndex);
 
 			fileLogger.log(Level.INFO, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
 
 			// Add the segments to the collection
-			pc.addSegments(segments);
+			fileLogger.log(Level.FINE, "Adding segments to profile collection");
+			fileLogger.log(Level.FINE, NucleusBorderSegment.toString(segments));
+			pc.addSegments(BorderTag.REFERENCE_POINT, segments);
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE, "Error creating segments", e);
 		}
@@ -580,6 +592,8 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 		try{
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+			fileLogger.log(Level.FINE, "Median profile");
+			fileLogger.log(Level.FINE, pc.toString());
 			List<NucleusBorderSegment> segments = pc.getSegments(pointType);
 
 			// make a new profile collection to hold the frankendata
@@ -603,12 +617,18 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
  
 			 */
 			for(BorderTag key : pc.getOffsetKeys()){
+				
+				int offset = pc.getOffset(key);
+				fileLogger.log(Level.FINE, "Adding franken collection offset "+offset+" for "+ key);
 				frankenCollection.addOffset(key, pc.getOffset(key));
 			}
 
 
 			// copy the segments from the profile collection
 			frankenCollection.addSegments(segments);
+			
+			fileLogger.log(Level.FINE, "Franken profile collection");
+			fileLogger.log(Level.FINE, frankenCollection.toString());
 
 			// At this point, the FrankenCollection is identical to the ProfileCollection
 			// We need to add the individual recombined frankenProfiles
@@ -739,7 +759,9 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 			
 			// head is half way around from the tail
-			int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length() /2;
+			double length = (double) collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length();		
+			int offset =  (int) Math.ceil(length / 2d); // ceil to ensure offsets are correct
+			
 			// now we have the tail point located, update the reference point to be opposite
 			
 			// adjust the index to the offset
@@ -780,6 +802,8 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 				if(collection.getNucleusType().equals(NucleusType.PIG_SPERM)){
 					findTailInPigSpermMedian(collection);
+					fileLogger.log(Level.FINE, "Found tail and head in median profile");
+					fileLogger.log(Level.FINE, collection.getProfileCollection(ProfileCollectionType.REGULAR).toString());
 				}
 
 				if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){

@@ -86,18 +86,6 @@ public class ProfileCollection implements Serializable {
 		if(tag==null){
 			throw new IllegalArgumentException("A profile key is required");
 		}
-//		String pointType = s;
-//		if(s.endsWith("25")){
-//			pointType = s.replace("25", "");
-//			int indexOffset = offsets.get(pointType);
-//			return getAggregate().getQuartile(25).offset(indexOffset);
-//		}
-//		
-//		if( s.endsWith("75")){
-//			pointType = s.replace("75", "");
-//			int indexOffset = offsets.get(pointType);
-//			return getAggregate().getQuartile(75).offset(indexOffset);
-//		}
 		
 		int indexOffset = offsets.get(tag);
 		return getAggregate().getQuartile(quartile).offset(indexOffset);
@@ -143,8 +131,7 @@ public class ProfileCollection implements Serializable {
 		// of the array
 		int offset = -getOffset(tag);
 
-		List<NucleusBorderSegment> result = null;
-		result = NucleusBorderSegment.nudge(segments, offset);
+		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(segments, offset);
 
 		return result;
 	}
@@ -330,9 +317,9 @@ public class ProfileCollection implements Serializable {
 		
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("    Point types:\t");
+		builder.append("\tPoint types:\t");
 		for(BorderTag tag : this.offsets.keySet()){
-			builder.append("     "+tag+": "+this.offsets.get(tag)+"\n");
+			builder.append("\t\t"+tag+": "+this.offsets.get(tag)+"\r\n");
 		}
 		return builder.toString();
 	}
@@ -340,9 +327,9 @@ public class ProfileCollection implements Serializable {
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
 		builder.append(this.printKeys());
-		builder.append("\n");
+		builder.append("\r\n");
 		for(NucleusBorderSegment s :segments){
-			builder.append(s.toString()+"\n");
+			builder.append(s.toString()+"\r\n");
 		}
 		return builder.toString();
 		

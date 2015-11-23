@@ -65,13 +65,17 @@ public class ProfileSegmenter {
 		this.profile = p;
 //		logger = new Logger(debugFile, "ProfileSegmenter");
 		this.logger = logger;
+		logger.log(Level.FINE, "Created profile segmenter");
 	}
 	
 	/**
 	 * Get the deltas and find minima and maxima. These switch between segments
+	 * @param splitIndex an index point that must be segmented on
 	 * @return a list of segments
 	 */
-	public List<NucleusBorderSegment> segment(){
+	public List<NucleusBorderSegment> segment(int splitIndex){
+		
+		logger.log(Level.FINE, "Identifying maxima and minima");
 		BooleanProfile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
 		BooleanProfile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
 		
@@ -110,7 +114,11 @@ public class ProfileSegmenter {
 				// We want a minima or maxima, and the value must be distinct from its surroundings			
 				if( (   breakpoint.get(index)==true 
 						&& Math.abs(dDeltas.get(index)) > minRateOfChange
-						&& segLength >= MIN_SEGMENT_SIZE)){
+						&& segLength >= MIN_SEGMENT_SIZE)
+						
+						|| (index==splitIndex)
+						
+					){
 					
 					// we've hit a new segment
 					NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
@@ -119,6 +127,10 @@ public class ProfileSegmenter {
 					segments.add(seg);
 					
 					logger.log(Level.FINE, "New segment found: "+seg.toString());
+					
+					if(index==splitIndex){
+						logger.log(Level.FINE, "Segment split by index");
+					}
 
 					segmentStart = index; // start the next segment at this position
 					segLength=0;
