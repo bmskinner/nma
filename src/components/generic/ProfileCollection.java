@@ -33,6 +33,8 @@ public class ProfileCollection implements Serializable {
 		
 	private static final long serialVersionUID = 1L;
 	
+	private static final int ZERO_INDEX = 0;
+	
 	private ProfileAggregate 	aggregate;
 	
 	private Map<BorderTag, Integer> offsets 		= new HashMap<BorderTag, Integer>();
@@ -126,8 +128,9 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
-	 * Create a list of segments based on an offset of existing segments
-	 * @param s the name of the point type
+	 * Create a list of segments based on an offset of existing segments.
+	 * @param s the name of the tag
+	 * @return a copy of the segments in the profile, offset to start at the tag
 	 */
 	public List<NucleusBorderSegment> getSegments(BorderTag tag){
 		if(tag==null){
@@ -146,6 +149,50 @@ public class ProfileCollection implements Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return result;
+	}
+	
+	/**
+	 * Fetch the segment from the profile beginning at the given tag;
+	 * i.e. the segment with a start index of zero, when the profile is offset 
+	 * to the tag. 
+	 * @param tag the border tag
+	 * @return a copy of the segment with the tag at its start index, or null
+	 */
+	public NucleusBorderSegment getSegmentStartingWith(BorderTag tag) throws Exception {
+		List<NucleusBorderSegment> segments = this.getSegments(tag);
+
+		NucleusBorderSegment result = null;
+		// get the name of the segment with the tag at the start
+		for(NucleusBorderSegment seg : segments){
+
+			if(  seg.getStartIndex()==ZERO_INDEX ){
+				result = seg;
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Fetch the segment from the profile beginning at the given tag;
+	 * i.e. the segment with a start index of zero, when the profile is offset 
+	 * to the tag. 
+	 * @param tag the border tag
+	 * @return a copy of the segment with the tag at its start index, or null
+	 */
+	public NucleusBorderSegment getSegmentEndingWith(BorderTag tag) throws Exception {
+		List<NucleusBorderSegment> segments = this.getSegments(tag);
+
+		NucleusBorderSegment result = null;
+		// get the name of the segment with the tag at the start
+		for(NucleusBorderSegment seg : segments){
+
+			if(  seg.getEndIndex()==ZERO_INDEX ){
+				result = seg;
+			}
+		}
+		
 		return result;
 	}
 	

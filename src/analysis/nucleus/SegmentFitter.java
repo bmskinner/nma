@@ -183,7 +183,7 @@ public class SegmentFitter {
 	private void remapBorderPoints(Nucleus n, ProfileCollection pc) throws Exception {
 		
 		if(pc==null){
-			fileLogger.log(Level.INFO, "No profile collection found, skipping remapping");
+			fileLogger.log(Level.WARNING, "No profile collection found, skipping remapping");
 			return; // this allows the unit tests to skip this section if a profile collection has not been created
 		}
 		
@@ -198,35 +198,42 @@ public class SegmentFitter {
 			
 			// get the segments the point should lie between
 			// from the median profile
-			String segName = null;
 			
-			// get the name of the segment with the tag at the start
-			for(NucleusBorderSegment seg : pc.getSegments(tag)){
-
-				/*
-				 What happens when the tag does not lie on the segment start?
-				 This occurrs in pig sperm, where the reference point (head) is in 
-				 the centre of a segment.
-				 
-				 In these cases, do not try remapping the point; just leave it
-				 
-				 
-				 It can also be the last index of the profile?
-				 * 
-				 */
-				if(  seg.getStartIndex()==0 ){
-					segName = seg.getName();
-				}
-			}
+			/*
+			 * The goal is to move the index of the border tag to the start index
+			 * of the relevant segment.
+			 * 
+			 * Select the segments from the median profile, offset to begin from the tag.
+			 * The relevant segment has a start index of 0
+			 * Find the name of this segment, and adjust it's start position in the
+			 * individual nucleus profile.
+			 */
 			
-			if(segName!=null){
-				// Get the same segment in the nucleus, and update the tag
-				NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(segName);
+			NucleusBorderSegment seg = pc.getSegmentStartingWith(tag);
+			List<NucleusBorderSegment> segments = pc.getSegments(tag);
+						
+			if(seg!=null){
+				// Get the same segment in the nucleus, and move the tag to the segment start point
+				NucleusBorderSegment nSeg = n.getAngleProfile().getSegment(seg.getName());
 				n.setBorderTag(tag, nSeg.getStartIndex());
-				fileLogger.log(Level.FINE, "Remapped border point "+tag);
+				fileLogger.log(Level.FINE, "Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
 			} else {
-				fileLogger.log(Level.WARNING, "Cannot find border tag '"+tag+"' in median profile");
+								
+				// A segment was not found with a start index at zero; segName is null
+				fileLogger.log(Level.WARNING, "Border tag '"+tag+"' not found in median profile");
+				fileLogger.log(Level.WARNING, "Median profile:");
 				fileLogger.log(Level.WARNING, pc.toString());
+				fileLogger.log(Level.WARNING, "Segment list:");
+				fileLogger.log(Level.WARNING, NucleusBorderSegment.toString(segments));
+				
+				// Check to see if the segments are reversed
+				seg = pc.getSegmentEndingWith(tag);
+				if(seg!=null){
+					fileLogger.log(Level.WARNING, "Found segment "+seg.getName()+" ending with tag "+tag);
+				} else {
+					fileLogger.log(Level.WARNING, "No segments end with tag "+tag);
+				}
+				
 			}
 		}
 	}

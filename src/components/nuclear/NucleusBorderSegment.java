@@ -776,5 +776,15 @@ public class NucleusBorderSegment  implements Serializable{
 		
 		return result;
 	}
+	
+	public static String toString(List<NucleusBorderSegment> list){
+		StringBuilder builder = new StringBuilder();
+		builder.append("List of segments:\n");
+		for(NucleusBorderSegment segment : list){
+//			IJ.log(segment.getName()+" merges: "+segment.hasMergeSources());
+			builder.append("\t"+segment.toString()+"\n");
+		}
+		return builder.toString();
+	}
 
 }
