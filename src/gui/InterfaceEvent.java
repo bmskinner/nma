@@ -70,7 +70,8 @@ public class InterfaceEvent extends EventObject {
 		RECACHE_CHARTS		("Recache charts"),
 		LIST_DATASETS		("List datasets"),
 		RESEGMENT_SELECTED_DATASET ("Resegment datasets"),
-		LIST_SELECTED_DATASETS ("List selected datasets");
+		LIST_SELECTED_DATASETS ("List selected datasets"),
+		CLEAR_LOG_WINDOW 	("Clear log window");
 		
 		private final String name;
 		

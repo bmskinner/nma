@@ -1198,6 +1198,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			break;
 			
+		case CLEAR_LOG_WINDOW:
+			logPanel.clear();
+			break;
+			
 		default:
 			break;
 

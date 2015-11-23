@@ -67,6 +67,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
 		commandMap.put("unfuck", InterfaceMethod.RESEGMENT_SELECTED_DATASET);
 		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
+		commandMap.put("clear", InterfaceMethod.CLEAR_LOG_WINDOW);
 	}
 	
 	private Map<Integer, AnalysisDataset> datasetMap = new HashMap<Integer, AnalysisDataset>();
@@ -128,6 +129,10 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	
 	public void print(String s){
 		textArea.append(s);
+	}
+	
+	public void clear(){
+		textArea.setText(null);
 	}
 	
 	/**

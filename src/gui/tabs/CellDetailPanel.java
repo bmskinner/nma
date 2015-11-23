@@ -928,9 +928,30 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				int newStart = start ? index : seg.getStartIndex();
 				int newEnd = start ? seg.getEndIndex() : index;
 				
-				
+				int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
+	
+								
 				if(profile.update(seg, newStart, newEnd)){
 					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
+					
+					/* Check the border tags - if they overlap the old index
+					 * replace them. 
+					 */
+					int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
+					programLogger.log(Level.FINEST, "Testing border tags");
+					programLogger.log(Level.FINEST, "Updating to index "+index+" from reference point");
+					programLogger.log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
+					programLogger.log(Level.FINEST, "Raw new border point is index "+rawIndex);
+					
+					if(n.hasBorderTag(rawOldIndex)){						
+						BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
+						programLogger.log(Level.FINE, "Updating tag "+tagToUpdate);
+						n.setBorderTag(tagToUpdate, rawIndex);						
+					} else {
+						programLogger.log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
+//						programLogger.log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
+					}
+
 					updateCell(activeCell);
 				} else {
 					programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
