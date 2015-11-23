@@ -176,7 +176,8 @@ public class SegmentFitter {
 	}
 	
 	/**
-	 * Move any border points to the appropriate segment end
+	 * Move core border points within a nucleus to the end of their appropriate segment
+	 * based on the median profile segmentation pattern
 	 * @param n the nucleus to fit
 	 * @param pc the profile collection from the CellCollection
 	 */
@@ -207,8 +208,7 @@ public class SegmentFitter {
 			 * The relevant segment has a start index of 0
 			 * Find the name of this segment, and adjust it's start position in the
 			 * individual nucleus profile.
-			 */
-			
+			 */		
 			NucleusBorderSegment seg = pc.getSegmentStartingWith(tag);
 			List<NucleusBorderSegment> segments = pc.getSegments(tag);
 						
@@ -223,7 +223,7 @@ public class SegmentFitter {
 				fileLogger.log(Level.WARNING, "Border tag '"+tag+"' not found in median profile");
 				fileLogger.log(Level.WARNING, "Median profile:");
 				fileLogger.log(Level.WARNING, pc.toString());
-				fileLogger.log(Level.WARNING, "Segment list:");
+				fileLogger.log(Level.WARNING, "Median segment list:");
 				fileLogger.log(Level.WARNING, NucleusBorderSegment.toString(segments));
 				
 				// Check to see if the segments are reversed

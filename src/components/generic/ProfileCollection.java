@@ -27,6 +27,7 @@ import java.util.Map;
 import components.CellCollection;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import ij.IJ;
 import utility.Constants;
 
 public class ProfileCollection implements Serializable {
@@ -132,7 +133,7 @@ public class ProfileCollection implements Serializable {
 	 * @param s the name of the tag
 	 * @return a copy of the segments in the profile, offset to start at the tag
 	 */
-	public List<NucleusBorderSegment> getSegments(BorderTag tag){
+	public List<NucleusBorderSegment> getSegments(BorderTag tag) throws Exception {
 		if(tag==null){
 			throw new IllegalArgumentException("The requested segment key is null: "+tag);
 		}
@@ -143,12 +144,8 @@ public class ProfileCollection implements Serializable {
 		int offset = -getOffset(tag);
 
 		List<NucleusBorderSegment> result = null;
-		try {
-			result = NucleusBorderSegment.nudge(segments, offset);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		result = NucleusBorderSegment.nudge(segments, offset);
+
 		return result;
 	}
 	
@@ -335,7 +332,7 @@ public class ProfileCollection implements Serializable {
 
 		builder.append("    Point types:\t");
 		for(BorderTag tag : this.offsets.keySet()){
-			builder.append("     "+tag+"\t");
+			builder.append("     "+tag+": "+this.offsets.get(tag)+"\n");
 		}
 		return builder.toString();
 	}

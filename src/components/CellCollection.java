@@ -811,7 +811,7 @@ public class CellCollection implements Serializable {
    * Get a list of all the segments currently within the profile collection
    * @return
    */
-  public List<String> getSegmentNames(){
+  public List<String> getSegmentNames() throws Exception {
 
 	  List<String> result = new ArrayList<String>(0);
 	  ProfileCollection pc = this.getProfileCollection(ProfileCollectionType.REGULAR);
