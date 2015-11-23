@@ -706,11 +706,14 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			int tailIndex = 0;
 
 			// do not consider maxima that are too close to the head of the sperm
-			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
-			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
+			/*
+			 * ERROR when head is defined near to tail by chance - we exclude the true tail
+			 */
+//			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
+//			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
 
 			if(maxima.size()==0){
-				fileLogger.log(Level.SEVERE, "Error: no minima found in median line");
+				fileLogger.log(Level.SEVERE, "Error: no maxima found in median line");
 				tailIndex = 100; // set to roughly the middle of the array for the moment
 
 			} else{
@@ -723,7 +726,8 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 						double angle = medianProfile.get(index); // get the angle at this maximum
 						
 						// look for the highest local maximum outside the exclusion range
-						if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){
+//						if(angle>minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){
+						if(angle>minAngle){
 							minAngle = angle;
 							tailIndex = index;
 						}
