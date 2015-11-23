@@ -625,7 +625,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 
 
 			// copy the segments from the profile collection
-			frankenCollection.addSegments(segments);
+			frankenCollection.addSegments(pointType, segments);
 			
 			fileLogger.log(Level.FINE, "Franken profile collection");
 			fileLogger.log(Level.FINE, frankenCollection.toString());
