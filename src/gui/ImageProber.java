@@ -191,8 +191,15 @@ public abstract class ImageProber extends JDialog {
 							programLogger.log(Level.FINEST, "Selecting next image");
 							openImage = getNextImage();
 
-							programLogger.log(Level.FINEST, "Opening image");
-							importAndDisplayImage(openImage);
+							try{
+								programLogger.log(Level.FINEST, "Opening image");
+								importAndDisplayImage(openImage);
+							} catch(Exception e){
+								programLogger.log(Level.SEVERE, "Error opening image, skipping");
+								openImage = getNextImage();
+								importAndDisplayImage(openImage);
+							}
+							
 						}
 					};	
 					thr.start();
@@ -490,6 +497,26 @@ public abstract class ImageProber extends JDialog {
 				label.setIcon(loadingGif);
 			}
 		}
+	}
+	
+	/**
+	 * Set the header label and the image icons to display
+	 * the loading gif
+	 */
+	protected void setStatusError(){
+		
+		headerLabel.setIcon(null);
+		headerLabel.repaint();
+
+		for(ImageType key : imageType.getValues()){
+
+			JLabel label = iconMap.get(key);
+			ImageIcon icon = (ImageIcon) label.getIcon();
+			icon.getImage().flush();
+			label.setIcon(null);
+			label.setText("Error reading image");
+		}
+		
 	}
 	
 	/**

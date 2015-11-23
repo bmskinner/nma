@@ -179,6 +179,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 
 		} catch (Exception e) { // end try
 			programLogger.log(Level.SEVERE, "Error in image processing", e);
+			setStatusError();
 		} // end catch
 	}
 
