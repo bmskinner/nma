@@ -34,6 +34,9 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -394,14 +397,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			for(int i = 0; i < node.getChildCount() - 1; i++) {
 		        DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
 		        String nt = child.getUserObject().toString();
-		        String ntToCompare = nt.replace(".tiff", "");
 		        
 		        for(int j = i + 1; j <= node.getChildCount() - 1; j++) {
 		            DefaultMutableTreeNode prevNode = (DefaultMutableTreeNode) node.getChildAt(j);
 		            String np = prevNode.getUserObject().toString();
-		            String npToCompare = np.replace(".tiff", "");
 
-		            if(ntToCompare.compareToIgnoreCase(npToCompare) > 0) {
+		            if(nt.compareToIgnoreCase(np) > 0) {
 		                node.insert(child, j);
 		                node.insert(prevNode, i);
 		            }
@@ -417,9 +418,19 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		public class NodeData {
 			private String name;
 			private UUID id;
+			private String imageName;
+			private int nucleusNumber;
+			
+			
 			public NodeData(String name, UUID id) {
 				this.name = name;
 				this.id = id;
+				if(!name.equals("Cells")){
+					String[] array = name.split("\\.\\w+-"); // remove file extension and dash, leaving filename and nucleus number
+					this.imageName = array[0];
+					this.nucleusNumber = Integer.valueOf(array[1]);
+				}
+				
 			}
 			public String getName() {
 				return name;
@@ -428,7 +439,15 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				return id;
 			}
 			public String toString() {
-				return name;
+//				return name;
+				if(name.equals("Cells")){
+					return name;
+				}
+				NumberFormat df = DecimalFormat.getInstance();
+//				df.setRoundingMode(RoundingMode.FLOOR);
+				df.setMaximumFractionDigits(0);
+				df.setMinimumIntegerDigits(2);
+				return imageName+"-"+df.format(nucleusNumber);
 			}
 		}
 	}
@@ -474,6 +493,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			} catch(Exception e){
 				programLogger.log(Level.SEVERE, "Error updating cell panel", e);
+				JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
+				profileChartPanel.setChart(chart);
 			}
 
 		}
@@ -619,6 +640,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 			} catch(Exception e){
 				programLogger.log(Level.SEVERE, "Error updating outline chart", e);
+				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
+				panel.setChart(chart);
 			}
 		}
 
@@ -975,6 +998,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error updating segment stats", e);
+					try {
+						table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+					} catch (Exception e1) {
+						programLogger.log(Level.SEVERE, "Error recovering from segment stats error", e1);
+					}
 				}
 
 				Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
