@@ -105,7 +105,9 @@ public class NucleusDetectionImageProber extends ImageProber {
 			programLogger.log(Level.FINEST, "Creating processed images");
 			
 			CannyOptions cannyOptions = options.getCannyOptions("nucleus");
-			ImageProcessor openProcessor = ImageExporter.convertToRGB(imageStack).getProcessor();
+//			ImageProcessor openProcessor = ImageExporter.convertToRGB(imageStack).getProcessor();
+			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(imageStack).getProcessor();
+			openProcessor.invert();
 						
 			if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error
 				
@@ -119,6 +121,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 					programLogger.log(Level.FINEST, "Applying Kuwahara filter");
 					ImageProcessor kuwaharaProcessor = ImageFilterer.runKuwaharaFiltering(imageStack, Constants.COUNTERSTAIN, cannyOptions.getKuwaharaKernel());
 					processedImage = kuwaharaProcessor.duplicate(); 
+					kuwaharaProcessor.invert();
 					procMap.put(NucleusImageType.KUWAHARA, kuwaharaProcessor);
 					iconMap.get(NucleusImageType.KUWAHARA).setText(NucleusImageType.KUWAHARA.toString());
 				} else {
@@ -129,7 +132,8 @@ public class NucleusDetectionImageProber extends ImageProber {
 				if(cannyOptions.isUseFlattenImage()){
 					programLogger.log(Level.FINEST, "Applying flattening filter");
 					ImageProcessor flattenProcessor = ImageFilterer.squashChromocentres(processedImage, cannyOptions.getFlattenThreshold());
-					processedImage = flattenProcessor.duplicate(); 
+					processedImage = flattenProcessor.duplicate();
+					flattenProcessor.invert();
 					procMap.put(NucleusImageType.FLATTENED, flattenProcessor);
 					iconMap.get(NucleusImageType.FLATTENED).setText(NucleusImageType.FLATTENED.toString());
 				} else {
@@ -145,6 +149,9 @@ public class NucleusDetectionImageProber extends ImageProber {
 				procMap.put(NucleusImageType.MORPHOLOGY_CLOSED, closedProcessor);
 				
 				procMap.put(NucleusImageType.DETECTED_OBJECTS, openProcessor);
+				
+				edgesProcessor.invert();
+				closedProcessor.invert();
 							
 			} else {
 				// Threshold option selected - do not run edge detection
@@ -236,7 +243,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 		// annotate the image processor with the nucleus outline
 		
 		if(checkNucleus(n)){
-			ip.setColor(Color.YELLOW);
+			ip.setColor(Color.ORANGE);
 		} else {
 			ip.setColor(Color.RED);
 		}

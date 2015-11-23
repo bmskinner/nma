@@ -54,10 +54,36 @@ public class ImageExporter {
 		return result;
 	}
 	
-	//TODO
-//	public static ImagePlus convertToGreyscaleOnWhite(ImageStack stack){
-//		
-//	}
+	/**
+	 * Given a stack, invert slice 1 to white on black.
+	 * @param stack
+	 * @return
+	 */
+	public static ImageStack invertCounterstain(ImageStack stack){
+		
+		if(stack==null){
+			throw new IllegalArgumentException("Stack is null");
+		}
+		stack.getProcessor(Constants.COUNTERSTAIN).invert();
+		return stack;		
+	}
+	
+	/**
+	 * Given a stack, make an RGB greyscale image from the counterstain
+	 * @param stack
+	 * @return
+	 */
+	public static ImagePlus makeGreyRGBImage(ImageStack stack){
+		
+		ImagePlus[] images = new ImagePlus[3];
+		images[Constants.RGB_RED]   = new ImagePlus("red", stack.getProcessor(Constants.COUNTERSTAIN));  
+		images[Constants.RGB_GREEN] = new ImagePlus("green", stack.getProcessor(Constants.COUNTERSTAIN));  
+		images[Constants.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(Constants.COUNTERSTAIN));      
+
+		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
+		result = result.flatten();
+		return result;
+	}
 	
 	/**
 	 * Convert a single-plane stack to RGB.

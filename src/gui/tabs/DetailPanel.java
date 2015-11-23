@@ -77,7 +77,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	public ChartCache getChartCache(){
 		return this.chartCache;
 	}
-	
+		
 	/**
 	 * Remove all charts from the cache so they will be recalculated
 	 * @param list

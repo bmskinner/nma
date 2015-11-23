@@ -55,7 +55,7 @@ public abstract class ImageProber extends JDialog {
 	private double windowWidth;
 	private double windowHeight;
 	
-	private static double IMAGE_SCREEN_PROPORTION = 0.75;
+	private static double IMAGE_SCREEN_PROPORTION = 0.90;
 
 	private final JPanel contentPanel = new JPanel();
 	protected AnalysisOptions options; // the options to detect with
@@ -381,7 +381,7 @@ public abstract class ImageProber extends JDialog {
 	private File getNextImage(){
 
 		if(index >= probableFiles.size()-1){
-			index = probableFiles.size()-1;
+			index = 0;
 		} else {
 			index++;
 		}
@@ -397,7 +397,7 @@ public abstract class ImageProber extends JDialog {
 	private File getPrevImage(){
 		
 		if(index <= 0){
-			index = 0;
+			index = probableFiles.size()-1;
 		} else {
 			index--;
 		}
@@ -463,13 +463,10 @@ public abstract class ImageProber extends JDialog {
 		final ImageIcon icon = createViewableImage(procMap.get(key), true);
 		JOptionPane pane = new JOptionPane(null, JOptionPane.INFORMATION_MESSAGE, JOptionPane.OK_OPTION, icon);
         
-        Dialog dialog = pane.createDialog(this, key.toString());
-//        for(Component c : dialog.getComponents()){
-//        	IJ.log(c.getName());
-//        	if(c instanceof JButton){
-//        		dialog.remove(c);
-//        	}
-//        }
+		double scale = (double) icon.getIconHeight() / (double) procMap.get(key).getHeight();
+		scale *=100;
+		
+        Dialog dialog = pane.createDialog(this, key.toString()+": "+scale+"% scale");
 
         dialog.setModal(false);
         dialog.setVisible(true);
