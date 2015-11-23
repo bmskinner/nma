@@ -509,11 +509,20 @@ public interface Nucleus {
 	public int getBorderIndex(BorderTag tag);
 	
 	/**
-	 * Get the index of the border point with the given tag.
-	 * If the point does not exist, returns -1
-	 * @param tag the tag
-	 * @return the index of the border in borderList
+	 * Get the tag at a given index, given a zero tag
+	 * If there is no tag at the index, returns null
+	 * @param tag the border tag with index zero
+	 * @param index the index to fetch
+	 * @return the border tag at the index
 	 */
+	public BorderTag getBorderTag(BorderTag tag, int index);
+	
+	/**
+	 * Get the tag at the given raw index in the border list
+	 * @param index
+	 * @return the tag at the index, or null if no tag present
+	 */
+	public BorderTag getBorderTag(int index);
 
 	
 	/**
@@ -524,12 +533,37 @@ public interface Nucleus {
 	public boolean hasBorderTag(BorderTag tag);
 	
 	/**
+	 * Check if the nucleus has any border tag at the given index
+	 * (offset from the provided tag)
+	 * @param tag the border tag with index zero
+	 * @param i the index to be tested
+	 * @return true if a tag is present at the index
+	 */
+	public boolean hasBorderTag(BorderTag tag, int i);
+	
+	/**
+	 * Check if the nucleus has any border tag at the given index
+	 * in the raw border list
+	 * @param i the index to be tested
+	 * @return true if a tag is present at the index
+	 */
+	public boolean hasBorderTag( int index);
+	
+	/**
 	 * Set the name of the given NucleusBorderPoint
 	 * @param tag the new tag to use as a name
 	 * @param i the index of the border point
 	 */
 	
 	public void setBorderTag(BorderTag tag, int i);
+	
+	/**
+	 * Set or update a border tag based on an index from a reference tag
+	 * @param reference the border tag with index zero
+	 * @param tag the new tag to use
+	 * @param i the index of the border point relative to the reference
+	 */
+	public void setBorderTag(BorderTag reference, BorderTag tag, int i);
 
 
 	/**
@@ -597,6 +631,15 @@ public interface Nucleus {
 	 * @return
 	 */
 	public Map<BorderTag, Integer> getBorderTags();
+	
+	/**
+	 * Get the border index of a tag in the border list, 
+	 * removing offset to a reference tag
+	 * @param reference the border tag with index zero
+	 * @param index the index to offset. Should be counting from the reference tag
+	 * @return the offset index, or -1 if the reference tag is not present
+	 */
+	public int getOffsetBorderIndex(BorderTag reference, int index);
 	
 
 	/**

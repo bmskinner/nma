@@ -1037,12 +1037,13 @@ public class RoundNucleus
 	public String dumpInfo(int type){
 		String result = "";
 		result += "Dumping nucleus info: "+this.getNameAndNumber()+"\n";
+		result += "    Border length: "+this.getLength()+"\n";
 		result += "    CoM: "+this.getCentreOfMass().toString()+"\n";
 		if(type==ALL_POINTS || type==BORDER_POINTS){
 			result += "    Border:\n";
 			for(int i=0; i<this.getLength(); i++){
 				NucleusBorderPoint p = this.getBorderPoint(i);
-				result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\n";
+				result += "      Index "+i+": "+p.getX()+"\t"+p.getY()+"\t"+this.getBorderTag(i)+"\n";
 			}
 		}
 		if(type==ALL_POINTS || type==BORDER_TAGS){
@@ -1176,6 +1177,13 @@ public class RoundNucleus
 	public void setBorderTag(BorderTag tag, int i){
 		this.borderTags.put(tag, i);
 	}
+	
+	public void setBorderTag(BorderTag reference, BorderTag tag, int i){
+		int newIndex = getOffsetBorderIndex(reference, i);
+		this.setBorderTag(tag, newIndex);
+	}
+	
+	
 		
 	public boolean hasBorderTag(BorderTag tag){
 		if(this.borderTags.containsKey(tag)){
@@ -1183,6 +1191,45 @@ public class RoundNucleus
 		} else {
 			return false;
 		}
+	}
+	
+	public boolean hasBorderTag( int index){
+				
+		if(this.borderTags.containsValue(index)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public boolean hasBorderTag(BorderTag tag, int index){
+				
+		// remove offset
+		int newIndex = getOffsetBorderIndex(tag, index);
+		return this.hasBorderTag(newIndex);
+	}
+	
+	public int getOffsetBorderIndex(BorderTag reference, int index){
+		if(this.getBorderIndex(reference)>-1){
+			int newIndex =  Utils.wrapIndex( index+this.getBorderIndex(reference) , this.getLength() );
+			return newIndex;
+		}
+		return -1;
+	}
+	
+	public BorderTag getBorderTag(BorderTag tag, int index){
+		int newIndex = getOffsetBorderIndex(tag, index);
+		return this.getBorderTag(newIndex);
+	}
+	
+	public BorderTag getBorderTag(int index){
+
+		for(BorderTag b : this.borderTags.keySet()){
+			if(this.borderTags.get(b)==index){
+				return b;
+			}
+		}
+		return null;
 	}
 
 	private void calculateDistanceProfile(){
