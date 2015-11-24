@@ -76,6 +76,7 @@ public class ProfileSegmenter {
 	public List<NucleusBorderSegment> segment(int splitIndex){
 		
 		logger.log(Level.FINE, "Identifying maxima and minima");
+		logger.log(Level.FINE, profile.toString());
 		BooleanProfile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
 		BooleanProfile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
 		
@@ -99,7 +100,9 @@ public class ProfileSegmenter {
 			 * Iterate through the profile, looking for breakpoints
 			 * A new segment should always be called at the reference point, 
 			 * regardless of minima, since the segments in this region are 
-			 * used in frankenprofiling
+			 * used in frankenprofiling.
+			 * 
+			 * The reference point is at index 0: a segment should always be called at index 0
 			 */
 			for(int index=0; index<profile.size(); index++){
 				segmentEnd = index;
