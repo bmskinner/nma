@@ -120,62 +120,66 @@ public class MorphologyChartFactory {
 	 * @return a chart
 	 */
 	public static JFreeChart makeSingleProfileChart(ProfileChartOptions options) throws Exception {
-//	public static JFreeChart makeSingleProfileChart(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
-		AnalysisDataset dataset = options.getDatasets().get(0);
-		CellCollection collection = dataset.getCollection();
-//		CellCollection collection = dataset.getCollection();
-		XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, options.isNormalised(), options.getAlignment(), options.getTag());
 		
-		
-		int length = 100 ; // default if normalised
+		JFreeChart chart = null;
+		if(options.hasDatasets()){
+			AnalysisDataset dataset = options.firstDataset();
+			CellCollection collection = dataset.getCollection();
+			XYDataset ds = NucleusDatasetCreator.createSegmentedProfileDataset(collection, options.isNormalised(), options.getAlignment(), options.getTag());
 
-		
-		// if we set raw values, get the maximum nucleus length
-		if(!options.isNormalised()){
-			length = (int) collection.getMaxProfileLength();
-		}
-		
-		ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
-		JFreeChart chart = makeProfileChart(ds, length, swatch);
-		
-		// mark the reference and orientation points
-		
-		XYPlot plot = chart.getXYPlot();
 
-		for (BorderTag tag : collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffsetKeys()){
-			Color colour = Color.BLACK;
-			
-			// get the index of the tag
-			int index = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(tag);
-			
-			// get the offset from to the current draw point
-			int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(options.getTag());
-			
-			// adjust the index to the offset
-			index = Utils.wrapIndex( index - offset, collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length());
-			
-			double indexToDraw = index; // convert to a double to allow normalised positioning
-			
-			if(options.isNormalised()){ // set to the proportion of the point along the profile
-				indexToDraw =  (( indexToDraw / collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length() ) * 100);
-			}
-			if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
-				int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
-				int amountToAdd = maxX - collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length();
-				indexToDraw += amountToAdd;
-				
+			int length = 100 ; // default if normalised
+
+
+			// if we set raw values, get the maximum nucleus length
+			if(!options.isNormalised()){
+				length = (int) collection.getMaxProfileLength();
 			}
 
-			if(options.isShowMarkers()){
-				if(tag.equals(BorderTag.ORIENTATION_POINT)){
-					colour = Color.BLUE;
+			ColourSwatch swatch = dataset.getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : dataset.getSwatch();
+			chart = makeProfileChart(ds, length, swatch);
+
+			// mark the reference and orientation points
+
+			XYPlot plot = chart.getXYPlot();
+
+			for (BorderTag tag : collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffsetKeys()){
+				Color colour = Color.BLACK;
+
+				// get the index of the tag
+				int index = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(tag);
+
+				// get the offset from to the current draw point
+				int offset = collection.getProfileCollection(ProfileCollectionType.REGULAR).getOffset(options.getTag());
+
+				// adjust the index to the offset
+				index = Utils.wrapIndex( index - offset, collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length());
+
+				double indexToDraw = index; // convert to a double to allow normalised positioning
+
+				if(options.isNormalised()){ // set to the proportion of the point along the profile
+					indexToDraw =  (( indexToDraw / collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length() ) * 100);
 				}
-				if(tag.equals(BorderTag.REFERENCE_POINT)){
-					colour = Color.ORANGE;
+				if(options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()){
+					int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
+					int amountToAdd = maxX - collection.getProfileCollection(ProfileCollectionType.REGULAR).getAggregate().length();
+					indexToDraw += amountToAdd;
+
 				}
-				plot.addDomainMarker(new ValueMarker(indexToDraw, colour, ChartComponents.MARKER_STROKE));	
+
+				if(options.isShowMarkers()){
+					if(tag.equals(BorderTag.ORIENTATION_POINT)){
+						colour = Color.BLUE;
+					}
+					if(tag.equals(BorderTag.REFERENCE_POINT)){
+						colour = Color.ORANGE;
+					}
+					plot.addDomainMarker(new ValueMarker(indexToDraw, colour, ChartComponents.MARKER_STROKE));	
+				}
+
 			}
-			
+		} else {
+			chart = makeProfileChart(null, 100, ColourSwatch.REGULAR_SWATCH);
 		}
 		return chart;
 	}
@@ -316,56 +320,56 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeProfileChart(XYDataset ds, int xLength, ColourSwatch swatch){
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-				                "Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
-				                false);
+						"Position", "Angle", ds, PlotOrientation.VERTICAL, true, true,
+						false);
 		try {
-		
-		
-		XYPlot plot = chart.getXYPlot();
-		
-		// the default is to use an x range of 100, for a normalised chart
-		plot.getDomainAxis().setRange(0,xLength);
-		
-		// always set the y range to 360 degrees
-		plot.getRangeAxis().setRange(0,360);
-		plot.setBackgroundPaint(Color.WHITE);
-		
-		// the 180 degree line
-		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 
-		int seriesCount = plot.getSeriesCount();
 
-		for (int i = 0; i < seriesCount; i++) {
-			plot.getRenderer().setSeriesVisibleInLegend(i, false);
-			String name = (String) ds.getSeriesKey(i);
-			
-			// segments along the median profile
-			if(name.startsWith("Seg_")){
-				int colourIndex = getIndexFromLabel(name);
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
-				plot.getRenderer().setSeriesPaint(i, swatch.color(colourIndex));
+			XYPlot plot = chart.getXYPlot();
 
-			} 
-			
-			// entire nucleus profile
-			if(name.startsWith("Nucleus_")){
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-			} 
-			
-			// quartile profiles
-			if(name.startsWith("Q")){
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.QUARTILE_STROKE);
-				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-			} 
-			
-			// simple profiles
-			if(name.startsWith("Profile_")){
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-			} 
-			
-		}	
+			// the default is to use an x range of 100, for a normalised chart
+			plot.getDomainAxis().setRange(0,xLength);
+
+			// always set the y range to 360 degrees
+			plot.getRangeAxis().setRange(0,360);
+			plot.setBackgroundPaint(Color.WHITE);
+
+			// the 180 degree line
+			plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
+
+			int seriesCount = plot.getSeriesCount();
+
+			for (int i = 0; i < seriesCount; i++) {
+				plot.getRenderer().setSeriesVisibleInLegend(i, false);
+				String name = (String) ds.getSeriesKey(i);
+
+				// segments along the median profile
+				if(name.startsWith("Seg_")){
+					int colourIndex = getIndexFromLabel(name);
+					plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
+					plot.getRenderer().setSeriesPaint(i, swatch.color(colourIndex));
+
+				} 
+
+				// entire nucleus profile
+				if(name.startsWith("Nucleus_")){
+					plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
+					plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+				} 
+
+				// quartile profiles
+				if(name.startsWith("Q")){
+					plot.getRenderer().setSeriesStroke(i, ChartComponents.QUARTILE_STROKE);
+					plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
+				} 
+
+				// simple profiles
+				if(name.startsWith("Profile_")){
+					plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
+					plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
+				} 
+
+			}	
 		} catch (Exception e){
 			IJ.log("Error creating profile chart:"+e.getMessage() );
 			for(StackTraceElement e1 : e.getStackTrace()){

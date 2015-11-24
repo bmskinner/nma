@@ -117,15 +117,15 @@ public class PigSpermNucleus
     @Override
     public void findPointsAroundBorder() throws Exception{
 
-      NucleusBorderPoint tailPoint1 = this.findTailByMinima();
+//      NucleusBorderPoint tailPoint1 = this.findTailByMinima();
       int tailPointIndex2 = this.findTailByMaxima();
       NucleusBorderPoint tailPoint2 = this.getBorderPoint(tailPointIndex2);
       
-      NucleusBorderPoint tailPoint3 = this.findTailByNarrowestPoint();
+//      NucleusBorderPoint tailPoint3 = this.findTailByNarrowestPoint();
 
-      this.addTailEstimatePosition(tailPoint1);
+//      this.addTailEstimatePosition(tailPoint1);
       this.addTailEstimatePosition(tailPoint2);
-      this.addTailEstimatePosition(tailPoint3);
+//      this.addTailEstimatePosition(tailPoint3);
 
       // int consensusTailIndex = this.getPositionBetween(tailPoint2, tailPoint3);
       // NucleusBorderPoint consensusTail = this.getBorderPoint(consensusTailIndex);
@@ -137,8 +137,10 @@ public class PigSpermNucleus
 
       setBorderTag(BorderTag.ORIENTATION_POINT, consensusTailIndex);
 
+      // The estimated reference point is opposite the tail
       int headIndex = getIndex(this.findOppositeBorder(consensusTail));
-      setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
+      setBorderTag(BorderTag.REFERENCE_POINT, consensusTailIndex);
+      setBorderTag(BorderTag.INTERSECTION_POINT, headIndex);
     }
     
   	@Override

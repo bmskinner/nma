@@ -270,7 +270,8 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
-	 * Create the profile aggregate from the given collection, with a set length
+	 * Create the profile aggregate from the given collection, with a set length.
+	 * By default, the profiles are zeroed on the reference point
 	 * @param collection the Cellcollection
 	 * @param length the length of the aggregate
 	 * @throws Exception 

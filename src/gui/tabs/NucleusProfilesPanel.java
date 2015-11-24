@@ -434,8 +434,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 //				
 			}
 			
-//			boolean normalised = profileAlignmentOptionsPanel.isNormalised();
-//			ProfileAlignment alignment = profileAlignmentOptionsPanel.getSelected();
 			BorderTag tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			updateProfiles(list, true, ProfileAlignment.LEFT, tag, showMarkers);
