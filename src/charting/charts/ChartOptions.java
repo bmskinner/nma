@@ -42,6 +42,7 @@ public abstract class ChartOptions {
 				this.swatch = list.get(0).getSwatch();
 			} else {
 				this.swatch = ColourSwatch.REGULAR_SWATCH;
+				list.get(0).setSwatch(swatch);
 			}
 		} else {
 			this.swatch = ColourSwatch.REGULAR_SWATCH;

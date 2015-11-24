@@ -164,7 +164,7 @@ public class HistogramChartFactory {
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
 				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replace(options.getStat().toString()+"_", "");
+				String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
 				
 				for(AnalysisDataset dataset : options.getDatasets()){
 					
@@ -225,23 +225,23 @@ public class HistogramChartFactory {
 			
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
-				plot.getRenderer().setSeriesVisibleInLegend(j, false);
-				plot.getRenderer().setSeriesStroke(j, new BasicStroke(2));
+				plot.getRenderer().setSeriesVisibleInLegend(j, true);
+				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
 				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replace(options.getStat().toString()+"_", "");
+				String seriesName = seriesKey.replaceFirst(options.getStat().toString()+"_", "");
 
-
+				Color colour = ColourSelecter.getSegmentColor(j);
 				for(AnalysisDataset dataset : options.getDatasets()){
 
 					if(seriesName.equals(dataset.getName())){
 
-						Color colour = dataset.hasDatasetColour()
+						colour = dataset.hasDatasetColour()
 								? dataset.getDatasetColour()
-								: ColourSelecter.getSegmentColor(j);
+								: colour;
 
 
-								plot.getRenderer().setSeriesPaint(j, colour);
+						plot.getRenderer().setSeriesPaint(j, colour);
 
 					}
 				}
