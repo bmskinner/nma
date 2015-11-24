@@ -616,12 +616,17 @@ public class NucleusBorderSegment  implements Serializable{
 	}
 	
 	public String toString(){
-		return new String("Segment "
+		
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("Segment "
 				+this.getName()
 				+": "+this.startIndex+" - "+this.endIndex+" of "
-				+this.getTotalLength()
+				+(this.getTotalLength()-1)
 				+"; prev: "+this.hasPrevSegment()
 				+"; next: "+this.hasNextSegment());
+
+		  return builder.toString();
 	}
 	
 	/**

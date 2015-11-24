@@ -31,7 +31,6 @@ import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
 import utility.Utils;
-
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -1124,6 +1123,15 @@ public Profile calculateDeltas(int windowSize){
 	  for (int i=0; i<array.length; i++) {
 		  IJ.log("Point "+i+": "+array[i]);
 	  }
+  }
+  
+  public String toString(){
+	  StringBuilder builder = new StringBuilder();
+
+	  for (int i=0; i<array.length; i++) {
+		  builder.append("Index "+i+"\t"+array[i]+"\r\n");
+	  }
+	  return builder.toString();
   }
   
   private boolean isPowerOfTwo(int x){

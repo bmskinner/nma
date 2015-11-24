@@ -78,8 +78,9 @@ public class ProfileCollection implements Serializable {
 	/**
 	 * Get the requested profile. Generates it dynamically from the
 	 * appropriate ProfileAggregate each time. 
-	 * @param s the pointType of the profile to find
-	 * @return the profile
+	 * @param tag the BorderTag to use as index zero
+	 * @param quartile the collection quartile to return (0-100) 
+	 * @return the quartile profile from the given tag
 	 * @throws Exception
 	 */
 	public Profile getProfile(BorderTag tag, double quartile) throws Exception {
@@ -130,9 +131,16 @@ public class ProfileCollection implements Serializable {
 		// since we are moving the pointIndex back to the beginning
 		// of the array
 		int offset = -getOffset(tag);
-
+		
+//		IJ.log("");
+		
+//		IJ.log("Existing segments:");
+//		IJ.log(NucleusBorderSegment.toString(this.segments));
+//		IJ.log("Border tag "+tag+"    Offset "+offset);
+//		IJ.log("Nudging segments");
 		List<NucleusBorderSegment> result = NucleusBorderSegment.nudge(segments, offset);
-
+//		IJ.log(NucleusBorderSegment.toString(result));
+//		IJ.log("");
 		return result;
 	}
 	
@@ -317,9 +325,9 @@ public class ProfileCollection implements Serializable {
 		
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("\tPoint types:\t");
+		builder.append("\tPoint types:");
 		for(BorderTag tag : this.offsets.keySet()){
-			builder.append("\t\t"+tag+": "+this.offsets.get(tag)+"\r\n");
+			builder.append("\t"+tag+": "+this.offsets.get(tag));
 		}
 		return builder.toString();
 	}
@@ -327,9 +335,25 @@ public class ProfileCollection implements Serializable {
 	public String toString(){
 		StringBuilder builder = new StringBuilder();
 		builder.append(this.printKeys());
-		builder.append("\r\n");
-		for(NucleusBorderSegment s :segments){
-			builder.append(s.toString()+"\r\n");
+		if(this.segments.isEmpty()){
+			builder.append("\r\nNo segments in profile collection");
+		} else {
+			try {
+				builder.append("\r\nRaw segments:\r\n");
+				for(NucleusBorderSegment s : this.getSegments(BorderTag.REFERENCE_POINT)){
+					builder.append(s.toString()+"\r\n");
+				}
+
+				for(BorderTag tag : this.offsets.keySet()){
+					builder.append("\r\nSegments from "+tag+":\r\n");
+					for(NucleusBorderSegment s : this.getSegments(tag)){
+						builder.append(s.toString()+"\r\n");
+					}
+				}
+
+			} catch (Exception e) {
+				builder.append("\r\nError fetching segments");
+			}
 		}
 		return builder.toString();
 		
