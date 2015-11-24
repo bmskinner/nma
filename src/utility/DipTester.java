@@ -71,7 +71,8 @@ public class DipTester {
 					pvals[i] = pval;
 
 				} catch(Exception e){
-					IJ.log("Cannot get values for position "+position);
+//					IJ.log("Cannot get values for position "+position);
+					pvals[i] = 1;
 				}
 			}
 			
@@ -80,10 +81,11 @@ public class DipTester {
 			
 			
 		} catch (Exception e) {
-			IJ.log("Error in dip test: "+e.getMessage());
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
+			pvals = new double[100];
+			for(int i=0; i<100; i++){
+				pvals[i] = 1;
 			}
+			resultProfile = new Profile(pvals);
 		}
 		return resultProfile;
 	}

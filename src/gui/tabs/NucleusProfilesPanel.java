@@ -127,7 +127,10 @@ public class NucleusProfilesPanel extends DetailPanel {
 					modalityDisplayPanel.update(NucleusProfilesPanel.this.list);
 					programLogger.log(Level.FINEST, "Updated modality panel");
 				} catch  (Exception e){
-					programLogger.log(Level.SEVERE, "Error updating profile panels", e);
+					programLogger.log(Level.WARNING, "Error updating profile panels", e);
+					programLogger.log(Level.FINER, "Setting panels to null");
+					
+//					NucleusProfilesPanel.this.update( (List<AnalysisDataset>) null);
 				}
 			}
 		});
@@ -202,41 +205,46 @@ public class NucleusProfilesPanel extends DetailPanel {
 		
 		public void update(List<AnalysisDataset> list) throws Exception {
 
-			if(!list.isEmpty()){
-				
-				profileCollectionTypeSettingsPanel.setEnabled(true);;
-				
-				ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
-				
-				DecimalFormat df = new DecimalFormat("#0.00");
-				DefaultListModel<String> model = new DefaultListModel<String>();
-				if(list.size()==1){ // use the actual x-positions
-					List<Double> xvalues = list.get(0).getCollection().getProfileCollection(type).getAggregate().getXKeyset();
-					
-					for(Double d: xvalues){
-						model.addElement(df.format(d));
+			try{
+				if( list!=null && !list.isEmpty()){
+
+					profileCollectionTypeSettingsPanel.setEnabled(true);;
+
+					ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
+
+					DecimalFormat df = new DecimalFormat("#0.00");
+					DefaultListModel<String> model = new DefaultListModel<String>();
+					if(list.size()==1){ // use the actual x-positions
+						List<Double> xvalues = list.get(0).getCollection().getProfileCollection(type).getAggregate().getXKeyset();
+
+						for(Double d: xvalues){
+							model.addElement(df.format(d));
+						}
+
+
+					} else {
+						// use a standard 0.5 spacing
+						for(Double d=0.0; d<=100; d+=0.5){
+							model.addElement(df.format(d));
+						}
+
 					}
-					
-					
+					pointList.setModel(model);
+
+					String xString = pointList.getModel().getElementAt(0);
+					double xvalue = Double.valueOf(xString);
+
+					updateChart(xvalue);	
+					updateModalityProfileChart(list);
 				} else {
-					// use a standard 0.5 spacing
-					for(Double d=0.0; d<=100; d+=0.5){
-						model.addElement(df.format(d));
-					}
-					
+					profileCollectionTypeSettingsPanel.setEnabled(false);
 				}
-				pointList.setModel(model);
-				
-				String xString = pointList.getModel().getElementAt(0);
-				double xvalue = Double.valueOf(xString);
-				
-				updateChart(xvalue);	
-				updateModalityProfileChart(list);
-			} else {
-				profileCollectionTypeSettingsPanel.setEnabled(false);;
+
+			} catch(Exception e){
+				update( (List<AnalysisDataset>) null);
 			}
 		}
-		
+
 		public void updateModalityProfileChart(List<AnalysisDataset> list){
 			
 			ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
