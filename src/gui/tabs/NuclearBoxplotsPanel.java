@@ -332,94 +332,88 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 			if(event.type().equals("MarkerPositionUpdated")){
 				
-				// check the scale to use for selection
-				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
-
-				// get the parameters to filter on
 				SelectableChartPanel panel = (SelectableChartPanel) event.getSource();
-				Double lower = panel.getGateLower();
-				Double upper = panel.getGateUpper();
-				DecimalFormat df = new DecimalFormat("#.##");
-
-				// check the boxplot that fired
-				String name = panel.getName();
-				NucleusStatistic stat = null;
-				for (NucleusStatistic n : NucleusStatistic.values()){
-					if(n.toString().equals(name)){
-						stat = n;
-					}
-				}
-
-				// Make a dialog to ask if a filter should be performed
-				if(    !lower.isNaN() && !upper.isNaN()     ){
-
-
-
-					Object[] options = { "Filter collection" , "Cancel", };
-					int result = JOptionPane.showOptionDialog(null, "Filter between "+df.format(lower)+"-"+df.format(upper)+"?", "Confirm filter",
-
-							JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-							null, options, options[0]);
-
-					if(result==0){ // button at index 0 - continue
-
-
-						//				if( !(lower.isNaN() && upper.isNaN())  ){
-
-						// create a new sub-collection with the given parameters for each dataset
-						for(AnalysisDataset dataset : list){
-							CellCollection collection = dataset.getCollection();
-							CellCollection subCollection = new CellCollection(dataset, "Filtered_"+name+"_"+df.format(lower)+"-"+df.format(upper));
-
-
-							for(Cell c : collection.getCells()){
-								Nucleus n = c.getNucleus();
-								double value = 0;
-								try {
-									value = n.getStatistic(stat, scale);
-								} catch (Exception e1) {
-									programLogger.log(Level.SEVERE, "Cannot calculate statistic", e1);
-								}
-
-								// variability must be calculated from the collection, not the nucleus
-								if(stat.equals(NucleusStatistic.VARIABILITY)){
-									try{ 
-										value = collection.calculateVariabililtyOfNucleusProfile(n);
-									} catch (Exception e){
-										programLogger.log(Level.SEVERE, "Cannot calculate variabililty", e);
-									}
-								}
-
-								if(value>= lower && value<= upper){
-									subCollection.addCell(new Cell(c));
-								}
-							}
-
-							List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
-
-							if(subCollection.getNucleusCount()>0){
-
-								programLogger.log(Level.INFO, "Filtering on "+name+": "+df.format(lower)+" - "+df.format(upper));
-								programLogger.log(Level.INFO, "Filtered "+subCollection.getNucleusCount()+" nuclei");
-								dataset.addChildCollection(subCollection);
-								newList.add(  dataset.getChildDataset(subCollection.getID() ));
-							}
-							fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
-
-						}
-					}
-				} 
+				filterByChartSelection(panel);
 				
-//				else {
-//					programLogger.log(Level.SEVERE, "Error: "+name+": "+df.format(lower)+" - "+df.format(upper));
-//				}
-
 			}
 
 		}
 
+		private NucleusStatistic getPanelStatisticFromName(String name){
+			NucleusStatistic stat = null;
+			for (NucleusStatistic n : NucleusStatistic.values()){
+				if(n.toString().equals(name)){
+					stat = n;
+				}
+			}
+			return stat;
+		}
 		
+		private int getFilterDialogResult(double lower, double upper){
+			DecimalFormat df = new DecimalFormat("#.##");
+			Object[] options = { "Filter collection" , "Cancel", };
+			int result = JOptionPane.showOptionDialog(null, "Filter between "+df.format(lower)+"-"+df.format(upper)+"?", "Confirm filter",
+
+					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+
+					null, options, options[0]);
+			return result;
+		}
+		
+		/**
+		 * Filter the selected populations based on the region outlined on a histogram panel
+		 * @param panel
+		 */
+		public void filterByChartSelection(SelectableChartPanel panel){
+			// check the scale to use for selection
+			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
+
+			// get the parameters to filter on
+			Double lower = panel.getGateLower();
+			Double upper = panel.getGateUpper();
+			DecimalFormat df = new DecimalFormat("#.##");
+
+			// check the boxplot that fired
+			NucleusStatistic stat = getPanelStatisticFromName(panel.getName());
+
+			if(    !lower.isNaN() && !upper.isNaN()     ){
+				
+				// Make a dialog to ask if a filter should be performed
+				int result = getFilterDialogResult(lower, upper);
+
+				if(result==0){ // button at index 0 - continue
+					
+					List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+
+					// create a new sub-collection with the given parameters for each dataset
+					for(AnalysisDataset dataset : list){
+						CellCollection collection = dataset.getCollection();
+						try {
+							
+							programLogger.log(Level.INFO, "Filtering on "
+									+stat.toString()
+									+": "
+									+df.format(lower)
+									+" - "+df.format(upper));
+							
+							CellCollection subCollection = collection.filterCollection(stat, scale, lower, upper);
+
+							if(subCollection.hasCells()){
+
+								programLogger.log(Level.INFO, "Filtered "+subCollection.getNucleusCount()+" nuclei");
+								dataset.addChildCollection(subCollection);
+								newList.add(  dataset.getChildDataset(subCollection.getID() ));
+							}
+
+						} catch (Exception e) {
+							programLogger.log(Level.SEVERE, "Error filtering", e);
+							
+						}
+					}
+					fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
+				}
+			} 
+		}
 	}
 
 }

@@ -42,7 +42,7 @@ public enum NucleusType {
 	ROUND 		 ("Round nucleus"		 , "Head", "Tail", RoundNucleus.class), 
 	ASYMMETRIC 	 ("Asymmetric nucleus"	 , "Head", "Tail", AsymmetricNucleus.class),
 	RODENT_SPERM ("Rodent sperm nucleus" , "Tip" , "Tail", RodentSpermNucleus.class), 
-	PIG_SPERM 	 ("Pig sperm nucleus"	 , "Head", "Tail", PigSpermNucleus.class);
+	PIG_SPERM 	 ("Pig sperm nucleus"	 , "Tail", "Tail", PigSpermNucleus.class);
 	
     private final String name;   
     private final Class<?> nucleusClass;

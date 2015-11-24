@@ -33,11 +33,13 @@ import ij.process.FloatPolygon;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
 
 import utility.Constants;
 import utility.Stats;
@@ -112,6 +114,20 @@ public class CellCollection implements Serializable {
 			  template.getCollection().getNucleusType()
 			  );
   }
+  
+  /**
+   * Construct froma template collection
+   * @param template
+   * @param name
+   */
+  public CellCollection(CellCollection template, String name){
+	  this(template.getFolder(), 
+			  template.getOutputFolderName(), 
+			  name, 
+			  template.getDebugFile(),
+			  template.getNucleusType()
+			  );
+  }
 
   /*
     -----------------------
@@ -164,7 +180,18 @@ public class CellCollection implements Serializable {
 		  return true;
 	  }
   }
-
+  
+  /**
+   * Check if the collection contains cells
+   * @return
+   */
+  public boolean hasCells(){
+	  if(this.mappedCollection.isEmpty()){
+		  return false;
+	  } else {
+		  return true;
+	  }
+  }
 
   public void addConsensusNucleus(ConsensusNucleus n){
 	  this.consensusNucleus = n;
@@ -1052,6 +1079,40 @@ public class CellCollection implements Serializable {
 		  list.add(perimeterLength);
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
+  }
+  
+  /**
+   * Create a new CellCollection based on this as a template. Filter the nuclei by the given statistic
+   * between a lower and upper bound.
+ * @param stat the statistic to filter on
+ * @param scale the scale the values are in
+ * @param lower include values above this
+ * @param upper include values below this
+ * @return a new collection
+ * @throws Exception 
+ */
+  public CellCollection filterCollection(NucleusStatistic stat, MeasurementScale scale, double lower, double upper) throws Exception{
+	  DecimalFormat df = new DecimalFormat("#.##");
+	  CellCollection subCollection = new CellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
+
+
+	  for(Cell c : this.getCells()){
+		  Nucleus n = c.getNucleus();
+
+		  double value = n.getStatistic(stat, scale);
+
+
+		  // variability must be calculated from the collection, not the nucleus
+		  if(stat.equals(NucleusStatistic.VARIABILITY)){
+
+			  value = this.calculateVariabililtyOfNucleusProfile(n);
+		  }
+
+		  if(value>= lower && value<= upper){
+			  subCollection.addCell(new Cell(c));
+		  }
+	  }
+	  return subCollection;
   }
 
 }

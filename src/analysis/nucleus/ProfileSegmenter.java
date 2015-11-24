@@ -73,7 +73,7 @@ public class ProfileSegmenter {
 	 * @param splitIndex an index point that must be segmented on
 	 * @return a list of segments
 	 */
-	public List<NucleusBorderSegment> segment(int splitIndex){
+	public List<NucleusBorderSegment> segment(){
 		
 		logger.log(Level.FINE, "Identifying maxima and minima");
 		logger.log(Level.FINE, profile.toString());
@@ -119,7 +119,7 @@ public class ProfileSegmenter {
 						&& Math.abs(dDeltas.get(index)) > minRateOfChange
 						&& segLength >= MIN_SEGMENT_SIZE)
 						
-						|| (index==splitIndex)
+//						|| (index==splitIndex)
 						
 					){
 					
@@ -131,9 +131,9 @@ public class ProfileSegmenter {
 					
 					logger.log(Level.FINE, "New segment found: "+seg.toString());
 					
-					if(index==splitIndex){
-						logger.log(Level.FINE, "Segment split by index");
-					}
+//					if(index==splitIndex){
+//						logger.log(Level.FINE, "Segment split by index");
+//					}
 
 					segmentStart = index; // start the next segment at this position
 					segLength=0;

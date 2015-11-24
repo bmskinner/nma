@@ -242,7 +242,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 	private static void runProfiler(CellCollection collection, BorderTag pointType){
 		
 		try{
-			
+			programLogger.log(Level.FINE,  "Profiling collection");
 			// A cell collection starts with an empty Regular ProfileCollection
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
@@ -271,8 +271,9 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				// get the difference between aligned profiles and the median
 				score = compareProfilesToMedian(collection, pointType);
 				fileLogger.log(Level.INFO, "Reticulating splines: score: "+(int)score);
+				programLogger.log(Level.FINE, "Reticulating splines: score: "+(int)score);
 			}
-			
+			programLogger.log(Level.FINE,  "Finished profiling collection");
 			fileLogger.log(Level.INFO, "Finished profiling collection: "+(int)score);
 			fileLogger.log(Level.FINE, collection.getProfileCollection(ProfileCollectionType.REGULAR).toString());
 		} catch(Exception e){
@@ -438,15 +439,19 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 	 */
 	private void runSegmentation(CellCollection collection, BorderTag pointType){
 		fileLogger.log(Level.INFO, "Beginning segmentation...");
+		programLogger.log(Level.FINE, "Beginning segmentation...");
 		try{	
 			
 			// generate segments in the median profile
+			programLogger.log(Level.FINE, "Creating segments...");
 			createSegments(collection);
 			
 			// map the segments from the median directly onto the nuclei
+			programLogger.log(Level.FINE, "Assigning segments...");
 			assignSegments(collection);
 			
 			// adjust the segments to better fit each nucleus
+			programLogger.log(Level.FINE, "Revising segments...");
 			reviseSegments(collection, pointType);		
 	
 			// update the aggregate in case any borders have changed
@@ -456,8 +461,10 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE, "Error segmenting",e);
+			programLogger.log(Level.SEVERE, "Error segmenting",e);
 			collection.getProfileCollection(ProfileCollectionType.REGULAR).printKeys();
 		}
+		programLogger.log(Level.FINE, "Segmentation complete");
 		fileLogger.log(Level.INFO, "Segmentation complete");
 	}
 	
@@ -480,7 +487,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			ProfileSegmenter segmenter = new ProfileSegmenter(median, fileLogger);		
 			
 			int orientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
-			List<NucleusBorderSegment> segments = segmenter.segment(orientationIndex);
+			List<NucleusBorderSegment> segments = segmenter.segment();
 
 			fileLogger.log(Level.INFO, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
 
