@@ -111,9 +111,9 @@ public class RoundNucleus
 
 	protected XYPoint centreOfMass;
 
-	protected File sourceFile;    // the image from which the nucleus came
-	protected File nucleusFolder; // the folder to store nucleus information
-	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date
+	protected File sourceFile;    // the image from which the nucleus came e.g. /Testing/1.tiff
+	protected File nucleusFolder; // the folder to store nucleus information e.g. /Testing/2015-11-24_10:00:00/1/
+	protected String outputFolder;  // the top-level path in which to store outputs; has analysis date e.g. /Testing/2015-11-24_10:00:00
 	
 	protected double scale = 1; // allow conversion between pixels and SI units. The length of a pixel in microns
 	
@@ -324,7 +324,6 @@ public class RoundNucleus
 
 		int i = this.getImageName().lastIndexOf('.');
 		if (i > 0) {
-//				extension = this.getImageName().substring(i+1);
 				trimmed   = this.getImageName().substring(0,i);
 		}
 		return trimmed;

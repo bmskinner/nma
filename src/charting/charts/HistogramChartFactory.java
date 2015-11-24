@@ -225,7 +225,7 @@ public class HistogramChartFactory {
 			
 			for (int j = 0; j < ds.getSeriesCount(); j++) {
 
-				plot.getRenderer().setSeriesVisibleInLegend(j, true);
+				plot.getRenderer().setSeriesVisibleInLegend(j, false);
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
 				String seriesKey = (String) ds.getSeriesKey(j);
