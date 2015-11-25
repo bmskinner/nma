@@ -18,19 +18,12 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import ij.IJ;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.SwingWorker;
-
-import utility.Constants;
 import utility.DipTester;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
@@ -70,7 +63,9 @@ public class NucleusClusterer extends AnalysisWorker {
 		super(dataset, programLogger);
 		this.options = options;
 		this.collection = dataset.getCollection();
-		this.setProgressTotal(collection.size() *2);
+		this.setProgressTotal(dataset.getCollection().size() *2);
+		
+		programLogger.log(Level.FINEST, "Total set to "+this.getProgressTotal());
 		fileLogger = Logger.getLogger(NucleusClusterer.class.getName());
 		fileLogger.setLevel(Level.ALL);
 		fileLogger.addHandler(dataset.getLogHandler());
@@ -142,6 +137,7 @@ public class NucleusClusterer extends AnalysisWorker {
 				fileLogger.log(Level.INFO, "Clusterer is type "+options.getType());
 				for(String s : optionArray){
 					fileLogger.log(Level.FINE, "Clusterer options: "+s);
+					programLogger.log(Level.FINEST, "Clusterer options: "+s);
 				}
 				
 				
@@ -162,10 +158,12 @@ public class NucleusClusterer extends AnalysisWorker {
 
 			} catch (Exception e) {
 				fileLogger.log(Level.SEVERE, "Error in clustering", e);
+				programLogger.log(Level.SEVERE, "Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
 			fileLogger.log(Level.SEVERE, "Error in assignments", e);
+			programLogger.log(Level.SEVERE, "Error in assignments", e);
 			return false;
 		}
 		return true;
@@ -230,25 +228,26 @@ public class NucleusClusterer extends AnalysisWorker {
 	private Instances makeAttributesAndInstances(CellCollection collection){
 
 		// Values to cluster on: area, circularity, aspect ratio (feret/min diameter)
-		int attributeCount;
+		programLogger.log(Level.FINER, "Creating attributes");
+		int attributeCount = 4;
 		if(options.isIncludeModality()){
 			
-			attributeCount = options.getModalityRegions() + 3;
-			
-		} else {
-			attributeCount = 3;
+			attributeCount += options.getModalityRegions();
+			programLogger.log(Level.FINER, "Included modality");
 		}
 		 
 
 		Attribute area = new Attribute("area"); 
 		Attribute circularity = new Attribute("circularity"); 
 		Attribute aspect = new Attribute("aspect"); 
+		Attribute name = new Attribute("name"); 
 		
 		// hold the attributes in a Vector
 		FastVector attributes = new FastVector(attributeCount);
 		attributes.addElement(area);
 		attributes.addElement(circularity);
 		attributes.addElement(aspect);
+		attributes.addElement(name);
 		
 		if(options.isIncludeModality()){
 			
@@ -258,12 +257,15 @@ public class NucleusClusterer extends AnalysisWorker {
 			}
 			
 		}
+		
+		
+		programLogger.log(Level.FINER, "Created attributes");
 
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
 		try{
 
-			
+			programLogger.log(Level.FINER, "Building instances");
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
 
 			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT, ProfileCollectionType.FRANKEN);
@@ -273,6 +275,7 @@ public class NucleusClusterer extends AnalysisWorker {
 			// create Instance for each nucleus and add to Instances
 			int j=0;
 			for(Cell c : collection.getCells()){
+				programLogger.log(Level.FINEST, "Adding cell "+j);
 
 				Nucleus n = c.getNucleus();
 				// instance holds data
@@ -283,7 +286,7 @@ public class NucleusClusterer extends AnalysisWorker {
 				inst.setValue(area, n.getArea());
 				inst.setValue(circularity, n.getCircularity());
 				inst.setValue(aspect, n.getAspectRatio());
-
+				inst.setValue(name, (String) n.getNameAndNumber());
 				
 				
 				if(options.isIncludeModality()){
@@ -295,10 +298,12 @@ public class NucleusClusterer extends AnalysisWorker {
 						
 						int index = (int) indexes.get(i);
 						
-						Attribute att = (Attribute) attributes.elementAt(i+3);
+						Attribute att = (Attribute) attributes.elementAt(i+4);
 						inst.setValue(att, interpolated.get(index));
 					}
 				}
+				
+				
 				
 				/*
 				 * We now have an interpolated profile matching the length of the 
@@ -311,8 +316,10 @@ public class NucleusClusterer extends AnalysisWorker {
 				publish(j++);
 
 			}
+			programLogger.log(Level.FINER, "Built instances");
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE, "Error making instances", e);
+			programLogger.log(Level.SEVERE, "Error making instances", e);
 		}
 		return instances;
 	}

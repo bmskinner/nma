@@ -153,11 +153,13 @@ public class ClusteringOptions implements Serializable {
 		}
 		
 		if(this.type.equals(ClusteringMethod.HIERARCHICAL)){
-			options = new String[4];
+			options = new String[6];
 			options[0] = "-N";                 // number of clusters
 			options[1] = String.valueOf((Integer)clusterNumber);
 			options[2] = "-L";                 // algorithm
 			options[3] = hierarchicalMethod.code();
+			options[4] = "-P"; 				// print Newick Tree
+			options[5] = "";
 		}
 		
 		return options;
