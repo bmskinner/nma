@@ -166,7 +166,10 @@ public class NucleusTableDatasetCreator {
 	public static TableModel createMultiDatasetMedianProfileSegmentStatsTable(List<AnalysisDataset> list, MeasurementScale scale) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
-		DecimalFormat df = new DecimalFormat("#.##");
+		DecimalFormat df = new DecimalFormat("0.00");
+		df.setMinimumFractionDigits(2);
+		df.setMaximumFractionDigits(2);
+		df.setMinimumIntegerDigits(1);
 
 		List<Object> fieldNames = new ArrayList<Object>(0);
 		if(list==null){
@@ -209,11 +212,19 @@ public class NucleusTableDatasetCreator {
 				for(NucleusBorderSegment segment : segs) {
 					
 					// Convert array index lengths to pixel lengths
-					double perimeter = collection.getMedianNuclearPerimeter(); // get the perimeter in pixels
-					double maxIndex = segment.getTotalLength();
-					double segPixelLength = (  (double) segment.length() / maxIndex) * perimeter;
+//					double perimeter = collection.getMedianNuclearPerimeter(); // get the perimeter in pixels
+//					double maxIndex = segment.getTotalLength();
+//					double segPixelLength = (  (double) segment.length() / maxIndex) * perimeter;
 					
-					rowData.add(df.format(segPixelLength));
+					double[] meanLengths = collection.getSegmentLengths(segment.getName(), scale);
+					double mean = Stats.mean(meanLengths); 
+//					DescriptiveStatistics stat = new DescriptiveStatistics(meanLengths);
+					
+//					rowData.add(  df.format(stat.getMean() ) );
+					double ci = Stats.calculateConfidenceIntervalSize(meanLengths, 0.95);
+//					rowData.add(  df.format(sem) );
+					
+					rowData.add(df.format(mean)+" ± "+ df.format(ci));
 				}
 				model.addRow(rowData.toArray(new Object[0]));
 			}

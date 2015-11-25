@@ -133,29 +133,32 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
    * @return the lower [0] and upper [1] CI about the mean.
    */
   public static double[] calculateMeanConfidenceInterval(double[] data, double level){
-	  SummaryStatistics stats = new SummaryStatistics();
-	  for (double val : data) {
-		  stats.addValue(val);
-	  }
+	  
 
 	  // Calculate 95% confidence interval
-	  double ci = calcMeanCI(stats, level);
-	  System.out.println(String.format("Mean: %f", stats.getMean()));
+	  double ci = calculateConfidenceIntervalSize(data, level);
+	  double mean = Stats.mean(data);
 
-	  double lower = stats.getMean() - ci;
-	  double upper = stats.getMean() + ci;
+	  double lower = mean - ci;
+	  double upper = mean + ci;
 	  double[] result = { lower, upper };
 	  return result;
   }
 
   /**
    * Calculate the confidence interval about the mean using a T-distribution
- * @param stats
- * @param level
- * @return
- */
-  private static double calcMeanCI(SummaryStatistics stats, double level) {
+   * @param stats
+   * @param level
+   * @return
+   */
+  public static double calculateConfidenceIntervalSize(double[] data, double level) {
 	  try {
+		  
+		  SummaryStatistics stats = new SummaryStatistics();
+		  for (double val : data) {
+			  stats.addValue(val);
+		  }
+		  
 		  // Create T Distribution with N-1 degrees of freedom
 		  TDistribution tDist = new TDistribution(stats.getN() - 1);
 		  // Calculate critical value

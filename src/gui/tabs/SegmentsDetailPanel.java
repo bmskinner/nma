@@ -764,7 +764,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 		private static final long serialVersionUID = 1L;
 		private JTable table; // individual segment stats
-		
+				
 		private JScrollPane scrollPane;
 				
 		protected SegmentStatsPanel(){
