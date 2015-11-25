@@ -18,35 +18,17 @@
  *******************************************************************************/
 package components;
 
-import java.io.Serializable;
-import java.util.UUID;
-
-public class Mitochondrion implements Serializable, CellularComponent {
+public class Mitochondrion extends AbstractCellularComponent {
 
 	private static final long serialVersionUID = 1L;
-	private UUID uuid;
-	protected double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
 	
 	public Mitochondrion(){
-		this.uuid = java.util.UUID.randomUUID();
+		this.id = java.util.UUID.randomUUID();
 	}
 	
 	public Mitochondrion(Mitochondrion m){
-		this.uuid = java.util.UUID.randomUUID();
-		this.orignalPosition = m.getPosition();
+		this.id = m.getID();
+		this.position = m.getPosition();
 	} 
 
-	public UUID getID() {	
-		return this.uuid;
-	}
-
-	public double[] getPosition() {
-		return this.orignalPosition;
-	}
-
-	@Override
-	public double getArea() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }
