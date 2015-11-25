@@ -20,10 +20,18 @@ package gui.tabs;
 
 
 import gui.DatasetEvent.DatasetMethod;
+import jebl.evolution.io.ImportException;
+import jebl.evolution.io.NewickImporter;
+import jebl.evolution.trees.RootedTree;
+import jebl.evolution.trees.Tree;
+import jebl.gui.trees.treeviewer.TreePane;
+import jebl.gui.trees.treeviewer.TreeViewer;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,6 +48,7 @@ import javax.swing.table.TableModel;
 
 import analysis.AnalysisDataset;
 import charting.datasets.NucleusTableDatasetCreator;
+import components.ClusterGroup;
 
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends DetailPanel {
@@ -73,6 +82,8 @@ public class ClusterDetailPanel extends DetailPanel {
 		private JButton 	clusterButton	= new JButton("Cluster population");
 		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
 		private JPanel		statusPanel		= new JPanel(new BorderLayout());
+		
+//		private TreePane viewer = new TreePane();
 
 		
 		private JPanel tablesPanel;
@@ -103,6 +114,8 @@ public class ClusterDetailPanel extends DetailPanel {
 			this.add(tablesPanel, BorderLayout.CENTER);
 			statusPanel = makeStatusPanel();
 			this.add(statusPanel, BorderLayout.NORTH);
+			
+//			this.add(viewer, BorderLayout.SOUTH);
 
 
 		}
@@ -118,7 +131,6 @@ public class ClusterDetailPanel extends DetailPanel {
 			clusterButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-//					fireSignalChangeEvent("NewClusterAnalysis");
 					fireDatasetEvent(DatasetMethod.CLUSTER, list);
 					
 
@@ -153,41 +165,45 @@ public class ClusterDetailPanel extends DetailPanel {
 					} else {
 						statusLabel.setText("Dataset has "+dataset.getClusterGroups().size()+" cluster groups");
 						
-//						for(ClusterGroup g : dataset.getClusterGroups()){
-//							
-//							String newickTree = g.getTree();
-//
-//							if(newickTree!=null){
-//								
+						for(ClusterGroup g : dataset.getClusterGroups()){
+							
+							String newickTree = g.getTree();
+
+							if(newickTree!=null){
+								
 //								treeLabel.setText(newickTree);
-////								treeViewer.setVisible(true);
-////								StringReader reader = new StringReader(newickTree);
-////
-////								boolean readUnquotedLabels = true;
-////								NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
-////
-////								try {
-////									List<Tree> trees =  imp.importTrees();
-////									RootedTree topTree = (RootedTree) trees.get(0);
-////
-////									treeViewer.setTree( topTree, topTree.getNodes());
-////
-////								} catch (IOException e) {
-////									error("Error in reader io", e);
-////								} catch (ImportException e) {
-////									error("Error in tree io", e);
-////								}
-//							} else {
-//								treeLabel.setText("");
-//							}
-//						}
+//								viewer.setVisible(true);
+//								programLogger.log(Level.FINE, "Reading tree");
+//								StringReader reader = new StringReader(newickTree);
+//
+//								boolean readUnquotedLabels = true;
+//								NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
+
+//								try {
+//									List<Tree> trees =  imp.importTrees();
+//									final RootedTree topTree = (RootedTree) trees.get(0);
+
+//									programLogger.log(Level.FINEST, topTree.toString());
+//									Thread thr = new Thread(){
+//										public void run(){
+//											viewer.setTree( topTree, topTree.getNodes() );
+//										}
+//									};
+//									thr.start();
+									
+
+//								} catch (IOException e) {
+//									programLogger.log(Level.SEVERE, "Error reading tree", e);
+//								} catch (ImportException e) {
+//									programLogger.log(Level.SEVERE, "Error in tree IO", e);
+//								}
+							} 
+						}
 						
 					}
 				} else { // more than one dataset selected
 					statusLabel.setText("Multiple datasets selected");
 					clusterButton.setVisible(false);
-//					treeLabel.setText("");
-//					treeViewer.);
 				}
 			}
 		}
