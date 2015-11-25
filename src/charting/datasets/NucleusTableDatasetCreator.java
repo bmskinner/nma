@@ -157,6 +157,70 @@ public class NucleusTableDatasetCreator {
 	}
 	
 	/**
+	 * Create a table of segment stats for median profile of the given dataset.
+	 * @param dataset the AnalysisDataset to include
+	 * @return a table model
+	 * @throws Exception 
+	 */
+	public static TableModel createMultiDatasetMedianProfileSegmentStatsTable(List<AnalysisDataset> list, MeasurementScale scale) throws Exception {
+
+		DefaultTableModel model = new DefaultTableModel();
+		DecimalFormat df = new DecimalFormat("#.##");
+
+		List<Object> fieldNames = new ArrayList<Object>(0);
+		if(list==null){
+			model.addColumn("No data loaded");
+
+		} else {
+			
+			BorderTag point = BorderTag.ORIENTATION_POINT;
+			
+			// assumes all datasets have the same number of segments
+			List<NucleusBorderSegment> segments = list.get(0).getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+			
+			fieldNames.add("Dataset");
+			for(NucleusBorderSegment segment : segments) {
+				fieldNames.add(segment.getName());
+			}
+			model.setColumnIdentifiers(fieldNames.toArray());;
+			
+			// add the segment colours
+			List<Object> colours = new ArrayList<Object>(0);
+			colours.add("");
+			
+			for(NucleusBorderSegment segment : segments) {
+				colours.add("");
+			}
+			model.addRow(colours.toArray(new Object[0]));
+			
+			
+
+			for(AnalysisDataset dataset : list){
+
+				CellCollection collection = dataset.getCollection();		
+
+				// get the offset segments
+				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+				
+				List<Object> rowData = new ArrayList<Object>(0);
+				rowData.add(dataset.getName());
+
+				for(NucleusBorderSegment segment : segs) {
+					
+					// Convert array index lengths to pixel lengths
+					double perimeter = collection.getMedianNuclearPerimeter(); // get the perimeter in pixels
+					double maxIndex = segment.getTotalLength();
+					double segPixelLength = (  (double) segment.length() / maxIndex) * perimeter;
+					
+					rowData.add(df.format(segPixelLength));
+				}
+				model.addRow(rowData.toArray(new Object[0]));
+			}
+		}
+		return model;	
+	}
+	
+	/**
 	 * Create a table model of analysis parameters from a nucleus collection.
 	 * If null parameter is passed, will create an empty table
 	 * @param collection
@@ -556,194 +620,6 @@ public class NucleusTableDatasetCreator {
 		return model;
 	}
 
-//	/**
-//	 * Carry out pairwise wilcoxon rank-sum test on the perimeters of the given datasets
-//	 * @param list the datasets to test
-//	 * @return a tablemodel for display
-//	 */
-//	public static TableModel createWilcoxonPerimeterTable(List<AnalysisDataset> list){
-//
-//		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-//		if(list==null){
-//			return model;
-//		}
-//
-//		// add columns
-//		DecimalFormat df = new DecimalFormat("#0.0000"); 
-//		for(AnalysisDataset dataset : list){
-//			
-//			Object[] popData = new Object[list.size()];
-//			
-//			int i = 0;
-//			boolean getPValue = false;
-//			for(AnalysisDataset dataset2 : list){
-//				
-//				if(dataset2.getUUID().equals(dataset.getUUID())){
-//					popData[i] = "";
-//					getPValue = true;
-//				} else {
-//					popData[i] = df.format( runWilcoxonTest( 
-//							dataset.getCollection().getPerimeters(MeasurementScale.PIXELS), 
-//							dataset2.getCollection().getPerimeters(MeasurementScale.PIXELS), 
-//							getPValue) );
-//				}
-//				i++;
-//			}
-//			model.addColumn(dataset.getName(), popData);
-//		}
-//		return model;
-//	}
-//	
-//	/**
-//	 * Carry out pairwise wilcoxon rank-sum test on the min ferets of the given datasets
-//	 * @param list the datasets to test
-//	 * @return a tablemodel for display
-//	 */
-//	public static TableModel createWilcoxonMinFeretTable(List<AnalysisDataset> list){
-//		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-//		if(list==null){
-//			return model;
-//		}
-//		
-//		// add columns
-//		DecimalFormat df = new DecimalFormat("#0.0000"); 
-//		for(AnalysisDataset dataset : list){
-//			
-//			Object[] popData = new Object[list.size()];
-//			
-//			int i = 0;
-//			boolean getPValue = false;
-//			for(AnalysisDataset dataset2 : list){
-//				
-//				if(dataset2.getUUID().equals(dataset.getUUID())){
-//					popData[i] = "";
-//					getPValue = true;
-//				} else {
-//					popData[i] = df.format( runWilcoxonTest( 
-//							dataset.getCollection().getMinFerets(MeasurementScale.PIXELS), 
-//							dataset2.getCollection().getMinFerets(MeasurementScale.PIXELS), 
-//							getPValue) );
-//				}
-//				i++;
-//			}
-//			model.addColumn(dataset.getName(), popData);
-//		}
-//		return model;
-//	}
-//	
-//	/**
-//	 * Carry out pairwise wilcoxon rank-sum test on the ferets of the given datasets
-//	 * @param list the datasets to test
-//	 * @return a tablemodel for display
-//	 */
-//	public static TableModel createWilcoxonMaxFeretTable(List<AnalysisDataset> list){
-//		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-//		if(list==null){
-//			return model;
-//		}
-//		
-//		// add columns
-//		DecimalFormat df = new DecimalFormat("#0.0000"); 
-//		for(AnalysisDataset dataset : list){
-//			
-//			Object[] popData = new Object[list.size()];
-//			
-//			int i = 0;
-//			boolean getPValue = false;
-//			for(AnalysisDataset dataset2 : list){
-//				
-//				if(dataset2.getUUID().equals(dataset.getUUID())){
-//					popData[i] = "";
-//					getPValue = true;
-//				} else {
-//					popData[i] = df.format( runWilcoxonTest( 
-//							dataset.getCollection().getFerets(MeasurementScale.PIXELS), 
-//							dataset2.getCollection().getFerets(MeasurementScale.PIXELS), 
-//							getPValue) );
-//				}
-//				i++;
-//			}
-//			model.addColumn(dataset.getName(), popData);
-//		}
-//		return model;
-//	}
-//	
-//	/**
-//	 * Carry out pairwise wilcoxon rank-sum test on the variability of the given datasets
-//	 * @param list the datasets to test
-//	 * @return a tablemodel for display
-//	 * @throws Exception 
-//	 */
-//	public static TableModel createWilcoxonVariabilityTable(List<AnalysisDataset> list) throws Exception{
-//		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-//		if(list==null){
-//			return model;
-//		}
-//		
-//		// add columns
-//		DecimalFormat df = new DecimalFormat("#0.0000"); 
-//		for(AnalysisDataset dataset : list){
-//			
-//			Object[] popData = new Object[list.size()];
-//			
-//			int i = 0;
-//			boolean getPValue = false;
-//			for(AnalysisDataset dataset2 : list){
-//
-//				if(dataset2.getUUID().equals(dataset.getUUID())){
-//					popData[i] = "";
-//					getPValue = true;
-//				} else {
-//					popData[i] = df.format( runWilcoxonTest( 
-//							dataset.getCollection()
-//							.getDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT  ), 
-//									dataset2.getCollection()
-//									.getDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT ), 
-//											getPValue) );
-//				}
-//				i++;
-//			}
-//			model.addColumn(dataset.getName(), popData);
-//		}
-//		return model;
-//	}
-//
-//	/**
-//	 * Carry out pairwise wilcoxon rank-sum test on the areas of the given datasets
-//	 * @param list the datasets to test
-//	 * @return a tablemodel for display
-//	 */
-//	public static TableModel createWilcoxonAreaTable(List<AnalysisDataset> list){
-//		DefaultTableModel model = makeEmptyWilcoxonTable(list);
-//		if(list==null){
-//			return model;
-//		}
-//		
-//		// add columns
-//		DecimalFormat df = new DecimalFormat("#0.0000"); 
-//		for(AnalysisDataset dataset : list){
-//			
-//			Object[] popData = new Object[list.size()];
-//			
-//			int i = 0;
-//			boolean getPValue = false;
-//			for(AnalysisDataset dataset2 : list){
-//				
-//				if(dataset2.getUUID().equals(dataset.getUUID())){
-//					popData[i] = "";
-//					getPValue = true;
-//				} else {
-//					popData[i] = df.format( runWilcoxonTest( 
-//							dataset.getCollection().getAreas(MeasurementScale.PIXELS), 
-//							dataset2.getCollection().getAreas(MeasurementScale.PIXELS), 
-//							getPValue) );
-//				}
-//				i++;
-//			}
-//			model.addColumn(dataset.getName(), popData);
-//		}
-//		return model;
-//	}
 		
 	/**
 	 * Get the options used for clustering as a table
