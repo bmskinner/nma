@@ -49,6 +49,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
@@ -509,6 +510,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	@SuppressWarnings("serial")
 	protected class SegmentBoxplotsPanel extends JPanel implements ActionListener {
 //		private ChartPanel chartPanel; // for displaying the legnth of a given segment
+//		private JTabbedPane tabPane = new JTabbedPane(JTabbedPane.TOP); // switch between chart types
 		private JPanel 		mainPanel; // hold the charts
 		private Dimension preferredSize = new Dimension(200, 300);
 		private JScrollPane scrollPane;
@@ -517,6 +519,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		protected SegmentBoxplotsPanel(){
 			
 			this.setLayout(new BorderLayout());
+//			this.add(tabPane, BorderLayout.CENTER);
 			
 			JFreeChart boxplot = BoxplotChartFactory.makeEmptyBoxplot();
 			

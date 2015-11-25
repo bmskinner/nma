@@ -23,6 +23,7 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
 import gui.components.MeasurementUnitSettingsPanel;
+import gui.components.ProbabilityDensityCheckboxPanel;
 import gui.components.SelectableChartPanel;
 
 import java.awt.BorderLayout;
@@ -209,11 +210,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		private Map<NucleusStatistic, SelectableChartPanel> chartPanels = new HashMap<NucleusStatistic, SelectableChartPanel>();
 
-//		private Map<String, Integer> chartStatTypes = new HashMap<String, Integer>();
-
 		private JPanel 		mainPanel; // hold the charts
         private JPanel         headerPanel; // hold buttons
-        private JCheckBox    useDensityBox; 
+        private ProbabilityDensityCheckboxPanel useDensityPanel = new ProbabilityDensityCheckboxPanel();
         private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 
 		private JScrollPane scrollPane; // hold the main panel
@@ -226,9 +225,10 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 			
             headerPanel = new JPanel(new FlowLayout());
-            useDensityBox = new JCheckBox("Probability density function");
-            useDensityBox.addActionListener(this);
-            headerPanel.add(useDensityBox);
+            
+//            useDensityBox = new JCheckBox("Probability density function");
+            useDensityPanel.addActionListener(this);
+            headerPanel.add(useDensityPanel);
             headerPanel.add(measurementUnitSettingsPanel);
             measurementUnitSettingsPanel.addActionListener(this);
             
@@ -260,7 +260,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		public void update(List<AnalysisDataset> list) throws Exception {
 									
 			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
-            boolean useDensity = useDensityBox.isSelected();
+            boolean useDensity = useDensityPanel.isSelected();
 
 
 			for(NucleusStatistic stat : NucleusStatistic.values()){
