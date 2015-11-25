@@ -51,11 +51,11 @@ public class Cell implements Serializable {
 	}
 	
 	/**
-	 * Duplicate a cell TODO make defensive
+	 * Duplicate a cell. The ID is kept consistent
 	 * @param c the cell to duplicate
 	 */
 	public Cell(Cell c){
-//		this.uuid = UUID.randomUUID();
+
 		this.uuid = c.getId();
 		nucleus = c.getNucleus().duplicate();
 		
@@ -69,8 +69,10 @@ public class Cell implements Serializable {
 			tails.add(new SpermTail((SpermTail) f));
 		}
 		
-//		tails = c.getTails();
-		acrosomes = c.getAcrosomes();
+		acrosomes = new ArrayList<Acrosome>(0);
+		for(Acrosome a : c.getAcrosomes()){
+			acrosomes.add(new Acrosome(a));
+		}
 	}
 	
 	public UUID getId() {

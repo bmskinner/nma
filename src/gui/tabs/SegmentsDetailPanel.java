@@ -906,8 +906,21 @@ public class SegmentsDetailPanel extends DetailPanel {
 						}
 
 					} else {
-						programLogger.log(Level.FINEST, "Multiple datasets selected: making null table");
-						table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
+
+						if(checkSegmentCountsMatch(list)){
+							programLogger.log(Level.FINEST, "Multiple datasets selected");
+							TableModel model = NucleusTableDatasetCreator.createMultiDatasetMedianProfileSegmentStatsTable(list, scale);
+							table.setModel(model);
+							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+
+							while(columns.hasMoreElements()){
+								TableColumn column = columns.nextElement();
+								column.setCellRenderer(new SegmentTableCellRenderer());
+							}
+						} else {
+							programLogger.log(Level.FINEST, "Segment counts don't match");
+							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
+						}
 					}
 
 				}

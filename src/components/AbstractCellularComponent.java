@@ -37,6 +37,25 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	 */
 	private File sourceFile;
 	
+	public AbstractCellularComponent(){
+		this.id = java.util.UUID.randomUUID();
+	}
+	
+	
+	/**
+	 * Duplicate a component. The ID is kept consistent.
+	 * @param a
+	 */
+	public AbstractCellularComponent(AbstractCellularComponent a){
+		this.id = a.getID();
+		this.position = a.getPosition();
+		this.area = a.getArea();
+		this.perimeter = a.getPerimeter();
+		this.boundingRectangle = a.getBounds();
+		this.sourceFolder = a.getSourceFolder();
+		this.sourceFile = a.getSourceFile();
+	}
+	
 	public UUID getID() {
 		return this.id;
 	}

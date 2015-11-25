@@ -516,45 +516,44 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 		try{
 
-			String[] names = populationsPanel.getPopulationNames().toArray(new String[0]);
+//			String[] names = populationsPanel.getPopulationNames().toArray(new String[0]);
+//
+//			String selectedValue = (String) JOptionPane.showInputDialog(null,
+//					"Choose population", "FISH Remapping",
+//					JOptionPane.INFORMATION_MESSAGE, null,
+//					names, names[0]);
+//
+//			UUID id = populationsPanel.getUuidFromName(selectedValue);
+			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
+			if(list.size()==1){
+				final AnalysisDataset dataset = list.get(0);
+				
+				FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset, programLogger);
 
-			String selectedValue = (String) JOptionPane.showInputDialog(null,
-					"Choose population", "FISH Remapping",
-					JOptionPane.INFORMATION_MESSAGE, null,
-					names, names[0]);
+				List<CellCollection> subs = fishMapper.getSubCollections();
+				
+				final List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+				for(CellCollection sub : subs){
 
-			UUID id = populationsPanel.getUuidFromName(selectedValue);
-
-			final AnalysisDataset dataset = populationsPanel.getDataset(id);
-
-			FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset, programLogger);
-
-			List<CellCollection> subs = fishMapper.getSubCollections();
-			final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-			for(CellCollection sub : subs){
-
-				if(sub.getNucleusCount()>0){
-					
-					dataset.addChildCollection(sub);
-					
-					AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
-					list.add(subDataset);
+					if(sub.getNucleusCount()>0){
+						
+						dataset.addChildCollection(sub);
+						
+						AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
+						list.add(subDataset);
+					}
 				}
+				
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+						programLogger.log(Level.INFO, "Reapplying morphology...");
+						new MorphologyAnalysisAction(newList, dataset, ADD_POPULATION, MainWindow.this);
+
+					}});
+
+				
+				
 			}
-			
-			Thread thr = new Thread(){
-				public void run(){
-					programLogger.log(Level.INFO, "Reapplying morphology...");
-					new MorphologyAnalysisAction(list, dataset, ADD_POPULATION, MainWindow.this);
-				}
-			};
-			thr.start();
-			
-
-			
-			// get the dataset craeted by adding a child collection, and put it inthe populations list
-//			populationsPanel.addDataset(dataset.getChildDataset(sub.getID()));
-//			populationsPanel.update();	
 
 		} catch(Exception e){
 			programLogger.log(Level.SEVERE, "Error in FISH remapping: "+e.getMessage(), e);

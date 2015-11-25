@@ -20,6 +20,12 @@ package gui;
 
 import java.util.List;
 
+/**
+ * This is to allow different enums to be used in the 
+ * setup of an ImageProber
+ * @author bms41
+ *
+ */
 public interface ImageType {
 	
 	public String toString();

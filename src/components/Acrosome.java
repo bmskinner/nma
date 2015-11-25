@@ -18,32 +18,16 @@
  *******************************************************************************/
 package components;
 
-import java.io.File;
-import java.util.List;
+public class Acrosome extends  AbstractCellularComponent {
 
-import components.generic.XYPoint;
+	private static final long serialVersionUID = 1L;
 
-public interface Acrosome {
+	public Acrosome(){
 
+	}
+	
+	public Acrosome(Acrosome a){
+		super(a);
+	}
 
-	public List<XYPoint> getSkeleton();
-
-	/**
-	 * Fetch the skeleton offset to zero
-	 * @return
-	 */
-	public List<XYPoint> getOffsetSkeleton();
-
-	public List<XYPoint> getBorder();
-
-	// positions are offset by the bounding rectangle for easier plotting
-	public List<XYPoint> getOffsetBorder();
-
-	public double getLength();
-
-	public File getSourceFile();
-
-	public int getSourceChannel();
-
-	public double[] getPosition();
 }
