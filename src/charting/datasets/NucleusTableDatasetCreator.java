@@ -252,7 +252,8 @@ public class NucleusTableDatasetCreator {
 				"Run date",
 				"Run time",
 				"Collection source",
-				"Type"};
+				"Type",
+				"Version"};
 		model.addColumn("", columnData);
 		
 		if(list==null){
@@ -315,7 +316,8 @@ public class NucleusTableDatasetCreator {
 									date,
 									time,
 									collection.getFolder(),
-									options.getNucleusType().toString()				
+									options.getNucleusType().toString(),
+									dataset.getVersion()
 							};
 
 							model.addColumn(collection.getName(), collectionData);
