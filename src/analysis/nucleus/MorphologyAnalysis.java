@@ -55,15 +55,10 @@ public class MorphologyAnalysis extends AnalysisWorker {
     public static final int MODE_NEW     = 0;
     public static final int MODE_COPY    = 1;
     public static final int MODE_REFRESH = 2;
-    
-//    private int totalNuclei = 0;
-    
+        
     private CellCollection collection; // the collection to work on
     private CellCollection sourceCollection = null; // a collection to take segments from
     private int mode = MODE_NEW; 				// the analysis mode
-    
-//    private static Logger programLogger;
-//    private static Logger fileLogger;
 
     
     /*

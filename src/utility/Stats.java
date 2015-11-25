@@ -29,6 +29,10 @@
 
  import java.util.Arrays;
 
+import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.exception.MathIllegalArgumentException;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
  public class Stats {
 
  /*
@@ -120,5 +124,48 @@
 	  }
 	  return max;
   }
-  
+
+  /**
+   * Calculate the confidence interval about the data mean for
+   * the given confidence level
+   * @param data the array of data points
+   * @param level the confidence level (0-1)
+   * @return the lower [0] and upper [1] CI about the mean.
+   */
+  public static double[] calculateMeanConfidenceInterval(double[] data, double level){
+	  SummaryStatistics stats = new SummaryStatistics();
+	  for (double val : data) {
+		  stats.addValue(val);
+	  }
+
+	  // Calculate 95% confidence interval
+	  double ci = calcMeanCI(stats, level);
+	  System.out.println(String.format("Mean: %f", stats.getMean()));
+
+	  double lower = stats.getMean() - ci;
+	  double upper = stats.getMean() + ci;
+	  double[] result = { lower, upper };
+	  return result;
+  }
+
+  /**
+   * Calculate the confidence interval about the mean using a T-distribution
+ * @param stats
+ * @param level
+ * @return
+ */
+  private static double calcMeanCI(SummaryStatistics stats, double level) {
+	  try {
+		  // Create T Distribution with N-1 degrees of freedom
+		  TDistribution tDist = new TDistribution(stats.getN() - 1);
+		  // Calculate critical value
+		  double critVal = tDist.inverseCumulativeProbability(1.0 - (1 - level) / 2);
+		  // Calculate confidence interval
+		  return critVal * stats.getStandardDeviation() / Math.sqrt(stats.getN());
+	  } catch (MathIllegalArgumentException e) {
+		  return Double.NaN;
+	  }
+  }
+
  }
+  

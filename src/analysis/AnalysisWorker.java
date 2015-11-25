@@ -10,7 +10,9 @@ import javax.swing.SwingWorker;
 import utility.Constants;
 
 /**
- * This class provides progress and done signalling control for SwingWorker analyses
+ * This class provides progress and done signalling control for SwingWorker analyses.
+ * It provides a consistent process() and done() methods, allowing doInBackground() to 
+ * be overridden as needed for each worker
  * @author bms41
  *
  */
