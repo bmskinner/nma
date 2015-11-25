@@ -18,9 +18,12 @@
  *******************************************************************************/
 package analysis.nucleus;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -240,8 +243,8 @@ public class NucleusClusterer extends AnalysisWorker {
 		Attribute area = new Attribute("area"); 
 		Attribute circularity = new Attribute("circularity"); 
 		Attribute aspect = new Attribute("aspect"); 
-		Attribute name = new Attribute("name"); 
-		
+		Attribute name = new Attribute("name", (FastVector) null); 
+				
 		// hold the attributes in a Vector
 		FastVector attributes = new FastVector(attributeCount);
 		attributes.addElement(area);
@@ -273,6 +276,7 @@ public class NucleusClusterer extends AnalysisWorker {
 			Profile indexes = pvals.getSortedIndexes();
 			
 			// create Instance for each nucleus and add to Instances
+//			List<String> stringList = new ArrayList<String>();
 			int j=0;
 			for(Cell c : collection.getCells()){
 				programLogger.log(Level.FINEST, "Adding cell "+j);
@@ -286,7 +290,8 @@ public class NucleusClusterer extends AnalysisWorker {
 				inst.setValue(area, n.getArea());
 				inst.setValue(circularity, n.getCircularity());
 				inst.setValue(aspect, n.getAspectRatio());
-				inst.setValue(name, (String) n.getNameAndNumber());
+//				stringList.add(n.getNameAndNumber());
+				inst.setValue(name,  n.getNameAndNumber());
 				
 				
 				if(options.isIncludeModality()){
@@ -316,6 +321,8 @@ public class NucleusClusterer extends AnalysisWorker {
 				publish(j++);
 
 			}
+			
+			
 			programLogger.log(Level.FINER, "Built instances");
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE, "Error making instances", e);
