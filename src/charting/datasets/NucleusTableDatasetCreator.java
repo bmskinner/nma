@@ -19,6 +19,7 @@
 package charting.datasets;
 
 import utility.DipTester;
+import utility.Stats;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -344,19 +345,19 @@ public class NucleusTableDatasetCreator {
 	public static TableModel createStatsTable(List<AnalysisDataset> list) throws Exception {
 
 		DefaultTableModel model = new DefaultTableModel();
+		
+		List<Object> columnData = new ArrayList<Object>();	
+		columnData.add("Nuclei");
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+			columnData.add(stat.toString()+" median");
+			columnData.add(stat.toString()+" mean 95% CI");
+			columnData.add(stat.toString()+" p(unimodal)");
+		}
+		columnData.add("Signal channels");
+		columnData.add("Number of signals");
+		columnData.add("Signals per nucleus");
 
-		Object[] columnData = {
-				"Nuclei", 
-				"Median area",
-				"Area p(unimodal)",
-				"Median perimeter",
-				"Perimeter p(unimodal)",
-				"Median feret",
-				"Feret p(unimodal)",
-				"Signal channels",
-				"Number of signals",
-				"Signals per nucleus"};
-		model.addColumn("", columnData);
+		model.addColumn("", columnData.toArray());
 		
 		if(list==null){
 			model.addColumn("No data loaded");
@@ -368,26 +369,29 @@ public class NucleusTableDatasetCreator {
 
 			for(AnalysisDataset dataset : list){
 				CellCollection collection = dataset.getCollection();
-								
+
+				List<Object> datasetData = new ArrayList<Object>();			
 				double signalPerNucleus = (double) collection.getSignalCount()/  (double) collection.getNucleusCount();
+
+				datasetData.add(collection.getNucleusCount());
+
+				for(NucleusStatistic stat : NucleusStatistic.values()){
+					double[] stats 	= collection.getNuclearStatistics(stat, MeasurementScale.PIXELS);
+					double median 	= Stats.quartile(stats, 50);
+					double[] ci 	= Stats.calculateMeanConfidenceInterval(stats, 0.95);
+					String ciString = df.format(ci[0]) + " - " + df.format(ci[1]);
+					double diptest 	= DipTester.getDipTestPValue(stats);
+
+					datasetData.add(df.format(median));
+					datasetData.add(ciString);
+					datasetData.add(pf.format(diptest));					
+				}
 				
-				Object[] collectionData = {
-						collection.getNucleusCount(),
-						df.format(collection.getMedianNuclearArea()),
-						pf.format(DipTester.getDipTestPValue(collection.getNuclearStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS))),
-						
-						df.format(collection.getMedianNuclearPerimeter()),
-						pf.format(DipTester.getDipTestPValue(collection.getNuclearStatistics(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS))),
-						
-						df.format(collection.getMedianFeretLength()),
-						pf.format(DipTester.getDipTestPValue(collection.getNuclearStatistics(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS))),
-
-						collection.getSignalGroups().size(),
-						collection.getSignalCount(),
-						df.format(signalPerNucleus)
-				};
-
-				model.addColumn(collection.getName(), collectionData);
+				datasetData.add(collection.getSignalGroups().size());
+				datasetData.add(collection.getSignalCount());
+				datasetData.add(df.format(signalPerNucleus));
+				
+				model.addColumn(collection.getName(), datasetData.toArray());
 			}
 		}
 		return model;	
