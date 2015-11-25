@@ -95,7 +95,8 @@ public class SignalDetectionImageProber extends ImageProber {
 			String imageName = imageFile.getName();
 
 			programLogger.log(Level.FINEST, "Converting image");
-			ImageProcessor openProcessor = ImageExporter.convertToRGB(stack).getProcessor();
+			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(stack).getProcessor();
+			openProcessor.invert();
 			procMap.put(SignalImageType.DETECTED_OBJECTS, openProcessor);
 
 			// Store the options
@@ -154,7 +155,7 @@ public class SignalDetectionImageProber extends ImageProber {
 			List<NuclearSignal> list = map.get(n);
 			
 			// Draw the nucleus
-			ip.setColor(Color.WHITE);
+			ip.setColor(Color.BLUE);
 			FloatPolygon npolygon = Utils.createPolygon(n.getBorderList());
 			PolygonRoi nroi = new PolygonRoi(npolygon, PolygonRoi.POLYGON);
 			nroi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);

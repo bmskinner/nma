@@ -196,8 +196,8 @@ public abstract class ImageProber extends JDialog {
 								importAndDisplayImage(openImage);
 							} catch(Exception e){
 								programLogger.log(Level.SEVERE, "Error opening image, skipping");
-								openImage = getNextImage();
-								importAndDisplayImage(openImage);
+//								openImage = getNextImage();
+//								importAndDisplayImage(openImage);
 							}
 							
 						}
@@ -218,8 +218,17 @@ public abstract class ImageProber extends JDialog {
 							programLogger.log(Level.FINEST, "Selecting previous image");
 							openImage = getPrevImage();
 //							setStatusLoading();
-							programLogger.log(Level.FINEST, "Opening image");
-							importAndDisplayImage(openImage);
+							try{
+								programLogger.log(Level.FINEST, "Opening image");
+								importAndDisplayImage(openImage);
+							} catch(Exception e){
+								programLogger.log(Level.SEVERE, "Error opening image, skipping");
+//								openImage = getNextImage();
+//								importAndDisplayImage(openImage);
+							}
+							
+//							programLogger.log(Level.FINEST, "Opening image");
+//							importAndDisplayImage(openImage);
 						}
 					};	
 					thr.start();
