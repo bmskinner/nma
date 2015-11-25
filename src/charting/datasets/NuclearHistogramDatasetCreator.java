@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
@@ -32,7 +34,9 @@ import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.MeasurementScale;
+import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusStatistic;
+import components.nuclei.Nucleus;
 
 public class NuclearHistogramDatasetCreator {
 	
@@ -174,39 +178,142 @@ public class NuclearHistogramDatasetCreator {
 	 * Calculate the minimum and maximum ranges in a list of datasets
 	 * for the given stat type
 	 * @param list the datasets
-	 * @param stat the statistic to use (NuclearHistogramDatasetCreator.NUCLEAR_x constants)
+	 * @param stat the statistic to use
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
 	private static int[] calculateMinAndMaxRange(List<AnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws Exception {
 		
 		int[] result = new int[2];
-		result[0] = 1000000; // holds min
+		result[0] = Integer.MAX_VALUE; // holds min
 		result[1] = 0; // holds max
 
 		for(AnalysisDataset dataset : list){
 			
 			double[] values = findDatasetValues(dataset, stat, scale); 
-									
-			double min = Stats.min(values);
-			double max = Stats.max(values);
-						
+			
+			updateMinMaxRange(result, values);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Given an existing range for an axis scale, check if the range must be expanded for
+	 * the given set of values
+	 * @param range the existing min and max
+	 * @param values the new values
+	 * @return
+	 */
+	private static int[] updateMinMaxRange(int[] range, double[] values){
+		
+		double min = Stats.min(values);
+		double max = Stats.max(values);
+					
+		int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+					
+		int roundLog = log-1 == 0 ? log-2 : log-1;
+		double roundAbs = Math.pow(10, roundLog);
+					
+		// use int truncation to round to nearest 100 above max
+		int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
+		maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
+		int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
+		minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
+		minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
+		
+		range[0] = range[0] < minRounded ? range[0] : minRounded;
+		range[1] = range[1] > maxRounded ? range[1] : maxRounded;
+		
+		return range;
+	}
+	
+	/**
+	 * Get the lengths of the given segment in the collections
+	 * @param collections
+	 * @param segName
+	 * @return
+	 * @throws Exception 
+	 */
+	public static DefaultXYDataset createSegmentLengthDensityDataset(List<AnalysisDataset> list, String segName, MeasurementScale scale) throws Exception {
+
+		int[] minMaxRange = {Integer.MAX_VALUE, 0}; // start with extremes, trim to fit data
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			
+			int count=0;
+			double[] lengths = new double[collection.size()];
+			for(Nucleus n : collection.getNuclei()){
+				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+
+				int indexLength = seg.length();
+				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+				double length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+				lengths[count++] = length;
+			}
+			
+			minMaxRange = updateMinMaxRange(minMaxRange, lengths);
+		}
+
+		
+		// Ranges are found, now make the kernel
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		
+
+		for(AnalysisDataset dataset : list){
+			CellCollection collection = dataset.getCollection();
+			
+			int count=0;
+			double[] lengths = new double[collection.size()];
+			for(Nucleus n : collection.getNuclei()){
+				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+				
+				int indexLength = seg.length();
+				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+				double length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+				lengths[count++] = length;
+			}
+			
+			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(  lengths  );
+	
+			double min = Stats.min(lengths);
+			double max = Stats.max(lengths);
+
 			int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
-						
+			
 			int roundLog = log-1 == 0 ? log-2 : log-1;
 			double roundAbs = Math.pow(10, roundLog);
-						
+			
+			int binLog = log-2;
+			double stepSize = Math.pow(10, binLog);
+			
+//			IJ.log("   roundLog: "+roundLog);
+//			IJ.log("   round to nearest: "+roundAbs);
+			
 			// use int truncation to round to nearest 100 above max
 			int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
 			maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
 			int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
 			minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
 			minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
+	
 			
-			result[0] = result[0] < minRounded ? result[0] : minRounded;
-			result[1] = result[1] > maxRounded ? result[1] : maxRounded;
+			List<Double> xValues = new ArrayList<Double>();
+			List<Double> yValues = new ArrayList<Double>();
+			
+			for(double i=minMaxRange[0]; i<=minMaxRange[1]; i+=stepSize){
+				xValues.add(i);
+				yValues.add(est.getProbability(i));
+			}
+	
+			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
+					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+			
+			
+			ds.addSeries(segName+"_"+collection.getName(), data);
 		}
-		
-		return result;
+
+		return ds;
 	}
 }
