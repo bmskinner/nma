@@ -108,5 +108,18 @@ public abstract class ChartOptions {
 		}
 	}
 	
+	/**
+	 * Check if the dataset list has one or many
+	 * datasets
+	 * @return
+	 */
+	public boolean isSingleDataset(){
+		if(list.size()==1){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	
 }

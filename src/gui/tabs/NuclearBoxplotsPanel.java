@@ -22,6 +22,7 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
+import gui.components.HistogramsTabPanel;
 import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.ProbabilityDensityCheckboxPanel;
 import gui.components.SelectableChartPanel;
@@ -89,7 +90,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		boxplotPanel = new BoxplotsPanel();
 		tabPane.addTab("Boxplots", boxplotPanel);
 		
-		histogramsPanel = new HistogramsPanel();
+		histogramsPanel = new HistogramsPanel(programLogger);
 		tabPane.addTab("Histograms", histogramsPanel);
 		
 		this.add(tabPane, BorderLayout.CENTER);
@@ -204,96 +205,74 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 	}
 	
-	protected class HistogramsPanel extends JPanel implements ActionListener, SignalChangeListener {
+	@SuppressWarnings("serial")
+	protected class HistogramsPanel extends HistogramsTabPanel implements SignalChangeListener {
 		
-		private static final long serialVersionUID = 1L;
-		
-		private Map<NucleusStatistic, SelectableChartPanel> chartPanels = new HashMap<NucleusStatistic, SelectableChartPanel>();
+		public HistogramsPanel(Logger programLogger){
+			super(programLogger);
 
-		private JPanel 		mainPanel; // hold the charts
-        private JPanel         headerPanel; // hold buttons
-        private ProbabilityDensityCheckboxPanel useDensityPanel = new ProbabilityDensityCheckboxPanel();
-        private MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
-
-		private JScrollPane scrollPane; // hold the main panel
-
-		public HistogramsPanel(){
-			this.setLayout(new BorderLayout());
-						
 			try {
-			mainPanel = new JPanel();
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-			
-            headerPanel = new JPanel(new FlowLayout());
-            
-//            useDensityBox = new JCheckBox("Probability density function");
-            useDensityPanel.addActionListener(this);
-            headerPanel.add(useDensityPanel);
-            headerPanel.add(measurementUnitSettingsPanel);
-            measurementUnitSettingsPanel.addActionListener(this);
-            
-    
-            this.add(headerPanel, BorderLayout.NORTH);
 
-            MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
-			Dimension preferredSize = new Dimension(400, 150);
-			for(NucleusStatistic stat : NucleusStatistic.values()){
+				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
+				Dimension preferredSize = new Dimension(400, 150);
+				for(NucleusStatistic stat : NucleusStatistic.values()){
 
-				HistogramChartOptions options = new HistogramChartOptions(null, stat, scale, false);
-				SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(options), stat.toString());
-				panel.setPreferredSize(preferredSize);
-				panel.addSignalChangeListener(this);
-				chartPanels.put(stat, panel);
-				mainPanel.add(panel);
-				
-			}
-			
-			// add the scroll pane to the tab
-			scrollPane  = new JScrollPane(mainPanel);
-			this.add(scrollPane, BorderLayout.CENTER);
+					HistogramChartOptions options = new HistogramChartOptions(null, stat, scale, false);
+					SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(options), stat.toString());
+					panel.setPreferredSize(preferredSize);
+					panel.addSignalChangeListener(this);
+					HistogramsPanel.this.chartPanels.put(stat, panel);
+					HistogramsPanel.this.mainPanel.add(panel);
+
+				}
+
 			} catch(Exception e){
 				programLogger.log(Level.SEVERE, "Error creating histogram panel", e);
 			}
-			
+
 		}
-		
-		public void update(List<AnalysisDataset> list) throws Exception {
-									
-			MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
-            boolean useDensity = useDensityPanel.isSelected();
+
+		public void update(List<AnalysisDataset> list) {
+			HistogramsPanel.this.list = list;
+
+			MeasurementScale scale  = HistogramsPanel.this.measurementUnitSettingsPanel.getSelected();
+			boolean useDensity = HistogramsPanel.this.useDensityPanel.isSelected();
+
+			try{
+				for(NucleusStatistic stat : NucleusStatistic.values()){
+					SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat);
+
+					JFreeChart chart = null;
+					HistogramChartOptions options = new HistogramChartOptions(list, stat, scale, useDensity);
+					options.setLogger(programLogger);
+
+					if(this.getChartCache().hasChart(options)){
+						programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
+						chart = HistogramsPanel.this.getChartCache().getChart(options);
+
+					} else { // No cache
 
 
-			for(NucleusStatistic stat : NucleusStatistic.values()){
-				SelectableChartPanel panel = chartPanels.get(stat);
-				
-				JFreeChart chart = null;
-				HistogramChartOptions options = new HistogramChartOptions(list, stat, scale, useDensity);
-				options.setLogger(programLogger);
-				
-				if(getChartCache().hasChart(options)){
-					programLogger.log(Level.FINEST, "Using cached histogram: "+stat.toString());
-					chart = getChartCache().getChart(options);
-									
-				} else { // No cache
-				
-			
-					if(useDensity){
-						chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
-						getChartCache().addChart(options, chart);
+						if(useDensity){
+							chart = HistogramChartFactory.createNuclearDensityStatsChart(options);
+							HistogramsPanel.this.getChartCache().addChart(options, chart);
 
-					} else {
-						chart = HistogramChartFactory.createNuclearStatsHistogram(options);
-						getChartCache().addChart(options, chart);
-						
+						} else {
+							chart = HistogramChartFactory.createNuclearStatsHistogram(options);
+							HistogramsPanel.this.getChartCache().addChart(options, chart);
+
+						}
+						programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
 					}
-					programLogger.log(Level.FINEST, "Added cached histogram chart: "+stat);
-				}
-//				detectModes(chart, list, stat);
-				XYPlot plot = (XYPlot) chart.getPlot();
-		        plot.setDomainPannable(true);
-		        plot.setRangePannable(true);
 
-				panel.setChart(chart);
+					XYPlot plot = (XYPlot) chart.getPlot();
+					plot.setDomainPannable(true);
+					plot.setRangePannable(true);
+
+					panel.setChart(chart);
+				}
+			} catch(Exception e){
+				programLogger.log(Level.SEVERE, "Error updating histogram panel", e);
 			}
 		}
 				
@@ -314,18 +293,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			}
 			
 		}
-		
-        @Override
-        public void actionPerformed(ActionEvent e) {
-
-            try {
-                this.update(list);
-            } catch (Exception e1) {
-            	programLogger.log(Level.SEVERE, "Error updating histogram panel from action listener", e1);
-            }
-            
-            
-        }
 
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {
@@ -348,18 +315,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			}
 			return stat;
 		}
-		
-		private int getFilterDialogResult(double lower, double upper){
-			DecimalFormat df = new DecimalFormat("#.##");
-			Object[] options = { "Filter collection" , "Cancel", };
-			int result = JOptionPane.showOptionDialog(null, "Filter between "+df.format(lower)+"-"+df.format(upper)+"?", "Confirm filter",
-
-					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-					null, options, options[0]);
-			return result;
-		}
-		
+				
 		/**
 		 * Filter the selected populations based on the region outlined on a histogram panel
 		 * @param panel

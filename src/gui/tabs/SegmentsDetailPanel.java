@@ -386,38 +386,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 						getChartCache().addChart(options, chart);
 					}
 					
-
 					// Set the button configuration
-					if(list.size()>1){
-						buttonsPanel.setEnabled(false);
-					} else { // single collection
-						buttonsPanel.setEnabled(true);
-						CellCollection collection = list.get(0).getCollection();
-						SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-								.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
-						
-						// Don't allow merging below 2 segments (causes errors)
-						if(medianProfile.getSegmentCount()<=2){
-							mergeButton.setEnabled(false);
-						} else {
-							mergeButton.setEnabled(true);
-						}
-						
-						// Check if there are any merged segments
-						boolean hasMerges = false;
-						for(NucleusBorderSegment seg : medianProfile.getSegments()){
-							if(seg.hasMergeSources()){
-								hasMerges = true;
-							}
-						}
-						
-						// If there are no merged segments, don't allow unmerging 
-						if(hasMerges){
-							unmergeButton.setEnabled(true);
-						} else {
-							unmergeButton.setEnabled(false);
-						}
-					}
+					configureButtons(options);
 				} 
 				
 				chartPanel.setChart(chart);
@@ -427,6 +397,46 @@ public class SegmentsDetailPanel extends DetailPanel {
 				unmergeButton.setEnabled(false);
 				mergeButton.setEnabled(false);
 			} 
+		}
+		
+		/**
+		 * Enable or disable buttons depending on datasets selected
+		 * @param options
+		 * @throws Exception
+		 */
+		private void configureButtons(ProfileChartOptions options) throws Exception {
+			if(options.isSingleDataset()){
+				
+				buttonsPanel.setEnabled(true);
+				CellCollection collection = options.firstDataset().getCollection();
+				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+						.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
+				
+				// Don't allow merging below 2 segments (causes errors)
+				if(medianProfile.getSegmentCount()<=2){
+					mergeButton.setEnabled(false);
+				} else {
+					mergeButton.setEnabled(true);
+				}
+				
+				// Check if there are any merged segments
+				boolean hasMerges = false;
+				for(NucleusBorderSegment seg : medianProfile.getSegments()){
+					if(seg.hasMergeSources()){
+						hasMerges = true;
+					}
+				}
+				
+				// If there are no merged segments, don't allow unmerging 
+				if(hasMerges){
+					unmergeButton.setEnabled(true);
+				} else {
+					unmergeButton.setEnabled(false);
+				}
+				
+			} else { // multiple collections
+				buttonsPanel.setEnabled(false);
+			}
 		}
 
 		@Override

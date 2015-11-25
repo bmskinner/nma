@@ -13,7 +13,7 @@ public class ProbabilityDensityCheckboxPanel extends EnumeratedOptionsPanel {
 
 
 		// checkbox to select raw or normalised profiles
-		checkBox.setSelected(true);
+		checkBox.setSelected(false);
 		checkBox.addActionListener(this);
 		this.add(checkBox);
 

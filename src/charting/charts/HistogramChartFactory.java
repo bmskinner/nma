@@ -212,12 +212,12 @@ public class HistogramChartFactory {
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
 				                false);
 		
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Color.WHITE);
+		
 		if(ds!=null && options.hasDatasets()){
-			
-			XYPlot plot = chart.getXYPlot();
-			
-			plot.setBackgroundPaint(Color.WHITE);
-			
+						
 			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
 			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
 			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
