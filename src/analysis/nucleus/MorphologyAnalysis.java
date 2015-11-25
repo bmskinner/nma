@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import javax.swing.SwingWorker;
 
 import analysis.AnalysisDataset;
+import analysis.AnalysisWorker;
 import utility.Constants;
 import utility.Utils;
 import components.CellCollection;
@@ -48,21 +49,21 @@ import components.nuclei.sperm.RodentSpermNucleus;
  * generates the median profiles, segments them, and applies the segments to
  * nuclei.
  */
-public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
+public class MorphologyAnalysis extends AnalysisWorker {
 	
 //	private static Logger logger;
     public static final int MODE_NEW     = 0;
     public static final int MODE_COPY    = 1;
     public static final int MODE_REFRESH = 2;
     
-    private int totalNuclei = 0;
+//    private int totalNuclei = 0;
     
     private CellCollection collection; // the collection to work on
     private CellCollection sourceCollection = null; // a collection to take segments from
     private int mode = MODE_NEW; 				// the analysis mode
     
-    private static Logger programLogger;
-    private static Logger fileLogger;
+//    private static Logger programLogger;
+//    private static Logger fileLogger;
 
     
     /*
@@ -72,12 +73,13 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
     */
     
     public MorphologyAnalysis(AnalysisDataset dataset, int mode, Logger programLogger){
-    	MorphologyAnalysis.programLogger = programLogger;
+    	super(dataset, programLogger);
+//    	MorphologyAnalysis.programLogger = programLogger;
     	try{
     		this.collection = dataset.getCollection();
     		this.mode = mode;
     		
-    		MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
+    		AnalysisWorker.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
     		fileLogger.setLevel(Level.FINE);
     		fileLogger.addHandler(dataset.getLogHandler());
     		fileLogger.log(Level.FINE, "Created MorphologyAnalysis");
@@ -87,7 +89,7 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
     }
     
     public MorphologyAnalysis(AnalysisDataset dataset, CellCollection source, Logger programLogger){
-    	MorphologyAnalysis.programLogger = programLogger;
+    	super(dataset, programLogger);
     	try{
     		this.collection = dataset.getCollection();
     		this.mode = MODE_COPY;
@@ -108,14 +110,14 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
       //////////////////////////////////////////////////
      */
     
-    @Override
-    protected void process( List<Integer> integers ) {
-        int amount = integers.get( integers.size() - 1 );
-        int percent = (int) ( (double) amount / (double) totalNuclei * 100);
-        if(percent >= 0 && percent <=100){
-        	setProgress(percent); // the integer representation of the percent
-        }
-    }
+//    @Override
+//    protected void process( List<Integer> integers ) {
+//        int amount = integers.get( integers.size() - 1 );
+//        int percent = (int) ( (double) amount / (double) totalNuclei * 100);
+//        if(percent >= 0 && percent <=100){
+//        	setProgress(percent); // the integer representation of the percent
+//        }
+//    }
     
     @Override
     protected Boolean doInBackground() throws Exception {
@@ -140,7 +142,8 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 				fileLogger.log(Level.INFO, "Beginning core morphology analysis");
 
 				// we run the profiler and segmenter on each nucleus - may need to double
-				totalNuclei = collection.getNucleusCount(); 
+				this.setProgressTotal(collection.getNucleusCount());
+//				totalNuclei = collection.getNucleusCount(); 
 
 				BorderTag pointType = BorderTag.REFERENCE_POINT;
 
@@ -168,7 +171,8 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 					fileLogger.log(Level.INFO, "Cannot copy: source collection is null");
 					result = false;
 				} else {
-					totalNuclei = collection.getNucleusCount(); 
+					this.setProgressTotal(collection.getNucleusCount());
+//					totalNuclei = collection.getNucleusCount(); 
 					fileLogger.log(Level.INFO, "Copying segmentation pattern");
 					programLogger.log(Level.FINE,  "Copying segmentation pattern");
 					reapplyProfiles(collection, sourceCollection);
@@ -190,42 +194,41 @@ public class MorphologyAnalysis extends SwingWorker<Boolean, Integer> {
 			result = false;
 		} 
 
-//		IJ.log("End of method reached; head to done() with result "+result);
 		return result;
 	}
     
-    @Override
-    public void done() {
-    	
-    	programLogger.log(Level.FINEST, "Completed morphology worker task; firing trigger");
-
-        try {
-            if(this.get()){
-            	programLogger.log(Level.FINEST, "Firing trigger for sucessful task");
-                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
-
-            } else {
-            	programLogger.log(Level.FINEST, "Firing trigger for error in task");
-                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-            }
-        } catch (InterruptedException e) {
-        	fileLogger.log(Level.SEVERE, "Error in morphology application", e);
-        } catch (ExecutionException e) {
-        	fileLogger.log(Level.SEVERE, "Error in morphology application", e);
-            
-        	fileLogger.log(Level.SEVERE, "Collection keys:");
-        	fileLogger.log(Level.SEVERE, collection.getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
-            
-        	fileLogger.log(Level.SEVERE, "FrankenCollection keys:");
-        	fileLogger.log(Level.SEVERE, collection.getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
-       }
-//        	} finally{
-//			for(Handler h : fileLogger.getHandlers()){
-//				h.close();
-//			}
-//		}
-
-    } 
+//    @Override
+//    public void done() {
+//    	
+//    	programLogger.log(Level.FINEST, "Completed morphology worker task; firing trigger");
+//
+//        try {
+//            if(this.get()){
+//            	programLogger.log(Level.FINEST, "Firing trigger for sucessful task");
+//                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
+//
+//            } else {
+//            	programLogger.log(Level.FINEST, "Firing trigger for error in task");
+//                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+//            }
+//        } catch (InterruptedException e) {
+//        	fileLogger.log(Level.SEVERE, "Error in morphology application", e);
+//        } catch (ExecutionException e) {
+//        	fileLogger.log(Level.SEVERE, "Error in morphology application", e);
+//            
+//        	fileLogger.log(Level.SEVERE, "Collection keys:");
+//        	fileLogger.log(Level.SEVERE, collection.getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
+//            
+//        	fileLogger.log(Level.SEVERE, "FrankenCollection keys:");
+//        	fileLogger.log(Level.SEVERE, collection.getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
+//       }
+////        	} finally{
+////			for(Handler h : fileLogger.getHandlers()){
+////				h.close();
+////			}
+////		}
+//
+//    } 
 
     /*
     //////////////////////////////////////////////////

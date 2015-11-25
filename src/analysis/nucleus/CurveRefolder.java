@@ -35,6 +35,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import analysis.AnalysisDataset;
+import analysis.AnalysisWorker;
 import utility.Constants;
 import utility.Equation;
 import utility.Utils;
@@ -51,7 +52,7 @@ import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
 
-public class CurveRefolder extends SwingWorker<Boolean, Integer>{
+public class CurveRefolder extends AnalysisWorker {
 
 	private Profile targetCurve;
 
@@ -61,8 +62,8 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	private CountDownLatch doneSignal;
 	
 	
-	private static Logger logger; // the program logger
-	private static Logger fileLogger; // the debug file logger
+//	private static Logger logger; // the program logger
+//	private static Logger fileLogger; // the debug file logger
 
 
 //	public static final int FAST_MODE 		= 0; // default; iterate until convergence
@@ -112,8 +113,10 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 	 * @throws Exception
 	 */
 	public CurveRefolder(AnalysisDataset dataset, CurveRefoldingMode refoldMode, CountDownLatch doneSignal, Logger logger) throws Exception {
+		super(dataset, logger);
 		this.doneSignal = doneSignal;
-		this.logger = logger;
+		this.setProgressTotal(refoldMode.maxIterations());
+//		this.logger = logger;
 
 		collection = dataset.getCollection();
 		
@@ -187,85 +190,85 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 
 			collection.addConsensusNucleus(refoldNucleus);
 			fileLogger.log(Level.INFO,"Curve refolding complete: trigger done()");
-			logger.log(Level.FINEST,"Curve refolding complete: trigger done()");
+			programLogger.log(Level.FINEST,"Curve refolding complete: trigger done()");
 			// done() is scheduled to be executed on the EDT
 
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
-			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
+			programLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
 			return false;
 //		}
 		} finally {
 //			logger.log(Level.FINEST,"Closing log file handler");
 //			handler.close();
-			logger.log(Level.FINEST, "Curve refolder doInBackground is EDT: "+SwingUtilities.isEventDispatchThread());
+			programLogger.log(Level.FINEST, "Curve refolder doInBackground is EDT: "+SwingUtilities.isEventDispatchThread());
 			fileLogger.log(Level.FINEST, "Curve refolder doInBackground is EDT: "+SwingUtilities.isEventDispatchThread());
 			doneSignal.countDown();
-			logger.log(Level.FINEST, "Curve refolder thinks latch is "+doneSignal.getCount());
+			programLogger.log(Level.FINEST, "Curve refolder thinks latch is "+doneSignal.getCount());
 			
 		}
 		return true;
 	}
 	
-	@Override
-	protected void process( List<Integer> integers ) {
-		//update the number of entries added
-//		logger.log(Level.FINEST, "Processing integer list from publish()");
-		
-		int lastCycle = integers.get(integers.size()-1);
-		
-		int maxCycles = this.mode.maxIterations();
-
-		int percent = (int) ( (double) lastCycle / (double) maxCycles * 100);
-		
-		/*
-		 * What happens when the iteration continues past 50 cycles for some reason?
-		 * 
-		 * 
-		 */
-
-		if(lastCycle > maxCycles){
-			logger.log(Level.INFO, "Last cycle ("+lastCycle+") is above max cycles for mode ("+maxCycles+")");
-			fileLogger.log(Level.SEVERE, "Last cycle is above max cycles for mode");
-			percent = 100;
-			
-		}
-		setProgress(percent); // the integer representation of the percent
-	}
+//	@Override
+//	protected void process( List<Integer> integers ) {
+//		//update the number of entries added
+////		logger.log(Level.FINEST, "Processing integer list from publish()");
+//		
+//		int lastCycle = integers.get(integers.size()-1);
+//		
+//		int maxCycles = this.mode.maxIterations();
+//
+//		int percent = (int) ( (double) lastCycle / (double) maxCycles * 100);
+//		
+//		/*
+//		 * What happens when the iteration continues past 50 cycles for some reason?
+//		 * 
+//		 * 
+//		 */
+//
+//		if(lastCycle > maxCycles){
+//			programLogger.log(Level.INFO, "Last cycle ("+lastCycle+") is above max cycles for mode ("+maxCycles+")");
+//			fileLogger.log(Level.SEVERE, "Last cycle is above max cycles for mode");
+//			percent = 100;
+//			
+//		}
+//		setProgress(percent); // the integer representation of the percent
+//	}
 	
-	@Override
-	public void done() {
-		
-		/*
-	     * Scheduled to be executed in event dispatching thread once called.
-	     */
-		logger.log(Level.FINEST, "SwingWorker task called done()");
-		fileLogger.log(Level.FINEST, "SwingWorker task called done()");
-		
-		
-		try {
-			if(this.get()){
-				fileLogger.log(Level.FINEST, "Firing successful worker task");
-				logger.log(Level.FINEST, "Firing successful worker task");
-
-				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
-			} else {
-				fileLogger.log(Level.FINEST, "Firing error in worker task");
-				logger.log(Level.FINEST, "Firing error in worker task");
-
-				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-			}
-		} catch (InterruptedException e) {
-			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
-			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
-
-		} catch (ExecutionException e) {
-			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
-			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
-
-		}
-		
-	} 
+//	@Override
+//	public void done() {
+//		
+//		/*
+//	     * Scheduled to be executed in event dispatching thread once called.
+//	     */
+//		programLogger.log(Level.FINEST, "SwingWorker task called done()");
+//		fileLogger.log(Level.FINEST, "SwingWorker task called done()");
+//		
+//		
+//		try {
+//			if(this.get()){
+//				fileLogger.log(Level.FINEST, "Firing successful worker task");
+//				programLogger.log(Level.FINEST, "Firing successful worker task");
+//
+//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
+//			} else {
+//				fileLogger.log(Level.FINEST, "Firing error in worker task");
+//				programLogger.log(Level.FINEST, "Firing error in worker task");
+//
+//				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+//			}
+//		} catch (InterruptedException e) {
+//			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
+//			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
+//
+//		} catch (ExecutionException e) {
+//			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
+//			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
+//
+//		}
+//		
+//	} 
 
 	/*
 		The main function to be called externally;
@@ -283,7 +286,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 			double score = refoldNucleus.getAngleProfile(BorderTag.ORIENTATION_POINT).absoluteSquareDifference(targetCurve);
 			
 			fileLogger.log(Level.INFO, "Refolding curve: initial score: "+(int)score);
-			logger.log(Level.FINE, "Refolding curve: initial score: "+(int)score);
+			programLogger.log(Level.FINE, "Refolding curve: initial score: "+(int)score);
 
 //			double originalScore = score;
 			double prevScore = score*2;
@@ -298,7 +301,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 					i++;
 					publish(i);
 					fileLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
-					logger.log(Level.FINE, "Iteration "+i+": "+(int)score);
+					programLogger.log(Level.FINE, "Iteration "+i+": "+(int)score);
 				}
 //			}
 
@@ -331,7 +334,7 @@ public class CurveRefolder extends SwingWorker<Boolean, Integer>{
 //				}
 //			}
 			fileLogger.log(Level.INFO, "Refolded curve: final score: "+(int)score);
-			logger.log(Level.FINE, "Refolded curve: final score: "+(int)score);
+			programLogger.log(Level.FINE, "Refolded curve: final score: "+(int)score);
 
 		} catch(Exception e){
 			throw new Exception("Cannot calculate scores: "+e.getMessage());

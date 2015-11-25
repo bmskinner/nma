@@ -57,7 +57,7 @@ public class AddTailStainAction extends ProgressableAction {
 				return; // check folder is ok
 			}
 
-			worker = new TubulinTailDetector(dataset, folder, channel);
+			worker = new TubulinTailDetector(dataset, folder, channel, mw.getProgramLogger());
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Tail detection:"+dataset.getName());
 			worker.execute();

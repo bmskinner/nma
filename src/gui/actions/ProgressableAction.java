@@ -40,6 +40,7 @@ import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
 import analysis.AnalysisDataset;
+import analysis.AnalysisWorker;
 
 /**
  * Contains a progress bar and handling methods for when an action
@@ -51,7 +52,7 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	protected AnalysisDataset dataset = null; // the dataset being worked on
 	protected JProgressBar progressBar = null;
 	protected String errorMessage = null;
-	protected SwingWorker<Boolean, Integer> worker;
+	protected AnalysisWorker worker;
 	protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
 	protected LogPanel logPanel;
 	protected Logger programLogger;

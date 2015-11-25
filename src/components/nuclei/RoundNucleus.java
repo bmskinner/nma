@@ -479,8 +479,12 @@ public class RoundNucleus
 		return (4 * Math.PI) * (this.getArea() / perim2);
 	}
 	
-	public double getAspectRatio(){
-		return this.getFeret() / this.getNarrowestDiameter();
+	public double getAspectRatio() {
+		try {
+			return this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getHeight() / this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
+		} catch(Exception e){
+			return 0;
+		}
 	}
 
 	public double getFeret(){

@@ -48,7 +48,7 @@ public class ShellAnalysisAction extends ProgressableAction {
 		} else if (option == JOptionPane.OK_OPTION)	{
 
 			int shellCount = (Integer) spinner.getModel().getValue();
-			worker = new ShellAnalysis(dataset,shellCount);
+			worker = new ShellAnalysis(dataset,shellCount, mw.getProgramLogger());
 
 			worker.addPropertyChangeListener(this);
 			worker.execute();	

@@ -53,6 +53,7 @@ import Skeletonize3D_.Skeletonize3D_;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
+import analysis.AnalysisWorker;
 import analysis.CannyEdgeDetector;
 import analysis.Detector;
 import analysis.ImageFilterer;
@@ -70,33 +71,32 @@ import components.nuclei.Nucleus;
  * as a SwingWorker, the reported progress will be the number of cells processed, and
  * upon completion, a "Finished" property change event is fired.
  */
-public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
-	
-	private static Logger logger;
+public class TubulinTailDetector extends AnalysisWorker {
 
-	private final AnalysisDataset dataset;
 	private final File folder;
 	private final int channel;
 	
 	private static final int WHITE = 255;
 	
-	public TubulinTailDetector(AnalysisDataset dataset, File folder, int channel){
-		this.dataset = dataset;
+	public TubulinTailDetector(AnalysisDataset dataset, File folder, int channel, Logger programLogger){
+		super(dataset, programLogger);
 		this.folder = folder;
 		this.channel = channel;
 		
-		logger = Logger.getLogger(TubulinTailDetector.class.getName());
-		logger.addHandler(dataset.getLogHandler());
+		fileLogger = Logger.getLogger(TubulinTailDetector.class.getName());
+		fileLogger.addHandler(dataset.getLogHandler());
+		
+		this.setProgressTotal(dataset.getCollection().getNucleusCount());
 	}
 	
-	@Override
-	protected void process( List<Integer> integers ) {
-		//update the number of entries added
-		int amount = integers.get( integers.size() - 1 );
-		int totalCells = dataset.getCollection().getNucleusCount();
-		int percent = (int) ( (double) amount / (double) totalCells * 100);
-		setProgress(percent); // the integer representation of the percent
-	}
+//	@Override
+//	protected void process( List<Integer> integers ) {
+//		//update the number of entries added
+//		int amount = integers.get( integers.size() - 1 );
+//		int totalCells = dataset.getCollection().getNucleusCount();
+//		int percent = (int) ( (double) amount / (double) totalCells * 100);
+//		setProgress(percent); // the integer representation of the percent
+//	}
 	
 	@Override
 	protected  Boolean doInBackground() {
@@ -104,23 +104,23 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 		
 		
 //		logger = new Logger(dataset.getDebugFile(), "TubulinTailDetector");
-		logger.log(Level.INFO, "Beginning tail detection");
+		fileLogger.log(Level.INFO, "Beginning tail detection");
 
 		try{
 			int progress = 0;
-			for(Cell c : dataset.getCollection().getCells()){
+			for(Cell c : getDataset().getCollection().getCells()){
 
 				Nucleus n = c.getNucleus();
-				logger.log(Level.INFO, "Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
+				fileLogger.log(Level.INFO, "Looking for tails associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getImageName());
-				logger.log(Level.FINE, "Tail in: "+imageFile.getAbsolutePath());
+				fileLogger.log(Level.FINE, "Tail in: "+imageFile.getAbsolutePath());
 //				SpermTail tail = null;
 				
-				TailFinder finder = new TailFinder(dataset.getAnalysisOptions().getCannyOptions("tail"),
-						logger, 
+				TailFinder finder = new TailFinder(getDataset().getAnalysisOptions().getCannyOptions("tail"),
+						fileLogger, 
 						channel);
 				
 				// attempt to detect the tails in the image
@@ -132,35 +132,35 @@ public class TubulinTailDetector extends SwingWorker<Boolean, Integer> {
 					}
 					
 				} catch(Exception e){
-					logger.log(Level.SEVERE, "Error detecting tail", e);
+					fileLogger.log(Level.SEVERE, "Error detecting tail", e);
 				}
 				
 				progress++;
 				publish(progress);
 			}
 		} catch (Exception e){
-			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
+			fileLogger.log(Level.SEVERE, "Error in tubulin tail detection", e);
 			return false;
 		}
 
 		return result;
 	}
-
-	@Override
-	public void done() {
-
-		try {
-			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
-			} else {
-				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-			}
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
-		} catch (ExecutionException e) {
-			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
-		}
-
-	} 	
+//
+//	@Override
+//	public void done() {
+//
+//		try {
+//			if(this.get()){
+//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
+//			} else {
+//				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+//			}
+//		} catch (InterruptedException e) {
+//			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
+//		} catch (ExecutionException e) {
+//			logger.log(Level.SEVERE, "Error in tubulin tail detection", e);
+//		}
+//
+//	} 	
 
 }

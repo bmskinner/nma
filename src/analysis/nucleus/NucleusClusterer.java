@@ -41,6 +41,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 import analysis.AnalysisDataset;
+import analysis.AnalysisWorker;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import components.Cell;
@@ -52,7 +53,7 @@ import components.generic.ProfileCollectionType;
 import components.nuclei.Nucleus;
 
 
-public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
+public class NucleusClusterer extends AnalysisWorker {
 	
 	public static final int EM = 0; // expectation maximisation
 	public static final int HIERARCHICAL = 1;
@@ -61,27 +62,18 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	private Map<Integer, CellCollection> clusterMap = new HashMap<Integer, CellCollection>();
 	
 	private String newickTree;	
-	private Logger logger;
 		
 	private CellCollection collection;
 	private ClusteringOptions options;
 		
-	public NucleusClusterer(AnalysisDataset dataset, ClusteringOptions options){
+	public NucleusClusterer(AnalysisDataset dataset, ClusteringOptions options, Logger programLogger){
+		super(dataset, programLogger);
 		this.options = options;
 		this.collection = dataset.getCollection();
-		this.logger = Logger.getLogger(NucleusClusterer.class.getName());
-		logger.setLevel(Level.ALL);
-		logger.addHandler(dataset.getLogHandler());
-	}
-	
-	
-	@Override
-	protected void process(List<Integer> integers){
-		int totalCells = collection.size() *2;
-		int lastValue = integers.get(integers.size()-1);
-		
-		int percent = (int) ( ( (double) lastValue / (double) totalCells) *100 )  ;
-		setProgress(percent);
+		this.setProgressTotal(collection.size() *2);
+		fileLogger = Logger.getLogger(NucleusClusterer.class.getName());
+		fileLogger.setLevel(Level.ALL);
+		fileLogger.addHandler(dataset.getLogHandler());
 	}
 	
 	@Override
@@ -89,22 +81,6 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		boolean ok = cluster(collection);
 		return ok;
 	}
-	
-	@Override
-	protected void done(){
-		try {
-			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
-			} else {
-				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-			}
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Error in clustering", e);
-		} catch (ExecutionException e) {
-			logger.log(Level.SEVERE, "Error in clustering", e);
-		}
-	}
-
 	
 	/**
 	 * Fetch the cluster with the given number
@@ -149,7 +125,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		
 //		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
 		
-		logger.log(Level.INFO, "Beginning clustering of population");
+		fileLogger.log(Level.INFO, "Beginning clustering of population");
 				
 		try {
 						
@@ -163,9 +139,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			try {
 				
 
-				logger.log(Level.INFO, "Clusterer is type "+options.getType());
+				fileLogger.log(Level.INFO, "Clusterer is type "+options.getType());
 				for(String s : optionArray){
-					logger.log(Level.FINE, "Clusterer options: "+s);
+					fileLogger.log(Level.FINE, "Clusterer options: "+s);
 				}
 				
 				
@@ -185,11 +161,11 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 				}
 
 			} catch (Exception e) {
-				logger.log(Level.SEVERE, "Error in clustering", e);
+				fileLogger.log(Level.SEVERE, "Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Error in assignments", e);
+			fileLogger.log(Level.SEVERE, "Error in assignments", e);
 			return false;
 		}
 		return true;
@@ -203,11 +179,11 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 	private void assignClusters(Clusterer clusterer, CellCollection collection){
 		try {
 			// construct new collections for each cluster
-			logger.log(Level.FINE, "Assigning nuclei to clusters");
-			logger.log(Level.FINE, "Clusters : "+clusterer.numberOfClusters());
+			fileLogger.log(Level.FINE, "Assigning nuclei to clusters");
+			fileLogger.log(Level.FINE, "Clusters : "+clusterer.numberOfClusters());
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
-				logger.log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
+				fileLogger.log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
 				CellCollection clusterCollection = new CellCollection(collection.getFolder(), 
 						collection.getOutputFolderName(), 
 						collection.getName()+"_Cluster_"+i, 
@@ -232,17 +208,17 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 					if(collection.getCell(id)!=null){
 						cluster.addCell(new Cell (collection.getCell(id)));
 					} else {
-						logger.log(Level.SEVERE, "Error: cell with ID "+id+" is not found");
+						fileLogger.log(Level.SEVERE, "Error: cell with ID "+id+" is not found");
 					}
 					publish(i);
 					i++;
 				} catch(Exception e){
-					logger.log(Level.SEVERE, "Error assigning instance to cluster", e);
+					fileLogger.log(Level.SEVERE, "Error assigning instance to cluster", e);
 				}
 				 
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Error clustering", e);
+			fileLogger.log(Level.SEVERE, "Error clustering", e);
 		}
 	}
 	
@@ -336,7 +312,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 
 			}
 		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error making instances", e);
+			fileLogger.log(Level.SEVERE, "Error making instances", e);
 		}
 		return instances;
 	}
@@ -366,7 +342,7 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 		
 		int attributeCount = collection.size();
 
-		logger.log(Level.FINE, "Building instance matrix");
+		fileLogger.log(Level.FINE, "Building instance matrix");
 		
 		FastVector attributes = new FastVector(attributeCount);
 		for(int i=0; i<attributeCount; i++){
@@ -401,9 +377,9 @@ public class NucleusClusterer extends SwingWorker<Boolean, Integer> {
 			}
 
 		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error making instances", e);
+			fileLogger.log(Level.SEVERE, "Error making instances", e);
 		}
-		logger.log(Level.FINE, "Instance matrix: "+instances.toSummaryString());
+		fileLogger.log(Level.FINE, "Instance matrix: "+instances.toSummaryString());
 		return instances;
 	}
 

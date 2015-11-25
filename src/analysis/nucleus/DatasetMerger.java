@@ -29,14 +29,13 @@ import javax.swing.SwingWorker;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
+import analysis.AnalysisWorker;
 import components.Cell;
 import components.CellCollection;
 import components.nuclear.NucleusType;
 
-public class DatasetMerger extends SwingWorker<Boolean, Integer> {
-	
-	private Logger logger;
-	private Logger programLogger;
+public class DatasetMerger extends AnalysisWorker {
+
 	private List<AnalysisDataset> datasets;
 	private String function;
 	
@@ -57,16 +56,15 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	 * @param saveFile the file to save the new dataset as
 	 */
 	public DatasetMerger(List<AnalysisDataset> datasets, String function, File saveFile, Logger programLogger){
-		
+		super(datasets.get(0), programLogger);
 		AnalysisDataset firstDataset = datasets.get(0);
-		logger = Logger.getLogger(DatasetMerger.class.getName());
-		logger.addHandler(firstDataset.getLogHandler());
-		logger.setLevel(Level.INFO);
-//		logger = new Logger(firstDataset.getDebugFile(), "DatasetMerger");
+		fileLogger = Logger.getLogger(DatasetMerger.class.getName());
+		fileLogger.addHandler(firstDataset.getLogHandler());
+		fileLogger.setLevel(Level.INFO);
+		this.setProgressTotal(MAX_PROGRESS);
 		this.datasets = datasets;
 		this.function = function;
 		this.saveFile = saveFile;
-		this.programLogger = programLogger;
 	}
 	
 	@Override
@@ -83,31 +81,31 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 		return result;
 	}
 	
-	@Override
-	protected void process( List<Integer> integers ) {
-		//update the number of entries added
-		int lastCycle = integers.get(integers.size()-1);
-		int percent = (int) ( (double) lastCycle / (double) MAX_PROGRESS * 100);
-
-		setProgress(percent); // the integer representation of the percent
-	}
+//	@Override
+//	protected void process( List<Integer> integers ) {
+//		//update the number of entries added
+//		int lastCycle = integers.get(integers.size()-1);
+//		int percent = (int) ( (double) lastCycle / (double) MAX_PROGRESS * 100);
+//
+//		setProgress(percent); // the integer representation of the percent
+//	}
 	
-	@Override
-	public void done() {
-		try {
-			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
-			} else {
-				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-			}
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
-			programLogger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
-		} catch (ExecutionException e) {
-			logger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
-			programLogger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
-		}
-	} 
+//	@Override
+//	public void done() {
+//		try {
+//			if(this.get()){
+//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
+//			} else {
+//				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+//			}
+//		} catch (InterruptedException e) {
+//			logger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
+//			programLogger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
+//		} catch (ExecutionException e) {
+//			logger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
+//			programLogger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
+//		}
+//	} 
 	
 	
 	public List<AnalysisDataset> getResults(){
@@ -155,18 +153,18 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 	private boolean merge(){
 				
 		if(datasets.size()>1){
-			logger.log(Level.INFO, "Prepare to merge");
+			fileLogger.log(Level.INFO, "Prepare to merge");
 
 			// check we are not merging a parent and child (would just get parent)
 			if(datasets.size()==2){ 
 				if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
-					logger.log(Level.INFO, "Merging parent and child would be silly.");
+					fileLogger.log(Level.INFO, "Merging parent and child would be silly.");
 					return false;
 				}
 			}
 
 			try{
-				logger.log(Level.INFO, "Finding new names");
+				fileLogger.log(Level.INFO, "Finding new names");
 
 				// Set the names of folders for the new collection
 
@@ -186,18 +184,18 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 
 //				logger = new Logger(mergeDebugFile, "DatasetMerger");
 
-				logger.log(Level.FINE, "Checked new file names");
+				fileLogger.log(Level.FINE, "Checked new file names");
 				
 				// check all collections are of the same type
 				if(! checkNucleusClass()){
-					logger.log(Level.SEVERE, "Error: cannot merge collections of different class");
+					fileLogger.log(Level.SEVERE, "Error: cannot merge collections of different class");
 					return false;
 				}
-				logger.log(Level.FINE, "Checked nucleus classes match");
+				fileLogger.log(Level.FINE, "Checked nucleus classes match");
 
 				// check if the new dataset should be root
 				boolean newRoot = checkNewRootNeeded();
-				logger.log(Level.FINE, "Checked root status");
+				fileLogger.log(Level.FINE, "Checked root status");
 
 				// make a new collection based on the first dataset
 				CellCollection templateCollection = datasets.get(0).getCollection();
@@ -209,10 +207,10 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 						templateCollection.getNucleusType()
 						);
 
-				logger.log(Level.FINE, "Created collection");
+				fileLogger.log(Level.FINE, "Created collection");
 
 				// add the cells from each population to the new collection
-				logger.log(Level.FINE, "Merging datasets");
+				fileLogger.log(Level.FINE, "Merging datasets");
 				for(AnalysisDataset d : datasets){
 
 					for(Cell n : d.getCollection().getCells()){
@@ -246,13 +244,13 @@ public class DatasetMerger extends SwingWorker<Boolean, Integer> {
 
 				return true;
 			} catch (Exception e){
-				logger.log(Level.SEVERE, "Error in merging", e);
+				fileLogger.log(Level.SEVERE, "Error in merging", e);
 				return false;
 			}
 
 		} else {
 			// there is only one datast
-			logger.log(Level.INFO, "Cannot merge single dataset");
+			fileLogger.log(Level.INFO, "Cannot merge single dataset");
 			return false;
 		}
 	}

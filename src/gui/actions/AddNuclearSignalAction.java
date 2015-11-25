@@ -50,7 +50,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 				String signalGroupName = dataset.getSignalGroupName(signalGroup);
 
 
-				worker = new SignalDetector(dataset, analysisSetup.getFolder(), analysisSetup.getChannel(), dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName), signalGroup, signalGroupName);
+				worker = new SignalDetector(dataset, analysisSetup.getFolder(), analysisSetup.getChannel(), dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroupName), signalGroup, signalGroupName, mw.getProgramLogger());
 				this.setProgressMessage("Signal detection: "+signalGroupName);
 				worker.addPropertyChangeListener(this);
 				worker.execute();

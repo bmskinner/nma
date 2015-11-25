@@ -45,6 +45,7 @@ import utility.StatsMap;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions.NuclearSignalOptions;
+import analysis.AnalysisWorker;
 import analysis.Detector;
 import components.Cell;
 import components.generic.BooleanProfile;
@@ -62,12 +63,12 @@ import components.nuclei.Nucleus;
  * TODO: For a paint, assume one or two signals per nucleus. 
  * If more are detected, lower the threshold until the signals merge
  */
-public class SignalDetector extends SwingWorker<Boolean, Integer> {
+public class SignalDetector extends AnalysisWorker {
 	
 	protected NuclearSignalOptions options = null;
-	protected Logger logger;
+//	protected Logger logger;
 	protected File folder;
-	protected AnalysisDataset dataset;
+//	protected AnalysisDataset dataset;
 	protected int channel;
 	protected int signalGroup;
 	protected String channelName;
@@ -75,9 +76,9 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	/**
 	 * Empty constructor. Detector will have default values
 	 */
-	public SignalDetector(){
-		
-	}
+//	public SignalDetector(){
+//		
+//	}
 	
 	/**
 	 * For use when running on an existing dataset
@@ -87,61 +88,63 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 	 * @param options the analysis options
 	 * @param group the signal group to add signals to
 	 */
-	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName){
+	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName, Logger programLogger){
+		super(d, programLogger);
 		this.options	 = options;
-		this.logger		 = Logger.getLogger(SignalDetector.class.getName());
-		logger.addHandler(d.getLogHandler());
-		logger.setLevel(Level.ALL);
+		fileLogger		 = Logger.getLogger(SignalDetector.class.getName());
+		fileLogger.addHandler(d.getLogHandler());
+		fileLogger.setLevel(Level.ALL);
 		
 		this.folder		 = folder;
 		this.channel	 = channel;
 		this.signalGroup = group;
 		this.channelName = channelName;
-		this.dataset	 = d;
+		
+		this.setProgressTotal(d.getCollection().getNucleusCount());
 	}
 	
 	
-	@Override
-	protected void process( List<Integer> integers ) {
-		//update the number of entries added
-		int amount = integers.get( integers.size() - 1 );
-		int totalCells = dataset.getCollection().getNucleusCount();
-		int percent = (int) ( (double) amount / (double) totalCells * 100);
-		setProgress(percent); // the integer representation of the percent
-	}
+//	@Override
+//	protected void process( List<Integer> integers ) {
+//		//update the number of entries added
+//		int amount = integers.get( integers.size() - 1 );
+//		int totalCells = dataset.getCollection().getNucleusCount();
+//		int percent = (int) ( (double) amount / (double) totalCells * 100);
+//		setProgress(percent); // the integer representation of the percent
+//	}
 	
 	@Override
 	protected Boolean doInBackground() throws Exception {
 		boolean result = true;
-		logger.log(Level.INFO, "Beginning signal detection in channel "+channel);
+		fileLogger.log(Level.INFO, "Beginning signal detection in channel "+channel);
 
 		try{
 			int progress = 0;
 			
 			int originalMinThreshold = options.getSignalThreshold();
 			
-			SignalFinder finder = new SignalFinder(options, logger, channel);
+			SignalFinder finder = new SignalFinder(options, fileLogger, channel);
 			
-			for(Cell c : dataset.getCollection().getCells()){
+			for(Cell c : getDataset().getCollection().getCells()){
 				
 				// reset the  min threshold for each cell
 				options.setThreshold(originalMinThreshold);
 
 				Nucleus n = c.getNucleus();
-				logger.log(Level.INFO, "Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
+				fileLogger.log(Level.INFO, "Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getImageName());
-				logger.log(Level.FINE, "Source file: "+imageFile.getAbsolutePath());
+				fileLogger.log(Level.FINE, "Source file: "+imageFile.getAbsolutePath());
 
 				try{
 					
-					ImageStack stack = ImageImporter.importImage(imageFile, (DebugFileHandler) dataset.getLogHandler());
+					ImageStack stack = ImageImporter.importImage(imageFile, (DebugFileHandler) getDataset().getLogHandler());
 					
 					ArrayList<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					
-					logger.log(Level.FINER, "Creating signal collection");
+					fileLogger.log(Level.FINER, "Creating signal collection");
 					
 					SignalCollection signalCollection = n.getSignalCollection();
 					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
@@ -149,23 +152,23 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 					n.calculateSignalDistancesFromCoM();
 					n.calculateFractionalSignalDistancesFromCoM();
 
-					logger.log(Level.FINE, "Calculating signal angles");
+					fileLogger.log(Level.FINE, "Calculating signal angles");
 					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-						logger.log(Level.FINER, "Nucleus type is asymmetric: "+n.getClass().getSimpleName());
+						fileLogger.log(Level.FINER, "Nucleus type is asymmetric: "+n.getClass().getSimpleName());
 						
 						if(n.hasBorderTag(BorderTag.ORIENTATION_POINT)){
-							logger.log(Level.FINEST, "Calculating angle from orientation point");
+							fileLogger.log(Level.FINEST, "Calculating angle from orientation point");
 							n.calculateSignalAnglesFromPoint(n.getPoint(BorderTag.ORIENTATION_POINT));
 						} else {
-							logger.log(Level.FINEST, "No orientation point in nucleus");
+							fileLogger.log(Level.FINEST, "No orientation point in nucleus");
 						}
 					} else {
-						logger.log(Level.FINER, "Nucleus type is round: "+n.getClass().getSimpleName());
+						fileLogger.log(Level.FINER, "Nucleus type is round: "+n.getClass().getSimpleName());
 					}
 					
 					
 				} catch(Exception e){
-					logger.log(Level.SEVERE, "Error detecting signal", e);
+					fileLogger.log(Level.SEVERE, "Error detecting signal", e);
 				}
 				
 				progress++;
@@ -173,29 +176,29 @@ public class SignalDetector extends SwingWorker<Boolean, Integer> {
 			}		
 			
 		} catch (Exception e){
-			logger.log(Level.SEVERE, "Error in signal detection", e);
+			fileLogger.log(Level.SEVERE, "Error in signal detection", e);
 			return false;
 		}
 
 		return result;
 	}
 	
-	@Override
-	public void done() {
-
-		try {
-			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());			
-				
-			} else {
-				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-			}
-		} catch (InterruptedException e) {
-			logger.log(Level.SEVERE, "Error in signal detection", e);
-		} catch (ExecutionException e) {
-			logger.log(Level.SEVERE, "Error in signal detection", e);
-		} finally {
-		}
-
-	} 
+//	@Override
+//	public void done() {
+//
+//		try {
+//			if(this.get()){
+//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());			
+//				
+//			} else {
+//				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+//			}
+//		} catch (InterruptedException e) {
+//			logger.log(Level.SEVERE, "Error in signal detection", e);
+//		} catch (ExecutionException e) {
+//			logger.log(Level.SEVERE, "Error in signal detection", e);
+//		} finally {
+//		}
+//
+//	} 
 }
