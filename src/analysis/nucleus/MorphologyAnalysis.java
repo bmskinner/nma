@@ -51,7 +51,6 @@ import components.nuclei.sperm.RodentSpermNucleus;
  */
 public class MorphologyAnalysis extends AnalysisWorker {
 	
-//	private static Logger logger;
     public static final int MODE_NEW     = 0;
     public static final int MODE_COPY    = 1;
     public static final int MODE_REFRESH = 2;
@@ -104,29 +103,9 @@ public class MorphologyAnalysis extends AnalysisWorker {
       SwingWorker methods
       //////////////////////////////////////////////////
      */
-    
-//    @Override
-//    protected void process( List<Integer> integers ) {
-//        int amount = integers.get( integers.size() - 1 );
-//        int percent = (int) ( (double) amount / (double) totalNuclei * 100);
-//        if(percent >= 0 && percent <=100){
-//        	setProgress(percent); // the integer representation of the percent
-//        }
-//    }
-    
+        
     @Override
     protected Boolean doInBackground() throws Exception {
-//    	logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
-//    	DebugFileHandler handler = null;
-//		try {
-//			handler = new DebugFileHandler(collection.getDebugFile());
-//			handler.setFormatter(new DebugFileFormatter());
-//			fileLogger.addHandler(handler);
-//		} catch (SecurityException e1) {
-//			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
-//		} catch (IOException e1) {
-//			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
-//		}
     	
     	boolean result = true;
 		try{
@@ -192,39 +171,6 @@ public class MorphologyAnalysis extends AnalysisWorker {
 		return result;
 	}
     
-//    @Override
-//    public void done() {
-//    	
-//    	programLogger.log(Level.FINEST, "Completed morphology worker task; firing trigger");
-//
-//        try {
-//            if(this.get()){
-//            	programLogger.log(Level.FINEST, "Firing trigger for sucessful task");
-//                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
-//
-//            } else {
-//            	programLogger.log(Level.FINEST, "Firing trigger for error in task");
-//                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-//            }
-//        } catch (InterruptedException e) {
-//        	fileLogger.log(Level.SEVERE, "Error in morphology application", e);
-//        } catch (ExecutionException e) {
-//        	fileLogger.log(Level.SEVERE, "Error in morphology application", e);
-//            
-//        	fileLogger.log(Level.SEVERE, "Collection keys:");
-//        	fileLogger.log(Level.SEVERE, collection.getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
-//            
-//        	fileLogger.log(Level.SEVERE, "FrankenCollection keys:");
-//        	fileLogger.log(Level.SEVERE, collection.getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
-//       }
-////        	} finally{
-////			for(Handler h : fileLogger.getHandlers()){
-////				h.close();
-////			}
-////		}
-//
-//    } 
-
     /*
     //////////////////////////////////////////////////
     Analysis methods

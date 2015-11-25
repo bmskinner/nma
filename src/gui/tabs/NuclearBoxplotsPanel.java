@@ -366,7 +366,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 							
 						}
 					}
-					fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
+					NuclearBoxplotsPanel.this.fireDatasetEvent(DatasetMethod.NEW_MORPHOLOGY, newList);
 				}
 			} 
 		}

@@ -66,20 +66,11 @@ import components.nuclei.Nucleus;
 public class SignalDetector extends AnalysisWorker {
 	
 	protected NuclearSignalOptions options = null;
-//	protected Logger logger;
 	protected File folder;
-//	protected AnalysisDataset dataset;
 	protected int channel;
 	protected int signalGroup;
 	protected String channelName;
-	
-	/**
-	 * Empty constructor. Detector will have default values
-	 */
-//	public SignalDetector(){
-//		
-//	}
-	
+		
 	/**
 	 * For use when running on an existing dataset
 	 * @param d the dataset to add signals to
@@ -102,16 +93,6 @@ public class SignalDetector extends AnalysisWorker {
 		
 		this.setProgressTotal(d.getCollection().getNucleusCount());
 	}
-	
-	
-//	@Override
-//	protected void process( List<Integer> integers ) {
-//		//update the number of entries added
-//		int amount = integers.get( integers.size() - 1 );
-//		int totalCells = dataset.getCollection().getNucleusCount();
-//		int percent = (int) ( (double) amount / (double) totalCells * 100);
-//		setProgress(percent); // the integer representation of the percent
-//	}
 	
 	@Override
 	protected Boolean doInBackground() throws Exception {
@@ -183,22 +164,4 @@ public class SignalDetector extends AnalysisWorker {
 		return result;
 	}
 	
-//	@Override
-//	public void done() {
-//
-//		try {
-//			if(this.get()){
-//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());			
-//				
-//			} else {
-//				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-//			}
-//		} catch (InterruptedException e) {
-//			logger.log(Level.SEVERE, "Error in signal detection", e);
-//		} catch (ExecutionException e) {
-//			logger.log(Level.SEVERE, "Error in signal detection", e);
-//		} finally {
-//		}
-//
-//	} 
 }

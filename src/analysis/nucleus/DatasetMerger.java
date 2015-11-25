@@ -75,39 +75,9 @@ public class DatasetMerger extends AnalysisWorker {
 			result = merge();
 		}
 		
-//		if(function.equals(DATASET_SPLIT)){
-////			result = split();
-//		}
 		return result;
 	}
-	
-//	@Override
-//	protected void process( List<Integer> integers ) {
-//		//update the number of entries added
-//		int lastCycle = integers.get(integers.size()-1);
-//		int percent = (int) ( (double) lastCycle / (double) MAX_PROGRESS * 100);
-//
-//		setProgress(percent); // the integer representation of the percent
-//	}
-	
-//	@Override
-//	public void done() {
-//		try {
-//			if(this.get()){
-//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
-//			} else {
-//				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-//			}
-//		} catch (InterruptedException e) {
-//			logger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
-//			programLogger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
-//		} catch (ExecutionException e) {
-//			logger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
-//			programLogger.log(Level.SEVERE, "Unable to "+function+" datasets", e);
-//		}
-//	} 
-	
-	
+		
 	public List<AnalysisDataset> getResults(){
 		return resultDatasets;
 	}

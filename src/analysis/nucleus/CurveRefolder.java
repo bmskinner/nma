@@ -61,14 +61,6 @@ public class CurveRefolder extends AnalysisWorker {
 	private CellCollection collection;
 	private CountDownLatch doneSignal;
 	
-	
-//	private static Logger logger; // the program logger
-//	private static Logger fileLogger; // the debug file logger
-
-
-//	public static final int FAST_MODE 		= 0; // default; iterate until convergence
-//	public static final int INTENSIVE_MODE 	= 1; // iterate until value
-//	public static final int BRUTAL_MODE 	= 2; // iterate until value
 	private CurveRefoldingMode mode = CurveRefoldingMode.FAST; 				 // the dafault mode
 	
 	public enum CurveRefoldingMode {
@@ -93,18 +85,6 @@ public class CurveRefolder extends AnalysisWorker {
 			return this.iterations;
 		}
 	}
-	
-//	public static final int MAX_ITERATIONS_FAST 		= 50;
-//	public static final int MAX_ITERATIONS_INTENSIVE 	= 1000;
-//	public static final int MAX_ITERATIONS_BRUTAL 		= 10000;
-//
-//	public static Map<String, Integer> MODES = new LinkedHashMap<String, Integer>();
-//
-//	static {
-//		MODES.put("Fast", FAST_MODE);
-//		MODES.put("Intensive", INTENSIVE_MODE);
-//		MODES.put("Brutal", BRUTAL_MODE);
-//	}
 			
 	/**
 	 * construct from a collection of cells and the mode of refolding
@@ -210,66 +190,6 @@ public class CurveRefolder extends AnalysisWorker {
 		return true;
 	}
 	
-//	@Override
-//	protected void process( List<Integer> integers ) {
-//		//update the number of entries added
-////		logger.log(Level.FINEST, "Processing integer list from publish()");
-//		
-//		int lastCycle = integers.get(integers.size()-1);
-//		
-//		int maxCycles = this.mode.maxIterations();
-//
-//		int percent = (int) ( (double) lastCycle / (double) maxCycles * 100);
-//		
-//		/*
-//		 * What happens when the iteration continues past 50 cycles for some reason?
-//		 * 
-//		 * 
-//		 */
-//
-//		if(lastCycle > maxCycles){
-//			programLogger.log(Level.INFO, "Last cycle ("+lastCycle+") is above max cycles for mode ("+maxCycles+")");
-//			fileLogger.log(Level.SEVERE, "Last cycle is above max cycles for mode");
-//			percent = 100;
-//			
-//		}
-//		setProgress(percent); // the integer representation of the percent
-//	}
-	
-//	@Override
-//	public void done() {
-//		
-//		/*
-//	     * Scheduled to be executed in event dispatching thread once called.
-//	     */
-//		programLogger.log(Level.FINEST, "SwingWorker task called done()");
-//		fileLogger.log(Level.FINEST, "SwingWorker task called done()");
-//		
-//		
-//		try {
-//			if(this.get()){
-//				fileLogger.log(Level.FINEST, "Firing successful worker task");
-//				programLogger.log(Level.FINEST, "Firing successful worker task");
-//
-//				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
-//			} else {
-//				fileLogger.log(Level.FINEST, "Firing error in worker task");
-//				programLogger.log(Level.FINEST, "Firing error in worker task");
-//
-//				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-//			}
-//		} catch (InterruptedException e) {
-//			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
-//			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
-//
-//		} catch (ExecutionException e) {
-//			fileLogger.log(Level.SEVERE,"Unable to refold nucleus", e);
-//			logger.log(Level.SEVERE,"Unable to refold nucleus", e);
-//
-//		}
-//		
-//	} 
-
 	/*
 		The main function to be called externally;
 		all other functions will hang off this

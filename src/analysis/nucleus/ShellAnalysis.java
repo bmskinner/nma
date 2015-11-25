@@ -58,20 +58,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		
 		
 	}
-	
-//	@Override
-//	protected void process(List<Integer> integers){
-//		// get last published value
-//		int amount = integers.get( integers.size() - 1 );
-//		
-//		// total number of nuclei
-//		int total = dataset.getCollection().getNucleusCount();
-//		
-//		// express as percent as int
-//		int progress = (int) (((double) amount / (double) total)*100);
-//		setProgress(progress);
-//	}
-	
+		
 	@Override
 	protected Boolean doInBackground() {
 		
@@ -152,23 +139,7 @@ public class ShellAnalysis extends AnalysisWorker {
 		}
 		return true;
 	}
-	
-	@Override
-	public void done() {
-		try {
-			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());
-			} else {
-				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-			}
-		} catch (InterruptedException e) {
-			fileLogger.log(Level.SEVERE, "Interruption error in shell analysis", e);			
-		} catch (ExecutionException e) {
-			fileLogger.log(Level.SEVERE, "Execution error in shell analysis", e);			
-		}
 		
-	}
-	
 	/**
 	 * Perform shell analysis on the given collection
 	 * @param collection the collection of nuclei to analyse
