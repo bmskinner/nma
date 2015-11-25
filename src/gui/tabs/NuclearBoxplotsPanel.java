@@ -221,7 +221,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					SelectableChartPanel panel = new SelectableChartPanel(HistogramChartFactory.createNuclearStatsHistogram(options), stat.toString());
 					panel.setPreferredSize(preferredSize);
 					panel.addSignalChangeListener(this);
-					HistogramsPanel.this.chartPanels.put(stat, panel);
+					HistogramsPanel.this.chartPanels.put(stat.toString(), panel);
 					HistogramsPanel.this.mainPanel.add(panel);
 
 				}
@@ -240,7 +240,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 			try{
 				for(NucleusStatistic stat : NucleusStatistic.values()){
-					SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat);
+					SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat.toString());
 
 					JFreeChart chart = null;
 					HistogramChartOptions options = new HistogramChartOptions(list, stat, scale, useDensity);

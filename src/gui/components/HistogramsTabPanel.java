@@ -28,14 +28,14 @@ import components.nuclear.NucleusStatistic;
 @SuppressWarnings("serial")
 public abstract class HistogramsTabPanel extends DetailPanel implements ActionListener {
 	
-	protected Map<NucleusStatistic, SelectableChartPanel> chartPanels = new HashMap<NucleusStatistic, SelectableChartPanel>();
+	protected Map<String, SelectableChartPanel> chartPanels = new HashMap<String, SelectableChartPanel>();
 
 	protected JPanel 		mainPanel; // hold the charts
 	protected JPanel		headerPanel; // hold buttons
 	protected ProbabilityDensityCheckboxPanel useDensityPanel = new ProbabilityDensityCheckboxPanel();
 	protected MeasurementUnitSettingsPanel measurementUnitSettingsPanel = new MeasurementUnitSettingsPanel();
 
-	private JScrollPane scrollPane; // hold the main panel
+	protected JScrollPane scrollPane; // hold the main panel
 	
 	public HistogramsTabPanel(Logger programLogger){
 		super(programLogger);

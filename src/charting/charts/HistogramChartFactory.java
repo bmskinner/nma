@@ -251,5 +251,125 @@ public class HistogramChartFactory {
 		}
 		return chart;
 	}
+	
+	/**
+	 * Create a histogram with segment lengths
+	 * @param options the HistogramOptions. 
+	 * @param segName the segment to plot
+	 * @return
+	 */
+	public static JFreeChart createSegmentLengthHistogram(HistogramChartOptions options, String segName) throws Exception{
+
+		HistogramDataset ds = null;
+				
+		if (options.hasDatasets()){
+			ds = NuclearHistogramDatasetCreator.createSegmentLengthHistogramDataset(options, segName);
+		}
+		
+		if(options.hasLogger()){
+			options.getLogger().log(Level.FINER, "Creating histogram for "+segName);
+		}
+		
+		JFreeChart chart = createHistogram(ds, segName+" length ("+options.getScale()+")", "Nuclei" );
+		
+		if(ds!=null && options.hasDatasets()){
+						
+			XYPlot plot = chart.getXYPlot();
+			
+			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
+			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
+			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
+			
+			for (int j = 0; j < ds.getSeriesCount(); j++) {
+
+				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+
+				String seriesKey = (String) ds.getSeriesKey(j);
+				String seriesName = seriesKey.replaceFirst(segName+"_", "");
+				
+				for(AnalysisDataset dataset : options.getDatasets()){
+					
+					if(seriesName.equals(dataset.getName())){
+						Color colour = dataset.hasDatasetColour()
+								? dataset.getDatasetColour()
+										: ColourSelecter.getSegmentColor(j);
+
+
+								if(options.hasLogger()){
+									options.getLogger().log(Level.FINEST, "Setting histogram series colour: "+colour.toString());
+								}
+						plot.getRenderer().setSeriesPaint(j, colour);
+
+					}
+				}
+				
+			}
+		}
+		return chart;
+	}
+	
+	/**
+	 * Create a density line chart with nuclear statistics. It is used to replace the histograms
+	 * when the 'Use density' box is ticked in the Nuclear chart histogram panel
+	 * @param ds the histogram dataset
+	 * @param list the analysis datasets used to create the histogrom
+	 * @param xLabel the x axis label
+	 * @return
+	 * @throws Exception 
+	 */
+	public static JFreeChart createSegmentLengthDensityChart(HistogramChartOptions options, String segName) throws Exception{
+		
+		DefaultXYDataset ds = null;
+		
+		if (options.hasDatasets()){
+			ds = NuclearHistogramDatasetCreator.createSegmentLengthDensityDataset(options.getDatasets(), segName, options.getScale());
+		}
+
+		String xLabel = segName+" length ("+options.getScale()+")";
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
+				                false);
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Color.WHITE);
+		
+		if(ds!=null && options.hasDatasets()){
+						
+			Number maxX = DatasetUtilities.findMaximumDomainValue(ds);
+			Number minX = DatasetUtilities.findMinimumDomainValue(ds);
+			plot.getDomainAxis().setRange(minX.doubleValue(), maxX.doubleValue());	
+			
+			
+			for (int j = 0; j < ds.getSeriesCount(); j++) {
+
+				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
+
+				String seriesKey = (String) ds.getSeriesKey(j);
+				String seriesName = seriesKey.replaceFirst(segName+"_", "");
+
+				Color colour = ColourSelecter.getSegmentColor(j);
+				for(AnalysisDataset dataset : options.getDatasets()){
+
+					if(seriesName.equals(dataset.getName())){
+
+						colour = dataset.hasDatasetColour()
+								? dataset.getDatasetColour()
+								: colour;
+
+
+						plot.getRenderer().setSeriesPaint(j, colour);
+
+					}
+				}
+
+			}
+
+		}
+		return chart;
+	}
 
 }
