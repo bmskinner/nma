@@ -162,7 +162,7 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 					Taxon t = tree.getTaxon(n);
 					
 					String name = t.getName();
-					programLogger.log(Level.INFO, "Cell: "+name);
+//					programLogger.log(Level.INFO, "Cell: "+name);
 					
 					for(Cell c : dataset.getCollection().getCells()){
 						if(c.getNucleus().getNameAndNumber().equals(name)){
