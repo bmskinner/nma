@@ -171,6 +171,15 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
         }
     }
     
+    protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
+
+    	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list, template);
+    	Iterator<Object> iterator = datasetListeners.iterator();
+    	while( iterator.hasNext() ) {
+    		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
+    	}
+    }
+    
     protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
     	
     	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());

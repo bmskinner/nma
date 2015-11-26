@@ -29,6 +29,7 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import utility.Constants;
 import utility.DipTester;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
@@ -167,6 +168,8 @@ public class NucleusClusterer extends AnalysisWorker {
 					this.newickTree = clusterer.graph();
 					
 					clusterer.setNumClusters(options.getClusterNumber());
+					
+//					firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
 					clusterer.buildClusterer(instances);    // build the clusterer
 					assignClusters(clusterer, collection);		
 					

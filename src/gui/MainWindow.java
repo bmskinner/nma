@@ -1027,13 +1027,14 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
 				
 				
-				final AnalysisDataset target = event.firstDataset();
+				
+//				final AnalysisDataset target = event.firstDataset();
 				final AnalysisDataset source = event.secondaryDataset();
 				
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(target, source, null, MainWindow.this);
+						new MorphologyAnalysisAction(event.getDatasets(), source, null, MainWindow.this);
 					
 				}});
 

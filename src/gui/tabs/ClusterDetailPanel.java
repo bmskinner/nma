@@ -19,7 +19,9 @@
 package gui.tabs;
 
 
+import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
+import gui.DatasetEventListener;
 import gui.components.ClusterTreePanel;
 
 import java.awt.BorderLayout;
@@ -45,7 +47,7 @@ import charting.datasets.NucleusTableDatasetCreator;
 import components.ClusterGroup;
 
 @SuppressWarnings("serial")
-public class ClusterDetailPanel extends DetailPanel {
+public class ClusterDetailPanel extends DetailPanel implements DatasetEventListener {
 			
 	private ClustersPanel clusterPanel;
 
@@ -198,7 +200,8 @@ public class ClusterDetailPanel extends DetailPanel {
 								group = g;
 							}
 						}
-						new ClusterTreePanel(programLogger, dataset, group);
+						ClusterTreePanel clusterPanel = new ClusterTreePanel(programLogger, dataset, group);
+						clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
 					}
 				}
 				
@@ -230,5 +233,15 @@ public class ClusterDetailPanel extends DetailPanel {
 			
 		}
 
+	}
+
+	@Override
+	public void datasetEventReceived(DatasetEvent event) {
+
+		// Pass morphology on
+		if(event.method()==DatasetMethod.COPY_MORPHOLOGY){
+			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
+		}
+		
 	}
 }
