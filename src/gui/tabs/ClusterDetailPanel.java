@@ -20,6 +20,7 @@ package gui.tabs;
 
 
 import gui.DatasetEvent.DatasetMethod;
+import gui.components.ClusterTreePanel;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.NewickImporter;
 import jebl.evolution.trees.RootedTree;
@@ -30,6 +31,7 @@ import jebl.gui.trees.treeviewer.TreeViewer;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -77,7 +79,7 @@ public class ClusterDetailPanel extends DetailPanel {
 		
 	}
 		
-	private class ClustersPanel extends JPanel {
+	private class ClustersPanel extends JPanel implements MouseListener {
 		
 		private JButton 	clusterButton	= new JButton("Cluster population");
 		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
@@ -105,6 +107,8 @@ public class ClusterDetailPanel extends DetailPanel {
 				    return false;
 				}
 			};
+			clusterDetailsTable.addMouseListener(this);
+			
 			JScrollPane detailScrollPanel = new JScrollPane(clusterDetailsTable);
 			clusterDetailPanel.add(detailScrollPanel, BorderLayout.CENTER);
 			clusterDetailPanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
@@ -206,6 +210,52 @@ public class ClusterDetailPanel extends DetailPanel {
 					clusterButton.setVisible(false);
 				}
 			}
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			JTable table = (JTable) e.getSource();
+			int row = table.rowAtPoint((e.getPoint()));
+			int column = table.columnAtPoint((e.getPoint()));
+			String rowName = table.getModel().getValueAt(row, 0).toString();
+			String colName = table.getColumnName(column);
+			String groupName = table.getModel().getValueAt(0, column).toString();
+			
+			// double click
+			if (e.getClickCount() == 2) {
+				
+				if(rowName.equals("Tree") && column > 0 ){
+					
+					String tree = table.getModel().getValueAt(row, column).toString();
+					new ClusterTreePanel(programLogger, tree, colName+" : "+groupName);
+				}
+				
+			}
+			
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
 		}
 
 	}

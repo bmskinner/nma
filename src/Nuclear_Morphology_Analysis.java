@@ -35,6 +35,7 @@ implements PlugIn
 			"commons-math3",
 			"jcommon",
 			"jdistlib",
+			"jebl",
 			"jfreechart",
 			"swingx-all",
 			"weka",
