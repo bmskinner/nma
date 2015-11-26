@@ -18,6 +18,8 @@
  *******************************************************************************/
 package analysis.nucleus;
 
+import ij.IJ;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +34,7 @@ import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
+import weka.core.EuclideanDistance;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -128,8 +131,15 @@ public class NucleusClusterer extends AnalysisWorker {
 		try {
 						
 			// create Instances to hold Instance
-			Instances instances = makeAttributesAndInstances(collection);
-//			Instances instances = makeMatrixInstances(collection);
+			
+			Instances instances = null;
+			
+			if(options.isUseSimilarityMatrix()){
+				instances = makeMatrixInstances(collection);
+			} else {
+				 instances = makeAttributesAndInstances(collection);
+			}
+			
 
 			// create the clusterer to run on the Instances
 			String[] optionArray = this.options.getOptions();
@@ -146,16 +156,27 @@ public class NucleusClusterer extends AnalysisWorker {
 				
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					HierarchicalClusterer clusterer = new HierarchicalClusterer();
+					
 					clusterer.setOptions(optionArray);     // set the options
+					clusterer.setDistanceFunction(new EuclideanDistance());
+					clusterer.setDistanceIsBranchLength(true);
+					clusterer.setNumClusters(1);
+					clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
+					clusterer.setPrintNewick(true);
+					
+					this.newickTree = clusterer.graph();
+					
+					clusterer.setNumClusters(options.getClusterNumber());
 					clusterer.buildClusterer(instances);    // build the clusterer
 					assignClusters(clusterer, collection);		
-					this.newickTree = clusterer.graph();
+					
 				}
 				
 				if(options.getType().equals(ClusteringMethod.EM)){
 					EM clusterer = new EM();   // new instance of clusterer
 					clusterer.setOptions(optionArray);     // set the options
 					clusterer.buildClusterer(instances);    // build the clusterer
+					
 					assignClusters(clusterer, collection);		
 				}
 
@@ -354,7 +375,7 @@ public class NucleusClusterer extends AnalysisWorker {
 
 	private Instances makeMatrixInstances(CellCollection collection){
 		
-		int attributeCount = collection.size();
+		int attributeCount = collection.size()+1;
 
 		fileLogger.log(Level.FINE, "Building instance matrix");
 		
@@ -363,6 +384,8 @@ public class NucleusClusterer extends AnalysisWorker {
 			Attribute a = new Attribute("att_"+i); 
 			attributes.addElement(a);
 		}
+		Attribute name = new Attribute("name", (FastVector) null); 
+		attributes.addElement(name);
 
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
@@ -381,10 +404,9 @@ public class NucleusClusterer extends AnalysisWorker {
 					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
 					score /= n1.getPerimeter();
 					inst.setValue(att, score);
-//					logger.log(Level.FINEST, n1.getNameAndNumber()+"\t"+n2.getNameAndNumber()+"\t"+score);
 					j++;
 				}
-//				IJ.log("    ");
+				inst.setValue(name,  n1.getNameAndNumber());
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());
 				publish(i++);

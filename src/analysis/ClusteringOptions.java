@@ -18,6 +18,9 @@
  *******************************************************************************/
 package analysis;
 
+import gui.components.ColourSelecter.ColourSwatch;
+
+import java.io.IOException;
 import java.io.Serializable;
 
 public class ClusteringOptions implements Serializable {
@@ -32,6 +35,8 @@ public class ClusteringOptions implements Serializable {
 	private boolean includeModality;
 	private int modalityRegions;
 	
+	private transient boolean useSimilarityMatrix;
+	
 	/**
 	 * Create a new set of options based on the given
 	 * method.
@@ -40,6 +45,22 @@ public class ClusteringOptions implements Serializable {
 	public ClusteringOptions(ClusteringMethod type){
 		this.type = type;
 	}
+	
+	
+
+
+	public boolean isUseSimilarityMatrix() {
+		return useSimilarityMatrix;
+	}
+
+
+
+
+	public void setUseSimilarityMatrix(boolean useSimilarityMatrix) {
+		this.useSimilarityMatrix = useSimilarityMatrix;
+	}
+
+
 
 
 	/**
@@ -153,16 +174,21 @@ public class ClusteringOptions implements Serializable {
 		}
 		
 		if(this.type.equals(ClusteringMethod.HIERARCHICAL)){
-			options = new String[6];
+			options = new String[4];
 			options[0] = "-N";                 // number of clusters
 			options[1] = String.valueOf((Integer)clusterNumber);
 			options[2] = "-L";                 // algorithm
 			options[3] = hierarchicalMethod.code();
-			options[4] = "-P"; 				// print Newick Tree
-			options[5] = "";
+//			options[4] = "-P"; 				// print Newick Tree
+//			options[5] = "";
 		}
 		
 		return options;
+	}
+	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	    in.defaultReadObject();
+	    this.useSimilarityMatrix = false;
 	}
 	
 	

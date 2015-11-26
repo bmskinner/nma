@@ -61,6 +61,8 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	private static final int DEFAULT_EM_ITERATIONS = 100;
 	private static final int DEFAULT_MODALITY_REGIONS = 2;
 	private static final boolean DEFAULT_USE_MODALITY = true;
+	private static final boolean DEFAULT_USE_SIMILARITY_MATRIX = false;
+	
 
 	private final JPanel contentPanel = new JPanel();
 	
@@ -82,6 +84,8 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	
 	private JCheckBox useModalityCheckBox;
 	private JSpinner modalityPointsSpinner;
+	
+	private JCheckBox useSimilarityMatrixCheckBox;
 	
 	private boolean readyToRun = false;
 	
@@ -118,6 +122,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		options.setIterations(DEFAULT_EM_ITERATIONS);
 		options.setIncludeModality(DEFAULT_USE_MODALITY);
 		options.setModalityRegions(DEFAULT_MODALITY_REGIONS);
+		options.setUseSimilarityMatrix(DEFAULT_USE_SIMILARITY_MATRIX);
 	}
 	
 	private JPanel createHierarchicalPanel(){
@@ -274,6 +279,10 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	    methodPanel.add(clusterHierarchicalButton);
 	    methodPanel.add(clusterEMButton);
 	    
+	    useSimilarityMatrixCheckBox = new JCheckBox("Use similarity matrix");
+	    useSimilarityMatrixCheckBox.addChangeListener(this);
+	    methodPanel.add(useSimilarityMatrixCheckBox);
+	    
 	    JPanel modalityPanel = createModalityPanel();
 
 	    optionsPanel.add(methodPanel, BorderLayout.NORTH);
@@ -353,7 +362,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		if(clusterNumberAutoButton.isSelected()){
 			clusterNumberSpinner.setEnabled(false);
 		}
-		
+				
 	}
 
 	@Override
@@ -379,6 +388,20 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 				}
 				
 			} 
+			
+			if(e.getSource()==useSimilarityMatrixCheckBox){
+				options.setUseSimilarityMatrix(useSimilarityMatrixCheckBox.isSelected());
+				if(useSimilarityMatrixCheckBox.isSelected()){
+					useModalityCheckBox.setEnabled(false);
+					modalityPointsSpinner.setEnabled(false);
+				} else {
+					useModalityCheckBox.setEnabled(true);
+					modalityPointsSpinner.setEnabled(true);
+				}
+				
+			} 
+			
+			
 			
 			if(e.getSource()==modalityPointsSpinner){
 				JSpinner j = (JSpinner) e.getSource();

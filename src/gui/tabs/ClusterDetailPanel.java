@@ -159,43 +159,7 @@ public class ClusterDetailPanel extends DetailPanel {
 						statusLabel.setText("Dataset contains no clusters");
 
 					} else {
-						statusLabel.setText("Dataset has "+dataset.getClusterGroups().size()+" cluster groups");
-						
-						for(ClusterGroup g : dataset.getClusterGroups()){
-							
-							String newickTree = g.getTree();
-
-							if(newickTree!=null){
-								
-//								treeLabel.setText(newickTree);
-//								viewer.setVisible(true);
-//								programLogger.log(Level.FINE, "Reading tree");
-//								StringReader reader = new StringReader(newickTree);
-//
-//								boolean readUnquotedLabels = true;
-//								NewickImporter imp = new NewickImporter(reader, readUnquotedLabels);
-
-//								try {
-//									List<Tree> trees =  imp.importTrees();
-//									final RootedTree topTree = (RootedTree) trees.get(0);
-
-//									programLogger.log(Level.FINEST, topTree.toString());
-//									Thread thr = new Thread(){
-//										public void run(){
-//											viewer.setTree( topTree, topTree.getNodes() );
-//										}
-//									};
-//									thr.start();
-									
-
-//								} catch (IOException e) {
-//									programLogger.log(Level.SEVERE, "Error reading tree", e);
-//								} catch (ImportException e) {
-//									programLogger.log(Level.SEVERE, "Error in tree IO", e);
-//								}
-							} 
-						}
-						
+						statusLabel.setText("Dataset has "+dataset.getClusterGroups().size()+" cluster groups");						
 					}
 				} else { // more than one dataset selected
 					statusLabel.setText("Multiple datasets selected");
@@ -220,7 +184,21 @@ public class ClusterDetailPanel extends DetailPanel {
 					
 					String tree = table.getModel().getValueAt(row, column).toString();
 					if(!tree.equals("N/A")){
-						new ClusterTreePanel(programLogger, tree, colName+" : "+groupName);
+						
+						AnalysisDataset dataset = null;
+						for(AnalysisDataset d: list){
+							if(d.getName().equals(colName)){
+								dataset = d;
+							}
+						}
+						
+						ClusterGroup group = null;
+						for(ClusterGroup g : dataset.getClusterGroups()){
+							if(g.getName().equals(groupName)){
+								group = g;
+							}
+						}
+						new ClusterTreePanel(programLogger, dataset, group);
 					}
 				}
 				
