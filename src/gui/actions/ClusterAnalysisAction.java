@@ -81,18 +81,21 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 
 			CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
-			programLogger.log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
-			group.addDataset(c);
-			c.setName(group.getName()+"_"+c.getName());
-			programLogger.log(Level.FINEST, "Renamed cluster: "+c.getName());
-			dataset.addChildCollection(c);
-			// attach the clusters to their parent collection
-			//	dataset.addCluster(c);
 
-			programLogger.log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
-			AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-			clusterDataset.setRoot(false);
-			list.add(clusterDataset);
+			if(c.hasCells()){
+				programLogger.log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
+				group.addDataset(c);
+				c.setName(group.getName()+"_"+c.getName());
+				programLogger.log(Level.FINEST, "Renamed cluster: "+c.getName());
+				dataset.addChildCollection(c);
+				// attach the clusters to their parent collection
+				//	dataset.addCluster(c);
+
+				programLogger.log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
+				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+				clusterDataset.setRoot(false);
+				list.add(clusterDataset);
+			}
 
 
 		}
