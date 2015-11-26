@@ -21,19 +21,11 @@ package gui.tabs;
 
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ClusterTreePanel;
-import jebl.evolution.io.ImportException;
-import jebl.evolution.io.NewickImporter;
-import jebl.evolution.trees.RootedTree;
-import jebl.evolution.trees.Tree;
-import jebl.gui.trees.treeviewer.TreePane;
-import jebl.gui.trees.treeviewer.TreeViewer;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -227,7 +219,9 @@ public class ClusterDetailPanel extends DetailPanel {
 				if(rowName.equals("Tree") && column > 0 ){
 					
 					String tree = table.getModel().getValueAt(row, column).toString();
-					new ClusterTreePanel(programLogger, tree, colName+" : "+groupName);
+					if(!tree.equals("N/A")){
+						new ClusterTreePanel(programLogger, tree, colName+" : "+groupName);
+					}
 				}
 				
 			}
