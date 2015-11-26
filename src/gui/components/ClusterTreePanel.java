@@ -194,6 +194,8 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 			}
 			
 			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
+			this.setVisible(false);
+			this.dispose();
 		}
 
 	}
