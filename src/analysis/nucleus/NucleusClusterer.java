@@ -253,7 +253,8 @@ public class NucleusClusterer extends AnalysisWorker {
 
 		// Values to cluster on: area, circularity, aspect ratio (feret/min diameter)
 		programLogger.log(Level.FINER, "Creating attributes");
-		int attributeCount = 4;
+		int basicAttibuteCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? 4 : 3;
+		int attributeCount = basicAttibuteCount;
 		if(options.isIncludeModality()){
 			
 			attributeCount += options.getModalityRegions();
@@ -264,6 +265,7 @@ public class NucleusClusterer extends AnalysisWorker {
 		Attribute area = new Attribute("area"); 
 		Attribute circularity = new Attribute("circularity"); 
 		Attribute aspect = new Attribute("aspect"); 
+		
 		Attribute name = new Attribute("name", (FastVector) null); 
 				
 		// hold the attributes in a Vector
@@ -271,7 +273,10 @@ public class NucleusClusterer extends AnalysisWorker {
 		attributes.addElement(area);
 		attributes.addElement(circularity);
 		attributes.addElement(aspect);
-		attributes.addElement(name);
+		
+		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+			attributes.addElement(name);
+		}
 		
 		if(options.isIncludeModality()){
 			
@@ -312,7 +317,10 @@ public class NucleusClusterer extends AnalysisWorker {
 				inst.setValue(circularity, n.getCircularity());
 				inst.setValue(aspect, n.getAspectRatio());
 //				stringList.add(n.getNameAndNumber());
-				inst.setValue(name,  n.getNameAndNumber());
+				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+					inst.setValue(name,  n.getNameAndNumber());
+				}
+				
 				
 				
 				if(options.isIncludeModality()){
@@ -324,7 +332,7 @@ public class NucleusClusterer extends AnalysisWorker {
 						
 						int index = (int) indexes.get(i);
 						
-						Attribute att = (Attribute) attributes.elementAt(i+4);
+						Attribute att = (Attribute) attributes.elementAt(i+basicAttibuteCount);
 						inst.setValue(att, interpolated.get(index));
 					}
 				}
@@ -375,7 +383,8 @@ public class NucleusClusterer extends AnalysisWorker {
 
 	private Instances makeMatrixInstances(CellCollection collection){
 		
-		int attributeCount = collection.size()+1;
+		int basicAttributeCount = collection.size();
+		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+1 : basicAttributeCount;
 
 		fileLogger.log(Level.FINE, "Building instance matrix");
 		
@@ -384,9 +393,13 @@ public class NucleusClusterer extends AnalysisWorker {
 			Attribute a = new Attribute("att_"+i); 
 			attributes.addElement(a);
 		}
+		
 		Attribute name = new Attribute("name", (FastVector) null); 
-		attributes.addElement(name);
-
+		
+		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+			attributes.addElement(name);
+		}
+		
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
 		try{
@@ -406,7 +419,10 @@ public class NucleusClusterer extends AnalysisWorker {
 					inst.setValue(att, score);
 					j++;
 				}
-				inst.setValue(name,  n1.getNameAndNumber());
+				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+					inst.setValue(name,  n1.getNameAndNumber());
+				}
+				
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());
 				publish(i++);
