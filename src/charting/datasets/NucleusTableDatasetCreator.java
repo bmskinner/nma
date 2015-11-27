@@ -124,12 +124,16 @@ public class NucleusTableDatasetCreator {
 			fieldNames.add("Start index");
 			fieldNames.add("End index");
 			fieldNames.add("Mean length ("+ scale+")");
+			fieldNames.add("Mean length 95% CI ("+ scale+")");
 			fieldNames.add("Length std err. ("+ scale+")");
 			fieldNames.add("Length p(unimodal)");
 
 			model.addColumn("", fieldNames.toArray(new Object[0]));
 						
 			DecimalFormat df = new DecimalFormat("#.##");
+			df.setMaximumFractionDigits(2);
+			df.setMinimumFractionDigits(2);
+			df.setMinimumIntegerDigits(1);
 			DecimalFormat pf = new DecimalFormat("#.###");
 
 			for(NucleusBorderSegment segment : segments) {
@@ -142,11 +146,15 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.getEndIndex());
 								
 				double[] meanLengths = collection.getSegmentLengths(segment.getName(), scale);
-				DescriptiveStatistics stat = new DescriptiveStatistics(meanLengths);
 				
-				rowData.add(  df.format(stat.getMean() ) );
-				double sem = stat.getStandardDeviation() / Math.sqrt(meanLengths.length);
+				double mean = Stats.mean( meanLengths);
+				double sem  = Stats.stderr(meanLengths);
+				double[] ci = Stats.calculateMeanConfidenceInterval(meanLengths, 0.95);
+				
+				rowData.add(  df.format(mean ) );
+				rowData.add(  df.format(ci[0])+" - "+ df.format(ci[1]));
 				rowData.add(  df.format(sem) );
+				
 				
 				double pval = DipTester.getDipTestPValue(meanLengths);
 				rowData.add( pf.format(pval) );

@@ -890,6 +890,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 				if(list.isEmpty()){
 					programLogger.log(Level.FINEST, "Dataset list is empty: making null table");
+					table.setToolTipText(null);
 					table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 
 				} else {
@@ -898,6 +899,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						programLogger.log(Level.FINEST, "Single dataset selected");
 						TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset(), scale);
 						table.setModel(model);
+						table.setToolTipText(null);
 						Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
 
 						while(columns.hasMoreElements()){
@@ -911,6 +913,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 							programLogger.log(Level.FINEST, "Multiple datasets selected");
 							TableModel model = NucleusTableDatasetCreator.createMultiDatasetMedianProfileSegmentStatsTable(list, scale);
 							table.setModel(model);
+							table.setToolTipText("Mean and range for 95% confidence interval");
 							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
 
 							while(columns.hasMoreElements()){
@@ -919,6 +922,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 							}
 						} else {
 							programLogger.log(Level.FINEST, "Segment counts don't match");
+							table.setToolTipText(null);
 							table.setModel(NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, scale));
 						}
 					}

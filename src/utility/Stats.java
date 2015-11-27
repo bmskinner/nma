@@ -66,6 +66,11 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
     if (m == null || m.length == 0) {
         throw new IllegalArgumentException("The data array either is null or does not contain any data.");
     }
+    
+    if(m.length==1){
+    	return m[0];
+    }
+    
     double sum = 0;
     for (int i = 0; i < m.length; i++) {
         sum += m[i];
@@ -77,12 +82,21 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 	  if (m == null || m.length == 0) {
 	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
 	  }
+	  
+	  if(m.length<2){
+		  return 0;
+	  }
+	  
 	  return stdev(m)/Math.sqrt(m.length);
   }
   
   public static double stdev(double[] m){
 	  if (m == null || m.length == 0) {
 	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
+	  }
+	  
+	  if(m.length<2){
+	    	return 0;
 	  }
 	  return Math.sqrt(variance(m));
   }
@@ -91,6 +105,11 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 	  if (m == null || m.length == 0) {
 	        throw new IllegalArgumentException("The data array either is null or does not contain any data.");
 	  }
+	  
+	  if(m.length<2){
+		  return 0;
+	  }
+	  
       double mean = mean(m);
       double temp = 0;
       for(double d : m)
@@ -152,6 +171,10 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
    * @return
    */
   public static double calculateConfidenceIntervalSize(double[] data, double level) {
+	  
+	  if(data.length<2){
+		  return 0;
+	  }
 	  try {
 		  
 		  SummaryStatistics stats = new SummaryStatistics();
