@@ -208,9 +208,14 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 				}
 
 			}
-
-			clusterList.add(clusterCollection);
-			programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
+			
+			if(clusterCollection.hasCells()){
+				clusterList.add(clusterCollection);
+				programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
+			} else {
+				programLogger.log(Level.WARNING, "No cells found. Check taxon labels are correct");
+			}
+			
 
 		}
 		
@@ -229,7 +234,11 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 				}
 			}
 			
-			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
+			if(!list.isEmpty()){
+				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
+			} else {
+				programLogger.log(Level.WARNING, "No datasets to analyse");
+			}
 			this.setVisible(false);
 			this.dispose();
 		}
