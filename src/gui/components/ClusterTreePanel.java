@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -138,19 +140,54 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 //		
 //		viewer.setBranchDecorator(b);
 //	}
+	
+	private String checkName(int offset){
+		
+		int maxExisting = 0;
+		Pattern pattern = Pattern.compile(dataset.getName()+"_ManualCluster_(\\d+)$");
+		
+		for(AnalysisDataset d : dataset.getChildDatasets()){
+
+			Matcher matcher = pattern.matcher(d.getName());
+
+			int digit = 0;
+
+			while (matcher.find()) {
+
+				digit = Integer.valueOf(matcher.group(1));
+
+				if(digit>maxExisting){
+					maxExisting = digit;
+				}
+
+			}
+			
+		}
+		
+		int clusterNumber = maxExisting+offset;
+		
+		String result = dataset.getName()+"_ManualCluster_"+clusterNumber;
+		
+		return result;
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		if(e.getActionCommand().equals("Extract")){
 			
-			CellCollection clusterCollection = new CellCollection(dataset.getCollection().getFolder(), 
-					dataset.getCollection().getOutputFolderName(), 
-					dataset.getCollection().getName()+"_ManualCluster_"+clusterList.size(), 
-					dataset.getCollection().getDebugFile(), 
-					dataset.getCollection().getNucleusType());
+			CellCollection template = dataset.getCollection();
 			
-			clusterCollection.setName(dataset.getCollection().getName()+"_ManualCluster_"+clusterList.size());
+			CellCollection clusterCollection = new CellCollection(template.getFolder(), 
+					template.getOutputFolderName(), 
+					template.getName()+"_ManualCluster_"+clusterList.size(), 
+					template.getDebugFile(), 
+					template.getNucleusType());
+			
+			String newName = template.getName()+"_ManualCluster_"+clusterList.size();
+			newName = checkName(clusterList.size());
+			
+			clusterCollection.setName(newName);
 
 			Tree tree = viewer.getTreePane().getTree();
 
@@ -162,7 +199,6 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 					Taxon t = tree.getTaxon(n);
 					
 					String name = t.getName();
-//					programLogger.log(Level.INFO, "Cell: "+name);
 					
 					for(Cell c : dataset.getCollection().getCells()){
 						if(c.getNucleus().getNameAndNumber().equals(name)){
