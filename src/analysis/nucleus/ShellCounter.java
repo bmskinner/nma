@@ -20,6 +20,7 @@
 package analysis.nucleus;
 
 import ij.IJ;
+import stats.Stats;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -32,8 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
-
-import utility.Stats;
 
 public class ShellCounter {
 	

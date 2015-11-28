@@ -22,6 +22,7 @@ import gui.components.BorderTagOptionsPanel;
 import gui.components.ColourSelecter;
 import gui.components.ProfileAlignmentOptionsPanel;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import stats.DipTester;
 import gui.components.ProfileCollectionTypeSettingsPanel;
 import gui.components.ProfileMarkersOptionsPanel;
 import gui.components.ProflleDisplaySettingsPanel;
@@ -66,7 +67,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 
 import utility.Constants;
-import utility.DipTester;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;

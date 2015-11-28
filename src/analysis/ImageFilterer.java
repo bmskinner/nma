@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage;
 import analysis.AnalysisOptions.CannyOptions;
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
+import stats.Stats;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ByteProcessor;
@@ -30,7 +31,6 @@ import ij.process.ImageProcessor;
 import io.ImageExporter;
 import io.ImageImporter;
 import utility.Constants;
-import utility.Stats;
 
 public class ImageFilterer {
 	

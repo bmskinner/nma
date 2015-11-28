@@ -28,6 +28,7 @@
 package components;
 
 import ij.IJ;
+import stats.Stats;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +41,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import utility.Constants;
-import utility.Stats;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import components.generic.BorderTag;

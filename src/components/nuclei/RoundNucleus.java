@@ -30,6 +30,7 @@ import ij.IJ;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+import stats.Stats;
 
 import java.awt.Rectangle;
 import java.io.File;
@@ -43,11 +44,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import utility.Constants;
-import utility.Equation;
-import utility.Stats;
 import utility.Utils;
 import components.CellularComponent;
 import components.generic.BorderTag;
+import components.generic.Equation;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.SegmentedProfile;

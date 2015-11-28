@@ -1,3 +1,4 @@
+package components.generic;
 /*******************************************************************************
  *  	Copyright (C) 2015 Ben Skinner
  *   
@@ -21,11 +22,7 @@
 	EQUATION
 	-----------------------
 	Line equations
-*/  
-package utility;
-
-import components.generic.XYPoint;
-
+*/
 
 public class Equation{
 

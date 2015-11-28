@@ -18,9 +18,6 @@
  *******************************************************************************/
 package charting.datasets;
 
-import utility.DipTester;
-import utility.Stats;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +44,8 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusStatistic;
 import components.nuclei.Nucleus;
 import ij.IJ;
+import stats.DipTester;
+import stats.Stats;
 
 public class NucleusTableDatasetCreator {
 	

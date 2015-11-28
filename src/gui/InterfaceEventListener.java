@@ -18,6 +18,11 @@
  *******************************************************************************/
 package gui;
 
+/**
+ * Allows the implementing class to respond to interface events
+ * @author ben
+ *
+ */
 public interface InterfaceEventListener {
 	
 	public void interfaceEventReceived(InterfaceEvent event);

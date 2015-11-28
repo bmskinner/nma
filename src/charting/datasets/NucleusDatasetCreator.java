@@ -21,6 +21,7 @@ package charting.datasets;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 import ij.process.FloatPolygon;
+import stats.DipTester;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,14 +36,13 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import charting.charts.BoxplotChartOptions;
 import charting.charts.ProfileChartOptions;
-import utility.DipTester;
-import utility.Equation;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.Equation;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;

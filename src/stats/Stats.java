@@ -25,13 +25,15 @@
   other classes
 */
 
- package utility;
+ package stats;
 
  import java.util.Arrays;
 
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
+import utility.Utils;
 
  public class Stats {
 

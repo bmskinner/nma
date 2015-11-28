@@ -16,16 +16,16 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package utility;
+package stats;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import utility.ModalityTest.BinnedData.Bin;
-
 import components.generic.BooleanProfile;
 import components.generic.Profile;
+import stats.ModalityTest.BinnedData.Bin;
+import utility.Utils;
 
 /**
  * Test a set of values for multimodality

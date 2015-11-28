@@ -34,10 +34,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import utility.Equation;
 import utility.Utils;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
+import components.generic.Equation;
 import components.generic.Profile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;

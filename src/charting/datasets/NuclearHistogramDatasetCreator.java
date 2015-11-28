@@ -28,7 +28,6 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 
 import charting.charts.HistogramChartOptions;
-import utility.Stats;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
@@ -37,6 +36,7 @@ import components.generic.MeasurementScale;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusStatistic;
 import components.nuclei.Nucleus;
+import stats.Stats;
 
 public class NuclearHistogramDatasetCreator {
 	

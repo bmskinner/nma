@@ -19,6 +19,7 @@
 package analysis.nucleus;
 
 import ij.IJ;
+import stats.DipTester;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +31,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import utility.Constants;
-import utility.DipTester;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
 import weka.clusterers.HierarchicalClusterer;

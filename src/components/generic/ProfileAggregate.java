@@ -20,6 +20,7 @@
 package components.generic;
 
 import ij.IJ;
+import stats.Stats;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import java.util.Map;
 import java.util.Set;
 
 import utility.ProfileException;
-import utility.Stats;
 import utility.Utils;
 
 /**
