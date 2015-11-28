@@ -387,7 +387,7 @@ public class NucleusClusterer extends AnalysisWorker {
 	private Instances makeMatrixInstances(CellCollection collection){
 		
 		int basicAttributeCount = collection.size();
-		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+1 : basicAttributeCount;
+		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
 
 		fileLogger.log(Level.FINE, "Building instance matrix");
 		
@@ -397,11 +397,15 @@ public class NucleusClusterer extends AnalysisWorker {
 			attributes.addElement(a);
 		}
 		
+		Attribute area = new Attribute("area"); 
+		Attribute aspect = new Attribute("aspect"); 
 		Attribute name = new Attribute("name", (FastVector) null); 
 		
 		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 			attributes.addElement(name);
 		}
+		attributes.addElement(area);
+		attributes.addElement(aspect);
 		
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
@@ -425,6 +429,9 @@ public class NucleusClusterer extends AnalysisWorker {
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					inst.setValue(name,  n1.getNameAndNumber());
 				}
+				
+				inst.setValue(area, n1.getArea());
+				inst.setValue(aspect, n1.getAspectRatio());
 				
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());

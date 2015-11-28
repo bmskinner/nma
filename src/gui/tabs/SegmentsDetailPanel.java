@@ -595,7 +595,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					// Check that all the datasets have the same number of segments
 					if(checkSegmentCountsMatch(list)){ // make a boxplot for each segment
 						
-						for(SegmentStatistic stat : SegmentStatistic.values()){
+//						for(SegmentStatistic stat : SegmentStatistic.values()){
 						
 							CellCollection collection = list.get(0).getCollection();
 							int segmentCount = collection.getProfileCollection(ProfileCollectionType.REGULAR)
@@ -605,13 +605,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 							// Get each segment as a boxplot
 							for( int i=0; i<segmentCount; i++){
 								String segName = "Seg_"+i;
-								JFreeChart boxplot = BoxplotChartFactory.makeSegmentBoxplot(segName, list, scale, stat);
+								JFreeChart boxplot = BoxplotChartFactory.makeSegmentBoxplot(segName, list, scale, SegmentStatistic.LENGTH);
 								ChartPanel chartPanel = new ChartPanel(boxplot);
 								chartPanel.setPreferredSize(preferredSize);
 								mainPanel.add(chartPanel);							
 							}
 						
-						}
+//						}
 						
 					} else { // different number of segments, blank chart
 						mainPanel.add(new JLabel("Segment number is not consistent across datasets"));

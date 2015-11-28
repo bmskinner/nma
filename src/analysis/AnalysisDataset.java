@@ -800,6 +800,10 @@ public class AnalysisDataset implements Serializable {
 	public ColourSwatch getSwatch() {
 		return swatch;
 	}
+	
+	public String toString(){
+		return this.getName();
+	}
 
 	/**
 	 * Set the swatch

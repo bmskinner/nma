@@ -13,6 +13,8 @@ import java.awt.FlowLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -27,6 +29,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
@@ -44,11 +47,14 @@ import jebl.evolution.trees.Tree;
 import jebl.gui.trees.treeviewer.TreeViewer;
 import jebl.gui.trees.treeviewer.decorators.AttributeBranchDecorator;
 import jebl.gui.trees.treeviewer.decorators.BranchDecorator;
+import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;
+import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
+import jebl.gui.trees.treeviewer.painters.Painter;
 import jebl.gui.trees.treeviewer_dev.decorators.Decorator;
 import jebl.gui.trees.treeviewer_dev.decorators.DiscreteColorDecorator;
 
 @SuppressWarnings("serial")
-public class ClusterTreePanel extends JDialog implements ActionListener {
+public class ClusterTreeDialog extends JDialog implements ActionListener, ItemListener {
 
 	private JPanel buttonPanel;
 	private TreeViewer viewer;
@@ -56,18 +62,20 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 	private ClusterGroup group;
 	private Logger programLogger;
 	
+	private JComboBox<AnalysisDataset> selectedClusterBox;
+	
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	
 	private List<CellCollection> clusterList = new ArrayList<CellCollection>(0);
 	
 
-	public ClusterTreePanel(Logger programLogger, AnalysisDataset dataset, ClusterGroup group) {
+	public ClusterTreeDialog(Logger programLogger, AnalysisDataset dataset, ClusterGroup group) {
 		
 		this.dataset = dataset;
 		this.group = group;
 		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
-		this.setSize(600, 800);
+		this.setSize(700, 800);
 
 		this.viewer = new TreeViewer();
 		this.add(viewer, BorderLayout.CENTER);
@@ -90,7 +98,7 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 			viewer.setTree( topTree );
 			this.setTitle(dataset.getName() + " : " + group.getName() +" : "+numTaxa+ " taxa");
 			
-//			colourTreeNodesByCluster();
+			colourTreeNodesByCluster(null);
 			
 		} catch (IOException e) {
 			programLogger.log(Level.SEVERE, "Error reading tree", e);
@@ -115,31 +123,62 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 		analyseButton.setActionCommand("Analyse");
 		panel.add(analyseButton);
 		
+		selectedClusterBox = new JComboBox<AnalysisDataset>();
+		selectedClusterBox.addItem(dataset);
+		for(AnalysisDataset d: dataset.getChildDatasets()){
+			selectedClusterBox.addItem(d);
+		}
+		selectedClusterBox.addItemListener(this);
+		panel.add(selectedClusterBox);
+		
 		return panel;
 	}
 	
 	/**
 	 * Update the taxon colours to match their cluster
+	 * @param cluster the dataset of nuclei in the cluster
 	 */
-//	private void colourTreeNodesByCluster(){
-//
-//		
-//		Map<Object,Paint> paintMap = new HashMap<Object, Paint>();
-//		paintMap.put("0", Color.RED);
-//		
-//		for(Taxon t : viewer.getTreePane().getTree().getTaxa()){
-//			
-//			viewer.getTreePane().setSelectedTaxon(t);
-//			viewer.getTreePane().annotateSelectedTaxa("Cluster", "0");
-//			
-//		}
-//		
-//		BranchDecorator b = new AttributeBranchDecorator("Cluster", paintMap);
-////		Decorator decorator = new DiscreteColorDecorator("Cluster 0", viewer.getTreePane().getTree().getTaxa(), new Color[] {Color.RED});
-//		
-//		
-//		viewer.setBranchDecorator(b);
-//	}
+	private void colourTreeNodesByCluster(AnalysisDataset cluster){
+
+		if(cluster!=null){
+			RootedTree tree = viewer.getTreePane().getTree();
+
+			List<Node> clusterNodes = new ArrayList<Node>();
+
+			for(Node n : tree.getNodes()){
+
+				if(tree.isExternal(n)){
+
+					Taxon t = tree.getTaxon(n);
+
+					String name = t.getName();
+
+					for(Nucleus nucleus : cluster.getCollection().getNuclei()){
+						if(nucleus.getNameAndNumber().equals(name)){
+							clusterNodes.add(n);
+						}
+					}
+
+
+					//				viewer.getTreePane().addSelectedNode(n);
+					//				n.setAttribute("colour", Color.RED);
+				}
+
+			}
+
+			VariableNodePainter painter = new VariableNodePainter("cluster", tree, PainterIntent.TIP, clusterNodes);
+			//		painter.setForeground(Color.BLUE);
+
+			viewer.getTreePane().setTaxonLabelPainter(painter);
+			//		viewer.getTreePane().annotateSelectedNodes("colour", Color.RED);
+
+			//		BranchDecorator b = new AttributeBranchDecorator("Cluster", paintMap);
+			//		Decorator decorator = new DiscreteColorDecorator("Cluster 0", viewer.getTreePane().getTree().getTaxa(), new Color[] {Color.RED});
+
+
+			//		viewer.setBranchDecorator(b);
+		}
+	}
 	
 	private String checkName(int offset){
 		
@@ -260,6 +299,16 @@ public class ClusterTreePanel extends JDialog implements ActionListener {
 
 	public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
 		datasetListeners.remove( l );
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+
+
+		if(e.getSource().equals(selectedClusterBox)){
+			colourTreeNodesByCluster((AnalysisDataset) selectedClusterBox.getSelectedItem());
+		}
+		
 	}
 
 }

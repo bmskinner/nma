@@ -22,7 +22,7 @@ package gui.tabs;
 import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
-import gui.components.ClusterTreePanel;
+import gui.components.ClusterTreeDialog;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
@@ -200,7 +200,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 								group = g;
 							}
 						}
-						ClusterTreePanel clusterPanel = new ClusterTreePanel(programLogger, dataset, group);
+						ClusterTreeDialog clusterPanel = new ClusterTreeDialog(programLogger, dataset, group);
 						clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
 					}
 				}
