@@ -8,7 +8,7 @@ import components.generic.MeasurementScale;
  * @author ben
  *
  */
-public interface Plottable {
+public interface PlottableStatistic {
 
 	/**
 	 * Get the string representation (name) of the statistic. 
@@ -54,6 +54,6 @@ public interface Plottable {
 	 * iteration access via the interface
 	 * @return
 	 */
-	public Plottable[] getValues();
+	public PlottableStatistic[] getValues();
 }
 

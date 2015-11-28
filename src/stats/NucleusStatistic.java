@@ -25,7 +25,7 @@ import components.generic.MeasurementScale;
    * These are the values that we can make boxplots from
    *
    */
-  public enum NucleusStatistic implements Plottable {
+  public enum NucleusStatistic implements PlottableStatistic {
 	  AREA ("Area", StatisticDimension.AREA),
 	  PERIMETER("Perimeter", StatisticDimension.LENGTH),
 	  MAX_FERET("Max feret", StatisticDimension.LENGTH),
@@ -134,7 +134,7 @@ import components.generic.MeasurementScale;
 		  return result;
 	  }
 	  
-	  public Plottable[] getValues(){
+	  public PlottableStatistic[] getValues(){
 		  return NucleusStatistic.values();
 	  }
   }
