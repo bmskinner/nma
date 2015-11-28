@@ -19,6 +19,7 @@
 package charting.charts;
 
 import gui.components.ColourSelecter;
+import stats.SegmentStatistic;
 
 import java.awt.Color;
 import java.util.List;
@@ -72,14 +73,14 @@ public class BoxplotChartFactory {
 	 * @param ds the dataset
 	 * @return
 	 */
-	public static JFreeChart makeSegmentBoxplot(String segName, List<AnalysisDataset> list, MeasurementScale scale) throws Exception {
+	public static JFreeChart makeSegmentBoxplot(String segName, List<AnalysisDataset> list, MeasurementScale scale, SegmentStatistic stat) throws Exception {
 
 		if(list==null){
 			return makeEmptyBoxplot();
 		}
 		
-		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentLengthDataset(list, segName, scale);
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Segment length ("+scale.toString()+")", ds, false);	
+		BoxAndWhiskerCategoryDataset ds = NucleusDatasetCreator.createSegmentStatDataset(list, segName, scale, stat);
+		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, "Segment "+stat.toString()+" ("+scale.toString()+")", ds, false);	
 		
 		formatBoxplot(boxplot);
 		CategoryPlot plot = boxplot.getCategoryPlot();

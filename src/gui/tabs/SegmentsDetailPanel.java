@@ -31,6 +31,7 @@ import gui.tabs.NuclearBoxplotsPanel.BoxplotsPanel;
 import gui.tabs.NuclearBoxplotsPanel.HistogramsPanel;
 import ij.IJ;
 import stats.NucleusStatistic;
+import stats.SegmentStatistic;
 import utility.Constants;
 
 import java.awt.BorderLayout;
@@ -594,21 +595,23 @@ public class SegmentsDetailPanel extends DetailPanel {
 					// Check that all the datasets have the same number of segments
 					if(checkSegmentCountsMatch(list)){ // make a boxplot for each segment
 						
-						CellCollection collection = list.get(0).getCollection();
-						int segmentCount = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-								.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-								.getSegmentCount();
+						for(SegmentStatistic stat : SegmentStatistic.values()){
 						
-						// Get each segment as a boxplot
-						for( int i=0; i<segmentCount; i++){
-							String segName = "Seg_"+i;
-							JFreeChart boxplot = BoxplotChartFactory.makeSegmentBoxplot(segName, list, scale);
-							ChartPanel chartPanel = new ChartPanel(boxplot);
-							chartPanel.setPreferredSize(preferredSize);
-							mainPanel.add(chartPanel);							
+							CellCollection collection = list.get(0).getCollection();
+							int segmentCount = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+									.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+									.getSegmentCount();
+							
+							// Get each segment as a boxplot
+							for( int i=0; i<segmentCount; i++){
+								String segName = "Seg_"+i;
+								JFreeChart boxplot = BoxplotChartFactory.makeSegmentBoxplot(segName, list, scale, stat);
+								ChartPanel chartPanel = new ChartPanel(boxplot);
+								chartPanel.setPreferredSize(preferredSize);
+								mainPanel.add(chartPanel);							
+							}
+						
 						}
-						
-						
 						
 					} else { // different number of segments, blank chart
 						mainPanel.add(new JLabel("Segment number is not consistent across datasets"));

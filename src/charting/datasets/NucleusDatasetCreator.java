@@ -23,6 +23,7 @@ import ij.IJ;
 import ij.process.FloatPolygon;
 import stats.DipTester;
 import stats.NucleusStatistic;
+import stats.SegmentStatistic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -649,7 +650,27 @@ public class NucleusDatasetCreator {
 
 		return ds;
 	}
-		
+	
+	/**
+	 * Create a box and whisker dataset for the desired segment statistic
+	 * @param collections the datasets to include
+	 * @param segName the segment to calculate for
+	 * @param scale the scale
+	 * @param stat the segment statistic to use
+	 * @return
+	 * @throws Exception
+	 */
+	public static BoxAndWhiskerCategoryDataset createSegmentStatDataset(List<AnalysisDataset> collections, String segName, MeasurementScale scale, SegmentStatistic stat) throws Exception {
+		switch(stat){
+		case DISPLACEMENT:
+			return createSegmentDisplacementDataset(collections, segName);
+		case LENGTH:
+			return createSegmentLengthDataset(collections, segName, scale);
+		default:
+			return null;
+		}
+	}
+	
 	/**
 	 * Get the lengths of the given segment in the collections
 	 * @param collections
@@ -675,6 +696,37 @@ public class NucleusDatasetCreator {
 				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
 				double length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
 				list.add(length);
+			}
+
+			dataset.add(list, segName+"_"+i, segName);
+		}
+		return dataset;
+	}
+	
+	/**
+	 * Get the displacements of the given segment in the collections
+	 * @param collections
+	 * @param segName
+	 * @return
+	 * @throws Exception 
+	 */
+	public static BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, String segName) throws Exception {
+
+		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+
+		for (int i=0; i < collections.size(); i++) {
+
+			CellCollection collection = collections.get(i).getCollection();
+
+
+			List<Double> list = new ArrayList<Double>(0);
+
+			for(Nucleus n : collection.getNuclei()){
+				SegmentedProfile profile = n.getAngleProfile();
+				NucleusBorderSegment seg = profile.getSegment(segName);
+				
+				double displacement = profile.getDisplacement(seg);
+				list.add(displacement);
 			}
 
 			dataset.add(list, segName+"_"+i, segName);
