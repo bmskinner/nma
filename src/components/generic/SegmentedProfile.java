@@ -236,6 +236,30 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
+	 * Find the value displacement of the given segment in the profile.
+	 * i.e the difference between the min value and the max value
+	 * @param segment the segment to measure
+	 * @return the displacement, or 0 if the segment was not found
+	 */
+	public double getDisplacement(NucleusBorderSegment segment){
+		if(this.contains(segment)){
+			
+			double min = 360;
+			double max = 0;
+			
+			for(int i=segment.getStartIndex(); i<=segment.getEndIndex(); i++){
+					double value = this.get(i);
+					min = value<min ? value : min;
+					max = value>max ? value : max;
+			}
+			return max-min;
+			
+		} else {
+			return 0;
+		}
+	}
+	
+	/**
 	 * Test if the profile contains the given segment. Copies are ok,
 	 * it checks position, length and name
 	 * @param segment

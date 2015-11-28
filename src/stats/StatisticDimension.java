@@ -7,6 +7,6 @@ package stats;
  */
 public enum StatisticDimension {
 	  
-	  AREA, LENGTH, DIMENSIONLESS
-	  
+	  AREA, LENGTH, DIMENSIONLESS, ANGLE
+	  	  
   }
