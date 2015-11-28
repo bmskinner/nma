@@ -22,6 +22,7 @@ import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 import ij.process.FloatPolygon;
 import stats.DipTester;
+import stats.NucleusStatistic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +53,6 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusStatistic;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 

@@ -30,6 +30,7 @@ import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import gui.tabs.NuclearBoxplotsPanel.BoxplotsPanel;
 import gui.tabs.NuclearBoxplotsPanel.HistogramsPanel;
 import ij.IJ;
+import stats.NucleusStatistic;
 import utility.Constants;
 
 import java.awt.BorderLayout;
@@ -78,7 +79,6 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusStatistic;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 

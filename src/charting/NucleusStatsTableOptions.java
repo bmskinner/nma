@@ -21,7 +21,7 @@ package charting;
 import java.util.List;
 
 import analysis.AnalysisDataset;
-import components.nuclear.NucleusStatistic;
+import stats.NucleusStatistic;
 
 public class NucleusStatsTableOptions extends TableOptions {
 

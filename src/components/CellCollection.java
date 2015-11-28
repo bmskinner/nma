@@ -28,6 +28,7 @@
 package components;
 
 import ij.IJ;
+import stats.NucleusStatistic;
 import stats.Stats;
 
 import java.io.File;
@@ -50,7 +51,6 @@ import components.generic.ProfileCollection;
 import components.generic.ProfileCollectionType;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusStatistic;
 import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;

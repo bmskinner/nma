@@ -41,10 +41,10 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileCollectionType;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusStatistic;
 import components.nuclei.Nucleus;
 import ij.IJ;
 import stats.DipTester;
+import stats.NucleusStatistic;
 import stats.Stats;
 
 public class NucleusTableDatasetCreator {

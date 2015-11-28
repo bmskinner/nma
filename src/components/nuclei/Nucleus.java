@@ -32,8 +32,8 @@ import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
-import components.nuclear.NucleusStatistic;
 import components.nuclear.SignalCollection;
+import stats.NucleusStatistic;
 
 public interface Nucleus {
 

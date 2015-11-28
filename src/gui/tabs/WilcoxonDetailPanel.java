@@ -36,12 +36,12 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import components.nuclear.NucleusStatistic;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import charting.NucleusStatsTableOptions;
 import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
+import stats.NucleusStatistic;
 
 public class WilcoxonDetailPanel extends DetailPanel {
 

@@ -26,6 +26,7 @@ import gui.components.HistogramsTabPanel;
 import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.ProbabilityDensityCheckboxPanel;
 import gui.components.SelectableChartPanel;
+import stats.NucleusStatistic;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -70,7 +71,6 @@ import charting.datasets.NucleusDatasetCreator;
 import components.Cell;
 import components.CellCollection;
 import components.generic.MeasurementScale;
-import components.nuclear.NucleusStatistic;
 import components.nuclei.Nucleus;
 
 public class NuclearBoxplotsPanel extends DetailPanel {

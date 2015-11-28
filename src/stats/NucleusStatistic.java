@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package components.nuclear;
+package stats;
 
 import utility.Utils;
 import components.generic.MeasurementScale;
@@ -25,7 +25,7 @@ import components.generic.MeasurementScale;
    * These are the values that we can make boxplots from
    *
    */
-  public enum NucleusStatistic {
+  public enum NucleusStatistic implements Plottable {
 	  AREA ("Area", StatisticDimension.AREA),
 	  PERIMETER("Perimeter", StatisticDimension.LENGTH),
 	  MAX_FERET("Max feret", StatisticDimension.LENGTH),
@@ -134,9 +134,7 @@ import components.generic.MeasurementScale;
 		  return result;
 	  }
 	  
-	  public enum StatisticDimension {
-		  
-		  AREA, LENGTH, DIMENSIONLESS
-		  
+	  public Plottable[] getValues(){
+		  return NucleusStatistic.values();
 	  }
   }

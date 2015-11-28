@@ -34,8 +34,8 @@ import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusStatistic;
 import components.nuclei.Nucleus;
+import stats.NucleusStatistic;
 import stats.Stats;
 
 public class NuclearHistogramDatasetCreator {

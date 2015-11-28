@@ -30,6 +30,7 @@ import ij.IJ;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+import stats.NucleusStatistic;
 import stats.Stats;
 
 import java.awt.Rectangle;
@@ -55,7 +56,6 @@ import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
-import components.nuclear.NucleusStatistic;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;
 

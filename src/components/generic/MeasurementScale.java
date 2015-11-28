@@ -18,7 +18,7 @@
  *******************************************************************************/
 package components.generic;
 
-import components.nuclear.NucleusStatistic;
+import stats.NucleusStatistic;
 
 public enum MeasurementScale {
 	

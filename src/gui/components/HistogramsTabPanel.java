@@ -1,6 +1,7 @@
 package gui.components;
 
 import gui.tabs.DetailPanel;
+import stats.NucleusStatistic;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -16,8 +17,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
-import components.nuclear.NucleusStatistic;
 
 /**
  * This class is extended for making a panel with multiple stats histograms

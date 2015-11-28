@@ -22,7 +22,7 @@ import java.util.List;
 
 import analysis.AnalysisDataset;
 import components.generic.MeasurementScale;
-import components.nuclear.NucleusStatistic;
+import stats.NucleusStatistic;
 
 public class HistogramChartOptions extends BoxplotChartOptions {
 

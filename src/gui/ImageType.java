@@ -18,8 +18,6 @@
  *******************************************************************************/
 package gui;
 
-import java.util.List;
-
 /**
  * This is to allow different enums to be used in the 
  * setup of an ImageProber

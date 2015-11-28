@@ -19,6 +19,7 @@
 package charting.datasets;
 
 import ij.IJ;
+import stats.NucleusStatistic;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NuclearSignal;
-import components.nuclear.NucleusStatistic;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 

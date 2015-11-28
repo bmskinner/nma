@@ -20,6 +20,7 @@ package charting.charts;
 
 import gui.components.ColourSelecter;
 import ij.IJ;
+import stats.NucleusStatistic;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -42,7 +43,6 @@ import charting.datasets.NuclearHistogramDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;
 import analysis.AnalysisDataset;
 import components.generic.MeasurementScale;
-import components.nuclear.NucleusStatistic;
 
 
 public class HistogramChartFactory {
