@@ -54,6 +54,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
+import gui.components.ColourSelecter.ColourSwatch;
 
 /**
  * @author bms41
@@ -78,6 +79,8 @@ public class CellCollection implements Serializable {
 	private ConsensusNucleus consensusNucleus; 	// the refolded consensus nucleus
 	
 	private Map<UUID, Cell> mappedCollection  = new HashMap<UUID, Cell>();	// store all the nuclei analysed
+	
+	private transient double[][] nucleusSimilarityMatrix = null;
 
 	/**
 	 * Constructor.
@@ -1112,5 +1115,45 @@ public class CellCollection implements Serializable {
 	  }
 	  return subCollection;
   }
+  
+  /**
+   * Get the saved similarity matrix. If the matrix is of a different
+   * size to teh collection (e.g. a cell has been added or removed)
+   * returns null
+   * @return
+   */
+  public double[][] getNucleusSimilarityMatrix(){
+	  if(this.nucleusSimilarityMatrix.length==this.size()){
+		  return this.nucleusSimilarityMatrix;
+	  } else {
+		  return null;
+	  }
+
+  }
+
+  /**
+   * Set the similarity matrix as a transient variable
+   * @param nucleusSimilarityMatrix
+   */
+  public void setNucleusSimilarityMatrix(double[][] nucleusSimilarityMatrix){
+	  this.nucleusSimilarityMatrix = nucleusSimilarityMatrix;
+  }
+  
+  /**
+   * Check if the similarity matrix is available
+   * @return
+   */
+  public boolean hasNucleusSimilarityMatrix(){
+	  if(this.nucleusSimilarityMatrix==null  || this.nucleusSimilarityMatrix.length!=this.size()){
+		  return false;
+	  } else {
+		  return true;
+	  }
+  }
+  
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	    in.defaultReadObject();
+	    this.nucleusSimilarityMatrix = null;
+	}
 
 }

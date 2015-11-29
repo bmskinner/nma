@@ -24,6 +24,7 @@ public class VariableNodePainter extends BasicLabelPainter {
 	@Override
 	public void paint(Graphics2D g2, Node item, Justification justification, Rectangle2D bounds) {
 		final Font oldFont = g2.getFont();
+		final Font newFont = new Font(oldFont.getFontName(), Font.BOLD, oldFont.getSize());
 
 //        if (this.background != null) {
 //            g2.setPaint(background);
@@ -35,15 +36,17 @@ public class VariableNodePainter extends BasicLabelPainter {
 //            g2.setStroke(borderStroke);
 //            g2.draw(bounds);
 //        }
+
 		
 
-        g2.setPaint(Color.BLACK);
-        g2.setFont(new Font("sansserif", Font.PLAIN, 8));
+        g2.setPaint(Color.LIGHT_GRAY);
+        g2.setFont(oldFont);
 
         if(highlights.contains(item)){
-        	g2.setPaint(Color.YELLOW);
-        	g2.fill(bounds);
-        	g2.setPaint(Color.BLUE);
+//        	g2.setPaint(Color.YELLOW);
+//        	g2.fill(bounds);
+        	g2.setFont(newFont);
+        	g2.setPaint(Color.BLACK);
         }
 
 

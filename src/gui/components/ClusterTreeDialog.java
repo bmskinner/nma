@@ -75,7 +75,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		this.group = group;
 		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
-		this.setSize(700, 800);
+		this.setBounds(100, 100, 700, 800);
 
 		this.viewer = new TreeViewer();
 		this.add(viewer, BorderLayout.CENTER);

@@ -51,8 +51,8 @@ import components.nuclear.ShellResult;
 
 
 /**
- * This holds a NucleusCollection, the analyses that have been run on it
- * and the relationships it holds with other NucleusCollections
+ * This holds a CellCollection, the analyses that have been run on it
+ * and the relationships it holds with other CellCollection
  *
  */
 public class AnalysisDataset implements Serializable {
@@ -90,7 +90,7 @@ public class AnalysisDataset implements Serializable {
 	private String version;
 	
 	private transient ColourSwatch swatch = ColourSwatch.REGULAR_SWATCH;
-	
+		
 	private boolean isRoot;	
 	
 	/*
