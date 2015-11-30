@@ -1151,6 +1151,19 @@ public class CellCollection implements Serializable {
 	  }
   }
   
+  public void updateSourceFolder(File newFolder){
+		File oldFile = this.getFolder();
+
+		if(newFolder.exists()){
+			this.folder = newFolder;
+			
+			for(Nucleus n : this.getNuclei()){
+				n.updateSourceFolder(newFolder);
+			}
+		}
+
+	}
+  
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
 	    this.nucleusSimilarityMatrix = null;

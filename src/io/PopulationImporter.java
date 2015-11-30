@@ -29,66 +29,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+
 //import utility.Logger;
 import analysis.AnalysisDataset;
 import components.CellCollection;
+import components.nuclei.Nucleus;
 
 public class PopulationImporter {
-	
-//	private static Logger programLogger;
-//	private static Logger fileLogger;
-
-
-	public static CellCollection readPopulation(File inputFile, Logger programLogger){
 		
-		if(!inputFile.exists()){
-			programLogger.log(Level.INFO, "Requested file does not exist");
-			throw new IllegalArgumentException("Requested file does not exist");
-		}
-
-		CellCollection collection = null;
-
-		FileInputStream fis;
-		try {
-			fis = new FileInputStream(inputFile.getAbsolutePath());
-
-			ObjectInputStream ois = new ObjectInputStream(fis);
-
-			programLogger.log(Level.INFO, "Reading file...");
-			List<Object> inputList = new ArrayList<Object>(0);
-
-			try{
-				Object inputObject = ois.readObject();
-				while (inputObject != null){
-					inputList.add(inputObject);
-					inputObject = ois.readObject();
-				}
-			} catch (Exception e) { // exception occurs on reaching EOF
-
-				programLogger.log(Level.INFO, "OK");
-				collection = (CellCollection) inputList.get(0);
-
-				programLogger.log(Level.INFO, "File imported");
-
-			} finally {
-				ois.close();
-				fis.close();
-			}
-		} catch (FileNotFoundException e1) {
-			programLogger.log(Level.SEVERE, "File not found: "+inputFile.getAbsolutePath(), e1);
-		} catch (IOException e1) {
-			programLogger.log(Level.SEVERE, "File IO error: "+inputFile.getAbsolutePath(), e1);
-		}
-		return collection;
-	}
-	
 	public static AnalysisDataset readDataset(File inputFile, Logger programLogger) throws Exception {
 
 		if(!inputFile.exists()){
 			throw new IllegalArgumentException("Requested file does not exist");
 		}
-
-//		logger = new Logger(new File(inputFile.getParent()), "PopulationImporter");
 
 		AnalysisDataset dataset = null;
 
@@ -101,24 +54,40 @@ public class PopulationImporter {
 			ois = new ObjectInputStream(fis);
 			
 			dataset = (AnalysisDataset) ois.readObject();
-//		     recordList.add(readCase);
+			
+			// Replace existing save file path with the path to the file that has been opened
+			
+			if(!dataset.getSavePath().equals(inputFile)){
+				programLogger.log(Level.FINE, "File path has changed: attempting to relocate images");
 
-//			List<Object> inputList = new ArrayList<Object>(0);
+				dataset.setSavePath(inputFile);
 
-//			try{
-//				Object inputObject = ois.readObject();
-//				while (inputObject != null){
-//					inputList.add(inputObject);
-//					inputObject = ois.readObject();
-//				}
-//			} catch (Exception e) { // exception occurs on reaching EOF
-//
-//				dataset = (AnalysisDataset) inputList.get(0);
-//
-//			} finally {
-//				ois.close();
-//				fis.close();
-//			}
+				// Check if the image folders are present in the correct relative directories
+				// If so, update the CellCollection image paths
+
+				//			should be /ImageDir/AnalysisDir/dataset.nmd
+
+				File expectedAnalysisDirectory = inputFile.getParentFile();
+				File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
+				programLogger.log(Level.FINE, "Searching "+expectedImageDirectory.getAbsolutePath());
+
+				if(expectedAnalysisDirectory.exists() && expectedImageDirectory.exists()){
+
+					programLogger.log(Level.FINE, "Updating dataset image paths");
+					dataset.getCollection().updateSourceFolder(expectedImageDirectory);
+					
+					programLogger.log(Level.FINE, "Updating child dataset image paths");
+					for(AnalysisDataset child : dataset.getAllChildDatasets()){
+						child.getCollection().updateSourceFolder(expectedImageDirectory);
+					}
+					
+					programLogger.log(Level.FINE, "Updated all images");
+
+				} else {
+					programLogger.log(Level.FINE, "Unable to locate image directory and/or analysis directory");
+				}
+			}
+
 		} catch (FileNotFoundException e1) {
 			programLogger.log(Level.SEVERE, "File not found: "+inputFile.getAbsolutePath(), e1);
 		} catch (IOException e1) {

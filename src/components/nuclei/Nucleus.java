@@ -292,10 +292,22 @@ public interface Nucleus {
 	
 	
 
+	/**
+	 * Get the size of the angle profile window in pixels
+	 * @return
+	 */
 	public int getAngleProfileWindowSize();
 
+	/**
+	 * Fetch the distance profile through the centre of mass
+	 * @return
+	 */
 	public Profile getDistanceProfile();
 
+	/**
+	 * Get the length of the angle profile in index units
+	 * @return
+	 */
 	public int getLength();
 	
 	
@@ -334,6 +346,11 @@ public interface Nucleus {
 	 */
 	public List<NucleusBorderPoint> getBorderList();
 	
+	/**
+	 * Get a copy of the nucleus border points in the border list
+	 * offset to their original coordinates in the source image
+	 * @return
+	 */
 	public List<NucleusBorderPoint> getOriginalBorderList();
 
 	public void calculateFractionalSignalDistancesFromCoM();
@@ -344,11 +361,10 @@ public interface Nucleus {
     Protected setters for subclasses
     -----------------------
 	 */
+	
 	public void setOutputFolder(String f);
 
 	public void setCentreOfMass(XYPoint d);
-
-	//  public void setPolygon(FloatPolygon p);
 
 	public void updateFailureCode(int i);
 
@@ -428,23 +444,17 @@ public interface Nucleus {
 	 */
 	public NucleusBorderPoint findOrthogonalBorderPoint(NucleusBorderPoint a);
 
-	/*
-    This will find the point in a list that is closest to any local maximum
-    in the border profile, wherever that maximum may be
+	/**
+	 *  Find the point with the narrowest diameter through the CoM
+	 *  using the distance profile
+	 * @return
 	 */
-//	public NucleusBorderPoint findPointClosestToLocalMaximum(NucleusBorderPoint[] list) throws Exception;
-
-	/*
-    This will find the point in a list that is closest to any local minimum
-    in the border profile, wherever that minimum may be
-	 */
-//	public NucleusBorderPoint findPointClosestToLocalMinimum(NucleusBorderPoint[] list) throws Exception;
-
-
-	// find the point with the narrowest diameter through the CoM
-	// Uses the distance profile
 	public NucleusBorderPoint getNarrowestDiameterPoint();
 
+	/**
+	 * Flip the nucleus on the x-axis (horizontally) about the given point
+	 * @param p the point with the x coordinate to flip on
+	 */
 	public void flipXAroundPoint(XYPoint p);
 
 	public double getMedianDistanceBetweenPoints();
@@ -647,6 +657,19 @@ public interface Nucleus {
 	 * @throws Exception
 	 */
 	public void reverse() throws Exception;
+	
+	
+	/**
+	 * Get the name of the folder to store analysis specific data.
+	 * This is the folder with the analysis date/time name.
+	 * @return
+	 */
 	public String getOutputFolderName();
+	
+	
+	/**
+	 * Update the image source folder to the given new folder
+	 * @param newFolder
+	 */
 	public void updateSourceFolder(File newFolder);
 }
