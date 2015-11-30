@@ -25,6 +25,7 @@ import gui.DatasetEventListener;
 import gui.components.ClusterTreeDialog;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -76,6 +77,9 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	private class ClustersPanel extends JPanel implements MouseListener {
 		
 		private JButton 	clusterButton	= new JButton("Cluster population");
+		private JButton 	buildTreeButton	= new JButton("Create tree");
+		private JButton 	saveClassifierButton	= new JButton("Create classifier");
+		
 		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
 		private JPanel		statusPanel		= new JPanel(new BorderLayout());
 		
@@ -126,6 +130,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 		private JPanel makeStatusPanel(){
 			
 			JPanel panel = new JPanel(new BorderLayout());
+			
+			JPanel buttonPanel = new JPanel(new FlowLayout());
 			clusterButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
@@ -136,14 +142,47 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			});
 			clusterButton.setVisible(false);
 			
-			panel.add(clusterButton, BorderLayout.SOUTH);
+			buildTreeButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					fireDatasetEvent(DatasetMethod.BUILD_TREE, list);
+					
+
+				}
+			});
+			buildTreeButton.setVisible(false);
+			
+			saveClassifierButton.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					fireDatasetEvent(DatasetMethod.TRAIN_CLASSIFIER, list);
+					
+
+				}
+			});
+			saveClassifierButton.setVisible(false);
+			
+			saveClassifierButton.setEnabled(false);
+			buildTreeButton.setEnabled(false);
+			buttonPanel.add(buildTreeButton);
+			buttonPanel.add(clusterButton);
+			buttonPanel.add(saveClassifierButton);
+			
+			panel.add(buttonPanel, BorderLayout.SOUTH);
 			panel.add(statusLabel, BorderLayout.CENTER);
 					
 			return panel;
 		}
+		
+		private void setButtonsVisible(boolean b){
+			clusterButton.setVisible(b);
+			saveClassifierButton.setVisible(b);
+			buildTreeButton.setVisible(b);
+			
+		}
 
 		public void update(List<AnalysisDataset> list){
-			clusterButton.setVisible(true);
+			setButtonsVisible(true);
 //			treeViewer.setVisible(false);
 			
 			TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(list);
@@ -165,7 +204,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 					}
 				} else { // more than one dataset selected
 					statusLabel.setText("Multiple datasets selected");
-					clusterButton.setVisible(false);
+					setButtonsVisible(false);
 				}
 			}
 		}

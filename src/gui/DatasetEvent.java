@@ -114,6 +114,8 @@ public class DatasetEvent extends EventObject {
 		SELECT_DATASETS		("Select datasets"),
 		EXTRACT_SOURCE		("Extract source"),
 		CLUSTER 			("Cluster"),
+		BUILD_TREE			("Build tree"),
+		TRAIN_CLASSIFIER	("Train classifier"),
 		RECALCULATE_CACHE	("Recalculate caches"),
 		SAVE				("Save selected"),
 		ADD_DATASET			("Add dataset"),
