@@ -42,8 +42,6 @@ import components.nuclei.Nucleus;
 
 public class ShellAnalysis extends AnalysisWorker {
 	
-//	private static Logger logger;
-//	private final AnalysisDataset dataset;
 	private final int shells;
 	
 	private static Map<Integer, ShellCounter> counters = new HashMap<Integer, ShellCounter>(0);
@@ -53,10 +51,6 @@ public class ShellAnalysis extends AnalysisWorker {
 		super(dataset, programLogger);
 		this.shells = shells;
 		this.setProgressTotal(dataset.getCollection().getNucleusCount());
-		fileLogger = Logger.getLogger(ShellAnalysis.class.getName());
-		fileLogger.addHandler(dataset.getLogHandler());
-		
-		
 	}
 		
 	@Override
@@ -64,14 +58,12 @@ public class ShellAnalysis extends AnalysisWorker {
 		
 		CellCollection collection = this.getDataset().getCollection();
 		
-//		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
-		
 		if(collection.getSignalCount()==0){
-			fileLogger.log(Level.FINE, "No signals in population");
+			log(Level.FINE, "No signals in population");
 			return true; // only bother if there are signals
 		}
 		
-		fileLogger.log(Level.INFO, "Performing shell analysis with "+shells+" shells...");
+		log(Level.INFO, "Performing shell analysis with "+shells+" shells...");
 		
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
@@ -113,7 +105,7 @@ public class ShellAnalysis extends AnalysisWorker {
 								double[] signalPerShell = shellAnalyser.findShell(s, channel, signalStack);
 								counter.addValues(signalPerShell);
 							} catch (Exception e) {
-								fileLogger.log(Level.SEVERE, "Error in signal in shell analysis", e);
+								logError( "Error in signal in shell analysis", e);
 							}
 						} // end for signals
 					} // end if signals
@@ -132,9 +124,9 @@ public class ShellAnalysis extends AnalysisWorker {
 				}
 			}
 			
-			fileLogger.log(Level.INFO, "Shell analysis complete");
+			log(Level.INFO, "Shell analysis complete");
 		} catch (Exception e) {
-			fileLogger.log(Level.SEVERE, "Error in shell analysis", e);			
+			logError( "Error in shell analysis", e);	
 			return false;
 		}
 		return true;

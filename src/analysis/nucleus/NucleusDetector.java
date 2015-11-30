@@ -58,18 +58,19 @@ import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
+import analysis.AnalysisWorker;
 import components.Cell;
 import components.CellCollection;
 import components.nuclei.Nucleus;
 
-public class NucleusDetector extends SwingWorker<Boolean, Integer> {
+public class NucleusDetector extends AnalysisWorker {
   
   private static final String spacerString = "---------";
 
   // counts of nuclei processed
-  protected int totalNuclei        = 0;
+//  protected int totalNuclei        = 0;
   
-  protected int totalImages;
+//  protected int totalImages;
   
   private int progress;
 
@@ -79,122 +80,78 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 
   protected AnalysisOptions analysisOptions;
 
-  protected Logger fileLogger = null;
-  protected Logger programLogger; // the debug file logger
-  protected Level debugLevel = Level.ALL;
+//  protected Logger fileLogger = null;
+//  protected Logger programLogger; // the debug file logger
+//  protected Level debugLevel = Level.ALL;
 
 //  protected MainWindow mw;
   private Map<File, CellCollection> collectionGroup = new HashMap<File, CellCollection>();
   
   List<AnalysisDataset> datasets;
 
-
   /**
-  * Construct a detector on the given folder, and output the results to 
-  * the given output folder
-  *
-  * @param inputFolder the folder to analyse
-  * @param outputFolder the name of the folder for results
-  */
+   * Construct a detector on the given folder, and output the results to 
+   * the given output folder
+   * @param outputFolder the name of the folder for results
+   * @param programLogger the logger to the log panel
+   * @param debugFile the dataset log file
+   * @param options the options to detect with
+   */
   public NucleusDetector(String outputFolder, Logger programLogger, File debugFile, AnalysisOptions options){
+	  super(null, programLogger, debugFile);
 	  this.inputFolder 		= options.getFolder();
 	  this.outputFolder 	= outputFolder;
-//	  this.mw 				= mw;
 	  this.debugFile 		= debugFile;
 	  this.analysisOptions 	= options;
-	  this.programLogger = programLogger;
 	  
-//	  logger = new Logger(debugFile, "NucleusDetector");
-	  fileLogger = Logger.getLogger(NucleusDetector.class.getName());
-	  fileLogger.setLevel(debugLevel);
+	  log(Level.INFO, "Calculating number of images to analyse");
+	  int totalImages = NucleusDetector.countSuitableImages(analysisOptions.getFolder());
+	  this.setProgressTotal(totalImages);
+	  log(Level.INFO, "Analysing "+totalImages+" images");
+	  
+	  this.progress = 0;
   }
-
-  
-  @Override
-	protected void process( List<Integer> integers ) {
-		//update the number of entries added
-		int amount = integers.get( integers.size() - 1 );
-		int percent = (int) ( (double) amount / (double) totalImages * 100);
-		setProgress(percent); // the integer representation of the percent
-	}
 	
 	@Override
 	protected Boolean doInBackground() throws Exception {
 
 		boolean result = false;
-		progress = 0;
 		
-		DebugFileHandler handler = null;
-		try {
-			handler = new DebugFileHandler(debugFile);
-			handler.setFormatter(new DebugFileFormatter());
-			fileLogger.addHandler(handler);
-			fileLogger.setLevel(Level.ALL);
-		} catch (SecurityException e1) {
-			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
-		} catch (IOException e1) {
-			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
-		}
-
-		this.totalImages = NucleusDetector.countSuitableImages(analysisOptions.getFolder());
 		try{
-			fileLogger.log(Level.INFO, "Running nucleus detector");
+			log(Level.INFO, "Running nucleus detector");
 			processFolder(this.inputFolder);
 
-			fileLogger.log(Level.FINE, "Folder processed");
+			log(Level.FINE, "Folder processed");
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 
-			fileLogger.log(Level.FINE, "Getting collections");
+			log(Level.FINE, "Getting collections");
 
 			List<CellCollection> folderCollection = this.getNucleiCollections();
 
 			// Run the analysis pipeline
 
-			fileLogger.log(Level.FINE,"Analysing collections");
+			log(Level.FINE,"Analysing collections");
 
 			datasets = analysePopulations(folderCollection);		
 
 			result = true;
-			fileLogger.log(Level.FINE, "Analysis complete; return collections");
+			log(Level.FINE, "Analysis complete; return collections");
 
 		} catch(Exception e){
 			result = false;
-			fileLogger.log(Level.SEVERE, "Error in processing folder", e);
-//		}
-		} finally {
-			handler.close();
+			logError("Error in processing folder", e);
 		}
 		return result;
 	}
-	
-	@Override
-	public void done() {
-
-		try {
-			if(this.get()){
-				firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());			
-				
-			} else {
-				firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
-			}
-		} catch (InterruptedException e) {
-			programLogger.log(Level.SEVERE, "Error in nucleus detection", e);
-
-		} catch (ExecutionException e) {
-			programLogger.log(Level.SEVERE, "Error in nucleus detection", e);
-		}
-
-	} 
-	
-	
+		
 	public List<AnalysisDataset> getDatasets(){
 		return this.datasets;
 	}
 	
 	public List<AnalysisDataset> analysePopulations(List<CellCollection> folderCollection){
-		programLogger.log(Level.INFO, "Beginning analysis");
-		fileLogger.log(Level.INFO, "Beginning analysis");
+//		programLogger.log(Level.INFO, "Beginning analysis");
+		log(Level.INFO, "Beginning analysis");
 
 		List<AnalysisDataset> result = new ArrayList<AnalysisDataset>();
 
@@ -204,9 +161,10 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 			AnalysisDataset dataset = new AnalysisDataset(r);
 			dataset.setAnalysisOptions(analysisOptions);
 			dataset.setRoot(true);
+			File debugFile = r.getDebugFile();
 
 			File folder = r.getFolder();
-			fileLogger.log(Level.INFO, "Analysing: "+folder.getName());
+			log(Level.INFO, "Analysing: "+folder.getName());
 
 			LinkedHashMap<String, Integer> nucleusCounts = new LinkedHashMap<String, Integer>();
 
@@ -220,34 +178,38 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 						analysisOptions.getNucleusType());
 
 //				boolean ok;
-				programLogger.log(Level.INFO, "Filtering collection...");
+				log(Level.INFO, "Filtering collection...");
 				boolean ok = CollectionFilterer.run(r, failedNuclei, fileLogger); // put fails into failedNuclei, remove from r
 				if(ok){
-					programLogger.log(Level.INFO, "OK");
+					log(Level.INFO, "Filtered OK");
 				} else {
-					programLogger.log(Level.INFO, "Error");
+					log(Level.INFO, "Filtering error");
 				}
 
 				if(failedNuclei.getNucleusCount()>0){
-					programLogger.log(Level.INFO, "Exporting failed nuclei...");
+					log(Level.INFO, "Exporting failed nuclei...");
 					ok = CompositeExporter.run(failedNuclei, fileLogger);
 					if(ok){
-						programLogger.log(Level.INFO, "OK");
+						log(Level.INFO, "Export OK");
 					} else {
-						programLogger.log(Level.INFO, "Error");
+						log(Level.INFO, "Export error");
 					}
 					nucleusCounts.put("failed", failedNuclei.getNucleusCount());
 				}
 				
 			} catch(Exception e){
-				fileLogger.log(Level.SEVERE, "Cannot create collection: "+e.getMessage());
+				log(Level.WARNING, "Cannot create collection: "+e.getMessage());
 			}
 
 			programLogger.log(Level.INFO, spacerString);
+			
 			programLogger.log(Level.INFO, "Population: "+r.getType());
+			
 			programLogger.log(Level.INFO, "Population: "+r.getNucleusCount()+" nuclei");
-			fileLogger.log(Level.INFO, "Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
 			programLogger.log(Level.INFO, spacerString);
+			
+			fileLogger.log(Level.INFO, "Population: "+r.getType()+" : "+r.getNucleusCount()+" nuclei");
+			
 
 			result.add(dataset);
 
@@ -454,8 +416,7 @@ public class NucleusDetector extends SwingWorker<Boolean, Integer> {
 				  fileLogger.log(Level.SEVERE, "Error in image processing: "+e.getMessage(), e);
 			  } // end catch
 			  
-			  progress++;
-			  publish(progress);
+			  publish(progress++); // must be global since this function recurses
 		  } else { // if !ok
 			  if(file.isDirectory()){ // recurse over any sub folders
 				  processFolder(file);

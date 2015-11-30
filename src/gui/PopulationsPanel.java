@@ -20,6 +20,7 @@ package gui;
 
 
 import gui.DatasetEvent.DatasetMethod;
+import gui.actions.SaveDatasetAction;
 import gui.components.ColourSelecter;
 import gui.tabs.DetailPanel;
 import io.PopulationExporter;
@@ -594,6 +595,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				if(saveFile.exists()){
 					saveFile.delete();
 				}
+//				new SaveDatasetAction(dataset, "Saving dataset", "Error saving dataset", mw);
+//				
 				PopulationExporter.saveAnalysisDataset(dataset);
 				update();
 				

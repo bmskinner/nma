@@ -18,15 +18,12 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import ij.IJ;
 import stats.DipTester;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,10 +69,10 @@ public class NucleusClusterer extends AnalysisWorker {
 		this.collection = dataset.getCollection();
 		this.setProgressTotal(dataset.getCollection().size() * 2);
 		
-		programLogger.log(Level.FINEST, "Total set to "+this.getProgressTotal());
-		fileLogger = Logger.getLogger(NucleusClusterer.class.getName());
-		fileLogger.setLevel(Level.ALL);
-		fileLogger.addHandler(dataset.getLogHandler());
+		log(Level.FINEST, "Total set to "+this.getProgressTotal());
+//		fileLogger = Logger.getLogger(NucleusClusterer.class.getName());
+//		fileLogger.setLevel(Level.ALL);
+//		fileLogger.addHandler(dataset.getLogHandler());
 	}
 	
 	@Override
@@ -127,12 +124,12 @@ public class NucleusClusterer extends AnalysisWorker {
 		
 //		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
 		
-		fileLogger.log(Level.INFO, "Beginning clustering of population");
+		log(Level.FINE, "Beginning clustering of population");
 				
 		try {
 						
 			// create Instances to hold Instance
-			programLogger.log(Level.FINER, "Making instances");
+			log(Level.FINER, "Making instances");
 			Instances instances = null;
 			
 			if(options.isUseSimilarityMatrix()){
@@ -148,10 +145,10 @@ public class NucleusClusterer extends AnalysisWorker {
 			try {
 				
 
-				fileLogger.log(Level.INFO, "Clusterer is type "+options.getType());
+				log(Level.FINER, "Clusterer is type "+options.getType());
 				for(String s : optionArray){
-					fileLogger.log(Level.FINE, "Clusterer options: "+s);
-					programLogger.log(Level.FINEST, "Clusterer options: "+s);
+//					fileLogger.log(Level.FINE, "Clusterer options: "+s);
+					log(Level.FINEST, "Clusterer options: "+s);
 				}
 				
 				
@@ -163,7 +160,7 @@ public class NucleusClusterer extends AnalysisWorker {
 					clusterer.setDistanceIsBranchLength(true);
 					clusterer.setNumClusters(1);
 					
-					programLogger.log(Level.FINEST, "Building clusterer for tree");
+					log(Level.FINEST, "Building clusterer for tree");
 					firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
 					clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
 					clusterer.setPrintNewick(true);
@@ -172,7 +169,7 @@ public class NucleusClusterer extends AnalysisWorker {
 					
 					clusterer.setNumClusters(options.getClusterNumber());
 
-					programLogger.log(Level.FINEST, "Building clusterer for clustering");
+					log(Level.FINEST, "Building clusterer for clustering");
 					clusterer.buildClusterer(instances);    // build the clusterer
 					assignClusters(clusterer, collection);		
 					
@@ -187,13 +184,13 @@ public class NucleusClusterer extends AnalysisWorker {
 				}
 
 			} catch (Exception e) {
-				fileLogger.log(Level.SEVERE, "Error in clustering", e);
-				programLogger.log(Level.SEVERE, "Error in clustering", e);
+				logError("Error in clustering", e);
+//				programLogger.log(Level.SEVERE, "Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
-			fileLogger.log(Level.SEVERE, "Error in assignments", e);
-			programLogger.log(Level.SEVERE, "Error in assignments", e);
+			logError("Error in assignments", e);
+//			programLogger.log(Level.SEVERE, "Error in assignments", e);
 			return false;
 		}
 		return true;
@@ -207,11 +204,11 @@ public class NucleusClusterer extends AnalysisWorker {
 	private void assignClusters(Clusterer clusterer, CellCollection collection){
 		try {
 			// construct new collections for each cluster
-			fileLogger.log(Level.FINE, "Assigning nuclei to clusters");
-			fileLogger.log(Level.FINE, "Clusters : "+clusterer.numberOfClusters());
+			log(Level.FINE, "Assigning nuclei to clusters");
+			log(Level.FINE, "Clusters : "+clusterer.numberOfClusters());
 
 			for(int i=0;i<clusterer.numberOfClusters();i++ ){
-				fileLogger.log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
+				log(Level.FINE, "Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
 				CellCollection clusterCollection = new CellCollection(collection.getFolder(), 
 						collection.getOutputFolderName(), 
 						collection.getName()+"_Cluster_"+i, 
@@ -236,19 +233,19 @@ public class NucleusClusterer extends AnalysisWorker {
 					if(collection.getCell(id)!=null){
 						cluster.addCell(new Cell (collection.getCell(id)));
 					} else {
-						fileLogger.log(Level.SEVERE, "Error: cell with ID "+id+" is not found");
+						log(Level.WARNING, "Error: cell with ID "+id+" is not found");
 					}
 					publish(i);
 					i++;
 				} catch(Exception e){
-					fileLogger.log(Level.SEVERE, "Error assigning instance to cluster", e);
-					programLogger.log(Level.SEVERE, "Error assigning instance to cluster", e);
+					logError("Error assigning instance to cluster", e);
+//					programLogger.log(Level.SEVERE, "Error assigning instance to cluster", e);
 				}
 				 
 			}
 		} catch (Exception e) {
-			fileLogger.log(Level.SEVERE, "Error clustering", e);
-			programLogger.log(Level.SEVERE, "Error clustering", e);
+			logError("Error clustering", e);
+//			programLogger.log(Level.SEVERE, "Error clustering", e);
 			
 		}
 	}
@@ -261,13 +258,13 @@ public class NucleusClusterer extends AnalysisWorker {
 	private Instances makeAttributesAndInstances(CellCollection collection){
 
 		// Values to cluster on: area, circularity, aspect ratio (feret/min diameter)
-		programLogger.log(Level.FINER, "Creating attributes");
+		log(Level.FINER, "Creating attributes");
 		int basicAttibuteCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? 4 : 3;
 		int attributeCount = basicAttibuteCount;
 		if(options.isIncludeModality()){
 			
 			attributeCount += options.getModalityRegions();
-			programLogger.log(Level.FINER, "Included modality");
+			log(Level.FINER, "Included modality");
 		}
 		 
 
@@ -297,13 +294,13 @@ public class NucleusClusterer extends AnalysisWorker {
 		}
 		
 		
-		programLogger.log(Level.FINER, "Created attributes");
+		log(Level.FINER, "Created attributes");
 
 		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
 
 		try{
 
-			programLogger.log(Level.FINER, "Building instances");
+			log(Level.FINER, "Building instances");
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
 
 			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT, ProfileCollectionType.FRANKEN);
@@ -314,7 +311,7 @@ public class NucleusClusterer extends AnalysisWorker {
 //			List<String> stringList = new ArrayList<String>();
 			int j=0;
 			for(Cell c : collection.getCells()){
-				programLogger.log(Level.FINEST, "Adding cell "+j);
+				log(Level.FINEST, "Adding cell "+j);
 
 				Nucleus n = c.getNucleus();
 				// instance holds data
@@ -361,10 +358,11 @@ public class NucleusClusterer extends AnalysisWorker {
 			}
 			
 			
-			programLogger.log(Level.FINER, "Built instances");
+			log(Level.FINER, "Built instances");
 		} catch(Exception e){
-			fileLogger.log(Level.SEVERE, "Error making instances", e);
-			programLogger.log(Level.SEVERE, "Error making instances", e);
+			
+			logError("Error making instances", e);
+//			programLogger.log(Level.SEVERE, "Error making instances", e);
 		}
 		return instances;
 	}
@@ -372,11 +370,11 @@ public class NucleusClusterer extends AnalysisWorker {
 	private double[][] makeSimilarityMatrix(CellCollection collection) throws Exception{
 		
 		if(collection.hasNucleusSimilarityMatrix()){
-			programLogger.log(Level.FINER, "Found existing matrix");
+			log(Level.FINER, "Found existing matrix");
 			publish(collection.size());
 			return collection.getNucleusSimilarityMatrix();
 		} else {
-			programLogger.log(Level.FINER, "Creating similarity matrix");
+			log(Level.FINER, "Creating similarity matrix");
 			double[][] matrix = new double[collection.size()][collection.size()];
 
 			List<Nucleus> nuclei = collection.getNuclei();
@@ -405,8 +403,8 @@ public class NucleusClusterer extends AnalysisWorker {
 		
 		int basicAttributeCount = collection.size();
 		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
-		programLogger.log(Level.FINE, "Building instance matrix");
-		fileLogger.log(Level.FINE, "Building instance matrix");
+//		programLogger.log(Level.FINE, "Building instance matrix");
+		log(Level.FINE, "Building instance matrix");
 		
 		FastVector attributes = new FastVector(attributeCount);
 		for(int i=0; i<attributeCount; i++){
@@ -459,11 +457,9 @@ public class NucleusClusterer extends AnalysisWorker {
 			}
 
 		} catch(Exception e){
-			fileLogger.log(Level.SEVERE, "Error making instances", e);
-			programLogger.log(Level.SEVERE, "Error making instances", e);
+			logError("Error making instances", e);
 		}
-		fileLogger.log(Level.FINE, "Instance matrix: "+instances.toSummaryString());
-//		programLogger.log(Level.FINEST, "Instance matrix: "+instances.toSummaryString());
+//		log(Level.FINEST, "Instance matrix: "+instances.toSummaryString());
 		return instances;
 	}
 

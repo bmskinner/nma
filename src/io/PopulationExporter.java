@@ -32,65 +32,64 @@ import java.util.logging.Logger;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
+import analysis.AnalysisWorker;
 import components.CellCollection;
 import components.nuclei.Nucleus;
 
-public class PopulationExporter {
+public class PopulationExporter extends AnalysisWorker {
 	
-	private static Logger logger;
-
-	public static boolean savePopulation(AnalysisDataset dataset){
-
+	private File saveFile = null;
+	
+	public PopulationExporter(AnalysisDataset dataset, File saveFile, Logger programLogger) {
+		super(dataset, programLogger);		
+		this.saveFile = saveFile;
+		this.setProgressTotal(1);
+	}
+	
+	public PopulationExporter(AnalysisDataset dataset, Logger programLogger) {
+		super(dataset, programLogger);
 		CellCollection collection = dataset.getCollection();
-		logger = Logger.getLogger(PopulationExporter.class.getName());
-		logger.addHandler(dataset.getLogHandler());
-//		logger = new Logger(collection.getDebugFile(), "PopulationExporter");
+		this.saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
+		this.setProgressTotal(1);
+		
+	}
+	
+	@Override
+	protected Boolean doInBackground() throws Exception {
+		
+//		boolean result = false;
+//		CellCollection collection = this.getDataset().getCollection();
+		
+		if(saveAnalysisDataset(getDataset(), saveFile)){
+			publish(1);
+			return true;
+		} else{
+			return false;
+		}
+		
+	}
 
-//		try{
+//	private static Logger logger;
 
-			
-		File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
+	public boolean savePopulation(AnalysisDataset dataset){
+
+//		CellCollection collection = dataset.getCollection();
+//		logger = Logger.getLogger(PopulationExporter.class.getName());
+//		logger.addHandler(dataset.getLogHandler());
+		//		logger = new Logger(collection.getDebugFile(), "PopulationExporter");
+
+		//		try{
+
+
+//		File saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
 		if(saveFile.exists()){
 			saveFile.delete();
 		}
-		logger.log(Level.INFO, "Saving to "+saveFile.getAbsolutePath());
+		log(Level.INFO, "Saving to "+saveFile.getAbsolutePath());
 
 		boolean result = saveAnalysisDataset(dataset, saveFile);
 
-//			try{
-//				//use buffering
-//				OutputStream file = new FileOutputStream(saveFile);
-//				OutputStream buffer = new BufferedOutputStream(file);
-//				ObjectOutputStream output = new ObjectOutputStream(buffer);
-//
-//				try{
-//
-//					output.writeObject(collection);
-//			
-//
-//					logger.log(Level.INFO, "Save complete");
-//
-//				} catch(IOException e){
-//					logger.error("Unable to save nuclei", e);
-//					throw new Exception("Individual nucleus error: "+e.getMessage());
-//
-//				} finally{
-//					output.close();
-//					buffer.close();
-//					file.close();
-//				}
-//
-//			} catch(Exception e){
-//				logger.error("Error saving", e);
-//				return false;
-//			}
-			return result;
-			
-//		} catch(Exception e){
-//			logger.error("Error saving", e);
-//			return false;
-//		}
-//		return true;
+		return result;
 	}
 	
 	/**
@@ -99,15 +98,15 @@ public class PopulationExporter {
 	 * @param saveFile the file to save as
 	 * @return
 	 */
-	public static boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
+	public boolean saveAnalysisDataset(AnalysisDataset dataset, File saveFile){
 //		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
-		CellCollection collection = dataset.getCollection();
-		logger = Logger.getLogger(PopulationExporter.class.getName());
-		logger.addHandler(dataset.getLogHandler());
+//		CellCollection collection = dataset.getCollection();
+//		logger = Logger.getLogger(PopulationExporter.class.getName());
+//		logger.addHandler(dataset.getLogHandler());
 
 		try{
 			// Since we're creating a save format, go with nmd: Nuclear Morphology Dataset
-			logger.log(Level.INFO, "Saving dataset to "+saveFile.getAbsolutePath());
+			log(Level.INFO, "Saving dataset to "+saveFile.getAbsolutePath());
 
 			try{
 				//use buffering
@@ -118,10 +117,10 @@ public class PopulationExporter {
 				try{
 
 					output.writeObject(dataset);
-					logger.log(Level.INFO, "Save complete");
+					log(Level.INFO, "Save complete");
 
 				} catch(IOException e){
-					logger.log(Level.SEVERE, "Unable to save dataset", e);
+					logError("Unable to save dataset", e);
 
 				} finally{
 					output.close();
@@ -130,12 +129,12 @@ public class PopulationExporter {
 				}
 
 			} catch(Exception e){
-				logger.log(Level.SEVERE, "Error saving", e);
+				logError("Error saving dataset", e);
 				return false;
 			}
 			
 		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error saving", e);
+			logError("Error saving dataset", e);
 			return false;
 		}
 		return true;
@@ -149,8 +148,8 @@ public class PopulationExporter {
 	public static boolean saveAnalysisDataset(AnalysisDataset dataset){
 
 //		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
-		logger = Logger.getLogger(PopulationExporter.class.getName());
-		logger.addHandler(dataset.getLogHandler());
+//		logger = Logger.getLogger(PopulationExporter.class.getName());
+//		logger.addHandler(dataset.getLogHandler());
 
 		try{
 
@@ -158,51 +157,72 @@ public class PopulationExporter {
 			if(saveFile.exists()){
 				saveFile.delete();
 			}
-			saveAnalysisDataset(dataset, saveFile);
+			try{
+				//use buffering
+				OutputStream file = new FileOutputStream(saveFile);
+				OutputStream buffer = new BufferedOutputStream(file);
+				ObjectOutputStream output = new ObjectOutputStream(buffer);
+
+				try{
+
+					output.writeObject(dataset);
+
+				} catch(IOException e){
+
+
+				} finally{
+					output.close();
+					buffer.close();
+					file.close();
+				}
+
+			} catch(Exception e){
+
+				return false;
+			}
 						
 		} catch(Exception e){
-			logger.log(Level.SEVERE, "Error saving", e);
 			return false;
 		}
 		return true;
 	}
 	
-	public static boolean extractNucleiToFolder(AnalysisDataset dataset, File exportFolder){
-//		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
-		logger = Logger.getLogger(PopulationExporter.class.getName());
-		logger.addHandler(dataset.getLogHandler());
-
-		try{
-
-			logger.log(Level.INFO, "Extracting nuclei to "+exportFolder.getAbsolutePath());
-
-			for(Nucleus n : dataset.getCollection().getNuclei()){
-
-				// get the path to the enlarged image
-				File imagePath = new File(n.getEnlargedImagePath());
-
-				// trim the name back to image name and number
-				String imageName = n.getImageName();
-				if(imageName.endsWith(".tiff")){
-					imageName = imageName.replace(".tiff", "");
-				}
-				
-				File newPath = new File(exportFolder+File.separator+n.getImageName()+"-"+n.getNucleusNumber()+".tiff");
-
-				if(imagePath.exists()){		
-					
-					copyFile(imagePath, newPath);
-
-				}
-			}
-
-		}catch(Exception e){
-			logger.log(Level.SEVERE, "Error extracting", e);
-			return false;
-		}
-		return true;
-
-	}
+//	public static boolean extractNucleiToFolder(AnalysisDataset dataset, File exportFolder){
+////		logger = new Logger(dataset.getDebugFile(), "PopulationExporter");
+////		logger = Logger.getLogger(PopulationExporter.class.getName());
+////		logger.addHandler(dataset.getLogHandler());
+//
+//		try{
+//
+//			logger.log(Level.INFO, "Extracting nuclei to "+exportFolder.getAbsolutePath());
+//
+//			for(Nucleus n : dataset.getCollection().getNuclei()){
+//
+//				// get the path to the enlarged image
+//				File imagePath = new File(n.getEnlargedImagePath());
+//
+//				// trim the name back to image name and number
+//				String imageName = n.getImageName();
+//				if(imageName.endsWith(".tiff")){
+//					imageName = imageName.replace(".tiff", "");
+//				}
+//				
+//				File newPath = new File(exportFolder+File.separator+n.getImageName()+"-"+n.getNucleusNumber()+".tiff");
+//
+//				if(imagePath.exists()){		
+//					
+//					copyFile(imagePath, newPath);
+//
+//				}
+//			}
+//
+//		}catch(Exception e){
+//			logger.log(Level.SEVERE, "Error extracting", e);
+//			return false;
+//		}
+//		return true;
+//
+//	}
 	
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
 	    if(!destFile.exists()) {
@@ -226,4 +246,6 @@ public class PopulationExporter {
 	        }
 	    }
 	}
+
+
 }

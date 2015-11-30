@@ -204,7 +204,9 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 
 				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
 //					logger.log("Saving dataset", utility.Logger.DEBUG);
-					PopulationExporter.saveAnalysisDataset(dataset);
+					new SaveDatasetAction(dataset, "Saving dataset", "Error saving dataset", mw);
+//					
+//					PopulationExporter.saveAnalysisDataset(dataset);
 				}
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){

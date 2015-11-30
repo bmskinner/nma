@@ -27,6 +27,7 @@ import gui.actions.MergeCollectionAction;
 import gui.actions.MorphologyAnalysisAction;
 import gui.actions.RefoldNucleusAction;
 import gui.actions.NewAnalysisAction;
+import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
@@ -374,9 +375,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				for(AnalysisDataset d : populationsPanel.getRootDatasets()){
 					if(d.isRoot()){
 						programLogger.log(Level.INFO, "Saving dataset "+d.getCollection().getName()+"...");
-						PopulationExporter.saveAnalysisDataset(d);
+						
+						new SaveDatasetAction(d, "Saving dataset", "Error saving dataset", MainWindow.this);
+						
+//						PopulationExporter.saveAnalysisDataset(d);
 //						d.save();
-						programLogger.log(Level.INFO, "OK");
+						programLogger.log(Level.INFO, "Saved dataset OK");
 					}
 				}
 				programLogger.log(Level.INFO, "All root datasets saved");
@@ -875,12 +879,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						File saveFile = new File(folderName+File.separator+fileName);
 
 						programLogger.log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
-						boolean ok = PopulationExporter.saveAnalysisDataset(selectedDataset, saveFile);
-						if(ok){
-							programLogger.log(Level.INFO, "OK");
-						} else {
-							programLogger.log(Level.INFO, "Error");
-						}
+						new SaveDatasetAction(selectedDataset, saveFile, "Saving dataset", "Error saving dataset", MainWindow.this);
+//						boolean ok = PopulationExporter.saveAnalysisDataset(selectedDataset, saveFile);
+//						if(ok){
+//							programLogger.log(Level.INFO, "OK");
+//						} else {
+//							programLogger.log(Level.INFO, "Error");
+//						}
 					}
 				}
 			};
@@ -889,37 +894,37 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 		}
 		
-		if(event.type().equals("ExtractNucleiAction")){
-			Thread thr = new Thread() {
-        		public void run() {
-
-        			DirectoryChooser openDialog = new DirectoryChooser("Select directory to export images...");
-        			String folderName = openDialog.getDirectory();
-
-        			if(folderName==null){
-        				return; // user cancelled
-        			}
-
-        			File folder =  new File(folderName);
-
-        			if(!folder.isDirectory() ){
-        				return;
-        			}
-        			if(!folder.exists()){
-        				return; // check folder is ok
-        			}
-
-        			programLogger.log(Level.INFO, "Extracting nuclei from collection...");
-        			boolean ok = PopulationExporter.extractNucleiToFolder(selectedDataset, folder);
-        			if(ok){ 
-        				programLogger.log(Level.INFO, "OK");
-        			} else {
-        				programLogger.log(Level.INFO, "Error");
-        			}
-        		}
-        	};
-        	thr.start();
-		}
+//		if(event.type().equals("ExtractNucleiAction")){
+//			Thread thr = new Thread() {
+//        		public void run() {
+//
+//        			DirectoryChooser openDialog = new DirectoryChooser("Select directory to export images...");
+//        			String folderName = openDialog.getDirectory();
+//
+//        			if(folderName==null){
+//        				return; // user cancelled
+//        			}
+//
+//        			File folder =  new File(folderName);
+//
+//        			if(!folder.isDirectory() ){
+//        				return;
+//        			}
+//        			if(!folder.exists()){
+//        				return; // check folder is ok
+//        			}
+//
+//        			programLogger.log(Level.INFO, "Extracting nuclei from collection...");
+//        			boolean ok = PopulationExporter.extractNucleiToFolder(selectedDataset, folder);
+//        			if(ok){ 
+//        				programLogger.log(Level.INFO, "OK");
+//        			} else {
+//        				programLogger.log(Level.INFO, "Error");
+//        			}
+//        		}
+//        	};
+//        	thr.start();
+//		}
 		
 		if(event.type().equals("ChangeNucleusFolderAction")){
 			new ReplaceNucleusFolderAction();
@@ -1121,7 +1126,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 		case SAVE_ROOT:
 			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-				PopulationExporter.saveAnalysisDataset(root);
+				new SaveDatasetAction(root, "Saving dataset", "Error saving dataset", MainWindow.this);
+//				
+//				PopulationExporter.saveAnalysisDataset(root);
 			}
 			break;
 			

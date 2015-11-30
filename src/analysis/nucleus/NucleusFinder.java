@@ -66,8 +66,8 @@ public class NucleusFinder {
 	 * @throws Exception 
 	 */
 	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, File sourceFile, String outputFolderName) throws Exception{
-//		logger = new Logger(logfile, "NucleusFinder");
 		NucleusFinder.programLogger = programLogger;
+
 		NucleusFinder.fileLogger = null;
 		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
 		return result;

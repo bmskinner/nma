@@ -35,10 +35,7 @@ public class DebugFileFormatter extends Formatter {
 				 + "\t" 
 				 + record.getLoggerName()
 				 + "\t"
-				 + record.getMessage() 
-				 + " in "
-				 +record.getSourceMethodName()
-				 + "()" 
+				 + record.getMessage()
 				 + "\r\n";
 		 
 		 	if(record.getLevel()==Level.SEVERE){
