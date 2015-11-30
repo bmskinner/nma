@@ -190,5 +190,29 @@ public class ProfileTest {
 		}
 		
 	}
+	
+	@Test
+	public void sortedValuesShouldReturnCorrectOrder(){
+		double[] data       = { 10, 5, 1, 2, 7, 19, 12, 3 };
+		double[] expected   = {  2, 3, 7, 1, 4,  0,  6, 5 };
+		
+		Profile tester = new Profile(data);
+		
+		Profile result = null;
+		try{
+			result = tester.getSortedIndexes();
+		} catch(Exception e){
+			System.out.println("Error getting sorted values: "+e.getMessage());
+			fail("Interpolation failed");
+		}
+		
+		double[] output = result.asArray();	
+		
+		for( int i =0;i<expected.length; i++){
+//			System.out.println(output[i]+" should be "+expected[i]);
+			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
+		}
+		
+	}
 
 }

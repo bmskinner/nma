@@ -20,6 +20,7 @@ package analysis.nucleus;
 
 import stats.DipTester;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import utility.Constants;
+import utility.Utils;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
 import weka.clusterers.HierarchicalClusterer;
@@ -333,23 +335,64 @@ public class NucleusClusterer extends AnalysisWorker {
 					
 					Profile p = n.getAngleProfile(BorderTag.REFERENCE_POINT);
 					Profile interpolated = p.interpolate(medianProfile.size());
+					
+					/*
+					 * We now have an interpolated profile matching the length of the 
+					 * median profile of the collection. The lowestPvalueIndex should now
+					 * correspond to the correct point in the interpolated profile.
+					 */
+					List<Integer> previousValues = new ArrayList<Integer>();
 
-					for(int i=0; i<options.getModalityRegions(); i++){
-						
+					for(int i=0; i<indexes.size(); i++){
 						int index = (int) indexes.get(i);
+						log(Level.FINEST, "Testing p-value index "+i+": "+index);
+						// Stop picking values if we have enough modalilty regions
+						if(previousValues.size()>=options.getModalityRegions()){
+							log(Level.FINEST, "Found enough modality points");
+							break;
+						}
+//					for(int i=0; i<options.getModalityRegions(); i++){
 						
-						Attribute att = (Attribute) attributes.elementAt(i+basicAttibuteCount);
-						inst.setValue(att, interpolated.get(index));
+						
+						// check that each value is not too close to the previous
+						// values in the profile						
+						boolean ok = true;
+						
+						if(!previousValues.isEmpty()){
+							
+							for(int testIndex = -n.getAngleProfileWindowSize(); testIndex<n.getAngleProfileWindowSize();testIndex++){
+
+								// Get the values wrapped to the array for testing
+								int offsetTestIndex = Utils.wrapIndex(index + testIndex, p.size());
+
+								for(int prev : previousValues){
+
+									if(prev == offsetTestIndex){
+										log(Level.FINEST, "Existing index "+prev+" is within window of "+index);
+										ok=false; // too close to a previous value
+									}
+								}
+
+							}
+						}
+						
+						if(ok){
+							Attribute att = (Attribute) attributes.elementAt(previousValues.size()+basicAttibuteCount);
+							inst.setValue(att, interpolated.get(index));
+							log(Level.FINEST, "Added modality index "+previousValues.size()+": "+index);
+							previousValues.add(index);
+							
+						}
+						
+						
+						
 					}
+					log(Level.FINEST, "Found "+previousValues.size()+" usable modality points");
 				}
 				
 				
 				
-				/*
-				 * We now have an interpolated profile matching the length of the 
-				 * median profile of the collection. The lowestPvalueIndex should now
-				 * correspond to the correct point in the interpolated profile.
-				 */
+				
 
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());
@@ -362,7 +405,6 @@ public class NucleusClusterer extends AnalysisWorker {
 		} catch(Exception e){
 			
 			logError("Error making instances", e);
-//			programLogger.log(Level.SEVERE, "Error making instances", e);
 		}
 		return instances;
 	}
