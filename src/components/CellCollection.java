@@ -1151,17 +1151,32 @@ public class CellCollection implements Serializable {
 	  }
   }
   
-  public void updateSourceFolder(File newFolder){
+  public boolean updateSourceFolder(File newFolder) throws Exception{
 		File oldFile = this.getFolder();
+		boolean ok = false;
 
 		if(newFolder.exists()){
-			this.folder = newFolder;
 			
-			for(Nucleus n : this.getNuclei()){
-				n.updateSourceFolder(newFolder);
+			try {
+				this.folder = newFolder;
+
+				for(Nucleus n : this.getNuclei()){
+					n.updateSourceFolder(newFolder);
+				}
+				ok = true;
+				
+			} catch (Exception e){
+				// one of the nuclei failed to update
+				// reset all to previous
+				this.folder = oldFile;
+
+				for(Nucleus n : this.getNuclei()){
+					n.updateSourceFolder(oldFile);
+				}
+				ok = false;
 			}
 		}
-
+		return ok;
 	}
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

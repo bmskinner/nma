@@ -670,6 +670,7 @@ public interface Nucleus {
 	/**
 	 * Update the image source folder to the given new folder
 	 * @param newFolder
+	 * @throws Exception 
 	 */
-	public void updateSourceFolder(File newFolder);
+	public void updateSourceFolder(File newFolder) throws Exception;
 }

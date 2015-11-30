@@ -1333,7 +1333,7 @@ public class RoundNucleus
 		}
 	}
 	
-	public void updateSourceFolder(File newFolder){
+	public void updateSourceFolder(File newFolder) throws Exception {
 		File oldFile = this.getSourceFile();
 		String oldName = oldFile.getName();
 		File newFile = new File(newFolder+File.separator+oldName);
@@ -1341,7 +1341,7 @@ public class RoundNucleus
 			this.setSourceFile(newFile);
 			this.setNucleusFolder(new File(this.getOutputFolder().getAbsolutePath()+File.separator+this.getImageNameWithoutExtension()));
 		} else {
-			throw new IllegalArgumentException("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
+			throw new Exception("Cannot find file "+oldName+" in folder "+newFolder.getAbsolutePath());
 		}
 		
 	}
