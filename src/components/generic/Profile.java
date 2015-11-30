@@ -203,7 +203,11 @@ public class Profile implements Serializable {
 	 * @return an array of values
 	 */
 	public double[] asArray(){
-		return this.array;
+		double[] result = new double[this.size()];
+		for(int i=0;i<result.length; i++){
+			result[i] = this.array[i];
+		}
+		return result;
 	}
   
 	
@@ -1097,15 +1101,21 @@ public Profile calculateDeltas(int windowSize){
 	  double[] sorted = this.asArray();
 	  Arrays.sort(sorted);
 	  
-	  double[]indexes = new double[this.size()];
+	  double[]indexes = new double[sorted.length];
 	  
+	  // Go through each index in the sorted list
 	  for(int index=0; index<sorted.length; index++){
 		  
-		  for(int i=0; i<this.size(); i++){
-			  double value = this.get(i);
+		  double value = sorted[index];
+		  // Go through each index in the original array
+		  for(int originalIndex=0; originalIndex<sorted.length; originalIndex++){
 			  
-			  if(value==sorted[index]){
-				  indexes[index] = i;
+			  
+			  // If the value in the profile is the value at the original index,
+			  // save the original index
+			  if(value==this.get(originalIndex)){
+				  System.out.println("Found value "+value+" at original index "+originalIndex);
+				  indexes[index] = (double) originalIndex;
 				  break;
 			  }
 		  }

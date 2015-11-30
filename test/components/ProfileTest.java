@@ -197,6 +197,7 @@ public class ProfileTest {
 		double[] expected   = {  2, 3, 7, 1, 4,  0,  6, 5 };
 		
 		Profile tester = new Profile(data);
+		System.out.println(tester.toString());
 		
 		Profile result = null;
 		try{

@@ -252,6 +252,51 @@ public class NucleusClusterer extends AnalysisWorker {
 		}
 	}
 	
+	private List<Integer> getModalityIndexes(Profile indexes, int windowSize){
+		List<Integer> previousValues = new ArrayList<Integer>();
+
+		for(int i=0; i<indexes.size(); i++){
+			int index = (int) indexes.get(i);
+			log(Level.FINEST, "Testing p-value index "+i+": "+index);
+			// Stop picking values if we have enough modalilty regions
+			if(previousValues.size()>=options.getModalityRegions()){
+				log(Level.FINEST, "Found enough modality points");
+				break;
+			}		
+			
+			// check that each value is not too close to the previous
+			// values in the profile						
+			boolean ok = true;
+			
+			if(!previousValues.isEmpty()){
+				
+				for(int testIndex = -windowSize; testIndex<windowSize;testIndex++){
+
+					// Get the values wrapped to the array for testing
+					int offsetTestIndex = Utils.wrapIndex(index + testIndex, indexes.size());
+
+					for(int prev : previousValues){
+
+						if(prev == offsetTestIndex){
+							log(Level.FINEST, "Existing index "+prev+" is within window of "+index);
+							ok=false; // too close to a previous value
+						}
+					}
+
+				}
+			}
+			
+			if(ok){
+				log(Level.FINEST, "Added modality index "+previousValues.size()+": "+index);
+				previousValues.add(index);
+				
+			}
+
+		}
+		log(Level.FINEST, "Found "+previousValues.size()+" usable modality points");
+		return previousValues;
+	}
+	
  	/**
  	 * Make the attributes on which to cluster, and build the Weka instances used internally
  	 * @param collection the collection to cluster
@@ -309,8 +354,11 @@ public class NucleusClusterer extends AnalysisWorker {
 			Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 			Profile indexes = pvals.getSortedIndexes();
 			
+
+			List<Integer> modalityIndexes = getModalityIndexes(indexes, collection.getNuclei().get(0).getAngleProfileWindowSize());
+
 			// create Instance for each nucleus and add to Instances
-//			List<String> stringList = new ArrayList<String>();
+			//			List<String> stringList = new ArrayList<String>();
 			int j=0;
 			for(Cell c : collection.getCells()){
 				log(Level.FINEST, "Adding cell "+j);
@@ -324,86 +372,35 @@ public class NucleusClusterer extends AnalysisWorker {
 				inst.setValue(area, n.getArea());
 				inst.setValue(circularity, n.getCircularity());
 				inst.setValue(aspect, n.getAspectRatio());
-//				stringList.add(n.getNameAndNumber());
+				//				stringList.add(n.getNameAndNumber());
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					inst.setValue(name,  n.getNameAndNumber());
 				}
-				
-				
-				
+
+
+
 				if(options.isIncludeModality()){
-					
+
 					Profile p = n.getAngleProfile(BorderTag.REFERENCE_POINT);
 					Profile interpolated = p.interpolate(medianProfile.size());
-					
-					/*
-					 * We now have an interpolated profile matching the length of the 
-					 * median profile of the collection. The lowestPvalueIndex should now
-					 * correspond to the correct point in the interpolated profile.
-					 */
-					List<Integer> previousValues = new ArrayList<Integer>();
 
-					for(int i=0; i<indexes.size(); i++){
-						int index = (int) indexes.get(i);
-						log(Level.FINEST, "Testing p-value index "+i+": "+index);
-						// Stop picking values if we have enough modalilty regions
-						if(previousValues.size()>=options.getModalityRegions()){
-							log(Level.FINEST, "Found enough modality points");
-							break;
-						}
-//					for(int i=0; i<options.getModalityRegions(); i++){
-						
-						
-						// check that each value is not too close to the previous
-						// values in the profile						
-						boolean ok = true;
-						
-						if(!previousValues.isEmpty()){
-							
-							for(int testIndex = -n.getAngleProfileWindowSize(); testIndex<n.getAngleProfileWindowSize();testIndex++){
+					for(int index=0; index<modalityIndexes.size(); index++){
 
-								// Get the values wrapped to the array for testing
-								int offsetTestIndex = Utils.wrapIndex(index + testIndex, p.size());
+						Attribute att = (Attribute) attributes.elementAt(index+basicAttibuteCount);
+						inst.setValue(att, interpolated.get(modalityIndexes.get(index)));
 
-								for(int prev : previousValues){
-
-									if(prev == offsetTestIndex){
-										log(Level.FINEST, "Existing index "+prev+" is within window of "+index);
-										ok=false; // too close to a previous value
-									}
-								}
-
-							}
-						}
-						
-						if(ok){
-							Attribute att = (Attribute) attributes.elementAt(previousValues.size()+basicAttibuteCount);
-							inst.setValue(att, interpolated.get(index));
-							log(Level.FINEST, "Added modality index "+previousValues.size()+": "+index);
-							previousValues.add(index);
-							
-						}
-						
-						
-						
 					}
-					log(Level.FINEST, "Found "+previousValues.size()+" usable modality points");
+
+					instances.add(inst);
+					cellToInstanceMap.put(inst, c.getId());
+					publish(j++);
+
 				}
-				
-				
-				
-				
-
-				instances.add(inst);
-				cellToInstanceMap.put(inst, c.getId());
-				publish(j++);
-
 			}
-			
-			
+
 			log(Level.FINER, "Built instances");
 		} catch(Exception e){
-			
+
 			logError("Error making instances", e);
 		}
 		return instances;
