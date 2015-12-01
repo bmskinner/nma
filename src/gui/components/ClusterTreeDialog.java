@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import components.Cell;
@@ -40,6 +41,8 @@ import components.CellCollection;
 import components.ClusterGroup;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
+import analysis.ClusteringOptions;
+import analysis.ClusteringOptions.ClusteringMethod;
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.NewickImporter;
@@ -132,7 +135,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		for(AnalysisDataset d: dataset.getChildDatasets()){
 			selectedClusterBox.addItem(d);
 		}
-		selectedClusterBox.setSelectedItem(dataset);
+		selectedClusterBox.setSelectedIndex(-1);
 		selectedClusterBox.addItemListener(this);
 		panel.add(selectedClusterBox);
 		
@@ -151,7 +154,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 	 * Update the taxon colours to match their cluster
 	 * @param cluster the dataset of nuclei in the cluster
 	 */
-	private void colourTreeNodesByCluster(AnalysisDataset cluster){
+	private void colourTreeNodesByCluster(CellCollection cluster){
 
 		if(cluster!=null){
 			
@@ -166,7 +169,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 
 					String name = t.getName();
 
-					for(Nucleus nucleus : cluster.getCollection().getNuclei()){
+					for(Nucleus nucleus : cluster.getNuclei()){
 						if(nucleus.getNameAndNumber().equals(name)){
 							clusterMemberships.put(n, Color.BLACK);
 						}
@@ -284,6 +287,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			}
 			
 			if(clusterCollection.hasCells()){
+				colourTreeNodesByCluster(clusterCollection);
 				clusterList.add(clusterCollection);
 				programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
 			} else {
@@ -307,6 +311,68 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 					list.add(clusterDataset);
 				}
 			}
+			
+			/*
+			 * Offer to put the datasets into a cluster group if conditions are met
+			 */
+			if(!list.isEmpty()){
+				
+				// Check that a cell is not present in more than one cluster
+				List<UUID> cellIDsFound = new ArrayList<UUID>();
+				boolean clash = false;
+				for(AnalysisDataset d : list){
+					for(Cell c : d.getCollection().getCells()){
+						if(cellIDsFound.contains(c.getId())){
+							clash=true;
+						}
+						cellIDsFound.add(c.getId());
+					}
+				}
+				
+				// Check that all cells belong to a cluster
+				boolean coveredAll = true;
+				for(Cell c : dataset.getCollection().getCells()){
+					if(!cellIDsFound.contains(c.getId())){
+						coveredAll=false;
+					}
+				}
+				
+				if( !clash && coveredAll){
+					// Offer to make a cluster group
+					int option = JOptionPane.showOptionDialog(null, 
+							"Put the new clusters into a cluster group?", 
+							"Create cluster group", 
+							JOptionPane.OK_CANCEL_OPTION, 
+							JOptionPane.QUESTION_MESSAGE, null, null, null);
+					
+					if (option == JOptionPane.CANCEL_OPTION) {
+						// Cancelled
+						programLogger.log(Level.INFO, "Adding standard manual clusters");
+					} else if (option == JOptionPane.OK_OPTION)	{
+						// Make the group
+						
+						int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+						programLogger.log(Level.INFO, "Creating cluster group "+clusterNumber);
+
+						ClusteringOptions newOptions = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
+						newOptions.setClusterNumber(list.size());
+						newOptions.setHierarchicalMethod(group.getOptions().getHierarchicalMethod());
+						newOptions.setIncludeModality(group.getOptions().isIncludeModality());
+						newOptions.setModalityRegions(group.getOptions().getModalityRegions());
+						newOptions.setUseSimilarityMatrix(group.getOptions().isUseSimilarityMatrix());
+						ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
+						
+						for(AnalysisDataset d : list){
+							newGroup.addDataset(d);
+						}
+						dataset.addClusterGroup(newGroup);
+						
+					}
+				}
+				
+			}
+			
+			
 			
 			if(!list.isEmpty()){
 				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
@@ -345,7 +411,8 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			selectedClusterGroupBox.removeItemListener(this);
 			selectedClusterGroupBox.setSelectedIndex(-1);
 			selectedClusterGroupBox.addItemListener(this);
-			colourTreeNodesByCluster((AnalysisDataset) selectedClusterBox.getSelectedItem());
+			AnalysisDataset selected = (AnalysisDataset) selectedClusterBox.getSelectedItem();
+			colourTreeNodesByCluster(selected.getCollection());
 			
 		}
 		
