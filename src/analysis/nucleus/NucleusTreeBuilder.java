@@ -295,12 +295,12 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 						inst.setValue(att, interpolated.get(modalityIndexes.get(index)));
 
 					}
-
-					instances.add(inst);
-					cellToInstanceMap.put(inst, c.getId());
-					publish(j++);
-
 				}
+
+				instances.add(inst);
+				cellToInstanceMap.put(inst, c.getId());
+				publish(j++);
+
 			}
 
 			log(Level.FINER, "Built instances");

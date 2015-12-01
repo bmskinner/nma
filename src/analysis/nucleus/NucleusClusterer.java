@@ -206,7 +206,6 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 					UUID id = cellToInstanceMap.get(inst);
 
 					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
-					//			 IJ.log("instance "+index+" is in cluster "+ clusterNumber)  ; //       #pretty print results
 					CellCollection cluster = clusterMap.get(clusterNumber);
 
 					// should never be null
@@ -219,14 +218,11 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 					i++;
 				} catch(Exception e){
 					logError("Error assigning instance to cluster", e);
-//					programLogger.log(Level.SEVERE, "Error assigning instance to cluster", e);
 				}
 				 
 			}
 		} catch (Exception e) {
-			logError("Error clustering", e);
-//			programLogger.log(Level.SEVERE, "Error clustering", e);
-			
+			logError("Error clustering", e);			
 		}
 	}
 	

@@ -371,6 +371,7 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 				options.setIncludeModality(useModalityCheckBox.isSelected());
 				if(useModalityCheckBox.isSelected()){
 					modalityPointsSpinner.setEnabled(true);
+					options.setModalityRegions(  (Integer) modalityPointsSpinner.getValue());
 				} else {
 					modalityPointsSpinner.setEnabled(false);
 				}
@@ -383,8 +384,13 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 					useModalityCheckBox.setEnabled(false);
 					modalityPointsSpinner.setEnabled(false);
 				} else {
+					
 					useModalityCheckBox.setEnabled(true);
-					modalityPointsSpinner.setEnabled(true);
+					if(useModalityCheckBox.isSelected()){
+						modalityPointsSpinner.setEnabled(true);
+					} else {
+						modalityPointsSpinner.setEnabled(false);
+					}
 				}
 				
 			} 
