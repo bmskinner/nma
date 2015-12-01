@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.dialogs;
 
+import gui.Labels;
 import gui.MainWindow;
 import ij.IJ;
 
@@ -194,13 +195,18 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupWindow.DEFAULT_HIERARCHICAL_METHOD);
 		hierarchicalClusterMethodCheckBox.addActionListener(this);
 		
-		labels.add(new JLabel("Cluster method"));
+		
+		JLabel clusterLabel = new JLabel("Cluster method");
+		clusterLabel.setToolTipText(Labels.HIERARCHICAL_CLUSTER_METHOD);
+		labels.add(clusterLabel);
 		fields.add(hierarchicalClusterMethodCheckBox);
 
 		useModalityCheckBox = new JCheckBox("");
 		useModalityCheckBox.setSelected(ClusteringSetupWindow.DEFAULT_USE_MODALITY);
 		useModalityCheckBox.addChangeListener(this);
-		labels.add(new JLabel("Include modality"));
+		JLabel modalityLabel = new JLabel("Include modality");
+		modalityLabel.setToolTipText(Labels.USE_MODALITY_REGIONS);
+		labels.add(modalityLabel);
 		fields.add(useModalityCheckBox);
 
 		SpinnerModel model =
@@ -213,14 +219,17 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		modalityPointsSpinner.addChangeListener(this);
 		modalityPointsSpinner.setEnabled(ClusteringSetupWindow.DEFAULT_USE_MODALITY);
 		
-		
-		labels.add(new JLabel("Modality points"));
+		JLabel modalityPoints = new JLabel("Modality points");
+		modalityPoints.setToolTipText(Labels.NUMBER_MODALITY_REGIONS);
+		labels.add(modalityPoints);
 		fields.add(modalityPointsSpinner);
 		
 		useSimilarityMatrixCheckBox = new JCheckBox("");
 	    useSimilarityMatrixCheckBox.addChangeListener(this);
 	    
-	    labels.add(new JLabel("Use similarity matrix"));
+	    JLabel similarityLabel = new JLabel("Use similarity matrix");
+	    similarityLabel.setToolTipText(Labels.USE_SIMILARITY_MATRIX);
+		labels.add(similarityLabel);
 		fields.add(useSimilarityMatrixCheckBox);
 		
 		this.addLabelTextRows(labels, fields, layout, panel);

@@ -1,7 +1,15 @@
 package gui;
 
+/**
+ * Hold tool tip labels for the various options panels
+ * @author bms41
+ *
+ */
 public class Labels {
 
+	/*
+	 * signal detection
+	 */
 	public static final String FORWARD_THRESHOLDING_RADIO_LABEL = "Take all objects with pixels over the threshold, meeting the size requirements. If there is a lot of bright background, it can mistake this for signal.";
 
 	public static final String REVERSE_THRESHOLDING_RADIO_LABEL = "Starts with the brightest pixels (intensity 255), and tries to detect objects meeting size and shape criteria. If it fails, it looks at pixels with intensity 254 or above. "
@@ -20,4 +28,17 @@ public class Labels {
 	
 	public static final String MINIMUM_SIGNAL_AREA = "The smallest number of pixels a signal can contain";
 	public static final String MAXIMUM_SIGNAL_FRACTION = "The largest size of a signal, as a fraction of the nuclear area (0-1)";
+
+
+	/*
+	 * Clustering and tree building
+	 */
+	public static final String HIERARCHICAL_CLUSTER_METHOD = "The hierarchical clustering algorithm to run";
+	public static final String USE_MODALITY_REGIONS = "Should profile angles with the lowest dip-test p-values\n"
+			+ "be used in the clustering";
+	public static final String NUMBER_MODALITY_REGIONS = "The number of dip-test p-values to "
+			+ "be used in the clustering";
+	public static final String USE_SIMILARITY_MATRIX = "If selected, use the difference between each nucleus profile\n"
+			+ "and every other nucleus for clustering. Otherwise, use area, circularity and aspect ratio";
+
 }
