@@ -312,67 +312,8 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 				}
 			}
 			
-			/*
-			 * Offer to put the datasets into a cluster group if conditions are met
-			 */
-			if(!list.isEmpty()){
-				
-				// Check that a cell is not present in more than one cluster
-				List<UUID> cellIDsFound = new ArrayList<UUID>();
-				boolean clash = false;
-				for(AnalysisDataset d : list){
-					for(Cell c : d.getCollection().getCells()){
-						if(cellIDsFound.contains(c.getId())){
-							clash=true;
-						}
-						cellIDsFound.add(c.getId());
-					}
-				}
-				
-				// Check that all cells belong to a cluster
-				boolean coveredAll = true;
-				for(Cell c : dataset.getCollection().getCells()){
-					if(!cellIDsFound.contains(c.getId())){
-						coveredAll=false;
-					}
-				}
-				
-				if( !clash && coveredAll){
-					// Offer to make a cluster group
-					int option = JOptionPane.showOptionDialog(null, 
-							"Put the new clusters into a cluster group?", 
-							"Create cluster group", 
-							JOptionPane.OK_CANCEL_OPTION, 
-							JOptionPane.QUESTION_MESSAGE, null, null, null);
-					
-					if (option == JOptionPane.CANCEL_OPTION) {
-						// Cancelled
-						programLogger.log(Level.INFO, "Adding standard manual clusters");
-					} else if (option == JOptionPane.OK_OPTION)	{
-						// Make the group
-						
-						int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-						programLogger.log(Level.INFO, "Creating cluster group "+clusterNumber);
+			testClusterGroupable(list);
 
-						ClusteringOptions newOptions = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
-						newOptions.setClusterNumber(list.size());
-						newOptions.setHierarchicalMethod(group.getOptions().getHierarchicalMethod());
-						newOptions.setIncludeModality(group.getOptions().isIncludeModality());
-						newOptions.setModalityRegions(group.getOptions().getModalityRegions());
-						newOptions.setUseSimilarityMatrix(group.getOptions().isUseSimilarityMatrix());
-						ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
-						
-						for(AnalysisDataset d : list){
-							newGroup.addDataset(d);
-						}
-						dataset.addClusterGroup(newGroup);
-						
-					}
-				}
-				
-			}
-			
-			
 			
 			if(!list.isEmpty()){
 				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
@@ -384,6 +325,99 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			this.dispose();
 		}
 
+	}
+	
+	private boolean checkCellPresentOnlyOnce(List<AnalysisDataset> list){
+		boolean ok = true;
+		// Check that a cell is not present in more than one cluster
+		List<UUID> cellIDsFound = new ArrayList<UUID>();
+		for(AnalysisDataset d : list){
+			for(Cell c : d.getCollection().getCells()){
+				if(cellIDsFound.contains(c.getId())){
+					ok=false;
+				}
+				cellIDsFound.add(c.getId());
+			}
+		}
+		return ok;
+	}
+	
+	/**
+	 * Check that a cell is not present in more than one cluster
+	 * @param list
+	 * @return
+	 */
+	private boolean checkAllCellsPresent(List<AnalysisDataset> list){
+		boolean ok = true;
+		
+		List<UUID> cellIDsFound = new ArrayList<UUID>();
+		for(AnalysisDataset d : list){
+			for(Cell c : d.getCollection().getCells()){
+				cellIDsFound.add(c.getId());
+			}
+		}
+		
+		for(Cell c : dataset.getCollection().getCells()){
+			if(!cellIDsFound.contains(c.getId())){
+				ok=false;
+			}
+		}
+		
+		return ok;
+	}
+	
+	/*
+	 * Offer to put the datasets into a cluster group if conditions are met
+	 */
+	private void testClusterGroupable(List<AnalysisDataset> list){
+		
+		if(!list.isEmpty()){
+			
+			if( checkCellPresentOnlyOnce(list)  ){
+
+				if( checkAllCellsPresent(list) ) {
+					// Offer to make a cluster group
+					int option = JOptionPane.showOptionDialog(null, 
+							"Join the new clusters into a cluster group?", 
+							"Create cluster group", 
+							JOptionPane.OK_CANCEL_OPTION, 
+							JOptionPane.QUESTION_MESSAGE, null, null, null);
+
+					if (option == JOptionPane.CANCEL_OPTION) {
+						// Cancelled
+						programLogger.log(Level.INFO, "Adding as standard manual clusters");
+					} else if (option == JOptionPane.OK_OPTION)	{
+						// Make the group
+
+						int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+						programLogger.log(Level.INFO, "Creating cluster group "+clusterNumber);
+
+						ClusteringOptions newOptions = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
+						newOptions.setClusterNumber(list.size());
+						newOptions.setHierarchicalMethod(group.getOptions().getHierarchicalMethod());
+						newOptions.setIncludeModality(group.getOptions().isIncludeModality());
+						newOptions.setModalityRegions(group.getOptions().getModalityRegions());
+						newOptions.setUseSimilarityMatrix(group.getOptions().isUseSimilarityMatrix());
+						ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
+
+						for(AnalysisDataset d : list){
+							newGroup.addDataset(d);
+						}
+						dataset.addClusterGroup(newGroup);
+
+					}
+				} else {
+					programLogger.log(Level.INFO, "Cannot make cluster group");
+					programLogger.log(Level.INFO, "Not all cells are assigned clusters");
+					programLogger.log(Level.INFO, "Adding as standard manual clusters");
+				}
+			} else {
+				programLogger.log(Level.INFO, "Cannot make cluster group");
+				programLogger.log(Level.INFO, "Cells present in more than one cluster");
+				programLogger.log(Level.INFO, "Adding as standard manual clusters");
+			}
+			
+		}
 	}
 	
 	protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list, AnalysisDataset template) {
