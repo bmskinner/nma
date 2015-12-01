@@ -19,25 +19,26 @@
 package gui.dialogs;
 
 import gui.MainWindow;
-import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Dimension;
+import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -52,7 +53,7 @@ import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
 
-public class ClusteringSetupWindow extends JDialog implements ActionListener, ChangeListener {
+public class ClusteringSetupWindow extends SettingsDialog implements ActionListener, ChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -88,14 +89,12 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	
 	private JCheckBox useSimilarityMatrixCheckBox;
 	
-	private boolean readyToRun = false;
-	
 	private ClusteringOptions options;
 	
 	public ClusteringSetupWindow(MainWindow mw) {
 		
 		// modal dialog
-		super(mw, true);
+		super(mw.getProgramLogger(), mw, true);
 		this.setTitle("Clustering options");
 		this.setLocationRelativeTo(null);
 		
@@ -104,7 +103,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 			createGUI();
 
 		} catch (Exception e) {
-			IJ.log("Error making gui: "+e.getMessage());
+			programLogger.log(Level.SEVERE, "Error making dialog", e);
 		}
 		
 	}
@@ -112,11 +111,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	public ClusteringOptions getOptions(){
 		return this.options;
 	}
-		
-	public boolean isReadyToRun(){
-		return this.readyToRun;
-	}
-	
+			
 	private void setDefaults(){
 		options = new ClusteringOptions(ClusteringSetupWindow.DEFAULT_CLUSTER_METHOD);
 		options.setClusterNumber(DEFAULT_MANUAL_CLUSTER_NUMBER);
@@ -129,29 +124,18 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	
 	private JPanel createHierarchicalPanel(){
 		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		GridBagLayout layout = new GridBagLayout();
+		panel.setLayout(layout);
 		
-		panel.add(new JLabel("Hierarchical clustering method:"));
+		List<JLabel> labels = new ArrayList<JLabel>();
+		List<Component> fields = new ArrayList<Component>();
+
 		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
 		hierarchicalClusterMethodCheckBox.setSelectedItem(DEFAULT_HIERARCHICAL_METHOD);
 		hierarchicalClusterMethodCheckBox.addActionListener(this);
-		panel.add(hierarchicalClusterMethodCheckBox);
-
-		JLabel clusterCountLabel = new JLabel("Desired number of clusters:");
-		panel.add(clusterCountLabel);
-
-		clusterNumberAutoButton = new JRadioButton("Default (2)");
-		clusterNumberAutoButton.setSelected(true);
-
-		clusterManualButton = new JRadioButton("Manual");
-
-		ButtonGroup clusterNumberGroup = new ButtonGroup();
-		clusterNumberGroup.add(clusterNumberAutoButton);
-		clusterNumberGroup.add(clusterManualButton);
-
-
-		panel.add(clusterNumberAutoButton);
-		panel.add(clusterManualButton);
+		
+		labels.add(new JLabel("Cluster method"));
+		fields.add(hierarchicalClusterMethodCheckBox);
 
 		SpinnerModel model =
 				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
@@ -160,21 +144,28 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 						1); //step
 
 		clusterNumberSpinner = new JSpinner(model);
-		clusterNumberSpinner.setEnabled(false);
-		panel.add(clusterNumberSpinner);
+		clusterNumberSpinner.setEnabled(true);
 
-		clusterManualButton.addActionListener(this);
+		labels.add(new JLabel("Cluster number"));
+		fields.add(clusterNumberSpinner);
+
 		clusterNumberSpinner.addChangeListener(this);
-
+		
+		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
 	}
 	
 	private JPanel createEMPanel(){
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
-		panel.add(new JLabel("Number of iterations:"));
+		GridBagLayout layout = new GridBagLayout();
+		panel.setLayout(layout);
+		
+		List<JLabel> labels = new ArrayList<JLabel>();
+		List<Component> fields = new ArrayList<Component>();
+		
+		
 
 		SpinnerModel model =
 				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_EM_ITERATIONS, //initial value
@@ -185,13 +176,10 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		iterationsSpinner = new JSpinner(model);
 		iterationsSpinner.addChangeListener(this);
 		
-		panel.add(iterationsSpinner);
-		
-		Dimension minSize = new Dimension(10, 5);
-		Dimension prefSize = new Dimension(10, 5);
-		Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
-		panel.add(new Box.Filler(minSize, prefSize, maxSize));
-		
+		labels.add(new JLabel("Iterations"));
+		fields.add(iterationsSpinner);
+
+		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
 	}
 	
@@ -199,8 +187,6 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		JLabel headingLabel = new JLabel("Set clustering options");
-		panel.add(headingLabel);
 		return panel;
 	}
 	
@@ -280,11 +266,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 
 	    methodPanel.add(clusterHierarchicalButton);
 	    methodPanel.add(clusterEMButton);
-	    
-	    useSimilarityMatrixCheckBox = new JCheckBox("Use similarity matrix");
-	    useSimilarityMatrixCheckBox.addChangeListener(this);
-	    methodPanel.add(useSimilarityMatrixCheckBox);
-	    
+	    	    
 	    JPanel modalityPanel = createModalityPanel();
 
 	    optionsPanel.add(methodPanel, BorderLayout.NORTH);
@@ -302,14 +284,18 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 	
 	private JPanel createModalityPanel(){
 		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		GridBagLayout layout = new GridBagLayout();
+		panel.setLayout(layout);
 		
-		useModalityCheckBox = new JCheckBox("Include modality");
+		List<JLabel> labels = new ArrayList<JLabel>();
+		List<Component> fields = new ArrayList<Component>();
+		
+		useModalityCheckBox = new JCheckBox("");
 		useModalityCheckBox.setSelected(DEFAULT_USE_MODALITY);
 		useModalityCheckBox.addChangeListener(this);
-		panel.add(useModalityCheckBox);
 		
-		panel.add(new JLabel("Number of modality points:"));
+		labels.add(new JLabel("Include modality"));
+		fields.add(useModalityCheckBox);
 		
 		SpinnerModel model =
 				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MODALITY_REGIONS, //initial value
@@ -320,8 +306,14 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		modalityPointsSpinner = new JSpinner(model);
 		modalityPointsSpinner.addChangeListener(this);
 		modalityPointsSpinner.setEnabled(DEFAULT_USE_MODALITY);
-		panel.add(modalityPointsSpinner);
+		labels.add(new JLabel("Modality points"));
+		fields.add(modalityPointsSpinner);
 		
+		useSimilarityMatrixCheckBox = new JCheckBox("");
+	    useSimilarityMatrixCheckBox.addChangeListener(this);
+	    labels.add(new JLabel("Similarity matrix"));
+		fields.add(useSimilarityMatrixCheckBox);
+		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
 	}
 
@@ -339,9 +331,6 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 			clusterNumberSpinner.setEnabled(true);
 			options.setClusterNumber( (Integer) clusterNumberSpinner.getValue());
 			options.setHierarchicalMethod((HierarchicalClusterMethod) hierarchicalClusterMethodCheckBox.getSelectedItem());
-			
-//			clusterNumberAutoButton.setEnabled(true);
-//			clusterManualButton.setEnabled(true);
 		} 
 		
 		if(clusterEMButton.isSelected()){
@@ -350,10 +339,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		    cl.show(cardPanel, "EMPanel");
 			
 			options.setType(ClusteringMethod.EM);
-//			clusterNumberSpinner.setEnabled(false);
-//
-//			clusterNumberAutoButton.setEnabled(false);
-//			clusterManualButton.setEnabled(false);
+
 		} 
 		
 
@@ -411,7 +397,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 				options.setModalityRegions(  (Integer) j.getValue());
 			} 
 		}catch (ParseException e1) {
-			IJ.log("Error in spinners for Clustering options");
+			programLogger.log(Level.SEVERE, "Error in spinners for Clustering options", e1);
 		}	
 		
 	}

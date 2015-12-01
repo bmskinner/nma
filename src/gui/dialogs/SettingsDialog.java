@@ -23,6 +23,7 @@ import ij.IJ;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -54,16 +55,60 @@ import analysis.AnalysisOptions.NuclearSignalOptions;
 public abstract class SettingsDialog extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
-	protected boolean ok = false;
+	protected boolean readyToRun = false;
 	
 	protected Logger programLogger;
 	
+	String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
+	
+	/**
+	 * Constructor for generic dialogs not attached to a frame 
+	 * @param programLogger
+	 */
 	public SettingsDialog(Logger programLogger){
 		this.programLogger = programLogger;
+		this.setLocationRelativeTo(null);
 	}
 	
-	String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
+	/**
+	 * Constructor for dialogs attached to a frame
+	 * @param programLogger the logger
+	 * @param owner the frame (will be a MainWindow)
+	 * @param modal is the dialog modal
+	 */
+	public SettingsDialog(Logger programLogger, Frame owner, boolean modal){
+		super(owner, modal);
+		this.programLogger = programLogger;
+		this.setLocationRelativeTo(null);
+	}
+	
+	/**
+	 * Add components to a container via a list
+	 * @param labels the list of labels
+	 * @param fields the list of components
+	 * @param gridbag the layout
+	 * @param container the container to add the labels and fields to
+	 */
+	protected void addLabelTextRows(List<JLabel> labels,
+			List<Component> fields,
+			GridBagLayout gridbag,
+			Container container) {
+		
+		JLabel[] labelArray = labels.toArray(new JLabel[0]);
+		Component[] fieldArray = fields.toArray(new Component[0]);
+		
+		addLabelTextRows(labelArray, fieldArray, gridbag, container);
+		
+	}
+	
 
+	/**
+	 * Add components to a container via arrays
+	 * @param labels the list of labels
+	 * @param fields the list of components
+	 * @param gridbag the layout
+	 * @param container the container to add the labels and fields to
+	 */
 	protected void addLabelTextRows(JLabel[] labels,
 			Component[] fields,
 			GridBagLayout gridbag,
@@ -93,8 +138,13 @@ public abstract class SettingsDialog extends JDialog {
 		}
 	}
 	
-	public boolean isOK(){
-		return this.ok;
+	/**
+	 * Check if this dialog was cancelled or if the subsequent
+	 * analysis can be run
+	 * @return
+	 */
+	public boolean isReadyToRun(){
+		return this.readyToRun;
 	}
 	
 	/**

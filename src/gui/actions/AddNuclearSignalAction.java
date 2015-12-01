@@ -42,7 +42,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 			// add dialog for non-default detection options
 			SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(dataset, programLogger);
 
-			if(analysisSetup.isOK()){
+			if(analysisSetup.isReadyToRun()){
 
 				this.signalGroup = analysisSetup.getSignalGroup();
 				//				this.signalGroup = newSignalGroup;

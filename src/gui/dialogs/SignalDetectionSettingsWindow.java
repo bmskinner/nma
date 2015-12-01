@@ -231,7 +231,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 
 							signalGroup = newSignalGroup;
 							dataset.setSignalGroupName(newSignalGroup, signalGroupName);
-							ok = true;
+							readyToRun = true;
 							SignalDetectionSettingsWindow.this.setVisible(false);
 						} else {
 
@@ -239,7 +239,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 						}
 
 					} else {
-						ok = false;
+						readyToRun = false;
 						SignalDetectionSettingsWindow.this.setVisible(false);
 					}
 				} catch(Exception e){
@@ -270,8 +270,8 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		return this.folder;
 	}
 	
-	public boolean isOK(){
-		return this.ok;
+	public boolean isReadyToRun(){
+		return this.readyToRun;
 	}
 	
 	/**

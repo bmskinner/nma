@@ -23,13 +23,18 @@ import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -52,7 +57,7 @@ import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
 
-public class HierarchicalTreeSetupDialog extends JDialog implements ActionListener, ChangeListener {
+public class HierarchicalTreeSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -62,7 +67,6 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 	private JPanel headingPanel;
 	private JPanel optionsPanel;
 	private JPanel footerPanel;
-	private JPanel 		cardPanel;
 	
 	
 	private JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
@@ -72,15 +76,14 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 	
 	private JCheckBox useSimilarityMatrixCheckBox;
 	
-	private boolean readyToRun = false;
-	
 	private ClusteringOptions options;
 	
 	public HierarchicalTreeSetupDialog(MainWindow mw) {
 		
 		// modal dialog
-		super(mw, true);
+		super(mw.getProgramLogger(), mw, true);
 		this.setTitle("Tree building options");
+		setSize(450, 300);
 		this.setLocationRelativeTo(null);
 		
 		try {
@@ -88,7 +91,7 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 			createGUI();
 
 		} catch (Exception e) {
-			IJ.log("Error making gui: "+e.getMessage());
+			programLogger.log(Level.SEVERE, "Error making gui", e);
 		}
 		
 	}
@@ -97,9 +100,9 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 		return this.options;
 	}
 		
-	public boolean isReadyToRun(){
-		return this.readyToRun;
-	}
+//	public boolean isReadyToRun(){
+//		return this.readyToRun;
+//	}
 	
 	private void setDefaults(){
 		options = new ClusteringOptions(ClusteringSetupWindow.DEFAULT_CLUSTER_METHOD);
@@ -110,26 +113,11 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 		options.setModalityRegions(ClusteringSetupWindow.DEFAULT_MODALITY_REGIONS);
 		options.setUseSimilarityMatrix(ClusteringSetupWindow.DEFAULT_USE_SIMILARITY_MATRIX);
 	}
-	
-	private JPanel createHierarchicalPanel(){
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
-		panel.add(new JLabel("Hierarchical clustering method:"));
-		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
-		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupWindow.DEFAULT_HIERARCHICAL_METHOD);
-		hierarchicalClusterMethodCheckBox.addActionListener(this);
-		panel.add(hierarchicalClusterMethodCheckBox);
-
-		return panel;
-	}
-	
 	private JPanel createHeader(){
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		JLabel headingLabel = new JLabel("Set clustering options");
-		panel.add(headingLabel);
 		return panel;
 	}
 	
@@ -161,7 +149,6 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 	
 	private void createGUI(){
 		
-		setSize(450, 300);
 		contentPanel.setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPanel);
@@ -182,21 +169,8 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 		//---------------
 		optionsPanel = new JPanel();
 		optionsPanel.setLayout(new BorderLayout());
-		
-		JPanel methodPanel = new JPanel(new FlowLayout()); 
-		   
-	    
-	    cardPanel = createHierarchicalPanel();
-	    
-	    useSimilarityMatrixCheckBox = new JCheckBox("Use similarity matrix");
-	    useSimilarityMatrixCheckBox.addChangeListener(this);
-	    methodPanel.add(useSimilarityMatrixCheckBox);
-	    
-	    JPanel modalityPanel = createModalityPanel();
 
-	    optionsPanel.add(methodPanel, BorderLayout.NORTH);
-	    optionsPanel.add(cardPanel, BorderLayout.CENTER);
-	    optionsPanel.add(modalityPanel, BorderLayout.SOUTH);
+	    JPanel optionsPanel = createOptionsPanel();
 	   
 	    contentPanel.add(optionsPanel, BorderLayout.CENTER);
 		//---------------
@@ -206,17 +180,29 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 		this.setVisible(true);
 	}
 	
-	private JPanel createModalityPanel(){
+	private JPanel createOptionsPanel(){
 		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		GridBagLayout layout = new GridBagLayout();
+		panel.setLayout(layout);
 		
-		useModalityCheckBox = new JCheckBox("Include modality");
+		List<JLabel> labels = new ArrayList<JLabel>();
+		List<Component> fields = new ArrayList<Component>();
+		
+		
+
+		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
+		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupWindow.DEFAULT_HIERARCHICAL_METHOD);
+		hierarchicalClusterMethodCheckBox.addActionListener(this);
+		
+		labels.add(new JLabel("Cluster method"));
+		fields.add(hierarchicalClusterMethodCheckBox);
+
+		useModalityCheckBox = new JCheckBox("");
 		useModalityCheckBox.setSelected(ClusteringSetupWindow.DEFAULT_USE_MODALITY);
 		useModalityCheckBox.addChangeListener(this);
-		panel.add(useModalityCheckBox);
-		
-		panel.add(new JLabel("Number of modality points:"));
-		
+		labels.add(new JLabel("Include modality"));
+		fields.add(useModalityCheckBox);
+
 		SpinnerModel model =
 				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MODALITY_REGIONS, //initial value
 						1, //min
@@ -226,9 +212,20 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 		modalityPointsSpinner = new JSpinner(model);
 		modalityPointsSpinner.addChangeListener(this);
 		modalityPointsSpinner.setEnabled(ClusteringSetupWindow.DEFAULT_USE_MODALITY);
-		panel.add(modalityPointsSpinner);
 		
+		
+		labels.add(new JLabel("Modality points"));
+		fields.add(modalityPointsSpinner);
+		
+		useSimilarityMatrixCheckBox = new JCheckBox("");
+	    useSimilarityMatrixCheckBox.addChangeListener(this);
+	    
+	    labels.add(new JLabel("Use similarity matrix"));
+		fields.add(useSimilarityMatrixCheckBox);
+		
+		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
+		
 	}
 
 	@Override
@@ -259,8 +256,13 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 					useModalityCheckBox.setEnabled(false);
 					modalityPointsSpinner.setEnabled(false);
 				} else {
+					
 					useModalityCheckBox.setEnabled(true);
-					modalityPointsSpinner.setEnabled(true);
+					if(useModalityCheckBox.isSelected()){
+						modalityPointsSpinner.setEnabled(true);
+					} else {
+						modalityPointsSpinner.setEnabled(false);
+					}
 				}
 				
 			} 
@@ -273,7 +275,7 @@ public class HierarchicalTreeSetupDialog extends JDialog implements ActionListen
 				options.setModalityRegions(  (Integer) j.getValue());
 			} 
 		}catch (ParseException e1) {
-			IJ.log("Error in spinners for Clustering options");
+			programLogger.log(Level.SEVERE, "Error in spinners for Clustering options", e);
 		}	
 		
 	}

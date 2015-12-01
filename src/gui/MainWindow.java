@@ -22,6 +22,7 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.actions.AddNuclearSignalAction;
 import gui.actions.AddTailStainAction;
+import gui.actions.BuildHierarchicalTreeAction;
 import gui.actions.ClusterAnalysisAction;
 import gui.actions.MergeCollectionAction;
 import gui.actions.MorphologyAnalysisAction;
@@ -1049,6 +1050,11 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			if(event.method().equals(DatasetMethod.CLUSTER)){
 				programLogger.log(Level.INFO, "Clustering dataset");
 				new ClusterAnalysisAction(event.firstDataset(), this);
+			}
+			
+			if(event.method().equals(DatasetMethod.BUILD_TREE)){
+				programLogger.log(Level.INFO, "Building a tree from dataset");
+				new BuildHierarchicalTreeAction(event.firstDataset(), this);
 			}
 			
 			if(event.method().equals(DatasetMethod.REFOLD_CONSENSUS)){
