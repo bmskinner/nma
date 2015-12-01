@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ij.IJ;
 import jebl.evolution.graphs.Node;
@@ -13,11 +15,18 @@ import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;
 
 public class VariableNodePainter extends BasicLabelPainter {
 
-	List<Node> highlights; // the nodes to highlight
+//	List<Node> highlights = null; // the nodes to highlight
+	Map<Node, Color> clusterMemberships = null; // nodes to highlight
 	
-	public VariableNodePainter(String title, RootedTree tree, PainterIntent intent, List<Node> highlights) {
+//	public VariableNodePainter(String title, RootedTree tree, PainterIntent intent, List<Node> highlights) {
+//		super(title, tree, intent);
+////		this.highlights = highlights;
+//		
+//	}
+	
+	public VariableNodePainter(String title, RootedTree tree, PainterIntent intent, Map<Node, Color> highlights) {
 		super(title, tree, intent);
-		this.highlights = highlights;
+		this.clusterMemberships = highlights;
 		
 	}
 	
@@ -42,11 +51,19 @@ public class VariableNodePainter extends BasicLabelPainter {
         g2.setPaint(Color.LIGHT_GRAY);
         g2.setFont(oldFont);
 
-        if(highlights.contains(item)){
-//        	g2.setPaint(Color.YELLOW);
-//        	g2.fill(bounds);
+//        if(highlights.contains(item)){
+////        	g2.setPaint(Color.YELLOW);
+////        	g2.fill(bounds);
+//        	g2.setFont(newFont);
+//        	g2.setPaint(Color.BLACK);
+//        }
+        
+        if(clusterMemberships.containsKey(item)){
         	g2.setFont(newFont);
-        	g2.setPaint(Color.BLACK);
+        	g2.setPaint(clusterMemberships.get(item));
+        } else {
+        	g2.setFont(newFont);
+        	g2.setPaint(Color.LIGHT_GRAY);
         }
 
 

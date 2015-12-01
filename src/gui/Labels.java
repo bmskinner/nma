@@ -15,16 +15,18 @@ public class Labels {
 	public static final String REVERSE_THRESHOLDING_RADIO_LABEL = "Starts with the brightest pixels (intensity 255), and tries to detect objects meeting size and shape criteria. If it fails, it looks at pixels with intensity 254 or above. "
 			+ "This recurses until either a signal is found, or the signal threshold is reached.";
 
-	public static final String ADAPTIVE_THRESHOLDING_RADIO_LABEL = "The intensity histogram within the nuclear bounding box is trimmed to the minimum signal threshold defined in the options, "
-			+ "then scanned for the position with maximum dropoff "
-			+ "(formally, in the delta profile, the local minimum "
-			+ "(a) below zero "
-			+ "(b) with an absolute value greater than 10% of the total intensity range of the trimmed profile "
-			+ "(c) with the highest index). "
-			+ "Since this position lies in the middle of the dropoff, "
-			+ "a (currently) fixed offset is added to the index to remove remaining background. "
-			+ "This index is used as the new threshold for the detector. "
-			+ "If a suitable position is not found, we fall back to the minimum signal threshold defined in the options.";
+	public static final String ADAPTIVE_THRESHOLDING_RADIO_LABEL = "<html>The intensity histogram within the nuclear bounding box is trimmed to the minimum <br>"
+			+ "signal threshold defined in the options, <br>"
+			+ "then scanned for the position with maximum dropoff <br>"
+			+ "Formally, in the delta profile, this is the local minimum <br>"
+			+ "(a) below zero <br>"
+			+ "(b) with an absolute value greater than 10% of the total intensity range of the trimmed profile <br>"
+			+ "(c) with the highest index). <br>"
+			+ "Since this position lies in the middle of the dropoff, <br>"
+			+ "a (currently) fixed offset is added to the index to remove remaining background. <br>"
+			+ "This index is used as the new threshold for the detector. <br>"
+			+ "If a suitable position is not found, we fall back to the <br>"
+			+ "minimum signal threshold defined in the options.</html>";
 	
 	public static final String MINIMUM_SIGNAL_AREA = "The smallest number of pixels a signal can contain";
 	public static final String MAXIMUM_SIGNAL_FRACTION = "The largest size of a signal, as a fraction of the nuclear area (0-1)";
@@ -34,11 +36,11 @@ public class Labels {
 	 * Clustering and tree building
 	 */
 	public static final String HIERARCHICAL_CLUSTER_METHOD = "The hierarchical clustering algorithm to run";
-	public static final String USE_MODALITY_REGIONS = "Should profile angles with the lowest dip-test p-values\n"
+	public static final String USE_MODALITY_REGIONS = "Should profile angles with the lowest dip-test p-values "
 			+ "be used in the clustering";
 	public static final String NUMBER_MODALITY_REGIONS = "The number of dip-test p-values to "
 			+ "be used in the clustering";
-	public static final String USE_SIMILARITY_MATRIX = "If selected, use the difference between each nucleus profile\n"
-			+ "and every other nucleus for clustering. Otherwise, use area, circularity and aspect ratio";
+	public static final String USE_SIMILARITY_MATRIX = "<html>If selected, use the difference between each nucleus profile<br>"
+			+ "and every other nucleus for clustering.<br>Otherwise, use area, circularity and aspect ratio</html>";
 
 }

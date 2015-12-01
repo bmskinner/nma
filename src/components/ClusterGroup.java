@@ -143,5 +143,9 @@ public class ClusterGroup implements Serializable {
 			return true;
 		}
 	}
+	
+	public String toString(){
+		return this.name;
+	}
 
 }
