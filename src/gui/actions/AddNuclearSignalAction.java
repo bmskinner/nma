@@ -19,8 +19,8 @@
 package gui.actions;
 
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.dialogs.SignalDetectionSettingsWindow;
 import gui.MainWindow;
-import gui.SignalDetectionSettingsWindow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,6 @@ import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.nucleus.SignalDetector;
-
 import components.Cell;
 import components.CellCollection;
 

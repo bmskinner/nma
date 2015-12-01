@@ -16,8 +16,9 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui;
+package gui.dialogs;
 
+import gui.MainWindow;
 import ij.IJ;
 
 import java.awt.BorderLayout;
@@ -55,13 +56,13 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
-	private static final ClusteringMethod DEFAULT_CLUSTER_METHOD = ClusteringMethod.HIERARCHICAL;
-	private static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD = HierarchicalClusterMethod.WARD;
-	private static final int DEFAULT_EM_ITERATIONS = 100;
-	private static final int DEFAULT_MODALITY_REGIONS = 2;
-	private static final boolean DEFAULT_USE_MODALITY = true;
-	private static final boolean DEFAULT_USE_SIMILARITY_MATRIX = false;
+	static final int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
+	static final ClusteringMethod DEFAULT_CLUSTER_METHOD = ClusteringMethod.HIERARCHICAL;
+	static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD = HierarchicalClusterMethod.WARD;
+	static final int DEFAULT_EM_ITERATIONS = 100;
+	static final int DEFAULT_MODALITY_REGIONS = 2;
+	static final boolean DEFAULT_USE_MODALITY = true;
+	static final boolean DEFAULT_USE_SIMILARITY_MATRIX = false;
 	
 
 	private final JPanel contentPanel = new JPanel();
@@ -96,6 +97,7 @@ public class ClusteringSetupWindow extends JDialog implements ActionListener, Ch
 		// modal dialog
 		super(mw, true);
 		this.setTitle("Clustering options");
+		this.setLocationRelativeTo(null);
 		
 		try {
 			setDefaults();

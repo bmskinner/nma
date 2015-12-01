@@ -18,8 +18,8 @@
  *******************************************************************************/
 package gui.actions;
 
-import gui.AnalysisSetupWindow;
 import gui.MainWindow;
+import gui.dialogs.AnalysisSetupWindow;
 
 import java.io.File;
 import java.text.SimpleDateFormat;

@@ -66,11 +66,12 @@ public class NucleusFinder {
 	 * @throws Exception 
 	 */
 	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, File sourceFile, String outputFolderName) throws Exception{
-		NucleusFinder.programLogger = programLogger;
+//		NucleusFinder.programLogger = programLogger;
+		return getCells(image, options, programLogger, null, sourceFile, outputFolderName);
 
-		NucleusFinder.fileLogger = null;
-		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
-		return result;
+//		NucleusFinder.fileLogger = null;
+//		List<Cell> result = processImage(image, sourceFile, options, outputFolderName);
+//		return result;
 	}
 	
 	public static List<Cell> getCells(ImageStack image, AnalysisOptions options, Logger programLogger, Logger fileLogger, File sourceFile, String outputFolderName) throws Exception{
@@ -290,7 +291,7 @@ public class NucleusFinder {
 			  if(fileLogger!=null){
 				  fileLogger.log(Level.SEVERE, "Error creating nucleus", e);
 			  } else {
-				  programLogger.log(Level.SEVERE, " Error creating nucleus", e);
+				  programLogger.log(Level.SEVERE, "Error creating nucleus", e);
 			  }
 		  }
 		  return n;

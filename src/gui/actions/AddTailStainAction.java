@@ -19,7 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
-import gui.TailDetectionSettingsWindow;
+import gui.dialogs.TailDetectionSettingsWindow;
 import ij.io.DirectoryChooser;
 
 import java.io.File;
