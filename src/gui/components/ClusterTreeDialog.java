@@ -190,8 +190,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			int clusterNumber = 0;
 			for(UUID id : group.getUUIDs()){
 				AnalysisDataset cluster = dataset.getChildDataset(id);
-				Color colour = ColourSelecter.getSegmentColor(clusterNumber);
-				clusterNumber++;
+				Color colour = ColourSelecter.getSegmentColor(clusterNumber++);
 
 				for(Node n : tree.getNodes()){
 
@@ -211,7 +210,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 				}
 
 			}
-			VariableNodePainter painter = new VariableNodePainter("cluster", tree, PainterIntent.TIP, clusterMemberships);
+			VariableNodePainter painter = new VariableNodePainter("Cluster", tree, PainterIntent.TIP, clusterMemberships);
 			viewer.getTreePane().setTaxonLabelPainter(painter);
 		}
 	}
@@ -343,11 +342,19 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 
 
 		if(e.getSource().equals(selectedClusterBox)){
+			selectedClusterGroupBox.removeItemListener(this);
+			selectedClusterGroupBox.setSelectedIndex(-1);
+			selectedClusterGroupBox.addItemListener(this);
 			colourTreeNodesByCluster((AnalysisDataset) selectedClusterBox.getSelectedItem());
+			
 		}
 		
 		if(e.getSource().equals(selectedClusterGroupBox)){
+			selectedClusterBox.removeItemListener(this);
+			selectedClusterBox.setSelectedIndex(-1);
+			selectedClusterBox.addItemListener(this);
 			colourTreeNodesByClusterGroup((ClusterGroup) selectedClusterGroupBox.getSelectedItem());
+			
 		}
 		
 	}

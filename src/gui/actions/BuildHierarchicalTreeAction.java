@@ -34,7 +34,7 @@ import components.ClusterGroup;
 public class BuildHierarchicalTreeAction extends ProgressableAction implements DatasetEventListener {
 
 	public BuildHierarchicalTreeAction(AnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Cluster analysis", "Error in cluster analysis", mw);
+		super(dataset, "Building tree", "Error building tree", mw);
 
 		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw);
 		ClusteringOptions options = clusterSetup.getOptions();
