@@ -24,20 +24,14 @@ import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ClusterTreeDialog;
 import gui.dialogs.HierarchicalTreeSetupDialog;
-import gui.tabs.ClusterDetailPanel;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
-import analysis.nucleus.NucleusClusterer;
 import analysis.nucleus.NucleusTreeBuilder;
-import components.CellCollection;
 import components.ClusterGroup;
 
-public class BuildHierarchicalTreeAction extends ProgressableAction  {
+public class BuildHierarchicalTreeAction extends ProgressableAction implements DatasetEventListener {
 
 	public BuildHierarchicalTreeAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Cluster analysis", "Error in cluster analysis", mw);
@@ -70,58 +64,29 @@ public class BuildHierarchicalTreeAction extends ProgressableAction  {
 	@Override
 	public void finished() {
 
-//		programLogger.log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
-
 		String tree = (((NucleusTreeBuilder) worker).getNewickTree());
-		
-//		programLogger.log(Level.INFO, tree);
 
-//		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 		ClusteringOptions options =  ((NucleusTreeBuilder) worker).getOptions();
-//		//int clusterNumber = dataset.getClusterGroups().size();
-//		programLogger.log(Level.FINEST, "Getting group number");
+
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-//		programLogger.log(Level.FINEST, "Cluster group number chosen: "+clusterNumber);
-//
+
 		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
 		
 		ClusterTreeDialog clusterPanel = new ClusterTreeDialog(programLogger, dataset, group);
-//		clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
-//
-//		for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
-//
-//			CellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
-//
-//			if(c.hasCells()){
-//				programLogger.log(Level.FINEST, "Cluster "+cluster+": "+c.getName());
-//				group.addDataset(c);
-//				c.setName(group.getName()+"_"+c.getName());
-//				programLogger.log(Level.FINEST, "Renamed cluster: "+c.getName());
-//				dataset.addChildCollection(c);
-//				
-//				
-//				// attach the clusters to their parent collection
-//				programLogger.log(Level.INFO, "Cluster "+cluster+": "+c.getNucleusCount()+" nuclei");
-//				AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-//				clusterDataset.setRoot(false);
-//				list.add(clusterDataset);
-//			}
-//
-//
-//		}
-//		dataset.addClusterGroup(group);
+		clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
 
-		cancel();
+		cleanup(); // do not cancel, we need the MainWindow listener to remain attached 
 
 	}
 
 
-//	@Override
-//	public void datasetEventReceived(DatasetEvent event) {
-//		// TODO Auto-generated method stub
-//		if(event.method()==DatasetMethod.COPY_MORPHOLOGY){
-//			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
-//		}
-//		
-//	}
+	@Override
+	public void datasetEventReceived(DatasetEvent event) {
+		programLogger.log(Level.FINEST, "BuildHierarchicalTreeAction heard dataset event");
+		if(event.method().equals(DatasetMethod.COPY_MORPHOLOGY)){
+			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
+		}
+		
+	}
+
 }

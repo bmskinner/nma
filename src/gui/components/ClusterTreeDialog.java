@@ -9,6 +9,7 @@ import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
@@ -77,8 +78,6 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		this.group = group;
 		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
-		this.setLocationRelativeTo(null);
-		this.setSize(1000, 800);
 
 		this.viewer = new TreeViewer();
 		this.add(viewer, BorderLayout.CENTER);
@@ -109,6 +108,9 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		}
 				
 		this.setModal(false);
+		this.setMinimumSize(new Dimension(500, 500));
+		this.pack();
+		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
 	
@@ -130,6 +132,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		for(AnalysisDataset d: dataset.getChildDatasets()){
 			selectedClusterBox.addItem(d);
 		}
+		selectedClusterBox.setSelectedItem(dataset);
 		selectedClusterBox.addItemListener(this);
 		panel.add(selectedClusterBox);
 		
@@ -137,6 +140,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		for(ClusterGroup g: dataset.getClusterGroups()){
 			selectedClusterGroupBox.addItem(g);
 		}
+		selectedClusterGroupBox.setSelectedItem(group);
 		selectedClusterGroupBox.addItemListener(this);
 		panel.add(selectedClusterGroupBox);
 		
@@ -307,6 +311,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			
 			if(!list.isEmpty()){
 				fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, list, dataset);
+				programLogger.log(Level.FINEST, "Fired dataset copy event to listeners");
 			} else {
 				programLogger.log(Level.WARNING, "No datasets to analyse");
 			}
