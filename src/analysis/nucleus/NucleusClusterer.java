@@ -18,63 +18,47 @@
  *******************************************************************************/
 package analysis.nucleus;
 
-import stats.DipTester;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import utility.Constants;
-import utility.Utils;
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
 import weka.clusterers.HierarchicalClusterer;
-import weka.core.Attribute;
 import weka.core.EuclideanDistance;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.SparseInstance;
 import analysis.AnalysisDataset;
-import analysis.AnalysisWorker;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import components.Cell;
 import components.CellCollection;
-import components.generic.BorderTag;
-import components.generic.Profile;
-import components.generic.ProfileCollection;
-import components.generic.ProfileCollectionType;
-import components.nuclei.Nucleus;
 
 
-public class NucleusClusterer extends AnalysisWorker {
+public class NucleusClusterer extends NucleusTreeBuilder {
 	
 	public static final int EM = 0; // expectation maximisation
 	public static final int HIERARCHICAL = 1;
 	
-	private Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
+//	private Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 	private Map<Integer, CellCollection> clusterMap = new HashMap<Integer, CellCollection>();
 	
-	private String newickTree;	
+//	private String newickTree;	
 		
-	private CellCollection collection;
-	private ClusteringOptions options;
+//	private CellCollection collection;
+//	private ClusteringOptions options;
 		
 	public NucleusClusterer(AnalysisDataset dataset, ClusteringOptions options, Logger programLogger){
-		super(dataset, programLogger);
-		this.options = options;
-		this.collection = dataset.getCollection();
-		this.setProgressTotal(dataset.getCollection().size() * 2);
+		super(dataset, options, programLogger);
+//		this.options = options;
+//		this.collection = dataset.getCollection();
+//		this.setProgressTotal(dataset.getCollection().size() * 2);
 		
 		log(Level.FINEST, "Total set to "+this.getProgressTotal());
-//		fileLogger = Logger.getLogger(NucleusClusterer.class.getName());
-//		fileLogger.setLevel(Level.ALL);
-//		fileLogger.addHandler(dataset.getLogHandler());
 	}
 	
 	@Override
@@ -101,9 +85,10 @@ public class NucleusClusterer extends AnalysisWorker {
 	 * return the string of the tree, otherwise return null
 	 * @return
 	 */
+	@Override
 	public String getNewickTree(){
 		if(options.getType()==ClusteringMethod.HIERARCHICAL){
-			return this.newickTree;
+			return super.getNewickTree();
 		} else{
 			return null;
 		}
@@ -131,14 +116,7 @@ public class NucleusClusterer extends AnalysisWorker {
 		try {
 						
 			// create Instances to hold Instance
-			log(Level.FINER, "Making instances");
-			Instances instances = null;
-			
-			if(options.isUseSimilarityMatrix()){
-				instances = makeMatrixInstances(collection);
-			} else {
-				 instances = makeAttributesAndInstances(collection);
-			}
+			Instances instances = makeInstances();
 			
 
 			// create the clusterer to run on the Instances
@@ -252,254 +230,6 @@ public class NucleusClusterer extends AnalysisWorker {
 		}
 	}
 	
-	private List<Integer> getModalityIndexes(Profile indexes, int windowSize){
-		List<Integer> previousValues = new ArrayList<Integer>();
 
-		for(int i=0; i<indexes.size(); i++){
-			int index = (int) indexes.get(i);
-			log(Level.FINEST, "Testing p-value index "+i+": "+index);
-			// Stop picking values if we have enough modalilty regions
-			if(previousValues.size()>=options.getModalityRegions()){
-				log(Level.FINEST, "Found enough modality points");
-				break;
-			}		
-			
-			// check that each value is not too close to the previous
-			// values in the profile						
-			boolean ok = true;
-			
-			if(!previousValues.isEmpty()){
-				
-				for(int testIndex = -windowSize; testIndex<windowSize;testIndex++){
-
-					// Get the values wrapped to the array for testing
-					int offsetTestIndex = Utils.wrapIndex(index + testIndex, indexes.size());
-
-					for(int prev : previousValues){
-
-						if(prev == offsetTestIndex){
-							log(Level.FINEST, "Existing index "+prev+" is within window of "+index);
-							ok=false; // too close to a previous value
-						}
-					}
-
-				}
-			}
-			
-			if(ok){
-				log(Level.FINEST, "Added modality index "+previousValues.size()+": "+index);
-				previousValues.add(index);
-				
-			}
-
-		}
-		log(Level.FINEST, "Found "+previousValues.size()+" usable modality points");
-		return previousValues;
-	}
-	
- 	/**
- 	 * Make the attributes on which to cluster, and build the Weka instances used internally
- 	 * @param collection the collection to cluster
- 	 * @return a Weka Instances
- 	 */
-	private Instances makeAttributesAndInstances(CellCollection collection){
-
-		// Values to cluster on: area, circularity, aspect ratio (feret/min diameter)
-		log(Level.FINER, "Creating attributes");
-		int basicAttibuteCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? 4 : 3;
-		int attributeCount = basicAttibuteCount;
-		if(options.isIncludeModality()){
-			
-			attributeCount += options.getModalityRegions();
-			log(Level.FINER, "Included modality");
-		}
-		 
-
-		Attribute area = new Attribute("area"); 
-		Attribute circularity = new Attribute("circularity"); 
-		Attribute aspect = new Attribute("aspect"); 
-		
-		Attribute name = new Attribute("name", (FastVector) null); 
-				
-		// hold the attributes in a Vector
-		FastVector attributes = new FastVector(attributeCount);
-		attributes.addElement(area);
-		attributes.addElement(circularity);
-		attributes.addElement(aspect);
-		
-		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-			attributes.addElement(name);
-		}
-		
-		if(options.isIncludeModality()){
-			
-			for(int i=0; i<options.getModalityRegions(); i++){
-				Attribute modality = new Attribute("modality_"+i); // use the point least likely to be unimodal
-				attributes.addElement(modality);
-			}
-			
-		}
-		
-		
-		log(Level.FINER, "Created attributes");
-
-		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
-
-		try{
-
-			log(Level.FINER, "Building instances");
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.FRANKEN);
-
-			Profile pvals = DipTester.testCollectionGetPValues(collection, BorderTag.REFERENCE_POINT, ProfileCollectionType.FRANKEN);
-			Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
-			Profile indexes = pvals.getSortedIndexes();
-			
-
-			List<Integer> modalityIndexes = getModalityIndexes(indexes, collection.getNuclei().get(0).getAngleProfileWindowSize());
-
-			// create Instance for each nucleus and add to Instances
-			//			List<String> stringList = new ArrayList<String>();
-			int j=0;
-			for(Cell c : collection.getCells()){
-				log(Level.FINEST, "Adding cell "+j);
-
-				Nucleus n = c.getNucleus();
-				// instance holds data
-				// Create empty instance with five attribute values
-				Instance inst = new SparseInstance(attributeCount);
-
-				// Set instance's values for the attributes
-				inst.setValue(area, n.getArea());
-				inst.setValue(circularity, n.getCircularity());
-				inst.setValue(aspect, n.getAspectRatio());
-				//				stringList.add(n.getNameAndNumber());
-				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					inst.setValue(name,  n.getNameAndNumber());
-				}
-
-
-
-				if(options.isIncludeModality()){
-
-					Profile p = n.getAngleProfile(BorderTag.REFERENCE_POINT);
-					Profile interpolated = p.interpolate(medianProfile.size());
-
-					for(int index=0; index<modalityIndexes.size(); index++){
-
-						Attribute att = (Attribute) attributes.elementAt(index+basicAttibuteCount);
-						inst.setValue(att, interpolated.get(modalityIndexes.get(index)));
-
-					}
-
-					instances.add(inst);
-					cellToInstanceMap.put(inst, c.getId());
-					publish(j++);
-
-				}
-			}
-
-			log(Level.FINER, "Built instances");
-		} catch(Exception e){
-
-			logError("Error making instances", e);
-		}
-		return instances;
-	}
-	
-	private double[][] makeSimilarityMatrix(CellCollection collection) throws Exception{
-		
-		if(collection.hasNucleusSimilarityMatrix()){
-			log(Level.FINER, "Found existing matrix");
-			publish(collection.size());
-			return collection.getNucleusSimilarityMatrix();
-		} else {
-			log(Level.FINER, "Creating similarity matrix");
-			double[][] matrix = new double[collection.size()][collection.size()];
-
-			List<Nucleus> nuclei = collection.getNuclei();
-			int i = 0;
-			for(Nucleus n1 : nuclei){
-
-				int j = 0;
-				for(Nucleus n2 : nuclei){
-
-					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
-					
-					score /= n1.getPerimeter();
-					
-					matrix[i][j] = score;
-
-					j++;
-				}
-				publish(i++);
-			}
-			collection.setNucleusSimilarityMatrix(matrix);
-			return matrix;
-		}
-	}
-
-	private Instances makeMatrixInstances(CellCollection collection){
-		
-		int basicAttributeCount = collection.size();
-		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
-//		programLogger.log(Level.FINE, "Building instance matrix");
-		log(Level.FINE, "Building instance matrix");
-		
-		FastVector attributes = new FastVector(attributeCount);
-		for(int i=0; i<attributeCount; i++){
-			Attribute a = new Attribute("att_"+i); 
-			attributes.addElement(a);
-		}
-		
-		Attribute area = new Attribute("area"); 
-		Attribute aspect = new Attribute("aspect"); 
-		Attribute name = new Attribute("name", (FastVector) null); 
-		
-		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-			attributes.addElement(name);
-		}
-		attributes.addElement(area);
-		attributes.addElement(aspect);
-		
-		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
-		
-
-		try{
-			double[][] matrix = makeSimilarityMatrix(collection);
-			
-			int i=0;
-			for(Cell c : collection.getCells()){
-				Nucleus n1 = c.getNucleus();
-				Instance inst = new SparseInstance(attributeCount);
-
-				
-				int j=0;
-				for(Nucleus n2 : collection.getNuclei()){
-					
-					Attribute att = (Attribute) attributes.elementAt(j);
-					double score = matrix[i][j];
-//					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
-//					score /= n1.getPerimeter();
-					inst.setValue(att, score);
-					j++;
-				}
-				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					inst.setValue(name,  n1.getNameAndNumber());
-				}
-				
-				inst.setValue(area, n1.getArea());
-				inst.setValue(aspect, n1.getAspectRatio());
-				
-				instances.add(inst);
-				cellToInstanceMap.put(inst, c.getId());
-				publish(i++);
-			}
-
-		} catch(Exception e){
-			logError("Error making instances", e);
-		}
-//		log(Level.FINEST, "Instance matrix: "+instances.toSummaryString());
-		return instances;
-	}
 
 }

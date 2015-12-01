@@ -18,8 +18,13 @@
  *******************************************************************************/
 package gui.actions;
 
+import gui.DatasetEvent;
+import gui.DatasetEventListener;
 import gui.MainWindow;
+import gui.DatasetEvent.DatasetMethod;
+import gui.components.ClusterTreeDialog;
 import gui.dialogs.HierarchicalTreeSetupDialog;
+import gui.tabs.ClusterDetailPanel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +33,11 @@ import java.util.logging.Level;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.nucleus.NucleusClusterer;
+import analysis.nucleus.NucleusTreeBuilder;
 import components.CellCollection;
 import components.ClusterGroup;
 
-public class BuildHierarchicalTreeAction extends ProgressableAction {
+public class BuildHierarchicalTreeAction extends ProgressableAction  {
 
 	public BuildHierarchicalTreeAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Cluster analysis", "Error in cluster analysis", mw);
@@ -43,7 +49,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction {
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
 			//	worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
-			worker = new NucleusClusterer( dataset , options , mw.getProgramLogger());
+			worker = new NucleusTreeBuilder( dataset , options , mw.getProgramLogger());
 			//	((NucleusClusterer) worker).setClusteringOptions(options);
 
 			worker.addPropertyChangeListener(this);
@@ -66,16 +72,21 @@ public class BuildHierarchicalTreeAction extends ProgressableAction {
 
 //		programLogger.log(Level.INFO, "Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
 
-		String tree = (((NucleusClusterer) worker).getNewickTree());
+		String tree = (((NucleusTreeBuilder) worker).getNewickTree());
+		
+//		programLogger.log(Level.INFO, tree);
 
 //		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-//		ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
+		ClusteringOptions options =  ((NucleusTreeBuilder) worker).getOptions();
 //		//int clusterNumber = dataset.getClusterGroups().size();
 //		programLogger.log(Level.FINEST, "Getting group number");
-//		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 //		programLogger.log(Level.FINEST, "Cluster group number chosen: "+clusterNumber);
 //
-//		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
+		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
+		
+		ClusterTreeDialog clusterPanel = new ClusterTreeDialog(programLogger, dataset, group);
+//		clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
 //
 //		for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
 //
@@ -103,4 +114,14 @@ public class BuildHierarchicalTreeAction extends ProgressableAction {
 		cancel();
 
 	}
+
+
+//	@Override
+//	public void datasetEventReceived(DatasetEvent event) {
+//		// TODO Auto-generated method stub
+//		if(event.method()==DatasetMethod.COPY_MORPHOLOGY){
+//			fireDatasetEvent(DatasetMethod.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
+//		}
+//		
+//	}
 }
