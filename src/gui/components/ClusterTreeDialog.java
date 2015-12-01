@@ -401,6 +401,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 						ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
 
 						for(AnalysisDataset d : list){
+							d.setName(newGroup.getName()+"_"+d.getName());
 							newGroup.addDataset(d);
 						}
 						dataset.addClusterGroup(newGroup);
