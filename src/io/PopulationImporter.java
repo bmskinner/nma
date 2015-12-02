@@ -91,48 +91,54 @@ public class PopulationImporter {
 		programLogger.log(Level.FINE, "File path has changed: attempting to relocate images");
 
 		dataset.setSavePath(inputFile);
-
-		// This should be /ImageDir/DateTimeDir/
-		File expectedAnalysisDirectory = inputFile.getParentFile();
 		
-		// This should be /ImageDir/
-		File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
-		programLogger.log(Level.FINE, "Searching "+expectedImageDirectory.getAbsolutePath());
+		if(!dataset.hasMergeSources()){
 
-		if(expectedImageDirectory.exists()){
-			
-			// Is the name of the expectedImageDirectory the same as the dataset image directory?
-			if(checkName(expectedImageDirectory, dataset)){
-				programLogger.log(Level.FINE, "Dataset name matches new folder");
+			// This should be /ImageDir/DateTimeDir/
+			File expectedAnalysisDirectory = inputFile.getParentFile();
 
-				// Does expectedImageDirectory contain image files?
-				if(checkHasImages(expectedImageDirectory)){
-					programLogger.log(Level.FINE, "Target folder contains at least one image");
+			// This should be /ImageDir/
+			File expectedImageDirectory = expectedAnalysisDirectory.getParentFile();
+			programLogger.log(Level.FINE, "Searching "+expectedImageDirectory.getAbsolutePath());
 
-					programLogger.log(Level.FINE, "Updating dataset image paths");
-					boolean ok = dataset.getCollection().updateSourceFolder(expectedImageDirectory);
-					if(!ok){
-						programLogger.log(Level.WARNING, "Error updating dataset image paths; update cancelled");
-					}
+			if(expectedImageDirectory.exists()){
 
-					programLogger.log(Level.FINE, "Updating child dataset image paths");
-					for(AnalysisDataset child : dataset.getAllChildDatasets()){
-						ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
+				// Is the name of the expectedImageDirectory the same as the dataset image directory?
+				if(checkName(expectedImageDirectory, dataset)){
+					programLogger.log(Level.FINE, "Dataset name matches new folder");
+
+					// Does expectedImageDirectory contain image files?
+					if(checkHasImages(expectedImageDirectory)){
+						programLogger.log(Level.FINE, "Target folder contains at least one image");
+
+						programLogger.log(Level.FINE, "Updating dataset image paths");
+						boolean ok = dataset.getCollection().updateSourceFolder(expectedImageDirectory);
 						if(!ok){
-							programLogger.log(Level.SEVERE, "Error updating child dataset image paths; update cancelled");
+							programLogger.log(Level.WARNING, "Error updating dataset image paths; update cancelled");
 						}
+
+						programLogger.log(Level.FINE, "Updating child dataset image paths");
+						for(AnalysisDataset child : dataset.getAllChildDatasets()){
+							ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
+							if(!ok){
+								programLogger.log(Level.SEVERE, "Error updating child dataset image paths; update cancelled");
+							}
+						}
+
+						programLogger.log(Level.INFO, "Updated image paths to new folder location");
+					} else {
+						programLogger.log(Level.WARNING, "Target folder contains no images; unable to update paths");
 					}
-
-					programLogger.log(Level.INFO, "Updated image paths to new folder location");
 				} else {
-					programLogger.log(Level.WARNING, "Target folder contains no images; unable to update paths");
+					programLogger.log(Level.WARNING, "Dataset name does not match new folder; unable to update paths");
 				}
-			} else {
-				programLogger.log(Level.WARNING, "Dataset name does not match new folder; unable to update paths");
-			}
 
-		} else {
-			programLogger.log(Level.WARNING, "Unable to locate image directory and/or analysis directory; unable to update paths");
+			} else {
+				programLogger.log(Level.WARNING, "Unable to locate image directory and/or analysis directory; unable to update paths");
+			}
+		}else {
+			programLogger.log(Level.WARNING, "Dataset is a merge");
+			programLogger.log(Level.WARNING, "Unable to find single source image directory");
 		}
 	}
 	
