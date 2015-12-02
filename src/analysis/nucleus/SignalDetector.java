@@ -82,9 +82,9 @@ public class SignalDetector extends AnalysisWorker {
 	public SignalDetector(AnalysisDataset d, File folder, int channel, NuclearSignalOptions options, int group, String channelName, Logger programLogger){
 		super(d, programLogger);
 		this.options	 = options;
-		fileLogger		 = Logger.getLogger(SignalDetector.class.getName());
-		fileLogger.addHandler(d.getLogHandler());
-		fileLogger.setLevel(Level.ALL);
+//		fileLogger		 = Logger.getLogger(SignalDetector.class.getName());
+//		fileLogger.addHandler(d.getLogHandler());
+//		fileLogger.setLevel(Level.ALL);
 		
 		this.folder		 = folder;
 		this.channel	 = channel;
@@ -97,7 +97,7 @@ public class SignalDetector extends AnalysisWorker {
 	@Override
 	protected Boolean doInBackground() throws Exception {
 		boolean result = true;
-		fileLogger.log(Level.INFO, "Beginning signal detection in channel "+channel);
+		log(Level.FINE, "Beginning signal detection in channel "+channel);
 
 		try{
 			int progress = 0;
@@ -112,12 +112,12 @@ public class SignalDetector extends AnalysisWorker {
 				options.setThreshold(originalMinThreshold);
 
 				Nucleus n = c.getNucleus();
-				fileLogger.log(Level.INFO, "Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
+				log(Level.FINER, "Looking for signals associated with nucleus "+n.getImageName()+"-"+n.getNucleusNumber());
 				
 				// get the image in the folder with the same name as the
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getImageName());
-				fileLogger.log(Level.FINE, "Source file: "+imageFile.getAbsolutePath());
+				log(Level.FINER, "Source file: "+imageFile.getAbsolutePath());
 
 				try{
 					
@@ -125,7 +125,7 @@ public class SignalDetector extends AnalysisWorker {
 					
 					ArrayList<NuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					
-					fileLogger.log(Level.FINER, "Creating signal collection");
+					log(Level.FINER, "Creating signal collection");
 					
 					SignalCollection signalCollection = n.getSignalCollection();
 					signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
@@ -133,23 +133,23 @@ public class SignalDetector extends AnalysisWorker {
 					n.calculateSignalDistancesFromCoM();
 					n.calculateFractionalSignalDistancesFromCoM();
 
-					fileLogger.log(Level.FINE, "Calculating signal angles");
+					log(Level.FINE, "Calculating signal angles");
 					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
-						fileLogger.log(Level.FINER, "Nucleus type is asymmetric: "+n.getClass().getSimpleName());
+						log(Level.FINER, "Nucleus type is asymmetric: "+n.getClass().getSimpleName());
 						
 						if(n.hasBorderTag(BorderTag.ORIENTATION_POINT)){
-							fileLogger.log(Level.FINEST, "Calculating angle from orientation point");
+							log(Level.FINEST, "Calculating angle from orientation point");
 							n.calculateSignalAnglesFromPoint(n.getPoint(BorderTag.ORIENTATION_POINT));
 						} else {
-							fileLogger.log(Level.FINEST, "No orientation point in nucleus");
+							log(Level.FINEST, "No orientation point in nucleus");
 						}
 					} else {
-						fileLogger.log(Level.FINER, "Nucleus type is round: "+n.getClass().getSimpleName());
+						log(Level.FINER, "Nucleus type is round: "+n.getClass().getSimpleName());
 					}
 					
 					
 				} catch(Exception e){
-					fileLogger.log(Level.SEVERE, "Error detecting signal", e);
+					logError("Error detecting signal", e);
 				}
 				
 				progress++;
@@ -157,7 +157,8 @@ public class SignalDetector extends AnalysisWorker {
 			}		
 			
 		} catch (Exception e){
-			fileLogger.log(Level.SEVERE, "Error in signal detection", e);
+			logError("Error in signal detection", e);
+//			fileLogger.log(Level.SEVERE, "Error in signal detection", e);
 			return false;
 		}
 

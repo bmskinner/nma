@@ -144,11 +144,11 @@ public class ShellAnalysis extends AnalysisWorker {
 //		logger = new Logger(collection.getDebugFile(), "ShellAnalysis");
 		
 		if(collection.getSignalCount()==0){
-			fileLogger.log(Level.FINE, "No signals in population");
+			log(Level.FINE, "No signals in population");
 			return true; // only bother if there are signals
 		}
 		
-		fileLogger.log(Level.INFO, "Performing shell analysis with "+shells+" shells...");
+		log(Level.FINE, "Performing shell analysis with "+shells+" shells...");
 		
 		try {
 			counters = new HashMap<Integer, ShellCounter>(0);
@@ -195,9 +195,9 @@ public class ShellAnalysis extends AnalysisWorker {
 				}
 			}
 			
-			fileLogger.log(Level.INFO, "Shell analysis complete");
+			log(Level.FINE, "Shell analysis complete");
 		} catch (Exception e) {
-			fileLogger.log(Level.SEVERE, "Error in shell analysis", e);
+			logError("Error in shell analysis", e);
 			return false;
 		}
 		return true;

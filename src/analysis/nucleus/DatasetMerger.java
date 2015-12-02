@@ -57,10 +57,6 @@ public class DatasetMerger extends AnalysisWorker {
 	 */
 	public DatasetMerger(List<AnalysisDataset> datasets, String function, File saveFile, Logger programLogger){
 		super(datasets.get(0), programLogger);
-		AnalysisDataset firstDataset = datasets.get(0);
-		fileLogger = Logger.getLogger(DatasetMerger.class.getName());
-		fileLogger.addHandler(firstDataset.getLogHandler());
-		fileLogger.setLevel(Level.INFO);
 		this.setProgressTotal(MAX_PROGRESS);
 		this.datasets = datasets;
 		this.function = function;
@@ -123,18 +119,18 @@ public class DatasetMerger extends AnalysisWorker {
 	private boolean merge(){
 				
 		if(datasets.size()>1){
-			fileLogger.log(Level.INFO, "Prepare to merge");
+			log(Level.INFO, "Prepare to merge");
 
 			// check we are not merging a parent and child (would just get parent)
 			if(datasets.size()==2){ 
 				if(datasets.get(0).hasChild(datasets.get(1))  || datasets.get(1).hasChild(datasets.get(0)) ){
-					fileLogger.log(Level.INFO, "Merging parent and child would be silly.");
+					log(Level.WARNING, "Merging parent and child would be silly.");
 					return false;
 				}
 			}
 
 			try{
-				fileLogger.log(Level.INFO, "Finding new names");
+				log(Level.FINE, "Finding new names");
 
 				// Set the names of folders for the new collection
 
@@ -154,18 +150,18 @@ public class DatasetMerger extends AnalysisWorker {
 
 //				logger = new Logger(mergeDebugFile, "DatasetMerger");
 
-				fileLogger.log(Level.FINE, "Checked new file names");
+				log(Level.FINE, "Checked new file names");
 				
 				// check all collections are of the same type
 				if(! checkNucleusClass()){
-					fileLogger.log(Level.SEVERE, "Error: cannot merge collections of different class");
+					log(Level.WARNING, "Error: cannot merge collections of different class");
 					return false;
 				}
-				fileLogger.log(Level.FINE, "Checked nucleus classes match");
+				log(Level.FINE, "Checked nucleus classes match");
 
 				// check if the new dataset should be root
 				boolean newRoot = checkNewRootNeeded();
-				fileLogger.log(Level.FINE, "Checked root status");
+				log(Level.FINE, "Checked root status");
 
 				// make a new collection based on the first dataset
 				CellCollection templateCollection = datasets.get(0).getCollection();
@@ -177,10 +173,10 @@ public class DatasetMerger extends AnalysisWorker {
 						templateCollection.getNucleusType()
 						);
 
-				fileLogger.log(Level.FINE, "Created collection");
+				log(Level.FINE, "Created collection");
 
 				// add the cells from each population to the new collection
-				fileLogger.log(Level.FINE, "Merging datasets");
+				log(Level.FINE, "Merging datasets");
 				for(AnalysisDataset d : datasets){
 
 					for(Cell n : d.getCollection().getCells()){
@@ -214,13 +210,13 @@ public class DatasetMerger extends AnalysisWorker {
 
 				return true;
 			} catch (Exception e){
-				fileLogger.log(Level.SEVERE, "Error in merging", e);
+				logError("Error in merging", e);
 				return false;
 			}
 
 		} else {
 			// there is only one datast
-			fileLogger.log(Level.INFO, "Cannot merge single dataset");
+			log(Level.WARNING, "Cannot merge single dataset");
 			return false;
 		}
 	}

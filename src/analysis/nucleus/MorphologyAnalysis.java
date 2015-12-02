@@ -72,13 +72,9 @@ public class MorphologyAnalysis extends AnalysisWorker {
     	try{
     		this.collection = dataset.getCollection();
     		this.mode = mode;
-    		
-    		AnalysisWorker.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
-    		fileLogger.setLevel(Level.FINE);
-    		fileLogger.addHandler(dataset.getLogHandler());
-    		fileLogger.log(Level.FINE, "Created MorphologyAnalysis");
+
     	} catch (Exception e){
-    		programLogger.log(Level.SEVERE, "Error creating analysis", e);
+    		logError("Error creating analysis", e);
     	}
     }
     
@@ -89,12 +85,12 @@ public class MorphologyAnalysis extends AnalysisWorker {
     		this.mode = MODE_COPY;
     		this.sourceCollection = source;
 
-    		MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
-    		fileLogger.setLevel(Level.FINE);
-    		fileLogger.addHandler(dataset.getLogHandler());
-    		fileLogger.log(Level.FINE, "Created MorphologyAnalysis");
+//    		MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
+//    		fileLogger.setLevel(Level.FINE);
+//    		fileLogger.addHandler(dataset.getLogHandler());
+//    		fileLogger.log(Level.FINE, "Created MorphologyAnalysis");
     	} catch (Exception e){
-    		programLogger.log(Level.SEVERE, "Error creating analysis", e);
+    		logError("Error creating analysis", e);
     	}
     }
     
@@ -112,8 +108,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 
 			// mode selection
 			if(mode == MODE_NEW){
-				programLogger.log(Level.FINE, "Beginning core morphology analysis");
-				fileLogger.log(Level.INFO, "Beginning core morphology analysis");
+				log(Level.FINE, "Beginning core morphology analysis");
 
 				// we run the profiler and segmenter on each nucleus - may need to double
 				this.setProgressTotal(collection.getNucleusCount());
@@ -127,38 +122,33 @@ public class MorphologyAnalysis extends AnalysisWorker {
 				// segment the profiles from head
 				runSegmentation(collection, pointType);
 
-				fileLogger.log(Level.INFO, "Core morphology analysis complete");
+				log(Level.FINE, "Core morphology analysis complete");
 			}
 			
 			if(mode == MODE_REFRESH){
 
-				fileLogger.log(Level.INFO, "Refreshing morphology");
+				log(Level.FINE, "Refreshing morphology");
 				refresh(collection);
-				fileLogger.log(Level.INFO, "Refresh complete");
+				log(Level.FINE, "Refresh complete");
 //				return true;
 			}
 			
 			if(mode == MODE_COPY){
 //				IJ.log("Copying");
 				if(sourceCollection==null){
-					programLogger.log(Level.WARNING,  "Cannot copy: source collection is null");
-					fileLogger.log(Level.INFO, "Cannot copy: source collection is null");
+					log(Level.WARNING,  "Cannot copy: source collection is null");
 					result = false;
 				} else {
 					this.setProgressTotal(collection.getNucleusCount());
-//					totalNuclei = collection.getNucleusCount(); 
-					fileLogger.log(Level.INFO, "Copying segmentation pattern");
-					programLogger.log(Level.FINE,  "Copying segmentation pattern");
+					log(Level.FINE,  "Copying segmentation pattern");
 					reapplyProfiles(collection, sourceCollection);
-					fileLogger.log(Level.INFO, "Copying complete");
-					programLogger.log(Level.FINE, "Copying complete");
+					log(Level.FINE, "Copying complete");
 				}
 			}
 			
 		} catch(Exception e){
 			
-			fileLogger.log(Level.SEVERE, "Error in morphology analysis", e);
-			programLogger.log(Level.SEVERE, "Error in morphology analysis");
+			logError("Error in morphology analysis", e);
 			
 			fileLogger.log(Level.SEVERE, "Collection keys:");
 			fileLogger.log(Level.SEVERE, collection.getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
@@ -186,7 +176,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 	private static void runProfiler(CellCollection collection, BorderTag pointType){
 		
 		try{
-			programLogger.log(Level.FINE,  "Profiling collection");
+			log(Level.FINE,  "Profiling collection");
 			// A cell collection starts with an empty Regular ProfileCollection
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
@@ -214,14 +204,14 @@ public class MorphologyAnalysis extends AnalysisWorker {
 
 				// get the difference between aligned profiles and the median
 				score = compareProfilesToMedian(collection, pointType);
-				fileLogger.log(Level.INFO, "Reticulating splines: score: "+(int)score);
-				programLogger.log(Level.FINE, "Reticulating splines: score: "+(int)score);
+//				fileLogger.log(Level.INFO, "Reticulating splines: score: "+(int)score);
+				log(Level.FINE, "Reticulating splines: score: "+(int)score);
 			}
-			programLogger.log(Level.FINE,  "Finished profiling collection");
-			fileLogger.log(Level.INFO, "Finished profiling collection: "+(int)score);
-			fileLogger.log(Level.FINE, collection.getProfileCollection(ProfileCollectionType.REGULAR).toString());
+			log(Level.FINE,  "Finished profiling collection");
+//			fileLogger.log(Level.INFO, "Finished profiling collection: "+(int)score);
+//			fileLogger.log(Level.FINE, collection.getProfileCollection(ProfileCollectionType.REGULAR).toString());
 		} catch(Exception e){
-			fileLogger.log(Level.SEVERE, "Error in morphology profiling", e);
+			logError("Error in morphology profiling", e);
 		}
 	}
 		
@@ -234,7 +224,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection){
 		
 //		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
-		fileLogger.log(Level.INFO, "Applying existing segmentation profile to population...");
+		log(Level.FINE, "Applying existing segmentation profile to population...");
 		
 		try {
 			BorderTag referencePoint   = BorderTag.REFERENCE_POINT;
@@ -263,7 +253,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			for(BorderTag offsetKey : sc.getOffsetKeys()){
 				int offset = sc.getOffset(offsetKey);
 				pc.addOffset(offsetKey, offset);
-				fileLogger.log(Level.FINE, "Setting "+offsetKey+" to "+offset);
+				log(Level.FINER, "Setting "+offsetKey+" to "+offset);
 			}
 			
 			
@@ -281,10 +271,10 @@ public class MorphologyAnalysis extends AnalysisWorker {
 
 
 		} catch (Exception e) {
-			fileLogger.log(Level.SEVERE, "Error reapplying profiles", e);
+			logError("Error reapplying profiles", e);
 			return false;
 		}
-		fileLogger.log(Level.INFO, "Re-profiling complete");
+		log(Level.FINE, "Re-profiling complete");
 		return true;
 	}
 	
@@ -296,7 +286,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 	 */
 	public boolean refresh(CellCollection collection){
 //		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
-		fileLogger.log(Level.INFO, "Refreshing mophology");
+		log(Level.FINE, "Refreshing mophology");
 		try{
 			
 			BorderTag pointType = BorderTag.REFERENCE_POINT;
@@ -348,13 +338,13 @@ public class MorphologyAnalysis extends AnalysisWorker {
 
 			// update the profile aggregate
 			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
-			fileLogger.log(Level.INFO, "FrankenProfile generated");
+			log(Level.FINER, "FrankenProfile generated");
 
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
 
 		} catch (Exception e) {
-			fileLogger.log(Level.SEVERE, "Error reapplying profiles", e);
+			logError("Error reapplying profiles", e);
 			return false;
 		}
 		return true;
@@ -382,20 +372,20 @@ public class MorphologyAnalysis extends AnalysisWorker {
 	 * @param pointType
 	 */
 	private void runSegmentation(CellCollection collection, BorderTag pointType){
-		fileLogger.log(Level.INFO, "Beginning segmentation...");
-		programLogger.log(Level.FINE, "Beginning segmentation...");
+//		fileLogger.log(Level.INFO, "Beginning segmentation...");
+		log(Level.FINE, "Beginning segmentation...");
 		try{	
 			
 			// generate segments in the median profile
-			programLogger.log(Level.FINE, "Creating segments...");
+			log(Level.FINE, "Creating segments...");
 			createSegments(collection);
 			
 			// map the segments from the median directly onto the nuclei
-			programLogger.log(Level.FINE, "Assigning segments...");
+			log(Level.FINE, "Assigning segments...");
 			assignSegments(collection);
 			
 			// adjust the segments to better fit each nucleus
-			programLogger.log(Level.FINE, "Revising segments...");
+			log(Level.FINE, "Revising segments...");
 			reviseSegments(collection, pointType);		
 	
 			// update the aggregate in case any borders have changed
@@ -404,12 +394,12 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			// At this point, the franken collection still contains tip/head values only
 			
 		} catch(Exception e){
-			fileLogger.log(Level.SEVERE, "Error segmenting",e);
-			programLogger.log(Level.SEVERE, "Error segmenting",e);
+			logError("Error segmenting",e);
+//			programLogger.log(Level.SEVERE, "Error segmenting",e);
 			collection.getProfileCollection(ProfileCollectionType.REGULAR).printKeys();
 		}
-		programLogger.log(Level.FINE, "Segmentation complete");
-		fileLogger.log(Level.INFO, "Segmentation complete");
+		log(Level.FINE, "Segmentation complete");
+//		fileLogger.log(Level.INFO, "Segmentation complete");
 	}
 	
 	/**
@@ -433,14 +423,14 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			int orientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
 			List<NucleusBorderSegment> segments = segmenter.segment();
 
-			fileLogger.log(Level.INFO, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
+			log(Level.FINER, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
 
 			// Add the segments to the collection
 //			fileLogger.log(Level.FINE, "Adding segments to profile collection");
 //			fileLogger.log(Level.FINE, NucleusBorderSegment.toString(segments));
 			pc.addSegments(BorderTag.REFERENCE_POINT, segments);
 		} catch(Exception e){
-			fileLogger.log(Level.SEVERE, "Error creating segments", e);
+			logError("Error creating segments", e);
 		}
 	}
 
@@ -453,12 +443,9 @@ public class MorphologyAnalysis extends AnalysisWorker {
 	private static void assignSegments(CellCollection collection){
 
 		try{
-			fileLogger.log(Level.INFO, "Assigning segments to nuclei...");
+			log(Level.FINER, "Assigning segments to nuclei...");
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
-			
-//			fileLogger.log(Level.FINE, "Using regular profile collection for assignment");
-//			fileLogger.log(Level.FINE, pc.toString());
 
 			// find the corresponding point in each Nucleus
 			SegmentedProfile median = pc.getSegmentedProfile(BorderTag.REFERENCE_POINT);
@@ -466,9 +453,9 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			for(Nucleus n : collection.getNuclei()){
 				assignSegmentsToNucleus(n, median);
 			}
-			fileLogger.log(Level.INFO, "Segments assigned to nuclei");
+			log(Level.FINER, "Segments assigned to nuclei");
 		} catch(Exception e){
-			fileLogger.log(Level.SEVERE, "Error assigning segments", e);
+			logError("Error assigning segments", e);
 		}
 	}
 	
@@ -525,7 +512,8 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			nucleusProfile.setSegments(nucleusSegments);
 			n.setAngleProfile(nucleusProfile);
 		} catch (Exception e) {
-			fileLogger.log(Level.SEVERE, "Error assigning segments to nucleus",e);
+			logError("Error assigning segments to nucleus", e);
+//			fileLogger.log(Level.SEVERE, "Error assigning segments to nucleus",e);
 		}
 
 		
@@ -538,7 +526,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 	 * @param pointType
 	 */
 	private void reviseSegments(CellCollection collection, BorderTag pointType){
-		fileLogger.log(Level.INFO, "Refining segment assignments...");
+		log(Level.FINER, "Refining segment assignments...");
 		try{
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
@@ -571,7 +559,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			for(BorderTag key : pc.getOffsetKeys()){
 				
 				int offset = pc.getOffset(key);
-				fileLogger.log(Level.FINE, "Adding franken collection offset "+offset+" for "+ key);
+				log(Level.FINEST, "Adding franken collection offset "+offset+" for "+ key);
 				frankenCollection.addOffset(key, pc.getOffset(key));
 			}
 
@@ -592,7 +580,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 
 			int count = 1;
 			for(Nucleus n : collection.getNuclei()){ 
-				fileLogger.log(Level.INFO, "Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.size()+")");
+				log(Level.FINER, "Fitting nucleus "+n.getPathAndNumber()+" ("+count+" of "+collection.size()+")");
 				fitter.fit(n, pc);
 
 				// recombine the segments at the lengths of the median profile segments
@@ -610,12 +598,13 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
 //			logger.log("FrankenProfile generated");
 			double firstPoint = frankenCollection.getSegmentedProfile(BorderTag.REFERENCE_POINT).get(0);
-			fileLogger.log(Level.INFO, "FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);
+			log(Level.FINER, "FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
-			fileLogger.log(Level.INFO, "Segment assignments refined");
+			log(Level.FINER, "Segment assignments refined");
 		} catch(Exception e){
-			fileLogger.log(Level.SEVERE, "Error revising segments", e);
+			logError("Error revising segments", e);
+//			fileLogger.log(Level.SEVERE, "Error revising segments", e);
 		}
 	}
 	
@@ -654,7 +643,8 @@ public class MorphologyAnalysis extends AnalysisWorker {
 				collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 
 			} catch(Exception e){
-				fileLogger.log(Level.SEVERE, "Error finding tail", e);
+				logError("Error finding tail", e);
+//				fileLogger.log(Level.SEVERE, "Error finding tail", e);
 			}
 		}
 
@@ -708,7 +698,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			}
 
 			// add this index to be the orientation point
-			fileLogger.log(Level.FINE, "Setting tail to index: "+tailIndex);
+			log(Level.FINEST, "Setting tail to index: "+tailIndex);
 			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, tailIndex);
 			/*
@@ -771,7 +761,8 @@ public class MorphologyAnalysis extends AnalysisWorker {
 				}
 
 			} catch(Exception e){
-				fileLogger.log(Level.SEVERE, "Error finding tail", e);
+				logError("Error finding tail", e);
+//				fileLogger.log(Level.SEVERE, "Error finding tail", e);
 			}
 
 		}
@@ -805,7 +796,8 @@ public class MorphologyAnalysis extends AnalysisWorker {
 					n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
 				}
 			}catch(Exception e){
-				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
+				logError("Error calculating offsets", e);
+//				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
 			}
 		}
 
@@ -836,7 +828,8 @@ public class MorphologyAnalysis extends AnalysisWorker {
 					nucleus.splitNucleusToHeadAndHump();
 				}
 			}catch(Exception e){
-				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
+				logError("Error calculating offsets", e);
+//				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
 			}
 		}
 		
@@ -882,7 +875,8 @@ public class MorphologyAnalysis extends AnalysisWorker {
 					calculateOffsetsInPigSpermNuclei(collection);
 				}
 			}catch(Exception e){
-				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
+				logError("Error calculating offsets", e);
+//				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
 			}
 		}
 	}

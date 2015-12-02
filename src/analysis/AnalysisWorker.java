@@ -80,7 +80,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
      * @param level the log level
      * @param message the message to log
      */
-    protected void log(Level level, String message){
+    protected static void log(Level level, String message){
     	fileLogger.log(level, message);
 		programLogger.log(level, message);
     }
@@ -91,7 +91,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
      * @param message the error messsage
      * @param t the exception
      */
-    protected void logError(String message, Throwable t){
+    protected static void logError(String message, Throwable t){
     	fileLogger.log(Level.SEVERE, message, t);
 		programLogger.log(Level.SEVERE, message, t);
     }
