@@ -2,25 +2,17 @@ package gui.dialogs;
 
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
-import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;
-import gui.actions.MorphologyAnalysisAction;
 import gui.components.ColourSelecter;
-import gui.components.DraggableTreePane;
 import gui.components.DraggableTreeViewer;
 import gui.components.VariableNodePainter;
-import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -106,14 +98,13 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			public void mouseMoved(MouseEvent e){
 
 				Point location = viewer.getMousePosition();
-				Rectangle treePaneBounds = viewer.getTreePane().getBounds();
-				double lineLength = treePaneBounds.getHeight();
-
+				double lineLength = viewer.getTreePane().getBounds().getHeight();
 
 				Line2D.Double line = new Line2D.Double(location.getX(), 
 						0, 
 						location.getX(), 
 						lineLength);
+				
 				viewer.addLine(line);
 				viewer.repaint();
 			}
@@ -194,12 +185,6 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		panel.add(selectedClusterGroupBox);
 		
 		return panel;
-	}
-	
-	private void addMovableLine(){
-		
-		
-		
 	}
 	
 	/**
