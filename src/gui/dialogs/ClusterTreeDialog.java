@@ -6,6 +6,8 @@ import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;
 import gui.actions.MorphologyAnalysisAction;
 import gui.components.ColourSelecter;
+import gui.components.DraggableTreePane;
+import gui.components.DraggableTreeViewer;
 import gui.components.VariableNodePainter;
 import ij.IJ;
 
@@ -13,11 +15,19 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Paint;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -64,10 +74,12 @@ import jebl.gui.trees.treeviewer_dev.decorators.DiscreteColorDecorator;
 public class ClusterTreeDialog extends JDialog implements ActionListener, ItemListener {
 
 	private JPanel buttonPanel;
-	private TreeViewer viewer;
+	private DraggableTreeViewer viewer;
 	private AnalysisDataset dataset;
 	private ClusterGroup group;
 	private Logger programLogger;
+	
+//	private DraggableTreePane treePane;
 	
 	private JComboBox<AnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
@@ -76,15 +88,46 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 	
 	private List<CellCollection> clusterList = new ArrayList<CellCollection>(0);
 	
+	
+	
 
-	public ClusterTreeDialog(Logger programLogger, AnalysisDataset dataset, ClusterGroup group) {
+	public ClusterTreeDialog(Logger programLogger, AnalysisDataset dataset, final ClusterGroup group) {
 		
 		this.dataset = dataset;
 		this.group = group;
 		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
+		this.viewer = new DraggableTreeViewer();
+				
+		
+		viewer.getTreePane().addMouseMotionListener(new MouseMotionAdapter(){
 
-		this.viewer = new TreeViewer();
+			@Override
+			public void mouseMoved(MouseEvent e){
+
+				Point location = viewer.getMousePosition();
+				Rectangle treePaneBounds = viewer.getTreePane().getBounds();
+				double lineLength = treePaneBounds.getHeight();
+
+
+				Line2D.Double line = new Line2D.Double(location.getX(), 
+						0, 
+						location.getX(), 
+						lineLength);
+				viewer.addLine(line);
+				viewer.repaint();
+			}
+				
+			
+			@Override
+			public void	mouseDragged(MouseEvent e){
+
+			}
+
+				 	
+			
+		});
+
 		this.add(viewer, BorderLayout.CENTER);
 		
 		this.buttonPanel = createButtonPanel();
@@ -103,6 +146,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			int numTaxa = topTree.getTaxa().size(); 
 			
 			viewer.setTree( topTree );
+//			treePane.setTree( topTree, topTree.getNodes() );
 			this.setTitle(dataset.getName() + " : " + group.getName() +" : "+numTaxa+ " taxa");
 			colourTreeNodesByClusterGroup(group);
 			
@@ -150,6 +194,12 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		panel.add(selectedClusterGroupBox);
 		
 		return panel;
+	}
+	
+	private void addMovableLine(){
+		
+		
+		
 	}
 	
 	/**

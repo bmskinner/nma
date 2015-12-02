@@ -34,29 +34,11 @@ public class VariableNodePainter extends BasicLabelPainter {
 	public void paint(Graphics2D g2, Node item, Justification justification, Rectangle2D bounds) {
 		final Font oldFont = g2.getFont();
 		final Font newFont = new Font(oldFont.getFontName(), Font.BOLD, oldFont.getSize());
-
-//        if (this.background != null) {
-//            g2.setPaint(background);
-//            g2.fill(bounds);
-//        }
-//
-//        if (borderPaint != null && borderStroke != null) {
-//            g2.setPaint(borderPaint);
-//            g2.setStroke(borderStroke);
-//            g2.draw(bounds);
-//        }
-
-		
+	
 
         g2.setPaint(Color.LIGHT_GRAY);
         g2.setFont(oldFont);
 
-//        if(highlights.contains(item)){
-////        	g2.setPaint(Color.YELLOW);
-////        	g2.fill(bounds);
-//        	g2.setFont(newFont);
-//        	g2.setPaint(Color.BLACK);
-//        }
         
         if(clusterMemberships.containsKey(item)){
         	g2.setFont(newFont);
