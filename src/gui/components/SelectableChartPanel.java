@@ -20,22 +20,35 @@ package gui.components;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import ij.IJ;
+import jebl.evolution.graphs.Edge;
+import jebl.evolution.graphs.Node;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jfree.chart.ChartMouseEvent;
+import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.AxisSpace;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.Layer;
+import org.jfree.ui.RectangleEdge;
 
 /**
  * This extension of the ChartPanel provides a new MouseAdapter
@@ -43,12 +56,13 @@ import org.jfree.ui.Layer;
  *
  */
 @SuppressWarnings("serial")
-public class SelectableChartPanel extends ChartPanel implements SignalChangeListener {
+public class SelectableChartPanel extends ChartPanel implements SignalChangeListener, ChartMouseListener {
 	
 	private String name = null;
 	MouseMarker mouseMarker = null;
 	public static final String SOURCE_COMPONENT = "SelectableChartPanel"; 
 	private List<Object> listeners = new ArrayList<Object>();
+	List<Line2D.Double> lines = new ArrayList<Line2D.Double>(); // drwaing lines on the chart
 
 	public SelectableChartPanel(JFreeChart chart, String name){
 		super(chart);
@@ -58,6 +72,27 @@ public class SelectableChartPanel extends ChartPanel implements SignalChangeList
 		mouseMarker = new MouseMarker(this);
 		this.addSignalChangeListener(mouseMarker);
 		this.addMouseListener(mouseMarker);
+		this.addChartMouseListener(this);
+		
+//		this.addChartMouseListener(new ChartNiyse(){
+//
+//			public void mouseMoved(MouseEvent e){
+//				
+//				Point location = e.getPoint();
+//				
+//				double lineLength = ((SelectableChartPanel) e.getSource()).getBounds().getHeight();
+//
+//				Line2D.Double line = new Line2D.Double(location.getX(), 
+//						0, 
+//						location.getX(), 
+//						lineLength);
+//				
+//				addLine(line);
+//				repaint();
+//				
+//			}
+//		});
+		
 	}
 	
 	public String getName(){
@@ -85,6 +120,28 @@ public class SelectableChartPanel extends ChartPanel implements SignalChangeList
 		mouseMarker = new MouseMarker(this);
 		this.addMouseListener(mouseMarker);
 		mouseMarker.addSignalChangeListener(this);
+	}
+		
+	public void addLine(Line2D.Double line){
+		clearLines();
+		this.lines.add(line);
+	}
+	
+	public void clearLines(){
+		this.lines = new ArrayList<Line2D.Double>();
+	}
+	
+	@Override
+	public void paint(Graphics g){
+				
+		super.paint(g);
+		
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setPaint(Color.BLACK);
+		g2.setStroke(new BasicStroke(2f));
+		for(Line2D.Double line : lines){
+			g2.draw(line);
+		}
 	}
 	
 	private final static class MouseMarker extends MouseAdapter implements SignalChangeListener{
@@ -181,7 +238,6 @@ public class SelectableChartPanel extends ChartPanel implements SignalChangeList
 	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
-//		IJ.log("Selectable chart panel has heard a change");
 		// pass messages up
 		if(event.type().equals("MarkerPositionUpdated")){
 			fireSignalChangeEvent("MarkerPositionUpdated");
@@ -204,5 +260,39 @@ public class SelectableChartPanel extends ChartPanel implements SignalChangeList
             ( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
         }
     }
+
+	@Override
+	public void chartMouseClicked(ChartMouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void chartMouseMoved(ChartMouseEvent e) {
+			
+			Point location = e.getTrigger().getPoint();
+			Rectangle2D plotArea = this.getChartRenderingInfo().getPlotInfo().getPlotArea();
+			Rectangle2D dataArea = this.getChartRenderingInfo().getPlotInfo().getDataArea();
+			
+			/*
+			 * The dataArea size includes the bottom axis, so we have to compute the axis space and subtract it
+			 * from the dataArea height when making the line 
+			 */
+			double lineLength = dataArea.getHeight();
+			
+			AxisSpace space = new AxisSpace();
+			this.getChart().getXYPlot().getDomainAxis().reserveSpace((Graphics2D) this.getGraphics(), this.getChart().getPlot(), plotArea,  RectangleEdge.BOTTOM, space);
+			
+			Line2D.Double line = new Line2D.Double(location.getX(), 
+					dataArea.getMinY(), 
+					location.getX(), 
+					dataArea.getMinY()+lineLength-space.getBottom());
+			
+			addLine(line);
+			repaint();
+			
+	
+		
+	}
 
 }

@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Line2D;
@@ -47,6 +48,7 @@ import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
+import jebl.evolution.graphs.Edge;
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.NewickImporter;
@@ -71,8 +73,6 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 	private ClusterGroup group;
 	private Logger programLogger;
 	
-//	private DraggableTreePane treePane;
-	
 	private JComboBox<AnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
 	
@@ -80,9 +80,6 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 	
 	private List<CellCollection> clusterList = new ArrayList<CellCollection>(0);
 	
-	
-	
-
 	public ClusterTreeDialog(Logger programLogger, AnalysisDataset dataset, final ClusterGroup group) {
 		
 		this.dataset = dataset;
@@ -92,32 +89,31 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		this.viewer = new DraggableTreeViewer();
 				
 		
-		viewer.getTreePane().addMouseMotionListener(new MouseMotionAdapter(){
-
-			@Override
-			public void mouseMoved(MouseEvent e){
-
-				Point location = viewer.getMousePosition();
-				double lineLength = viewer.getTreePane().getBounds().getHeight();
-
-				Line2D.Double line = new Line2D.Double(location.getX(), 
-						0, 
-						location.getX(), 
-						lineLength);
-				
-				viewer.addLine(line);
-				viewer.repaint();
-			}
-				
-			
-			@Override
-			public void	mouseDragged(MouseEvent e){
-
-			}
-
-				 	
-			
-		});
+//		viewer.getTreePane().addMouseMotionListener(new MouseMotionAdapter(){
+//
+//			@Override
+//			public void mouseMoved(MouseEvent e){
+//
+//				Point location = viewer.getMousePosition();
+//				double lineLength = viewer.getTreePane().getBounds().getHeight();
+//
+//				Line2D.Double line = new Line2D.Double(location.getX(), 
+//						0, 
+//						location.getX(), 
+//						lineLength);
+//				
+//				viewer.addLine(line);
+//				viewer.repaint();
+//			}
+//				
+//			
+//			@Override
+//			public void	mouseDragged(MouseEvent e){
+//
+//			}
+//		});
+		viewer.getTreePane().addMouseMotionListener(new MouseClusterSelectionAdapter());
+		
 
 		this.add(viewer, BorderLayout.CENTER);
 		
@@ -494,6 +490,53 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			selectedClusterBox.addItemListener(this);
 			colourTreeNodesByClusterGroup((ClusterGroup) selectedClusterGroupBox.getSelectedItem());
 			
+		}
+		
+	}
+	
+	protected class MouseClusterSelectionAdapter extends MouseAdapter{
+		
+		public MouseClusterSelectionAdapter(){
+			
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e){
+			
+			Point location = viewer.getTreePane().getMousePosition();
+			
+			/*
+			 * How to get the edges or nodes bisected by the mouse x-position?
+			 * May be able to use the branch lengths cumulatively,
+			 * iterating through the tree until we get to a node to the right of the line
+			 */
+			
+			for(Edge edge : viewer.getTreePane().getTree().getEdges()){
+				edge.getLength();
+			}
+			
+			for(Node n : viewer.getTreePane().getTree().getNodes()){
+
+			}
+			
+			viewer.getTreePane().getTree();
+			
+			
+		}
+		
+		@Override
+		public void mouseMoved(MouseEvent e){
+
+			Point location = viewer.getMousePosition();
+			double lineLength = viewer.getTreePane().getBounds().getHeight();
+
+			Line2D.Double line = new Line2D.Double(location.getX(), 
+					0, 
+					location.getX(), 
+					lineLength);
+			
+			viewer.addLine(line);
+			viewer.repaint();
 		}
 		
 	}
