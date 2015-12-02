@@ -19,7 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
-import gui.dialogs.ClusteringSetupWindow;
+import gui.dialogs.ClusteringSetupDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 	public ClusterAnalysisAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Cluster analysis", "Error in cluster analysis", mw);
 
-		ClusteringSetupWindow clusterSetup = new ClusteringSetupWindow(mw);
+		ClusteringSetupDialog clusterSetup = new ClusteringSetupDialog(mw);
 		ClusteringOptions options = clusterSetup.getOptions();
 		//Map<String, Object> options = clusterSetup.getOptions();
 

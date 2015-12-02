@@ -53,7 +53,7 @@ import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
 
-public class ClusteringSetupWindow extends SettingsDialog implements ActionListener, ChangeListener {
+public class ClusteringSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -91,7 +91,7 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 	
 	private ClusteringOptions options;
 	
-	public ClusteringSetupWindow(MainWindow mw) {
+	public ClusteringSetupDialog(MainWindow mw) {
 		
 		// modal dialog
 		super(mw.getProgramLogger(), mw, true);
@@ -113,7 +113,7 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 	}
 			
 	private void setDefaults(){
-		options = new ClusteringOptions(ClusteringSetupWindow.DEFAULT_CLUSTER_METHOD);
+		options = new ClusteringOptions(ClusteringSetupDialog.DEFAULT_CLUSTER_METHOD);
 		options.setClusterNumber(DEFAULT_MANUAL_CLUSTER_NUMBER);
 		options.setHierarchicalMethod(DEFAULT_HIERARCHICAL_METHOD);
 		options.setIterations(DEFAULT_EM_ITERATIONS);
@@ -138,7 +138,7 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 		fields.add(hierarchicalClusterMethodCheckBox);
 
 		SpinnerModel model =
-				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
+				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
 						1, //min
 						100, //max
 						1); //step
@@ -168,7 +168,7 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 		
 
 		SpinnerModel model =
-				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_EM_ITERATIONS, //initial value
+				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_EM_ITERATIONS, //initial value
 						1, //min
 						1000, //max
 						1); //step
@@ -198,8 +198,8 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 		okButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ClusteringSetupWindow.this.readyToRun = true;
-				ClusteringSetupWindow.this.setVisible(false);			
+				ClusteringSetupDialog.this.readyToRun = true;
+				ClusteringSetupDialog.this.setVisible(false);			
 			}
 		});
 
@@ -209,7 +209,7 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 		cancelButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				ClusteringSetupWindow.this.dispose();			
+				ClusteringSetupDialog.this.dispose();			
 			}
 		});
 		panel.add(cancelButton);
@@ -298,7 +298,7 @@ public class ClusteringSetupWindow extends SettingsDialog implements ActionListe
 		fields.add(useModalityCheckBox);
 		
 		SpinnerModel model =
-				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MODALITY_REGIONS, //initial value
+				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS, //initial value
 						1, //min
 						20, //max
 						1); //step

@@ -19,7 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
-import gui.dialogs.TailDetectionSettingsWindow;
+import gui.dialogs.TailDetectionSettingsDialog;
 import ij.io.DirectoryChooser;
 
 import java.io.File;
@@ -34,7 +34,7 @@ public class AddTailStainAction extends ProgressableAction {
 		super(dataset, "Tail detection", "Error in tail detection", mw);
 		try{
 			
-			TailDetectionSettingsWindow analysisSetup = new TailDetectionSettingsWindow(dataset.getAnalysisOptions(), programLogger);
+			TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions(), programLogger);
 			
 			final int channel = analysisSetup.getChannel();
 			

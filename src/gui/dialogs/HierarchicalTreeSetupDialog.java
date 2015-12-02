@@ -106,13 +106,13 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 //	}
 	
 	private void setDefaults(){
-		options = new ClusteringOptions(ClusteringSetupWindow.DEFAULT_CLUSTER_METHOD);
-		options.setClusterNumber(ClusteringSetupWindow.DEFAULT_MANUAL_CLUSTER_NUMBER);
-		options.setHierarchicalMethod(ClusteringSetupWindow.DEFAULT_HIERARCHICAL_METHOD);
-		options.setIterations(ClusteringSetupWindow.DEFAULT_EM_ITERATIONS);
-		options.setIncludeModality(ClusteringSetupWindow.DEFAULT_USE_MODALITY);
-		options.setModalityRegions(ClusteringSetupWindow.DEFAULT_MODALITY_REGIONS);
-		options.setUseSimilarityMatrix(ClusteringSetupWindow.DEFAULT_USE_SIMILARITY_MATRIX);
+		options = new ClusteringOptions(ClusteringSetupDialog.DEFAULT_CLUSTER_METHOD);
+		options.setClusterNumber(ClusteringSetupDialog.DEFAULT_MANUAL_CLUSTER_NUMBER);
+		options.setHierarchicalMethod(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
+		options.setIterations(ClusteringSetupDialog.DEFAULT_EM_ITERATIONS);
+		options.setIncludeModality(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
+		options.setModalityRegions(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS);
+		options.setUseSimilarityMatrix(ClusteringSetupDialog.DEFAULT_USE_SIMILARITY_MATRIX);
 	}
 		
 	private JPanel createHeader(){
@@ -192,7 +192,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		
 
 		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
-		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupWindow.DEFAULT_HIERARCHICAL_METHOD);
+		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
 		hierarchicalClusterMethodCheckBox.addActionListener(this);
 		
 		
@@ -202,7 +202,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		fields.add(hierarchicalClusterMethodCheckBox);
 
 		useModalityCheckBox = new JCheckBox("");
-		useModalityCheckBox.setSelected(ClusteringSetupWindow.DEFAULT_USE_MODALITY);
+		useModalityCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
 		useModalityCheckBox.addChangeListener(this);
 		JLabel modalityLabel = new JLabel("Include modality");
 		modalityLabel.setToolTipText(Labels.USE_MODALITY_REGIONS);
@@ -210,14 +210,14 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		fields.add(useModalityCheckBox);
 
 		SpinnerModel model =
-				new SpinnerNumberModel(ClusteringSetupWindow.DEFAULT_MODALITY_REGIONS, //initial value
+				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS, //initial value
 						1, //min
 						20, //max
 						1); //step
 		
 		modalityPointsSpinner = new JSpinner(model);
 		modalityPointsSpinner.addChangeListener(this);
-		modalityPointsSpinner.setEnabled(ClusteringSetupWindow.DEFAULT_USE_MODALITY);
+		modalityPointsSpinner.setEnabled(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
 		
 		JLabel modalityPoints = new JLabel("Modality points");
 		modalityPoints.setToolTipText(Labels.NUMBER_MODALITY_REGIONS);

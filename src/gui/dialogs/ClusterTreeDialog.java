@@ -1,10 +1,12 @@
-package gui.components;
+package gui.dialogs;
 
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
 import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;
 import gui.actions.MorphologyAnalysisAction;
+import gui.components.ColourSelecter;
+import gui.components.VariableNodePainter;
 import ij.IJ;
 
 import java.awt.BorderLayout;

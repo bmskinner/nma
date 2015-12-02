@@ -22,7 +22,7 @@ package gui.tabs;
 import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
-import gui.components.ClusterTreeDialog;
+import gui.dialogs.ClusterTreeDialog;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

@@ -19,7 +19,7 @@
 package gui.actions;
 
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.dialogs.SignalDetectionSettingsWindow;
+import gui.dialogs.SignalDetectionSettingsDialog;
 import gui.MainWindow;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 		try{
 			// add dialog for non-default detection options
-			SignalDetectionSettingsWindow analysisSetup = new SignalDetectionSettingsWindow(dataset, programLogger);
+			SignalDetectionSettingsDialog analysisSetup = new SignalDetectionSettingsDialog(dataset, programLogger);
 
 			if(analysisSetup.isReadyToRun()){
 

@@ -57,7 +57,7 @@ import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.CannyOptions;
 import components.nuclear.NucleusType;
 
-public class AnalysisSetupWindow extends SettingsDialog implements ActionListener, ChangeListener {
+public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
 	private AnalysisOptions analysisOptions = new AnalysisOptions();
 	
@@ -112,7 +112,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	/**
 	 * Create the frame.
 	 */
-	public AnalysisSetupWindow(Logger logger) {
+	public AnalysisSetupDialog(Logger logger) {
 		super(logger);
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); // disable the 'X'; we need to use the footer buttons 
@@ -126,7 +126,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 	 * Create the dialog with an existing set of options
 	 * Allows settings to be reloaded.
 	 */
-	public AnalysisSetupWindow(AnalysisOptions options, Logger logger) {
+	public AnalysisSetupDialog(AnalysisOptions options, Logger logger) {
 		super(logger);
 		setModal(true); // ensure nothing happens until this window is closed
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -258,12 +258,12 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 					} else {
 						
 						// ok, close the window
-						AnalysisSetupWindow.this.setVisible(false);
+						AnalysisSetupDialog.this.setVisible(false);
 					}
 					
 				} else {
 					analysisOptions = null;
-					AnalysisSetupWindow.this.setVisible(false);
+					AnalysisSetupDialog.this.setVisible(false);
 				}
 				
 			}
@@ -276,7 +276,7 @@ public class AnalysisSetupWindow extends SettingsDialog implements ActionListene
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				analysisOptions = null;
-				AnalysisSetupWindow.this.setVisible(false);
+				AnalysisSetupDialog.this.setVisible(false);
 			}
 		});
 		panel.add(btnCancel);

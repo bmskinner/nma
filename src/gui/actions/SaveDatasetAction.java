@@ -47,9 +47,10 @@ public class SaveDatasetAction extends ProgressableAction {
 	
 	@Override
 	public void finished(){
-		cancel();		
+		// Do not use super.finished(), or it will trigger another save action
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);
+		cancel();		
 	}
 
 }

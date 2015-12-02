@@ -19,7 +19,7 @@
 package gui.actions;
 
 import gui.MainWindow;
-import gui.dialogs.AnalysisSetupWindow;
+import gui.dialogs.AnalysisSetupDialog;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -48,7 +48,7 @@ public class NewAnalysisAction extends ProgressableAction {
 	public NewAnalysisAction(MainWindow mw) {
 		super(null, "Nucleus detection", "Error in analysis", mw);
 
-		AnalysisSetupWindow analysisSetup = new AnalysisSetupWindow(programLogger);
+		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(programLogger);
 		if( analysisSetup.getOptions()!=null){
 
 			options = analysisSetup.getOptions();

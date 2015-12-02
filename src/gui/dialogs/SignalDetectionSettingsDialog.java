@@ -55,7 +55,7 @@ import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
 import analysis.AnalysisOptions.NuclearSignalOptions;
 
-public class SignalDetectionSettingsWindow extends SettingsDialog implements ChangeListener {
+public class SignalDetectionSettingsDialog extends SettingsDialog implements ChangeListener {
 
 	private JPanel contentPanel;
 	private static final long serialVersionUID = 1L;
@@ -92,7 +92,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 	/**
 	 * Create the dialog.
 	 */
-	public SignalDetectionSettingsWindow(AnalysisDataset d, Logger programLogger) {
+	public SignalDetectionSettingsDialog(AnalysisDataset d, Logger programLogger) {
 		super(programLogger);
 		this.dataset = d;
 		this.options = d.getAnalysisOptions();
@@ -232,7 +232,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 							signalGroup = newSignalGroup;
 							dataset.setSignalGroupName(newSignalGroup, signalGroupName);
 							readyToRun = true;
-							SignalDetectionSettingsWindow.this.setVisible(false);
+							SignalDetectionSettingsDialog.this.setVisible(false);
 						} else {
 
 							// No action - revise settings
@@ -240,7 +240,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 
 					} else {
 						readyToRun = false;
-						SignalDetectionSettingsWindow.this.setVisible(false);
+						SignalDetectionSettingsDialog.this.setVisible(false);
 					}
 				} catch(Exception e){
 					programLogger.log(Level.SEVERE, "Error in signal detection", e);
@@ -255,7 +255,7 @@ public class SignalDetectionSettingsWindow extends SettingsDialog implements Cha
 		btnCancel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				SignalDetectionSettingsWindow.this.dispose();
+				SignalDetectionSettingsDialog.this.dispose();
 			}
 		});
 		panel.add(btnCancel);

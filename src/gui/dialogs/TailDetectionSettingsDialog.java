@@ -37,7 +37,7 @@ import javax.swing.border.EmptyBorder;
 import utility.Constants;
 import analysis.AnalysisOptions;
 
-public class TailDetectionSettingsWindow extends SettingsDialog implements ActionListener {
+public class TailDetectionSettingsDialog extends SettingsDialog implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -54,7 +54,7 @@ public class TailDetectionSettingsWindow extends SettingsDialog implements Actio
 	/**
 	 * Create the dialog.
 	 */
-	public TailDetectionSettingsWindow(AnalysisOptions a, Logger logger) {
+	public TailDetectionSettingsDialog(AnalysisOptions a, Logger logger) {
 		super(logger);
 		setModal(true);
 		this.options = a;
@@ -98,7 +98,7 @@ public class TailDetectionSettingsWindow extends SettingsDialog implements Actio
 		btnOk.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				TailDetectionSettingsWindow.this.setVisible(false);
+				TailDetectionSettingsDialog.this.setVisible(false);
 			}
 		});
 
@@ -108,7 +108,7 @@ public class TailDetectionSettingsWindow extends SettingsDialog implements Actio
 		btnCancel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				TailDetectionSettingsWindow.this.dispose();
+				TailDetectionSettingsDialog.this.dispose();
 			}
 		});
 		panel.add(btnCancel);

@@ -22,8 +22,9 @@ import gui.DatasetEvent;
 import gui.DatasetEventListener;
 import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;
-import gui.components.ClusterTreeDialog;
+import gui.dialogs.ClusterTreeDialog;
 import gui.dialogs.HierarchicalTreeSetupDialog;
+
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
