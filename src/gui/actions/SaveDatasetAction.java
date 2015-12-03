@@ -3,6 +3,7 @@ package gui.actions;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import io.PopulationExporter;
 import gui.MainWindow;
@@ -21,11 +22,7 @@ public class SaveDatasetAction extends ProgressableAction {
 	 */
 	public SaveDatasetAction(AnalysisDataset dataset, String barMessage,
 			String errorMessage, MainWindow mw) {
-		super(dataset, barMessage, errorMessage, mw);
-		
-		worker = new PopulationExporter(dataset, programLogger);
-		worker.addPropertyChangeListener(this);
-		worker.execute();	
+		this(dataset, dataset.getSavePath(), barMessage, errorMessage, mw);
 	}
 	
 	/**
@@ -39,6 +36,7 @@ public class SaveDatasetAction extends ProgressableAction {
 	public SaveDatasetAction(AnalysisDataset dataset, File saveFile, String barMessage,
 			String errorMessage, MainWindow mw) {
 		super(dataset, barMessage, errorMessage, mw);
+		mw.getProgramLogger().log(Level.FINE, "Save dataset action created");
 		
 		worker = new PopulationExporter(dataset, saveFile, programLogger);
 		worker.addPropertyChangeListener(this);
@@ -48,9 +46,10 @@ public class SaveDatasetAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		// Do not use super.finished(), or it will trigger another save action
+		cancel();		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);
-		cancel();		
+		
 	}
 
 }

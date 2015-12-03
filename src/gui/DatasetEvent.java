@@ -118,6 +118,7 @@ public class DatasetEvent extends EventObject {
 		TRAIN_CLASSIFIER	("Train classifier"),
 		RECALCULATE_CACHE	("Recalculate caches"),
 		SAVE				("Save selected"),
+		SAVE_AS				("Save as new file"),
 		ADD_DATASET			("Add dataset"),
 		RESEGMENT			("Resegment dataset");
 		

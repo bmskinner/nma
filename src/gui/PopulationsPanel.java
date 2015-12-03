@@ -597,7 +597,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				}
 //				new SaveDatasetAction(dataset, "Saving dataset", "Error saving dataset", mw);
 //				
-				PopulationExporter.saveAnalysisDataset(dataset);
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				list.add(dataset);
+				fireDatasetEvent(DatasetMethod.SAVE, list);
+//				PopulationExporter.saveAnalysisDataset(dataset);
 				update();
 				
 				selectDataset(dataset);

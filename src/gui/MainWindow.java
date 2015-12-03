@@ -864,37 +864,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		if(event.type().equals("SplitCollectionAction")){
 			new SplitCollectionAction();
 		}
-		
-		if(event.type().equals("SaveCollectionAction")){
-
-			Thread thr = new Thread() {
-				public void run() {
-
-
-					SaveDialog saveDialog = new SaveDialog("Save as...", selectedDataset.getName(), ".nmd");
-
-					String fileName = saveDialog.getFileName();
-					String folderName = saveDialog.getDirectory();
-					
-					if(fileName!=null && folderName!=null){
-						File saveFile = new File(folderName+File.separator+fileName);
-
-						programLogger.log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
-						new SaveDatasetAction(selectedDataset, saveFile, "Saving dataset", "Error saving dataset", MainWindow.this);
-//						boolean ok = PopulationExporter.saveAnalysisDataset(selectedDataset, saveFile);
-//						if(ok){
-//							programLogger.log(Level.INFO, "OK");
-//						} else {
-//							programLogger.log(Level.INFO, "Error");
-//						}
-					}
-				}
-			};
-
-			thr.start();
-
-		}
-		
+				
 //		if(event.type().equals("ExtractNucleiAction")){
 //			Thread thr = new Thread() {
 //        		public void run() {
@@ -1110,6 +1080,22 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				populationsPanel.addDataset(event.firstDataset());
 			}
 			
+			if(event.method().equals(DatasetMethod.SAVE_AS)){
+			
+				AnalysisDataset selectedDataset = event.firstDataset();
+				SaveDialog saveDialog = new SaveDialog("Save as...", selectedDataset.getName(), ".nmd");
+				
+				String fileName = saveDialog.getFileName();
+				String folderName = saveDialog.getDirectory();
+				
+				if(fileName!=null && folderName!=null){
+					File saveFile = new File(folderName+File.separator+fileName);
+
+					programLogger.log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
+					new SaveDatasetAction(selectedDataset, saveFile, "Saving dataset", "Error saving dataset", MainWindow.this);
+				}
+			}
+							
 		}
 		
 	}
