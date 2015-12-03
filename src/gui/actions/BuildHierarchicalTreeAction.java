@@ -24,11 +24,17 @@ import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;
 import gui.dialogs.ClusterTreeDialog;
 import gui.dialogs.HierarchicalTreeSetupDialog;
+import jebl.evolution.trees.RootedTree;
+import jebl.evolution.trees.Tree;
+import jebl.evolution.trees.Utils;
 
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
+import analysis.NeighbourJoiningTreeBuilder;
+import analysis.ClusteringOptions.ClusteringMethod;
+import analysis.ClusteringOptions.HierarchicalClusterMethod;
 import analysis.nucleus.NucleusTreeBuilder;
 import components.ClusterGroup;
 
@@ -37,23 +43,22 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 	public BuildHierarchicalTreeAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Building tree", "Error building tree", mw);
 
-		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw);
-		ClusteringOptions options = clusterSetup.getOptions();
+//		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw);
+//		ClusteringOptions options = clusterSetup.getOptions();
 		//Map<String, Object> options = clusterSetup.getOptions();
 
-		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
+//		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 
-			//	worker = new NucleusClusterer(  (Integer) options.get("type"), dataset.getCollection() );
-			worker = new NucleusTreeBuilder( dataset , options , mw.getProgramLogger());
-			//	((NucleusClusterer) worker).setClusteringOptions(options);
+//			worker = new NucleusTreeBuilder( dataset , options , mw.getProgramLogger());
+			worker = new NeighbourJoiningTreeBuilder( dataset , mw.getProgramLogger());
 
 			worker.addPropertyChangeListener(this);
 			worker.execute();
 
-		} else {
-			this.cancel();
-		}
-		clusterSetup.dispose();
+//		} else {
+//			this.cancel();
+//		}
+//		clusterSetup.dispose();
 	}
 
 
@@ -65,13 +70,22 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 	@Override
 	public void finished() {
 
-		String tree = (((NucleusTreeBuilder) worker).getNewickTree());
+		Tree tree = (((NeighbourJoiningTreeBuilder) worker).getTree());
+		
+		RootedTree rt = Utils.rootTreeAtCenter(tree);
+		String newick = Utils.toNewick(rt);
 
-		ClusteringOptions options =  ((NucleusTreeBuilder) worker).getOptions();
+//		ClusteringOptions options =  ((NucleusTreeBuilder) worker).getOptions();
+		ClusteringOptions options = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
+		options.setClusterNumber(1);
+		options.setHierarchicalMethod(HierarchicalClusterMethod.NEIGHBOR_JOINING);
+		options.setIncludeModality(false);
+		options.setModalityRegions(2);
+		options.setUseSimilarityMatrix(true);
 
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
-		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, tree);
+		ClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, newick);
 		
 		ClusterTreeDialog clusterPanel = new ClusterTreeDialog(programLogger, dataset, group);
 		clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
