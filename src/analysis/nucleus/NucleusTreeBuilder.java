@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import utility.Constants;
 import utility.Utils;
+import weka.clusterers.Cobweb;
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
 import weka.core.EuclideanDistance;
@@ -97,7 +98,9 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		} else {
 			instances = makeStandardInstances(collection);
 		}
+		log(Level.FINEST, instances.toSummaryString());
 		return instances;
+		
 	}
 	
 
@@ -129,13 +132,14 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					log(Level.FINEST, "Clusterer options: "+s);
 				}
 				
-
+//				Cobweb clusterer = new Cobweb();
 				HierarchicalClusterer clusterer = new HierarchicalClusterer();
 
 				clusterer.setOptions(optionArray);     // set the options
 				clusterer.setDistanceFunction(new EuclideanDistance());
 				clusterer.setDistanceIsBranchLength(true);
 				clusterer.setNumClusters(1);
+				clusterer.setDebug(true);
 
 				log(Level.FINEST, "Building clusterer for tree");
 				firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
@@ -146,12 +150,10 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 
 			} catch (Exception e) {
 				logError("Error in clustering", e);
-//				programLogger.log(Level.SEVERE, "Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
 			logError("Error in assignments", e);
-//			programLogger.log(Level.SEVERE, "Error in assignments", e);
 			return false;
 		}
 		return true;
@@ -279,7 +281,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				inst.setValue(aspect, n.getAspectRatio());
 				//				stringList.add(n.getNameAndNumber());
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					inst.setValue(name,  n.getNameAndNumber());
+					String uniqueName = n.getSourceDirectoryName()+"-"+n.getNameAndNumber();
+					inst.setValue(name,  uniqueName);
 				}
 
 
@@ -327,11 +330,13 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 
 				int j = 0;
 				for(Nucleus n2 : nuclei){
+					
+					/*
+					 * TODO: We can cut this in half by flipping the matrix
+					 */
 
 					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
-					
-					score /= n1.getPerimeter();
-					
+										
 					matrix[i][j] = score;
 
 					j++;
@@ -384,12 +389,12 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					Attribute att = (Attribute) attributes.elementAt(j);
 					double score = matrix[i][j];
 //					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
-//					score /= n1.getPerimeter();
+					score /= n1.getPerimeter();
 					inst.setValue(att, score);
 					j++;
 				}
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					inst.setValue(name,  n1.getNameAndNumber());
+					inst.setValue(name,  n1.getSourceDirectoryName()+"-"+n1.getNameAndNumber());
 				}
 				
 				inst.setValue(area, n1.getArea());

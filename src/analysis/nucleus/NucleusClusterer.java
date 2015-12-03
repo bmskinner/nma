@@ -53,11 +53,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 //	private ClusteringOptions options;
 		
 	public NucleusClusterer(AnalysisDataset dataset, ClusteringOptions options, Logger programLogger){
-		super(dataset, options, programLogger);
-//		this.options = options;
-//		this.collection = dataset.getCollection();
-//		this.setProgressTotal(dataset.getCollection().size() * 2);
-		
+		super(dataset, options, programLogger);		
 		log(Level.FINEST, "Total set to "+this.getProgressTotal());
 	}
 	
@@ -165,12 +161,10 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 
 			} catch (Exception e) {
 				logError("Error in clustering", e);
-//				programLogger.log(Level.SEVERE, "Error in clustering", e);
 				return false;
 			}
 		} catch (Exception e) {
 			logError("Error in assignments", e);
-//			programLogger.log(Level.SEVERE, "Error in assignments", e);
 			return false;
 		}
 		return true;

@@ -54,6 +54,10 @@ public interface Nucleus {
 
 	public UUID getID();
 
+	/**
+	 * Get the absolute path to the image containing the nucleus
+	 * @return
+	 */
 	public String getPath();
 	
 	/**
@@ -151,6 +155,14 @@ public interface Nucleus {
 	 * @return
 	 */
 	public String getDirectory();
+	
+	/**
+	 * Get the name of the directory in which the image containing
+	 * the nucleus is found. e.g. C:\Folder\ImageFolder\1.tiff
+	 * will return ImageFolder
+	 * @return
+	 */
+	public String getSourceDirectoryName();
 
 	/**
 	 * Get the absolute path to the image containing the nucleus

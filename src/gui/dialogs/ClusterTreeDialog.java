@@ -6,11 +6,13 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.components.DraggableTreeViewer;
 import gui.components.VariableNodePainter;
+import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -19,11 +21,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +59,10 @@ import jebl.evolution.taxa.Taxon;
 import jebl.evolution.trees.RootedTree;
 import jebl.evolution.trees.Tree;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
+import jebl.gui.trees.treeviewer.treelayouts.RectilinearTreeLayout;
+import jebl.gui.trees.treeviewer.treelayouts.TreeLayout;
 import jebl.gui.trees.treeviewer.TreePane;
+import jebl.gui.trees.treeviewer.TreePaneSelector.SelectionMode;
 
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends JDialog implements ActionListener, ItemListener {
@@ -80,33 +88,8 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		this.setLayout(new BorderLayout());
 		this.viewer = new DraggableTreeViewer();
 				
-		
-//		viewer.getTreePane().addMouseMotionListener(new MouseMotionAdapter(){
-//
-//			@Override
-//			public void mouseMoved(MouseEvent e){
-//
-//				Point location = viewer.getMousePosition();
-//				double lineLength = viewer.getTreePane().getBounds().getHeight();
-//
-//				Line2D.Double line = new Line2D.Double(location.getX(), 
-//						0, 
-//						location.getX(), 
-//						lineLength);
-//				
-//				viewer.addLine(line);
-//				viewer.repaint();
-//			}
-//				
-//			
-//			@Override
-//			public void	mouseDragged(MouseEvent e){
-//
-//			}
-//		});
-//		viewer.getTreePane().addMouseMotionListener(new MouseClusterSelectionAdapter());
-		viewer.addMouseMotionListener(new MouseClusterSelectionAdapter());
-		
+		viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());
+
 
 		this.add(viewer, BorderLayout.CENTER);
 		
@@ -197,7 +180,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 					String name = t.getName();
 
 					for(Nucleus nucleus : cluster.getNuclei()){
-						if(nucleus.getNameAndNumber().equals(name)){
+						if(taxonNamesMatch(name, nucleus)){
 							clusterMemberships.put(n, Color.BLACK);
 						}
 							
@@ -233,7 +216,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 						String name = t.getName();
 
 						for(Nucleus nucleus : cluster.getCollection().getNuclei()){
-							if(nucleus.getNameAndNumber().equals(name)){
+							if(taxonNamesMatch(name, nucleus)){
 								clusterMemberships.put(n, colour);
 							}
 						}
@@ -244,6 +227,15 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			}
 			VariableNodePainter painter = new VariableNodePainter("Cluster", tree, PainterIntent.TIP, clusterMemberships);
 			viewer.getTreePane().setTaxonLabelPainter(painter);
+		}
+	}
+	
+	private boolean taxonNamesMatch(String name, Nucleus nucleus){
+		String nucleusName = nucleus.getSourceDirectoryName()+"-"+nucleus.getNameAndNumber();
+		if(name.equals(nucleusName)){
+			return true;
+		} else {
+			return false;
 		}
 	}
 	
@@ -276,52 +268,57 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		
 		return result;
 	}
+	
+	private void extractSelectedNodesToCluster(){
+		CellCollection template = dataset.getCollection();
+		
+		CellCollection clusterCollection = new CellCollection(template.getFolder(), 
+				template.getOutputFolderName(), 
+				template.getName()+"_ManualCluster_"+clusterList.size(), 
+				template.getDebugFile(), 
+				template.getNucleusType());
+		
+		String newName = template.getName()+"_ManualCluster_"+clusterList.size();
+		newName = checkName(clusterList.size());
+		
+		clusterCollection.setName(newName);
+
+		Tree tree = viewer.getTreePane().getTree();
+
+		Set<Node> nodes = viewer.getTreePane().getSelectedNodes();
+		for(Node n : nodes){
+
+			if(tree.isExternal(n)){
+
+				Taxon t = tree.getTaxon(n);
+				
+				String name = t.getName();
+				
+				for(Cell c : dataset.getCollection().getCells()){
+
+					if(taxonNamesMatch(name, c.getNucleus())){
+						clusterCollection.addCell(new Cell (c));
+					}
+				}
+			}
+
+		}
+		
+		if(clusterCollection.hasCells()){
+			colourTreeNodesByCluster(clusterCollection);
+			clusterList.add(clusterCollection);
+			programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
+		} else {
+			programLogger.log(Level.WARNING, "No cells found. Check taxon labels are correct");
+		}
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
 		if(e.getActionCommand().equals("Extract")){
 			
-			CellCollection template = dataset.getCollection();
-			
-			CellCollection clusterCollection = new CellCollection(template.getFolder(), 
-					template.getOutputFolderName(), 
-					template.getName()+"_ManualCluster_"+clusterList.size(), 
-					template.getDebugFile(), 
-					template.getNucleusType());
-			
-			String newName = template.getName()+"_ManualCluster_"+clusterList.size();
-			newName = checkName(clusterList.size());
-			
-			clusterCollection.setName(newName);
-
-			Tree tree = viewer.getTreePane().getTree();
-
-			Set<Node> nodes = viewer.getTreePane().getSelectedNodes();
-			for(Node n : nodes){
-
-				if(tree.isExternal(n)){
-
-					Taxon t = tree.getTaxon(n);
-					
-					String name = t.getName();
-					
-					for(Cell c : dataset.getCollection().getCells()){
-						if(c.getNucleus().getNameAndNumber().equals(name)){
-							clusterCollection.addCell(new Cell (c));
-						}
-					}
-				}
-
-			}
-			
-			if(clusterCollection.hasCells()){
-				colourTreeNodesByCluster(clusterCollection);
-				clusterList.add(clusterCollection);
-				programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
-			} else {
-				programLogger.log(Level.WARNING, "No cells found. Check taxon labels are correct");
-			}
+			extractSelectedNodesToCluster();
 			
 
 		}
@@ -496,43 +493,95 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			
 		}
 		
-		@Override
-		public void mousePressed(MouseEvent e){
-			
-			Point location = viewer.getTreePane().getMousePosition();
-			
-			/*
-			 * How to get the rectangle left of the mouse x-position?
-			 * Then select all nodes to the left, and find the nodes with no children
-			 * selected. Use their direct children as the new clusters
-			 */
-			
-//			 The region left of the line
-			Rectangle r = new Rectangle( (int) location.getX(), (int) viewer.getTreePane().getBounds().getHeight());
+//		public void mousePressed(MouseEvent e){
 //			
-			TreePane pane = viewer.getTreePane();
-
-			
-//			for(Edge edge : viewer.getTreePane().getTree().getEdges()){
-//				edge.getLength();
-//			}
-			
-//			for(Node n : viewer.getTreePane().getTree().getNodes()){
+//			TreePane pane = viewer.getTreePane();
+//			Point location = pane.getMousePosition();
+//			RootedTree tree = pane.getTree();
+//			/*
+//			 * How to get the rectangle left of the mouse x-position?
+//			 * Then select all nodes to the left, and find the nodes with no children
+//			 * selected. Use their direct children as the new clusters
+//			 */
+//			IJ.log("Click heard");
+//			
+////			 The region left of the line
+//			Rectangle r = new Rectangle( (int) location.getX(), (int) pane.getBounds().getHeight());
+//			viewer.setSelectionMode(SelectionMode.NODE);
+//			pane.setDragRectangle(r);
+//			
+//			// Need to select the given nodes
+//			
+//			Set<Node> leftNodes = pane.getSelectedNodes();
 //
+////			Set<Node> leftNodes = viewer.getNodesAtPoint((Graphics2D) pane.getGraphics(), r);
+////			Set<Node> leftNodes = getNodesAt((Graphics2D) pane.getGraphics(), r);
+//			
+//			// The child free nodes
+//			Set<Node> childLess = new HashSet<Node>();
+//			for(Node n : leftNodes){
+//				for(Node check : leftNodes){
+//					if( ! tree.getChildren(n).contains(check)){
+//						// no children in the left space
+//						childLess.add(n);
+//					}
+//				}
 //			}
-			
-//			viewer.getTreePane().getTree();
-			
-			
-		}
+//			IJ.log("Found "+childLess.size()+" child free nodes left of point");
+//			viewer.setSelectionMode(SelectionMode.CLADE);
+//			for(Node n : childLess){
+//				List<Node> clusterNodes = tree.getChildren(n);
+//				
+//				for(Node clusterNode : clusterNodes){
+//					pane.setSelectedNode(clusterNode);
+//					extractSelectedNodesToCluster();
+//					
+//				}
+//			}
+//			IJ.log("Clusters made");
+//			
+//			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+//			
+//			for(CellCollection c : clusterList){
+//				if(c.hasCells()){
+//
+//					dataset.addChildCollection(c);
+//
+//					AnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+//					clusterDataset.setRoot(false);
+//					list.add(clusterDataset);
+//				}
+//			}
+//			
+//			ClusteringOptions newOptions = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
+//			newOptions.setClusterNumber(list.size());
+//			newOptions.setHierarchicalMethod(group.getOptions().getHierarchicalMethod());
+//			newOptions.setIncludeModality(group.getOptions().isIncludeModality());
+//			newOptions.setModalityRegions(group.getOptions().getModalityRegions());
+//			newOptions.setUseSimilarityMatrix(group.getOptions().isUseSimilarityMatrix());
+//			int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+//			ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
+//
+//			for(AnalysisDataset d : list){
+//				d.setName(newGroup.getName()+"_"+d.getName());
+//				newGroup.addDataset(d);
+//			}
+//			
+//			colourTreeNodesByClusterGroup(newGroup);
+//			
+//			
+//		}
 		
-//		Set<Node> getNodesAt(Graphics2D g2, Rectangle rect) {
-//
+//		private Set<Node> getNodesAt(Graphics2D g2, Rectangle rect) {
+////
 //	        Set<Node> nodes = new HashSet<Node>();
-//
+////
 //	        Tree tree = viewer.getTreePane().getTree();
+//	        
+//	        IJ.log("Selection rectangle: "+rect.x+", "+rect.y+"  :  "+rect.width+" x "+rect.height);
 //	        AffineTransform transform = g2.getTransform();
-//	        TreeLayout treeLayout = viewer.getTreePane().getTreeLayout();
+//	        TreeLayout treeLayout = new RectilinearTreeLayout();
+//	        treeLayout.setTree(tree);
 //
 //	        Node[] allNodes = tree.getNodes().toArray(new Node[0]);
 //	        for(int i=allNodes.length-1; i >= 0; i--){
@@ -543,7 +592,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 //
 //	        return nodes;
 //	    }
-		
+//		
 		@Override
 		public void mouseMoved(MouseEvent e){
 

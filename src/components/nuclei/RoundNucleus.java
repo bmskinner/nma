@@ -340,6 +340,10 @@ public class RoundNucleus
 	public String getDirectory(){
 		return this.sourceFile.getParent();
 	}
+	
+	public String getSourceDirectoryName(){
+		return this.sourceFile.getParentFile().getName();
+	}
 
 	public String getPathWithoutExtension(){
 		
