@@ -430,8 +430,14 @@ public abstract class ImageProber extends JDialog {
 				
 				probableFiles = new ArrayList<File>();
 				probableFiles = importImages(folder);
-				openImage = probableFiles.get(index);
-				importAndDisplayImage(openImage);
+				
+				if(probableFiles.size()>0){
+					openImage = probableFiles.get(index);
+					importAndDisplayImage(openImage);
+				} else {
+					programLogger.log(Level.WARNING, "No images found in folder");
+					setStatusError();
+				}
 			}
 		};	
 		thr.start();
