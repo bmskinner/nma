@@ -20,7 +20,7 @@ import jebl.gui.trees.treeviewer.TreeViewer;
 public class DraggableTreeViewer extends TreeViewer {
 	
 	List<Line2D.Double> lines = new ArrayList<Line2D.Double>();
-	SelectableTreePane sampleTreePane;
+//	SelectableTreePane sampleTreePane;
 	
 	public DraggableTreeViewer(){
 		super();
