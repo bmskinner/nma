@@ -19,7 +19,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.io.StringReader;
@@ -48,21 +47,14 @@ import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
-import jebl.evolution.graphs.Edge;
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
 import jebl.evolution.io.NewickImporter;
 import jebl.evolution.taxa.Taxon;
 import jebl.evolution.trees.RootedTree;
 import jebl.evolution.trees.Tree;
-import jebl.gui.trees.treeviewer.TreeViewer;
-import jebl.gui.trees.treeviewer.decorators.AttributeBranchDecorator;
-import jebl.gui.trees.treeviewer.decorators.BranchDecorator;
-import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
-import jebl.gui.trees.treeviewer.painters.Painter;
-import jebl.gui.trees.treeviewer_dev.decorators.Decorator;
-import jebl.gui.trees.treeviewer_dev.decorators.DiscreteColorDecorator;
+import jebl.gui.trees.treeviewer.TreePane;
 
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends JDialog implements ActionListener, ItemListener {
@@ -112,7 +104,8 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 //
 //			}
 //		});
-		viewer.getTreePane().addMouseMotionListener(new MouseClusterSelectionAdapter());
+//		viewer.getTreePane().addMouseMotionListener(new MouseClusterSelectionAdapter());
+		viewer.addMouseMotionListener(new MouseClusterSelectionAdapter());
 		
 
 		this.add(viewer, BorderLayout.CENTER);
@@ -192,6 +185,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		if(cluster!=null){
 			
 			Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
+//			RootedTree tree = (RootedTree) viewer.getTrees().get(0);
 			RootedTree tree = viewer.getTreePane().getTree();
 
 			for(Node n : tree.getNodes()){
@@ -215,6 +209,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 
 			VariableNodePainter painter = new VariableNodePainter("cluster", tree, PainterIntent.TIP, clusterMemberships);
 			viewer.getTreePane().setTaxonLabelPainter(painter);
+//			viewer.setTipLabelPainter(painter);
 		}
 	}
 	
@@ -223,6 +218,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		if(group!=null){
 			Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
 			RootedTree tree = viewer.getTreePane().getTree();
+//			RootedTree tree = (RootedTree) viewer.getTrees().get(0);
 			int clusterNumber = 0;
 			for(UUID id : group.getUUIDs()){
 				AnalysisDataset cluster = dataset.getChildDataset(id);
@@ -506,23 +502,47 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			Point location = viewer.getTreePane().getMousePosition();
 			
 			/*
-			 * How to get the edges or nodes bisected by the mouse x-position?
-			 * May be able to use the branch lengths cumulatively,
-			 * iterating through the tree until we get to a node to the right of the line
+			 * How to get the rectangle left of the mouse x-position?
+			 * Then select all nodes to the left, and find the nodes with no children
+			 * selected. Use their direct children as the new clusters
 			 */
 			
-			for(Edge edge : viewer.getTreePane().getTree().getEdges()){
-				edge.getLength();
-			}
-			
-			for(Node n : viewer.getTreePane().getTree().getNodes()){
+//			 The region left of the line
+			Rectangle r = new Rectangle( (int) location.getX(), (int) viewer.getTreePane().getBounds().getHeight());
+//			
+			TreePane pane = viewer.getTreePane();
 
-			}
 			
-			viewer.getTreePane().getTree();
+//			for(Edge edge : viewer.getTreePane().getTree().getEdges()){
+//				edge.getLength();
+//			}
+			
+//			for(Node n : viewer.getTreePane().getTree().getNodes()){
+//
+//			}
+			
+//			viewer.getTreePane().getTree();
 			
 			
 		}
+		
+//		Set<Node> getNodesAt(Graphics2D g2, Rectangle rect) {
+//
+//	        Set<Node> nodes = new HashSet<Node>();
+//
+//	        Tree tree = viewer.getTreePane().getTree();
+//	        AffineTransform transform = g2.getTransform();
+//	        TreeLayout treeLayout = viewer.getTreePane().getTreeLayout();
+//
+//	        Node[] allNodes = tree.getNodes().toArray(new Node[0]);
+//	        for(int i=allNodes.length-1; i >= 0; i--){
+//	            if(rect.contains(transform.transform(treeLayout.getNodePoint(allNodes[i]),null))){
+//	                nodes.add(allNodes[i]);
+//	            }
+//	        }
+//
+//	        return nodes;
+//	    }
 		
 		@Override
 		public void mouseMoved(MouseEvent e){
