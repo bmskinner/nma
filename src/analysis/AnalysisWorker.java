@@ -118,6 +118,10 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
         }
     }
     
+    protected void fireCooldown(){
+    	firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());  
+    }
+    
     @Override
     public void done() {
     	
