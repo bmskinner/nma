@@ -85,10 +85,6 @@ public class MorphologyAnalysis extends AnalysisWorker {
     		this.mode = MODE_COPY;
     		this.sourceCollection = source;
 
-//    		MorphologyAnalysis.fileLogger = Logger.getLogger(MorphologyAnalysis.class.getName());
-//    		fileLogger.setLevel(Level.FINE);
-//    		fileLogger.addHandler(dataset.getLogHandler());
-//    		fileLogger.log(Level.FINE, "Created MorphologyAnalysis");
     	} catch (Exception e){
     		logError("Error creating analysis", e);
     	}

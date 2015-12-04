@@ -51,16 +51,19 @@ public class PopulationExporter extends AnalysisWorker {
 		CellCollection collection = dataset.getCollection();
 		this.saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
 		this.setProgressTotal(1);
+//		this.setProgress(0);
 		
 	}
 	
 	@Override
 	protected Boolean doInBackground() throws Exception {
-				
+		publish(0);
 		if(saveAnalysisDataset(getDataset(), saveFile)){
 			publish(1);
+			log(Level.FINEST, "Save was sucessful");
 			return true;
 		} else{
+			log(Level.WARNING, "Save was unsucessful");
 			return false;
 		}
 		
