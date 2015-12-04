@@ -19,22 +19,35 @@
 package gui.actions;
 
 import gui.MainWindow;
+import ij.io.SaveDialog;
 
 import java.io.File;
 import java.util.List;
 
+import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetMerger;
 import analysis.nucleus.MorphologyAnalysis;
 
 public class MergeCollectionAction extends ProgressableAction {
 
-	public MergeCollectionAction(List<AnalysisDataset> datasets, File saveFile, MainWindow mw) {
+	public MergeCollectionAction(List<AnalysisDataset> datasets, MainWindow mw) {
 		super(null, "Merging", "Error merging", mw);
 
-		worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile, programLogger);
-		worker.addPropertyChangeListener(this);
-		worker.execute();	
+		SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Constants.SAVE_FILE_EXTENSION);
+
+		String fileName = saveDialog.getFileName();
+		String folderName = saveDialog.getDirectory();
+		
+		if(fileName!=null && folderName!=null){
+			File saveFile = new File(folderName+File.separator+fileName);
+			worker = new DatasetMerger(datasets, DatasetMerger.DATASET_MERGE, saveFile, programLogger);
+			worker.addPropertyChangeListener(this);
+			worker.execute();	
+		} else {
+			this.cancel();
+		}
+
 	}
 
 	@Override

@@ -40,28 +40,18 @@ public class RefoldNucleusAction extends ProgressableAction {
 	
 	public RefoldNucleusAction(AnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
 		super(dataset, "Refolding", "Error refolding nucleus", mw);
-		programLogger.log(Level.FINEST, "Created RefoldNucleusAction");
+		this.setLatch(doneSignal);
 		try{
 
 			this.progressBar.setIndeterminate(true);
 			worker = new CurveRefolder(dataset, 
 					CurveRefoldingMode.FAST, 
-					doneSignal, 
 					programLogger);
 
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Refolding: "+dataset.getName());
 			
-			/*
-			 * The SwingWorker doInBackground is off the EDT. At this point, the EDT should be free
-			 * 
-			 * 
-			 * What thread is waiting for a signal from the worker?
-			 */
-			programLogger.log(Level.FINEST, "RefoldNucleusAction init is EDT: "+SwingUtilities.isEventDispatchThread());
-			
 			worker.execute();
-			programLogger.log(Level.FINEST, "Executed CurveRefolder");
 
 		} catch(Exception e1){
 			this.cancel();
@@ -73,14 +63,12 @@ public class RefoldNucleusAction extends ProgressableAction {
 	public void finished(){
 
 		programLogger.log(Level.FINE, "Refolding finished, cleaning up");
-		programLogger.log(Level.FINEST, "RefoldNucleusAction.finished() is EDT: "+SwingUtilities.isEventDispatchThread());
-		
-		
-		// ensure the bar is gone, even if the cleanup fails
-		this.progressBar.setVisible(false);
+
 		dataset.getAnalysisOptions().setRefoldNucleus(true);
 		dataset.getAnalysisOptions().setRefoldMode("Fast");
+		
 		super.finished();
+		this.countdownLatch();
 		
 	}
 

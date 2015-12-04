@@ -33,6 +33,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,6 +58,7 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	protected LogPanel logPanel;
 	protected Logger programLogger;
 	protected MainWindow mw;
+	private CountDownLatch latch = null; // allow threads to wait for the analysis to complete
 	
 	private List<Object> interfaceListeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
@@ -80,6 +82,16 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		this.addInterfaceEventListener(mw);
 		this.addDatasetEventListener(mw);
 
+	}
+	
+	protected void setLatch(CountDownLatch latch){
+		this.latch = latch;
+	}
+	
+	protected void countdownLatch(){
+		if(latch!=null){
+			latch.countDown();
+		}
 	}
 	
 	public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, MainWindow mw, int flag){

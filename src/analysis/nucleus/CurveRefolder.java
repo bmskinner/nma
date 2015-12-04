@@ -54,7 +54,7 @@ public class CurveRefolder extends AnalysisWorker {
 	private ConsensusNucleus refoldNucleus;
 	
 	private CellCollection collection;
-	private CountDownLatch doneSignal;
+//	private CountDownLatch doneSignal;
 	
 	private CurveRefoldingMode mode = CurveRefoldingMode.FAST; 				 // the dafault mode
 	
@@ -87,9 +87,9 @@ public class CurveRefolder extends AnalysisWorker {
 	 * @param refoldMode
 	 * @throws Exception
 	 */
-	public CurveRefolder(AnalysisDataset dataset, CurveRefoldingMode refoldMode, CountDownLatch doneSignal, Logger logger) throws Exception {
+	public CurveRefolder(AnalysisDataset dataset, CurveRefoldingMode refoldMode, Logger logger) throws Exception {
 		super(dataset, logger);
-		this.doneSignal = doneSignal;
+//		this.doneSignal = doneSignal;
 		this.setProgressTotal(refoldMode.maxIterations());
 
 		collection = dataset.getCollection();
@@ -157,8 +157,6 @@ public class CurveRefolder extends AnalysisWorker {
 		} catch(Exception e){
 			logError("Unable to refold nucleus", e);
 			return false;
-		} finally {
-			doneSignal.countDown();
 		}
 		return true;
 	}

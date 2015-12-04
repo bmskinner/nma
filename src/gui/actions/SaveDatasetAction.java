@@ -3,6 +3,7 @@ package gui.actions;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import io.PopulationExporter;
@@ -20,9 +21,8 @@ public class SaveDatasetAction extends ProgressableAction {
 	 * @param errorMessage
 	 * @param mw
 	 */
-	public SaveDatasetAction(AnalysisDataset dataset, String barMessage,
-			String errorMessage, MainWindow mw) {
-		this(dataset, dataset.getSavePath(), barMessage, errorMessage, mw);
+	public SaveDatasetAction(AnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
+		this(dataset, dataset.getSavePath(), mw, doneSignal);
 	}
 	
 	/**
@@ -33,9 +33,9 @@ public class SaveDatasetAction extends ProgressableAction {
 	 * @param errorMessage
 	 * @param mw
 	 */
-	public SaveDatasetAction(AnalysisDataset dataset, File saveFile, String barMessage,
-			String errorMessage, MainWindow mw) {
-		super(dataset, barMessage, errorMessage, mw);
+	public SaveDatasetAction(AnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
+		super(dataset, "Saving dataset", "Error saving dataset", mw);
+		setLatch(doneSignal);
 		mw.getProgramLogger().log(Level.FINE, "Save dataset action created");
 		
 		worker = new PopulationExporter(dataset, saveFile, programLogger);
@@ -49,6 +49,7 @@ public class SaveDatasetAction extends ProgressableAction {
 		cancel();		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);
+		this.countdownLatch();
 		
 	}
 

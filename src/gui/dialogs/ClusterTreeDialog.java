@@ -86,6 +86,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		this.group = group;
 		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.viewer = new DraggableTreeViewer();
 				
 		viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());

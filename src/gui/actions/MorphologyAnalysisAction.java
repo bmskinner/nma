@@ -191,9 +191,6 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 				if(  (downFlag & MainWindow.CURVE_REFOLD) == MainWindow.CURVE_REFOLD){
 
 					final CountDownLatch latch = new CountDownLatch(1);
-//					logger.log("Running curve refolder", utility.Logger.DEBUG);
-					programLogger.log(Level.FINEST, "Morphology finished() process thread is EDT: "+SwingUtilities.isEventDispatchThread());
-					
 					new RefoldNucleusAction(dataset, mw, latch);
 					try {
 						latch.await();
@@ -203,10 +200,13 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 				}
 
 				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
-//					logger.log("Saving dataset", utility.Logger.DEBUG);
-					new SaveDatasetAction(dataset, "Saving dataset", "Error saving dataset", mw);
-//					
-//					PopulationExporter.saveAnalysisDataset(dataset);
+					final CountDownLatch latch = new CountDownLatch(1);
+					new SaveDatasetAction(dataset, mw, latch);
+					try {
+						latch.await();
+					} catch (InterruptedException e) {
+						programLogger.log(Level.SEVERE, "Interruption to thread", e);
+					}
 				}
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
@@ -218,13 +218,11 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 				// if no list was provided, or no more entries remain,
 				// call the finish
 				if(processList==null){
-//					logger.log("Analysis complete, process list null, cleaning up", utility.Logger.DEBUG);
+
 					MorphologyAnalysisAction.super.finished();
 				} else if(processList.isEmpty()){
-//					logger.log("Analysis complete, process list empty, cleaning up", utility.Logger.DEBUG);
 					MorphologyAnalysisAction.super.finished();
 				} else {
-//					logger.log("Morphology analysis continuing; removing progress bar", utility.Logger.DEBUG);
 					// otherwise analyse the next item in the list
 					cancel();
 					if(mode == MorphologyAnalysis.MODE_COPY){
@@ -239,10 +237,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 								new MorphologyAnalysisAction(processList, mode, downFlag, mw);
 							}});
 					}
-				}
-//				removeDatasetEventListener(mw);
-//				removeInterfaceEventListener(mw);
-			
+				}			
 			}
 		};
 		thr.start();
