@@ -35,6 +35,8 @@ public class DebugFileFormatter extends Formatter {
 				 + "\t" 
 				 + record.getLoggerName()
 				 + "\t"
+				 + record.getSourceMethodName()
+				 + "\t"
 				 + record.getMessage()
 				 + "\r\n";
 		 
