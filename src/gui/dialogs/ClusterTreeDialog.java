@@ -249,7 +249,9 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 	}
 	
 	private boolean taxonNamesMatch(String name, Nucleus nucleus){
-		String nucleusName = nucleus.getSourceDirectoryName()+"-"+nucleus.getNameAndNumber();
+		String nucleusName = nucleus.getSourceFile()+"-"+nucleus.getNameAndNumber();
+//		String nucleusName = "'"+nucleus.getSourceFile()+"-"+nucleus.getNameAndNumber()+"'";
+//		String nucleusName = nucleus.getSourceDirectoryName()+"-"+nucleus.getNameAndNumber();
 		if(name.equals(nucleusName)){
 			return true;
 		} else {

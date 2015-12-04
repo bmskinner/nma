@@ -281,7 +281,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				inst.setValue(aspect, n.getAspectRatio());
 				//				stringList.add(n.getNameAndNumber());
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					String uniqueName = n.getSourceDirectoryName()+"-"+n.getNameAndNumber();
+					String uniqueName =  makeUniqueName(n);
+//					String uniqueName = n.getSourceDirectoryName()+"-"+n.getNameAndNumber();
 					inst.setValue(name,  uniqueName);
 				}
 
@@ -347,6 +348,10 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			return matrix;
 		}
 	}
+	
+	private String makeUniqueName(Nucleus n){
+		return "'"+n.getSourceFile()+"-"+n.getNameAndNumber()+"'";
+	}
 
 	private Instances makeMatrixInstances(CellCollection collection){
 		
@@ -398,7 +403,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					attNumber++;
 				}
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					inst.setValue(name,  n1.getSourceDirectoryName()+"-"+n1.getNameAndNumber());
+					String uniqueName = makeUniqueName(n1);
+//					inst.setValue(name,  n1.getSourceDirectoryName()+"-"+n1.getNameAndNumber());
 				}
 				
 				inst.setValue(area, n1.getArea());
