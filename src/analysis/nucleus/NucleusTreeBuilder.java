@@ -348,6 +348,12 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		}
 	}
 	
+	/**
+	 * Make a taxon name with quoting, suitable for use in a Newick tree.
+	 * Uses the full nucleus original file path, so will work in merged datsets.
+	 * @param n
+	 * @return
+	 */
 	private String makeUniqueName(Nucleus n){
 		return "'"+n.getSourceFile()+"-"+n.getNameAndNumber()+"'";
 	}
