@@ -20,8 +20,6 @@ package gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,7 +31,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
-import analysis.AnalysisDataset;
 import charting.DefaultTableOptions;
 import charting.DefaultTableOptions.TableType;
 import charting.TableOptions;
@@ -82,87 +79,71 @@ public class VennDetailPanel extends DetailPanel {
 	
 	/**
 	 * Update the venn panel with data from the given datasets
-	 * @param list the datasets
+	 * @param getDatasets() the datasets
 	 */
-	public void update(final List<AnalysisDataset> list){
-		this.list = list;
+	@Override
+	public void updateDetail(){
+		
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				updateVennTable();
 				updatePairwiseVennTable();
+				setUpdating(false);
 			}});
 	}
-	
+
 	private void updateVennTable(){
 		programLogger.log(Level.FINE, "Updating venn panel");
-		
-//		Thread thr = new Thread(){
-//		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-			
-				
-				// format the numbers and make into a tablemodel
-				TableModel model = NucleusTableDatasetCreator.createVennTable(null);
-				
-				if(!list.isEmpty() && list!=null){
-					
-					TableOptions options = new DefaultTableOptions(list, TableType.VENN);
-					if(getTableCache().hasTable(options)){
-						model = getTableCache().getTable(options);
-					} else {
-						model = NucleusTableDatasetCreator.createVennTable(list);
-						getTableCache().addTable(options, model);
-					}
 
-				}
-				vennTable.setModel(model);
-				
-				int columns = vennTable.getColumnModel().getColumnCount();
 
-				if(columns>1){
-					for(int i=1;i<columns;i++){
-						vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
-					}
-				}
-				programLogger.log(Level.FINEST, "Updated venn panel");
-//		}};//);
-//		thr.start();
+		// format the numbers and make into a tablemodel
+		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
+
+		if(!getDatasets().isEmpty() && getDatasets()!=null){
+
+			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.VENN);
+			if(getTableCache().hasTable(options)){
+				model = getTableCache().getTable(options);
+			} else {
+				model = NucleusTableDatasetCreator.createVennTable(getDatasets());
+				getTableCache().addTable(options, model);
+			}
+
+		}
+		vennTable.setModel(model);
+
+		int columns = vennTable.getColumnModel().getColumnCount();
+
+		if(columns>1){
+			for(int i=1;i<columns;i++){
+				vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
+			}
+		}
+		programLogger.log(Level.FINEST, "Updated venn panel");
 	}
-	
+
 	private void updatePairwiseVennTable(){
 		programLogger.log(Level.FINE, "Updating pairwise venn table");
-		
-//		Thread thr = new Thread(){
-////		SwingUtilities.invokeLater(new Runnable(){
-//			public void run(){
-			
-				
-				// format the numbers and make into a tablemodel
-				TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
-				
-				if(!list.isEmpty() && list!=null){
-					
-					TableOptions options = new DefaultTableOptions(list, TableType.PAIRWISE_VENN);
-					if(getTableCache().hasTable(options)){
-						model = getTableCache().getTable(options);
-					} else {
-						model = NucleusTableDatasetCreator.createPairwiseVennTable(list);
-						getTableCache().addTable(options, model);
-					}
 
-				}
-				pairwiseVennTable.setModel(model);
-				
-//				int columns = vennTable.getColumnModel().getColumnCount();
-//
-//				if(columns>1){
-//					for(int i=1;i<columns;i++){
-//						vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
-//					}
-//				}
-				programLogger.log(Level.FINEST, "Updated pairwise venn panel");
-//		}};//);
-//		thr.start();
+
+		// format the numbers and make into a tablemodel
+		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
+
+		if(!getDatasets().isEmpty() && getDatasets()!=null){
+
+			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
+			if(getTableCache().hasTable(options)){
+				model = getTableCache().getTable(options);
+			} else {
+				model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
+				getTableCache().addTable(options, model);
+			}
+
+		}
+		pairwiseVennTable.setModel(model);
+
+		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
+
 	}
 	
 	/**

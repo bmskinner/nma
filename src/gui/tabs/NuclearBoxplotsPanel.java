@@ -95,25 +95,51 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		this.add(tabPane, BorderLayout.CENTER);
 	}
-
-	public void update(List<AnalysisDataset> list){	
-		this.list = list;
-		programLogger.log(Level.FINE, "Updating nuclear boxplots panel");
+	
+	@Override
+	protected void updateDetail(){
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				try {
-					
-					boxplotPanel.update(NuclearBoxplotsPanel.this.list);
+
+					boxplotPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
-					histogramsPanel.update(NuclearBoxplotsPanel.this.list);
+					histogramsPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
+				} finally {
+					setUpdating(false);
 				}
 			}
 		});
-
 	}
+
+//	public void update(List<AnalysisDataset> list){	
+//		if(this.isUpdating()){
+//			programLogger.log(Level.FINEST, "Profiles panel is already updating");
+//		} else {
+//			setUpdating(true);
+//			this.list = list;
+//			programLogger.log(Level.FINE, "Updating nuclear boxplots panel");
+//			SwingUtilities.invokeLater(new Runnable(){
+//				public void run(){
+//					try {
+//
+//						boxplotPanel.update(NuclearBoxplotsPanel.this.list);
+//						programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
+//						histogramsPanel.update(NuclearBoxplotsPanel.this.list);
+//						programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
+//					} catch (Exception e) {
+//						programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
+//					} finally {
+//						setUpdating(false);
+//					}
+//				}
+//			});
+//		}
+//
+//	}
 	
 	protected class BoxplotsPanel extends JPanel implements ActionListener {
 
@@ -135,7 +161,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			
 			for(NucleusStatistic stat : NucleusStatistic.values()){
 				
-				BoxplotChartOptions options = new BoxplotChartOptions(list, stat, MeasurementScale.PIXELS);
+				BoxplotChartOptions options = new BoxplotChartOptions(getDatasets(), stat, MeasurementScale.PIXELS);
 				JFreeChart chart = null;
 				try {
 					chart = BoxplotChartFactory.createNucleusStatisticBoxplot(options);
@@ -199,7 +225,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
-			update(list);
+			update(getDatasets());
 			
 		}
 		
@@ -232,8 +258,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 		}
 
-		public void update(List<AnalysisDataset> list) {
-			HistogramsPanel.this.list = list;
+		@Override
+		public void updateDetail() {
+//			HistogramsPanel.this.getDatasets() = list;
 
 			MeasurementScale scale  = HistogramsPanel.this.measurementUnitSettingsPanel.getSelected();
 			boolean useDensity = HistogramsPanel.this.useDensityPanel.isSelected();
@@ -243,7 +270,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					SelectableChartPanel panel = HistogramsPanel.this.chartPanels.get(stat.toString());
 
 					JFreeChart chart = null;
-					HistogramChartOptions options = new HistogramChartOptions(list, stat, scale, useDensity);
+					HistogramChartOptions options = new HistogramChartOptions(getDatasets(), stat, scale, useDensity);
 					options.setLogger(programLogger);
 
 					if(this.getChartCache().hasChart(options)){
@@ -342,7 +369,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
 
 					// create a new sub-collection with the given parameters for each dataset
-					for(AnalysisDataset dataset : list){
+					for(AnalysisDataset dataset : getDatasets()){
 						CellCollection collection = dataset.getCollection();
 						try {
 							

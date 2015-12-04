@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import charting.ChartCache;
 import charting.TableCache;
@@ -51,12 +52,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	private List<Object> listeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	private List<Object> interfaceListeners = new ArrayList<Object>();
-	protected List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
 	// The chart cache holds rendered charts for all selected options, until a change is made to a dataset
 	// The table cache does the same for table models
 	protected ChartCache chartCache = new ChartCache();
 	protected TableCache tableCache = new TableCache();
+	
+	private boolean isUpdating = false;
 	
 	protected Logger programLogger;
 	
@@ -74,8 +77,36 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		return list.get(0);
 	}
 	
+	protected List<AnalysisDataset> getDatasets(){
+		return this.list;
+	}
+	
 	public ChartCache getChartCache(){
 		return this.chartCache;
+	}
+	
+	protected boolean isUpdating(){
+		return this.isUpdating;
+	}
+	
+	protected void setUpdating(boolean b){
+		this.isUpdating = b;
+	}
+	
+	public void update(List<AnalysisDataset> list){
+		
+		if(this.isUpdating()){
+			programLogger.log(Level.FINEST, "Panel is already updating");
+		} else {
+			this.list = list;
+			setUpdating(true);
+			updateDetail();
+		}
+
+	}
+	
+	protected void updateDetail(){
+		
 	}
 		
 	/**

@@ -107,28 +107,29 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	 * @param list the datasets
 	 * @throws Exception 
 	 */
-	public void update(final List<AnalysisDataset> list) {
+	@Override
+	public void updateDetail() {
 		programLogger.log(Level.FINE, "Updating Wilcoxon panel");
-//		Thread thr = new Thread(){
+
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				try{
-					
-					if(!list.isEmpty() && list!=null){
-						
+
+					if(!getDatasets().isEmpty() && getDatasets()!=null){
+
 						for(NucleusStatistic stat : NucleusStatistic.values()){
-							
+
 							TableModel model;
-							
-							TableOptions options = new NucleusStatsTableOptions(list, stat);
+
+							TableOptions options = new NucleusStatsTableOptions(getDatasets(), stat);
 							if(getTableCache().hasTable(options)){
 								programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
 								model = getTableCache().getTable(options);
 							} else {
-								model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(list, stat);
+								model = NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(getDatasets(), stat);
 								programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
 							}
-							
+
 							tables.get(stat).setModel(model);
 							setRenderer(tables.get(stat));
 
@@ -145,11 +146,12 @@ public class WilcoxonDetailPanel extends DetailPanel {
 					programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
+				} finally {
+					setUpdating(false);
 				}
 			}});
-//			thr.start();
 	}
-	
+
 	private void setRenderer(JTable table){
 		int columns = table.getColumnModel().getColumnCount();
 		if(columns>1){

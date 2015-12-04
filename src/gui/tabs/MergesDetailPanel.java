@@ -84,8 +84,8 @@ public class MergesDetailPanel extends DetailPanel {
 		this.add(getSourceButton, BorderLayout.SOUTH);
 	}
 	
-	public void update(List<AnalysisDataset> list){
-		this.list = list;
+	@Override
+	public void updateDetail(){
 		
 		SwingUtilities.invokeLater( new Runnable(){
 
@@ -93,7 +93,7 @@ public class MergesDetailPanel extends DetailPanel {
 				try {
 					programLogger.log(Level.FINEST, "Updating merges panel");
 					getSourceButton.setVisible(false);
-					if(MergesDetailPanel.this.list.size()==1){
+					if(getDatasets().size()==1){
 
 						if(activeDataset().hasMergeSources()){
 
@@ -126,6 +126,8 @@ public class MergesDetailPanel extends DetailPanel {
 					programLogger.log(Level.FINEST, "Updated merges panel");
 				} catch (Exception e){
 					programLogger.log(Level.SEVERE, "Error updating merges panel", e);
+				} finally {
+					setUpdating(false);
 				}
 			}} );
 	}

@@ -25,7 +25,6 @@ import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import stats.DipTester;
 import gui.components.ProfileCollectionTypeSettingsPanel;
 import gui.components.ProfileMarkersOptionsPanel;
-import gui.components.ProflleDisplaySettingsPanel;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -62,20 +61,16 @@ import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.TextAnchor;
 
 import utility.Constants;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;
-import charting.datasets.NucleusDatasetCreator;
 import components.CellCollection;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
-import components.generic.ProfileCollection;
 import components.generic.ProfileCollectionType;
 
 public class NucleusProfilesPanel extends DetailPanel {
@@ -87,8 +82,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 	FrankenProfileDisplayPanel 	frankenDisplayPanel; // hold franken profiles
 	VariabililtyDisplayPanel	variabilityChartPanel;
 	ModalityDisplayPanel 		modalityDisplayPanel;
-	
-	private List<AnalysisDataset> list;
 	
 	public NucleusProfilesPanel(Logger programLogger) {
 		super(programLogger);
@@ -110,31 +103,64 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 	}
 	
-	public void update(List<AnalysisDataset> list){
-		programLogger.log(Level.FINE, "Updating profiles panel");
-		this.list = list;
+	@Override
+	protected void updateDetail(){
+
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-
 				try {
-					
-					profileDisplayPanel.update(NucleusProfilesPanel.this.list);
+
+					profileDisplayPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updated nuclear profiles panel");
-					frankenDisplayPanel.update(NucleusProfilesPanel.this.list);
+					frankenDisplayPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updated franken profiles panel");
-					variabilityChartPanel.update(NucleusProfilesPanel.this.list);
+					variabilityChartPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updated variabililty panel");
-					modalityDisplayPanel.update(NucleusProfilesPanel.this.list);
+					modalityDisplayPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updated modality panel");
 				} catch  (Exception e){
-					programLogger.log(Level.WARNING, "Error updating profile panels", e);
+					programLogger.log(Level.SEVERE, "Error updating profile panels", e);
 					programLogger.log(Level.FINER, "Setting panels to null");
-					
-//					NucleusProfilesPanel.this.update( (List<AnalysisDataset>) null);
+
+				} finally {
+					setUpdating(false);
 				}
-			}
-		});
+			}});
 	}
+
+	//	public void update(List<AnalysisDataset> list){
+	//		
+	//		if(this.isUpdating()){
+//			programLogger.log(Level.FINEST, "Profiles panel is already updating");
+//		} else {
+//			programLogger.log(Level.FINE, "Updating profiles panel");
+//			setUpdating(true);
+//			this.list = list;
+//			SwingUtilities.invokeLater(new Runnable(){
+//				public void run(){
+//
+//					try {
+//
+//						profileDisplayPanel.update(NucleusProfilesPanel.this.list);
+//						programLogger.log(Level.FINEST, "Updated nuclear profiles panel");
+//						frankenDisplayPanel.update(NucleusProfilesPanel.this.list);
+//						programLogger.log(Level.FINEST, "Updated franken profiles panel");
+//						variabilityChartPanel.update(NucleusProfilesPanel.this.list);
+//						programLogger.log(Level.FINEST, "Updated variabililty panel");
+//						modalityDisplayPanel.update(NucleusProfilesPanel.this.list);
+//						programLogger.log(Level.FINEST, "Updated modality panel");
+//					} catch  (Exception e){
+//						programLogger.log(Level.WARNING, "Error updating profile panels", e);
+//						programLogger.log(Level.FINER, "Setting panels to null");
+//
+//					} finally {
+//						setUpdating(false);
+//					}
+//				}
+//			});
+//			
+//		}
+//	}
 
 	@SuppressWarnings("serial")
 	private class ModalityDisplayPanel extends JPanel implements ActionListener {
@@ -271,7 +297,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			JFreeChart chart = null;
 			try {
 
-				chart = MorphologyChartFactory.createModalityChart(xvalue, list, type);
+				chart = MorphologyChartFactory.createModalityChart(xvalue, getDatasets(), type);
 				XYPlot plot = chart.getXYPlot();
 
 				double yMax = 0;
@@ -286,7 +312,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 				}
 				
 				int index = 0;
-				for(AnalysisDataset dataset : list){
+				for(AnalysisDataset dataset : getDatasets()){
 					
 					// Do the stats testing
 					double pvalue = DipTester.getPValueForPositon(dataset.getCollection(), xvalue, type); 
@@ -326,7 +352,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			updatePointSelection();
-			updateModalityProfileChart(list);
+			updateModalityProfileChart(getDatasets());
 		}
 		
 		private void updatePointSelection(){
@@ -497,7 +523,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 
-			update(list);
+			update(getDatasets());
 
 		}
 
@@ -511,7 +537,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 					programLogger.log(Level.SEVERE, "Error setting p-value spinner", e);
 				}
 			}
-			update(list);
+			update(getDatasets());
 			
 		}
 	}
@@ -584,7 +610,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			
-			update(list);
+			update(getDatasets());
 		}
 	}
 	
@@ -631,7 +657,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 				} else { // No cache
 
-					if(list.size()==1){
+					if(getDatasets().size()==1){
 
 						// full segment colouring
 						chart = MorphologyChartFactory.makeSingleProfileChart( options );
@@ -699,7 +725,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 				} else { // No cache
 
 
-					if(list.size()==1){
+					if(getDatasets().size()==1){
 
 						chart = MorphologyChartFactory.makeFrankenProfileChart(options);
 

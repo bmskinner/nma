@@ -151,24 +151,26 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 	}
 		
-	public void update(List<AnalysisDataset> list){
-		this.list = list;
+	@Override
+	public void updateDetail(){
+//		this.list = list;
 		programLogger.log(Level.FINE, "Updating segments detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				if(SegmentsDetailPanel.this.list!=null && !SegmentsDetailPanel.this.list.isEmpty()){
-					segmentBoxplotsPanel.update(SegmentsDetailPanel.this.list); // get segname from panel
+				if(getDatasets()!=null && !getDatasets().isEmpty()){
+					segmentBoxplotsPanel.update(getDatasets()); // get segname from panel
 					programLogger.log(Level.FINEST, "Updated segments boxplot panel");
 					
-					segmentHistogramsPanel.update(SegmentsDetailPanel.this.list); // get segname from panel
+					segmentHistogramsPanel.update(getDatasets()); // get segname from panel
 					programLogger.log(Level.FINEST, "Updated segments histogram panel");
 					
-					segmentProfilePanel.update(SegmentsDetailPanel.this.list); // get segname from panel
+					segmentProfilePanel.update(getDatasets()); // get segname from panel
 					programLogger.log(Level.FINEST, "Updated segments profile panel");
 					
-					segmentStatsPanel.update(SegmentsDetailPanel.this.list);
+					segmentStatsPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updated segments stats panel");
 				}
+				setUpdating(false);
 			}
 		});
 	}
@@ -347,7 +349,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
 				}
 				
-				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
+				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 			} else {
 				JOptionPane.showMessageDialog(this, "Cannot merge segments across core border tags");
 			}
@@ -389,7 +391,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				profile.unmergeSegment(nSeg1);
 				n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
 			}
-			fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, list);
+			fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 		}
 		
 		public void update(List<AnalysisDataset> list){
@@ -633,7 +635,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			update(list);
+			update(getDatasets());
 			
 		}
 	}
@@ -686,8 +688,9 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 		}
 
-		public void update(List<AnalysisDataset> list) {
-			this.list = list;
+		@Override
+		public void updateDetail() {
+//			this.getDatasets() = list;
 			try{
 
 				mainPanel = new JPanel();
@@ -700,18 +703,18 @@ public class SegmentsDetailPanel extends DetailPanel {
 				 * Do not use the chart cache, because the charts are created new every time
 				 */
 				
-				if(!list.isEmpty()){
+				if(!getDatasets().isEmpty()){
 
 					programLogger.log(Level.FINEST, "Dataset list is not empty");
 
 					// Check that all the datasets have the same number of segments
-					if(checkSegmentCountsMatch(list)){ // make a histogram for each segment
+					if(checkSegmentCountsMatch(getDatasets())){ // make a histogram for each segment
 						
 //						JFreeChart chart = null;
-						HistogramChartOptions options = new HistogramChartOptions(list, null, scale, useDensity);
+						HistogramChartOptions options = new HistogramChartOptions(getDatasets(), null, scale, useDensity);
 						options.setLogger(programLogger);
 
-						CellCollection collection = list.get(0).getCollection();
+						CellCollection collection = activeDataset().getCollection();
 						int segmentCount = collection.getProfileCollection(ProfileCollectionType.REGULAR)
 								.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
 								.getSegmentCount();
@@ -947,7 +950,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			update(list);
+			update(getDatasets());
 			
 		}
 	}

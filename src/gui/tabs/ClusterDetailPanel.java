@@ -61,14 +61,15 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
 	}
 		
-	public void update(final List<AnalysisDataset> list){
+	public void updateDetail(){
 		programLogger.log(Level.FINE, "Updating cluster panel");
-		this.list = list;
+
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				
-				clusterPanel.update(list);		
+				clusterPanel.update(getDatasets());		
 				programLogger.log(Level.FINEST, "Updated cluster panel");
+				setUpdating(false);
 			}
 		});
 		
@@ -135,7 +136,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			clusterButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					fireDatasetEvent(DatasetMethod.CLUSTER, list);
+					fireDatasetEvent(DatasetMethod.CLUSTER, getDatasets());
 					
 
 				}
@@ -145,7 +146,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			buildTreeButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					fireDatasetEvent(DatasetMethod.BUILD_TREE, list);
+					fireDatasetEvent(DatasetMethod.BUILD_TREE, getDatasets());
 					
 
 				}
@@ -155,7 +156,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			saveClassifierButton.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
-					fireDatasetEvent(DatasetMethod.TRAIN_CLASSIFIER, list);
+					fireDatasetEvent(DatasetMethod.TRAIN_CLASSIFIER, getDatasets());
 					
 
 				}
@@ -227,7 +228,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 					if(!tree.equals("N/A")){
 						
 						AnalysisDataset dataset = null;
-						for(AnalysisDataset d: list){
+						for(AnalysisDataset d: getDatasets()){
 							if(d.getName().equals(colName)){
 								dataset = d;
 							}

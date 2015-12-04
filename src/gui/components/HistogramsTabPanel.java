@@ -71,7 +71,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
          try {
         	 programLogger.log(Level.FINEST, "Updating abstract histogram tab panel");
-             this.update(list);
+             this.update(getDatasets());
          } catch (Exception e1) {
          	programLogger.log(Level.SEVERE, "Error updating histogram panel from action listener", e1);
          }

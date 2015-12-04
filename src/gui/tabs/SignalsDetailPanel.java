@@ -131,22 +131,22 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
         container.revalidate();
     }
 
-	
-	public void update(final List<AnalysisDataset> list){
-		this.list = list;
+	@Override
+	public void updateDetail(){
+//		this.list = list;
 		programLogger.log(Level.FINE, "Updating signals detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				
-				shellsPanel.update(list);
+				shellsPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated shells panel");
-				overviewPanel.update(list);
+				overviewPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated signals overview panel");
-				histogramPanel.update(list);
+				histogramPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated signals histogram panel");
-				analysisPanel.update(list);
+				analysisPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated signals analysis panel");
-				boxplotPanel.update(list);
+				boxplotPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated signals boxplot panel");
 			
 		}});
@@ -172,10 +172,10 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			
 			int signalGroup = this.getIndexFromLabel(e.getActionCommand());
 			JCheckBox box = (JCheckBox) e.getSource();
-			AnalysisDataset d = list.get(0);
+			AnalysisDataset d = this.activeDataset();
 			d.setSignalGroupVisible(signalGroup, box.isSelected());
-			overviewPanel.update(list);
-			histogramPanel.update(list);
+			overviewPanel.update(getDatasets());
+			histogramPanel.update(getDatasets());
 		}
 		
 	}
@@ -218,7 +218,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		if(event.type().equals("SignalColourUpdate")){
-			update(list);
+			update(getDatasets());
 		}
 	}
     
@@ -294,7 +294,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			
 			if(newColor != null){
 				activeDataset().setSignalGroupColour(signalGroup, newColor);
-				SignalsDetailPanel.this.update(list);
+				SignalsDetailPanel.this.update(getDatasets());
 				fireSignalChangeEvent("SignalColourUpdate");
 			}
     	}

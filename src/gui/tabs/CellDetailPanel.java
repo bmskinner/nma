@@ -159,9 +159,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		return centrePanel;
 	}
 	
-	
-	public void update(List<AnalysisDataset> list){
-		updateList(list);
+	@Override
+	public void updateDetail(){
+		updateList(getDatasets());
+		setUpdating(false);
 	}
 	
 	/**
@@ -173,9 +174,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 //		programLogger.log(Level.FINE, "Updating cell detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				
-				CellDetailPanel.this.list = list;
-				
+								
 				if(list.size()==1){
 					
 					cellsListPanel.updateDataset( activeDataset()  );
@@ -1024,7 +1023,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 		UUID cellID = data.getID();
 
-		if(list.size()==1){	
+		if(getDatasets().size()==1){	
 			try{
 				
 				activeCell = activeDataset().getCollection().getCell(cellID);
