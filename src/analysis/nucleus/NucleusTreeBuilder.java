@@ -362,7 +362,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		log(Level.FINE, "Building instance matrix");
 		
 		FastVector attributes = new FastVector(attributeCount);
-		for(int i=0; i<collection.size(); i+=1){
+		for(int i=0; i<basicAttributeCount; i+=1){
 			Attribute a = new Attribute("att_"+i); 
 			attributes.addElement(a);
 		}
@@ -403,6 +403,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				}
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					String uniqueName = makeUniqueName(n1);
+					inst.setValue(name, uniqueName);
 				}
 				
 				inst.setValue(area, n1.getArea());
@@ -416,7 +417,6 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		} catch(Exception e){
 			logError("Error making instances", e);
 		}
-		log(Level.FINEST, instances.toSummaryString());
 		return instances;
 	}
 
