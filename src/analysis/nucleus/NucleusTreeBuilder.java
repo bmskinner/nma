@@ -356,7 +356,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		log(Level.FINE, "Building instance matrix");
 		
 		FastVector attributes = new FastVector(attributeCount);
-		for(int i=0; i<attributeCount; i++){
+		for(int i=0; i<collection.size(); i+=1){
 			Attribute a = new Attribute("att_"+i); 
 			attributes.addElement(a);
 		}
@@ -383,15 +383,17 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Instance inst = new SparseInstance(attributeCount);
 
 				
-				int j=0;
-				for(Nucleus n2 : collection.getNuclei()){
-					
+//				int attNumber = 0;
+				for(int j=0; j<collection.size(); j+=10){
+//				for(Nucleus n2 : collection.getNuclei()){
+					Nucleus n2 = collection.getNuclei().get(j);
 					Attribute att = (Attribute) attributes.elementAt(j);
+//					Attribute att = (Attribute) attributes.elementAt(attNumber);
 					double score = matrix[i][j];
-//					double score = n1.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(n2.getAngleProfile(BorderTag.REFERENCE_POINT));
+//					
 					score /= n1.getPerimeter();
 					inst.setValue(att, score);
-					j++;
+//					attNumber++;
 				}
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					inst.setValue(name,  n1.getSourceDirectoryName()+"-"+n1.getNameAndNumber());
@@ -408,6 +410,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		} catch(Exception e){
 			logError("Error making instances", e);
 		}
+		log(Level.FINEST, instances.toSummaryString());
 		return instances;
 	}
 
