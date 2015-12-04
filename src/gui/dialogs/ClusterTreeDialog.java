@@ -139,6 +139,13 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		analyseButton.setActionCommand("Analyse");
 		panel.add(analyseButton);
 		
+		if(dataset.hasMergeSources()){
+			JButton mergeSourceButton = new JButton("Show merge sources");
+			mergeSourceButton.addActionListener(this);
+			mergeSourceButton.setActionCommand("ShowMergeSources");
+			panel.add(mergeSourceButton);
+		}
+		
 		selectedClusterBox = new JComboBox<AnalysisDataset>();
 		selectedClusterBox.addItem(dataset);
 		for(AnalysisDataset d: dataset.getChildDatasets()){
@@ -192,10 +199,10 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 
 			VariableNodePainter painter = new VariableNodePainter("cluster", tree, PainterIntent.TIP, clusterMemberships);
 			viewer.getTreePane().setTaxonLabelPainter(painter);
-//			viewer.setTipLabelPainter(painter);
+
 		}
 	}
-	
+		
 	private void colourTreeNodesByClusterGroup(ClusterGroup group){
 
 		if(group!=null){
@@ -204,7 +211,17 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 //			RootedTree tree = (RootedTree) viewer.getTrees().get(0);
 			int clusterNumber = 0;
 			for(UUID id : group.getUUIDs()){
-				AnalysisDataset cluster = dataset.getChildDataset(id);
+				AnalysisDataset cluster = null;
+				
+				if(dataset.hasChild(id)){
+					cluster = dataset.getChildDataset(id);
+				}
+				
+				if(dataset.hasMergeSource(id)){
+					cluster = dataset.getMergeSource(id);
+				}
+				
+				
 				Color colour = ColourSelecter.getSegmentColor(clusterNumber++);
 
 				for(Node n : tree.getNodes()){
@@ -350,9 +367,83 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			this.setVisible(false);
 			this.dispose();
 		}
+		
+		if(e.getActionCommand().equals("ShowMergeSources")){
+			
+			// Disable the selection dropdown boxes
+			setClusterGroupBoxNull();
+			setClusterBoxNull();
+			
+			
+			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			for(UUID id : dataset.getMergeSources()){
+				list.add(dataset.getMergeSource(id));
+			}
+			
+//			programLogger.log(Level.INFO, "Detected "+list.size()+" merge sources");
+			
+			ClusterGroup mergeGroup = makeNewClusterGroup(list);
+		
+			
+			for(AnalysisDataset d : list){
+				mergeGroup.addDataset(d);
+//				programLogger.log(Level.INFO, "Added merge source with "+d.getCollection().size()+" nuclei");
+			}
+			
+			colourTreeNodesByClusterGroup(mergeGroup);
+
+		}
+		
 
 	}
 	
+	/**
+	 * Create a new cluster group based on the clustering options
+	 * in the existing cluster group, and a new list of datasets
+	 * @param list the datasets to include in the cluster group
+	 * @return
+	 */
+	private ClusterGroup makeNewClusterGroup(List<AnalysisDataset> list){
+		ClusteringOptions newOptions = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
+		newOptions.setClusterNumber(list.size());
+		newOptions.setHierarchicalMethod(group.getOptions().getHierarchicalMethod());
+		newOptions.setIncludeModality(group.getOptions().isIncludeModality());
+		newOptions.setModalityRegions(group.getOptions().getModalityRegions());
+		newOptions.setUseSimilarityMatrix(group.getOptions().isUseSimilarityMatrix());
+		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+//		programLogger.log(Level.INFO, "Creating cluster group "+clusterNumber);
+		ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
+		return newGroup;
+	}
+	
+	/**
+	 * Set the cluster group drop down menu to null.
+	 * Removes and replaces the item listener to avoid 
+	 * recursive firing
+	 */
+	private void setClusterGroupBoxNull(){
+		selectedClusterGroupBox.removeItemListener(this);
+		selectedClusterGroupBox.setSelectedIndex(-1);
+		selectedClusterGroupBox.addItemListener(this);
+	}
+	
+	/**
+	 * Set the cluster drop down menu to null.
+	 * Removes and replaces the item listener to avoid 
+	 * recursive firing
+	 */
+	private void setClusterBoxNull(){
+		selectedClusterBox.removeItemListener(this);
+		selectedClusterBox.setSelectedIndex(-1);
+		selectedClusterBox.addItemListener(this);
+	}
+	
+	/**
+	 * Check that the list of datasets has only one copy of each
+	 * cell
+	 * @param list
+	 * @return
+	 */
 	private boolean checkCellPresentOnlyOnce(List<AnalysisDataset> list){
 		boolean ok = true;
 		// Check that a cell is not present in more than one cluster
@@ -415,16 +506,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 					} else if (option == JOptionPane.OK_OPTION)	{
 						// Make the group
 
-						int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-						programLogger.log(Level.INFO, "Creating cluster group "+clusterNumber);
-
-						ClusteringOptions newOptions = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
-						newOptions.setClusterNumber(list.size());
-						newOptions.setHierarchicalMethod(group.getOptions().getHierarchicalMethod());
-						newOptions.setIncludeModality(group.getOptions().isIncludeModality());
-						newOptions.setModalityRegions(group.getOptions().getModalityRegions());
-						newOptions.setUseSimilarityMatrix(group.getOptions().isUseSimilarityMatrix());
-						ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
+						ClusterGroup newGroup = makeNewClusterGroup(list);
 
 						for(AnalysisDataset d : list){
 							d.setName(newGroup.getName()+"_"+d.getName());
@@ -469,18 +551,16 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 
 
 		if(e.getSource().equals(selectedClusterBox)){
-			selectedClusterGroupBox.removeItemListener(this);
-			selectedClusterGroupBox.setSelectedIndex(-1);
-			selectedClusterGroupBox.addItemListener(this);
+			
+			setClusterGroupBoxNull();
 			AnalysisDataset selected = (AnalysisDataset) selectedClusterBox.getSelectedItem();
 			colourTreeNodesByCluster(selected.getCollection());
 			
 		}
 		
 		if(e.getSource().equals(selectedClusterGroupBox)){
-			selectedClusterBox.removeItemListener(this);
-			selectedClusterBox.setSelectedIndex(-1);
-			selectedClusterBox.addItemListener(this);
+			
+			setClusterBoxNull();
 			colourTreeNodesByClusterGroup((ClusterGroup) selectedClusterGroupBox.getSelectedItem());
 			
 		}
