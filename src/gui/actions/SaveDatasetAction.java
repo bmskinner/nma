@@ -27,7 +27,7 @@ public class SaveDatasetAction extends ProgressableAction {
 	public SaveDatasetAction(AnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
 		super(dataset, "Saving dataset", "Error saving dataset", mw);
 		setLatch(doneSignal);
-		mw.getProgramLogger().log(Level.FINE, "Save dataset action created");
+		log(Level.FINEST, "Save dataset action created by explicit file location");
 		
 		worker = new PopulationExporter(dataset, saveFile, programLogger);
 		worker.addPropertyChangeListener(this);
@@ -44,6 +44,7 @@ public class SaveDatasetAction extends ProgressableAction {
 	public SaveDatasetAction(AnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal, boolean chooseSaveLocation) {
 		super(dataset, "Saving dataset", "Error saving dataset", mw);
 		setLatch(doneSignal);
+		log(Level.FINEST, "Save dataset action created by default or manual file location");
 		
 		File saveFile = null;
 		if(chooseSaveLocation){
@@ -61,11 +62,11 @@ public class SaveDatasetAction extends ProgressableAction {
 		} else {
 			saveFile = dataset.getSavePath();
 		}
-		programLogger.log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
+		log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
 		worker = new PopulationExporter(dataset, saveFile, programLogger);
 		worker.addPropertyChangeListener(this);
 		worker.execute();	
-		mw.getProgramLogger().log(Level.FINE, "Save dataset action created");
+		log(Level.FINE, "Save dataset action created");
 		
 	}
 	
@@ -74,9 +75,11 @@ public class SaveDatasetAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		// Do not use super.finished(), or it will trigger another save action
+		log(Level.FINE, "Save complete");
 		cancel();		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);
+		log(Level.FINE, "Removing latch");
 		this.countdownLatch();
 		
 	}

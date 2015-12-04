@@ -146,12 +146,12 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 				if(  (downFlag & MainWindow.STATS_EXPORT) == MainWindow.STATS_EXPORT){
 //					logger.log(Level.FINE, "Running stats export");
 //					logger.log("Running stats export", utility.Logger.DEBUG);
-					programLogger.log(Level.INFO, "Exporting stats...");
+					programLogger.log(Level.INFO, "Exporting stats");
 					boolean ok = StatsExporter.run(dataset);
 					if(ok){
-						programLogger.log(Level.INFO, "OK");
+						programLogger.log(Level.INFO, "Exporting stats OK");
 					} else {
-						programLogger.log(Level.INFO, "Error");
+						programLogger.log(Level.INFO, "Exporting stats error");
 					}
 				}
 
@@ -161,9 +161,9 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 					programLogger.log(Level.INFO, "Annotating nuclei...");
 					boolean ok = NucleusAnnotator.run(dataset);
 					if(ok){
-						programLogger.log(Level.INFO, "OK");
+						programLogger.log(Level.INFO, "Annotating nuclei OK");
 					} else {
-						programLogger.log(Level.INFO, "Error");
+						programLogger.log(Level.INFO, "Annotating nuclei error");
 					}
 				}
 
@@ -173,9 +173,9 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 						programLogger.log(Level.INFO, "Exporting composite...");
 						boolean ok = CompositeExporter.run(dataset);
 						if(ok){
-							programLogger.log(Level.INFO, "OK");
+							programLogger.log(Level.INFO, "Exporting composite OK");
 						} else {
-							programLogger.log(Level.INFO, "Error");
+							programLogger.log(Level.INFO, "Exporting composite error");
 						}
 					}
 				}
@@ -186,7 +186,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 				// refold from firing a done signal. Hence, put a latch on the refold to 
 				// make this thread wait until the refolding is complete.
 				if(  (downFlag & MainWindow.CURVE_REFOLD) == MainWindow.CURVE_REFOLD){
-
+					programLogger.log(Level.FINEST, "Preparing to hold thread while refolding datast");
 					final CountDownLatch latch = new CountDownLatch(1);
 					new RefoldNucleusAction(dataset, mw, latch);
 					try {
@@ -194,16 +194,19 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 					} catch (InterruptedException e) {
 						programLogger.log(Level.SEVERE, "Interruption to thread", e);
 					}
+					programLogger.log(Level.FINEST, "Resuming thread after refolding datast");
 				}
 
 				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
 					final CountDownLatch latch = new CountDownLatch(1);
+					programLogger.log(Level.FINEST, "Preparing to hold thread while saving datast");
 					new SaveDatasetAction(dataset, mw, latch, false);
 					try {
 						latch.await();
 					} catch (InterruptedException e) {
 						programLogger.log(Level.SEVERE, "Interruption to thread", e);
 					}
+					programLogger.log(Level.FINEST, "Resuming thread after saving datast");
 				}
 
 				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
