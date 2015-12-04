@@ -282,7 +282,6 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				//				stringList.add(n.getNameAndNumber());
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					String uniqueName =  makeUniqueName(n);
-//					String uniqueName = n.getSourceDirectoryName()+"-"+n.getNameAndNumber();
 					inst.setValue(name,  uniqueName);
 				}
 
@@ -359,7 +358,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		int basicAttributeCount = collection.size()/10;
 		
 		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
-//		programLogger.log(Level.FINE, "Building instance matrix");
+
 		log(Level.FINE, "Building instance matrix");
 		
 		FastVector attributes = new FastVector(attributeCount);
@@ -404,7 +403,6 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				}
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					String uniqueName = makeUniqueName(n1);
-//					inst.setValue(name,  n1.getSourceDirectoryName()+"-"+n1.getNameAndNumber());
 				}
 				
 				inst.setValue(area, n1.getArea());

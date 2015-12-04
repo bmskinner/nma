@@ -690,7 +690,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 		@Override
 		public void updateDetail() {
-//			this.getDatasets() = list;
+
 			try{
 
 				mainPanel = new JPanel();
@@ -749,6 +749,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 				mainPanel = new JPanel();
 				mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 				mainPanel.add(new JLabel("Unable to display segment boxplots"));
+			} finally {
+				SegmentHistogramsPanel.this.setUpdating(false);
 			}
 		}
 		

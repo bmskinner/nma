@@ -300,6 +300,8 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 				}
 			} catch(Exception e){
 				programLogger.log(Level.SEVERE, "Error updating histogram panel", e);
+			} finally {
+				HistogramsPanel.this.setUpdating(false);
 			}
 		}
 				
