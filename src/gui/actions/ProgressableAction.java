@@ -51,11 +51,11 @@ import analysis.AnalysisWorker;
 abstract class ProgressableAction implements PropertyChangeListener {
 
 	protected AnalysisDataset dataset = null; // the dataset being worked on
-	protected JProgressBar progressBar = null;
-	protected String errorMessage = null;
-	protected AnalysisWorker worker;
+	private JProgressBar progressBar = null;
+	private String errorMessage = null;
+	protected AnalysisWorker worker = null;
 	protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
-	protected LogPanel logPanel;
+	private LogPanel logPanel;
 	protected Logger programLogger;
 	protected MainWindow mw;
 	private CountDownLatch latch = null; // allow threads to wait for the analysis to complete
@@ -78,10 +78,18 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		logPanel.addProgressBar(this.progressBar);
 		logPanel.revalidate();
 		logPanel.repaint();
+		
+
+//		worker.addPropertyChangeListener(this);
 
 		this.addInterfaceEventListener(mw);
 		this.addDatasetEventListener(mw);
+		log(Level.FINEST, "Created progressable action");
 
+	}
+	
+	protected void log(Level level, String message){
+		programLogger.log(level, message);
 	}
 	
 	protected void setLatch(CountDownLatch latch){
@@ -119,6 +127,10 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		removeInterfaceEventListener(mw);
 	}
 	
+	protected void setProgressBarVisible(boolean b){
+		this.progressBar.setVisible(b);
+	}
+	
 	/**
 	 * Use to manually remove the progress bar after an action is complete
 	 */
@@ -149,8 +161,8 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		}
 
 		if(evt.getPropertyName().equals("Error")){
-			programLogger.log(Level.FINEST,"Worker signaled error");
-			error();
+			log(Level.WARNING, "Error in worker");
+			removeProgressBar();
 		}
 		
 		if(evt.getPropertyName().equals("Cooldown")){
@@ -186,11 +198,10 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	/**
 	 * Runs when an error was encountered in the analysis
 	 */
-	public void error(){
-		programLogger.log(Level.SEVERE, this.errorMessage);
-//		log(this.errorMessage);
-		removeProgressBar();
-	}
+////	public void logError(){
+//		programLogger.log(Level.WARNING, this.errorMessage);
+//		removeProgressBar();
+//	}
 	
 	/**
 	 * Runs if a cooldown signal is received. Use to set progress bars
@@ -201,8 +212,6 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		this.progressBar.setIndeterminate(true);
 		logPanel.revalidate();
 		logPanel.repaint();
-//		contentPane.revalidate();
-//		contentPane.repaint();
 	}
 	
 	protected synchronized void fireInterfaceEvent(InterfaceMethod method) {

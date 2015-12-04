@@ -133,12 +133,9 @@ public class MorphologyAnalysisAction extends ProgressableAction {
   
 	@Override
 	public void finished() {
-//		final utility.Logger logger = new utility.Logger(dataset.getDebugFile(), "MainWindow");
-//		logger.log(Level.INFO, "Morphology analysis finished");
-//		logger.log("Morphology analysis finished");
 
 		// ensure the progress bar gets hidden even if it is not removed
-		this.progressBar.setVisible(false);
+		this.setProgressBarVisible(false);
 
 		// The analysis takes place in a new thread to accomodate refolding.
 		// See specific comment below
@@ -201,7 +198,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 
 				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
 					final CountDownLatch latch = new CountDownLatch(1);
-					new SaveDatasetAction(dataset, mw, latch);
+					new SaveDatasetAction(dataset, mw, latch, false);
 					try {
 						latch.await();
 					} catch (InterruptedException e) {

@@ -196,8 +196,6 @@ public abstract class ImageProber extends JDialog {
 								importAndDisplayImage(openImage);
 							} catch(Exception e){
 								programLogger.log(Level.SEVERE, "Error opening image, skipping");
-//								openImage = getNextImage();
-//								importAndDisplayImage(openImage);
 							}
 							
 						}

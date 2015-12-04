@@ -43,7 +43,7 @@ public class RefoldNucleusAction extends ProgressableAction {
 		this.setLatch(doneSignal);
 		try{
 
-			this.progressBar.setIndeterminate(true);
+			this.cooldown();
 			worker = new CurveRefolder(dataset, 
 					CurveRefoldingMode.FAST, 
 					programLogger);

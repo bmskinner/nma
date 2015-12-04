@@ -345,8 +345,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			public void mouseClicked(MouseEvent arg0) {
 				
 				new NewAnalysisAction(MainWindow.this);
-//				new NewMorphologyAnalysisAction();
-//				newAnalysis();
+
 			}
 		});
 		panelHeader.add(btnNewAnalysis);
@@ -373,20 +372,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				programLogger.log(Level.INFO, "Saving root populations...");
-				for(AnalysisDataset d : populationsPanel.getRootDatasets()){
-					if(d.isRoot()){
-						programLogger.log(Level.INFO, "Saving dataset "+d.getCollection().getName()+"...");
-						final CountDownLatch latch = new CountDownLatch(1);
-						new SaveDatasetAction(d, MainWindow.this, latch);
-						try {
-							latch.await();
-						} catch (InterruptedException e) {
-							programLogger.log(Level.SEVERE, "Interruption to thread", e);
-						}
-						programLogger.log(Level.INFO, "Saved dataset OK");
-					}
-				}
-				programLogger.log(Level.INFO, "All root datasets saved");
+				
+				Thread thr = new Thread(){
+					public void run(){
+						saveRootDatasets();
+					}};
+				thr.start();
 			}
 		});
 		panelHeader.add(btnSavePopulation);
@@ -1071,32 +1062,42 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
 				populationsPanel.addDataset(event.firstDataset());
 			}
-			
-			if(event.method().equals(DatasetMethod.SAVE_AS)){
-			
-				AnalysisDataset selectedDataset = event.firstDataset();
-				SaveDialog saveDialog = new SaveDialog("Save as...", selectedDataset.getName(), ".nmd");
-				
-				String fileName = saveDialog.getFileName();
-				String folderName = saveDialog.getDirectory();
-				
-				if(fileName!=null && folderName!=null){
-					
-					final CountDownLatch latch = new CountDownLatch(1);
-					File saveFile = new File(folderName+File.separator+fileName);
 
-					programLogger.log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
-					new SaveDatasetAction(selectedDataset, saveFile, MainWindow.this, latch);
-					try {
-						latch.await();
-					} catch (InterruptedException e) {
-						programLogger.log(Level.SEVERE, "Interruption to thread", e);
-					}
-				}
+			if(event.method().equals(DatasetMethod.SAVE_AS)){
+
+				final AnalysisDataset selectedDataset = event.firstDataset();
+
+				final CountDownLatch latch = new CountDownLatch(1);
+
+				Thread thr = new Thread(){
+					public void run(){
+
+						new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+						try {
+							latch.await();
+						} catch (InterruptedException e) {
+							programLogger.log(Level.SEVERE, "Interruption to thread", e);
+						}
+					}};
+					thr.start();
 			}
-							
+
 		}
 		
+	}
+	
+	private void saveRootDatasets(){
+		for(AnalysisDataset root : populationsPanel.getRootDatasets()){
+			final CountDownLatch latch = new CountDownLatch(1);
+
+			new SaveDatasetAction(root, MainWindow.this, latch, false);
+			try {
+				latch.await();
+			} catch (InterruptedException e) {
+				programLogger.log(Level.SEVERE, "Interruption to thread", e);
+			}
+		}
+		programLogger.log(Level.INFO, "All root datasets saved");
 	}
 
 	
@@ -1113,17 +1114,11 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			break;
 			
 		case SAVE_ROOT:
-			for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-				final CountDownLatch latch = new CountDownLatch(1);
-				new SaveDatasetAction(root, MainWindow.this, latch);
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					programLogger.log(Level.SEVERE, "Interruption to thread", e);
-				}
-//				
-//				PopulationExporter.saveAnalysisDataset(root);
-			}
+			Thread thr = new Thread(){
+				public void run(){
+					saveRootDatasets();
+				}};
+				thr.start();
 			break;
 			
 		case UPDATE_PANELS:

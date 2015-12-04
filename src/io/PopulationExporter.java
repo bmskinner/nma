@@ -56,10 +56,7 @@ public class PopulationExporter extends AnalysisWorker {
 	
 	@Override
 	protected Boolean doInBackground() throws Exception {
-		
-//		boolean result = false;
-//		CellCollection collection = this.getDataset().getCollection();
-		
+				
 		if(saveAnalysisDataset(getDataset(), saveFile)){
 			publish(1);
 			return true;

@@ -350,7 +350,9 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 
 	private Instances makeMatrixInstances(CellCollection collection){
 		
-		int basicAttributeCount = collection.size();
+//		int basicAttributeCount = collection.size();
+		int basicAttributeCount = collection.size()/10;
+		
 		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
 //		programLogger.log(Level.FINE, "Building instance matrix");
 		log(Level.FINE, "Building instance matrix");
@@ -383,17 +385,17 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				Instance inst = new SparseInstance(attributeCount);
 
 				
-//				int attNumber = 0;
+				int attNumber = 0;
 				for(int j=0; j<collection.size(); j+=10){
 //				for(Nucleus n2 : collection.getNuclei()){
-					Nucleus n2 = collection.getNuclei().get(j);
-					Attribute att = (Attribute) attributes.elementAt(j);
-//					Attribute att = (Attribute) attributes.elementAt(attNumber);
+//					Nucleus n2 = collection.getNuclei().get(j);
+//					Attribute att = (Attribute) attributes.elementAt(j);
+					Attribute att = (Attribute) attributes.elementAt(attNumber);
 					double score = matrix[i][j];
 //					
 					score /= n1.getPerimeter();
 					inst.setValue(att, score);
-//					attNumber++;
+					attNumber++;
 				}
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					inst.setValue(name,  n1.getSourceDirectoryName()+"-"+n1.getNameAndNumber());

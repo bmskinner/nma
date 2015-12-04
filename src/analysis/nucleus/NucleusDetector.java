@@ -66,11 +66,6 @@ import components.nuclei.Nucleus;
 public class NucleusDetector extends AnalysisWorker {
   
   private static final String spacerString = "---------";
-
-  // counts of nuclei processed
-//  protected int totalNuclei        = 0;
-  
-//  protected int totalImages;
   
   private int progress;
 
@@ -79,10 +74,6 @@ public class NucleusDetector extends AnalysisWorker {
   protected File debugFile;
 
   protected AnalysisOptions analysisOptions;
-
-//  protected Logger fileLogger = null;
-//  protected Logger programLogger; // the debug file logger
-//  protected Level debugLevel = Level.ALL;
 
 //  protected MainWindow mw;
   private Map<File, CellCollection> collectionGroup = new HashMap<File, CellCollection>();
@@ -103,6 +94,8 @@ public class NucleusDetector extends AnalysisWorker {
 	  this.outputFolder 	= outputFolder;
 	  this.debugFile 		= debugFile;
 	  this.analysisOptions 	= options;
+	  
+	  
 	  
 	  log(Level.INFO, "Calculating number of images to analyse");
 	  int totalImages = NucleusDetector.countSuitableImages(analysisOptions.getFolder());

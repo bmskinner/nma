@@ -41,6 +41,8 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
     		fileLogger.setLevel(FILE_DEBUG_LEVEL);
     		fileLogger.addHandler(dataset.getLogHandler());
     	}
+
+    	programLogger.log(Level.FINEST, "Created worker");
     	
     }
     
@@ -57,21 +59,19 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
     	programLogger.log(Level.FINEST, "Creating log file handler");
 		DebugFileHandler handler = null;
 		try {
+			
 			AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
 			handler = new DebugFileHandler(debugFile);
 			handler.setFormatter(new DebugFileFormatter());
-			programLogger.log(Level.FINEST, "Made file handler");
 			fileLogger.addHandler(handler);
-			programLogger.log(Level.FINEST, "Added handler to logger");
 			fileLogger.setLevel(FILE_DEBUG_LEVEL);
-			programLogger.log(Level.FINEST, "Set logger level");
+
 		} catch (SecurityException e1) {
 			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
 		} catch (IOException e1) {
 			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
 		}
-		programLogger.log(Level.FINEST, "Created log file handler");
-    	
+		log(Level.FINEST, "Created worker");
     }
     
     /**
@@ -125,21 +125,21 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
     @Override
     public void done() {
     	
-    	programLogger.log(Level.FINEST, "Completed worker task; firing trigger");
+    	log(Level.FINEST, "Worker completed task");
 
         try {
             if(this.get()){
-            	programLogger.log(Level.FINEST, "Firing trigger for sucessful task");
+            	log(Level.FINEST, "Firing trigger for sucessful task");
                 firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
 
             } else {
-            	programLogger.log(Level.FINEST, "Firing trigger for error in task");
+            	log(Level.FINEST, "Firing trigger for failed task");
                 firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
             }
         } catch (InterruptedException e) {
-        	fileLogger.log(Level.SEVERE, "Interruption error in worker", e);
+        	logError("Interruption error in worker", e);
         } catch (ExecutionException e) {
-        	fileLogger.log(Level.SEVERE, "Execution error in worker", e);
+        	logError("Execution error in worker", e);
 
        } finally{
     	   programLogger.log(Level.FINEST, "Closing log file handlers");

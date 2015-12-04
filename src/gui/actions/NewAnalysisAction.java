@@ -39,7 +39,6 @@ import analysis.nucleus.NucleusDetector;
 public class NewAnalysisAction extends ProgressableAction {
 			
 	private AnalysisOptions options;
-	private NucleusDetector detector;
 	private Date startTime;
 	private String outputFolderName;
 	
@@ -48,12 +47,14 @@ public class NewAnalysisAction extends ProgressableAction {
 	public NewAnalysisAction(MainWindow mw) {
 		super(null, "Nucleus detection", "Error in analysis", mw);
 
+		log(Level.FINE, "Making analysis options");
 		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(programLogger);
+		
 		if( analysisSetup.getOptions()!=null){
 
 			options = analysisSetup.getOptions();
 
-			programLogger.log(Level.INFO, "Directory: "+options.getFolder().getName());
+			log(Level.INFO, "Directory: "+options.getFolder().getName());
 
 			this.startTime = Calendar.getInstance().getTime();
 			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
@@ -63,20 +64,20 @@ public class NewAnalysisAction extends ProgressableAction {
 			if(!analysisFolder.exists()){
 				analysisFolder.mkdir();
 			}
-//			utility.Logger logger = new utility.Logger( new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt"), "AnalysisCreator");
-			File logFile = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+"log.debug.txt");
-//			logger.log("Analysis began: "+analysisFolder.getAbsolutePath());
-//			logger.log("Directory: "+options.getFolder().getName());
+//			
+			File logFile = new File(options.getFolder().getAbsolutePath()+File.separator+outputFolderName+File.separator+options.getFolder().getName()+".log");
+
 			mw.setStatus("New analysis in progress");
 			
-			detector = new NucleusDetector(this.outputFolderName, programLogger, logFile, options);
-			detector.addPropertyChangeListener(this);
-			detector.execute();
+			worker = new NucleusDetector(this.outputFolderName, programLogger, logFile, options);
+			worker.addPropertyChangeListener(this);
+			worker.execute();
+			log(Level.FINEST, "Worker has executed");
 			analysisSetup.dispose();
 			
-		} else {
-							
+		} else {				
 			analysisSetup.dispose();
+			log(Level.FINE, "Analysis cancelled");
 			this.cancel();
 		}
 		
@@ -86,10 +87,10 @@ public class NewAnalysisAction extends ProgressableAction {
 	@Override
 	public void finished(){
 		
-		final List<AnalysisDataset> datasets = detector.getDatasets();
+		final List<AnalysisDataset> datasets = ((NucleusDetector) worker).getDatasets();
 		
 		if(datasets.size()==0 || datasets==null){
-			programLogger.log(Level.INFO, "No datasets returned");
+			log(Level.INFO, "No datasets returned");
 			this.cancel();
 		} else {
 
