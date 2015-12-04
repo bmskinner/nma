@@ -875,15 +875,16 @@ public class CellCollection implements Serializable {
 	  List<Double> list = new ArrayList<Double>();
 
 	  Profile medianProfile = this.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(pointType, Constants.MEDIAN);
-//	  Profile medianProfile = this.getProfileCollection().getProfile(pointType);
+
 	  for(Nucleus n : this.getNuclei()){
 		  
-		  double diff = n.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);										 
-//		  double diff = n.getAngleProfile().offset(n.getBorderIndex(pointType)).absoluteSquareDifference(medianProfile);										 
+		  double diff = n.getAngleProfile(pointType).absoluteSquareDifference(medianProfile);		
+		  diff /= n.getPerimeter(); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 		  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
-		  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 		  
-		  list.add(var);
+//		  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+		  
+		  list.add(rootDiff);
 	  }
 
 	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
