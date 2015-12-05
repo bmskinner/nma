@@ -88,14 +88,15 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		return this.newickTree;
 	}
 	
-	protected Instances makeInstances(){
-		log(Level.FINER, "Making instances");
+	protected Instances makeInstances()throws Exception{
 
 		Instances instances = null;
 
 		if(options.isUseSimilarityMatrix()){
-			instances = makeMatrixInstances(collection);
+			log(Level.FINER, "Making profile instances");
+			instances = makeProfileInstances(collection);
 		} else {
+			log(Level.FINER, "Making standard instances");
 			instances = makeStandardInstances(collection);
 		}
 		log(Level.FINEST, instances.toSummaryString());
@@ -357,10 +358,99 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	private String makeUniqueName(Nucleus n){
 		return "'"+n.getSourceFile()+"-"+n.getNameAndNumber()+"'";
 	}
+	
+	private FastVector makeAttributes(CellCollection collection, int windowSize)throws Exception {
+		
+		// An attribute for each angle in the median profile
+		int basicAttributeCount = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+		basicAttributeCount /= windowSize;
+		
+		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
 
+		FastVector attributes = new FastVector(attributeCount);
+		for(int i=0; i<basicAttributeCount; i+=1){
+			Attribute a = new Attribute("att_"+i); 
+			attributes.addElement(a);
+		}
+		
+		Attribute area = new Attribute("area"); 
+		Attribute aspect = new Attribute("aspect"); 
+		Attribute name = new Attribute("name", (FastVector) null); 
+		
+		
+		attributes.addElement(area);
+		attributes.addElement(aspect);
+		
+		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+			attributes.addElement(name);
+		}
+		return attributes;
+	}
+	
+	/**
+	 * Create Instances using the interpolated profiles of nuclei
+	 * @param collection
+	 * @return
+	 */
+	private Instances makeProfileInstances(CellCollection collection)throws Exception {
+		
+		int profileSize = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+		int windowSize = collection.getNuclei().get(0).getAngleProfileWindowSize(); // use the first window size found for now
+		
+		
+		FastVector attributes = makeAttributes(collection, windowSize);
+		
+		Instances instances = new Instances(collection.getName(), attributes, collection.getNucleusCount());
+		
+		int profilePointsToCount = profileSize/windowSize;
+
+		try{
+			
+			int i=0;
+			for(Cell c : collection.getCells()){
+				Nucleus n1 = c.getNucleus();
+				Instance inst = new SparseInstance(attributes.size());
+
+				// Interpolate the profile to the median length
+				Profile p = n1.getAngleProfile(BorderTag.REFERENCE_POINT).interpolate(profileSize);
+				
+				for(int attNumber=0; attNumber<profilePointsToCount; attNumber++){
+
+					Attribute att = (Attribute) attributes.elementAt(attNumber);
+					inst.setValue(att, p.get(attNumber*windowSize));
+					
+				}
+				int attNumber = profilePointsToCount;
+				Attribute att = (Attribute) attributes.elementAt(attNumber++);
+				inst.setValue(att, n1.getArea());
+				att = (Attribute) attributes.elementAt(attNumber++);
+				inst.setValue(att, n1.getAspectRatio());
+				
+				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+					String uniqueName = makeUniqueName(n1);
+					att = (Attribute) attributes.elementAt(attNumber++);
+					inst.setValue(att, uniqueName);
+				}
+				
+				instances.add(inst);
+				cellToInstanceMap.put(inst, c.getId());
+				publish(i++);
+			}
+
+		} catch(Exception e){
+			logError("Error making instances", e);
+		}
+		return instances;
+		
+	}
+
+	/**
+	 * Create Instances using the similarity matrix of nuclei
+	 * @param collection
+	 * @return
+	 */
 	private Instances makeMatrixInstances(CellCollection collection){
 		
-//		int basicAttributeCount = collection.size();
 		int basicAttributeCount = collection.size()/10;
 		
 		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
