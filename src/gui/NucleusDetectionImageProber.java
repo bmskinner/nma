@@ -87,7 +87,7 @@ public class NucleusDetectionImageProber extends ImageProber {
 
 		try {
 			setStatusLoading();
-			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
+			this.setLoadingLabelText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 			
 			ImageStack imageStack = ImageImporter.importImage(imageFile, programLogger);
 			programLogger.log(Level.FINEST, "Imported image as stack");
@@ -180,9 +180,10 @@ public class NucleusDetectionImageProber extends ImageProber {
 			// update the map of icons
 			updateImageThumbnails();
 
-			headerLabel.setText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
-			headerLabel.setIcon(null);
-			headerLabel.repaint();
+			this.setLoadingLabelText("Showing "+cells.size()+" nuclei in "+imageFile.getAbsolutePath());
+			this.setStatusLoaded();
+//			headerLabel.setIcon(null);
+//			headerLabel.repaint();
 
 		} catch (Exception e) { // end try
 			programLogger.log(Level.SEVERE, "Error in image processing", e);

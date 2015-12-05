@@ -48,7 +48,7 @@ import analysis.AnalysisOptions;
 import analysis.nucleus.NucleusDetector;
 
 @SuppressWarnings("serial")
-public abstract class ImageProber extends JDialog {
+public abstract class ImageProber extends LoadingIconDialog {
 	
 	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	
@@ -61,11 +61,11 @@ public abstract class ImageProber extends JDialog {
 	protected AnalysisOptions options; // the options to detect with
 	protected File openImage;			// the image currently open
 
-	protected Logger programLogger;
+//	protected Logger programLogger;
 
-	protected JLabel headerLabel = new JLabel("Examining input folders...");	// the header text and loading gif
+//	protected JLabel headerLabel = new JLabel("Examining input folders...");	// the header text and loading gif
 	
-	protected ImageIcon loadingGif = null; // the icon for the loading gif
+//	protected ImageIcon loadingGif = null; // the icon for the loading gif
 	
 	protected Map<ImageType, JLabel> iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
 	protected Map<ImageType, ImageProcessor> procMap = new HashMap<ImageType, ImageProcessor>(); // allow multiple images 
@@ -118,14 +118,14 @@ public abstract class ImageProber extends JDialog {
 	 * Create the dialog.
 	 */
 	public ImageProber(AnalysisOptions options, Logger logger, ImageType type, File folder) {
-
+		super(logger);
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");
 		} 
 
 		try{
 			this.options = options;
-			this.programLogger = logger;
+
 			this.imageType = type;
 			
 			for(ImageType key : imageType.getValues()){
@@ -153,16 +153,16 @@ public abstract class ImageProber extends JDialog {
 		setBounds(100, 100, w, h);
 		this.setLocationRelativeTo(null); // centre on screen
 
-		// Load the gif (may be in a res folder depending on Eclipse version)
-		String pathToGif = "res/ajax-loader.gif";	
-		boolean ok = loadResources(pathToGif);
-		if(!ok){
-			pathToGif = "ajax-loader.gif";	
-			ok = loadResources(pathToGif);
-		}
-		if(!ok){
-			programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
-		}
+//		// Load the gif (may be in a res folder depending on Eclipse version)
+//		String pathToGif = "res/ajax-loader.gif";	
+//		boolean ok = loadResources(pathToGif);
+//		if(!ok){
+//			pathToGif = "ajax-loader.gif";	
+//			ok = loadResources(pathToGif);
+//		}
+//		if(!ok){
+//			programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
+//		}
 		
 
 		getContentPane().setLayout(new BorderLayout());
@@ -237,35 +237,35 @@ public abstract class ImageProber extends JDialog {
 		}
 	}
 
-	/**
-	 * Fetch the gif loading resources
-	 * 
-	 */
-	private boolean loadResources(String pathToGif){
-		boolean ok = false;
-		try{
-			
-			// Get current classloader
-			ClassLoader cl = this.getClass().getClassLoader();
-			URL urlToGif = cl.getResource(pathToGif);
-			
-			if(urlToGif!=null){
-				loadingGif = new ImageIcon(urlToGif);
-
-				if(loadingGif==null){
-					programLogger.log(Level.WARNING, "Unable to load gif");
-
-				} else {
-					ok = true;
-				}
-
-			} 
-			
-		} catch (Exception e){
-			programLogger.log(Level.SEVERE, "Cannot load gif resource", e);
-		}
-		return ok;
-	}
+//	/**
+//	 * Fetch the gif loading resources
+//	 * 
+//	 */
+//	private boolean loadResources(String pathToGif){
+//		boolean ok = false;
+//		try{
+//			
+//			// Get current classloader
+//			ClassLoader cl = this.getClass().getClassLoader();
+//			URL urlToGif = cl.getResource(pathToGif);
+//			
+//			if(urlToGif!=null){
+//				loadingGif = new ImageIcon(urlToGif);
+//
+//				if(loadingGif==null){
+//					programLogger.log(Level.WARNING, "Unable to load gif");
+//
+//				} else {
+//					ok = true;
+//				}
+//
+//			} 
+//			
+//		} catch (Exception e){
+//			programLogger.log(Level.SEVERE, "Cannot load gif resource", e);
+//		}
+//		return ok;
+//	}
 	
 	/**
 	 * Make the header panel with status label
@@ -275,12 +275,14 @@ public abstract class ImageProber extends JDialog {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
 
+		this.setLoadingLabelText("Examining input folders...");
+		this.setStatusLoading();
 //		headerLabel = new JLabel("Examining input folders...");
-		headerLabel.setIcon(loadingGif);
+//		headerLabel.setIcon(loadingGif);
 		
 		panel.add(new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version."), BorderLayout.NORTH);
 
-		panel.add(headerLabel, BorderLayout.SOUTH);
+		panel.add(this.getLoadingLabel(), BorderLayout.SOUTH);
 
 		return panel;
 	}
@@ -307,13 +309,13 @@ public abstract class ImageProber extends JDialog {
 
 		for(final ImageType key : imageType.getValues()){
 
-			JLabel label = new JLabel("", loadingGif, JLabel.CENTER);
+			JLabel label = new JLabel("", this.getLoadingGif(), JLabel.CENTER);
 			label.setText(key.toString());
 			label.setHorizontalTextPosition(JLabel.CENTER);
 			label.setVerticalTextPosition(JLabel.TOP);
 			ImageIcon icon = (ImageIcon) label.getIcon();
 			icon.getImage().flush();
-			label.setIcon(loadingGif);
+			label.setIcon(this.getLoadingGif());
 			
 			panel.add(label);
 			label.repaint();
@@ -490,21 +492,16 @@ public abstract class ImageProber extends JDialog {
 	 * Set the header label and the image icons to display
 	 * the loading gif
 	 */
+	@Override
 	protected void setStatusLoading(){
-		if(loadingGif!=null){
-			ImageIcon hicon = (ImageIcon) headerLabel.getIcon();
-			if(hicon!=null){
-				hicon.getImage().flush();
-			}
-			headerLabel.setIcon(loadingGif);
-			headerLabel.repaint();
-
+		super.setStatusLoading();
+		if(this.getLoadingGif()!=null){
 			for(ImageType key : imageType.getValues()){
 				
 				JLabel label = iconMap.get(key);
 				ImageIcon icon = (ImageIcon) label.getIcon();
 				icon.getImage().flush();
-				label.setIcon(loadingGif);
+				label.setIcon(this.getLoadingGif());
 			}
 		}
 	}
@@ -515,8 +512,9 @@ public abstract class ImageProber extends JDialog {
 	 */
 	protected void setStatusError(){
 		
-		headerLabel.setIcon(null);
-		headerLabel.repaint();
+//		headerLabel.setIcon(null);
+//		headerLabel.repaint();
+		super.setStatusLoaded();
 
 		for(ImageType key : imageType.getValues()){
 

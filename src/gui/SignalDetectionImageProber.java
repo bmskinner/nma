@@ -87,7 +87,7 @@ public class SignalDetectionImageProber extends ImageProber {
 
 		try{
 			setStatusLoading();
-			headerLabel.setText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
+			this.setLoadingLabelText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
 
 			ImageStack stack = ImageImporter.importImage(imageFile, programLogger);
 
@@ -136,9 +136,10 @@ public class SignalDetectionImageProber extends ImageProber {
 
 			updateImageThumbnails();
 
-			headerLabel.setText("Showing signals in "+imageFile.getAbsolutePath());
-			headerLabel.setIcon(null);
-			headerLabel.repaint();
+			this.setLoadingLabelText("Showing signals in "+imageFile.getAbsolutePath());
+			this.setStatusLoaded();
+//			headerLabel.setIcon(null);
+//			headerLabel.repaint();
 		} catch(Exception e){
 				programLogger.log(Level.SEVERE, "Error in signal probing", e);
 			}

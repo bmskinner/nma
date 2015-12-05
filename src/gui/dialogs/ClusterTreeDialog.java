@@ -2,6 +2,8 @@ package gui.dialogs;
 
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
+import gui.ImageType;
+import gui.LoadingIconDialog;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter;
 import gui.components.DraggableTreeViewer;
@@ -26,6 +28,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,9 +42,11 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -54,6 +59,7 @@ import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
+import jebl.evolution.io.ImportException.DuplicateTaxaException;
 import jebl.evolution.io.NewickImporter;
 import jebl.evolution.taxa.Taxon;
 import jebl.evolution.trees.RootedTree;
@@ -65,13 +71,12 @@ import jebl.gui.trees.treeviewer.TreePane;
 import jebl.gui.trees.treeviewer.TreePaneSelector.SelectionMode;
 
 @SuppressWarnings("serial")
-public class ClusterTreeDialog extends JDialog implements ActionListener, ItemListener {
+public class ClusterTreeDialog extends LoadingIconDialog implements ActionListener, ItemListener {
 
 	private JPanel buttonPanel;
 	private DraggableTreeViewer viewer;
 	private AnalysisDataset dataset;
 	private ClusterGroup group;
-	private Logger programLogger;
 	
 	private JComboBox<AnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
@@ -81,10 +86,10 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 	private List<CellCollection> clusterList = new ArrayList<CellCollection>(0);
 	
 	public ClusterTreeDialog(Logger programLogger, AnalysisDataset dataset, final ClusterGroup group) {
-		
+		super(programLogger);
 		this.dataset = dataset;
 		this.group = group;
-		this.programLogger = programLogger;
+
 		this.setLayout(new BorderLayout());
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.viewer = new DraggableTreeViewer();
@@ -96,7 +101,22 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		
 		this.buttonPanel = createButtonPanel();
 		this.add(buttonPanel, BorderLayout.NORTH);
-
+				
+		importTree();
+		
+				
+		this.setModal(false);
+		this.setMinimumSize(new Dimension(500, 500));
+		this.pack();
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
+	}
+	
+	/**
+	 * Turn the Newick string in the cluster group into a tree,
+	 * and display it  
+	 */
+	private void importTree(){
 		programLogger.log(Level.FINE, "Reading tree");
 		StringReader reader = new StringReader(group.getTree());
 
@@ -110,23 +130,19 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 			int numTaxa = topTree.getTaxa().size(); 
 			
 			viewer.setTree( topTree );
-//			treePane.setTree( topTree, topTree.getNodes() );
+
 			this.setTitle(dataset.getName() + " : " + group.getName() +" : "+numTaxa+ " taxa");
 			colourTreeNodesByClusterGroup(group);
 			
 		} catch (IOException e) {
 			programLogger.log(Level.SEVERE, "Error reading tree", e);
+		} catch (DuplicateTaxaException e){
+			programLogger.log(Level.WARNING, "Unable to display tree: duplicate taxon names");
 		} catch (ImportException e) {
 			programLogger.log(Level.SEVERE, "Error in tree IO", e);
 		}
-				
-		this.setModal(false);
-		this.setMinimumSize(new Dimension(500, 500));
-		this.pack();
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
 	}
-	
+		
 	private JPanel createButtonPanel(){
 		JPanel panel = new JPanel(new FlowLayout());
 		
@@ -164,6 +180,8 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		selectedClusterGroupBox.addItemListener(this);
 		panel.add(selectedClusterGroupBox);
 		
+		panel.add(this.getLoadingLabel());
+		
 		return panel;
 	}
 	
@@ -176,7 +194,7 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		if(cluster!=null){
 			
 			Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
-//			RootedTree tree = (RootedTree) viewer.getTrees().get(0);
+			
 			RootedTree tree = viewer.getTreePane().getTree();
 
 			for(Node n : tree.getNodes()){
@@ -204,50 +222,80 @@ public class ClusterTreeDialog extends JDialog implements ActionListener, ItemLi
 		}
 	}
 		
-	private void colourTreeNodesByClusterGroup(ClusterGroup group){
+	private void colourTreeNodesByClusterGroup(final ClusterGroup group){
 
 		if(group!=null){
-			Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
-			RootedTree tree = viewer.getTreePane().getTree();
-//			RootedTree tree = (RootedTree) viewer.getTrees().get(0);
-			int clusterNumber = 0;
-			for(UUID id : group.getUUIDs()){
-				AnalysisDataset cluster = null;
+			setStatusLoading();
+			Thread thr = new Thread(){
 				
-				if(dataset.hasChild(id)){
-					cluster = dataset.getChildDataset(id);
-				}
-				
-				if(dataset.hasMergeSource(id)){
-					cluster = dataset.getMergeSource(id);
-				}
-				
-				
-				Color colour = ColourSelecter.getSegmentColor(clusterNumber++);
+				public void run(){
+			
+					Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
+					RootedTree tree = viewer.getTreePane().getTree();
 
-				for(Node n : tree.getNodes()){
-
-					if(tree.isExternal(n)){
-
-						Taxon t = tree.getTaxon(n);
-
-						String name = t.getName();
-
-						for(Nucleus nucleus : cluster.getCollection().getNuclei()){
-							if(taxonNamesMatch(name, nucleus)){
-								clusterMemberships.put(n, colour);
-							}
+					int clusterNumber = 0;
+					for(UUID id : group.getUUIDs()){
+						AnalysisDataset cluster = null;
+						
+						if(dataset.hasChild(id)){
+							cluster = dataset.getChildDataset(id);
 						}
+						
+						if(dataset.hasMergeSource(id)){
+							cluster = dataset.getMergeSource(id);
+						}
+												
+						
+						Color colour = ColourSelecter.getSegmentColor(clusterNumber++);
+		
+						for(Node n : tree.getNodes()){
+		
+							if(tree.isExternal(n)){
+		
+								Taxon t = tree.getTaxon(n);
+		
+								String name = t.getName();
+		
+								for(Nucleus nucleus : cluster.getCollection().getNuclei()){
+									if(taxonNamesMatch(name, nucleus)){
+										clusterMemberships.put(n, colour);
+									}
+								}
+							}
+		
+						}
+		
 					}
-
+					VariableNodePainter painter = new VariableNodePainter("Cluster", tree, PainterIntent.TIP, clusterMemberships);
+					viewer.getTreePane().setTaxonLabelPainter(painter);
+					setStatusLoaded();
 				}
-
-			}
-			VariableNodePainter painter = new VariableNodePainter("Cluster", tree, PainterIntent.TIP, clusterMemberships);
-			viewer.getTreePane().setTaxonLabelPainter(painter);
+			};
+			thr.start();
 		}
 	}
 	
+	/**
+	 * Get the names of all nuclei in the collection, formatted as
+	 * taxon names
+	 * @param collection
+	 * @return
+	 */
+	private List<String> getNucleusNames(CellCollection collection){
+		List<String> result = new ArrayList<String>();
+		for(Nucleus nucleus : collection.getNuclei()){
+			result.add(nucleus.getSourceFile()+"-"+nucleus.getNameAndNumber());
+		}
+		return result;
+	}
+	
+
+	/**
+	 * Check that a taxon name matches a nucleus name
+	 * @param name
+	 * @param nucleus
+	 * @return
+	 */
 	private boolean taxonNamesMatch(String name, Nucleus nucleus){
 		String nucleusName = nucleus.getSourceFile()+"-"+nucleus.getNameAndNumber();
 
