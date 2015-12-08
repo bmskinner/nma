@@ -901,7 +901,7 @@ public class MorphologyChartFactory {
 		
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getDomainAxis().setRange(0, 100);
-		plot.getRangeAxis().setRange(0, 1);
+		plot.getRangeAxis().setRange(-0.01, 1.01);
 		
 		for(int i=0; i<options.getDatasets().size(); i++){
 			

@@ -60,7 +60,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 	private JPanel createHeaderPanel(){
 		JPanel panel = new JPanel(new FlowLayout());
 
-		panel.add(new JLabel("Kruskal-Wallis comparison of datasets"));
+		panel.add(new JLabel("Kruskal-Wallis comparison of datasets (Bonferroni-corrected p-values)"));
 
 		return panel;
 		

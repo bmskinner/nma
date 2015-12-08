@@ -1,5 +1,7 @@
 package stats;
 
+import ij.IJ;
+
 import java.util.List;
 
 import jdistlib.disttest.DistributionTest;
@@ -14,20 +16,14 @@ public class KruskalTester {
 	public static Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTag tag, ProfileCollectionType type){
 		
 		Profile resultProfile = null;
-		
+		int sampleNumber = 300;
 		double[] pvals = null;
 		try {
-//			int offsetOne = one.getCollection().getProfileCollection(type).getOffset(tag);
-//			int offsetTwo = two.getCollection().getProfileCollection(type).getOffset(tag);
 			
-			// ensure the postions are starting from the right place
-//			List<Double> keysOne = one.getCollection().getProfileCollection(type).getAggregate().getXKeyset();
-//			List<Double> keysTwo = two.getCollection().getProfileCollection(type).getAggregate().getXKeyset();
-
 			
-			pvals = new double[200];
+			pvals = new double[sampleNumber];
 			
-			for(int i=0; i<200; i++ ){
+			for(int i=0; i<sampleNumber; i++ ){
 //				
 				double position = ( (double) i / 2d);
 				try{ 
@@ -42,27 +38,27 @@ public class KruskalTester {
 						valuesCombined[j] = valuesOne[j];
 						groupsCombined[j] = 1;
 					}
-					for(int j=valuesOne.length; j<valuesTwo.length; j++){
+					for(int j=valuesOne.length; j<valuesCombined.length; j++){
 						valuesCombined[j] = valuesTwo[j-valuesOne.length];
 						groupsCombined[j] = 2;
 					}
 					
 					double[] pval = DistributionTest.kruskal_wallis_test(valuesCombined, groupsCombined);
-					pvals[i] = pval[1];
+					pvals[i] = pval[1] * sampleNumber > 1 ? 1 : pval[1] * sampleNumber;
 //
 				} catch(Exception e){
-//					IJ.log("Cannot get values for position "+position);
+
 					pvals[i] = 1;
 				}
 			}
 //			
 			resultProfile = new Profile(pvals);
-//			resultProfile = resultProfile.offset(offset);
+
 			
 			
 		} catch (Exception e) {
-			pvals = new double[100];
-			for(int i=0; i<200; i++){
+			pvals = new double[sampleNumber];
+			for(int i=0; i<sampleNumber; i++){
 				pvals[i] = 1;
 			}
 			resultProfile = new Profile(pvals);
