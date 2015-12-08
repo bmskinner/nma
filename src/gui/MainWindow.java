@@ -35,6 +35,7 @@ import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
 import gui.tabs.ClusterDetailPanel;
 import gui.tabs.DetailPanel;
+import gui.tabs.KruskalDetailPanel;
 import gui.tabs.MergesDetailPanel;
 import gui.tabs.NuclearBoxplotsPanel;
 import gui.tabs.NucleusProfilesPanel;
@@ -107,6 +108,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
 	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
 	private WilcoxonDetailPanel 	wilcoxonDetailPanel;	// stats test between populations
+	private KruskalDetailPanel		kruskalDetailPanel;
 	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
 	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
 	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
@@ -280,6 +282,14 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			detailPanels.add(wilcoxonDetailPanel);
 			wilcoxonDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Wilcoxon", null, wilcoxonDetailPanel, null);
+			
+			//---------------
+			// Create the Wilcoxon test panel
+			//---------------
+			kruskalDetailPanel = new KruskalDetailPanel(programLogger);
+			detailPanels.add(kruskalDetailPanel);
+			kruskalDetailPanel.addDatasetEventListener(this);
+			tabbedPane.addTab("Kruskal", null, kruskalDetailPanel, null);
 			
 			//---------------
 			// Create the segments boxplot panel
