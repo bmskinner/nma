@@ -152,18 +152,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 
 		setBounds(100, 100, w, h);
 		this.setLocationRelativeTo(null); // centre on screen
-
-//		// Load the gif (may be in a res folder depending on Eclipse version)
-//		String pathToGif = "res/ajax-loader.gif";	
-//		boolean ok = loadResources(pathToGif);
-//		if(!ok){
-//			pathToGif = "ajax-loader.gif";	
-//			ok = loadResources(pathToGif);
-//		}
-//		if(!ok){
-//			programLogger.log(Level.WARNING, "Resource loading failed (gif): "+pathToGif);
-//		}
-		
+	
 
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setLayout(new BorderLayout());
@@ -236,36 +225,6 @@ public abstract class ImageProber extends LoadingIconDialog {
 			contentPanel.add(prevButton, BorderLayout.WEST);
 		}
 	}
-
-//	/**
-//	 * Fetch the gif loading resources
-//	 * 
-//	 */
-//	private boolean loadResources(String pathToGif){
-//		boolean ok = false;
-//		try{
-//			
-//			// Get current classloader
-//			ClassLoader cl = this.getClass().getClassLoader();
-//			URL urlToGif = cl.getResource(pathToGif);
-//			
-//			if(urlToGif!=null){
-//				loadingGif = new ImageIcon(urlToGif);
-//
-//				if(loadingGif==null){
-//					programLogger.log(Level.WARNING, "Unable to load gif");
-//
-//				} else {
-//					ok = true;
-//				}
-//
-//			} 
-//			
-//		} catch (Exception e){
-//			programLogger.log(Level.SEVERE, "Cannot load gif resource", e);
-//		}
-//		return ok;
-//	}
 	
 	/**
 	 * Make the header panel with status label
@@ -277,8 +236,6 @@ public abstract class ImageProber extends LoadingIconDialog {
 
 		this.setLoadingLabelText("Examining input folders...");
 		this.setStatusLoading();
-//		headerLabel = new JLabel("Examining input folders...");
-//		headerLabel.setIcon(loadingGif);
 		
 		panel.add(new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version."), BorderLayout.NORTH);
 
@@ -499,9 +456,11 @@ public abstract class ImageProber extends LoadingIconDialog {
 			for(ImageType key : imageType.getValues()){
 				
 				JLabel label = iconMap.get(key);
-				ImageIcon icon = (ImageIcon) label.getIcon();
-				icon.getImage().flush();
-				label.setIcon(this.getLoadingGif());
+				if(label!=null){
+					ImageIcon icon = (ImageIcon) label.getIcon();
+					icon.getImage().flush();
+					label.setIcon(this.getLoadingGif());
+				}
 			}
 		}
 	}
