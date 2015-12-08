@@ -653,20 +653,37 @@ public class NucleusTableDatasetCreator {
 	public static TableModel createClusterOptionsTable(List<AnalysisDataset> list){
 		DefaultTableModel model = new DefaultTableModel();
 
-		Object[] columnData = {
-				"Cluster group",
-				"Clusters found",
-				"Method", 
-				"Iterations",
-				"Hierarchical method",
-				"Cluster number",
-				"Include modality",
-				"Modality points",
-				"Include profile",
-				"Include area",
-				"Include aspect",
-				"Tree"};
-		model.addColumn("", columnData);
+		List<Object> columnList = new ArrayList<Object>();
+		columnList.add("Cluster group");
+		columnList.add("Clusters found");
+		columnList.add("Method");
+		columnList.add("Iterations");
+		columnList.add("Hierarchical method");
+		columnList.add("Target cluster number");
+		columnList.add("Include modality (deprecated)");
+		columnList.add("Modality points (deprecated)");
+		columnList.add("Include profile");
+
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+			columnList.add("Include "+stat.toString());
+		}
+		
+		columnList.add("Tree");
+		
+//		Object[] columnData = {
+//				"Cluster group",
+//				"Clusters found",
+//				"Method", 
+//				"Iterations",
+//				"Hierarchical method",
+//				"Cluster number",
+//				"Include modality",
+//				"Modality points",
+//				"Include profile",
+//				"Include area",
+//				"Include aspect",
+//				"Tree"};
+		model.addColumn("", columnList.toArray());
 		
 		if(list==null){
 			model.addColumn("No data loaded");
@@ -694,22 +711,37 @@ public class NucleusTableDatasetCreator {
 							: "N/A";
 							
 					String tree = g.hasTree() ? g.getTree() : "N/A";
-											
-					Object[] data = {
-						g.getName(),
-						g.size(),
-						op.getType().toString(),
-						iterationString,
-						hierarchicalMethodString,
-						hierarchicalClusterString,
-						op.isIncludeModality(),
-						op.getModalityRegions(),
-						op.isIncludeProfile(),
-						op.isIncludeStatistic(NucleusStatistic.AREA),
-						op.isIncludeStatistic(NucleusStatistic.ASPECT),
-						tree
-					};
-					model.addColumn(dataset.getName(), data);
+									
+					List<Object> dataList = new ArrayList<Object>();
+					dataList.add(g.getName());
+					dataList.add(g.size());
+					dataList.add(op.getType().toString());
+					dataList.add(iterationString);
+					dataList.add(hierarchicalMethodString);
+					dataList.add(hierarchicalClusterString);
+					dataList.add(op.isIncludeModality());
+					dataList.add(op.getModalityRegions());
+					dataList.add(op.isIncludeProfile());
+					for(NucleusStatistic stat : NucleusStatistic.values()){
+						dataList.add(op.isIncludeStatistic(stat));
+					}
+					dataList.add(tree);
+					
+//					Object[] data = {
+//						g.getName(),
+//						g.size(),
+//						op.getType().toString(),
+//						iterationString,
+//						hierarchicalMethodString,
+//						hierarchicalClusterString,
+//						op.isIncludeModality(),
+//						op.getModalityRegions(),
+//						op.isIncludeProfile(),
+//						op.isIncludeStatistic(NucleusStatistic.AREA),
+//						op.isIncludeStatistic(NucleusStatistic.ASPECT),
+//						tree
+//					};
+					model.addColumn(dataset.getName(), dataList.toArray());
 				}
 			}
 		}
