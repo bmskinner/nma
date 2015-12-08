@@ -473,14 +473,10 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	 * @return
 	 */
 	private ClusterGroup makeNewClusterGroup(List<AnalysisDataset> list){
-		ClusteringOptions newOptions = new ClusteringOptions(ClusteringMethod.HIERARCHICAL);
-		newOptions.setClusterNumber(list.size());
-		newOptions.setHierarchicalMethod(group.getOptions().getHierarchicalMethod());
-		newOptions.setIncludeModality(group.getOptions().isIncludeModality());
-		newOptions.setModalityRegions(group.getOptions().getModalityRegions());
-		newOptions.setUseSimilarityMatrix(group.getOptions().isUseSimilarityMatrix());
+		ClusteringOptions newOptions = new ClusteringOptions(group.getOptions());
+		newOptions.setClusterNumber(list.size());		
+		
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-//		programLogger.log(Level.INFO, "Creating cluster group "+clusterNumber);
 		ClusterGroup newGroup = new ClusterGroup("ClusterGroup_"+clusterNumber, newOptions, group.getTree());
 		return newGroup;
 	}

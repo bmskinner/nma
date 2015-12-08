@@ -19,6 +19,7 @@
 package analysis.nucleus;
 
 import stats.DipTester;
+import stats.NucleusStatistic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import analysis.ClusteringOptions.ClusteringMethod;
 import components.Cell;
 import components.CellCollection;
 import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileCollectionType;
@@ -92,13 +94,14 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 
 		Instances instances = null;
 
-		if(options.isUseSimilarityMatrix()){
+//		if(options.isUseSimilarityMatrix()){
 			log(Level.FINER, "Making profile instances");
 			instances = makeProfileInstances(collection);
-		} else {
-			log(Level.FINER, "Making standard instances");
-			instances = makeStandardInstances(collection);
-		}
+			
+//		} else {
+//			log(Level.FINER, "Making standard instances");
+//			instances = makeStandardInstances(collection);
+//		}
 		log(Level.FINEST, instances.toSummaryString());
 		return instances;
 		
@@ -361,29 +364,67 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	
 	private FastVector makeAttributes(CellCollection collection, int windowSize)throws Exception {
 		
-		// An attribute for each angle in the median profile
-		int basicAttributeCount = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
-		basicAttributeCount /= windowSize;
 		
-		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
-
-		FastVector attributes = new FastVector(attributeCount);
-		for(int i=0; i<basicAttributeCount; i+=1){
-			Attribute a = new Attribute("att_"+i); 
-			attributes.addElement(a);
+		int attributeCount = 0;
+		int profileAttributeCount = 0;
+		
+		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile
+			log(Level.FINEST, "Including profile");
+			profileAttributeCount = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50).size();
+			profileAttributeCount /= windowSize;
+			attributeCount += profileAttributeCount;
 		}
 		
-		Attribute area = new Attribute("area"); 
-		Attribute aspect = new Attribute("aspect"); 
-		Attribute name = new Attribute("name", (FastVector) null); 
-		
-		
-		attributes.addElement(area);
-		attributes.addElement(aspect);
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+			if(options.isIncludeStatistic(stat)){
+				log(Level.FINEST, "Including "+stat.toString());
+				attributeCount++;
+			}
+		}
 		
 		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+			attributeCount++;
+		}
+		
+		FastVector attributes = new FastVector(attributeCount);
+		
+		
+//		int attributeCount = options.getType().equals(ClusteringMethod.HIERARCHICAL) ? basicAttributeCount+3 : basicAttributeCount+2;
+//		int attributeToAdd = 0;
+		
+		if(options.isIncludeProfile()){
+			for(int i=0; i<profileAttributeCount; i++){
+				Attribute a = new Attribute("att_"+i); 
+				attributes.addElement(a);
+//				attributeToAdd++;
+			}
+		}
+		
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+			if(options.isIncludeStatistic(stat)){
+				Attribute a = new Attribute(stat.toString()); 
+				attributes.addElement(a);
+
+			}
+		}
+		
+		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+			Attribute name = new Attribute("name", (FastVector) null); 
 			attributes.addElement(name);
 		}
+		
+		
+//		Attribute area = new Attribute("area"); 
+//		Attribute aspect = new Attribute("aspect"); 
+//		Attribute name = new Attribute("name", (FastVector) null); 
+//		
+//		
+//		attributes.addElement(area);
+//		attributes.addElement(aspect);
+//		
+//		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+//			attributes.addElement(name);
+//		}
 		return attributes;
 	}
 	
@@ -414,24 +455,46 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				// Interpolate the profile to the median length
 				Profile p = n1.getAngleProfile(BorderTag.REFERENCE_POINT).interpolate(profileSize);
 				
-				for(int attNumber=0; attNumber<profilePointsToCount; attNumber++){
-
-					Attribute att = (Attribute) attributes.elementAt(attNumber);
-					inst.setValue(att, p.get(attNumber*windowSize));
-					
+//				for(int attNumber=0; attNumber<profilePointsToCount; attNumber++){
+//
+//					Attribute att = (Attribute) attributes.elementAt(attNumber);
+//					inst.setValue(att, p.get(attNumber*windowSize));
+//					
+//				}
+//				int attNumber = profilePointsToCount;
+//				Attribute att = (Attribute) attributes.elementAt(attNumber++);
+//				inst.setValue(att, n1.getArea());
+//				att = (Attribute) attributes.elementAt(attNumber++);
+//				inst.setValue(att, n1.getAspectRatio());
+//				
+//				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+//					String uniqueName = makeUniqueName(n1);
+//					att = (Attribute) attributes.elementAt(attNumber++);
+//					inst.setValue(att, uniqueName);
+//				}
+				int attNumber=0;
+				if(options.isIncludeProfile()){
+					for(attNumber=0; attNumber<profilePointsToCount; attNumber++){
+						Attribute att = (Attribute) attributes.elementAt(attNumber);
+						inst.setValue(att, p.get(attNumber*windowSize));
+					}
 				}
-				int attNumber = profilePointsToCount;
-				Attribute att = (Attribute) attributes.elementAt(attNumber++);
-				inst.setValue(att, n1.getArea());
-				att = (Attribute) attributes.elementAt(attNumber++);
-				inst.setValue(att, n1.getAspectRatio());
+				
+				for(NucleusStatistic stat : NucleusStatistic.values()){
+					if(options.isIncludeStatistic(stat)){
+						Attribute att = (Attribute) attributes.elementAt(attNumber++);
+						inst.setValue(att, n1.getStatistic(stat, MeasurementScale.MICRONS));
+
+					}
+				}
 				
 				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
 					String uniqueName = makeUniqueName(n1);
-					att = (Attribute) attributes.elementAt(attNumber++);
+					Attribute att = (Attribute) attributes.elementAt(attNumber++);
 					inst.setValue(att, uniqueName);
 				}
 				
+
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());
 				publish(i++);

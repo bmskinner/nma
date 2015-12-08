@@ -662,6 +662,9 @@ public class NucleusTableDatasetCreator {
 				"Cluster number",
 				"Include modality",
 				"Modality points",
+				"Include profile",
+				"Include area",
+				"Include aspect",
 				"Tree"};
 		model.addColumn("", columnData);
 		
@@ -701,6 +704,9 @@ public class NucleusTableDatasetCreator {
 						hierarchicalClusterString,
 						op.isIncludeModality(),
 						op.getModalityRegions(),
+						op.isIncludeProfile(),
+						op.isIncludeStatistic(NucleusStatistic.AREA),
+						op.isIncludeStatistic(NucleusStatistic.ASPECT),
 						tree
 					};
 					model.addColumn(dataset.getName(), data);

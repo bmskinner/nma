@@ -64,6 +64,9 @@ public class ClusteringSetupDialog extends SettingsDialog implements ActionListe
 	static final int DEFAULT_MODALITY_REGIONS = 2;
 	static final boolean DEFAULT_USE_MODALITY = true;
 	static final boolean DEFAULT_USE_SIMILARITY_MATRIX = false;
+	static final boolean DEFAULT_INCLUDE_AREA = false;
+	static final boolean DEFAULT_INCLUDE_ASPECT = false;
+	static final boolean DEFAULT_INCLUDE_PROFILE = true;
 	
 
 	private final JPanel contentPanel = new JPanel();

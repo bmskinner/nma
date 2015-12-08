@@ -60,12 +60,6 @@ public abstract class ImageProber extends LoadingIconDialog {
 	private final JPanel contentPanel = new JPanel();
 	protected AnalysisOptions options; // the options to detect with
 	protected File openImage;			// the image currently open
-
-//	protected Logger programLogger;
-
-//	protected JLabel headerLabel = new JLabel("Examining input folders...");	// the header text and loading gif
-	
-//	protected ImageIcon loadingGif = null; // the icon for the loading gif
 	
 	protected Map<ImageType, JLabel> iconMap = new HashMap<ImageType, JLabel>(); // allow multiple images 
 	protected Map<ImageType, ImageProcessor> procMap = new HashMap<ImageType, ImageProcessor>(); // allow multiple images 

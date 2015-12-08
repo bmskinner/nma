@@ -34,7 +34,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import javax.swing.Box;
@@ -54,6 +56,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import stats.NucleusStatistic;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
@@ -61,7 +64,6 @@ import analysis.ClusteringOptions.HierarchicalClusterMethod;
 public class HierarchicalTreeSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
 	private static final long serialVersionUID = 1L;
-
 
 	private final JPanel contentPanel = new JPanel();
 	
@@ -76,6 +78,9 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	private JSpinner modalityPointsSpinner;
 	
 	private JCheckBox useSimilarityMatrixCheckBox;
+	
+	private JCheckBox includeProfilesCheckBox;
+	private Map<NucleusStatistic, JCheckBox> statBoxMap = new HashMap<NucleusStatistic, JCheckBox>();
 	
 	private ClusteringOptions options;
 	
@@ -100,11 +105,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	public ClusteringOptions getOptions(){
 		return this.options;
 	}
-		
-//	public boolean isReadyToRun(){
-//		return this.readyToRun;
-//	}
-	
+			
 	private void setDefaults(){
 		options = new ClusteringOptions(ClusteringSetupDialog.DEFAULT_CLUSTER_METHOD);
 		options.setClusterNumber(ClusteringSetupDialog.DEFAULT_MANUAL_CLUSTER_NUMBER);
@@ -113,6 +114,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		options.setIncludeModality(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
 		options.setModalityRegions(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS);
 		options.setUseSimilarityMatrix(ClusteringSetupDialog.DEFAULT_USE_SIMILARITY_MATRIX);
+		options.setIncludeProfile(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
 	}
 		
 	private JPanel createHeader(){
@@ -201,36 +203,54 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		labels.add(clusterLabel);
 		fields.add(hierarchicalClusterMethodCheckBox);
 
-		useModalityCheckBox = new JCheckBox("");
-		useModalityCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
-		useModalityCheckBox.addChangeListener(this);
-		JLabel modalityLabel = new JLabel("Include modality");
-		modalityLabel.setToolTipText(Labels.USE_MODALITY_REGIONS);
-		labels.add(modalityLabel);
-		fields.add(useModalityCheckBox);
-
-		SpinnerModel model =
-				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS, //initial value
-						1, //min
-						20, //max
-						1); //step
-		
-		modalityPointsSpinner = new JSpinner(model);
-		modalityPointsSpinner.addChangeListener(this);
-		modalityPointsSpinner.setEnabled(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
-		
-		JLabel modalityPoints = new JLabel("Modality points");
-		modalityPoints.setToolTipText(Labels.NUMBER_MODALITY_REGIONS);
-		labels.add(modalityPoints);
-		fields.add(modalityPointsSpinner);
-		
-		useSimilarityMatrixCheckBox = new JCheckBox("");
-	    useSimilarityMatrixCheckBox.addChangeListener(this);
+//		useModalityCheckBox = new JCheckBox("");
+//		useModalityCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
+//		useModalityCheckBox.addChangeListener(this);
+//		JLabel modalityLabel = new JLabel("Include modality");
+//		modalityLabel.setToolTipText(Labels.USE_MODALITY_REGIONS);
+//		labels.add(modalityLabel);
+//		fields.add(useModalityCheckBox);
+//
+//		SpinnerModel model =
+//				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS, //initial value
+//						1, //min
+//						20, //max
+//						1); //step
+//		
+//		modalityPointsSpinner = new JSpinner(model);
+//		modalityPointsSpinner.addChangeListener(this);
+//		modalityPointsSpinner.setEnabled(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
+//		
+//		JLabel modalityPoints = new JLabel("Modality points");
+//		modalityPoints.setToolTipText(Labels.NUMBER_MODALITY_REGIONS);
+//		labels.add(modalityPoints);
+//		fields.add(modalityPointsSpinner);
+//		
+//		useSimilarityMatrixCheckBox = new JCheckBox("");
+//	    useSimilarityMatrixCheckBox.addChangeListener(this);
 	    
-	    JLabel similarityLabel = new JLabel("Use similarity matrix");
-	    similarityLabel.setToolTipText(Labels.USE_SIMILARITY_MATRIX);
-		labels.add(similarityLabel);
-		fields.add(useSimilarityMatrixCheckBox);
+//	    JLabel similarityLabel = new JLabel("Use similarity matrix");
+//	    similarityLabel.setToolTipText(Labels.USE_SIMILARITY_MATRIX);
+//		labels.add(similarityLabel);
+//		fields.add(useSimilarityMatrixCheckBox);
+		
+		
+		includeProfilesCheckBox = new JCheckBox("");
+		includeProfilesCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
+		includeProfilesCheckBox.addChangeListener(this);
+		JLabel profileLabel = new JLabel("Include profiles");
+		labels.add(profileLabel);
+		fields.add(includeProfilesCheckBox);
+		
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+			JCheckBox box = new JCheckBox("");
+			box.setSelected(false);
+			box.addChangeListener(this);
+			JLabel label = new JLabel(stat.toString());
+			labels.add(label);
+			fields.add(box);
+			statBoxMap.put(stat, box);
+		}
 		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
@@ -247,45 +267,56 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
-		try {
+//		try {
+			
+			for(NucleusStatistic stat : NucleusStatistic.values()){
+				JCheckBox box = statBoxMap.get(stat);
+				options.setIncludeStatistic(stat, box.isSelected());
+			}
+			
+			if(e.getSource()==includeProfilesCheckBox){
+				options.setIncludeProfile(includeProfilesCheckBox.isSelected());				
+			} 
 						
-			if(e.getSource()==useModalityCheckBox){
-				options.setIncludeModality(useModalityCheckBox.isSelected());
-				if(useModalityCheckBox.isSelected()){
-					modalityPointsSpinner.setEnabled(true);
-				} else {
-					modalityPointsSpinner.setEnabled(false);
-				}
-				
-			} 
+//			if(e.getSource()==useModalityCheckBox){
+//				options.setIncludeModality(useModalityCheckBox.isSelected());
+//				if(useModalityCheckBox.isSelected()){
+//					modalityPointsSpinner.setEnabled(true);
+//				} else {
+//					modalityPointsSpinner.setEnabled(false);
+//				}
+//				
+//			} 
+//			
+//			if(e.getSource()==useSimilarityMatrixCheckBox){
+//				options.setUseSimilarityMatrix(useSimilarityMatrixCheckBox.isSelected());
+//				if(useSimilarityMatrixCheckBox.isSelected()){
+//					useModalityCheckBox.setEnabled(false);
+//					modalityPointsSpinner.setEnabled(false);
+//				} else {
+//					
+//					useModalityCheckBox.setEnabled(true);
+//					if(useModalityCheckBox.isSelected()){
+//						modalityPointsSpinner.setEnabled(true);
+//					} else {
+//						modalityPointsSpinner.setEnabled(false);
+//					}
+//				}
+//				
+//			} 
 			
-			if(e.getSource()==useSimilarityMatrixCheckBox){
-				options.setUseSimilarityMatrix(useSimilarityMatrixCheckBox.isSelected());
-				if(useSimilarityMatrixCheckBox.isSelected()){
-					useModalityCheckBox.setEnabled(false);
-					modalityPointsSpinner.setEnabled(false);
-				} else {
-					
-					useModalityCheckBox.setEnabled(true);
-					if(useModalityCheckBox.isSelected()){
-						modalityPointsSpinner.setEnabled(true);
-					} else {
-						modalityPointsSpinner.setEnabled(false);
-					}
-				}
-				
-			} 
 			
 			
+//			if(e.getSource()==modalityPointsSpinner){
+//				JSpinner j = (JSpinner) e.getSource();
+//				j.commitEdit();
+//				options.setModalityRegions(  (Integer) j.getValue());
+//			} 
 			
-			if(e.getSource()==modalityPointsSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setModalityRegions(  (Integer) j.getValue());
-			} 
-		}catch (ParseException e1) {
-			programLogger.log(Level.SEVERE, "Error in spinners for Clustering options", e);
-		}	
+			
+//		}catch (ParseException e1) {
+//			programLogger.log(Level.SEVERE, "Error in spinners for Clustering options", e);
+//		}	
 		
 	}
 }

@@ -18,10 +18,12 @@
  *******************************************************************************/
 package analysis;
 
-import gui.components.ColourSelecter.ColourSwatch;
-
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
+import stats.NucleusStatistic;
 
 public class ClusteringOptions implements Serializable {
 
@@ -31,6 +33,10 @@ public class ClusteringOptions implements Serializable {
 	private HierarchicalClusterMethod hierarchicalMethod;
 	private int iterations;
 	private boolean autoClusterNumber;
+	
+	
+	private Map<NucleusStatistic, Boolean> statMap = new HashMap<NucleusStatistic, Boolean>();
+	private boolean includeProfile; // should the nuclear profiles be a part of the clustering?
 	
 	private boolean includeModality;
 	private int modalityRegions;
@@ -44,10 +50,41 @@ public class ClusteringOptions implements Serializable {
 	 */
 	public ClusteringOptions(ClusteringMethod type){
 		this.type = type;
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+    		statMap.put(stat, false);
+    	}
 	}
 	
+	public ClusteringOptions(ClusteringOptions oldOptions){
+		this.type = oldOptions.getType();
+		this.hierarchicalMethod = oldOptions.getHierarchicalMethod();
+		this.includeModality = oldOptions.isIncludeModality();
+		this.modalityRegions = oldOptions.getModalityRegions();
+		this.useSimilarityMatrix = oldOptions.isUseSimilarityMatrix();
+		this.includeProfile = oldOptions.isIncludeProfile();
+		
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+    		statMap.put(stat, oldOptions.isIncludeStatistic(stat));
+    	}
+	}
+		
 	
-
+	public boolean isIncludeStatistic(NucleusStatistic stat){
+		return this.statMap.get(stat);
+	}
+	
+	public void setIncludeStatistic(NucleusStatistic stat, boolean b){
+		this.statMap.put(stat, b);
+	}
+	
+	public boolean isIncludeProfile(){
+		return this.includeProfile;
+	}
+	
+	public void setIncludeProfile(boolean b){
+		this.includeProfile = b;
+	}
+	
 
 	public boolean isUseSimilarityMatrix() {
 		return useSimilarityMatrix;
@@ -189,6 +226,13 @@ public class ClusteringOptions implements Serializable {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
 	    this.useSimilarityMatrix = false;
+	    this.includeProfile = false;
+	    if(statMap==null){
+	    	statMap = new HashMap<NucleusStatistic, Boolean>();
+	    	for(NucleusStatistic stat : NucleusStatistic.values()){
+	    		statMap.put(stat, false);
+	    	}
+	    }
 	}
 	
 	
