@@ -23,6 +23,7 @@ import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.components.ExportableTable;
 import gui.components.HistogramsTabPanel;
 import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.SelectableChartPanel;
@@ -771,7 +772,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	protected class SegmentStatsPanel extends JPanel implements ActionListener {
 		
 		private static final long serialVersionUID = 1L;
-		private JTable table; // individual segment stats
+		private ExportableTable table; // individual segment stats
 				
 		private JScrollPane scrollPane;
 				
@@ -783,7 +784,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 						
 			try {
 				TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, MeasurementScale.PIXELS);
-				table = new JTable(model);
+				table = new ExportableTable(model);
 				table.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {

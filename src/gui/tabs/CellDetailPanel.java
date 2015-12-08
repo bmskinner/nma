@@ -22,6 +22,7 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
+import gui.components.ExportableTable;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import ij.IJ;
 
@@ -649,7 +650,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected class CellStatsPanel extends JPanel {
 		
 		private static final long serialVersionUID = 1L;
-		private JTable table; // individual cell stats
+		private ExportableTable table; // individual cell stats
 		
 		private JScrollPane scrollPane;
 		
@@ -659,7 +660,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			scrollPane = new JScrollPane();
 						
-			table = new JTable(CellDatasetCreator.createCellInfoTable(null));
+			table = new ExportableTable(CellDatasetCreator.createCellInfoTable(null));
 			table.setEnabled(false);
 			
 			table.addMouseListener(new MouseAdapter() {
@@ -841,7 +842,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected class SegmentStatsPanel extends JPanel {
 		
 		private static final long serialVersionUID = 1L;
-		private JTable table; // individual cell stats
+		private ExportableTable table; // individual cell stats
 		
 		private JScrollPane scrollPane;
 		
@@ -852,7 +853,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			scrollPane = new JScrollPane();
 						
 			try {
-				table = new JTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+				table = new ExportableTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
 				table.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {

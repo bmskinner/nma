@@ -19,6 +19,7 @@
 package gui.tabs;
 
 import gui.DatasetEvent.DatasetMethod;
+import gui.components.ExportableTable;
 
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
@@ -40,13 +41,13 @@ import analysis.AnalysisDataset;
 @SuppressWarnings("serial")
 public class MergesDetailPanel extends DetailPanel {
 	
-	private JTable		mergeSources;
+	private ExportableTable		mergeSources;
 	private JButton		getSourceButton = new JButton("Recover source");
 	
 	public MergesDetailPanel(Logger programLogger){
 		super(programLogger);
 		this.setLayout(new BorderLayout());
-		mergeSources = new JTable(makeBlankTable()){
+		mergeSources = new ExportableTable(makeBlankTable()){
 			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
 			    return false;

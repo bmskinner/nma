@@ -35,6 +35,7 @@ import charting.DefaultTableOptions;
 import charting.DefaultTableOptions.TableType;
 import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
+import gui.components.ExportableTable;
 
 public class VennDetailPanel extends DetailPanel {
 
@@ -43,8 +44,8 @@ public class VennDetailPanel extends DetailPanel {
 	
 	private JPanel mainPanel = new JPanel();
 	
-	private JTable vennTable;
-	private JTable pairwiseVennTable;
+	private ExportableTable vennTable;
+	private ExportableTable pairwiseVennTable;
 
 	public VennDetailPanel(Logger programLogger) {
 		super(programLogger);
@@ -58,7 +59,7 @@ public class VennDetailPanel extends DetailPanel {
 		
 		this.add(scrollPane, BorderLayout.CENTER);
 		
-		vennTable = new JTable(NucleusTableDatasetCreator.createVennTable(null));
+		vennTable = new ExportableTable(NucleusTableDatasetCreator.createVennTable(null));
 		vennPanel.add(vennTable, BorderLayout.CENTER);
 		vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
 		mainPanel.add(vennPanel);
@@ -68,7 +69,7 @@ public class VennDetailPanel extends DetailPanel {
 		
 		JPanel pairwisePanel = new JPanel(new BorderLayout());
 		
-		pairwiseVennTable = new JTable(NucleusTableDatasetCreator.createPairwiseVennTable(null));
+		pairwiseVennTable = new ExportableTable(NucleusTableDatasetCreator.createPairwiseVennTable(null));
 		
 		pairwisePanel.add(pairwiseVennTable, BorderLayout.CENTER);
 		pairwisePanel.add(pairwiseVennTable.getTableHeader(), BorderLayout.NORTH);

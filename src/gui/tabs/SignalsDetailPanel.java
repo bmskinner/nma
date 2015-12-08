@@ -22,6 +22,7 @@ package gui.tabs;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
+import gui.components.ExportableTable;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -227,7 +228,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	private static final long serialVersionUID = 1L;
     	
     	private ChartPanel 	chartPanel; 		// consensus nucleus plus signals
-    	private JTable 		statsTable;					// table for signal stats
+    	private ExportableTable 		statsTable;					// table for signal stats
     	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
     	private JPanel		checkboxPanel;
     	
@@ -249,7 +250,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		DefaultTableModel tableModel = new DefaultTableModel();
     		tableModel.addColumn("");
     		tableModel.addColumn("");
-    		statsTable = new JTable(); // table  for basic stats
+    		statsTable = new ExportableTable(); // table  for basic stats
     		statsTable.setModel(tableModel);
     		statsTable.setEnabled(false);
     		
@@ -600,7 +601,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
     	private static final long serialVersionUID = 1L;
 
-    	private JTable 		table;			// table for analysis parameters
+    	private ExportableTable 		table;			// table for analysis parameters
     	private JScrollPane scrollPane;
 
 
@@ -608,7 +609,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
     		this.setLayout(new BorderLayout());
 
-    		table  = new JTable(new DefaultTableModel());
+    		table  = new ExportableTable(new DefaultTableModel());
     		table.setAutoCreateColumnsFromModel(false);
     		table.setEnabled(false);
     		scrollPane = new JScrollPane(table);

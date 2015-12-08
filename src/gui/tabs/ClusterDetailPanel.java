@@ -22,6 +22,7 @@ package gui.tabs;
 import gui.DatasetEvent;
 import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
+import gui.components.ExportableTable;
 import gui.dialogs.ClusterTreeDialog;
 
 import java.awt.BorderLayout;
@@ -88,7 +89,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
 		
 		private JPanel tablesPanel;
-		private JTable clusterDetailsTable; 
+		private ExportableTable clusterDetailsTable; 
 		
 		public ClustersPanel(){
 			this.setLayout(new BorderLayout());
@@ -100,7 +101,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			
 			JPanel clusterDetailPanel = new JPanel(new BorderLayout());
 			TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(null);
-			clusterDetailsTable = new JTable(optionsModel){
+			clusterDetailsTable = new ExportableTable(optionsModel){
 				@Override
 				public boolean isCellEditable(int rowIndex, int columnIndex) {
 				    return false;

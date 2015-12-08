@@ -41,6 +41,7 @@ import analysis.AnalysisDataset;
 import charting.NucleusStatsTableOptions;
 import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
+import gui.components.ExportableTable;
 import stats.NucleusStatistic;
 
 public class WilcoxonDetailPanel extends DetailPanel {
@@ -74,7 +75,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 		
 		
 		for(NucleusStatistic stat : NucleusStatistic.values()){
-			JTable table = new JTable(NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(null, stat));
+			ExportableTable table = new ExportableTable(NucleusTableDatasetCreator.createWilcoxonNuclearStatTable(null, stat));
 			tables.put(stat, table);
 			addWilconxonTable(panel, table, stat.toString());
 		}

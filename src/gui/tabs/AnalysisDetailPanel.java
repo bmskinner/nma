@@ -35,6 +35,7 @@ import charting.DefaultTableOptions;
 import charting.DefaultTableOptions.TableType;
 import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
+import gui.components.ExportableTable;
 
 /**
  * Holds the nuclear detection parameters and basic stats about the
@@ -46,8 +47,8 @@ public class AnalysisDetailPanel extends DetailPanel {
 
 	private static final long serialVersionUID = 1L;
 	
-	private JTable tablePopulationStats;
-	private JTable tableAnalysisParamters;
+	private ExportableTable tablePopulationStats;
+	private ExportableTable tableAnalysisParamters;
 	private JTabbedPane tabPane;
 
 	public AnalysisDetailPanel(Logger programLogger) {
@@ -151,7 +152,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 
 			panelGeneralStats.setLayout(new BorderLayout(0, 0));
 
-			tablePopulationStats = new JTable();
+			tablePopulationStats = new ExportableTable();
 			panelGeneralStats.add(tablePopulationStats, BorderLayout.CENTER);
 			tablePopulationStats.setEnabled(false);
 
@@ -172,7 +173,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 		
 		panel.setLayout(new BorderLayout(0, 0));
 
-		tableAnalysisParamters = new JTable();
+		tableAnalysisParamters = new ExportableTable();
 		tableAnalysisParamters.setAutoCreateColumnsFromModel(false);
 		tableAnalysisParamters.setModel(NucleusTableDatasetCreator.createAnalysisParametersTable(null));
 		tableAnalysisParamters.setEnabled(false);
