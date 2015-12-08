@@ -94,14 +94,9 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 
 		Instances instances = null;
 
-//		if(options.isUseSimilarityMatrix()){
-			log(Level.FINER, "Making profile instances");
-			instances = makeProfileInstances(collection);
-			
-//		} else {
-//			log(Level.FINER, "Making standard instances");
-//			instances = makeStandardInstances(collection);
-//		}
+		log(Level.FINER, "Making profile instances");
+		instances = makeProfileInstances(collection);
+
 		log(Level.FINEST, instances.toSummaryString());
 		return instances;
 		

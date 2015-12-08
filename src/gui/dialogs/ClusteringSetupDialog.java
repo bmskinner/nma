@@ -19,6 +19,7 @@
 package gui.dialogs;
 
 import gui.MainWindow;
+import stats.NucleusStatistic;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -27,16 +28,12 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -49,13 +46,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
 
-public class ClusteringSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
-
-	private static final long serialVersionUID = 1L;
+@SuppressWarnings("serial")
+public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener, ChangeListener {
 	
 	static final int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
 	static final ClusteringMethod DEFAULT_CLUSTER_METHOD = ClusteringMethod.HIERARCHICAL;
@@ -68,39 +63,27 @@ public class ClusteringSetupDialog extends SettingsDialog implements ActionListe
 	static final boolean DEFAULT_INCLUDE_ASPECT = false;
 	static final boolean DEFAULT_INCLUDE_PROFILE = true;
 	
-
-	private final JPanel contentPanel = new JPanel();
-	
-	private JPanel headingPanel;
-	private JPanel optionsPanel;
-	private JPanel footerPanel;
 	private JPanel 		cardPanel;
 	
 	private JSpinner clusterNumberSpinner;
 	
 	private JRadioButton clusterHierarchicalButton;
 	private JRadioButton clusterEMButton;
-	
-	private JRadioButton clusterNumberAutoButton;
-	private JRadioButton clusterManualButton;
-	
-	private JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
+		
 	private JSpinner iterationsSpinner;
-	
-	private JCheckBox useModalityCheckBox;
-	private JSpinner modalityPointsSpinner;
-	
-	private JCheckBox useSimilarityMatrixCheckBox;
-	
-	private ClusteringOptions options;
+
 	
 	public ClusteringSetupDialog(MainWindow mw) {
-		
-		// modal dialog
-		super(mw.getProgramLogger(), mw, true);
-		this.setTitle("Clustering options");
-		this.setLocationRelativeTo(null);
-		
+
+		super(mw, "Clustering options");
+		this.initialise();
+		this.pack();
+		this.setVisible(true);
+
+	}
+	
+	@Override
+	protected void initialise(){
 		try {
 			setDefaults();
 			createGUI();
@@ -108,23 +91,8 @@ public class ClusteringSetupDialog extends SettingsDialog implements ActionListe
 		} catch (Exception e) {
 			programLogger.log(Level.SEVERE, "Error making dialog", e);
 		}
+	}
 		
-	}
-	
-	public ClusteringOptions getOptions(){
-		return this.options;
-	}
-			
-	private void setDefaults(){
-		options = new ClusteringOptions(ClusteringSetupDialog.DEFAULT_CLUSTER_METHOD);
-		options.setClusterNumber(DEFAULT_MANUAL_CLUSTER_NUMBER);
-		options.setHierarchicalMethod(DEFAULT_HIERARCHICAL_METHOD);
-		options.setIterations(DEFAULT_EM_ITERATIONS);
-		options.setIncludeModality(DEFAULT_USE_MODALITY);
-		options.setModalityRegions(DEFAULT_MODALITY_REGIONS);
-		options.setUseSimilarityMatrix(DEFAULT_USE_SIMILARITY_MATRIX);
-	}
-	
 	private JPanel createHierarchicalPanel(){
 		JPanel panel = new JPanel();
 		GridBagLayout layout = new GridBagLayout();
@@ -186,40 +154,9 @@ public class ClusteringSetupDialog extends SettingsDialog implements ActionListe
 		return panel;
 	}
 	
-	private JPanel createHeader(){
-
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		return panel;
-	}
 	
-	private JPanel createFooter(){
-
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		JButton okButton = new JButton("OK");
-		okButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				ClusteringSetupDialog.this.readyToRun = true;
-				ClusteringSetupDialog.this.setVisible(false);			
-			}
-		});
-
-		panel.add(okButton);
-
-		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				ClusteringSetupDialog.this.dispose();			
-			}
-		});
-		panel.add(cancelButton);
-		return panel;
-	}
-	
-	private void createGUI(){
+	@Override
+	protected void createGUI(){
 		
 		setBounds(100, 100, 450, 300);
 		contentPanel.setLayout(new BorderLayout());
@@ -270,22 +207,17 @@ public class ClusteringSetupDialog extends SettingsDialog implements ActionListe
 	    methodPanel.add(clusterHierarchicalButton);
 	    methodPanel.add(clusterEMButton);
 	    	    
-	    JPanel modalityPanel = createModalityPanel();
+	    JPanel includePanel = createOptionsPanel();
 
 	    optionsPanel.add(methodPanel, BorderLayout.NORTH);
 	    optionsPanel.add(cardPanel, BorderLayout.CENTER);
-	    optionsPanel.add(modalityPanel, BorderLayout.SOUTH);
+	    optionsPanel.add(includePanel, BorderLayout.SOUTH);
 	   
 	    
 	    contentPanel.add(optionsPanel, BorderLayout.CENTER);
-		//---------------
-		// end
-		//---------------
-		this.pack();
-		this.setVisible(true);
 	}
 	
-	private JPanel createModalityPanel(){
+	private JPanel createOptionsPanel(){
 		JPanel panel = new JPanel();
 		GridBagLayout layout = new GridBagLayout();
 		panel.setLayout(layout);
@@ -293,35 +225,33 @@ public class ClusteringSetupDialog extends SettingsDialog implements ActionListe
 		List<JLabel> labels = new ArrayList<JLabel>();
 		List<Component> fields = new ArrayList<Component>();
 		
-		useModalityCheckBox = new JCheckBox("");
-		useModalityCheckBox.setSelected(DEFAULT_USE_MODALITY);
-		useModalityCheckBox.addChangeListener(this);
+
+		includeProfilesCheckBox = new JCheckBox("");
+		includeProfilesCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
+		includeProfilesCheckBox.addChangeListener(this);
+		JLabel profileLabel = new JLabel("Include profiles");
+		labels.add(profileLabel);
+		fields.add(includeProfilesCheckBox);
 		
-		labels.add(new JLabel("Include modality"));
-		fields.add(useModalityCheckBox);
+		for(NucleusStatistic stat : NucleusStatistic.values()){
+			JCheckBox box = new JCheckBox("");
+			box.setSelected(false);
+			box.addChangeListener(this);
+			JLabel label = new JLabel(stat.toString());
+			labels.add(label);
+			fields.add(box);
+			statBoxMap.put(stat, box);
+		}
 		
-		SpinnerModel model =
-				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS, //initial value
-						1, //min
-						20, //max
-						1); //step
-		
-		modalityPointsSpinner = new JSpinner(model);
-		modalityPointsSpinner.addChangeListener(this);
-		modalityPointsSpinner.setEnabled(DEFAULT_USE_MODALITY);
-		labels.add(new JLabel("Modality points"));
-		fields.add(modalityPointsSpinner);
-		
-		useSimilarityMatrixCheckBox = new JCheckBox("");
-	    useSimilarityMatrixCheckBox.addChangeListener(this);
-	    labels.add(new JLabel("Similarity matrix"));
-		fields.add(useSimilarityMatrixCheckBox);
 		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
+		
 	}
+
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
+		super.actionPerformed(arg0);
 		
 		// Set enabled based on button text (you can use whatever text you prefer)
 		if(clusterHierarchicalButton.isSelected()){
@@ -344,20 +274,14 @@ public class ClusteringSetupDialog extends SettingsDialog implements ActionListe
 			options.setType(ClusteringMethod.EM);
 
 		} 
-		
 
-		if(clusterManualButton.isSelected()){
-			clusterNumberSpinner.setEnabled(true);
-		}
-
-		if(clusterNumberAutoButton.isSelected()){
-			clusterNumberSpinner.setEnabled(false);
-		}
 				
 	}
 
 	@Override
 	public void stateChanged(ChangeEvent e) {
+		super.stateChanged(e);
+		
 		try {
 			if(e.getSource()==clusterNumberSpinner){
 				JSpinner j = (JSpinner) e.getSource();
@@ -370,41 +294,6 @@ public class ClusteringSetupDialog extends SettingsDialog implements ActionListe
 				options.setIterations(  (Integer) j.getValue());
 			} 
 			
-			if(e.getSource()==useModalityCheckBox){
-				options.setIncludeModality(useModalityCheckBox.isSelected());
-				if(useModalityCheckBox.isSelected()){
-					modalityPointsSpinner.setEnabled(true);
-					options.setModalityRegions(  (Integer) modalityPointsSpinner.getValue());
-				} else {
-					modalityPointsSpinner.setEnabled(false);
-				}
-				
-			} 
-			
-			if(e.getSource()==useSimilarityMatrixCheckBox){
-				options.setUseSimilarityMatrix(useSimilarityMatrixCheckBox.isSelected());
-				if(useSimilarityMatrixCheckBox.isSelected()){
-					useModalityCheckBox.setEnabled(false);
-					modalityPointsSpinner.setEnabled(false);
-				} else {
-					
-					useModalityCheckBox.setEnabled(true);
-					if(useModalityCheckBox.isSelected()){
-						modalityPointsSpinner.setEnabled(true);
-					} else {
-						modalityPointsSpinner.setEnabled(false);
-					}
-				}
-				
-			} 
-			
-			
-			
-			if(e.getSource()==modalityPointsSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setModalityRegions(  (Integer) j.getValue());
-			} 
 		}catch (ParseException e1) {
 			programLogger.log(Level.SEVERE, "Error in spinners for Clustering options", e1);
 		}	

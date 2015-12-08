@@ -65,24 +65,24 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 
 	private static final long serialVersionUID = 1L;
 
-	private final JPanel contentPanel = new JPanel();
+	protected final JPanel contentPanel = new JPanel();
 	
-	private JPanel headingPanel;
-	private JPanel optionsPanel;
-	private JPanel footerPanel;
+	protected JPanel headingPanel;
+	protected JPanel optionsPanel;
+	protected JPanel footerPanel;
 	
 	
-	private JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
+	protected JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
 	
-	private JCheckBox useModalityCheckBox;
-	private JSpinner modalityPointsSpinner;
+//	private JCheckBox useModalityCheckBox;
+//	private JSpinner modalityPointsSpinner;
+//	
+//	private JCheckBox useSimilarityMatrixCheckBox;
 	
-	private JCheckBox useSimilarityMatrixCheckBox;
+	protected JCheckBox includeProfilesCheckBox;
+	protected Map<NucleusStatistic, JCheckBox> statBoxMap = new HashMap<NucleusStatistic, JCheckBox>();
 	
-	private JCheckBox includeProfilesCheckBox;
-	private Map<NucleusStatistic, JCheckBox> statBoxMap = new HashMap<NucleusStatistic, JCheckBox>();
-	
-	private ClusteringOptions options;
+	protected ClusteringOptions options;
 	
 	public HierarchicalTreeSetupDialog(MainWindow mw) {
 		
@@ -91,22 +91,49 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		this.setTitle("Tree building options");
 		setSize(450, 300);
 		this.setLocationRelativeTo(null);
+		initialise();
+		this.pack();
+		this.setVisible(true);
 		
+	}
+	
+	/**
+	 * Constructor that does not make panel visible
+	 * @param mw
+	 * @param title
+	 */
+	protected HierarchicalTreeSetupDialog(MainWindow mw, String title){
+		super(mw.getProgramLogger(), mw, true);
+		this.setTitle(title);
+		setSize(450, 300);
+		this.setLocationRelativeTo(null);
+	}
+	
+	/**
+	 * Set the default options and make the panel
+	 */
+	protected void initialise(){
 		try {
 			setDefaults();
 			createGUI();
 
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error making gui", e);
+			programLogger.log(Level.SEVERE, "Error making dialog", e);
 		}
-		
 	}
 	
+	/**
+	 * Get the options saved in this panel
+	 * @return
+	 */
 	public ClusteringOptions getOptions(){
 		return this.options;
 	}
 			
-	private void setDefaults(){
+	/**
+	 * Set the default options
+	 */
+	protected void setDefaults(){
 		options = new ClusteringOptions(ClusteringSetupDialog.DEFAULT_CLUSTER_METHOD);
 		options.setClusterNumber(ClusteringSetupDialog.DEFAULT_MANUAL_CLUSTER_NUMBER);
 		options.setHierarchicalMethod(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
@@ -117,14 +144,14 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		options.setIncludeProfile(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
 	}
 		
-	private JPanel createHeader(){
+	protected JPanel createHeader(){
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		return panel;
 	}
 	
-	private JPanel createFooter(){
+	protected JPanel createFooter(){
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -132,8 +159,8 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		okButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				HierarchicalTreeSetupDialog.this.readyToRun = true;
-				HierarchicalTreeSetupDialog.this.setVisible(false);			
+				readyToRun = true;
+				setVisible(false);			
 			}
 		});
 
@@ -143,14 +170,14 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		cancelButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				HierarchicalTreeSetupDialog.this.dispose();			
+				dispose();			
 			}
 		});
 		panel.add(cancelButton);
 		return panel;
 	}
 	
-	private void createGUI(){
+	protected void createGUI(){
 		
 		contentPanel.setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -179,8 +206,8 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		//---------------
 		// end
 		//---------------
-		this.pack();
-		this.setVisible(true);
+//		this.pack();
+//		this.setVisible(true);
 	}
 	
 	private JPanel createOptionsPanel(){
@@ -203,38 +230,6 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		labels.add(clusterLabel);
 		fields.add(hierarchicalClusterMethodCheckBox);
 
-//		useModalityCheckBox = new JCheckBox("");
-//		useModalityCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
-//		useModalityCheckBox.addChangeListener(this);
-//		JLabel modalityLabel = new JLabel("Include modality");
-//		modalityLabel.setToolTipText(Labels.USE_MODALITY_REGIONS);
-//		labels.add(modalityLabel);
-//		fields.add(useModalityCheckBox);
-//
-//		SpinnerModel model =
-//				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_MODALITY_REGIONS, //initial value
-//						1, //min
-//						20, //max
-//						1); //step
-//		
-//		modalityPointsSpinner = new JSpinner(model);
-//		modalityPointsSpinner.addChangeListener(this);
-//		modalityPointsSpinner.setEnabled(ClusteringSetupDialog.DEFAULT_USE_MODALITY);
-//		
-//		JLabel modalityPoints = new JLabel("Modality points");
-//		modalityPoints.setToolTipText(Labels.NUMBER_MODALITY_REGIONS);
-//		labels.add(modalityPoints);
-//		fields.add(modalityPointsSpinner);
-//		
-//		useSimilarityMatrixCheckBox = new JCheckBox("");
-//	    useSimilarityMatrixCheckBox.addChangeListener(this);
-	    
-//	    JLabel similarityLabel = new JLabel("Use similarity matrix");
-//	    similarityLabel.setToolTipText(Labels.USE_SIMILARITY_MATRIX);
-//		labels.add(similarityLabel);
-//		fields.add(useSimilarityMatrixCheckBox);
-		
-		
 		includeProfilesCheckBox = new JCheckBox("");
 		includeProfilesCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
 		includeProfilesCheckBox.addChangeListener(this);
