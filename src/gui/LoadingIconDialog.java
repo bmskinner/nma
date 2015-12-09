@@ -43,6 +43,10 @@ public abstract class LoadingIconDialog extends JDialog {
 
 	}
 	
+	protected Logger getProgramLogger(){
+		return this.programLogger;
+	}
+	
 	/**
 	 * Get the JLabel with the loading icon
 	 * @return

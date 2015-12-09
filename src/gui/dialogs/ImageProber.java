@@ -332,6 +332,11 @@ public abstract class ImageProber extends LoadingIconDialog {
 	}
 
 	
+	/**
+	 * Get if the downstream analysis is ok to run,
+	 * or if the dialog has been cancelled
+	 * @return
+	 */
 	public boolean getOK(){
 		return this.ok;
 	}

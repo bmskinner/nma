@@ -519,42 +519,38 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 		try{
 
-//			String[] names = populationsPanel.getPopulationNames().toArray(new String[0]);
-//
-//			String selectedValue = (String) JOptionPane.showInputDialog(null,
-//					"Choose population", "FISH Remapping",
-//					JOptionPane.INFORMATION_MESSAGE, null,
-//					names, names[0]);
-//
-//			UUID id = populationsPanel.getUuidFromName(selectedValue);
 			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
 			if(list.size()==1){
 				final AnalysisDataset dataset = list.get(0);
 				
 				FishRemappingDialog fishMapper = new FishRemappingDialog(MainWindow.this, dataset, programLogger);
 
-				List<CellCollection> subs = fishMapper.getSubCollections();
-				
-				final List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
-				for(CellCollection sub : subs){
+				if(fishMapper.getOK()){
+					programLogger.log(Level.INFO, "Fetching collections...");
+					List<CellCollection> subs = fishMapper.getSubCollections();
 
-					if(sub.getNucleusCount()>0){
-						
-						dataset.addChildCollection(sub);
-						
-						AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
-						list.add(subDataset);
+					final List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+					for(CellCollection sub : subs){
+
+						if(sub.getNucleusCount()>0){
+
+							dataset.addChildCollection(sub);
+
+							AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
+							newList.add(subDataset);
+						}
 					}
+
+					SwingUtilities.invokeLater(new Runnable(){
+						public void run(){
+							programLogger.log(Level.INFO, "Reapplying morphology...");
+							new MorphologyAnalysisAction(newList, dataset, ADD_POPULATION, MainWindow.this);
+
+						}});
+
+				} else {
+					programLogger.log(Level.INFO, "Remapping cancelled");
 				}
-				
-				SwingUtilities.invokeLater(new Runnable(){
-					public void run(){
-						programLogger.log(Level.INFO, "Reapplying morphology...");
-						new MorphologyAnalysisAction(newList, dataset, ADD_POPULATION, MainWindow.this);
-
-					}});
-
-				
 				
 			}
 

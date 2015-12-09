@@ -535,6 +535,20 @@ public class CellCollection implements Serializable {
 	  }
 	  return result;
   }
+  
+  /**
+   * Get the cells in this collection
+   * @return
+   */
+  public List<Cell> getCells(File imageFile){
+	  List<Cell> result = new ArrayList<Cell>(0);
+	  for(Cell cell : this.getCells()){
+		  if(cell.getNucleus().getSourceFile().equals(imageFile)){
+			  result.add(cell);
+		  }
+	  }
+	  return result;
+  }
 
   /**
    * Get the nuclei in this collection
@@ -548,10 +562,6 @@ public class CellCollection implements Serializable {
 
 	  return result;
   }
-
-//  public Cell getCell(int i){
-//    return this.cellCollection.get(i);
-//  }
   
   /**
    * Get the nuclei within the specified image

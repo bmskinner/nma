@@ -41,6 +41,7 @@ import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
@@ -69,44 +70,21 @@ import components.CellCollection;
 import components.nuclear.NuclearSignal;
 import components.nuclei.Nucleus;
 
+@SuppressWarnings("serial")
 public class FishRemappingDialog extends ImageProber {
 
-	private static final long serialVersionUID = 1L;
 	public static final int NUCLEUS_OUTLINE_WIDTH = 2;
-//	private final JPanel contentPanel = new JPanel();
-	
-//	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	
 	private AnalysisDataset dataset;
 	private File postFISHImageDirectory;
 	
-//	private JLabel preImageLabel;
-//	private JLabel postImageLabel;
-	
-//	JButton prevButton;
-//	JButton nextButton;
-	
 	JLabel fileLabel;
 	
-//	private File openFile;
-//	private ImageProcessor openProcessor;
-	
-//	private JPanel imagePane;
-	
 	private boolean isFinished = false;
-	
-	private CellCollection subCollectionLeft;
-	private CellCollection subCollectionRight;
-	
+		
 	private List<UUID> selectedNucleiLeft = new ArrayList<UUID>(0);
 	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0);
-	
-//	private int currentImage = 0;
-	
-//	private double conversion;
-//	private int smallWidth; 
-//	private int smallHeight;
-	
+		
 	public enum FishMappingImageType implements ImageType {
 		
 		ORIGINAL_IMAGE   ("Original image"),
@@ -141,25 +119,72 @@ public class FishRemappingDialog extends ImageProber {
 		// set the collectio of pre-FISH images
 		this.dataset = dataset;
 		
+		// Clear the 'large image' mouse listener
+		// It must be replaced with a custom listener
+		for(MouseListener l : iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getMouseListeners()){
+			iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).removeMouseListener(l);
+		}
+		
+		iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+
+//				getProgramLogger().log(Level.FINER, "Mouse clicked");
+//				 correct scaling 
+				ImageProcessor openProcessor = procMap.get(FishMappingImageType.ORIGINAL_IMAGE);
+				
+				double labelWidth = iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getWidth();
+				double labelHeight = iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getHeight();
+				
+				double iconWidth = iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getIcon().getIconWidth();
+				double iconHeight = iconMap.get(FishMappingImageType.ORIGINAL_IMAGE).getIcon().getIconHeight();
+				
+				double conversion = (double) iconWidth / (double) openProcessor.getWidth();
+				
+				
+				double x = e.getX() ; // positions on label
+				double y = e.getY() ;
+				
+				// convert to positions on the image icon
+				double xIcon = x - (  (labelWidth  - iconWidth ) /2 );
+				double yIcon = y - (  (labelHeight - iconHeight) /2 );;
+				int originalX =  (int) ( xIcon / conversion) ;
+				int originalY =  (int) ( yIcon / conversion) ;
+				
+//				getProgramLogger().log(Level.FINEST, "x: "+x);
+//				getProgramLogger().log(Level.FINEST, "y: "+y);
+//				getProgramLogger().log(Level.FINEST, "orignal x: "+originalX);
+//				getProgramLogger().log(Level.FINEST, "orignal y: "+originalY);
+
+				List<Cell> imageNuclei = FishRemappingDialog.this.dataset.getCollection().getCells(openImage);
+				for(Cell c : imageNuclei){
+					Nucleus n = c.getNucleus();
+					double[] positions = n.getPosition();
+
+					FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+					PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+					roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+
+					if(roi.contains(originalX, originalY)){
+//						getProgramLogger().log(Level.FINER, "Nucleus clicked");
+						respondToMouseEvent(e, c, openProcessor);
+					}
+				}
+				updateImageThumbnails();
+			}
+		});
 		
 		
 
 		// ask for a folder of post-FISH images
 		if(this.getPostFISHDirectory()){
 
-			try {
-				
-				this.subCollectionLeft  = new CellCollection(dataset, "SubCollectionLeft");
-				this.subCollectionRight = new CellCollection(dataset, "SubCollectionRight");
-				
-//				createGUI();
-
-			} catch (Exception e) {
-				programLogger.log(Level.SEVERE, "Error creating mapping window: ", e);
-			}
+			createFileList(dataset.getAnalysisOptions().getFolder());
+			this.setVisible(true);
+		} else {
+			this.dispose();
 		}
-		createFileList(dataset.getAnalysisOptions().getFolder());
-		this.setVisible(true);
+		
 	}
 	
 	public boolean isFinished(){
@@ -168,7 +193,19 @@ public class FishRemappingDialog extends ImageProber {
 	
 	public List<CellCollection> getSubCollections(){
 		List<CellCollection> result = new ArrayList<CellCollection>(0);
+		
+		CellCollection subCollectionLeft  = new CellCollection(dataset, "SubCollectionLeft");
+		for(UUID id : selectedNucleiLeft){
+			Cell cell = dataset.getCollection().getCell(id);
+			subCollectionLeft.addCell(new Cell(cell));
+		}
 		result.add(subCollectionLeft);
+		
+		CellCollection subCollectionRight  = new CellCollection(dataset, "SubCollectionRight");
+		for(UUID id : selectedNucleiRight){
+			Cell cell = dataset.getCollection().getCell(id);
+			subCollectionRight.addCell(new Cell(cell));
+		}
 		result.add(subCollectionRight);
 		return result;
 	}
@@ -199,16 +236,9 @@ public class FishRemappingDialog extends ImageProber {
 			
 			procMap.put(FishMappingImageType.FISH_IMAGE, fishProcessor);
 			
-
-
 			// Get the cells matching the imageFile
-			programLogger.log(Level.FINEST, "Detecting signals in image");
-
-			for(Nucleus n : dataset.getCollection().getNuclei()){
-
-				if(n.getImageName().equals(imageName)){
-					drawNucleus(n, openProcessor);
-				}
+			for(Cell c : dataset.getCollection().getCells(imageFile)){
+				drawNucleus(c, openProcessor);
 			}
 
 			
@@ -224,280 +254,53 @@ public class FishRemappingDialog extends ImageProber {
 		}
 	
 	
-//	public void createGUI(){
-//		
-//		
-//		setBounds(100, 100, 450, 300);
-//		contentPanel.setLayout(new BorderLayout());
-//		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-//		setContentPane(contentPanel);
-////		IJ.log("Made content panel");
-//		
-//		// panel for text labels
-//		JPanel headingPanel = new JPanel();
-//		headingPanel.setLayout(new BoxLayout(headingPanel, BoxLayout.Y_AXIS));
-//		
-//		JLabel headingLabel = new JLabel("Select nuclei to keep for analysis", JLabel.LEFT);
-//		headingPanel.add(headingLabel);
-//		JLabel helpLabel = new JLabel("Yellow nuclei are available to select", JLabel.LEFT);
-//		JLabel helpLabel2 = new JLabel("Click nuclei with left or right button to add them to a sub-population", JLabel.LEFT);
-//		headingPanel.add(helpLabel);
-//		headingPanel.add(helpLabel2);
-//		fileLabel = new JLabel("", JLabel.RIGHT);
-//		headingPanel.add(fileLabel);
-//		
-//		contentPanel.add(headingPanel, BorderLayout.NORTH);
-//		//---------------
-//		// add the next image button
-//		//---------------
-//		JPanel buttonPane = new JPanel();
-//		buttonPane.setLayout(new FlowLayout(FlowLayout.CENTER));
-//		
-//		prevButton = new JButton("Previous");
-//		nextButton = new JButton("Next");
-//		
-//		nextButton.addMouseListener(new NextButtonClickedAdapter());
-//		prevButton.addMouseListener(new PrevButtonClickedAdapter());
-//		
-//		prevButton.setEnabled(false);
-//		buttonPane.add(prevButton);
-//
-//		buttonPane.add(nextButton);
-//
-//		//---------------
-//		// add the cancel button panel
-//		//---------------
-//
-//		JButton cancelButton = new JButton("Cancel");
-//		cancelButton.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mousePressed(MouseEvent arg0) {
-//				
-//				FishRemappingDialog.this.dispose();			
-//			}
-//		});
-//		buttonPane.add(cancelButton);
-//
-//		contentPanel.add(buttonPane, BorderLayout.SOUTH);
-////		IJ.log("Made buttons");
-//		
-//		//---------------
-//		// add the image panel
-//		//---------------
-//		
-//		imagePane = new JPanel();
-//		imagePane.setLayout(new BoxLayout(imagePane, BoxLayout.X_AXIS));
-//		
-//		ImageIcon preImage = new ImageIcon(new BufferedImage(100,100,BufferedImage.TYPE_INT_RGB));
-//		ImageIcon postImage = new ImageIcon(new BufferedImage(100,100,BufferedImage.TYPE_INT_RGB));
-//		
-////		preImageLabel = new JLabel("", preImage, JLabel.CENTER);
-//		postImageLabel = new JLabel("", postImage, JLabel.CENTER);
-//		
-//		preImageLabel = new DrawableImageArea(preImage);
-//		
-//		preImageLabel.addMouseListener(new MouseAdapter() {
-//		    @Override
-//		    public void mousePressed(MouseEvent e) {
-//		    			    
-//		        // correct scaling 
-//		    	int x = e.getX();
-//		    	int y = e.getY();
-//		    	int originalX = openProcessor.getWidth()>smallWidth ? (int) ( (double) x / (double) conversion) : x;
-//		    	int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
-//		    	
-//		    	
-//		    	List<Nucleus> imageNuclei = FishRemappingDialog.this.dataset.getCollection().getNuclei(openFile);
-//		    	for(Nucleus n : imageNuclei){
-//		    		
-//
-//		    		double[] positions = n.getPosition();
-//		    		
-//		    		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-//		    		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-//		    		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-//		    		
-//		    		if(roi.contains(originalX, originalY)){
-//
-//		    			drawNucleus(n, openProcessor, e, roi);
-//		    			
-//		    			ImagePlus preSmall;
-//		    			if(openProcessor.getWidth()>smallWidth){
-//		    				preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
-//		    			} else {
-//		    				preSmall = new ImagePlus("small", openProcessor);
-//		    			}
-//
-//			    		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
-//			    		preImageLabel.setIcon(preImageIcon);
-//		    		}
-//		    	}
-//		    }
-//		});
-//		
-//		
-//		
-//		
-//		imagePane.add(preImageLabel);
-//		Dimension minSize = new Dimension(10, 100);
-//		Dimension prefSize = new Dimension(20, 100);
-//		Dimension maxSize = new Dimension(Short.MAX_VALUE, 100);
-//		imagePane.add(new Box.Filler(minSize, prefSize, maxSize));
-//		imagePane.add(postImageLabel);
-//		
-//		contentPanel.add(imagePane, BorderLayout.CENTER);
-//
-//		File firstImage = this.dataset.getCollection().getImageFiles().get(0);
-//		if(firstImage.exists()){
-//			fileLabel.setText("Image file: "+firstImage.getAbsolutePath());
-//			openImages(firstImage);
-//		} else {
-//			firstImage = this.dataset.getCollection().getImageFiles().get(1);
-//			fileLabel.setText("Image file: "+firstImage.getAbsolutePath());
-//			openImages(firstImage);
-//		}
-//
-//		this.pack(); 
-//		this.setVisible(true);
-//	}
-	
-	/**
-	 * Open the selected pre-FISH image file, annotate nuclei, and find the post-FISH image file.
-	 * Large images are scaled to take up a maximum width of 0.45 the screen, allowing pre- and post-
-	 * side by side.
-	 * @param preFile the pre-FISH image
-	 */
-//	private void openImages(File preFile){
-//				
-//		openFile = preFile;
-//				
-//		ImageStack preStack = ImageImporter.importImage(preFile, programLogger);
-//		ImagePlus preImage = ImageExporter.convertToRGB(preStack);
-//
-//		openProcessor = preImage.getProcessor();
-//		List<Nucleus> imageNuclei = this.dataset.getCollection().getNuclei(openFile);
-//		
-//
-//		for(Nucleus n : imageNuclei){
-//
-//			// if present in list, colour green, else yellow
-//			if(selectedNucleiLeft.contains(n.getID())){
-//				openProcessor.setColor(Color.GREEN);
-//			} else {
-//
-//				if(selectedNucleiRight.contains(n.getID())){
-//					openProcessor.setColor(Color.MAGENTA);
-//
-//				} else {
-//					openProcessor.setColor(Color.YELLOW);
-//				}
-//			}
-//
-//			double[] positions = n.getPosition();
-//			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-//			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-//			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
-//			openProcessor.setLineWidth(2);
-//			openProcessor.draw(roi);
-//
-//		}
-//	
-//		int originalWidth = openProcessor.getWidth();
-//		int originalHeight = openProcessor.getHeight();
-//				
-//
-//		// set the image width to be less than half the screen width
-//		smallWidth = (int) ((double) screenSize.getWidth() * 0.45);
-//		
-//		// keep the image aspect ratio
-//		double ratio = (double) originalWidth / (double) originalHeight;
-//		smallHeight = (int) (smallWidth / ratio);
-//		
-//		// get the conversion factor to find original image coordinates when we click the scaled image
-//		conversion = (double) smallWidth / (double) originalWidth;
-//		
-//		final ImagePlus preSmall;
-//
-//		
-//		if(openProcessor.getWidth()>smallWidth){
-//			preSmall = new ImagePlus("small", openProcessor.resize(smallWidth, smallHeight ));
-//		} else {
-//			preSmall = new ImagePlus("small", openProcessor);
-//		}
-//
-//		ImageIcon preImageIcon = new ImageIcon(preSmall.getBufferedImage());
-//		preImageLabel.setIcon(preImageIcon);
-//
-//		
-//		try {
-//			openPostImage(preFile);
-//		} catch (Exception e) {
-//			IJ.log("Error opening post-image: "+e.getMessage());
-//
-//			e.printStackTrace();
-//		}
-//
-//	}
-	
-	/**
-	 * Open the post-FISH file corresponding to the filename of the pre-FISH file.
-	 * If the file is not found, a blank image is shown instead.
-	 * @param preFile the pre-FISH image file
-	 */
-//	private void openPostImage(File preFile) {
-//		String imageName = preFile.getName(); // the file name e.g. P60.tif
-//		String postFile = this.postFISHImageDirectory.getAbsolutePath()+File.separator+imageName;
-//		File post = new File(postFile);
-//		if(post.exists()){
-//			ImagePlus postImage = new ImagePlus(postFile);
-//
-//			// make an image icon and display
-//			ImagePlus postSmall;
-//			//		ImagePlus preSmall = new ImagePlus("small", ip.resize(smallWidth, smallHeight ));
-//			if(openProcessor.getWidth()>smallWidth){
-//				postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
-//			} else {
-//				postSmall = postImage;
-//			}
-//
-//			//		ImagePlus postSmall = new ImagePlus("small", postImage.getProcessor().resize(smallWidth, smallHeight));
-//			ImageIcon postImageIcon = new ImageIcon(postSmall.getBufferedImage());
-//			postImageLabel.setIcon(postImageIcon);
-//		} else {
-//			ImageIcon postImage = new ImageIcon(new BufferedImage(smallWidth,smallHeight,BufferedImage.TYPE_INT_RGB));
-//			postImageLabel = new JLabel("", postImage, JLabel.CENTER);
-//		}
-//	}
-	
-	private void drawNucleus(Nucleus n, ImageProcessor ip){
 
-
+	
+	private void respondToMouseEvent(MouseEvent e, Cell c, ImageProcessor ip){
+		
+		
 		// if present in list, remove it, otherwise add it
-//		if(FishRemappingDialog.this.selectedNucleiLeft.contains(n.getID()) ||  FishRemappingDialog.this.selectedNucleiRight.contains(n.getID()) ){
-//
-//			FishRemappingDialog.this.selectedNucleiLeft.remove(n.getID());
-//			FishRemappingDialog.this.selectedNucleiRight.remove(n.getID());
-//			ip.setColor(Color.YELLOW);
-//
-//		} else {
-//
-//			if((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){ // right button
-//				FishRemappingDialog.this.selectedNucleiRight.add(n.getID());
-//				FishRemappingDialog.this.selectedNucleiLeft.remove(n.getID());
-//				ip.setColor(Color.MAGENTA);
-//			}
-//
-//			if((e.getModifiers() & InputEvent.BUTTON1_MASK)	== InputEvent.BUTTON1_MASK){ // left button
-//				FishRemappingDialog.this.selectedNucleiLeft.add(n.getID());
-//				FishRemappingDialog.this.selectedNucleiRight.remove(n.getID());
-//				ip.setColor(Color.GREEN);
-//			}
-//
-//		}
+		if(FishRemappingDialog.this.selectedNucleiLeft.contains(c.getId()) ||  FishRemappingDialog.this.selectedNucleiRight.contains(c.getId()) ){
 
+			FishRemappingDialog.this.selectedNucleiLeft.remove(c.getId());
+			FishRemappingDialog.this.selectedNucleiRight.remove(c.getId());
+
+		} else {
+
+			if((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){ // right button
+				FishRemappingDialog.this.selectedNucleiRight.add(c.getId());
+				FishRemappingDialog.this.selectedNucleiLeft.remove(c.getId());
+			}
+
+			if((e.getModifiers() & InputEvent.BUTTON1_MASK)	== InputEvent.BUTTON1_MASK){ // left button
+				FishRemappingDialog.this.selectedNucleiLeft.add(c.getId());
+				FishRemappingDialog.this.selectedNucleiRight.remove(c.getId());
+			}
+
+		}
+		
+		drawNucleus(c, ip);
+		
+	}
+	
+	private Color chooseNucleusOutlineColor(Cell c){
+		Color color = Color.ORANGE;
+		if(selectedNucleiLeft.contains(c.getId())){
+			color = Color.GREEN;
+		}
+		if(selectedNucleiRight.contains(c.getId())){
+			color = Color.MAGENTA;
+		}
+		
+		return color;
+	}
+	
+	private void drawNucleus(Cell c, ImageProcessor ip){
+		
 		// update the image
+		Nucleus n = c.getNucleus();
 		double[] positions = n.getPosition();
-		ip.setColor(Color.ORANGE);
+		ip.setColor(chooseNucleusOutlineColor(c));
 		ip.setLineWidth(NUCLEUS_OUTLINE_WIDTH);
 		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
 		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
@@ -525,97 +328,9 @@ public class FishRemappingDialog extends ImageProber {
 	    if(!folder.exists()){
 	    	return false; // check folder is ok
 	    }
-//	    IJ.log("Got directory: "+folder.getAbsolutePath());
 	    this.postFISHImageDirectory = folder;
 	    return true;
 	}
-//	
-//	
-//	class NextButtonClickedAdapter extends MouseAdapter {
-//		
-//		@Override
-//		public void mousePressed(MouseEvent arg0) {
-//			
-//			if(arg0.getSource()==nextButton){
-//
-//				currentImage++;
-//
-//				if(currentImage==0){
-//					FishRemappingDialog.this.prevButton.setEnabled(false);
-//				}
-//				if(currentImage>0){
-//					prevButton.setEnabled(true);
-//				}
-//
-//				if(nextButton.getText().equals("Next")){
-//
-//					if(currentImage==FishRemappingDialog.this.dataset.getCollection().getImageFiles().size()-1){
-//						// set next click to be end
-//						nextButton.setText("Done");
-//					}
-//
-//
-//					//				IJ.log("Opening "+currentImage);
-//					File imagefile = FishRemappingDialog.this.dataset.getCollection().getImageFiles().get(currentImage);
-//					int imageDisplayCount = currentImage+1;
-//					String progress = "Image "+imageDisplayCount+" of "+FishRemappingDialog.this.dataset.getCollection().getImageFiles().size();
-//					fileLabel.setText("Image file: "+imagefile.getAbsolutePath()+" : "+progress);
-//					openImages(imagefile);
-//
-//
-//				} else { // end of analysis; make a collection from all the nuclei selected
-//					for(Cell cell : FishRemappingDialog.this.dataset.getCollection().getCells()){
-//						if (FishRemappingDialog.this.selectedNucleiLeft.contains(cell.getId())){
-//							FishRemappingDialog.this.subCollectionLeft.addCell(new Cell(cell));
-//						}
-//						if (FishRemappingDialog.this.selectedNucleiRight.contains(cell.getId())){
-//							FishRemappingDialog.this.subCollectionRight.addCell( new Cell (cell));
-//						}
-//
-//					}
-//					FishRemappingDialog.this.subCollectionLeft.setName(FishRemappingDialog.this.dataset.getName()+"_left_subset");
-//					FishRemappingDialog.this.subCollectionRight.setName(FishRemappingDialog.this.dataset.getName()+"_right_subset");
-//					FishRemappingDialog.this.setVisible(false);
-//					FishRemappingDialog.this.isFinished = true;
-//				}
-//			} else {
-//				IJ.log("Next button got spurious trigger");
-//			}
-//		}
-//	}
-	
-
-//	class PrevButtonClickedAdapter extends MouseAdapter {
-//
-//		@Override
-//		public void mousePressed(MouseEvent arg0) {
-//			
-//			if(arg0.getSource()==prevButton){
-//			currentImage--;
-//			
-//			if(currentImage==0){
-//				prevButton.setEnabled(false);
-//			}
-//			if(currentImage>0){
-//				prevButton.setEnabled(true);
-//			}
-//			
-//			if(currentImage<FishRemappingDialog.this.dataset.getCollection().getImageFiles().size()-1){
-//				nextButton.setText("Next");
-//			}
-//			
-//			
-////			IJ.log("Opening "+currentImage);
-//			File imagefile = FishRemappingDialog.this.dataset.getCollection().getImageFiles().get(currentImage);
-//			int imageDisplayCount = currentImage+1;
-//			String progress = "Image "+imageDisplayCount+" of "+FishRemappingDialog.this.dataset.getCollection().getImageFiles().size();
-//			fileLabel.setText("Image file: "+imagefile.getAbsolutePath()+" : "+progress);
-//			openImages(imagefile);
-//			} else {
-//				IJ.log("Prev button got spurious trigger");
-//			}
-//		}
-//	}
 
 //	@SuppressWarnings("serial")
 //	private class DrawableImageArea extends JLabel {
