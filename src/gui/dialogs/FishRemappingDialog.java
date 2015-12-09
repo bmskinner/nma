@@ -73,25 +73,25 @@ public class FishRemappingDialog extends ImageProber {
 
 	private static final long serialVersionUID = 1L;
 	public static final int NUCLEUS_OUTLINE_WIDTH = 2;
-	private final JPanel contentPanel = new JPanel();
+//	private final JPanel contentPanel = new JPanel();
 	
 //	Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	
 	private AnalysisDataset dataset;
 	private File postFISHImageDirectory;
 	
-	private JLabel preImageLabel;
-	private JLabel postImageLabel;
+//	private JLabel preImageLabel;
+//	private JLabel postImageLabel;
 	
-	JButton prevButton;
-	JButton nextButton;
+//	JButton prevButton;
+//	JButton nextButton;
 	
 	JLabel fileLabel;
 	
-	private File openFile;
-	private ImageProcessor openProcessor;
+//	private File openFile;
+//	private ImageProcessor openProcessor;
 	
-	private JPanel imagePane;
+//	private JPanel imagePane;
 	
 	private boolean isFinished = false;
 	
@@ -101,7 +101,7 @@ public class FishRemappingDialog extends ImageProber {
 	private List<UUID> selectedNucleiLeft = new ArrayList<UUID>(0);
 	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0);
 	
-	private int currentImage = 0;
+//	private int currentImage = 0;
 	
 //	private double conversion;
 //	private int smallWidth; 
@@ -134,13 +134,13 @@ public class FishRemappingDialog extends ImageProber {
 		
 		super(dataset.getAnalysisOptions(), programLogger, FishMappingImageType.ORIGINAL_IMAGE, dataset.getAnalysisOptions().getFolder());
 
-		if(dataset==null){
-			throw new IllegalArgumentException("Dataset cannot be null");
-		}
+//		if(dataset==null){
+//			throw new IllegalArgumentException("Dataset cannot be null");
+//		}
 		
 		// set the collectio of pre-FISH images
 		this.dataset = dataset;
-		createFileList(dataset.getAnalysisOptions().getFolder());
+		
 		
 		
 
@@ -158,6 +158,7 @@ public class FishRemappingDialog extends ImageProber {
 				programLogger.log(Level.SEVERE, "Error creating mapping window: ", e);
 			}
 		}
+		createFileList(dataset.getAnalysisOptions().getFolder());
 		this.setVisible(true);
 	}
 	
