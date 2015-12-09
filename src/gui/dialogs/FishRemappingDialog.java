@@ -77,10 +77,6 @@ public class FishRemappingDialog extends ImageProber {
 	
 	private AnalysisDataset dataset;
 	private File postFISHImageDirectory;
-	
-	JLabel fileLabel;
-	
-	private boolean isFinished = false;
 		
 	private List<UUID> selectedNucleiLeft = new ArrayList<UUID>(0);
 	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(0);
@@ -111,10 +107,8 @@ public class FishRemappingDialog extends ImageProber {
 	public FishRemappingDialog(MainWindow mw, AnalysisDataset dataset, Logger programLogger) {
 		
 		super(dataset.getAnalysisOptions(), programLogger, FishMappingImageType.ORIGINAL_IMAGE, dataset.getAnalysisOptions().getFolder());
-
-//		if(dataset==null){
-//			throw new IllegalArgumentException("Dataset cannot be null");
-//		}
+		
+		this.setTitle("FISH remapping");
 		
 		// set the collectio of pre-FISH images
 		this.dataset = dataset;
@@ -185,10 +179,6 @@ public class FishRemappingDialog extends ImageProber {
 			this.dispose();
 		}
 		
-	}
-	
-	public boolean isFinished(){
-		return this.isFinished;
 	}
 	
 	public List<CellCollection> getSubCollections(){
