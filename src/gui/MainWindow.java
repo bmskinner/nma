@@ -31,6 +31,7 @@ import gui.actions.NewAnalysisAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.dialogs.ManualCellCurator;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
 import gui.tabs.ClusterDetailPanel;
@@ -59,6 +60,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
@@ -77,6 +79,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import jebl.evolution.graphs.Node;
+import jebl.evolution.taxa.Taxon;
+import jebl.evolution.trees.Tree;
 import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
@@ -846,38 +851,57 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		if(event.type().equals("SplitCollectionAction")){
 			new SplitCollectionAction();
 		}
+		
+		if(event.type().equals("CurateCollectionAction")){
+			ManualCellCurator curator = new ManualCellCurator(programLogger, selectedDataset);
+			
+			List<UUID> manualIDs = curator.getIDsToKeep();
+			
+			CellCollection template = selectedDataset.getCollection();
+			
+			CellCollection clusterCollection = new CellCollection(template.getFolder(), 
+					template.getOutputFolderName(), 
+					template.getName()+"_Curated", 
+					template.getDebugFile(), 
+					template.getNucleusType());
+						
+			clusterCollection.setName(template.getName()+"_Curated");
+
+			for(Cell c : selectedDataset.getCollection().getCells()){
+
+				if(manualIDs.contains(c.getId())){
+					clusterCollection.addCell(new Cell (c));
+				}
+			}
+
+			
+			if(clusterCollection.hasCells()){
+				programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
+				final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				selectedDataset.addChildCollection(clusterCollection);
+
+				AnalysisDataset clusterDataset = selectedDataset.getChildDataset(clusterCollection.getID());
+				clusterDataset.setRoot(false);
+				list.add(clusterDataset);
 				
-//		if(event.type().equals("ExtractNucleiAction")){
-//			Thread thr = new Thread() {
-//        		public void run() {
-//
-//        			DirectoryChooser openDialog = new DirectoryChooser("Select directory to export images...");
-//        			String folderName = openDialog.getDirectory();
-//
-//        			if(folderName==null){
-//        				return; // user cancelled
-//        			}
-//
-//        			File folder =  new File(folderName);
-//
-//        			if(!folder.isDirectory() ){
-//        				return;
-//        			}
-//        			if(!folder.exists()){
-//        				return; // check folder is ok
-//        			}
-//
-//        			programLogger.log(Level.INFO, "Extracting nuclei from collection...");
-//        			boolean ok = PopulationExporter.extractNucleiToFolder(selectedDataset, folder);
-//        			if(ok){ 
-//        				programLogger.log(Level.INFO, "OK");
-//        			} else {
-//        				programLogger.log(Level.INFO, "Error");
-//        			}
-//        		}
-//        	};
-//        	thr.start();
-//		}
+				programLogger.log(Level.INFO, "Running new morphology analysis");
+				final int flag = ADD_POPULATION;
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+					
+						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
+
+				}});
+				
+			} else {
+				programLogger.log(Level.WARNING, "No cells found");
+			}
+			
+			
+			
+		}
+				
+
 		
 		if(event.type().equals("ChangeNucleusFolderAction")){
 			new ReplaceNucleusFolderAction();

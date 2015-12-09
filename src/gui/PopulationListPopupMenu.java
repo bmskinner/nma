@@ -40,6 +40,14 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		}
 	});
 	
+	JMenuItem curateMenuItem = new JMenuItem( new AbstractAction("Curate"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("CurateCollectionAction");				
+		}
+	});
+	
 	JMenuItem deleteMenuItem = new JMenuItem( new AbstractAction("Delete"){
 		private static final long serialVersionUID = 1L;
 		@Override
@@ -148,6 +156,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		this.add(mergeMenuItem);
 		this.add(deleteMenuItem);
 		this.add(splitMenuItem);
+		this.add(curateMenuItem);
 		this.addSeparator();
 		this.add(saveMenuItem);
 		this.add(extractMenuItem);
@@ -165,6 +174,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		enableMerge();
 		enableDelete();
 		enableSplit();
+		enableCurate();
 		enableSave();
 		enableExtract();
 		enableMenuUp();
@@ -182,6 +192,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		disableMerge();
 		disableDelete();
 		disableSplit();
+		disableCurate();
 		disableSave();
 		disableExtract();
 		disableMenuUp();
@@ -200,6 +211,14 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	
 	public void disableMerge(){
 		mergeMenuItem.setEnabled(false);
+	}
+	
+	public void enableCurate(){
+		curateMenuItem.setEnabled(true);
+	}
+	
+	public void disableCurate(){
+		curateMenuItem.setEnabled(false);
 	}
 	
 	public void enableDelete(){
