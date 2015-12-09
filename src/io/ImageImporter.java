@@ -74,7 +74,7 @@ public class ImageImporter {
 		ImageStack stack = null;
 		try{
 			if(f.isFile()){
-				programLogger.log(Level.INFO, "Importing image: "+f.getAbsolutePath());
+				programLogger.log(Level.FINE, "Importing image: "+f.getAbsolutePath());
 				ImagePlus image = new ImagePlus(f.getAbsolutePath());
 				stack = convert(image);
 			} else {

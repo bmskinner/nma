@@ -700,64 +700,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 						BorderTag tag = activeDataset().getCollection().getNucleusType().getTagFromName(rowName);
 						if(n.hasBorderTag(tag)){
 							
-							String pointType = rowName;
+							updateBorderTagIndex(n, tag);
 							
-							
-							int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
-							
-							SpinnerNumberModel sModel 
-								= new SpinnerNumberModel(index, 0, n.getLength(), 1);
-							JSpinner spinner = new JSpinner(sModel);
-							
-							int option = JOptionPane.showOptionDialog(null, 
-									spinner, 
-									"Choose the new "+pointType+" point", 
-									JOptionPane.OK_CANCEL_OPTION, 
-									JOptionPane.QUESTION_MESSAGE, null, null, null);
-							if (option == JOptionPane.CANCEL_OPTION) {
-							    // user hit cancel
-							} else if (option == JOptionPane.OK_OPTION)	{
-								
-								// the value chosen by the user
-								int chosenIndex = (Integer) spinner.getModel().getValue();
-								
-								int existingIndex = n.getBorderIndex(tag);
-								
-								// adjust to the actual point index
-								int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
-								
-								// find the amount the index is changing by
-								int difference = pointIndex - existingIndex;
-								
-								// TODO: update segment boundaries 
-								try {
-									
-									SegmentedProfile profile = n.getAngleProfile(tag);
-									NucleusBorderSegment seg = profile.getSegment("Seg_0");
-									// this updates the correct direction, but the wrong end of the segment
-									seg.lengthenStart(-difference);
-									
-									n.setAngleProfile(profile, tag);
-									
-								} catch(Exception e1){
-									programLogger.log(Level.SEVERE, "Error updating cell profile", e1);
-								}
-								
-								// Update the border tag index
-								n.setBorderTag(tag, pointIndex);
-								
-								if(tag.equals(BorderTag.ORIENTATION_POINT)){
-									if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
-										// only rodent sperm use the intersection point, which is equivalent to the head.
-										NucleusBorderPoint newPoint = n.findOppositeBorder(n.getPoint(BorderTag.ORIENTATION_POINT));
-										n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getIndex(newPoint));
-									}
-								}
-								
-								
-								updateCell(activeCell);
-								
-							}
 						}
 							
 					}
@@ -769,6 +713,67 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			scrollPane.setColumnHeaderView(table.getTableHeader());
 			
 			this.add(scrollPane, BorderLayout.CENTER);
+		}
+		
+		private void updateBorderTagIndex(Nucleus n, BorderTag tag){
+//			String pointType = rowName;
+			
+			
+			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
+			
+			SpinnerNumberModel sModel 
+				= new SpinnerNumberModel(index, 0, n.getLength(), 1);
+			JSpinner spinner = new JSpinner(sModel);
+			
+			int option = JOptionPane.showOptionDialog(null, 
+					spinner, 
+					"Choose the new "+tag.toString(), 
+					JOptionPane.OK_CANCEL_OPTION, 
+					JOptionPane.QUESTION_MESSAGE, null, null, null);
+			if (option == JOptionPane.CANCEL_OPTION) {
+			    // user hit cancel
+			} else if (option == JOptionPane.OK_OPTION)	{
+				
+				// the value chosen by the user
+				int chosenIndex = (Integer) spinner.getModel().getValue();
+				
+				int existingIndex = n.getBorderIndex(tag);
+				
+				// adjust to the actual point index
+				int pointIndex = Utils.wrapIndex(chosenIndex + n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
+				
+				// find the amount the index is changing by
+				int difference = pointIndex - existingIndex;
+				
+				// TODO: update segment boundaries 
+				try {
+					
+					SegmentedProfile profile = n.getAngleProfile(tag);
+					NucleusBorderSegment seg = profile.getSegment("Seg_0");
+					// this updates the correct direction, but the wrong end of the segment
+					seg.lengthenStart(-difference);
+					
+					n.setAngleProfile(profile, tag);
+					
+				} catch(Exception e1){
+					programLogger.log(Level.SEVERE, "Error updating cell profile", e1);
+				}
+				
+				// Update the border tag index
+				n.setBorderTag(tag, pointIndex);
+				
+				if(tag.equals(BorderTag.ORIENTATION_POINT)){
+					if(n.hasBorderTag(BorderTag.INTERSECTION_POINT)){
+						// only rodent sperm use the intersection point, which is equivalent to the head.
+						NucleusBorderPoint newPoint = n.findOppositeBorder(n.getPoint(BorderTag.ORIENTATION_POINT));
+						n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getIndex(newPoint));
+					}
+				}
+				
+				
+				updateCell(activeCell);
+				
+			}
 		}
 		
 		private void showCellImage(){
