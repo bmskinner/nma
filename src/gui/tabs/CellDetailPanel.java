@@ -23,6 +23,7 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
 import gui.components.ExportableTable;
+import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import ij.IJ;
 
@@ -674,27 +675,17 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					// double click
 					if (e.getClickCount() == 2) {
 						
+						if(rowName.equals("Image")){
+							showCellImage();
+						}
+						
 						// Look for signal group colour
 						if(rowName.equals("")){
 							String value = table.getModel().getValueAt(row+1, 0).toString();
 							if(value.equals("Signal group")){
 								
-								// the group number is in the next row down
-								String groupString = table.getModel().getValueAt(row+1, 1).toString();
-								int signalGroup = Integer.valueOf(groupString);
-								
-								Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
-								
-								Color newColor = JColorChooser.showDialog(
-					                     CellDetailPanel.this,
-					                     "Choose signal Color",
-					                     oldColour);
-								
-								if(newColor != null){
-									activeDataset().setSignalGroupColour(signalGroup, newColor);
-									updateCell(activeCell);
-									fireSignalChangeEvent("SignalColourUpdate");
-								}
+								changeSignalGroupColour(row);
+
 							}
 						}
 
@@ -778,6 +769,29 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			scrollPane.setColumnHeaderView(table.getTableHeader());
 			
 			this.add(scrollPane, BorderLayout.CENTER);
+		}
+		
+		private void showCellImage(){
+			new CellImageDialog(programLogger, activeCell);
+		}
+		
+		private void changeSignalGroupColour(int row){
+			// the group number is in the next row down
+			String groupString = table.getModel().getValueAt(row+1, 1).toString();
+			int signalGroup = Integer.valueOf(groupString);
+			
+			Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
+			
+			Color newColor = JColorChooser.showDialog(
+                     CellDetailPanel.this,
+                     "Choose signal Color",
+                     oldColour);
+			
+			if(newColor != null){
+				activeDataset().setSignalGroupColour(signalGroup, newColor);
+				updateCell(activeCell);
+				fireSignalChangeEvent("SignalColourUpdate");
+			}
 		}
 		
 		private void updateScale(){

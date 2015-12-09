@@ -37,6 +37,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 	
 	public AnnotatedNucleusPanel(Logger programLogger){
 //		this.cell = cell;
+		this.setSize(500, 500);
 		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
 		this.add(imageLabel, BorderLayout.CENTER);
@@ -69,6 +70,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 		imageLabel.setIcon(icon);
 		imageLabel.revalidate();
 		imageLabel.repaint();
+		this.repaint();
 	}
 	
 	private void annotateImage(){
