@@ -18,9 +18,7 @@
  *******************************************************************************/
 package gui.dialogs;
 
-import gui.ImageProber;
 import gui.Labels;
-import gui.SignalDetectionImageProber;
 import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;

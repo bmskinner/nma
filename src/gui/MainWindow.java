@@ -31,6 +31,7 @@ import gui.actions.NewAnalysisAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.dialogs.FishRemappingDialog;
 import gui.dialogs.ManualCellCurator;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
@@ -530,7 +531,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			if(list.size()==1){
 				final AnalysisDataset dataset = list.get(0);
 				
-				FishMappingWindow fishMapper = new FishMappingWindow(MainWindow.this, dataset, programLogger);
+				FishRemappingDialog fishMapper = new FishRemappingDialog(MainWindow.this, dataset, programLogger);
 
 				List<CellCollection> subs = fishMapper.getSubCollections();
 				

@@ -29,7 +29,6 @@ public class CellImageDialog extends LoadingIconDialog {
 
 			this.panel = new AnnotatedNucleusPanel(programLogger);
 
-			//		this.setSize(500, 500);
 			this.setLayout(new BorderLayout());
 			this.add(panel, BorderLayout.CENTER);
 			this.setTitle(cell.getNucleus().getNameAndNumber());

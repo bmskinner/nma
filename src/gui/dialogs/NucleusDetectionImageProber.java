@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui;
+package gui.dialogs;
 
 import java.awt.Color;
 import java.io.File;
@@ -30,6 +30,7 @@ import analysis.AnalysisOptions.CannyOptions;
 import analysis.nucleus.NucleusFinder;
 import components.Cell;
 import components.nuclei.Nucleus;
+import gui.ImageType;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
 import ij.process.FloatPolygon;

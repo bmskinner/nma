@@ -40,7 +40,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 		
 		createUI();
 		
-//		this.pack();
+		this.pack();
 		this.setModal(true);
 		this.setVisible(true);
 	}
@@ -64,9 +64,10 @@ public class ManualCellCurator extends LoadingIconDialog {
 	private void updateCell(Cell cell){
 		try {
 			int totalCells = dataset.getCollection().size();
-			this.setTitle(cell.getNucleus().getNameAndNumber()+": Cell "+cellIndex+" of "+totalCells);
+			int cellNumber = cellIndex+1;
+			this.setTitle(cell.getNucleus().getNameAndNumber()+": Cell "+cellNumber+" of "+totalCells);
 			panel.updateCell(cell);
-//			this.pack();
+
 		} catch (Exception e) {
 			programLogger.log(Level.SEVERE, "Error updating cell", e);
 		}

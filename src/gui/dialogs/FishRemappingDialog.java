@@ -16,8 +16,10 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui;
+package gui.dialogs;
 
+import gui.LoadingIconDialog;
+import gui.MainWindow;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -43,6 +45,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.Box;
@@ -61,7 +64,7 @@ import components.Cell;
 import components.CellCollection;
 import components.nuclei.Nucleus;
 
-public class FishMappingWindow extends JDialog {
+public class FishRemappingDialog extends LoadingIconDialog {
 
 	private static final long serialVersionUID = 1L;
 	public static final int NUCLEUS_OUTLINE_WIDTH = 3;
@@ -98,18 +101,13 @@ public class FishMappingWindow extends JDialog {
 	private double conversion;
 	private int smallWidth; 
 	private int smallHeight;
-	
-	private Logger programLogger;
-	
+		
 	/**
 	 * Create the dialog.
 	 */
-	public FishMappingWindow(MainWindow mw, AnalysisDataset dataset, Logger programLogger) {
+	public FishRemappingDialog(MainWindow mw, AnalysisDataset dataset, Logger programLogger) {
 		
-		super(mw, true);
-		this.programLogger = programLogger;
-		
-//		 IJ.log("Preparing setup");
+		super(programLogger);
 
 		// set the collectio of pre-FISH images
 		this.preFISHDataset = dataset;
@@ -126,10 +124,7 @@ public class FishMappingWindow extends JDialog {
 				createGUI();
 
 			} catch (Exception e) {
-				IJ.log("Error creating mapping window: "+e.getMessage());
-				for(StackTraceElement el : e.getStackTrace()){
-					IJ.log(el.toString());
-				}
+				programLogger.log(Level.SEVERE, "Error creating mapping window: ", e);
 			}
 		}
 	}
@@ -193,7 +188,7 @@ public class FishMappingWindow extends JDialog {
 		cancelButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent arg0) {
-				FishMappingWindow.this.dispose();			
+				FishRemappingDialog.this.dispose();			
 			}
 		});
 		buttonPane.add(cancelButton);
@@ -227,7 +222,7 @@ public class FishMappingWindow extends JDialog {
 		    	int originalY = openProcessor.getWidth()>smallWidth ? (int) ( (double)y / (double) conversion) : y;
 		    	
 		    	
-		    	List<Nucleus> imageNuclei = FishMappingWindow.this.preFISHDataset.getCollection().getNuclei(openFile);
+		    	List<Nucleus> imageNuclei = FishRemappingDialog.this.preFISHDataset.getCollection().getNuclei(openFile);
 		    	for(Nucleus n : imageNuclei){
 		    		
 
@@ -393,23 +388,23 @@ public class FishMappingWindow extends JDialog {
 
 
 		// if present in list, remove it, otherwise add it
-		if(FishMappingWindow.this.selectedNucleiLeft.contains(n.getID()) ||  FishMappingWindow.this.selectedNucleiRight.contains(n.getID()) ){
+		if(FishRemappingDialog.this.selectedNucleiLeft.contains(n.getID()) ||  FishRemappingDialog.this.selectedNucleiRight.contains(n.getID()) ){
 
-			FishMappingWindow.this.selectedNucleiLeft.remove(n.getID());
-			FishMappingWindow.this.selectedNucleiRight.remove(n.getID());
+			FishRemappingDialog.this.selectedNucleiLeft.remove(n.getID());
+			FishRemappingDialog.this.selectedNucleiRight.remove(n.getID());
 			ip.setColor(Color.YELLOW);
 
 		} else {
 
 			if((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){ // right button
-				FishMappingWindow.this.selectedNucleiRight.add(n.getID());
-				FishMappingWindow.this.selectedNucleiLeft.remove(n.getID());
+				FishRemappingDialog.this.selectedNucleiRight.add(n.getID());
+				FishRemappingDialog.this.selectedNucleiLeft.remove(n.getID());
 				ip.setColor(Color.MAGENTA);
 			}
 
 			if((e.getModifiers() & InputEvent.BUTTON1_MASK)	== InputEvent.BUTTON1_MASK){ // left button
-				FishMappingWindow.this.selectedNucleiLeft.add(n.getID());
-				FishMappingWindow.this.selectedNucleiRight.remove(n.getID());
+				FishRemappingDialog.this.selectedNucleiLeft.add(n.getID());
+				FishRemappingDialog.this.selectedNucleiRight.remove(n.getID());
 				ip.setColor(Color.GREEN);
 			}
 
@@ -458,7 +453,7 @@ public class FishMappingWindow extends JDialog {
 				currentImage++;
 
 				if(currentImage==0){
-					FishMappingWindow.this.prevButton.setEnabled(false);
+					FishRemappingDialog.this.prevButton.setEnabled(false);
 				}
 				if(currentImage>0){
 					prevButton.setEnabled(true);
@@ -466,34 +461,34 @@ public class FishMappingWindow extends JDialog {
 
 				if(nextButton.getText().equals("Next")){
 
-					if(currentImage==FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size()-1){
+					if(currentImage==FishRemappingDialog.this.preFISHDataset.getCollection().getImageFiles().size()-1){
 						// set next click to be end
 						nextButton.setText("Done");
 					}
 
 
 					//				IJ.log("Opening "+currentImage);
-					File imagefile = FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().get(currentImage);
+					File imagefile = FishRemappingDialog.this.preFISHDataset.getCollection().getImageFiles().get(currentImage);
 					int imageDisplayCount = currentImage+1;
-					String progress = "Image "+imageDisplayCount+" of "+FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size();
+					String progress = "Image "+imageDisplayCount+" of "+FishRemappingDialog.this.preFISHDataset.getCollection().getImageFiles().size();
 					fileLabel.setText("Image file: "+imagefile.getAbsolutePath()+" : "+progress);
 					openImages(imagefile);
 
 
 				} else { // end of analysis; make a collection from all the nuclei selected
-					for(Cell cell : FishMappingWindow.this.preFISHDataset.getCollection().getCells()){
-						if (FishMappingWindow.this.selectedNucleiLeft.contains(cell.getId())){
-							FishMappingWindow.this.subCollectionLeft.addCell(new Cell(cell));
+					for(Cell cell : FishRemappingDialog.this.preFISHDataset.getCollection().getCells()){
+						if (FishRemappingDialog.this.selectedNucleiLeft.contains(cell.getId())){
+							FishRemappingDialog.this.subCollectionLeft.addCell(new Cell(cell));
 						}
-						if (FishMappingWindow.this.selectedNucleiRight.contains(cell.getId())){
-							FishMappingWindow.this.subCollectionRight.addCell( new Cell (cell));
+						if (FishRemappingDialog.this.selectedNucleiRight.contains(cell.getId())){
+							FishRemappingDialog.this.subCollectionRight.addCell( new Cell (cell));
 						}
 
 					}
-					FishMappingWindow.this.subCollectionLeft.setName(FishMappingWindow.this.preFISHDataset.getName()+"_left_subset");
-					FishMappingWindow.this.subCollectionRight.setName(FishMappingWindow.this.preFISHDataset.getName()+"_right_subset");
-					FishMappingWindow.this.setVisible(false);
-					FishMappingWindow.this.isFinished = true;
+					FishRemappingDialog.this.subCollectionLeft.setName(FishRemappingDialog.this.preFISHDataset.getName()+"_left_subset");
+					FishRemappingDialog.this.subCollectionRight.setName(FishRemappingDialog.this.preFISHDataset.getName()+"_right_subset");
+					FishRemappingDialog.this.setVisible(false);
+					FishRemappingDialog.this.isFinished = true;
 				}
 			} else {
 				IJ.log("Next button got spurious trigger");
@@ -517,15 +512,15 @@ public class FishMappingWindow extends JDialog {
 				prevButton.setEnabled(true);
 			}
 			
-			if(currentImage<FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size()-1){
+			if(currentImage<FishRemappingDialog.this.preFISHDataset.getCollection().getImageFiles().size()-1){
 				nextButton.setText("Next");
 			}
 			
 			
 //			IJ.log("Opening "+currentImage);
-			File imagefile = FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().get(currentImage);
+			File imagefile = FishRemappingDialog.this.preFISHDataset.getCollection().getImageFiles().get(currentImage);
 			int imageDisplayCount = currentImage+1;
-			String progress = "Image "+imageDisplayCount+" of "+FishMappingWindow.this.preFISHDataset.getCollection().getImageFiles().size();
+			String progress = "Image "+imageDisplayCount+" of "+FishRemappingDialog.this.preFISHDataset.getCollection().getImageFiles().size();
 			fileLabel.setText("Image file: "+imagefile.getAbsolutePath()+" : "+progress);
 			openImages(imagefile);
 			} else {
@@ -582,7 +577,7 @@ public class FishMappingWindow extends JDialog {
 		    	
 		    	Rectangle originalRect = new Rectangle(originalX, originalY, originalWidth, originalHeight);
 		    	
-		    	List<Nucleus> imageNuclei = FishMappingWindow.this.preFISHDataset.getCollection().getNuclei(openFile);
+		    	List<Nucleus> imageNuclei = FishRemappingDialog.this.preFISHDataset.getCollection().getNuclei(openFile);
 		    	for(Nucleus n : imageNuclei){
 
 		    		if(originalRect.contains(n.getCentreOfMass().getX(), n.getCentreOfMass().getY())){
@@ -591,8 +586,8 @@ public class FishMappingWindow extends JDialog {
 		    			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 		    			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
 
-		    			FishMappingWindow.this.selectedNucleiLeft.add(n.getID());
-		    			FishMappingWindow.this.selectedNucleiRight.remove(n.getID());
+		    			FishRemappingDialog.this.selectedNucleiLeft.add(n.getID());
+		    			FishRemappingDialog.this.selectedNucleiRight.remove(n.getID());
 		    			openProcessor.setColor(Color.GREEN);
 
 		    			// update the image
