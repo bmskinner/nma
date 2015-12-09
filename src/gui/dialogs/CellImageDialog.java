@@ -22,7 +22,7 @@ public class CellImageDialog extends LoadingIconDialog {
 		super(programLogger);
 		this.panel = new AnnotatedNucleusPanel(programLogger);
 		
-		this.setSize(500, 500);
+//		this.setSize(500, 500);
 		this.setLayout(new BorderLayout());
 		this.add(panel, BorderLayout.CENTER);
 		this.setTitle(cell.getNucleus().getNameAndNumber());
@@ -37,6 +37,7 @@ public class CellImageDialog extends LoadingIconDialog {
 			programLogger.log(Level.SEVERE, "Error making dialog", e);
 		}
 		this.setModal(false);
+		this.pack();
 		this.setVisible(true);
 		
 	}

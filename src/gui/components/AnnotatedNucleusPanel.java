@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.io.File;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,8 +19,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import charting.charts.MorphologyChartFactory;
 import utility.Utils;
 import components.Cell;
+import components.nuclear.NucleusBorderPoint;
+import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
 /**
@@ -36,17 +40,22 @@ public class AnnotatedNucleusPanel extends JPanel {
 	private Logger programLogger;
 	
 	public AnnotatedNucleusPanel(Logger programLogger){
-//		this.cell = cell;
-		this.setSize(500, 500);
+
+		
 		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
 		this.add(imageLabel, BorderLayout.CENTER);
-		
+		imageLabel.setHorizontalTextPosition(JLabel.CENTER);
+		imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
+		imageLabel.setVerticalAlignment(JLabel.CENTER);
+		imageLabel.setHorizontalAlignment(JLabel.CENTER);
+
 	}
 	
 	public void updateCell(Cell c) throws Exception {
 		this.cell = c;
 		importNucleusImage();
+		
 	}
 	
 	private void importNucleusImage() throws Exception {
@@ -67,9 +76,11 @@ public class AnnotatedNucleusPanel extends JPanel {
 			icon.getImage().flush();
 		}
 		icon = createViewableImage(openProcessor);
+		this.setSize(icon.getIconWidth(), icon.getIconHeight());
 		imageLabel.setIcon(icon);
 		imageLabel.revalidate();
 		imageLabel.repaint();
+		
 		this.repaint();
 	}
 	
@@ -88,19 +99,47 @@ public class AnnotatedNucleusPanel extends JPanel {
 		}
 		
 		Nucleus n = cell.getNucleus();
-		// annotate the image processor with the nucleus outline
-		
-
-		ip.setColor(Color.ORANGE);
-
-		
-		
 		double[] positions = n.getPosition();
-		FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
-		PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-		roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+
+		
+		// annotate the image processor with the nucleus outline
+		List<NucleusBorderSegment> segmentList = n.getAngleProfile().getSegments();
+		
 		ip.setLineWidth(2);
-		ip.draw(roi);
+		if(!segmentList.isEmpty()){ // only draw if there are segments
+			
+			for(NucleusBorderSegment seg  : segmentList){
+				
+				float[] x = new float[seg.length()+1];
+				float[] y = new float[seg.length()+1];
+				
+				
+				for(int j=0; j<=seg.length();j++){
+					int k = Utils.wrapIndex(seg.getStartIndex()+j, n.getLength());
+					NucleusBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+					x[j] = (float) p.getX();
+					y[j] = (float) p.getY();
+				}
+				
+				int segIndex = MorphologyChartFactory.getIndexFromLabel (seg.getName());
+				ip.setColor(ColourSelecter.getSegmentColor(segIndex));
+				
+				PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
+				
+				segRoi.setLocation(segRoi.getBounds().getMinX()+positions[Nucleus.X_BASE], segRoi.getBounds().getMinY()+positions[Nucleus.Y_BASE]);
+				
+				ip.draw(segRoi);
+
+			}
+		} else {
+
+			ip.setColor(Color.ORANGE);
+			FloatPolygon polygon = Utils.createPolygon(n.getBorderList());
+			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+			roi.setLocation(positions[Nucleus.X_BASE], positions[Nucleus.Y_BASE]);
+			ip.draw(roi);
+		}
+
 	}
 	
 	/**
@@ -113,39 +152,52 @@ public class AnnotatedNucleusPanel extends JPanel {
 		int originalWidth = ip.getWidth();
 		int originalHeight = ip.getHeight();
 		
-		// The panel dimension
-		Dimension screenSize = this.getSize();
-		
-		
-		// set the image width to be less than half the screen width
-		int smallWidth = (int) ((double) screenSize.getWidth() );
-		
-		
-		// keep the image aspect ratio
-		double ratio = (double) originalWidth / (double) originalHeight;
-		int smallHeight = (int) (smallWidth / ratio);
-		
+		// Choose a clip for the image (an enlargement of the original nucleus ROI
+		double[] positions = cell.getNucleus().getPosition();
+		int wideW = (int) (positions[Nucleus.WIDTH]+20);
+		int wideH = (int) (positions[Nucleus.HEIGHT]+20);
+		int wideX = (int) (positions[Nucleus.X_BASE]-10);
+		int wideY = (int) (positions[Nucleus.Y_BASE]-10);
 
-		if(smallHeight > screenSize.getHeight()  ){ // image is too high, adjust to scale on height
-			smallHeight = (int) screenSize.getHeight();
-			smallWidth = (int) (smallHeight * ratio);
-		}
+		wideX = wideX<0 ? 0 : wideX;
+		wideY = wideY<0 ? 0 : wideY;
+
+		ip.setRoi(wideX, wideY, wideW, wideH);
+		ImageProcessor croppedProcessor = ip.crop();
+		
+		// The panel dimension
+		Dimension screenSize = new Dimension(croppedProcessor.getWidth(), croppedProcessor.getHeight());
 		
 		
-		
+//		// set the image width to be less than half the screen width
+//		int smallWidth = (int) ((double) screenSize.getWidth() );
+//		
+//		
+//		// keep the image aspect ratio
+//		double ratio = (double) originalWidth / (double) originalHeight;
+//		int smallHeight = (int) (smallWidth / ratio);
+//		
+//
+//		if(smallHeight > screenSize.getHeight()  ){ // image is too high, adjust to scale on height
+//			smallHeight = (int) screenSize.getHeight();
+//			smallWidth = (int) (smallHeight * ratio);
+//		}
 		
 		// Create the image
 		
+		
+		
+		
 		ImageIcon smallImageIcon;
 
-		if(ip.getWidth()>smallWidth || ip.getHeight() > smallHeight){
+//		if(croppedProcessor.getWidth()>smallWidth || croppedProcessor.getHeight() > smallHeight){
+//			
+//			smallImageIcon = new ImageIcon(croppedProcessor.resize(smallWidth, smallHeight ).getBufferedImage());
+//			
+//		} else {
 			
-			smallImageIcon = new ImageIcon(ip.resize(smallWidth, smallHeight ).getBufferedImage());
-			
-		} else {
-			
-			smallImageIcon = new ImageIcon( ip.getBufferedImage()  );
-		}
+			smallImageIcon = new ImageIcon( croppedProcessor.getBufferedImage()  );
+//		}
 		return smallImageIcon;
 	}
 
