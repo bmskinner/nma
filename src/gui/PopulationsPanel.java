@@ -1046,7 +1046,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			// pass on signals from the menu
 			fireSignalChangeEvent(event.type());
 			
+//			if(event.type().equals("SaveCollectionAction")){
+//				programLogger.log(Level.FINEST, "Firing dataset save-as event");
+//				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+//				list.add(activeDataset());
+//				fireDatasetEvent(DatasetMethod.SAVE_AS, list);
+//			}
+			
 		}
+		
+		if(event.type().equals("SaveCollectionAction")){
+			programLogger.log(Level.FINEST, "Firing dataset save-as event");
+			List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			list.add(activeDataset());
+			fireDatasetEvent(DatasetMethod.SAVE_AS, list);
+		}
+		
+		
 		
 		// catch any signals that affect the datasets directly
 		if(event.type().equals("MoveDatasetDownAction")){

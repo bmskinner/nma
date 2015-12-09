@@ -39,10 +39,12 @@ import components.nuclei.Nucleus;
 public class PopulationExporter extends AnalysisWorker {
 	
 	private File saveFile = null;
+	private boolean useHDF5 = false;
 	
 	public PopulationExporter(AnalysisDataset dataset, File saveFile, Logger programLogger) {
 		super(dataset, programLogger);		
 		this.saveFile = saveFile;
+//		this.useHDF5 = useHDF5;
 		this.setProgressTotal(1);
 	}
 	
@@ -51,6 +53,7 @@ public class PopulationExporter extends AnalysisWorker {
 		CellCollection collection = dataset.getCollection();
 		this.saveFile = new File(collection.getOutputFolder()+File.separator+collection.getType()+Constants.SAVE_FILE_EXTENSION);
 		this.setProgressTotal(1);
+//		this.useHDF5 = useHDF5;
 //		this.setProgress(0);
 		
 	}
@@ -58,13 +61,20 @@ public class PopulationExporter extends AnalysisWorker {
 	@Override
 	protected Boolean doInBackground() throws Exception {
 		publish(0);
-		if(saveAnalysisDataset(getDataset(), saveFile)){
-			publish(1);
-			log(Level.FINEST, "Save was sucessful");
+		
+		if(useHDF5){
+			saveAnalysisDatasetToHDF5(getDataset());
 			return true;
-		} else{
-			log(Level.WARNING, "Save was unsucessful");
-			return false;
+		} else {
+
+			if(saveAnalysisDataset(getDataset(), saveFile)){
+				publish(1);
+				log(Level.FINEST, "Save was sucessful");
+				return true;
+			} else{
+				log(Level.WARNING, "Save was unsucessful");
+				return false;
+			}
 		}
 		
 	}
@@ -191,6 +201,28 @@ public class PopulationExporter extends AnalysisWorker {
 	        }
 	    }
 	}
+	
+	public static void saveAnalysisDatasetToHDF5(AnalysisDataset dataset){
+
+		/* TODO: the basic approach show below does not work;
+		 * The HDF5 writer cannot handle the Maps within a Java object.
+		 * Each object will need to be unpacked.
+		 */
+		
+		
+//		File saveFile = new File(dataset.getSavePath().getAbsolutePath()+".hdf5");
+//		if(saveFile.exists()){
+//			saveFile.delete();
+//		}
+//		IHDF5Writer writer = HDF5FactoryProvider.get().open(saveFile);
+
+//		HDF5CompoundType<AnalysisDataset> type = writer.compound().getInferredAnonType(AnalysisDataset.class);
+
+//		writer.compound().write("ds_name", type, dataset);
+//		writer.close();
+
+
+	} 
 
 
 }
