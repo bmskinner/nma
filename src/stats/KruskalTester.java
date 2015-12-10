@@ -16,7 +16,7 @@ public class KruskalTester {
 	public static Profile testCollectionGetPValues(AnalysisDataset one, AnalysisDataset two, BorderTag tag, ProfileCollectionType type){
 		
 		Profile resultProfile = null;
-		int sampleNumber = 300;
+		int sampleNumber = 200;
 		double[] pvals = null;
 		try {
 			

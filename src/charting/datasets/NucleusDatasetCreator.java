@@ -247,6 +247,47 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
+	
+	
+	/**
+	 * Create a charting dataset for the median profile of an AnalysisDataset
+	 * @param dataset
+	 * @param normalised
+	 * @param alignment
+	 * @param point
+	 * @return
+	 * @throws Exception 
+	 */
+	public static XYDataset createNonsegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
+		CellCollection collection = dataset.getCollection();
+		DefaultXYDataset ds = new DefaultXYDataset();
+				
+		int maxLength = (int) getMaximumNucleusProfileLength(collection);
+		int medianProfileLength = (int) collection.getMedianArrayLength();
+		double offset = 0;
+				
+		Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point, 50);
+		Profile xpoints = null;
+		if(normalised){
+			xpoints = profile.getPositions(100);
+		} else {
+			xpoints = profile.getPositions( medianProfileLength );
+			
+			if(alignment.equals(ProfileAlignment.RIGHT)){
+				double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
+				offset = differenceToMaxLength;
+				xpoints = xpoints.add(differenceToMaxLength);
+			}
+		}
+
+		// rendering order will be first on top
+		double[][] data = { xpoints.asArray(), profile.asArray() };
+		ds.addSeries("Profile_"+dataset.getName(), data);
+
+		return ds;
+	}
+	
+	
 	/**
 	 * Make a dataset from the given collection, with each segment profile as a separate series
 	 * @param dataset 

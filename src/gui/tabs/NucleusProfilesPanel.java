@@ -128,40 +128,6 @@ public class NucleusProfilesPanel extends DetailPanel {
 			}});
 	}
 
-	//	public void update(List<AnalysisDataset> list){
-	//		
-	//		if(this.isUpdating()){
-//			programLogger.log(Level.FINEST, "Profiles panel is already updating");
-//		} else {
-//			programLogger.log(Level.FINE, "Updating profiles panel");
-//			setUpdating(true);
-//			this.list = list;
-//			SwingUtilities.invokeLater(new Runnable(){
-//				public void run(){
-//
-//					try {
-//
-//						profileDisplayPanel.update(NucleusProfilesPanel.this.list);
-//						programLogger.log(Level.FINEST, "Updated nuclear profiles panel");
-//						frankenDisplayPanel.update(NucleusProfilesPanel.this.list);
-//						programLogger.log(Level.FINEST, "Updated franken profiles panel");
-//						variabilityChartPanel.update(NucleusProfilesPanel.this.list);
-//						programLogger.log(Level.FINEST, "Updated variabililty panel");
-//						modalityDisplayPanel.update(NucleusProfilesPanel.this.list);
-//						programLogger.log(Level.FINEST, "Updated modality panel");
-//					} catch  (Exception e){
-//						programLogger.log(Level.WARNING, "Error updating profile panels", e);
-//						programLogger.log(Level.FINER, "Setting panels to null");
-//
-//					} finally {
-//						setUpdating(false);
-//					}
-//				}
-//			});
-//			
-//		}
-//	}
-
 	@SuppressWarnings("serial")
 	private class ModalityDisplayPanel extends JPanel implements ActionListener {
 		

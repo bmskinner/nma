@@ -32,7 +32,6 @@ import analysis.AnalysisDataset;
 @SuppressWarnings("serial")
 public class KruskalDetailPanel  extends DetailPanel {
 	
-//	private JComboBox<AnalysisDataset> datasetSelectionBox;
 	private ChartPanel chartPanel;
 
 	public KruskalDetailPanel(Logger programLogger ) throws Exception {
@@ -53,8 +52,8 @@ public class KruskalDetailPanel  extends DetailPanel {
 	}
 	
 	private void createChartPanel(){
-		JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart();
-		chartPanel = MorphologyChartFactory.makeProfileChartPanel(profileChart);
+		JFreeChart profileChart = MorphologyChartFactory.makeBlankProbabililtyChart();
+		chartPanel =  new ChartPanel(profileChart);
 	}
 	
 	private JPanel createHeaderPanel(){
@@ -69,24 +68,26 @@ public class KruskalDetailPanel  extends DetailPanel {
 	/**
 	 * Create a chart showing the Kruskal-Wallis p-values of comparisons
 	 * between curves
-	 * @param subject the dataset selected in the populations panel
-	 * @param object the dataset selected in the drop down list
 	 * @return
 	 */
 	private void updateChartPanel() throws Exception {
 
 		JFreeChart chart = null;
 
-		if(getDatasets().size()==2){
-			ProfileChartOptions options = new ProfileChartOptions(getDatasets(),
-					true, // normalised
-					ProfileAlignment.LEFT,
-					BorderTag.REFERENCE_POINT,
-					true, // show markers
-					ProfileCollectionType.REGULAR);
-			chart = MorphologyChartFactory.makeKruskalWallisChart(options);
+
+		ProfileChartOptions options = new ProfileChartOptions(getDatasets(),
+				true, // normalised
+				ProfileAlignment.LEFT,
+				BorderTag.REFERENCE_POINT,
+				true, // show markers
+				ProfileCollectionType.REGULAR);
+
+
+		if(getChartCache().hasChart(options)){
+			chart = getChartCache().getChart(options);
 		} else {
-			chart = MorphologyChartFactory.makeEmptyProfileChart();
+			chart = MorphologyChartFactory.makeKruskalWallisChart(options);
+			getChartCache().addChart(options, chart);
 		}
 
 		chartPanel.setChart(chart);
@@ -104,18 +105,25 @@ public class KruskalDetailPanel  extends DetailPanel {
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				try{
-
+					
+					// Only create a chart if datasets are available
 					if(!getDatasets().isEmpty() && getDatasets()!=null){
 
+						// Only create a chart if exactly two datasets are selected
 						if(getDatasets().size()==2){
 							updateChartPanel();
+							
 						} else {
 							// null chart
-							JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();
+							JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
 							chartPanel.setChart(chart);
 
 						}
 						programLogger.log(Level.FINEST, "Updated Kruskal panel");
+					} else {
+						// null chart
+						JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
+						chartPanel.setChart(chart);
 					}
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error making Kruskal panel", e);
