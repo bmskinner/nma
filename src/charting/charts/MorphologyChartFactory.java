@@ -887,5 +887,35 @@ public class MorphologyChartFactory {
 		}
 		return chart;
 	}
+	
+	public static JFreeChart makeKruskalWallisChart(ProfileChartOptions options) throws Exception {
+		
+		XYDataset ds = NucleusDatasetCreator.createKruskalProfileDataset(options);
+		
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+						"Position", "Probability", ds, PlotOrientation.VERTICAL, true, true,
+						false);
+		
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Color.WHITE);
+		plot.getDomainAxis().setRange(0, 100);
+		plot.getRangeAxis().setRange(-0.01, 1.01);
+		
+		for(int i=0; i<options.getDatasets().size(); i++){
+			
+			AnalysisDataset dataset = options.getDatasets().get(i);
+			
+			Color colour = dataset.getDatasetColour() == null 
+					? ColourSelecter.getSegmentColor(i)
+							: dataset.getDatasetColour();
+
+			plot.getRenderer().setSeriesPaint(i, colour);
+			plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+			plot.getRenderer().setSeriesVisibleInLegend(i, false);
+		}
+		return chart;
+	}
 
 }

@@ -22,6 +22,7 @@ import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 import ij.process.FloatPolygon;
 import stats.DipTester;
+import stats.KruskalTester;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 
@@ -1278,6 +1279,24 @@ public class NucleusDatasetCreator {
 		ds.addSeries("Q-Q", data);
 		return ds;
 		
+	}
+	
+	public static XYDataset createKruskalProfileDataset(ProfileChartOptions options) throws Exception {
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		AnalysisDataset setOne = options.getDatasets().get(0);
+		AnalysisDataset setTwo = options.getDatasets().get(1);
+	
+		Profile pvalues = KruskalTester.testCollectionGetPValues(setOne, setTwo, options.getTag(), options.getType());
+		
+		double[] yvalues = pvalues.asArray();
+		double[] xvalues = pvalues.getPositions(100).asArray();
+		
+		double[][] data = { xvalues, yvalues };
+		ds.addSeries(setOne.getCollection().getName(), data);
+
+		return ds;
 	}
 	
 }
