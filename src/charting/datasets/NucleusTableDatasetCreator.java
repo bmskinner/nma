@@ -494,43 +494,13 @@ public class NucleusTableDatasetCreator {
 				"Unique %",
 				"Population 2"
 				};
-//		model.addColumn("Population 1", columnData ); //0
-//		model.addColumn("Unique %", columnData ); //1
-//		model.addColumn("Unique", columnData ); //2
-//		model.addColumn("Shared %", columnData ); //3
-//		model.addColumn("Shared", columnData ); //4
-//		model.addColumn("Shared %", columnData ); //5
-//		model.addColumn("Unique", columnData ); //6
-//		model.addColumn("Unique %", columnData ); //7
-//		model.addColumn("Population 2", columnData ); //8
 		model.setColumnIdentifiers(columnNames);
 		
 		if(list==null){
-//			Object[] columnData = {""};
-//			model.addColumn("Population 1", columnData );
-//			model.addColumn("Unique %", columnData );
-//			model.addColumn("Unique", columnData );
-//			model.addColumn("Shared %", columnData );
-//			model.addColumn("Shared", columnData );
-//			model.addColumn("Shared %", columnData );
-//			model.addColumn("Unique", columnData );
-//			model.addColumn("Unique %", columnData );
-//			model.addColumn("Population 2", columnData );
 			return model;
 		}
-		
-		// set rows
-//		Object[] columnData = {""};
-//		model.addColumn("Population 1", columnData ); //0
-//		model.addColumn("Unique %", columnData ); //1
-//		model.addColumn("Unique", columnData ); //2
-//		model.addColumn("Shared %", columnData ); //3
-//		model.addColumn("Shared", columnData ); //4
-//		model.addColumn("Shared %", columnData ); //5
-//		model.addColumn("Unique", columnData ); //6
-//		model.addColumn("Unique %", columnData ); //7
-//		model.addColumn("Population 2", columnData ); //8
-		
+			
+		// Track the pairwase comparisons performed to avoid duplicates
 		Map<UUID, ArrayList<UUID>> existingMatches = new HashMap<UUID, ArrayList<UUID>>();
 
 		// add columns

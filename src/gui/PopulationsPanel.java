@@ -1046,6 +1046,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			
 			// pass on signals from the menu
 			fireSignalChangeEvent(event.type());
+			programLogger.log(Level.FINEST, "Firing signal change event: "+event.type());
 			
 //			if(event.type().equals("SaveCollectionAction")){
 //				programLogger.log(Level.FINEST, "Firing dataset save-as event");

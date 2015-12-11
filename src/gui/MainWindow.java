@@ -30,6 +30,7 @@ import gui.actions.RefoldNucleusAction;
 import gui.actions.NewAnalysisAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
+import gui.actions.SplitCollectionAction;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.dialogs.FishRemappingDialog;
 import gui.dialogs.ManualCellCurator;
@@ -114,11 +115,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	private AnalysisDetailPanel		analysisDetailPanel;	// nucleus detection parameters and stats
 	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
 	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
-//	private WilcoxonDetailPanel 	wilcoxonDetailPanel;	// stats test between populations
-//	private KruskalDetailPanel		kruskalDetailPanel;
 	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
 	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
-//	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
 	private InterDatasetComparisonDetailPanel interdatasetDetailPanel;
@@ -639,18 +637,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					for(DetailPanel panel : MainWindow.this.detailPanels){
 						panel.update(list);
 					}
-//					consensusNucleusPanel.update(list);
-//
-//					nucleusProfilesPanel.update(list);
-//					analysisDetailPanel.update(list);
-//					nuclearBoxplotsPanel.update(list);
-//					signalsDetailPanel.update(list);
-//					clusterDetailPanel.update(list);
-//					mergesDetailPanel.update(list);
-//					vennDetailPanel.update(list);
-//					wilcoxonDetailPanel.update(list);
-//					cellDetailPanel.updateList(list);
-//					segmentsDetailPanel.update(list);
+					
 					programLogger.log(Level.FINE, "Updated tab panels");
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE,"Error updating panels", e);
@@ -659,88 +646,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		};
 		thr.start();
 	}
-						
-	class SplitCollectionAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public SplitCollectionAction() {
-	        super("Split");
-	    }
-		
-	    public void actionPerformed(ActionEvent e) {
-	        
-	        List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-
-	        if(datasets.size()==1){
-	        	try {
-	        		
-	        		AnalysisDataset dataset = datasets.get(0);
-
-	        		if(dataset.hasChildren()){
-	        			programLogger.log(Level.INFO, "Splitting collection...");
-
-	        			// create a JDialog of options
-	        			// get the names of subpopulations
-	        			List<String> nameList = new ArrayList<String>(0);
-	        			for(AnalysisDataset child : dataset.getAllChildDatasets()){
-	        				nameList.add(child.getName());
-	        			}
-
-	        			String[] names = nameList.toArray(new String[0]);
-
-	        			String selectedValue = (String) JOptionPane.showInputDialog(null,
-	        					"Give me nuclei that are NOT present within the following population", "Split population",
-	        					JOptionPane.PLAIN_MESSAGE, null,
-	        					names, names[0]);
-
-	        			// find the population to subtract
-	        			AnalysisDataset negative = populationsPanel.getDataset(selectedValue);
-
-	        			// prepare a new collection
-	        			CellCollection collection = dataset.getCollection();
-
-	        			CellCollection newCollection = new CellCollection(dataset, "Subtraction");
-
-	        			for(Cell n : collection.getCells()){
-	        				if(! negative.getCollection().getCells().contains(n)){
-	        					newCollection.addCell(new Cell(n));
-	        				}
-	        			}
-	        			newCollection.setName("Not_in_"+negative.getName());
-	        			UUID newID = newCollection.getID();
-
-	        			dataset.addChildCollection(newCollection);
-	        			
-	        			if(newCollection.getNucleusCount()>0){
-
-	        				programLogger.log(Level.INFO,"Reapplying morphology...");
-//	        				logc("Reapplying morphology...");
-	        				
-	        				AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
-	        				new MorphologyAnalysisAction(newDataset, dataset, null, MainWindow.this);
-	        			}
-
-
-	        			
-
-	        			populationsPanel.addDataset(dataset.getChildDataset(newID));
-	        			populationsPanel.update();
-	        			
-	        		} else {
-	        			programLogger.log(Level.INFO,"Cannot split; no children in dataset");
-	        		}
-
-
-				} catch (Exception e1) {
-					programLogger.log(Level.SEVERE,"Error splitting collection", e1);
-				} 
-				
-	        }   else {
-	        	programLogger.log(Level.INFO,"Cannot split multiple collections");
-	        }
-	    }
-	}
-				
+										
 	class ReplaceNucleusFolderAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -821,6 +727,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
 		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().get(0);
+		programLogger.log(Level.FINEST, "Heard signal change event: "+event.type());
 		
 		if(event.type().equals("RunShellAnalysis")){
 			programLogger.log(Level.INFO, "Shell analysis selected");
@@ -841,7 +748,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		
 		if(event.type().equals("SplitCollectionAction")){
-			new SplitCollectionAction();
+			new SplitCollectionAction(selectedDataset, MainWindow.this);
 		}
 		
 		if(event.type().equals("CurateCollectionAction")){
