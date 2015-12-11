@@ -272,40 +272,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			mergesDetailPanel.addSignalChangeListener(this);
 			mergesDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Merges", mergesDetailPanel);
-			
-			//---------------
-			// Create the inter-dataset panel
-			//---------------
-			interdatasetDetailPanel = new InterDatasetComparisonDetailPanel(programLogger);
-			detailPanels.add(interdatasetDetailPanel);
-			interdatasetDetailPanel.addDatasetEventListener(this);
-			tabbedPane.addTab("Inter-dataset comparisons", null, interdatasetDetailPanel, null);
-			
-			//---------------
-			// Create the Venn panel
-			//---------------
-//			vennDetailPanel = new VennDetailPanel(programLogger);
-//			detailPanels.add(vennDetailPanel);
-//			vennDetailPanel.addDatasetEventListener(this);
-//			tabbedPane.addTab("Venn", null, vennDetailPanel, null);
-//			
-//			
-//			//---------------
-//			// Create the Wilcoxon test panel
-//			//---------------
-//			wilcoxonDetailPanel = new WilcoxonDetailPanel(programLogger);
-//			detailPanels.add(wilcoxonDetailPanel);
-//			wilcoxonDetailPanel.addDatasetEventListener(this);
-//			tabbedPane.addTab("Wilcoxon", null, wilcoxonDetailPanel, null);
-//			
-//			//---------------
-//			// Create the Wilcoxon test panel
-//			//---------------
-//			kruskalDetailPanel = new KruskalDetailPanel(programLogger);
-//			detailPanels.add(kruskalDetailPanel);
-//			kruskalDetailPanel.addDatasetEventListener(this);
-//			tabbedPane.addTab("Kruskal", null, kruskalDetailPanel, null);
-			
+
 			//---------------
 			// Create the segments boxplot panel
 			//---------------
@@ -323,6 +290,14 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			cellDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
 			cellDetailPanel.addSignalChangeListener(this);
+			
+			//---------------
+			// Create the inter-dataset panel
+			//---------------
+			interdatasetDetailPanel = new InterDatasetComparisonDetailPanel(programLogger);
+			detailPanels.add(interdatasetDetailPanel);
+			interdatasetDetailPanel.addDatasetEventListener(this);
+			tabbedPane.addTab("Inter-dataset comparisons", null, interdatasetDetailPanel, null);
 			
 			
 			//---------------

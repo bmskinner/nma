@@ -45,7 +45,7 @@ public class VennDetailPanel extends DetailPanel {
 	private JPanel mainPanel = new JPanel();
 	
 	private ExportableTable vennTable;
-	private ExportableTable pairwiseVennTable;
+//	private ExportableTable pairwiseVennTable;
 
 	public VennDetailPanel(Logger programLogger) {
 		super(programLogger);
@@ -67,14 +67,14 @@ public class VennDetailPanel extends DetailPanel {
 		
 		
 		
-		JPanel pairwisePanel = new JPanel(new BorderLayout());
-		
-		pairwiseVennTable = new ExportableTable(NucleusTableDatasetCreator.createPairwiseVennTable(null));
-		
-		pairwisePanel.add(pairwiseVennTable, BorderLayout.CENTER);
-		pairwisePanel.add(pairwiseVennTable.getTableHeader(), BorderLayout.NORTH);
-		mainPanel.add(pairwisePanel);
-		pairwiseVennTable.setEnabled(false);
+//		JPanel pairwisePanel = new JPanel(new BorderLayout());
+//		
+//		pairwiseVennTable = new ExportableTable(NucleusTableDatasetCreator.createPairwiseVennTable(null));
+//		
+//		pairwisePanel.add(pairwiseVennTable, BorderLayout.CENTER);
+//		pairwisePanel.add(pairwiseVennTable.getTableHeader(), BorderLayout.NORTH);
+//		mainPanel.add(pairwisePanel);
+//		pairwiseVennTable.setEnabled(false);
 		
 	}
 	
@@ -88,7 +88,7 @@ public class VennDetailPanel extends DetailPanel {
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				updateVennTable();
-				updatePairwiseVennTable();
+//				updatePairwiseVennTable();
 				setUpdating(false);
 			}});
 	}
@@ -123,29 +123,29 @@ public class VennDetailPanel extends DetailPanel {
 		programLogger.log(Level.FINEST, "Updated venn panel");
 	}
 
-	private void updatePairwiseVennTable(){
-		programLogger.log(Level.FINE, "Updating pairwise venn table");
-
-
-		// format the numbers and make into a tablemodel
-		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
-
-		if(!getDatasets().isEmpty() && getDatasets()!=null){
-
-			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
-			if(getTableCache().hasTable(options)){
-				model = getTableCache().getTable(options);
-			} else {
-				model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
-				getTableCache().addTable(options, model);
-			}
-
-		}
-		pairwiseVennTable.setModel(model);
-
-		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
-
-	}
+//	private void updatePairwiseVennTable(){
+//		programLogger.log(Level.FINE, "Updating pairwise venn table");
+//
+//
+//		// format the numbers and make into a tablemodel
+//		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
+//
+//		if(!getDatasets().isEmpty() && getDatasets()!=null){
+//
+//			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
+//			if(getTableCache().hasTable(options)){
+//				model = getTableCache().getTable(options);
+//			} else {
+//				model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
+//				getTableCache().addTable(options, model);
+//			}
+//
+//		}
+//		pairwiseVennTable.setModel(model);
+//
+//		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
+//
+//	}
 	
 	/**
 	 * Colour table cell background to show pairwise comparisons. All cells are white, apart
