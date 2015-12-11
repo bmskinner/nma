@@ -104,6 +104,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 		super.setChart(chart);
 		this.profile = profile;
 		isRunning = false;
+
 		updateOverlays();
 		
 		
@@ -146,7 +147,6 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	    		fireSignalChangeEvent("UpdateSegment|"+seg.getName()+"|"+xValue);
 	    		updateOverlays();
 	    		
-//	    		IJ.log("Firing signal: "+"UpdateSegment|"+seg.getName()+"|"+xValue);
 	    	}
 	    }
 	}
