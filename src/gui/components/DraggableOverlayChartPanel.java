@@ -40,7 +40,9 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	
 	private SegmentedProfile profile = null;
 	
-	private Map<CrosshairOverlay, NucleusBorderSegment> lines = new HashMap<CrosshairOverlay, NucleusBorderSegment>(); // drwaing lines on the chart
+//	private Map<CrosshairOverlay, NucleusBorderSegment> lines = new HashMap<CrosshairOverlay, NucleusBorderSegment>(); // drwaing lines on the chart
+	private Map<Crosshair, NucleusBorderSegment> lines = new HashMap<Crosshair, NucleusBorderSegment>(); // drwaing lines on the chart
+	
 	
 	private CrosshairOverlay activeOverlay = null;
 	private Crosshair activeCrosshair = null;
@@ -57,10 +59,10 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	}
 	
 	private void clearOverlays(){
-		
-		for(Overlay o : lines.keySet()){
-			this.removeOverlay(o);
+		if(activeOverlay!=null){
+			this.removeOverlay(activeOverlay);
 		}
+//		this.activeCrosshair = null;
 	}
 	
 	private void updateOverlays(){
@@ -73,27 +75,28 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 		if(profile!=null){
 			try {
 
-				
+				activeOverlay = new CrosshairOverlay();
 				int i=0;
 				for(NucleusBorderSegment seg : profile.getSegments()){
-
-					CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
 
 					Color colour = ColourSelecter.getSegmentColor(i++);
 
 					Crosshair xCrosshair = new Crosshair(Double.NaN, colour, ChartComponents.MARKER_STROKE);
 					xCrosshair.setLabelVisible(false);
 					xCrosshair.setValue(seg.getStartIndex());
-
-					crosshairOverlay.addDomainCrosshair(xCrosshair);
-					this.addOverlay(crosshairOverlay);
-					lines.put(crosshairOverlay, seg);
-
+					lines.put(xCrosshair, seg);
+					
+					activeOverlay.addDomainCrosshair(xCrosshair);
+					
 				}
 				
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				this.addOverlay(activeOverlay);
+				
+			} catch (Exception e1) {
+				IJ.log("Error sending signal: "+e1.getMessage());
+    			for(StackTraceElement e2 : e1.getStackTrace()){
+    				IJ.log(e2.toString());
+    			}
 			}
 
 
@@ -103,8 +106,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	public void setChart(JFreeChart chart, SegmentedProfile profile){
 		super.setChart(chart);
 		this.profile = profile;
-		isRunning = false;
-
+		IJ.log("Set chart   : Running :"+checkRunning()); 
 		updateOverlays();
 		
 		
@@ -113,9 +115,12 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	@Override
 	public void mousePressed(MouseEvent e) {
 	    if (e.getButton() == MouseEvent.BUTTON1) {
-//	    	IJ.log("Mouse down");
-	    	mouseIsDown = true;
-	        initThread();
+
+	    	if(activeCrosshair!=null){
+	    		IJ.log("Mouse down : Running :"+checkRunning()); 
+	    		mouseIsDown = true;
+	    		initThread();
+	    	}
 	    }
 	}
 
@@ -125,27 +130,43 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 		final int y = e.getY();
 		
 	    if (e.getButton() == MouseEvent.BUTTON1) {
-//	    	IJ.log("Mouse up");
 	    	mouseIsDown = false;
-	    	
+	    	IJ.log("Mouse up   : Running :"+checkRunning()); 
+//	    	isRunning = false;
 	    	/*
 	    	 * Get the location on the chart, and send a signal to update the profile
 	    	 */
 	    	
 	    	if(activeCrosshair!=null){
+	    		IJ.log("Mouse up on active crosshair");
 	    		
-	    		Rectangle2D dataArea = getScreenDataArea();
-	    		JFreeChart chart = getChart();
-	    		XYPlot plot = (XYPlot) chart.getPlot();
-	    		ValueAxis xAxis = plot.getDomainAxis();
-	    		int xValue = (int) xAxis.java2DToValue(x, dataArea, 
-	    				RectangleEdge.BOTTOM);
+	    		for(Crosshair c : lines.keySet()){
+	    			IJ.log(lines.get(c).toString());
+	    		}
 	    		
+	    		try {
+	    			Rectangle2D dataArea = getScreenDataArea();
+	    			JFreeChart chart = getChart();
+	    			XYPlot plot = (XYPlot) chart.getPlot();
+	    			ValueAxis xAxis = plot.getDomainAxis();
+	    			int xValue = (int) xAxis.java2DToValue(x, dataArea, 
+	    					RectangleEdge.BOTTOM);
 
-	    		NucleusBorderSegment seg = lines.get(activeOverlay);
-	    		isRunning = false;
-	    		fireSignalChangeEvent("UpdateSegment|"+seg.getName()+"|"+xValue);
-	    		updateOverlays();
+	    			NucleusBorderSegment seg = lines.get(activeCrosshair);
+
+	    			if(seg!=null){
+	    				IJ.log("UpdateSegment|"+seg.getName()+"|"+xValue);
+	    				//	    			isRunning = false;
+	    				fireSignalChangeEvent("UpdateSegment|"+seg.getName()+"|"+xValue);
+	    			}
+
+	    		} catch(Exception e1){
+	    			IJ.log("Error sending signal: "+e1.getMessage());
+	    			for(StackTraceElement e2 : e1.getStackTrace()){
+	    				IJ.log(e2.toString());
+	    			}
+	    		}
+
 	    		
 	    	}
 	    }
@@ -159,10 +180,9 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 		
 		if(mouseIsDown){
 
-			
-			
+	
 		} else {
-			isRunning = false;
+
 			if (checkCursorIsOverLine(x, y)) {
 				this.setCursor(new Cursor(Cursor.E_RESIZE_CURSOR));
 			} else {
@@ -172,8 +192,11 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	}
 	
 	private void updateActiveCrosshairLocation(int x, int y){
-		
+
 		if(activeCrosshair!=null){
+
+			//					NucleusBorderSegment seg = lines.get(activeCrosshair);
+			//					lines.remove(activeCrosshair);
 
 			Rectangle2D dataArea = getScreenDataArea();
 			JFreeChart chart = getChart();
@@ -182,7 +205,18 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 			double movex = xAxis.java2DToValue(x, dataArea, 
 					RectangleEdge.BOTTOM);
 			activeCrosshair.setValue(movex);
+			//					activeOverlay.fireOverlayChanged();
+			//			activeOverlay.paintOverlay(arg0, arg1);
+
+			//					lines.put(activeCrosshair, seg);
 		}
+	}
+	
+	private synchronized boolean checkRunning(){
+		if (isRunning) 
+			return true;
+		else 
+			return false;
 	}
 
 	volatile private boolean isRunning = false;
@@ -196,6 +230,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	    if (checkAndMark()) {
 	        new Thread() {
 	            public void run() {
+	            	IJ.log("Thread start : Running :"+checkRunning()); 
 	                do {
 	                	
 	                	/*
@@ -209,8 +244,11 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	                	
 	                } while (mouseIsDown);
 	                isRunning = false;
+	                IJ.log("Thread end : Running :"+checkRunning()); 
 	            }
 	        }.start();
+	    } else {
+	    	IJ.log("Not starting thread");
 	    }
 	}
 	
@@ -223,38 +261,35 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	 */
 	private boolean checkCursorIsOverLine(int x, int y){
 		Rectangle2D dataArea = this.getScreenDataArea(); 
-        ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
-        activeCrosshair = null;
-        activeOverlay = null;
-        boolean isOverLine = false;
-        for(CrosshairOverlay o : lines.keySet()){
-        	// only display a hand if the cursor is over the items
-        	
-        	List<Crosshair> crosshairs = o.getDomainCrosshairs();
-        	for(Crosshair c :  crosshairs){
-        	
-        		
-        		// Turn the chart coordinates into panel coordinates
-        		double rectangleX = xAxis.valueToJava2D(c.getValue(), dataArea, 
-                        RectangleEdge.BOTTOM);
-        		
-        		
-        		
-        		
-        		final Rectangle bounds = new Rectangle( (int)rectangleX-2, 
-        				(int) dataArea.getMinY(), 
-        				(int) 4,   
-        				(int) dataArea.getHeight() );
-        		
+		ValueAxis xAxis = this.getChart().getXYPlot().getDomainAxis();
+		activeCrosshair = null;
 
-        		if (bounds != null && bounds.contains(x, y)) {
-        			isOverLine = true;
-        			activeCrosshair = c;
-        			activeOverlay = o;
-        		}
-        	}
-        }
-        return isOverLine;
+		boolean isOverLine = false;
+
+		// only display a hand if the cursor is over the items
+		for(Crosshair c :  lines.keySet()){
+
+
+			// Turn the chart coordinates into panel coordinates
+			double rectangleX = xAxis.valueToJava2D(c.getValue(), dataArea, 
+					RectangleEdge.BOTTOM);
+
+
+			final Rectangle bounds = new Rectangle( (int)rectangleX-2, 
+					(int) dataArea.getMinY(), 
+					(int) 4,   
+					(int) dataArea.getHeight() );
+
+
+			if (bounds != null && bounds.contains(x, y)) {
+				isOverLine = true;
+				activeCrosshair = c;
+				if(c==null){
+					IJ.log("Error: c is null");
+				}
+			}
+		}
+		return isOverLine;
 	}
 	
     protected synchronized void fireSignalChangeEvent(String message) {
