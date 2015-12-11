@@ -730,7 +730,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		programLogger.log(Level.FINEST, "Heard signal change event: "+event.type());
 		
 		if(event.type().equals("RunShellAnalysis")){
-			programLogger.log(Level.INFO, "Shell analysis selected");
+			programLogger.log(Level.FINER, "Shell analysis selected");
 			new ShellAnalysisAction(selectedDataset, this);
 		}
 
@@ -750,6 +750,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		if(event.type().equals("SplitCollectionAction")){
 			new SplitCollectionAction(selectedDataset, MainWindow.this);
 		}
+		
+		if(event.type().equals("SaveCollectionAction")){
+			CountDownLatch latch = new CountDownLatch(1);
+			new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+		}
+		
+		
 		
 		if(event.type().equals("CurateCollectionAction")){
 			ManualCellCurator curator = new ManualCellCurator(programLogger, selectedDataset);
@@ -985,24 +992,24 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				populationsPanel.addDataset(event.firstDataset());
 			}
 
-			if(event.method().equals(DatasetMethod.SAVE_AS)){
-
-				final AnalysisDataset selectedDataset = event.firstDataset();
-
-				final CountDownLatch latch = new CountDownLatch(1);
-
-				Thread thr = new Thread(){
-					public void run(){
-
-						new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
-						try {
-							latch.await();
-						} catch (InterruptedException e) {
-							programLogger.log(Level.SEVERE, "Interruption to thread", e);
-						}
-					}};
-					thr.start();
-			}
+//			if(event.method().equals(DatasetMethod.SAVE_AS)){
+//				programLogger.log(Level.FINEST, "Dataset save as event heard");
+//				final AnalysisDataset selectedDataset = event.firstDataset();
+//
+//				final CountDownLatch latch = new CountDownLatch(1);
+//
+//				Thread thr = new Thread(){
+//					public void run(){
+//
+//						new SaveDatasetAction(selectedDataset, MainWindow.this, latch, true);
+//						try {
+//							latch.await();
+//						} catch (InterruptedException e) {
+//							programLogger.log(Level.SEVERE, "Interruption to thread", e);
+//						}
+//					}};
+//					thr.start();
+//			}
 
 		}
 		
