@@ -103,6 +103,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	public void setChart(JFreeChart chart, SegmentedProfile profile){
 		super.setChart(chart);
 		this.profile = profile;
+		isRunning = false;
 		updateOverlays();
 		
 		
@@ -141,8 +142,10 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	    		
 
 	    		NucleusBorderSegment seg = lines.get(activeOverlay);
-	    		
+	    		isRunning = false;
 	    		fireSignalChangeEvent("UpdateSegment|"+seg.getName()+"|"+xValue);
+	    		updateOverlays();
+	    		
 //	    		IJ.log("Firing signal: "+"UpdateSegment|"+seg.getName()+"|"+xValue);
 	    	}
 	    }
@@ -159,6 +162,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 			
 			
 		} else {
+			isRunning = false;
 			if (checkCursorIsOverLine(x, y)) {
 				this.setCursor(new Cursor(Cursor.E_RESIZE_CURSOR));
 			} else {
@@ -237,9 +241,9 @@ public class DraggableOverlayChartPanel extends ChartPanel {
         		
         		
         		
-        		final Rectangle bounds = new Rectangle( (int)rectangleX-5, 
+        		final Rectangle bounds = new Rectangle( (int)rectangleX-2, 
         				(int) dataArea.getMinY(), 
-        				(int) 10,   
+        				(int) 4,   
         				(int) dataArea.getHeight() );
         		
 
