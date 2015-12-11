@@ -85,6 +85,7 @@ public class ManualCellCurator extends LoadingIconDialog {
 				
 				if(cellIndex==dataset.getCollection().size()-1){
 					// last cell
+					idsToKeep.add(dataset.getCollection().getCells().get(cellIndex).getId());
 					setVisible(false);
 				} else {
 

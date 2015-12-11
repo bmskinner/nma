@@ -24,6 +24,7 @@ import gui.actions.AddNuclearSignalAction;
 import gui.actions.AddTailStainAction;
 import gui.actions.BuildHierarchicalTreeAction;
 import gui.actions.ClusterAnalysisAction;
+import gui.actions.CurateCollectionAction;
 import gui.actions.MergeCollectionAction;
 import gui.actions.MorphologyAnalysisAction;
 import gui.actions.RefoldNucleusAction;
@@ -759,51 +760,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 		
 		if(event.type().equals("CurateCollectionAction")){
-			ManualCellCurator curator = new ManualCellCurator(programLogger, selectedDataset);
 			
-			List<UUID> manualIDs = curator.getIDsToKeep();
-			
-			CellCollection template = selectedDataset.getCollection();
-			
-			CellCollection clusterCollection = new CellCollection(template.getFolder(), 
-					template.getOutputFolderName(), 
-					template.getName()+"_Curated", 
-					template.getDebugFile(), 
-					template.getNucleusType());
-						
-			clusterCollection.setName(template.getName()+"_Curated");
-
-			for(Cell c : selectedDataset.getCollection().getCells()){
-
-				if(manualIDs.contains(c.getId())){
-					clusterCollection.addCell(new Cell (c));
-				}
-			}
-
-			
-			if(clusterCollection.hasCells()){
-				programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
-				final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				selectedDataset.addChildCollection(clusterCollection);
-
-				AnalysisDataset clusterDataset = selectedDataset.getChildDataset(clusterCollection.getID());
-				clusterDataset.setRoot(false);
-				list.add(clusterDataset);
-				
-				programLogger.log(Level.INFO, "Running new morphology analysis");
-				final int flag = ADD_POPULATION;
-				SwingUtilities.invokeLater(new Runnable(){
-					public void run(){
-					
-						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
-
-				}});
-				
-			} else {
-				programLogger.log(Level.WARNING, "No cells found");
-			}
-			
-			
+			new CurateCollectionAction(selectedDataset, MainWindow.this);		
 			
 		}
 				
