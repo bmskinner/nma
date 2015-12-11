@@ -44,9 +44,14 @@ import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisSpace;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.panel.CrosshairOverlay;
+import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.IntervalMarker;
 import org.jfree.chart.plot.Marker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.general.DatasetUtilities;
 import org.jfree.ui.Layer;
 import org.jfree.ui.RectangleEdge;
 
@@ -63,6 +68,8 @@ public class SelectableChartPanel extends ChartPanel implements SignalChangeList
 	public static final String SOURCE_COMPONENT = "SelectableChartPanel"; 
 	private List<Object> listeners = new ArrayList<Object>();
 	List<Line2D.Double> lines = new ArrayList<Line2D.Double>(); // drwaing lines on the chart
+	
+	private Crosshair xCrosshair;
 
 	public SelectableChartPanel(JFreeChart chart, String name){
 		super(chart);
@@ -73,27 +80,18 @@ public class SelectableChartPanel extends ChartPanel implements SignalChangeList
 		this.addSignalChangeListener(mouseMarker);
 		this.addMouseListener(mouseMarker);
 		this.addChartMouseListener(this);
-		
-//		this.addChartMouseListener(new ChartNiyse(){
-//
-//			public void mouseMoved(MouseEvent e){
-//				
-//				Point location = e.getPoint();
-//				
-//				double lineLength = ((SelectableChartPanel) e.getSource()).getBounds().getHeight();
-//
-//				Line2D.Double line = new Line2D.Double(location.getX(), 
-//						0, 
-//						location.getX(), 
-//						lineLength);
-//				
-//				addLine(line);
-//				repaint();
-//				
-//			}
-//		});
+
+	    CrosshairOverlay crosshairOverlay = new CrosshairOverlay();
+	    this.xCrosshair = new Crosshair(Double.NaN, Color.GRAY, new BasicStroke(0f));
+	    this.xCrosshair.setLabelVisible(false);
+
+	    crosshairOverlay.addDomainCrosshair(xCrosshair);
+	    this.addOverlay(crosshairOverlay);
+
 		
 	}
+	
+
 	
 	public String getName(){
 		return this.name;
@@ -269,28 +267,14 @@ public class SelectableChartPanel extends ChartPanel implements SignalChangeList
 
 	@Override
 	public void chartMouseMoved(ChartMouseEvent e) {
-			
-			Point location = e.getTrigger().getPoint();
-			Rectangle2D plotArea = this.getChartRenderingInfo().getPlotInfo().getPlotArea();
-			Rectangle2D dataArea = this.getChartRenderingInfo().getPlotInfo().getDataArea();
-			
-			/*
-			 * The dataArea size includes the bottom axis, so we have to compute the axis space and subtract it
-			 * from the dataArea height when making the line 
-			 */
-			double lineLength = dataArea.getHeight();
-			
-			AxisSpace space = new AxisSpace();
-			this.getChart().getXYPlot().getDomainAxis().reserveSpace((Graphics2D) this.getGraphics(), this.getChart().getPlot(), plotArea,  RectangleEdge.BOTTOM, space);
-			
-			Line2D.Double line = new Line2D.Double(location.getX(), 
-					dataArea.getMinY(), 
-					location.getX(), 
-					dataArea.getMinY()+lineLength-space.getBottom());
-			
-			addLine(line);
-			repaint();
-			
+					
+		Rectangle2D dataArea = this.getScreenDataArea();
+        JFreeChart chart = e.getChart();
+        XYPlot plot = (XYPlot) chart.getPlot();
+        ValueAxis xAxis = plot.getDomainAxis();
+        double x = xAxis.java2DToValue(e.getTrigger().getX(), dataArea, 
+                RectangleEdge.BOTTOM);
+        this.xCrosshair.setValue(x);		
 	
 		
 	}

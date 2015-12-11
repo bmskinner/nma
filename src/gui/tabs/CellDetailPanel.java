@@ -22,6 +22,7 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
+import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
@@ -468,13 +469,15 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected class ProfilePanel extends JPanel{
 		
 		private static final long serialVersionUID = 1L;
-		private ChartPanel profileChartPanel; // holds the chart with the cell
+		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
 		
 		protected ProfilePanel(){
 			this.setLayout(new BorderLayout());
 			
-			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();		
-			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); 
+			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();	
+			
+			profileChartPanel = new DraggableOverlayChartPanel(chart, null); 
+//			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); 
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
 		}
@@ -494,7 +497,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
 					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset().getSwatch());
 
-					profileChartPanel.setChart(chart);
+					profileChartPanel.setChart(chart, nucleus.getAngleProfile(BorderTag.REFERENCE_POINT));
 					
 //					nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).fastFourierTransform();
 				}
