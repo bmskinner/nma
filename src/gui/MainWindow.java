@@ -37,6 +37,7 @@ import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
 import gui.tabs.ClusterDetailPanel;
 import gui.tabs.DetailPanel;
+import gui.tabs.InterDatasetComparisonDetailPanel;
 import gui.tabs.KruskalDetailPanel;
 import gui.tabs.MergesDetailPanel;
 import gui.tabs.NuclearBoxplotsPanel;
@@ -113,13 +114,14 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	private AnalysisDetailPanel		analysisDetailPanel;	// nucleus detection parameters and stats
 	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
 	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
-	private WilcoxonDetailPanel 	wilcoxonDetailPanel;	// stats test between populations
-	private KruskalDetailPanel		kruskalDetailPanel;
+//	private WilcoxonDetailPanel 	wilcoxonDetailPanel;	// stats test between populations
+//	private KruskalDetailPanel		kruskalDetailPanel;
 	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
 	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
-	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
+//	private VennDetailPanel			vennDetailPanel; 		// overlaps between populations
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
+	private InterDatasetComparisonDetailPanel interdatasetDetailPanel;
 	
 	private List<DetailPanel> detailPanels = new ArrayList<DetailPanel>(); // store panels for iterating messsages
 	
@@ -272,29 +274,37 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			tabbedPane.addTab("Merges", mergesDetailPanel);
 			
 			//---------------
+			// Create the inter-dataset panel
+			//---------------
+			interdatasetDetailPanel = new InterDatasetComparisonDetailPanel(programLogger);
+			detailPanels.add(interdatasetDetailPanel);
+			interdatasetDetailPanel.addDatasetEventListener(this);
+			tabbedPane.addTab("Inter-dataset comparisons", null, interdatasetDetailPanel, null);
+			
+			//---------------
 			// Create the Venn panel
 			//---------------
-			vennDetailPanel = new VennDetailPanel(programLogger);
-			detailPanels.add(vennDetailPanel);
-			vennDetailPanel.addDatasetEventListener(this);
-			tabbedPane.addTab("Venn", null, vennDetailPanel, null);
-			
-			
-			//---------------
-			// Create the Wilcoxon test panel
-			//---------------
-			wilcoxonDetailPanel = new WilcoxonDetailPanel(programLogger);
-			detailPanels.add(wilcoxonDetailPanel);
-			wilcoxonDetailPanel.addDatasetEventListener(this);
-			tabbedPane.addTab("Wilcoxon", null, wilcoxonDetailPanel, null);
-			
-			//---------------
-			// Create the Wilcoxon test panel
-			//---------------
-			kruskalDetailPanel = new KruskalDetailPanel(programLogger);
-			detailPanels.add(kruskalDetailPanel);
-			kruskalDetailPanel.addDatasetEventListener(this);
-			tabbedPane.addTab("Kruskal", null, kruskalDetailPanel, null);
+//			vennDetailPanel = new VennDetailPanel(programLogger);
+//			detailPanels.add(vennDetailPanel);
+//			vennDetailPanel.addDatasetEventListener(this);
+//			tabbedPane.addTab("Venn", null, vennDetailPanel, null);
+//			
+//			
+//			//---------------
+//			// Create the Wilcoxon test panel
+//			//---------------
+//			wilcoxonDetailPanel = new WilcoxonDetailPanel(programLogger);
+//			detailPanels.add(wilcoxonDetailPanel);
+//			wilcoxonDetailPanel.addDatasetEventListener(this);
+//			tabbedPane.addTab("Wilcoxon", null, wilcoxonDetailPanel, null);
+//			
+//			//---------------
+//			// Create the Wilcoxon test panel
+//			//---------------
+//			kruskalDetailPanel = new KruskalDetailPanel(programLogger);
+//			detailPanels.add(kruskalDetailPanel);
+//			kruskalDetailPanel.addDatasetEventListener(this);
+//			tabbedPane.addTab("Kruskal", null, kruskalDetailPanel, null);
 			
 			//---------------
 			// Create the segments boxplot panel

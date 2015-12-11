@@ -250,12 +250,15 @@ public class NucleusDatasetCreator {
 	
 	
 	/**
-	 * Create a charting dataset for the median profile of an AnalysisDataset
+	 * Create a charting dataset for the median profile of an AnalysisDataset.
+	 * This is only the median line, with no segments. To get a segmented profile,
+	 * use createSegmentedMedianProfileDataset()
 	 * @param dataset
 	 * @param normalised
 	 * @param alignment
 	 * @param point
 	 * @return
+	 * @see createSegmentedMedianProfileDataset()
 	 * @throws Exception 
 	 */
 	public static XYDataset createNonsegmentedMedianProfileDataset(AnalysisDataset dataset, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{

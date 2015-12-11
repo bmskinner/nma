@@ -984,7 +984,7 @@ public class MorphologyChartFactory {
 				: options.getDatasets().get(1).getDatasetColour();
 		angleRendererTwo.setSeriesPaint(0, colorTwo);
 		angleRendererTwo.setSeriesVisibleInLegend(0, false);
-		angleRendererOne.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
+		angleRendererTwo.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
 
 		
 		plot.setRenderer(0, logRenderer);
