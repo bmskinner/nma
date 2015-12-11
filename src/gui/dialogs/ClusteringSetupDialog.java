@@ -19,15 +19,18 @@
 package gui.dialogs;
 
 import gui.MainWindow;
+import stats.DipTester;
 import stats.NucleusStatistic;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,8 +49,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import analysis.AnalysisDataset;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
+import components.generic.MeasurementScale;
 
 @SuppressWarnings("serial")
 public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener, ChangeListener {
@@ -73,10 +78,11 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	private JSpinner iterationsSpinner;
 
 	
-	public ClusteringSetupDialog(MainWindow mw) {
+	public ClusteringSetupDialog(MainWindow mw, AnalysisDataset dataset) {
 
-		super(mw, "Clustering options");
+		super(mw, dataset, "Clustering options");
 		this.initialise();
+		this.setLocationRelativeTo(null);
 		this.pack();
 		this.setVisible(true);
 
@@ -233,8 +239,20 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		labels.add(profileLabel);
 		fields.add(includeProfilesCheckBox);
 		
+		DecimalFormat pf = new DecimalFormat("#0.000"); 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
-			JCheckBox box = new JCheckBox("");
+			
+			String pval = "";
+			try {
+				double[] stats = dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS);
+				double diptest 	= DipTester.getDipTestPValue(stats);
+				pval = pf.format(diptest);		
+			} catch (Exception e) {
+				programLogger.log(Level.SEVERE, "Error getting p-value", e);
+			}
+			
+			JCheckBox box = new JCheckBox("  p(uni) = "+pval);
+			box.setForeground(Color.DARK_GRAY);
 			box.setSelected(false);
 			box.addChangeListener(this);
 			JLabel label = new JLabel(stat.toString());

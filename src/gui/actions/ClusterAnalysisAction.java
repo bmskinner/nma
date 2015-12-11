@@ -36,7 +36,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 	public ClusterAnalysisAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Cluster analysis", "Error in cluster analysis", mw);
 
-		ClusteringSetupDialog clusterSetup = new ClusteringSetupDialog(mw);
+		ClusteringSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
 		ClusteringOptions options = clusterSetup.getOptions();
 		//Map<String, Object> options = clusterSetup.getOptions();
 

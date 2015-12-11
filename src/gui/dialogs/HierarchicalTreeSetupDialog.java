@@ -24,6 +24,7 @@ import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -32,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,10 +58,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import stats.DipTester;
 import stats.NucleusStatistic;
+import stats.Stats;
+import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.ClusteringOptions.HierarchicalClusterMethod;
+import components.generic.MeasurementScale;
 
 public class HierarchicalTreeSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
@@ -74,6 +80,8 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	protected JComboBox<HierarchicalClusterMethod> hierarchicalClusterMethodCheckBox;
 	
+	protected AnalysisDataset dataset;
+	
 //	private JCheckBox useModalityCheckBox;
 //	private JSpinner modalityPointsSpinner;
 //	
@@ -84,10 +92,11 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	protected ClusteringOptions options;
 	
-	public HierarchicalTreeSetupDialog(MainWindow mw) {
+	public HierarchicalTreeSetupDialog(MainWindow mw, AnalysisDataset dataset) {
 		
 		// modal dialog
 		super(mw.getProgramLogger(), mw, true);
+		this.dataset = dataset;
 		this.setTitle("Tree building options");
 		setSize(450, 300);
 		this.setLocationRelativeTo(null);
@@ -102,8 +111,9 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	 * @param mw
 	 * @param title
 	 */
-	protected HierarchicalTreeSetupDialog(MainWindow mw, String title){
+	protected HierarchicalTreeSetupDialog(MainWindow mw, AnalysisDataset dataset, String title){
 		super(mw.getProgramLogger(), mw, true);
+		this.dataset = dataset;
 		this.setTitle(title);
 		setSize(450, 300);
 		this.setLocationRelativeTo(null);
@@ -237,8 +247,21 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		labels.add(profileLabel);
 		fields.add(includeProfilesCheckBox);
 		
+		
+		DecimalFormat pf = new DecimalFormat("#0.000"); 
 		for(NucleusStatistic stat : NucleusStatistic.values()){
-			JCheckBox box = new JCheckBox("");
+			
+			String pval = "";
+			try {
+				double[] stats = dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS);
+				double diptest 	= DipTester.getDipTestPValue(stats);
+				pval = pf.format(diptest);		
+			} catch (Exception e) {
+				programLogger.log(Level.SEVERE, "Error getting p-value", e);
+			}
+
+			JCheckBox box = new JCheckBox("  p(uni) = "+pval);
+			box.setForeground(Color.DARK_GRAY);
 			box.setSelected(false);
 			box.addChangeListener(this);
 			JLabel label = new JLabel(stat.toString());

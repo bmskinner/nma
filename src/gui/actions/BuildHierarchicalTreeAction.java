@@ -43,7 +43,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 	public BuildHierarchicalTreeAction(AnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Building tree", "Error building tree", mw);
 
-		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw);
+		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);
 		ClusteringOptions options = clusterSetup.getOptions();
 //		Map<String, Object> options = clusterSetup.getOptions();
 
