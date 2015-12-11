@@ -196,10 +196,14 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			// only apply to first row, after the first column
 			if(column>0 && row==0){
-//				String colName = table.getColumnName(column); // will be Seg_x
 				
-
-				int segment = Integer.valueOf(colName.replace("Seg_", ""));
+				int segment;
+		        try {
+		        	segment = Integer.valueOf(colName.replace("Seg_", ""));
+		        } catch (Exception e){
+		        	programLogger.log(Level.FINEST, "Error getting segment name: "+colName);
+		        	segment = 0;
+		        }
 
 				ColourSwatch swatch = activeDataset().getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : activeDataset().getSwatch();
 				colour = swatch.color(segment);
@@ -211,7 +215,15 @@ public class SegmentsDetailPanel extends DetailPanel {
 			if(rowName.equals("Length p(unimodal)") && column > 0){
 
 				String cellContents = l.getText();
-				Double pval = Double.valueOf(  cellContents );
+				
+				double pval;
+		        try {
+		        	pval = Double.valueOf(cellContents);
+		        } catch (Exception e){
+		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+colName);
+		        	pval = 1;
+		        }
+				
 				if(  pval < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
 					colour = Color.YELLOW;
 				}

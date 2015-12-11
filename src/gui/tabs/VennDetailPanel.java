@@ -45,7 +45,6 @@ public class VennDetailPanel extends DetailPanel {
 	private JPanel mainPanel = new JPanel();
 	
 	private ExportableTable vennTable;
-//	private ExportableTable pairwiseVennTable;
 
 	public VennDetailPanel(Logger programLogger) {
 		super(programLogger);
@@ -64,17 +63,6 @@ public class VennDetailPanel extends DetailPanel {
 		vennPanel.add(vennTable.getTableHeader(), BorderLayout.NORTH);
 		mainPanel.add(vennPanel);
 		vennTable.setEnabled(false);
-		
-		
-		
-//		JPanel pairwisePanel = new JPanel(new BorderLayout());
-//		
-//		pairwiseVennTable = new ExportableTable(NucleusTableDatasetCreator.createPairwiseVennTable(null));
-//		
-//		pairwisePanel.add(pairwiseVennTable, BorderLayout.CENTER);
-//		pairwisePanel.add(pairwiseVennTable.getTableHeader(), BorderLayout.NORTH);
-//		mainPanel.add(pairwisePanel);
-//		pairwiseVennTable.setEnabled(false);
 		
 	}
 	
@@ -122,30 +110,6 @@ public class VennDetailPanel extends DetailPanel {
 		}
 		programLogger.log(Level.FINEST, "Updated venn panel");
 	}
-
-//	private void updatePairwiseVennTable(){
-//		programLogger.log(Level.FINE, "Updating pairwise venn table");
-//
-//
-//		// format the numbers and make into a tablemodel
-//		TableModel model = NucleusTableDatasetCreator.createPairwiseVennTable(null);
-//
-//		if(!getDatasets().isEmpty() && getDatasets()!=null){
-//
-//			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.PAIRWISE_VENN);
-//			if(getTableCache().hasTable(options)){
-//				model = getTableCache().getTable(options);
-//			} else {
-//				model = NucleusTableDatasetCreator.createPairwiseVennTable(getDatasets());
-//				getTableCache().addTable(options, model);
-//			}
-//
-//		}
-//		pairwiseVennTable.setModel(model);
-//
-//		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
-//
-//	}
 	
 	/**
 	 * Colour table cell background to show pairwise comparisons. All cells are white, apart
@@ -162,14 +126,19 @@ public class VennDetailPanel extends DetailPanel {
 
 	        String cellContents = l.getText();
 	        if(cellContents!=null && !cellContents.equals("")){ // ensure value
-//	        	IJ.log(cellContents);
+
+	        	String columnName = table.getColumnName(column);
 	        	String[] array = cellContents.split("%");
-//	        	 IJ.log(array[0]);
 		        String[] array2 = array[0].split("\\(");
-//		        IJ.log(array2[1]);
-		        double pct = Double.valueOf(array2[1]);
 		        
-//		        IJ.log("Pct: "+pct);
+		        double pct;
+		        try {
+		        	pct = Double.valueOf(array2[1]);
+		        } catch (Exception e){
+		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName);
+		        	pct = 0;
+		        }
+		        		        
 		        double colourIndex = 255 - ((pct/100) * 255);
 		        
 		        Color colour = new Color((int) colourIndex,(int) colourIndex, 255);

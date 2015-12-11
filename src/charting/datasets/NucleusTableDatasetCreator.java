@@ -21,7 +21,9 @@ package charting.datasets;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.swing.table.DefaultTableModel;
@@ -480,39 +482,77 @@ public class NucleusTableDatasetCreator {
 	public static TableModel createPairwiseVennTable(List<AnalysisDataset> list) {
 		DefaultTableModel model = new DefaultTableModel();
 		
+		
+		Object[] columnNames = new Object[] {
+				"Population 1",
+				"Unique %",
+				"Unique",
+				"Shared %",
+				"Shared",
+				"Shared %",
+				"Unique",
+				"Unique %",
+				"Population 2"
+				};
+//		model.addColumn("Population 1", columnData ); //0
+//		model.addColumn("Unique %", columnData ); //1
+//		model.addColumn("Unique", columnData ); //2
+//		model.addColumn("Shared %", columnData ); //3
+//		model.addColumn("Shared", columnData ); //4
+//		model.addColumn("Shared %", columnData ); //5
+//		model.addColumn("Unique", columnData ); //6
+//		model.addColumn("Unique %", columnData ); //7
+//		model.addColumn("Population 2", columnData ); //8
+		model.setColumnIdentifiers(columnNames);
+		
 		if(list==null){
-			Object[] columnData = {""};
-			model.addColumn("Population 1", columnData );
-			model.addColumn("Unique %", columnData );
-			model.addColumn("Unique", columnData );
-			model.addColumn("Shared %", columnData );
-			model.addColumn("Shared", columnData );
-			model.addColumn("Shared %", columnData );
-			model.addColumn("Unique", columnData );
-			model.addColumn("Unique %", columnData );
-			model.addColumn("Population 2", columnData );
+//			Object[] columnData = {""};
+//			model.addColumn("Population 1", columnData );
+//			model.addColumn("Unique %", columnData );
+//			model.addColumn("Unique", columnData );
+//			model.addColumn("Shared %", columnData );
+//			model.addColumn("Shared", columnData );
+//			model.addColumn("Shared %", columnData );
+//			model.addColumn("Unique", columnData );
+//			model.addColumn("Unique %", columnData );
+//			model.addColumn("Population 2", columnData );
 			return model;
 		}
 		
 		// set rows
-		Object[] columnData = {""};
-		model.addColumn("Population 1", columnData ); //0
-		model.addColumn("Unique %", columnData ); //1
-		model.addColumn("Unique", columnData ); //2
-		model.addColumn("Shared %", columnData ); //3
-		model.addColumn("Shared", columnData ); //4
-		model.addColumn("Shared %", columnData ); //5
-		model.addColumn("Unique", columnData ); //6
-		model.addColumn("Unique %", columnData ); //7
-		model.addColumn("Population 2", columnData ); //8
+//		Object[] columnData = {""};
+//		model.addColumn("Population 1", columnData ); //0
+//		model.addColumn("Unique %", columnData ); //1
+//		model.addColumn("Unique", columnData ); //2
+//		model.addColumn("Shared %", columnData ); //3
+//		model.addColumn("Shared", columnData ); //4
+//		model.addColumn("Shared %", columnData ); //5
+//		model.addColumn("Unique", columnData ); //6
+//		model.addColumn("Unique %", columnData ); //7
+//		model.addColumn("Population 2", columnData ); //8
+		
+		Map<UUID, ArrayList<UUID>> existingMatches = new HashMap<UUID, ArrayList<UUID>>();
 
 		// add columns
 		for(AnalysisDataset dataset1 : list){
-
+			
+			ArrayList<UUID> set1List = new ArrayList<UUID>();
+			existingMatches.put(dataset1.getUUID(), set1List);
+			
 			for(AnalysisDataset dataset2 : list){
 
 				// Ignore self-self matches
 				if( ! dataset2.getUUID().equals(dataset1.getUUID())){
+					
+					set1List.add(dataset2.getUUID());
+					
+					if(existingMatches.get(dataset2.getUUID())!=null){
+						if(existingMatches.get(dataset2.getUUID()).contains(dataset1.getUUID())    ){
+							continue;
+						}
+					}
+				
+					
 
 					Object[] popData = new Object[9];
 

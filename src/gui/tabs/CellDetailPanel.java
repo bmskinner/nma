@@ -261,10 +261,17 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			if(column>0 && row==0){
 				String colName = table.getColumnName(column); // will be Seg_x
 
-				int segment = Integer.valueOf(colName.replace("Seg_", ""));
 				
+				int segment;
+		        try {
+		        	segment = Integer.valueOf(colName.replace("Seg_", ""));
+		        } catch (Exception e){
+		        	programLogger.log(Level.FINEST, "Error getting segment name: "+colName);
+		        	segment = 0;
+		        }
+		        
 				colour = activeDataset().getSwatch().color(segment);
-//				colour = ColourSelecter.getOptimisedColor(segment);
+
 			}
 			
 			//Cells are by default rendered as a JLabel.
