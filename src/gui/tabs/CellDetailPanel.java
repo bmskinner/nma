@@ -209,6 +209,43 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	}
 	
 	
+	private void updateSegmentIndex(boolean start, int index, NucleusBorderSegment seg, Nucleus n, SegmentedProfile profile) throws Exception{
+		
+		int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
+		int newStart = start ? index : seg.getStartIndex();
+		int newEnd = start ? seg.getEndIndex() : index;
+		
+		int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
+
+						
+		if(profile.update(seg, newStart, newEnd)){
+			n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
+			
+			/* Check the border tags - if they overlap the old index
+			 * replace them. 
+			 */
+			int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
+			programLogger.log(Level.FINEST, "Testing border tags");
+			programLogger.log(Level.FINEST, "Updating to index "+index+" from reference point");
+			programLogger.log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
+			programLogger.log(Level.FINEST, "Raw new border point is index "+rawIndex);
+			
+			if(n.hasBorderTag(rawOldIndex)){						
+				BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
+				programLogger.log(Level.FINE, "Updating tag "+tagToUpdate);
+				n.setBorderTag(tagToUpdate, rawIndex);						
+			} else {
+				programLogger.log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
+//				programLogger.log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
+			}
+
+			updateCell(activeCell);
+		} else {
+			programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+		}
+	}
+	
+	
 	/**
 	 * Allows for cell background to be coloured based on position in a list. Used to colour
 	 * the signal stats list
@@ -466,17 +503,19 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 * Show the profile for the nuclei in the given cell
 	 *
 	 */
-	protected class ProfilePanel extends JPanel{
+	protected class ProfilePanel extends JPanel implements SignalChangeListener {
 		
 		private static final long serialVersionUID = 1L;
 		private DraggableOverlayChartPanel profileChartPanel; // holds the chart with the cell
 		
 		protected ProfilePanel(){
+
 			this.setLayout(new BorderLayout());
 			
 			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();	
 			
 			profileChartPanel = new DraggableOverlayChartPanel(chart, null); 
+			profileChartPanel.addSignalChangeListener(this);
 //			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); 
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
@@ -508,6 +547,32 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				profileChartPanel.setChart(chart);
 			}
 
+		}
+
+		@Override
+		public void signalChangeReceived(SignalChangeEvent event) {
+			if(event.type().contains("UpdateSegment")){
+
+				try{
+//					IJ.log("Updating segment");
+
+					String[] array = event.type().split("\\|");
+					String segName = array[1];
+					String index = array[2];
+					int indexValue = Integer.valueOf(index);
+
+					Nucleus n = activeCell.getNucleus();
+					SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+					NucleusBorderSegment seg = profile.getSegment(segName);
+
+					updateSegmentIndex(true, indexValue, seg, n, profile);
+				} catch(Exception e){
+					programLogger.log(Level.SEVERE, "Error updating segment", e);
+				}
+
+			}
+			
+			
 		}
 
 	}
@@ -976,44 +1041,44 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			} else if (option == JOptionPane.OK_OPTION)	{
 				
 				int index = (Integer) spinner.getModel().getValue();
-				
-				int newStart = start ? index : seg.getStartIndex();
-				int newEnd = start ? seg.getEndIndex() : index;
-				
-				int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
-	
-								
-				if(profile.update(seg, newStart, newEnd)){
-					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
-					
-					/* Check the border tags - if they overlap the old index
-					 * replace them. 
-					 */
-					int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
-					programLogger.log(Level.FINEST, "Testing border tags");
-					programLogger.log(Level.FINEST, "Updating to index "+index+" from reference point");
-					programLogger.log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
-					programLogger.log(Level.FINEST, "Raw new border point is index "+rawIndex);
-					
-					if(n.hasBorderTag(rawOldIndex)){						
-						BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
-						programLogger.log(Level.FINE, "Updating tag "+tagToUpdate);
-						n.setBorderTag(tagToUpdate, rawIndex);						
-					} else {
-						programLogger.log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
-//						programLogger.log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
-					}
-
-					updateCell(activeCell);
-				} else {
-					programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-				}
+				updateSegmentIndex(start, index, seg, n, profile);
+//				int newStart = start ? index : seg.getStartIndex();
+//				int newEnd = start ? seg.getEndIndex() : index;
+//				
+//				int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
+//	
+//								
+//				if(profile.update(seg, newStart, newEnd)){
+//					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
+//					
+//					/* Check the border tags - if they overlap the old index
+//					 * replace them. 
+//					 */
+//					int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
+//					programLogger.log(Level.FINEST, "Testing border tags");
+//					programLogger.log(Level.FINEST, "Updating to index "+index+" from reference point");
+//					programLogger.log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
+//					programLogger.log(Level.FINEST, "Raw new border point is index "+rawIndex);
+//					
+//					if(n.hasBorderTag(rawOldIndex)){						
+//						BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
+//						programLogger.log(Level.FINE, "Updating tag "+tagToUpdate);
+//						n.setBorderTag(tagToUpdate, rawIndex);						
+//					} else {
+//						programLogger.log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
+////						programLogger.log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
+//					}
+//
+//					updateCell(activeCell);
+//				} else {
+//					programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+//				}
 			}
 			
 			
 			return option;
 		}
-		
+				
 		protected void update(Cell cell){
 
 			if(cell==null){
