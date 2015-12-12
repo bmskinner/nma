@@ -40,8 +40,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	
 	private SegmentedProfile profile = null;
 	
-//	private Map<CrosshairOverlay, NucleusBorderSegment> lines = new HashMap<CrosshairOverlay, NucleusBorderSegment>(); // drwaing lines on the chart
-	private Map<Crosshair, NucleusBorderSegment> lines = new HashMap<Crosshair, NucleusBorderSegment>(); // drwaing lines on the chart
+	private Map<Color, NucleusBorderSegment> lines = new HashMap<Color, NucleusBorderSegment>(); // drawing lines on the chart
 	
 	
 	private CrosshairOverlay activeOverlay = null;
@@ -62,7 +61,6 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 		if(activeOverlay!=null){
 			this.removeOverlay(activeOverlay);
 		}
-//		this.activeCrosshair = null;
 	}
 	
 	private void updateOverlays(){
@@ -84,7 +82,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 					Crosshair xCrosshair = new Crosshair(Double.NaN, colour, ChartComponents.MARKER_STROKE);
 					xCrosshair.setLabelVisible(false);
 					xCrosshair.setValue(seg.getStartIndex());
-					lines.put(xCrosshair, seg);
+					lines.put(colour, seg);
 					
 					activeOverlay.addDomainCrosshair(xCrosshair);
 					
@@ -106,7 +104,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	public void setChart(JFreeChart chart, SegmentedProfile profile){
 		super.setChart(chart);
 		this.profile = profile;
-		IJ.log("Set chart   : Running :"+checkRunning()); 
+//		IJ.log("Set chart   : Running :"+checkRunning()); 
 		updateOverlays();
 		
 		
@@ -117,7 +115,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 
 	    	if(activeCrosshair!=null){
-	    		IJ.log("Mouse down : Running :"+checkRunning()); 
+//	    		IJ.log("Mouse down : Running :"+checkRunning()); 
 	    		mouseIsDown = true;
 	    		initThread();
 	    	}
@@ -127,22 +125,22 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	public void mouseReleased(MouseEvent e) {
 		
 		final int x = e.getX();
-		final int y = e.getY();
+//		final int y = e.getY();
 		
 	    if (e.getButton() == MouseEvent.BUTTON1) {
 	    	mouseIsDown = false;
-	    	IJ.log("Mouse up   : Running :"+checkRunning()); 
+//	    	IJ.log("Mouse up   : Running :"+checkRunning()); 
 //	    	isRunning = false;
 	    	/*
 	    	 * Get the location on the chart, and send a signal to update the profile
 	    	 */
 	    	
 	    	if(activeCrosshair!=null){
-	    		IJ.log("Mouse up on active crosshair");
+//	    		IJ.log("Mouse up on active crosshair");
 	    		
-	    		for(Crosshair c : lines.keySet()){
-	    			IJ.log(lines.get(c).toString());
-	    		}
+//	    		for(Crosshair c : lines.keySet()){
+//	    			IJ.log(lines.get(c).toString());
+//	    		}
 	    		
 	    		try {
 	    			Rectangle2D dataArea = getScreenDataArea();
@@ -152,10 +150,10 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	    			int xValue = (int) xAxis.java2DToValue(x, dataArea, 
 	    					RectangleEdge.BOTTOM);
 
-	    			NucleusBorderSegment seg = lines.get(activeCrosshair);
+	    			NucleusBorderSegment seg = lines.get(activeCrosshair.getPaint());
 
 	    			if(seg!=null){
-	    				IJ.log("UpdateSegment|"+seg.getName()+"|"+xValue);
+//	    				IJ.log("UpdateSegment|"+seg.getName()+"|"+xValue);
 	    				//	    			isRunning = false;
 	    				fireSignalChangeEvent("UpdateSegment|"+seg.getName()+"|"+xValue);
 	    			}
@@ -230,7 +228,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	    if (checkAndMark()) {
 	        new Thread() {
 	            public void run() {
-	            	IJ.log("Thread start : Running :"+checkRunning()); 
+//	            	IJ.log("Thread start : Running :"+checkRunning()); 
 	                do {
 	                	
 	                	/*
@@ -244,11 +242,11 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	                	
 	                } while (mouseIsDown);
 	                isRunning = false;
-	                IJ.log("Thread end : Running :"+checkRunning()); 
+//	                IJ.log("Thread end : Running :"+checkRunning()); 
 	            }
 	        }.start();
 	    } else {
-	    	IJ.log("Not starting thread");
+//	    	IJ.log("Not starting thread: Running is "+checkRunning());
 	    }
 	}
 	
@@ -266,8 +264,9 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 
 		boolean isOverLine = false;
 
+		List<Crosshair> crosshairs = activeOverlay.getDomainCrosshairs();
 		// only display a hand if the cursor is over the items
-		for(Crosshair c :  lines.keySet()){
+		for(Crosshair c : crosshairs ){
 
 
 			// Turn the chart coordinates into panel coordinates
@@ -284,9 +283,9 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 			if (bounds != null && bounds.contains(x, y)) {
 				isOverLine = true;
 				activeCrosshair = c;
-				if(c==null){
-					IJ.log("Error: c is null");
-				}
+//				if(c==null){
+//					IJ.log("Error: c is null");
+//				}
 			}
 		}
 		return isOverLine;
