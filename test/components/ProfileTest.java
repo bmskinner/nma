@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 
 import components.generic.Profile;
+import components.generic.SegmentedProfile;
 
 
 public class ProfileTest {
@@ -213,6 +214,16 @@ public class ProfileTest {
 //			System.out.println(output[i]+" should be "+expected[i]);
 			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
 		}
+		
+	}
+	
+	@Test
+	public void rodentProfileShouldGiveCorrectVertical(){
+		
+//		SegmentedProfile p = IndividualNuclei.rodentSpermMedianProfile();
+//		int[] i = p.getConsistentRegionBounds(180, 2, 5);
+//		System.out.println("Start: "+i[0]);
+//		System.out.println("End  : "+i[1]);
 		
 	}
 

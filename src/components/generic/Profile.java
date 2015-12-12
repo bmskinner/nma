@@ -532,6 +532,52 @@ public class Profile implements Serializable {
 	  return index;
   }
 
+  /**
+   * Detect regions with a consistent value in a profile
+   * @param value the profile value that is to be maintained
+   * @param tolerance the variation allow plus or minus
+   * @points the number of points the value must be sustained over
+   * @return the first and last index in the profile covering the detected region
+   */
+  public int[] getConsistentRegionBounds(double value, double tolerance, int points){
+
+	  int counter = 0;
+	  int start = -1;
+	  int end = -1;
+	  int[] result = {start, end};
+	  
+	  for(int index = 0; index<array.length; index++){ // go through each point TODO wrapping
+		  double d = array[index];
+		  if(d > value-tolerance && d < value+tolerance){ // if the point meets criteria
+			  
+			  if(start==-1){ // start a new region if needed
+				  counter = 0;
+				  start = index;
+			  }
+			  counter++; // start counting a new region or increase an existing region
+			  
+		  } else { // does not meet criteria
+			  
+			  end = index;
+			  
+			  if(counter>=points){ // if the region is large enough
+				  // return points
+				  result[0] = start; // use the saved start and end indexes
+				  result[1] = end;
+				  return result;
+				  
+			  } else { // otherwise, reset the counter 
+				  
+				  
+				  start=-1;
+				  end=-1;
+			  }
+			  
+			 
+		  }
+	  }
+	  return result;
+  }
 
   /*
     --------------------
