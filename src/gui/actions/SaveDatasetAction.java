@@ -49,12 +49,11 @@ public class SaveDatasetAction extends ProgressableAction {
 		File saveFile = null;
 		if(chooseSaveLocation){
 			
-			// TODO: replace with native java dialog, not IJ version
 			SaveDialog saveDialog = new SaveDialog("Save as...", dataset.getName(), ".nmd");
 
 			String fileName = saveDialog.getFileName();
 			String folderName = saveDialog.getDirectory();
-			if(!fileName.isEmpty() && !folderName.isEmpty()){
+			if(fileName!=null && folderName!=null){
 				saveFile = new File(folderName+File.separator+fileName);
 			}
 
