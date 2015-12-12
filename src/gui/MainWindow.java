@@ -35,45 +35,31 @@ import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
 import gui.actions.SplitCollectionAction;
 import gui.components.ColourSelecter.ColourSwatch;
-import gui.dialogs.FishRemappingDialog;
-import gui.dialogs.ManualCellCurator;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
 import gui.tabs.ClusterDetailPanel;
 import gui.tabs.DetailPanel;
 import gui.tabs.InterDatasetComparisonDetailPanel;
-import gui.tabs.KruskalDetailPanel;
 import gui.tabs.MergesDetailPanel;
 import gui.tabs.NuclearBoxplotsPanel;
 import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
-import gui.tabs.VennDetailPanel;
-import gui.tabs.WilcoxonDetailPanel;
 import ij.IJ;
-import ij.io.DirectoryChooser;
-import ij.io.SaveDialog;
-import io.PopulationExporter;
 import io.PopulationImporter;
-import io.StatsExporter;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -86,16 +72,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import jebl.evolution.graphs.Node;
-import jebl.evolution.taxa.Taxon;
-import jebl.evolution.trees.Tree;
 import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.nucleus.MorphologyAnalysis;
-import components.Cell;
-import components.CellCollection;
 import components.generic.BorderTag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
@@ -470,7 +451,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		boolean ok = true;
 		
 		if(version==null){ // allow for debugging, but warn
-			programLogger.log(Level.SEVERE, "No version info found: functions may not work as expected");
+			programLogger.log(Level.WARNING, "No version info found: functions may not work as expected");
 			return true;
 		}
 		
@@ -482,8 +463,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		// dataset revision should be equal or greater to program
 		if(Integer.valueOf(parts[1])<Constants.VERSION_REVISION){
-			programLogger.log(Level.SEVERE, "Dataset was created with an older version of the program");
-			programLogger.log(Level.SEVERE, "Some functionality may not work as expected");
+			programLogger.log(Level.WARNING, "Dataset was created with an older version of the program");
+			programLogger.log(Level.WARNING, "Some functionality may not work as expected");
 		}
 		return ok;
 	}
