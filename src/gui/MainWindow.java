@@ -239,8 +239,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			nuclearBoxplotsPanel  = new NuclearBoxplotsPanel(programLogger);
 			detailPanels.add(nuclearBoxplotsPanel);
-			nuclearBoxplotsPanel.addSignalChangeListener(this);
-			nuclearBoxplotsPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Nuclear charts", nuclearBoxplotsPanel);
 				
 			
@@ -249,8 +247,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			signalsDetailPanel  = new SignalsDetailPanel(programLogger);
 			detailPanels.add(signalsDetailPanel);
-			signalsDetailPanel.addSignalChangeListener(this);
-			signalsDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Signals", signalsDetailPanel);
 			
 
@@ -259,8 +255,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			clusterDetailPanel = new ClusterDetailPanel(programLogger);
 			detailPanels.add(clusterDetailPanel);
-			clusterDetailPanel.addSignalChangeListener(this);
-			clusterDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Clusters", clusterDetailPanel);
 			
 			//---------------
@@ -268,8 +262,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			mergesDetailPanel = new MergesDetailPanel(programLogger);
 			detailPanels.add(mergesDetailPanel);
-			mergesDetailPanel.addSignalChangeListener(this);
-			mergesDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Merges", mergesDetailPanel);
 
 			//---------------
@@ -277,8 +269,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			segmentsDetailPanel = new SegmentsDetailPanel(programLogger);
 			detailPanels.add(segmentsDetailPanel);
-			segmentsDetailPanel.addDatasetEventListener(this);
-			segmentsDetailPanel.addInterfaceEventListener(this);
 			tabbedPane.addTab("Segments", null, segmentsDetailPanel, null);
 
 			//---------------
@@ -286,22 +276,27 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			cellDetailPanel = new CellDetailPanel(programLogger);
 			detailPanels.add(cellDetailPanel);
-			cellDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
-			cellDetailPanel.addSignalChangeListener(this);
 			
 			//---------------
 			// Create the inter-dataset panel
 			//---------------
 			interdatasetDetailPanel = new InterDatasetComparisonDetailPanel(programLogger);
 			detailPanels.add(interdatasetDetailPanel);
-			interdatasetDetailPanel.addDatasetEventListener(this);
 			tabbedPane.addTab("Inter-dataset comparisons", null, interdatasetDetailPanel, null);
 			
 			
 			//---------------
 			// Register change listeners
 			//---------------
+			
+			for(DetailPanel d : detailPanels){
+				d.addDatasetEventListener(this);
+				d.addInterfaceEventListener(this);
+				d.addSignalChangeListener(this);
+			}
+			
+			
 			signalsDetailPanel.addSignalChangeListener(cellDetailPanel);
 			cellDetailPanel.addSignalChangeListener(signalsDetailPanel); // allow the panels to communicate colour updates
 			

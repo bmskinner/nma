@@ -19,6 +19,7 @@
 package gui.tabs;
 
 import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
@@ -240,6 +241,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			}
 
 			updateCell(activeCell);
+			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		} else {
 			programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
 		}
