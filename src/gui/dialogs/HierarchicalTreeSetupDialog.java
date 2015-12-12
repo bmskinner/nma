@@ -160,33 +160,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		return panel;
 	}
-	
-	protected JPanel createFooter(){
-
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		JButton okButton = new JButton("OK");
-		okButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				readyToRun = true;
-				setVisible(false);			
-			}
-		});
-
-		panel.add(okButton);
-
-		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				dispose();			
-			}
-		});
-		panel.add(cancelButton);
-		return panel;
-	}
-	
+		
 	protected void createGUI(){
 		
 		contentPanel.setLayout(new BorderLayout());

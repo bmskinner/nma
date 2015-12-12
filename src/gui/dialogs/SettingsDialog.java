@@ -23,17 +23,21 @@ import ij.IJ;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -80,6 +84,37 @@ public abstract class SettingsDialog extends JDialog {
 		super(owner, modal);
 		this.programLogger = programLogger;
 		this.setLocationRelativeTo(null);
+	}
+	
+	/**
+	 * Create the panel footer, with OK and Cancel option
+	 * buttons
+	 * @return
+	 */
+	protected JPanel createFooter(){
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		JButton okButton = new JButton("OK");
+		okButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				readyToRun = true;
+				setVisible(false);			
+			}
+		});
+
+		panel.add(okButton);
+
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				dispose();			
+			}
+		});
+		panel.add(cancelButton);
+		return panel;
 	}
 	
 	/**

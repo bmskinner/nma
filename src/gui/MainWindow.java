@@ -25,6 +25,7 @@ import gui.actions.AddTailStainAction;
 import gui.actions.BuildHierarchicalTreeAction;
 import gui.actions.ClusterAnalysisAction;
 import gui.actions.CurateCollectionAction;
+import gui.actions.DatasetArithmeticAction;
 import gui.actions.FishRemappingAction;
 import gui.actions.MergeCollectionAction;
 import gui.actions.MorphologyAnalysisAction;
@@ -640,7 +641,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		
 		if(event.type().equals("SplitCollectionAction")){
-			new SplitCollectionAction(selectedDataset, MainWindow.this);
+			new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this);
 		}
 		
 		if(event.type().equals("SaveCollectionAction")){
