@@ -48,25 +48,29 @@ public class SaveDatasetAction extends ProgressableAction {
 		
 		File saveFile = null;
 		if(chooseSaveLocation){
-			SaveDialog saveDialog = new SaveDialog("Save as...", dataset.getName(), ".nmd");
 			
+			// TODO: replace with native java dialog, not IJ version
+			SaveDialog saveDialog = new SaveDialog("Save as...", dataset.getName(), ".nmd");
+
 			String fileName = saveDialog.getFileName();
 			String folderName = saveDialog.getDirectory();
 			if(!fileName.isEmpty() && !folderName.isEmpty()){
 				saveFile = new File(folderName+File.separator+fileName);
-			} else {
-				cancel();
-				this.finished();
 			}
 
 		} else {
 			saveFile = dataset.getSavePath();
 		}
-		log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
-		worker = new PopulationExporter(dataset, saveFile, programLogger);
-		worker.addPropertyChangeListener(this);
-		worker.execute();	
-		log(Level.FINE, "Save dataset action created");
+		
+		if(saveFile!=null){
+			log(Level.INFO, "Saving as "+saveFile.getAbsolutePath()+"...");
+			worker = new PopulationExporter(dataset, saveFile, programLogger);
+			worker.addPropertyChangeListener(this);
+			worker.execute();	
+			log(Level.FINE, "Save dataset action created");
+		} else {
+			this.finished();
+		}
 		
 	}
 	
