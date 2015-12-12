@@ -93,7 +93,7 @@ public class MorphologyChartFactory {
 	}
 	
 	/**
-	 * Make a profle chart for a nucleus, and annotate the border points
+	 * Make a profile chart for a single nucleus
 	 * @param ds
 	 * @param n
 	 * @return
@@ -101,20 +101,20 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeIndividualNucleusProfileChart(XYDataset ds, Nucleus n, ColourSwatch swatch){
 		JFreeChart chart = makeProfileChart(ds, n.getLength(), swatch);
 
-		XYPlot plot = chart.getXYPlot();
+//		XYPlot plot = chart.getXYPlot();
 
-		for(BorderTag tag : n.getBorderTags().keySet()){
-			Color colour = Color.BLACK;
-			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
-
-			if(tag.equals(BorderTag.ORIENTATION_POINT)){
-				colour = Color.BLUE;
-			}
-			if(tag.equals(BorderTag.REFERENCE_POINT)){
-				colour = Color.ORANGE;
-			}
-			plot.addDomainMarker(new ValueMarker(index, colour, ChartComponents.MARKER_STROKE));	
-		}
+//		for(BorderTag tag : n.getBorderTags().keySet()){
+//			Color colour = Color.BLACK;
+//			int index = Utils.wrapIndex(n.getBorderIndex(tag)- n.getBorderIndex(BorderTag.REFERENCE_POINT), n.getLength());
+//
+//			if(tag.equals(BorderTag.ORIENTATION_POINT)){
+//				colour = Color.BLUE;
+//			}
+//			if(tag.equals(BorderTag.REFERENCE_POINT)){
+//				colour = Color.ORANGE;
+//			}
+//			plot.addDomainMarker(new ValueMarker(index, colour, ChartComponents.MARKER_STROKE));	
+//		}
 		return chart;
 	}
 		
