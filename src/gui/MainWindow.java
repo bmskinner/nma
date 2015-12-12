@@ -597,42 +597,42 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		thr.start();
 	}
 
-	class ExportDatasetStatsAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public ExportDatasetStatsAction() {
-			super("Export stats");
-		}
-		// note - this will overwrite the stats for any collection with the same name in the output folder
-		public void actionPerformed(ActionEvent e) {
-
-			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-
-			if(datasets.size()==1){
-
-				Thread thr = new Thread() {
-					public void run() {
-
-						AnalysisDataset d = datasets.get(0);
-						try{
-
-							programLogger.log(Level.INFO, "Exporting stats...");
-							boolean ok = StatsExporter.run(d);
-							if(ok){
-								programLogger.log(Level.INFO, "OK");
-							} else {
-								programLogger.log(Level.INFO, "Error");
-							}
-						} catch(Exception e1){
-							programLogger.log(Level.SEVERE, "Error in stats export", e1);
-						}
-					}
-				};
-				thr.run();
-			}
-
-		}
-	}
+//	class ExportDatasetStatsAction extends AbstractAction {
+//
+//		private static final long serialVersionUID = 1L;
+//		public ExportDatasetStatsAction() {
+//			super("Export stats");
+//		}
+//		// note - this will overwrite the stats for any collection with the same name in the output folder
+//		public void actionPerformed(ActionEvent e) {
+//
+//			final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
+//
+//			if(datasets.size()==1){
+//
+//				Thread thr = new Thread() {
+//					public void run() {
+//
+//						AnalysisDataset d = datasets.get(0);
+//						try{
+//
+//							programLogger.log(Level.INFO, "Exporting stats...");
+//							boolean ok = StatsExporter.run(d);
+//							if(ok){
+//								programLogger.log(Level.INFO, "OK");
+//							} else {
+//								programLogger.log(Level.INFO, "Error");
+//							}
+//						} catch(Exception e1){
+//							programLogger.log(Level.SEVERE, "Error in stats export", e1);
+//						}
+//					}
+//				};
+//				thr.run();
+//			}
+//
+//		}
+//	}
 			
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
@@ -682,7 +682,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		}
 		
 		if(event.type().equals("ExportDatasetStatsAction")){
-			new ExportDatasetStatsAction();
+			//TODO: Replace this with more robust action
+//			new ExportDatasetStatsAction();
+			programLogger.log(Level.WARNING, "Function disabled");
 		}
 		
 		if(event.type().equals("ReapplySegmentProfileAction")){
