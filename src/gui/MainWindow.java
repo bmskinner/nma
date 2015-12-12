@@ -29,6 +29,7 @@ import gui.actions.FishRemappingAction;
 import gui.actions.MergeCollectionAction;
 import gui.actions.MorphologyAnalysisAction;
 import gui.actions.RefoldNucleusAction;
+import gui.actions.ReplaceSourceImageDirectoryAction;
 import gui.actions.NewAnalysisAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
@@ -595,45 +596,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		};
 		thr.start();
 	}
-										
-	class ReplaceNucleusFolderAction extends AbstractAction {
-
-		private static final long serialVersionUID = 1L;
-		public ReplaceNucleusFolderAction() {
-			super("Change folder");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-
-			DirectoryChooser localOpenDialog = new DirectoryChooser("Select new directory of images...");
-			String folderName = localOpenDialog.getDirectory();
-
-			if(folderName!=null) { 
-				
-				
-
-				File newFolder = new File(folderName);
-
-				final List<AnalysisDataset> datasets = populationsPanel.getSelectedDatasets();
-
-				if(datasets.size()==1){
-					programLogger.log(Level.INFO, "Updating folder to "+folderName );
-
-					AnalysisDataset d = datasets.get(0);
-					for(Nucleus n : d.getCollection().getNuclei()){
-						try{
-							n.updateSourceFolder(newFolder);
-						} catch(Exception e1){
-							programLogger.log(Level.SEVERE, "Error renaming nucleus: "+e1.getMessage(), e);
-						}
-					}
-					programLogger.log(Level.INFO, "Folder updated");
-				}
-				
-			}
-
-		}
-	}
 
 	class ExportDatasetStatsAction extends AbstractAction {
 
@@ -716,7 +678,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 		
 		if(event.type().equals("ChangeNucleusFolderAction")){
-			new ReplaceNucleusFolderAction();
+			new ReplaceSourceImageDirectoryAction(selectedDataset, MainWindow.this);
 		}
 		
 		if(event.type().equals("ExportDatasetStatsAction")){
