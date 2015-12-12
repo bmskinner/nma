@@ -25,6 +25,7 @@ import gui.actions.AddTailStainAction;
 import gui.actions.BuildHierarchicalTreeAction;
 import gui.actions.ClusterAnalysisAction;
 import gui.actions.CurateCollectionAction;
+import gui.actions.FishRemappingAction;
 import gui.actions.MergeCollectionAction;
 import gui.actions.MorphologyAnalysisAction;
 import gui.actions.RefoldNucleusAction;
@@ -384,7 +385,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		btnPostanalysisMapping.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				fishMapping();
+//				fishMapping();
+				new FishRemappingAction(populationsPanel.getSelectedDatasets(), MainWindow.this);
 			}
 		});
 		panelHeader.add(btnPostanalysisMapping);
@@ -498,56 +500,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public void setStatus(String message){
 		lblStatusLine.setText(message);
 	}
-	
-	
-	/**
-	 * Compare morphology images with post-FISH images, and select nuclei into new
-	 * sub-populations
-	 */
-	public void fishMapping(){
-
-		try{
-
-			List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
-			if(list.size()==1){
-				final AnalysisDataset dataset = list.get(0);
-				
-				FishRemappingDialog fishMapper = new FishRemappingDialog(MainWindow.this, dataset, programLogger);
-
-				if(fishMapper.getOK()){
-					programLogger.log(Level.INFO, "Fetching collections...");
-					List<CellCollection> subs = fishMapper.getSubCollections();
-
-					final List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
-					for(CellCollection sub : subs){
-
-						if(sub.getNucleusCount()>0){
-
-							dataset.addChildCollection(sub);
-
-							AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
-							newList.add(subDataset);
-						}
-					}
-
-					SwingUtilities.invokeLater(new Runnable(){
-						public void run(){
-							programLogger.log(Level.INFO, "Reapplying morphology...");
-							new MorphologyAnalysisAction(newList, dataset, ADD_POPULATION, MainWindow.this);
-
-						}});
-
-				} else {
-					programLogger.log(Level.INFO, "Remapping cancelled");
-				}
-				
-			}
-
-		} catch(Exception e){
-			programLogger.log(Level.SEVERE, "Error in FISH remapping: "+e.getMessage(), e);
-		}
-	}
-	
+		
 			
 	/**
 	 * Call an open dialog to choose a saved .nbd dataset. The opened dataset
