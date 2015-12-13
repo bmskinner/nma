@@ -54,6 +54,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
+import components.nuclei.RoundNucleus;
 import gui.components.ColourSelecter.ColourSwatch;
 
 /**
@@ -1042,10 +1043,25 @@ public class CellCollection implements Serializable {
 	  			result = this.getBoundingRectangleDimension(true, scale);
 	  			break;
 	  		}
+	  		case OP_RP_ANGLE:
+				result = this.getReferenceAngles(scale);
+			
 
 	  }
 	  return result;
   }
+  
+  public double[] getReferenceAngles(MeasurementScale scale) throws Exception{
+	  List<Double> list = new ArrayList<Double>();
+
+	  for(Nucleus n : this.getNuclei()){
+
+			  list.add(n.getStatistic(NucleusStatistic.OP_RP_ANGLE, scale));
+
+	  }
+	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
+  }
+  
 
   /**
    * Calculate the widths of the bounding rectangles for each nucleus

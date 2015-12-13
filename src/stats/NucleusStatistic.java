@@ -34,7 +34,8 @@ import components.generic.MeasurementScale;
 	  CIRCULARITY("Circularity", StatisticDimension.DIMENSIONLESS),
 	  VARIABILITY("Variability", StatisticDimension.DIMENSIONLESS), 
 	  BOUNDING_HEIGHT ("Bounding height", StatisticDimension.LENGTH), 
-	  BOUNDING_WIDTH ("Bounding width", StatisticDimension.LENGTH);
+	  BOUNDING_WIDTH ("Bounding width", StatisticDimension.LENGTH),
+	  OP_RP_ANGLE ("Angle between reference points", StatisticDimension.ANGLE);
 
 	  private String name;
 	  private StatisticDimension dimension;

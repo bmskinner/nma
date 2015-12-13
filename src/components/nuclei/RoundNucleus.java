@@ -422,6 +422,8 @@ public class RoundNucleus
 			case BOUNDING_WIDTH:
 				result = this.getBoundingRectangle(BorderTag.ORIENTATION_POINT).getWidth();
 				break;
+			case OP_RP_ANGLE:
+				result = RoundNucleus.findAngleBetweenXYPoints(this.getBorderTag(BorderTag.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTag.ORIENTATION_POINT));
 			default:
 				break;
 		
@@ -439,7 +441,7 @@ public class RoundNucleus
 		return result;
 		
 	}
-	
+		
 	/**
 	 * Get the cached bounding rectangle for the nucleus. If not present,
 	 * the rectangle is calculated and stored

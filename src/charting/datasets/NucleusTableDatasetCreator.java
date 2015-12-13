@@ -733,7 +733,11 @@ public class NucleusTableDatasetCreator {
 					dataList.add(op.getModalityRegions());
 					dataList.add(op.isIncludeProfile());
 					for(NucleusStatistic stat : NucleusStatistic.values()){
-						dataList.add(op.isIncludeStatistic(stat));
+						try{
+							dataList.add(op.isIncludeStatistic(stat));
+						} catch(NullPointerException e){
+							dataList.add("N/A");
+						}
 					}
 					dataList.add(tree);
 					
