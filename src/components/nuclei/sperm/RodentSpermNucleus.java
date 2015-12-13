@@ -229,7 +229,7 @@ extends SpermNucleus
      * Call to a StraightPointFinder that will find the straight part of the nucleus
      * Use this to set the BorderTag.TopVertical and BottomVertical
      */
-    int[] verticalPoints = this.getAngleProfile().getConsistentRegionBounds(180, 2, 10);
+    int[] verticalPoints = this.getAngleProfile().getConsistentRegionBounds(180, 4, 10);
     if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
     	//TODO check which is closer to the tip
     	

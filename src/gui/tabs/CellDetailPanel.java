@@ -234,7 +234,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			if(n.hasBorderTag(rawOldIndex)){						
 				BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
 				programLogger.log(Level.FINE, "Updating tag "+tagToUpdate);
-				n.setBorderTag(tagToUpdate, rawIndex);						
+				n.setBorderTag(tagToUpdate, rawIndex);	
+				
+				// Update intersection point if needed
+				if(tagToUpdate.equals(BorderTag.ORIENTATION_POINT)){
+					n.setBorderTag(BorderTag.INTERSECTION_POINT, n.getIndex(n.findOppositeBorder(n.getBorderTag(BorderTag.ORIENTATION_POINT))));
+				}
+				
 			} else {
 				programLogger.log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
 //				programLogger.log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));

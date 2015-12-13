@@ -500,6 +500,12 @@ public interface Nucleus {
 
 	public double getAngle(int index);
 
+	
+	/**
+	 * Get the index of the given point in the border list
+	 * @param p
+	 * @return
+	 */
 	public int getIndex(NucleusBorderPoint p);
 
 	public double getDistance(int index);
@@ -546,6 +552,13 @@ public interface Nucleus {
 	 */
 	public BorderTag getBorderTag(int index);
 
+	
+	/**
+	 * Get a copy of the border point at the given tag
+	 * @param tag
+	 * @return
+	 */
+	public NucleusBorderPoint getBorderTag(BorderTag tag);
 	
 	/**
 	 * Check if the nucleus has the given border tag
@@ -596,7 +609,7 @@ public interface Nucleus {
 	 * @param angleProfileWindowSize the window size
 	 * @throws Exception 
 	 */
-	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception;
+	public SegmentedProfile calculateAngleProfile(int angleProfileWindowSize) throws Exception;
 	
 	
 	/**

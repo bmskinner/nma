@@ -250,7 +250,8 @@ public class RoundNucleus
 
 
 		// calculate angle profile
-		this.calculateAngleProfile(angleProfileWindowSize);
+		this.setAngleProfile(this.calculateAngleProfile(angleProfileWindowSize));
+		this.setAngleProfileWindowSize(angleProfileWindowSize);
 
 		// calc distances around nucleus through CoM
 		this.calculateDistanceProfile();
@@ -1268,7 +1269,7 @@ public class RoundNucleus
 		this.singleDistanceProfile = new Profile(profile);
 	}
 
-	public void calculateAngleProfile(int angleProfileWindowSize) throws Exception{
+	public SegmentedProfile calculateAngleProfile(int angleProfileWindowSize) throws Exception{
 
 		List<NucleusBorderSegment> segments = null;
 		// store segments to reapply later
@@ -1311,8 +1312,9 @@ public class RoundNucleus
 		if(segments!=null){
 			newProfile.setSegments(segments);
 		}
-		this.setAngleProfile( newProfile  );
-		this.setAngleProfileWindowSize(angleProfileWindowSize);
+		return newProfile;
+//		this.setAngleProfile( newProfile  );
+//		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}
 
 
