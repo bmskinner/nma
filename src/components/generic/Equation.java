@@ -1,4 +1,7 @@
 package components.generic;
+
+import ij.IJ;
+
 /*******************************************************************************
  *  	Copyright (C) 2015 Ben Skinner
  *   
@@ -86,6 +89,14 @@ public class Equation{
 	public double getY(double x){
 		return (this.m * x) + this.c;
 	}
+	
+	public double getM(){
+		return this.m;
+	}
+	
+	public double getC(){
+		return this.c;
+	}
 
 	/**
 	*	Returns a point a given distance away from a given point
@@ -153,13 +164,54 @@ public class Equation{
 		return new Equation(this.m, newC);
 
 	}
+	
+	/**
+	 * Find the intercept between this equation and another
+	 * @param eq
+	 * @return
+	 */
+	public XYPoint getIntercept(Equation eq){
+		// (this.m * x) + this.c = (eq.m * x) + eq.c
+		
+		// (this.m * x) - (eq.m * x) + this.c = eq.c
+		// (this.m * x) - (eq.m * x)  = eq.c - this.c
+		// (this.m -eq.m) * x  = eq.c - this.c
+		// x  = (eq.c - this.c) / (this.m -eq.m)
+		
+		double x = (eq.getC() - this.c) / (this.m - eq.getM());
+		double y = this.getY(x);
+		return new XYPoint(x, y);
+	}
+	
+	
+	/**
+	 * Find the smallest distance from a given point to the line
+	 * @param p
+	 * @return
+	 */
+	public double getClosestDistanceToPoint(XYPoint p){
+		
+		// translate the equation to p
+		Equation tr = this.translate(p);
+		
+		// get the orthogonal line, which will intersect the original equation
+		Equation orth = tr.getPerpendicular(p);
+		
+		// find the point of intercept
+		XYPoint intercept = this.getIntercept(orth);
+//		IJ.log("Intercept: "+intercept.toString());
+		
+		// measure the distance between p and the intercept
+		double distance = p.getLengthTo(intercept);
+		return distance;
+	}
 
 	/**
 	* Returns the equation as a string as y=mx+c
 	*
 	* @return The Equation of the line
 	*/ 
-	public String print(){
+	public String toString(){
 		return "y="+m+".x+"+c;
 	}
 

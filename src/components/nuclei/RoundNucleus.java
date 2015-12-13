@@ -475,7 +475,10 @@ public class RoundNucleus
 		ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
 
 		if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-			testw.alignPointsOnVertical(this.getBorderTag(BorderTag.TOP_VERTICAL), this.getBorderTag(BorderTag.BOTTOM_VERTICAL));
+			
+			NucleusBorderPoint[] points = getBorderPointsForVerticalAlignment();
+
+			testw.alignPointsOnVertical(points[0], points[1] );
 			
 		} else {
 			testw.rotatePointToBottom(testw.getBorderTag(point));
@@ -484,6 +487,68 @@ public class RoundNucleus
 		
 		FloatPolygon pw = Utils.createPolygon(testw);
 		return pw.getBounds();
+	}
+	
+	public NucleusBorderPoint[] getBorderPointsForVerticalAlignment(){
+		NucleusBorderPoint topPoint =  this.getBorderTag(BorderTag.TOP_VERTICAL);
+		NucleusBorderPoint bottomPoint =this.getBorderTag(BorderTag.BOTTOM_VERTICAL);
+		
+		// Find the best line across the region
+//		Profile region = this.getAngleProfile().getSubregion(this.getBorderIndex(BorderTag.TOP_VERTICAL), this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
+		
+		List<NucleusBorderPoint> pointsInRegion = new ArrayList<NucleusBorderPoint>();
+		int startIndex = Math.min(this.getBorderIndex(BorderTag.TOP_VERTICAL),  this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
+		int endIndex = Math.max(this.getBorderIndex(BorderTag.TOP_VERTICAL),  this.getBorderIndex(BorderTag.BOTTOM_VERTICAL));
+		for(int index = startIndex; index < endIndex; index++ ){
+			pointsInRegion.add(this.getBorderPoint(index));
+		}
+		
+		// Make an equation covering the region
+		Equation eq = new Equation(topPoint, bottomPoint);
+		IJ.log("Equation: "+eq.toString());
+		// Find the orthogonal
+		Equation bottomOrth = eq.getPerpendicular(bottomPoint);
+		Equation topOrth = eq.getPerpendicular(topPoint);
+		IJ.log("Bottom: "+bottomOrth.toString());
+		IJ.log("Top:    "+topOrth.toString());
+		
+		double minScore = Double.MAX_VALUE;
+		// With variation about the orthogonal, test sum-of-squares
+		// Make new points to align at based on best fit to the region
+		for(int i=-10; i<10;i++){
+			// change the posiiton of the top point
+			XYPoint iPoint = topOrth.getPointOnLine(topPoint, i);
+			
+			for(int j=-10; j<10;j++){
+				// change the posiiton of the bottom point
+				XYPoint jPoint = bottomOrth.getPointOnLine(bottomPoint, j);
+				
+				// make a new equation for the line
+				Equation newLine = new Equation(iPoint, jPoint);
+				
+				// Check the fit of the line aginst the profile region
+				// Build a line from the border points in the region
+				// Test each point's distance to the equation line
+				double score = 0;
+				for(XYPoint p : pointsInRegion){
+					score += Math.pow(newLine.getClosestDistanceToPoint(p), 2);
+				}
+				IJ.log("i="+i+" : j="+j+" : Score: "+score);
+				if(score<minScore){
+					minScore = score;
+					topPoint = new NucleusBorderPoint(iPoint);
+					bottomPoint = new NucleusBorderPoint(jPoint);
+				}
+				
+			}
+			 
+			
+		}
+		
+		IJ.log("Final score: "+minScore);
+		IJ.log(topPoint.toString());
+		IJ.log(bottomPoint.toString());
+		return new NucleusBorderPoint[] {topPoint, bottomPoint};
 	}
 	
 	

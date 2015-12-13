@@ -199,6 +199,13 @@ public interface Nucleus {
 	 */
 	public Rectangle getBoundingRectangle(BorderTag point) throws Exception;
 	
+	
+	/**
+	 * Get the vertical points for alignment
+	 * @return
+	 */
+	public NucleusBorderPoint[] getBorderPointsForVerticalAlignment();
+	
 	/**
 	 * Get a copy of the border point mapped to the given tag
 	 * @param tag

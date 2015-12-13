@@ -20,6 +20,8 @@
 
 package components.nuclear;
 
+import components.generic.XYPoint;
+
 /**
  *  This class contains border points around the periphery of a nucleus.
  *	Mostly the same as an XYPoint now, after creation of Profiles. It does
@@ -39,6 +41,10 @@ public class NucleusBorderPoint
 		super(x, y);
 	}
 
+	public NucleusBorderPoint( XYPoint p){
+		super(p);
+	}
+	
 	public NucleusBorderPoint( NucleusBorderPoint p){
 		super(p.getX(), p.getY());
 	}

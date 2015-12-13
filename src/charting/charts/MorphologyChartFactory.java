@@ -35,6 +35,7 @@ import java.util.Map;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.LogarithmicAxis;
@@ -72,6 +73,7 @@ import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.generic.ProfileCollection;
 import components.generic.ProfileCollectionType;
+import components.nuclear.NucleusBorderPoint;
 import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory {
@@ -702,7 +704,14 @@ public class MorphologyChartFactory {
 					int colourIndex = getIndexFromLabel(name);
 					
 					plot.getRenderer().setSeriesPaint(i, dataset.getSwatch().color(colourIndex));
-//					plot.getRenderer().setSeriesPaint(i, ColourSelecter.getOptimisedColor(colourIndex));
+					
+					NucleusBorderPoint[] verticals = cell.getNucleus().getBorderPointsForVerticalAlignment();
+					plot.addAnnotation(new XYLineAnnotation(verticals[0].getX(),
+							verticals[0].getY(),
+							verticals[1].getX(),
+							verticals[1].getY()
+							));
+
 				}
 				
 				
