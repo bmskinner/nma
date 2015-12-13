@@ -37,6 +37,7 @@ import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileCollectionType;
 import components.generic.SegmentedProfile;
+import components.generic.XYPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
@@ -637,10 +638,19 @@ public class MorphologyAnalysis extends AnalysisWorker {
 				}
 
 				collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+				
+				 /*
+			     * Call to a StraightPointFinder that will find the straight part of the nucleus
+			     * Use this to set the BorderTag.TopVertical and BottomVertical
+			     */
+			    int[] verticalPoints = medianProfile.getConsistentRegionBounds(180, 2, 10);
+			    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
+			    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.TOP_VERTICAL, verticalPoints[0]);
+			    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
+			    }
 
 			} catch(Exception e){
 				logError("Error finding tail", e);
-//				fileLogger.log(Level.SEVERE, "Error finding tail", e);
 			}
 		}
 
@@ -822,6 +832,36 @@ public class MorphologyAnalysis extends AnalysisWorker {
 					int headIndex = nucleus.getIndex(nucleus.findOppositeBorder( nucleus.getPoint(newTailIndex) ));
 					nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
 					nucleus.splitNucleusToHeadAndHump();
+					
+					// Set the top vertical and bottom vertical points
+					
+					/*
+				     * Call to a StraightPointFinder that will find the straight part of the nucleus
+				     * Use this to set the BorderTag.TopVertical and BottomVertical
+				     */
+					Profile verticalTopMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.TOP_VERTICAL, 50); // returns a median profile
+					int newIndexOne = nucleus.getAngleProfile().getSlidingWindowOffset(verticalTopMedian);
+					
+					Profile verticalBottomMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.BOTTOM_VERTICAL, 50); // returns a median profile
+					int newIndexTwo = nucleus.getAngleProfile().getSlidingWindowOffset(verticalBottomMedian);
+					
+					
+					XYPoint p0 = nucleus.getBorderPoint(newIndexOne);
+			    	XYPoint p1 = nucleus.getBorderPoint(newIndexTwo);
+			    	
+			    	if(p0.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT))> p1.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT)) ){
+			    		
+			    		// P0 is further from the reference point than p1
+			    		
+			    		nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexTwo);
+						nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexOne);
+			    		
+			    	} else {
+			    		
+			    		nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexOne);
+						nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexTwo);
+			    		
+			    	}
 				}
 			}catch(Exception e){
 				logError("Error calculating offsets", e);

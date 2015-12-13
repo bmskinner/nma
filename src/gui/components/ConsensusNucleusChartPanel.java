@@ -50,7 +50,7 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		JMenuItem alignItem = new JMenuItem("Align vertical");
 		alignItem.addActionListener(this);
 		alignItem.setActionCommand("AlignVertical");
-		alignItem.setEnabled(false);
+		alignItem.setEnabled(true);
 		
 		JMenuItem rotateItem = new JMenuItem("Rotate by...");
 		rotateItem.addActionListener(this);
@@ -213,9 +213,6 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		if(arg0.getActionCommand().equals("AlignVertical")){
 			
 			fireSignalChangeEvent("AlignVertical");
-			// select points, do rotation
-			// wait for click, get point nearest, wait for click, get point nearest
-			// run rotation
 		}
 		
 		// Rotate the consensus in the chart by the given amount

@@ -45,6 +45,7 @@ import components.nuclear.NucleusType;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
+import ij.IJ;
 
 
 public class CurveRefolder extends AnalysisWorker {
@@ -143,7 +144,17 @@ public class CurveRefolder extends AnalysisWorker {
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// orient refolded nucleus to put tail at the bottom
-			refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
+			
+			if(refoldNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && refoldNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+				log(Level.FINER, "Calculating rotation angle via TopVertical");
+				refoldNucleus.alignPointsOnVertical(refoldNucleus.getBorderTag(BorderTag.TOP_VERTICAL), refoldNucleus.getBorderTag(BorderTag.BOTTOM_VERTICAL));
+				
+			} else {
+				log(Level.FINER, "Calculating rotation angle via OrientationPoint");
+				refoldNucleus.rotatePointToBottom(refoldNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
+
+			}
+			
 
 			// if rodent sperm, put tip on left if needed
 			if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){

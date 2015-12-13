@@ -224,32 +224,6 @@ extends SpermNucleus
     setBorderTag(BorderTag.ORIENTATION_POINT, consensusTailIndex);
 
     setBorderTag(BorderTag.INTERSECTION_POINT, this.getIndex(this.findOppositeBorder(consensusTail)));
-    
-    /*
-     * Call to a StraightPointFinder that will find the straight part of the nucleus
-     * Use this to set the BorderTag.TopVertical and BottomVertical
-     */
-    int[] verticalPoints = this.getAngleProfile().getConsistentRegionBounds(180, 4, 10);
-    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
-    	//TODO check which is closer to the tip
-    	
-    	XYPoint p0 = getBorderPoint(verticalPoints[0]);
-    	XYPoint p1 = getBorderPoint(verticalPoints[1]);
-    	
-    	if(p0.getLengthTo(getBorderTag(BorderTag.REFERENCE_POINT))> p1.getLengthTo(getBorderTag(BorderTag.REFERENCE_POINT)) ){
-    		
-    		// p1 is closer to the reference point
-    		setBorderTag(BorderTag.TOP_VERTICAL, verticalPoints[1]);
-        	setBorderTag(BorderTag.BOTTOM_VERTICAL, verticalPoints[0]);
-    		
-    	} else {
-    		
-    		// p0 is closer to the reference point
-    		setBorderTag(BorderTag.TOP_VERTICAL, verticalPoints[0]);
-        	setBorderTag(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
-    		
-    	}
-    }
   }
 
  

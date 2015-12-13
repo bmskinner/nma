@@ -464,14 +464,24 @@ public class RoundNucleus
 	}
 	
 	/**
-	 * Find the bounding rectangle of the Nucleus from the given orientation
+	 * Find the bounding rectangle of the Nucleus. If the TopVertical and
+	 * BottomVertical points have been set, these will be used. Otherwise,
+	 * the given point is moved to directly below the CoM
 	 * @param point
 	 * @return
 	 * @throws Exception
 	 */
 	protected Rectangle calculateBoundingRectangle(BorderTag point) throws Exception{
 		ConsensusNucleus testw = new ConsensusNucleus( this, NucleusType.ROUND);
-		testw.rotatePointToBottom(testw.getBorderTag(point));
+
+		if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+			testw.alignPointsOnVertical(this.getBorderTag(BorderTag.TOP_VERTICAL), this.getBorderTag(BorderTag.BOTTOM_VERTICAL));
+			
+		} else {
+			testw.rotatePointToBottom(testw.getBorderTag(point));
+		}
+
+		
 		FloatPolygon pw = Utils.createPolygon(testw);
 		return pw.getBounds();
 	}
@@ -1006,10 +1016,23 @@ public class RoundNucleus
 	*/
 	
 	public double findRotationAngle(){
-		XYPoint end = new XYPoint(this.getBorderTag(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getBorderTag(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
+		
+		double angle;
+		if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+			IJ.log("Calculating rotation angle via TopVertical");
+			XYPoint end = new XYPoint(this.getBorderTag(BorderTag.BOTTOM_VERTICAL).getXAsInt(),this.getBorderTag(BorderTag.BOTTOM_VERTICAL).getYAsInt()-50);
+			angle = findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.BOTTOM_VERTICAL), this.getBorderTag(BorderTag.TOP_VERTICAL));
 
-	    double angle = findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
+			
+		} else {
+			IJ.log("Calculating rotation angle via OrientationPoint");
+			// Make a point directly below the orientation point
+			XYPoint end = new XYPoint(this.getBorderTag(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getBorderTag(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
 
+		    angle = findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.ORIENTATION_POINT), this.getCentreOfMass());
+
+		}
+		
 	    if(this.getCentreOfMass().getX() < this.getBorderTag(BorderTag.ORIENTATION_POINT).getX()){
 	      return angle;
 	    } else {

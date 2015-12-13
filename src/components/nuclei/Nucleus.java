@@ -478,8 +478,10 @@ public interface Nucleus {
 	 */
 
 	/**
-	 * Calculate the angle that the nucleus must be rotated by to place
-	 * the orientation point directly below the centre of mass
+	 * Calculate the angle that the nucleus must be rotated by. 
+	 * If the BorderTags TOP_VERTICAL and BOTTOM_VERTICAL have been set, 
+	 * the angle will align these points on the y-axis. Otherwise, the angle will
+	 * place the orientation point directly below the centre of mass.
 	 * @return
 	 */
 	public double findRotationAngle();

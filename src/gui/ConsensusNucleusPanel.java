@@ -48,6 +48,7 @@ import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.XYPoint;
 import components.nuclear.NucleusBorderPoint;
+import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
 public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeListener {
@@ -432,6 +433,28 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 					}
 				} else {
 					programLogger.log(Level.WARNING, "Cannot rotate: must have one dataset selected");
+				}
+			}
+			
+			if(event.type().equals("AlignVertical")){
+				if(activeDataset!=null){
+
+					if(activeDataset.getCollection().hasConsensusNucleus()){
+						ConsensusNucleus nucleus = activeDataset.getCollection().getConsensusNucleus();
+						if(nucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+							nucleus.alignPointsOnVertical(nucleus.getBorderTag(BorderTag.TOP_VERTICAL), nucleus.getBorderTag(BorderTag.BOTTOM_VERTICAL));
+							List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+							list.add(activeDataset);
+							this.update(list);
+						} else {
+							programLogger.log(Level.WARNING, "Top and bottom vertical points are not available");
+						}
+						
+					} else {
+						programLogger.log(Level.WARNING, "No consensus nucleus available");
+					}
+				} else {
+					programLogger.log(Level.WARNING, "Cannot align: must have one dataset selected");
 				}
 			}
 			
