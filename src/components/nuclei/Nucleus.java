@@ -665,10 +665,19 @@ public interface Nucleus {
 	
 
 	/**
-	 * Reverse the angle profile of the nucleus
+	 * Reverse the angle profile of the nucleus. Also reverses the distance
+	 * profile, the border list and updates the border tags to the new positions
 	 * @throws Exception
 	 */
 	public void reverse() throws Exception;
+	
+	
+	/**
+	 * Reverses the angle profile, without reversing the border points,
+	 * distance profile or border tag indexes.
+	 * @throws Exception
+	 */
+	public void flipAngleProfile()throws Exception;
 	
 	
 	/**

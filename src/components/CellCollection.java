@@ -1043,20 +1043,30 @@ public class CellCollection implements Serializable {
 	  			result = this.getBoundingRectangleDimension(true, scale);
 	  			break;
 	  		}
-	  		case OP_RP_ANGLE:
+	  		
+	  		case OP_RP_ANGLE:{
 				result = this.getReferenceAngles(scale);
+				break;
+	  		}
 			
 
 	  }
 	  return result;
   }
   
+  /**
+   * Calculate the angles for each nucleus between the orientation point
+   * and the reference point, via the centre of mass.
+   * @param scale the scale to use (can be null, angles have no scale)
+   * @return a list of angles
+   * @throws Exception
+   */
   public double[] getReferenceAngles(MeasurementScale scale) throws Exception{
 	  List<Double> list = new ArrayList<Double>();
 
 	  for(Nucleus n : this.getNuclei()){
 
-			  list.add(n.getStatistic(NucleusStatistic.OP_RP_ANGLE, scale));
+		  list.add(n.getStatistic(NucleusStatistic.OP_RP_ANGLE, scale));
 
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));

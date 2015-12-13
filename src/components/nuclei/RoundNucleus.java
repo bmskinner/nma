@@ -1315,6 +1315,7 @@ public class RoundNucleus
 		this.setAngleProfileWindowSize(angleProfileWindowSize);
 	}
 
+
 	public void reverse() throws Exception{
 		SegmentedProfile aProfile = this.getAngleProfile();
 		aProfile.reverse();
@@ -1337,6 +1338,12 @@ public class RoundNucleus
 			int newIndex = this.getLength() - index - 1; // if was 0, will now be <length-1>; if was length-1, will be 0
 			setBorderTag(s, newIndex);
 		}
+	}
+	
+	public void flipAngleProfile()throws Exception{
+		SegmentedProfile aProfile = this.getAngleProfile();
+		aProfile.reverse();
+		this.setAngleProfile(aProfile);
 	}
 	
 	public void updateSourceFolder(File newFolder) throws Exception {
