@@ -423,8 +423,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			log(Level.FINER, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
 
 			// Add the segments to the collection
-//			fileLogger.log(Level.FINE, "Adding segments to profile collection");
-//			fileLogger.log(Level.FINE, NucleusBorderSegment.toString(segments));
+
 			pc.addSegments(BorderTag.REFERENCE_POINT, segments);
 		} catch(Exception e){
 			logError("Error creating segments", e);
@@ -564,9 +563,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			// copy the segments from the profile collection
 			frankenCollection.addSegments(pointType, segments);
 			
-//			fileLogger.log(Level.FINE, "Franken profile collection");
-//			fileLogger.log(Level.FINE, frankenCollection.toString());
-
+			
 			// At this point, the FrankenCollection is identical to the ProfileCollection
 			// We need to add the individual recombined frankenProfiles
 
@@ -593,7 +590,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 
 			// update the profile aggregate
 			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
-//			logger.log("FrankenProfile generated");
+
 			double firstPoint = frankenCollection.getSegmentedProfile(BorderTag.REFERENCE_POINT).get(0);
 			log(Level.FINER, "FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);
 			// attach the frankencollection to the cellcollection
@@ -601,7 +598,6 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			log(Level.FINER, "Segment assignments refined");
 		} catch(Exception e){
 			logError("Error revising segments", e);
-//			fileLogger.log(Level.SEVERE, "Error revising segments", e);
 		}
 	}
 	
@@ -833,12 +829,60 @@ public class MorphologyAnalysis extends AnalysisWorker {
 					nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
 					nucleus.splitNucleusToHeadAndHump();
 					
-					// Set the top vertical and bottom vertical points
-					
+				}
+				
+				
+				// Set the top vertical and bottom vertical points
+				assignFlatRegionToMouseNuclei(collection);
+				
+			}catch(Exception e){
+				logError("Error calculating offsets", e);
+			}
+		}
+		
+		private static void assignFlatRegionToMouseNuclei(CellCollection collection) throws Exception{
+			Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); // returns a median profile
+
+			// go through each nucleus
+			for(Nucleus n : collection.getNuclei()){
+				
+				
+				
+				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+				
+				/*
+				 * Franken profile method: segment proportionality
+				 */
+				
+				{
 					/*
-				     * Call to a StraightPointFinder that will find the straight part of the nucleus
-				     * Use this to set the BorderTag.TopVertical and BottomVertical
+				     * TODO: Use segment proportionality rather than offsetting, so we benefit from the frankenmedian
+				     * 
+				     * Find the segment with the flat top index
+				     * Get the proportion through the segment
+				     * Find the appropriate border point in the nucleus
+				     * Add the tag
+				     * 
+				     * Repeat for the flat bottom index
+				     * 
 				     */
+//					int verticalTopIndex = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//							.getOffset(BorderTag.TOP_VERTICAL); 
+//					
+//					String segName = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentContaining(BorderTag.TOP_VERTICAL).getName();
+//					
+//					
+//					SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.REFERENCE_POINT);
+//				
+//					NucleusBorderSegment segOffsetFromRef = profile.getSegment(segName);
+				}
+				
+				
+				/*
+				 * Regular profile method: offsetting
+				 */
+				
+				{
 					Profile verticalTopMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.TOP_VERTICAL, 50); // returns a median profile
 					int newIndexOne = nucleus.getAngleProfile().getSlidingWindowOffset(verticalTopMedian);
 					
@@ -863,9 +907,7 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			    		
 			    	}
 				}
-			}catch(Exception e){
-				logError("Error calculating offsets", e);
-//				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
+				
 			}
 		}
 		
@@ -912,7 +954,6 @@ public class MorphologyAnalysis extends AnalysisWorker {
 				}
 			}catch(Exception e){
 				logError("Error calculating offsets", e);
-//				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
 			}
 		}
 	}

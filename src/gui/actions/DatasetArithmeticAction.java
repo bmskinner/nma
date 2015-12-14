@@ -38,7 +38,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 				programLogger.log(Level.INFO,"Performing "+operation+" on datasets");
 				// prepare a new collection
 
-				CellCollection newCollection = null; // = new CellCollection(one, "operation");
+				CellCollection newCollection = null; 
 
 				switch(operation){
 					case AND: // present in both
@@ -70,7 +70,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 					newDataset.setRoot(true);
 					int flag = MainWindow.ADD_POPULATION;
 					flag |= MainWindow.SAVE_DATASET;
-					new MorphologyAnalysisAction(newDataset, one, flag, mw);
+					new MorphologyAnalysisAction(newDataset, flag, MorphologyAnalysis.MODE_NEW, mw);
 //					this.cancel();
 										
 				} else {
