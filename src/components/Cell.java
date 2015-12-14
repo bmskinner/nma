@@ -142,4 +142,12 @@ public class Cell implements Serializable {
 			return true;
 		}
 	}
+	
+	public boolean equals(Cell c){
+		if(c.getId().equals(this.getId())){
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

@@ -866,6 +866,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		populationPopup.enableDelete();
 		populationPopup.disableMerge();
+		populationPopup.enableSplit();
 		populationPopup.enableSave();
 		populationPopup.enableExtract();
 		populationPopup.enableCurate();
@@ -917,11 +918,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			populationPopup.disableMenuDown();
 		}
 
-		if(!d.hasChildren()){ // cannot split population without children yet
-			populationPopup.disableSplit();
-		} else {
-			populationPopup.enableSplit();
-		}
 	}
 		
 	/**

@@ -56,11 +56,11 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		}
 	});
 	
-	JMenuItem splitMenuItem = new JMenuItem( new AbstractAction("Split"){
+	JMenuItem splitMenuItem = new JMenuItem( new AbstractAction("Boolean operation"){
 		private static final long serialVersionUID = 1L;
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			fireSignalChangeEvent("SplitCollectionAction");				
+			fireSignalChangeEvent("DatasetArithmeticAction");				
 		}
 	});
 	JMenuItem saveMenuItem = new JMenuItem( new AbstractAction("Save as..."){

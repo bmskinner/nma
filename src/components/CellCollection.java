@@ -164,7 +164,12 @@ public class CellCollection implements Serializable {
   }
 
   public void addCell(Cell r){
-	  this.mappedCollection.put(r.getId(), r);
+	  if(mappedCollection.containsKey(r.getId())){
+		  // do nothing
+		  return;
+	  } else {
+		  this.mappedCollection.put(r.getId(), r);
+	  }
   }
   
   public void removeCell(Cell c){

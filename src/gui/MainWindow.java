@@ -640,7 +640,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 		}
 		
-		if(event.type().equals("SplitCollectionAction")){
+		if(event.type().equals("DatasetArithmeticAction")){
 			new DatasetArithmeticAction(selectedDataset, populationsPanel.getAllDatasets(), MainWindow.this);
 		}
 		
