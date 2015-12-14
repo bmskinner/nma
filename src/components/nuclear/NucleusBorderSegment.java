@@ -32,11 +32,12 @@ import ij.IJ;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import utility.Utils;
 
-public class NucleusBorderSegment  implements Serializable{
+public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 
 	// the smallest number of values in a segment
 	// Set to 3 (a start, midpoint and an end) so that the minimum length
@@ -141,19 +142,73 @@ public class NucleusBorderSegment  implements Serializable{
 		return this.endIndex;
 	}
 	
-	public String getOldName(){
-		if(this.name==null){
-			IJ.log("Name is null on segment getName()");
-			return null;
+	/**
+	 * Get the index closest to the fraction
+	 * of the way through the segment
+	 * @param d a fraction between 0 (start) and 1 (end)
+	 * @return the nearest index, or -1 on error
+	 */
+	public int getProportionalIndex(double d){
+		if(d<0 || d > 1){
+			return -1;
 		}
+		
+		double desiredDistanceFromStart = (double) this.length() * d;
+		
+		int target = (int) desiredDistanceFromStart;
+		
+		int counter = 0;
+		Iterator<Integer> it = this.iterator();
+		while(it.hasNext()){
+			int index = it.next();
+			
+			if(counter==target){
+				return index;
+			}
+			counter++;
+		}
+		return -1;
+		
+	}
+	
+	/**
+	 * Get the proportion of the given index along the segment
+	 * from zero to one
+	 * @param index the index to test
+	 * @return
+	 */
+	public double getIndexProportion(int index){
+		if(!this.contains(index)){
+			throw new IllegalArgumentException("Segment does not contain index "+index);
+		}
+		
+		int counter = 0;
+		Iterator<Integer> it = this.iterator();
+		while(it.hasNext()){
+			int test = it.next();
+			
+			if(index==test){
+				return (double) counter / (double) this.length();
+			}
+			counter++;
+		}
+		return -1;
+	}
+	
+	public String getOldName(){
+//		if(this.name==null){
+//			IJ.log("Name is null on segment getName()");
+//			return null;
+//		}
 		return this.name;
 	}
 
+	/**
+	 * Get the name of the segment in the form "Seg_n"
+	 * where n is the position in the profile
+	 * @return
+	 */
 	public String getName(){
-		if(this.name==null){
-			IJ.log("Name is null on segment getName()");
-		}
-//		return this.name;
 		return "Seg_"+this.positionInProfile;
 	}
 
@@ -770,9 +825,8 @@ public class NucleusBorderSegment  implements Serializable{
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		
 		
-//		IJ.log("Before copy linking:");
 		for(NucleusBorderSegment segment : list){
-//			IJ.log(segment.getName()+" merges: "+segment.hasMergeSources());
+
 			result.add( new NucleusBorderSegment(segment));
 		}
 		
@@ -786,10 +840,36 @@ public class NucleusBorderSegment  implements Serializable{
 		StringBuilder builder = new StringBuilder();
 		builder.append("List of segments:\n");
 		for(NucleusBorderSegment segment : list){
-//			IJ.log(segment.getName()+" merges: "+segment.hasMergeSources());
+
 			builder.append("\t"+segment.toString()+"\n");
 		}
 		return builder.toString();
+	}
+
+	@Override
+	public Iterator<Integer> iterator() {
+
+		List<Integer> indexes = new ArrayList<Integer>();
+		
+		if(this.wraps()){
+			
+			for(int i = this.getStartIndex(); i<this.getTotalLength(); i++){
+				indexes.add(i);
+			}
+			for(int i = 0; i<this.getEndIndex(); i++){
+				indexes.add(i);
+			}
+			
+			
+		} else {
+			
+			for(int i = this.getStartIndex(); i<=this.getEndIndex(); i++){
+				indexes.add(i);
+			}
+			
+		}
+		
+		return indexes.iterator();
 	}
 
 }

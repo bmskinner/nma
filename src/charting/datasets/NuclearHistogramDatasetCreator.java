@@ -251,9 +251,17 @@ public class NuclearHistogramDatasetCreator {
 				for(Nucleus n : collection.getNuclei()){
 					NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
 
-					int indexLength = seg.length();
-					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+					double length = 0;
+					if(seg!=null){
+						int indexLength = seg.length();
+						double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+						length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+						
+					}
+
+//					int indexLength = seg.length();
+//					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+//					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 					lengths[count++] = length;
 				}
 					

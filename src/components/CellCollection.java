@@ -1114,11 +1114,12 @@ public class CellCollection implements Serializable {
 
 	  for(Nucleus n : this.getNuclei()){
 		  NucleusBorderSegment segment = n.getAngleProfile(BorderTag.REFERENCE_POINT).getSegment(segName);
-
-		  int indexLength = segment.length();
-		  double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
-		  double perimeterLength = fractionOfPerimeter * n.getStatistic(NucleusStatistic.PERIMETER, scale);
-
+		  double perimeterLength = 0;
+		  if(segment!=null){
+			  int indexLength = segment.length();
+			  double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+			  perimeterLength = fractionOfPerimeter * n.getStatistic(NucleusStatistic.PERIMETER, scale);
+		  }
 		  list.add(perimeterLength);
 	  }
 	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));

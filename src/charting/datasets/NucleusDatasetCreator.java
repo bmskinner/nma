@@ -637,7 +637,21 @@ public class NucleusDatasetCreator {
 		int profileCount = 0;
 		for(Profile angles : collection.getProfileCollection(ProfileCollectionType.FRANKEN).getNucleusProfiles(point)){
 
-			double[][] ndata = { xpoints.asArray(), angles.asArray() };
+			
+			double[] xArray = xpoints.asArray();
+			double[] yArray = angles.asArray();
+			
+			if(xArray.length!=yArray.length){ // ensure length mismatches don't crash the system
+
+				yArray = new double[xArray.length];
+				for(int i=0; i<xArray.length; i++){
+					yArray[i] = 0;
+				}
+				
+			} 
+			double[][] ndata = new double[][] { xArray, yArray };
+			
+			
 			ds.addSeries("Nucleus_"+profileCount, ndata);
 			profileCount++;
 		}
@@ -736,10 +750,13 @@ public class NucleusDatasetCreator {
 
 			for(Nucleus n : collection.getNuclei()){
 				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
-				
-				int indexLength = seg.length();
-				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-				double length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+				double length = 0;
+				if(seg!=null){
+					int indexLength = seg.length();
+					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+					length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+					
+				}
 				list.add(length);
 			}
 

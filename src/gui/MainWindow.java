@@ -34,7 +34,6 @@ import gui.actions.ReplaceSourceImageDirectoryAction;
 import gui.actions.NewAnalysisAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
-import gui.actions.SplitCollectionAction;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
@@ -157,8 +156,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 			consensusNucleusPanel = new ConsensusNucleusPanel(programLogger);
 			detailPanels.add(consensusNucleusPanel);
-//			consensusNucleusPanel.addSignalChangeListener(this);
-//			consensusNucleusPanel.addDatasetEventListener(this);
+
 			
 			//---------------
 			// Create the log panel

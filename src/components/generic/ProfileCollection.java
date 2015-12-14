@@ -189,6 +189,26 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
+	 * Fetch the segment from the profile containing at the given tag;
+	 * @param tag the border tag
+	 * @return a copy of the segment with the tag index inside, or null
+	 */
+	public NucleusBorderSegment getSegmentContaining(BorderTag tag) throws Exception {
+		List<NucleusBorderSegment> segments = this.getSegments(tag);
+
+		NucleusBorderSegment result = null;
+		// get the name of the segment with the tag at the start
+		for(NucleusBorderSegment seg : segments){
+
+			if(  seg.contains(ZERO_INDEX) ){
+				result = seg;
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
 	 * Get the nucleus profiles offset to the requested key. 
 	 * This will not be as accurate as a nucleus by nucleus approach, 
 	 * in which the keys are linked directly to indexes. Use only when no choice

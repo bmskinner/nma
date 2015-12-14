@@ -58,8 +58,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -248,6 +250,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		private JPanel buttonsPanel;
 		private JButton mergeButton;
 		private JButton unmergeButton;
+		private JButton splitButton;
 		
 		protected SegmentProfilePanel(){
 			
@@ -287,9 +290,14 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			unmergeButton = new JButton("Unmerge segments");
 			unmergeButton.addActionListener(this);
-
 			
 			panel.add(unmergeButton);
+			
+			splitButton = new JButton("Split segment");
+			splitButton.addActionListener(this);
+
+			panel.add(splitButton);
+			
 			return panel;
 			
 			
@@ -405,6 +413,80 @@ public class SegmentsDetailPanel extends DetailPanel {
 				n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
 			}
 			fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
+		}
+		
+		private void splitSegment(String segName) throws Exception {
+			
+			
+			CellCollection collection = activeDataset().getCollection();
+			
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
+			
+			// Get the segments to merge
+			NucleusBorderSegment seg = medianProfile.getSegment(segName);
+			
+			SpinnerNumberModel sModel 
+			= new SpinnerNumberModel(seg.getStartIndex(), 
+					0, 
+					medianProfile.size(),
+					1);
+			JSpinner spinner = new JSpinner(sModel);
+
+			int option = JOptionPane.showOptionDialog(null, 
+					spinner, 
+					"Choose the split index", 
+					JOptionPane.OK_CANCEL_OPTION, 
+					JOptionPane.QUESTION_MESSAGE, null, null, null);
+			if (option == JOptionPane.CANCEL_OPTION) {
+				
+				// user hit cancel
+				
+				
+			} else if (option == JOptionPane.OK_OPTION)	{
+				
+				
+				
+				int index = (Integer) spinner.getModel().getValue();
+				double proportion = seg.getIndexProportion(index);
+							
+				// merge the two segments in the median - this is only a copy of the profile collection
+				medianProfile.splitSegment(seg, index);
+				
+				// put the new segment pattern back with the appropriate offset
+				collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
+
+				/*
+				 * With the median profile segments unmerged, also split the segments
+				 * in the individual nuclei. Requires proportional alignment
+				 */
+				for(Nucleus n : collection.getNuclei()){
+
+					SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+					NucleusBorderSegment nSeg = profile.getSegment(segName);
+					
+					int targetIndex = nSeg.getProportionalIndex(proportion);
+					profile.splitSegment(nSeg, targetIndex);
+					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+				}
+				
+				/*
+				 * Update the consensus if present
+				 */
+				if(collection.hasConsensusNucleus()){
+					ConsensusNucleus n = collection.getConsensusNucleus();
+					SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+					NucleusBorderSegment nSeg1 = profile.getSegment(segName);
+					int targetIndex = nSeg1.getProportionalIndex(proportion);
+					profile.splitSegment(nSeg1, targetIndex);
+					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+				}
+				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
+			}
+			
+			
+			
+			
+			
 		}
 		
 		public void update(List<AnalysisDataset> list){
@@ -542,6 +624,39 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 
 						unmergeSegments(mergeOption);
+
+						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+						list.add(activeDataset());
+						SegmentsDetailPanel.this.update(list);
+						SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
+					}
+
+					
+				}
+				
+				if(e.getSource().equals(splitButton)){
+					// show a list of segments that can be split, and merge the selected option
+
+					// Put the names of the mergable segments into a list
+					for(NucleusBorderSegment seg : medianProfile.getSegments()){
+							names.add(seg.getName());						
+					}
+					
+					String[] nameArray = names.toArray(new String[0]);
+
+					String option = (String) JOptionPane.showInputDialog(null, 
+							"Choose segment to split",
+							"Split",
+							JOptionPane.QUESTION_MESSAGE, 
+							null, 
+							nameArray, 
+							nameArray[0]);
+
+					if(option!=null){
+						// a choice was made
+
+
+						splitSegment(option);
 
 						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 						list.add(activeDataset());

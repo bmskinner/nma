@@ -22,10 +22,10 @@ import ij.IJ;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import utility.Utils;
-
 import components.nuclear.NucleusBorderSegment;
 
 /**
@@ -563,6 +563,57 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment.linkSegments(newSegs);
 		this.setSegments(newSegs);
 
+	}
+	
+	/**
+	 * Split a segment at the given index into two new segments
+	 * @param segment the segment to split
+	 * @param splitIndex the index to split at
+	 * @throws Exception
+	 */
+	public void splitSegment(NucleusBorderSegment segment, int splitIndex) throws Exception {
+		// Check the segments belong to the profile
+		if(!this.contains(segment) ){
+			throw new IllegalArgumentException("Input segment is not part of this profile");
+		}
+		
+		if(!segment.contains(splitIndex)){
+			throw new IllegalArgumentException("Splitting index is not within the segment");
+		}
+		
+		// Replace the two segments in this profile
+		List<NucleusBorderSegment> oldSegs = this.getSegments();
+		List<NucleusBorderSegment> newSegs = new ArrayList<NucleusBorderSegment>();
+		
+		// Add the new segments to a list
+		List<NucleusBorderSegment> splitSegments = new ArrayList<NucleusBorderSegment>();
+		splitSegments.add(new NucleusBorderSegment(segment.getStartIndex(), splitIndex, segment.getTotalLength()));
+		splitSegments.add(new NucleusBorderSegment(splitIndex, segment.getEndIndex(), segment.getTotalLength()));
+		
+
+		int position = 0;
+		for(NucleusBorderSegment oldSegment : oldSegs){
+
+			if(oldSegment.equals(segment)){
+				
+				// add each of the old segments
+				for(NucleusBorderSegment mergedSegment : splitSegments){
+					mergedSegment.setPosition(position);
+					newSegs.add(mergedSegment);
+					position++;
+				}
+				
+			} else {
+				
+				// add the original segments
+				oldSegment.setPosition(position);
+				newSegs.add(oldSegment);
+			}
+			position++;
+		}
+		NucleusBorderSegment.linkSegments(newSegs);
+		this.setSegments(newSegs);
+		
 	}
 	
 
