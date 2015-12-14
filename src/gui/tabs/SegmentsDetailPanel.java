@@ -244,7 +244,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	}
 	
 	@SuppressWarnings("serial")
-	protected class SegmentProfilePanel extends JPanel implements ActionListener {
+	public class SegmentProfilePanel extends JPanel implements ActionListener {
 		
 		private ChartPanel chartPanel; // for displaying the legnth of a given segment
 		private JPanel buttonsPanel;
@@ -415,8 +415,9 @@ public class SegmentsDetailPanel extends DetailPanel {
 			fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 		}
 		
-		private void splitSegment(String segName) throws Exception {
+		private boolean splitSegment(String segName) throws Exception {
 			
+			boolean result = false;
 			
 			CellCollection collection = activeDataset().getCollection();
 			
@@ -444,49 +445,56 @@ public class SegmentsDetailPanel extends DetailPanel {
 				
 			} else if (option == JOptionPane.OK_OPTION)	{
 				
-				
-				
-				int index = (Integer) spinner.getModel().getValue();
-				double proportion = seg.getIndexProportion(index);
-							
-				// merge the two segments in the median - this is only a copy of the profile collection
-				medianProfile.splitSegment(seg, index);
-				
-				// put the new segment pattern back with the appropriate offset
-				collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
+				try{
 
-				/*
-				 * With the median profile segments unmerged, also split the segments
-				 * in the individual nuclei. Requires proportional alignment
-				 */
-				for(Nucleus n : collection.getNuclei()){
+					int index = (Integer) spinner.getModel().getValue();
+					if(seg.contains(index)){
 
-					SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
-					NucleusBorderSegment nSeg = profile.getSegment(segName);
-					
-					int targetIndex = nSeg.getProportionalIndex(proportion);
-					profile.splitSegment(nSeg, targetIndex);
-					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+
+						double proportion = seg.getIndexProportion(index);
+
+						// merge the two segments in the median - this is only a copy of the profile collection
+						medianProfile.splitSegment(seg, index);
+
+						// put the new segment pattern back with the appropriate offset
+						collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
+
+						/*
+						 * With the median profile segments unmerged, also split the segments
+						 * in the individual nuclei. Requires proportional alignment
+						 */
+						for(Nucleus n : collection.getNuclei()){
+
+							SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+							NucleusBorderSegment nSeg = profile.getSegment(segName);
+
+							int targetIndex = nSeg.getProportionalIndex(proportion);
+							profile.splitSegment(nSeg, targetIndex);
+							n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+						}
+
+						/*
+						 * Update the consensus if present
+						 */
+						if(collection.hasConsensusNucleus()){
+							ConsensusNucleus n = collection.getConsensusNucleus();
+							SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+							NucleusBorderSegment nSeg1 = profile.getSegment(segName);
+							int targetIndex = nSeg1.getProportionalIndex(proportion);
+							profile.splitSegment(nSeg1, targetIndex);
+							n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+						}
+						fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
+						result = true;
+					} else {
+						SegmentsDetailPanel.this.programLogger.log(Level.WARNING, "Unable to split segment: index not present");
+					}
+				} catch(Exception e){
+					SegmentsDetailPanel.this.programLogger.log(Level.SEVERE, "Error splitting segment", e);
 				}
-				
-				/*
-				 * Update the consensus if present
-				 */
-				if(collection.hasConsensusNucleus()){
-					ConsensusNucleus n = collection.getConsensusNucleus();
-					SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
-					NucleusBorderSegment nSeg1 = profile.getSegment(segName);
-					int targetIndex = nSeg1.getProportionalIndex(proportion);
-					profile.splitSegment(nSeg1, targetIndex);
-					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
-				}
-				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 			}
 			
-			
-			
-			
-			
+			return result;
 		}
 		
 		public void update(List<AnalysisDataset> list){
@@ -656,12 +664,10 @@ public class SegmentsDetailPanel extends DetailPanel {
 						// a choice was made
 
 
-						splitSegment(option);
-
-						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-						list.add(activeDataset());
-						SegmentsDetailPanel.this.update(list);
-						SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
+						if(splitSegment(option)){
+							SegmentsDetailPanel.this.update(SegmentsDetailPanel.this.activeDatasetToList());
+							SegmentsDetailPanel.this.fireSignalChangeEvent("UpdatePanels");
+						}
 					}
 
 					
