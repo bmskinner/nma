@@ -157,8 +157,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			
 			consensusNucleusPanel = new ConsensusNucleusPanel(programLogger);
 			detailPanels.add(consensusNucleusPanel);
-			consensusNucleusPanel.addSignalChangeListener(this);
-			consensusNucleusPanel.addDatasetEventListener(this);
+//			consensusNucleusPanel.addSignalChangeListener(this);
+//			consensusNucleusPanel.addDatasetEventListener(this);
 			
 			//---------------
 			// Create the log panel
@@ -925,7 +925,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			break;
 		case RESEGMENT_SELECTED_DATASET:
-//				programLogger.log(Level.INFO, "Resegmenting selected datasets");
+
 				final int flag = CURVE_REFOLD; // ensure consensus is replaced
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
@@ -936,19 +936,19 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 							try{
 								programLogger.log(Level.INFO, "Replacing nucleus roi patterns");
 								for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
-//									IJ.log(n.getNameAndNumber());
+
 									RodentSpermNucleus r = (RodentSpermNucleus) n;  
-//									IJ.log("Splitting nuclcus");
+
 									r.splitNucleusToHeadAndHump();
 									try {
-//										IJ.log("Calculating angles");
+
 										r.calculateSignalAnglesFromPoint(r.getPoint(BorderTag.ORIENTATION_POINT));
 									} catch (Exception e) {
 										programLogger.log(Level.SEVERE, "Error restoring signal angles", e);
 									}
-//									IJ.log("Finished calculating angles");
+
 								}
-//								programLogger.log(Level.INFO, "Replaced nucleus roi patterns");
+
 							}catch(Exception e){
 								programLogger.log(Level.SEVERE, "Error recalculating angles", e);
 							}

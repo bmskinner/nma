@@ -505,21 +505,24 @@ public class RoundNucleus
 		
 		// Make an equation covering the region
 		Equation eq = new Equation(topPoint, bottomPoint);
-		IJ.log("Equation: "+eq.toString());
+//		IJ.log("Equation: "+eq.toString());
 		// Find the orthogonal
 		Equation bottomOrth = eq.getPerpendicular(bottomPoint);
 		Equation topOrth = eq.getPerpendicular(topPoint);
-		IJ.log("Bottom: "+bottomOrth.toString());
-		IJ.log("Top:    "+topOrth.toString());
+//		IJ.log("Bottom: "+bottomOrth.toString());
+//		IJ.log("Top:    "+topOrth.toString());
 		
 		double minScore = Double.MAX_VALUE;
 		// With variation about the orthogonal, test sum-of-squares
 		// Make new points to align at based on best fit to the region
-		for(int i=-10; i<10;i++){
+		
+		int variation = 10;
+		
+		for(int i=-variation; i<variation;i++){
 			// change the posiiton of the top point
 			XYPoint iPoint = topOrth.getPointOnLine(topPoint, i);
 			
-			for(int j=-10; j<10;j++){
+			for(int j=-variation; j<variation;j++){
 				// change the posiiton of the bottom point
 				XYPoint jPoint = bottomOrth.getPointOnLine(bottomPoint, j);
 				
@@ -533,7 +536,7 @@ public class RoundNucleus
 				for(XYPoint p : pointsInRegion){
 					score += Math.pow(newLine.getClosestDistanceToPoint(p), 2);
 				}
-				IJ.log("i="+i+" : j="+j+" : Score: "+score);
+//				IJ.log("i="+i+" : j="+j+" : Score: "+score);
 				if(score<minScore){
 					minScore = score;
 					topPoint = new NucleusBorderPoint(iPoint);
@@ -545,9 +548,9 @@ public class RoundNucleus
 			
 		}
 		
-		IJ.log("Final score: "+minScore);
-		IJ.log(topPoint.toString());
-		IJ.log(bottomPoint.toString());
+//		IJ.log("Final score: "+minScore);
+//		IJ.log(topPoint.toString());
+//		IJ.log(bottomPoint.toString());
 		return new NucleusBorderPoint[] {topPoint, bottomPoint};
 	}
 	

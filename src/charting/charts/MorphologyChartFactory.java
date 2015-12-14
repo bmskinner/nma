@@ -705,12 +705,14 @@ public class MorphologyChartFactory {
 					
 					plot.getRenderer().setSeriesPaint(i, dataset.getSwatch().color(colourIndex));
 					
-					NucleusBorderPoint[] verticals = cell.getNucleus().getBorderPointsForVerticalAlignment();
-					plot.addAnnotation(new XYLineAnnotation(verticals[0].getX(),
-							verticals[0].getY(),
-							verticals[1].getX(),
-							verticals[1].getY()
-							));
+					if(cell.getNucleus().hasBorderTag(BorderTag.TOP_VERTICAL) && cell.getNucleus().hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+						NucleusBorderPoint[] verticals = cell.getNucleus().getBorderPointsForVerticalAlignment();
+						plot.addAnnotation(new XYLineAnnotation(verticals[0].getX(),
+								verticals[0].getY(),
+								verticals[1].getX(),
+								verticals[1].getY()
+								));
+					}
 
 				}
 				

@@ -34,7 +34,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import charting.ChartCache;
 import charting.TableCache;
@@ -75,6 +74,17 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	 */
 	public AnalysisDataset activeDataset(){
 		return list.get(0);
+	}
+	
+	/**
+	 * Make a new list holding only the active dataset. This is used
+	 * to pass the active dataset back to update()
+	 * @return
+	 */
+	public List<AnalysisDataset> activeDatasetToList(){
+		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+		list.add(activeDataset());
+		return list;
 	}
 	
 	protected List<AnalysisDataset> getDatasets(){
