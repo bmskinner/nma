@@ -20,7 +20,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 		super(null, "Dataset arithmetic", "Error in dataset arithmetic", mw);
 
 		try {
-			programLogger.log(Level.INFO, "Performing arithmetic...");
+			programLogger.log(Level.FINE, "Performing arithmetic...");
 
 			/*
 			 * Make a dialog with a dropdown for dataset 1, operator, then  dropdown for dataset 2
@@ -34,6 +34,8 @@ public class DatasetArithmeticAction extends ProgressableAction {
 				AnalysisDataset two = dialog.getDatasetTwo();
 				DatasetArithmeticOperation operation = dialog.getOperation();
 
+				
+				programLogger.log(Level.INFO,"Performing "+operation+" on datasets");
 				// prepare a new collection
 
 				CellCollection newCollection = null; // = new CellCollection(one, "operation");
@@ -62,12 +64,13 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 
 				if(newCollection !=null && newCollection.getNucleusCount()>0){
-
-					programLogger.log(Level.INFO,"Reapplying morphology...");
+					programLogger.log(Level.INFO,"Found "+newCollection.getNucleusCount()+" cells");
+					programLogger.log(Level.INFO,"Applying morphology...");
 					AnalysisDataset newDataset = new AnalysisDataset(newCollection);
+					newDataset.setRoot(true);
 					int flag = MainWindow.ADD_POPULATION;
 					flag |= MainWindow.SAVE_DATASET;
-					new MorphologyAnalysisAction(newDataset, MorphologyAnalysis.MODE_NEW, flag, mw);
+					new MorphologyAnalysisAction(newDataset, one, flag, mw);
 //					this.cancel();
 										
 				} else {
@@ -99,7 +102,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 		
 		for(Cell c : one.getCollection().getCells()){
 
-			if(two.getCollection().getCells().contains(c)){
+			if(two.getCollection().contains(c)){
 				newCollection.addCell(new Cell(c));
 			}
 		}
@@ -115,11 +118,11 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	 */
 	private CellCollection datasetsNOT(AnalysisDataset one, AnalysisDataset two){
 
-		CellCollection newCollection = new CellCollection(one, "and");
+		CellCollection newCollection = new CellCollection(one, "not");
 		
 		for(Cell c : one.getCollection().getCells()){
 
-			if(!two.getCollection().getCells().contains(c)){
+			if(!two.getCollection().contains(c)){
 				newCollection.addCell(new Cell(c));
 			}
 		}
@@ -135,18 +138,18 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	 */
 	private CellCollection datasetsXOR(AnalysisDataset one, AnalysisDataset two){
 
-		CellCollection newCollection = new CellCollection(one, "and");
+		CellCollection newCollection = new CellCollection(one, "xor");
 		
 		for(Cell c : one.getCollection().getCells()){
 
-			if(!two.getCollection().getCells().contains(c)){
+			if(!two.getCollection().contains(c)){
 				newCollection.addCell(new Cell(c));
 			}
 		}
 		
 		for(Cell c : two.getCollection().getCells()){
 
-			if(!one.getCollection().getCells().contains(c)){
+			if(!one.getCollection().contains(c)){
 				newCollection.addCell(new Cell(c));
 			}
 		}

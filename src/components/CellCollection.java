@@ -103,7 +103,7 @@ public class CellCollection implements Serializable {
 	}
   
   /**
-   * Construct from a template dataset
+   * Construct an empty collection from a template dataset
    * @param template the dataset to base on for analysis options, folders
    * @param name the collection name
    */
@@ -118,7 +118,7 @@ public class CellCollection implements Serializable {
   }
   
   /**
-   * Construct froma template collection
+   * Construct an empty collection from a template collection
    * @param template
    * @param name
    */
@@ -1220,6 +1220,20 @@ public class CellCollection implements Serializable {
 		}
 		return ok;
 	}
+  
+  /**
+   * Test if the collection contains the given cell
+   * @param c
+   * @return
+   */
+  public boolean contains(Cell c){
+	  for(Cell cell : this.getCells()){
+		  if (cell.equals(c)){
+			  return true;
+		  }
+	  }
+	  return false;
+  }
   
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
