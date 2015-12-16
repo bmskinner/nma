@@ -10,6 +10,7 @@ import gui.components.DraggableTreeViewer;
 import gui.components.VariableNodePainter;
 import ij.IJ;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -136,6 +137,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			viewer.setSelectionMode(SelectionMode.CLADE);
 			viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
 			viewer.getTreePane().setBranchTransform(true,  TransformedRootedTree.Transform.PROPORTIONAL);
+			
 
 			this.setTitle(dataset.getName() + " : " + group.getName() +" : "+numTaxa+ " taxa");
 			colourTreeNodesByClusterGroup(group);
@@ -223,6 +225,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			
 
 			VariableNodePainter painter = new VariableNodePainter("cluster", tree, PainterIntent.TIP, clusterMemberships);
+			painter.setBorder(Color.BLACK, new BasicStroke(2f));
 			viewer.getTreePane().setTaxonLabelPainter(painter);
 
 		}
@@ -273,6 +276,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		
 					}
 					VariableNodePainter painter = new VariableNodePainter("Cluster", tree, PainterIntent.TIP, clusterMemberships);
+					painter.setBorder(Color.BLACK, new BasicStroke(2f));
 					viewer.getTreePane().setTaxonLabelPainter(painter);
 					setStatusLoaded();
 				}
