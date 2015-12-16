@@ -63,12 +63,14 @@ import jebl.evolution.io.ImportException.DuplicateTaxaException;
 import jebl.evolution.io.NewickImporter;
 import jebl.evolution.taxa.Taxon;
 import jebl.evolution.trees.RootedTree;
+import jebl.evolution.trees.TransformedRootedTree;
 import jebl.evolution.trees.Tree;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 import jebl.gui.trees.treeviewer.treelayouts.RectilinearTreeLayout;
 import jebl.gui.trees.treeviewer.treelayouts.TreeLayout;
 import jebl.gui.trees.treeviewer.TreePane;
 import jebl.gui.trees.treeviewer.TreePaneSelector.SelectionMode;
+import jebl.gui.trees.treeviewer.TreeViewer.TreeLayoutType;
 
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends LoadingIconDialog implements ActionListener, ItemListener {
@@ -130,6 +132,10 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			int numTaxa = topTree.getTaxa().size(); 
 			
 			viewer.setTree( topTree );
+			
+			viewer.setSelectionMode(SelectionMode.CLADE);
+			viewer.setTreeLayoutType(TreeLayoutType.RECTILINEAR);
+			viewer.getTreePane().setBranchTransform(true,  TransformedRootedTree.Transform.PROPORTIONAL);
 
 			this.setTitle(dataset.getName() + " : " + group.getName() +" : "+numTaxa+ " taxa");
 			colourTreeNodesByClusterGroup(group);

@@ -314,8 +314,6 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 							if(collection.hasConsensusNucleus()){
 								consensusChart = ConsensusNucleusChartFactory.makeSegmentedConsensusChart(activeDataset());
 
-								//									activeDataset.getCollection().getConsensusNucleus().dumpInfo(Nucleus.ALL_POINTS);
-
 								// hide the refold button
 								runRefoldingButton.setVisible(false);
 								offsetsPanel.setVisible(true);
