@@ -20,33 +20,48 @@ package stats;
 
 import utility.Utils;
 import components.generic.MeasurementScale;
+import components.nuclear.NucleusType;
 
 /**
    * These are the values that we can make boxplots from
    *
    */
-  public enum NucleusStatistic implements PlottableStatistic {
-	  AREA ("Area", StatisticDimension.AREA),
-	  PERIMETER("Perimeter", StatisticDimension.LENGTH),
-	  MAX_FERET("Max feret", StatisticDimension.LENGTH),
-	  MIN_DIAMETER("Min diameter", StatisticDimension.LENGTH),
-	  ASPECT("Aspect", StatisticDimension.DIMENSIONLESS),
-	  CIRCULARITY("Circularity", StatisticDimension.DIMENSIONLESS),
-	  VARIABILITY("Variability", StatisticDimension.DIMENSIONLESS), 
-	  BOUNDING_HEIGHT ("Bounding height", StatisticDimension.LENGTH), 
-	  BOUNDING_WIDTH ("Bounding width", StatisticDimension.LENGTH),
-	  OP_RP_ANGLE ("Angle between reference points", StatisticDimension.ANGLE);
+  /**
+ * @author ben
+ *
+ */
+public enum NucleusStatistic implements PlottableStatistic {
+	  AREA ("Area", StatisticDimension.AREA, new NucleusType[]{NucleusType.ROUND}),
+	  PERIMETER("Perimeter", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}),
+	  MAX_FERET("Max feret", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}),
+	  MIN_DIAMETER("Min diameter", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}),
+	  ASPECT("Aspect", StatisticDimension.DIMENSIONLESS, new NucleusType[]{NucleusType.ROUND}),
+	  CIRCULARITY("Circularity", StatisticDimension.DIMENSIONLESS, new NucleusType[]{NucleusType.ROUND}),
+	  VARIABILITY("Variability", StatisticDimension.DIMENSIONLESS, new NucleusType[]{NucleusType.ROUND}), 
+	  BOUNDING_HEIGHT ("Bounding height", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}), 
+	  BOUNDING_WIDTH ("Bounding width", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}),
+	  OP_RP_ANGLE ("Angle between reference points", StatisticDimension.ANGLE, new NucleusType[]{NucleusType.ROUND});
 
 	  private String name;
 	  private StatisticDimension dimension;
+	  private NucleusType[] applicableSuperType;
 
-	  NucleusStatistic(String name, StatisticDimension dimension){
+	  NucleusStatistic(String name, StatisticDimension dimension, NucleusType[] type){
 		  this.name = name;
 		  this.dimension = dimension;
+		  this.applicableSuperType = type;
 	  }
 
 	  public String toString(){
 		  return this.name;
+	  }
+	  
+	  /**
+	   * Get the types of nucleus for which the statistic applies
+	 * @return an array of types
+	 */
+	public NucleusType[] getApplicableTypes(){
+		  return this.applicableSuperType;
 	  }
 	  
 	  public boolean isDimensionless(){
