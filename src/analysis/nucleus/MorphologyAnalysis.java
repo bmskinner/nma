@@ -869,12 +869,20 @@ public class MorphologyAnalysis extends AnalysisWorker {
 //					int verticalTopIndex = collection.getProfileCollection(ProfileCollectionType.REGULAR)
 //							.getOffset(BorderTag.TOP_VERTICAL); 
 //					
-//					String segName = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentContaining(BorderTag.TOP_VERTICAL).getName();
+//					String segName = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//							.getSegmentContaining(BorderTag.TOP_VERTICAL).getName();
 //					
 //					
-//					SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.REFERENCE_POINT);
+//					SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//							.getSegmentedProfile(BorderTag.REFERENCE_POINT);
 //				
 //					NucleusBorderSegment segOffsetFromRef = profile.getSegment(segName);
+//					
+//					double verticalProportion = segOffsetFromRef.getIndexProportion(verticalTopIndex);
+//					
+//					int segIndex = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT)
+//							.getSegment(segName)
+//							.getProportionalIndex(verticalProportion);
 				}
 				
 				
