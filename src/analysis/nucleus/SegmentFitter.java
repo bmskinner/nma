@@ -165,7 +165,11 @@ public class SegmentFitter {
 				 */
 				
 				/*
-				 * TODO: Error occurs here: the segment 0 is not at index 0, so the frankenprofiles are misaligned
+				 * TODO: Error occurs here: the segment 0 is not at index 0.
+				 * When the sub-profiles are merged, they begin with seg 0, when the median
+				 * profile begins with seg 1. The frankenNormaliseToProfile() method uses a segment
+				 * iterator, beginning with segment zero. Consequently, the segments fall out of order
+				 * at this step.
 				 */
 				SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(tag));
 				

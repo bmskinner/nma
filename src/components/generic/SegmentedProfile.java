@@ -577,29 +577,47 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
 		
-//		 Get the list of segments in the template profile
+//		 Get the list of segments in the template profile, starting from segment 0
 		
-		Iterator<NucleusBorderSegment> it = template.segmentIterator();
+//		Iterator<NucleusBorderSegment> it = template.segmentIterator();
 		
 		IJ.log("FrankenNormalising profile");
 		
-		while(it.hasNext()){
-			
-			// Get the template segment, starting from template seg 0
-			// This should be the correct zero index of the template profile
-			NucleusBorderSegment templateSeg = it.next();
-			
+//		while(it.hasNext()){
+//			
+//			// Get the template segment, starting from template seg 0
+//			// This should be the correct zero index of the template profile
+//			NucleusBorderSegment templateSeg = it.next();
+//			
+//			// Get the corresponding segment in this profile, by segment position
+//			NucleusBorderSegment testSeg = this.segments.get(templateSeg.getPosition());
+//			
+//			IJ.log(" FrankenNormalising segment:");
+//			IJ.log("    Temp: "+templateSeg.toString()+"  Angle: "+template.get(templateSeg.getStartIndex()));
+//			IJ.log("    Test: "+testSeg.toString()+"  Angle: "+this.get(testSeg.getStartIndex()));
+//			
+//			// Interpolate the segment region to the new length
+//			Profile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
+//			finalSegmentProfiles.add(revisedProfile);
+//		}
+		
+		
+		List<NucleusBorderSegment> newList = template.getOrderedSegments();
+		
+		
+		for(NucleusBorderSegment templateSeg : newList){
 			// Get the corresponding segment in this profile, by segment position
 			NucleusBorderSegment testSeg = this.segments.get(templateSeg.getPosition());
-			
+
 			IJ.log(" FrankenNormalising segment:");
 			IJ.log("    Temp: "+templateSeg.toString()+"  Angle: "+template.get(templateSeg.getStartIndex()));
 			IJ.log("    Test: "+testSeg.toString()+"  Angle: "+this.get(testSeg.getStartIndex()));
-			
+
 			// Interpolate the segment region to the new length
 			Profile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
 			finalSegmentProfiles.add(revisedProfile);
 		}
+		
 		
 //		Recombine the segment profiles
 		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));

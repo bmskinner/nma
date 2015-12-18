@@ -562,9 +562,14 @@ public class MorphologyAnalysis extends AnalysisWorker {
 				and build a ProfileAggregate
 			 */
 
-			// run the segment fitter on each nucleus
+			// Get the median profile for the population
 			SegmentedProfile medianProfile = pc.getSegmentedProfile(pointType);
-//			medianProfile = medianProfile.alignSegmentPositionToZeroIndex();
+			log(Level.FINER, "Median profile: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+medianProfile.get(0));
+
+			
+			/*
+			 * At this point, the median profile has the reference point at index 0
+			 */
 			
 			SegmentFitter fitter = new SegmentFitter(medianProfile, fileLogger);
 			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
