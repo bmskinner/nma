@@ -602,12 +602,15 @@ public class SegmentedProfile extends Profile implements Serializable {
 //		}
 		
 		
-		List<NucleusBorderSegment> newList = template.getOrderedSegments();
+		List<NucleusBorderSegment> tempList = template.getOrderedSegments();
+		
+		List<NucleusBorderSegment> testList = this.getOrderedSegments();
 		
 		
-		for(NucleusBorderSegment templateSeg : newList){
+		int counter = 0;
+		for(NucleusBorderSegment templateSeg : tempList){
 			// Get the corresponding segment in this profile, by segment position
-			NucleusBorderSegment testSeg = this.segments.get(templateSeg.getPosition());
+			NucleusBorderSegment testSeg = testList.get(counter++);
 
 			IJ.log(" FrankenNormalising segment:");
 			IJ.log("    Temp: "+templateSeg.toString()+"  Angle: "+template.get(templateSeg.getStartIndex()));
