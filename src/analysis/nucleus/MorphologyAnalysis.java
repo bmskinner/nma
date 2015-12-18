@@ -536,21 +536,9 @@ public class MorphologyAnalysis extends AnalysisWorker {
 			ProfileCollection frankenCollection = new ProfileCollection();
 
 			/*
-			 The border tags for the frankenCollection are the same as the profile 
-			 collection keys, and have the same positions (since a franken profile
-			  is based on the median). The reference point is at index 0.
-
-			TODO: An error occurs in here somewhere. A frankenMedian for Testing
-			 has put the frankenMedian reference point at the segment 5-0 boundary.
-			 This is to the right of the orientation point.
-			 
-			 Analysis of the error: test the incoming profiles.
-
-
-			 The profile aggregate is being given values that have the wrong offset;
-			 these values will come from individual frankenProfiles
-			 Therefore, the frankenProfiles have had their reference point wrongly assigned
- 
+			   The border tags for the frankenCollection are the same as the profile 
+			   collection keys, and have the same positions (since a franken profile
+			   is based on the median). The reference point is at index 0. 
 			 */
 			for(BorderTag key : pc.getOffsetKeys()){
 				
@@ -559,17 +547,26 @@ public class MorphologyAnalysis extends AnalysisWorker {
 				frankenCollection.addOffset(key, pc.getOffset(key));
 			}
 
-
-			// copy the segments from the profile collection
+			
+			/*
+			 * At this point, the frankencollection is indexed on the reference point.
+			 * This is because the reference point is used to generate the profile collection.
+			 * Copy the segments from the profile collection, starting from the reference point
+			 */
 			frankenCollection.addSegments(pointType, segments);
 			
-			
-			// At this point, the FrankenCollection is identical to the ProfileCollection
-			// We need to add the individual recombined frankenProfiles
-
+			/*
+				At this point, the FrankenCollection is identical to the ProfileCollection, 
+				but has no ProfileAggregate.
+				We need to add the individual recombined frankenProfiles to the internal profile list,
+				and build a ProfileAggregate
+			 */
 
 			// run the segment fitter on each nucleus
-			SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType), fileLogger);
+			SegmentedProfile medianProfile = pc.getSegmentedProfile(pointType);
+//			medianProfile = medianProfile.alignSegmentPositionToZeroIndex();
+			
+			SegmentFitter fitter = new SegmentFitter(medianProfile, fileLogger);
 			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
 			int count = 1;
@@ -578,11 +575,10 @@ public class MorphologyAnalysis extends AnalysisWorker {
 				fitter.fit(n, pc);
 
 				// recombine the segments at the lengths of the median profile segments
-				//TODO: When the frankenProfile is created, the reference point may be wrong
 				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
 				frankenProfiles.add(recombinedProfile);
-				count++;
-				publish(count); // publish the progress to gui
+
+				publish(count++); // publish the progress to gui
 			}
 
 			// add all the nucleus frankenprofiles to the frankencollection

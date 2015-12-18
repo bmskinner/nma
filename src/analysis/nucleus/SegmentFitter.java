@@ -145,6 +145,7 @@ public class SegmentFitter {
 	/**
 	 * Join the segments within the given nucleus into Frankenstein's Profile. 
 	 * @param n the nucleus to recombine
+	 * @param tag the BorderTag to start from
 	 * @return a profile
 	 */
 	public Profile recombine(Nucleus n, BorderTag tag){
@@ -152,27 +153,45 @@ public class SegmentFitter {
 			fileLogger.log(Level.SEVERE, "Recombined nucleus is null");
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
-//		Profile frankenProfile = null;
+		//		Profile frankenProfile = null;
 		SegmentedProfile frankenProfile = null;
 		try {
-			if(n.getAngleProfile().getSegments()==null){
+			if(n.getAngleProfile().hasSegments()){
+
+				/*
+				 * Generate a segmented profile from the angle profile of the point type.
+				 * The zero index of the profile is the border tag. The segment list for the profile
+				 * begins with seg 0 at the border tag.
+				 */
+				
+				/*
+				 * TODO: Error occurs here: the segment 0 is not at index 0, so the frankenprofiles are misaligned
+				 */
+				SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(tag));
+				
+//				nucleusProfile = nucleusProfile.alignSegmentPositionToZeroIndex(1);
+				
+				fileLogger.log(Level.FINEST, "    Segmentation beginning from "+tag);
+				fileLogger.log(Level.FINEST, "    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag));
+				fileLogger.log(Level.FINEST, "    Angle at incoming segmented profile index 0 ("+tag+") is "+nucleusProfile.get(0));
+
+				// stretch or squeeze the segments to match the length of the median profile of the collection
+				//			frankenProfile = recombineSegments(n, nucleusProfile, tag);
+				frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
+				
+				fileLogger.log(Level.FINEST, "Angle at median profile index 0 ("+tag+") is "+medianProfile.get(0));
+				
+				fileLogger.log(Level.FINEST, "Angle at franken profile index 0 ("+tag+") is "+frankenProfile.get(0));
+				
+			} else {
 				fileLogger.log(Level.SEVERE, "Nucleus has no segments");
 				throw new IllegalArgumentException("Nucleus has no segments");
 			}
-
-			/*
-			 * Generate a segmented profile from the angle profile of the point type.
-			 * The zero index of the profile is the border tag.
-			 */
-			SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(tag));
-//			fileLogger.log("Angle at nucleus profile index 0 ("+tag+") is "+nucleusProfile.get(0));
-			
-			// stretch or squeeze the segments to match the length of the median profile of the collection
-//			frankenProfile = recombineSegments(n, nucleusProfile, tag);
-			frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE, "Error recombining segments", e);
 		}
+
+		
 		
 		return frankenProfile;
 	}

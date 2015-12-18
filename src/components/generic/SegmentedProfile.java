@@ -512,7 +512,52 @@ public class SegmentedProfile extends Profile implements Serializable {
 		*/
 		
 		List<NucleusBorderSegment> segments = NucleusBorderSegment.nudge(getSegments(), -newStartIndex);
+		
+		/*
+		 * Ensure that the first segment in the list is at index zero
+		 */
+		
 		return new SegmentedProfile(offsetProfile, segments);
+	}
+	
+	/**
+	 * Enure that the segment startign with index 0 is first in the segments list
+	 * @return
+	 * @throws Exception
+	 */
+	public SegmentedProfile alignSegmentPositionToZeroIndex(int position) throws Exception{
+		/*
+		 * Set the positions of the segments based on start index, if available
+		 * Get the segment with index 0, and use this as the start
+		 */
+
+		NucleusBorderSegment first = null;
+		List<NucleusBorderSegment> list = this.getSegments();
+		for(NucleusBorderSegment segment : list){
+			if(segment.getStartIndex()==0){
+				first = segment;
+			}
+		}
+		
+		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>();
+		
+		if(first!=null){
+			
+			int positionInProfile = position;
+			int counter = this.getSegmentCount();
+			while(counter>0){
+				first.setPosition(positionInProfile++);
+				if(positionInProfile>=this.getSegmentCount()){
+					positionInProfile = 0;
+				}
+				newList.add(first);
+				first = first.nextSegment();
+				counter--;
+			}
+		}
+		
+		SegmentedProfile result =  new SegmentedProfile(this, newList);
+		return result;
 	}
 	
 	
@@ -536,20 +581,26 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		Iterator<NucleusBorderSegment> it = template.segmentIterator();
 		
+		IJ.log("FrankenNormalising profile");
+		
 		while(it.hasNext()){
-			NucleusBorderSegment seg = it.next();
-			Profile revisedProfile = interpolateSegment(seg);
+			
+			// Get the template segment, starting from template seg 0
+			// This should be the correct zero index of the template profile
+			NucleusBorderSegment templateSeg = it.next();
+			
+			// Get the corresponding segment in this profile, by segment position
+			NucleusBorderSegment testSeg = this.segments.get(templateSeg.getPosition());
+			
+			IJ.log(" FrankenNormalising segment:");
+			IJ.log("    Temp: "+templateSeg.toString()+"  Angle: "+template.get(templateSeg.getStartIndex()));
+			IJ.log("    Test: "+testSeg.toString()+"  Angle: "+this.get(testSeg.getStartIndex()));
+			
+			// Interpolate the segment region to the new length
+			Profile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
 			finalSegmentProfiles.add(revisedProfile);
 		}
 		
-//		for(NucleusBorderSegment seg : template.getSegments()){
-//
-////			Interpolate the subject segments as profiles
-//			Profile revisedProfile = interpolateSegment(seg);
-//			finalSegmentProfiles.add(revisedProfile);
-//
-//		}
-
 //		Recombine the segment profiles
 		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
 		
@@ -561,20 +612,21 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * The interpolation step of frankenprofile creation. The segment in this profile,
 	 * with the same name as the template segment is interpolated to the length of the template,
 	 * and returned as a new Profile.
-	 * @param templateSegment the segment to base the interpolation on
+	 * @param templateSegment the segment to interpolate
+	 * @param newLength the new length of the segment profile
 	 * @return the interpolated profile
 	 */
-	private Profile interpolateSegment(NucleusBorderSegment templateSegment){
+	private Profile interpolateSegment(NucleusBorderSegment testSeg, int newLength){
 
 		// The segment to be interpolated
-		NucleusBorderSegment testSeg = this.getSegmentAt(templateSegment.getPosition());
+//		NucleusBorderSegment testSeg = this.getSegmentAt(templateSegment.getPosition());
 //		NucleusBorderSegment testSeg = this.getSegment(templateSegment.getName());
 		
 		// get the region within the segment as a new profile
 		Profile testSegProfile = this.getSubregion(testSeg);
 
 		// interpolate the test segments to the length of the median segments
-		Profile revisedProfile = testSegProfile.interpolate(templateSegment.length());
+		Profile revisedProfile = testSegProfile.interpolate(newLength);
 		return revisedProfile;
 	}
 	

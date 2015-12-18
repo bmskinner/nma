@@ -1179,8 +1179,35 @@ public class RoundNucleus
 		int pointIndex = this.borderTags.get(tag);
 		
 		// offset the angle profile to start at the pointIndex
-		return new SegmentedProfile(this.angleProfile.offset(pointIndex));
+		SegmentedProfile profile =  new SegmentedProfile(this.angleProfile.offset(pointIndex));
+		
+//		/*
+//		 * Set the positions of the segments based on start index, if available
+//		 * Get the segment with index 0, and use this as the start
+//		 */
+//
+//		NucleusBorderSegment first = null;
+//		List<NucleusBorderSegment> list = profile.getSegments();
+//		for(NucleusBorderSegment segment : list){
+//			if(segment.getStartIndex()==0){
+//				first = segment;
+//			}
+//		}
+//		
+//		if(first!=null){
+//			int positionInProfile = 0;
+//			int counter = profile.getSegmentCount();
+//			while(counter>0){
+//				first.setPosition(positionInProfile++);
+//				first = first.nextSegment();
+//				counter--;
+//			}
+//		}
+//		
+//		SegmentedProfile result =  new SegmentedProfile(profile, list);
+		return profile;
 	}
+	
 
 	public void setAngleProfile(SegmentedProfile p) throws Exception{
 		this.angleProfile = new SegmentedProfile(p);

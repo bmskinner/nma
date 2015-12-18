@@ -676,6 +676,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 
 		builder.append("Segment "
 				+this.getName()
+				+" ("+this.getPosition()+") "
 				+": "+this.startIndex+" - "+this.endIndex+" of "
 				+(this.getTotalLength()-1)
 				+"; prev: "+this.hasPrevSegment()
@@ -694,8 +695,10 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		if(list==null || list.isEmpty()){
 			throw new IllegalArgumentException("List of segments is null or empty");
 		}
-		
+				
 		NucleusBorderSegment prevSeg = null;
+		
+		
 
 		int position = 0;
 		for(NucleusBorderSegment segment : list){
@@ -729,6 +732,30 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
 			firstSegment.update(0, firstSegment.getEndIndex());
 		}
+		
+//		/*
+//		 * Set the positions of the segments based on start index, if available
+//		 * Get the segment with index 0, and use this as the start
+//		 */
+//
+//		NucleusBorderSegment first = null;
+//		for(NucleusBorderSegment segment : list){
+//			if(segment.getStartIndex()==0){
+//				first = segment;
+//			}
+//		}
+//		
+//		if(first!=null){
+//			int positionInProfile = 0;
+//			int counter = list.size();
+//			while(counter>0){
+//				first.setPosition(positionInProfile++);
+//				first = first.nextSegment();
+//				counter--;
+//			}
+//		}
+		
+		
 	}
 	
 	/**
@@ -748,6 +775,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 					segment.getTotalLength() );
 			
 			newSeg.setName(segment.getName());
+			newSeg.setPosition(segment.getPosition());
 			
 			
 			// adjust merge sources also and read
