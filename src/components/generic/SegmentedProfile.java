@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 
 import utility.Utils;
 import components.nuclear.NucleusBorderSegment;
@@ -55,6 +56,12 @@ public class SegmentedProfile extends Profile implements Serializable {
 			throw new IllegalArgumentException("Segments do not fit profile");
 		}
 		
+		try {
+			NucleusBorderSegment.linkSegments(segments);
+		} catch (Exception e) {
+			IJ.log("Error linking segments");
+		}
+		
 		this.segments = segments;
 	}
 	
@@ -76,12 +83,21 @@ public class SegmentedProfile extends Profile implements Serializable {
 		super(profile);
 		int midpoint = profile.size()/2;
 		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, profile.size());
-		segment1.setName("Seg_1");
+//		segment1.setName("Seg_1");
+		segment1.setPosition(0);
 		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, profile.size());
-		segment2.setName("Seg_2");
+//		segment2.setName("Seg_2");
+		segment2.setPosition(1);
 		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 		segments.add(segment1);
 		segments.add(segment2);
+		
+		try {
+			NucleusBorderSegment.linkSegments(segments);
+		} catch (Exception e) {
+			IJ.log("Error linking segments");
+		}
+		
 		this.segments = segments;
 	}
 	
@@ -94,11 +110,20 @@ public class SegmentedProfile extends Profile implements Serializable {
 		int midpoint = values.length/2;
 		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, values.length);
 		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, values.length);
-		segment1.setName("Seg_1");
-		segment2.setName("Seg_2");
+		segment1.setPosition(0);
+		segment2.setPosition(1);
+//		segment1.setName("Seg_1");
+//		segment2.setName("Seg_2");
 		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 		segments.add(segment1);
 		segments.add(segment2);
+		
+		try {
+			NucleusBorderSegment.linkSegments(segments);
+		} catch (Exception e) {
+			IJ.log("Error linking segments");
+		}
+		
 		this.segments = segments;
 	}
 	
@@ -124,6 +149,56 @@ public class SegmentedProfile extends Profile implements Serializable {
 		return NucleusBorderSegment.copy(this.segments);
 	}
 	
+
+	/**
+	 * Get an iterator that begins with the segment at position zero in the profile
+	 * @return
+	 * @throws Exception
+	 */
+	public Iterator<NucleusBorderSegment> segmentIterator() throws Exception {
+
+		List<NucleusBorderSegment> list = new ArrayList<NucleusBorderSegment>();
+		
+		// find the first segment
+		NucleusBorderSegment first = null;
+		
+		for(NucleusBorderSegment seg : this.segments){
+			if(seg.getPosition()==0){
+				first = seg;
+			}
+		}
+		
+		list = getSegmentsFrom(first);
+		
+		
+		
+		return list.iterator();
+	}
+	
+	/**
+	 * Get the segments in order from the given segment
+	 * @param firstSeg
+	 * @return
+	 * @throws Exception
+	 */
+	private List<NucleusBorderSegment> getSegmentsFrom(NucleusBorderSegment firstSeg) throws Exception {
+		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
+		int i = segments.size()-1; // the number of segments 
+		result.add(firstSeg);
+		while(i>0){
+			
+			if(firstSeg.hasNextSegment()){
+				firstSeg = firstSeg.nextSegment();
+				result.add(firstSeg);
+				i--;
+			} else {
+				throw new Exception(i+": No next segment in "+firstSeg.toString());
+			}
+		}
+		return NucleusBorderSegment.copy(result);
+	}
+	
+	
 	/**
 	 * Get a copy of the segments in this profile, ordered 
 	 * from the zero index of the profile
@@ -145,30 +220,32 @@ public class SegmentedProfile extends Profile implements Serializable {
 			}
 		}
 		
-		result.add(firstSeg);
+		result = getSegmentsFrom(firstSeg);
 		
-		/*
-		 * Test 5 segments
-		 * Input: seg 0 has been added
-		 * i = 4
-		 * Round 1 : seg 1 added; set i to 3
-		 * Round 2 : seg 2 added; set i to 2
-		 * Round 4 : seg 3 added; set i to 1
-		 * Round 5 : seg 4 added; set i to 0 
-		 * Break as i=0; 5 segments added
-		 */
-		
-		int i = segments.size()-1; // the number of segments 
-		while(i>0){
-			
-			if(firstSeg.hasNextSegment()){
-				firstSeg = firstSeg.nextSegment();
-				result.add(firstSeg);
-				i--;
-			} else {
-				throw new Exception(i+": No next segment in "+firstSeg.toString());
-			}
-		}
+//		result.add(firstSeg);
+//		
+//		/*
+//		 * Test 5 segments
+//		 * Input: seg 0 has been added
+//		 * i = 4
+//		 * Round 1 : seg 1 added; set i to 3
+//		 * Round 2 : seg 2 added; set i to 2
+//		 * Round 4 : seg 3 added; set i to 1
+//		 * Round 5 : seg 4 added; set i to 0 
+//		 * Break as i=0; 5 segments added
+//		 */
+//		
+//		int i = segments.size()-1; // the number of segments 
+//		while(i>0){
+//			
+//			if(firstSeg.hasNextSegment()){
+//				firstSeg = firstSeg.nextSegment();
+//				result.add(firstSeg);
+//				i--;
+//			} else {
+//				throw new Exception(i+": No next segment in "+firstSeg.toString());
+//			}
+//		}
 		return NucleusBorderSegment.copy(result);
 	}
 	
@@ -186,6 +263,24 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment result = null;
 		for(NucleusBorderSegment seg : this.segments){
 			if(seg.getName().equals(name)){
+				result = seg;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Get the segment at the given position in the profile.
+	 * is found. Gets the actual segment, not a copy
+	 * @param name
+	 * @return
+	 */
+	public NucleusBorderSegment getSegmentAt(int position){
+		
+		
+		NucleusBorderSegment result = null;
+		for(NucleusBorderSegment seg : this.segments){
+			if(seg.getPosition()==position){
 				result = seg;
 			}
 		}
@@ -418,6 +513,69 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		List<NucleusBorderSegment> segments = NucleusBorderSegment.nudge(getSegments(), -newStartIndex);
 		return new SegmentedProfile(offsetProfile, segments);
+	}
+	
+	
+	/**
+	 * Interpolate the segments of this profile to the proportional lengths of the
+	 * segments in the template. The template must have the same number of segments.
+	 * Both this and the template must be already offset to start at equivalent positions
+	 * @param template the profile with segments to copy.
+	 * @return
+	 * @throws Exception
+	 */
+	public SegmentedProfile frankenNormaliseToProfile(SegmentedProfile template) throws Exception {
+		
+		if(this.getSegmentCount()!=template.getSegmentCount()){
+			throw new IllegalArgumentException("Segment counts are different in profile and template");
+		}
+		
+		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
+		
+//		 Get the list of segments in the template profile
+		
+		Iterator<NucleusBorderSegment> it = template.segmentIterator();
+		
+		while(it.hasNext()){
+			NucleusBorderSegment seg = it.next();
+			Profile revisedProfile = interpolateSegment(seg);
+			finalSegmentProfiles.add(revisedProfile);
+		}
+		
+//		for(NucleusBorderSegment seg : template.getSegments()){
+//
+////			Interpolate the subject segments as profiles
+//			Profile revisedProfile = interpolateSegment(seg);
+//			finalSegmentProfiles.add(revisedProfile);
+//
+//		}
+
+//		Recombine the segment profiles
+		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
+		
+		SegmentedProfile result = new SegmentedProfile(mergedProfile, template.getSegments());
+		return result;
+	}
+	
+	/**
+	 * The interpolation step of frankenprofile creation. The segment in this profile,
+	 * with the same name as the template segment is interpolated to the length of the template,
+	 * and returned as a new Profile.
+	 * @param templateSegment the segment to base the interpolation on
+	 * @return the interpolated profile
+	 */
+	private Profile interpolateSegment(NucleusBorderSegment templateSegment){
+
+		// The segment to be interpolated
+		NucleusBorderSegment testSeg = this.getSegmentAt(templateSegment.getPosition());
+//		NucleusBorderSegment testSeg = this.getSegment(templateSegment.getName());
+		
+		// get the region within the segment as a new profile
+		Profile testSegProfile = this.getSubregion(testSeg);
+
+		// interpolate the test segments to the length of the median segments
+		Profile revisedProfile = testSegProfile.interpolate(templateSegment.length());
+		return revisedProfile;
 	}
 	
 	/**

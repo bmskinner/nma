@@ -152,7 +152,8 @@ public class SegmentFitter {
 			fileLogger.log(Level.SEVERE, "Recombined nucleus is null");
 			throw new IllegalArgumentException("Test nucleus is null");
 		}
-		Profile frankenProfile = null;
+//		Profile frankenProfile = null;
+		SegmentedProfile frankenProfile = null;
 		try {
 			if(n.getAngleProfile().getSegments()==null){
 				fileLogger.log(Level.SEVERE, "Nucleus has no segments");
@@ -167,7 +168,8 @@ public class SegmentFitter {
 //			fileLogger.log("Angle at nucleus profile index 0 ("+tag+") is "+nucleusProfile.get(0));
 			
 			// stretch or squeeze the segments to match the length of the median profile of the collection
-			frankenProfile = recombineSegments(n, nucleusProfile, tag);
+//			frankenProfile = recombineSegments(n, nucleusProfile, tag);
+			frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
 		} catch(Exception e){
 			fileLogger.log(Level.SEVERE, "Error recombining segments", e);
 		}
@@ -246,77 +248,77 @@ public class SegmentFitter {
 	 * @param tag the border tag to start from
 	 * @return a frankenprofile constructed from the stretched segments
 	 */
-	private Profile recombineSegments(Nucleus n, SegmentedProfile profile, BorderTag tag) throws Exception {
-		
-		if(profile==null){
-			throw new IllegalArgumentException("Test profile is null in recombiner");
-		}
-		fileLogger.log(Level.FINE, "Recombining segments to FrankenProfile");
-		fileLogger.log(Level.FINE, "    Segmentation beginning from "+tag);
-//		fileLogger.log("    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag), fileLogger.DEBUG);
-//		fileLogger.log("    Angle at incoming segmented profile index 0 ("+tag+") is "+profile.get(0));
-		
-		
-		/*
-		 * The profiles derived from each segment will be merged to a single 
-		 * profile at the end. Store them ordered in a list
-		 */
-		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
-		
-		/*
-		 * The incoming nucleus profile has been offset to begin from 
-		 * the border tag (usually the reference point)
-		 * 
-		 * The first segment in the profile should therefore be directly after the reference point,
-		 * and no further offsets are needed.
-		 * 
-		 * The profile segmenter should be forcing a segment end at the reference point
-		 * Using getOrderedSegments() rather than getSegments() to force the zero index segment
-		 * to be first in the list.
-		 * 
-		 * The problem occurs in getOrderedSegments() - the wrong segment is put in postion 0
-		 * The wrong segment is the segment directly before the correct segment
-		 */
-		for(NucleusBorderSegment seg : profile.getOrderedSegments()){
-
-			Profile revisedProfile = interpolateSegment(seg.getOldName(), profile);
-			finalSegmentProfiles.add(revisedProfile);
-			
-			fileLogger.log(Level.FINE, "    Recombining segment: "+seg.toString());
-//			fileLogger.log("    Segment starting angle: "+revisedProfile.get(0), fileLogger.DEBUG);
-
-		}
-
-		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
-		
-//		fileLogger.log("Angle at franken profile index 0 ("+tag+") is "+mergedProfile.get(0));
-		return mergedProfile;
-	}
-	
-	/**
-	 * The interpolation step of frankenprofile creation
-	 * @param name the segment to interpolate
-	 * @param profile the profile to take it from
-	 * @return the interpolated profile
-	 */
-	private Profile interpolateSegment(String name, SegmentedProfile profile){
-
-		NucleusBorderSegment testSeg = profile.getSegment(name);
-		
-		// The relevant segment from the median profile
-		NucleusBorderSegment 	medianSegment = this.medianProfile.getSegment(name);
-
-		// get the region within the segment as a new profile
-		Profile testSegProfile = profile.getSubregion(testSeg);
-
-		// interpolate the test segments to the length of the median segments
-		Profile revisedProfile = testSegProfile.interpolate(medianSegment.length());
-
-		if(debug){
-			fileLogger.log(Level.FINE, "\tAdjusted segment "+name+":\t"+testSeg.getStartIndex()+"-"+testSeg.getEndIndex()+"\t"+testSeg.length()+" -> "+medianSegment.length());
-		}
-		return revisedProfile;
-	}
+//	private Profile recombineSegments(Nucleus n, SegmentedProfile profile, BorderTag tag) throws Exception {
+//		
+//		if(profile==null){
+//			throw new IllegalArgumentException("Test profile is null in recombiner");
+//		}
+//		fileLogger.log(Level.FINE, "Recombining segments to FrankenProfile");
+//		fileLogger.log(Level.FINE, "    Segmentation beginning from "+tag);
+////		fileLogger.log("    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag), fileLogger.DEBUG);
+////		fileLogger.log("    Angle at incoming segmented profile index 0 ("+tag+") is "+profile.get(0));
+//		
+//		
+//		/*
+//		 * The profiles derived from each segment will be merged to a single 
+//		 * profile at the end. Store them ordered in a list
+//		 */
+//		List<Profile> finalSegmentProfiles = new ArrayList<Profile>(0);
+//		
+//		/*
+//		 * The incoming nucleus profile has been offset to begin from 
+//		 * the border tag (usually the reference point)
+//		 * 
+//		 * The first segment in the profile should therefore be directly after the reference point,
+//		 * and no further offsets are needed.
+//		 * 
+//		 * The profile segmenter should be forcing a segment end at the reference point
+//		 * Using getOrderedSegments() rather than getSegments() to force the zero index segment
+//		 * to be first in the list.
+//		 * 
+//		 * The problem occurs in getOrderedSegments() - the wrong segment is put in postion 0
+//		 * The wrong segment is the segment directly before the correct segment
+//		 */
+//		for(NucleusBorderSegment seg : profile.getOrderedSegments()){
+//
+//			Profile revisedProfile = interpolateSegment(seg.getOldName(), profile);
+//			finalSegmentProfiles.add(revisedProfile);
+//			
+//			fileLogger.log(Level.FINE, "    Recombining segment: "+seg.toString());
+////			fileLogger.log("    Segment starting angle: "+revisedProfile.get(0), fileLogger.DEBUG);
+//
+//		}
+//
+//		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));
+//		
+////		fileLogger.log("Angle at franken profile index 0 ("+tag+") is "+mergedProfile.get(0));
+//		return mergedProfile;
+//	}
+//	
+//	/**
+//	 * The interpolation step of frankenprofile creation
+//	 * @param name the segment to interpolate
+//	 * @param profile the profile to take it from
+//	 * @return the interpolated profile
+//	 */
+//	private Profile interpolateSegment(String name, SegmentedProfile profile){
+//
+//		NucleusBorderSegment testSeg = profile.getSegment(name);
+//		
+//		// The relevant segment from the median profile
+//		NucleusBorderSegment 	medianSegment = this.medianProfile.getSegment(name);
+//
+//		// get the region within the segment as a new profile
+//		Profile testSegProfile = profile.getSubregion(testSeg);
+//
+//		// interpolate the test segments to the length of the median segments
+//		Profile revisedProfile = testSegProfile.interpolate(medianSegment.length());
+//
+//		if(debug){
+//			fileLogger.log(Level.FINE, "\tAdjusted segment "+name+":\t"+testSeg.getStartIndex()+"-"+testSeg.getEndIndex()+"\t"+testSeg.length()+" -> "+medianSegment.length());
+//		}
+//		return revisedProfile;
+//	}
 	
 	/**
 	 * In progress version of fitter for 1.10.0

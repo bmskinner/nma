@@ -202,7 +202,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 //		}
 		return this.name;
 	}
-
+	
 	/**
 	 * Get the name of the segment in the form "Seg_n"
 	 * where n is the position in the profile
@@ -719,7 +719,6 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		boolean ok = firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
 		if(!ok){
 			throw new Exception("Error fitting final segment: "+firstSegment.getLastFailReason());
-//			IJ.log("Error fitting final segment: "+firstSegment.getLastFailReason());
 		}
 
 		lastSegment.setNextSegment(firstSegment); // ensure they match up at the end
