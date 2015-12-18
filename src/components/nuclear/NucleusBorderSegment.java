@@ -731,30 +731,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		// it to start at 0
 		if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
 			firstSegment.update(0, firstSegment.getEndIndex());
-		}
-		
-//		/*
-//		 * Set the positions of the segments based on start index, if available
-//		 * Get the segment with index 0, and use this as the start
-//		 */
-//
-//		NucleusBorderSegment first = null;
-//		for(NucleusBorderSegment segment : list){
-//			if(segment.getStartIndex()==0){
-//				first = segment;
-//			}
-//		}
-//		
-//		if(first!=null){
-//			int positionInProfile = 0;
-//			int counter = list.size();
-//			while(counter>0){
-//				first.setPosition(positionInProfile++);
-//				first = first.nextSegment();
-//				counter--;
-//			}
-//		}
-		
+		}		
 		
 	}
 	

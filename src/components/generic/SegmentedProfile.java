@@ -581,25 +581,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 //		Iterator<NucleusBorderSegment> it = template.segmentIterator();
 		
-		IJ.log("FrankenNormalising profile");
-		
-//		while(it.hasNext()){
-//			
-//			// Get the template segment, starting from template seg 0
-//			// This should be the correct zero index of the template profile
-//			NucleusBorderSegment templateSeg = it.next();
-//			
-//			// Get the corresponding segment in this profile, by segment position
-//			NucleusBorderSegment testSeg = this.segments.get(templateSeg.getPosition());
-//			
-//			IJ.log(" FrankenNormalising segment:");
-//			IJ.log("    Temp: "+templateSeg.toString()+"  Angle: "+template.get(templateSeg.getStartIndex()));
-//			IJ.log("    Test: "+testSeg.toString()+"  Angle: "+this.get(testSeg.getStartIndex()));
-//			
-//			// Interpolate the segment region to the new length
-//			Profile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
-//			finalSegmentProfiles.add(revisedProfile);
-//		}
+//		IJ.log("FrankenNormalising profile");
 		
 		
 		List<NucleusBorderSegment> tempList = template.getOrderedSegments();
@@ -612,9 +594,9 @@ public class SegmentedProfile extends Profile implements Serializable {
 			// Get the corresponding segment in this profile, by segment position
 			NucleusBorderSegment testSeg = testList.get(counter++);
 
-			IJ.log(" FrankenNormalising segment:");
-			IJ.log("    Temp: "+templateSeg.toString()+"  Angle: "+template.get(templateSeg.getStartIndex()));
-			IJ.log("    Test: "+testSeg.toString()+"  Angle: "+this.get(testSeg.getStartIndex()));
+//			IJ.log(" FrankenNormalising segment:");
+//			IJ.log("    Temp: "+templateSeg.toString()+"  Angle: "+template.get(templateSeg.getStartIndex()));
+//			IJ.log("    Test: "+testSeg.toString()+"  Angle: "+this.get(testSeg.getStartIndex()));
 
 			// Interpolate the segment region to the new length
 			Profile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
