@@ -45,6 +45,7 @@ import logging.DebugFileFormatter;
 import logging.DebugFileHandler;
 import logging.LogPanelFormatter;
 import utility.Constants;
+import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
 import components.nuclear.ShellResult;
@@ -124,6 +125,23 @@ public class AnalysisDataset implements Serializable {
 		this.savePath = saveFile;
 		this.isRoot = false;
 		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
+	}
+	
+	
+	/**
+	 * Make a copy of the cells in this dataset. Does not yet include
+	 * child datasets, clusters or signal groups
+	 * @return
+	 */
+	public AnalysisDataset duplicate(){
+		AnalysisDataset result = new AnalysisDataset(this.getCollection());
+		for(Cell c : this.getCollection().getCells()){
+			result.getCollection().addCell(new Cell(c));
+		}
+		
+//		TODO: Add child collections, clusters etc
+		
+		return result;
 	}
 		
 	/**

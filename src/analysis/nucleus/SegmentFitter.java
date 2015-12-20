@@ -93,6 +93,18 @@ public class SegmentFitter {
 		
 	}
 	
+	public SegmentFitter(SegmentedProfile medianProfile){
+		if(medianProfile==null){
+			throw new IllegalArgumentException("Median profile is null");
+		}
+
+		try {
+			this.medianProfile  = new SegmentedProfile(medianProfile);
+		} catch (Exception e) {
+			
+		}
+	}
+	
 	/**
 	 * Run the segment fitter on the given nucleus. It will take the segments
 	 * loaded into the fitter upon cosntruction, and apply them to the nucleus
