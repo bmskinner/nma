@@ -280,82 +280,161 @@ public class NucleusTableDatasetCreator {
 			model.addColumn("No data loaded");
 		} else {
 
-			// format the numbers and make into a tablemodel
-			DecimalFormat df = new DecimalFormat("#0.00"); 
-
 			for(AnalysisDataset dataset : list){
-				CellCollection collection = dataset.getCollection();
-				AnalysisOptions options = dataset.getAnalysisOptions();
-
 				
 				// only display if there are options available
 				// This may not be the case for a merged dataset or its children
-				if(options!=null){ 
+				if(dataset.getAnalysisOptions()!=null){ 
 
-					// only display refold mode if nucleus was refolded
-					String refoldMode = options.refoldNucleus() 
-							? options.getRefoldMode()
-									: "N/A";
+					Object[] collectionData = formatAnalysisOptionsForTable(dataset, null);
 
-							String[] times = collection.getOutputFolderName().split("_");
-							String date = times[0];
-							String time = times[1];
-
-							CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
-
-							String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
-							String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
-							
-							String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara() ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : "N/A";
-							
-							String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
-							String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
-							String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
-							String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : "N/A";
-							String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : "N/A";
-							String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
-
-							Object[] collectionData = {
-									options.getAngleProfileWindowSize(),
-									detectionMethod,
-									nucleusThreshold,
-									kuwaharaRadius,
-									cannyAutoThreshold,
-									cannyLowThreshold,
-									cannyHighThreshold,
-									cannyKernelRadius,
-									cannyKernelWidth,
-									cannyClosingRadius,
-									options.getMinNucleusSize(),
-									options.getMaxNucleusSize(),
-									df.format(options.getMinNucleusCirc()),
-									df.format(options.getMaxNucleusCirc()),
-									options.refoldNucleus(),
-									refoldMode,
-									dataset.hasShellResult(),
-									date,
-									time,
-									collection.getFolder(),
-									options.getNucleusType().toString(),
-									dataset.getVersion()
-							};
-
-							model.addColumn(collection.getName(), collectionData);
+					model.addColumn(dataset.getCollection().getName(), collectionData);
+					
 				} else {
-					// there are no options to use; fill blank
+					
 					Object[] collectionData =  new Object[columnData.length];
 					if(dataset.hasMergeSources()){
-						Arrays.fill(collectionData, "N/A - merged");
+						
+						AnalysisOptions op = testMergedDatasetOptionsAreSame(dataset);
+						if(op!=null){
+							// The options are all the same, show the first option
+							collectionData = formatAnalysisOptionsForTable(dataset, op);
+
+							model.addColumn(dataset.getCollection().getName(), collectionData);
+							
+						} else {
+							// Merge sources have different options
+							Arrays.fill(collectionData, "N/A - merged");
+						
+						}
 
 					} else {
+						// there are no options to use; fill blank
 						Arrays.fill(collectionData, "N/A");
 					}
 					
-					model.addColumn(collection.getName(), collectionData);
+					model.addColumn(dataset.getCollection().getName(), collectionData);
 				}
 			}
 		}
 		return model;	
+	}
+	
+	/**
+	 * Test if the merge sources of a dataset have the same analysis options
+	 * TODO: make recursive; what happens when two merged datsets are merged?
+	 * @param dataset
+	 * @return the common options, or null if an options is different
+	 */
+	private static AnalysisOptions testMergedDatasetOptionsAreSame(AnalysisDataset dataset){
+		
+		AnalysisOptions result = null;
+		
+		List<UUID> list = dataset.getMergeSources();
+		
+//		Test each merge source against each other
+		for(UUID id : dataset.getMergeSources()){
+			
+			AnalysisDataset d = dataset.getMergeSource(id);
+			
+			if(dataset.getAnalysisOptions()!=null){ 
+				
+				
+				for(UUID id2 : dataset.getMergeSources()){
+					AnalysisDataset d2 = dataset.getMergeSource(id2);
+					
+					if(dataset.getAnalysisOptions()!=null){ 
+						if( ! d.getAnalysisOptions().equals(d2.getAnalysisOptions())){
+							return null;
+						}
+					} else {
+						if(d.hasMergeSources()){
+							
+							result = testMergedDatasetOptionsAreSame(d);
+							
+						} else {
+							return null;
+						}
+					}
+					
+					
+				}	
+				
+			} else {
+				
+				if(d.hasMergeSources()){
+					
+					result = testMergedDatasetOptionsAreSame(d);
+					
+				} else {
+					return null;
+				}
+			}
+			
+			
+			
+		}
+		return result;
+	}
+	
+	/**
+	 * Get an array of formatted info from a dataset analysis options
+	 * @param dataset
+	 * @return
+	 */
+	private static Object[] formatAnalysisOptionsForTable(AnalysisDataset dataset, AnalysisOptions options){
+		options = options == null ? dataset.getAnalysisOptions() : options;
+		
+		DecimalFormat df = new DecimalFormat("#0.00"); 
+		
+		// only display refold mode if nucleus was refolded
+		String refoldMode = options.refoldNucleus() 
+				? options.getRefoldMode()
+						: "N/A";
+
+		String[] times = dataset.getCollection().getOutputFolderName().split("_");
+		String date = times[0];
+		String time = times[1];
+
+		CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
+
+		String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
+		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getNucleusThreshold());
+		
+		String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara() ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : "N/A";
+		
+		String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
+		String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
+		String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
+		String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : "N/A";
+		String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : "N/A";
+		String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
+
+		Object[] collectionData = {
+				options.getAngleProfileWindowSize(),
+				detectionMethod,
+				nucleusThreshold,
+				kuwaharaRadius,
+				cannyAutoThreshold,
+				cannyLowThreshold,
+				cannyHighThreshold,
+				cannyKernelRadius,
+				cannyKernelWidth,
+				cannyClosingRadius,
+				options.getMinNucleusSize(),
+				options.getMaxNucleusSize(),
+				df.format(options.getMinNucleusCirc()),
+				df.format(options.getMaxNucleusCirc()),
+				options.refoldNucleus(),
+				refoldMode,
+				dataset.hasShellResult(),
+				date,
+				time,
+				dataset.getCollection().getFolder(),
+				options.getNucleusType().toString(),
+				dataset.getVersion()
+				};
+		return collectionData;
 	}
 	
 	/**

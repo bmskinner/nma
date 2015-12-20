@@ -289,6 +289,50 @@ public class AnalysisOptions implements Serializable {
 	}
 
 	
+	/**
+	 * Test if another options has the same value as this.
+	 * @param options
+	 * @return
+	 */
+	public boolean equals(AnalysisOptions options){
+
+		if( nucleusThreshold!= options.getNucleusThreshold()){
+			return false;
+		}
+		if( minNucleusSize!= options.getMinNucleusSize()){
+			return false;
+		}
+		if( maxNucleusSize!= options.getMaxNucleusSize()){
+			return false;
+		}
+		if( minNucleusCirc!= options.getMinNucleusCirc()){
+			return false;
+		}
+		if( maxNucleusCirc!= options.getMaxNucleusCirc()){
+			return false;
+		}
+		if( normaliseContrast!= options.isNormaliseContrast()){
+			return false;
+		}
+		if( angleProfileWindowSize!= options.getAngleProfileWindowSize()){
+			return false;
+		}
+		if( nucleusType!= options.getNucleusType()){
+			return false;
+		}
+		if( performReanalysis!= options.isReanalysis()){
+			return false;
+		}
+
+		CannyOptions thisCanny = edgeDetection.get("nucleus");
+
+		if( !thisCanny.equals( options.getCannyOptions("nucleus"))){
+			return false;
+		}
+		return true;
+		
+	}
+	
 	public class CannyOptions implements Serializable {
 
 		private static final long serialVersionUID = 1L;
@@ -428,6 +472,55 @@ public class AnalysisOptions implements Serializable {
 
 		public void setKernelWidth(int kernelWidth) {
 			this.kernelWidth = kernelWidth;
+		}
+		
+		public boolean equals(CannyOptions options){
+
+			if( useCanny != options.isUseCanny()){
+				return false;
+			}
+			
+			if( cannyAutoThreshold != options.isCannyAutoThreshold()){
+				return false;
+			}
+			
+			if( flattenChromocentres != options.isUseFlattenImage()){
+				return false;
+			}
+			
+			if( flattenThreshold != options.getFlattenThreshold()){
+				return false;
+			}
+			
+			if( useKuwahara != options.isUseKuwahara()){
+				return false;
+			}
+
+			if( kuwaharaKernel != options.getKuwaharaKernel()){
+				return false;
+			}
+			
+			
+			if( lowThreshold != options.getLowThreshold()){
+				return false;
+			}
+			
+			if( highThreshold != options.getHighThreshold()){
+				return false;
+			}
+
+			if( kernelRadius != options.getKernelRadius()){
+				return false;
+			}
+			
+			if( kernelWidth != options.getKernelWidth()){
+				return false;
+			}
+			
+			if( closingObjectRadius != options.getClosingObjectRadius()){
+				return false;
+			}
+			return true;
 		}
 	}
 	
