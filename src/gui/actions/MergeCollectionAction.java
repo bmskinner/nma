@@ -32,7 +32,7 @@ import analysis.nucleus.MorphologyAnalysis;
 public class MergeCollectionAction extends ProgressableAction {
 
 	public MergeCollectionAction(List<AnalysisDataset> datasets, MainWindow mw) {
-		super(null, "Merging", "Error merging", mw);
+		super(null, "Merging", mw);
 
 		SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Constants.SAVE_FILE_EXTENSION);
 

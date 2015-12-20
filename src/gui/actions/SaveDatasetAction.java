@@ -25,7 +25,7 @@ public class SaveDatasetAction extends ProgressableAction {
 	 * @param doneSignal a latch to hold threads until the save is complete
 	 */
 	public SaveDatasetAction(AnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
-		super(dataset, "Saving dataset", "Error saving dataset", mw);
+		super(dataset, "Saving dataset", mw);
 		setLatch(doneSignal);
 		log(Level.FINEST, "Save dataset action created by explicit file location");
 		
@@ -42,7 +42,7 @@ public class SaveDatasetAction extends ProgressableAction {
 	 * @param chooseSaveLocation save to the default dataset save file, or choose another location
 	 */
 	public SaveDatasetAction(AnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal, boolean chooseSaveLocation) {
-		super(dataset, "Saving dataset", "Error saving dataset", mw);
+		super(dataset, "Saving dataset", mw);
 		setLatch(doneSignal);
 		log(Level.FINEST, "Save dataset action created by default or manual file location");
 		

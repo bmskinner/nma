@@ -17,7 +17,7 @@ import analysis.nucleus.MorphologyAnalysis;
 public class DatasetArithmeticAction extends ProgressableAction {
 
 	public DatasetArithmeticAction(AnalysisDataset selected, List<AnalysisDataset> list, MainWindow mw) {
-		super(null, "Dataset arithmetic", "Error in dataset arithmetic", mw);
+		super(null, "Dataset arithmetic", mw);
 
 		try {
 			programLogger.log(Level.FINE, "Performing arithmetic...");

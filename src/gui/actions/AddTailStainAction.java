@@ -31,7 +31,7 @@ import analysis.tail.TubulinTailDetector;
 public class AddTailStainAction extends ProgressableAction {
 
 	public AddTailStainAction(AnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Tail detection", "Error in tail detection", mw);
+		super(dataset, "Tail detection", mw);
 		try{
 			
 			TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions(), programLogger);

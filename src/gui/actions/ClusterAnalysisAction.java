@@ -34,7 +34,7 @@ import components.ClusterGroup;
 public class ClusterAnalysisAction extends ProgressableAction {
 
 	public ClusterAnalysisAction(AnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Cluster analysis", "Error in cluster analysis", mw);
+		super(dataset, "Cluster analysis", mw);
 
 		ClusteringSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
 		ClusteringOptions options = clusterSetup.getOptions();

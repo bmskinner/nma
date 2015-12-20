@@ -30,7 +30,7 @@ import analysis.nucleus.ShellAnalysis;
 public class ShellAnalysisAction extends ProgressableAction {
 
 	public ShellAnalysisAction(AnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Shell analysis", "Error in shell analysis", mw);
+		super(dataset, "Shell analysis", mw);
 
 		SpinnerNumberModel sModel = new SpinnerNumberModel(5, 2, 10, 1);
 		JSpinner spinner = new JSpinner(sModel);

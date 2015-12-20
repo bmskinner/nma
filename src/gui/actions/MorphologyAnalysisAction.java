@@ -49,7 +49,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 	 * @param downFlag the next analyses to perform
 	 */
 	public MorphologyAnalysisAction(AnalysisDataset dataset, int mode, int downFlag, MainWindow mw){
-		super(dataset, "Morphology analysis", "Error in analysis", mw, downFlag);
+		super(dataset, "Morphology analysis", mw, downFlag);
 		programLogger.log(Level.FINE, "Creating morphology analysis");
 		this.mode = mode;
 		runNewAnalysis();
@@ -62,13 +62,44 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 	 * @param downFlag the next analyses to perform
 	 */
 	public MorphologyAnalysisAction(List<AnalysisDataset> list, int mode, int downFlag, MainWindow mw){
-		super(list.get(0), "Morphology analysis", "Error in analysis", mw, downFlag);
+		super(list.get(0), "Morphology analysis", mw, downFlag);
 		programLogger.log(Level.FINE, "Creating morphology analysis");
 		this.mode = mode;
 		this.processList = list;
 		processList.remove(0); // remove the first entry
 		
 		runNewAnalysis();
+	}
+	
+	/**
+	 * Copy the morphology information from the source dataset to the dataset
+	 * @param dataset the target
+	 * @param source the source
+	 */
+	public MorphologyAnalysisAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag, MainWindow mw){
+		super(dataset, "Copying morphology to "+dataset.getName(), mw);
+
+		this.mode = MorphologyAnalysis.MODE_COPY;
+		this.source = source;
+		if(downFlag!=null){
+			this.downFlag = downFlag;
+		}
+		
+		// always copy when a source is given
+		worker = new MorphologyAnalysis(dataset, source.getCollection(), programLogger);
+		worker.addPropertyChangeListener(this);
+		worker.execute();
+	}
+	
+	/**
+	 * Copy the morphology information from the source dataset to each dataset in a list
+	 * @param list
+	 * @param source
+	 */
+	public MorphologyAnalysisAction(List<AnalysisDataset> list, AnalysisDataset source, Integer downFlag, MainWindow mw){
+		this(list.get(0), source, downFlag, mw ); // take the first entry
+		this.processList = list;
+		processList.remove(0); // remove the first entry
 	}
 	
 	private void runNewAnalysis(){
@@ -98,38 +129,6 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 			programLogger.log(Level.SEVERE, "Error in morphology analysis", e);
 		}
 	}
-
-
-	/**
-	 * Copy the morphology information from the source dataset to the dataset
-	 * @param dataset the target
-	 * @param source the source
-	 */
-	public MorphologyAnalysisAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag, MainWindow mw){
-		super(dataset, "Copying morphology to "+dataset.getName(), "Error in analysis", mw);
-
-		this.mode = MorphologyAnalysis.MODE_COPY;
-		this.source = source;
-		if(downFlag!=null){
-			this.downFlag = downFlag;
-		}
-		
-		// always copy when a source is given
-		worker = new MorphologyAnalysis(dataset, source.getCollection(), programLogger);
-		worker.addPropertyChangeListener(this);
-		worker.execute();
-	}
-	
-	/**
-	 * Copy the morphology information from the source dataset to each dataset in a list
-	 * @param list
-	 * @param source
-	 */
-	public MorphologyAnalysisAction(List<AnalysisDataset> list, AnalysisDataset source, Integer downFlag, MainWindow mw){
-		this(list.get(0), source, downFlag, mw ); // take the first entry
-		this.processList = list;
-		processList.remove(0); // remove the first entry
-	}
   
 	@Override
 	public void finished() {
@@ -144,8 +143,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 			public void run(){
 
 				if(  (downFlag & MainWindow.STATS_EXPORT) == MainWindow.STATS_EXPORT){
-//					logger.log(Level.FINE, "Running stats export");
-//					logger.log("Running stats export", utility.Logger.DEBUG);
+
 					programLogger.log(Level.INFO, "Exporting stats");
 					boolean ok = StatsExporter.run(dataset);
 					if(ok){
@@ -157,7 +155,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 
 				// annotate the nuclei in the population
 				if(  (downFlag & MainWindow.NUCLEUS_ANNOTATE) == MainWindow.NUCLEUS_ANNOTATE){
-//					logger.log("Running annotation", utility.Logger.DEBUG);
+
 					programLogger.log(Level.INFO, "Annotating nuclei...");
 					boolean ok = NucleusAnnotator.run(dataset);
 					if(ok){

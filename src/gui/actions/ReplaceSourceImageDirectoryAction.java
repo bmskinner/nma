@@ -11,7 +11,7 @@ import io.PopulationImporter;
 public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 
 	public ReplaceSourceImageDirectoryAction(AnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Replacing images", "Error replacing images", mw);
+		super(dataset, "Replacing images", mw);
 		this.cooldown();
 
 		try{

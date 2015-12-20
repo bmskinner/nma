@@ -36,7 +36,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	private int signalGroup = 0;
 	
 	public AddNuclearSignalAction(AnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Signal detection", "Error in signal detection", mw);
+		super(dataset, "Signal detection", mw);
 
 		try{
 			// add dialog for non-default detection options

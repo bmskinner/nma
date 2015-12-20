@@ -52,7 +52,7 @@ abstract class ProgressableAction implements PropertyChangeListener {
 
 	protected AnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;
-	private String errorMessage = null;
+	
 	protected AnalysisWorker worker = null;
 	protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
 	private LogPanel logPanel;
@@ -63,9 +63,8 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	private List<Object> interfaceListeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	
-	public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, MainWindow mw){
+	public ProgressableAction(AnalysisDataset dataset, String barMessage, MainWindow mw){
 		
-		this.errorMessage 	= errorMessage;
 		this.dataset 		= dataset;
 		this.progressBar 	= new JProgressBar(0, 100);
 		this.progressBar.setString(barMessage);
@@ -78,14 +77,23 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		logPanel.addProgressBar(this.progressBar);
 		logPanel.revalidate();
 		logPanel.repaint();
-		
-
-//		worker.addPropertyChangeListener(this);
 
 		this.addInterfaceEventListener(mw);
 		this.addDatasetEventListener(mw);
 		log(Level.FINEST, "Created progressable action");
 
+	}
+	
+	/**
+	 * Constructor including a flag for downstream analyses to be carried out
+	 * @param dataset
+	 * @param barMessage
+	 * @param mw
+	 * @param flag
+	 */
+	public ProgressableAction(AnalysisDataset dataset, String barMessage, MainWindow mw, int flag){
+		this(dataset, barMessage, mw);
+		this.downFlag = flag;
 	}
 	
 	protected void log(Level level, String message){
@@ -101,12 +109,7 @@ abstract class ProgressableAction implements PropertyChangeListener {
 			latch.countDown();
 		}
 	}
-	
-	public ProgressableAction(AnalysisDataset dataset, String barMessage, String errorMessage, MainWindow mw, int flag){
-		this(dataset, barMessage, errorMessage, mw);
-		this.downFlag = flag;
-	}
-	
+		
 	/**
 	 * Change the progress message from the default in the constructor
 	 * @param messsage the string to display
@@ -121,6 +124,9 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		logPanel.repaint();
 	}
 	
+	/**
+	 * Remove the progress bar and dataset and interface listeners 
+	 */
 	public void cancel(){
 		removeProgressBar();
 		removeDatasetEventListener(mw);
@@ -180,8 +186,8 @@ abstract class ProgressableAction implements PropertyChangeListener {
 
 		log(Level.FINEST, "Firing update populations");
 		fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
-		log(Level.FINEST, "Firing save root");
-		fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
+//		log(Level.FINEST, "Firing save root");
+//		fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
 		
 		
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
@@ -201,13 +207,6 @@ abstract class ProgressableAction implements PropertyChangeListener {
 		this.removeDatasetEventListener(mw);
 	}
 	
-	/**
-	 * Runs when an error was encountered in the analysis
-	 */
-////	public void logError(){
-//		programLogger.log(Level.WARNING, this.errorMessage);
-//		removeProgressBar();
-//	}
 	
 	/**
 	 * Runs if a cooldown signal is received. Use to set progress bars

@@ -13,7 +13,7 @@ import analysis.AnalysisDataset;
 public class SplitCollectionAction extends ProgressableAction {
 
 	public SplitCollectionAction(AnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Splitting collection", "Error splitting collection", mw);
+		super(dataset, "Splitting collection", mw);
 
         	try {
 

@@ -16,7 +16,7 @@ import gui.dialogs.FishRemappingDialog;
 public class FishRemappingAction extends ProgressableAction {
 
 	public FishRemappingAction(List<AnalysisDataset> datasets, MainWindow mw) {
-		super(null, "Remapping", "Error remapping", mw);
+		super(null, "Remapping", mw);
 
 		try{
 

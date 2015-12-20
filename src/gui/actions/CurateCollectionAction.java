@@ -16,7 +16,7 @@ import analysis.nucleus.MorphologyAnalysis;
 public class CurateCollectionAction extends ProgressableAction {
 
 	public CurateCollectionAction(AnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Curating collection", "Error curating collection", mw);
+		super(dataset, "Curating collection", mw);
 
 		try{
 			ManualCellCurator curator = new ManualCellCurator(programLogger, dataset);
