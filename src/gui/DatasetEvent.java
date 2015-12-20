@@ -50,6 +50,7 @@ public class DatasetEvent extends EventObject {
 	 * @param source the source of the datasets
 	 * @param message the instruction on what to do with the datasets
 	 * @param sourceName the name of the object or component generating the datasets
+	 * @param sourceDataset a secondary dataset to use when handling the list
 	 * @param list the datasets to carry
 	 */
 	public DatasetEvent( Object source, DatasetMethod method, String sourceName, List<AnalysisDataset> list, AnalysisDataset sourceDataset) {

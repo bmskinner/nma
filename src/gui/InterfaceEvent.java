@@ -25,6 +25,11 @@ import java.util.List;
 
 import analysis.AnalysisDataset;
 
+/**
+ * Instruct a UI change or action, without requiring any particular datasets selected
+ * @author ben
+ *
+ */
 public class InterfaceEvent extends EventObject {
 	
 	private static final long serialVersionUID = 1L;

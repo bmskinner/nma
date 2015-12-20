@@ -18,7 +18,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 	public DatasetArithmeticAction(AnalysisDataset selected, List<AnalysisDataset> list, MainWindow mw) {
 		super(null, "Dataset arithmetic", mw);
-
+		this.cooldown();
 		try {
 			programLogger.log(Level.FINE, "Performing arithmetic...");
 
@@ -71,7 +71,6 @@ public class DatasetArithmeticAction extends ProgressableAction {
 					int flag = MainWindow.ADD_POPULATION;
 					flag |= MainWindow.SAVE_DATASET;
 					new MorphologyAnalysisAction(newDataset, flag, MorphologyAnalysis.MODE_NEW, mw);
-//					this.cancel();
 										
 				} else {
 					programLogger.log(Level.INFO,"No populations returned");
