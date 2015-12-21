@@ -28,6 +28,10 @@ import components.generic.XYPoint;
  * allow linkage of points, but this is not yet used
  *
  */
+/**
+ * @author ben
+ *
+ */
 public class NucleusBorderPoint
 	extends components.generic.XYPoint {
 
@@ -37,32 +41,54 @@ public class NucleusBorderPoint
 	private NucleusBorderPoint prevPoint = null;
 	private NucleusBorderPoint nextPoint = null;
 	
+	/**
+	 * Construct from x and y positions 
+	 * @param x
+	 * @param y
+	 */
 	public NucleusBorderPoint( double x, double y){
 		super(x, y);
 	}
 
+	/**
+	 * Construct from an existing XY point
+	 * @param p
+	 */
 	public NucleusBorderPoint( XYPoint p){
 		super(p);
 	}
 	
+	/**
+	 * Construct from an existing border point
+	 * @param p
+	 */
 	public NucleusBorderPoint( NucleusBorderPoint p){
 		super(p.getX(), p.getY());
 	}
 	
+	/**
+	 * Set the next point in the border
+	 * @param next
+	 */
 	public void setNextPoint(NucleusBorderPoint next){
 		this.nextPoint = next;
 	}
 	
+	
+	/**
+	 * Set the previous point in the border
+	 * @param prev
+	 */
 	public void setPrevPoint(NucleusBorderPoint prev){
 		this.prevPoint = prev;
 	}
 	
 	public NucleusBorderPoint nextPoint(){
-		return  this.nextPoint;
+		return this.nextPoint;
 	}
 	
 	public NucleusBorderPoint prevPoint(){
-		return  this.prevPoint;
+		return this.prevPoint;
 	}
 	
 	public boolean hasNextPoint(){

@@ -37,5 +37,7 @@ public interface CellularComponent {
 	public double[] getPosition();
 	
 	public double getArea();
+	
+	public boolean equals(CellularComponent c);
 
 }

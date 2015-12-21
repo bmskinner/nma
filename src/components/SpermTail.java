@@ -153,4 +153,13 @@ public class SpermTail  implements Serializable, CellularComponent, Flagellum {
 			return 0;
 		}
 
+		@Override
+		public boolean equals(CellularComponent c) {
+			if(c.getClass()==SpermTail.class){
+				return true;
+			} else {
+				return false;
+			}
+		}
+
 }

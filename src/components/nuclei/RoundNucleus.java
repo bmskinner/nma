@@ -47,6 +47,7 @@ import java.util.UUID;
 import utility.Constants;
 import utility.Utils;
 import components.CellularComponent;
+import components.SpermTail;
 import components.generic.BorderTag;
 import components.generic.Equation;
 import components.generic.MeasurementScale;
@@ -1482,5 +1483,20 @@ public class RoundNucleus
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
 	    this.boundingRectangles = new HashMap<BorderTag, Rectangle>();
+	}
+
+	@Override
+	public boolean equals(CellularComponent c) {
+		if(c.getClass()==this.getClass()){
+			if(this.getID().equals(c.getID())){
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			
+			return false;
+			
+		}
 	}
 }

@@ -128,6 +128,12 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	public void setSourceFile(File sourceFile) {
 		this.sourceFile = sourceFile;
 	}
+
+
+	@Override
+	public boolean equals(CellularComponent c) {
+		return false;
+	}
 	
 	
 
