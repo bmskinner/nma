@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import components.CellCollection;
+import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -338,21 +339,18 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * Run the segmenter on the median profile for the given point type
 	 * @param collection
 	 */
-	private static void createSegments(CellCollection collection){
+	private void createSegments(CellCollection collection){
 
 		try{
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
-
-//			fileLogger.log(Level.FINE, "Using regular profile collection for segmentation");
-//			fileLogger.log(Level.FINE, pc.toString());
 			
 			// the reference point is always index 0, so the segments will match
 			// the profile
 			Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 
-			ProfileSegmenter segmenter = new ProfileSegmenter(median, fileLogger);		
+			ProfileSegmenter segmenter = new ProfileSegmenter(median);		
 			
-			int orientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
+//			int orientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
 			List<NucleusBorderSegment> segments = segmenter.segment();
 
 			log(Level.FINER, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
@@ -371,7 +369,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * @param collection
 	 * @param pointType
 	 */
-	private static void assignSegments(CellCollection collection){
+	private void assignSegments(CellCollection collection){
 
 		try{
 			log(Level.FINER, "Assigning segments to nuclei...");
@@ -396,7 +394,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * @param n the nucleus to segment
 	 * @param median the segmented median profile
 	 */
-	private static void assignSegmentsToNucleus(Nucleus n, SegmentedProfile median){
+	private void assignSegmentsToNucleus(Nucleus n, SegmentedProfile median){
 
 		try{
 			
@@ -562,7 +560,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 		 * The number of points ahead and behind to test
 		 * when creating new segment profiles
 		 */
-		private static final int POINTS_TO_TEST = 20;
+//		private static final int POINTS_TO_TEST = 20;
 
 		/**
 		 * Construct with a median profile containing segments. The originals will not be modified
@@ -1051,6 +1049,163 @@ public class DatasetSegmenter extends AnalysisWorker {
 				result += compareSegments(name, referenceProfile, testProfile);
 			}
 			return result;
+		}
+	}
+	
+	/**
+	 * Divide a profile into segments of interest based on
+	 * minima and maxima.
+	 */
+	public class ProfileSegmenter {
+		
+		/**
+		 * The smallest number of points a segment can contain. 
+		 * Increasing this value will make the segment fitting more robust, 
+		 * but reduces resolution
+		 */
+		public static final int MIN_SEGMENT_SIZE = 10;
+		
+		
+		private static final int SMOOTH_WINDOW	= 2; // the window size for smoothing profiles
+		private static final int MAXIMA_WINDOW	= 5; // the window size for calculating minima and maxima
+		private static final int DELTA_WINDOW	= 2; // the window size for calculating deltas
+		private static final int ANGLE_THRESHOLD= 180; // a maximum must be above this, a minimum below it
+		
+		
+		private Profile profile; // the profile to segment
+		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>(0);
+			
+		/**
+		 * Constructed from a profile
+		 * @param p
+		 */
+		public ProfileSegmenter(Profile p){
+			if(p==null){
+				throw new IllegalArgumentException("Profile is null");
+			}
+			this.profile = p;
+
+			log(Level.FINE, "Created profile segmenter");
+		}
+		
+		/**
+		 * Get the deltas and find minima and maxima. These switch between segments
+		 * @param splitIndex an index point that must be segmented on
+		 * @return a list of segments
+		 */
+		public List<NucleusBorderSegment> segment(){
+			
+			log(Level.FINE, "Identifying maxima and minima");
+			log(Level.FINE, profile.toString());
+			BooleanProfile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
+			BooleanProfile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
+			
+			BooleanProfile breakpoint = minima.or(maxima);
+			
+			Profile deltas = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima and maxima should be near 0 
+			Profile dDeltas = deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second differential
+			double dMax = dDeltas.getMax();
+			double dMin = dDeltas.getMin();
+			double variationRange = Math.abs(dMax - dMin);
+			double minRateOfChange = variationRange*0.02;
+
+			int segmentStart = 0;
+			int segmentEnd = 0;
+			int segLength = 0;
+			int segCount = 0;
+					
+			try{
+				
+				/*
+				 * Iterate through the profile, looking for breakpoints
+				 * A new segment should always be called at the reference point, 
+				 * regardless of minima, since the segments in this region are 
+				 * used in frankenprofiling.
+				 * 
+				 * The reference point is at index 0: a segment should always be called at index 0
+				 */
+				for(int index=0; index<profile.size(); index++){
+					segmentEnd = index;
+					segLength++;
+
+					// when we get to the end of the profile, seglength must  be discounted, so we can wrap
+					// ditto for the beginning of the profile
+					if(index>profile.size()-MIN_SEGMENT_SIZE || index<MIN_SEGMENT_SIZE){
+						segLength = MIN_SEGMENT_SIZE;
+					}
+
+					// We want a minima or maxima, and the value must be distinct from its surroundings			
+					if( (   breakpoint.get(index)==true 
+							&& Math.abs(dDeltas.get(index)) > minRateOfChange
+							&& segLength >= MIN_SEGMENT_SIZE)
+							
+//							|| (index==splitIndex)
+							
+						){
+						
+						// we've hit a new segment
+						NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
+						seg.setName("Seg_"+segCount);
+
+						segments.add(seg);
+						
+						log(Level.FINE, "New segment found: "+seg.toString());
+						
+//						if(index==splitIndex){
+//							logger.log(Level.FINE, "Segment split by index");
+//						}
+
+						segmentStart = index; // start the next segment at this position
+						segLength=0;
+						segCount++;
+					}
+				}
+				
+				/*
+				 * End of the profile; call a new segment boundary to avoid
+				 * linking across the reference point
+				 * 
+				 * If a boundary is already called at index 0 in the first segment,
+				 * do not create a new segment, as it would have 1 length
+				 * 
+				 * If a boundary is already called at the last index in the profile,
+				 *  do not add a terminal segment, and just allow merging
+				 */
+				if(  (segments.get(0).getEndIndex()!=0) && segments.get(segments.size()-1).getEndIndex() != profile.size()-1 ) {
+					NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
+					seg.setName("Seg_"+segCount);
+					segments.add(seg);
+					log(Level.FINE, "Terminal segment found: "+seg.toString());
+					
+				} else {
+					// the first segment is not larger than the minimum size
+					// We need to merge the first and last segments
+					
+					log(Level.FINE, "Terminal segment not needed: first segment has index 0 or last has full index");
+				}
+				
+				NucleusBorderSegment.linkSegments(segments);
+				
+				log(Level.FINE, "Segments linked");
+				for(NucleusBorderSegment s : segments){
+					log(Level.FINE, s.toString());
+				}
+				
+
+			} catch (Exception e){
+				logError( "Error in segmentation", e);
+			}
+			
+			return segments;
+		}
+
+		/**
+		 * For debugging. Print the details of each segment found 
+		 */
+		public void print(){
+			for(NucleusBorderSegment s : segments){
+				s.print();
+			}
 		}
 	}
 }
