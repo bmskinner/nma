@@ -34,10 +34,11 @@ import javax.swing.SwingUtilities;
 
 import analysis.AnalysisDataset;
 import analysis.nucleus.MorphologyAnalysis;
+import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class MorphologyAnalysisAction extends ProgressableAction {
 
-	private int mode = MorphologyAnalysis.MODE_NEW;
+	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 	private List<AnalysisDataset> processList = null;
 	private AnalysisDataset source 			= null;
 	
@@ -48,7 +49,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 	 * @param mode the type of morphology analysis to carry out
 	 * @param downFlag the next analyses to perform
 	 */
-	public MorphologyAnalysisAction(AnalysisDataset dataset, int mode, int downFlag, MainWindow mw){
+	public MorphologyAnalysisAction(AnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, MainWindow mw){
 		super(dataset, "Morphology analysis", mw, downFlag);
 		programLogger.log(Level.FINE, "Creating morphology analysis");
 		this.mode = mode;
@@ -61,7 +62,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 	 * @param mode the type of morphology analysis to carry out
 	 * @param downFlag the next analyses to perform
 	 */
-	public MorphologyAnalysisAction(List<AnalysisDataset> list, int mode, int downFlag, MainWindow mw){
+	public MorphologyAnalysisAction(List<AnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag, MainWindow mw){
 		super(list.get(0), "Morphology analysis", mw, downFlag);
 		programLogger.log(Level.FINE, "Creating morphology analysis");
 		this.mode = mode;
@@ -79,7 +80,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 	public MorphologyAnalysisAction(AnalysisDataset dataset, AnalysisDataset source, Integer downFlag, MainWindow mw){
 		super(dataset, "Copying morphology to "+dataset.getName(), mw);
 
-		this.mode = MorphologyAnalysis.MODE_COPY;
+		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;
 		if(downFlag!=null){
 			this.downFlag = downFlag;
@@ -107,10 +108,10 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 		try{
 			String message = null;
 			switch (this.mode) {
-			case MorphologyAnalysis.MODE_COPY:  message = "Copying morphology";
+			case COPY:  message = "Copying morphology";
 			break;
 
-			case MorphologyAnalysis.MODE_REFRESH: message = "Refreshing morphology";
+			case REFRESH: message = "Refreshing morphology";
 			break;
 
 			default: message = "Morphology analysis: "+dataset.getName();
@@ -223,7 +224,7 @@ public class MorphologyAnalysisAction extends ProgressableAction {
 				} else {
 					// otherwise analyse the next item in the list
 					cancel();
-					if(mode == MorphologyAnalysis.MODE_COPY){
+					if(mode.equals(MorphologyAnalysisMode.COPY)){
 
 						SwingUtilities.invokeLater(new Runnable(){
 							public void run(){

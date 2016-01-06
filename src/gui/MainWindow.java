@@ -76,7 +76,7 @@ import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
 import analysis.AnalysisDataset;
-import analysis.nucleus.MorphologyAnalysis;
+import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
@@ -117,6 +117,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	public static final int CURVE_REFOLD 		 = 8;
 	public static final int EXPORT_COMPOSITE	 = 16;
 	public static final int SAVE_DATASET		 = 32;
+	public static final int ASSIGN_SEGMENTS		 = 64;
 	
 	private static final Logger programLogger =
 	        Logger.getLogger(MainWindow.class.getName()); // the program logger will report status and errors in the running of the program, not involving datasets 
@@ -746,7 +747,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
+						new MorphologyAnalysisAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 
 				}});
 			}
@@ -756,7 +757,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_REFRESH, 0, MainWindow.this);
+						new MorphologyAnalysisAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
 					
 				}});
 
@@ -960,7 +961,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						
 						programLogger.log(Level.INFO, "Resegmenting datasets");
 						List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
-						new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, MainWindow.this);
+						new MorphologyAnalysisAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 
 				}});
 				break;
