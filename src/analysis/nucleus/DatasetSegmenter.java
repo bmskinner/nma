@@ -41,14 +41,14 @@ import components.nuclei.Nucleus;
  * nuclei.
  */
 public class DatasetSegmenter extends AnalysisWorker {
-	
-    public static final int MODE_NEW     = 0;
-    public static final int MODE_COPY    = 1;
-    public static final int MODE_REFRESH = 2;
-        
-//    private CellCollection collection; // the collection to work on
+
     private CellCollection sourceCollection = null; // a collection to take segments from
-    private int mode = MODE_NEW; 				// the analysis mode
+
+    private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
+    
+    public enum MorphologyAnalysisMode {
+    	NEW, COPY, REFRESH
+    }
 
     
     /*
@@ -63,7 +63,7 @@ public class DatasetSegmenter extends AnalysisWorker {
      * @param mode
      * @param programLogger
      */
-    public DatasetSegmenter(AnalysisDataset dataset, int mode, Logger programLogger){
+    public DatasetSegmenter(AnalysisDataset dataset, MorphologyAnalysisMode mode, Logger programLogger){
     	super(dataset, programLogger);
     	this.mode = mode;
     }
@@ -75,8 +75,7 @@ public class DatasetSegmenter extends AnalysisWorker {
      * @param programLogger
      */
     public DatasetSegmenter(AnalysisDataset dataset, CellCollection source, Logger programLogger){
-    	super(dataset, programLogger);
-    	this.mode = MODE_COPY;
+    	this(dataset, MorphologyAnalysisMode.COPY, programLogger);
     	this.sourceCollection = source;
     }
     
@@ -91,55 +90,72 @@ public class DatasetSegmenter extends AnalysisWorker {
     	
     	boolean result = true;
 		try{
-
-			// mode selection
-			if(mode == MODE_NEW){
-				log(Level.FINE, "Beginning core morphology analysis");
-
-				this.setProgressTotal(getDataset().getCollection().getNucleusCount());
-
-
-				BorderTag pointType = BorderTag.REFERENCE_POINT;
-
-				// segment the profiles from head
-				runSegmentation(getDataset().getCollection(), pointType);
-
-				log(Level.FINE, "Core morphology analysis complete");
-			}
 			
-			if(mode == MODE_REFRESH){
-
-				log(Level.FINE, "Refreshing morphology");
-				refresh(getDataset().getCollection());
-				log(Level.FINE, "Refresh complete");
-			}
-			
-			if(mode == MODE_COPY){
-				if(sourceCollection==null){
-					log(Level.WARNING,  "Cannot copy: source collection is null");
+			switch(mode){
+				case COPY:
+					result = runCopyAnalysis();
+					break;
+				case NEW:
+					result = runNewAnalysis();
+					break;
+				case REFRESH:
+					result = runRefreshAnalysis();
+					break;
+				default:
 					result = false;
-				} else {
-					this.setProgressTotal(getDataset().getCollection().getNucleusCount());
-					log(Level.FINE,  "Copying segmentation pattern");
-					reapplyProfiles(getDataset().getCollection(), sourceCollection);
-					log(Level.FINE, "Copying complete");
-				}
+					break;
 			}
 			
 		} catch(Exception e){
 			
 			logError("Error in morphology analysis", e);
 			
-			fileLogger.log(Level.SEVERE, "Collection keys:");
-			fileLogger.log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
+			log(Level.SEVERE, "Collection keys:");
+			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
 			
-			fileLogger.log(Level.SEVERE, "FrankenCollection keys:");
-			fileLogger.log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
+			log(Level.SEVERE, "FrankenCollection keys:");
+			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
 			result = false;
 		} 
 
 		return result;
 	}
+    
+    private boolean runNewAnalysis() throws Exception{
+    	log(Level.FINE, "Beginning core morphology analysis");
+
+		this.setProgressTotal(getDataset().getCollection().getNucleusCount());
+
+
+		BorderTag pointType = BorderTag.REFERENCE_POINT;
+
+		// segment the profiles from head
+		runSegmentation(getDataset().getCollection(), pointType);
+
+		log(Level.FINE, "Core morphology analysis complete");
+		return true;
+    }
+    
+    private boolean runCopyAnalysis() throws Exception{
+    	if(sourceCollection==null){
+			log(Level.WARNING,  "Cannot copy: source collection is null");
+			return false;
+		} else {
+			this.setProgressTotal(getDataset().getCollection().getNucleusCount());
+			log(Level.FINE,  "Copying segmentation pattern");
+			reapplyProfiles(getDataset().getCollection(), sourceCollection);
+			log(Level.FINE, "Copying complete");
+			return true;
+		}
+    }
+    
+    private boolean runRefreshAnalysis() throws Exception{
+    	log(Level.FINE, "Refreshing morphology");
+		refresh(getDataset().getCollection());
+		log(Level.FINE, "Refresh complete");
+		return true;
+    }
+    
     
     /*
     //////////////////////////////////////////////////
@@ -155,14 +171,15 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 */
 	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection){
 		
-//		logger = new Logger(collection.getDebugFile(), "MorphologyAnalysis");
 		log(Level.FINE, "Applying existing segmentation profile to population...");
 		
 		try {
 			BorderTag referencePoint   = BorderTag.REFERENCE_POINT;
 			
 			// use the same array length as the source collection to avoid segment slippage
-			int profileLength = sourceCollection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(referencePoint, 50).size();
+			int profileLength = sourceCollection.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getProfile(referencePoint, 50) // Median of profile collection 
+					.size(); 
 			
 			// get the empty profile collection from the new CellCollection
 			// TODO: if the target collection is not new, ie we are copying onto
@@ -170,7 +187,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 			// offsets
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 			
-			// make an aggregate from the nuclei. A new median profile must necessarily result.
+			// Create an aggregate from the nuclei in the collection. 
+			// A new median profile must necessarily result.
 			// By default, the aggregates are created from the reference point
 			pc.createProfileAggregate(collection, profileLength);
 			
