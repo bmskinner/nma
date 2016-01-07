@@ -60,6 +60,8 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	protected MainWindow mw;
 	private CountDownLatch latch = null; // allow threads to wait for the analysis to complete
 	
+	private List<AnalysisDataset> processList = new ArrayList<AnalysisDataset>(0); // list of datasets that need processing after this
+	
 	private List<Object> interfaceListeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	
@@ -85,6 +87,30 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	}
 	
 	/**
+	 * Construct using a list of datasets to be processed. The first is analysed, and the rest stored.
+	 * @param list
+	 * @param barMessage
+	 * @param mw
+	 */
+	public ProgressableAction(List<AnalysisDataset> list, String barMessage, MainWindow mw){
+		this(list.get(0), barMessage, mw);
+		processList = list;
+		processList.remove(0); // remove the first entry
+	}
+	
+	/**
+	 * Construct using a list of datasets to be processed. The first is analysed, and the rest stored.
+	 * @param list
+	 * @param barMessage
+	 * @param mw
+	 * @param flag
+	 */
+	public ProgressableAction(List<AnalysisDataset> list, String barMessage, MainWindow mw, int flag){
+		this(list, barMessage, mw);
+		this.downFlag = flag;
+	}
+	
+	/**
 	 * Constructor including a flag for downstream analyses to be carried out
 	 * @param dataset
 	 * @param barMessage
@@ -107,6 +133,18 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	protected void countdownLatch(){
 		if(latch!=null){
 			latch.countDown();
+		}
+	}
+	
+	protected List<AnalysisDataset> getRemainingDatasetsToProcess(){
+		return this.processList;
+	}
+	
+	protected boolean hasRemainingDatasetsToProcess(){
+		if(this.processList.size()>0){
+			return true;
+		} else {
+			return false;
 		}
 	}
 		
