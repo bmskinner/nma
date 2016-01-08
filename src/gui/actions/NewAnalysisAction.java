@@ -30,7 +30,7 @@ import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisOptions;
-import analysis.nucleus.MorphologyAnalysis;
+import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 import analysis.nucleus.NucleusDetector;
 
 /**
@@ -45,7 +45,7 @@ public class NewAnalysisAction extends ProgressableAction {
 	public static final int NEW_ANALYSIS = 0;
 	
 	public NewAnalysisAction(MainWindow mw) {
-		super(null, "Nucleus detection", mw);
+		super("Nucleus detection", mw);
 
 		log(Level.FINE, "Making analysis options");
 		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(programLogger);
@@ -110,7 +110,7 @@ public class NewAnalysisAction extends ProgressableAction {
 						flag |= MainWindow.CURVE_REFOLD;
 					}
 					// begin a recursive morphology analysis
-					new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag, mw);
+					new RunSegmentationAction(datasets, MorphologyAnalysisMode.NEW, flag, mw);
 				}
 				
 			};

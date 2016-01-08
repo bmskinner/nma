@@ -27,12 +27,12 @@ import java.util.List;
 import utility.Constants;
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetMerger;
-import analysis.nucleus.MorphologyAnalysis;
+import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class MergeCollectionAction extends ProgressableAction {
 
 	public MergeCollectionAction(List<AnalysisDataset> datasets, MainWindow mw) {
-		super(null, "Merging", mw);
+		super("Merging", mw);
 
 		SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Constants.SAVE_FILE_EXTENSION);
 
@@ -61,7 +61,7 @@ public class MergeCollectionAction extends ProgressableAction {
 
 			int flag = MainWindow.ADD_POPULATION;
 			flag |= MainWindow.SAVE_DATASET;
-			new MorphologyAnalysisAction(datasets, MorphologyAnalysis.MODE_NEW, flag, mw);
+			new RunSegmentationAction(datasets, MorphologyAnalysisMode.NEW, flag, mw);
 			this.cancel();
 		}
 	}

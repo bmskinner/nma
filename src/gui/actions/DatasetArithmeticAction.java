@@ -12,12 +12,12 @@ import gui.MainWindow;
 import gui.dialogs.DatasetArithmeticSetupDialog;
 import gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
 import analysis.AnalysisDataset;
-import analysis.nucleus.MorphologyAnalysis;
+import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class DatasetArithmeticAction extends ProgressableAction {
 
 	public DatasetArithmeticAction(AnalysisDataset selected, List<AnalysisDataset> list, MainWindow mw) {
-		super(null, "Dataset arithmetic", mw);
+		super("Dataset arithmetic", mw);
 		this.cooldown();
 		try {
 			programLogger.log(Level.FINE, "Performing arithmetic...");
@@ -70,7 +70,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 					newDataset.setRoot(true);
 					int flag = MainWindow.ADD_POPULATION;
 					flag |= MainWindow.SAVE_DATASET;
-					new MorphologyAnalysisAction(newDataset, flag, MorphologyAnalysis.MODE_NEW, mw);
+					new RunSegmentationAction(newDataset, MorphologyAnalysisMode.NEW, flag, mw);
 										
 				} else {
 					programLogger.log(Level.INFO,"No populations returned");

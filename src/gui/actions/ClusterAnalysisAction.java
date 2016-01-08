@@ -100,7 +100,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		}
 		dataset.addClusterGroup(group);
 		programLogger.log(Level.FINEST, "Running new morphology analysis on cluster group");
-		new MorphologyAnalysisAction(list, dataset, MainWindow.ADD_POPULATION, mw);
+		new RunSegmentationAction(list, dataset, MainWindow.ADD_POPULATION, mw);
 
 		cancel();
 

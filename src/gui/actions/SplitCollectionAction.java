@@ -58,7 +58,7 @@ public class SplitCollectionAction extends ProgressableAction {
 
         					int flag = 0;
         					AnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
-        					new MorphologyAnalysisAction(newDataset, dataset, flag, mw);
+        					new RunSegmentationAction(newDataset, dataset, flag, mw);
         				}
         			} else {
         				programLogger.log(Level.FINE,"User cancelled split");

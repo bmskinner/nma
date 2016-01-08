@@ -16,7 +16,7 @@ import gui.dialogs.FishRemappingDialog;
 public class FishRemappingAction extends ProgressableAction {
 
 	public FishRemappingAction(List<AnalysisDataset> datasets, MainWindow mw) {
-		super(null, "Remapping", mw);
+		super("Remapping", mw);
 
 		try{
 
@@ -43,7 +43,7 @@ public class FishRemappingAction extends ProgressableAction {
 						}
 					}
 					programLogger.log(Level.INFO, "Reapplying morphology...");
-					new MorphologyAnalysisAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
+					new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
 
 					finished();
 

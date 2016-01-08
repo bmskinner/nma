@@ -11,7 +11,7 @@ import components.CellCollection;
 import gui.MainWindow;
 import gui.dialogs.ManualCellCurator;
 import analysis.AnalysisDataset;
-import analysis.nucleus.MorphologyAnalysis;
+import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 
 public class CurateCollectionAction extends ProgressableAction {
 
@@ -55,7 +55,7 @@ public class CurateCollectionAction extends ProgressableAction {
 				//			SwingUtilities.invokeLater(new Runnable(){
 				//				public void run(){
 
-				new MorphologyAnalysisAction(list, MorphologyAnalysis.MODE_NEW, flag, mw);
+				new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, mw);
 
 				//			}});
 

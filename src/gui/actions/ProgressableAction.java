@@ -65,6 +65,31 @@ abstract class ProgressableAction implements PropertyChangeListener {
 	private List<Object> interfaceListeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	
+	/**
+	 * Constructor with no datasets - used for new analysis
+	 * @param barMessage
+	 * @param mw
+	 */
+	protected ProgressableAction(String barMessage, MainWindow mw){
+		this.dataset 		= null;
+		this.progressBar 	= new JProgressBar(0, 100);
+		this.progressBar.setString(barMessage);
+		this.progressBar.setStringPainted(true);
+
+		this.mw 			= mw;
+		this.logPanel 		= mw.getLogPanel();
+		this.programLogger 	= mw.getProgramLogger();
+		
+		logPanel.addProgressBar(this.progressBar);
+		logPanel.revalidate();
+		logPanel.repaint();
+
+		this.addInterfaceEventListener(mw);
+		this.addDatasetEventListener(mw);
+		log(Level.FINEST, "Created progressable action");
+
+	}
+	
 	public ProgressableAction(AnalysisDataset dataset, String barMessage, MainWindow mw){
 		
 		this.dataset 		= dataset;

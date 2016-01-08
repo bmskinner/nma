@@ -28,9 +28,9 @@ import gui.actions.CurateCollectionAction;
 import gui.actions.DatasetArithmeticAction;
 import gui.actions.FishRemappingAction;
 import gui.actions.MergeCollectionAction;
-import gui.actions.MorphologyAnalysisAction;
 import gui.actions.RefoldNucleusAction;
 import gui.actions.ReplaceSourceImageDirectoryAction;
+import gui.actions.RunSegmentationAction;
 import gui.actions.NewAnalysisAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
@@ -690,7 +690,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 							AnalysisDataset source = populationsPanel.getDataset(selectedValue);
 
-							new MorphologyAnalysisAction(selectedDataset, source, null, MainWindow.this);
+							new RunSegmentationAction(selectedDataset, source, null, MainWindow.this);
 						}
 					} catch(Exception e1){
 						programLogger.log(Level.SEVERE, "Error applying morphology", e1);
@@ -747,7 +747,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+						new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 
 				}});
 			}
@@ -757,7 +757,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
+						new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, 0, MainWindow.this);
 					
 				}});
 
@@ -770,7 +770,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 				SwingUtilities.invokeLater(new Runnable(){
 					public void run(){
 					
-						new MorphologyAnalysisAction(event.getDatasets(), source, null, MainWindow.this);
+						new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
 					
 				}});
 
@@ -961,7 +961,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						
 						programLogger.log(Level.INFO, "Resegmenting datasets");
 						List<AnalysisDataset> list = populationsPanel.getSelectedDatasets();
-						new MorphologyAnalysisAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+						new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 
 				}});
 				break;
