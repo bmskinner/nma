@@ -104,13 +104,13 @@ public class NewAnalysisAction extends ProgressableAction {
 					flag |= MainWindow.STATS_EXPORT;
 					flag |= MainWindow.NUCLEUS_ANNOTATE;
 					flag |= MainWindow.EXPORT_COMPOSITE;
-//					flag |= MainWindow.SAVE_DATASET;
+					flag |= MainWindow.ASSIGN_SEGMENTS;
 					
 					if(datasets.get(0).getAnalysisOptions().refoldNucleus()){
 						flag |= MainWindow.CURVE_REFOLD;
 					}
 					// begin a recursive morphology analysis
-					new RunSegmentationAction(datasets, MorphologyAnalysisMode.NEW, flag, mw);
+					new RunProfilingAction(datasets, flag, mw);
 				}
 				
 			};

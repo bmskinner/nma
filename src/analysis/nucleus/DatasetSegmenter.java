@@ -116,7 +116,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			
 			log(Level.SEVERE, "FrankenCollection keys:");
 			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
-			result = false;
+			return false;
 		} 
 
 		return result;
@@ -306,10 +306,10 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * @param collection
 	 * @param pointType
 	 */
-	private void runSegmentation(CellCollection collection, BorderTag pointType){
+	private void runSegmentation(CellCollection collection, BorderTag pointType) throws Exception {
 
 		log(Level.FINE, "Beginning segmentation...");
-		try{	
+	
 			
 			// generate segments in the median profile
 			log(Level.FINE, "Creating segments...");
@@ -328,10 +328,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 						
 			// At this point, the franken collection still contains tip/head values only
 			
-		} catch(Exception e){
-			logError("Error segmenting",e);
-			collection.getProfileCollection(ProfileCollectionType.REGULAR).printKeys();
-		}
+		
 		log(Level.FINE, "Segmentation complete");
 	}
 	
@@ -339,28 +336,24 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * Run the segmenter on the median profile for the given point type
 	 * @param collection
 	 */
-	private void createSegments(CellCollection collection){
+	private void createSegments(CellCollection collection) throws Exception {
 
-		try{
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
-			
-			// the reference point is always index 0, so the segments will match
-			// the profile
-			Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
+		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
-			ProfileSegmenter segmenter = new ProfileSegmenter(median);		
-			
-//			int orientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
-			List<NucleusBorderSegment> segments = segmenter.segment();
+		// the reference point is always index 0, so the segments will match
+		// the profile
+		Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 
-			log(Level.FINER, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
+		ProfileSegmenter segmenter = new ProfileSegmenter(median);		
 
-			// Add the segments to the collection
+		List<NucleusBorderSegment> segments = segmenter.segment();
 
-			pc.addSegments(BorderTag.REFERENCE_POINT, segments);
-		} catch(Exception e){
-			logError("Error creating segments", e);
-		}
+		log(Level.FINER, "Found "+segments.size()+" segments in "+collection.getPoint(BorderTag.REFERENCE_POINT)+" profile");
+
+		// Add the segments to the collection
+
+		pc.addSegments(BorderTag.REFERENCE_POINT, segments);
+		
 	}
 
 	/**
@@ -394,56 +387,50 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * @param n the nucleus to segment
 	 * @param median the segmented median profile
 	 */
-	private void assignSegmentsToNucleus(Nucleus n, SegmentedProfile median){
-
-		try{
+	private void assignSegmentsToNucleus(Nucleus n, SegmentedProfile median) throws Exception {
 			
-			// remove any existing segments in the nucleus
-			SegmentedProfile nucleusProfile = n.getAngleProfile();
-			nucleusProfile.clearSegments();
-			
-			List<NucleusBorderSegment> nucleusSegments = new ArrayList<NucleusBorderSegment>();
-			
-			// go through each segment defined for the median curve
-			NucleusBorderSegment prevSeg = null;
+		// remove any existing segments in the nucleus
+		SegmentedProfile nucleusProfile = n.getAngleProfile();
+		nucleusProfile.clearSegments();
 
-			for(NucleusBorderSegment segment : median.getSegments()){
+		List<NucleusBorderSegment> nucleusSegments = new ArrayList<NucleusBorderSegment>();
 
-				// get the positions the segment begins and ends in the median profile
-				int startIndexInMedian 	= segment.getStartIndex();
-				int endIndexInMedian 	= segment.getEndIndex();
+		// go through each segment defined for the median curve
+		NucleusBorderSegment prevSeg = null;
 
-				// find the positions these correspond to in the offset profiles
+		for(NucleusBorderSegment segment : median.getSegments()){
 
-				// get the median profile, indexed to the start or end point
-				Profile startOffsetMedian 	= median.offset(startIndexInMedian);
-				Profile endOffsetMedian 	= median.offset(endIndexInMedian);
+			// get the positions the segment begins and ends in the median profile
+			int startIndexInMedian 	= segment.getStartIndex();
+			int endIndexInMedian 	= segment.getEndIndex();
 
-				// find the index at the point of the best fit
-				int startIndex 	= n.getAngleProfile().getSlidingWindowOffset(startOffsetMedian);
-				int endIndex 	= n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
+			// find the positions these correspond to in the offset profiles
 
-				// create a segment at these points
-				// ensure that the segment meets length requirements
-				NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getLength());
-				if(prevSeg != null){
-					seg.setPrevSegment(prevSeg);
-					prevSeg.setNextSegment(seg);
-				}
+			// get the median profile, indexed to the start or end point
+			Profile startOffsetMedian 	= median.offset(startIndexInMedian);
+			Profile endOffsetMedian 	= median.offset(endIndexInMedian);
 
-				seg.setName(segment.getName());
-				nucleusSegments.add(seg);
+			// find the index at the point of the best fit
+			int startIndex 	= n.getAngleProfile().getSlidingWindowOffset(startOffsetMedian);
+			int endIndex 	= n.getAngleProfile().getSlidingWindowOffset(endOffsetMedian);
 
-				prevSeg = seg;
+			// create a segment at these points
+			// ensure that the segment meets length requirements
+			NucleusBorderSegment seg = new NucleusBorderSegment(startIndex, endIndex, n.getLength());
+			if(prevSeg != null){
+				seg.setPrevSegment(prevSeg);
+				prevSeg.setNextSegment(seg);
 			}
 
-			NucleusBorderSegment.linkSegments(nucleusSegments);
-			nucleusProfile.setSegments(nucleusSegments);
-			n.setAngleProfile(nucleusProfile);
-		} catch (Exception e) {
-			logError("Error assigning segments to nucleus", e);
-//			fileLogger.log(Level.SEVERE, "Error assigning segments to nucleus",e);
+			seg.setName(segment.getName());
+			nucleusSegments.add(seg);
+
+			prevSeg = seg;
 		}
+
+		NucleusBorderSegment.linkSegments(nucleusSegments);
+		nucleusProfile.setSegments(nucleusSegments);
+		n.setAngleProfile(nucleusProfile);
 
 		
 	}
@@ -454,9 +441,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * @param collection
 	 * @param pointType
 	 */
-	private void reviseSegments(CellCollection collection, BorderTag pointType){
+	private void reviseSegments(CellCollection collection, BorderTag pointType) throws Exception {
 		log(Level.FINER, "Refining segment assignments...");
-		try{
 
 			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 //			fileLogger.log(Level.FINE, "Median profile");
@@ -530,9 +516,6 @@ public class DatasetSegmenter extends AnalysisWorker {
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
 			log(Level.FINER, "Segment assignments refined");
-		} catch(Exception e){
-			logError("Error revising segments", e);
-		}
 	}
 	
 	public class SegmentFitter {

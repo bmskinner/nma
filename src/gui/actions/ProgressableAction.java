@@ -26,7 +26,6 @@ import gui.InterfaceEventListener;
 import gui.LogPanel;
 import gui.DatasetEvent.DatasetMethod;
 import gui.MainWindow;
-import io.PopulationExporter;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -38,7 +37,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JProgressBar;
-import javax.swing.SwingWorker;
 
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;

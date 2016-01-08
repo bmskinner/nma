@@ -70,7 +70,8 @@ public class DatasetArithmeticAction extends ProgressableAction {
 					newDataset.setRoot(true);
 					int flag = MainWindow.ADD_POPULATION;
 					flag |= MainWindow.SAVE_DATASET;
-					new RunSegmentationAction(newDataset, MorphologyAnalysisMode.NEW, flag, mw);
+					flag |= MainWindow.ASSIGN_SEGMENTS;
+					new RunProfilingAction(newDataset, flag, mw);
 										
 				} else {
 					programLogger.log(Level.INFO,"No populations returned");
@@ -82,7 +83,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 
 		} catch (Exception e1) {
-			programLogger.log(Level.SEVERE,"Error splitting collection", e1);
+			programLogger.log(Level.SEVERE,"Error in dataset arithmetic", e1);
 		} finally {
 			cancel();
 		}
