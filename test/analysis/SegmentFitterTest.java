@@ -29,8 +29,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import analysis.nucleus.ProfileSegmenter;
-import analysis.nucleus.SegmentFitter;
 import components.NucleusTest;
 import components.SegmentedProfileTest;
 import components.generic.Profile;

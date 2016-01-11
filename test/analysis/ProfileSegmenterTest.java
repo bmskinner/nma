@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.junit.Test;
 
-import analysis.nucleus.ProfileSegmenter;
 import components.NucleusTest;
 import components.generic.Profile;
 import components.nuclear.NucleusBorderSegment;
