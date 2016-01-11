@@ -712,4 +712,16 @@ public interface Nucleus {
 	 * @throws Exception 
 	 */
 	public void updateSourceFolder(File newFolder) throws Exception;
+	
+	/**
+	 * Get the reason for a nucleus failing checks
+	 * @return
+	 */
+	public int getFailureCode();
+	
+	/**
+	 * Add a failure code to the nucleus
+	 * @param failureFeret
+	 */
+	public void updateFailureCode(int failCode);
 }

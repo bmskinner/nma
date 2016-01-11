@@ -44,17 +44,6 @@ public class CollectionFilterer {
 	public static boolean run(CellCollection collection, CellCollection failCollection, Logger fileLogger){
 
 		logger = fileLogger;
-//		logger = Logger.getLogger(CollectionFilterer.class.getName());  // (collection.getDebugFile(), "CollectionFilterer");
-//		DebugFileHandler handler = null;
-//		try {
-//			handler = new DebugFileHandler(collection.getDebugFile());
-//			handler.setFormatter(new DebugFileFormatter());
-//			logger.addHandler(handler);
-//		} catch (SecurityException e1) {
-////			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
-//		} catch (IOException e1) {
-////			logger.log(Level.SEVERE, "Could not create the log file handler", e1);
-//		}
 		
 		try{
 
@@ -95,38 +84,36 @@ public class CollectionFilterer {
 	    int feretlength = 0;
 
 	    logger.log(Level.FINE, "Prefiltered values found");
-//	    IJ.append("Prefiltered:\r\n", this.getDebugFile().getAbsolutePath());
-//	    exportFilterStats(collection);
 
 	    for(Cell c : collection.getCells()){
-//	    for(int i=0;i<collection.getNucleusCount();i++){
+
 	      Nucleus n = c.getNucleus();
 	      
 	      if(n.getArea() > maxArea || n.getArea() < minArea ){
-//	        n.updateFailureCode(FAILURE_AREA);
+	        n.updateFailureCode(FAILURE_AREA);
 	        area++;
 	      }
 	      if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
-//	        n.updateFailureCode(FAILURE_PERIM);
+	        n.updateFailureCode(FAILURE_PERIM);
 	        perim++;
 	      }
 	      if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
-//	        n.updateFailureCode(FAILURE_THRESHOLD);
+	        n.updateFailureCode(FAILURE_THRESHOLD);
 	        pathlength++;
 	      }
 	      if(n.getLength() > medianArrayLength * maxDifferenceFromMedian || n.getLength() < medianArrayLength / maxDifferenceFromMedian ){
-//	        n.updateFailureCode(FAILURE_ARRAY);
+	        n.updateFailureCode(FAILURE_ARRAY);
 	         arraylength++;
 	      }
 
 	      if(n.getFeret() < minFeret){
-//	        n.updateFailureCode(FAILURE_FERET);
+	        n.updateFailureCode(FAILURE_FERET);
 	        feretlength++;
 	      }
 	      
-//	      if(n.getFailureCode() > 0){
-//	        failCollection.addCell(c);
-//	      }
+	      if(n.getFailureCode() > 0){
+	        failCollection.addCell(c);
+	      }
 	    }
 
 	    for( Cell f : failCollection.getCells()){ // should be safer than the i-- above

@@ -76,16 +76,13 @@ public class RoundNucleus
 	
 	private UUID uuid;// = java.util.UUID.randomUUID();
 	
-//	private Class<?> nucleusClass;
-
 	public static final String IMAGE_PREFIX = "export.";
 
 	protected int nucleusNumber; // the number of the nucleus in the current image
-//	protected int failureCode = 0; // stores a code to explain why the nucleus failed filters
+	protected int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
 	protected int angleProfileWindowSize;
 
-	// private double medianAngle; // the median interior angle
 	protected double perimeter;   // the nuclear perimeter
 	protected double pathLength;  // the angle path length - measures wibbliness in border
 	protected double feret;       // the maximum diameter
@@ -740,9 +737,9 @@ public class RoundNucleus
 		return this.angleProfileWindowSize;
 	}
 
-//	public int getFailureCode(){
-//		return this.failureCode;
-//	}
+	public int getFailureCode(){
+		return this.failureCode;
+	}
 		
 	/* (non-Javadoc)
 	 * Check if the given signal group contains signals
@@ -814,9 +811,9 @@ public class RoundNucleus
 		this.nucleusFolder = d;
 	}
 
-//	public void updateFailureCode(int i){
-//		this.failureCode = this.failureCode | i;
-//	}
+	public void updateFailureCode(int i){
+		this.failureCode = this.failureCode | i;
+	}
 
 	public void setAngleProfileWindowSize(int i){
 		this.angleProfileWindowSize = i;
@@ -1639,13 +1636,6 @@ public class RoundNucleus
 
 		private double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
 
-		/*
-			The following fields are part of the redesign of the whole system. Instead of storing border points within
-			an AngleProfile, they will be part of the Nucleus. The Profiles can take any double[] of values, and
-			manipulate them. BorderPoints can be combined into BorderSegments, which may overlap. No copies of the 
-			BorderPoints are made; everything references the copy in the Nucleus. Given this, the points of interest 
-			(now borderTags) need only to be indexes.
-		*/
 		private SegmentedProfile angleProfile; // 
 		private Profile distanceProfile; // holds distances through CoM to opposite border
 		private Profile singleDistanceProfile; // holds distances from CoM, not through CoM
