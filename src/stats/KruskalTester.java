@@ -1,15 +1,12 @@
 package stats;
 
-import ij.IJ;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import jdistlib.disttest.DistributionTest;
 import analysis.AnalysisDataset;
-import analysis.nucleus.SegmentFitter;
-import components.CellCollection;
+import analysis.nucleus.DatasetSegmenter;
+import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
@@ -87,7 +84,14 @@ public class KruskalTester {
 			frankenCollection.addSegments(tag, segments);
 
 			SegmentedProfile medianProfile = pc.getSegmentedProfile(tag);
-			SegmentFitter fitter = new SegmentFitter(medianProfile);
+			
+			/*
+			 * Create a segmenter just to access the segmnet fitter. Do not execute the analysis function 
+			 * in the segmenter
+			 */
+			DatasetSegmenter segmenter = new DatasetSegmenter(one, MorphologyAnalysisMode.NEW, null);
+			DatasetSegmenter.SegmentFitter fitter = segmenter.new SegmentFitter(medianProfile);
+			
 			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
 			for(Nucleus n : copyOfTwo.getCollection().getNuclei()){ 
