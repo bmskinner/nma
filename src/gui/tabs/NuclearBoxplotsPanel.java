@@ -21,17 +21,13 @@ package gui.tabs;
 import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.components.ColourSelecter;
 import gui.components.HistogramsTabPanel;
 import gui.components.MeasurementUnitSettingsPanel;
-import gui.components.ProbabilityDensityCheckboxPanel;
 import gui.components.SelectableChartPanel;
 import stats.NucleusStatistic;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
@@ -43,35 +39,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.HistogramDataset;
-import org.jfree.data.xy.DefaultXYDataset;
-
 import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.BoxplotChartOptions;
 import charting.charts.HistogramChartFactory;
 import charting.charts.HistogramChartOptions;
-import charting.datasets.NuclearHistogramDatasetCreator;
-import charting.datasets.NucleusDatasetCreator;
-import components.Cell;
 import components.CellCollection;
 import components.generic.MeasurementScale;
-import components.nuclei.Nucleus;
 
 public class NuclearBoxplotsPanel extends DetailPanel {
 	

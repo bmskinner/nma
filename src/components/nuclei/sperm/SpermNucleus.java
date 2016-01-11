@@ -34,7 +34,6 @@ import java.io.File;
 import components.nuclear.SignalCollection;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
 
 public class SpermNucleus
 	extends AsymmetricNucleus

@@ -20,7 +20,6 @@ package stats;
 
 import ij.IJ;
 
-import java.util.Arrays;
 import java.util.List;
 
 import jdistlib.InvNormal;

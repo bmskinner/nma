@@ -21,17 +21,12 @@ package gui.tabs;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.ExportableTable;
 import gui.components.HistogramsTabPanel;
 import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.SelectableChartPanel;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import gui.tabs.NuclearBoxplotsPanel.BoxplotsPanel;
-import gui.tabs.NuclearBoxplotsPanel.HistogramsPanel;
-import ij.IJ;
-import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import utility.Constants;
 

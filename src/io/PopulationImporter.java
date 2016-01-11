@@ -23,8 +23,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,8 +32,6 @@ import java.util.logging.Logger;
 //import utility.Logger;
 import analysis.AnalysisDataset;
 import analysis.nucleus.NucleusDetector;
-import components.CellCollection;
-import components.nuclei.Nucleus;
 
 public class PopulationImporter {
 	

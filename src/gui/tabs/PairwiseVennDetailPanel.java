@@ -35,7 +35,6 @@ import charting.DefaultTableOptions.TableType;
 import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 import gui.components.ExportableTable;
-import gui.tabs.VennDetailPanel.VennTableCellRenderer;
 
 @SuppressWarnings("serial")
 public class PairwiseVennDetailPanel extends DetailPanel {

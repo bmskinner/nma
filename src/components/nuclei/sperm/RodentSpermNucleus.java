@@ -26,9 +26,7 @@
 */  
 package components.nuclei.sperm;
 
-import ij.IJ;
 import ij.gui.Roi;
-import ij.process.FloatPolygon;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,7 +44,6 @@ import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 

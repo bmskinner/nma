@@ -61,7 +61,6 @@ import org.jfree.chart.renderer.category.StatisticalBarRenderer;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.XYDataset;
 
 import utility.Constants;
@@ -74,7 +73,6 @@ import charting.charts.HistogramChartFactory;
 import charting.charts.HistogramChartOptions;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.NuclearSignalDatasetCreator;
-import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
 import components.nuclear.ShellResult;
 

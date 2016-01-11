@@ -4,30 +4,20 @@ import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.table.TableModel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import components.generic.BorderTag;
 import components.generic.ProfileCollectionType;
-import stats.NucleusStatistic;
-import charting.NucleusStatsTableOptions;
-import charting.TableOptions;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;
-import charting.datasets.NucleusTableDatasetCreator;
-import analysis.AnalysisDataset;
 
 @SuppressWarnings("serial")
 public class KruskalDetailPanel  extends DetailPanel {

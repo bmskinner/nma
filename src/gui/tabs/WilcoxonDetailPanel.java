@@ -22,7 +22,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,7 +36,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
 import utility.Constants;
-import analysis.AnalysisDataset;
 import charting.NucleusStatsTableOptions;
 import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
