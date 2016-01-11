@@ -486,8 +486,14 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 
 					if(activeDataset().getCollection().hasConsensusNucleus()){
 
-						NucleusBorderPoint orientationPoint = activeDataset().getCollection().getConsensusNucleus().getBorderTag(BorderTag.ORIENTATION_POINT);
-						activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
+						NucleusBorderPoint orientationPoint = activeDataset()
+								.getCollection()
+								.getConsensusNucleus()
+								.getBorderTag(BorderTag.ORIENTATION_POINT);
+						
+						activeDataset().getCollection()
+						.getConsensusNucleus()
+						.rotatePointToBottom(orientationPoint);
 						
 						this.update(activeDatasetToList());
 					}
@@ -500,11 +506,15 @@ public class ConsensusNucleusPanel extends DetailPanel implements SignalChangeLi
 				if(activeDataset()!=null){
 
 					if(activeDataset().getCollection().hasConsensusNucleus()){
+						
 						ConsensusNucleus nucleus = activeDataset().getCollection().getConsensusNucleus();
+						
 						if(nucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && nucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+							
 							nucleus.alignPointsOnVertical(nucleus.getBorderTag(BorderTag.TOP_VERTICAL), nucleus.getBorderTag(BorderTag.BOTTOM_VERTICAL));
 							
 							this.update(activeDatasetToList());
+							
 						} else {
 							programLogger.log(Level.WARNING, "Top and bottom vertical points are not available");
 						}

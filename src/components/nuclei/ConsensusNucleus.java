@@ -18,6 +18,8 @@
  *******************************************************************************/
 package components.nuclei;
 
+import ij.IJ;
+
 import java.io.Serializable;
 
 import utility.Utils;
@@ -114,11 +116,22 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	 */
 	public void alignPointsOnVertical(NucleusBorderPoint topPoint, NucleusBorderPoint bottomPoint){
 		
+		/*
+		 * If the points are already aligned vertically, the rotation should not have any effect
+		 */
 		double angleToRotate 	= 0;
-		
-		// get the angle from vertical of the line between the points
-		// This is the line running from top to bottom, then up
-		// to the y position of the top directly above the bottom 
+				
+		/*
+		 *  Get the angle from the vertical of the line between the points.
+		 *  
+		 *  This is the line running from top (T) to bottom (B), then up
+		 *  to the y position of the top at the X position of the bottom (V)
+		 * 
+		 *     T V
+		 *      \|
+		 *       B
+		 * 
+		 */
 		double angleToBeat = findAngleBetweenXYPoints( topPoint, 
 				bottomPoint, 
 				new XYPoint(bottomPoint.getX(),topPoint.getY()));
@@ -128,17 +141,25 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 			XYPoint newTop 		= getPositionAfterRotation(topPoint, angle);
 			XYPoint newBottom 	= getPositionAfterRotation(bottomPoint, angle);
 			
-			double newAngle = findAngleBetweenXYPoints( newTop, 
-					newBottom, 
-					new XYPoint(newBottom.getX(),newTop.getY()));
-			
-			// We want to minimise the angle between the points, whereupon
-			// they are vertically aligned. Also test that the top is still on the
-			// top
-			if(newAngle < angleToBeat && newTop.getY() > newBottom.getY()){
-				angleToBeat = newAngle;
-				angleToRotate = angle;
+			// Test that the top point is still on the top; no point getting
+			// angles for the rotations where the top has moved to the bottom 
+			if(newTop.getY() > newBottom.getY()){
+				
+				double newAngle = findAngleBetweenXYPoints( newTop, 
+						newBottom, 
+						new XYPoint(newBottom.getX(),newTop.getY()));
+				
+				/*
+				 * We want to minimise the angle between the points, whereupon
+				 * they are vertically aligned. 
+				 */
+
+				if( newAngle < angleToBeat ){
+					angleToBeat = newAngle;
+					angleToRotate = angle;
+				}
 			}
+
 		}
 		this.rotate(angleToRotate);
 	}
@@ -148,30 +169,40 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	 * @param angle
 	 */
 	public void rotate(double angle){
-			
-		for(int i=0; i<this.getLength(); i++){
-			XYPoint p = this.getBorderPoint(i);
-			
-			
-			// get the distance from this point to the centre of mass
-			double distance = p.getLengthTo(this.getCentreOfMass());
-			
-			// get the angle between the centre of mass, the point and a
-			// point directly under the centre of mass
-			double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
-					this.getCentreOfMass(), 
-					new XYPoint(this.getCentreOfMass().getX(),-10));
-			
-			
-			if(p.getX()<this.getCentreOfMass().getX()){
-				oldAngle = 360-oldAngle;
+		
+		if(angle!=0){
+
+			for(int i=0; i<this.getLength(); i++){
+				XYPoint p = this.getBorderPoint(i);
+
+
+				// get the distance from this point to the centre of mass
+				double distance = p.getLengthTo(this.getCentreOfMass());
+
+				// get the angle between the centre of mass (C), the point (P) and a
+				// point directly under the centre of mass (V)
+
+				/*
+				 *      C
+				 *      |\  
+				 *      V P
+				 * 
+				 */
+				double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
+						this.getCentreOfMass(), 
+						new XYPoint(this.getCentreOfMass().getX(),-10));
+
+
+				if(p.getX()<this.getCentreOfMass().getX()){
+					oldAngle = 360-oldAngle;
+				}
+
+				double newAngle = oldAngle + angle;
+				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+
+				this.updatePoint(i, newX, newY);
 			}
-
-			double newAngle = oldAngle + angle;
-			double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-			double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-
-			this.updatePoint(i, newX, newY);
 		}
 	}
 	
