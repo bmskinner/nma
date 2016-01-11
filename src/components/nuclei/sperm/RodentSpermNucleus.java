@@ -34,16 +34,19 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import stats.NucleusStatistic;
 import utility.Utils;
 import components.generic.BooleanProfile;
 import components.generic.BorderTag;
 import components.generic.Equation;
+import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.generic.XYPoint;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalCollection;
+import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import components.nuclei.RoundNucleus;
 
@@ -115,6 +118,96 @@ extends SpermNucleus
 			return duplicate;
 		} catch (Exception e) {
 			return null;
+		}
+	}
+	
+	@Override
+	public double getStatistic(NucleusStatistic stat, MeasurementScale scale) throws Exception{
+		double result = super.getStatistic(stat, scale);
+		
+		switch(stat){
+			
+			case HOOK_LENGTH:
+				result = getHookOrBodyLength(true);
+				break;
+			case BODY_WIDTH:
+				result = getHookOrBodyLength(false);
+				break;
+			default:
+				return result;
+		
+		}
+		
+		result = stat.convert(result, this.getScale(), scale);
+
+		return result;
+		
+	}
+	
+	protected double getHookOrBodyLength(boolean useHook) throws Exception{
+
+		// Copy the nucleus
+		
+		RodentSpermNucleus testNucleus = (RodentSpermNucleus) this.duplicate();
+		double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
+//		IJ.log("Initial vertX:" +vertX);
+		NucleusBorderPoint[] points = getBorderPointsForVerticalAlignment();
+		
+		// Only proceed if the verticals have been set
+		if(testNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && testNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+
+			// Rotate vertical
+//			IJ.log(testNucleus.dumpInfo(Nucleus.BORDER_TAGS));
+			testNucleus.alignPointsOnVertical(points[0], points[1] );
+
+
+			
+			// Measure vertical to bounding hook side
+			// Measure vertical to bounding hump side
+			vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
+//			IJ.log("Final vertX:" +vertX);
+
+			double maxBoundingX = testNucleus.getBoundingRectangle(BorderTag.REFERENCE_POINT).getMaxX();
+			double minBoundingX = testNucleus.getBoundingRectangle(BorderTag.REFERENCE_POINT).getMinX();
+
+			double distanceLeft = vertX - minBoundingX;
+			double distanceRight = maxBoundingX - vertX;
+
+			double distanceHook = 0;
+			double distanceHump = 0;
+			/*
+			 * To determine if the point is hook or hump, take a value either
+			 * size of the CoM, and test if it is closer to the desired bounding
+			 * box value
+			 */
+
+			XYPoint newLeftPoint = new XYPoint(testNucleus.getCentreOfMass().getX()-5, testNucleus.getCentreOfMass().getY());
+
+			if(testNucleus.isHookSide( newLeftPoint) ){
+
+				distanceHook = distanceLeft;
+				distanceHump = distanceRight;
+
+			} else {
+				distanceHook = distanceRight;
+				distanceHump = distanceLeft;
+			}
+			
+//			IJ.log("Left point: "+newLeftPoint.toString());
+//			IJ.log("Bounding rectangle: "+testNucleus.getBoundingRectangle(BorderTag.REFERENCE_POINT).toString());
+//			IJ.log("Distance hook: "+distanceHook);
+//			IJ.log("Distance hump: "+distanceHump);
+//			IJ.log(testNucleus.dumpInfo(Nucleus.BORDER_TAGS));
+//			
+//			IJ.log("");
+
+			if(useHook){
+				return distanceHook;
+			} else {
+				return distanceHump;
+			}	
+		} else {
+			return 0;
 		}
 	}
 	
@@ -498,60 +591,118 @@ extends SpermNucleus
 //	  IJ.log(this.getNameAndNumber()+": Calculating signal angles");
 	  try {
 		  super.calculateSignalAnglesFromPoint(p);
-//
-//		  if(this.hasSignal()){
-//			  IJ.log(this.getNameAndNumber()+": Signals present in nucleus");
-//		  }
+
 		  // update signal angles with hook or hump side
 		  for( int i : signalCollection.getSignalGroups()){
-//			  IJ.log(this.getNameAndNumber()+": Signal group "+i);
-			  if(signalCollection.hasSignal(i)){
-				  List<NuclearSignal> signals = signalCollection.getSignals(i);
-				  //		  if(!signals.isEmpty()){
 
-//				  IJ.log(this.getNameAndNumber()+": Signals group is not empty");
+			  if(signalCollection.hasSignal(i)){
+				  
+				  List<NuclearSignal> signals = signalCollection.getSignals(i);
 
 				  for(NuclearSignal n : signals){
 
 					  /*
 					   * Angle begins from the orientation point 
 					   */
-//					  IJ.log(this.getNameAndNumber()+": Signal at "+n.getCentreOfMass().toString());
 
 					  double angle = n.getAngle();
-//					  IJ.log(this.getNameAndNumber()+": Checking signal roi");
 
 					  try{
 
 						  if( this.isHookSide(n.getCentreOfMass()) ){ 
 							  angle = 360 - angle;
-//							  IJ.log(this.getNameAndNumber()+": Hook side: "+n.getAngle()+" -> "+angle);
 						  } else {
-//							  IJ.log(this.getNameAndNumber()+": Hump side: "+n.getAngle());
+							  
 						  }
 					  } catch(Exception e){
 //						  IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
 					  } finally {
 
-						  
-//							  IJ.log(this.getNameAndNumber()+": Setting angle to "+angle );
 							  n.setAngle(angle);
-//							  IJ.log(this.getNameAndNumber()+": Angle set");
-//						  } catch(Exception e){
-//							  IJ.log(this.getNameAndNumber()+": Error setting angle");
-//						  }
+
 					  }
-//					  IJ.log(this.getNameAndNumber()+": Signal updated");
 				  }
-//				  IJ.log(this.getNameAndNumber()+": All signals in group processed");
 			  }
-//			  IJ.log(this.getNameAndNumber()+": All signal groups processed");
-			  //		  IJ.log(this.dumpInfo(Nucleus.BORDER_TAGS));
 		  }
 	  } catch(Exception e){
 //		  IJ.log("Error updating signal angles");
 	  }
   }
+  
+  @Override
+  public void rotate(double angle){
+		super.rotate(angle);
+		
+		if(angle!=0){
+
+			for(NucleusBorderPoint p : hookRoi){
+//				XYPoint p = this.getBorderPoint(i);
+
+
+				// get the distance from this point to the centre of mass
+				double distance = p.getLengthTo(this.getCentreOfMass());
+
+				// get the angle between the centre of mass (C), the point (P) and a
+				// point directly under the centre of mass (V)
+
+				/*
+				 *      C
+				 *      |\  
+				 *      V P
+				 * 
+				 */
+				double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
+						this.getCentreOfMass(), 
+						new XYPoint(this.getCentreOfMass().getX(),-10));
+
+
+				if(p.getX()<this.getCentreOfMass().getX()){
+					oldAngle = 360-oldAngle;
+				}
+
+				double newAngle = oldAngle + angle;
+				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+
+				p.setX(newX);
+				p.setY(newY);
+			}
+			
+			for(NucleusBorderPoint p : humpRoi){
+//				XYPoint p = this.getBorderPoint(i);
+
+
+				// get the distance from this point to the centre of mass
+				double distance = p.getLengthTo(this.getCentreOfMass());
+
+				// get the angle between the centre of mass (C), the point (P) and a
+				// point directly under the centre of mass (V)
+
+				/*
+				 *      C
+				 *      |\  
+				 *      V P
+				 * 
+				 */
+				double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
+						this.getCentreOfMass(), 
+						new XYPoint(this.getCentreOfMass().getX(),-10));
+
+
+				if(p.getX()<this.getCentreOfMass().getX()){
+					oldAngle = 360-oldAngle;
+				}
+
+				double newAngle = oldAngle + angle;
+				double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+				double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+
+				p.setX(newX);
+				p.setY(newY);
+			}
+		}
+	}
+  
   
   @Override
   public String dumpInfo(int type){
