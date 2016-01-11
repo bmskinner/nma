@@ -81,6 +81,8 @@ public class KruskalDetailPanel  extends DetailPanel {
 				BorderTag.REFERENCE_POINT,
 				true, // show markers
 				ProfileCollectionType.REGULAR);
+		
+		options.setLogger(programLogger);
 
 
 		if(getChartCache().hasChart(options)){

@@ -959,7 +959,7 @@ public class MorphologyChartFactory {
 		LogAxis rangeAxis = new LogAxis("Probability");
 		rangeAxis.setBase(10);
 		DecimalFormat df=new DecimalFormat();
-		df.applyPattern("0.#E0"); // this only works for the first (1.0)
+		df.applyPattern("0.#E0");
 		rangeAxis.setNumberFormatOverride(df);
 		rangeAxis.setStandardTickUnits(new StandardTickUnitSource());
 

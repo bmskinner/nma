@@ -1,7 +1,11 @@
 package stats;
 
+import ij.IJ;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jdistlib.disttest.DistributionTest;
 import analysis.AnalysisDataset;
@@ -60,7 +64,17 @@ public class KruskalTester {
 		return resultProfile;
 	}
 	
-	public static Profile testCollectionGetFrankenPValues(AnalysisDataset one, AnalysisDataset two, BorderTag tag){
+	/**
+	 * Run a Kruskal-Wallis test at each position along the normalised angle profiles
+	 * for the two given datasets, starting at the given tag.
+	 * 
+	 * This compares profile one to frankenprofile for two, using the segment pattern in one
+	 * @param one
+	 * @param two
+	 * @param tag
+	 * @return
+	 */
+	public static Profile testCollectionGetFrankenPValues(AnalysisDataset one, AnalysisDataset two, BorderTag tag, Logger programLogger){
 		
 		Profile resultProfile = null;
 		int sampleNumber = 200;
@@ -73,7 +87,9 @@ public class KruskalTester {
 			AnalysisDataset copyOfTwo = two.duplicate();
 			
 			/*
-			 * This is taken from MorphologyAnalysis
+			 * This is taken from MorphologyAnalysis.
+			 * 
+			 * Create a new ProfileCollection based on the segments from dataset one
 			 */
 			ProfileCollection pc = one.getCollection().getProfileCollection(ProfileCollectionType.REGULAR);
 			List<NucleusBorderSegment> segments = pc.getSegments(tag);
@@ -83,13 +99,14 @@ public class KruskalTester {
 			}
 			frankenCollection.addSegments(tag, segments);
 
-			SegmentedProfile medianProfile = pc.getSegmentedProfile(tag);
+			
 			
 			/*
 			 * Create a segmenter just to access the segmnet fitter. Do not execute the analysis function 
 			 * in the segmenter
 			 */
-			DatasetSegmenter segmenter = new DatasetSegmenter(one, MorphologyAnalysisMode.NEW, null);
+			SegmentedProfile medianProfile = pc.getSegmentedProfile(tag);
+			DatasetSegmenter segmenter = new DatasetSegmenter(one, MorphologyAnalysisMode.NEW, programLogger);
 			DatasetSegmenter.SegmentFitter fitter = segmenter.new SegmentFitter(medianProfile);
 			
 			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
@@ -108,6 +125,8 @@ public class KruskalTester {
 			// update the profile aggregate
 			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
 			
+			// Put the new collection into the duplicate dataset
+			copyOfTwo.getCollection().setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
 			/*
 			 * This returns to the Kruskal test above, but using the franken profiles 
 			 */
@@ -115,6 +134,8 @@ public class KruskalTester {
 			resultProfile = testCollectionGetPValues(one, copyOfTwo, tag, ProfileCollectionType.FRANKEN);		
 			
 		} catch (Exception e) {
+			programLogger.log(Level.SEVERE, "Error in franken profiling", e);
+			
 			pvals = new double[sampleNumber];
 			for(int i=0; i<sampleNumber; i++){
 				pvals[i] = 1;
