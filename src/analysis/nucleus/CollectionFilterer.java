@@ -103,30 +103,30 @@ public class CollectionFilterer {
 	      Nucleus n = c.getNucleus();
 	      
 	      if(n.getArea() > maxArea || n.getArea() < minArea ){
-	        n.updateFailureCode(FAILURE_AREA);
+//	        n.updateFailureCode(FAILURE_AREA);
 	        area++;
 	      }
 	      if(n.getPerimeter() > maxPerim || n.getPerimeter() < minPerim ){
-	        n.updateFailureCode(FAILURE_PERIM);
+//	        n.updateFailureCode(FAILURE_PERIM);
 	        perim++;
 	      }
 	      if(n.getPathLength() > maxPathLength){ // only filter for values too big here - wibbliness detector
-	        n.updateFailureCode(FAILURE_THRESHOLD);
+//	        n.updateFailureCode(FAILURE_THRESHOLD);
 	        pathlength++;
 	      }
 	      if(n.getLength() > medianArrayLength * maxDifferenceFromMedian || n.getLength() < medianArrayLength / maxDifferenceFromMedian ){
-	        n.updateFailureCode(FAILURE_ARRAY);
+//	        n.updateFailureCode(FAILURE_ARRAY);
 	         arraylength++;
 	      }
 
 	      if(n.getFeret() < minFeret){
-	        n.updateFailureCode(FAILURE_FERET);
+//	        n.updateFailureCode(FAILURE_FERET);
 	        feretlength++;
 	      }
 	      
-	      if(n.getFailureCode() > 0){
-	        failCollection.addCell(c);
-	      }
+//	      if(n.getFailureCode() > 0){
+//	        failCollection.addCell(c);
+//	      }
 	    }
 
 	    for( Cell f : failCollection.getCells()){ // should be safer than the i-- above

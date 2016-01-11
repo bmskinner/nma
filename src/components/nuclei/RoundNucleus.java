@@ -76,12 +76,12 @@ public class RoundNucleus
 	
 	private UUID uuid;// = java.util.UUID.randomUUID();
 	
-	private Class<?> nucleusClass;
+//	private Class<?> nucleusClass;
 
 	public static final String IMAGE_PREFIX = "export.";
 
 	protected int nucleusNumber; // the number of the nucleus in the current image
-	protected int failureCode = 0; // stores a code to explain why the nucleus failed filters
+//	protected int failureCode = 0; // stores a code to explain why the nucleus failed filters
 
 	protected int angleProfileWindowSize;
 
@@ -155,6 +155,29 @@ public class RoundNucleus
 	}
 
 	public RoundNucleus(Nucleus n) throws Exception {
+		
+//		RoundNucleusBuilder builder = new RoundNucleusBuilder();
+//		
+//		return builder.uuid(n.getID())
+//		.nucleusNumber(n.getNucleusNumber())
+//		.angleProfileWindowSize(n.getAngleProfileWindowSize())
+//		.perimeter(n.getPerimeter())
+//		.pathLength(n.getPathLength())
+//		.feret(n.getFeret())
+//		.area(n.getArea())
+//		.orignalPosition(n.getPosition())
+//		.angleProfile(n.getAngleProfile())
+//		.distanceProfile(n.getDistanceProfile())
+//		.singleDistanceProfile(n.getSingleDistanceProfile())
+//		.borderList(n.getBorderList())
+//		.borderTags(n.getBorderTags())
+//		.centreOfMass(n.getCentreOfMass())
+//		.sourceFile(n.getSourceFile())
+//		.nucleusFolder(n.getNucleusFolder())
+//		.outputFolder(n.getOutputFolderName())
+//		.scale(n.getScale())
+//		.signalCollections(n.getSignalCollection())
+//		.build();
 
 		this.setID(n.getID());
 		this.setPosition(n.getPosition());
@@ -186,41 +209,141 @@ public class RoundNucleus
 
 	}
 	
+	/**
+	 * Constructor with all internal fields, for reloading from saved file.
+	 * @param uuid
+	 * @param nucleusNumber
+	 * @param angleProfileWindowSize
+	 * @param perimeter
+	 * @param pathLength
+	 * @param feret
+	 * @param area
+	 * @param orignalPosition
+	 * @param angleProfile
+	 * @param distanceProfile
+	 * @param singleDistanceProfile
+	 * @param borderList
+	 * @param segmentList
+	 * @param borderTags
+	 * @param segmentTags
+	 * @param centreOfMass
+	 * @param sourceFile
+	 * @param nucleusFolder
+	 * @param outputFolder
+	 * @param scale
+	 * @param signalCollection
+	 * @param boundingRectangles
+	 */
+	public RoundNucleus(UUID uuid,
+			int nucleusNumber,
+			int angleProfileWindowSize,
+			double perimeter,
+			double pathLength,
+			double feret, 
+			double area,
+			double[] orignalPosition,
+			SegmentedProfile angleProfile,
+			Profile distanceProfile,
+			Profile singleDistanceProfile,
+			List<NucleusBorderPoint> borderList, 
+			List<NucleusBorderSegment> segmentList,
+			Map<BorderTag, Integer> borderTags,
+			Map<String, Integer> segmentTags,
+			XYPoint centreOfMass,
+			File sourceFile,
+			File nucleusFolder,
+			String outputFolder,
+			double scale,
+			SignalCollection signalCollection,
+			Map<BorderTag, Rectangle> boundingRectangles
+			){
+		
+		this.uuid = uuid;
+		this.nucleusNumber = nucleusNumber;
+		this.angleProfileWindowSize = angleProfileWindowSize;
+		this.perimeter = perimeter;
+		this.pathLength = pathLength;
+		this.feret = feret;
+		this.area = area;
+		this.orignalPosition = orignalPosition; 
+		this.angleProfile =  angleProfile;
+		this.distanceProfile =  distanceProfile;
+		this.singleDistanceProfile = singleDistanceProfile;
+		this.borderList = borderList;
+		this.segmentList = segmentList;
+		this.borderTags = borderTags;
+		this.segmentTags = segmentTags;
+		this.centreOfMass = centreOfMass;
+		this.sourceFile = sourceFile;
+		this.nucleusFolder = nucleusFolder;
+		this.outputFolder = outputFolder;
+		this.scale = scale;
+		this.signalCollection = signalCollection;
+		this.boundingRectangles = boundingRectangles;
+		
+	}
+	
 	public Nucleus duplicate(){
 		try {
+			RoundNucleusBuilder builder = new RoundNucleusBuilder();
 			
-			RoundNucleus duplicate = new RoundNucleus();
+			return builder.uuid(getID())
+			.nucleusNumber(getNucleusNumber())
+			.angleProfileWindowSize(getAngleProfileWindowSize())
+			.perimeter(getPerimeter())
+			.pathLength(getPathLength())
+			.feret(getFeret())
+			.area(getArea())
+			.orignalPosition(getPosition())
+			.angleProfile(getAngleProfile())
+			.distanceProfile(getDistanceProfile())
+			.singleDistanceProfile(getSingleDistanceProfile())
+			.borderList(getBorderList())
+			.segmentList(segmentList)
+			.borderTags(getBorderTags())
+			.segmentTags(segmentTags)
+			.centreOfMass(getCentreOfMass())
+			.sourceFile(getSourceFile())
+			.nucleusFolder(getNucleusFolder())
+			.outputFolder(getOutputFolderName())
+			.scale(getScale())
+			.signalCollections(getSignalCollection())
+			.boundingRectangles(boundingRectangles)
+			.build();
 			
-			duplicate.setID(this.getID());
-			duplicate.setPosition(this.getPosition());
-
-			duplicate.setSourceFile(this.getSourceFile());
-			duplicate.setOutputFolder(this.getOutputFolderName());
-					
-			duplicate.setNucleusNumber(this.getNucleusNumber());
-			duplicate.setNucleusFolder(this.getNucleusFolder());
 			
-			duplicate.setPerimeter(this.getPerimeter());
-			duplicate.setFeret(this.getFeret());
-			duplicate.setArea(this.getArea());
-
-			duplicate.setCentreOfMass(this.getCentreOfMass());
+//			RoundNucleus duplicate = new RoundNucleus();
+//			
+//			duplicate.setID(this.getID());
+//			duplicate.setPosition(this.getPosition());
+//
+//			duplicate.setSourceFile(this.getSourceFile());
+//			duplicate.setOutputFolder(this.getOutputFolderName());
+//					
+//			duplicate.setNucleusNumber(this.getNucleusNumber());
+//			duplicate.setNucleusFolder(this.getNucleusFolder());
+//			
+//			duplicate.setPerimeter(this.getPerimeter());
+//			duplicate.setFeret(this.getFeret());
+//			duplicate.setArea(this.getArea());
+//
+//			duplicate.setCentreOfMass(this.getCentreOfMass());
+//			
+//			duplicate.setSignals( new SignalCollection(this.getSignalCollection()));
+//
+//			duplicate.setDistanceProfile(this.getDistanceProfile());
+//			duplicate.setAngleProfile(this.getAngleProfile());
+//
+//			duplicate.setBorderTags(this.getBorderTags());
+//			duplicate.setBorderList(this.getBorderList());
+//					
+//			duplicate.setAngleProfileWindowSize(this.getAngleProfileWindowSize());
+//			duplicate.setSingleDistanceProfile(this.getSingleDistanceProfile());
+//			
+//			duplicate.setScale(this.getScale());
+//			
+//			return duplicate;
 			
-			duplicate.setSignals( new SignalCollection(this.getSignalCollection()));
-
-			duplicate.setDistanceProfile(this.getDistanceProfile());
-			duplicate.setAngleProfile(this.getAngleProfile());
-
-			duplicate.setBorderTags(this.getBorderTags());
-			duplicate.setBorderList(this.getBorderList());
-					
-			duplicate.setAngleProfileWindowSize(this.getAngleProfileWindowSize());
-			duplicate.setSingleDistanceProfile(this.getSingleDistanceProfile());
-			
-			duplicate.setScale(this.getScale());
-			
-			return duplicate;
-//			return new RoundNucleus(this);
 		} catch (Exception e) {
 			return null;
 		}
@@ -617,9 +740,9 @@ public class RoundNucleus
 		return this.angleProfileWindowSize;
 	}
 
-	public int getFailureCode(){
-		return this.failureCode;
-	}
+//	public int getFailureCode(){
+//		return this.failureCode;
+//	}
 		
 	/* (non-Javadoc)
 	 * Check if the given signal group contains signals
@@ -691,9 +814,9 @@ public class RoundNucleus
 		this.nucleusFolder = d;
 	}
 
-	public void updateFailureCode(int i){
-		this.failureCode = this.failureCode | i;
-	}
+//	public void updateFailureCode(int i){
+//		this.failureCode = this.failureCode | i;
+//	}
 
 	public void setAngleProfileWindowSize(int i){
 		this.angleProfileWindowSize = i;
@@ -1499,4 +1622,212 @@ public class RoundNucleus
 			
 		}
 	}
+	
+	
+	public class RoundNucleusBuilder {
+		
+		private UUID uuid;
+
+		private int nucleusNumber; // the number of the nucleus in the current image
+
+		private int angleProfileWindowSize;
+
+		private double perimeter;   // the nuclear perimeter
+		private double pathLength;  // the angle path length - measures wibbliness in border
+		private double feret;       // the maximum diameter
+		private double area;        // the nuclear area
+
+		private double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
+
+		/*
+			The following fields are part of the redesign of the whole system. Instead of storing border points within
+			an AngleProfile, they will be part of the Nucleus. The Profiles can take any double[] of values, and
+			manipulate them. BorderPoints can be combined into BorderSegments, which may overlap. No copies of the 
+			BorderPoints are made; everything references the copy in the Nucleus. Given this, the points of interest 
+			(now borderTags) need only to be indexes.
+		*/
+		private SegmentedProfile angleProfile; // 
+		private Profile distanceProfile; // holds distances through CoM to opposite border
+		private Profile singleDistanceProfile; // holds distances from CoM, not through CoM
+		private List<NucleusBorderPoint> borderList; // eventually to replace angleProfile
+		private List<NucleusBorderSegment> segmentList; // expansion for e.g acrosome
+		private Map<BorderTag, Integer> borderTags = new HashMap<BorderTag, Integer>(); // to replace borderPointsOfInterest; <tag, index>
+		private Map<String, Integer> segmentTags =  new HashMap<String, Integer>();
+
+		private XYPoint centreOfMass;
+
+		private File sourceFile;    // the image from which the nucleus came e.g. /Testing/1.tiff
+		private File nucleusFolder; // the folder to store nucleus information e.g. /Testing/2015-11-24_10:00:00/1/
+		private String outputFolder;  // the top-level path in which to store outputs; has analysis date e.g. /Testing/2015-11-24_10:00:00
+		
+		private double scale = 1; // allow conversion between pixels and SI units. The length of a pixel in microns
+		
+		private SignalCollection signalCollections;
+		
+		private Map<BorderTag, Rectangle> boundingRectangles = new HashMap<BorderTag, Rectangle>(); // cache the bounding rectange to save time
+	
+		public RoundNucleusBuilder(){};
+		
+		public RoundNucleusBuilder uuid(UUID id) {
+		      this.uuid = id;
+		      return this;
+		   }
+
+		public RoundNucleusBuilder nucleusNumber(int nucleusNumber) {
+			this.nucleusNumber = nucleusNumber;
+			return this;
+		}
+		
+		public RoundNucleusBuilder angleProfileWindowSize(int angleProfileWindowSize) {
+			this.angleProfileWindowSize = angleProfileWindowSize;
+			return this;
+		}
+		
+		public RoundNucleusBuilder perimeter(double perimeter) {
+			this.perimeter = perimeter;
+			return this;
+		}
+		
+		public RoundNucleusBuilder pathLength(double pathLength) {
+			this.pathLength = pathLength;
+			return this;
+		}
+		
+		public RoundNucleusBuilder feret(double feret) {
+			this.feret = feret;
+			return this;
+		}
+		
+		public RoundNucleusBuilder area(double area) {
+			this.area = area;
+			return this;
+		}
+		
+		public RoundNucleusBuilder orignalPosition(double[] orignalPosition) {
+			this.orignalPosition = orignalPosition;
+			return this;
+		}
+		
+		public RoundNucleusBuilder angleProfile(SegmentedProfile angleProfile) {
+			try {
+				this.angleProfile = new SegmentedProfile(angleProfile);
+			} catch (Exception e) {
+				this.angleProfile = null;
+			}
+			return this;
+		}
+		
+		public RoundNucleusBuilder distanceProfile(Profile distanceProfile) {
+			this.distanceProfile = new Profile(distanceProfile);
+			return this;
+		}
+		
+		public RoundNucleusBuilder singleDistanceProfile(Profile singleDistanceProfile) {
+			this.singleDistanceProfile = new Profile(singleDistanceProfile);
+			return this;
+		}
+		
+		public RoundNucleusBuilder borderList(List<NucleusBorderPoint> borderList) {
+			
+			this.borderList = new ArrayList<NucleusBorderPoint>();
+			for(NucleusBorderPoint b : borderList){
+				this.borderList.add(new NucleusBorderPoint(b));
+			}
+			return this;
+		}
+
+		public RoundNucleusBuilder segmentList(List<NucleusBorderSegment> segmentList) {
+
+			this.segmentList = new ArrayList<NucleusBorderSegment>();
+			for(NucleusBorderSegment b : segmentList){
+				this.segmentList.add(new NucleusBorderSegment(b));
+			}
+			return this;
+		}
+
+		public RoundNucleusBuilder borderTags(Map<BorderTag, Integer> borderTags) {
+			this.borderTags = new HashMap<BorderTag, Integer>();
+			for(BorderTag b : borderTags.keySet()){
+				this.borderTags.put(b,  new Integer(borderTags.get(b)));
+			}
+			return this;
+		}
+		
+		public RoundNucleusBuilder segmentTags(Map<String, Integer> segmentTags) {
+			this.segmentTags = new HashMap<String, Integer>();
+			for(String b : segmentTags.keySet()){
+				this.segmentTags.put(b, new Integer(segmentTags.get(b)));
+			}
+			return this;
+		}
+
+		public RoundNucleusBuilder centreOfMass(XYPoint centreOfMass) {
+			this.centreOfMass = new XYPoint(centreOfMass);
+			return this;
+		}
+		
+		public RoundNucleusBuilder sourceFile(File sourceFile) {
+			this.sourceFile = sourceFile;
+			return this;
+		}
+		
+		public RoundNucleusBuilder nucleusFolder(File nucleusFolder) {
+			this.nucleusFolder = nucleusFolder;
+			return this;
+		}
+		
+		public RoundNucleusBuilder outputFolder(String outputFolder) {
+			this.outputFolder = outputFolder;
+			return this;
+		}
+		
+		public RoundNucleusBuilder scale(double scale) {
+			this.scale = scale;
+			return this;
+		}
+		
+		public RoundNucleusBuilder signalCollections(SignalCollection signalCollections) {
+			this.signalCollections = new SignalCollection(signalCollections);
+			return this;
+		}
+		
+		public RoundNucleusBuilder boundingRectangles(Map<BorderTag, Rectangle> boundingRectangles) {
+
+			this.boundingRectangles = new HashMap<BorderTag, Rectangle>();
+			for(BorderTag b : boundingRectangles.keySet()){
+				this.boundingRectangles.put(b, new Rectangle(boundingRectangles.get(b)));
+			}
+			return this;
+		}
+		
+		public RoundNucleus build() {
+		      return new RoundNucleus(this.uuid,
+		    		  this.nucleusNumber,
+		    		  this.angleProfileWindowSize,
+		    		  this.perimeter,
+		    		  this.pathLength,
+		    		  this.feret, 
+		    		  this.area,
+		    		  this.orignalPosition,
+		    		  this.angleProfile,
+		    		  this.distanceProfile,
+		    		  this.singleDistanceProfile,
+		    		  this.borderList, 
+		    		  this.segmentList,
+		    		  this.borderTags,
+		    		  this.segmentTags,
+		    		  this.centreOfMass,
+		    		  this.sourceFile,
+		    		  this.nucleusFolder,
+		    		  this.outputFolder,
+		    		  this.scale,
+		    		  this.signalCollections,
+		    		  this.boundingRectangles);
+		   }
+		
+	}
+	
+	
+	
+	
 }

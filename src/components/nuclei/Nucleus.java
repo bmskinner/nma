@@ -344,7 +344,6 @@ public interface Nucleus {
 	
 	public NucleusBorderPoint getBorderPoint(int i);
 
-	public int getFailureCode();
 
 	/**
 	 * Check if the given signal group has a signal in this nucleus
@@ -384,9 +383,6 @@ public interface Nucleus {
 	public void setOutputFolder(String f);
 
 	public void setCentreOfMass(XYPoint d);
-
-	public void updateFailureCode(int i);
-
 
 	public void setBorderList(List<NucleusBorderPoint> list);
 
