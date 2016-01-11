@@ -43,7 +43,13 @@ public class FishRemappingAction extends ProgressableAction {
 						}
 					}
 					programLogger.log(Level.INFO, "Reapplying morphology...");
-					new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
+//					int flag = MainWindow.ADD_POPULATION;
+//					flag |= MainWindow.ASSIGN_SEGMENTS;
+////					flag |= MainWindow.SAVE_DATASET;
+//
+//					// begin a recursive morphology analysis
+//					new RunProfilingAction(list, flag, mw);
+//					new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
 
 					finished();
 

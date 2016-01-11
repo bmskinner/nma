@@ -744,7 +744,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			
 			testedProfiles = new ArrayList<SegmentedProfile>();
 
-			log(Level.INFO, "Fitting segments");
+			log(Level.FINE, "Fitting segments");
 			
 			// By default, return the input profile
 			SegmentedProfile result 	 = new SegmentedProfile(profile);

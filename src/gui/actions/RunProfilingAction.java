@@ -50,7 +50,7 @@ public class RunProfilingAction extends ProgressableAction {
 		this.setProgressBarVisible(false);
 
 		// The analysis takes place in a new thread to accomodate refolding.
-		// See specific comment below
+		// See specific comment in RunSegmentationAction
 		Thread thr = new Thread(){
 
 			public void run(){
@@ -66,7 +66,10 @@ public class RunProfilingAction extends ProgressableAction {
 				// call the finish
 				if( ! hasRemainingDatasetsToProcess()){
 
-					RunProfilingAction.super.finished();
+					cancel();		
+					RunProfilingAction.this.removeInterfaceEventListener(mw);
+					RunProfilingAction.this.removeDatasetEventListener(mw);					
+//					RunProfilingAction.super.finished();
 					
 				} else {
 					// otherwise analyse the next item in the list

@@ -146,11 +146,15 @@ public class RunSegmentationAction extends ProgressableAction {
 					}
 				}
 
-				// The new refold action is a progressable action, so must not block
-				// the EDT. Also, the current action must wait for refolding to complete,
-				// otherwise the next MorphologyAnalysisAction in the chain will block the
-				// refold from firing a done signal. Hence, put a latch on the refold to 
-				// make this thread wait until the refolding is complete.
+				/*
+				 * The refold action is a progressable action, so must not block
+				 * the EDT. Also, the current action must wait for refolding to complete,
+				 * otherwise the next RunSegmentationAction in the chain will block the
+				 * refold from firing a done signal. 
+				 * 
+				 * Hence, put a latch on the refold to make this thread wait 
+				 * until the refolding is complete.
+				 */
 				if(  (downFlag & MainWindow.CURVE_REFOLD) == MainWindow.CURVE_REFOLD){
 					programLogger.log(Level.FINEST, "Preparing to hold thread while refolding datast");
 					final CountDownLatch latch = new CountDownLatch(1);
@@ -166,7 +170,9 @@ public class RunSegmentationAction extends ProgressableAction {
 				if(  (downFlag & MainWindow.SAVE_DATASET) == MainWindow.SAVE_DATASET){
 					final CountDownLatch latch = new CountDownLatch(1);
 					programLogger.log(Level.FINEST, "Preparing to hold thread while saving datast");
-					new SaveDatasetAction(dataset, mw, latch, false);
+					
+					
+					new SaveDatasetAction(dataset, dataset.getSavePath(), mw, latch);
 					try {
 						latch.await();
 					} catch (InterruptedException e) {

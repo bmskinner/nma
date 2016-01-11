@@ -7,7 +7,6 @@ import java.util.logging.Level;
 
 import components.Cell;
 import components.CellCollection;
-
 import gui.MainWindow;
 import gui.dialogs.ManualCellCurator;
 import analysis.AnalysisDataset;
@@ -51,13 +50,12 @@ public class CurateCollectionAction extends ProgressableAction {
 				list.add(clusterDataset);
 
 				programLogger.log(Level.INFO, "Running new morphology analysis");
-				final int flag = MainWindow.ADD_POPULATION;
-				//			SwingUtilities.invokeLater(new Runnable(){
-				//				public void run(){
+				int flag = MainWindow.ADD_POPULATION;
+				flag |= MainWindow.ASSIGN_SEGMENTS;
+//				flag |= MainWindow.SAVE_DATASET;
 
-				new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, mw);
-
-				//			}});
+				// begin a recursive morphology analysis
+				new RunProfilingAction(list, flag, mw);
 
 			} else {
 				programLogger.log(Level.WARNING, "No cells found");
