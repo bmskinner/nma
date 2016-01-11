@@ -333,118 +333,6 @@ public class CellCollection implements Serializable {
   }
   
   /**
-   * Get the areas of the nuclei in this collection as
-   * an array at the appropriate scale
-   * @return
-   */
-  public double[] getAreas(MeasurementScale scale){
-
-	  List<Double> list = new ArrayList<Double>();
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  
-		  double area = n.getArea();
-		  
-		  if(scale.equals(MeasurementScale.MICRONS)){
-			  area = Utils.micronArea(area, n.getScale());
-		  }
-		  list.add(area);
-	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-  }
-    
-  /**
-   * Get the perimeters of the nuclei in this collection as
-   * an array
-   * @return
-   */
-  public double[] getPerimeters(MeasurementScale scale){
-
-	  List<Double> list = new ArrayList<Double>();
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  
-		  double value = n.getPerimeter();
-		  
-		  if(scale.equals(MeasurementScale.MICRONS)){
-			  value = Utils.micronLength(value, n.getScale());
-		  }
-		  list.add(value);
-	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-  }
-  
-  /**
-   * Get the circularities of the nuclei in this collection as
-   * an array
-   * @return
-   */
-  public double[] getCircularities(){
-
-	  List<Double> list = new ArrayList<Double>();
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  list.add(n.getCircularity());
-	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-  }
-
-  /**
-   * Get the aspect ratios of the nuclei in this collection as
-   * an array
-   * @return
-   */
-  public double[] getAspectRatios(){
-
-	  List<Double> list = new ArrayList<Double>();
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  list.add(n.getAspectRatio());
-	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-  }
-  
-  /**
-   * Get the ferets of the nuclei in this collection as
-   * an array
-   * @return
-   */
-  public double[] getFerets(MeasurementScale scale){
-
-	  List<Double> list = new ArrayList<Double>();
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  double value = n.getFeret();
-		  
-		  if(scale.equals(MeasurementScale.MICRONS)){
-			  value = Utils.micronLength(value, n.getScale());
-		  }
-		  list.add(value);
-	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-  }
-    
-  /**
-   * Get the minimum diameters of the nuclei in this collection as
-   * an array
-   * @return
-   */
-  public double[] getMinFerets(MeasurementScale scale){
-
-	  List<Double> list = new ArrayList<Double>();
-	  for(Cell cell : getCells() ){ 
-		  Nucleus n = cell.getNucleus();
-		  double value = n.getNarrowestDiameter();
-		  
-		  if(scale.equals(MeasurementScale.MICRONS)){
-			  value = Utils.micronLength(value, n.getScale());
-		  }
-		  list.add(value);
-	  }
-	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-  }
-
-  /**
    * Get the path lengths of the nuclei in this collection as
    * an array
    * @return
@@ -717,14 +605,14 @@ public class CellCollection implements Serializable {
   }
   
   // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
-  public double getMedianNuclearArea(){
-    double[] areas = this.getAreas(MeasurementScale.PIXELS);
+  public double getMedianNuclearArea() throws Exception{
+    double[] areas = this.getStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS);
     double median = Stats.quartile(areas, 50);
     return median;
   }
 
-  public double getMedianNuclearPerimeter(){
-    double[] p = this.getPerimeters(MeasurementScale.PIXELS);
+  public double getMedianNuclearPerimeter() throws Exception{
+    double[] p = this.getStatistics(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
     double median = Stats.quartile(p, 50);
     return median;
   }
@@ -741,8 +629,8 @@ public class CellCollection implements Serializable {
     return median;
   }
 
-  public double getMedianFeretLength(){
-    double[] p = this.getFerets(MeasurementScale.PIXELS);
+  public double getMedianFeretLength() throws Exception{
+    double[] p = this.getStatistics(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
     double median = Stats.quartile(p, 50);
     return median;
   }
@@ -750,11 +638,6 @@ public class CellCollection implements Serializable {
   public double getMaxProfileLength(){
 	  return Stats.max(this.getArrayLengths());
   }
-  
-//  public int getProfileWindowSize(){
-//	  this.mappedCollection.
-//	  return this.getCell(0).getNucleus().getAngleProfileWindowSize();
-//  }
   
   /**
    * Get the median area of the signals in the given channel
@@ -1000,107 +883,42 @@ public class CellCollection implements Serializable {
    * @throws Exception
    */
   public double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) throws Exception {
-	  
+
 	  double[] result = null;
 	  switch (stat) {
-	  
-	  		case AREA: {
-	  			result = this.getAreas(scale);
-	  			break;
-	  		}
-	  		
-	  		case PERIMETER:{
-	  			result = this.getPerimeters(scale);
-	  			break;
-	  		}
-	  		
-	  		case MAX_FERET:{
-	  			result = this.getFerets(scale);
-	  			break;
-	  		}
-	  		
-	  		case MIN_DIAMETER:{
-	  			result = this.getMinFerets(scale);
-	  			break;
-	  		}
-	  		
-	  		case ASPECT:{
-	  			result = this.getAspectRatios();
-	  			break;
-	  		}
-	  		
-	  		case CIRCULARITY:{
-	  			result = this.getCircularities();
-	  			break;
-	  		}
-	  		
-	  		case VARIABILITY:{
-	  			result = this.getNormalisedDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT);
-	  			break;
-	  		}
-	  		
-	  		case BOUNDING_HEIGHT:{
-	  			result = this.getBoundingRectangleDimension(false, scale);
-	  			break;
-	  		}
-	  		
-	  		case BOUNDING_WIDTH:{
-	  			result = this.getBoundingRectangleDimension(true, scale);
-	  			break;
-	  		}
-	  		
-	  		case OP_RP_ANGLE:{
-				result = this.getReferenceAngles(scale);
-				break;
-	  		}
-			
+
+		  case VARIABILITY:{
+			  result = this.getNormalisedDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT);
+			  break;
+		  }
+	
+		  default: {
+			  result = this.getStatistics(stat, scale);
+			  break;
+		  }
 
 	  }
 	  return result;
   }
   
   /**
-   * Calculate the angles for each nucleus between the orientation point
-   * and the reference point, via the centre of mass.
-   * @param scale the scale to use (can be null, angles have no scale)
-   * @return a list of angles
-   * @throws Exception
+   * Get the stats of the nuclei in this collection as
+   * an array
+   * @return
+ * @throws Exception 
    */
-  public double[] getReferenceAngles(MeasurementScale scale) throws Exception{
+  private double[] getStatistics(NucleusStatistic stat, MeasurementScale scale) throws Exception{
+
 	  List<Double> list = new ArrayList<Double>();
-
-	  for(Nucleus n : this.getNuclei()){
-
-		  list.add(n.getStatistic(NucleusStatistic.OP_RP_ANGLE, scale));
-
+	  for(Cell cell : getCells() ){ 
+		  Nucleus n = cell.getNucleus();
+		  double value = n.getStatistic(stat, scale);
+		  list.add(value);
 	  }
-	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
+	  return Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+
   }
   
-
-  /**
-   * Calculate the widths of the bounding rectangles for each nucleus
-   * after rotating the tail to lie underneath the centre of mass
-   * @param width true for width, false for height
-   * @return a list of dimensions
-   * @throws Exception
-   */
-  public double[] getBoundingRectangleDimension(boolean width, MeasurementScale scale) throws Exception{
-	  List<Double> list = new ArrayList<Double>();
-
-	  for(Nucleus n : this.getNuclei()){
-
-		  if(width){
-			  list.add(n.getStatistic(NucleusStatistic.BOUNDING_WIDTH, scale));
-		  } else {
-			  list.add(n.getStatistic(NucleusStatistic.BOUNDING_HEIGHT, scale));
-		  }
-
-	  }
-	  return Utils.getdoubleFromDouble( list.toArray(new Double[0]));
-  }
-
-
   /**
    * Calculate the length of the segment with the given name in each nucleus
    * of the collection

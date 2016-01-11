@@ -18,6 +18,9 @@
  *******************************************************************************/
 package stats;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import utility.Utils;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusType;
@@ -40,7 +43,9 @@ public enum NucleusStatistic implements PlottableStatistic {
 	  VARIABILITY("Variability", StatisticDimension.DIMENSIONLESS, new NucleusType[]{NucleusType.ROUND}), 
 	  BOUNDING_HEIGHT ("Bounding height", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}), 
 	  BOUNDING_WIDTH ("Bounding width", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.ROUND}),
-	  OP_RP_ANGLE ("Angle between reference points", StatisticDimension.ANGLE, new NucleusType[]{NucleusType.ROUND});
+	  OP_RP_ANGLE ("Angle between reference points", StatisticDimension.ANGLE, new NucleusType[]{NucleusType.ROUND}),
+	  HOOK_LENGTH ("Length of hook", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.RODENT_SPERM}),
+	  BODY_WIDTH ("Width of body", StatisticDimension.LENGTH, new NucleusType[]{NucleusType.RODENT_SPERM});
 
 	  private String name;
 	  private StatisticDimension dimension;
@@ -81,16 +86,21 @@ public enum NucleusStatistic implements PlottableStatistic {
 	  }
 	  
 	  /**
-	   * Get the label (name and units) for the stat
+	   * Get the label (name and units) for the statistic
 	   * @return
 	   */
 	  public String label(MeasurementScale scale){
 		  String result = "";
-		  if(this.isDimensionless()){
-			  result = this.toString();
-		  } else {
-			  result = this.toString() +" ("+ this.units(scale) + ")";
+		  
+		  switch(this.dimension){
+			  case DIMENSIONLESS:
+				  result = this.toString();
+				  break;
+			  default:
+				  result = this.toString() +" ("+ this.units(scale) + ")";
+				  break;
 		  }
+
 		  return result;
 	  }
 	  
@@ -106,29 +116,26 @@ public enum NucleusStatistic implements PlottableStatistic {
 		  double result = value;
 
 		  switch(scale){
-		  case MICRONS:
-		  {
-			  switch(this.dimension){
-			  case AREA:
-				  result = Utils.micronArea(value, factor);
+		  	case MICRONS: {
+				  switch(this.dimension){
+					  case AREA:
+						  result = Utils.micronArea(value, factor);
+						  break;
+					  case LENGTH:
+						  result = Utils.micronLength(value, factor);
+						  break;
+					  default:
+						  break;
+	
+				  }
 				  break;
-			  case DIMENSIONLESS:
-				  break;
-			  case LENGTH:
-				  result = Utils.micronLength(value, factor);
-				  break;
-			  default:
-				  break;
-
 			  }
-		  }
-		  break;
-		  case PIXELS:
-			  break;
+			  
 		  default:
 			  break;
-		  }
-		  return result;
+				
+		}
+		return result;
 	  }
 	  
 	  public String units(MeasurementScale scale){
@@ -138,11 +145,11 @@ public enum NucleusStatistic implements PlottableStatistic {
 			  case AREA:
 				  result = "square "+scale.toString().toLowerCase();
 				  break;
-			  case DIMENSIONLESS:
-				  break;
 			  case LENGTH:
 				  result = scale.toString().toLowerCase();
 				  break;
+			  case ANGLE:
+				  result = "degrees";
 			  default:
 				  break;
 
@@ -152,5 +159,30 @@ public enum NucleusStatistic implements PlottableStatistic {
 	  
 	  public PlottableStatistic[] getValues(){
 		  return NucleusStatistic.values();
+	  }
+
+	  /**
+	   * Get all the statistics that apply to the given nucleus type
+	   * @param type
+	   * @return
+	   */
+	public NucleusStatistic[] values(NucleusType type){
+		
+		List<NucleusStatistic> result = new ArrayList<NucleusStatistic>();
+		  for(NucleusStatistic stat : this.values(type)){
+			  
+			  for(NucleusType t : stat.getApplicableTypes()){
+				  if(t.equals(NucleusType.ROUND) && !result.contains(stat)){
+					  result.add(stat);
+				  }
+				  
+				  if(t.equals(type) && !result.contains(stat)){
+					  result.add(stat);
+				  }
+			  }
+			  
+		  }
+		  
+		  return result.toArray(new NucleusStatistic[0]);
 	  }
   }

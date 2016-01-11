@@ -49,15 +49,6 @@ public enum MeasurementScale {
 		case AREA: 
 			result = "Square "+name;
 			break;
-		case PERIMETER: 
-			result = name;
-			break;
-		case MAX_FERET: 
-			result = name;
-			break;
-		case MIN_DIAMETER: 
-			result = name;
-			break;
 		case ASPECT: 
 			result = "Aspect ratio (feret / min diameter)";
 			break;
@@ -67,11 +58,8 @@ public enum MeasurementScale {
 		case VARIABILITY: 
 			result = "Degrees per perimeter unit";
 			break;
-		case BOUNDING_HEIGHT:
-			result = name;
-			break;
-		case BOUNDING_WIDTH:
-			result = name;
+		case OP_RP_ANGLE:
+			result = "Degrees";
 			break;
 		default:
 			result = name;

@@ -114,32 +114,6 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			}
 		});
 	}
-
-//	public void update(List<AnalysisDataset> list){	
-//		if(this.isUpdating()){
-//			programLogger.log(Level.FINEST, "Profiles panel is already updating");
-//		} else {
-//			setUpdating(true);
-//			this.list = list;
-//			programLogger.log(Level.FINE, "Updating nuclear boxplots panel");
-//			SwingUtilities.invokeLater(new Runnable(){
-//				public void run(){
-//					try {
-//
-//						boxplotPanel.update(NuclearBoxplotsPanel.this.list);
-//						programLogger.log(Level.FINEST, "Updated nuclear boxplots panel");
-//						histogramsPanel.update(NuclearBoxplotsPanel.this.list);
-//						programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
-//					} catch (Exception e) {
-//						programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
-//					} finally {
-//						setUpdating(false);
-//					}
-//				}
-//			});
-//		}
-//
-//	}
 	
 	protected class BoxplotsPanel extends JPanel implements ActionListener {
 

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
 import components.CellCollection;
 import components.generic.BorderTag;
@@ -62,12 +63,12 @@ public class StatsExporter {
 	public static void exportNuclearStats(CellCollection collection, String filename) throws Exception {
 
 		TableExporter nuclearStats = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
-		nuclearStats.addColumn("AREA",                       collection.getAreas(MeasurementScale.PIXELS));
-		nuclearStats.addColumn("PERIMETER",                  collection.getPerimeters(MeasurementScale.PIXELS));
-		nuclearStats.addColumn("FERET",                      collection.getFerets(MeasurementScale.PIXELS));
+		nuclearStats.addColumn("AREA",                       collection.getNuclearStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS));
+		nuclearStats.addColumn("PERIMETER",                  collection.getNuclearStatistics(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS));
+		nuclearStats.addColumn("FERET",                      collection.getNuclearStatistics(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS));
 		nuclearStats.addColumn("PATH_LENGTH",                collection.getPathLengths());
 		nuclearStats.addColumn("MEDIAN_DIST_BETWEEN_POINTS", collection.getMedianDistanceBetweenPoints());
-		nuclearStats.addColumn("MIN_FERET",                  collection.getMinFerets(MeasurementScale.PIXELS));
+		nuclearStats.addColumn("MIN_FERET",                  collection.getNuclearStatistics(NucleusStatistic.MIN_DIAMETER, MeasurementScale.PIXELS));
 //		nuclearStats.addColumn("NORM_TAIL_INDEX",            collection.getBorderIndex(BorderTag.ORIENTATION_POINT));
 		nuclearStats.addColumn("DIFFERENCE_TO_MEDIAN",       collection.getDifferencesToMedianFromPoint(BorderTag.ORIENTATION_POINT));
 		nuclearStats.addColumn("PATH",                       collection.getNucleusImagePaths());

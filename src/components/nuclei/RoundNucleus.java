@@ -546,20 +546,15 @@ public class RoundNucleus
 				break;
 			case OP_RP_ANGLE:
 				result = RoundNucleus.findAngleBetweenXYPoints(this.getBorderTag(BorderTag.REFERENCE_POINT), this.getCentreOfMass(), this.getBorderTag(BorderTag.ORIENTATION_POINT));
+				break;
 			default:
+				result = 0;
 				break;
 		
 		}
 		
-//		if(stat.isDimensionless()){
-//			return result;
-//		} else {
-			result = stat.convert(result, this.getScale(), scale);
-			
-//			if(scale.equals(MeasurementScale.MICRONS)){
-//				result = Utils.micronLength(result, this.getScale());
-//			}
-//		}
+		result = stat.convert(result, this.getScale(), scale);
+
 		return result;
 		
 	}

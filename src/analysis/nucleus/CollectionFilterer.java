@@ -60,7 +60,7 @@ public class CollectionFilterer {
 		return true;
 	}
 	
-	private static void refilterNuclei(CellCollection collection, CellCollection failCollection){
+	private static void refilterNuclei(CellCollection collection, CellCollection failCollection) throws Exception{
 
 	    double medianArea = collection.getMedianNuclearArea();
 	    double medianPerimeter = collection.getMedianNuclearPerimeter();
@@ -142,7 +142,7 @@ public class CollectionFilterer {
 	    
 	  }
 	
-	private static void exportFilterStats(CellCollection collection){
+	private static void exportFilterStats(CellCollection collection) throws Exception{
 
 	    double medianArea = collection.getMedianNuclearArea();
 	    double medianPerimeter = collection.getMedianNuclearPerimeter();
