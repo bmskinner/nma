@@ -661,41 +661,71 @@ public class SegmentedProfile extends Profile implements Serializable {
 			double proportionalLength = (double) seg.length() / (double) seg.getTotalLength();
 			double newSegLength = (double) newLength * proportionalLength;
 			
-			newSegLength = newSegLength<3 ? 3 : newSegLength;
+			newSegLength = newSegLength<NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH 
+					? NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH 
+					: newSegLength;
 			
+			IJ.log("Old length: "+seg.length());
 			IJ.log("New length: "+newSegLength);
 			
 			double newStart;
 			double newEnd;
 			
-			if(count==0){
-				// first segment, establish position
-				
-				double proportionalStart = (double) seg.getStartIndex() / (double) seg.getTotalLength();
-				newStart = (double) newLength * proportionalStart;
-				
-			} else {
-				
-				newStart = segStart;
-
-			}
+			double proportionalStart = (double) seg.getStartIndex() / (double) seg.getTotalLength();
+			newStart = (double) newLength * proportionalStart;
 			
-			if(seg.wraps()){
-				
-				newEnd = newSegLength - (newLength - newStart);
-				
-				if(newEnd<0){
-					newEnd = newLength-newEnd;
-				}
-				
-			} else {
-				newEnd = newStart + newSegLength;
-				if(newEnd>=newLength){
-					newEnd = newEnd - newLength;
-				}
-			}
+			double proportionalEnd = (double) seg.getEndIndex() / (double) seg.getTotalLength();
+			newEnd = (double) newLength * proportionalEnd;
 			
-			segStart = (int) newEnd;
+//			if(newEnd<newStart){
+//				
+//				if(newEnd+ ( newSegLength - newStart   )  < 3){
+//					newEnd = newStart+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH; 
+//				}
+//				
+//				
+//			} else {
+//				if(newEnd-newStart < 3){
+//					
+//					if(newStart+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH<newSegLength){
+//						newEnd = newStart+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH; 
+//					} else {
+//						newEnd = newSegLength - (newStart+NucleusBorderSegment.MINIMUM_SEGMENT_LENGTH);
+//					}
+//				}
+//			}
+//			
+//			if(count==0){
+//				// first segment, establish position
+//				
+//				double proportionalStart = (double) seg.getStartIndex() / (double) seg.getTotalLength();
+//				newStart = (double) newLength * proportionalStart;
+//				
+//				double proportionalEnd = (double) seg.getEndIndex() / (double) seg.getTotalLength();
+//				newEnd = (double) newLength * proportionalEnd;
+//				
+//			} else {
+//				
+//				newStart = segStart;
+//
+//			}
+//			
+//			if(seg.wraps()){
+//				
+//				newEnd = newSegLength - (newLength - newStart);
+//				
+//				if(newEnd<0){
+//					newEnd = newLength-newEnd;
+//				}
+//				
+//			} else {
+//				newEnd = newStart + newSegLength;
+//				if(newEnd>=newLength){
+//					newEnd = newEnd - newLength;
+//				}
+//			}
+//			
+//			segStart = (int) newEnd;
 			NucleusBorderSegment newSeg = new NucleusBorderSegment(  (int) newStart, (int) newEnd, newLength);
 			newList.add(newSeg);
 			count++;
