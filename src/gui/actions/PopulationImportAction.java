@@ -13,7 +13,10 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.MainWindow;
 import io.PopulationImportWorker;
 
-
+/**
+ * Call an open dialog to choose a saved .nbd dataset. The opened dataset
+ * will be added to the bottom of the dataset list.
+ */
 public class PopulationImportAction extends ProgressableAction {
 
 	/**
