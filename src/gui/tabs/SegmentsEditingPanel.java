@@ -369,8 +369,8 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 								if(isSingleDataset()){
 									profile = activeDataset().getCollection()
 											.getProfileCollection(ProfileCollectionType.REGULAR)
-											.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-											.interpolate((int) activeDataset().getCollection().getMedianArrayLength());
+											.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+//											.interpolate((int) activeDataset().getCollection().getMedianArrayLength());
 								}
 							} 
 							
