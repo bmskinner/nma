@@ -20,11 +20,13 @@ package gui.tabs;
 
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.RotationMode;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.ColourSelecter;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
+import gui.components.RotationSelectionSettingsPanel;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import ij.IJ;
@@ -32,8 +34,11 @@ import ij.IJ;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -49,10 +54,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -81,6 +88,7 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusTableDatasetCreator;
 import components.Cell;
 import components.generic.BorderTag;
+import components.generic.MeasurementScale;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -585,10 +593,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 	}
 	
-	protected class OutlinePanel extends JPanel{
+	protected class OutlinePanel extends JPanel implements ActionListener{
 
 		private static final long serialVersionUID = 1L;
 		
+		private RotationSelectionSettingsPanel rotationPanel;
 		private ChartPanel panel;
 		
 		@SuppressWarnings("serial")
@@ -598,6 +607,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.setLayout(new BorderLayout());
 			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 
+			
+			rotationPanel = new RotationSelectionSettingsPanel();
+			rotationPanel.addActionListener(this);
+			this.add(rotationPanel, BorderLayout.NORTH);
+			
 			panel = new ChartPanel(chart){
 				
 				
@@ -676,24 +690,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					plot.getDomainAxis().setRange(xMin, xMax);				
 				} 
 				
-//				@Override
-//				//override the default zoom to keep aspect ratio
-//				public void zoom(java.awt.geom.Rectangle2D selection){
-//					
-//					Rectangle2D.Double newSelection = null;
-//					if(selection.getWidth()>selection.getHeight()){
-//						newSelection = new Rectangle2D.Double(selection.getX(), 
-//								selection.getY(), 
-//								selection.getWidth(), 
-//								selection.getWidth());					
-//					} else {
-//						newSelection = new Rectangle2D.Double(selection.getX(), 
-//								selection.getY(), 
-//								selection.getHeight(), 
-//								selection.getHeight());		
-//					}
-//					super.zoom(newSelection);
-//				}
 			};
 			
 			panel.addComponentListener(new ComponentAdapter() {
@@ -708,15 +704,17 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(panel, BorderLayout.CENTER);
 			
 		}
-		
+				
 		protected void update(Cell cell){
 
+			RotationMode rotateMode = rotationPanel.getSelected();
+			
 			try{
 				JFreeChart chart;
 				if(cell==null){
 					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				} else {
-					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset());
+					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode);
 				}
 				panel.setChart(chart);
 				if(cell!=null){
@@ -727,6 +725,14 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				panel.setChart(chart);
 			}
+		}
+
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			update(activeCell);
+			
 		}
 
 	}

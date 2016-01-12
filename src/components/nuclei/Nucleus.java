@@ -724,4 +724,36 @@ public interface Nucleus {
 	 * @param failureFeret
 	 */
 	public void updateFailureCode(int failCode);
+	
+	
+	/*
+	 * Rotations
+	 */
+	
+	/**
+	 * Given two points in the nucleus, rotate the nucleus so that they are vertical.
+	 * @param topPoint the point to have the higher Y value
+	 * @param bottomPoint the point to have the lower Y value
+	 */
+	public void alignPointsOnVertical(NucleusBorderPoint topPoint, NucleusBorderPoint bottomPoint);
+	
+	/**
+	 * Rotate the nucleus by the given amount around the centre of mass
+	 * @param angle
+	 */
+	public void rotate(double angle);
+	
+	/**
+	 * Translate the XY coordinates of each border point so that
+	 * the nuclear centre of mass is at the given point
+	 * @param point the new centre of mass
+	 */
+	public void moveCentreOfMass(XYPoint point);
+	
+	/**
+	 * Translate the XY coordinates of each border point so that
+	 * the nuclear centre of mass is at the given point
+	 * @param point the new centre of mass
+	 */
+	public void offset(double xOffset, double yOffset);
 }

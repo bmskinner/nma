@@ -18,6 +18,7 @@
  *******************************************************************************/
 package charting.charts;
 
+import gui.RotationMode;
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -631,7 +632,7 @@ public class MorphologyChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset) throws Exception{
+	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode) throws Exception{
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -644,6 +645,23 @@ public class MorphologyChartFactory {
 		// make a hash to track the contents of each dataset produced
 		Map<Integer, String> hash = new HashMap<Integer, String>(0); 
 		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
+		
+		if(rotateMode.equals(RotationMode.VERTICAL)){
+			// duplicate the cell
+			Cell newCell = new Cell();
+			Nucleus verticalNucleus = cell.getNucleus().duplicate();
+			newCell.setNucleus(verticalNucleus);
+			if(verticalNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && verticalNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+
+				// Rotate vertical
+				NucleusBorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
+				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
+			}
+			cell = newCell;
+			
+			// Need to have top point at the top of the image
+			plot.getRangeAxis().setInverted(false);
+		}
 
 
 		// get the nucleus dataset
