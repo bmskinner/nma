@@ -61,6 +61,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import utility.Constants;
 import utility.Utils;
 import weka.core.logging.Logger;
 import analysis.AnalysisDataset;
@@ -197,6 +198,14 @@ public class MorphologyChartFactory {
 	public static JFreeChart makeMultiSegmentedProfileChart(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
 		int length = 100 ; // default if normalised
+		if(list.size()==1){
+			length = list.get(0).getCollection()
+					.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN)
+					.size();
+			normalised = false;
+		}
+		
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
 				                false);

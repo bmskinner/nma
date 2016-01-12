@@ -22,6 +22,7 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
 import gui.components.HistogramsTabPanel;
 import gui.components.MeasurementUnitSettingsPanel;
@@ -241,7 +242,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	@SuppressWarnings("serial")
 	public class SegmentProfilePanel extends JPanel implements ActionListener {
 		
-		private ChartPanel chartPanel; // for displaying the legnth of a given segment
+		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
 		private JPanel buttonsPanel;
 		private JButton mergeButton;
 		private JButton unmergeButton;
@@ -254,7 +255,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 			Dimension preferredChartSize = new Dimension(400, 300);
 			
 			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart();
-			chartPanel= MorphologyChartFactory.makeProfileChartPanel(profileChart);
+			chartPanel = new DraggableOverlayChartPanel(profileChart, null);
+//			chartPanel= MorphologyChartFactory.makeProfileChartPanel(profileChart);
 			
 			chartPanel.setMinimumSize(minimumChartSize);
 			chartPanel.setPreferredSize(preferredChartSize);
@@ -496,12 +498,14 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 			try {
 				JFreeChart chart = null;
+				SegmentedProfile profile = null;
 				if(list==null || list.isEmpty()){
 					
 					chart = MorphologyChartFactory.makeEmptyProfileChart();
 					
 					
 				} else {
+					
 					ProfileChartOptions options = new ProfileChartOptions(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileCollectionType.REGULAR);
 					
 					if(getChartCache().hasChart(options)){
@@ -513,9 +517,15 @@ public class SegmentsDetailPanel extends DetailPanel {
 					
 					// Set the button configuration
 					configureButtons(options);
+					
+					if(list.size()==1){
+						profile = list.get(0).getCollection()
+								.getProfileCollection(ProfileCollectionType.REGULAR)
+								.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+					}
 				} 
 				
-				chartPanel.setChart(chart);
+				chartPanel.setChart(chart, profile);
 			} catch (Exception e) {
 				programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
 				chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());

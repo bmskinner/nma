@@ -532,7 +532,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			profileChartPanel = new DraggableOverlayChartPanel(chart, null); 
 			profileChartPanel.addSignalChangeListener(this);
-//			profileChartPanel = MorphologyChartFactory.makeProfileChartPanel(chart); 
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
 		}

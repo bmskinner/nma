@@ -146,13 +146,14 @@ extends SpermNucleus
 		// Copy the nucleus
 		
 		RodentSpermNucleus testNucleus = (RodentSpermNucleus) this.duplicate();
-		double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
-//		IJ.log("Initial vertX:" +vertX);
-		NucleusBorderPoint[] points = getBorderPointsForVerticalAlignment();
+		
 		
 		// Only proceed if the verticals have been set
 		if(testNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && testNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
 
+			double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
+//			IJ.log("Initial vertX:" +vertX);
+			NucleusBorderPoint[] points = getBorderPointsForVerticalAlignment();
 			// Rotate vertical
 //			IJ.log(testNucleus.dumpInfo(Nucleus.BORDER_TAGS));
 			testNucleus.alignPointsOnVertical(points[0], points[1] );
