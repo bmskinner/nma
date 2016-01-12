@@ -421,8 +421,9 @@ public class Profile implements Serializable {
    * Make this profile the length specified.
    * @param newLength the new array length
    * @return an interpolated profile
+ * @throws Exception 
    */
-  public Profile interpolate(int newLength) {
+  public Profile interpolate(int newLength) throws Exception {
 
     if(newLength < this.size()){
     	System.out.println("Interpolating to a smaller array!");

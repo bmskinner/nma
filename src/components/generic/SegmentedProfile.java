@@ -22,8 +22,10 @@ import ij.IJ;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import utility.Utils;
@@ -618,8 +620,9 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param templateSegment the segment to interpolate
 	 * @param newLength the new length of the segment profile
 	 * @return the interpolated profile
+	 * @throws Exception 
 	 */
-	private Profile interpolateSegment(NucleusBorderSegment testSeg, int newLength){
+	private Profile interpolateSegment(NucleusBorderSegment testSeg, int newLength) throws Exception{
 
 		// The segment to be interpolated
 //		NucleusBorderSegment testSeg = this.getSegmentAt(templateSegment.getPosition());
@@ -631,6 +634,79 @@ public class SegmentedProfile extends Profile implements Serializable {
 		// interpolate the test segments to the length of the median segments
 		Profile revisedProfile = testSegProfile.interpolate(newLength);
 		return revisedProfile;
+	}
+	
+	
+	/**
+	 * Interpolate the profile to the given length. Segment boundaries are 
+	 * updated to equivalent proportional positions
+	 * @param newLength
+	 * @return a new segmented profile
+	 * @throws Exception
+	 */
+	public SegmentedProfile interpolate(int newLength) throws Exception {
+		Profile newProfile = super.interpolate(newLength);
+		
+		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>();
+		
+		int segStart = 0;
+		
+		int count = 0;
+		Iterator<NucleusBorderSegment> it = this.segmentIterator();
+		while (it.hasNext()){
+			
+			NucleusBorderSegment seg = it.next();
+			IJ.log(seg.toString());
+			
+			double proportionalLength = (double) seg.length() / (double) seg.getTotalLength();
+			double newSegLength = (double) newLength * proportionalLength;
+			
+			newSegLength = newSegLength<3 ? 3 : newSegLength;
+			
+			IJ.log("New length: "+newSegLength);
+			
+			double newStart;
+			double newEnd;
+			
+			if(count==0){
+				// first segment, establish position
+				
+				double proportionalStart = (double) seg.getStartIndex() / (double) seg.getTotalLength();
+				newStart = (double) newLength * proportionalStart;
+				
+			} else {
+				
+				newStart = segStart;
+
+			}
+			
+			if(seg.wraps()){
+				
+				newEnd = newSegLength - (newLength - newStart);
+				
+				if(newEnd<0){
+					newEnd = newLength-newEnd;
+				}
+				
+			} else {
+				newEnd = newStart + newSegLength;
+				if(newEnd>=newLength){
+					newEnd = newEnd - newLength;
+				}
+			}
+			
+			segStart = (int) newEnd;
+			NucleusBorderSegment newSeg = new NucleusBorderSegment(  (int) newStart, (int) newEnd, newLength);
+			newList.add(newSeg);
+			count++;
+			
+			
+			IJ.log(newSeg.toString());
+		}
+		
+		NucleusBorderSegment.linkSegments(newList);
+		return new SegmentedProfile(newProfile, newList);
+		
 	}
 	
 	/**
