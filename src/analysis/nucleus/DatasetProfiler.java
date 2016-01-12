@@ -11,7 +11,9 @@ import components.generic.BorderTag;
 import components.generic.Profile;
 import components.generic.ProfileCollection;
 import components.generic.ProfileCollectionType;
+import components.generic.SegmentedProfile;
 import components.generic.XYPoint;
+import components.nuclear.NucleusBorderSegment;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.PigSpermNucleus;
@@ -372,8 +374,38 @@ public class DatasetProfiler extends AnalysisWorker {
 		}
 		
 		private static void assignFlatRegionToMouseNuclei(CellCollection collection) throws Exception{
-			Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); // returns a median profile
+//			Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); // returns a median profile
 
+//			{
+				/*
+				 * TODO: This will not work: the segmnets and frankenprofiling has not yet been performed
+				 * Find the median profile segment with the flat region
+				 */
+//				int verticalTopIndex = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//						.getOffset(BorderTag.TOP_VERTICAL); 
+//
+//				int verticalBottomIndex = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//						.getOffset(BorderTag.BOTTOM_VERTICAL); 
+//
+//				String topSegName = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//						.getSegmentContaining(BorderTag.TOP_VERTICAL).getName();
+//
+//				String bottomSegName = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//						.getSegmentContaining(BorderTag.BOTTOM_VERTICAL).getName();
+//
+//				SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//						.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+//
+//				NucleusBorderSegment topSegFromRef    = profile.getSegment(topSegName);
+//				NucleusBorderSegment bottomSegFromRef = profile.getSegment(bottomSegName);
+//
+//				/*
+//				 * Get the proportion of the indexes through the segment
+//				 */
+//				double topProportion = topSegFromRef.getIndexProportion(verticalTopIndex);
+//				double bottomProportion = bottomSegFromRef.getIndexProportion(verticalBottomIndex);
+//			}
+			
 			// go through each nucleus
 			for(Nucleus n : collection.getNuclei()){
 				
@@ -385,36 +417,28 @@ public class DatasetProfiler extends AnalysisWorker {
 				 * Franken profile method: segment proportionality
 				 */
 				
-				{
-					/*
-				     * TODO: Use segment proportionality rather than offsetting, so we benefit from the frankenmedian
-				     * 
-				     * Find the segment with the flat top index
-				     * Get the proportion through the segment
-				     * Find the appropriate border point in the nucleus
-				     * Add the tag
-				     * 
-				     * Repeat for the flat bottom index
-				     * 
-				     */
-//					int verticalTopIndex = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//							.getOffset(BorderTag.TOP_VERTICAL); 
+//				{
+//					/*
+//				     * Use segment proportionality rather than offsetting, so we benefit from the frankenmedian
+//				     * Find the appropriate segment in the nucleus
+//				     * Find the proportional index
+//				     * Add the border tag
+//				     * 
+//				     * Repeat for the flat bottom index
+//				     */
+//					int topNucleusIndex = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT)
+//							.getSegment(topSegName)
+//							.getProportionalIndex(topProportion);
 //					
-//					String segName = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//							.getSegmentContaining(BorderTag.TOP_VERTICAL).getName();
+//					int bottomNucleusIndex = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT)
+//							.getSegment(bottomSegName)
+//							.getProportionalIndex(bottomProportion);
 //					
+//					nucleus.setBorderTag(BorderTag.TOP_VERTICAL,    topNucleusIndex);
+//					nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, bottomNucleusIndex);
 //					
-//					SegmentedProfile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-//							.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-//				
-//					NucleusBorderSegment segOffsetFromRef = profile.getSegment(segName);
-//					
-//					double verticalProportion = segOffsetFromRef.getIndexProportion(verticalTopIndex);
-//					
-//					int segIndex = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT)
-//							.getSegment(segName)
-//							.getProportionalIndex(verticalProportion);
-				}
+//
+//				}
 				
 				
 				/*
