@@ -231,7 +231,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 	
 	/**
 	 * Refresh the given collection. Create a new profile aggregate, and recalculate
-	 * the FrankenProfiles. Do not refit segments.
+	 * the FrankenProfiles. Do not recalculate segments for the median profile. Adjust
+	 * individual nucleus segments to the median.
 	 * @param collection
 	 * @return
 	 */
@@ -293,6 +294,12 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
+			
+			
+			
+			// Ensure each nucleus gets the new profile pattern
+			assignSegments(collection);
+			reviseSegments(collection, pointType);
 
 		} catch (Exception e) {
 			logError("Error reapplying profiles", e);

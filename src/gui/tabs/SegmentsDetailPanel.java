@@ -21,6 +21,7 @@ package gui.tabs;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
@@ -240,7 +241,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	}
 	
 	@SuppressWarnings("serial")
-	public class SegmentProfilePanel extends JPanel implements ActionListener {
+	public class SegmentProfilePanel extends JPanel implements ActionListener, SignalChangeListener {
 		
 		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
 		private JPanel buttonsPanel;
@@ -262,6 +263,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			chartPanel.setPreferredSize(preferredChartSize);
 			chartPanel.setMinimumDrawWidth( 0 );
 			chartPanel.setMinimumDrawHeight( 0 );
+			chartPanel.addSignalChangeListener(this);
 			this.add(chartPanel, BorderLayout.CENTER);
 			
 			buttonsPanel = makeButtonPanel();
@@ -574,6 +576,80 @@ public class SegmentsDetailPanel extends DetailPanel {
 			}
 		}
 
+		@Override
+		public void signalChangeReceived(SignalChangeEvent event) {
+			if(event.type().contains("UpdateSegment")){
+
+				try{
+
+					String[] array = event.type().split("\\|");
+					String segName = array[1];
+					String index = array[2];
+					int indexValue = Integer.valueOf(index);
+
+					// Update the median profile
+					updateMedianProfileSegmentIndex(true , segName, indexValue); // DraggablePanel always uses seg start index
+					
+					
+					// Make a dialog - update the morphology of each nucleus?
+					Object[] options = { "Update nuclei" , "Do not update", };
+					int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
+
+							JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+
+							null, options, options[0]);
+					
+					if(result==0){ // OK
+						
+						// TODO: Update each nucleus profile
+						fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
+						
+					}
+					
+
+				} catch(Exception e){
+					programLogger.log(Level.SEVERE, "Error updating segment", e);
+				}
+
+			}
+			
+			
+		}
+		
+		private void updateMedianProfileSegmentIndex(boolean start, String segName, int index) throws Exception {
+			
+			// Get the median profile from the reference point
+			
+			SegmentedProfile oldProfile = activeDataset()
+					.getCollection()
+					.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+
+
+			NucleusBorderSegment seg = oldProfile.getSegment(segName);
+
+			int newStart = start ? index : seg.getStartIndex();
+			int newEnd = start ? seg.getEndIndex() : index;
+
+			 // Move the appropriate segment endpoint
+			if(oldProfile.update(seg, newStart, newEnd)){
+				
+				// Replace the old segments in the median
+				
+				activeDataset()
+				.getCollection()
+				.getProfileCollection(ProfileCollectionType.REGULAR)
+				.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
+				
+				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+				update(getDatasets());
+				
+			} else {
+				programLogger.log(Level.WARNING, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+			}
+			
+		}
+		
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			try {
