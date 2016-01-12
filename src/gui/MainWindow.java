@@ -102,7 +102,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
 	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
 	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
-//	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
 	private InterDatasetComparisonDetailPanel interdatasetDetailPanel;
@@ -257,12 +256,6 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			detailPanels.add(segmentsDetailPanel);
 			tabbedPane.addTab("Segments", null, segmentsDetailPanel, null);
 
-			//---------------
-			// Create the cells panel
-			//---------------
-//			cellDetailPanel = new CellDetailPanel(programLogger);
-//			detailPanels.add(cellDetailPanel);
-//			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
 			
 			//---------------
 			// Create the inter-dataset panel

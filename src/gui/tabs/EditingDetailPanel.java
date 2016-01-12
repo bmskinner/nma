@@ -59,11 +59,10 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		
 		if(event.sourceName().equals("CellDetailPanel") || event.sourceName().equals("SegmentsEditingPanel")){
 			fireSignalChangeEvent(event.type());			
-		} else {
+		} 
 			
-			
-			cellDetailPanel.signalChangeReceived(event);
-		}
+		cellDetailPanel.signalChangeReceived(event);
+		segmentsEditingPanel.signalChangeReceived(event);
 
 		
 	}

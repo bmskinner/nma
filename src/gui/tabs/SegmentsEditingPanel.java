@@ -30,7 +30,6 @@ import org.jfree.chart.JFreeChart;
 import analysis.AnalysisDataset;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.ProfileChartOptions;
-
 import components.CellCollection;
 import components.generic.BorderTag;
 import components.generic.ProfileCollectionType;
@@ -41,7 +40,7 @@ import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
-public class SegmentsEditingPanel extends DetailPanel {
+public class SegmentsEditingPanel extends DetailPanel implements SignalChangeListener {
 	
 	private SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
 	
@@ -50,10 +49,10 @@ public class SegmentsEditingPanel extends DetailPanel {
 		super(programLogger);
 		
 		this.setLayout(new BorderLayout());
-		segmentProfilePanel  = new SegmentProfilePanel();
+		segmentProfilePanel  = new SegmentProfilePanel(programLogger);
+		segmentProfilePanel.addSignalChangeListener(this);
 		this.add(segmentProfilePanel, BorderLayout.CENTER);
-		
-		//TODO: Contains the median profile with selectable segments only
+
 		
 	}
 	
@@ -72,7 +71,16 @@ public class SegmentsEditingPanel extends DetailPanel {
 		});
 	}
 	
-	public class SegmentProfilePanel extends JPanel implements ActionListener, SignalChangeListener {
+	@Override
+	public void signalChangeReceived(SignalChangeEvent event) {
+		
+		if(event.sourceName().equals("SegmentProfilePanel")){
+			fireSignalChangeEvent(event.type());
+		}
+		
+	}
+		
+	public class SegmentProfilePanel extends DetailPanel implements ActionListener, SignalChangeListener {
 		
 		private DraggableOverlayChartPanel chartPanel; // for displaying the legnth of a given segment
 		private JPanel buttonsPanel;
@@ -80,8 +88,8 @@ public class SegmentsEditingPanel extends DetailPanel {
 		private JButton unmergeButton;
 		private JButton splitButton;
 		
-		protected SegmentProfilePanel(){
-			
+		protected SegmentProfilePanel(Logger programLogger){
+			super(programLogger);
 			this.setLayout(new BorderLayout());
 			Dimension minimumChartSize = new Dimension(50, 100);
 			Dimension preferredChartSize = new Dimension(400, 300);
@@ -327,48 +335,59 @@ public class SegmentsEditingPanel extends DetailPanel {
 			return result;
 		}
 		
-		public void update(List<AnalysisDataset> list){
-			
-			try {
-				JFreeChart chart = null;
-				SegmentedProfile profile = null;
-				if(list==null || list.isEmpty()){
-					
-					chart = MorphologyChartFactory.makeEmptyProfileChart();
-					
-					
-				} else {
-					
-					ProfileChartOptions options = new ProfileChartOptions(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileCollectionType.REGULAR);
-					
-					if(getChartCache().hasChart(options)){
-						chart = getChartCache().getChart(options);
-					} else {
-						chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
-						
-						getChartCache().addChart(options, chart);
-					}
-					
-					// Set the button configuration
-					configureButtons(options);
-					
-					if(isSingleDataset()){
-						profile = activeDataset().getCollection()
-								.getProfileCollection(ProfileCollectionType.REGULAR)
-								.getSegmentedProfile(BorderTag.REFERENCE_POINT)
-								.interpolate((int) activeDataset().getCollection().getMedianArrayLength());
-					}
-				} 
-				
-				chartPanel.setChart(chart, profile);
-			} catch (Exception e) {
-				programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
-				chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-				unmergeButton.setEnabled(false);
-				mergeButton.setEnabled(false);
-			} 
-		}
 		
+		@Override
+		public void updateDetail(){
+
+			programLogger.log(Level.FINE, "Updating segments editing panel");
+			SwingUtilities.invokeLater(new Runnable(){
+				public void run(){
+					if(getDatasets()!=null && !getDatasets().isEmpty()){
+						try {
+							JFreeChart chart = null;
+							SegmentedProfile profile = null;
+							if(getDatasets()==null || getDatasets().isEmpty()){
+								
+								chart = MorphologyChartFactory.makeEmptyProfileChart();
+								
+								
+							} else {
+								
+								ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileCollectionType.REGULAR);
+								
+								if(getChartCache().hasChart(options)){
+									chart = getChartCache().getChart(options);
+								} else {
+									chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
+									
+									getChartCache().addChart(options, chart);
+								}
+								
+								// Set the button configuration
+								configureButtons(options);
+								
+								if(isSingleDataset()){
+									profile = activeDataset().getCollection()
+											.getProfileCollection(ProfileCollectionType.REGULAR)
+											.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+											.interpolate((int) activeDataset().getCollection().getMedianArrayLength());
+								}
+							} 
+							
+							chartPanel.setChart(chart, profile);
+						} catch (Exception e) {
+							programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
+							chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+							unmergeButton.setEnabled(false);
+							mergeButton.setEnabled(false);
+						} 
+						
+					}
+					setUpdating(false);
+				}
+			});
+		}
+				
 		/**
 		 * Enable or disable buttons depending on datasets selected
 		 * @param options

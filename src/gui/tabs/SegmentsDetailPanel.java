@@ -244,10 +244,10 @@ public class SegmentsDetailPanel extends DetailPanel {
 	public class SegmentProfilePanel extends JPanel implements ActionListener, SignalChangeListener {
 		
 		private ChartPanel chartPanel; // for displaying the legnth of a given segment
-		private JPanel buttonsPanel;
-		private JButton mergeButton;
-		private JButton unmergeButton;
-		private JButton splitButton;
+//		private JPanel buttonsPanel;
+//		private JButton mergeButton;
+//		private JButton unmergeButton;
+//		private JButton splitButton;
 		
 		protected SegmentProfilePanel(){
 			
@@ -271,36 +271,36 @@ public class SegmentsDetailPanel extends DetailPanel {
 			
 		}
 		
-		private JPanel makeButtonPanel(){
-			
-			JPanel panel = new JPanel(new FlowLayout()){
-				@Override
-				public void setEnabled(boolean b){
-					super.setEnabled(b);
-					for(Component c : this.getComponents()){
-						c.setEnabled(b);
-					}
-				}
-			};
-			mergeButton = new JButton("Merge segments");
-			mergeButton.addActionListener(this);
-			
-			panel.add(mergeButton);
-			
-			unmergeButton = new JButton("Unmerge segments");
-			unmergeButton.addActionListener(this);
-			
-			panel.add(unmergeButton);
-			
-			splitButton = new JButton("Split segment");
-			splitButton.addActionListener(this);
-
-			panel.add(splitButton);
-			
-			return panel;
-			
-			
-		}
+//		private JPanel makeButtonPanel(){
+//			
+//			JPanel panel = new JPanel(new FlowLayout()){
+//				@Override
+//				public void setEnabled(boolean b){
+//					super.setEnabled(b);
+//					for(Component c : this.getComponents()){
+//						c.setEnabled(b);
+//					}
+//				}
+//			};
+//			mergeButton = new JButton("Merge segments");
+//			mergeButton.addActionListener(this);
+//			
+//			panel.add(mergeButton);
+//			
+//			unmergeButton = new JButton("Unmerge segments");
+//			unmergeButton.addActionListener(this);
+//			
+//			panel.add(unmergeButton);
+//			
+//			splitButton = new JButton("Split segment");
+//			splitButton.addActionListener(this);
+//
+//			panel.add(splitButton);
+//			
+//			return panel;
+//			
+//			
+//		}
 		
 //		private void mergeSegments(String segName1, String segName2) throws Exception {
 //			
@@ -534,8 +534,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 			} catch (Exception e) {
 				programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
 				chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-				unmergeButton.setEnabled(false);
-				mergeButton.setEnabled(false);
+//				unmergeButton.setEnabled(false);
+//				mergeButton.setEnabled(false);
 			} 
 		}
 		
@@ -581,77 +581,77 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 		@Override
 		public void signalChangeReceived(SignalChangeEvent event) {
-			if(event.type().contains("UpdateSegment")){
-
-				try{
-
-					String[] array = event.type().split("\\|");
-					String segName = array[1];
-					String index = array[2];
-					int indexValue = Integer.valueOf(index);
-
-					// Update the median profile
-					updateMedianProfileSegmentIndex(true , segName, indexValue); // DraggablePanel always uses seg start index
-					
-					
-					// Make a dialog - update the morphology of each nucleus?
-					Object[] options = { "Update nuclei" , "Do not update", };
-					int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
-
-							JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-							null, options, options[0]);
-					
-					if(result==0){ // OK
-						
-						// TODO: Update each nucleus profile
-						fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
-						
-					}
-					
-
-				} catch(Exception e){
-					programLogger.log(Level.SEVERE, "Error updating segment", e);
-				}
-
-			}
+//			if(event.type().contains("UpdateSegment")){
+//
+//				try{
+//
+//					String[] array = event.type().split("\\|");
+//					String segName = array[1];
+//					String index = array[2];
+//					int indexValue = Integer.valueOf(index);
+//
+//					// Update the median profile
+//					updateMedianProfileSegmentIndex(true , segName, indexValue); // DraggablePanel always uses seg start index
+//					
+//					
+//					// Make a dialog - update the morphology of each nucleus?
+//					Object[] options = { "Update nuclei" , "Do not update", };
+//					int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
+//
+//							JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+//
+//							null, options, options[0]);
+//					
+//					if(result==0){ // OK
+//						
+//						// TODO: Update each nucleus profile
+//						fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
+//						
+//					}
+//					
+//
+//				} catch(Exception e){
+//					programLogger.log(Level.SEVERE, "Error updating segment", e);
+//				}
+//
+//			}
 			
 			
 		}
 		
-		private void updateMedianProfileSegmentIndex(boolean start, String segName, int index) throws Exception {
-			
-			// Get the median profile from the reference point
-			
-			SegmentedProfile oldProfile = activeDataset()
-					.getCollection()
-					.getProfileCollection(ProfileCollectionType.REGULAR)
-					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-
-
-			NucleusBorderSegment seg = oldProfile.getSegment(segName);
-
-			int newStart = start ? index : seg.getStartIndex();
-			int newEnd = start ? seg.getEndIndex() : index;
-
-			 // Move the appropriate segment endpoint
-			if(oldProfile.update(seg, newStart, newEnd)){
-				
-				// Replace the old segments in the median
-				
-				activeDataset()
-				.getCollection()
-				.getProfileCollection(ProfileCollectionType.REGULAR)
-				.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
-				
-				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-				update(getDatasets());
-				
-			} else {
-				programLogger.log(Level.WARNING, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-			}
-			
-		}
+//		private void updateMedianProfileSegmentIndex(boolean start, String segName, int index) throws Exception {
+//			
+//			// Get the median profile from the reference point
+//			
+//			SegmentedProfile oldProfile = activeDataset()
+//					.getCollection()
+//					.getProfileCollection(ProfileCollectionType.REGULAR)
+//					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+//
+//
+//			NucleusBorderSegment seg = oldProfile.getSegment(segName);
+//
+//			int newStart = start ? index : seg.getStartIndex();
+//			int newEnd = start ? seg.getEndIndex() : index;
+//
+//			 // Move the appropriate segment endpoint
+//			if(oldProfile.update(seg, newStart, newEnd)){
+//				
+//				// Replace the old segments in the median
+//				
+//				activeDataset()
+//				.getCollection()
+//				.getProfileCollection(ProfileCollectionType.REGULAR)
+//				.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
+//				
+//				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//				update(getDatasets());
+//				
+//			} else {
+//				programLogger.log(Level.WARNING, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+//			}
+//			
+//		}
 		
 		@Override
 		public void actionPerformed(ActionEvent e) {
