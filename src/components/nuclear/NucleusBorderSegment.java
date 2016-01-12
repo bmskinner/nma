@@ -43,7 +43,8 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	// Set to 3 (a start, midpoint and an end) so that the minimum length
 	// in the ProfileSegmenter can be interpolated downwards without
 	// causing errors when fitting segments to individual nuclei
-	public static final int MINIMUM_SEGMENT_LENGTH = 2; 
+	public static final int MINIMUM_SEGMENT_LENGTH = 3; 
+	public static final int INTERPOLATION_MINIMUM_LENGTH = 2;
 	
 	private static final long serialVersionUID = 1L;
 	private int startIndex;
