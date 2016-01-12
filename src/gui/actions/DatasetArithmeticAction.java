@@ -98,7 +98,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	 */
 	private CellCollection datasetsAND(AnalysisDataset one, AnalysisDataset two){
 
-		CellCollection newCollection = new CellCollection(one, "and");
+		CellCollection newCollection = new CellCollection(one, "AND operation");
 		
 		for(Cell c : one.getCollection().getCells()){
 
@@ -118,7 +118,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	 */
 	private CellCollection datasetsNOT(AnalysisDataset one, AnalysisDataset two){
 
-		CellCollection newCollection = new CellCollection(one, "not");
+		CellCollection newCollection = new CellCollection(one, "NOT operation");
 		
 		for(Cell c : one.getCollection().getCells()){
 
@@ -138,7 +138,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	 */
 	private CellCollection datasetsXOR(AnalysisDataset one, AnalysisDataset two){
 
-		CellCollection newCollection = new CellCollection(one, "xor");
+		CellCollection newCollection = new CellCollection(one, "XOR operation");
 		
 		for(Cell c : one.getCollection().getCells()){
 

@@ -3,6 +3,8 @@ package gui.dialogs;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -16,15 +18,29 @@ import javax.swing.border.EmptyBorder;
 import analysis.AnalysisDataset;
 import gui.MainWindow;
 
-public class DatasetArithmeticSetupDialog extends SettingsDialog{
+public class DatasetArithmeticSetupDialog extends SettingsDialog implements ActionListener{
 	
 	
 	JComboBox<AnalysisDataset> boxOne;
 	JComboBox<AnalysisDataset> boxTwo;
 	JComboBox<DatasetArithmeticOperation> operatorBox;
+	JLabel operatorDescription = new JLabel(DatasetArithmeticOperation.AND.getDescription());
 	
 	public enum DatasetArithmeticOperation {
-		AND, OR, NOT, XOR
+		AND ("Cells are present in both datasets"),
+		OR ("Cells are in either dataset (this merges the datasets"), 
+		NOT ("Cells are in dataset one, but not dataset two"), 
+		XOR ("Cells are in one or other dataset, but not both datasets");
+		
+		private String description;
+		
+		private DatasetArithmeticOperation(String description){
+			this.description = description;
+		}
+		
+		public String getDescription(){
+			return this.description;
+		}
 	}
 
 	public DatasetArithmeticSetupDialog(AnalysisDataset selected, List<AnalysisDataset> list, MainWindow mw) {
@@ -70,11 +86,17 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog{
 		boxOne.setSelectedItem(selected);
 		
 		operatorBox = new JComboBox<DatasetArithmeticOperation>(DatasetArithmeticOperation.values());
+		operatorBox.setSelectedItem(DatasetArithmeticOperation.AND);
+		operatorBox.addActionListener(this);
 		
 		labels.add(new JLabel("Dataset one"));
 		fields.add(boxOne);
 		labels.add(new JLabel("Operation"));
 		fields.add(operatorBox);
+		
+		labels.add(new JLabel("Description"));
+		fields.add(operatorDescription);
+		
 		labels.add(new JLabel("Dataset two"));
 		fields.add(boxTwo);
 		
@@ -84,6 +106,13 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog{
 		
 		this.add(createFooter(), BorderLayout.SOUTH);
 		
+		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		operatorDescription.setText(getOperation().getDescription());
 		
 	}
 	
