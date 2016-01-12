@@ -32,11 +32,11 @@ import gui.actions.RefoldNucleusAction;
 import gui.actions.ReplaceSourceImageDirectoryAction;
 import gui.actions.RunSegmentationAction;
 import gui.actions.NewAnalysisAction;
+import gui.actions.PopulationImportAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.tabs.AnalysisDetailPanel;
-import gui.tabs.CellDetailPanel;
 import gui.tabs.ClusterDetailPanel;
 import gui.tabs.DetailPanel;
 import gui.tabs.EditingDetailPanel;
@@ -47,15 +47,12 @@ import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
 import ij.IJ;
-import io.PopulationImporter;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -63,7 +60,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -72,8 +68,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
@@ -335,7 +329,16 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		btnLoadSavedDataset.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				loadDataset();
+//				
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+					
+						new PopulationImportAction(MainWindow.this);
+
+				}});
+						
+				
+				
 			}
 		});
 		panelHeader.add(btnLoadSavedDataset);
@@ -439,35 +442,35 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		return Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
 
-	/**
-	 * Check a version string to see if the program will be able to open a 
-	 * dataset. The major version must be the same, while the revision of the
-	 * dataset must be equal to or greater than the program revision. Bugfixing
-	 * versions are not checked for.
-	 * @param version
-	 * @return a pass or fail
-	 */
-	public boolean checkVersion(String version){
-		boolean ok = true;
-		
-		if(version==null){ // allow for debugging, but warn
-			programLogger.log(Level.WARNING, "No version info found: functions may not work as expected");
-			return true;
-		}
-		
-		String[] parts = version.split("\\.");
-		
-		// major version MUST be the same
-		if(Integer.valueOf(parts[0])!=Constants.VERSION_MAJOR){
-			ok = false;
-		}
-		// dataset revision should be equal or greater to program
-		if(Integer.valueOf(parts[1])<Constants.VERSION_REVISION){
-			programLogger.log(Level.WARNING, "Dataset was created with an older version of the program");
-			programLogger.log(Level.WARNING, "Some functionality may not work as expected");
-		}
-		return ok;
-	}
+//	/**
+//	 * Check a version string to see if the program will be able to open a 
+//	 * dataset. The major version must be the same, while the revision of the
+//	 * dataset must be equal to or greater than the program revision. Bugfixing
+//	 * versions are not checked for.
+//	 * @param version
+//	 * @return a pass or fail
+//	 */
+//	public boolean checkVersion(String version){
+//		boolean ok = true;
+//		
+//		if(version==null){ // allow for debugging, but warn
+//			programLogger.log(Level.WARNING, "No version info found: functions may not work as expected");
+//			return true;
+//		}
+//		
+//		String[] parts = version.split("\\.");
+//		
+//		// major version MUST be the same
+//		if(Integer.valueOf(parts[0])!=Constants.VERSION_MAJOR){
+//			ok = false;
+//		}
+//		// dataset revision should be equal or greater to program
+//		if(Integer.valueOf(parts[1])<Constants.VERSION_REVISION){
+//			programLogger.log(Level.WARNING, "Dataset was created with an older version of the program");
+//			programLogger.log(Level.WARNING, "Some functionality may not work as expected");
+//		}
+//		return ok;
+//	}
 	
 	/**
 	 * Create the status panel at the base of the window
@@ -488,71 +491,71 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 * Call an open dialog to choose a saved .nbd dataset. The opened dataset
 	 * will be added to the bottom of the dataset list.
 	 */
-	public void loadDataset(){
-		Thread thr = new Thread() {
-			public void run() {
-				try {
-					
-					FileNameExtensionFilter filter = new FileNameExtensionFilter("Nuclear morphology datasets", "nmd");
-					
-					File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
-					JFileChooser fc = new JFileChooser("Select a saved dataset...");
-					if(defaultDir.exists()){
-						fc = new JFileChooser(defaultDir);
-					}
-					fc.setFileFilter(filter);
-
-					int returnVal = fc.showOpenDialog(fc);
-					if (returnVal != 0)	{
-						return;
-					}
-					File file = fc.getSelectedFile();
+//	public void loadDataset(){
+//		Thread thr = new Thread() {
+//			public void run() {
+//				try {
 //					
-					if(file.isDirectory()){
-						return;
-					}
-					
-					programLogger.log(Level.INFO, "Opening dataset...");
-					
-					// read the dataset
-					AnalysisDataset dataset = PopulationImporter.readDataset(file, programLogger);
-					
-					if(checkVersion( dataset.getVersion() )){
-
-						dataset.setRoot(true);
-						
-						populationsPanel.addDataset(dataset);
-						
-						for(AnalysisDataset child : dataset.getAllChildDatasets() ){
-							populationsPanel.addDataset(child);
-						}
-						
-						// update the log file to the same folder as the dataset
-						File logFile = new File(file.getParent()+File.separator+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
-						
-						dataset.getCollection().setDebugFile(logFile);
-						
-						dataset.setSwatch(activeSwatch);
-						
-						programLogger.log(Level.INFO, "OK");
+//					FileNameExtensionFilter filter = new FileNameExtensionFilter("Nuclear morphology datasets", "nmd");
+//					
+//					File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
+//					JFileChooser fc = new JFileChooser("Select a saved dataset...");
+//					if(defaultDir.exists()){
+//						fc = new JFileChooser(defaultDir);
+//					}
+//					fc.setFileFilter(filter);
+//
+//					int returnVal = fc.showOpenDialog(fc);
+//					if (returnVal != 0)	{
+//						return;
+//					}
+//					File file = fc.getSelectedFile();
+////					
+//					if(file.isDirectory()){
+//						return;
+//					}
+//					
+//					programLogger.log(Level.INFO, "Opening dataset...");
+//					
+//					// read the dataset
+//					AnalysisDataset dataset = PopulationImporter.readDataset(file, programLogger);
+//					
+//					if(checkVersion( dataset.getVersion() )){
+//
+//						dataset.setRoot(true);
 //						
-	
-						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
-						list.add(dataset);
-	
-						updatePanels(list);
-						populationsPanel.update();
-						
-					} else {
-						programLogger.log(Level.SEVERE, "Unable to open dataset version: "+ dataset.getVersion());
-					}
-				} catch (Exception e) {
-					programLogger.log(Level.SEVERE, "Error opening dataset", e);
-				}
-			}
-		};
-		thr.start();
-	}
+//						populationsPanel.addDataset(dataset);
+//						
+//						for(AnalysisDataset child : dataset.getAllChildDatasets() ){
+//							populationsPanel.addDataset(child);
+//						}
+//						
+//						// update the log file to the same folder as the dataset
+//						File logFile = new File(file.getParent()+File.separator+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
+//						
+//						dataset.getCollection().setDebugFile(logFile);
+//						
+//						dataset.setSwatch(activeSwatch);
+//						
+//						programLogger.log(Level.INFO, "OK");
+////						
+//	
+//						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
+//						list.add(dataset);
+//	
+//						updatePanels(list);
+//						populationsPanel.update();
+//						
+//					} else {
+//						programLogger.log(Level.SEVERE, "Unable to open dataset version: "+ dataset.getVersion());
+//					}
+//				} catch (Exception e) {
+//					programLogger.log(Level.SEVERE, "Error opening dataset", e);
+//				}
+//			}
+//		};
+//		thr.start();
+//	}
 	
 	/**
 	 * Update the display panels with information from the given datasets
@@ -840,7 +843,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			if(event.method().equals(DatasetMethod.ADD_DATASET)){
+				event.firstDataset().setSwatch(activeSwatch);
 				populationsPanel.addDataset(event.firstDataset());
+				for(AnalysisDataset child : event.firstDataset().getAllChildDatasets() ){
+					populationsPanel.addDataset(child);
+				}
+				
+				
 			}
 
 //			if(event.method().equals(DatasetMethod.SAVE_AS)){

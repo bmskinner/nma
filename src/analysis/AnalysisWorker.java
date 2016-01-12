@@ -40,6 +40,8 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
     		AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
     		fileLogger.setLevel(FILE_DEBUG_LEVEL);
     		fileLogger.addHandler(dataset.getLogHandler());
+    	} else {
+    		fileLogger = programLogger;
     	}
 
     	programLogger.log(Level.FINEST, "Created worker");
