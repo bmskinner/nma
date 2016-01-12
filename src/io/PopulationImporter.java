@@ -56,6 +56,9 @@ public class PopulationImporter {
 			
 			dataset = (AnalysisDataset) ois.readObject();
 			
+			// TODO: Validate the profile collection length matches the median array length,
+			// and recalculate if needed
+			
 			// Replace existing save file path with the path to the file that has been opened
 			
 			if(!dataset.getSavePath().equals(inputFile)){

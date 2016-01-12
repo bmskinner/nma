@@ -39,6 +39,7 @@ import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.CellDetailPanel;
 import gui.tabs.ClusterDetailPanel;
 import gui.tabs.DetailPanel;
+import gui.tabs.EditingDetailPanel;
 import gui.tabs.InterDatasetComparisonDetailPanel;
 import gui.tabs.MergesDetailPanel;
 import gui.tabs.NuclearBoxplotsPanel;
@@ -47,6 +48,7 @@ import gui.tabs.SegmentsDetailPanel;
 import gui.tabs.SignalsDetailPanel;
 import ij.IJ;
 import io.PopulationImporter;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -100,10 +102,11 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
 	private NuclearBoxplotsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
 	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
-	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
+//	private CellDetailPanel 		cellDetailPanel;		// cell by cell in a population
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
 	private InterDatasetComparisonDetailPanel interdatasetDetailPanel;
+	private EditingDetailPanel		editingDetailPanel; 	// for altering data
 	
 	private List<DetailPanel> detailPanels = new ArrayList<DetailPanel>(); // store panels for iterating messsages
 	
@@ -257,9 +260,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			//---------------
 			// Create the cells panel
 			//---------------
-			cellDetailPanel = new CellDetailPanel(programLogger);
-			detailPanels.add(cellDetailPanel);
-			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
+//			cellDetailPanel = new CellDetailPanel(programLogger);
+//			detailPanels.add(cellDetailPanel);
+//			tabbedPane.addTab("Cells", null, cellDetailPanel, null);
 			
 			//---------------
 			// Create the inter-dataset panel
@@ -268,6 +271,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			detailPanels.add(interdatasetDetailPanel);
 			tabbedPane.addTab("Inter-dataset comparisons", null, interdatasetDetailPanel, null);
 			
+			
+			editingDetailPanel = new EditingDetailPanel(programLogger);
+			detailPanels.add(editingDetailPanel);
+			tabbedPane.addTab("Editing", null, editingDetailPanel, null);
 			
 			//---------------
 			// Register change listeners
@@ -280,8 +287,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 			
 			
-			signalsDetailPanel.addSignalChangeListener(cellDetailPanel);
-			cellDetailPanel.addSignalChangeListener(signalsDetailPanel); // allow the panels to communicate colour updates
+			signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
+			editingDetailPanel.addSignalChangeListener(signalsDetailPanel); // allow the panels to communicate colour updates
 			
 			//---------------
 			// Add the top and bottom rows to the main panel
