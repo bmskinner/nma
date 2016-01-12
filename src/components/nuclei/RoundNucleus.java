@@ -605,6 +605,7 @@ public class RoundNucleus
 		return pw.getBounds();
 	}
 	
+
 	public NucleusBorderPoint[] getBorderPointsForVerticalAlignment(){
 		NucleusBorderPoint topPoint =  this.getBorderTag(BorderTag.TOP_VERTICAL);
 		NucleusBorderPoint bottomPoint =this.getBorderTag(BorderTag.BOTTOM_VERTICAL);
@@ -618,6 +619,7 @@ public class RoundNucleus
 		for(int index = startIndex; index < endIndex; index++ ){
 			pointsInRegion.add(this.getBorderPoint(index));
 		}
+//		IJ.log(this.getNameAndNumber()+": "+ pointsInRegion.size());
 		
 		// Make an equation covering the region
 		Equation eq = new Equation(topPoint, bottomPoint);
@@ -633,12 +635,46 @@ public class RoundNucleus
 		// Make new points to align at based on best fit to the region
 		
 		int variation = 10;
+		double movementSize = 1;
+		double bestI = 0;
+		double bestJ = 0;
 		
-		for(int i=-variation; i<variation;i++){
+		for(int i=-variation; i<variation;i+=movementSize){
 			// change the posiiton of the top point
 			XYPoint iPoint = topOrth.getPointOnLine(topPoint, i);
 			
-			for(int j=-variation; j<variation;j++){
+			for(int j=-variation; j<variation;j+=movementSize){
+				// change the posiiton of the bottom point
+				XYPoint jPoint = bottomOrth.getPointOnLine(bottomPoint, j);
+				
+				// make a new equation for the line
+				Equation newLine = new Equation(iPoint, jPoint);
+				
+				// Check the fit of the line aginst the profile region
+				// Build a line from the border points in the region
+				// Test each point's distance to the equation line
+				double score = 0;
+				for(XYPoint p : pointsInRegion){
+					score += Math.pow(newLine.getClosestDistanceToPoint(p), 2);
+				}
+//				IJ.log("i="+i+" : j="+j+" : Score: "+score);
+				if(score<minScore){
+					minScore = score;
+					topPoint = new NucleusBorderPoint(iPoint);
+					bottomPoint = new NucleusBorderPoint(jPoint);
+					bestI = i;
+					bestJ = j;
+				}
+			}
+
+		}
+		
+		movementSize = 0.1;
+		for(double i=bestI-0.9; i<bestI+1;i+=movementSize){
+			// change the posiiton of the top point
+			XYPoint iPoint = topOrth.getPointOnLine(topPoint, i);
+			
+			for(double j=bestJ-0.9; i<bestJ+1;i+=movementSize){
 				// change the posiiton of the bottom point
 				XYPoint jPoint = bottomOrth.getPointOnLine(bottomPoint, j);
 				
@@ -658,15 +694,10 @@ public class RoundNucleus
 					topPoint = new NucleusBorderPoint(iPoint);
 					bottomPoint = new NucleusBorderPoint(jPoint);
 				}
-				
 			}
-			 
-			
+
 		}
 		
-//		IJ.log("Final score: "+minScore);
-//		IJ.log(topPoint.toString());
-//		IJ.log(bottomPoint.toString());
 		return new NucleusBorderPoint[] {topPoint, bottomPoint};
 	}
 	
@@ -1673,6 +1704,24 @@ public class RoundNucleus
 				distanceFromZero = distanceFromCoM;
 			}
 		}
+		
+		// Now we have the int angle.
+		// Test 0.05 degree increments for the degree each side
+				
+		for(double angle=angleToRotate-0.9;angle<angleToRotate+0.9;angle+=0.05){
+
+			XYPoint newPoint = getPositionAfterRotation(bottomPoint, angle);
+
+			// get the absolute distance from the vertical
+			double distanceFromCoM = Math.abs(newPoint.getX()-this.getCentreOfMass().getX());
+			// if the new x position is closer to the central vertical line
+			// AND the y position is below zero
+			// this is a better rotation
+			if( distanceFromCoM < distanceFromZero && newPoint.getY() < this.getCentreOfMass().getY()){
+				angleToRotate = angle;
+				distanceFromZero = distanceFromCoM;
+						}
+		}
 		this.rotate(angleToRotate);
 	}
 	
@@ -1731,32 +1780,26 @@ public class RoundNucleus
 		
 		
 		// Now we have the int angle.
-		// Test 0.1 degree increments for the degree each side
+		// Test 0.05 degree increments for the degree each side
 		
-		for(double angle=angleToRotate-0.9;angle<angleToRotate+0.9;angle+=0.1){
+		for(double angle=angleToRotate-0.9;angle<angleToRotate+0.9;angle+=0.05){
 			
 			XYPoint newTop 		= getPositionAfterRotation(topPoint, angle);
 			XYPoint newBottom 	= getPositionAfterRotation(bottomPoint, angle);
-			
-			// Test that the top point is still on the top; no point getting
-			// angles for the rotations where the top has moved to the bottom 
-			if(newTop.getY() > newBottom.getY()){
-				
-				double newAngle = findAngleBetweenXYPoints( newTop, 
-						newBottom, 
-						new XYPoint(newBottom.getX(),newTop.getY()));
-				
-				/*
-				 * We want to minimise the angle between the points, whereupon
-				 * they are vertically aligned. 
-				 */
+	
+			double newAngle = findAngleBetweenXYPoints( newTop, 
+					newBottom, 
+					new XYPoint(newBottom.getX(),newTop.getY()));
 
-				if( newAngle < angleToBeat ){
-					angleToBeat = newAngle;
-					angleToRotate = angle;
-				}
+			/*
+			 * We want to minimise the angle between the points, whereupon
+			 * they are vertically aligned. 
+			 */
+
+			if( newAngle < angleToBeat ){
+				angleToBeat = newAngle;
+				angleToRotate = angle;
 			}
-
 		}
 		
 		

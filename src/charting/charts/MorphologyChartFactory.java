@@ -723,6 +723,9 @@ public class MorphologyChartFactory {
 					
 					plot.getRenderer().setSeriesPaint(i, dataset.getSwatch().color(colourIndex));
 					
+					/*
+					 * Add a line between the top and bottom vertical points
+					 */
 					if(cell.getNucleus().hasBorderTag(BorderTag.TOP_VERTICAL) && cell.getNucleus().hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
 						NucleusBorderPoint[] verticals = cell.getNucleus().getBorderPointsForVerticalAlignment();
 						plot.addAnnotation(new XYLineAnnotation(verticals[0].getX(),

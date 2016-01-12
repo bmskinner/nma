@@ -201,7 +201,11 @@ public interface Nucleus {
 	
 	
 	/**
-	 * Get the vertical points for alignment
+	 * Detect the points that can be used for vertical alignment.These are based on the
+	 * BorderTags TOP_VERTICAL and BOTTOM_VETICAL. The actual points returned are not
+	 * necessarily on the border of the nucleus; a bibble correction is performed on the
+	 * line drawn between the two border points, minimising the sum-of-squares to each border
+	 * point within the region covered by the line. 
 	 * @return
 	 */
 	public NucleusBorderPoint[] getBorderPointsForVerticalAlignment();
