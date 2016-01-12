@@ -513,17 +513,19 @@ public class SegmentsDetailPanel extends DetailPanel {
 					if(getChartCache().hasChart(options)){
 						chart = getChartCache().getChart(options);
 					} else {
-						chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(list, true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false);
+						chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
+						
 						getChartCache().addChart(options, chart);
 					}
 					
 					// Set the button configuration
 					configureButtons(options);
 					
-					if(list.size()==1){
-						profile = list.get(0).getCollection()
+					if(isSingleDataset()){
+						profile = activeDataset().getCollection()
 								.getProfileCollection(ProfileCollectionType.REGULAR)
 								.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+//								.interpolate((int) activeDataset().getCollection().getMedianArrayLength());
 					}
 				} 
 				

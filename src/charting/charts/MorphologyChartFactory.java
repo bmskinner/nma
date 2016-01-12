@@ -195,17 +195,27 @@ public class MorphologyChartFactory {
 		return chart;
 	}
 	
-	public static JFreeChart makeMultiSegmentedProfileChart(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
+	/**
+	 * Create a profile chart with the median line only, segmented. Can have multiple datasets shown.
+	 * If a single dataset is shown, the chart is real length, otherwise normalised
+	 * @param list
+	 * @param normalised
+	 * @param alignment
+	 * @param borderTag
+	 * @param showMarkers
+	 * @return
+	 * @throws Exception
+	 */
+//	public static JFreeChart makeMultiSegmentedProfileChart(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
 		
-		int length = 100 ; // default if normalised
-		if(list.size()==1){
-			length = list.get(0).getCollection()
-					.getProfileCollection(ProfileCollectionType.REGULAR)
-					.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN)
-					.size();
-			normalised = false;
-		}
+	public static JFreeChart makeMultiSegmentedProfileChart(ProfileChartOptions options) throws Exception {
 		
+		boolean normalised = options.isSingleDataset() ? false : true;
+		int length = options.isSingleDataset() ? (int) options.firstDataset()
+				.getCollection()
+				.getMedianArrayLength()
+				: 100;
+				
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
 				                false);
@@ -224,10 +234,10 @@ public class MorphologyChartFactory {
 		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 		
 		int datasetIndex = 0;
-		for(AnalysisDataset dataset : list){
+		for(AnalysisDataset dataset : options.getDatasets()){
 			CellCollection collection = dataset.getCollection();
-			String point = collection.getPoint(borderTag);
-			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, normalised, alignment, borderTag);
+			String point = collection.getPoint(options.getTag());
+			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, normalised, options.getAlignment(), options.getTag());
 
 			plot.setDataset(datasetIndex, ds);
 //			IJ.log("Set dataset "+datasetIndex + " for "+dataset.getName());

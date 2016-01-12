@@ -87,6 +87,18 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		return list;
 	}
 	
+	/**
+	 * Test if only a single dataset is selected
+	 * @return
+	 */
+	public boolean isSingleDataset(){
+		if(this.list.size()==1){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	protected List<AnalysisDataset> getDatasets(){
 		return this.list;
 	}

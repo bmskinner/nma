@@ -59,7 +59,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 	
 	private List<NucleusBorderSegment> mergeSources = new ArrayList<NucleusBorderSegment>();
 	
-	private int positionInProfile; // for future refactor
+	private int positionInProfile = 0; // for future refactor
 
 	public NucleusBorderSegment(int startIndex, int endIndex, int total){
 		

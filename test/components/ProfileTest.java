@@ -158,7 +158,13 @@ public class ProfileTest {
 		double[] expected   = { 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 12.5 };
 		
 		Profile tester = new Profile(data);
-		Profile result = tester.interpolate(12);
+		Profile result = null;
+		try {
+			result = tester.interpolate(12);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		double[] output = result.asArray();	
 		

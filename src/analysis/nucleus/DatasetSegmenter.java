@@ -167,6 +167,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 	/**
 	 * When a population needs to be reanalysed do not offset nuclei or recalculate best fits;
 	 * just get the new median profile 
+	 * TODO: Make this use index proportion method for segment copying
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
@@ -218,6 +219,9 @@ public class DatasetSegmenter extends AnalysisWorker {
 			// No Frankenprofile has been copied.
 
 			reviseSegments(collection, referencePoint);	
+			
+			// Update the ProfileCollection length to fit the new dataset
+//			pc.createProfileAggregate(collection);
 
 
 
