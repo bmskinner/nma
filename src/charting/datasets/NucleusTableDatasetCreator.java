@@ -272,6 +272,7 @@ public class NucleusTableDatasetCreator {
 				"Run date",
 				"Run time",
 				"Collection source",
+				"Log file",
 				"Type",
 				"Version"};
 		model.addColumn("", columnData);
@@ -431,6 +432,7 @@ public class NucleusTableDatasetCreator {
 				date,
 				time,
 				dataset.getCollection().getFolder(),
+				dataset.getDebugFile().getAbsolutePath(),
 				options.getNucleusType().toString(),
 				dataset.getVersion()
 				};
