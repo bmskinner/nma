@@ -61,9 +61,9 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		programLogger.log(Level.FINE, "Updating editing detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				if(getDatasets()!=null && !getDatasets().isEmpty()){
+				if(hasDatasets()){
 					
-					if(isSingleDataset()){
+//					if(isSingleDataset()){
 						
 						cellDetailPanel.setEnabled(true);
 						segmentsEditingPanel.setEnabled(true);
@@ -73,10 +73,10 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 
 						segmentsEditingPanel.update(getDatasets()); 
 						programLogger.log(Level.FINEST, "Updated segments histogram panel");
-					} else {
-						cellDetailPanel.setEnabled(false);
-						segmentsEditingPanel.setEnabled(false);
-					}
+//					} else {
+//						cellDetailPanel.setEnabled(false);
+//						segmentsEditingPanel.setEnabled(false);
+//					}
 				}
 				setUpdating(false);
 			}

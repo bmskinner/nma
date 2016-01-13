@@ -405,39 +405,44 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					try {
 						JFreeChart chart = null;
 						SegmentedProfile profile = null;
-						if(getDatasets()==null || getDatasets().isEmpty()){
+						if(! hasDatasets()){
 
-							chart = MorphologyChartFactory.makeEmptyProfileChart();
-
+							chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
 
 						} else {
-
+							
 							ProfileChartOptions options = new ProfileChartOptions(getDatasets(), true, ProfileAlignment.LEFT, BorderTag.REFERENCE_POINT, false, ProfileCollectionType.REGULAR);
-
-							if(getChartCache().hasChart(options)){
-								chart = getChartCache().getChart(options);
-							} else {
-								chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
-
-								getChartCache().addChart(options, chart);
-							}
 
 							// Set the button configuration
 							configureButtons(options);
 
 							if(isSingleDataset()){
+								
+								if(getChartCache().hasChart(options)){
+									chart = getChartCache().getChart(options);
+								} else {
+									chart = MorphologyChartFactory.makeMultiSegmentedProfileChart(options);
+									getChartCache().addChart(options, chart);
+								}
+
 								profile = activeDataset().getCollection()
 										.getProfileCollection(ProfileCollectionType.REGULAR)
 										.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+								
+								chartPanel.setChart(chart, profile, true);
+							} else {
+								// Multiple datasets
+								chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
 							}
 						} 
 
-						chartPanel.setChart(chart, profile, true);
+						
 					} catch (Exception e) {
 						programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
 						chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
 						unmergeButton.setEnabled(false);
 						mergeButton.setEnabled(false);
+						splitButton.setEnabled(false);
 					} 
 
 

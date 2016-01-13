@@ -136,11 +136,18 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	
 	public void setChart(JFreeChart chart, SegmentedProfile profile, boolean normalised){
 		super.setChart(chart);
+		clearOverlays();
 		this.profile = profile;
 		this.isChartNormalised = normalised;
+		lines = new HashMap<Color, NucleusBorderSegment>();
+		activeOverlay = null;
+		activeCrosshair = null;
 		updateOverlays();
-		
-		
+	}
+	
+	@Override
+	public void setChart(JFreeChart chart){
+		this.setChart(chart, null, true);
 	}
 	
 	@Override
