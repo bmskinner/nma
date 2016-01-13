@@ -42,7 +42,12 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
     	if(dataset!=null){
     		AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
     		fileLogger.setLevel(FILE_DEBUG_LEVEL);
-    		fileLogger.addHandler(dataset.getLogHandler());
+    		try {
+    			fileLogger.addHandler(dataset.getLogHandler());
+    		} catch(Exception e){
+    			programLogger.log(Level.SEVERE, "Error getting log file handler", e);
+    			fileLogger = null;
+    		}
     	} else {
     		fileLogger = programLogger;
     	}
@@ -73,8 +78,12 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
 
 		} catch (SecurityException e1) {
 			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
+			fileLogger = null;
+			logFile = null;
 		} catch (IOException e1) {
 			programLogger.log(Level.SEVERE, "Could not create the log file handler", e1);
+			fileLogger = null;
+			logFile = null;
 		}
 		log(Level.FINEST, "Created worker");
     }

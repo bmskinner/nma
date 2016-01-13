@@ -83,8 +83,8 @@ public class TubulinTailDetector extends AnalysisWorker {
 		this.folder = folder;
 		this.channel = channel;
 		
-		fileLogger = Logger.getLogger(TubulinTailDetector.class.getName());
-		fileLogger.addHandler(dataset.getLogHandler());
+//		fileLogger = Logger.getLogger(TubulinTailDetector.class.getName());
+//		fileLogger.addHandler(dataset.getLogHandler());
 		
 		this.setProgressTotal(dataset.getCollection().getNucleusCount());
 	}

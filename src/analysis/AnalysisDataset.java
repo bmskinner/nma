@@ -149,19 +149,13 @@ public class AnalysisDataset implements Serializable {
 	 * if needed.
 	 * @return
 	 */
-	public Handler getLogHandler(){
-		if(fileHandler == null){
-			try {
-				fileHandler = new DebugFileHandler(this.getDebugFile());
-				fileHandler.setFormatter(new DebugFileFormatter());
-			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	public Handler getLogHandler() throws Exception {
+//		if(fileHandler == null){
+
+			fileHandler = new DebugFileHandler(this.getDebugFile());
+			fileHandler.setFormatter(new DebugFileFormatter());
+
+//		}
 		return this.fileHandler;
 	}
 	

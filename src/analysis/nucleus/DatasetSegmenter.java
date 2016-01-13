@@ -604,7 +604,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 				// modify tail and head/tip point to nearest segment end
 				remapBorderPoints(n, pc);
 				
-				log(Level.INFO, "Fitted nucleus "+n.getPathAndNumber());
+				log(Level.FINE, "Fitted nucleus "+n.getPathAndNumber());
 				
 
 				long endTime = System.currentTimeMillis();

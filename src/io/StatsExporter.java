@@ -21,6 +21,7 @@ package io;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,9 +44,17 @@ public class StatsExporter {
 
 		CellCollection collection = dataset.getCollection();
 		logger = Logger.getLogger(StatsExporter.class.getName());
-		logger.addHandler(dataset.getLogHandler());
+		try {
+			logger.addHandler(dataset.getLogHandler());
+		} catch (SecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
-//		logger = new Logger(collection.getDebugFile(), "StatsExporter");
+
 		try{
 			exportNuclearStats(collection, "log.stats");
 			exportImagePaths(collection, "log.imagePaths");
@@ -56,6 +65,11 @@ public class StatsExporter {
 		} catch (Exception e){
 			logger.log(Level.SEVERE, "Error in stats export", e);
 			return false;
+		} finally {
+			for(Handler h : logger.getHandlers()){
+				h.close();
+				logger.removeHandler(h);
+			}
 		}
 		return true;
 	}

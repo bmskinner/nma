@@ -28,6 +28,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -50,7 +51,15 @@ public class NucleusAnnotator {
 
 		CellCollection collection = dataset.getCollection();
 		logger = Logger.getLogger(NucleusAnnotator.class.getName());
-		logger.addHandler(dataset.getLogHandler());
+		try {
+			logger.addHandler(dataset.getLogHandler());
+		} catch (SecurityException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 //		logger = new Logger(collection.getDebugFile(), "NucleusAnnotator");
 		try{
 			logger.log(Level.INFO, "Annotating images of nuclei...");
@@ -62,6 +71,11 @@ public class NucleusAnnotator {
 		}catch(Exception e){
 			logger.log(Level.SEVERE, "Error in annotation", e);
 			return false;
+		} finally {
+			for(Handler h : logger.getHandlers()){
+				h.close();
+				logger.removeHandler(h);
+			}
 		}
 		return true;
 	}

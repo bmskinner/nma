@@ -30,6 +30,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -45,17 +46,24 @@ public class CompositeExporter {
 	
 	public static boolean run(AnalysisDataset dataset){
 		logger = Logger.getLogger(CompositeExporter.class.getName());
-		logger.addHandler(dataset.getLogHandler());
+		try {
+			logger.addHandler(dataset.getLogHandler());
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		CellCollection collection = dataset.getCollection();
 		boolean ok = run(collection, logger);
 		return ok;
 	}
 
 	public static boolean run(CellCollection collection, Logger logger){
-//		CellCollection collection = dataset.getCollection();
+
 		CompositeExporter.logger = logger;
 		
-//		logger = new Logger(collection.getDebugFile(), "CompositeExporter");
 
 		if(collection.getNucleusCount()==0){
 			logger.log(Level.FINE, "No nuclei in collection");
@@ -121,6 +129,11 @@ public class CompositeExporter {
 		} catch(Exception e){
 			logger.log(Level.SEVERE, "Error creating composite image", e);
 			return false;
+		} finally {
+			for(Handler h : logger.getHandlers()){
+				h.close();
+				logger.removeHandler(h);
+			}
 		}
 		return true;
 	}
