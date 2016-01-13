@@ -30,6 +30,9 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
 	protected static Logger programLogger; // log to the program LogPanel
 	protected static Logger fileLogger; // log to the active dataset log file
 	protected static final Level FILE_DEBUG_LEVEL = Level.ALL;
+	protected int progressCount = 0;
+
+	private File logFile = null;
     
     private final AnalysisDataset activeDataset;
     
@@ -55,9 +58,9 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
      * @param programLogger
      * @param debugFile
      */
-    public AnalysisWorker(AnalysisDataset dataset, Logger programLogger, File debugFile){
+    public AnalysisWorker(final AnalysisDataset dataset, final Logger programLogger, final File debugFile){
     	this(dataset, programLogger);
-    	
+    	this.logFile = debugFile;
     	programLogger.log(Level.FINEST, "Creating log file handler");
 		DebugFileHandler handler = null;
 		try {
@@ -144,20 +147,32 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
         	logError("Execution error in worker", e);
 
        } finally{
-    	   programLogger.log(Level.FINEST, "Closing log file handlers");
     	   
+    	   log(Level.FINEST, "Closing log file handlers");
+
     	   if(activeDataset!=null){
     		   
     		   // if dataset is null, the fileLogger was set to be the programLogger
     		   // and we don't want to close that
-    		   for(Handler h : fileLogger.getHandlers()){
-    			   h.close();
-    			   fileLogger.removeHandler(h);
+    		   closeLogFileHandlers();
+    		   
+    	   } else {
+    		   // No dataset was given, so no intrinsic log file
+    		   // But if a separate log file was provided, we need to close it
+    		   if(logFile!=null){
+    			   closeLogFileHandlers();
     		   }
     	   }
        }
 
     } 
+    
+    private void closeLogFileHandlers(){
+    	for(Handler h : fileLogger.getHandlers()){
+			   h.close();
+			   fileLogger.removeHandler(h);
+		   }
+    }
 	
 
 }

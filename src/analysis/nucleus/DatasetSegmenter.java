@@ -46,7 +46,7 @@ public class DatasetSegmenter extends AnalysisWorker {
     private CellCollection sourceCollection = null; // a collection to take segments from
 
     private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
-    
+
     public enum MorphologyAnalysisMode {
     	NEW, COPY, REFRESH
     }
@@ -125,7 +125,7 @@ public class DatasetSegmenter extends AnalysisWorker {
     private boolean runNewAnalysis() throws Exception{
     	log(Level.FINE, "Beginning core morphology analysis");
 
-		this.setProgressTotal(getDataset().getCollection().getNucleusCount());
+		this.setProgressTotal(getDataset().getCollection().getNucleusCount()*2);
 
 
 		BorderTag pointType = BorderTag.REFERENCE_POINT;
@@ -142,7 +142,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			log(Level.WARNING,  "Cannot copy: source collection is null");
 			return false;
 		} else {
-			this.setProgressTotal(getDataset().getCollection().getNucleusCount());
+			this.setProgressTotal(getDataset().getCollection().getNucleusCount()*2);
 			log(Level.FINE,  "Copying segmentation pattern");
 			reapplyProfiles(getDataset().getCollection(), sourceCollection);
 			log(Level.FINE, "Copying complete");
@@ -152,7 +152,7 @@ public class DatasetSegmenter extends AnalysisWorker {
     
     private boolean runRefreshAnalysis() throws Exception{
     	log(Level.FINE, "Refreshing segmentation");
-    	this.setProgressTotal(getDataset().getCollection().getNucleusCount());
+    	this.setProgressTotal(getDataset().getCollection().getNucleusCount()*3);
 		refresh(getDataset().getCollection());
 		log(Level.FINE, "Refresh complete");
 		return true;
@@ -269,13 +269,12 @@ public class DatasetSegmenter extends AnalysisWorker {
 		SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType));
 		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
 
-		int count = 0;
 		for(Nucleus n : collection.getNuclei()){ 
 			// recombine the segments at the lengths of the median profile segments
 			Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
 			frankenProfiles.add(recombinedProfile);
-			count++;
-			publish(count);
+
+			publish(progressCount++);
 
 		}
 
@@ -375,6 +374,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 			for(Nucleus n : collection.getNuclei()){
 				assignSegmentsToNucleus(n, median);
+				publish(progressCount++);
 			}
 			log(Level.FINER, "Segments assigned to nuclei");
 		} catch(Exception e){
@@ -495,8 +495,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 				// recombine the segments at the lengths of the median profile segments
 				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
 				frankenProfiles.add(recombinedProfile);
-
-				publish(count++); // publish the progress to gui
+				count++;
+				publish(progressCount++); // publish the progress to gui
 			}
 
 			// add all the nucleus frankenprofiles to the frankencollection
@@ -514,6 +514,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 			double firstPoint = frankenCollection.getSegmentedProfile(BorderTag.REFERENCE_POINT).get(0);
 			log(Level.FINER, "FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);
+			
 			// attach the frankencollection to the cellcollection
 			collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
 			log(Level.FINER, "Segment assignments refined");

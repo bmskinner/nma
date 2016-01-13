@@ -41,7 +41,6 @@ public class DatasetProfiler extends AnalysisWorker {
 
 				log(Level.FINE, "Profiling dataset");
 
-//				this.setProgressTotal(getDataset().getCollection().getNucleusCount());
 				this.setProgressTotal(3);
 
 				BorderTag pointType = BorderTag.REFERENCE_POINT;
@@ -55,13 +54,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		} catch(Exception e){
 			
 			logError("Error in dataset profiling", e);
-			
-			fileLogger.log(Level.SEVERE, "Collection keys:");
-			fileLogger.log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
-			
-			fileLogger.log(Level.SEVERE, "FrankenCollection keys:");
-			fileLogger.log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
-			result = false;
+			return false;
 		} 
 
 		return result;
@@ -228,7 +221,7 @@ public class DatasetProfiler extends AnalysisWorker {
 //			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
 
 			if(maxima.size()==0){
-				fileLogger.log(Level.SEVERE, "Error: no maxima found in median line");
+				log(Level.WARNING, "Error: no maxima found in median line");
 				tailIndex = 100; // set to roughly the middle of the array for the moment
 
 			} else{
@@ -297,98 +290,82 @@ public class DatasetProfiler extends AnalysisWorker {
 		 * @param collection the nucleus collection
 		 * @param nucleusClass the class of nucleus
 		 */
-		public static void findTailIndexInMedianCurve(CellCollection collection){
+		public static void findTailIndexInMedianCurve(CellCollection collection) throws Exception {
 
-			try{
+			switch(collection.getNucleusType()){
 
-				if(collection.getNucleusType().equals(NucleusType.ROUND)){
-					findTailInRoundMedian(collection);
-				}
-
-				if(collection.getNucleusType().equals(NucleusType.PIG_SPERM)){
-					findTailInPigSpermMedian(collection);
-				}
-
-				if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
+				case PIG_SPERM:
+					findTailInPigSpermMedian(collection);	
+					break;
+				case RODENT_SPERM:
 					findTailInRodentSpermMedian(collection);
-				}
-
-			} catch(Exception e){
-				logError("Error finding tail", e);
-//				fileLogger.log(Level.SEVERE, "Error finding tail", e);
+					break;
+				default:
+					findTailInRoundMedian(collection);
+					break;
 			}
-
 		}
 	}
 	
 	public static class Offsetter {
 		
-		private static void calculateOffsetsInRoundNuclei(CellCollection collection){
-			
-			try{
-				Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50); // returns a median profile with head at 0
+		private static void calculateOffsetsInRoundNuclei(CellCollection collection) throws Exception {
 
-				for(Nucleus n : collection.getNuclei()){
+			Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50); // returns a median profile with head at 0
 
-					// returns the positive offset index of this profile which best matches the median profile
-					int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-					n.setBorderTag(BorderTag.REFERENCE_POINT, newHeadIndex);
+			for(Nucleus n : collection.getNuclei()){
 
-					// check if flipping the profile will help
+				// returns the positive offset index of this profile which best matches the median profile
+				int newHeadIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
+				n.setBorderTag(BorderTag.REFERENCE_POINT, newHeadIndex);
 
-					double differenceToMedian1 = n.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
-					n.reverse();
-					double differenceToMedian2 = n.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
+				// check if flipping the profile will help
 
-					if(differenceToMedian1<differenceToMedian2){
-						n.reverse(); // put it back if no better
-					}
+				double differenceToMedian1 = n.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
+				n.reverse();
+				double differenceToMedian2 = n.getAngleProfile(BorderTag.REFERENCE_POINT).absoluteSquareDifference(medianToCompare);
 
-					// also update the tail position
-					int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
-					n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
+				if(differenceToMedian1<differenceToMedian2){
+					n.reverse(); // put it back if no better
 				}
-			}catch(Exception e){
-				logError("Error calculating offsets", e);
-//				fileLogger.log(Level.SEVERE, "Error calculating offsets", e);
+
+				// also update the tail position
+				int tailIndex = n.getIndex(n.findOppositeBorder( n.getPoint(newHeadIndex) ));
+				n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
 			}
 		}
 
 		
-		private static void calculateOffsetsInRodentSpermNuclei(CellCollection collection){
-			
-			try{
-				// Get the median profile starting from the orientation point
-				Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); // returns a median profile
+		private static void calculateOffsetsInRodentSpermNuclei(CellCollection collection) throws Exception {
 
-				// go through each nucleus
-				for(Nucleus n : collection.getNuclei()){
+			// Get the median profile starting from the orientation point
+			Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); // returns a median profile
 
-					// ensure the correct class is chosen
-					RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+			// go through each nucleus
+			for(Nucleus n : collection.getNuclei()){
 
-					// get the offset for the best fit to the median profile
-					int newTailIndex = nucleus.getAngleProfile().getSlidingWindowOffset(median);
+				// ensure the correct class is chosen
+				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
 
-					// add the offset of the tail to the nucleus
-					nucleus.setBorderTag(BorderTag.ORIENTATION_POINT, newTailIndex);
-					
+				// get the offset for the best fit to the median profile
+				int newTailIndex = nucleus.getAngleProfile().getSlidingWindowOffset(median);
 
-					// also update the head position (same as round reference point)
-					// - the point opposite the tail through the CoM
-					int headIndex = nucleus.getIndex(nucleus.findOppositeBorder( nucleus.getPoint(newTailIndex) ));
-					nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
-					nucleus.splitNucleusToHeadAndHump();
-					
-				}
-				
-				
-				// Set the top vertical and bottom vertical points
-				assignFlatRegionToMouseNuclei(collection);
-				
-			}catch(Exception e){
-				logError("Error calculating offsets", e);
+				// add the offset of the tail to the nucleus
+				nucleus.setBorderTag(BorderTag.ORIENTATION_POINT, newTailIndex);
+
+
+				// also update the head position (same as round reference point)
+				// - the point opposite the tail through the CoM
+				int headIndex = nucleus.getIndex(nucleus.findOppositeBorder( nucleus.getPoint(newTailIndex) ));
+				nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
+				nucleus.splitNucleusToHeadAndHump();
+
 			}
+
+
+			// Set the top vertical and bottom vertical points
+			assignFlatRegionToMouseNuclei(collection);
+
 		}
 		
 		public static void assignFlatRegionToMouseNuclei(CellCollection collection) throws Exception{
@@ -502,41 +479,38 @@ public class DatasetProfiler extends AnalysisWorker {
 
 				// returns the positive offset index of this profile which best matches the median profile
 				int tailIndex = n.getAngleProfile().getSlidingWindowOffset(medianToCompare);
-				
+
 				n.setBorderTag(BorderTag.ORIENTATION_POINT, tailIndex);
 
-				
+
 				// also update the head position
 				int headIndex = n.getIndex(n.findOppositeBorder( n.getPoint(tailIndex) ));
 				n.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
 			}
 
 		}
-		
+
 		/**
 		 * Offset the position of the tail in each nucleus based on the difference to the median
 		 * @param collection the nuclei
 		 * @param nucleusClass the class of nucleus
 		 */
-		public static void calculateOffsets(CellCollection collection){
+		public static void calculateOffsets(CellCollection collection) throws Exception {
 
-			try{
+			switch(collection.getNucleusType()){
 
-				if(collection.getNucleusType().equals(NucleusType.ROUND)){
-					calculateOffsetsInRoundNuclei(collection);
-				}
-
-				if(collection.getNucleusType().equals(NucleusType.RODENT_SPERM)){
-					calculateOffsetsInRodentSpermNuclei(collection);
-				}
-
-				if(collection.getNucleusType().equals(NucleusType.PIG_SPERM)){
+				case PIG_SPERM:
 					calculateOffsetsInPigSpermNuclei(collection);
-				}
-			}catch(Exception e){
-				logError("Error calculating offsets", e);
+					break;
+				case RODENT_SPERM:
+					calculateOffsetsInRodentSpermNuclei(collection);
+					break;
+				default:
+					calculateOffsetsInRoundNuclei(collection);
+					break;
 			}
 		}
+
 	}
 	 
 }
