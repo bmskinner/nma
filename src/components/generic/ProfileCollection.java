@@ -76,6 +76,19 @@ public class ProfileCollection implements Serializable {
 	}
 	
 	/**
+	 * Test if the given tag is present in the collection
+	 * @param tag
+	 * @return
+	 */
+	public boolean hasBorderTag(BorderTag tag){
+		if(offsets.keySet().contains(tag)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
 	 * Get the requested profile. Generates it dynamically from the
 	 * appropriate ProfileAggregate each time. 
 	 * @param tag the BorderTag to use as index zero

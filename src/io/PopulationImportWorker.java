@@ -6,8 +6,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import components.generic.BorderTag;
+import components.generic.ProfileCollectionType;
+import components.nuclear.NucleusType;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
+import analysis.nucleus.DatasetProfiler;
 import utility.Constants;
 
 public class PopulationImportWorker extends AnalysisWorker {
@@ -46,7 +50,26 @@ public class PopulationImportWorker extends AnalysisWorker {
 				dataset.getCollection().setDebugFile(logFile);
 				programLogger.log(Level.FINE, "Updated log file location");
 				
-//				publish(1);
+				
+				// If rodent sperm, check if the TOP_VERTICAL and BOTTOM_VERTICAL 
+				// points have been set, and if not, add them
+				if(dataset.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+					
+					if(! dataset.getCollection()
+							.getProfileCollection(ProfileCollectionType.REGULAR)
+							.hasBorderTag(BorderTag.TOP_VERTICAL)  ){
+						
+						programLogger.log(Level.FINE, "TOP_ and BOTTOM_VERTICAL not assigned; calculating");
+						calculateTopAndBottomVerticals(dataset);
+						programLogger.log(Level.FINE, "Calculating TOP and BOTTOM for child datasets");
+						for(AnalysisDataset child : dataset.getAllChildDatasets()){
+							calculateTopAndBottomVerticals(child);
+						}
+						
+					}
+					
+				}
+				
 				return true;
 				
 			} else {
@@ -59,6 +82,15 @@ public class PopulationImportWorker extends AnalysisWorker {
 			logError("Unable to open file", e);
 			return false;
 		}
+	}
+	
+	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
+		
+		programLogger.log(Level.FINE, "Detecting flat region");
+		DatasetProfiler.TailFinder.assignTopAndBottomVerticalInMouse(dataset.getCollection());
+		
+		programLogger.log(Level.FINE, "Assigning flat region to nuclei");
+		DatasetProfiler.Offsetter.assignFlatRegionToMouseNuclei(dataset.getCollection());
 	}
 	
 	/**

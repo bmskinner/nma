@@ -166,21 +166,39 @@ public class DatasetProfiler extends AnalysisWorker {
 					}
 				}
 
-				collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+				collection.getProfileCollection(ProfileCollectionType.REGULAR)
+					.addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 				
-				 /*
-			     * Call to a StraightPointFinder that will find the straight part of the nucleus
-			     * Use this to set the BorderTag.TopVertical and BottomVertical
-			     */
-			    int[] verticalPoints = medianProfile.getConsistentRegionBounds(180, 2, 10);
-			    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
-			    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.TOP_VERTICAL, verticalPoints[0]);
-			    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
-			    }
+//				 /*
+//			     * Call to a StraightPointFinder that will find the straight part of the nucleus
+//			     * Use this to set the BorderTag.TopVertical and BottomVertical
+//			     */
+				assignTopAndBottomVerticalInMouse(collection);
+//			    int[] verticalPoints = medianProfile.getConsistentRegionBounds(180, 2, 10);
+//			    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
+//			    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.TOP_VERTICAL, verticalPoints[0]);
+//			    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
+//			    }
 
 			} catch(Exception e){
 				logError("Error finding tail", e);
 			}
+		}
+		
+		public static void assignTopAndBottomVerticalInMouse(CellCollection collection) throws Exception{
+			 
+			Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
+
+			/*
+		     * Call to a StraightPointFinder that will find the straight part of the nucleus
+		     * Use this to set the BorderTag.TopVertical and BottomVertical
+		     */
+		    int[] verticalPoints = medianProfile.getConsistentRegionBounds(180, 2, 10);
+		    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
+		    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.TOP_VERTICAL, verticalPoints[0]);
+		    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
+		    }
+			
 		}
 
 		private static void findTailInPigSpermMedian(CellCollection collection) throws Exception {
@@ -373,7 +391,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			}
 		}
 		
-		private static void assignFlatRegionToMouseNuclei(CellCollection collection) throws Exception{
+		public static void assignFlatRegionToMouseNuclei(CellCollection collection) throws Exception{
 //			Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); // returns a median profile
 
 //			{
