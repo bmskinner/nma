@@ -76,7 +76,9 @@ public class InterfaceEvent extends EventObject {
 		LIST_DATASETS		("List datasets"),
 		RESEGMENT_SELECTED_DATASET ("Resegment datasets"),
 		LIST_SELECTED_DATASETS ("List selected datasets"),
-		CLEAR_LOG_WINDOW 	("Clear log window");
+		CLEAR_LOG_WINDOW 	("Clear log window"),
+		UPDATE_IN_PROGRESS  ("Updating"),
+		UPDATE_COMPLETE     ("Update finished");
 		
 		private final String name;
 		

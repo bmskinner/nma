@@ -147,6 +147,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 				programLogger.log(Level.FINEST, "Updated signals analysis panel");
 				boxplotPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated signals boxplot panel");
+				setUpdating(false);
 			
 		}});
 

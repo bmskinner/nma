@@ -73,16 +73,27 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 * to display
 	 * @param list
 	 */
-	public void update(final List<AnalysisDataset> list){
+	
+	public void updateDetail(){
 		programLogger.log(Level.FINE, "Updating analysis panel");
+		
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				
-				updateAnalysisParametersPanel(list);
-				programLogger.log(Level.FINEST, "Updated analysis parameter panel");
-				updateStatsPanel(list);
-				programLogger.log(Level.FINEST, "Updated analysis stats panel");
-			
+				try{
+					
+					updateAnalysisParametersPanel();
+					programLogger.log(Level.FINEST, "Updated analysis parameter panel");
+					updateStatsPanel();
+					programLogger.log(Level.FINEST, "Updated analysis stats panel");
+				}  catch  (Exception e){
+					programLogger.log(Level.SEVERE, "Error updating analysis panels", e);
+
+				} finally {
+					
+					setUpdating(false);
+					programLogger.log(Level.FINE, "Updated analysis panels");
+				}
 		}});
 	}
 		
@@ -91,18 +102,18 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 * Update the analysis panel with data from the given datasets
 	 * @param list the datasets
 	 */
-	private void updateAnalysisParametersPanel(List<AnalysisDataset> list){
+	private void updateAnalysisParametersPanel(){
 		
 		TableModel model = NucleusTableDatasetCreator.createAnalysisParametersTable(null);
-		if(list!=null && !list.isEmpty()){
+		if(this.hasDatasets()){
 
-			TableOptions options = new DefaultTableOptions(list, TableType.ANALYSIS_PARAMETERS);
+			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.ANALYSIS_PARAMETERS);
 
 			if(getTableCache().hasTable(options)){
 				model = getTableCache().getTable(options);
 				programLogger.log(Level.FINEST, "Fetched cached analysis parameters table");
 			} else {
-				model = NucleusTableDatasetCreator.createAnalysisParametersTable(list);
+				model = NucleusTableDatasetCreator.createAnalysisParametersTable(getDatasets());
 				getTableCache().addTable(options, model);
 				programLogger.log(Level.FINEST, "Added cached analysis parameters table");
 			}
@@ -119,19 +130,19 @@ public class AnalysisDetailPanel extends DetailPanel {
 	 * Update the stats panel with data from the given datasets
 	 * @param list the datasets
 	 */
-	private void updateStatsPanel(List<AnalysisDataset> list){
+	private void updateStatsPanel(){
 		try{
 			TableModel model = NucleusTableDatasetCreator.createStatsTable(null);
 
-			if(list!=null && !list.isEmpty()){
+			if(hasDatasets()){
 				
-				TableOptions options = new DefaultTableOptions(list, TableType.ANALYSIS_STATS);
+				TableOptions options = new DefaultTableOptions(getDatasets(), TableType.ANALYSIS_STATS);
 
 				if(getTableCache().hasTable(options)){
 					model = getTableCache().getTable(options);
 					programLogger.log(Level.FINEST, "Fetched cached analysis stats table");
 				} else {
-					model = NucleusTableDatasetCreator.createStatsTable(list);
+					model = NucleusTableDatasetCreator.createStatsTable(getDatasets());
 					getTableCache().addTable(options, model);
 					programLogger.log(Level.FINEST, "Added cached analysis stats table");
 				}

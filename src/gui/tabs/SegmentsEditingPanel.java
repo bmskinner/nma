@@ -13,6 +13,7 @@ import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -279,6 +280,12 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 		}
 		
+		/**
+		 * Split the given segment into two segmnets. The split is made at the midpoint
+		 * @param segName
+		 * @return
+		 * @throws Exception
+		 */
 		private boolean splitSegment(String segName) throws Exception {
 			
 			boolean result = false;
@@ -290,31 +297,32 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			// Get the segments to merge
 			NucleusBorderSegment seg = medianProfile.getSegment(segName);
 			
-			SpinnerNumberModel sModel 
-			= new SpinnerNumberModel(seg.getStartIndex(), 
-					0, 
-					medianProfile.size(),
-					1);
-			JSpinner spinner = new JSpinner(sModel);
-
-			int option = JOptionPane.showOptionDialog(null, 
-					spinner, 
-					"Choose the split index", 
-					JOptionPane.OK_CANCEL_OPTION, 
-					JOptionPane.QUESTION_MESSAGE, null, null, null);
-			if (option == JOptionPane.CANCEL_OPTION) {
-				
-				// user hit cancel
-				
-				
-			} else if (option == JOptionPane.OK_OPTION)	{
+//			SpinnerNumberModel sModel 
+//			= new SpinnerNumberModel(seg.getMidpointIndex(), 
+//					0, 
+//					medianProfile.size(),
+//					1);
+//			JSpinner spinner = new JSpinner(sModel);
+//
+//			int option = JOptionPane.showOptionDialog(null, 
+//					spinner, 
+//					"Choose the split index", 
+//					JOptionPane.OK_CANCEL_OPTION, 
+//					JOptionPane.QUESTION_MESSAGE, null, null, null);
+//			if (option == JOptionPane.CANCEL_OPTION) {
+//				
+//				// user hit cancel
+//				
+//				
+//			} else if (option == JOptionPane.OK_OPTION)	{
 				
 				try{
 
-					int index = (Integer) spinner.getModel().getValue();
+					int index = seg.getMidpointIndex();
+//					int index = (Integer) spinner.getModel().getValue();
 					if(seg.contains(index)){
 
-
+						fireInterfaceEvent(InterfaceMethod.UPDATE_IN_PROGRESS);
 						double proportion = seg.getIndexProportion(index);
 
 						// merge the two segments in the median - this is only a copy of the profile collection
@@ -348,6 +356,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 							profile.splitSegment(nSeg1, targetIndex);
 							n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
 						}
+						fireInterfaceEvent(InterfaceMethod.UPDATE_COMPLETE);
 						fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 						result = true;
 					} else {
@@ -356,7 +365,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				} catch(Exception e){
 					SegmentsEditingPanel.this.programLogger.log(Level.SEVERE, "Error splitting segment", e);
 				}
-			}
+//			}
 			
 			return result;
 		}
@@ -396,7 +405,6 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 								profile = activeDataset().getCollection()
 										.getProfileCollection(ProfileCollectionType.REGULAR)
 										.getSegmentedProfile(BorderTag.REFERENCE_POINT);
-								//											.interpolate((int) activeDataset().getCollection().getMedianArrayLength());
 							}
 						} 
 
@@ -459,6 +467,9 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			if(event.type().contains("UpdateSegment")){
 
 				try{
+					
+					
+					SegmentsEditingPanel.this.setAnalysing(true);
 
 					String[] array = event.type().split("\\|");
 					String segName = array[1];
@@ -487,6 +498,8 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 				} catch(Exception e){
 					programLogger.log(Level.SEVERE, "Error updating segment", e);
+				} finally {
+					SegmentsEditingPanel.this.setAnalysing(false);
 				}
 
 			}
@@ -534,105 +547,119 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				CellCollection collection = activeDataset().getCollection();
 				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 				List<String> names = new ArrayList<String>();
-
+				SegmentsEditingPanel.this.setAnalysing(true);
+				
 				if(e.getSource().equals(mergeButton)){
-
-					// Put the names of the mergable segments into a list
-					for(NucleusBorderSegment seg : medianProfile.getSegments()){
-						String mergeName = seg.getName()+" - "+seg.nextSegment().getName();
-						names.add(mergeName);
-					}
-					String[] nameArray = names.toArray(new String[0]);
-
-					String mergeOption = (String) JOptionPane.showInputDialog(null, 
-							"Choose segments to merge",
-							"Merge",
-							JOptionPane.QUESTION_MESSAGE, 
-							null, 
-							nameArray, 
-							nameArray[0]);
-
-					if(mergeOption!=null){
-						// a choice was made
-						String[] segs = mergeOption.split(" - "); // split back up to seg names
-
-						mergeSegments(segs[0], segs[1]);
-
-						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-						list.add(activeDataset());
-						SegmentsEditingPanel.this.update(list);
-						SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
-					}
-
-
+					
+					mergeAction(medianProfile, names);
+					
 				}
 
 				if(e.getSource().equals(unmergeButton)){
-					// show a list of segments that can be unmerged, and merge the selected option
 
-					// Put the names of the mergable segments into a list
-					for(NucleusBorderSegment seg : medianProfile.getSegments()){
-						if(seg.hasMergeSources()){
-							names.add(seg.getName());
-						}							
-					}
-					String[] nameArray = names.toArray(new String[0]);
-
-					String mergeOption = (String) JOptionPane.showInputDialog(null, 
-							"Choose segments to unmerge",
-							"Unmerge",
-							JOptionPane.QUESTION_MESSAGE, 
-							null, 
-							nameArray, 
-							nameArray[0]);
-
-					if(mergeOption!=null){
-						// a choice was made
-
-
-						unmergeSegments(mergeOption);
-
-						List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-						list.add(activeDataset());
-						SegmentsEditingPanel.this.update(list);
-						SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
-					}
-
-					
+					unmergeAction(medianProfile, names);
 				}
 				
 				if(e.getSource().equals(splitButton)){
-					// show a list of segments that can be split, and merge the selected option
-
-					// Put the names of the mergable segments into a list
-					for(NucleusBorderSegment seg : medianProfile.getSegments()){
-							names.add(seg.getName());						
-					}
-					
-					String[] nameArray = names.toArray(new String[0]);
-
-					String option = (String) JOptionPane.showInputDialog(null, 
-							"Choose segment to split",
-							"Split",
-							JOptionPane.QUESTION_MESSAGE, 
-							null, 
-							nameArray, 
-							nameArray[0]);
-
-					if(option!=null){
-						// a choice was made
-
-
-						if(splitSegment(option)){
-							SegmentsEditingPanel.this.update(SegmentsEditingPanel.this.activeDatasetToList());
-							SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
-						}
-					}
-
+					splitAction(medianProfile, names);
 					
 				}
+				
 			} catch (Exception e1) {
-				programLogger.log(Level.SEVERE, "Error merging segments", e1);
+				
+				programLogger.log(Level.SEVERE, "Error altering segments", e1);
+			} finally {
+				SegmentsEditingPanel.this.setAnalysing(false);
+			}
+		}
+		
+		private void mergeAction(SegmentedProfile medianProfile, List<String> names) throws Exception{
+			// Put the names of the mergable segments into a list
+			for(NucleusBorderSegment seg : medianProfile.getSegments()){
+				String mergeName = seg.getName()+" - "+seg.nextSegment().getName();
+				names.add(mergeName);
+			}
+			String[] nameArray = names.toArray(new String[0]);
+
+			String mergeOption = (String) JOptionPane.showInputDialog(null, 
+					"Choose segments to merge",
+					"Merge",
+					JOptionPane.QUESTION_MESSAGE, 
+					null, 
+					nameArray, 
+					nameArray[0]);
+
+			if(mergeOption!=null){
+				// a choice was made
+				String[] segs = mergeOption.split(" - "); // split back up to seg names
+
+				
+				mergeSegments(segs[0], segs[1]);
+				
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				list.add(activeDataset());
+				SegmentsEditingPanel.this.update(list);
+				SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
+			}
+		}
+		
+		private void splitAction(SegmentedProfile medianProfile, List<String> names) throws Exception{
+			// show a list of segments that can be split, and merge the selected option
+
+			// Put the names of the mergable segments into a list
+			for(NucleusBorderSegment seg : medianProfile.getSegments()){
+					names.add(seg.getName());						
+			}
+			
+			String[] nameArray = names.toArray(new String[0]);
+
+			String option = (String) JOptionPane.showInputDialog(null, 
+					"Choose segment to split",
+					"Split",
+					JOptionPane.QUESTION_MESSAGE, 
+					null, 
+					nameArray, 
+					nameArray[0]);
+
+			if(option!=null){
+				// a choice was made
+
+
+				if(splitSegment(option)){
+					SegmentsEditingPanel.this.update(SegmentsEditingPanel.this.activeDatasetToList());
+					SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
+				}
+			}
+		}
+		
+		private void unmergeAction(SegmentedProfile medianProfile, List<String> names) throws Exception{
+			// show a list of segments that can be unmerged, and merge the selected option
+
+			// Put the names of the mergable segments into a list
+			for(NucleusBorderSegment seg : medianProfile.getSegments()){
+				if(seg.hasMergeSources()){
+					names.add(seg.getName());
+				}							
+			}
+			String[] nameArray = names.toArray(new String[0]);
+
+			String mergeOption = (String) JOptionPane.showInputDialog(null, 
+					"Choose segments to unmerge",
+					"Unmerge",
+					JOptionPane.QUESTION_MESSAGE, 
+					null, 
+					nameArray, 
+					nameArray[0]);
+
+			if(mergeOption!=null){
+				// a choice was made
+
+				unmergeSegments(mergeOption);
+
+				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+				list.add(activeDataset());
+				SegmentsEditingPanel.this.update(list);
+				SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
 			}
 		}
 	}

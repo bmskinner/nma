@@ -45,12 +45,18 @@ import gui.tabs.MergesDetailPanel;
 import gui.tabs.NuclearBoxplotsPanel;
 import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
+import gui.tabs.SegmentsEditingPanel;
 import gui.tabs.SignalsDetailPanel;
 import ij.IJ;
+
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -60,6 +66,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -68,6 +75,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
 import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
@@ -284,6 +293,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 					topRow, tabbedPane);
 			
 			contentPane.add(panelMain, BorderLayout.CENTER);
+			
+			checkUpdatingState();
 
 		} catch (Exception e) {
 			IJ.log("Error initialising Main: "+e.getMessage());
@@ -465,17 +476,64 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		Thread thr = new Thread() {
 			public void run() {
 				try {
-					
+//					MainWindow.this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 					
 					for(DetailPanel panel : MainWindow.this.detailPanels){
 						panel.update(list);
 					}
 					
 					programLogger.log(Level.FINE, "Updated tab panels");
+//					MainWindow.this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE,"Error updating panels", e);
 				}
 			}
+		};
+		thr.start();
+	}
+	
+	
+	volatile private boolean isRunning = false;
+	
+	private synchronized boolean checkRunning(){
+		if (isRunning) 
+			return true;
+		else 
+			return false;
+	}
+	
+	public synchronized void checkUpdatingState(){
+		Thread thr = new Thread() {
+			public void run() {
+				try {
+					while(true){
+						isRunning = false;
+
+						for(DetailPanel panel : MainWindow.this.detailPanels){
+							if(panel.isUpdating()){
+								isRunning = true;
+//								IJ.log(isRunning+": Panel: "+panel.getClass().getSimpleName());
+							}
+							
+						}
+
+						if(checkRunning()){
+							MainWindow.this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+						} else {
+							MainWindow.this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+						}
+
+						Thread.sleep(500);
+					}
+				} catch (InterruptedException e) {
+
+					IJ.log("Error checking update state: "+e.getMessage());
+					for(StackTraceElement el : e.getStackTrace()){
+						IJ.log(el.toString());
+					}
+				}
+			}
+
 		};
 		thr.start();
 	}
@@ -886,9 +944,44 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			logPanel.clear();
 			break;
 			
+		case UPDATE_IN_PROGRESS:
+			for(DetailPanel panel : this.detailPanels){
+				panel.setAnalysing(true);
+			}
+			this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			break;
+			
+		case UPDATE_COMPLETE:
+			for(DetailPanel panel : this.detailPanels){
+				panel.setAnalysing(false);
+			}
+			this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			break;
+			
 		default:
 			break;
 
 		}		
 	}	
+	
+//	@SuppressWarnings("serial")
+//	class GlassPane extends JPanel implements ItemListener {
+//        
+//    	public GlassPane(){
+//    		JLabel l = new JLabel();
+//            l.setText("Hello");
+//            l.setBorder(new LineBorder(Color.BLACK, 1));
+//            l.setBounds(10, 10, 50, 20);
+//            l.setBackground(Color.RED);
+//            l.setOpaque(true);
+//            l.setPreferredSize(l.getSize());
+//           add(l);
+//    	}
+//    	
+//        //React to change button clicks.
+//        public void itemStateChanged(ItemEvent e) {
+//            setVisible(e.getStateChange() == ItemEvent.SELECTED);
+//        }
+//
+//    }
 }

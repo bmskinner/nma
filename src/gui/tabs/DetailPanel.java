@@ -27,12 +27,16 @@ import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 
+import java.awt.Cursor;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import charting.ChartCache;
@@ -42,6 +46,22 @@ import analysis.AnalysisDataset;
 /**
  * Add the listener and signal change settings to save each panel
  * reimplementing them
+ * @author bms41
+ *
+ */
+/**
+ * @author bms41
+ *
+ */
+/**
+ * @author bms41
+ *
+ */
+/**
+ * @author bms41
+ *
+ */
+/**
  * @author bms41
  *
  */
@@ -59,8 +79,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	// The table cache does the same for table models
 	protected final ChartCache chartCache = new ChartCache();
 	protected final TableCache tableCache = new TableCache();
+
 	
-	private boolean isUpdating = false;
+	volatile private boolean isUpdating = false;
 	
 	protected Logger programLogger;
 	
@@ -111,6 +132,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		}
 	}
 	
+	public boolean hasDatasets(){
+		if(this.list.size()>0){
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	protected List<AnalysisDataset> getDatasets(){
 		return this.list;
 	}
@@ -119,12 +148,37 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		return this.chartCache;
 	}
 	
-	protected boolean isUpdating(){
-		return this.isUpdating;
+	public boolean isUpdating(){
+		boolean result = false;
+		for(DetailPanel panel : this.subPanels){
+			if(panel.isUpdating()){
+				result = true;
+			}
+		}
+		if(this.isUpdating){
+			result = true;
+		}
+		return result;
 	}
 	
 	protected void setUpdating(boolean b){
 		this.isUpdating = b;
+	}
+	
+	
+	/**
+	 * Toggle wait cursor on element
+	 * @param b
+	 */
+	public void setAnalysing(boolean b){
+		if(b){
+			this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+		} else {
+			this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		}
+		for(DetailPanel panel : this.subPanels){
+			panel.setAnalysing(b);;
+		}
 	}
 	
 	public void update(List<AnalysisDataset> list){
