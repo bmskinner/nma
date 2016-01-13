@@ -95,7 +95,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			Dimension preferredChartSize = new Dimension(400, 300);
 			
 			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart();
-			chartPanel = new DraggableOverlayChartPanel(profileChart, null);
+			chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
 //			chartPanel= MorphologyChartFactory.makeProfileChartPanel(profileChart);
 			
 			chartPanel.setMinimumSize(minimumChartSize);
@@ -374,7 +374,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 								}
 							} 
 							
-							chartPanel.setChart(chart, profile);
+							chartPanel.setChart(chart, profile, true);
 						} catch (Exception e) {
 							programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
 							chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());

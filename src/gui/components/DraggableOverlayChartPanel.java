@@ -48,10 +48,13 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	
 	private volatile boolean mouseIsDown = false;
 	
+	private boolean isChartNormalised = false;
+	
 
-	public DraggableOverlayChartPanel(JFreeChart chart, SegmentedProfile profile){
+	public DraggableOverlayChartPanel(JFreeChart chart, SegmentedProfile profile, boolean normalised){
 		super(chart);
 		this.profile = profile;
+		this.isChartNormalised = normalised;
 		updateOverlays();
 		this.setRangeZoomable(false);
 		this.setDomainZoomable(false);		
@@ -81,7 +84,10 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 
 					Crosshair xCrosshair = new Crosshair(Double.NaN, colour, ChartComponents.MARKER_STROKE);
 					xCrosshair.setLabelVisible(false);
-					xCrosshair.setValue(seg.getStartIndex());
+					
+					double value = isChartNormalised ? profile.getRescaledIndex(seg.getStartIndex(), 100) : seg.getStartIndex();
+					
+					xCrosshair.setValue(value);
 					lines.put(colour, seg);
 					
 					activeOverlay.addDomainCrosshair(xCrosshair);
@@ -101,10 +107,10 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 		}
 	}
 	
-	public void setChart(JFreeChart chart, SegmentedProfile profile){
+	public void setChart(JFreeChart chart, SegmentedProfile profile, boolean normalised){
 		super.setChart(chart);
 		this.profile = profile;
-//		IJ.log("Set chart   : Running :"+checkRunning()); 
+		this.isChartNormalised = normalised;
 		updateOverlays();
 		
 		
@@ -149,6 +155,10 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	    			ValueAxis xAxis = plot.getDomainAxis();
 	    			int xValue = (int) xAxis.java2DToValue(x, dataArea, 
 	    					RectangleEdge.BOTTOM);
+	    			
+	    			if(isChartNormalised){
+	    				xValue = (int) (profile.size() * ( (double) xValue / 100));
+	    			}
 
 	    			NucleusBorderSegment seg = lines.get(activeCrosshair.getPaint());
 

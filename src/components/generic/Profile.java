@@ -213,16 +213,27 @@ public class Profile implements Serializable {
 	
 	/**
 	 * Get an X-axis; get a position
-	 * for each point on the scale 0-<length>
+	 * for each point on the scale 0-length
 	 * @param length the length to scale to
 	 * @return a profile with the positions as values
 	 */
 	public Profile getPositions(int length){
 		double [] result = new double[array.length];
 		for(int i=0;i<array.length;i++){
-			result[i] = (double) i / (double) array.length * (double) length;
+			result[i] = getRescaledIndex(i, length);
 		}
 		return new Profile(result);
+	}
+	
+	/**
+	 * Get the position of an index on an X-axis, rescaled to the 
+	 * new length 
+	 * @param index
+	 * @param newLength
+	 * @return
+	 */
+	public double getRescaledIndex(int index, int newLength){
+		return (double)index / (double) array.length * (double) newLength;
 	}
 	
 	/**

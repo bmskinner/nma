@@ -39,6 +39,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import charting.charts.BoxplotChartOptions;
 import charting.charts.ProfileChartOptions;
+import utility.Constants;
 import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
@@ -303,13 +304,13 @@ public class NucleusDatasetCreator {
 		CellCollection collection = dataset.getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-//		String point = collection.getOrientationPoint();
-		
+
+		// Find the longest nucleus profile in the collection (for alignment)
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
 		int medianProfileLength = (int) collection.getMedianArrayLength();
 		double offset = 0;
 				
-		Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point, 50);
+		Profile profile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(point, Constants.MEDIAN);
 		Profile xpoints = null;
 		if(normalised){
 			xpoints = profile.getPositions(100);

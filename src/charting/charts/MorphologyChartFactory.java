@@ -210,11 +210,13 @@ public class MorphologyChartFactory {
 		
 	public static JFreeChart makeMultiSegmentedProfileChart(ProfileChartOptions options) throws Exception {
 		
-		boolean normalised = options.isSingleDataset() ? false : true;
-		int length = options.isSingleDataset() ? (int) options.firstDataset()
-				.getCollection()
-				.getMedianArrayLength()
-				: 100;
+//		boolean normalised = options.isSingleDataset() ? false : true;
+//		int length = options.isSingleDataset() ? (int) options.firstDataset()
+//				.getCollection()
+//				.getMedianArrayLength()
+//				: 100;
+		
+		int length = 100;
 				
 		JFreeChart chart = ChartFactory.createXYLineChart(null,
 				                "Position", "Angle", null, PlotOrientation.VERTICAL, true, true,
@@ -237,7 +239,7 @@ public class MorphologyChartFactory {
 		for(AnalysisDataset dataset : options.getDatasets()){
 			CellCollection collection = dataset.getCollection();
 			String point = collection.getPoint(options.getTag());
-			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, normalised, options.getAlignment(), options.getTag());
+			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, options.isNormalised(), options.getAlignment(), options.getTag());
 
 			plot.setDataset(datasetIndex, ds);
 //			IJ.log("Set dataset "+datasetIndex + " for "+dataset.getName());

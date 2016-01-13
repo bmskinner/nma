@@ -530,7 +530,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			JFreeChart chart = MorphologyChartFactory.makeEmptyProfileChart();	
 			
-			profileChartPanel = new DraggableOverlayChartPanel(chart, null); 
+			profileChartPanel = new DraggableOverlayChartPanel(chart, null, false); 
 			profileChartPanel.addSignalChangeListener(this);
 			this.add(profileChartPanel, BorderLayout.CENTER);
 			
@@ -551,7 +551,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					XYDataset ds 	= NucleusDatasetCreator.createSegmentedProfileDataset(nucleus);
 					JFreeChart chart = MorphologyChartFactory.makeIndividualNucleusProfileChart(ds, nucleus, activeDataset().getSwatch());
 
-					profileChartPanel.setChart(chart, nucleus.getAngleProfile(BorderTag.REFERENCE_POINT));
+					profileChartPanel.setChart(chart, nucleus.getAngleProfile(BorderTag.REFERENCE_POINT), false);
 					
 //					nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).fastFourierTransform();
 				}
