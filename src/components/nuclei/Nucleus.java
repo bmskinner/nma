@@ -742,6 +742,13 @@ public interface Nucleus {
 	public void alignPointsOnVertical(NucleusBorderPoint topPoint, NucleusBorderPoint bottomPoint);
 	
 	/**
+	 * Rotate the nucleus so that the given point is directly 
+	 * below the centre of mass
+	 * @param bottomPoint
+	 */
+	public void rotatePointToBottom(NucleusBorderPoint bottomPoint);
+	
+	/**
 	 * Rotate the nucleus by the given amount around the centre of mass
 	 * @param angle
 	 */

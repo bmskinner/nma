@@ -683,6 +683,9 @@ public class MorphologyChartFactory {
 				// Rotate vertical
 				NucleusBorderPoint[] points = verticalNucleus.getBorderPointsForVerticalAlignment();
 				verticalNucleus.alignPointsOnVertical(points[0], points[1] );
+			} else {
+				// If the verticals are not present, use the orientation point
+				verticalNucleus.rotatePointToBottom(verticalNucleus.getBorderTag(BorderTag.ORIENTATION_POINT));
 			}
 			cell = newCell;
 			
