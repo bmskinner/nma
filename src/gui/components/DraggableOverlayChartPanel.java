@@ -1,10 +1,28 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package gui.components;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.tabs.DetailPanel;
 import ij.IJ;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.MouseInfo;
@@ -17,13 +35,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.jfree.chart.ChartMouseEvent;
-import org.jfree.chart.ChartMouseListener;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.panel.CrosshairOverlay;
-import org.jfree.chart.panel.Overlay;
 import org.jfree.chart.plot.Crosshair;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
@@ -49,7 +64,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	private volatile boolean mouseIsDown = false;
 	
 	private boolean isChartNormalised = false;
-	
+		
 
 	public DraggableOverlayChartPanel(JFreeChart chart, SegmentedProfile profile, boolean normalised){
 		super(chart);
@@ -58,6 +73,18 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 		updateOverlays();
 		this.setRangeZoomable(false);
 		this.setDomainZoomable(false);		
+	}
+	
+	/**
+	 * Toggle wait cursor on element
+	 * @param b
+	 */
+	public void setAnalysing(boolean b){
+		if(b){
+			this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+		} else {
+			this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		}
 	}
 	
 	private void clearOverlays(){

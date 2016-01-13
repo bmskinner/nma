@@ -49,22 +49,6 @@ import analysis.AnalysisDataset;
  * @author bms41
  *
  */
-/**
- * @author bms41
- *
- */
-/**
- * @author bms41
- *
- */
-/**
- * @author bms41
- *
- */
-/**
- * @author bms41
- *
- */
 public abstract class DetailPanel extends JPanel implements TabPanel {
 	
 	private static final long serialVersionUID = 1L;

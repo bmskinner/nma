@@ -39,5 +39,13 @@ public interface TabPanel {
 	 * @return
 	 */
 	public AnalysisDataset activeDataset();
+	
+	
+	/**
+	 * Test if the current tab is in the process of updating
+	 * its display
+	 * @return
+	 */
+	public boolean isUpdating();
 
 }

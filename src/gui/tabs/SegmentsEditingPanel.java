@@ -137,6 +137,12 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 		}
 		
+		@Override
+		public void setAnalysing(boolean b){
+			super.setAnalysing(b);
+			chartPanel.setAnalysing(b);
+		}
+		
 		private JPanel makeButtonPanel(){
 			
 			JPanel panel = new JPanel(new FlowLayout()){
@@ -467,8 +473,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			if(event.type().contains("UpdateSegment")){
 
 				try{
-					
-					
+
 					SegmentsEditingPanel.this.setAnalysing(true);
 
 					String[] array = event.type().split("\\|");
