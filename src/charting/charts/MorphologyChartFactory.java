@@ -38,6 +38,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYLineAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
@@ -76,6 +77,7 @@ import components.generic.MeasurementScale;
 import components.generic.ProfileCollection;
 import components.generic.ProfileCollectionType;
 import components.nuclear.NucleusBorderPoint;
+import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
 public class MorphologyChartFactory {
@@ -198,23 +200,11 @@ public class MorphologyChartFactory {
 	/**
 	 * Create a profile chart with the median line only, segmented. Can have multiple datasets shown.
 	 * If a single dataset is shown, the chart is real length, otherwise normalised
-	 * @param list
-	 * @param normalised
-	 * @param alignment
-	 * @param borderTag
-	 * @param showMarkers
-	 * @return
+	 * @param options
 	 * @throws Exception
-	 */
-//	public static JFreeChart makeMultiSegmentedProfileChart(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag, boolean showMarkers) throws Exception {
-		
+	 */	
 	public static JFreeChart makeMultiSegmentedProfileChart(ProfileChartOptions options) throws Exception {
 		
-//		boolean normalised = options.isSingleDataset() ? false : true;
-//		int length = options.isSingleDataset() ? (int) options.firstDataset()
-//				.getCollection()
-//				.getMedianArrayLength()
-//				: 100;
 		
 		int length = 100;
 				
@@ -242,7 +232,6 @@ public class MorphologyChartFactory {
 			XYDataset ds = NucleusDatasetCreator.createSegmentedMedianProfileDataset(dataset, options.isNormalised(), options.getAlignment(), options.getTag());
 
 			plot.setDataset(datasetIndex, ds);
-//			IJ.log("Set dataset "+datasetIndex + " for "+dataset.getName());
 			
 			DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
 			renderer.setBaseShapesVisible(false);
@@ -267,6 +256,23 @@ public class MorphologyChartFactory {
 			}	
 
 			datasetIndex++;
+		}
+		
+		// Add segment name annotations
+		if(options.isSingleDataset()){
+			
+			for(NucleusBorderSegment seg :  options.firstDataset().getCollection()
+					.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getSegmentedProfile(options.getTag())
+					.getSegments()){
+
+				int midPoint = seg.getMidpointIndex();
+
+				double x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
+				XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
+				segmentAnnotation.setPaint(options.firstDataset().getSwatch().color(seg.getPosition()));
+				plot.addAnnotation(segmentAnnotation);
+			}
 		}
 		return chart;
 	}
