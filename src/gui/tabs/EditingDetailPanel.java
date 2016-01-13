@@ -86,7 +86,7 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-		programLogger.log(Level.INFO, "Editing panel heard signal: "+event.type());
+		programLogger.log(Level.FINER, "Editing panel heard signal: "+event.type());
 		if(event.sourceName().equals("CellDetailPanel") || event.sourceName().equals("SegmentsEditingPanel")){
 			fireSignalChangeEvent(event.type());			
 		} 

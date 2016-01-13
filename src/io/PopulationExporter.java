@@ -60,7 +60,7 @@ public class PopulationExporter extends AnalysisWorker {
 	
 	@Override
 	protected Boolean doInBackground() throws Exception {
-		publish(0);
+//		publish(0);
 		
 		if(useHDF5){
 			saveAnalysisDatasetToHDF5(getDataset());
@@ -68,7 +68,7 @@ public class PopulationExporter extends AnalysisWorker {
 		} else {
 
 			if(saveAnalysisDataset(getDataset(), saveFile)){
-				publish(1);
+//				publish(1);
 				log(Level.FINEST, "Save was sucessful");
 				return true;
 			} else{

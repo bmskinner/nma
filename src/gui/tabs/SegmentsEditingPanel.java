@@ -484,8 +484,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				}
 
 			}
-			
-			
+
 		}
 		
 		private void updateSegmentStartIndex(String segName, int index) throws Exception{

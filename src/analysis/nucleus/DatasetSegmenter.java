@@ -240,10 +240,13 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 		// get the empty profile collection from the new CellCollection
 		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
+		int previousLength = pc.length();
 
 		// make an aggregate from the nuclei. A new median profile must necessarily result.
 		// By default, the aggregates are created from the reference point
-		pc.createProfileAggregate(collection);
+		// Ensure that the aggregate created has the same length as the original, otherwise
+		// segments will not fit
+		pc.createProfileAggregate(collection, previousLength);
 
 		List<NucleusBorderSegment> segments = pc.getSegments(BorderTag.REFERENCE_POINT);
 
