@@ -48,15 +48,17 @@ import analysis.AnalysisDataset;
 public abstract class DetailPanel extends JPanel implements TabPanel {
 	
 	private static final long serialVersionUID = 1L;
-	private List<Object> listeners = new ArrayList<Object>();
-	private List<Object> datasetListeners = new ArrayList<Object>();
-	private List<Object> interfaceListeners = new ArrayList<Object>();
+	private final List<Object> listeners = new ArrayList<Object>();
+	private final List<Object> datasetListeners = new ArrayList<Object>();
+	private final List<Object> interfaceListeners = new ArrayList<Object>();
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+	
+	private final List<DetailPanel> subPanels = new  ArrayList<DetailPanel>();
 	
 	// The chart cache holds rendered charts for all selected options, until a change is made to a dataset
 	// The table cache does the same for table models
-	protected ChartCache chartCache = new ChartCache();
-	protected TableCache tableCache = new TableCache();
+	protected final ChartCache chartCache = new ChartCache();
+	protected final TableCache tableCache = new TableCache();
 	
 	private boolean isUpdating = false;
 	
@@ -64,6 +66,16 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	
 	public DetailPanel(Logger programLogger){
 		this.programLogger = programLogger;
+	}
+	
+	
+	/**
+	 * Add another detail panel as a sub panel to this.
+	 * This will pass on refreshes and UI updates
+	 * @param panel
+	 */
+	public void addSubPanel(DetailPanel panel){
+		subPanels.add(panel);
 	}
 	
 	/**
@@ -138,6 +150,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	public void refreshChartCache(){
 		programLogger.log(Level.FINEST, "Refreshing chart cache");
 		this.getChartCache().refresh();
+		for(DetailPanel panel : this.subPanels){
+			panel.refreshChartCache();
+		}
 	}
 	
 	/**
@@ -148,6 +163,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	public void refreshChartCache(List<AnalysisDataset> list){
 		programLogger.log(Level.FINEST, "Refreshing chart cache");
 		this.getChartCache().refresh(list);
+		for(DetailPanel panel : this.subPanels){
+			panel.refreshChartCache(list);
+		}
 	}
 	
 	public TableCache getTableCache(){
@@ -161,6 +179,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	public void refreshTableCache(){
 		programLogger.log(Level.FINEST, "Refreshing table cache");
 		this.getTableCache().refresh();
+		for(DetailPanel panel : this.subPanels){
+			panel.refreshTableCache();
+		}
 	}
 	
 	/**
@@ -171,6 +192,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	public void refreshTableCache(List<AnalysisDataset> list){
 		programLogger.log(Level.FINEST, "Refreshing chart cache");
 		this.getTableCache().refresh(list);
+		for(DetailPanel panel : this.subPanels){
+			panel.refreshTableCache(list);
+		}
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {

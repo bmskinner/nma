@@ -151,7 +151,8 @@ public class DatasetSegmenter extends AnalysisWorker {
     }
     
     private boolean runRefreshAnalysis() throws Exception{
-    	log(Level.FINE, "Refreshing morphology");
+    	log(Level.FINE, "Refreshing segmentation");
+    	this.setProgressTotal(getDataset().getCollection().getNucleusCount());
 		refresh(getDataset().getCollection());
 		log(Level.FINE, "Refresh complete");
 		return true;

@@ -75,10 +75,10 @@ public class RunSegmentationAction extends ProgressableAction {
 		try{
 			String message = null;
 			switch (this.mode) {
-			case COPY:  message = "Copying morphology";
+			case COPY:  message = "Copying segmentation";
 			break;
 
-			case REFRESH: message = "Refreshing morphology";
+			case REFRESH: message = "Refreshing segmentation";
 			break;
 
 			default: message = "Morphology analysis: "+dataset.getName();

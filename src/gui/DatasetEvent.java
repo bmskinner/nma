@@ -94,6 +94,13 @@ public class DatasetEvent extends EventObject {
 		return true;
 	}
 	
+	public boolean hasSecondaryDataset(){
+		if(secondaryDataset==null){
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * The name of the component that fired the event
 	 * @return
@@ -102,6 +109,11 @@ public class DatasetEvent extends EventObject {
 		return this.sourceName;
 	}
 	
+	
+	/**
+	 * Get the secondary dataset, or null if not set
+	 * @return
+	 */
 	public AnalysisDataset secondaryDataset(){
 		return secondaryDataset;
 	}
