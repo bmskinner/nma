@@ -169,19 +169,23 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 		}
 		
-		private void mergeSegments(String segName1, String segName2) throws Exception {
-			
+		/**
+		 * Check that the given segment pair does not cross a core border tag
+		 * @param seg1
+		 * @param seg2
+		 * @return
+		 * @throws Exception
+		 */
+		private boolean testSegmentsMergeable(NucleusBorderSegment seg1, NucleusBorderSegment seg2) throws Exception{
 			CellCollection collection = activeDataset().getCollection();
 			
 			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
 					.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
 			
-			// Get the segments to merge
-			NucleusBorderSegment seg1 = medianProfile.getSegment(segName1);
-			NucleusBorderSegment seg2 = medianProfile.getSegment(segName2);
 			
 			// check the boundaries of the segment - we do not want to merge across the BorderTags
 			boolean ok = true;
+//			BorderTag overlappingTag = null;
 			for(BorderTag tag : BorderTag.values(BorderTagType.CORE)){
 				
 				/*
@@ -197,13 +201,26 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 				if(seg2.getStartIndex()==seg2.getTotalLength()+difference || seg2.getStartIndex()==difference){
 					ok=false;
-//					IJ.log("Fail on "+tag+": OP: "+offsetForOp+" ; "+offset+" ;  difference "+difference+" ; seg2 start"+seg2.getStartIndex()); 
+//					overlappingTag = tag;
 				}
 
 
 			}
+			return ok;
+		}
+		
+		private void mergeSegments(String segName1, String segName2) throws Exception {
 			
-			if(ok){
+			CellCollection collection = activeDataset().getCollection();
+			
+			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
+			
+			// Get the segments to merge
+			NucleusBorderSegment seg1 = medianProfile.getSegment(segName1);
+			NucleusBorderSegment seg2 = medianProfile.getSegment(segName2);
+						
+			if(testSegmentsMergeable(seg1, seg2)){
 
 				// merge the two segments in the median - this is only a copy of the profile collection
 				medianProfile.mergeSegments(seg1, seg2);
@@ -238,7 +255,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				
 				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
 			} else {
-				JOptionPane.showMessageDialog(this, "Cannot merge segments across core border tags");
+				JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
 			}
 		}
 		
@@ -297,6 +314,12 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			// Get the segments to merge
 			NucleusBorderSegment seg = medianProfile.getSegment(segName);
+			
+			// Do not try to split segments that are a merge of other segments
+			if(seg.hasMergeSources()){
+				JOptionPane.showMessageDialog(this, "Cannot split this segment: it is a merge of two segments");
+				return false;
+			}
 			
 //			SpinnerNumberModel sModel 
 //			= new SpinnerNumberModel(seg.getMidpointIndex(), 

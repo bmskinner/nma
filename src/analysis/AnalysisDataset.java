@@ -83,10 +83,10 @@ public class AnalysisDataset implements Serializable {
 	//The ids of datasets merged to create this dataset. The IDs must be present in
 	// otherCollections
 	private List<UUID> mergeSources	  = new ArrayList<UUID>(0);
-	private String newickTree = null;
+	private String newickTree = null; // No longer used - see ClusterGroup.setTree() instead
 	
 	private File debugFile;
-	private transient DebugFileHandler fileHandler;// = new DebugFileHandler(debugFile);
+	private transient DebugFileHandler fileHandler;// = new DebugFileHandler(debugFile); // No longer used - handler is created new on get()
 	
 	private String version;
 	
@@ -150,13 +150,11 @@ public class AnalysisDataset implements Serializable {
 	 * @return
 	 */
 	public Handler getLogHandler() throws Exception {
-//		if(fileHandler == null){
 
-			fileHandler = new DebugFileHandler(this.getDebugFile());
-			fileHandler.setFormatter(new DebugFileFormatter());
+		Handler fileHandler = new DebugFileHandler(this.getDebugFile());
+		fileHandler.setFormatter(new DebugFileFormatter());
 
-//		}
-		return this.fileHandler;
+		return fileHandler;
 	}
 	
 	/**

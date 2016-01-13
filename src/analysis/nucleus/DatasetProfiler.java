@@ -18,6 +18,7 @@ import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.PigSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
+import utility.Constants;
 import utility.Utils;
 
 /**
@@ -130,54 +131,46 @@ public class DatasetProfiler extends AnalysisWorker {
 	
 	public static class TailFinder {
 
-		private static void findTailInRodentSpermMedian(CellCollection collection){
-			try{
-				// can't use regular tail detector, because it's based on NucleusBorderPoints
-				// get minima in curve, then find the lowest minima / minima furthest from both ends
-				collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
+		private static void findTailInRodentSpermMedian(CellCollection collection) throws Exception {
 
-				Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
+			// can't use regular tail detector, because it's based on NucleusBorderPoints
+			// get minima in curve, then find the lowest minima / minima furthest from both ends
+			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.REFERENCE_POINT, 0);
 
-				BooleanProfile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
+			Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
 
-				//		double minDiff = medianProfile.size();
-				double minAngle = 180;
-				int tailIndex = 0;
+			BooleanProfile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
 
-				int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
-				int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
+			//		double minDiff = medianProfile.size();
+			double minAngle = 180;
+			int tailIndex = 0;
 
-				for(int i = 0; i<minima.size();i++){
-					if( minima.get(i)==true){
-						int index = i;
+			int tipExclusionIndex1 = (int) (medianProfile.size() * 0.2);
+			int tipExclusionIndex2 = (int) (medianProfile.size() * 0.6);
 
-						double angle = medianProfile.get(index);
-						if(angle<minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
-							minAngle = angle;
-							tailIndex = index;
-						}
+			for(int i = 0; i<minima.size();i++){
+				if( minima.get(i)==true){
+					int index = i;
+
+					double angle = medianProfile.get(index);
+					if(angle<minAngle && index > tipExclusionIndex1 && index < tipExclusionIndex2){ // get the lowest point that is not near the tip
+						minAngle = angle;
+						tailIndex = index;
 					}
 				}
-
-				collection.getProfileCollection(ProfileCollectionType.REGULAR)
-					.addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
-				
-//				 /*
-//			     * Call to a StraightPointFinder that will find the straight part of the nucleus
-//			     * Use this to set the BorderTag.TopVertical and BottomVertical
-//			     */
-				assignTopAndBottomVerticalInMouse(collection);
-//			    int[] verticalPoints = medianProfile.getConsistentRegionBounds(180, 2, 10);
-//			    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
-//			    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.TOP_VERTICAL, verticalPoints[0]);
-//			    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
-//			    }
-
-			} catch(Exception e){
-				logError("Error finding tail", e);
 			}
+
+			collection.getProfileCollection(ProfileCollectionType.REGULAR)
+			.addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
+
 		}
 		
+		/**
+		 * Find the flat region of the nucleus under the hook in the median profile, and mark the ends of the region
+		 * with BorderTags TOP_VERTICAL and BOTTOM_VERTICAL
+		 * @param collection
+		 * @throws Exception
+		 */
 		public static void assignTopAndBottomVerticalInMouse(CellCollection collection) throws Exception{
 			 
 			Profile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50);
@@ -188,8 +181,12 @@ public class DatasetProfiler extends AnalysisWorker {
 		     */
 		    int[] verticalPoints = medianProfile.getConsistentRegionBounds(180, 2, 10);
 		    if(verticalPoints[0]!=-1 && verticalPoints[1]!=-1){
-		    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.TOP_VERTICAL, verticalPoints[0]);
-		    	collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
+		    	collection.getProfileCollection(ProfileCollectionType.REGULAR)
+		    		.addOffset(BorderTag.TOP_VERTICAL, verticalPoints[0]);
+		    	collection.getProfileCollection(ProfileCollectionType.REGULAR)
+		    	.addOffset(BorderTag.BOTTOM_VERTICAL, verticalPoints[1]);
+		    } else {
+		    	log(Level.WARNING, "Dataset "+collection.getName()+": Unable to assign vertical positions in median profile");
 		    }
 			
 		}
@@ -288,7 +285,6 @@ public class DatasetProfiler extends AnalysisWorker {
 		 * regular round nucleus, the tail is one of the points of longest
 		 *  diameter, and lowest angle
 		 * @param collection the nucleus collection
-		 * @param nucleusClass the class of nucleus
 		 */
 		public static void findTailIndexInMedianCurve(CellCollection collection) throws Exception {
 
@@ -299,6 +295,7 @@ public class DatasetProfiler extends AnalysisWorker {
 					break;
 				case RODENT_SPERM:
 					findTailInRodentSpermMedian(collection);
+					assignTopAndBottomVerticalInMouse(collection);
 					break;
 				default:
 					findTailInRoundMedian(collection);
@@ -360,11 +357,7 @@ public class DatasetProfiler extends AnalysisWorker {
 				nucleus.setBorderTag(BorderTag.REFERENCE_POINT, headIndex);
 				nucleus.splitNucleusToHeadAndHump();
 
-			}
-
-
-			// Set the top vertical and bottom vertical points
-			assignFlatRegionToMouseNuclei(collection);
+			}			
 
 		}
 		
@@ -376,6 +369,10 @@ public class DatasetProfiler extends AnalysisWorker {
 				 * TODO: This will not work: the segmnets and frankenprofiling has not yet been performed
 				 * Find the median profile segment with the flat region
 				 */
+			
+			/*
+			 * Franken profile method: segment proportionality
+			 */
 //				int verticalTopIndex = collection.getProfileCollection(ProfileCollectionType.REGULAR)
 //						.getOffset(BorderTag.TOP_VERTICAL); 
 //
@@ -401,71 +398,52 @@ public class DatasetProfiler extends AnalysisWorker {
 //				double bottomProportion = bottomSegFromRef.getIndexProportion(verticalBottomIndex);
 //			}
 			
-			// go through each nucleus
-			for(Nucleus n : collection.getNuclei()){
-				
-				
-				
-				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
-				
-				/*
-				 * Franken profile method: segment proportionality
-				 */
-				
-//				{
-//					/*
-//				     * Use segment proportionality rather than offsetting, so we benefit from the frankenmedian
-//				     * Find the appropriate segment in the nucleus
-//				     * Find the proportional index
-//				     * Add the border tag
-//				     * 
-//				     * Repeat for the flat bottom index
-//				     */
-//					int topNucleusIndex = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT)
-//							.getSegment(topSegName)
-//							.getProportionalIndex(topProportion);
-//					
-//					int bottomNucleusIndex = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT)
-//							.getSegment(bottomSegName)
-//							.getProportionalIndex(bottomProportion);
-//					
-//					nucleus.setBorderTag(BorderTag.TOP_VERTICAL,    topNucleusIndex);
-//					nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, bottomNucleusIndex);
-//					
-//
-//				}
-				
-				
-				/*
-				 * Regular profile method: offsetting
-				 */
-				
-				{
-					Profile verticalTopMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.TOP_VERTICAL, 50); // returns a median profile
-					int newIndexOne = nucleus.getAngleProfile().getSlidingWindowOffset(verticalTopMedian);
-					
-					Profile verticalBottomMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.BOTTOM_VERTICAL, 50); // returns a median profile
-					int newIndexTwo = nucleus.getAngleProfile().getSlidingWindowOffset(verticalBottomMedian);
-					
-					
-					XYPoint p0 = nucleus.getBorderPoint(newIndexOne);
-			    	XYPoint p1 = nucleus.getBorderPoint(newIndexTwo);
-			    	
-			    	if(p0.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT))> p1.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT)) ){
-			    		
-			    		// P0 is further from the reference point than p1
-			    		
-			    		nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexTwo);
-						nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexOne);
-			    		
-			    	} else {
-			    		
-			    		nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexOne);
-						nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexTwo);
-			    		
-			    	}
+			/*
+			 * Regular profile method: offsetting
+			 */
+			{
+				Profile verticalTopMedian;
+				Profile verticalBottomMedian;
+				try{
+					verticalTopMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+							.getProfile(BorderTag.TOP_VERTICAL, Constants.MEDIAN); 
+
+					verticalBottomMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR)
+							.getProfile(BorderTag.BOTTOM_VERTICAL, Constants.MEDIAN); 
+
+
+				} catch (IllegalArgumentException e){
+//					logError("Error assigning vertical in dataset "+collection.getName(), e);
+					// This occurs when the median profile did not have detectable verticals. Return quietly.
+					return;
 				}
-				
+				for(Nucleus n : collection.getNuclei()){
+
+					RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+
+
+					int newIndexOne = nucleus.getAngleProfile().getSlidingWindowOffset(verticalTopMedian);
+					int newIndexTwo = nucleus.getAngleProfile().getSlidingWindowOffset(verticalBottomMedian);
+
+					XYPoint p0 = nucleus.getBorderPoint(newIndexOne);
+					XYPoint p1 = nucleus.getBorderPoint(newIndexTwo);
+
+					if(p0.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT))> p1.getLengthTo(nucleus.getBorderTag(BorderTag.REFERENCE_POINT)) ){
+
+						// P0 is further from the reference point than p1
+
+						nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexTwo);
+						nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexOne);
+
+					} else {
+
+						nucleus.setBorderTag(BorderTag.TOP_VERTICAL, newIndexOne);
+						nucleus.setBorderTag(BorderTag.BOTTOM_VERTICAL, newIndexTwo);
+
+					}
+				}
+
+
 			}
 		}
 		
@@ -504,6 +482,7 @@ public class DatasetProfiler extends AnalysisWorker {
 					break;
 				case RODENT_SPERM:
 					calculateOffsetsInRodentSpermNuclei(collection);
+					assignFlatRegionToMouseNuclei(collection);
 					break;
 				default:
 					calculateOffsetsInRoundNuclei(collection);

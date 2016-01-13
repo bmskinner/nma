@@ -49,7 +49,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
     			fileLogger = null;
     		}
     	} else {
-    		fileLogger = programLogger;
+    		fileLogger = null;
     	}
 
     	programLogger.log(Level.FINEST, "Created worker");
@@ -95,7 +95,9 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
      * @param message the message to log
      */
     protected static void log(Level level, String message){
-    	fileLogger.log(level, message);
+    	if(fileLogger!=null){
+    		fileLogger.log(level, message);
+    	}
 		programLogger.log(level, message);
     }
     
@@ -106,7 +108,9 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
      * @param t the exception
      */
     protected static void logError(String message, Throwable t){
-    	fileLogger.log(Level.SEVERE, message, t);
+    	if(fileLogger!=null){
+    		fileLogger.log(Level.SEVERE, message, t);
+    	}
 		programLogger.log(Level.SEVERE, message, t);
     }
     
@@ -161,7 +165,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
 
     	   if(activeDataset!=null){
     		   
-    		   // if dataset is null, the fileLogger was set to be the programLogger
+    		   // if dataset is null, the fileLogger was set to be null
     		   // and we don't want to close that
     		   closeLogFileHandlers();
     		   

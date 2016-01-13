@@ -101,8 +101,14 @@ public class ProfileCollection implements Serializable {
 			throw new IllegalArgumentException("A profile key is required");
 		}
 		
-		int indexOffset = offsets.get(tag);
-		return getAggregate().getQuartile(quartile).offset(indexOffset);
+		if(this.hasBorderTag(tag)){
+
+			int indexOffset = offsets.get(tag);
+			return getAggregate().getQuartile(quartile).offset(indexOffset);
+			
+		} else {
+			throw new IllegalArgumentException("The requested tag is not present: "+tag.toString());
+		}
 	}
 	
 	
