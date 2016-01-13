@@ -49,6 +49,12 @@ public class InterfaceEvent extends EventObject {
 		this.sourceName = sourceName;
 	}
 	
+	public InterfaceEvent( InterfaceEvent event ) {
+		super( event.getSource() );
+		this.method = event.method();
+		this.sourceName = event.sourceName();
+	}
+	
 	/**
 	 * The name of the component that fired the event
 	 * @return

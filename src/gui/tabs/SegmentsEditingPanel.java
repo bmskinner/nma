@@ -47,7 +47,7 @@ import components.nuclei.Nucleus;
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends DetailPanel implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 	
-	private SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
+	private final SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
 	
 	public SegmentsEditingPanel(Logger programLogger) {
 		
@@ -73,7 +73,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		programLogger.log(Level.FINE, "Updating segments editing panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				if(getDatasets()!=null && !getDatasets().isEmpty()){
+				if(hasDatasets()){
 					segmentProfilePanel.update(getDatasets());
 					
 				}
@@ -84,27 +84,23 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
-		fireSignalChangeEvent(event.type());
+		fireSignalChangeEvent(event);
 	}
 	
 	@Override
 	public void interfaceEventReceived(InterfaceEvent event) {
-		fireInterfaceEvent(event.method());
+		fireInterfaceEvent(event);
+		
 		if(event.method().equals(InterfaceMethod.RECACHE_CHARTS)){
-			segmentProfilePanel.refreshChartCache();
-			segmentProfilePanel.refreshTableCache();
+			this.refreshChartCache();
+			this.refreshTableCache();
 		}
 		
 	}
 
 	@Override
 	public void datasetEventReceived(DatasetEvent event) {
-		
-		if(event.hasSecondaryDataset()){
-			fireDatasetEvent(event.method(), event.getDatasets(), event.secondaryDataset());
-		} else {
-			fireDatasetEvent(event.method(), event.getDatasets());
-		}
+		fireDatasetEvent(event);
 	}
 		
 	public class SegmentProfilePanel extends DetailPanel implements ActionListener, SignalChangeListener {
@@ -123,7 +119,6 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			JFreeChart profileChart = MorphologyChartFactory.makeEmptyProfileChart();
 			chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
-//			chartPanel= MorphologyChartFactory.makeProfileChartPanel(profileChart);
 			
 			chartPanel.setMinimumSize(minimumChartSize);
 			chartPanel.setPreferredSize(preferredChartSize);

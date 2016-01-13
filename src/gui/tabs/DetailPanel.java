@@ -49,12 +49,13 @@ import analysis.AnalysisDataset;
  * @author bms41
  *
  */
+@SuppressWarnings("serial")
 public abstract class DetailPanel extends JPanel implements TabPanel {
 	
-	private static final long serialVersionUID = 1L;
-	private final List<Object> listeners = new ArrayList<Object>();
-	private final List<Object> datasetListeners = new ArrayList<Object>();
-	private final List<Object> interfaceListeners = new ArrayList<Object>();
+	private final List<Object> listeners 			= new ArrayList<Object>();
+	private final List<Object> datasetListeners 	= new ArrayList<Object>();
+	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
+	
 	private List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 	
 	private final List<DetailPanel> subPanels = new  ArrayList<DetailPanel>();
@@ -67,9 +68,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	
 	volatile private boolean isUpdating = false;
 	
-	protected Logger programLogger;
+	protected final Logger programLogger;
 	
-	public DetailPanel(Logger programLogger){
+	public DetailPanel( final Logger programLogger){
 		this.programLogger = programLogger;
 	}
 	
@@ -277,6 +278,13 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
         }
     }
     
+    protected synchronized void fireSignalChangeEvent(SignalChangeEvent event) {
+    	Iterator<Object> iterator = datasetListeners.iterator();
+    	while( iterator.hasNext() ) {
+    		( (SignalChangeListener) iterator.next() ).signalChangeReceived( event );
+    	}
+    }
+    
     protected synchronized void fireDatasetEvent(DatasetMethod method, List<AnalysisDataset> list) {
     	
         DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
@@ -295,9 +303,24 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
     	}
     }
     
+    protected synchronized void fireDatasetEvent(DatasetEvent event) {
+    	Iterator<Object> iterator = datasetListeners.iterator();
+    	while( iterator.hasNext() ) {
+    		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
+    	}
+    }
+    
     protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
     	
     	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
+        Iterator<Object> iterator = interfaceListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
+        }
+    }
+    
+    protected synchronized void fireInterfaceEvent(InterfaceEvent event) {
+
         Iterator<Object> iterator = interfaceListeners.iterator();
         while( iterator.hasNext() ) {
             ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );

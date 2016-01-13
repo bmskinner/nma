@@ -59,6 +59,18 @@ public class DatasetEvent extends EventObject {
 	}
 	
 	/**
+	 * Construct from an existing event. Use to pass messages on.
+	 * @param event
+	 */
+	public DatasetEvent(DatasetEvent event){
+		super(event.getSource());
+		this.method = event.method();
+		this.sourceName = event.sourceName();
+		this.list = event.getDatasets();
+		this.secondaryDataset = event.secondaryDataset();
+	}
+	
+	/**
 	 * The message to carry
 	 * @return
 	 */
