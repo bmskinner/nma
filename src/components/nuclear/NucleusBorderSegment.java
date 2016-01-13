@@ -215,8 +215,18 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 
 	// when using this, use wrapIndex()!
 	public int getMidpointIndex(){
-		int midpoint = ((endIndex- startIndex)/2) + startIndex;
-		return midpoint;
+		if(this.wraps()){
+			
+			int midLength = this.length()/2 ;
+			if( midLength+startIndex < this.getTotalLength()){
+				return midLength+startIndex;
+			} else {
+				return endIndex - midLength;
+			}
+			
+		} else {
+			return ((endIndex- startIndex)/2) + startIndex;
+		}
 	}
 	
 	/**
