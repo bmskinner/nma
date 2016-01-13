@@ -469,32 +469,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 				try{
 
+					
 					SegmentsEditingPanel.this.setAnalysing(true);
 
 					String[] array = event.type().split("\\|");
 					String segName = array[1];
-					String index = array[2];
-					int indexValue = Integer.valueOf(index);
-
-					// Update the median profile
-					updateMedianProfileSegmentIndex(true , segName, indexValue); // DraggablePanel always uses seg start index
-					
-					
-					// Make a dialog - update the morphology of each nucleus?
-					Object[] options = { "Update nuclei" , "Do not update", };
-					int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
-
-							JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-							null, options, options[0]);
-					
-					if(result==0){ // OK
-						
-						// TODO: Update each nucleus profile
-						fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
-						
-					}
-					
+					int index = Integer.valueOf(array[2]);
+					updateSegmentStartIndex(segName, index);
 
 				} catch(Exception e){
 					programLogger.log(Level.SEVERE, "Error updating segment", e);
@@ -507,14 +488,46 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 		}
 		
+		private void updateSegmentStartIndex(String segName, int index) throws Exception{
+
+			// Update the median profile
+			updateMedianProfileSegmentIndex(true , segName, index); // DraggablePanel always uses seg start index
+			
+			
+			// Make a dialog - update the morphology of each nucleus?
+			Object[] options = { "Update nuclei" , "Do not update", };
+			int result = JOptionPane.showOptionDialog(null, "Update the nuclei to the new boundaries?", "Update nuclei",
+
+					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+
+					null, options, options[0]);
+			
+			if(result==0){ // OK
+				
+				// TODO: Update each nucleus profile
+				fireDatasetEvent(DatasetMethod.REFRESH_MORPHOLOGY, getDatasets());
+				
+			} else {
+				// Only run a panel update if the refresh was not called
+				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+				update(getDatasets());
+			}
+			
+			
+		}
+		
 		private void updateMedianProfileSegmentIndex(boolean start, String segName, int index) throws Exception {
 			
+			programLogger.log(Level.FINE, "Updating median profile segment: "+segName+" to index "+index);
 			// Get the median profile from the reference point
 			
 			SegmentedProfile oldProfile = activeDataset()
 					.getCollection()
 					.getProfileCollection(ProfileCollectionType.REGULAR)
 					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+			
+			programLogger.log(Level.FINEST, "Old profile: "+oldProfile.toString());
+			
 
 
 			NucleusBorderSegment seg = oldProfile.getSegment(segName);
@@ -525,15 +538,21 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			 // Move the appropriate segment endpoint
 			if(oldProfile.update(seg, newStart, newEnd)){
 				
+				programLogger.log(Level.FINEST, "Segment position update succeeded");
 				// Replace the old segments in the median
+				programLogger.log(Level.FINEST, "Updated profile: "+oldProfile.toString());
+
+				programLogger.log(Level.FINEST, "Adding segments to profile collection");
 				
 				activeDataset()
 				.getCollection()
 				.getProfileCollection(ProfileCollectionType.REGULAR)
 				.addSegments(BorderTag.REFERENCE_POINT, oldProfile.getSegments());
 				
-				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-				update(getDatasets());
+				programLogger.log(Level.FINEST, "Segments added, refresh the charts");
+				
+//				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//				update(getDatasets());
 				
 			} else {
 				programLogger.log(Level.WARNING, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());

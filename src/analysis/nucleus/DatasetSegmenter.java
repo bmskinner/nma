@@ -109,13 +109,13 @@ public class DatasetSegmenter extends AnalysisWorker {
 			
 		} catch(Exception e){
 			
-			logError("Error in morphology analysis", e);
+			logError("Error in segmentation analysis", e);
 			
-			log(Level.SEVERE, "Collection keys:");
-			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
-			
-			log(Level.SEVERE, "FrankenCollection keys:");
-			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
+//			log(Level.SEVERE, "Collection keys:");
+//			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
+//			
+//			log(Level.SEVERE, "FrankenCollection keys:");
+//			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
 			return false;
 		} 
 
@@ -172,64 +172,55 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * @param collection the collection of nuclei
 	 * @param sourceCollection the collection with segments to copy
 	 */
-	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection){
+	public boolean reapplyProfiles(CellCollection collection, CellCollection sourceCollection) throws Exception {
 		
 		log(Level.FINE, "Applying existing segmentation profile to population...");
-		
-		try {
-			BorderTag referencePoint   = BorderTag.REFERENCE_POINT;
-			
-			// use the same array length as the source collection to avoid segment slippage
-			int profileLength = sourceCollection.getProfileCollection(ProfileCollectionType.REGULAR)
-					.getProfile(referencePoint, 50) // Median of profile collection 
-					.size(); 
-			
-			// get the empty profile collection from the new CellCollection
-			// TODO: if the target collection is not new, ie we are copying onto
-			// an existing segmenation pattern, then this profile collection will have
-			// offsets
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
-			
-			// Create an aggregate from the nuclei in the collection. 
-			// A new median profile must necessarily result.
-			// By default, the aggregates are created from the reference point
-			pc.createProfileAggregate(collection, profileLength);
-			
-			// copy the offset keys from the source collection
-			//TODO:
-			// If this is applied to a collection from an entirely difference source,
-			// rather than a child, then the offsets will be completely wrong. In that
-			// instance, we should probably keep the existing offset positions for head
-			// and tail
-			ProfileCollection sc = sourceCollection.getProfileCollection(ProfileCollectionType.REGULAR);
-			
-			for(BorderTag offsetKey : sc.getOffsetKeys()){
-				int offset = sc.getOffset(offsetKey);
-				pc.addOffset(offsetKey, offset);
-				log(Level.FINER, "Setting "+offsetKey+" to "+offset);
-			}
-			
-			
-			// What happens when the array length is greater in the source collection? 
-			// Segments are added that no longer have an index
-			// We need to scale the segments to the array length of the new collection
-			pc.addSegments(referencePoint, sc.getSegments(referencePoint));
 
-			
-			// At this point the collection has only a regular profile collection.
-			// No Frankenprofile has been copied.
+		BorderTag referencePoint   = BorderTag.REFERENCE_POINT;
 
-			reviseSegments(collection, referencePoint);	
-			
-			// Update the ProfileCollection length to fit the new dataset
-//			pc.createProfileAggregate(collection);
+		// use the same array length as the source collection to avoid segment slippage
+		int profileLength = sourceCollection.getProfileCollection(ProfileCollectionType.REGULAR)
+				.getProfile(referencePoint, 50) // Median of profile collection 
+				.size(); 
 
+		// get the empty profile collection from the new CellCollection
+		// TODO: if the target collection is not new, ie we are copying onto
+		// an existing segmenation pattern, then this profile collection will have
+		// offsets
+		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
+		// Create an aggregate from the nuclei in the collection. 
+		// A new median profile must necessarily result.
+		// By default, the aggregates are created from the reference point
+		pc.createProfileAggregate(collection, profileLength);
 
-		} catch (Exception e) {
-			logError("Error reapplying profiles", e);
-			return false;
+		// copy the offset keys from the source collection
+		//TODO:
+		// If this is applied to a collection from an entirely difference source,
+		// rather than a child, then the offsets will be completely wrong. In that
+		// instance, we should probably keep the existing offset positions for head
+		// and tail
+		ProfileCollection sc = sourceCollection.getProfileCollection(ProfileCollectionType.REGULAR);
+
+		for(BorderTag offsetKey : sc.getOffsetKeys()){
+			int offset = sc.getOffset(offsetKey);
+			pc.addOffset(offsetKey, offset);
+			log(Level.FINER, "Setting "+offsetKey+" to "+offset);
 		}
+
+
+		// What happens when the array length is greater in the source collection? 
+		// Segments are added that no longer have an index
+		// We need to scale the segments to the array length of the new collection
+		pc.addSegments(referencePoint, sc.getSegments(referencePoint));
+
+
+		// At this point the collection has only a regular profile collection.
+		// No Frankenprofile has been copied.
+
+		reviseSegments(collection, referencePoint);	
+
+
 		log(Level.FINE, "Re-profiling complete");
 		return true;
 	}
@@ -241,75 +232,70 @@ public class DatasetSegmenter extends AnalysisWorker {
 	 * @param collection
 	 * @return
 	 */
-	public boolean refresh(CellCollection collection){
+	public boolean refresh(CellCollection collection) throws Exception {
 
 		log(Level.FINE, "Refreshing mophology");
-		try{
-			
-			BorderTag pointType = BorderTag.REFERENCE_POINT;
-			
-			// get the empty profile collection from the new CellCollection
-			ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
-			// make an aggregate from the nuclei. A new median profile must necessarily result.
-			// By default, the aggregates are created from the reference point
-			pc.createProfileAggregate(collection);
-			
-			List<NucleusBorderSegment> segments = pc.getSegments(BorderTag.REFERENCE_POINT);
+		BorderTag pointType = BorderTag.REFERENCE_POINT;
 
-			// make a new profile collection to hold the frankendata
-			ProfileCollection frankenCollection = new ProfileCollection();
+		// get the empty profile collection from the new CellCollection
+		ProfileCollection pc = collection.getProfileCollection(ProfileCollectionType.REGULAR);
 
-			// add the correct offset keys
-			// These are the same as the profile collection keys, and have
-			// the same positions (since a franken profile is based on the median)
-			// The reference point is at index 0
-			for(BorderTag key : pc.getOffsetKeys()){
-				frankenCollection.addOffset(key, pc.getOffset(key));
-			}
+		// make an aggregate from the nuclei. A new median profile must necessarily result.
+		// By default, the aggregates are created from the reference point
+		pc.createProfileAggregate(collection);
 
+		List<NucleusBorderSegment> segments = pc.getSegments(BorderTag.REFERENCE_POINT);
 
-			// copy the segments from the profile collection
-			frankenCollection.addSegments(pointType, segments);
+		// make a new profile collection to hold the frankendata
+		ProfileCollection frankenCollection = new ProfileCollection();
 
-			// At this point, the FrankenCollection is identical to the ProfileCollection
-			// We need to add the individual recombined frankenProfiles
-
-
-			// make a segment fitter to do the recombination of profiles
-			SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType));
-			List<Profile> frankenProfiles = new ArrayList<Profile>(0);
-
-			int count = 0;
-			for(Nucleus n : collection.getNuclei()){ 
-				// recombine the segments at the lengths of the median profile segments
-				Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
-				frankenProfiles.add(recombinedProfile);
-				count++;
-				publish(count);
-				
-			}
-
-			// add all the nucleus frankenprofiles to the frankencollection
-			frankenCollection.addNucleusProfiles(frankenProfiles);
-
-			// update the profile aggregate
-			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
-			log(Level.FINER, "FrankenProfile generated");
-
-			// attach the frankencollection to the cellcollection
-			collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
-			
-			
-			
-			// Ensure each nucleus gets the new profile pattern
-			assignSegments(collection);
-			reviseSegments(collection, pointType);
-
-		} catch (Exception e) {
-			logError("Error reapplying profiles", e);
-			return false;
+		// add the correct offset keys
+		// These are the same as the profile collection keys, and have
+		// the same positions (since a franken profile is based on the median)
+		// The reference point is at index 0
+		for(BorderTag key : pc.getOffsetKeys()){
+			frankenCollection.addOffset(key, pc.getOffset(key));
 		}
+
+		// At this point, the FrankenCollection is identical to the ProfileCollection
+		// We need to add the individual recombined frankenProfiles
+
+
+		// make a segment fitter to do the recombination of profiles
+		SegmentFitter fitter = new SegmentFitter(pc.getSegmentedProfile(pointType));
+		List<Profile> frankenProfiles = new ArrayList<Profile>(0);
+
+		int count = 0;
+		for(Nucleus n : collection.getNuclei()){ 
+			// recombine the segments at the lengths of the median profile segments
+			Profile recombinedProfile = fitter.recombine(n, BorderTag.REFERENCE_POINT);
+			frankenProfiles.add(recombinedProfile);
+			count++;
+			publish(count);
+
+		}
+
+		// add all the nucleus frankenprofiles to the frankencollection
+		frankenCollection.addNucleusProfiles(frankenProfiles);
+
+		// update the profile aggregate
+		frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
+		log(Level.FINER, "FrankenProfile generated");
+
+		// copy the segments from the profile collection
+		log(Level.FINER, "Copying profile collection segments to frankenCollection");
+		frankenCollection.addSegments(pointType, segments);
+		
+		// attach the frankencollection to the cellcollection
+		collection.setProfileCollection(ProfileCollectionType.FRANKEN, frankenCollection);
+
+
+
+		// Ensure each nucleus gets the new profile pattern
+		assignSegments(collection);
+		reviseSegments(collection, pointType);
+			
 		return true;
 	}
 		
@@ -480,13 +466,6 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 			
 			/*
-			 * At this point, the frankencollection is indexed on the reference point.
-			 * This is because the reference point is used to generate the profile collection.
-			 * Copy the segments from the profile collection, starting from the reference point
-			 */
-			frankenCollection.addSegments(pointType, segments);
-			
-			/*
 				At this point, the FrankenCollection is identical to the ProfileCollection, 
 				but has no ProfileAggregate.
 				We need to add the individual recombined frankenProfiles to the internal profile list,
@@ -522,6 +501,13 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 			// update the profile aggregate
 			frankenCollection.createProfileAggregateFromInternalProfiles((int)pc.getAggregate().length());
+			
+			/*
+			 * At this point, the frankencollection is indexed on the reference point.
+			 * This is because the reference point is used to generate the profile collection.
+			 * Copy the segments from the profile collection, starting from the reference point
+			 */
+			frankenCollection.addSegments(pointType, segments);
 
 			double firstPoint = frankenCollection.getSegmentedProfile(BorderTag.REFERENCE_POINT).get(0);
 			log(Level.FINER, "FrankenProfile generated: angle at index 0 for "+BorderTag.REFERENCE_POINT+" is "+firstPoint);

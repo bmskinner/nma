@@ -36,7 +36,7 @@ public class ProfileCollection implements Serializable {
 	
 	private static final int ZERO_INDEX = 0;
 	
-	private ProfileAggregate 	aggregate;
+	private ProfileAggregate 	aggregate = null;
 	
 	private Map<BorderTag, Integer> offsets 		= new HashMap<BorderTag, Integer>();
 	private List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
@@ -128,6 +128,31 @@ public class ProfileCollection implements Serializable {
 	 */
 	public ProfileAggregate getAggregate(){
 		return aggregate;
+	}
+	
+	/**
+	 * Test if the profile aggregate has been created
+	 * @return
+	 */
+	public boolean hasAggregate(){
+		if (aggregate==null){
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
+	/**
+	 * Get the length of the profile aggregate (this is the
+	 * integer value of the median CellCollection array length)
+	 * @return Length, or zero if the aggregate is not yet created
+	 */
+	public int length(){
+		if(this.hasAggregate()){
+			return aggregate.length();
+		} else {
+			return 0;
+		}
 	}
 	
 	/**
@@ -261,8 +286,17 @@ public class ProfileCollection implements Serializable {
 	 */
 	public void addSegments(List<NucleusBorderSegment> n){
 		if(n==null || n.isEmpty()){
-			throw new IllegalArgumentException("String or segment list is null or empty");
+			throw new NullPointerException("String or segment list is null or empty");
 		}
+		
+		if(this.length() != n.get(0).getTotalLength() ){
+			throw new IllegalArgumentException("Segments total length ("
+							+n.get(0).getTotalLength()
+							+") does not fit aggregate ("+
+							+this.length()
+							+")");
+		}
+		
 		this.segments = n;
 	}
 	
@@ -275,7 +309,15 @@ public class ProfileCollection implements Serializable {
 	 */
 	public void addSegments(BorderTag tag, List<NucleusBorderSegment> n) throws Exception {
 		if(n==null || n.isEmpty()){
-			throw new IllegalArgumentException("String or segment list is null or empty");
+			throw new NullPointerException("String or segment list is null or empty");
+		}
+		
+		if(this.length() != n.get(0).getTotalLength() ){
+			throw new IllegalArgumentException("Segments total length ("
+							+n.get(0).getTotalLength()
+							+") does not fit aggregate ("+
+							+this.length()
+							+")");
 		}
 		
 		/*

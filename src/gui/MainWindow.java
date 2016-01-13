@@ -426,7 +426,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 				Level[] nameArray = { Level.INFO, Level.FINE, Level.FINEST };
 				Level option = (Level) JOptionPane.showInputDialog(null, 
-						"Choose swatch",
+						"Choose logging level",
 						"Swatch",
 						JOptionPane.QUESTION_MESSAGE, 
 						null, 
