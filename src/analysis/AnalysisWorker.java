@@ -29,11 +29,11 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
 	
 	protected static Logger programLogger; // log to the program LogPanel
 	protected static Logger fileLogger; // log to the active dataset log file
-	protected static Level FILE_DEBUG_LEVEL = Level.ALL;
+	protected static final Level FILE_DEBUG_LEVEL = Level.ALL;
     
-    private AnalysisDataset activeDataset;
+    private final AnalysisDataset activeDataset;
     
-    public AnalysisWorker(AnalysisDataset dataset, Logger programLogger){
+    public AnalysisWorker(final AnalysisDataset dataset, final Logger programLogger){
     	this.activeDataset = dataset;
     	AnalysisWorker.programLogger = programLogger;
     	if(dataset!=null){
@@ -145,9 +145,15 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer>{
 
        } finally{
     	   programLogger.log(Level.FINEST, "Closing log file handlers");
-    	   for(Handler h : fileLogger.getHandlers()){
-    		   h.close();
-    		   fileLogger.removeHandler(h);
+    	   
+    	   if(activeDataset!=null){
+    		   
+    		   // if dataset is null, the fileLogger was set to be the programLogger
+    		   // and we don't want to close that
+    		   for(Handler h : fileLogger.getHandlers()){
+    			   h.close();
+    			   fileLogger.removeHandler(h);
+    		   }
     	   }
        }
 

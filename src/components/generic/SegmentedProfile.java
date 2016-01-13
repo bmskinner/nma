@@ -48,22 +48,22 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param p the profile
 	 * @param segments the list of segments to use
 	 */
-	public SegmentedProfile(Profile p, List<NucleusBorderSegment> segments){		
+	public SegmentedProfile(Profile p, List<NucleusBorderSegment> segments) throws Exception{		
 		super(p);
 		
 		if(segments==null || segments.isEmpty()){
 			throw new IllegalArgumentException("Segment list is null or empty in profile contructor");
 		}
 		if(p.size() != segments.get(0).getTotalLength() ){
-			throw new IllegalArgumentException("Segments do not fit profile");
+			throw new IllegalArgumentException("Segments total length ("
+							+segments.get(0).getTotalLength()
+							+") does not fit profile ("+
+							+p.size()
+							+")");
 		}
 		
-		try {
-			NucleusBorderSegment.linkSegments(segments);
-		} catch (Exception e) {
-			IJ.log("Error linking segments");
-		}
-		
+		NucleusBorderSegment.linkSegments(segments);
+
 		this.segments = segments;
 	}
 	
@@ -81,52 +81,49 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * that span the entire profile, half each
 	 * @param profile
 	 */
-	public SegmentedProfile(Profile profile){
+	public SegmentedProfile(Profile profile) throws Exception {
 		super(profile);
 		int midpoint = profile.size()/2;
 		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, profile.size());
-//		segment1.setName("Seg_1");
+
 		segment1.setPosition(0);
 		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, profile.size());
-//		segment2.setName("Seg_2");
+
 		segment2.setPosition(1);
 		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 		segments.add(segment1);
 		segments.add(segment2);
 		
-		try {
-			NucleusBorderSegment.linkSegments(segments);
-		} catch (Exception e) {
-			IJ.log("Error linking segments");
-		}
-		
+		NucleusBorderSegment.linkSegments(segments);
+
 		this.segments = segments;
 	}
 	
 	/**
 	 * Construct from an array of values
 	 * @param values
+	 * @throws Exception 
 	 */
-	public SegmentedProfile(double[] values){
-		super(values);
-		int midpoint = values.length/2;
-		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, values.length);
-		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, values.length);
-		segment1.setPosition(0);
-		segment2.setPosition(1);
-//		segment1.setName("Seg_1");
-//		segment2.setName("Seg_2");
-		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
-		segments.add(segment1);
-		segments.add(segment2);
-		
-		try {
-			NucleusBorderSegment.linkSegments(segments);
-		} catch (Exception e) {
-			IJ.log("Error linking segments");
-		}
-		
-		this.segments = segments;
+	public SegmentedProfile(double[] values) throws Exception{
+		this( new Profile(values));
+//		super(values);
+//		int midpoint = values.length/2;
+//		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, values.length);
+//		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, values.length);
+//		segment1.setPosition(0);
+//		segment2.setPosition(1);
+//
+//		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
+//		segments.add(segment1);
+//		segments.add(segment2);
+//		
+//		try {
+//			NucleusBorderSegment.linkSegments(segments);
+//		} catch (Exception e) {
+//			IJ.log("Error linking segments");
+//		}
+//		
+//		this.segments = segments;
 	}
 	
 	/**
