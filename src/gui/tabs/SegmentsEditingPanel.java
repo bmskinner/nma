@@ -129,6 +129,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			buttonsPanel = makeButtonPanel();
 			this.add(buttonsPanel, BorderLayout.NORTH);
+			setButtonsEnabled(false);
 			
 		}
 		
@@ -149,12 +150,12 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					}
 				}
 			};
-			mergeButton = new JButton("Merge segments");
+			mergeButton = new JButton("Hide segment boundary");
 			mergeButton.addActionListener(this);
 			
 			panel.add(mergeButton);
 			
-			unmergeButton = new JButton("Unmerge segments");
+			unmergeButton = new JButton("Unhide segment boundary");
 			unmergeButton.addActionListener(this);
 			
 			panel.add(unmergeButton);
@@ -320,26 +321,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				JOptionPane.showMessageDialog(this, "Cannot split this segment: it is a merge of two segments");
 				return false;
 			}
-			
-//			SpinnerNumberModel sModel 
-//			= new SpinnerNumberModel(seg.getMidpointIndex(), 
-//					0, 
-//					medianProfile.size(),
-//					1);
-//			JSpinner spinner = new JSpinner(sModel);
-//
-//			int option = JOptionPane.showOptionDialog(null, 
-//					spinner, 
-//					"Choose the split index", 
-//					JOptionPane.OK_CANCEL_OPTION, 
-//					JOptionPane.QUESTION_MESSAGE, null, null, null);
-//			if (option == JOptionPane.CANCEL_OPTION) {
-//				
-//				// user hit cancel
-//				
-//				
-//			} else if (option == JOptionPane.OK_OPTION)	{
-				
+							
 				try{
 
 					int index = seg.getMidpointIndex();
@@ -408,6 +390,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 						if(! hasDatasets()){
 
 							chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
+							setButtonsEnabled(false);
 
 						} else {
 							
@@ -438,15 +421,13 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 						
 					} catch (Exception e) {
-						programLogger.log(Level.SEVERE, "Error in plotting segment profile", e);
+						programLogger.log(Level.SEVERE, "Error plotting segment profile", e);
 						chartPanel.setChart(MorphologyChartFactory.makeEmptyProfileChart());
-						unmergeButton.setEnabled(false);
-						mergeButton.setEnabled(false);
-						splitButton.setEnabled(false);
-					} 
-
-
-					setUpdating(false);
+						setButtonsEnabled(false);
+					}  finally {
+						
+						setUpdating(false);
+					}
 				}
 			});
 		}
@@ -459,7 +440,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		private void configureButtons(ProfileChartOptions options) throws Exception {
 			if(options.isSingleDataset()){
 				
-				buttonsPanel.setEnabled(true);
+				setButtonsEnabled(true);
 				CellCollection collection = options.firstDataset().getCollection();
 				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
 						.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
@@ -487,8 +468,14 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				}
 				
 			} else { // multiple collections
-				buttonsPanel.setEnabled(false);
+				setButtonsEnabled(false);
 			}
+		}
+		
+		public void setButtonsEnabled(boolean b){
+			unmergeButton.setEnabled(b);
+			mergeButton.setEnabled(b);
+			splitButton.setEnabled(b);
 		}
 
 		@Override

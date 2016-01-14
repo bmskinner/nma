@@ -164,6 +164,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			JScrollPane listPanel = new JScrollPane(pointList);
 			this.add(listPanel, BorderLayout.WEST);
 			pointList.addListSelectionListener(new ModalitySelectionListener());
+			pointList.setEnabled(false);
 			
 		}
 		
@@ -200,7 +201,8 @@ public class NucleusProfilesPanel extends DetailPanel {
 			try{
 				if( list!=null && !list.isEmpty()){
 
-					profileCollectionTypeSettingsPanel.setEnabled(true);;
+					profileCollectionTypeSettingsPanel.setEnabled(true);
+					pointList.setEnabled(true);
 
 					ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
 
@@ -230,6 +232,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 					updateModalityProfileChart(list);
 				} else {
 					profileCollectionTypeSettingsPanel.setEnabled(false);
+					pointList.setEnabled(false);
 				}
 
 			} catch(Exception e){

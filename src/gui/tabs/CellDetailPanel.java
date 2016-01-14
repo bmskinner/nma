@@ -417,6 +417,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 			});
 			
+			tree.setEnabled(false);
 			JScrollPane scrollPane = new JScrollPane(tree);
 			this.add(scrollPane, BorderLayout.CENTER);
 		}
@@ -432,7 +433,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 			if(dataset!=null){
 				createNodes(root, dataset);
-			} 
+				tree.setEnabled(true);
+			} else {
+				TreeModel model = new DefaultTreeModel(root);
+				tree.setModel(model);
+				tree.setEnabled(false);
+			}
 			TreeModel model = new DefaultTreeModel(root);
 			tree.setModel(model);
 		}
@@ -608,6 +614,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			
 			rotationPanel = new RotationSelectionSettingsPanel();
+			rotationPanel.setEnabled(false);
 			rotationPanel.addActionListener(this);
 			this.add(rotationPanel, BorderLayout.NORTH);
 			
@@ -711,18 +718,23 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			try{
 				JFreeChart chart;
 				if(cell==null){
+					rotationPanel.setEnabled(false);
 					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				} else {
+					rotationPanel.setEnabled(true);
 					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode);
 				}
 				panel.setChart(chart);
+				
 				if(cell!=null){
 					panel.restoreAutoBounds();
 				}
+				
 			} catch(Exception e){
 				programLogger.log(Level.SEVERE, "Error updating outline chart", e);
 				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				panel.setChart(chart);
+				rotationPanel.setEnabled(false);
 			}
 		}
 
