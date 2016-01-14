@@ -117,6 +117,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 				
 			this.add(tablesPanel, BorderLayout.CENTER);
 			statusPanel = makeStatusPanel();
+			setButtonsEnabled(false);
 			this.add(statusPanel, BorderLayout.NORTH);
 			
 //			this.add(viewer, BorderLayout.SOUTH);
@@ -124,6 +125,12 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
 		}
 				
+		
+		private void setButtonsEnabled(boolean b){
+			clusterButton.setEnabled(b);
+			buildTreeButton.setEnabled(b);
+			saveClassifierButton.setEnabled(false); // not yet enabled
+		}
 		/**
 		 * This panel shows the status of the dataset, 
 		 * and holds the clustering button
@@ -185,6 +192,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
 		public void update(List<AnalysisDataset> list){
 			setButtonsVisible(true);
+			setButtonsEnabled(true);
 //			treeViewer.setVisible(false);
 			
 			TableModel optionsModel = NucleusTableDatasetCreator.createClusterOptionsTable(list);
@@ -192,9 +200,11 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			
 			if(list.isEmpty() || list==null){
 				statusLabel.setText("No datasets selected");
+				setButtonsEnabled(false);
 			} else {
 
 				if(list.size()==1){
+					setButtonsEnabled(true);
 					AnalysisDataset dataset = list.get(0);
 
 					if(!dataset.hasClusters()){
@@ -207,6 +217,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 				} else { // more than one dataset selected
 					statusLabel.setText("Multiple datasets selected");
 					setButtonsVisible(false);
+					setButtonsEnabled(false);
 				}
 			}
 		}

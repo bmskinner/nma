@@ -91,10 +91,9 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		programLogger.log(Level.FINE, "Updating segments editing panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				if(hasDatasets()){
-					segmentProfilePanel.update(getDatasets());
-					
-				}
+				
+				segmentProfilePanel.update(getDatasets());
+
 				setUpdating(false);
 			}
 		});

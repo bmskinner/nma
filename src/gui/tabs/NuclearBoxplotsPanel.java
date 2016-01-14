@@ -137,6 +137,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 			this.add(scrollPane, BorderLayout.CENTER);
 			
 			measurementUnitSettingsPanel.addActionListener(this);
+			measurementUnitSettingsPanel.setEnabled(false);
 			this.add(measurementUnitSettingsPanel, BorderLayout.NORTH);
 			
 		}
@@ -148,6 +149,12 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		public void update(List<AnalysisDataset> list){
 
 			try {
+				
+				if(hasDatasets()){
+					measurementUnitSettingsPanel.setEnabled(true);
+				} else {
+					measurementUnitSettingsPanel.setEnabled(false);
+				}
 				
 				MeasurementScale scale  = this.measurementUnitSettingsPanel.getSelected();
 
@@ -216,7 +223,13 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 
 		@Override
 		public void updateDetail() {
-//			HistogramsPanel.this.getDatasets() = list;
+			
+			
+			if(hasDatasets()){
+				this.setEnabled(true);
+			} else {
+				this.setEnabled(false);
+			}
 
 			MeasurementScale scale  = HistogramsPanel.this.measurementUnitSettingsPanel.getSelected();
 			boolean useDensity = HistogramsPanel.this.useDensityPanel.isSelected();

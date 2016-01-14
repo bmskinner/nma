@@ -67,6 +67,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
 			
 			headerPanel.add(useDensityPanel);
+
 			useDensityPanel.addActionListener(this);
 			
 			headerPanel.add(measurementUnitSettingsPanel);
@@ -78,10 +79,17 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 			// add the scroll pane to the tab
 			scrollPane  = new JScrollPane(mainPanel);
 			this.add(scrollPane, BorderLayout.CENTER);
+			
+			this.setEnabled(false);
 		} catch(Exception e){
 			programLogger.log(Level.SEVERE, "Error creating panel", e);
 		}
 
+	}
+	
+	public void setEnabled(boolean b){
+		useDensityPanel.setEnabled(b);
+		measurementUnitSettingsPanel.setEnabled(b);
 	}
 	
 	 @Override

@@ -171,7 +171,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		if(this.isUpdating()){
 			programLogger.log(Level.FINEST, "Panel is already updating");
 		} else {
-			this.list = list;
+			if(list!=null){
+				this.list = list;
+			} else {
+				this.list = new ArrayList<AnalysisDataset>();
+			}
 			setUpdating(true);
 			updateDetail();
 		}

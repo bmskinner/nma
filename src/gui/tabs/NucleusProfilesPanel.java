@@ -169,31 +169,41 @@ public class NucleusProfilesPanel extends DetailPanel {
 		}
 		
 		private ChartPanel createPositionChartPanel(){
-			JFreeChart chart = ChartFactory.createXYLineChart(null,
-					"Probability", "Angle", null);
-			XYPlot plot = chart.getXYPlot();
-			plot.setBackgroundPaint(Color.WHITE);
-			plot.getDomainAxis().setRange(0,360);
-			plot.addDomainMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2f)));
 			
+			JFreeChart chart = createPositionChart();
 			ChartPanel chartPanel = new ChartPanel(chart);
 			chartPanel.setMinimumDrawWidth( 0 );
 			chartPanel.setMinimumDrawHeight( 0 );
 			return chartPanel;
 		}
 		
+		private JFreeChart createPositionChart(){
+			JFreeChart chart = ChartFactory.createXYLineChart(null,
+					"Probability", "Angle", null);
+			XYPlot plot = chart.getXYPlot();
+			plot.setBackgroundPaint(Color.WHITE);
+			plot.getDomainAxis().setRange(0,360);
+			plot.addDomainMarker(new ValueMarker(180, Color.BLACK, new BasicStroke(2f)));
+			return chart;
+		}
+		
 		private ChartPanel createModalityProfileChartPanel(){
+			
+			JFreeChart chart = createModalityProfileChart();
+			ChartPanel chartPanel = new ChartPanel(chart);
+			chartPanel.setMinimumDrawWidth( 0 );
+			chartPanel.setMinimumDrawHeight( 0 );
+			return chartPanel;
+		}
+		
+		private JFreeChart createModalityProfileChart(){
 			JFreeChart chart = ChartFactory.createXYLineChart(null,
 					"Position", "Probability", null);
 			XYPlot plot = chart.getXYPlot();
 			plot.setBackgroundPaint(Color.WHITE);
 			plot.getDomainAxis().setRange(0,100);
 			plot.getRangeAxis().setRange(0,1);
-			
-			ChartPanel chartPanel = new ChartPanel(chart);
-			chartPanel.setMinimumDrawWidth( 0 );
-			chartPanel.setMinimumDrawHeight( 0 );
-			return chartPanel;
+			return chart;
 		}
 		
 		public void update(List<AnalysisDataset> list) throws Exception {
@@ -231,6 +241,8 @@ public class NucleusProfilesPanel extends DetailPanel {
 					updateChart(xvalue);	
 					updateModalityProfileChart(list);
 				} else {
+					modalityProfileChartPanel.setChart(createModalityProfileChart());
+					chartPanel.setChart(createPositionChart());
 					profileCollectionTypeSettingsPanel.setEnabled(false);
 					pointList.setEnabled(false);
 				}
@@ -423,10 +435,9 @@ public class NucleusProfilesPanel extends DetailPanel {
 
 				// if the list is empty, do not enable controls
 				borderTagOptionsPanel.setEnabled(false);
-//				profileAlignmentOptionsPanel.setEnabled(false);
 				profileCollectionTypeSettingsPanel.setEnabled(false);
 				profileMarkersOptionsPanel.setEnabled(false);
-//				
+				pvalueSpinner.setEnabled(false);
 			}
 			
 			BorderTag tag = borderTagOptionsPanel.getSelected();

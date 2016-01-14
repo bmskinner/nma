@@ -79,23 +79,16 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		programLogger.log(Level.FINE, "Updating editing detail panel");
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
-				if(hasDatasets()){
-					
-//					if(isSingleDataset()){
 						
-						cellDetailPanel.setEnabled(true);
-						segmentsEditingPanel.setEnabled(true);
-						
-						cellDetailPanel.update(getDatasets()); 
-						programLogger.log(Level.FINEST, "Updated segments boxplot panel");
+				cellDetailPanel.setEnabled(true);
+				segmentsEditingPanel.setEnabled(true);
 
-						segmentsEditingPanel.update(getDatasets()); 
-						programLogger.log(Level.FINEST, "Updated segments histogram panel");
-//					} else {
-//						cellDetailPanel.setEnabled(false);
-//						segmentsEditingPanel.setEnabled(false);
-//					}
-				}
+				cellDetailPanel.update(getDatasets()); 
+				programLogger.log(Level.FINEST, "Updated segments boxplot panel");
+
+				segmentsEditingPanel.update(getDatasets()); 
+				programLogger.log(Level.FINEST, "Updated segments histogram panel");
+
 				setUpdating(false);
 			}
 		});

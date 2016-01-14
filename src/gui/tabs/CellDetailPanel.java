@@ -189,7 +189,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 								
-				if(list.size()==1){
+				if(isSingleDataset()){
 					
 					cellsListPanel.updateDataset( activeDataset()  );
 					programLogger.log(Level.FINEST, "Updated cell list panel");
