@@ -141,7 +141,6 @@ public class DatasetProfiler extends AnalysisWorker {
 
 			BooleanProfile minima = medianProfile.smooth(2).getLocalMinima(5); // window size 5
 
-			//		double minDiff = medianProfile.size();
 			double minAngle = 180;
 			int tailIndex = 0;
 
@@ -308,7 +307,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		
 		private static void calculateOffsetsInRoundNuclei(CellCollection collection) throws Exception {
 
-			Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, 50); // returns a median profile with head at 0
+			Profile medianToCompare = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN); // returns a median profile with head at 0
 
 			for(Nucleus n : collection.getNuclei()){
 
@@ -336,7 +335,7 @@ public class DatasetProfiler extends AnalysisWorker {
 		private static void calculateOffsetsInRodentSpermNuclei(CellCollection collection) throws Exception {
 
 			// Get the median profile starting from the orientation point
-			Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50); // returns a median profile
+			Profile median = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, Constants.MEDIAN); // returns a median profile
 
 			// go through each nucleus
 			for(Nucleus n : collection.getNuclei()){
