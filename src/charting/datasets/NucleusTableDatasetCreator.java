@@ -285,8 +285,9 @@ public class NucleusTableDatasetCreator {
 				
 				// only display if there are options available
 				// This may not be the case for a merged dataset or its children
-				if(dataset.getAnalysisOptions()!=null){ 
+				if(dataset.hasAnalysisOptions()){ 
 
+					// Do not provide an options, so the existing dataset options is used
 					Object[] collectionData = formatAnalysisOptionsForTable(dataset, null);
 
 					model.addColumn(dataset.getCollection().getName(), collectionData);
@@ -296,12 +297,18 @@ public class NucleusTableDatasetCreator {
 					Object[] collectionData =  new Object[columnData.length];
 					if(dataset.hasMergeSources()){
 						
-						AnalysisOptions op = testMergedDatasetOptionsAreSame(dataset);
-						if(op!=null){
-							// The options are all the same, show the first option
+//						
+						if( testMergedDatasetOptionsAreSame(dataset)){
+							
+							// The options are the same in all merge sources
+							// Show the first options from the first source
+							
+							AnalysisOptions op = dataset.getAllMergeSources().get(0).getAnalysisOptions();
+							
+							// Provide an options to be used
 							collectionData = formatAnalysisOptionsForTable(dataset, op);
 
-							model.addColumn(dataset.getCollection().getName(), collectionData);
+//							model.addColumn(dataset.getCollection().getName(), collectionData);
 							
 						} else {
 							// Merge sources have different options
@@ -327,55 +334,36 @@ public class NucleusTableDatasetCreator {
 	 * @param dataset
 	 * @return the common options, or null if an options is different
 	 */
-	private static AnalysisOptions testMergedDatasetOptionsAreSame(AnalysisDataset dataset){
+	private static boolean testMergedDatasetOptionsAreSame(AnalysisDataset dataset){
 		
-		AnalysisOptions result = null;
+//		AnalysisOptions result = null;
 		
-		List<UUID> list = dataset.getMergeSources();
+		List<AnalysisDataset> list = dataset.getAllMergeSources();
+//		IJ.log("Dataset has "+list.size()+" merge sources");
 		
-//		Test each merge source against each other
-		for(UUID id : dataset.getMergeSources()){
+		boolean ok = true;
+//		AnalysisOptions test = list.get(0).getAnalysisOptions();
+		for(AnalysisDataset d1 : list){
 			
-			AnalysisDataset d = dataset.getMergeSource(id);
+			// If the dataset has merge sources, the options are null
+			if(! d1.hasMergeSources()){
 			
-			if(dataset.getAnalysisOptions()!=null){ 
-				
-				
-				for(UUID id2 : dataset.getMergeSources()){
-					AnalysisDataset d2 = dataset.getMergeSource(id2);
-					
-					if(dataset.getAnalysisOptions()!=null){ 
-						if( ! d.getAnalysisOptions().equals(d2.getAnalysisOptions())){
-							return null;
-						}
-					} else {
-						if(d.hasMergeSources()){
-							
-							result = testMergedDatasetOptionsAreSame(d);
-							
-						} else {
-							return null;
+				for(AnalysisDataset d2 : list){
+
+					if(! d2.hasMergeSources()){
+
+						if( ! d1.getAnalysisOptions().equals(d2.getAnalysisOptions())){
+							ok = false;
 						}
 					}
-					
-					
-				}	
-				
-			} else {
-				
-				if(d.hasMergeSources()){
-					
-					result = testMergedDatasetOptionsAreSame(d);
-					
-				} else {
-					return null;
 				}
 			}
-			
-			
-			
+
 		}
-		return result;
+		
+//		IJ.log("Sources have same options: "+ok);
+		
+		return ok;
 	}
 	
 	/**
@@ -393,9 +381,18 @@ public class NucleusTableDatasetCreator {
 				? options.getRefoldMode()
 						: "N/A";
 
-		String[] times = dataset.getCollection().getOutputFolderName().split("_");
-		String date = times[0];
-		String time = times[1];
+		String date;
+		String time;
+				
+		if(dataset.hasMergeSources()){
+			date = "N/A - merge";
+			time = "N/A - merge";
+			
+		} else {
+			String[] times = dataset.getCollection().getOutputFolderName().split("_");
+			date = times[0];
+			time = times[1];
+		}
 
 		CannyOptions nucleusCannyOptions = options.getCannyOptions("nucleus");
 

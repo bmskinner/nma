@@ -339,6 +339,27 @@ public class AnalysisDataset implements Serializable {
 	}
 	
 	/**
+	 * Recursively fetch all the merge sources for this dataset.
+	 * Only includes the root sources (not intermediate merges)
+	 * @return
+	 */
+	public List<AnalysisDataset> getAllMergeSources(){
+		
+		List<AnalysisDataset>  result = new ArrayList<AnalysisDataset>();
+		
+		for(UUID id : getMergeSources()){
+			
+			AnalysisDataset source = this.getAssociatedDataset(id);
+			if(source.hasMergeSources()){
+				result.addAll(source.getAllMergeSources());
+			} else {
+				result.add(source);
+			}
+		}
+		return result;
+	}
+	
+	/**
 	 * Add the given dataset as a merge source
 	 * @param dataset
 	 */
@@ -354,6 +375,23 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public List<UUID> getMergeSources(){
 		return this.mergeSources;
+	}
+	
+	/**
+	 * Get the ids of all datasets considered merge sources to this
+	 * dataset, recursively (that is, if the merge source is a merge, get
+	 * the sources of that merge)
+	 * @return
+	 */
+	public List<UUID> getAllMergeSourceIDs(){
+		
+		List<UUID> result = new ArrayList<UUID>();
+		
+		for(UUID id : this.getMergeSources()){
+			result.addAll(getMergeSource(id).getAllMergeSourceIDs());
+		}
+
+		return result;
 	}
 	
 	/**
@@ -474,6 +512,19 @@ public class AnalysisDataset implements Serializable {
 	 */
 	public AnalysisOptions getAnalysisOptions() {
 		return analysisOptions;
+	}
+	
+	/**
+	 * Test if the dataset has analysis options set.
+	 * This is not the case for (for example) merge sources
+	 * @return
+	 */
+	public boolean hasAnalysisOptions(){
+		if(this.analysisOptions==null){
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
