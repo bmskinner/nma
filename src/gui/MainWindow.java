@@ -36,6 +36,7 @@ import gui.actions.PopulationImportAction;
 import gui.actions.SaveDatasetAction;
 import gui.actions.ShellAnalysisAction;
 import gui.components.ColourSelecter.ColourSwatch;
+import gui.dialogs.MainOptionsDialog;
 import gui.tabs.AnalysisDetailPanel;
 import gui.tabs.ClusterDetailPanel;
 import gui.tabs.DetailPanel;
@@ -309,6 +310,18 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		return MainWindow.programLogger;
 	}
 	
+	public ColourSwatch getColourSwatch(){
+		return activeSwatch;
+	}
+	
+	public void setColourSwatch(ColourSwatch swatch){
+		activeSwatch = swatch;
+	}
+	
+	public PopulationsPanel getPopulationsPanel(){
+		return this.populationsPanel;
+	}
+	
 	public LogPanel getLogPanel(){
 		return this.logPanel;
 	}
@@ -386,58 +399,21 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 			}
 		});
 		panelHeader.add(btnPostanalysisMapping);
-		
-		
-		JButton btnSetSwatch = new JButton("Set swatch");
-		btnSetSwatch.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-									
-					ColourSwatch[] nameArray = ColourSwatch.values();
-					
-					ColourSwatch option = (ColourSwatch) JOptionPane.showInputDialog(null, 
-							"Choose swatch",
-							"Swatch",
-							JOptionPane.QUESTION_MESSAGE, 
-							null, 
-							nameArray, 
-							activeSwatch);
-					
-					if(option!=null){
-						// a choice was made
-						for(AnalysisDataset d : populationsPanel.getAllDatasets()){
-							d.setSwatch(option);
-						}
-						activeSwatch = option;
-						updatePanels(populationsPanel.getSelectedDatasets());
-					}
 				
-				
-				
-			}
-		});
-		panelHeader.add(btnSetSwatch);
-		
-		
-		JButton btnSetLogLevel = new JButton("Set logging level");
+		JButton btnSetLogLevel = new JButton("Options");
 		btnSetLogLevel.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 
-				Level[] nameArray = { Level.INFO, Level.FINE, Level.FINEST };
-				Level option = (Level) JOptionPane.showInputDialog(null, 
-						"Choose logging level",
-						"Swatch",
-						JOptionPane.QUESTION_MESSAGE, 
-						null, 
-						nameArray, 
-						programLogger.getLevel());
+				MainOptionsDialog dialog = new MainOptionsDialog(MainWindow.this);
+				if(dialog.isReadyToRun()){
+					for(DetailPanel panel : MainWindow.this.detailPanels){
+						panel.refreshChartCache();
+						panel.refreshTableCache();
+					}
 
-				if(option!=null){
-					// a choice was made
-					programLogger.setLevel(option);
-					programLogger.log(Level.SEVERE, "Set the logging level to "+option.toString());
-
+                    updatePanels(populationsPanel.getSelectedDatasets());
+                    
 				}
 			}
 		});		
@@ -476,14 +452,13 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		Thread thr = new Thread() {
 			public void run() {
 				try {
-//					MainWindow.this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 					
 					for(DetailPanel panel : MainWindow.this.detailPanels){
 						panel.update(list);
 					}
 					
 					programLogger.log(Level.FINE, "Updated tab panels");
-//					MainWindow.this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE,"Error updating panels", e);
 				}
