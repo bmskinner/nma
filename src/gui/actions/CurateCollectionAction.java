@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.swing.JOptionPane;
+
 import components.Cell;
 import components.CellCollection;
 import gui.MainWindow;
@@ -57,31 +59,66 @@ public class CurateCollectionAction extends ProgressableAction {
 				}
 			}
 
+			analyseNewCollection(clusterCollection);
 
-			if(clusterCollection.hasCells()){
-				programLogger.log(Level.INFO, "Extracted "+clusterCollection.size()+" cells");
-				final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-				dataset.addChildCollection(clusterCollection);
-
-				AnalysisDataset clusterDataset = dataset.getChildDataset(clusterCollection.getID());
-				clusterDataset.setRoot(false);
-				list.add(clusterDataset);
-
-				programLogger.log(Level.INFO, "Running new morphology analysis");
-				int flag = MainWindow.ADD_POPULATION;
-				flag |= MainWindow.ASSIGN_SEGMENTS;
-//				flag |= MainWindow.SAVE_DATASET;
-
-				// begin a recursive morphology analysis
-				new RunProfilingAction(list, flag, mw);
-
-			} else {
-				programLogger.log(Level.WARNING, "No cells found");
-			}
 		}catch(Exception e){
 			programLogger.log(Level.SEVERE,"Error curating collection", e);
 		} finally {
 			cancel();
+		}
+	}
+	
+	private void analyseNewCollection(CellCollection collection){
+		if(collection.hasCells()){
+			programLogger.log(Level.INFO, "Extracted "+collection.size()+" cells");
+			final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
+			dataset.addChildCollection(collection);
+
+			AnalysisDataset clusterDataset = dataset.getChildDataset(collection.getID());
+			clusterDataset.setRoot(false);
+			list.add(clusterDataset);
+			
+			
+			/*
+			 * Decide the analysis to perform on the new dataset
+			 */
+			
+//			Object[] options = { "Use existing cell segmentation" , "Re-segment cells", };
+//			int option = JOptionPane.showOptionDialog(null, "Re-segment the new dataset?", "Re-segment?",
+//
+//					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+//
+//					null, options, options[1]);
+//			
+			
+			
+			int flag = MainWindow.ADD_POPULATION;
+			flag |= MainWindow.ASSIGN_SEGMENTS;
+			
+//			if(option==0){ // use existing
+//				
+//				programLogger.log(Level.INFO, "Copying existing segments");
+//				/*
+//				 * Create a new profile collection
+//				 * 
+//				 * Assign the segmnent pattern from the individual nuclei
+//				 * How? Use the first nucleus in the collection, or average index proportions across them? 
+//				 * 
+//				 * Create a new franken collection, based on the new segments in the profile collection
+//				 */
+//				
+//			} else { // resegment
+//				
+//				programLogger.log(Level.INFO, "Re-segmenting the dataset");
+//				
+//				
+//			}
+
+			// begin a recursive morphology analysis
+			new RunProfilingAction(list, flag, mw);
+
+		} else {
+			programLogger.log(Level.WARNING, "No cells found");
 		}
 	}
 
