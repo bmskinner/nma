@@ -168,6 +168,12 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 		}
 		
+		
+		public void setEnabled(boolean b){
+			profileCollectionTypeSettingsPanel.setEnabled(b);
+			pointList.setEnabled(b);
+		}
+		
 		private ChartPanel createPositionChartPanel(){
 			
 			JFreeChart chart = createPositionChart();
@@ -211,8 +217,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			try{
 				if( list!=null && !list.isEmpty()){
 
-					profileCollectionTypeSettingsPanel.setEnabled(true);
-					pointList.setEnabled(true);
+					this.setEnabled(true);
 
 					ProfileCollectionType type = profileCollectionTypeSettingsPanel.getSelected();
 
@@ -243,8 +248,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 				} else {
 					modalityProfileChartPanel.setChart(createModalityProfileChart());
 					chartPanel.setChart(createPositionChart());
-					profileCollectionTypeSettingsPanel.setEnabled(false);
-					pointList.setEnabled(false);
+					this.setEnabled(false);
 				}
 
 			} catch(Exception e){
@@ -377,13 +381,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			chartPanel.setMinimumDrawWidth( 0 );
 			chartPanel.setMinimumDrawHeight( 0 );
 			this.add(chartPanel, BorderLayout.CENTER);
-			
-			// add the alignments panel to the tab
-			
-//			buttonPanel.add(profileAlignmentOptionsPanel);
-//			profileAlignmentOptionsPanel.addActionListener(this);
-//			profileAlignmentOptionsPanel.setEnabled(false);
-			
+						
 			buttonPanel.add(borderTagOptionsPanel);
 			borderTagOptionsPanel.addActionListener(this);
 			borderTagOptionsPanel.setEnabled(false);
@@ -410,23 +408,24 @@ public class NucleusProfilesPanel extends DetailPanel {
 			
 			this.add(buttonPanel, BorderLayout.NORTH);
 		}
+		
+		public void setEnabled(boolean b){
+			borderTagOptionsPanel.setEnabled(b);
+			profileCollectionTypeSettingsPanel.setEnabled(b);
+			profileMarkersOptionsPanel.setEnabled(b);
+			pvalueSpinner.setEnabled(b);
+		}
 
 		public void update(List<AnalysisDataset> list){
 
-			if(!list.isEmpty()){
+			if(hasDatasets()){
 
-				borderTagOptionsPanel.setEnabled(true);
-//				profileAlignmentOptionsPanel.setEnabled(true);
-				profileCollectionTypeSettingsPanel.setEnabled(true);
-				profileMarkersOptionsPanel.setEnabled(true);
-				
-				pvalueSpinner.setEnabled(true);
+				this.setEnabled(true);
 
 				if(list.size()>1){
 
 					// Don't allow marker selection for multiple datasets
 					profileMarkersOptionsPanel.setEnabled(false);
-//					
 					pvalueSpinner.setEnabled(false);
 				}
 
@@ -434,10 +433,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 			} else {
 
 				// if the list is empty, do not enable controls
-				borderTagOptionsPanel.setEnabled(false);
-				profileCollectionTypeSettingsPanel.setEnabled(false);
-				profileMarkersOptionsPanel.setEnabled(false);
-				pvalueSpinner.setEnabled(false);
+				this.setEnabled(false);
 			}
 			
 			BorderTag tag = borderTagOptionsPanel.getSelected();
@@ -563,27 +559,26 @@ public class NucleusProfilesPanel extends DetailPanel {
 			this.add(buttonPanel, BorderLayout.NORTH);
 		}
 		
+		public void setEnabled(boolean b){
+			profileAlignmentOptionsPanel.setEnabled(b);
+			borderTagOptionsPanel.setEnabled(b);
+			profileMarkersOptionsPanel.setEnabled(b);
+		}
+		
 		public void update(List<AnalysisDataset> list){
 			
-			if(!list.isEmpty()){
+			if(hasDatasets()){
 				
-				profileAlignmentOptionsPanel.setEnabled(true);
-				borderTagOptionsPanel.setEnabled(true);
-				profileMarkersOptionsPanel.setEnabled(true);
+				this.setEnabled(true);
 
-				
-				if(list.size()>1){
+				if( ! isSingleDataset()){
 					
 					// Don't allow marker selection for multiple datasets
 					profileMarkersOptionsPanel.setEnabled(false);
 				}
-				
-				
+
 			} else {
-				profileAlignmentOptionsPanel.setEnabled(false);
-				borderTagOptionsPanel.setEnabled(false);
-				profileMarkersOptionsPanel.setEnabled(false);
-				
+				this.setEnabled(false);				
 			}
 		}
 

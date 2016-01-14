@@ -166,6 +166,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		}
 	}
 	
+	public void setEnabled(boolean b){
+		for(DetailPanel panel : this.subPanels){
+			panel.setEnabled(b);;
+		}
+	}
+	
 	public void update(List<AnalysisDataset> list){
 		
 		if(this.isUpdating()){
