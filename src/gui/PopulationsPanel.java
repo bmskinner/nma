@@ -100,6 +100,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		this.add(panelPopulations, BorderLayout.CENTER);
 
 	}
+	
 	public void update(List<AnalysisDataset> list){
 		this.update();
 	}
@@ -124,24 +125,30 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		treeTableModel.setColumnIdentifiers(columns);
 				
 		if(this.analysisDatasets.size()>0){ // if there are datasets to display
+			programLogger.log(Level.FINEST, "Loaded: "+analysisDatasets.size()+" datasets");
 			for(UUID id : treeOrderMap.getIDs()){
 												
 				AnalysisDataset rootDataset = analysisDatasets.get(id);
 				root.add( addTreeTableChildNodes(    rootDataset    )     );
-				
 			}
+
+		} else {
+			programLogger.log(Level.FINEST, "No datasets loaded");
 		}
 		
 		treeTable.setTreeTableModel(treeTableModel);
 
-		int row = 0;
-		while (row < treeTable.getRowCount()) {
-			treeTable.expandRow(row);
-			row++;
+		if(this.analysisDatasets.size()>0){
+			programLogger.log(Level.FINEST, "Expanding rows");
+			for (int row = 0; row < treeTable.getRowCount(); row++) {
+				treeTable.expandRow(row);
+			}
 		}
 		
+		programLogger.log(Level.FINEST, "Restoring column widths");
 		treeTable.getColumnModel().getColumn(COLUMN_NAME).setWidth(nameColWidth);
 		treeTable.getColumnModel().getColumn(COLUMN_COLOUR).setWidth(colourColWidth);
+		programLogger.log(Level.FINEST, "Update complete");
 	}
 	
 	/**
@@ -480,12 +487,14 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	public void selectDataset(AnalysisDataset dataset){
 
-		TreeSelectionModel selectedRows = treeTable.getTreeSelectionModel();
-		int index = getIndexOfDataset(dataset);
-				
-		TreePath path = treeTable.getPathForRow(index);
-		if(path!=null){
-			selectedRows.setSelectionPath(path);
+		if(dataset!=null){
+			TreeSelectionModel selectedRows = treeTable.getTreeSelectionModel();
+			int index = getIndexOfDataset(dataset);
+
+			TreePath path = treeTable.getPathForRow(index);
+			if(path!=null){
+				selectedRows.setSelectionPath(path);
+			}
 		}
 		update();
 	}
@@ -793,17 +802,20 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						refreshClusters();
 						programLogger.log(Level.FINEST, "Updating panels");
 						update();
+						programLogger.log(Level.FINEST, "Firing update panel event");
+						fireSignalChangeEvent("UpdatePanelsNull");
+						repaint();
 
 					} else {
 						programLogger.log(Level.FINEST, "No datasets selected");
 					}
 					programLogger.log(Level.FINEST, "Deletion complete");
-					fireSignalChangeEvent("UpdatePanels");
+					
 
 				}
 			};
 			thr.start();
-
+//			selectDataset((AnalysisDataset) null);
 		} catch (Exception e){
 			programLogger.log(Level.SEVERE, "Error deleting datasets", e);
 		}

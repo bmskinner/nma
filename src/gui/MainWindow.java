@@ -546,8 +546,12 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
-		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().get(0);
 		programLogger.log(Level.FINEST, "Heard signal change event: "+event.type());
+		
+		final AnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
+				? null 
+				: populationsPanel.getSelectedDatasets().get(0);
+		
 		
 		if(event.type().equals("RunShellAnalysis")){
 			programLogger.log(Level.FINER, "Shell analysis selected");
@@ -641,6 +645,10 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 		if(event.type().equals("UpdatePanels")){
 			this.updatePanels(populationsPanel.getSelectedDatasets());
+		}
+		
+		if(event.type().equals("UpdatePanelsNull")){
+			this.updatePanels(new ArrayList<AnalysisDataset>());
 		}
 		
 		if(event.type().equals("UpdatePopulationPanel")){
