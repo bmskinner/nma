@@ -1,6 +1,7 @@
 package gui.actions;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import javax.swing.SwingUtilities;
@@ -23,6 +24,22 @@ public class RunProfilingAction extends ProgressableAction {
 		super(list, "Segmentation analysis", mw, downFlag);
 		programLogger.log(Level.FINE, "Creating profiling analysis");
 		runNewAnalysis();
+	}
+	
+	public RunProfilingAction(AnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch){
+		super(dataset, "Segmentation analysis", mw, downFlag);
+		this.setLatch(latch);
+		programLogger.log(Level.FINE, "Creating profiling analysis");
+		runNewAnalysis();
+		
+	}
+	
+	public RunProfilingAction(List<AnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch){
+		super(list, "Segmentation analysis", mw, downFlag);
+		this.setLatch(latch);
+		programLogger.log(Level.FINE, "Creating profiling analysis");
+		runNewAnalysis();
+		
 	}
 	
 	private void runNewAnalysis(){
@@ -69,7 +86,8 @@ public class RunProfilingAction extends ProgressableAction {
 					cancel();		
 					RunProfilingAction.this.removeInterfaceEventListener(mw);
 					RunProfilingAction.this.removeDatasetEventListener(mw);					
-//					RunProfilingAction.super.finished();
+//					
+					RunProfilingAction.this.countdownLatch();
 					
 				} else {
 					// otherwise analyse the next item in the list

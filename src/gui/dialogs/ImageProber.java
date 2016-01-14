@@ -307,6 +307,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				ImageProber.this.ok = true;
+				programLogger.log(Level.FINEST, "Set ok to "+ok);
 				ImageProber.this.setVisible(false);
 
 			}
@@ -321,6 +322,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 			public void mouseClicked(MouseEvent arg0) {
 
 				ImageProber.this.ok = false;
+				programLogger.log(Level.FINEST, "Set ok to "+ok);
 				ImageProber.this.setVisible(false);
 
 			}

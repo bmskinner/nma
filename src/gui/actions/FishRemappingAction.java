@@ -2,6 +2,7 @@ package gui.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 
 import analysis.AnalysisDataset;
@@ -15,7 +16,7 @@ import gui.dialogs.FishRemappingDialog;
  */
 public class FishRemappingAction extends ProgressableAction {
 
-	public FishRemappingAction(List<AnalysisDataset> datasets, MainWindow mw) {
+	public FishRemappingAction(final List<AnalysisDataset> datasets, final MainWindow mw) {
 		super("Remapping", mw);
 
 		try{
@@ -30,28 +31,30 @@ public class FishRemappingAction extends ProgressableAction {
 					
 					programLogger.log(Level.INFO, "Fetching collections...");
 					List<CellCollection> subs = fishMapper.getSubCollections();
+					
+					if(!subs.isEmpty()){
 
-					final List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
-					for(CellCollection sub : subs){
+						final List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+						for(CellCollection sub : subs){
 
-						if(sub.getNucleusCount()>0){
+							if(sub.hasCells()){
 
-							dataset.addChildCollection(sub);
+								dataset.addChildCollection(sub);
 
-							AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
-							newList.add(subDataset);
+								final AnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
+								newList.add(subDataset);
+							}
 						}
-					}
-					programLogger.log(Level.INFO, "Reapplying morphology...");
-//					int flag = MainWindow.ADD_POPULATION;
-//					flag |= MainWindow.ASSIGN_SEGMENTS;
-////					flag |= MainWindow.SAVE_DATASET;
-//
-//					// begin a recursive morphology analysis
-//					new RunProfilingAction(list, flag, mw);
-//					new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
+						programLogger.log(Level.INFO, "Reapplying morphology...");
 
-					finished();
+
+
+						new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
+						finished();
+					}else {
+						programLogger.log(Level.INFO, "No collections returned");
+						cancel();
+					}
 
 				} else {
 					programLogger.log(Level.INFO, "Remapping cancelled");

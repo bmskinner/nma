@@ -181,22 +181,31 @@ public class FishRemappingDialog extends ImageProber {
 		
 	}
 	
+	/**
+	 * Get a list of CellCollections, containing the selected nuclei.
+	 * If no nuclei were selected, the list is empty
+	 * @return 
+	 */
 	public List<CellCollection> getSubCollections(){
 		List<CellCollection> result = new ArrayList<CellCollection>(0);
 		
-		CellCollection subCollectionLeft  = new CellCollection(dataset, "SubCollectionLeft");
-		for(UUID id : selectedNucleiLeft){
-			Cell cell = dataset.getCollection().getCell(id);
-			subCollectionLeft.addCell(new Cell(cell));
+		if(!selectedNucleiLeft.isEmpty()){
+			CellCollection subCollectionLeft  = new CellCollection(dataset, "SubCollectionLeft");
+			for(UUID id : selectedNucleiLeft){
+				Cell cell = dataset.getCollection().getCell(id);
+				subCollectionLeft.addCell(new Cell(cell));
+			}
+			result.add(subCollectionLeft);
 		}
-		result.add(subCollectionLeft);
 		
-		CellCollection subCollectionRight  = new CellCollection(dataset, "SubCollectionRight");
-		for(UUID id : selectedNucleiRight){
-			Cell cell = dataset.getCollection().getCell(id);
-			subCollectionRight.addCell(new Cell(cell));
+		if(!selectedNucleiRight.isEmpty()){
+			CellCollection subCollectionRight  = new CellCollection(dataset, "SubCollectionRight");
+			for(UUID id : selectedNucleiRight){
+				Cell cell = dataset.getCollection().getCell(id);
+				subCollectionRight.addCell(new Cell(cell));
+			}
+			result.add(subCollectionRight);
 		}
-		result.add(subCollectionRight);
 		return result;
 	}
 		
