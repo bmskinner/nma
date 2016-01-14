@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import charting.charts.MorphologyChartFactory;
 import utility.Utils;
@@ -44,6 +45,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 		
 		this.programLogger = programLogger;
 		this.setLayout(new BorderLayout());
+		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		this.add(imageLabel, BorderLayout.CENTER);
 		imageLabel.setHorizontalTextPosition(JLabel.CENTER);
 		imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
@@ -149,9 +151,7 @@ public class AnnotatedNucleusPanel extends JPanel {
 	 * @return an image icon with the resized image
 	 */
 	private ImageIcon createViewableImage(ImageProcessor ip){
-		int originalWidth = ip.getWidth();
-		int originalHeight = ip.getHeight();
-		
+				
 		// Choose a clip for the image (an enlargement of the original nucleus ROI
 		double[] positions = cell.getNucleus().getPosition();
 		int wideW = (int) (positions[Nucleus.WIDTH]+20);
@@ -165,40 +165,44 @@ public class AnnotatedNucleusPanel extends JPanel {
 		ip.setRoi(wideX, wideY, wideW, wideH);
 		ImageProcessor croppedProcessor = ip.crop();
 		
+
+		/*
+		 * Resize the image to half of the screen height 
+		 */
+		return resizeImage(croppedProcessor);
+		
+	}
+	
+	/*
+	 * Resize the image to half of the screen height 
+	 */
+	private ImageIcon resizeImage(ImageProcessor processor){
+
+		int originalWidth = processor.getWidth();
+		int originalHeight = processor.getHeight();
+		
+		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 		// The panel dimension
-		Dimension screenSize = new Dimension(croppedProcessor.getWidth(), croppedProcessor.getHeight());
-		
-		
-//		// set the image width to be less than half the screen width
-//		int smallWidth = (int) ((double) screenSize.getWidth() );
-//		
-//		
-//		// keep the image aspect ratio
-//		double ratio = (double) originalWidth / (double) originalHeight;
-//		int smallHeight = (int) (smallWidth / ratio);
-//		
-//
-//		if(smallHeight > screenSize.getHeight()  ){ // image is too high, adjust to scale on height
-//			smallHeight = (int) screenSize.getHeight();
-//			smallWidth = (int) (smallHeight * ratio);
-//		}
-		
+//		Dimension screenSize = new Dimension(processor.getWidth(), processor.getHeight());
+		// set the image width to be half the screen width
+		int newHeight = (int) (screenSize.getHeight() * 0.3 );
+
+		// keep the image aspect ratio
+		double ratio = (double) originalWidth / (double) originalHeight;
+
+		int newWidth = (int) (   (double) newHeight * ratio);
+
 		// Create the image
-		
-		
-		
-		
+
+
+
+
 		ImageIcon smallImageIcon;
 
-//		if(croppedProcessor.getWidth()>smallWidth || croppedProcessor.getHeight() > smallHeight){
-//			
-//			smallImageIcon = new ImageIcon(croppedProcessor.resize(smallWidth, smallHeight ).getBufferedImage());
-//			
-//		} else {
-			
-			smallImageIcon = new ImageIcon( croppedProcessor.getBufferedImage()  );
-//		}
+		smallImageIcon = new ImageIcon(processor.resize(newWidth, newHeight ).getBufferedImage());
+
 		return smallImageIcon;
+
 	}
 
 }

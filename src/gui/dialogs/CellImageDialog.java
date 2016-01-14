@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.border.EmptyBorder;
+
 import components.Cell;
 import gui.LoadingIconDialog;
 import gui.components.AnnotatedNucleusPanel;
