@@ -29,6 +29,7 @@ package components.nuclei.sperm;
 import ij.gui.Roi;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +57,9 @@ extends SpermNucleus
 
 	private List<NucleusBorderPoint> hookRoi;
 	private List<NucleusBorderPoint> humpRoi;
+	
+	private transient double hookLength = 0;
+	private transient double bodyWidth = 0;
 
 	// Requires a sperm nucleus object to construct from
 	public RodentSpermNucleus(RoundNucleus n) throws Exception{
@@ -141,7 +145,38 @@ extends SpermNucleus
 		
 	}
 	
+	@Override
+	public void setBorderTag(BorderTag tag, int i){
+		super.setBorderTag(tag, i);
+		
+			
+		// If the flat region moved, update the cached lengths 
+		if(tag.equals(BorderTag.TOP_VERTICAL) || tag.equals(BorderTag.BOTTOM_VERTICAL)){
+			try {
+				calculateHookOrBodyLength();
+			} catch (Exception e) {
+				this.hookLength = 0;
+			    this.bodyWidth = 0;
+			}
+		}
+		
+	}
+	
 	protected double getHookOrBodyLength(boolean useHook) throws Exception{
+		if(useHook){
+			if(hookLength==0){
+				calculateHookOrBodyLength();
+			}
+			return hookLength;
+		} else {
+			if(bodyWidth==0){
+				calculateHookOrBodyLength();
+			}
+			return bodyWidth;
+		}	
+	}
+	
+	protected void calculateHookOrBodyLength() throws Exception{
 
 		// Copy the nucleus
 		
@@ -198,14 +233,16 @@ extends SpermNucleus
 //			IJ.log(testNucleus.dumpInfo(Nucleus.BORDER_TAGS));
 //			
 //			IJ.log("");
-
-			if(useHook){
-				return distanceHook;
-			} else {
-				return distanceHump;
-			}	
-		} else {
-			return 0;
+			this.hookLength = distanceHook;
+			this.bodyWidth = distanceHump;
+//			if(useHook){
+//				return distanceHook;
+//			} else {
+//				return distanceHump;
+//			}	
+//		} else {
+//			return 0;
+//		}
 		}
 	}
 	
@@ -721,4 +758,15 @@ extends SpermNucleus
 	  return result;
 	  
   }
+  
+  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	    in.defaultReadObject();
+	    try {
+			calculateHookOrBodyLength();
+		} catch (Exception e) {
+		    this.hookLength = 0;
+		    this.bodyWidth = 0;
+		}
+
+	}
 }

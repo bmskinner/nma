@@ -1451,6 +1451,12 @@ public class RoundNucleus
 	
 	public void setBorderTag(BorderTag tag, int i){
 		this.borderTags.put(tag, i);
+		
+		// The intersection point should always be opposite the orientation point
+		if(tag.equals(BorderTag.ORIENTATION_POINT)){
+			int intersectionIndex = this.getIndex(this.findOppositeBorder( this.getPoint(i) ));
+			this.setBorderTag(BorderTag.INTERSECTION_POINT, intersectionIndex);
+		}
 	}
 	
 	public void setBorderTag(BorderTag reference, BorderTag tag, int i){
