@@ -60,8 +60,9 @@ public class MergeCollectionAction extends ProgressableAction {
 		} else {
 
 			int flag = MainWindow.ADD_POPULATION;
+			flag |= MainWindow.ASSIGN_SEGMENTS;
 			flag |= MainWindow.SAVE_DATASET;
-			new RunSegmentationAction(datasets, MorphologyAnalysisMode.NEW, flag, mw);
+			new RunProfilingAction(datasets, flag, mw);
 			this.cancel();
 		}
 	}

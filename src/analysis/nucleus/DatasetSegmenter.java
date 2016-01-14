@@ -108,21 +108,15 @@ public class DatasetSegmenter extends AnalysisWorker {
 			}
 			
 		} catch(Exception e){
-			
+			result = false;
 			logError("Error in segmentation analysis", e);
-			
-//			log(Level.SEVERE, "Collection keys:");
-//			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.REGULAR).printKeys());
-//			
-//			log(Level.SEVERE, "FrankenCollection keys:");
-//			log(Level.SEVERE, getDataset().getCollection().getProfileCollection(ProfileCollectionType.FRANKEN).printKeys());
-			return false;
-		} 
+		}
 
 		return result;
+
 	}
     
-    private boolean runNewAnalysis() throws Exception{
+    private boolean runNewAnalysis() throws Exception {
     	log(Level.FINE, "Beginning core morphology analysis");
 
 		this.setProgressTotal(getDataset().getCollection().getNucleusCount()*2);
