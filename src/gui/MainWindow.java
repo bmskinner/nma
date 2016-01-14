@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
+ *  	Copyright (C) 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -46,18 +46,14 @@ import gui.tabs.MergesDetailPanel;
 import gui.tabs.NuclearBoxplotsPanel;
 import gui.tabs.NucleusProfilesPanel;
 import gui.tabs.SegmentsDetailPanel;
-import gui.tabs.SegmentsEditingPanel;
 import gui.tabs.SignalsDetailPanel;
 import ij.IJ;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -67,7 +63,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -76,8 +71,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-
 import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
