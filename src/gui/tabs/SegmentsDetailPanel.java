@@ -60,6 +60,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
@@ -102,16 +103,19 @@ public class SegmentsDetailPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 		
 		tabPanel = new JTabbedPane(JTabbedPane.TOP);
+		tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
 		JPanel panel = new JPanel(new GridBagLayout());
 		
 		Dimension minimumChartSize = new Dimension(100, 100);
 		segmentProfilePanel  = new SegmentProfilePanel();
 		segmentProfilePanel.setMinimumSize(minimumChartSize);
+		segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		segmentBoxplotsPanel = new SegmentBoxplotsPanel();
 		segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
 		tabPanel.addTab("Boxplots", segmentBoxplotsPanel);
+		
 		
 		segmentHistogramsPanel = new SegmentHistogramsPanel(programLogger);
 		segmentHistogramsPanel.setMinimumSize(minimumChartSize);
@@ -119,6 +123,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 		segmentStatsPanel = new SegmentStatsPanel();
 		segmentStatsPanel.setMinimumSize(minimumChartSize);
+		segmentStatsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		
 		GridBagConstraints constraints = new GridBagConstraints();

@@ -66,6 +66,7 @@ import javax.swing.JTable;
 import javax.swing.JTree;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.TableColumn;
@@ -155,6 +156,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	private JPanel createCentrePanel() throws Exception{
 		JPanel centrePanel = new JPanel();
 		centrePanel.setLayout(new BoxLayout(centrePanel, BoxLayout.Y_AXIS));
+		centrePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		
 		cellStatsPanel = new CellStatsPanel();

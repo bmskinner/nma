@@ -31,7 +31,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -694,7 +693,7 @@ public class NucleusDatasetCreator {
 		List<AnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = options.getStat();
 		MeasurementScale scale = options.getScale();
-		DefaultBoxAndWhiskerCategoryDataset ds = new DefaultBoxAndWhiskerCategoryDataset();
+		OutlierFreeBoxAndWhiskerCategoryDataset ds = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < datasets.size(); i++) {
 			CellCollection c = datasets.get(i).getCollection();
@@ -740,7 +739,7 @@ public class NucleusDatasetCreator {
 	 */
 	public static BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<AnalysisDataset> collections, String segName, MeasurementScale scale) throws Exception {
 
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
@@ -775,7 +774,7 @@ public class NucleusDatasetCreator {
 	 */
 	public static BoxAndWhiskerCategoryDataset createSegmentDisplacementDataset(List<AnalysisDataset> collections, String segName) throws Exception {
 
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < collections.size(); i++) {
 
@@ -809,7 +808,14 @@ public class NucleusDatasetCreator {
 		if(datasets==null || datasets.isEmpty()){
 			return null;
 		}
-		DefaultBoxAndWhiskerCategoryDataset dataset = new DefaultBoxAndWhiskerCategoryDataset();
+		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset(){
+			
+			@Override
+			public List<?> getOutliers(int row, int column){
+				return new ArrayList();
+				
+			}
+		};
 
 		for (int i=0; i < datasets.size(); i++) {
 

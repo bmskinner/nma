@@ -410,7 +410,7 @@ public class NuclearSignalDatasetCreator {
 	 */
 	public static BoxAndWhiskerCategoryDataset createSignalAreaBoxplotDataset(AnalysisDataset dataset) {
 
-		DefaultBoxAndWhiskerCategoryDataset result = new DefaultBoxAndWhiskerCategoryDataset();
+		OutlierFreeBoxAndWhiskerCategoryDataset result = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
 		CellCollection c = dataset.getCollection();
 		

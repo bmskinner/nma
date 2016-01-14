@@ -493,9 +493,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 						}
 
 						if(checkRunning()){
-							MainWindow.this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+							MainWindow.this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 						} else {
-							MainWindow.this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+							MainWindow.this.setCursor(Cursor.getDefaultCursor());
 						}
 
 						Thread.sleep(500);
