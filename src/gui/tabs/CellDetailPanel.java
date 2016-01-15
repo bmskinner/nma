@@ -35,6 +35,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -43,6 +44,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -76,9 +78,12 @@ import javax.swing.tree.TreeModel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.Align;
+import org.jfree.ui.RectangleEdge;
 
 import utility.Utils;
 import analysis.AnalysisDataset;
@@ -621,8 +626,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(rotationPanel, BorderLayout.NORTH);
 			
 			panel = new ChartPanel(chart){
-				
-				
+								
 				@Override
 				public void restoreAutoBounds() {
 					XYPlot plot = (XYPlot) this.getChart().getPlot();
@@ -695,7 +699,50 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 //					IJ.log("New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
 
 					plot.getRangeAxis().setRange(yMin, yMax);
-					plot.getDomainAxis().setRange(xMin, xMax);				
+					plot.getDomainAxis().setRange(xMin, xMax);	
+					
+					/*
+					 * Update background images to the loaded cell dimensions
+					 */
+//					double maxX = Double.MIN_VALUE;
+//					double maxY = Double.MIN_VALUE;
+//					double minX = Double.MAX_VALUE;
+//					double minY = Double.MAX_VALUE;
+//					
+//					for(int i = 0; i<this.getChart().getXYPlot().getDatasetCount(); i++){
+//						maxX = Math.max(maxX,DatasetUtilities.findMaximumDomainValue(this.getChart().getXYPlot().getDataset(i)).doubleValue());
+//						maxY = Math.max(maxY,DatasetUtilities.findMaximumRangeValue(this.getChart().getXYPlot().getDataset(i)).doubleValue());
+//						minX = Math.min(minX,DatasetUtilities.findMinimumDomainValue(this.getChart().getXYPlot().getDataset(i)).doubleValue());
+//						minY = Math.min(minY,DatasetUtilities.findMinimumRangeValue(this.getChart().getXYPlot().getDataset(i)).doubleValue());
+//					
+//					}
+//					
+//					
+//					Graphics2D g2 = (Graphics2D) this.getGraphics();
+//					
+//					Rectangle2D dataArea = getScreenDataArea();
+//	    			ValueAxis xAxis = plot.getDomainAxis();
+//	    			ValueAxis yAxis = plot.getRangeAxis();
+//	    			
+//	    			int min2DX = (int) xAxis.valueToJava2D(minX, dataArea, RectangleEdge.BOTTOM);
+//	    			int max2DX = (int) xAxis.valueToJava2D(maxX, dataArea, RectangleEdge.BOTTOM);
+//	    			
+//	    			int min2DY = (int) yAxis.valueToJava2D(minY, dataArea, RectangleEdge.BOTTOM);
+//	    			int max2DY = (int) yAxis.valueToJava2D(maxY, dataArea, RectangleEdge.BOTTOM);
+//
+//					int w = max2DX - min2DX;
+//					int h = max2DY > min2DY ? max2DY - min2DY : min2DY - max2DY; // when y axis is inverted
+//					int x = min2DX;
+//					int y = max2DY > min2DY ? min2DY : max2DY ; // when y axis is inverted
+//								
+//					
+//					Rectangle2D area   = new Rectangle2D.Double(x, y, w, h);
+//					
+//					programLogger.log(Level.INFO, "Coordinates   :  X: "+minX+"-"+maxX+" Y: "+minY+"-"+maxY );
+//					programLogger.log(Level.INFO, "Data area     : "+ dataArea.toString());
+//					programLogger.log(Level.INFO, "New image area: "+ area.toString());
+//					
+//					plot.drawBackgroundImage(g2, area);
 				} 
 				
 			};
@@ -706,9 +753,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
     				panel.restoreAutoBounds();
     			}
     		});
-			
-
-			
+						
 			this.add(panel, BorderLayout.CENTER);
 			
 		}

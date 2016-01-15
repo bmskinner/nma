@@ -23,15 +23,23 @@ import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
+import ij.ImageStack;
+import ij.process.ImageProcessor;
+import io.ImageExporter;
+import io.ImageImporter;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.ImageIcon;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -61,6 +69,7 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.Align;
 
 import utility.Constants;
 import utility.Utils;
@@ -693,7 +702,6 @@ public class MorphologyChartFactory {
 			plot.getRangeAxis().setInverted(false);
 		}
 
-
 		// get the nucleus dataset
 		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell, true);
 		hash.put(hash.size(), "Nucleus"); // add to the first free entry
@@ -801,9 +809,50 @@ public class MorphologyChartFactory {
 					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
 				}
 			}
+			
+			// Add a background image to the plot
+			addCellImageToPlot(cell, plot);
+			
 
 		}
 		return chart;
+	}
+	
+	private static void addCellImageToPlot(Cell cell, XYPlot plot){
+		if(cell.getNucleus().getSourceFile().exists()){
+			
+			File imageFile = cell.getNucleus().getSourceFile();
+			ImageStack imageStack = ImageImporter.importImage(imageFile);
+			
+			// Get the counterstain stack, make greyscale and invert
+			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(imageStack).getProcessor();
+			openProcessor.invert();	
+			
+			double[] positions = cell.getNucleus().getPosition();
+			
+			int padding = 0;
+			int wideW = (int) (positions[Nucleus.WIDTH]+(padding*2));
+			int wideH = (int) (positions[Nucleus.HEIGHT]+(padding*2));
+			int wideX = (int) (positions[Nucleus.X_BASE]-padding);
+			int wideY = (int) (positions[Nucleus.Y_BASE]-padding);
+
+			wideX = wideX<0 ? 0 : wideX;
+			wideY = wideY<0 ? 0 : wideY;
+
+			openProcessor.setRoi(wideX, wideY, wideW, wideH);
+			openProcessor = openProcessor.crop();
+//			
+//			plot.getRangeAxis().setRange(wideY, wideY+wideH);
+//			plot.getDomainAxis().setRange(wideX, wideX+wideW);
+			plot.setDomainGridlinesVisible(false);
+			plot.setRangeGridlinesVisible(false);
+						
+//			IJ.log("Adding background image");
+			Image im = new ImageIcon(openProcessor.getBufferedImage()).getImage();
+			plot.setBackgroundPaint(null);
+			plot.setBackgroundImageAlignment(Align.FIT);
+			plot.setBackgroundImage(im);
+		}
 	}
 	
 	/**

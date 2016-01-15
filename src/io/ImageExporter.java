@@ -71,18 +71,22 @@ public class ImageExporter {
 	/**
 	 * Given a stack, make an RGB greyscale image from the counterstain
 	 * @param stack
-	 * @return
+	 * @return a new ImagePlus, or null if the stack was null
 	 */
 	public static ImagePlus makeGreyRGBImage(ImageStack stack){
 		
-		ImagePlus[] images = new ImagePlus[3];
-		images[Constants.RGB_RED]   = new ImagePlus("red", stack.getProcessor(Constants.COUNTERSTAIN));  
-		images[Constants.RGB_GREEN] = new ImagePlus("green", stack.getProcessor(Constants.COUNTERSTAIN));  
-		images[Constants.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(Constants.COUNTERSTAIN));      
+		if(stack!=null){
+			ImagePlus[] images = new ImagePlus[3];
+			images[Constants.RGB_RED]   = new ImagePlus("red", stack.getProcessor(Constants.COUNTERSTAIN));  
+			images[Constants.RGB_GREEN] = new ImagePlus("green", stack.getProcessor(Constants.COUNTERSTAIN));  
+			images[Constants.RGB_BLUE]  = new ImagePlus("blue", stack.getProcessor(Constants.COUNTERSTAIN));      
 
-		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
-		result = result.flatten();
-		return result;
+			ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
+			result = result.flatten();
+			return result;
+		} else {
+			return null;
+		}
 	}
 	
 	/**
