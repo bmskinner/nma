@@ -811,7 +811,7 @@ public class MorphologyChartFactory {
 			}
 			
 			// Add a background image to the plot
-			addCellImageToPlot(cell, plot);
+//			addCellImageToPlot(cell, plot);
 			
 
 		}
@@ -841,12 +841,16 @@ public class MorphologyChartFactory {
 
 			openProcessor.setRoi(wideX, wideY, wideW, wideH);
 			openProcessor = openProcessor.crop();
-//			
-//			plot.getRangeAxis().setRange(wideY, wideY+wideH);
-//			plot.getDomainAxis().setRange(wideX, wideX+wideW);
+
 			plot.setDomainGridlinesVisible(false);
 			plot.setRangeGridlinesVisible(false);
-						
+			
+			plot.getDomainAxis().setVisible(false);
+			plot.getRangeAxis().setVisible(false);
+			
+			plot.setOutlineVisible(false);
+			
+		
 //			IJ.log("Adding background image");
 			Image im = new ImageIcon(openProcessor.getBufferedImage()).getImage();
 			plot.setBackgroundPaint(null);
