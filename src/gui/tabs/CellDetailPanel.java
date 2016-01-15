@@ -28,6 +28,8 @@ import gui.components.ColourSelecter;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
 import gui.components.RotationSelectionSettingsPanel;
+import gui.components.ShapeOverlay;
+import gui.components.ShapeOverlayObject;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
 import ij.IJ;
@@ -39,12 +41,14 @@ import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -617,6 +621,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private RotationSelectionSettingsPanel rotationPanel;
 		private CellBackgroundChartPanel panel;
 		
+		boolean drawPointOverlay = false;
+		
 		@SuppressWarnings("serial")
 		protected OutlinePanel(){
 			
@@ -665,8 +671,18 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 				
 				
+				
 				if(cell!=null){
 					panel.restoreAutoBounds();
+					
+					if(drawPointOverlay){
+						ShapeOverlay overlay = new ShapeOverlay();
+						for(NucleusBorderPoint p : cell.getNucleus().getBorderList()){
+							Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 0.5, 0.5);
+							overlay.addShape(new ShapeOverlayObject(s));
+						}
+						panel.addOverlay(overlay);
+					}
 				}
 				
 			} catch(Exception e){
