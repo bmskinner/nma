@@ -1,19 +1,33 @@
 package gui.components;
 
 import ij.IJ;
+import ij.ImageStack;
+import ij.process.ImageProcessor;
+import io.ImageExporter;
+import io.ImageImporter;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYAnnotation;
+import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
 
 import stats.NucleusStatistic;
+import utility.Constants;
 import components.Cell;
 import components.generic.MeasurementScale;
+import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
 public class CellBackgroundChartPanel extends ChartPanel {
@@ -25,7 +39,14 @@ public class CellBackgroundChartPanel extends ChartPanel {
 	}
 	
 	public void setCell(Cell c){
-		this.cell = c;
+		clearAnnotations();
+		this.cell = c;		
+	}
+	
+	public void clearAnnotations(){
+		for(  Object a : this.getChart().getXYPlot().getAnnotations()){
+			this.getChart().getXYPlot().removeAnnotation((XYAnnotation) a);
+		}
 	}
 	
 	
@@ -38,6 +59,49 @@ public class CellBackgroundChartPanel extends ChartPanel {
 //			}
 //		}
 		super.repaint();
+	}
+	
+	public void drawNucleusImageAsAnnotation(){
+		if(cell!=null){
+			XYPlot plot = this.getChart().getXYPlot();
+
+
+
+			File imageFile = cell.getNucleus().getSourceFile();
+			ImageStack imageStack = ImageImporter.importImage(imageFile);
+
+			// Get the counterstain stack, make greyscale and invert
+			ImageProcessor openProcessor = imageStack.getProcessor(Constants.COUNTERSTAIN);
+			openProcessor.invert();	
+
+			double[] positions = cell.getNucleus().getPosition();
+			int padding = 10;
+			int wideW = (int) (positions[Nucleus.WIDTH]+(padding*2));
+			int wideH = (int) (positions[Nucleus.HEIGHT]+(padding*2));
+			int wideX = (int) (positions[Nucleus.X_BASE]-padding);
+			int wideY = (int) (positions[Nucleus.Y_BASE]-padding);
+
+			wideX = wideX<0 ? 0 : wideX;
+			wideY = wideY<0 ? 0 : wideY;
+
+			openProcessor.setRoi(wideX, wideY, wideW, wideH);
+			openProcessor = openProcessor.crop();
+
+			for(int x=0; x<openProcessor.getWidth(); x++){
+				for(int y=0; y<openProcessor.getHeight(); y++){
+
+					//				int pixel = im.getRGB(x, y);
+					int pixel = openProcessor.get(x, y);
+					Color col = new Color(pixel, pixel, pixel, 128);
+//					IJ.log("x: "+x+" y: "+y+" : "+pixel+" : "+col);
+					Rectangle r = new Rectangle(x-10, y-10, 1, 1);
+					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+
+					plot.addAnnotation(a);
+				}
+			}
+
+		}
 	}
 	
 	private void setPlotArea(){

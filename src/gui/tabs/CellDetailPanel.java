@@ -658,6 +658,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				}
 				
 				panel.setChart(chart);
+				if(rotateMode.equals(RotationMode.ACTUAL)){
+					panel.drawNucleusImageAsAnnotation();
+				} else {
+					panel.clearAnnotations();
+				}
 				
 				
 				if(cell!=null){
