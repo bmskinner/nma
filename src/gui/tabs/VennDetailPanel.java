@@ -20,6 +20,8 @@ package gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -75,7 +77,6 @@ public class VennDetailPanel extends DetailPanel {
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				updateVennTable();
-//				updatePairwiseVennTable();
 				setUpdating(false);
 			}});
 	}
@@ -87,7 +88,7 @@ public class VennDetailPanel extends DetailPanel {
 		// format the numbers and make into a tablemodel
 		TableModel model = NucleusTableDatasetCreator.createVennTable(null);
 
-		if(!getDatasets().isEmpty() && getDatasets()!=null){
+		if(hasDatasets()){
 
 			TableOptions options = new DefaultTableOptions(getDatasets(), TableType.VENN);
 			if(getTableCache().hasTable(options)){
@@ -132,9 +133,12 @@ public class VennDetailPanel extends DetailPanel {
 		        
 		        double pct;
 		        try {
-		        	pct = Double.valueOf(array2[1]);
+		        	
+		        	NumberFormat nf = NumberFormat.getInstance();
+		        	pct = nf.parse(array2[1]).doubleValue();
+//		        	pct = Double.valueOf(array2[1]);
 		        } catch (Exception e){
-		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName);
+		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName, e);
 		        	pct = 0;
 		        }
 		        		        

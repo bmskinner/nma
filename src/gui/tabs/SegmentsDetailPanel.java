@@ -43,6 +43,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -219,14 +220,16 @@ public class SegmentsDetailPanel extends DetailPanel {
 			if(rowName.equals("Length p(unimodal)") && column > 0){
 
 				String cellContents = l.getText();
-				
+
 				double pval;
-		        try {
-		        	pval = Double.valueOf(cellContents);
-		        } catch (Exception e){
-		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+colName);
-		        	pval = 1;
-		        }
+				try {
+
+					NumberFormat nf = NumberFormat.getInstance();
+					pval = nf.parse(cellContents).doubleValue();
+				} catch (Exception e){
+					programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+colName, e);
+					pval = 0;
+				}
 				
 				if(  pval < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
 					colour = Color.YELLOW;

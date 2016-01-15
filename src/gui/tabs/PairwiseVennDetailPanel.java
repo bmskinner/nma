@@ -20,6 +20,7 @@ package gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.text.NumberFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -140,9 +141,11 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	        	
 		        double pct;
 		        try {
-		        	pct = Double.valueOf(cellContents);
+		        	
+		        	NumberFormat nf = NumberFormat.getInstance();
+		        	pct = nf.parse(cellContents).doubleValue();
 		        } catch (Exception e){
-		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName);
+		        	programLogger.log(Level.FINEST, "Error getting value: "+cellContents+" in column "+columnName, e);
 		        	pct = 0;
 		        }
 		        

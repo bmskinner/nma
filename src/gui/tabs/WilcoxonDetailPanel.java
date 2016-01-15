@@ -21,6 +21,8 @@ package gui.tabs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -114,7 +116,7 @@ public class WilcoxonDetailPanel extends DetailPanel {
 			public void run(){
 				try{
 
-					if(!getDatasets().isEmpty() && getDatasets()!=null){
+					if(hasDatasets()){
 
 						for(NucleusStatistic stat : NucleusStatistic.values()){
 
@@ -178,7 +180,19 @@ public class WilcoxonDetailPanel extends DetailPanel {
 	        String cellContents = l.getText();
 	        if(cellContents!=null && !cellContents.equals("")){ // ensure value
 //	        	
-		        double pvalue = Double.valueOf(cellContents);
+	        	
+	        	NumberFormat nf = NumberFormat.getInstance();
+	        	double pvalue = 1; 
+	        	
+	        	try {
+	        		pvalue = nf.parse(cellContents).doubleValue();
+	        	} catch (ParseException e) {
+
+	        		programLogger.log(Level.FINEST, "Parsing error in Wilcoxon renederer", e);
+	        	}
+	        	
+	        	
+//		        double pvalue = Double.valueOf(cellContents);
 		        
 		        Color colour = Color.WHITE; // default
 		        
