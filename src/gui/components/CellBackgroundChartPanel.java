@@ -39,13 +39,19 @@ public class CellBackgroundChartPanel extends ChartPanel {
 	}
 	
 	public void setCell(Cell c){
-		clearAnnotations();
+		clearShapeAnnotations();
 		this.cell = c;		
 	}
 	
-	public void clearAnnotations(){
+	/**
+	 * Remove the XYShapeAnnotations from this image
+	 * This will leave all other annotation types.
+	 */
+	public void clearShapeAnnotations(){
 		for(  Object a : this.getChart().getXYPlot().getAnnotations()){
-			this.getChart().getXYPlot().removeAnnotation((XYAnnotation) a);
+			if(a.getClass().isAssignableFrom(XYShapeAnnotation.class)){
+				this.getChart().getXYPlot().removeAnnotation((XYShapeAnnotation) a);
+			}
 		}
 	}
 	
@@ -61,46 +67,50 @@ public class CellBackgroundChartPanel extends ChartPanel {
 		super.repaint();
 	}
 	
+	/**
+	 * Simulate a nucleus image using shape annotations
+	 * for each pixel
+	 */
 	public void drawNucleusImageAsAnnotation(){
 		if(cell!=null){
 			XYPlot plot = this.getChart().getXYPlot();
 
-
-
 			File imageFile = cell.getNucleus().getSourceFile();
-			ImageStack imageStack = ImageImporter.importImage(imageFile);
 
-			// Get the counterstain stack, make greyscale and invert
-			ImageProcessor openProcessor = imageStack.getProcessor(Constants.COUNTERSTAIN);
-			openProcessor.invert();	
+			if(imageFile.exists()){
+				ImageStack imageStack = ImageImporter.importImage(imageFile);
 
-			double[] positions = cell.getNucleus().getPosition();
-			int padding = 10;
-			int wideW = (int) (positions[Nucleus.WIDTH]+(padding*2));
-			int wideH = (int) (positions[Nucleus.HEIGHT]+(padding*2));
-			int wideX = (int) (positions[Nucleus.X_BASE]-padding);
-			int wideY = (int) (positions[Nucleus.Y_BASE]-padding);
+				// Get the counterstain stack, make greyscale and invert
+				ImageProcessor openProcessor = imageStack.getProcessor(Constants.COUNTERSTAIN);
+				openProcessor.invert();	
 
-			wideX = wideX<0 ? 0 : wideX;
-			wideY = wideY<0 ? 0 : wideY;
+				double[] positions = cell.getNucleus().getPosition();
+				int padding = 10;
+				int wideW = (int) (positions[Nucleus.WIDTH]+(padding*2));
+				int wideH = (int) (positions[Nucleus.HEIGHT]+(padding*2));
+				int wideX = (int) (positions[Nucleus.X_BASE]-padding);
+				int wideY = (int) (positions[Nucleus.Y_BASE]-padding);
 
-			openProcessor.setRoi(wideX, wideY, wideW, wideH);
-			openProcessor = openProcessor.crop();
+				wideX = wideX<0 ? 0 : wideX;
+				wideY = wideY<0 ? 0 : wideY;
 
-			for(int x=0; x<openProcessor.getWidth(); x++){
-				for(int y=0; y<openProcessor.getHeight(); y++){
+				openProcessor.setRoi(wideX, wideY, wideW, wideH);
+				openProcessor = openProcessor.crop();
 
-					//				int pixel = im.getRGB(x, y);
-					int pixel = openProcessor.get(x, y);
-					Color col = new Color(pixel, pixel, pixel, 128);
-//					IJ.log("x: "+x+" y: "+y+" : "+pixel+" : "+col);
-					Rectangle r = new Rectangle(x-10, y-10, 1, 1);
-					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+				for(int x=0; x<openProcessor.getWidth(); x++){
+					for(int y=0; y<openProcessor.getHeight(); y++){
 
-					plot.addAnnotation(a);
+						//				int pixel = im.getRGB(x, y);
+						int pixel = openProcessor.get(x, y);
+						Color col = new Color(pixel, pixel, pixel, 128);
+						//					IJ.log("x: "+x+" y: "+y+" : "+pixel+" : "+col);
+						Rectangle r = new Rectangle(x-10, y-10, 1, 1);
+						XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
+
+						plot.addAnnotation(a);
+					}
 				}
 			}
-
 		}
 	}
 	

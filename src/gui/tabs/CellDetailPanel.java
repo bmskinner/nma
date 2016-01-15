@@ -661,7 +661,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				if(rotateMode.equals(RotationMode.ACTUAL)){
 					panel.drawNucleusImageAsAnnotation();
 				} else {
-					panel.clearAnnotations();
+					panel.clearShapeAnnotations();
 				}
 				
 				
