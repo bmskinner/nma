@@ -621,7 +621,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		private RotationSelectionSettingsPanel rotationPanel;
 		private CellBackgroundChartPanel panel;
 		
-		boolean drawPointOverlay = false;
+		boolean drawPointOverlay = false; // debugging
+		private ShapeOverlay overlay = new ShapeOverlay();
 		
 		@SuppressWarnings("serial")
 		protected OutlinePanel(){
@@ -637,6 +638,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(rotationPanel, BorderLayout.NORTH);
 			
 			panel = new CellBackgroundChartPanel(chart);
+			panel.addOverlay(overlay);
 			panel.addComponentListener(new ComponentAdapter() {
 				@Override
 				public void componentResized(ComponentEvent e) {
@@ -652,6 +654,8 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 			RotationMode rotateMode = rotationPanel.getSelected();
 			panel.setCell(cell);
+			
+			panel.removeOverlay(overlay);
 			
 			try{
 				JFreeChart chart;
@@ -674,15 +678,16 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				
 				if(cell!=null){
 					panel.restoreAutoBounds();
-					
-					if(drawPointOverlay){
-						ShapeOverlay overlay = new ShapeOverlay();
-						for(NucleusBorderPoint p : cell.getNucleus().getBorderList()){
-							Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 0.5, 0.5);
-							overlay.addShape(new ShapeOverlayObject(s));
-						}
-						panel.addOverlay(overlay);
+										
+					overlay.clearShapes();
+
+					for(NucleusBorderPoint p : cell.getNucleus().getBorderList()){
+						Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 0.5, 0.5);
+						ShapeOverlayObject ov = new ShapeOverlayObject(s);
+						ov.setVisible(drawPointOverlay);
+						overlay.addShape(ov);
 					}
+					panel.addOverlay(overlay);
 				}
 				
 			} catch(Exception e){

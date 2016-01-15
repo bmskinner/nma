@@ -46,7 +46,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
             throw new IllegalArgumentException("Null 'crosshair' argument.");
         }
         this.shapes.add(shape);
-//        shape.addPropertyChangeListener(this);
+        shape.addPropertyChangeListener(this);
     }
 
     public void removeshape(ShapeOverlayObject shape) {
@@ -54,7 +54,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
             throw new IllegalArgumentException("Null 'crosshair' argument.");
         }
         if (this.shapes.remove(shape)) {
-//        	shape.removePropertyChangeListener(this);
+        	shape.removePropertyChangeListener(this);
             fireOverlayChanged();
         }
     }
@@ -65,9 +65,9 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
         }
         List<ShapeOverlayObject> shapes = getShapes();
         for (int i = 0; i < shapes.size(); i++) {
-        	Shape c = (Shape) shapes.get(i);
+        	ShapeOverlayObject c = (ShapeOverlayObject) shapes.get(i);
             this.shapes.remove(c);
-//            c.removePropertyChangeListener(this);
+            c.removePropertyChangeListener(this);
         }
         fireOverlayChanged();
     }
@@ -90,7 +90,8 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
 	@Override
     public void paintOverlay(Graphics2D g2, ChartPanel chartPanel) {
         Shape savedClip = g2.getClip();
-        Rectangle2D dataArea = chartPanel.getScreenDataArea();
+//        Rectangle2D dataArea = chartPanel.getScreenDataArea();
+        Rectangle2D dataArea = chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
         g2.clip(dataArea);
         JFreeChart chart = chartPanel.getChart();
         XYPlot plot = (XYPlot) chart.getPlot();
@@ -103,7 +104,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
         Iterator<ShapeOverlayObject> iterator = this.shapes.iterator();
         while (iterator.hasNext()) {
         	ShapeOverlayObject ch = (ShapeOverlayObject) iterator.next();
-//            if (ch.isVisible()) {
+            if (ch.isVisible()) {
                 double x = ch.getShape().getBounds2D().getCenterX();
                 double xx = xAxis.valueToJava2D(x, dataArea, xAxisEdge);
                 
@@ -111,13 +112,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
                 double yy = yAxis.valueToJava2D(y, dataArea, yAxisEdge);
                 
                 drawShape(g2, dataArea, xx, yy, ch);
-//                if (plot.getOrientation() == PlotOrientation.VERTICAL) {
-//                    drawVerticalCrosshair(g2, dataArea, xx, ch);
-//                }
-//                else {
-//                    drawHorizontalCrosshair(g2, dataArea, xx, ch);
-//                }
-//            }
+            }
         }
         g2.setClip(savedClip);
     }
@@ -128,7 +123,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
      * @param g2  the graphics target.
      * @param dataArea  the data area.
      * @param y  the y-value in Java2D space.
-     * @param crosshair  the crosshair.
+     * @param shape  the overlay object
      */
     protected void drawShape(Graphics2D g2, Rectangle2D dataArea,
             double x, double y, ShapeOverlayObject shape) {
@@ -138,35 +133,11 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
 
             Paint savedPaint = g2.getPaint();
             Stroke savedStroke = g2.getStroke();
+            
             g2.setPaint(shape.getOutline());
             g2.setStroke(shape.getStroke());
             g2.draw(shape.getShape());
-//            if (crosshair.isLabelVisible()) {
-//                String label = crosshair.getLabelGenerator().generateLabel(
-//                        crosshair);
-//                RectangleAnchor anchor = crosshair.getLabelAnchor();
-//                Point2D pt = calculateLabelPoint(line, anchor, 5, 5);
-//                float xx = (float) pt.getX();
-//                float yy = (float) pt.getY();
-//                TextAnchor alignPt = textAlignPtForLabelAnchorH(anchor);
-//                Shape hotspot = TextUtilities.calculateRotatedStringBounds(
-//                        label, g2, xx, yy, alignPt, 0.0, TextAnchor.CENTER);
-//                if (!dataArea.contains(hotspot.getBounds2D())) {
-//                    anchor = flipAnchorV(anchor);
-//                    pt = calculateLabelPoint(line, anchor, 5, 5);
-//                    xx = (float) pt.getX();
-//                    yy = (float) pt.getY();
-//                    alignPt = textAlignPtForLabelAnchorH(anchor);
-//                    hotspot = TextUtilities.calculateRotatedStringBounds(
-//                           label, g2, xx, yy, alignPt, 0.0, TextAnchor.CENTER);
-//                }
-//
-//                g2.setPaint(crosshair.getLabelBackgroundPaint());
-//                g2.fill(hotspot);
-//                g2.setPaint(crosshair.getLabelOutlinePaint());
-//                g2.draw(hotspot);
-//                TextUtilities.drawAlignedString(label, g2, xx, yy, alignPt);
-//            }
+            
             g2.setPaint(savedPaint);
             g2.setStroke(savedStroke);
         }

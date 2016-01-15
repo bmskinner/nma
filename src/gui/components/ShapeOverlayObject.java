@@ -7,15 +7,18 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShapeOverlayObject implements PropertyChangeListener {
+public class ShapeOverlayObject {
 	
 	private Shape shape;
 	private Stroke stroke;
 	private Paint fill;
 	private Paint outline;
+	private boolean isVisible;
+	private PropertyChangeSupport pcs;
 	
 //	List<Object> propertyChangeListeners = new ArrayList<Object>();
 	
@@ -32,6 +35,7 @@ public class ShapeOverlayObject implements PropertyChangeListener {
 		this.stroke = stroke;
 		this.outline = outline;
 		this.fill = fill;
+		this.pcs = new PropertyChangeSupport(this);
 	}
 
 	public Shape getShape() {
@@ -65,12 +69,33 @@ public class ShapeOverlayObject implements PropertyChangeListener {
 	public void setOutline(Paint outline) {
 		this.outline = outline;
 	}
+	
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		// TODO Auto-generated method stub
-		
+	public boolean isVisible() {
+		return isVisible;
 	}
+
+	public void setVisible(boolean isVisible) {
+		this.isVisible = isVisible;
+	}
+	
+	 /**
+     * Adds a property change listener.
+     *
+     * @param l  the listener.
+     */
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        this.pcs.addPropertyChangeListener(l);
+    }
+
+    /**
+     * Removes a property change listener.
+     *
+     * @param l  the listener.
+     */
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        this.pcs.removePropertyChangeListener(l);
+    }
 	
 	
 
