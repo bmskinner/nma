@@ -29,7 +29,7 @@ import javax.swing.table.TableModel;
 import analysis.AnalysisDataset;
 
 
-public class TableCache {
+public class TableCache implements Cache {
 	private Map<UUID, TableModel> tableMap = new HashMap<UUID, TableModel>();
 	private Map<TableOptions, UUID> optionsMap = new HashMap<TableOptions, UUID>();
 	

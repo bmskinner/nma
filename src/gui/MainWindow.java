@@ -400,6 +400,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
 				MainOptionsDialog dialog = new MainOptionsDialog(MainWindow.this);
 				if(dialog.isReadyToRun()){
+					programLogger.log(Level.FINEST, "Options closed, refreshing charts");
 					for(DetailPanel panel : MainWindow.this.detailPanels){
 						panel.refreshChartCache();
 						panel.refreshTableCache();
@@ -407,6 +408,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 
                     updatePanels(populationsPanel.getSelectedDatasets());
                     
+				} else {
+					programLogger.log(Level.FINEST, "Options cancelled");
 				}
 			}
 		});		

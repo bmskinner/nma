@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import charting.Cache;
 import charting.ChartCache;
 import charting.TableCache;
 import analysis.AnalysisDataset;
@@ -80,7 +81,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	 * This will pass on refreshes and UI updates
 	 * @param panel
 	 */
-	public void addSubPanel(DetailPanel panel){
+	public void addSubPanel(final DetailPanel panel){
 		subPanels.add(panel);
 	}
 	
@@ -166,13 +167,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		}
 	}
 	
+	@Override
 	public void setEnabled(boolean b){
 		for(DetailPanel panel : this.subPanels){
-			panel.setEnabled(b);;
+			panel.setEnabled(b);
 		}
 	}
 	
-	public void update(List<AnalysisDataset> list){
+	public void update(final List<AnalysisDataset> list){
 		
 		if(this.isUpdating()){
 			programLogger.log(Level.FINEST, "Panel is already updating");
@@ -188,6 +190,10 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 
 	}
 	
+	/**
+	 * This method must be overridden by the extending class
+	 * to perform the actual update 
+	 */
 	protected void updateDetail(){
 		
 	}
@@ -202,19 +208,22 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		for(DetailPanel panel : this.subPanels){
 			panel.refreshChartCache();
 		}
+		this.update(getDatasets());
 	}
 	
 	/**
 	 * Remove all charts from the cache containing datasets in
-	 * the given list, so they will be recalculated
+	 * the given list, so they will be recalculated. This allows a refresh of
+	 * some of the charts in the chache, without recalculating everything
 	 * @param list
 	 */
-	public void refreshChartCache(List<AnalysisDataset> list){
+	public void refreshChartCache(final List<AnalysisDataset> list){
 		programLogger.log(Level.FINEST, "Refreshing chart cache");
 		this.getChartCache().refresh(list);
 		for(DetailPanel panel : this.subPanels){
 			panel.refreshChartCache(list);
 		}
+		this.update(getDatasets());
 	}
 	
 	public TableCache getTableCache(){
@@ -231,6 +240,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 		for(DetailPanel panel : this.subPanels){
 			panel.refreshTableCache();
 		}
+		this.update(getDatasets());
 	}
 	
 	/**
@@ -238,12 +248,13 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	 * the given list, so they will be recalculated
 	 * @param list
 	 */
-	public void refreshTableCache(List<AnalysisDataset> list){
+	public void refreshTableCache(final List<AnalysisDataset> list){
 		programLogger.log(Level.FINEST, "Refreshing chart cache");
 		this.getTableCache().refresh(list);
 		for(DetailPanel panel : this.subPanels){
 			panel.refreshTableCache(list);
 		}
+		this.update(getDatasets());
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {

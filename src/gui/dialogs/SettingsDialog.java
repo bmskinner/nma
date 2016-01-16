@@ -110,6 +110,7 @@ public abstract class SettingsDialog extends JDialog {
 		cancelButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				readyToRun = false;
 				dispose();			
 			}
 		});

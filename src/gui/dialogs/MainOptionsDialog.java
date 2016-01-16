@@ -46,7 +46,8 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 	private JComboBox<ColourSwatch> colourBox;
 	
 	public MainOptionsDialog(MainWindow mw){
-		super(mw.getProgramLogger());
+		super(mw.getProgramLogger(), mw, true);
+
 		this.mw = mw;
 		this.setLayout(new BorderLayout());
 		this.setTitle("Options");

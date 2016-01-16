@@ -34,7 +34,7 @@ import analysis.AnalysisDataset;
  * This needs to hold a UUID for any combination of datasets and display options,
  *  and map this uuid to the appropriate chart
  */
-public class ChartCache {
+public class ChartCache implements Cache {
 	
 	private Map<UUID, JFreeChart> chartMap = new HashMap<UUID, JFreeChart>();
 	private Map<ChartOptions, UUID> optionsMap = new HashMap<ChartOptions, UUID>();
@@ -68,23 +68,27 @@ public class ChartCache {
 		return false;
 	}
 	
-	/**
-	 * Remove all cached charts
+	/* (non-Javadoc)
+	 * @see charting.Cache#purge()
 	 */
+	@Override
 	public void purge(){
 		chartMap = new HashMap<UUID, JFreeChart>();
 		optionsMap = new HashMap<ChartOptions, UUID>();
 	}
 	
+	/* (non-Javadoc)
+	 * @see charting.Cache#refresh()
+	 */
+	@Override
 	public void refresh(){
 		this.purge();
 	}
 	
-	/**
-	 * Remove caches containing any of the given datasets.
-	 * These will be recalculated at next call
-	 * @param list
+	/* (non-Javadoc)
+	 * @see charting.Cache#refresh(java.util.List)
 	 */
+	@Override
 	public void refresh(List<AnalysisDataset> list){
 		List<ChartOptions> toRemove = new ArrayList<ChartOptions>();
 		
