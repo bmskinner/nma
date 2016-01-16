@@ -21,6 +21,7 @@ package gui.tabs;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
 import gui.components.ExportableTable;
 
@@ -259,13 +260,28 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     				
     				JTable table = (JTable) e.getSource();
     				
+    				int row = table.rowAtPoint(e.getPoint());
+    				int column = table.columnAtPoint(e.getPoint());
+    				
+    				int signalGroupRow = 0;
+    				int signalGroup = 0;
+    				int rowsPerSignalGroup = 11;
+    				if(row>0){
+    					signalGroupRow = row - (row % rowsPerSignalGroup);
+    					signalGroup = (Integer) table.getModel().getValueAt(signalGroupRow, column);
+    				}
+    				
     				// double click
     				if (e.getClickCount() == 2) {
-    					int row = table.rowAtPoint((e.getPoint()));
 
-    					String value = table.getModel().getValueAt(row+1, 0).toString();
-    					if(value.equals("Signal group")){
-    						updateSignalColour(row);
+    					String rowName = table.getModel().getValueAt(row, 0).toString();
+    					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
+    					if(nextRowName.equals("Signal group")){
+    						updateSignalColour( signalGroup );
+    					}
+    					
+    					if(rowName.equals("Source")){
+    						updateSignalSource( signalGroup );
     					}
     						
     				}
@@ -277,13 +293,15 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     		return scrollPane;
     	}
     	
+    	private void updateSignalSource(int signalGroup){
+    		programLogger.log(Level.FINEST, "Updating signal source for signal group "+signalGroup);
+    	}
+    	
     	/**
     	 * Update the colour of the clicked signal group
     	 * @param row the row selected (the colour bar, one above the group name)
     	 */
-    	private void updateSignalColour(int row){
-    		String groupString = statsTable.getModel().getValueAt(row+1, 1).toString();
-			int signalGroup = Integer.valueOf(groupString);
+    	private void updateSignalColour(int signalGroup){
 			
 			Color oldColour = ColourSelecter.getSignalColour( signalGroup-1 );
 			
@@ -295,7 +313,8 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			if(newColor != null){
 				activeDataset().setSignalGroupColour(signalGroup, newColor);
 				SignalsDetailPanel.this.update(getDatasets());
-				fireSignalChangeEvent("SignalColourUpdate");
+//				fireSignalChangeEvent("SignalColourUpdate");
+				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 			}
     	}
     	

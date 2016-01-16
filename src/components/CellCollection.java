@@ -510,9 +510,14 @@ public class CellCollection implements Serializable {
 	  return result;
   }
   
+  /**
+   * Get the name of the folder containing the images for the given signal group
+   * @param signalGroup
+   * @return
+   */
   public String getSignalSourceFolder(int signalGroup){
 	  String result = null;
-	  
+
 	  for(Nucleus n : this.getNuclei()){
 		  if(n.hasSignal(signalGroup)){
 			  File file = n.getSignalCollection().getSourceFile(signalGroup);
@@ -520,6 +525,21 @@ public class CellCollection implements Serializable {
 		  }
 	  }
 	  return result;
+  }
+  
+  /**
+   * Update the source image folder for the given signal group
+   * @param signalGroup
+   * @param f
+   */
+  public void updateSignalSourceFolder(int signalGroup, File f){
+	  for(Nucleus n : this.getNuclei()){
+		  if(n.hasSignal(signalGroup)){
+			  String fileName = n.getSignalCollection().getSourceFile(signalGroup).getName();
+			  File newFile = new File(f.getAbsolutePath()+File.pathSeparator+fileName);
+			  n.getSignalCollection().updateSourceFile(signalGroup, newFile);
+		  }
+	  }
   }
   
   /**

@@ -197,6 +197,15 @@ public class SignalCollection implements Serializable {
 	}
 	
 	/**
+	 * Update the source file for the given signal group
+	 * @param signalGroup
+	 * @param f
+	 */
+	public void updateSourceFile(int signalGroup, File f){
+		this.sourceFiles.put(signalGroup, f);
+	}
+	
+	/**
 	 * Get the channel containing the signals in the given signal group
 	 * @param signalGroup the group id
 	 * @return the RGB channel with the signals (0 if greyscale)
