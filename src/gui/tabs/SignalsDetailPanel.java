@@ -24,6 +24,7 @@ import gui.SignalChangeListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
 import gui.components.ExportableTable;
+import ij.io.DirectoryChooser;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -35,6 +36,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -294,7 +296,33 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	}
     	
     	private void updateSignalSource(int signalGroup){
-    		programLogger.log(Level.FINEST, "Updating signal source for signal group "+signalGroup);
+    		if(isSingleDataset()){
+    			programLogger.log(Level.FINEST, "Updating signal source for signal group "+signalGroup);
+
+    			DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
+    			String folderName = openDialog.getDirectory();
+
+    			if(folderName==null){
+    				programLogger.log(Level.FINEST, "Folder name null");
+    				return;
+    			}
+
+    			File folder =  new File(folderName);
+
+    			if(!folder.isDirectory() ){
+    				programLogger.log(Level.FINEST, "Folder is not directory");
+    				return;
+    			}
+    			if(!folder.exists()){
+    				programLogger.log(Level.FINEST, "Folder does not exist");
+    				return;
+    			}
+
+    			activeDataset().getCollection().updateSignalSourceFolder(signalGroup, folder);
+//    			SignalsDetailPanel.this.update(getDatasets());
+    			refreshTableCache();
+    			programLogger.log(Level.FINEST, "Updated signal source for signal group "+signalGroup+" to "+folder.getAbsolutePath() );
+    		}
     	}
     	
     	/**
