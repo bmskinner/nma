@@ -35,7 +35,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	/**
 	 * The name of the image which the component was detected
 	 */
-	private File sourceFile;
+	private String sourceFileName;
 	
 	public AbstractCellularComponent(){
 		this.id = java.util.UUID.randomUUID();
@@ -53,7 +53,7 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 		this.perimeter = a.getPerimeter();
 		this.boundingRectangle = a.getBounds();
 		this.sourceFolder = a.getSourceFolder();
-		this.sourceFile = a.getSourceFile();
+		this.sourceFileName = a.getSourceFileName();
 	}
 	
 	public UUID getID() {
@@ -91,7 +91,11 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 	 * @return
 	 */
 	public File getSourceFile(){
-		return new File(this.sourceFolder.getAbsolutePath()+this.sourceFile);
+		return new File(this.sourceFolder.getAbsolutePath()+File.separator+this.getSourceFileName());
+	}
+	
+	public String getSourceFileName(){
+		return this.sourceFileName;
 	}
 
 
@@ -122,11 +126,6 @@ public class AbstractCellularComponent implements CellularComponent, Serializabl
 
 	public void setSourceFolder(File sourceFolder) {
 		this.sourceFolder = sourceFolder;
-	}
-
-
-	public void setSourceFile(File sourceFile) {
-		this.sourceFile = sourceFile;
 	}
 
 

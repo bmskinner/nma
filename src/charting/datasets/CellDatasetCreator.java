@@ -120,6 +120,9 @@ public class CellDatasetCreator {
 				fieldNames.add("Signal name");
 				rowData.add(n.getSignalCollection().getSignalGroupName(signalGroup));
 				
+				fieldNames.add("Source image");
+				rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
+				
 				fieldNames.add("Number of signals");
 				rowData.add(n.getSignalCount(signalGroup));
 				

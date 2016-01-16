@@ -536,7 +536,7 @@ public class CellCollection implements Serializable {
 	  for(Nucleus n : this.getNuclei()){
 		  if(n.hasSignal(signalGroup)){
 			  String fileName = n.getSignalCollection().getSourceFile(signalGroup).getName();
-			  File newFile = new File(f.getAbsolutePath()+File.pathSeparator+fileName);
+			  File newFile = new File(f.getAbsolutePath()+File.separator+fileName);
 			  n.getSignalCollection().updateSourceFile(signalGroup, newFile);
 		  }
 	  }

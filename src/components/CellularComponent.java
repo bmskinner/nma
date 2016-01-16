@@ -18,6 +18,7 @@
  *******************************************************************************/
 package components;
 
+import java.io.File;
 import java.util.UUID;
 
 public interface CellularComponent {
@@ -39,5 +40,7 @@ public interface CellularComponent {
 	public double getArea();
 	
 	public boolean equals(CellularComponent c);
+	
+	public File getSourceFile();
 
 }

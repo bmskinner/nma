@@ -1234,13 +1234,13 @@ public class RoundNucleus
 		
 		double angle;
 		if(this.hasBorderTag(BorderTag.TOP_VERTICAL) && this.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
-			IJ.log("Calculating rotation angle via TopVertical");
+//			IJ.log("Calculating rotation angle via TopVertical");
 			XYPoint end = new XYPoint(this.getBorderTag(BorderTag.BOTTOM_VERTICAL).getXAsInt(),this.getBorderTag(BorderTag.BOTTOM_VERTICAL).getYAsInt()-50);
 			angle = findAngleBetweenXYPoints(end, this.getBorderTag(BorderTag.BOTTOM_VERTICAL), this.getBorderTag(BorderTag.TOP_VERTICAL));
 
 			
 		} else {
-			IJ.log("Calculating rotation angle via OrientationPoint");
+//			IJ.log("Calculating rotation angle via OrientationPoint");
 			// Make a point directly below the orientation point
 			XYPoint end = new XYPoint(this.getBorderTag(BorderTag.ORIENTATION_POINT).getXAsInt(),this.getBorderTag(BorderTag.ORIENTATION_POINT).getYAsInt()-50);
 
