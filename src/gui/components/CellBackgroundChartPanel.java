@@ -68,20 +68,23 @@ public class CellBackgroundChartPanel extends ChartPanel {
 	}
 	
 	/**
-	 * Simulate a nucleus image using shape annotations
-	 * for each pixel
+	 * Draw the greyscale image from teh given channel on the plot
+	 * @param imageFile
+	 * @param channel
 	 */
-	public void drawNucleusImageAsAnnotation(){
+	public void drawImageAsAnnotation(File imageFile, int channel){
 		if(cell!=null){
-			XYPlot plot = this.getChart().getXYPlot();
+			clearShapeAnnotations();
 
-			File imageFile = cell.getNucleus().getSourceFile();
 
 			if(imageFile.exists()){
+
+				XYPlot plot = this.getChart().getXYPlot();
+
 				ImageStack imageStack = ImageImporter.importImage(imageFile);
 
-				// Get the counterstain stack, make greyscale and invert
-				ImageProcessor openProcessor = imageStack.getProcessor(Constants.COUNTERSTAIN);
+				// Get the stack, make greyscale and invert
+				ImageProcessor openProcessor = imageStack.getProcessor(Constants.rgbToStack(channel));
 				openProcessor.invert();	
 
 				double[] positions = cell.getNucleus().getPosition();
@@ -104,13 +107,26 @@ public class CellBackgroundChartPanel extends ChartPanel {
 						int pixel = openProcessor.get(x, y);
 						Color col = new Color(pixel, pixel, pixel, 128);
 						//					IJ.log("x: "+x+" y: "+y+" : "+pixel+" : "+col);
-						Rectangle r = new Rectangle(x-10, y-10, 1, 1);
+						Rectangle r = new Rectangle(x-padding, y-padding, 1, 1);
 						XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
 						plot.addAnnotation(a);
 					}
 				}
 			}
+		}
+	}
+	
+	/**
+	 * Simulate a nucleus image using shape annotations
+	 * for each pixel
+	 */
+	public void drawNucleusImageAsAnnotation(){
+		if(cell!=null){
+
+			File imageFile = cell.getNucleus().getSourceFile();
+			drawImageAsAnnotation(imageFile, Constants.RGB_BLUE);
+			
 		}
 	}
 	

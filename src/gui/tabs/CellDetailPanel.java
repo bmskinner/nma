@@ -32,13 +32,9 @@ import gui.components.ShapeOverlay;
 import gui.components.ShapeOverlayObject;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
-import ij.IJ;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Shape;
@@ -49,24 +45,22 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
-import java.awt.geom.Rectangle2D;
-import java.math.RoundingMode;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -74,33 +68,26 @@ import javax.swing.JTree;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.Align;
-import org.jfree.ui.RectangleEdge;
 
-import stats.NucleusStatistic;
+import utility.Constants;
 import utility.Utils;
 import analysis.AnalysisDataset;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.datasets.CellDatasetCreator;
 import charting.datasets.NucleusDatasetCreator;
-import charting.datasets.NucleusTableDatasetCreator;
 import components.Cell;
 import components.generic.BorderTag;
-import components.generic.MeasurementScale;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
@@ -649,6 +636,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.add(panel, BorderLayout.CENTER);
 			
 		}
+		
+		public void drawCellBackgroundImage(File f, int channel){
+			panel.drawImageAsAnnotation(f, channel);
+		}
 				
 		protected void update(Cell cell){
 
@@ -918,11 +909,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 	}
 	
-	protected class SegmentStatsPanel extends JPanel {
+	protected class SegmentStatsPanel extends JPanel implements ListSelectionListener {
 		
 		private static final long serialVersionUID = 1L;
-		private ExportableTable table; // individual cell stats
+//		private ExportableTable table; // individual cell stats
 		
+		private JList<String> signalList;
 		private JScrollPane scrollPane;
 		
 		protected SegmentStatsPanel(){
@@ -932,33 +924,42 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			scrollPane = new JScrollPane();
 						
 			try {
-				table = new ExportableTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
-				table.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						
-						JTable table = (JTable) e.getSource();
-						int row = table.rowAtPoint(e.getPoint());
-						String rowName = table.getModel().getValueAt(row, 0).toString();
-						
-						int column = table.columnAtPoint(e.getPoint());
-						String columnName = table.getModel().getColumnName(column);
-						
-						// double click
-						if (e.getClickCount() == 2) {
-							
-//							// Change segment start and endpoint
-							updateSegment(rowName, columnName);
-						}
-					}
-				});
+				
+				
+				signalList = new JList<String>();
+				DefaultListModel<String> model = new DefaultListModel<String>();
+
+				signalList.setModel(model);
+				signalList.addListSelectionListener(this);
+				signalList.setEnabled(false);
+				
+//				table = new ExportableTable(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+//				table.addMouseListener(new MouseAdapter() {
+//					@Override
+//					public void mouseClicked(MouseEvent e) {
+//						
+//						JTable table = (JTable) e.getSource();
+//						int row = table.rowAtPoint(e.getPoint());
+//						String rowName = table.getModel().getValueAt(row, 0).toString();
+//						
+//						int column = table.columnAtPoint(e.getPoint());
+//						String columnName = table.getModel().getColumnName(column);
+//						
+//						// double click
+//						if (e.getClickCount() == 2) {
+//							
+////							// Change segment start and endpoint
+//							updateSegment(rowName, columnName);
+//						}
+//					}
+//				});
 			} catch (Exception e) {
 				programLogger.log(Level.SEVERE, "Error in segment stats", e);
 			}
-			table.setEnabled(false);
+//			table.setEnabled(false);
 						
-			scrollPane.setViewportView(table);
-			scrollPane.setColumnHeaderView(table.getTableHeader());
+			scrollPane.setViewportView(signalList);
+//			scrollPane.setColumnHeaderView(table.getTableHeader());
 			
 			this.add(scrollPane, BorderLayout.CENTER);
 		}
@@ -968,31 +969,31 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		 * @param rowName the field name
 		 * @param columnName the segment name
 		 */
-		private void updateSegment(String rowName, String columnName){
-			// Change segment start and endpoint
-			Nucleus n = activeCell.getNucleus();
-			
-			if(columnName.startsWith("Seg_")){
-				
-				try {
-					
-					if(rowName.equals("Start index")){
-						
-						int option = getSegmentUpdateOptions(true, columnName, n);
-						programLogger.log(Level.INFO, "Segment start index update: "+option);
-					}
-					
-					if(rowName.equals("End index")){
-						int option = getSegmentUpdateOptions(false, columnName, n);
-						programLogger.log(Level.INFO, "Segment end index update: "+option);
-					}
-					
-					
-				} catch (Exception e1) {
-					programLogger.log(Level.SEVERE, "Error getting segment", e1);
-				}
-			}
-		}
+//		private void updateSegment(String rowName, String columnName){
+//			// Change segment start and endpoint
+//			Nucleus n = activeCell.getNucleus();
+//			
+//			if(columnName.startsWith("Seg_")){
+//				
+//				try {
+//					
+//					if(rowName.equals("Start index")){
+//						
+//						int option = getSegmentUpdateOptions(true, columnName, n);
+//						programLogger.log(Level.INFO, "Segment start index update: "+option);
+//					}
+//					
+//					if(rowName.equals("End index")){
+//						int option = getSegmentUpdateOptions(false, columnName, n);
+//						programLogger.log(Level.INFO, "Segment end index update: "+option);
+//					}
+//					
+//					
+//				} catch (Exception e1) {
+//					programLogger.log(Level.SEVERE, "Error getting segment", e1);
+//				}
+//			}
+//		}
 		
 		/**
 		 * Update the start and end of a segment via a JOptionPane
@@ -1002,95 +1003,113 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		 * @return the result of the option pane
 		 * @throws Exception
 		 */
-		private int getSegmentUpdateOptions(boolean start, String columnName, Nucleus n) throws Exception{
-
-			SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
-			NucleusBorderSegment seg = profile.getSegment(columnName);
-			int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
-			SpinnerNumberModel sModel = new SpinnerNumberModel(startPos, 
-					0, 
-					n.getLength(),
-					1);
-			JSpinner spinner = new JSpinner(sModel);
-
-			String type = start ? "start" : "end";
-			int option = JOptionPane.showOptionDialog(null, 
-					spinner, 
-					"Choose the new segment "+type+" index", 
-					JOptionPane.OK_CANCEL_OPTION, 
-					JOptionPane.QUESTION_MESSAGE, null, null, null);
-			
-			// Carry out the update if selected
-			if (option == JOptionPane.CANCEL_OPTION) {
-				// user hit cancel
-			} else if (option == JOptionPane.OK_OPTION)	{
-				
-				int index = (Integer) spinner.getModel().getValue();
-				updateSegmentIndex(start, index, seg, n, profile);
-//				int newStart = start ? index : seg.getStartIndex();
-//				int newEnd = start ? seg.getEndIndex() : index;
-//				
-//				int rawOldIndex =  n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, startPos);
-//	
-//								
-//				if(profile.update(seg, newStart, newEnd)){
-//					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
-//					
-//					/* Check the border tags - if they overlap the old index
-//					 * replace them. 
-//					 */
-//					int rawIndex = n.getOffsetBorderIndex(BorderTag.REFERENCE_POINT, index);
-//					programLogger.log(Level.FINEST, "Testing border tags");
-//					programLogger.log(Level.FINEST, "Updating to index "+index+" from reference point");
-//					programLogger.log(Level.FINEST, "Raw old border point is index "+rawOldIndex);
-//					programLogger.log(Level.FINEST, "Raw new border point is index "+rawIndex);
-//					
-//					if(n.hasBorderTag(rawOldIndex)){						
-//						BorderTag tagToUpdate = n.getBorderTag(rawOldIndex);
-//						programLogger.log(Level.FINE, "Updating tag "+tagToUpdate);
-//						n.setBorderTag(tagToUpdate, rawIndex);						
-//					} else {
-//						programLogger.log(Level.FINEST, "No border tag at index "+rawOldIndex+" from reference point");
-////						programLogger.log(Level.FINEST, n.dumpInfo(Nucleus.ALL_POINTS));
-//					}
+//		private int getSegmentUpdateOptions(boolean start, String columnName, Nucleus n) throws Exception{
 //
-//					updateCell(activeCell);
-//				} else {
-//					programLogger.log(Level.INFO, "Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
-//				}
-			}
-			
-			
-			return option;
-		}
+//			SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+//			NucleusBorderSegment seg = profile.getSegment(columnName);
+//			int startPos = start ? seg.getStartIndex() : seg.getEndIndex();
+//			SpinnerNumberModel sModel = new SpinnerNumberModel(startPos, 
+//					0, 
+//					n.getLength(),
+//					1);
+//			JSpinner spinner = new JSpinner(sModel);
+//
+//			String type = start ? "start" : "end";
+//			int option = JOptionPane.showOptionDialog(null, 
+//					spinner, 
+//					"Choose the new segment "+type+" index", 
+//					JOptionPane.OK_CANCEL_OPTION, 
+//					JOptionPane.QUESTION_MESSAGE, null, null, null);
+//			
+//			// Carry out the update if selected
+//			if (option == JOptionPane.CANCEL_OPTION) {
+//				// user hit cancel
+//			} else if (option == JOptionPane.OK_OPTION)	{
+//				
+//				int index = (Integer) spinner.getModel().getValue();
+//				updateSegmentIndex(start, index, seg, n, profile);
+//			}
+//			
+//			
+//			return option;
+//		}
 				
 		protected void update(Cell cell){
 
-			if(cell==null){
+			if(cell!=null){
 				try {
-					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+					DefaultListModel<String> model = new DefaultListModel<String>();
+					model.addElement("Nucleus");
+					for(int i : activeCell.getNucleus().getSignalGroups()){
+						if(activeCell.getNucleus().hasSignal(i)){
+							model.addElement(activeCell.getNucleus().getSignals(i).get(0).getSourceImage().getAbsolutePath());
+						}
+					}
+					signalList.setModel(model);
+					signalList.setEnabled(true);
+//					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error updating segment stats", e);
 				}
 			} else {
 				try {
-					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
+					DefaultListModel<String> model = new DefaultListModel<String>();
+//					for(int i : activeCell.getNucleus().getSignalGroups()){
+//						model.addElement(activeCell.getNucleus().getSignals(i).get(0).getOrigin());
+//					}
+					signalList.setModel(model);
+					signalList.setEnabled(false);
+//					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(cell.getNucleus()));
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error updating segment stats", e);
-					try {
-						table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
-					} catch (Exception e1) {
-						programLogger.log(Level.SEVERE, "Error recovering from segment stats error", e1);
-					}
+//					try {
+////						table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
+//					} catch (Exception e1) {
+//						programLogger.log(Level.SEVERE, "Error recovering from segment stats error", e1);
+//					}
 				}
 
-				Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+//				Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
 
-				while(columns.hasMoreElements()){
-					TableColumn column = columns.nextElement();
-					column.setCellRenderer(new SegmentTableCellRenderer());
+//				while(columns.hasMoreElements()){
+//					TableColumn column = columns.nextElement();
+//					column.setCellRenderer(new SegmentTableCellRenderer());
+//				}
+			}
+		}
+
+		@Override
+		public void valueChanged(ListSelectionEvent e) {
+
+//			if selected value is a valid file reference, load the file and update the
+			// nucleus annotation
+				
+			int row = signalList.getSelectedIndex();
+			String fileName = signalList.getModel().getElementAt(row);
+			
+			if(fileName.equals("Nucleus")){
+				
+				File file =  activeCell.getNucleus().getSourceFile();
+				if(file.exists()){
+					
+					// find the channel of the signal
+					outlinePanel.drawCellBackgroundImage(file, Constants.RGB_BLUE);
+
+				}
+				
+			} else {
+				File file = new File(fileName);
+				if(file.exists()){
+					
+					// find the channel of the signal
+					outlinePanel.drawCellBackgroundImage(file, Constants.RGB_RED);
+					
+					
 				}
 			}
+			
+			
+			
 		}
 	}
 

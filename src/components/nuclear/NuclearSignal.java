@@ -21,6 +21,7 @@ package components.nuclear;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -132,6 +133,10 @@ public class NuclearSignal implements Serializable {
 
 	public String getOrigin(){
 		return this.origin;
+	}
+	
+	public File getSourceImage(){
+		return new File(this.origin);
 	}
 
 	/*

@@ -158,7 +158,7 @@ public class SignalFinder {
 						values.get("Perim"), 
 						new XYPoint(values.get("XM")-n.getPosition()[Nucleus.X_BASE], 
 									values.get("YM")-n.getPosition()[Nucleus.Y_BASE]),
-						n.getImageName()+"-"+n.getNucleusNumber());
+						sourceFile.getAbsolutePath());
 
 				// only keep the signal if it is within the nucleus
 				if(Utils.createPolygon(n).contains(	(float) s.getCentreOfMass().getX(), 
