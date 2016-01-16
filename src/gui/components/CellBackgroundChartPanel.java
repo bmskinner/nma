@@ -72,7 +72,7 @@ public class CellBackgroundChartPanel extends ChartPanel {
 	 * @param imageFile
 	 * @param channel
 	 */
-	public void drawImageAsAnnotation(File imageFile, int channel){
+	public void drawImageAsAnnotation(File imageFile, int stack){
 		if(cell!=null){
 			clearShapeAnnotations();
 
@@ -84,7 +84,7 @@ public class CellBackgroundChartPanel extends ChartPanel {
 				ImageStack imageStack = ImageImporter.importImage(imageFile);
 
 				// Get the stack, make greyscale and invert
-				ImageProcessor openProcessor = imageStack.getProcessor(Constants.rgbToStack(channel));
+				ImageProcessor openProcessor = imageStack.getProcessor(stack);
 				openProcessor.invert();	
 
 				double[] positions = cell.getNucleus().getPosition();
@@ -125,7 +125,7 @@ public class CellBackgroundChartPanel extends ChartPanel {
 		if(cell!=null){
 
 			File imageFile = cell.getNucleus().getSourceFile();
-			drawImageAsAnnotation(imageFile, Constants.RGB_BLUE);
+			drawImageAsAnnotation(imageFile, Constants.COUNTERSTAIN);
 			
 		}
 	}

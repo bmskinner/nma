@@ -1042,10 +1042,11 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					model.addElement("Nucleus");
 					for(int i : activeCell.getNucleus().getSignalGroups()){
 						if(activeCell.getNucleus().hasSignal(i)){
-							model.addElement(activeCell.getNucleus().getSignals(i).get(0).getSourceImage().getAbsolutePath());
+							model.addElement(activeCell.getNucleus().getSignalCollection().getSignalGroupName(i));
 						}
 					}
 					signalList.setModel(model);
+					signalList.setSelectedIndex(0);
 					signalList.setEnabled(true);
 //					table.setModel(NucleusTableDatasetCreator.createSegmentStatsTable(null));
 				} catch (Exception e) {
@@ -1083,32 +1084,37 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 //			if selected value is a valid file reference, load the file and update the
 			// nucleus annotation
-				
 			int row = signalList.getSelectedIndex();
-			String fileName = signalList.getModel().getElementAt(row);
 			
-			if(fileName.equals("Nucleus")){
-				
-				File file =  activeCell.getNucleus().getSourceFile();
-				if(file.exists()){
-					
-					// find the channel of the signal
-					outlinePanel.drawCellBackgroundImage(file, Constants.RGB_BLUE);
+			if(row>=0){ // -1 if nothing selected
+				String signalGroupName = signalList.getModel().getElementAt(row);
 
+				if(signalGroupName.equals("Nucleus")){
+
+					File file =  activeCell.getNucleus().getSourceFile();
+					if(file.exists()){
+
+						outlinePanel.drawCellBackgroundImage(file, Constants.COUNTERSTAIN);
+
+					}
+
+				} else {
+
+					int signalGroup = activeCell.getNucleus().getSignalCollection().getSignalGroup(signalGroupName);
+					File file = activeCell.getNucleus().getSignalCollection().getSourceFile(signalGroup);
+					int channel = activeCell.getNucleus().getSignalCollection().getSignalChannel(signalGroup);
+					int stack = Constants.rgbToStack(channel);
+
+					if(file.exists()){
+
+						// find the channel of the signal
+						outlinePanel.drawCellBackgroundImage(file, stack);
+
+
+					}
 				}
-				
-			} else {
-				File file = new File(fileName);
-				if(file.exists()){
-					
-					// find the channel of the signal
-					outlinePanel.drawCellBackgroundImage(file, Constants.RGB_RED);
-					
-					
-				}
+			
 			}
-			
-			
 			
 		}
 	}

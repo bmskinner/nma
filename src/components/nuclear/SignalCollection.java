@@ -217,6 +217,27 @@ public class SignalCollection implements Serializable {
 		names.put(signalGroup, name);
 	}
 	
+	/**
+	 * Get the signal group with the given name
+	 * @param signalGroupName
+	 * @return
+	 */
+	public int getSignalGroup(String signalGroupName){
+		if(signalGroupName==null){
+			throw new IllegalArgumentException("Signal group name is null");
+		}
+		if(!names.containsValue(signalGroupName)){
+			throw new IllegalArgumentException("Signal group name is not present");
+		}
+		
+		for(int signalGroup : names.keySet()){
+			if(names.get(signalGroup).equals(signalGroupName)){
+				return signalGroup;
+			}
+		}
+		return -1;
+	}
+	
 	public String getSignalGroupName(int signalGroup){
 		if(Integer.valueOf(signalGroup)==null){
 			throw new IllegalArgumentException("Channel is null");
