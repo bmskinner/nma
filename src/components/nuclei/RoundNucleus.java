@@ -1851,8 +1851,39 @@ public class RoundNucleus
 
 				this.updatePoint(i, newX, newY);
 			}
+			
+			// Also update signal locations
+			// TODO: rotates, but does not get location correct. Is there an offset?
+//			for (int signalGroup : this.getSignalGroups()){
+//				for(NuclearSignal s : this.getSignals(signalGroup)){
+//					for(int i = 0; i<s.getBorderSize(); i++){
+//						XYPoint p = s.getBorderPoint(i);
+//
+//
+//						// get the distance from this point to the centre of mass
+//						double distance = p.getLengthTo(this.getCentreOfMass());
+//						
+//						double oldAngle = RoundNucleus.findAngleBetweenXYPoints( p, 
+//								this.getCentreOfMass(), 
+//								new XYPoint(this.getCentreOfMass().getX(),-10));
+//
+//
+//						if(p.getX()<this.getCentreOfMass().getX()){
+//							oldAngle = 360-oldAngle;
+//						}
+//
+//						double newAngle = oldAngle + angle;
+//						double newX = Utils.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+//						double newY = Utils.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+//
+//						s.updateBorderPoint(i, newX, newY);
+//					}
+//					
+//				}
+//			}
 		}
 	}
+	
 	
 
 	/**

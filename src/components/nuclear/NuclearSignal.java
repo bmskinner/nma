@@ -98,6 +98,34 @@ public class NuclearSignal implements Serializable {
 		}
 		return result;
 	}
+	
+	/**
+	 * Get the number of border points
+	 * @return
+	 */
+	public int getBorderSize(){
+		return this.borderList.size();
+	}
+	
+	/**
+	 * Get a copy of the border point at the given index
+	 * @param index
+	 * @return
+	 */
+	public NucleusBorderPoint getBorderPoint(int index){
+		return new NucleusBorderPoint(borderList.get(index));
+	}
+	
+	/**
+	 * Update the border point at the given index to a new position
+	 * @param index
+	 * @param newX
+	 * @param newY
+	 */
+	public void updateBorderPoint(int index, double newX, double newY){
+		this.borderList.get(index).setX(newX);
+		this.borderList.get(index).setY(newY);
+	}
 
 	public double getArea(){
 		return this.area;
