@@ -636,7 +636,8 @@ public class DatasetSegmenter extends AnalysisWorker {
 					
 					SegmentedProfile nucleusProfile = new SegmentedProfile(n.getAngleProfile(tag));
 					
-//					nucleusProfile = nucleusProfile.alignSegmentPositionToZeroIndex(1);
+//					NucleusBorderSegment firstSegment = n.getAngleProfile(tag).getOrderedSegments().get(0);
+//					nucleusProfile = nucleusProfile.moveSegmentToPositionZero(firstSegment);
 					
 					log(Level.FINEST, "    Segmentation beginning from "+tag);
 					log(Level.FINEST, "    The border tag "+tag+" in this nucleus is at raw index "+n.getBorderIndex(tag));

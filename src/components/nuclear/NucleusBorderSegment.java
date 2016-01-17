@@ -785,7 +785,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		
 		return result;
 	}
-	
+		
 	/**
 	 * Nudge segments that are not linked together into a complete profile. Used in merging and unmerging
 	 * segments recursively.

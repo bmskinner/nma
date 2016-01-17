@@ -519,42 +519,76 @@ public class SegmentedProfile extends Profile implements Serializable {
 		return new SegmentedProfile(offsetProfile, segments);
 	}
 	
+//	/**
+//	 * Enure that the segment startign with index 0 is first in the segments list
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	public SegmentedProfile alignSegmentPositionToZeroIndex(int position) throws Exception{
+//		/*
+//		 * Set the positions of the segments based on start index, if available
+//		 * Get the segment with index 0, and use this as the start
+//		 */
+//
+//		NucleusBorderSegment first = null;
+//		List<NucleusBorderSegment> list = this.getSegments();
+//		for(NucleusBorderSegment segment : list){
+//			if(segment.getStartIndex()==0){
+//				first = segment;
+//			}
+//		}
+//		
+//		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>();
+//		
+//		if(first!=null){
+//			
+//			int positionInProfile = position;
+//			int counter = this.getSegmentCount();
+//			while(counter>0){
+//				first.setPosition(positionInProfile++);
+//				if(positionInProfile>=this.getSegmentCount()){
+//					positionInProfile = 0;
+//				}
+//				newList.add(first);
+//				first = first.nextSegment();
+//				counter--;
+//			}
+//		}
+//		
+//		SegmentedProfile result =  new SegmentedProfile(this, newList);
+//		return result;
+//	}
+	
 	/**
-	 * Enure that the segment startign with index 0 is first in the segments list
+	 * Return a profile with the given segment at the beginning of the list (i.e. as Seg_0)
 	 * @return
 	 * @throws Exception
 	 */
-	public SegmentedProfile alignSegmentPositionToZeroIndex(int position) throws Exception{
-		/*
-		 * Set the positions of the segments based on start index, if available
-		 * Get the segment with index 0, and use this as the start
-		 */
-
-		NucleusBorderSegment first = null;
-		List<NucleusBorderSegment> list = this.getSegments();
-		for(NucleusBorderSegment segment : list){
-			if(segment.getStartIndex()==0){
-				first = segment;
-			}
+	public SegmentedProfile moveSegmentToPositionZero(NucleusBorderSegment firstSegment) throws Exception{
+		
+		if( ! this.contains(firstSegment)){
+			throw new IllegalArgumentException("Profile does not contain the given segment");
 		}
 		
 		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>();
+		List<NucleusBorderSegment> part1List = new ArrayList<NucleusBorderSegment>();
+		List<NucleusBorderSegment> list = this.getSegments();
+		boolean segmentFound = false;
 		
-		if(first!=null){
+		for(NucleusBorderSegment segment : list){
 			
-			int positionInProfile = position;
-			int counter = this.getSegmentCount();
-			while(counter>0){
-				first.setPosition(positionInProfile++);
-				if(positionInProfile>=this.getSegmentCount()){
-					positionInProfile = 0;
-				}
-				newList.add(first);
-				first = first.nextSegment();
-				counter--;
+			if(segment.equals(firstSegment)){
+				segmentFound = true;
+			}
+			
+			if(segmentFound){
+				newList.add(segment);
+			} else {
+				part1List.add(segment);
 			}
 		}
 		
+		newList.addAll(part1List);
 		SegmentedProfile result =  new SegmentedProfile(this, newList);
 		return result;
 	}

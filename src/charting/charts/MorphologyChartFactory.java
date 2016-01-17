@@ -273,7 +273,7 @@ public class MorphologyChartFactory {
 			for(NucleusBorderSegment seg :  options.firstDataset().getCollection()
 					.getProfileCollection(ProfileCollectionType.REGULAR)
 					.getSegmentedProfile(options.getTag())
-					.getSegments()){
+					.getOrderedSegments()){
 
 				int midPoint = seg.getMidpointIndex();
 

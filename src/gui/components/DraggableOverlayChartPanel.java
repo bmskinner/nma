@@ -105,7 +105,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 
 				activeOverlay = new CrosshairOverlay();
 				int i=0;
-				for(NucleusBorderSegment seg : profile.getSegments()){
+				for(NucleusBorderSegment seg : profile.getOrderedSegments()){
 
 					Color colour = ColourSelecter.getSegmentColor(i++);
 
