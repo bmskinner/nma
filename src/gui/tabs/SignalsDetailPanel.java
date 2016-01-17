@@ -23,6 +23,7 @@ import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter;
+import gui.components.ConsensusNucleusChartPanel;
 import gui.components.ExportableTable;
 import ij.io.DirectoryChooser;
 
@@ -140,17 +141,23 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
 				
-				shellsPanel.update(getDatasets());
-				programLogger.log(Level.FINEST, "Updated shells panel");
-				overviewPanel.update(getDatasets());
-				programLogger.log(Level.FINEST, "Updated signals overview panel");
-				histogramPanel.update(getDatasets());
-				programLogger.log(Level.FINEST, "Updated signals histogram panel");
-				analysisPanel.update(getDatasets());
-				programLogger.log(Level.FINEST, "Updated signals analysis panel");
-				boxplotPanel.update(getDatasets());
-				programLogger.log(Level.FINEST, "Updated signals boxplot panel");
-				setUpdating(false);
+				try{
+					shellsPanel.update(getDatasets());
+					programLogger.log(Level.FINEST, "Updated shells panel");
+					overviewPanel.update(getDatasets());
+					programLogger.log(Level.FINEST, "Updated signals overview panel");
+					histogramPanel.update(getDatasets());
+					programLogger.log(Level.FINEST, "Updated signals histogram panel");
+					analysisPanel.update(getDatasets());
+					programLogger.log(Level.FINEST, "Updated signals analysis panel");
+					boxplotPanel.update(getDatasets());
+					programLogger.log(Level.FINEST, "Updated signals boxplot panel");
+					setUpdating(false);
+				} catch(Exception e){
+					setUpdating(false);
+					programLogger.log(Level.SEVERE, "Error updating signals detail panel" ,e);
+					SignalsDetailPanel.this.update( (List<AnalysisDataset>) null);
+				}
 			
 		}});
 
@@ -229,7 +236,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     	
     	private static final long serialVersionUID = 1L;
     	
-    	private ChartPanel 	chartPanel; 		// consensus nucleus plus signals
+    	private ConsensusNucleusChartPanel 	chartPanel; 		// consensus nucleus plus signals
     	private ExportableTable 		statsTable;					// table for signal stats
     	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
     	private JPanel		checkboxPanel;
@@ -360,85 +367,85 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
     				
     		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
     		// this allows a checkbox panel to be added to the JPanel later
-    		chartPanel = new ChartPanel(signalsChart) {
-    			@Override
-				public void restoreAutoBounds() {
-					XYPlot plot = (XYPlot) this.getChart().getPlot();
-					
-					double chartWidth = this.getWidth();
-					double chartHeight = this.getHeight();
-					double aspectRatio = chartWidth / chartHeight;
-					
-					// start with impossible values
-					double xMin = chartWidth;
-					double yMin = chartHeight;
+    		chartPanel = new ConsensusNucleusChartPanel(signalsChart);// {
+//    			@Override
+//				public void restoreAutoBounds() {
+//					XYPlot plot = (XYPlot) this.getChart().getPlot();
 //					
-					double xMax = 0;
-					double yMax = 0;
-					
-					// get the max and min values of the chart
-					for(int i = 0; i<plot.getDatasetCount();i++){
-						XYDataset dataset = plot.getDataset(i);
-
-						if(DatasetUtilities.findMaximumDomainValue(dataset)!=null){
-
-							xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
-									? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
-											: xMax;
-
-							xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
-									? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
-											: xMin;
-
-							yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
-									? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue()
-											: yMax;
-
-							yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
-									? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue()
-											: yMin;
-						}
-					}
-					
-
-					// find the ranges they cover
-					double xRange = xMax - xMin;
-					double yRange = yMax - yMin;
-					
-//					double aspectRatio = xRange / yRange;
-
-					double newXRange = xRange;
-					double newYRange = yRange;
-
-					// test the aspect ratio
-//					IJ.log("Old range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
-					if( (xRange / yRange) > aspectRatio){
-						// width is not enough
-//						IJ.log("Too narrow: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
-						newXRange = xRange * 1.1;
-						newYRange = newXRange / aspectRatio;
-					} else {
-						// height is not enough
-//						IJ.log("Too short: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
-						newYRange = yRange * 1.1; // add some extra x space
-						newXRange = newYRange * aspectRatio; // get the new Y range
-					}
-					
-
-					// with the new ranges, find the best min and max values to use
-					double xDiff = (newXRange - xRange)/2;
-					double yDiff = (newYRange - yRange)/2;
-
-					xMin -= xDiff;
-					xMax += xDiff;
-					yMin -= yDiff;
-					yMax += yDiff;
-//					IJ.log("New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
-
-					plot.getRangeAxis().setRange(yMin, yMax);
-					plot.getDomainAxis().setRange(xMin, xMax);				
-				} 
-    		};
+//					double chartWidth = this.getWidth();
+//					double chartHeight = this.getHeight();
+//					double aspectRatio = chartWidth / chartHeight;
+//					
+//					// start with impossible values
+//					double xMin = chartWidth;
+//					double yMin = chartHeight;
+////					
+//					double xMax = 0;
+//					double yMax = 0;
+//					
+//					// get the max and min values of the chart
+//					for(int i = 0; i<plot.getDatasetCount();i++){
+//						XYDataset dataset = plot.getDataset(i);
+//
+//						if(DatasetUtilities.findMaximumDomainValue(dataset)!=null){
+//
+//							xMax = DatasetUtilities.findMaximumDomainValue(dataset).doubleValue() > xMax
+//									? DatasetUtilities.findMaximumDomainValue(dataset).doubleValue()
+//											: xMax;
+//
+//							xMin = DatasetUtilities.findMinimumDomainValue(dataset).doubleValue() < xMin
+//									? DatasetUtilities.findMinimumDomainValue(dataset).doubleValue()
+//											: xMin;
+//
+//							yMax = DatasetUtilities.findMaximumRangeValue(dataset).doubleValue() > yMax
+//									? DatasetUtilities.findMaximumRangeValue(dataset).doubleValue()
+//											: yMax;
+//
+//							yMin = DatasetUtilities.findMinimumRangeValue(dataset).doubleValue() < yMin
+//									? DatasetUtilities.findMinimumRangeValue(dataset).doubleValue()
+//											: yMin;
+//						}
+//					}
+//					
+//
+//					// find the ranges they cover
+//					double xRange = xMax - xMin;
+//					double yRange = yMax - yMin;
+//					
+////					double aspectRatio = xRange / yRange;
+//
+//					double newXRange = xRange;
+//					double newYRange = yRange;
+//
+//					// test the aspect ratio
+////					IJ.log("Old range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
+//					if( (xRange / yRange) > aspectRatio){
+//						// width is not enough
+////						IJ.log("Too narrow: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
+//						newXRange = xRange * 1.1;
+//						newYRange = newXRange / aspectRatio;
+//					} else {
+//						// height is not enough
+////						IJ.log("Too short: "+xRange+", "+yRange+":  aspect ratio "+aspectRatio);
+//						newYRange = yRange * 1.1; // add some extra x space
+//						newXRange = newYRange * aspectRatio; // get the new Y range
+//					}
+//					
+//
+//					// with the new ranges, find the best min and max values to use
+//					double xDiff = (newXRange - xRange)/2;
+//					double yDiff = (newYRange - yRange)/2;
+//
+//					xMin -= xDiff;
+//					xMax += xDiff;
+//					yMin -= yDiff;
+//					yMax += yDiff;
+////					IJ.log("New range: "+xMax+"-"+xMin+", "+yMax+"-"+yMin);
+//
+//					plot.getRangeAxis().setRange(yMin, yMax);
+//					plot.getDomainAxis().setRange(xMin, xMax);				
+//				} 
+//    		};
     		panel.add(chartPanel, BorderLayout.CENTER);
     		
     		
