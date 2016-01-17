@@ -51,7 +51,7 @@ import analysis.AnalysisDataset;
  *
  */
 @SuppressWarnings("serial")
-public abstract class DetailPanel extends JPanel implements TabPanel {
+public abstract class DetailPanel extends JPanel implements TabPanel, SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 	
 	private final List<Object> listeners 			= new ArrayList<Object>();
 	private final List<Object> datasetListeners 	= new ArrayList<Object>();
@@ -83,6 +83,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
 	 */
 	public void addSubPanel(final DetailPanel panel){
 		subPanels.add(panel);
+		panel.addSignalChangeListener(this);
+		panel.addDatasetEventListener(this);
+		panel.addInterfaceEventListener(this);
 	}
 	
 	/**
@@ -346,6 +349,18 @@ public abstract class DetailPanel extends JPanel implements TabPanel {
         while( iterator.hasNext() ) {
             ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
         }
+    }
+
+    public void interfaceEventReceived(InterfaceEvent event){
+
+    }
+
+    public void datasetEventReceived(DatasetEvent event){
+
+    }
+
+    public void signalChangeReceived(SignalChangeEvent event){
+
     }
 
 }

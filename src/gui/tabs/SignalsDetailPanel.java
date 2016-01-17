@@ -163,11 +163,6 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().startsWith("GroupVisble_")){
-			
-			int signalGroup = this.getIndexFromLabel(e.getActionCommand());
-			JCheckBox box = (JCheckBox) e.getSource();
-			AnalysisDataset d = this.activeDataset();
-			d.setSignalGroupVisible(signalGroup, box.isSelected());
 			overviewPanel.update(getDatasets());
 			histogramPanel.update(getDatasets());
 		}
@@ -213,6 +208,11 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	public void signalChangeReceived(SignalChangeEvent event) {
 		if(event.type().equals("SignalColourUpdate")){
 			update(getDatasets());
+		}
+		
+		if(event.type().startsWith("GroupVisble_")){
+			overviewPanel.update(getDatasets());
+			histogramPanel.update(getDatasets());
 		}
 	}
     

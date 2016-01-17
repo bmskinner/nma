@@ -502,6 +502,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener 
 			int signalGroup = this.getIndexFromLabel(e.getActionCommand());
 			JCheckBox box = (JCheckBox) e.getSource();
 			activeDataset().setSignalGroupVisible(signalGroup, box.isSelected());
+			fireSignalChangeEvent("GroupVisble_");
 		}
 		
 	}
