@@ -35,6 +35,7 @@ import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
+import utility.Constants;
 
 /**
  * This is the core of the morphology analysis pipeline.
@@ -336,7 +337,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 		// the reference point is always index 0, so the segments will match
 		// the profile
-		Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
+		Profile median = pc.getProfile(BorderTag.REFERENCE_POINT, Constants.MEDIAN);
 
 		ProfileSegmenter segmenter = new ProfileSegmenter(median);		
 
@@ -708,6 +709,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 									
 					// A segment was not found with a start index at zero; segName is null
 					log(Level.WARNING, "Border tag '"+tag+"' not found in median profile");
+					log(Level.WARNING, "No segment with start index zero in median profile");
 					log(Level.WARNING, "Median profile:");
 					log(Level.WARNING, pc.toString());
 					log(Level.WARNING, "Median segment list:");
@@ -1150,7 +1152,18 @@ public class DatasetSegmenter extends AnalysisWorker {
 				 * If a boundary is already called at the last index in the profile,
 				 *  do not add a terminal segment, and just allow merging
 				 */
-				if(  (segments.get(0).getEndIndex()!=0) && segments.get(segments.size()-1).getEndIndex() != profile.size()-1 ) {
+				int firstSegmentEndIndex = segments.get(0).getEndIndex();
+				int lastSegmentEndIndex =  segments.get(segments.size()-1).getEndIndex();
+				int lastProfileIndex = profile.size()-1;
+				
+				log(Level.FINE, "First segment end: " + firstSegmentEndIndex + " of "+lastProfileIndex);
+				log(Level.FINE, "Final segment end: " + lastSegmentEndIndex  + " of "+lastProfileIndex);
+				
+                if(  (segments.get(0).getEndIndex()!=0) && segments.get(segments.size()-1).getEndIndex() != profile.size()-1 ) {
+
+				
+//				if(  firstSegmentEndIndex != 0 && lastSegmentEndIndex != lastProfileIndex ) {
+					
 					NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
 					seg.setName("Seg_"+segCount);
 					segments.add(seg);
@@ -1161,6 +1174,9 @@ public class DatasetSegmenter extends AnalysisWorker {
 					// We need to merge the first and last segments
 					
 					log(Level.FINE, "Terminal segment not needed: first segment has index 0 or last has full index");
+					
+//					log(Level.FINE, " Updating the final segment to end at index zero");
+//					segments.get(segments.size()-1).update(segments.get(segments.size()-1).getStartIndex(), 0);
 				}
 				
 				NucleusBorderSegment.linkSegments(segments);

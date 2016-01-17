@@ -273,9 +273,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			Profile medianProfile = pc.getProfile(BorderTag.REFERENCE_POINT, 50);
 
 			int tailIndex = (int) Math.floor(medianProfile.size()/2);
-			
-			
-			
+						
 			collection.getProfileCollection(ProfileCollectionType.REGULAR).addOffset(BorderTag.ORIENTATION_POINT, tailIndex);
 		}
 
