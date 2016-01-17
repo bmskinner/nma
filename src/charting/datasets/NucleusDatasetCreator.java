@@ -1136,14 +1136,12 @@ public class NucleusDatasetCreator {
 		
 		for(int signalGroup : nucleus.getSignalGroups()){
 			
-			DefaultXYDataset groupDataset = new DefaultXYDataset();
-			int signalNumber = 0;
+			if(dataset.isSignalGroupVisible(signalGroup)){ // only add the groups that are set to visible
 
-			for(NuclearSignal signal : nucleus.getSignals(signalGroup)){
-				
-				
-				
-				if(dataset.isSignalGroupVisible(signalGroup)){ // only add the groups that are set to visible
+				DefaultXYDataset groupDataset = new DefaultXYDataset();
+				int signalNumber = 0;
+
+				for(NuclearSignal signal : nucleus.getSignals(signalGroup)){
 
 					double[] xpoints = new double[signal.getBorder().size()];
 					double[] ypoints = new double[signal.getBorder().size()];
@@ -1156,7 +1154,7 @@ public class NucleusDatasetCreator {
 					}
 					double[][] data = { xpoints, ypoints };
 					groupDataset.addSeries("Group_"+signalGroup+"_signal_"+signalNumber, data);
-				
+
 					result.add(groupDataset);
 				}
 				signalNumber++;

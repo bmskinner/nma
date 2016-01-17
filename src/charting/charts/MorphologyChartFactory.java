@@ -665,6 +665,7 @@ public class MorphologyChartFactory {
 	 * Get a chart contaning the details of the given cell from the given dataset
 	 * @param cell the cell to draw
 	 * @param dataset the dataset the cell came from
+	 * @param rotateMode the orientation of the image
 	 * @return
 	 * @throws Exception 
 	 */
@@ -713,18 +714,22 @@ public class MorphologyChartFactory {
 		datasetHash.put(datasetHash.size(), tags);
 		
 		// get the signals datasets and add each group to the hash
-		if(cell.getNucleus().hasSignal()){
-			List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
+		// Only display the signal outlines if the rotation is ACTUAL;
+		// TODO: the RoundNucleus.rotate() is not working with signals 
+		if(rotateMode.equals(RotationMode.ACTUAL)){
+			if(cell.getNucleus().hasSignal()){
+				List<DefaultXYDataset> signalsDatasets = NucleusDatasetCreator.createSignalOutlines(cell, dataset);
 
-			for(XYDataset d : signalsDatasets){
+				for(XYDataset d : signalsDatasets){
 
-				String name = "default_0";
-				for (int i = 0; i < d.getSeriesCount(); i++) {
-					name = (String) d.getSeriesKey(i);	
+					String name = "default_0";
+					for (int i = 0; i < d.getSeriesCount(); i++) {
+						name = (String) d.getSeriesKey(i);	
+					}
+					int signalGroup = getIndexFromLabel(name);
+					hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
+					datasetHash.put(datasetHash.size(), d);
 				}
-				int signalGroup = getIndexFromLabel(name);
-				hash.put(hash.size(), "SignalGroup_"+signalGroup); // add to the first free entry	
-				datasetHash.put(datasetHash.size(), d);
 			}
 		}
 

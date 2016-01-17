@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -21,6 +22,8 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.ui.RectangleEdge;
 import org.jfree.util.PublicCloneable;
+
+import ij.IJ;
 
 public class ShapeOverlay extends AbstractOverlay implements Overlay,
     PropertyChangeListener, Serializable {
@@ -92,6 +95,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
         Shape savedClip = g2.getClip();
 //        Rectangle2D dataArea = chartPanel.getScreenDataArea();
         Rectangle2D dataArea = chartPanel.getChartRenderingInfo().getPlotInfo().getDataArea();
+//        IJ.log(dataArea.toString());
         g2.clip(dataArea);
         JFreeChart chart = chartPanel.getChart();
         XYPlot plot = (XYPlot) chart.getPlot();
@@ -103,15 +107,20 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
         
         Iterator<ShapeOverlayObject> iterator = this.shapes.iterator();
         while (iterator.hasNext()) {
-        	ShapeOverlayObject ch = (ShapeOverlayObject) iterator.next();
-            if (ch.isVisible()) {
-                double x = ch.getShape().getBounds2D().getCenterX();
+        	ShapeOverlayObject object = (ShapeOverlayObject) iterator.next();
+            if (object.isVisible()) {
+                double x = object.getShape().getBounds2D().getX();
                 double xx = xAxis.valueToJava2D(x, dataArea, xAxisEdge);
                 
-                double y = ch.getShape().getBounds2D().getCenterY();
+//                IJ.log("X: "+x+" at "+xx);
+                
+                double y = object.getShape().getBounds2D().getY();
                 double yy = yAxis.valueToJava2D(y, dataArea, yAxisEdge);
                 
-                drawShape(g2, dataArea, xx, yy, ch);
+//                IJ.log("Y: "+y+" at "+yy);
+
+                
+                drawShape(g2, dataArea, xx, yy, object);
             }
         }
         g2.setClip(savedClip);
@@ -134,12 +143,22 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay,
             Paint savedPaint = g2.getPaint();
             Stroke savedStroke = g2.getStroke();
             
+            Shape s = getJavaCoordinatesShape(x, y, shape);
+            
             g2.setPaint(shape.getOutline());
             g2.setStroke(shape.getStroke());
-            g2.draw(shape.getShape());
+            g2.draw(s);
             
             g2.setPaint(savedPaint);
             g2.setStroke(savedStroke);
         }
+    }
+    
+    protected Shape getJavaCoordinatesShape(double xCentre, double yCentre, ShapeOverlayObject shape){
+    	
+    	Shape s = shape.getShape();
+    	AffineTransform aft = new AffineTransform();
+    	aft.translate(xCentre, yCentre);
+    	return aft.createTransformedShape(s);
     }
 }

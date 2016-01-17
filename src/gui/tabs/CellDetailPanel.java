@@ -673,7 +673,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 					overlay.clearShapes();
 
 					for(NucleusBorderPoint p : cell.getNucleus().getBorderList()){
-						Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 0.5, 0.5);
+						Shape s = new Ellipse2D.Double(p.getX(), p.getY(), 1d, 1d);
 						ShapeOverlayObject ov = new ShapeOverlayObject(s);
 						ov.setVisible(drawPointOverlay);
 						overlay.addShape(ov);
