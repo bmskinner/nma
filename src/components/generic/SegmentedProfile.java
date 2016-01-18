@@ -106,24 +106,6 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 */
 	public SegmentedProfile(double[] values) throws Exception{
 		this( new Profile(values));
-//		super(values);
-//		int midpoint = values.length/2;
-//		NucleusBorderSegment segment1 = new NucleusBorderSegment(0, midpoint, values.length);
-//		NucleusBorderSegment segment2 = new NucleusBorderSegment(midpoint, 0, values.length);
-//		segment1.setPosition(0);
-//		segment2.setPosition(1);
-//
-//		List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
-//		segments.add(segment1);
-//		segments.add(segment2);
-//		
-//		try {
-//			NucleusBorderSegment.linkSegments(segments);
-//		} catch (Exception e) {
-//			IJ.log("Error linking segments");
-//		}
-//		
-//		this.segments = segments;
 	}
 	
 	/**
@@ -168,9 +150,6 @@ public class SegmentedProfile extends Profile implements Serializable {
 		}
 		
 		list = getSegmentsFrom(first);
-		
-		
-		
 		return list.iterator();
 	}
 	
@@ -221,30 +200,6 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		result = getSegmentsFrom(firstSeg);
 		
-//		result.add(firstSeg);
-//		
-//		/*
-//		 * Test 5 segments
-//		 * Input: seg 0 has been added
-//		 * i = 4
-//		 * Round 1 : seg 1 added; set i to 3
-//		 * Round 2 : seg 2 added; set i to 2
-//		 * Round 4 : seg 3 added; set i to 1
-//		 * Round 5 : seg 4 added; set i to 0 
-//		 * Break as i=0; 5 segments added
-//		 */
-//		
-//		int i = segments.size()-1; // the number of segments 
-//		while(i>0){
-//			
-//			if(firstSeg.hasNextSegment()){
-//				firstSeg = firstSeg.nextSegment();
-//				result.add(firstSeg);
-//				i--;
-//			} else {
-//				throw new Exception(i+": No next segment in "+firstSeg.toString());
-//			}
-//		}
 		return NucleusBorderSegment.copy(result);
 	}
 	

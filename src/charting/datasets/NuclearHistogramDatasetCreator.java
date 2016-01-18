@@ -32,6 +32,7 @@ import utility.Utils;
 import weka.estimators.KernelEstimator;
 import analysis.AnalysisDataset;
 import components.CellCollection;
+import components.generic.BorderTag;
 import components.generic.MeasurementScale;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
@@ -249,7 +250,11 @@ public class NuclearHistogramDatasetCreator {
 				int count=0;
 				double[] lengths = new double[collection.size()];
 				for(Nucleus n : collection.getNuclei()){
-					NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+//					NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+					NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
+							n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+						);
+					
 
 					double length = 0;
 					if(seg!=null){
@@ -319,7 +324,10 @@ public class NuclearHistogramDatasetCreator {
 			int count=0;
 			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
-				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+//				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
+						n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+					);
 
 				int indexLength = seg.length();
 				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
@@ -342,7 +350,10 @@ public class NuclearHistogramDatasetCreator {
 			int count=0;
 			double[] lengths = new double[collection.size()];
 			for(Nucleus n : collection.getNuclei()){
-				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+//				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(
+						n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments(), segName
+					);
 				
 				int indexLength = seg.length();
 				double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();

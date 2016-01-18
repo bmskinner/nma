@@ -94,11 +94,8 @@ public class BoxplotChartFactory {
 				
 				for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
 
-					int segIndex = MorphologyChartFactory.getIndexFromLabel(segName);
+//					int segIndex = MorphologyChartFactory.getIndexFromLabel(segName);
 					
-//					ColourSwatch swatch = list.get(0).getSwatch() == null ? ColourSwatch.REGULAR_SWATCH : list.get(0).getSwatch();
-					
-//					Color color = swatch.color(segIndex);
 					Color color = list.get(series).getDatasetColour() == null 
 							? ColourSelecter.getSegmentColor(series)
 							: list.get(series).getDatasetColour();

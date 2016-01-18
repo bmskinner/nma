@@ -57,45 +57,45 @@ public class NucleusTableDatasetCreator {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public static TableModel createSegmentStatsTable(Nucleus nucleus) throws Exception{
-
-		DefaultTableModel model = new DefaultTableModel();
-
-		List<Object> fieldNames = new ArrayList<Object>(0);
-		
-		if(nucleus==null){
-			model.addColumn("No data loaded");
-
-		} else {
-
-			// get the offset segments
-			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).getSegments();
-			
-
-			// create the row names
-			fieldNames.add("Colour");
-			fieldNames.add("Length");
-			fieldNames.add("Start index");
-			fieldNames.add("End index");
-
-			model.addColumn("", fieldNames.toArray(new Object[0]));
-
-			for(NucleusBorderSegment segment : segments) {
-
-				List<Object> rowData = new ArrayList<Object>(0);
-				
-				rowData.add("");
-				rowData.add(segment.length());
-				rowData.add(segment.getStartIndex());
-				rowData.add(segment.getEndIndex());
-
-				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
-			}
-
-		}
-
-		return model;	
-	}
+//	public static TableModel createSegmentStatsTable(Nucleus nucleus) throws Exception{
+//
+//		DefaultTableModel model = new DefaultTableModel();
+//
+//		List<Object> fieldNames = new ArrayList<Object>(0);
+//		
+//		if(nucleus==null){
+//			model.addColumn("No data loaded");
+//
+//		} else {
+//
+//			// get the offset segments
+//			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).getSegments();
+//			
+//
+//			// create the row names
+//			fieldNames.add("Colour");
+//			fieldNames.add("Length");
+//			fieldNames.add("Start index");
+//			fieldNames.add("End index");
+//
+//			model.addColumn("", fieldNames.toArray(new Object[0]));
+//
+//			for(NucleusBorderSegment segment : segments) {
+//
+//				List<Object> rowData = new ArrayList<Object>(0);
+//				
+//				rowData.add("");
+//				rowData.add(segment.length());
+//				rowData.add(segment.getStartIndex());
+//				rowData.add(segment.getEndIndex());
+//
+//				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
+//			}
+//
+//		}
+//
+//		return model;	
+//	}
 	
 	/**
 	 * Create a table of segment stats for median profile of the given dataset.
@@ -114,10 +114,11 @@ public class NucleusTableDatasetCreator {
 		} else {
 			CellCollection collection = dataset.getCollection();
 			// check which reference point to use
-			BorderTag point = BorderTag.ORIENTATION_POINT;
+			BorderTag point = BorderTag.REFERENCE_POINT;
 
 			// get the offset segments
-			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+//			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 
 			// create the row names
 			fieldNames.add("Colour");

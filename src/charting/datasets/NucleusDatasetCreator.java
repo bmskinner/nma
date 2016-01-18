@@ -753,14 +753,32 @@ public class NucleusDatasetCreator {
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
+				
+				// Get the segment starting from the reference point with the given name
 //				NucleusBorderSegment seg = null;
 //				List<NucleusBorderSegment> segs = n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
-//				for(NucleusBorderSegment test : segs){
-//					if(test.getName().equals(segName)){
-//						seg = test;
-//					}
-//				}
-				NucleusBorderSegment seg = n.getAngleProfile().getSegment(segName);
+
+//				NucleusBorderSegment seg2 = n.getAngleProfile().getSegment(segName);
+				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments(), segName);
+				
+				/*
+				 * Testing code to validate segment ordering is correct
+				 */
+				
+//				IJ.log("Raw: "+seg2.toString());
+//				IJ.log("Ref: "+n.getAngleProfile(BorderTag.REFERENCE_POINT).getSegment(segName).toString());
+//				IJ.log("Ord: "+seg.toString());
+//				
+//				IJ.log("Raw profile:");
+//				IJ.log(n.getAngleProfile().toString());
+//				IJ.log("Ref profile:");
+//				IJ.log(n.getAngleProfile(BorderTag.REFERENCE_POINT).toString());
+//				IJ.log("Ordered Ref profile:");
+//				IJ.log(NucleusBorderSegment.toString(n.getAngleProfile(BorderTag.REFERENCE_POINT).getOrderedSegments()));
+//				
+				
+				
+				
 				double length = 0;
 				if(seg!=null){
 					int indexLength = seg.length();
@@ -795,8 +813,9 @@ public class NucleusDatasetCreator {
 			List<Double> list = new ArrayList<Double>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				SegmentedProfile profile = n.getAngleProfile();
-				NucleusBorderSegment seg = profile.getSegment(segName);
+				SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
+//				NucleusBorderSegment seg = profile.getSegment(segName);
+				NucleusBorderSegment seg = NucleusBorderSegment.getSegment(profile.getOrderedSegments(), segName);
 				
 				double displacement = profile.getDisplacement(seg);
 				list.add(displacement);
@@ -819,14 +838,7 @@ public class NucleusDatasetCreator {
 		if(datasets==null || datasets.isEmpty()){
 			return null;
 		}
-		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset(){
-			
-			@Override
-			public List<?> getOutliers(int row, int column){
-				return new ArrayList();
-				
-			}
-		};
+		OutlierFreeBoxAndWhiskerCategoryDataset dataset = new OutlierFreeBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < datasets.size(); i++) {
 
@@ -1082,21 +1094,39 @@ public class NucleusDatasetCreator {
 			 * based on numbers will work
 			 */
 			List<NucleusBorderSegment> segmentList = nucleus.getAngleProfile().getSegments();
+//			SegmentedProfile profile = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT);
+
+			
 			if(!segmentList.isEmpty()){ // only draw if there are segments
 				
 				for(NucleusBorderSegment seg  : segmentList){
 
 					double[] xpoints = new double[seg.length()+1];
 					double[] ypoints = new double[seg.length()+1];
+					
+					/* We are adding the border points directly in the order they are found in the nucleus
+					 * This means the profile cannot be offset for segmentation.
+					 * The choice of segment name must be made in another manner
+					 * 
+					 * Identify Seg_0 by finding the segment with the reference point index 
+					 * at the start
+					 */
+					
+					int segmentPosition = getSegmentPosition(nucleus, seg);
+					
+					
+					
 					for(int j=0; j<=seg.length();j++){
 						int k = Utils.wrapIndex(seg.getStartIndex()+j, nucleus.getLength());
 						NucleusBorderPoint p = nucleus.getBorderPoint(k); // get the border points in the segment
+//						nucleus.getB
 						xpoints[j] = p.getX();
 						ypoints[j] = p.getY();
 					}
 
 					double[][] data = { xpoints, ypoints };
-					ds.addSeries(seg.getName(), data);
+//					ds.addSeries(seg.getName(), data);
+					ds.addSeries("Seg_"+segmentPosition, data);
 				}
 			}
 
@@ -1116,6 +1146,18 @@ public class NucleusDatasetCreator {
 
 		}		
 		return ds;
+	}
+	
+	public static int getSegmentPosition(Nucleus n, NucleusBorderSegment seg){
+		
+		int result = 0;
+		if(seg.getStartIndex()==n.getBorderIndex(BorderTag.REFERENCE_POINT)){
+			return result;
+		} else {
+			result++;
+			result += getSegmentPosition(n, seg.prevSegment());
+		}
+		return result;
 	}
 	
 	public static XYDataset createNucleusIndexTags(Cell cell) throws Exception {

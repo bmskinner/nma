@@ -689,7 +689,9 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		builder.append("Segment "
 				+this.getName()
 				+" ("+this.getPosition()+") "
-				+": "+this.startIndex+" - "+this.endIndex+" of "
+				+": "+this.startIndex+" - "+this.endIndex+" ("
+				+this.length()
+				+") of "
 				+(this.getTotalLength()-1)
 				+"; prev: "+this.hasPrevSegment()
 				+"; next: "+this.hasNextSegment());
@@ -850,6 +852,24 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 
 		
 		return result;
+	}
+	
+	/**
+	 * Given a list of ordered segments, fetch the segment with the given name
+	 * @param list the linked order list
+	 * @param segName the segment name to find ('Seg_n')
+	 * @return the segment or null
+	 * @throws Exception
+	 */
+	public static NucleusBorderSegment getSegment(List<NucleusBorderSegment> list, String segName) throws Exception{
+
+		for(NucleusBorderSegment segment : list){
+
+			if(segment.getName().equals(segName)){
+				return segment;
+			}
+		}
+		return null;
 	}
 	
 	public static String toString(List<NucleusBorderSegment> list){
