@@ -32,6 +32,8 @@ import gui.components.ShapeOverlay;
 import gui.components.ShapeOverlayObject;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
+import ij.IJ;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -578,16 +580,23 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			if(event.type().contains("UpdateSegment")){
 
 				try{
-//					IJ.log("Updating segment");
-
+//					
 					String[] array = event.type().split("\\|");
-					String segName = array[1];
+					int selectedSegMidpoint = Integer.valueOf(array[1]);
 					String index = array[2];
 					int indexValue = Integer.valueOf(index);
 
 					Nucleus n = activeCell.getNucleus();
 					SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
-					NucleusBorderSegment seg = profile.getSegment(segName);
+					
+					/*
+					 * The numbering of segments is adjusted for profile charts, so we can't rely on 
+					 * the segment name stored in the profile.
+					 * 
+					 * Get the name via the midpoint index of the segment that was selected. 
+					 */
+					NucleusBorderSegment seg = profile.getSegmentContaining(selectedSegMidpoint);
+//					NucleusBorderSegment seg = profile.getSegment(segName);
 
 					updateSegmentIndex(true, indexValue, seg, n, profile);
 				} catch(Exception e){

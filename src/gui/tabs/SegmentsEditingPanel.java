@@ -28,6 +28,7 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.DraggableOverlayChartPanel;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -37,7 +38,9 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -231,8 +234,14 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			
 			CellCollection collection = activeDataset().getCollection();
 			
+//			List<NucleusBorderSegment> list =collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//					.getSegmentedProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
+			
 			SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR)
-					.getSegmentedProfile(BorderTag.ORIENTATION_POINT);
+					.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+			
+//			NucleusBorderSegment seg1 = NucleusBorderSegment.getSegment(list, segName1);
+//			NucleusBorderSegment seg2 = NucleusBorderSegment.getSegment(list, segName2);
 			
 			// Get the segments to merge
 			NucleusBorderSegment seg1 = medianProfile.getSegment(segName1);
@@ -244,7 +253,7 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				medianProfile.mergeSegments(seg1, seg2);
 
 				// put the new segment pattern back with the appropriate offset
-				collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.ORIENTATION_POINT,  medianProfile.getSegments());
+				collection.getProfileCollection(ProfileCollectionType.REGULAR).addSegments( BorderTag.REFERENCE_POINT,  medianProfile.getSegments());
 
 				/*
 				 * With the median profile segments merged, also merge the segments
@@ -252,11 +261,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				 */
 				for(Nucleus n : collection.getNuclei()){
 
-					SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+					SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
 					NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
 					profile.mergeSegments(nSeg1, nSeg2);
-					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
 				}
 
 				/*
@@ -264,11 +273,11 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 				 */
 				if(collection.hasConsensusNucleus()){
 					ConsensusNucleus n = collection.getConsensusNucleus();
-					SegmentedProfile profile = n.getAngleProfile(BorderTag.ORIENTATION_POINT);
+					SegmentedProfile profile = n.getAngleProfile(BorderTag.REFERENCE_POINT);
 					NucleusBorderSegment nSeg1 = profile.getSegment(segName1);
 					NucleusBorderSegment nSeg2 = profile.getSegment(segName2);
 					profile.mergeSegments(nSeg1, nSeg2);
-					n.setAngleProfile(profile, BorderTag.ORIENTATION_POINT);
+					n.setAngleProfile(profile, BorderTag.REFERENCE_POINT);
 				}
 				
 				fireDatasetEvent(DatasetMethod.RECALCULATE_CACHE, getDatasets());
@@ -505,8 +514,15 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 					SegmentsEditingPanel.this.setAnalysing(true);
 
 					String[] array = event.type().split("\\|");
-					String segName = array[1];
+					int segMidpointIndex = Integer.valueOf(array[1]);
 					int index = Integer.valueOf(array[2]);
+					
+					String segName = activeDataset()
+							.getCollection()
+							.getProfileCollection(ProfileCollectionType.REGULAR)
+							.getSegmentedProfile(BorderTag.REFERENCE_POINT)
+							.getSegmentContaining(segMidpointIndex)
+							.getName();
 					updateSegmentStartIndex(segName, index);
 
 				} catch(Exception e){
@@ -595,23 +611,33 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 		public void actionPerformed(ActionEvent e) {
 			try {
 				CellCollection collection = activeDataset().getCollection();
-				SegmentedProfile medianProfile = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(BorderTag.ORIENTATION_POINT);
-				List<String> names = new ArrayList<String>();
+				SegmentedProfile medianProfile = collection
+						.getProfileCollection(ProfileCollectionType.REGULAR)
+						.getSegmentedProfile(BorderTag.REFERENCE_POINT);
+				
+//				List<NucleusBorderSegment> list =collection.getProfileCollection(ProfileCollectionType.REGULAR)
+//						.getSegmentedProfile(BorderTag.REFERENCE_POINT).getOrderedSegments();
+				
+				
+				// Update the segment pattern to the same ordered pattern seen in the profile chart
+//				medianProfile.setSegments(list);
+				
+//				List<String> names = new ArrayList<String>();
 				SegmentsEditingPanel.this.setAnalysing(true);
 				
 				if(e.getSource().equals(mergeButton)){
 					
-					mergeAction(medianProfile, names);
+					mergeAction(medianProfile);
 					
 				}
 
 				if(e.getSource().equals(unmergeButton)){
 
-					unmergeAction(medianProfile, names);
+					unmergeAction(medianProfile);
 				}
 				
 				if(e.getSource().equals(splitButton)){
-					splitAction(medianProfile, names);
+					splitAction(medianProfile);
 					
 				}
 				
@@ -623,9 +649,27 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			}
 		}
 		
-		private void mergeAction(SegmentedProfile medianProfile, List<String> names) throws Exception{
+		private void mergeAction(SegmentedProfile medianProfile) throws Exception{
+			
+			List<String> names = new ArrayList<String>();
+			
+			/*
+			 * The segment names on the chart do not match the name in the profile,
+			 * due to reordering to put seg_0 after the reference point
+			 * 
+			 * We need a way to convert back, after a choice is made
+			 */
+			
+			Map<String, String> map = new HashMap<String, String>();
+			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
+				
+				NucleusBorderSegment realSeg = medianProfile.getSegment(seg);
+				map.put(seg.getName(), realSeg.getName());
+			}
+			
+			
 			// Put the names of the mergable segments into a list
-			for(NucleusBorderSegment seg : medianProfile.getSegments()){
+			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
 				String mergeName = seg.getName()+" - "+seg.nextSegment().getName();
 				names.add(mergeName);
 			}
@@ -642,9 +686,14 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			if(mergeOption!=null){
 				// a choice was made
 				String[] segs = mergeOption.split(" - "); // split back up to seg names
-
 				
-				mergeSegments(segs[0], segs[1]);
+				String realSeg1 = map.get(segs[0]);
+				String realSeg2 = map.get(segs[1]);
+				
+//				IJ.log("Converted seg "+segs[0]+" to "+realSeg1);
+//				IJ.log("Converted seg "+segs[1]+" to "+realSeg2);
+								
+				mergeSegments(realSeg1, realSeg2);
 				
 				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 				list.add(activeDataset());
@@ -653,8 +702,17 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 			}
 		}
 		
-		private void splitAction(SegmentedProfile medianProfile, List<String> names) throws Exception{
+		private void splitAction(SegmentedProfile medianProfile) throws Exception{
+			
+			List<String> names = new ArrayList<String>();
 			// show a list of segments that can be split, and merge the selected option
+			
+			Map<String, String> map = new HashMap<String, String>();
+			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
+				
+				NucleusBorderSegment realSeg = medianProfile.getSegment(seg);
+				map.put(seg.getName(), realSeg.getName());
+			}
 
 			// Put the names of the mergable segments into a list
 			for(NucleusBorderSegment seg : medianProfile.getSegments()){
@@ -673,20 +731,31 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 			if(option!=null){
 				// a choice was made
+				
+				String realSeg = map.get(option);
 
-
-				if(splitSegment(option)){
+				if(splitSegment(realSeg)){
 					SegmentsEditingPanel.this.update(SegmentsEditingPanel.this.activeDatasetToList());
 					SegmentsEditingPanel.this.fireSignalChangeEvent("UpdatePanels");
 				}
 			}
 		}
 		
-		private void unmergeAction(SegmentedProfile medianProfile, List<String> names) throws Exception{
+		private void unmergeAction(SegmentedProfile medianProfile) throws Exception{
+			
+			List<String> names = new ArrayList<String>();
+			
+			Map<String, String> map = new HashMap<String, String>();
+			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
+				
+				NucleusBorderSegment realSeg = medianProfile.getSegment(seg);
+				map.put(seg.getName(), realSeg.getName());
+			}
+			
 			// show a list of segments that can be unmerged, and merge the selected option
 
 			// Put the names of the mergable segments into a list
-			for(NucleusBorderSegment seg : medianProfile.getSegments()){
+			for(NucleusBorderSegment seg : medianProfile.getOrderedSegments()){
 				if(seg.hasMergeSources()){
 					names.add(seg.getName());
 				}							
@@ -703,8 +772,10 @@ public class SegmentsEditingPanel extends DetailPanel implements SignalChangeLis
 
 			if(mergeOption!=null){
 				// a choice was made
+				
+				String realSeg = map.get(mergeOption);
 
-				unmergeSegments(mergeOption);
+				unmergeSegments(realSeg);
 
 				List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
 				list.add(activeDataset());

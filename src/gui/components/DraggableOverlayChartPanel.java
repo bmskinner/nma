@@ -199,7 +199,7 @@ public class DraggableOverlayChartPanel extends ChartPanel {
 	    			if(seg!=null){
 //	    				IJ.log("UpdateSegment|"+seg.getName()+"|"+xValue);
 	    				//	    			isRunning = false;
-	    				fireSignalChangeEvent("UpdateSegment|"+seg.getName()+"|"+xValue);
+	    				fireSignalChangeEvent("UpdateSegment|"+seg.getMidpointIndex()+"|"+xValue);
 	    			}
 
 	    		} catch(Exception e1){

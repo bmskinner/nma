@@ -359,11 +359,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		if(test.getTotalLength()!=this.getTotalLength()){
 			return false;
 		}
-		
-		if(!test.getName().equals(this.getName())){
-			return false;
-		}
-		
+
 		if(test.getStartIndex()!=this.getStartIndex() 
 				|| test.getEndIndex()!=this.getEndIndex()){
 			return false;

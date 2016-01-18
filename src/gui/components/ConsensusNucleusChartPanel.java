@@ -126,6 +126,7 @@ public class ConsensusNucleusChartPanel extends ChartPanel implements SignalChan
 		double xMax = 0;
 		double yMax = 0;
 		
+		
 		// get the max and min values of the chart
 		for(int i = 0; i<plot.getDatasetCount();i++){
 			XYDataset dataset = plot.getDataset(i);

@@ -20,6 +20,7 @@ package components.generic;
 
 import ij.IJ;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,8 @@ public class SegmentedProfile extends Profile implements Serializable {
 	// the segments
 	protected List<NucleusBorderSegment> segments = new ArrayList<NucleusBorderSegment>();
 	
+	private transient NucleusBorderSegment firstSegment = null;
+	
 	/**
 	 * Construct using a regular profile and a list of border segments
 	 * @param p the profile
@@ -65,6 +68,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment.linkSegments(segments);
 
 		this.segments = segments;
+		this.firstSegment = segments.get(0);
 	}
 	
 	/**
@@ -97,6 +101,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment.linkSegments(segments);
 
 		this.segments = segments;
+		this.firstSegment = segments.get(0);
 	}
 	
 	/**
@@ -160,6 +165,12 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @throws Exception
 	 */
 	private List<NucleusBorderSegment> getSegmentsFrom(NucleusBorderSegment firstSeg) throws Exception {
+		
+		if(firstSeg==null){
+			throw new IllegalArgumentException("Requested first segment is null");
+		}
+		
+		
 		List<NucleusBorderSegment> result = new ArrayList<NucleusBorderSegment>();
 		int i = segments.size()-1; // the number of segments 
 		result.add(firstSeg);
@@ -204,6 +215,22 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
+	 * Get the segment assigned to be the first in the list
+	 * @return
+	 */
+	public NucleusBorderSegment getFirstSegment(){
+		if(this.firstSegment != null){
+			return new NucleusBorderSegment(this.firstSegment);
+		} else {
+			return null;
+		}
+	}
+	
+	public List<NucleusBorderSegment> getSegmentsFromFirst() throws Exception {
+		return getSegmentsFrom(getFirstSegment());
+	}
+	
+	/**
 	 * Get the segment with the given name. Returns null if no segment
 	 * is found. Gets the actual segment, not a copy
 	 * @param name
@@ -217,6 +244,26 @@ public class SegmentedProfile extends Profile implements Serializable {
 		NucleusBorderSegment result = null;
 		for(NucleusBorderSegment seg : this.segments){
 			if(seg.getName().equals(name)){
+				result = seg;
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Get the given segment. Returns null if no segment
+	 * is found. Gets the actual segment, not a copy
+	 * @param name
+	 * @return
+	 */
+	public NucleusBorderSegment getSegment(NucleusBorderSegment segment){
+		if(! this.contains(segment)){
+			throw new IllegalArgumentException("Requested segment name is not present");
+		}
+		
+		NucleusBorderSegment result = null;
+		for(NucleusBorderSegment seg : this.segments){
+			if(seg.equals(segment)){
 				result = seg;
 			}
 		}
@@ -242,6 +289,22 @@ public class SegmentedProfile extends Profile implements Serializable {
 	}
 	
 	/**
+	 * Get the segment containing the given index
+	 * @param index
+	 * @return
+	 */
+	public NucleusBorderSegment getSegmentContaining(int index){
+
+		NucleusBorderSegment result = null;
+		for(NucleusBorderSegment seg : this.segments){
+			if(seg.contains(index)){
+				result = seg;
+			}
+		}
+		return result;
+	}
+	
+	/**
 	 * Replace the segments in the profile with the given list
 	 * @param segments
 	 */
@@ -255,6 +318,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		}
 		
 		this.segments = NucleusBorderSegment.copy(segments);
+		this.firstSegment = new NucleusBorderSegment(segments.get(0));
 	}
 	
 	/**
@@ -262,6 +326,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 */
 	public void clearSegments(){
 		this.segments = new ArrayList<NucleusBorderSegment>(0);
+		this.firstSegment = null;
 	}
 	
 	/**
@@ -316,8 +381,7 @@ public class SegmentedProfile extends Profile implements Serializable {
 		
 		boolean result = false;
 		for(NucleusBorderSegment seg : this.segments){
-			if(seg.getName().equals(segment.getName())
-					&& seg.getStartIndex()==segment.getStartIndex()
+			if(	seg.getStartIndex()==segment.getStartIndex()
 					&& seg.getEndIndex()==segment.getEndIndex()
 					&& seg.getTotalLength()==this.size()
 					
@@ -402,13 +466,13 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @param amount the number of indexes to move
 	 * @return did the update succeed
 	 */
-	public boolean adjustSegmentStart(String name, int amount){
-		if(!this.getSegmentNames().contains(name)){
+	public boolean adjustSegmentStart(NucleusBorderSegment segment, int amount){
+		if(!this.contains(segment)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
 		
 		// get the segment within this profile, not a copy that looks the same
-		NucleusBorderSegment segmentToUpdate = this.getSegment(name);
+		NucleusBorderSegment segmentToUpdate = this.getSegment(segment);
 		
 		int newValue = Utils.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
@@ -519,34 +583,34 @@ public class SegmentedProfile extends Profile implements Serializable {
 	 * @return
 	 * @throws Exception
 	 */
-	public SegmentedProfile moveSegmentToPositionZero(NucleusBorderSegment firstSegment) throws Exception{
-		
-		if( ! this.contains(firstSegment)){
-			throw new IllegalArgumentException("Profile does not contain the given segment");
-		}
-		
-		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>();
-		List<NucleusBorderSegment> part1List = new ArrayList<NucleusBorderSegment>();
-		List<NucleusBorderSegment> list = this.getSegments();
-		boolean segmentFound = false;
-		
-		for(NucleusBorderSegment segment : list){
-			
-			if(segment.equals(firstSegment)){
-				segmentFound = true;
-			}
-			
-			if(segmentFound){
-				newList.add(segment);
-			} else {
-				part1List.add(segment);
-			}
-		}
-		
-		newList.addAll(part1List);
-		SegmentedProfile result =  new SegmentedProfile(this, newList);
-		return result;
-	}
+//	public SegmentedProfile moveSegmentToPositionZero(NucleusBorderSegment firstSegment) throws Exception{
+//		
+//		if( ! this.contains(firstSegment)){
+//			throw new IllegalArgumentException("Profile does not contain the given segment");
+//		}
+//		
+//		List<NucleusBorderSegment> newList = new ArrayList<NucleusBorderSegment>();
+//		List<NucleusBorderSegment> part1List = new ArrayList<NucleusBorderSegment>();
+//		List<NucleusBorderSegment> list = this.getSegments();
+//		boolean segmentFound = false;
+//		
+//		for(NucleusBorderSegment segment : list){
+//			
+//			if(segment.equals(firstSegment)){
+//				segmentFound = true;
+//			}
+//			
+//			if(segmentFound){
+//				newList.add(segment);
+//			} else {
+//				part1List.add(segment);
+//			}
+//		}
+//		
+//		newList.addAll(part1List);
+//		SegmentedProfile result =  new SegmentedProfile(this, newList);
+//		return result;
+//	}
 	
 	
 	/**
@@ -890,4 +954,9 @@ public class SegmentedProfile extends Profile implements Serializable {
 		}
 		return builder.toString();
 	}
+	
+	  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		    in.defaultReadObject();
+		    this.firstSegment = segments.get(0);
+		}
 }

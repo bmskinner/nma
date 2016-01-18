@@ -624,38 +624,41 @@ public class MorphologyChartFactory {
 		JFreeChart chart = ConsensusNucleusChartFactory.makeNucleusOutlineChart(dataset);
 
 		XYPlot plot = chart.getXYPlot();
-		plot.setDataset(1, signalCoMs);
+		
+		if(signalCoMs.getSeriesCount()>0){
+			plot.setDataset(1, signalCoMs);
 
-		XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
-		for(int series=0;series<signalCoMs.getSeriesCount();series++){
+			XYLineAndShapeRenderer  rend = new XYLineAndShapeRenderer();
+			for(int series=0;series<signalCoMs.getSeriesCount();series++){
 
-			Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
-			rend.setSeriesShape(series, circle);
+				Shape circle = new Ellipse2D.Double(0, 0, 4, 4);
+				rend.setSeriesShape(series, circle);
 
-			String name = (String) signalCoMs.getSeriesKey(series);
-			int seriesGroup = getIndexFromLabel(name);
-			Color colour = dataset.getSignalGroupColour(seriesGroup);
-			rend.setSeriesPaint(series, colour);
-			rend.setBaseLinesVisible(false);
-			rend.setBaseShapesVisible(true);
-			rend.setBaseSeriesVisibleInLegend(false);
-		}
-		plot.setRenderer(1, rend);
+				String name = (String) signalCoMs.getSeriesKey(series);
+				int seriesGroup = getIndexFromLabel(name);
+				Color colour = dataset.getSignalGroupColour(seriesGroup);
+				rend.setSeriesPaint(series, colour);
+				rend.setBaseLinesVisible(false);
+				rend.setBaseShapesVisible(true);
+				rend.setBaseSeriesVisibleInLegend(false);
+			}
+			plot.setRenderer(1, rend);
 
-		for(int signalGroup : dataset.getCollection().getSignalGroups()){
-			List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
+			for(int signalGroup : dataset.getCollection().getSignalGroups()){
+				List<Shape> shapes = NuclearSignalDatasetCreator.createSignalRadiusDataset(dataset, signalGroup);
 
-			int signalCount = shapes.size();
+				int signalCount = shapes.size();
 
-			int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
-			alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
+				int alpha = (int) Math.floor( 255 / ((double) signalCount) )+20;
+				alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
 
-			Color colour = dataset.getSignalGroupColour(signalGroup);
+				Color colour = dataset.getSignalGroupColour(signalGroup);
 
-			for(Shape s : shapes){
-				XYShapeAnnotation an = new XYShapeAnnotation( s, null,
-						null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
-				plot.addAnnotation(an);
+				for(Shape s : shapes){
+					XYShapeAnnotation an = new XYShapeAnnotation( s, null,
+							null, ColourSelecter.getTransparentColour(colour, true, alpha)); // layer transparent signals
+					plot.addAnnotation(an);
+				}
 			}
 		}
 		return chart;
