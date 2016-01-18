@@ -50,53 +50,7 @@ import stats.NucleusStatistic;
 import stats.Stats;
 
 public class NucleusTableDatasetCreator {
-	
-	/**
-	 * Create a table of segment stats for the given nucleus.
-	 * @param list the AnalysisDatasets to include
-	 * @return a table model
-	 * @throws Exception 
-	 */
-//	public static TableModel createSegmentStatsTable(Nucleus nucleus) throws Exception{
-//
-//		DefaultTableModel model = new DefaultTableModel();
-//
-//		List<Object> fieldNames = new ArrayList<Object>(0);
-//		
-//		if(nucleus==null){
-//			model.addColumn("No data loaded");
-//
-//		} else {
-//
-//			// get the offset segments
-//			List<NucleusBorderSegment> segments = nucleus.getAngleProfile(BorderTag.REFERENCE_POINT).getSegments();
-//			
-//
-//			// create the row names
-//			fieldNames.add("Colour");
-//			fieldNames.add("Length");
-//			fieldNames.add("Start index");
-//			fieldNames.add("End index");
-//
-//			model.addColumn("", fieldNames.toArray(new Object[0]));
-//
-//			for(NucleusBorderSegment segment : segments) {
-//
-//				List<Object> rowData = new ArrayList<Object>(0);
-//				
-//				rowData.add("");
-//				rowData.add(segment.length());
-//				rowData.add(segment.getStartIndex());
-//				rowData.add(segment.getEndIndex());
-//
-//				model.addColumn(segment.getName(), rowData.toArray(new Object[0])); // separate column per segment
-//			}
-//
-//		}
-//
-//		return model;	
-//	}
-	
+		
 	/**
 	 * Create a table of segment stats for median profile of the given dataset.
 	 * @param dataset the AnalysisDataset to include
@@ -116,10 +70,16 @@ public class NucleusTableDatasetCreator {
 			// check which reference point to use
 			BorderTag point = BorderTag.REFERENCE_POINT;
 
-			// get the offset segments
+			// get mapping from ordered segments to segment names
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
-//			List<NucleusBorderSegment> segments = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 
+			Map<String, String> map = new HashMap<String, String>();
+			for(NucleusBorderSegment seg : segments){
+				
+				NucleusBorderSegment realSeg = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+				map.put(seg.getName(), realSeg.getName());
+			}
+			
 			// create the row names
 			fieldNames.add("Colour");
 			fieldNames.add("Length");
@@ -147,7 +107,7 @@ public class NucleusTableDatasetCreator {
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
 								
-				double[] meanLengths = collection.getSegmentLengths(segment.getName(), scale);
+				double[] meanLengths = collection.getSegmentLengths(map.get(segment.getName()), scale);
 				
 				double mean = Stats.mean( meanLengths);
 				double sem  = Stats.stderr(meanLengths);
@@ -190,7 +150,23 @@ public class NucleusTableDatasetCreator {
 			BorderTag point = BorderTag.ORIENTATION_POINT;
 			
 			// assumes all datasets have the same number of segments
-			List<NucleusBorderSegment> segments = list.get(0).getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+			List<NucleusBorderSegment> segments = list.get(0)
+					.getCollection()
+					.getProfileCollection(ProfileCollectionType.REGULAR)
+					.getSegmentedProfile(point)
+					.getOrderedSegments();
+			
+			Map<String, String> map = new HashMap<String, String>();
+			for(NucleusBorderSegment seg : segments){
+				
+				NucleusBorderSegment realSeg = list.get(0)
+						.getCollection()
+						.getProfileCollection(ProfileCollectionType.REGULAR)
+						.getSegmentedProfile(point)
+						.getSegment(seg);
+				map.put(seg.getName(), realSeg.getName());
+			}
+//			List<NucleusBorderSegment> segments = list.get(0).getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
 			
 			fieldNames.add("Dataset");
 			for(NucleusBorderSegment segment : segments) {
@@ -214,25 +190,22 @@ public class NucleusTableDatasetCreator {
 				CellCollection collection = dataset.getCollection();		
 
 				// get the offset segments
-				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+//				List<NucleusBorderSegment> segs = collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
+				
+				List<NucleusBorderSegment> segs = collection
+						.getProfileCollection(ProfileCollectionType.REGULAR)
+						.getSegmentedProfile(point)
+						.getOrderedSegments();
 				
 				List<Object> rowData = new ArrayList<Object>(0);
 				rowData.add(dataset.getName());
 
 				for(NucleusBorderSegment segment : segs) {
 					
-					// Convert array index lengths to pixel lengths
-//					double perimeter = collection.getMedianNuclearPerimeter(); // get the perimeter in pixels
-//					double maxIndex = segment.getTotalLength();
-//					double segPixelLength = (  (double) segment.length() / maxIndex) * perimeter;
-					
-					double[] meanLengths = collection.getSegmentLengths(segment.getName(), scale);
+					double[] meanLengths = collection.getSegmentLengths(map.get(segment.getName()), scale);
 					double mean = Stats.mean(meanLengths); 
-//					DescriptiveStatistics stat = new DescriptiveStatistics(meanLengths);
-					
-//					rowData.add(  df.format(stat.getMean() ) );
+
 					double ci = Stats.calculateConfidenceIntervalSize(meanLengths, 0.95);
-//					rowData.add(  df.format(sem) );
 					
 					rowData.add(df.format(mean)+" ± "+ df.format(ci));
 				}
