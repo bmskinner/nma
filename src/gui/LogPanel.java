@@ -24,7 +24,7 @@ import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +33,10 @@ import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -43,11 +46,8 @@ import javax.swing.KeyStroke;
 import javax.swing.text.DefaultCaret;
 
 import analysis.AnalysisDataset;
-import components.nuclei.Nucleus;
-import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.tabs.DetailPanel;
-import ij.io.DirectoryChooser;
 
 public class LogPanel extends DetailPanel implements ActionListener {
 
@@ -203,8 +203,20 @@ public class LogPanel extends DetailPanel implements ActionListener {
 				}
 				
 			} else {
+				
+				{
+//					programLogger.log(Level.INFO, "Command not recognised");
+				}
+				
+				
+				{
+					if(command.equals("Carlton dance")){
+						new CarltonDialog();
+					} else {
 
-				programLogger.log(Level.INFO, "Command not recognised");
+						programLogger.log(Level.INFO, "Command not recognised");
+					}
+				}
 			}
 		}		
 	}
@@ -214,6 +226,41 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		//Does nothing, no datasets are displayed. 
 		// Using DetailPanel only for signalling access
 		
+	}
+		
+	@SuppressWarnings("serial")
+	private class CarltonDialog extends JDialog {
+		
+		private static final String IMAGE_URL = "res/Carlton.gif";
+		
+	    public CarltonDialog() {
+	        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+	        setUndecorated(false);
+	        setLocationRelativeTo(null);
+	        setModal(false);
+	        
+	        setContentPane(new JPanel(new BorderLayout()));
+
+	        try {
+	        	
+	        	ClassLoader cl = this.getClass().getClassLoader();
+	        	
+				URL url = cl.getResource(IMAGE_URL);
+//				
+//				ImageIcon icon = new ImageIcon(IMAGE_PATH);
+				ImageIcon icon = new ImageIcon(url);
+				getContentPane().add(new JLabel(icon), BorderLayout.CENTER);
+				
+			} catch (Exception e) {
+				
+				programLogger.log(Level.SEVERE, "Error loading Carlton", e);
+			} finally {
+
+				this.pack();
+
+				this.setVisible(true);
+			}
+	    }
 	}
 
 }
