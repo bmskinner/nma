@@ -34,6 +34,7 @@ import components.generic.ProfileCollectionType;
 import components.generic.SegmentedProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.nuclear.NucleusBorderSegment;
+import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import utility.Constants;
 
@@ -347,6 +348,26 @@ public class DatasetSegmenter extends AnalysisWorker {
 
 		// Add the segments to the collection
 
+		
+		
+		/* If there are round nuclei in the collection, and only two segments
+		 * were called, the orientation point may not have been
+		 * associated with the segment breakpoint. 
+		 * Update the segment position to the OP
+		 */
+		
+		if(collection.getNucleusType().equals(NucleusType.ROUND) && segments.size()==2){
+
+			log(Level.FINER, "Updating segment pattern to match orientation point in round nuclei");
+
+			int medianOrientationIndex = pc.getOffset(BorderTag.ORIENTATION_POINT);
+			
+			log(Level.FINER, "Orientation point is at index "+medianOrientationIndex);
+						
+			NucleusBorderSegment firstSegment = segments.get(0);
+			firstSegment.update(firstSegment.getStartIndex(), medianOrientationIndex);
+		}
+		
 		pc.addSegments(BorderTag.REFERENCE_POINT, segments);
 		
 	}
@@ -1163,12 +1184,30 @@ public class DatasetSegmenter extends AnalysisWorker {
                 if(  (segments.get(0).getEndIndex()!=0) && segments.get(segments.size()-1).getEndIndex() != profile.size()-1 ) {
 
 				
-//				if(  firstSegmentEndIndex != 0 && lastSegmentEndIndex != lastProfileIndex ) {
+                	/*
+                	 * What happens in round nuclei, when the segmentation detects a boundary in the index
+                	 * dirctly before 0?
+                	 * 
+                	 * A new segment is attempted to be created with length 1, and of course fails.
+                	 * Catch the exception, and attempty to extend the final segment up to index 0
+                	 */
+
+                	try {
 					
-					NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
-					seg.setName("Seg_"+segCount);
-					segments.add(seg);
-					log(Level.FINE, "Terminal segment found: "+seg.toString());
+                		NucleusBorderSegment seg = new NucleusBorderSegment(segmentStart, segmentEnd, profile.size());
+                		seg.setName("Seg_"+segCount);
+    					segments.add(seg);
+    					log(Level.FINE, "Terminal segment found: "+seg.toString());
+    					
+                	} catch(IllegalArgumentException e){
+                		
+                		log(Level.WARNING, "Error creating segment, likely it was too short");
+                		log(Level.WARNING, "Attempting to extend the final segment into a terminal segment");
+                		NucleusBorderSegment finalSegment = segments.get(segments.size()-1);
+                		finalSegment.update(finalSegment.getStartIndex(), 0);;
+                	}
+                	
+					
 					
 				} else {
 					// the first segment is not larger than the minimum size

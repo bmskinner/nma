@@ -75,7 +75,7 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		if(testLength < MINIMUM_SEGMENT_LENGTH){
 			throw new IllegalArgumentException("Cannot create segment of length "
 						+ testLength
-						+ "from " + startIndex + " to " + endIndex
+						+ " from " + startIndex + " to " + endIndex
 						+ ": shorter than "+MINIMUM_SEGMENT_LENGTH);
 		}
 		this.startIndex = startIndex;
