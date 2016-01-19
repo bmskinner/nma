@@ -359,12 +359,12 @@ extends SpermNucleus
 			 */
 						
 			FloatPolygon poly = Utils.createPolygon(hookRoi);
-			IJ.log("Hook roi: "+ poly.getBounds().toString());
+//			IJ.log("Hook roi: "+ poly.getBounds().toString());
 			if(poly.contains( (float)p.getX(), (float)p.getY() ) ){
-				IJ.log("Contains "+p.toString());
+//				IJ.log("Contains "+p.toString());
 				return true;
 			} else {
-				IJ.log("Not contains "+p.toString());
+//				IJ.log("Not contains "+p.toString());
 				return false;
 			}
 		} else {
@@ -611,7 +611,7 @@ extends SpermNucleus
 
 	  if(this.hasSignal()){
 		  
-		  IJ.log(this.dumpInfo(BORDER_TAGS));
+//		  IJ.log(this.dumpInfo(BORDER_TAGS));
 
 		  // update signal angles with hook or hump side
 		  for( int i : signalCollection.getSignalGroups()){
@@ -635,10 +635,10 @@ extends SpermNucleus
 						  // These rois are offset, not original
 						  if( this.isHookSide(com) ){ 
 							  angle = 360 - angle;
-							  IJ.log("Signal com is hookside");
+//							  IJ.log("Signal com is hookside");
 						  } 
-						  IJ.log("Signal com: "  +com.toString());
-						  IJ.log("Signal angle: "+angle);
+//						  IJ.log("Signal com: "  +com.toString());
+//						  IJ.log("Signal angle: "+angle);
 					  } catch(Exception e){
 						  // IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
 					  } finally {

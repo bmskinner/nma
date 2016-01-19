@@ -81,7 +81,7 @@ public class PopulationImporter {
 	
 	private static void checkCarlton(AnalysisDataset dataset){
 		
-		if(dataset.getCollection().size()>10){
+		if(dataset.getCollection().size()>1000){
 			String pluginDirName = IJ.getDirectory("plugins");
 			File pluginDir = new File(pluginDirName);
 			File doNotRun = new File(pluginDir.getAbsolutePath()+File.separator+".noCarlton");

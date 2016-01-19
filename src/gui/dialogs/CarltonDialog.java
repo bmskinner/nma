@@ -17,7 +17,7 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class CarltonDialog extends JDialog {
 	
-	private static final String IMAGE_NAME = "Carlton_orig.gif";
+	private static final String IMAGE_NAME = "Carlton.gif";
 	private static final String IMAGE_URL = "res/"+IMAGE_NAME;
 	private static final String BACKUP_IMAGE_URL = IMAGE_NAME;
 	
@@ -44,23 +44,23 @@ public class CarltonDialog extends JDialog {
 
 			if( icon != null ){ // only trigger if everything was loaded sucessfully
 
-				programLogger.log(Level.WARNING, "Image loaded from "+url.toString());
+				programLogger.log(Level.FINE, "Image loaded from "+url.toString());
 				
 				try {
 					
-					programLogger.log(Level.INFO, "Oh boy...");
-					Thread.sleep(1000);
+					programLogger.log(Level.INFO, "Oh my...");
+					Thread.sleep(1500);
 					programLogger.log(Level.INFO, "You have been busy.");
-					Thread.sleep(1000);
-					programLogger.log(Level.INFO, "There are a lot of nuclei here.");
-					Thread.sleep(1000);
-					programLogger.log(Level.INFO, "You have earned a treat.");
-					Thread.sleep(1000);
+					Thread.sleep(1500);
+					programLogger.log(Level.INFO, "So many nuclei.");
+					Thread.sleep(1500);
+					programLogger.log(Level.INFO, "You have earned a dance.");
+					Thread.sleep(1500);
 					
 					
 				} catch (InterruptedException e) {
 					// If an error occurs in threading, cancel
-					programLogger.log(Level.WARNING, "Threading error in loading ");
+					programLogger.log(Level.FINE, "Threading error in loading ");
 					return;
 				}
 				
@@ -69,14 +69,14 @@ public class CarltonDialog extends JDialog {
 
 				this.setVisible(true);
 			} else {
-				programLogger.log(Level.WARNING, "Could not load icon; cancelling");
+				programLogger.log(Level.FINE, "Could not load icon; cancelling");
 				return;
 			}
 
 			
 			
 		} catch (Exception e) {
-			programLogger.log(Level.SEVERE, "Error in loading ", e);
+			programLogger.log(Level.FINE, "Error in loading ");
 			return;
 		}
     }
@@ -84,7 +84,7 @@ public class CarltonDialog extends JDialog {
     private ImageIcon loadURL(URL url, Logger programLogger){
     	ImageIcon icon = null;
     	if(url!=null){
-    		programLogger.log(Level.WARNING, "URL found: "+url.toString());
+    		programLogger.log(Level.FINE, "URL found: "+url.toString());
     		icon = new ImageIcon(url);
     		
 //    		String status = "";
