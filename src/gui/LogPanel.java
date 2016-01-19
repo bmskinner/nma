@@ -205,18 +205,9 @@ public class LogPanel extends DetailPanel implements ActionListener {
 			} else {
 				
 				{
-//					programLogger.log(Level.INFO, "Command not recognised");
+					programLogger.log(Level.INFO, "Command not recognised");
 				}
-				
-				
-				{
-					if(command.equals("Carlton dance")){
-						new CarltonDialog();
-					} else {
 
-						programLogger.log(Level.INFO, "Command not recognised");
-					}
-				}
 			}
 		}		
 	}
@@ -226,41 +217,6 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		//Does nothing, no datasets are displayed. 
 		// Using DetailPanel only for signalling access
 		
-	}
-		
-	@SuppressWarnings("serial")
-	private class CarltonDialog extends JDialog {
-		
-		private static final String IMAGE_URL = "res/Carlton.gif";
-		
-	    public CarltonDialog() {
-	        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-	        setUndecorated(false);
-	        setLocationRelativeTo(null);
-	        setModal(false);
-	        
-	        setContentPane(new JPanel(new BorderLayout()));
-
-	        try {
-	        	
-	        	ClassLoader cl = this.getClass().getClassLoader();
-	        	
-				URL url = cl.getResource(IMAGE_URL);
-//				
-//				ImageIcon icon = new ImageIcon(IMAGE_PATH);
-				ImageIcon icon = new ImageIcon(url);
-				getContentPane().add(new JLabel(icon), BorderLayout.CENTER);
-				
-			} catch (Exception e) {
-				
-				programLogger.log(Level.SEVERE, "Error loading Carlton", e);
-			} finally {
-
-				this.pack();
-
-				this.setVisible(true);
-			}
-	    }
 	}
 
 }
