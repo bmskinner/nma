@@ -151,7 +151,7 @@ public abstract class LoadingIconDialog extends JDialog {
 	private ImageIcon loadURL(URL url){
     	ImageIcon icon = null;
     	if(url!=null){
-    		programLogger.log(Level.WARNING, "URL found: "+url.toString());
+    		programLogger.log(Level.FINER, "URL found: "+url.toString());
     		icon = new ImageIcon(url);
     		
     		String status = "";
@@ -168,7 +168,7 @@ public abstract class LoadingIconDialog extends JDialog {
     		
     		}
     		
-    		programLogger.log(Level.WARNING, "Load status: "+status);
+    		programLogger.log(Level.FINER, "Load status: "+status);
     		
 //    		if(icon.getImageLoadStatus()== MediaTracker.ERRORED){
 //    			programLogger.log(Level.WARNING, "Could not load icon from "+url.getPath());

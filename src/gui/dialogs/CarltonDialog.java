@@ -87,21 +87,21 @@ public class CarltonDialog extends JDialog {
     		programLogger.log(Level.WARNING, "URL found: "+url.toString());
     		icon = new ImageIcon(url);
     		
-    		String status = "";
-    		switch(icon.getImageLoadStatus()){
-    		
-    			case 1: status = "Loading";
-    				break;
-    			case 2: status = "Aborted";
-    				break;
-    			case 4: status = "Errored";
-					break;
-    			case 8: status = "Complete";
-					break;
-    		
-    		}
-    		
-    		programLogger.log(Level.WARNING, "Load status: "+status);
+//    		String status = "";
+//    		switch(icon.getImageLoadStatus()){
+//    		
+//    			case 1: status = "Loading";
+//    				break;
+//    			case 2: status = "Aborted";
+//    				break;
+//    			case 4: status = "Errored";
+//					break;
+//    			case 8: status = "Complete";
+//					break;
+//    		
+//    		}
+//    		
+//    		programLogger.log(Level.WARNING, "Load status: "+status);
     		
 //    		if(icon.getImageLoadStatus()== MediaTracker.ERRORED){
 //    			programLogger.log(Level.WARNING, "Could not load icon from "+url.getPath());
