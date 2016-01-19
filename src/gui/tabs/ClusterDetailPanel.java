@@ -260,7 +260,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 		
 		private void setButtonsVisible(boolean b){
 			clusterButton.setVisible(b);
-			saveClassifierButton.setVisible(b);
+			saveClassifierButton.setVisible(false);
 			buildTreeButton.setVisible(b);
 			
 		}
