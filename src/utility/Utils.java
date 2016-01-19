@@ -218,17 +218,17 @@ public class Utils {
 	  * @return
 	  */
 	 public static FloatPolygon createPolygon(Nucleus n){
-		 float[] xpoints = new float[n.getLength()];
-		 float[] ypoints = new float[n.getLength()];
-
-		 for(int i=0;i<n.getLength();i++){
-			 NucleusBorderPoint p = n.getBorderPoint(i);
-			 xpoints[i] = (float) p.getX();
-			 ypoints[i] = (float) p.getY();
-		 }
-
-		 return new FloatPolygon(xpoints, ypoints, n.getLength());
-
+//		 float[] xpoints = new float[n.getLength()];
+//		 float[] ypoints = new float[n.getLength()];
+//
+//		 for(int i=0;i<n.getLength();i++){
+//			 NucleusBorderPoint p = n.getBorderPoint(i);
+//			 xpoints[i] = (float) p.getX();
+//			 ypoints[i] = (float) p.getY();
+//		 }
+//
+//		 return new FloatPolygon(xpoints, ypoints, n.getLength());
+		 return createPolygon(n.getBorderList());
 	 }
 
 	 /**
@@ -237,16 +237,20 @@ public class Utils {
 	 * @return
 	 */
 	public static FloatPolygon createPolygon(List<NucleusBorderPoint> list){
-		 float[] xpoints = new float[list.size()];
-		 float[] ypoints = new float[list.size()];
+		 float[] xpoints = new float[list.size()+1];
+		 float[] ypoints = new float[list.size()+1];
 
 		 for(int i=0;i<list.size();i++){
 			 NucleusBorderPoint p = list.get(i);
 			 xpoints[i] = (float) p.getX();
 			 ypoints[i] = (float) p.getY();
 		 }
+		 
+		 // Ensure the polygon is closed
+		 xpoints[list.size()] = (float) list.get(0).getX();
+		 ypoints[list.size()] = (float) list.get(0).getY();
 
-		 return new FloatPolygon(xpoints, ypoints, list.size());
+		 return new FloatPolygon(xpoints, ypoints);
 	 }
 	
 	 /**
@@ -258,16 +262,20 @@ public class Utils {
 		 * @return
 		 */
 		public static FloatPolygon createOriginalPolygon(List<NucleusBorderPoint> list, double[] originalPosition){
-			 float[] xpoints = new float[list.size()];
-			 float[] ypoints = new float[list.size()];
+			 float[] xpoints = new float[list.size()+1];
+			 float[] ypoints = new float[list.size()+1];
 
 			 for(int i=0;i<list.size();i++){
 				 NucleusBorderPoint p = list.get(i);
 				 xpoints[i] = (float) p.getX() + (float) originalPosition[Nucleus.X_BASE];
 				 ypoints[i] = (float) p.getY() + (float) originalPosition[Nucleus.Y_BASE];
 			 }
+			 
+			// Ensure the polygon is closed
+			 xpoints[list.size()] = (float) list.get(0).getX();
+			 ypoints[list.size()] = (float) list.get(0).getY();
 
-			 return new FloatPolygon(xpoints, ypoints, list.size());
+			 return new FloatPolygon(xpoints, ypoints);
 		 }
 	
 	/**
@@ -277,16 +285,17 @@ public class Utils {
 	 * @return a polygon
 	 */
 	public static FloatPolygon createOriginalPolygon(Nucleus n){
-		 float[] xpoints = new float[n.getLength()];
-		 float[] ypoints = new float[n.getLength()]; 
-
-		 for(int i=0;i<n.getLength();i++){
-			 NucleusBorderPoint p = n.getBorderPoint(i);
-			 xpoints[i] = (float) p.getX() + (float) n.getPosition()[Nucleus.X_BASE];
-			 ypoints[i] = (float) p.getY() + (float) n.getPosition()[Nucleus.Y_BASE];
-		 }
-
-		 return new FloatPolygon(xpoints, ypoints, n.getLength());
+//		 float[] xpoints = new float[n.getLength()];
+//		 float[] ypoints = new float[n.getLength()]; 
+//
+//		 for(int i=0;i<n.getLength();i++){
+//			 NucleusBorderPoint p = n.getBorderPoint(i);
+//			 xpoints[i] = (float) p.getX() + (float) n.getPosition()[Nucleus.X_BASE];
+//			 ypoints[i] = (float) p.getY() + (float) n.getPosition()[Nucleus.Y_BASE];
+//		 }
+//
+//		 return new FloatPolygon(xpoints, ypoints, n.getLength());
+		return createOriginalPolygon(n.getOriginalBorderList(), n.getPosition());
 
 	 }
 	

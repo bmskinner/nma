@@ -863,6 +863,32 @@ public class RoundNucleus
 	public void setSegmentMap(Map<String, Integer> map){
 		this.segmentTags = map;
 	}
+	
+	/**
+	 * Check if a given point lies within the nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsPoint(XYPoint p){
+		if(Utils.createPolygon(this.getBorderList()).contains( (float)p.getX(), (float)p.getY() ) ){
+			return true;
+		} else { 
+			return false;
+		}
+	}
+	
+	/**
+	 * Check if a given point lies within the nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsOriginalPoint(XYPoint p){
+		if(Utils.createPolygon(this.getOriginalBorderList()).contains( (float)p.getX(), (float)p.getY() ) ){
+			return true;
+		} else { 
+			return false;
+		}
+	}
 
 	/*
 		-----------------------
@@ -1259,9 +1285,12 @@ public class RoundNucleus
 	public void calculateSignalAnglesFromPoint(NucleusBorderPoint p) throws Exception {
 
 		for( int signalGroup : signalCollection.getSignalGroups()){
-			List<NuclearSignal> signals = signalCollection.getSignals(signalGroup);
+			
+			if(signalCollection.hasSignal(signalGroup)){
+				
+			
+				List<NuclearSignal> signals = signalCollection.getSignals(signalGroup);
 
-			if(!signals.isEmpty()){
 //				IJ.log(this.getNameAndNumber()+": Signals present in nucleus");
 				for(NuclearSignal s : signals){
 //					IJ.log(this.getNameAndNumber()+": Calculating angle");
