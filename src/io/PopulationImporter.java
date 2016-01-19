@@ -18,6 +18,8 @@
  *******************************************************************************/
 package io;
 
+import ij.IJ;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,12 +28,9 @@ import java.io.ObjectInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
-
-
-//import utility.Logger;
 import analysis.AnalysisDataset;
 import analysis.nucleus.NucleusDetector;
+import gui.dialogs.CarltonDialog;
 
 public class PopulationImporter {
 	
@@ -61,6 +60,11 @@ public class PopulationImporter {
 			if(!dataset.getSavePath().equals(inputFile)){
 				updateSavePath(inputFile, dataset);
 			}
+			
+			/*
+			 * A birthday treat
+			 */
+			checkCarlton(dataset);
 
 		} catch (FileNotFoundException e1) {
 			programLogger.log(Level.SEVERE, "File not found: "+inputFile.getAbsolutePath(), e1);
@@ -73,6 +77,28 @@ public class PopulationImporter {
 			fis.close();
 		}
 		return dataset;
+	}
+	
+	private static void checkCarlton(AnalysisDataset dataset){
+		
+		if(dataset.getCollection().size()>10){
+			String pluginDirName = IJ.getDirectory("plugins");
+			File pluginDir = new File(pluginDirName);
+			File doNotRun = new File(pluginDir.getAbsolutePath()+File.separator+".noCarlton");
+
+			if(doNotRun.exists()){
+				return;
+			} else {
+				try {
+					doNotRun.createNewFile();
+				} catch (IOException e) {
+					// If we can't create the blocking file, don't start spamming Carltons
+					// every time the dataset is opened
+					return;
+				}
+				new CarltonDialog(programLogger);				
+			}
+		}
 	}
 	
 	/**
