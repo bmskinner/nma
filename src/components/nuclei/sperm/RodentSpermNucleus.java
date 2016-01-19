@@ -26,7 +26,9 @@
 */  
 package components.nuclei.sperm;
 
+import ij.IJ;
 import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 import java.io.File;
 import java.io.IOException;
@@ -181,10 +183,9 @@ extends SpermNucleus
 		// Copy the nucleus
 		
 		RodentSpermNucleus testNucleus = (RodentSpermNucleus) this.duplicate();
-		
-		
+
 		// Only proceed if the verticals have been set
-		if(testNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && testNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
+		if(testNucleus!=null && testNucleus.hasBorderTag(BorderTag.TOP_VERTICAL) && testNucleus.hasBorderTag(BorderTag.BOTTOM_VERTICAL)){
 
 			double vertX = testNucleus.getBorderTag(BorderTag.TOP_VERTICAL).getX();
 //			IJ.log("Initial vertX:" +vertX);
@@ -226,23 +227,12 @@ extends SpermNucleus
 				distanceHump = distanceLeft;
 			}
 			
-//			IJ.log("Left point: "+newLeftPoint.toString());
-//			IJ.log("Bounding rectangle: "+testNucleus.getBoundingRectangle(BorderTag.REFERENCE_POINT).toString());
-//			IJ.log("Distance hook: "+distanceHook);
-//			IJ.log("Distance hump: "+distanceHump);
-//			IJ.log(testNucleus.dumpInfo(Nucleus.BORDER_TAGS));
-//			
-//			IJ.log("");
 			this.hookLength = distanceHook;
 			this.bodyWidth = distanceHump;
-//			if(useHook){
-//				return distanceHook;
-//			} else {
-//				return distanceHump;
-//			}	
-//		} else {
-//			return 0;
-//		}
+
+		} else {
+			this.hookLength = 0;
+			this.bodyWidth 	= 0;
 		}
 	}
 	
@@ -354,37 +344,31 @@ extends SpermNucleus
     setBorderTag(BorderTag.INTERSECTION_POINT, this.getIndex(this.findOppositeBorder(consensusTail)));
   }
 
- 
-	/**
-	 * Check if a given point lies within the nucleus
-	 * @param p
-	 * @return
-	 */
-	public boolean checkNucleusContainsPoint(XYPoint p){
-		if(Utils.createPolygon(this.getBorderList()).contains( (float)p.getX(), (float)p.getY() ) ){
-			return true;
-		} else { 
-			return false;
-		}
-	}
-
 	/**
 	 * Check if the given point is in the hook side of the nucleus
 	 * @param p
 	 * @return
 	 */
 	public boolean isHookSide(XYPoint p){
-		if(checkNucleusContainsPoint(p)){
+		if(containsPoint(p)){
+			
+			/*
+			 * Are border list and hook hump rois offset the same?
+			 * Yes.
+			 * Both are using the offset positions, not original positions
+			 */
 						
-			if(Utils.createPolygon(hookRoi).contains( (float)p.getX(), (float)p.getY() ) ){
+			FloatPolygon poly = Utils.createPolygon(hookRoi);
+			IJ.log("Hook roi: "+ poly.getBounds().toString());
+			if(poly.contains( (float)p.getX(), (float)p.getY() ) ){
+				IJ.log("Contains "+p.toString());
 				return true;
 			} else {
+				IJ.log("Not contains "+p.toString());
 				return false;
-//				throw new IllegalArgumentException("Selected point is not in hook or hump rois");
 			}
 		} else {
-			return false;
-//			throw new IllegalArgumentException("Selected point is not in the nucleus");
+			throw new IllegalArgumentException("Requested point is not in the nucleus: "+p.toString());
 		}
 	}
 
@@ -394,17 +378,13 @@ extends SpermNucleus
 	 * @param p
 	 * @return
 	 */
-	public boolean isHumpSide(XYPoint p){
-		if(checkNucleusContainsPoint(p)){
-			if(Utils.createPolygon(humpRoi).contains( (float)p.getX(), (float)p.getY() ) ){
-				return true;
-			} else {
-				return false;
-			}
-		} else {
+	public boolean isHumpSide(XYPoint p){			
+		if(isHookSide(p)){
 			return false;
-			
+		} else {
+			return true;
 		}
+		
 	}    
 
 	/**
@@ -606,9 +586,12 @@ extends SpermNucleus
     this.humpRoi = roi1;
 
     //    check if we need to swap
-    if(roi1.contains(this.getBorderTag(BorderTag.REFERENCE_POINT))){ //).overlaps(this.getBorderTag(BorderTag.REFERENCE_POINT))){
-    	this.hookRoi = roi1;
-    	this.humpRoi = roi2;
+    for(NucleusBorderPoint point : roi1){
+    	if(point.overlaps(this.getBorderTag(BorderTag.REFERENCE_POINT))){
+    		this.hookRoi = roi1;
+        	this.humpRoi = roi2;
+        	break;
+    	}
     }
 
   }
@@ -623,15 +606,18 @@ extends SpermNucleus
   @Override
   public void calculateSignalAnglesFromPoint(NucleusBorderPoint p) throws Exception {
 
-//	  IJ.log(this.getNameAndNumber()+": Calculating signal angles");
-	  try {
-		  super.calculateSignalAnglesFromPoint(p);
+
+	  super.calculateSignalAnglesFromPoint(p);
+
+	  if(this.hasSignal()){
+		  
+		  IJ.log(this.dumpInfo(BORDER_TAGS));
 
 		  // update signal angles with hook or hump side
 		  for( int i : signalCollection.getSignalGroups()){
 
 			  if(signalCollection.hasSignal(i)){
-				  
+
 				  List<NuclearSignal> signals = signalCollection.getSignals(i);
 
 				  for(NuclearSignal n : signals){
@@ -643,24 +629,26 @@ extends SpermNucleus
 					  double angle = n.getAngle();
 
 					  try{
+						  // This com is offset, not original
+						  XYPoint com = n.getCentreOfMass();
 
-						  if( this.isHookSide(n.getCentreOfMass()) ){ 
+						  // These rois are offset, not original
+						  if( this.isHookSide(com) ){ 
 							  angle = 360 - angle;
-						  } else {
-							  
-						  }
+							  IJ.log("Signal com is hookside");
+						  } 
+						  IJ.log("Signal com: "  +com.toString());
+						  IJ.log("Signal angle: "+angle);
 					  } catch(Exception e){
-//						  IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
+						  // IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
 					  } finally {
 
-							  n.setAngle(angle);
+						  n.setAngle(angle);
 
 					  }
 				  }
 			  }
 		  }
-	  } catch(Exception e){
-//		  IJ.log("Error updating signal angles");
 	  }
   }
   
@@ -762,7 +750,15 @@ extends SpermNucleus
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
 	    try {
+	    	// recalculate - old datasets have problems
+	    	splitNucleusToHeadAndHump();
+	    	
+	    	// calculate for datasets below 1.11.5
 			calculateHookOrBodyLength();
+			
+			// recalculate signal angles - old datasets have problems
+			calculateSignalAnglesFromPoint(this.getPoint(BorderTag.ORIENTATION_POINT));
+			
 		} catch (Exception e) {
 		    this.hookLength = 0;
 		    this.bodyWidth = 0;

@@ -247,9 +247,9 @@ abstract class ProgressableAction implements PropertyChangeListener {
 
 		log(Level.FINEST, "Firing update populations");
 		fireInterfaceEvent(InterfaceMethod.UPDATE_POPULATIONS);
+		
 //		log(Level.FINEST, "Firing save root");
 //		fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
-		
 		
 		List<AnalysisDataset> list = new ArrayList<AnalysisDataset>(0);
 		list.add(dataset);

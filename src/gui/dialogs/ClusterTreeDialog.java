@@ -99,6 +99,8 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	private AnalysisDataset dataset;
 	private ClusterGroup group;
 	
+	private int numberOfTimesColouringCalled = 0; // for debugging, ignore
+	
 	private JComboBox<AnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
 	
@@ -106,31 +108,47 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	
 	private List<CellCollection> clusterList = new ArrayList<CellCollection>(0);
 	
-	public ClusterTreeDialog(Logger programLogger, AnalysisDataset dataset, final ClusterGroup group) {
+	private boolean hasMergeSources; // cache this to speed comparisons
+	
+	public ClusterTreeDialog(final Logger programLogger, final AnalysisDataset dataset, final ClusterGroup group) {
 		super(programLogger);
 		this.dataset = dataset;
 		this.group = group;
-
-		this.setLayout(new BorderLayout());
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		this.viewer = new DraggableTreeViewer();
-				
-		viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());
-
-
-		this.add(viewer, BorderLayout.CENTER);
+		this.hasMergeSources = dataset.hasMergeSources();
 		
-		this.buttonPanel = createButtonPanel();
-		this.add(buttonPanel, BorderLayout.NORTH);
-				
-		importTree();
-		
-				
-		this.setModal(false);
-		this.setMinimumSize(new Dimension(500, 500));
-		this.pack();
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
+		try{
+
+			programLogger.log(Level.FINEST, "Building tree view");
+			this.setLayout(new BorderLayout());
+			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			this.viewer = new DraggableTreeViewer();
+			programLogger.log(Level.FINEST, "Created draggable viewer");
+			
+			viewer.getTreePane().addMouseListener(new MouseClusterSelectionAdapter());
+			programLogger.log(Level.FINEST, "Added listener");
+
+
+			this.add(viewer, BorderLayout.CENTER);
+			programLogger.log(Level.FINEST, "Added viewer");
+
+			this.buttonPanel = createButtonPanel();
+			programLogger.log(Level.FINEST, "Made button panel");
+			this.add(buttonPanel, BorderLayout.NORTH);
+
+			programLogger.log(Level.FINEST, "Importing tree");
+			importTree();
+			programLogger.log(Level.FINEST, "Imported tree");
+
+			this.setModal(false);
+			this.setMinimumSize(new Dimension(500, 500));
+			this.pack();
+			this.setLocationRelativeTo(null);
+			programLogger.log(Level.FINEST, "Displaying dialog");
+			this.setVisible(true);
+		} catch(Exception e){
+				programLogger.log(Level.SEVERE, "Error creating tree view", e);
+				this.dispose();
+		}
 	}
 	
 	/**
@@ -149,6 +167,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			RootedTree topTree = (RootedTree) trees.get(0);
 			
 			int numTaxa = topTree.getTaxa().size(); 
+			programLogger.log(Level.FINE, "Tree has "+numTaxa+" taxa");
 			
 			viewer.setTree( topTree );
 			
@@ -215,42 +234,35 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	 * Update the taxon colours to match their cluster
 	 * @param cluster the dataset of nuclei in the cluster
 	 */
-	private void colourTreeNodesByCluster(CellCollection cluster){
+	private void colourTreeNodesByCluster(final CellCollection cluster){
 
 		if(cluster!=null){
+			setStatusLoading();
 			
 			Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
 			
-			RootedTree tree = viewer.getTreePane().getTree();
-
-			for(Node n : tree.getNodes()){
-
-				if(tree.isExternal(n)){
-
-					Taxon t = tree.getTaxon(n);
-
-					String name = t.getName();
-
-					for(Nucleus nucleus : cluster.getNuclei()){
-						if(taxonNamesMatch(name, nucleus)){
-							clusterMemberships.put(n, Color.BLACK);
-						}
-							
-					}
-				}
-
+			List<UUID> completedNuclei = new ArrayList<UUID>(); // store each nucleus assigned
+			
+			Map<Node, Color> map = assignNodeMemberships(completedNuclei, cluster, -1);
+			 
+			for(Node n : map.keySet()){
+				clusterMemberships.put(n, map.get(n));
 			}
 			
+			RootedTree tree = viewer.getTreePane().getTree();		
 
 			VariableNodePainter painter = new VariableNodePainter("cluster", tree, PainterIntent.TIP, clusterMemberships);
 			painter.setBorder(Color.BLACK, new BasicStroke(2f));
 			viewer.getTreePane().setTaxonLabelPainter(painter);
+			setStatusLoaded();
 
 		}
 	}
 		
 	private void colourTreeNodesByClusterGroup(final ClusterGroup group){
 
+		programLogger.log(Level.FINER, "Colouring nodes by cluster group: "+group.getName()+" iteration "+numberOfTimesColouringCalled);	
+		numberOfTimesColouringCalled++;
 		if(group!=null){
 			setStatusLoading();
 			Thread thr = new Thread(){
@@ -258,41 +270,39 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 				public void run(){
 			
 					Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
-					RootedTree tree = viewer.getTreePane().getTree();
-
+//					RootedTree tree = viewer.getTreePane().getTree();
+					
+					List<UUID> completedNuclei = new ArrayList<UUID>(); // store each nucleus assigned
+					
 					int clusterNumber = 0;
 					for(UUID id : group.getUUIDs()){
+						
 						AnalysisDataset cluster = null;
-						
-						if(dataset.hasChild(id)){
-							cluster = dataset.getChildDataset(id);
-						}
-						
-						if(dataset.hasMergeSource(id)){
-							cluster = dataset.getMergeSource(id);
-						}
 												
-						
-						Color colour = ColourSelecter.getSegmentColor(clusterNumber++);
-		
-						for(Node n : tree.getNodes()){
-		
-							if(tree.isExternal(n)){
-		
-								Taxon t = tree.getTaxon(n);
-		
-								String name = t.getName();
-		
-								for(Nucleus nucleus : cluster.getCollection().getNuclei()){
-									if(taxonNamesMatch(name, nucleus)){
-										clusterMemberships.put(n, colour);
-									}
-								}
-							}
-		
+						if(dataset.hasChild(id)){
+							
+							cluster = dataset.getChildDataset(id);
+							
+						} else if(dataset.hasMergeSource(id)){
+							
+							cluster = dataset.getMergeSource(id);
+						} else {
+							// If the cluster was not found, stop
+							programLogger.log(Level.WARNING, "Child dataset not found, cancelling");
+							return;
 						}
+						
+						 Map<Node, Color> map = assignNodeMemberships(completedNuclei, cluster.getCollection(), clusterNumber);
+						 
+						 for(Node n : map.keySet()){
+							 clusterMemberships.put(n, map.get(n));
+						 }
+						
+						clusterNumber++;
+						programLogger.log(Level.FINER, "Node colours assigned");	
 		
 					}
+					RootedTree tree = viewer.getTreePane().getTree();
 					VariableNodePainter painter = new VariableNodePainter("Cluster", tree, PainterIntent.TIP, clusterMemberships);
 					painter.setBorder(Color.BLACK, new BasicStroke(2f));
 					viewer.getTreePane().setTaxonLabelPainter(painter);
@@ -303,20 +313,51 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		}
 	}
 	
-	/**
-	 * Get the names of all nuclei in the collection, formatted as
-	 * taxon names
-	 * @param collection
-	 * @return
-	 */
-	private List<String> getNucleusNames(CellCollection collection){
-		List<String> result = new ArrayList<String>();
-		for(Nucleus nucleus : collection.getNuclei()){
-			result.add(nucleus.getSourceFile()+"-"+nucleus.getNameAndNumber());
+	private Map<Node, Color> assignNodeMemberships(List<UUID> completedNuclei, CellCollection cluster, int clusterNumber){
+		
+		RootedTree tree = viewer.getTreePane().getTree();
+		
+		Map<Node, Color> clusterMemberships = new HashMap<Node, Color>();
+		
+		// Cache the list of nuclei to be tested
+		List<UUID> toAnalyse = new ArrayList<UUID>();
+		for(Cell cell : cluster.getCells()){
+			
+			if( ! completedNuclei.contains(cell.getId())){
+				toAnalyse.add(UUID.fromString(cell.getId().toString()));
+			}
 		}
-		return result;
+		programLogger.log(Level.FINEST, "Built "+toAnalyse.size()+" cell list");	
+								
+		programLogger.log(Level.FINER, "Colouring dataset "+cluster.getName());				
+		
+		Color colour = clusterNumber == -1 ? Color.BLACK : ColourSelecter.getSegmentColor(clusterNumber);
+
+		for(Node n : tree.getNodes()){
+
+			if(tree.isExternal(n)){ // choose the taxon nodes
+
+				Taxon t = tree.getTaxon(n);
+				String name = t.getName();
+
+				programLogger.log(Level.FINEST, "Testing "+name+" against "+toAnalyse.size()+" cells");	
+				
+				
+				for (Iterator<UUID> iterator = toAnalyse.iterator(); iterator.hasNext();) {
+					UUID nid = iterator.next();
+					Nucleus nucleus = cluster.getCell(nid).getNucleus();
+					if(taxonNamesMatch(name, nucleus)){
+						programLogger.log(Level.FINEST, "Added colour for "+name);	
+						clusterMemberships.put(n, colour);
+						iterator.remove();
+						completedNuclei.add(nid);
+					}
+				}						
+			}
+
+		}
+		return clusterMemberships;
 	}
-	
 
 	/**
 	 * Check that a taxon name matches a nucleus name
@@ -325,27 +366,45 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	 * @return
 	 */
 	private boolean taxonNamesMatch(String name, Nucleus nucleus){
+		
+		/*
+		Testing name: P106.tiff-3
+		Testing J:\Protocols\Scripts and macros\Testing_cluster_images\P100.tiff-P100.tiff-0
+		Testing Testing_cluster_images-P100.tiff-0
+		Testing P100.tiff-0
+		Name not found
+		*/
+		
 		String nucleusName = nucleus.getSourceFile()+"-"+nucleus.getNameAndNumber();
+		
+//		programLogger.log(Level.FINEST, "\tTesting name: "+name);
+		
+//		programLogger.log(Level.FINEST, "\t\tTesting "+nucleusName);
 
 		// the ideal is full file path
-		if(name.equals(nucleusName)){
+		if(name.equals(nucleusName)){ // 'C:\bla\image.tiff-image.tiff-1'
 			return true;
 		} else {
+//			return false;
 			// otherwise look for the folder and name
+			
 			nucleusName = nucleus.getSourceDirectoryName()+"-"+nucleus.getNameAndNumber();
+//			programLogger.log(Level.FINEST, "\t\tTesting "+nucleusName);
 			if(name.equals(nucleusName)){
 				return true;
 			} else {
-				// Can't get just names from merge sources
-				if(dataset.hasMergeSources()){
+//				// Can't get just names from merge sources
+				if(hasMergeSources){
+//					programLogger.log(Level.FINEST, "Cannot test further in a merge source");
 					return false;
 				} else {
 					// otherwise look for just the name from an old dataset
 					nucleusName = nucleus.getNameAndNumber();
+//					programLogger.log(Level.FINEST, "\t\tTesting "+nucleusName);
 					if(name.equals(nucleusName)){
 						return true;
 					} else {
-
+//						programLogger.log(Level.FINEST, "Name not found");s
 						return false;
 					}
 				}

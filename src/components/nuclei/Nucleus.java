@@ -375,6 +375,21 @@ public interface Nucleus {
 	 */
 	public List<NucleusBorderPoint> getOriginalBorderList();
 
+	
+	/**
+	 * Test if the given point is within the offset nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsPoint(XYPoint p);
+	
+	/**
+	 * Test if the given point is within the original nucleus
+	 * @param p
+	 * @return
+	 */
+	public boolean containsOriginalPoint(XYPoint p);
+	
 	public void calculateFractionalSignalDistancesFromCoM();
 	public void calculateSignalDistancesFromCoM();
 

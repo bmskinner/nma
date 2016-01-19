@@ -28,6 +28,7 @@ import javax.swing.SwingUtilities;
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetSegmenter;
 import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.MainWindow;
 import gui.DatasetEvent.DatasetMethod;
 import io.CompositeExporter;
@@ -209,7 +210,10 @@ public class RunSegmentationAction extends ProgressableAction {
 				// call the finish
 				if( ! hasRemainingDatasetsToProcess()){
 
+					log(Level.FINEST, "Firing save root");
+					fireInterfaceEvent(InterfaceMethod.SAVE_ROOT);
 					RunSegmentationAction.super.finished();
+					
 					
 				} else {
 					// otherwise analyse the next item in the list
