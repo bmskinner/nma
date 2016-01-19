@@ -395,6 +395,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 						
 					} else { // different number of segments, blank chart
+						measurementUnitSettingsPanel.setEnabled(false);
+						mainPanel.setLayout(new FlowLayout());
 						mainPanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
 					}
 					mainPanel.revalidate();
@@ -523,6 +525,8 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 
 					} else { // different number of segments, blank chart
+						this.setEnabled(false);
+						mainPanel.setLayout(new FlowLayout());
 						mainPanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
 						scrollPane.setViewportView(mainPanel);
 					}
