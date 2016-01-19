@@ -99,7 +99,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	private AnalysisDataset dataset;
 	private ClusterGroup group;
 	
-	private int numberOfTimesColouringCalled = 0;
+	private int numberOfTimesColouringCalled = 0; // for debugging, ignore
 	
 	private JComboBox<AnalysisDataset> selectedClusterBox;
 	private JComboBox<ClusterGroup> selectedClusterGroupBox;
@@ -234,7 +234,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 	 * Update the taxon colours to match their cluster
 	 * @param cluster the dataset of nuclei in the cluster
 	 */
-	private void colourTreeNodesByCluster(CellCollection cluster){
+	private void colourTreeNodesByCluster(final CellCollection cluster){
 
 		if(cluster!=null){
 			setStatusLoading();
