@@ -18,10 +18,14 @@
  *******************************************************************************/
 package gui;
 
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -34,6 +38,9 @@ import javax.swing.JLabel;
  */
 @SuppressWarnings("serial")
 public abstract class LoadingIconDialog extends JDialog {
+	
+	private static final String LOADING_GIF_NAME = "ajax-loader.gif";
+	private static final String BLANK_GIF_NAME   = "blank.gif";
 
 	private JLabel loadingLabel = new JLabel("");
 	private ImageIcon loadingGif = null; // the icon for the loading gif
@@ -95,8 +102,8 @@ public abstract class LoadingIconDialog extends JDialog {
 	 */
 	private boolean loadResources(String path){
 		
-		String pathToGif   = path+"ajax-loader.gif";	
-		String pathToBlank = path+"blank.gif";
+		String pathToGif   = path+LOADING_GIF_NAME;	
+		String pathToBlank = path+BLANK_GIF_NAME;
 		
 		boolean ok = false;
 		try{
@@ -106,7 +113,8 @@ public abstract class LoadingIconDialog extends JDialog {
 			URL urlToGif = cl.getResource(pathToGif);
 			
 			if(urlToGif!=null){
-				loadingGif = new ImageIcon(urlToGif);
+//				loadingGif = new ImageIcon(urlToGif);
+				loadingGif = loadURL(urlToGif);
 
 				if(loadingGif==null){
 					programLogger.log(Level.WARNING, "Unable to load gif");
@@ -121,7 +129,8 @@ public abstract class LoadingIconDialog extends JDialog {
 			URL urlToBlank = cl.getResource(pathToBlank);
 
 			if(urlToBlank!=null){
-				blankGif = new ImageIcon(urlToBlank);
+				blankGif = loadURL(urlToBlank);
+//				blankGif = new ImageIcon(urlToBlank);
 
 				if(blankGif==null){
 					programLogger.log(Level.WARNING, "Unable to load blank gif");
@@ -138,6 +147,48 @@ public abstract class LoadingIconDialog extends JDialog {
 		}
 		return ok;
 	}
+	
+	private ImageIcon loadURL(URL url){
+    	ImageIcon icon = null;
+    	if(url!=null){
+    		programLogger.log(Level.WARNING, "URL found: "+url.toString());
+    		icon = new ImageIcon(url);
+    		
+    		String status = "";
+    		switch(icon.getImageLoadStatus()){
+    		
+    			case 1: status = "Loading";
+    				break;
+    			case 2: status = "Aborted";
+    				break;
+    			case 4: status = "Errored";
+					break;
+    			case 8: status = "Complete";
+					break;
+    		
+    		}
+    		
+    		programLogger.log(Level.WARNING, "Load status: "+status);
+    		
+//    		if(icon.getImageLoadStatus()== MediaTracker.ERRORED){
+//    			programLogger.log(Level.WARNING, "Could not load icon from "+url.getPath());
+//    			programLogger.log(Level.WARNING, "Icon status "+icon.getImageLoadStatus());
+//
+//    			
+//    			
+//    			programLogger.log(Level.WARNING, "Trying to load icon directly...");
+//    			try{
+//    				Image img = ImageIO.read(url);
+//    				icon = new ImageIcon(img);
+//    			} catch(IOException e){
+//    				programLogger.log(Level.SEVERE, "Error in loading image ", e);
+//    				icon = null;
+//    			}
+//    		}
+
+    	}
+    	return icon;
+    }
 	
 	/**
 	 * Set the header label to loading
