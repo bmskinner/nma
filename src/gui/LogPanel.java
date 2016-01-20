@@ -215,7 +215,13 @@ public class LogPanel extends DetailPanel implements ActionListener {
 				
 				{
 					if(command.equals("Carlton dance")){
-						new CarltonDialog(programLogger);
+						Thread thr = new Thread(){
+							public void run(){
+								new CarltonDialog(programLogger);
+							}
+						};
+						thr.start();
+						
 					} else {
 
 						programLogger.log(Level.INFO, "Command not recognised");
