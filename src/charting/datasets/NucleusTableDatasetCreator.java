@@ -405,7 +405,7 @@ public class NucleusTableDatasetCreator {
 				dataset.getCollection().getFolder(),
 				dataset.getDebugFile().getAbsolutePath(),
 				options.getNucleusType().toString(),
-				dataset.getVersion()
+				dataset.getVersion().toString()
 				};
 		return collectionData;
 	}

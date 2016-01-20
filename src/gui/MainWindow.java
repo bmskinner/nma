@@ -71,9 +71,11 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+
 import logging.LogPanelFormatter;
 import logging.TextAreaHandler;
 import utility.Constants;
+import utility.Version;
 import analysis.AnalysisDataset;
 import analysis.nucleus.DatasetSegmenter.MorphologyAnalysisMode;
 import components.generic.BorderTag;
@@ -128,7 +130,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 		
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		try {
-			setTitle("Nuclear Morphology Analysis v"+getVersion());
+			setTitle("Nuclear Morphology Analysis v"+getVersion().toString());
 			setBounds(100, 100, 1012, 604);
 			this.setLocationRelativeTo(null); // centre on screen
 			contentPane = new JPanel();
@@ -421,8 +423,9 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 * Get the program version
 	 * @return the version
 	 */
-	public String getVersion(){
-		return Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
+	public Version getVersion(){
+		return new Version(Constants.VERSION_MAJOR, Constants.VERSION_REVISION, Constants.VERSION_BUGFIX);
+//		return Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
 	}
 	
 	/**

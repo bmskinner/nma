@@ -751,13 +751,13 @@ extends SpermNucleus
 	    in.defaultReadObject();
 	    try {
 	    	// recalculate - old datasets have problems
-	    	splitNucleusToHeadAndHump();
+//	    	splitNucleusToHeadAndHump();
 	    	
 	    	// calculate for datasets below 1.11.5
 			calculateHookOrBodyLength();
 			
 			// recalculate signal angles - old datasets have problems
-			calculateSignalAnglesFromPoint(this.getPoint(BorderTag.ORIENTATION_POINT));
+//			calculateSignalAnglesFromPoint(this.getPoint(BorderTag.ORIENTATION_POINT));
 			
 		} catch (Exception e) {
 		    this.hookLength = 0;

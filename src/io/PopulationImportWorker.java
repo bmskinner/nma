@@ -27,10 +27,13 @@ import java.util.logging.Logger;
 import components.generic.BorderTag;
 import components.generic.ProfileCollectionType;
 import components.nuclear.NucleusType;
+import components.nuclei.Nucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
 import analysis.AnalysisDataset;
 import analysis.AnalysisWorker;
 import analysis.nucleus.DatasetProfiler;
 import utility.Constants;
+import utility.Version;
 
 public class PopulationImportWorker extends AnalysisWorker {
 	
@@ -85,6 +88,23 @@ public class PopulationImportWorker extends AnalysisWorker {
 						}
 						
 					}
+					Version version = Version.parseString(dataset.getVersion());
+					
+					// This is when bugs were fixed for hook hump assignment
+					Version testVersion = new Version(1, 11, 5);
+					
+					/*
+					 * Correct hook-hump for older versions
+					 * Don't run a load of calculations unnecessarily in newer versions
+					 */
+					if(version.isOlderThan(testVersion)){
+						
+						programLogger.log(Level.FINE, "Updating older dataset hook-hump split and signals");
+						updateRodentSpermHookHumpSplits(dataset);
+						for(AnalysisDataset child : dataset.getAllChildDatasets()){
+							updateRodentSpermHookHumpSplits(child);
+						}
+					}
 					
 				}
 				
@@ -100,6 +120,28 @@ public class PopulationImportWorker extends AnalysisWorker {
 			logError("Unable to open file", e);
 			return false;
 		}
+	}
+	
+	/**
+	 * Recalculate the hook-hunp split, and signal angle measurements for the 
+	 * given dataset of rodent sperm nuclei
+	 * @param d
+	 * @throws Exception
+	 */
+	private void updateRodentSpermHookHumpSplits(AnalysisDataset d) throws Exception{
+		
+		if(d.getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+			for(Nucleus n : d.getCollection().getNuclei()){
+
+				RodentSpermNucleus nucleus = (RodentSpermNucleus) n;
+				// recalculate - old datasets have problems
+				nucleus.splitNucleusToHeadAndHump();
+
+				// recalculate signal angles - old datasets have problems
+				nucleus.calculateSignalAnglesFromPoint(nucleus.getPoint(BorderTag.ORIENTATION_POINT));
+			}
+		}
+		
 	}
 	
 	private void calculateTopAndBottomVerticals(AnalysisDataset dataset) throws Exception {
@@ -127,14 +169,16 @@ public class PopulationImportWorker extends AnalysisWorker {
 			return true;
 		}
 		
-		String[] parts = version.split("\\.");
+		Version v = Version.parseString(version);
+		
+//		String[] parts = version.split("\\.");
 		
 		// major version MUST be the same
-		if(Integer.valueOf(parts[0])!=Constants.VERSION_MAJOR){
+		if(v.getMajor()!=Constants.VERSION_MAJOR){
 			ok = false;
 		}
 		// dataset revision should be equal or greater to program
-		if(Integer.valueOf(parts[1])<Constants.VERSION_REVISION){
+		if(v.getMinor()<Constants.VERSION_REVISION){
 			programLogger.log(Level.WARNING, "Dataset was created with an older version of the program");
 			programLogger.log(Level.WARNING, "Some functionality may not work as expected");
 		}
