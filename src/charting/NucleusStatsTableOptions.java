@@ -22,17 +22,18 @@ import java.util.List;
 
 import analysis.AnalysisDataset;
 import stats.NucleusStatistic;
+import stats.PlottableStatistic;
 
 public class NucleusStatsTableOptions extends TableOptions {
 
-	private NucleusStatistic stat;
+	private PlottableStatistic stat;
 	
-	public NucleusStatsTableOptions(List<AnalysisDataset> list, NucleusStatistic stat) {
+	public NucleusStatsTableOptions(List<AnalysisDataset> list, PlottableStatistic stat) {
 		super(list);
 		this.stat = stat;
 	}
 
-	public NucleusStatistic getStat() {
+	public PlottableStatistic getStat() {
 		return stat;
 	}
 	

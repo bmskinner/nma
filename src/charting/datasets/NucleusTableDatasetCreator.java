@@ -47,6 +47,7 @@ import components.nuclei.Nucleus;
 import ij.IJ;
 import stats.DipTester;
 import stats.NucleusStatistic;
+import stats.SegmentStatistic;
 import stats.Stats;
 
 public class NucleusTableDatasetCreator {
@@ -697,6 +698,68 @@ public class NucleusTableDatasetCreator {
 					popData[i] = df.format( runWilcoxonTest( 
 							dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS), 
 							dataset2.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS), 
+							getPValue) );
+				}
+				i++;
+			}
+			model.addColumn(dataset.getName(), popData);
+		}
+		return model;
+	}
+	
+	/**
+	 * Carry out pairwise wilcoxon rank-sum test on the given stat of the segments
+	 * @param list the datasets to test
+	 * @param stat the statistic to measure
+	 * @param segName the segment to create the table for
+	 * @return a tablemodel for display
+	 */	
+	public static TableModel createWilcoxonSegmentStatTable(List<AnalysisDataset> list, SegmentStatistic stat, String segName) throws Exception {
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
+		if(list==null){
+			return model;
+		}
+		
+		// check which reference point to use
+		BorderTag point = BorderTag.REFERENCE_POINT;
+
+		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
+		for(AnalysisDataset dataset : list){
+			
+			// get mapping from ordered segments to segment names
+			List<NucleusBorderSegment> segments1 = dataset.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+
+			Map<String, String> map1 = new HashMap<String, String>();
+			for(NucleusBorderSegment seg : segments1){
+				
+				NucleusBorderSegment realSeg = dataset.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+				map1.put(seg.getName(), realSeg.getName());
+			}
+
+			Object[] popData = new Object[list.size()];
+
+			int i = 0;
+			boolean getPValue = false;
+			for(AnalysisDataset dataset2 : list){
+				
+				// get mapping from ordered segments to segment names
+				List<NucleusBorderSegment> segments2 = dataset2.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+
+				Map<String, String> map2 = new HashMap<String, String>();
+				for(NucleusBorderSegment seg : segments2){
+					
+					NucleusBorderSegment realSeg = dataset2.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+					map2.put(seg.getName(), realSeg.getName());
+				}
+
+				if(dataset2.getUUID().equals(dataset.getUUID())){
+					popData[i] = "";
+					getPValue = true;
+				} else {
+					popData[i] = df.format( runWilcoxonTest( 
+							dataset.getCollection().getSegmentLengths(map1.get(segName), MeasurementScale.PIXELS),
+							dataset2.getCollection().getSegmentLengths(map1.get(segName), MeasurementScale.PIXELS),
 							getPValue) );
 				}
 				i++;
