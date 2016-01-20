@@ -18,8 +18,6 @@
  *******************************************************************************/
 package io;
 
-import ij.IJ;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,7 +28,6 @@ import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
 import analysis.nucleus.NucleusDetector;
-import gui.dialogs.CarltonDialog;
 
 public class PopulationImporter {
 	
@@ -61,11 +58,6 @@ public class PopulationImporter {
 				updateSavePath(inputFile, dataset);
 			}
 			
-			/*
-			 * A birthday treat
-			 */
-			checkCarlton(dataset);
-
 		} catch (FileNotFoundException e1) {
 			programLogger.log(Level.SEVERE, "File not found: "+inputFile.getAbsolutePath(), e1);
 		} catch (IOException e1) {
@@ -78,29 +70,7 @@ public class PopulationImporter {
 		}
 		return dataset;
 	}
-	
-	private static void checkCarlton(AnalysisDataset dataset){
 		
-		if(dataset.getCollection().size()>1000){
-			String pluginDirName = IJ.getDirectory("plugins");
-			File pluginDir = new File(pluginDirName);
-			File doNotRun = new File(pluginDir.getAbsolutePath()+File.separator+".noCarlton");
-
-			if(doNotRun.exists()){
-				return;
-			} else {
-				try {
-					doNotRun.createNewFile();
-				} catch (IOException e) {
-					// If we can't create the blocking file, don't start spamming Carltons
-					// every time the dataset is opened
-					return;
-				}
-				new CarltonDialog(programLogger);				
-			}
-		}
-	}
-	
 	/**
 	 * Check if the image folders are present in the correct relative directories
 	 * If so, update the CellCollection image paths

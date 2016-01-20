@@ -24,7 +24,6 @@ import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +32,7 @@ import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -47,7 +43,6 @@ import javax.swing.text.DefaultCaret;
 
 import analysis.AnalysisDataset;
 import gui.InterfaceEvent.InterfaceMethod;
-import gui.dialogs.CarltonDialog;
 import gui.tabs.DetailPanel;
 
 public class LogPanel extends DetailPanel implements ActionListener {
@@ -204,29 +199,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 				}
 				
 			} else {
-				
-				{
-//					programLogger.log(Level.INFO, "Command not recognised");
-				}
-				
-				/*
-				 * Birthday treat. Remove this section to disable
-				 */
-				
-				{
-					if(command.equals("Carlton dance")){
-						Thread thr = new Thread(){
-							public void run(){
-								new CarltonDialog(programLogger);
-							}
-						};
-						thr.start();
-						
-					} else {
-
-						programLogger.log(Level.INFO, "Command not recognised");
-					}
-				}
+				programLogger.log(Level.INFO, "Command not recognised");
 			}
 		}		
 	}
