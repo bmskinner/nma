@@ -109,6 +109,7 @@ public class FishRemappingDialog extends ImageProber {
 		super(dataset.getAnalysisOptions(), programLogger, FishMappingImageType.ORIGINAL_IMAGE, dataset.getAnalysisOptions().getFolder());
 		
 		this.setTitle("FISH remapping");
+		this.setHeaderText("Detected nuclei are outlined in yellow. Left or right click to add nuclei to new collections.");
 		
 		// set the collectio of pre-FISH images
 		this.dataset = dataset;

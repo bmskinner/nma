@@ -71,6 +71,8 @@ public abstract class ImageProber extends LoadingIconDialog {
 	private int rows = 0;
 	private int cols = 2;
 	
+	private JLabel headerLabel = new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.");
+	
 	
 	private boolean ok = false;
 	
@@ -233,15 +235,21 @@ public abstract class ImageProber extends LoadingIconDialog {
 		this.setLoadingLabelText("Examining input folders...");
 		this.setStatusLoading();
 		
-		panel.add(new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version."), BorderLayout.NORTH);
+		panel.add(headerLabel, BorderLayout.NORTH);
 
 		panel.add(this.getLoadingLabel(), BorderLayout.SOUTH);
 
 		return panel;
 	}
 	
-
-
+	/**
+	 * Update the heading text
+	 * @param s
+	 */
+	protected void setHeaderText(String s){
+		this.headerLabel.setText(s);
+	}
+	
 	/**
 	 * Make the image panel 
 	 * @return
