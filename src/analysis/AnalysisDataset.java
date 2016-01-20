@@ -112,7 +112,7 @@ public class AnalysisDataset implements Serializable {
 				+collection.getType()
 				+Constants.SAVE_FILE_EXTENSION); // nmd Nuclear Morphology Dataset
 		this.isRoot = false;
-		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
+		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_MINOR+"."+Constants.VERSION_REVISION;
 	}
 	
 	/**
@@ -124,7 +124,7 @@ public class AnalysisDataset implements Serializable {
 		this.thisCollection = collection;
 		this.savePath = saveFile;
 		this.isRoot = false;
-		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
+		this.version = Constants.VERSION_MAJOR+"."+Constants.VERSION_MINOR+"."+Constants.VERSION_REVISION;
 	}
 	
 	

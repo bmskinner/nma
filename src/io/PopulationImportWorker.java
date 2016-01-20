@@ -178,7 +178,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 			ok = false;
 		}
 		// dataset revision should be equal or greater to program
-		if(v.getMinor()<Constants.VERSION_REVISION){
+		if(v.getMinor()<Constants.VERSION_MINOR){
 			programLogger.log(Level.WARNING, "Dataset was created with an older version of the program");
 			programLogger.log(Level.WARNING, "Some functionality may not work as expected");
 		}

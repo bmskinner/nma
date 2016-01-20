@@ -29,6 +29,8 @@ public class Version {
 	private final int minor;
 	private final int revision;
 	
+	private static final String SEPARATOR = "."; 
+	
 	public Version(final int major, final int minor, final int revision ){
 		this.major = major;
 		this.minor = minor;
@@ -37,7 +39,7 @@ public class Version {
 	
 	/**
 	 * Parse the given string to a version. The string should have
-	 * the format '1.11.5'
+	 * three integers separated by dots - e.g. 1.11.5
 	 * @param s
 	 * @return
 	 */
@@ -46,7 +48,7 @@ public class Version {
 			throw new IllegalArgumentException("Input string is null");
 		}
 		
-		String[] parts = s.split("\\.");
+		String[] parts = s.split("\\"+SEPARATOR);
 		if(parts.length==3){
 			return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), Integer.valueOf(parts[2]));
 		} else {
@@ -121,7 +123,7 @@ public class Version {
 	}
 	
 	public String toString(){
-		return major+"."+minor+"."+revision;
+		return major + SEPARATOR + minor + SEPARATOR + revision;
 	}
 
 }

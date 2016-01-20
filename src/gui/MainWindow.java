@@ -109,6 +109,8 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	private List<DetailPanel> detailPanels = new ArrayList<DetailPanel>(); // store panels for iterating messsages
 	
 	private ColourSwatch activeSwatch = ColourSwatch.REGULAR_SWATCH;
+	
+	private final Version version = new Version(Constants.VERSION_MAJOR, Constants.VERSION_MINOR, Constants.VERSION_REVISION);
 		
 	// Flags to pass to ProgressableActions to determine the analyses
 	// to carry out in subsequently
@@ -424,8 +426,7 @@ public class MainWindow extends JFrame implements SignalChangeListener, DatasetE
 	 * @return the version
 	 */
 	public Version getVersion(){
-		return new Version(Constants.VERSION_MAJOR, Constants.VERSION_REVISION, Constants.VERSION_BUGFIX);
-//		return Constants.VERSION_MAJOR+"."+Constants.VERSION_REVISION+"."+Constants.VERSION_BUGFIX;
+		return version;
 	}
 	
 	/**
