@@ -460,7 +460,14 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
-	
+	/**
+	 * Create a franken profile dataset for multiple AnalysisDatsets
+	 * @param list the datasets
+	 * @param normalised is the length normalised to 100 
+	 * @param rightAlign is a non-normalised dataset hung to the right
+	 * @return
+	 * @throws Exception 
+	 */
 	public static DefaultXYDataset createMultiProfileFrankenDataset(List<AnalysisDataset> list, boolean normalised, ProfileAlignment alignment, BorderTag borderTag) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 
@@ -586,6 +593,14 @@ public class NucleusDatasetCreator {
 		return result;
 	}
 	
+	/**
+	 * Create a chart of the variability in the interquartile ranges across the angle profiles of the given datasets
+	 * @param list
+	 * @param borderTag
+	 * @param type
+	 * @return
+	 * @throws Exception
+	 */
 	public static XYDataset createIQRVariabilityDataset(List<AnalysisDataset> list, BorderTag borderTag, ProfileCollectionType type) throws Exception{
 
 		
@@ -593,9 +608,7 @@ public class NucleusDatasetCreator {
 			CellCollection collection = list.get(0).getCollection();
 
 			Profile profile = collection.getProfileCollection(type).getIQRProfile(borderTag);
-			
-			
-//			List<NucleusBorderSegment> segments = collection.getProfileCollection(type).getSegments(borderTag);
+
 			List<NucleusBorderSegment> segments = collection.getProfileCollection(type).getSegmentedProfile(borderTag).getOrderedSegments();
 			XYDataset ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);	
 			return ds;
@@ -616,11 +629,20 @@ public class NucleusDatasetCreator {
 		
 	}
 		
+	/**
+	 * Create a dataset containing series for each segment within the FrankenCollection
+	 * @param collection the cell collection to draw from
+	 * @param normalised should the chart be normalised to 100
+	 * @param alignment hang the chart from left or right
+	 * @param point the zero index of the chart
+	 * @return
+	 * @throws Exception
+	 */
 	public static XYDataset createFrankenSegmentDataset(CellCollection collection, boolean normalised, ProfileAlignment alignment, BorderTag point) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 //		String pointType = collection.getOrientationPoint();
-		Profile profile = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, 50);
+		Profile profile = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, Constants.MEDIAN);
 		Profile xpoints = profile.getPositions(100);
 		
 		// rendering order will be first on top
@@ -631,8 +653,8 @@ public class NucleusDatasetCreator {
 		addSegmentsFromProfile(segments, profile, ds, 100, 0);
 
 		// make the IQR
-		Profile profile25 = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, 25);
-		Profile profile75 = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, 75);
+		Profile profile25 = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, Constants.LOWER_QUARTILE);
+		Profile profile75 = collection.getProfileCollection(ProfileCollectionType.FRANKEN).getProfile(point, Constants.UPPER_QUARTILE);
 		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
 		ds.addSeries("Q25", data25);
 		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
@@ -1150,9 +1172,9 @@ public class NucleusDatasetCreator {
 	}
 	
 	/**
-	 * Create a dataset with the hook and hump rois for a rodent sperm nucleus.
+	 * Create a dataset with the hook and hump rois for a rodent sperm nucleus. If the
+	 * given cell does not contain a rodent sperm nucleus, the returned dataset is empty
 	 * @param cell
-	 * @param segmented
 	 * @return
 	 * @throws Exception
 	 */
@@ -1195,6 +1217,12 @@ public class NucleusDatasetCreator {
 		return ds;
 	}
 	
+	/**
+	 * Get the position of a segment in the nucleus angle profile
+	 * @param n
+	 * @param seg
+	 * @return
+	 */
 	public static int getSegmentPosition(Nucleus n, NucleusBorderSegment seg){
 		
 		int result = 0;
@@ -1207,6 +1235,13 @@ public class NucleusDatasetCreator {
 		return result;
 	}
 	
+	/**
+	 * Create a dataset with lines from each of the BorderTags within the nucleus
+	 * to the centre of mass of the nucleus
+	 * @param cell
+	 * @return
+	 * @throws Exception
+	 */
 	public static XYDataset createNucleusIndexTags(Cell cell) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
@@ -1448,6 +1483,12 @@ public class NucleusDatasetCreator {
 		
 	}
 	
+	/**
+	 * Create a Kruskal-Wallis comparison along the angle profiles for two analysis datasets
+	 * @param options
+	 * @return
+	 * @throws Exception
+	 */
 	public static XYDataset createKruskalProfileDataset(ProfileChartOptions options) throws Exception {
 
 		DefaultXYDataset ds = new DefaultXYDataset();

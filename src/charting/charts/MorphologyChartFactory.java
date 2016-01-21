@@ -770,7 +770,9 @@ public class MorphologyChartFactory {
 				plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
 				plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
 
-				// Basic nucleus colour
+				/*
+				 * Segmented nucleus outline
+				 */
 				if(hash.get(key).equals("Nucleus")){
 					String name = (String) plot.getDataset(key).getSeriesKey(i);
 					int colourIndex = getIndexFromLabel(name);
@@ -803,6 +805,10 @@ public class MorphologyChartFactory {
 					
 				}
 				
+				/*
+				 * Border tags
+				 */
+				
 				if(hash.get(key).equals("Tags")){
 					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
 					String name = plot.getDataset(key).getSeriesKey(i).toString().replace("Tag_", "");
@@ -816,21 +822,27 @@ public class MorphologyChartFactory {
 						
 				}
 
-				// signal colours
+				/*
+				 * Nuclear signals
+				 */
 				if(hash.get(key).startsWith("SignalGroup_")){
 					int colourIndex = getIndexFromLabel(hash.get(key));
 					Color colour = dataset.getSignalGroupColour(colourIndex);
 					plot.getRenderer(key).setSeriesPaint(i, colour);
 				}
 
-				// tail border
+				/*
+				 * Sperm tail  / flagellum border
+				 */
 				if(hash.get(key).equals("TailBorder")){
 
 					plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
 				}
 
 
-				// tail skeleton
+				/*
+				 * Sperm tail  / flagellum skeleton
+				 */
 				if(hash.get(key).equals("TailSkeleton")){
 
 					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
