@@ -27,6 +27,7 @@ import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -161,12 +162,22 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 	 */
 	public void setAnalysing(boolean b){
 		if(b){
-			this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			
+			for(Component c : this.getComponents()){
+				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); //new Cursor(Cursor.WAIT_CURSOR));
+			}
+			
+			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+			
 		} else {
-			this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			
+			for(Component c : this.getComponents()){
+				c.setCursor(Cursor.getDefaultCursor());
+			}
+			this.setCursor(Cursor.getDefaultCursor());
 		}
 		for(DetailPanel panel : this.subPanels){
-			panel.setAnalysing(b);;
+			panel.setAnalysing(b);
 		}
 	}
 	
