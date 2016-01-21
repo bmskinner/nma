@@ -240,7 +240,7 @@ extends SpermNucleus
 	 * Get a copy of the points in the hook roi
 	 * @return
 	 */
-	protected List<NucleusBorderPoint> getHookRoi(){
+	public List<NucleusBorderPoint> getHookRoi(){
 		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
 		for(NucleusBorderPoint n : hookRoi){
 			result.add(new NucleusBorderPoint(n));
@@ -252,7 +252,7 @@ extends SpermNucleus
 	 * Get a copy of the points in the hook roi
 	 * @return
 	 */
-	protected List<NucleusBorderPoint> getHumpRoi(){
+	public List<NucleusBorderPoint> getHumpRoi(){
 		List<NucleusBorderPoint> result = new ArrayList<NucleusBorderPoint>(0);
 		for(NucleusBorderPoint n : humpRoi){
 			result.add(new NucleusBorderPoint(n));

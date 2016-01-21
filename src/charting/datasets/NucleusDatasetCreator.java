@@ -57,6 +57,7 @@ import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
+import components.nuclei.sperm.RodentSpermNucleus;
 
 public class NucleusDatasetCreator {
 	
@@ -1145,6 +1146,52 @@ public class NucleusDatasetCreator {
 			ds.addSeries("Nucleus Border", data);
 
 		}		
+		return ds;
+	}
+	
+	/**
+	 * Create a dataset with the hook and hump rois for a rodent sperm nucleus.
+	 * @param cell
+	 * @param segmented
+	 * @return
+	 * @throws Exception
+	 */
+	public static XYDataset createNucleusHookHumpOutline(Cell cell) throws Exception{
+		
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		if(cell.getNucleus().getClass().isAssignableFrom(RodentSpermNucleus.class)){
+			
+			RodentSpermNucleus nucleus = (RodentSpermNucleus) cell.getNucleus();
+//			double[] position = nucleus.getPosition();
+			
+			double[] xpoints = new double[nucleus.getHookRoi().size()];
+			double[] ypoints = new double[nucleus.getHookRoi().size()];
+
+			int i =0;
+			for(XYPoint p : nucleus.getHookRoi()){
+				xpoints[i] = p.getX();
+				ypoints[i] = p.getY();
+				i++;
+			}
+
+			double[][] data = { xpoints, ypoints };
+			ds.addSeries("Hook", data);
+			
+			double[] xpoints2 = new double[nucleus.getHumpRoi().size()];
+			double[] ypoints2 = new double[nucleus.getHumpRoi().size()];
+
+			i =0;
+			for(XYPoint p : nucleus.getHumpRoi()){
+				xpoints2[i] = p.getX();
+				ypoints2[i] = p.getY();
+				i++;
+			}
+
+			double[][] data2 = { xpoints, ypoints };
+			ds.addSeries("Hump", data2);
+			
+		} 
 		return ds;
 	}
 	
