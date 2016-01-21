@@ -193,6 +193,9 @@ extends SpermNucleus
 			// Rotate vertical
 //			IJ.log(testNucleus.dumpInfo(Nucleus.BORDER_TAGS));
 			testNucleus.alignPointsOnVertical(points[0], points[1] );
+			
+			// Ensure that the rois are correctly assigned
+			testNucleus.splitNucleusToHeadAndHump();
 
 
 			
@@ -212,7 +215,9 @@ extends SpermNucleus
 			/*
 			 * To determine if the point is hook or hump, take a value either
 			 * size of the CoM, and test if it is closer to the desired bounding
-			 * box value
+			 * box value.
+			 * 
+			 * Since the nucleus is rotated, there should not be issues...
 			 */
 
 			XYPoint newLeftPoint = new XYPoint(testNucleus.getCentreOfMass().getX()-5, testNucleus.getCentreOfMass().getY());
@@ -228,7 +233,7 @@ extends SpermNucleus
 			}
 			
 			this.hookLength = distanceHook;
-			this.bodyWidth = distanceHump;
+			this.bodyWidth  = distanceHump;
 
 		} else {
 			this.hookLength = 0;
@@ -654,8 +659,7 @@ extends SpermNucleus
   
   @Override
   public void rotate(double angle){
-		super.rotate(angle);
-		
+				
 		if(angle!=0){
 
 			for(NucleusBorderPoint p : hookRoi){
@@ -723,6 +727,7 @@ extends SpermNucleus
 				p.setX(newX);
 				p.setY(newY);
 			}
+			super.rotate(angle);
 		}
 	}
   
@@ -751,14 +756,10 @@ extends SpermNucleus
 	    in.defaultReadObject();
 	    try {
 	    	// recalculate - old datasets have problems
-//	    	splitNucleusToHeadAndHump();
 	    	
 	    	// calculate for datasets below 1.11.5
 			calculateHookOrBodyLength();
-			
-			// recalculate signal angles - old datasets have problems
-//			calculateSignalAnglesFromPoint(this.getPoint(BorderTag.ORIENTATION_POINT));
-			
+						
 		} catch (Exception e) {
 		    this.hookLength = 0;
 		    this.bodyWidth = 0;
