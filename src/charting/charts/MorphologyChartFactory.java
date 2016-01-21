@@ -21,7 +21,7 @@ package charting.charts;
 import gui.RotationMode;
 import gui.components.ColourSelecter;
 import gui.components.ColourSelecter.ColourSwatch;
-import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 import ij.ImageStack;
 import ij.process.ImageProcessor;

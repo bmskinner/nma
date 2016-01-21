@@ -18,7 +18,7 @@
  *******************************************************************************/
 package gui.tabs;
 
-import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

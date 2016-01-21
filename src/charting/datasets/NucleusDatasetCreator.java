@@ -18,7 +18,7 @@
  *******************************************************************************/
 package charting.datasets;
 
-import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 import ij.process.FloatPolygon;
 import stats.DipTester;

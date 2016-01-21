@@ -18,13 +18,13 @@
  *******************************************************************************/
 package gui.tabs;
 
-import gui.components.BorderTagOptionsPanel;
 import gui.components.ColourSelecter;
-import gui.components.ProfileAlignmentOptionsPanel;
-import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.components.panels.BorderTagOptionsPanel;
+import gui.components.panels.ProfileAlignmentOptionsPanel;
+import gui.components.panels.ProfileCollectionTypeSettingsPanel;
+import gui.components.panels.ProfileMarkersOptionsPanel;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import stats.DipTester;
-import gui.components.ProfileCollectionTypeSettingsPanel;
-import gui.components.ProfileMarkersOptionsPanel;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;

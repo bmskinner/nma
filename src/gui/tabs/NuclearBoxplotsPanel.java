@@ -22,8 +22,8 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
 import gui.components.HistogramsTabPanel;
-import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.SelectableChartPanel;
+import gui.components.panels.MeasurementUnitSettingsPanel;
 import stats.NucleusStatistic;
 
 import java.awt.BorderLayout;
@@ -47,6 +47,7 @@ import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
+
 import analysis.AnalysisDataset;
 import charting.charts.BoxplotChartFactory;
 import charting.charts.BoxplotChartOptions;

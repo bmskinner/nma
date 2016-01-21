@@ -16,7 +16,10 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package gui.components;
+package gui.components.panels;
+
+
+import gui.RotationMode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,50 +27,42 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
-import components.generic.BorderTag;
-import components.generic.BorderTag.BorderTagType;
-
 @SuppressWarnings("serial")
-public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
-	
-	private Map<BorderTag, JRadioButton> map  = new  HashMap<BorderTag, JRadioButton>();
-	
-	public BorderTagOptionsPanel(){
+public class RotationSelectionSettingsPanel extends EnumeratedOptionsPanel {
 		
-		super();
-		final ButtonGroup group = new ButtonGroup();
+		private Map<RotationMode, JRadioButton> map  = new  HashMap<RotationMode, JRadioButton>();
 		
-		for(BorderTag type : BorderTag.values(BorderTagType.CORE)){
-			JRadioButton button = new JRadioButton(type.toString());
-			button.setActionCommand(type.toString());
-			button.addActionListener(this);
-			this.add(button);
-			group.add(button);
-			map.put(type, button);
-		}
-		// Set the default
-		map.get(BorderTag.REFERENCE_POINT).setSelected(true);
-		
-	}
-	
-	public void setEnabled(boolean b){
-		for(BorderTag type : BorderTag.values(BorderTagType.CORE)){
-			map.get(type).setEnabled(b);
-		}
-	}
+		public RotationSelectionSettingsPanel(){
+			super();
+			
+			final ButtonGroup group = new ButtonGroup();
 
-	/**
-	 * Get the selected profile type, or null
-	 * @return
-	 */
-	public BorderTag getSelected(){
-		for(BorderTag type : BorderTag.values(BorderTagType.CORE)){
-			JRadioButton button = map.get(type);
-			if(button.isSelected()){
-				return type;
+			for(RotationMode type : RotationMode.values()){
+				JRadioButton button = new JRadioButton(type.toString());
+				button.setActionCommand(type.toString());
+				button.addActionListener(this);
+				this.add(button);
+				group.add(button);
+				map.put(type, button);
+			}
+			// Set the default
+			map.get(RotationMode.ACTUAL).setSelected(true);		
+		}
+			
+		public RotationMode getSelected(){
+			for(RotationMode type : RotationMode.values()){
+				JRadioButton button = map.get(type);
+				if(button.isSelected()){
+					return type;
+				}
+			}
+			return null;
+		}
+		
+		public void setEnabled(boolean b){
+
+			for(RotationMode type : RotationMode.values()){
+				map.get(type).setEnabled(b);
 			}
 		}
-		return null;
 	}
-
-}

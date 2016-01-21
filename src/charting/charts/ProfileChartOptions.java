@@ -22,7 +22,7 @@ import java.util.List;
 
 import analysis.AnalysisDataset;
 import gui.components.ColourSelecter.ColourSwatch;
-import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import components.generic.BorderTag;
 import components.generic.ProfileCollectionType;
 

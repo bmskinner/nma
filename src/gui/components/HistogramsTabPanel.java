@@ -18,6 +18,8 @@
  *******************************************************************************/
 package gui.components;
 
+import gui.components.panels.MeasurementUnitSettingsPanel;
+import gui.components.panels.ProbabilityDensityCheckboxPanel;
 import gui.tabs.DetailPanel;
 import stats.NucleusStatistic;
 

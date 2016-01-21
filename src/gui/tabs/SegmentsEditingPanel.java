@@ -27,7 +27,7 @@ import gui.SignalChangeListener;
 import gui.DatasetEvent.DatasetMethod;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.DraggableOverlayChartPanel;
-import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.IJ;
 
 import java.awt.BorderLayout;
