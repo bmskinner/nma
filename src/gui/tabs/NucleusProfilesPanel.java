@@ -120,7 +120,9 @@ public class NucleusProfilesPanel extends DetailPanel {
 					programLogger.log(Level.FINEST, "Updated modality panel");
 				} catch  (Exception e){
 					programLogger.log(Level.SEVERE, "Error updating profile panels", e);
-					programLogger.log(Level.FINER, "Setting panels to null");
+					programLogger.log(Level.FINER, " Setting panels to null");
+					
+					NucleusProfilesPanel.this.update( (List<AnalysisDataset>) null);
 
 				} finally {
 					setUpdating(false);

@@ -91,6 +91,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					programLogger.log(Level.FINEST, "Updated nuclear histograms panel");
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
+					NuclearBoxplotsPanel.this.update( (List<AnalysisDataset>) null);
 				} finally {
 					setUpdating(false);
 				}
