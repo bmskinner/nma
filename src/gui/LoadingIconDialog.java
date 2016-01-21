@@ -18,6 +18,8 @@
  *******************************************************************************/
 package gui;
 
+import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.io.IOException;
@@ -203,8 +205,13 @@ public abstract class LoadingIconDialog extends JDialog {
 			loadingLabel.setIcon(loadingGif);
 			loadingLabel.repaint();
 		}
+
+		this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		for(Component c : this.getComponents()){
+			c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		}
 	}
-	
+
 	/**
 	 * Set the header label to the blank gif
 	 */
@@ -215,5 +222,10 @@ public abstract class LoadingIconDialog extends JDialog {
 		}
 		loadingLabel.setIcon(blankGif);
 		loadingLabel.repaint();
+
+		this.setCursor(Cursor.getDefaultCursor());
+		for(Component c : this.getComponents()){
+			c.setCursor(Cursor.getDefaultCursor());
+		}
 	}
 }
