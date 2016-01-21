@@ -289,49 +289,121 @@ public class AnalysisOptions implements Serializable {
 	}
 
 	
-	/**
-	 * Test if another options has the same value as this.
-	 * @param options
-	 * @return
-	 */
-	public boolean equals(AnalysisOptions options){
-
-		if( nucleusThreshold!= options.getNucleusThreshold()){
-			return false;
-		}
-		if( minNucleusSize!= options.getMinNucleusSize()){
-			return false;
-		}
-		if( maxNucleusSize!= options.getMaxNucleusSize()){
-			return false;
-		}
-		if( minNucleusCirc!= options.getMinNucleusCirc()){
-			return false;
-		}
-		if( maxNucleusCirc!= options.getMaxNucleusCirc()){
-			return false;
-		}
-		if( normaliseContrast!= options.isNormaliseContrast()){
-			return false;
-		}
-		if( angleProfileWindowSize!= options.getAngleProfileWindowSize()){
-			return false;
-		}
-		if( nucleusType!= options.getNucleusType()){
-			return false;
-		}
-		if( performReanalysis!= options.isReanalysis()){
-			return false;
-		}
-
-		CannyOptions thisCanny = edgeDetection.get("nucleus");
-
-		if( !thisCanny.equals( options.getCannyOptions("nucleus"))){
-			return false;
-		}
-		return true;
-		
+	
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + angleProfileWindowSize;
+		long temp;
+		temp = Double.doubleToLongBits(maxNucleusCirc);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(maxNucleusSize);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(minNucleusCirc);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(minNucleusSize);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + (normaliseContrast ? 1231 : 1237);
+		result = prime * result + nucleusThreshold;
+		result = prime * result
+				+ ((nucleusType == null) ? 0 : nucleusType.hashCode());
+		result = prime * result + (performReanalysis ? 1231 : 1237);
+		temp = Double.doubleToLongBits(scale);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result
+				+ ((signalDetection == null) ? 0 : signalDetection.hashCode());
+		return result;
 	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AnalysisOptions other = (AnalysisOptions) obj;
+		if (angleProfileWindowSize != other.angleProfileWindowSize)
+			return false;
+		if (Double.doubleToLongBits(maxNucleusCirc) != Double
+				.doubleToLongBits(other.maxNucleusCirc))
+			return false;
+		if (Double.doubleToLongBits(maxNucleusSize) != Double
+				.doubleToLongBits(other.maxNucleusSize))
+			return false;
+		if (Double.doubleToLongBits(minNucleusCirc) != Double
+				.doubleToLongBits(other.minNucleusCirc))
+			return false;
+		if (Double.doubleToLongBits(minNucleusSize) != Double
+				.doubleToLongBits(other.minNucleusSize))
+			return false;
+		if (normaliseContrast != other.normaliseContrast)
+			return false;
+		if (nucleusThreshold != other.nucleusThreshold)
+			return false;
+		if (nucleusType != other.nucleusType)
+			return false;
+		if (performReanalysis != other.performReanalysis)
+			return false;
+		if (Double.doubleToLongBits(scale) != Double
+				.doubleToLongBits(other.scale))
+			return false;
+		if (signalDetection == null) {
+			if (other.signalDetection != null)
+				return false;
+		} else if (!signalDetection.equals(other.signalDetection))
+			return false;
+		return true;
+	}
+
+
+//	/**
+//	 * Test if another options has the same value as this.
+//	 * @param options
+//	 * @return
+//	 */
+//	public boolean equals(AnalysisOptions options){
+//
+//		if( nucleusThreshold!= options.getNucleusThreshold()){
+//			return false;
+//		}
+//		if( minNucleusSize!= options.getMinNucleusSize()){
+//			return false;
+//		}
+//		if( maxNucleusSize!= options.getMaxNucleusSize()){
+//			return false;
+//		}
+//		if( minNucleusCirc!= options.getMinNucleusCirc()){
+//			return false;
+//		}
+//		if( maxNucleusCirc!= options.getMaxNucleusCirc()){
+//			return false;
+//		}
+//		if( normaliseContrast!= options.isNormaliseContrast()){
+//			return false;
+//		}
+//		if( angleProfileWindowSize!= options.getAngleProfileWindowSize()){
+//			return false;
+//		}
+//		if( nucleusType!= options.getNucleusType()){
+//			return false;
+//		}
+//		if( performReanalysis!= options.isReanalysis()){
+//			return false;
+//		}
+//
+//		CannyOptions thisCanny = edgeDetection.get("nucleus");
+//
+//		if( !thisCanny.equals( options.getCannyOptions("nucleus"))){
+//			return false;
+//		}
+//		return true;
+//		
+//	}
 	
 	public class CannyOptions implements Serializable {
 
@@ -474,53 +546,117 @@ public class AnalysisOptions implements Serializable {
 			this.kernelWidth = kernelWidth;
 		}
 		
-		public boolean equals(CannyOptions options){
+		
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + (cannyAutoThreshold ? 1231 : 1237);
+			result = prime * result + closingObjectRadius;
+			result = prime * result + (flattenChromocentres ? 1231 : 1237);
+			result = prime * result + flattenThreshold;
+			result = prime * result + Float.floatToIntBits(highThreshold);
+			result = prime * result + Float.floatToIntBits(kernelRadius);
+			result = prime * result + kernelWidth;
+			result = prime * result + kuwaharaKernel;
+			result = prime * result + Float.floatToIntBits(lowThreshold);
+			result = prime * result + (useCanny ? 1231 : 1237);
+			result = prime * result + (useKuwahara ? 1231 : 1237);
+			return result;
+		}
 
-			if( useCanny != options.isUseCanny()){
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
 				return false;
-			}
-			
-			if( cannyAutoThreshold != options.isCannyAutoThreshold()){
+			if (getClass() != obj.getClass())
 				return false;
-			}
-			
-			if( flattenChromocentres != options.isUseFlattenImage()){
+			CannyOptions other = (CannyOptions) obj;
+			if (!getOuterType().equals(other.getOuterType()))
 				return false;
-			}
-			
-			if( flattenThreshold != options.getFlattenThreshold()){
+			if (cannyAutoThreshold != other.cannyAutoThreshold)
 				return false;
-			}
-			
-			if( useKuwahara != options.isUseKuwahara()){
+			if (closingObjectRadius != other.closingObjectRadius)
 				return false;
-			}
-
-			if( kuwaharaKernel != options.getKuwaharaKernel()){
+			if (flattenChromocentres != other.flattenChromocentres)
 				return false;
-			}
-			
-			
-			if( lowThreshold != options.getLowThreshold()){
+			if (flattenThreshold != other.flattenThreshold)
 				return false;
-			}
-			
-			if( highThreshold != options.getHighThreshold()){
+			if (Float.floatToIntBits(highThreshold) != Float
+					.floatToIntBits(other.highThreshold))
 				return false;
-			}
-
-			if( kernelRadius != options.getKernelRadius()){
+			if (Float.floatToIntBits(kernelRadius) != Float
+					.floatToIntBits(other.kernelRadius))
 				return false;
-			}
-			
-			if( kernelWidth != options.getKernelWidth()){
+			if (kernelWidth != other.kernelWidth)
 				return false;
-			}
-			
-			if( closingObjectRadius != options.getClosingObjectRadius()){
+			if (kuwaharaKernel != other.kuwaharaKernel)
 				return false;
-			}
+			if (Float.floatToIntBits(lowThreshold) != Float
+					.floatToIntBits(other.lowThreshold))
+				return false;
+			if (useCanny != other.useCanny)
+				return false;
+			if (useKuwahara != other.useKuwahara)
+				return false;
 			return true;
+		}
+
+//		public boolean equals(CannyOptions options){
+//
+//			if( useCanny != options.isUseCanny()){
+//				return false;
+//			}
+//			
+//			if( cannyAutoThreshold != options.isCannyAutoThreshold()){
+//				return false;
+//			}
+//			
+//			if( flattenChromocentres != options.isUseFlattenImage()){
+//				return false;
+//			}
+//			
+//			if( flattenThreshold != options.getFlattenThreshold()){
+//				return false;
+//			}
+//			
+//			if( useKuwahara != options.isUseKuwahara()){
+//				return false;
+//			}
+//
+//			if( kuwaharaKernel != options.getKuwaharaKernel()){
+//				return false;
+//			}
+//			
+//			
+//			if( lowThreshold != options.getLowThreshold()){
+//				return false;
+//			}
+//			
+//			if( highThreshold != options.getHighThreshold()){
+//				return false;
+//			}
+//
+//			if( kernelRadius != options.getKernelRadius()){
+//				return false;
+//			}
+//			
+//			if( kernelWidth != options.getKernelWidth()){
+//				return false;
+//			}
+//			
+//			if( closingObjectRadius != options.getClosingObjectRadius()){
+//				return false;
+//			}
+//			return true;
+//		}
+
+		private AnalysisOptions getOuterType() {
+			return AnalysisOptions.this;
 		}
 	}
 	

@@ -306,40 +306,40 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	 * the segment stats list
 	 *
 	 */
-	private class SegmentTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-
-		private static final long serialVersionUID = 1L;
-
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
-			// default cell colour is white
-			Color colour = Color.WHITE;
-			
-			// only apply to first row, after the first column
-			if(column>0 && row==0){
-				String colName = table.getColumnName(column); // will be Seg_x
-
-				
-				int segment;
-		        try {
-		        	segment = Integer.valueOf(colName.replace("Seg_", ""));
-		        } catch (Exception e){
-		        	programLogger.log(Level.FINEST, "Error getting segment name: "+colName);
-		        	segment = 0;
-		        }
-		        
-				colour = activeDataset().getSwatch().color(segment);
-
-			}
-			
-			//Cells are by default rendered as a JLabel.
-			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			l.setBackground(colour);
-
-			//Return the JLabel which renders the cell.
-			return l;
-		}
-	}
+//	private class SegmentTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+//
+//		private static final long serialVersionUID = 1L;
+//
+//		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+//
+//			// default cell colour is white
+//			Color colour = Color.WHITE;
+//			
+//			// only apply to first row, after the first column
+//			if(column>0 && row==0){
+//				String colName = table.getColumnName(column); // will be Seg_x
+//
+//				
+//				int segment;
+//		        try {
+//		        	segment = Integer.valueOf(colName.replace("Seg_", ""));
+//		        } catch (Exception e){
+//		        	programLogger.log(Level.FINEST, "Error getting segment name: "+colName);
+//		        	segment = 0;
+//		        }
+//		        
+//				colour = activeDataset().getSwatch().color(segment);
+//
+//			}
+//			
+//			//Cells are by default rendered as a JLabel.
+//			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+//			l.setBackground(colour);
+//
+//			//Return the JLabel which renders the cell.
+//			return l;
+//		}
+//	}
 
 
 	@Override

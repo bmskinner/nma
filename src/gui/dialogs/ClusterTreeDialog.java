@@ -166,6 +166,19 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 			List<Tree> trees =  imp.importTrees();
 			RootedTree topTree = (RootedTree) trees.get(0);
 			
+			/*
+			 * TODO
+			 * The tree (if created in 1.11.6 or above) will
+			 * have the taxon labels as the Cell UUID.
+			 * 
+			 * If below 1.11.6, the label will be the path and nucleus name
+			 * 
+			 * Where UUIDs are used, the tree must be converted to a tree
+			 * with image names
+			 */
+			
+			
+			
 			int numTaxa = topTree.getTaxa().size(); 
 			programLogger.log(Level.FINE, "Tree has "+numTaxa+" taxa");
 			
@@ -261,9 +274,10 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		
 	private void colourTreeNodesByClusterGroup(final ClusterGroup group){
 
-		programLogger.log(Level.FINER, "Colouring nodes by cluster group: "+group.getName()+" iteration "+numberOfTimesColouringCalled);	
 		numberOfTimesColouringCalled++;
 		if(group!=null){
+			programLogger.log(Level.FINER, "Colouring nodes by cluster group: "+group.getName()+" iteration "+numberOfTimesColouringCalled);	
+			
 			setStatusLoading();
 			Thread thr = new Thread(){
 				
@@ -339,6 +353,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 
 				Taxon t = tree.getTaxon(n);
 				String name = t.getName();
+				
 
 				programLogger.log(Level.FINEST, "Testing "+name+" against "+toAnalyse.size()+" cells");	
 				
@@ -374,7 +389,6 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ActionListen
 		Testing P100.tiff-0
 		Name not found
 		*/
-		
 		String nucleusName = nucleus.getSourceFile()+"-"+nucleus.getNameAndNumber();
 		
 //		programLogger.log(Level.FINEST, "\tTesting name: "+name);

@@ -344,28 +344,58 @@ public class NucleusBorderSegment  implements Serializable, Iterable<Integer>{
 		return testLength(this.getStartIndex(), this.getEndIndex());
 	}
 	
-	/**
-	 * Test if the given segment matches this segment in position, length
-	 * and name
-	 * @param test
-	 * @return
-	 */
-	public boolean equals(NucleusBorderSegment test){
-		
-		if(test==null){
-			return false;
-		}
-		
-		if(test.getTotalLength()!=this.getTotalLength()){
-			return false;
-		}
+	
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + endIndex;
+		result = prime * result + startIndex;
+		result = prime * result + totalLength;
+		return result;
+	}
 
-		if(test.getStartIndex()!=this.getStartIndex() 
-				|| test.getEndIndex()!=this.getEndIndex()){
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
 			return false;
-		}
+		if (getClass() != obj.getClass())
+			return false;
+		NucleusBorderSegment other = (NucleusBorderSegment) obj;
+		if (endIndex != other.endIndex)
+			return false;
+		if (startIndex != other.startIndex)
+			return false;
+		if (totalLength != other.totalLength)
+			return false;
 		return true;
 	}
+
+//	/**
+//	 * Test if the given segment matches this segment in position, length
+//	 * and name
+//	 * @param test
+//	 * @return
+//	 */
+//	public boolean equals(NucleusBorderSegment test){
+//		
+//		if(test==null){
+//			return false;
+//		}
+//		
+//		if(test.getTotalLength()!=this.getTotalLength()){
+//			return false;
+//		}
+//
+//		if(test.getStartIndex()!=this.getStartIndex() 
+//				|| test.getEndIndex()!=this.getEndIndex()){
+//			return false;
+//		}
+//		return true;
+//	}
 	
 	/**
 	 * Test the effect of new start and end indexes on the length

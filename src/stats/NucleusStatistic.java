@@ -169,7 +169,7 @@ public enum NucleusStatistic implements PlottableStatistic {
 	public NucleusStatistic[] values(NucleusType type){
 		
 		List<NucleusStatistic> result = new ArrayList<NucleusStatistic>();
-		  for(NucleusStatistic stat : this.values(type)){
+		  for(NucleusStatistic stat : NucleusStatistic.values()){
 			  
 			  for(NucleusType t : stat.getApplicableTypes()){
 				  if(t.equals(NucleusType.ROUND) && !result.contains(stat)){

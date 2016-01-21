@@ -470,20 +470,6 @@ public abstract class SettingsDialog extends JDialog {
 		private void createPanel(){
 			
 			this.setLayout(new GridBagLayout());
-//			GridBagConstraints c = new GridBagConstraints();
-//			Dimension minSize = new Dimension(10, 5);
-//			Dimension prefSize = new Dimension(10, 5);
-//			Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
-//			c.gridwidth = GridBagConstraints.REMAINDER; //next-to-last
-//			c.fill = GridBagConstraints.NONE;      //reset to default
-//			c.weightx = 0.1;                       //reset to default
-//			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-//			
-//			
-//			
-//			
-//			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-			
 			
 			// add the canny settings
 			List<JLabel> labelList	 	= new ArrayList<JLabel>();

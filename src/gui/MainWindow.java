@@ -83,9 +83,9 @@ import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 
+@SuppressWarnings("serial")
 public class MainWindow extends JFrame implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 				
-	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 
 	private JLabel lblStatusLine = new JLabel("No analysis open");
