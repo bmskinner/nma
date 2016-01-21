@@ -672,40 +672,15 @@ public class SegmentsDetailPanel extends DetailPanel {
 	
 	@SuppressWarnings("serial")
 	protected class SegmentWilcoxonPanel extends JPanel  {
-		
-		private Map<SegmentStatistic, HashMap<String, JTable>> tables = new HashMap<SegmentStatistic, HashMap<String,JTable>>();
-
-		private static final String DEFAULT_SEGNAME = "Seg_0";
-		
+				
 		private JPanel tablePanel;
+		private JScrollPane scrollPane = new JScrollPane();
 		
 		public SegmentWilcoxonPanel(){
 			this.setLayout(new BorderLayout());
-
-			JScrollPane scrollPane = new JScrollPane();
 			
 			tablePanel = createTablePanel();
-			
 			scrollPane.setViewportView(tablePanel);
-
-//			for(SegmentStatistic stat : SegmentStatistic.values()){
-//				
-//				ExportableTable table;
-//				try {
-//					table = new ExportableTable(NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(null, stat, DEFAULT_SEGNAME));
-//					HashMap<String,JTable> map = new HashMap<String,JTable>();
-//					map.put(DEFAULT_SEGNAME, table);
-//					tables.put(stat, map);
-//					addWilconxonTable(panel, table, stat.toString()+" - " + DEFAULT_SEGNAME);
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//				
-//			}
-
-//			scrollPane.setColumnHeaderView(tables.get(SegmentStatistic.LENGTH).get(DEFAULT_SEGNAME).getTableHeader());
-
 
 			this.add(createInfoPanel(), BorderLayout.NORTH);
 			this.add(scrollPane, BorderLayout.CENTER);
@@ -714,10 +689,10 @@ public class SegmentsDetailPanel extends DetailPanel {
 		private JPanel createInfoPanel(){
 			JPanel infoPanel = new JPanel();
 			infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-			infoPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank-sum test)"));
+			infoPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test"));
 			infoPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
 			infoPanel.add(new JLabel("Below the diagonal: p-values"));
-			infoPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
+			infoPanel.add(new JLabel("Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
 			return infoPanel;
 		}
 		
@@ -757,6 +732,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				public void run(){
 					try{
 						setAnalysing(true);
+						scrollPane.setColumnHeaderView(null);
 						if(hasDatasets()){
 							
 							if(!isSingleDataset()){
@@ -793,40 +769,31 @@ public class SegmentsDetailPanel extends DetailPanel {
 											ExportableTable table = new ExportableTable(model);
 											setRenderer(table);
 											addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
-//											HashMap<String,JTable> map = tables.get(stat);
-//											if(map==null){
-//												map = new HashMap<String,JTable>();
-//												tables.put(stat, map);
-//											}
-//											if(map.get(segName)==null){
-//												map.put(segName, new ExportableTable(model));
-//											}
-//											tables.get(stat).get(segName).setModel(model);
-//											setRenderer(tables.get(stat).get(segName));
+											scrollPane.setColumnHeaderView(table.getTableHeader());
 										}
 
 									}
+									tablePanel.revalidate();
 
 								} else {
 									tablePanel = createTablePanel();
-//									for(SegmentStatistic stat : SegmentStatistic.values()){
-//										TableModel model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(null, stat, "Seg_0");
-//										tables.get(stat).get("Seg_0").setModel(model);
-//										setRenderer(tables.get(stat).get("Seg_0"));
-//
-//									}
+									tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
 								} 
 							} else {
 								tablePanel = createTablePanel();
+								tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
 							}
 						} else {
 							tablePanel = createTablePanel();
+							
 						}
 						programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
 					} catch (Exception e) {
 						programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
 						tablePanel = createTablePanel();
 					} finally {
+						scrollPane.setViewportView(tablePanel);;
+						tablePanel.repaint();
 						setAnalysing(false);
 					}
 				}});
