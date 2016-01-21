@@ -19,19 +19,21 @@
 package gui.tabs;
 
 import java.awt.BorderLayout;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import analysis.AnalysisDataset;
+
 @SuppressWarnings("serial")
 public class InterDatasetComparisonDetailPanel extends DetailPanel {
 	
-	private VennDetailPanel 	vennPanel;
+	private VennDetailPanel 	    vennPanel;
 	private PairwiseVennDetailPanel pairwiseVennPanel;
-	private WilcoxonDetailPanel wilcoxonPanel;
-	private KruskalDetailPanel 	kruskalPanel;
+	private KruskalDetailPanel 	    kruskalPanel;
 
 	public InterDatasetComparisonDetailPanel(Logger programLogger) {
 		super(programLogger);
@@ -50,17 +52,16 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
-		vennPanel 		= new VennDetailPanel(programLogger); 
+		vennPanel 		  = new VennDetailPanel(programLogger); 
 		pairwiseVennPanel = new PairwiseVennDetailPanel(programLogger);
-		wilcoxonPanel 	= new WilcoxonDetailPanel(programLogger);
-		kruskalPanel	= new KruskalDetailPanel(programLogger);
+		kruskalPanel	  = new KruskalDetailPanel(programLogger);
 		
 
 		// Add to the tabbed panel
-		tabPanel.addTab("Venn", null, vennPanel, null);
+		// Title, icon, component, tooltip
+		tabPanel.addTab("Venn"         , null, vennPanel        , null);
 		tabPanel.addTab("Pairwise Venn", null, pairwiseVennPanel, null);
-		tabPanel.addTab("Wilcoxon", null, wilcoxonPanel, null);
-		tabPanel.addTab("Kruskal", null, kruskalPanel, null);
+		tabPanel.addTab("Kruskal"      , null, kruskalPanel     , null);
 
 		this.add(tabPanel, BorderLayout.CENTER);
 	}
@@ -78,13 +79,11 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
 					pairwiseVennPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updating pairwise Venn panel");
 					
-					wilcoxonPanel.update(getDatasets());
-					programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
-					
 					kruskalPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updating Kruskal panel");
 
 				} catch  (Exception e){
+					InterDatasetComparisonDetailPanel.this.update( (List<AnalysisDataset>) null);
 					programLogger.log(Level.SEVERE, "Error updating inter-dataset panels", e);
 
 				} finally {

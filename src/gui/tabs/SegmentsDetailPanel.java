@@ -115,7 +115,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		segmentHistogramsPanel.setMinimumSize(minimumChartSize);
 		tabPanel.addTab("Histograms", segmentHistogramsPanel);
 		
-		segmentWilcoxonPanel = new SegmentWilcoxonPanel();
+		segmentWilcoxonPanel = new SegmentWilcoxonPanel(programLogger);
 		segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
 		tabPanel.addTab("Stats", segmentWilcoxonPanel);
 		
@@ -175,7 +175,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 				segmentStatsPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated segments stats panel");
 				
-				segmentWilcoxonPanel.update();
+				segmentWilcoxonPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated segments stats panel");
 				
 				setUpdating(false);
@@ -419,7 +419,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			} catch (Exception e){
 				programLogger.log(Level.SEVERE, "Error updating segments boxplot", e);		
 				mainPanel = new JPanel();
-				mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+				mainPanel.setLayout(new FlowLayout());
 				mainPanel.add(new JLabel("Unable to display segment boxplots", JLabel.CENTER));
 				scrollPane.setViewportView(mainPanel);
 			}
@@ -671,75 +671,25 @@ public class SegmentsDetailPanel extends DetailPanel {
 	}
 	
 	@SuppressWarnings("serial")
-	protected class SegmentWilcoxonPanel extends JPanel  {
-				
-		private JPanel tablePanel;
-		private JScrollPane scrollPane = new JScrollPane();
-		
-		public SegmentWilcoxonPanel(){
-			this.setLayout(new BorderLayout());
-			
-			tablePanel = createTablePanel();
-			scrollPane.setViewportView(tablePanel);
+	protected class SegmentWilcoxonPanel extends AbstractWilcoxonDetailPanel  {
+						
+		public SegmentWilcoxonPanel(Logger logger){
+			super(logger);
+		}
 
-			this.add(createInfoPanel(), BorderLayout.NORTH);
-			this.add(scrollPane, BorderLayout.CENTER);
-		}
-		
-		private JPanel createInfoPanel(){
-			JPanel infoPanel = new JPanel();
-			infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-			infoPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test"));
-			infoPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
-			infoPanel.add(new JLabel("Below the diagonal: p-values"));
-			infoPanel.add(new JLabel("Significant values at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
-			return infoPanel;
-		}
-		
-		private JPanel createTablePanel(){
-			JPanel panel = new JPanel();
-			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-			Dimension minSize = new Dimension(10, 10);
-			Dimension prefSize = new Dimension(10, 10);
-			Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-			panel.add(new Box.Filler(minSize, prefSize, maxSize));
-			return panel;
-		}
-		
-		/**
-		 * Prepare a wilcoxon table
-		 * @param panel the JPanel to add the table to
-		 * @param table the table to add
-		 * @param model the model to provide
-		 * @param label the label for the table
-		 */
-		private void addWilconxonTable(JPanel panel, JTable table, String label){
-			Dimension minSize = new Dimension(10, 10);
-			Dimension prefSize = new Dimension(10, 10);
-			Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-			panel.add(new Box.Filler(minSize, prefSize, maxSize));
-			panel.add(new JLabel(label));
-			panel.add(table);
-			table.setEnabled(false);
-		}
-		
-		
-		public void update() {
+		public void updateDetail() {
 			programLogger.log(Level.FINE, "Updating segment Wilcoxon panel");
 
 			SwingUtilities.invokeLater(new Runnable(){
 				public void run(){
 					try{
-						setAnalysing(true);
+						tablePanel = createTablePanel();
 						scrollPane.setColumnHeaderView(null);
 						if(hasDatasets()){
 							
 							if(!isSingleDataset()){
 
 								if(checkSegmentCountsMatch(getDatasets())){
-									
-									tablePanel = createTablePanel();
 
 									int segmentCount = activeDataset()
 											.getCollection()
@@ -776,15 +726,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 									tablePanel.revalidate();
 
 								} else {
-									tablePanel = createTablePanel();
 									tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
 								} 
 							} else {
-								tablePanel = createTablePanel();
 								tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
 							}
 						} else {
-							tablePanel = createTablePanel();
+							tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
 							
 						}
 						programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
@@ -794,19 +742,10 @@ public class SegmentsDetailPanel extends DetailPanel {
 					} finally {
 						scrollPane.setViewportView(tablePanel);;
 						tablePanel.repaint();
-						setAnalysing(false);
+						setUpdating(false);
 					}
 				}});
 		}
-		
-		private void setRenderer(JTable table){
-			int columns = table.getColumnModel().getColumnCount();
-			if(columns>1){
-				for(int i=1;i<columns;i++){
-					table.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-				}
-			}
-		}
-		
+				
 	}
 }
