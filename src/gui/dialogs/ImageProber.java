@@ -73,6 +73,8 @@ public abstract class ImageProber extends LoadingIconDialog {
 	
 	private JLabel headerLabel = new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.");
 	
+	private JButton okButton     = new JButton("Proceed with analysis");
+	private JButton cancelButton = new JButton("Revise settings");
 	
 	private boolean ok = false;
 	
@@ -310,7 +312,6 @@ public abstract class ImageProber extends LoadingIconDialog {
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
-		JButton okButton = new JButton("Proceed with analysis");
 		okButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -324,7 +325,6 @@ public abstract class ImageProber extends LoadingIconDialog {
 
 		getRootPane().setDefaultButton(okButton);
 
-		JButton cancelButton = new JButton("Revise settings");
 		cancelButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -339,6 +339,22 @@ public abstract class ImageProber extends LoadingIconDialog {
 
 
 		return panel;
+	}
+	
+	/**
+	 * Change the button text on the OK button
+	 * @param s
+	 */
+	protected void setOKButtonText(String s){
+		okButton.setText(s);
+	}
+	
+	/**
+	 * Change the button text on the cancel button
+	 * @param s
+	 */
+	protected void setCancelButtonText(String s){
+		cancelButton.setText(s);
 	}
 
 	
