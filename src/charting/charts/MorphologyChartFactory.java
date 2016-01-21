@@ -715,9 +715,9 @@ public class MorphologyChartFactory {
 		/*
 		 * If the cell has a rodent sperm nucleus, get the hook and hump rois
 		 */
-		XYDataset hookHump = NucleusDatasetCreator.createNucleusHookHumpOutline(cell);
-		hash.put(hash.size(), "HookHump"); // add to the first free entry
-		datasetHash.put(datasetHash.size(), hookHump);
+//		XYDataset hookHump = NucleusDatasetCreator.createNucleusHookHumpOutline(cell);
+//		hash.put(hash.size(), "HookHump"); // add to the first free entry
+//		datasetHash.put(datasetHash.size(), hookHump);
 		
 		// get the index tags
 		XYDataset tags = NucleusDatasetCreator.createNucleusIndexTags(cell);
@@ -796,14 +796,14 @@ public class MorphologyChartFactory {
 				/*
 				 * Hook and hump for rodent sperm
 				 */
-				if(hash.get(key).equals("HookHump")){
-					String name = (String) plot.getDataset(key).getSeriesKey(i);
-					// Colour the hook transparent blue, the hump transparent green
-					Color color = name.equals("Hook") ? new Color(0, 0, 255, 128) : new Color(0, 255, 0, 128);
-					
-					plot.getRenderer().setSeriesPaint(i, color);
-					
-				}
+//				if(hash.get(key).equals("HookHump")){
+//					String name = (String) plot.getDataset(key).getSeriesKey(i);
+//					// Colour the hook transparent blue, the hump transparent green
+//					Color color = name.equals("Hump") ? Color.GREEN : Color.BLUE;
+//					plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(5));
+//					plot.getRenderer(key).setSeriesPaint(i, color);
+//					
+//				}
 				
 				/*
 				 * Border tags

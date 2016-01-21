@@ -1210,7 +1210,7 @@ public class NucleusDatasetCreator {
 				i++;
 			}
 
-			double[][] data2 = { xpoints, ypoints };
+			double[][] data2 = { xpoints2, ypoints2 };
 			ds.addSeries("Hump", data2);
 			
 		} 
