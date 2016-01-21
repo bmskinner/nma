@@ -20,34 +20,26 @@ package gui.tabs;
 
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
-import gui.DatasetEvent.DatasetMethod;
-import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ColourSelecter.ColourSwatch;
-import gui.components.DraggableOverlayChartPanel;
 import gui.components.ExportableTable;
 import gui.components.HistogramsTabPanel;
 import gui.components.MeasurementUnitSettingsPanel;
 import gui.components.SelectableChartPanel;
 import gui.components.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import gui.tabs.WilcoxonDetailPanel.WilcoxonTableCellRenderer;
-import stats.NucleusStatistic;
+import gui.components.WilcoxonTableCellRenderer;
 import stats.SegmentStatistic;
 import utility.Constants;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -57,15 +49,11 @@ import java.util.logging.Logger;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableColumn;
@@ -75,7 +63,6 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.AnalysisDataset;
-import charting.NucleusStatsTableOptions;
 import charting.SegmentStatsTableOptions;
 import charting.TableOptions;
 import charting.charts.BoxplotChartFactory;
@@ -86,13 +73,9 @@ import charting.charts.ProfileChartOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 import components.CellCollection;
 import components.generic.BorderTag;
-import components.generic.BorderTag.BorderTagType;
 import components.generic.MeasurementScale;
 import components.generic.ProfileCollectionType;
 import components.generic.SegmentedProfile;
-import components.nuclear.NucleusBorderSegment;
-import components.nuclei.ConsensusNucleus;
-import components.nuclei.Nucleus;
 
 public class SegmentsDetailPanel extends DetailPanel {
 
@@ -692,50 +675,61 @@ public class SegmentsDetailPanel extends DetailPanel {
 		
 		private Map<SegmentStatistic, HashMap<String, JTable>> tables = new HashMap<SegmentStatistic, HashMap<String,JTable>>();
 
+		private static final String DEFAULT_SEGNAME = "Seg_0";
+		
+		private JPanel tablePanel;
+		
 		public SegmentWilcoxonPanel(){
 			this.setLayout(new BorderLayout());
 
 			JScrollPane scrollPane = new JScrollPane();
-			JPanel panel = new JPanel();
-			scrollPane.setViewportView(panel);
+			
+			tablePanel = createTablePanel();
+			
+			scrollPane.setViewportView(tablePanel);
+
+//			for(SegmentStatistic stat : SegmentStatistic.values()){
+//				
+//				ExportableTable table;
+//				try {
+//					table = new ExportableTable(NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(null, stat, DEFAULT_SEGNAME));
+//					HashMap<String,JTable> map = new HashMap<String,JTable>();
+//					map.put(DEFAULT_SEGNAME, table);
+//					tables.put(stat, map);
+//					addWilconxonTable(panel, table, stat.toString()+" - " + DEFAULT_SEGNAME);
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				
+//			}
+
+//			scrollPane.setColumnHeaderView(tables.get(SegmentStatistic.LENGTH).get(DEFAULT_SEGNAME).getTableHeader());
 
 
-			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
-			Dimension minSize = new Dimension(10, 10);
-			Dimension prefSize = new Dimension(10, 10);
-			Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
-			panel.add(new Box.Filler(minSize, prefSize, maxSize));
-
+			this.add(createInfoPanel(), BorderLayout.NORTH);
+			this.add(scrollPane, BorderLayout.CENTER);
+		}
+		
+		private JPanel createInfoPanel(){
 			JPanel infoPanel = new JPanel();
 			infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 			infoPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test (aka Wilcoxon rank-sum test)"));
 			infoPanel.add(new JLabel("Above the diagonal: Mann-Whitney U statistics"));
 			infoPanel.add(new JLabel("Below the diagonal: p-values"));
 			infoPanel.add(new JLabel("p-values significant at 5% and 1% levels after Bonferroni correction are highlighted in yellow and green"));
+			return infoPanel;
+		}
+		
+		private JPanel createTablePanel(){
+			JPanel panel = new JPanel();
+			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-
-			for(SegmentStatistic stat : SegmentStatistic.values()){
-				
-				ExportableTable table;
-				try {
-					table = new ExportableTable(NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(null, stat, "Seg_0"));
-					HashMap<String,JTable> map = new HashMap<String,JTable>();
-					map.put("Seg_0", table);
-					tables.put(stat, map);
-					addWilconxonTable(panel, table, stat.toString()+" - Seg_0");
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-
-			scrollPane.setColumnHeaderView(tables.get(SegmentStatistic.LENGTH).get("Seg_0").getTableHeader());
-
-
-			this.add(infoPanel, BorderLayout.NORTH);
-			this.add(scrollPane, BorderLayout.CENTER);
+			Dimension minSize = new Dimension(10, 10);
+			Dimension prefSize = new Dimension(10, 10);
+			Dimension maxSize = new Dimension(Short.MAX_VALUE, 10);
+			panel.add(new Box.Filler(minSize, prefSize, maxSize));
+			return panel;
 		}
 		
 		/**
@@ -762,62 +756,79 @@ public class SegmentsDetailPanel extends DetailPanel {
 			SwingUtilities.invokeLater(new Runnable(){
 				public void run(){
 					try{
-
+						setAnalysing(true);
 						if(hasDatasets()){
+							
+							if(!isSingleDataset()){
 
-							if(checkSegmentCountsMatch(getDatasets())){
+								if(checkSegmentCountsMatch(getDatasets())){
+									
+									tablePanel = createTablePanel();
 
-								int segmentCount = activeDataset()
-										.getCollection()
-										.getProfileCollection(ProfileCollectionType.REGULAR)
-										.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
-										.getSegmentCount();
-								
-								for(SegmentStatistic stat : SegmentStatistic.values()){
+									int segmentCount = activeDataset()
+											.getCollection()
+											.getProfileCollection(ProfileCollectionType.REGULAR)
+											.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+											.getSegmentCount();
 
-									// Get each segment as a boxplot
-									for( int i=0; i<segmentCount; i++){
-										String segName = "Seg_"+i;
+									for(SegmentStatistic stat : SegmentStatistic.values()){
 
-										TableModel model;
+										// Get each segment as a boxplot
+										for( int i=0; i<segmentCount; i++){
+											String segName = "Seg_"+i;
 
-										TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
-										if(getTableCache().hasTable(options)){
-											programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
-											model = getTableCache().getTable(options);
-										} else {
-											model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(getDatasets(), stat, segName);
-											programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
-											getTableCache().addTable(options, model);
+											TableModel model;
+
+											TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
+											if(getTableCache().hasTable(options)){
+												programLogger.log(Level.FINEST, "Fetched cached Wilcoxon table: "+stat);
+												model = getTableCache().getTable(options);
+											} else {
+												model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(getDatasets(), stat, segName);
+												programLogger.log(Level.FINEST, "Added cached Wilcoxon table: "+stat);
+												getTableCache().addTable(options, model);
+											}
+
+											
+											ExportableTable table = new ExportableTable(model);
+											setRenderer(table);
+											addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
+//											HashMap<String,JTable> map = tables.get(stat);
+//											if(map==null){
+//												map = new HashMap<String,JTable>();
+//												tables.put(stat, map);
+//											}
+//											if(map.get(segName)==null){
+//												map.put(segName, new ExportableTable(model));
+//											}
+//											tables.get(stat).get(segName).setModel(model);
+//											setRenderer(tables.get(stat).get(segName));
 										}
 
-										HashMap<String,JTable> map = tables.get(stat);
-										if(map==null){
-											map = new HashMap<String,JTable>();
-											tables.put(stat, map);
-										}
-										if(map.get(segName)==null){
-											map.put(segName, new ExportableTable(model));
-										}
-										tables.get(stat).get(segName).setModel(model);
-										setRenderer(tables.get(stat).get(segName));
 									}
 
-								}
-
+								} else {
+									tablePanel = createTablePanel();
+//									for(SegmentStatistic stat : SegmentStatistic.values()){
+//										TableModel model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(null, stat, "Seg_0");
+//										tables.get(stat).get("Seg_0").setModel(model);
+//										setRenderer(tables.get(stat).get("Seg_0"));
+//
+//									}
+								} 
 							} else {
-								for(SegmentStatistic stat : SegmentStatistic.values()){
-									TableModel model = NucleusTableDatasetCreator.createWilcoxonSegmentStatTable(null, stat, "Seg_0");
-									tables.get(stat).get("Seg_0").setModel(model);
-									setRenderer(tables.get(stat).get("Seg_0"));
-
-								}
+								tablePanel = createTablePanel();
 							}
+						} else {
+							tablePanel = createTablePanel();
 						}
 						programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
 					} catch (Exception e) {
 						programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
-					} 
+						tablePanel = createTablePanel();
+					} finally {
+						setAnalysing(false);
+					}
 				}});
 		}
 		
@@ -830,64 +841,5 @@ public class SegmentsDetailPanel extends DetailPanel {
 			}
 		}
 		
-	}
-	
-	/**
-	 * Colour a table cell background based on its value to show statistical 
-	 * significance. Shows yellow for values below a Bonferroni-corrected cutoff
-	 * of 0.05, and green for values below a Bonferroni-corrected cutoff
-	 * of 0.01
-	 */
-	public class WilcoxonTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-
-		private static final long serialVersionUID = 1L;
-
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	        
-	      //Cells are by default rendered as a JLabel.
-	        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-	        String cellContents = l.getText();
-	        if(cellContents!=null && !cellContents.equals("")){ // ensure value
-//	        	
-	        	
-	        	NumberFormat nf = NumberFormat.getInstance();
-	        	double pvalue = 1; 
-	        	
-	        	try {
-	        		pvalue = nf.parse(cellContents).doubleValue();
-	        	} catch (ParseException e) {
-
-	        		programLogger.log(Level.FINEST, "Parsing error in Wilcoxon renederer", e);
-	        	}
-	        	
-	        	
-//		        double pvalue = Double.valueOf(cellContents);
-		        
-		        Color colour = Color.WHITE; // default
-		        
-		        int numberOfTests = 5; // correct for the different variables measured;
-		        double divisor = (double) (   (table.getColumnCount()-2)  * numberOfTests); // for > 2 datasets with numberOFtests tests per dataset
-		        
-		        double fivePct = Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni correction
-		        double onePct = Constants.ONE_PERCENT_SIGNIFICANCE_LEVEL /   divisor;
-//		        IJ.log("Columns: "+table.getColumnCount());
-		        
-		        if(pvalue<=fivePct){
-		        	colour = Color.YELLOW;
-		        }
-		        
-		        if(pvalue<=onePct){
-		        	colour = Color.GREEN;
-		        }
-		        l.setBackground(colour);
-
-	        } else {
-	            l.setBackground(Color.LIGHT_GRAY);
-	        }
-
-	      //Return the JLabel which renders the cell.
-	      return l;
-	    }
 	}
 }
