@@ -539,6 +539,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 			label.setIcon(icon);
 			label.revalidate();
 			label.repaint();
+			System.gc(); // try to clean up the unused thumbnails
 		}
 	}
 
