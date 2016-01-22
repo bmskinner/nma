@@ -33,7 +33,7 @@ import gui.components.WilcoxonTableCellRenderer;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
-public class WilcoxonDetailPanel extends AbstractWilcoxonDetailPanel {
+public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 		
 	public WilcoxonDetailPanel(Logger programLogger) throws Exception {
 		super(programLogger);

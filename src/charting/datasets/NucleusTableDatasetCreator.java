@@ -769,7 +769,50 @@ public class NucleusTableDatasetCreator {
 		return model;
 	}
 
-		
+	
+	/**
+	 * Generate a table of magnitude difference between datasets
+	 * @param list the datasets to test
+	 * @param stat the statistic to measure
+	 * @return a tablemodel for display
+	 */	
+	public static TableModel createMagnitudeNuclearStatTable(List<AnalysisDataset> list, NucleusStatistic stat) throws Exception {
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
+		if(list==null){
+			return model;
+		}
+
+		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
+		for(AnalysisDataset dataset : list){
+
+			double value1 =  dataset.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
+			
+			Object[] popData = new Object[list.size()];
+
+			int i = 0;
+
+			for(AnalysisDataset dataset2 : list){
+
+				if(dataset2.getUUID().equals(dataset.getUUID())){
+					
+					popData[i] = "";
+
+				} else {
+					
+					double value2 =  dataset2.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
+					
+					double magnitude = value2 / value1;
+					popData[i] = df.format( magnitude );
+				}
+				i++;
+			}
+			model.addColumn(dataset.getName(), popData);
+		}
+		return model;
+	}
+	
+	
 	/**
 	 * Get the options used for clustering as a table
 	 * @param list

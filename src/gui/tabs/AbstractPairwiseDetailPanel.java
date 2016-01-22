@@ -1,7 +1,5 @@
 package gui.tabs;
 
-import gui.components.WilcoxonTableCellRenderer;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.logging.Logger;
@@ -14,12 +12,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
 @SuppressWarnings("serial")
-public abstract class AbstractWilcoxonDetailPanel extends DetailPanel {
+public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
 
 	protected JPanel tablePanel;
 	protected JScrollPane scrollPane = new JScrollPane();
 				
-		public AbstractWilcoxonDetailPanel(Logger logger){
+		public AbstractPairwiseDetailPanel(Logger logger){
 			super(logger);
 
 			this.setLayout(new BorderLayout());
@@ -35,7 +33,7 @@ public abstract class AbstractWilcoxonDetailPanel extends DetailPanel {
 		 * Create the info panel
 		 * @return
 		 */
-		private JPanel createInfoPanel(){
+		protected JPanel createInfoPanel(){
 			JPanel infoPanel = new JPanel();
 			infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 			infoPanel.add(new JLabel("Pairwise comparisons between populations using Mann-Whitney U test"));

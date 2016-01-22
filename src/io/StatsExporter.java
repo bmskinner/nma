@@ -147,7 +147,7 @@ public class StatsExporter {
 		try {
 
 			Profile normalisedMedian = collection.getProfileCollection(ProfileCollectionType.REGULAR).getProfile(BorderTag.ORIENTATION_POINT, 50);
-			Profile interpolatedMedian = normalisedMedian.interpolate((int)collection.getMedianNuclearPerimeter());
+			Profile interpolatedMedian = normalisedMedian.interpolate( (int)collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS));
 
 			TableExporter logger = new TableExporter(collection.getFolder()+File.separator+collection.getOutputFolderName());
 			logger.addColumn("X_POSITION",   interpolatedMedian.getPositions(interpolatedMedian.size()).asArray());

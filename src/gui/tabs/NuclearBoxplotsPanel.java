@@ -63,6 +63,7 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 	private BoxplotsPanel 	boxplotPanel;
 	private HistogramsPanel histogramsPanel;
 	private WilcoxonDetailPanel wilcoxonPanel;
+	private NucleusMagnitudePanel nucleusMagnitudePanel;
 	
 	private JTabbedPane 	tabPane;
 
@@ -79,6 +80,9 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 		
 		wilcoxonPanel 	= new WilcoxonDetailPanel(programLogger);
 		tabPane.addTab("Stats", null, wilcoxonPanel, null);
+		
+		nucleusMagnitudePanel 	= new NucleusMagnitudePanel(programLogger);
+		tabPane.addTab("Magnitude", null, nucleusMagnitudePanel, null);
 		
 		this.add(tabPane, BorderLayout.CENTER);
 	}
@@ -97,6 +101,10 @@ public class NuclearBoxplotsPanel extends DetailPanel {
 					
 					wilcoxonPanel.update(getDatasets());
 					programLogger.log(Level.FINEST, "Updating Wilcoxon panel");
+					
+					nucleusMagnitudePanel.update(getDatasets());
+					programLogger.log(Level.FINEST, "Updating magnitude panel");
+					
 				} catch (Exception e) {
 					programLogger.log(Level.SEVERE, "Error updating nuclear charts", e);
 					NuclearBoxplotsPanel.this.update( (List<AnalysisDataset>) null);

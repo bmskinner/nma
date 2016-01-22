@@ -21,8 +21,10 @@ package analysis.nucleus;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import stats.NucleusStatistic;
 import components.Cell;
 import components.CellCollection;
+import components.generic.MeasurementScale;
 import components.nuclei.Nucleus;
 
 public class CollectionFilterer {
@@ -62,11 +64,11 @@ public class CollectionFilterer {
 	
 	private static void refilterNuclei(CellCollection collection, CellCollection failCollection) throws Exception{
 
-	    double medianArea = collection.getMedianNuclearArea();
-	    double medianPerimeter = collection.getMedianNuclearPerimeter();
+	    double medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+	    double medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
 	    double medianPathLength = collection.getMedianPathLength();
 	    double medianArrayLength = collection.getMedianArrayLength();
-	    double medianFeretLength = collection.getMedianFeretLength();
+	    double medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
 
 	    int beforeSize = collection.getNucleusCount();
 
@@ -121,11 +123,11 @@ public class CollectionFilterer {
 	    }
 	      
 
-	    medianArea = collection.getMedianNuclearArea();
-	    medianPerimeter = collection.getMedianNuclearPerimeter();
+	    medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+	    medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
 	    medianPathLength = collection.getMedianPathLength();
 	    medianArrayLength = collection.getMedianArrayLength();
-	    medianFeretLength = collection.getMedianFeretLength();
+	    medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
 
 	    int afterSize = collection.getNucleusCount();
 	    int removed = beforeSize - afterSize;
@@ -144,17 +146,10 @@ public class CollectionFilterer {
 	
 	private static void exportFilterStats(CellCollection collection) throws Exception{
 
-	    double medianArea = collection.getMedianNuclearArea();
-	    double medianPerimeter = collection.getMedianNuclearPerimeter();
+		double medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+	    double medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
 	    double medianPathLength = collection.getMedianPathLength();
 	    double medianArrayLength = collection.getMedianArrayLength();
-	    double medianFeretLength = collection.getMedianFeretLength();
-
-//	    logger.log("Area: "        +(int)medianArea);
-//	    logger.log("Perimeter: "   +(int)medianPerimeter);
-//	    logger.log("Path length: " +(int)medianPathLength);
-//	    logger.log("Array length: "+(int)medianArrayLength);
-//	    logger.log("Feret length: "+(int)medianFeretLength);
-	    
+	    double medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);	    
 	  }
 }

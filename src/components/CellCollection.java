@@ -625,17 +625,17 @@ public class CellCollection implements Serializable {
   }
   
   // allow for refiltering of nuclei based on nuclear parameters after looking at the rest of the data
-  public double getMedianNuclearArea() throws Exception{
-    double[] areas = this.getStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS);
-    double median = Stats.quartile(areas, 50);
-    return median;
-  }
-
-  public double getMedianNuclearPerimeter() throws Exception{
-    double[] p = this.getStatistics(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
-    double median = Stats.quartile(p, 50);
-    return median;
-  }
+//  public double getMedianNuclearArea() throws Exception{
+//    double[] areas = this.getStatistics(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+//    double median = Stats.quartile(areas, 50);
+//    return median;
+//  }
+//
+//  public double getMedianNuclearPerimeter() throws Exception{
+//    double[] p = this.getStatistics(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
+//    double median = Stats.quartile(p, 50);
+//    return median;
+//  }
 
   public double getMedianPathLength(){
     double[] p = this.getPathLengths();
@@ -649,11 +649,11 @@ public class CellCollection implements Serializable {
     return median;
   }
 
-  public double getMedianFeretLength() throws Exception{
-    double[] p = this.getStatistics(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
-    double median = Stats.quartile(p, 50);
-    return median;
-  }
+//  public double getMedianFeretLength() throws Exception{
+//    double[] p = this.getStatistics(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
+//    double median = Stats.quartile(p, 50);
+//    return median;
+//  }
 
   public double getMaxProfileLength(){
 	  return Stats.max(this.getArrayLengths());
@@ -893,6 +893,18 @@ public class CellCollection implements Serializable {
 	  double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 	  double var = (rootDiff / n.getPerimeter()  ); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 	  return var;
+  }
+  
+  /**
+   * Get the median value of the given statistic
+   * @param stat
+   * @param scale
+   * @return
+   * @throws Exception
+   */
+  public double getMedianStatistic(NucleusStatistic stat, MeasurementScale scale)  throws Exception {
+	  double[] values = this.getNuclearStatistics(stat, scale);
+	  return Stats.quartile(values, Constants.MEDIAN);
   }
   
   /**

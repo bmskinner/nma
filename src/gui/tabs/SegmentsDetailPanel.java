@@ -657,7 +657,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	}
 	
 	@SuppressWarnings("serial")
-	protected class SegmentWilcoxonPanel extends AbstractWilcoxonDetailPanel  {
+	protected class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 						
 		public SegmentWilcoxonPanel(Logger logger){
 			super(logger);

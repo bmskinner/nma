@@ -56,6 +56,8 @@ public class FishRemappingAction extends ProgressableAction {
 						for(CellCollection sub : subs){
 
 							if(sub.hasCells()){
+								
+								programLogger.log(Level.INFO, sub.getName()+": "+sub.getNucleusCount()+" cells");
 
 								dataset.addChildCollection(sub);
 

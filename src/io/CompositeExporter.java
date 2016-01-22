@@ -35,8 +35,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import analysis.AnalysisDataset;
+import stats.NucleusStatistic;
 import utility.Utils;
 import components.CellCollection;
+import components.generic.MeasurementScale;
 import components.nuclei.Nucleus;
 
 public class CompositeExporter {
@@ -77,8 +79,8 @@ public class CompositeExporter {
 			int totalWidth = 0;
 			int totalHeight = 0;
 
-			int boxWidth  = (int)(collection.getMedianNuclearPerimeter()/1.4);
-			int boxHeight = (int)(collection.getMedianNuclearPerimeter()/1.2);
+			int boxWidth  = (int)(collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS)/1.4);
+			int boxHeight = (int)(collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS)/1.2);
 
 			int maxBoxWidth = boxWidth * 5;
 			int maxBoxHeight = (boxHeight * (int)(Math.ceil(collection.getNucleusCount()/5)) + boxHeight );
