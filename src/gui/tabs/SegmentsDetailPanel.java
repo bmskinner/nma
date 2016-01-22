@@ -23,6 +23,7 @@ import gui.SignalChangeListener;
 import gui.components.ColourSelecter.ColourSwatch;
 import gui.components.ExportableTable;
 import gui.components.HistogramsTabPanel;
+import gui.components.PairwiseTableCellRenderer;
 import gui.components.SelectableChartPanel;
 import gui.components.panels.MeasurementUnitSettingsPanel;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -86,6 +87,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	private SegmentBoxplotsPanel 	segmentBoxplotsPanel;	// draw boxplots of segment lengths
 	private SegmentHistogramsPanel 	segmentHistogramsPanel;	// draw boxplots of segment lengths
 	private SegmentWilcoxonPanel	segmentWilcoxonPanel;	// stats between datasets
+	private SegmentMagnitudePanel	segmentMagnitudePanel;
 	
 	private JTabbedPane 			tabPanel;
 	
@@ -118,6 +120,10 @@ public class SegmentsDetailPanel extends DetailPanel {
 		segmentWilcoxonPanel = new SegmentWilcoxonPanel(programLogger);
 		segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
 		tabPanel.addTab("Stats", segmentWilcoxonPanel);
+		
+		segmentMagnitudePanel = new SegmentMagnitudePanel(programLogger);
+		segmentMagnitudePanel.setMinimumSize(minimumChartSize);
+		tabPanel.addTab("Magnitude", segmentMagnitudePanel);
 		
 		
 		
@@ -177,6 +183,9 @@ public class SegmentsDetailPanel extends DetailPanel {
 				
 				segmentWilcoxonPanel.update(getDatasets());
 				programLogger.log(Level.FINEST, "Updated segments stats panel");
+				
+				segmentMagnitudePanel.update(getDatasets());
+				programLogger.log(Level.FINEST, "Updated segments magnitude panel");
 				
 				setUpdating(false);
 			}
@@ -724,6 +733,98 @@ public class SegmentsDetailPanel extends DetailPanel {
 						programLogger.log(Level.FINEST, "Updated Wilcoxon panel");
 					} catch (Exception e) {
 						programLogger.log(Level.SEVERE, "Error making Wilcoxon table", e);
+						tablePanel = createTablePanel();
+					} finally {
+						scrollPane.setViewportView(tablePanel);;
+						tablePanel.repaint();
+						setUpdating(false);
+					}
+				}});
+		}
+				
+	}
+	
+	@SuppressWarnings("serial")
+	protected class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {
+						
+		public SegmentMagnitudePanel(Logger logger){
+			super(logger);
+		}
+		
+		/**
+		 * Create the info panel
+		 * @return
+		 */
+		@Override
+		protected JPanel createInfoPanel(){
+			JPanel infoPanel = new JPanel();
+			infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+			infoPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
+			infoPanel.add(new JLabel("Row median value as a proportion of column median value"));
+			return infoPanel;
+		}
+
+		public void updateDetail() {
+			programLogger.log(Level.FINE, "Updating segment Wilcoxon panel");
+
+			SwingUtilities.invokeLater(new Runnable(){
+				public void run(){
+					try{
+						tablePanel = createTablePanel();
+						scrollPane.setColumnHeaderView(null);
+						if(hasDatasets()){
+							
+							if(!isSingleDataset()){
+
+								if(checkSegmentCountsMatch(getDatasets())){
+
+									int segmentCount = activeDataset()
+											.getCollection()
+											.getProfileCollection(ProfileCollectionType.REGULAR)
+											.getSegmentedProfile(BorderTag.ORIENTATION_POINT)
+											.getSegmentCount();
+
+									for(SegmentStatistic stat : SegmentStatistic.values()){
+
+										// Get each segment as a boxplot
+										for( int i=0; i<segmentCount; i++){
+											String segName = "Seg_"+i;
+
+											TableModel model;
+
+											TableOptions options = new SegmentStatsTableOptions(getDatasets(), stat, segName);
+											if(getTableCache().hasTable(options)){
+												programLogger.log(Level.FINEST, "Fetched cached magnitude table: "+stat);
+												model = getTableCache().getTable(options);
+											} else {
+												model = NucleusTableDatasetCreator.createMagnitudeSegmentStatTable(getDatasets(), stat, segName);
+												programLogger.log(Level.FINEST, "Added cached magnitude table: "+stat);
+												getTableCache().addTable(options, model);
+											}
+
+											
+											ExportableTable table = new ExportableTable(model);
+											setRenderer(table, new PairwiseTableCellRenderer());
+											addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
+											scrollPane.setColumnHeaderView(table.getTableHeader());
+										}
+
+									}
+									tablePanel.revalidate();
+
+								} else {
+									tablePanel.add(new JLabel("Segment number is not consistent across datasets", JLabel.CENTER));
+								} 
+							} else {
+								tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+							}
+						} else {
+							tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+							
+						}
+						programLogger.log(Level.FINEST, "Updated segment magnitude panel");
+					} catch (Exception e) {
+						programLogger.log(Level.SEVERE, "Error making segment magnitude table", e);
 						tablePanel = createTablePanel();
 					} finally {
 						scrollPane.setViewportView(tablePanel);;

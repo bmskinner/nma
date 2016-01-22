@@ -49,6 +49,7 @@ import stats.DipTester;
 import stats.NucleusStatistic;
 import stats.SegmentStatistic;
 import stats.Stats;
+import utility.Constants;
 
 public class NucleusTableDatasetCreator {
 		
@@ -802,6 +803,70 @@ public class NucleusTableDatasetCreator {
 					
 					double value2 =  dataset2.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
 					
+					double magnitude = value2 / value1;
+					popData[i] = df.format( magnitude );
+				}
+				i++;
+			}
+			model.addColumn(dataset.getName(), popData);
+		}
+		return model;
+	}
+	
+	/**
+	 * Generate a table of segmment magnitude differences between datasets
+	 * @param list the datasets to test
+	 * @param stat the statistic to measure
+	 * @param segName the segment to create the table for
+	 * @return a tablemodel for display
+	 */	
+	public static TableModel createMagnitudeSegmentStatTable(List<AnalysisDataset> list, SegmentStatistic stat, String segName) throws Exception {
+		DefaultTableModel model = makeEmptyWilcoxonTable(list);
+		if(list==null){
+			return model;
+		}
+		
+		// check which reference point to use
+		BorderTag point = BorderTag.REFERENCE_POINT;
+
+		// add columns
+		DecimalFormat df = new DecimalFormat("#0.0000"); 
+		for(AnalysisDataset dataset : list){
+			
+			// get mapping from ordered segments to segment names
+			List<NucleusBorderSegment> segments1 = dataset.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+
+			Map<String, String> map1 = new HashMap<String, String>();
+			for(NucleusBorderSegment seg : segments1){
+				
+				NucleusBorderSegment realSeg = dataset.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+				map1.put(seg.getName(), realSeg.getName());
+			}
+			
+			double value1 = Stats.quartile( dataset.getCollection().getSegmentLengths(map1.get(segName), MeasurementScale.PIXELS), Constants.MEDIAN);
+
+			Object[] popData = new Object[list.size()];
+
+			int i = 0;
+
+			for(AnalysisDataset dataset2 : list){
+				
+				// get mapping from ordered segments to segment names
+				List<NucleusBorderSegment> segments2 = dataset2.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getOrderedSegments();
+
+				Map<String, String> map2 = new HashMap<String, String>();
+				for(NucleusBorderSegment seg : segments2){
+					
+					NucleusBorderSegment realSeg = dataset2.getCollection().getProfileCollection(ProfileCollectionType.REGULAR).getSegmentedProfile(point).getSegment(seg);;
+					map2.put(seg.getName(), realSeg.getName());
+				}
+
+				if(dataset2.getUUID().equals(dataset.getUUID())){
+					popData[i] = "";
+
+				} else {
+					double value2 = Stats.quartile( dataset2.getCollection().getSegmentLengths(map2.get(segName), MeasurementScale.PIXELS), Constants.MEDIAN);
+
 					double magnitude = value2 / value1;
 					popData[i] = df.format( magnitude );
 				}
