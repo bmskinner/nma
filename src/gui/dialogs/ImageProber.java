@@ -27,8 +27,10 @@ import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -545,7 +548,72 @@ public abstract class ImageProber extends LoadingIconDialog {
 		programLogger.log(Level.INFO, logTestMessages[index]+"...");
 	}
 	
+	/**
+	 * Given a location in the image icon, find the location in the original 
+	 * full size image
+	 * @param image
+	 * @param iconLocation
+	 * @return the converted point with int precision
+	 */
+	protected Point convertIconLocationToOriginalImage(ImageType image, Point iconLocation){
+		
+		// The original image
+		ImageProcessor ip = procMap.get(image);
+				
+		int originalWidth = ip.getWidth();
+		int labelWidth    = iconMap.get(image).getWidth();
+		int iconWidth     = iconMap.get(image).getIcon().getIconWidth();
+		int labelHeight   = iconMap.get(image).getHeight();
+		int iconHeight    = iconMap.get(image).getIcon().getIconHeight();
+		
+		// Get the conversion ratio
+		// Divide an icon value by this to get an original value
+		double conversion = (double) iconWidth / (double) originalWidth;
+
+		// Get the position on the label
+		double labelX = iconLocation.getX();
+		double labelY = iconLocation.getY();
+		
+		// convert to positions on the image icon
+		double iconX = labelX - (  (labelWidth  - iconWidth ) / 2 );
+		double iconY = labelY - (  (labelHeight - iconHeight) / 2 );
+		
+		int originalX =  (int) ( iconX / conversion) ;
+		int originalY =  (int) ( iconY / conversion) ;
+		
+		return new Point(  originalX,  originalY  );
+	}
 	
+	/**
+	 * Calculate the aspect ratio of an image
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	protected double getAspectRatio(int width, int height){
+		return (double) width / (double) height;
+	}
+	
+	/**
+	 * Calculate a new height based on a new width, preserving the aspect ratio
+	 * @param ip
+	 * @param newHeight
+	 * @return
+	 */
+	protected int getNewHeight(ImageProcessor ip, int newWidth){
+		return (int) (newWidth / getAspectRatio(ip.getWidth(), ip.getHeight()));
+	}
+	
+	/**
+	 * Calculate a new width based on a new height, preserving the aspect ratio
+	 * @param ip
+	 * @param newHeight
+	 * @return
+	 */
+	protected int getNewWidth(ImageProcessor ip, int newHeight){
+		return (int) (newHeight * getAspectRatio(ip.getWidth(), ip.getHeight()));
+	}
+
 	/**
 	 * Rezize the given image processor to fit in the screen,
 	 * and make an icon
@@ -553,9 +621,6 @@ public abstract class ImageProber extends LoadingIconDialog {
 	 * @return an image icon with the resized image
 	 */
 	protected ImageIcon createViewableImage(ImageProcessor ip, boolean fullSize){
-		int originalWidth = ip.getWidth();
-		int originalHeight = ip.getHeight();
-		
 		
 		programLogger.log(Level.FINEST, "Display has "+rows+" rows");
 		programLogger.log(Level.FINEST, "Display has "+cols+" columns");
@@ -570,18 +635,17 @@ public abstract class ImageProber extends LoadingIconDialog {
 		}
 		
 		// keep the image aspect ratio
-		double ratio = (double) originalWidth / (double) originalHeight;
-		int smallHeight = (int) (smallWidth / ratio);
+		int smallHeight = getNewHeight(ip, smallWidth);
 		
 		if(!fullSize){
 			if(smallHeight > windowHeight / (rows+1) ){ // image is too high, adjust to scale on height
 				smallHeight = (int) (windowHeight / (rows+1));
-				smallWidth = (int) (smallHeight * ratio);
+				smallWidth = getNewWidth(ip, smallHeight);
 			}
 		} else { // full size image must still be scaled to fit
 			if(smallHeight > screenSize.getHeight() * IMAGE_SCREEN_PROPORTION){ // image is too high, adjust to scale on height
 				smallHeight = (int) (windowHeight * IMAGE_SCREEN_PROPORTION);
-				smallWidth = (int) (smallHeight * ratio);
+				smallWidth = getNewWidth(ip, smallHeight);
 			}
 		}
 		
