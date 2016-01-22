@@ -38,8 +38,10 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
 import org.jfree.chart.annotations.XYShapeAnnotation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.Layer;
 
 import stats.NucleusStatistic;
 import utility.Constants;
@@ -98,6 +100,7 @@ public class CellBackgroundChartPanel extends ChartPanel {
 			if(imageFile.exists()){
 
 				XYPlot plot = this.getChart().getXYPlot();
+				XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
 
 				ImageStack imageStack = ImageImporter.importImage(imageFile);
 
@@ -123,12 +126,13 @@ public class CellBackgroundChartPanel extends ChartPanel {
 
 						//				int pixel = im.getRGB(x, y);
 						int pixel = openProcessor.get(x, y);
-						Color col = new Color(pixel, pixel, pixel, 128);
+						Color col = new Color(pixel, pixel, pixel, 255);
 						//					IJ.log("x: "+x+" y: "+y+" : "+pixel+" : "+col);
-						Rectangle r = new Rectangle(x-padding, y-padding, 1, 1);
+						// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
+						Rectangle2D r = new Rectangle2D.Double(x-padding-0.1, y-padding-0.1, 1.2, 1.2);
 						XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
-						plot.addAnnotation(a);
+						rend.addAnnotation(a, Layer.BACKGROUND);
 					}
 				}
 			}

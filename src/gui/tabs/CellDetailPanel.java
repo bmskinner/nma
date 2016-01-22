@@ -620,7 +620,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		boolean drawPointOverlay = false; // debugging
 		private ShapeOverlay overlay = new ShapeOverlay();
 		
-		@SuppressWarnings("serial")
 		protected OutlinePanel(){
 			
 			// make the chart for each nucleus
