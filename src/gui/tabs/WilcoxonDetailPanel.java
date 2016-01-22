@@ -29,6 +29,7 @@ import charting.NucleusStatsTableOptions;
 import charting.TableOptions;
 import charting.datasets.NucleusTableDatasetCreator;
 import gui.components.ExportableTable;
+import gui.components.WilcoxonTableCellRenderer;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
@@ -75,7 +76,7 @@ public class WilcoxonDetailPanel extends AbstractWilcoxonDetailPanel {
 
 
 								ExportableTable table = new ExportableTable(model);
-								setRenderer(table);
+								setRenderer(table, new WilcoxonTableCellRenderer());
 								addWilconxonTable(tablePanel, table, stat.toString());
 								scrollPane.setColumnHeaderView(table.getTableHeader());
 

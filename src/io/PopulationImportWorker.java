@@ -91,7 +91,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 					Version version = Version.parseString(dataset.getVersion());
 					
 					// This is when bugs were fixed for hook hump assignment
-					Version testVersion = new Version(1, 11, 5);
+					Version testVersion = new Version(1, 11, 6);
 					
 					/*
 					 * Correct hook-hump for older versions

@@ -23,6 +23,7 @@ import gui.DatasetEvent.DatasetMethod;
 import gui.DatasetEventListener;
 import gui.InterfaceEvent;
 import gui.InterfaceEvent.InterfaceMethod;
+import gui.tabs.AnalysisDetailPanel.AnalysisTableCellRenderer;
 import gui.InterfaceEventListener;
 import gui.SignalChangeEvent;
 import gui.SignalChangeListener;
@@ -39,6 +40,8 @@ import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
 
 import charting.Cache;
 import charting.ChartCache;
@@ -269,6 +272,20 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 			panel.refreshTableCache(list);
 		}
 		this.update(getDatasets());
+	}
+	
+	/**
+	 * Set the given table to use a custom table renderer. The renderer will be
+	 * used for every column except the first.
+	 * @param table
+	 */
+	protected void setRenderer(JTable table, TableCellRenderer renderer){
+		int columns = table.getColumnModel().getColumnCount();
+		if(columns>1){
+			for(int i=1;i<columns;i++){
+				table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+			}
+		}
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {

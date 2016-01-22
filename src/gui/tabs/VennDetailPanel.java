@@ -100,19 +100,13 @@ public class VennDetailPanel extends DetailPanel {
 
 		}
 		vennTable.setModel(model);
+		setRenderer(vennTable, new VennTableCellRenderer());
 
-		int columns = vennTable.getColumnModel().getColumnCount();
-
-		if(columns>1){
-			for(int i=1;i<columns;i++){
-				vennTable.getColumnModel().getColumn(i).setCellRenderer(new VennTableCellRenderer());
-			}
-		}
 		programLogger.log(Level.FINEST, "Updated venn panel");
 	}
 	
 	/**
-	 * Colour table cell background to show pairwise comparisons. All cells are white, apart
+	 * Colour table cell backsground to show pairwise comparisons. All cells are white, apart
 	 * from the diagonal, which is made light grey
 	 */
 	class VennTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {

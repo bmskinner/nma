@@ -576,23 +576,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 			try {
 				TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(null, MeasurementScale.PIXELS);
 				table = new ExportableTable(model);
-//				table.addMouseListener(new MouseAdapter() {
-//					@Override
-//					public void mouseClicked(MouseEvent e) {
-//						
-//						JTable table = (JTable) e.getSource();
-//						int row = table.rowAtPoint(e.getPoint());
-//						String rowName = table.getModel().getValueAt(row, 0).toString();
-//						
-//						int column = table.columnAtPoint(e.getPoint());
-//						String columnName = table.getModel().getColumnName(column);
-//						
-//						// double click
-//						if (e.getClickCount() == 2) {
-//							
-//						}
-//					}
-//				});
+
 			} catch (Exception e) {
 				programLogger.log(Level.SEVERE, "Error in segment table", e);
 			}
@@ -621,12 +605,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 						TableModel model = NucleusTableDatasetCreator.createMedianProfileSegmentStatsTable(activeDataset(), scale);
 						table.setModel(model);
 						table.setToolTipText(null);
-						Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
-
-						while(columns.hasMoreElements()){
-							TableColumn column = columns.nextElement();
-							column.setCellRenderer(new SegmentTableCellRenderer());
-						}
+						setRenderer(table, new SegmentTableCellRenderer());
+//						Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+//
+//						while(columns.hasMoreElements()){
+//							TableColumn column = columns.nextElement();
+//							column.setCellRenderer(new SegmentTableCellRenderer());
+//						}
 
 					} else {
 
@@ -635,12 +620,13 @@ public class SegmentsDetailPanel extends DetailPanel {
 							TableModel model = NucleusTableDatasetCreator.createMultiDatasetMedianProfileSegmentStatsTable(list, scale);
 							table.setModel(model);
 							table.setToolTipText("Mean and range for 95% confidence interval");
-							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
-
-							while(columns.hasMoreElements()){
-								TableColumn column = columns.nextElement();
-								column.setCellRenderer(new SegmentTableCellRenderer());
-							}
+							setRenderer(table, new SegmentTableCellRenderer());
+//							Enumeration<TableColumn> columns = table.getColumnModel().getColumns();
+//
+//							while(columns.hasMoreElements()){
+//								TableColumn column = columns.nextElement();
+//								column.setCellRenderer(new SegmentTableCellRenderer());
+//							}
 						} else {
 							programLogger.log(Level.FINEST, "Segment counts don't match");
 							table.setToolTipText(null);
@@ -717,7 +703,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 
 											
 											ExportableTable table = new ExportableTable(model);
-											setRenderer(table);
+											setRenderer(table, new WilcoxonTableCellRenderer());
 											addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
 											scrollPane.setColumnHeaderView(table.getTableHeader());
 										}

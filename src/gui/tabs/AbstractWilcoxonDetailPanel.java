@@ -75,19 +75,5 @@ public abstract class AbstractWilcoxonDetailPanel extends DetailPanel {
 			panel.add(new JLabel(label));
 			panel.add(table);
 			table.setEnabled(false);
-		}
-				
-		/**
-		 * Set the given table to use a Wilcoxon table renderer
-		 * @param table
-		 */
-		protected void setRenderer(JTable table){
-			int columns = table.getColumnModel().getColumnCount();
-			if(columns>1){
-				for(int i=1;i<columns;i++){
-					table.getColumnModel().getColumn(i).setCellRenderer(new WilcoxonTableCellRenderer());
-				}
-			}
-		}
-		
+		}		
 	}

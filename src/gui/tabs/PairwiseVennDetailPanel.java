@@ -108,14 +108,16 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 
 		}
 		pairwiseVennTable.setModel(model);
+		setRenderer(pairwiseVennTable, new PairwiseVennTableCellRenderer());
 		
-		int columns = pairwiseVennTable.getColumnModel().getColumnCount();
-
-		if(columns>1){
-			for(int i=1;i<columns;i++){
-				pairwiseVennTable.getColumnModel().getColumn(i).setCellRenderer(new PairwiseVennTableCellRenderer());
-			}
-		}
+//		int columns = pairwiseVennTable.getColumnModel().getColumnCount();
+//		
+//
+//		if(columns>1){
+//			for(int i=1;i<columns;i++){
+//				pairwiseVennTable.getColumnModel().getColumn(i).setCellRenderer(new PairwiseVennTableCellRenderer());
+//			}
+//		}
 
 		programLogger.log(Level.FINEST, "Updated pairwise venn panel");
 
