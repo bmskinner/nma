@@ -1,3 +1,21 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package gui.dialogs;
 
 import java.awt.BorderLayout;
@@ -11,11 +29,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -29,7 +47,6 @@ import analysis.AnalysisDataset;
 import analysis.RandomSampler;
 import charting.charts.HistogramChartFactory;
 import gui.LoadingIconDialog;
-import ij.IJ;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
@@ -56,7 +73,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	}
 	
 	private void createUI(){
-		this.setTitle("Random sampling");
+		this.setTitle("Random sampling: "+dataset.getName());
 		this.setLayout(new BorderLayout());
 		
 		int cellCount = dataset.getCollection().getNucleusCount();
@@ -105,7 +122,13 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		topPanel.add(showDensity);
 		topPanel.add(this.getLoadingLabel());
 		
-		this.add(topPanel, BorderLayout.NORTH);
+		JPanel headerPanel = new JPanel();
+		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+		
+		headerPanel.add(new JLabel("Create two populations randomly sampled from the dataset, and find the magnitude difference in nuclear parameters", JLabel.LEFT));
+		headerPanel.add(topPanel);
+		
+		this.add(headerPanel, BorderLayout.NORTH);
 		
 		resultList.add(1d);
 		resultList.add(1d);
@@ -143,8 +166,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			chartPanel.setChart(chart);
 			setStatusLoaded();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			programLogger.log(Level.SEVERE, "Error running sampling", e);
 		}
 	}
 
