@@ -18,18 +18,29 @@
  *******************************************************************************/
 package gui.tabs;
 
+import gui.MainWindow;
 import gui.components.ExportableTable;
 import gui.components.PairwiseTableCellRenderer;
+import gui.dialogs.MainOptionsDialog;
+import gui.dialogs.RandomSamplingDialog;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import analysis.RandomSampler;
+import analysis.nucleus.ShellAnalysis;
 import stats.NucleusStatistic;
 import charting.NucleusStatsTableOptions;
 import charting.TableOptions;
@@ -53,6 +64,18 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 		infoPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
 		infoPanel.add(new JLabel("Row median value as a proportion of column median value"));
+		
+		JButton button = new JButton("Random sampling");
+		button.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+
+				new RandomSamplingDialog(activeDataset(), programLogger);
+			
+			}
+		});		
+		
+		infoPanel.add(button);
 		return infoPanel;
 	}
 		

@@ -126,6 +126,12 @@ public class HistogramChartFactory {
 		}
 	}
 	
+	public static JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
+		HistogramDataset ds = NuclearHistogramDatasetCreator.createHistogramDatasetFromList(list);
+		JFreeChart chart = createHistogram(ds, "Magnitude difference", "Cells");
+		return chart;
+	}
+	
 	/**
 	 * Create a histogram with nuclear statistics
 	 * @param ds the histogram dataset
