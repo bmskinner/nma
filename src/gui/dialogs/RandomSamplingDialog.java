@@ -2,6 +2,8 @@ package gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -10,12 +12,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -28,7 +33,7 @@ import ij.IJ;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
-public class RandomSamplingDialog extends LoadingIconDialog {
+public class RandomSamplingDialog extends LoadingIconDialog implements ActionListener, ChangeListener {
 	private AnalysisDataset dataset;
 	private ChartPanel chartPanel;
 	
@@ -37,6 +42,9 @@ public class RandomSamplingDialog extends LoadingIconDialog {
 	private JSpinner iterattionsSpinner;
 	private JComboBox<NucleusStatistic> statsBox = new JComboBox<NucleusStatistic>(NucleusStatistic.values());
 	private JButton  runButton;
+	private JCheckBox showDensity;
+	
+	private List<Double> resultList = new ArrayList<Double>();
 	
 	public RandomSamplingDialog(final AnalysisDataset dataset, final Logger logger){
 		super(logger);
@@ -58,13 +66,14 @@ public class RandomSamplingDialog extends LoadingIconDialog {
 				cellCount,
 				1);
 		set1SizeSpinner = new JSpinner(first);
-
+		set1SizeSpinner.addChangeListener(this);
 
 		SpinnerNumberModel second = new SpinnerNumberModel(cellCount,
 				1,
 				cellCount,
 				1);
 		set2SizeSpinner = new JSpinner(second);
+		set2SizeSpinner.addChangeListener(this);
 		
 		int iterations = 1000;
 		SpinnerNumberModel iterationsModel = new SpinnerNumberModel(iterations,
@@ -83,6 +92,9 @@ public class RandomSamplingDialog extends LoadingIconDialog {
 			}
 		});	
 		
+		showDensity = new JCheckBox("Density");
+		showDensity.addActionListener(this);
+		
 		
 		JPanel topPanel = new JPanel(new FlowLayout());
 		topPanel.add(set1SizeSpinner);
@@ -90,19 +102,18 @@ public class RandomSamplingDialog extends LoadingIconDialog {
 		topPanel.add(iterattionsSpinner);
 		topPanel.add(statsBox);
 		topPanel.add(runButton);
+		topPanel.add(showDensity);
 		topPanel.add(this.getLoadingLabel());
 		
 		this.add(topPanel, BorderLayout.NORTH);
 		
-		
-		List<Double> list = new ArrayList<Double>();
-		list.add(1d);
-		list.add(1d);
-		list.add(1d);
-		list.add(1d);
+		resultList.add(1d);
+		resultList.add(1d);
+		resultList.add(1d);
+		resultList.add(1d);
 		
 		try {
-			chartPanel = new ChartPanel(HistogramChartFactory.createRandomSampleHistogram(list));
+			chartPanel = new ChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
 			this.add(chartPanel, BorderLayout.CENTER);
 		} catch (Exception e) {
 			programLogger.log(Level.SEVERE, "Error making chart", e);
@@ -121,13 +132,73 @@ public class RandomSamplingDialog extends LoadingIconDialog {
 		
 		try {
 			setStatusLoading();
-			List<Double> result = r.run(stat, iterations, firstCount, secondCount);
-			JFreeChart chart = HistogramChartFactory.createRandomSampleHistogram(result);
+			resultList = r.run(stat, iterations, firstCount, secondCount);
+			
+			JFreeChart chart = null;
+			if(showDensity.isSelected()){
+				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
+			} else {
+				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
+			}
 			chartPanel.setChart(chart);
 			setStatusLoaded();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		JFreeChart chart = null;
+		try {
+			if(showDensity.isSelected()){
+
+				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
+
+			} else {
+				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
+			}
+		}catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		chartPanel.setChart(chart);
+
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+
+		try {
+			int cellCount = dataset.getCollection().getNucleusCount();
+
+			if(e.getSource()==set1SizeSpinner){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+
+				int firstCount  = (Integer) set1SizeSpinner.getValue();
+				int secondCount = (Integer) set2SizeSpinner.getValue(); 
+				if(secondCount > cellCount - firstCount){
+					set2SizeSpinner.setValue( cellCount - firstCount );
+				}
+
+			}
+			
+			if(e.getSource()==set2SizeSpinner){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+
+				int firstCount  = (Integer) set1SizeSpinner.getValue();
+				int secondCount = (Integer) set2SizeSpinner.getValue(); 
+				if(firstCount > cellCount - secondCount){
+					set1SizeSpinner.setValue( cellCount - secondCount );
+				}
+
+			}
+		} catch(Exception e1){
+			programLogger.log(Level.SEVERE, "Error in spinners", e1);
+		}
+		
 	}
 }

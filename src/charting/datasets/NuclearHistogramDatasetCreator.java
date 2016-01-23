@@ -414,7 +414,7 @@ public class NuclearHistogramDatasetCreator {
 		
 
 		double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-
+		
 //		double min = Stats.min(values);
 //		double max = Stats.max(values);
 
@@ -434,8 +434,31 @@ public class NuclearHistogramDatasetCreator {
 
 		int bins = 100;
 
-		ds.addSeries("Sample", values, bins, 0.9, 1.1 );
+		ds.addSeries("Sample", values, bins, 0.95, 1.05 );
 	
 		return ds;
 	}
+	
+	public static DefaultXYDataset createDensityDatasetFromList(List<Double> list) throws Exception{
+		DefaultXYDataset ds = new DefaultXYDataset();
+		double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+		KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values);
+
+		List<Double> xValues = new ArrayList<Double>();
+		List<Double> yValues = new ArrayList<Double>();
+
+		for(double i=0.9; i<=1.1; i+=0.005){
+			xValues.add(i);
+			yValues.add(est.getProbability(i));
+		}
+
+		double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
+				Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+
+
+		ds.addSeries("Density", data);
+		return ds;
+		
+	}
+	
 }

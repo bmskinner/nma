@@ -37,6 +37,7 @@ import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
 
 import charting.ChartComponents;
 import charting.datasets.NuclearHistogramDatasetCreator;
@@ -129,6 +130,19 @@ public class HistogramChartFactory {
 	public static JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
 		HistogramDataset ds = NuclearHistogramDatasetCreator.createHistogramDatasetFromList(list);
 		JFreeChart chart = createHistogram(ds, "Magnitude difference", "Cells");
+		return chart;
+	}
+	
+	public static JFreeChart createRandomSampleDensity(List<Double> list) throws Exception{
+		XYDataset ds = NuclearHistogramDatasetCreator.createDensityDatasetFromList(list);
+		String xLabel = "Magnitude";
+		JFreeChart chart = 
+				ChartFactory.createXYLineChart(null,
+				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
+				                false);
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.setBackgroundPaint(Color.WHITE);
 		return chart;
 	}
 	
