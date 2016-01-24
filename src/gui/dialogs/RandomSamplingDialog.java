@@ -24,6 +24,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,6 +37,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
@@ -50,7 +53,7 @@ import gui.LoadingIconDialog;
 import stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
-public class RandomSamplingDialog extends LoadingIconDialog implements ActionListener, ChangeListener {
+public class RandomSamplingDialog extends LoadingIconDialog implements ActionListener, ChangeListener, PropertyChangeListener  {
 	private AnalysisDataset dataset;
 	private ChartPanel chartPanel;
 	
@@ -60,6 +63,9 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	private JComboBox<NucleusStatistic> statsBox = new JComboBox<NucleusStatistic>(NucleusStatistic.values());
 	private JButton  runButton;
 	private JCheckBox showDensity;
+	private RandomSampler sampler;
+	
+	private JProgressBar progressBar = new JProgressBar(0, 100);
 	
 	private List<Double> resultList = new ArrayList<Double>();
 	
@@ -104,7 +110,13 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 
-				run();
+				Thread thr = new Thread(){
+					public void run(){
+						runSampling();
+					}
+				};
+				thr.start();
+				
 			
 			}
 		});	
@@ -122,10 +134,16 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		topPanel.add(showDensity);
 		topPanel.add(this.getLoadingLabel());
 		
+		progressBar.setValue(0);
+		topPanel.add(this.progressBar);
+		
 		JPanel headerPanel = new JPanel();
 		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 		
-		headerPanel.add(new JLabel("Create two populations randomly sampled from the dataset, and find the magnitude difference in nuclear parameters", JLabel.LEFT));
+		JPanel labelPanel = new JPanel(new FlowLayout());
+		labelPanel.add(new JLabel("Create two populations randomly sampled from the dataset, and find the magnitude difference in nuclear parameters", JLabel.LEFT));
+		
+		headerPanel.add(labelPanel);
 		headerPanel.add(topPanel);
 		
 		this.add(headerPanel, BorderLayout.NORTH);
@@ -145,8 +163,9 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		
 	}
 	
-	private void run(){
-		RandomSampler r = new RandomSampler(dataset);
+	private void runSampling(){
+		
+		
 		
 		int iterations = (Integer) iterattionsSpinner.getValue();
 		int firstCount = (Integer) set1SizeSpinner.getValue();
@@ -155,8 +174,20 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		
 		try {
 			setStatusLoading();
-			resultList = r.run(stat, iterations, firstCount, secondCount);
-			
+
+			sampler = new RandomSampler(dataset, programLogger, stat, iterations, firstCount, secondCount);
+			sampler.addPropertyChangeListener(this);
+			sampler.execute();
+
+		} catch (Exception e) {
+			programLogger.log(Level.SEVERE, "Error running sampling", e);
+		}
+	}
+	
+	public void finished(){
+		try {
+			resultList = sampler.getResults();
+
 			JFreeChart chart = null;
 			if(showDensity.isSelected()){
 				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
@@ -182,8 +213,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
 			}
 		}catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			programLogger.log(Level.SEVERE, "Error running sampling", e);
 		}
 		chartPanel.setChart(chart);
 
@@ -220,6 +250,27 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			}
 		} catch(Exception e1){
 			programLogger.log(Level.SEVERE, "Error in spinners", e1);
+		}
+		
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+
+		int value = (Integer) evt.getNewValue(); // should be percent
+		programLogger.log(Level.FINEST,"Property change: "+value);
+		
+		if(value >=0 && value <=100){
+			
+			if(this.progressBar.isIndeterminate()){
+				this.progressBar.setIndeterminate(false);
+			}
+			this.progressBar.setValue(value);
+		}
+
+		if(evt.getPropertyName().equals("Finished")){
+			programLogger.log(Level.FINEST,"Worker signaled finished");
+			finished();
 		}
 		
 	}

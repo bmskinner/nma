@@ -3,6 +3,8 @@ package analysis;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import components.Cell;
 import components.CellCollection;
@@ -18,58 +20,93 @@ import stats.NucleusStatistic;
  * @author ben
  *
  */
-public class RandomSampler {
+public class RandomSampler extends AnalysisWorker {
 	
-	private AnalysisDataset dataset;
 	private List<Double> magnitudes = new ArrayList<Double>();
+	private int iterations;
+	private NucleusStatistic stat;
+	private int first;
+	private int second;
 	
-	public RandomSampler(AnalysisDataset dataset){
-		this.dataset = dataset;
+	public RandomSampler(AnalysisDataset dataset, Logger logger, NucleusStatistic stat, int iterations, int first, int second){
+		super(dataset, logger);
+		this.stat = stat;
+		this.iterations = iterations;
+		this.first = first;
+		this.second = second;
+		
+		this.setProgressTotal(iterations);
+		programLogger.log(Level.FINE,"Created sampler for "+stat);
+	}
+	
+
+	@Override
+	protected Boolean doInBackground() throws Exception {
+		boolean result = false;
+		try {
+			programLogger.log(Level.FINE,"Running sampler");
+			generateSamples();
+			result = true;
+			
+		} catch (Exception e){
+			result = false;
+		}
+		return result;
+	}
+	
+	public List<Double> getResults(){
+		return magnitudes;
 	}
 		
-	public List<Double> run(NucleusStatistic stat, int iterations, int first, int second) throws Exception{
+	public void generateSamples() throws Exception{
 		
 		// for each iteration
+		programLogger.log(Level.FINE,"Beginning sampling");
 		for(int i=0; i<iterations; i++){
+			programLogger.log(Level.FINEST,"Sample "+i);
 			// make a new collection randomly sampled to teh correct proportion
 			List<CellCollection> collections = makeRandomSampledCollection(first, second);
-
+			programLogger.log(Level.FINEST,"Made collection");
 			// get the stat magnitude
 			double value1 =  collections.get(0).getMedianStatistic(stat, MeasurementScale.PIXELS);
 			double value2 =  collections.get(1).getMedianStatistic(stat, MeasurementScale.PIXELS);
 			double magnitude = value2 / value1;
-
+			programLogger.log(Level.FINEST, "Found value");
 			// add to a list
 			magnitudes.add(magnitude);
 			
-//			IJ.log("Iteration "+i+": "+magnitude);
-		}
-		
-		// generate the summary chart
-		return magnitudes;
+			if( i%10==0){
+				publish(i);
+			}
+		}	
 		
 	}
 	
 	private List<CellCollection> makeRandomSampledCollection(int firstSize, int secondSize){
 		List<CellCollection> result = new ArrayList<CellCollection>();
 		
-		CellCollection first  = new CellCollection(dataset, "first");
-		CellCollection second = new CellCollection(dataset, "second");
+		CellCollection first  = new CellCollection( this.getDataset(), "first");
+		CellCollection second = new CellCollection( this.getDataset(), "second");
+		programLogger.log(Level.FINEST,"Created new collections");
 		
-		List<Cell> cells = dataset.getCollection().getCells();
+		List<Cell> cells = this.getDataset().getCollection().getCells();
 		Collections.shuffle(cells);
+		programLogger.log(Level.FINEST,"Shuffled cells");
 		
 		for(int i=0; i<firstSize; i++){
 			first.addCell(new Cell(cells.get(i)));
 		}
+		programLogger.log(Level.FINEST,"Added first set");
 		for(int i=firstSize; i<firstSize+secondSize; i++){
 			second.addCell(new Cell(cells.get(i)));
 		}
+		programLogger.log(Level.FINEST,"Added second set");
 		result.add(first);
 		result.add(second);
 		
 		return result;
 		
+	
 	}
 
 }
