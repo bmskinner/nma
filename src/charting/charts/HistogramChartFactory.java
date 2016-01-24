@@ -129,13 +129,13 @@ public class HistogramChartFactory {
 	
 	public static JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
 		HistogramDataset ds = NuclearHistogramDatasetCreator.createHistogramDatasetFromList(list);
-		JFreeChart chart = createHistogram(ds, "Magnitude difference", "Cells");
+		JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
 		return chart;
 	}
 	
 	public static JFreeChart createRandomSampleDensity(List<Double> list) throws Exception{
-		XYDataset ds = NuclearHistogramDatasetCreator.createDensityDatasetFromList(list);
-		String xLabel = "Magnitude";
+		XYDataset ds = NuclearHistogramDatasetCreator.createDensityDatasetFromList(list, 0.0001);
+		String xLabel = "Magnitude difference between populations";
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,

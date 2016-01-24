@@ -71,7 +71,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	
 	public RandomSamplingDialog(final AnalysisDataset dataset, final Logger logger){
 		super(logger);
-		this.dataset= dataset;
+		this.dataset = dataset;
 		createUI();
 		this.setModal(false);
 		this.pack();
@@ -101,7 +101,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		int iterations = 1000;
 		SpinnerNumberModel iterationsModel = new SpinnerNumberModel(iterations,
 				1,
-				10000,
+				100000,
 				1);
 		iterattionsSpinner = new JSpinner(iterationsModel);
 		
@@ -187,6 +187,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	public void finished(){
 		try {
 			resultList = sampler.getResults();
+			progressBar.setValue(0);
 
 			JFreeChart chart = null;
 			if(showDensity.isSelected()){

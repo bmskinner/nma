@@ -1447,8 +1447,8 @@ public class NucleusDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static KernelEstimator createProbabililtyKernel(double[] values) throws Exception {
-		KernelEstimator est = new KernelEstimator(0.001);
+	public static KernelEstimator createProbabililtyKernel(double[] values, double binWidth) throws Exception {
+		KernelEstimator est = new KernelEstimator(binWidth);
 		// add the values to a kernel estimator
 		// give each value equal weighting
 		for(double d : values){

@@ -133,7 +133,7 @@ public class NuclearHistogramDatasetCreator {
 			
 			String groupLabel = stat.toString();
 			double[] values = findDatasetValues(dataset, stat, scale); 
-			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values);
+			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, 0.001);
 	
 			double min = Stats.min(values);
 			double max = Stats.max(values);
@@ -361,7 +361,7 @@ public class NuclearHistogramDatasetCreator {
 				lengths[count++] = length;
 			}
 			
-			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(  lengths  );
+			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(  lengths , 0.001 );
 	
 			double min = Stats.min(lengths);
 			double max = Stats.max(lengths);
@@ -439,15 +439,15 @@ public class NuclearHistogramDatasetCreator {
 		return ds;
 	}
 	
-	public static DefaultXYDataset createDensityDatasetFromList(List<Double> list) throws Exception{
+	public static DefaultXYDataset createDensityDatasetFromList(List<Double> list, double binWidth) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-		KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values);
+		KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, binWidth);
 
 		List<Double> xValues = new ArrayList<Double>();
 		List<Double> yValues = new ArrayList<Double>();
 
-		for(double i=0.95; i<=1.05; i+=0.005){
+		for(double i=0.95; i<=1.05; i+=0.0001){
 			xValues.add(i);
 			yValues.add(est.getProbability(i));
 		}
