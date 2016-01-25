@@ -70,7 +70,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	private RandomSampler sampler;
 	
 	private JSpinner magnitudeTestSpinner; // Enter an observed magnitude, to get observed count
-	private JLabel observedPctLabel = new JLabel("Lower in 0.00% of samples");
+	private JLabel observedPctLabel = new JLabel("Lower in 0.000% of samples");
 	
 	private JProgressBar progressBar = new JProgressBar(0, 100);
 	
@@ -149,7 +149,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 		
 		JPanel labelPanel = new JPanel(new FlowLayout());
-		labelPanel.add(new JLabel("Create two populations randomly sampled from the dataset n times, and find the magnitude difference in nuclear parameters", JLabel.LEFT));
+		labelPanel.add(new JLabel("Create two non-overlapping populations randomly sampled from the dataset n times, and find the magnitude difference in nuclear parameters", JLabel.LEFT));
 		
 		headerPanel.add(labelPanel);
 		headerPanel.add(topPanel);
@@ -158,10 +158,6 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		
 		this.add(createFooter(), BorderLayout.SOUTH);
 		
-		resultList.add(1d);
-		resultList.add(1d);
-		resultList.add(1d);
-		resultList.add(1d);
 		
 		try {
 			chartPanel = new ChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
@@ -179,12 +175,14 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		showDensity = new JCheckBox("Density");
 		showDensity.addActionListener(this);
 		
-		SpinnerNumberModel magnitudeSpinnerModel = new SpinnerNumberModel(0.985d,
+		SpinnerNumberModel magnitudeSpinnerModel = new SpinnerNumberModel(1d,
 				0d,
 				1d,
-				0.001d);
+				0.0001d);
 		magnitudeTestSpinner = new JSpinner(magnitudeSpinnerModel);
-		magnitudeTestSpinner.setPreferredSize(new Dimension(60, 20));
+		JSpinner.NumberEditor numberEditor = new JSpinner.NumberEditor(magnitudeTestSpinner,"0.0000");
+		magnitudeTestSpinner.setEditor(numberEditor);
+		magnitudeTestSpinner.setPreferredSize(new Dimension(70, 20));
 		magnitudeTestSpinner.addChangeListener(this);
 		
 		panel.add(showDensity);
@@ -219,7 +217,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			resultList = sampler.getResults();
 			Collections.sort(resultList);
 			double observedPct = calculateObservedPercent();
-			DecimalFormat df = new DecimalFormat("#0.00"); 
+			DecimalFormat df = new DecimalFormat("#0.000"); 
 			observedPctLabel.setText("Lower in "+  df.format(observedPct)  +"% of samples");
 			sampler = null;
 			progressBar.setValue(0);
@@ -291,7 +289,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 				j.commitEdit();
 
 				double observedPct = calculateObservedPercent();
-				DecimalFormat df = new DecimalFormat("#0.00"); 
+				DecimalFormat df = new DecimalFormat("#0.000"); 
 				observedPctLabel.setText("Lower in "+  df.format(observedPct)  +"% of samples");
 
 			}
@@ -304,6 +302,10 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	
 	private double calculateObservedPercent(){
 		double magnitudeTest  = (Double) magnitudeTestSpinner.getValue();
+		
+		if(resultList.size()==0){
+			return 0;
+		}
 		
 		int count = 0;
 		for(double d : resultList){
