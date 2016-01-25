@@ -19,6 +19,7 @@
 package analysis;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -430,10 +431,16 @@ public class AnalysisOptions implements Serializable {
 		private boolean useCanny; 
 		private boolean cannyAutoThreshold;
 		
-		private transient boolean flattenChromocentres; 	// should the white threshold be lowered to hide internal structures?
-		private transient int flattenThreshold; // if the white threhold is lower, this is the value
-		private transient boolean useKuwahara;	// perform a Kuwahara filtering to enhance edge detection?
-		private transient int kuwaharaKernel;		// the radius of the Kuwahara kernel - must be an odd number
+		
+//		private transient boolean flattenChromocentres; 	// should the white threshold be lowered to hide internal structures?
+//		private transient int flattenThreshold; // if the white threhold is lower, this is the value
+//		private transient boolean useKuwahara;	// perform a Kuwahara filtering to enhance edge detection?
+//		private transient int kuwaharaKernel;		// the radius of the Kuwahara kernel - must be an odd number
+		
+		private boolean flattenChromocentres; 	// should the white threshold be lowered to hide internal structures?
+		private int flattenThreshold; // if the white threhold is lower, this is the value
+		private boolean useKuwahara;	// perform a Kuwahara filtering to enhance edge detection?
+		private int kuwaharaKernel;		// the radius of the Kuwahara kernel - must be an odd number
 		
 		private float lowThreshold;		// the canny low threshold
 		private float highThreshold;	// the canny high threshold
@@ -606,57 +613,25 @@ public class AnalysisOptions implements Serializable {
 			return true;
 		}
 
-//		public boolean equals(CannyOptions options){
-//
-//			if( useCanny != options.isUseCanny()){
-//				return false;
-//			}
-//			
-//			if( cannyAutoThreshold != options.isCannyAutoThreshold()){
-//				return false;
-//			}
-//			
-//			if( flattenChromocentres != options.isUseFlattenImage()){
-//				return false;
-//			}
-//			
-//			if( flattenThreshold != options.getFlattenThreshold()){
-//				return false;
-//			}
-//			
-//			if( useKuwahara != options.isUseKuwahara()){
-//				return false;
-//			}
-//
-//			if( kuwaharaKernel != options.getKuwaharaKernel()){
-//				return false;
-//			}
-//			
-//			
-//			if( lowThreshold != options.getLowThreshold()){
-//				return false;
-//			}
-//			
-//			if( highThreshold != options.getHighThreshold()){
-//				return false;
-//			}
-//
-//			if( kernelRadius != options.getKernelRadius()){
-//				return false;
-//			}
-//			
-//			if( kernelWidth != options.getKernelWidth()){
-//				return false;
-//			}
-//			
-//			if( closingObjectRadius != options.getClosingObjectRadius()){
-//				return false;
-//			}
-//			return true;
-//		}
 
 		private AnalysisOptions getOuterType() {
 			return AnalysisOptions.this;
+		}
+		
+		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		    
+			/*
+			 * The chromocentre flattening parameter and Kuwahara
+			 * kernel parameter are transient. When these are stored,
+			 * check if they were filled, and override if needed.
+			 */
+			in.defaultReadObject();
+
+//			flattenChromocentres = false; 	// should the white threshold be lowered to hide internal structures?
+//			private transient int flattenThreshold; // if the white threhold is lower, this is the value
+//			private transient boolean useKuwahara;	// perform a Kuwahara filtering to enhance edge detection?
+//			private transient int kuwaharaKernel;		// the radius of the Kuwahara kernel - must be an odd number
+		    
 		}
 	}
 	
