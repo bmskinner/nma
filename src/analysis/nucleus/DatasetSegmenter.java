@@ -138,7 +138,7 @@ public class DatasetSegmenter extends AnalysisWorker {
 			log(Level.WARNING,  "Cannot copy: source collection is null");
 			return false;
 		} else {
-			this.setProgressTotal(getDataset().getCollection().getNucleusCount()*2);
+			this.setProgressTotal(getDataset().getCollection().getNucleusCount());
 			log(Level.FINE,  "Copying segmentation pattern");
 			reapplyProfiles(getDataset().getCollection(), sourceCollection);
 			log(Level.FINE, "Copying complete");
