@@ -87,7 +87,7 @@ public class FishRemappingDialog extends ImageProber {
 	private int offsetX = 0;
 	private int offsetY = 0;
 	
-	private PaintableJPanel paintablePanel;
+//	private PaintableJPanel paintablePanel;
 //	private Image originalImageZoom;
 		
 	public enum FishMappingImageType implements ImageType {
@@ -217,36 +217,36 @@ public class FishRemappingDialog extends ImageProber {
 			iconMap.get(fishImage).removeMouseListener(l);
 		}
 		
-		iconMap.get(fishImage).addMouseListener(new MouseAdapter() {
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-				
-				if(e.isControlDown() && e.getButton()==MouseEvent.BUTTON1){
-					
-					Point originalPoint = convertIconLocationToOriginalImage(fishImage, e.getPoint());
-					
-					programLogger.log(Level.INFO, "Offset FISH to "+originalPoint.x + "-"+ originalPoint.y);
-					
-					// Get the middle of the FISH image
-					int midX = procMap.get(fishImage).getWidth()  / 2;
-					int midY = procMap.get(fishImage).getHeight() / 2;
-										
-					offsetX = originalPoint.x - midX;
-					offsetY = originalPoint.y - midY;
-					
-					updateImageThumbnails();
-				}
-				
-			}
-		});
+//		iconMap.get(fishImage).addMouseListener(new MouseAdapter() {
+//			
+//			@Override
+//			public void mousePressed(MouseEvent e) {
+//				
+//				if(e.isControlDown() && e.getButton()==MouseEvent.BUTTON1){
+//					
+//					Point originalPoint = convertIconLocationToOriginalImage(fishImage, e.getPoint());
+//					
+//					programLogger.log(Level.INFO, "Offset FISH to "+originalPoint.x + "-"+ originalPoint.y);
+//					
+//					// Get the middle of the FISH image
+//					int midX = procMap.get(fishImage).getWidth()  / 2;
+//					int midY = procMap.get(fishImage).getHeight() / 2;
+//										
+//					offsetX = originalPoint.x - midX;
+//					offsetY = originalPoint.y - midY;
+//					
+//					updateImageThumbnails();
+//				}
+//				
+//			}
+//		});
 		
 		
-		paintablePanel = new PaintableJPanel();
-		paintablePanel.setMaximumSize(new Dimension(400, 400));
-		paintablePanel.setMinimumSize(new Dimension(400, 400));
-//		
-		this.add(paintablePanel, BorderLayout.NORTH);
+//		paintablePanel = new PaintableJPanel();
+//		paintablePanel.setMaximumSize(new Dimension(400, 400));
+//		paintablePanel.setMinimumSize(new Dimension(400, 400));
+////		
+//		this.add(paintablePanel, BorderLayout.NORTH);
 
 		// ask for a folder of post-FISH images
 		if(this.getPostFISHDirectory()){
@@ -259,15 +259,15 @@ public class FishRemappingDialog extends ImageProber {
 		
 	}
 	
-	private void makeCroppedVersion(ImageType imageType, ImageType storageType, Rectangle r){
-		// The original image
-		ImageProcessor original = procMap.get(imageType).duplicate();
-		procMap.put(storageType, null); // remove previous version
-		original.setRoi(r);
-		ImageProcessor crop = original.crop();
-		procMap.put(storageType, crop);
-		original = null; // free memory
-	}
+//	private void makeCroppedVersion(ImageType imageType, ImageType storageType, Rectangle r){
+//		// The original image
+//		ImageProcessor original = procMap.get(imageType).duplicate();
+//		procMap.put(storageType, null); // remove previous version
+//		original.setRoi(r);
+//		ImageProcessor crop = original.crop();
+//		procMap.put(storageType, crop);
+//		original = null; // free memory
+//	}
 	
 	/**
 	 * Get a list of CellCollections, containing the selected nuclei.
@@ -301,7 +301,7 @@ public class FishRemappingDialog extends ImageProber {
 	 * Import the morphology image file and make a greyscale image
 	 * @param imageFile
 	 */
-	private void importOriginalImage(File imageFile){
+	private void importOriginalImage(final File imageFile){
 		ImageStack stack = ImageImporter.importImage(imageFile, programLogger);
 
 		programLogger.log(Level.FINEST, "Converting image");
@@ -320,7 +320,7 @@ public class FishRemappingDialog extends ImageProber {
 	 * file from the FISH image directory
 	 * @param imageFile
 	 */
-	private void importFISHImage(File imageFile){
+	private void importFISHImage(final File imageFile){
 		// Import the image as a stack
 		String imageName = imageFile.getName();
 		File fishImageFile = new File(postFISHImageDirectory+File.separator+imageName);
@@ -343,7 +343,7 @@ public class FishRemappingDialog extends ImageProber {
 		
 	
 	@Override
-	protected void importAndDisplayImage(File imageFile){
+	protected void importAndDisplayImage(final File imageFile){
 
 		try{
 			setStatusLoading();
