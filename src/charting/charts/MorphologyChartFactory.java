@@ -672,7 +672,7 @@ public class MorphologyChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode) throws Exception{
+	public static JFreeChart makeCellOutlineChart(Cell cell, AnalysisDataset dataset, RotationMode rotateMode, boolean showhookHump) throws Exception{
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
 						null, null, null, PlotOrientation.VERTICAL, true, true,
@@ -706,18 +706,20 @@ public class MorphologyChartFactory {
 			plot.getRangeAxis().setInverted(false);
 		}
 
-		// get the nucleus dataset
+		/*
+		 * Get the nucleus dataset
+		 */
 		XYDataset nucleus = NucleusDatasetCreator.createNucleusOutline(cell, true);
 		hash.put(hash.size(), "Nucleus"); // add to the first free entry
 		datasetHash.put(datasetHash.size(), nucleus);
 		
-		// get the nucleus dataset
+
 		/*
 		 * If the cell has a rodent sperm nucleus, get the hook and hump rois
 		 */
-//		XYDataset hookHump = NucleusDatasetCreator.createNucleusHookHumpOutline(cell);
-//		hash.put(hash.size(), "HookHump"); // add to the first free entry
-//		datasetHash.put(datasetHash.size(), hookHump);
+		XYDataset hookHump = NucleusDatasetCreator.createNucleusHookHumpOutline(cell);
+		hash.put(hash.size(), "HookHump"); // add to the first free entry
+		datasetHash.put(datasetHash.size(), hookHump);
 		
 		// get the index tags
 		XYDataset tags = NucleusDatasetCreator.createNucleusIndexTags(cell);
@@ -796,14 +798,18 @@ public class MorphologyChartFactory {
 				/*
 				 * Hook and hump for rodent sperm
 				 */
-//				if(hash.get(key).equals("HookHump")){
-//					String name = (String) plot.getDataset(key).getSeriesKey(i);
-//					// Colour the hook transparent blue, the hump transparent green
-//					Color color = name.equals("Hump") ? Color.GREEN : Color.BLUE;
-//					plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(5));
-//					plot.getRenderer(key).setSeriesPaint(i, color);
-//					
-//				}
+				if(hash.get(key).equals("HookHump")){
+					
+					if(showhookHump){
+						String name = (String) plot.getDataset(key).getSeriesKey(i);
+						// Colour the hook blue, the hump green
+						Color color = name.equals("Hump") ? Color.GREEN : Color.BLUE;
+						plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(5));
+						plot.getRenderer(key).setSeriesPaint(i, color);
+						plot.getRenderer(key).setSeriesVisibleInLegend(i, true);
+					}
+					
+				}
 				
 				/*
 				 * Border tags

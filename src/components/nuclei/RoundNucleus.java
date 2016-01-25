@@ -87,8 +87,6 @@ public class RoundNucleus
 	protected double pathLength;  // the angle path length - measures wibbliness in border
 	protected double feret;       // the maximum diameter
 	protected double area;        // the nuclear area
-
-//	private String position; // the position of the centre of the ROI bounding rectangle in the original image as "x.y"
 	
 	protected double[] orignalPosition; // the xbase, ybase, width and height of the original bounding rectangle
 

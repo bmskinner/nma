@@ -239,6 +239,7 @@ extends SpermNucleus
 			this.hookLength = 0;
 			this.bodyWidth 	= 0;
 		}
+		testNucleus = null;
 	}
 	
 	/**
@@ -755,9 +756,8 @@ extends SpermNucleus
   private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    in.defaultReadObject();
 	    try {
-	    	// recalculate - old datasets have problems
 	    	
-	    	// calculate for datasets below 1.11.5
+	    	// calculate for new datasets
 			calculateHookOrBodyLength();
 						
 		} catch (Exception e) {

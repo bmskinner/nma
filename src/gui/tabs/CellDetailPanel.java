@@ -32,11 +32,11 @@ import gui.components.ShapeOverlayObject;
 import gui.components.panels.RotationSelectionSettingsPanel;
 import gui.dialogs.CellImageDialog;
 import gui.tabs.CellDetailPanel.CellsListPanel.NodeData;
-import ij.IJ;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Shape;
@@ -58,6 +58,7 @@ import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -93,11 +94,11 @@ import components.generic.BorderTag;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderPoint;
 import components.nuclear.NucleusBorderSegment;
+import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 
+@SuppressWarnings("serial")
 public class CellDetailPanel extends DetailPanel implements SignalChangeListener, TreeSelectionListener {
-
-	private static final long serialVersionUID = 1L;
 	
 	private Cell activeCell = null;
 	
@@ -301,46 +302,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		}
 	}
 	
-	/**
-	 * Allows for cell background to be coloured based on position in a list. Used to colour
-	 * the segment stats list
-	 *
-	 */
-//	private class SegmentTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
-//
-//		private static final long serialVersionUID = 1L;
-//
-//		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-//
-//			// default cell colour is white
-//			Color colour = Color.WHITE;
-//			
-//			// only apply to first row, after the first column
-//			if(column>0 && row==0){
-//				String colName = table.getColumnName(column); // will be Seg_x
-//
-//				
-//				int segment;
-//		        try {
-//		        	segment = Integer.valueOf(colName.replace("Seg_", ""));
-//		        } catch (Exception e){
-//		        	programLogger.log(Level.FINEST, "Error getting segment name: "+colName);
-//		        	segment = 0;
-//		        }
-//		        
-//				colour = activeDataset().getSwatch().color(segment);
-//
-//			}
-//			
-//			//Cells are by default rendered as a JLabel.
-//			JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-//			l.setBackground(colour);
-//
-//			//Return the JLabel which renders the cell.
-//			return l;
-//		}
-//	}
-
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
@@ -611,10 +572,10 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	}
 	
 	protected class OutlinePanel extends JPanel implements ActionListener{
-
-		private static final long serialVersionUID = 1L;
 		
 		private RotationSelectionSettingsPanel rotationPanel;
+
+		private JCheckBox showHookHump = new JCheckBox("Show hook and hump ROIs");
 		private CellBackgroundChartPanel panel;
 		
 		boolean drawPointOverlay = false; // debugging
@@ -627,10 +588,16 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 
 			
+			JPanel settingsPanel = new JPanel(new FlowLayout());
+			
 			rotationPanel = new RotationSelectionSettingsPanel();
 			rotationPanel.setEnabled(false);
 			rotationPanel.addActionListener(this);
-			this.add(rotationPanel, BorderLayout.NORTH);
+			
+			settingsPanel.add(rotationPanel);
+			settingsPanel.add(createHookHumpPanel());
+			
+			this.add(settingsPanel, BorderLayout.NORTH);
 			
 			panel = new CellBackgroundChartPanel(chart);
 			panel.addOverlay(overlay);
@@ -645,6 +612,15 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			
 		}
 		
+		private JPanel createHookHumpPanel(){
+			JPanel panel = new JPanel();
+			panel.add(showHookHump);
+			showHookHump.setEnabled(false);
+			showHookHump.addActionListener(this);
+			return panel;
+			
+		}
+		
 		public void drawCellBackgroundImage(File f, int channel){
 			panel.drawImageAsAnnotation(f, channel);
 		}
@@ -652,6 +628,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		protected void update(Cell cell){
 
 			RotationMode rotateMode = rotationPanel.getSelected();
+			boolean showHook = showHookHump.isSelected();
 			panel.setCell(cell);
 			
 			panel.removeOverlay(overlay);
@@ -660,12 +637,22 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				JFreeChart chart;
 				if(cell==null){
 					rotationPanel.setEnabled(false);
+					showHookHump.setEnabled(false);
 					chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				} else {
+					
+					if(activeDataset().getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
+						showHookHump.setEnabled(true);
+					} else {
+						showHookHump.setEnabled(false);
+					}
+					
 					rotationPanel.setEnabled(true);
-					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode);
+					
+					chart = MorphologyChartFactory.makeCellOutlineChart(cell, activeDataset(), rotateMode, showHook);
 				}
 				
+				panel.clearShapeAnnotations();
 				panel.setChart(chart);
 				if(rotateMode.equals(RotationMode.ACTUAL)){
 					panel.drawNucleusImageAsAnnotation();
@@ -694,6 +681,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 				JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyNucleusOutlineChart();
 				panel.setChart(chart);
 				rotationPanel.setEnabled(false);
+				showHookHump.setEnabled(false);
 			}
 		}
 
