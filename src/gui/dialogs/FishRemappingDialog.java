@@ -21,6 +21,7 @@ package gui.dialogs;
 import gui.ImageType;
 import gui.LoadingIconDialog;
 import gui.MainWindow;
+import gui.components.PaintableJPanel;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -37,6 +38,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.InputEvent;
@@ -84,13 +86,19 @@ public class FishRemappingDialog extends ImageProber {
 	
 	private int offsetX = 0;
 	private int offsetY = 0;
+	
+	private PaintableJPanel paintablePanel;
+//	private Image originalImageZoom;
 		
 	public enum FishMappingImageType implements ImageType {
 		
+//		ORIGINAL_IMAGE   ("Original image"),
+//		FISH_IMAGE		 ("FISHed image"),
+//		ORIGINAL_IMAGE_LARGE   ("Full scale original"),
+//		FISH_IMAGE_LARGE   ("Full scale FISH");
+		
 		ORIGINAL_IMAGE   ("Original image"),
-		FISH_IMAGE		 ("FISHed image"),
-		ORIGINAL_IMAGE_LARGE   ("Full scale original"),
-		FISH_IMAGE_LARGE   ("Full scale FISH");
+		FISH_IMAGE		 ("FISHed image");
 		
 		private String name;
 		
@@ -153,52 +161,53 @@ public class FishRemappingDialog extends ImageProber {
 			}
 		});
 		
-		iconMap.get(originalImage).addMouseMotionListener(new MouseAdapter(){
-			@Override
-			public void mouseMoved(MouseEvent e){
-				
-				Point location = e.getPoint();
-				Point originalPoint = convertIconLocationToOriginalImage(originalImage, location);
-
-				int w = 400;
-				int border = w/2;
-				/*
-				 * Get a rectangle around the location
-				 * Crop this section from the original image
-				 * Set the large icons to use the cropped images
-				 */
-				
-				int rX = originalPoint.x < border // if the point is less than the border distance from the left edge 
-						? 0                       // set the rectangle edge to zero
-						: originalPoint.x-border; // put the point a border distance to the left of the point
-//								                   otherwise
-//						: originalPoint.x > iconMap.get(originalImage).getWidth()-w // if the point is less than the border from teh right edge
-//							? iconMap.get(originalImage).getWidth()-w // set the rectangle edge to the right edge - the full width of the rectangle
-//									                          // otherwise
-//									: originalPoint.x-border; // put the point a border distance to the left of the point
+//		iconMap.get(originalImage).addMouseMotionListener(new MouseAdapter(){
+//			@Override
+//			public void mouseMoved(MouseEvent e){
+//				
+//				Point location = e.getPoint();
+//				Point originalPoint = convertIconLocationToOriginalImage(originalImage, location);
+//
+//				int w = 400;
+//				int border = w/2;
+//				/*
+//				 * Get a rectangle around the location
+//				 * Crop this section from the original image
+//				 * Set the large icons to use the cropped images
+//				 */
+//				
+//				int rX = originalPoint.x < border // if the point is less than the border distance from the left edge 
+//						? 0                       // set the rectangle edge to zero
+//						: originalPoint.x-border; // put the point a border distance to the left of the point
+////								                   otherwise
+////						: originalPoint.x > iconMap.get(originalImage).getWidth()-w // if the point is less than the border from teh right edge
+////							? iconMap.get(originalImage).getWidth()-w // set the rectangle edge to the right edge - the full width of the rectangle
+////									                          // otherwise
+////									: originalPoint.x-border; // put the point a border distance to the left of the point
+////							
 //							
-							
-				int rY = originalPoint.y < border 
-						? 0 
-						: originalPoint.y-border;
-//						: originalPoint.y > iconMap.get(originalImage).getHeight()-w
-//								? iconMap.get(originalImage).getHeight()-w
-//								: originalPoint.y-border;
-				
-				Rectangle r = new Rectangle(rX, rY, w, w);
-				
-				// The original image
-				makeCroppedVersion(FishMappingImageType.ORIGINAL_IMAGE, FishMappingImageType.ORIGINAL_IMAGE_LARGE, r);
-
-				
-				// The fish image
-				Rectangle offsetR = new Rectangle(rX+(offsetX/2), rY+(offsetY/2), w, w);
-				makeCroppedVersion(FishMappingImageType.FISH_IMAGE, FishMappingImageType.FISH_IMAGE_LARGE, offsetR);
-								
-				updateImageThumbnails();
-				
-			}
-		});
+//				int rY = originalPoint.y < border 
+//						? 0 
+//						: originalPoint.y-border;
+////						: originalPoint.y > iconMap.get(originalImage).getHeight()-w
+////								? iconMap.get(originalImage).getHeight()-w
+////								: originalPoint.y-border;
+//				
+//				Rectangle r = new Rectangle(rX, rY, w, w);
+//				
+//				// The original image
+////				makeCroppedVersion(FishMappingImageType.ORIGINAL_IMAGE, FishMappingImageType.ORIGINAL_IMAGE_LARGE, r);
+//
+//				
+//				// The fish image
+//				Rectangle offsetR = new Rectangle(rX+(offsetX/2), rY+(offsetY/2), w, w);
+////				makeCroppedVersion(FishMappingImageType.FISH_IMAGE, FishMappingImageType.FISH_IMAGE_LARGE, offsetR);
+//								
+//				updateImageThumbnails();
+////				paintablePanel.setClip(offsetR);
+//				
+//			}
+//		});
 		
 		// Clear the 'large FISH image' mouse listener
 		// It must be replaced with a custom listener
@@ -233,6 +242,11 @@ public class FishRemappingDialog extends ImageProber {
 		});
 		
 		
+		paintablePanel = new PaintableJPanel();
+		paintablePanel.setMaximumSize(new Dimension(400, 400));
+		paintablePanel.setMinimumSize(new Dimension(400, 400));
+//		
+		this.add(paintablePanel, BorderLayout.NORTH);
 
 		// ask for a folder of post-FISH images
 		if(this.getPostFISHDirectory()){
@@ -248,9 +262,11 @@ public class FishRemappingDialog extends ImageProber {
 	private void makeCroppedVersion(ImageType imageType, ImageType storageType, Rectangle r){
 		// The original image
 		ImageProcessor original = procMap.get(imageType).duplicate();
+		procMap.put(storageType, null); // remove previous version
 		original.setRoi(r);
 		ImageProcessor crop = original.crop();
 		procMap.put(storageType, crop);
+		original = null; // free memory
 	}
 	
 	/**
@@ -280,6 +296,50 @@ public class FishRemappingDialog extends ImageProber {
 		}
 		return result;
 	}
+	
+	/**
+	 * Import the morphology image file and make a greyscale image
+	 * @param imageFile
+	 */
+	private void importOriginalImage(File imageFile){
+		ImageStack stack = ImageImporter.importImage(imageFile, programLogger);
+
+		programLogger.log(Level.FINEST, "Converting image");
+		ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(stack).getProcessor();
+		openProcessor.invert();
+		
+		// Get the cells matching the imageFile
+		for(Cell c : dataset.getCollection().getCells(imageFile)){
+			drawNucleus(c, openProcessor);
+		}
+		procMap.put(FishMappingImageType.ORIGINAL_IMAGE, openProcessor);
+	}
+	
+	/**
+	 * Get the file name from the input, and import the corresponding
+	 * file from the FISH image directory
+	 * @param imageFile
+	 */
+	private void importFISHImage(File imageFile){
+		// Import the image as a stack
+		String imageName = imageFile.getName();
+		File fishImageFile = new File(postFISHImageDirectory+File.separator+imageName);
+
+		if(fishImageFile.exists()){
+			ImageStack fishStack = ImageImporter.importImage(fishImageFile, programLogger);
+
+			ImageProcessor fishProcessor = ImageExporter.convertToRGB(fishStack).getProcessor();
+
+			procMap.put(FishMappingImageType.FISH_IMAGE, fishProcessor);
+
+		} else {
+
+			/*
+			 * If there is no corresponding FISH image, don't display anything
+			 */
+			procMap.put(FishMappingImageType.FISH_IMAGE, null);
+		}
+	}
 		
 	
 	@Override
@@ -289,35 +349,20 @@ public class FishRemappingDialog extends ImageProber {
 			setStatusLoading();
 			this.setLoadingLabelText("Opening image "+index+": "+imageFile.getAbsolutePath()+"...");
 
-			ImageStack stack = ImageImporter.importImage(imageFile, programLogger);
-
-			// Import the image as a stack
-			String imageName = imageFile.getName();
-
-			programLogger.log(Level.FINEST, "Converting image");
-			ImageProcessor openProcessor = ImageExporter.makeGreyRGBImage(stack).getProcessor();
-			openProcessor.invert();
-			procMap.put(FishMappingImageType.ORIGINAL_IMAGE, openProcessor);
-
-						
-			File fishImageFile = new File(postFISHImageDirectory+File.separator+imageName);
-			ImageStack fishStack = ImageImporter.importImage(fishImageFile, programLogger);
 			
-			ImageProcessor fishProcessor = ImageExporter.convertToRGB(fishStack).getProcessor();
-			
-			procMap.put(FishMappingImageType.FISH_IMAGE, fishProcessor);
-			
-			// Get the cells matching the imageFile
-			for(Cell c : dataset.getCollection().getCells(imageFile)){
-				drawNucleus(c, openProcessor);
-			}
+			importOriginalImage(imageFile);
 
-			Rectangle r = new Rectangle(0, 0, 200, 200);
 			
-			// The original image
-			makeCroppedVersion(FishMappingImageType.ORIGINAL_IMAGE, FishMappingImageType.ORIGINAL_IMAGE_LARGE, r);
-			makeCroppedVersion(FishMappingImageType.FISH_IMAGE, FishMappingImageType.FISH_IMAGE_LARGE, r);
+			importFISHImage(imageFile);
+			
+			
+//			makeCroppedVersion(FishMappingImageType.ORIGINAL_IMAGE, FishMappingImageType.ORIGINAL_IMAGE_LARGE, r);
+//			makeCroppedVersion(FishMappingImageType.FISH_IMAGE, FishMappingImageType.FISH_IMAGE_LARGE, r);
 
+			
+//			paintablePanel = new PaintableJPanel(openProcessor.getBufferedImage());
+//			paintablePanel.setMinimumSize(new Dimension(400,400));
+//			paintablePanel.setMaximumSize(new Dimension(400,400));
 			
 			updateImageThumbnails();
 

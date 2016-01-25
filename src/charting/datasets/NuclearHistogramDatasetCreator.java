@@ -411,52 +411,37 @@ public class NuclearHistogramDatasetCreator {
 	 */
 	public static HistogramDataset createHistogramDatasetFromList(List<Double> list) throws Exception {
 		HistogramDataset ds = new HistogramDataset();
+		if(!list.isEmpty()){
 		
+			double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
 
-		double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-		
-//		double min = Stats.min(values);
-//		double max = Stats.max(values);
+			int bins = 100;
 
-
-//		int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
-//
-//		int roundLog = log-1 == 0 ? log-2 : log-1;
-//		double roundAbs = Math.pow(10, roundLog);
-//
-//		// use int truncation to round to nearest 100 above max
-//		int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
-//		maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
-//		int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
-//		minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
-//		minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
-//
-
-		int bins = 100;
-
-		ds.addSeries("Sample", values, bins, 0.95, 1.00 );
-	
+			ds.addSeries("Sample", values, bins, 0.95, 1.00 );
+		}
 		return ds;
 	}
 	
 	public static DefaultXYDataset createDensityDatasetFromList(List<Double> list, double binWidth) throws Exception{
 		DefaultXYDataset ds = new DefaultXYDataset();
-		double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
-		KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, binWidth);
+		if(!list.isEmpty()){
+			double[] values = Utils.getdoubleFromDouble(list.toArray(new Double[0]));
+			KernelEstimator est = NucleusDatasetCreator.createProbabililtyKernel(values, binWidth);
 
-		List<Double> xValues = new ArrayList<Double>();
-		List<Double> yValues = new ArrayList<Double>();
+			List<Double> xValues = new ArrayList<Double>();
+			List<Double> yValues = new ArrayList<Double>();
 
-		for(double i=0.95; i<=1.00; i+=0.0001){
-			xValues.add(i);
-			yValues.add(est.getProbability(i));
+			for(double i=0.95; i<=1.00; i+=0.0001){
+				xValues.add(i);
+				yValues.add(est.getProbability(i));
+			}
+
+			double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
+					Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
+
+
+			ds.addSeries("Density", data);
 		}
-
-		double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new Double[0])),  
-				Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
-
-
-		ds.addSeries("Density", data);
 		return ds;
 		
 	}

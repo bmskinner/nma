@@ -33,6 +33,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -467,8 +468,9 @@ public abstract class ImageProber extends LoadingIconDialog {
         
 		double scale = (double) icon.getIconHeight() / (double) procMap.get(key).getHeight();
 		scale *=100;
+		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
-        Dialog dialog = pane.createDialog(this, key.toString()+": "+scale+"% scale");
+        Dialog dialog = pane.createDialog(this, key.toString()+": "+ df.format(scale) +"% scale");
 
         dialog.setModal(false);
         dialog.setVisible(true);
@@ -488,7 +490,9 @@ public abstract class ImageProber extends LoadingIconDialog {
 				JLabel label = iconMap.get(key);
 				if(label!=null){
 					ImageIcon icon = (ImageIcon) label.getIcon();
-					icon.getImage().flush();
+					if(icon.getImage()!=null){
+						icon.getImage().flush();
+					}
 					label.setIcon(this.getLoadingGif());
 				}
 			}
@@ -626,6 +630,11 @@ public abstract class ImageProber extends LoadingIconDialog {
 		programLogger.log(Level.FINEST, "Display has "+rows+" rows");
 		programLogger.log(Level.FINEST, "Display has "+cols+" columns");
 		
+		if(ip==null){
+			return new ImageIcon(); // blank image
+		}
+		
+		ImageIcon smallImageIcon = null;
 		
 		// set the image width to be less than half the screen width
 		int smallWidth = 0;
@@ -654,7 +663,7 @@ public abstract class ImageProber extends LoadingIconDialog {
 		
 		// Create the image
 		
-		ImageIcon smallImageIcon;
+		
 
 		if(ip.getWidth()>smallWidth || ip.getHeight() > smallHeight){
 			

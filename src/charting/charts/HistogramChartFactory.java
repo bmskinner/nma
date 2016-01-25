@@ -67,6 +67,11 @@ public class HistogramChartFactory {
 		rend.setBarPainter(new StandardXYBarPainter());
 		rend.setShadowVisible(false);
 		plot.setRenderer(rend);
+		if(ds!=null && ds.getSeriesCount()>0){
+			for (int j = 0; j < ds.getSeriesCount(); j++) {
+				plot.getRenderer().setSeriesVisibleInLegend(j, false);
+			}
+		}
 		return chart;
 	}
 	
@@ -130,6 +135,7 @@ public class HistogramChartFactory {
 	public static JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception{
 		HistogramDataset ds = NuclearHistogramDatasetCreator.createHistogramDatasetFromList(list);
 		JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
+		
 		return chart;
 	}
 	
@@ -141,6 +147,9 @@ public class HistogramChartFactory {
 				                xLabel, "Probability", ds, PlotOrientation.VERTICAL, true, true,
 				                false);
 		XYPlot plot = chart.getXYPlot();
+		for (int j = 0; j < ds.getSeriesCount(); j++) {
+			plot.getRenderer().setSeriesVisibleInLegend(j, false);
+		}
 		
 		plot.setBackgroundPaint(Color.WHITE);
 		return chart;

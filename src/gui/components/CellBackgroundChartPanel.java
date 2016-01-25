@@ -79,11 +79,6 @@ public class CellBackgroundChartPanel extends ChartPanel {
 	@Override
 	public void repaint(){
 		
-//		if(this.getChart()!=null){
-//			if(this.getChart().getPlot()!=null){
-//				setPlotArea();
-//			}
-//		}
 		super.repaint();
 	}
 	
