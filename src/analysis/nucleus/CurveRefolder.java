@@ -386,6 +386,8 @@ public class CurveRefolder extends AnalysisWorker {
 					similarityScore = score;
 				}
 			}
+			
+			testNucleus = null;
 		}
 		return similarityScore;
 	}

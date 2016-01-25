@@ -19,6 +19,7 @@
 package gui.dialogs;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +27,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +48,7 @@ import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.annotations.XYTextAnnotation;
 
 import analysis.AnalysisDataset;
 import analysis.RandomSampler;
@@ -64,6 +68,9 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	private JButton  runButton;
 	private JCheckBox showDensity;
 	private RandomSampler sampler;
+	
+	private JSpinner magnitudeTestSpinner; // Enter an observed magnitude, to get observed count
+	private JLabel observedPctLabel = new JLabel("Lower in 0.00% of samples");
 	
 	private JProgressBar progressBar = new JProgressBar(0, 100);
 	
@@ -90,6 +97,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 				1);
 		set1SizeSpinner = new JSpinner(first);
 		set1SizeSpinner.addChangeListener(this);
+		set1SizeSpinner.setToolTipText("Size of population 1");
 
 		SpinnerNumberModel second = new SpinnerNumberModel(cellCount,
 				1,
@@ -97,6 +105,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 				1);
 		set2SizeSpinner = new JSpinner(second);
 		set2SizeSpinner.addChangeListener(this);
+		set2SizeSpinner.setToolTipText("Size of population 2");
 		
 		int iterations = 1000;
 		SpinnerNumberModel iterationsModel = new SpinnerNumberModel(iterations,
@@ -104,6 +113,7 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 				100000,
 				1);
 		iterattionsSpinner = new JSpinner(iterationsModel);
+		iterattionsSpinner.setToolTipText("Number of iterations to run");
 		
 		runButton = new JButton("Run");
 		runButton.addMouseListener(new MouseAdapter() {
@@ -121,9 +131,6 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 			}
 		});	
 		
-		showDensity = new JCheckBox("Density");
-		showDensity.addActionListener(this);
-		
 		
 		JPanel topPanel = new JPanel(new FlowLayout());
 		topPanel.add(set1SizeSpinner);
@@ -131,7 +138,8 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		topPanel.add(iterattionsSpinner);
 		topPanel.add(statsBox);
 		topPanel.add(runButton);
-		topPanel.add(showDensity);
+		
+		
 		topPanel.add(this.getLoadingLabel());
 		
 		progressBar.setValue(0);
@@ -141,12 +149,14 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 		
 		JPanel labelPanel = new JPanel(new FlowLayout());
-		labelPanel.add(new JLabel("Create two populations randomly sampled from the dataset, and find the magnitude difference in nuclear parameters", JLabel.LEFT));
+		labelPanel.add(new JLabel("Create two populations randomly sampled from the dataset n times, and find the magnitude difference in nuclear parameters", JLabel.LEFT));
 		
 		headerPanel.add(labelPanel);
 		headerPanel.add(topPanel);
 		
 		this.add(headerPanel, BorderLayout.NORTH);
+		
+		this.add(createFooter(), BorderLayout.SOUTH);
 		
 		resultList.add(1d);
 		resultList.add(1d);
@@ -161,6 +171,26 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 		}
 		
 		
+	}
+	
+	private JPanel createFooter(){
+		JPanel panel = new JPanel(new FlowLayout());
+		
+		showDensity = new JCheckBox("Density");
+		showDensity.addActionListener(this);
+		
+		SpinnerNumberModel magnitudeSpinnerModel = new SpinnerNumberModel(0.985d,
+				0d,
+				1d,
+				0.001d);
+		magnitudeTestSpinner = new JSpinner(magnitudeSpinnerModel);
+		magnitudeTestSpinner.setPreferredSize(new Dimension(60, 20));
+		magnitudeTestSpinner.addChangeListener(this);
+		
+		panel.add(showDensity);
+		panel.add(magnitudeTestSpinner);
+		panel.add(observedPctLabel);
+		return panel;
 	}
 	
 	private void runSampling(){
@@ -187,6 +217,11 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 	public void finished(){
 		try {
 			resultList = sampler.getResults();
+			Collections.sort(resultList);
+			double observedPct = calculateObservedPercent();
+			DecimalFormat df = new DecimalFormat("#0.00"); 
+			observedPctLabel.setText("Lower in "+  df.format(observedPct)  +"% of samples");
+			sampler = null;
 			progressBar.setValue(0);
 
 			JFreeChart chart = null;
@@ -249,10 +284,38 @@ public class RandomSamplingDialog extends LoadingIconDialog implements ActionLis
 				}
 
 			}
+			
+			
+			if(e.getSource()==magnitudeTestSpinner){
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+
+				double observedPct = calculateObservedPercent();
+				DecimalFormat df = new DecimalFormat("#0.00"); 
+				observedPctLabel.setText("Lower in "+  df.format(observedPct)  +"% of samples");
+
+			}
+			
 		} catch(Exception e1){
 			programLogger.log(Level.SEVERE, "Error in spinners", e1);
 		}
 		
+	}
+	
+	private double calculateObservedPercent(){
+		double magnitudeTest  = (Double) magnitudeTestSpinner.getValue();
+		
+		int count = 0;
+		for(double d : resultList){
+			if(d <= magnitudeTest){
+				count++;
+			} else {
+				break;
+			}
+		}
+		
+		double observedPct =  ( (double) count / (double) resultList.size()) * 100 ;
+		return observedPct;
 	}
 
 	@Override

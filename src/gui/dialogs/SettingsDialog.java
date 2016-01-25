@@ -207,7 +207,7 @@ public abstract class SettingsDialog extends JDialog {
 		
 		private CannyOptions options;
 		
-		public CannyPanel(CannyOptions options){
+		public CannyPanel(final CannyOptions options){
 			this.options = options;
 			getDefaults();
 			createPanel();

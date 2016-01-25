@@ -24,6 +24,7 @@ import gui.components.PairwiseTableCellRenderer;
 import gui.dialogs.MainOptionsDialog;
 import gui.dialogs.RandomSamplingDialog;
 
+import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.logging.Level;
@@ -49,6 +50,8 @@ import charting.datasets.NucleusTableDatasetCreator;
 @SuppressWarnings("serial")
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 	
+	private JButton randomSamplingButton;
+	
 	public NucleusMagnitudePanel(Logger programLogger) throws Exception {
 		super(programLogger);
 	}
@@ -60,13 +63,22 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 	 */
 	@Override
 	protected JPanel createInfoPanel(){
-		JPanel infoPanel = new JPanel();
-		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-		infoPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
-		infoPanel.add(new JLabel("Row median value as a proportion of column median value"));
 		
-		JButton button = new JButton("Random sampling");
-		button.addMouseListener(new MouseAdapter() {
+		/*
+		 * Header labels
+		 */
+		JPanel labelPanel = new JPanel();
+		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+		labelPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
+		labelPanel.add(new JLabel("Row median value as a proportion of column median value"));
+		
+		
+		/*
+		 * Control buttons
+		 */
+		JPanel buttonPanel = new JPanel(new FlowLayout());
+		randomSamplingButton = new JButton("Random sampling");
+		randomSamplingButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 
@@ -74,8 +86,14 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 			
 			}
 		});		
+		randomSamplingButton.setEnabled(false);
 		
-		infoPanel.add(button);
+		buttonPanel.add(randomSamplingButton);
+		
+		JPanel infoPanel = new JPanel();
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.X_AXIS));
+		infoPanel.add( labelPanel  );
+		infoPanel.add( buttonPanel );
 		return infoPanel;
 	}
 		
@@ -99,6 +117,7 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 					if(hasDatasets()){
 						
 						if(!isSingleDataset()){
+							randomSamplingButton.setEnabled(false);
 
 							for(NucleusStatistic stat : NucleusStatistic.values()){
 
@@ -125,9 +144,11 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 
 							
 						} else {
+							randomSamplingButton.setEnabled(true);
 							tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
 						}
 					} else {
+						randomSamplingButton.setEnabled(false);
 						tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
 					}
 					programLogger.log(Level.FINEST, "Updated magnitude panel");

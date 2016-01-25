@@ -18,7 +18,6 @@
  *******************************************************************************/
 package gui.dialogs;
 
-import gui.dialogs.SettingsDialog.CannyPanel;
 import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;

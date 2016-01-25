@@ -434,7 +434,7 @@ public class NuclearHistogramDatasetCreator {
 
 		int bins = 100;
 
-		ds.addSeries("Sample", values, bins, 0.95, 1.05 );
+		ds.addSeries("Sample", values, bins, 0.95, 1.00 );
 	
 		return ds;
 	}
@@ -447,7 +447,7 @@ public class NuclearHistogramDatasetCreator {
 		List<Double> xValues = new ArrayList<Double>();
 		List<Double> yValues = new ArrayList<Double>();
 
-		for(double i=0.95; i<=1.05; i+=0.0001){
+		for(double i=0.95; i<=1.00; i+=0.0001){
 			xValues.add(i);
 			yValues.add(est.getProbability(i));
 		}

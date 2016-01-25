@@ -232,6 +232,7 @@ public class NucleusTableDatasetCreator {
 				"Nucleus detection method",
 				"Nucleus threshold",
 				"Kuwahara filter radius",
+				"Chromocentre flattening threshold",
 				"Canny auto threshold",
 				"Canny low threshold",
 				"Canny high threshold",
@@ -377,6 +378,8 @@ public class NucleusTableDatasetCreator {
 		
 		String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara() ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : "N/A";
 		
+		String chromocentreThreshold = nucleusCannyOptions.isUseFlattenImage() ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : "N/A";
+		
 		String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
 		String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
 		String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
@@ -389,6 +392,7 @@ public class NucleusTableDatasetCreator {
 				detectionMethod,
 				nucleusThreshold,
 				kuwaharaRadius,
+				chromocentreThreshold,
 				cannyAutoThreshold,
 				cannyLowThreshold,
 				cannyHighThreshold,

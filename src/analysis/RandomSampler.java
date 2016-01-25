@@ -70,14 +70,23 @@ public class RandomSampler extends AnalysisWorker {
 			// get the stat magnitude
 			double value1 =  collections.get(0).getMedianStatistic(stat, MeasurementScale.PIXELS);
 			double value2 =  collections.get(1).getMedianStatistic(stat, MeasurementScale.PIXELS);
-			double magnitude = value2 / value1;
+			
+			// Always take the smaller as a proportion of the larger
+			double magnitude = value1 > value2 ? value2/value1 : value1/value2; 
+			
+//			double magnitude = value2 / value1;
 			programLogger.log(Level.FINEST, "Found value");
 			// add to a list
 			magnitudes.add(magnitude);
 			
 			if( i%10==0){
 				publish(i);
+				System.gc(); // Suggest a clean up
 			}
+			
+			// Release memory for collection
+			collections = null;
+			
 		}	
 		
 	}
